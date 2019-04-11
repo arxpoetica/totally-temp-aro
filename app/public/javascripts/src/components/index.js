@@ -3,6 +3,7 @@ import { react2angular } from 'react2angular'
 import CoverageInitializer from '../react/components/coverage/coverage-initializer.jsx'
 import CoverageButton from '../react/components/coverage/coverage-button.jsx'
 import PlanTargetList from '../react/components/selection/plan-target-list.jsx'
+import BroadcastButton from '../react/components/global-settings/broadcast-button.jsx'
 
 import boundaryDetail from './sidebar/view/boundary-detail'
 import equipmentDetail from './sidebar/view/equipment-detail'
@@ -222,6 +223,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rCoverageInitializer', react2angular(CoverageInitializer))
   .component('rCoverageButton', react2angular(CoverageButton))
   .component('rPlanTargetList', react2angular(PlanTargetList))
+  .component('rBroadcastButton', react2angular(BroadcastButton))
   .service('Utils', utils)
   .service('state', state)
   .service('aclManager', aclManager)

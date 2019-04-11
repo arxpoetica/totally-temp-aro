@@ -67,8 +67,8 @@
         <br>Data Upload
       </button>
 
-      <button class="btn btn-light settings-btn" ng-click="$ctrl.currentView = $ctrl.views.BROADCAST">
-        <i class="fa fa-2x fa-volume-up"></i>
+      <button class="btn btn-light settings-btn" ng-if="$ctrl.state.loggedInUser.isAdministrator" ng-click="$ctrl.currentView = $ctrl.views.BROADCAST">
+        <i class="fa fa-2x fa-bullhorn"></i>
         <br>BroadCast
       </button>
     </div>
@@ -97,7 +97,8 @@
       release-notes-view="$ctrl.globalSettingsService.currentReleaseNotesView">
     </release-notes>
 
-    <broadcast ng-if="$ctrl.currentView === $ctrl.views.BROADCAST"></broadcast>
+    <!-- <broadcast ng-if="$ctrl.currentView === $ctrl.views.BROADCAST"></broadcast> -->
+    <r-broadcast-button ng-if="$ctrl.currentView === $ctrl.views.BROADCAST"></r-broadcast-button>
   </modal-body>
 
   <modal-footer>
