@@ -35,7 +35,9 @@ export class AssetManager extends Component {
             {this.state.assetKeys.map(assetKey =>
               <tr key={assetKey}>
                 <td style={{ verticalAlign: 'middle' }}>{assetKey}</td>
-                <td style={{ textAlign: 'center' }}><img src={`/ui_assets/${assetKey}`} /></td>
+                <td style={{ textAlign: 'center' }}>
+                  <img src={`/ui_assets/${assetKey}`} style={{ maxWidth: '100px', maxHeight: '100px' }} />
+                </td>
               </tr>
             )}
           </tbody>
