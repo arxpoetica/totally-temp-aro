@@ -3,9 +3,6 @@ import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import AroHttp from '../../common/aro-http'
 
-// import { ToastContainer } from 'react-toastify'
-// import 'react-toastify/dist/ReactToastify.css';
-
 export class BroadcastButton extends Component {
   constructor (props) {
     super(props)
@@ -34,7 +31,6 @@ export class BroadcastButton extends Component {
         <div style={{ flex: '0 0 auto' }}>
           <button className={'btn btn-primary float-right'} onClick={() => this.confirmBroadcast()}><i className={'fa fa-save'} />&nbsp;&nbsp;Send</button>
         </div>
-        {/* <ToastContainer /> */}
       </div>
     )
   }

@@ -1,6 +1,5 @@
 import Actions from '../../common/actions'
 import { List, Map } from 'immutable'
-import { toast } from 'react-toastify'
 
 const defaultState = {
   location: new List(),
@@ -70,14 +69,6 @@ function setShowSiteBoundary (state, visibility) {
   return { ...state, showSiteBoundary: visibility }
 }
 
-function showBroadcastMsg (state, msg) {
-  toast.error(msg.subject + ': ' + msg.body, {
-    position: toast.POSITION.BOTTOM_LEFT,
-    className: 'map-canvas'
-  })
-  return state
-}
-
 function mapLayersReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.LAYERS_SET_LOCATION:
@@ -106,9 +97,6 @@ function mapLayersReducer (state = defaultState, action) {
 
     case Actions.LAYERS_SET_SITE_BOUNDARY:
       return setShowSiteBoundary(state, action.payload.visibility)
-
-    case Actions.BROADCAST_ACTION:
-      return showBroadcastMsg(state, action.payload)
 
     default:
       return state
