@@ -9,7 +9,8 @@ export class AssetManager extends Component {
     super(props)
     this.fileInput = React.createRef()
     this.state = {
-      assetKeys: []
+      assetKeys: [],
+      isValidFileSelected: false
     }
     AroHttp.get('/ui_assets/list/assetKeys')
       .then(result => {
@@ -22,25 +23,28 @@ export class AssetManager extends Component {
 
   render () {
     return <div>
-      <input type='file' ref={this.fileInput} />
-      <button className='btn btn-primary' onClick={event => this.uploadFile()}>
+      <table className='table table-sm table-striped' style={{ maxHeight: '300px', overflowY: 'auto' }}>
+        <thead className='thead thead-dark'>
+          <tr>
+            <th>Asset key</th>
+            <th style={{ textAlign: 'center' }}>Image</th>
+          </tr>
+        </thead>
+        <tbody>
+          {this.state.assetKeys.map(assetKey =>
+            <tr key={assetKey}>
+              <td style={{ verticalAlign: 'middle' }}>{assetKey}</td>
+              <td style={{ textAlign: 'center' }}><img src={`/ui_assets/${assetKey}`} /></td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+      <hr />
+      <h4>Upload a new file:</h4>
+      <input type='file' ref={this.fileInput} onChange={event => this.setState({ isValidFileSelected: Boolean(this.fileInput.current) })} />
+      <button className='btn btn-primary' disabled={!this.state.isValidFileSelected} onClick={event => this.uploadFile()}>
         Upload
       </button>
-      <div style={{ backgroundColor: '#ddd' }} className='container'>
-        <div className='row'>
-          {this.state.assetKeys.map(assetKey =>
-            <div className='col-md-3'>
-              <div className='card'>
-                <img src={`/ui_assets/${assetKey}`} className='card-img-top' />
-                {assetKey}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-      <ul>
-        {this.state.assetKeys.map(assetKey => <li><img src={`/ui_assets/${assetKey}`} /></li>)}
-      </ul>
     </div>
   }
 
