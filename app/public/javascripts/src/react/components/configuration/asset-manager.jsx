@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
-import reduxStore from '../../../redux-store'
+import { connect } from 'react-redux'
 import AroHttp from '../../common/aro-http'
-import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import ConfigurationActions from './configuration-actions'
 
 export class AssetManager extends Component {
@@ -69,5 +68,5 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   uploadAssetToServer: (assetKey, file) => dispatch(ConfigurationActions.uploadAssetToServer(assetKey, file))
 })
 
-const AssetManagerComponent = wrapComponentWithProvider(reduxStore, AssetManager, mapStateToProps, mapDispatchToProps)
+const AssetManagerComponent = connect(mapStateToProps, mapDispatchToProps)(AssetManager)
 export default AssetManagerComponent
