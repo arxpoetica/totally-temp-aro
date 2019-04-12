@@ -37,6 +37,7 @@ function uploadAssetToServer (assetKey, file) {
     var formData = new FormData()
     formData.append('file', file)
     AroHttp.postRaw(`/ui_assets/${assetKey}`, formData) // Important to send empty headers so file upload works
+      .then(() => dispatch(getAssetKeys(0, 500)))
       .catch(err => console.error(err))
   }
 }
