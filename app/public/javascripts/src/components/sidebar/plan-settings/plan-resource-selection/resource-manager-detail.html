@@ -1,3 +1,11 @@
 <div>
-  {{$ctrl.resourceManager.name}}
+  <resource-permissions-editor resource-type="RESOURCE_MANAGER"
+                               resource-id="{{$ctrl.resourceManager.id}}"
+                               system-actors="$ctrl.state.systemActors"
+                               register-save-access-callback="$ctrl.registerSaveAccessCallback(saveResourceAccess)"
+                               >
+   </resource-permissions-editor>
+   <button class="btn btn-light" ng-click="$ctrl.saveAccessSettings()">
+     <i class="fa fa-save"></i>&nbsp; Save
+   </button>
 </div>

@@ -40,7 +40,7 @@ class ResourceManagerController {
         'defaultValue': '',
         'editable': true,
         'visible': true
-      }, 
+      }/*, 
       {
         'propertyName': 'permissionsView',
         'levelOfDetail': 0,
@@ -51,7 +51,7 @@ class ResourceManagerController {
         'defaultValue': '',
         'editable': false,
         'visible': true
-      }
+      }*/
     ]
     
     this.idProp = 'id' // unique id of each row
@@ -177,12 +177,14 @@ class ResourceManagerController {
         for (i = 0; i<result.data.length; i++){
           if (!result.data[i].deleted){
             var row = result.data[i]
+            /*
             row.permissionsView = ""
             if (row.permissions){
               if (row.permissions & 4) row.permissionsView += "read "
               if (row.permissions & 2) row.permissionsView += "write "
               if (row.permissions & 1) row.permissionsView += "admin "    
             }
+            */
             newRows.push(row)
           }
         }
