@@ -21,11 +21,21 @@ function saveConfigurationToServerAndReload (type, configuration) {
   }
 }
 
+function getAssetKeys (offset, limit) {
+  return dispatch => {
+    AroHttp.get(`/ui_assets/list/assetKeys?offset=${offset}&limit=${limit}`)
+      .then(result => dispatch({
+        type: Actions.CONFIGURATION_SET_ASSET_KEYS,
+        payload: result.data
+      }))
+      .catch(err => console.error(err))
+  }
+}
+
 function uploadAssetToServer (assetKey, file) {
   return dispatch => {
     var formData = new FormData()
     formData.append('file', file)
-
     AroHttp.postRaw(`/ui_assets/${assetKey}`, formData) // Important to send empty headers so file upload works
       .catch(err => console.error(err))
   }
@@ -34,5 +44,6 @@ function uploadAssetToServer (assetKey, file) {
 export default {
   loadConfigurationFromServer: loadConfigurationFromServer,
   saveConfigurationToServerAndReload: saveConfigurationToServerAndReload,
+  getAssetKeys: getAssetKeys,
   uploadAssetToServer: uploadAssetToServer
 }

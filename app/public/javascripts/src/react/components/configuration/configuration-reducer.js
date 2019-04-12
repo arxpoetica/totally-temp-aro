@@ -1,13 +1,29 @@
 import Actions from '../../common/actions'
 
-function setConfiguration (configuration) {
-  return { ...configuration }
+const defaultState = {
+  items: [],
+  assetKeys: []
 }
 
-function configurationReducer (state = {}, action) {
+function setConfiguration (state, configuration) {
+  return { ...state,
+    items: configuration
+  }
+}
+
+function setAssetKeys (state, assetKeys) {
+  return { ...state,
+    assetKeys: assetKeys
+  }
+}
+
+function configurationReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.CONFIGURATION_SET_CONFIGURATION:
-      return setConfiguration(action.payload)
+      return setConfiguration(state, action.payload)
+
+    case Actions.CONFIGURATION_SET_ASSET_KEYS:
+      return setAssetKeys(state, action.payload)
 
     default:
       return state

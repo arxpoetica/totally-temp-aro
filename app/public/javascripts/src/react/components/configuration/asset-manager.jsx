@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import AroHttp from '../../common/aro-http'
 import ConfigurationActions from './configuration-actions'
 
 export class AssetManager extends Component {
@@ -8,16 +7,9 @@ export class AssetManager extends Component {
     super(props)
     this.fileInput = React.createRef()
     this.state = {
-      assetKeys: [],
       isValidFileSelected: false
     }
-    AroHttp.get('/ui_assets/list/assetKeys?limit=500')
-      .then(result => {
-        this.setState({
-          assetKeys: result.data
-        })
-      })
-      .catch(err => console.error(err))
+    this.props.getAssetKeys(0, 500)
   }
 
   render () {
@@ -31,7 +23,7 @@ export class AssetManager extends Component {
             </tr>
           </thead>
           <tbody>
-            {this.state.assetKeys.map(assetKey =>
+            {this.props.assetKeys.map(assetKey =>
               <tr key={assetKey}>
                 <td style={{ verticalAlign: 'middle' }}>{assetKey}</td>
                 <td style={{ textAlign: 'center' }}>
@@ -45,7 +37,8 @@ export class AssetManager extends Component {
       <hr />
       <h4>Upload a new file:</h4>
       <input type='file' ref={this.fileInput} onChange={event => this.setState({ isValidFileSelected: Boolean(this.fileInput.current) })} />
-      <button className='btn btn-primary' disabled={!this.state.isValidFileSelected} onClick={event => this.uploadFile()}>
+      <button className={this.state.isValidFileSelected ? 'btn btn-primary' : 'btn btn-light'}
+        disabled={!this.state.isValidFileSelected} onClick={event => this.uploadFile()}>
         Upload
       </button>
     </div>
@@ -62,9 +55,11 @@ AssetManager.propTypes = {
 }
 
 const mapStateToProps = (state) => ({
+  assetKeys: state.configuration.assetKeys
 })
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
+  getAssetKeys: (offset, limit) => dispatch(ConfigurationActions.getAssetKeys(offset, limit)),
   uploadAssetToServer: (assetKey, file) => dispatch(ConfigurationActions.uploadAssetToServer(assetKey, file))
 })
 

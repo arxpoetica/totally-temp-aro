@@ -91,7 +91,7 @@ SettingsEditor.propTypes = {
 }
 
 const mapStateToProps = (state) => ({
-  initialConfiguration: state.configuration
+  initialConfiguration: state.configuration.items
 })
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
