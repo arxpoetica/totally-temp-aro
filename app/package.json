@@ -88,6 +88,7 @@
     "react-dom": "^16.7.0",
     "react-immutable-proptypes": "^2.1.0",
     "react-redux": "^6.0.0",
+    "react-toastify": "^5.0.1",
     "react2angular": "^4.0.4",
     "redux": "^4.0.1",
     "redux-logger": "^3.0.6",
