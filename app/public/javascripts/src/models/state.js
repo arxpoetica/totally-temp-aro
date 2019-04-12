@@ -1839,11 +1839,11 @@ class State {
       }
     }
 
-    socketManager.subscribe('BROADCAST_MESSAGE', message => service._receiveBroadCastData(message))
+    // socketManager.subscribe('BROADCAST_MESSAGE', message => service.showBroadCastData(message))
 
-    service._receiveBroadCastData = (msg) => {
-      Notification.error({title: msg.data.subject,message: msg.data.body});
-    }
+    // service._receiveBroadCastData = (msg) => {
+    //   Notification.error({title: msg.data.subject,message: msg.data.body});
+    // }
 
     return service
   }
@@ -1868,6 +1868,7 @@ class State {
       addPlanTargets: (planId, planTargets) => dispatch(SelectionActions.addPlanTargets(planId, planTargets)),
       removePlanTargets: (planId, planTargets) => dispatch(SelectionActions.removePlanTargets(planId, planTargets)),
       updateShowSiteBoundary: (isVisible) => {dispatch(MapLayerActions.setShowSiteBoundary(isVisible))}
+      // showBroadCastData: (msg) => {dispatch({type: Actions.BROADCAST_ACTION,payload: msg})}
     }
   }
 }
