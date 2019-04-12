@@ -3,7 +3,7 @@ import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import AroHttp from '../../common/aro-http'
 
-export class BroadcastButton extends Component {
+export class Broadcast extends Component {
   constructor (props) {
     super(props)
     this.state = { subject: '', body: '' }
@@ -69,5 +69,5 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch, ownProps) => ({})
 
-const BroadcastButtonComponent = wrapComponentWithProvider(reduxStore, BroadcastButton, mapStateToProps, mapDispatchToProps)
-export default BroadcastButtonComponent
+const BroadcastComponent = wrapComponentWithProvider(reduxStore, Broadcast, mapStateToProps, mapDispatchToProps)
+export default BroadcastComponent

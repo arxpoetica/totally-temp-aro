@@ -11,7 +11,6 @@ import mapLayers from '../react/components/map-layers/map-layer-reducer'
 import plan from '../react/components/plan/plan-reducer'
 import selection from '../react/components/selection/selection-reducer'
 import user from '../react/components/user/user-reducer'
-import globalSettings from '../react/components/global-settings/global-settings-reducer'
 
 const logger = createLogger({
   level: 'info',
@@ -19,7 +18,7 @@ const logger = createLogger({
 })
 const socketMiddleware = createSocketMiddleware()
 
-let reducer = combineReducers({ coverage, mapLayers, plan, selection, user, globalSettings })
+let reducer = combineReducers({ coverage, mapLayers, plan, selection, user })
 
 // Add support for Redux devtools extension. Yes, even in production.
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose

@@ -4,7 +4,7 @@ import { ToastContainer } from "react-toastify";
 import CoverageInitializer from '../react/components/coverage/coverage-initializer.jsx'
 import CoverageButton from '../react/components/coverage/coverage-button.jsx'
 import PlanTargetList from '../react/components/selection/plan-target-list.jsx'
-import BroadcastButton from '../react/components/global-settings/broadcast-button.jsx'
+import Broadcast from '../react/components/global-settings/broadcast.jsx'
 
 import boundaryDetail from './sidebar/view/boundary-detail'
 import equipmentDetail from './sidebar/view/equipment-detail'
@@ -84,7 +84,6 @@ import userAccountSettings from './global-settings/user-account-settings'
 import manageUsers from './global-settings/manage-users'
 import multifactorSettings from './global-settings/multifactor-settings'
 import manageGroups from './global-settings/manage-groups'
-import broadcast from './global-settings/broadcast'
 import globalSettings from './global-settings/global-settings'
 import aroPanel from './common/aro-panel'
 import aroMultiSelect from './common/aro-multiselect'
@@ -194,7 +193,6 @@ app.component('boundaryDetail', boundaryDetail)
   .component('manageUsers', manageUsers)
   .component('multifactorSettings', multifactorSettings)
   .component('manageGroups', manageGroups)
-  .component('broadcast', broadcast)
   .component('globalSettings', globalSettings)
   .component('aroPanel', aroPanel)
   .component('aroMultiSelect', aroMultiSelect)
@@ -224,7 +222,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rCoverageInitializer', react2angular(CoverageInitializer))
   .component('rCoverageButton', react2angular(CoverageButton))
   .component('rPlanTargetList', react2angular(PlanTargetList))
-  .component('rBroadcastButton', react2angular(BroadcastButton))
+  .component('rBroadcast', react2angular(Broadcast))
   .component('rToastContainer', react2angular(ToastContainer))
   .service('Utils', utils)
   .service('state', state)

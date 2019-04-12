@@ -11,7 +11,7 @@ const createSocketMiddleware = () => {
         position: toast.POSITION.BOTTOM_LEFT,
         className: 'map-canvas'
       })
-      storeAPI.dispatch(command)
+      // storeAPI.dispatch(command)
     })
 
     // next is the following action to be run after this middleware
