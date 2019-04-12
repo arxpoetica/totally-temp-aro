@@ -12,7 +12,7 @@ export class AssetManager extends Component {
       assetKeys: [],
       isValidFileSelected: false
     }
-    AroHttp.get('/ui_assets/list/assetKeys')
+    AroHttp.get('/ui_assets/list/assetKeys?limit=500')
       .then(result => {
         this.setState({
           assetKeys: result.data
@@ -23,22 +23,24 @@ export class AssetManager extends Component {
 
   render () {
     return <div>
-      <table className='table table-sm table-striped' style={{ maxHeight: '300px', overflowY: 'auto' }}>
-        <thead className='thead thead-dark'>
-          <tr>
-            <th>Asset key</th>
-            <th style={{ textAlign: 'center' }}>Image</th>
-          </tr>
-        </thead>
-        <tbody>
-          {this.state.assetKeys.map(assetKey =>
-            <tr key={assetKey}>
-              <td style={{ verticalAlign: 'middle' }}>{assetKey}</td>
-              <td style={{ textAlign: 'center' }}><img src={`/ui_assets/${assetKey}`} /></td>
+      <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+        <table className='table table-sm table-striped'>
+          <thead className='thead thead-dark'>
+            <tr>
+              <th>Asset key</th>
+              <th style={{ textAlign: 'center' }}>Image</th>
             </tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {this.state.assetKeys.map(assetKey =>
+              <tr key={assetKey}>
+                <td style={{ verticalAlign: 'middle' }}>{assetKey}</td>
+                <td style={{ textAlign: 'center' }}><img src={`/ui_assets/${assetKey}`} /></td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
       <hr />
       <h4>Upload a new file:</h4>
       <input type='file' ref={this.fileInput} onChange={event => this.setState({ isValidFileSelected: Boolean(this.fileInput.current) })} />

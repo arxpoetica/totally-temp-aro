@@ -22,7 +22,7 @@ exports.configure = (api, middleware) => {
   // Get a list of all asset keys from the database
   api.get('/ui_assets/list/assetKeys', (request, response, next) => {
     const offset = request.query.offset || 0
-    const limit = request.query.limit || 0
+    const limit = request.query.limit || 10
     models.UiAssets.getAssetKeys(offset, limit)
       .then(jsonSuccess(response, next))
       .catch(next)
