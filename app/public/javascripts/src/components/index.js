@@ -1,4 +1,5 @@
 import { react2angular } from 'react2angular'
+import { ToastContainer } from "react-toastify";
 
 import CoverageInitializer from '../react/components/coverage/coverage-initializer.jsx'
 import CoverageButton from '../react/components/coverage/coverage-button.jsx'
@@ -224,6 +225,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rCoverageButton', react2angular(CoverageButton))
   .component('rPlanTargetList', react2angular(PlanTargetList))
   .component('rBroadcastButton', react2angular(BroadcastButton))
+  .component('rToastContainer', react2angular(ToastContainer))
   .service('Utils', utils)
   .service('state', state)
   .service('aclManager', aclManager)

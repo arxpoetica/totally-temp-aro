@@ -71,8 +71,9 @@ function setShowSiteBoundary (state, visibility) {
 }
 
 function showBroadcastMsg (state, msg) {
-  toast.success(msg.body, {
-    position: 'top-right'
+  toast.error(msg.subject + ': ' + msg.body, {
+    position: toast.POSITION.BOTTOM_LEFT,
+    className: 'map-canvas'
   })
   return state
 }
