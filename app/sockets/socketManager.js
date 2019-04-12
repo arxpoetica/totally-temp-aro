@@ -76,13 +76,12 @@ class SocketManager {
 
   broadcastMessage(msg) {
     // sending to all clients in namespace 'broadcastnsp', including sender
-    // this.broadcastnsp.emit('message', { type: BROADCAST_MESSAGE, data: msg })
-    this.broadcastnsp.emit('BROADCAST_MESSAGE', {
-      type: 'BROADCAST_ACTION',
+    this.broadcastnsp.emit('message', {
+      type: 'NOTIFICATION_SHOW',
       payload: msg
     })
     // sending to a specific room in a specific namespace, including sender
-    // this.broadcastnsp.to('/allUsers').emit('message', { type: BROADCAST_MESSAGE, data: msg })
+    // this.broadcastnsp.to('/allUsers').emit('message', { type: NOTIFICATION_SHOW, data: msg })
   }
 }
 

@@ -1,6 +1,5 @@
 import Actions from '../../common/actions'
 import { Map } from 'immutable'
-import { toast } from 'react-toastify'
 
 const defaultState = {
   broadcastedMessage: new Map()
@@ -8,10 +7,6 @@ const defaultState = {
 
 // Set the broadcasted message
 function showBroadcastMsg (state, msg) {
-  toast.error(msg.subject + ': ' + msg.body, {
-    position: toast.POSITION.BOTTOM_LEFT,
-    className: 'map-canvas'
-  })
   return { ...state, broadcastedMessage: msg }
 }
 
