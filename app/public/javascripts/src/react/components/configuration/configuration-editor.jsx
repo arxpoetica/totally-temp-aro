@@ -4,13 +4,18 @@ import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import ConfigurationActions from '../configuration/configuration-actions'
 import SettingsEditor from './settings-editor.jsx'
+import AssetManager from './asset-manager.jsx'
 
 export class ConfigurationEditor extends Component {
   constructor (props) {
     super(props)
-    // Form component state does not need to go into Redux
+    this.navs = Object.freeze({
+      SETTINGS: 'Settings',
+      ASSET_MANAGER: 'Asset Manager'
+    })
     this.state = {
-      showInitialWarning: true
+      showInitialWarning: true,
+      selectedNav: this.navs.SETTINGS
     }
   }
 
@@ -18,7 +23,7 @@ export class ConfigurationEditor extends Component {
     return <div>
       { this.state.showInitialWarning
         ? this.renderWarningMessage()
-        : <SettingsEditor id='compSettingsEditor' />
+        : this.renderControls()
       }
     </div>
   }
@@ -33,6 +38,28 @@ export class ConfigurationEditor extends Component {
         onClick={event => this.setState({ showInitialWarning: false })}>
         I understand, take me to the configuration editor
       </button>
+    </div>
+  }
+
+  renderControls () {
+    return <div>
+      <ul className='nav nav-tabs' style={{ marginBottom: '10px' }}>
+        <li className='nav-item' onClick={() => this.setState({ selectedNav: this.navs.SETTINGS })}>
+          <a className={`nav-link ${this.state.selectedNav === this.navs.SETTINGS ? 'active' : ''}`} href='#'>
+            {this.navs.SETTINGS}
+          </a>
+        </li>
+        <li className='nav-item' onClick={() => this.setState({ selectedNav: this.navs.ASSET_MANAGER })}>
+          <a className={`nav-link ${this.state.selectedNav === this.navs.ASSET_MANAGER ? 'active' : ''}`} href='#'>
+            {this.navs.ASSET_MANAGER}
+          </a>
+        </li>
+      </ul>
+      {
+        (this.state.selectedNav === this.navs.SETTINGS)
+          ? <SettingsEditor id='compSettingsEditor' />
+          : <AssetManager />
+      }
     </div>
   }
 }

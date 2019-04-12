@@ -1,3 +1,4 @@
+/* globals FormData */
 import Actions from '../../common/actions'
 import AroHttp from '../../common/aro-http'
 
@@ -20,7 +21,18 @@ function saveConfigurationToServerAndReload (type, configuration) {
   }
 }
 
+function uploadAssetToServer (assetKey, file) {
+  return dispatch => {
+    var formData = new FormData()
+    formData.append('file', file)
+
+    AroHttp.postRaw(`/ui_assets/${assetKey}`, formData) // Important to send empty headers so file upload works
+      .catch(err => console.error(err))
+  }
+}
+
 export default {
   loadConfigurationFromServer: loadConfigurationFromServer,
-  saveConfigurationToServerAndReload: saveConfigurationToServerAndReload
+  saveConfigurationToServerAndReload: saveConfigurationToServerAndReload,
+  uploadAssetToServer: uploadAssetToServer
 }

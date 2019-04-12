@@ -30,8 +30,41 @@ exports[`Component render - default and after clicking button 1`] = `
 
 exports[`Component render - default and after clicking button 2`] = `
 <div>
-  <Component
-    id="compSettingsEditor"
-  />
+  <div>
+    <ul
+      className="nav nav-tabs"
+      style={
+        Object {
+          "marginBottom": "10px",
+        }
+      }
+    >
+      <li
+        className="nav-item"
+        onClick={[Function]}
+      >
+        <a
+          className="nav-link active"
+          href="#"
+        >
+          Settings
+        </a>
+      </li>
+      <li
+        className="nav-item"
+        onClick={[Function]}
+      >
+        <a
+          className="nav-link "
+          href="#"
+        >
+          Asset Manager
+        </a>
+      </li>
+    </ul>
+    <Component
+      id="compSettingsEditor"
+    />
+  </div>
 </div>
 `;
