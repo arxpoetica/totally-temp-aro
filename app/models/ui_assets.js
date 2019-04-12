@@ -4,6 +4,12 @@ var helpers = require('../helpers')
 var database = helpers.database
 
 module.exports = class UiAssets {
+  static getAssetKeys (offset = 0, limit = 10) {
+    limit = Math.max(limit, 1000)
+    const sql = 'SELECT key FROM ui.assets OFFSET $1 LIMIT $2'
+    return database.query(sql, [offset, limit])
+      .then(res => res.map(item => item.key))
+  }
 
   static getAssetByKey (assetKey) {
     const sql = 'SELECT data::bytea FROM ui.assets WHERE key=$1'
