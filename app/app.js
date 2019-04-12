@@ -49,7 +49,8 @@ var routes = [
   'admin_settings',
   'settings',
   'reports',
-  'ui_assets'
+  'ui_assets',
+  'ui_settings'
 ]
 routes.forEach((route) => {
   require('./routes/routes_' + route).configure(api, middleware)

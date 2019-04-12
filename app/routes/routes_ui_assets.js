@@ -19,6 +19,15 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
+  // Get a list of all asset keys from the database
+  api.get('/ui_assets/list/assetKeys', (request, response, next) => {
+    const offset = request.query.offset || 0
+    const limit = request.query.limit || 10
+    models.UiAssets.getAssetKeys(offset, limit)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
   // Save a binary UI asset into the database
   api.post('/ui_assets/:assetKey', upload.single('file'), (request, response, next) => {
     const assetKey = request.params.assetKey

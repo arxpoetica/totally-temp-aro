@@ -4,6 +4,7 @@ import format from './string-template'
 import StateViewMode from './state-view-mode'
 import Constants from '../components/common/constants'
 import Actions from '../react/common/actions'
+import ConfigurationActions from '../react/components/configuration/configuration-actions'
 import UserActions from '../react/components/user/user-actions'
 import PlanActions from '../react/components/plan/plan-actions'
 import MapLayerActions from '../react/components/map-layers/map-layer-actions'
@@ -1572,6 +1573,9 @@ class State {
           }
         })
         .catch(err => console.error(err))
+
+      // Fire a redux action to get configuration for the redux side. This will result in two calls to /configuration for the time being.
+      service.loadConfigurationFromServer()
     }
 
     service.setOptimizationOptions = () => {
@@ -1856,12 +1860,13 @@ class State {
 
   mapDispatchToTarget (dispatch) {
     return {
-      setLoggedInUserRedux: (loggedInUser) => { dispatch(UserActions.setLoggedInUser(loggedInUser)) },
-      setPlanRedux: (plan) => { dispatch(PlanActions.setPlan(plan)) },
+      loadConfigurationFromServer: () => dispatch(ConfigurationActions.loadConfigurationFromServer()),
+      setLoggedInUserRedux: loggedInUser => dispatch(UserActions.setLoggedInUser(loggedInUser)),
+      setPlanRedux: plan => dispatch(PlanActions.setPlan(plan)),
       setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId)),
       addPlanTargets: (planId, planTargets) => dispatch(SelectionActions.addPlanTargets(planId, planTargets)),
       removePlanTargets: (planId, planTargets) => dispatch(SelectionActions.removePlanTargets(planId, planTargets)),
-      updateShowSiteBoundary: (isVisible) => {dispatch(MapLayerActions.setShowSiteBoundary(isVisible))}
+      updateShowSiteBoundary: isVisible => dispatch(MapLayerActions.setShowSiteBoundary(isVisible))
     }
   }
 }
