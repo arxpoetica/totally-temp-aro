@@ -2,7 +2,7 @@
 class ResourceManagerDetailController {
   constructor (state) {
     this.state = state
-    //console.log(this.state.dataItems)
+    this.isChanges = false
   }
   
   registerSaveAccessCallback (saveResourceAccess) {
@@ -14,6 +14,7 @@ class ResourceManagerDetailController {
   saveAccessSettings (dataSource) {
     console.log(this.resourceManager)
     // This will call a function into the resource permissions editor that will do the actual save
+    this.isChanges = false
     if (this.saveResourceAccess) {
       this.saveResourceAccess()
       /*
@@ -25,10 +26,17 @@ class ResourceManagerDetailController {
       ]))
       .then(() => this.state.uploadDataSource = this.state.uploadDataSources.filter(item => item.name === dataSource.dataType)[0])
       */
-      .catch((err) => console.error(err))
+      .catch((err) => {
+        this.isChanges = true
+        console.error(err)
+      })
     }
   }
   
+  onSelectionChanged (data) {
+    // data isn't used
+    this.isChanges = true
+  }
 }
 
 ResourceManagerDetailController.$inject = ['state']

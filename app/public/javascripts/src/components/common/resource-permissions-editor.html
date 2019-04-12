@@ -12,7 +12,8 @@
         label-id="name" 
         search-list="$ctrl.subSystemActors" 
         selected="access.actors"
-        refresh-tag-list="$ctrl.searchActors(searchObj)">
+        refresh-tag-list="$ctrl.searchActors(searchObj)"
+        on-selection-changed="$ctrl.onSelectionChanged(data)">
       </aro-multiselect-search>
 
 

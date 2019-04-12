@@ -3,9 +3,11 @@
                                resource-id="{{$ctrl.resourceManager.id}}"
                                system-actors="$ctrl.state.systemActors"
                                register-save-access-callback="$ctrl.registerSaveAccessCallback(saveResourceAccess)"
-                               >
+                               on-selection-changed="$ctrl.onSelectionChanged(data)">
    </resource-permissions-editor>
-   <button class="btn btn-light" ng-click="$ctrl.saveAccessSettings()">
+   <button class="btn btn-primary" style="margin-top: 4px; float: right;" 
+           ng-click="$ctrl.saveAccessSettings()"
+           ng-disabled="!$ctrl.isChanges">
      <i class="fa fa-save"></i>&nbsp; Save
    </button>
 </div>
