@@ -274,6 +274,40 @@ editor-interface-tree .ei-header{
 	top: 0px;
 }
 
+
+.ei-table-foldout-striped tbody tr:nth-of-type(4n-3), 
+.ei-table-foldout-striped tbody tr:nth-of-type(4n-2) {
+    background-color: rgba(0,0,0,.05);
+}
+
+.ei-foldout-row td {
+	display: none;
+}
+
+.ei-foldout-table-open + .ei-foldout-row td {
+  display: table-cell;
+}
+
+.ei-foldout-icon-table-closed, ei-foldout-icon-table-open{
+	cursor: pointer;
+}
+
+.ei-foldout-icon-table-open{
+	display: none;
+}
+
+.ei-foldout-table-open .ei-foldout-icon-table-open{
+  display: initial;
+}
+
+.ei-foldout-table-open .ei-foldout-icon-table-closed{
+  display: none;
+}
+
+
+
+/* - pagination - */
+
 .ei-pagination-menu{
 	text-align: center;
 }

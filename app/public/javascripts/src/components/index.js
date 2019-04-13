@@ -59,6 +59,7 @@ import planResourceEditorModal from './sidebar/plan-settings/plan-resource-selec
 import planResourceSelection from './sidebar/plan-settings/plan-resource-selection/plan-resource-selection'
 import pricebookEditor from './sidebar/plan-settings/plan-resource-selection/pricebook-editor'
 import resourceManager from './sidebar/plan-settings/plan-resource-selection/resource-manager'
+import resourceManagerDetail from './sidebar/plan-settings/plan-resource-selection/resource-manager-detail'
 import pricebookCreator from './sidebar/plan-settings/plan-resource-selection/pricebook-creator'
 import roicEditor from './sidebar/plan-settings/plan-resource-selection/roic-editor'
 import rateReachEditor from './sidebar/plan-settings/plan-resource-selection/rate-reach-editor'
@@ -168,6 +169,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('planResourceSelection', planResourceSelection)
   .component('pricebookEditor', pricebookEditor)
   .component('resourceManager', resourceManager)
+  .component('resourceManagerDetail', resourceManagerDetail)
   .component('pricebookCreator', pricebookCreator)
   .component('roicEditor', roicEditor)
   .component('rateReachEditor', rateReachEditor)

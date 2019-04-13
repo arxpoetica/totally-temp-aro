@@ -81,6 +81,7 @@ class DataSourceUploadController {
   }
 
   saveAccessSettings (dataSource) {
+    console.log(dataSource)
     // This will call a function into the resource permissions editor that will do the actual save
     if (this.saveResourceAccess) {
       this.saveResourceAccess()
@@ -245,7 +246,8 @@ class DataSourceUploadController {
   addDatasource (data) {
     this.state.dataItems[data.dataType].allLibraryItems.push(data)
   }
-
+  
+  // ToDo: this doesn't belong here, move to permissions editor 
   loadDataSources () {
     if (!this.state.uploadDataSource) {
       return // When items in state.js are being refreshed, this may be null as the combobox has a two-way binding to the model.

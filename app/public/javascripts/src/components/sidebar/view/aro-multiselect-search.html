@@ -1,5 +1,6 @@
 <ui-select multiple theme="bootstrap" ng-model="$ctrl.selected" close-on-select="true" 
-  on-select="$ctrl.onSelectionChanged({selectedObj:$select.selected})">
+  on-select="$ctrl.onSelectionChanged({selectedObj:$select.selected})"
+  on-remove="$ctrl.onSelectionChanged({selectedObj:$select.selected})">
 <ui-select-match placeholder="Select or search a {{$ctrl.objectName}} in the list...">
   <div ng-bind-html="$item[$ctrl.labelId]" style="display: inline; word-wrap: break-word;"></div>
 </ui-select-match>

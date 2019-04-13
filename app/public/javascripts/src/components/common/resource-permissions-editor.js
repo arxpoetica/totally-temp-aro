@@ -27,12 +27,9 @@ class ResourcePermissionsEditorController {
           }
         })
         // Get the actors that have access for this resource
-        console.log(this.resourceType)
-        console.log(this.resourceId)
         return this.$http.get(`/service/auth/acl/${this.resourceType}/${this.resourceId}`)
       })
       .then((result) => {
-        console.log(result)
         var idToSystemActor = {}
         this.systemActors.forEach((systemActor) => idToSystemActor[systemActor.id] = systemActor)
         result.data.resourcePermissions.forEach((access) => {
@@ -104,7 +101,8 @@ let resourcePermissionsEditor = {
     resourceId: '@',
     systemActors: '<',
     enabled: '<',
-    registerSaveAccessCallback: '&' // To be called to register a callback, which will save the access list
+    registerSaveAccessCallback: '&', // To be called to register a callback, which will save the access list
+    onSelectionChanged: '&'
   },
   controller: ResourcePermissionsEditorController
 }
