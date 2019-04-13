@@ -109,6 +109,20 @@
 		        </div>
 		      </ui-select-choices>
 		    </ui-select>
+		    <div style="margin-top: 4px;">
+			    <button class="btn btn-primary nowrap_label" 
+	                ng-if="$ctrl.regionSelectEnabled"
+	                ng-click="$ctrl.selectAll()">
+	          <i class="fa fa-check action-button-icon"></i> Select All
+	        </button>
+	        
+	        <button class="btn btn-primary nowrap_label" 
+	                ng-if="$ctrl.regionSelectEnabled"
+	                ng-disabled="$ctrl.selectedRegions.length < 1"
+	                ng-click="$ctrl.selectNone()">
+	          <i class="fa fa-times action-button-icon"></i> Clear
+	        </button>
+		    </div>
 	    </div>
 	    
 	    <div class="comp_edit_filter_row_right" id="comp_edit_region_btn">

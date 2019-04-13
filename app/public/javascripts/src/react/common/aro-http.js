@@ -19,6 +19,15 @@ class AroHttp {
     return this._fetch(url, options)
   }
 
+  // Make a HTTP POST request, without converting to JSON
+  static postRaw (url, body = {}) {
+    const options = {
+      method: 'POST',
+      body: body
+    }
+    return this._fetch(url, options)
+  }
+
   // Make a HTTP DELETE request
   static delete (url) {
     const options = {

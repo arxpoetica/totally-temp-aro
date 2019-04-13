@@ -3,6 +3,7 @@ import { createLogger } from 'redux-logger'
 import thunk from 'redux-thunk'
 
 // Reducers
+import configuration from '../react/components/configuration/configuration-reducer'
 import coverage from '../react/components/coverage/coverage-reducer'
 import mapLayers from '../react/components/map-layers/map-layer-reducer'
 import plan from '../react/components/plan/plan-reducer'
@@ -14,7 +15,7 @@ const logger = createLogger({
   collapsed: true
 })
 
-let reducer = combineReducers({ coverage, mapLayers, plan, selection, user })
+let reducer = combineReducers({ configuration, coverage, mapLayers, plan, selection, user })
 
 // Add support for Redux devtools extension. Yes, even in production.
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
