@@ -61,6 +61,11 @@
         <br>Release Notes
         <!-- <span class="badge">!</span> -->
       </button>
+
+      <button class="btn btn-light settings-btn" ng-if="$ctrl.state.loggedInUser.isAdministrator" ng-click="$ctrl.currentView = $ctrl.views.CONFIGURATION_EDITOR">
+        <i class="fa fa-2x fa-sliders-h"></i>
+        <br>Configuration Editor
+      </button>
       
       <button class="btn btn-light settings-btn" ng-click="$ctrl.uploadDataSource()">
         <i class="fa fa-2x fa-upload"></i>
@@ -98,6 +103,9 @@
     </release-notes>
 
     <r-broadcast ng-if="$ctrl.currentView === $ctrl.views.BROADCAST"></r-broadcast>
+    
+    <r-configuration-editor ng-if="$ctrl.currentView === $ctrl.views.CONFIGURATION_EDITOR">
+    </r-configuration-editor>
   </modal-body>
 
   <modal-footer>

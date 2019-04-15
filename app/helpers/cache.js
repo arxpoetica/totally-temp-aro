@@ -66,6 +66,8 @@ function loadConfiguration() {
     .catch(err => console.error(err))
 }
 
+exports.clearUiConfigurationCache = () => UIConfiguration.clearCache()
+
 exports.refresh = () => {
   return Promise.all([
     loadAnalysisLayers(),
@@ -73,7 +75,7 @@ exports.refresh = () => {
     loadFiberTypes(),
     loadConfiguration()
   ])
-  .then(() => console.log(`Cache loaded ${exports.serviceLayers.length} service areas, ${exports.analysisLayers.length} analysis layers`))
+    .then(() => console.log(`Cache loaded ${exports.serviceLayers.length} service areas, ${exports.analysisLayers.length} analysis layers`))
 }
 
 exports.refresh()

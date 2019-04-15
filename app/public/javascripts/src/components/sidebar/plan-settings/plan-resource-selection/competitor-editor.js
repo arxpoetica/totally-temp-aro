@@ -82,6 +82,16 @@ class CompetitorEditorController {
     this.regionSelectEnabled = true
   }
   
+  selectAll () {
+    if (!this.regionSelectEnabled) return
+    this.selectedRegions = JSON.parse(JSON.stringify(this.regions))
+  }
+  
+  selectNone () {
+    if (!this.regionSelectEnabled || this.selectedRegions.length < 1) return
+    this.selectedRegions = []
+  }
+  
   onStrengthChange (param) {
     this.hasChanged = true
   }

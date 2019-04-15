@@ -5,6 +5,7 @@ import CoverageInitializer from '../react/components/coverage/coverage-initializ
 import CoverageButton from '../react/components/coverage/coverage-button.jsx'
 import PlanTargetList from '../react/components/selection/plan-target-list.jsx'
 import Broadcast from '../react/components/global-settings/broadcast.jsx'
+import ConfigurationEditor from '../react/components/configuration/configuration-editor.jsx'
 
 import boundaryDetail from './sidebar/view/boundary-detail'
 import equipmentDetail from './sidebar/view/equipment-detail'
@@ -60,6 +61,7 @@ import planResourceEditorModal from './sidebar/plan-settings/plan-resource-selec
 import planResourceSelection from './sidebar/plan-settings/plan-resource-selection/plan-resource-selection'
 import pricebookEditor from './sidebar/plan-settings/plan-resource-selection/pricebook-editor'
 import resourceManager from './sidebar/plan-settings/plan-resource-selection/resource-manager'
+import resourceManagerDetail from './sidebar/plan-settings/plan-resource-selection/resource-manager-detail'
 import pricebookCreator from './sidebar/plan-settings/plan-resource-selection/pricebook-creator'
 import roicEditor from './sidebar/plan-settings/plan-resource-selection/roic-editor'
 import rateReachEditor from './sidebar/plan-settings/plan-resource-selection/rate-reach-editor'
@@ -169,6 +171,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('planResourceSelection', planResourceSelection)
   .component('pricebookEditor', pricebookEditor)
   .component('resourceManager', resourceManager)
+  .component('resourceManagerDetail', resourceManagerDetail)
   .component('pricebookCreator', pricebookCreator)
   .component('roicEditor', roicEditor)
   .component('rateReachEditor', rateReachEditor)
@@ -224,6 +227,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rPlanTargetList', react2angular(PlanTargetList))
   .component('rBroadcast', react2angular(Broadcast))
   .component('rToastContainer', react2angular(ToastContainer))
+  .component('rConfigurationEditor', react2angular(ConfigurationEditor))
   .service('Utils', utils)
   .service('state', state)
   .service('aclManager', aclManager)
