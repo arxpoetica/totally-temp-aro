@@ -13,12 +13,12 @@ export class ReportDefinitionList extends Component {
 
   render () {
     return this.props.reportBeingEdited
-      ? <ReportDefinitionEditor />
+      ? <ReportDefinitionEditor id='comReportDefinitionEditor' />
       : this.renderReportsList()
   }
 
   renderReportsList () {
-    return <div>
+    return <div id='divReportsList'>
       <table className='table table-sm table-striped'>
         <tbody>
           {this.props.reportsMetaData.map(reportMetaData => (
@@ -26,7 +26,7 @@ export class ReportDefinitionList extends Component {
               <td>{reportMetaData.reportType}</td>
               <td>{reportMetaData.displayName}</td>
               <td>
-                <button className='btn btn-primary' onClick={event => this.props.startEditingReport(reportMetaData.id)}>
+                <button id={`btnEditReport${reportMetaData.id}`} className='btn btn-primary' onClick={event => this.props.startEditingReport(reportMetaData.id)}>
                   Edit
                 </button>
               </td>
@@ -45,7 +45,7 @@ export class ReportDefinitionList extends Component {
 }
 
 ReportDefinitionList.propTypes = {
-  reportDefinitions: PropTypes.array,
+  reportsMetaData: PropTypes.array,
   reportBeingEdited: PropTypes.object
 }
 
