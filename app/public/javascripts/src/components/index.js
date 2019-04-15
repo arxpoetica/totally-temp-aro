@@ -4,6 +4,7 @@ import CoverageInitializer from '../react/components/coverage/coverage-initializ
 import CoverageButton from '../react/components/coverage/coverage-button.jsx'
 import PlanTargetList from '../react/components/selection/plan-target-list.jsx'
 import ConfigurationEditor from '../react/components/configuration/configuration-editor.jsx'
+import ReportDefinitionList from '../react/components/configuration/report-definition-list.jsx'
 
 import boundaryDetail from './sidebar/view/boundary-detail'
 import equipmentDetail from './sidebar/view/equipment-detail'
@@ -224,6 +225,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rCoverageButton', react2angular(CoverageButton))
   .component('rPlanTargetList', react2angular(PlanTargetList))
   .component('rConfigurationEditor', react2angular(ConfigurationEditor))
+  .component('rReportDefinitionList', react2angular(ReportDefinitionList))
   .service('Utils', utils)
   .service('state', state)
   .service('aclManager', aclManager)

@@ -42,9 +42,41 @@ function uploadAssetToServer (assetKey, file) {
   }
 }
 
+function getReportsMetadata () {
+  return dispatch => {
+    AroHttp.get('/service/v2/installed/report/meta-data')
+      .then(result => dispatch({
+        type: Actions.CONFIGURATION_SET_REPORTS_METADATA,
+        payload: result.data
+      }))
+      .catch(err => console.error(err))
+  }
+}
+
+function startEditingReport (reportId) {
+  return {
+    type: Actions.CONFIGURATION_SET_EDITING_REPORT_ID,
+    payload: reportId
+  }
+}
+
+function populateEditingReportDefinition (reportId) {
+  return dispatch => {
+    AroHttp.get(`/service/v2/report-module/${reportId}`)
+      .then(result => dispatch({
+        type: Actions.CONFIGURATION_SET_EDITING_REPORT_DEFINITION,
+        payload: result.data
+      }))
+      .catch(err => console.error(err))
+  }
+}
+
 export default {
   loadConfigurationFromServer: loadConfigurationFromServer,
   saveConfigurationToServerAndReload: saveConfigurationToServerAndReload,
   getAssetKeys: getAssetKeys,
-  uploadAssetToServer: uploadAssetToServer
+  uploadAssetToServer: uploadAssetToServer,
+  getReportsMetadata: getReportsMetadata,
+  startEditingReport: startEditingReport,
+  populateEditingReportDefinition: populateEditingReportDefinition
 }

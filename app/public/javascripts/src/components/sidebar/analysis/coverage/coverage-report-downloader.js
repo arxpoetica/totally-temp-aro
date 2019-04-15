@@ -23,13 +23,13 @@ class CoverageReportDownloaderController {
     }
 
     // Get the coverage report details
-    this.$http.get('/service/installed/report/meta-data')
+    this.$http.get('/service/v2/installed/report/meta-data')
       .then(result => {
         this.reportFilename = ''
         const allowedReportType = (this.coverageReport.coverageAnalysisRequest.coverageType === 'location') ? 'COVERAGE' : 'FORM477'
         this.reports = result.data.filter(item => item.reportType === allowedReportType)
         this.reports.forEach((item, index) => {
-          this.reports[index].downloadUrlPrefix = `/report-extended/${item.name}/${this.state.plan.getValue().id}`
+          this.reports[index].downloadUrlPrefix = `/report-extended/${item.id}/${this.state.plan.getValue().id}`
           this.reports[index].selectedForDownload = false
         })
         this.updateDownloadFilenameAndMediaType()
@@ -46,7 +46,7 @@ class CoverageReportDownloaderController {
     const fileName = `${this.reportFilename}.${this.selectedReportType.mediaType}`
     if (numReportsSelected === 1) {
       // We are downloading an individual report. We need { responseType: 'arraybuffer' } to receive binary data.
-      this.$http.get(`/service-download-file/${fileName}/report-extended/${selectedReports[0].name}/${this.state.plan.getValue().id}.${this.selectedReportType.mediaType}`,
+      this.$http.get(`/service-download-file/${fileName}/v2/report-extended/${selectedReports[0].id}/${this.state.plan.getValue().id}.${this.selectedReportType.mediaType}`,
         { responseType: 'arraybuffer' })
         .then(result => {
           this.Utils.downloadFile(result.data, fileName)
@@ -56,9 +56,9 @@ class CoverageReportDownloaderController {
     } else {
       // We are downloading multiple reports. We need { responseType: 'arraybuffer' } to receive binary data.
       const reportNames = this.reports.filter(item => item.selectedForDownload)
-        .map(item => item.name)
+        .map(item => item.id)
 
-      this.$http.post(`/service-download-file/${fileName}/report-extended-queries/${this.state.plan.getValue().id}.xls`, reportNames,
+      this.$http.post(`/service-download-file/${fileName}/v2/report-extended-queries/${this.state.plan.getValue().id}.xls`, reportNames,
         { responseType: 'arraybuffer' })
         .then(result => {
           this.Utils.downloadFile(result.data, fileName)

@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
+import { PropTypes } from 'prop-types'
 import ConfigurationActions from './configuration-actions'
 
 export class AssetManager extends Component {
@@ -52,6 +53,7 @@ export class AssetManager extends Component {
 }
 
 AssetManager.propTypes = {
+  assetKeys: PropTypes.array
 }
 
 const mapStateToProps = (state) => ({

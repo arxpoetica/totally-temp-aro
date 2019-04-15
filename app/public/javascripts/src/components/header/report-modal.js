@@ -1,15 +1,13 @@
 class ReportModalController {
-  constructor ($scope, $http, state) {
-    this.state = state
-    this.analysis = []
+  constructor ($timeout, $http, state, Utils) {
+    this.$timeout = $timeout
     this.$http = $http
-
-    this.plan
-    this.selectedFileType = {}
-    state.plan.subscribe((newPlan) => {
-      if (newPlan) {
-        this.plan = newPlan
-      }
+    this.state = state
+    this.Utils = Utils
+    this.reports = []
+    state.plan.skip(1).subscribe((newPlan) => {
+      var a = 0
+      this.plan = newPlan
     })
   }
 
@@ -31,38 +29,37 @@ class ReportModalController {
   }
 
   loadPlanReport () {
-    this.analysis = []
-    this.$http.get(`/service/installed/report/meta-data`).then((response) => {
-      if (response.data) {
-        var reports = response.data
-
-        var twoDigits = (d) => d > 9 ? String(d) : '0' + d
-        var date = new Date()
-        var now = `${date.getFullYear()}${twoDigits(date.getMonth() + 1)}${twoDigits(date.getDate())}`
-        // var prefix = `${now}_${this.plan.id}_${this.plan.areaName}_`
-        var prefix = `${now}_${this.plan.id}_`
-
-        var analysis = []
-        reports.forEach((report) => {
-          var reportName = `${prefix}${report.name}`
-          this.selectedFileType[reportName] = report.mediaTypes[0] // Choose the first media type by default
-
-          analysis.push({
-            originalName: report.name,
-            name: reportName,
-            type: report.mediaTypes,
-            url: `/report-extended/${report.name}/${this.plan.id}/${this.selectedFileType[reportName]}`
-          })
+    var twoDigits = (d) => d > 9 ? String(d) : '0' + d
+    var date = new Date()
+    var now = `${date.getFullYear()}${twoDigits(date.getMonth() + 1)}${twoDigits(date.getDate())}`
+    var downloadPrefix = `${now}_${this.plan.id}_`
+    this.reports = []
+    this.$http.get(`/service/v2/installed/report/meta-data`)
+      .then((response) => {
+        this.reports = response.data.map(report => {
+          // Add some properties to the report object
+          return { ...report,
+            selectedFileType: report.media_types[0],
+            downloadFilename: `${downloadPrefix}_${report.name}`
+          }
         })
-        this.analysis = analysis
-      }
-    }).catch((err) => {
-      console.error(err)
-    })
+        this.$timeout()
+      })
+      .catch(err => console.error(err))
+  }
+
+  downloadReport (report) {
+    const filename = `${report.downloadFilename}.${report.selectedFileType}`
+    // We need { responseType: 'arraybuffer' } to receive binary data.
+    this.$http.get(`/service-download-file/${filename}/v2/report-extended/${report.id}/${this.plan.id}.${report.selectedFileType}`, { responseType: 'arraybuffer' })
+      .then(result => {
+        this.Utils.downloadFile(result.data, filename)
+      })
+      .catch(err => console.error(err))
   }
 }
 
-ReportModalController.$inject = ['$scope', '$http', 'state']
+ReportModalController.$inject = ['$timeout', '$http', 'state', 'Utils']
 
 let reportModal = {
   templateUrl: '/components/header/report-modal.html',
