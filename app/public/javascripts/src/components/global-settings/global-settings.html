@@ -67,6 +67,11 @@
         <br>Configuration Editor
       </button>
       
+      <button class="btn btn-light settings-btn" ng-if="$ctrl.state.loggedInUser.isAdministrator" ng-click="$ctrl.currentView = $ctrl.views.REPORTS_EDITOR">
+        <i class="fa fa-2x fa-sliders-h"></i>
+        <br>Reports Editor
+      </button>
+
       <button class="btn btn-light settings-btn" ng-click="$ctrl.uploadDataSource()">
         <i class="fa fa-2x fa-upload"></i>
         <br>Data Upload
@@ -99,6 +104,9 @@
 
     <r-configuration-editor ng-if="$ctrl.currentView === $ctrl.views.CONFIGURATION_EDITOR">
     </r-configuration-editor>
+
+    <r-report-definition-list ng-if="$ctrl.currentView === $ctrl.views.REPORTS_EDITOR">
+    </r-report-definition-list>
   </modal-body>
 
   <modal-footer>
