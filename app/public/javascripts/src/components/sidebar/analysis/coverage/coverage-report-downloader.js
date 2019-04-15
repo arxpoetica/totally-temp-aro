@@ -56,9 +56,9 @@ class CoverageReportDownloaderController {
     } else {
       // We are downloading multiple reports. We need { responseType: 'arraybuffer' } to receive binary data.
       const reportNames = this.reports.filter(item => item.selectedForDownload)
-        .map(item => item.name)
+        .map(item => item.id)
 
-      this.$http.post(`/service-download-file/${fileName}/report-extended-queries/${this.state.plan.getValue().id}.xls`, reportNames,
+      this.$http.post(`/service-download-file/${fileName}/v2/report-extended-queries/${this.state.plan.getValue().id}.xls`, reportNames,
         { responseType: 'arraybuffer' })
         .then(result => {
           this.Utils.downloadFile(result.data, fileName)
