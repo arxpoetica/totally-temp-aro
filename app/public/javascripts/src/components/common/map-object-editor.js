@@ -715,7 +715,7 @@ class MapObjectEditorController {
   }
 
   createEditableExistingMapObject (feature, iconUrl) {
-    this.createMapObject(feature, iconUrl, true, true)
+    this.createMapObject(feature, iconUrl, true, true, true)
   }
 
   createMapObject (feature, iconUrl, usingMapClick, existingObjectOverride, deleteExistingBoundary) {
