@@ -13,7 +13,8 @@ class GlobalSettingsController {
       TAG_MANAGER: 'Tag Manager',
       RELEASE_NOTES: 'Release Notes',
       BROADCAST: 'BROADCAST',
-      CONFIGURATION_EDITOR: 'Configuration Editor'
+      CONFIGURATION_EDITOR: 'Configuration Editor',
+      REPORTS_EDITOR: 'Reports Editor'
     })
     this.currentView = this.views.GLOBAL_SETTINGS
     this.userIdForSettingsEdit = null
