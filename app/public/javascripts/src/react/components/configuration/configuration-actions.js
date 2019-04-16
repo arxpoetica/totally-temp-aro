@@ -4,10 +4,10 @@ import AroHttp from '../../common/aro-http'
 
 function loadConfigurationFromServer () {
   return dispatch => {
-    AroHttp.get('/configuration')
+    AroHttp.get('/ui_settings')
       .then(result => dispatch({
         type: Actions.CONFIGURATION_SET_CONFIGURATION,
-        payload: result.data.appConfiguration
+        payload: result.data
       }))
       .catch(err => console.error(err))
   }
