@@ -29,6 +29,7 @@ class CompetitorEditorController {
       console.log("reset data model..");
     });
     */
+    
     this.onInit()
   }
   
@@ -45,6 +46,13 @@ class CompetitorEditorController {
     this.loadCompManMeta()
   }
   
+  getDefaultStrength (carrierId) {
+    return {
+      retail: {providerTypeId: "retail", carrierId: carrierId, strength: 0.0}, 
+      tower: {providerTypeId: "tower", carrierId: carrierId, strength: 0.0}, 
+      wholesale: {providerTypeId: "wholesale", carrierId: carrierId, strength: 0.0}
+    }
+  }
   
   onSelectedRegionsChanged () {
     //console.log('on regions changed')
@@ -117,16 +125,20 @@ class CompetitorEditorController {
   }
   
   loadCompManForStates () {
+    console.log(this.competitorManagerId)
     if ('undefined' == typeof this.competitorManagerId || this.selectedRegions.length < 1) return
     var regionsString = this.selectedRegions.map(ele => ele.stusps).join(",");
     
     this.$http.get(`/service/v1/competitor-profiles?states=${regionsString}`)
     .then((carrierResult) => {
       var newCarriersById = {}
+      var newStrengthsById = {}
       
       carrierResult.data.forEach(ele => {
         newCarriersById[ele.carrierId] = ele
+        newStrengthsById[ele.carrierId] = this.getDefaultStrength(ele.carrierId)
       })
+      
       this.carriersById = newCarriersById
       
       carrierResult.data.sort((a,b) => {return b.cbPercent - a.cbPercent})
@@ -135,9 +147,15 @@ class CompetitorEditorController {
       
       this.$http.get(`/service/v1/competitor-manager/${this.competitorManagerId}/strengths?states=${regionsString}&user_id=${this.state.loggedInUser.id}`)
       .then((strengthsResult) => {
-        var newStrengthsById = {}
-        var newStrengthColsDict = {}
-        var newStrengthCols = []
+        //var newStrengthsById = {}
+        
+        // ToDo: strength types should be dynamic, either get this list from the server OR have the server initilize strengths 
+        //var newStrengthColsDict = {}
+        var newStrengthColsDict = {wholesale: "wholesale", tower: "tower", retail: "retail"}
+        
+        //var newStrengthCols = []
+        var newStrengthCols = ["wholesale", "tower", "retail"]
+        
         strengthsResult.data.forEach(ele => {
           
           if (!newStrengthColsDict.hasOwnProperty(ele.providerTypeId)){
