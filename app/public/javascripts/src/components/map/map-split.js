@@ -143,7 +143,7 @@ let mapSplit = {
 
     <!-- Define the canvas that will hold the map. -->
     <div id="map-canvas-container" ng-style="{ position: 'relative', float: 'left', height: '100%', width: '100%', transition: $ctrl.transitionCSS }">
-      <div id="map-canvas" style="position: relative; overflow: hidden;"></div>
+      <div id="map-canvas" class="map-canvas" style="position: relative; overflow: hidden;"></div>
       <!-- Technically the toolbar, etc should be a child of the map canvas, but putting these elements in the map canvas
           causes the map to not show up -->
       <div id="header-bar-container" style="position: absolute; top: 0px; width: 100%; height: 55px; display: flex; flex-direction: row;">
@@ -160,6 +160,7 @@ let mapSplit = {
       </map-selector-plan-target>
       <map-selector-export-locations map-global-object-name="map" ng-if="$ctrl.selectedDisplayMode === $ctrl.displayModes.VIEW
         "></map-selector-export-locations>
+      <r-toast-container></r-toast-container>
     </div>
 
     <!-- Define the sidebar -->

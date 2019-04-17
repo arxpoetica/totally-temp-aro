@@ -3,11 +3,13 @@ const helpers = require('../helpers')
 const config = helpers.config
 const VECTOR_TILE_DATA_MESSAGE = 'VECTOR_TILE_DATA'
 const VECTOR_TILE_EXCHANGE = 'aro_vt', VECTOR_TILE_QUEUE = 'vectorTileQueue'
+const BROADCAST_MESSAGE = 'BROADCAST_MESSAGE'
 class SocketManager {
-
+  
   constructor(app) {
     this.vectorTileRequestToRoom = {}
     this.io = require('socket.io')(app)
+    this.broadcastnsp = this.io.of('/broadcastRoom')
     this.setupConnectionhandlers()
     this.setupVectorTileAMQP()
   }
@@ -23,6 +25,13 @@ class SocketManager {
       socket.on('SOCKET_LEAVE_ROOM', (roomId) => {
         console.log(`Leaving socket room: /${roomId}`)
         socket.leave(`/${roomId}`)
+      })
+    })
+
+    this.broadcastnsp.on('connection', (socket) => {
+      socket.on('SOCKET_BROADCAST_ROOM', (roomId) => {
+        console.log(`Joining Broadcast socket namespace: /broadcastRoom , room: /${roomId}`)
+        socket.join(`/${roomId}`)
       })
     })
   }
@@ -63,6 +72,16 @@ class SocketManager {
 
   mapVectorTileUuidToRoom(vtUuid, roomId) {
     this.vectorTileRequestToRoom[vtUuid] = roomId
+  }
+
+  broadcastMessage(msg) {
+    // sending to all clients in namespace 'broadcastnsp', including sender
+    this.broadcastnsp.emit('message', {
+      type: 'NOTIFICATION_SHOW',
+      payload: msg
+    })
+    // sending to a specific room in a specific namespace, including sender
+    // this.broadcastnsp.to('/allUsers').emit('message', { type: NOTIFICATION_SHOW, data: msg })
   }
 }
 

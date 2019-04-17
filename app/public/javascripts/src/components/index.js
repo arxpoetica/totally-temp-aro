@@ -1,8 +1,10 @@
 import { react2angular } from 'react2angular'
+import { ToastContainer } from "react-toastify";
 
 import CoverageInitializer from '../react/components/coverage/coverage-initializer.jsx'
 import CoverageButton from '../react/components/coverage/coverage-button.jsx'
 import PlanTargetList from '../react/components/selection/plan-target-list.jsx'
+import Broadcast from '../react/components/global-settings/broadcast.jsx'
 import ConfigurationEditor from '../react/components/configuration/configuration-editor.jsx'
 import ReportDefinitionList from '../react/components/configuration/report-definition-list.jsx'
 
@@ -224,6 +226,8 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rCoverageInitializer', react2angular(CoverageInitializer))
   .component('rCoverageButton', react2angular(CoverageButton))
   .component('rPlanTargetList', react2angular(PlanTargetList))
+  .component('rBroadcast', react2angular(Broadcast))
+  .component('rToastContainer', react2angular(ToastContainer))
   .component('rConfigurationEditor', react2angular(ConfigurationEditor))
   .component('rReportDefinitionList', react2angular(ReportDefinitionList))
   .service('Utils', utils)

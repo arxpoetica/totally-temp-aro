@@ -1,0 +1,65 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Default component render 1`] = `
+<div
+  className="no-collapse"
+  style={
+    Object {
+      "display": "flex",
+      "flexDirection": "column",
+      "height": "100%",
+    }
+  }
+>
+  <div
+    style={
+      Object {
+        "flex": "1 1 auto",
+      }
+    }
+  >
+    <div
+      className="form-group"
+    >
+      <label>
+        Subject
+      </label>
+      <input
+        className="form-control"
+        onChange={[Function]}
+        type="text"
+        value=""
+      />
+    </div>
+    <div
+      className="form-group"
+    >
+      <label>
+        Text
+      </label>
+      <textarea
+        className="form-control"
+        onChange={[Function]}
+        rows="14"
+      />
+    </div>
+  </div>
+  <div
+    style={
+      Object {
+        "flex": "0 0 auto",
+      }
+    }
+  >
+    <button
+      className="btn btn-primary float-right"
+      onClick={[Function]}
+    >
+      <i
+        className="fa fa-save"
+      />
+        Send
+    </button>
+  </div>
+</div>
+`;

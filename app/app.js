@@ -50,6 +50,7 @@ var routes = [
   'settings',
   'reports',
   'ui_assets',
+  'socket',
   'ui_settings'
 ]
 routes.forEach((route) => {

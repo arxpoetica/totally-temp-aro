@@ -12,6 +12,7 @@ class GlobalSettingsController {
       USER_SETTINGS: 'User Settings',
       TAG_MANAGER: 'Tag Manager',
       RELEASE_NOTES: 'Release Notes',
+      BROADCAST: 'BROADCAST',
       CONFIGURATION_EDITOR: 'Configuration Editor',
       REPORTS_EDITOR: 'Reports Editor'
     })

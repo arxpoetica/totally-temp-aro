@@ -76,6 +76,11 @@
         <i class="fa fa-2x fa-upload"></i>
         <br>Data Upload
       </button>
+
+      <button class="btn btn-light settings-btn" ng-if="$ctrl.state.loggedInUser.isAdministrator" ng-click="$ctrl.currentView = $ctrl.views.BROADCAST">
+        <i class="fa fa-2x fa-bullhorn"></i>
+        <br>BroadCast
+      </button>
     </div>
 
     <user-account-settings ng-if="$ctrl.currentView === $ctrl.views.MY_ACCOUNT"></user-account-settings>
@@ -102,6 +107,8 @@
       release-notes-view="$ctrl.globalSettingsService.currentReleaseNotesView">
     </release-notes>
 
+    <r-broadcast ng-if="$ctrl.currentView === $ctrl.views.BROADCAST"></r-broadcast>
+    
     <r-configuration-editor ng-if="$ctrl.currentView === $ctrl.views.CONFIGURATION_EDITOR">
     </r-configuration-editor>
 
