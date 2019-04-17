@@ -39,7 +39,7 @@ class StateViewMode {
   // Plan search - tags
   static loadListOfPlanTags ($http, state) {
     var promises = [
-      $http.get(`/service/tag-mapping/tags`)
+      $http.get(`/service/tag-mapping/global-tags`)
     ]
 
     return Promise.all(promises)
