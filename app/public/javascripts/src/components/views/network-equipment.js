@@ -4,7 +4,21 @@ import MapLayerActions from '../../react/components/map-layers/map-layer-actions
 
 // We need a selector, else the .toJS() call will create an infinite digest loop
 const getAllNetworkEquipmentLayers = reduxState => reduxState.mapLayers.networkEquipment
-const getNetworkEquipmentLayersList = createSelector([getAllNetworkEquipmentLayers], (networkEquipmentLayers) => networkEquipmentLayers)
+const getNetworkEquipmentLayersList = createSelector([getAllNetworkEquipmentLayers], networkEquipmentLayers => networkEquipmentLayers)
+const getEquipmentsArray = createSelector([getAllNetworkEquipmentLayers], networkEquipmentLayers => {
+  var equipmentsArray = []
+  if (networkEquipmentLayers.equipments) {
+    Object.keys(networkEquipmentLayers.equipments).forEach(key => equipmentsArray.push(networkEquipmentLayers.equipments[key]))
+  }
+  return equipmentsArray
+})
+const getCablesArray = createSelector([getAllNetworkEquipmentLayers], networkEquipmentLayers => {
+  var cablesArray = []
+  if (networkEquipmentLayers.cables) {
+    Object.keys(networkEquipmentLayers.cables).forEach(key => cablesArray.push(networkEquipmentLayers.cables[key]))
+  }
+  return cablesArray
+})
 
 class NetworkEquipmentController {
   constructor($rootScope, $http, $location, $ngRedux, map_tools, MapLayer, $timeout, state) {
@@ -272,6 +286,8 @@ class NetworkEquipmentController {
   mapStateToThis (reduxState) {
     return {
       networkEquipmentLayers: getNetworkEquipmentLayersList(reduxState),
+      equipmentsArray: getEquipmentsArray(reduxState),
+      cablesArray: getCablesArray(reduxState),
       showSiteBoundary: reduxState.mapLayers.showSiteBoundary,
       selectedBoundaryType: reduxState.mapLayers.selectedBoundaryType
     }
