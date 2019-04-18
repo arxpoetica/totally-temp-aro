@@ -8,6 +8,20 @@ export class ReportModuleEditor extends Component {
   constructor (props) {
     super(props)
     this.props.populateEditingReportDefinition(this.props.reportId)
+    this.state = {
+      isEditingPrimary: true,
+      subDefinitionEditingIndex: -1
+    }
+  }
+
+  getDefinitionBeingEdited () {
+    if (!this.props.moduleDefinition) {
+      return null
+    } else {
+      return this.state.isEditingPrimary
+        ? this.props.moduleDefinition.definition
+        : this.props.moduleDefinition.subDefinitions[this.state.subDefinitionEditingIndex]
+    }
   }
 
   render () {
@@ -15,15 +29,25 @@ export class ReportModuleEditor extends Component {
       <div className='row' style={{ height: '100%' }}>
         <div className='col-md-2'>
           <ul className='nav nav-pills'>
-            <li className='nav-item'>
-              <a className='nav-link active'>Primary Definition</a>
+            <li className='nav-item' key='-1'>
+              <a className='nav-link active' onClick={() => this.setState({ isEditingPrimary: true, subDefinitionEditingIndex: -1 })}>Primary Definition</a>
             </li>
+            {
+              this.props.moduleDefinition
+                ? this.props.moduleDefinition.subDefinitions.map((subDefinition, index) => (
+                  <li className='nav-item' key={subDefinition.id}>
+                    <a className='nav-link' onClick={() => this.setState({ isEditingPrimary: false, subDefinitionEditingIndex: index })}>
+                      Subdefinition {index}
+                    </a>
+                  </li>
+                ))
+                : null
+            }
           </ul>
         </div>
         <div className='col-md-10 d-flex flex-column' style={{ height: '100%' }}>
-          { this.props.initialValues
-            ? <div className='flex-grow-1'><ReportDefinitionEditor initialName={this.props.initialValues.name} initialDisplayName={this.props.initialValues.displayName}
-              initialQueryType={this.props.initialValues.queryType} initialQuery={this.props.initialValues.query} /></div>
+          { this.getDefinitionBeingEdited()
+            ? <div className='flex-grow-1'><ReportDefinitionEditor initialValues={this.getDefinitionBeingEdited()} enableReinitialize /></div>
             : null
           }
           {/* Show an alert if required */}
@@ -58,7 +82,9 @@ ReportModuleEditor.propTypes = {
 
 const mapStateToProps = (state) => ({
   reportId: state.configuration.reports.reportBeingEdited && state.configuration.reports.reportBeingEdited.id,
-  initialValues: (state.configuration.reports.reportBeingEdited && state.configuration.reports.reportBeingEdited.definition && state.configuration.reports.reportBeingEdited.definition.moduleDefinition.definition)
+  moduleDefinition: (state.configuration.reports.reportBeingEdited &&
+    state.configuration.reports.reportBeingEdited.definition &&
+    state.configuration.reports.reportBeingEdited.definition.moduleDefinition)
 })
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
