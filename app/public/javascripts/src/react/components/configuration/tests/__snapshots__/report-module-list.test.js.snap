@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Default component render and click edit one report 1`] = `
+exports[`Click delete report 1`] = `
 <div
   id="divReportsList"
 >
@@ -122,7 +122,7 @@ exports[`Default component render and click edit one report 1`] = `
 </div>
 `;
 
-exports[`Default component render and click edit one report 2`] = `
+exports[`Click delete report 2`] = `
 <div
   id="divReportsList"
 >
@@ -244,7 +244,129 @@ exports[`Default component render and click edit one report 2`] = `
 </div>
 `;
 
-exports[`Edit a report 1`] = `
+exports[`Click edit report 1`] = `
+<div
+  id="divReportsList"
+>
+  <table
+    className="table table-sm table-striped"
+  >
+    <thead>
+      <tr>
+        <th>
+          Report Type
+        </th>
+        <th>
+          Name
+        </th>
+        <th>
+          Actions
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr
+        key="1"
+      >
+        <td>
+          GENERAL
+        </td>
+        <td>
+          plan_report
+        </td>
+        <td>
+          <button
+            className="btn btn-primary"
+            id="btnEditReport1"
+            onClick={[Function]}
+          >
+            <i
+              className="fa fa-edit"
+            />
+             Edit
+          </button>
+          <button
+            className="btn btn-danger"
+            id="btnDeleteReport1"
+            onClick={[Function]}
+          >
+            <i
+              className="fa fa-trash-alt"
+            />
+             Delete
+          </button>
+        </td>
+      </tr>
+      <tr
+        key="2"
+      >
+        <td>
+          GENERAL
+        </td>
+        <td>
+          Planned Equipment Elements
+        </td>
+        <td>
+          <button
+            className="btn btn-primary"
+            id="btnEditReport2"
+            onClick={[Function]}
+          >
+            <i
+              className="fa fa-edit"
+            />
+             Edit
+          </button>
+          <button
+            className="btn btn-danger"
+            id="btnDeleteReport2"
+            onClick={[Function]}
+          >
+            <i
+              className="fa fa-trash-alt"
+            />
+             Delete
+          </button>
+        </td>
+      </tr>
+      <tr
+        key="3"
+      >
+        <td>
+          GENERAL
+        </td>
+        <td>
+          Planned Fiber Elements
+        </td>
+        <td>
+          <button
+            className="btn btn-primary"
+            id="btnEditReport3"
+            onClick={[Function]}
+          >
+            <i
+              className="fa fa-edit"
+            />
+             Edit
+          </button>
+          <button
+            className="btn btn-danger"
+            id="btnDeleteReport3"
+            onClick={[Function]}
+          >
+            <i
+              className="fa fa-trash-alt"
+            />
+             Delete
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+`;
+
+exports[`Is editing report 1`] = `
 <Connect(ReportModuleEditor)
   id="comReportDefinitionEditor"
 />

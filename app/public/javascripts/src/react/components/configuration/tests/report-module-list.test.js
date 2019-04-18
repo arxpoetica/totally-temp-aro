@@ -1,7 +1,7 @@
 /* global test expect jest */
 import React from 'react'
 import { shallow } from 'enzyme'
-import { ReportDefinitionList } from '../report-module-list'
+import { ReportModuleList } from '../report-module-list'
 
 const reportsState = {
   metaData: [
@@ -13,11 +13,11 @@ const reportsState = {
 }
 
 // -----------------------------------------------------------------------------
-test('Default component render and click edit one report', () => {
+test('Click edit report', () => {
   const mockGetReportsMetadata = jest.fn()
   const mockStartEditingReport = jest.fn()
   const component = shallow(
-    <ReportDefinitionList reportsMetaData={reportsState.metaData} reportBeingEdited={null}
+    <ReportModuleList reportsMetaData={reportsState.metaData} reportBeingEdited={null}
       getReportsMetadata={mockGetReportsMetadata} startEditingReport={mockStartEditingReport} />
   )
   expect(mockGetReportsMetadata.mock.calls.length).toBe(1)
@@ -25,14 +25,29 @@ test('Default component render and click edit one report', () => {
 
   component.find('#btnEditReport1').simulate('click')
   expect(mockStartEditingReport).toBeCalledWith(1)
+})
+
+// -----------------------------------------------------------------------------
+test('Click delete report', () => {
+  const mockGetReportsMetadata = jest.fn()
+  const mockDeleteReport = jest.fn()
+  const component = shallow(
+    <ReportModuleList reportsMetaData={reportsState.metaData} reportBeingEdited={null}
+      getReportsMetadata={mockGetReportsMetadata} deleteReport={mockDeleteReport} />
+  )
+  expect(mockGetReportsMetadata.mock.calls.length).toBe(1)
+  expect(component).toMatchSnapshot()
+
+  component.find('#btnDeleteReport1').simulate('click')
+  expect(mockDeleteReport).toBeCalledWith(1)
   expect(component).toMatchSnapshot()
 })
 
 // -----------------------------------------------------------------------------
-test('Edit a report', () => {
+test('Is editing report', () => {
   const mockGetReportsMetadata = jest.fn()
   const component = shallow(
-    <ReportDefinitionList reportsMetaData={reportsState.metaData} reportBeingEdited={reportsState.metaData[1]}
+    <ReportModuleList reportsMetaData={reportsState.metaData} reportBeingEdited={reportsState.metaData[1]}
       getReportsMetadata={mockGetReportsMetadata} />
   )
   expect(mockGetReportsMetadata.mock.calls.length).toBe(1)

@@ -6,7 +6,7 @@ import ConfigurationActions from './configuration-actions'
 import ReportModuleEditor from './report-module-editor.jsx'
 import '../common-styles/common-styles.css'
 
-export class ReportDefinitionList extends Component {
+export class ReportModuleList extends Component {
   constructor (props) {
     super(props)
     this.props.getReportsMetadata()
@@ -55,7 +55,7 @@ export class ReportDefinitionList extends Component {
   }
 }
 
-ReportDefinitionList.propTypes = {
+ReportModuleList.propTypes = {
   reportsMetaData: PropTypes.array,
   reportBeingEdited: PropTypes.object
 }
@@ -71,5 +71,5 @@ const mapDispatchToProps = dispatch => ({
   deleteReport: reportId => dispatch(ConfigurationActions.deleteReport(reportId))
 })
 
-const ReportDefinitionListComponent = wrapComponentWithProvider(reduxStore, ReportDefinitionList, mapStateToProps, mapDispatchToProps)
-export default ReportDefinitionListComponent
+const ReportModuleListComponent = wrapComponentWithProvider(reduxStore, ReportModuleList, mapStateToProps, mapDispatchToProps)
+export default ReportModuleListComponent

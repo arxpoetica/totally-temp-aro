@@ -38,7 +38,8 @@ export class ReportModuleEditor extends Component {
         <div className='col-md-3'>
           <ul className='nav nav-pills'>
             <li className='nav-item' key='-1'>
-              <a className={`nav-link ${this.state.isEditingPrimary ? 'active' : ''}`}
+              <a id='lnkEditPrimaryDefinition'
+                className={`nav-link ${this.state.isEditingPrimary ? 'active' : ''}`}
                 onClick={() => this.startEditingPrimaryDefinition()}>
                   Primary Definition
               </a>
@@ -46,8 +47,9 @@ export class ReportModuleEditor extends Component {
             {
               this.props.reportBeingEdited.moduleDefinition
                 ? this.props.reportBeingEdited.moduleDefinition.subDefinitions.map((subDefinition, index) => (
-                  <li className='nav-item' key={subDefinition.id}>
-                    <a className={`nav-link ${this.state.subDefinitionEditingIndex === index ? 'active' : ''}`}
+                  <li className='nav-item' key={index}>
+                    <a id={`lnkEditSubDefinition${index}`}
+                      className={`nav-link ${this.state.subDefinitionEditingIndex === index ? 'active' : ''}`}
                       onClick={() => this.startEditingSubDefinition(index)}>
                       Subdefinition {index}
                     </a>
@@ -67,11 +69,11 @@ export class ReportModuleEditor extends Component {
           {/* Show an alert if required */}
           { this.renderValidationAlert() }
           <div className='form-row flex-grow-0' style={{ justifyContent: 'flex-end' }}>
-            <button className='btn btn-light' onClick={event => {
+            <button id='btnSaveCurrentDefinition' className='btn btn-light' onClick={event => {
               this.saveCurrentDefinition()
               this.props.validateReport(this.props.planId)
             }}>Check Syntax</button>
-            <button className='btn btn-primary' onClick={event => {
+            <button id='btnSaveReportToServer' className='btn btn-primary' onClick={event => {
               this.saveCurrentDefinition()
               this.props.saveCurrentReportToServer()
             }}>Save Definition</button>
