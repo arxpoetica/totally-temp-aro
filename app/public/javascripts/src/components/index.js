@@ -6,7 +6,7 @@ import CoverageButton from '../react/components/coverage/coverage-button.jsx'
 import PlanTargetList from '../react/components/selection/plan-target-list.jsx'
 import Broadcast from '../react/components/global-settings/broadcast.jsx'
 import ConfigurationEditor from '../react/components/configuration/configuration-editor.jsx'
-import ReportDefinitionList from '../react/components/configuration/report-definition-list.jsx'
+import ReportModuleList from '../react/components/configuration/report-module-list.jsx'
 
 import boundaryDetail from './sidebar/view/boundary-detail'
 import equipmentDetail from './sidebar/view/equipment-detail'
@@ -229,7 +229,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rBroadcast', react2angular(Broadcast))
   .component('rToastContainer', react2angular(ToastContainer))
   .component('rConfigurationEditor', react2angular(ConfigurationEditor))
-  .component('rReportDefinitionList', react2angular(ReportDefinitionList))
+  .component('rReportModuleList', react2angular(ReportModuleList))
   .service('Utils', utils)
   .service('state', state)
   .service('aclManager', aclManager)

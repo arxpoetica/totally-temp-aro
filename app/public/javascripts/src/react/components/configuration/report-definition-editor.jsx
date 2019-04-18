@@ -1,41 +1,40 @@
 import React, { Component } from 'react'
-import { connect } from 'react-redux'
-import { PropTypes } from 'prop-types'
-import ConfigurationActions from './configuration-actions'
+import { Field, reduxForm } from 'redux-form'
+import Constants from '../../common/constants'
+import './report-definition-editor.css'
 
 export class ReportDefinitionEditor extends Component {
-  constructor (props) {
-    super(props)
-    this.props.populateEditingReportDefinition(this.props.reportId)
-  }
-
   render () {
-    return <div>
-      <table className='table table-sm table-striped'>
-        <tbody>
-          <tr>
-            <td>Report Type</td>
-            <td>{this.props.reportDefinition && this.props.reportDefinition.reportType}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    return <form className='d-flex flex-column report-definition-editor' style={{ height: '100%' }} onSubmit={event => event.preventDefault()}>
+      <div className='form-row flex-grow-0'>
+        <div className='col'>
+          <label>Name</label>
+          <Field name='name' className='form-control' component='input' type='text' />
+        </div>
+        <div className='col'>
+          <label>Display Name</label>
+          <Field name='displayName' className='form-control' component='input' type='text' />
+        </div>
+        <div className='col'>
+          <label>Query Type</label>
+          <Field name='queryType' className='form-control' component='select' type='text'>
+            <option value='SQL_REPORT'>SQL Report</option>
+            <option value='SQL_SCRIPT'>SQL Script</option>
+            <option value='KML_REPORT'>KML Report</option>
+          </Field>
+        </div>
+      </div>
+      <div className='form-row flex-grow-1' style={{ paddingTop: '10px', paddingBottom: '10px' }}>
+        <div className='col' style={{ height: '100%' }}>
+          <Field name='query' className='form-control' component='textarea' type='text' style={{ height: '100%', fontFamily: 'Courier New', fontSize: '12px' }} />
+        </div>
+      </div>
+    </form>
   }
 }
 
-ReportDefinitionEditor.propTypes = {
-  reportId: PropTypes.number,
-  reportDefinition: PropTypes.object
-}
+let ReportDefinitionEditorForm = reduxForm({
+  form: Constants.REPORT_DEFINITION_EDITOR_FORM
+})(ReportDefinitionEditor)
 
-const mapStateToProps = (state) => ({
-  reportId: state.configuration.reports.reportBeingEdited && state.configuration.reports.reportBeingEdited.id,
-  reportDefinition: state.configuration.reports.reportBeingEdited && state.configuration.reports.reportBeingEdited.definition
-})
-
-const mapDispatchToProps = (dispatch, ownProps) => ({
-  populateEditingReportDefinition: reportId => dispatch(ConfigurationActions.populateEditingReportDefinition(reportId))
-})
-
-const ReportDefinitionEditorComponent = connect(mapStateToProps, mapDispatchToProps)(ReportDefinitionEditor)
-export default ReportDefinitionEditorComponent
+export default ReportDefinitionEditorForm

@@ -3,9 +3,10 @@ import reduxStore from '../../../redux-store'
 import { PropTypes } from 'prop-types'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import ConfigurationActions from './configuration-actions'
-import ReportDefinitionEditor from './report-definition-editor.jsx'
+import ReportModuleEditor from './report-module-editor.jsx'
+import '../common-styles/common-styles.css'
 
-export class ReportDefinitionList extends Component {
+export class ReportModuleList extends Component {
   constructor (props) {
     super(props)
     this.props.getReportsMetadata()
@@ -13,13 +14,20 @@ export class ReportDefinitionList extends Component {
 
   render () {
     return this.props.reportBeingEdited
-      ? <ReportDefinitionEditor id='comReportDefinitionEditor' />
+      ? <ReportModuleEditor id='comReportDefinitionEditor' />
       : this.renderReportsList()
   }
 
   renderReportsList () {
     return <div id='divReportsList'>
       <table className='table table-sm table-striped'>
+        <thead>
+          <tr>
+            <th>Report Type</th>
+            <th>Name</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
         <tbody>
           {this.props.reportsMetaData.map(reportMetaData => (
             <tr key={reportMetaData.id}>
@@ -27,13 +35,19 @@ export class ReportDefinitionList extends Component {
               <td>{reportMetaData.displayName}</td>
               <td>
                 <button id={`btnEditReport${reportMetaData.id}`} className='btn btn-primary' onClick={event => this.props.startEditingReport(reportMetaData.id)}>
-                  Edit
+                  <i className='fa fa-edit' /> Edit
+                </button>
+                <button id={`btnDeleteReport${reportMetaData.id}`} className='btn btn-danger' onClick={event => this.props.deleteReport(reportMetaData.id)}>
+                  <i className='fa fa-trash-alt' /> Delete
                 </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+      <button id='btnCreateNewReport' className='btn btn-primary float-right' onClick={() => this.props.createReport()}>
+        <i className='fa fa-plus' /> Create new report
+      </button>
     </div>
   }
 
@@ -44,7 +58,7 @@ export class ReportDefinitionList extends Component {
   }
 }
 
-ReportDefinitionList.propTypes = {
+ReportModuleList.propTypes = {
   reportsMetaData: PropTypes.array,
   reportBeingEdited: PropTypes.object
 }
@@ -56,8 +70,10 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = dispatch => ({
   getReportsMetadata: () => dispatch(ConfigurationActions.getReportsMetadata()),
-  startEditingReport: reportId => dispatch(ConfigurationActions.startEditingReport(reportId))
+  startEditingReport: reportId => dispatch(ConfigurationActions.startEditingReport(reportId)),
+  createReport: () => dispatch(ConfigurationActions.createReport()),
+  deleteReport: reportId => dispatch(ConfigurationActions.deleteReport(reportId))
 })
 
-const ReportDefinitionListComponent = wrapComponentWithProvider(reduxStore, ReportDefinitionList, mapStateToProps, mapDispatchToProps)
-export default ReportDefinitionListComponent
+const ReportModuleListComponent = wrapComponentWithProvider(reduxStore, ReportModuleList, mapStateToProps, mapDispatchToProps)
+export default ReportModuleListComponent

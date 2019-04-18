@@ -1,5 +1,6 @@
 import { applyMiddleware, combineReducers, createStore, compose } from 'redux'
 import { createLogger } from 'redux-logger'
+import { reducer as form } from 'redux-form'
 import thunk from 'redux-thunk'
 
 // Custom middleware
@@ -19,7 +20,7 @@ const logger = createLogger({
 })
 const socketMiddleware = createSocketMiddleware()
 
-let reducer = combineReducers({ configuration, coverage, mapLayers, plan, selection, user })
+let reducer = combineReducers({ configuration, coverage, mapLayers, plan, selection, user, form })
 
 // Add support for Redux devtools extension. Yes, even in production.
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose

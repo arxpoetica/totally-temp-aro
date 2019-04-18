@@ -5,7 +5,8 @@ const defaultState = {
   assetKeys: [],
   reports: {
     metaData: [],
-    reportBeingEdited: null
+    reportBeingEdited: null,
+    validation: null
   }
 }
 
@@ -39,12 +40,55 @@ function setReportIdBeingEdited (state, reportIdToEdit) {
   }
 }
 
+function clearReportBeingEdited (state) {
+  return { ...state,
+    reports: { ...state.reports,
+      reportBeingEdited: null,
+      validation: null
+    }
+  }
+}
+
 function setReportDefinitionBeingEdited (state, reportDefinition) {
   return { ...state,
     reports: { ...state.reports,
-      reportBeingEdited: {
-        definition: reportDefinition
+      reportBeingEdited: reportDefinition
+    }
+  }
+}
+
+function setPrimaryReportDefinitionBeingEdited (state, primaryReportDefinition) {
+  // Nested object, but thats how it comes from service
+  return { ...state,
+    reports: { ...state.reports,
+      reportBeingEdited: { ...state.reports.reportBeingEdited,
+        moduleDefinition: { ...state.reports.reportBeingEdited.moduleDefinition,
+          definition: primaryReportDefinition
+        }
       }
+    }
+  }
+}
+
+function setReportSubDefinitionBeingEdited (state, subDefinition, subDefinitionIndex) {
+  // Nested object, but thats how it comes from service
+  return { ...state,
+    reports: { ...state.reports,
+      reportBeingEdited: { ...state.reports.reportBeingEdited,
+        moduleDefinition: { ...state.reports.reportBeingEdited.moduleDefinition,
+          subDefinitions: state.reports.reportBeingEdited.moduleDefinition.subDefinitions.map((item, index) => {
+            return (index === subDefinitionIndex) ? subDefinition : item
+          })
+        }
+      }
+    }
+  }
+}
+
+function setReportValidation (state, validation) {
+  return { ...state,
+    reports: { ...state.reports,
+      validation: validation
     }
   }
 }
@@ -65,6 +109,18 @@ function configurationReducer (state = defaultState, action) {
 
     case Actions.CONFIGURATION_SET_EDITING_REPORT_DEFINITION:
       return setReportDefinitionBeingEdited(state, action.payload)
+
+    case Actions.CONFIGURATION_SET_EDITING_REPORT_PRIMARY_DEFINITION:
+      return setPrimaryReportDefinitionBeingEdited(state, action.payload)
+
+    case Actions.CONFIGURATION_SET_EDITING_REPORT_SUBDEFINITION:
+      return setReportSubDefinitionBeingEdited(state, action.payload.subDefinition, action.payload.subDefinitionIndex)
+
+    case Actions.CONFIGURATION_SET_REPORT_VALIDATION:
+      return setReportValidation(state, action.payload)
+
+    case Actions.CONFIGURATION_CLEAR_EDITING_REPORT:
+      return clearReportBeingEdited(state)
 
     default:
       return state
