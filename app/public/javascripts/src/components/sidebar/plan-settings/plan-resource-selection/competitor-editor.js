@@ -125,7 +125,6 @@ class CompetitorEditorController {
   }
   
   loadCompManForStates () {
-    console.log(this.competitorManagerId)
     if ('undefined' == typeof this.competitorManagerId || this.selectedRegions.length < 1) return
     var regionsString = this.selectedRegions.map(ele => ele.stusps).join(",");
     
