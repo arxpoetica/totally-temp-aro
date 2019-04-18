@@ -3,7 +3,7 @@ import reduxStore from '../../../redux-store'
 import { PropTypes } from 'prop-types'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import ConfigurationActions from './configuration-actions'
-import ReportDefinitionEditor from './report-definition-editor.jsx'
+import ReportModuleEditor from './report-module-editor.jsx'
 
 export class ReportDefinitionList extends Component {
   constructor (props) {
@@ -13,7 +13,7 @@ export class ReportDefinitionList extends Component {
 
   render () {
     return this.props.reportBeingEdited
-      ? <ReportDefinitionEditor id='comReportDefinitionEditor' />
+      ? <ReportModuleEditor id='comReportDefinitionEditor' />
       : this.renderReportsList()
   }
 

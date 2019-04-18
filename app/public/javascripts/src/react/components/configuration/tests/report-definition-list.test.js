@@ -1,7 +1,7 @@
 /* global test expect jest */
 import React from 'react'
 import { shallow } from 'enzyme'
-import { ReportDefinitionList } from '../report-definition-list'
+import { ReportDefinitionList } from '../report-module-list'
 
 const reportsState = {
   metaData: [

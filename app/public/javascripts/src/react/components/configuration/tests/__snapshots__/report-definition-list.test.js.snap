@@ -141,7 +141,7 @@ exports[`Default component render and click edit one report 2`] = `
 `;
 
 exports[`Edit a report 1`] = `
-<Connect(ReportDefinitionEditor)
+<Connect(ReportModuleEditor)
   id="comReportDefinitionEditor"
 />
 `;
