@@ -7,6 +7,19 @@ exports[`Default component render and click edit one report 1`] = `
   <table
     className="table table-sm table-striped"
   >
+    <thead>
+      <tr>
+        <th>
+          Report Type
+        </th>
+        <th>
+          Name
+        </th>
+        <th>
+          Actions
+        </th>
+      </tr>
+    </thead>
     <tbody>
       <tr
         key="1"
@@ -23,7 +36,20 @@ exports[`Default component render and click edit one report 1`] = `
             id="btnEditReport1"
             onClick={[Function]}
           >
-            Edit
+            <i
+              className="fa fa-edit"
+            />
+             Edit
+          </button>
+          <button
+            className="btn btn-danger"
+            id="btnDeleteReport1"
+            onClick={[Function]}
+          >
+            <i
+              className="fa fa-trash-alt"
+            />
+             Delete
           </button>
         </td>
       </tr>
@@ -42,7 +68,20 @@ exports[`Default component render and click edit one report 1`] = `
             id="btnEditReport2"
             onClick={[Function]}
           >
-            Edit
+            <i
+              className="fa fa-edit"
+            />
+             Edit
+          </button>
+          <button
+            className="btn btn-danger"
+            id="btnDeleteReport2"
+            onClick={[Function]}
+          >
+            <i
+              className="fa fa-trash-alt"
+            />
+             Delete
           </button>
         </td>
       </tr>
@@ -61,7 +100,20 @@ exports[`Default component render and click edit one report 1`] = `
             id="btnEditReport3"
             onClick={[Function]}
           >
-            Edit
+            <i
+              className="fa fa-edit"
+            />
+             Edit
+          </button>
+          <button
+            className="btn btn-danger"
+            id="btnDeleteReport3"
+            onClick={[Function]}
+          >
+            <i
+              className="fa fa-trash-alt"
+            />
+             Delete
           </button>
         </td>
       </tr>
@@ -77,6 +129,19 @@ exports[`Default component render and click edit one report 2`] = `
   <table
     className="table table-sm table-striped"
   >
+    <thead>
+      <tr>
+        <th>
+          Report Type
+        </th>
+        <th>
+          Name
+        </th>
+        <th>
+          Actions
+        </th>
+      </tr>
+    </thead>
     <tbody>
       <tr
         key="1"
@@ -93,7 +158,20 @@ exports[`Default component render and click edit one report 2`] = `
             id="btnEditReport1"
             onClick={[Function]}
           >
-            Edit
+            <i
+              className="fa fa-edit"
+            />
+             Edit
+          </button>
+          <button
+            className="btn btn-danger"
+            id="btnDeleteReport1"
+            onClick={[Function]}
+          >
+            <i
+              className="fa fa-trash-alt"
+            />
+             Delete
           </button>
         </td>
       </tr>
@@ -112,7 +190,20 @@ exports[`Default component render and click edit one report 2`] = `
             id="btnEditReport2"
             onClick={[Function]}
           >
-            Edit
+            <i
+              className="fa fa-edit"
+            />
+             Edit
+          </button>
+          <button
+            className="btn btn-danger"
+            id="btnDeleteReport2"
+            onClick={[Function]}
+          >
+            <i
+              className="fa fa-trash-alt"
+            />
+             Delete
           </button>
         </td>
       </tr>
@@ -131,7 +222,20 @@ exports[`Default component render and click edit one report 2`] = `
             id="btnEditReport3"
             onClick={[Function]}
           >
-            Edit
+            <i
+              className="fa fa-edit"
+            />
+             Edit
+          </button>
+          <button
+            className="btn btn-danger"
+            id="btnDeleteReport3"
+            onClick={[Function]}
+          >
+            <i
+              className="fa fa-trash-alt"
+            />
+             Delete
           </button>
         </td>
       </tr>

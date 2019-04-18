@@ -107,6 +107,14 @@ function saveCurrentReportToServer () {
   }
 }
 
+function deleteReport (reportId) {
+  return dispatch => {
+    AroHttp.delete(`/service/v2/report-module/${reportId}`)
+      .then(() => dispatch(getReportsMetadata()))
+      .catch(err => console.error(err))
+  }
+}
+
 function validateReport (planId) {
   return (dispatch, getState) => {
     // We have to do a getState() because there may be state changes that have not yet been updated in the calling component
@@ -138,5 +146,6 @@ export default {
   saveEditingReportPrimaryDefinition: saveEditingReportPrimaryDefinition,
   saveEditingReportSubDefinition: saveEditingReportSubDefinition,
   saveCurrentReportToServer: saveCurrentReportToServer,
+  deleteReport: deleteReport,
   validateReport: validateReport
 }

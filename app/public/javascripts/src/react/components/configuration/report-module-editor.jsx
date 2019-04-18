@@ -35,7 +35,7 @@ export class ReportModuleEditor extends Component {
   render () {
     return <div className='container' style={{ height: '100%' }}>
       <div className='row' style={{ height: '100%' }}>
-        <div className='col-md-2'>
+        <div className='col-md-3'>
           <ul className='nav nav-pills'>
             <li className='nav-item' key='-1'>
               <a className={`nav-link ${this.state.isEditingPrimary ? 'active' : ''}`}
@@ -57,7 +57,7 @@ export class ReportModuleEditor extends Component {
             }
           </ul>
         </div>
-        <div className='col-md-10 d-flex flex-column' style={{ height: '100%' }}>
+        <div className='col-md-9 d-flex flex-column' style={{ height: '100%' }}>
           { this.getDefinitionBeingEdited()
             ? <div className='flex-grow-1'>
               <ReportDefinitionEditor initialValues={this.getDefinitionBeingEdited()} enableReinitialize />
