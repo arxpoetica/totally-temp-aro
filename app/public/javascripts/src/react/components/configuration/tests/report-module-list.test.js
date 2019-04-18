@@ -28,6 +28,22 @@ test('Click edit report', () => {
 })
 
 // -----------------------------------------------------------------------------
+test('Click create report', () => {
+  const mockGetReportsMetadata = jest.fn()
+  const mockCreateReport = jest.fn()
+  const component = shallow(
+    <ReportModuleList reportsMetaData={reportsState.metaData} reportBeingEdited={null}
+      getReportsMetadata={mockGetReportsMetadata} createReport={mockCreateReport} />
+  )
+  expect(mockGetReportsMetadata.mock.calls.length).toBe(1)
+  expect(component).toMatchSnapshot()
+
+  component.find('#btnCreateNewReport').simulate('click')
+  expect(mockCreateReport.mock.calls.length).toBe(1)
+  expect(component).toMatchSnapshot()
+})
+
+// -----------------------------------------------------------------------------
 test('Click delete report', () => {
   const mockGetReportsMetadata = jest.fn()
   const mockDeleteReport = jest.fn()

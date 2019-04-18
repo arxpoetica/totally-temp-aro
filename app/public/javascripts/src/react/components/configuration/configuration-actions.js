@@ -107,6 +107,29 @@ function saveCurrentReportToServer () {
   }
 }
 
+function createReport () {
+  return dispatch => {
+    const blankReport = {
+      reportType: 'GENERAL',
+      moduleDefinition: {
+        definition: {
+          name: 'new_report',
+          displayName: 'New Report',
+          queryType: 'SQL_REPORT',
+          query: "SELECT 'Test Report';"
+        },
+        subDefinitions: []
+      }
+    }
+    AroHttp.post(`/service/v2/report-module/-1`, blankReport)
+      .then(result => {
+        dispatch(startEditingReport(result.data.id))
+        dispatch(getReportsMetadata()) // List has changed. Update it.
+      })
+      .catch(err => console.error(err))
+  }
+}
+
 function deleteReport (reportId) {
   return dispatch => {
     AroHttp.delete(`/service/v2/report-module/${reportId}`)
@@ -146,6 +169,7 @@ export default {
   saveEditingReportPrimaryDefinition: saveEditingReportPrimaryDefinition,
   saveEditingReportSubDefinition: saveEditingReportSubDefinition,
   saveCurrentReportToServer: saveCurrentReportToServer,
+  createReport: createReport,
   deleteReport: deleteReport,
   validateReport: validateReport
 }

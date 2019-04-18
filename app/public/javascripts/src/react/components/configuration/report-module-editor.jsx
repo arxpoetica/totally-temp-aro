@@ -96,7 +96,7 @@ export class ReportModuleEditor extends Component {
       alertMessage = this.props.reportValidation.errorMessage
     }
     return <div className='form-row flex-grow-0' style={{ width: '100%' }}>
-      <div class='col'>
+      <div className='col'>
         <div className={alertClass} role='alert' style={{ width: '100%' }}>
           {alertMessage}
         </div>

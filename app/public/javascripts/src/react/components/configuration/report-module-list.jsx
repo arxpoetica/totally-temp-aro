@@ -45,6 +45,9 @@ export class ReportModuleList extends Component {
           ))}
         </tbody>
       </table>
+      <button id='btnCreateNewReport' className='btn btn-primary float-right' onClick={() => this.props.createReport()}>
+        <i className='fa fa-plus' /> Create new report
+      </button>
     </div>
   }
 
@@ -68,6 +71,7 @@ const mapStateToProps = (state) => ({
 const mapDispatchToProps = dispatch => ({
   getReportsMetadata: () => dispatch(ConfigurationActions.getReportsMetadata()),
   startEditingReport: reportId => dispatch(ConfigurationActions.startEditingReport(reportId)),
+  createReport: () => dispatch(ConfigurationActions.createReport()),
   deleteReport: reportId => dispatch(ConfigurationActions.deleteReport(reportId))
 })
 
