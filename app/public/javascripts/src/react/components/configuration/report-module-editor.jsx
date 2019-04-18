@@ -13,7 +13,8 @@ export class ReportModuleEditor extends Component {
     this.props.populateEditingReportDefinition(this.props.reportId)
     this.state = {
       isEditingPrimary: true,
-      subDefinitionEditingIndex: -1
+      subDefinitionEditingIndex: -1,
+      validationMessage: null
     }
   }
 
@@ -64,20 +65,36 @@ export class ReportModuleEditor extends Component {
             : null
           }
           {/* Show an alert if required */}
-          {
-            <div className='form-row flex-grow-0'>
-              <div className='alert alert-primary' role='alert'>
-                This is a primary alert—check it out!
-              </div>
-            </div>
-          }
+          { this.renderValidationAlert() }
           <div className='form-row flex-grow-0'>
             <div className='float-right'>
-              <button className='btn btn-light'>Test</button>
+              <button className='btn btn-light' onClick={event => {
+                this.saveCurrentDefinition()
+                this.props.validateReport(this.props.planId)
+              }}>Test</button>
               <button className='btn btn-primary'>Save Definition</button>
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  }
+
+  renderValidationAlert () {
+    if (!this.props.reportValidation) {
+      return null
+    }
+    var alertClass, alertMessage
+    if (this.props.reportValidation.validated) {
+      alertClass = 'alert alert-success'
+      alertMessage = 'The report definition was successfully validated without any errors.'
+    } else {
+      alertClass = 'alert alert-danger'
+      alertMessage = this.props.reportValidation.errorMessage
+    }
+    return <div className='form-row flex-grow-0 mt-3' style={{ width: '100%' }}>
+      <div className={alertClass} role='alert' style={{ width: '100%' }}>
+        {alertMessage}
       </div>
     </div>
   }
@@ -117,7 +134,9 @@ ReportModuleEditor.propTypes = {
 }
 
 const mapStateToProps = (state) => ({
+  planId: state.plan.activePlan.id,
   reportId: state.configuration.reports.reportBeingEdited && state.configuration.reports.reportBeingEdited.id,
+  reportValidation: state.configuration.reports.validation,
   moduleDefinition: (state.configuration.reports.reportBeingEdited &&
     state.configuration.reports.reportBeingEdited.definition &&
     state.configuration.reports.reportBeingEdited.definition.moduleDefinition),
@@ -128,7 +147,8 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   populateEditingReportDefinition: reportId => dispatch(ConfigurationActions.populateEditingReportDefinition(reportId)),
   clearEditingReportDefinition: () => dispatch(ConfigurationActions.clearEditingReportDefinition()),
   saveEditingReportPrimaryDefinition: reportDefinition => dispatch(ConfigurationActions.saveEditingReportPrimaryDefinition(reportDefinition)),
-  saveEditingReportSubDefinition: (subDefinition, subDefinitionIndex) => dispatch(ConfigurationActions.saveEditingReportSubDefinition(subDefinition, subDefinitionIndex))
+  saveEditingReportSubDefinition: (subDefinition, subDefinitionIndex) => dispatch(ConfigurationActions.saveEditingReportSubDefinition(subDefinition, subDefinitionIndex)),
+  validateReport: planId => dispatch(ConfigurationActions.validateReport(planId))
 })
 
 const ReportModuleEditorComponent = connect(mapStateToProps, mapDispatchToProps)(ReportModuleEditor)

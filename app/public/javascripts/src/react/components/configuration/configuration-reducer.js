@@ -5,7 +5,8 @@ const defaultState = {
   assetKeys: [],
   reports: {
     metaData: [],
-    reportBeingEdited: null
+    reportBeingEdited: null,
+    validation: null
   }
 }
 
@@ -81,6 +82,14 @@ function setReportSubDefinitionBeingEdited (state, subDefinition, subDefinitionI
   }
 }
 
+function setReportValidation (state, validation) {
+  return { ...state,
+    reports: { ...state.reports,
+      validation: validation
+    }
+  }
+}
+
 function configurationReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.CONFIGURATION_SET_CONFIGURATION:
@@ -103,6 +112,9 @@ function configurationReducer (state = defaultState, action) {
 
     case Actions.CONFIGURATION_SET_EDITING_REPORT_SUBDEFINITION:
       return setReportSubDefinitionBeingEdited(state, action.payload.subDefinition, action.payload.subDefinitionIndex)
+
+    case Actions.CONFIGURATION_SET_REPORT_VALIDATION:
+      return setReportValidation(state, action.payload)
 
     default:
       return state
