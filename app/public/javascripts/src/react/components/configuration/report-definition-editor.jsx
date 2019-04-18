@@ -1,22 +1,30 @@
 import React, { Component } from 'react'
 import { Field, reduxForm } from 'redux-form'
 import Constants from '../../common/constants'
+import './report-definition-editor.css'
 
 export class ReportDefinitionEditor extends Component {
   render () {
-    return <form className='d-flex flex-column' style={{ height: '100%' }} onSubmit={event => event.preventDefault()}>
+    return <form className='d-flex flex-column report-definition-editor' style={{ height: '100%' }} onSubmit={event => event.preventDefault()}>
       <div className='form-row flex-grow-0'>
         <div className='col'>
+          <label>Name</label>
           <Field name='name' className='form-control' component='input' type='text' />
         </div>
         <div className='col'>
+          <label>Display Name</label>
           <Field name='displayName' className='form-control' component='input' type='text' />
         </div>
         <div className='col'>
-          <Field name='queryType' className='form-control' component='input' type='text' />
+          <label>Query Type</label>
+          <Field name='queryType' className='form-control' component='select' type='text'>
+            <option value='SQL_REPORT'>SQL Report</option>
+            <option value='SQL_SCRIPT'>SQL Script</option>
+            <option value='KML_REPORT'>KML Report</option>
+          </Field>
         </div>
       </div>
-      <div className='form-row flex-grow-1' style={{ paddingTop: '10px' }}>
+      <div className='form-row flex-grow-1' style={{ paddingTop: '10px', paddingBottom: '10px' }}>
         <div className='col' style={{ height: '100%' }}>
           <Field name='query' className='form-control' component='textarea' type='text' style={{ height: '100%', fontFamily: 'Courier New', fontSize: '12px' }} />
         </div>

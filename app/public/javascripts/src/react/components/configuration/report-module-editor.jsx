@@ -10,7 +10,7 @@ const selector = formValueSelector(Constants.REPORT_DEFINITION_EDITOR_FORM)
 export class ReportModuleEditor extends Component {
   constructor (props) {
     super(props)
-    this.props.populateEditingReportDefinition(this.props.reportId)
+    this.props.populateEditingReportDefinition(this.props.reportBeingEdited.id)
     this.state = {
       isEditingPrimary: true,
       subDefinitionEditingIndex: -1,
@@ -19,12 +19,12 @@ export class ReportModuleEditor extends Component {
   }
 
   getDefinitionBeingEdited () {
-    if (!this.props.moduleDefinition) {
+    if (!this.props.reportBeingEdited.moduleDefinition) {
       return null
     } else {
       return this.state.isEditingPrimary
-        ? this.props.moduleDefinition.definition
-        : this.props.moduleDefinition.subDefinitions[this.state.subDefinitionEditingIndex]
+        ? this.props.reportBeingEdited.moduleDefinition.definition
+        : this.props.reportBeingEdited.moduleDefinition.subDefinitions[this.state.subDefinitionEditingIndex]
     }
   }
 
@@ -44,8 +44,8 @@ export class ReportModuleEditor extends Component {
               </a>
             </li>
             {
-              this.props.moduleDefinition
-                ? this.props.moduleDefinition.subDefinitions.map((subDefinition, index) => (
+              this.props.reportBeingEdited.moduleDefinition
+                ? this.props.reportBeingEdited.moduleDefinition.subDefinitions.map((subDefinition, index) => (
                   <li className='nav-item' key={subDefinition.id}>
                     <a className={`nav-link ${this.state.subDefinitionEditingIndex === index ? 'active' : ''}`}
                       onClick={() => this.startEditingSubDefinition(index)}>
@@ -66,14 +66,15 @@ export class ReportModuleEditor extends Component {
           }
           {/* Show an alert if required */}
           { this.renderValidationAlert() }
-          <div className='form-row flex-grow-0'>
-            <div className='float-right'>
-              <button className='btn btn-light' onClick={event => {
-                this.saveCurrentDefinition()
-                this.props.validateReport(this.props.planId)
-              }}>Test</button>
-              <button className='btn btn-primary'>Save Definition</button>
-            </div>
+          <div className='form-row flex-grow-0' style={{ justifyContent: 'flex-end' }}>
+            <button className='btn btn-light' onClick={event => {
+              this.saveCurrentDefinition()
+              this.props.validateReport(this.props.planId)
+            }}>Check Syntax</button>
+            <button className='btn btn-primary' onClick={event => {
+              this.saveCurrentDefinition()
+              this.props.saveCurrentReportToServer()
+            }}>Save Definition</button>
           </div>
         </div>
       </div>
@@ -92,9 +93,11 @@ export class ReportModuleEditor extends Component {
       alertClass = 'alert alert-danger'
       alertMessage = this.props.reportValidation.errorMessage
     }
-    return <div className='form-row flex-grow-0 mt-3' style={{ width: '100%' }}>
-      <div className={alertClass} role='alert' style={{ width: '100%' }}>
-        {alertMessage}
+    return <div className='form-row flex-grow-0' style={{ width: '100%' }}>
+      <div class='col'>
+        <div className={alertClass} role='alert' style={{ width: '100%' }}>
+          {alertMessage}
+        </div>
       </div>
     </div>
   }
@@ -129,17 +132,16 @@ export class ReportModuleEditor extends Component {
 }
 
 ReportModuleEditor.propTypes = {
-  reportId: PropTypes.number,
-  reportDefinition: PropTypes.object
+  planId: PropTypes.number,
+  reportValidation: PropTypes.object,
+  reportBeingEdited: PropTypes.object,
+  reportDefinitionEditorValues: PropTypes.object
 }
 
 const mapStateToProps = (state) => ({
   planId: state.plan.activePlan.id,
-  reportId: state.configuration.reports.reportBeingEdited && state.configuration.reports.reportBeingEdited.id,
   reportValidation: state.configuration.reports.validation,
-  moduleDefinition: (state.configuration.reports.reportBeingEdited &&
-    state.configuration.reports.reportBeingEdited.definition &&
-    state.configuration.reports.reportBeingEdited.definition.moduleDefinition),
+  reportBeingEdited: state.configuration.reports.reportBeingEdited,
   reportDefinitionEditorValues: selector(state, 'name', 'displayName', 'queryType', 'query')
 })
 
@@ -148,6 +150,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   clearEditingReportDefinition: () => dispatch(ConfigurationActions.clearEditingReportDefinition()),
   saveEditingReportPrimaryDefinition: reportDefinition => dispatch(ConfigurationActions.saveEditingReportPrimaryDefinition(reportDefinition)),
   saveEditingReportSubDefinition: (subDefinition, subDefinitionIndex) => dispatch(ConfigurationActions.saveEditingReportSubDefinition(subDefinition, subDefinitionIndex)),
+  saveCurrentReportToServer: () => dispatch(ConfigurationActions.saveCurrentReportToServer()),
   validateReport: planId => dispatch(ConfigurationActions.validateReport(planId))
 })
 

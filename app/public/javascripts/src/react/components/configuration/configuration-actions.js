@@ -95,9 +95,22 @@ function saveEditingReportSubDefinition (subDefinition, subDefinitionIndex) {
   }
 }
 
+function saveCurrentReportToServer () {
+  return (dispatch, getState) => {
+    // We have to do a getState() because there may be state changes that have not yet been updated in the calling component
+    const reportDefinition = getState().configuration.reports.reportBeingEdited
+    return AroHttp.put(`/service/v2/report-module/${reportDefinition.id}`, reportDefinition)
+      .then(() => dispatch({
+        type: Actions.CONFIGURATION_CLEAR_EDITING_REPORT
+      }))
+      .catch(err => console.error(err))
+  }
+}
+
 function validateReport (planId) {
   return (dispatch, getState) => {
-    const reportDefinition = getState().configuration.reports.reportBeingEdited.definition
+    // We have to do a getState() because there may be state changes that have not yet been updated in the calling component
+    const reportDefinition = getState().configuration.reports.reportBeingEdited
     return AroHttp.post(`/service/v2/report-module-validate/${planId}?sampleSize=10`, reportDefinition)
       .then(result => dispatch({
         type: Actions.CONFIGURATION_SET_REPORT_VALIDATION,
@@ -124,5 +137,6 @@ export default {
   clearEditingReportDefinition: clearEditingReportDefinition,
   saveEditingReportPrimaryDefinition: saveEditingReportPrimaryDefinition,
   saveEditingReportSubDefinition: saveEditingReportSubDefinition,
+  saveCurrentReportToServer: saveCurrentReportToServer,
   validateReport: validateReport
 }

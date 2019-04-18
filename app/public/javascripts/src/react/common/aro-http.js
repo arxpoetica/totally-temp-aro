@@ -28,6 +28,18 @@ class AroHttp {
     return this._fetch(url, options)
   }
 
+  // Make a HTTP PUT request
+  static put (url, body = {}) {
+    const options = {
+      method: 'PUT',
+      headers: {
+        'Content-type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    }
+    return this._fetch(url, options)
+  }
+
   // Make a HTTP DELETE request
   static delete (url) {
     const options = {

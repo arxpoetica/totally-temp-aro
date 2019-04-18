@@ -40,12 +40,19 @@ function setReportIdBeingEdited (state, reportIdToEdit) {
   }
 }
 
+function clearReportBeingEdited (state) {
+  return { ...state,
+    reports: { ...state.reports,
+      reportBeingEdited: null,
+      validation: null
+    }
+  }
+}
+
 function setReportDefinitionBeingEdited (state, reportDefinition) {
   return { ...state,
     reports: { ...state.reports,
-      reportBeingEdited: {
-        definition: reportDefinition
-      }
+      reportBeingEdited: reportDefinition
     }
   }
 }
@@ -54,11 +61,9 @@ function setPrimaryReportDefinitionBeingEdited (state, primaryReportDefinition) 
   // Nested object, but thats how it comes from service
   return { ...state,
     reports: { ...state.reports,
-      reportBeingEdited: {
-        definition: { ...state.reports.reportBeingEdited.definition,
-          moduleDefinition: { ...state.reports.reportBeingEdited.definition.moduleDefinition,
-            definition: primaryReportDefinition
-          }
+      reportBeingEdited: { ...state.reports.reportBeingEdited,
+        moduleDefinition: { ...state.reports.reportBeingEdited.moduleDefinition,
+          definition: primaryReportDefinition
         }
       }
     }
@@ -69,13 +74,11 @@ function setReportSubDefinitionBeingEdited (state, subDefinition, subDefinitionI
   // Nested object, but thats how it comes from service
   return { ...state,
     reports: { ...state.reports,
-      reportBeingEdited: {
-        definition: { ...state.reports.reportBeingEdited.definition,
-          moduleDefinition: { ...state.reports.reportBeingEdited.definition.moduleDefinition,
-            subDefinitions: state.reports.reportBeingEdited.definition.moduleDefinition.subDefinitions.map((item, index) => {
-              return (index === subDefinitionIndex) ? subDefinition : item
-            })
-          }
+      reportBeingEdited: { ...state.reports.reportBeingEdited,
+        moduleDefinition: { ...state.reports.reportBeingEdited.moduleDefinition,
+          subDefinitions: state.reports.reportBeingEdited.moduleDefinition.subDefinitions.map((item, index) => {
+            return (index === subDefinitionIndex) ? subDefinition : item
+          })
         }
       }
     }
@@ -115,6 +118,9 @@ function configurationReducer (state = defaultState, action) {
 
     case Actions.CONFIGURATION_SET_REPORT_VALIDATION:
       return setReportValidation(state, action.payload)
+
+    case Actions.CONFIGURATION_CLEAR_EDITING_REPORT:
+      return clearReportBeingEdited(state)
 
     default:
       return state
