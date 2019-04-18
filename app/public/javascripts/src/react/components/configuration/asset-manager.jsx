@@ -38,7 +38,7 @@ export class AssetManager extends Component {
       <hr />
       <h4>Upload a new file:</h4>
       <input type='file' ref={this.fileInput} onChange={event => this.setState({ isValidFileSelected: Boolean(this.fileInput.current) })} />
-      <button className={this.state.isValidFileSelected ? 'btn btn-primary' : 'btn btn-light'}
+      <button id='btnUploadAsset' className={this.state.isValidFileSelected ? 'btn btn-primary' : 'btn btn-light'}
         disabled={!this.state.isValidFileSelected} onClick={event => this.uploadFile()}>
         Upload
       </button>
