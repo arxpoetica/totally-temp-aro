@@ -71,6 +71,30 @@ function populateEditingReportDefinition (reportId) {
   }
 }
 
+function clearEditingReportDefinition () {
+  return {
+    type: Actions.CONFIGURATION_SET_EDITING_REPORT_DEFINITION,
+    payload: null
+  }
+}
+
+function saveEditingReportPrimaryDefinition (primaryDefinition) {
+  return {
+    type: Actions.CONFIGURATION_SET_EDITING_REPORT_PRIMARY_DEFINITION,
+    payload: primaryDefinition
+  }
+}
+
+function saveEditingReportSubDefinition (subDefinition, subDefinitionIndex) {
+  return {
+    type: Actions.CONFIGURATION_SET_EDITING_REPORT_SUBDEFINITION,
+    payload: {
+      subDefinition: subDefinition,
+      subDefinitionIndex: subDefinitionIndex
+    }
+  }
+}
+
 export default {
   loadConfigurationFromServer: loadConfigurationFromServer,
   saveConfigurationToServerAndReload: saveConfigurationToServerAndReload,
@@ -78,5 +102,8 @@ export default {
   uploadAssetToServer: uploadAssetToServer,
   getReportsMetadata: getReportsMetadata,
   startEditingReport: startEditingReport,
-  populateEditingReportDefinition: populateEditingReportDefinition
+  populateEditingReportDefinition: populateEditingReportDefinition,
+  clearEditingReportDefinition: clearEditingReportDefinition,
+  saveEditingReportPrimaryDefinition: saveEditingReportPrimaryDefinition,
+  saveEditingReportSubDefinition: saveEditingReportSubDefinition
 }

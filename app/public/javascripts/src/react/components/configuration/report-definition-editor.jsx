@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { Field, reduxForm } from 'redux-form'
+import Constants from '../../common/constants'
 
 export class ReportDefinitionEditor extends Component {
   render () {
@@ -22,14 +23,10 @@ export class ReportDefinitionEditor extends Component {
       </div>
     </form>
   }
-
-  submit (values) {
-    // print the form values to the console
-    console.log(values)
-  }
 }
 
 let ReportDefinitionEditorForm = reduxForm({
-  form: 'reportDefinitionEditor'
+  form: Constants.REPORT_DEFINITION_EDITOR_FORM
 })(ReportDefinitionEditor)
+
 export default ReportDefinitionEditorForm
