@@ -116,6 +116,7 @@ class PriceBookEditorController {
         // If this item id is in cost assignments, add it
         var item = {
           id: definitionItem.id,
+          name: definitionItem.name,
           description: definitionItem.description,
           unitOfMeasure: definitionItem.unitOfMeasure,
           costAssignment: itemIdToCostAssignment[definitionItem.id],
