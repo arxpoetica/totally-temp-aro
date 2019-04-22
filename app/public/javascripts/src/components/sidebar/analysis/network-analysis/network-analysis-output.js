@@ -10,7 +10,7 @@ class NetworkAnalysisOutputController {
 
     state.plan
       .subscribe((plan) => {
-        this.downloadLink = `/reports/network_analysis/download/${plan.id}/optimization_analysis`
+        this.downloadLink = `/reports/network_analysis/download/${plan.id}/4`
       })
   }
 
