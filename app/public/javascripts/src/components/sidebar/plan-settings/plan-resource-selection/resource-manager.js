@@ -15,6 +15,10 @@ class ResourceManagerController {
       competition_manager: 'competitor-manager',
       rate_reach_manager: 'rate-reach-matrix'
     }
+    
+    // ToDo: once server can make new versions of all types this won't be needed
+    this.canMakeNewFilter = {'price_book':true, 'rate_reach_manager':true, 'competition_manager':true}
+    
     this.managerIdString = 'MANAGER_ID'
     this.rows = []
 
@@ -115,24 +119,7 @@ class ResourceManagerController {
     this.setCurrentSelectedResourceKey({ resourceKey: this.selectedResourceKey })
     //this.getRows()
   }
-/*
-  buildRows () {
-    var newRows = []
 
-    for (const key in this.resourceItems) {
-      if (this.resourceItems.hasOwnProperty(key)) {
-        if (this.resourceItems[key].hasOwnProperty('allManagers') &&
-            (this.selectedResourceKey == 'all' || key == this.selectedResourceKey)
-        ) {
-          newRows = newRows.concat(this.resourceItems[key].allManagers)
-        }
-      }
-    }
-    console.log(this.resourceItems)
-    this.rows = newRows
-    console.log(this.rows)
-  }
-*/
   buildFilterOptions () {
     var newFilterByOptions = { 'all': 'all' }
 
@@ -148,7 +135,7 @@ class ResourceManagerController {
         }
       }
     }
-
+    //console.log(newFilterByOptions)
     this.filterByOptions = newFilterByOptions
   }
   
@@ -177,14 +164,6 @@ class ResourceManagerController {
         for (i = 0; i<result.data.length; i++){
           if (!result.data[i].deleted){
             var row = result.data[i]
-            /*
-            row.permissionsView = ""
-            if (row.permissions){
-              if (row.permissions & 4) row.permissionsView += "read "
-              if (row.permissions & 2) row.permissionsView += "write "
-              if (row.permissions & 1) row.permissionsView += "admin "    
-            }
-            */
             newRows.push(row)
           }
         }
@@ -193,52 +172,39 @@ class ResourceManagerController {
     // end promise
   }
   
-/*
-  $doCheck () {
-    if (this.resourceItems && this.resourceItems !== this.oldResourceItems) {
-      this.oldResourceItems = this.resourceItems
-    }
+  
+  createByEditMode (createMode, sourceId) {
+    this.setEditingManagerId({ newId: sourceId })
+    this.setEditingMode({ mode: createMode })
   }
-*/
-  createBlankPriceBook () {
-    this.setEditingManagerId({ newId: null })
-    this.setEditingMode({ mode: this.createPriceBookMode })
-  }
-
-  cloneSelectedPriceBook (selectedManager) {
-    this.setEditingManagerId({ newId: selectedManager.id })
-    this.setEditingMode({ mode: this.createPriceBookMode })
-  }
-
-  createBlankRateReachManager () {
-    this.setEditingManagerId({ newId: null })
-    this.setEditingMode({ mode: this.createRateReachManagerMode })
-  }
-
-  cloneSelectedRateReachManager (selectedManager) {
-    this.setEditingManagerId({ newId: selectedManager.id })
-    this.setEditingMode({ mode: this.createRateReachManagerMode })
-  }
-
+  
   cloneSelectedManagerFromSource (selectedManager) {
-    this.setCurrentSelectedResourceKey({ resourceKey: selectedManager.resourceType })
+    this.newManager(selectedManager.resourceType, selectedManager.id)
+  }
+  
+  //cloneSelectedManagerFromSource (selectedManager) {
+  newManager (resourceType, sourceId) {
+    if ('undefined' == typeof sourceId) sourceId = null // new one
+    this.setCurrentSelectedResourceKey({ resourceKey: resourceType })
     
     // TODO: once endpoint is ready use v2/resource-manager for pricebook and rate-reach-matrix as well
-    var managerId = this.resourceKeyToEndpointId[selectedManager.resourceType]
+    var managerId = this.resourceKeyToEndpointId[resourceType]
     if (managerId === 'pricebook') {
       // Have to put this switch in here because the API for pricebook cloning is different. Can remove once API is unified.
-      this.cloneSelectedPriceBook(selectedManager)
+      this.createByEditMode(this.createPriceBookMode, sourceId)
     } else if (managerId === 'rate-reach-matrix') {
-      this.cloneSelectedRateReachManager(selectedManager)
+      this.createByEditMode(this.createRateReachManagerMode, sourceId)
     } else {
       
       // Create a resource manager
       this.getNewResourceDetailsFromUser()
         .then((resourceName) => {
         // Create a new manager with the specified name and description
-          
-          return this.$http.post(`/service/v2/resource-manager?resourceManagerId=${selectedManager.id}&user_id=${this.state.loggedInUser.id}`,
-            {resourceType: selectedManager.resourceType, name: resourceName, description: resourceName })
+          var idParam = ''
+          if (null != sourceId) idParam = `resourceManagerId=${sourceId}&`
+          //console.log(resourceType)
+          return this.$http.post(`/service/v2/resource-manager?${idParam}user_id=${this.state.loggedInUser.id}`,
+            {resourceType: resourceType, name: resourceName, description: resourceName })
         })
         .then((result) => this.onManagerCreated(result.data.id))
         .catch((err) => console.error(err))
