@@ -144,6 +144,17 @@ class PriceBookEditorController {
     return totalInstallCost
   }
 
+  shouldShowPercentageError () {
+    const fiberLaborList = this.structuredPriceBookDefinitions.filter(item => item.id === 'fiberLaborList')[0]
+    var totalInstallPercentage = 0
+    fiberLaborList.items.forEach(item => {
+      const ratioItem = this.constructionRatios[this.selectedStateForStrategy].constructionRatios.cableConstructionRatios[item.cableConstructionType]
+      const ratio = ratioItem ? (ratioItem.ratio || 0.0) : 0.0
+      totalInstallPercentage += ratio
+    })
+    return Math.abs(1.0 - totalInstallPercentage) > 0.001 // Total percentage should be 100%
+  }
+
   saveAssignmentsToServer () {
     // Build a map of cost assignment ids to their index within the array
     var assignments = JSON.parse(JSON.stringify(this.pristineAssignments))
