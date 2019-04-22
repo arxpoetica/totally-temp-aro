@@ -42,7 +42,17 @@ class PriceBookEditorController {
         this.statesForStrategy = [...new Set(this.statesForStrategy)].sort() // array --> set --> back to array
         this.selectedStateForStrategy = this.statesForStrategy[0]
         this.priceBookDefinitions = results[1].data
-        var assignmentResult = results[2].data
+        const assignmentResult = results[2].data
+        // Save construction ratios keyed by state
+        this.constructionRatios = {}
+        assignmentResult.constructionRatios.forEach(ratio => {
+          // Also change the "ratio" object so that the ratios are keyed by cable type (e.g. ARIEL or BURIED)
+          var ratioValues = {}
+          ratio.constructionRatios.cableConstructionRatios.forEach(item => { ratioValues[item.type] = item })
+          var keyedRatio = angular.copy(ratio)
+          keyedRatio.constructionRatios.cableConstructionRatios = ratioValues
+          this.constructionRatios[keyedRatio.code] = keyedRatio
+        })
         // Save a deep copy of the result, we can use this later if we save modifications to the server
         this.pristineAssignments = angular.copy(assignmentResult)
         this.definePriceBookForSelectedState()
@@ -100,6 +110,7 @@ class PriceBookEditorController {
           description: definitionItem.description,
           unitOfMeasure: definitionItem.unitOfMeasure,
           costAssignment: itemIdToCostAssignment[definitionItem.id],
+          cableConstructionType: definitionItem.cableConstructionType,
           subItems: []
         }
         definitionItem.subItems.forEach((subItem) => {
@@ -119,6 +130,18 @@ class PriceBookEditorController {
       })
       this.structuredPriceBookDefinitions.push(definition)
     })
+  }
+
+  getTotalFiberInstallCost () {
+    const fiberLaborList = this.structuredPriceBookDefinitions.filter(item => item.id === 'fiberLaborList')[0]
+    var totalInstallCost = 0
+    fiberLaborList.items.forEach(item => {
+      const ratioItem = this.constructionRatios[this.selectedStateForStrategy].constructionRatios.cableConstructionRatios[item.cableConstructionType]
+      const ratio = ratioItem ? (ratioItem.ratio || 0.0) : 0.0
+      const cost = item.costAssignment.cost || 0.0
+      totalInstallCost += (cost * ratio)
+    })
+    return totalInstallCost
   }
 
   saveAssignmentsToServer () {
@@ -159,6 +182,18 @@ class PriceBookEditorController {
         })
       })
     })
+    // Save cable construction ratios. Convert back from keyed to array
+    assignments.constructionRatios = []
+    Object.keys(this.constructionRatios).forEach(constructionRatioKey => {
+      var constructionRatio = angular.copy(this.constructionRatios[constructionRatioKey])
+      var cableConstructionRatios = []
+      Object.keys(constructionRatio.constructionRatios.cableConstructionRatios).forEach(ratioKey => {
+        cableConstructionRatios.push(constructionRatio.constructionRatios.cableConstructionRatios[ratioKey])
+      })
+      constructionRatio.constructionRatios.cableConstructionRatios = cableConstructionRatios
+      assignments.constructionRatios.push(constructionRatio)
+    })
+
     // Save assignments to the server
     this.$http.put(`/service/v1/pricebook/${this.priceBookId}/assignment`, assignments)
       .then((result) => this.exitEditingMode())
