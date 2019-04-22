@@ -196,7 +196,7 @@ exports.configure = (api, middleware) => {
     var plan_id = request.params.plan_id
     var req = {
       method: 'GET',
-      url: config.aro_service_url + `/v1/report-extended/${name}/${plan_id}.csv`
+      url: config.aro_service_url + `/v2/report-extended/${name}/${plan_id}.csv`
     }
     return models.AROService.request(req)
       .then((output) => {
@@ -212,7 +212,7 @@ exports.configure = (api, middleware) => {
     var plan_id = request.params.plan_id
     var req = {
       method: 'GET',
-      url: config.aro_service_url + `/v1/report-extended/${name}/${plan_id}.csv`
+      url: config.aro_service_url + `/v2/report-extended/${name}/${plan_id}.csv`
     }
     return models.AROService.request(req)
       .then((output) => {
