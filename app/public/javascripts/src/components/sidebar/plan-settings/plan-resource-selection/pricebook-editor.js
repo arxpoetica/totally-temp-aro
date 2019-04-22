@@ -49,6 +49,15 @@ class PriceBookEditorController {
           // Also change the "ratio" object so that the ratios are keyed by cable type (e.g. ARIEL or BURIED)
           var ratioValues = {}
           ratio.constructionRatios.cableConstructionRatios.forEach(item => { ratioValues[item.type] = item })
+          // Make sure that we have values for all types of cable construction ratios
+          this.priceBookDefinitions.fiberLaborList.forEach(item => {
+            if (!ratioValues[item.cableConstructionType]) {
+              ratioValues[item.cableConstructionType] = {
+                type: item.cableConstructionType,
+                ratio: 0
+              }
+            }
+          })
           var keyedRatio = angular.copy(ratio)
           keyedRatio.constructionRatios.cableConstructionRatios = ratioValues
           this.constructionRatios[keyedRatio.code] = keyedRatio
@@ -199,7 +208,10 @@ class PriceBookEditorController {
       var constructionRatio = angular.copy(this.constructionRatios[constructionRatioKey])
       var cableConstructionRatios = []
       Object.keys(constructionRatio.constructionRatios.cableConstructionRatios).forEach(ratioKey => {
-        cableConstructionRatios.push(constructionRatio.constructionRatios.cableConstructionRatios[ratioKey])
+        // Only save non-zero ratios
+        if (Math.abs(constructionRatio.constructionRatios.cableConstructionRatios[ratioKey].ratio) > 0.001) {
+          cableConstructionRatios.push(constructionRatio.constructionRatios.cableConstructionRatios[ratioKey])
+        }
       })
       constructionRatio.constructionRatios.cableConstructionRatios = cableConstructionRatios
       assignments.constructionRatios.push(constructionRatio)
