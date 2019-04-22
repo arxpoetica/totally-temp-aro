@@ -55,7 +55,7 @@ class NetworkAnalysisOutputContentController {
 
   showCashFlowChart (force) {
     if (!this.plan) return
-    this.getChartData(force, 'optimization_analysis', {})
+    this.getChartData(force, '4', {})
       .then((cashFlow) => {
         var data = this.buildChartData(cashFlow, this.selectedOption)
 
