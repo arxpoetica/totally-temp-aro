@@ -43,8 +43,9 @@
                           root-meta-data="{}">
   </editor-interface-table>
   
+  <!-- change if to include all once server is working -->
   <form class="form-horizontal"
-        ng-if="$ctrl.selectedResourceKey != 'all' && !!$ctrl.filterByOptions[$ctrl.selectedResourceKey]">
+        ng-if="$ctrl.selectedResourceKey != 'all' && !!$ctrl.filterByOptions[$ctrl.selectedResourceKey] && !!$ctrl.canMakeNewFilter[$ctrl.selectedResourceKey]">
     <div class="form-group row" style="flex-direction: row-reverse;">
       <div class="col-sm-8" style="margin-top: 1rem">
         

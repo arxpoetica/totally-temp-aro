@@ -15,17 +15,10 @@ class ResourceManagerController {
       competition_manager: 'competitor-manager',
       rate_reach_manager: 'rate-reach-matrix'
     }
-    /*
-    this.resourceKeyToText = {
-        price_book: 'pricebook',
-        roic_manager: 'roic-manager',
-        arpu_manager: 'arpu-manager',
-        impedance_mapping_manager: 'impedance-manager',
-        tsm_manager: 'tsm-manager',
-        competition_manager: 'competitor-manager',
-        rate_reach_manager: 'rate-reach-matrix'
-      }
-    */
+    
+    // ToDo: once server can make new versions of all types this won't be needed
+    this.canMakeNewFilter = {'price_book':true, 'rate_reach_manager':true, 'competition_manager':true}
+    
     this.managerIdString = 'MANAGER_ID'
     this.rows = []
 
@@ -142,7 +135,7 @@ class ResourceManagerController {
         }
       }
     }
-
+    //console.log(newFilterByOptions)
     this.filterByOptions = newFilterByOptions
   }
   
@@ -209,7 +202,7 @@ class ResourceManagerController {
         // Create a new manager with the specified name and description
           var idParam = ''
           if (null != sourceId) idParam = `resourceManagerId=${sourceId}&`
-          console.log(resourceType)
+          //console.log(resourceType)
           return this.$http.post(`/service/v2/resource-manager?${idParam}user_id=${this.state.loggedInUser.id}`,
             {resourceType: resourceType, name: resourceName, description: resourceName })
         })
