@@ -2,7 +2,7 @@
 
 exports[`Click primary and subdefinitions to edit 1`] = `
 <div
-  className="container"
+  className="container report-module-editor"
   style={
     Object {
       "height": "100%",
@@ -20,8 +20,40 @@ exports[`Click primary and subdefinitions to edit 1`] = `
     <div
       className="col-md-3"
     >
+      <label>
+        Report Type
+      </label>
+      <select
+        className="form-control mb-3"
+        onChange={[Function]}
+        value="GENERAL"
+      >
+        <option
+          value="GENERAL"
+        >
+          General
+        </option>
+        <option
+          value="COVERAGE"
+        >
+          Coverage
+        </option>
+        <option
+          value="FORM477"
+        >
+          Form477
+        </option>
+        <option
+          value="PARAM_QUERY"
+        >
+          Param Query
+        </option>
+      </select>
+      <label>
+        Report Definitions
+      </label>
       <ul
-        className="nav nav-pills"
+        className="nav nav-pills mb-2 definitions-list"
       >
         <li
           className="nav-item"
@@ -40,12 +72,19 @@ exports[`Click primary and subdefinitions to edit 1`] = `
           key="0"
         >
           <a
-            className="nav-link "
+            className="nav-link subdefinition-link "
             id="lnkEditSubDefinition0"
             onClick={[Function]}
           >
-            Subdefinition 
-            0
+            Subdefinition
+            <button
+              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
+              onClick={[Function]}
+            >
+              <i
+                className="fas fa-trash-alt"
+              />
+            </button>
           </a>
         </li>
         <li
@@ -53,15 +92,31 @@ exports[`Click primary and subdefinitions to edit 1`] = `
           key="1"
         >
           <a
-            className="nav-link "
+            className="nav-link subdefinition-link "
             id="lnkEditSubDefinition1"
             onClick={[Function]}
           >
-            Subdefinition 
-            1
+            Subdefinition
+            <button
+              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
+              onClick={[Function]}
+            >
+              <i
+                className="fas fa-trash-alt"
+              />
+            </button>
           </a>
         </li>
       </ul>
+      <button
+        className="btn btn-light btn-sm float-right"
+        onClick={[Function]}
+      >
+        <i
+          className="fa fa-plus"
+        />
+         Add Subdefinition
+      </button>
     </div>
     <div
       className="col-md-9 d-flex flex-column"
@@ -308,7 +363,7 @@ exports[`Click primary and subdefinitions to edit 1`] = `
 
 exports[`Click primary and subdefinitions to edit 2`] = `
 <div
-  className="container"
+  className="container report-module-editor"
   style={
     Object {
       "height": "100%",
@@ -326,8 +381,40 @@ exports[`Click primary and subdefinitions to edit 2`] = `
     <div
       className="col-md-3"
     >
+      <label>
+        Report Type
+      </label>
+      <select
+        className="form-control mb-3"
+        onChange={[Function]}
+        value="GENERAL"
+      >
+        <option
+          value="GENERAL"
+        >
+          General
+        </option>
+        <option
+          value="COVERAGE"
+        >
+          Coverage
+        </option>
+        <option
+          value="FORM477"
+        >
+          Form477
+        </option>
+        <option
+          value="PARAM_QUERY"
+        >
+          Param Query
+        </option>
+      </select>
+      <label>
+        Report Definitions
+      </label>
       <ul
-        className="nav nav-pills"
+        className="nav nav-pills mb-2 definitions-list"
       >
         <li
           className="nav-item"
@@ -346,12 +433,19 @@ exports[`Click primary and subdefinitions to edit 2`] = `
           key="0"
         >
           <a
-            className="nav-link active"
+            className="nav-link subdefinition-link active"
             id="lnkEditSubDefinition0"
             onClick={[Function]}
           >
-            Subdefinition 
-            0
+            Subdefinition
+            <button
+              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
+              onClick={[Function]}
+            >
+              <i
+                className="fas fa-trash-alt"
+              />
+            </button>
           </a>
         </li>
         <li
@@ -359,15 +453,31 @@ exports[`Click primary and subdefinitions to edit 2`] = `
           key="1"
         >
           <a
-            className="nav-link "
+            className="nav-link subdefinition-link "
             id="lnkEditSubDefinition1"
             onClick={[Function]}
           >
-            Subdefinition 
-            1
+            Subdefinition
+            <button
+              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
+              onClick={[Function]}
+            >
+              <i
+                className="fas fa-trash-alt"
+              />
+            </button>
           </a>
         </li>
       </ul>
+      <button
+        className="btn btn-light btn-sm float-right"
+        onClick={[Function]}
+      >
+        <i
+          className="fa fa-plus"
+        />
+         Add Subdefinition
+      </button>
     </div>
     <div
       className="col-md-9 d-flex flex-column"
@@ -457,7 +567,7 @@ AND NOT(is_deleted)",
 
 exports[`Click primary and subdefinitions to edit 3`] = `
 <div
-  className="container"
+  className="container report-module-editor"
   style={
     Object {
       "height": "100%",
@@ -475,8 +585,40 @@ exports[`Click primary and subdefinitions to edit 3`] = `
     <div
       className="col-md-3"
     >
+      <label>
+        Report Type
+      </label>
+      <select
+        className="form-control mb-3"
+        onChange={[Function]}
+        value="GENERAL"
+      >
+        <option
+          value="GENERAL"
+        >
+          General
+        </option>
+        <option
+          value="COVERAGE"
+        >
+          Coverage
+        </option>
+        <option
+          value="FORM477"
+        >
+          Form477
+        </option>
+        <option
+          value="PARAM_QUERY"
+        >
+          Param Query
+        </option>
+      </select>
+      <label>
+        Report Definitions
+      </label>
       <ul
-        className="nav nav-pills"
+        className="nav nav-pills mb-2 definitions-list"
       >
         <li
           className="nav-item"
@@ -495,12 +637,19 @@ exports[`Click primary and subdefinitions to edit 3`] = `
           key="0"
         >
           <a
-            className="nav-link "
+            className="nav-link subdefinition-link "
             id="lnkEditSubDefinition0"
             onClick={[Function]}
           >
-            Subdefinition 
-            0
+            Subdefinition
+            <button
+              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
+              onClick={[Function]}
+            >
+              <i
+                className="fas fa-trash-alt"
+              />
+            </button>
           </a>
         </li>
         <li
@@ -508,15 +657,31 @@ exports[`Click primary and subdefinitions to edit 3`] = `
           key="1"
         >
           <a
-            className="nav-link active"
+            className="nav-link subdefinition-link active"
             id="lnkEditSubDefinition1"
             onClick={[Function]}
           >
-            Subdefinition 
-            1
+            Subdefinition
+            <button
+              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
+              onClick={[Function]}
+            >
+              <i
+                className="fas fa-trash-alt"
+              />
+            </button>
           </a>
         </li>
       </ul>
+      <button
+        className="btn btn-light btn-sm float-right"
+        onClick={[Function]}
+      >
+        <i
+          className="fa fa-plus"
+        />
+         Add Subdefinition
+      </button>
     </div>
     <div
       className="col-md-9 d-flex flex-column"
@@ -598,7 +763,7 @@ AND NOT(e.is_deleted)
 
 exports[`Click primary and subdefinitions to edit 4`] = `
 <div
-  className="container"
+  className="container report-module-editor"
   style={
     Object {
       "height": "100%",
@@ -616,8 +781,40 @@ exports[`Click primary and subdefinitions to edit 4`] = `
     <div
       className="col-md-3"
     >
+      <label>
+        Report Type
+      </label>
+      <select
+        className="form-control mb-3"
+        onChange={[Function]}
+        value="GENERAL"
+      >
+        <option
+          value="GENERAL"
+        >
+          General
+        </option>
+        <option
+          value="COVERAGE"
+        >
+          Coverage
+        </option>
+        <option
+          value="FORM477"
+        >
+          Form477
+        </option>
+        <option
+          value="PARAM_QUERY"
+        >
+          Param Query
+        </option>
+      </select>
+      <label>
+        Report Definitions
+      </label>
       <ul
-        className="nav nav-pills"
+        className="nav nav-pills mb-2 definitions-list"
       >
         <li
           className="nav-item"
@@ -636,12 +833,19 @@ exports[`Click primary and subdefinitions to edit 4`] = `
           key="0"
         >
           <a
-            className="nav-link "
+            className="nav-link subdefinition-link "
             id="lnkEditSubDefinition0"
             onClick={[Function]}
           >
-            Subdefinition 
-            0
+            Subdefinition
+            <button
+              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
+              onClick={[Function]}
+            >
+              <i
+                className="fas fa-trash-alt"
+              />
+            </button>
           </a>
         </li>
         <li
@@ -649,15 +853,31 @@ exports[`Click primary and subdefinitions to edit 4`] = `
           key="1"
         >
           <a
-            className="nav-link "
+            className="nav-link subdefinition-link "
             id="lnkEditSubDefinition1"
             onClick={[Function]}
           >
-            Subdefinition 
-            1
+            Subdefinition
+            <button
+              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
+              onClick={[Function]}
+            >
+              <i
+                className="fas fa-trash-alt"
+              />
+            </button>
           </a>
         </li>
       </ul>
+      <button
+        className="btn btn-light btn-sm float-right"
+        onClick={[Function]}
+      >
+        <i
+          className="fa fa-plus"
+        />
+         Add Subdefinition
+      </button>
     </div>
     <div
       className="col-md-9 d-flex flex-column"
@@ -904,7 +1124,7 @@ exports[`Click primary and subdefinitions to edit 4`] = `
 
 exports[`With only report id 1`] = `
 <div
-  className="container"
+  className="container report-module-editor"
   style={
     Object {
       "height": "100%",
@@ -922,8 +1142,39 @@ exports[`With only report id 1`] = `
     <div
       className="col-md-3"
     >
+      <label>
+        Report Type
+      </label>
+      <select
+        className="form-control mb-3"
+        onChange={[Function]}
+      >
+        <option
+          value="GENERAL"
+        >
+          General
+        </option>
+        <option
+          value="COVERAGE"
+        >
+          Coverage
+        </option>
+        <option
+          value="FORM477"
+        >
+          Form477
+        </option>
+        <option
+          value="PARAM_QUERY"
+        >
+          Param Query
+        </option>
+      </select>
+      <label>
+        Report Definitions
+      </label>
       <ul
-        className="nav nav-pills"
+        className="nav nav-pills mb-2 definitions-list"
       >
         <li
           className="nav-item"
@@ -938,6 +1189,15 @@ exports[`With only report id 1`] = `
           </a>
         </li>
       </ul>
+      <button
+        className="btn btn-light btn-sm float-right"
+        onClick={[Function]}
+      >
+        <i
+          className="fa fa-plus"
+        />
+         Add Subdefinition
+      </button>
     </div>
     <div
       className="col-md-9 d-flex flex-column"
@@ -977,7 +1237,7 @@ exports[`With only report id 1`] = `
 
 exports[`With populated report 1`] = `
 <div
-  className="container"
+  className="container report-module-editor"
   style={
     Object {
       "height": "100%",
@@ -995,8 +1255,40 @@ exports[`With populated report 1`] = `
     <div
       className="col-md-3"
     >
+      <label>
+        Report Type
+      </label>
+      <select
+        className="form-control mb-3"
+        onChange={[Function]}
+        value="GENERAL"
+      >
+        <option
+          value="GENERAL"
+        >
+          General
+        </option>
+        <option
+          value="COVERAGE"
+        >
+          Coverage
+        </option>
+        <option
+          value="FORM477"
+        >
+          Form477
+        </option>
+        <option
+          value="PARAM_QUERY"
+        >
+          Param Query
+        </option>
+      </select>
+      <label>
+        Report Definitions
+      </label>
       <ul
-        className="nav nav-pills"
+        className="nav nav-pills mb-2 definitions-list"
       >
         <li
           className="nav-item"
@@ -1015,12 +1307,19 @@ exports[`With populated report 1`] = `
           key="0"
         >
           <a
-            className="nav-link "
+            className="nav-link subdefinition-link "
             id="lnkEditSubDefinition0"
             onClick={[Function]}
           >
-            Subdefinition 
-            0
+            Subdefinition
+            <button
+              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
+              onClick={[Function]}
+            >
+              <i
+                className="fas fa-trash-alt"
+              />
+            </button>
           </a>
         </li>
         <li
@@ -1028,15 +1327,31 @@ exports[`With populated report 1`] = `
           key="1"
         >
           <a
-            className="nav-link "
+            className="nav-link subdefinition-link "
             id="lnkEditSubDefinition1"
             onClick={[Function]}
           >
-            Subdefinition 
-            1
+            Subdefinition
+            <button
+              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
+              onClick={[Function]}
+            >
+              <i
+                className="fas fa-trash-alt"
+              />
+            </button>
           </a>
         </li>
       </ul>
+      <button
+        className="btn btn-light btn-sm float-right"
+        onClick={[Function]}
+      >
+        <i
+          className="fa fa-plus"
+        />
+         Add Subdefinition
+      </button>
     </div>
     <div
       className="col-md-9 d-flex flex-column"
@@ -1283,7 +1598,7 @@ exports[`With populated report 1`] = `
 
 exports[`With validation error message 1`] = `
 <div
-  className="container"
+  className="container report-module-editor"
   style={
     Object {
       "height": "100%",
@@ -1301,8 +1616,40 @@ exports[`With validation error message 1`] = `
     <div
       className="col-md-3"
     >
+      <label>
+        Report Type
+      </label>
+      <select
+        className="form-control mb-3"
+        onChange={[Function]}
+        value="GENERAL"
+      >
+        <option
+          value="GENERAL"
+        >
+          General
+        </option>
+        <option
+          value="COVERAGE"
+        >
+          Coverage
+        </option>
+        <option
+          value="FORM477"
+        >
+          Form477
+        </option>
+        <option
+          value="PARAM_QUERY"
+        >
+          Param Query
+        </option>
+      </select>
+      <label>
+        Report Definitions
+      </label>
       <ul
-        className="nav nav-pills"
+        className="nav nav-pills mb-2 definitions-list"
       >
         <li
           className="nav-item"
@@ -1321,12 +1668,19 @@ exports[`With validation error message 1`] = `
           key="0"
         >
           <a
-            className="nav-link "
+            className="nav-link subdefinition-link "
             id="lnkEditSubDefinition0"
             onClick={[Function]}
           >
-            Subdefinition 
-            0
+            Subdefinition
+            <button
+              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
+              onClick={[Function]}
+            >
+              <i
+                className="fas fa-trash-alt"
+              />
+            </button>
           </a>
         </li>
         <li
@@ -1334,15 +1688,31 @@ exports[`With validation error message 1`] = `
           key="1"
         >
           <a
-            className="nav-link "
+            className="nav-link subdefinition-link "
             id="lnkEditSubDefinition1"
             onClick={[Function]}
           >
-            Subdefinition 
-            1
+            Subdefinition
+            <button
+              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
+              onClick={[Function]}
+            >
+              <i
+                className="fas fa-trash-alt"
+              />
+            </button>
           </a>
         </li>
       </ul>
+      <button
+        className="btn btn-light btn-sm float-right"
+        onClick={[Function]}
+      >
+        <i
+          className="fa fa-plus"
+        />
+         Add Subdefinition
+      </button>
     </div>
     <div
       className="col-md-9 d-flex flex-column"
@@ -1613,7 +1983,7 @@ exports[`With validation error message 1`] = `
 
 exports[`With validation success message 1`] = `
 <div
-  className="container"
+  className="container report-module-editor"
   style={
     Object {
       "height": "100%",
@@ -1631,8 +2001,40 @@ exports[`With validation success message 1`] = `
     <div
       className="col-md-3"
     >
+      <label>
+        Report Type
+      </label>
+      <select
+        className="form-control mb-3"
+        onChange={[Function]}
+        value="GENERAL"
+      >
+        <option
+          value="GENERAL"
+        >
+          General
+        </option>
+        <option
+          value="COVERAGE"
+        >
+          Coverage
+        </option>
+        <option
+          value="FORM477"
+        >
+          Form477
+        </option>
+        <option
+          value="PARAM_QUERY"
+        >
+          Param Query
+        </option>
+      </select>
+      <label>
+        Report Definitions
+      </label>
       <ul
-        className="nav nav-pills"
+        className="nav nav-pills mb-2 definitions-list"
       >
         <li
           className="nav-item"
@@ -1651,12 +2053,19 @@ exports[`With validation success message 1`] = `
           key="0"
         >
           <a
-            className="nav-link "
+            className="nav-link subdefinition-link "
             id="lnkEditSubDefinition0"
             onClick={[Function]}
           >
-            Subdefinition 
-            0
+            Subdefinition
+            <button
+              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
+              onClick={[Function]}
+            >
+              <i
+                className="fas fa-trash-alt"
+              />
+            </button>
           </a>
         </li>
         <li
@@ -1664,15 +2073,31 @@ exports[`With validation success message 1`] = `
           key="1"
         >
           <a
-            className="nav-link "
+            className="nav-link subdefinition-link "
             id="lnkEditSubDefinition1"
             onClick={[Function]}
           >
-            Subdefinition 
-            1
+            Subdefinition
+            <button
+              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
+              onClick={[Function]}
+            >
+              <i
+                className="fas fa-trash-alt"
+              />
+            </button>
           </a>
         </li>
       </ul>
+      <button
+        className="btn btn-light btn-sm float-right"
+        onClick={[Function]}
+      >
+        <i
+          className="fa fa-plus"
+        />
+         Add Subdefinition
+      </button>
     </div>
     <div
       className="col-md-9 d-flex flex-column"

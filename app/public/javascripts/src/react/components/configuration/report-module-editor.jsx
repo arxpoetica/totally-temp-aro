@@ -1,10 +1,11 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { PropTypes } from 'prop-types'
-import { formValueSelector } from 'redux-form'
+import { formValueSelector, reset } from 'redux-form'
 import ConfigurationActions from './configuration-actions'
 import ReportDefinitionEditor from './report-definition-editor.jsx'
 import Constants from '../../common/constants'
+import './report-module-editor.css'
 const selector = formValueSelector(Constants.REPORT_DEFINITION_EDITOR_FORM)
 
 export class ReportModuleEditor extends Component {
@@ -33,10 +34,19 @@ export class ReportModuleEditor extends Component {
   }
 
   render () {
-    return <div className='container' style={{ height: '100%' }}>
+    return <div className='container report-module-editor' style={{ height: '100%' }}>
       <div className='row' style={{ height: '100%' }}>
         <div className='col-md-3'>
-          <ul className='nav nav-pills'>
+          <label>Report Type</label>
+          <select className='form-control mb-3' value={this.props.reportBeingEdited.reportType}
+            onChange={event => this.props.saveEditingReportType(event.target.value)}>
+            <option value='GENERAL'>General</option>
+            <option value='COVERAGE'>Coverage</option>
+            <option value='FORM477'>Form477</option>
+            <option value='PARAM_QUERY'>Param Query</option>
+          </select>
+          <label>Report Definitions</label>
+          <ul className='nav nav-pills mb-2 definitions-list'>
             <li className='nav-item' key='-1'>
               <a id='lnkEditPrimaryDefinition'
                 className={`nav-link ${this.state.isEditingPrimary ? 'active' : ''}`}
@@ -49,15 +59,23 @@ export class ReportModuleEditor extends Component {
                 ? this.props.reportBeingEdited.moduleDefinition.subDefinitions.map((subDefinition, index) => (
                   <li className='nav-item' key={index}>
                     <a id={`lnkEditSubDefinition${index}`}
-                      className={`nav-link ${this.state.subDefinitionEditingIndex === index ? 'active' : ''}`}
+                      className={`nav-link subdefinition-link ${this.state.subDefinitionEditingIndex === index ? 'active' : ''}`}
                       onClick={() => this.startEditingSubDefinition(index)}>
-                      Subdefinition {index}
+                      Subdefinition
+                      <button className='btn btn-sm btn-danger ml-1 subdefinition-delete-button'
+                        onClick={event => this.props.removeEditingReportSubDefinition(index)}>
+                        <i className='fas fa-trash-alt' />
+                      </button>
                     </a>
                   </li>
                 ))
                 : null
             }
           </ul>
+          <button className='btn btn-light btn-sm float-right'
+            onClick={event => this.props.addEditingReportSubDefinition()}>
+            <i className='fa fa-plus' /> Add Subdefinition
+          </button>
         </div>
         <div className='col-md-9 d-flex flex-column' style={{ height: '100%' }}>
           { this.getDefinitionBeingEdited()
@@ -150,8 +168,17 @@ const mapStateToProps = (state) => ({
 const mapDispatchToProps = (dispatch, ownProps) => ({
   populateEditingReportDefinition: reportId => dispatch(ConfigurationActions.populateEditingReportDefinition(reportId)),
   clearEditingReportDefinition: () => dispatch(ConfigurationActions.clearEditingReportDefinition()),
-  saveEditingReportPrimaryDefinition: reportDefinition => dispatch(ConfigurationActions.saveEditingReportPrimaryDefinition(reportDefinition)),
-  saveEditingReportSubDefinition: (subDefinition, subDefinitionIndex) => dispatch(ConfigurationActions.saveEditingReportSubDefinition(subDefinition, subDefinitionIndex)),
+  saveEditingReportPrimaryDefinition: reportDefinition => {
+    dispatch(ConfigurationActions.saveEditingReportPrimaryDefinition(reportDefinition))
+    dispatch(reset(Constants.REPORT_DEFINITION_EDITOR_FORM))
+  },
+  saveEditingReportType: reportType => dispatch(ConfigurationActions.saveEditingReportType(reportType)),
+  saveEditingReportSubDefinition: (subDefinition, subDefinitionIndex) => {
+    dispatch(ConfigurationActions.saveEditingReportSubDefinition(subDefinition, subDefinitionIndex))
+    dispatch(reset(Constants.REPORT_DEFINITION_EDITOR_FORM))
+  },
+  addEditingReportSubDefinition: () => dispatch(ConfigurationActions.addEditingReportSubDefinition()),
+  removeEditingReportSubDefinition: subDefinitionIndex => dispatch(ConfigurationActions.removeEditingReportSubDefinition(subDefinitionIndex)),
   saveCurrentReportToServer: () => dispatch(ConfigurationActions.saveCurrentReportToServer()),
   validateReport: planId => dispatch(ConfigurationActions.validateReport(planId))
 })

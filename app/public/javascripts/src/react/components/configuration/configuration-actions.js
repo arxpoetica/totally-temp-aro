@@ -85,6 +85,13 @@ function saveEditingReportPrimaryDefinition (primaryDefinition) {
   }
 }
 
+function saveEditingReportType (reportType) {
+  return {
+    type: Actions.CONFIGURATION_SET_EDITING_REPORT_TYPE,
+    payload: reportType
+  }
+}
+
 function saveEditingReportSubDefinition (subDefinition, subDefinitionIndex) {
   return {
     type: Actions.CONFIGURATION_SET_EDITING_REPORT_SUBDEFINITION,
@@ -95,14 +102,28 @@ function saveEditingReportSubDefinition (subDefinition, subDefinitionIndex) {
   }
 }
 
+function addEditingReportSubDefinition () {
+  return {
+    type: Actions.CONFIGURATION_ADD_EDITING_REPORT_SUBDEFINITION
+  }
+}
+
+function removeEditingReportSubDefinition (subDefinitionIndex) {
+  return {
+    type: Actions.CONFIGURATION_REMOVE_EDITING_REPORT_SUBDEFINITION,
+    payload: subDefinitionIndex
+  }
+}
+
 function saveCurrentReportToServer () {
   return (dispatch, getState) => {
     // We have to do a getState() because there may be state changes that have not yet been updated in the calling component
     const reportDefinition = getState().configuration.reports.reportBeingEdited
     return AroHttp.put(`/service/v2/report-module/${reportDefinition.id}`, reportDefinition)
-      .then(() => dispatch({
-        type: Actions.CONFIGURATION_CLEAR_EDITING_REPORT
-      }))
+      .then(() => {
+        dispatch(getReportsMetadata()) // The name/reporttype may have changed
+        dispatch(clearEditingReportDefinition())
+      })
       .catch(err => console.error(err))
   }
 }
@@ -167,7 +188,10 @@ export default {
   populateEditingReportDefinition: populateEditingReportDefinition,
   clearEditingReportDefinition: clearEditingReportDefinition,
   saveEditingReportPrimaryDefinition: saveEditingReportPrimaryDefinition,
+  saveEditingReportType: saveEditingReportType,
   saveEditingReportSubDefinition: saveEditingReportSubDefinition,
+  addEditingReportSubDefinition: addEditingReportSubDefinition,
+  removeEditingReportSubDefinition: removeEditingReportSubDefinition,
   saveCurrentReportToServer: saveCurrentReportToServer,
   createReport: createReport,
   deleteReport: deleteReport,

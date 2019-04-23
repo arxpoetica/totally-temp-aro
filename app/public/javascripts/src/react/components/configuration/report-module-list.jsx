@@ -56,6 +56,10 @@ export class ReportModuleList extends Component {
     const assetKey = file.name
     this.props.uploadAssetToServer(assetKey, file)
   }
+
+  componentWillUnmount () {
+    this.props.clearEditingReportDefinition()
+  }
 }
 
 ReportModuleList.propTypes = {
@@ -71,6 +75,7 @@ const mapStateToProps = (state) => ({
 const mapDispatchToProps = dispatch => ({
   getReportsMetadata: () => dispatch(ConfigurationActions.getReportsMetadata()),
   startEditingReport: reportId => dispatch(ConfigurationActions.startEditingReport(reportId)),
+  clearEditingReportDefinition: () => dispatch(ConfigurationActions.clearEditingReportDefinition()),
   createReport: () => dispatch(ConfigurationActions.createReport()),
   deleteReport: reportId => dispatch(ConfigurationActions.deleteReport(reportId))
 })

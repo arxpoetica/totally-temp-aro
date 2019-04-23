@@ -1,0 +1,20 @@
+.report-module-editor label {
+  font-weight: 700;
+}
+
+.definitions-list a {
+  line-height: 28px;
+  cursor: pointer;
+}
+
+.definitions-list li {
+  width: 100%;
+}
+
+.subdefinition-delete-button {
+  display: none;
+}
+
+.subdefinition-link:hover .subdefinition-delete-button, .subdefinition-delete-button:hover {
+  display: inline-block;
+}
