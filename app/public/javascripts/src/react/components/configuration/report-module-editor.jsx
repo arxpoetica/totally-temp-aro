@@ -59,15 +59,22 @@ export class ReportModuleEditor extends Component {
                 ? this.props.reportBeingEdited.moduleDefinition.subDefinitions.map((subDefinition, index) => (
                   <li className='nav-item' key={index}>
                     <a id={`lnkEditSubDefinition${index}`}
-                      className={`nav-link ${this.state.subDefinitionEditingIndex === index ? 'active' : ''}`}
+                      className={`nav-link subdefinition-link ${this.state.subDefinitionEditingIndex === index ? 'active' : ''}`}
                       onClick={() => this.startEditingSubDefinition(index)}>
-                      Subdefinition {index}
+                      Subdefinition
+                      <button className='btn btn-sm btn-danger ml-1 subdefinition-delete-button'
+                        onClick={event => this.props.removeEditingReportSubDefinition(index)}>
+                        <i className='fas fa-trash-alt' />
+                      </button>
                     </a>
                   </li>
                 ))
                 : null
             }
           </ul>
+          <button className='btn btn-light float-right' onClick={event => this.props.addEditingReportSubDefinition()}>
+            <i className='fa fa-plus' /> Add Subdefinition
+          </button>
         </div>
         <div className='col-md-9 d-flex flex-column' style={{ height: '100%' }}>
           { this.getDefinitionBeingEdited()
@@ -163,6 +170,8 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   saveEditingReportPrimaryDefinition: reportDefinition => dispatch(ConfigurationActions.saveEditingReportPrimaryDefinition(reportDefinition)),
   saveEditingReportType: reportType => dispatch(ConfigurationActions.saveEditingReportType(reportType)),
   saveEditingReportSubDefinition: (subDefinition, subDefinitionIndex) => dispatch(ConfigurationActions.saveEditingReportSubDefinition(subDefinition, subDefinitionIndex)),
+  addEditingReportSubDefinition: () => dispatch(ConfigurationActions.addEditingReportSubDefinition()),
+  removeEditingReportSubDefinition: subDefinitionIndex => dispatch(ConfigurationActions.removeEditingReportSubDefinition(subDefinitionIndex)),
   saveCurrentReportToServer: () => dispatch(ConfigurationActions.saveCurrentReportToServer()),
   validateReport: planId => dispatch(ConfigurationActions.validateReport(planId))
 })

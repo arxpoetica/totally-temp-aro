@@ -1,3 +1,11 @@
 .report-module-editor label {
   font-weight: 700;
 }
+
+.subdefinition-delete-button {
+  display: none;
+}
+
+.subdefinition-link:hover .subdefinition-delete-button, .subdefinition-delete-button:hover {
+  display: inline-block;
+}

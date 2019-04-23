@@ -102,6 +102,19 @@ function saveEditingReportSubDefinition (subDefinition, subDefinitionIndex) {
   }
 }
 
+function addEditingReportSubDefinition () {
+  return {
+    type: Actions.CONFIGURATION_ADD_EDITING_REPORT_SUBDEFINITION
+  }
+}
+
+function removeEditingReportSubDefinition (subDefinitionIndex) {
+  return {
+    type: Actions.CONFIGURATION_REMOVE_EDITING_REPORT_SUBDEFINITION,
+    payload: subDefinitionIndex
+  }
+}
+
 function saveCurrentReportToServer () {
   return (dispatch, getState) => {
     // We have to do a getState() because there may be state changes that have not yet been updated in the calling component
@@ -179,6 +192,8 @@ export default {
   saveEditingReportPrimaryDefinition: saveEditingReportPrimaryDefinition,
   saveEditingReportType: saveEditingReportType,
   saveEditingReportSubDefinition: saveEditingReportSubDefinition,
+  addEditingReportSubDefinition: addEditingReportSubDefinition,
+  removeEditingReportSubDefinition: removeEditingReportSubDefinition,
   saveCurrentReportToServer: saveCurrentReportToServer,
   createReport: createReport,
   deleteReport: deleteReport,

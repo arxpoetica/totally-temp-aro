@@ -10,6 +10,13 @@ const defaultState = {
   }
 }
 
+const defaultSubDefinition = {
+  name: 'sub_definition',
+  displayName: 'Sub Definition',
+  query: '',
+  queryType: 'SQL_REPORT'
+}
+
 function setConfiguration (state, configuration) {
   return { ...state,
     items: configuration
@@ -96,6 +103,36 @@ function setReportSubDefinitionBeingEdited (state, subDefinition, subDefinitionI
   }
 }
 
+function addReportSubDefinition (state) {
+  var newSubDefinitions = state.reports.reportBeingEdited.moduleDefinition.subDefinitions.map(item => item)
+  console.log(defaultSubDefinition)
+  newSubDefinitions.push({ ...defaultSubDefinition })
+  console.log(defaultSubDefinition)
+  return { ...state,
+    reports: { ...state.reports,
+      reportBeingEdited: { ...state.reports.reportBeingEdited,
+        moduleDefinition: { ...state.reports.reportBeingEdited.moduleDefinition,
+          subDefinitions: newSubDefinitions
+        }
+      }
+    }
+  }
+}
+
+function removeReportSubDefinition (state, subDefinitionIndex) {
+  var newSubDefinitions = state.reports.reportBeingEdited.moduleDefinition.subDefinitions.map(item => item)
+  newSubDefinitions.splice(subDefinitionIndex, 1)
+  return { ...state,
+    reports: { ...state.reports,
+      reportBeingEdited: { ...state.reports.reportBeingEdited,
+        moduleDefinition: { ...state.reports.reportBeingEdited.moduleDefinition,
+          subDefinitions: newSubDefinitions
+        }
+      }
+    }
+  }
+}
+
 function setReportValidation (state, validation) {
   return { ...state,
     reports: { ...state.reports,
@@ -129,6 +166,12 @@ function configurationReducer (state = defaultState, action) {
 
     case Actions.CONFIGURATION_SET_EDITING_REPORT_SUBDEFINITION:
       return setReportSubDefinitionBeingEdited(state, action.payload.subDefinition, action.payload.subDefinitionIndex)
+
+    case Actions.CONFIGURATION_ADD_EDITING_REPORT_SUBDEFINITION:
+      return addReportSubDefinition(state)
+
+    case Actions.CONFIGURATION_REMOVE_EDITING_REPORT_SUBDEFINITION:
+      return removeReportSubDefinition(state, action.payload)
 
     case Actions.CONFIGURATION_SET_REPORT_VALIDATION:
       return setReportValidation(state, action.payload)
