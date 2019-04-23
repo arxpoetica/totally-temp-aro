@@ -42,10 +42,9 @@ class CoverageReportDownloaderController {
     this.reportDownloading = true
     // Note that we are not using the cached "this.numReportsSelected" here. That is for disabling buttons in the UI only.
     const selectedReports = this.reports.filter(item => item.selectedForDownload)
-    const numReportsSelected = selectedReports.length
     const fileName = `${this.reportFilename}.${this.selectedReportType.mediaType}`
-    if (numReportsSelected === 1) {
-      // We are downloading an individual report. We need { responseType: 'arraybuffer' } to receive binary data.
+    if (this.selectedReportType.mediaType !== 'xls') {
+      // We are downloading an individual, non-excel report. We need { responseType: 'arraybuffer' } to receive binary data.
       this.$http.get(`/service-download-file/${fileName}/v2/report-extended/${selectedReports[0].id}/${this.state.plan.getValue().id}.${this.selectedReportType.mediaType}`,
         { responseType: 'arraybuffer' })
         .then(result => {
@@ -54,7 +53,7 @@ class CoverageReportDownloaderController {
         })
         .catch(err => console.error(err))
     } else {
-      // We are downloading multiple reports. We need { responseType: 'arraybuffer' } to receive binary data.
+      // We are downloading excel reports. We need { responseType: 'arraybuffer' } to receive binary data.
       const reportNames = this.reports.filter(item => item.selectedForDownload)
         .map(item => item.id)
 
