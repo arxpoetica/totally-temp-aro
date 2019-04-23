@@ -53,7 +53,7 @@ exports[`Click primary and subdefinitions to edit 1`] = `
         Report Definitions
       </label>
       <ul
-        className="nav nav-pills"
+        className="nav nav-pills mb-2 definitions-list"
       >
         <li
           className="nav-item"
@@ -72,12 +72,19 @@ exports[`Click primary and subdefinitions to edit 1`] = `
           key="0"
         >
           <a
-            className="nav-link "
+            className="nav-link subdefinition-link "
             id="lnkEditSubDefinition0"
             onClick={[Function]}
           >
-            Subdefinition 
-            0
+            Subdefinition
+            <button
+              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
+              onClick={[Function]}
+            >
+              <i
+                className="fas fa-trash-alt"
+              />
+            </button>
           </a>
         </li>
         <li
@@ -85,15 +92,31 @@ exports[`Click primary and subdefinitions to edit 1`] = `
           key="1"
         >
           <a
-            className="nav-link "
+            className="nav-link subdefinition-link "
             id="lnkEditSubDefinition1"
             onClick={[Function]}
           >
-            Subdefinition 
-            1
+            Subdefinition
+            <button
+              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
+              onClick={[Function]}
+            >
+              <i
+                className="fas fa-trash-alt"
+              />
+            </button>
           </a>
         </li>
       </ul>
+      <button
+        className="btn btn-light btn-sm float-right"
+        onClick={[Function]}
+      >
+        <i
+          className="fa fa-plus"
+        />
+         Add Subdefinition
+      </button>
     </div>
     <div
       className="col-md-9 d-flex flex-column"
@@ -391,7 +414,7 @@ exports[`Click primary and subdefinitions to edit 2`] = `
         Report Definitions
       </label>
       <ul
-        className="nav nav-pills"
+        className="nav nav-pills mb-2 definitions-list"
       >
         <li
           className="nav-item"
@@ -410,12 +433,19 @@ exports[`Click primary and subdefinitions to edit 2`] = `
           key="0"
         >
           <a
-            className="nav-link active"
+            className="nav-link subdefinition-link active"
             id="lnkEditSubDefinition0"
             onClick={[Function]}
           >
-            Subdefinition 
-            0
+            Subdefinition
+            <button
+              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
+              onClick={[Function]}
+            >
+              <i
+                className="fas fa-trash-alt"
+              />
+            </button>
           </a>
         </li>
         <li
@@ -423,15 +453,31 @@ exports[`Click primary and subdefinitions to edit 2`] = `
           key="1"
         >
           <a
-            className="nav-link "
+            className="nav-link subdefinition-link "
             id="lnkEditSubDefinition1"
             onClick={[Function]}
           >
-            Subdefinition 
-            1
+            Subdefinition
+            <button
+              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
+              onClick={[Function]}
+            >
+              <i
+                className="fas fa-trash-alt"
+              />
+            </button>
           </a>
         </li>
       </ul>
+      <button
+        className="btn btn-light btn-sm float-right"
+        onClick={[Function]}
+      >
+        <i
+          className="fa fa-plus"
+        />
+         Add Subdefinition
+      </button>
     </div>
     <div
       className="col-md-9 d-flex flex-column"
@@ -572,7 +618,7 @@ exports[`Click primary and subdefinitions to edit 3`] = `
         Report Definitions
       </label>
       <ul
-        className="nav nav-pills"
+        className="nav nav-pills mb-2 definitions-list"
       >
         <li
           className="nav-item"
@@ -591,12 +637,19 @@ exports[`Click primary and subdefinitions to edit 3`] = `
           key="0"
         >
           <a
-            className="nav-link "
+            className="nav-link subdefinition-link "
             id="lnkEditSubDefinition0"
             onClick={[Function]}
           >
-            Subdefinition 
-            0
+            Subdefinition
+            <button
+              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
+              onClick={[Function]}
+            >
+              <i
+                className="fas fa-trash-alt"
+              />
+            </button>
           </a>
         </li>
         <li
@@ -604,15 +657,31 @@ exports[`Click primary and subdefinitions to edit 3`] = `
           key="1"
         >
           <a
-            className="nav-link active"
+            className="nav-link subdefinition-link active"
             id="lnkEditSubDefinition1"
             onClick={[Function]}
           >
-            Subdefinition 
-            1
+            Subdefinition
+            <button
+              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
+              onClick={[Function]}
+            >
+              <i
+                className="fas fa-trash-alt"
+              />
+            </button>
           </a>
         </li>
       </ul>
+      <button
+        className="btn btn-light btn-sm float-right"
+        onClick={[Function]}
+      >
+        <i
+          className="fa fa-plus"
+        />
+         Add Subdefinition
+      </button>
     </div>
     <div
       className="col-md-9 d-flex flex-column"
@@ -745,7 +814,7 @@ exports[`Click primary and subdefinitions to edit 4`] = `
         Report Definitions
       </label>
       <ul
-        className="nav nav-pills"
+        className="nav nav-pills mb-2 definitions-list"
       >
         <li
           className="nav-item"
@@ -764,12 +833,19 @@ exports[`Click primary and subdefinitions to edit 4`] = `
           key="0"
         >
           <a
-            className="nav-link "
+            className="nav-link subdefinition-link "
             id="lnkEditSubDefinition0"
             onClick={[Function]}
           >
-            Subdefinition 
-            0
+            Subdefinition
+            <button
+              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
+              onClick={[Function]}
+            >
+              <i
+                className="fas fa-trash-alt"
+              />
+            </button>
           </a>
         </li>
         <li
@@ -777,15 +853,31 @@ exports[`Click primary and subdefinitions to edit 4`] = `
           key="1"
         >
           <a
-            className="nav-link "
+            className="nav-link subdefinition-link "
             id="lnkEditSubDefinition1"
             onClick={[Function]}
           >
-            Subdefinition 
-            1
+            Subdefinition
+            <button
+              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
+              onClick={[Function]}
+            >
+              <i
+                className="fas fa-trash-alt"
+              />
+            </button>
           </a>
         </li>
       </ul>
+      <button
+        className="btn btn-light btn-sm float-right"
+        onClick={[Function]}
+      >
+        <i
+          className="fa fa-plus"
+        />
+         Add Subdefinition
+      </button>
     </div>
     <div
       className="col-md-9 d-flex flex-column"
@@ -1082,7 +1174,7 @@ exports[`With only report id 1`] = `
         Report Definitions
       </label>
       <ul
-        className="nav nav-pills"
+        className="nav nav-pills mb-2 definitions-list"
       >
         <li
           className="nav-item"
@@ -1097,6 +1189,15 @@ exports[`With only report id 1`] = `
           </a>
         </li>
       </ul>
+      <button
+        className="btn btn-light btn-sm float-right"
+        onClick={[Function]}
+      >
+        <i
+          className="fa fa-plus"
+        />
+         Add Subdefinition
+      </button>
     </div>
     <div
       className="col-md-9 d-flex flex-column"
@@ -1187,7 +1288,7 @@ exports[`With populated report 1`] = `
         Report Definitions
       </label>
       <ul
-        className="nav nav-pills"
+        className="nav nav-pills mb-2 definitions-list"
       >
         <li
           className="nav-item"
@@ -1206,12 +1307,19 @@ exports[`With populated report 1`] = `
           key="0"
         >
           <a
-            className="nav-link "
+            className="nav-link subdefinition-link "
             id="lnkEditSubDefinition0"
             onClick={[Function]}
           >
-            Subdefinition 
-            0
+            Subdefinition
+            <button
+              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
+              onClick={[Function]}
+            >
+              <i
+                className="fas fa-trash-alt"
+              />
+            </button>
           </a>
         </li>
         <li
@@ -1219,15 +1327,31 @@ exports[`With populated report 1`] = `
           key="1"
         >
           <a
-            className="nav-link "
+            className="nav-link subdefinition-link "
             id="lnkEditSubDefinition1"
             onClick={[Function]}
           >
-            Subdefinition 
-            1
+            Subdefinition
+            <button
+              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
+              onClick={[Function]}
+            >
+              <i
+                className="fas fa-trash-alt"
+              />
+            </button>
           </a>
         </li>
       </ul>
+      <button
+        className="btn btn-light btn-sm float-right"
+        onClick={[Function]}
+      >
+        <i
+          className="fa fa-plus"
+        />
+         Add Subdefinition
+      </button>
     </div>
     <div
       className="col-md-9 d-flex flex-column"
@@ -1525,7 +1649,7 @@ exports[`With validation error message 1`] = `
         Report Definitions
       </label>
       <ul
-        className="nav nav-pills"
+        className="nav nav-pills mb-2 definitions-list"
       >
         <li
           className="nav-item"
@@ -1544,12 +1668,19 @@ exports[`With validation error message 1`] = `
           key="0"
         >
           <a
-            className="nav-link "
+            className="nav-link subdefinition-link "
             id="lnkEditSubDefinition0"
             onClick={[Function]}
           >
-            Subdefinition 
-            0
+            Subdefinition
+            <button
+              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
+              onClick={[Function]}
+            >
+              <i
+                className="fas fa-trash-alt"
+              />
+            </button>
           </a>
         </li>
         <li
@@ -1557,15 +1688,31 @@ exports[`With validation error message 1`] = `
           key="1"
         >
           <a
-            className="nav-link "
+            className="nav-link subdefinition-link "
             id="lnkEditSubDefinition1"
             onClick={[Function]}
           >
-            Subdefinition 
-            1
+            Subdefinition
+            <button
+              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
+              onClick={[Function]}
+            >
+              <i
+                className="fas fa-trash-alt"
+              />
+            </button>
           </a>
         </li>
       </ul>
+      <button
+        className="btn btn-light btn-sm float-right"
+        onClick={[Function]}
+      >
+        <i
+          className="fa fa-plus"
+        />
+         Add Subdefinition
+      </button>
     </div>
     <div
       className="col-md-9 d-flex flex-column"
@@ -1887,7 +2034,7 @@ exports[`With validation success message 1`] = `
         Report Definitions
       </label>
       <ul
-        className="nav nav-pills"
+        className="nav nav-pills mb-2 definitions-list"
       >
         <li
           className="nav-item"
@@ -1906,12 +2053,19 @@ exports[`With validation success message 1`] = `
           key="0"
         >
           <a
-            className="nav-link "
+            className="nav-link subdefinition-link "
             id="lnkEditSubDefinition0"
             onClick={[Function]}
           >
-            Subdefinition 
-            0
+            Subdefinition
+            <button
+              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
+              onClick={[Function]}
+            >
+              <i
+                className="fas fa-trash-alt"
+              />
+            </button>
           </a>
         </li>
         <li
@@ -1919,15 +2073,31 @@ exports[`With validation success message 1`] = `
           key="1"
         >
           <a
-            className="nav-link "
+            className="nav-link subdefinition-link "
             id="lnkEditSubDefinition1"
             onClick={[Function]}
           >
-            Subdefinition 
-            1
+            Subdefinition
+            <button
+              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
+              onClick={[Function]}
+            >
+              <i
+                className="fas fa-trash-alt"
+              />
+            </button>
           </a>
         </li>
       </ul>
+      <button
+        className="btn btn-light btn-sm float-right"
+        onClick={[Function]}
+      >
+        <i
+          className="fa fa-plus"
+        />
+         Add Subdefinition
+      </button>
     </div>
     <div
       className="col-md-9 d-flex flex-column"

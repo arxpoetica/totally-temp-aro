@@ -105,9 +105,7 @@ function setReportSubDefinitionBeingEdited (state, subDefinition, subDefinitionI
 
 function addReportSubDefinition (state) {
   var newSubDefinitions = state.reports.reportBeingEdited.moduleDefinition.subDefinitions.map(item => item)
-  console.log(defaultSubDefinition)
   newSubDefinitions.push({ ...defaultSubDefinition })
-  console.log(defaultSubDefinition)
   return { ...state,
     reports: { ...state.reports,
       reportBeingEdited: { ...state.reports.reportBeingEdited,

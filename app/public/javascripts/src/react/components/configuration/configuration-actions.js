@@ -122,9 +122,7 @@ function saveCurrentReportToServer () {
     return AroHttp.put(`/service/v2/report-module/${reportDefinition.id}`, reportDefinition)
       .then(() => {
         dispatch(getReportsMetadata()) // The name/reporttype may have changed
-        dispatch({
-          type: Actions.CONFIGURATION_CLEAR_EDITING_REPORT
-        })
+        dispatch(clearEditingReportDefinition())
       })
       .catch(err => console.error(err))
   }
