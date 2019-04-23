@@ -70,6 +70,17 @@ function setPrimaryReportDefinitionBeingEdited (state, primaryReportDefinition) 
   }
 }
 
+function setReportType (state, reportType) {
+  // Nested object, but thats how it comes from service
+  return { ...state,
+    reports: { ...state.reports,
+      reportBeingEdited: { ...state.reports.reportBeingEdited,
+        reportType: reportType
+      }
+    }
+  }
+}
+
 function setReportSubDefinitionBeingEdited (state, subDefinition, subDefinitionIndex) {
   // Nested object, but thats how it comes from service
   return { ...state,
@@ -112,6 +123,9 @@ function configurationReducer (state = defaultState, action) {
 
     case Actions.CONFIGURATION_SET_EDITING_REPORT_PRIMARY_DEFINITION:
       return setPrimaryReportDefinitionBeingEdited(state, action.payload)
+
+    case Actions.CONFIGURATION_SET_EDITING_REPORT_TYPE:
+      return setReportType(state, action.payload)
 
     case Actions.CONFIGURATION_SET_EDITING_REPORT_SUBDEFINITION:
       return setReportSubDefinitionBeingEdited(state, action.payload.subDefinition, action.payload.subDefinitionIndex)

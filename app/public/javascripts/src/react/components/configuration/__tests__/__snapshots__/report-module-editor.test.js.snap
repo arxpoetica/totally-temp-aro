@@ -2,7 +2,7 @@
 
 exports[`Click primary and subdefinitions to edit 1`] = `
 <div
-  className="container"
+  className="container report-module-editor"
   style={
     Object {
       "height": "100%",
@@ -20,6 +20,38 @@ exports[`Click primary and subdefinitions to edit 1`] = `
     <div
       className="col-md-3"
     >
+      <label>
+        Report Type
+      </label>
+      <select
+        className="form-control mb-3"
+        onChange={[Function]}
+        value="GENERAL"
+      >
+        <option
+          value="GENERAL"
+        >
+          General
+        </option>
+        <option
+          value="COVERAGE"
+        >
+          Coverage
+        </option>
+        <option
+          value="FORM477"
+        >
+          Form477
+        </option>
+        <option
+          value="PARAM_QUERY"
+        >
+          Param Query
+        </option>
+      </select>
+      <label>
+        Report Definitions
+      </label>
       <ul
         className="nav nav-pills"
       >
@@ -308,7 +340,7 @@ exports[`Click primary and subdefinitions to edit 1`] = `
 
 exports[`Click primary and subdefinitions to edit 2`] = `
 <div
-  className="container"
+  className="container report-module-editor"
   style={
     Object {
       "height": "100%",
@@ -326,6 +358,38 @@ exports[`Click primary and subdefinitions to edit 2`] = `
     <div
       className="col-md-3"
     >
+      <label>
+        Report Type
+      </label>
+      <select
+        className="form-control mb-3"
+        onChange={[Function]}
+        value="GENERAL"
+      >
+        <option
+          value="GENERAL"
+        >
+          General
+        </option>
+        <option
+          value="COVERAGE"
+        >
+          Coverage
+        </option>
+        <option
+          value="FORM477"
+        >
+          Form477
+        </option>
+        <option
+          value="PARAM_QUERY"
+        >
+          Param Query
+        </option>
+      </select>
+      <label>
+        Report Definitions
+      </label>
       <ul
         className="nav nav-pills"
       >
@@ -457,7 +521,7 @@ AND NOT(is_deleted)",
 
 exports[`Click primary and subdefinitions to edit 3`] = `
 <div
-  className="container"
+  className="container report-module-editor"
   style={
     Object {
       "height": "100%",
@@ -475,6 +539,38 @@ exports[`Click primary and subdefinitions to edit 3`] = `
     <div
       className="col-md-3"
     >
+      <label>
+        Report Type
+      </label>
+      <select
+        className="form-control mb-3"
+        onChange={[Function]}
+        value="GENERAL"
+      >
+        <option
+          value="GENERAL"
+        >
+          General
+        </option>
+        <option
+          value="COVERAGE"
+        >
+          Coverage
+        </option>
+        <option
+          value="FORM477"
+        >
+          Form477
+        </option>
+        <option
+          value="PARAM_QUERY"
+        >
+          Param Query
+        </option>
+      </select>
+      <label>
+        Report Definitions
+      </label>
       <ul
         className="nav nav-pills"
       >
@@ -598,7 +694,7 @@ AND NOT(e.is_deleted)
 
 exports[`Click primary and subdefinitions to edit 4`] = `
 <div
-  className="container"
+  className="container report-module-editor"
   style={
     Object {
       "height": "100%",
@@ -616,6 +712,38 @@ exports[`Click primary and subdefinitions to edit 4`] = `
     <div
       className="col-md-3"
     >
+      <label>
+        Report Type
+      </label>
+      <select
+        className="form-control mb-3"
+        onChange={[Function]}
+        value="GENERAL"
+      >
+        <option
+          value="GENERAL"
+        >
+          General
+        </option>
+        <option
+          value="COVERAGE"
+        >
+          Coverage
+        </option>
+        <option
+          value="FORM477"
+        >
+          Form477
+        </option>
+        <option
+          value="PARAM_QUERY"
+        >
+          Param Query
+        </option>
+      </select>
+      <label>
+        Report Definitions
+      </label>
       <ul
         className="nav nav-pills"
       >
@@ -904,7 +1032,7 @@ exports[`Click primary and subdefinitions to edit 4`] = `
 
 exports[`With only report id 1`] = `
 <div
-  className="container"
+  className="container report-module-editor"
   style={
     Object {
       "height": "100%",
@@ -922,6 +1050,37 @@ exports[`With only report id 1`] = `
     <div
       className="col-md-3"
     >
+      <label>
+        Report Type
+      </label>
+      <select
+        className="form-control mb-3"
+        onChange={[Function]}
+      >
+        <option
+          value="GENERAL"
+        >
+          General
+        </option>
+        <option
+          value="COVERAGE"
+        >
+          Coverage
+        </option>
+        <option
+          value="FORM477"
+        >
+          Form477
+        </option>
+        <option
+          value="PARAM_QUERY"
+        >
+          Param Query
+        </option>
+      </select>
+      <label>
+        Report Definitions
+      </label>
       <ul
         className="nav nav-pills"
       >
@@ -977,7 +1136,7 @@ exports[`With only report id 1`] = `
 
 exports[`With populated report 1`] = `
 <div
-  className="container"
+  className="container report-module-editor"
   style={
     Object {
       "height": "100%",
@@ -995,6 +1154,38 @@ exports[`With populated report 1`] = `
     <div
       className="col-md-3"
     >
+      <label>
+        Report Type
+      </label>
+      <select
+        className="form-control mb-3"
+        onChange={[Function]}
+        value="GENERAL"
+      >
+        <option
+          value="GENERAL"
+        >
+          General
+        </option>
+        <option
+          value="COVERAGE"
+        >
+          Coverage
+        </option>
+        <option
+          value="FORM477"
+        >
+          Form477
+        </option>
+        <option
+          value="PARAM_QUERY"
+        >
+          Param Query
+        </option>
+      </select>
+      <label>
+        Report Definitions
+      </label>
       <ul
         className="nav nav-pills"
       >
@@ -1283,7 +1474,7 @@ exports[`With populated report 1`] = `
 
 exports[`With validation error message 1`] = `
 <div
-  className="container"
+  className="container report-module-editor"
   style={
     Object {
       "height": "100%",
@@ -1301,6 +1492,38 @@ exports[`With validation error message 1`] = `
     <div
       className="col-md-3"
     >
+      <label>
+        Report Type
+      </label>
+      <select
+        className="form-control mb-3"
+        onChange={[Function]}
+        value="GENERAL"
+      >
+        <option
+          value="GENERAL"
+        >
+          General
+        </option>
+        <option
+          value="COVERAGE"
+        >
+          Coverage
+        </option>
+        <option
+          value="FORM477"
+        >
+          Form477
+        </option>
+        <option
+          value="PARAM_QUERY"
+        >
+          Param Query
+        </option>
+      </select>
+      <label>
+        Report Definitions
+      </label>
       <ul
         className="nav nav-pills"
       >
@@ -1613,7 +1836,7 @@ exports[`With validation error message 1`] = `
 
 exports[`With validation success message 1`] = `
 <div
-  className="container"
+  className="container report-module-editor"
   style={
     Object {
       "height": "100%",
@@ -1631,6 +1854,38 @@ exports[`With validation success message 1`] = `
     <div
       className="col-md-3"
     >
+      <label>
+        Report Type
+      </label>
+      <select
+        className="form-control mb-3"
+        onChange={[Function]}
+        value="GENERAL"
+      >
+        <option
+          value="GENERAL"
+        >
+          General
+        </option>
+        <option
+          value="COVERAGE"
+        >
+          Coverage
+        </option>
+        <option
+          value="FORM477"
+        >
+          Form477
+        </option>
+        <option
+          value="PARAM_QUERY"
+        >
+          Param Query
+        </option>
+      </select>
+      <label>
+        Report Definitions
+      </label>
       <ul
         className="nav nav-pills"
       >

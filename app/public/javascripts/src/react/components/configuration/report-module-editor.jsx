@@ -5,6 +5,7 @@ import { formValueSelector } from 'redux-form'
 import ConfigurationActions from './configuration-actions'
 import ReportDefinitionEditor from './report-definition-editor.jsx'
 import Constants from '../../common/constants'
+import './report-module-editor.css'
 const selector = formValueSelector(Constants.REPORT_DEFINITION_EDITOR_FORM)
 
 export class ReportModuleEditor extends Component {
@@ -33,9 +34,18 @@ export class ReportModuleEditor extends Component {
   }
 
   render () {
-    return <div className='container' style={{ height: '100%' }}>
+    return <div className='container report-module-editor' style={{ height: '100%' }}>
       <div className='row' style={{ height: '100%' }}>
         <div className='col-md-3'>
+          <label>Report Type</label>
+          <select className='form-control mb-3' value={this.props.reportBeingEdited.reportType}
+            onChange={event => this.props.saveEditingReportType(event.target.value)}>
+            <option value='GENERAL'>General</option>
+            <option value='COVERAGE'>Coverage</option>
+            <option value='FORM477'>Form477</option>
+            <option value='PARAM_QUERY'>Param Query</option>
+          </select>
+          <label>Report Definitions</label>
           <ul className='nav nav-pills'>
             <li className='nav-item' key='-1'>
               <a id='lnkEditPrimaryDefinition'
@@ -151,6 +161,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   populateEditingReportDefinition: reportId => dispatch(ConfigurationActions.populateEditingReportDefinition(reportId)),
   clearEditingReportDefinition: () => dispatch(ConfigurationActions.clearEditingReportDefinition()),
   saveEditingReportPrimaryDefinition: reportDefinition => dispatch(ConfigurationActions.saveEditingReportPrimaryDefinition(reportDefinition)),
+  saveEditingReportType: reportType => dispatch(ConfigurationActions.saveEditingReportType(reportType)),
   saveEditingReportSubDefinition: (subDefinition, subDefinitionIndex) => dispatch(ConfigurationActions.saveEditingReportSubDefinition(subDefinition, subDefinitionIndex)),
   saveCurrentReportToServer: () => dispatch(ConfigurationActions.saveCurrentReportToServer()),
   validateReport: planId => dispatch(ConfigurationActions.validateReport(planId))
