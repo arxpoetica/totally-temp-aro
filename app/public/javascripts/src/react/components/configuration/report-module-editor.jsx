@@ -46,7 +46,7 @@ export class ReportModuleEditor extends Component {
             <option value='PARAM_QUERY'>Param Query</option>
           </select>
           <label>Report Definitions</label>
-          <ul className='nav nav-pills mb-2'>
+          <ul className='nav nav-pills mb-2 definitions-list'>
             <li className='nav-item' key='-1'>
               <a id='lnkEditPrimaryDefinition'
                 className={`nav-link ${this.state.isEditingPrimary ? 'active' : ''}`}
@@ -72,7 +72,8 @@ export class ReportModuleEditor extends Component {
                 : null
             }
           </ul>
-          <button className='btn btn-light btn-sm float-right' onClick={event => this.props.addEditingReportSubDefinition()}>
+          <button className='btn btn-light btn-sm float-right'
+            onClick={event => this.props.addEditingReportSubDefinition()}>
             <i className='fa fa-plus' /> Add Subdefinition
           </button>
         </div>
