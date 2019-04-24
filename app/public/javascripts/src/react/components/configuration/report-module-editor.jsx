@@ -91,10 +91,11 @@ export class ReportModuleEditor extends Component {
               this.saveCurrentDefinition()
               this.props.validateReport(this.props.planId)
             }}>Check Syntax</button>
-            <button id='btnSaveReportToServer' className='btn btn-primary' onClick={event => {
-              this.saveCurrentDefinition()
-              this.props.saveCurrentReportToServer()
-            }}>Save Definition</button>
+            <button id='btnSaveReportToServer' className='btn btn-primary' disabled={this.props.formHasErrors}
+              onClick={event => {
+                this.saveCurrentDefinition()
+                this.props.saveCurrentReportToServer()
+              }}>Save Definition</button>
           </div>
         </div>
       </div>
@@ -131,6 +132,10 @@ export class ReportModuleEditor extends Component {
   }
 
   startEditingPrimaryDefinition () {
+    if (this.props.formHasErrors) {
+      // Form has errors, cannot change definitions
+      return
+    }
     this.saveCurrentDefinition()
     this.setState({
       isEditingPrimary: true,
@@ -139,6 +144,10 @@ export class ReportModuleEditor extends Component {
   }
 
   startEditingSubDefinition (index) {
+    if (this.props.formHasErrors) {
+      // Form has errors, cannot change definitions
+      return
+    }
     this.saveCurrentDefinition()
     this.setState({
       isEditingPrimary: false,
@@ -162,7 +171,8 @@ const mapStateToProps = (state) => ({
   planId: state.plan.activePlan.id,
   reportValidation: state.configuration.reports.validation,
   reportBeingEdited: state.configuration.reports.reportBeingEdited,
-  reportDefinitionEditorValues: selector(state, 'name', 'displayName', 'queryType', 'query')
+  reportDefinitionEditorValues: selector(state, 'name', 'displayName', 'queryType', 'query'),
+  formHasErrors: Boolean(state.form[Constants.REPORT_DEFINITION_EDITOR_FORM] && state.form[Constants.REPORT_DEFINITION_EDITOR_FORM].syncErrors)
 })
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
