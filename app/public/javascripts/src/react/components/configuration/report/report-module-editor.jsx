@@ -12,6 +12,7 @@ export class ReportModuleEditor extends Component {
   constructor (props) {
     super(props)
     this.props.populateEditingReportDefinition(this.props.reportBeingEdited.id)
+    this.props.populateReportTypes()
     this.state = {
       isEditingPrimary: true,
       subDefinitionEditingIndex: -1,
@@ -40,10 +41,7 @@ export class ReportModuleEditor extends Component {
           <label>Report Type</label>
           <select className='form-control mb-3' value={this.props.reportBeingEdited.reportType}
             onChange={event => this.props.saveEditingReportType(event.target.value)}>
-            <option value='GENERAL'>General</option>
-            <option value='COVERAGE'>Coverage</option>
-            <option value='FORM477'>Form477</option>
-            <option value='PARAM_QUERY'>Param Query</option>
+            {this.props.reportTypes.map(item => <option value={item.name} key={item.name}>{item.description}</option>)}
           </select>
           <label>Report Definitions</label>
           <ul className='nav nav-pills mb-2 definitions-list'>
@@ -157,6 +155,7 @@ export class ReportModuleEditor extends Component {
 
   componentWillUnmount () {
     this.props.clearEditingReportDefinition()
+    this.props.clearReportTypes()
   }
 }
 
@@ -164,7 +163,8 @@ ReportModuleEditor.propTypes = {
   planId: PropTypes.number,
   reportValidation: PropTypes.object,
   reportBeingEdited: PropTypes.object,
-  reportDefinitionEditorValues: PropTypes.object
+  reportDefinitionEditorValues: PropTypes.object,
+  reportTypes: PropTypes.array
 }
 
 const mapStateToProps = (state) => ({
@@ -172,12 +172,15 @@ const mapStateToProps = (state) => ({
   reportValidation: state.configuration.report.validation,
   reportBeingEdited: state.configuration.report.reportBeingEdited,
   reportDefinitionEditorValues: selector(state, 'name', 'displayName', 'queryType', 'query'),
+  reportTypes: state.configuration.report.reportTypes,
   formHasErrors: Boolean(state.form[Constants.REPORT_DEFINITION_EDITOR_FORM] && state.form[Constants.REPORT_DEFINITION_EDITOR_FORM].syncErrors)
 })
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
   populateEditingReportDefinition: reportId => dispatch(ReportActions.populateEditingReportDefinition(reportId)),
   clearEditingReportDefinition: () => dispatch(ReportActions.clearEditingReportDefinition()),
+  populateReportTypes: () => dispatch(ReportActions.getReportTypes()),
+  clearReportTypes: () => dispatch(ReportActions.clearReportTypes()),
   saveEditingReportPrimaryDefinition: reportDefinition => {
     dispatch(ReportActions.saveEditingReportPrimaryDefinition(reportDefinition))
     dispatch(reset(Constants.REPORT_DEFINITION_EDITOR_FORM))

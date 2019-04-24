@@ -2,6 +2,7 @@ import Actions from '../../../common/actions'
 
 const defaultState = {
   metaData: [],
+  reportTypes: [],
   reportBeingEdited: null,
   validation: null
 }
@@ -16,6 +17,12 @@ const defaultSubDefinition = {
 function setReportsMetaData (state, reportsMetaData) {
   return { ...state,
     metaData: reportsMetaData
+  }
+}
+
+function setReportTypes (state, reportTypes) {
+  return { ...state,
+    reportTypes: reportTypes
   }
 }
 
@@ -51,7 +58,7 @@ function setPrimaryReportDefinitionBeingEdited (state, primaryReportDefinition) 
   }
 }
 
-function setReportType (state, reportType) {
+function setEditingReportType (state, reportType) {
   // Nested object, but thats how it comes from service
   return { ...state,
     reportBeingEdited: { ...state.reportBeingEdited,
@@ -108,6 +115,9 @@ function configurationReducer (state = defaultState, action) {
     case Actions.CONFIGURATION_SET_REPORTS_METADATA:
       return setReportsMetaData(state, action.payload)
 
+    case Actions.CONFIGURATION_SET_REPORT_TYPES:
+      return setReportTypes(state, action.payload)
+
     case Actions.CONFIGURATION_SET_EDITING_REPORT_ID:
       return setReportIdBeingEdited(state, action.payload)
 
@@ -118,7 +128,7 @@ function configurationReducer (state = defaultState, action) {
       return setPrimaryReportDefinitionBeingEdited(state, action.payload)
 
     case Actions.CONFIGURATION_SET_EDITING_REPORT_TYPE:
-      return setReportType(state, action.payload)
+      return setEditingReportType(state, action.payload)
 
     case Actions.CONFIGURATION_SET_EDITING_REPORT_SUBDEFINITION:
       return setReportSubDefinitionBeingEdited(state, action.payload.subDefinition, action.payload.subDefinitionIndex)

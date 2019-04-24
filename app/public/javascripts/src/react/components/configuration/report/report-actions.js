@@ -13,6 +13,24 @@ function getReportsMetadata () {
   }
 }
 
+function getReportTypes () {
+  return dispatch => {
+    AroHttp.get('/service/odata/ReportTypeEntity')
+      .then(result => dispatch({
+        type: Actions.CONFIGURATION_SET_REPORT_TYPES,
+        payload: result.data
+      }))
+      .catch(err => console.error(err))
+  }
+}
+
+function clearReportTypes () {
+  return {
+    type: Actions.CONFIGURATION_SET_REPORT_TYPES,
+    payload: []
+  }
+}
+
 function startEditingReport (reportId) {
   return {
     type: Actions.CONFIGURATION_SET_EDITING_REPORT_ID,
@@ -140,6 +158,8 @@ function validateReport (planId) {
 
 export default {
   getReportsMetadata: getReportsMetadata,
+  getReportTypes: getReportTypes,
+  clearReportTypes: clearReportTypes,
   startEditingReport: startEditingReport,
   populateEditingReportDefinition: populateEditingReportDefinition,
   clearEditingReportDefinition: clearEditingReportDefinition,
