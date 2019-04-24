@@ -29,21 +29,25 @@ exports[`Click primary and subdefinitions to edit 1`] = `
         value="GENERAL"
       >
         <option
+          key="GENERAL"
           value="GENERAL"
         >
           General
         </option>
         <option
+          key="COVERAGE"
           value="COVERAGE"
         >
           Coverage
         </option>
         <option
+          key="FORM477"
           value="FORM477"
         >
           Form477
         </option>
         <option
+          key="PARAM_QUERY"
           value="PARAM_QUERY"
         >
           Param Query
@@ -390,21 +394,25 @@ exports[`Click primary and subdefinitions to edit 2`] = `
         value="GENERAL"
       >
         <option
+          key="GENERAL"
           value="GENERAL"
         >
           General
         </option>
         <option
+          key="COVERAGE"
           value="COVERAGE"
         >
           Coverage
         </option>
         <option
+          key="FORM477"
           value="FORM477"
         >
           Form477
         </option>
         <option
+          key="PARAM_QUERY"
           value="PARAM_QUERY"
         >
           Param Query
@@ -594,21 +602,25 @@ exports[`Click primary and subdefinitions to edit 3`] = `
         value="GENERAL"
       >
         <option
+          key="GENERAL"
           value="GENERAL"
         >
           General
         </option>
         <option
+          key="COVERAGE"
           value="COVERAGE"
         >
           Coverage
         </option>
         <option
+          key="FORM477"
           value="FORM477"
         >
           Form477
         </option>
         <option
+          key="PARAM_QUERY"
           value="PARAM_QUERY"
         >
           Param Query
@@ -790,21 +802,25 @@ exports[`Click primary and subdefinitions to edit 4`] = `
         value="GENERAL"
       >
         <option
+          key="GENERAL"
           value="GENERAL"
         >
           General
         </option>
         <option
+          key="COVERAGE"
           value="COVERAGE"
         >
           Coverage
         </option>
         <option
+          key="FORM477"
           value="FORM477"
         >
           Form477
         </option>
         <option
+          key="PARAM_QUERY"
           value="PARAM_QUERY"
         >
           Param Query
@@ -1150,21 +1166,25 @@ exports[`With only report id 1`] = `
         onChange={[Function]}
       >
         <option
+          key="GENERAL"
           value="GENERAL"
         >
           General
         </option>
         <option
+          key="COVERAGE"
           value="COVERAGE"
         >
           Coverage
         </option>
         <option
+          key="FORM477"
           value="FORM477"
         >
           Form477
         </option>
         <option
+          key="PARAM_QUERY"
           value="PARAM_QUERY"
         >
           Param Query
@@ -1264,21 +1284,25 @@ exports[`With populated report 1`] = `
         value="GENERAL"
       >
         <option
+          key="GENERAL"
           value="GENERAL"
         >
           General
         </option>
         <option
+          key="COVERAGE"
           value="COVERAGE"
         >
           Coverage
         </option>
         <option
+          key="FORM477"
           value="FORM477"
         >
           Form477
         </option>
         <option
+          key="PARAM_QUERY"
           value="PARAM_QUERY"
         >
           Param Query
@@ -1625,21 +1649,25 @@ exports[`With validation error message 1`] = `
         value="GENERAL"
       >
         <option
+          key="GENERAL"
           value="GENERAL"
         >
           General
         </option>
         <option
+          key="COVERAGE"
           value="COVERAGE"
         >
           Coverage
         </option>
         <option
+          key="FORM477"
           value="FORM477"
         >
           Form477
         </option>
         <option
+          key="PARAM_QUERY"
           value="PARAM_QUERY"
         >
           Param Query
@@ -2010,21 +2038,25 @@ exports[`With validation success message 1`] = `
         value="GENERAL"
       >
         <option
+          key="GENERAL"
           value="GENERAL"
         >
           General
         </option>
         <option
+          key="COVERAGE"
           value="COVERAGE"
         >
           Coverage
         </option>
         <option
+          key="FORM477"
           value="FORM477"
         >
           Form477
         </option>
         <option
+          key="PARAM_QUERY"
           value="PARAM_QUERY"
         >
           Param Query

@@ -1,13 +1,10 @@
-import Actions from '../../common/actions'
+import Actions from '../../../common/actions'
 
 const defaultState = {
-  items: [],
-  assetKeys: [],
-  reports: {
-    metaData: [],
-    reportBeingEdited: null,
-    validation: null
-  }
+  metaData: [],
+  reportTypes: [],
+  reportBeingEdited: null,
+  validation: null
 }
 
 const defaultSubDefinition = {
@@ -17,73 +14,55 @@ const defaultSubDefinition = {
   queryType: 'SQL_REPORT'
 }
 
-function setConfiguration (state, configuration) {
-  return { ...state,
-    items: configuration
-  }
-}
-
-function setAssetKeys (state, assetKeys) {
-  return { ...state,
-    assetKeys: assetKeys
-  }
-}
-
 function setReportsMetaData (state, reportsMetaData) {
   return { ...state,
-    reports: { ...state.reports,
-      metaData: reportsMetaData
-    }
+    metaData: reportsMetaData
+  }
+}
+
+function setReportTypes (state, reportTypes) {
+  return { ...state,
+    reportTypes: reportTypes
   }
 }
 
 function setReportIdBeingEdited (state, reportIdToEdit) {
   return { ...state,
-    reports: { ...state.reports,
-      reportBeingEdited: {
-        id: reportIdToEdit
-      }
+    reportBeingEdited: {
+      id: reportIdToEdit
     }
   }
 }
 
 function clearReportBeingEdited (state) {
   return { ...state,
-    reports: { ...state.reports,
-      reportBeingEdited: null,
-      validation: null
-    }
+    reportBeingEdited: null,
+    validation: null
   }
 }
 
 function setReportDefinitionBeingEdited (state, reportDefinition) {
   return { ...state,
-    reports: { ...state.reports,
-      reportBeingEdited: reportDefinition
-    }
+    reportBeingEdited: reportDefinition
   }
 }
 
 function setPrimaryReportDefinitionBeingEdited (state, primaryReportDefinition) {
   // Nested object, but thats how it comes from service
   return { ...state,
-    reports: { ...state.reports,
-      reportBeingEdited: { ...state.reports.reportBeingEdited,
-        moduleDefinition: { ...state.reports.reportBeingEdited.moduleDefinition,
-          definition: primaryReportDefinition
-        }
+    reportBeingEdited: { ...state.reportBeingEdited,
+      moduleDefinition: { ...state.reportBeingEdited.moduleDefinition,
+        definition: primaryReportDefinition
       }
     }
   }
 }
 
-function setReportType (state, reportType) {
+function setEditingReportType (state, reportType) {
   // Nested object, but thats how it comes from service
   return { ...state,
-    reports: { ...state.reports,
-      reportBeingEdited: { ...state.reports.reportBeingEdited,
-        reportType: reportType
-      }
+    reportBeingEdited: { ...state.reportBeingEdited,
+      reportType: reportType
     }
   }
 }
@@ -91,41 +70,35 @@ function setReportType (state, reportType) {
 function setReportSubDefinitionBeingEdited (state, subDefinition, subDefinitionIndex) {
   // Nested object, but thats how it comes from service
   return { ...state,
-    reports: { ...state.reports,
-      reportBeingEdited: { ...state.reports.reportBeingEdited,
-        moduleDefinition: { ...state.reports.reportBeingEdited.moduleDefinition,
-          subDefinitions: state.reports.reportBeingEdited.moduleDefinition.subDefinitions.map((item, index) => {
-            return (index === subDefinitionIndex) ? subDefinition : item
-          })
-        }
+    reportBeingEdited: { ...state.reportBeingEdited,
+      moduleDefinition: { ...state.reportBeingEdited.moduleDefinition,
+        subDefinitions: state.reportBeingEdited.moduleDefinition.subDefinitions.map((item, index) => {
+          return (index === subDefinitionIndex) ? subDefinition : item
+        })
       }
     }
   }
 }
 
 function addReportSubDefinition (state) {
-  var newSubDefinitions = state.reports.reportBeingEdited.moduleDefinition.subDefinitions.map(item => item)
+  var newSubDefinitions = state.reportBeingEdited.moduleDefinition.subDefinitions.map(item => item)
   newSubDefinitions.push({ ...defaultSubDefinition })
   return { ...state,
-    reports: { ...state.reports,
-      reportBeingEdited: { ...state.reports.reportBeingEdited,
-        moduleDefinition: { ...state.reports.reportBeingEdited.moduleDefinition,
-          subDefinitions: newSubDefinitions
-        }
+    reportBeingEdited: { ...state.reportBeingEdited,
+      moduleDefinition: { ...state.reportBeingEdited.moduleDefinition,
+        subDefinitions: newSubDefinitions
       }
     }
   }
 }
 
 function removeReportSubDefinition (state, subDefinitionIndex) {
-  var newSubDefinitions = state.reports.reportBeingEdited.moduleDefinition.subDefinitions.map(item => item)
+  var newSubDefinitions = state.reportBeingEdited.moduleDefinition.subDefinitions.map(item => item)
   newSubDefinitions.splice(subDefinitionIndex, 1)
   return { ...state,
-    reports: { ...state.reports,
-      reportBeingEdited: { ...state.reports.reportBeingEdited,
-        moduleDefinition: { ...state.reports.reportBeingEdited.moduleDefinition,
-          subDefinitions: newSubDefinitions
-        }
+    reportBeingEdited: { ...state.reportBeingEdited,
+      moduleDefinition: { ...state.reportBeingEdited.moduleDefinition,
+        subDefinitions: newSubDefinitions
       }
     }
   }
@@ -133,22 +106,17 @@ function removeReportSubDefinition (state, subDefinitionIndex) {
 
 function setReportValidation (state, validation) {
   return { ...state,
-    reports: { ...state.reports,
-      validation: validation
-    }
+    validation: validation
   }
 }
 
 function configurationReducer (state = defaultState, action) {
   switch (action.type) {
-    case Actions.CONFIGURATION_SET_CONFIGURATION:
-      return setConfiguration(state, action.payload)
-
-    case Actions.CONFIGURATION_SET_ASSET_KEYS:
-      return setAssetKeys(state, action.payload)
-
     case Actions.CONFIGURATION_SET_REPORTS_METADATA:
       return setReportsMetaData(state, action.payload)
+
+    case Actions.CONFIGURATION_SET_REPORT_TYPES:
+      return setReportTypes(state, action.payload)
 
     case Actions.CONFIGURATION_SET_EDITING_REPORT_ID:
       return setReportIdBeingEdited(state, action.payload)
@@ -160,7 +128,7 @@ function configurationReducer (state = defaultState, action) {
       return setPrimaryReportDefinitionBeingEdited(state, action.payload)
 
     case Actions.CONFIGURATION_SET_EDITING_REPORT_TYPE:
-      return setReportType(state, action.payload)
+      return setEditingReportType(state, action.payload)
 
     case Actions.CONFIGURATION_SET_EDITING_REPORT_SUBDEFINITION:
       return setReportSubDefinitionBeingEdited(state, action.payload.subDefinition, action.payload.subDefinitionIndex)

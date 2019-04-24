@@ -4,7 +4,7 @@ import format from './string-template'
 import StateViewMode from './state-view-mode'
 import Constants from '../components/common/constants'
 import Actions from '../react/common/actions'
-import ConfigurationActions from '../react/components/configuration/configuration-actions'
+import UiActions from '../react/components/configuration/ui/ui-actions'
 import UserActions from '../react/components/user/user-actions'
 import PlanActions from '../react/components/plan/plan-actions'
 import MapLayerActions from '../react/components/map-layers/map-layer-actions'
@@ -1860,7 +1860,7 @@ class State {
 
   mapDispatchToTarget (dispatch) {
     return {
-      loadConfigurationFromServer: () => dispatch(ConfigurationActions.loadConfigurationFromServer()),
+      loadConfigurationFromServer: () => dispatch(UiActions.loadConfigurationFromServer()),
       setLoggedInUserRedux: loggedInUser => dispatch(UserActions.setLoggedInUser(loggedInUser)),
       setPlanRedux: plan => dispatch(PlanActions.setPlan(plan)),
       setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId)),

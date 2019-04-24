@@ -1,12 +1,12 @@
 import { react2angular } from 'react2angular'
-import { ToastContainer } from "react-toastify";
+import { ToastContainer } from 'react-toastify'
 
 import CoverageInitializer from '../react/components/coverage/coverage-initializer.jsx'
 import CoverageButton from '../react/components/coverage/coverage-button.jsx'
 import PlanTargetList from '../react/components/selection/plan-target-list.jsx'
 import Broadcast from '../react/components/global-settings/broadcast.jsx'
-import ConfigurationEditor from '../react/components/configuration/configuration-editor.jsx'
-import ReportModuleList from '../react/components/configuration/report-module-list.jsx'
+import ConfigurationEditor from '../react/components/configuration/ui/configuration-editor.jsx'
+import ReportModuleList from '../react/components/configuration/report/report-module-list.jsx'
 
 import boundaryDetail from './sidebar/view/boundary-detail'
 import equipmentDetail from './sidebar/view/equipment-detail'

@@ -32,6 +32,12 @@ const sampleReport = {
     ]
   }
 }
+const reportTypes = [
+  { id: 1, name: 'GENERAL', description: 'General' },
+  { id: 2, name: 'COVERAGE', description: 'Coverage' },
+  { id: 3, name: 'FORM477', description: 'Form477' },
+  { id: 4, name: 'PARAM_QUERY', description: 'Param Query' }
+]
 const dummyFormValues = { name: 'Dummy Name', displayName: 'Dummy display name', queryType: 'SQL_REPORT', query: 'Dummy query' }
 const successValidation = { validated: true, sampleReport: '<kml></kml>', errorMessage: '' }
 const errorValidation = { validated: false, sampleReport: '', errorMessage: 'Syntax error at SELECTA' }
@@ -40,13 +46,17 @@ const PLAN_ID = 1
 // -----------------------------------------------------------------------------
 test('With only report id', () => {
   const mockPopulateEditingReportDefinition = jest.fn()
+  const mockPopulateReportTypes = jest.fn()
   const component = shallow(
     <ReportModuleEditor planId={PLAN_ID}
       reportBeingEdited={{ id: sampleReport.id }}
-      populateEditingReportDefinition={mockPopulateEditingReportDefinition} />
+      reportTypes={reportTypes}
+      populateEditingReportDefinition={mockPopulateEditingReportDefinition}
+      populateReportTypes={mockPopulateReportTypes} />
   )
   expect(mockPopulateEditingReportDefinition.mock.calls.length).toBe(1)
   expect(mockPopulateEditingReportDefinition.mock.calls[0][0]).toBe(sampleReport.id)
+  expect(mockPopulateReportTypes.mock.calls.length).toBe(1)
   expect(component).toMatchSnapshot()
 })
 
@@ -55,7 +65,9 @@ test('With populated report', () => {
   const component = shallow(
     <ReportModuleEditor planId={PLAN_ID}
       reportBeingEdited={sampleReport}
-      populateEditingReportDefinition={() => {}} />
+      reportTypes={reportTypes}
+      populateEditingReportDefinition={() => {}}
+      populateReportTypes={() => {}} />
   )
   expect(component).toMatchSnapshot()
 })
@@ -65,7 +77,9 @@ test('Click primary and subdefinitions to edit', () => {
   const component = shallow(
     <ReportModuleEditor planId={PLAN_ID}
       reportBeingEdited={sampleReport}
-      populateEditingReportDefinition={() => {}} />
+      reportTypes={reportTypes}
+      populateEditingReportDefinition={() => {}}
+      populateReportTypes={() => {}} />
   )
   expect(component).toMatchSnapshot()
 
@@ -85,8 +99,10 @@ test('With validation success message', () => {
   const component = shallow(
     <ReportModuleEditor planId={PLAN_ID}
       reportBeingEdited={sampleReport}
+      reportTypes={reportTypes}
       reportValidation={successValidation}
-      populateEditingReportDefinition={() => {}} />
+      populateEditingReportDefinition={() => {}}
+      populateReportTypes={() => {}} />
   )
   expect(component).toMatchSnapshot()
 })
@@ -96,8 +112,10 @@ test('With validation error message', () => {
   const component = shallow(
     <ReportModuleEditor planId={PLAN_ID}
       reportBeingEdited={sampleReport}
+      reportTypes={reportTypes}
       reportValidation={errorValidation}
-      populateEditingReportDefinition={() => {}} />
+      populateEditingReportDefinition={() => {}}
+      populateReportTypes={() => {}} />
   )
   expect(component).toMatchSnapshot()
 })
@@ -105,13 +123,18 @@ test('With validation error message', () => {
 // -----------------------------------------------------------------------------
 test('Call when component unmounts', () => {
   const mockClearEditingReportDefinition = jest.fn()
+  const mockClearReportTypes = jest.fn()
   const component = shallow(
     <ReportModuleEditor reportBeingEdited={{ id: sampleReport.id }}
+      reportTypes={reportTypes}
       clearEditingReportDefinition={mockClearEditingReportDefinition}
-      populateEditingReportDefinition={() => {}} />
+      clearReportTypes={mockClearReportTypes}
+      populateEditingReportDefinition={() => {}}
+      populateReportTypes={() => {}} />
   )
   component.unmount()
   expect(mockClearEditingReportDefinition.mock.calls.length).toBe(1)
+  expect(mockClearReportTypes.mock.calls.length).toBe(1)
 })
 
 // -----------------------------------------------------------------------------
@@ -121,10 +144,12 @@ test('Call to save primary definition', () => {
   const component = shallow(
     <ReportModuleEditor reportBeingEdited={sampleReport}
       planId={PLAN_ID}
+      reportTypes={reportTypes}
       reportDefinitionEditorValues={dummyFormValues}
       saveEditingReportPrimaryDefinition={mockSaveEditingReportPrimaryDefinition}
       validateReport={mockValidateReport}
-      populateEditingReportDefinition={() => {}} />
+      populateEditingReportDefinition={() => {}}
+      populateReportTypes={() => {}} />
   )
   // Click 'save definition'
   component.find('#btnSaveCurrentDefinition').simulate('click')
@@ -141,11 +166,13 @@ test('Call to save sub definition', () => {
   const component = shallow(
     <ReportModuleEditor reportBeingEdited={sampleReport}
       planId={PLAN_ID}
+      reportTypes={reportTypes}
       reportDefinitionEditorValues={dummyFormValues}
       saveEditingReportPrimaryDefinition={() => {}}
       saveEditingReportSubDefinition={mockSaveEditingReportSubDefinition}
       validateReport={mockValidateReport}
-      populateEditingReportDefinition={() => {}} />
+      populateEditingReportDefinition={() => {}}
+      populateReportTypes={() => {}} />
   )
   // Click 'save definition'
   component.find('#lnkEditSubDefinition0').simulate('click')
@@ -164,11 +191,13 @@ test('Call to save report to server', () => {
   const component = shallow(
     <ReportModuleEditor reportBeingEdited={sampleReport}
       planId={PLAN_ID}
+      reportTypes={reportTypes}
       reportDefinitionEditorValues={dummyFormValues}
       saveEditingReportPrimaryDefinition={() => {}}
       saveCurrentReportToServer={mockSaveCurrentReportToServer}
       validateReport={mockValidateReport}
-      populateEditingReportDefinition={() => {}} />
+      populateEditingReportDefinition={() => {}}
+      populateReportTypes={() => {}} />
   )
   // Click 'save definition'
   component.find('#btnSaveReportToServer').simulate('click')
