@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Field, reduxForm } from 'redux-form'
-import Constants from '../../common/constants'
+import Constants from '../../../common/constants'
 import './report-definition-editor.css'
 
 const renderField = ({

@@ -2,9 +2,9 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { PropTypes } from 'prop-types'
 import { formValueSelector, reset } from 'redux-form'
-import ConfigurationActions from './configuration-actions'
+import ReportActions from './report-actions'
 import ReportDefinitionEditor from './report-definition-editor.jsx'
-import Constants from '../../common/constants'
+import Constants from '../../../common/constants'
 import './report-module-editor.css'
 const selector = formValueSelector(Constants.REPORT_DEFINITION_EDITOR_FORM)
 
@@ -169,28 +169,28 @@ ReportModuleEditor.propTypes = {
 
 const mapStateToProps = (state) => ({
   planId: state.plan.activePlan.id,
-  reportValidation: state.configuration.reports.validation,
-  reportBeingEdited: state.configuration.reports.reportBeingEdited,
+  reportValidation: state.configuration.report.validation,
+  reportBeingEdited: state.configuration.report.reportBeingEdited,
   reportDefinitionEditorValues: selector(state, 'name', 'displayName', 'queryType', 'query'),
   formHasErrors: Boolean(state.form[Constants.REPORT_DEFINITION_EDITOR_FORM] && state.form[Constants.REPORT_DEFINITION_EDITOR_FORM].syncErrors)
 })
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  populateEditingReportDefinition: reportId => dispatch(ConfigurationActions.populateEditingReportDefinition(reportId)),
-  clearEditingReportDefinition: () => dispatch(ConfigurationActions.clearEditingReportDefinition()),
+  populateEditingReportDefinition: reportId => dispatch(ReportActions.populateEditingReportDefinition(reportId)),
+  clearEditingReportDefinition: () => dispatch(ReportActions.clearEditingReportDefinition()),
   saveEditingReportPrimaryDefinition: reportDefinition => {
-    dispatch(ConfigurationActions.saveEditingReportPrimaryDefinition(reportDefinition))
+    dispatch(ReportActions.saveEditingReportPrimaryDefinition(reportDefinition))
     dispatch(reset(Constants.REPORT_DEFINITION_EDITOR_FORM))
   },
-  saveEditingReportType: reportType => dispatch(ConfigurationActions.saveEditingReportType(reportType)),
+  saveEditingReportType: reportType => dispatch(ReportActions.saveEditingReportType(reportType)),
   saveEditingReportSubDefinition: (subDefinition, subDefinitionIndex) => {
-    dispatch(ConfigurationActions.saveEditingReportSubDefinition(subDefinition, subDefinitionIndex))
+    dispatch(ReportActions.saveEditingReportSubDefinition(subDefinition, subDefinitionIndex))
     dispatch(reset(Constants.REPORT_DEFINITION_EDITOR_FORM))
   },
-  addEditingReportSubDefinition: () => dispatch(ConfigurationActions.addEditingReportSubDefinition()),
-  removeEditingReportSubDefinition: subDefinitionIndex => dispatch(ConfigurationActions.removeEditingReportSubDefinition(subDefinitionIndex)),
-  saveCurrentReportToServer: () => dispatch(ConfigurationActions.saveCurrentReportToServer()),
-  validateReport: planId => dispatch(ConfigurationActions.validateReport(planId))
+  addEditingReportSubDefinition: () => dispatch(ReportActions.addEditingReportSubDefinition()),
+  removeEditingReportSubDefinition: subDefinitionIndex => dispatch(ReportActions.removeEditingReportSubDefinition(subDefinitionIndex)),
+  saveCurrentReportToServer: () => dispatch(ReportActions.saveCurrentReportToServer()),
+  validateReport: planId => dispatch(ReportActions.validateReport(planId))
 })
 
 const ReportModuleEditorComponent = connect(mapStateToProps, mapDispatchToProps)(ReportModuleEditor)

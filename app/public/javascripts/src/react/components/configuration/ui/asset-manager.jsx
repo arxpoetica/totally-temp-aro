@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { PropTypes } from 'prop-types'
-import ConfigurationActions from './configuration-actions'
+import ConfigurationActions from './ui-actions'
 
 export class AssetManager extends Component {
   constructor (props) {
@@ -57,7 +57,7 @@ AssetManager.propTypes = {
 }
 
 const mapStateToProps = (state) => ({
-  assetKeys: state.configuration.assetKeys
+  assetKeys: state.configuration.ui.assetKeys
 })
 
 const mapDispatchToProps = (dispatch, ownProps) => ({

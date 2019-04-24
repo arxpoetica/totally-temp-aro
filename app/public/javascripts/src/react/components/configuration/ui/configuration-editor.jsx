@@ -1,8 +1,7 @@
 import React, { Component } from 'react'
-import { PropTypes } from 'prop-types'
-import reduxStore from '../../../redux-store'
-import wrapComponentWithProvider from '../../common/provider-wrapped-component'
-import ConfigurationActions from '../configuration/configuration-actions'
+import reduxStore from '../../../../redux-store'
+import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
+import UiActions from './ui-actions'
 import SettingsEditor from './settings-editor.jsx'
 import AssetManager from './asset-manager.jsx'
 
@@ -64,16 +63,12 @@ export class ConfigurationEditor extends Component {
   }
 }
 
-ConfigurationEditor.propTypes = {
-  configuration: PropTypes.object
-}
+ConfigurationEditor.propTypes = {}
 
-const mapStateToProps = (state) => ({
-  initialConfiguration: state.configuration
-})
+const mapStateToProps = (state) => ({})
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  saveConfigurationToServerAndReload: (type, configuration) => dispatch(ConfigurationActions.saveConfigurationToServerAndReload(type, configuration))
+  saveConfigurationToServerAndReload: (type, configuration) => dispatch(UiActions.saveConfigurationToServerAndReload(type, configuration))
 })
 
 const ConfigurationEditorComponent = wrapComponentWithProvider(reduxStore, ConfigurationEditor, mapStateToProps, mapDispatchToProps)
