@@ -1,6 +1,6 @@
-<modal visible="$ctrl.state.showDataSourceUploadModal.value" backdrop="static" on-show="$ctrl.modalShown()" on-hide="$ctrl.modalHide()" >
+<modal visible="$ctrl.state.showDataSourceUploadModal.value" backdrop="static" on-show="$ctrl.modalShown()" on-hide="$ctrl.modalHide()" modal-size="'modal-lg'">
   <modal-header title="{{!$ctrl.isDataManagementView && 'Upload Data Sources' || 'Data Management'}}"></modal-header>
-  <modal-body id="data_source_upload_modal" style="max-height: 550px; overflow-y: auto;">
+  <modal-body id="data_source_upload_modal">
     <form class="form-horizontal">
       <div class="form-group row">
         <div class="col-sm-8"></div>
@@ -9,21 +9,21 @@
         </div>
       </div>
 
-      <div class="form-group row">
-        <label class="col-sm-4 col-form-label">Data Type</label>
-        <div class="col-sm-8">
-          <select class="form-control" ng-change="$ctrl.loadDataSources()"
-            ng-model="$ctrl.state.uploadDataSource"
-            ng-options="item as item.label for item in $ctrl.state.uploadDataSources">
-          </select>
-        </div>
-      </div>
-
       <!-- File upload View -->
       <!-- For all data sources other than 'conic_tile_system', just upload a file -->
       <div ng-if="$ctrl.state.uploadDataSource.name !== 'tile_system'">
         <div ng-show="!$ctrl.isDataManagementView">
-
+          
+          <div class="form-group row">
+		        <label class="col-sm-4 col-form-label">Data Type</label>
+		        <div class="col-sm-8">
+		          <select class="form-control" ng-change="$ctrl.onSourceChange()"
+		            ng-model="$ctrl.state.uploadDataSource"
+		            ng-options="item as item.label for item in $ctrl.state.uploadDataSources">
+		          </select>
+		        </div>
+		      </div>
+          
           <div class="form-group row">
             <label class="col-sm-4 col-form-label">Data Source Name</label>
             <div class="col-sm-8">
@@ -89,40 +89,28 @@
 
       <!-- Data Management view -->
       <div ng-show="$ctrl.isDataManagementView">
+        
         <div class="form-group row">
-          <label class="col-sm-4 col-form-label">Data Sources</label>
-          <div class="col-sm-8" style="min-height: 100px; width: 63%; max-height: 400px; overflow-y: visible;">
-            <ul class="list-group">
-              <li class="list-group-item clearfix"
-                  style="padding: 0px 0px 0px 15px; line-height: 33px;"
-                  ng-repeat="dataSource in $ctrl.state.dataItems[$ctrl.state.uploadDataSource.name].allLibraryItems">
-                <strong ng-if="$ctrl.dataSourceMeta[dataSource.identifier].isExpanded">{{dataSource.name}}</strong>
-                <span ng-if="!$ctrl.dataSourceMeta[dataSource.identifier].isExpanded">{{dataSource.name}}</span>
-                <div class="btn-group float-right" ng-if="$ctrl.dataSourceMeta[dataSource.identifier].isEditableByUser">
-                  <button class="btn btn-danger" ng-click="$ctrl.deleteDatasource(dataSource)">
-                    <i class="far fa-trash-alt"></i>
-                  </button>
-                  <button ng-if="$ctrl.dataSourceMeta[dataSource.identifier].isExpanded" class="btn btn-light" ng-click="$ctrl.saveAccessSettings(dataSource)">
-                    <i class="fa fa-save"></i>&nbsp; Save
-                  </button>
-                  <button class="btn btn-light"
-                          ng-click="$ctrl.toggleDataSourceExpanded(dataSource)">
-                    <i ng-class="{ 'fa': true, 'fa-user-plus': !dataSource.isExpanded, 'fa-times': dataSource.isExpanded }"></i>
-                  </button>
-                </div>
-                <div style="margin-left: 15px;">
-                  <resource-permissions-editor ng-if="$ctrl.dataSourceMeta[dataSource.identifier].isExpanded && $ctrl.dataSourceMeta[dataSource.identifier].isEditableByUser"
-                                              resource-type="LIBRARY"
-                                              resource-id="{{dataSource.identifier}}"
-                                              system-actors="$ctrl.state.systemActors"
-                                              register-save-access-callback="$ctrl.registerSaveAccessCallback(saveResourceAccess)"
-                                              style="margin-left: 10px;">
-                  </resource-permissions-editor>
-                </div>
-              </li>
-            </ul>
-          </div>
+          <label class="col-sm-4 col-form-label">Data Type</label>
+	        <div class="col-sm-8">
+	          <select class="form-control" ng-change="$ctrl.onTableSourceChange()"
+	            ng-model="$ctrl.tableSource"
+	            ng-options="item as item.label for item in $ctrl.tableSources">
+	          </select>
+	        </div>
         </div>
+        
+        <editor-interface-table display-props="$ctrl.displayProps"
+                          id-prop="$ctrl.idProp"
+                          rows="$ctrl.rows"
+                          detail-view="'resource-manager-detail'"
+                          detail-data="{'resourceType':'LIBRARY'}"
+                          is-edit="false" 
+                          actions="$ctrl.actions"
+                          rows-per-page="10"
+                          root-meta-data="{}">
+        </editor-interface-table>
+        
       </div>
 
     </form>

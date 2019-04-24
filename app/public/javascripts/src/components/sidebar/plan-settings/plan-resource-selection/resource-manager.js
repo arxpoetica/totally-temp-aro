@@ -168,6 +168,7 @@ class ResourceManagerController {
           }
         }
         this.rows = newRows
+        console.log(this.rows)
       })
     // end promise
   }
@@ -229,7 +230,7 @@ class ResourceManagerController {
     return new Promise((resolve, reject) => {
       swal({
         title: 'Delete resource manager?',
-        text: `Are you sure you want to delete ${managerName}`,
+        text: `Are you sure you want to delete "${managerName}"?`,
         type: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#DD6B55',

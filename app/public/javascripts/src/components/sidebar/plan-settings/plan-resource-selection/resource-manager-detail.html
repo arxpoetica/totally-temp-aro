@@ -1,5 +1,5 @@
 <div>
-  <resource-permissions-editor resource-type="RESOURCE_MANAGER"
+  <resource-permissions-editor resource-type="{{$ctrl.resourceType}}"
                                resource-id="{{$ctrl.resourceManager.id}}"
                                system-actors="$ctrl.state.systemActors"
                                register-save-access-callback="$ctrl.registerSaveAccessCallback(saveResourceAccess)"

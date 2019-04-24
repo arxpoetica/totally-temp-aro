@@ -17,15 +17,14 @@ class ResourceManagerDetailController {
     this.isChanges = false
     if (this.saveResourceAccess) {
       this.saveResourceAccess()
-      /*
+      // --- ToDo: check that this section is still needed 
       .then(() => Promise.all([
         this.state.loadPlanDataSelectionFromServer(),
         this.state.loadPlanResourceSelectionFromServer(),
-        this.state.loadNetworkConfigurationFromServer(),
-        this.toggleDataSourceExpanded(dataSource)
+        this.state.loadNetworkConfigurationFromServer()
       ]))
-      .then(() => this.state.uploadDataSource = this.state.uploadDataSources.filter(item => item.name === dataSource.dataType)[0])
-      */
+      //.then(() => this.state.uploadDataSource = this.state.uploadDataSources.filter(item => item.name === dataSource.dataType)[0])
+      // ---
       .catch((err) => {
         this.isChanges = true
         console.error(err)
@@ -44,7 +43,8 @@ ResourceManagerDetailController.$inject = ['state']
 let resourceManagerDetail = {
   templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/resource-manager-detail.html',
   bindings: {
-    resourceManager: '='
+    resourceManager: '=', 
+    resourceType: '<'
   },
   controller: ResourceManagerDetailController
 }

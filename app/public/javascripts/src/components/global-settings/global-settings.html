@@ -78,6 +78,11 @@
         <i class="fa fa-2x fa-upload"></i>
         <br>Data Upload
       </button>
+      
+      <button class="btn btn-light settings-btn" ng-click="$ctrl.openResourceEdit()">
+        <i class="fa fa-2x fa-edit"></i>
+        <br>Resource Editor
+      </button>
 
       <button class="btn btn-light settings-btn" ng-if="$ctrl.state.loggedInUser.isAdministrator" ng-click="$ctrl.currentView = $ctrl.views.BROADCAST">
         <i class="fa fa-2x fa-bullhorn"></i>

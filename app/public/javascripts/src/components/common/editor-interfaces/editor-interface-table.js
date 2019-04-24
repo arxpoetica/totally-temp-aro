@@ -119,6 +119,7 @@ let editorInterfaceTable = {
     idProp: '<', 
     rows: '=',
     detailView: '<', 
+    detailData: '<', 
     onChange: '&',
     isEdit: '<',
     actions: '<',
