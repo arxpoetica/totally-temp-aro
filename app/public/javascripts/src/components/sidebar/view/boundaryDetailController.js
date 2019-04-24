@@ -8,6 +8,7 @@ class BoundaryDetailController {
     this.selectedAnalysisAreaInfo = null
     this.selectedBoundaryTags = []
     this.selectedBoundary = null
+    this.toggleOtherAttributes = false
 
     this.censusCategories = this.state.censusCategories.getValue()
     this.state.censusCategories.subscribe((newValue) => {
