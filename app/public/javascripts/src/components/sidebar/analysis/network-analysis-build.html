@@ -349,6 +349,16 @@
           </select>
         </td>
       </tr>
+      
+      <tr ng-if="$ctrl.toggleAdvanceSettings">
+        <td>Brand Strength</td>
+        <td>
+          <input type="number" step="0.1"
+              ng-model="$ctrl.state.optimizationOptions.competitionConfiguration.providerStrength"
+              class="form-control text-right"
+              min="0" max="5">
+        </td>
+      </tr>
 
       <tr>
         <td>Selection Type</td>

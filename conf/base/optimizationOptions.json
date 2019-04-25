@@ -89,5 +89,8 @@
   "optimization": {
     "algorithmType": "DEFAULT",
     "algorithm": "UNCONSTRAINED"
+  }, 
+  "competitionConfiguration": {
+    "providerStrength": 1.0
   }
 }
