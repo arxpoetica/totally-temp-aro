@@ -1160,15 +1160,12 @@ class State {
                 })
               })
             } else if (result === service.modifyDialogResult.OVERWRITE) {
-            // Overwrite the current plan. Delete existing results. Reload the plan from the server.
-              return $http.delete(`/service/v1/plan/${currentPlan.id}/analysis?user_id=${userId}`)
-                .then((result) => {
-                  return service.loadPlan(currentPlan.id)
+              return service.copyCurrentPlanTo(currentPlan.name)
+                .then(() => {
+                  return $http.delete(`/service/v1/plan/${currentPlan.id}?user_id=${service.loggedInUser.id}`)
                     .then(() => {
-                      tileDataService.clearDataCache()
-                      tileDataService.markHtmlCacheDirty()
-                      service.requestMapLayerRefresh.next(null)
-                      return Promise.resolve()
+                      service.selectedDisplayMode.next(service.displayModes.ANALYSIS)
+                      return resolve()
                     })
                 })
             }
