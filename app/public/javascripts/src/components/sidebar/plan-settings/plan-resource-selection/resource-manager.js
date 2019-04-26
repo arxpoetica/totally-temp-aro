@@ -168,7 +168,7 @@ class ResourceManagerController {
           }
         }
         this.rows = newRows
-        console.log(this.rows)
+        //console.log(this.rows)
       })
     // end promise
   }

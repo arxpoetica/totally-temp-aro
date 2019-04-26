@@ -12,7 +12,6 @@ class ResourceManagerDetailController {
   }
   
   saveAccessSettings (dataSource) {
-    console.log(this.resourceManager)
     // This will call a function into the resource permissions editor that will do the actual save
     this.isChanges = false
     if (this.saveResourceAccess) {

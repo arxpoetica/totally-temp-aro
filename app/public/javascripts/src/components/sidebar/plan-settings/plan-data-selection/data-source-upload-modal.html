@@ -10,19 +10,20 @@
       </div>
 
       <!-- File upload View -->
+      
+      <div class="form-group row" ng-show="!$ctrl.isDataManagementView">
+        <label class="col-sm-4 col-form-label">Data Type</label>
+        <div class="col-sm-8">
+          <select class="form-control" ng-change="$ctrl.onUploadSourceChange()"
+            ng-model="$ctrl.uploadSource"
+            ng-options="item as item.label for item in $ctrl.uploadSources">
+          </select>
+        </div>
+      </div>
+      
       <!-- For all data sources other than 'conic_tile_system', just upload a file -->
       <div ng-if="$ctrl.state.uploadDataSource.name !== 'tile_system'">
         <div ng-show="!$ctrl.isDataManagementView">
-          
-          <div class="form-group row">
-		        <label class="col-sm-4 col-form-label">Data Type</label>
-		        <div class="col-sm-8">
-		          <select class="form-control" ng-change="$ctrl.onSourceChange()"
-		            ng-model="$ctrl.state.uploadDataSource"
-		            ng-options="item as item.label for item in $ctrl.state.uploadDataSources">
-		          </select>
-		        </div>
-		      </div>
           
           <div class="form-group row">
             <label class="col-sm-4 col-form-label">Data Source Name</label>

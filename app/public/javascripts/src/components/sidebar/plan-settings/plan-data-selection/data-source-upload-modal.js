@@ -57,8 +57,9 @@ class DataSourceUploadController {
     // ---
     
     
-    this.tableSource = this.state.uploadDataSource
-    this.tableSources = this.state.uploadDataSources
+    this.tableSource = this.uploadSource = this.state.uploadDataSource
+    this.tableSources = this.uploadSources = this.state.uploadDataSources
+    this.rootSourceDescs = {}
     
     this.rows = []
 
@@ -124,10 +125,22 @@ class DataSourceUploadController {
 
   modalShown () {
     this.state.showDataSourceUploadModal.next(true)
-    console.log(this.state.uploadDataSources)
     
-    this.tableSource = this.state.uploadDataSource
+    this.tableSource = this.uploadSource = this.state.uploadDataSource
+    this.uploadSources = this.state.uploadDataSources
     this.tableSources = [{'label':'all', 'name':'all'}].concat( this.state.uploadDataSources )
+    // some of the sources are alaises for others (construction_location for location)
+    // and we want to avoid duplications 
+    this.rootSourceDescs = {}
+    this.state.uploadDataSources.forEach((uploadSource) => {
+      var name = uploadSource.name
+      if (!!uploadSource.proxyFor) name = uploadSource.proxyFor
+      if (!this.rootSourceDescs.hasOwnProperty(name)){ 
+        this.rootSourceDescs[name] = uploadSource.name
+      }else{
+        this.rootSourceDescs[name] += ", "+uploadSource.name
+      }
+    })
     
   }
 
@@ -310,14 +323,14 @@ class DataSourceUploadController {
   
   // --- date source table view --- //
   
-  onSourceChange () {
-    this.tableSource = this.state.uploadDataSource
+  onUploadSourceChange () {
+    this.state.uploadDataSource = this.tableSource = this.uploadSource
     this.loadDataSources()
   }
   
   onTableSourceChange () {
     if ('all' != this.tableSource.name){
-      this.state.uploadDataSource = this.tableSource
+      this.state.uploadDataSource = this.uploadSource = this.tableSource
     }
     this.loadDataSources()
   }
@@ -377,9 +390,12 @@ class DataSourceUploadController {
       this.rows = []
       
       this.state.uploadDataSources.forEach((uploadSource) => {
-        if ('all' == this.tableSource.name || uploadSource.name == this.tableSource.name){
+        if (('all' == this.tableSource.name && !uploadSource.proxyFor) || uploadSource.name == this.tableSource.name){
           this.state.dataItems[uploadSource.name].allLibraryItems.forEach((item, index) => {
             item.id = item.identifier // we need to standardize ID property names
+            if ('all' == this.tableSource.name && this.rootSourceDescs.hasOwnProperty(item.dataType)){
+              item.dataType = this.rootSourceDescs[item.dataType]
+            }
             this.rows.push(item)
             
             /*
@@ -393,7 +409,7 @@ class DataSourceUploadController {
           })
         }
       })
-      console.log(this.rows)
+      //console.log(this.rows)
       /*
       Promise.all(aclPromises)
         .then(results => {
