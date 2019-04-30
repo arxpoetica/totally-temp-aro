@@ -40,13 +40,18 @@ export class NetworkAnalysisOutput extends Component {
       <canvas ref={this.chartRef} />
       {/* A button to download the report */}
       { this.props.report
-        ? <a className='btn btn-sm btn-light float-right'
+        ? <a id='lnkDownloadNetworkAnalysisOutputReport' className='btn btn-sm btn-light float-right'
           href={`/service-download-file/NetworkAnalysis.csv/v2/report-extended/${this.props.reportMetaData.id}/${this.props.planId}.csv`}
           download>
           <i className='fa fa-download' /> Download Report
         </a>
         : null
       }
+      {/* Render the current chart definition (i.e. the object that we use when creating a new chart) as a hidden <pre> tag.
+          This is so that we include the chart definition in unit tests. */}
+      <pre style={{ display: 'none' }}>
+        {JSON.stringify(this.chartDefinitionForTesting, null, 2)}
+      </pre>
     </div>
   }
 
@@ -58,12 +63,16 @@ export class NetworkAnalysisOutput extends Component {
       selectedUiDefinition = this.props.reportDefinition.uiDefinition.filter(item => item.chartDefinition.name === this.state.selectedUiDefinition)[0]
     }
     const chartDefinition = this.buildChartDefinition(selectedUiDefinition.chartDefinition, selectedUiDefinition.dataModifiers, this.props.report)
+    this.chartDefinitionForTesting = JSON.parse(JSON.stringify(chartDefinition))
     if (this.chart) {
       this.chart.destroy()
     }
-    var ctx = this.chartRef.current.getContext('2d')
-    this.chart = new Chart(ctx, chartDefinition)
-    this.chart.update()
+    if (this.props.isTesting) {
+      console.log('*** network-analysis-output: We are running in test mode. The actual chart will not be created')
+    } else {
+      var ctx = this.chartRef.current.getContext('2d')
+      this.chart = new Chart(ctx, chartDefinition)
+    }
   }
 
   buildChartDefinition (rawChartDefinition, dataModifiers, chartData) {
@@ -161,6 +170,7 @@ export class NetworkAnalysisOutput extends Component {
 }
 
 NetworkAnalysisOutput.propTypes = {
+  isTesting: PropTypes.bool,
   planId: PropTypes.number,
   reportMetaData: PropTypes.object,
   reportDefinition: PropTypes.object,
