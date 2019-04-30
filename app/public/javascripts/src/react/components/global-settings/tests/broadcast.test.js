@@ -19,7 +19,7 @@ test('should call onChange prop with input value', () => {
   const component = shallow(<Broadcast
     handleSubjectChange={onChangeMock}
     handleBodyChange={onChangeMock} />)
-  component.find('input').simulate('change', { target: { value: 'Alert' } })
+  component.find('[type="text"]').simulate('change', { target: { value: 'Alert' } })
   component.find('textarea').simulate('change', { target: { value: 'Shutdown' } })
 
   expect(component.state('subject')).toEqual('Alert')
