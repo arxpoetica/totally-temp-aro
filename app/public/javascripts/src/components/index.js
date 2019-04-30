@@ -38,9 +38,6 @@ import roicReportsLarge from './sidebar/analysis/roic-reports/roic-reports-large
 import roicReportsSmall from './sidebar/analysis/roic-reports/roic-reports-small'
 import roicReportsModal from './sidebar/analysis/roic-reports/roic-reports-modal'
 import networkAnalysisBuild from './sidebar/analysis/network-analysis-build'
-import networkAnalysisOutput from './sidebar/analysis/network-analysis/network-analysis-output'
-import networkAnalysisOutputContent from './sidebar/analysis/network-analysis/network-analysis-output-content'
-import networkAnalysisModal from './sidebar/analysis/network-analysis/network-analysis-modal'
 import coverageReportDownloader from './sidebar/analysis/coverage/coverage-report-downloader'
 import networkBuildOutput from './sidebar/analysis/network-build/network-build-output'
 import aroDebug from './sidebar/debug/aro-debug'
@@ -148,9 +145,6 @@ app.component('boundaryDetail', boundaryDetail)
   .component('roicReportsLarge', roicReportsLarge)
   .component('roicReportsSmall', roicReportsSmall)
   .component('roicReportsModal', roicReportsModal)
-  .component('networkAnalysisOutput', networkAnalysisOutput)
-  .component('networkAnalysisOutputContent', networkAnalysisOutputContent)
-  .component('networkAnalysisModal', networkAnalysisModal)
   .component('coverageReportDownloader', coverageReportDownloader)
   .component('networkBuildOutput', networkBuildOutput)
   .component('aroDebug', aroDebug)

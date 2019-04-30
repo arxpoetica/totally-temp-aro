@@ -75,8 +75,6 @@
       </div>
       <div ng-if="$ctrl.state.networkAnalysisType.id === 'NETWORK_ANALYSIS'">
         <r-network-analysis-output></r-network-analysis-output>
-        ANGULAR:
-        <network-analysis-output></network-analysis-output>
       </div>
       <div ng-if="$ctrl.state.networkAnalysisType.id === 'COVERAGE_ANALYSIS' && $ctrl.coverageReport">
         <coverage-report-downloader>
