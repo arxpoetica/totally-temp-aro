@@ -8,28 +8,51 @@ import NetworkAnalysisActions from './network-analysis-actions'
 export class NetworkAnalysisOutput extends Component {
   constructor (props) {
     super(props)
+    this.state = {
+      selectedChartDefinition: null
+    }
     this.props.loadReport(this.props.planId)
     this.chartRef = React.createRef()
   }
 
   render () {
+    if (this.props.reportDefinition && this.props.report) {
+      this.updateChart()
+    }
     return <div>
+      <div className='row'>
+        <div className='col-md-4'>
+          <label>Chart type</label>
+        </div>
+        <div className='col-md-8'>
+          <select className='form-control' value={this.state.selectedChartDefinition ? this.state.selectedChartDefinition.name : ''}
+            onChange={event => this.setState({ selectedChartDefinition: event.target.value })}>
+            { this.props.reportDefinition
+              ? this.props.reportDefinition.uiDefinition.map(chart => (
+                <option key={chart.chartDefinition.name} value={chart.chartDefinition.name}>{chart.chartDefinition.displayName}</option>
+              ))
+              : null }
+          </select>
+        </div>
+      </div>
       <canvas ref={this.chartRef} />
     </div>
   }
 
-  createChart (chartData) {
-    var ctx = this.chartRef.current.getContext('2d')
-    this.chart = new Chart(ctx, chartData)
-    this.chart.update()
-  }
-
-  componentWillReceiveProps (nextProps) {
-    if (nextProps.reportDefinition && nextProps.report) {
-      const chartProps = nextProps.reportDefinition.uiDefinition[0]
-      const chartDefinition = this.getChartDefinition(chartProps.chartDefinition, chartProps.dataModifiers, nextProps.report)
-      this.createChart(chartDefinition)
+  updateChart () {
+    var selectedChartDefinition = null
+    if (!this.state.selectedChartDefinition) {
+      selectedChartDefinition = this.props.reportDefinition.uiDefinition[0]
+    } else {
+      selectedChartDefinition = this.props.reportDefinition.uiDefinition.filter(item => item.chartDefinition.name === this.state.selectedChartDefinition)[0]
     }
+    const chartDefinition = this.getChartDefinition(selectedChartDefinition.chartDefinition, selectedChartDefinition.dataModifiers, this.props.report)
+    if (this.chart) {
+      this.chart.destroy()
+    }
+    var ctx = this.chartRef.current.getContext('2d')
+    this.chart = new Chart(ctx, chartDefinition)
+    this.chart.update()
   }
 
   getChartDefinition (rawChartDefinition, dataModifiers, chartData) {
