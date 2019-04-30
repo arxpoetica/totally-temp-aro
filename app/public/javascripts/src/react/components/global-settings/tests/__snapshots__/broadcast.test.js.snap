@@ -22,6 +22,18 @@ exports[`Default component render 1`] = `
       className="form-group"
     >
       <label>
+        <input
+          checked={true}
+          onChange={[Function]}
+          type="checkbox"
+        />
+        Disappear after 15 Seconds
+      </label>
+    </div>
+    <div
+      className="form-group"
+    >
+      <label>
         Subject
       </label>
       <input
@@ -40,7 +52,7 @@ exports[`Default component render 1`] = `
       <textarea
         className="form-control"
         onChange={[Function]}
-        rows="14"
+        rows="12"
       />
     </div>
   </div>

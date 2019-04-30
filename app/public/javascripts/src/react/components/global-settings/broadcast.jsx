@@ -1,16 +1,17 @@
 import React, { Component } from 'react'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
-import AroHttp from '../../common/aro-http'
+import globalsettingsActions from '../global-settings/globalsettings-action'
 
 export class Broadcast extends Component {
   constructor (props) {
     super(props)
-    this.state = { subject: '', body: '' }
+    this.state = { subject: '', body: '', isChecked: true }
 
     this.handleSubjectChange = this.handleSubjectChange.bind(this)
     this.handleBodyChange = this.handleBodyChange.bind(this)
     this.confirmBroadcast = this.confirmBroadcast.bind(this)
+    this.toggleChange = this.toggleChange.bind(this)
   }
 
   render () {
@@ -20,12 +21,20 @@ export class Broadcast extends Component {
       <div className={'no-collapse'} style={divStyle}>
         <div style={{ flex: '1 1 auto' }}>
           <div className={'form-group'}>
+            <label>
+              <input type="checkbox"
+                checked={this.state.isChecked}
+                onChange={this.toggleChange} />
+              Disappear after 15 Seconds
+            </label>
+          </div>
+          <div className={'form-group'}>
             <label>Subject</label>
             <input type='text' className={'form-control'} value={this.state.subject} onChange={this.handleSubjectChange} />
           </div>
           <div className={'form-group'}>
             <label>Text</label>
-            <textarea className={'form-control'} rows='14' value={this.state.text} onChange={this.handleBodyChange} />
+            <textarea className={'form-control'} rows='12' value={this.state.text} onChange={this.handleBodyChange} />
           </div>
         </div>
         <div style={{ flex: '0 0 auto' }}>
@@ -43,6 +52,10 @@ export class Broadcast extends Component {
     this.setState({ body: event.target.value })
   }
 
+  toggleChange () {
+    this.setState({ isChecked: !this.state.isChecked })
+  }
+
   confirmBroadcast () {
     swal({ // eslint-disable-line
       title: 'Are you sure?',
@@ -53,21 +66,19 @@ export class Broadcast extends Component {
       showCancelButton: true,
       closeOnConfirm: true
     }, (confirmed) => {
-      confirmed && this.send()
+      confirmed && this.props.broadcastMessage(this.state)
     })
   }
 
-  send () {
-    AroHttp.post('/socket/broadcast', this.state)
-      .catch((err) => console.error(err))
-  }
 }
 
 const mapStateToProps = (state) => {
   return {}
 }
 
-const mapDispatchToProps = (dispatch, ownProps) => ({})
+const mapDispatchToProps = (dispatch, ownProps) => ({
+  broadcastMessage: (message) => dispatch(globalsettingsActions.broadcastMessage(message)),
+})
 
 const BroadcastComponent = wrapComponentWithProvider(reduxStore, Broadcast, mapStateToProps, mapDispatchToProps)
 export default BroadcastComponent
