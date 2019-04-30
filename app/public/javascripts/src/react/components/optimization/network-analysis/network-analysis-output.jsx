@@ -20,9 +20,9 @@ export class NetworkAnalysisOutput extends Component {
       this.updateChart()
     }
     return <div>
-      <div className='row'>
+      <div className='row p-3'>
         <div className='col-md-4'>
-          <label>Chart type</label>
+          <label style={{ lineHeight: '36px' }}>Chart type</label>
         </div>
         <div className='col-md-8'>
           <select className='form-control' value={this.state.selectedChartDefinition ? this.state.selectedChartDefinition.name : ''}
@@ -36,6 +36,14 @@ export class NetworkAnalysisOutput extends Component {
         </div>
       </div>
       <canvas ref={this.chartRef} />
+      { this.props.report
+        ? <a className='btn btn-sm btn-light float-right'
+          href={`/service-download-file/NetworkAnalysis.csv/v2/report-extended/${this.props.reportMetaData.id}/${this.props.planId}.csv`}
+          download>
+          <i className='fa fa-download' /> Download Report
+        </a>
+        : null
+      }
     </div>
   }
 
