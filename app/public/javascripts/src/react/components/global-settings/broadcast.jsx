@@ -22,7 +22,7 @@ export class Broadcast extends Component {
         <div style={{ flex: '1 1 auto' }}>
           <div className={'form-group'}>
             <label>
-              <input type="checkbox"
+              <input type='checkbox'
                 checked={this.state.isChecked}
                 onChange={this.toggleChange} />
               Disappear after 15 Seconds
@@ -69,7 +69,6 @@ export class Broadcast extends Component {
       confirmed && this.props.broadcastMessage(this.state)
     })
   }
-
 }
 
 const mapStateToProps = (state) => {
@@ -77,7 +76,7 @@ const mapStateToProps = (state) => {
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  broadcastMessage: (message) => dispatch(globalsettingsActions.broadcastMessage(message)),
+  broadcastMessage: (message) => dispatch(globalsettingsActions.broadcastMessage(message))
 })
 
 const BroadcastComponent = wrapComponentWithProvider(reduxStore, Broadcast, mapStateToProps, mapDispatchToProps)
