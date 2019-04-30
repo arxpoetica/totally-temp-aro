@@ -39,10 +39,52 @@ export class NetworkAnalysisOutput extends Component {
       return (a[dataModifiers.sortBy] - b[dataModifiers.sortBy]) * multiplier
     })
     // Then fill in the series values
+    const xAxisValues = sortedData.map(item => item[dataModifiers.labels.property])
+    const tickFormat = dataModifiers[rawChartDefinition.name].tickFormat
     rawChartDefinition.data.datasets.forEach(dataset => {
-      dataset.data = sortedData.map(item => item[dataset.propertyName])
+      dataset.data = sortedData.map((item, index) => {
+        const y = item[dataset.propertyName] * tickFormat.multiplier
+        return (rawChartDefinition.type === 'scatter')
+          ? { x: xAxisValues[index], y: y }
+          : y
+      })
     })
+
+    // Then build the chart options
+    rawChartDefinition.options.scales.yAxes.forEach(yAxis => {
+      yAxis.ticks.callback = (value, index, values) => this.formatAxisValue(value, values,
+        tickFormat.prefix || '', tickFormat.suffix || '', tickFormat.precision || 1)
+    })
+    const xTickFormat = dataModifiers.labels.tickFormat
+    if (rawChartDefinition.type !== 'scatter') {
+      rawChartDefinition.data.labels = xAxisValues.map(item => this.formatAxisValue(item, xAxisValues, xTickFormat.prefix || '',
+        xTickFormat.suffix || '', xTickFormat.precision || 1))
+    } else {
+      rawChartDefinition.options.scales.xAxes.forEach(xAxis => {
+        xAxis.ticks.userCallback = (value, index, values) => this.formatAxisValue(value, values,
+          xTickFormat.prefix || '', xTickFormat.suffix || '', xTickFormat.precision || 1)
+      })
+    }
     return rawChartDefinition
+  }
+
+  formatAxisValue (value, allValues, tickPrefix, tickSuffix, precision) {
+    // This function will format the Y-axis tick values so that we show '100 K' instead of '100000'
+    // (and will do the same for millions/billions). We can also specify a tick prefix like '$'
+    const maxValue = Math.max.apply(Math, allValues) // Inefficient to do this every time, but 'values' length will be small
+    const thresholds = [
+      { zeroes: 9, suffix: 'B' }, // Billions
+      { zeroes: 6, suffix: 'M' }, // Millions
+      { zeroes: 3, suffix: 'K' } // Thousands
+    ]
+    const threshold = thresholds.filter(item => maxValue >= Math.pow(10, item.zeroes))[0]
+    // Two spaces in front of the return value - For some reason values with yMax = 900,000 were getting chopped off on the graph
+    // without these two spaces.
+    if (threshold) {
+      return `  ${tickPrefix}${(value / Math.pow(10, threshold.zeroes)).toFixed(precision)} ${threshold.suffix}${tickSuffix}`
+    } else {
+      return `  ${tickPrefix}${value.toFixed(precision)}${tickSuffix}` // For values less than 1000
+    }
   }
 
   componentWillUnmount () {
