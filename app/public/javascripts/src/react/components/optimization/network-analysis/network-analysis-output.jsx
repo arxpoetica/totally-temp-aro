@@ -9,7 +9,7 @@ export class NetworkAnalysisOutput extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      selectedChartDefinition: null
+      selectedUiDefinition: null
     }
     this.props.loadReport(this.props.planId)
     this.chartRef = React.createRef()
@@ -20,13 +20,14 @@ export class NetworkAnalysisOutput extends Component {
       this.updateChart()
     }
     return <div>
+      {/* A combobox to select the chart type */}
       <div className='row p-3'>
         <div className='col-md-4'>
           <label style={{ lineHeight: '36px' }}>Chart type</label>
         </div>
         <div className='col-md-8'>
-          <select className='form-control' value={this.state.selectedChartDefinition ? this.state.selectedChartDefinition.name : ''}
-            onChange={event => this.setState({ selectedChartDefinition: event.target.value })}>
+          <select className='form-control' value={this.state.selectedUiDefinition ? this.state.selectedUiDefinition.name : ''}
+            onChange={event => this.setState({ selectedUiDefinition: event.target.value })}>
             { this.props.reportDefinition
               ? this.props.reportDefinition.uiDefinition.map(chart => (
                 <option key={chart.chartDefinition.name} value={chart.chartDefinition.name}>{chart.chartDefinition.displayName}</option>
@@ -35,7 +36,9 @@ export class NetworkAnalysisOutput extends Component {
           </select>
         </div>
       </div>
+      {/* The canvas that will hold the actual chart */}
       <canvas ref={this.chartRef} />
+      {/* A button to download the report */}
       { this.props.report
         ? <a className='btn btn-sm btn-light float-right'
           href={`/service-download-file/NetworkAnalysis.csv/v2/report-extended/${this.props.reportMetaData.id}/${this.props.planId}.csv`}
@@ -48,13 +51,13 @@ export class NetworkAnalysisOutput extends Component {
   }
 
   updateChart () {
-    var selectedChartDefinition = null
-    if (!this.state.selectedChartDefinition) {
-      selectedChartDefinition = this.props.reportDefinition.uiDefinition[0]
+    var selectedUiDefinition = null
+    if (!this.state.selectedUiDefinition) {
+      selectedUiDefinition = this.props.reportDefinition.uiDefinition[0]
     } else {
-      selectedChartDefinition = this.props.reportDefinition.uiDefinition.filter(item => item.chartDefinition.name === this.state.selectedChartDefinition)[0]
+      selectedUiDefinition = this.props.reportDefinition.uiDefinition.filter(item => item.chartDefinition.name === this.state.selectedUiDefinition)[0]
     }
-    const chartDefinition = this.getChartDefinition(selectedChartDefinition.chartDefinition, selectedChartDefinition.dataModifiers, this.props.report)
+    const chartDefinition = this.buildChartDefinition(selectedUiDefinition.chartDefinition, selectedUiDefinition.dataModifiers, this.props.report)
     if (this.chart) {
       this.chart.destroy()
     }
@@ -63,40 +66,63 @@ export class NetworkAnalysisOutput extends Component {
     this.chart.update()
   }
 
-  getChartDefinition (rawChartDefinition, dataModifiers, chartData) {
+  buildChartDefinition (rawChartDefinition, dataModifiers, chartData) {
     // First, sort the report data
     const sortedData = chartData.sort((a, b) => {
       const multiplier = (dataModifiers.sortOrder === 'ascending') ? 1.0 : -1.0
       return (a[dataModifiers.sortBy] - b[dataModifiers.sortBy]) * multiplier
     })
-    // Then fill in the series values
+    this.populateSeriesValues(sortedData, rawChartDefinition, dataModifiers)
+    this.populateAxesOptions(sortedData, rawChartDefinition, dataModifiers)
+    this.populateTooltipOptions(rawChartDefinition, dataModifiers)
+    return rawChartDefinition
+  }
+
+  // Populate a raw chart definition with series values
+  populateSeriesValues (sortedData, rawChartDefinition, dataModifiers) {
     const xAxisValues = sortedData.map(item => item[dataModifiers.labelProperty])
     const tickFormat = dataModifiers[rawChartDefinition.name].tickFormat
+
+    // Populate all datasets
     rawChartDefinition.data.datasets.forEach(dataset => {
       dataset.data = sortedData.map((item, index) => {
+        // For scatter charts, return an object of the form { x: <value>, y: <value> }, otherwise just return the values
         const y = item[dataset.propertyName] * tickFormat.multiplier
         return (rawChartDefinition.type === 'scatter')
           ? { x: xAxisValues[index], y: y }
           : y
       })
     })
+  }
 
-    // Then build the chart options
+  // Populate the options object to display axes
+  populateAxesOptions (sortedData, rawChartDefinition, dataModifiers) {
+    const xAxisValues = sortedData.map(item => item[dataModifiers.labelProperty])
+    const tickFormat = dataModifiers[rawChartDefinition.name].tickFormat
+
+    // Apply formatting on all y axes
     rawChartDefinition.options.scales.yAxes.forEach(yAxis => {
       yAxis.ticks.callback = (value, index, values) => this.formatAxisValue(value, values,
         tickFormat.prefix || '', tickFormat.suffix || '', tickFormat.precision || 1)
     })
+
+    // Apply formatting on x axis
     const xTickFormat = dataModifiers[dataModifiers.labelProperty].tickFormat
     if (rawChartDefinition.type !== 'scatter') {
+      // For scatter charts, we need to set the "data.labels" array
       rawChartDefinition.data.labels = xAxisValues.map(item => this.formatAxisValue(item, xAxisValues, xTickFormat.prefix || '',
         xTickFormat.suffix || '', xTickFormat.precision || 1))
     } else {
+      // For all other charts, set the "options.scales.xAxes"
       rawChartDefinition.options.scales.xAxes.forEach(xAxis => {
         xAxis.ticks.userCallback = (value, index, values) => this.formatAxisValue(value, values,
           xTickFormat.prefix || '', xTickFormat.suffix || '', xTickFormat.precision || 1)
       })
     }
+  }
 
+  // Populate the options for showing tooltips when a user hovers over a data point
+  populateTooltipOptions (rawChartDefinition, dataModifiers) {
     rawChartDefinition.options.tooltips.callbacks.label = (tooltipItem, data) => {
       var allXValues = []
       var allYValues = []
@@ -104,10 +130,10 @@ export class NetworkAnalysisOutput extends Component {
       data.datasets.forEach(dataset => { allYValues = allYValues.concat(dataset.data.map(item => item.y || item)) })
       const xTickFormat = dataModifiers[dataModifiers.labelProperty].tickFormat
       const yTickFormat = dataModifiers[rawChartDefinition.name].tickFormat
-      return [`${dataModifiers.labelProperty}: ${this.formatAxisValue(+tooltipItem.label, allXValues, xTickFormat.prefix || '', xTickFormat.suffix || '', xTickFormat.precision || 1)}`,
-        `${rawChartDefinition.displayName}: ${this.formatAxisValue(+tooltipItem.value, allYValues, yTickFormat.prefix || '', yTickFormat.suffix || '', yTickFormat.precision || 1)}`]
+      const labelLine1 = `${dataModifiers.labelProperty}: ${this.formatAxisValue(+tooltipItem.label, allXValues, xTickFormat.prefix || '', xTickFormat.suffix || '', xTickFormat.precision || 1)}`
+      const labelLine2 = `${rawChartDefinition.displayName}: ${this.formatAxisValue(+tooltipItem.value, allYValues, yTickFormat.prefix || '', yTickFormat.suffix || '', yTickFormat.precision || 1)}`
+      return [labelLine1, labelLine2]
     }
-    return rawChartDefinition
   }
 
   formatAxisValue (value, allValues, tickPrefix, tickSuffix, precision) {
