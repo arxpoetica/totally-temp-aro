@@ -39,7 +39,7 @@ export class NetworkAnalysisOutput extends Component {
       return (a[dataModifiers.sortBy] - b[dataModifiers.sortBy]) * multiplier
     })
     // Then fill in the series values
-    const xAxisValues = sortedData.map(item => item[dataModifiers.labels.property])
+    const xAxisValues = sortedData.map(item => item[dataModifiers.labelProperty])
     const tickFormat = dataModifiers[rawChartDefinition.name].tickFormat
     rawChartDefinition.data.datasets.forEach(dataset => {
       dataset.data = sortedData.map((item, index) => {
@@ -55,7 +55,7 @@ export class NetworkAnalysisOutput extends Component {
       yAxis.ticks.callback = (value, index, values) => this.formatAxisValue(value, values,
         tickFormat.prefix || '', tickFormat.suffix || '', tickFormat.precision || 1)
     })
-    const xTickFormat = dataModifiers.labels.tickFormat
+    const xTickFormat = dataModifiers[dataModifiers.labelProperty].tickFormat
     if (rawChartDefinition.type !== 'scatter') {
       rawChartDefinition.data.labels = xAxisValues.map(item => this.formatAxisValue(item, xAxisValues, xTickFormat.prefix || '',
         xTickFormat.suffix || '', xTickFormat.precision || 1))
@@ -64,6 +64,17 @@ export class NetworkAnalysisOutput extends Component {
         xAxis.ticks.userCallback = (value, index, values) => this.formatAxisValue(value, values,
           xTickFormat.prefix || '', xTickFormat.suffix || '', xTickFormat.precision || 1)
       })
+    }
+
+    rawChartDefinition.options.tooltips.callbacks.label = (tooltipItem, data) => {
+      var allXValues = []
+      var allYValues = []
+      data.datasets.forEach(dataset => { allXValues = allXValues.concat(dataset.data.map((item, index) => item.x || index)) })
+      data.datasets.forEach(dataset => { allYValues = allYValues.concat(dataset.data.map(item => item.y || item)) })
+      const xTickFormat = dataModifiers[dataModifiers.labelProperty].tickFormat
+      const yTickFormat = dataModifiers[rawChartDefinition.name].tickFormat
+      return [`${dataModifiers.labelProperty}: ${this.formatAxisValue(+tooltipItem.label, allXValues, xTickFormat.prefix || '', xTickFormat.suffix || '', xTickFormat.precision || 1)}`,
+        `${rawChartDefinition.displayName}: ${this.formatAxisValue(+tooltipItem.value, allYValues, yTickFormat.prefix || '', yTickFormat.suffix || '', yTickFormat.precision || 1)}`]
     }
     return rawChartDefinition
   }
