@@ -27,9 +27,12 @@ function loadReport (planId) {
           type: Actions.NETWORK_ANALYSIS_SET_REPORT,
           payload: results[0].data
         })
+        // uiDefinition comes in as a JSON string. We should parse it back out.
+        var reportDefinition = results[1].data
+        reportDefinition.uiDefinition = JSON.parse(reportDefinition.uiDefinition)
         dispatch({
           type: Actions.NETWORK_ANALYSIS_SET_REPORT_DEFINITION,
-          payload: results[1].data
+          payload: reportDefinition
         })
       })
       .catch(err => console.error(err))
