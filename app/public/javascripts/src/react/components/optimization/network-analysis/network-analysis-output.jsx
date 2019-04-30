@@ -27,7 +27,7 @@ export class NetworkAnalysisOutput extends Component {
   componentWillReceiveProps (nextProps) {
     if (nextProps.reportDefinition && nextProps.report) {
       const chartProps = nextProps.reportDefinition.uiDefinition[0]
-      const chartDefinition = this.getChartDefinition(chartProps.chart, chartProps.dataModifiers, nextProps.report)
+      const chartDefinition = this.getChartDefinition(chartProps.chartDefinition, chartProps.dataModifiers, nextProps.report)
       this.createChart(chartDefinition)
     }
   }
