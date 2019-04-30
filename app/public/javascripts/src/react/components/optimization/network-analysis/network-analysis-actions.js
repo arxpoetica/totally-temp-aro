@@ -15,14 +15,23 @@ function loadReport (planId) {
           type: Actions.NETWORK_ANALYSIS_SET_REPORT_METADATA,
           payload: optimizationReports[0]
         })
-        // Get the actual report for this plan id
+        // Get the report definition and actual report for this plan id
         const reportModuleId = optimizationReports[0].id
-        return AroHttp.get(`/service-download-file/test.json/v2/report-extended/${reportModuleId}/${planId}.json`)
+        return Promise.all([
+          AroHttp.get(`/service-download-file/test.json/v2/report-extended/${reportModuleId}/${planId}.json`),
+          AroHttp.get(`/service/v2/report-module/${reportModuleId}`)
+        ])
       })
-      .then(result => dispatch({
-        type: Actions.NETWORK_ANALYSIS_SET_REPORT,
-        payload: result.data
-      }))
+      .then(results => {
+        dispatch({
+          type: Actions.NETWORK_ANALYSIS_SET_REPORT,
+          payload: results[0].data
+        })
+        dispatch({
+          type: Actions.NETWORK_ANALYSIS_SET_REPORT_DEFINITION,
+          payload: results[1].data
+        })
+      })
       .catch(err => console.error(err))
   }
 }

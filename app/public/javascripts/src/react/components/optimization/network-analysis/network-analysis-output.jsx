@@ -26,12 +26,14 @@ export class NetworkAnalysisOutput extends Component {
 NetworkAnalysisOutput.propTypes = {
   planId: PropTypes.number,
   reportMetaData: PropTypes.object,
+  reportDefinition: PropTypes.object,
   report: PropTypes.array
 }
 
 const mapStateToProps = (state) => ({
   planId: state.plan.activePlan.id,
   reportMetaData: state.optimization.networkAnalysis.reportMetaData,
+  reportDefinition: state.optimization.networkAnalysis.reportDefinition,
   report: state.optimization.networkAnalysis.report
 })
 

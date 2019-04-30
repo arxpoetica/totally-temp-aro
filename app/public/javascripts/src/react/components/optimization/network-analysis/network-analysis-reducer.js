@@ -2,7 +2,8 @@ import Actions from '../../../common/actions'
 
 const defaultState = {
   report: null,
-  reportMetaData: null
+  reportMetaData: null,
+  reportDefinition: null
 }
 
 function setReport (state, report) {
@@ -17,10 +18,17 @@ function setReportMetaData (state, reportMetaData) {
   }
 }
 
+function setReportDefinition (state, reportDefinition) {
+  return { ...state,
+    reportDefinition: reportDefinition
+  }
+}
+
 function clearOutput (state) {
   return { ...state,
     report: null,
-    reportMetaData: null
+    reportMetaData: null,
+    reportDefinition: null
   }
 }
 
@@ -31,6 +39,9 @@ function configurationReducer (state = defaultState, action) {
 
     case Actions.NETWORK_ANALYSIS_SET_REPORT_METADATA:
       return setReportMetaData(state, action.payload)
+
+    case Actions.NETWORK_ANALYSIS_SET_REPORT_DEFINITION:
+      return setReportDefinition(state, action.payload)
 
     case Actions.NETWORK_ANALYSIS_CLEAR_OUTPUT:
       return clearOutput(state)
