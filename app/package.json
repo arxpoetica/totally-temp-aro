@@ -42,6 +42,7 @@
     "busboy": "^0.2.13",
     "chai": "~3.0.0",
     "chai-string": "^1.1.6",
+    "chart.js": "^2.8.0",
     "compression": "~1.5.0",
     "cookie-session": "^1.2.0",
     "cross-fetch": "^3.0.0",
