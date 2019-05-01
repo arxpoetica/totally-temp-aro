@@ -1,10 +1,10 @@
 import React, { Component } from 'react'
-import reduxStore from '../../../redux-store'
+import reduxStore from '../../../../redux-store'
 import { PropTypes } from 'prop-types'
-import wrapComponentWithProvider from '../../common/provider-wrapped-component'
-import ConfigurationActions from './configuration-actions'
+import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
+import ReportActions from './report-actions'
 import ReportModuleEditor from './report-module-editor.jsx'
-import '../common-styles/common-styles.css'
+import '../../common-styles/common-styles.css'
 
 export class ReportModuleList extends Component {
   constructor (props) {
@@ -56,6 +56,10 @@ export class ReportModuleList extends Component {
     const assetKey = file.name
     this.props.uploadAssetToServer(assetKey, file)
   }
+
+  componentWillUnmount () {
+    this.props.clearEditingReportDefinition()
+  }
 }
 
 ReportModuleList.propTypes = {
@@ -64,15 +68,16 @@ ReportModuleList.propTypes = {
 }
 
 const mapStateToProps = (state) => ({
-  reportsMetaData: state.configuration.reports.metaData,
-  reportBeingEdited: state.configuration.reports.reportBeingEdited
+  reportsMetaData: state.configuration.report.metaData,
+  reportBeingEdited: state.configuration.report.reportBeingEdited
 })
 
 const mapDispatchToProps = dispatch => ({
-  getReportsMetadata: () => dispatch(ConfigurationActions.getReportsMetadata()),
-  startEditingReport: reportId => dispatch(ConfigurationActions.startEditingReport(reportId)),
-  createReport: () => dispatch(ConfigurationActions.createReport()),
-  deleteReport: reportId => dispatch(ConfigurationActions.deleteReport(reportId))
+  getReportsMetadata: () => dispatch(ReportActions.getReportsMetadata()),
+  startEditingReport: reportId => dispatch(ReportActions.startEditingReport(reportId)),
+  clearEditingReportDefinition: () => dispatch(ReportActions.clearEditingReportDefinition()),
+  createReport: () => dispatch(ReportActions.createReport()),
+  deleteReport: reportId => dispatch(ReportActions.deleteReport(reportId))
 })
 
 const ReportModuleListComponent = wrapComponentWithProvider(reduxStore, ReportModuleList, mapStateToProps, mapDispatchToProps)

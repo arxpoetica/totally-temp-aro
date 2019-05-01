@@ -9,7 +9,8 @@ const createSocketMiddleware = () => {
     socketManager.subscribe('NOTIFICATION_SHOW', (command) => {
       toast.error(command.payload.subject + ': ' + command.payload.body, {
         position: toast.POSITION.BOTTOM_LEFT,
-        className: 'map-canvas'
+        className: 'map-canvas',
+        autoClose: command.payload.isChecked
       })
       // storeAPI.dispatch(command)
     })

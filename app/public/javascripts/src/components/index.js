@@ -1,12 +1,13 @@
 import { react2angular } from 'react2angular'
-import { ToastContainer } from "react-toastify";
+import { ToastContainer } from 'react-toastify'
 
+import Broadcast from '../react/components/global-settings/broadcast.jsx'
+import ConfigurationEditor from '../react/components/configuration/ui/configuration-editor.jsx'
 import CoverageInitializer from '../react/components/coverage/coverage-initializer.jsx'
 import CoverageButton from '../react/components/coverage/coverage-button.jsx'
+import NetworkAnalysisOutput from '../react/components/optimization/network-analysis/network-analysis-output.jsx'
 import PlanTargetList from '../react/components/selection/plan-target-list.jsx'
-import Broadcast from '../react/components/global-settings/broadcast.jsx'
-import ConfigurationEditor from '../react/components/configuration/configuration-editor.jsx'
-import ReportModuleList from '../react/components/configuration/report-module-list.jsx'
+import ReportModuleList from '../react/components/configuration/report/report-module-list.jsx'
 
 import boundaryDetail from './sidebar/view/boundary-detail'
 import equipmentDetail from './sidebar/view/equipment-detail'
@@ -37,9 +38,6 @@ import roicReportsLarge from './sidebar/analysis/roic-reports/roic-reports-large
 import roicReportsSmall from './sidebar/analysis/roic-reports/roic-reports-small'
 import roicReportsModal from './sidebar/analysis/roic-reports/roic-reports-modal'
 import networkAnalysisBuild from './sidebar/analysis/network-analysis-build'
-import networkAnalysisOutput from './sidebar/analysis/network-analysis/network-analysis-output'
-import networkAnalysisOutputContent from './sidebar/analysis/network-analysis/network-analysis-output-content'
-import networkAnalysisModal from './sidebar/analysis/network-analysis/network-analysis-modal'
 import coverageReportDownloader from './sidebar/analysis/coverage/coverage-report-downloader'
 import networkBuildOutput from './sidebar/analysis/network-build/network-build-output'
 import aroDebug from './sidebar/debug/aro-debug'
@@ -147,9 +145,6 @@ app.component('boundaryDetail', boundaryDetail)
   .component('roicReportsLarge', roicReportsLarge)
   .component('roicReportsSmall', roicReportsSmall)
   .component('roicReportsModal', roicReportsModal)
-  .component('networkAnalysisOutput', networkAnalysisOutput)
-  .component('networkAnalysisOutputContent', networkAnalysisOutputContent)
-  .component('networkAnalysisModal', networkAnalysisModal)
   .component('coverageReportDownloader', coverageReportDownloader)
   .component('networkBuildOutput', networkBuildOutput)
   .component('aroDebug', aroDebug)
@@ -223,13 +218,14 @@ app.component('boundaryDetail', boundaryDetail)
   .component('editorInterfacePrimitive', editorInterfacePrimitive)
   .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
 // ReactJS components
+  .component('rBroadcast', react2angular(Broadcast))
+  .component('rConfigurationEditor', react2angular(ConfigurationEditor))
   .component('rCoverageInitializer', react2angular(CoverageInitializer))
   .component('rCoverageButton', react2angular(CoverageButton))
+  .component('rNetworkAnalysisOutput', react2angular(NetworkAnalysisOutput))
   .component('rPlanTargetList', react2angular(PlanTargetList))
-  .component('rBroadcast', react2angular(Broadcast))
-  .component('rToastContainer', react2angular(ToastContainer))
-  .component('rConfigurationEditor', react2angular(ConfigurationEditor))
   .component('rReportModuleList', react2angular(ReportModuleList))
+  .component('rToastContainer', react2angular(ToastContainer))
   .service('Utils', utils)
   .service('state', state)
   .service('aclManager', aclManager)

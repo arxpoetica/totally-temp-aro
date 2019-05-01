@@ -4,7 +4,7 @@ import format from './string-template'
 import StateViewMode from './state-view-mode'
 import Constants from '../components/common/constants'
 import Actions from '../react/common/actions'
-import ConfigurationActions from '../react/components/configuration/configuration-actions'
+import UiActions from '../react/components/configuration/ui/ui-actions'
 import UserActions from '../react/components/user/user-actions'
 import PlanActions from '../react/components/plan/plan-actions'
 import MapLayerActions from '../react/components/map-layers/map-layer-actions'
@@ -1164,15 +1164,12 @@ class State {
                 })
               })
             } else if (result === service.modifyDialogResult.OVERWRITE) {
-            // Overwrite the current plan. Delete existing results. Reload the plan from the server.
-              return $http.delete(`/service/v1/plan/${currentPlan.id}/analysis?user_id=${userId}`)
-                .then((result) => {
-                  return service.loadPlan(currentPlan.id)
+              return service.copyCurrentPlanTo(currentPlan.name)
+                .then(() => {
+                  return $http.delete(`/service/v1/plan/${currentPlan.id}?user_id=${service.loggedInUser.id}`)
                     .then(() => {
-                      tileDataService.clearDataCache()
-                      tileDataService.markHtmlCacheDirty()
-                      service.requestMapLayerRefresh.next(null)
-                      return Promise.resolve()
+                      service.selectedDisplayMode.next(service.displayModes.ANALYSIS)
+                      return resolve()
                     })
                 })
             }
@@ -1864,7 +1861,7 @@ class State {
 
   mapDispatchToTarget (dispatch) {
     return {
-      loadConfigurationFromServer: () => dispatch(ConfigurationActions.loadConfigurationFromServer()),
+      loadConfigurationFromServer: () => dispatch(UiActions.loadConfigurationFromServer()),
       setLoggedInUserRedux: loggedInUser => dispatch(UserActions.setLoggedInUser(loggedInUser)),
       setPlanRedux: plan => dispatch(PlanActions.setPlan(plan)),
       setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId)),

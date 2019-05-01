@@ -43,6 +43,29 @@
   <div ng-repeat="locationCountInfo in $ctrl.selectedBoundaryInfo.locationCount">
     <span class="capitalize">{{locationCountInfo.locationCategory}}</span>: {{locationCountInfo.houseHoldCount}}
   </div>
+
+  <!-- other Attributes -->
+  <div style="width: 100%; margin-top: 2px; margin-bottom: 6px;">
+    <div class="ei-header" style="padding-top: 0px;" ng-click="$ctrl.toggleOtherAttributes = !$ctrl.toggleOtherAttributes">
+      <i class="far fa-plus-square ei-foldout-icon" ng-if="!$ctrl.toggleOtherAttributes"></i>
+      <i class="far fa-minus-square ei-foldout-icon" ng-if="$ctrl.toggleOtherAttributes"></i>
+      Other Attributes
+    </div>  
+  </div>
+  <span ng-if="$ctrl.toggleOtherAttributes
+    && $ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.BOUNDARIES_INFO">
+    <div class="table-wrapper-scroll-y">
+      <table class="table table-sm table-striped">
+        <tbody>
+          <tr ng-repeat="(key, value) in $ctrl.selectedBoundaryInfo.attributes">
+            <td>{{ key }}</td>
+            <td>{{ value }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </span>
+
 </div>
 <div class="boundary-detail" ng-if="$ctrl.selectedSAInfo !== null">
   <div>Code: {{$ctrl.selectedSAInfo.code}}</div>

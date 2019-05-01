@@ -7,7 +7,11 @@ import thunk from 'redux-thunk'
 import createSocketMiddleware from './middleware/websockets'
 
 // Reducers
-import configuration from '../react/components/configuration/configuration-reducer'
+import ui from '../react/components/configuration/ui/ui-reducer'
+import report from '../react/components/configuration/report/report-reducer'
+
+import networkAnalysis from '../react/components/optimization/network-analysis/network-analysis-reducer'
+
 import coverage from '../react/components/coverage/coverage-reducer'
 import mapLayers from '../react/components/map-layers/map-layer-reducer'
 import plan from '../react/components/plan/plan-reducer'
@@ -20,7 +24,16 @@ const logger = createLogger({
 })
 const socketMiddleware = createSocketMiddleware()
 
-let reducer = combineReducers({ configuration, coverage, mapLayers, plan, selection, user, form })
+let reducer = combineReducers({
+  configuration: combineReducers({ report, ui }),
+  coverage,
+  mapLayers,
+  optimization: combineReducers({ networkAnalysis }),
+  plan,
+  selection,
+  user,
+  form
+})
 
 // Add support for Redux devtools extension. Yes, even in production.
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose

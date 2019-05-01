@@ -1,16 +1,18 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { PropTypes } from 'prop-types'
-import { formValueSelector } from 'redux-form'
-import ConfigurationActions from './configuration-actions'
+import { formValueSelector, reset } from 'redux-form'
+import ReportActions from './report-actions'
 import ReportDefinitionEditor from './report-definition-editor.jsx'
-import Constants from '../../common/constants'
+import Constants from '../../../common/constants'
+import './report-module-editor.css'
 const selector = formValueSelector(Constants.REPORT_DEFINITION_EDITOR_FORM)
 
 export class ReportModuleEditor extends Component {
   constructor (props) {
     super(props)
     this.props.populateEditingReportDefinition(this.props.reportBeingEdited.id)
+    this.props.populateReportTypes()
     this.state = {
       isEditingPrimary: true,
       subDefinitionEditingIndex: -1,
@@ -33,10 +35,16 @@ export class ReportModuleEditor extends Component {
   }
 
   render () {
-    return <div className='container' style={{ height: '100%' }}>
+    return <div className='container report-module-editor' style={{ height: '100%' }}>
       <div className='row' style={{ height: '100%' }}>
         <div className='col-md-3'>
-          <ul className='nav nav-pills'>
+          <label>Report Type</label>
+          <select className='form-control mb-3' value={this.props.reportBeingEdited.reportType}
+            onChange={event => this.props.saveEditingReportType(event.target.value)}>
+            {this.props.reportTypes.map(item => <option value={item.name} key={item.name}>{item.description}</option>)}
+          </select>
+          <label>Report Definitions</label>
+          <ul className='nav nav-pills mb-2 definitions-list'>
             <li className='nav-item' key='-1'>
               <a id='lnkEditPrimaryDefinition'
                 className={`nav-link ${this.state.isEditingPrimary ? 'active' : ''}`}
@@ -49,15 +57,23 @@ export class ReportModuleEditor extends Component {
                 ? this.props.reportBeingEdited.moduleDefinition.subDefinitions.map((subDefinition, index) => (
                   <li className='nav-item' key={index}>
                     <a id={`lnkEditSubDefinition${index}`}
-                      className={`nav-link ${this.state.subDefinitionEditingIndex === index ? 'active' : ''}`}
+                      className={`nav-link subdefinition-link ${this.state.subDefinitionEditingIndex === index ? 'active' : ''}`}
                       onClick={() => this.startEditingSubDefinition(index)}>
-                      Subdefinition {index}
+                      Subdefinition
+                      <button className='btn btn-sm btn-danger ml-1 subdefinition-delete-button'
+                        onClick={event => this.props.removeEditingReportSubDefinition(index)}>
+                        <i className='fas fa-trash-alt' />
+                      </button>
                     </a>
                   </li>
                 ))
                 : null
             }
           </ul>
+          <button className='btn btn-light btn-sm float-right'
+            onClick={event => this.props.addEditingReportSubDefinition()}>
+            <i className='fa fa-plus' /> Add Subdefinition
+          </button>
         </div>
         <div className='col-md-9 d-flex flex-column' style={{ height: '100%' }}>
           { this.getDefinitionBeingEdited()
@@ -73,10 +89,11 @@ export class ReportModuleEditor extends Component {
               this.saveCurrentDefinition()
               this.props.validateReport(this.props.planId)
             }}>Check Syntax</button>
-            <button id='btnSaveReportToServer' className='btn btn-primary' onClick={event => {
-              this.saveCurrentDefinition()
-              this.props.saveCurrentReportToServer()
-            }}>Save Definition</button>
+            <button id='btnSaveReportToServer' className='btn btn-primary' disabled={this.props.formHasErrors}
+              onClick={event => {
+                this.saveCurrentDefinition()
+                this.props.saveCurrentReportToServer()
+              }}>Save Definition</button>
           </div>
         </div>
       </div>
@@ -113,6 +130,10 @@ export class ReportModuleEditor extends Component {
   }
 
   startEditingPrimaryDefinition () {
+    if (this.props.formHasErrors) {
+      // Form has errors, cannot change definitions
+      return
+    }
     this.saveCurrentDefinition()
     this.setState({
       isEditingPrimary: true,
@@ -121,6 +142,10 @@ export class ReportModuleEditor extends Component {
   }
 
   startEditingSubDefinition (index) {
+    if (this.props.formHasErrors) {
+      // Form has errors, cannot change definitions
+      return
+    }
     this.saveCurrentDefinition()
     this.setState({
       isEditingPrimary: false,
@@ -130,6 +155,7 @@ export class ReportModuleEditor extends Component {
 
   componentWillUnmount () {
     this.props.clearEditingReportDefinition()
+    this.props.clearReportTypes()
   }
 }
 
@@ -137,23 +163,37 @@ ReportModuleEditor.propTypes = {
   planId: PropTypes.number,
   reportValidation: PropTypes.object,
   reportBeingEdited: PropTypes.object,
-  reportDefinitionEditorValues: PropTypes.object
+  reportDefinitionEditorValues: PropTypes.object,
+  reportTypes: PropTypes.array
 }
 
 const mapStateToProps = (state) => ({
   planId: state.plan.activePlan.id,
-  reportValidation: state.configuration.reports.validation,
-  reportBeingEdited: state.configuration.reports.reportBeingEdited,
-  reportDefinitionEditorValues: selector(state, 'name', 'displayName', 'queryType', 'query')
+  reportValidation: state.configuration.report.validation,
+  reportBeingEdited: state.configuration.report.reportBeingEdited,
+  reportDefinitionEditorValues: selector(state, 'name', 'displayName', 'queryType', 'query'),
+  reportTypes: state.configuration.report.reportTypes,
+  formHasErrors: Boolean(state.form[Constants.REPORT_DEFINITION_EDITOR_FORM] && state.form[Constants.REPORT_DEFINITION_EDITOR_FORM].syncErrors)
 })
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  populateEditingReportDefinition: reportId => dispatch(ConfigurationActions.populateEditingReportDefinition(reportId)),
-  clearEditingReportDefinition: () => dispatch(ConfigurationActions.clearEditingReportDefinition()),
-  saveEditingReportPrimaryDefinition: reportDefinition => dispatch(ConfigurationActions.saveEditingReportPrimaryDefinition(reportDefinition)),
-  saveEditingReportSubDefinition: (subDefinition, subDefinitionIndex) => dispatch(ConfigurationActions.saveEditingReportSubDefinition(subDefinition, subDefinitionIndex)),
-  saveCurrentReportToServer: () => dispatch(ConfigurationActions.saveCurrentReportToServer()),
-  validateReport: planId => dispatch(ConfigurationActions.validateReport(planId))
+  populateEditingReportDefinition: reportId => dispatch(ReportActions.populateEditingReportDefinition(reportId)),
+  clearEditingReportDefinition: () => dispatch(ReportActions.clearEditingReportDefinition()),
+  populateReportTypes: () => dispatch(ReportActions.getReportTypes()),
+  clearReportTypes: () => dispatch(ReportActions.clearReportTypes()),
+  saveEditingReportPrimaryDefinition: reportDefinition => {
+    dispatch(ReportActions.saveEditingReportPrimaryDefinition(reportDefinition))
+    dispatch(reset(Constants.REPORT_DEFINITION_EDITOR_FORM))
+  },
+  saveEditingReportType: reportType => dispatch(ReportActions.saveEditingReportType(reportType)),
+  saveEditingReportSubDefinition: (subDefinition, subDefinitionIndex) => {
+    dispatch(ReportActions.saveEditingReportSubDefinition(subDefinition, subDefinitionIndex))
+    dispatch(reset(Constants.REPORT_DEFINITION_EDITOR_FORM))
+  },
+  addEditingReportSubDefinition: () => dispatch(ReportActions.addEditingReportSubDefinition()),
+  removeEditingReportSubDefinition: subDefinitionIndex => dispatch(ReportActions.removeEditingReportSubDefinition(subDefinitionIndex)),
+  saveCurrentReportToServer: () => dispatch(ReportActions.saveCurrentReportToServer()),
+  validateReport: planId => dispatch(ReportActions.validateReport(planId))
 })
 
 const ReportModuleEditorComponent = connect(mapStateToProps, mapDispatchToProps)(ReportModuleEditor)

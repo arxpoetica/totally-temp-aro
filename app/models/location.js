@@ -426,12 +426,13 @@ module.exports = class Location {
       .then(()=> {
 
         var attributeQuery = `
-          SELECT attributes FROM location_entity
+          SELECT name,attributes FROM location_entity
           WHERE id=$1
         `
         return database.findOne(attributeQuery, [location_id])
       })
       .then((result)=>{
+        locationInfo.name = result.name ? result.name : ''      
         if (!result || !result.attributes) {
           locationInfo.attributes = []
           return Promise.resolve() // There are no attributes for households, celltowers

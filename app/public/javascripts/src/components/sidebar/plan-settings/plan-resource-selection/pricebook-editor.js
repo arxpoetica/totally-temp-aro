@@ -1,3 +1,13 @@
+const defaultConstructionRatios = {
+  code: 'MORPHOLOGY_CODE',
+  constructionRatios: {
+    cableConstructionRatios: [
+      { type: 'ARIEL', ratio: 0.7 },
+      { type: 'BURIED', ratio: 0.3 }
+    ]
+  }
+}
+
 class PriceBookEditorController {
   constructor ($http, $timeout) {
     this.$http = $http
@@ -42,28 +52,8 @@ class PriceBookEditorController {
         this.statesForStrategy = [...new Set(this.statesForStrategy)].sort() // array --> set --> back to array
         this.selectedStateForStrategy = this.statesForStrategy[0]
         this.priceBookDefinitions = results[1].data
-        const assignmentResult = results[2].data
-        // Save construction ratios keyed by state
-        this.constructionRatios = {}
-        assignmentResult.constructionRatios.forEach(ratio => {
-          // Also change the "ratio" object so that the ratios are keyed by cable type (e.g. ARIEL or BURIED)
-          var ratioValues = {}
-          ratio.constructionRatios.cableConstructionRatios.forEach(item => { ratioValues[item.type] = item })
-          // Make sure that we have values for all types of cable construction ratios
-          this.priceBookDefinitions.fiberLaborList.forEach(item => {
-            if (!ratioValues[item.cableConstructionType]) {
-              ratioValues[item.cableConstructionType] = {
-                type: item.cableConstructionType,
-                ratio: 0
-              }
-            }
-          })
-          var keyedRatio = angular.copy(ratio)
-          keyedRatio.constructionRatios.cableConstructionRatios = ratioValues
-          this.constructionRatios[keyedRatio.code] = keyedRatio
-        })
         // Save a deep copy of the result, we can use this later if we save modifications to the server
-        this.pristineAssignments = angular.copy(assignmentResult)
+        this.pristineAssignments = angular.copy(results[2].data)
         this.definePriceBookForSelectedState()
         this.$timeout()
       })
@@ -83,6 +73,13 @@ class PriceBookEditorController {
         return clonedItem
       })
       this.pristineAssignments.costAssignments = this.pristineAssignments.costAssignments.concat(stateCodeAssignments)
+    }
+    const hasConstructionRatiosForState = this.pristineAssignments.constructionRatios.filter(item => item.code === stateCode).length > 0
+    if (!hasConstructionRatiosForState) {
+      // Add default construction ratios for this state
+      var constructionRatio = angular.copy(defaultConstructionRatios)
+      constructionRatio.code = stateCode
+      this.pristineAssignments.constructionRatios.push(constructionRatio)
     }
   }
 
@@ -140,6 +137,32 @@ class PriceBookEditorController {
       })
       this.structuredPriceBookDefinitions.push(definition)
     })
+
+    // Save construction ratios keyed by state
+    this.defineConstructionRatiosForSelectedState()
+  }
+
+  defineConstructionRatiosForSelectedState () {
+    this.constructionRatios = this.constructionRatios || {}
+    if (!this.constructionRatios[this.selectedStateForStrategy]) {
+      this.pristineAssignments.constructionRatios.forEach(ratio => {
+        // Also change the "ratio" object so that the ratios are keyed by cable type (e.g. ARIEL or BURIED)
+        var ratioValues = {}
+        ratio.constructionRatios.cableConstructionRatios.forEach(item => { ratioValues[item.type] = item })
+        // Make sure that we have values for all types of cable construction ratios
+        this.priceBookDefinitions.fiberLaborList.forEach(item => {
+          if (!ratioValues[item.cableConstructionType]) {
+            ratioValues[item.cableConstructionType] = {
+              type: item.cableConstructionType,
+              ratio: 0
+            }
+          }
+        })
+        var keyedRatio = angular.copy(ratio)
+        keyedRatio.constructionRatios.cableConstructionRatios = ratioValues
+        this.constructionRatios[keyedRatio.code] = keyedRatio
+      })
+    }
   }
 
   getTotalFiberInstallCost () {
