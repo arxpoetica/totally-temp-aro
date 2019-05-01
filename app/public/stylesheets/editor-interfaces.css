@@ -273,8 +273,11 @@ editor-interface-tree .ei-header{
 .ei-table-col-sort-icon{
 	display: inline-block;
 	position: absolute;
+	/*
 	right: 11px;
 	top: 0px;
+	*/
+	padding-left: 4px;
 }
 
 

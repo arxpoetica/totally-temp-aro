@@ -8,7 +8,7 @@ class EditorInterfacePrimitiveController {
 
   $onInit () {
     this.enumVal = ''
-    this.enumSet = []
+    //this.enumSet = []
     this.isValid = true
     this.needsValidation = false
     this.dateVal = new Date()
@@ -39,38 +39,48 @@ class EditorInterfacePrimitiveController {
   }
 
   getEnumSet () {
-    if (this.displayProps.displayDataType == 'enum' && this.displayProps.enumTypeURL) {
-      AroFeatureFactory.getEnumSet(this.rootMetaData, this.parentObj, '/service/type-enum/' + this.displayProps.enumTypeURL)
-        .then((enumSet) => {
-          var oldEnumText = JSON.stringify(this.enumSet)
-          var isEnumSame = (JSON.stringify(enumSet) == oldEnumText)
+    if (this.displayProps.displayDataType == 'enum') {
+      
+      var digestEnum = (enumSet) => {
+        //console.log(enumSet)
+        var oldEnumText = JSON.stringify(this.displayProps.enumSet)
+        var isEnumSame = (JSON.stringify(enumSet) == oldEnumText)
 
-          this.enumSet = enumSet
-
-          var isInSet = false
-          for (let i = 0; i < this.enumSet.length; i++) {
-            if (this.enumSet[i].id == this.model) {
-              this.enumVal = this.enumSet[i].description
-              isInSet = true
-              break
-            }
+        this.displayProps.enumSet = enumSet
+        
+        
+        var isInSet = false
+        for (let i = 0; i < this.displayProps.enumSet.length; i++) {
+          if (this.displayProps.enumSet[i].id == this.model) {
+            this.enumVal = this.displayProps.enumSet[i].description
+            isInSet = true
+            break
           }
-          if (!isInSet && this.enumSet && this.enumSet.length > 0) {
-            if (this.isEdit) {
-              this.enumVal = this.enumSet[0].description
-              this.model = this.enumSet[0].id
-            } else {
-              this.enumVal = this.model
-            }
-            this.onChange()
-          } else if (!isEnumSame) {
-          // need to refresh the local view
-            this.$timeout()
+        }
+        if (!isInSet && this.displayProps.enumSet && this.displayProps.enumSet.length > 0) {
+          if (this.isEdit) {
+            this.enumVal = this.displayProps.enumSet[0].description
+            this.model = this.displayProps.enumSet[0].id
+          } else {
+            this.enumVal = this.model
           }
-        }, (errorText) => {
-          console.log(errorText)
-          this.enumSet = []
-        })
+          this.onChange()
+        } else if (!isEnumSame) {
+        // need to refresh the local view
+          this.$timeout()
+        }
+      }
+      
+      if (this.displayProps.enumTypeURL) {
+        AroFeatureFactory.getEnumSet(this.rootMetaData, this.parentObj, '/service/type-enum/' + this.displayProps.enumTypeURL)
+          .then(digestEnum, (errorText) => {
+            console.log(errorText)
+            this.displayProps.enumSet = []
+          })
+      }else{
+        digestEnum(this.displayProps.enumSet)
+      }
+        
     }
   }
 

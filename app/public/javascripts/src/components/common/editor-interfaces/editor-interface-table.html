@@ -64,7 +64,7 @@
 	        </td>
 	      </tr>
 	      <tr class="ei-foldout-row" ng-repeat-end>
-	        <td colspan="999">
+	        <td colspan="999" ng-if="$ctrl.detailView">
 	          <!-- ToDo: use a better strategy for dynamic components -->
 	          <resource-manager-detail ng-if="$ctrl.detailView == 'resource-manager-detail'"
 	                                   resource-manager="rowValue"
