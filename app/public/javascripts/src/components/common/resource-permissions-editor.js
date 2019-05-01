@@ -30,6 +30,7 @@ class ResourcePermissionsEditorController {
         return this.$http.get(`/service/auth/acl/${this.resourceType}/${this.resourceId}`)
       })
       .then((result) => {
+        //console.log(result)
         var idToSystemActor = {}
         this.systemActors.forEach((systemActor) => idToSystemActor[systemActor.id] = systemActor)
         result.data.resourcePermissions.forEach((access) => {
@@ -69,6 +70,7 @@ class ResourcePermissionsEditorController {
             rolePermissions: systemActorIdToPermissions[actorId]
           })
         })
+        //console.log(putBody)
         return this.$http.put(`/service/auth/acl/${this.resourceType}/${this.resourceId}`, putBody)
       })
       .catch((err) => console.error(err))

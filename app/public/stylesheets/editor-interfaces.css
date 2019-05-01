@@ -258,6 +258,9 @@ editor-interface-tree .ei-header{
 	white-space: nowrap;
 }
 
+.ei-table-button-cell{
+  text-align: right;
+}
 
 .ei-table-content{
 	max-width: 188px;
@@ -303,7 +306,6 @@ editor-interface-tree .ei-header{
 .ei-foldout-table-open .ei-foldout-icon-table-closed{
   display: none;
 }
-
 
 
 /* - pagination - */

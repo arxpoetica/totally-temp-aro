@@ -10,7 +10,7 @@ class DataSourceUploadController {
     }
     this.isUpLoad = false
     this.isUpLoading = false
-    this.dataSourceMeta = {} // Metadata for a data source (e.g. isLoading)
+    //this.dataSourceMeta = {} // Metadata for a data source (e.g. isLoading)
 
     this.saCreationTypes = [
       { id: 'upload_file', label: 'Upload From File' },
@@ -50,6 +50,72 @@ class DataSourceUploadController {
         }
       }, 0)
     })
+    
+    
+    
+    
+    // ---
+    
+    
+    this.tableSource = this.uploadSource = this.state.uploadDataSource
+    this.tableSources = this.uploadSources = this.state.uploadDataSources
+    this.rootSourceDescs = {}
+    
+    this.rows = []
+
+    this.displayProps = [
+      {
+        'propertyName': 'dataType', 
+        'levelOfDetail': 0,
+        'format': '',
+        'displayName': 'Data Type',
+        'enumTypeURL': '',
+        'displayDataType': 'string',
+        'defaultValue': '',
+        'editable': false,
+        'visible': true
+      },
+      {
+        'propertyName': 'name',
+        'levelOfDetail': 0,
+        'format': '',
+        'displayName': 'Name',
+        'enumTypeURL': '',
+        'displayDataType': 'string',
+        'defaultValue': '',
+        'editable': true,
+        'visible': true
+      }/*, 
+      {
+        'propertyName': 'permissionsView',
+        'levelOfDetail': 0,
+        'format': '',
+        'displayName': 'Permissions',
+        'enumTypeURL': '',
+        'displayDataType': 'string',
+        'defaultValue': '',
+        'editable': false,
+        'visible': true
+      }*/
+    ]
+    
+    this.idProp = 'identifier' // unique id of each row
+    
+    this.actions = [
+      {
+        buttonText: 'Delete', // Delete
+        buttonClass: 'btn-outline-danger',
+        iconClass: 'fa-trash-alt',
+        toolTip: 'Delete',
+        callBack: (row, index) => {
+          this.onDeleteRequest(row)
+        }
+      }
+    ]
+    
+    
+    // ---
+    
   }
 
   close () {
@@ -59,6 +125,23 @@ class DataSourceUploadController {
 
   modalShown () {
     this.state.showDataSourceUploadModal.next(true)
+    
+    this.tableSource = this.uploadSource = this.state.uploadDataSource
+    this.uploadSources = this.state.uploadDataSources
+    this.tableSources = [{'label':'all', 'name':'all'}].concat( this.state.uploadDataSources )
+    // some of the sources are alaises for others (construction_location for location)
+    // and we want to avoid duplications 
+    this.rootSourceDescs = {}
+    this.state.uploadDataSources.forEach((uploadSource) => {
+      var name = uploadSource.name
+      if (!!uploadSource.proxyFor) name = uploadSource.proxyFor
+      if (!this.rootSourceDescs.hasOwnProperty(name)){ 
+        this.rootSourceDescs[name] = uploadSource.name
+      }else{
+        this.rootSourceDescs[name] += ", "+uploadSource.name
+      }
+    })
+    
   }
 
   modalHide () {
@@ -73,13 +156,14 @@ class DataSourceUploadController {
   onDestroyConicUploader () {
     this.conicTileSystemUploaderApi = null
   }
-
+  
+  /*
   registerSaveAccessCallback (saveResourceAccess) {
     // We will call this function in resource-permissions-editor when we want to save the access settings for a data source.
     // Note that this will get overwritten every time we open a datasources access editor (and only one editor can be active at a time).
     this.saveResourceAccess = saveResourceAccess
   }
-
+  
   saveAccessSettings (dataSource) {
     console.log(dataSource)
     // This will call a function into the resource permissions editor that will do the actual save
@@ -95,7 +179,8 @@ class DataSourceUploadController {
         .catch((err) => console.error(err))
     }
   }
-
+  */
+  
   save () {
     if (this.conicTileSystemUploaderApi) {
       // We have a conic system uploader API, so the upload will be handled by the control
@@ -234,36 +319,98 @@ class DataSourceUploadController {
         this.submit(response.data.libraryItem.identifier)
       })
   }
-
+  
+  
+  // --- date source table view --- //
+  
+  onUploadSourceChange () {
+    this.state.uploadDataSource = this.tableSource = this.uploadSource
+    this.loadDataSources()
+  }
+  
+  onTableSourceChange () {
+    if ('all' != this.tableSource.name){
+      this.state.uploadDataSource = this.uploadSource = this.tableSource
+    }
+    this.loadDataSources()
+  }
+  
   deleteDatasource (dataSource) {
     this.$http.delete(`/service/v1/library-entry/${dataSource.identifier}?user_id=${this.state.loggedInUser.id}`)
       .then(() => {
         this.state.dataItems[dataSource.dataType].allLibraryItems = this.state.dataItems[dataSource.dataType].allLibraryItems.filter(item => item.identifier !== dataSource.identifier)
+        this.loadDataSources()
         this.$timeout()
       })
   }
-
+  
+  onDeleteRequest (dataSource) {
+    this.askUserToConfirmManagerDelete(dataSource.name)
+    .then((okToDelete) => {
+      if (okToDelete) {
+        this.deleteDatasource(dataSource)
+      }
+    })
+    .catch((err) => console.error(err))
+  }
+  
+  askUserToConfirmManagerDelete (name) {
+    return new Promise((resolve, reject) => {
+      swal({
+        title: 'Delete data source?',
+        text: `Are you sure you want to delete "${name}"?`,
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No'
+      }, (result) => {
+        if (result) {
+          resolve(true)
+        } else {
+          resolve(false)
+        }
+      })
+    })
+  }
+  
   addDatasource (data) {
     this.state.dataItems[data.dataType].allLibraryItems.push(data)
   }
   
-  // ToDo: this doesn't belong here, move to permissions editor 
   loadDataSources () {
-    if (!this.state.uploadDataSource) {
-      return // When items in state.js are being refreshed, this may be null as the combobox has a two-way binding to the model.
+    if (!this.tableSource) {
+      return // When items in state.js are being refreshed, state.uploadDataSource may be null as the combobox has a two-way binding to the model.
     }
     if (this.isDataManagementView) {
-      var aclPromises = [] // For each data source, get the effective ACL permissions and then allow/disallow editing
-      this.dataSourceMeta = {}
-      var indexToIdentifier = {}
-      this.state.dataItems[this.state.uploadDataSource.name].allLibraryItems.forEach((item, index) => {
-        this.dataSourceMeta[item.identifier] = {
-          isExpanded: false,
-          isEditableByUser: false
+      //var aclPromises = [] // For each data source, get the effective ACL permissions and then allow/disallow editing
+      //this.dataSourceMeta = {}
+      //var indexToIdentifier = {}
+      
+      this.rows = []
+      
+      this.state.uploadDataSources.forEach((uploadSource) => {
+        if (('all' == this.tableSource.name && !uploadSource.proxyFor) || uploadSource.name == this.tableSource.name){
+          this.state.dataItems[uploadSource.name].allLibraryItems.forEach((item, index) => {
+            item.id = item.identifier // we need to standardize ID property names
+            if ('all' == this.tableSource.name && this.rootSourceDescs.hasOwnProperty(item.dataType)){
+              item.dataType = this.rootSourceDescs[item.dataType]
+            }
+            this.rows.push(item)
+            
+            /*
+            this.dataSourceMeta[item.identifier] = {
+              isExpanded: false,
+              isEditableByUser: false
+            }
+            indexToIdentifier[index] = item.identifier
+            aclPromises.push(this.aclManager.getEffectivePermissions('LIBRARY', item.identifier, this.state.loggedInUser))
+            */
+          })
         }
-        indexToIdentifier[index] = item.identifier
-        aclPromises.push(this.aclManager.getEffectivePermissions('LIBRARY', item.identifier, this.state.loggedInUser))
       })
+      //console.log(this.rows)
+      /*
       Promise.all(aclPromises)
         .then(results => {
           // We have permissions for all data sources. Now set the editable flag so that the permissions show up all at once.
@@ -271,18 +418,24 @@ class DataSourceUploadController {
             this.dataSourceMeta[indexToIdentifier[index]].isEditableByUser = dataSourcePermissions && (dataSourcePermissions.ADMIN || dataSourcePermissions.IS_SUPERUSER)
           })
           this.$timeout()
+          console.log(this.dataSourceMeta)
         })
         .catch(err => console.error(err))
+      */
     }
   }
-
+  
+  /*
   toggleDataSourceExpanded (dataSource) {
     const newValue = !this.dataSourceMeta[dataSource.identifier].isExpanded
     // Collapse all datasources, then expand/collapse the selected one
     this.state.dataItems[this.state.uploadDataSource.name].allLibraryItems.forEach((item, index) => this.dataSourceMeta[item.identifier].isExpanded = false)
     this.dataSourceMeta[dataSource.identifier].isExpanded = newValue
   }
-
+  */
+  
+  
+  
   toggleView () {
     this.isDataManagementView = !this.isDataManagementView
     this.loadDataSources()

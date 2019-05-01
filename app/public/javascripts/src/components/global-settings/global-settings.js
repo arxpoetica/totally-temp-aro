@@ -57,6 +57,11 @@ class GlobalSettingsController {
     }
     this.modalHide()
   }
+  
+  openResourceEdit () {
+    this.state.showPlanResourceEditor('all')
+    this.modalHide()
+  }
 
   goBack () {
     if (!this.isManageUsersView() && !this.isReleaseNotesDescriptionView()) {

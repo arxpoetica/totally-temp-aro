@@ -657,11 +657,15 @@ class State {
           service.uploadDataSources = []
           dataTypeEntityResult.forEach((dataTypeEntity) => {
             if (dataTypeEntity.uploadSupported) {
+              /*
               service.uploadDataSources.push({
                 id: dataTypeEntity.id,
                 label: dataTypeEntity.description,
                 name: dataTypeEntity.name
               })
+              */
+              dataTypeEntity.label = dataTypeEntity.description
+              service.uploadDataSources.push(dataTypeEntity)
             }
           })
 

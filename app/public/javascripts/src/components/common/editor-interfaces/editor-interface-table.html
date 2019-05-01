@@ -43,7 +43,7 @@
 		          </editor-interface-value>
 	          </div>
 	        </td>
-	        <td class="ei-table-cell">
+	        <td class="ei-table-cell ei-table-button-cell">
 	          <button class="btn btn-sm ng-class: btnValue.buttonClass;" 
 	                  ng-if="$ctrl.actionDisplayLimit >= $ctrl.actions.length"
 	                  ng-repeat="(btnKey, btnValue) in $ctrl.actions"
@@ -67,7 +67,8 @@
 	        <td colspan="999">
 	          <!-- ToDo: use a better strategy for dynamic components -->
 	          <resource-manager-detail ng-if="$ctrl.detailView == 'resource-manager-detail'"
-	                                   resource-manager="rowValue">
+	                                   resource-manager="rowValue"
+	                                   resource-type="$ctrl.detailData.resourceType">
 	          </resource-manager-detail>
 	        </td>
 	      </tr>
