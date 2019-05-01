@@ -6,7 +6,7 @@
   
   <div class="ei-table-contain">
 	  <table class="table table-sm ei-table-foldout-striped" style="border-bottom: 1px solid #dee2e6;">
-      <thead class="thead-dark">
+      <thead class="{{$ctrl.theadClass}}">
 	      <tr>
 	        <th ng-if="!!$ctrl.detailView"></th>
 	        <th class="ei-table-col-head-sortable" 
@@ -72,9 +72,10 @@
 	          </resource-manager-detail>
 	        </td>
 	      </tr>
-	      
-	    </div>
-	  </div>
+	      <!-- should NOT be in repeat -->
+	      <tr><td colspan="999" class="ei-table-bottomline"></td></tr>
+	    </tbody>
+	  </table>
   </div>
   
   <div class="ei-pagination-menu" ng-if="$ctrl.rowsPerPage < $ctrl.rows.length">
