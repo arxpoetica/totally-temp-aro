@@ -998,6 +998,8 @@ class State {
 
     service.loadPlan = (planId) => {
       tracker.trackEvent(tracker.CATEGORIES.LOAD_PLAN, tracker.ACTIONS.CLICK, 'PlanID', planId)
+      service.plan.getValue().id && socketManager.leavePlanRoom(service.plan.getValue().id) //leave previous plan
+      socketManager.joinPlanRoom(planId) //Join new plan
       service.selectedDisplayMode.next(service.displayModes.VIEW)
       var userId = service.loggedInUser.id
       var plan = null
@@ -1247,7 +1249,8 @@ class State {
               // console.log(response)
                 if (response.status >= 200 && response.status <= 299) {
                   service.Optimizingplan.optimizationId = response.data.optimizationIdentifier
-                  service.startPolling()
+                  // service.startPolling()
+                  service.getOptimizationProgress(service.Optimizingplan)
                 } else {
                   console.error(response)
                 }
@@ -1259,43 +1262,90 @@ class State {
     }
 
     service.planOptimization = new Rx.BehaviorSubject(null)
-    service.startPolling = () => {
-      service.stopPolling()
-      service.progressPollingInterval = setInterval(() => {
-        $http.get(`/service/optimization/processes/${service.Optimizingplan.optimizationId}`).then((response) => {
-          var newPlan = JSON.parse(JSON.stringify(service.plan.getValue()))
-          newPlan.planState = response.data.optimizationState
-          service.planOptimization.next(newPlan)
-          service.checkPollingStatus(newPlan)
-          if (response.data.optimizationState === 'COMPLETED' ||
-            response.data.optimizationState === 'CANCELED' ||
-            response.data.optimizationState === 'FAILED') {
-            service.stopPolling()
+    // service.startPolling_old = () => {
+    //   service.stopPolling()
+    //   service.progressPollingInterval = setInterval(() => {
+    //     $http.get(`/service/optimization/processes/${service.Optimizingplan.optimizationId}`).then((response) => {
+    //       var newPlan = JSON.parse(JSON.stringify(service.plan.getValue()))
+    //       newPlan.planState = response.data.optimizationState
+    //       service.planOptimization.next(newPlan)
+    //       service.checkPollingStatus(newPlan)
+    //       if (response.data.optimizationState === 'COMPLETED' ||
+    //         response.data.optimizationState === 'CANCELED' ||
+    //         response.data.optimizationState === 'FAILED') {
+    //         service.stopPolling()
+    //         service.clearTileCachePlanOutputs()
+    //         tileDataService.markHtmlCacheDirty()
+    //         service.requestMapLayerRefresh.next(null)
+    //         delete service.Optimizingplan.optimizationId
+    //         service.loadPlanInputs(newPlan.id)
+    //       }
+    //       var diff = (Date.now() - new Date(response.data.startDate).getTime()) / 1000
+    //       var minutes = Math.floor(diff / 60)
+    //       var seconds = Math.ceil(diff % 60)
+    //       service.progressPercent = response.data.progress * 100
+    //       service.progressMessage = `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds} Runtime`
+    //       $timeout() // Trigger a digest cycle so that components can update
+    //     })
+    //   }, 1000)
+    // }
+
+    service.getOptimizationProgress = (newPlan) => {
+      service.Optimizingplan = newPlan
+      if(service.Optimizingplan && service.Optimizingplan.planState !== Constants.PLAN_STATE.COMPLETED) {
+        socketManager.subscribe('PROGRESS_MESSAGE_DATA', (progressData) => {
+          newPlan.planState = progressData.data.optimizationState
+
+          if(progressData.data.optimizationState === Constants.PLAN_STATE.COMPLETED) {
             service.clearTileCachePlanOutputs()
             tileDataService.markHtmlCacheDirty()
             service.requestMapLayerRefresh.next(null)
             delete service.Optimizingplan.optimizationId
             service.loadPlanInputs(newPlan.id)
           }
-          var diff = (Date.now() - new Date(response.data.startDate).getTime()) / 1000
+
+          service.planOptimization.next(newPlan)
+          var diff = (Date.now() - new Date(progressData.data.startDate).getTime()) / 1000
           var minutes = Math.floor(diff / 60)
           var seconds = Math.ceil(diff % 60)
-          service.progressPercent = response.data.progress * 100
+          service.progressPercent = progressData.data.progress * 100
           service.progressMessage = `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds} Runtime`
           $timeout() // Trigger a digest cycle so that components can update
         })
-      }, 1000)
-    }
-
-    service.stopPolling = () => {
-      if (service.progressPollingInterval) {
-        clearInterval(service.progressPollingInterval)
-        service.progressPollingInterval = null
       }
     }
 
+    // service.stopPolling = () => {
+    //   if (service.progressPollingInterval) {
+    //     clearInterval(service.progressPollingInterval)
+    //     service.progressPollingInterval = null
+    //   }
+    // }
+
+    // service.cancelOptimization_old = () => {
+    //   service.stopPolling()
+    //   service.isCanceling = true
+    //   $http.delete(`/service/optimization/processes/${service.Optimizingplan.optimizationId}`)
+    //     .then((response) => {
+    //     // Optimization process was cancelled. Get the plan status from the server
+    //       return $http.get(`/service/v1/plan/${service.Optimizingplan.id}?user_id=${service.loggedInUser.id}`)
+    //     })
+    //     .then((response) => {
+    //       service.isCanceling = false
+    //       service.Optimizingplan.planState = response.data.planState // Note that this should match with Constants.PLAN_STATE
+    //       delete service.Optimizingplan.optimizationId
+    //       service.clearTileCachePlanOutputs()
+    //       tileDataService.markHtmlCacheDirty()
+    //       service.requestMapLayerRefresh.next(null)
+    //     })
+    //     .catch((err) => {
+    //       console.error(err)
+    //       service.isCanceling = false
+    //     })
+    // }
+
     service.cancelOptimization = () => {
-      service.stopPolling()
+      // service.stopPolling()
       service.isCanceling = true
       $http.delete(`/service/optimization/processes/${service.Optimizingplan.optimizationId}`)
         .then((response) => {
@@ -1316,18 +1366,23 @@ class State {
         })
     }
 
-    service.checkPollingStatus = (newPlan) => {
-      service.stopPolling()
-      service.Optimizingplan = newPlan
-      service.isCanceling = false
-      if (service.Optimizingplan && service.Optimizingplan.planState === Constants.PLAN_STATE.STARTED) {
-      // Optimization is in progress. We can start polling for the results
-        service.startPolling()
-      }
-    }
+    // service.checkPollingStatus = (newPlan) => {
+    //   service.stopPolling()
+    //   service.Optimizingplan = newPlan
+    //   service.isCanceling = false
+    //   if (service.Optimizingplan && service.Optimizingplan.planState === Constants.PLAN_STATE.STARTED) {
+    //   // Optimization is in progress. We can start polling for the results
+    //     service.startPolling()
+    //     socketManager.joinProgressRoom(service.Optimizingplan.optimizationId)
+    //     socketManager.subscribe('PROGRESS_MESSAGE_DATA', (progressData) => {
+    //       console.log(progressData)
+    //     })
+    //   }
+    // }
 
     service.plan.subscribe((newPlan) => {
-      service.checkPollingStatus(newPlan)
+      // service.checkPollingStatus(newPlan)
+      service.getOptimizationProgress(newPlan)
     })
 
     service.getDefaultPlanInputs = () => {
@@ -1508,6 +1563,7 @@ class State {
       service.getOrCreateEphemeralPlan() // Will be called once when the page loads, since state.js is a service
         .then((result) => {
           plan = result.data
+          socketManager.joinPlanRoom(plan.id) //Join new plan
           // Get the default location for this user
           return $http.get(`/service/auth/users/${user.id}/configuration`)
         })

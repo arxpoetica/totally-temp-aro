@@ -20,8 +20,16 @@ class SocketManager {
     this.broadcastnsp.emit('SOCKET_BROADCAST_ROOM', group)
   }
 
+  joinPlanRoom (roomId) {
+    this.socket.emit('SOCKET_JOIN_PLAN_ROOM', roomId)
+  }
+
   leaveRoom (roomId) {
     this.socket.emit('SOCKET_LEAVE_ROOM', roomId)
+  }
+
+  leavePlanRoom (roomId) {
+    this.socket.emit('SOCKET_LEAVE_PLAN_ROOM', roomId)
   }
 
   subscribe (messageType, callback) {

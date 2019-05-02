@@ -3,6 +3,8 @@ const helpers = require('../helpers')
 const config = helpers.config
 const VECTOR_TILE_DATA_MESSAGE = 'VECTOR_TILE_DATA'
 const VECTOR_TILE_EXCHANGE = 'aro_vt', VECTOR_TILE_QUEUE = 'vectorTileQueue'
+const PROGRESS_MESSAGE = 'PROGRESS_MESSAGE_DATA'
+const PROGRESS_EXCHANGE = 'aro_progress', PROGRESS_QUEUE = 'progressQueue'
 const BROADCAST_MESSAGE = 'BROADCAST_MESSAGE'
 class SocketManager {
   
@@ -24,6 +26,15 @@ class SocketManager {
       })
       socket.on('SOCKET_LEAVE_ROOM', (roomId) => {
         console.log(`Leaving socket room: /${roomId}`)
+        socket.leave(`/${roomId}`)
+      })
+
+      socket.on('SOCKET_JOIN_PLAN_ROOM', (roomId) => {
+        console.log(`Joining plan socket room: /${roomId}`)
+        socket.join(`/${roomId}`)
+      })
+      socket.on('SOCKET_LEAVE_PLAN_ROOM', (roomId) => {
+        console.log(`Leaving plan socket room: /${roomId}`)
         socket.leave(`/${roomId}`)
       })
     })
@@ -65,6 +76,25 @@ class SocketManager {
               self.io.to(`/${roomId}`).emit('message', { type: VECTOR_TILE_DATA_MESSAGE, data: msg })
             }
           }, {noAck: true})
+
+          // Create progress channel
+          ch.assertQueue(PROGRESS_QUEUE, {durable: false})
+          ch.assertExchange(PROGRESS_EXCHANGE, 'topic')
+          ch.bindQueue(PROGRESS_QUEUE, PROGRESS_EXCHANGE, '#')
+  
+          ch.consume(PROGRESS_QUEUE, function(msg) {
+            const processId = JSON.parse(msg.content.toString()).processId
+            if (!processId) {
+              console.error(`ERROR: No socket roomId found for processId ${processId}`)
+            } else {
+              console.log(`Optimization Progress Socket: Routing message with UUID ${processId} to /${processId}`)
+              var data = JSON.parse(msg.content.toString())
+              //UI dependent on optimizationState at so many places TODO: need to remove optimizationstate
+              data.optimizationState = data.progress != 1 ? 'STARTED' : 'COMPLETED'
+              self.io.to(`/${processId}`).emit('message', { type: PROGRESS_MESSAGE, data:  data})
+            }
+          }, {noAck: true})
+
         })
       }
     })

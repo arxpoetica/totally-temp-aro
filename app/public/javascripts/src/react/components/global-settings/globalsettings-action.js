@@ -8,5 +8,5 @@ function broadcastMessage (message) {
 }
 
 export default {
-  broadcastMessage: broadcastMessage,
+  broadcastMessage: broadcastMessage
 }
