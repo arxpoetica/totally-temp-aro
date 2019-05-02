@@ -9,6 +9,7 @@ import UserActions from '../react/components/user/user-actions'
 import PlanActions from '../react/components/plan/plan-actions'
 import MapLayerActions from '../react/components/map-layers/map-layer-actions'
 import SelectionActions from '../react/components/selection/selection-actions'
+import PlanStates from '../react/components/plan/plan-states'
 import SelectionModes from '../react/components/selection/selection-modes'
 import socketManager from '../react/common/socket-manager'
 
@@ -1248,6 +1249,7 @@ class State {
                 if (response.status >= 200 && response.status <= 299) {
                   service.Optimizingplan.optimizationId = response.data.optimizationIdentifier
                   service.startPolling()
+                  service.setActivePlanState(PlanStates.START_STATE)
                 } else {
                   console.error(response)
                 }
@@ -1267,15 +1269,16 @@ class State {
           newPlan.planState = response.data.optimizationState
           service.planOptimization.next(newPlan)
           service.checkPollingStatus(newPlan)
-          if (response.data.optimizationState === 'COMPLETED' ||
-            response.data.optimizationState === 'CANCELED' ||
-            response.data.optimizationState === 'FAILED') {
+          if (response.data.optimizationState === PlanStates.COMPLETED ||
+            response.data.optimizationState === PlanStates.CANCELED ||
+            response.data.optimizationState === PlanStates.FAILED) {
             service.stopPolling()
             service.clearTileCachePlanOutputs()
             tileDataService.markHtmlCacheDirty()
             service.requestMapLayerRefresh.next(null)
             delete service.Optimizingplan.optimizationId
             service.loadPlanInputs(newPlan.id)
+            service.setActivePlanState(response.data.optimizationState)
           }
           var diff = (Date.now() - new Date(response.data.startDate).getTime()) / 1000
           var minutes = Math.floor(diff / 60)
@@ -1863,10 +1866,11 @@ class State {
     return {
       loadConfigurationFromServer: () => dispatch(UiActions.loadConfigurationFromServer()),
       setLoggedInUserRedux: loggedInUser => dispatch(UserActions.setLoggedInUser(loggedInUser)),
-      setPlanRedux: plan => dispatch(PlanActions.setPlan(plan)),
+      setPlanRedux: plan => dispatch(PlanActions.setActivePlan(plan)),
       setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId)),
       addPlanTargets: (planId, planTargets) => dispatch(SelectionActions.addPlanTargets(planId, planTargets)),
       removePlanTargets: (planId, planTargets) => dispatch(SelectionActions.removePlanTargets(planId, planTargets)),
+      setActivePlanState: planState => dispatch(PlanActions.setActivePlanState(planState)),
       updateShowSiteBoundary: isVisible => dispatch(MapLayerActions.setShowSiteBoundary(isVisible))
     }
   }

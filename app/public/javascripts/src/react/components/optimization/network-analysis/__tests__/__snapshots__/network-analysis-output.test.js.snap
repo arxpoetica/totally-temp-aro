@@ -4,6 +4,11 @@ exports[`When report and report definition are empty 1`] = `
 <div>
   <div
     className="row p-3"
+    style={
+      Object {
+        "display": "none",
+      }
+    }
   >
     <div
       className="col-md-4"
@@ -28,7 +33,23 @@ exports[`When report and report definition are empty 1`] = `
       />
     </div>
   </div>
-  <canvas />
+  <canvas
+    style={
+      Object {
+        "display": "none",
+      }
+    }
+  />
+  <div
+    className="alert alert-warning mt-3"
+    style={
+      Object {
+        "display": "block",
+      }
+    }
+  >
+    Network analysis data not available. Run a new network analysis to see results.
+  </div>
   <pre
     style={
       Object {
@@ -61,20 +82,6 @@ exports[`When report and report definition are given 1`] = `
         "npv": 333972.6394671266,
       },
       Object {
-        "capex": 221904.55623732723,
-        "coverage": 1647,
-        "index": 3,
-        "irr": 0.6023000000000015,
-        "npv": 2102823.3532786667,
-      },
-      Object {
-        "capex": 482498.3552715056,
-        "coverage": 3580,
-        "index": 4,
-        "irr": 0.5882000000000004,
-        "npv": 4402880.713705363,
-      },
-      Object {
         "capex": 1573704.1506588343,
         "coverage": 11262,
         "index": 5,
@@ -87,6 +94,20 @@ exports[`When report and report definition are given 1`] = `
         "index": 6,
         "irr": 0.5437000000000013,
         "npv": 15683535.295389896,
+      },
+      Object {
+        "capex": 221904.55623732723,
+        "coverage": 1647,
+        "index": 3,
+        "irr": 0.6023000000000015,
+        "npv": 2102823.3532786667,
+      },
+      Object {
+        "capex": 482498.3552715056,
+        "coverage": 3580,
+        "index": 4,
+        "irr": 0.5882000000000004,
+        "npv": 4402880.713705363,
       },
       Object {
         "capex": 2158455.9218533617,
@@ -113,40 +134,7 @@ exports[`When report and report definition are given 1`] = `
               "datasets": Array [
                 Object {
                   "backgroundColor": "rgb(121, 127, 121)",
-                  "data": Array [
-                    Object {
-                      "x": 25373.196882982724,
-                      "y": 69.26999999999963,
-                    },
-                    Object {
-                      "x": 28469.416882982725,
-                      "y": 68.91999999999996,
-                    },
-                    Object {
-                      "x": 221904.55623732723,
-                      "y": 60.23000000000015,
-                    },
-                    Object {
-                      "x": 482498.3552715056,
-                      "y": 58.820000000000036,
-                    },
-                    Object {
-                      "x": 1573704.1506588343,
-                      "y": 55.04000000000019,
-                    },
-                    Object {
-                      "x": 1950232.128700931,
-                      "y": 54.37000000000013,
-                    },
-                    Object {
-                      "x": 2158455.9218533617,
-                      "y": 53.95000000000001,
-                    },
-                    Object {
-                      "x": 2178230.5915344288,
-                      "y": 53.90000000000001,
-                    },
-                  ],
+                  "data": Array [],
                   "fill": false,
                   "label": "IRR",
                   "propertyName": "irr",
@@ -171,9 +159,7 @@ exports[`When report and report definition are given 1`] = `
                   Object {
                     "display": true,
                     "labelString": "CAPEX",
-                    "ticks": Object {
-                      "userCallback": [Function],
-                    },
+                    "ticks": Object {},
                   },
                 ],
                 "yAxes": Array [
@@ -181,7 +167,6 @@ exports[`When report and report definition are given 1`] = `
                     "display": true,
                     "ticks": Object {
                       "beginAtZero": false,
-                      "callback": [Function],
                     },
                   },
                 ],
@@ -191,9 +176,7 @@ exports[`When report and report definition are given 1`] = `
                 "display": false,
               },
               "tooltips": Object {
-                "callbacks": Object {
-                  "label": [Function],
-                },
+                "callbacks": Object {},
               },
             },
             "type": "scatter",
@@ -228,6 +211,11 @@ exports[`When report and report definition are given 1`] = `
   <div>
     <div
       className="row p-3"
+      style={
+        Object {
+          "display": "flex",
+        }
+      }
     >
       <div
         className="col-md-4"
@@ -259,7 +247,13 @@ exports[`When report and report definition are given 1`] = `
         </select>
       </div>
     </div>
-    <canvas />
+    <canvas
+      style={
+        Object {
+          "display": "block",
+        }
+      }
+    />
     <a
       className="btn btn-sm btn-light float-right"
       download={true}
@@ -271,99 +265,23 @@ exports[`When report and report definition are given 1`] = `
       />
        Download Report
     </a>
-    <pre
+    <div
+      className="alert alert-warning mt-3"
       style={
         Object {
           "display": "none",
         }
       }
     >
-      {
-  "name": "irr",
-  "displayName": "IRR",
-  "type": "scatter",
-  "data": {
-    "datasets": [
-      {
-        "label": "IRR",
-        "backgroundColor": "rgb(121, 127, 121)",
-        "data": [
-          {
-            "x": 25373.196882982724,
-            "y": 69.26999999999963
-          },
-          {
-            "x": 28469.416882982725,
-            "y": 68.91999999999996
-          },
-          {
-            "x": 221904.55623732723,
-            "y": 60.23000000000015
-          },
-          {
-            "x": 482498.3552715056,
-            "y": 58.820000000000036
-          },
-          {
-            "x": 1573704.1506588343,
-            "y": 55.04000000000019
-          },
-          {
-            "x": 1950232.128700931,
-            "y": 54.37000000000013
-          },
-          {
-            "x": 2158455.9218533617,
-            "y": 53.95000000000001
-          },
-          {
-            "x": 2178230.5915344288,
-            "y": 53.90000000000001
-          }
-        ],
-        "fill": false,
-        "propertyName": "irr"
-      }
-    ]
-  },
-  "options": {
-    "legend": {
-      "display": false
-    },
-    "elements": {
-      "line": {
-        "fill": false,
-        "tension": 0
-      }
-    },
-    "showLines": true,
-    "responsive": true,
-    "title": {
-      "display": false
-    },
-    "scales": {
-      "xAxes": [
-        {
-          "display": true,
-          "labelString": "CAPEX",
-          "ticks": {}
+      Network analysis data not available. Run a new network analysis to see results.
+    </div>
+    <pre
+      style={
+        Object {
+          "display": "none",
         }
-      ],
-      "yAxes": [
-        {
-          "display": true,
-          "ticks": {
-            "beginAtZero": false
-          }
-        }
-      ]
-    },
-    "tooltips": {
-      "callbacks": {}
-    }
-  }
-}
-    </pre>
+      }
+    />
   </div>
 </NetworkAnalysisOutput>
 `;
@@ -372,6 +290,11 @@ exports[`When report definition is empty 1`] = `
 <div>
   <div
     className="row p-3"
+    style={
+      Object {
+        "display": "none",
+      }
+    }
   >
     <div
       className="col-md-4"
@@ -396,7 +319,13 @@ exports[`When report definition is empty 1`] = `
       />
     </div>
   </div>
-  <canvas />
+  <canvas
+    style={
+      Object {
+        "display": "none",
+      }
+    }
+  />
   <a
     className="btn btn-sm btn-light float-right"
     download={true}
@@ -408,6 +337,16 @@ exports[`When report definition is empty 1`] = `
     />
      Download Report
   </a>
+  <div
+    className="alert alert-warning mt-3"
+    style={
+      Object {
+        "display": "block",
+      }
+    }
+  >
+    Network analysis data not available. Run a new network analysis to see results.
+  </div>
   <pre
     style={
       Object {
@@ -422,6 +361,11 @@ exports[`When report is empty 1`] = `
 <div>
   <div
     className="row p-3"
+    style={
+      Object {
+        "display": "none",
+      }
+    }
   >
     <div
       className="col-md-4"
@@ -453,7 +397,23 @@ exports[`When report is empty 1`] = `
       </select>
     </div>
   </div>
-  <canvas />
+  <canvas
+    style={
+      Object {
+        "display": "none",
+      }
+    }
+  />
+  <div
+    className="alert alert-warning mt-3"
+    style={
+      Object {
+        "display": "block",
+      }
+    }
+  >
+    Network analysis data not available. Run a new network analysis to see results.
+  </div>
   <pre
     style={
       Object {

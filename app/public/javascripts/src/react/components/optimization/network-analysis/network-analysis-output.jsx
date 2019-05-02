@@ -4,6 +4,7 @@ import Chart from 'chart.js'
 import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
 import NetworkAnalysisActions from './network-analysis-actions'
+import PlanStates from '../../plan/plan-states'
 
 export class NetworkAnalysisOutput extends Component {
   constructor (props) {
@@ -16,12 +17,20 @@ export class NetworkAnalysisOutput extends Component {
   }
 
   render () {
-    if (this.props.reportDefinition && this.props.report) {
-      this.updateChart()
+    const hasChartData = Boolean(this.props.reportDefinition && this.props.report && this.props.report.length > 0)
+    if (hasChartData) {
+      // Why setTimeout()? We need the chart to be rendered with the right display style, THEN we create the chart.
+      setTimeout(() => this.updateChart(), 0)
+    } else {
+      // Someone may have clicked the 'Modify' button to re-run analysis. Clear old chart (if any)
+      if (this.chart) {
+        this.chart.destroy()
+        this.chart = null
+      }
     }
     return <div>
       {/* A combobox to select the chart type */}
-      <div className='row p-3'>
+      <div className='row p-3' style={{ display: hasChartData ? 'flex' : 'none' }}>
         <div className='col-md-4'>
           <label style={{ lineHeight: '36px' }}>Chart type</label>
         </div>
@@ -37,7 +46,7 @@ export class NetworkAnalysisOutput extends Component {
         </div>
       </div>
       {/* The canvas that will hold the actual chart */}
-      <canvas ref={this.chartRef} />
+      <canvas ref={this.chartRef} style={{ display: hasChartData ? 'block' : 'none' }} />
       {/* A button to download the report */}
       { this.props.report
         ? <a id='lnkDownloadNetworkAnalysisOutputReport' className='btn btn-sm btn-light float-right'
@@ -47,25 +56,46 @@ export class NetworkAnalysisOutput extends Component {
         </a>
         : null
       }
+      {/* If we don't have a chart to show, display a message */}
+      <div className='alert alert-warning mt-3' style={{ display: hasChartData ? 'none' : 'block' }}>
+        Network analysis data not available. Run a new network analysis to see results.
+      </div>
       {/* Render the current chart definition (i.e. the object that we use when creating a new chart) as a hidden <pre> tag.
           This is so that we include the chart definition in unit tests. */}
       <pre style={{ display: 'none' }}>
         {JSON.stringify(this.chartDefinitionForTesting, null, 2)}
       </pre>
+
     </div>
   }
 
+  componentWillReceiveProps (nextProps) {
+    // If the plan state changes (e.g. when optimization is finished), either clear the old report or load the new one
+    if (this.props.activePlanState !== nextProps.activePlanState) {
+      if (nextProps.activePlanState === PlanStates.START_STATE) {
+        this.props.clearOutput()
+      } else {
+        this.props.loadReport(this.props.planId)
+      }
+    }
+  }
+
   updateChart () {
+    if (!this.props.reportDefinition) {
+      return // This can happen when updateChart() is called from a setTimeout(), and the properties change in the meantime
+    }
     var selectedUiDefinition = null
     if (!this.state.selectedUiDefinition) {
       selectedUiDefinition = this.props.reportDefinition.uiDefinition[0]
     } else {
       selectedUiDefinition = this.props.reportDefinition.uiDefinition.filter(item => item.chartDefinition.name === this.state.selectedUiDefinition)[0]
     }
-    const chartDefinition = this.buildChartDefinition(selectedUiDefinition.chartDefinition, selectedUiDefinition.dataModifiers, this.props.report)
+    const copyOfSelectedUiDefinition = JSON.parse(JSON.stringify(selectedUiDefinition))
+    const chartDefinition = this.buildChartDefinition(copyOfSelectedUiDefinition.chartDefinition, copyOfSelectedUiDefinition.dataModifiers, this.props.report)
     this.chartDefinitionForTesting = JSON.parse(JSON.stringify(chartDefinition))
     if (this.chart) {
       this.chart.destroy()
+      this.chart = null
     }
     if (this.props.isTesting) {
       console.log('*** network-analysis-output: We are running in test mode. The actual chart will not be created')
@@ -179,6 +209,7 @@ NetworkAnalysisOutput.propTypes = {
 
 const mapStateToProps = (state) => ({
   planId: state.plan.activePlan.id,
+  activePlanState: state.plan.activePlan.planState,
   reportMetaData: state.optimization.networkAnalysis.reportMetaData,
   reportDefinition: state.optimization.networkAnalysis.reportDefinition,
   report: state.optimization.networkAnalysis.report

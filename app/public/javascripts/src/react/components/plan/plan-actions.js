@@ -3,10 +3,10 @@ import CoverageActions from '../coverage/coverage-actions'
 import SelectionActions from '../selection/selection-actions'
 
 // Set the plan
-function setPlan (plan) {
+function setActivePlan (plan) {
   return dispatch => {
     dispatch({
-      type: Actions.PLAN_SET_PLAN,
+      type: Actions.PLAN_SET_ACTIVE_PLAN,
       payload: {
         plan: plan
       }
@@ -18,6 +18,14 @@ function setPlan (plan) {
   }
 }
 
+function setActivePlanState (planState) {
+  return {
+    type: Actions.PLAN_SET_ACTIVE_PLAN_STATE,
+    payload: planState
+  }
+}
+
 export default {
-  setPlan: setPlan
+  setActivePlan: setActivePlan,
+  setActivePlanState: setActivePlanState
 }
