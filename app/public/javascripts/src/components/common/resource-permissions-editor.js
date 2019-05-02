@@ -1,7 +1,8 @@
 class ResourcePermissionsEditorController {
-  constructor ($http, $timeout) {
+  constructor ($http, $timeout, state) {
     this.$http = $http
     this.$timeout = $timeout
+    this.state = state
     this.accessTypes = Object.freeze({
       RESOURCE_READ: { displayName: 'Read', permissionBits: null, actors: [] },
       RESOURCE_WRITE: { displayName: 'Write', permissionBits: null, actors: [] },
@@ -153,10 +154,11 @@ class ResourcePermissionsEditorController {
             rolePermissions: systemActorIdToPermissions[actorId]
           })
         })
+        console.log(`/service/auth/acl/${this.resourceType}/${this.resourceId}?userId=${this.state.loggedInUser.id}`)
         console.log(putBody)
-        return this.$http.put(`/service/auth/acl/${this.resourceType}/${this.resourceId}`, putBody)
+        return this.$http.put(`/service/auth/acl/${this.resourceType}/${this.resourceId}?userId=${this.state.loggedInUser.id}`, putBody)
       })
-      .catch((err) => console.error(err))
+      .catch((err) => console.error(err)) // reload pristine model? 
   }
   
   // depricate
@@ -180,7 +182,7 @@ class ResourcePermissionsEditorController {
   
 }
 
-ResourcePermissionsEditorController.$inject = ['$http', '$timeout']
+ResourcePermissionsEditorController.$inject = ['$http', '$timeout', 'state']
 
 let resourcePermissionsEditor = {
   templateUrl: '/components/common/resource-permissions-editor.html',
