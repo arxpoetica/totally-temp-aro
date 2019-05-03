@@ -29,9 +29,17 @@
 <editor-interface-table display-props="$ctrl.displayProps"
                         id-prop="$ctrl.idProp"
                         rows="$ctrl.rows"
+                        actions="$ctrl.actions"
                         is-edit="$ctrl.enabled" 
                         thead-class="''">
 </editor-interface-table>
 <div ng-if="$ctrl.enabled">
   add user: 
+  <select class="form-control ei-input-select" 
+      ng-model="$ctrl.newActor"
+      ng-options="item as item.name for item in $ctrl.subSystemActors | filter: $ctrl.filterNewActorList">
+  </select>
+  <button type="button" class="btn btn-sm btn-primary" ng-click="$ctrl.addActor()" ng-disabled="!$ctrl.newActor">
+    <i class="fa fa-plus ei-button-icon"></i>Add
+  </button>
 </div>

@@ -17,7 +17,9 @@ class ResourcePermissionsEditorController {
     
     
     // test data
-  
+    
+    this.newActor = null
+    
     this.rows = [
       {
         'systemActorId': 13371, 
@@ -64,7 +66,17 @@ class ResourcePermissionsEditorController {
       
     ]
     
-    
+    this.actions = [
+      {
+        buttonText: 'Delete', // Delete
+        buttonClass: 'btn-outline-danger',
+        iconClass: 'fa-trash-alt',
+        toolTip: 'Delete',
+        callBack: (row, index) => {
+          this.removeActor(row)
+        }
+      }
+    ]
     
     
     
@@ -74,10 +86,9 @@ class ResourcePermissionsEditorController {
     
     
     
-    
-    
-    
-    
+    this.filterNewActorList = (value, index, array) => {
+      return !this.rows.find((obj)=>{return obj.systemActorId === value.id})
+    }
   }
   
   
@@ -96,7 +107,29 @@ class ResourcePermissionsEditorController {
     console.log(this.subSystemActors)
     this.registerSaveAccessCallback && this.registerSaveAccessCallback({ saveResourceAccess: this.saveResourceAccess.bind(this) })
   }
-
+  
+  addActor () {
+    console.log(this.newActor)
+    this.rows.push({
+      'systemActorId': this.newActor.id, 
+      'name': this.newActor.name, 
+      'rolePermissions': 4
+    })
+  }
+  
+  removeActor (row) {
+    console.log(row)
+    this.rows = this.rows.filter(function(value, index, arr){
+      return value != row;
+    });
+  }
+  
+  
+  
+  
+  
+  
+  
   loadResourceAccess () {
     return this.$http.get('/service/auth/permissions')
       .then((result) => {
