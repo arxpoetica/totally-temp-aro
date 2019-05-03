@@ -3,36 +3,36 @@ class ResourcePermissionsEditorController {
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
-    this.accessTypes = Object.freeze({
-      RESOURCE_READ: { displayName: 'Read', permissionBits: null, actors: [] },
-      RESOURCE_WRITE: { displayName: 'Write', permissionBits: null, actors: [] },
-      RESOURCE_ADMIN: { displayName: 'Owner', permissionBits: null, actors: [] }
+    
+    this.authRollsEnum = []
+    
+    var requestedRolls = {
+      'RESOURCE_OWNER': 'Owner',
+      'RESOURCE_MODIFIER': 'Modifier',
+      'RESOURCE_VIEWER': 'Viewer'
+    }
+    
+    this.isOwner = false
+    
+    this.defaultPermissions = 4
+    this.ownerPermissions = 7
+    
+    this.state.authRolls.forEach((authRoll) => {
+      if (requestedRolls.hasOwnProperty(authRoll.name)) {
+        this.authRollsEnum.push({
+          'id': authRoll.permissions, 
+          'description': requestedRolls[authRoll.name], 
+          'name': authRoll.name
+        })
+        if ('RESOURCE_VIEWER' == authRoll.name) this.defaultPermissions = authRoll.permissions
+        if ('RESOURCE_OWNER' == authRoll.name) this.ownerPermissions = authRoll.permissions
+      }
     })
     
-    
-    
-    
-    
-    
-    
-    
-    // test data
+    console.log(this.authRollsEnum)
     
     this.newActor = null
-    
-    this.rows = [
-      {
-        'systemActorId': 13371, 
-        'name': 'name 1', 
-        'rolePermissions': 4
-      }, 
-      {
-        'systemActorId': 13372, 
-        'name': 'this is a name', 
-        'rolePermissions': 7
-      } 
-    ]
-    
+    this.rows = []
     this.idProp = 'systemActorId' // unique id of each row
     
     this.displayProps = [
@@ -53,11 +53,7 @@ class ResourcePermissionsEditorController {
         'format': '',
         'displayName': 'Role Permissions',
         'enumTypeURL': '',
-        'enumSet': [
-          {'id': 7, 'description':'Owner'}, 
-          {'id': 6, 'description':'Modifier'}, 
-          {'id': 4, 'description':'Viewer'}
-        ], 
+        'enumSet': this.authRollsEnum, 
         'displayDataType': 'enum',
         'defaultValue': '',
         'editable': true,
@@ -78,33 +74,20 @@ class ResourcePermissionsEditorController {
       }
     ]
     
-    
-    
-    
-    // ---
-    
-    
-    
-    
     this.filterNewActorList = (value, index, array) => {
       return !this.rows.find((obj)=>{return obj.systemActorId === value.id})
     }
   }
   
   
-  
-  
-  
-  
-  
   $onInit () {
     if (typeof this.enabled === 'undefined') {
       this.enabled = true // If not defined, then make it true
     }
-    this.loadResourceAccess()
+    
     this.subSystemActors = this.systemActors && this.systemActors.slice(0, 10)
-    console.log("actors")
-    console.log(this.subSystemActors)
+    this.loadResourceAccess()
+    
     this.registerSaveAccessCallback && this.registerSaveAccessCallback({ saveResourceAccess: this.saveResourceAccess.bind(this) })
   }
   
@@ -113,8 +96,9 @@ class ResourcePermissionsEditorController {
     this.rows.push({
       'systemActorId': this.newActor.id, 
       'name': this.newActor.name, 
-      'rolePermissions': 4
+      'rolePermissions': this.defaultPermissions
     })
+    this.onSelectionChanged()
   }
   
   removeActor (row) {
@@ -122,94 +106,43 @@ class ResourcePermissionsEditorController {
     this.rows = this.rows.filter(function(value, index, arr){
       return value != row;
     });
+    this.onSelectionChanged()
   }
-  
-  
-  
-  
-  
-  
+
   
   loadResourceAccess () {
-    return this.$http.get('/service/auth/permissions')
+    return this.$http.get(`/service/auth/acl/${this.resourceType}/${this.resourceId}`)
       .then((result) => {
-        console.log("load A")
-        console.log(result)
-        result.data.forEach((authPermissionEntity) => {
-          if (this.accessTypes.hasOwnProperty(authPermissionEntity.name)) {
-            this.accessTypes[authPermissionEntity.name].permissionBits = authPermissionEntity.id
-          }
-        })
-        // Get the actors that have access for this resource
-        return this.$http.get(`/service/auth/acl/${this.resourceType}/${this.resourceId}`)
-      })
-      .then((result) => {
-        console.log("load B")
-        console.log(result)
+        this.rows = []
         var idToSystemActor = {}
         this.systemActors.forEach((systemActor) => idToSystemActor[systemActor.id] = systemActor)
+        this.isOwner = false
+        console.log(result)
         result.data.resourcePermissions.forEach((access) => {
-          const systemActor = idToSystemActor[access.systemActorId]
-          const permission = access.rolePermissions
-          Object.keys(this.accessTypes).forEach((accessTypeKey) => {
-            if ((permission & this.accessTypes[accessTypeKey].permissionBits) != 0) {
-              this.accessTypes[accessTypeKey].actors.push(systemActor)
-            }
+          this.rows.push({
+            'systemActorId': access.systemActorId, 
+            'name': idToSystemActor[access.systemActorId].name, 
+            'rolePermissions': access.rolePermissions
           })
+          if (access.systemActorId == this.state.loggedInUser.id 
+              && access.rolePermissions == this.ownerPermissions) this.isOwner = true
         })
       })
       .catch((err) => console.error(err))
   }
-
-  saveResourceAccess () {
-    return this.$http.get(`/service/auth/acl/${this.resourceType}/${this.resourceId}`)
-      .then((result) => {
-        console.log("save A")
-        console.log(result)
-        // Loop through all our access types
-        var systemActorIdToPermissions = {}
-        Object.keys(this.accessTypes).forEach((accessTypeKey) => {
-          // Get the actors selected for this access type
-          const selectedActors = this.accessTypes[accessTypeKey].actors
-          selectedActors.forEach((selectedActor) => {
-            if (!systemActorIdToPermissions.hasOwnProperty(selectedActor.id)) {
-              systemActorIdToPermissions[selectedActor.id] = 0
-            }
-            // Set the permission bit
-            systemActorIdToPermissions[selectedActor.id] |= this.accessTypes[accessTypeKey].permissionBits
-          })
-        })
-        // Construct a put body with all the permissions we will send over to aro-service
-        var putBody = { resourcePermissions: [] }
-        Object.keys(systemActorIdToPermissions).forEach((actorId) => {
-          putBody.resourcePermissions.push({
-            systemActorId: actorId,
-            rolePermissions: systemActorIdToPermissions[actorId]
-          })
-        })
-        console.log(`/service/auth/acl/${this.resourceType}/${this.resourceId}?userId=${this.state.loggedInUser.id}`)
-        console.log(putBody)
-        return this.$http.put(`/service/auth/acl/${this.resourceType}/${this.resourceId}?userId=${this.state.loggedInUser.id}`, putBody)
-      })
-      .catch((err) => console.error(err)) // reload pristine model? 
-  }
   
-  // depricate
-  searchActors (filterObj) {
-    if (filterObj !== '') {
-      var reg = new RegExp(filterObj, 'i')
-      this.subSystemActors = this.systemActors.filter((actor) => {
-        // Filter users
-        if (actor.hasOwnProperty('firstName')) {
-          return actor.firstName.match(reg) || actor.lastName.match(reg)
-        }
-        // Filter Groups
-        else if (actor.hasOwnProperty('originalName')) {
-          return actor.originalName.match(reg)
+  saveResourceAccess () {
+    // check that user is still owner
+    
+    var putBody = {
+      'resourcePermissions': this.rows.map(row => {
+        return {
+          'systemActorId': row.systemActorId, 
+          'rolePermissions': row.rolePermissions
         }
       })
-      this.$timeout()
     }
+    return this.$http.put(`/service/auth/acl/${this.resourceType}/${this.resourceId}?userId=${this.state.loggedInUser.id}`, putBody)
   }
   
   

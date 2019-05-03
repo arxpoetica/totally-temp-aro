@@ -1444,7 +1444,18 @@ class State {
       service.entityTypeBoundaryList = []
     }
     service.selectedBoundaryTypeforSearch = null
-
+    
+    service.authRolls = []
+    service.reloadAuthRolls = () => {
+      ///auth/roles
+      return $http.get('/service/auth/roles')
+      .then((result) => {
+        service.authRolls = result.data
+      })
+      .catch((err) => console.error(err))
+    }
+    service.reloadAuthRolls()
+    
     service.systemActors = [] // All the system actors (i.e. users and groups)
     service.reloadSystemActors = () => {
       var newSystemActors = []
