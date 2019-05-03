@@ -1253,6 +1253,8 @@ class State {
                 if (response.status >= 200 && response.status <= 299) {
                   service.Optimizingplan.optimizationId = response.data.optimizationIdentifier
                   // service.startPolling()
+                  service.Optimizingplan.planState = Constants.PLAN_STATE.STARTED
+                  service.progressPercent = 0
                   service.getOptimizationProgress(service.Optimizingplan)
                   service.setActivePlanState(PlanStates.START_STATE)
                 } else {
@@ -1300,6 +1302,7 @@ class State {
         socketManager.subscribe('PROGRESS_MESSAGE_DATA', (progressData) => {
           console.log(progressData)
           newPlan.planState = progressData.data.optimizationState
+          service.Optimizingplan.planState = progressData.data.optimizationState
 
           if (progressData.data.optimizationState === Constants.PLAN_STATE.COMPLETED) {
             service.clearTileCachePlanOutputs()

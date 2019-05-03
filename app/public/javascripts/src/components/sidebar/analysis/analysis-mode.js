@@ -14,6 +14,13 @@ class AnalysisModeController {
 
     this.expandedAccordionIndex = this.accordions.INPUT
 
+    this.analysisModePanels = Object.freeze({
+      INPUT: 'INPUT',
+      OUTPUT: 'OUTPUT'
+    })
+
+    this.analysisModePanel = this.analysisModePanels.INPUT
+
     state.plan.subscribe((plan) => {
       this.plan = plan
     })
