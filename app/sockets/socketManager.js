@@ -72,6 +72,8 @@ class SocketManager {
   setupTileInvalidationAMQP () {
     var self = this
     const messageHandler = msg => {
+      console.log('Received tile invalidation message from service')
+      console.log(msg.content.toString())
       self.sockets.tileInvalidation.emit('message', {
         type: TILE_INVALIDATION_MESSAGE,
         payload: JSON.parse(msg.content.toString())
