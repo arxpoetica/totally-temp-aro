@@ -1182,12 +1182,6 @@ class State {
       }
     }
 
-    // Clear the tile cache for plan outputs like fiber, 5G nodes, etc.
-    service.clearTileCachePlanOutputs = () => {
-      // The tile cache will clear all cache entries whose keys contain the given keywords
-      tileDataService.clearDataCacheContaining(service.configuration.networkEquipment.tileCacheKeywords)
-    }
-
     service.showModifyQuestionDialog = () => {
       return new Promise((resolve, reject) => {
         swal({
@@ -1266,19 +1260,21 @@ class State {
     service.planOptimization = new Rx.BehaviorSubject(null)
     service.getOptimizationProgress = (newPlan) => {
       service.Optimizingplan = newPlan
-      if (service.Optimizingplan && service.Optimizingplan.planState !== Constants.PLAN_STATE.COMPLETED) {
+      if (service.Optimizingplan && service.Optimizingplan.planState !== PlanStates.COMPLETED) {
         SocketManager.subscribe('PROGRESS_MESSAGE_DATA', progressData => {
           if (progressData.data.processType === 'optimization') {
             console.log(progressData)
             newPlan.planState = progressData.data.optimizationState
             service.Optimizingplan.planState = progressData.data.optimizationState
 
-            if (progressData.data.optimizationState === Constants.PLAN_STATE.COMPLETED) {
-              service.clearTileCachePlanOutputs()
+            if (progressData.data.optimizationState === PlanStates.COMPLETED ||
+              progressData.data.optimizationState === PlanStates.CANCELED ||
+              progressData.data.optimizationState === PlanStates.FAILED) {
               tileDataService.markHtmlCacheDirty()
               service.requestMapLayerRefresh.next(null)
               delete service.Optimizingplan.optimizationId
               service.loadPlanInputs(newPlan.id)
+              service.setActivePlanState(progressData.data.optimizationState)
             }
 
             service.planOptimization.next(newPlan)

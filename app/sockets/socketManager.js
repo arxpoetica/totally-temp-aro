@@ -23,12 +23,15 @@ class SocketManager {
     const socket = require('socket.io')(app)
     this.sockets = {
       clients: socket.of('/clients'),
+      plans: socket.of('/plans'),
       broadcast: socket.of('/broadcast'),
       tileInvalidation: socket.of('/tileInvalidation')
     }
     this.setupPerClientSocket()
+    this.setupPerPlanSocket()
     this.setupVectorTileAMQP()
     this.setupTileInvalidationAMQP()
+    this.setupProgressAMQP()
   }
 
   // Set up the per-client socket namespace. Each client connected to the server will register with this namespace.
@@ -42,6 +45,23 @@ class SocketManager {
       })
       socket.on('SOCKET_LEAVE_ROOM', (roomId) => {
         console.log(`Leaving socket room: /${roomId}`)
+        socket.leave(`/${roomId}`)
+      })
+
+    })
+  }
+
+  // Set up the per-plan socket namespace. Each client connected to the server will register with this namespace.
+  setupPerPlanSocket() {
+    this.sockets.plans.on('connection', (socket) => {
+      console.log(`Connected socket with session id ${socket.client.id}`)
+
+      socket.on('SOCKET_JOIN_PLAN_ROOM', (roomId) => {
+        console.log(`Joining socket plan room: /${roomId}`)
+        socket.join(`/${roomId}`)
+      })
+      socket.on('SOCKET_LEAVE_PLAN_ROOM', (roomId) => {
+        console.log(`Leaving socket plan room: /${roomId}`)
         socket.leave(`/${roomId}`)
       })
     })
@@ -63,21 +83,6 @@ class SocketManager {
       }
     }
     this.setupAMQPConnectionWithService(VECTOR_TILE_QUEUE, VECTOR_TILE_EXCHANGE, messageHandler)
-
-    // Create progress channel
-    const progressHandler = msg => {
-      const processId = JSON.parse(msg.content.toString()).processId
-      if (!processId) {
-        console.error(`ERROR: No socket roomId found for processId ${processId}`)
-      } else {
-        console.log(`Optimization Progress Socket: Routing message with UUID ${processId} to /${processId}`)
-        var data = JSON.parse(msg.content.toString())
-        //UI dependent on optimizationState at so many places TODO: need to remove optimizationstate
-        data.optimizationState = data.progress != 1 ? 'STARTED' : 'COMPLETED'
-        self.sockets.clients.to(`/${processId}`).emit('message', { type: PROGRESS_MESSAGE, data:  data})
-      }
-    }
-    this.setupAMQPConnectionWithService(PROGRESS_QUEUE, PROGRESS_EXCHANGE, progressHandler)
   }
 
   // Map a vector tile request UUID to a client ID.
@@ -96,6 +101,24 @@ class SocketManager {
       })
     }
     this.setupAMQPConnectionWithService(TILE_INVALIDATION_QUEUE, TILE_INVALIDATION_EXCHANGE, messageHandler)
+  }
+
+  setupProgressAMQP() {
+    // Create progress channel
+    var self = this
+    const progressHandler = msg => {
+      const processId = JSON.parse(msg.content.toString()).processId
+      if (!processId) {
+        console.error(`ERROR: No socket roomId found for processId ${processId}`)
+      } else {
+        console.log(`Optimization Progress Socket: Routing message with UUID ${processId} to /${processId}`)
+        var data = JSON.parse(msg.content.toString())
+        //UI dependent on optimizationState at so many places TODO: need to remove optimizationstate
+        data.optimizationState = data.progress != 1 ? 'STARTED' : 'COMPLETED'
+        self.sockets.plans.to(`/${processId}`).emit('message', { type: PROGRESS_MESSAGE, data: data })
+      }
+    }
+    this.setupAMQPConnectionWithService(PROGRESS_QUEUE, PROGRESS_EXCHANGE, progressHandler)
   }
 
   // Sets up a AMQP connection with aro-service

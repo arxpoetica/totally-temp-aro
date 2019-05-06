@@ -6,6 +6,7 @@ class SocketManager {
     this.websocketSessionId = null
     this.sockets = {
       clients: io('/clients'),
+      plans: io('/plans'),
       broadcast: io('/broadcast'),
       tileInvalidation: io('/tileInvalidation')
     }
@@ -24,15 +25,15 @@ class SocketManager {
   }
 
   joinPlanRoom (roomId) {
-    this.socket.emit('SOCKET_JOIN_PLAN_ROOM', roomId)
+    this.sockets.clients.emit('SOCKET_JOIN_PLAN_ROOM', roomId)
   }
 
   leaveRoom (roomId) {
-    this.sockets.clients.emit('SOCKET_LEAVE_ROOM', roomId)
+    this.sockets.plans.emit('SOCKET_LEAVE_ROOM', roomId)
   }
 
   leavePlanRoom (roomId) {
-    this.socket.emit('SOCKET_LEAVE_PLAN_ROOM', roomId)
+    this.sockets.plans.emit('SOCKET_LEAVE_PLAN_ROOM', roomId)
   }
 
   subscribe (messageType, callback) {
