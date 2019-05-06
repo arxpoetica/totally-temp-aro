@@ -11,6 +11,12 @@ const TILE_INVALIDATION_QUEUE = 'tileInvalidationQueue'
 class SocketManager {
   constructor (app) {
     this.vectorTileRequestToRoom = {}
+    // Socket namespaces:
+    // default: Each client that connects to the server will do so with a "<Websocket ID>". To post a message to a specific
+    //          client, use the "/<Websocket ID>" room in the default namespace.
+    // broadcast: Used for broadcasting user messages to all connected clients. This is used when, say, an admin user
+    //            wants to send messages to all users.
+    // tileInvalidation: Used to send vector tile invalidation messages to all clients listening on the namespace.
     this.sockets = {
       default: require('socket.io')(app)
     }
