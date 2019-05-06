@@ -10,14 +10,13 @@ class SocketManager {
     this.broadcastnsp.on('message', message => this.routeMessage(message))
   }
 
-  initializeSession (websocketSessionId, group) {
+  initializeSession (websocketSessionId) {
     this.websocketSessionId = websocketSessionId
-    this.joinRoom(websocketSessionId, group)
+    this.joinRoom(websocketSessionId)
   }
 
-  joinRoom (roomId, group) {
+  joinRoom (roomId) {
     this.socket.emit('SOCKET_JOIN_ROOM', roomId)
-    this.broadcastnsp.emit('SOCKET_BROADCAST_ROOM', group)
   }
 
   leaveRoom (roomId) {

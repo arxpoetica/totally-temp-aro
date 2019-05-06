@@ -211,6 +211,14 @@ class MapTileRenderer {
     frontBufferCanvas.style.top = `0 px`
     var backBufferCanvas = this.createTileCanvas(ownerDocument)
     var heatmapCanvas = this.createTileCanvas(ownerDocument)
+
+    const newDiv = ownerDocument.createElement('div')
+    newDiv.style.width = '256px'
+    newDiv.style.height = '256px'
+    newDiv.style['background-color'] = 'rgba(0, 0, 0, 0.4)'
+    newDiv.style.display = 'none'
+    div.appendChild(newDiv)
+
     this.tileDataService.tileHtmlCache[numberedTileId] = {
       div: div,
       frontBufferCanvas: frontBufferCanvas,
