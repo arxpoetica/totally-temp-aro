@@ -999,8 +999,6 @@ class State {
 
     service.loadPlan = (planId) => {
       tracker.trackEvent(tracker.CATEGORIES.LOAD_PLAN, tracker.ACTIONS.CLICK, 'PlanID', planId)
-      service.plan.getValue().id && socketManager.leavePlanRoom(service.plan.getValue().id) //leave previous plan
-      socketManager.joinPlanRoom(planId) //Join new plan
       service.selectedDisplayMode.next(service.displayModes.VIEW)
       var userId = service.loggedInUser.id
       var plan = null
@@ -1136,8 +1134,6 @@ class State {
         return $http.post(url, {})
           .then((result) => {
             if (result.status >= 200 && result.status <= 299) {
-              currentPlan.id && socketManager.leavePlanRoom(currentPlan.id) //leave previous plan
-              socketManager.joinPlanRoom(result.data.id) //Join new plan
               service.setPlan(result.data, true)
               return Promise.resolve()
             }
@@ -1571,7 +1567,6 @@ class State {
       service.getOrCreateEphemeralPlan() // Will be called once when the page loads, since state.js is a service
         .then((result) => {
           plan = result.data
-          socketManager.joinPlanRoom(plan.id) //Join new plan
           // Get the default location for this user
           return $http.get(`/service/auth/users/${user.id}/configuration`)
         })
