@@ -18,7 +18,7 @@ class TileDataService {
     this.mapLayers = {}
     this.tileFetchers = [
       { description: 'HTTP (legacy)', fetcher: new HttpTileFetcher() },
-      { description: 'Websockets', fetcher: new SocketTileFetcher() },
+      { description: 'Websockets', fetcher: new SocketTileFetcher() }
     ]
     this.activeTileFetcher = this.tileFetchers[0]
 
@@ -38,6 +38,22 @@ class TileDataService {
       LOCK_ICON_KEY: 'LOCK_ICON_KEY',
       INVALIDATED_ICON_KEY: 'INVALIDATED_ICON_KEY'
     }
+  }
+
+  isWithinBounds (boxZoom, zoom, x, y, x1, y1, x2, y2) {
+    const scaleFactor = 1 << (boxZoom - zoom)
+    const wx1 = x * scaleFactor
+    const wx2 = (x + 1) * scaleFactor
+
+    const wy1 = y * scaleFactor
+    const wy2 = (y + 1) * scaleFactor
+
+    // Rectangles must not be to the Left of each other 
+    // And Rectangles must not be above each other
+    // This generalizes to points
+
+    return (!(wx1 > x2 || x1 > wx2) &&
+            !(wy2 < y1 || y2 < wy1))
   }
 
   setLocationStateIcon(locationState, iconUrl) {
@@ -356,33 +372,43 @@ class TileDataService {
     this.modifiedBoundaries = {}
   }
 
-  // Clear only those entries in the tile data cache containing the specified keywords
-  clearDataCacheContaining(keywords) {
-    // Clear data from the data cache
-    Object.keys(this.tileDataCache).forEach((tileId) => {
-      var singleTileCache = this.tileDataCache[tileId]
-      Object.keys(singleTileCache).forEach((cacheKey) => {
-        var shouldDelete = false
-        keywords.forEach((keyword) => shouldDelete = shouldDelete || (cacheKey.indexOf(keyword) >= 0))
-        if (shouldDelete) {
-          delete this.tileDataCache[tileId][cacheKey]
-        }
-      })
+  _clearCacheInTileBox (cache, setOfInvalidatedLayers, tileBox) {
+    Object.keys(cache).forEach(cacheKey => {
+      // Get the zoom, x and y from the html cache key
+      const components = cacheKey.split('-')
+      const tileZoom = +components[0]
+      const tileX = +components[1]
+      const tileY = +components[2]
+      if (this.isWithinBounds(tileBox.zoom, tileZoom, tileX, tileY, tileBox.x1, tileBox.y1, tileBox.x2, tileBox.y2)) {
+        // Delete all invalidated layers
+        const tileCache = cache[cacheKey]
+        Object.keys(tileCache).forEach(tileCacheKey => {
+          if (setOfInvalidatedLayers.has(tileCacheKey)) {
+            delete tileCache[tileCacheKey]
+          }
+        })
+      }
     })
+  }
 
-    // Clear data from the data provider cache
-    Object.keys(this.tileProviderCache).forEach((tileId) => {
-      var singleTileProvider = this.tileProviderCache[tileId]
-      Object.keys(singleTileProvider).forEach((cacheKey) => {
-        var shouldDelete = false
-        keywords.forEach((keyword) => shouldDelete = shouldDelete || (cacheKey.indexOf(keyword) >= 0))
-        if (shouldDelete) {
-          // Delete the pointer to the promise. This kind of leaves a "dangling" set of data, since the
-          // promise will contain the data for this and for other layers. However, since we deleted
-          // the pointer to the promise, our code will never access that dangling data.
-          delete this.tileProviderCache[tileId][cacheKey]
-        }
-      })
+  clearCacheInTileBox (invalidatedLayersArray, tileBox) {
+    const invalidatedLayers = new Set(invalidatedLayersArray)
+    this._clearCacheInTileBox(this.tileDataCache, invalidatedLayers, tileBox)
+    this._clearCacheInTileBox(this.tileProviderCache, invalidatedLayers, tileBox)
+  }
+
+  displayInvalidatedTiles (tileBox) {
+    Object.keys(this.tileHtmlCache).forEach(htmlCacheKey => {
+      // Get the zoom, x and y from the html cache key
+      const components = htmlCacheKey.split('-')
+      const tileZoom = +components[0]
+      const tileX = +components[1]
+      const tileY = +components[2]
+      if (this.isWithinBounds(tileBox.zoom, tileZoom, tileX, tileY, tileBox.x1, tileBox.y1, tileBox.x2, tileBox.y2)) {
+        // Show a div that indicated whether the data in this tile is stale. The div will be hidden after the div is rendered
+        const staleDataDiv = this.tileHtmlCache[htmlCacheKey].staleDataDiv
+        staleDataDiv.style.display = 'block'
+      }
     })
   }
 

@@ -192,9 +192,7 @@ class PlanEditorController {
     })
 
     this.currentTransaction = null
-    this.state.clearTileCachePlanOutputs() // Clear the data cache for network equipment, so it will be re-downloaded
     this.state.loadModifiedFeatures(planId)
-    this.state.requestMapLayerRefresh.next(null) // Request a refresh of the map layers
     this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
     this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO
     this.$timeout()
@@ -741,7 +739,6 @@ class PlanEditorController {
         // clone of existing or planned equipment
         const planId = this.state.plan.getValue().id
         // Add modified features to vector tiles and do the rendering, etc.
-        this.state.clearTileCachePlanOutputs()
         this.state.loadModifiedFeatures(planId)
           .then(() => {
             this.state.requestMapLayerRefresh.next(null)

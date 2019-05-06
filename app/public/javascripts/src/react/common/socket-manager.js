@@ -4,24 +4,27 @@ class SocketManager {
   constructor () {
     this.router = {}
     this.websocketSessionId = null
-    this.socket = io()
-    this.broadcastnsp = io('/broadcastRoom')
-    this.socket.on('message', message => this.routeMessage(message))
-    this.broadcastnsp.on('message', message => this.routeMessage(message))
+    this.sockets = {
+      clients: io('/clients'),
+      broadcast: io('/broadcast'),
+      tileInvalidation: io('/tileInvalidation')
+    }
+    Object.keys(this.sockets).forEach(namespaceKey => {
+      this.sockets[namespaceKey].on('message', message => this.routeMessage(message))
+    })
   }
 
-  initializeSession (websocketSessionId, group) {
+  initializeSession (websocketSessionId) {
     this.websocketSessionId = websocketSessionId
-    this.joinRoom(websocketSessionId, group)
+    this.joinRoom(websocketSessionId)
   }
 
-  joinRoom (roomId, group) {
-    this.socket.emit('SOCKET_JOIN_ROOM', roomId)
-    this.broadcastnsp.emit('SOCKET_BROADCAST_ROOM', group)
+  joinRoom (roomId) {
+    this.sockets.clients.emit('SOCKET_JOIN_ROOM', roomId)
   }
 
   leaveRoom (roomId) {
-    this.socket.emit('SOCKET_LEAVE_ROOM', roomId)
+    this.sockets.clients.emit('SOCKET_LEAVE_ROOM', roomId)
   }
 
   subscribe (messageType, callback) {
