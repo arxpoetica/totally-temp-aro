@@ -39,41 +39,35 @@ class SocketManager {
   setupVectorTileAMQP () {
     // We will receive vector tile data via a RabbitMQ server
     var self = this
-    const rabbitMqConnectionString = `amqp://${config.rabbitmq.username}:${config.rabbitmq.password}@${config.rabbitmq.server}`
-    amqp.connect(rabbitMqConnectionString, (err, conn) => {
-      if (err) {
-        console.error('ERROR when connecting to the RabbitMQ server')
-        console.error(err)
+    const messageHandler = msg => {
+      const uuid = JSON.parse(msg.content.toString()).uuid
+      const roomId = self.vectorTileRequestToRoom[uuid]
+      if (!roomId) {
+        console.error(`ERROR: No socket roomId found for vector tile UUID ${uuid}`)
       } else {
-        conn.createChannel(function (err, ch) {
-          if (err) {
-            console.error('ERROR when trying to create a channel on the RabbitMQ server')
-            console.error(err)
-          }
-          ch.assertQueue(VECTOR_TILE_QUEUE, { durable: false })
-          ch.assertExchange(VECTOR_TILE_EXCHANGE, 'topic')
-          ch.bindQueue(VECTOR_TILE_QUEUE, VECTOR_TILE_EXCHANGE, '#')
-
-          ch.consume(VECTOR_TILE_QUEUE, function (msg) {
-            const uuid = JSON.parse(msg.content.toString()).uuid
-            const roomId = self.vectorTileRequestToRoom[uuid]
-            if (!roomId) {
-              console.error(`ERROR: No socket roomId found for vector tile UUID ${uuid}`)
-            } else {
-              console.log(`Vector Tile Socket: Routing message with UUID ${uuid} to /${roomId}`)
-              delete self.vectorTileRequestToRoom[uuid]
-              self.sockets.default.to(`/${roomId}`).emit('message', { type: VECTOR_TILE_DATA_MESSAGE, data: msg })
-            }
-          }, { noAck: true })
-        })
+        console.log(`Vector Tile Socket: Routing message with UUID ${uuid} to /${roomId}`)
+        delete self.vectorTileRequestToRoom[uuid]
+        self.sockets.default.to(`/${roomId}`).emit('message', { type: VECTOR_TILE_DATA_MESSAGE, data: msg })
       }
-    })
+    }
+    this.setupAMQPConnectionWithService(VECTOR_TILE_QUEUE, VECTOR_TILE_EXCHANGE, messageHandler)
   }
 
   setupTileInvalidationAMQP () {
-    // We will receive vector tile invalidation messages via a RabbitMQ server. These should be
-    // broadcast to all connected clients
+    // We will receive vector tile invalidation messages via a RabbitMQ server. These should be broadcast to all connected clients
     var self = this
+    const messageHandler = msg => {
+      self.sockets.tileInvalidation.emit('message', {
+        type: TILE_INVALIDATION_MESSAGE,
+        payload: JSON.parse(msg.content.toString())
+      })
+    }
+    this.setupAMQPConnectionWithService(TILE_INVALIDATION_QUEUE, TILE_INVALIDATION_EXCHANGE, messageHandler)
+  }
+
+  // Sets up a AMQP connection with aro-service
+  setupAMQPConnectionWithService (queue, exchange, messageHandler) {
+    // We will receive vector tile data via a RabbitMQ server
     const rabbitMqConnectionString = `amqp://${config.rabbitmq.username}:${config.rabbitmq.password}@${config.rabbitmq.server}`
     amqp.connect(rabbitMqConnectionString, (err, conn) => {
       if (err) {
@@ -85,15 +79,10 @@ class SocketManager {
             console.error('ERROR when trying to create a channel on the RabbitMQ server')
             console.error(err)
           }
-          ch.assertQueue(TILE_INVALIDATION_QUEUE, { durable: false })
-          ch.assertExchange(TILE_INVALIDATION_EXCHANGE, 'topic')
-          ch.bindQueue(TILE_INVALIDATION_QUEUE, TILE_INVALIDATION_EXCHANGE, '#')
-          ch.consume(TILE_INVALIDATION_QUEUE, msg => {
-            self.sockets.tileInvalidation.emit('message', {
-              type: TILE_INVALIDATION_MESSAGE,
-              payload: JSON.parse(msg.content.toString())
-            })
-          })
+          ch.assertQueue(queue, { durable: false })
+          ch.assertExchange(exchange, 'topic')
+          ch.bindQueue(queue, exchange, '#')
+          ch.consume(queue, messageHandler, { noAck: true })
         })
       }
     })
