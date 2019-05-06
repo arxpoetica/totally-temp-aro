@@ -1,11 +1,12 @@
 import Constants from '../../common/constants'
 
 class ServiceLayerEditorController {
-  constructor ($http, $timeout, state, Utils) {
+  constructor ($http, $timeout, state, Utils, tileDataService) {
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
     this.utils = Utils
+    this.tileDataService = tileDataService
     this.Constants = Constants
 
     this.discardChanges = false
@@ -141,8 +142,10 @@ class ServiceLayerEditorController {
         this.discardChanges = true
         this.currentTransaction = null
         // Do not recreate tiles and/or data cache. That will be handled by the tile invalidation messages from aro-service
-        return this.resumeOrCreateTransaction()
+        Object.keys(this.objectIdToMapObject).forEach(objectId => this.tileDataService.removeFeatureToExclude(objectId))
+        return this.state.loadModifiedFeatures(this.state.plan.getValue().id)
       })
+      .then(() => this.resumeOrCreateTransaction())
       .catch((err) => {
         this.discardChanges = true
         this.currentTransaction = null
@@ -213,17 +216,9 @@ class ServiceLayerEditorController {
         .catch((err) => console.error(err))
     }
   }
-
-  // $onChanges(changesObj) {
-
-  // }
-
-  // $onDestroy() {
-
-  // }
 }
 
-ServiceLayerEditorController.$inject = ['$http', '$timeout', 'state', 'Utils']
+ServiceLayerEditorController.$inject = ['$http', '$timeout', 'state', 'Utils', 'tileDataService']
 
 let serviceLayerEditor = {
   templateUrl: '/components/sidebar/plan-editor/service-layer-editor.html',
