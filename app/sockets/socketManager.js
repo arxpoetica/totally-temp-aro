@@ -12,23 +12,24 @@ class SocketManager {
   constructor (app) {
     this.vectorTileRequestToRoom = {}
     // Socket namespaces:
-    // default: Each client that connects to the server will do so with a "<Websocket ID>". To post a message to a specific
-    //          client, use the "/<Websocket ID>" room in the default namespace.
+    // clients: Each client that connects to the server will do so with a "<Websocket ID>". To post a message to a specific
+    //          client, use the "/<Websocket ID>" room in this namespace.
     // broadcast: Used for broadcasting user messages to all connected clients. This is used when, say, an admin user
     //            wants to send messages to all users.
     // tileInvalidation: Used to send vector tile invalidation messages to all clients listening on the namespace.
+    const socket = require('socket.io')(app)
     this.sockets = {
-      default: require('socket.io')(app)
+      clients: socket.of('/clients'),
+      broadcast: socket.of('/broadcast'),
+      tileInvalidation: socket.of('/tileInvalidation')
     }
-    this.sockets.broadcast = this.sockets.default.of('/broadcast')
-    this.sockets.tileInvalidation = this.sockets.default.of('/tileInvalidation')
     this.setupConnectionhandlers()
     this.setupVectorTileAMQP()
     this.setupTileInvalidationAMQP()
   }
 
   setupConnectionhandlers () {
-    this.sockets.default.on('connection', (socket) => {
+    this.sockets.clients.on('connection', (socket) => {
       console.log(`Connected socket with session id ${socket.client.id}`)
 
       socket.on('SOCKET_JOIN_ROOM', (roomId) => {
@@ -53,7 +54,7 @@ class SocketManager {
       } else {
         console.log(`Vector Tile Socket: Routing message with UUID ${uuid} to /${roomId}`)
         delete self.vectorTileRequestToRoom[uuid]
-        self.sockets.default.to(`/${roomId}`).emit('message', { type: VECTOR_TILE_DATA_MESSAGE, data: msg })
+        self.sockets.clients.to(`/${roomId}`).emit('message', { type: VECTOR_TILE_DATA_MESSAGE, data: msg })
       }
     }
     this.setupAMQPConnectionWithService(VECTOR_TILE_QUEUE, VECTOR_TILE_EXCHANGE, messageHandler)
