@@ -18,12 +18,13 @@ class LocationProperties {
 }
 
 class LocationEditorController {
-  constructor ($timeout, $http, $ngRedux, state, tracker) {
+  constructor ($timeout, $http, $ngRedux, state, tracker, tileDataService) {
     this.$timeout = $timeout
     this.$http = $http
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
     this.state = state
     this.tracker = tracker
+    this.tileDataService = tileDataService
     this.selectedMapObject = null
     this.objectIdToProperties = {}
     this.objectIdToMapObject = {}
@@ -136,9 +137,11 @@ class LocationEditorController {
       .then((result) => {
         // Transaction has been committed, start a new one
         this.isCommiting = false
-        this.state.recreateTilesAndCache()
-        return this.resumeOrCreateTransaction()
+        // Do not recreate tiles and/or data cache. That will be handled by the tile invalidation messages from aro-service
+        Object.keys(this.objectIdToMapObject).forEach(objectId => this.tileDataService.removeFeatureToExclude(objectId))
+        return this.state.loadModifiedFeatures(this.state.plan.getValue().id)
       })
+      .then(() => this.resumeOrCreateTransaction())
       .catch((err) => {
         this.currentTransaction = null
         this.isCommiting = false
@@ -385,7 +388,7 @@ class LocationEditorController {
   }
 }
 
-LocationEditorController.$inject = ['$timeout', '$http', '$ngRedux', 'state', 'tracker']
+LocationEditorController.$inject = ['$timeout', '$http', '$ngRedux', 'state', 'tracker', 'tileDataService']
 
 let locationEditor = {
   templateUrl: '/components/sidebar/view/location-editor.html',

@@ -3,6 +3,7 @@ import PolylineFeatureRenderer from './polyline-feature-renderer'
 import PolygonFeatureRenderer from './polygon-feature-renderer'
 import TileUtilities from './tile-utilities'
 import AsyncPriorityQueue from 'async/priorityQueue'
+import Constants from '../common/constants'
 
 class MapTileRenderer {
   constructor (tileSize, tileDataService, mapTileOptions, censusCategories, selectedDisplayMode, selectionModes, analysisSelectionMode, displayModes,
@@ -211,11 +212,29 @@ class MapTileRenderer {
     frontBufferCanvas.style.top = `0 px`
     var backBufferCanvas = this.createTileCanvas(ownerDocument)
     var heatmapCanvas = this.createTileCanvas(ownerDocument)
+
+    // We have a div overlaying everything that is visible when the data for a tile is "stale". This is shown
+    // when we have received a message from aro-service invalidating the data for certain tiles
+    const staleDataDiv = ownerDocument.createElement('div')
+    staleDataDiv.style.position = 'absolute'
+    staleDataDiv.style.left = '0 px'
+    staleDataDiv.style.top = '0 px'
+    staleDataDiv.style.width = `${Constants.TILE_SIZE}px`
+    staleDataDiv.style.height = `${Constants.TILE_SIZE}px`
+    staleDataDiv.style['background-color'] = 'rgba(255, 255, 255, 0.7)'
+    staleDataDiv.style.display = 'none'
+    // Add a spinning icon to the div
+    staleDataDiv.innerHTML = `<div style="height: 100%; text-align: center; border: dashed 1px black;">
+      <i class="fa fa-5x fa-spinner fa-spin" style="line-height: ${Constants.TILE_SIZE}px"></i>
+    </div>`
+    div.appendChild(staleDataDiv)
+
     this.tileDataService.tileHtmlCache[numberedTileId] = {
       div: div,
       frontBufferCanvas: frontBufferCanvas,
       backBufferCanvas: backBufferCanvas,
       heatmapCanvas: heatmapCanvas,
+      staleDataDiv: staleDataDiv,
       isDirty: true,
       zoom: zoom,
       coord: coord
@@ -331,10 +350,12 @@ class MapTileRenderer {
           // Do NOT use this.tileDataService.tileHtmlCache[tileId], that object reference may have changed
           htmlCache.isDirty = false
         }
+        this.hideStaleDataMarker(zoom, coord.x, coord.y)
         return Promise.resolve()
       })
       .catch((err) => {
         console.error(err)
+        this.hideStaleDataMarker(zoom, coord.x, coord.y)
         this.uiNotificationService.removeNotification('main', 'rendering tiles')
         this.state.areTilesRendering = false
       })
@@ -591,6 +612,13 @@ class MapTileRenderer {
     }).length > 0
 
     return ishighlight
+  }
+
+  // Hides the stale data marker for a tile
+  hideStaleDataMarker (zoom, x, y) {
+    const tileKeyPrefix = `${zoom}-${x}-${y}`
+    const tileKeys = Object.keys(this.tileDataService.tileHtmlCache).filter(item => item.indexOf(tileKeyPrefix) === 0)
+    tileKeys.forEach(tileKey => { this.tileDataService.tileHtmlCache[tileKey].staleDataDiv.style.display = 'none' })
   }
 }
 

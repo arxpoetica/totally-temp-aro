@@ -2,22 +2,38 @@ const amqp = require('amqplib/callback_api')
 const helpers = require('../helpers')
 const config = helpers.config
 const VECTOR_TILE_DATA_MESSAGE = 'VECTOR_TILE_DATA'
-const VECTOR_TILE_EXCHANGE = 'aro_vt', VECTOR_TILE_QUEUE = 'vectorTileQueue'
+const VECTOR_TILE_EXCHANGE = 'aro_vt'
+const VECTOR_TILE_QUEUE = 'vectorTileQueue'
+const TILE_INVALIDATION_MESSAGE = 'TILES_INVALIDATED'
+const TILE_INVALIDATION_EXCHANGE = 'tile_invalidation'
+const TILE_INVALIDATION_QUEUE = 'tileInvalidationQueue'
 const PROGRESS_MESSAGE = 'PROGRESS_MESSAGE_DATA'
-const PROGRESS_EXCHANGE = 'aro_progress', PROGRESS_QUEUE = 'progressQueue'
-const BROADCAST_MESSAGE = 'BROADCAST_MESSAGE'
+const PROGRESS_EXCHANGE = 'aro_progress'
+const PROGRESS_QUEUE = 'progressQueue'
+
 class SocketManager {
-  
-  constructor(app) {
+  constructor (app) {
     this.vectorTileRequestToRoom = {}
-    this.io = require('socket.io')(app)
-    this.broadcastnsp = this.io.of('/broadcastRoom')
-    this.setupConnectionhandlers()
+    // Socket namespaces:
+    // clients: Each client that connects to the server will do so with a "<Websocket ID>". To post a message to a specific
+    //          client, use the "/<Websocket ID>" room in this namespace.
+    // broadcast: Used for broadcasting user messages to all connected clients. This is used when, say, an admin user
+    //            wants to send messages to all users.
+    // tileInvalidation: Used to send vector tile invalidation messages to all clients listening on the namespace.
+    const socket = require('socket.io')(app)
+    this.sockets = {
+      clients: socket.of('/clients'),
+      broadcast: socket.of('/broadcast'),
+      tileInvalidation: socket.of('/tileInvalidation')
+    }
+    this.setupPerClientSocket()
     this.setupVectorTileAMQP()
+    this.setupTileInvalidationAMQP()
   }
 
-  setupConnectionhandlers() {
-    this.io.on('connection', (socket) => {
+  // Set up the per-client socket namespace. Each client connected to the server will register with this namespace.
+  setupPerClientSocket () {
+    this.sockets.clients.on('connection', (socket) => {
       console.log(`Connected socket with session id ${socket.client.id}`)
 
       socket.on('SOCKET_JOIN_ROOM', (roomId) => {
@@ -28,95 +44,94 @@ class SocketManager {
         console.log(`Leaving socket room: /${roomId}`)
         socket.leave(`/${roomId}`)
       })
-
-      socket.on('SOCKET_JOIN_PLAN_ROOM', (roomId) => {
-        console.log(`Joining plan socket room: /${roomId}`)
-        socket.join(`/${roomId}`)
-      })
-      socket.on('SOCKET_LEAVE_PLAN_ROOM', (roomId) => {
-        console.log(`Leaving plan socket room: /${roomId}`)
-        socket.leave(`/${roomId}`)
-      })
-    })
-
-    this.broadcastnsp.on('connection', (socket) => {
-      socket.on('SOCKET_BROADCAST_ROOM', (roomId) => {
-        console.log(`Joining Broadcast socket namespace: /broadcastRoom , room: /${roomId}`)
-        socket.join(`/${roomId}`)
-      })
     })
   }
 
-  setupVectorTileAMQP() {
-    // We will receive vector tile data via a RabbitMQ server
+  // Set up a connection to the aro-service RabbitMQ server for getting vector tile data. This function is also
+  // responsible for routing the vector tile data to the correct connected client.
+  setupVectorTileAMQP () {
     var self = this
+    const messageHandler = msg => {
+      const uuid = JSON.parse(msg.content.toString()).uuid
+      const clientId = self.vectorTileRequestToRoom[uuid]
+      if (!clientId) {
+        console.error(`ERROR: No socket clientId found for vector tile UUID ${uuid}`)
+      } else {
+        console.log(`Vector Tile Socket: Routing message with UUID ${uuid} to /${clientId}`)
+        delete self.vectorTileRequestToRoom[uuid]
+        self.sockets.clients.to(`/${clientId}`).emit('message', { type: VECTOR_TILE_DATA_MESSAGE, data: msg })
+      }
+    }
+    this.setupAMQPConnectionWithService(VECTOR_TILE_QUEUE, VECTOR_TILE_EXCHANGE, messageHandler)
+
+    // Create progress channel
+    const progressHandler = msg => {
+      const processId = JSON.parse(msg.content.toString()).processId
+      if (!processId) {
+        console.error(`ERROR: No socket roomId found for processId ${processId}`)
+      } else {
+        console.log(`Optimization Progress Socket: Routing message with UUID ${processId} to /${processId}`)
+        var data = JSON.parse(msg.content.toString())
+        //UI dependent on optimizationState at so many places TODO: need to remove optimizationstate
+        data.optimizationState = data.progress != 1 ? 'STARTED' : 'COMPLETED'
+        self.sockets.clients.to(`/${processId}`).emit('message', { type: PROGRESS_MESSAGE, data:  data})
+      }
+    }
+    this.setupAMQPConnectionWithService(PROGRESS_QUEUE, PROGRESS_EXCHANGE, progressHandler)
+  }
+
+  // Map a vector tile request UUID to a client ID.
+  mapVectorTileUuidToClientId (vtUuid, clientId) {
+    this.vectorTileRequestToRoom[vtUuid] = clientId
+  }
+
+  // Set up a connection to the aro-service RabbitMQ server for getting vector tile invalidation data. These messages
+  // should be broadcast to all connected clients (via the tileInvalidation namespace).
+  setupTileInvalidationAMQP () {
+    var self = this
+    const messageHandler = msg => {
+      self.sockets.tileInvalidation.emit('message', {
+        type: TILE_INVALIDATION_MESSAGE,
+        payload: JSON.parse(msg.content.toString())
+      })
+    }
+    this.setupAMQPConnectionWithService(TILE_INVALIDATION_QUEUE, TILE_INVALIDATION_EXCHANGE, messageHandler)
+  }
+
+  // Sets up a AMQP connection with aro-service
+  setupAMQPConnectionWithService (queue, exchange, messageHandler) {
+    // We will receive vector tile data via a RabbitMQ server
     const rabbitMqConnectionString = `amqp://${config.rabbitmq.username}:${config.rabbitmq.password}@${config.rabbitmq.server}`
     amqp.connect(rabbitMqConnectionString, (err, conn) => {
       if (err) {
         console.error('ERROR when connecting to the RabbitMQ server')
         console.error(err)
-      }else{
-        conn.createChannel(function(err, ch) {
+      } else {
+        conn.createChannel(function (err, ch) {
           if (err) {
             console.error('ERROR when trying to create a channel on the RabbitMQ server')
             console.error(err)
           }
-          ch.assertQueue(VECTOR_TILE_QUEUE, {durable: false})
-          ch.assertExchange(VECTOR_TILE_EXCHANGE, 'topic')
-          ch.bindQueue(VECTOR_TILE_QUEUE, VECTOR_TILE_EXCHANGE, '#')
-  
-          ch.consume(VECTOR_TILE_QUEUE, function(msg) {
-            const uuid = JSON.parse(msg.content.toString()).uuid
-            const roomId = self.vectorTileRequestToRoom[uuid]
-            if (!roomId) {
-              console.error(`ERROR: No socket roomId found for vector tile UUID ${uuid}`)
-            } else {
-              console.log(`Vector Tile Socket: Routing message with UUID ${uuid} to /${roomId}`)
-              delete self.vectorTileRequestToRoom[uuid]
-              self.io.to(`/${roomId}`).emit('message', { type: VECTOR_TILE_DATA_MESSAGE, data: msg })
-            }
-          }, {noAck: true})
-
-          // Create progress channel
-          ch.assertQueue(PROGRESS_QUEUE, {durable: false})
-          ch.assertExchange(PROGRESS_EXCHANGE, 'topic')
-          ch.bindQueue(PROGRESS_QUEUE, PROGRESS_EXCHANGE, '#')
-  
-          ch.consume(PROGRESS_QUEUE, function(msg) {
-            const processId = JSON.parse(msg.content.toString()).processId
-            if (!processId) {
-              console.error(`ERROR: No socket roomId found for processId ${processId}`)
-            } else {
-              console.log(`Optimization Progress Socket: Routing message with UUID ${processId} to /${processId}`)
-              var data = JSON.parse(msg.content.toString())
-              //UI dependent on optimizationState at so many places TODO: need to remove optimizationstate
-              data.optimizationState = data.progress != 1 ? 'STARTED' : 'COMPLETED'
-              self.io.to(`/${processId}`).emit('message', { type: PROGRESS_MESSAGE, data:  data})
-            }
-          }, {noAck: true})
-
+          ch.assertQueue(queue, { durable: false })
+          ch.assertExchange(exchange, 'topic')
+          ch.bindQueue(queue, exchange, '#')
+          ch.consume(queue, messageHandler, { noAck: true })
         })
       }
     })
   }
 
-  mapVectorTileUuidToRoom(vtUuid, roomId) {
-    this.vectorTileRequestToRoom[vtUuid] = roomId
-  }
-
-  broadcastMessage(msg) {
-    // sending to all clients in namespace 'broadcastnsp', including sender
-    this.broadcastnsp.emit('message', {
+  broadcastMessage (msg) {
+    // Sending to all clients in namespace 'broadcast', including sender
+    this.sockets.broadcast.emit('message', {
       type: 'NOTIFICATION_SHOW',
       payload: msg
     })
-    // sending to a specific room in a specific namespace, including sender
-    // this.broadcastnsp.to('/allUsers').emit('message', { type: NOTIFICATION_SHOW, data: msg })
   }
 }
 
 let socketManager = null
 module.exports = {
-  initialize: app => socketManager = new SocketManager(app),
+  initialize: app => { socketManager = new SocketManager(app) },
   socketManager: () => socketManager
 }
