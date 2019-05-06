@@ -25,11 +25,11 @@ class SocketManager {
   }
 
   joinPlanRoom (roomId) {
-    this.sockets.clients.emit('SOCKET_JOIN_PLAN_ROOM', roomId)
+    this.sockets.plans.emit('SOCKET_JOIN_PLAN_ROOM', roomId)
   }
 
   leaveRoom (roomId) {
-    this.sockets.plans.emit('SOCKET_LEAVE_ROOM', roomId)
+    this.sockets.clients.emit('SOCKET_LEAVE_ROOM', roomId)
   }
 
   leavePlanRoom (roomId) {
