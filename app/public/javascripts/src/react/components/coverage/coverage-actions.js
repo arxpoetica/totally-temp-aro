@@ -115,6 +115,13 @@ function setSiteAssignment (siteAssignment) {
   }
 }
 
+function setCoverageProgress (progress) {
+  return {
+    type: Actions.COVERAGE_SET_PROGRESS,
+    payload: progress
+  }
+}
+
 export default {
   updateCoverageStatus: updateCoverageStatus,
   initializeCoverageReport: initializeCoverageReport,
@@ -123,5 +130,6 @@ export default {
   setGroupKeyType: setGroupKeyType,
   setLimitMarketableTechnology: setLimitMarketableTechnology,
   setLimitMaxSpeed: setLimitMaxSpeed,
-  setSiteAssignment: setSiteAssignment
+  setSiteAssignment: setSiteAssignment,
+  setCoverageProgress: setCoverageProgress
 }
