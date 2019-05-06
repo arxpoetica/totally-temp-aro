@@ -34,7 +34,7 @@ exports.configure = (api, middleware) => {
     if (!websocketSessionId) {
       return next(new Error('You must specify a websocketSessionId body parameter for socket routing to work'))
     }
-    socketManager().mapVectorTileUuidToRoom(uuid, websocketSessionId)
+    socketManager().mapVectorTileUuidToClientId(uuid, websocketSessionId)
 
     models.Tiles.getTileData(apiUrl, request.body.layerDefinitions)
       .then(jsonSuccess(response, next))

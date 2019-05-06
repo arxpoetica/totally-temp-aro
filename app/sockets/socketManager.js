@@ -23,12 +23,13 @@ class SocketManager {
       broadcast: socket.of('/broadcast'),
       tileInvalidation: socket.of('/tileInvalidation')
     }
-    this.setupConnectionhandlers()
+    this.setupPerClientSocket()
     this.setupVectorTileAMQP()
     this.setupTileInvalidationAMQP()
   }
 
-  setupConnectionhandlers () {
+  // Set up the per-client socket namespace. Each client connected to the server will register with this namespace.
+  setupPerClientSocket () {
     this.sockets.clients.on('connection', (socket) => {
       console.log(`Connected socket with session id ${socket.client.id}`)
 
@@ -43,25 +44,32 @@ class SocketManager {
     })
   }
 
+  // Set up a connection to the aro-service RabbitMQ server for getting vector tile data. This function is also
+  // responsible for routing the vector tile data to the correct connected client.
   setupVectorTileAMQP () {
-    // We will receive vector tile data via a RabbitMQ server
     var self = this
     const messageHandler = msg => {
       const uuid = JSON.parse(msg.content.toString()).uuid
-      const roomId = self.vectorTileRequestToRoom[uuid]
-      if (!roomId) {
-        console.error(`ERROR: No socket roomId found for vector tile UUID ${uuid}`)
+      const clientId = self.vectorTileRequestToRoom[uuid]
+      if (!clientId) {
+        console.error(`ERROR: No socket clientId found for vector tile UUID ${uuid}`)
       } else {
-        console.log(`Vector Tile Socket: Routing message with UUID ${uuid} to /${roomId}`)
+        console.log(`Vector Tile Socket: Routing message with UUID ${uuid} to /${clientId}`)
         delete self.vectorTileRequestToRoom[uuid]
-        self.sockets.clients.to(`/${roomId}`).emit('message', { type: VECTOR_TILE_DATA_MESSAGE, data: msg })
+        self.sockets.clients.to(`/${clientId}`).emit('message', { type: VECTOR_TILE_DATA_MESSAGE, data: msg })
       }
     }
     this.setupAMQPConnectionWithService(VECTOR_TILE_QUEUE, VECTOR_TILE_EXCHANGE, messageHandler)
   }
 
+  // Map a vector tile request UUID to a client ID.
+  mapVectorTileUuidToClientId (vtUuid, clientId) {
+    this.vectorTileRequestToRoom[vtUuid] = clientId
+  }
+
+  // Set up a connection to the aro-service RabbitMQ server for getting vector tile invalidation data. These messages
+  // should be broadcast to all connected clients (via the tileInvalidation namespace).
   setupTileInvalidationAMQP () {
-    // We will receive vector tile invalidation messages via a RabbitMQ server. These should be broadcast to all connected clients
     var self = this
     const messageHandler = msg => {
       self.sockets.tileInvalidation.emit('message', {
@@ -95,12 +103,8 @@ class SocketManager {
     })
   }
 
-  mapVectorTileUuidToRoom (vtUuid, roomId) {
-    this.vectorTileRequestToRoom[vtUuid] = roomId
-  }
-
   broadcastMessage (msg) {
-    // sending to all clients in namespace 'broadcast', including sender
+    // Sending to all clients in namespace 'broadcast', including sender
     this.sockets.broadcast.emit('message', {
       type: 'NOTIFICATION_SHOW',
       payload: msg
