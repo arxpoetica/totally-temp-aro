@@ -1,7 +1,6 @@
 import AsyncQueue from 'async/queue'
 import SocketTileFetcher from './tile-data-fetchers/SocketTileFetcher'
 import HttpTileFetcher from './tile-data-fetchers/HttpTileFetcher'
-import SocketManager from '../../react/common/socket-manager'
 
 class TileDataService {
 
@@ -39,36 +38,10 @@ class TileDataService {
       LOCK_ICON_KEY: 'LOCK_ICON_KEY',
       INVALIDATED_ICON_KEY: 'INVALIDATED_ICON_KEY'
     }
-
-    this.tileInvalidationHandler = SocketManager.subscribe('TILES_INVALIDATED', this.handleTileInvalidationMessage.bind(this))
-  }
-
-  handleTileInvalidationMessage (msg) {
-    console.log(msg)
-    // Loop through the entire HTML cache
-    Object.keys(this.tileHtmlCache).forEach(htmlCacheKey => {
-      // Get the zoom, x and y from the html cache key
-      const components = htmlCacheKey.split('-')
-      const tileZoom = +components[0]
-      const tileX = +components[1]
-      const tileY = +components[2]
-      const tileBox = msg.payload.tileBox
-      // const tileBox = { zoom: 22, x1: 671770, y1: 1464804, x2: 671771, y2: 1464805 }
-      if (this.isWithinBounds(tileBox.zoom, tileZoom, tileX, tileY, tileBox.x1, tileBox.y1, tileBox.x2, tileBox.y2)) {
-        console.log('Invalidate tile')
-        const htmlTileNode = this.tileHtmlCache[htmlCacheKey].div
-        const invalidationOverlay = htmlTileNode.children[1]
-        invalidationOverlay.style.display = 'block'
-        setTimeout(() => { invalidationOverlay.style.display = 'none' }, 5000)
-      } else {
-        console.log('Ignore tile')
-      }
-    })
   }
 
   isWithinBounds (boxZoom, zoom, x, y, x1, y1, x2, y2) {
-
-    const scaleFactor = 1 << (boxZoom - zoom) ;
+    const scaleFactor = 1 << (boxZoom - zoom)
     const wx1 = x * scaleFactor
     const wx2 = (x + 1) * scaleFactor
 
@@ -397,6 +370,47 @@ class TileDataService {
     this.featuresToExclude = new Set()
     this.modifiedFeatures = {}
     this.modifiedBoundaries = {}
+  }
+
+  _clearCacheInTileBox (cache, setOfInvalidatedLayers, tileBox) {
+    Object.keys(cache).forEach(cacheKey => {
+      // Get the zoom, x and y from the html cache key
+      const components = cacheKey.split('-')
+      const tileZoom = +components[0]
+      const tileX = +components[1]
+      const tileY = +components[2]
+      if (this.isWithinBounds(tileBox.zoom, tileZoom, tileX, tileY, tileBox.x1, tileBox.y1, tileBox.x2, tileBox.y2)) {
+        // Delete all invalidated layers
+        const tileCache = cache[cacheKey]
+        Object.keys(tileCache).forEach(tileCacheKey => {
+          if (setOfInvalidatedLayers.has(tileCacheKey)) {
+            delete tileCache[tileCacheKey]
+          }
+        })
+      }
+    })
+  }
+
+  clearCacheInTileBox (invalidatedLayersArray, tileBox) {
+    const invalidatedLayers = new Set(invalidatedLayersArray)
+    this._clearCacheInTileBox(this.tileDataCache, invalidatedLayers, tileBox)
+    this._clearCacheInTileBox(this.tileProviderCache, invalidatedLayers, tileBox)
+  }
+
+  displayInvalidatedTiles (tileBox) {
+    Object.keys(this.tileHtmlCache).forEach(htmlCacheKey => {
+      // Get the zoom, x and y from the html cache key
+      const components = htmlCacheKey.split('-')
+      const tileZoom = +components[0]
+      const tileX = +components[1]
+      const tileY = +components[2]
+      if (this.isWithinBounds(tileBox.zoom, tileZoom, tileX, tileY, tileBox.x1, tileBox.y1, tileBox.x2, tileBox.y2)) {
+        const htmlTileNode = this.tileHtmlCache[htmlCacheKey].div
+        const invalidationOverlay = htmlTileNode.children[1]
+        invalidationOverlay.style.display = 'block'
+        setTimeout(() => { invalidationOverlay.style.display = 'none' }, 5000)
+      }
+    })
   }
 
   // Clear only those entries in the tile data cache containing the specified keywords

@@ -11,7 +11,7 @@ import MapLayerActions from '../react/components/map-layers/map-layer-actions'
 import SelectionActions from '../react/components/selection/selection-actions'
 import PlanStates from '../react/components/plan/plan-states'
 import SelectionModes from '../react/components/selection/selection-modes'
-import socketManager from '../react/common/socket-manager'
+import SocketManager from '../react/common/socket-manager'
 
 // We need a selector, else the .toJS() call will create an infinite digest loop
 const getAllLocationLayers = reduxState => reduxState.mapLayers.location
@@ -1182,12 +1182,6 @@ class State {
       }
     }
 
-    // Clear the tile cache for plan outputs like fiber, 5G nodes, etc.
-    service.clearTileCachePlanOutputs = () => {
-    // The tile cache will clear all cache entries whose keys contain the given keywords
-      tileDataService.clearDataCacheContaining(service.configuration.networkEquipment.tileCacheKeywords)
-    }
-
     service.showModifyQuestionDialog = () => {
       return new Promise((resolve, reject) => {
         swal({
@@ -1234,7 +1228,6 @@ class State {
       checkToDisplayPopup()
         .then((result) => {
           if (result) {
-            service.clearTileCachePlanOutputs()
             tileDataService.markHtmlCacheDirty()
             service.requestMapLayerRefresh.next(null)
 
@@ -1273,7 +1266,6 @@ class State {
             response.data.optimizationState === PlanStates.CANCELED ||
             response.data.optimizationState === PlanStates.FAILED) {
             service.stopPolling()
-            service.clearTileCachePlanOutputs()
             tileDataService.markHtmlCacheDirty()
             service.requestMapLayerRefresh.next(null)
             delete service.Optimizingplan.optimizationId
@@ -1309,7 +1301,6 @@ class State {
           service.isCanceling = false
           service.Optimizingplan.planState = response.data.planState // Note that this should match with Constants.PLAN_STATE
           delete service.Optimizingplan.optimizationId
-          service.clearTileCachePlanOutputs()
           tileDataService.markHtmlCacheDirty()
           service.requestMapLayerRefresh.next(null)
         })
@@ -1570,7 +1561,7 @@ class State {
           service.setOptimizationOptions()
           tileDataService.setLocationStateIcon(tileDataService.locationStates.LOCK_ICON_KEY, service.configuration.locationCategories.entityLockIcon)
           tileDataService.setLocationStateIcon(tileDataService.locationStates.INVALIDATED_ICON_KEY, service.configuration.locationCategories.entityInvalidatedIcon)
-          socketManager.initializeSession(result.data.sessionWebsocketId)
+          SocketManager.initializeSession(result.data.sessionWebsocketId)
           service.getReleaseVersions()
           if (service.configuration.ARO_CLIENT === 'frontier') {
             heatmapOptions.selectedHeatmapOption = service.viewSetting.heatmapOptions.filter((option) => option.id === 'HEATMAP_OFF')[0]
@@ -1846,6 +1837,18 @@ class State {
         removePlanTargets: service.removePlanTargets
       }
     }
+
+    service.handleTileInvalidationMessage = msg => {
+      // First, mark the HTML cache so we know which tiles are invalidated
+      tileDataService.displayInvalidatedTiles(msg.payload.tileBox)
+
+      // Then delete items from the tile data cache and the tile provider cache
+      tileDataService.clearCacheInTileBox(msg.payload.layerNames, msg.payload.tileBox)
+
+      // Refresh map layers
+      service.requestMapLayerRefresh.next(null)
+    }
+    service.unsubscribeTileInvalidationHandler = SocketManager.subscribe('TILES_INVALIDATED', service.handleTileInvalidationMessage.bind(service))
 
     return service
   }
