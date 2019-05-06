@@ -412,36 +412,6 @@ class TileDataService {
     })
   }
 
-  // Clear only those entries in the tile data cache containing the specified keywords
-  clearDataCacheContaining(keywords) {
-    // Clear data from the data cache
-    Object.keys(this.tileDataCache).forEach((tileId) => {
-      var singleTileCache = this.tileDataCache[tileId]
-      Object.keys(singleTileCache).forEach((cacheKey) => {
-        var shouldDelete = false
-        keywords.forEach((keyword) => shouldDelete = shouldDelete || (cacheKey.indexOf(keyword) >= 0))
-        if (shouldDelete) {
-          delete this.tileDataCache[tileId][cacheKey]
-        }
-      })
-    })
-
-    // Clear data from the data provider cache
-    Object.keys(this.tileProviderCache).forEach((tileId) => {
-      var singleTileProvider = this.tileProviderCache[tileId]
-      Object.keys(singleTileProvider).forEach((cacheKey) => {
-        var shouldDelete = false
-        keywords.forEach((keyword) => shouldDelete = shouldDelete || (cacheKey.indexOf(keyword) >= 0))
-        if (shouldDelete) {
-          // Delete the pointer to the promise. This kind of leaves a "dangling" set of data, since the
-          // promise will contain the data for this and for other layers. However, since we deleted
-          // the pointer to the promise, our code will never access that dangling data.
-          delete this.tileProviderCache[tileId][cacheKey]
-        }
-      })
-    })
-  }
-
   // Mark all tiles in the HTML cache as dirty
   markHtmlCacheDirty(tilesToRefresh) {
     Object.keys(this.tileHtmlCache).forEach((cacheId) => {
