@@ -5,6 +5,7 @@ class ResourcePermissionsEditorController {
     this.state = state
     
     this.authRollsEnum = []
+    this.actorsById = {}
     
     var requestedRolls = {
       'RESOURCE_OWNER': 'Owner',
@@ -31,7 +32,7 @@ class ResourcePermissionsEditorController {
     
     console.log(this.authRollsEnum)
     
-    this.newActor = null
+    this.newActorId = null
     this.rows = []
     this.idProp = 'systemActorId' // unique id of each row
     
@@ -42,9 +43,9 @@ class ResourcePermissionsEditorController {
         'format': '',
         'displayName': 'Name',
         'enumTypeURL': '',
-        'displayDataType': 'string',
+        'displayDataType': 'html',// string
         'defaultValue': '',
-        'editable': false,
+        'editable': true,
         'visible': true
       }, 
       {
@@ -85,20 +86,25 @@ class ResourcePermissionsEditorController {
       this.enabled = true // If not defined, then make it true
     }
     
-    this.subSystemActors = this.systemActors && this.systemActors.slice(0, 10)
-    this.loadResourceAccess()
+    this.actorsById = this.systemActors.reduce((map, item) => {
+      map[item.id] = item
+      return map
+    }, {})
     
+    this.loadResourceAccess()
     this.registerSaveAccessCallback && this.registerSaveAccessCallback({ saveResourceAccess: this.saveResourceAccess.bind(this) })
   }
   
   addActor () {
-    console.log(this.newActor)
-    this.rows.push({
-      'systemActorId': this.newActor.id, 
-      'name': this.newActor.name, 
-      'rolePermissions': this.defaultPermissions
-    })
-    this.onSelectionChanged()
+    if (this.actorsById.hasOwnProperty(this.newActorId)){
+      var newActor = this.actorsById[this.newActorId]
+      this.rows.push({
+        'systemActorId': newActor.id, 
+        'name': newActor.name, 
+        'rolePermissions': this.defaultPermissions
+      })
+      this.onSelectionChanged()
+    }
   }
   
   removeActor (row) {
