@@ -140,7 +140,7 @@ class ServiceLayerEditorController {
       // Transaction has been committed, start a new one
         this.discardChanges = true
         this.currentTransaction = null
-        this.state.recreateTilesAndCache()
+        // Do not recreate tiles and/or data cache. That will be handled by the tile invalidation messages from aro-service
         return this.resumeOrCreateTransaction()
       })
       .catch((err) => {
