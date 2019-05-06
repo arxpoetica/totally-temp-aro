@@ -11,15 +11,18 @@ const TILE_INVALIDATION_QUEUE = 'tileInvalidationQueue'
 class SocketManager {
   constructor (app) {
     this.vectorTileRequestToRoom = {}
-    this.io = require('socket.io')(app)
-    this.broadcastnsp = this.io.of('/broadcastRoom')
+    this.sockets = {
+      default: require('socket.io')(app)
+    }
+    this.sockets.broadcast = this.sockets.default.of('/broadcast')
+    this.sockets.tileInvalidation = this.sockets.default.of('/tileInvalidation')
     this.setupConnectionhandlers()
     this.setupVectorTileAMQP()
     this.setupTileInvalidationAMQP()
   }
 
   setupConnectionhandlers () {
-    this.io.on('connection', (socket) => {
+    this.sockets.default.on('connection', (socket) => {
       console.log(`Connected socket with session id ${socket.client.id}`)
 
       socket.on('SOCKET_JOIN_ROOM', (roomId) => {
@@ -29,12 +32,6 @@ class SocketManager {
       socket.on('SOCKET_LEAVE_ROOM', (roomId) => {
         console.log(`Leaving socket room: /${roomId}`)
         socket.leave(`/${roomId}`)
-      })
-    })
-
-    this.broadcastnsp.on('connection', (socket) => {
-      socket.on('SOCKET_BROADCAST_ROOM', (roomId) => {
-        console.log(`Joining Broadcast socket namespace: /broadcastRoom , room: /${roomId}`)
       })
     })
   }
@@ -65,7 +62,7 @@ class SocketManager {
             } else {
               console.log(`Vector Tile Socket: Routing message with UUID ${uuid} to /${roomId}`)
               delete self.vectorTileRequestToRoom[uuid]
-              self.io.to(`/${roomId}`).emit('message', { type: VECTOR_TILE_DATA_MESSAGE, data: msg })
+              self.sockets.default.to(`/${roomId}`).emit('message', { type: VECTOR_TILE_DATA_MESSAGE, data: msg })
             }
           }, { noAck: true })
         })
@@ -92,7 +89,7 @@ class SocketManager {
           ch.assertExchange(TILE_INVALIDATION_EXCHANGE, 'topic')
           ch.bindQueue(TILE_INVALIDATION_QUEUE, TILE_INVALIDATION_EXCHANGE, '#')
           ch.consume(TILE_INVALIDATION_QUEUE, msg => {
-            self.broadcastnsp.emit('message', {
+            self.sockets.tileInvalidation.emit('message', {
               type: TILE_INVALIDATION_MESSAGE,
               payload: JSON.parse(msg.content.toString())
             })
@@ -107,8 +104,8 @@ class SocketManager {
   }
 
   broadcastMessage (msg) {
-    // sending to all clients in namespace 'broadcastnsp', including sender
-    this.broadcastnsp.emit('message', {
+    // sending to all clients in namespace 'broadcast', including sender
+    this.sockets.broadcast.emit('message', {
       type: 'NOTIFICATION_SHOW',
       payload: msg
     })

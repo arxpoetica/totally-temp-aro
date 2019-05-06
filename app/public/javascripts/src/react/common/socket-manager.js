@@ -4,10 +4,14 @@ class SocketManager {
   constructor () {
     this.router = {}
     this.websocketSessionId = null
-    this.socket = io()
-    this.broadcastnsp = io('/broadcastRoom')
-    this.socket.on('message', message => this.routeMessage(message))
-    this.broadcastnsp.on('message', message => this.routeMessage(message))
+    this.sockets = {
+      default: io(),
+      broadcast: io('/broadcast'),
+      tileInvalidation: io('/tileInvalidation')
+    }
+    Object.keys(this.sockets).forEach(namespaceKey => {
+      this.sockets[namespaceKey].on('message', message => this.routeMessage(message))
+    })
   }
 
   initializeSession (websocketSessionId) {
@@ -16,11 +20,11 @@ class SocketManager {
   }
 
   joinRoom (roomId) {
-    this.socket.emit('SOCKET_JOIN_ROOM', roomId)
+    this.sockets.default.emit('SOCKET_JOIN_ROOM', roomId)
   }
 
   leaveRoom (roomId) {
-    this.socket.emit('SOCKET_LEAVE_ROOM', roomId)
+    this.sockets.default.emit('SOCKET_LEAVE_ROOM', roomId)
   }
 
   subscribe (messageType, callback) {
