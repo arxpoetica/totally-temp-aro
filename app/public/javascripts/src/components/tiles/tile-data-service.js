@@ -405,10 +405,9 @@ class TileDataService {
       const tileX = +components[1]
       const tileY = +components[2]
       if (this.isWithinBounds(tileBox.zoom, tileZoom, tileX, tileY, tileBox.x1, tileBox.y1, tileBox.x2, tileBox.y2)) {
-        const htmlTileNode = this.tileHtmlCache[htmlCacheKey].div
-        const invalidationOverlay = htmlTileNode.children[1]
-        invalidationOverlay.style.display = 'block'
-        setTimeout(() => { invalidationOverlay.style.display = 'none' }, 5000)
+        // Show a div that indicated whether the data in this tile is stale. The div will be hidden after the div is rendered
+        const staleDataDiv = this.tileHtmlCache[htmlCacheKey].staleDataDiv
+        staleDataDiv.style.display = 'block'
       }
     })
   }
