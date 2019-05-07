@@ -1,16 +1,23 @@
 import Actions from '../../common/actions'
 import CoverageActions from '../coverage/coverage-actions'
 import SelectionActions from '../selection/selection-actions'
+import socketManager from '../../../react/common/socket-manager'
 
 // Set the plan
 function setActivePlan (plan) {
-  return dispatch => {
+  return (dispatch, getState) => {
+    getState().plan.activePlan && getState().plan.activePlan.id &&
+      socketManager.leavePlanRoom(getState().plan.activePlan.id) // leave previous plan
+
     dispatch({
       type: Actions.PLAN_SET_ACTIVE_PLAN,
       payload: {
         plan: plan
       }
     })
+
+    socketManager.joinPlanRoom(plan.id) // Join new plan
+
     // Update details on the coverage report
     dispatch(CoverageActions.updateCoverageStatus(plan.id))
     // Clear plan target selection

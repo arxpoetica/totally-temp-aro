@@ -31,8 +31,8 @@ const getSelectedBoundaryType = createSelector([getselectedBoundaryType], (selec
 
 /* global app localStorage map */
 class State {
-  constructor ($rootScope, $http, $document, $timeout, $sce, $ngRedux, stateSerializationHelper, $filter, tileDataService, Utils, tracker, Notification) {
-  // Important: RxJS must have been included using browserify before this point
+  constructor($rootScope, $http, $document, $timeout, $sce, $ngRedux, stateSerializationHelper, $filter, tileDataService, Utils, tracker, Notification) {
+    // Important: RxJS must have been included using browserify before this point
     var Rx = require('rxjs')
 
     var service = {}
@@ -122,7 +122,7 @@ class State {
     // Promises for app initialization (configuration loaded, map ready, etc.)
     service.mapReadyPromise = new Promise((resolve, reject) => {
       $document.ready(() => {
-      // At this point we will have access to the global map variable
+        // At this point we will have access to the global map variable
         map.ready(() => resolve())
       })
     })
@@ -468,8 +468,8 @@ class State {
       if (map) {
         var bounds = map.getBounds()
         var params = {
-    	maxY: bounds.getNorthEast().lat(),
-    	maxX: bounds.getNorthEast().lng(),
+          maxY: bounds.getNorthEast().lat(),
+          maxX: bounds.getNorthEast().lng(),
           minY: bounds.getSouthWest().lat(),
           minX: bounds.getSouthWest().lng()
         }
@@ -571,7 +571,7 @@ class State {
     }
 
     service.setLayerVisibilityByKey = (keyType, layerKey, isVisible) => {
-    // First find the layer corresponding to the ID
+      // First find the layer corresponding to the ID
       const layerState = $ngRedux.getState().mapLayers
       var layerToChange = null
       Object.keys(layerState).forEach(layerType => {
@@ -595,13 +595,13 @@ class State {
 
     // Load optimization options from a JSON string
     service.loadOptimizationOptionsFromJSON = (json) => {
-    // Note that we are NOT returning the state (the state is set after the call), but a promise
-    // that resolves once all the geographies have been loaded
+      // Note that we are NOT returning the state (the state is set after the call), but a promise
+      // that resolves once all the geographies have been loaded
       return stateSerializationHelper.loadStateFromJSON(service, service.getDispatchers(), json)
     }
 
     $document.ready(() => {
-    // We should have a map object at this point. Unfortunately, this is hardcoded for now.
+      // We should have a map object at this point. Unfortunately, this is hardcoded for now.
       if (map) {
         map.addListener('center_changed', () => {
           var center = map.getCenter()
@@ -650,7 +650,7 @@ class State {
 
       return Promise.all(promises)
         .then((results) => {
-        // Results will be returned in the same order as the promises array
+          // Results will be returned in the same order as the promises array
           var dataTypeEntityResult = results[0].data
           var libraryResult = results[1].data
           var configurationResult = results[2].data
@@ -689,7 +689,7 @@ class State {
 
           // For each data item, construct the list of all available library items
           Object.keys(newDataItems).forEach((dataItemKey) => {
-          // Add the list of all library items for this data type
+            // Add the list of all library items for this data type
             libraryResult.forEach((libraryItem) => {
               if (libraryItem.dataType === dataItemKey) {
                 newDataItems[dataItemKey].allLibraryItems.push(libraryItem)
@@ -699,7 +699,7 @@ class State {
 
           // For each data item, construct the list of selected library items
           configurationResult.configurationItems.forEach((configurationItem) => {
-          // For this configuration item, find the data item based on the dataType
+            // For this configuration item, find the data item based on the dataType
             var dataItem = newDataItems[configurationItem.dataType]
             // Find the item from the allLibraryItems based on the library id
             var selectedLibraryItems = configurationItem.libraryItems
@@ -801,7 +801,7 @@ class State {
       }
 
       Object.keys(service.dataItems).forEach((dataItemKey) => {
-      // An example of dataItemKey is 'location'
+        // An example of dataItemKey is 'location'
         if (service.dataItems[dataItemKey].selectedLibraryItems.length > 0) {
           var configurationItem = {
             dataType: dataItemKey,
@@ -828,7 +828,7 @@ class State {
       Object.keys(service.resourceItems).forEach((resourceItemKey) => {
         var selectedManager = service.resourceItems[resourceItemKey].selectedManager
         if (selectedManager) {
-        // We have a selected manager
+          // We have a selected manager
           putBody.resourceConfigItems.push({
             aroResourceType: resourceItemKey,
             resourceManagerId: selectedManager.id,
@@ -847,7 +847,7 @@ class State {
     service.saveNetworkConfigurationToDefaultProject = () => {
       return service.getDefaultProjectForUser(service.loggedInUser.id)
         .then((projectTemplateId) => {
-        // Making parallel calls causes a crash in aro-service. Make sequential calls.
+          // Making parallel calls causes a crash in aro-service. Make sequential calls.
           service.pristineNetworkConfigurations = angular.copy(service.networkConfigurations)
 
           var networkConfigurationsArray = []
@@ -891,7 +891,7 @@ class State {
           const userId = service.loggedInUser.id
           var apiEndpoint = `/service/v1/plan?user_id=${userId}&project_template_id=${result.data.projectTemplateId}`
           if (!isEphemeral && parentPlan) {
-          // associate selected tags to child plan
+            // associate selected tags to child plan
             planOptions.tagMapping = {
               global: [],
               linkTags: {
@@ -915,13 +915,13 @@ class State {
       var userId = service.loggedInUser.id
       return $http.get(`/service/v1/plan/ephemeral/latest?user_id=${userId}`)
         .then((result) => {
-        // We have a valid ephemeral plan if we get back an object with *some* properties
+          // We have a valid ephemeral plan if we get back an object with *some* properties
           var isValidEphemeralPlan = Object.getOwnPropertyNames(result.data).length > 0
           if (isValidEphemeralPlan) {
-          // We have a valid ephemeral plan. Return it.
+            // We have a valid ephemeral plan. Return it.
             return Promise.resolve(result)
           } else {
-          // We dont have an ephemeral plan. Create one and send it back
+            // We dont have an ephemeral plan. Create one and send it back
             tracker.trackEvent(tracker.CATEGORIES.NEW_PLAN, tracker.ACTIONS.CLICK)
             return service.createNewPlan(true)
           }
@@ -954,7 +954,7 @@ class State {
         })
         .then((result) => {
           if (result.status >= 200 && result.status <= 299) {
-          // Plan has been saved in the DB. Reload it
+            // Plan has been saved in the DB. Reload it
             service.setPlan(result.data)
           } else {
             console.error('Unable to make plan permanent')
@@ -1129,7 +1129,7 @@ class State {
       var currentPlan = service.plan.getValue()
       var userId = service.loggedInUser.id
       if (currentPlan.ephemeral) {
-      // This is an ephemeral plan. Don't show any dialogs to the user, simply copy this plan over to a new ephemeral plan
+        // This is an ephemeral plan. Don't show any dialogs to the user, simply copy this plan over to a new ephemeral plan
         var url = `/service/v1/plan-command/copy?user_id=${userId}&source_plan_id=${currentPlan.id}&is_ephemeral=${currentPlan.ephemeral}`
         return $http.post(url, {})
           .then((result) => {
@@ -1143,11 +1143,11 @@ class State {
             return Promise.reject()
           })
       } else {
-      // This is not an ephemeral plan. Show a dialog to the user asking whether to overwrite current plan or save as a new one.
+        // This is not an ephemeral plan. Show a dialog to the user asking whether to overwrite current plan or save as a new one.
         return service.showModifyQuestionDialog()
           .then((result) => {
             if (result === service.modifyDialogResult.SAVEAS) {
-            // Ask for the name to save this plan as, then save it
+              // Ask for the name to save this plan as, then save it
               return new Promise((resolve, reject) => {
                 swal({
                   title: 'Plan name required',
@@ -1157,12 +1157,12 @@ class State {
                   confirmButtonColor: '#DD6B55',
                   confirmButtonText: 'Create Plan'
                 },
-                (planName) => {
-                  if (planName) {
-                    return service.copyCurrentPlanTo(planName)
-                      .then(() => { return resolve() })
-                  }
-                })
+                  (planName) => {
+                    if (planName) {
+                      return service.copyCurrentPlanTo(planName)
+                        .then(() => { return resolve() })
+                    }
+                  })
               })
             } else if (result === service.modifyDialogResult.OVERWRITE) {
               return service.copyCurrentPlanTo(currentPlan.name)
@@ -1238,10 +1238,14 @@ class State {
             apiUrl += `?userId=${service.loggedInUser.id}`
             $http.post(apiUrl, optimizationBody)
               .then((response) => {
-              // console.log(response)
+                // console.log(response)
                 if (response.status >= 200 && response.status <= 299) {
                   service.Optimizingplan.optimizationId = response.data.optimizationIdentifier
-                  service.startPolling()
+                  // service.startPolling()
+                  service.Optimizingplan.planState = Constants.PLAN_STATE.STARTED
+                  service.progressPercent = 0
+                  service.progressMessage = `00:00 Runtime`
+                  service.getOptimizationProgress(service.Optimizingplan)
                   service.setActivePlanState(PlanStates.START_STATE)
                 } else {
                   console.error(response)
@@ -1254,47 +1258,42 @@ class State {
     }
 
     service.planOptimization = new Rx.BehaviorSubject(null)
-    service.startPolling = () => {
-      service.stopPolling()
-      service.progressPollingInterval = setInterval(() => {
-        $http.get(`/service/optimization/processes/${service.Optimizingplan.optimizationId}`).then((response) => {
-          var newPlan = JSON.parse(JSON.stringify(service.plan.getValue()))
-          newPlan.planState = response.data.optimizationState
-          service.planOptimization.next(newPlan)
-          service.checkPollingStatus(newPlan)
-          if (response.data.optimizationState === PlanStates.COMPLETED ||
-            response.data.optimizationState === PlanStates.CANCELED ||
-            response.data.optimizationState === PlanStates.FAILED) {
-            service.stopPolling()
-            tileDataService.markHtmlCacheDirty()
-            service.requestMapLayerRefresh.next(null)
-            delete service.Optimizingplan.optimizationId
-            service.loadPlanInputs(newPlan.id)
-            service.setActivePlanState(response.data.optimizationState)
-          }
-          var diff = (Date.now() - new Date(response.data.startDate).getTime()) / 1000
-          var minutes = Math.floor(diff / 60)
-          var seconds = Math.ceil(diff % 60)
-          service.progressPercent = response.data.progress * 100
-          service.progressMessage = `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds} Runtime`
-          $timeout() // Trigger a digest cycle so that components can update
-        })
-      }, 1000)
-    }
+    service.getOptimizationProgress = (newPlan) => {
+      service.Optimizingplan = newPlan
+      if (service.Optimizingplan && service.Optimizingplan.planState !== PlanStates.COMPLETED) {
+        SocketManager.subscribe('PROGRESS_MESSAGE_DATA', progressData => {
+          if (progressData.data.processType === 'optimization') {
+            console.log(progressData)
+            newPlan.planState = progressData.data.optimizationState
+            service.Optimizingplan.planState = progressData.data.optimizationState
 
-    service.stopPolling = () => {
-      if (service.progressPollingInterval) {
-        clearInterval(service.progressPollingInterval)
-        service.progressPollingInterval = null
+            if (progressData.data.optimizationState === PlanStates.COMPLETED ||
+              progressData.data.optimizationState === PlanStates.CANCELED ||
+              progressData.data.optimizationState === PlanStates.FAILED) {
+              tileDataService.markHtmlCacheDirty()
+              service.requestMapLayerRefresh.next(null)
+              delete service.Optimizingplan.optimizationId
+              service.loadPlanInputs(newPlan.id)
+              service.setActivePlanState(progressData.data.optimizationState)
+            }
+
+            service.planOptimization.next(newPlan)
+            var diff = (Date.now() - new Date(progressData.data.startDate).getTime()) / 1000
+            var minutes = Math.floor(diff / 60)
+            var seconds = Math.ceil(diff % 60)
+            service.progressPercent = progressData.data.progress * 100
+            service.progressMessage = `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds} Runtime`
+            $timeout() // Trigger a digest cycle so that components can update
+          }
+        })
       }
     }
 
     service.cancelOptimization = () => {
-      service.stopPolling()
       service.isCanceling = true
       $http.delete(`/service/optimization/processes/${service.Optimizingplan.optimizationId}`)
         .then((response) => {
-        // Optimization process was cancelled. Get the plan status from the server
+          // Optimization process was cancelled. Get the plan status from the server
           return $http.get(`/service/v1/plan/${service.Optimizingplan.id}?user_id=${service.loggedInUser.id}`)
         })
         .then((response) => {
@@ -1310,18 +1309,8 @@ class State {
         })
     }
 
-    service.checkPollingStatus = (newPlan) => {
-      service.stopPolling()
-      service.Optimizingplan = newPlan
-      service.isCanceling = false
-      if (service.Optimizingplan && service.Optimizingplan.planState === Constants.PLAN_STATE.STARTED) {
-      // Optimization is in progress. We can start polling for the results
-        service.startPolling()
-      }
-    }
-
     service.plan.subscribe((newPlan) => {
-      service.checkPollingStatus(newPlan)
+      service.getOptimizationProgress(newPlan)
     })
 
     service.getDefaultPlanInputs = () => {
@@ -1340,10 +1329,10 @@ class State {
             let tagsById = {}
             cat.tags.forEach((tag) => {
               tag.colourHash = service.StateViewMode.getTagColour(tag)
-              tagsById[ tag.id + '' ] = tag
+              tagsById[tag.id + ''] = tag
             })
             cat.tags = tagsById
-            censusCats[ cat.id + '' ] = cat
+            censusCats[cat.id + ''] = cat
           })
           service.reloadCensusCategories(censusCats)
         })
@@ -1358,7 +1347,7 @@ class State {
           boundaryTypes.sort((a, b) => a.id - b.id)
           var selectedBoundaryType = boundaryTypes[0]
 
-          service.setBoundaryTypes(boundaryTypes)         
+          service.setBoundaryTypes(boundaryTypes)
           service.setSelectedBoundaryType(selectedBoundaryType)
         })
     }
@@ -1408,7 +1397,7 @@ class State {
     }
 
     service.isFeatureLayerOnForBoundary = (boundaryFeature) => {
-    // if it doesn't have a network_node_type return TRUE
+      // if it doesn't have a network_node_type return TRUE
       var isOn = true
       var networkNodeType = ''
       if (boundaryFeature.network_node_type) {
@@ -1551,7 +1540,7 @@ class State {
           service.configuration = result.data.appConfiguration
           service.googleMapsLicensing = result.data.googleMapsLicensing
           service.configuration.loadPerspective = (perspective) => {
-          // If a perspective is not found, go to the default
+            // If a perspective is not found, go to the default
             const defaultPerspective = service.configuration.perspectives.filter(item => item.name === 'default')[0]
             const thisPerspective = service.configuration.perspectives.filter(item => item.name === perspective)[0]
             service.configuration.perspective = thisPerspective || defaultPerspective
@@ -1594,7 +1583,7 @@ class State {
     // Ask the user if they want to "steal" and existing transaction from another user.
     // If yes, steal it. If not, throw a rejection
     service.stealOrRejectTransaction = (transaction) => {
-    // Get the name of the current owner of the transaction
+      // Get the name of the current owner of the transaction
       return $http.get(`/service/odata/userentity?$select=firstName,lastName&$filter=id eq ${transaction.userId}`)
         .then((result) => {
           const user = result.data[0]
@@ -1624,8 +1613,8 @@ class State {
     }
 
     service.deleteBadTransactionsAndCreateNew = (transactionsForPlan) => {
-    // Sometimes we will get into a state where we have multiple open transactions for the same plan. Ask the
-    // user whether they want to delete all and start a new transaction
+      // Sometimes we will get into a state where we have multiple open transactions for the same plan. Ask the
+      // user whether they want to delete all and start a new transaction
       return new Promise((resolve, reject) => {
         swal({
           title: 'Multiple transactions',
@@ -1653,7 +1642,7 @@ class State {
     }
 
     service.resumeOrCreateTransaction = () => {
-    // Workflow:
+      // Workflow:
       // 1. If we don't have any transaction for this plan, create one
       // 2. If we have multiple transactions for this plan, we are in a bad state. Ask the user if they want to delete all but one.
       // 3. If we have a transaction for this plan BUT not for the current user
@@ -1667,24 +1656,24 @@ class State {
           const transactionsForPlan = result.data.filter((item) => item.planId === currentPlanId)
           const transactionsForUserAndPlan = transactionsForPlan.filter((item) => item.userId === service.loggedInUser.id)
           if (transactionsForPlan.length === 0) {
-          // A transaction does not exist. Create it.
+            // A transaction does not exist. Create it.
             tracker.trackEvent(tracker.CATEGORIES.NEW_PLAN_TRANSACTION, tracker.ACTIONS.CLICK)
             return $http.post(`/service/plan-transactions`, { userId: service.loggedInUser.id, planId: currentPlanId })
           } else if (transactionsForPlan > 1) {
-          // We have multiple transactions for this plan. We should never get into this state, but can happen
-          // due to race conditions, network issues, etc.
+            // We have multiple transactions for this plan. We should never get into this state, but can happen
+            // due to race conditions, network issues, etc.
             return service.deleteBadTransactionsAndCreateNew(transactionsForPlan)
           } else if (transactionsForUserAndPlan.length === 1) {
-          // We have one open transaction for this user and plan combo. Resume it.
+            // We have one open transaction for this user and plan combo. Resume it.
             tracker.trackEvent(tracker.CATEGORIES.RESUME_PLAN_TRANSACTION, tracker.ACTIONS.CLICK, 'TransactionID', transactionsForUserAndPlan[0].id)
             return Promise.resolve({ data: transactionsForUserAndPlan[0] }) // Using {data:} so that the signature is consistent
           } else if (transactionsForPlan.length === 1) {
-          // We have one open transaction for this plan, but it was not started by this user. Ask the user what to do.
+            // We have one open transaction for this plan, but it was not started by this user. Ask the user what to do.
             return service.stealOrRejectTransaction(transactionsForPlan[0])
           }
         })
         .catch((err) => {
-        // For transaction resume errors, log it and rethrow the exception
+          // For transaction resume errors, log it and rethrow the exception
           console.warn(err)
           return Promise.reject(err)
         })
@@ -1696,7 +1685,7 @@ class State {
       var aclResult = null
       return $http.get('/service/auth/permissions')
         .then((result) => {
-        // Get the permissions for the name USER_ADMIN
+          // Get the permissions for the name USER_ADMIN
           userAdminPermissions = result.data.filter((item) => item.name === 'USER_ADMIN')[0].id
           return $http.get(`/service/auth/acl/SYSTEM/1`)
         })
@@ -1710,7 +1699,7 @@ class State {
           return $http.get(`/service/auth/users/${userId}`)
         })
         .then((result) => {
-        // Also check if the groups that the user belongs to have administrator permissions
+          // Also check if the groups that the user belongs to have administrator permissions
           userGroupIsAdministrator = false
           result.data.groupIds.forEach((groupId) => {
             const userGroupAcl = aclResult.resourcePermissions.filter((item) => item.systemActorId === groupId)[0]
@@ -1809,7 +1798,7 @@ class State {
           var currentuserAppVersions = localStorage.getItem(service.loggedInUser.id)
 
           if (!localStorage.getItem(service.loggedInUser.id) ||
-        _.difference(service.listOfAppVersions, JSON.parse(currentuserAppVersions)).length > 0) {
+            _.difference(service.listOfAppVersions, JSON.parse(currentuserAppVersions)).length > 0) {
             Notification.primary({
               message: `<a href="#" onClick="openReleaseNotes()">Latest Updates and Platform Improvements</a>`
             })
@@ -1830,7 +1819,7 @@ class State {
     }
 
     service.getDispatchers = () => {
-    // So we can send dispatchers to stateSerializationHelper. This function can go away after stateSerializationHelper is refactored.
+      // So we can send dispatchers to stateSerializationHelper. This function can go away after stateSerializationHelper is refactored.
       return {
         setSelectionTypeById: service.setSelectionTypeById,
         addPlanTargets: service.addPlanTargets,
@@ -1853,7 +1842,7 @@ class State {
     return service
   }
 
-  mapStateToThis (reduxState) {
+  mapStateToThis(reduxState) {
     return {
       locationLayers: getLocationLayersList(reduxState),
       networkEquipmentLayers: getNetworkEquipmentLayersList(reduxState),
@@ -1865,7 +1854,7 @@ class State {
     }
   }
 
-  mapDispatchToTarget (dispatch) {
+  mapDispatchToTarget(dispatch) {
     return {
       loadConfigurationFromServer: () => dispatch(UiActions.loadConfigurationFromServer()),
       setLoggedInUserRedux: loggedInUser => dispatch(UserActions.setLoggedInUser(loggedInUser)),
