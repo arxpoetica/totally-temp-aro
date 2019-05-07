@@ -130,6 +130,7 @@ class ResourcePermissionsEditorController {
             'rolePermissions': access.rolePermissions
           })
           // check for user and group permissions 
+          
           if ( access.rolePermissions == this.ownerPermissions 
               && (access.systemActorId == this.state.loggedInUser.id 
                   || this.state.loggedInUser.groupIds.includes(access.systemActorId)
@@ -138,6 +139,7 @@ class ResourcePermissionsEditorController {
             this.isOwner = true
             this.actionsParam = this.actions
           }
+          
         })
       })
       .catch((err) => console.error(err))
