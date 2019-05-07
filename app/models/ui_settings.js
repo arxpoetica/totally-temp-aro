@@ -14,6 +14,14 @@ module.exports = class UiSettings {
       })
   }
 
+  static getStylesheetsForClient (aroClient) {
+    const sql = 'SELECT settings FROM ui.stylesheets WHERE client=$1'
+    return database.findOne(sql, [aroClient])
+      .then(results => {
+        return Promise.resolve(results && results.settings)
+      })
+  }
+
   static saveSettings (aroClient, settingType, settingValue) {
     const sql = `
       INSERT INTO ui.settings(client, type, settings)

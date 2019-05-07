@@ -10,6 +10,16 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
+  api.get('/ui_stylesheets', (req, res, next) => {
+    models.UiSettings.getStylesheetsForClient(process.env.ARO_CLIENT)
+    .then((cssData) => {
+      res.writeHead(200, {'Content-type' : 'text/css'});
+      cssData && res.write(cssData);
+      res.end()
+    })
+    .catch(next)
+  })
+
   api.post('/ui_settings/save/:settingType', (req, res, next) => {
     const settingType = req.params.settingType
     const settingValue = req.body.configuration
