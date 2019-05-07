@@ -130,7 +130,6 @@ class ResourcePermissionsEditorController {
             'rolePermissions': access.rolePermissions
           })
           // check for user and group permissions 
-          
           if ( access.rolePermissions == this.ownerPermissions 
               && (access.systemActorId == this.state.loggedInUser.id 
                   || this.state.loggedInUser.groupIds.includes(access.systemActorId)
@@ -146,8 +145,7 @@ class ResourcePermissionsEditorController {
   }
   
   saveResourceAccess () {
-    // check that user is still owner
-    
+    // server will check that there is still an owner
     var putBody = {
       'resourcePermissions': this.rows.map(row => {
         return {
@@ -158,7 +156,6 @@ class ResourcePermissionsEditorController {
     }
     return this.$http.put(`/service/auth/acl/${this.resourceType}/${this.resourceId}?userId=${this.state.loggedInUser.id}`, putBody)
   }
-  
   
 }
 
