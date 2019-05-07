@@ -18,7 +18,7 @@
 	            <i ng-if="!$ctrl.isOrderAscending" class="fa fa-chevron-up" aria-hidden="true"> </i>
 	          </div>
 	        </th>
-	        <th class="ei-table-col-head" ng-if="$ctrl.isEdit && !!$ctrl.actions"></th>
+	        <th class="ei-table-col-head" ng-if="!!$ctrl.actions"></th>
 	      </tr>
 	    </thead>
 	    <tbody>
@@ -43,7 +43,7 @@
 		          </editor-interface-value>
 	          </div>
 	        </td>
-	        <td class="ei-table-cell ei-table-button-cell" ng-if="$ctrl.isEdit && !!$ctrl.actions">
+	        <td class="ei-table-cell ei-table-button-cell" ng-if="!!$ctrl.actions">
 	          <button class="btn btn-sm ng-class: btnValue.buttonClass;" 
 	                  ng-if="$ctrl.actionDisplayLimit >= $ctrl.actions.length"
 	                  ng-repeat="(btnKey, btnValue) in $ctrl.actions"

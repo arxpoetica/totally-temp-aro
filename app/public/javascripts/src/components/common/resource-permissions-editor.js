@@ -30,8 +30,6 @@ class ResourcePermissionsEditorController {
       }
     })
     
-    console.log(this.authRollsEnum)
-    
     this.newActorId = null
     this.rows = []
     this.idProp = 'systemActorId' // unique id of each row
@@ -62,6 +60,8 @@ class ResourcePermissionsEditorController {
       }
       
     ]
+    
+    this.actionsParam = null
     
     this.actions = [
       {
@@ -108,7 +108,6 @@ class ResourcePermissionsEditorController {
   }
   
   removeActor (row) {
-    console.log(row)
     this.rows = this.rows.filter(function(value, index, arr){
       return value != row;
     });
@@ -123,15 +122,22 @@ class ResourcePermissionsEditorController {
         var idToSystemActor = {}
         this.systemActors.forEach((systemActor) => idToSystemActor[systemActor.id] = systemActor)
         this.isOwner = false
-        console.log(result)
+        this.actionsParam = null
         result.data.resourcePermissions.forEach((access) => {
           this.rows.push({
             'systemActorId': access.systemActorId, 
             'name': idToSystemActor[access.systemActorId].name, 
             'rolePermissions': access.rolePermissions
           })
-          if (access.systemActorId == this.state.loggedInUser.id 
-              && access.rolePermissions == this.ownerPermissions) this.isOwner = true
+          // check for user and group permissions 
+          if ( access.rolePermissions == this.ownerPermissions 
+              && (access.systemActorId == this.state.loggedInUser.id 
+                  || this.state.loggedInUser.groupIds.includes(access.systemActorId)
+                  )
+              ) {
+            this.isOwner = true
+            this.actionsParam = this.actions
+          }
         })
       })
       .catch((err) => console.error(err))

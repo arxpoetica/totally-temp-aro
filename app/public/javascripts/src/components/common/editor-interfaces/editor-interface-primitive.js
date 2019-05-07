@@ -26,16 +26,6 @@ class EditorInterfacePrimitiveController {
         }
       }
     }
-    /*
-    // change this out for proper dynamic constraint checking
-    if ('siteClli' == this.displayProps.propertyName || 'siteName' == this.displayProps.propertyName){
-      this.isValid = this.checkConstraint()
-      this.needsValidation = true
-    }else{
-      this.isValid = true
-      this.needsValidation = false
-    }
-    */
   }
 
   getEnumSet () {
@@ -66,7 +56,7 @@ class EditorInterfacePrimitiveController {
           }
           this.onChange()
         } else if (!isEnumSame) {
-        // need to refresh the local view
+          // need to refresh the local view
           this.$timeout()
         }
       }
