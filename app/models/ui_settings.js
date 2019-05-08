@@ -33,4 +33,17 @@ module.exports = class UiSettings {
     `
     return database.query(sql, [aroClient, settingType, settingValue])
   }
+
+  static savestylesheet (aroClient, stylesheetsValue) {
+    const sql = `
+      INSERT INTO ui.stylesheets(client, settings)
+      VALUES($1, $2)
+      ON CONFLICT ON CONSTRAINT client_unique
+      DO
+        UPDATE
+          SET settings=$2;
+    `
+    return database.query(sql, [aroClient, stylesheetsValue])
+  }
+
 }

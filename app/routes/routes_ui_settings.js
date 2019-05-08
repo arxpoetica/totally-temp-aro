@@ -10,15 +10,17 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
-  api.get('/ui_stylesheets', (req, res, next) => {
+  function getStylesheetsForClient(request, response, next) {
     models.UiSettings.getStylesheetsForClient(process.env.ARO_CLIENT)
-    .then((cssData) => {
-      res.writeHead(200, {'Content-type' : 'text/css'});
-      cssData && res.write(cssData);
-      res.end()
-    })
-    .catch(next)
-  })
+      .then((cssData) => {
+        response.writeHead(200, { 'Content-type': 'text/css' });
+        cssData && response.write(cssData);
+        response.end()
+      })
+      .catch(next)
+  }
+
+  api.get('/ui_stylesheets', getStylesheetsForClient)
 
   api.post('/ui_settings/save/:settingType', (req, res, next) => {
     const settingType = req.params.settingType
@@ -29,6 +31,13 @@ exports.configure = (api, middleware) => {
         helpers.cache.clearUiConfigurationCache()
         helpers.cache.refresh()
       })
+      .then(jsonSuccess(res, next))
+      .catch(next)
+  })
+
+  api.post('/ui_stylesheets', (req, res, next) => {
+    const stylesheetsValue = req.body.configuration
+    models.UiSettings.savestylesheet(process.env.ARO_CLIENT, stylesheetsValue)
       .then(jsonSuccess(res, next))
       .catch(next)
   })
