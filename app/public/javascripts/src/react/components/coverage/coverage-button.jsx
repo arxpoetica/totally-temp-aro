@@ -5,8 +5,19 @@ import reduxStore from '../../../redux-store'
 import CoverageActions from '../coverage/coverage-actions'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import CoverageStatusTypes from './constants'
+import socketManager from '../../../react/common/socket-manager'
 
 export class CoverageButton extends Component {
+  constructor (props) {
+    super(props)
+    socketManager.subscribe('PROGRESS_MESSAGE_DATA', (progressData) => {
+      if (progressData.data.processType === 'coverage') {
+        console.log(progressData)
+        this.props.setCoverageProgress(progressData.data)
+      }
+    })
+  }
+
   render () {
     switch (this.props.status) {
       case CoverageStatusTypes.UNINITIALIZED:
@@ -96,7 +107,8 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   initializeCoverageReport: (userId, planId, projectId, activeSelectionMode, locationTypes, boundaryLayers, initializationParams) => {
     dispatch(CoverageActions.initializeCoverageReport(userId, planId, projectId, activeSelectionMode, locationTypes,
       boundaryLayers, initializationParams))
-  }
+  },
+  setCoverageProgress: (progress) => dispatch(CoverageActions.setCoverageProgress(progress))
 })
 
 const CoverageButtonComponent = wrapComponentWithProvider(reduxStore, CoverageButton, mapStateToProps, mapDispatchToProps)
