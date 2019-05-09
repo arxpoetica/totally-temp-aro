@@ -5,7 +5,7 @@ import wrapComponentWithProvider from '../../../common/provider-wrapped-componen
 import NetworkAnalysisActions from './network-analysis-actions'
 
 // An internal class for rendering a single row in the reports table
-class NetworkAnalysisReportRow extends Component {
+export class NetworkAnalysisReportRow extends Component {
   constructor (props) {
     super(props)
     this.state = {
@@ -57,6 +57,7 @@ export class NetworkAnalysisReportModal extends Component {
           <div className='modal-header'>
             <h4 className='modal-title'>Network Analysis Reports</h4>
             <button
+              id='btnHeaderHideReportModal'
               type='button'
               onClick={() => this.props.showOrHideReportModal(false)}
               className='close'
@@ -90,6 +91,7 @@ export class NetworkAnalysisReportModal extends Component {
           </div>
           <div className='modal-footer'>
             <button
+              id='btnHideReportModal'
               onClick={() => this.props.showOrHideReportModal(false)}
               type='button'
               className='btn btn-light'
