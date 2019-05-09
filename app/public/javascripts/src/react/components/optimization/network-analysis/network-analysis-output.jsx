@@ -48,15 +48,6 @@ export class NetworkAnalysisOutput extends Component {
       </div>
       {/* The canvas that will hold the actual chart */}
       <canvas ref={this.chartRef} style={{ display: hasChartData ? 'block' : 'none' }} />
-      {/* A button to download the report */}
-      { this.props.chartReport
-        ? <a id='lnkDownloadNetworkAnalysisOutputReport' className='btn btn-sm btn-light float-right'
-          href={`/service-download-file/NetworkAnalysis.csv/v2/report-extended/${this.props.chartReportMetaData.id}/${this.props.planId}.csv`}
-          download>
-          <i className='fa fa-download' /> Download Report
-        </a>
-        : null
-      }
       {/* If we don't have a chart to show, display a message */}
       <div className='alert alert-warning mt-3' style={{ display: hasChartData ? 'none' : 'block' }}>
         Network analysis data not available. Run a new network analysis to see results.

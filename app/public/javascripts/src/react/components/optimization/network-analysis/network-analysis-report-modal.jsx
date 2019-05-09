@@ -12,7 +12,10 @@ class NetworkAnalysisReportRow extends Component {
       selectedFormat: this.props.mediaTypes[0]
     }
   }
+
   render () {
+    // "(new Date()).toISOString().split('T')[0]" will give "YYYY-MM-DD"
+    const downloadFileName = `${(new Date()).toISOString().split('T')[0]}_${this.props.reportName}.${this.state.selectedFormat}`
     return <tr>
       <td>{this.props.displayName}</td>
       <td>
@@ -23,9 +26,9 @@ class NetworkAnalysisReportRow extends Component {
           { this.props.mediaTypes.map(item => <option key={item} value={item}>{item}</option>)}
         </select>
       </td>
-      <td>
+      <td style={{ textAlign: 'center' }}>
         <a className='btn btn-sm btn-light'
-          href={`/service-download-file/NetworkAnalysis.csv/v2/report-extended/${this.props.reportId}/${this.props.planId}.${this.state.selectedFormat}`}
+          href={`/service-download-file/${downloadFileName}/v2/report-extended/${this.props.reportId}/${this.props.planId}.${this.state.selectedFormat}`}
           download>
           <i className='fa fa-download' /> Download
         </a>
@@ -36,6 +39,7 @@ class NetworkAnalysisReportRow extends Component {
 NetworkAnalysisReportRow.propTypes = {
   planId: PropTypes.number,
   reportId: PropTypes.number,
+  reportName: PropTypes.string,
   displayName: PropTypes.string,
   mediaTypes: PropTypes.array
 }
@@ -75,6 +79,7 @@ export class NetworkAnalysisReportModal extends Component {
                     <NetworkAnalysisReportRow
                       key={index}
                       reportId={report.id}
+                      reportName={report.name}
                       displayName={report.displayName}
                       mediaTypes={report.media_types}
                       planId={this.props.planId} />
