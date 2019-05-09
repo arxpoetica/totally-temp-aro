@@ -60,7 +60,7 @@ export class NetworkAnalysisOutput extends Component {
         {JSON.stringify(this.chartDefinitionForTesting, null, 2)}
       </pre>
       <button className='btn btn-primary pull-left' onClick={() => this.props.showOrHideReportModal(true)}>Reports</button>
-      <ReportsDownloadModal />
+      <ReportsDownloadModal reportTypes={['NETWORK_ANALYSIS']} />
     </div>
   }
 

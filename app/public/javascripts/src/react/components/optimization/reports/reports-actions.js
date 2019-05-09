@@ -6,10 +6,9 @@ function loadReportsMetaData () {
   return dispatch => {
     AroHttp.get('/service/v2/installed/report/meta-data')
       .then(result => {
-        const networkAnalysisReports = result.data.filter(report => report.reportType === 'NETWORK_ANALYSIS')
         dispatch({
           type: Actions.OPTIMIZATION_REPORTS_SET_REPORTS_METADATA,
-          payload: networkAnalysisReports
+          payload: result.data
         })
       })
       .catch(err => console.error(err))

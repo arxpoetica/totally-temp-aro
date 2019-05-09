@@ -48,6 +48,8 @@ ReportsDownloadRow.propTypes = {
 
 export class ReportsDownloadModal extends Component {
   render () {
+    const reportTypes = (this.props.reportTypes || [])
+    const visibleReports = (this.props.reportsMetaData || []).filter(report => reportTypes.indexOf(report.reportType) >= 0)
     return <div
       id='modalNetworkAnalysisReports'
       className={`modal fade ${this.props.showReportModal ? 'show' : ''}`}
@@ -78,7 +80,7 @@ export class ReportsDownloadModal extends Component {
               </thead>
               <tbody>
                 {
-                  (this.props.reportsMetaData || []).map((report, index) => (
+                  visibleReports.map((report, index) => (
                     <ReportsDownloadRow
                       key={index}
                       reportId={report.id}
@@ -117,6 +119,7 @@ export class ReportsDownloadModal extends Component {
 ReportsDownloadModal.propTypes = {
   planId: PropTypes.number,
   reportsMetaData: PropTypes.array,
+  reportTypes: PropTypes.array,
   showReportModal: PropTypes.bool
 }
 

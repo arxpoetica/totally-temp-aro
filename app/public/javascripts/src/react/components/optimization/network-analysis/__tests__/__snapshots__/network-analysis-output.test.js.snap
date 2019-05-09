@@ -63,7 +63,13 @@ exports[`When report and report definition are empty 1`] = `
   >
     Reports
   </button>
-  <Component />
+  <Component
+    reportTypes={
+      Array [
+        "NETWORK_ANALYSIS",
+      ]
+    }
+  />
 </div>
 `;
 
@@ -223,7 +229,13 @@ exports[`When report and report definition are given 1`] = `
   >
     Reports
   </button>
-  <Component />
+  <Component
+    reportTypes={
+      Array [
+        "NETWORK_ANALYSIS",
+      ]
+    }
+  />
 </div>
 `;
 
@@ -290,7 +302,13 @@ exports[`When report definition is empty 1`] = `
   >
     Reports
   </button>
-  <Component />
+  <Component
+    reportTypes={
+      Array [
+        "NETWORK_ANALYSIS",
+      ]
+    }
+  />
 </div>
 `;
 
@@ -364,6 +382,12 @@ exports[`When report is empty 1`] = `
   >
     Reports
   </button>
-  <Component />
+  <Component
+    reportTypes={
+      Array [
+        "NETWORK_ANALYSIS",
+      ]
+    }
+  />
 </div>
 `;

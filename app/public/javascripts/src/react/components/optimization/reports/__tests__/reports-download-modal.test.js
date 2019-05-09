@@ -67,6 +67,7 @@ test('When reports metadata is defined', () => {
     <ReportsDownloadModal
       planId={100}
       reportsMetaData={reportsMetaData}
+      reportTypes={['NETWORK_ANALYSIS']}
     />
   )
   expect(component).toMatchSnapshot()
@@ -83,6 +84,7 @@ test('NetworkAnalysisReportRow render', () => {
       reportName={'optimization_analysis_report'}
       displayName={'Optimization analysis report'}
       mediaTypes={['csv', 'json', 'xls']}
+      reportTypes={['NETWORK_ANALYSIS']}
     />
   )
   expect(component).toMatchSnapshot()
