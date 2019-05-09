@@ -21,6 +21,7 @@ export class NetworkAnalysisOutput extends Component {
     const hasChartData = Boolean(this.props.chartReportDefinition && this.props.chartReport && this.props.chartReport.length > 0)
     if (hasChartData) {
       // Why setTimeout()? We need the chart to be rendered with the right display style, THEN we create the chart.
+      this.updateChartDefinition()
       setTimeout(() => this.updateChart(), 0)
     } else {
       // Someone may have clicked the 'Modify' button to re-run analysis. Clear old chart (if any)
@@ -73,7 +74,7 @@ export class NetworkAnalysisOutput extends Component {
     }
   }
 
-  updateChart () {
+  updateChartDefinition () {
     if (!this.props.chartReportDefinition) {
       return // This can happen when updateChart() is called from a setTimeout(), and the properties change in the meantime
     }
@@ -84,8 +85,11 @@ export class NetworkAnalysisOutput extends Component {
       selectedUiDefinition = this.props.chartReportDefinition.uiDefinition.filter(item => item.chartDefinition.name === this.state.selectedUiDefinition)[0]
     }
     const copyOfSelectedUiDefinition = JSON.parse(JSON.stringify(selectedUiDefinition))
-    const chartDefinition = this.buildChartDefinition(copyOfSelectedUiDefinition.chartDefinition, copyOfSelectedUiDefinition.dataModifiers, this.props.chartReport)
-    this.chartDefinitionForTesting = JSON.parse(JSON.stringify(chartDefinition))
+    this.chartDefinition = this.buildChartDefinition(copyOfSelectedUiDefinition.chartDefinition, copyOfSelectedUiDefinition.dataModifiers, this.props.chartReport)
+    this.chartDefinitionForTesting = JSON.parse(JSON.stringify(this.chartDefinition))
+  }
+
+  updateChart () {
     if (this.chart) {
       this.chart.destroy()
       this.chart = null
@@ -94,7 +98,7 @@ export class NetworkAnalysisOutput extends Component {
       console.log('*** network-analysis-output: We are running in test mode. The actual chart will not be created')
     } else {
       var ctx = this.chartRef.current.getContext('2d')
-      this.chart = new Chart(ctx, chartDefinition)
+      this.chart = new Chart(ctx, this.chartDefinition)
     }
   }
 
