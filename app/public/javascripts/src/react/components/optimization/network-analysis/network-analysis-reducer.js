@@ -3,9 +3,7 @@ import Actions from '../../../common/actions'
 const defaultState = {
   chartReport: null,
   chartReportMetaData: null,
-  chartReportDefinition: null,
-  reportsMetaData: null,
-  showReportModal: false
+  chartReportDefinition: null
 }
 
 function setChartReport (state, chartReport) {
@@ -26,28 +24,6 @@ function setChartReportDefinition (state, chartReportDefinition) {
   }
 }
 
-function setReportsMetaData (state, reportsMetaData) {
-  return { ...state,
-    reportsMetaData: reportsMetaData
-  }
-}
-
-function clearOutput (state) {
-  return { ...state,
-    chartReport: null,
-    chartReportMetaData: null,
-    chartReportDefinition: null,
-    reportsMetaData: null,
-    showReportModal: false
-  }
-}
-
-function setReportModalVisibility (state, showReportModal) {
-  return { ...state,
-    showReportModal: showReportModal
-  }
-}
-
 function configurationReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.NETWORK_ANALYSIS_SET_CHART_REPORT:
@@ -58,15 +34,6 @@ function configurationReducer (state = defaultState, action) {
 
     case Actions.NETWORK_ANALYSIS_SET_CHART_REPORT_DEFINITION:
       return setChartReportDefinition(state, action.payload)
-
-    case Actions.NETWORK_ANALYSIS_SET_REPORTS_METADATA:
-      return setReportsMetaData(state, action.payload)
-
-    case Actions.NETWORK_ANALYSIS_CLEAR_OUTPUT:
-      return clearOutput(state)
-
-    case Actions.NETWORK_ANALYSIS_SHOW_HIDE_REPORT_MODAL:
-      return setReportModalVisibility(state, action.payload)
 
     default:
       return state

@@ -2,11 +2,11 @@ import React, { Component } from 'react'
 import { PropTypes } from 'prop-types'
 import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
-import NetworkAnalysisActions from './network-analysis-actions'
+import ReportsActions from './reports-actions'
 import '../../common-styles/modal.css'
 
 // An internal class for rendering a single row in the reports table
-export class NetworkAnalysisReportRow extends Component {
+export class ReportsDownloadRow extends Component {
   constructor (props) {
     super(props)
     this.state = {
@@ -38,7 +38,7 @@ export class NetworkAnalysisReportRow extends Component {
   }
 }
 
-NetworkAnalysisReportRow.propTypes = {
+ReportsDownloadRow.propTypes = {
   planId: PropTypes.number,
   reportId: PropTypes.number,
   reportName: PropTypes.string,
@@ -46,7 +46,7 @@ NetworkAnalysisReportRow.propTypes = {
   mediaTypes: PropTypes.array
 }
 
-export class NetworkAnalysisReportModal extends Component {
+export class ReportsDownloadModal extends Component {
   render () {
     return <div
       id='modalNetworkAnalysisReports'
@@ -79,7 +79,7 @@ export class NetworkAnalysisReportModal extends Component {
               <tbody>
                 {
                   (this.props.reportsMetaData || []).map((report, index) => (
-                    <NetworkAnalysisReportRow
+                    <ReportsDownloadRow
                       key={index}
                       reportId={report.id}
                       reportName={report.name}
@@ -114,7 +114,7 @@ export class NetworkAnalysisReportModal extends Component {
   }
 }
 
-NetworkAnalysisReportModal.propTypes = {
+ReportsDownloadModal.propTypes = {
   planId: PropTypes.number,
   reportsMetaData: PropTypes.array,
   showReportModal: PropTypes.bool
@@ -122,14 +122,14 @@ NetworkAnalysisReportModal.propTypes = {
 
 const mapStateToProps = state => ({
   planId: state.plan.activePlan.id,
-  reportsMetaData: state.optimization.networkAnalysis.reportsMetaData,
-  showReportModal: state.optimization.networkAnalysis.showReportModal
+  reportsMetaData: state.optimization.report.reportsMetaData,
+  showReportModal: state.optimization.report.showReportModal
 })
 
 const mapDispatchToProps = dispatch => ({
-  loadReportsMetaData: () => dispatch(NetworkAnalysisActions.loadReportsMetaData()),
-  showOrHideReportModal: showReportModal => dispatch(NetworkAnalysisActions.showOrHideReportModal(showReportModal))
+  loadReportsMetaData: () => dispatch(ReportsActions.loadReportsMetaData()),
+  showOrHideReportModal: showReportModal => dispatch(ReportsActions.showOrHideReportModal(showReportModal))
 })
 
-const NetworkAnalysisReportModalComponent = wrapComponentWithProvider(reduxStore, NetworkAnalysisReportModal, mapStateToProps, mapDispatchToProps)
-export default NetworkAnalysisReportModalComponent
+const ReportsDownloadModalComponent = wrapComponentWithProvider(reduxStore, ReportsDownloadModal, mapStateToProps, mapDispatchToProps)
+export default ReportsDownloadModalComponent

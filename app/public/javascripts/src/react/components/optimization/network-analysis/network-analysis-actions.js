@@ -39,36 +39,6 @@ function loadReport (planId) {
   }
 }
 
-function clearOutput () {
-  return {
-    type: Actions.NETWORK_ANALYSIS_CLEAR_OUTPUT
-  }
-}
-
-function loadReportsMetaData () {
-  return dispatch => {
-    AroHttp.get('/service/v2/installed/report/meta-data')
-      .then(result => {
-        const networkAnalysisReports = result.data.filter(report => report.reportType === 'NETWORK_ANALYSIS')
-        dispatch({
-          type: Actions.NETWORK_ANALYSIS_SET_REPORTS_METADATA,
-          payload: networkAnalysisReports
-        })
-      })
-      .catch(err => console.error(err))
-  }
-}
-
-function showOrHideReportModal (showReportModal) {
-  return {
-    type: Actions.NETWORK_ANALYSIS_SHOW_HIDE_REPORT_MODAL,
-    payload: showReportModal
-  }
-}
-
 export default {
-  loadReport: loadReport,
-  clearOutput: clearOutput,
-  loadReportsMetaData: loadReportsMetaData,
-  showOrHideReportModal: showOrHideReportModal
+  loadReport: loadReport
 }

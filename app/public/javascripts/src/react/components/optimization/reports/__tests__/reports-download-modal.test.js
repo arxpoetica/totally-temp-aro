@@ -1,12 +1,12 @@
 /* global test expect jest */
 import React from 'react'
 import { shallow } from 'enzyme'
-import { NetworkAnalysisReportModal, NetworkAnalysisReportRow } from '../network-analysis-report-modal'
+import { ReportsDownloadModal, ReportsDownloadRow } from '../reports-download-modal'
 
 // -----------------------------------------------------------------------------
 test('When modal is hidden', () => {
   const component = shallow(
-    <NetworkAnalysisReportModal
+    <ReportsDownloadModal
       planId={100}
       showReportModal={false}
     />
@@ -17,7 +17,7 @@ test('When modal is hidden', () => {
 // -----------------------------------------------------------------------------
 test('When modal is shown', () => {
   const component = shallow(
-    <NetworkAnalysisReportModal
+    <ReportsDownloadModal
       planId={100}
       showReportModal
     />
@@ -29,7 +29,7 @@ test('When modal is shown', () => {
 test('When modal is initially hidden and then shown', () => {
   const mockLoadReportsMetaData = jest.fn()
   const component = shallow(
-    <NetworkAnalysisReportModal
+    <ReportsDownloadModal
       planId={100}
       showReportModal={false}
       loadReportsMetaData={mockLoadReportsMetaData}
@@ -44,7 +44,7 @@ test('When modal is initially hidden and then shown', () => {
 // -----------------------------------------------------------------------------
 test('When reports metadata is null', () => {
   const component = shallow(
-    <NetworkAnalysisReportModal
+    <ReportsDownloadModal
       planId={100}
       reportsMetaData={null}
     />
@@ -64,7 +64,7 @@ test('When reports metadata is defined', () => {
     }
   ]
   const component = shallow(
-    <NetworkAnalysisReportModal
+    <ReportsDownloadModal
       planId={100}
       reportsMetaData={reportsMetaData}
     />
@@ -77,7 +77,7 @@ test('NetworkAnalysisReportRow render', () => {
   // Mock the Date.now() function so that the test is determinstic
   Date.now = jest.fn(() => 1557383970443)
   const component = shallow(
-    <NetworkAnalysisReportRow
+    <ReportsDownloadRow
       planId={100}
       reportId={287}
       reportName={'optimization_analysis_report'}

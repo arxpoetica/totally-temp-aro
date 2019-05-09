@@ -388,7 +388,7 @@ exports[`When reports metadata is defined 1`] = `
             </tr>
           </thead>
           <tbody>
-            <NetworkAnalysisReportRow
+            <ReportsDownloadRow
               displayName="Optimization Analysis"
               key="0"
               mediaTypes={

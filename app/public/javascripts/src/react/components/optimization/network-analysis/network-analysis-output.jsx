@@ -3,8 +3,9 @@ import { PropTypes } from 'prop-types'
 import Chart from 'chart.js'
 import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
-import NetworkAnalysisReportModal from './network-analysis-report-modal.jsx'
+import ReportsDownloadModal from '../reports/reports-download-modal.jsx'
 import NetworkAnalysisActions from './network-analysis-actions'
+import ReportActions from '../reports/reports-actions'
 import PlanStates from '../../plan/plan-states'
 
 export class NetworkAnalysisOutput extends Component {
@@ -59,7 +60,7 @@ export class NetworkAnalysisOutput extends Component {
         {JSON.stringify(this.chartDefinitionForTesting, null, 2)}
       </pre>
       <button className='btn btn-primary pull-left' onClick={() => this.props.showOrHideReportModal(true)}>Reports</button>
-      <NetworkAnalysisReportModal />
+      <ReportsDownloadModal />
     </div>
   }
 
@@ -215,7 +216,7 @@ const mapStateToProps = (state) => ({
 const mapDispatchToProps = dispatch => ({
   loadReport: planId => dispatch(NetworkAnalysisActions.loadReport(planId)),
   clearOutput: () => dispatch(NetworkAnalysisActions.clearOutput()),
-  showOrHideReportModal: showReportModal => dispatch(NetworkAnalysisActions.showOrHideReportModal(showReportModal))
+  showOrHideReportModal: showReportModal => dispatch(ReportActions.showOrHideReportModal(showReportModal))
 })
 
 const NetworkAnalysisOutputComponent = wrapComponentWithProvider(reduxStore, NetworkAnalysisOutput, mapStateToProps, mapDispatchToProps)
