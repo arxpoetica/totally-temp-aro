@@ -1,6 +1,6 @@
 /* global test expect jest */
 import React from 'react'
-import { shallow, mount } from 'enzyme'
+import { shallow } from 'enzyme'
 import { NetworkAnalysisOutput } from '../network-analysis-output'
 
 const reportMetaData = { id: 10 }
@@ -79,6 +79,7 @@ const reportDefinition = {
     }
   ]
 }
+
 const report = [
   { coverage: 193.0, capex: 25373.196882982724, npv: 299981.76532897586, irr: 0.6926999999999963, index: 1 },
   { coverage: 215.0, capex: 28469.416882982725, npv: 333972.6394671266, irr: 0.6891999999999996, index: 2 },
@@ -107,8 +108,8 @@ test('When report is empty', () => {
   const component = shallow(
     <NetworkAnalysisOutput planId={100}
       loadReport={() => {}}
-      reportDefinition={reportDefinition}
-      reportMetaData={reportMetaData}
+      chartReportDefinition={reportDefinition}
+      chartReportMetaData={reportMetaData}
     />
   )
   expect(component).toMatchSnapshot()
@@ -119,8 +120,8 @@ test('When report definition is empty', () => {
   const component = shallow(
     <NetworkAnalysisOutput planId={100}
       loadReport={() => {}}
-      report={report}
-      reportMetaData={reportMetaData}
+      chartReport={report}
+      chartReportMetaData={reportMetaData}
     />
   )
   expect(component).toMatchSnapshot()
@@ -128,13 +129,13 @@ test('When report definition is empty', () => {
 
 // -----------------------------------------------------------------------------
 test('When report and report definition are given', () => {
-  const component = mount(
+  const component = shallow(
     <NetworkAnalysisOutput planId={100}
       isTesting
       loadReport={() => {}}
-      report={report}
-      reportDefinition={reportDefinition}
-      reportMetaData={reportMetaData}
+      chartReport={report}
+      chartReportDefinition={reportDefinition}
+      chartReportMetaData={reportMetaData}
     />
   )
   expect(component).toMatchSnapshot()
