@@ -215,7 +215,7 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = dispatch => ({
   loadReport: planId => dispatch(NetworkAnalysisActions.loadReport(planId)),
-  clearOutput: () => dispatch(NetworkAnalysisActions.clearOutput()),
+  clearOutput: () => dispatch(ReportActions.clearOutput()),
   showOrHideReportModal: showReportModal => dispatch(ReportActions.showOrHideReportModal(showReportModal))
 })
 

@@ -201,13 +201,6 @@ class PlanSearchController {
       })
   }
 
-  openReport () {
-    this.state.networkPlanModal.next(false)
-    // This previous modal will show after close the report
-    this.state.previousModal = this.state.networkPlanModal
-    this.state.reportModal.next(true)
-  }
-
   getPlanCreatorName (createdBy) {
     var creator = this.state.systemActors.filter((creator) => creator.id === createdBy)[0]
     return creator && creator.fullName
