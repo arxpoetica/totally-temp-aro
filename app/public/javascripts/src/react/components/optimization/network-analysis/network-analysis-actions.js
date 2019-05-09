@@ -45,7 +45,15 @@ function clearOutput () {
   }
 }
 
+function showOrHideReportModal (showReportModal) {
+  return {
+    type: Actions.NETWORK_ANALYSIS_SHOW_HIDE_REPORT_MODAL,
+    payload: showReportModal
+  }
+}
+
 export default {
   loadReport: loadReport,
-  clearOutput: clearOutput
+  clearOutput: clearOutput,
+  showOrHideReportModal: showOrHideReportModal
 }

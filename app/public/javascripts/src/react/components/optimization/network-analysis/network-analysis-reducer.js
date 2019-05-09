@@ -3,7 +3,8 @@ import Actions from '../../../common/actions'
 const defaultState = {
   report: null,
   reportMetaData: null,
-  reportDefinition: null
+  reportDefinition: null,
+  showReportModal: false
 }
 
 function setReport (state, report) {
@@ -28,7 +29,14 @@ function clearOutput (state) {
   return { ...state,
     report: null,
     reportMetaData: null,
-    reportDefinition: null
+    reportDefinition: null,
+    showReportModal: false
+  }
+}
+
+function setReportModalVisibility (state, showReportModal) {
+  return { ...state,
+    showReportModal: showReportModal
   }
 }
 
@@ -45,6 +53,9 @@ function configurationReducer (state = defaultState, action) {
 
     case Actions.NETWORK_ANALYSIS_CLEAR_OUTPUT:
       return clearOutput(state)
+
+    case Actions.NETWORK_ANALYSIS_SHOW_HIDE_REPORT_MODAL:
+      return setReportModalVisibility(state, action.payload)
 
     default:
       return state
