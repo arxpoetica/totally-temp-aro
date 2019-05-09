@@ -74,6 +74,8 @@ test('When reports metadata is defined', () => {
 
 // -----------------------------------------------------------------------------
 test('NetworkAnalysisReportRow render', () => {
+  // Mock the Date.now() function so that the test is determinstic
+  Date.now = jest.fn(() => 1557383970443)
   const component = shallow(
     <NetworkAnalysisReportRow
       planId={100}

@@ -37,6 +37,7 @@ export class NetworkAnalysisReportRow extends Component {
     </tr>
   }
 }
+
 NetworkAnalysisReportRow.propTypes = {
   planId: PropTypes.number,
   reportId: PropTypes.number,
