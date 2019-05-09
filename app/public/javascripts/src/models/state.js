@@ -1560,6 +1560,8 @@ class State {
 
       // Fire a redux action to get configuration for the redux side. This will result in two calls to /configuration for the time being.
       service.loadConfigurationFromServer()
+      service.getStyleValues()
+
     }
 
     service.setOptimizationOptions = () => {
@@ -1857,6 +1859,7 @@ class State {
   mapDispatchToTarget(dispatch) {
     return {
       loadConfigurationFromServer: () => dispatch(UiActions.loadConfigurationFromServer()),
+      getStyleValues: () => dispatch(UiActions.getStyleValues()),
       setLoggedInUserRedux: loggedInUser => dispatch(UserActions.setLoggedInUser(loggedInUser)),
       setPlanRedux: plan => dispatch(PlanActions.setActivePlan(plan)),
       setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId)),

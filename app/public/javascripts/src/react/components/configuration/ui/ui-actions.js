@@ -12,7 +12,16 @@ function loadConfigurationFromServer () {
       .catch(err => console.error(err))
   }
 }
-
+function getStyleValues () {
+  return dispatch => {
+    AroHttp.get('/ui_stylesheets')
+      .then(result => dispatch({
+        type: Actions.CONFIGURATION_SET_STYLEVALUES,
+        payload: result.data
+      }))
+      .catch(err => console.error(err))
+  }
+}
 function saveConfigurationToServerAndReload (type, configuration) {
   return dispatch => {
     AroHttp.post(`/ui_settings/save/${type}`, { configuration: configuration })
@@ -20,7 +29,13 @@ function saveConfigurationToServerAndReload (type, configuration) {
       .catch(err => console.error(err))
   }
 }
-
+function saveStylesheetsToServerAndReload (Stylesheetvalues){
+  return dispatch => {
+    AroHttp.post('/ui_stylesheets', { configuration: Stylesheetvalues })
+      .then(result => dispatch(getStyleValues))
+      .catch(err => console.error(err))
+  }
+}
 function getAssetKeys (offset, limit) {
   return dispatch => {
     AroHttp.get(`/ui_assets/list/assetKeys?offset=${offset}&limit=${limit}`)
@@ -46,5 +61,7 @@ export default {
   loadConfigurationFromServer: loadConfigurationFromServer,
   saveConfigurationToServerAndReload: saveConfigurationToServerAndReload,
   getAssetKeys: getAssetKeys,
+  getStyleValues: getStyleValues,
+  saveStylesheetsToServerAndReload:saveStylesheetsToServerAndReload,
   uploadAssetToServer: uploadAssetToServer
 }
