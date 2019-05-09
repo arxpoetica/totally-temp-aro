@@ -3,6 +3,7 @@ import { PropTypes } from 'prop-types'
 import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
 import NetworkAnalysisActions from './network-analysis-actions'
+import '../../common-styles/modal.css'
 
 // An internal class for rendering a single row in the reports table
 export class NetworkAnalysisReportRow extends Component {
