@@ -36,13 +36,15 @@ class ReportModalController {
     this.reports = []
     this.$http.get(`/service/v2/installed/report/meta-data`)
       .then((response) => {
-        this.reports = response.data.map(report => {
-          // Add some properties to the report object
-          return { ...report,
-            selectedFileType: report.media_types[0],
-            downloadFilename: `${downloadPrefix}_${report.name}`
-          }
-        })
+        this.reports = response.data
+          .filter(item => (item.reportType === 'GENERAL') || (item.reportType === 'PARAM_QUERY'))
+          .map(report => {
+            // Add some properties to the report object
+            return { ...report,
+              selectedFileType: report.media_types[0],
+              downloadFilename: `${downloadPrefix}_${report.name}`
+            }
+          })
         this.$timeout()
       })
       .catch(err => console.error(err))
