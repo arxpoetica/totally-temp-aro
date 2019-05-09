@@ -4,6 +4,7 @@ const defaultState = {
   chartReport: null,
   chartReportMetaData: null,
   chartReportDefinition: null,
+  reportsMetaData: null,
   showReportModal: false
 }
 
@@ -25,11 +26,18 @@ function setChartReportDefinition (state, chartReportDefinition) {
   }
 }
 
+function setReportsMetaData (state, reportsMetaData) {
+  return { ...state,
+    reportsMetaData: reportsMetaData
+  }
+}
+
 function clearOutput (state) {
   return { ...state,
     chartReport: null,
     chartReportMetaData: null,
     chartReportDefinition: null,
+    reportsMetaData: null,
     showReportModal: false
   }
 }
@@ -50,6 +58,9 @@ function configurationReducer (state = defaultState, action) {
 
     case Actions.NETWORK_ANALYSIS_SET_CHART_REPORT_DEFINITION:
       return setChartReportDefinition(state, action.payload)
+
+    case Actions.NETWORK_ANALYSIS_SET_REPORTS_METADATA:
+      return setReportsMetaData(state, action.payload)
 
     case Actions.NETWORK_ANALYSIS_CLEAR_OUTPUT:
       return clearOutput(state)
