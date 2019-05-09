@@ -1,100 +1,165 @@
 class ResourcePermissionsEditorController {
-  constructor ($http, $timeout) {
+  constructor ($http, $timeout, state) {
     this.$http = $http
     this.$timeout = $timeout
-    this.accessTypes = Object.freeze({
-      RESOURCE_READ: { displayName: 'Read', permissionBits: null, actors: [] },
-      RESOURCE_WRITE: { displayName: 'Write', permissionBits: null, actors: [] },
-      RESOURCE_ADMIN: { displayName: 'Owner', permissionBits: null, actors: [] }
+    this.state = state
+    
+    this.authRollsEnum = []
+    this.actorsById = {}
+    
+    var requestedRolls = {
+      'RESOURCE_OWNER': 'Owner',
+      'RESOURCE_MODIFIER': 'Modifier',
+      'RESOURCE_VIEWER': 'Viewer'
+    }
+    
+    this.isOwner = false
+    
+    this.defaultPermissions = 4
+    this.ownerPermissions = 7
+    
+    this.state.authRolls.forEach((authRoll) => {
+      if (requestedRolls.hasOwnProperty(authRoll.name)) {
+        this.authRollsEnum.push({
+          'id': authRoll.permissions, 
+          'description': requestedRolls[authRoll.name], 
+          'name': authRoll.name
+        })
+        if ('RESOURCE_VIEWER' == authRoll.name) this.defaultPermissions = authRoll.permissions
+        if ('RESOURCE_OWNER' == authRoll.name) this.ownerPermissions = authRoll.permissions
+      }
     })
+    
+    this.newActorId = null
+    this.rows = []
+    this.idProp = 'systemActorId' // unique id of each row
+    
+    this.displayProps = [
+      {
+        'propertyName': 'name',
+        'levelOfDetail': 0,
+        'format': '',
+        'displayName': 'Name',
+        'enumTypeURL': '',
+        'displayDataType': 'html',// string
+        'defaultValue': '',
+        'editable': true,
+        'visible': true
+      }, 
+      {
+        'propertyName': 'rolePermissions', //'managerType',
+        'levelOfDetail': 0,
+        'format': '',
+        'displayName': 'Role Permissions',
+        'enumTypeURL': '',
+        'enumSet': this.authRollsEnum, 
+        'displayDataType': 'enum',
+        'defaultValue': '',
+        'editable': true,
+        'visible': true
+      }
+      
+    ]
+    
+    this.actionsParam = null
+    
+    this.actions = [
+      {
+        buttonText: 'Delete', // Delete
+        buttonClass: 'btn-outline-danger',
+        iconClass: 'fa-trash-alt',
+        toolTip: 'Delete',
+        callBack: (row, index) => {
+          this.removeActor(row)
+        }
+      }
+    ]
+    
+    this.filterNewActorList = (value, index, array) => {
+      return !this.rows.find((obj)=>{return obj.systemActorId === value.id})
+    }
   }
-
+  
+  
   $onInit () {
     if (typeof this.enabled === 'undefined') {
       this.enabled = true // If not defined, then make it true
     }
+    
+    this.actorsById = this.systemActors.reduce((map, item) => {
+      map[item.id] = item
+      return map
+    }, {})
+    
     this.loadResourceAccess()
-    this.subSystemActors = this.systemActors && this.systemActors.slice(0, 10)
     this.registerSaveAccessCallback && this.registerSaveAccessCallback({ saveResourceAccess: this.saveResourceAccess.bind(this) })
   }
-
-  loadResourceAccess () {
-    return this.$http.get('/service/auth/permissions')
-      .then((result) => {
-        result.data.forEach((authPermissionEntity) => {
-          if (this.accessTypes.hasOwnProperty(authPermissionEntity.name)) {
-            this.accessTypes[authPermissionEntity.name].permissionBits = authPermissionEntity.id
-          }
-        })
-        // Get the actors that have access for this resource
-        return this.$http.get(`/service/auth/acl/${this.resourceType}/${this.resourceId}`)
+  
+  addActor () {
+    if (this.actorsById.hasOwnProperty(this.newActorId)){
+      var newActor = this.actorsById[this.newActorId]
+      this.rows.push({
+        'systemActorId': newActor.id, 
+        'name': newActor.name, 
+        'rolePermissions': this.defaultPermissions
       })
-      .then((result) => {
-        //console.log(result)
-        var idToSystemActor = {}
-        this.systemActors.forEach((systemActor) => idToSystemActor[systemActor.id] = systemActor)
-        result.data.resourcePermissions.forEach((access) => {
-          const systemActor = idToSystemActor[access.systemActorId]
-          const permission = access.rolePermissions
-          Object.keys(this.accessTypes).forEach((accessTypeKey) => {
-            if ((permission & this.accessTypes[accessTypeKey].permissionBits) != 0) {
-              this.accessTypes[accessTypeKey].actors.push(systemActor)
-            }
-          })
-        })
-      })
-      .catch((err) => console.error(err))
-  }
-
-  saveResourceAccess () {
-    return this.$http.get(`/service/auth/acl/${this.resourceType}/${this.resourceId}`)
-      .then((result) => {
-        // Loop through all our access types
-        var systemActorIdToPermissions = {}
-        Object.keys(this.accessTypes).forEach((accessTypeKey) => {
-          // Get the actors selected for this access type
-          const selectedActors = this.accessTypes[accessTypeKey].actors
-          selectedActors.forEach((selectedActor) => {
-            if (!systemActorIdToPermissions.hasOwnProperty(selectedActor.id)) {
-              systemActorIdToPermissions[selectedActor.id] = 0
-            }
-            // Set the permission bit
-            systemActorIdToPermissions[selectedActor.id] |= this.accessTypes[accessTypeKey].permissionBits
-          })
-        })
-        // Construct a put body with all the permissions we will send over to aro-service
-        var putBody = { resourcePermissions: [] }
-        Object.keys(systemActorIdToPermissions).forEach((actorId) => {
-          putBody.resourcePermissions.push({
-            systemActorId: actorId,
-            rolePermissions: systemActorIdToPermissions[actorId]
-          })
-        })
-        //console.log(putBody)
-        return this.$http.put(`/service/auth/acl/${this.resourceType}/${this.resourceId}`, putBody)
-      })
-      .catch((err) => console.error(err))
-  }
-
-  searchActors (filterObj) {
-    if (filterObj !== '') {
-      var reg = new RegExp(filterObj, 'i')
-      this.subSystemActors = this.systemActors.filter((actor) => {
-        // Filter users
-        if (actor.hasOwnProperty('firstName')) {
-          return actor.firstName.match(reg) || actor.lastName.match(reg)
-        }
-        // Filter Groups
-        else if (actor.hasOwnProperty('originalName')) {
-          return actor.originalName.match(reg)
-        }
-      })
-      this.$timeout()
+      this.onSelectionChanged()
     }
   }
+  
+  removeActor (row) {
+    this.rows = this.rows.filter(function(value, index, arr){
+      return value != row;
+    });
+    this.onSelectionChanged()
+  }
+
+  
+  loadResourceAccess () {
+    return this.$http.get(`/service/auth/acl/${this.resourceType}/${this.resourceId}`)
+      .then((result) => {
+        this.rows = []
+        var idToSystemActor = {}
+        this.systemActors.forEach((systemActor) => idToSystemActor[systemActor.id] = systemActor)
+        this.isOwner = false
+        this.actionsParam = null
+        result.data.resourcePermissions.forEach((access) => {
+          this.rows.push({
+            'systemActorId': access.systemActorId, 
+            'name': idToSystemActor[access.systemActorId].name, 
+            'rolePermissions': access.rolePermissions
+          })
+          // check for user and group permissions 
+          if ( access.rolePermissions == this.ownerPermissions 
+              && (access.systemActorId == this.state.loggedInUser.id 
+                  || this.state.loggedInUser.groupIds.includes(access.systemActorId)
+                  )
+              ) {
+            this.isOwner = true
+            this.actionsParam = this.actions
+          }
+          
+        })
+      })
+      .catch((err) => console.error(err))
+  }
+  
+  saveResourceAccess () {
+    // server will check that there is still an owner
+    var putBody = {
+      'resourcePermissions': this.rows.map(row => {
+        return {
+          'systemActorId': row.systemActorId, 
+          'rolePermissions': row.rolePermissions
+        }
+      })
+    }
+    return this.$http.put(`/service/auth/acl/${this.resourceType}/${this.resourceId}?userId=${this.state.loggedInUser.id}`, putBody)
+  }
+  
 }
 
-ResourcePermissionsEditorController.$inject = ['$http', '$timeout']
+ResourcePermissionsEditorController.$inject = ['$http', '$timeout', 'state']
 
 let resourcePermissionsEditor = {
   templateUrl: '/components/common/resource-permissions-editor.html',

@@ -15,6 +15,12 @@ class EditorInterfaceTableController {
   }
 
   $onInit () {
+    if ('undefined' === typeof this.idProp) this.idProp = 'id'
+    if ('undefined' === typeof this.rowsPerPage) this.rowsPerPage = 10
+    if ('undefined' === typeof this.rootMetaData) this.rootMetaData = {}
+    if ('undefined' === typeof this.isEdit) this.isEdit = false
+    if ('undefined' === typeof this.theadClass) this.theadClass = 'thead-dark'
+      
     this.orderCol = this.displayProps[0].propertyName
     this.orderTable()
     this.setPage()
@@ -124,7 +130,8 @@ let editorInterfaceTable = {
     isEdit: '<',
     actions: '<',
     rowsPerPage: '<',
-    rootMetaData: '<'
+    rootMetaData: '<', 
+    theadClass: '<'
   },
   controller: EditorInterfaceTableController
 }

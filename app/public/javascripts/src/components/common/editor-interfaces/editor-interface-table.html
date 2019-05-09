@@ -6,7 +6,7 @@
   
   <div class="ei-table-contain">
 	  <table class="table table-sm ei-table-foldout-striped" style="border-bottom: 1px solid #dee2e6;">
-      <thead class="thead-dark">
+      <thead class="{{$ctrl.theadClass}}">
 	      <tr>
 	        <th ng-if="!!$ctrl.detailView"></th>
 	        <th class="ei-table-col-head-sortable" 
@@ -18,7 +18,7 @@
 	            <i ng-if="!$ctrl.isOrderAscending" class="fa fa-chevron-up" aria-hidden="true"> </i>
 	          </div>
 	        </th>
-	        <th class="ei-table-col-head"></th>
+	        <th class="ei-table-col-head" ng-if="!!$ctrl.actions"></th>
 	      </tr>
 	    </thead>
 	    <tbody>
@@ -43,7 +43,7 @@
 		          </editor-interface-value>
 	          </div>
 	        </td>
-	        <td class="ei-table-cell ei-table-button-cell">
+	        <td class="ei-table-cell ei-table-button-cell" ng-if="!!$ctrl.actions">
 	          <button class="btn btn-sm ng-class: btnValue.buttonClass;" 
 	                  ng-if="$ctrl.actionDisplayLimit >= $ctrl.actions.length"
 	                  ng-repeat="(btnKey, btnValue) in $ctrl.actions"
@@ -64,7 +64,7 @@
 	        </td>
 	      </tr>
 	      <tr class="ei-foldout-row" ng-repeat-end>
-	        <td colspan="999">
+	        <td colspan="999" ng-if="$ctrl.detailView">
 	          <!-- ToDo: use a better strategy for dynamic components -->
 	          <resource-manager-detail ng-if="$ctrl.detailView == 'resource-manager-detail'"
 	                                   resource-manager="rowValue"
@@ -72,9 +72,10 @@
 	          </resource-manager-detail>
 	        </td>
 	      </tr>
-	      
-	    </div>
-	  </div>
+	      <!-- should NOT be in repeat -->
+	      <tr><td colspan="999" class="ei-table-bottomline"></td></tr>
+	    </tbody>
+	  </table>
   </div>
   
   <div class="ei-pagination-menu" ng-if="$ctrl.rowsPerPage < $ctrl.rows.length">

@@ -2,6 +2,9 @@
 <div ng-if="$ctrl.isLoading">Loading</div>
 <div ng-if="$ctrl.isEdit" ng-switch="$ctrl.displayProps.displayDataType" ng-class="{'ei-invalid-highlight': !$ctrl.isValid }">
   
+  <!-- HTML values are not editable, they are used for labels -->
+  <div class="ei-output-text" ng-switch-when="html" ng-bind-html="$ctrl.model"></div>
+  
   <input ng-switch-when="string" type="text" ng-model="$ctrl.model" ng-change="$ctrl.onInput()" class="form-control input-sm ei-input-text">
   <input ng-switch-when="integer" type="number" ng-model="$ctrl.model" ng-change="$ctrl.onInput()" class="form-control input-sm ei-input-number">
   <input ng-switch-when="number" type="number" ng-model="$ctrl.model" ng-change="$ctrl.onInput()" class="form-control input-sm ei-input-number">
@@ -18,7 +21,7 @@
   <select ng-switch-when="enum" class="form-control ei-input-select" 
       ng-model="$ctrl.model"
       ng-change="$ctrl.onInput()"
-      ng-options="item.id as item.description for item in $ctrl.enumSet">
+      ng-options="item.id as item.description for item in $ctrl.displayProps.enumSet">
   </select>
   
   <div class="ei-output-text" ng-switch-default>
@@ -39,6 +42,7 @@
     {{$ctrl.getEnumSet();""}}
     {{ $ctrl.enumVal }}
   </div>
+  <div class="ei-output-text" ng-switch-when="html" ng-bind-html="$ctrl.model"></div>
   <div class="ei-output-text" ng-switch-default>
     {{ $ctrl.model }}
   </div>

@@ -65,17 +65,6 @@ class DataSourceUploadController {
 
     this.displayProps = [
       {
-        'propertyName': 'dataType', 
-        'levelOfDetail': 0,
-        'format': '',
-        'displayName': 'Data Type',
-        'enumTypeURL': '',
-        'displayDataType': 'string',
-        'defaultValue': '',
-        'editable': false,
-        'visible': true
-      },
-      {
         'propertyName': 'name',
         'levelOfDetail': 0,
         'format': '',
@@ -85,18 +74,18 @@ class DataSourceUploadController {
         'defaultValue': '',
         'editable': true,
         'visible': true
-      }/*, 
+      }, 
       {
-        'propertyName': 'permissionsView',
+        'propertyName': 'dataType', 
         'levelOfDetail': 0,
         'format': '',
-        'displayName': 'Permissions',
+        'displayName': 'Data Type',
         'enumTypeURL': '',
         'displayDataType': 'string',
         'defaultValue': '',
         'editable': false,
         'visible': true
-      }*/
+      }
     ]
     
     this.idProp = 'identifier' // unique id of each row

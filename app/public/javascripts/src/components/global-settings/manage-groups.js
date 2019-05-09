@@ -1,7 +1,8 @@
 class ManageGroupsController {
-  constructor ($http, $timeout) {
+  constructor ($http, $timeout, state) {
     this.$http = $http
     this.$timeout = $timeout
+    this.state = state
     this.groups = []
     this.loadGroups()
     this.initEmptyUserMessage()
@@ -104,7 +105,7 @@ class ManageGroupsController {
           })
         }
         // Our resource permissions may have been modifed. Save the whole lot.
-        return this.$http.put('/service/auth/acl/SYSTEM/1', acls)
+        return this.$http.put(`/service/auth/acl/SYSTEM/1?userId=${this.state.loggedInUser.id}`, acls)
       })
       .then((result) => {
         this.userMessage = {
@@ -136,7 +137,7 @@ class ManageGroupsController {
   }
 }
 
-ManageGroupsController.$inject = ['$http', '$timeout']
+ManageGroupsController.$inject = ['$http', '$timeout', 'state']
 
 let manageGroups = {
   templateUrl: '/components/global-settings/manage-groups.html',
