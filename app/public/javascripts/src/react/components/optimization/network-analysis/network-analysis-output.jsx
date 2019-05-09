@@ -18,7 +18,7 @@ export class NetworkAnalysisOutput extends Component {
   }
 
   render () {
-    const hasChartData = Boolean(this.props.reportDefinition && this.props.report && this.props.report.length > 0)
+    const hasChartData = Boolean(this.props.chartReportDefinition && this.props.chartReport && this.props.chartReport.length > 0)
     if (hasChartData) {
       // Why setTimeout()? We need the chart to be rendered with the right display style, THEN we create the chart.
       setTimeout(() => this.updateChart(), 0)
@@ -38,8 +38,8 @@ export class NetworkAnalysisOutput extends Component {
         <div className='col-md-8'>
           <select className='form-control' value={this.state.selectedUiDefinition ? this.state.selectedUiDefinition.name : ''}
             onChange={event => this.setState({ selectedUiDefinition: event.target.value })}>
-            { this.props.reportDefinition
-              ? this.props.reportDefinition.uiDefinition.map(chart => (
+            { this.props.chartReportDefinition
+              ? this.props.chartReportDefinition.uiDefinition.map(chart => (
                 <option key={chart.chartDefinition.name} value={chart.chartDefinition.name}>{chart.chartDefinition.displayName}</option>
               ))
               : null }
@@ -49,9 +49,9 @@ export class NetworkAnalysisOutput extends Component {
       {/* The canvas that will hold the actual chart */}
       <canvas ref={this.chartRef} style={{ display: hasChartData ? 'block' : 'none' }} />
       {/* A button to download the report */}
-      { this.props.report
+      { this.props.chartReport
         ? <a id='lnkDownloadNetworkAnalysisOutputReport' className='btn btn-sm btn-light float-right'
-          href={`/service-download-file/NetworkAnalysis.csv/v2/report-extended/${this.props.reportMetaData.id}/${this.props.planId}.csv`}
+          href={`/service-download-file/NetworkAnalysis.csv/v2/report-extended/${this.props.chartReportMetaData.id}/${this.props.planId}.csv`}
           download>
           <i className='fa fa-download' /> Download Report
         </a>
@@ -83,17 +83,17 @@ export class NetworkAnalysisOutput extends Component {
   }
 
   updateChart () {
-    if (!this.props.reportDefinition) {
+    if (!this.props.chartReportDefinition) {
       return // This can happen when updateChart() is called from a setTimeout(), and the properties change in the meantime
     }
     var selectedUiDefinition = null
     if (!this.state.selectedUiDefinition) {
-      selectedUiDefinition = this.props.reportDefinition.uiDefinition[0]
+      selectedUiDefinition = this.props.chartReportDefinition.uiDefinition[0]
     } else {
-      selectedUiDefinition = this.props.reportDefinition.uiDefinition.filter(item => item.chartDefinition.name === this.state.selectedUiDefinition)[0]
+      selectedUiDefinition = this.props.chartReportDefinition.uiDefinition.filter(item => item.chartDefinition.name === this.state.selectedUiDefinition)[0]
     }
     const copyOfSelectedUiDefinition = JSON.parse(JSON.stringify(selectedUiDefinition))
-    const chartDefinition = this.buildChartDefinition(copyOfSelectedUiDefinition.chartDefinition, copyOfSelectedUiDefinition.dataModifiers, this.props.report)
+    const chartDefinition = this.buildChartDefinition(copyOfSelectedUiDefinition.chartDefinition, copyOfSelectedUiDefinition.dataModifiers, this.props.chartReport)
     this.chartDefinitionForTesting = JSON.parse(JSON.stringify(chartDefinition))
     if (this.chart) {
       this.chart.destroy()
@@ -204,17 +204,17 @@ export class NetworkAnalysisOutput extends Component {
 NetworkAnalysisOutput.propTypes = {
   isTesting: PropTypes.bool,
   planId: PropTypes.number,
-  reportMetaData: PropTypes.object,
-  reportDefinition: PropTypes.object,
-  report: PropTypes.array
+  chartReportMetaData: PropTypes.object,
+  chartReportDefinition: PropTypes.object,
+  chartReport: PropTypes.array
 }
 
 const mapStateToProps = (state) => ({
   planId: state.plan.activePlan.id,
   activePlanState: state.plan.activePlan.planState,
-  reportMetaData: state.optimization.networkAnalysis.reportMetaData,
-  reportDefinition: state.optimization.networkAnalysis.reportDefinition,
-  report: state.optimization.networkAnalysis.report
+  chartReportMetaData: state.optimization.networkAnalysis.chartReportMetaData,
+  chartReportDefinition: state.optimization.networkAnalysis.chartReportDefinition,
+  chartReport: state.optimization.networkAnalysis.chartReport
 })
 
 const mapDispatchToProps = dispatch => ({
