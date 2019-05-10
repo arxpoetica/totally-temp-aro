@@ -31,6 +31,10 @@ class MessageQueueManager {
           console.log(`RabbitMQ connection has closed. Attempting to reconnect in ${RETRY_CONNECTION_IN_MSEC} msec`)
           setTimeout(() => this.connectToPublisher(), RETRY_CONNECTION_IN_MSEC)
         })
+        connection.on('error', err => {
+          console.error(`ERROR from RabbitMQ connection:`)
+          console.error(err)
+        })
         return connection.createChannel()
       })
       .then(channel => {
