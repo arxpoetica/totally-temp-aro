@@ -1,5 +1,6 @@
 const amqp = require('amqplib/callback_api')
 const helpers = require('../helpers')
+const Sockets = require('./sockets')
 const config = helpers.config
 const VECTOR_TILE_DATA_MESSAGE = 'VECTOR_TILE_DATA'
 const VECTOR_TILE_EXCHANGE = 'aro_vt'
@@ -14,19 +15,7 @@ const PROGRESS_QUEUE = 'progressQueue'
 class SocketManager {
   constructor (app) {
     this.vectorTileRequestToRoom = {}
-    // Socket namespaces:
-    // clients: Each client that connects to the server will do so with a "<Websocket ID>". To post a message to a specific
-    //          client, use the "/<Websocket ID>" room in this namespace.
-    // broadcast: Used for broadcasting user messages to all connected clients. This is used when, say, an admin user
-    //            wants to send messages to all users.
-    // tileInvalidation: Used to send vector tile invalidation messages to all clients listening on the namespace.
-    const socket = require('socket.io')(app)
-    this.sockets = {
-      clients: socket.of('/clients'),
-      plans: socket.of('/plans'),
-      broadcast: socket.of('/broadcast'),
-      tileInvalidation: socket.of('/tileInvalidation')
-    }
+    this.sockets = new Sockets(app)
     this.setupPerClientSocket()
     this.setupPerPlanSocket()
     this.setupVectorTileAMQP()
