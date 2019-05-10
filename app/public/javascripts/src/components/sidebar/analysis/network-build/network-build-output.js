@@ -1,14 +1,31 @@
+import ReportsActions from '../../../../react/components/optimization/reports/reports-actions'
 class NetworkBuildOutputController {
-  constructor (state) {
+  constructor ($ngRedux, state) {
     this.state = state
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }
 
   showDetailedOutput () {
     this.state.showRoicReportsModal = true
   }
+
+  mapStateToThis (reduxState) {
+    return {
+    }
+  }
+
+  mapDispatchToTarget (dispatch) {
+    return {
+      showReportModal: () => dispatch(ReportsActions.showOrHideReportModal(true))
+    }
+  }
+
+  $onDestroy () {
+    this.unsubscribeRedux()
+  }
 }
 
-NetworkBuildOutputController.$inject = ['state']
+NetworkBuildOutputController.$inject = ['$ngRedux', 'state']
 
 let networkBuildOutput = {
   templateUrl: '/components/sidebar/analysis/network-build/network-build-output.html',

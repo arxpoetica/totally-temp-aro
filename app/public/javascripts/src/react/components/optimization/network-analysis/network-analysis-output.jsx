@@ -3,7 +3,9 @@ import { PropTypes } from 'prop-types'
 import Chart from 'chart.js'
 import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
+import ReportsDownloadModal from '../reports/reports-download-modal.jsx'
 import NetworkAnalysisActions from './network-analysis-actions'
+import ReportActions from '../reports/reports-actions'
 import PlanStates from '../../plan/plan-states'
 
 export class NetworkAnalysisOutput extends Component {
@@ -17,9 +19,10 @@ export class NetworkAnalysisOutput extends Component {
   }
 
   render () {
-    const hasChartData = Boolean(this.props.reportDefinition && this.props.report && this.props.report.length > 0)
+    const hasChartData = Boolean(this.props.chartReportDefinition && this.props.chartReport && this.props.chartReport.length > 0)
     if (hasChartData) {
       // Why setTimeout()? We need the chart to be rendered with the right display style, THEN we create the chart.
+      this.updateChartDefinition()
       setTimeout(() => this.updateChart(), 0)
     } else {
       // Someone may have clicked the 'Modify' button to re-run analysis. Clear old chart (if any)
@@ -37,8 +40,8 @@ export class NetworkAnalysisOutput extends Component {
         <div className='col-md-8'>
           <select className='form-control' value={this.state.selectedUiDefinition ? this.state.selectedUiDefinition.name : ''}
             onChange={event => this.setState({ selectedUiDefinition: event.target.value })}>
-            { this.props.reportDefinition
-              ? this.props.reportDefinition.uiDefinition.map(chart => (
+            { this.props.chartReportDefinition
+              ? this.props.chartReportDefinition.uiDefinition.map(chart => (
                 <option key={chart.chartDefinition.name} value={chart.chartDefinition.name}>{chart.chartDefinition.displayName}</option>
               ))
               : null }
@@ -47,15 +50,6 @@ export class NetworkAnalysisOutput extends Component {
       </div>
       {/* The canvas that will hold the actual chart */}
       <canvas ref={this.chartRef} style={{ display: hasChartData ? 'block' : 'none' }} />
-      {/* A button to download the report */}
-      { this.props.report
-        ? <a id='lnkDownloadNetworkAnalysisOutputReport' className='btn btn-sm btn-light float-right'
-          href={`/service-download-file/NetworkAnalysis.csv/v2/report-extended/${this.props.reportMetaData.id}/${this.props.planId}.csv`}
-          download>
-          <i className='fa fa-download' /> Download Report
-        </a>
-        : null
-      }
       {/* If we don't have a chart to show, display a message */}
       <div className='alert alert-warning mt-3' style={{ display: hasChartData ? 'none' : 'block' }}>
         Network analysis data not available. Run a new network analysis to see results.
@@ -65,7 +59,8 @@ export class NetworkAnalysisOutput extends Component {
       <pre style={{ display: 'none' }}>
         {JSON.stringify(this.chartDefinitionForTesting, null, 2)}
       </pre>
-
+      <button className='btn btn-primary pull-left' onClick={() => this.props.showOrHideReportModal(true)}>Reports</button>
+      <ReportsDownloadModal reportTypes={['NETWORK_ANALYSIS']} />
     </div>
   }
 
@@ -80,19 +75,22 @@ export class NetworkAnalysisOutput extends Component {
     }
   }
 
-  updateChart () {
-    if (!this.props.reportDefinition) {
+  updateChartDefinition () {
+    if (!this.props.chartReportDefinition) {
       return // This can happen when updateChart() is called from a setTimeout(), and the properties change in the meantime
     }
     var selectedUiDefinition = null
     if (!this.state.selectedUiDefinition) {
-      selectedUiDefinition = this.props.reportDefinition.uiDefinition[0]
+      selectedUiDefinition = this.props.chartReportDefinition.uiDefinition[0]
     } else {
-      selectedUiDefinition = this.props.reportDefinition.uiDefinition.filter(item => item.chartDefinition.name === this.state.selectedUiDefinition)[0]
+      selectedUiDefinition = this.props.chartReportDefinition.uiDefinition.filter(item => item.chartDefinition.name === this.state.selectedUiDefinition)[0]
     }
     const copyOfSelectedUiDefinition = JSON.parse(JSON.stringify(selectedUiDefinition))
-    const chartDefinition = this.buildChartDefinition(copyOfSelectedUiDefinition.chartDefinition, copyOfSelectedUiDefinition.dataModifiers, this.props.report)
-    this.chartDefinitionForTesting = JSON.parse(JSON.stringify(chartDefinition))
+    this.chartDefinition = this.buildChartDefinition(copyOfSelectedUiDefinition.chartDefinition, copyOfSelectedUiDefinition.dataModifiers, this.props.chartReport)
+    this.chartDefinitionForTesting = JSON.parse(JSON.stringify(this.chartDefinition))
+  }
+
+  updateChart () {
     if (this.chart) {
       this.chart.destroy()
       this.chart = null
@@ -101,7 +99,7 @@ export class NetworkAnalysisOutput extends Component {
       console.log('*** network-analysis-output: We are running in test mode. The actual chart will not be created')
     } else {
       var ctx = this.chartRef.current.getContext('2d')
-      this.chart = new Chart(ctx, chartDefinition)
+      this.chart = new Chart(ctx, this.chartDefinition)
     }
   }
 
@@ -202,22 +200,23 @@ export class NetworkAnalysisOutput extends Component {
 NetworkAnalysisOutput.propTypes = {
   isTesting: PropTypes.bool,
   planId: PropTypes.number,
-  reportMetaData: PropTypes.object,
-  reportDefinition: PropTypes.object,
-  report: PropTypes.array
+  chartReportMetaData: PropTypes.object,
+  chartReportDefinition: PropTypes.object,
+  chartReport: PropTypes.array
 }
 
 const mapStateToProps = (state) => ({
   planId: state.plan.activePlan.id,
   activePlanState: state.plan.activePlan.planState,
-  reportMetaData: state.optimization.networkAnalysis.reportMetaData,
-  reportDefinition: state.optimization.networkAnalysis.reportDefinition,
-  report: state.optimization.networkAnalysis.report
+  chartReportMetaData: state.optimization.networkAnalysis.chartReportMetaData,
+  chartReportDefinition: state.optimization.networkAnalysis.chartReportDefinition,
+  chartReport: state.optimization.networkAnalysis.chartReport
 })
 
 const mapDispatchToProps = dispatch => ({
   loadReport: planId => dispatch(NetworkAnalysisActions.loadReport(planId)),
-  clearOutput: () => dispatch(NetworkAnalysisActions.clearOutput())
+  clearOutput: () => dispatch(ReportActions.clearOutput()),
+  showOrHideReportModal: showReportModal => dispatch(ReportActions.showOrHideReportModal(showReportModal))
 })
 
 const NetworkAnalysisOutputComponent = wrapComponentWithProvider(reduxStore, NetworkAnalysisOutput, mapStateToProps, mapDispatchToProps)

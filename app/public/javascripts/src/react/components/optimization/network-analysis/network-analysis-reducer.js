@@ -1,50 +1,39 @@
 import Actions from '../../../common/actions'
 
 const defaultState = {
-  report: null,
-  reportMetaData: null,
-  reportDefinition: null
+  chartReport: null,
+  chartReportMetaData: null,
+  chartReportDefinition: null
 }
 
-function setReport (state, report) {
+function setChartReport (state, chartReport) {
   return { ...state,
-    report: report
+    chartReport: chartReport
   }
 }
 
-function setReportMetaData (state, reportMetaData) {
+function setChartReportMetaData (state, chartReportMetaData) {
   return { ...state,
-    reportMetaData: reportMetaData
+    chartReportMetaData: chartReportMetaData
   }
 }
 
-function setReportDefinition (state, reportDefinition) {
+function setChartReportDefinition (state, chartReportDefinition) {
   return { ...state,
-    reportDefinition: reportDefinition
-  }
-}
-
-function clearOutput (state) {
-  return { ...state,
-    report: null,
-    reportMetaData: null,
-    reportDefinition: null
+    chartReportDefinition: chartReportDefinition
   }
 }
 
 function configurationReducer (state = defaultState, action) {
   switch (action.type) {
-    case Actions.NETWORK_ANALYSIS_SET_REPORT:
-      return setReport(state, action.payload)
+    case Actions.NETWORK_ANALYSIS_SET_CHART_REPORT:
+      return setChartReport(state, action.payload)
 
-    case Actions.NETWORK_ANALYSIS_SET_REPORT_METADATA:
-      return setReportMetaData(state, action.payload)
+    case Actions.NETWORK_ANALYSIS_SET_CHART_REPORT_METADATA:
+      return setChartReportMetaData(state, action.payload)
 
-    case Actions.NETWORK_ANALYSIS_SET_REPORT_DEFINITION:
-      return setReportDefinition(state, action.payload)
-
-    case Actions.NETWORK_ANALYSIS_CLEAR_OUTPUT:
-      return clearOutput(state)
+    case Actions.NETWORK_ANALYSIS_SET_CHART_REPORT_DEFINITION:
+      return setChartReportDefinition(state, action.payload)
 
     default:
       return state
