@@ -1,6 +1,7 @@
 /* global swal */
 import AroHttp from '../../common/aro-http'
 import Actions from '../../common/actions'
+import SelectionActions from '../selection/selection-actions'
 import CoverageStatusTypes from './constants'
 
 function initializeCoverageReport (userId, planId, projectId, activeSelectionMode, locationTypes, tileLayers, initializationParams) {
@@ -50,10 +51,23 @@ function initializeCoverageReport (userId, planId, projectId, activeSelectionMod
 
 // Modify the coverage report
 function modifyCoverageReport (reportId) {
-  return dispatch => {
+  return (dispatch, getState) => {
     AroHttp.delete(`/service/coverage/report/${reportId}`)
       .then(result => {
+        var initializationParams = {
+          coverageType: 'location',
+          groupKeyType: 'networkNode',
+          useMarketableTechnologies: false,
+          useMaxSpeed: false
+        }
+        var keys = Object.keys(initializationParams)
+        keys.forEach((key) => {
+          initializationParams[key] = getState().coverage.initializationParams[key]
+        })
+
         dispatch({ type: Actions.COVERAGE_SET_DETAILS })
+        dispatch({ type: Actions.COVERAGE_SET_INIT_PARAMS, payload: { initializationParams: initializationParams } })
+        dispatch(SelectionActions.setActiveSelectionMode(getState().selection.activeSelectionMode.id))
       })
       .catch(err => console.error(err))
   }

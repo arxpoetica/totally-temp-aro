@@ -10,7 +10,7 @@ import socketManager from '../../../react/common/socket-manager'
 export class CoverageButton extends Component {
   constructor (props) {
     super(props)
-    socketManager.subscribe('PROGRESS_MESSAGE_DATA', (progressData) => {
+    this.unsubscriber = socketManager.subscribe('PROGRESS_MESSAGE_DATA', (progressData) => {
       if (progressData.data.processType === 'coverage') {
         console.log(progressData)
         this.props.setCoverageProgress(progressData.data)

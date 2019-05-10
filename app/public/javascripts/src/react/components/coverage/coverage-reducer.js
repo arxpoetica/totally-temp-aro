@@ -7,9 +7,9 @@ const defaultStatus = {
   progress: 0,
   initializationParams: {
     coverageType: 'location',
-    groupKeyType: 'serviceArea',
-    useMarketableTechnologies: true,
-    useMaxSpeed: true
+    groupKeyType: 'networkNode',
+    useMarketableTechnologies: false,
+    useMaxSpeed: false
   }
 }
 

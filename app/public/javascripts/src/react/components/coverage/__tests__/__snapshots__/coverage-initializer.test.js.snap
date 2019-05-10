@@ -93,7 +93,7 @@ exports[`When the logged in user is a SuperUser 1`] = `
           <select
             className="form-control"
             onChange={[Function]}
-            value="Proximity"
+            value="Incremental"
           >
             <option
               value="Proximity"
@@ -259,7 +259,7 @@ exports[`When we do not have an existing report 1`] = `
           <select
             className="form-control"
             onChange={[Function]}
-            value="Proximity"
+            value="Incremental"
           >
             <option
               value="Proximity"
@@ -410,7 +410,7 @@ exports[`When we have an existing report 1`] = `
           <select
             className="form-control"
             onChange={[Function]}
-            value="Proximity"
+            value="Incremental"
           >
             <option
               value="Proximity"
@@ -568,7 +568,7 @@ exports[`When we have supplied all parameters 1`] = `
           <select
             className="form-control"
             onChange={[Function]}
-            value="Proximity"
+            value="Incremental"
           >
             <option
               value="Proximity"

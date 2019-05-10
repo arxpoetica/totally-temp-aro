@@ -58,7 +58,7 @@
   border-color: #1a79db
 }
 .tool-bar .btn {
-  background-color: #D9272D !important;
+  background-color: #D9272D;
 }
 
 .tool-bar .btn-selected {
@@ -66,7 +66,7 @@
 }
 
 .tool-bar {
-  background-color: #D9272D !important;
+  background-color: #D9272D;
 }
 
 .map_tool_label {
@@ -81,10 +81,6 @@
   color: #eee;
 }
 
-#global-search-toolbutton .select2-chosen {
-  background-color: #D9272D;
-}
-
 .select2-search {
   padding: 0px;
   background-color: #D9272D !important;
@@ -95,10 +91,6 @@
 .select2-results .select2-highlighted {
   background-color: white;
   color: #1f7de6;
-}
-
-#global-search-toolbutton .select2-chosen {
-  background-color: #D9272D !important;
 }
 
 .map-tools-button.active {
