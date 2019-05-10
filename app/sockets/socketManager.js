@@ -1,6 +1,7 @@
 const amqp = require('amqplib/callback_api')
 const helpers = require('../helpers')
 const Sockets = require('./sockets')
+const MessageQueueManager = require('./message-queue-manager')
 const config = helpers.config
 const VECTOR_TILE_DATA_MESSAGE = 'VECTOR_TILE_DATA'
 const VECTOR_TILE_EXCHANGE = 'aro_vt'
@@ -18,9 +19,12 @@ class SocketManager {
     this.sockets = new Sockets(app)
     this.setupPerClientSocket()
     this.setupPerPlanSocket()
-    this.setupVectorTileAMQP()
-    this.setupTileInvalidationAMQP()
-    this.setupProgressAMQP()
+
+    this.messageQueueManager = new MessageQueueManager(config.rabbitmq.server, config.rabbitmq.username, config.rabbitmq.password)
+    this.setupVectorTileAMQP(this.messageQueueManager)
+    this.setupTileInvalidationAMQP(this.messageQueueManager)
+    this.setupProgressAMQP(this.messageQueueManager)
+    this.messageQueueManager.connectToPublisher()
   }
 
   // Set up the per-client socket namespace. Each client connected to the server will register with this namespace.
@@ -41,7 +45,7 @@ class SocketManager {
   }
 
   // Set up the per-plan socket namespace. Each client connected to the server will register with this namespace.
-  setupPerPlanSocket() {
+  setupPerPlanSocket () {
     this.sockets.plans.on('connection', (socket) => {
       console.log(`Connected socket with session id ${socket.client.id}`)
 
@@ -58,7 +62,7 @@ class SocketManager {
 
   // Set up a connection to the aro-service RabbitMQ server for getting vector tile data. This function is also
   // responsible for routing the vector tile data to the correct connected client.
-  setupVectorTileAMQP () {
+  setupVectorTileAMQP (messageQueueManager) {
     var self = this
     const messageHandler = msg => {
       const uuid = JSON.parse(msg.content.toString()).uuid
@@ -71,7 +75,7 @@ class SocketManager {
         self.sockets.clients.to(`/${clientId}`).emit('message', { type: VECTOR_TILE_DATA_MESSAGE, data: msg })
       }
     }
-    this.setupAMQPConnectionWithService(VECTOR_TILE_QUEUE, VECTOR_TILE_EXCHANGE, messageHandler)
+    messageQueueManager.addConsumer(VECTOR_TILE_QUEUE, VECTOR_TILE_EXCHANGE, messageHandler)
   }
 
   // Map a vector tile request UUID to a client ID.
@@ -81,7 +85,7 @@ class SocketManager {
 
   // Set up a connection to the aro-service RabbitMQ server for getting vector tile invalidation data. These messages
   // should be broadcast to all connected clients (via the tileInvalidation namespace).
-  setupTileInvalidationAMQP () {
+  setupTileInvalidationAMQP (messageQueueManager) {
     var self = this
     const messageHandler = msg => {
       console.log('Received tile invalidation message from service')
@@ -91,10 +95,10 @@ class SocketManager {
         payload: JSON.parse(msg.content.toString())
       })
     }
-    this.setupAMQPConnectionWithService(TILE_INVALIDATION_QUEUE, TILE_INVALIDATION_EXCHANGE, messageHandler)
+    messageQueueManager.addConsumer(TILE_INVALIDATION_QUEUE, TILE_INVALIDATION_EXCHANGE, messageHandler)
   }
 
-  setupProgressAMQP() {
+  setupProgressAMQP (messageQueueManager) {
     // Create progress channel
     var self = this
     const progressHandler = msg => {
@@ -104,36 +108,36 @@ class SocketManager {
       } else {
         console.log(`Optimization Progress Socket: Routing message with UUID ${processId} to /${processId}`)
         var data = JSON.parse(msg.content.toString())
-        //UI dependent on optimizationState at so many places TODO: need to remove optimizationstate
+        // UI dependent on optimizationState at so many places TODO: need to remove optimizationstate
         data.optimizationState = data.progress != 1 ? 'STARTED' : 'COMPLETED'
         self.sockets.plans.to(`/${processId}`).emit('message', { type: PROGRESS_MESSAGE, data: data })
       }
     }
-    this.setupAMQPConnectionWithService(PROGRESS_QUEUE, PROGRESS_EXCHANGE, progressHandler)
+    messageQueueManager.addConsumer(PROGRESS_QUEUE, PROGRESS_EXCHANGE, progressHandler)
   }
 
-  // Sets up a AMQP connection with aro-service
-  setupAMQPConnectionWithService (queue, exchange, messageHandler) {
-    // We will receive vector tile data via a RabbitMQ server
-    const rabbitMqConnectionString = `amqp://${config.rabbitmq.username}:${config.rabbitmq.password}@${config.rabbitmq.server}`
-    amqp.connect(rabbitMqConnectionString, (err, conn) => {
-      if (err) {
-        console.error('ERROR when connecting to the RabbitMQ server')
-        console.error(err)
-      } else {
-        conn.createChannel(function (err, ch) {
-          if (err) {
-            console.error('ERROR when trying to create a channel on the RabbitMQ server')
-            console.error(err)
-          }
-          ch.assertQueue(queue, { durable: false })
-          ch.assertExchange(exchange, 'topic')
-          ch.bindQueue(queue, exchange, '#')
-          ch.consume(queue, messageHandler, { noAck: true })
-        })
-      }
-    })
-  }
+  // // Sets up a AMQP connection with aro-service
+  // setupAMQPConnectionWithService (queue, exchange, messageHandler) {
+  //   // We will receive vector tile data via a RabbitMQ server
+  //   const rabbitMqConnectionString = `amqp://${config.rabbitmq.username}:${config.rabbitmq.password}@${config.rabbitmq.server}`
+  //   amqp.connect(rabbitMqConnectionString, (err, conn) => {
+  //     if (err) {
+  //       console.error('ERROR when connecting to the RabbitMQ server')
+  //       console.error(err)
+  //     } else {
+  //       conn.createChannel(function (err, ch) {
+  //         if (err) {
+  //           console.error('ERROR when trying to create a channel on the RabbitMQ server')
+  //           console.error(err)
+  //         }
+  //         ch.assertQueue(queue, { durable: false })
+  //         ch.assertExchange(exchange, 'topic')
+  //         ch.bindQueue(queue, exchange, '#')
+  //         ch.consume(queue, messageHandler, { noAck: true })
+  //       })
+  //     }
+  //   })
+  // }
 
   broadcastMessage (msg) {
     // Sending to all clients in namespace 'broadcast', including sender
