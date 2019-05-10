@@ -1,5 +1,6 @@
 const amqp = require('amqplib')
-const RETRY_CONNECTION_IN_MSEC = 5000
+const Consumer = require('./consumer')
+const RETRY_CONNECTION_IN_MSEC = 10000
 
 class MessageQueueManager {
   constructor (host, username, password) {
@@ -8,11 +9,15 @@ class MessageQueueManager {
     this.consumers = []
   }
 
-  addConsumer (queue, exchange, messageHandler) {
+  addConsumer (consumer) {
+    if (!(consumer instanceof Consumer)) {
+      console.error('ERROR: In MessageQueueManager.addConsumer(), input must be an object of type Consumer. Consumer will not be added to list.')
+      return
+    }
     this.consumers.push({
-      queue: queue,
-      exchange: exchange,
-      messageHandler: messageHandler
+      queue: consumer.queue,
+      exchange: consumer.exchange,
+      messageHandler: consumer.messageHandler
     })
   }
 
