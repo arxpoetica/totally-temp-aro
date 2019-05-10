@@ -7,21 +7,21 @@ export class StylesheetManager extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      StyleValues: props.initialConfiguration
+      styleValues: props.initialConfiguration,
+      errorMessage: null
     }
   }
-  
 
   render () {
     return <div id='divStylesheetForm'>
-     <form>
+      <form>
         <div className='form-group row'>
           {/* The value of the selected configuration type */}
           <label className='col-sm-4 col-form-label'>Value</label>
           <div className='col-sm-8'>
             <textarea className='form-control'
               style={{ height: '350px' }}
-              value={this.state.StyleValues}
+              value={this.state.styleValues}
               onChange={event => this.handleChanges(event.target.value)} />
           </div>
         </div>
@@ -39,17 +39,18 @@ export class StylesheetManager extends Component {
   }
   handleChanges (newValue) {
     this.setState({
-      StyleValues:  newValue
+      styleValues: newValue
     })
   }
   saveStylesheettoServer () {
-    if(!this.state.StyleValues){
-      this.setState({
-               errorMessage: `Please Update some CSS values!!`
-             })
-    }else{
-      this.props.saveStylesheetsToServerAndReload(this.state.StyleValues)
-    }
+    // if(!this.state.styleValues){
+    //   this.setState({
+    //     errorMessage: `Please Update some CSS values!!`
+    //   })
+    // }else{
+    //   this.setState({ errorMessage: null })
+    this.props.saveStylesheetsToServerAndReload(this.state.styleValues)
+    // }
   }
 }
 
@@ -58,10 +59,8 @@ const mapStateToProps = (state) => ({
   initialConfiguration: state.configuration.ui.styleValues
 })
 
-
-
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  saveStylesheetsToServerAndReload: (StyleValues) => dispatch(UiActions.saveStylesheetsToServerAndReload(StyleValues))
+  saveStylesheetsToServerAndReload: (styleValues) => dispatch(UiActions.saveStylesheetsToServerAndReload(styleValues))
 })
 
 const ConfigurationEditorComponent = wrapComponentWithProvider(reduxStore, StylesheetManager, mapStateToProps, mapDispatchToProps)

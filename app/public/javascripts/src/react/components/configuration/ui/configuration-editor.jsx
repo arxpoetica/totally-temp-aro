@@ -19,22 +19,21 @@ export class ConfigurationEditor extends Component {
       selectedNav: this.navs.SETTINGS
     }
   }
-  navSelection (){
-    let val=this.state.selectedNav;
-    
-    if(val=='Settings'){
-      return(
+  navSelection () {
+    let val = this.state.selectedNav
+
+    if (val === 'Settings') {
+      return (
         <SettingsEditor id='compSettingsEditor' />
-    );
-    }
-    else if(val=='Asset Manager'){
-      return(
+      )
+    } else if (val === 'Asset Manager') {
+      return (
         <AssetManager />
-    );
-    }else{
-      return(
+      )
+    } else {
+      return (
         <StylesheetsManager />
-    );
+      )
     }
   }
   render () {

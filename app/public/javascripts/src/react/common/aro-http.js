@@ -47,14 +47,14 @@ class AroHttp {
     }
     return this._fetch(url, options)
   }
-  static IsValidJSONString(str) {
+  static IsValidJSONString (str) {
     try {
-        JSON.parse(str);
+      JSON.parse(str)
     } catch (e) {
-        return false;
+      return false
     }
-    return true;
-}
+    return true
+  }
   // Internal fetch() implementation. Rejects all HTTP response codes other than 200-299
   static _fetch (url, options) {
     var status
@@ -71,16 +71,14 @@ class AroHttp {
         }
       })
       .then(result => {
-        const res=this.IsValidJSONString(result);
-        if(res==true){
+        const res = this.IsValidJSONString(result)
+        if (res === true) {
           const parsedResult = (result === '') ? {} : JSON.parse(result)
           return Promise.resolve(parsedResult)
-        }else{
+        } else {
           const parsedResult = result
           return Promise.resolve(parsedResult)
         }
-        
-        
       })
       .then(result => {
         // We have all the data from the request. Send it back

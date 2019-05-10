@@ -29,7 +29,7 @@ function saveConfigurationToServerAndReload (type, configuration) {
       .catch(err => console.error(err))
   }
 }
-function saveStylesheetsToServerAndReload (Stylesheetvalues){
+function saveStylesheetsToServerAndReload (Stylesheetvalues) {
   return dispatch => {
     AroHttp.post('/ui_stylesheets', { configuration: Stylesheetvalues })
       .then(result => dispatch(getStyleValues))
@@ -62,6 +62,6 @@ export default {
   saveConfigurationToServerAndReload: saveConfigurationToServerAndReload,
   getAssetKeys: getAssetKeys,
   getStyleValues: getStyleValues,
-  saveStylesheetsToServerAndReload:saveStylesheetsToServerAndReload,
+  saveStylesheetsToServerAndReload: saveStylesheetsToServerAndReload,
   uploadAssetToServer: uploadAssetToServer
 }

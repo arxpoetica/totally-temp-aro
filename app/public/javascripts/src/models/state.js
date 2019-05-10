@@ -1263,7 +1263,6 @@ class State {
       if (service.Optimizingplan && service.Optimizingplan.planState !== PlanStates.COMPLETED) {
         SocketManager.subscribe('PROGRESS_MESSAGE_DATA', progressData => {
           if (progressData.data.processType === 'optimization') {
-            console.log(progressData)
             newPlan.planState = progressData.data.optimizationState
             service.Optimizingplan.planState = progressData.data.optimizationState
 
