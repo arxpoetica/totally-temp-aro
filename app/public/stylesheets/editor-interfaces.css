@@ -108,10 +108,7 @@
 }
 
 .ei-button-icon{
-  padding-left: 10px;
-}
-
-.ei-button-icon{
+	padding-left: 10px;
 	padding-right: 10px;
 }
 
@@ -139,6 +136,11 @@
 
 
 /* === input elements === */
+.ei-input-label{
+	display: inline-block;
+	padding: .375rem 8px .375rem 0px;
+}
+
 .ei-input-text, .ei-input-number, .ei-input-select{
   width: auto;
 }
@@ -153,6 +155,11 @@
 
 .ei-input-select{
 	
+}
+
+select.ei-input-select-autosize{
+  flex: unset !important;
+  width: auto !important;
 }
 
 .ei-output-text{
@@ -273,18 +280,29 @@ editor-interface-tree .ei-header{
 .ei-table-col-sort-icon{
 	display: inline-block;
 	position: absolute;
+	/*
 	right: 11px;
 	top: 0px;
+	*/
+	padding-left: 4px;
 }
 
 
-.ei-table-foldout-striped tbody tr:nth-of-type(4n-3), 
-.ei-table-foldout-striped tbody tr:nth-of-type(4n-2) {
+.ei-table-foldout-striped tbody>tr{
+	background-color: transparent;
+}
+.ei-table-foldout-striped tbody>tr:nth-of-type(4n-3), 
+.ei-table-foldout-striped tbody>tr:nth-of-type(4n-2) {
     background-color: rgba(0,0,0,.05);
 }
 
 .ei-foldout-row td {
 	display: none;
+}
+
+tr>td.ei-table-bottomline {
+	padding: 0;
+  border-top: none;
 }
 
 .ei-foldout-table-open + .ei-foldout-row td {

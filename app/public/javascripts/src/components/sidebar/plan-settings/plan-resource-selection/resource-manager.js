@@ -24,17 +24,6 @@ class ResourceManagerController {
 
     this.displayProps = [
       {
-        'propertyName': 'resourceType', //'managerType',
-        'levelOfDetail': 0,
-        'format': '',
-        'displayName': 'Resource Type',
-        'enumTypeURL': '',
-        'displayDataType': 'string',
-        'defaultValue': '',
-        'editable': false,
-        'visible': true
-      },
-      {
         'propertyName': 'name',
         'levelOfDetail': 0,
         'format': '',
@@ -44,18 +33,18 @@ class ResourceManagerController {
         'defaultValue': '',
         'editable': true,
         'visible': true
-      }/*, 
+      }, 
       {
-        'propertyName': 'permissionsView',
+        'propertyName': 'resourceType', //'managerType',
         'levelOfDetail': 0,
         'format': '',
-        'displayName': 'Permissions',
+        'displayName': 'Resource Type',
         'enumTypeURL': '',
         'displayDataType': 'string',
         'defaultValue': '',
         'editable': false,
         'visible': true
-      }*/
+      }
     ]
     
     this.idProp = 'id' // unique id of each row

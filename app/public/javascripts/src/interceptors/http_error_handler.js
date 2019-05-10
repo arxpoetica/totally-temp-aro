@@ -9,7 +9,15 @@ app.config(($httpProvider) => {
     NO_SUBNET_FOUND: {
       title: 'Central Office error',
       text: 'Unable to find a Central Office that we can link this node to'
-    }
+    }, 
+    INSUFFICIENT_PERMISSIONS: {
+      title: 'Permissions error',
+      text: 'You do not have the permission level required'
+    }, 
+    OWNER_REQUIRED: {
+      title: 'Owner error',
+      text: 'Permissions must include at least one Owner'
+    }, 
   }
 
   function shouldHandleRejection (rejection) {

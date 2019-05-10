@@ -7,7 +7,7 @@
           <div style="display:flex">
             <select class="form-control"
                     ng-model="itemValue.selectedManager"
-                    ng-options="item.description for item in itemValue.allManagers"
+                    ng-options="item.name for item in itemValue.allManagers"
                     ng-change="$ctrl.onSelectionChanged()"
                     style="flex: 1 1 auto;">
             </select>
