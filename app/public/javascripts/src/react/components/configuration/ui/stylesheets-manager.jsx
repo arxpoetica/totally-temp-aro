@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import { PropTypes } from 'prop-types'
 import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
 import UiActions from './ui-actions'
@@ -10,6 +11,7 @@ export class StylesheetManager extends Component {
       styleValues: props.initialConfiguration,
       errorMessage: null
     }
+    this.handleChanges = this.handleChanges.bind(this)
   }
 
   render () {
@@ -22,7 +24,7 @@ export class StylesheetManager extends Component {
             <textarea className='form-control'
               style={{ height: '350px' }}
               value={this.state.styleValues}
-              onChange={event => this.handleChanges(event.target.value)} />
+              onChange={this.handleChanges} />
           </div>
         </div>
         {/* Show an error message if we have one */}
@@ -32,14 +34,14 @@ export class StylesheetManager extends Component {
             : null
         }
       </form>
-      <button className='btn btn-primary float-right' onClick={() => this.saveStylesheettoServer()}>
+      <button className='btn btn-primary float-right save-stylesheet' onClick={() => this.saveStylesheettoServer()}>
         <i className='fa fa-save' />Save settings
       </button>
     </div>
   }
-  handleChanges (newValue) {
+  handleChanges (event) {
     this.setState({
-      styleValues: newValue
+      styleValues: event.target.value
     })
   }
   saveStylesheettoServer () {
@@ -54,7 +56,9 @@ export class StylesheetManager extends Component {
   }
 }
 
-StylesheetManager.propTypes = {}
+StylesheetManager.propTypes = {
+  styleValues: PropTypes.string
+}
 const mapStateToProps = (state) => ({
   initialConfiguration: state.configuration.ui.styleValues
 })
@@ -63,5 +67,5 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   saveStylesheetsToServerAndReload: (styleValues) => dispatch(UiActions.saveStylesheetsToServerAndReload(styleValues))
 })
 
-const ConfigurationEditorComponent = wrapComponentWithProvider(reduxStore, StylesheetManager, mapStateToProps, mapDispatchToProps)
-export default ConfigurationEditorComponent
+const StylesheetManagerComponent = wrapComponentWithProvider(reduxStore, StylesheetManager, mapStateToProps, mapDispatchToProps)
+export default StylesheetManagerComponent

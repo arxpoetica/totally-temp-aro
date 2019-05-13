@@ -3,7 +3,7 @@ import Actions from '../../../common/actions'
 const defaultState = {
   items: [],
   assetKeys: [],
-  styleValues: []
+  styleValues: ''
 }
 
 function setConfiguration (state, configuration) {
