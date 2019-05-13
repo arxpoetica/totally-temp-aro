@@ -24,6 +24,7 @@ exports[`Default Stylesheet component render 1`] = `
               "height": "350px",
             }
           }
+          value=".test{ background-color:red}"
         />
       </div>
     </div>

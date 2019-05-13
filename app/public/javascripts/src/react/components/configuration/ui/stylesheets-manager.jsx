@@ -27,14 +27,9 @@ export class StylesheetManager extends Component {
               onChange={this.handleChanges} />
           </div>
         </div>
-        {/* Show an error message if we have one */}
-        {
-          this.state.errorMessage
-            ? <div className='alert alert-danger'>{this.state.errorMessage}</div>
-            : null
-        }
+
       </form>
-      <button className='btn btn-primary float-right save-stylesheet' onClick={() => this.saveStylesheettoServer()}>
+      <button className='btn btn-primary float-right save-stylesheet' onClick={() => this.props.saveStylesheetsToServerAndReload(this.state.styleValues)}>
         <i className='fa fa-save' />Save settings
       </button>
     </div>
@@ -43,16 +38,6 @@ export class StylesheetManager extends Component {
     this.setState({
       styleValues: event.target.value
     })
-  }
-  saveStylesheettoServer () {
-    // if(!this.state.styleValues){
-    //   this.setState({
-    //     errorMessage: `Please Update some CSS values!!`
-    //   })
-    // }else{
-    //   this.setState({ errorMessage: null })
-    this.props.saveStylesheetsToServerAndReload(this.state.styleValues)
-    // }
   }
 }
 
