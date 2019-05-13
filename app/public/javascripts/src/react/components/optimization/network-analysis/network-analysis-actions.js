@@ -12,7 +12,7 @@ function loadReport (planId) {
           console.warn(`Warning - expected exactly one optimization report in DB, found ${optimizationReports.length}`)
         }
         dispatch({
-          type: Actions.NETWORK_ANALYSIS_SET_REPORT_METADATA,
+          type: Actions.NETWORK_ANALYSIS_SET_CHART_REPORT_METADATA,
           payload: optimizationReports[0]
         })
         // Get the report definition and actual report for this plan id
@@ -24,14 +24,14 @@ function loadReport (planId) {
       })
       .then(results => {
         dispatch({
-          type: Actions.NETWORK_ANALYSIS_SET_REPORT,
+          type: Actions.NETWORK_ANALYSIS_SET_CHART_REPORT,
           payload: results[0].data
         })
         // uiDefinition comes in as a JSON string. We should parse it back out.
         var reportDefinition = results[1].data
         reportDefinition.uiDefinition = JSON.parse(reportDefinition.uiDefinition)
         dispatch({
-          type: Actions.NETWORK_ANALYSIS_SET_REPORT_DEFINITION,
+          type: Actions.NETWORK_ANALYSIS_SET_CHART_REPORT_DEFINITION,
           payload: reportDefinition
         })
       })
@@ -39,13 +39,6 @@ function loadReport (planId) {
   }
 }
 
-function clearOutput () {
-  return {
-    type: Actions.NETWORK_ANALYSIS_CLEAR_OUTPUT
-  }
-}
-
 export default {
-  loadReport: loadReport,
-  clearOutput: clearOutput
+  loadReport: loadReport
 }

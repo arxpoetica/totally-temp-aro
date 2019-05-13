@@ -4,20 +4,38 @@ import wrapComponentWithProvider from '../../../common/provider-wrapped-componen
 import UiActions from './ui-actions'
 import SettingsEditor from './settings-editor.jsx'
 import AssetManager from './asset-manager.jsx'
+import StylesheetsManager from './stylesheets-manager.jsx'
 
 export class ConfigurationEditor extends Component {
   constructor (props) {
     super(props)
     this.navs = Object.freeze({
       SETTINGS: 'Settings',
-      ASSET_MANAGER: 'Asset Manager'
+      ASSET_MANAGER: 'Asset Manager',
+      STYLESHEETS: 'Stylesheets'
     })
     this.state = {
       showInitialWarning: true,
       selectedNav: this.navs.SETTINGS
     }
   }
+  navSelection () {
+    let val = this.state.selectedNav
 
+    if (val === 'Settings') {
+      return (
+        <SettingsEditor id='compSettingsEditor' />
+      )
+    } else if (val === 'Asset Manager') {
+      return (
+        <AssetManager />
+      )
+    } else {
+      return (
+        <StylesheetsManager />
+      )
+    }
+  }
   render () {
     return <div>
       { this.state.showInitialWarning
@@ -53,11 +71,17 @@ export class ConfigurationEditor extends Component {
             {this.navs.ASSET_MANAGER}
           </a>
         </li>
+        <li className='nav-item' onClick={() => this.setState({ selectedNav: this.navs.STYLESHEETS })}>
+          <a className={`nav-link ${this.state.selectedNav === this.navs.STYLESHEETS ? 'active' : ''}`} href='#'>
+            {this.navs.STYLESHEETS}
+          </a>
+        </li>
       </ul>
       {
-        (this.state.selectedNav === this.navs.SETTINGS)
-          ? <SettingsEditor id='compSettingsEditor' />
-          : <AssetManager />
+        this.navSelection()
+        // (this.state.selectedNav === this.navs.SETTINGS)
+        //   ? <SettingsEditor id='compSettingsEditor' />
+        //   : <AssetManager />
       }
     </div>
   }

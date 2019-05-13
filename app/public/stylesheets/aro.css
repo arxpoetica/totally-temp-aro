@@ -1461,3 +1461,35 @@ ui-select-font {
   width: 10px;
 }
 
+.tool-bar {
+  z-index: 3;
+  display: flex;
+  flex-direction: row;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  background-color: #1f7de6;
+  color: #eee;
+}
+
+.tool-bar .btn {
+  flex: 0 0 30px;
+  background-color: #1f7de6;
+  border: none;
+  border-radius: 0px;
+  color: #eee;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  width: 36px;
+}
+
+#global-search-toolbutton .select2-chosen {
+  background-color: #1f7de6;
+  padding-left: 10px;
+  margin-right: 0px;
+  color: #eee;
+}
+
+.footer-clr {
+  background:-webkit-linear-gradient(left,#a60c0d, #c1151b, #d9272d, #d9272d, #d9272d, #c1151b, #a60c0d);
+}

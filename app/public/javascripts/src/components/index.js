@@ -8,6 +8,7 @@ import CoverageButton from '../react/components/coverage/coverage-button.jsx'
 import NetworkAnalysisOutput from '../react/components/optimization/network-analysis/network-analysis-output.jsx'
 import PlanTargetList from '../react/components/selection/plan-target-list.jsx'
 import ReportModuleList from '../react/components/configuration/report/report-module-list.jsx'
+import ReportsDownloadModal from '../react/components/optimization/reports/reports-download-modal.jsx'
 
 import boundaryDetail from './sidebar/view/boundary-detail'
 import equipmentDetail from './sidebar/view/equipment-detail'
@@ -75,7 +76,6 @@ import mapSelectorPlanTarget from './map/map-selector-plan-target'
 import mapSelectorExportLocations from './map/map-selector-export-locations'
 import mapToggleComponent from './map/map-toggle'
 import toolBar from './header/tool-bar'
-import reportModal from './header/report-modal'
 import networkPlanModal from './header/network-plan-modal'
 import planInputsModal from './header/plan-inputs-modal'
 import networkPlanManage from './header/network-plan-manage'
@@ -182,7 +182,6 @@ app.component('boundaryDetail', boundaryDetail)
   .component('mapSelectorExportLocations', mapSelectorExportLocations)
   .component('mapToggleComponent', mapToggleComponent)
   .component('toolBar', toolBar)
-  .component('reportModal', reportModal)
   .component('networkPlanModal', networkPlanModal)
   .component('planInputsModal', planInputsModal)
   .component('networkPlanManage', networkPlanManage)
@@ -225,6 +224,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rNetworkAnalysisOutput', react2angular(NetworkAnalysisOutput))
   .component('rPlanTargetList', react2angular(PlanTargetList))
   .component('rReportModuleList', react2angular(ReportModuleList))
+  .component('rReportsDownloadModal', react2angular(ReportsDownloadModal, ['reportTypes'])) // reportTypes is passed in manually, not through redux.
   .component('rToastContainer', react2angular(ToastContainer))
   .service('Utils', utils)
   .service('state', state)

@@ -25,8 +25,4 @@ configuration.rabbitmq = {
   username: process.env.RABBITMQ_USERNAME || 'guest',
   password: process.env.RABBITMQ_PASSWORD || 'guest'
 }
-console.log('RabbitMQ environment variables are:')
-console.log(`RABBITMQ_SERVER: ${process.env.RABBITMQ_SERVER}`)
-console.log(`RABBITMQ_USERNAME: ${process.env.RABBITMQ_USERNAME}`)
-console.log(`RABBITMQ_PASSWORD: ${process.env.RABBITMQ_PASSWORD}`)
 module.exports = configuration

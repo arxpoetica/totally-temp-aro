@@ -249,7 +249,6 @@ class State {
     service.showNetworkAnalysisOutput = false
     service.networkPlanModal = new Rx.BehaviorSubject(false)
     service.planInputsModal = new Rx.BehaviorSubject(false)
-    service.reportModal = new Rx.BehaviorSubject(false)
     service.splitterObj = new Rx.BehaviorSubject({})
     service.requestSetMapCenter = new Rx.BehaviorSubject({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
     service.requestSetMapZoom = new Rx.BehaviorSubject(service.defaultPlanCoordinates.zoom)
@@ -1119,7 +1118,7 @@ class State {
       SAVEAS: 0,
       OVERWRITE: 1
     })
-    service.progressPollingInterval = null
+    service.progressMessagePollingInterval = null
     service.progressMessage = ''
     service.progressPercent = 0
     service.isCanceling = false // True when we have requested the server to cancel a request
@@ -1236,7 +1235,7 @@ class State {
             // Make the API call that starts optimization calculations on aro-service
             var apiUrl = (service.networkAnalysisType.type === 'NETWORK_ANALYSIS') ? '/service/v1/analyze/masterplan' : '/service/v1/optimize/masterplan'
             apiUrl += `?userId=${service.loggedInUser.id}`
-            $http.post(apiUrl, optimizationBody)
+          $http.post(apiUrl, optimizationBody)
               .then((response) => {
                 // console.log(response)
                 if (response.status >= 200 && response.status <= 299) {
@@ -1244,7 +1243,7 @@ class State {
                   // service.startPolling()
                   service.Optimizingplan.planState = Constants.PLAN_STATE.STARTED
                   service.progressPercent = 0
-                  service.progressMessage = `00:00 Runtime`
+                  service.startProgressMessagePolling(response.data.startDate)
                   service.getOptimizationProgress(service.Optimizingplan)
                   service.setActivePlanState(PlanStates.START_STATE)
                 } else {
@@ -1263,7 +1262,6 @@ class State {
       if (service.Optimizingplan && service.Optimizingplan.planState !== PlanStates.COMPLETED) {
         SocketManager.subscribe('PROGRESS_MESSAGE_DATA', progressData => {
           if (progressData.data.processType === 'optimization') {
-            console.log(progressData)
             newPlan.planState = progressData.data.optimizationState
             service.Optimizingplan.planState = progressData.data.optimizationState
 
@@ -1275,14 +1273,11 @@ class State {
               delete service.Optimizingplan.optimizationId
               service.loadPlanInputs(newPlan.id)
               service.setActivePlanState(progressData.data.optimizationState)
+              service.stopProgressMessagePolling()
             }
 
             service.planOptimization.next(newPlan)
-            var diff = (Date.now() - new Date(progressData.data.startDate).getTime()) / 1000
-            var minutes = Math.floor(diff / 60)
-            var seconds = Math.ceil(diff % 60)
             service.progressPercent = progressData.data.progress * 100
-            service.progressMessage = `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds} Runtime`
             $timeout() // Trigger a digest cycle so that components can update
           }
         })
@@ -1307,6 +1302,24 @@ class State {
           console.error(err)
           service.isCanceling = false
         })
+    }
+
+    service.startProgressMessagePolling = (startDate) => {
+      service.progressMessagePollingInterval = setInterval(() => {
+        var diff = (Date.now() - new Date(startDate).getTime()) / 1000
+        var minutes = Math.floor(diff / 60)
+        var seconds = Math.ceil(diff % 60)
+        service.progressMessage = `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds} Runtime`
+        $timeout()
+      },1000)
+    }
+
+    service.stopProgressMessagePolling = () => {
+      if (service.progressMessagePollingInterval) {
+        clearInterval(service.progressMessagePollingInterval)
+        service.progressMessagePollingInterval = null
+        service.progressMessage = ''
+      }
     }
 
     service.plan.subscribe((newPlan) => {
@@ -1571,6 +1584,8 @@ class State {
 
       // Fire a redux action to get configuration for the redux side. This will result in two calls to /configuration for the time being.
       service.loadConfigurationFromServer()
+      service.getStyleValues()
+
     }
 
     service.setOptimizationOptions = () => {
@@ -1868,6 +1883,7 @@ class State {
   mapDispatchToTarget(dispatch) {
     return {
       loadConfigurationFromServer: () => dispatch(UiActions.loadConfigurationFromServer()),
+      getStyleValues: () => dispatch(UiActions.getStyleValues()),
       setLoggedInUserRedux: loggedInUser => dispatch(UserActions.setLoggedInUser(loggedInUser)),
       setPlanRedux: plan => dispatch(PlanActions.setActivePlan(plan)),
       setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId)),

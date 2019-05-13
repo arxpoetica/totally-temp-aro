@@ -61,6 +61,17 @@ exports[`Component render - default and after clicking button 2`] = `
           Asset Manager
         </a>
       </li>
+      <li
+        className="nav-item"
+        onClick={[Function]}
+      >
+        <a
+          className="nav-link "
+          href="#"
+        >
+          Stylesheets
+        </a>
+      </li>
     </ul>
     <Component
       id="compSettingsEditor"

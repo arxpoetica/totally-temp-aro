@@ -21,7 +21,7 @@ export class CoverageInitializer extends Component {
         { id: 'location', name: 'Locations' }
       ],
       siteAssignments: ['Proximity', 'Incremental'],
-      selectedSiteAssignment: 'Proximity'
+      selectedSiteAssignment: 'Incremental'
     }
   }
 
@@ -141,7 +141,7 @@ CoverageInitializer.propTypes = {
   activeSelectionModeId: PropTypes.string,
   selectionModes: PropTypes.array,
   coverageType: PropTypes.string,
-  groupKey: PropTypes.string,
+  groupKeyType: PropTypes.string,
   useMarketableTechnologies: PropTypes.bool,
   useMaxSpeed: PropTypes.bool,
   coverageReport: PropTypes.object
@@ -156,7 +156,7 @@ const mapStateToProps = state => ({
   activeSelectionModeId: state.selection.activeSelectionMode.id,
   selectionModes: getAllowedSelectionModes(state),
   coverageType: state.coverage.initializationParams.coverageType,
-  groupKey: state.coverage.initializationParams.groupKey,
+  groupKeyType: state.coverage.initializationParams.groupKeyType,
   useMarketableTechnologies: state.coverage.initializationParams.useMarketableTechnologies,
   useMaxSpeed: state.coverage.initializationParams.useMaxSpeed,
   coverageReport: state.coverage.report
@@ -164,7 +164,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = (dispatch) => ({
   setCoverageType: coverageType => dispatch(CoverageActions.setCoverageType(coverageType)),
-  setGroupKeyType: groupKey => dispatch(CoverageActions.setGroupKeyType(groupKey)),
+  setGroupKeyType: groupKeyType => dispatch(CoverageActions.setGroupKeyType(groupKeyType)),
   setLimitMarketableTechnology: limitMarketableTechnology => dispatch(CoverageActions.setLimitMarketableTechnology(limitMarketableTechnology)),
   setLimitMaxSpeed: limitMaxSpeed => dispatch(CoverageActions.setLimitMaxSpeed(limitMaxSpeed)),
   setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId))
