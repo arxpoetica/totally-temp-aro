@@ -109,6 +109,7 @@ class SocketManager {
         console.log(`Optimization Progress Socket: Routing message with UUID ${processId} to /${processId}`)
         var data = JSON.parse(msg.content.toString())
         // UI dependent on optimizationState at so many places TODO: need to remove optimizationstate
+        data.progress = (data.jobsCompleted + 1) / (data.totalJobs + 1)
         data.optimizationState = data.progress != 1 ? 'STARTED' : 'COMPLETED'
         self.sockets.plans.to(`/${processId}`).emit('message', { type: PROGRESS_MESSAGE, data: data })
       }

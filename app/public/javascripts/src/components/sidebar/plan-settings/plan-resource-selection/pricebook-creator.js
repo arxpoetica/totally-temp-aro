@@ -31,7 +31,7 @@ class PriceBookCreatorController {
   createPriceBook () {
     // Create a new pricebook with the specified name and description
     var createdManagerId = null
-    return this.$http.post('/service/v1/pricebook', { name: this.newPriceBookName, description: this.newPriceBookDescription, priceStrategy: this.selectedPriceStrategy.name })
+    return this.$http.post(`/service/v1/pricebook?user_id=${this.state.loggedInUser.id}`, { name: this.newPriceBookName, description: this.newPriceBookDescription, priceStrategy: this.selectedPriceStrategy.name })
       .then((result) => {
         createdManagerId = result.data.id
         // Return the assignments of either the 0th pricebook (if creating a new one) or the source pricebook (if cloning)
