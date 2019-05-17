@@ -1259,8 +1259,15 @@ class State {
     service.planOptimization = new Rx.BehaviorSubject(null)
     service.getOptimizationProgress = (newPlan) => {
       service.Optimizingplan = newPlan
+      if (service.Optimizingplan && !service.Optimizingplan.planState) {
+        service.Optimizingplan.planState = PlanStates.START_STATE
+      }
       if (service.Optimizingplan && service.Optimizingplan.planState !== PlanStates.COMPLETED) {
-        SocketManager.subscribe('PROGRESS_MESSAGE_DATA', progressData => {
+        // Unsubscribe from progress message handler (if any)
+        if (service.unsubscribeProgressHandler) {
+          service.unsubscribeProgressHandler()
+        }
+        service.unsubscribeProgressHandler = SocketManager.subscribe('PROGRESS_MESSAGE_DATA', progressData => {
           if (progressData.data.processType === 'optimization') {
             newPlan.planState = progressData.data.optimizationState
             service.Optimizingplan.planState = progressData.data.optimizationState
