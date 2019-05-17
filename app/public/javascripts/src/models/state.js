@@ -1260,7 +1260,11 @@ class State {
     service.getOptimizationProgress = (newPlan) => {
       service.Optimizingplan = newPlan
       if (service.Optimizingplan && service.Optimizingplan.planState !== PlanStates.COMPLETED) {
-        SocketManager.subscribe('PROGRESS_MESSAGE_DATA', progressData => {
+        // Unsubscribe from progress message handler (if any)
+        if (service.unsubscribeProgressHandler) {
+          service.unsubscribeProgressHandler()
+        }
+        service.unsubscribeProgressHandler = SocketManager.subscribe('PROGRESS_MESSAGE_DATA', progressData => {
           if (progressData.data.processType === 'optimization') {
             newPlan.planState = progressData.data.optimizationState
             service.Optimizingplan.planState = progressData.data.optimizationState
