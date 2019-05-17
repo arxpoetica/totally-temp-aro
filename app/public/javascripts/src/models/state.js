@@ -1442,11 +1442,18 @@ class State {
     service.selectedBoundaryTypeforSearch = null
     
     service.authRolls = []
+    service.authRollsByName = {}
     service.reloadAuthRolls = () => {
       ///auth/roles
       return $http.get('/service/auth/roles')
       .then((result) => {
         service.authRolls = result.data
+        service.authRollsByName = {}
+        service.authRolls.forEach((authRoll) => {
+          if (authRoll.hasOwnProperty('name')){
+            service.authRollsByName[authRoll.name] = authRoll
+          }
+        })
       })
       .catch((err) => console.error(err))
     }

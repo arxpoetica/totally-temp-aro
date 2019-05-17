@@ -96,6 +96,13 @@ class DataSourceUploadController {
         buttonClass: 'btn-outline-danger',
         iconClass: 'fa-trash-alt',
         toolTip: 'Delete',
+        isEnabled: (row, index) => {
+          console.log(row)
+          console.log(index)
+          console.log(" ")
+          //return this.canEdit(row)
+          return true
+        },
         callBack: (row, index) => {
           this.onDeleteRequest(row)
         }
@@ -106,7 +113,12 @@ class DataSourceUploadController {
     // ---
     
   }
-
+  
+  canEdit (row) {
+    // todo: need row permissions, doesn't come in with 
+    return row.permissions == this.state.authRollsByName['RESOURCE_OWNER'].permissions || row.permissions == this.state.authRollsByName['SUPER_USER'].permissions
+  }
+  
   close () {
     this.state.showDataSourceUploadModal.next(false)
     this.isDataManagementView = false

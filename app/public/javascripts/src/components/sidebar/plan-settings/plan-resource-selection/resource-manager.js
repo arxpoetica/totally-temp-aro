@@ -55,6 +55,9 @@ class ResourceManagerController {
         buttonClass: 'btn-light',
         iconClass: 'fa-edit',
         toolTip: 'Edit',
+        isEnabled: (row, index) => {
+          return this.canEdit(row)
+        },
         callBack: (row, index) => {
           this.editSelectedManager(row)
         }
@@ -73,6 +76,9 @@ class ResourceManagerController {
         buttonClass: 'btn-outline-danger',
         iconClass: 'fa-trash-alt',
         toolTip: 'Delete',
+        isEnabled: (row, index) => {
+          return this.canEdit(row)
+        },
         callBack: (row, index) => {
           this.deleteSelectedResourceManager(row)
         }
@@ -87,6 +93,10 @@ class ResourceManagerController {
       }
       */
     ]
+  }
+  
+  canEdit (row) {
+    return row.permissions == this.state.authRollsByName['RESOURCE_OWNER'].permissions || row.permissions == this.state.authRollsByName['SUPER_USER'].permissions
   }
   
   $onChanges (changes) {

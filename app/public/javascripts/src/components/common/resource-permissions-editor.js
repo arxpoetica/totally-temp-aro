@@ -15,8 +15,10 @@ class ResourcePermissionsEditorController {
     
     this.isOwner = false
     
+    // these vals will be replaced by vals from state
     this.defaultPermissions = 4
     this.ownerPermissions = 7
+    this.superuserPermissions = 31
     
     this.state.authRolls.forEach((authRoll) => {
       if (requestedRolls.hasOwnProperty(authRoll.name)) {
@@ -25,9 +27,11 @@ class ResourcePermissionsEditorController {
           'description': requestedRolls[authRoll.name], 
           'name': authRoll.name
         })
-        if ('RESOURCE_VIEWER' == authRoll.name) this.defaultPermissions = authRoll.permissions
-        if ('RESOURCE_OWNER' == authRoll.name) this.ownerPermissions = authRoll.permissions
       }
+      // can replace these with state.authRollsByName
+      if ('RESOURCE_VIEWER' == authRoll.name) this.defaultPermissions = authRoll.permissions
+      if ('RESOURCE_OWNER' == authRoll.name) this.ownerPermissions = authRoll.permissions
+      if ('SUPER_USER' == authRoll.name) this.superuserPermissions = authRoll.permissions
     })
     
     this.newActorId = null

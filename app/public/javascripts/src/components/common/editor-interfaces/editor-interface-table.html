@@ -47,6 +47,7 @@
 	          <button class="btn btn-sm ng-class: btnValue.buttonClass;" 
 	                  ng-if="$ctrl.actionDisplayLimit >= $ctrl.actions.length"
 	                  ng-repeat="(btnKey, btnValue) in $ctrl.actions"
+	                  ng-disabled="!!btnValue.isEnabled && !btnValue.isEnabled(rowValue, rowKey)"
 	                  ng-click="btnValue.callBack(rowValue, rowKey)"
 	                  data-toggle="tooltip" data-placement="bottom" title="{{btnValue.toolTip}}"><i ng-if="'' != btnValue.iconClass" ng-class="btnValue.iconClass" class="fa ei-button-icon"></i>{{'' != btnValue.iconClass ? ' ' : ''}}{{'' == btnValue.iconClass ? btnValue.buttonText : ''}}</button>
 	          
@@ -57,6 +58,7 @@
 						  <div class="dropdown-menu dropdown-menu-right">
 						    <button class="dropdown-item" type="button"
 						            ng-repeat="(btnKey, btnValue) in $ctrl.actions"
+                        ng-disabled="!!btnValue.isEnabled && !btnValue.isEnabled(rowValue, rowKey)"
                         ng-click="btnValue.callBack(rowValue, rowKey)">{{btnValue.buttonText}}</button>
 						  </div>
 						</div>
