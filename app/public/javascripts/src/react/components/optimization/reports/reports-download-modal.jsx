@@ -16,7 +16,7 @@ export class ReportsDownloadRow extends Component {
 
   render () {
     // "(new Date()).toISOString().split('T')[0]" will give "YYYY-MM-DD"
-    const downloadFileName = `${(new Date()).toISOString().split('T')[0]}_${this.props.reportName}.${this.state.selectedFormat}`
+    const downloadFileName = `${(new Date(Date.now())).toISOString().split('T')[0]}_${this.props.reportName}.${this.state.selectedFormat}`
     return <tr>
       <td>{this.props.displayName}</td>
       <td>

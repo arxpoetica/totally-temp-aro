@@ -468,6 +468,11 @@ exports[`When we have an existing report 1`] = `
   <div
     className="disable-sibling-controls"
     ng-if="$ctrl.isSuperUser && $ctrl.coverageReport"
+    style={
+      Object {
+        "top": "50px",
+      }
+    }
   />
 </div>
 `;
@@ -627,6 +632,11 @@ exports[`When we have supplied all parameters 1`] = `
   <div
     className="disable-sibling-controls"
     ng-if="$ctrl.isSuperUser && $ctrl.coverageReport"
+    style={
+      Object {
+        "top": "50px",
+      }
+    }
   />
 </div>
 `;
