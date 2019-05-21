@@ -15,7 +15,7 @@ export class RfpOptions extends Component {
                 <tr key={optionKey}>
                   <td>{this.props.initialValues[optionKey].displayName}</td>
                   <td>
-                    <Field name={`${optionKey}.value`} className='form-control form-control-sm' component='select' type='text'>
+                    <Field id={`field_${optionKey}`} name={`${optionKey}.value`} className='form-control form-control-sm' component='select' type='text'>
                       <option value='ROUTE_FROM_NODES'>Route from nodes</option>
                       <option value='ROUTE_FROM_FIBER'>Route from fiber</option>
                     </Field>
