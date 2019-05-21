@@ -12,7 +12,7 @@ export class RfpFileUpload extends Component {
   render () {
     return <div style={{ display: 'inline-block' }}>
       <label htmlFor='inpRfpFileUpload' className='rfp-file-upload-label btn btn-sm btn-primary'>
-        <i className='fas fa-cloud-upload-alt' /> Upload csv
+        <i className='fas fa-file-import' /> Import csv...
       </label>
       <input id='inpRfpFileUpload' className='rfp-file-upload-input' type='file' onChange={event => this.loadPointsFromFile(event)} />
     </div>

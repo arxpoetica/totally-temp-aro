@@ -28,6 +28,28 @@ export class RfpTargetsMap extends Component {
       const targetIdsToDelete = [...existingTargetIds].filter(targetId => !newTargetIds.has(targetId))
       targetIdsToDelete.forEach(id => this.deleteMapObject(id))
     }
+    if (prevProps.selectedTarget !== this.props.selectedTarget) {
+      // Clear the old selected targets marker (if any)
+      if (prevProps.selectedTarget) {
+        const marker = this.createdMapObjects[prevProps.selectedTarget.id]
+        if (marker) {
+          marker.setIcon({
+            url: '/images/map_icons/aro/target.png'
+          })
+        }
+      }
+      if (this.props.selectedTarget) {
+        // Pan the map to the selected target
+        this.props.googleMaps.panTo({ lat: this.props.selectedTarget.lat, lng: this.props.selectedTarget.lng })
+        // Make the marker icon bigger
+        const marker = this.createdMapObjects[this.props.selectedTarget.id]
+        if (marker) {
+          marker.setIcon({
+            url: '/images/map_icons/aro/target_selected.png'
+          })
+        }
+      }
+    }
   }
 
   createMapObjects (targets) {
@@ -54,12 +76,14 @@ export class RfpTargetsMap extends Component {
 
 RfpTargetsMap.propTypes = {
   googleMaps: PropTypes.object,
-  targets: PropTypes.arrayOf(PropTypes.instanceOf(Point))
+  targets: PropTypes.arrayOf(PropTypes.instanceOf(Point)),
+  selectedTarget: PropTypes.instanceOf(Point)
 }
 
 const mapStateToProps = (state) => ({
   googleMaps: state.map.googleMaps,
-  targets: state.optimization.rfp.targets
+  targets: state.optimization.rfp.targets,
+  selectedTarget: state.optimization.rfp.selectedTarget
 })
 
 const mapDispatchToProps = dispatch => ({

@@ -8,6 +8,7 @@ const defaultState = {
     }
   },
   targets: [],
+  selectedTarget: null,
   showRfpStatusModal: false
 }
 
@@ -39,6 +40,12 @@ function removeTarget (state, index) {
   }
 }
 
+function setSelectedTarget (state, selectedTarget) {
+  return { ...state,
+    selectedTarget: selectedTarget
+  }
+}
+
 function rfpReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.RFP_INITIALIZE:
@@ -55,6 +62,9 @@ function rfpReducer (state = defaultState, action) {
 
     case Actions.RFP_REMOVE_TARGET:
       return removeTarget(state, action.payload)
+
+    case Actions.RFP_SET_SELECTED_TARGET:
+      return setSelectedTarget(state, action.payload)
 
     default:
       return state

@@ -34,10 +34,18 @@ function removeTarget (indexToRemove) {
   }
 }
 
+function setSelectedTarget (selectedTarget) {
+  return {
+    type: Actions.RFP_SET_SELECTED_TARGET,
+    payload: selectedTarget
+  }
+}
+
 export default {
   addTargets: addTargets,
   clearState: clearState,
   initialize: initialize,
   removeTarget: removeTarget,
+  setSelectedTarget: setSelectedTarget,
   showOrHideRfpStatusModal: showOrHideRfpStatusModal
 }

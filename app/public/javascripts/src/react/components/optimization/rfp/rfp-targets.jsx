@@ -6,6 +6,7 @@ import Point from '../../../common/point'
 import RfpActions from './rfp-actions'
 import RfpFileUploader from './rfp-file-uploader.jsx'
 import RfpTargetsMap from './rfp-targets-map.jsx'
+import './rfp-targets.css'
 
 const NEW_TARGET = {
   lat: 0,
@@ -37,7 +38,7 @@ export class RfpTargets extends Component {
         }
       </h4>
       <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
-        <table className='table table-sm table-striped'>
+        <table id='tblRfpTargets' className='table table-sm table-striped'>
           <thead className='thead thead-light'>
             <tr>
               <th>Latitude</th>
@@ -49,7 +50,8 @@ export class RfpTargets extends Component {
             {/* Show current targets */}
             {
               this.props.targets.map((target, index) => (
-                <tr key={index}>
+                <tr key={index} onClick={event => this.props.setSelectedTarget(target)}
+                  className={'tr-rfp-target' + (this.props.selectedTarget === target ? ' selected-target-row ' : '')}>
                   <td>{target.lat}</td>
                   <td>{target.lng}</td>
                   <td><button className='btn btn-sm btn-danger' onClick={() => this.props.removeTarget(index)}><i className='fa fa-trash-alt' /></button></td>
@@ -98,16 +100,19 @@ export class RfpTargets extends Component {
 }
 
 RfpTargets.propTypes = {
-  targets: PropTypes.arrayOf(PropTypes.instanceOf(Point))
+  targets: PropTypes.arrayOf(PropTypes.instanceOf(Point)),
+  selectedTarget: PropTypes.instanceOf(Point)
 }
 
 const mapStateToProps = (state) => ({
-  targets: state.optimization.rfp.targets
+  targets: state.optimization.rfp.targets,
+  selectedTarget: state.optimization.rfp.selectedTarget
 })
 
 const mapDispatchToProps = dispatch => ({
   addTargets: (lat, lng) => dispatch(RfpActions.addTargets(lat, lng)),
-  removeTarget: indexToRemove => dispatch(RfpActions.removeTarget(indexToRemove))
+  removeTarget: indexToRemove => dispatch(RfpActions.removeTarget(indexToRemove)),
+  setSelectedTarget: selectedTarget => dispatch(RfpActions.setSelectedTarget(selectedTarget))
 })
 
 const RfpTargetsComponent = wrapComponentWithProvider(reduxStore, RfpTargets, mapStateToProps, mapDispatchToProps)
