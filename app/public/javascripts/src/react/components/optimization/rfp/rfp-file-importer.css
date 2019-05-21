@@ -1,10 +1,10 @@
 /*
   Styles for customizing the file input (<input type='file'>)
 */
-.rfp-file-upload-input {
+.rfp-file-import-input {
   display: none;
 }
-.rfp-file-upload-label {
+.rfp-file-import-label {
   display: inline-block;
   cursor: pointer;
   margin: 0px;

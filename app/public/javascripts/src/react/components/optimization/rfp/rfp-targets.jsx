@@ -4,7 +4,7 @@ import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
 import Point from '../../../common/point'
 import RfpActions from './rfp-actions'
-import RfpFileUploader from './rfp-file-uploader.jsx'
+import RfpFileImporter from './rfp-file-importer.jsx'
 import RfpTargetsMap from './rfp-targets-map.jsx'
 import './rfp-targets.css'
 
@@ -30,7 +30,7 @@ export class RfpTargets extends Component {
           this.state.showNewTargetInputs
             ? null // Dont show button if we already have the inputs shown
             : <div className='float-right'>
-              <RfpFileUploader />
+              <RfpFileImporter />
               <button className='btn btn-sm btn-primary ml-1' onClick={this.startAddingNewTarget.bind(this)}>
                 <i className='fas fa-pencil-alt' /> Add target
               </button>
