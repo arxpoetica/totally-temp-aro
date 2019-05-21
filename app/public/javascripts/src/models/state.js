@@ -7,6 +7,7 @@ import Actions from '../react/common/actions'
 import UiActions from '../react/components/configuration/ui/ui-actions'
 import UserActions from '../react/components/user/user-actions'
 import PlanActions from '../react/components/plan/plan-actions'
+import MapActions from '../react/components/map/map-actions'
 import MapLayerActions from '../react/components/map-layers/map-layer-actions'
 import SelectionActions from '../react/components/selection/selection-actions'
 import PlanStates from '../react/components/plan/plan-states'
@@ -124,6 +125,7 @@ class State {
       $document.ready(() => {
         // At this point we will have access to the global map variable
         map.ready(() => resolve())
+        service.setGoogleMapsReference(map)
       })
     })
 
@@ -534,6 +536,7 @@ class State {
         { id: 'NETWORK_PLAN', label: 'Network Build', type: 'NETWORK_PLAN' },
         { id: 'NETWORK_ANALYSIS', label: 'Network Analysis', type: 'NETWORK_ANALYSIS' },
         { id: 'COVERAGE_ANALYSIS', label: 'Coverage Analysis', type: 'COVERAGE' },
+        { id: 'RFP', label: 'RFP Analyzer', type: 'RFP' },
         { id: 'NEARNET_ANALYSIS', label: 'Near-net Analysis', type: 'UNDEFINED' },
         { id: 'EXPERT_MODE', label: 'Expert Mode', type: 'Expert' }
       ]
@@ -1897,6 +1900,7 @@ class State {
       addPlanTargets: (planId, planTargets) => dispatch(SelectionActions.addPlanTargets(planId, planTargets)),
       removePlanTargets: (planId, planTargets) => dispatch(SelectionActions.removePlanTargets(planId, planTargets)),
       setActivePlanState: planState => dispatch(PlanActions.setActivePlanState(planState)),
+      setGoogleMapsReference: mapRef => dispatch(MapActions.setGoogleMapsReference(mapRef)),
       updateShowSiteBoundary: isVisible => dispatch(MapLayerActions.setShowSiteBoundary(isVisible))
     }
   }
