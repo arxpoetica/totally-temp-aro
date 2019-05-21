@@ -1,6 +1,10 @@
 import Actions from '../../../common/actions'
 
 const defaultState = {
+  options: {}
+}
+
+const initializedState = {
   options: {
     hle_id: {
       displayName: 'HLE ID',
@@ -37,14 +41,21 @@ const defaultState = {
   }
 }
 
-function initializeComponent () {
+function initialize () {
+  return JSON.parse(JSON.stringify(initializedState))
+}
+
+function clearState () {
   return JSON.parse(JSON.stringify(defaultState))
 }
 
 function rfpReducer (state = defaultState, action) {
   switch (action.type) {
-    case Actions.RFP_INITIALIZE_COMPONENT:
-      return initializeComponent()
+    case Actions.RFP_INITIALIZE:
+      return initialize(state)
+
+    case Actions.RFP_CLEAR_STATE:
+      return clearState(state)
 
     default:
       return state
