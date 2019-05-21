@@ -8,7 +8,7 @@ import Point from '../../../common/point'
 export class RfpTargetsMap extends Component {
   constructor (props) {
     super(props)
-    this.createdMapObjects = []
+    this.createdMapObjects = {}
   }
 
   render () {
@@ -18,19 +18,37 @@ export class RfpTargetsMap extends Component {
 
   componentDidUpdate (prevProps) {
     if (prevProps.targets !== this.props.targets) {
-      this.props.targets.forEach(target => {
-        const mapObj = new google.maps.Marker({
-          position: target,
-          map: this.props.googleMaps,
-          icon: '/images/map_icons/aro/target.png'
-        })
-        this.createdMapObjects.push(mapObj)
-      })
+      // Determine the map objects to create
+      const existingTargetIds = new Set(Object.keys(this.createdMapObjects))
+      const targetsToCreate = this.props.targets.filter(newTarget => !existingTargetIds.has(newTarget.id))
+      this.createMapObjects(targetsToCreate)
+
+      // Determine the map objects to delete
+      const newTargetIds = new Set(this.props.targets.map(target => target.id))
+      const targetIdsToDelete = [...existingTargetIds].filter(targetId => !newTargetIds.has(targetId))
+      targetIdsToDelete.forEach(id => this.deleteMapObject(id))
     }
   }
 
+  createMapObjects (targets) {
+    targets.forEach(target => {
+      const mapObj = new google.maps.Marker({
+        id: target.id,
+        position: { lat: target.lat, lng: target.lng },
+        map: this.props.googleMaps,
+        icon: '/images/map_icons/aro/target.png'
+      })
+      this.createdMapObjects[target.id] = mapObj
+    })
+  }
+
+  deleteMapObject (objectId) {
+    this.createdMapObjects[objectId].setMap(null)
+    delete this.createdMapObjects[objectId]
+  }
+
   componentWillUnmount () {
-    this.createdMapObjects.forEach(mapObj => mapObj.setMap(null))
+    Object.keys(this.createdMapObjects).forEach(objectId => this.deleteMapObject(objectId))
   }
 }
 

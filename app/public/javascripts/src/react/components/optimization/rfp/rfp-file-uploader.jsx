@@ -21,6 +21,10 @@ export class RfpFileUpload extends Component {
   loadPointsFromFile (event) {
     const self = this
     const file = event.target.files[0]
+    if (!file) {
+      console.warn('No file selected')
+      return
+    }
     if (file.size > MAX_FILE_SIZE_IN_BYTES) {
       throw new Error(`File too large. Maximum file size for selecting targets is ${MAX_FILE_SIZE_IN_BYTES} bytes.`)
     }
