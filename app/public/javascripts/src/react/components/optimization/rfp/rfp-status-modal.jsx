@@ -42,7 +42,7 @@ export class RfpStatusModal extends Component {
       role='dialog'
       style={{ display: this.props.showRfpStatusModal ? 'block' : 'none' }}
     >
-      <div className='modal-dialog'>
+      <div className='modal-dialog' style={{ maxWidth: '600px' }}>
         <div className='modal-content'>
           <div className='modal-header'>
             <h4 className='modal-title'>RFP Status</h4>
