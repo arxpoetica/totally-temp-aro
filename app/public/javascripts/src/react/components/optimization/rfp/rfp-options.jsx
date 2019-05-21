@@ -28,11 +28,6 @@ export class RfpOptions extends Component {
       </form>
     </div>
   }
-
-  validateName (value) {
-    value = value || ''
-    return (value.indexOf(' ') >= 0) ? 'Name cannot have spaces' : undefined
-  }
 }
 
 let RfpOptionsForm = reduxForm({
