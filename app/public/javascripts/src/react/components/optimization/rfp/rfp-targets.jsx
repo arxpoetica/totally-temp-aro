@@ -21,7 +21,7 @@ export class RfpTargets extends Component {
   }
 
   render () {
-    return <div>
+    return <div className='m-2 p-2' style={{ borderTop: 'solid 2px #eee' }}>
       <h4>
         RFP Targets
         {
@@ -30,7 +30,7 @@ export class RfpTargets extends Component {
             : <div className='float-right'>
               <RfpFileUploader />
               <button className='btn btn-sm btn-primary ml-1' onClick={this.startAddingNewTarget.bind(this)}>
-                <i className='fas fa-pencil-alt' /> Add one
+                <i className='fas fa-pencil-alt' /> Add target
               </button>
             </div>
         }

@@ -35,7 +35,7 @@ export class RfpFileUpload extends Component {
       }
       var targets = lines.map(line => {
         const latLng = line.split(',')
-        return new Point(latLng[0], latLng[1])
+        return new Point(+latLng[0], +latLng[1])
       })
       self.props.addTargets(targets)
     }
