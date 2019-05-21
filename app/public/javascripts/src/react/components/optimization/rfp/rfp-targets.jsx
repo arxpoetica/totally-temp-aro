@@ -5,6 +5,7 @@ import wrapComponentWithProvider from '../../../common/provider-wrapped-componen
 import Point from '../../../common/point'
 import RfpActions from './rfp-actions'
 import RfpFileUploader from './rfp-file-uploader.jsx'
+import RfpTargetsMap from './rfp-targets-map.jsx'
 
 const NEW_TARGET = {
   lat: 0,
@@ -74,6 +75,7 @@ export class RfpTargets extends Component {
           </tbody>
         </table>
       </div>
+      <RfpTargetsMap />
     </div>
   }
 
@@ -86,7 +88,7 @@ export class RfpTargets extends Component {
   }
 
   saveNewTarget () {
-    this.props.addTargets([new Point(this.state.newTargetLat, this.state.newTargetLng)])
+    this.props.addTargets([new Point(+this.state.newTargetLat, +this.state.newTargetLng)])
     this.setState({
       showNewTargetInputs: false,
       newTargetLat: NEW_TARGET.lat,
