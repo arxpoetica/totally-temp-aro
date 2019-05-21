@@ -1,7 +1,8 @@
 import Actions from '../../../common/actions'
 
 const defaultState = {
-  options: {}
+  options: {},
+  showRfpStatusModal: false
 }
 
 const initializedState = {
@@ -49,6 +50,12 @@ function clearState () {
   return JSON.parse(JSON.stringify(defaultState))
 }
 
+function setRfpStatusModalVisibility (state, showRfpStatusModal) {
+  return { ...state,
+    showRfpStatusModal: showRfpStatusModal
+  }
+}
+
 function rfpReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.RFP_INITIALIZE:
@@ -56,6 +63,9 @@ function rfpReducer (state = defaultState, action) {
 
     case Actions.RFP_CLEAR_STATE:
       return clearState(state)
+
+    case Actions.RFP_SHOW_HIDE_STATUS_MODAL:
+      return setRfpStatusModalVisibility(state, action.payload)
 
     default:
       return state

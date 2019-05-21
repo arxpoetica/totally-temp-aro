@@ -13,7 +13,15 @@ function clearState () {
   }
 }
 
+function showOrHideRfpStatusModal (showRfpStatusModal) {
+  return {
+    type: Actions.RFP_SHOW_HIDE_STATUS_MODAL,
+    payload: showRfpStatusModal
+  }
+}
+
 export default {
   initialize: initialize,
-  clearState: clearState
+  clearState: clearState,
+  showOrHideRfpStatusModal: showOrHideRfpStatusModal
 }

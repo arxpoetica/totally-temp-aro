@@ -1,7 +1,8 @@
 import Constants from '../common/constants'
+import RfpActions from '../../react/components/optimization/rfp/rfp-actions'
 
 class ToolBarController {
-  constructor ($element, $timeout, $document, $http, state, map_tools, $window) {
+  constructor ($element, $timeout, $document, $http, $ngRedux, state, map_tools, $window) {
     this.state = state
     this.$element = $element
     this.$timeout = $timeout
@@ -18,6 +19,7 @@ class ToolBarController {
     this.isViewSettingsEnabled = false
     this.currentUser = state.loggedInUser
     this.Constants = Constants
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
 
     this.min = 0
     // Map tile settings used for debugging
@@ -530,9 +532,24 @@ class ToolBarController {
       this.rulerAction()
     }
   }
+
+  $onDestroy () {
+    this.unsubscribeRedux()
+  }
+
+  mapStateToThis (reduxState) {
+    return {
+    }
+  }
+
+  mapDispatchToTarget (dispatch) {
+    return {
+      showRfpStatusModal: () => dispatch(RfpActions.showOrHideRfpStatusModal(true))
+    }
+  }
 }
 
-ToolBarController.$inject = ['$element', '$timeout', '$document', '$http', 'state', 'map_tools', '$window']
+ToolBarController.$inject = ['$element', '$timeout', '$document', '$http', '$ngRedux', 'state', 'map_tools', '$window']
 
 let toolBar = {
   templateUrl: '/components/header/tool-bar.html',

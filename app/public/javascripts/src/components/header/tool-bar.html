@@ -87,7 +87,7 @@
     <input class="form-control select2" style="padding:0px; border-radius: 0px;" type="text" placeholder="Search an address, city, or state">
   </div>
 
-  <div class="fa fa-search no-collapse" style="padding-left: 10px; padding-right: 10px; margin: auto;"></div>
+  <div class="fa fa-search no-collapse" style="padding-left: 10px; padding-right: 10px; margin: auto; color: #eee;"></div>
 
   <div class="separator" class="no-collapse"></div>
 
@@ -277,6 +277,14 @@
       <i class="fa fa-cube"></i>
   </button>
 
+  <button ng-click="$ctrl.showRfpStatusModal()"
+    class="btn"
+    data-toggle="tooltip"
+    data-placement="bottom" 
+    title="Show RFP status">
+      <i class="fas fa-cloud-download-alt"></i>
+  </button>
+
   <div class="dropdown" ng-hide="!$ctrl.showDropDown" ng-style="{ 'border-left': '#eee 1px dotted', width: $ctrl.dropdownWidthPixels }">
     <button class="btn btn-light" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
       <i class="fa fa-angle-double-down"></i>
@@ -287,3 +295,5 @@
   </div>
 
 </div>
+<!-- Render the modal outside the .tool-bar div so that it does not pick up any toolbar button styles -->
+<r-rfp-status-modal></r-rfp-status-modal>
