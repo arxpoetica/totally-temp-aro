@@ -4,11 +4,13 @@ import { PropTypes } from 'prop-types'
 import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
 import Point from '../../../common/point'
+import RfpActions from './rfp-actions'
 
 export class RfpTargetsMap extends Component {
   constructor (props) {
     super(props)
     this.createdMapObjects = {}
+    this.mapObjectListeners = {}
   }
 
   render () {
@@ -61,7 +63,15 @@ export class RfpTargetsMap extends Component {
         id: target.id,
         position: { lat: target.lat, lng: target.lng },
         map: this.props.googleMaps,
-        icon: '/images/map_icons/aro/target.png'
+        icon: '/images/map_icons/aro/target.png',
+        draggable: true
+      })
+      this.mapObjectListeners[target.id] = google.maps.event.addListener(mapObj, 'dragend', event => {
+        // Replace the target with another target having the same ID, but updated coordinates
+        const oldTargetIndex = this.props.targets.findIndex(target => target.id === mapObj.id)
+        const oldTarget = this.props.targets[oldTargetIndex]
+        var newTarget = new Point(event.latLng.lat(), event.latLng.lng(), oldTarget.id)
+        this.props.replaceTarget(oldTargetIndex, newTarget)
       })
       this.createdMapObjects[target.id] = mapObj
     })
@@ -70,6 +80,9 @@ export class RfpTargetsMap extends Component {
   deleteMapObject (objectId) {
     this.createdMapObjects[objectId].setMap(null)
     delete this.createdMapObjects[objectId]
+
+    this.mapObjectListeners[objectId].remove()
+    delete this.mapObjectListeners[objectId]
   }
 
   componentWillUnmount () {
@@ -90,6 +103,7 @@ const mapStateToProps = (state) => ({
 })
 
 const mapDispatchToProps = dispatch => ({
+  replaceTarget: (index, target) => dispatch(RfpActions.replaceTarget(index, target))
 })
 
 const RfpTargetsMapComponent = wrapComponentWithProvider(reduxStore, RfpTargetsMap, mapStateToProps, mapDispatchToProps)
