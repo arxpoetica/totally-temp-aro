@@ -20,8 +20,24 @@ function showOrHideRfpStatusModal (showRfpStatusModal) {
   }
 }
 
+function addTargets (targets) {
+  return {
+    type: Actions.RFP_ADD_TARGETS,
+    payload: targets
+  }
+}
+
+function removeTarget (indexToRemove) {
+  return {
+    type: Actions.RFP_REMOVE_TARGET,
+    payload: indexToRemove
+  }
+}
+
 export default {
-  initialize: initialize,
+  addTargets: addTargets,
   clearState: clearState,
+  initialize: initialize,
+  removeTarget: removeTarget,
   showOrHideRfpStatusModal: showOrHideRfpStatusModal
 }

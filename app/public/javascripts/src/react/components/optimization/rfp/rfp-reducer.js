@@ -1,11 +1,6 @@
 import Actions from '../../../common/actions'
 
 const defaultState = {
-  options: {},
-  showRfpStatusModal: false
-}
-
-const initializedState = {
   options: {
     hle_id: {
       displayName: 'HLE ID',
@@ -39,11 +34,13 @@ const initializedState = {
       displayName: 'Near-net strategy',
       value: 'euclidean'
     }
-  }
+  },
+  targets: [],
+  showRfpStatusModal: false
 }
 
 function initialize () {
-  return JSON.parse(JSON.stringify(initializedState))
+  return JSON.parse(JSON.stringify(defaultState))
 }
 
 function clearState () {
@@ -53,6 +50,20 @@ function clearState () {
 function setRfpStatusModalVisibility (state, showRfpStatusModal) {
   return { ...state,
     showRfpStatusModal: showRfpStatusModal
+  }
+}
+
+function addTargets (state, targets) {
+  return { ...state,
+    targets: state.targets.concat(targets)
+  }
+}
+
+function removeTarget (state, index) {
+  var newTargets = [].concat(state.targets)
+  newTargets.splice(index, 1)
+  return { ...state,
+    targets: newTargets
   }
 }
 
@@ -66,6 +77,12 @@ function rfpReducer (state = defaultState, action) {
 
     case Actions.RFP_SHOW_HIDE_STATUS_MODAL:
       return setRfpStatusModalVisibility(state, action.payload)
+
+    case Actions.RFP_ADD_TARGETS:
+      return addTargets(state, action.payload)
+
+    case Actions.RFP_REMOVE_TARGET:
+      return removeTarget(state, action.payload)
 
     default:
       return state
