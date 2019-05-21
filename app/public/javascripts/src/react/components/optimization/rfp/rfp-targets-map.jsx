@@ -27,6 +27,9 @@ export class RfpTargetsMap extends Component {
       const newTargetIds = new Set(this.props.targets.map(target => target.id))
       const targetIdsToDelete = [...existingTargetIds].filter(targetId => !newTargetIds.has(targetId))
       targetIdsToDelete.forEach(id => this.deleteMapObject(id))
+
+      // At this point we will have all markers. Update their position (some markers may have changed position)
+      this.props.targets.forEach(target => this.createdMapObjects[target.id].setPosition({ lat: target.lat, lng: target.lng }))
     }
     if (prevProps.selectedTarget !== this.props.selectedTarget) {
       // Clear the old selected targets marker (if any)

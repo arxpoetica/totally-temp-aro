@@ -40,6 +40,14 @@ function removeTarget (state, index) {
   }
 }
 
+function replaceTarget (state, index, target) {
+  var newTargets = [].concat(state.targets)
+  newTargets.splice(index, 1, target)
+  return { ...state,
+    targets: newTargets
+  }
+}
+
 function setSelectedTarget (state, selectedTarget) {
   return { ...state,
     selectedTarget: selectedTarget
@@ -62,6 +70,9 @@ function rfpReducer (state = defaultState, action) {
 
     case Actions.RFP_REMOVE_TARGET:
       return removeTarget(state, action.payload)
+
+    case Actions.RFP_REPLACE_TARGET:
+      return replaceTarget(state, action.payload.index, action.payload.target)
 
     case Actions.RFP_SET_SELECTED_TARGET:
       return setSelectedTarget(state, action.payload)

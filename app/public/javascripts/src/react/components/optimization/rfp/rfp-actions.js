@@ -34,6 +34,16 @@ function removeTarget (indexToRemove) {
   }
 }
 
+function replaceTarget (indexToReplace, target) {
+  return {
+    type: Actions.RFP_REPLACE_TARGET,
+    payload: {
+      index: indexToReplace,
+      target: target
+    }
+  }
+}
+
 function setSelectedTarget (selectedTarget) {
   return {
     type: Actions.RFP_SET_SELECTED_TARGET,
@@ -46,6 +56,7 @@ export default {
   clearState: clearState,
   initialize: initialize,
   removeTarget: removeTarget,
+  replaceTarget: replaceTarget,
   setSelectedTarget: setSelectedTarget,
   showOrHideRfpStatusModal: showOrHideRfpStatusModal
 }
