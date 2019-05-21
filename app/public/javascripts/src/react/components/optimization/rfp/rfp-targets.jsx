@@ -81,23 +81,28 @@ export class RfpTargets extends Component {
   }
 
   renderRegularTarget (target, index) {
-    return <tr key={index} onClick={event => this.props.setSelectedTarget(target)}
+    return <tr id={`trTarget_${index}`} key={index} onClick={event => this.props.setSelectedTarget(target)}
       className={'tr-rfp-target' + (this.props.selectedTarget === target ? ' selected-target-row ' : '')}>
       <td>{target.lat}</td>
       <td>{target.lng}</td>
       <td>
-        <button className='btn btn-sm btn-light' onClick={() => this.startEditingTarget(target)}><i className='fa fa-edit' /></button>
-        <button className='btn btn-sm btn-danger' onClick={() => this.props.removeTarget(index)}><i className='fa fa-trash-alt' /></button>
+        <button id={`btnEditTarget_${index}`} className='btn btn-sm btn-light' onClick={() => this.startEditingTarget(target)}>
+          <i className='fa fa-edit' />
+        </button>
+        <button id={`btnDeleteTarget_${index}`} className='btn btn-sm btn-danger' onClick={() => this.props.removeTarget(index)}>
+          <i className='fa fa-trash-alt' />
+        </button>
       </td>
     </tr>
   }
 
   renderTargetBeingEdited (target, index) {
     const indexWithinEditingTargets = this.state.targetsBeingEdited.findIndex(editingTarget => editingTarget.id === target.id)
-    return <tr key={index} onClick={event => this.props.setSelectedTarget(target)}
+    return <tr id={`trTarget_${index}`} key={index} onClick={event => this.props.setSelectedTarget(target)}
       className={'tr-rfp-target' + (this.props.selectedTarget === target ? ' selected-target-row ' : '')}>
       <td>
         <input
+          id={`inpTargetLatitude_${index}`}
           type='text'
           className='form-control form-control-sm'
           value={this.state.targetsBeingEdited[indexWithinEditingTargets].lat}
@@ -106,6 +111,7 @@ export class RfpTargets extends Component {
       </td>
       <td>
         <input
+          id={`inpTargetLongitude_${index}`}
           type='text'
           className='form-control form-control-sm'
           value={this.state.targetsBeingEdited[indexWithinEditingTargets].lng}
@@ -113,8 +119,12 @@ export class RfpTargets extends Component {
         />
       </td>
       <td>
-        <button className='btn btn-sm btn-light' onClick={() => this.saveEditingTarget(target.id)}><i className='fa fa-save' /></button>
-        <button className='btn btn-sm btn-light' onClick={() => this.cancelEditingTarget(target.id)}>Cancel</button>
+        <button id={`btnSaveTarget_${index}`} className='btn btn-sm btn-light' onClick={() => this.saveEditingTarget(target.id)}>
+          <i className='fa fa-save' />
+        </button>
+        <button id={`btnCancelEditTarget_${index}`} className='btn btn-sm btn-light' onClick={() => this.cancelEditingTarget(target.id)}>
+          Cancel
+        </button>
       </td>
     </tr>
   }
