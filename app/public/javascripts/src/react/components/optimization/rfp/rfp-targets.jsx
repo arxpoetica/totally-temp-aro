@@ -24,7 +24,7 @@ export class RfpTargets extends Component {
   render () {
     return <div className='m-2 p-2' style={{ borderTop: 'solid 2px #eee' }}>
       <h4>
-        RFP Targets
+        Targets
         {
           this.state.showNewTargetInputs
             ? null // Dont show button if we already have the inputs shown

@@ -2,37 +2,9 @@ import Actions from '../../../common/actions'
 
 const defaultState = {
   options: {
-    hle_id: {
-      displayName: 'HLE ID',
-      value: 100
-    },
-    system_config: {
-      displayName: 'System config',
-      value: 'sales_1'
-    },
-    service_layer_strategy: {
-      displayName: 'Service layer strategy',
-      value: 'dynamic'
-    },
-    routing_type: {
-      displayName: 'Routing type',
-      value: 'point_to_point'
-    },
-    fiber_routing_mode: {
+    fiberRoutingMode: {
       displayName: 'Fiber routing mode',
-      value: 'route_from_fiber'
-    },
-    max_distance_to_splice_point_meters: {
-      displayName: 'Max distance to splice point',
-      value: 15000
-    },
-    near_net_distance_meters: {
-      displayName: 'Near-net distance',
-      value: 500
-    },
-    near_net_strategy: {
-      displayName: 'Near-net strategy',
-      value: 'euclidean'
+      value: 'ROUTE_FROM_FIBER'
     }
   },
   targets: [],
