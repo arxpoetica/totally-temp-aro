@@ -4,7 +4,6 @@ import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
 import RfpActions from './rfp-actions'
 import RfpOptions from './rfp-options.jsx'
-import RfpFileUploader from './rfp-file-uploader.jsx'
 import RfpTargets from './rfp-targets.jsx'
 
 export class RfpAnalyzer extends Component {
@@ -17,7 +16,6 @@ export class RfpAnalyzer extends Component {
     return <div>
       <RfpOptions initialValues={this.props.rfpOptions} enableReinitialize />
       <RfpTargets />
-      <RfpFileUploader />
     </div>
   }
 

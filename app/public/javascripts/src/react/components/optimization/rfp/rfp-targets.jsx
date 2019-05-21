@@ -4,6 +4,7 @@ import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
 import Point from '../../../common/point'
 import RfpActions from './rfp-actions'
+import RfpFileUploader from './rfp-file-uploader.jsx'
 
 const NEW_TARGET = {
   lat: 0,
@@ -21,14 +22,26 @@ export class RfpTargets extends Component {
 
   render () {
     return <div>
-      <h4>RFP Targets</h4>
+      <h4>
+        RFP Targets
+        {
+          this.state.showNewTargetInputs
+            ? null // Dont show button if we already have the inputs shown
+            : <div className='float-right'>
+              <RfpFileUploader />
+              <button className='btn btn-sm btn-primary ml-1' onClick={this.startAddingNewTarget.bind(this)}>
+                <i className='fas fa-pencil-alt' /> Add one
+              </button>
+            </div>
+        }
+      </h4>
       <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
         <table className='table table-sm table-striped'>
           <thead className='thead thead-light'>
             <tr>
               <th>Latitude</th>
               <th>Longitude</th>
-              <th style={{ width: '100px' }}>Action</th>
+              <th style={{ width: '100px' }}>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -57,12 +70,6 @@ export class RfpTargets extends Component {
                   </td>
                 </tr>
                 : null
-            }
-            {/* Show a button to add a new target */}
-            {
-              this.state.showNewTargetInputs
-                ? null  // Dont show button if we already have the inputs shown
-                : <tr><td /><td /><td><button className='btn btn-sm btn-primary' onClick={this.startAddingNewTarget.bind(this)}>Add target</button></td></tr>
             }
           </tbody>
         </table>

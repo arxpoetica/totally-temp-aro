@@ -1,0 +1,11 @@
+/*
+  Styles for customizing the file input (<input type='file'>)
+*/
+.rfp-file-upload-input {
+  display: none;
+}
+.rfp-file-upload-label {
+  display: inline-block;
+  cursor: pointer;
+  margin: 0px;
+}
