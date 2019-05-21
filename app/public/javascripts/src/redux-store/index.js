@@ -12,6 +12,7 @@ import report from '../react/components/configuration/report/report-reducer'
 
 import networkAnalysis from '../react/components/optimization/network-analysis/network-analysis-reducer'
 import opReport from '../react/components/optimization/reports/reports-reducer'
+import rfp from '../react/components/optimization/rfp/rfp-reducer'
 
 import coverage from '../react/components/coverage/coverage-reducer'
 import mapLayers from '../react/components/map-layers/map-layer-reducer'
@@ -29,7 +30,7 @@ let reducer = combineReducers({
   configuration: combineReducers({ report, ui }),
   coverage,
   mapLayers,
-  optimization: combineReducers({ networkAnalysis, report: opReport }),
+  optimization: combineReducers({ networkAnalysis, report: opReport, rfp }),
   plan,
   selection,
   user,

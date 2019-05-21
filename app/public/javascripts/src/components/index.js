@@ -9,6 +9,7 @@ import NetworkAnalysisOutput from '../react/components/optimization/network-anal
 import PlanTargetList from '../react/components/selection/plan-target-list.jsx'
 import ReportModuleList from '../react/components/configuration/report/report-module-list.jsx'
 import ReportsDownloadModal from '../react/components/optimization/reports/reports-download-modal.jsx'
+import RfpAnalyzer from '../react/components/optimization/rfp/rfp-analyzer.jsx'
 
 import boundaryDetail from './sidebar/view/boundary-detail'
 import equipmentDetail from './sidebar/view/equipment-detail'
@@ -225,6 +226,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rPlanTargetList', react2angular(PlanTargetList))
   .component('rReportModuleList', react2angular(ReportModuleList))
   .component('rReportsDownloadModal', react2angular(ReportsDownloadModal, ['reportTypes'])) // reportTypes is passed in manually, not through redux.
+  .component('rRfpAnalyzer', react2angular(RfpAnalyzer))
   .component('rToastContainer', react2angular(ToastContainer))
   .service('Utils', utils)
   .service('state', state)
