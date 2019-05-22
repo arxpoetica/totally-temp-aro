@@ -102,7 +102,7 @@ class BoundaryDetailController {
     return this.$http.get('/census_blocks/' + cbId + '/details')
       .then((response) => {
         censusBlockInfo = response.data
-        return this.$http.get(`/service/plan-query/${this.state.plan.getValue().id}/censusBlockCounts?census-block-ids=${censusBlockInfo.id}`)
+        return this.$http.get(`/service/plan-query/${this.state.plan.id}/censusBlockCounts?census-block-ids=${censusBlockInfo.id}`)
       })
       .then((response) => {
         censusBlockInfo.locationCount = response.data

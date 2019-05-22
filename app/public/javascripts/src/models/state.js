@@ -525,7 +525,7 @@ class State {
     service.selectedLocationIcon = '/images/map_icons/aro/target.png'
 
     // Plan - define once
-    service.plan = new Rx.BehaviorSubject(null)
+    service.plan = null
 
     // Initialize the state of the application (the parts that depend upon configuration being loaded from the server)
     service.initializeState = function () {
@@ -643,7 +643,7 @@ class State {
         return Promise.resolve()
       }
 
-      var currentPlan = service.plan.getValue()
+      var currentPlan = service.plan
       var promises = [
         $http.get('/service/odata/datatypeentity'),
         $http.get(`/service/v1/library-entry?user_id=${service.loggedInUser.id}`),
@@ -731,7 +731,7 @@ class State {
       if (!service.plan) {
         return Promise.resolve()
       }
-      var currentPlan = service.plan.getValue()
+      var currentPlan = service.plan
       return Promise.all([
         $http.get('/service/odata/resourcetypeentity'), // The types of resource managers
         $http.get('/service/odata/resourcemanager?$select=name,id,description,managerType,deleted'), // All resource managers in the system
@@ -813,7 +813,7 @@ class State {
         }
       })
 
-      var currentPlan = service.plan.getValue()
+      var currentPlan = service.plan
       // Save the configuration to the server
       $http.put(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${service.loggedInUser.id}`, putBody)
     }
@@ -841,7 +841,7 @@ class State {
       })
 
       // Save the configuration to the server
-      var currentPlan = service.plan.getValue()
+      var currentPlan = service.plan
       $http.put(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${service.loggedInUser.id}`, putBody)
     }
 
@@ -931,7 +931,7 @@ class State {
     }
 
     service.makeCurrentPlanNonEphemeral = (planName) => {
-      var newPlan = JSON.parse(JSON.stringify(service.plan.getValue()))
+      var newPlan = JSON.parse(JSON.stringify(service.plan))
       newPlan.name = planName
       newPlan.ephemeral = false
       newPlan.latitude = service.defaultPlanCoordinates.latitude
@@ -966,7 +966,7 @@ class State {
     }
 
     service.copyCurrentPlanTo = (planName) => {
-      var newPlan = JSON.parse(JSON.stringify(service.plan.getValue()))
+      var newPlan = JSON.parse(JSON.stringify(service.plan))
       newPlan.name = planName
       newPlan.ephemeral = false
 
@@ -979,7 +979,7 @@ class State {
         }
       })
       var userId = service.loggedInUser.id
-      var url = `/service/v1/plan-command/copy?user_id=${userId}&source_plan_id=${service.plan.getValue().id}&is_ephemeral=${newPlan.ephemeral}&name=${newPlan.name}`
+      var url = `/service/v1/plan-command/copy?user_id=${userId}&source_plan_id=${service.plan.id}&is_ephemeral=${newPlan.ephemeral}&name=${newPlan.name}`
 
       return $http.post(url, {})
         .then((result) => {
@@ -1027,7 +1027,7 @@ class State {
     service.recreateTilesAndCache = () => {
       tileDataService.clearDataCache()
       tileDataService.clearHtmlCache()
-      return service.loadModifiedFeatures(service.plan.getValue().id)
+      return service.loadModifiedFeatures(service.plan.id)
         .then(() => {
           service.requestDestroyMapOverlay.next(null) // Destroy the old map overlay (may not exist if we have just loaded a plan)
           service.requestCreateMapOverlay.next(null) // Create a new one
@@ -1128,7 +1128,7 @@ class State {
     service.Optimizingplan = null
 
     service.handleModifyClicked = () => {
-      var currentPlan = service.plan.getValue()
+      var currentPlan = service.plan
       var userId = service.loggedInUser.id
       if (currentPlan.ephemeral) {
         // This is an ephemeral plan. Don't show any dialogs to the user, simply copy this plan over to a new ephemeral plan
@@ -1641,7 +1641,7 @@ class State {
         .then((stealTransaction) => {
           if (stealTransaction) {
             tracker.trackEvent(tracker.CATEGORIES.STEAL_PLAN_TRANSACTION, tracker.ACTIONS.CLICK)
-            return $http.post(`/service/plan-transactions?force=true`, { userId: service.loggedInUser.id, planId: service.plan.getValue().id })
+            return $http.post(`/service/plan-transactions?force=true`, { userId: service.loggedInUser.id, planId: service.plan.id })
           } else {
             return Promise.reject('User does not want to steal the transaction')
           }
@@ -1665,7 +1665,7 @@ class State {
           if (deleteOldTransactions) {
             var deletePromises = []
             transactionsForPlan.forEach(transactionForPlan => deletePromises.push($http.delete(`/service/plan-transactions/transaction/${transactionForPlan.id}`)))
-            const currentPlanId = service.plan.getValue().id
+            const currentPlanId = service.plan.id
             Promise.all(deletePromises)
               .then(res => $http.post(`/service/plan-transactions`, { userId: service.loggedInUser.id, planId: currentPlanId }))
               .then(res => resolve(res))
@@ -1688,7 +1688,7 @@ class State {
       // Get a list of all open transactions in the system (Do NOT send in userId so we get transactions across all users)
       return $http.get(`/service/plan-transaction`)
         .then((result) => {
-          const currentPlanId = service.plan.getValue().id
+          const currentPlanId = service.plan.id
           const transactionsForPlan = result.data.filter((item) => item.planId === currentPlanId)
           const transactionsForUserAndPlan = transactionsForPlan.filter((item) => item.userId === service.loggedInUser.id)
           if (transactionsForPlan.length === 0) {
@@ -1770,7 +1770,7 @@ class State {
       // (239573,239586,239607,91293,91306,91328,237792,86289,86290,109232,239603,145556,145557,239604,239552)
       $http.post('/locations/getLocationIds', { query: query })
         .then((result) => {
-          var plan = service.plan.getValue()
+          var plan = service.plan
 
           const dispatchers = service.getDispatchers()
           if (service.selectedExpertMode === service.expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].id) {

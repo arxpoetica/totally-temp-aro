@@ -179,7 +179,7 @@ class NetworkEquipmentController {
             })
         }
 
-        const planId = this.state.plan && this.state.plan.getValue() && this.state.plan.getValue().id
+        const planId = this.state.plan && this.state.plan && this.state.plan.id
         if (this.state.equipmentLayerTypeVisibility.planned && networkEquipment.checked && planId) {
           // We need to show the planned network equipment for this plan.
           var mapLayerKey = `${categoryItemKey}_planned`
@@ -220,7 +220,7 @@ class NetworkEquipmentController {
         }
 
         //Planned Boundaries
-        const planId = this.state.plan && this.state.plan.getValue() && this.state.plan.getValue().id
+        const planId = this.state.plan && this.state.plan && this.state.plan.id
         if (this.state.equipmentLayerTypeVisibility.planned && this.state.showSiteBoundary && planId) {
           // We need to show the planned network equipment for this plan.
           var mapLayerKey = `${categoryItemKey}_planned`

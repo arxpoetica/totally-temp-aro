@@ -1,12 +1,9 @@
 class AnalysisModeController {
-  constructor ($scope, $http, $ngRedux, state, tracker) {
+  constructor ($scope, $ngRedux, state, tracker) {
     this.state = state
     this.canceler = null
     this.$scope = $scope
     tracker.trackEvent(tracker.CATEGORIES.ENTER_ANALYSIS_MODE, tracker.ACTIONS.CLICK)
-
-    $scope.plan = null
-
     this.accordions = Object.freeze({
       INPUT: 0,
       OUTPUT: 1
@@ -20,10 +17,6 @@ class AnalysisModeController {
     })
 
     this.analysisModePanel = this.analysisModePanels.INPUT
-
-    state.plan.subscribe((plan) => {
-      this.plan = plan
-    })
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }
 
@@ -47,7 +40,7 @@ class AnalysisModeController {
   }
 }
 
-AnalysisModeController.$inject = ['$scope', '$http', '$ngRedux', 'state', 'tracker']
+AnalysisModeController.$inject = ['$scope', '$ngRedux', 'state', 'tracker']
 
 let analysisMode = {
   templateUrl: '/components/sidebar/analysis/analysis-mode.html',

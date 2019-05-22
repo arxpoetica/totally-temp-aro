@@ -169,7 +169,7 @@ class StateViewMode {
 
     if (entityType === 'NetworkEquipmentEntity') {
       // Filtering NetworkEquipmentEntity by planId so as to fetch latest equipment info
-      filter = filter ? filter.concat(` and (planId eq ${state.plan.getValue().id})`) : filter
+      filter = filter ? filter.concat(` and (planId eq ${state.plan.id})`) : filter
       var selectedEquipments = StateViewMode.getSelectedEquipmentIds(state.flattenDeep, state.networkNodeTypes, configuration).map(id => `networkNodeType eq ${id}`).join(' or ')
       // Search for equipments that are selected in NetworkEquipment modal
       if (selectedEquipments == '') return

@@ -28,8 +28,8 @@ class SummaryReportsController {
 
   downloadReport (reportType) {
     // Substitute plan id, selected boundary name, etc
-    const planId = this.state.plan.getValue().id
-    const planName = this.state.plan.getValue().name
+    const planId = this.state.plan.id
+    const planName = this.state.plan.name
     const selectedBoundaryName = this.state.selectedBoundaryType.name
 
     this.downloads[reportType].url = this.downloads[reportType].url

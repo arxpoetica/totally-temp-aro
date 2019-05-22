@@ -41,7 +41,7 @@ class PlanInfoController {
         })
         // Get the actors that have access for this resource
         return Promise.all([
-          this.$http.get(`/service/auth/acl/PLAN/${this.state.plan.getValue().id}`),
+          this.$http.get(`/service/auth/acl/PLAN/${this.state.plan.id}`),
           this.$http.get(`/service/auth/acl/SYSTEM/${this.state.loggedInUser.id}`)
         ])
       })

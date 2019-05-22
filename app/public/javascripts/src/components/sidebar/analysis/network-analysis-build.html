@@ -40,7 +40,7 @@
     }
     
   </style>
-  <div ng-style="!$ctrl.areControlsEnabled && {'position':'relative'}" style="height: 100%">
+  <div ng-style="!$ctrl.areControlsEnabled() && {'position':'relative'}" style="height: 100%">
   <table id="tblNetworkAnalysisBuild" class="table table-sm table-striped">
     
     
@@ -382,6 +382,6 @@
               a proper analysis type from service -->
   <div class="disable-sibling-controls"
        style="top: 50px;"
-       ng-hide="$ctrl.areControlsEnabled">
+       ng-hide="$ctrl.areControlsEnabled()">
   </div>
 </div>

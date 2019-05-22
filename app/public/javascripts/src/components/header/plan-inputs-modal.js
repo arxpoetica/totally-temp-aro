@@ -9,7 +9,7 @@ class PlanInputsModalController {
   initModalData () {
     this.planName = null
     this.parentPlan = null
-    const currentPlan = this.state.plan.getValue()
+    const currentPlan = this.state.plan
     if (currentPlan && !currentPlan.isEphemeral) {
       // IF the current plan is not an ephemeral plan, then set it as the parent plan.
       this.parentPlan = currentPlan
@@ -46,7 +46,7 @@ class PlanInputsModalController {
               .catch((err) => console.error(err))
           } else {
           // No parent plan specified
-            var currentPlan = this.state.plan.getValue()
+            var currentPlan = this.state.plan
             if (currentPlan.ephemeral) {
               if (this.planName) {
                 this.state.makeCurrentPlanNonEphemeral(this.planName)

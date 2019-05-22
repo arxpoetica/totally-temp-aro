@@ -29,7 +29,7 @@ class CoverageReportDownloaderController {
         const allowedReportType = (this.coverageReport.coverageAnalysisRequest.coverageType === 'location') ? 'COVERAGE' : 'FORM477'
         this.reports = result.data.filter(item => item.reportType === allowedReportType)
         this.reports.forEach((item, index) => {
-          this.reports[index].downloadUrlPrefix = `/report-extended/${item.id}/${this.state.plan.getValue().id}`
+          this.reports[index].downloadUrlPrefix = `/report-extended/${item.id}/${this.state.plan.id}`
           this.reports[index].selectedForDownload = false
         })
         this.updateDownloadFilenameAndMediaType()
@@ -45,7 +45,7 @@ class CoverageReportDownloaderController {
     const fileName = `${this.reportFilename}.${this.selectedReportType.mediaType}`
     if (this.selectedReportType.mediaType !== 'xls') {
       // We are downloading an individual, non-excel report. We need { responseType: 'arraybuffer' } to receive binary data.
-      this.$http.get(`/service-download-file/${fileName}/v2/report-extended/${selectedReports[0].id}/${this.state.plan.getValue().id}.${this.selectedReportType.mediaType}`,
+      this.$http.get(`/service-download-file/${fileName}/v2/report-extended/${selectedReports[0].id}/${this.state.plan.id}.${this.selectedReportType.mediaType}`,
         { responseType: 'arraybuffer' })
         .then(result => {
           this.Utils.downloadFile(result.data, fileName)
@@ -57,7 +57,7 @@ class CoverageReportDownloaderController {
       const reportNames = this.reports.filter(item => item.selectedForDownload)
         .map(item => item.id)
 
-      this.$http.post(`/service-download-file/${fileName}/v2/report-extended-queries/${this.state.plan.getValue().id}.xls`, reportNames,
+      this.$http.post(`/service-download-file/${fileName}/v2/report-extended-queries/${this.state.plan.id}.xls`, reportNames,
         { responseType: 'arraybuffer' })
         .then(result => {
           this.Utils.downloadFile(result.data, fileName)

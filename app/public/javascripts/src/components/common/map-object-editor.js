@@ -908,7 +908,7 @@ class MapObjectEditorController {
         this.displayViewObject({ feature: feature })
         this.selectMapObject(null)        
         // Get the boundary geometry from aro-service
-        // featurePromise = this.$http.get(`/service/plan-feature/${this.state.plan.getValue().id}/equipment_boundary/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
+        // featurePromise = this.$http.get(`/service/plan-feature/${this.state.plan.id}/equipment_boundary/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
         //   .then((result) => {
         //   // ToDo: check for empty object, reject on true
         //     if (!result.hasOwnProperty('data') || !result.data.hasOwnProperty('objectId')) {
