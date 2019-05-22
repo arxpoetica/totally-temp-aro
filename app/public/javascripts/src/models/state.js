@@ -1142,7 +1142,7 @@ class State {
           })
           .catch((err) => {
             console.log(err)
-            return Promise.reject()
+            return Promise.reject(err)
           })
       } else {
         // This is not an ephemeral plan. Show a dialog to the user asking whether to overwrite current plan or save as a new one.
@@ -1159,22 +1159,22 @@ class State {
                   confirmButtonColor: '#DD6B55',
                   confirmButtonText: 'Create Plan'
                 },
-                  (planName) => {
-                    if (planName) {
-                      return service.copyCurrentPlanTo(planName)
-                        .then(() => { return resolve() })
-                    }
-                  })
+                planName => {
+                  if (planName) {
+                    return service.copyCurrentPlanTo(planName)
+                      .then(() => { return resolve() })
+                  }
+                })
               })
             } else if (result === service.modifyDialogResult.OVERWRITE) {
-              return service.copyCurrentPlanTo(currentPlan.name)
-                .then(() => {
-                  return $http.delete(`/service/v1/plan/${currentPlan.id}?user_id=${service.loggedInUser.id}`)
-                    .then(() => {
-                      service.selectedDisplayMode.next(service.displayModes.ANALYSIS)
-                      return resolve()
-                    })
+              return $http.delete(`/service/v1/plan/${currentPlan.id}/optimization-state?user_id=${service.loggedInUser.id}`)
+                .then(() => $http.get(`/service/v1/plan/${currentPlan.id}/optimization-state?user_id=${service.loggedInUser.id}`))
+                .then(result => {
+                  service.plan.planState = result.data
+                  service.setActivePlanState(result.data)
+                  $timeout()
                 })
+                .catch(err => console.error(err))
             }
           })
           .catch((err) => {
@@ -1262,6 +1262,7 @@ class State {
     service.getOptimizationProgress = (newPlan) => {
       if (!service.plan.planState) {
         service.plan.planState = PlanStates.START_STATE
+        service.setActivePlanState(PlanStates.START_STATE)
       }
       if (service.plan && service.plan.planState !== PlanStates.COMPLETED) {
         // Unsubscribe from progress message handler (if any)
