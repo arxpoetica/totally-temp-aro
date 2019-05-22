@@ -20,7 +20,6 @@ class NetworkAnalysisBuildController {
     this.rateReachCategories = []
     this.toggleAdvanceSettings = false
 
-    this.areControlsEnabled = true
     this.budgetDisplay = this.state.optimizationOptions.budget
     this.SelectionModes = SelectionModes
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)

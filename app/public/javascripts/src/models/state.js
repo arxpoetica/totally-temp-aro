@@ -526,6 +526,7 @@ class State {
 
     // Plan - define once
     service.plan = null
+    service.planChanged = new Rx.BehaviorSubject(null)
 
     // Initialize the state of the application (the parts that depend upon configuration being loaded from the server)
     service.initializeState = function () {
@@ -1038,8 +1039,8 @@ class State {
     }
 
     service.setPlan = (plan) => {
-      service.plan.next(plan)
-      service.planOptimization.next(plan)
+      service.plan = plan
+      service.planChanged.next(null)
 
       service.currentPlanTags = service.listOfTags.filter(tag => _.contains(plan.tagMapping.global, tag.id))
       service.currentPlanServiceAreaTags = service.listOfServiceAreaTags.filter(tag => _.contains(plan.tagMapping.linkTags.serviceAreaIds, tag.id))
@@ -1125,7 +1126,6 @@ class State {
     service.progressMessage = ''
     service.progressPercent = 0
     service.isCanceling = false // True when we have requested the server to cancel a request
-    service.Optimizingplan = null
 
     service.handleModifyClicked = () => {
       var currentPlan = service.plan
@@ -1238,16 +1238,16 @@ class State {
             // Make the API call that starts optimization calculations on aro-service
             var apiUrl = (service.networkAnalysisType.type === 'NETWORK_ANALYSIS') ? '/service/v1/analyze/masterplan' : '/service/v1/optimize/masterplan'
             apiUrl += `?userId=${service.loggedInUser.id}`
-          $http.post(apiUrl, optimizationBody)
+            $http.post(apiUrl, optimizationBody)
               .then((response) => {
                 // console.log(response)
                 if (response.status >= 200 && response.status <= 299) {
-                  service.Optimizingplan.optimizationId = response.data.optimizationIdentifier
+                  service.plan.optimizationId = response.data.optimizationIdentifier
                   // service.startPolling()
-                  service.Optimizingplan.planState = Constants.PLAN_STATE.STARTED
+                  service.plan.planState = Constants.PLAN_STATE.STARTED
                   service.progressPercent = 0
                   service.startProgressMessagePolling(response.data.startDate)
-                  service.getOptimizationProgress(service.Optimizingplan)
+                  service.getOptimizationProgress(service.plan)
                   service.setActivePlanState(PlanStates.START_STATE)
                 } else {
                   console.error(response)
@@ -1259,13 +1259,11 @@ class State {
         })
     }
 
-    service.planOptimization = new Rx.BehaviorSubject(null)
     service.getOptimizationProgress = (newPlan) => {
-      service.Optimizingplan = newPlan
-      if (service.Optimizingplan && !service.Optimizingplan.planState) {
-        service.Optimizingplan.planState = PlanStates.START_STATE
+      if (!service.plan.planState) {
+        service.plan.planState = PlanStates.START_STATE
       }
-      if (service.Optimizingplan && service.Optimizingplan.planState !== PlanStates.COMPLETED) {
+      if (service.plan && service.plan.planState !== PlanStates.COMPLETED) {
         // Unsubscribe from progress message handler (if any)
         if (service.unsubscribeProgressHandler) {
           service.unsubscribeProgressHandler()
@@ -1273,20 +1271,19 @@ class State {
         service.unsubscribeProgressHandler = SocketManager.subscribe('PROGRESS_MESSAGE_DATA', progressData => {
           if (progressData.data.processType === 'optimization') {
             newPlan.planState = progressData.data.optimizationState
-            service.Optimizingplan.planState = progressData.data.optimizationState
+            service.plan.planState = progressData.data.optimizationState
 
             if (progressData.data.optimizationState === PlanStates.COMPLETED ||
               progressData.data.optimizationState === PlanStates.CANCELED ||
               progressData.data.optimizationState === PlanStates.FAILED) {
               tileDataService.markHtmlCacheDirty()
               service.requestMapLayerRefresh.next(null)
-              delete service.Optimizingplan.optimizationId
+              delete service.plan.optimizationId
               service.loadPlanInputs(newPlan.id)
               service.setActivePlanState(progressData.data.optimizationState)
               service.stopProgressMessagePolling()
             }
 
-            service.planOptimization.next(newPlan)
             service.progressPercent = progressData.data.progress * 100
             $timeout() // Trigger a digest cycle so that components can update
           }
@@ -1296,15 +1293,15 @@ class State {
 
     service.cancelOptimization = () => {
       service.isCanceling = true
-      $http.delete(`/service/optimization/processes/${service.Optimizingplan.optimizationId}`)
+      $http.delete(`/service/optimization/processes/${service.plan.optimizationId}`)
         .then((response) => {
           // Optimization process was cancelled. Get the plan status from the server
-          return $http.get(`/service/v1/plan/${service.Optimizingplan.id}?user_id=${service.loggedInUser.id}`)
+          return $http.get(`/service/v1/plan/${service.plan.id}?user_id=${service.loggedInUser.id}`)
         })
         .then((response) => {
           service.isCanceling = false
-          service.Optimizingplan.planState = response.data.planState // Note that this should match with Constants.PLAN_STATE
-          delete service.Optimizingplan.optimizationId
+          service.plan.planState = response.data.planState // Note that this should match with Constants.PLAN_STATE
+          delete service.plan.optimizationId
           tileDataService.markHtmlCacheDirty()
           service.requestMapLayerRefresh.next(null)
         })
@@ -1331,10 +1328,6 @@ class State {
         service.progressMessage = ''
       }
     }
-
-    service.plan.subscribe((newPlan) => {
-      service.getOptimizationProgress(newPlan)
-    })
 
     service.getDefaultPlanInputs = () => {
       return angular.copy(service.configuration.optimizationOptions)

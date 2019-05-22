@@ -24,7 +24,7 @@ let roicReportsModal = {
     <modal-body style="height: 500px;">
       <network-build-roic-reports ng-if="$ctrl.state.showRoicReportsModal"
                     plan-id="$ctrl.state.plan.id"
-                    optimization-state="$ctrl.state.Optimizingplan.planState"
+                    optimization-state="$ctrl.state.plan.planState"
                     report-size="'large'">
       </network-build-roic-reports>
     </modal-body>

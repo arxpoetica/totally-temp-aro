@@ -4,17 +4,12 @@ class LocationDetailController {
     this.$timeout = $timeout
     this.state = state
     this.locationDetailPropertiesFactory = locationDetailPropertiesFactory
-    this.plan = null
     this.selectedLocationInfo = null
     // this.map_url = null
     this.currentUser = state.loggedInUser
     this.selectedLocation = null
     this.toggleOtherAttributes = false
     this.roicPlanSettings = null
-
-    this.planSubscription = state.plan.subscribe((plan) => {
-      this.plan = plan
-    })
 
     this.mapFeaturesSelectedSubscription = state.mapFeaturesSelectedEvent.subscribe((options) => {
       // In ruler mode click should not perform any view action's
@@ -47,7 +42,7 @@ class LocationDetailController {
           this.selectedLocationObjectId = feature.object_id
           this.toggleAuditLog = false
           this.updateSelectedState(feature, locationId)
-          this.getLocationInfo(this.plan.id, locationId)
+          this.getLocationInfo(this.state.plan.id, locationId)
             .then(locationInfo => this.showStaticMap(locationInfo))
             .catch((err) => console.error(err))
         } else {
@@ -134,7 +129,7 @@ class LocationDetailController {
   viewSelectedLocation (selectedLocation) {
     this.selectedLocationObjectId = selectedLocation.objectId
     this.updateSelectedState(selectedLocation, selectedLocation.id)
-    this.getLocationInfo(this.plan.id, selectedLocation.id)
+    this.getLocationInfo(this.state.plan.id, selectedLocation.id)
       .then(locationInfo => this.showStaticMap(locationInfo))
       .then(() => {
         map.setCenter({ lat: this.selectedLocationInfo.geog.coordinates[1], lng: this.selectedLocationInfo.geog.coordinates[0] })
@@ -144,7 +139,6 @@ class LocationDetailController {
   }
 
   $onDestroy () {
-    this.planSubscription.unsubscribe()
     this.mapFeaturesSelectedSubscription.unsubscribe()
     this.clearViewModeSubscription.unsubscribe()
   }

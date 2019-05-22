@@ -48,7 +48,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, $filt
   })
 
   function openLocation (id) {
-    $http.get(`/locations/${$scope.plan.id}/${id}/show`).then((response) => {
+    $http.get(`/locations/${state.plan.id}/${id}/show`).then((response) => {
       response.data.id = id
       setSelectedLocation(response.data)
       $scope.market_size = null
@@ -60,11 +60,6 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, $filt
         })
     })
   }
-
-  state.plan
-    .subscribe((plan) => {
-      $scope.plan = plan
-    })
 
   state.showDetailedLocationInfo
     .subscribe((locationInfo) => {
@@ -184,11 +179,6 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, $filt
     })
   }
 
-  $scope.plan = null
-  $rootScope.$on('plan_selected', (e, plan) => {
-    $scope.plan = plan
-  })
-
   $scope.export = () => {
     $('#selected_location_controller').modal('hide')
     swal({
@@ -210,7 +200,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, $filt
         filename: name
       }
       $http({
-        url: '/market_size/plan/' + $scope.plan.id + '/location/' + $scope.location.id + '/export',
+        url: '/market_size/plan/' + state.plan.id + '/location/' + $scope.location.id + '/export',
         method: 'GET',
         params: params
       })

@@ -6,7 +6,6 @@ class PlanSettingsController {
     this.state = state
     this.currentUser = state.loggedInUser
     this.$timeout = $timeout
-    this.areControlsEnabled = true
     this.isSaveEnabled = false
     this.errorText = ''
 
