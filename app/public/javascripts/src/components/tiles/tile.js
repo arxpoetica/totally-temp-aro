@@ -197,6 +197,9 @@ class TileComponentController {
             if (this.activeSelectionModeId != SelectionModes.SELECTED_AREAS) {
               canSelectSA = false
             }
+            if (this.state.networkAnalysisType.id === 'RFP') {
+              canSelectLoc = canSelectSA = false // Do not allow any selection for RFP mode
+            }
           }
 
           if (canSelectLoc) {
@@ -435,6 +438,9 @@ class TileComponentController {
               case SelectionModes.SELECTED_LOCATIONS:
                 canSelectLoc = !canSelectLoc
                 break
+            }
+            if (this.state.networkAnalysisType.id === 'RFP') {
+              canSelectLoc = canSelectSA = false // Do not allow any selection for RFP mode
             }
           } else if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.VIEW) {
             canSelectSA = true
