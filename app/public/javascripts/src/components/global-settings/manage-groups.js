@@ -105,7 +105,7 @@ class ManageGroupsController {
           })
         }
         // Our resource permissions may have been modifed. Save the whole lot.
-        return this.$http.put(`/service/auth/acl/SYSTEM/1?userId=${this.state.loggedInUser.id}`, acls)
+        return this.$http.put(`/service/auth/acl/SYSTEM/1?user_id=${this.state.loggedInUser.id}`, acls)
       })
       .then((result) => {
         this.userMessage = {

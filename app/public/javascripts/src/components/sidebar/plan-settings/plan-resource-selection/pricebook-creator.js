@@ -56,7 +56,7 @@ class PriceBookCreatorController {
             detailAssignment.ratioFixed = 1
           })
         }
-        return this.$http.put(`/service/v1/pricebook/${createdManagerId}/assignment`, newManagerAssignments)
+        return this.$http.put(`/service/v1/pricebook/${createdManagerId}/assignment?user_id=${this.state.loggedInUser.id}`, newManagerAssignments)
       })
       .then(() => {
         this.onManagersChanged && this.onManagersChanged()

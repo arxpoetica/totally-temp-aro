@@ -127,6 +127,11 @@ class ResourcePermissionsEditorController {
         this.systemActors.forEach((systemActor) => idToSystemActor[systemActor.id] = systemActor)
         this.isOwner = false
         this.actionsParam = null
+        if (!!(this.state.loggedInUser.systemPermissions & this.state.authPermissionsByName['RESOURCE_ADMIN'].permissions)){
+          this.isOwner = true
+          this.actionsParam = this.actions
+        }
+        
         result.data.resourcePermissions.forEach((access) => {
           this.rows.push({
             'systemActorId': access.systemActorId, 
@@ -134,10 +139,11 @@ class ResourcePermissionsEditorController {
             'rolePermissions': access.rolePermissions
           })
           // check for user and group permissions 
-          if ( access.rolePermissions == this.ownerPermissions 
-              && (access.systemActorId == this.state.loggedInUser.id 
-                  || this.state.loggedInUser.groupIds.includes(access.systemActorId)
-                  )
+          //if ( access.rolePermissions == this.ownerPermissions && (
+          if ( !!(access.rolePermissions & this.state.authPermissionsByName['RESOURCE_ADMIN'].permissions) && (
+                  access.systemActorId == this.state.loggedInUser.id || 
+                  this.state.loggedInUser.groupIds.includes(access.systemActorId)
+                )
               ) {
             this.isOwner = true
             this.actionsParam = this.actions
@@ -158,7 +164,7 @@ class ResourcePermissionsEditorController {
         }
       })
     }
-    return this.$http.put(`/service/auth/acl/${this.resourceType}/${this.resourceId}?userId=${this.state.loggedInUser.id}`, putBody)
+    return this.$http.put(`/service/auth/acl/${this.resourceType}/${this.resourceId}?user_id=${this.state.loggedInUser.id}`, putBody)
   }
   
 }

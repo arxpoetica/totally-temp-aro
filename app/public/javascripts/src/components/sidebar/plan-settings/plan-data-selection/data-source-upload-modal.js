@@ -51,11 +51,7 @@ class DataSourceUploadController {
       }, 0)
     })
     
-    
-    
-    
     // ---
-    
     
     this.tableSource = this.uploadSource = this.state.uploadDataSource
     this.tableSources = this.uploadSources = this.state.uploadDataSources
@@ -97,11 +93,7 @@ class DataSourceUploadController {
         iconClass: 'fa-trash-alt',
         toolTip: 'Delete',
         isEnabled: (row, index) => {
-          console.log(row)
-          console.log(index)
-          console.log(" ")
-          //return this.canEdit(row)
-          return true
+          return this.canEdit(row)
         },
         callBack: (row, index) => {
           this.onDeleteRequest(row)
@@ -109,14 +101,11 @@ class DataSourceUploadController {
       }
     ]
     
-    
-    // ---
-    
   }
   
   canEdit (row) {
-    // todo: need row permissions, doesn't come in with 
-    return row.permissions == this.state.authRollsByName['RESOURCE_OWNER'].permissions || row.permissions == this.state.authRollsByName['SUPER_USER'].permissions
+    return (!!(this.state.loggedInUser.systemPermissions & this.state.authPermissionsByName['RESOURCE_ADMIN'].permissions) 
+         || !!(row.permissions & this.state.authPermissionsByName['RESOURCE_ADMIN'].permissions)) 
   }
   
   close () {
@@ -158,29 +147,6 @@ class DataSourceUploadController {
     this.conicTileSystemUploaderApi = null
   }
   
-  /*
-  registerSaveAccessCallback (saveResourceAccess) {
-    // We will call this function in resource-permissions-editor when we want to save the access settings for a data source.
-    // Note that this will get overwritten every time we open a datasources access editor (and only one editor can be active at a time).
-    this.saveResourceAccess = saveResourceAccess
-  }
-  
-  saveAccessSettings (dataSource) {
-    console.log(dataSource)
-    // This will call a function into the resource permissions editor that will do the actual save
-    if (this.saveResourceAccess) {
-      this.saveResourceAccess()
-        .then(() => Promise.all([
-          this.state.loadPlanDataSelectionFromServer(),
-          this.state.loadPlanResourceSelectionFromServer(),
-          this.state.loadNetworkConfigurationFromServer(),
-          this.toggleDataSourceExpanded(dataSource)
-        ]))
-        .then(() => this.state.uploadDataSource = this.state.uploadDataSources.filter(item => item.name === dataSource.dataType)[0])
-        .catch((err) => console.error(err))
-    }
-  }
-  */
   
   save () {
     if (this.conicTileSystemUploaderApi) {
@@ -384,10 +350,6 @@ class DataSourceUploadController {
       return // When items in state.js are being refreshed, state.uploadDataSource may be null as the combobox has a two-way binding to the model.
     }
     if (this.isDataManagementView) {
-      //var aclPromises = [] // For each data source, get the effective ACL permissions and then allow/disallow editing
-      //this.dataSourceMeta = {}
-      //var indexToIdentifier = {}
-      
       this.rows = []
       
       this.state.uploadDataSources.forEach((uploadSource) => {
@@ -399,43 +361,11 @@ class DataSourceUploadController {
             }
             this.rows.push(item)
             
-            /*
-            this.dataSourceMeta[item.identifier] = {
-              isExpanded: false,
-              isEditableByUser: false
-            }
-            indexToIdentifier[index] = item.identifier
-            aclPromises.push(this.aclManager.getEffectivePermissions('LIBRARY', item.identifier, this.state.loggedInUser))
-            */
           })
         }
       })
-      //console.log(this.rows)
-      /*
-      Promise.all(aclPromises)
-        .then(results => {
-          // We have permissions for all data sources. Now set the editable flag so that the permissions show up all at once.
-          results.forEach((dataSourcePermissions, index) => {
-            this.dataSourceMeta[indexToIdentifier[index]].isEditableByUser = dataSourcePermissions && (dataSourcePermissions.ADMIN || dataSourcePermissions.IS_SUPERUSER)
-          })
-          this.$timeout()
-          console.log(this.dataSourceMeta)
-        })
-        .catch(err => console.error(err))
-      */
     }
   }
-  
-  /*
-  toggleDataSourceExpanded (dataSource) {
-    const newValue = !this.dataSourceMeta[dataSource.identifier].isExpanded
-    // Collapse all datasources, then expand/collapse the selected one
-    this.state.dataItems[this.state.uploadDataSource.name].allLibraryItems.forEach((item, index) => this.dataSourceMeta[item.identifier].isExpanded = false)
-    this.dataSourceMeta[dataSource.identifier].isExpanded = newValue
-  }
-  */
-  
-  
   
   toggleView () {
     this.isDataManagementView = !this.isDataManagementView

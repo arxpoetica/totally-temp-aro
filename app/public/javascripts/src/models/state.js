@@ -664,6 +664,7 @@ class State {
                 name: dataTypeEntity.name
               })
               */
+              
               dataTypeEntity.label = dataTypeEntity.description
               service.uploadDataSources.push(dataTypeEntity)
             }
@@ -1237,7 +1238,6 @@ class State {
             apiUrl += `?userId=${service.loggedInUser.id}`
           $http.post(apiUrl, optimizationBody)
               .then((response) => {
-                // console.log(response)
                 if (response.status >= 200 && response.status <= 299) {
                   service.Optimizingplan.optimizationId = response.data.optimizationIdentifier
                   // service.startPolling()
@@ -1444,7 +1444,6 @@ class State {
     service.authRolls = []
     service.authRollsByName = {}
     service.reloadAuthRolls = () => {
-      ///auth/roles
       return $http.get('/service/auth/roles')
       .then((result) => {
         service.authRolls = result.data
@@ -1458,6 +1457,25 @@ class State {
       .catch((err) => console.error(err))
     }
     service.reloadAuthRolls()
+    
+    service.authPermissionsByName = {}
+    service.reloadAuthPermissions = () => {
+      return $http.get('/service/auth/permissions')
+      .then((result) => {
+        service.authPermissionsByName = {}
+        result.data.forEach((auth) => {
+          if (auth.hasOwnProperty('name')){
+            if (!auth.hasOwnProperty('permissions') && auth.hasOwnProperty('id')){
+              auth.permissions = auth.id
+            }
+            service.authPermissionsByName[auth.name] = auth
+          }
+        })
+      })
+      .catch((err) => console.error(err))
+    }
+    service.reloadAuthPermissions()
+    
     
     service.systemActors = [] // All the system actors (i.e. users and groups)
     service.reloadSystemActors = () => {
@@ -1500,19 +1518,40 @@ class State {
 
       // Set the logged in user, then call all the initialization functions that depend on having a logged in user.
       service.loggedInUser = user
-
-      service.isUserAdministrator(service.loggedInUser.id)
-        .then((isAdministrator) => {
-          service.loggedInUser.isAdministrator = isAdministrator
-        })
-        .catch((err) => console.error(err))
-
+      
+      service.loggedInUser.systemPermissions = 0
+      service.loggedInUser.isAdministrator = false
+      
       // Populate the group ids that this user is a part of
       service.loggedInUser.groupIds = []
-      $http.get(`/service/auth/users/${service.loggedInUser.id}`)
-        .then((result) => service.loggedInUser.groupIds = result.data.groupIds)
-        .catch((err) => console.error(err))
-
+      
+      var aclResult = null
+      $http.get(`/service/auth/acl/SYSTEM/1`)
+      .then((result) => {
+        aclResult = result.data
+        // Get the acl entry corresponding to the currently logged in user
+        var userAcl = aclResult.resourcePermissions.filter((item) => item.systemActorId === service.loggedInUser.id)[0]
+        if (!!userAcl){
+          service.loggedInUser.systemPermissions = userAcl.rolePermissions
+        }
+        return $http.get(`/service/auth/users/${service.loggedInUser.id}`)
+      })
+      .then((result) => {
+        service.loggedInUser.groupIds = result.data.groupIds
+        
+        var userGroupIsAdministrator = false
+        result.data.groupIds.forEach((groupId) => {
+          const userGroupAcl = aclResult.resourcePermissions.filter((item) => item.systemActorId === groupId)[0]
+          const thisGroupIsAdministrator = (userGroupAcl && (userGroupAcl.rolePermissions & service.authPermissionsByName['USER_ADMIN'].permissions)) > 0
+          userGroupIsAdministrator |= thisGroupIsAdministrator
+        })
+        
+        service.loggedInUser.isAdministrator = (userGroupIsAdministrator 
+            || !!(service.loggedInUser.systemPermissions & service.authPermissionsByName['USER_ADMIN'].permissions))
+        
+      })
+      .catch((err) => console.error(err))
+      
       var initializeToDefaultCoords = (plan) => {
         service.requestSetMapCenter.next({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
         service.requestSetMapZoom.next(service.defaultPlanCoordinates.zoom)
@@ -1711,40 +1750,8 @@ class State {
           return Promise.reject(err)
         })
     }
-
-    service.isUserAdministrator = (userId) => {
-      var userAdminPermissions = null
-      var userIsAdministrator = false; var userGroupIsAdministrator = false
-      var aclResult = null
-      return $http.get('/service/auth/permissions')
-        .then((result) => {
-          // Get the permissions for the name USER_ADMIN
-          userAdminPermissions = result.data.filter((item) => item.name === 'USER_ADMIN')[0].id
-          return $http.get(`/service/auth/acl/SYSTEM/1`)
-        })
-        .then((result) => {
-          aclResult = result.data
-          // Get the acl entry corresponding to the currently logged in user
-          var userAcl = aclResult.resourcePermissions.filter((item) => item.systemActorId === userId)[0]
-          // The userAcl.rolePermissions is a bit field. If it contains the bit for "userAdminPermissions" then
-          // the logged in user is an administrator.
-          userIsAdministrator = (userAcl && (userAcl.rolePermissions & userAdminPermissions)) > 0
-          return $http.get(`/service/auth/users/${userId}`)
-        })
-        .then((result) => {
-          // Also check if the groups that the user belongs to have administrator permissions
-          userGroupIsAdministrator = false
-          result.data.groupIds.forEach((groupId) => {
-            const userGroupAcl = aclResult.resourcePermissions.filter((item) => item.systemActorId === groupId)[0]
-            const thisGroupIsAdministrator = (userGroupAcl && (userGroupAcl.rolePermissions & userAdminPermissions)) > 0
-            userGroupIsAdministrator |= thisGroupIsAdministrator
-          })
-          const isAdministrator = userIsAdministrator || userGroupIsAdministrator
-          return Promise.resolve(isAdministrator)
-        })
-        .catch((err) => console.error(err))
-    }
-
+    
+    
     service.serviceLayers = []
     service.nameToServiceLayers = {}
     service.loadServiceLayers = () => {
