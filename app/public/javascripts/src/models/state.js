@@ -1519,11 +1519,22 @@ class State {
       // Set the logged in user, then call all the initialization functions that depend on having a logged in user.
       service.loggedInUser = user
       
+      // ToDo: LoggedInUser should be a class
       service.loggedInUser.systemPermissions = 0
       service.loggedInUser.isAdministrator = false
       
       // Populate the group ids that this user is a part of
       service.loggedInUser.groupIds = []
+      
+      // will check if the logged in user has a permissions level
+      // either globally or on a resource 
+      service.loggedInUser.hasPermissions = (permissionsLevel, resourcePermissions) => {
+        var hasPerms = !!(permissionsLevel & service.loggedInUser.systemPermissions)
+        if (!hasPerms && 'undefined' != typeof resourcePermissions){
+          hasPerms = hasPerms || !!(permissionsLevel & resourcePermissions)
+        }
+        return hasPerms
+      }
       
       var aclResult = null
       $http.get(`/service/auth/acl/SYSTEM/1`)

@@ -127,7 +127,9 @@ class ResourcePermissionsEditorController {
         this.systemActors.forEach((systemActor) => idToSystemActor[systemActor.id] = systemActor)
         this.isOwner = false
         this.actionsParam = null
-        if (!!(this.state.loggedInUser.systemPermissions & this.state.authPermissionsByName['RESOURCE_ADMIN'].permissions)){
+        //if (!!(this.state.loggedInUser.systemPermissions & this.state.authPermissionsByName['RESOURCE_ADMIN'].permissions)){
+          
+        if ( this.state.loggedInUser.hasPermissions(this.state.authPermissionsByName['RESOURCE_ADMIN'].permissions) ){  
           this.isOwner = true
           this.actionsParam = this.actions
         }
@@ -139,12 +141,15 @@ class ResourcePermissionsEditorController {
             'rolePermissions': access.rolePermissions
           })
           // check for user and group permissions 
-          //if ( access.rolePermissions == this.ownerPermissions && (
-          if ( !!(access.rolePermissions & this.state.authPermissionsByName['RESOURCE_ADMIN'].permissions) && (
-                  access.systemActorId == this.state.loggedInUser.id || 
-                  this.state.loggedInUser.groupIds.includes(access.systemActorId)
-                )
-              ) {
+          if ( !this.isOwner 
+              && (
+                  this.state.loggedInUser.hasPermissions(this.state.authPermissionsByName['RESOURCE_ADMIN'].permissions, access.rolePermissions)
+                  && (
+                      access.systemActorId == this.state.loggedInUser.id || 
+                      this.state.loggedInUser.groupIds.includes(access.systemActorId)
+                     )
+                  )
+              ){
             this.isOwner = true
             this.actionsParam = this.actions
           }

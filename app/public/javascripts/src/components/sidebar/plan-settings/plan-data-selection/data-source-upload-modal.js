@@ -104,8 +104,7 @@ class DataSourceUploadController {
   }
   
   canEdit (row) {
-    return (!!(this.state.loggedInUser.systemPermissions & this.state.authPermissionsByName['RESOURCE_ADMIN'].permissions) 
-         || !!(row.permissions & this.state.authPermissionsByName['RESOURCE_ADMIN'].permissions)) 
+    return this.state.loggedInUser.hasPermissions(this.state.authPermissionsByName['RESOURCE_ADMIN'].permissions, row.permissions)
   }
   
   close () {
