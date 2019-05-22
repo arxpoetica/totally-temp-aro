@@ -11,6 +11,10 @@ export class RfpTargetsMap extends Component {
     super(props)
     this.createdMapObjects = {}
     this.mapObjectListeners = {}
+    this.props.googleMaps.setOptions({ draggableCursor: 'crosshair' })
+    this.mapClickListener = google.maps.event.addListener(this.props.googleMaps, 'click', event => {
+      this.props.addTargets([new Point(event.latLng.lat(), event.latLng.lng())])
+    })
   }
 
   render () {
@@ -87,6 +91,8 @@ export class RfpTargetsMap extends Component {
 
   componentWillUnmount () {
     Object.keys(this.createdMapObjects).forEach(objectId => this.deleteMapObject(objectId))
+    this.mapClickListener.remove()
+    this.props.googleMaps.setOptions({ draggableCursor: null })
   }
 }
 
@@ -103,6 +109,7 @@ const mapStateToProps = (state) => ({
 })
 
 const mapDispatchToProps = dispatch => ({
+  addTargets: targets => dispatch(RfpActions.addTargets(targets)),
   replaceTarget: (index, target) => dispatch(RfpActions.replaceTarget(index, target))
 })
 

@@ -12,9 +12,18 @@ const targets = [
 
 // -----------------------------------------------------------------------------
 test('With no targets', () => {
+  global.google = {
+    maps: {
+      event: {
+        addListener: () => {}
+      }
+    }
+  }
+  const mockGoogleMaps = { setOptions: () => {} }
   shallow(
     <RfpTargetsMap targets={[]}
       selectedTarget={null}
+      googleMaps={mockGoogleMaps}
     />
   )
 })
@@ -36,23 +45,29 @@ test('With targets, no selection', () => {
       Marker: mockMarkerConstructor,
       event: {
         addListener: mockAddListener
-      }
+      },
+      setOptions: () => {}
     }
   }
+  const mockGoogleMaps = { setOptions: () => {} }
 
   // Create component, then set the props
   const component = shallow(
     <RfpTargetsMap targets={[]}
       selectedTarget={null}
+      googleMaps={mockGoogleMaps}
     />
   )
+  expect(mockAddListener.mock.calls[0][1]).toEqual('click')
+  mockAddListener.mockReset()
   component.setProps({ targets: targets })
+
   // Make sure the mock functions are called
   const constructorParams = targets.map(target => ([{
     draggable: true,
     icon: '/images/map_icons/aro/target.png',
     id: target.id,
-    map: undefined,
+    map: mockGoogleMaps,
     position: {
       lat: target.lat,
       lng: target.lng
@@ -93,7 +108,8 @@ test('With targets and one selection', () => {
   }
 
   const mockGoogleMaps = {
-    panTo: jest.fn()
+    panTo: jest.fn(),
+    setOptions: () => {}
   }
 
   // Create component, then set the props
@@ -150,7 +166,8 @@ test('When marker is dragged', () => {
   }
 
   const mockGoogleMaps = {
-    panTo: jest.fn()
+    panTo: jest.fn(),
+    setOptions: () => {}
   }
 
   // Create component
@@ -175,4 +192,70 @@ test('When marker is dragged', () => {
   expect(mockReplaceTarget.mock.calls).toEqual([
     [0, new Point(newLatLng.lat, newLatLng.lng, 1)]
   ])
+})
+
+// -----------------------------------------------------------------------------
+test('Click-to-add marker listeners and unsubscribe calls', () => {
+  const mockUnsubscribeClickListener = jest.fn()
+  const mockAddListener = jest.fn((event, callback, handler) => {
+    return {
+      remove: mockUnsubscribeClickListener
+    }
+  })
+  global.google = {
+    maps: {
+      event: {
+        addListener: mockAddListener
+      }
+    }
+  }
+  const mockGoogleMaps = { setOptions: () => {} }
+  const component = shallow(
+    <RfpTargetsMap targets={[]}
+      selectedTarget={null}
+      googleMaps={mockGoogleMaps}
+    />
+  )
+  // When the component is mounted, we should have a call to addListener for click events
+  expect(mockAddListener.mock.calls.length).toEqual(1)
+  expect(mockAddListener.mock.calls[0][1]).toEqual('click')
+  expect(mockUnsubscribeClickListener.mock.calls.length).toEqual(0)
+
+  // On unmount, we should unsubscribe from the click listener
+  component.unmount()
+  expect(mockUnsubscribeClickListener.mock.calls.length).toEqual(1)
+})
+
+// -----------------------------------------------------------------------------
+test('Click on map to add markers', () => {
+  const mockAddTargets = jest.fn()
+  var mockClickHandler = jest.fn()
+  const mockAddListener = jest.fn((event, callback, handler) => {
+    mockClickHandler = handler
+  })
+  global.google = {
+    maps: {
+      event: {
+        addListener: mockAddListener
+      }
+    }
+  }
+  const mockGoogleMaps = { setOptions: () => {} }
+  shallow(
+    <RfpTargetsMap targets={[]}
+      selectedTarget={null}
+      googleMaps={mockGoogleMaps}
+      addTargets={mockAddTargets}
+    />
+  )
+  // At this point, mockClickHandler should be defined. Call it and make sure the action for add props is called
+  mockClickHandler({
+    latLng: {
+      lat: () => 47.1111,
+      lng: () => -122.3333
+    }
+  })
+  expect(mockAddTargets.mock.calls.length).toEqual(1)
+  expect(mockAddTargets.mock.calls[0][0][0].lat).toEqual(47.1111)
+  expect(mockAddTargets.mock.calls[0][0][0].lng).toEqual(-122.3333)
 })
