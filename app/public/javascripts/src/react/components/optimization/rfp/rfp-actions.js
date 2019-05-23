@@ -53,7 +53,7 @@ function setSelectedTarget (selectedTarget) {
   }
 }
 
-function initializeRfpReport (projectId, rfpId, targets) {
+function initializeRfpReport (planId, userId, projectId, rfpId, targets) {
   return dispatch => {
     const requestBody = {
       projectId: projectId,
@@ -66,7 +66,8 @@ function initializeRfpReport (projectId, rfpId, targets) {
         }
       }))
     }
-    AroHttp.post(`/service/rfp/process`, requestBody)
+    AroHttp.delete(`/service/v1/plan/${planId}/optimization-state?user_id=${userId}`)
+      .then(() => AroHttp.post(`/service/rfp/process?user_id=${userId}&plan_id=${planId}`, requestBody))
       .then(result => console.log(result))
       .catch(err => console.error(err))
 

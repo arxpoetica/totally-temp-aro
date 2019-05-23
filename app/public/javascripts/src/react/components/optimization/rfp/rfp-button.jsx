@@ -26,7 +26,7 @@ export class RfpButton extends Component {
   renderUninitializedButton () {
     return (
       <button className={'btn btn-block btn-primary'} style={{ marginBottom: '10px' }}
-        onClick={() => this.props.initializeRfpReport(this.props.projectId, uuidv4(), this.props.targets)}>
+        onClick={() => this.props.initializeRfpReport(this.props.planId, this.props.userId, this.props.projectId, uuidv4(), this.props.targets)}>
         <i className='fa fa-bolt' /> Run
       </button>
     )
@@ -64,20 +64,24 @@ export class RfpButton extends Component {
 RfpButton.propTypes = {
   status: PropTypes.string,
   targets: PropTypes.array,
-  projectId: PropTypes.number
+  projectId: PropTypes.number,
+  userId: PropTypes.number,
+  planId: PropTypes.number
 }
 
 const mapStateToProps = (state) => {
   return {
     status: state.optimization.rfp.status,
     targets: state.optimization.rfp.targets,
-    projectId: state.user.loggedInUser.projectId
+    projectId: state.user.loggedInUser.projectId,
+    userId: state.user.loggedInUser.id,
+    planId: state.plan.activePlan.id
   }
 }
 
 const mapDispatchToProps = dispatch => ({
   modifyRfpReport: () => dispatch(RfpActions.modifyRfpReport()),
-  initializeRfpReport: (projectId, rfpId, targets) => dispatch(RfpActions.initializeRfpReport(projectId, rfpId, targets))
+  initializeRfpReport: (planId, userId, projectId, rfpId, targets) => dispatch(RfpActions.initializeRfpReport(planId, userId, projectId, rfpId, targets))
 })
 
 const CoverageButtonComponent = wrapComponentWithProvider(reduxStore, RfpButton, mapStateToProps, mapDispatchToProps)
