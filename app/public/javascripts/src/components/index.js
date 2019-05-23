@@ -226,7 +226,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rNetworkAnalysisOutput', react2angular(NetworkAnalysisOutput))
   .component('rPlanTargetList', react2angular(PlanTargetList))
   .component('rReportModuleList', react2angular(ReportModuleList))
-  .component('rReportsDownloadModal', react2angular(ReportsDownloadModal, ['reportTypes'])) // reportTypes is passed in manually, not through redux.
+  .component('rReportsDownloadModal', react2angular(ReportsDownloadModal, ['reportTypes', 'title'])) // Some properties are passed in manually, not through redux.
   .component('rRfpAnalyzer', react2angular(RfpAnalyzer))
   .component('rRfpStatusModal', react2angular(RfpStatusModal))
   .component('rToastContainer', react2angular(ToastContainer))

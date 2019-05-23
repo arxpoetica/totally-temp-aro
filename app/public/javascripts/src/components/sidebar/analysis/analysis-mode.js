@@ -1,3 +1,5 @@
+import ReportsActions from '../../../react/components/optimization/reports/reports-actions'
+
 class AnalysisModeController {
   constructor ($scope, $ngRedux, state, tracker) {
     this.state = state
@@ -36,7 +38,9 @@ class AnalysisModeController {
   }
 
   mapDispatchToTarget (dispatch) {
-    return {}
+    return {
+      showReportModal: () => dispatch(ReportsActions.showOrHideReportModal(true))
+    }
   }
 }
 

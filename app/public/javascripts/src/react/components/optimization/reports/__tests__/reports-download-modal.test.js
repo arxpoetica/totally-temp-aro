@@ -9,6 +9,7 @@ test('When modal is hidden', () => {
     <ReportsDownloadModal
       planId={100}
       showReportModal={false}
+      title={'Network Analysis Reports'}
     />
   )
   expect(component).toMatchSnapshot()
@@ -20,6 +21,7 @@ test('When modal is shown', () => {
     <ReportsDownloadModal
       planId={100}
       showReportModal
+      title={'Network Analysis Reports'}
     />
   )
   expect(component).toMatchSnapshot()
@@ -32,6 +34,7 @@ test('When modal is initially hidden and then shown', () => {
     <ReportsDownloadModal
       planId={100}
       showReportModal={false}
+      title={'Network Analysis Reports'}
       loadReportsMetaData={mockLoadReportsMetaData}
     />
   )
@@ -47,6 +50,7 @@ test('When reports metadata is null', () => {
     <ReportsDownloadModal
       planId={100}
       reportsMetaData={null}
+      title={'Network Analysis Reports'}
     />
   )
   expect(component).toMatchSnapshot()
@@ -68,6 +72,7 @@ test('When reports metadata is defined', () => {
       planId={100}
       reportsMetaData={reportsMetaData}
       reportTypes={['NETWORK_ANALYSIS']}
+      title={'Network Analysis Reports'}
     />
   )
   expect(component).toMatchSnapshot()
@@ -85,6 +90,7 @@ test('ReportsDownloadRow render', () => {
       displayName={'Optimization analysis report'}
       mediaTypes={['csv', 'json', 'xls']}
       reportTypes={['NETWORK_ANALYSIS']}
+      title={'Network Analysis Reports'}
     />
   )
   expect(component).toMatchSnapshot()

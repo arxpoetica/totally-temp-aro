@@ -44,7 +44,8 @@ ReportsDownloadRow.propTypes = {
   reportId: PropTypes.number,
   reportName: PropTypes.string,
   displayName: PropTypes.string,
-  mediaTypes: PropTypes.array
+  mediaTypes: PropTypes.array,
+  title: PropTypes.string
 }
 
 export class ReportsDownloadModal extends Component {
@@ -60,7 +61,7 @@ export class ReportsDownloadModal extends Component {
       <div className='modal-dialog'>
         <div className='modal-content'>
           <div className='modal-header'>
-            <h4 className='modal-title'>Network Analysis Reports</h4>
+            <h4 className='modal-title'>{this.props.title}</h4>
             <button
               id='btnHeaderHideReportModal'
               type='button'

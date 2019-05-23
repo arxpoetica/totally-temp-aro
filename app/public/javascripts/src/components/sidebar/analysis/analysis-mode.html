@@ -83,6 +83,10 @@
         <coverage-report-downloader>
         </coverage-report-downloader>
       </div>
+      <div ng-if="$ctrl.state.networkAnalysisType.id === 'RFP'">
+        <button class="btn btn-primary pull-left" ng-click="$ctrl.showReportModal()">Reports</button>
+        <r-reports-download-modal report-types="['RFP']" title="'RFP Reports'"></r-reports-download-modal>
+      </div>
     </accordion-panel-contents>
   </accordion>
 </div>
