@@ -4,6 +4,7 @@ import reduxStore from '../../../../redux-store'
 import RfpActions from './rfp-actions'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
 import RfpStatusTypes from './constants'
+import uuidv4 from 'uuid/v4'
 
 export class RfpButton extends Component {
   render () {
@@ -25,7 +26,7 @@ export class RfpButton extends Component {
   renderUninitializedButton () {
     return (
       <button className={'btn btn-block btn-primary'} style={{ marginBottom: '10px' }}
-        onClick={() => this.props.initializeRfpReport(this.props.targets)}>
+        onClick={() => this.props.initializeRfpReport(this.props.projectId, uuidv4(), this.props.targets)}>
         <i className='fa fa-bolt' /> Run
       </button>
     )
@@ -62,19 +63,21 @@ export class RfpButton extends Component {
 
 RfpButton.propTypes = {
   status: PropTypes.string,
-  targets: PropTypes.array
+  targets: PropTypes.array,
+  projectId: PropTypes.number
 }
 
 const mapStateToProps = (state) => {
   return {
     status: state.optimization.rfp.status,
-    targets: state.optimization.rfp.targets
+    targets: state.optimization.rfp.targets,
+    projectId: state.user.loggedInUser.projectId
   }
 }
 
 const mapDispatchToProps = dispatch => ({
   modifyRfpReport: () => dispatch(RfpActions.modifyRfpReport()),
-  initializeRfpReport: targets => dispatch(RfpActions.initializeRfpReport(targets))
+  initializeRfpReport: (projectId, rfpId, targets) => dispatch(RfpActions.initializeRfpReport(projectId, rfpId, targets))
 })
 
 const CoverageButtonComponent = wrapComponentWithProvider(reduxStore, RfpButton, mapStateToProps, mapDispatchToProps)

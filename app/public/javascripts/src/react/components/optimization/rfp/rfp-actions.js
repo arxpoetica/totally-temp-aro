@@ -53,9 +53,11 @@ function setSelectedTarget (selectedTarget) {
   }
 }
 
-function initializeRfpReport (targets) {
+function initializeRfpReport (projectId, rfpId, targets) {
   return dispatch => {
     const requestBody = {
+      projectId: projectId,
+      rfpId: rfpId,
       fiberRoutingMode: 'ROUTE_FROM_NODES',
       targets: targets.map(target => ({
         point: {
