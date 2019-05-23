@@ -225,7 +225,7 @@ class CompetitorEditorController {
     if (this.doRecalc) {
       var compManMes = 'recalculating: '+this.compManMeta.name
       this.uiNotificationService.addNotification('main', compManMes)
-      this.$http.post(`/service/v1/competitor-manager/${this.competitorManagerId}/refresh`)
+      this.$http.post(`/service/v1/competitor-manager/${this.competitorManagerId}/refresh?user_id=${this.state.loggedInUser.id}`)
       .then((result) => {
         this.uiNotificationService.removeNotification('main', compManMes)
       })

@@ -55,6 +55,9 @@ class ResourceManagerController {
         buttonClass: 'btn-light',
         iconClass: 'fa-edit',
         toolTip: 'Edit',
+        isEnabled: (row, index) => {
+          return this.canEdit(row)
+        },
         callBack: (row, index) => {
           this.editSelectedManager(row)
         }
@@ -73,20 +76,19 @@ class ResourceManagerController {
         buttonClass: 'btn-outline-danger',
         iconClass: 'fa-trash-alt',
         toolTip: 'Delete',
+        isEnabled: (row, index) => {
+          return this.canEdit(row)
+        },
         callBack: (row, index) => {
           this.deleteSelectedResourceManager(row)
         }
       }
-      /*
-      {
-        buttonText: '', // Permissions
-        buttonClass: "btn-primary", // use default
-        iconClass: "fa-user-plus",
-        toolTip: "Permissions",
-        callBack: function(index, row){console.log('permissions');console.log(row)}
-      }
-      */
+      
     ]
+  }
+  
+  canEdit (row) {
+    return this.state.loggedInUser.hasPermissions(this.state.authPermissionsByName['RESOURCE_ADMIN'].permissions, row.permissions)
   }
   
   $onChanges (changes) {
@@ -104,9 +106,7 @@ class ResourceManagerController {
   }
 
   onSelectedResourceKeyChanged () {
-    //this.buildRows()
     this.setCurrentSelectedResourceKey({ resourceKey: this.selectedResourceKey })
-    //this.getRows()
   }
 
   buildFilterOptions () {
@@ -119,12 +119,10 @@ class ResourceManagerController {
           if (this.resourceItems[key].hasOwnProperty('description')) {
             desc = this.resourceItems[key].description
           }
-          // newFilterByOptions.push({'label':desc, 'value':key})
           newFilterByOptions[key] = desc
         }
       }
     }
-    //console.log(newFilterByOptions)
     this.filterByOptions = newFilterByOptions
   }
   
@@ -157,7 +155,6 @@ class ResourceManagerController {
           }
         }
         this.rows = newRows
-        //console.log(this.rows)
       })
     // end promise
   }
@@ -192,7 +189,6 @@ class ResourceManagerController {
         // Create a new manager with the specified name and description
           var idParam = ''
           if (null != sourceId) idParam = `resourceManagerId=${sourceId}&`
-          //console.log(resourceType)
           return this.$http.post(`/service/v2/resource-manager?${idParam}user_id=${this.state.loggedInUser.id}`,
             {resourceType: resourceType, name: resourceName, description: resourceName })
         })

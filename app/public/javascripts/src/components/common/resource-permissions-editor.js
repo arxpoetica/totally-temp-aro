@@ -15,8 +15,10 @@ class ResourcePermissionsEditorController {
     
     this.isOwner = false
     
+    // these vals will be replaced by vals from state
     this.defaultPermissions = 4
     this.ownerPermissions = 7
+    this.superuserPermissions = 31
     
     this.state.authRolls.forEach((authRoll) => {
       if (requestedRolls.hasOwnProperty(authRoll.name)) {
@@ -25,9 +27,11 @@ class ResourcePermissionsEditorController {
           'description': requestedRolls[authRoll.name], 
           'name': authRoll.name
         })
-        if ('RESOURCE_VIEWER' == authRoll.name) this.defaultPermissions = authRoll.permissions
-        if ('RESOURCE_OWNER' == authRoll.name) this.ownerPermissions = authRoll.permissions
       }
+      // can replace these with state.authRollsByName
+      if ('RESOURCE_VIEWER' == authRoll.name) this.defaultPermissions = authRoll.permissions
+      if ('RESOURCE_OWNER' == authRoll.name) this.ownerPermissions = authRoll.permissions
+      if ('SUPER_USER' == authRoll.name) this.superuserPermissions = authRoll.permissions
     })
     
     this.newActorId = null
@@ -123,6 +127,13 @@ class ResourcePermissionsEditorController {
         this.systemActors.forEach((systemActor) => idToSystemActor[systemActor.id] = systemActor)
         this.isOwner = false
         this.actionsParam = null
+        //if (!!(this.state.loggedInUser.systemPermissions & this.state.authPermissionsByName['RESOURCE_ADMIN'].permissions)){
+          
+        if ( this.state.loggedInUser.hasPermissions(this.state.authPermissionsByName['RESOURCE_ADMIN'].permissions) ){  
+          this.isOwner = true
+          this.actionsParam = this.actions
+        }
+        
         result.data.resourcePermissions.forEach((access) => {
           this.rows.push({
             'systemActorId': access.systemActorId, 
@@ -130,11 +141,15 @@ class ResourcePermissionsEditorController {
             'rolePermissions': access.rolePermissions
           })
           // check for user and group permissions 
-          if ( access.rolePermissions == this.ownerPermissions 
-              && (access.systemActorId == this.state.loggedInUser.id 
-                  || this.state.loggedInUser.groupIds.includes(access.systemActorId)
+          if ( !this.isOwner 
+              && (
+                  this.state.loggedInUser.hasPermissions(this.state.authPermissionsByName['RESOURCE_ADMIN'].permissions, access.rolePermissions)
+                  && (
+                      access.systemActorId == this.state.loggedInUser.id || 
+                      this.state.loggedInUser.groupIds.includes(access.systemActorId)
+                     )
                   )
-              ) {
+              ){
             this.isOwner = true
             this.actionsParam = this.actions
           }
@@ -154,7 +169,7 @@ class ResourcePermissionsEditorController {
         }
       })
     }
-    return this.$http.put(`/service/auth/acl/${this.resourceType}/${this.resourceId}?userId=${this.state.loggedInUser.id}`, putBody)
+    return this.$http.put(`/service/auth/acl/${this.resourceType}/${this.resourceId}?user_id=${this.state.loggedInUser.id}`, putBody)
   }
   
 }
