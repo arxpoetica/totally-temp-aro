@@ -12,8 +12,10 @@ import report from '../react/components/configuration/report/report-reducer'
 
 import networkAnalysis from '../react/components/optimization/network-analysis/network-analysis-reducer'
 import opReport from '../react/components/optimization/reports/reports-reducer'
+import rfp from '../react/components/optimization/rfp/rfp-reducer'
 
 import coverage from '../react/components/coverage/coverage-reducer'
+import map from '../react/components/map/map-reducer'
 import mapLayers from '../react/components/map-layers/map-layer-reducer'
 import plan from '../react/components/plan/plan-reducer'
 import selection from '../react/components/selection/selection-reducer'
@@ -28,8 +30,9 @@ const socketMiddleware = createSocketMiddleware()
 let reducer = combineReducers({
   configuration: combineReducers({ report, ui }),
   coverage,
+  map,
   mapLayers,
-  optimization: combineReducers({ networkAnalysis, report: opReport }),
+  optimization: combineReducers({ networkAnalysis, report: opReport, rfp }),
   plan,
   selection,
   user,

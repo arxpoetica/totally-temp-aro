@@ -116,9 +116,12 @@ export class CoverageInitializer extends Component {
       </table>
 
       {/* If we have a valid report, then disable all controls */}
+      {/* Hack - Set the top of the disabler so that people can access the Analysis Type dropdown. Remove this after we get
+                 a proper analysis type from service */}
       {this.props.isSuperUser && this.props.coverageReport
         ? <div ng-if='$ctrl.isSuperUser && $ctrl.coverageReport'
-          className='disable-sibling-controls' />
+          className='disable-sibling-controls'
+          style={{ top: '50px' }} />
         : null
       }
     </div>

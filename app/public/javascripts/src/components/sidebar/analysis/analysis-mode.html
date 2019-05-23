@@ -67,7 +67,10 @@
       <div style="height: 100%;" ng-if="$ctrl.state.networkAnalysisType.id === 'COVERAGE_ANALYSIS'">
         <r-coverage-initializer></r-coverage-initializer>
       </div>
-    </accordion-panel-contents>
+      <div style="height: 100%;" ng-if="$ctrl.state.networkAnalysisType.id === 'RFP'">
+        <r-rfp-analyzer></r-rfp-analyzer>
+      </div>
+   </accordion-panel-contents>
     <accordion-panel-title id="output-bar" title="'Output'" panel-id="$ctrl.analysisModePanels.OUTPUT"></accordion-panel-title>
     <accordion-panel-contents panel-id="$ctrl.analysisModePanels.OUTPUT">
       <div ng-if="$ctrl.state.networkAnalysisType.id === 'NETWORK_PLAN'">

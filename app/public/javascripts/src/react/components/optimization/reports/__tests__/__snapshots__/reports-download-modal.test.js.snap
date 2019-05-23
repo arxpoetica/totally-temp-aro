@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`NetworkAnalysisReportRow render 1`] = `
+exports[`ReportsDownloadRow render 1`] = `
 <tr>
   <td>
     Optimization analysis report
