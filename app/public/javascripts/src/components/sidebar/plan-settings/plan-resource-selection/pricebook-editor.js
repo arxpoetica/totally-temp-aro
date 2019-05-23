@@ -9,9 +9,10 @@ const defaultConstructionRatios = {
 }
 
 class PriceBookEditorController {
-  constructor ($http, $timeout) {
+  constructor ($http, $timeout, state) {
     this.$http = $http
     this.$timeout = $timeout
+    this.state = state
     this.priceBookDefinitions = []
     this.structuredPriceBookDefinitions = []
     this.pristineAssignments = []
@@ -242,7 +243,7 @@ class PriceBookEditorController {
     })
 
     // Save assignments to the server
-    this.$http.put(`/service/v1/pricebook/${this.priceBookId}/assignment`, assignments)
+    this.$http.put(`/service/v1/pricebook/${this.priceBookId}/assignment?user_id=${this.state.loggedInUser.id}`, assignments)
       .then((result) => this.exitEditingMode())
       .catch((err) => console.error(err))
   }
@@ -252,7 +253,7 @@ class PriceBookEditorController {
   }
 }
 
-PriceBookEditorController.$inject = ['$http', '$timeout']
+PriceBookEditorController.$inject = ['$http', '$timeout', 'state']
 
 let pricebookEditor = {
   templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/pricebook-editor.html',
