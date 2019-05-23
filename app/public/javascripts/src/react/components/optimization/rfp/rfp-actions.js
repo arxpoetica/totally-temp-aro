@@ -64,7 +64,6 @@ function initializeRfpReport (targets) {
         }
       }))
     }
-    console.log(JSON.stringify(requestBody, null, 2))
     AroHttp.post(`/service/rfp/process`, requestBody)
       .then(result => console.log(result))
       .catch(err => console.error(err))
