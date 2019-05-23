@@ -47,8 +47,6 @@ class TileComponentController {
     this.contextMenuService = contextMenuService
     this.utils = Utils
 
-    this.areControlsEnabled = true
-
     // Subscribe to changes in the mapLayers subject
     state.mapLayers
       .debounceTime(100)
@@ -56,19 +54,15 @@ class TileComponentController {
       .subscribe((pairs) => this.handleMapEvents(pairs[0], pairs[1], null))
 
     // Subscribe to changes in the plan (for setting center and zoom)
-    state.plan.subscribe((plan) => {
+    state.planChanged.subscribe(() => {
       // Set default coordinates in case we dont have a valid plan
       var coordinates = state.defaultPlanCoordinates
-      if (plan) {
+      if (state.plan) {
         coordinates = {
-          zoom: plan.zoomIndex,
-          latitude: plan.latitude,
-          longitude: plan.longitude
+          zoom: state.plan.zoomIndex,
+          latitude: state.plan.latitude,
+          longitude: state.plan.longitude
         }
-      }
-
-      if (plan) {
-        this.areControlsEnabled = (plan.planState === Constants.PLAN_STATE.START_STATE) || (plan.planState === Constants.PLAN_STATE.INITIALIZED)
       }
     })
 

@@ -14,7 +14,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   // Get a POST body that we will send to aro-service for performing optimization
   stateSerializationHelper.getOptimizationBody = (state, reduxState) => {
     var optimizationBody = {
-      planId: state.plan.getValue().id,
+      planId: state.plan.id,
       projectTemplateId: state.loggedInUser.projectId,
       analysis_type: 'NETWORK_PLAN'
     }

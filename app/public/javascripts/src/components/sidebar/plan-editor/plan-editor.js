@@ -186,7 +186,7 @@ class PlanEditorController {
 
   exitPlanEditMode () {
     // You should no longer hide any of the object ids that have been committed or discarded
-    var planId = this.state.plan.getValue().id
+    var planId = this.state.plan.id
     Object.keys(this.objectIdToProperties).forEach((objectId) => {
       this.tileDataService.removeFeatureToExclude(objectId)
     })
@@ -245,7 +245,7 @@ class PlanEditorController {
         this.calculateCoverage(mapObject, equipmentPoint)
       } else {
         // we do not have an edited version of the equipment point, get ti from the server
-        var planId = this.state.plan.getValue().id
+        var planId = this.state.plan.id
         this.$http.get(`/service/plan-feature/${planId}/equipment/${networkObjectId}?userId=${this.state.loggedInUser.id}`)
           .then((result) => {
             equipmentPoint = result.data.geometry
@@ -629,7 +629,7 @@ class PlanEditorController {
 
   displayEquipmentViewObject(feature, iconUrl) {
     return new Promise((resolve, reject) => {
-      var planId = this.state.plan.getValue().id
+      var planId = this.state.plan.id
       this.$http.get(`/service/plan-feature/${planId}/equipment/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
         .then((result) => {
           if (result.data.hasOwnProperty('geometry')) {
@@ -657,7 +657,7 @@ class PlanEditorController {
 
   displaySiteBoundaryViewObject(feature, iconUrl) {
     return new Promise((resolve, reject) => {
-      var planId = this.state.plan.getValue().id
+      var planId = this.state.plan.id
       this.$http.get(`/service/plan-feature/${planId}/equipment_boundary/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
         .then((result) => {
           if (result.data.hasOwnProperty('geometry')) {
@@ -737,7 +737,7 @@ class PlanEditorController {
       var isNew = true
       if (feature.isExistingObject) {
         // clone of existing or planned equipment
-        const planId = this.state.plan.getValue().id
+        const planId = this.state.plan.id
         // Add modified features to vector tiles and do the rendering, etc.
         this.state.loadModifiedFeatures(planId)
           .then(() => {
@@ -1159,7 +1159,7 @@ class PlanEditorController {
       // The value we have been passed is a network node type. Return the icon directly.
       return Promise.resolve(this.state.configuration.networkEquipment.equipments[eventArgs.objectValue].iconUrl)
     } else if (eventArgs.objectKey === Constants.MAP_OBJECT_CREATE_KEY_OBJECT_ID) {
-      const planId = this.state.plan.getValue().id
+      const planId = this.state.plan.id
       return this.$http.get(`/service/plan-feature/${planId}/equipment/${eventArgs.objectValue}?userId=${this.state.loggedInUser.id}`)
         .then((result) => {
           const networkNodeType = result.data.networkNodeType

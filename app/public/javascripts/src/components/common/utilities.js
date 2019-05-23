@@ -121,7 +121,7 @@ class Utilities {
   getBoundsCLLIs (features, state) {
     var cllisByObjectId = {}
     var doCall = false
-    var filter = `planId eq ${state.plan.getValue().id} and (`
+    var filter = `planId eq ${state.plan.id} and (`
     features.forEach((feature) => {
       filter += `objectId eq guid'${feature.network_node_object_id}' or `
       doCall = true

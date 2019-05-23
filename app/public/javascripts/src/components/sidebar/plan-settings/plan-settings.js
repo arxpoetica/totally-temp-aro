@@ -1,27 +1,15 @@
 import Constants from '../../common/constants'
 
 class PlanSettingsController {
-  constructor ($scope, $http, state, $timeout, tracker) {
+  constructor ($http, state, $timeout, tracker) {
     this.$http = $http
-    this.plan = {}
     this.state = state
     this.currentUser = state.loggedInUser
     this.$timeout = $timeout
-    this.areControlsEnabled = true
     this.isSaveEnabled = false
     this.errorText = ''
 
     tracker.trackEvent(tracker.CATEGORIES.ENTER_PLAN_SETTINGS_MODE, tracker.ACTIONS.CLICK)
-
-    state.plan.subscribe((newPlan) => {
-      this.plan = newPlan
-      this.setControlsEnabled(newPlan)
-    })
-
-    state.planOptimization.subscribe((newPlan) => {
-      this.setControlsEnabled(newPlan)
-    })
-
     this.childSettingsPanels = {}
     this.resetChildSettingsPanels()
   }
@@ -34,10 +22,8 @@ class PlanSettingsController {
     this.updateUIState()
   }
 
-  setControlsEnabled (newPlan) {
-    if (newPlan) {
-      this.areControlsEnabled = (newPlan.planState === Constants.PLAN_STATE.START_STATE) || (newPlan.planState === Constants.PLAN_STATE.INITIALIZED)
-    }
+  areControlsEnabled () {
+    return (this.state.plan.planState === Constants.PLAN_STATE.START_STATE) || (this.state.plan.planState === Constants.PLAN_STATE.INITIALIZED)
   }
 
   resetChildSettingsPanels (childKey) {
@@ -133,7 +119,7 @@ class PlanSettingsController {
   }
 
   clearAllSelectedSA () {
-    var plan = this.state.plan.getValue()
+    var plan = this.state.plan
 
     this.$http.delete(`/service_areas/${plan.id}/removeAllServiceAreaTargets`, { })
       .then(() => {
@@ -208,7 +194,7 @@ class PlanSettingsController {
   }
 }
 
-PlanSettingsController.$inject = ['$scope', '$http', 'state', '$timeout', 'tracker']
+PlanSettingsController.$inject = ['$http', 'state', '$timeout', 'tracker']
 
 let planSettings = {
   templateUrl: '/components/sidebar/plan-settings/plan-settings.html',

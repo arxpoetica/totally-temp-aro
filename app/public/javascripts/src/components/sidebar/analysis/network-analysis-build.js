@@ -18,26 +18,15 @@ class NetworkAnalysisBuildController {
     this.serviceAreas = []
     this.analysisAreas = []
     this.rateReachCategories = []
-    this.config = config
     this.toggleAdvanceSettings = false
 
-    this.areControlsEnabled = true
-    // this.budgetDisplay = this.state.optimizationOptions.budget / 1000
     this.budgetDisplay = this.state.optimizationOptions.budget
-
-    state.plan.subscribe((newPlan) => {
-      if (newPlan) {
-        this.areControlsEnabled = (newPlan.planState === Constants.PLAN_STATE.START_STATE) || (newPlan.planState === Constants.PLAN_STATE.INITIALIZED)
-      }
-    })
-
-    state.planOptimization.subscribe((newPlan) => {
-      if (newPlan) {
-        this.areControlsEnabled = (newPlan.planState === Constants.PLAN_STATE.START_STATE) || (newPlan.planState === Constants.PLAN_STATE.INITIALIZED)
-      }
-    })
     this.SelectionModes = SelectionModes
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
+  }
+
+  areControlsEnabled () {
+    return (this.state.plan.planState === Constants.PLAN_STATE.START_STATE) || (this.state.plan.planState === Constants.PLAN_STATE.INITIALIZED)
   }
 
   onSelectionTypeChange (selectionType) {

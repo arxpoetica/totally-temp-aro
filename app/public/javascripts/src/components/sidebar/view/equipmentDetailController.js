@@ -34,7 +34,7 @@ class EquipmentDetailController {
       if (!this.state.StateViewMode.allowViewModeClickAction(this.state)) return
       if (options.hasOwnProperty('roadSegments') && options.roadSegments.size > 0) return
 
-      const plan = state.plan.getValue()
+      const plan = state.plan
       const userId = this.state.loggedInUser.id
 
       if (options.hasOwnProperty('equipmentFeatures') && options.equipmentFeatures.length > 0) {
@@ -142,7 +142,7 @@ class EquipmentDetailController {
   }
 
   viewSelectedEquipment (selectedEquipment, isZoom) {
-    var plan = this.state.plan.getValue()
+    var plan = this.state.plan
     var objectId = selectedEquipment.objectId || selectedEquipment.object_id
     this.updateSelectedState(selectedEquipment)
     this.displayEquipment(plan.id, objectId).then((equipmentInfo) => {
@@ -162,7 +162,7 @@ class EquipmentDetailController {
       this.boundsData = null
       return
     }
-    var planId = this.state.plan.getValue().id
+    var planId = this.state.plan.id
     var equipmentId = this.equipmentData.objectId
     var filter = `rootPlanId eq ${planId} and networkNodeObjectId eq guid'${equipmentId}'`
     this.$http.get(`/service/odata/NetworkBoundaryEntity?$filter=${filter}`)

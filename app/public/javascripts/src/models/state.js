@@ -525,7 +525,8 @@ class State {
     service.selectedLocationIcon = '/images/map_icons/aro/target.png'
 
     // Plan - define once
-    service.plan = new Rx.BehaviorSubject(null)
+    service.plan = null
+    service.planChanged = new Rx.BehaviorSubject(null)
 
     // Initialize the state of the application (the parts that depend upon configuration being loaded from the server)
     service.initializeState = function () {
@@ -643,7 +644,7 @@ class State {
         return Promise.resolve()
       }
 
-      var currentPlan = service.plan.getValue()
+      var currentPlan = service.plan
       var promises = [
         $http.get('/service/odata/datatypeentity'),
         $http.get(`/service/v1/library-entry?user_id=${service.loggedInUser.id}`),
@@ -731,7 +732,7 @@ class State {
       if (!service.plan) {
         return Promise.resolve()
       }
-      var currentPlan = service.plan.getValue()
+      var currentPlan = service.plan
       return Promise.all([
         $http.get('/service/odata/resourcetypeentity'), // The types of resource managers
         $http.get('/service/odata/resourcemanager?$select=name,id,description,managerType,deleted'), // All resource managers in the system
@@ -813,7 +814,7 @@ class State {
         }
       })
 
-      var currentPlan = service.plan.getValue()
+      var currentPlan = service.plan
       // Save the configuration to the server
       $http.put(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${service.loggedInUser.id}`, putBody)
     }
@@ -841,7 +842,7 @@ class State {
       })
 
       // Save the configuration to the server
-      var currentPlan = service.plan.getValue()
+      var currentPlan = service.plan
       $http.put(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${service.loggedInUser.id}`, putBody)
     }
 
@@ -931,7 +932,7 @@ class State {
     }
 
     service.makeCurrentPlanNonEphemeral = (planName) => {
-      var newPlan = JSON.parse(JSON.stringify(service.plan.getValue()))
+      var newPlan = JSON.parse(JSON.stringify(service.plan))
       newPlan.name = planName
       newPlan.ephemeral = false
       newPlan.latitude = service.defaultPlanCoordinates.latitude
@@ -966,7 +967,7 @@ class State {
     }
 
     service.copyCurrentPlanTo = (planName) => {
-      var newPlan = JSON.parse(JSON.stringify(service.plan.getValue()))
+      var newPlan = JSON.parse(JSON.stringify(service.plan))
       newPlan.name = planName
       newPlan.ephemeral = false
 
@@ -979,7 +980,7 @@ class State {
         }
       })
       var userId = service.loggedInUser.id
-      var url = `/service/v1/plan-command/copy?user_id=${userId}&source_plan_id=${service.plan.getValue().id}&is_ephemeral=${newPlan.ephemeral}&name=${newPlan.name}`
+      var url = `/service/v1/plan-command/copy?user_id=${userId}&source_plan_id=${service.plan.id}&is_ephemeral=${newPlan.ephemeral}&name=${newPlan.name}`
 
       return $http.post(url, {})
         .then((result) => {
@@ -1027,7 +1028,7 @@ class State {
     service.recreateTilesAndCache = () => {
       tileDataService.clearDataCache()
       tileDataService.clearHtmlCache()
-      return service.loadModifiedFeatures(service.plan.getValue().id)
+      return service.loadModifiedFeatures(service.plan.id)
         .then(() => {
           service.requestDestroyMapOverlay.next(null) // Destroy the old map overlay (may not exist if we have just loaded a plan)
           service.requestCreateMapOverlay.next(null) // Create a new one
@@ -1038,8 +1039,8 @@ class State {
     }
 
     service.setPlan = (plan) => {
-      service.plan.next(plan)
-      service.planOptimization.next(plan)
+      service.plan = plan
+      service.planChanged.next(null)
 
       service.currentPlanTags = service.listOfTags.filter(tag => _.contains(plan.tagMapping.global, tag.id))
       service.currentPlanServiceAreaTags = service.listOfServiceAreaTags.filter(tag => _.contains(plan.tagMapping.linkTags.serviceAreaIds, tag.id))
@@ -1125,10 +1126,9 @@ class State {
     service.progressMessage = ''
     service.progressPercent = 0
     service.isCanceling = false // True when we have requested the server to cancel a request
-    service.Optimizingplan = null
 
     service.handleModifyClicked = () => {
-      var currentPlan = service.plan.getValue()
+      var currentPlan = service.plan
       var userId = service.loggedInUser.id
       if (currentPlan.ephemeral) {
         // This is an ephemeral plan. Don't show any dialogs to the user, simply copy this plan over to a new ephemeral plan
@@ -1142,7 +1142,7 @@ class State {
           })
           .catch((err) => {
             console.log(err)
-            return Promise.reject()
+            return Promise.reject(err)
           })
       } else {
         // This is not an ephemeral plan. Show a dialog to the user asking whether to overwrite current plan or save as a new one.
@@ -1159,22 +1159,22 @@ class State {
                   confirmButtonColor: '#DD6B55',
                   confirmButtonText: 'Create Plan'
                 },
-                  (planName) => {
-                    if (planName) {
-                      return service.copyCurrentPlanTo(planName)
-                        .then(() => { return resolve() })
-                    }
-                  })
+                planName => {
+                  if (planName) {
+                    return service.copyCurrentPlanTo(planName)
+                      .then(() => { return resolve() })
+                  }
+                })
               })
             } else if (result === service.modifyDialogResult.OVERWRITE) {
-              return service.copyCurrentPlanTo(currentPlan.name)
-                .then(() => {
-                  return $http.delete(`/service/v1/plan/${currentPlan.id}?user_id=${service.loggedInUser.id}`)
-                    .then(() => {
-                      service.selectedDisplayMode.next(service.displayModes.ANALYSIS)
-                      return resolve()
-                    })
+              return $http.delete(`/service/v1/plan/${currentPlan.id}/optimization-state?user_id=${service.loggedInUser.id}`)
+                .then(() => $http.get(`/service/v1/plan/${currentPlan.id}/optimization-state?user_id=${service.loggedInUser.id}`))
+                .then(result => {
+                  service.plan.planState = result.data
+                  service.setActivePlanState(result.data)
+                  $timeout()
                 })
+                .catch(err => console.error(err))
             }
           })
           .catch((err) => {
@@ -1238,16 +1238,16 @@ class State {
             // Make the API call that starts optimization calculations on aro-service
             var apiUrl = (service.networkAnalysisType.type === 'NETWORK_ANALYSIS') ? '/service/v1/analyze/masterplan' : '/service/v1/optimize/masterplan'
             apiUrl += `?userId=${service.loggedInUser.id}`
-          $http.post(apiUrl, optimizationBody)
+            $http.post(apiUrl, optimizationBody)
               .then((response) => {
                 // console.log(response)
                 if (response.status >= 200 && response.status <= 299) {
-                  service.Optimizingplan.optimizationId = response.data.optimizationIdentifier
+                  service.plan.optimizationId = response.data.optimizationIdentifier
                   // service.startPolling()
-                  service.Optimizingplan.planState = Constants.PLAN_STATE.STARTED
+                  service.plan.planState = Constants.PLAN_STATE.STARTED
                   service.progressPercent = 0
                   service.startProgressMessagePolling(response.data.startDate)
-                  service.getOptimizationProgress(service.Optimizingplan)
+                  service.getOptimizationProgress(service.plan)
                   service.setActivePlanState(PlanStates.START_STATE)
                 } else {
                   console.error(response)
@@ -1259,13 +1259,12 @@ class State {
         })
     }
 
-    service.planOptimization = new Rx.BehaviorSubject(null)
     service.getOptimizationProgress = (newPlan) => {
-      service.Optimizingplan = newPlan
-      if (service.Optimizingplan && !service.Optimizingplan.planState) {
-        service.Optimizingplan.planState = PlanStates.START_STATE
+      if (!service.plan.planState) {
+        service.plan.planState = PlanStates.START_STATE
+        service.setActivePlanState(PlanStates.START_STATE)
       }
-      if (service.Optimizingplan && service.Optimizingplan.planState !== PlanStates.COMPLETED) {
+      if (service.plan && service.plan.planState !== PlanStates.COMPLETED) {
         // Unsubscribe from progress message handler (if any)
         if (service.unsubscribeProgressHandler) {
           service.unsubscribeProgressHandler()
@@ -1273,20 +1272,19 @@ class State {
         service.unsubscribeProgressHandler = SocketManager.subscribe('PROGRESS_MESSAGE_DATA', progressData => {
           if (progressData.data.processType === 'optimization') {
             newPlan.planState = progressData.data.optimizationState
-            service.Optimizingplan.planState = progressData.data.optimizationState
+            service.plan.planState = progressData.data.optimizationState
 
             if (progressData.data.optimizationState === PlanStates.COMPLETED ||
               progressData.data.optimizationState === PlanStates.CANCELED ||
               progressData.data.optimizationState === PlanStates.FAILED) {
               tileDataService.markHtmlCacheDirty()
               service.requestMapLayerRefresh.next(null)
-              delete service.Optimizingplan.optimizationId
+              delete service.plan.optimizationId
               service.loadPlanInputs(newPlan.id)
               service.setActivePlanState(progressData.data.optimizationState)
               service.stopProgressMessagePolling()
             }
 
-            service.planOptimization.next(newPlan)
             service.progressPercent = progressData.data.progress * 100
             $timeout() // Trigger a digest cycle so that components can update
           }
@@ -1296,15 +1294,15 @@ class State {
 
     service.cancelOptimization = () => {
       service.isCanceling = true
-      $http.delete(`/service/optimization/processes/${service.Optimizingplan.optimizationId}`)
+      $http.delete(`/service/optimization/processes/${service.plan.optimizationId}`)
         .then((response) => {
           // Optimization process was cancelled. Get the plan status from the server
-          return $http.get(`/service/v1/plan/${service.Optimizingplan.id}?user_id=${service.loggedInUser.id}`)
+          return $http.get(`/service/v1/plan/${service.plan.id}?user_id=${service.loggedInUser.id}`)
         })
         .then((response) => {
           service.isCanceling = false
-          service.Optimizingplan.planState = response.data.planState // Note that this should match with Constants.PLAN_STATE
-          delete service.Optimizingplan.optimizationId
+          service.plan.planState = response.data.planState // Note that this should match with Constants.PLAN_STATE
+          delete service.plan.optimizationId
           tileDataService.markHtmlCacheDirty()
           service.requestMapLayerRefresh.next(null)
         })
@@ -1331,10 +1329,6 @@ class State {
         service.progressMessage = ''
       }
     }
-
-    service.plan.subscribe((newPlan) => {
-      service.getOptimizationProgress(newPlan)
-    })
 
     service.getDefaultPlanInputs = () => {
       return angular.copy(service.configuration.optimizationOptions)
@@ -1641,7 +1635,7 @@ class State {
         .then((stealTransaction) => {
           if (stealTransaction) {
             tracker.trackEvent(tracker.CATEGORIES.STEAL_PLAN_TRANSACTION, tracker.ACTIONS.CLICK)
-            return $http.post(`/service/plan-transactions?force=true`, { userId: service.loggedInUser.id, planId: service.plan.getValue().id })
+            return $http.post(`/service/plan-transactions?force=true`, { userId: service.loggedInUser.id, planId: service.plan.id })
           } else {
             return Promise.reject('User does not want to steal the transaction')
           }
@@ -1665,7 +1659,7 @@ class State {
           if (deleteOldTransactions) {
             var deletePromises = []
             transactionsForPlan.forEach(transactionForPlan => deletePromises.push($http.delete(`/service/plan-transactions/transaction/${transactionForPlan.id}`)))
-            const currentPlanId = service.plan.getValue().id
+            const currentPlanId = service.plan.id
             Promise.all(deletePromises)
               .then(res => $http.post(`/service/plan-transactions`, { userId: service.loggedInUser.id, planId: currentPlanId }))
               .then(res => resolve(res))
@@ -1688,7 +1682,7 @@ class State {
       // Get a list of all open transactions in the system (Do NOT send in userId so we get transactions across all users)
       return $http.get(`/service/plan-transaction`)
         .then((result) => {
-          const currentPlanId = service.plan.getValue().id
+          const currentPlanId = service.plan.id
           const transactionsForPlan = result.data.filter((item) => item.planId === currentPlanId)
           const transactionsForUserAndPlan = transactionsForPlan.filter((item) => item.userId === service.loggedInUser.id)
           if (transactionsForPlan.length === 0) {
@@ -1770,7 +1764,7 @@ class State {
       // (239573,239586,239607,91293,91306,91328,237792,86289,86290,109232,239603,145556,145557,239604,239552)
       $http.post('/locations/getLocationIds', { query: query })
         .then((result) => {
-          var plan = service.plan.getValue()
+          var plan = service.plan
 
           const dispatchers = service.getDispatchers()
           if (service.selectedExpertMode === service.expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].id) {

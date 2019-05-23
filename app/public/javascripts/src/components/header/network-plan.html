@@ -23,12 +23,12 @@
 
 <div class="network-plan">
   <!-- For ephemeral plans, the name has not been set by the user -->
-  <div ng-if="$ctrl.showPlan">
+  <div ng-if="($ctrl.state.plan && $ctrl.state.plan.ephemeral) && $ctrl.state.loggedInUser.perspective === 'admin'">
     <div id="selectedPlan" style="font-size: 25px; line-height: 40px;">Existing Network</div>
   </div>
 
   <!-- For saved plans, display the plan name only -->
-  <div id="selectedPlan" ng-if="$ctrl.plan && !$ctrl.plan.ephemeral" title="{{$ctrl.plan.name}}" class="non-ephemeral">
-    {{$ctrl.plan.name}}
+  <div id="selectedPlan" ng-if="$ctrl.state.plan && !$ctrl.state.plan.ephemeral" title="{{$ctrl.state.plan.name}}" class="non-ephemeral">
+    {{$ctrl.state.plan.name}}
   </div>
 </div>

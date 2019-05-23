@@ -21,7 +21,7 @@ class AnalysisExpertModeController {
   }
 
   $onInit () {
-    this.$http.get(`/service/v1/plan/${this.state.plan.getValue().id}/scope-context?user_id=${this.state.loggedInUser.id}`)
+    this.$http.get(`/service/v1/plan/${this.state.plan.id}/scope-context?user_id=${this.state.loggedInUser.id}`)
     .then((result) => {
       this.state.expertModeScopeContext = result.data
       this.getAvailableScopeContextKeys(this.state.expertModeScopeContext)

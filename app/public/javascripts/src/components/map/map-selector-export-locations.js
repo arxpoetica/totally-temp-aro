@@ -52,7 +52,7 @@ class MapSelectorExportLocationsController {
       })
     }
 
-    var planId = this.state.plan.getValue().id
+    var planId = this.state.plan.id
     var points = []
     for (var polyI = 0; polyI < polygon.length; polyI++) {
       var pt = polygon[polyI]
