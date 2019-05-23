@@ -1,5 +1,6 @@
 /* globals */
 import Actions from '../../../common/actions'
+import RfpStatusTypes from './constants'
 
 function initialize () {
   return {
@@ -51,10 +52,34 @@ function setSelectedTarget (selectedTarget) {
   }
 }
 
+function initializeRfpReport () {
+  return dispatch => {
+    dispatch({
+      type: Actions.RFP_SET_STATUS,
+      payload: RfpStatusTypes.RUNNING
+    })
+    setTimeout(() => {
+      dispatch({
+        type: Actions.RFP_SET_STATUS,
+        payload: RfpStatusTypes.FINISHED
+      })
+    }, 5000)
+  }
+}
+
+function modifyRfpReport () {
+  return {
+    type: Actions.RFP_SET_STATUS,
+    payload: RfpStatusTypes.UNINITIALIZED
+  }
+}
+
 export default {
   addTargets: addTargets,
   clearState: clearState,
   initialize: initialize,
+  initializeRfpReport: initializeRfpReport,
+  modifyRfpReport: modifyRfpReport,
   removeTarget: removeTarget,
   replaceTarget: replaceTarget,
   setSelectedTarget: setSelectedTarget,

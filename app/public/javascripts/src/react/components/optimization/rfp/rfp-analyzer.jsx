@@ -5,6 +5,7 @@ import wrapComponentWithProvider from '../../../common/provider-wrapped-componen
 import RfpActions from './rfp-actions'
 import RfpOptions from './rfp-options.jsx'
 import RfpTargets from './rfp-targets.jsx'
+import RfpStatusTypes from './constants'
 
 export class RfpAnalyzer extends Component {
   constructor (props) {
@@ -16,6 +17,11 @@ export class RfpAnalyzer extends Component {
     return <div>
       <RfpOptions initialValues={this.props.rfpOptions} enableReinitialize />
       <RfpTargets />
+      {
+        this.props.status === RfpStatusTypes.UNINITIALIZED
+          ? null
+          : <div className='disable-sibling-controls' />
+      }
     </div>
   }
 
@@ -28,7 +34,8 @@ RfpAnalyzer.propTypes = {
 }
 
 const mapStateToProps = (state) => ({
-  rfpOptions: state.optimization.rfp.options
+  rfpOptions: state.optimization.rfp.options,
+  status: state.optimization.rfp.status
 })
 
 const mapDispatchToProps = dispatch => ({

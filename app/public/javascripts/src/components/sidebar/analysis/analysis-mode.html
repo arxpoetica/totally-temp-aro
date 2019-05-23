@@ -40,8 +40,11 @@
 <div class="analysis-mode-container">
   <div class="analysis-type">
     <h4 style="text-align: center; margin-top: 20px;">Analysis Type:{{$ctrl.state.networkAnalysisType.label}}</h4>
-    <optimize-button ng-if="$ctrl.state.networkAnalysisType.id !== 'COVERAGE_ANALYSIS'"></optimize-button>
-    <r-coverage-button ng-if="$ctrl.state.networkAnalysisType.id === 'COVERAGE_ANALYSIS'"></r-coverage-button>
+    <div ng-switch="$ctrl.state.networkAnalysisType.id">
+      <r-coverage-button ng-switch-when="COVERAGE_ANALYSIS"></r-coverage-button>
+      <r-rfp-button ng-switch-when="RFP"></r-rfp-button>
+      <optimize-button ng-switch-default></optimize-button>
+    </div>
   </div>
   <accordion style="position: relative; flex: 1 1 auto;" toggle-expanded-panel="$ctrl.analysisModePanel">
     <accordion-panel-title title="'Input'" panel-id="$ctrl.analysisModePanels.INPUT"></accordion-panel-title>

@@ -1,0 +1,5 @@
+export default Object.freeze({
+  UNINITIALIZED: 'UNINITIALIZED',
+  RUNNING: 'RUNNING',
+  FINISHED: 'FINISHED'
+})

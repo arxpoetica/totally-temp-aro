@@ -1,4 +1,5 @@
 import Actions from '../../../common/actions'
+import RfpStatusTypes from './constants'
 
 const defaultState = {
   options: {
@@ -9,7 +10,8 @@ const defaultState = {
   },
   targets: [],
   selectedTarget: null,
-  showRfpStatusModal: false
+  showRfpStatusModal: false,
+  status: RfpStatusTypes.UNINITIALIZED
 }
 
 function initialize () {
@@ -54,6 +56,12 @@ function setSelectedTarget (state, selectedTarget) {
   }
 }
 
+function setStatus (state, status) {
+  return { ...state,
+    status: status
+  }
+}
+
 function rfpReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.RFP_INITIALIZE:
@@ -76,6 +84,9 @@ function rfpReducer (state = defaultState, action) {
 
     case Actions.RFP_SET_SELECTED_TARGET:
       return setSelectedTarget(state, action.payload)
+
+    case Actions.RFP_SET_STATUS:
+      return setStatus(state, action.payload)
 
     default:
       return state
