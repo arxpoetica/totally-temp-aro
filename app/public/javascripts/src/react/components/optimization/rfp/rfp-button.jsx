@@ -25,7 +25,7 @@ export class RfpButton extends Component {
   renderUninitializedButton () {
     return (
       <button className={'btn btn-block btn-primary'} style={{ marginBottom: '10px' }}
-        onClick={() => this.props.initializeRfpReport()}>
+        onClick={() => this.props.initializeRfpReport(this.props.targets)}>
         <i className='fa fa-bolt' /> Run
       </button>
     )
@@ -61,18 +61,20 @@ export class RfpButton extends Component {
 }
 
 RfpButton.propTypes = {
-  status: PropTypes.string
+  status: PropTypes.string,
+  targets: PropTypes.array
 }
 
 const mapStateToProps = (state) => {
   return {
-    status: state.optimization.rfp.status
+    status: state.optimization.rfp.status,
+    targets: state.optimization.rfp.targets
   }
 }
 
 const mapDispatchToProps = dispatch => ({
   modifyRfpReport: () => dispatch(RfpActions.modifyRfpReport()),
-  initializeRfpReport: () => dispatch(RfpActions.initializeRfpReport())
+  initializeRfpReport: targets => dispatch(RfpActions.initializeRfpReport(targets))
 })
 
 const CoverageButtonComponent = wrapComponentWithProvider(reduxStore, RfpButton, mapStateToProps, mapDispatchToProps)

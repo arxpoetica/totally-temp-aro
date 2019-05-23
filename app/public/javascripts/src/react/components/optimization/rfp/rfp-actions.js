@@ -1,5 +1,6 @@
 /* globals */
 import Actions from '../../../common/actions'
+import AroHttp from '../../../common/aro-http'
 import RfpStatusTypes from './constants'
 
 function initialize () {
@@ -52,8 +53,22 @@ function setSelectedTarget (selectedTarget) {
   }
 }
 
-function initializeRfpReport () {
+function initializeRfpReport (targets) {
   return dispatch => {
+    const requestBody = {
+      fiberRoutingMode: 'ROUTE_FROM_NODES',
+      targets: targets.map(target => ({
+        point: {
+          type: 'Point',
+          coordinates: [target.lng, target.lat]
+        }
+      }))
+    }
+    console.log(JSON.stringify(requestBody, null, 2))
+    AroHttp.post(`/service/rfp/process`, requestBody)
+      .then(result => console.log(result))
+      .catch(err => console.error(err))
+
     dispatch({
       type: Actions.RFP_SET_STATUS,
       payload: RfpStatusTypes.RUNNING
