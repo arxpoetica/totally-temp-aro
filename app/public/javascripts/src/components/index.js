@@ -5,6 +5,7 @@ import Broadcast from '../react/components/global-settings/broadcast.jsx'
 import ConfigurationEditor from '../react/components/configuration/ui/configuration-editor.jsx'
 import CoverageInitializer from '../react/components/coverage/coverage-initializer.jsx'
 import CoverageButton from '../react/components/coverage/coverage-button.jsx'
+import RfpButton from '../react/components/optimization/rfp/rfp-button.jsx'
 import NetworkAnalysisOutput from '../react/components/optimization/network-analysis/network-analysis-output.jsx'
 import PlanTargetList from '../react/components/selection/plan-target-list.jsx'
 import ReportModuleList from '../react/components/configuration/report/report-module-list.jsx'
@@ -223,10 +224,11 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rConfigurationEditor', react2angular(ConfigurationEditor))
   .component('rCoverageInitializer', react2angular(CoverageInitializer))
   .component('rCoverageButton', react2angular(CoverageButton))
+  .component('rRfpButton', react2angular(RfpButton))
   .component('rNetworkAnalysisOutput', react2angular(NetworkAnalysisOutput))
   .component('rPlanTargetList', react2angular(PlanTargetList))
   .component('rReportModuleList', react2angular(ReportModuleList))
-  .component('rReportsDownloadModal', react2angular(ReportsDownloadModal, ['reportTypes'])) // reportTypes is passed in manually, not through redux.
+  .component('rReportsDownloadModal', react2angular(ReportsDownloadModal, ['reportTypes', 'title'])) // Some properties are passed in manually, not through redux.
   .component('rRfpAnalyzer', react2angular(RfpAnalyzer))
   .component('rRfpStatusModal', react2angular(RfpStatusModal))
   .component('rToastContainer', react2angular(ToastContainer))

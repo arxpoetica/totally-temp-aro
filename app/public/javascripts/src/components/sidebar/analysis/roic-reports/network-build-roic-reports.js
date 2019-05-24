@@ -28,7 +28,6 @@ class NetworkBuildRoicReportsController {
     this.$http.get(`/service/report/plan/${planId}`)
       .then(result => {
         this.roicResultsData = result.data
-        console.log(this.roicResultsData)
       })
       .catch(err => console.error(err))
   }

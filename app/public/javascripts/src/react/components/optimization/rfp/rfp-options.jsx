@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { Field, reduxForm } from 'redux-form'
+import Constants from '../../../common/constants'
 
 export class RfpOptions extends Component {
   render () {
@@ -31,7 +32,7 @@ export class RfpOptions extends Component {
 }
 
 let RfpOptionsForm = reduxForm({
-  form: 'rfp'
+  form: Constants.RFP_OPTIONS_FORM
 })(RfpOptions)
 
 export default RfpOptionsForm

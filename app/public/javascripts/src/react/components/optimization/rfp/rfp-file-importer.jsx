@@ -34,12 +34,12 @@ export class RfpFileImporter extends Component {
       // Split by lines
       var lines = contents.split('\n')
       const firstLine = lines.splice(0, 1)[0] // The first line is assumed to be a column header, ignore it
-      if (firstLine !== 'latitude, longitude') {
-        throw new Error('In RfpFileImporter: The csv file format is incorrect. The first line should be "latitude, longitude"')
+      if (firstLine !== 'id,latitude,longitude') {
+        throw new Error('In RfpFileImporter: The csv file format is incorrect. The first line should be "id,latitude,longitude"')
       }
       var targets = lines.map(line => {
-        const latLng = line.split(',')
-        return new Point(+latLng[0], +latLng[1])
+        const columns = line.split(',')
+        return new Point(+columns[1], +columns[2], columns[0])
       })
       self.props.addTargets(targets)
     }
