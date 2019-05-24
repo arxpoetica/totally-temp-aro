@@ -53,12 +53,12 @@ function setSelectedTarget (selectedTarget) {
   }
 }
 
-function initializeRfpReport (planId, userId, projectId, rfpId, targets) {
+function initializeRfpReport (planId, userId, projectId, rfpId, fiberRoutingMode, targets) {
   return dispatch => {
     const requestBody = {
       projectId: projectId,
       rfpId: rfpId,
-      fiberRoutingMode: 'ROUTE_FROM_NODES',
+      fiberRoutingMode: fiberRoutingMode,
       targets: targets.map(target => ({
         point: {
           type: 'Point',
@@ -66,21 +66,25 @@ function initializeRfpReport (planId, userId, projectId, rfpId, targets) {
         }
       }))
     }
-    AroHttp.delete(`/service/v1/plan/${planId}/optimization-state?user_id=${userId}`)
-      .then(() => AroHttp.post(`/service/rfp/process?user_id=${userId}&plan_id=${planId}`, requestBody))
-      .then(result => console.log(result))
-      .catch(err => console.error(err))
-
     dispatch({
       type: Actions.RFP_SET_STATUS,
       payload: RfpStatusTypes.RUNNING
     })
-    setTimeout(() => {
-      dispatch({
-        type: Actions.RFP_SET_STATUS,
-        payload: RfpStatusTypes.FINISHED
+    AroHttp.delete(`/service/v1/plan/${planId}/optimization-state?user_id=${userId}`)
+      .then(() => AroHttp.post(`/service/rfp/process?user_id=${userId}&plan_id=${planId}`, requestBody))
+      .then(result => {
+        dispatch({
+          type: Actions.RFP_SET_STATUS,
+          payload: RfpStatusTypes.FINISHED
+        })
       })
-    }, 5000)
+      .catch(err => {
+        console.error(err)
+        dispatch({
+          type: Actions.RFP_SET_STATUS,
+          payload: RfpStatusTypes.FINISHED
+        })
+      })
   }
 }
 
