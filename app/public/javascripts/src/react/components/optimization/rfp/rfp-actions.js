@@ -60,6 +60,7 @@ function initializeRfpReport (planId, userId, projectId, rfpId, fiberRoutingMode
       rfpId: rfpId,
       fiberRoutingMode: fiberRoutingMode,
       targets: targets.map(target => ({
+        id: target.id,
         point: {
           type: 'Point',
           coordinates: [target.lng, target.lat]
