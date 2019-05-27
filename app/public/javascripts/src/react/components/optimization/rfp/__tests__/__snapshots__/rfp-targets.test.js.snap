@@ -78,7 +78,7 @@ exports[`Click to delete a target 1`] = `
           onClick={[Function]}
         >
           <td>
-            47.58444322
+            47.58444
           </td>
           <td>
             -122.33033
@@ -255,7 +255,7 @@ exports[`Click to delete a target 2`] = `
           onClick={[Function]}
         >
           <td>
-            47.58444322
+            47.58444
           </td>
           <td>
             -122.33033
@@ -432,7 +432,7 @@ exports[`Click to edit a target 1`] = `
           onClick={[Function]}
         >
           <td>
-            47.58444322
+            47.58444
           </td>
           <td>
             -122.33033
@@ -801,7 +801,7 @@ exports[`Click to edit a target 3`] = `
               id="inpTargetLatitude_0"
               onChange={[Function]}
               type="text"
-              value={47.11111}
+              value="47.11111"
             />
           </td>
           <td>
@@ -810,7 +810,7 @@ exports[`Click to edit a target 3`] = `
               id="inpTargetLongitude_0"
               onChange={[Function]}
               type="text"
-              value={-122.33333}
+              value="-122.33333"
             />
           </td>
           <td>
@@ -983,7 +983,7 @@ exports[`Click to edit a target 4`] = `
           onClick={[Function]}
         >
           <td>
-            47.58444322
+            47.58444
           </td>
           <td>
             -122.33033
@@ -1160,7 +1160,7 @@ exports[`Click to manually add a target 1`] = `
           onClick={[Function]}
         >
           <td>
-            47.58444322
+            47.58444
           </td>
           <td>
             -122.33033
@@ -1312,7 +1312,7 @@ exports[`Click to manually add a target 2`] = `
           onClick={[Function]}
         >
           <td>
-            47.58444322
+            47.58444
           </td>
           <td>
             -122.33033
@@ -1516,7 +1516,7 @@ exports[`Click to manually add a target 3`] = `
           onClick={[Function]}
         >
           <td>
-            47.58444322
+            47.58444
           </td>
           <td>
             -122.33033
@@ -1693,7 +1693,7 @@ exports[`Click to select a target 1`] = `
           onClick={[Function]}
         >
           <td>
-            47.58444322
+            47.58444
           </td>
           <td>
             -122.33033
@@ -1870,7 +1870,7 @@ exports[`Click to select a target 2`] = `
           onClick={[Function]}
         >
           <td>
-            47.58444322
+            47.58444
           </td>
           <td>
             -122.33033
@@ -2124,7 +2124,7 @@ exports[`With targets and one selection 1`] = `
           onClick={[Function]}
         >
           <td>
-            47.58444322
+            47.58444
           </td>
           <td>
             -122.33033
@@ -2301,7 +2301,7 @@ exports[`With targets, no selection 1`] = `
           onClick={[Function]}
         >
           <td>
-            47.58444322
+            47.58444
           </td>
           <td>
             -122.33033

@@ -6,6 +6,7 @@ import Point from '../../../common/point'
 import RfpActions from './rfp-actions'
 import RfpFileImporter from './rfp-file-importer.jsx'
 import RfpTargetsMap from './rfp-targets-map.jsx'
+import Constants from '../../../common/constants'
 import './rfp-targets.css'
 
 const NEW_TARGET = {
@@ -90,8 +91,8 @@ export class RfpTargets extends Component {
   renderRegularTarget (target, index) {
     return <tr id={`trTarget_${index}`} key={index} onClick={event => this.props.setSelectedTarget(target)}
       className={'tr-rfp-target' + (this.props.selectedTarget === target ? ' selected-target-row ' : '')}>
-      <td>{target.lat}</td>
-      <td>{target.lng}</td>
+      <td>{this.limitLatLongPrecision(target.lat)}</td>
+      <td>{this.limitLatLongPrecision(target.lng)}</td>
       <td>
         <button id={`btnEditTarget_${index}`} className='btn btn-sm btn-light' onClick={() => this.startEditingTarget(target)}>
           <i className='fa fa-edit' />
@@ -113,7 +114,7 @@ export class RfpTargets extends Component {
           type='text'
           className='form-control form-control-sm'
           value={this.state.targetsBeingEdited[indexWithinEditingTargets].lat}
-          onChange={event => this.setEditingTargetProperty(target.id, 'lat', +event.target.value)}
+          onChange={event => this.setEditingTargetProperty(target.id, 'lat', event.target.value)}
         />
       </td>
       <td>
@@ -122,7 +123,7 @@ export class RfpTargets extends Component {
           type='text'
           className='form-control form-control-sm'
           value={this.state.targetsBeingEdited[indexWithinEditingTargets].lng}
-          onChange={event => this.setEditingTargetProperty(target.id, 'lng', +event.target.value)}
+          onChange={event => this.setEditingTargetProperty(target.id, 'lng', event.target.value)}
         />
       </td>
       <td>
@@ -134,6 +135,11 @@ export class RfpTargets extends Component {
         </button>
       </td>
     </tr>
+  }
+
+  limitLatLongPrecision (number) {
+    // This will limit precision, as well as remove insignificant trailing zeros. E.g. 1.210000003 => 1.21
+    return Number(number.toFixed(Constants.LAT_LONG_DISPLAY_PRECISION)).toString()
   }
 
   startAddingNewTarget () {
@@ -176,6 +182,9 @@ export class RfpTargets extends Component {
     // Save the change to the redux store
     const targetIndex = this.props.targets.findIndex(target => target.id === targetId)
     const editingTargetIndex = this.state.targetsBeingEdited.findIndex(target => target.id === targetId)
+    // Make sure that the lat/longs of the editing target are numbers
+    this.state.targetsBeingEdited[editingTargetIndex].lat = +this.state.targetsBeingEdited[editingTargetIndex].lat
+    this.state.targetsBeingEdited[editingTargetIndex].lng = +this.state.targetsBeingEdited[editingTargetIndex].lng
     this.props.replaceTarget(targetIndex, this.state.targetsBeingEdited[editingTargetIndex])
 
     var newTargetsBeingEdited = [].concat(this.state.targetsBeingEdited)
