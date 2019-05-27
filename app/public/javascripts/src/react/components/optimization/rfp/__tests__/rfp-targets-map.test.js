@@ -19,11 +19,9 @@ test('With no targets', () => {
       }
     }
   }
-  const mockGoogleMaps = { setOptions: () => {} }
   shallow(
     <RfpTargetsMap targets={[]}
       selectedTarget={null}
-      googleMaps={mockGoogleMaps}
     />
   )
 })
@@ -241,14 +239,28 @@ test('Click on map to add markers', () => {
     }
   }
   const mockGoogleMaps = { setOptions: () => {} }
-  shallow(
+  const mockSetClickMapToAddTarget = jest.fn()
+  const component = shallow(
     <RfpTargetsMap targets={[]}
       selectedTarget={null}
       googleMaps={mockGoogleMaps}
       addTargets={mockAddTargets}
+      clickMapToAddTarget={false}
+      setClickMapToAddTarget={mockSetClickMapToAddTarget}
     />
   )
-  // At this point, mockClickHandler should be defined. Call it and make sure the action for add props is called
+  // At this point, mockClickHandler should be defined. Call it, but clicking is disabled so no calls should be made.
+  mockClickHandler({
+    latLng: {
+      lat: () => 47.1111,
+      lng: () => -122.3333
+    }
+  })
+  expect(mockAddTargets.mock.calls.length).toEqual(0)
+  expect(mockSetClickMapToAddTarget.mock.calls.length).toEqual(0)
+
+  // Enable click-to-add-target-on-map and make sure the handler is called
+  component.setProps({ clickMapToAddTarget: true })
   mockClickHandler({
     latLng: {
       lat: () => 47.1111,
@@ -258,4 +270,5 @@ test('Click on map to add markers', () => {
   expect(mockAddTargets.mock.calls.length).toEqual(1)
   expect(mockAddTargets.mock.calls[0][0][0].lat).toEqual(47.1111)
   expect(mockAddTargets.mock.calls[0][0][0].lng).toEqual(-122.3333)
+  expect(mockSetClickMapToAddTarget).toHaveBeenCalledWith(false)
 })

@@ -3,18 +3,6 @@ import Actions from '../../../common/actions'
 import AroHttp from '../../../common/aro-http'
 import RfpStatusTypes from './constants'
 
-function initialize () {
-  return {
-    type: Actions.RFP_INITIALIZE
-  }
-}
-
-function clearState () {
-  return {
-    type: Actions.RFP_CLEAR_STATE
-  }
-}
-
 function showOrHideRfpStatusModal (showRfpStatusModal) {
   return {
     type: Actions.RFP_SHOW_HIDE_STATUS_MODAL,
@@ -91,19 +79,24 @@ function initializeRfpReport (planId, userId, projectId, rfpId, fiberRoutingMode
 
 function modifyRfpReport () {
   return {
-    type: Actions.RFP_SET_STATUS,
-    payload: RfpStatusTypes.UNINITIALIZED
+    type: Actions.RFP_CLEAR_STATE
+  }
+}
+
+function setClickMapToAddTarget (clickMapToAddTarget) {
+  return {
+    type: Actions.RFP_SET_CLICK_MAP_TO_ADD_TARGET,
+    payload: clickMapToAddTarget
   }
 }
 
 export default {
   addTargets: addTargets,
-  clearState: clearState,
-  initialize: initialize,
   initializeRfpReport: initializeRfpReport,
   modifyRfpReport: modifyRfpReport,
   removeTarget: removeTarget,
   replaceTarget: replaceTarget,
   setSelectedTarget: setSelectedTarget,
-  showOrHideRfpStatusModal: showOrHideRfpStatusModal
+  showOrHideRfpStatusModal: showOrHideRfpStatusModal,
+  setClickMapToAddTarget: setClickMapToAddTarget
 }

@@ -77,7 +77,9 @@ test('Click to edit a target', () => {
   expect(component).toMatchSnapshot()
 
   // Save the changes
-  component.find(`#btnSaveTarget_${indexToEdit}`).simulate('click')
+  const mockStopEventPropagation = jest.fn()
+  component.find(`#btnSaveTarget_${indexToEdit}`).simulate('click', { stopPropagation: mockStopEventPropagation })
+  expect(mockStopEventPropagation).toHaveBeenCalled()
   expect(mockReplaceTarget).toHaveBeenCalledWith(indexToEdit, { id: 1, lat: 47.11111, lng: -122.33333 })
   // Note that the actual target value has not changed, so the next snapshot will show old lat/long values.
   // But we still check the snapshot to make sure that the input boxes are gone and just the <td>'s are rendered.
@@ -94,7 +96,29 @@ test('Click to delete a target', () => {
     />
   )
   expect(component).toMatchSnapshot()
-  component.find('#btnDeleteTarget_2').simulate('click')
+  const mockStopEventPropagation = jest.fn()
+  component.find('#btnDeleteTarget_2').simulate('click', { stopPropagation: mockStopEventPropagation })
   expect(mockRemoveTarget).toHaveBeenCalledWith(2)
+  expect(mockStopEventPropagation).toHaveBeenCalled()
   expect(component).toMatchSnapshot()
+})
+
+// -----------------------------------------------------------------------------
+test('Click to manually add a target', () => {
+  const mockAddTargets = jest.fn()
+  const mockSetClickMapToAddTarget = jest.fn()
+  const component = shallow(
+    <RfpTargets targets={targets}
+      selectedTarget={null}
+      addTargets={mockAddTargets}
+      setClickMapToAddTarget={mockSetClickMapToAddTarget}
+    />
+  )
+  expect(component).toMatchSnapshot()
+  component.find('#btnAddTargetManual').simulate('click')
+  expect(component).toMatchSnapshot()
+  expect(mockSetClickMapToAddTarget).toHaveBeenCalledWith(false)
+  component.find('#btnSaveTarget').simulate('click')
+  expect(component).toMatchSnapshot()
+  expect(mockAddTargets.mock.calls.length).toBe(1)
 })

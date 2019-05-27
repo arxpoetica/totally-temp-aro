@@ -9,13 +9,10 @@ const defaultState = {
     }
   },
   targets: [],
+  clickMapToAddTarget: false,
   selectedTarget: null,
   showRfpStatusModal: false,
   status: RfpStatusTypes.UNINITIALIZED
-}
-
-function initialize () {
-  return JSON.parse(JSON.stringify(defaultState))
 }
 
 function clearState () {
@@ -42,11 +39,13 @@ function removeTarget (state, index) {
   }
 }
 
-function replaceTarget (state, index, target) {
+function replaceTarget (state, index, newTarget) {
   var newTargets = [].concat(state.targets)
-  newTargets.splice(index, 1, target)
+  const oldSelectedTargetIndex = state.selectedTarget ? state.targets.findIndex(oldTarget => oldTarget === state.selectedTarget) : -1
+  newTargets.splice(index, 1, newTarget)
   return { ...state,
-    targets: newTargets
+    targets: newTargets,
+    selectedTarget: (oldSelectedTargetIndex === index) ? newTarget : state.selectedTarget
   }
 }
 
@@ -62,11 +61,14 @@ function setStatus (state, status) {
   }
 }
 
+function setClickMapToAddTarget (state, clickMapToAddTarget) {
+  return { ...state,
+    clickMapToAddTarget: clickMapToAddTarget
+  }
+}
+
 function rfpReducer (state = defaultState, action) {
   switch (action.type) {
-    case Actions.RFP_INITIALIZE:
-      return initialize(state)
-
     case Actions.RFP_CLEAR_STATE:
       return clearState(state)
 
@@ -87,6 +89,9 @@ function rfpReducer (state = defaultState, action) {
 
     case Actions.RFP_SET_STATUS:
       return setStatus(state, action.payload)
+
+    case Actions.RFP_SET_CLICK_MAP_TO_ADD_TARGET:
+      return setClickMapToAddTarget(state, action.payload)
 
     default:
       return state

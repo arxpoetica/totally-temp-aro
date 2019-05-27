@@ -12,7 +12,7 @@ function loadFiberTypes () {
 }
 
 function loadServiceLayers () {
-  return database.query('SELECT * FROM client.service_layer WHERE is_user_defined=false ORDER BY id ASC')
+  return database.query('SELECT * FROM client.service_layer WHERE is_user_defined=false AND show_in_boundaries=true ORDER BY id ASC')
     .then((response) => {
       exports.serviceLayers = response
       return database.query(`

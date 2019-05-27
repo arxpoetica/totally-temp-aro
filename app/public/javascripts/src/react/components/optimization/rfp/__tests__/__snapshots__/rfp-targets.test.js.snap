@@ -16,13 +16,24 @@ exports[`Click to delete a target 1`] = `
     >
       <Component />
       <button
-        className="btn btn-sm btn-primary ml-1"
+        className="btn btn-sm btn-light"
+        id="btnAddTargetManual"
         onClick={[Function]}
       >
         <i
           className="fas fa-pencil-alt"
         />
-         Add target
+         Manual entry
+      </button>
+      <button
+        className="btn btn-sm btn-light"
+        id="btnClickMapToAddTarget"
+        onClick={[Function]}
+      >
+        <i
+          className="fas fa-bullseye"
+        />
+         Click map
       </button>
     </div>
   </h4>
@@ -30,6 +41,7 @@ exports[`Click to delete a target 1`] = `
     style={
       Object {
         "maxHeight": "300px",
+        "overflowX": "hidden",
         "overflowY": "auto",
       }
     }
@@ -42,6 +54,9 @@ exports[`Click to delete a target 1`] = `
         className="thead thead-light"
       >
         <tr>
+          <th>
+            ID
+          </th>
           <th>
             Latitude
           </th>
@@ -67,7 +82,10 @@ exports[`Click to delete a target 1`] = `
           onClick={[Function]}
         >
           <td>
-            47.58444322
+            1
+          </td>
+          <td>
+            47.58444
           </td>
           <td>
             -122.33033
@@ -99,6 +117,9 @@ exports[`Click to delete a target 1`] = `
           key="1"
           onClick={[Function]}
         >
+          <td>
+            2
+          </td>
           <td>
             47.59
           </td>
@@ -132,6 +153,9 @@ exports[`Click to delete a target 1`] = `
           key="2"
           onClick={[Function]}
         >
+          <td>
+            3
+          </td>
           <td>
             47.57
           </td>
@@ -182,13 +206,24 @@ exports[`Click to delete a target 2`] = `
     >
       <Component />
       <button
-        className="btn btn-sm btn-primary ml-1"
+        className="btn btn-sm btn-light"
+        id="btnAddTargetManual"
         onClick={[Function]}
       >
         <i
           className="fas fa-pencil-alt"
         />
-         Add target
+         Manual entry
+      </button>
+      <button
+        className="btn btn-sm btn-light"
+        id="btnClickMapToAddTarget"
+        onClick={[Function]}
+      >
+        <i
+          className="fas fa-bullseye"
+        />
+         Click map
       </button>
     </div>
   </h4>
@@ -196,6 +231,7 @@ exports[`Click to delete a target 2`] = `
     style={
       Object {
         "maxHeight": "300px",
+        "overflowX": "hidden",
         "overflowY": "auto",
       }
     }
@@ -208,6 +244,9 @@ exports[`Click to delete a target 2`] = `
         className="thead thead-light"
       >
         <tr>
+          <th>
+            ID
+          </th>
           <th>
             Latitude
           </th>
@@ -233,7 +272,10 @@ exports[`Click to delete a target 2`] = `
           onClick={[Function]}
         >
           <td>
-            47.58444322
+            1
+          </td>
+          <td>
+            47.58444
           </td>
           <td>
             -122.33033
@@ -265,6 +307,9 @@ exports[`Click to delete a target 2`] = `
           key="1"
           onClick={[Function]}
         >
+          <td>
+            2
+          </td>
           <td>
             47.59
           </td>
@@ -298,6 +343,9 @@ exports[`Click to delete a target 2`] = `
           key="2"
           onClick={[Function]}
         >
+          <td>
+            3
+          </td>
           <td>
             47.57
           </td>
@@ -348,13 +396,24 @@ exports[`Click to edit a target 1`] = `
     >
       <Component />
       <button
-        className="btn btn-sm btn-primary ml-1"
+        className="btn btn-sm btn-light"
+        id="btnAddTargetManual"
         onClick={[Function]}
       >
         <i
           className="fas fa-pencil-alt"
         />
-         Add target
+         Manual entry
+      </button>
+      <button
+        className="btn btn-sm btn-light"
+        id="btnClickMapToAddTarget"
+        onClick={[Function]}
+      >
+        <i
+          className="fas fa-bullseye"
+        />
+         Click map
       </button>
     </div>
   </h4>
@@ -362,6 +421,7 @@ exports[`Click to edit a target 1`] = `
     style={
       Object {
         "maxHeight": "300px",
+        "overflowX": "hidden",
         "overflowY": "auto",
       }
     }
@@ -374,6 +434,9 @@ exports[`Click to edit a target 1`] = `
         className="thead thead-light"
       >
         <tr>
+          <th>
+            ID
+          </th>
           <th>
             Latitude
           </th>
@@ -399,7 +462,10 @@ exports[`Click to edit a target 1`] = `
           onClick={[Function]}
         >
           <td>
-            47.58444322
+            1
+          </td>
+          <td>
+            47.58444
           </td>
           <td>
             -122.33033
@@ -431,6 +497,9 @@ exports[`Click to edit a target 1`] = `
           key="1"
           onClick={[Function]}
         >
+          <td>
+            2
+          </td>
           <td>
             47.59
           </td>
@@ -464,6 +533,9 @@ exports[`Click to edit a target 1`] = `
           key="2"
           onClick={[Function]}
         >
+          <td>
+            3
+          </td>
           <td>
             47.57
           </td>
@@ -514,13 +586,24 @@ exports[`Click to edit a target 2`] = `
     >
       <Component />
       <button
-        className="btn btn-sm btn-primary ml-1"
+        className="btn btn-sm btn-light"
+        id="btnAddTargetManual"
         onClick={[Function]}
       >
         <i
           className="fas fa-pencil-alt"
         />
-         Add target
+         Manual entry
+      </button>
+      <button
+        className="btn btn-sm btn-light"
+        id="btnClickMapToAddTarget"
+        onClick={[Function]}
+      >
+        <i
+          className="fas fa-bullseye"
+        />
+         Click map
       </button>
     </div>
   </h4>
@@ -528,6 +611,7 @@ exports[`Click to edit a target 2`] = `
     style={
       Object {
         "maxHeight": "300px",
+        "overflowX": "hidden",
         "overflowY": "auto",
       }
     }
@@ -540,6 +624,9 @@ exports[`Click to edit a target 2`] = `
         className="thead thead-light"
       >
         <tr>
+          <th>
+            ID
+          </th>
           <th>
             Latitude
           </th>
@@ -564,6 +651,15 @@ exports[`Click to edit a target 2`] = `
           key="0"
           onClick={[Function]}
         >
+          <td>
+            <input
+              className="form-control form-control-sm"
+              id="inpTargetId_0"
+              onChange={[Function]}
+              type="text"
+              value={1}
+            />
+          </td>
           <td>
             <input
               className="form-control form-control-sm"
@@ -608,6 +704,9 @@ exports[`Click to edit a target 2`] = `
           onClick={[Function]}
         >
           <td>
+            2
+          </td>
+          <td>
             47.59
           </td>
           <td>
@@ -640,6 +739,9 @@ exports[`Click to edit a target 2`] = `
           key="2"
           onClick={[Function]}
         >
+          <td>
+            3
+          </td>
           <td>
             47.57
           </td>
@@ -690,13 +792,24 @@ exports[`Click to edit a target 3`] = `
     >
       <Component />
       <button
-        className="btn btn-sm btn-primary ml-1"
+        className="btn btn-sm btn-light"
+        id="btnAddTargetManual"
         onClick={[Function]}
       >
         <i
           className="fas fa-pencil-alt"
         />
-         Add target
+         Manual entry
+      </button>
+      <button
+        className="btn btn-sm btn-light"
+        id="btnClickMapToAddTarget"
+        onClick={[Function]}
+      >
+        <i
+          className="fas fa-bullseye"
+        />
+         Click map
       </button>
     </div>
   </h4>
@@ -704,6 +817,7 @@ exports[`Click to edit a target 3`] = `
     style={
       Object {
         "maxHeight": "300px",
+        "overflowX": "hidden",
         "overflowY": "auto",
       }
     }
@@ -716,6 +830,9 @@ exports[`Click to edit a target 3`] = `
         className="thead thead-light"
       >
         <tr>
+          <th>
+            ID
+          </th>
           <th>
             Latitude
           </th>
@@ -743,10 +860,19 @@ exports[`Click to edit a target 3`] = `
           <td>
             <input
               className="form-control form-control-sm"
+              id="inpTargetId_0"
+              onChange={[Function]}
+              type="text"
+              value={1}
+            />
+          </td>
+          <td>
+            <input
+              className="form-control form-control-sm"
               id="inpTargetLatitude_0"
               onChange={[Function]}
               type="text"
-              value={47.11111}
+              value="47.11111"
             />
           </td>
           <td>
@@ -755,7 +881,7 @@ exports[`Click to edit a target 3`] = `
               id="inpTargetLongitude_0"
               onChange={[Function]}
               type="text"
-              value={-122.33333}
+              value="-122.33333"
             />
           </td>
           <td>
@@ -783,6 +909,9 @@ exports[`Click to edit a target 3`] = `
           key="1"
           onClick={[Function]}
         >
+          <td>
+            2
+          </td>
           <td>
             47.59
           </td>
@@ -816,6 +945,9 @@ exports[`Click to edit a target 3`] = `
           key="2"
           onClick={[Function]}
         >
+          <td>
+            3
+          </td>
           <td>
             47.57
           </td>
@@ -866,13 +998,24 @@ exports[`Click to edit a target 4`] = `
     >
       <Component />
       <button
-        className="btn btn-sm btn-primary ml-1"
+        className="btn btn-sm btn-light"
+        id="btnAddTargetManual"
         onClick={[Function]}
       >
         <i
           className="fas fa-pencil-alt"
         />
-         Add target
+         Manual entry
+      </button>
+      <button
+        className="btn btn-sm btn-light"
+        id="btnClickMapToAddTarget"
+        onClick={[Function]}
+      >
+        <i
+          className="fas fa-bullseye"
+        />
+         Click map
       </button>
     </div>
   </h4>
@@ -880,6 +1023,7 @@ exports[`Click to edit a target 4`] = `
     style={
       Object {
         "maxHeight": "300px",
+        "overflowX": "hidden",
         "overflowY": "auto",
       }
     }
@@ -892,6 +1036,9 @@ exports[`Click to edit a target 4`] = `
         className="thead thead-light"
       >
         <tr>
+          <th>
+            ID
+          </th>
           <th>
             Latitude
           </th>
@@ -917,7 +1064,10 @@ exports[`Click to edit a target 4`] = `
           onClick={[Function]}
         >
           <td>
-            47.58444322
+            1
+          </td>
+          <td>
+            47.58444
           </td>
           <td>
             -122.33033
@@ -949,6 +1099,9 @@ exports[`Click to edit a target 4`] = `
           key="1"
           onClick={[Function]}
         >
+          <td>
+            2
+          </td>
           <td>
             47.59
           </td>
@@ -982,6 +1135,589 @@ exports[`Click to edit a target 4`] = `
           key="2"
           onClick={[Function]}
         >
+          <td>
+            3
+          </td>
+          <td>
+            47.57
+          </td>
+          <td>
+            -122.32
+          </td>
+          <td>
+            <button
+              className="btn btn-sm btn-light"
+              id="btnEditTarget_2"
+              onClick={[Function]}
+            >
+              <i
+                className="fa fa-edit"
+              />
+            </button>
+            <button
+              className="btn btn-sm btn-danger"
+              id="btnDeleteTarget_2"
+              onClick={[Function]}
+            >
+              <i
+                className="fa fa-trash-alt"
+              />
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <Component />
+</div>
+`;
+
+exports[`Click to manually add a target 1`] = `
+<div
+  className="m-2 p-2"
+  style={
+    Object {
+      "borderTop": "solid 2px #eee",
+    }
+  }
+>
+  <h4>
+    Targets
+    <div
+      className="float-right"
+    >
+      <Component />
+      <button
+        className="btn btn-sm btn-light"
+        id="btnAddTargetManual"
+        onClick={[Function]}
+      >
+        <i
+          className="fas fa-pencil-alt"
+        />
+         Manual entry
+      </button>
+      <button
+        className="btn btn-sm btn-light"
+        id="btnClickMapToAddTarget"
+        onClick={[Function]}
+      >
+        <i
+          className="fas fa-bullseye"
+        />
+         Click map
+      </button>
+    </div>
+  </h4>
+  <div
+    style={
+      Object {
+        "maxHeight": "300px",
+        "overflowX": "hidden",
+        "overflowY": "auto",
+      }
+    }
+  >
+    <table
+      className="table table-sm table-striped"
+      id="tblRfpTargets"
+    >
+      <thead
+        className="thead thead-light"
+      >
+        <tr>
+          <th>
+            ID
+          </th>
+          <th>
+            Latitude
+          </th>
+          <th>
+            Longitude
+          </th>
+          <th
+            style={
+              Object {
+                "width": "100px",
+              }
+            }
+          >
+            Actions
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          className="tr-rfp-target"
+          id="trTarget_0"
+          key="0"
+          onClick={[Function]}
+        >
+          <td>
+            1
+          </td>
+          <td>
+            47.58444
+          </td>
+          <td>
+            -122.33033
+          </td>
+          <td>
+            <button
+              className="btn btn-sm btn-light"
+              id="btnEditTarget_0"
+              onClick={[Function]}
+            >
+              <i
+                className="fa fa-edit"
+              />
+            </button>
+            <button
+              className="btn btn-sm btn-danger"
+              id="btnDeleteTarget_0"
+              onClick={[Function]}
+            >
+              <i
+                className="fa fa-trash-alt"
+              />
+            </button>
+          </td>
+        </tr>
+        <tr
+          className="tr-rfp-target"
+          id="trTarget_1"
+          key="1"
+          onClick={[Function]}
+        >
+          <td>
+            2
+          </td>
+          <td>
+            47.59
+          </td>
+          <td>
+            -122.34
+          </td>
+          <td>
+            <button
+              className="btn btn-sm btn-light"
+              id="btnEditTarget_1"
+              onClick={[Function]}
+            >
+              <i
+                className="fa fa-edit"
+              />
+            </button>
+            <button
+              className="btn btn-sm btn-danger"
+              id="btnDeleteTarget_1"
+              onClick={[Function]}
+            >
+              <i
+                className="fa fa-trash-alt"
+              />
+            </button>
+          </td>
+        </tr>
+        <tr
+          className="tr-rfp-target"
+          id="trTarget_2"
+          key="2"
+          onClick={[Function]}
+        >
+          <td>
+            3
+          </td>
+          <td>
+            47.57
+          </td>
+          <td>
+            -122.32
+          </td>
+          <td>
+            <button
+              className="btn btn-sm btn-light"
+              id="btnEditTarget_2"
+              onClick={[Function]}
+            >
+              <i
+                className="fa fa-edit"
+              />
+            </button>
+            <button
+              className="btn btn-sm btn-danger"
+              id="btnDeleteTarget_2"
+              onClick={[Function]}
+            >
+              <i
+                className="fa fa-trash-alt"
+              />
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <Component />
+</div>
+`;
+
+exports[`Click to manually add a target 2`] = `
+<div
+  className="m-2 p-2"
+  style={
+    Object {
+      "borderTop": "solid 2px #eee",
+    }
+  }
+>
+  <h4>
+    Targets
+  </h4>
+  <div
+    style={
+      Object {
+        "maxHeight": "300px",
+        "overflowX": "hidden",
+        "overflowY": "auto",
+      }
+    }
+  >
+    <table
+      className="table table-sm table-striped"
+      id="tblRfpTargets"
+    >
+      <thead
+        className="thead thead-light"
+      >
+        <tr>
+          <th>
+            ID
+          </th>
+          <th>
+            Latitude
+          </th>
+          <th>
+            Longitude
+          </th>
+          <th
+            style={
+              Object {
+                "width": "100px",
+              }
+            }
+          >
+            Actions
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          className="tr-rfp-target"
+          id="trTarget_0"
+          key="0"
+          onClick={[Function]}
+        >
+          <td>
+            1
+          </td>
+          <td>
+            47.58444
+          </td>
+          <td>
+            -122.33033
+          </td>
+          <td>
+            <button
+              className="btn btn-sm btn-light"
+              id="btnEditTarget_0"
+              onClick={[Function]}
+            >
+              <i
+                className="fa fa-edit"
+              />
+            </button>
+            <button
+              className="btn btn-sm btn-danger"
+              id="btnDeleteTarget_0"
+              onClick={[Function]}
+            >
+              <i
+                className="fa fa-trash-alt"
+              />
+            </button>
+          </td>
+        </tr>
+        <tr
+          className="tr-rfp-target"
+          id="trTarget_1"
+          key="1"
+          onClick={[Function]}
+        >
+          <td>
+            2
+          </td>
+          <td>
+            47.59
+          </td>
+          <td>
+            -122.34
+          </td>
+          <td>
+            <button
+              className="btn btn-sm btn-light"
+              id="btnEditTarget_1"
+              onClick={[Function]}
+            >
+              <i
+                className="fa fa-edit"
+              />
+            </button>
+            <button
+              className="btn btn-sm btn-danger"
+              id="btnDeleteTarget_1"
+              onClick={[Function]}
+            >
+              <i
+                className="fa fa-trash-alt"
+              />
+            </button>
+          </td>
+        </tr>
+        <tr
+          className="tr-rfp-target"
+          id="trTarget_2"
+          key="2"
+          onClick={[Function]}
+        >
+          <td>
+            3
+          </td>
+          <td>
+            47.57
+          </td>
+          <td>
+            -122.32
+          </td>
+          <td>
+            <button
+              className="btn btn-sm btn-light"
+              id="btnEditTarget_2"
+              onClick={[Function]}
+            >
+              <i
+                className="fa fa-edit"
+              />
+            </button>
+            <button
+              className="btn btn-sm btn-danger"
+              id="btnDeleteTarget_2"
+              onClick={[Function]}
+            >
+              <i
+                className="fa fa-trash-alt"
+              />
+            </button>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <input
+              className="form-control"
+              onChange={[Function]}
+              type="text"
+              value="2d897638-960e-40b3-b25b-5356d3e6c865"
+            />
+          </td>
+          <td>
+            <input
+              className="form-control"
+              onChange={[Function]}
+              type="text"
+              value={0}
+            />
+          </td>
+          <td>
+            <input
+              className="form-control"
+              onChange={[Function]}
+              type="text"
+              value={0}
+            />
+          </td>
+          <td>
+            <button
+              className="btn btn-sm btn-primary"
+              id="btnSaveTarget"
+              onClick={[Function]}
+            >
+              Save
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <Component />
+</div>
+`;
+
+exports[`Click to manually add a target 3`] = `
+<div
+  className="m-2 p-2"
+  style={
+    Object {
+      "borderTop": "solid 2px #eee",
+    }
+  }
+>
+  <h4>
+    Targets
+    <div
+      className="float-right"
+    >
+      <Component />
+      <button
+        className="btn btn-sm btn-light"
+        id="btnAddTargetManual"
+        onClick={[Function]}
+      >
+        <i
+          className="fas fa-pencil-alt"
+        />
+         Manual entry
+      </button>
+      <button
+        className="btn btn-sm btn-light"
+        id="btnClickMapToAddTarget"
+        onClick={[Function]}
+      >
+        <i
+          className="fas fa-bullseye"
+        />
+         Click map
+      </button>
+    </div>
+  </h4>
+  <div
+    style={
+      Object {
+        "maxHeight": "300px",
+        "overflowX": "hidden",
+        "overflowY": "auto",
+      }
+    }
+  >
+    <table
+      className="table table-sm table-striped"
+      id="tblRfpTargets"
+    >
+      <thead
+        className="thead thead-light"
+      >
+        <tr>
+          <th>
+            ID
+          </th>
+          <th>
+            Latitude
+          </th>
+          <th>
+            Longitude
+          </th>
+          <th
+            style={
+              Object {
+                "width": "100px",
+              }
+            }
+          >
+            Actions
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          className="tr-rfp-target"
+          id="trTarget_0"
+          key="0"
+          onClick={[Function]}
+        >
+          <td>
+            1
+          </td>
+          <td>
+            47.58444
+          </td>
+          <td>
+            -122.33033
+          </td>
+          <td>
+            <button
+              className="btn btn-sm btn-light"
+              id="btnEditTarget_0"
+              onClick={[Function]}
+            >
+              <i
+                className="fa fa-edit"
+              />
+            </button>
+            <button
+              className="btn btn-sm btn-danger"
+              id="btnDeleteTarget_0"
+              onClick={[Function]}
+            >
+              <i
+                className="fa fa-trash-alt"
+              />
+            </button>
+          </td>
+        </tr>
+        <tr
+          className="tr-rfp-target"
+          id="trTarget_1"
+          key="1"
+          onClick={[Function]}
+        >
+          <td>
+            2
+          </td>
+          <td>
+            47.59
+          </td>
+          <td>
+            -122.34
+          </td>
+          <td>
+            <button
+              className="btn btn-sm btn-light"
+              id="btnEditTarget_1"
+              onClick={[Function]}
+            >
+              <i
+                className="fa fa-edit"
+              />
+            </button>
+            <button
+              className="btn btn-sm btn-danger"
+              id="btnDeleteTarget_1"
+              onClick={[Function]}
+            >
+              <i
+                className="fa fa-trash-alt"
+              />
+            </button>
+          </td>
+        </tr>
+        <tr
+          className="tr-rfp-target"
+          id="trTarget_2"
+          key="2"
+          onClick={[Function]}
+        >
+          <td>
+            3
+          </td>
           <td>
             47.57
           </td>
@@ -1032,13 +1768,24 @@ exports[`Click to select a target 1`] = `
     >
       <Component />
       <button
-        className="btn btn-sm btn-primary ml-1"
+        className="btn btn-sm btn-light"
+        id="btnAddTargetManual"
         onClick={[Function]}
       >
         <i
           className="fas fa-pencil-alt"
         />
-         Add target
+         Manual entry
+      </button>
+      <button
+        className="btn btn-sm btn-light"
+        id="btnClickMapToAddTarget"
+        onClick={[Function]}
+      >
+        <i
+          className="fas fa-bullseye"
+        />
+         Click map
       </button>
     </div>
   </h4>
@@ -1046,6 +1793,7 @@ exports[`Click to select a target 1`] = `
     style={
       Object {
         "maxHeight": "300px",
+        "overflowX": "hidden",
         "overflowY": "auto",
       }
     }
@@ -1058,6 +1806,9 @@ exports[`Click to select a target 1`] = `
         className="thead thead-light"
       >
         <tr>
+          <th>
+            ID
+          </th>
           <th>
             Latitude
           </th>
@@ -1083,7 +1834,10 @@ exports[`Click to select a target 1`] = `
           onClick={[Function]}
         >
           <td>
-            47.58444322
+            1
+          </td>
+          <td>
+            47.58444
           </td>
           <td>
             -122.33033
@@ -1115,6 +1869,9 @@ exports[`Click to select a target 1`] = `
           key="1"
           onClick={[Function]}
         >
+          <td>
+            2
+          </td>
           <td>
             47.59
           </td>
@@ -1148,6 +1905,9 @@ exports[`Click to select a target 1`] = `
           key="2"
           onClick={[Function]}
         >
+          <td>
+            3
+          </td>
           <td>
             47.57
           </td>
@@ -1198,13 +1958,24 @@ exports[`Click to select a target 2`] = `
     >
       <Component />
       <button
-        className="btn btn-sm btn-primary ml-1"
+        className="btn btn-sm btn-light"
+        id="btnAddTargetManual"
         onClick={[Function]}
       >
         <i
           className="fas fa-pencil-alt"
         />
-         Add target
+         Manual entry
+      </button>
+      <button
+        className="btn btn-sm btn-light"
+        id="btnClickMapToAddTarget"
+        onClick={[Function]}
+      >
+        <i
+          className="fas fa-bullseye"
+        />
+         Click map
       </button>
     </div>
   </h4>
@@ -1212,6 +1983,7 @@ exports[`Click to select a target 2`] = `
     style={
       Object {
         "maxHeight": "300px",
+        "overflowX": "hidden",
         "overflowY": "auto",
       }
     }
@@ -1224,6 +1996,9 @@ exports[`Click to select a target 2`] = `
         className="thead thead-light"
       >
         <tr>
+          <th>
+            ID
+          </th>
           <th>
             Latitude
           </th>
@@ -1249,7 +2024,10 @@ exports[`Click to select a target 2`] = `
           onClick={[Function]}
         >
           <td>
-            47.58444322
+            1
+          </td>
+          <td>
+            47.58444
           </td>
           <td>
             -122.33033
@@ -1281,6 +2059,9 @@ exports[`Click to select a target 2`] = `
           key="1"
           onClick={[Function]}
         >
+          <td>
+            2
+          </td>
           <td>
             47.59
           </td>
@@ -1314,6 +2095,9 @@ exports[`Click to select a target 2`] = `
           key="2"
           onClick={[Function]}
         >
+          <td>
+            3
+          </td>
           <td>
             47.57
           </td>
@@ -1364,13 +2148,24 @@ exports[`With no targets 1`] = `
     >
       <Component />
       <button
-        className="btn btn-sm btn-primary ml-1"
+        className="btn btn-sm btn-light"
+        id="btnAddTargetManual"
         onClick={[Function]}
       >
         <i
           className="fas fa-pencil-alt"
         />
-         Add target
+         Manual entry
+      </button>
+      <button
+        className="btn btn-sm btn-light"
+        id="btnClickMapToAddTarget"
+        onClick={[Function]}
+      >
+        <i
+          className="fas fa-bullseye"
+        />
+         Click map
       </button>
     </div>
   </h4>
@@ -1378,6 +2173,7 @@ exports[`With no targets 1`] = `
     style={
       Object {
         "maxHeight": "300px",
+        "overflowX": "hidden",
         "overflowY": "auto",
       }
     }
@@ -1390,6 +2186,9 @@ exports[`With no targets 1`] = `
         className="thead thead-light"
       >
         <tr>
+          <th>
+            ID
+          </th>
           <th>
             Latitude
           </th>
@@ -1430,13 +2229,24 @@ exports[`With targets and one selection 1`] = `
     >
       <Component />
       <button
-        className="btn btn-sm btn-primary ml-1"
+        className="btn btn-sm btn-light"
+        id="btnAddTargetManual"
         onClick={[Function]}
       >
         <i
           className="fas fa-pencil-alt"
         />
-         Add target
+         Manual entry
+      </button>
+      <button
+        className="btn btn-sm btn-light"
+        id="btnClickMapToAddTarget"
+        onClick={[Function]}
+      >
+        <i
+          className="fas fa-bullseye"
+        />
+         Click map
       </button>
     </div>
   </h4>
@@ -1444,6 +2254,7 @@ exports[`With targets and one selection 1`] = `
     style={
       Object {
         "maxHeight": "300px",
+        "overflowX": "hidden",
         "overflowY": "auto",
       }
     }
@@ -1456,6 +2267,9 @@ exports[`With targets and one selection 1`] = `
         className="thead thead-light"
       >
         <tr>
+          <th>
+            ID
+          </th>
           <th>
             Latitude
           </th>
@@ -1481,7 +2295,10 @@ exports[`With targets and one selection 1`] = `
           onClick={[Function]}
         >
           <td>
-            47.58444322
+            1
+          </td>
+          <td>
+            47.58444
           </td>
           <td>
             -122.33033
@@ -1513,6 +2330,9 @@ exports[`With targets and one selection 1`] = `
           key="1"
           onClick={[Function]}
         >
+          <td>
+            2
+          </td>
           <td>
             47.59
           </td>
@@ -1546,6 +2366,9 @@ exports[`With targets and one selection 1`] = `
           key="2"
           onClick={[Function]}
         >
+          <td>
+            3
+          </td>
           <td>
             47.57
           </td>
@@ -1596,13 +2419,24 @@ exports[`With targets, no selection 1`] = `
     >
       <Component />
       <button
-        className="btn btn-sm btn-primary ml-1"
+        className="btn btn-sm btn-light"
+        id="btnAddTargetManual"
         onClick={[Function]}
       >
         <i
           className="fas fa-pencil-alt"
         />
-         Add target
+         Manual entry
+      </button>
+      <button
+        className="btn btn-sm btn-light"
+        id="btnClickMapToAddTarget"
+        onClick={[Function]}
+      >
+        <i
+          className="fas fa-bullseye"
+        />
+         Click map
       </button>
     </div>
   </h4>
@@ -1610,6 +2444,7 @@ exports[`With targets, no selection 1`] = `
     style={
       Object {
         "maxHeight": "300px",
+        "overflowX": "hidden",
         "overflowY": "auto",
       }
     }
@@ -1622,6 +2457,9 @@ exports[`With targets, no selection 1`] = `
         className="thead thead-light"
       >
         <tr>
+          <th>
+            ID
+          </th>
           <th>
             Latitude
           </th>
@@ -1647,7 +2485,10 @@ exports[`With targets, no selection 1`] = `
           onClick={[Function]}
         >
           <td>
-            47.58444322
+            1
+          </td>
+          <td>
+            47.58444
           </td>
           <td>
             -122.33033
@@ -1679,6 +2520,9 @@ exports[`With targets, no selection 1`] = `
           key="1"
           onClick={[Function]}
         >
+          <td>
+            2
+          </td>
           <td>
             47.59
           </td>
@@ -1712,6 +2556,9 @@ exports[`With targets, no selection 1`] = `
           key="2"
           onClick={[Function]}
         >
+          <td>
+            3
+          </td>
           <td>
             47.57
           </td>
