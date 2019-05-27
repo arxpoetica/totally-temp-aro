@@ -97,7 +97,12 @@ export class RfpTargets extends Component {
         <button id={`btnEditTarget_${index}`} className='btn btn-sm btn-light' onClick={() => this.startEditingTarget(target)}>
           <i className='fa fa-edit' />
         </button>
-        <button id={`btnDeleteTarget_${index}`} className='btn btn-sm btn-danger' onClick={() => this.props.removeTarget(index)}>
+        <button id={`btnDeleteTarget_${index}`}
+          className='btn btn-sm btn-danger'
+          onClick={event => {
+            this.props.removeTarget(index)
+            event.stopPropagation()
+          }}>
           <i className='fa fa-trash-alt' />
         </button>
       </td>

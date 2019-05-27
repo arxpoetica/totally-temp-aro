@@ -94,8 +94,10 @@ test('Click to delete a target', () => {
     />
   )
   expect(component).toMatchSnapshot()
-  component.find('#btnDeleteTarget_2').simulate('click')
+  const mockStopEventPropagation = jest.fn()
+  component.find('#btnDeleteTarget_2').simulate('click', { stopPropagation: mockStopEventPropagation })
   expect(mockRemoveTarget).toHaveBeenCalledWith(2)
+  expect(mockStopEventPropagation).toHaveBeenCalled()
   expect(component).toMatchSnapshot()
 })
 
