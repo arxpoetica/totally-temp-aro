@@ -39,11 +39,13 @@ function removeTarget (state, index) {
   }
 }
 
-function replaceTarget (state, index, target) {
+function replaceTarget (state, index, newTarget) {
   var newTargets = [].concat(state.targets)
-  newTargets.splice(index, 1, target)
+  const oldSelectedTargetIndex = state.selectedTarget ? state.targets.findIndex(oldTarget => oldTarget === newTarget) : -1
+  newTargets.splice(index, 1, newTarget)
   return { ...state,
-    targets: newTargets
+    targets: newTargets,
+    selectedTarget: (oldSelectedTargetIndex === index) ? newTarget : state.selectedTarget
   }
 }
 

@@ -170,13 +170,11 @@ test('When marker is dragged', () => {
 
   // Create component
   const mockReplaceTarget = jest.fn()
-  const mockSetSelectedTarget = jest.fn()
   const component = shallow(
     <RfpTargetsMap targets={[]}
       selectedTarget={null}
       googleMaps={mockGoogleMaps}
       replaceTarget={mockReplaceTarget}
-      setSelectedTarget={mockSetSelectedTarget}
     />
   )
   component.setProps({ targets: [targets[0]] })
@@ -192,7 +190,6 @@ test('When marker is dragged', () => {
   expect(mockReplaceTarget.mock.calls).toEqual([
     [0, new Point(newLatLng.lat, newLatLng.lng, 1)]
   ])
-  expect(mockSetSelectedTarget).toHaveBeenCalledWith(new Point(newLatLng.lat, newLatLng.lng, 1))
 })
 
 // -----------------------------------------------------------------------------
