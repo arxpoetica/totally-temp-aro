@@ -12,7 +12,7 @@ function loadFiberTypes () {
 }
 
 function loadServiceLayers () {
-  return database.query('SELECT * FROM client.service_layer WHERE is_user_defined=false ORDER BY id ASC')
+  return database.query('SELECT * FROM client.service_layer WHERE is_user_defined=false AND show_in_boundaries=true ORDER BY id ASC')
     .then((response) => {
       exports.serviceLayers = response
       return database.query(`
@@ -21,7 +21,6 @@ function loadServiceLayers () {
           FROM client.service_layer_node_type slnt
           JOIN client.network_node_types nnt ON nnt.id = slnt.network_node_type_id
           WHERE is_displayed=true
-            AND show_in_boundaries=true
       `)
     })
     .then((nodeTypes) => {
