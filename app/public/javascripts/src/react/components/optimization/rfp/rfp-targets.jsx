@@ -33,8 +33,13 @@ export class RfpTargets extends Component {
             ? null // Dont show button if we already have the inputs shown
             : <div className='float-right'>
               <RfpFileImporter />
-              <button className='btn btn-sm btn-primary ml-1' onClick={this.startAddingNewTarget.bind(this)}>
-                <i className='fas fa-pencil-alt' /> Add target
+              <button className='btn btn-sm btn-light'
+                onClick={this.startAddingNewTarget.bind(this)}>
+                <i className='fas fa-pencil-alt' /> Manual entry
+              </button>
+              <button className={'btn btn-sm ' + (this.props.clickMapToAddTarget ? 'btn-primary' : 'btn-light')}
+                onClick={() => this.props.setClickMapToAddTarget(!this.props.clickMapToAddTarget)}>
+                <i className='fas fa-bullseye' /> Click map
               </button>
             </div>
         }
@@ -135,6 +140,7 @@ export class RfpTargets extends Component {
       newTargetLat: NEW_TARGET.lat,
       newTargetLng: NEW_TARGET.lng
     })
+    this.props.setClickMapToAddTarget(false)
   }
 
   saveNewTarget () {
@@ -192,19 +198,22 @@ export class RfpTargets extends Component {
 
 RfpTargets.propTypes = {
   targets: PropTypes.arrayOf(PropTypes.instanceOf(Point)),
-  selectedTarget: PropTypes.instanceOf(Point)
+  selectedTarget: PropTypes.instanceOf(Point),
+  clickMapToAddTarget: PropTypes.bool
 }
 
 const mapStateToProps = (state) => ({
   targets: state.optimization.rfp.targets,
-  selectedTarget: state.optimization.rfp.selectedTarget
+  selectedTarget: state.optimization.rfp.selectedTarget,
+  clickMapToAddTarget: state.optimization.rfp.clickMapToAddTarget
 })
 
 const mapDispatchToProps = dispatch => ({
   addTargets: (lat, lng) => dispatch(RfpActions.addTargets(lat, lng)),
   removeTarget: indexToRemove => dispatch(RfpActions.removeTarget(indexToRemove)),
   replaceTarget: (index, target) => dispatch(RfpActions.replaceTarget(index, target)),
-  setSelectedTarget: selectedTarget => dispatch(RfpActions.setSelectedTarget(selectedTarget))
+  setSelectedTarget: selectedTarget => dispatch(RfpActions.setSelectedTarget(selectedTarget)),
+  setClickMapToAddTarget: clickMapToAddTarget => dispatch(RfpActions.setClickMapToAddTarget(clickMapToAddTarget))
 })
 
 const RfpTargetsComponent = wrapComponentWithProvider(reduxStore, RfpTargets, mapStateToProps, mapDispatchToProps)

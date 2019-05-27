@@ -83,6 +83,13 @@ function modifyRfpReport () {
   }
 }
 
+function setClickMapToAddTarget (clickMapToAddTarget) {
+  return {
+    type: Actions.RFP_SET_CLICK_MAP_TO_ADD_TARGET,
+    payload: clickMapToAddTarget
+  }
+}
+
 export default {
   addTargets: addTargets,
   initializeRfpReport: initializeRfpReport,
@@ -90,5 +97,6 @@ export default {
   removeTarget: removeTarget,
   replaceTarget: replaceTarget,
   setSelectedTarget: setSelectedTarget,
-  showOrHideRfpStatusModal: showOrHideRfpStatusModal
+  showOrHideRfpStatusModal: showOrHideRfpStatusModal,
+  setClickMapToAddTarget: setClickMapToAddTarget
 }

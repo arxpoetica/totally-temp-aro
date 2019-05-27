@@ -16,13 +16,22 @@ exports[`Click to delete a target 1`] = `
     >
       <Component />
       <button
-        className="btn btn-sm btn-primary ml-1"
+        className="btn btn-sm btn-light"
         onClick={[Function]}
       >
         <i
           className="fas fa-pencil-alt"
         />
-         Add target
+         Manual entry
+      </button>
+      <button
+        className="btn btn-sm btn-light"
+        onClick={[Function]}
+      >
+        <i
+          className="fas fa-bullseye"
+        />
+         Click map
       </button>
     </div>
   </h4>
@@ -182,13 +191,22 @@ exports[`Click to delete a target 2`] = `
     >
       <Component />
       <button
-        className="btn btn-sm btn-primary ml-1"
+        className="btn btn-sm btn-light"
         onClick={[Function]}
       >
         <i
           className="fas fa-pencil-alt"
         />
-         Add target
+         Manual entry
+      </button>
+      <button
+        className="btn btn-sm btn-light"
+        onClick={[Function]}
+      >
+        <i
+          className="fas fa-bullseye"
+        />
+         Click map
       </button>
     </div>
   </h4>
@@ -348,13 +366,22 @@ exports[`Click to edit a target 1`] = `
     >
       <Component />
       <button
-        className="btn btn-sm btn-primary ml-1"
+        className="btn btn-sm btn-light"
         onClick={[Function]}
       >
         <i
           className="fas fa-pencil-alt"
         />
-         Add target
+         Manual entry
+      </button>
+      <button
+        className="btn btn-sm btn-light"
+        onClick={[Function]}
+      >
+        <i
+          className="fas fa-bullseye"
+        />
+         Click map
       </button>
     </div>
   </h4>
@@ -514,13 +541,22 @@ exports[`Click to edit a target 2`] = `
     >
       <Component />
       <button
-        className="btn btn-sm btn-primary ml-1"
+        className="btn btn-sm btn-light"
         onClick={[Function]}
       >
         <i
           className="fas fa-pencil-alt"
         />
-         Add target
+         Manual entry
+      </button>
+      <button
+        className="btn btn-sm btn-light"
+        onClick={[Function]}
+      >
+        <i
+          className="fas fa-bullseye"
+        />
+         Click map
       </button>
     </div>
   </h4>
@@ -690,13 +726,22 @@ exports[`Click to edit a target 3`] = `
     >
       <Component />
       <button
-        className="btn btn-sm btn-primary ml-1"
+        className="btn btn-sm btn-light"
         onClick={[Function]}
       >
         <i
           className="fas fa-pencil-alt"
         />
-         Add target
+         Manual entry
+      </button>
+      <button
+        className="btn btn-sm btn-light"
+        onClick={[Function]}
+      >
+        <i
+          className="fas fa-bullseye"
+        />
+         Click map
       </button>
     </div>
   </h4>
@@ -866,13 +911,22 @@ exports[`Click to edit a target 4`] = `
     >
       <Component />
       <button
-        className="btn btn-sm btn-primary ml-1"
+        className="btn btn-sm btn-light"
         onClick={[Function]}
       >
         <i
           className="fas fa-pencil-alt"
         />
-         Add target
+         Manual entry
+      </button>
+      <button
+        className="btn btn-sm btn-light"
+        onClick={[Function]}
+      >
+        <i
+          className="fas fa-bullseye"
+        />
+         Click map
       </button>
     </div>
   </h4>
@@ -1032,13 +1086,22 @@ exports[`Click to select a target 1`] = `
     >
       <Component />
       <button
-        className="btn btn-sm btn-primary ml-1"
+        className="btn btn-sm btn-light"
         onClick={[Function]}
       >
         <i
           className="fas fa-pencil-alt"
         />
-         Add target
+         Manual entry
+      </button>
+      <button
+        className="btn btn-sm btn-light"
+        onClick={[Function]}
+      >
+        <i
+          className="fas fa-bullseye"
+        />
+         Click map
       </button>
     </div>
   </h4>
@@ -1198,13 +1261,22 @@ exports[`Click to select a target 2`] = `
     >
       <Component />
       <button
-        className="btn btn-sm btn-primary ml-1"
+        className="btn btn-sm btn-light"
         onClick={[Function]}
       >
         <i
           className="fas fa-pencil-alt"
         />
-         Add target
+         Manual entry
+      </button>
+      <button
+        className="btn btn-sm btn-light"
+        onClick={[Function]}
+      >
+        <i
+          className="fas fa-bullseye"
+        />
+         Click map
       </button>
     </div>
   </h4>
@@ -1364,13 +1436,22 @@ exports[`With no targets 1`] = `
     >
       <Component />
       <button
-        className="btn btn-sm btn-primary ml-1"
+        className="btn btn-sm btn-light"
         onClick={[Function]}
       >
         <i
           className="fas fa-pencil-alt"
         />
-         Add target
+         Manual entry
+      </button>
+      <button
+        className="btn btn-sm btn-light"
+        onClick={[Function]}
+      >
+        <i
+          className="fas fa-bullseye"
+        />
+         Click map
       </button>
     </div>
   </h4>
@@ -1430,13 +1511,22 @@ exports[`With targets and one selection 1`] = `
     >
       <Component />
       <button
-        className="btn btn-sm btn-primary ml-1"
+        className="btn btn-sm btn-light"
         onClick={[Function]}
       >
         <i
           className="fas fa-pencil-alt"
         />
-         Add target
+         Manual entry
+      </button>
+      <button
+        className="btn btn-sm btn-light"
+        onClick={[Function]}
+      >
+        <i
+          className="fas fa-bullseye"
+        />
+         Click map
       </button>
     </div>
   </h4>
@@ -1596,13 +1686,22 @@ exports[`With targets, no selection 1`] = `
     >
       <Component />
       <button
-        className="btn btn-sm btn-primary ml-1"
+        className="btn btn-sm btn-light"
         onClick={[Function]}
       >
         <i
           className="fas fa-pencil-alt"
         />
-         Add target
+         Manual entry
+      </button>
+      <button
+        className="btn btn-sm btn-light"
+        onClick={[Function]}
+      >
+        <i
+          className="fas fa-bullseye"
+        />
+         Click map
       </button>
     </div>
   </h4>

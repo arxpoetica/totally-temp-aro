@@ -9,6 +9,7 @@ const defaultState = {
     }
   },
   targets: [],
+  clickMapToAddTarget: false,
   selectedTarget: null,
   showRfpStatusModal: false,
   status: RfpStatusTypes.UNINITIALIZED
@@ -58,6 +59,12 @@ function setStatus (state, status) {
   }
 }
 
+function setClickMapToAddTarget (state, clickMapToAddTarget) {
+  return { ...state,
+    clickMapToAddTarget: clickMapToAddTarget
+  }
+}
+
 function rfpReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.RFP_CLEAR_STATE:
@@ -80,6 +87,9 @@ function rfpReducer (state = defaultState, action) {
 
     case Actions.RFP_SET_STATUS:
       return setStatus(state, action.payload)
+
+    case Actions.RFP_SET_CLICK_MAP_TO_ADD_TARGET:
+      return setClickMapToAddTarget(state, action.payload)
 
     default:
       return state

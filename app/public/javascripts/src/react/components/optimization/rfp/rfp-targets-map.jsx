@@ -11,9 +11,10 @@ export class RfpTargetsMap extends Component {
     super(props)
     this.createdMapObjects = {}
     this.mapObjectListeners = {}
-    this.props.googleMaps.setOptions({ draggableCursor: 'crosshair' })
     this.mapClickListener = google.maps.event.addListener(this.props.googleMaps, 'click', event => {
-      this.props.addTargets([new Point(event.latLng.lat(), event.latLng.lng())])
+      if (this.props.clickMapToAddTarget) {
+        this.props.addTargets([new Point(event.latLng.lat(), event.latLng.lng())])
+      }
     })
   }
 
@@ -34,9 +35,14 @@ export class RfpTargetsMap extends Component {
     if (prevProps.selectedTarget !== this.props.target) {
       this.synchronizeSelectedTarget(prevProps.selectedTarget)
     }
+    if (prevProps.clickMapToAddTarget !== this.props.clickMapToAddTarget) {
+      this.props.googleMaps.setOptions({
+        draggableCursor: (this.props.clickMapToAddTarget ? 'crosshair' : null)
+      })
+    }
   }
 
-  synchronizeTargets (previousSelectedTarget = null) {
+  synchronizeTargets () {
     // Determine the map objects to create
     const existingTargetIds = new Set(Object.keys(this.createdMapObjects))
     const targetsToCreate = this.props.targets.filter(newTarget => !existingTargetIds.has(newTarget.id))
@@ -112,13 +118,15 @@ export class RfpTargetsMap extends Component {
 RfpTargetsMap.propTypes = {
   googleMaps: PropTypes.object,
   targets: PropTypes.arrayOf(PropTypes.instanceOf(Point)),
-  selectedTarget: PropTypes.instanceOf(Point)
+  selectedTarget: PropTypes.instanceOf(Point),
+  clickMapToAddTarget: PropTypes.bool
 }
 
 const mapStateToProps = (state) => ({
   googleMaps: state.map.googleMaps,
   targets: state.optimization.rfp.targets,
-  selectedTarget: state.optimization.rfp.selectedTarget
+  selectedTarget: state.optimization.rfp.selectedTarget,
+  clickMapToAddTarget: state.optimization.rfp.clickMapToAddTarget
 })
 
 const mapDispatchToProps = dispatch => ({

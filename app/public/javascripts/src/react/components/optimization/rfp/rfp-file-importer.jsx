@@ -11,7 +11,7 @@ const MAX_FILE_SIZE_IN_BYTES = 1000000
 export class RfpFileImporter extends Component {
   render () {
     return <div style={{ display: 'inline-block' }}>
-      <label htmlFor='inpRfpFileImport' className='rfp-file-import-label btn btn-sm btn-primary'>
+      <label htmlFor='inpRfpFileImport' className='rfp-file-import-label btn btn-sm btn-light'>
         <i className='fas fa-file-import' /> Import csv...
       </label>
       <input id='inpRfpFileImport' className='rfp-file-import-input' type='file' onChange={event => this.loadPointsFromFile(event)} />
