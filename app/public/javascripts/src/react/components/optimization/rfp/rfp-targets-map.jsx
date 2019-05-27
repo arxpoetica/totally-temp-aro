@@ -96,6 +96,7 @@ export class RfpTargetsMap extends Component {
         const oldTarget = this.props.targets[oldTargetIndex]
         var newTarget = new Point(event.latLng.lat(), event.latLng.lng(), oldTarget.id)
         this.props.replaceTarget(oldTargetIndex, newTarget)
+        this.props.setSelectedTarget(newTarget)
       })
       this.createdMapObjects[target.id] = mapObj
     })
@@ -133,7 +134,8 @@ const mapStateToProps = (state) => ({
 const mapDispatchToProps = dispatch => ({
   addTargets: targets => dispatch(RfpActions.addTargets(targets)),
   replaceTarget: (index, target) => dispatch(RfpActions.replaceTarget(index, target)),
-  setClickMapToAddTarget: clickMapToAddTarget => dispatch(RfpActions.setClickMapToAddTarget(clickMapToAddTarget))
+  setClickMapToAddTarget: clickMapToAddTarget => dispatch(RfpActions.setClickMapToAddTarget(clickMapToAddTarget)),
+  setSelectedTarget: selectedTarget => dispatch(RfpActions.setSelectedTarget(selectedTarget))
 })
 
 const RfpTargetsMapComponent = wrapComponentWithProvider(reduxStore, RfpTargetsMap, mapStateToProps, mapDispatchToProps)
