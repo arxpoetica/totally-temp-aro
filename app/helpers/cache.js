@@ -21,6 +21,7 @@ function loadServiceLayers () {
           FROM client.service_layer_node_type slnt
           JOIN client.network_node_types nnt ON nnt.id = slnt.network_node_type_id
           WHERE is_displayed=true
+            AND show_in_boundaries=true
       `)
     })
     .then((nodeTypes) => {
