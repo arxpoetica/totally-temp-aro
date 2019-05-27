@@ -33,11 +33,13 @@ export class RfpTargets extends Component {
             ? null // Dont show button if we already have the inputs shown
             : <div className='float-right'>
               <RfpFileImporter />
-              <button className='btn btn-sm btn-light'
+              <button id='btnAddTargetManual'
+                className='btn btn-sm btn-light'
                 onClick={this.startAddingNewTarget.bind(this)}>
                 <i className='fas fa-pencil-alt' /> Manual entry
               </button>
-              <button className={'btn btn-sm ' + (this.props.clickMapToAddTarget ? 'btn-primary' : 'btn-light')}
+              <button id='btnClickMapToAddTarget'
+                className={'btn btn-sm ' + (this.props.clickMapToAddTarget ? 'btn-primary' : 'btn-light')}
                 onClick={() => this.props.setClickMapToAddTarget(!this.props.clickMapToAddTarget)}>
                 <i className='fas fa-bullseye' /> Click map
               </button>
@@ -73,7 +75,7 @@ export class RfpTargets extends Component {
                     <input className='form-control' type='text' value={this.state.newTargetLng} onChange={event => this.setState({ newTargetLng: event.target.value })} />
                   </td>
                   <td>
-                    <button className='btn btn-sm btn-primary' onClick={this.saveNewTarget.bind(this)}>Save</button>
+                    <button id='btnSaveTarget' className='btn btn-sm btn-primary' onClick={this.saveNewTarget.bind(this)}>Save</button>
                   </td>
                 </tr>
                 : null

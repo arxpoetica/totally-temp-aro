@@ -98,3 +98,23 @@ test('Click to delete a target', () => {
   expect(mockRemoveTarget).toHaveBeenCalledWith(2)
   expect(component).toMatchSnapshot()
 })
+
+// -----------------------------------------------------------------------------
+test('Click to manually add a target', () => {
+  const mockAddTargets = jest.fn()
+  const mockSetClickMapToAddTarget = jest.fn()
+  const component = shallow(
+    <RfpTargets targets={targets}
+      selectedTarget={null}
+      addTargets={mockAddTargets}
+      setClickMapToAddTarget={mockSetClickMapToAddTarget}
+    />
+  )
+  expect(component).toMatchSnapshot()
+  component.find('#btnAddTargetManual').simulate('click')
+  expect(component).toMatchSnapshot()
+  expect(mockSetClickMapToAddTarget).toHaveBeenCalledWith(false)
+  component.find('#btnSaveTarget').simulate('click')
+  expect(component).toMatchSnapshot()
+  expect(mockAddTargets.mock.calls.length).toBe(1)
+})
