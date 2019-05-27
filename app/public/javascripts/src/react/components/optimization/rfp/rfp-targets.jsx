@@ -20,12 +20,11 @@ export class RfpTargets extends Component {
       showNewTargetInputs: false,
       newTargetLat: NEW_TARGET.lat,
       newTargetLng: NEW_TARGET.lng,
-      targetsBeingEdited: []
+      indexToEditableTarget: {}
     }
   }
 
   render () {
-    const targetIdsBeingEdited = new Set(this.state.targetsBeingEdited.map(target => target.id))
     return <div className='m-2 p-2' style={{ borderTop: 'solid 2px #eee' }}>
       <h4>
         Targets
@@ -60,7 +59,7 @@ export class RfpTargets extends Component {
             {/* Show current targets */}
             {
               this.props.targets.map((target, index) => (
-                targetIdsBeingEdited.has(target.id)
+                this.state.indexToEditableTarget[index]
                   ? this.renderTargetBeingEdited(target, index)
                   : this.renderRegularTarget(target, index)
               ))
@@ -94,7 +93,7 @@ export class RfpTargets extends Component {
       <td>{this.limitLatLongPrecision(target.lat)}</td>
       <td>{this.limitLatLongPrecision(target.lng)}</td>
       <td>
-        <button id={`btnEditTarget_${index}`} className='btn btn-sm btn-light' onClick={() => this.startEditingTarget(target)}>
+        <button id={`btnEditTarget_${index}`} className='btn btn-sm btn-light' onClick={() => this.startEditingTarget(index)}>
           <i className='fa fa-edit' />
         </button>
         <button id={`btnDeleteTarget_${index}`}
@@ -110,7 +109,6 @@ export class RfpTargets extends Component {
   }
 
   renderTargetBeingEdited (target, index) {
-    const indexWithinEditingTargets = this.state.targetsBeingEdited.findIndex(editingTarget => editingTarget.id === target.id)
     return <tr id={`trTarget_${index}`} key={index} onClick={event => this.props.setSelectedTarget(target)}
       className={'tr-rfp-target' + (this.props.selectedTarget === target ? ' selected-target-row ' : '')}>
       <td>
@@ -118,8 +116,8 @@ export class RfpTargets extends Component {
           id={`inpTargetLatitude_${index}`}
           type='text'
           className='form-control form-control-sm'
-          value={this.state.targetsBeingEdited[indexWithinEditingTargets].lat}
-          onChange={event => this.setEditingTargetProperty(target.id, 'lat', event.target.value)}
+          value={this.state.indexToEditableTarget[index].lat}
+          onChange={event => this.setEditingTargetProperty(index, 'lat', event.target.value)}
         />
       </td>
       <td>
@@ -127,15 +125,15 @@ export class RfpTargets extends Component {
           id={`inpTargetLongitude_${index}`}
           type='text'
           className='form-control form-control-sm'
-          value={this.state.targetsBeingEdited[indexWithinEditingTargets].lng}
-          onChange={event => this.setEditingTargetProperty(target.id, 'lng', event.target.value)}
+          value={this.state.indexToEditableTarget[index].lng}
+          onChange={event => this.setEditingTargetProperty(index, 'lng', event.target.value)}
         />
       </td>
       <td>
-        <button id={`btnSaveTarget_${index}`} className='btn btn-sm btn-light' onClick={() => this.saveEditingTarget(target.id)}>
+        <button id={`btnSaveTarget_${index}`} className='btn btn-sm btn-light' onClick={() => this.saveEditingTarget(index)}>
           <i className='fa fa-save' />
         </button>
-        <button id={`btnCancelEditTarget_${index}`} className='btn btn-sm btn-light' onClick={() => this.cancelEditingTarget(target.id)}>
+        <button id={`btnCancelEditTarget_${index}`} className='btn btn-sm btn-light' onClick={() => this.cancelEditingTarget(index)}>
           Cancel
         </button>
       </td>
@@ -165,49 +163,46 @@ export class RfpTargets extends Component {
     })
   }
 
-  startEditingTarget (target) {
-    var newTargetsBeingEdited = [].concat(this.state.targetsBeingEdited)
-    // Make a copy of the point being edited
-    newTargetsBeingEdited.push(new Point(target.lat, target.lng, target.id))
+  startEditingTarget (indexToEdit) {
+    const existingTarget = this.props.targets[indexToEdit]
+    var newTargetsBeingEdited = {
+      ...this.state.indexToEditableTarget,
+      [indexToEdit]: new Point(existingTarget.lat, existingTarget.lng, existingTarget.id)
+    }
     this.setState({
-      targetsBeingEdited: newTargetsBeingEdited
+      indexToEditableTarget: newTargetsBeingEdited
     })
   }
 
-  cancelEditingTarget (targetId) {
-    const editingTargetIndex = this.state.targetsBeingEdited.findIndex(target => target.id === targetId)
-    var newTargetsBeingEdited = [].concat(this.state.targetsBeingEdited)
-    newTargetsBeingEdited.splice(editingTargetIndex, 1)
+  cancelEditingTarget (indexToEdit) {
+    var newTargetsBeingEdited = {
+      ...this.state.indexToEditableTarget
+    }
+    delete newTargetsBeingEdited[indexToEdit]
     this.setState({
-      targetsBeingEdited: newTargetsBeingEdited
+      indexToEditableTarget: newTargetsBeingEdited
     })
   }
 
-  saveEditingTarget (targetId) {
+  saveEditingTarget (indexToSave) {
     // Save the change to the redux store
-    const targetIndex = this.props.targets.findIndex(target => target.id === targetId)
-    const editingTargetIndex = this.state.targetsBeingEdited.findIndex(target => target.id === targetId)
     // Make sure that the lat/longs of the editing target are numbers
-    this.state.targetsBeingEdited[editingTargetIndex].lat = +this.state.targetsBeingEdited[editingTargetIndex].lat
-    this.state.targetsBeingEdited[editingTargetIndex].lng = +this.state.targetsBeingEdited[editingTargetIndex].lng
-    this.props.replaceTarget(targetIndex, this.state.targetsBeingEdited[editingTargetIndex])
-
-    var newTargetsBeingEdited = [].concat(this.state.targetsBeingEdited)
-    newTargetsBeingEdited.splice(editingTargetIndex, 1)
-    this.setState({
-      targetsBeingEdited: newTargetsBeingEdited
-    })
+    const editedTarget = this.state.indexToEditableTarget[indexToSave]
+    const newTarget = new Point(+editedTarget.lat, +editedTarget.lng, editedTarget.id)
+    this.props.replaceTarget(indexToSave, newTarget)
+    this.cancelEditingTarget(indexToSave)
   }
 
-  setEditingTargetProperty (targetId, property, value) {
-    const editingTargetIndex = this.state.targetsBeingEdited.findIndex(target => target.id === targetId)
-    const oldTarget = this.state.targetsBeingEdited[editingTargetIndex]
+  setEditingTargetProperty (indexToEdit, property, value) {
+    const oldTarget = this.state.indexToEditableTarget[indexToEdit]
     var newTarget = new Point(oldTarget.lat, oldTarget.lng, oldTarget.id)
     newTarget[property] = value
-    var newTargetsBeingEdited = [].concat(this.state.targetsBeingEdited)
-    newTargetsBeingEdited.splice(editingTargetIndex, 1, newTarget)
+    var newTargetsBeingEdited = {
+      ...this.state.indexToEditableTarget,
+      [indexToEdit]: newTarget
+    }
     this.setState({
-      targetsBeingEdited: newTargetsBeingEdited
+      indexToEditableTarget: newTargetsBeingEdited
     })
   }
 }
