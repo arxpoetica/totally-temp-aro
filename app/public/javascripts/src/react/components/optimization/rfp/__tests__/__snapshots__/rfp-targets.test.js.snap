@@ -55,6 +55,9 @@ exports[`Click to delete a target 1`] = `
       >
         <tr>
           <th>
+            ID
+          </th>
+          <th>
             Latitude
           </th>
           <th>
@@ -78,6 +81,9 @@ exports[`Click to delete a target 1`] = `
           key="0"
           onClick={[Function]}
         >
+          <td>
+            1
+          </td>
           <td>
             47.58444
           </td>
@@ -112,6 +118,9 @@ exports[`Click to delete a target 1`] = `
           onClick={[Function]}
         >
           <td>
+            2
+          </td>
+          <td>
             47.59
           </td>
           <td>
@@ -144,6 +153,9 @@ exports[`Click to delete a target 1`] = `
           key="2"
           onClick={[Function]}
         >
+          <td>
+            3
+          </td>
           <td>
             47.57
           </td>
@@ -233,6 +245,9 @@ exports[`Click to delete a target 2`] = `
       >
         <tr>
           <th>
+            ID
+          </th>
+          <th>
             Latitude
           </th>
           <th>
@@ -256,6 +271,9 @@ exports[`Click to delete a target 2`] = `
           key="0"
           onClick={[Function]}
         >
+          <td>
+            1
+          </td>
           <td>
             47.58444
           </td>
@@ -290,6 +308,9 @@ exports[`Click to delete a target 2`] = `
           onClick={[Function]}
         >
           <td>
+            2
+          </td>
+          <td>
             47.59
           </td>
           <td>
@@ -322,6 +343,9 @@ exports[`Click to delete a target 2`] = `
           key="2"
           onClick={[Function]}
         >
+          <td>
+            3
+          </td>
           <td>
             47.57
           </td>
@@ -411,6 +435,9 @@ exports[`Click to edit a target 1`] = `
       >
         <tr>
           <th>
+            ID
+          </th>
+          <th>
             Latitude
           </th>
           <th>
@@ -434,6 +461,9 @@ exports[`Click to edit a target 1`] = `
           key="0"
           onClick={[Function]}
         >
+          <td>
+            1
+          </td>
           <td>
             47.58444
           </td>
@@ -468,6 +498,9 @@ exports[`Click to edit a target 1`] = `
           onClick={[Function]}
         >
           <td>
+            2
+          </td>
+          <td>
             47.59
           </td>
           <td>
@@ -500,6 +533,9 @@ exports[`Click to edit a target 1`] = `
           key="2"
           onClick={[Function]}
         >
+          <td>
+            3
+          </td>
           <td>
             47.57
           </td>
@@ -589,6 +625,9 @@ exports[`Click to edit a target 2`] = `
       >
         <tr>
           <th>
+            ID
+          </th>
+          <th>
             Latitude
           </th>
           <th>
@@ -612,6 +651,15 @@ exports[`Click to edit a target 2`] = `
           key="0"
           onClick={[Function]}
         >
+          <td>
+            <input
+              className="form-control form-control-sm"
+              id="inpTargetId_0"
+              onChange={[Function]}
+              type="text"
+              value={1}
+            />
+          </td>
           <td>
             <input
               className="form-control form-control-sm"
@@ -656,6 +704,9 @@ exports[`Click to edit a target 2`] = `
           onClick={[Function]}
         >
           <td>
+            2
+          </td>
+          <td>
             47.59
           </td>
           <td>
@@ -688,6 +739,9 @@ exports[`Click to edit a target 2`] = `
           key="2"
           onClick={[Function]}
         >
+          <td>
+            3
+          </td>
           <td>
             47.57
           </td>
@@ -777,6 +831,9 @@ exports[`Click to edit a target 3`] = `
       >
         <tr>
           <th>
+            ID
+          </th>
+          <th>
             Latitude
           </th>
           <th>
@@ -800,6 +857,15 @@ exports[`Click to edit a target 3`] = `
           key="0"
           onClick={[Function]}
         >
+          <td>
+            <input
+              className="form-control form-control-sm"
+              id="inpTargetId_0"
+              onChange={[Function]}
+              type="text"
+              value={1}
+            />
+          </td>
           <td>
             <input
               className="form-control form-control-sm"
@@ -844,6 +910,9 @@ exports[`Click to edit a target 3`] = `
           onClick={[Function]}
         >
           <td>
+            2
+          </td>
+          <td>
             47.59
           </td>
           <td>
@@ -876,6 +945,9 @@ exports[`Click to edit a target 3`] = `
           key="2"
           onClick={[Function]}
         >
+          <td>
+            3
+          </td>
           <td>
             47.57
           </td>
@@ -965,6 +1037,9 @@ exports[`Click to edit a target 4`] = `
       >
         <tr>
           <th>
+            ID
+          </th>
+          <th>
             Latitude
           </th>
           <th>
@@ -988,6 +1063,9 @@ exports[`Click to edit a target 4`] = `
           key="0"
           onClick={[Function]}
         >
+          <td>
+            1
+          </td>
           <td>
             47.58444
           </td>
@@ -1022,6 +1100,9 @@ exports[`Click to edit a target 4`] = `
           onClick={[Function]}
         >
           <td>
+            2
+          </td>
+          <td>
             47.59
           </td>
           <td>
@@ -1054,6 +1135,9 @@ exports[`Click to edit a target 4`] = `
           key="2"
           onClick={[Function]}
         >
+          <td>
+            3
+          </td>
           <td>
             47.57
           </td>
@@ -1143,6 +1227,9 @@ exports[`Click to manually add a target 1`] = `
       >
         <tr>
           <th>
+            ID
+          </th>
+          <th>
             Latitude
           </th>
           <th>
@@ -1166,6 +1253,9 @@ exports[`Click to manually add a target 1`] = `
           key="0"
           onClick={[Function]}
         >
+          <td>
+            1
+          </td>
           <td>
             47.58444
           </td>
@@ -1200,6 +1290,9 @@ exports[`Click to manually add a target 1`] = `
           onClick={[Function]}
         >
           <td>
+            2
+          </td>
+          <td>
             47.59
           </td>
           <td>
@@ -1232,6 +1325,9 @@ exports[`Click to manually add a target 1`] = `
           key="2"
           onClick={[Function]}
         >
+          <td>
+            3
+          </td>
           <td>
             47.57
           </td>
@@ -1296,6 +1392,9 @@ exports[`Click to manually add a target 2`] = `
       >
         <tr>
           <th>
+            ID
+          </th>
+          <th>
             Latitude
           </th>
           <th>
@@ -1319,6 +1418,9 @@ exports[`Click to manually add a target 2`] = `
           key="0"
           onClick={[Function]}
         >
+          <td>
+            1
+          </td>
           <td>
             47.58444
           </td>
@@ -1353,6 +1455,9 @@ exports[`Click to manually add a target 2`] = `
           onClick={[Function]}
         >
           <td>
+            2
+          </td>
+          <td>
             47.59
           </td>
           <td>
@@ -1386,6 +1491,9 @@ exports[`Click to manually add a target 2`] = `
           onClick={[Function]}
         >
           <td>
+            3
+          </td>
+          <td>
             47.57
           </td>
           <td>
@@ -1413,6 +1521,14 @@ exports[`Click to manually add a target 2`] = `
           </td>
         </tr>
         <tr>
+          <td>
+            <input
+              className="form-control"
+              onChange={[Function]}
+              type="text"
+              value={2}
+            />
+          </td>
           <td>
             <input
               className="form-control"
@@ -1501,6 +1617,9 @@ exports[`Click to manually add a target 3`] = `
       >
         <tr>
           <th>
+            ID
+          </th>
+          <th>
             Latitude
           </th>
           <th>
@@ -1524,6 +1643,9 @@ exports[`Click to manually add a target 3`] = `
           key="0"
           onClick={[Function]}
         >
+          <td>
+            1
+          </td>
           <td>
             47.58444
           </td>
@@ -1558,6 +1680,9 @@ exports[`Click to manually add a target 3`] = `
           onClick={[Function]}
         >
           <td>
+            2
+          </td>
+          <td>
             47.59
           </td>
           <td>
@@ -1590,6 +1715,9 @@ exports[`Click to manually add a target 3`] = `
           key="2"
           onClick={[Function]}
         >
+          <td>
+            3
+          </td>
           <td>
             47.57
           </td>
@@ -1679,6 +1807,9 @@ exports[`Click to select a target 1`] = `
       >
         <tr>
           <th>
+            ID
+          </th>
+          <th>
             Latitude
           </th>
           <th>
@@ -1702,6 +1833,9 @@ exports[`Click to select a target 1`] = `
           key="0"
           onClick={[Function]}
         >
+          <td>
+            1
+          </td>
           <td>
             47.58444
           </td>
@@ -1736,6 +1870,9 @@ exports[`Click to select a target 1`] = `
           onClick={[Function]}
         >
           <td>
+            2
+          </td>
+          <td>
             47.59
           </td>
           <td>
@@ -1768,6 +1905,9 @@ exports[`Click to select a target 1`] = `
           key="2"
           onClick={[Function]}
         >
+          <td>
+            3
+          </td>
           <td>
             47.57
           </td>
@@ -1857,6 +1997,9 @@ exports[`Click to select a target 2`] = `
       >
         <tr>
           <th>
+            ID
+          </th>
+          <th>
             Latitude
           </th>
           <th>
@@ -1880,6 +2023,9 @@ exports[`Click to select a target 2`] = `
           key="0"
           onClick={[Function]}
         >
+          <td>
+            1
+          </td>
           <td>
             47.58444
           </td>
@@ -1914,6 +2060,9 @@ exports[`Click to select a target 2`] = `
           onClick={[Function]}
         >
           <td>
+            2
+          </td>
+          <td>
             47.59
           </td>
           <td>
@@ -1946,6 +2095,9 @@ exports[`Click to select a target 2`] = `
           key="2"
           onClick={[Function]}
         >
+          <td>
+            3
+          </td>
           <td>
             47.57
           </td>
@@ -2035,6 +2187,9 @@ exports[`With no targets 1`] = `
       >
         <tr>
           <th>
+            ID
+          </th>
+          <th>
             Latitude
           </th>
           <th>
@@ -2113,6 +2268,9 @@ exports[`With targets and one selection 1`] = `
       >
         <tr>
           <th>
+            ID
+          </th>
+          <th>
             Latitude
           </th>
           <th>
@@ -2136,6 +2294,9 @@ exports[`With targets and one selection 1`] = `
           key="0"
           onClick={[Function]}
         >
+          <td>
+            1
+          </td>
           <td>
             47.58444
           </td>
@@ -2170,6 +2331,9 @@ exports[`With targets and one selection 1`] = `
           onClick={[Function]}
         >
           <td>
+            2
+          </td>
+          <td>
             47.59
           </td>
           <td>
@@ -2202,6 +2366,9 @@ exports[`With targets and one selection 1`] = `
           key="2"
           onClick={[Function]}
         >
+          <td>
+            3
+          </td>
           <td>
             47.57
           </td>
@@ -2291,6 +2458,9 @@ exports[`With targets, no selection 1`] = `
       >
         <tr>
           <th>
+            ID
+          </th>
+          <th>
             Latitude
           </th>
           <th>
@@ -2314,6 +2484,9 @@ exports[`With targets, no selection 1`] = `
           key="0"
           onClick={[Function]}
         >
+          <td>
+            1
+          </td>
           <td>
             47.58444
           </td>
@@ -2348,6 +2521,9 @@ exports[`With targets, no selection 1`] = `
           onClick={[Function]}
         >
           <td>
+            2
+          </td>
+          <td>
             47.59
           </td>
           <td>
@@ -2380,6 +2556,9 @@ exports[`With targets, no selection 1`] = `
           key="2"
           onClick={[Function]}
         >
+          <td>
+            3
+          </td>
           <td>
             47.57
           </td>

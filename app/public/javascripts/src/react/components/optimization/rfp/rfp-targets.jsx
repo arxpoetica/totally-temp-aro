@@ -18,6 +18,7 @@ export class RfpTargets extends Component {
     super(props)
     this.state = {
       showNewTargetInputs: false,
+      newTargetId: 1,
       newTargetLat: NEW_TARGET.lat,
       newTargetLng: NEW_TARGET.lng,
       indexToEditableTarget: {}
@@ -50,6 +51,7 @@ export class RfpTargets extends Component {
         <table id='tblRfpTargets' className='table table-sm table-striped'>
           <thead className='thead thead-light'>
             <tr>
+              <th>ID</th>
               <th>Latitude</th>
               <th>Longitude</th>
               <th style={{ width: '100px' }}>Actions</th>
@@ -68,6 +70,9 @@ export class RfpTargets extends Component {
             {
               this.state.showNewTargetInputs
                 ? <tr>
+                  <td>
+                    <input className='form-control' type='text' value={this.state.newTargetId} onChange={event => this.setState({ newTargetId: event.target.value })} />
+                  </td>
                   <td>
                     <input className='form-control' type='text' value={this.state.newTargetLat} onChange={event => this.setState({ newTargetLat: event.target.value })} />
                   </td>
@@ -90,6 +95,7 @@ export class RfpTargets extends Component {
   renderRegularTarget (target, index) {
     return <tr id={`trTarget_${index}`} key={index} onClick={event => this.props.setSelectedTarget(target)}
       className={'tr-rfp-target' + (this.props.selectedTarget === target ? ' selected-target-row ' : '')}>
+      <td>{target.id}</td>
       <td>{this.limitLatLongPrecision(target.lat)}</td>
       <td>{this.limitLatLongPrecision(target.lng)}</td>
       <td>
@@ -113,6 +119,15 @@ export class RfpTargets extends Component {
       className={'tr-rfp-target' + (this.props.selectedTarget === target ? ' selected-target-row ' : '')}>
       <td>
         <input
+          id={`inpTargetId_${index}`}
+          type='text'
+          className='form-control form-control-sm'
+          value={this.state.indexToEditableTarget[index].id}
+          onChange={event => this.setEditingTargetProperty(index, 'id', event.target.value)}
+        />
+      </td>
+      <td>
+        <input
           id={`inpTargetLatitude_${index}`}
           type='text'
           className='form-control form-control-sm'
@@ -130,7 +145,11 @@ export class RfpTargets extends Component {
         />
       </td>
       <td>
-        <button id={`btnSaveTarget_${index}`} className='btn btn-sm btn-light' onClick={() => this.saveEditingTarget(index)}>
+        <button id={`btnSaveTarget_${index}`} className='btn btn-sm btn-light'
+          onClick={event => {
+            this.saveEditingTarget(index)
+            event.stopPropagation()
+          }}>
           <i className='fa fa-save' />
         </button>
         <button id={`btnCancelEditTarget_${index}`} className='btn btn-sm btn-light' onClick={() => this.cancelEditingTarget(index)}>
@@ -148,6 +167,7 @@ export class RfpTargets extends Component {
   startAddingNewTarget () {
     this.setState({
       showNewTargetInputs: true,
+      newTargetId: this.state.newTargetId + 1,
       newTargetLat: NEW_TARGET.lat,
       newTargetLng: NEW_TARGET.lng
     })
@@ -155,9 +175,10 @@ export class RfpTargets extends Component {
   }
 
   saveNewTarget () {
-    this.props.addTargets([new Point(+this.state.newTargetLat, +this.state.newTargetLng)])
+    this.props.addTargets([new Point(+this.state.newTargetLat, +this.state.newTargetLng, this.state.newTargetId)])
     this.setState({
       showNewTargetInputs: false,
+      newTargetId: this.state.newTargetId + 1,
       newTargetLat: NEW_TARGET.lat,
       newTargetLng: NEW_TARGET.lng
     })

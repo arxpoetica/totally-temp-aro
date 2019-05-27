@@ -41,7 +41,7 @@ function removeTarget (state, index) {
 
 function replaceTarget (state, index, newTarget) {
   var newTargets = [].concat(state.targets)
-  const oldSelectedTargetIndex = state.selectedTarget ? state.targets.findIndex(oldTarget => oldTarget === newTarget) : -1
+  const oldSelectedTargetIndex = state.selectedTarget ? state.targets.findIndex(oldTarget => oldTarget === state.selectedTarget) : -1
   newTargets.splice(index, 1, newTarget)
   return { ...state,
     targets: newTargets,
