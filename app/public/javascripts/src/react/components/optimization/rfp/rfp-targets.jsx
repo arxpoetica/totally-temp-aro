@@ -7,6 +7,7 @@ import RfpActions from './rfp-actions'
 import RfpFileImporter from './rfp-file-importer.jsx'
 import RfpTargetsMap from './rfp-targets-map.jsx'
 import Constants from '../../../common/constants'
+import uuidv4 from 'uuid/v4'
 import './rfp-targets.css'
 
 const NEW_TARGET = {
@@ -167,7 +168,7 @@ export class RfpTargets extends Component {
   startAddingNewTarget () {
     this.setState({
       showNewTargetInputs: true,
-      newTargetId: this.state.newTargetId + 1,
+      newTargetId: uuidv4(),
       newTargetLat: NEW_TARGET.lat,
       newTargetLng: NEW_TARGET.lng
     })
