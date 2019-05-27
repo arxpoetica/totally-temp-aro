@@ -14,10 +14,6 @@ const defaultState = {
   status: RfpStatusTypes.UNINITIALIZED
 }
 
-function initialize () {
-  return JSON.parse(JSON.stringify(defaultState))
-}
-
 function clearState () {
   return JSON.parse(JSON.stringify(defaultState))
 }
@@ -64,9 +60,6 @@ function setStatus (state, status) {
 
 function rfpReducer (state = defaultState, action) {
   switch (action.type) {
-    case Actions.RFP_INITIALIZE:
-      return initialize(state)
-
     case Actions.RFP_CLEAR_STATE:
       return clearState(state)
 

@@ -22,41 +22,54 @@ export class RfpTargetsMap extends Component {
     return null
   }
 
+  componentDidMount () {
+    this.synchronizeTargets()
+    this.synchronizeSelectedTarget(null)
+  }
+
   componentDidUpdate (prevProps) {
     if (prevProps.targets !== this.props.targets) {
-      // Determine the map objects to create
-      const existingTargetIds = new Set(Object.keys(this.createdMapObjects))
-      const targetsToCreate = this.props.targets.filter(newTarget => !existingTargetIds.has(newTarget.id))
-      this.createMapObjects(targetsToCreate)
-
-      // Determine the map objects to delete
-      const newTargetIds = new Set(this.props.targets.map(target => target.id))
-      const targetIdsToDelete = [...existingTargetIds].filter(targetId => !newTargetIds.has(targetId))
-      targetIdsToDelete.forEach(id => this.deleteMapObject(id))
-
-      // At this point we will have all markers. Update their position (some markers may have changed position)
-      this.props.targets.forEach(target => this.createdMapObjects[target.id].setPosition({ lat: target.lat, lng: target.lng }))
+      this.synchronizeTargets()
     }
-    if (prevProps.selectedTarget !== this.props.selectedTarget) {
-      // Clear the old selected targets marker (if any)
-      if (prevProps.selectedTarget) {
-        const marker = this.createdMapObjects[prevProps.selectedTarget.id]
-        if (marker) {
-          marker.setIcon({
-            url: '/images/map_icons/aro/target.png'
-          })
-        }
+    if (prevProps.selectedTarget !== this.props.target) {
+      this.synchronizeSelectedTarget(prevProps.selectedTarget)
+    }
+  }
+
+  synchronizeTargets (previousSelectedTarget = null) {
+    // Determine the map objects to create
+    const existingTargetIds = new Set(Object.keys(this.createdMapObjects))
+    const targetsToCreate = this.props.targets.filter(newTarget => !existingTargetIds.has(newTarget.id))
+    this.createMapObjects(targetsToCreate)
+
+    // Determine the map objects to delete
+    const newTargetIds = new Set(this.props.targets.map(target => target.id))
+    const targetIdsToDelete = [...existingTargetIds].filter(targetId => !newTargetIds.has(targetId))
+    targetIdsToDelete.forEach(id => this.deleteMapObject(id))
+
+    // At this point we will have all markers. Update their position (some markers may have changed position)
+    this.props.targets.forEach(target => this.createdMapObjects[target.id].setPosition({ lat: target.lat, lng: target.lng }))
+  }
+
+  synchronizeSelectedTarget (previousSelectedTarget = null) {
+    // Clear the old selected targets marker (if any)
+    if (previousSelectedTarget) {
+      const marker = this.createdMapObjects[previousSelectedTarget.id]
+      if (marker) {
+        marker.setIcon({
+          url: '/images/map_icons/aro/target.png'
+        })
       }
-      if (this.props.selectedTarget) {
-        // Pan the map to the selected target
-        this.props.googleMaps.panTo({ lat: this.props.selectedTarget.lat, lng: this.props.selectedTarget.lng })
-        // Make the marker icon bigger
-        const marker = this.createdMapObjects[this.props.selectedTarget.id]
-        if (marker) {
-          marker.setIcon({
-            url: '/images/map_icons/aro/target_selected.png'
-          })
-        }
+    }
+    if (this.props.selectedTarget) {
+      // Pan the map to the selected target
+      this.props.googleMaps.panTo({ lat: this.props.selectedTarget.lat, lng: this.props.selectedTarget.lng })
+      // Make the marker icon bigger
+      const marker = this.createdMapObjects[this.props.selectedTarget.id]
+      if (marker) {
+        marker.setIcon({
+          url: '/images/map_icons/aro/target_selected.png'
+        })
       }
     }
   }
