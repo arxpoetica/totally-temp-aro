@@ -47,7 +47,7 @@ export class RfpTargets extends Component {
             </div>
         }
       </h4>
-      <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+      <div style={{ maxHeight: '300px', overflowY: 'auto', overflowX: 'hidden' }}>
         <table id='tblRfpTargets' className='table table-sm table-striped'>
           <thead className='thead thead-light'>
             <tr>

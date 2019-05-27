@@ -41,6 +41,7 @@ exports[`Click to delete a target 1`] = `
     style={
       Object {
         "maxHeight": "300px",
+        "overflowX": "hidden",
         "overflowY": "auto",
       }
     }
@@ -218,6 +219,7 @@ exports[`Click to delete a target 2`] = `
     style={
       Object {
         "maxHeight": "300px",
+        "overflowX": "hidden",
         "overflowY": "auto",
       }
     }
@@ -395,6 +397,7 @@ exports[`Click to edit a target 1`] = `
     style={
       Object {
         "maxHeight": "300px",
+        "overflowX": "hidden",
         "overflowY": "auto",
       }
     }
@@ -572,6 +575,7 @@ exports[`Click to edit a target 2`] = `
     style={
       Object {
         "maxHeight": "300px",
+        "overflowX": "hidden",
         "overflowY": "auto",
       }
     }
@@ -759,6 +763,7 @@ exports[`Click to edit a target 3`] = `
     style={
       Object {
         "maxHeight": "300px",
+        "overflowX": "hidden",
         "overflowY": "auto",
       }
     }
@@ -946,6 +951,7 @@ exports[`Click to edit a target 4`] = `
     style={
       Object {
         "maxHeight": "300px",
+        "overflowX": "hidden",
         "overflowY": "auto",
       }
     }
@@ -1123,6 +1129,7 @@ exports[`Click to manually add a target 1`] = `
     style={
       Object {
         "maxHeight": "300px",
+        "overflowX": "hidden",
         "overflowY": "auto",
       }
     }
@@ -1275,6 +1282,7 @@ exports[`Click to manually add a target 2`] = `
     style={
       Object {
         "maxHeight": "300px",
+        "overflowX": "hidden",
         "overflowY": "auto",
       }
     }
@@ -1479,6 +1487,7 @@ exports[`Click to manually add a target 3`] = `
     style={
       Object {
         "maxHeight": "300px",
+        "overflowX": "hidden",
         "overflowY": "auto",
       }
     }
@@ -1656,6 +1665,7 @@ exports[`Click to select a target 1`] = `
     style={
       Object {
         "maxHeight": "300px",
+        "overflowX": "hidden",
         "overflowY": "auto",
       }
     }
@@ -1833,6 +1843,7 @@ exports[`Click to select a target 2`] = `
     style={
       Object {
         "maxHeight": "300px",
+        "overflowX": "hidden",
         "overflowY": "auto",
       }
     }
@@ -2010,6 +2021,7 @@ exports[`With no targets 1`] = `
     style={
       Object {
         "maxHeight": "300px",
+        "overflowX": "hidden",
         "overflowY": "auto",
       }
     }
@@ -2087,6 +2099,7 @@ exports[`With targets and one selection 1`] = `
     style={
       Object {
         "maxHeight": "300px",
+        "overflowX": "hidden",
         "overflowY": "auto",
       }
     }
@@ -2264,6 +2277,7 @@ exports[`With targets, no selection 1`] = `
     style={
       Object {
         "maxHeight": "300px",
+        "overflowX": "hidden",
         "overflowY": "auto",
       }
     }
