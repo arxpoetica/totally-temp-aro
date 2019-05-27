@@ -14,6 +14,7 @@ export class RfpTargetsMap extends Component {
     this.mapClickListener = google.maps.event.addListener(this.props.googleMaps, 'click', event => {
       if (this.props.clickMapToAddTarget) {
         this.props.addTargets([new Point(event.latLng.lat(), event.latLng.lng())])
+        this.props.setClickMapToAddTarget(false)
       }
     })
   }
@@ -131,7 +132,8 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = dispatch => ({
   addTargets: targets => dispatch(RfpActions.addTargets(targets)),
-  replaceTarget: (index, target) => dispatch(RfpActions.replaceTarget(index, target))
+  replaceTarget: (index, target) => dispatch(RfpActions.replaceTarget(index, target)),
+  setClickMapToAddTarget: clickMapToAddTarget => dispatch(RfpActions.setClickMapToAddTarget(clickMapToAddTarget))
 })
 
 const RfpTargetsMapComponent = wrapComponentWithProvider(reduxStore, RfpTargetsMap, mapStateToProps, mapDispatchToProps)

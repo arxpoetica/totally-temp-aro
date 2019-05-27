@@ -239,12 +239,14 @@ test('Click on map to add markers', () => {
     }
   }
   const mockGoogleMaps = { setOptions: () => {} }
+  const mockSetClickMapToAddTarget = jest.fn()
   const component = shallow(
     <RfpTargetsMap targets={[]}
       selectedTarget={null}
       googleMaps={mockGoogleMaps}
       addTargets={mockAddTargets}
       clickMapToAddTarget={false}
+      setClickMapToAddTarget={mockSetClickMapToAddTarget}
     />
   )
   // At this point, mockClickHandler should be defined. Call it, but clicking is disabled so no calls should be made.
@@ -255,6 +257,7 @@ test('Click on map to add markers', () => {
     }
   })
   expect(mockAddTargets.mock.calls.length).toEqual(0)
+  expect(mockSetClickMapToAddTarget.mock.calls.length).toEqual(0)
 
   // Enable click-to-add-target-on-map and make sure the handler is called
   component.setProps({ clickMapToAddTarget: true })
@@ -267,4 +270,5 @@ test('Click on map to add markers', () => {
   expect(mockAddTargets.mock.calls.length).toEqual(1)
   expect(mockAddTargets.mock.calls[0][0][0].lat).toEqual(47.1111)
   expect(mockAddTargets.mock.calls[0][0][0].lng).toEqual(-122.3333)
+  expect(mockSetClickMapToAddTarget).toHaveBeenCalledWith(false)
 })
