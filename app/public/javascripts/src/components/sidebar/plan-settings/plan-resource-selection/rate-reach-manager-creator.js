@@ -53,8 +53,8 @@ class RateReachManagerCreatorController {
       rateReachGroupMap: {},
       marketAdjustmentFactorMap: {
         RETAIL: 1,
-        WHOLESALE: 0.75,
-        TOWER: 0.5
+        WHOLESALE: 1,
+        TOWER: 1
       }
     }
 
