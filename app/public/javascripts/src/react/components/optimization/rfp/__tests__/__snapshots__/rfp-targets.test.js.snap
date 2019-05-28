@@ -1534,7 +1534,7 @@ exports[`Click to manually add a target 2`] = `
               className="form-control"
               onChange={[Function]}
               type="text"
-              value={0}
+              value={47.877}
             />
           </td>
           <td>
@@ -1542,7 +1542,7 @@ exports[`Click to manually add a target 2`] = `
               className="form-control"
               onChange={[Function]}
               type="text"
-              value={0}
+              value={-122.235}
             />
           </td>
           <td>
