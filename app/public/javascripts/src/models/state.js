@@ -668,7 +668,7 @@ class State {
                 name: dataTypeEntity.name
               })
               */
-              
+
               dataTypeEntity.label = dataTypeEntity.description
               service.uploadDataSources.push(dataTypeEntity)
             }
@@ -1444,7 +1444,7 @@ class State {
       service.entityTypeBoundaryList = []
     }
     service.selectedBoundaryTypeforSearch = null
-    
+
     service.authRolls = []
     service.authRollsByName = {}
     service.reloadAuthRolls = () => {
@@ -1461,7 +1461,7 @@ class State {
       .catch((err) => console.error(err))
     }
     service.reloadAuthRolls()
-    
+
     service.authPermissionsByName = {}
     service.reloadAuthPermissions = () => {
       return $http.get('/service/auth/permissions')
@@ -1479,8 +1479,8 @@ class State {
       .catch((err) => console.error(err))
     }
     service.reloadAuthPermissions()
-    
-    
+
+
     service.systemActors = [] // All the system actors (i.e. users and groups)
     service.reloadSystemActors = () => {
       var newSystemActors = []
@@ -1522,16 +1522,16 @@ class State {
 
       // Set the logged in user, then call all the initialization functions that depend on having a logged in user.
       service.loggedInUser = user
-      
+
       // ToDo: LoggedInUser should be a class
       service.loggedInUser.systemPermissions = 0
       service.loggedInUser.isAdministrator = false
-      
+
       // Populate the group ids that this user is a part of
       service.loggedInUser.groupIds = []
-      
+
       // will check if the logged in user has a permissions level
-      // either globally or on a resource 
+      // either globally or on a resource
       service.loggedInUser.hasPermissions = (permissionsLevel, resourcePermissions) => {
         var hasPerms = !!(permissionsLevel & service.loggedInUser.systemPermissions)
         if (!hasPerms && 'undefined' != typeof resourcePermissions){
@@ -1539,7 +1539,7 @@ class State {
         }
         return hasPerms
       }
-      
+
       var aclResult = null
       $http.get(`/service/auth/acl/SYSTEM/1`)
       .then((result) => {
@@ -1553,20 +1553,20 @@ class State {
       })
       .then((result) => {
         service.loggedInUser.groupIds = result.data.groupIds
-        
+
         var userGroupIsAdministrator = false
         result.data.groupIds.forEach((groupId) => {
           const userGroupAcl = aclResult.resourcePermissions.filter((item) => item.systemActorId === groupId)[0]
           const thisGroupIsAdministrator = (userGroupAcl && (userGroupAcl.rolePermissions & service.authPermissionsByName['USER_ADMIN'].permissions)) > 0
           userGroupIsAdministrator |= thisGroupIsAdministrator
         })
-        
-        service.loggedInUser.isAdministrator = (userGroupIsAdministrator 
+
+        service.loggedInUser.isAdministrator = (userGroupIsAdministrator
             || !!(service.loggedInUser.systemPermissions & service.authPermissionsByName['USER_ADMIN'].permissions))
-        
+
       })
       .catch((err) => console.error(err))
-      
+
       var initializeToDefaultCoords = (plan) => {
         service.requestSetMapCenter.next({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
         service.requestSetMapZoom.next(service.defaultPlanCoordinates.zoom)
@@ -1637,7 +1637,7 @@ class State {
           tileDataService.setLocationStateIcon(tileDataService.locationStates.INVALIDATED_ICON_KEY, service.configuration.locationCategories.entityInvalidatedIcon)
           SocketManager.initializeSession(result.data.sessionWebsocketId)
           service.getReleaseVersions()
-          if (service.configuration.ARO_CLIENT === 'frontier') {
+          if (service.configuration.ARO_CLIENT === 'frontier' || service.configuration.ARO_CLIENT === 'sse') {
             heatmapOptions.selectedHeatmapOption = service.viewSetting.heatmapOptions.filter((option) => option.id === 'HEATMAP_OFF')[0]
           }
         })
@@ -1765,8 +1765,8 @@ class State {
           return Promise.reject(err)
         })
     }
-    
-    
+
+
     service.serviceLayers = []
     service.nameToServiceLayers = {}
     service.loadServiceLayers = () => {
