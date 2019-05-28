@@ -956,32 +956,41 @@ module.exports = class NetworkPlan {
       }])
     } else {
       // Ask google to predict what the responses may be
-      const queryParameters = {
-        input: text,
-        sessiontoken: sessionToken,
-        key: process.env.GOOGLE_MAPS_API_IP_KEY
-      }
-      // If the user has provided a "bias" location, set it so that the results will be filtered according to this location.
-      if (biasLatitude && biasLongitude) {
-        const BIAS_RADIUS = 100000  // In meters. Why this specific number? No reason. "Seems ok"
-        queryParameters.location = `${biasLatitude},${biasLongitude}`
-        queryParameters.radius = BIAS_RADIUS
-      }
-      const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json`
-      console.log(`Getting autocomplete results from ${url} with query parameters:`)
-      console.log(queryParameters)
-      return request({url: url, qs: queryParameters, json: true})
-        .then((result) => {
-          var compressedResults = []
-          result[1].predictions.forEach((item) => {
-            compressedResults.push({
-              type: 'placeId',
-              value: item.place_id,
-              displayText: item.description
+      if (!process.env.GOOGLE_MAPS_API_IP_KEY) {
+        return Promise.resolve([
+          {
+            type: 'error',
+            displayText: 'ERROR: GOOGLE_MAPS_API_KEY not defined'
+          }
+        ])
+      } else {
+        const queryParameters = {
+          input: text,
+          sessiontoken: sessionToken,
+          key: process.env.GOOGLE_MAPS_API_IP_KEY
+        }
+        // If the user has provided a "bias" location, set it so that the results will be filtered according to this location.
+        if (biasLatitude && biasLongitude) {
+          const BIAS_RADIUS = 100000  // In meters. Why this specific number? No reason. "Seems ok"
+          queryParameters.location = `${biasLatitude},${biasLongitude}`
+          queryParameters.radius = BIAS_RADIUS
+        }
+        const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json`
+        console.log(`Getting autocomplete results from ${url} with query parameters:`)
+        console.log(queryParameters)
+        return request({url: url, qs: queryParameters, json: true})
+          .then((result) => {
+            var compressedResults = []
+            result[1].predictions.forEach((item) => {
+              compressedResults.push({
+                type: 'placeId',
+                value: item.place_id,
+                displayText: item.description
+              })
             })
+            return Promise.resolve(compressedResults)
           })
-          return Promise.resolve(compressedResults)
-        })
+      }
     }
   }
 

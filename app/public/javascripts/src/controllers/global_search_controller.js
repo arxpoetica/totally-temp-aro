@@ -88,6 +88,9 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', '$s
           })
           state.requestSetMapZoom.next(ZOOM_FOR_LOCATION_SEARCH)
           addBouncingMarker(+selectedLocation.value[0], +selectedLocation.value[1])
+        } else if (selectedLocation.type === 'error') {
+          console.error('ERROR when searching for location')
+          console.error(selectedLocation)
         }
       }
     })
