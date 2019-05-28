@@ -5,9 +5,9 @@ import { RfpTargets } from '../rfp-targets'
 import Point from '../../../../common/point'
 
 const targets = [
-  new Point(47.58444322, -122.330330, 1),
-  new Point(47.59, -122.34, 2),
-  new Point(47.57, -122.32, 3)
+  new Point(47.58444322, -122.330330, '1'),
+  new Point(47.59, -122.34, '2'),
+  new Point(47.57, -122.32, '3')
 ]
 
 // -----------------------------------------------------------------------------
@@ -80,7 +80,7 @@ test('Click to edit a target', () => {
   const mockStopEventPropagation = jest.fn()
   component.find(`#btnSaveTarget_${indexToEdit}`).simulate('click', { stopPropagation: mockStopEventPropagation })
   expect(mockStopEventPropagation).toHaveBeenCalled()
-  expect(mockReplaceTarget).toHaveBeenCalledWith(indexToEdit, { id: 1, lat: 47.11111, lng: -122.33333 })
+  expect(mockReplaceTarget).toHaveBeenCalledWith(indexToEdit, { id: '1', lat: 47.11111, lng: -122.33333 })
   // Note that the actual target value has not changed, so the next snapshot will show old lat/long values.
   // But we still check the snapshot to make sure that the input boxes are gone and just the <td>'s are rendered.
   expect(component).toMatchSnapshot()
@@ -112,13 +112,56 @@ test('Click to manually add a target', () => {
       selectedTarget={null}
       addTargets={mockAddTargets}
       setClickMapToAddTarget={mockSetClickMapToAddTarget}
+      defaultLatitude={47.877}
+      defaultLongitude={-122.235}
     />
   )
   expect(component).toMatchSnapshot()
   component.find('#btnAddTargetManual').simulate('click')
+  component.find('#txtNewTargetId').simulate('change', { target: { value: '4' } })
   expect(component).toMatchSnapshot()
   expect(mockSetClickMapToAddTarget).toHaveBeenCalledWith(false)
   component.find('#btnSaveTarget').simulate('click')
   expect(component).toMatchSnapshot()
   expect(mockAddTargets.mock.calls.length).toBe(1)
+})
+
+// -----------------------------------------------------------------------------
+test('Disable new target save button for duplicate target id', () => {
+  const mockAddTargets = jest.fn()
+  const mockSetClickMapToAddTarget = jest.fn()
+  const component = shallow(
+    <RfpTargets targets={targets}
+      selectedTarget={null}
+      addTargets={mockAddTargets}
+      setClickMapToAddTarget={mockSetClickMapToAddTarget}
+      defaultLatitude={47.877}
+      defaultLongitude={-122.235}
+    />
+  )
+  component.find('#btnAddTargetManual').simulate('click')
+  expect(component).toMatchSnapshot()
+  component.find('#txtNewTargetId').simulate('change', { target: { value: '4' } })
+  expect(component).toMatchSnapshot()
+})
+
+// -----------------------------------------------------------------------------
+test('Disable existing target save button for duplicate target id', () => {
+  const mockAddTargets = jest.fn()
+  const mockSetClickMapToAddTarget = jest.fn()
+  const component = shallow(
+    <RfpTargets targets={targets}
+      selectedTarget={null}
+      addTargets={mockAddTargets}
+      setClickMapToAddTarget={mockSetClickMapToAddTarget}
+      defaultLatitude={47.877}
+      defaultLongitude={-122.235}
+    />
+  )
+  component.find('#btnEditTarget_0').simulate('click')
+  expect(component).toMatchSnapshot()
+  component.find('#inpTargetId_0').simulate('change', { target: { value: '2' } })
+  expect(component).toMatchSnapshot()
+  component.find('#inpTargetId_0').simulate('change', { target: { value: '5' } })
+  expect(component).toMatchSnapshot()
 })
