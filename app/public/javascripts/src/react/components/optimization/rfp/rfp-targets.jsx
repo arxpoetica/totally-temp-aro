@@ -7,7 +7,6 @@ import RfpActions from './rfp-actions'
 import RfpFileImporter from './rfp-file-importer.jsx'
 import RfpTargetsMap from './rfp-targets-map.jsx'
 import Constants from '../../../common/constants'
-import uuidv4 from 'uuid/v4'
 import './rfp-targets.css'
 
 export class RfpTargets extends Component {
@@ -15,7 +14,7 @@ export class RfpTargets extends Component {
     super(props)
     this.state = {
       showNewTargetInputs: false,
-      newTargetId: 1,
+      newTargetId: '0', // Keep this as a string. Making it a number causes comparison errors after IDs are edited.
       newTargetLat: this.props.defaultLatitude,
       newTargetLng: this.props.defaultLongitude,
       indexToEditableTarget: {}
@@ -23,6 +22,8 @@ export class RfpTargets extends Component {
   }
 
   render () {
+    const newTargetIdNotUnique = this.props.targets.findIndex(existingTarget => existingTarget.id === this.state.newTargetId) >= 0
+    const disableSave = this.state.showNewTargetInputs && newTargetIdNotUnique
     return <div className='m-2 p-2' style={{ borderTop: 'solid 2px #eee' }}>
       <h4>
         Targets
@@ -68,7 +69,7 @@ export class RfpTargets extends Component {
               this.state.showNewTargetInputs
                 ? <tr>
                   <td>
-                    <input className='form-control' type='text' value={this.state.newTargetId} onChange={event => this.setState({ newTargetId: event.target.value })} />
+                    <input id='txtNewTargetId' className='form-control' type='text' value={this.state.newTargetId} onChange={event => this.setState({ newTargetId: event.target.value })} />
                   </td>
                   <td>
                     <input className='form-control' type='text' value={this.state.newTargetLat} onChange={event => this.setState({ newTargetLat: event.target.value })} />
@@ -77,7 +78,7 @@ export class RfpTargets extends Component {
                     <input className='form-control' type='text' value={this.state.newTargetLng} onChange={event => this.setState({ newTargetLng: event.target.value })} />
                   </td>
                   <td>
-                    <button id='btnSaveTarget' className='btn btn-sm btn-primary' onClick={this.saveNewTarget.bind(this)}>Save</button>
+                    <button id='btnSaveTarget' className='btn btn-sm btn-primary' disabled={disableSave} onClick={this.saveNewTarget.bind(this)}>Save</button>
                   </td>
                 </tr>
                 : null
@@ -112,6 +113,12 @@ export class RfpTargets extends Component {
   }
 
   renderTargetBeingEdited (target, index) {
+    // If the "id" of the target is edited, make sure it does not clash with any OTHER targets in the list
+    const existingTargetIndexWithSameId = this.props.targets.findIndex(existingTarget => existingTarget.id === this.state.indexToEditableTarget[index].id)
+    const clashesWithExistingTargetId = (existingTargetIndexWithSameId >= 0) && (existingTargetIndexWithSameId !== index)
+    const clashesWithNewPointId = (this.state.showNewTargetInputs && this.state.newTargetId === this.state.indexToEditableTarget[index].id)
+    const disableSave = clashesWithNewPointId || clashesWithExistingTargetId
+
     return <tr id={`trTarget_${index}`} key={index} onClick={event => this.props.setSelectedTarget(target)}
       className={'tr-rfp-target' + (this.props.selectedTarget === target ? ' selected-target-row ' : '')}>
       <td>
@@ -142,7 +149,10 @@ export class RfpTargets extends Component {
         />
       </td>
       <td>
-        <button id={`btnSaveTarget_${index}`} className='btn btn-sm btn-light'
+        {/* Must have a unique id. If not, disable the save button */}
+        <button id={`btnSaveTarget_${index}`}
+          className='btn btn-sm btn-light'
+          disabled={disableSave}
           onClick={event => {
             this.saveEditingTarget(index)
             event.stopPropagation()
@@ -164,7 +174,7 @@ export class RfpTargets extends Component {
   startAddingNewTarget () {
     this.setState({
       showNewTargetInputs: true,
-      newTargetId: uuidv4(),
+      newTargetId: (+this.state.newTargetId + 1).toString(),
       newTargetLat: this.props.defaultLatitude,
       newTargetLng: this.props.defaultLongitude
     })
@@ -175,7 +185,6 @@ export class RfpTargets extends Component {
     this.props.addTargets([new Point(+this.state.newTargetLat, +this.state.newTargetLng, this.state.newTargetId)])
     this.setState({
       showNewTargetInputs: false,
-      newTargetId: this.state.newTargetId + 1,
       newTargetLat: this.props.defaultLatitude,
       newTargetLng: this.props.defaultLongitude
     })
