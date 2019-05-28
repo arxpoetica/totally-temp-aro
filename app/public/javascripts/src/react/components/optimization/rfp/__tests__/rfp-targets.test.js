@@ -3,6 +3,10 @@ import React from 'react'
 import { shallow } from 'enzyme'
 import { RfpTargets } from '../rfp-targets'
 import Point from '../../../../common/point'
+// Return the same UUID for deterministic tests
+import uuidv4 from 'uuid/v4'
+jest.mock('uuid/v4')
+uuidv4.mockImplementation(() => '2d897638-960e-40b3-b25b-5356d3e6c865')
 
 const targets = [
   new Point(47.58444322, -122.330330, 1),
@@ -112,6 +116,8 @@ test('Click to manually add a target', () => {
       selectedTarget={null}
       addTargets={mockAddTargets}
       setClickMapToAddTarget={mockSetClickMapToAddTarget}
+      defaultLatitude={47.877}
+      defaultLongitude={-122.235}
     />
   )
   expect(component).toMatchSnapshot()

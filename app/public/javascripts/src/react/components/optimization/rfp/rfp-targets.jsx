@@ -10,18 +10,14 @@ import Constants from '../../../common/constants'
 import uuidv4 from 'uuid/v4'
 import './rfp-targets.css'
 
-const NEW_TARGET = {
-  lat: 0,
-  lng: 0
-}
 export class RfpTargets extends Component {
   constructor (props) {
     super(props)
     this.state = {
       showNewTargetInputs: false,
       newTargetId: 1,
-      newTargetLat: NEW_TARGET.lat,
-      newTargetLng: NEW_TARGET.lng,
+      newTargetLat: this.props.defaultLatitude,
+      newTargetLng: this.props.defaultLongitude,
       indexToEditableTarget: {}
     }
   }
@@ -169,8 +165,8 @@ export class RfpTargets extends Component {
     this.setState({
       showNewTargetInputs: true,
       newTargetId: uuidv4(),
-      newTargetLat: NEW_TARGET.lat,
-      newTargetLng: NEW_TARGET.lng
+      newTargetLat: this.props.defaultLatitude,
+      newTargetLng: this.props.defaultLongitude
     })
     this.props.setClickMapToAddTarget(false)
   }
@@ -180,8 +176,8 @@ export class RfpTargets extends Component {
     this.setState({
       showNewTargetInputs: false,
       newTargetId: this.state.newTargetId + 1,
-      newTargetLat: NEW_TARGET.lat,
-      newTargetLng: NEW_TARGET.lng
+      newTargetLat: this.props.defaultLatitude,
+      newTargetLng: this.props.defaultLongitude
     })
   }
 
@@ -232,13 +228,17 @@ export class RfpTargets extends Component {
 RfpTargets.propTypes = {
   targets: PropTypes.arrayOf(PropTypes.instanceOf(Point)),
   selectedTarget: PropTypes.instanceOf(Point),
-  clickMapToAddTarget: PropTypes.bool
+  clickMapToAddTarget: PropTypes.bool,
+  defaultLatitude: PropTypes.number,
+  defaultLongitude: PropTypes.number
 }
 
 const mapStateToProps = (state) => ({
   targets: state.optimization.rfp.targets,
   selectedTarget: state.optimization.rfp.selectedTarget,
-  clickMapToAddTarget: state.optimization.rfp.clickMapToAddTarget
+  clickMapToAddTarget: state.optimization.rfp.clickMapToAddTarget,
+  defaultLatitude: state.plan.activePlan.latitude,
+  defaultLongitude: state.plan.activePlan.longitude
 })
 
 const mapDispatchToProps = dispatch => ({
