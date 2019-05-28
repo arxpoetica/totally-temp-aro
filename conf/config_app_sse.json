@@ -5,7 +5,7 @@
   "LOCALaro_service_url": "http://localhost:8080",
   "client_schema": "client",
   "spend_by_city": false,
-  "currency_symbol": "$",
+  "currency_symbol": "£",
   "hsv_defaults" : {
 	"saturation": 0.5,
 	"value": 0.5
@@ -18,7 +18,7 @@
   "ui": {
     "title": "ARO",
     "layout": "default",
-    "defaultSearch":"Seattle, WA, USA",
+    "defaultSearch":"Manchester, UK",
     "map_tools": {
       "layerVisibilityThresh" : 12,
       "locations": {
