@@ -1,5 +1,5 @@
 /* globals */
-import Actions from '../../../common/actions'
+import Actions from '../../common/actions'
 
 function setTestState (testState) {
   return {
