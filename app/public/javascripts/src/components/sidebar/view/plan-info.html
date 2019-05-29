@@ -22,36 +22,36 @@
     border: none;
   }
 </style>
-<div class="plan-details-container" ng-if="!$ctrl.currentPlanInfo.ephemeral">
+<div class="plan-details-container" ng-if="!$ctrl.state.plan.ephemeral">
   <div style="position: relative;">
     <table id="tblPlanInfo" class="table table-sm table-striped">
       <tbody>
         <tr>
           <td>Plan Name</td>
           <td>
-            <span ng-if="!$ctrl.isEditMode">{{$ctrl.currentPlanInfo.name}}</span>
+            <span ng-if="!$ctrl.isEditMode">{{$ctrl.state.plan.name}}</span>
             <input ng-if="$ctrl.isEditMode" type="text" class="form-control text-left"
-                  placeholder="Plan Name" ng-model="$ctrl.currentPlanInfo.name">
+                  placeholder="Plan Name" ng-model="$ctrl.state.plan.name">
           </td>
         </tr>
         <tr>
           <td>Plan Location</td>
           <td> 
-            <span ng-show="!$ctrl.isEditMode">{{$ctrl.currentPlanInfo.areaName}}</span>
+            <span ng-show="!$ctrl.isEditMode">{{$ctrl.state.plan.areaName}}</span>
             <span ng-show="$ctrl.isEditMode">
               <input class="form-control select2" type="text" placeholder="Set cities, states or wirecenters">
             </span>
           </td>
         </tr>
-        <tr ng-if="$ctrl.currentPlanInfo.createdBy">
+        <tr ng-if="$ctrl.state.plan.createdBy">
           <td>Created By</td>
-          <td>{{ $ctrl.getPlanCreatorName($ctrl.currentPlanInfo.createdBy) }}</td>
+          <td>{{ $ctrl.getPlanCreatorName($ctrl.state.plan.createdBy) }}</td>
         </tr>
         <tr>
           <td>General tags</td>
           <td>
             <span class="tags">
-              <div ng-if="!$ctrl.addGeneralTags" ng-repeat="tag in $ctrl.getTagDetails({tagObject:$ctrl.currentPlanInfo.tagMapping.global}) track by tag.id" 
+              <div ng-if="!$ctrl.addGeneralTags" ng-repeat="tag in $ctrl.getTagDetails({tagObject:$ctrl.state.plan.tagMapping.global}) track by tag.id" 
                 class="badge badge-primary" ng-style="{'background-color': $ctrl.state.StateViewMode.getTagColour(tag)}">
                 <span> {{tag.name}} 
                   <i class="fa fa-times pointer" ng-if="$ctrl.isEditMode" ng-click="$ctrl.removeTag('general',tag)"></i>
@@ -109,7 +109,7 @@
     <button class="btn btn-primary" ng-disabled="!$ctrl.currentUserCanEdit" ng-if="$ctrl.isEditMode" ng-click="$ctrl.commitUpdatestoPlan(false)">
       <i class="fa fa-save"></i>&nbsp;&nbsp;Save Changes
     </button>
-    <button class="btn btn-danger" ng-disabled="!$ctrl.currentUserCanEdit" ng-click="$ctrl.deletePlan({plan:$ctrl.currentPlanInfo})">
+    <button class="btn btn-danger" ng-disabled="!$ctrl.currentUserCanEdit" ng-click="$ctrl.deletePlan({plan:$ctrl.state.plan})">
       <i class="far fa-trash-alt"></i>&nbsp;&nbsp;Delete Plan
     </button>
   </div>
