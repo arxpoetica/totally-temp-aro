@@ -1882,16 +1882,23 @@ class State {
       }
     }
 
+    // Define a tile box at zoom level 22 that covers the entire world
+    const WORLD_ZOOM = 22
+    const MAX_TILE_XY_AT_WORLD_ZOOM = Math.pow(2, WORLD_ZOOM) - 1
+    const wholeWorldTileBox = { zoom: WORLD_ZOOM, x1: 0, y1: 0, x2: MAX_TILE_XY_AT_WORLD_ZOOM, y2: MAX_TILE_XY_AT_WORLD_ZOOM }
     service.handleTileInvalidationMessage = msg => {
+      // If the tileBox is null, use a tile box that covers the entire world
+      const tileBox = msg.payload.tileBox || wholeWorldTileBox
       // First, mark the HTML cache so we know which tiles are invalidated
-      tileDataService.displayInvalidatedTiles(msg.payload.tileBox)
+      tileDataService.displayInvalidatedTiles(tileBox)
 
       // Then delete items from the tile data cache and the tile provider cache
-      tileDataService.clearCacheInTileBox(msg.payload.layerNames, msg.payload.tileBox)
+      tileDataService.clearCacheInTileBox(msg.payload.layerNames, tileBox)
 
       // Refresh map layers
       service.requestMapLayerRefresh.next(null)
     }
+
     service.unsubscribeTileInvalidationHandler = SocketManager.subscribe('TILES_INVALIDATED', service.handleTileInvalidationMessage.bind(service))
 
     return service
