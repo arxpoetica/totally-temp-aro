@@ -15,12 +15,10 @@ class PlanInfoController {
     this.addSATags = false
 
     this.currentUserCanEdit = false
-    this.planObserver = state.plan
-      .subscribe((plan) => {
-        this.currentPlanInfo = plan
-        this.getPlanTagDetails()
-        this.updateEditableStatus()
-      })
+    this.currentPlanInfo = state.plan
+    this.getPlanTagDetails()
+    this.updateEditableStatus()
+      
 
     // Save the permission bits for resource read, write and admin
     this.accessTypes = Object.freeze({
