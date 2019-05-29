@@ -21,6 +21,8 @@ import plan from '../react/components/plan/plan-reducer'
 import selection from '../react/components/selection/selection-reducer'
 import user from '../react/components/user/user-reducer'
 
+import ringEdit from '../react/components/ring-edit/ring-edit-reducer'
+
 const logger = createLogger({
   level: 'info',
   collapsed: true
@@ -36,7 +38,8 @@ let reducer = combineReducers({
   plan,
   selection,
   user,
-  form
+  form, 
+  ringEdit
 })
 
 // Add support for Redux devtools extension. Yes, even in production.

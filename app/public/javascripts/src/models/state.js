@@ -168,7 +168,8 @@ class State {
     // The selected panel when in the edit plan mode
     service.EditPlanPanels = Object.freeze({
       EDIT_PLAN: 'EDIT_PLAN',
-      PLAN_SUMMARY: 'PLAN_SUMMARY'
+      PLAN_SUMMARY: 'PLAN_SUMMARY', 
+      EDIT_RINGS: 'EDIT_RINGS'
     })
     service.activeEditPlanPanel = service.EditPlanPanels.EDIT_PLAN
 
