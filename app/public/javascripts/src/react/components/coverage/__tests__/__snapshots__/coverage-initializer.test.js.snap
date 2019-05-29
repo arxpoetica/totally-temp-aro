@@ -1,11 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`When the logged in user is a SuperUser 1`] = `
+exports[`Default render 1`] = `
 <div>
   <table
     className="table table-sm table-striped sidebar-options-table"
     id="table-coverage-initializer"
-    ng-if="$ctrl.isSuperUser"
   >
     <tbody>
       <tr>
@@ -151,27 +150,11 @@ exports[`When the logged in user is a SuperUser 1`] = `
 </div>
 `;
 
-exports[`When the logged in user is not a SuperUser 1`] = `
-<div>
-  <div
-    className="alert alert-danger"
-    style={
-      Object {
-        "marginTop": "60px",
-      }
-    }
-  >
-    You must be a system-wide superuser in order to use coverage reports.
-  </div>
-</div>
-`;
-
 exports[`When we do not have an existing report 1`] = `
 <div>
   <table
     className="table table-sm table-striped sidebar-options-table"
     id="table-coverage-initializer"
-    ng-if="$ctrl.isSuperUser"
   >
     <tbody>
       <tr>
@@ -322,7 +305,6 @@ exports[`When we have an existing report 1`] = `
   <table
     className="table table-sm table-striped sidebar-options-table"
     id="table-coverage-initializer"
-    ng-if="$ctrl.isSuperUser"
   >
     <tbody>
       <tr>
@@ -467,7 +449,6 @@ exports[`When we have an existing report 1`] = `
   </table>
   <div
     className="disable-sibling-controls"
-    ng-if="$ctrl.isSuperUser && $ctrl.coverageReport"
     style={
       Object {
         "top": "50px",
@@ -482,7 +463,6 @@ exports[`When we have supplied all parameters 1`] = `
   <table
     className="table table-sm table-striped sidebar-options-table"
     id="table-coverage-initializer"
-    ng-if="$ctrl.isSuperUser"
   >
     <tbody>
       <tr>
@@ -631,7 +611,6 @@ exports[`When we have supplied all parameters 1`] = `
   </table>
   <div
     className="disable-sibling-controls"
-    ng-if="$ctrl.isSuperUser && $ctrl.coverageReport"
     style={
       Object {
         "top": "50px",

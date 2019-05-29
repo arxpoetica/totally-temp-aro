@@ -13,20 +13,9 @@ const selectionModes = [
 ]
 
 // -----------------------------------------------------------------------------
-test('When the logged in user is not a SuperUser', () => {
+test('Default render', () => {
   const component = renderer.create(
-    <CoverageInitializer isSuperUser={false}
-      selectionModes={selectionModes}
-    />
-  )
-  let tree = component.toJSON()
-  expect(tree).toMatchSnapshot()
-})
-
-// -----------------------------------------------------------------------------
-test('When the logged in user is a SuperUser', () => {
-  const component = renderer.create(
-    <CoverageInitializer isSuperUser
+    <CoverageInitializer
       selectionModes={selectionModes}
     />
   )
