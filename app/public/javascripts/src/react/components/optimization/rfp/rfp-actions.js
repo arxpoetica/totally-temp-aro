@@ -90,8 +90,15 @@ function setClickMapToAddTarget (clickMapToAddTarget) {
   }
 }
 
+function clearRfpState () {
+  return {
+    type: Actions.RFP_CLEAR_STATE
+  }
+}
+
 export default {
   addTargets: addTargets,
+  clearRfpState: clearRfpState,
   initializeRfpReport: initializeRfpReport,
   modifyRfpReport: modifyRfpReport,
   removeTarget: removeTarget,
