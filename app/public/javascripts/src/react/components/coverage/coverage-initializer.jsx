@@ -26,12 +26,8 @@ export class CoverageInitializer extends Component {
   }
 
   render () {
-    return this.props.isSuperUser ? this.renderForSuperUser() : this.renderForNonSuperUser()
-  }
-
-  renderForSuperUser () {
     return <div>
-      <table id='table-coverage-initializer' ng-if='$ctrl.isSuperUser' className='table table-sm table-striped sidebar-options-table'>
+      <table id='table-coverage-initializer' className='table table-sm table-striped sidebar-options-table'>
         <tbody>
 
           {/* Coverage type */}
@@ -118,29 +114,17 @@ export class CoverageInitializer extends Component {
       {/* If we have a valid report, then disable all controls */}
       {/* Hack - Set the top of the disabler so that people can access the Analysis Type dropdown. Remove this after we get
                  a proper analysis type from service */}
-      {this.props.isSuperUser && this.props.coverageReport
-        ? <div ng-if='$ctrl.isSuperUser && $ctrl.coverageReport'
+      {this.props.coverageReport
+        ? <div
           className='disable-sibling-controls'
           style={{ top: '50px' }} />
         : null
       }
     </div>
   }
-
-  renderForNonSuperUser () {
-    return <div>
-      {/* Show an error message if the logged in user is not a SuperUser */}
-      {!this.props.isSuperUser
-        ? <div className='alert alert-danger' style={{ marginTop: '60px' }}>
-            You must be a system-wide superuser in order to use coverage reports.
-        </div>
-        : null}
-    </div>
-  }
 }
 
 CoverageInitializer.propTypes = {
-  isSuperUser: PropTypes.bool,
   activeSelectionModeId: PropTypes.string,
   selectionModes: PropTypes.array,
   coverageType: PropTypes.string,
@@ -155,7 +139,6 @@ const getAllowedSelectionModes = createSelector([getAllSelectionModes],
   (selectionModes) => selectionModes.filter(item => item.id !== 'SELECTED_LOCATIONS'))
 
 const mapStateToProps = state => ({
-  isSuperUser: state.user.isSuperUser,
   activeSelectionModeId: state.selection.activeSelectionMode.id,
   selectionModes: getAllowedSelectionModes(state),
   coverageType: state.coverage.initializationParams.coverageType,
