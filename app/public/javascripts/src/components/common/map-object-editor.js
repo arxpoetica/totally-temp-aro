@@ -318,29 +318,20 @@ class MapObjectEditorController {
               if (this.createdMapObjects.hasOwnProperty(result.objectId)) {
               // it's on the edit layer / in the transaction
                 feature = this.createdMapObjects[result.objectId].feature
-                // options.push(this.contextMenuService.makeItemOption('Select', 'fa-pencil', () => { this.selectProposedFeature(result.objectId) }))
                 options.push(new MenuAction(MenuActionTypes.SELECT, () => this.selectProposedFeature(result.objectId)))
                 if (featureType === MenuItemTypes.EQUIPMENT) {
                   if (this.isBoundaryCreationAllowed({ 'mapObject': result })) {
-                    // options.push(this.contextMenuService.makeItemOption('Add Boundary', 'fa-plus', () => { this.startDrawingBoundaryForId(result.objectId) }))
                     options.push(new MenuAction(MenuActionTypes.ADD, () => this.startDrawingBoundaryForId(result.objectId)))
                   }
                 } else if (featureType === MenuItemTypes.BOUNDARY) {
                 // options.push( this.contextMenuService.makeItemOption('Edit Boundary', 'fa-pencil', () => {this.editBoundary(result.objectId)}) )
                 }
-                // options.push(this.contextMenuService.makeItemOption('Delete', 'fa-trash-alt', () => { this.deleteObjectWithId(result.objectId) }))
                 options.push(new MenuAction(MenuActionTypes.DELETE, () => this.deleteObjectWithId(result.objectId)))
               } else {
-                // options.push(this.contextMenuService.makeItemOption('View Existing', 'fa-pencil', () => { this.viewExistingFeature(result, latLng) }))
                 options.push(new MenuAction(MenuActionTypes.VIEW, () => this.viewExistingFeature(result, latLng)))
                 if (result.deployment_type !== 1 && !this.state.configuration.planEditor.editExistingObjects) {
-                  // options.push(this.contextMenuService.makeItemOption('Edit Existing', 'fa-pencil', () => { this.editExistingFeature(result, latLng) }))                
                   options.push(new MenuAction(MenuActionTypes.EDIT, () => this.editExistingFeature(result, latLng)))
                   if (result._data_type.indexOf('equipment.') > -1 && this.isBoundaryCreationAllowed({ 'mapObject': result })) {
-                    // options.push(this.contextMenuService.makeItemOption('Add Boundary', 'fa-plus', () => { 
-                    //   this.editExistingFeature(result, latLng)
-                    //     .then(() => this.startDrawingBoundaryForId(result.objectId)) 
-                    // }))
                     options.push(new MenuAction(MenuActionTypes.ADD, () => {
                       this.editExistingFeature(result, latLng)
                         .then(() => this.startDrawingBoundaryForId(result.objectId))
@@ -352,8 +343,7 @@ class MapObjectEditorController {
               var name = this.utils.getFeatureDisplayName(feature)
 
               menuItemsById[result.objectId] = options
-              // menuItems.push(this.contextMenuService.makeMenuItem(name, data, options))
-              menuItems.push(new MenuItem(MenuItemTypes.EQUIPMENT, name, options, feature))
+              menuItems.push(new MenuItem(featureType, name, options, feature))
             }
           })
 
@@ -382,10 +372,8 @@ class MapObjectEditorController {
 
           if (results.length == 0) {
             var options = []
-            // options.push(this.contextMenuService.makeItemOption('Add Service Area', 'fa-plus', () => { this.startDrawingBoundaryForSA(latLng) }))
             options.push(new MenuAction(MenuActionTypes.ADD, () => this.startDrawingBoundaryForSA(latLng)))
             var name = 'Add Service Area'
-            // menuItems.push(this.contextMenuService.makeMenuItem(name, data, options))
             menuItems.push(new MenuItem(MenuItemTypes.SERVICE_AREA, name, options))
           } else {
             results.forEach((result) => {
@@ -407,25 +395,18 @@ class MapObjectEditorController {
                 if (this.createdMapObjects.hasOwnProperty(result.objectId)) {
                   // it's on the edit layer / in the transaction
                   feature = this.createdMapObjects[result.objectId].feature
-                  // options.push(this.contextMenuService.makeItemOption('Select', 'fa-pencil', () => { this.selectProposedFeature(result.objectId) }))
                   options.push(new MenuAction(MenuActionTypes.SELECT, () => this.selectProposedFeature(result.objectId)))
-                  // options.push(this.contextMenuService.makeItemOption('Delete', 'fa-trash-alt', () => {
-                  //   this.deleteObjectWithId(result.objectId)
-                  //   this.deleteCreatedMapObject(result.objectId)
-                  // }))
                   options.push(new MenuAction(MenuActionTypes.DELETE, 'fa-trash-alt', () => {
                     this.deleteObjectWithId(result.objectId)
                     this.deleteCreatedMapObject(result.objectId)
                   }))
                 } else {
-                  // options.push(this.contextMenuService.makeItemOption('Edit Existing', 'fa-pencil', () => { this.viewExistingFeature(result, latLng) }))
                   options.push(new MenuAction(MenuActionTypes.EDIT, () => this.viewExistingFeature(result, latLng)))
                 }
 
                 var name = this.utils.getFeatureDisplayName(result)
 
                 menuItemsById[result.objectId] = options
-                // menuItems.push(this.contextMenuService.makeMenuItem(name, data, options))
                 menuItems.push(new MenuItem(MenuItemTypes.SERVICE_AREA, name, options, feature))
               }
             })
@@ -449,7 +430,6 @@ class MapObjectEditorController {
       }) ]
       var menuItems = []
 
-      // menuItems.push(this.contextMenuService.makeMenuItem(name, data, options))
       menuItems.push(new MenuItem(MenuItemTypes.LOCATION, name, options, this.selectedMapObject))
       this.openContextMenu(x, y, menuItems)
     }
