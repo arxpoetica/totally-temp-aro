@@ -94,7 +94,7 @@ class Utilities {
     const dataType = dataTypeComponents[0]
     // Have a map of functions that will extract feature names based on the feature type
     const dataTypeToNameExtractor = {
-      location: feature => feature.name || (feature.objectId && feature.objectId.substring(0, 8)) || 'Location',
+      location: feature => feature.name || (feature.objectId && feature.objectId.substring(feature.objectId.length - 7)) || 'Location',
       equipment_boundary: feature => 'Boundary',
       networkNodeType: feature => feature.networkNodeType,
       service_layer: feature => feature.code || feature.siteClli || 'Unnamed service area'
