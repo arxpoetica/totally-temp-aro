@@ -64,15 +64,40 @@
   <div class="dropdown open context-menu-dropdown">
     <div class="dropdown-menu map-object-editor-context-menu-dropdown">
       <div ng-repeat="menuItem in $ctrl.menuItems" class="dropdown-item aro-dropdown-item" href="#">
-        <div class="badge badge-primary">Service Area</div>
-        {{menuItem.label}}
-        <i class="fa-caret-right fas ml-2"></i>
+
+        <div ng-switch="menuItem.type">
+          <div ng-switch-when="BOUNDARY" class="badge badge-primary">Boundary</div>
+          <div ng-switch-when="EQUIPMENT" class="badge badge-primary">Equipment</div>
+          <div ng-switch-when="LOCATION" class="badge badge-primary">Location</div>
+          <div ng-switch-when="SERVICE_AREA" class="badge badge-primary">Service Area</div>
+          {{menuItem.displayName}}
+          <i class="fa-caret-right fas ml-2"></i>
+        </div>
         <ul class="dropdown-menu sub-menu"
-          ng-if="menuItem.options && menuItem.options.length > 0"
+          ng-if="menuItem.actions && menuItem.actions.length > 0"
           ng-style="{ top: ($index * 38) + 'px' }">
-          <li ng-repeat="option in menuItem.options" class="dropdown-item"
+          <li ng-repeat="option in menuItem.actions" class="dropdown-item"
             ng-click="$ctrl.onOptionClick(option.callback, menuItem.data)">
-            <a href="#" class="dropdown-item aro-dropdown-item">{{option.label}}</a>
+            <a href="#" class="dropdown-item aro-dropdown-item">
+              <div ng-switch="option.type">
+                <div ng-switch-when="ADD">
+                  <i class="fa fa-eye"></i> Add
+                </div>
+                <div ng-switch-when="SELECT">
+                  <i class="fa fa-eye"></i> Select
+                </div>
+                <div ng-switch-when="VIEW">
+                  <i class="fa fa-eye"></i> View
+                </div>
+                <div ng-switch-when="EDIT">
+                  <i class="fa fa-eye"></i> Edit
+                </div>
+                <div ng-switch-when="DELETE">
+                  <i class="fa fa-eye"></i> Delete
+                </div>
+              </div>
+              {{option.label}}
+            </a>
           </li>
         </ul>
       </div>

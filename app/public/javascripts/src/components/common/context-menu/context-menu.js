@@ -84,7 +84,7 @@ class ContextMenuController {
 ContextMenuController.$inject = ['$scope', '$element', '$timeout', 'contextMenuService']
 
 let contextMenu = {
-  templateUrl: '/components/common/context-menu.html',
+  templateUrl: '/components/common/context-menu/context-menu.html',
   bindings: {},
   controller: ContextMenuController
 }
