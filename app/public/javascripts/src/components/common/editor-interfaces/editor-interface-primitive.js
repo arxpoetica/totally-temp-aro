@@ -57,7 +57,7 @@ class EditorInterfacePrimitiveController {
           this.onChange()
         } else if (!isEnumSame) {
           // need to refresh the local view
-          this.$timeout()
+          // this.$timeout() // Commenting out for now, this was causing an infinite loop
         }
       }
       
