@@ -1,6 +1,7 @@
 import Actions from '../../common/actions'
 import CoverageActions from '../coverage/coverage-actions'
 import SelectionActions from '../selection/selection-actions'
+import RfpActions from '../optimization/rfp/rfp-actions'
 import socketManager from '../../../react/common/socket-manager'
 
 // Set the plan
@@ -22,6 +23,8 @@ function setActivePlan (plan) {
     dispatch(CoverageActions.updateCoverageStatus(plan.id))
     // Clear plan target selection
     dispatch(SelectionActions.loadPlanTargetSelectionsFromServer(plan.id))
+    // Clear RFP state
+    dispatch(RfpActions.clearRfpState())
   }
 }
 
