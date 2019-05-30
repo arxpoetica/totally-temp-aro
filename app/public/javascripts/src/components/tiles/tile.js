@@ -9,6 +9,8 @@ import MapUtilities from '../common/plan/map-utilities'
 import FeatureSelector from './feature-selector'
 import Constants from '../common/constants'
 import SelectionModes from '../../react/components/selection/selection-modes'
+import MenuAction, { MenuActionTypes } from '../common/context-menu/menu-action'
+import MenuItem, { MenuItemTypes } from '../common/context-menu/menu-item'
 
 class TileComponentController {
   // MapLayer objects contain the following information
@@ -315,13 +317,15 @@ class TileComponentController {
                 }
 
                 var options = []
-                options.push(this.contextMenuService.makeItemOption('Select', 'fa-eye', () => {
-                  this.state.mapFeaturesSelectedEvent.next(singleHitFeature)
-                }))
+                // options.push(this.contextMenuService.makeItemOption('Select', 'fa-eye', () => {
+                //   this.state.mapFeaturesSelectedEvent.next(singleHitFeature)
+                // }))
+                options.push(new MenuAction(MenuActionTypes.SELECT, () => this.state.mapFeaturesSelectedEvent.next(singleHitFeature)))
 
-                var dataTypeList = this.utils.getDataTypeListOfFeature(feature)
-                var name = this.utils.getFeatureDisplayName(feature, this.state, dataTypeList)
-                var menuItem = this.contextMenuService.makeMenuItem(name, data, options)
+                // var menuItem = this.contextMenuService.makeMenuItem(name, data, options)
+                const menuItemType = this.utils.getFeatureMenuItemType(feature)
+                var name = this.utils.getFeatureDisplayName(feature)
+                var menuItem = new MenuItem(menuItemType, name, options)
                 menuItems.push(menuItem)
                 // menuItemsById[feature.objectId] = menuItem
                 menuItemsById[objectId] = menuItem

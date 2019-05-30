@@ -1,0 +1,137 @@
+<!-- Define a dummy CSS class that we will use to select the dropdown element. The class name
+     must be unique as all this HTML is going to be attached to the $document -->
+<style>
+  .map-object-editor-context-menu-container {
+    line-height: 22px; /* Any property will do */
+    position: 'absolute';
+    bottom: 25px;
+  }
+  .map-object-editor-context-menu {
+    line-height: 22px; /* Any property will do */
+  }
+  .map-object-editor-context-menu-dropdown {
+    line-height: 22px; /* Any property will do */
+    max-height: 80vh;
+    top: auto;
+    padding: 0px;
+  }
+  .map-object-editor-context-menu-dropdown-section{
+    margin-bottom: 6px;
+  }
+  .context-menu-dropdown{
+    height: 100%;
+  }
+  
+  /* left: 100% is leaving a single pixel gap which causes the menu to then get hidden. Making 99% for now */
+  .dropdown-menu .sub-menu {
+      left: 99%;
+      position: absolute;
+      top: 0;
+      visibility: hidden;
+      margin-top: -1px;
+      padding: 0px;
+  }
+
+  .dropdown-item:hover .sub-menu, .dropdown-menu div:hover .sub-menu, .sub-menu:hover {
+      visibility: visible;
+  }
+
+  .dropdown:hover .dropdown-menu {
+      display: block;
+  }
+
+  .dropdown-menu {
+      margin-top: 0;
+  }
+
+  .dropdown-item:hover {
+    color: white;
+    background-color: #007bff;
+  }
+
+  .aro-dropdown-item {
+    color: black;
+    padding: 8px;
+    cursor: pointer;
+  }
+
+  .badge-boundary {
+    background-color: #a04040;
+  }
+
+  .badge-equipment {
+    background-color: #002792;
+  }
+
+  .badge-location {
+    background-color: #5a40a0;
+  }
+
+  .badge-service-area {
+    background-color: #40a040;
+  }
+</style>
+
+
+<div class="map-object-editor-context-menu-container" ng-style="$ctrl.contextMenuCss"> <!-- This ng-style will position the menu -->
+  <div class="dropdown open context-menu-dropdown">
+    <div class="dropdown-menu map-object-editor-context-menu-dropdown">
+      <!-- Show a button at the top IF there are too many menu items. The button will scroll the menu items -->
+      <button ng-if="$ctrl.menuItems.length > $ctrl.MAX_MENU_ITEMS"
+        class="btn btn-sm btn-block btn-light p-0"
+        ng-click="$ctrl.scrollMenuUp()"
+        ng-disabled="$ctrl.startMenuIndex === 0">
+        <i class="fa fas fa-caret-up"></i>
+      </button>
+
+      <!-- The actual menu items -->
+      <div ng-repeat="menuItem in $ctrl.menuItems | limitTo:$ctrl.MAX_MENU_ITEMS:$ctrl.startMenuIndex" class="dropdown-item aro-dropdown-item" href="#">
+        <div ng-switch="menuItem.type">
+          <div ng-switch-when="BOUNDARY" class="badge badge-primary badge-boundary">Boundary</div>
+          <div ng-switch-when="EQUIPMENT" class="badge badge-primary badge-equipment">Equipment</div>
+          <div ng-switch-when="LOCATION" class="badge badge-primary badge-location">Location</div>
+          <div ng-switch-when="SERVICE_AREA" class="badge badge-primary badge-service-area">Service Area</div>
+          {{menuItem.displayName}}
+          <i class="fa-caret-right fas ml-2"></i>
+        </div>
+        <!-- For the sub-menu, the top is calculated by offsetting by the index of the item, plus the
+             height of the scroll button (if it exists). Would be better if these constants can be removed -->
+        <ul class="dropdown-menu sub-menu"
+          ng-if="menuItem.actions && menuItem.actions.length > 0"
+          ng-style="{ top: ($index * 38 + ($ctrl.menuItems.length > $ctrl.MAX_MENU_ITEMS ? 20 : 0)) + 'px', padding: '0px' }">
+          <li ng-repeat="option in menuItem.actions" class="dropdown-item aro-dropdown-item"
+            ng-click="$ctrl.onOptionClick(option.callback, menuItem.data)">
+            <a href="#" class="dropdown-item aro-dropdown-item" style="padding: 0px;">
+              <div ng-switch="option.type">
+                <div ng-switch-when="ADD_BOUNDARY">
+                  <i class="fas fa-plus pl-2 pr-2"></i> Add boundary
+                </div>
+                <div ng-switch-when="SELECT">
+                  <i class="fas fa-mouse-pointer pl-2 pr-2"></i> Select
+                </div>
+                <div ng-switch-when="VIEW">
+                  <i class="fa fa-eye pl-2 pr-2"></i> View
+                </div>
+                <div ng-switch-when="EDIT">
+                  <i class="fas fa-pencil-alt pl-2 pr-2"></i> Edit
+                </div>
+                <div ng-switch-when="DELETE">
+                  <i class="fas fa-trash-alt pl-2 pr-2"></i> Delete
+                </div>
+              </div>
+              {{option.label}}
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Show a button at the bottom IF there are too many menu items. The button will scroll the menu items -->
+      <button ng-if="$ctrl.menuItems.length > $ctrl.MAX_MENU_ITEMS"
+        class="btn btn-sm btn-block btn-light p-0"
+        ng-click="$ctrl.scrollMenuDown()"
+        ng-disabled="$ctrl.startMenuIndex + $ctrl.MAX_MENU_ITEMS === $ctrl.menuItems.length">
+        <i class="fa fas fa-caret-down"></i>
+      </button>
+    </div>
+  </div>
+</div>
