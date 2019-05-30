@@ -11,13 +11,7 @@
   }
   .map-object-editor-context-menu-dropdown {
     line-height: 22px; /* Any property will do */
-    /* padding: 5px; */
-    /*
-    max-height: 100%;
-    */
     max-height: 80vh;
-    
-    /* overflow: scroll; */
     top: auto;
     padding: 0px;
   }
@@ -28,35 +22,53 @@
     height: 100%;
   }
   
-.dropdown-menu .sub-menu {
-    left: 100%;
-    position: absolute;
-    top: 0;
-    visibility: hidden;
-    margin-top: -1px;
-}
+  /* left: 100% is leaving a single pixel gap which causes the menu to then get hidden. Making 99% for now */
+  .dropdown-menu .sub-menu {
+      left: 99%;
+      position: absolute;
+      top: 0;
+      visibility: hidden;
+      margin-top: -1px;
+      padding: 0px;
+  }
 
-.dropdown-item:hover .sub-menu, .dropdown-menu div:hover .sub-menu, .sub-menu:hover {
-    visibility: visible;
-}
+  .dropdown-item:hover .sub-menu, .dropdown-menu div:hover .sub-menu, .sub-menu:hover {
+      visibility: visible;
+  }
 
-.dropdown:hover .dropdown-menu {
-    display: block;
-}
+  .dropdown:hover .dropdown-menu {
+      display: block;
+  }
 
-.dropdown-menu {
-    margin-top: 0;
-}
+  .dropdown-menu {
+      margin-top: 0;
+  }
 
-.dropdown-item:hover {
-  color: white;
-  background-color: #007bff;
-}
+  .dropdown-item:hover {
+    color: white;
+    background-color: #007bff;
+  }
 
-.aro-dropdown-item {
-  color: black;
-  padding: 8px;
-}
+  .aro-dropdown-item {
+    color: black;
+    padding: 8px;
+  }
+
+  .badge-boundary {
+    background-color: #a04040;
+  }
+
+  .badge-equipment {
+    background-color: #002792;
+  }
+
+  .badge-location {
+    background-color: #5a40a0;
+  }
+
+  .badge-service-area {
+    background-color: #40a040;
+  }
 </style>
 
 
@@ -64,21 +76,20 @@
   <div class="dropdown open context-menu-dropdown">
     <div class="dropdown-menu map-object-editor-context-menu-dropdown">
       <div ng-repeat="menuItem in $ctrl.menuItems" class="dropdown-item aro-dropdown-item" href="#">
-
         <div ng-switch="menuItem.type">
-          <div ng-switch-when="BOUNDARY" class="badge badge-primary">Boundary</div>
-          <div ng-switch-when="EQUIPMENT" class="badge badge-primary">Equipment</div>
-          <div ng-switch-when="LOCATION" class="badge badge-primary">Location</div>
-          <div ng-switch-when="SERVICE_AREA" class="badge badge-primary">Service Area</div>
+          <div ng-switch-when="BOUNDARY" class="badge badge-primary badge-boundary">Boundary</div>
+          <div ng-switch-when="EQUIPMENT" class="badge badge-primary badge-equipment">Equipment</div>
+          <div ng-switch-when="LOCATION" class="badge badge-primary badge-location">Location</div>
+          <div ng-switch-when="SERVICE_AREA" class="badge badge-primary badge-service-area">Service Area</div>
           {{menuItem.displayName}}
           <i class="fa-caret-right fas ml-2"></i>
         </div>
         <ul class="dropdown-menu sub-menu"
           ng-if="menuItem.actions && menuItem.actions.length > 0"
-          ng-style="{ top: ($index * 38) + 'px' }">
-          <li ng-repeat="option in menuItem.actions" class="dropdown-item"
+          ng-style="{ top: ($index * 38) + 'px', padding: '0px' }">
+          <li ng-repeat="option in menuItem.actions" class="dropdown-item aro-dropdown-item"
             ng-click="$ctrl.onOptionClick(option.callback, menuItem.data)">
-            <a href="#" class="dropdown-item aro-dropdown-item">
+            <a href="#" class="dropdown-item aro-dropdown-item" style="padding: 0px;">
               <div ng-switch="option.type">
                 <div ng-switch-when="ADD">
                   <i class="fa fa-eye"></i> Add
