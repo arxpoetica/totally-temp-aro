@@ -1,5 +1,5 @@
 export const MenuActionTypes = Object.freeze({
-  ADD: 'ADD',
+  ADD_BOUNDARY: 'ADD_BOUNDARY',
   SELECT: 'SELECT',
   VIEW: 'VIEW',
   EDIT: 'EDIT',

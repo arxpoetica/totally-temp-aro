@@ -321,7 +321,7 @@ class MapObjectEditorController {
                 options.push(new MenuAction(MenuActionTypes.SELECT, () => this.selectProposedFeature(result.objectId)))
                 if (featureType === MenuItemTypes.EQUIPMENT) {
                   if (this.isBoundaryCreationAllowed({ 'mapObject': result })) {
-                    options.push(new MenuAction(MenuActionTypes.ADD, () => this.startDrawingBoundaryForId(result.objectId)))
+                    options.push(new MenuAction(MenuActionTypes.ADD_BOUNDARY, () => this.startDrawingBoundaryForId(result.objectId)))
                   }
                 } else if (featureType === MenuItemTypes.BOUNDARY) {
                 // options.push( this.contextMenuService.makeItemOption('Edit Boundary', 'fa-pencil', () => {this.editBoundary(result.objectId)}) )
@@ -332,7 +332,7 @@ class MapObjectEditorController {
                 if (result.deployment_type !== 1 && !this.state.configuration.planEditor.editExistingObjects) {
                   options.push(new MenuAction(MenuActionTypes.EDIT, () => this.editExistingFeature(result, latLng)))
                   if (result._data_type.indexOf('equipment.') > -1 && this.isBoundaryCreationAllowed({ 'mapObject': result })) {
-                    options.push(new MenuAction(MenuActionTypes.ADD, () => {
+                    options.push(new MenuAction(MenuActionTypes.ADD_BOUNDARY, () => {
                       this.editExistingFeature(result, latLng)
                         .then(() => this.startDrawingBoundaryForId(result.objectId))
                     }))
@@ -372,7 +372,7 @@ class MapObjectEditorController {
 
           if (results.length == 0) {
             var options = []
-            options.push(new MenuAction(MenuActionTypes.ADD, () => this.startDrawingBoundaryForSA(latLng)))
+            options.push(new MenuAction(MenuActionTypes.ADD_BOUNDARY, () => this.startDrawingBoundaryForSA(latLng)))
             var name = 'Add Service Area'
             menuItems.push(new MenuItem(MenuItemTypes.SERVICE_AREA, name, options))
           } else {
