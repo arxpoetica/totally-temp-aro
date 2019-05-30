@@ -333,8 +333,13 @@ class MapObjectEditorController {
                   options.push(new MenuAction(MenuActionTypes.EDIT, () => this.editExistingFeature(result, latLng)))
                   if (result._data_type.indexOf('equipment.') > -1 && this.isBoundaryCreationAllowed({ 'mapObject': result })) {
                     options.push(new MenuAction(MenuActionTypes.ADD_BOUNDARY, () => {
-                      this.editExistingFeature(result, latLng)
-                        .then(() => this.startDrawingBoundaryForId(result.objectId))
+                      // Create a fake, ephemeral "map object" to fool the downstream functions to start adding or
+                      // editing the boundary without editing the equipment object itself
+                      const mockEquipmentMapObject = {
+                        objectId: result.objectId,
+                        icon: 'HACK to make this.isMarker() think this is a marker and not a polygon :('
+                      }
+                      this.startDrawingBoundaryFor(mockEquipmentMapObject)
                     }))
                   }
                 }
