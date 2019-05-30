@@ -19,6 +19,7 @@
     
     /* overflow: scroll; */
     top: auto;
+    padding: 0px;
   }
   .map-object-editor-context-menu-dropdown-section{
     margin-bottom: 6px;
@@ -35,7 +36,7 @@
     margin-top: -1px;
 }
 
-.dropdown-menu div:hover .sub-menu, .sub-menu:hover {
+.dropdown-item:hover .sub-menu, .dropdown-menu div:hover .sub-menu, .sub-menu:hover {
     visibility: visible;
 }
 
@@ -54,6 +55,7 @@
 
 .aro-dropdown-item {
   color: black;
+  padding: 8px;
 }
 </style>
 
@@ -62,11 +64,12 @@
   <div class="dropdown open context-menu-dropdown">
     <div class="dropdown-menu map-object-editor-context-menu-dropdown">
       <div ng-repeat="menuItem in $ctrl.menuItems" class="dropdown-item aro-dropdown-item" href="#">
+        <div class="badge badge-primary">Service Area</div>
         {{menuItem.label}}
-
+        <i class="fa-caret-right fas ml-2"></i>
         <ul class="dropdown-menu sub-menu"
           ng-if="menuItem.options && menuItem.options.length > 0"
-          ng-style="{ top: ($index * 30) + 'px' }">
+          ng-style="{ top: ($index * 38) + 'px' }">
           <li ng-repeat="option in menuItem.options" class="dropdown-item"
             ng-click="$ctrl.onOptionClick(option.callback, menuItem.data)">
             <a href="#" class="dropdown-item aro-dropdown-item">{{option.label}}</a>
