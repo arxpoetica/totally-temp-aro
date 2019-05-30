@@ -47,58 +47,21 @@
     margin-top: 0;
 }
 
+.dropdown-item:hover {
+  color: white;
+  background-color: #007bff;
+}
+
+.aro-dropdown-item {
+  color: black;
+}
 </style>
 
 
 <div class="map-object-editor-context-menu-container" ng-style="$ctrl.contextMenuCss"> <!-- This ng-style will position the menu -->
-  
   <div class="dropdown open context-menu-dropdown">
-  
-    <!-- Have a button but hide it. This markup is from the standard bootstrap dropdown docs.
-         The .dropdown() method is called on this hidden button, which in turn shows the menu. -->
-    <!-- 
-    <button ng-hide="true" class="btn btn-light dropdown-toggle map-object-editor-context-menu" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-      Dropdown
-      <span class="caret"></span>
-    </button>
-    -->
-
-    <!-- <ul class="dropdown-menu map-object-editor-context-menu-dropdown" ng-style="$ctrl.positionCss" aria-labelledby="dropdownMenu1">
-      <div class="map-object-editor-context-menu-dropdown-section" ng-repeat="item in $ctrl.menuItems">
-        <li>
-          {{item.label}}
-        </li>
-        <li ng-repeat="option in item.options">
-          <a href="#" ng-click="$ctrl.onOptionClick(option.callback, item.data)">
-            &nbsp;&nbsp;<i class="fa {{option.iconClass}}"></i>
-            {{option.label}}
-          </a>
-        </li>
-      </div>
-    </ul> -->
-
-    <!-- <div class="dropdown-menu map-object-editor-context-menu-dropdown">
-      <a class="dropdown-item" href="#">Action</a>
-      <ul class="dropdown-menu sub-menu">
-        <li class="dropdown-item"><a href="#">Action</a></li>
-        <li class="dropdown-item"><a href="#">Another action</a></li>
-        <li class="dropdown-item"><a href="#">Something else here</a></li>
-      </ul>
-
-      <a class="dropdown-item" href="#">Another action</a>
-      <ul class="dropdown-menu sub-menu" style="top: 30px;">
-        <li class="dropdown-item"><a href="#">Action 2</a></li>
-        <li class="dropdown-item"><a href="#">Another action 2</a></li>
-        <li class="dropdown-item"><a href="#">Something else here 2</a></li>
-      </ul>
-
-      <a class="dropdown-item" href="#">Something else here</a>
-      <div class="dropdown-divider"></div>
-      <a class="dropdown-item" href="#">Separated link</a>
-    </div> -->
-
     <div class="dropdown-menu map-object-editor-context-menu-dropdown">
-      <div ng-repeat="menuItem in $ctrl.menuItems" class="dropdown-item" href="#">
+      <div ng-repeat="menuItem in $ctrl.menuItems" class="dropdown-item aro-dropdown-item" href="#">
         {{menuItem.label}}
 
         <ul class="dropdown-menu sub-menu"
@@ -106,11 +69,10 @@
           ng-style="{ top: ($index * 30) + 'px' }">
           <li ng-repeat="option in menuItem.options" class="dropdown-item"
             ng-click="$ctrl.onOptionClick(option.callback, menuItem.data)">
-            <a href="#">{{option.label}}</a>
+            <a href="#" class="dropdown-item aro-dropdown-item">{{option.label}}</a>
           </li>
         </ul>
       </div>
     </div>
-
   </div>
 </div>
