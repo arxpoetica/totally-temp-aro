@@ -76,7 +76,16 @@
 <div class="map-object-editor-context-menu-container" ng-style="$ctrl.contextMenuCss"> <!-- This ng-style will position the menu -->
   <div class="dropdown open context-menu-dropdown">
     <div class="dropdown-menu map-object-editor-context-menu-dropdown">
-      <div ng-repeat="menuItem in $ctrl.menuItems" class="dropdown-item aro-dropdown-item" href="#">
+      <!-- Show a button at the top IF there are too many menu items. The button will scroll the menu items -->
+      <button ng-if="$ctrl.menuItems.length > $ctrl.MAX_MENU_ITEMS"
+        class="btn btn-sm btn-block btn-light p-0"
+        ng-click="$ctrl.scrollMenuUp()"
+        ng-disabled="$ctrl.startMenuIndex === 0">
+        <i class="fa fas fa-caret-up"></i>
+      </button>
+
+      <!-- The actual menu items -->
+      <div ng-repeat="menuItem in $ctrl.menuItems | limitTo:$ctrl.MAX_MENU_ITEMS:$ctrl.startMenuIndex" class="dropdown-item aro-dropdown-item" href="#">
         <div ng-switch="menuItem.type">
           <div ng-switch-when="BOUNDARY" class="badge badge-primary badge-boundary">Boundary</div>
           <div ng-switch-when="EQUIPMENT" class="badge badge-primary badge-equipment">Equipment</div>
@@ -85,9 +94,11 @@
           {{menuItem.displayName}}
           <i class="fa-caret-right fas ml-2"></i>
         </div>
+        <!-- For the sub-menu, the top is calculated by offsetting by the index of the item, plus the
+             height of the scroll button (if it exists). Would be better if these constants can be removed -->
         <ul class="dropdown-menu sub-menu"
           ng-if="menuItem.actions && menuItem.actions.length > 0"
-          ng-style="{ top: ($index * 38) + 'px', padding: '0px' }">
+          ng-style="{ top: ($index * 38 + ($ctrl.menuItems.length > $ctrl.MAX_MENU_ITEMS ? 20 : 0)) + 'px', padding: '0px' }">
           <li ng-repeat="option in menuItem.actions" class="dropdown-item aro-dropdown-item"
             ng-click="$ctrl.onOptionClick(option.callback, menuItem.data)">
             <a href="#" class="dropdown-item aro-dropdown-item" style="padding: 0px;">
@@ -113,6 +124,14 @@
           </li>
         </ul>
       </div>
+
+      <!-- Show a button at the bottom IF there are too many menu items. The button will scroll the menu items -->
+      <button ng-if="$ctrl.menuItems.length > $ctrl.MAX_MENU_ITEMS"
+        class="btn btn-sm btn-block btn-light p-0"
+        ng-click="$ctrl.scrollMenuDown()"
+        ng-disabled="$ctrl.startMenuIndex + $ctrl.MAX_MENU_ITEMS === $ctrl.menuItems.length">
+        <i class="fa fas fa-caret-down"></i>
+      </button>
     </div>
   </div>
 </div>

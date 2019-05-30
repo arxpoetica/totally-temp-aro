@@ -19,6 +19,8 @@ class ContextMenuController {
     }
     this.menuItems = []
     this.isVisible = false
+    this.startMenuIndex = 0
+    this.MAX_MENU_ITEMS = 6 // The maximum number of menu items to show
   }
 
   $onInit () {
@@ -46,6 +48,7 @@ class ContextMenuController {
   // ---
 
   openMenu () {
+    this.startMenuIndex = 0
     this.isVisible = true
     this.contextMenuCss.display = 'block'
     this.refreshView()
@@ -59,6 +62,18 @@ class ContextMenuController {
   onOptionClick (callback, data) {
     this.contextMenuService.menuOff()
     callback(data)
+  }
+
+  scrollMenuDown () {
+    if ((this.startMenuIndex + this.MAX_MENU_ITEMS) < this.menuItems.length) {
+      this.startMenuIndex = this.startMenuIndex + 1
+    }
+  }
+
+  scrollMenuUp () {
+    if (this.startMenuIndex > 0) {
+      this.startMenuIndex = this.startMenuIndex - 1
+    }
   }
 
   refreshView () {
