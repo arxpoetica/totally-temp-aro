@@ -11,13 +11,13 @@
   }
   .map-object-editor-context-menu-dropdown {
     line-height: 22px; /* Any property will do */
-    padding: 5px;
+    /* padding: 5px; */
     /*
     max-height: 100%;
     */
     max-height: 80vh;
     
-    overflow: scroll;
+    /* overflow: scroll; */
     top: auto;
   }
   .map-object-editor-context-menu-dropdown-section{
@@ -27,6 +27,26 @@
     height: 100%;
   }
   
+.dropdown-menu .sub-menu {
+    left: 100%;
+    position: absolute;
+    top: 0;
+    visibility: hidden;
+    margin-top: -1px;
+}
+
+.dropdown-menu div:hover .sub-menu, .sub-menu:hover {
+    visibility: visible;
+}
+
+.dropdown:hover .dropdown-menu {
+    display: block;
+}
+
+.dropdown-menu {
+    margin-top: 0;
+}
+
 </style>
 
 
@@ -42,7 +62,8 @@
       <span class="caret"></span>
     </button>
     -->
-    <ul class="dropdown-menu map-object-editor-context-menu-dropdown" ng-style="$ctrl.positionCss" aria-labelledby="dropdownMenu1">
+
+    <!-- <ul class="dropdown-menu map-object-editor-context-menu-dropdown" ng-style="$ctrl.positionCss" aria-labelledby="dropdownMenu1">
       <div class="map-object-editor-context-menu-dropdown-section" ng-repeat="item in $ctrl.menuItems">
         <li>
           {{item.label}}
@@ -54,7 +75,42 @@
           </a>
         </li>
       </div>
-    </ul>
-  
+    </ul> -->
+
+    <!-- <div class="dropdown-menu map-object-editor-context-menu-dropdown">
+      <a class="dropdown-item" href="#">Action</a>
+      <ul class="dropdown-menu sub-menu">
+        <li class="dropdown-item"><a href="#">Action</a></li>
+        <li class="dropdown-item"><a href="#">Another action</a></li>
+        <li class="dropdown-item"><a href="#">Something else here</a></li>
+      </ul>
+
+      <a class="dropdown-item" href="#">Another action</a>
+      <ul class="dropdown-menu sub-menu" style="top: 30px;">
+        <li class="dropdown-item"><a href="#">Action 2</a></li>
+        <li class="dropdown-item"><a href="#">Another action 2</a></li>
+        <li class="dropdown-item"><a href="#">Something else here 2</a></li>
+      </ul>
+
+      <a class="dropdown-item" href="#">Something else here</a>
+      <div class="dropdown-divider"></div>
+      <a class="dropdown-item" href="#">Separated link</a>
+    </div> -->
+
+    <div class="dropdown-menu map-object-editor-context-menu-dropdown">
+      <div ng-repeat="menuItem in $ctrl.menuItems" class="dropdown-item" href="#">
+        {{menuItem.label}}
+
+        <ul class="dropdown-menu sub-menu"
+          ng-if="menuItem.options && menuItem.options.length > 0"
+          ng-style="{ top: ($index * 30) + 'px' }">
+          <li ng-repeat="option in menuItem.options" class="dropdown-item"
+            ng-click="$ctrl.onOptionClick(option.callback, menuItem.data)">
+            <a href="#">{{option.label}}</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
   </div>
 </div>
