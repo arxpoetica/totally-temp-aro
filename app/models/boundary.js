@@ -189,4 +189,15 @@ module.exports = class Boundary {
     `
     return database.query(sql, [dataSources, serviceLayerId])
   }
+
+  static getBoundaryForNetworkNode (planId, networkNodeObjectId, boundaryTypeId) {
+    return database.query(`
+      SELECT id,object_id,deployment_type
+      FROM client.network_boundary
+      WHERE root_plan_id = $1
+        AND network_node_object_id = $2
+        AND boundary_type = $3
+        AND is_deleted=false;
+    `, [planId, networkNodeObjectId, boundaryTypeId])
+  }
 }

@@ -282,8 +282,6 @@ class MapObjectEditorController {
     if (this.featureType === 'equipment') { // ToDo: need a better way to do this, should be in plan-editor
       this.getFeaturesAtPoint(latLng)
         .then((results) => {
-        // console.log(clickedMapObject)
-        // console.log(results)
         // We may have come here when the user clicked an existing map object. For now, just add it to the list.
         // This should be replaced by something that loops over all created map objects and picks those that are under the cursor.
           if (clickedMapObject) {
@@ -297,11 +295,11 @@ class MapObjectEditorController {
 
           var menuItems = []
           var menuItemsById = {}
+          var allMenuPromises = []
 
           results.forEach((result) => {
           // populate context menu aray here
           // we may need different behavour for different controllers using this
-            var options = []
             const featureType = this.utils.getFeatureMenuItemType(result)
 
             if (result.hasOwnProperty('object_id')) result.objectId = result.object_id
@@ -315,48 +313,23 @@ class MapObjectEditorController {
 
             if (validFeature) {
               var feature = result
-              if (this.createdMapObjects.hasOwnProperty(result.objectId)) {
-              // it's on the edit layer / in the transaction
-                feature = this.createdMapObjects[result.objectId].feature
-                options.push(new MenuAction(MenuActionTypes.SELECT, () => this.selectProposedFeature(result.objectId)))
-                if (featureType === MenuItemTypes.EQUIPMENT) {
-                  if (this.isBoundaryCreationAllowed({ 'mapObject': result })) {
-                    options.push(new MenuAction(MenuActionTypes.ADD_BOUNDARY, () => this.startDrawingBoundaryForId(result.objectId)))
-                  }
-                } else if (featureType === MenuItemTypes.BOUNDARY) {
-                // options.push( this.contextMenuService.makeItemOption('Edit Boundary', 'fa-pencil', () => {this.editBoundary(result.objectId)}) )
-                }
-                options.push(new MenuAction(MenuActionTypes.DELETE, () => this.deleteObjectWithId(result.objectId)))
-              } else {
-                options.push(new MenuAction(MenuActionTypes.VIEW, () => this.viewExistingFeature(result, latLng)))
-                if (result.deployment_type !== 1 && !this.state.configuration.planEditor.editExistingObjects) {
-                  options.push(new MenuAction(MenuActionTypes.EDIT, () => this.editExistingFeature(result, latLng)))
-                  if (result._data_type.indexOf('equipment.') > -1 && this.isBoundaryCreationAllowed({ 'mapObject': result })) {
-                    options.push(new MenuAction(MenuActionTypes.ADD_BOUNDARY, () => {
-                      // Create a fake, ephemeral "map object" to fool the downstream functions to start adding or
-                      // editing the boundary without editing the equipment object itself
-                      const mockEquipmentMapObject = {
-                        objectId: result.objectId,
-                        icon: 'HACK to make this.isMarker() think this is a marker and not a polygon :('
-                      }
-                      this.startDrawingBoundaryFor(mockEquipmentMapObject)
-                    }))
-                  }
-                }
-              }
-
+              menuItemsById[feature.objectId] = true
               var name = this.utils.getFeatureDisplayName(feature)
+              var thisFeatureMenuPromise = this.getEquipmentContextMenuOptions(feature, latLng)
+                .then(options => menuItems.push(new MenuItem(featureType, name, options, feature)))
 
-              menuItemsById[result.objectId] = options
-              menuItems.push(new MenuItem(featureType, name, options, feature))
+              allMenuPromises = allMenuPromises.concat(thisFeatureMenuPromise)
             }
           })
-
-          if (menuItems.length <= 0) {
-            this.closeContextMenu()
-          } else {
-            this.openContextMenu(x, y, menuItems)
-          }
+          Promise.all(allMenuPromises)
+            .then(() => {
+              if (menuItems.length <= 0) {
+                this.closeContextMenu()
+              } else {
+                this.openContextMenu(x, y, menuItems)
+              }
+            })
+            .catch(err => console.error(err))
         })
     } else if (this.featureType == 'serviceArea') {
       this.getFeaturesAtPoint(latLng)
@@ -438,6 +411,68 @@ class MapObjectEditorController {
       menuItems.push(new MenuItem(MenuItemTypes.LOCATION, name, options, this.selectedMapObject))
       this.openContextMenu(x, y, menuItems)
     }
+  }
+
+  getEquipmentContextMenuOptions (feature, latLng) {
+    var options = []
+    const featureType = this.utils.getFeatureMenuItemType(feature)
+    if (this.createdMapObjects.hasOwnProperty(feature.objectId)) {
+      // it's on the edit layer / in the transaction
+      feature = this.createdMapObjects[feature.objectId].feature
+      options.push(new MenuAction(MenuActionTypes.SELECT, () => this.selectProposedFeature(feature.objectId)))
+      if (featureType === MenuItemTypes.EQUIPMENT) {
+        if (this.isBoundaryCreationAllowed({ 'mapObject': feature })) {
+          options.push(new MenuAction(MenuActionTypes.ADD_BOUNDARY, () => this.startDrawingBoundaryForId(feature.objectId)))
+        }
+      } else if (featureType === MenuItemTypes.BOUNDARY) {
+      // options.push( this.contextMenuService.makeItemOption('Edit Boundary', 'fa-pencil', () => {this.editBoundary(result.objectId)}) )
+      }
+      options.push(new MenuAction(MenuActionTypes.DELETE, () => this.deleteObjectWithId(feature.objectId)))
+    } else {
+      options.push(new MenuAction(MenuActionTypes.VIEW, () => this.viewExistingFeature(feature, latLng)))
+      if (feature.deployment_type !== 1 && !this.state.configuration.planEditor.editExistingObjects) {
+        options.push(new MenuAction(MenuActionTypes.EDIT, () => this.editExistingFeature(feature, latLng)))
+      }
+    }
+
+    var menuPromises = [Promise.resolve()]
+    if (featureType === MenuItemTypes.EQUIPMENT) {
+      const planId = this.state.plan.id
+      const selectedBoundaryTypeId = this.state.selectedBoundaryType.id
+      menuPromises.push(
+        this.$http.get(`/boundary/for_network_node/${planId}/${feature.object_id}/${selectedBoundaryTypeId}`)
+          .then(boundaryResult => {
+            var allowAddBoundary = false
+            if (boundaryResult.data.length === 0) {
+              // No results for this combination of planid, object_id, selectedBoundaryTypeId. Allow users to add boundary
+              allowAddBoundary = true
+            } else {
+              // We have a boundary for this combination of inputs. Allow editing only if it is not locked
+              const boundary = boundaryResult.data[0]
+              allowAddBoundary = (boundary.deployment_type !== 1)
+            }
+            if (allowAddBoundary) {
+              options.push(new MenuAction(MenuActionTypes.ADD_BOUNDARY, () => {
+                // Create a fake, ephemeral "map object" to fool the downstream functions to start adding or
+                // editing the boundary without editing the equipment object itself
+                const mockEquipmentMapObject = {
+                  objectId: feature.objectId,
+                  icon: 'HACK to make this.isMarker() think this is a marker and not a polygon :('
+                }
+                this.startDrawingBoundaryFor(mockEquipmentMapObject)
+              }))
+            }
+            return Promise.resolve()
+          })
+          .catch(err => {
+            console.error(err)
+            // Still resolve, we don't want a failure here to prevent the menu from showing up
+            return Promise.resolve()
+          })
+      )
+    }
+    return Promise.all(menuPromises)
+      .then(() => Promise.resolve(options))
   }
 
   getFeaturesAtPoint (latLng) {
