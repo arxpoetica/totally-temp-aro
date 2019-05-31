@@ -315,6 +315,7 @@ class MapObjectEditorController {
 
             if (validFeature) {
               var feature = result
+              var allowAddBoundary = false
               if (this.createdMapObjects.hasOwnProperty(result.objectId)) {
               // it's on the edit layer / in the transaction
                 feature = this.createdMapObjects[result.objectId].feature
@@ -331,32 +332,58 @@ class MapObjectEditorController {
                 options.push(new MenuAction(MenuActionTypes.VIEW, () => this.viewExistingFeature(result, latLng)))
                 if (result.deployment_type !== 1 && !this.state.configuration.planEditor.editExistingObjects) {
                   options.push(new MenuAction(MenuActionTypes.EDIT, () => this.editExistingFeature(result, latLng)))
-                  if (result._data_type.indexOf('equipment.') > -1 && this.isBoundaryCreationAllowed({ 'mapObject': result })) {
-                    options.push(new MenuAction(MenuActionTypes.ADD_BOUNDARY, () => {
-                      // Create a fake, ephemeral "map object" to fool the downstream functions to start adding or
-                      // editing the boundary without editing the equipment object itself
-                      const mockEquipmentMapObject = {
-                        objectId: result.objectId,
-                        icon: 'HACK to make this.isMarker() think this is a marker and not a polygon :('
-                      }
-                      this.startDrawingBoundaryFor(mockEquipmentMapObject)
-                    }))
-                  }
                 }
               }
 
               var name = this.utils.getFeatureDisplayName(feature)
-
               menuItemsById[result.objectId] = options
-              menuItems.push(new MenuItem(featureType, name, options, feature))
+              var menuPromises = [Promise.resolve()]
+              if (!allowAddBoundary && (featureType === MenuItemTypes.EQUIPMENT)) {
+                const planId = this.state.plan.id
+                const selectedBoundaryTypeId = this.state.selectedBoundaryType.id
+                menuPromises.push(
+                  this.$http.get(`/boundary/for_network_node/${planId}/${result.object_id}/${selectedBoundaryTypeId}`)
+                    .then(result => {
+                      if (result.data.length === 0) {
+                        // No results for this combination of planid, object_id, selectedBoundaryTypeId. Allow users to add boundary
+                        allowAddBoundary = true
+                      } else {
+                        // We have a boundary for this combination of inputs. Allow editing only if it is not locked
+                        const boundary = result.data[0]
+                        allowAddBoundary = (boundary.deployment_type !== 1)
+                      }
+                      if (allowAddBoundary) {
+                        options.push(new MenuAction(MenuActionTypes.ADD_BOUNDARY, () => {
+                          // Create a fake, ephemeral "map object" to fool the downstream functions to start adding or
+                          // editing the boundary without editing the equipment object itself
+                          const mockEquipmentMapObject = {
+                            objectId: result.objectId,
+                            icon: 'HACK to make this.isMarker() think this is a marker and not a polygon :('
+                          }
+                          this.startDrawingBoundaryFor(mockEquipmentMapObject)
+                        }))
+                      }
+                      return Promise.resolve()
+                    })
+                    .catch(err => {
+                      console.error(err)
+                      // Still resolve, we don't want a failure here to prevent the menu from showing up
+                      return Promise.resolve()
+                    })
+                )
+              }
+              Promise.all(menuPromises)
+                .then(() => {
+                  menuItems.push(new MenuItem(featureType, name, options, feature))
+                  if (menuItems.length <= 0) {
+                    this.closeContextMenu()
+                  } else {
+                    this.openContextMenu(x, y, menuItems)
+                  }
+                })
+                .catch(err => console.error(err))
             }
           })
-
-          if (menuItems.length <= 0) {
-            this.closeContextMenu()
-          } else {
-            this.openContextMenu(x, y, menuItems)
-          }
         })
     } else if (this.featureType == 'serviceArea') {
       this.getFeaturesAtPoint(latLng)
