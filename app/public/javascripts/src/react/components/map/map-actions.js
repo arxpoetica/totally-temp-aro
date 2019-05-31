@@ -8,6 +8,14 @@ function setGoogleMapsReference (googleMapsReference) {
   }
 }
 
+function setSelectedMapFeatures (features) {
+  return {
+    type: Actions.MAP_SET_SELECTED_FEATURES,
+    payload: features
+  }
+}
+
 export default {
-  setGoogleMapsReference: setGoogleMapsReference
+  setGoogleMapsReference: setGoogleMapsReference, 
+  setSelectedMapFeatures: setSelectedMapFeatures
 }

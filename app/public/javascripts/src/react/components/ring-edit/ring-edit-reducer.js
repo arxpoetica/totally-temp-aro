@@ -1,17 +1,8 @@
 import Actions from '../../common/actions'
 
 const defaultState = {
-  testState: 'init', 
   rings: {}, 
   selectedRingId: null
-}
-
-function setTestState (state, testState) {
-  console.log('test state: ', testState)
-  console.log(state)
-  return { ...state, 
-    testState
-  }
 }
 
 function setSelectedRingId (state, ringId) {
@@ -40,8 +31,6 @@ function removeRing (state, ringId) {
 
 function ringEditReducer (state = defaultState, action) {
   switch (action.type) {
-    case Actions.RING_SET_TEST_STATE:
-      return setTestState(state, action.payload)
     case Actions.RING_SET_SELECTED_RING_ID:
       return setSelectedRingId(state, action.payload)
     case Actions.RING_ADD_RINGS:

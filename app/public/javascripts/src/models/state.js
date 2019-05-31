@@ -279,7 +279,14 @@ class State {
       $rootScope.$broadcast('map_layer_clicked_feature', features, {})
     }
     service.mapFeaturesSelectedEvent = new Rx.BehaviorSubject({})
-
+    
+    service.mapFeaturesSelectedEvent.subscribe((options) => {
+      $ngRedux.dispatch({
+        type: Actions.MAP_SET_SELECTED_FEATURES,
+        payload: options
+      })
+    })
+    
     // Raise an event requesting locations within a polygon to be selected. Coordinates are relative to the visible map.
     service.requestPolygonSelect = new Rx.BehaviorSubject({})
 

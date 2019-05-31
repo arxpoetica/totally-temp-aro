@@ -467,6 +467,7 @@ class TileComponentController {
           })
 
           // ToDo: formalize this
+          // var hitFeatures = new FeatureSets() // need to import the class BUT it's over in React land, ask Parag
           var hitFeatures = {
             latLng: latLng,
             locations: locationFeatures,

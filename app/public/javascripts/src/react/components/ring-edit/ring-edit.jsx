@@ -3,8 +3,9 @@ import React, { Component } from 'react'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import ringActions from './ring-edit-actions.js'
+import uuidv4 from 'uuid/v4'
 
-import Ring from './ring.js'
+import Ring from '../../common/ring.js'
 
 
 export class RingEdit extends Component {
@@ -37,15 +38,10 @@ export class RingEdit extends Component {
   }
 
   requestAddNewRing () {
-    var ringId = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)// ToDo: replace this with proper get ID
+    //var ringId = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)// ToDo: replace this with proper get ID
+    var ringId = uuidv4()
     var ring = new Ring(ringId)
     this.props.addRings([ring])
-  }
-
-  localFunction () {
-    var ring = new Ring('1234')
-    console.log(ring)
-    this.props.setTestState('new state!')
   }
 
 }
@@ -63,7 +59,6 @@ const mapStateToProps = (state) => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  setTestState: testState => dispatch(ringActions.setTestState(testState)), 
   setSelectedRingId: ringId => dispatch(ringActions.setSelectedRingId(ringId)), 
   addRings: rings => dispatch(ringActions.addRings(rings)), 
   removeRing: ringId => dispatch(ringActions.removeRing(ringId))
