@@ -604,6 +604,11 @@ class PlanEditorController {
   }
 
   displayViewObject (feature, iconUrl) {
+    // First deselect all equipment and boundary features
+    this.viewEventFeature = this.viewFeature = this.viewLabel = this.viewIconUrl = null
+    this.isEditFeatureProps = false
+    this.viewSiteBoundaryEventFeature = this.viewBoundaryProps = null
+    this.isBoundaryEditMode = false
     if (feature.type && feature.type === "equipment_boundary.select") {
       var newSelection = this.state.cloneSelection()
       newSelection.details.siteBoundaryId = feature.objectId
