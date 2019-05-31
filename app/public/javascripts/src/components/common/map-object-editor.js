@@ -297,6 +297,7 @@ class MapObjectEditorController {
 
           var menuItems = []
           var menuItemsById = {}
+          var allMenuPromises = []
 
           results.forEach((result) => {
           // populate context menu aray here
@@ -315,7 +316,6 @@ class MapObjectEditorController {
 
             if (validFeature) {
               var feature = result
-              var allowAddBoundary = false
               if (this.createdMapObjects.hasOwnProperty(result.objectId)) {
               // it's on the edit layer / in the transaction
                 feature = this.createdMapObjects[result.objectId].feature
@@ -338,18 +338,19 @@ class MapObjectEditorController {
               var name = this.utils.getFeatureDisplayName(feature)
               menuItemsById[result.objectId] = options
               var menuPromises = [Promise.resolve()]
-              if (!allowAddBoundary && (featureType === MenuItemTypes.EQUIPMENT)) {
+              if (featureType === MenuItemTypes.EQUIPMENT) {
                 const planId = this.state.plan.id
                 const selectedBoundaryTypeId = this.state.selectedBoundaryType.id
                 menuPromises.push(
                   this.$http.get(`/boundary/for_network_node/${planId}/${result.object_id}/${selectedBoundaryTypeId}`)
-                    .then(result => {
-                      if (result.data.length === 0) {
+                    .then(boundaryResult => {
+                      var allowAddBoundary = false
+                      if (boundaryResult.data.length === 0) {
                         // No results for this combination of planid, object_id, selectedBoundaryTypeId. Allow users to add boundary
                         allowAddBoundary = true
                       } else {
                         // We have a boundary for this combination of inputs. Allow editing only if it is not locked
-                        const boundary = result.data[0]
+                        const boundary = boundaryResult.data[0]
                         allowAddBoundary = (boundary.deployment_type !== 1)
                       }
                       if (allowAddBoundary) {
@@ -372,18 +373,21 @@ class MapObjectEditorController {
                     })
                 )
               }
+              allMenuPromises = allMenuPromises.concat(menuPromises)
               Promise.all(menuPromises)
-                .then(() => {
-                  menuItems.push(new MenuItem(featureType, name, options, feature))
-                  if (menuItems.length <= 0) {
-                    this.closeContextMenu()
-                  } else {
-                    this.openContextMenu(x, y, menuItems)
-                  }
-                })
+                .then(() => menuItems.push(new MenuItem(featureType, name, options, feature)))
                 .catch(err => console.error(err))
             }
           })
+          Promise.all(allMenuPromises)
+            .then(() => {
+              if (menuItems.length <= 0) {
+                this.closeContextMenu()
+              } else {
+                this.openContextMenu(x, y, menuItems)
+              }
+            })
+            .catch(err => console.error(err))
         })
     } else if (this.featureType == 'serviceArea') {
       this.getFeaturesAtPoint(latLng)
