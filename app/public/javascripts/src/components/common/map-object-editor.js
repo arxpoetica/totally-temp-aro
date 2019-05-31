@@ -890,33 +890,20 @@ class MapObjectEditorController {
       feature.isExistingObject = true
       feature.type = clickedObject._data_type
       feature.deployment_type = clickedObject.deployment_type
+      var newSelection = this.state.cloneSelection()
       if (clickedObject._data_type === 'equipment_boundary.select') {
         iconKey = Constants.MAP_OBJECT_CREATE_KEY_EQUIPMENT_BOUNDARY
         this.displayViewObject({ feature: feature })
-        this.selectMapObject(null)        
-        // Get the boundary geometry from aro-service
-        // featurePromise = this.$http.get(`/service/plan-feature/${this.state.plan.id}/equipment_boundary/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
-        //   .then((result) => {
-        //   // ToDo: check for empty object, reject on true
-        //     if (!result.hasOwnProperty('data') || !result.data.hasOwnProperty('objectId')) {
-        //       return Promise.reject(`object: ${feature.objectId} may have been deleted`)
-        //     }
-
-        //     var serviceFeature = result.data
-        //     serviceFeature.attributes = {
-        //       network_node_object_id: serviceFeature.networkObjectId,
-        //       networkNodeType: serviceFeature.networkNodeType
-        //     }
-        //     serviceFeature.isExistingObject = true
-        //     return Promise.resolve(serviceFeature)
-        //   })
-          return
+        this.selectMapObject(null)
+        newSelection.editable.equipment = {}
+        this.state.selection = newSelection
+        return
       } else {
         // Quickfix - Display the equipment and return, do not make multiple calls to aro-service #159544541
         this.displayViewObject({ feature: feature })
         this.selectMapObject(null)
         // Update selected feature in state so it is rendered correctly
-        var newSelection = this.state.cloneSelection()
+        newSelection.details.siteBoundaryId = {}
         newSelection.editable.equipment = {}
         newSelection.editable.equipment[feature.objectId] = feature
         this.state.selection = newSelection
