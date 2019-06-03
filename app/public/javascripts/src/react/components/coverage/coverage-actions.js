@@ -122,6 +122,20 @@ function setLimitMaxSpeed (limitMaxSpeed) {
   }
 }
 
+function setExistingFiber (existingFiber) {
+  return {
+    type: Actions.COVERAGE_SET_EXISTING_FIBER,
+    payload: existingFiber
+  }
+}
+
+function setPlannedFiber (plannedFiber) {
+  return {
+    type: Actions.COVERAGE_SET_PLANNED_FIBER,
+    payload: plannedFiber
+  }
+}
+
 function setSiteAssignment (siteAssignment) {
   return {
     type: Actions.COVERAGE_SET_SITE_ASSIGNMENT,
@@ -144,6 +158,8 @@ export default {
   setGroupKeyType: setGroupKeyType,
   setLimitMarketableTechnology: setLimitMarketableTechnology,
   setLimitMaxSpeed: setLimitMaxSpeed,
+  setExistingFiber: setExistingFiber,
+  setPlannedFiber: setPlannedFiber,
   setSiteAssignment: setSiteAssignment,
   setCoverageProgress: setCoverageProgress
 }
