@@ -23,7 +23,6 @@ function removeRing (ringId) {
 }
 
 export default {
-  setTestState, 
   setSelectedRingId, 
   addRings, 
   removeRing

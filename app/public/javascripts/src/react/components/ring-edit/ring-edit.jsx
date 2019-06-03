@@ -52,7 +52,6 @@ RingEdit.propTypes = {
 }
 
 const mapStateToProps = (state) => ({
-  testState: state.ringEdit.testState, 
   rings: state.ringEdit.rings, 
   selectedRingId: state.ringEdit.selectedRingId
 

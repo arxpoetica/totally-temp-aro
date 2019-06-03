@@ -9,6 +9,7 @@ import MapUtilities from '../common/plan/map-utilities'
 import FeatureSelector from './feature-selector'
 import Constants from '../common/constants'
 import SelectionModes from '../../react/components/selection/selection-modes'
+import FeatureSets from '../../react/common/featureSets'
 
 class TileComponentController {
   // MapLayer objects contain the following information
@@ -478,7 +479,10 @@ class TileComponentController {
             censusFeatures: censusFeatures,
             fiberFeatures: fiberFeatures
           }
-
+          
+          //var hitFeatures = new FeatureSets()
+          
+          
           return hitFeatures
         /*
         //console.log(hitFeatures)
