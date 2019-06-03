@@ -68,6 +68,30 @@ export class CoverageInitializer extends Component {
             </td>
           </tr>
 
+          {/* Use Existing Fiber */}
+          <tr>
+            <td>Use Existing Fiber</td>
+            <td>
+              <input id='chkUseExistingFiber'
+                type='checkbox'
+                className='checkboxfill'
+                checked={this.props.useExistingFiber}
+                onChange={event => this.props.setExistingFiber(event.target.checked)} />
+            </td>
+          </tr>
+
+          {/* Use Planned Fiber */}
+          <tr>
+            <td>Use Planned Fiber</td>
+            <td>
+              <input id='chkUsePlannedFiber'
+                type='checkbox'
+                className='checkboxfill'
+                checked={this.props.usePlannedFiber}
+                onChange={event => this.props.setPlannedFiber(event.target.checked)} />
+            </td>
+          </tr>
+
           {/* Limit To Max Equipment Speed */}
           <tr>
             <td>Limit To Max Equipment Speed</td>
@@ -131,6 +155,8 @@ CoverageInitializer.propTypes = {
   groupKeyType: PropTypes.string,
   useMarketableTechnologies: PropTypes.bool,
   useMaxSpeed: PropTypes.bool,
+  useExistingFiber: PropTypes.bool,
+  usePlannedFiber: PropTypes.bool,
   coverageReport: PropTypes.object
 }
 
@@ -145,6 +171,8 @@ const mapStateToProps = state => ({
   groupKeyType: state.coverage.initializationParams.groupKeyType,
   useMarketableTechnologies: state.coverage.initializationParams.useMarketableTechnologies,
   useMaxSpeed: state.coverage.initializationParams.useMaxSpeed,
+  useExistingFiber: state.coverage.initializationParams.useExistingFiber,
+  usePlannedFiber: state.coverage.initializationParams.usePlannedFiber,
   coverageReport: state.coverage.report
 })
 
@@ -153,6 +181,8 @@ const mapDispatchToProps = (dispatch) => ({
   setGroupKeyType: groupKeyType => dispatch(CoverageActions.setGroupKeyType(groupKeyType)),
   setLimitMarketableTechnology: limitMarketableTechnology => dispatch(CoverageActions.setLimitMarketableTechnology(limitMarketableTechnology)),
   setLimitMaxSpeed: limitMaxSpeed => dispatch(CoverageActions.setLimitMaxSpeed(limitMaxSpeed)),
+  setExistingFiber: existingFiber => dispatch(CoverageActions.setExistingFiber(existingFiber)),
+  setPlannedFiber: plannedFiber => dispatch(CoverageActions.setPlannedFiber(plannedFiber)),
   setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId))
 })
 
