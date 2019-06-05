@@ -122,10 +122,7 @@ export class RingEdit extends Component {
   drawRings(){
     console.log('render rings')
     // clear prev lines
-    this.createdMapObjects.forEach(path => {
-      path.setMap(null)
-    })
-    this.createdMapObjects = []
+    this.clearRendering()
 
     for (let [ringId, ring] of Object.entries(this.props.rings)) {
       if (ring.nodes.length > 0){
@@ -144,7 +141,9 @@ export class RingEdit extends Component {
             geodesic: true,
             strokeColor: '#FF1493',
             strokeOpacity: 0.4,
-            strokeWeight: 400
+            strokeWeight: 400, 
+            clickable: false,
+            draggable: false
           })
           ringPath.setMap(this.props.map.googleMaps)
           this.createdMapObjects.push(ringPath)
@@ -155,12 +154,21 @@ export class RingEdit extends Component {
           geodesic: true,
           strokeColor: '#543500',
           strokeOpacity: 1.0,
-          strokeWeight: 1
+          strokeWeight: 1, 
+          clickable: false,
+          draggable: false
         })
         ringPath.setMap(this.props.map.googleMaps)
         this.createdMapObjects.push(ringPath)
       }
     }
+  }
+  
+  clearRendering(){
+    this.createdMapObjects.forEach(path => {
+      path.setMap(null)
+    })
+    this.createdMapObjects = []
   }
 
   /*
@@ -168,11 +176,11 @@ export class RingEdit extends Component {
     // set panel active = true
     console.log('------- ON')
   }
-  componentWillUnmount () {
-    // set panel active = false
-    console.log('------- OFF')
-  }
   */
+  componentWillUnmount () {
+    this.clearRendering()
+  }
+  
 }
 
 // --- //

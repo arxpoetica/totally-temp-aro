@@ -885,7 +885,7 @@ class State {
         .catch((err) => console.error(err))
     }
 
-    service.createNewPlan = (isEphemeral, planName, parentPlan) => {
+    service.createNewPlan = (isEphemeral, planName, parentPlan, planType) => {
       if (isEphemeral && parentPlan) {
         return Promise.reject('ERROR: Ephemeral plans cannot have a parent plan')
       }
@@ -897,7 +897,8 @@ class State {
         longitude: service.defaultPlanCoordinates.longitude,
         zoomIndex: service.defaultPlanCoordinates.zoom,
         ephemeral: isEphemeral,
-        name: planName || 'Untitled'
+        name: planName || 'Untitled', 
+        planType: planType || 'UNDEFINED'
       }
       return service.getAddressFor(planOptions.latitude, planOptions.longitude)
         .then((address) => {
