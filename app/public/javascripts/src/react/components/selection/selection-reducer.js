@@ -5,7 +5,8 @@ const defaultState = {
   selectionModes: [
     { id: SelectionModes.SELECTED_AREAS, description: 'Service Areas' },
     { id: SelectionModes.SELECTED_LOCATIONS, description: 'Locations' },
-    { id: SelectionModes.SELECTED_ANALYSIS_AREAS, description: 'Analysis Areas' }
+    { id: SelectionModes.SELECTED_ANALYSIS_AREAS, description: 'Analysis Areas' },
+    { id: SelectionModes.SELECTED_ALL_SERVICE_AREAS, description: 'All Service Areas' }
   ],
   activeSelectionMode: { id: 'SELECTED_AREAS', description: 'Service Areas' },
   planTargets: {

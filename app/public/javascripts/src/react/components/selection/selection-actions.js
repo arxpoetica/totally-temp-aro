@@ -29,7 +29,8 @@ function loadPlanTargetSelectionsFromServer (planId) {
         const planTargets = {
           locations: results[0].data.map(item => +item.id),
           serviceAreas: results[1].data.map(item => +item.id),
-          analysisAreas: results[2].data.map(item => +item.id)
+          analysisAreas: results[2].data.map(item => +item.id),
+          allServiceAreas: []
         }
         dispatch(addPlanTargets(planId, planTargets))
       })
@@ -67,7 +68,8 @@ function addPlanTargets (planId, planTargets) {
           payload: {
             locations: results[0].data,
             serviceAreas: results[1].data,
-            analysisAreas: results[2].data
+            analysisAreas: results[2].data,
+            allServiceAreas: []
           }
         })
       })
