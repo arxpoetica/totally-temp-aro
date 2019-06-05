@@ -16,7 +16,8 @@
                 title="View Mode"></div>
   </button>
   <button type="button"
-          ng-if="$ctrl.state.configuration.perspective.showDisplayModeButtons.ANALYSIS"
+          ng-if="$ctrl.state.configuration.perspective.showDisplayModeButtons.ANALYSIS
+                  && $ctrl.state.plan.planType != 'RING'"
           ng-class="{ 'btn display-mode-button': true,
                       'btn-light': $ctrl.selectedDisplayMode !== $ctrl.displayModes.ANALYSIS,
                       'btn-primary': $ctrl.selectedDisplayMode === $ctrl.displayModes.ANALYSIS }"
@@ -26,6 +27,18 @@
                 data-toggle="tooltip"
                 data-placement="bottom"
                 title="Analysis Mode"></div>
+  </button>
+  <button type="button"
+          ng-if="$ctrl.state.plan.planType == 'RING'"
+          ng-class="{ 'btn display-mode-button': true,
+                      'btn-light': $ctrl.selectedDisplayMode !== $ctrl.displayModes.EDIT_RINGS,
+                      'btn-primary': $ctrl.selectedDisplayMode === $ctrl.displayModes.EDIT_RINGS }"
+          ng-click="$ctrl.setSelectedDisplayMode($ctrl.displayModes.EDIT_RINGS)"
+          ng-if="$ctrl.currentUser.perspective !== 'sales'">
+            <div class="fa fa-2x fa-project-diagram"
+                data-toggle="tooltip"
+                data-placement="bottom"
+                title="Edit Rings"></div>
   </button>
   <button type="button"
           ng-if="$ctrl.state.configuration.perspective.showDisplayModeButtons.EDIT_PLAN"

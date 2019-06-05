@@ -47,6 +47,7 @@ import coverageReportDownloader from './sidebar/analysis/coverage/coverage-repor
 import networkBuildOutput from './sidebar/analysis/network-build/network-build-output'
 import aroDebug from './sidebar/debug/aro-debug'
 import viewSettings from './sidebar/debug/view-settings'
+import ringEditor from './sidebar/ring-editor'
 import draggableButton from './sidebar/plan-editor/draggable-button'
 import planEditor from './sidebar/plan-editor/plan-editor'
 import planSummary from './sidebar/plan-editor/plan-summary'
@@ -153,6 +154,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('networkBuildOutput', networkBuildOutput)
   .component('aroDebug', aroDebug)
   .component('viewSettings', viewSettings)
+  .component('ringEditor', ringEditor)
   .component('planEditor', planEditor)
   .component('planSummary', planSummary)
   .component('serviceLayerEditor', serviceLayerEditor)

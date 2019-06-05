@@ -172,6 +172,11 @@ class State {
       EDIT_RINGS: 'EDIT_RINGS'
     })
     service.activeEditPlanPanel = service.EditPlanPanels.EDIT_PLAN
+    
+    service.EditRingsPanels = Object.freeze({
+      EDIT_RINGS: 'EDIT_RINGS'
+    })
+    service.activeEditRingsPanel = service.EditRingsPanels.EDIT_RINGS
 
     service.routingModes = {
       DIRECT_ROUTING: { id: 'DIRECT_ROUTING', label: 'Direct Routing' },
@@ -290,6 +295,7 @@ class State {
     service.displayModes = Object.freeze({
       VIEW: 'VIEW',
       ANALYSIS: 'ANALYSIS',
+      EDIT_RINGS: 'EDIT_RINGS', 
       EDIT_PLAN: 'EDIT_PLAN',
       PLAN_SETTINGS: 'PLAN_SETTINGS',
       DEBUG: 'DEBUG'
@@ -423,8 +429,8 @@ class State {
     
     service.mapFeaturesSelectedEvent.subscribe((options) => {
       // ToDo: this check may need to move into REACT
-      if (service.selectedDisplayMode.getValue() == service.displayModes.EDIT_PLAN
-        && service.activeEditPlanPanel == service.EditPlanPanels.EDIT_RINGS){
+      if (service.selectedDisplayMode.getValue() == service.displayModes.EDIT_RINGS
+        && service.activeEditRingsPanel == service.EditRingsPanels.EDIT_RINGS){
         $ngRedux.dispatch({
           type: Actions.MAP_SET_SELECTED_FEATURES,
           payload: options

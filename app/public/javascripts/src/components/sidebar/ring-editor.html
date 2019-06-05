@@ -1,0 +1,21 @@
+<style>
+  .edit-ring-container {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+</style>
+
+<div class="edit-ring-container">
+  <accordion style="position: relative; flex: 1 1 auto;" toggle-expanded-panel="$ctrl.state.activeEditRingsPanel">
+
+    <!-- Ring Edit -->
+    <accordion-panel-title title="'Edit Rings'" panel-id="$ctrl.state.EditRingsPanels.EDIT_RINGS"></accordion-panel-title>
+    <accordion-panel-contents panel-id="$ctrl.state.EditRingsPanels.EDIT_RINGS">
+      <r-ring-edit ng-if="$ctrl.state.activeEditRingsPanel === $ctrl.state.EditRingsPanels.EDIT_RINGS" />
+    </accordion-panel-contents>
+
+  </accordion>
+</div>
