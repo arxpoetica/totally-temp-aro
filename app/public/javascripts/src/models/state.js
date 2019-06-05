@@ -275,18 +275,6 @@ class State {
     }
     service.expertModeScopeContext = null
 
-    service.hackRaiseEvent = (features) => {
-      $rootScope.$broadcast('map_layer_clicked_feature', features, {})
-    }
-    service.mapFeaturesSelectedEvent = new Rx.BehaviorSubject({})
-    
-    service.mapFeaturesSelectedEvent.subscribe((options) => {
-      $ngRedux.dispatch({
-        type: Actions.MAP_SET_SELECTED_FEATURES,
-        payload: options
-      })
-    })
-    
     // Raise an event requesting locations within a polygon to be selected. Coordinates are relative to the visible map.
     service.requestPolygonSelect = new Rx.BehaviorSubject({})
 
@@ -426,6 +414,24 @@ class State {
       ],
       selectedRenderingOption: null
     }
+    
+    // feature clicked on map
+    service.hackRaiseEvent = (features) => {
+      $rootScope.$broadcast('map_layer_clicked_feature', features, {})
+    }
+    service.mapFeaturesSelectedEvent = new Rx.BehaviorSubject({})
+    
+    service.mapFeaturesSelectedEvent.subscribe((options) => {
+      // ToDo: this check may need to move into REACT
+      if (service.selectedDisplayMode.getValue() == service.displayModes.EDIT_PLAN
+        && service.activeEditPlanPanel == service.EditPlanPanels.EDIT_RINGS){
+        $ngRedux.dispatch({
+          type: Actions.MAP_SET_SELECTED_FEATURES,
+          payload: options
+        })
+      }
+    })
+    
 
     // Function to convert from hsv to rgb color values.
     // https://stackoverflow.com/questions/17242144/javascript-convert-hsb-hsv-color-to-rgb-accurately

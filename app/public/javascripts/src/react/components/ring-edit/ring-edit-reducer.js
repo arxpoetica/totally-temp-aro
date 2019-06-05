@@ -5,9 +5,9 @@ import Ring from '../../common/ring'
 const defaultState = {
 
   rings: {
-    '65e426e0-1e9b-11e9-aa81-07fd2257c3c7': new Ring('65e426e0-1e9b-11e9-aa81-07fd2257c3c7')
+    '1': new Ring('1')
   }, 
-  selectedRingId: null
+  selectedRingId: '1'
 }
 
 function setSelectedRingId (state, ringId) {
@@ -35,18 +35,36 @@ function removeRing (state, ringId) {
 }
 
 function onFeatureSelected (state, features = new FeatureSets()) {
-  console.log(features)
+  // ToDo: check if ring edit is active
+  
   if (state.selectedRingId 
     && state.rings.hasOwnProperty(state.selectedRingId)
+    && features.equipmentFeatures
     && features.equipmentFeatures.length > 0
   ){
-    console.log(features.equipmentFeatures[0])
-
+    
     // add selected feature to selected ring 
     // OR delete selected feature from selected ring
-    //var newNodes = state.rings[state.selectedRingId].nodes
+    var equipmentFeature = features.equipmentFeatures[0]
+    console.log(equipmentFeature)
+    console.log(equipmentFeature.geometry)
+    var newRing = {...state.rings[state.selectedRingId], 
+      nodes: [...state.rings[state.selectedRingId].nodes]
+    }
+    var featureIndex = newRing.nodes.findIndex((ele) => ele.object_id == equipmentFeature.object_id)
+    
+    if (-1 == featureIndex){
+      newRing.nodes.push(equipmentFeature)
+    }else{
+      newRing.nodes.splice(featureIndex, 1)
+    }
+    
+    var newRings = {}
+    newRings[state.selectedRingId] = newRing
 
-    return state
+    return { ...state,
+      rings: {...state.rings, ...newRings}
+    }
   }else{
     return state
   }

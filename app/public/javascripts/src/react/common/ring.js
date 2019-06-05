@@ -1,7 +1,9 @@
 
 export default class Ring {
-  constructor(id){
+  constructor(id, name, nodes = []){
     this.id = id
-    this.nodes = []
+    this.name = id
+    this.nodes = nodes
+    if ('undefined' != typeof name) this.name = name
   }
 }
