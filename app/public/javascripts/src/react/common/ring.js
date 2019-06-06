@@ -26,13 +26,11 @@ export default class Ring {
         promisses.push( RingUtils.getEquipmentDataPromise(id, planId, userId) )
       })
       
-      Promise.all(promises)
+      Promise.all(promisses)
       .then(results => {
+        //ToDo protect against fail returns
         console.log(results)
         results.forEach(result => {
-          if (result.data.hasOwnProperty('objectId')){
-            this.nodeMeta[result.data.objectId] = result.data
-          }
           var index = nodeIds.findIndex((ele) => ele == result.data.objectId)
           if (-1 != index){
             parsedRing.nodes[index] = {
@@ -40,8 +38,8 @@ export default class Ring {
               data: result.data
             }
           }
-        }).catch(err => console.error(err)) 
-      })
+        })
+      }).catch(err => console.error(err)) 
     }
     
     return parsedRing

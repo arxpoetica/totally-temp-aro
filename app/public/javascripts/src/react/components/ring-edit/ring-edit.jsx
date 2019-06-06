@@ -53,9 +53,9 @@ export class RingEdit extends Component {
               <tbody>
                 {
                   ring.nodes.map((node, index) => (
-                    <tr className='m-2 p-2' key={ring.id+'_'+node.id}>
+                    <tr className='m-2 p-2' key={ring.id+'_'+node.objectId}>
                       <td>
-                        {node.id} {node.siteClli}
+                        {node.objectId} {node.siteClli}
                       </td>
                     </tr>
                   ))
@@ -78,10 +78,13 @@ export class RingEdit extends Component {
   
 
   requestAddNewRing () {
-    var ringId = uuidv4() // ToDo: use /src/components/common/utilitias.js > getUUID()
+    var ringId = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)// ToDo: replace this with proper get ID
+    //var ringId = uuidv4() // ToDo: use /src/components/common/utilitias.js > getUUID()
     //var ringId = Utilities.getUUID
     var ring = new Ring(ringId)
-    this.props.addRings([ring])
+    const planId = this.props.plan.activePlan.id
+    const userId = this.props.user.loggedInUser.id
+    this.props.addRings([ring], planId, userId)
   }
   
 
@@ -128,7 +131,7 @@ export class RingEdit extends Component {
     }
   }
   
-  
+
   clearRendering(){
     this.createdMapObjects.forEach(path => {
       path.setMap(null)
@@ -163,7 +166,7 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = dispatch => ({
   setSelectedRingId: ringId => dispatch(ringActions.setSelectedRingId(ringId)), 
-  addRings: rings => dispatch(ringActions.addRings(rings)), 
+  addRings: (rings, planId, userId) => dispatch(ringActions.addRings(rings, planId, userId)), 
   removeRing: ringId => dispatch(ringActions.removeRing(ringId))
   
 })

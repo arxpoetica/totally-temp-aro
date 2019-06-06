@@ -86,6 +86,17 @@ function removeNode (state, ringId, featureId) {
   }
 }
 
+function updateRing (state, ring) {
+  if (!state.rings.hasOwnProperty(ring.id)) return state
+
+  var newRings = {}
+  newRings[ring.id] = ring
+  
+  return { ...state,
+    rings: {...state.rings, ...newRings}
+  }
+}
+
 
 function ringEditReducer (state = defaultState, action) {
   switch (action.type) {
@@ -101,6 +112,8 @@ function ringEditReducer (state = defaultState, action) {
       return addNode(state, action.payload.ringId, action.payload.feature)
     case Actions.RING_REMOVE_NODE:
       return removeNode(state, action.payload.ringId, action.payload.featureId)
+    case Actions.RING_UPDATE_RING:
+      return updateRing(state, action.payload)
 
     default:
       return state
