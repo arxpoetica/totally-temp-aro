@@ -7,62 +7,54 @@ import SelectionModes from '../selection/selection-modes'
 
 export class PlanTargetList extends Component {
   render () {
-    var geometryKey = null; var descriptionKey = null
+    var geometries = []
+    var geometryKey = null
+    var descriptionKey = null
     if (this.props.activeSelectionModeId === SelectionModes.SELECTED_LOCATIONS) {
       geometryKey = 'locations'
       descriptionKey = 'address'
+      geometries = this.props.planTargets[geometryKey]
     } else if (this.props.activeSelectionModeId === SelectionModes.SELECTED_AREAS) {
       geometryKey = 'serviceAreas'
       descriptionKey = 'code'
+      geometries = this.props.planTargets[geometryKey]
     } else if (this.props.activeSelectionModeId === SelectionModes.SELECTED_ANALYSIS_AREAS) {
       geometryKey = 'analysisAreas'
       descriptionKey = 'code'
-    } else if (this.props.activeSelectionModeId === SelectionModes.SELECTED_ALL_SERVICE_AREAS) {
-      geometryKey = 'allServiceAreas'
-      descriptionKey = 'code'
+      geometries = this.props.planTargets[geometryKey]
     }
-    const geometries = this.props.planTargets[geometryKey]
 
-    if ((geometryKey !== 'allServiceAreas') && (geometries.size === 0)) {
-      return <div>Selected Geographies (no items selected)</div>
-    } else if ((geometryKey === 'allServiceAreas') && (geometries.size === 0)) {
-      return <div />
+    if (geometries.size === 0) {
+      return <div>(no items selected)</div>
     } else {
-      return <div style={{ flex: 1, flexDirection: 'row' }}>
-
-        <div style={{ flex: 0.5, alignItems: 'flex-start' }}>
-        Selected Geographies
+      return <div>
+        <div style={{ backgroundColor: '#e0e0e0', paddingLeft: '10px' }}>
+          <span>{geometries.size} items selected</span>
+          <button className='btn btn-outline-danger btn-sm float-right'
+            style={{ marginTop: '3px' }}
+            onClick={() => this.props.removePlanTargets(this.props.planId, { [geometryKey]: this.props.planTargets[geometryKey] })}
+          >
+            <i className='far fa-trash-alt' />
+          </button>
         </div>
-
-        <div style={{ flex: 0.5, alignItems: 'flex-end' }}>
-          <div style={{ backgroundColor: '#e0e0e0', paddingLeft: '10px' }}>
-            <span>{geometries.size} items selected</span>
-            <button className='btn btn-outline-danger btn-sm float-right'
-              style={{ marginTop: '3px' }}
-              onClick={() => this.props.removePlanTargets(this.props.planId, { [geometryKey]: this.props.planTargets[geometryKey] })}
-            >
-              <i className='far fa-trash-alt' />
-            </button>
-          </div>
-          <ul style={{ listStyleType: 'none', paddingLeft: '0px', maxHeight: '200px', overflowY: 'auto', marginBottom: '0px' }}>
-            {
-              [...geometries].map(item => {
-                const description = this.props.planTargetDescriptions[geometryKey][item]
-                  ? this.props.planTargetDescriptions[geometryKey][item][descriptionKey]
-                  : 'loading...'
-                return <li key={item}>
-                  <button className='btn btn-thin btn-outline-danger'
-                    style={{ border: 'none' }}
-                    onClick={() => this.props.removePlanTargets(this.props.planId, { [geometryKey]: new Set([item]) })}
-                  >
-                    <i className='far fa-trash-alt' />
-                  </button>
-                  <span style={{ verticalAlign: 'middle' }}>{description}</span>
-                </li>
-              })
-            }
-          </ul>
-        </div>
+        <ul style={{ listStyleType: 'none', paddingLeft: '0px', maxHeight: '200px', overflowY: 'auto', marginBottom: '0px' }}>
+          {
+            [...geometries].map(item => {
+              const description = this.props.planTargetDescriptions[geometryKey][item]
+                ? this.props.planTargetDescriptions[geometryKey][item][descriptionKey]
+                : 'loading...'
+              return <li key={item}>
+                <button className='btn btn-thin btn-outline-danger'
+                  style={{ border: 'none' }}
+                  onClick={() => this.props.removePlanTargets(this.props.planId, { [geometryKey]: new Set([item]) })}
+                >
+                  <i className='far fa-trash-alt' />
+                </button>
+                <span style={{ verticalAlign: 'middle' }}>{description}</span>
+              </li>
+            })
+          }
+        </ul>
       </div>
     }
   }

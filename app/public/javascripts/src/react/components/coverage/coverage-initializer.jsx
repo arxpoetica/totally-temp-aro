@@ -23,8 +23,13 @@ export class CoverageInitializer extends Component {
       siteAssignments: ['Proximity', 'Incremental'],
       selectedSiteAssignment: 'Incremental'
     }
+    console.log("sssss",this.props.activeSelectionModeId);
   }
-
+  displayGeographies() {
+    if (this.props.activeSelectionModeId!== "SELECTED_ALL_SERVICE_AREAS") {
+      return (<tr><td width="50%">Selected<br/> Geographies</td><td><PlanTargetList /></td></tr>);
+    }
+  }
   render () {
     return <div>
       <table id='table-coverage-initializer' className='table table-sm table-striped sidebar-options-table'>
@@ -128,10 +133,9 @@ export class CoverageInitializer extends Component {
               </select>
             </td>
           </tr>
-          <tr>
-            {/* <td>Selected Geographies</td> */}
-            <td colSpan='2'><PlanTargetList /></td>
-          </tr>
+          {
+            this.displayGeographies()
+          }   
         </tbody>
       </table>
 
