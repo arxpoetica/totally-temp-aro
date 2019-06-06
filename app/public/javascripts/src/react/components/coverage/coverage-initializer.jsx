@@ -23,7 +23,6 @@ export class CoverageInitializer extends Component {
       siteAssignments: ['Proximity', 'Incremental'],
       selectedSiteAssignment: 'Incremental'
     }
-    console.log('sssss', this.props.activeSelectionModeId)
   }
   displayGeographies () {
     if (this.props.activeSelectionModeId !== 'SELECTED_ALL_SERVICE_AREAS') {
