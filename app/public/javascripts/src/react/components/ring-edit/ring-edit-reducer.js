@@ -43,15 +43,18 @@ function removeAllRings (state) {
 
 function addNode (state, ringId, feature) {
   if (!state.rings.hasOwnProperty(ringId)) return state
-
+  /*
   var ringClone = {...state.rings[ringId], 
     nodes: [...state.rings[ringId].nodes]
   }
+  */
+  var ringClone = state.rings[ringId].clone()
   var featureIndex = ringClone.nodes.findIndex((ele) => ele.object_id == feature.object_id)
   
   if (-1 != featureIndex) return state
-  ringClone.nodes.push(feature)
-  
+  //ringClone.nodes.push(feature)
+  ringClone.addNode(feature)
+
   var newRings = {}
   newRings[ringId] = ringClone
   
@@ -62,15 +65,19 @@ function addNode (state, ringId, feature) {
 
 function removeNode (state, ringId, featureId) {
   if (!state.rings.hasOwnProperty(ringId)) return state
-
+  /*
   var ringClone = {...state.rings[ringId], 
     nodes: [...state.rings[ringId].nodes]
   }
+  */
+  var ringClone = state.rings[ringId].clone()
+
   var featureIndex = ringClone.nodes.findIndex((ele) => ele.object_id == featureId)
   
   if (-1 == featureIndex) return state
-  ringClone.nodes.splice(featureIndex, 1)
-  
+  //ringClone.nodes.splice(featureIndex, 1)
+  ringClone.removeNode(featureId)
+
   var newRings = {}
   newRings[ringId] = ringClone
   

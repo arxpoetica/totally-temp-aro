@@ -32,7 +32,6 @@ function removeAllRings () {
 
 function onFeatureSelected (features) {
   // this may be a bit funky, revisit this
-  console.log(features)
   
   return (dispatch, getState) => {
     const state = getState()
@@ -57,7 +56,7 @@ function onFeatureSelected (features) {
         dispatch({
           type:Actions.RING_REMOVE_NODE, 
           payload: {ringId: state.ringEdit.selectedRingId, 
-            featureId: feature.object_id
+            featureId: feature.objectId
           }
         })
       }else{
