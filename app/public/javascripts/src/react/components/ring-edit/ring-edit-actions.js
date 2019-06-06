@@ -42,19 +42,15 @@ function onFeatureSelected (features) {
       && features.equipmentFeatures
       && features.equipmentFeatures.length > 0
     ){
-      
       // add selected feature to selected ring 
       // OR delete selected feature from selected ring
       var validNodes = features.equipmentFeatures.filter(feature => feature._data_type.includes("central_office"))
       if (validNodes.length == 0) return //{type:null}
-      var feature = validNodes[0]
-      console.log(feature)
-      console.log(feature.geometry)
-      var ringClone = {...state.ringEdit.rings[state.ringEdit.selectedRingId], 
-        nodes: [...state.ringEdit.rings[state.ringEdit.selectedRingId].nodes]
-      }
+      var feature = {...validNodes[0]}
+      feature.objectId = feature.object_id
+
       var featureIndex = state.ringEdit.rings[state.ringEdit.selectedRingId].nodes
-                         .findIndex((ele) => ele.object_id == feature.object_id)
+                         .findIndex((ele) => ele.objectId == feature.objectId)
       
       if (-1 != featureIndex){
         // remove node
@@ -67,16 +63,21 @@ function onFeatureSelected (features) {
       }else{
         // add node
         // get feature lat long
-        dispatch({
-          type:Actions.RING_ADD_NODE, 
-          payload: {ringId: state.ringEdit.selectedRingId, 
-            feature: feature
-          }
-        })
-      }
-      
+        RingUtils.getEquipmentDataPromise(
+          feature.object_id, 
+          state.plan.activePlan.id, 
+          state.user.loggedInUser.id
+        ).then(result => {
+          feature.data = result.data
+          dispatch({
+            type:Actions.RING_ADD_NODE, 
+            payload: {ringId: state.ringEdit.selectedRingId, 
+              feature: feature
+            }
+          })
+        }).catch(err => console.error(err)) 
+      } 
     }
-
   }
 }
 

@@ -14,12 +14,11 @@ export class RingEdit extends Component {
   
   constructor (props) {
     super(props)
-    this.nodeMeta = {}
     this.createdMapObjects = []
   }
   
   render () {
-    this.renderRings()
+    this.drawRings()
     return <div>
       
       <button id='btnRingDoathing'
@@ -76,46 +75,13 @@ export class RingEdit extends Component {
       </tr>
     }
   }
+  
 
   requestAddNewRing () {
     var ringId = uuidv4() // ToDo: use /src/components/common/utilitias.js > getUUID()
     //var ringId = Utilities.getUUID
     var ring = new Ring(ringId)
     this.props.addRings([ring])
-  }
-  
-  renderRings(){
-    console.log('render rings')
-    const planId = this.props.plan.activePlan.id
-    const userId = this.props.user.loggedInUser.id
-    // get all lat longs of 
-    var promises = []
-    for (let [ringId, ring] of Object.entries(this.props.rings)) {
-      ring.nodes.forEach(node => {
-        const id = node.object_id
-        if (!this.nodeMeta.hasOwnProperty(id)){
-          this.nodeMeta[id] = {}
-          promises.push(
-            AroHttp.get(`/service/plan-feature/${planId}/equipment/${id}?userId=${userId}`)
-          )
-        }
-      })
-    }
-    if (0 == promises.length){
-      this.drawRings()
-    }else{
-      Promise.all(promises)
-      .then(results => {
-        console.log(results)
-        results.forEach(result => {
-          if (result.data.hasOwnProperty('objectId')){
-            this.nodeMeta[result.data.objectId] = result.data
-          }
-        })
-        console.log(this.nodeMeta)
-        this.drawRings()
-      }).catch(err => console.error(err))
-    }
   }
   
 
@@ -129,10 +95,8 @@ export class RingEdit extends Component {
         var pathCoords = []
         
         ring.nodes.forEach(node => {
-          if (this.nodeMeta.hasOwnProperty(node.object_id)){// fix the error checking
-            const coords = this.nodeMeta[node.object_id].geometry.coordinates
-            pathCoords.push({lat:coords[1],lng:coords[0]})
-          }
+          const coords = node.data.geometry.coordinates
+          pathCoords.push({lat:coords[1],lng:coords[0]})
         })
         
         if (ringId == this.props.selectedRingId){
@@ -163,6 +127,7 @@ export class RingEdit extends Component {
       }
     }
   }
+  
   
   clearRendering(){
     this.createdMapObjects.forEach(path => {
