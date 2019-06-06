@@ -13,6 +13,7 @@ import SelectionActions from '../react/components/selection/selection-actions'
 import PlanStates from '../react/components/plan/plan-states'
 import SelectionModes from '../react/components/selection/selection-modes'
 import SocketManager from '../react/common/socket-manager'
+import RingEditActions from '../react/components/ring-edit/ring-edit-actions'
 
 // We need a selector, else the .toJS() call will create an infinite digest loop
 const getAllLocationLayers = reduxState => reduxState.mapLayers.location
@@ -431,10 +432,13 @@ class State {
       // ToDo: this check may need to move into REACT
       if (service.selectedDisplayMode.getValue() == service.displayModes.EDIT_RINGS
         && service.activeEditRingsPanel == service.EditRingsPanels.EDIT_RINGS){
+        /*
         $ngRedux.dispatch({
           type: Actions.MAP_SET_SELECTED_FEATURES,
           payload: options
         })
+        */
+        service.onFeatureSelectedRedux(options)
       }
     })
     
@@ -1948,7 +1952,8 @@ class State {
       removePlanTargets: (planId, planTargets) => dispatch(SelectionActions.removePlanTargets(planId, planTargets)),
       setActivePlanState: planState => dispatch(PlanActions.setActivePlanState(planState)),
       setGoogleMapsReference: mapRef => dispatch(MapActions.setGoogleMapsReference(mapRef)),
-      updateShowSiteBoundary: isVisible => dispatch(MapLayerActions.setShowSiteBoundary(isVisible))
+      updateShowSiteBoundary: isVisible => dispatch(MapLayerActions.setShowSiteBoundary(isVisible)), 
+      onFeatureSelectedRedux: features => dispatch(RingEditActions.onFeatureSelected(features))
     }
   }
 }

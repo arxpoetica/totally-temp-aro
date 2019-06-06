@@ -5,9 +5,9 @@ import Ring from '../../common/ring'
 const defaultState = {
 
   rings: {
-    '1': new Ring('1')
+    
   }, 
-  selectedRingId: '1'
+  selectedRingId: null
 }
 
 function setSelectedRingId (state, ringId) {
@@ -34,41 +34,51 @@ function removeRing (state, ringId) {
   }
 }
 
-function onFeatureSelected (state, features = new FeatureSets()) {
-  // ToDo: check if ring edit is active
-  
-  if (state.selectedRingId 
-    && state.rings.hasOwnProperty(state.selectedRingId)
-    && features.equipmentFeatures
-    && features.equipmentFeatures.length > 0
-  ){
-    
-    // add selected feature to selected ring 
-    // OR delete selected feature from selected ring
-    var equipmentFeature = features.equipmentFeatures[0]
-    console.log(equipmentFeature)
-    console.log(equipmentFeature.geometry)
-    var newRing = {...state.rings[state.selectedRingId], 
-      nodes: [...state.rings[state.selectedRingId].nodes]
-    }
-    var featureIndex = newRing.nodes.findIndex((ele) => ele.object_id == equipmentFeature.object_id)
-    
-    if (-1 == featureIndex){
-      newRing.nodes.push(equipmentFeature)
-    }else{
-      newRing.nodes.splice(featureIndex, 1)
-    }
-    
-    var newRings = {}
-    newRings[state.selectedRingId] = newRing
-
-    return { ...state,
-      rings: {...state.rings, ...newRings}
-    }
-  }else{
-    return state
+function removeAllRings (state) {
+  return { ...state,
+    rings: {}, 
+    selectedRingId: null
   }
 }
+
+function addNode (state, ringId, feature) {
+  if (!state.rings.hasOwnProperty(ringId)) return state
+
+  var ringClone = {...state.rings[ringId], 
+    nodes: [...state.rings[ringId].nodes]
+  }
+  var featureIndex = ringClone.nodes.findIndex((ele) => ele.object_id == feature.object_id)
+  
+  if (-1 != featureIndex) return state
+  ringClone.nodes.push(feature)
+  
+  var newRings = {}
+  newRings[ringId] = ringClone
+  
+  return { ...state,
+    rings: {...state.rings, ...newRings}
+  }
+}
+
+function removeNode (state, ringId, featureId) {
+  if (!state.rings.hasOwnProperty(ringId)) return state
+
+  var ringClone = {...state.rings[ringId], 
+    nodes: [...state.rings[ringId].nodes]
+  }
+  var featureIndex = ringClone.nodes.findIndex((ele) => ele.object_id == featureId)
+  
+  if (-1 == featureIndex) return state
+  ringClone.nodes.splice(featureIndex, 1)
+  
+  var newRings = {}
+  newRings[ringId] = ringClone
+  
+  return { ...state,
+    rings: {...state.rings, ...newRings}
+  }
+}
+
 
 function ringEditReducer (state = defaultState, action) {
   switch (action.type) {
@@ -78,8 +88,12 @@ function ringEditReducer (state = defaultState, action) {
       return addRings(state, action.payload)
     case Actions.RING_REMOVE_RING:
       return removeRing(state, action.payload)
-    case Actions.MAP_SET_SELECTED_FEATURES:
-      return onFeatureSelected(state, action.payload)
+    case Actions.RING_REMOVE_ALL_RINGS:
+      return removeAllRings(state)
+    case Actions.RING_ADD_NODE:
+      return addNode(state, action.payload.ringId, action.payload.feature)
+    case Actions.RING_REMOVE_NODE:
+      return removeNode(state, action.payload.ringId, action.payload.featureId)
 
     default:
       return state

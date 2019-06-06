@@ -4,6 +4,7 @@ import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import ringActions from './ring-edit-actions.js'
 import uuidv4 from 'uuid/v4'
+// import Utilities from '../../../components/common/utilities'
 import AroHttp from '../../common/aro-http'
 import Ring from '../../common/ring.js'
 import './ring-edit.css'
@@ -77,8 +78,8 @@ export class RingEdit extends Component {
   }
 
   requestAddNewRing () {
-    //var ringId = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)// ToDo: replace this with proper get ID
     var ringId = uuidv4() // ToDo: use /src/components/common/utilitias.js > getUUID()
+    //var ringId = Utilities.getUUID
     var ring = new Ring(ringId)
     this.props.addRings([ring])
   }
@@ -100,7 +101,6 @@ export class RingEdit extends Component {
         }
       })
     }
-
     if (0 == promises.length){
       this.drawRings()
     }else{
@@ -114,11 +114,11 @@ export class RingEdit extends Component {
         })
         console.log(this.nodeMeta)
         this.drawRings()
-      })
+      }).catch(err => console.error(err))
     }
-
   }
   
+
   drawRings(){
     console.log('render rings')
     // clear prev lines

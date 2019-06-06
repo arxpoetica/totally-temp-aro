@@ -2,6 +2,7 @@ import Actions from '../../common/actions'
 import CoverageActions from '../coverage/coverage-actions'
 import SelectionActions from '../selection/selection-actions'
 import socketManager from '../../../react/common/socket-manager'
+import RingEditActions from '../ring-edit/ring-edit-actions'
 
 // Set the plan
 function setActivePlan (plan) {
@@ -22,6 +23,8 @@ function setActivePlan (plan) {
     dispatch(CoverageActions.updateCoverageStatus(plan.id))
     // Clear plan target selection
     dispatch(SelectionActions.loadPlanTargetSelectionsFromServer(plan.id))
+    // load rings
+    dispatch(RingEditActions.loadRings(plan.id))
   }
 }
 
