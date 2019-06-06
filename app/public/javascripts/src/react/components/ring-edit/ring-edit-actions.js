@@ -103,14 +103,6 @@ function onFeatureSelected (features) {
       
       if (-1 != featureIndex){
         // remove node
-        /*
-        dispatch({
-          type:Actions.RING_REMOVE_NODE, 
-          payload: {ringId: state.ringEdit.selectedRingId, 
-            featureId: feature.objectId
-          }
-        })
-        */
         dispatch( removeNode(ring, feature.objectId, planId, userId) )
       }else{
         // add node
@@ -121,14 +113,6 @@ function onFeatureSelected (features) {
         RingUtils.getEquipmentDataPromise(feature.objectId, planId, userId)
         .then(result => {
           feature.data = result.data
-          /*
-          dispatch({
-            type:Actions.RING_ADD_NODE, 
-            payload: {ringId: state.ringEdit.selectedRingId, 
-              feature: feature
-            }
-          })
-          */
           dispatch( addNode(ring, feature, planId, userId) )
 
         }).catch(err => console.error(err)) 
