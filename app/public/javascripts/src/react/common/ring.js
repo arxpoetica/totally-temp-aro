@@ -29,7 +29,6 @@ export default class Ring {
       Promise.all(promisses)
       .then(results => {
         //ToDo protect against fail returns
-        console.log(results)
         results.forEach(result => {
           var index = nodeIds.findIndex((ele) => ele == result.data.objectId)
           if (-1 != index){
