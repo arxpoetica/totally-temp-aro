@@ -20,12 +20,13 @@ export class RingEdit extends Component {
   render () {
     this.drawRings()
     return <div>
-      
-      <button id='btnRingDoathing'
-        className='btn btn-sm btn-light'
-        onClick={() => this.requestAddNewRing()}>
-        <i className='fas fa-pencil-alt' /> Add Ring
-      </button>
+      <div className='m-2 p-2'>
+        <button id='btnRingDoathing'
+          className='btn btn-sm btn-light'
+          onClick={() => this.requestAddNewRing()}>
+          <i className='fas fa-pencil-alt' /> Add Ring
+        </button>
+      </div>
       <div className='m-2 p-2'>
         <h4>Rings</h4>
         <table className='table table-sm table-striped'>
@@ -43,10 +44,18 @@ export class RingEdit extends Component {
   
   renderRingRow (ring) {
     if (ring.id == this.props.selectedRingId){
+      // selected ring
       return <tr key={ring.id}>
         <td className='ring-table-item-selected'> 
-          <div className='ring-table-item-title ring-table-item-title-selected'>
+          <div className='ring-table-item-title ring-table-item-title-selected clearfix'>
             {ring.name}
+
+            <button className="btn btn-sm btn-outline-danger ring-del-btn" 
+                    onClick={() => this.requestDeleteRing(ring)}
+                    data-toggle="tooltip" data-placement="bottom" title="Delete">
+              <i className="fa ei-button-icon ng-scope fa-trash-alt"></i>
+            </button>
+
           </div>
           <div className='ring-sub-table'>
             <table className='table table-sm table-striped'>
@@ -55,7 +64,7 @@ export class RingEdit extends Component {
                   ring.nodes.map((node, index) => (
                     <tr className='m-2 p-2' key={ring.id+'_'+node.objectId}>
                       <td>
-                        {node.objectId} {node.siteClli}
+                        {node.objectId} {node.siteClli} 
                       </td>
                     </tr>
                   ))
@@ -78,18 +87,17 @@ export class RingEdit extends Component {
   
 
   requestAddNewRing () {
-    var ringId = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)// ToDo: replace this with proper get ID
+    //var ringId = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)// ToDo: replace this with proper get ID
     //var ringId = uuidv4() // ToDo: use /src/components/common/utilitias.js > getUUID()
     //var ringId = Utilities.getUUID
-    var ring = new Ring(ringId)
+    //var ring = new Ring(ringId)
     const planId = this.props.plan.activePlan.id
     const userId = this.props.user.loggedInUser.id
-    this.props.addRings([ring], planId, userId)
+    this.props.newRing(planId, userId)
   }
   
 
   drawRings(){
-    console.log('render rings')
     // clear prev lines
     this.clearRendering()
 
@@ -131,7 +139,25 @@ export class RingEdit extends Component {
     }
   }
   
-
+  requestDeleteRing(ring){
+    swal({
+      title: 'Delete Ring?',
+      text: 'Are you sure you want to delete Ring: ' + ring.name + '?',
+      type: 'warning',
+      confirmButtonColor: '#DD6B55',
+      confirmButtonText: 'Yes, delete',
+      cancelButtonText: 'No',
+      showCancelButton: true,
+      closeOnConfirm: true
+    }, (doDelete) => {
+      if (doDelete) {
+        const planId = this.props.plan.activePlan.id
+        const userId = this.props.user.loggedInUser.id
+        this.props.removeRing(ring.id, planId, userId)
+      }
+    });
+  }
+  
   clearRendering(){
     this.createdMapObjects.forEach(path => {
       path.setMap(null)
@@ -166,8 +192,8 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = dispatch => ({
   setSelectedRingId: ringId => dispatch(ringActions.setSelectedRingId(ringId)), 
-  addRings: (rings, planId, userId) => dispatch(ringActions.addRings(rings, planId, userId)), 
-  removeRing: ringId => dispatch(ringActions.removeRing(ringId))
+  newRing: (planId, userId) => dispatch(ringActions.newRing(planId, userId)), 
+  removeRing: (ringId, planId, userId) => dispatch(ringActions.removeRing(ringId, planId, userId))
   
 })
 

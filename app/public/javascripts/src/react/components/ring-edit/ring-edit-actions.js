@@ -11,28 +11,24 @@ function setSelectedRingId (ringId) {
   }
 }
 
-function addRings (rings, planId, userId) {
+function newRing (planId, userId) {
   return (dispatch) => {
+    /*
     var promisses = []
     rings.forEach(ring => {
       promisses.push(AroHttp.post(`/service/plan/${planId}/ring-config`, ring.getDataExport()))
     })
-    
-    Promise.all(promisses)
-    .then(results => {
+    */
+    //Promise.all(promisses)
+    AroHttp.post(`/service/plan/${planId}/ring-config`, {})
+    .then(result => {
       //ToDo protect against fail returns
+      var ring = new Ring(result.data.id)
       dispatch({
         type: Actions.RING_ADD_RINGS, 
-        payload: rings
+        payload: [ring]
       })
     }).catch(err => console.error(err)) 
-  }
-}
-
-function removeRing (ringId) {
-  return {
-    type: Actions.RING_REMOVE_RING, 
-    payload: ringId
   }
 }
 
@@ -76,6 +72,19 @@ function removeNode (ring, featureId, planId, userId) {
       dispatch({
         type:Actions.RING_UPDATE_RING, 
         payload: ringClone
+      })
+    }).catch(err => console.error(err))
+  }
+}
+
+function removeRing (ringId, planId, userId) {
+  return (dispatch) => {
+    AroHttp.delete(`/service/plan/${planId}/ring-config/${ringId}`)
+    .then(result => {
+      //ToDo protect against fail returns
+      dispatch({
+        type:Actions.RING_REMOVE_RING, 
+        payload: ringId
       })
     }).catch(err => console.error(err))
   }
@@ -125,14 +134,12 @@ function loadRings (planId) {
   return (dispatch, getState) => {
     const state = getState()
     const userId = state.user.loggedInUser.id
-    AroHttp.get(`/service//plan/{planId}/ring-config?planId=${planId}`)
+    AroHttp.get(`/service/plan/${planId}/ring-config?planId=${planId}`)
     .then(result => {
       
       dispatch({
         type: Actions.RING_REMOVE_ALL_RINGS
       })
-      console.log(result.data)
-      //var rings = RingUtils.parseRingData(result.data)
       var rings = []
       result.data.forEach(ringData => {
         rings.push(Ring.parseData(ringData, planId, userId))
@@ -148,7 +155,7 @@ function loadRings (planId) {
 
 export default {
   setSelectedRingId, 
-  addRings, 
+  newRing, 
   removeRing, 
   removeAllRings, 
   onFeatureSelected, 
