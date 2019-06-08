@@ -71,6 +71,11 @@ export class RingEdit extends Component {
                     <tr className='m-2 p-2' key={ring.id+'_'+node.objectId}>
                       <td>
                         {node.objectId} {node.siteClli} 
+                        <button className="btn btn-sm btn-outline-danger ring-del-btn" 
+                                onClick={() => this.deleteNode(ring, node.objectId)}
+                                data-toggle="tooltip" data-placement="bottom" title="Delete">
+                          <i className="fa ei-button-icon ng-scope fa-trash-alt"></i>
+                        </button>
                       </td>
                     </tr>
                   ))
@@ -164,6 +169,12 @@ export class RingEdit extends Component {
     });
   }
   
+  deleteNode(ring, nodeId){
+    const planId = this.props.plan.activePlan.id
+    const userId = this.props.user.loggedInUser.id
+    this.props.removeNode(ring, nodeId, planId, userId)
+  }
+
   requestSubNet(){
     var ringIds = []
     for (var key in this.props.rings) {
@@ -214,8 +225,8 @@ const mapStateToProps = (state) => ({
 const mapDispatchToProps = dispatch => ({
   setSelectedRingId: ringId => dispatch(ringActions.setSelectedRingId(ringId)), 
   newRing: (planId, userId) => dispatch(ringActions.newRing(planId, userId)), 
-  removeRing: (ringId, planId, userId) => dispatch(ringActions.removeRing(ringId, planId, userId))
-  
+  removeRing: (ringId, planId, userId) => dispatch(ringActions.removeRing(ringId, planId, userId)),
+  removeNode: (ring, featureId, planId, userId) => dispatch( ringActions.removeNode(ring, featureId, planId, userId) )
 })
 
 const RingEditComponent = wrapComponentWithProvider(reduxStore, RingEdit, mapStateToProps, mapDispatchToProps)
