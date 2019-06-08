@@ -4,9 +4,7 @@ import Ring from '../../common/ring'
 
 const defaultState = {
 
-  rings: {
-    
-  }, 
+  rings: {}, 
   selectedRingId: null
 }
 

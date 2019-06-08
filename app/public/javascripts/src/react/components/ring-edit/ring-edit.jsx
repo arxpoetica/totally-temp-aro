@@ -39,6 +39,12 @@ export class RingEdit extends Component {
           </tbody>
         </table>
       </div>
+      <div className='m-2 p-2'>
+        <button className="pull-left btn btn-primary button-export ng-scope"
+                onClick={() => this.requestSubNet()}>
+          <i className="fa fa-bolt"></i> Run
+        </button>
+      </div>
     </div>
   }
   
@@ -158,6 +164,21 @@ export class RingEdit extends Component {
     });
   }
   
+  requestSubNet(){
+    var ringIds = []
+    for (var key in this.props.rings) {
+      ringIds.push(''+this.props.rings[key].id)
+    }
+    console.log(ringIds)
+    const planId = this.props.plan.activePlan.id
+    const userId = this.props.user.loggedInUser.id
+    //this.props.calculateSubNet(ringIds, planId, userId)
+    AroHttp.post(`/service/plan/${planId}/ring-cmd`, {ringIds: ringIds})
+    .then(result => {
+      //ToDo check for error
+    }).catch(err => console.error(err))
+  }
+
   clearRendering(){
     this.createdMapObjects.forEach(path => {
       path.setMap(null)
