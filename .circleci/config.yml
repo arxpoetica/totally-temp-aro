@@ -63,6 +63,7 @@ workflows:
             branches:
               only: 
                 - master
+                - ring_ui
 
       - deploy:
           requires:
