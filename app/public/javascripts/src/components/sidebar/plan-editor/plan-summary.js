@@ -58,9 +58,10 @@ class PlanSummaryController {
   orderSummaryByCategory (obj, key) {
     var categoryOrder = []
 
-    for (const [objKey, objValue] of Object.entries(obj)) {
-      categoryOrder.push(objValue[key])
-    }
+    // for (const [objKey, objValue] of Object.entries(obj)) {
+    Object.keys(obj).forEach(objKey => {
+      categoryOrder.push(obj[objKey][key])
+    })
 
     return categoryOrder
   }

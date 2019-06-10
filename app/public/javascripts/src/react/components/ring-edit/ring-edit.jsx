@@ -111,7 +111,9 @@ export class RingEdit extends Component {
     // clear prev lines
     this.clearRendering()
 
-    for (let [ringId, ring] of Object.entries(this.props.rings)) {
+    // for (let [ringId, ring] of Object.entries(this.props.rings)) {
+    Object.keys(this.props.rings).forEach(ringId => {
+      const ring = this.props.rings[ringId]
       if (ring.nodes.length > 0){
         var pathCoords = []
         
@@ -163,7 +165,7 @@ export class RingEdit extends Component {
         ringPath.setMap(this.props.map.googleMaps)
         this.createdMapObjects.push(ringPath)
       }
-    }
+    })
   }
   
   requestDeleteRing(ring){
