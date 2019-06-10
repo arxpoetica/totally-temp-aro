@@ -86,6 +86,32 @@ exports[`Default render 1`] = `
       </tr>
       <tr>
         <td>
+          Use Existing Fiber
+        </td>
+        <td>
+          <input
+            className="checkboxfill"
+            id="chkUseExistingFiber"
+            onChange={[Function]}
+            type="checkbox"
+          />
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Use Planned Fiber
+        </td>
+        <td>
+          <input
+            className="checkboxfill"
+            id="chkUsePlannedFiber"
+            onChange={[Function]}
+            type="checkbox"
+          />
+        </td>
+      </tr>
+      <tr>
+        <td>
           Site Assignment
         </td>
         <td>
@@ -132,12 +158,21 @@ exports[`Default render 1`] = `
             >
               Analysis Areas
             </option>
+            <option
+              value="SELECTED_ALL_SERVICE_AREAS"
+            >
+              All Service Areas
+            </option>
           </select>
         </td>
       </tr>
       <tr>
-        <td>
-          Selected Geographies
+        <td
+          width="50%"
+        >
+          Selected
+          <br />
+           Geographies
         </td>
         <td>
           <div>
@@ -236,6 +271,32 @@ exports[`When we do not have an existing report 1`] = `
       </tr>
       <tr>
         <td>
+          Use Existing Fiber
+        </td>
+        <td>
+          <input
+            className="checkboxfill"
+            id="chkUseExistingFiber"
+            onChange={[Function]}
+            type="checkbox"
+          />
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Use Planned Fiber
+        </td>
+        <td>
+          <input
+            className="checkboxfill"
+            id="chkUsePlannedFiber"
+            onChange={[Function]}
+            type="checkbox"
+          />
+        </td>
+      </tr>
+      <tr>
+        <td>
           Site Assignment
         </td>
         <td>
@@ -282,12 +343,21 @@ exports[`When we do not have an existing report 1`] = `
             >
               Analysis Areas
             </option>
+            <option
+              value="SELECTED_ALL_SERVICE_AREAS"
+            >
+              All Service Areas
+            </option>
           </select>
         </td>
       </tr>
       <tr>
-        <td>
-          Selected Geographies
+        <td
+          width="50%"
+        >
+          Selected
+          <br />
+           Geographies
         </td>
         <td>
           <div>
@@ -386,6 +456,32 @@ exports[`When we have an existing report 1`] = `
       </tr>
       <tr>
         <td>
+          Use Existing Fiber
+        </td>
+        <td>
+          <input
+            className="checkboxfill"
+            id="chkUseExistingFiber"
+            onChange={[Function]}
+            type="checkbox"
+          />
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Use Planned Fiber
+        </td>
+        <td>
+          <input
+            className="checkboxfill"
+            id="chkUsePlannedFiber"
+            onChange={[Function]}
+            type="checkbox"
+          />
+        </td>
+      </tr>
+      <tr>
+        <td>
           Site Assignment
         </td>
         <td>
@@ -432,12 +528,21 @@ exports[`When we have an existing report 1`] = `
             >
               Analysis Areas
             </option>
+            <option
+              value="SELECTED_ALL_SERVICE_AREAS"
+            >
+              All Service Areas
+            </option>
           </select>
         </td>
       </tr>
       <tr>
-        <td>
-          Selected Geographies
+        <td
+          width="50%"
+        >
+          Selected
+          <br />
+           Geographies
         </td>
         <td>
           <div>
@@ -547,6 +652,34 @@ exports[`When we have supplied all parameters 1`] = `
       </tr>
       <tr>
         <td>
+          Use Existing Fiber
+        </td>
+        <td>
+          <input
+            checked={true}
+            className="checkboxfill"
+            id="chkUseExistingFiber"
+            onChange={[Function]}
+            type="checkbox"
+          />
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Use Planned Fiber
+        </td>
+        <td>
+          <input
+            checked={true}
+            className="checkboxfill"
+            id="chkUsePlannedFiber"
+            onChange={[Function]}
+            type="checkbox"
+          />
+        </td>
+      </tr>
+      <tr>
+        <td>
           Site Assignment
         </td>
         <td>
@@ -594,12 +727,21 @@ exports[`When we have supplied all parameters 1`] = `
             >
               Analysis Areas
             </option>
+            <option
+              value="SELECTED_ALL_SERVICE_AREAS"
+            >
+              All Service Areas
+            </option>
           </select>
         </td>
       </tr>
       <tr>
-        <td>
-          Selected Geographies
+        <td
+          width="50%"
+        >
+          Selected
+          <br />
+           Geographies
         </td>
         <td>
           <div>
