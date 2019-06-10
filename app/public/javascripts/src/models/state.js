@@ -933,12 +933,13 @@ class State {
         })
     }
 
-    service.makeCurrentPlanNonEphemeral = (planName) => {
+    service.makeCurrentPlanNonEphemeral = (planName, planType) => {
       var newPlan = JSON.parse(JSON.stringify(service.plan))
       newPlan.name = planName
       newPlan.ephemeral = false
       newPlan.latitude = service.defaultPlanCoordinates.latitude
       newPlan.longitude = service.defaultPlanCoordinates.longitude
+      newPlan.planType = planType || 'UNDEFINED'
       delete newPlan.optimizationId
       newPlan.tagMapping = {
         global: [],
@@ -968,13 +969,13 @@ class State {
         })
     }
 
-    service.copyCurrentPlanTo = (planName) => {
+    service.copyCurrentPlanTo = (planName, planType) => {
       var newPlan = JSON.parse(JSON.stringify(service.plan))
       newPlan.name = planName
       newPlan.ephemeral = false
 
       // Only keep the properties needed to create a plan
-      var validProperties = new Set(['projectId', 'areaName', 'latitude', 'longitude', 'ephemeral', 'name', 'zoomIndex'])
+      var validProperties = new Set(['projectId', 'areaName', 'latitude', 'longitude', 'ephemeral', 'name', 'zoomIndex', 'planType'])
       var keysInPlan = Object.keys(newPlan)
       keysInPlan.forEach((key) => {
         if (!validProperties.has(key)) {
@@ -990,6 +991,7 @@ class State {
             var center = map.getCenter()
             result.data.latitude = center.lat()
             result.data.longitude = center.lng()
+            result.data.planType = planType || 'UNDEFINED'
             return $http.put(`/service/v1/plan?user_id=${userId}`, result.data)
           } else {
             console.error('Unable to copy plan')

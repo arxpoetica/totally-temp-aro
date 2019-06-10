@@ -54,12 +54,12 @@ class PlanInputsModalController {
             var currentPlan = this.state.plan
             if (currentPlan.ephemeral) {
               if (this.planName) {
-                this.state.makeCurrentPlanNonEphemeral(this.planName)
+                this.state.makeCurrentPlanNonEphemeral(this.planName, this.planType)
                 this.resetPlanInputs()
               }
             } else {
               if (this.planName) {
-                this.state.copyCurrentPlanTo(this.planName)
+                this.state.copyCurrentPlanTo(this.planName, this.planType)
                 this.resetPlanInputs()
               }
             }
