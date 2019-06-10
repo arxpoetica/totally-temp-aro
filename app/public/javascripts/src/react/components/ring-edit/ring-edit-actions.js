@@ -109,16 +109,16 @@ function onFeatureSelected (features) {
       feature.objectId = feature.object_id
       var ring = state.ringEdit.rings[state.ringEdit.selectedRingId]
       var featureIndex = ring.nodes.findIndex((ele) => ele.objectId == feature.objectId)
-      
+      const planId = state.plan.activePlan.id
+      const userId = state.user.loggedInUser.id
+
       if (-1 != featureIndex){
         // remove node
         dispatch( removeNode(ring, feature.objectId, planId, userId) )
       }else{
         // add node
         // get feature lat long
-        const planId = state.plan.activePlan.id
-        const userId = state.user.loggedInUser.id
-
+        
         RingUtils.getEquipmentDataPromise(feature.objectId, planId, userId)
         .then(result => {
           feature.data = result.data

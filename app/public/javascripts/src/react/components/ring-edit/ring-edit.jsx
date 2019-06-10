@@ -55,7 +55,6 @@ export class RingEdit extends Component {
         <td className='ring-table-item-selected'> 
           <div className='ring-table-item-title ring-table-item-title-selected clearfix'>
             {ring.name}
-
             <button className="btn btn-sm btn-outline-danger ring-del-btn" 
                     onClick={() => this.requestDeleteRing(ring)}
                     data-toggle="tooltip" data-placement="bottom" title="Delete">
@@ -70,7 +69,7 @@ export class RingEdit extends Component {
                   ring.nodes.map((node, index) => (
                     <tr className='m-2 p-2' key={ring.id+'_'+node.objectId}>
                       <td>
-                        {node.objectId} {node.siteClli} 
+                        {node.siteClli || node.objectId} 
                         <button className="btn btn-sm btn-outline-danger ring-del-btn" 
                                 onClick={() => this.deleteNode(ring, node.objectId)}
                                 data-toggle="tooltip" data-placement="bottom" title="Delete">
@@ -122,6 +121,23 @@ export class RingEdit extends Component {
         })
         
         if (ringId == this.props.selectedRingId){
+          if (ring.nodes.length > 0){
+            const coords = ring.nodes[0].data.geometry.coordinates
+            var mapMarker = new google.maps.Marker({
+              position: new google.maps.LatLng(coords[1], coords[0]),
+              icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 22, 
+                strokeWeight: 2, 
+                strokeColor: '#543500'
+              }, 
+              draggable: false, 
+              clickable: false
+            })
+            mapMarker.setMap(this.props.map.googleMaps)
+            this.createdMapObjects.push(mapMarker)
+          }
+
           var ringPath = new google.maps.Polyline({
             path: pathCoords,
             geodesic: true,
