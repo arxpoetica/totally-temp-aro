@@ -180,11 +180,15 @@ export class RingEdit extends Component {
     for (var key in this.props.rings) {
       ringIds.push(''+this.props.rings[key].id)
     }
-    console.log(ringIds)
     const planId = this.props.plan.activePlan.id
     const userId = this.props.user.loggedInUser.id
+    var locationTypes = []
+    this.props.mapLayers.location.forEach(item => {
+      if (item.checked) locationTypes.push(item.plannerKey)
+    });
+    console.log(locationTypes)
     //this.props.calculateSubNet(ringIds, planId, userId)
-    AroHttp.post(`/service/plan/${planId}/ring-cmd`, {ringIds: ringIds})
+    AroHttp.post(`/service/plan/${planId}/ring-cmd`, {ringIds: ringIds, locationTypes: locationTypes})
     .then(result => {
       //ToDo check for error
     }).catch(err => console.error(err))
@@ -219,7 +223,8 @@ const mapStateToProps = (state) => ({
   selectedRingId: state.ringEdit.selectedRingId, 
   plan: state.plan, 
   user: state.user, 
-  map: state.map
+  map: state.map, 
+  mapLayers: state.mapLayers
 })
 
 const mapDispatchToProps = dispatch => ({
