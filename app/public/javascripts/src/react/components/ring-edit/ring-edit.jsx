@@ -186,7 +186,6 @@ export class RingEdit extends Component {
     this.props.mapLayers.location.forEach(item => {
       if (item.checked) locationTypes.push(item.plannerKey)
     });
-    console.log(locationTypes)
     //this.props.calculateSubNet(ringIds, planId, userId)
     AroHttp.post(`/service/plan/${planId}/ring-cmd`, {ringIds: ringIds, locationTypes: locationTypes})
     .then(result => {
