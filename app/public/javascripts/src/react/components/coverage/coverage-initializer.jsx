@@ -24,7 +24,11 @@ export class CoverageInitializer extends Component {
       selectedSiteAssignment: 'Incremental'
     }
   }
-
+  displayGeographies () {
+    if (this.props.activeSelectionModeId !== 'SELECTED_ALL_SERVICE_AREAS') {
+      return (<tr><td width='50%'>Selected<br /> Geographies</td><td><PlanTargetList /></td></tr>)
+    }
+  }
   render () {
     return <div>
       <table id='table-coverage-initializer' className='table table-sm table-striped sidebar-options-table'>
@@ -68,6 +72,18 @@ export class CoverageInitializer extends Component {
             </td>
           </tr>
 
+          {/* Limit To Max Equipment Speed */}
+          <tr>
+            <td>Limit To Max Equipment Speed</td>
+            <td>
+              <input id='chkLimitMaxSpeed'
+                type='checkbox'
+                className='checkboxfill'
+                checked={this.props.useMaxSpeed}
+                onChange={event => this.props.setLimitMaxSpeed(event.target.checked)} />
+            </td>
+          </tr>
+
           {/* Use Existing Fiber */}
           <tr>
             <td>Use Existing Fiber</td>
@@ -89,18 +105,6 @@ export class CoverageInitializer extends Component {
                 className='checkboxfill'
                 checked={this.props.usePlannedFiber}
                 onChange={event => this.props.setPlannedFiber(event.target.checked)} />
-            </td>
-          </tr>
-
-          {/* Limit To Max Equipment Speed */}
-          <tr>
-            <td>Limit To Max Equipment Speed</td>
-            <td>
-              <input id='chkLimitMaxSpeed'
-                type='checkbox'
-                className='checkboxfill'
-                checked={this.props.useMaxSpeed}
-                onChange={event => this.props.setLimitMaxSpeed(event.target.checked)} />
             </td>
           </tr>
 
@@ -128,10 +132,9 @@ export class CoverageInitializer extends Component {
               </select>
             </td>
           </tr>
-          <tr>
-            <td>Selected Geographies</td>
-            <td><PlanTargetList /></td>
-          </tr>
+          {
+            this.displayGeographies()
+          }
         </tbody>
       </table>
 

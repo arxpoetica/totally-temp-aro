@@ -7,18 +7,22 @@ import SelectionModes from '../selection/selection-modes'
 
 export class PlanTargetList extends Component {
   render () {
-    var geometryKey = null; var descriptionKey = null
+    var geometries = []
+    var geometryKey = null
+    var descriptionKey = null
     if (this.props.activeSelectionModeId === SelectionModes.SELECTED_LOCATIONS) {
       geometryKey = 'locations'
       descriptionKey = 'address'
+      geometries = this.props.planTargets[geometryKey]
     } else if (this.props.activeSelectionModeId === SelectionModes.SELECTED_AREAS) {
       geometryKey = 'serviceAreas'
       descriptionKey = 'code'
+      geometries = this.props.planTargets[geometryKey]
     } else if (this.props.activeSelectionModeId === SelectionModes.SELECTED_ANALYSIS_AREAS) {
       geometryKey = 'analysisAreas'
       descriptionKey = 'code'
+      geometries = this.props.planTargets[geometryKey]
     }
-    const geometries = this.props.planTargets[geometryKey]
 
     if (geometries.size === 0) {
       return <div>(no items selected)</div>
