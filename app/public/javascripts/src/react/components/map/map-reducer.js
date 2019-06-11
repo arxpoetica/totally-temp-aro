@@ -19,7 +19,7 @@ function configurationReducer (state = { googleMaps: null, selectedFeatures: new
       return setGoogleMapsReference(state, action.payload)
     case Actions.MAP_SET_SELECTED_FEATURES:
       return setSelectedMapFeatures(state, action.payload)
-    
+
     default:
       return state
   }

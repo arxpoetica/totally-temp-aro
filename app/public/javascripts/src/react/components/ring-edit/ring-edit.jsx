@@ -122,6 +122,41 @@ export class RingEdit extends Component {
           pathCoords.push({lat:coords[1],lng:coords[0]})
         })
         
+        var polygonOptions = {
+          strokeColor: '#888888',
+          strokeOpacity: 0.8,
+          strokeWeight: 1,
+          fillColor: '#888888',
+          fillOpacity: 0.3
+        }
+        
+        if (ringId == this.props.selectedRingId){
+          polygonOptions = {
+            strokeColor: '#FF1493',
+            strokeOpacity: 0.8,
+            strokeWeight: 2,
+            fillColor: '#FF1493',
+            fillOpacity: 0.4
+          }
+        }
+
+        ring.linkData.forEach(link => {
+          var linkBoundsPath = [
+            link.geom[0][0], 
+            link.geom[0][1], 
+            link.geom[1][0], 
+            link.geom[1][1]
+          ]
+          var polygon = new google.maps.Polygon({
+            paths: linkBoundsPath,
+            clickable: false,
+            draggable: false
+          })
+          polygon.setOptions(polygonOptions)
+          polygon.setMap(this.props.map.googleMaps)
+          this.createdMapObjects.push(polygon)
+        })
+
         if (ringId == this.props.selectedRingId){
           if (ring.nodes.length > 0){
             const coords = ring.nodes[0].data.geometry.coordinates
@@ -139,7 +174,7 @@ export class RingEdit extends Component {
             mapMarker.setMap(this.props.map.googleMaps)
             this.createdMapObjects.push(mapMarker)
           }
-
+          /*
           var ringPath = new google.maps.Polyline({
             path: pathCoords,
             geodesic: true,
@@ -151,6 +186,7 @@ export class RingEdit extends Component {
           })
           ringPath.setMap(this.props.map.googleMaps)
           this.createdMapObjects.push(ringPath)
+          */
         }
 
         var ringPath = new google.maps.Polyline({

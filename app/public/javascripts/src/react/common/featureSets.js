@@ -1,10 +1,9 @@
 
 export default class FeatureSets {
   constructor () {
-    
     this.latLng = {
-      lat:null,
-      lng:null
+      lat: null,
+      lng: null
     }
     this.locations = []
     this.serviceAreas = []
@@ -13,6 +12,5 @@ export default class FeatureSets {
     this.equipmentFeatures = []
     this.censusFeatures = []
     this.fiberFeatures = new Set()
-    
   }
 }

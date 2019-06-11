@@ -4,13 +4,13 @@ import Ring from '../../common/ring'
 
 const defaultState = {
 
-  rings: {}, 
+  rings: {},
   selectedRingId: null
 }
 
 function setSelectedRingId (state, ringId) {
-  return { ...state, 
-    selectedRingId: ringId 
+  return { ...state,
+    selectedRingId: ringId
   }
 }
 
@@ -20,12 +20,12 @@ function addRings (state, rings) {
     newRings[ring.id] = ring
   })
   return { ...state,
-    rings: {...state.rings, ...newRings}
+    rings: { ...state.rings, ...newRings }
   }
 }
 
 function removeRing (state, ringId) {
-  var newRings = {...state.rings}
+  var newRings = { ...state.rings }
   delete newRings[ringId]
   return { ...state,
     rings: newRings
@@ -34,7 +34,7 @@ function removeRing (state, ringId) {
 
 function removeAllRings (state) {
   return { ...state,
-    rings: {}, 
+    rings: {},
     selectedRingId: null
   }
 }
@@ -44,12 +44,11 @@ function updateRing (state, ring) {
 
   var newRings = {}
   newRings[ring.id] = ring
-  
+
   return { ...state,
-    rings: {...state.rings, ...newRings}
+    rings: { ...state.rings, ...newRings }
   }
 }
-
 
 function ringEditReducer (state = defaultState, action) {
   switch (action.type) {
