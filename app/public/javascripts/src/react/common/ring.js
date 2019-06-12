@@ -59,6 +59,10 @@ export default class Ring {
           })
           return parsedRing
         }).catch(err => console.error(err))
+    }else{
+      return new Promise((resolve, reject) => {
+        resolve(parsedRing)
+      }).catch(err => console.error(err))
     }
 
     //return parsedRing
