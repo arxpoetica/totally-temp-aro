@@ -28,6 +28,12 @@ function newRing (planId, userId) {
           type: Actions.RING_ADD_RINGS,
           payload: [ring]
         })
+        // ToDo: this should be in ringEdit in a .then()
+        dispatch({
+          type: Actions.RING_SET_SELECTED_RING_ID,
+          payload: ring.id
+        })
+        
       }).catch(err => console.error(err))
   }
 }

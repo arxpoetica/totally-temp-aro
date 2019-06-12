@@ -33,9 +33,10 @@ export class RingEdit extends Component {
         <table className='table table-sm table-striped'>
           <tbody>
           {
-            Object.keys(this.props.rings).map((key) => (
-              this.renderRingRow(this.props.rings[key])
-            ))
+            //Object.keys(this.props.rings).map((key) => (
+            //  this.renderRingRow(this.props.rings[key])
+            //))
+            this.renderRingRows(this.props.rings)
           }
           </tbody>
         </table>
@@ -49,6 +50,20 @@ export class RingEdit extends Component {
     </div>
   }
   
+  renderRingRows (rings) {
+    // reverse order, new ones first
+    var revOrder = []
+    Object.keys(rings).sort().map((key) => (
+      revOrder.unshift(rings[key])
+    ))
+    var jsx = []
+    revOrder.forEach((ring) => {
+      jsx.push( this.renderRingRow(ring) )
+    })
+    console.log(jsx)
+    return jsx
+  }
+
   renderRingRow (ring) {
     if (ring.id == this.props.selectedRingId){
       // selected ring
@@ -292,12 +307,17 @@ export class RingEdit extends Component {
     this.mapObjectListeners = []
   }
 
-  /*
+  selectNewestRing () {
+    var ringId = Object.keys(this.props.rings).sort().pop()
+    this.props.setSelectedRingId(ringId)
+  } 
+  
   componentDidMount () {
-    // set panel active = true
-    console.log('------- ON')
+    if (!this.props.selectedRingId){
+      this.selectNewestRing()
+    }
   }
-  */
+  
   componentWillUnmount () {
     this.clearRendering()
   }
