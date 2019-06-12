@@ -175,7 +175,6 @@ export default class Ring {
   }
 
   importGeom (geomPath) {
-    console.log(geomPath)
     var geom = []
     geomPath.coordinates[0][0].forEach(pt => {
       geom.push(new google.maps.LatLng(pt[1], pt[0]))

@@ -60,7 +60,6 @@ export class RingEdit extends Component {
     revOrder.forEach((ring) => {
       jsx.push( this.renderRingRow(ring) )
     })
-    console.log(jsx)
     return jsx
   }
 
@@ -70,12 +69,22 @@ export class RingEdit extends Component {
       return <tr key={ring.id}>
         <td className='ring-table-item-selected'> 
           <div className='ring-table-item-title ring-table-item-title-selected clearfix'>
-            {ring.name}
+            {ring.name} 
+            
             <button className="btn btn-sm btn-outline-danger ring-del-btn" 
                     onClick={() => this.requestDeleteRing(ring)}
                     data-toggle="tooltip" data-placement="bottom" title="Delete">
               <i className="fa ei-button-icon ng-scope fa-trash-alt"></i>
             </button>
+            
+            <input
+              id={`inpRingName_${ring.id}`}
+              type='text'
+              className='form-control form-control-sm ring-text-inp'
+              placeholder='rename'
+              onBlur={event => this.renameRing(ring.id, event.target.value)}
+              onKeyDown={event => {if (event.key === 'Enter') this.renameRing(ring.id, event.target.value) }}
+            />
 
           </div>
           <div className='ring-sub-table'>
@@ -122,7 +131,12 @@ export class RingEdit extends Component {
     this.props.newRing(planId, userId)
   }
   
-
+  renameRing (ringId, val) {
+    const planId = this.props.plan.activePlan.id
+    const userId = this.props.user.loggedInUser.id
+    this.props.renameRing(this.props.rings[ringId], val, planId, userId)
+  }
+  
   drawRings(){
     // clear prev lines
     this.clearRendering()
@@ -179,9 +193,6 @@ export class RingEdit extends Component {
             const planId = this.props.plan.activePlan.id
             const userId = this.props.user.loggedInUser.id
             var onPathChange = (path) => {
-              console.log(path)
-              console.log(polygon.getPath())
-              console.log(link)
               var newPath = []
               var vertices = polygon.getPath()
 
@@ -343,7 +354,8 @@ const mapDispatchToProps = dispatch => ({
   newRing: (planId, userId) => dispatch(ringActions.newRing(planId, userId)), 
   removeRing: (ringId, planId, userId) => dispatch(ringActions.removeRing(ringId, planId, userId)),
   removeNode: (ring, featureId, planId, userId) => dispatch( ringActions.removeNode(ring, featureId, planId, userId) ), 
-  saveRingChangesToServer: (ring, planId, userId) => dispatch(ringActions.saveRingChangesToServer(ring, planId, userId))
+  saveRingChangesToServer: (ring, planId, userId) => dispatch(ringActions.saveRingChangesToServer(ring, planId, userId)), 
+  renameRing: (ring, name, planId, userId) => dispatch(ringActions.renameRing(ring, name, planId, userId))
 })
 
 const RingEditComponent = wrapComponentWithProvider(reduxStore, RingEdit, mapStateToProps, mapDispatchToProps)

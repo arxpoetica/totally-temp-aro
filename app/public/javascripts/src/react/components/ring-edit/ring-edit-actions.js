@@ -111,6 +111,21 @@ function saveRingChangesToServer (ring, planId, userId) {
   }
 }
 
+function renameRing (ring, name, planId, userId) {
+  return (dispatch) => {
+    var ringClone = ring.clone()
+    ringClone.name = name
+    AroHttp.put(`/service/plan/${planId}/ring-config/${ringClone.id}`, ringClone.getDataExport())
+    .then(result => {
+      // ToDo protect against fail returns
+      dispatch({
+        type: Actions.RING_UPDATE_RING,
+        payload: ringClone
+      })
+    }).catch(err => console.error(err))
+  }
+}
+
 function onFeatureSelected (features) {
   // this may be a bit funky, revisit this
 
@@ -194,5 +209,6 @@ export default {
   loadRings,
   addNode,
   removeNode, 
-  saveRingChangesToServer
+  saveRingChangesToServer, 
+  renameRing
 }
