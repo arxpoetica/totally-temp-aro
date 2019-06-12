@@ -192,7 +192,10 @@ module.exports = class Boundary {
 
   static getBoundaryForNetworkNode (planId, networkNodeObjectId, boundaryTypeId) {
     return database.query(`
-      SELECT id,object_id,deployment_type
+      SELECT
+        id,
+        object_id,
+        COALESCE(is_locked::boolean, false) as is_locked
       FROM client.network_boundary
       WHERE root_plan_id = $1
         AND network_node_object_id = $2

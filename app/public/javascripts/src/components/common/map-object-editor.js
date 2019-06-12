@@ -430,7 +430,8 @@ class MapObjectEditorController {
       options.push(new MenuAction(MenuActionTypes.DELETE, () => this.deleteObjectWithId(feature.objectId)))
     } else {
       options.push(new MenuAction(MenuActionTypes.VIEW, () => this.viewExistingFeature(feature, latLng)))
-      if (feature.deployment_type !== 1 && !this.state.configuration.planEditor.editExistingObjects) {
+      // Note that feature.is_locked comes in as a string from the vector tiles
+      if ((feature.is_locked === 'false') && !this.state.configuration.planEditor.editExistingObjects) {
         options.push(new MenuAction(MenuActionTypes.EDIT, () => this.editExistingFeature(feature, latLng)))
       }
     }
@@ -449,7 +450,7 @@ class MapObjectEditorController {
             } else {
               // We have a boundary for this combination of inputs. Allow editing only if it is not locked
               const boundary = boundaryResult.data[0]
-              allowAddBoundary = (boundary.deployment_type !== 1)
+              allowAddBoundary = !boundary.is_locked
             }
             if (allowAddBoundary) {
               options.push(new MenuAction(MenuActionTypes.ADD_BOUNDARY, () => {
