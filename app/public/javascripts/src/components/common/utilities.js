@@ -81,14 +81,13 @@ class Utilities {
       location: MenuItemTypes.LOCATION,
       equipment: MenuItemTypes.EQUIPMENT,
       equipment_boundary: MenuItemTypes.BOUNDARY,
-      networkNodeType: MenuItemTypes.EQUIPMENT,
       service_layer: MenuItemTypes.SERVICE_AREA
     }
     return dataTypeToMenuItemType[dataType]
   }
 
   // ToDo: combine display name and CLLIs
-  getFeatureDisplayName (feature) {
+  getFeatureDisplayName (feature, state) {
     // Get the components of the data type. Example feature._data_type = 'location', 'equipment'
     const dataTypeComponents = (feature._data_type || feature.dataType || '').split('.')
     const dataType = dataTypeComponents[0]
@@ -96,7 +95,19 @@ class Utilities {
     const dataTypeToNameExtractor = {
       location: feature => feature.name || (feature.objectId && feature.objectId.substring(feature.objectId.length - 7)) || 'Location',
       equipment_boundary: feature => 'Boundary',
-      networkNodeType: feature => feature.networkNodeType,
+      equipment: feature => {
+        const nnType = (feature['_data_type']).split('.')[1]
+        var name = nnType
+        if (state.configuration.networkEquipment.equipments[nnType]) {
+          name = state.configuration.networkEquipment.equipments[nnType].label
+        } else if (state.networkNodeTypesEntity[nnType]) {
+          name = state.networkNodeTypesEntity[nnType]
+        }
+        if (feature.siteClli) {
+          name += `: ${feature.siteClli}`
+        }
+        return name
+      },
       service_layer: feature => feature.code || feature.siteClli || 'Unnamed service area'
     }
 
