@@ -9,7 +9,8 @@ import SelectionModes from '../../selection/selection-modes'
 const selectionModes = [
   { id: SelectionModes.SELECTED_AREAS, description: 'Service Areas' },
   { id: SelectionModes.SELECTED_LOCATIONS, description: 'Locations' },
-  { id: SelectionModes.SELECTED_ANALYSIS_AREAS, description: 'Analysis Areas' }
+  { id: SelectionModes.SELECTED_ANALYSIS_AREAS, description: 'Analysis Areas' },
+  { id: SelectionModes.SELECTED_ALL_SERVICE_AREAS, description: 'All Service Areas' }
 ]
 
 // -----------------------------------------------------------------------------
@@ -57,6 +58,8 @@ test('When we have supplied all parameters', () => {
       groupKey={'serviceArea'}
       useMarketableTechnologies
       useMaxSpeed
+      useExistingFiber
+      usePlannedFiber
       coverageReport={{}}
     />
   )
@@ -75,6 +78,8 @@ test('When the coverage type is changed', () => {
       groupKey={'serviceArea'}
       useMarketableTechnologies
       useMaxSpeed
+      useExistingFiber
+      usePlannedFiber
       coverageReport={{}}
       setCoverageType={mockSetCoverageType}
     />
@@ -94,6 +99,8 @@ test('When the group key type is changed', () => {
       groupKey={'serviceArea'}
       useMarketableTechnologies
       useMaxSpeed
+      useExistingFiber
+      usePlannedFiber
       coverageReport={{}}
       setGroupKeyType={mockSetGroupKeyType}
     />
@@ -113,6 +120,8 @@ test('When the limit-marketable-technology flag is changed', () => {
       groupKey={'serviceArea'}
       useMarketableTechnologies
       useMaxSpeed
+      useExistingFiber
+      usePlannedFiber
       coverageReport={{}}
       setLimitMarketableTechnology={mockSetLimitMarketableTechnology}
     />
@@ -132,12 +141,56 @@ test('When the limit-max-speed flag is changed', () => {
       groupKey={'serviceArea'}
       useMarketableTechnologies
       useMaxSpeed
+      useExistingFiber
+      usePlannedFiber
       coverageReport={{}}
       setLimitMaxSpeed={mockSetLimitMaxSpeed}
     />
   )
   component.find('#chkLimitMaxSpeed').simulate('change', { target: { checked: false } })
   expect(mockSetLimitMaxSpeed.mock.calls[0][0]).toEqual(false)
+})
+
+// -----------------------------------------------------------------------------
+test('When the Existing Fiber flag is changed', () => {
+  const mockSetExistingFiber = jest.fn()
+  const component = shallow(
+    <CoverageInitializer isSuperUser
+      activeSelectionModeId={SelectionModes.SELECTED_AREAS}
+      selectionModes={selectionModes}
+      coverageType={'location'}
+      groupKey={'serviceArea'}
+      useMarketableTechnologies
+      useMaxSpeed
+      useExistingFiber
+      usePlannedFiber
+      coverageReport={{}}
+      setExistingFiber={mockSetExistingFiber}
+    />
+  )
+  component.find('#chkUseExistingFiber').simulate('change', { target: { checked: true } })
+  expect(mockSetExistingFiber.mock.calls[0][0]).toEqual(true)
+})
+
+// -----------------------------------------------------------------------------
+test('When the Planned Fiber flag is changed', () => {
+  const mockSetPlannedFiber = jest.fn()
+  const component = shallow(
+    <CoverageInitializer isSuperUser
+      activeSelectionModeId={SelectionModes.SELECTED_AREAS}
+      selectionModes={selectionModes}
+      coverageType={'location'}
+      groupKey={'serviceArea'}
+      useMarketableTechnologies
+      useMaxSpeed
+      useExistingFiber
+      usePlannedFiber
+      coverageReport={{}}
+      setPlannedFiber={mockSetPlannedFiber}
+    />
+  )
+  component.find('#chkUsePlannedFiber').simulate('change', { target: { checked: true } })
+  expect(mockSetPlannedFiber.mock.calls[0][0]).toEqual(true)
 })
 
 // -----------------------------------------------------------------------------
@@ -151,6 +204,8 @@ test('When the selection type is changed', () => {
       groupKey={'serviceArea'}
       useMarketableTechnologies
       useMaxSpeed
+      useExistingFiber
+      usePlannedFiber
       coverageReport={{}}
       setSelectionTypeById={mockSetSelectionTypeById}
     />
