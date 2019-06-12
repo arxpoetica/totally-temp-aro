@@ -139,7 +139,12 @@ export default class Ring {
         exchangeLinkOid: link.exchangeLinkOid,
         fromOid: link.fromNode.objectId,
         toOid: link.toNode.objectId, 
-        geomPath: this.exportGeom(link)
+        geomPath: {
+          "type": "MultiPolygon", 
+          coordinates: [
+            [this.exportGeom(link)]
+          ]
+        }
       }
     })
     return {
@@ -156,15 +161,21 @@ export default class Ring {
         [pt.lng(), pt.lat()]
       )
     })
+    if (link.geom.length > 0){
+      geom.push(
+        [link.geom[0].lng(), link.geom[0].lat()]
+      )
+    }
     return geom
   }
 
   importGeom (geomPath) {
     console.log(geomPath)
     var geom = []
-    geomPath.coordinates.forEach(pt => {
-      geom.push(new google.maps.LatLng(pt.coordinate[1], pt.coordinate[0]))
+    geomPath.coordinates[0][0].forEach(pt => {
+      geom.push(new google.maps.LatLng(pt[1], pt[0]))
     })
+    if (geom.length > 0) geom.pop()
     return geom
   }
 
