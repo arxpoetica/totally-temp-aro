@@ -148,21 +148,33 @@ function loadRings (planId) {
   return (dispatch, getState) => {
     const state = getState()
     const userId = state.user.loggedInUser.id
+    
     AroHttp.get(`/service/plan/${planId}/ring-config?planId=${planId}`)
       .then(result => {
-        dispatch({
-          type: Actions.RING_REMOVE_ALL_RINGS
-        })
-        var rings = []
+
+        var promisses = []
+        
         result.data.forEach(ringData => {
-          rings.push(Ring.parseData(ringData, planId, userId))
+          promisses.push(Ring.parseData(ringData, planId, userId))
         })
-        dispatch({
-          type: Actions.RING_ADD_RINGS,
-          payload: rings
+        
+        Promise.all(promisses)
+        .then(results => {
+          var rings = []
+          results.forEach(result => {
+            rings.push(result)
+          })
+
+          dispatch({
+            type: Actions.RING_REMOVE_ALL_RINGS
+          })
+          dispatch({
+            type: Actions.RING_ADD_RINGS,
+            payload: rings
+          })
         })
       })
-      .catch(err => console.error(err))
+      .catch(err => console.error(err)) 
   }
 }
 

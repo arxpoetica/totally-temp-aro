@@ -28,7 +28,7 @@ export default class Ring {
         promisses.push(RingUtils.getEquipmentDataPromise(id, planId, userId))
       })
 
-      Promise.all(promisses)
+      return Promise.all(promisses)
         .then(results => {
         // ToDo protect against fail returns
           results.forEach(result => {
@@ -57,10 +57,11 @@ export default class Ring {
               geom: geom
             }
           })
+          return parsedRing
         }).catch(err => console.error(err))
     }
 
-    return parsedRing
+    //return parsedRing
   }
 
   // todo: each object can keep track of their own polygon
