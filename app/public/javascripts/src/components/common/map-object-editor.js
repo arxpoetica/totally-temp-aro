@@ -420,13 +420,6 @@ class MapObjectEditorController {
       // it's on the edit layer / in the transaction
       feature = this.createdMapObjects[feature.objectId].feature
       options.push(new MenuAction(MenuActionTypes.SELECT, () => this.selectProposedFeature(feature.objectId)))
-      if (featureType === MenuItemTypes.EQUIPMENT) {
-        if (this.isBoundaryCreationAllowed({ 'mapObject': feature })) {
-          options.push(new MenuAction(MenuActionTypes.ADD_BOUNDARY, () => this.startDrawingBoundaryForId(feature.objectId)))
-        }
-      } else if (featureType === MenuItemTypes.BOUNDARY) {
-      // options.push( this.contextMenuService.makeItemOption('Edit Boundary', 'fa-pencil', () => {this.editBoundary(result.objectId)}) )
-      }
       options.push(new MenuAction(MenuActionTypes.DELETE, () => this.deleteObjectWithId(feature.objectId)))
     } else {
       options.push(new MenuAction(MenuActionTypes.VIEW, () => this.viewExistingFeature(feature, latLng)))
@@ -441,16 +434,16 @@ class MapObjectEditorController {
       const planId = this.state.plan.id
       const selectedBoundaryTypeId = this.state.selectedBoundaryType.id
       menuPromises.push(
-        this.$http.get(`/boundary/for_network_node/${planId}/${feature.object_id}/${selectedBoundaryTypeId}`)
+        this.$http.get(`/boundary/for_network_node/${planId}/${feature.objectId}/${selectedBoundaryTypeId}`)
           .then(boundaryResult => {
-            var allowAddBoundary = false
+            var allowAddBoundary = this.isBoundaryCreationAllowed({ 'mapObject': feature })
             if (boundaryResult.data.length === 0) {
               // No results for this combination of planid, object_id, selectedBoundaryTypeId. Allow users to add boundary
-              allowAddBoundary = true
+              allowAddBoundary = allowAddBoundary && true
             } else {
               // We have a boundary for this combination of inputs. Allow editing only if it is not locked
               const boundary = boundaryResult.data[0]
-              allowAddBoundary = !boundary.is_locked
+              allowAddBoundary = allowAddBoundary && !boundary.is_locked
             }
             if (allowAddBoundary) {
               options.push(new MenuAction(MenuActionTypes.ADD_BOUNDARY, () => {
