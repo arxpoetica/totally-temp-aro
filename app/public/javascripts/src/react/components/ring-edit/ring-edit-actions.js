@@ -90,6 +90,21 @@ function removeRing (ringId, planId, userId) {
   }
 }
 
+function saveRingChangesToServer (ring, planId, userId) {
+  return (dispatch) => {
+    AroHttp.put(`/service/plan/${planId}/ring-config/${ring.id}`, ring.getDataExport())
+    .then(result => {
+      // ToDo protect against fail returns
+      /* // no need to update state, we don't need a redraw
+      dispatch({
+        type: Actions.RING_UPDATE_RING,
+        payload: ringClone
+      })
+      */
+    }).catch(err => console.error(err))
+  }
+}
+
 function onFeatureSelected (features) {
   // this may be a bit funky, revisit this
 
@@ -160,5 +175,6 @@ export default {
   onFeatureSelected,
   loadRings,
   addNode,
-  removeNode
+  removeNode, 
+  saveRingChangesToServer
 }

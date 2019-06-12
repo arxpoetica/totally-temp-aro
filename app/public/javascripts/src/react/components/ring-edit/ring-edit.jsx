@@ -15,6 +15,7 @@ export class RingEdit extends Component {
   constructor (props) {
     super(props)
     this.createdMapObjects = []
+    this.mapObjectListeners = []
   }
   
   render () {
@@ -127,7 +128,8 @@ export class RingEdit extends Component {
           strokeOpacity: 0.8,
           strokeWeight: 1,
           fillColor: '#888888',
-          fillOpacity: 0.3
+          fillOpacity: 0.3, 
+          editable: false
         }
         
         if (ringId == this.props.selectedRingId){
@@ -136,25 +138,56 @@ export class RingEdit extends Component {
             strokeOpacity: 0.8,
             strokeWeight: 2,
             fillColor: '#FF1493',
-            fillOpacity: 0.4
+            fillOpacity: 0.4, 
+            editable: true
           }
         }
 
         ring.linkData.forEach(link => {
+          /*
           var linkBoundsPath = [
             link.geom[0][0], 
             link.geom[0][1], 
             link.geom[1][0], 
             link.geom[1][1]
           ]
+          */
           var polygon = new google.maps.Polygon({
-            paths: linkBoundsPath,
+            paths: link.geom,
             clickable: false,
             draggable: false
           })
           polygon.setOptions(polygonOptions)
           polygon.setMap(this.props.map.googleMaps)
           this.createdMapObjects.push(polygon)
+          if (ringId == this.props.selectedRingId){
+            const planId = this.props.plan.activePlan.id
+            const userId = this.props.user.loggedInUser.id
+            var onPathChange = (path) => {
+              console.log(path)
+              console.log(polygon.getPath())
+              console.log(link)
+              var newPath = []
+              var vertices = polygon.getPath()
+
+              for (var i =0; i < vertices.getLength(); i++) {
+                newPath.push(vertices.getAt(i))
+              }
+              link.geom = newPath
+              this.props.saveRingChangesToServer(ring, planId, userId)
+            }
+
+            var polygonPath = polygon.getPath()
+            this.mapObjectListeners.push(
+              google.maps.event.addListener(polygonPath, 'insert_at', onPathChange)
+            )
+            this.mapObjectListeners.push(
+              google.maps.event.addListener(polygonPath, 'remove_at', onPathChange)
+            )
+            this.mapObjectListeners.push(
+              google.maps.event.addListener(polygonPath, 'set_at', onPathChange)
+            )
+          }
         })
 
         if (ringId == this.props.selectedRingId){
@@ -252,6 +285,11 @@ export class RingEdit extends Component {
       path.setMap(null)
     })
     this.createdMapObjects = []
+
+    this.mapObjectListeners.forEach(listener => {
+      listener.remove()
+    })
+    this.mapObjectListeners = []
   }
 
   /*
@@ -284,7 +322,8 @@ const mapDispatchToProps = dispatch => ({
   setSelectedRingId: ringId => dispatch(ringActions.setSelectedRingId(ringId)), 
   newRing: (planId, userId) => dispatch(ringActions.newRing(planId, userId)), 
   removeRing: (ringId, planId, userId) => dispatch(ringActions.removeRing(ringId, planId, userId)),
-  removeNode: (ring, featureId, planId, userId) => dispatch( ringActions.removeNode(ring, featureId, planId, userId) )
+  removeNode: (ring, featureId, planId, userId) => dispatch( ringActions.removeNode(ring, featureId, planId, userId) ), 
+  saveRingChangesToServer: (ring, planId, userId) => dispatch(ringActions.saveRingChangesToServer(ring, planId, userId))
 })
 
 const RingEditComponent = wrapComponentWithProvider(reduxStore, RingEdit, mapStateToProps, mapDispatchToProps)

@@ -15,6 +15,8 @@ export default class Ring {
   static parseData (data, planId, userId) {
     var parsedRing = new Ring(data.id, data.name)
     //exchangeLinks = data.exchangeLinks
+    
+    // ToDo: Should probably return a Promise 
 
     if (data.exchangeLinks.length > 0) {
       var nodeIds = [ data.exchangeLinks[0].fromOid ]
@@ -42,11 +44,17 @@ export default class Ring {
           data.exchangeLinks.forEach((link, i) => {
             var fromNode = parsedRing.nodesById[link.fromOid]
             var toNode = parsedRing.nodesById[link.toOid]
+            var geom = []
+            if (!link.geomPath || 0 == link.geomPath.length) {
+              geom = parsedRing.figureRangeIntersectOffset(fromNode, toNode) 
+            }else{
+              geom = parsedRing.importGeom(link.geomPath)
+            }
             parsedRing.linkData[i] = {
               exchangeLinkOid: link.exchangeLinkOid,
               fromNode: fromNode, 
               toNode: toNode,
-              geom: parsedRing.figureRangeIntersectOffset(fromNode, toNode) 
+              geom: geom
             }
           })
         }).catch(err => console.error(err))
@@ -113,13 +121,13 @@ export default class Ring {
     var latLngA = new google.maps.LatLng(coordsA[1], coordsA[0])
     var latLngB = new google.maps.LatLng(coordsB[1], coordsB[0])
     var heading = google.maps.geometry.spherical.computeHeading(latLngA, latLngB);
-    console.log(heading)
-    var bounds = [[], []]
-    bounds[0][0] = google.maps.geometry.spherical.computeOffset(latLngA, 1000.0, heading + 90)
-    bounds[0][1] = google.maps.geometry.spherical.computeOffset(latLngA, 1000.0, heading - 90)
-    bounds[1][0] = google.maps.geometry.spherical.computeOffset(latLngB, 1000.0, heading - 90)
-    bounds[1][1] = google.maps.geometry.spherical.computeOffset(latLngB, 1000.0, heading + 90)
-    console.log(bounds)
+    
+    var bounds = []
+    bounds.push( google.maps.geometry.spherical.computeOffset(latLngA, 1000.0, heading + 90) )
+    bounds.push( google.maps.geometry.spherical.computeOffset(latLngA, 1000.0, heading - 90) )
+    bounds.push( google.maps.geometry.spherical.computeOffset(latLngB, 1000.0, heading - 90) )
+    bounds.push( google.maps.geometry.spherical.computeOffset(latLngB, 1000.0, heading + 90) )
+    
     return bounds
   }
   
@@ -130,8 +138,8 @@ export default class Ring {
       exchangeLinks[i] = {
         exchangeLinkOid: link.exchangeLinkOid,
         fromOid: link.fromNode.objectId,
-        toOid: link.toNode.objectId
-        // geom
+        toOid: link.toNode.objectId, 
+        geomPath: this.exportGeom(link)
       }
     })
     return {
@@ -139,6 +147,25 @@ export default class Ring {
       name: this.name,
       exchangeLinks: exchangeLinks
     }
+  }
+  
+  exportGeom (link) {
+    var geom = []
+    link.geom.forEach(pt => {
+      geom.push(
+        [pt.lng(), pt.lat()]
+      )
+    })
+    return geom
+  }
+
+  importGeom (geomPath) {
+    console.log(geomPath)
+    var geom = []
+    geomPath.coordinates.forEach(pt => {
+      geom.push(new google.maps.LatLng(pt.coordinate[1], pt.coordinate[0]))
+    })
+    return geom
   }
 
   clone () {
