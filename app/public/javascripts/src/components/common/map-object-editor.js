@@ -314,7 +314,7 @@ class MapObjectEditorController {
             if (validFeature) {
               var feature = result
               menuItemsById[feature.objectId] = true
-              var name = this.utils.getFeatureDisplayName(feature)
+              var name = this.utils.getFeatureDisplayName(feature, this.state)
               var thisFeatureMenuPromise = this.getEquipmentContextMenuOptions(feature, latLng)
                 .then(options => menuItems.push(new MenuItem(featureType, name, options, feature)))
 
@@ -382,7 +382,7 @@ class MapObjectEditorController {
                   options.push(new MenuAction(MenuActionTypes.EDIT, () => this.viewExistingFeature(result, latLng)))
                 }
 
-                var name = this.utils.getFeatureDisplayName(result)
+                var name = this.utils.getFeatureDisplayName(result, this.state)
 
                 menuItemsById[result.objectId] = options
                 menuItems.push(new MenuItem(MenuItemTypes.SERVICE_AREA, name, options, feature))
