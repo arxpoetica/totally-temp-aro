@@ -169,6 +169,10 @@ class PolygonFeatureRenderer {
       drawingStyles.fillStyle = '#' + componentToHex(fillColor.r) + componentToHex(fillColor.g) + componentToHex(fillColor.b)
       var strokeColor = { r: Math.max(0, fillColor.r - 20), g: Math.max(0, fillColor.g - 20), b: Math.max(0, fillColor.b - 20) }
       drawingStyles.strokeStyle = '#' + componentToHex(strokeColor.r) + componentToHex(strokeColor.g) + componentToHex(strokeColor.b)
+    } else if (feature.properties.is_locked === 'true') {
+      drawingStyles.strokeStyle = '#ccc'
+      drawingStyles.fillStyle = '#aaa'
+      drawingStyles.opacity = 0.7
     }
     return drawingStyles
   }
