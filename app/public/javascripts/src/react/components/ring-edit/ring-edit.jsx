@@ -173,14 +173,6 @@ export class RingEdit extends Component {
         }
 
         ring.linkData.forEach(link => {
-          /*
-          var linkBoundsPath = [
-            link.geom[0][0], 
-            link.geom[0][1], 
-            link.geom[1][0], 
-            link.geom[1][1]
-          ]
-          */
           var polygon = new google.maps.Polygon({
             paths: link.geom,
             clickable: false,
@@ -233,19 +225,6 @@ export class RingEdit extends Component {
             mapMarker.setMap(this.props.map.googleMaps)
             this.createdMapObjects.push(mapMarker)
           }
-          /*
-          var ringPath = new google.maps.Polyline({
-            path: pathCoords,
-            geodesic: true,
-            strokeColor: '#FF1493',
-            strokeOpacity: 0.4,
-            strokeWeight: 400, 
-            clickable: false,
-            draggable: false
-          })
-          ringPath.setMap(this.props.map.googleMaps)
-          this.createdMapObjects.push(ringPath)
-          */
         }
 
         var ringPath = new google.maps.Polyline({

@@ -175,7 +175,8 @@ class State {
     service.activeEditPlanPanel = service.EditPlanPanels.EDIT_PLAN
     
     service.EditRingsPanels = Object.freeze({
-      EDIT_RINGS: 'EDIT_RINGS'
+      EDIT_RINGS: 'EDIT_RINGS', 
+      OUTPUT: 'OUTPUT'
     })
     service.activeEditRingsPanel = service.EditRingsPanels.EDIT_RINGS
 
