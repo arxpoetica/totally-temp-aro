@@ -11,18 +11,11 @@ const defaultState = {
   targets: [],
   clickMapToAddTarget: false,
   selectedTarget: null,
-  showRfpStatusModal: false,
   status: RfpStatusTypes.UNINITIALIZED
 }
 
 function clearState () {
   return JSON.parse(JSON.stringify(defaultState))
-}
-
-function setRfpStatusModalVisibility (state, showRfpStatusModal) {
-  return { ...state,
-    showRfpStatusModal: showRfpStatusModal
-  }
 }
 
 function addTargets (state, targets) {
@@ -71,9 +64,6 @@ function rfpReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.RFP_CLEAR_STATE:
       return clearState(state)
-
-    case Actions.RFP_SHOW_HIDE_STATUS_MODAL:
-      return setRfpStatusModalVisibility(state, action.payload)
 
     case Actions.RFP_ADD_TARGETS:
       return addTargets(state, action.payload)

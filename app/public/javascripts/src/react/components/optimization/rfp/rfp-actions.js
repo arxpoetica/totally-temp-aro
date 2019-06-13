@@ -3,13 +3,6 @@ import Actions from '../../../common/actions'
 import AroHttp from '../../../common/aro-http'
 import RfpStatusTypes from './constants'
 
-function showOrHideRfpStatusModal (showRfpStatusModal) {
-  return {
-    type: Actions.RFP_SHOW_HIDE_STATUS_MODAL,
-    payload: showRfpStatusModal
-  }
-}
-
 function addTargets (targets) {
   return {
     type: Actions.RFP_ADD_TARGETS,
@@ -104,6 +97,5 @@ export default {
   removeTarget: removeTarget,
   replaceTarget: replaceTarget,
   setSelectedTarget: setSelectedTarget,
-  showOrHideRfpStatusModal: showOrHideRfpStatusModal,
   setClickMapToAddTarget: setClickMapToAddTarget
 }

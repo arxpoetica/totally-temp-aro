@@ -544,7 +544,7 @@ class ToolBarController {
 
   mapDispatchToTarget (dispatch) {
     return {
-      showRfpStatusModal: () => dispatch(RfpActions.showOrHideRfpStatusModal(true))
+      
     }
   }
 }
