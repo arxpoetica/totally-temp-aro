@@ -25,6 +25,7 @@ class PlanEditorController {
     // this.selectedEquipmentInfo = {}
     this.objectIdToProperties = {}
     this.objectIdToMapObject = {}
+    this.objectIdToOriginalAttributes = {}
     this.boundaryIdToEquipmentId = {}
     this.equipmentIdToBoundaryId = {}
     this.boundaryCoverageById = {}
@@ -137,6 +138,7 @@ class PlanEditorController {
         const properties = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName, feature.networkNodeType,
           attributes.selectedEquipmentType, networkNodeEquipment, feature.deploymentType)
         this.objectIdToProperties[feature.objectId] = properties
+        this.objectIdToOriginalAttributes[feature.objectId] = attributes
       })
       transactionFeatures.forEach((feature) => {
         this.getViewObjectSBTypes(feature.objectId)
@@ -150,6 +152,7 @@ class PlanEditorController {
           attributes.selected_site_boundary_generation,
           attributes.spatialEdgeType, attributes.directed, attributes.network_node_type, item.feature.deploymentType)
         this.objectIdToProperties[item.feature.objectId] = properties
+        this.objectIdToOriginalAttributes[item.feature.objectId] = attributes
       })
       // Save the equipment and boundary ID associations
       result.data.forEach((item) => {
@@ -480,21 +483,24 @@ class PlanEditorController {
     if (typeof siteNetworkNodeType === 'undefined') siteNetworkNodeType = boundaryProperties.networkNodeType
 
     // ToDo: this should use AroFeatureFactory
+    const originalAttributes = this.objectIdToOriginalAttributes[objectId]
+    const customAttributes = {
+      boundary_type_id: boundaryProperties.selectedSiteBoundaryTypeId,
+      network_node_type: siteNetworkNodeType,
+      selected_site_move_update: boundaryProperties.selectedSiteMoveUpdate,
+      selected_site_boundary_generation: boundaryProperties.selectedSiteBoundaryGeneration,
+      network_node_object_id: this.boundaryIdToEquipmentId[objectId],
+      spatialEdgeType: boundaryProperties.spatialEdgeType,
+      directed: boundaryProperties.directed
+    }
+    const attributes = Object.assign({}, originalAttributes, customAttributes)
     var serviceFeature = {
       objectId: objectId,
       networkNodeType: siteNetworkNodeType,
       networkObjectId: this.boundaryIdToEquipmentId[objectId],
       geometry: this.polygonPathsToWKT(boundaryMapObject.getPaths()),
       boundaryTypeId: boundaryProperties.selectedSiteBoundaryTypeId,
-      attributes: {
-        boundary_type_id: boundaryProperties.selectedSiteBoundaryTypeId,
-        network_node_type: siteNetworkNodeType,
-        selected_site_move_update: boundaryProperties.selectedSiteMoveUpdate,
-        selected_site_boundary_generation: boundaryProperties.selectedSiteBoundaryGeneration,
-        network_node_object_id: this.boundaryIdToEquipmentId[objectId],
-        spatialEdgeType: boundaryProperties.spatialEdgeType,
-        directed: boundaryProperties.directed
-      },
+      attributes: attributes,
       dataType: 'equipment_boundary',
       deploymentType: boundaryProperties.deploymentType
     }
@@ -665,6 +671,7 @@ class PlanEditorController {
       var planId = this.state.plan.id
       this.$http.get(`/service/plan-feature/${planId}/equipment_boundary/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
         .then((result) => {
+          this.objectIdToOriginalAttributes[feature.objectId] = result.data.attributes
           if (result.data.hasOwnProperty('geometry')) {
             this.viewSiteBoundaryEventFeature = result.data
             this.viewSiteBoundaryEventFeature.attributes = {
