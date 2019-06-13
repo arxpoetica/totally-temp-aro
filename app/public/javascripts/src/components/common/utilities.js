@@ -1,3 +1,5 @@
+import { MenuItemTypes } from '../common/context-menu/menu-item'
+
 class Utilities {
   constructor ($document, $http) {
     this.$document = $document
@@ -70,52 +72,39 @@ class Utilities {
     return Object.keys(object).length
   }
 
-  // - Below are concerned with displaying information about a feature or equipment. These could be moved into their own utils class if this one gets too large
-
-  getDataTypeList (dataType) {
-    return dataType.split('.')
-  }
-
-  getDataTypeListOfFeature (feature) {
-    var dataTypeList = ['']
-    if (feature.hasOwnProperty('_data_type')) dataTypeList = this.getDataTypeList(feature._data_type)
-    if (feature.hasOwnProperty('dataType')) dataTypeList = this.getDataTypeList(feature.dataType)
-    return dataTypeList
+  getFeatureMenuItemType (feature) {
+    // Get the components of the data type. Example feature._data_type = 'location', 'equipment'
+    const dataTypeComponents = (feature._data_type || feature.dataType || '').split('.')
+    const dataType = dataTypeComponents[0]
+    // Have a map of data type to menu item types
+    const dataTypeToMenuItemType = {
+      location: MenuItemTypes.LOCATION,
+      equipment: MenuItemTypes.EQUIPMENT,
+      equipment_boundary: MenuItemTypes.BOUNDARY,
+      networkNodeType: MenuItemTypes.EQUIPMENT,
+      service_layer: MenuItemTypes.SERVICE_AREA
+    }
+    return dataTypeToMenuItemType[dataType]
   }
 
   // ToDo: combine display name and CLLIs
-  getFeatureDisplayName (feature, state, dataTypeList) {
-    if (typeof dataTypeList === 'undefined') dataTypeList = this.getDataTypeListOfFeature(feature)
-
-    var name = ''
-    if (dataTypeList[0] == 'location') {
-      name = 'Location'
-      if (feature.hasOwnProperty(name)) name = feature.name
-    } else if (dataTypeList[0] == 'equipment_boundary') {
-      name = 'Boundary'
-    } else if (feature.hasOwnProperty('networkNodeType')) {
-      name = feature.networkNodeType
-    } else if (dataTypeList[0] == 'service_layer') {
-      name = 'Service Area'
-    } else {
-      name = dataTypeList[1].split('_').join(' ').replace(/\b\w/g, function (l) { return l.toUpperCase() })
+  getFeatureDisplayName (feature) {
+    // Get the components of the data type. Example feature._data_type = 'location', 'equipment'
+    const dataTypeComponents = (feature._data_type || feature.dataType || '').split('.')
+    const dataType = dataTypeComponents[0]
+    // Have a map of functions that will extract feature names based on the feature type
+    const dataTypeToNameExtractor = {
+      location: feature => feature.name || (feature.objectId && feature.objectId.substring(feature.objectId.length - 7)) || 'Location',
+      equipment_boundary: feature => 'Boundary',
+      networkNodeType: feature => feature.networkNodeType,
+      service_layer: feature => feature.code || feature.siteClli || 'Unnamed service area'
     }
 
-    if (feature.hasOwnProperty('code')) {
-      if (name != '') name += ': '
-      name += feature.code
-    } else if (feature.hasOwnProperty('siteClli')) {
-      if (name != '') name += ': '
-      name += feature.siteClli
+    const defaultNameExtractor = () => {
+      return dataTypeComponents[1].split('_').join(' ').replace(/\b\w/g, function (l) { return l.toUpperCase() })
     }
-
-    if (state.configuration.networkEquipment.equipments.hasOwnProperty(name)) {
-      name = state.configuration.networkEquipment.equipments[name].label
-    } else if (state.networkNodeTypesEntity.hasOwnProperty(name)) {
-      name = state.networkNodeTypesEntity[name]
-    }
-
-    return name
+    const extractor = dataTypeToNameExtractor[dataType] || defaultNameExtractor
+    return extractor(feature)
   }
 
   getBoundsCLLIs (features, state) {

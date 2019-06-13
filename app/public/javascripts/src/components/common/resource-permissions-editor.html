@@ -13,7 +13,7 @@
   </div>
   <select class="custom-select ei-input-select ei-input-select-autosize" 
       ng-model="$ctrl.newActorId">
-    <option ng-repeat="item in $ctrl.systemActors | filter: $ctrl.filterNewActorList" value="{{item.id}}" ng-bind-html="item.name"></option>
+    <option ng-repeat="item in $ctrl.systemActors | filter: $ctrl.filterNewActorList | orderBy:'name' | limitTo:10 " value="{{item.id}}" ng-bind-html="item.name"></option>
   </select>
   <div class="input-group-append">
 	  <button type="button" class="btn btn-sm btn-primary" 

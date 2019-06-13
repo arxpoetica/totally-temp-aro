@@ -91,4 +91,13 @@ exports.configure = (api, middleware) => {
       .then(jsonSuccess(response, next))
       .catch(next)
   })
+
+  api.get('/boundary/for_network_node/:planId/:networkNodeObjectId/:boundaryTypeId', (request, response, next) => {
+    const planId = request.params.planId
+    const networkNodeObjectId = request.params.networkNodeObjectId
+    const boundaryTypeId = request.params.boundaryTypeId
+    models.Boundary.getBoundaryForNetworkNode(planId, networkNodeObjectId, boundaryTypeId)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
 }

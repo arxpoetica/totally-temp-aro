@@ -9,7 +9,9 @@ const defaultStatus = {
     coverageType: 'location',
     groupKeyType: 'networkNode',
     useMarketableTechnologies: false,
-    useMaxSpeed: false
+    useMaxSpeed: false,
+    useExistingFiber: true,
+    usePlannedFiber: true
   }
 }
 
@@ -66,6 +68,22 @@ function setLimitMaxSpeed (state, limitMaxSpeed) {
     } }
 }
 
+function setExistingFiber (state, existingFiber) {
+  return { ...state,
+    initializationParams: {
+      ...state.initializationParams,
+      useExistingFiber: existingFiber
+    } }
+}
+
+function setPlannedFiber (state, plannedFiber) {
+  return { ...state,
+    initializationParams: {
+      ...state.initializationParams,
+      usePlannedFiber: plannedFiber
+    } }
+}
+
 function coverageReducer (state = defaultStatus, action) {
   switch (action.type) {
     case Actions.COVERAGE_SET_DETAILS:
@@ -94,6 +112,12 @@ function coverageReducer (state = defaultStatus, action) {
 
     case Actions.COVERAGE_SET_LIMIT_MAX_SPEED:
       return setLimitMaxSpeed(state, action.payload)
+
+    case Actions.COVERAGE_SET_EXISTING_FIBER:
+      return setExistingFiber(state, action.payload)
+
+    case Actions.COVERAGE_SET_PLANNED_FIBER:
+      return setPlannedFiber(state, action.payload)
 
     default:
       return state

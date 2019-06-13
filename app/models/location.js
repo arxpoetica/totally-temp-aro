@@ -217,7 +217,7 @@ module.exports = class Location {
             sum(entry_fee)::integer as entry_fee,
             sum(install_cost)::integer as business_install_costs,
             sum(install_cost_per_hh)::integer as household_install_costs,
-            sum(number_of_households)::integer as number_of_households,
+            sum(number_of_households)::double precision as number_of_households,
             sum(number_of_businesses)::integer as number_of_businesses,
             sum(number_of_towers)::integer as number_of_towers
           from (
@@ -251,7 +251,7 @@ module.exports = class Location {
             union
 
             select
-              location_id, 0, 0, 0, sum(households.number_of_households), 0, 0
+              location_id, 0, 0, 0, sum(households.number_of_households::double precision), 0, 0
             from
               aro.households
             where
@@ -333,7 +333,7 @@ module.exports = class Location {
 
         sql = `
           SELECT
-            ct.name, COUNT(*)::integer AS total
+            ct.name, COUNT(*)::double precision AS total
           FROM households h
           JOIN client.household_customer_types hct
             ON hct.household_id = h.id

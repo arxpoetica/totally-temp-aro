@@ -39,7 +39,15 @@ jobs:
             docker push ${IMAGE_TAG}
             docker tag ${IMAGE_TAG} ${ECR_IMAGE_TAG}
             docker push ${ECR_IMAGE_TAG}
-            python docker/publish_version.py qa-${BRANCH} app $CIRCLE_BUILD_NUM
+            if [ $CIRCLE_BRANCH == "master" ]
+              then
+                docker tag ${IMAGE_TAG} ${IMAGE_NAME}:latest
+                docker push ${IMAGE_NAME}:latest
+                docker tag ${IMAGE_TAG} ${ECR_IMAGE_NAME}:latest
+                docker push ${ECR_IMAGE_NAME}:latest
+                python docker/publish_version.py qa-${BRANCH} app $CIRCLE_BUILD_NUM
+            fi
+            
 
   deploy:
     docker:
@@ -64,6 +72,7 @@ workflows:
               only: 
                 - master
                 - Ring_UI
+                - optional_building
 
       - deploy:
           requires:

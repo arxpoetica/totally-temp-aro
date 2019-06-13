@@ -24,7 +24,11 @@ export class CoverageInitializer extends Component {
       selectedSiteAssignment: 'Incremental'
     }
   }
-
+  displayGeographies () {
+    if (this.props.activeSelectionModeId !== 'SELECTED_ALL_SERVICE_AREAS') {
+      return (<tr><td width='50%'>Selected<br /> Geographies</td><td><PlanTargetList /></td></tr>)
+    }
+  }
   render () {
     return <div>
       <table id='table-coverage-initializer' className='table table-sm table-striped sidebar-options-table'>
@@ -80,6 +84,30 @@ export class CoverageInitializer extends Component {
             </td>
           </tr>
 
+          {/* Use Existing Fiber */}
+          <tr>
+            <td>Use Existing Fiber</td>
+            <td>
+              <input id='chkUseExistingFiber'
+                type='checkbox'
+                className='checkboxfill'
+                checked={this.props.useExistingFiber}
+                onChange={event => this.props.setExistingFiber(event.target.checked)} />
+            </td>
+          </tr>
+
+          {/* Use Planned Fiber */}
+          <tr>
+            <td>Use Planned Fiber</td>
+            <td>
+              <input id='chkUsePlannedFiber'
+                type='checkbox'
+                className='checkboxfill'
+                checked={this.props.usePlannedFiber}
+                onChange={event => this.props.setPlannedFiber(event.target.checked)} />
+            </td>
+          </tr>
+
           {/* Site assignment */}
           <tr>
             <td>Site Assignment</td>
@@ -104,10 +132,9 @@ export class CoverageInitializer extends Component {
               </select>
             </td>
           </tr>
-          <tr>
-            <td>Selected Geographies</td>
-            <td><PlanTargetList /></td>
-          </tr>
+          {
+            this.displayGeographies()
+          }
         </tbody>
       </table>
 
@@ -131,6 +158,8 @@ CoverageInitializer.propTypes = {
   groupKeyType: PropTypes.string,
   useMarketableTechnologies: PropTypes.bool,
   useMaxSpeed: PropTypes.bool,
+  useExistingFiber: PropTypes.bool,
+  usePlannedFiber: PropTypes.bool,
   coverageReport: PropTypes.object
 }
 
@@ -145,6 +174,8 @@ const mapStateToProps = state => ({
   groupKeyType: state.coverage.initializationParams.groupKeyType,
   useMarketableTechnologies: state.coverage.initializationParams.useMarketableTechnologies,
   useMaxSpeed: state.coverage.initializationParams.useMaxSpeed,
+  useExistingFiber: state.coverage.initializationParams.useExistingFiber,
+  usePlannedFiber: state.coverage.initializationParams.usePlannedFiber,
   coverageReport: state.coverage.report
 })
 
@@ -153,6 +184,8 @@ const mapDispatchToProps = (dispatch) => ({
   setGroupKeyType: groupKeyType => dispatch(CoverageActions.setGroupKeyType(groupKeyType)),
   setLimitMarketableTechnology: limitMarketableTechnology => dispatch(CoverageActions.setLimitMarketableTechnology(limitMarketableTechnology)),
   setLimitMaxSpeed: limitMaxSpeed => dispatch(CoverageActions.setLimitMaxSpeed(limitMaxSpeed)),
+  setExistingFiber: existingFiber => dispatch(CoverageActions.setExistingFiber(existingFiber)),
+  setPlannedFiber: plannedFiber => dispatch(CoverageActions.setPlannedFiber(plannedFiber)),
   setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId))
 })
 

@@ -370,7 +370,8 @@
           </select>
         </td>
       </tr>
-      <tr>
+      <!-- This tr will be hided for while selecting all service areas -->
+      <tr ng-if="$ctrl.activeSelectionModeId !== $ctrl.SelectionModes.SELECTED_ALL_SERVICE_AREAS">
         <td>Selected Geographies</td>
         <td><r-plan-target-list></r-plan-target-list></td>
       </tr>
