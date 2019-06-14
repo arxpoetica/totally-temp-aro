@@ -53,6 +53,8 @@ test('When button is clicked to initialize report', () => {
       boundaryLayers={boundaryLayers}
       activeSelectionModeId={'SELECTED_AREAS'}
       initializationParams={{ generic: 'Init Params' }}
+      useExistingFiber
+      usePlannedFiber={false}
       initializeCoverageReport={mockInitializeCoverageReport} />
   )
 
@@ -66,8 +68,11 @@ test('When button is clicked to initialize report', () => {
   const expectedLocationLayers = locationLayers.filter(item => item.checked).map(item => item.plannerKey)
   expect(mockInitializeCoverageReport.mock.calls[0][4].equals(expectedLocationLayers)).toBeTruthy()
 
-  expect(mockInitializeCoverageReport.mock.calls[0][5].equals(boundaryLayers)).toBeTruthy()
-  expect(mockInitializeCoverageReport.mock.calls[0][6]).toEqual({ generic: 'Init Params' })
+  expect(mockInitializeCoverageReport.mock.calls[0][5]).toBeTruthy()
+  expect(mockInitializeCoverageReport.mock.calls[0][6]).toBeFalsy()
+
+  expect(mockInitializeCoverageReport.mock.calls[0][7].equals(boundaryLayers)).toBeTruthy()
+  expect(mockInitializeCoverageReport.mock.calls[0][8]).toEqual({ generic: 'Init Params' })
 })
 
 // -----------------------------------------------------------------------------
