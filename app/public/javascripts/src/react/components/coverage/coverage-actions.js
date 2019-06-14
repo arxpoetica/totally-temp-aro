@@ -50,7 +50,7 @@ function initializeCoverageReport (userId, planId, projectId, activeSelectionMod
   }
 }
 
-// Modify the coverage report
+// Modify the coverage reports
 function modifyCoverageReport (reportId) {
   return (dispatch, getState) => {
     AroHttp.delete(`/service/coverage/report/${reportId}`)
