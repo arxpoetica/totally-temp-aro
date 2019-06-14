@@ -424,7 +424,7 @@ class MapObjectEditorController {
     } else {
       options.push(new MenuAction(MenuActionTypes.VIEW, () => this.viewExistingFeature(feature, latLng)))
       // Note that feature.is_locked comes in as a string from the vector tiles
-      if ((feature.is_locked === 'false') && !this.state.configuration.planEditor.editExistingObjects) {
+      if (feature.is_locked === 'false') {
         options.push(new MenuAction(MenuActionTypes.EDIT, () => this.editExistingFeature(feature, latLng)))
       }
     }

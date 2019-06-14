@@ -674,10 +674,9 @@ class PlanEditorController {
           this.objectIdToOriginalAttributes[feature.objectId] = result.data.attributes
           if (result.data.hasOwnProperty('geometry')) {
             this.viewSiteBoundaryEventFeature = result.data
-            this.viewSiteBoundaryEventFeature.attributes = {
-              network_node_object_id: this.viewSiteBoundaryEventFeature.networkObjectId,
-              networkNodeType: this.viewSiteBoundaryEventFeature.networkNodeType
-            }
+            this.viewSiteBoundaryEventFeature.attributes = this.viewSiteBoundaryEventFeature.attributes || {}
+            this.viewSiteBoundaryEventFeature.attributes.network_node_object_id = this.viewSiteBoundaryEventFeature.networkObjectId
+            this.viewSiteBoundaryEventFeature.attributes.networkNodeType = this.viewSiteBoundaryEventFeature.networkNodeType
             this.viewSiteBoundaryEventFeature.isExistingObject = true
 
             // use feature's coord NOT the event's coords
