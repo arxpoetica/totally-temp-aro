@@ -39,7 +39,6 @@ export class CoverageButton extends Component {
       <button className={'btn btn-block btn-primary'} style={{ marginBottom: '10px' }}
         onClick={() => this.props.initializeCoverageReport(this.props.userId, this.props.planId, this.props.projectId, this.props.activeSelectionModeId,
           this.props.locationLayers.filter(item => item.checked).map(item => item.plannerKey),
-          this.props.useExistingFiber, this.usePlannedFiber,
           this.props.boundaryLayers, this.props.initializationParams)}>
         <i className='fa fa-bolt' /> Run
       </button>
@@ -105,8 +104,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
   modifyCoverageReport: (reportId) => dispatch(CoverageActions.modifyCoverageReport(reportId)),
-  initializeCoverageReport: (userId, planId, projectId, activeSelectionMode, locationTypes, useExistingFiber, usePlannedFiber, boundaryLayers, initializationParams) => {
-    dispatch(CoverageActions.initializeCoverageReport(userId, planId, projectId, activeSelectionMode, locationTypes, useExistingFiber, usePlannedFiber,
+  initializeCoverageReport: (userId, planId, projectId, activeSelectionMode, locationTypes, boundaryLayers, initializationParams) => {
+    dispatch(CoverageActions.initializeCoverageReport(userId, planId, projectId, activeSelectionMode, locationTypes,
       boundaryLayers, initializationParams))
   },
   setCoverageProgress: (progress) => dispatch(CoverageActions.setCoverageProgress(progress))

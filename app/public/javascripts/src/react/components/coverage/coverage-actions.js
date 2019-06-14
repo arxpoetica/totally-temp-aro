@@ -4,7 +4,7 @@ import Actions from '../../common/actions'
 import SelectionActions from '../selection/selection-actions'
 import CoverageStatusTypes from './constants'
 
-function initializeCoverageReport (userId, planId, projectId, activeSelectionMode, locationTypes, useExistingFiber, usePlannedFiber, tileLayers, initializationParams) {
+function initializeCoverageReport (userId, planId, projectId, activeSelectionMode, locationTypes, tileLayers, initializationParams) {
   return dispatch => {
     // Format the coverage report that so it can be sent over to aro-service
     var requestBody = {
@@ -14,8 +14,6 @@ function initializeCoverageReport (userId, planId, projectId, activeSelectionMod
     requestBody.coverageAnalysisRequest.projectTemplateId = projectId
     requestBody.coverageAnalysisRequest.analysisSelectionMode = activeSelectionMode
     requestBody.coverageAnalysisRequest.locationTypes = locationTypes
-    requestBody.coverageAnalysisRequest.useExistingFiber = useExistingFiber
-    requestBody.coverageAnalysisRequest.usePlannedFiber = usePlannedFiber
     if (activeSelectionMode === 'SELECTED_ANALYSIS_AREAS') {
       // If we have analysis areas selected, we can have exactly one analysis layer selected in the UI
       const visibleAnalysisLayers = tileLayers.filter(item => item.checked && (item.type === 'analysis_layer'))
