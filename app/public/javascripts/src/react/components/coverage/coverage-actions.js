@@ -14,6 +14,7 @@ function initializeCoverageReport (userId, planId, projectId, activeSelectionMod
     requestBody.coverageAnalysisRequest.projectTemplateId = projectId
     requestBody.coverageAnalysisRequest.analysisSelectionMode = activeSelectionMode
     requestBody.coverageAnalysisRequest.locationTypes = locationTypes
+
     if (activeSelectionMode === 'SELECTED_ANALYSIS_AREAS') {
       // If we have analysis areas selected, we can have exactly one analysis layer selected in the UI
       const visibleAnalysisLayers = tileLayers.filter(item => item.checked && (item.type === 'analysis_layer'))
@@ -58,7 +59,9 @@ function modifyCoverageReport (reportId) {
           coverageType: 'location',
           groupKeyType: 'networkNode',
           useMarketableTechnologies: false,
-          useMaxSpeed: false
+          useMaxSpeed: false,
+          useExistingFiber: true,
+          usePlannedFiber: true
         }
         var keys = Object.keys(initializationParams)
         keys.forEach((key) => {

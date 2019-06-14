@@ -12,7 +12,6 @@ export class CoverageButton extends Component {
     super(props)
     this.unsubscriber = socketManager.subscribe('PROGRESS_MESSAGE_DATA', (progressData) => {
       if (progressData.data.processType === 'coverage') {
-        console.log(progressData)
         this.props.setCoverageProgress(progressData.data)
       }
     })
