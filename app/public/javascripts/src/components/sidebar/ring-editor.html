@@ -9,24 +9,24 @@
 </style>
 
 <div class="edit-ring-container">
-
+  <!--
   <div class="analysis-type">
     <h4 style="text-align: center; margin-top: 20px;">Ring Edit</h4>
     <div>button here</div>
   </div>
-
+-->
   <accordion style="position: relative; flex: 1 1 auto;" toggle-expanded-panel="$ctrl.state.activeEditRingsPanel">
 
     <!-- Ring Edit -->
-    <accordion-panel-title title="'Input'" panel-id="$ctrl.state.EditRingsPanels.EDIT_RINGS"></accordion-panel-title>
+    <accordion-panel-title title="'Ring Edit'" panel-id="$ctrl.state.EditRingsPanels.EDIT_RINGS"></accordion-panel-title>
     <accordion-panel-contents panel-id="$ctrl.state.EditRingsPanels.EDIT_RINGS">
       <r-ring-edit ng-if="$ctrl.state.activeEditRingsPanel === $ctrl.state.EditRingsPanels.EDIT_RINGS" />
     </accordion-panel-contents>
-
+    <!--
     <accordion-panel-title id="output-bar" title="'Output'" panel-id="$ctrl.state.EditRingsPanels.OUTPUT"></accordion-panel-title>
     <accordion-panel-contents panel-id="$ctrl.state.EditRingsPanels.OUTPUT">
       Ring output here
     </accordion-panel-contents>
-
+    -->
   </accordion>
 </div>

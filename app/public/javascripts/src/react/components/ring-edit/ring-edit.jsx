@@ -24,7 +24,7 @@ export class RingEdit extends Component {
     this.drawRings()
     return <div>
       <div className='m-2 p-2'>
-        <button id='btnRingDoathing'
+        <button id='btnRingNewRing'
           className='btn btn-sm btn-light'
           onClick={() => this.requestAddNewRing()}>
           <i className='fas fa-pencil-alt' /> Add Ring
