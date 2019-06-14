@@ -7,6 +7,8 @@ import uuidv4 from 'uuid/v4'
 // import Utilities from '../../../components/common/utilities'
 import AroHttp from '../../common/aro-http'
 import Ring from '../../common/ring.js'
+import ReportsDownloadModal from '../optimization/reports/reports-download-modal.jsx'
+import ReportActions from '../optimization/reports/reports-actions'
 import './ring-edit.css'
 
 
@@ -46,6 +48,10 @@ export class RingEdit extends Component {
                 onClick={() => this.requestSubNet()}>
           <i className="fa fa-bolt"></i> Run
         </button>
+      </div>
+      <div className='m-2 p-2'>
+        <button className='btn btn-primary pull-left' onClick={() => this.props.showOrHideReportModal(true)}>Reports</button>
+        <ReportsDownloadModal reportTypes={['RING']} />
       </div>
     </div>
   }
@@ -334,7 +340,8 @@ const mapDispatchToProps = dispatch => ({
   removeRing: (ringId, planId, userId) => dispatch(ringActions.removeRing(ringId, planId, userId)),
   removeNode: (ring, featureId, planId, userId) => dispatch( ringActions.removeNode(ring, featureId, planId, userId) ), 
   saveRingChangesToServer: (ring, planId, userId) => dispatch(ringActions.saveRingChangesToServer(ring, planId, userId)), 
-  renameRing: (ring, name, planId, userId) => dispatch(ringActions.renameRing(ring, name, planId, userId))
+  renameRing: (ring, name, planId, userId) => dispatch(ringActions.renameRing(ring, name, planId, userId)), 
+  showOrHideReportModal: showReportModal => dispatch(ReportActions.showOrHideReportModal(showReportModal))
 })
 
 const RingEditComponent = wrapComponentWithProvider(reduxStore, RingEdit, mapStateToProps, mapDispatchToProps)
