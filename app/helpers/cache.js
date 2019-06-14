@@ -48,7 +48,6 @@ function loadConfiguration() {
     'locationDetailProperties',
     'perspectives',
     'optimizationOptions',
-    'planEditor',
     'resourceEditors'
   ]
 
