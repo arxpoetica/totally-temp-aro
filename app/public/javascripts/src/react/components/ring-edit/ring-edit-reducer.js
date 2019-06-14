@@ -1,11 +1,34 @@
 import Actions from '../../common/actions'
 import FeatureSets from '../../common/featureSets'
 import Ring from '../../common/ring'
+import CoverageStatusTypes from './constants'
 
 const defaultState = {
-
   rings: {},
-  selectedRingId: null
+  selectedRingId: null, 
+  analysis: {
+    status: CoverageStatusTypes.UNINITIALIZED,
+    progress: 0, 
+    report: null
+  }
+}
+
+function setAnalysisStatus (state, status) {
+  return { ...state, 
+    analysis: { ...state.analysis, status: status}
+  }
+}
+
+function setAnalysisProgress (state, progress) {
+  return { ...state, 
+    analysis: { ...state.analysis, progress: progress}
+  }
+}
+
+function setAnalysisReport (state, report) {
+  return { ...state, 
+    analysis: { ...state.analysis, report: report}
+  }
 }
 
 function setSelectedRingId (state, ringId) {
@@ -52,6 +75,12 @@ function updateRing (state, ring) {
 
 function ringEditReducer (state = defaultState, action) {
   switch (action.type) {
+    case Actions.RING_SET_ANALYSIS_STATUS:
+      return setAnalysisStatus(state, action.payload)
+    case Actions.RING_SET_ANALYSIS_PROGRESS:
+      return setAnalysisProgress(state, action.payload)
+    case Actions.RING_SET_ANALYSIS_REPORT:
+      return setAnalysisReport(state, action.payload)
     case Actions.RING_SET_SELECTED_RING_ID:
       return setSelectedRingId(state, action.payload)
     case Actions.RING_ADD_RINGS:

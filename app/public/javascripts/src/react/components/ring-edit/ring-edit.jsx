@@ -11,6 +11,7 @@ import ReportsDownloadModal from '../optimization/reports/reports-download-modal
 import ReportActions from '../optimization/reports/reports-actions'
 import './ring-edit.css'
 
+import socketManager from '../../../react/common/socket-manager'
 
 export class RingEdit extends Component {
   
@@ -18,6 +19,16 @@ export class RingEdit extends Component {
     super(props)
     this.createdMapObjects = []
     this.mapObjectListeners = []
+
+    this.unsubscriber = socketManager.subscribe('PROGRESS_MESSAGE_DATA', (progressData) => {
+      console.log(progressData)
+      /*
+      if (progressData.data.processType === 'coverage') {
+        console.log(progressData)
+        this.props.setCoverageProgress(progressData.data)
+      }
+      */
+    })
   }
   
   render () {
