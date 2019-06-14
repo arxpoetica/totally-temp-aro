@@ -314,7 +314,7 @@ class MapObjectEditorController {
             if (validFeature) {
               var feature = result
               menuItemsById[feature.objectId] = true
-              var name = this.utils.getFeatureDisplayName(feature)
+              var name = this.utils.getFeatureDisplayName(feature, this.state)
               var thisFeatureMenuPromise = this.getEquipmentContextMenuOptions(feature, latLng)
                 .then(options => menuItems.push(new MenuItem(featureType, name, options, feature)))
 
@@ -382,7 +382,7 @@ class MapObjectEditorController {
                   options.push(new MenuAction(MenuActionTypes.EDIT, () => this.viewExistingFeature(result, latLng)))
                 }
 
-                var name = this.utils.getFeatureDisplayName(result)
+                var name = this.utils.getFeatureDisplayName(result, this.state)
 
                 menuItemsById[result.objectId] = options
                 menuItems.push(new MenuItem(MenuItemTypes.SERVICE_AREA, name, options, feature))
@@ -420,17 +420,11 @@ class MapObjectEditorController {
       // it's on the edit layer / in the transaction
       feature = this.createdMapObjects[feature.objectId].feature
       options.push(new MenuAction(MenuActionTypes.SELECT, () => this.selectProposedFeature(feature.objectId)))
-      if (featureType === MenuItemTypes.EQUIPMENT) {
-        if (this.isBoundaryCreationAllowed({ 'mapObject': feature })) {
-          options.push(new MenuAction(MenuActionTypes.ADD_BOUNDARY, () => this.startDrawingBoundaryForId(feature.objectId)))
-        }
-      } else if (featureType === MenuItemTypes.BOUNDARY) {
-      // options.push( this.contextMenuService.makeItemOption('Edit Boundary', 'fa-pencil', () => {this.editBoundary(result.objectId)}) )
-      }
       options.push(new MenuAction(MenuActionTypes.DELETE, () => this.deleteObjectWithId(feature.objectId)))
     } else {
       options.push(new MenuAction(MenuActionTypes.VIEW, () => this.viewExistingFeature(feature, latLng)))
-      if (feature.deployment_type !== 1 && !this.state.configuration.planEditor.editExistingObjects) {
+      // Note that feature.is_locked comes in as a string from the vector tiles
+      if ((feature.is_locked === 'false') && !this.state.configuration.planEditor.editExistingObjects) {
         options.push(new MenuAction(MenuActionTypes.EDIT, () => this.editExistingFeature(feature, latLng)))
       }
     }
@@ -440,16 +434,16 @@ class MapObjectEditorController {
       const planId = this.state.plan.id
       const selectedBoundaryTypeId = this.state.selectedBoundaryType.id
       menuPromises.push(
-        this.$http.get(`/boundary/for_network_node/${planId}/${feature.object_id}/${selectedBoundaryTypeId}`)
+        this.$http.get(`/boundary/for_network_node/${planId}/${feature.objectId}/${selectedBoundaryTypeId}`)
           .then(boundaryResult => {
-            var allowAddBoundary = false
+            var allowAddBoundary = this.isBoundaryCreationAllowed({ 'mapObject': feature })
             if (boundaryResult.data.length === 0) {
               // No results for this combination of planid, object_id, selectedBoundaryTypeId. Allow users to add boundary
-              allowAddBoundary = true
+              allowAddBoundary = allowAddBoundary && true
             } else {
               // We have a boundary for this combination of inputs. Allow editing only if it is not locked
               const boundary = boundaryResult.data[0]
-              allowAddBoundary = (boundary.deployment_type !== 1)
+              allowAddBoundary = allowAddBoundary && !boundary.is_locked
             }
             if (allowAddBoundary) {
               options.push(new MenuAction(MenuActionTypes.ADD_BOUNDARY, () => {
