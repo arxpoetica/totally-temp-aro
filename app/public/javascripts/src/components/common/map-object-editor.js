@@ -430,21 +430,15 @@ class MapObjectEditorController {
     }
 
     var menuPromises = [Promise.resolve()]
-    if (featureType === MenuItemTypes.EQUIPMENT) {
+    if (featureType === MenuItemTypes.EQUIPMENT && this.state.showSiteBoundary) {
+      // Site boundaries must be visible for the user to add boundaries to a RT
       const planId = this.state.plan.id
       const selectedBoundaryTypeId = this.state.selectedBoundaryType.id
       menuPromises.push(
         this.$http.get(`/boundary/for_network_node/${planId}/${feature.objectId}/${selectedBoundaryTypeId}`)
           .then(boundaryResult => {
-            var allowAddBoundary = this.isBoundaryCreationAllowed({ 'mapObject': feature })
-            if (boundaryResult.data.length === 0) {
-              // No results for this combination of planid, object_id, selectedBoundaryTypeId. Allow users to add boundary
-              allowAddBoundary = allowAddBoundary && true
-            } else {
-              // We have a boundary for this combination of inputs. Allow editing only if it is not locked
-              const boundary = boundaryResult.data[0]
-              allowAddBoundary = allowAddBoundary && !boundary.is_locked
-            }
+            var allowAddBoundary = this.isBoundaryCreationAllowed({ 'mapObject': feature }) &&
+                                   (boundaryResult.data.length === 0) // No results for this combination of planid, object_id, selectedBoundaryTypeId. Allow users to add boundary
             if (allowAddBoundary) {
               options.push(new MenuAction(MenuActionTypes.ADD_BOUNDARY, () => {
                 // Create a fake, ephemeral "map object" to fool the downstream functions to start adding or
