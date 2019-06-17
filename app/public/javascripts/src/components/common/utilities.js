@@ -25,17 +25,6 @@ class Utilities {
     this.$document[0].body.removeChild(a)
   }
 
-  blinkMarker () {
-    setTimeout(function () {
-      var blink = this.document.createElement('div')
-      blink.className = 'blink'
-      this.document.querySelector('#map-canvas').appendChild(blink)
-      setTimeout(function () {
-        blink.remove()
-      }, 5000)
-    }, 1000)
-  }
-
   // Get a list of UUIDs from the server
   getUUIDsFromServer () {
     const numUUIDsToFetch = 20
