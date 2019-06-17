@@ -8,9 +8,10 @@ import EquipmentFeature from '../../../service-typegen/dist/EquipmentFeature'
 import EquipmentBoundaryFeature from '../../../service-typegen/dist/EquipmentBoundaryFeature'
 // import MarketableEquipment from '../../../service-typegen/dist/MarketableEquipment'
 import TileUtilities from '../../tiles/tile-utilities.js'
+import PlanEditorActions from '../../../react/components/plan-editor/plan-editor-actions'
 
 class PlanEditorController {
-  constructor ($timeout, $http, $element, $filter, state, Utils, tileDataService, tracker) {
+  constructor ($timeout, $http, $element, $filter, $ngRedux, state, Utils, tileDataService, tracker) {
     this.$timeout = $timeout
     this.$http = $http
     this.$element = $element
@@ -32,7 +33,6 @@ class PlanEditorController {
     this.objectIdsToHide = new Set()
     this.computedBoundaries = new Set() // Object ids for boundaries that we have computed
     this.subnetMapObjects = {}
-    this.currentTransaction = null
     this.lastSelectedEquipmentType = 'Generic ADSL'
     this.lastUsedBoundaryDistance = 10000
     this.Constants = Constants
@@ -73,6 +73,7 @@ class PlanEditorController {
     })
 
     this.coverageOutput = {}
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
   }
 
   registerObjectDeleteCallback (deleteObjectWithIdCallback) {
@@ -104,77 +105,73 @@ class PlanEditorController {
     this.mapRef = window[this.mapGlobalObjectName]
 
     // Select the first transaction in the list
-    this.resumeOrCreateTransaction()
+    this.resumeOrCreateTransaction(this.planId, this.userId)
   }
 
-  resumeOrCreateTransaction () {
+  onCurrentTransactionChanged () {
     this.removeMapObjects && this.removeMapObjects()
-    this.currentTransaction = null
     var transactionFeatures = []
     // See if we have an existing transaction for the currently selected location library
     // Moved resume or create transaction to state so can get current transaction is accessed by other components
-    this.state.resumeOrCreateTransaction().then((result) => {
-      this.currentTransaction = result.data
-      return this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/transaction-features/equipment`)
-    }).then((result) => {
-      // We have a list of features. Replace them in the objectIdToProperties map.
-      this.objectIdToProperties = {}
-      this.objectIdToMapObject = {}
-      this.equipmentIdToBoundaryId = {}
-      this.boundaryIdToEquipmentId = {}
-      // Filter out all non-deleted features - we do not want to create map objects for deleted features.
-      transactionFeatures = result.data
-        .filter((item) => item.crudAction !== 'delete')
-        .map((item) => item.feature)
-      // Save the iconUrls in the list of objects returned from aro-service
-      transactionFeatures.forEach((feature) => feature.iconUrl = this.state.configuration.networkEquipment.equipments[feature.networkNodeType].iconUrl)
-      // Important: Create the map objects first. The events raised by the map object editor will
-      // populate the objectIdToMapObject object when the map objects are created
-      this.createMapObjects && this.createMapObjects(transactionFeatures)
-      // We now have objectIdToMapObject populated.
-      transactionFeatures.forEach((feature) => {
-        const attributes = feature.attributes
-        var networkNodeEquipment = AroFeatureFactory.createObject(feature).networkNodeEquipment
-        const properties = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName, feature.networkNodeType,
-          attributes.selectedEquipmentType, networkNodeEquipment, feature.deploymentType)
-        this.objectIdToProperties[feature.objectId] = properties
-        this.objectIdToOriginalAttributes[feature.objectId] = attributes
+    return this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/transaction-features/equipment`)
+      .then((result) => {
+        // We have a list of features. Replace them in the objectIdToProperties map.
+        this.objectIdToProperties = {}
+        this.objectIdToMapObject = {}
+        this.equipmentIdToBoundaryId = {}
+        this.boundaryIdToEquipmentId = {}
+        // Filter out all non-deleted features - we do not want to create map objects for deleted features.
+        transactionFeatures = result.data
+          .filter((item) => item.crudAction !== 'delete')
+          .map((item) => item.feature)
+        // Save the iconUrls in the list of objects returned from aro-service
+        transactionFeatures.forEach((feature) => { feature.iconUrl = this.state.configuration.networkEquipment.equipments[feature.networkNodeType].iconUrl })
+        // Important: Create the map objects first. The events raised by the map object editor will
+        // populate the objectIdToMapObject object when the map objects are created
+        this.createMapObjects && this.createMapObjects(transactionFeatures)
+        // We now have objectIdToMapObject populated.
+        transactionFeatures.forEach((feature) => {
+          const attributes = feature.attributes
+          var networkNodeEquipment = AroFeatureFactory.createObject(feature).networkNodeEquipment
+          const properties = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName, feature.networkNodeType,
+            attributes.selectedEquipmentType, networkNodeEquipment, feature.deploymentType)
+          this.objectIdToProperties[feature.objectId] = properties
+        })
+        transactionFeatures.forEach((feature) => {
+          this.getViewObjectSBTypes(feature.objectId)
+        })
+        return this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/transaction-features/equipment_boundary`)
+      }).then((result) => {
+        // Save the properties for the boundary
+        result.data.forEach((item) => {
+          const attributes = item.feature.attributes
+          const properties = new BoundaryProperties(+attributes.boundary_type_id, attributes.selected_site_move_update,
+            attributes.selected_site_boundary_generation,
+            attributes.spatialEdgeType, attributes.directed, attributes.network_node_type, item.feature.deploymentType)
+          this.objectIdToProperties[item.feature.objectId] = properties
+          this.objectIdToOriginalAttributes[item.feature.objectId] = attributes
+        })
+        // Save the equipment and boundary ID associations
+        result.data.forEach((item) => {
+          var equipmentId = item.feature.attributes.network_node_object_id
+          var boundaryId = item.feature.objectId
+          this.equipmentIdToBoundaryId[equipmentId] = boundaryId
+          this.boundaryIdToEquipmentId[boundaryId] = equipmentId
+        })
+        this.updateObjectIdsToHide()
+        // We have a list of equipment boundaries. Populate them in the map object
+        // Filter out all non-deleted features - we do not want to create map objects for deleted features.
+        var features = result.data
+          .filter((item) => item.crudAction !== 'delete')
+          .map((item) => item.feature)
+        this.createMapObjects && this.createMapObjects(features)
+        // If we have at least one transaction feature, do a recalculate subnet on it. Pass in all connected COs in the transaction.
+        if (transactionFeatures.length > 0) {
+          var allCentralOfficeIds = new Set()
+          transactionFeatures.forEach((item) => !!item.subnetId && allCentralOfficeIds.add(item.subnetId))
+          this.recalculateSubnetForEquipmentChange(transactionFeatures[0], Array.from(allCentralOfficeIds))
+        }
       })
-      transactionFeatures.forEach((feature) => {
-        this.getViewObjectSBTypes(feature.objectId)
-      })
-      return this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/transaction-features/equipment_boundary`)
-    }).then((result) => {
-      // Save the properties for the boundary
-      result.data.forEach((item) => {
-        const attributes = item.feature.attributes
-        const properties = new BoundaryProperties(+attributes.boundary_type_id, attributes.selected_site_move_update,
-          attributes.selected_site_boundary_generation,
-          attributes.spatialEdgeType, attributes.directed, attributes.network_node_type, item.feature.deploymentType)
-        this.objectIdToProperties[item.feature.objectId] = properties
-        this.objectIdToOriginalAttributes[item.feature.objectId] = attributes
-      })
-      // Save the equipment and boundary ID associations
-      result.data.forEach((item) => {
-        var equipmentId = item.feature.attributes.network_node_object_id
-        var boundaryId = item.feature.objectId
-        this.equipmentIdToBoundaryId[equipmentId] = boundaryId
-        this.boundaryIdToEquipmentId[boundaryId] = equipmentId
-      })
-      this.updateObjectIdsToHide()
-      // We have a list of equipment boundaries. Populate them in the map object
-      // Filter out all non-deleted features - we do not want to create map objects for deleted features.
-      var features = result.data
-        .filter((item) => item.crudAction !== 'delete')
-        .map((item) => item.feature)
-      this.createMapObjects && this.createMapObjects(features)
-      // If we have at least one transaction feature, do a recalculate subnet on it. Pass in all connected COs in the transaction.
-      if (transactionFeatures.length > 0) {
-        var allCentralOfficeIds = new Set()
-        transactionFeatures.forEach((item) => !!item.subnetId && allCentralOfficeIds.add(item.subnetId))
-        this.recalculateSubnetForEquipmentChange(transactionFeatures[0], Array.from(allCentralOfficeIds))
-      }
-    })
       .catch((err) => {
       // Log the error, then get out of "plan edit" mode.
         this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
@@ -194,7 +191,7 @@ class PlanEditorController {
       this.tileDataService.removeFeatureToExclude(objectId)
     })
 
-    this.currentTransaction = null
+    // this.currentTransaction = null
     this.state.loadModifiedFeatures(planId)
     this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
     this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO
@@ -369,23 +366,6 @@ class PlanEditorController {
   }
 
   // ---
-
-  commitTransaction () {
-    if (!this.currentTransaction) {
-      console.error('No current transaction. We should never be in this state. Aborting commit...')
-    }
-
-    this.tracker.trackEvent(this.tracker.CATEGORIES.COMMIT_PLAN_TRANSACTION, this.tracker.ACTIONS.CLICK, 'TransactionID', this.currentTransaction.id)
-    this.$http.put(`/service/plan-transactions/${this.currentTransaction.id}`)
-      .then(() => {
-      // Committing will close the transaction. To keep modifying, open a new transaction
-        this.exitPlanEditMode()
-      })
-      .catch((err) => {
-        console.error(err)
-        this.exitPlanEditMode()
-      })
-  }
 
   discardTransaction () {
     swal({
@@ -864,7 +844,7 @@ class PlanEditorController {
   }
 
   handleSelectedObjectChanged (mapObject) {
-    if (this.currentTransaction == null) return
+    if (this.currentTransaction === null) return
     if (mapObject != null) {
       this.updateSelectedState()
       this.isEditFeatureProps = true
@@ -1241,12 +1221,42 @@ class PlanEditorController {
   $onDestroy () {
     // Useful for cases where the boundary is still generating, but the component has been destroyed. We do not want to create map objects in that case.
     this.isComponentDestroyed = true
-
     this.clearAllSubnetMapObjects()
+    this.unsubscribeRedux()
+  }
+
+  mapStateToThis (reduxState) {
+    return {
+      planId: reduxState.plan.activePlan.id,
+      currentTransaction: reduxState.planEditor.transaction,
+      userId: reduxState.user.loggedInUser.id
+    }
+  }
+
+  mapDispatchToTarget (dispatch) {
+    return {
+      commitTransaction: transactionId => dispatch(PlanEditorActions.commitTransaction(transactionId)),
+      resumeOrCreateTransaction: (planId, userId) => dispatch(PlanEditorActions.resumeOrCreateTransaction(planId, userId))
+    }
+  }
+
+  mergeToTarget (nextState, actions) {
+    const oldTransaction = this.currentTransaction
+    // merge state and actions onto controller
+    Object.assign(this, nextState)
+    Object.assign(this, actions)
+
+    if (oldTransaction !== nextState.transaction) {
+      if (nextState.transaction) {
+        this.onCurrentTransactionChanged() // A new transaction was created
+      } else {
+        this.exitPlanEditMode() // The user did a commit or discard on the current transaction
+      }
+    }
   }
 }
 
-PlanEditorController.$inject = ['$timeout', '$http', '$element', '$filter', 'state', 'Utils', 'tileDataService', 'tracker']
+PlanEditorController.$inject = ['$timeout', '$http', '$element', '$filter', '$ngRedux', 'state', 'Utils', 'tileDataService', 'tracker']
 
 let planEditor = {
   templateUrl: '/components/sidebar/plan-editor/plan-editor.html',
