@@ -1,6 +1,7 @@
 import Actions from '../../common/actions'
 
 const defaultState = {
+  isPlanEditorActive: false,
   transaction: null,
   features: {
     equipments: [],
@@ -10,6 +11,7 @@ const defaultState = {
 
 function setTransaction (state, transaction) {
   return { ...state,
+    isPlanEditorActive: true,
     transaction: transaction
   }
 }

@@ -365,34 +365,6 @@ class PlanEditorController {
     return Object.keys(obj)
   }
 
-  // ---
-
-  discardTransaction () {
-    swal({
-      title: 'Discard transaction?',
-      text: `Are you sure you want to discard transaction with ID ${this.currentTransaction.id}`,
-      type: 'warning',
-      confirmButtonColor: '#DD6B55',
-      confirmButtonText: 'Yes, discard',
-      cancelButtonText: 'No',
-      showCancelButton: true,
-      closeOnConfirm: true
-    }, (deleteTransaction) => {
-      if (deleteTransaction) {
-        // The user has confirmed that the transaction should be deleted
-        this.tracker.trackEvent(this.tracker.CATEGORIES.DISCARD_PLAN_TRANSACTION, this.tracker.ACTIONS.CLICK, 'TransactionID', this.currentTransaction.id)
-        this.$http.delete(`/service/plan-transactions/transaction/${this.currentTransaction.id}`)
-          .then((result) => {
-            this.exitPlanEditMode()
-          })
-          .catch((err) => {
-            console.error(err)
-            this.exitPlanEditMode()
-          })
-      }
-    })
-  }
-
   // Marks the properties of the selected equipment as dirty (changed).
   markSelectedEquipmentPropertiesDirty () {
     if (this.selectedMapObject) {
@@ -1229,6 +1201,7 @@ class PlanEditorController {
     return {
       planId: reduxState.plan.activePlan.id,
       currentTransaction: reduxState.planEditor.transaction,
+      isPlanEditorActive: reduxState.planEditor.isPlanEditorActive,
       userId: reduxState.user.loggedInUser.id
     }
   }
@@ -1236,6 +1209,7 @@ class PlanEditorController {
   mapDispatchToTarget (dispatch) {
     return {
       commitTransaction: transactionId => dispatch(PlanEditorActions.commitTransaction(transactionId)),
+      discardTransaction: transactionId => dispatch(PlanEditorActions.discardTransaction(transactionId)),
       resumeOrCreateTransaction: (planId, userId) => dispatch(PlanEditorActions.resumeOrCreateTransaction(planId, userId))
     }
   }
@@ -1246,12 +1220,13 @@ class PlanEditorController {
     Object.assign(this, nextState)
     Object.assign(this, actions)
 
-    if (oldTransaction !== nextState.transaction) {
-      if (nextState.transaction) {
-        this.onCurrentTransactionChanged() // A new transaction was created
-      } else {
-        this.exitPlanEditMode() // The user did a commit or discard on the current transaction
-      }
+    // Why so complicated? Because in the first render, isPlanEditorActive will be false and we will exit plan edit mode.
+    // So we only exit plan edit mode if isPlanEditorActive === false AND we have an older transaction. All this because
+    // the plan editor (this component) closes itself after a commit/discard. Let it be for now, as this will move to React anyways.
+    if (!nextState.isPlanEditorActive && oldTransaction) {
+      this.exitPlanEditMode() // The user did a commit or discard on the current transaction
+    } else if ((oldTransaction !== nextState.currentTransaction) && nextState.currentTransaction) {
+      this.onCurrentTransactionChanged() // A new transaction was created
     }
   }
 }

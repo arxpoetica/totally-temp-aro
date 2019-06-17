@@ -29,7 +29,23 @@ function commitTransaction (transactionId) {
   }
 }
 
+function discardTransaction (transactionId) {
+  return dispatch => {
+    TransactionManager.discardTransaction(transactionId)
+      .then(res => dispatch({
+        type: Actions.PLAN_EDITOR_CLEAR_TRANSACTION
+      }))
+      .catch(err => {
+        console.error(err)
+        dispatch({
+          type: Actions.PLAN_EDITOR_CLEAR_TRANSACTION
+        })
+      })
+  }
+}
+
 export default {
-  resumeOrCreateTransaction,
-  commitTransaction
+  commitTransaction,
+  discardTransaction,
+  resumeOrCreateTransaction
 }
