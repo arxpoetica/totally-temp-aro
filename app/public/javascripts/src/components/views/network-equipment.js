@@ -21,7 +21,7 @@ const getCablesArray = createSelector([getAllNetworkEquipmentLayers], networkEqu
 })
 
 class NetworkEquipmentController {
-  constructor($rootScope, $http, $location, $ngRedux, map_tools, MapLayer, $timeout, state) {
+  constructor($rootScope, $http, $location, $ngRedux, map_tools, state) {
     this.map_tools = map_tools
     this.state = state
     this.currentUser = state.loggedInUser
@@ -327,7 +327,7 @@ class NetworkEquipmentController {
   }
 }
 
-NetworkEquipmentController.$inject = ['$rootScope', '$http', '$location', '$ngRedux', 'map_tools', 'MapLayer', '$timeout', 'state']
+NetworkEquipmentController.$inject = ['$rootScope', '$http', '$location', '$ngRedux', 'map_tools', 'state']
 
 let networkEquipment = {
   templateUrl: '/components/views/network-equipment.html',

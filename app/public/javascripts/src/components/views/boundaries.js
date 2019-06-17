@@ -8,10 +8,9 @@ const getAllBoundaryLayers = state => state.mapLayers.boundary
 const getBoundaryLayersList = createSelector([getAllBoundaryLayers], (boundaryLayer) => boundaryLayer.toJS())
 
 class BoundariesController {
-  constructor ($rootScope, $http, $ngRedux, state, map_tools, regions) {
+  constructor ($rootScope, $http, $ngRedux, state, map_tools) {
     this.$http = $http
     this.state = state
-    this.regions = regions
     this.map_tools = map_tools
 
     // Creates map layers based on selection in the UI
@@ -215,7 +214,7 @@ class BoundariesController {
   }
 }
 
-BoundariesController.$inject = ['$rootScope', '$http', '$ngRedux', 'state', 'map_tools', 'regions']
+BoundariesController.$inject = ['$rootScope', '$http', '$ngRedux', 'state', 'map_tools']
 
 let boundaries = {
   templateUrl: '/components/views/boundaries.html',
