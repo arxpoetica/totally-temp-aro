@@ -130,13 +130,17 @@ class PlanEditorController {
         // populate the objectIdToMapObject object when the map objects are created
         this.createMapObjects && this.createMapObjects(transactionFeatures)
         // We now have objectIdToMapObject populated.
+        var typedEquipmentNodes = []
         transactionFeatures.forEach((feature) => {
           const attributes = feature.attributes
-          var networkNodeEquipment = AroFeatureFactory.createObject(feature).networkNodeEquipment
+          const typedEquipmentNode = AroFeatureFactory.createObject(feature)
+          var networkNodeEquipment = typedEquipmentNode.networkNodeEquipment
+          typedEquipmentNodes.push(typedEquipmentNode)
           const properties = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName, feature.networkNodeType,
             attributes.selectedEquipmentType, networkNodeEquipment, feature.deploymentType)
           this.objectIdToProperties[feature.objectId] = properties
         })
+        this.addEquipmentNodes(typedEquipmentNodes)
         transactionFeatures.forEach((feature) => {
           this.getViewObjectSBTypes(feature.objectId)
         })
@@ -711,6 +715,7 @@ class PlanEditorController {
             var attributes = result.data.attributes
             // console.log(result.data)
             const equipmentFeature = AroFeatureFactory.createObject(result.data)
+            this.addEquipmentNodes([equipmentFeature])
             var networkNodeEquipment = equipmentFeature.networkNodeEquipment
 
             var equipmentProperties = new EquipmentProperties(networkNodeEquipment.siteInfo.siteClli, networkNodeEquipment.siteInfo.siteName,
@@ -749,7 +754,10 @@ class PlanEditorController {
           .catch((err) => console.error(err))
       } else {
         // nope it's new
-        var blankNetworkNodeEquipment = AroFeatureFactory.createObject({ dataType: 'equipment' }).networkNodeEquipment
+        const equipmentNode = AroFeatureFactory.createObject({ dataType: 'equipment' })
+        equipmentNode.objectId = mapObject.objectId
+        this.addEquipmentNodes([equipmentNode])
+        var blankNetworkNodeEquipment = equipmentNode.networkNodeEquipment
         this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties('', '', feature.networkNodeType, this.lastSelectedEquipmentType, blankNetworkNodeEquipment, 'PLANNED')
         var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
         this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
@@ -1194,6 +1202,7 @@ class PlanEditorController {
     // Useful for cases where the boundary is still generating, but the component has been destroyed. We do not want to create map objects in that case.
     this.isComponentDestroyed = true
     this.clearAllSubnetMapObjects()
+    this.clearTransaction()
     this.unsubscribeRedux()
   }
 
@@ -1208,9 +1217,11 @@ class PlanEditorController {
 
   mapDispatchToTarget (dispatch) {
     return {
+      clearTransaction: () => dispatch(PlanEditorActions.clearTransaction()),
       commitTransaction: transactionId => dispatch(PlanEditorActions.commitTransaction(transactionId)),
       discardTransaction: transactionId => dispatch(PlanEditorActions.discardTransaction(transactionId)),
-      resumeOrCreateTransaction: (planId, userId) => dispatch(PlanEditorActions.resumeOrCreateTransaction(planId, userId))
+      resumeOrCreateTransaction: (planId, userId) => dispatch(PlanEditorActions.resumeOrCreateTransaction(planId, userId)),
+      addEquipmentNodes: equipmentNodes => dispatch(PlanEditorActions.addEquipmentNodes(equipmentNodes))
     }
   }
 

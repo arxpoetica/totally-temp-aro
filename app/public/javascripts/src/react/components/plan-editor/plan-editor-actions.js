@@ -14,6 +14,12 @@ function resumeOrCreateTransaction (planId, userId) {
   }
 }
 
+function clearTransaction () {
+  return {
+    type: Actions.PLAN_EDITOR_CLEAR_TRANSACTION
+  }
+}
+
 function commitTransaction (transactionId) {
   return dispatch => {
     AroHttp.put(`/service/plan-transactions/${transactionId}`)
@@ -44,8 +50,25 @@ function discardTransaction (transactionId) {
   }
 }
 
+function addEquipmentNodes (equipmentNodes) {
+  return {
+    type: Actions.PLAN_EDITOR_ADD_EQUIPMENT_NODES,
+    payload: equipmentNodes
+  }
+}
+
+function removeEquipmentNode (objectId) {
+  return {
+    type: Actions.PLAN_EDITOR_REMOVE_EQUIPMENT_NODE,
+    payload: objectId
+  }
+}
+
 export default {
   commitTransaction,
+  clearTransaction,
   discardTransaction,
-  resumeOrCreateTransaction
+  resumeOrCreateTransaction,
+  addEquipmentNodes,
+  removeEquipmentNode
 }
