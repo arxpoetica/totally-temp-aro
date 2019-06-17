@@ -29,17 +29,6 @@ html, body {
   right: 0px;
 }
 
-/* #aro-header {
-  background-color: white;
-  box-shadow: 0px 3px 15px #888888;
-  z-index: 1; This is needed to show the "box-shadow" on top of the google map
-  position:absolute;
-  top: 50px;
-  left: 0px;
-  height: 50px;
-  right: 0px;
-} */
-
 #map-canvas {
   height: 100%;
   width: 100%;
@@ -72,11 +61,6 @@ html, body {
   top: 10px;
   padding-left: 10px;
   height: 100%;
-}
-
-.map-tools-vertical-align {
-  position: relative;
-  top: 65px;
 }
 
 .map-tool-wrapper {
@@ -152,48 +136,6 @@ html, body {
   background-color: #eee;
 }
 
-.locations-table {
-  width: 100%;
-  margin-top: 20px;
-}
-
-.locations-table td, .locations-table th {
-  padding: 0.7em;
-}
-
-.spin {
-  -webkit-animation: spin .7s infinite linear;
-     -moz-animation: spin .7s infinite linear;
-      -ms-animation: spin .7s infinite linear;
-       -o-animation: spin .7s infinite linear;
-          animation: spin .7s infinite linear;
-}
-
-@-webkit-keyframes spin {
-  from { transform: scale( 1 ) rotate( 0deg );   }
-  to   { transform: scale( 1 ) rotate( 360deg ); }
-}
-@-moz-keyframes spin {
-  from { transform: scale( 1 ) rotate( 0deg );   }
-  to   { transform: scale( 1 ) rotate( 360deg ); }
-}
-@-ms-keyframes spin {
-  from { transform: scale( 1 ) rotate( 0deg );   }
-  to   { transform: scale( 1 ) rotate( 360deg ); }
-}
-@-o-keyframes spin {
-  from { transform: scale( 1 ) rotate( 0deg );   }
-  to   { transform: scale( 1 ) rotate( 360deg ); }
-}
-@keyframes spin {
-  from { transform: scale( 1 ) rotate( 0deg );   }
-  to   { transform: scale( 1 ) rotate( 360deg ); }
-}
-
-.saving {
-  display: none;
-}
-
 footer {
   position: absolute;
   bottom: 0;
@@ -228,78 +170,6 @@ footer nav {
   margin-bottom: 10px;
   /*width: 500px;*/
   height:100px;
-}
-
-#new_route_map_canvas {
-  width: 100%;
-  height: 300px;
-}
-
-.map-tool h2 {
-  margin-top: 0;
-  padding-bottom: 10px;
-  font-size: 20px;
-  font-weight: bold;
-  text-align: center;
-}
-
-.icon {
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain !important;
-  background-size: cover !important;
-  width: 14px;
-  height: 14px;
-  display: inline-block;
-  margin-top: 3px;
-}
-
-.icon-boundaries {
-  background: url(/images/button_icons/boundaries.png);
-}
-
-.icon-backhaul {
-  background: url(/images/button_icons/backhaul.png);
-}
-
-.icon-locations {
-  width: 17px;
-  width: 6px;
-  background: url(/images/button_icons/locations.png);
-}
-
-.icon-network-equipment {
-  background: url(/images/button_icons/network_equipment.png);
-}
-
-.icon-network-planning {
-  background: url(/images/button_icons/network_planning.png);
-}
-
-.icon-network-planning-targeted {
-  background: url(/images/button_icons/target_builder_03.png);
-}
-
-
-#market-size .nav-tabs > li, #market-size .nav-pills > li {
-  float: none;
-  display: inline-block;
-}
-
-#market-size .nav-tabs, #market-size .nav-pills {
-    text-align:center;
-}
-
-.pie-legend, .line-legend, .bar-legend, .stackedbar-legend {
-  list-style-type: none;
-  padding-left: 0;
-}
-
-.pie-legend li span, .line-legend li span, .stackedbar-legend li span, .bar-legend li span {
-  display: inline-block;
-  width: 12px;
-  height: 12px;
-  margin-right: 5px;
 }
 
 .outlineLegendIcon{
@@ -369,10 +239,6 @@ footer nav {
   width: 250px;
 }
 
-.nopadding {
-  padding: 0;
-}
-
 .checkbox.disabled label {
   color: #ccc;
 }
@@ -381,48 +247,11 @@ footer nav {
   color: #ccc;
 }
 
-
-.noUi-handle:before, .noUi-handle:after {
-  height: 8px;
-  top: 5px;
-}
-
-.noUi-handle:before {
-  left: 10px;
-}
-
-.noUi-handle:after {
-  left: 14px;
-}
-
-.noUi-horizontal .noUi-handle {
-  width: 25px;
-  height: 20px;
-  top: -7px;
-}
-
-.noUi-horizontal {
-  height: 6px;
-}
-
-.noUi-marker-horizontal.noUi-marker {
-  display: none;
-}
-
-.noUi-pips-horizontal {
-  padding-top: 3px;
-}
-
-.noUi-value {
-  font-size: 10px;
-}
-
 #measuring-stick-result {
   position: absolute;
   bottom: 10px;
   left: 55px;
 }
-
 
 /* from bootstrap, but applied at any screen size */
 .table-responsive {
@@ -477,66 +306,6 @@ footer nav {
   z-index: 1;
 }
 
-#serviceLayersAccordion div.panel-heading {
-  background: white;
-  padding: 1px 0;
-  color: #666;
-}
-
-#serviceLayersAccordion p.panel-title {
-  font-size: 14px;
-}
-
-#serviceLayersAccordion div.panel {
-  border: none;
-  box-shadow: none;
-}
-
-#serviceLayersAccordion a:hover, #serviceLayersAccordion a:focus {
-  text-decoration: none;
-}
-
-#serviceLayersAccordion input {
-  margin: 0;
-  margin-right: 5px;
-}
-
-#serviceLayersAccordion .panel-body {
-  padding: 5px 10px;
-}
-
-
-.locations-filter {
-  position: fixed;
-  padding: 30px;
-  background: white;
-  left: 370px;
-  width: 300px;
-  border: 1px solid #ddd;
-  border-left-style: none;
-}
-
-.locations-filter-btn, .locations-filter-btn:hover, .locations-filter-btn:focus, .locations-filter-btn:active {
-  margin-left: 3px;
-  background-color: #ddd !important;
-}
-
-.locations-filter-btn .fa {
-  text-shadow: none;
-}
-
-.btn.chk-small {
-  padding: 1px 3px;
-  font-size: 10px;
-  line-height: 1.5;
-  border-radius: 3px;
-}
-.btn.chk-small.checked {
-  background: #1a79db;
-  color: white;
-  border-color: #217fdf;
-}
-
 .btn.btn-thin{
 	padding: 1px 8px;
 }
@@ -572,48 +341,6 @@ ul.customer-type .ctype-name {
   padding: 0.75rem;
 }
 
-[ng-controller=locations_controller] .panel-body {
-  padding-left: 0;
-  padding-right: 0;
-}
-
-[ng-controller=locations_controller] .panel-body .customer-type {
-  padding: 0 10px;
-  padding-top: 3px;
-  margin-top: 2px;
-}
-
-[ng-controller=locations_controller] .panel-body .shaded {
-  background-color: #eee;
-}
-
-[ng-controller=locations_controller] .alert {
-  margin: 10px;
-}
-
-.wrapper_csites_controller  .panel-body {
-  padding-left: 0;
-  padding-right: 0;
-}
-
-.wrapper_csites_controller  .panel-body .customer-type {
-  padding: 0 10px;
-  padding-top: 3px;
-  margin-top: 2px;
-}
-
-.wrapper_csites_controller  .panel-body .shaded {
-  background-color: #eee;
-}
-
-.wrapper_csites_controller  .alert {
-  margin: 10px;
-}
-
-#locations_controller .spin {
-  margin-right: 5px;
-}
-
 .map-layer-spinner.fa-repeat {
   opacity: 0;
   transition: opacity 0.3s ease-in-out;
@@ -631,117 +358,7 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
   display: none
 }
 
-#top-navbar {
-  display: none;
-}
-
-#home-button {
-  float: left;
-  margin-right: 8px;
-  margin-left: 7px;
-}
-
-#map-extras {
-  position:fixed;
-  left: 200px;
-  bottom: 10px;
-}
-
-.popover-content {
-  color: #444;
-}
-
-#equipment_nodes_controller .panel-title {
-  color: #444
-}
-
-.custom-ui {
-  display: none;
-}
-
-.fiber-label {
-  text-overflow: ellipsis;
-  max-width: 75%;
-  overflow: hidden;
-}
-
-/* The header bar, where we display plan name, location, IRR, etc */
-.header-container {
-  display:flex;
-  width:100%;
-  height:100%;
-}
-
-.header-column-child-width {
-  flex: 0 1 auto; /* Takes the width of the child elements */
-  height: 100%;
-}
-
-.header-column-fill-width {
-  flex: 1 1 auto; /* Fills the remaining width of the flex box */
-  height: 100%;
-}
-
-.header-back-button {
-  color: black;
-  padding-left: 10px;
-  padding-right: 10px;
-  line-height: 50px;
-  cursor: pointer;
-}
-
-.header-back-button:hover {
-  background-color: #d0e0f0;
-}
-
-.header-plan {
-  font-size: 25px;
-  padding-left: 10px;
-  padding-right: 10px;
-  height: 100%;
-  line-height: 46px;
-  cursor: pointer;
-}
-
-.header-plan:hover {
-  background-color: #d0e0f0;
-}
-
-.header-plan-location {
-  font-size: 15px;
-  padding-left: 10px;
-  line-height: 50px;
-  color: #aaaaaa;
-}
-
-.pad10 {
-   padding-right: 10px;
-}
-
-.header-financials-container {
-  line-height: 50px;
-  margin-right: 10px;
-  font-size: 16px
-}
-
-.header-financials-item {
-  color: #6060ff;
-  padding-right: 5px;
-  padding-left: 5px
-}
-
-.header-financials-capex {
-  color: #ff6060;
-}
-
-.plan-progress {
-  margin-left:20px;
-  margin-top:15px;
-  width: 200px
-}
-
 /* Map tool buttons */
-
 .map-tools-button {
   width: 50px;
   height: 50px;
@@ -771,12 +388,6 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
   margin: 0px;
   padding: 0px;
   text-align: center;
-}
-
-/* Map tools panels */
-.map-tool-panel-body {
-  overflow-y: auto;
-  max-height: 670px;
 }
 
 /* Selected locations */
@@ -934,65 +545,6 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
     pointer-events: none;
 }
 
-.new-plan-icon{
- padding-left: 5px;
- padding-right: 5px;
-}
-.morp_impedence_table {
-  max-height: 358px;
-  overflow-y: scroll;
-}
-.morp_impedance_table {
-  max-height: 358px;
-  overflow-y: scroll;
-}
-
-.morph_table_header {
-  padding-left: 6px;
-}
-
-
-.btn-add-impc {
-  margin-top: 5px;
-}
-
-.morp_impedence_item {
-  margin: 5px 5px;
-}
-
- /*Plan selector icon*/
-.f-select-plan {
-  font-size: 15px;
-  position: relative;
-  bottom: 3px;
-  font-weight: lighter;
-}
-.imp_item_1 {
-  display: inline;
-}
-
-.imp_item_1.inp_radio {
-  position: relative;
-  top: 11px;
-}
-
-.btn_remove_imp {
-  margin-right: 5px;
-}
-
-.div-blocked {
-  pointer-events: none;
-}
-
-.div-blocked .panel-title {
-  background-color: #c5c5c5 !important;
-}
-
-.fiber_select_all {
-  margin-bottom: 10px;
-}
-
-
 .radio {
   margin: 0.5rem;
 }
@@ -1042,17 +594,6 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 /*ui select width problem https://github.com/angular-ui/ui-select/issues/533*/
 .ui-select-multiple input.ui-select-search:not(.ng-touched) {
   width: 100% !important;
-}
-
-/*infobox*/
-.infobox {
-  position: absolute;
-  border: 1px solid #c9c9c9;
-  background: white;
-  padding: 3px;
-  z-index: 9999;
-  border-radius: 5px;
-  display: none;
 }
 
 .panel-fiber-details {
@@ -1291,30 +832,6 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
   font-size: 12px;
 }
 
-.attribute_table {
-  display: table;
-}
-
-.attribute_row {
-  display: table-row;
-}
-.attribute_cell {
-  display: table-cell;
-  padding: 3px;
-}
-
-.attribute_cell.key {
-  font-weight: bold;
-}
-
-.mb-5 {
-  margin-bottom: 5px;
-}
-
-.mt-2 {
-  margin-top: 2px;
-}
-
 .map-toggle {
   user-select: none;
   box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px;
@@ -1337,20 +854,6 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 
 .app_wrapper_container.footer {
   bottom: 25px;
-}
-
-.blink {
-  position: absolute;
-  left:  50%;
-  top: 50%;
-  width: 8px;
-  height: 8px;
-  background: #ff0000;
-  border-radius: 50%;
-  -webkit-transform-origin: 0 0;
-  animation: grow .3s linear forwards;
-  -webkit-animation: grow .3s linear forwards;
-          animation: grow .3s linear forwards;
 }
 
 .close {
@@ -1428,21 +931,6 @@ ui-select-font {
 .multiselect-container.dropdown-menu>.active:focus>a,
 .multiselect-container.dropdown-menu>.active:hover>a {
   color: white;
-}
-
-/* augment bootstrap modal for shrinkfit sizing */
-.aro-modal-flex-contain{
-	text-align: center;
-}
-
-.aro-modal-flex-contain > *{
-  text-align: left;
-}
-
-.aro-modal-flex.modal-dialog{
-  display: inline-block;
-  max-width: 90%;
-  text-align: left;
 }
 
 .aro-slider {

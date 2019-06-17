@@ -4,7 +4,6 @@
  * Services like "state" and "region" are intentionally not injected into this, instead we send them in as parameters.
  */
 app.service('stateSerializationHelper', ['$q', ($q) => {
-  var OPTIMIZATION_DATA_SOURCE_GLOBAL = 1
   var stateSerializationHelper = {}
 
   // ------------------------------------------------------------------------------------------------------------------

@@ -65,8 +65,8 @@
         <!-- Buttons to commit or discard a transaction -->
         <div class="text-center">
           <div class="btn-group ">
-            <button class="btn btn-light" ng-click="$ctrl.commitTransaction()"><i class="fa fa-check-circle"></i>&nbsp;&nbsp;Commit</button>
-            <button class="btn btn-light" ng-click="$ctrl.discardTransaction()"><i class="fa fa-times-circle"></i>&nbsp;&nbsp;Discard</button>
+            <button class="btn btn-light" ng-click="$ctrl.commitTransaction($ctrl.currentTransaction.id)"><i class="fa fa-check-circle"></i>&nbsp;&nbsp;Commit</button>
+            <button class="btn btn-light" ng-click="$ctrl.discardTransaction($ctrl.currentTransaction.id)"><i class="fa fa-times-circle"></i>&nbsp;&nbsp;Discard</button>
           </div>
         </div>
         <br>
