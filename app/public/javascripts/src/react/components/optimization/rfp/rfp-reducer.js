@@ -11,7 +11,8 @@ const defaultState = {
   targets: [],
   clickMapToAddTarget: false,
   selectedTarget: null,
-  status: RfpStatusTypes.UNINITIALIZED
+  status: RfpStatusTypes.UNINITIALIZED,
+  showAllRfpStatus: false
 }
 
 function clearState () {

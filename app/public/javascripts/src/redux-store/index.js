@@ -15,6 +15,7 @@ import opReport from '../react/components/optimization/reports/reports-reducer'
 import rfp from '../react/components/optimization/rfp/rfp-reducer'
 
 import coverage from '../react/components/coverage/coverage-reducer'
+import fullScreen from '../react/components/full-screen/full-screen-reducer'
 import map from '../react/components/map/map-reducer'
 import mapLayers from '../react/components/map-layers/map-layer-reducer'
 import plan from '../react/components/plan/plan-reducer'
@@ -31,6 +32,7 @@ const socketMiddleware = createSocketMiddleware()
 let reducer = combineReducers({
   configuration: combineReducers({ report, ui }),
   coverage,
+  fullScreen,
   map,
   mapLayers,
   optimization: combineReducers({ networkAnalysis, report: opReport, rfp }),

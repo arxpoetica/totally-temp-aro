@@ -84,6 +84,7 @@ import planInputsModal from './header/plan-inputs-modal'
 import networkPlanManage from './header/network-plan-manage'
 import networkPlan from './header/network-plan'
 import uiNotification from './footer/ui-notification'
+import fullScreenContainer from './full-screen/full-screen-container'
 import userAccountSettings from './global-settings/user-account-settings'
 import manageUsers from './global-settings/manage-users'
 import multifactorSettings from './global-settings/multifactor-settings'
@@ -190,6 +191,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('networkPlanManage', networkPlanManage)
   .component('networkPlan', networkPlan)
   .component('uiNotification', uiNotification)
+  .component('fullScreenContainer', fullScreenContainer)
   .component('userAccountSettings', userAccountSettings)
   .component('manageUsers', manageUsers)
   .component('multifactorSettings', multifactorSettings)
