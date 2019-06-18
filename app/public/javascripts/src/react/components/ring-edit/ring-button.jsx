@@ -4,19 +4,22 @@ import { PropTypes } from 'prop-types'
 import reduxStore from '../../../redux-store'
 import CoverageActions from '../coverage/coverage-actions'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
-import CoverageStatusTypes from './constants'
+import CoverageStatusTypes from '../../common/constants'
 import socketManager from '../../../react/common/socket-manager'
 
 export class RingButton extends Component {
   // ToDo: abstract and combine with Coverage Button and RFP Button
   constructor (props) {
     super(props)
+    /*
     this.unsubscriber = socketManager.subscribe('PROGRESS_MESSAGE_DATA', (progressData) => {
+      console.log(progressData)
       if (progressData.data.processType === 'coverage') {
         console.log(progressData)
         this.props.setCoverageProgress(progressData.data)
       }
     })
+    */
   }
 
   render () {
@@ -73,9 +76,16 @@ export class RingButton extends Component {
       </button>
     )
   }
+
+  componentWillUnmount () {
+    //this.unsubscriber()
+  }
+
 }
 
-CoverageButton.propTypes = {
+// --- //
+
+RingButton.propTypes = {
   status: PropTypes.string,
   progress: PropTypes.number,
   userId: PropTypes.number,
@@ -104,5 +114,5 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   setCoverageProgress: (progress) => dispatch(CoverageActions.setCoverageProgress(progress))
 })
 
-const CoverageButtonComponent = wrapComponentWithProvider(reduxStore, CoverageButton, mapStateToProps, mapDispatchToProps)
-export default CoverageButtonComponent
+const RingButtonComponent = wrapComponentWithProvider(reduxStore, RingButton, mapStateToProps, mapDispatchToProps)
+export default RingButtonComponent

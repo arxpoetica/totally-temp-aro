@@ -1,7 +1,7 @@
 import Actions from '../../common/actions'
 import FeatureSets from '../../common/featureSets'
 import Ring from '../../common/ring'
-import CoverageStatusTypes from './constants'
+import CoverageStatusTypes from '../../common/constants'
 
 const defaultState = {
   rings: {},
