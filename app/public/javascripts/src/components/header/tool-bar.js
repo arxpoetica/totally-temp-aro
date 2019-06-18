@@ -1,5 +1,6 @@
 import Constants from '../common/constants'
 import FullScreenActions from '../../react/components/full-screen/full-screen-actions'
+import RfpActions from '../../react/components/optimization/rfp/rfp-actions'
 
 class ToolBarController {
   constructor ($element, $timeout, $document, $http, $ngRedux, state, map_tools, $window) {
@@ -548,7 +549,10 @@ class ToolBarController {
 
   mapDispatchToTarget (dispatch) {
     return {
-      showFullScreenContainer: () => dispatch(FullScreenActions.showOrHideFullScreenContainer(true))
+      showFullScreenContainer: () => {
+        dispatch(FullScreenActions.showOrHideFullScreenContainer(true))
+        dispatch(RfpActions.showOrHideAllRfpStatus(true))
+      }
     }
   }
 }

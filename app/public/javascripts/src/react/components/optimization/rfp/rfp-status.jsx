@@ -1,6 +1,39 @@
 import React, { Component } from 'react'
+import { PropTypes } from 'prop-types'
 import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
+import rfpActions from './rfp-actions'
+
+class RfpStatusRow extends Component {
+  render () {
+    const planStateToBadgeColor = {
+      UNDEFINED: 'badge-danger',
+      START_STATE: 'badge-dark',
+      INITIALIZED: 'badge-dark',
+      STARTED: 'badge-primary',
+      COMPLETED: 'badge-success',
+      CANCELED: 'badge-danger',
+      FAILED: 'badge-danger'
+    }
+    return <tr>
+      <td>{this.props.id}</td>
+      <td>{this.props.name}</td>
+      <td>{this.props.createdBy}</td>
+      <td>
+        <div className={`badge ${planStateToBadgeColor[this.props.status]}`}>{this.props.status}</div>
+      </td>
+      <td>Download</td>
+      <td>Download</td>
+    </tr>
+  }
+}
+
+RfpStatusRow.propTypes = {
+  id: PropTypes.number,
+  name: PropTypes.string,
+  createdBy: PropTypes.string,
+  status: PropTypes.string
+}
 
 export class RfpStatus extends Component {
   render () {
@@ -19,20 +52,40 @@ export class RfpStatus extends Component {
                 <th />
               </tr>
             </thead>
+            <tbody>
+              {this.props.rfpPlans.map(rfpPlan => (
+                <RfpStatusRow key={rfpPlan.id} id={rfpPlan.id} name={rfpPlan.name} createdBy={rfpPlan.createdBy.toString()} status={rfpPlan.planState} />
+              ))
+              }
+            </tbody>
           </table>
         </div>
       </div>
     </div>
   }
+
+  componentDidMount () {
+    this.props.loadRfpPlans(this.props.userId)
+  }
+
+  componentWillUnmount () {
+    this.props.clearRfpPlans()
+  }
 }
 
 RfpStatus.propTypes = {
+  rfpPlans: PropTypes.array,
+  userId: PropTypes.number
 }
 
 const mapStateToProps = state => ({
+  rfpPlans: state.optimization.rfp.rfpPlans,
+  userId: state.user.loggedInUser && state.user.loggedInUser.id
 })
 
 const mapDispatchToProps = dispatch => ({
+  clearRfpPlans: () => dispatch(rfpActions.clearRfpPlans()),
+  loadRfpPlans: userId => dispatch(rfpActions.loadRfpPlans(userId))
 })
 
 const RfpStatusComponent = wrapComponentWithProvider(reduxStore, RfpStatus, mapStateToProps, mapDispatchToProps)

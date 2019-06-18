@@ -11,7 +11,8 @@ class FullScreenContainerController {
 
   mapStateToThis (reduxState) {
     return {
-      showFullScreenContainer: reduxState.fullScreen.showFullScreenContainer
+      showFullScreenContainer: reduxState.fullScreen.showFullScreenContainer,
+      showAllRfpStatus: reduxState.optimization.rfp.showAllRfpStatus
     }
   }
 

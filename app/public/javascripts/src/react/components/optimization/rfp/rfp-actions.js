@@ -83,6 +83,31 @@ function setClickMapToAddTarget (clickMapToAddTarget) {
   }
 }
 
+function loadRfpPlans (userId) {
+  return dispatch => {
+    AroHttp.get(`/service/v1/plan?search=&user_id=${userId}`)
+      .then(result => dispatch({
+        type: Actions.RFP_SET_PLANS,
+        payload: result.data
+      }))
+      .catch(err => console.error(err))
+  }
+}
+
+function clearRfpPlans () {
+  return {
+    type: Actions.RFP_SET_PLANS,
+    payload: []
+  }
+}
+
+function showOrHideAllRfpStatus (show) {
+  return {
+    type: Actions.RFP_SHOW_HIDE_ALL_RFP_STATUS,
+    payload: show
+  }
+}
+
 function clearRfpState () {
   return {
     type: Actions.RFP_CLEAR_STATE
@@ -90,12 +115,15 @@ function clearRfpState () {
 }
 
 export default {
-  addTargets: addTargets,
-  clearRfpState: clearRfpState,
-  initializeRfpReport: initializeRfpReport,
-  modifyRfpReport: modifyRfpReport,
-  removeTarget: removeTarget,
-  replaceTarget: replaceTarget,
-  setSelectedTarget: setSelectedTarget,
-  setClickMapToAddTarget: setClickMapToAddTarget
+  addTargets,
+  clearRfpState,
+  initializeRfpReport,
+  clearRfpPlans,
+  loadRfpPlans,
+  modifyRfpReport,
+  removeTarget,
+  replaceTarget,
+  setSelectedTarget,
+  setClickMapToAddTarget,
+  showOrHideAllRfpStatus
 }

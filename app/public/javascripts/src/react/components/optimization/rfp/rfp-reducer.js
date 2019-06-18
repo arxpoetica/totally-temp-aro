@@ -12,7 +12,8 @@ const defaultState = {
   clickMapToAddTarget: false,
   selectedTarget: null,
   status: RfpStatusTypes.UNINITIALIZED,
-  showAllRfpStatus: false
+  showAllRfpStatus: false,
+  rfpPlans: []
 }
 
 function clearState () {
@@ -61,6 +62,18 @@ function setClickMapToAddTarget (state, clickMapToAddTarget) {
   }
 }
 
+function setShowAllRfpStatus (state, showAllRfpStatus) {
+  return { ...state,
+    showAllRfpStatus: showAllRfpStatus
+  }
+}
+
+function setRfpPlans (state, rfpPlans) {
+  return { ...state,
+    rfpPlans: rfpPlans
+  }
+}
+
 function rfpReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.RFP_CLEAR_STATE:
@@ -80,6 +93,12 @@ function rfpReducer (state = defaultState, action) {
 
     case Actions.RFP_SET_STATUS:
       return setStatus(state, action.payload)
+
+    case Actions.RFP_SHOW_HIDE_ALL_RFP_STATUS:
+      return setShowAllRfpStatus(state, action.payload)
+
+    case Actions.RFP_SET_PLANS:
+      return setRfpPlans(state, action.payload)
 
     case Actions.RFP_SET_CLICK_MAP_TO_ADD_TARGET:
       return setClickMapToAddTarget(state, action.payload)
