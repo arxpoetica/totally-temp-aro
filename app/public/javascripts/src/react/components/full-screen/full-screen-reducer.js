@@ -8,7 +8,7 @@ function setShowFullScreenContainer (state, showFullScreenContainer) {
 
 function fullScreenReducer (state = { showFullScreenContainer: false }, action) {
   switch (action.type) {
-    case Actions.FULL_SCREEN_SHOW_CONTAINER:
+    case Actions.FULL_SCREEN_SHOW_HIDE_CONTAINER:
       return setShowFullScreenContainer(state, action.payload)
 
     default:
