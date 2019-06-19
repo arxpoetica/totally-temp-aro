@@ -17,8 +17,9 @@ class PlanInputsModalController {
     }
     this.parentPlanSelectorExpanded = false
     this.planTypeEnum = [
-      {label:'Standard Plan', value:'UNDEFINED'}, 
-      {label:'Ring Plan', value:'RING'}
+      { label: 'Standard Plan', value: 'UNDEFINED' },
+      { label: 'Ring Plan', value: 'RING' },
+      { label: 'RFP Plan', value: 'RFP' }
     ]
   }
 

@@ -85,7 +85,7 @@ function setClickMapToAddTarget (clickMapToAddTarget) {
 
 function loadRfpPlans (userId) {
   return dispatch => {
-    AroHttp.get(`/service/v1/plan?search=&user_id=${userId}`)
+    AroHttp.get(`/service/v1/plan?search=type:"RFP"&user_id=${userId}`)
       .then(result => dispatch({
         type: Actions.RFP_SET_PLANS,
         payload: result.data
