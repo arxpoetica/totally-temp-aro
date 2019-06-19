@@ -54,16 +54,7 @@ export class RingEdit extends Component {
           </tbody>
         </table>
       </div>
-      <div className='m-2 p-2'>
-        <button className="pull-left btn btn-primary button-export ng-scope"
-                onClick={() => this.requestSubNet()}>
-          <i className="fa fa-bolt"></i> Run
-        </button>
-      </div>
-      <div className='m-2 p-2'>
-        <button className='btn btn-primary pull-left' onClick={() => this.props.showOrHideReportModal(true)}>Reports</button>
-        <ReportsDownloadModal reportTypes={['RING']} />
-      </div>
+      
     </div>
   }
   
@@ -283,7 +274,7 @@ export class RingEdit extends Component {
     const userId = this.props.user.loggedInUser.id
     this.props.removeNode(ring, nodeId, planId, userId)
   }
-
+  /*
   requestSubNet(){
     var ringIds = []
     for (var key in this.props.rings) {
@@ -301,7 +292,7 @@ export class RingEdit extends Component {
       //ToDo check for error
     }).catch(err => console.error(err))
   }
-
+  */
   clearRendering(){
     this.createdMapObjects.forEach(path => {
       path.setMap(null)
@@ -341,8 +332,7 @@ const mapStateToProps = (state) => ({
   selectedRingId: state.ringEdit.selectedRingId, 
   plan: state.plan, 
   user: state.user, 
-  map: state.map, 
-  mapLayers: state.mapLayers
+  map: state.map
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -351,8 +341,7 @@ const mapDispatchToProps = dispatch => ({
   removeRing: (ringId, planId, userId) => dispatch(ringActions.removeRing(ringId, planId, userId)),
   removeNode: (ring, featureId, planId, userId) => dispatch( ringActions.removeNode(ring, featureId, planId, userId) ), 
   saveRingChangesToServer: (ring, planId, userId) => dispatch(ringActions.saveRingChangesToServer(ring, planId, userId)), 
-  renameRing: (ring, name, planId, userId) => dispatch(ringActions.renameRing(ring, name, planId, userId)), 
-  showOrHideReportModal: showReportModal => dispatch(ReportActions.showOrHideReportModal(showReportModal))
+  renameRing: (ring, name, planId, userId) => dispatch(ringActions.renameRing(ring, name, planId, userId))
 })
 
 const RingEditComponent = wrapComponentWithProvider(reduxStore, RingEdit, mapStateToProps, mapDispatchToProps)

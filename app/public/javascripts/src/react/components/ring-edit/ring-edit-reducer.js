@@ -1,13 +1,13 @@
 import Actions from '../../common/actions'
 import FeatureSets from '../../common/featureSets'
 import Ring from '../../common/ring'
-import CoverageStatusTypes from '../../common/constants'
+
 
 const defaultState = {
   rings: {},
   selectedRingId: null, 
   analysis: {
-    status: CoverageStatusTypes.UNINITIALIZED,
+    status: 'UNINITIALIZED',
     progress: 0, 
     report: null
   }

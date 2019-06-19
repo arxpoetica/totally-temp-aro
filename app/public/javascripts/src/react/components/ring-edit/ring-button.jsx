@@ -2,21 +2,27 @@ import React, { Component } from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import { PropTypes } from 'prop-types'
 import reduxStore from '../../../redux-store'
-import CoverageActions from '../coverage/coverage-actions'
+import ringActions from './ring-edit-actions.js'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
-import CoverageStatusTypes from '../../common/constants'
 import socketManager from '../../../react/common/socket-manager'
+import AroHttp from '../../common/aro-http'
+
 
 export class RingButton extends Component {
   // ToDo: abstract and combine with Coverage Button and RFP Button
   constructor (props) {
     super(props)
     
+    this.StatusTypes = Object.freeze({
+      UNINITIALIZED: 'UNINITIALIZED',
+      STARTED: 'STARTED',
+      COMPLETED: 'COMPLETED'
+    })
+
     this.unsubscriber = socketManager.subscribe('PROGRESS_MESSAGE_DATA', (progressData) => {
-      console.log(progressData)
-      if (progressData.data.processType === 'coverage') {
-        console.log(progressData)
-        this.props.setCoverageProgress(progressData.data)
+      if (progressData.data.processType === 'ring') {
+        this.props.setAnalysisStatus(progressData.data.optimizationState)
+        this.props.setAnalysisProgress(progressData.data.progress)
       }
     })
     
@@ -24,13 +30,13 @@ export class RingButton extends Component {
 
   render () {
     switch (this.props.status) {
-      case CoverageStatusTypes.UNINITIALIZED:
+      case this.StatusTypes.UNINITIALIZED:
         return this.renderUninitializedButton()
 
-      case CoverageStatusTypes.RUNNING:
+      case this.StatusTypes.STARTED:
         return this.renderProgressbar()
 
-      case CoverageStatusTypes.FINISHED:
+      case this.StatusTypes.COMPLETED:
         return this.renderFinishedButton()
 
       default:
@@ -41,9 +47,7 @@ export class RingButton extends Component {
   renderUninitializedButton () {
     return (
       <button className={'btn btn-block btn-primary'} style={{ marginBottom: '10px' }}
-        onClick={() => this.props.initializeCoverageReport(this.props.userId, this.props.planId, this.props.projectId, this.props.activeSelectionModeId,
-          this.props.locationLayers.filter(item => item.checked).map(item => item.plannerKey),
-          this.props.boundaryLayers, this.props.initializationParams)}>
+        onClick={() => this.requestSubNet()}>
         <i className='fa fa-bolt' /> Run
       </button>
     )
@@ -71,12 +75,30 @@ export class RingButton extends Component {
   renderFinishedButton () {
     return (
       <button className={'btn btn-block modify-coverage-button'} style={{ marginBottom: '10px' }}
-        onClick={() => this.props.modifyCoverageReport(this.props.report.reportId)}>
+        onClick={() => this.requestSubNet()}>
         <i className='fa fa-edit' /> Modify
       </button>
     )
   }
   
+  requestSubNet(){
+    var ringIds = []
+    for (var key in this.props.rings) {
+      ringIds.push(''+this.props.rings[key].id)
+    }
+    const planId = this.props.planId
+    const userId = this.props.userId
+    var locationTypes = []
+    this.props.mapLayers.location.forEach(item => {
+      if (item.checked) locationTypes.push(item.plannerKey)
+    });
+    //this.props.calculateSubNet(ringIds, planId, userId)
+    AroHttp.post(`/service/plan/${planId}/ring-cmd`, {ringIds: ringIds, locationTypes: locationTypes})
+    .then(result => {
+      //ToDo check for error
+    }).catch(err => console.error(err))
+  }
+
   componentWillUnmount () {
     this.unsubscriber()
   }
@@ -90,8 +112,7 @@ RingButton.propTypes = {
   progress: PropTypes.number,
   userId: PropTypes.number,
   planId: PropTypes.number,
-  projectId: PropTypes.number,
-  report: PropTypes.object
+  projectId: PropTypes.number
 }
 
 const mapStateToProps = (state) => {
@@ -101,17 +122,21 @@ const mapStateToProps = (state) => {
     userId: state.user.loggedInUser.id,
     planId: state.plan.activePlan && state.plan.activePlan.id,
     projectId: state.user.loggedInUser.projectId,
-    report: state.coverage.report
+    rings: state.ringEdit.rings, 
+    mapLayers: state.mapLayers
   }
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
+  /*
   modifyCoverageReport: (reportId) => dispatch(CoverageActions.modifyCoverageReport(reportId)),
   initializeCoverageReport: (userId, planId, projectId, activeSelectionMode, locationTypes, boundaryLayers, initializationParams) => {
     dispatch(CoverageActions.initializeCoverageReport(userId, planId, projectId, activeSelectionMode, locationTypes,
       boundaryLayers, initializationParams))
   },
-  setCoverageProgress: (progress) => dispatch(CoverageActions.setCoverageProgress(progress))
+  */
+  setAnalysisStatus: (status) => dispatch(ringActions.setAnalysisStatus(status)), 
+  setAnalysisProgress: (progress) => dispatch(ringActions.setAnalysisProgress(progress))
 })
 
 const RingButtonComponent = wrapComponentWithProvider(reduxStore, RingButton, mapStateToProps, mapDispatchToProps)

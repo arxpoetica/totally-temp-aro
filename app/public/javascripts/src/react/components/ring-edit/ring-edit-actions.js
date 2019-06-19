@@ -199,6 +199,20 @@ function loadRings (planId) {
   }
 }
 
+function setAnalysisStatus (status) {
+  return {
+    type: Actions.RING_SET_ANALYSIS_STATUS,
+    payload: status
+  }
+}
+
+function setAnalysisProgress (progress) {
+  return {
+    type: Actions.RING_SET_ANALYSIS_PROGRESS,
+    payload: progress
+  }
+}
+
 export default {
   setSelectedRingId,
   newRing,
@@ -210,5 +224,7 @@ export default {
   addNode,
   removeNode, 
   saveRingChangesToServer, 
-  renameRing
+  renameRing, 
+  setAnalysisStatus, 
+  setAnalysisProgress
 }
