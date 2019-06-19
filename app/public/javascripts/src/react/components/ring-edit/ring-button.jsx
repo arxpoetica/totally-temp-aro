@@ -11,7 +11,7 @@ export class RingButton extends Component {
   // ToDo: abstract and combine with Coverage Button and RFP Button
   constructor (props) {
     super(props)
-    /*
+    
     this.unsubscriber = socketManager.subscribe('PROGRESS_MESSAGE_DATA', (progressData) => {
       console.log(progressData)
       if (progressData.data.processType === 'coverage') {
@@ -19,7 +19,7 @@ export class RingButton extends Component {
         this.props.setCoverageProgress(progressData.data)
       }
     })
-    */
+    
   }
 
   render () {
@@ -76,9 +76,9 @@ export class RingButton extends Component {
       </button>
     )
   }
-
+  
   componentWillUnmount () {
-    //this.unsubscriber()
+    this.unsubscriber()
   }
 
 }

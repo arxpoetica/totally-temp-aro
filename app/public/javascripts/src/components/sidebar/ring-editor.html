@@ -12,9 +12,7 @@
   
   <div class="analysis-type">
     <h4 style="text-align: center; margin-top: 20px;">Ring Edit</h4>
-    <!--
     <r-ring-button></r-ring-button>
-    -->
   </div>
 
   <accordion style="position: relative; flex: 1 1 auto;" toggle-expanded-panel="$ctrl.state.activeEditRingsPanel">
@@ -27,7 +25,8 @@
     
     <accordion-panel-title id="output-bar" title="'Output'" panel-id="$ctrl.state.EditRingsPanels.OUTPUT"></accordion-panel-title>
     <accordion-panel-contents panel-id="$ctrl.state.EditRingsPanels.OUTPUT">
-      Ring output here
+      <!-- Ring output here -->
+      <network-build-output report-types="['RING']"></network-build-output>
     </accordion-panel-contents>
     
   </accordion>

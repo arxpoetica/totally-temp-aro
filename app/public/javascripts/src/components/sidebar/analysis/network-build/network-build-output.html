@@ -8,5 +8,5 @@
   </div>
   <button class="btn btn-primary pull-left" ng-click="$ctrl.showReportModal()">Reports</button>
   <button class="btn btn-primary pull-right" ng-click="$ctrl.showDetailedOutput()">Expand Results</button>
-    <r-reports-download-modal report-types="['GENERAL', 'PARAM_QUERY']" title="'Network Analysis Reports'"></r-reports-download-modal>
+  <r-reports-download-modal report-types="$ctrl.reportTypes" title="'Network Analysis Reports'"></r-reports-download-modal>
 </div>
