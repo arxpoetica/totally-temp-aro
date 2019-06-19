@@ -277,7 +277,8 @@
       <i class="fa fa-cube"></i>
   </button>
 
-  <button ng-click="$ctrl.showRfpWindow()"
+  <button ng-if="$ctrl.state.configuration.toolbar.showRfpStatus"
+    ng-click="$ctrl.showRfpWindow()"
     class="btn"
     data-toggle="tooltip" data-placement="bottom" 
     title="Show RFP status">
