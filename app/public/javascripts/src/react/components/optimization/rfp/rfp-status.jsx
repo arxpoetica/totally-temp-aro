@@ -15,15 +15,23 @@ class RfpStatusRow extends Component {
       CANCELED: 'badge-danger',
       FAILED: 'badge-danger'
     }
-    return <tr>
+    return <tr style={{ textAlign: 'center' }}>
       <td>{this.props.id}</td>
       <td>{this.props.name}</td>
       <td>{this.props.createdBy}</td>
       <td>
         <div className={`badge ${planStateToBadgeColor[this.props.status]}`}>{this.props.status}</div>
       </td>
-      <td>Download</td>
-      <td>Download</td>
+      <td>
+        <button className='btn btn-sm btn-primary'>
+          <i className='fa fa-download' />
+        </button>
+      </td>
+      <td>
+        <button className='btn btn-sm btn-primary'>
+          <i className='fa fa-download' />
+        </button>
+      </td>
     </tr>
   }
 }
@@ -43,13 +51,13 @@ export class RfpStatus extends Component {
         <div className='col-md-12'>
           <table className='table table-sm table-striped'>
             <thead className='thead-light'>
-              <tr>
+              <tr style={{ textAlign: 'center' }}>
                 <th>ID</th>
                 <th>Name</th>
                 <th>Created by</th>
                 <th>Status</th>
-                <th />
-                <th />
+                <th>RFP Report</th>
+                <th>Coverage Report</th>
               </tr>
             </thead>
             <tbody>
