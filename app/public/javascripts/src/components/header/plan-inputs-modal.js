@@ -9,12 +9,17 @@ class PlanInputsModalController {
   initModalData () {
     this.planName = null
     this.parentPlan = null
+    this.planType = 'UNDEFINED'
     const currentPlan = this.state.plan
     if (currentPlan && !currentPlan.isEphemeral) {
       // IF the current plan is not an ephemeral plan, then set it as the parent plan.
       this.parentPlan = currentPlan
     }
     this.parentPlanSelectorExpanded = false
+    this.planTypeEnum = [
+      {label:'Standard Plan', value:'UNDEFINED'}, 
+      {label:'Ring Plan', value:'RING'}
+    ]
   }
 
   close () {
@@ -39,9 +44,9 @@ class PlanInputsModalController {
       .then((planNameExists) => {
         if (!planNameExists) {
           if (this.parentPlan) {
-          // A parent plan is specified. Ignore the currently open plan, and just create a new one using
-          // the selected plan name and parent plan
-            this.state.createNewPlan(false, this.planName, this.parentPlan)
+            // A parent plan is specified. Ignore the currently open plan, and just create a new one using
+            // the selected plan name and parent plan
+            this.state.createNewPlan(false, this.planName, this.parentPlan, this.planType)
               .then((result) => this.state.loadPlan(result.data.id))
               .catch((err) => console.error(err))
           } else {

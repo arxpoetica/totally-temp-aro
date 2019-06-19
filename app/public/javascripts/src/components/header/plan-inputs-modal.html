@@ -16,6 +16,12 @@
 
     <!-- Plan name -->
     <input id="searchPlanName" class="form-control with-margin" type="text" ng-model="$ctrl.planName" placeholder="Plan Name">
+    
+    <!-- Plan type -->
+    <select class="form-control with-margin"
+      ng-model="$ctrl.planType"
+      ng-options="item.value as item.label for item in $ctrl.planTypeEnum">
+    </select>
 
     <!-- Plan tags -->
     <div class="with-margin">
