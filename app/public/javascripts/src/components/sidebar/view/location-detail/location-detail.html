@@ -196,7 +196,7 @@
   <span ng-if="$ctrl.toggleAuditLog
                && $ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.LOCATION_INFO
                && $ctrl.state.configuration.perspective.locationDetails.showAuditLog">
-    <location-audit-log plan-id="$ctrl.plan.id"
+    <location-audit-log plan-id="$ctrl.state.plan.id"
                         object-id="$ctrl.selectedLocationObjectId"
                         current-user-id="$ctrl.currentUser.id">
     </location-audit-log>
