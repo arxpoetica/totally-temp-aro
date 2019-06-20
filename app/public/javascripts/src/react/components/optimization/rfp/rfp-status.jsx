@@ -130,23 +130,39 @@ export class RfpStatus extends Component {
               </tr>
             </thead>
             <tbody>
-              {this.props.rfpPlans.map(rfpPlan => (
-                <RfpStatusRow
-                  key={rfpPlan.id}
-                  id={rfpPlan.id}
-                  name={rfpPlan.name}
-                  createdById={rfpPlan.createdBy}
-                  status={rfpPlan.planState}
-                  systemActors={this.props.systemActors}
-                  reportDefinitions={rfpPlan.reportDefinitions}
-                />
-              ))
+              {
+                this.props.isLoadingRfpPlans
+                  ? this.renderLoadingIconRow()
+                  : this.renderRfpPlanRows()
               }
             </tbody>
           </table>
         </div>
       </div>
     </div>
+  }
+
+  renderLoadingIconRow () {
+    return <tr>
+      <td colSpan={5} className='p-5 text-center'>
+        <div className='fa fa-5x fa-spin fa-spinner mb-4' />
+        <h4>Loading RFP Plans...</h4>
+      </td>
+    </tr>
+  }
+
+  renderRfpPlanRows () {
+    return this.props.rfpPlans.map(rfpPlan => (
+      <RfpStatusRow
+        key={rfpPlan.id}
+        id={rfpPlan.id}
+        name={rfpPlan.name}
+        createdById={rfpPlan.createdBy}
+        status={rfpPlan.planState}
+        systemActors={this.props.systemActors}
+        reportDefinitions={rfpPlan.reportDefinitions}
+      />
+    ))
   }
 
   componentDidMount () {
@@ -160,12 +176,14 @@ export class RfpStatus extends Component {
 
 RfpStatus.propTypes = {
   rfpPlans: PropTypes.array,
+  isLoadingRfpPlans: PropTypes.bool,
   systemActors: PropTypes.object,
   userId: PropTypes.number
 }
 
 const mapStateToProps = state => ({
   rfpPlans: state.optimization.rfp.rfpPlans,
+  isLoadingRfpPlans: state.optimization.rfp.isLoadingRfpPlans,
   systemActors: state.user.systemActors,
   userId: state.user.loggedInUser && state.user.loggedInUser.id
 })

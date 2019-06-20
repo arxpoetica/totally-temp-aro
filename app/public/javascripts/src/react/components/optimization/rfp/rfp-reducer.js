@@ -13,7 +13,8 @@ const defaultState = {
   selectedTarget: null,
   status: RfpStatusTypes.UNINITIALIZED,
   showAllRfpStatus: false,
-  rfpPlans: []
+  rfpPlans: [],
+  isLoadingRfpPlans: false
 }
 
 function clearState () {
@@ -68,9 +69,16 @@ function setShowAllRfpStatus (state, showAllRfpStatus) {
   }
 }
 
-function setRfpPlans (state, rfpPlans) {
+function setRfpPlans (state, payload) {
   return { ...state,
-    rfpPlans: rfpPlans
+    rfpPlans: payload.rfpPlans,
+    isLoadingRfpPlans: payload.isLoadingRfpPlans
+  }
+}
+
+function setIsLoadingRfpPlans (state, isLoadingRfpPlans) {
+  return { ...state,
+    isLoadingRfpPlans: isLoadingRfpPlans
   }
 }
 
@@ -102,6 +110,9 @@ function rfpReducer (state = defaultState, action) {
 
     case Actions.RFP_SET_CLICK_MAP_TO_ADD_TARGET:
       return setClickMapToAddTarget(state, action.payload)
+
+    case Actions.RFP_SET_IS_LOADING_RFP_PLANS:
+      return setIsLoadingRfpPlans(state, action.payload)
 
     default:
       return state

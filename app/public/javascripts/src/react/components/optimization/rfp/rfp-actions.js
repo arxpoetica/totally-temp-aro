@@ -86,6 +86,10 @@ function setClickMapToAddTarget (clickMapToAddTarget) {
 function loadRfpPlans (userId) {
   return dispatch => {
     var rfpPlans = []
+    dispatch({
+      type: Actions.RFP_SET_IS_LOADING_RFP_PLANS,
+      payload: true
+    })
     AroHttp.get(`/service/v1/plan?search=type:"RFP"&user_id=${userId}`)
       .then(result => {
         rfpPlans = result.data
@@ -104,10 +108,19 @@ function loadRfpPlans (userId) {
         })
         dispatch({
           type: Actions.RFP_SET_PLANS,
-          payload: rfpPlans
+          payload: {
+            rfpPlans: rfpPlans,
+            isLoadingRfpPlans: false
+          }
         })
       })
-      .catch(err => console.error(err))
+      .catch(err => {
+        console.error(err)
+        dispatch({
+          type: Actions.RFP_SET_IS_LOADING_RFP_PLANS,
+          payload: false
+        })
+      })
   }
 }
 
