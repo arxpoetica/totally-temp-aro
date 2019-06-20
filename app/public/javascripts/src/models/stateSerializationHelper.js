@@ -120,6 +120,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     }
 
     postBody.financialConstraints = JSON.parse(JSON.stringify(state.optimizationOptions.financialConstraints)) // Quick deep copy
+    postBody.competitionConfiguration = JSON.parse(JSON.stringify(state.optimizationOptions.competitionConfiguration)) // Quick deep copy
   }
 
   // Add fiber network constraints to a POST body that we will send to aro-service for optimization
@@ -259,6 +260,9 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
     if (postBody.financialConstraints) {
       state.optimizationOptions.financialConstraints = JSON.parse(JSON.stringify(postBody.financialConstraints))
+    }
+    if (postBody.competitionConfiguration) {
+      state.optimizationOptions.competitionConfiguration = JSON.parse(JSON.stringify(postBody.competitionConfiguration))
     }
     if (postBody.optimization.threshold) {
       state.optimizationOptions.threshold = +postBody.optimization.threshold
