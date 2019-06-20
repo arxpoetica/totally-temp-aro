@@ -1519,6 +1519,7 @@ class State {
 
       // Set the logged in user in the Redux store
       service.setLoggedInUserRedux(user)
+      service.loadSystemActorsRedux()
 
       service.equipmentLayerTypeVisibility.existing = service.configuration.networkEquipment.visibility.defaultShowExistingEquipment
       service.equipmentLayerTypeVisibility.planned = service.configuration.networkEquipment.visibility.defaultShowPlannedEquipment
@@ -1537,7 +1538,7 @@ class State {
       // either globally or on a resource
       service.loggedInUser.hasPermissions = (permissionsLevel, resourcePermissions) => {
         var hasPerms = !!(permissionsLevel & service.loggedInUser.systemPermissions)
-        if (!hasPerms && 'undefined' != typeof resourcePermissions){
+        if (!hasPerms && 'undefined' != typeof resourcePermissions) {
           hasPerms = hasPerms || !!(permissionsLevel & resourcePermissions)
         }
         return hasPerms
@@ -1545,30 +1546,28 @@ class State {
 
       var aclResult = null
       $http.get(`/service/auth/acl/SYSTEM/1`)
-      .then((result) => {
-        aclResult = result.data
-        // Get the acl entry corresponding to the currently logged in user
-        var userAcl = aclResult.resourcePermissions.filter((item) => item.systemActorId === service.loggedInUser.id)[0]
-        if (!!userAcl){
-          service.loggedInUser.systemPermissions = userAcl.rolePermissions
-        }
-        return $http.get(`/service/auth/users/${service.loggedInUser.id}`)
-      })
-      .then((result) => {
-        service.loggedInUser.groupIds = result.data.groupIds
-
-        var userGroupIsAdministrator = false
-        result.data.groupIds.forEach((groupId) => {
-          const userGroupAcl = aclResult.resourcePermissions.filter((item) => item.systemActorId === groupId)[0]
-          const thisGroupIsAdministrator = (userGroupAcl && (userGroupAcl.rolePermissions & service.authPermissionsByName['USER_ADMIN'].permissions)) > 0
-          userGroupIsAdministrator |= thisGroupIsAdministrator
+        .then((result) => {
+          aclResult = result.data
+          // Get the acl entry corresponding to the currently logged in user
+          var userAcl = aclResult.resourcePermissions.filter((item) => item.systemActorId === service.loggedInUser.id)[0]
+          if (!!userAcl) {
+            service.loggedInUser.systemPermissions = userAcl.rolePermissions
+          }
+          return $http.get(`/service/auth/users/${service.loggedInUser.id}`)
         })
+        .then((result) => {
+          service.loggedInUser.groupIds = result.data.groupIds
 
-        service.loggedInUser.isAdministrator = (userGroupIsAdministrator
+          var userGroupIsAdministrator = false
+          result.data.groupIds.forEach((groupId) => {
+            const userGroupAcl = aclResult.resourcePermissions.filter((item) => item.systemActorId === groupId)[0]
+            const thisGroupIsAdministrator = (userGroupAcl && (userGroupAcl.rolePermissions & service.authPermissionsByName['USER_ADMIN'].permissions)) > 0
+            userGroupIsAdministrator |= thisGroupIsAdministrator
+          })
+          service.loggedInUser.isAdministrator = (userGroupIsAdministrator
             || !!(service.loggedInUser.systemPermissions & service.authPermissionsByName['USER_ADMIN'].permissions))
-
-      })
-      .catch((err) => console.error(err))
+        })
+        .catch((err) => console.error(err))
 
       var initializeToDefaultCoords = (plan) => {
         service.requestSetMapCenter.next({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
@@ -1823,6 +1822,7 @@ class State {
       loadConfigurationFromServer: () => dispatch(UiActions.loadConfigurationFromServer()),
       getStyleValues: () => dispatch(UiActions.getStyleValues()),
       setLoggedInUserRedux: loggedInUser => dispatch(UserActions.setLoggedInUser(loggedInUser)),
+      loadSystemActorsRedux: () => dispatch(UserActions.loadSystemActors()),
       setPlanRedux: plan => dispatch(PlanActions.setActivePlan(plan)),
       setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId)),
       addPlanTargets: (planId, planTargets) => dispatch(SelectionActions.addPlanTargets(planId, planTargets)),

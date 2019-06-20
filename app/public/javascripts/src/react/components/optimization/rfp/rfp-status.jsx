@@ -15,10 +15,12 @@ class RfpStatusRow extends Component {
       CANCELED: 'badge-danger',
       FAILED: 'badge-danger'
     }
+    const createdByActor = this.props.systemActors[this.props.createdById]
+    const createdByName = createdByActor ? `${createdByActor.firstName} ${createdByActor.lastName}` : `UserID: ${this.props.createdById}`
     return <tr style={{ textAlign: 'center' }}>
       <td>{this.props.id}</td>
       <td>{this.props.name}</td>
-      <td>{this.props.createdBy}</td>
+      <td>{createdByName}</td>
       <td>
         <div className={`badge ${planStateToBadgeColor[this.props.status]}`}>{this.props.status}</div>
       </td>
@@ -39,8 +41,9 @@ class RfpStatusRow extends Component {
 RfpStatusRow.propTypes = {
   id: PropTypes.number,
   name: PropTypes.string,
-  createdBy: PropTypes.string,
-  status: PropTypes.string
+  createdById: PropTypes.number,
+  status: PropTypes.string,
+  systemActors: PropTypes.object
 }
 
 export class RfpStatus extends Component {
@@ -62,7 +65,14 @@ export class RfpStatus extends Component {
             </thead>
             <tbody>
               {this.props.rfpPlans.map(rfpPlan => (
-                <RfpStatusRow key={rfpPlan.id} id={rfpPlan.id} name={rfpPlan.name} createdBy={rfpPlan.createdBy.toString()} status={rfpPlan.planState} />
+                <RfpStatusRow
+                  key={rfpPlan.id}
+                  id={rfpPlan.id}
+                  name={rfpPlan.name}
+                  createdById={rfpPlan.createdBy}
+                  status={rfpPlan.planState}
+                  systemActors={this.props.systemActors}
+                />
               ))
               }
             </tbody>
@@ -83,11 +93,13 @@ export class RfpStatus extends Component {
 
 RfpStatus.propTypes = {
   rfpPlans: PropTypes.array,
+  systemActors: PropTypes.object,
   userId: PropTypes.number
 }
 
 const mapStateToProps = state => ({
   rfpPlans: state.optimization.rfp.rfpPlans,
+  systemActors: state.user.systemActors,
   userId: state.user.loggedInUser && state.user.loggedInUser.id
 })
 
