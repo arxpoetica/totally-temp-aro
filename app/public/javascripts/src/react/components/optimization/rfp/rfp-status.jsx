@@ -4,6 +4,70 @@ import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
 import rfpActions from './rfp-actions'
 
+class RfpReportDownloadCell extends Component {
+  constructor (props) {
+    super(props)
+    this.state = {
+      selectedReportTypeId: this.props.reportDefinitions[0].reportData.id,
+      selectedMediaType: this.props.reportDefinitions[0].reportData.media_types[0]
+    }
+  }
+
+  render () {
+    const selectedReport = this.props.reportDefinitions.filter(report => report.reportData.id === this.state.selectedReportTypeId)[0]
+    // "(new Date()).toISOString().split('T')[0]" will give "YYYY-MM-DD"
+    // Note that we are doing (new Date(Date.now())) so that we can have deterministic tests (by replacing the Date.now() function when testing)
+    const downloadFileName = `${(new Date(Date.now())).toISOString().split('T')[0]}_${selectedReport.reportData.name}.${this.state.selectedMediaType}`
+    return <div className='d-flex'>
+      <select
+        className='form-control'
+        value={this.state.selectedReportTypeId}
+        onChange={event => this.setState({ selectedReportTypeId: +event.target.value })}>
+        {this.props.reportDefinitions.map(reportDefinition => (
+          <option
+            key={reportDefinition.reportData.id}
+            value={reportDefinition.reportData.id}>
+            {reportDefinition.reportData.displayName}
+          </option>
+        ))}
+      </select>
+      <select
+        className='form-control'
+        value={this.state.selectedMediaType}
+        onChange={event => this.setState({ selectedMediaType: event.target.value })}>
+        {selectedReport.reportData.media_types.map(mediaType => (
+          <option
+            key={mediaType}
+            value={mediaType}>
+            {mediaType}
+          </option>
+        ))}
+      </select>
+      <a
+        className='btn btn-light'
+        style={{ whiteSpace: 'nowrap' }}
+        href={`/service-download-file/${downloadFileName}${selectedReport.href}.${this.state.selectedMediaType}`}
+        download
+      >
+        <i className='fa fa-download' /> Download
+      </a>
+    </div>
+  }
+}
+
+RfpReportDownloadCell.propTypes = {
+  reportDefinitions: PropTypes.arrayOf(PropTypes.shape({
+    reportData: PropTypes.shape({
+      id: PropTypes.number,
+      reportType: PropTypes.string,
+      name: PropTypes.string,
+      displayName: PropTypes.string,
+      media_types: PropTypes.arrayOf(PropTypes.string)
+    }),
+    href: PropTypes.string
+  }))
+}
+
 class RfpStatusRow extends Component {
   render () {
     const planStateToBadgeColor = {
@@ -25,14 +89,7 @@ class RfpStatusRow extends Component {
         <div className={`badge ${planStateToBadgeColor[this.props.status]}`}>{this.props.status}</div>
       </td>
       <td>
-        <button className='btn btn-sm btn-primary'>
-          <i className='fa fa-download' />
-        </button>
-      </td>
-      <td>
-        <button className='btn btn-sm btn-primary'>
-          <i className='fa fa-download' />
-        </button>
+        <RfpReportDownloadCell reportDefinitions={this.props.reportDefinitions} />
       </td>
     </tr>
   }
@@ -43,7 +100,17 @@ RfpStatusRow.propTypes = {
   name: PropTypes.string,
   createdById: PropTypes.number,
   status: PropTypes.string,
-  systemActors: PropTypes.object
+  systemActors: PropTypes.object,
+  reportDefinitions: PropTypes.arrayOf(PropTypes.shape({
+    reportData: PropTypes.shape({
+      id: PropTypes.number,
+      reportType: PropTypes.string,
+      name: PropTypes.string,
+      displayName: PropTypes.string,
+      media_types: PropTypes.arrayOf(PropTypes.string)
+    }),
+    href: PropTypes.string
+  }))
 }
 
 export class RfpStatus extends Component {
@@ -59,8 +126,7 @@ export class RfpStatus extends Component {
                 <th>Name</th>
                 <th>Created by</th>
                 <th>Status</th>
-                <th>RFP Report</th>
-                <th>Coverage Report</th>
+                <th>Reports</th>
               </tr>
             </thead>
             <tbody>
@@ -72,6 +138,7 @@ export class RfpStatus extends Component {
                   createdById={rfpPlan.createdBy}
                   status={rfpPlan.planState}
                   systemActors={this.props.systemActors}
+                  reportDefinitions={rfpPlan.reportDefinitions}
                 />
               ))
               }

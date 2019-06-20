@@ -85,11 +85,28 @@ function setClickMapToAddTarget (clickMapToAddTarget) {
 
 function loadRfpPlans (userId) {
   return dispatch => {
+    var rfpPlans = []
     AroHttp.get(`/service/v1/plan?search=type:"RFP"&user_id=${userId}`)
-      .then(result => dispatch({
-        type: Actions.RFP_SET_PLANS,
-        payload: result.data
-      }))
+      .then(result => {
+        rfpPlans = result.data
+        // Get report data for all plans
+        var reportDefinitionPromises = []
+        rfpPlans.forEach(rfpPlan => { reportDefinitionPromises.push(AroHttp.get(`/service/rfp/${rfpPlan.id}/report-definition?user_id=${userId}`)) })
+        return Promise.all(reportDefinitionPromises)
+      })
+      .then(results => {
+        const reportDefinitions = results.map(result => result.data)
+        // Report definitions will be returned in the same order as rfp plans
+        rfpPlans.forEach((rfpPlan, planIndex) => {
+          rfpPlan.reportDefinitions = reportDefinitions[planIndex].filter(reportDefinition =>
+            (reportDefinition.reportData.reportType === 'COVERAGE' || reportDefinition.reportData.reportType === 'RFP')
+          )
+        })
+        dispatch({
+          type: Actions.RFP_SET_PLANS,
+          payload: rfpPlans
+        })
+      })
       .catch(err => console.error(err))
   }
 }
