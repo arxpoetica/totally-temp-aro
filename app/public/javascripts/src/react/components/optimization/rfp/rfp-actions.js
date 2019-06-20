@@ -127,7 +127,10 @@ function loadRfpPlans (userId) {
 function clearRfpPlans () {
   return {
     type: Actions.RFP_SET_PLANS,
-    payload: []
+    payload: {
+      rfpPlans: [],
+      isLoadingRfpPlans: false
+    }
   }
 }
 
