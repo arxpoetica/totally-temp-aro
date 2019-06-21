@@ -8,19 +8,16 @@ class RfpReportDownloadCell extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      selectedReportTypeId: this.props.reportDefinitions[0].reportData.id,
-      selectedMediaType: this.props.reportDefinitions[0].reportData.media_types[0]
+      selectedReportTypeId: this.props.reportDefinitions[0].reportData.id
     }
   }
 
   render () {
     const selectedReport = this.props.reportDefinitions.filter(report => report.reportData.id === this.state.selectedReportTypeId)[0]
-    // "(new Date()).toISOString().split('T')[0]" will give "YYYY-MM-DD"
-    // Note that we are doing (new Date(Date.now())) so that we can have deterministic tests (by replacing the Date.now() function when testing)
-    const downloadFileName = `${(new Date(Date.now())).toISOString().split('T')[0]}_${selectedReport.reportData.name}.${this.state.selectedMediaType}`
     return <div className='d-flex'>
       <select
         className='form-control'
+        style={{ marginTop: '1px' }}
         value={this.state.selectedReportTypeId}
         onChange={event => this.setState({ selectedReportTypeId: +event.target.value })}>
         {this.props.reportDefinitions.map(reportDefinition => (
@@ -31,31 +28,33 @@ class RfpReportDownloadCell extends Component {
           </option>
         ))}
       </select>
-      <select
-        className='form-control'
-        value={this.state.selectedMediaType}
-        onChange={event => this.setState({ selectedMediaType: event.target.value })}>
-        {selectedReport.reportData.media_types.map(mediaType => (
-          <option
-            key={mediaType}
-            value={mediaType}>
-            {mediaType}
-          </option>
-        ))}
-      </select>
-      <a
-        className='btn btn-light'
-        style={{ whiteSpace: 'nowrap' }}
-        href={`/service-download-file/${downloadFileName}${selectedReport.href}.${this.state.selectedMediaType}`}
-        download
-      >
-        <i className='fa fa-download' /> Download
-      </a>
+      <div className='btn btn-group p-0'>
+        {
+          selectedReport.reportData.media_types.map(mediaType => {
+            // "(new Date()).toISOString().split('T')[0]" will give "YYYY-MM-DD"
+            // Note that we are doing (new Date(Date.now())) so that we can have deterministic tests (by replacing the Date.now() function when testing)
+            const downloadFileName = `${(new Date(Date.now())).toISOString().split('T')[0]}_${selectedReport.reportData.name}.${mediaType}`
+            const downloadUrl = selectedReport.href
+              .replace('{planId}', this.props.planId)
+              .replace('{mediaType}', mediaType)
+              .replace('{userId}', this.props.userId)
+            return <a
+              key={mediaType}
+              className='btn btn-light'
+              style={{ whiteSpace: 'nowrap' }}
+              href={`/service-download-file/${downloadFileName}${downloadUrl}`}
+              download>
+              <i className='fa fa-download' /> {mediaType}
+            </a>
+          })
+        }
+      </div>
     </div>
   }
 }
 
 RfpReportDownloadCell.propTypes = {
+  planId: PropTypes.number,
   reportDefinitions: PropTypes.arrayOf(PropTypes.shape({
     reportData: PropTypes.shape({
       id: PropTypes.number,
@@ -65,7 +64,8 @@ RfpReportDownloadCell.propTypes = {
       media_types: PropTypes.arrayOf(PropTypes.string)
     }),
     href: PropTypes.string
-  }))
+  })),
+  userId: PropTypes.number
 }
 
 class RfpStatusRow extends Component {
@@ -82,21 +82,21 @@ class RfpStatusRow extends Component {
     const createdByActor = this.props.systemActors[this.props.createdById]
     const createdByName = createdByActor ? `${createdByActor.firstName} ${createdByActor.lastName}` : `UserID: ${this.props.createdById}`
     return <tr style={{ textAlign: 'center' }}>
-      <td>{this.props.id}</td>
+      <td>{this.props.planId}</td>
       <td>{this.props.name}</td>
       <td>{createdByName}</td>
       <td>
         <div className={`badge ${planStateToBadgeColor[this.props.status]}`}>{this.props.status}</div>
       </td>
       <td>
-        <RfpReportDownloadCell reportDefinitions={this.props.reportDefinitions} />
+        <RfpReportDownloadCell planId={this.props.planId} userId={this.props.userId} reportDefinitions={this.props.reportDefinitions} />
       </td>
     </tr>
   }
 }
 
 RfpStatusRow.propTypes = {
-  id: PropTypes.number,
+  planId: PropTypes.number,
   name: PropTypes.string,
   createdById: PropTypes.number,
   status: PropTypes.string,
@@ -110,7 +110,8 @@ RfpStatusRow.propTypes = {
       media_types: PropTypes.arrayOf(PropTypes.string)
     }),
     href: PropTypes.string
-  }))
+  })),
+  userId: PropTypes.number
 }
 
 export class RfpStatus extends Component {
@@ -126,7 +127,7 @@ export class RfpStatus extends Component {
                 <th>Name</th>
                 <th>Created by</th>
                 <th>Status</th>
-                <th>Reports</th>
+                <th style={{ width: '400px' }}>Reports</th>
               </tr>
             </thead>
             <tbody>
@@ -155,12 +156,13 @@ export class RfpStatus extends Component {
     return this.props.rfpPlans.map(rfpPlan => (
       <RfpStatusRow
         key={rfpPlan.id}
-        id={rfpPlan.id}
+        planId={rfpPlan.id}
         name={rfpPlan.name}
         createdById={rfpPlan.createdBy}
         status={rfpPlan.planState}
         systemActors={this.props.systemActors}
         reportDefinitions={this.props.rfpReportDefinitions}
+        userId={this.props.userId}
       />
     ))
   }

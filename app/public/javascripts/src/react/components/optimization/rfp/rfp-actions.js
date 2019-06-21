@@ -98,6 +98,11 @@ function loadRfpPlans (userId) {
         const rfpReportDefinitions = results[1].data.filter(reportDefinition =>
           (reportDefinition.reportData.reportType === 'COVERAGE' || reportDefinition.reportData.reportType === 'RFP')
         )
+          .map(reportDefinition => {
+            // user_id should come from service. Manually adding it here until service does it.
+            reportDefinition.href += '?user_id={userId}'
+            return reportDefinition
+          })
         dispatch({
           type: Actions.RFP_SET_PLANS,
           payload: {
