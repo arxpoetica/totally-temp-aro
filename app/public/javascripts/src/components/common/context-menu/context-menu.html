@@ -75,7 +75,7 @@
 
 <div class="map-object-editor-context-menu-container" ng-style="$ctrl.contextMenuCss"> <!-- This ng-style will position the menu -->
   <div class="dropdown open context-menu-dropdown">
-    <div class="dropdown-menu map-object-editor-context-menu-dropdown">
+    <div class="dropdown-menu map-object-editor-context-menu-dropdown" oncontextmenu="return false">
       <!-- Show a button at the top IF there are too many menu items. The button will scroll the menu items -->
       <button ng-if="$ctrl.menuItems.length > $ctrl.MAX_MENU_ITEMS"
         class="btn btn-sm btn-block btn-light p-0"
