@@ -12,7 +12,6 @@ export class RingButton extends Component {
   // ToDo: abstract and combine with Coverage Button and RFP Button
   constructor (props) {
     super(props)
-    
     this.StatusTypes = Object.freeze({
       UNINITIALIZED: 'UNINITIALIZED',
       STARTED: 'STARTED',
@@ -29,6 +28,8 @@ export class RingButton extends Component {
   }
 
   render () {
+    console.log(this.props)
+    
     switch (this.props.status) {
       case this.StatusTypes.UNINITIALIZED:
         return this.renderUninitializedButton()
@@ -75,13 +76,15 @@ export class RingButton extends Component {
   renderFinishedButton () {
     return (
       <button className={'btn btn-block modify-coverage-button'} style={{ marginBottom: '10px' }}
-        onClick={() => this.requestSubNet()}>
+        onClick={() => this.props.onModify()}>
         <i className='fa fa-edit' /> Modify
       </button>
     )
   }
   
   requestSubNet(){
+    console.log(this.props)
+    //this.props.onModify()
     var ringIds = []
     for (var key in this.props.rings) {
       ringIds.push(''+this.props.rings[key].id)
@@ -112,7 +115,8 @@ RingButton.propTypes = {
   progress: PropTypes.number,
   userId: PropTypes.number,
   planId: PropTypes.number,
-  projectId: PropTypes.number
+  projectId: PropTypes.number, 
+  testProp: PropTypes.string
 }
 
 const mapStateToProps = (state) => {

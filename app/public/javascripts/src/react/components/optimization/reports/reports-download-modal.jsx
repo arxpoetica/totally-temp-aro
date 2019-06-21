@@ -9,6 +9,7 @@ import '../../common-styles/modal.css'
 export class ReportsDownloadRow extends Component {
   constructor (props) {
     super(props)
+    console.log(JSON.parse( JSON.stringify(this.props) ))
     this.state = {
       selectedFormat: this.props.mediaTypes[0]
     }
@@ -50,6 +51,7 @@ ReportsDownloadRow.propTypes = {
 
 export class ReportsDownloadModal extends Component {
   render () {
+    console.log(JSON.parse( JSON.stringify(this.props) ))
     const reportTypes = (this.props.reportTypes || [])
     const visibleReports = (this.props.reportsMetaData || []).filter(report => reportTypes.indexOf(report.reportType) >= 0)
     return <div
