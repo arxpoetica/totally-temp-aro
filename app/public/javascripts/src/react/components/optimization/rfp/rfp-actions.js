@@ -83,14 +83,15 @@ function setClickMapToAddTarget (clickMapToAddTarget) {
   }
 }
 
-function loadRfpPlans (userId) {
+function loadRfpPlans (userId, searchTerm = '') {
   return dispatch => {
     dispatch({
       type: Actions.RFP_SET_IS_LOADING_RFP_PLANS,
       payload: true
     })
+    const searchTermWithQuotes = searchTerm ? ` "${searchTerm}"` : ''
     Promise.all([
-      AroHttp.get(`/service/v1/plan?search=type:"RFP"&user_id=${userId}`),
+      AroHttp.get(`/service/v1/plan?search=type:"RFP"${searchTermWithQuotes}&user_id=${userId}`),
       AroHttp.get(`/service/rfp/report-definition?user_id=${userId}`)
     ])
       .then(results => {

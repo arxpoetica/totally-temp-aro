@@ -115,9 +115,35 @@ RfpStatusRow.propTypes = {
 }
 
 export class RfpStatus extends Component {
+  constructor (props) {
+    super(props)
+    this.state = {
+      searchTerm: ''
+    }
+  }
+
   render () {
     return <div className='container pt-5'>
       <h2>RFP Plan Status</h2>
+      <div className='row'>
+        <div className='col-md-6' />
+        <div className='col-md-6'>
+          <div className='input-group mb-3'>
+            <input
+              type='text'
+              className='form-control'
+              placeholder='Enter search term...'
+              aria-label='Enter search term"'
+              value={this.state.searchTerm}
+              onChange={event => this.onSearchTermChanged(event.target.value)}
+              onKeyPress={event => this.onSearchKeyPress(event)}
+            />
+            <div className='input-group-append'>
+              <button className='btn btn-primary' onClick={event => this.doSearch()}>Search</button>
+            </div>
+          </div>
+        </div>
+      </div>
       <div className='row'>
         <div className='col-md-12'>
           <table className='table table-sm table-striped'>
@@ -206,6 +232,22 @@ export class RfpStatus extends Component {
     </nav>
   }
 
+  onSearchTermChanged (newSearchTerm) {
+    this.setState({
+      searchTerm: newSearchTerm
+    })
+  }
+
+  onSearchKeyPress (event) {
+    if (event.key === 'Enter') {
+      this.doSearch()
+    }
+  }
+
+  doSearch () {
+    this.props.loadRfpPlans(this.props.userId, this.state.searchTerm)
+  }
+
   componentDidMount () {
     this.props.loadRfpPlans(this.props.userId)
   }
@@ -246,7 +288,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
   clearRfpPlans: () => dispatch(RfpActions.clearRfpPlans()),
-  loadRfpPlans: userId => dispatch(RfpActions.loadRfpPlans(userId)),
+  loadRfpPlans: (userId, searchTerm) => dispatch(RfpActions.loadRfpPlans(userId, searchTerm)),
   setPlanListOffset: planListOffset => dispatch(RfpActions.setPlanListOffset(planListOffset))
 })
 
