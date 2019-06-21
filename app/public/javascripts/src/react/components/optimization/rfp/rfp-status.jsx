@@ -160,7 +160,7 @@ export class RfpStatus extends Component {
         createdById={rfpPlan.createdBy}
         status={rfpPlan.planState}
         systemActors={this.props.systemActors}
-        reportDefinitions={rfpPlan.reportDefinitions}
+        reportDefinitions={this.props.rfpReportDefinitions}
       />
     ))
   }
@@ -176,6 +176,16 @@ export class RfpStatus extends Component {
 
 RfpStatus.propTypes = {
   rfpPlans: PropTypes.array,
+  rfpReportDefinitions: PropTypes.arrayOf(PropTypes.shape({
+    reportData: PropTypes.shape({
+      id: PropTypes.number,
+      reportType: PropTypes.string,
+      name: PropTypes.string,
+      displayName: PropTypes.string,
+      media_types: PropTypes.arrayOf(PropTypes.string)
+    }),
+    href: PropTypes.string
+  })),
   isLoadingRfpPlans: PropTypes.bool,
   systemActors: PropTypes.object,
   userId: PropTypes.number
@@ -183,6 +193,7 @@ RfpStatus.propTypes = {
 
 const mapStateToProps = state => ({
   rfpPlans: state.optimization.rfp.rfpPlans,
+  rfpReportDefinitions: state.optimization.rfp.rfpReportDefinitions,
   isLoadingRfpPlans: state.optimization.rfp.isLoadingRfpPlans,
   systemActors: state.user.systemActors,
   userId: state.user.loggedInUser && state.user.loggedInUser.id

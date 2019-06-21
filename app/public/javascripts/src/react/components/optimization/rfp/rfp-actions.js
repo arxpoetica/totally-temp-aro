@@ -85,31 +85,24 @@ function setClickMapToAddTarget (clickMapToAddTarget) {
 
 function loadRfpPlans (userId) {
   return dispatch => {
-    var rfpPlans = []
     dispatch({
       type: Actions.RFP_SET_IS_LOADING_RFP_PLANS,
       payload: true
     })
-    AroHttp.get(`/service/v1/plan?search=type:"RFP"&user_id=${userId}`)
-      .then(result => {
-        rfpPlans = result.data
-        // Get report data for all plans
-        var reportDefinitionPromises = []
-        rfpPlans.forEach(rfpPlan => { reportDefinitionPromises.push(AroHttp.get(`/service/rfp/${rfpPlan.id}/report-definition?user_id=${userId}`)) })
-        return Promise.all(reportDefinitionPromises)
-      })
+    Promise.all([
+      AroHttp.get(`/service/v1/plan?search=type:"RFP"&user_id=${userId}`),
+      AroHttp.get(`/service/rfp/report-definition?user_id=${userId}`)
+    ])
       .then(results => {
-        const reportDefinitions = results.map(result => result.data)
-        // Report definitions will be returned in the same order as rfp plans
-        rfpPlans.forEach((rfpPlan, planIndex) => {
-          rfpPlan.reportDefinitions = reportDefinitions[planIndex].filter(reportDefinition =>
-            (reportDefinition.reportData.reportType === 'COVERAGE' || reportDefinition.reportData.reportType === 'RFP')
-          )
-        })
+        const rfpPlans = results[0].data
+        const rfpReportDefinitions = results[1].data.filter(reportDefinition =>
+          (reportDefinition.reportData.reportType === 'COVERAGE' || reportDefinition.reportData.reportType === 'RFP')
+        )
         dispatch({
           type: Actions.RFP_SET_PLANS,
           payload: {
             rfpPlans: rfpPlans,
+            rfpReportDefinitions: rfpReportDefinitions,
             isLoadingRfpPlans: false
           }
         })
