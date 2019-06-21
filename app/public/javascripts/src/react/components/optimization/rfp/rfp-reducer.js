@@ -15,7 +15,9 @@ const defaultState = {
   showAllRfpStatus: false,
   rfpPlans: [],
   rfpReportDefinitions: [],
-  isLoadingRfpPlans: false
+  isLoadingRfpPlans: false,
+  planListOffset: 0,
+  planListLimit: 10
 }
 
 function clearState () {
@@ -74,13 +76,21 @@ function setRfpPlans (state, rfpPlans, rfpReportDefinitions, isLoadingRfpPlans) 
   return { ...state,
     rfpPlans: rfpPlans,
     rfpReportDefinitions: rfpReportDefinitions,
-    isLoadingRfpPlans: isLoadingRfpPlans
+    isLoadingRfpPlans: isLoadingRfpPlans,
+    planListOffset: defaultState.planListOffset,
+    planListLimit: defaultState.planListLimit
   }
 }
 
 function setIsLoadingRfpPlans (state, isLoadingRfpPlans) {
   return { ...state,
     isLoadingRfpPlans: isLoadingRfpPlans
+  }
+}
+
+function setPlanListOffset (state, planListOffset) {
+  return { ...state,
+    planListOffset: planListOffset
   }
 }
 
@@ -115,6 +125,9 @@ function rfpReducer (state = defaultState, action) {
 
     case Actions.RFP_SET_IS_LOADING_RFP_PLANS:
       return setIsLoadingRfpPlans(state, action.payload)
+
+    case Actions.RFP_SET_PLAN_LIST_OFFSET:
+      return setPlanListOffset(state, action.payload)
 
     default:
       return state

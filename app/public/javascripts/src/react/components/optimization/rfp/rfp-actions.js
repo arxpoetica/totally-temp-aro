@@ -132,6 +132,13 @@ function clearRfpPlans () {
   }
 }
 
+function setPlanListOffset (planListOffset) {
+  return {
+    type: Actions.RFP_SET_PLAN_LIST_OFFSET,
+    payload: planListOffset
+  }
+}
+
 function showOrHideAllRfpStatus (show) {
   return {
     type: Actions.RFP_SHOW_HIDE_ALL_RFP_STATUS,
@@ -156,5 +163,6 @@ export default {
   replaceTarget,
   setSelectedTarget,
   setClickMapToAddTarget,
+  setPlanListOffset,
   showOrHideAllRfpStatus
 }

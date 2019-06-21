@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { PropTypes } from 'prop-types'
 import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
-import rfpActions from './rfp-actions'
+import RfpActions from './rfp-actions'
 
 class RfpReportDownloadCell extends Component {
   constructor (props) {
@@ -138,6 +138,7 @@ export class RfpStatus extends Component {
               }
             </tbody>
           </table>
+          {this.renderPagination()}
         </div>
       </div>
     </div>
@@ -153,7 +154,8 @@ export class RfpStatus extends Component {
   }
 
   renderRfpPlanRows () {
-    return this.props.rfpPlans.map(rfpPlan => (
+    const plansToRender = this.props.rfpPlans.slice(this.props.planListOffset, this.props.planListOffset + this.props.planListLimit)
+    return plansToRender.map(rfpPlan => (
       <RfpStatusRow
         key={rfpPlan.id}
         planId={rfpPlan.id}
@@ -165,6 +167,43 @@ export class RfpStatus extends Component {
         userId={this.props.userId}
       />
     ))
+  }
+
+  renderPagination () {
+    const numPlans = this.props.rfpPlans.length
+    if (numPlans === 0) {
+      return null
+    }
+    const activePageNumber = Math.round(this.props.planListOffset / this.props.planListLimit) + 1
+    const numPages = Math.ceil(numPlans / this.props.planListLimit)
+    const NUM_PAGES_TO_SHOW = 2 // Number of pages to show before/after the active page
+    const startPage = Math.max(activePageNumber - NUM_PAGES_TO_SHOW, 1)
+    const endPage = Math.min(activePageNumber + NUM_PAGES_TO_SHOW, numPages)
+    const planListLimit = this.props.planListLimit
+    const offsetOnClick = pageToLoad => (pageToLoad - 1) * planListLimit + 1
+    var pageBlocks = []
+    if (startPage > 1) {
+      pageBlocks.push(<li key={'Previous'} className='page-item'>
+        <a className='page-link' href='#' onClick={event => this.props.setPlanListOffset(offsetOnClick(activePageNumber - 1))}>Prev</a>
+      </li>)
+    }
+    for (var iPage = startPage; iPage <= endPage; ++iPage) {
+      const liClassName = 'page-item' + (iPage === activePageNumber ? ' active' : '')
+      const copyIPage = iPage
+      pageBlocks.push(<li key={iPage} className={liClassName}>
+        <a className='page-link' href='#' onClick={event => this.props.setPlanListOffset(offsetOnClick(copyIPage))}>{iPage}</a>
+      </li>)
+    }
+    if (endPage !== numPages) {
+      pageBlocks.push(<li key={'Next'} className='page-item'>
+        <a className='page-link' href='#' onClick={event => this.props.setPlanListOffset(offsetOnClick(activePageNumber + 1))}>Next</a>
+      </li>)
+    }
+    return <nav aria-label='RFP plan pagination'>
+      <ul className='pagination justify-content-center'>
+        {pageBlocks}
+      </ul>
+    </nav>
   }
 
   componentDidMount () {
@@ -189,6 +228,8 @@ RfpStatus.propTypes = {
     href: PropTypes.string
   })),
   isLoadingRfpPlans: PropTypes.bool,
+  planListOffset: PropTypes.number,
+  planListLimit: PropTypes.number,
   systemActors: PropTypes.object,
   userId: PropTypes.number
 }
@@ -197,13 +238,16 @@ const mapStateToProps = state => ({
   rfpPlans: state.optimization.rfp.rfpPlans,
   rfpReportDefinitions: state.optimization.rfp.rfpReportDefinitions,
   isLoadingRfpPlans: state.optimization.rfp.isLoadingRfpPlans,
+  planListOffset: state.optimization.rfp.planListOffset,
+  planListLimit: state.optimization.rfp.planListLimit,
   systemActors: state.user.systemActors,
   userId: state.user.loggedInUser && state.user.loggedInUser.id
 })
 
 const mapDispatchToProps = dispatch => ({
-  clearRfpPlans: () => dispatch(rfpActions.clearRfpPlans()),
-  loadRfpPlans: userId => dispatch(rfpActions.loadRfpPlans(userId))
+  clearRfpPlans: () => dispatch(RfpActions.clearRfpPlans()),
+  loadRfpPlans: userId => dispatch(RfpActions.loadRfpPlans(userId)),
+  setPlanListOffset: planListOffset => dispatch(RfpActions.setPlanListOffset(planListOffset))
 })
 
 const RfpStatusComponent = wrapComponentWithProvider(reduxStore, RfpStatus, mapStateToProps, mapDispatchToProps)
