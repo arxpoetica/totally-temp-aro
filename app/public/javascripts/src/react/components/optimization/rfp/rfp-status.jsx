@@ -176,13 +176,13 @@ export class RfpStatus extends Component {
     }
     const activePageNumber = Math.round(this.props.planListOffset / this.props.planListLimit) + 1
     const numPages = Math.ceil(numPlans / this.props.planListLimit)
-    const NUM_PAGES_TO_SHOW = 2 // Number of pages to show before/after the active page
+    const NUM_PAGES_TO_SHOW = 4 // Number of pages to show before/after the active page
     const startPage = Math.max(activePageNumber - NUM_PAGES_TO_SHOW, 1)
     const endPage = Math.min(activePageNumber + NUM_PAGES_TO_SHOW, numPages)
     const planListLimit = this.props.planListLimit
-    const offsetOnClick = pageToLoad => (pageToLoad - 1) * planListLimit + 1
+    const offsetOnClick = pageToLoad => (pageToLoad - 1) * planListLimit
     var pageBlocks = []
-    if (startPage > 1) {
+    if (activePageNumber > 1) {
       pageBlocks.push(<li key={'Previous'} className='page-item'>
         <a className='page-link' href='#' onClick={event => this.props.setPlanListOffset(offsetOnClick(activePageNumber - 1))}>Prev</a>
       </li>)
@@ -194,7 +194,7 @@ export class RfpStatus extends Component {
         <a className='page-link' href='#' onClick={event => this.props.setPlanListOffset(offsetOnClick(copyIPage))}>{iPage}</a>
       </li>)
     }
-    if (endPage !== numPages) {
+    if (activePageNumber !== numPages) {
       pageBlocks.push(<li key={'Next'} className='page-item'>
         <a className='page-link' href='#' onClick={event => this.props.setPlanListOffset(offsetOnClick(activePageNumber + 1))}>Next</a>
       </li>)
