@@ -2,7 +2,8 @@ import React, { Component } from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import { PropTypes } from 'prop-types'
 import reduxStore from '../../../redux-store'
-import ringActions from './ring-edit-actions.js'
+import RingActions from './ring-edit-actions.js'
+import PlanActions from '../plan/plan-actions'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import socketManager from '../../../react/common/socket-manager'
 import AroHttp from '../../common/aro-http'
@@ -14,13 +15,15 @@ export class RingButton extends Component {
     super(props)
     this.StatusTypes = Object.freeze({
       UNINITIALIZED: 'UNINITIALIZED',
+      START_STATE: 'START_STATE',
       STARTED: 'STARTED',
       COMPLETED: 'COMPLETED'
     })
 
     this.unsubscriber = socketManager.subscribe('PROGRESS_MESSAGE_DATA', (progressData) => {
       if (progressData.data.processType === 'ring') {
-        this.props.setAnalysisStatus(progressData.data.optimizationState)
+        //this.props.setAnalysisStatus(progressData.data.optimizationState)
+        this.props.setActivePlanState(progressData.data.optimizationState)
         this.props.setAnalysisProgress(progressData.data.progress)
       }
     })
@@ -31,6 +34,7 @@ export class RingButton extends Component {
     console.log(this.props)
     
     switch (this.props.status) {
+      case this.StatusTypes.START_STATE: 
       case this.StatusTypes.UNINITIALIZED:
         return this.renderUninitializedButton()
 
@@ -121,7 +125,8 @@ RingButton.propTypes = {
 
 const mapStateToProps = (state) => {
   return {
-    status: state.ringEdit.analysis.status,
+    //status: state.ringEdit.analysis.status,
+    status: state.plan.activePlan && state.plan.activePlan.planState, 
     progress: state.ringEdit.analysis.progress,
     userId: state.user.loggedInUser.id,
     planId: state.plan.activePlan && state.plan.activePlan.id,
@@ -139,8 +144,9 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
       boundaryLayers, initializationParams))
   },
   */
-  setAnalysisStatus: (status) => dispatch(ringActions.setAnalysisStatus(status)), 
-  setAnalysisProgress: (progress) => dispatch(ringActions.setAnalysisProgress(progress))
+  //setAnalysisStatus: (status) => dispatch(RingActions.setAnalysisStatus(status)), 
+  setActivePlanState: (status) => dispatch(PlanActions.setActivePlanState(status)), 
+  setAnalysisProgress: (progress) => dispatch(RingActions.setAnalysisProgress(progress))
 })
 
 const RingButtonComponent = wrapComponentWithProvider(reduxStore, RingButton, mapStateToProps, mapDispatchToProps)

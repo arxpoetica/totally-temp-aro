@@ -19,16 +19,6 @@ export class RingEdit extends Component {
     super(props)
     this.createdMapObjects = []
     this.mapObjectListeners = []
-
-    this.unsubscriber = socketManager.subscribe('PROGRESS_MESSAGE_DATA', (progressData) => {
-      console.log(progressData)
-      /*
-      if (progressData.data.processType === 'coverage') {
-        console.log(progressData)
-        this.props.setCoverageProgress(progressData.data)
-      }
-      */
-    })
   }
   
   render () {
