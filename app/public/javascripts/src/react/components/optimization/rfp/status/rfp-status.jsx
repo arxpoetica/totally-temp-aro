@@ -3,7 +3,9 @@ import { PropTypes } from 'prop-types'
 import reduxStore from '../../../../../redux-store'
 import wrapComponentWithProvider from '../../../../common/provider-wrapped-component'
 import RfpActions from '../rfp-actions'
+import ReportDefinitionPropType from './report-definition-prop-type'
 import RfpStatusRow from './rfp-status-row.jsx'
+import RfpStatusSearch from './rfp-status-search.jsx'
 
 export class RfpStatus extends Component {
   constructor (props) {
@@ -19,20 +21,7 @@ export class RfpStatus extends Component {
       <div className='row'>
         <div className='col-md-6' />
         <div className='col-md-6'>
-          <div className='input-group mb-3'>
-            <input
-              type='text'
-              className='form-control'
-              placeholder='Enter search term...'
-              aria-label='Enter search term"'
-              value={this.state.searchTerm}
-              onChange={event => this.onSearchTermChanged(event.target.value)}
-              onKeyPress={event => this.onSearchKeyPress(event)}
-            />
-            <div className='input-group-append'>
-              <button className='btn btn-primary' onClick={event => this.doSearch()}>Search</button>
-            </div>
-          </div>
+          <RfpStatusSearch />
         </div>
       </div>
       <div className='row'>
@@ -123,22 +112,6 @@ export class RfpStatus extends Component {
     </nav>
   }
 
-  onSearchTermChanged (newSearchTerm) {
-    this.setState({
-      searchTerm: newSearchTerm
-    })
-  }
-
-  onSearchKeyPress (event) {
-    if (event.key === 'Enter') {
-      this.doSearch()
-    }
-  }
-
-  doSearch () {
-    this.props.loadRfpPlans(this.props.userId, this.state.searchTerm)
-  }
-
   componentDidMount () {
     this.props.loadRfpPlans(this.props.userId)
   }
@@ -150,16 +123,7 @@ export class RfpStatus extends Component {
 
 RfpStatus.propTypes = {
   rfpPlans: PropTypes.array,
-  rfpReportDefinitions: PropTypes.arrayOf(PropTypes.shape({
-    reportData: PropTypes.shape({
-      id: PropTypes.number,
-      reportType: PropTypes.string,
-      name: PropTypes.string,
-      displayName: PropTypes.string,
-      media_types: PropTypes.arrayOf(PropTypes.string)
-    }),
-    href: PropTypes.string
-  })),
+  rfpReportDefinitions: ReportDefinitionPropType,
   isLoadingRfpPlans: PropTypes.bool,
   planListOffset: PropTypes.number,
   planListLimit: PropTypes.number,
@@ -179,7 +143,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
   clearRfpPlans: () => dispatch(RfpActions.clearRfpPlans()),
-  loadRfpPlans: (userId, searchTerm) => dispatch(RfpActions.loadRfpPlans(userId, searchTerm)),
+  loadRfpPlans: (userId) => dispatch(RfpActions.loadRfpPlans(userId)),
   setPlanListOffset: planListOffset => dispatch(RfpActions.setPlanListOffset(planListOffset))
 })
 
