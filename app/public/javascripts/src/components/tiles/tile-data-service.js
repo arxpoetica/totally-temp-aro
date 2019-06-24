@@ -397,7 +397,8 @@ class TileDataService {
     this._clearCacheInTileBox(this.tileProviderCache, invalidatedLayers, tileBox)
   }
 
-  displayInvalidatedTiles (tileBox) {
+  displayInvalidatedTiles (layerNames, tileBox) {
+    const setOfLayerNames = new Set(layerNames)
     Object.keys(this.tileHtmlCache).forEach(htmlCacheKey => {
       // Get the zoom, x and y from the html cache key
       const components = htmlCacheKey.split('-')
@@ -405,9 +406,20 @@ class TileDataService {
       const tileX = +components[1]
       const tileY = +components[2]
       if (this.isWithinBounds(tileBox.zoom, tileZoom, tileX, tileY, tileBox.x1, tileBox.y1, tileBox.x2, tileBox.y2)) {
-        // Show a div that indicated whether the data in this tile is stale. The div will be hidden after the div is rendered
-        const staleDataDiv = this.tileHtmlCache[htmlCacheKey].staleDataDiv
-        staleDataDiv.style.display = 'block'
+        // This tile is within bounds, but we want to show the stale-data-div ONLY if at least one layer is invalidated
+        const tileDataKey = `${tileZoom}-${tileX}-${tileY}` // Do not use htmlCacheKey, that has a fourth component
+        const tileData = this.tileDataCache[tileDataKey]
+        var hasInvalidatedLayer = false
+        Object.keys(tileData).forEach(key => {
+          if (setOfLayerNames.has(key)) {
+            hasInvalidatedLayer = true
+          }
+        })
+        if (hasInvalidatedLayer) {
+          // Show a div that indicated whether the data in this tile is stale. The div will be hidden after the div is rendered
+          const staleDataDiv = this.tileHtmlCache[htmlCacheKey].staleDataDiv
+          staleDataDiv.style.display = 'block'
+        }
       }
     })
   }

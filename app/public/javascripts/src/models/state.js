@@ -1788,11 +1788,12 @@ class State {
     service.handleTileInvalidationMessage = msg => {
       // If the tileBox is null, use a tile box that covers the entire world
       const tileBox = msg.payload.tileBox || wholeWorldTileBox
+      const layerNames = msg.payload.layerNames
       // First, mark the HTML cache so we know which tiles are invalidated
-      tileDataService.displayInvalidatedTiles(tileBox)
+      tileDataService.displayInvalidatedTiles(layerNames, tileBox)
 
       // Then delete items from the tile data cache and the tile provider cache
-      tileDataService.clearCacheInTileBox(msg.payload.layerNames, tileBox)
+      tileDataService.clearCacheInTileBox(layerNames, tileBox)
 
       // Refresh map layers
       service.requestMapLayerRefresh.next(null)
