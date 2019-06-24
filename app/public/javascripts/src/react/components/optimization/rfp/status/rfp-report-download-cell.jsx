@@ -14,6 +14,7 @@ export default class RfpReportDownloadCell extends Component {
     const selectedReport = this.props.reportDefinitions.filter(report => report.reportData.id === this.state.selectedReportTypeId)[0]
     return <div className='d-flex'>
       <select
+        id='selectRfpReportDefinition'
         className='form-control'
         style={{ marginTop: '1px' }}
         value={this.state.selectedReportTypeId}
