@@ -277,6 +277,14 @@
       <i class="fa fa-cube"></i>
   </button>
 
+  <button ng-if="$ctrl.state.configuration.toolbar.showRfpStatus"
+    ng-click="$ctrl.showRfpWindow()"
+    class="btn"
+    data-toggle="tooltip" data-placement="bottom" 
+    title="Show RFP status">
+      <i class="fa fa-cloud"></i>
+  </button>
+
   <div class="dropdown" ng-hide="!$ctrl.showDropDown" ng-style="{ 'border-left': '#eee 1px dotted', width: $ctrl.dropdownWidthPixels }">
     <button class="btn btn-light" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
       <i class="fa fa-angle-double-down"></i>

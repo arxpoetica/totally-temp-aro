@@ -1,4 +1,5 @@
 import Constants from '../common/constants'
+import FullScreenActions from '../../react/components/full-screen/full-screen-actions'
 import RfpActions from '../../react/components/optimization/rfp/rfp-actions'
 
 class ToolBarController {
@@ -533,6 +534,10 @@ class ToolBarController {
     }
   }
 
+  showRfpWindow () {
+    this.showFullScreenContainer()
+  }
+
   $onDestroy () {
     this.unsubscribeRedux()
   }
@@ -544,7 +549,10 @@ class ToolBarController {
 
   mapDispatchToTarget (dispatch) {
     return {
-      
+      showFullScreenContainer: () => {
+        dispatch(FullScreenActions.showOrHideFullScreenContainer(true))
+        dispatch(RfpActions.showOrHideAllRfpStatus(true))
+      }
     }
   }
 }

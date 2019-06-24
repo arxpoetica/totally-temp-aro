@@ -11,7 +11,7 @@ import PlanTargetList from '../react/components/selection/plan-target-list.jsx'
 import ReportModuleList from '../react/components/configuration/report/report-module-list.jsx'
 import ReportsDownloadModal from '../react/components/optimization/reports/reports-download-modal.jsx'
 import RfpAnalyzer from '../react/components/optimization/rfp/rfp-analyzer.jsx'
-import RfpStatusModal from '../react/components/optimization/rfp/rfp-status-modal.jsx'
+import RfpStatus from '../react/components/optimization/rfp/status/rfp-status.jsx'
 
 import boundaryDetail from './sidebar/view/boundary-detail'
 import equipmentDetail from './sidebar/view/equipment-detail'
@@ -84,6 +84,7 @@ import planInputsModal from './header/plan-inputs-modal'
 import networkPlanManage from './header/network-plan-manage'
 import networkPlan from './header/network-plan'
 import uiNotification from './footer/ui-notification'
+import fullScreenContainer from './full-screen/full-screen-container'
 import userAccountSettings from './global-settings/user-account-settings'
 import manageUsers from './global-settings/manage-users'
 import multifactorSettings from './global-settings/multifactor-settings'
@@ -190,6 +191,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('networkPlanManage', networkPlanManage)
   .component('networkPlan', networkPlan)
   .component('uiNotification', uiNotification)
+  .component('fullScreenContainer', fullScreenContainer)
   .component('userAccountSettings', userAccountSettings)
   .component('manageUsers', manageUsers)
   .component('multifactorSettings', multifactorSettings)
@@ -230,7 +232,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rReportModuleList', react2angular(ReportModuleList))
   .component('rReportsDownloadModal', react2angular(ReportsDownloadModal, ['reportTypes', 'title'])) // Some properties are passed in manually, not through redux.
   .component('rRfpAnalyzer', react2angular(RfpAnalyzer))
-  .component('rRfpStatusModal', react2angular(RfpStatusModal))
+  .component('rRfpStatus', react2angular(RfpStatus))
   .component('rToastContainer', react2angular(ToastContainer))
   .service('Utils', utils)
   .service('state', state)

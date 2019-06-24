@@ -3,18 +3,44 @@ class PlanInputsModalController {
     this.state = state
     this.$element = $element
     this.$http = $http
-    this.initModalData()
+  }
+
+  $onInit () {
+    this.$element.find('#plan_inputs_modal > .modal-dialog').css('width', '350') // Ugh.. But.. legacy code. Leave for now
   }
 
   initModalData () {
     this.planName = null
     this.parentPlan = null
+    this.planType = 'UNDEFINED'
     const currentPlan = this.state.plan
     if (currentPlan && !currentPlan.isEphemeral) {
       // IF the current plan is not an ephemeral plan, then set it as the parent plan.
       this.parentPlan = currentPlan
     }
     this.parentPlanSelectorExpanded = false
+    this.allPlanTypes = {
+      UNDEFINED: 'Standard Plan',
+      NETWORK_PLAN: 'Network Build',
+      NETWORK_ANALYSIS: 'Network Analysis',
+      COVERAGE: 'Coverage Plan',
+      MANUAL: 'Manual Plan',
+      RFP: 'RFP',
+      RING: 'Ring Plan'
+    }
+    // Users can control the list of allowed plan types via a database setting
+    var allPlanTypes = []
+    var allowedPlanTypes = []
+    this.planTypes = {}
+    try {
+      allPlanTypes = this.state.configuration.plan.allPlanTypes
+      allowedPlanTypes = this.state.configuration.plan.allowedPlanTypes
+      allowedPlanTypes.forEach(allowedPlanType => { this.planTypes[allowedPlanType] = allPlanTypes[allowedPlanType] })
+    } catch (err) {
+      console.error('Error when determining the list of plan types to display. Plan configuration is:')
+      console.error(this.state.configuration.plan)
+      console.error(err)
+    }
   }
 
   close () {
@@ -39,9 +65,9 @@ class PlanInputsModalController {
       .then((planNameExists) => {
         if (!planNameExists) {
           if (this.parentPlan) {
-          // A parent plan is specified. Ignore the currently open plan, and just create a new one using
-          // the selected plan name and parent plan
-            this.state.createNewPlan(false, this.planName, this.parentPlan)
+            // A parent plan is specified. Ignore the currently open plan, and just create a new one using
+            // the selected plan name and parent plan
+            this.state.createNewPlan(false, this.planName, this.parentPlan, this.planType)
               .then((result) => this.state.loadPlan(result.data.id))
               .catch((err) => console.error(err))
           } else {
@@ -49,12 +75,12 @@ class PlanInputsModalController {
             var currentPlan = this.state.plan
             if (currentPlan.ephemeral) {
               if (this.planName) {
-                this.state.makeCurrentPlanNonEphemeral(this.planName)
+                this.state.makeCurrentPlanNonEphemeral(this.planName, this.planType)
                 this.resetPlanInputs()
               }
             } else {
               if (this.planName) {
-                this.state.copyCurrentPlanTo(this.planName)
+                this.state.copyCurrentPlanTo(this.planName, this.planType)
                 this.resetPlanInputs()
               }
             }
@@ -120,10 +146,6 @@ class PlanInputsModalController {
 
   clearParentPlan () {
     this.parentPlan = null
-  }
-
-  $onInit () {
-    this.$element.find('#plan_inputs_modal > .modal-dialog').css('width', '350')
   }
 }
 

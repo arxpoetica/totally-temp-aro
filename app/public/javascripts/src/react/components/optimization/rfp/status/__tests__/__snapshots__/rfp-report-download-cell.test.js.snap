@@ -1,0 +1,259 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Default component render 1`] = `
+<div
+  className="d-flex"
+>
+  <select
+    className="form-control"
+    id="selectRfpReportDefinition"
+    onChange={[Function]}
+    style={
+      Object {
+        "marginTop": "1px",
+      }
+    }
+    value={13}
+  >
+    <option
+      key="13"
+      value={13}
+    >
+      Site Coverage
+    </option>
+    <option
+      key="14"
+      value={14}
+    >
+      RFP Report
+    </option>
+  </select>
+  <div
+    className="btn btn-group p-0"
+  >
+    <a
+      className="btn btn-light"
+      download={true}
+      href="/service-download-file/2019-06-24_site_area_coverage.csv/rfp/42/report/coverage/13.csv"
+      key="csv"
+      style={
+        Object {
+          "whiteSpace": "nowrap",
+        }
+      }
+    >
+      <i
+        className="fa fa-download"
+      />
+       
+      csv
+    </a>
+    <a
+      className="btn btn-light"
+      download={true}
+      href="/service-download-file/2019-06-24_site_area_coverage.json/rfp/42/report/coverage/13.json"
+      key="json"
+      style={
+        Object {
+          "whiteSpace": "nowrap",
+        }
+      }
+    >
+      <i
+        className="fa fa-download"
+      />
+       
+      json
+    </a>
+    <a
+      className="btn btn-light"
+      download={true}
+      href="/service-download-file/2019-06-24_site_area_coverage.xls/rfp/42/report/coverage/13.xls"
+      key="xls"
+      style={
+        Object {
+          "whiteSpace": "nowrap",
+        }
+      }
+    >
+      <i
+        className="fa fa-download"
+      />
+       
+      xls
+    </a>
+  </div>
+</div>
+`;
+
+exports[`When selected report changes 1`] = `
+<div
+  className="d-flex"
+>
+  <select
+    className="form-control"
+    id="selectRfpReportDefinition"
+    onChange={[Function]}
+    style={
+      Object {
+        "marginTop": "1px",
+      }
+    }
+    value={13}
+  >
+    <option
+      key="13"
+      value={13}
+    >
+      Site Coverage
+    </option>
+    <option
+      key="14"
+      value={14}
+    >
+      RFP Report
+    </option>
+  </select>
+  <div
+    className="btn btn-group p-0"
+  >
+    <a
+      className="btn btn-light"
+      download={true}
+      href="/service-download-file/2019-06-24_site_area_coverage.csv/rfp/42/report/coverage/13.csv"
+      key="csv"
+      style={
+        Object {
+          "whiteSpace": "nowrap",
+        }
+      }
+    >
+      <i
+        className="fa fa-download"
+      />
+       
+      csv
+    </a>
+    <a
+      className="btn btn-light"
+      download={true}
+      href="/service-download-file/2019-06-24_site_area_coverage.json/rfp/42/report/coverage/13.json"
+      key="json"
+      style={
+        Object {
+          "whiteSpace": "nowrap",
+        }
+      }
+    >
+      <i
+        className="fa fa-download"
+      />
+       
+      json
+    </a>
+    <a
+      className="btn btn-light"
+      download={true}
+      href="/service-download-file/2019-06-24_site_area_coverage.xls/rfp/42/report/coverage/13.xls"
+      key="xls"
+      style={
+        Object {
+          "whiteSpace": "nowrap",
+        }
+      }
+    >
+      <i
+        className="fa fa-download"
+      />
+       
+      xls
+    </a>
+  </div>
+</div>
+`;
+
+exports[`When selected report changes 2`] = `
+<div
+  className="d-flex"
+>
+  <select
+    className="form-control"
+    id="selectRfpReportDefinition"
+    onChange={[Function]}
+    style={
+      Object {
+        "marginTop": "1px",
+      }
+    }
+    value={14}
+  >
+    <option
+      key="13"
+      value={13}
+    >
+      Site Coverage
+    </option>
+    <option
+      key="14"
+      value={14}
+    >
+      RFP Report
+    </option>
+  </select>
+  <div
+    className="btn btn-group p-0"
+  >
+    <a
+      className="btn btn-light"
+      download={true}
+      href="/service-download-file/2019-06-24_rfp_report.csv/rfp/42/report/general/14.csv"
+      key="csv"
+      style={
+        Object {
+          "whiteSpace": "nowrap",
+        }
+      }
+    >
+      <i
+        className="fa fa-download"
+      />
+       
+      csv
+    </a>
+    <a
+      className="btn btn-light"
+      download={true}
+      href="/service-download-file/2019-06-24_rfp_report.json/rfp/42/report/general/14.json"
+      key="json"
+      style={
+        Object {
+          "whiteSpace": "nowrap",
+        }
+      }
+    >
+      <i
+        className="fa fa-download"
+      />
+       
+      json
+    </a>
+    <a
+      className="btn btn-light"
+      download={true}
+      href="/service-download-file/2019-06-24_rfp_report.xls/rfp/42/report/general/14.xls"
+      key="xls"
+      style={
+        Object {
+          "whiteSpace": "nowrap",
+        }
+      }
+    >
+      <i
+        className="fa fa-download"
+      />
+       
+      xls
+    </a>
+  </div>
+</div>
+`;

@@ -83,6 +83,70 @@ function setClickMapToAddTarget (clickMapToAddTarget) {
   }
 }
 
+function loadRfpPlans (userId, searchTerm = '') {
+  return dispatch => {
+    dispatch({
+      type: Actions.RFP_SET_IS_LOADING_RFP_PLANS,
+      payload: true
+    })
+    const searchTermWithQuotes = searchTerm ? ` "${searchTerm}"` : ''
+    Promise.all([
+      AroHttp.get(`/service/v1/plan?search=type:"RFP"${searchTermWithQuotes}&user_id=${userId}`),
+      AroHttp.get(`/service/rfp/report-definition?user_id=${userId}`)
+    ])
+      .then(results => {
+        const rfpPlans = results[0].data
+        const rfpReportDefinitions = results[1].data.filter(reportDefinition =>
+          (reportDefinition.reportData.reportType === 'COVERAGE' || reportDefinition.reportData.reportType === 'RFP')
+        )
+          .map(reportDefinition => {
+            // user_id should come from service. Manually adding it here until service does it.
+            reportDefinition.href += '?user_id={userId}'
+            return reportDefinition
+          })
+        dispatch({
+          type: Actions.RFP_SET_PLANS,
+          payload: {
+            rfpPlans: rfpPlans,
+            rfpReportDefinitions: rfpReportDefinitions,
+            isLoadingRfpPlans: false
+          }
+        })
+      })
+      .catch(err => {
+        console.error(err)
+        dispatch({
+          type: Actions.RFP_SET_IS_LOADING_RFP_PLANS,
+          payload: false
+        })
+      })
+  }
+}
+
+function clearRfpPlans () {
+  return {
+    type: Actions.RFP_SET_PLANS,
+    payload: {
+      rfpPlans: [],
+      isLoadingRfpPlans: false
+    }
+  }
+}
+
+function setPlanListOffset (planListOffset) {
+  return {
+    type: Actions.RFP_SET_PLAN_LIST_OFFSET,
+    payload: planListOffset
+  }
+}
+
+function showOrHideAllRfpStatus (show) {
+  return {
+    type: Actions.RFP_SHOW_HIDE_ALL_RFP_STATUS,
+    payload: show
+  }
+}
+
 function clearRfpState () {
   return {
     type: Actions.RFP_CLEAR_STATE
@@ -90,12 +154,16 @@ function clearRfpState () {
 }
 
 export default {
-  addTargets: addTargets,
-  clearRfpState: clearRfpState,
-  initializeRfpReport: initializeRfpReport,
-  modifyRfpReport: modifyRfpReport,
-  removeTarget: removeTarget,
-  replaceTarget: replaceTarget,
-  setSelectedTarget: setSelectedTarget,
-  setClickMapToAddTarget: setClickMapToAddTarget
+  addTargets,
+  clearRfpState,
+  initializeRfpReport,
+  clearRfpPlans,
+  loadRfpPlans,
+  modifyRfpReport,
+  removeTarget,
+  replaceTarget,
+  setSelectedTarget,
+  setClickMapToAddTarget,
+  setPlanListOffset,
+  showOrHideAllRfpStatus
 }

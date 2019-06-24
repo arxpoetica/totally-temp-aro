@@ -871,7 +871,7 @@ class State {
         .catch((err) => console.error(err))
     }
 
-    service.createNewPlan = (isEphemeral, planName, parentPlan) => {
+    service.createNewPlan = (isEphemeral, planName, parentPlan, planType) => {
       if (isEphemeral && parentPlan) {
         return Promise.reject('ERROR: Ephemeral plans cannot have a parent plan')
       }
@@ -883,7 +883,8 @@ class State {
         longitude: service.defaultPlanCoordinates.longitude,
         zoomIndex: service.defaultPlanCoordinates.zoom,
         ephemeral: isEphemeral,
-        name: planName || 'Untitled'
+        name: planName || 'Untitled', 
+        planType: planType || 'UNDEFINED'
       }
       return service.getAddressFor(planOptions.latitude, planOptions.longitude)
         .then((address) => {
@@ -932,12 +933,13 @@ class State {
         })
     }
 
-    service.makeCurrentPlanNonEphemeral = (planName) => {
+    service.makeCurrentPlanNonEphemeral = (planName, planType) => {
       var newPlan = JSON.parse(JSON.stringify(service.plan))
       newPlan.name = planName
       newPlan.ephemeral = false
       newPlan.latitude = service.defaultPlanCoordinates.latitude
       newPlan.longitude = service.defaultPlanCoordinates.longitude
+      newPlan.planType = planType || 'UNDEFINED'
       delete newPlan.optimizationId
       newPlan.tagMapping = {
         global: [],
@@ -967,13 +969,13 @@ class State {
         })
     }
 
-    service.copyCurrentPlanTo = (planName) => {
+    service.copyCurrentPlanTo = (planName, planType) => {
       var newPlan = JSON.parse(JSON.stringify(service.plan))
       newPlan.name = planName
       newPlan.ephemeral = false
 
       // Only keep the properties needed to create a plan
-      var validProperties = new Set(['projectId', 'areaName', 'latitude', 'longitude', 'ephemeral', 'name', 'zoomIndex'])
+      var validProperties = new Set(['projectId', 'areaName', 'latitude', 'longitude', 'ephemeral', 'name', 'zoomIndex', 'planType'])
       var keysInPlan = Object.keys(newPlan)
       keysInPlan.forEach((key) => {
         if (!validProperties.has(key)) {
@@ -989,6 +991,7 @@ class State {
             var center = map.getCenter()
             result.data.latitude = center.lat()
             result.data.longitude = center.lng()
+            result.data.planType = planType || 'UNDEFINED'
             return $http.put(`/service/v1/plan?user_id=${userId}`, result.data)
           } else {
             console.error('Unable to copy plan')
@@ -1516,6 +1519,7 @@ class State {
 
       // Set the logged in user in the Redux store
       service.setLoggedInUserRedux(user)
+      service.loadSystemActorsRedux()
 
       service.equipmentLayerTypeVisibility.existing = service.configuration.networkEquipment.visibility.defaultShowExistingEquipment
       service.equipmentLayerTypeVisibility.planned = service.configuration.networkEquipment.visibility.defaultShowPlannedEquipment
@@ -1534,7 +1538,7 @@ class State {
       // either globally or on a resource
       service.loggedInUser.hasPermissions = (permissionsLevel, resourcePermissions) => {
         var hasPerms = !!(permissionsLevel & service.loggedInUser.systemPermissions)
-        if (!hasPerms && 'undefined' != typeof resourcePermissions){
+        if (!hasPerms && 'undefined' != typeof resourcePermissions) {
           hasPerms = hasPerms || !!(permissionsLevel & resourcePermissions)
         }
         return hasPerms
@@ -1542,30 +1546,28 @@ class State {
 
       var aclResult = null
       $http.get(`/service/auth/acl/SYSTEM/1`)
-      .then((result) => {
-        aclResult = result.data
-        // Get the acl entry corresponding to the currently logged in user
-        var userAcl = aclResult.resourcePermissions.filter((item) => item.systemActorId === service.loggedInUser.id)[0]
-        if (!!userAcl){
-          service.loggedInUser.systemPermissions = userAcl.rolePermissions
-        }
-        return $http.get(`/service/auth/users/${service.loggedInUser.id}`)
-      })
-      .then((result) => {
-        service.loggedInUser.groupIds = result.data.groupIds
-
-        var userGroupIsAdministrator = false
-        result.data.groupIds.forEach((groupId) => {
-          const userGroupAcl = aclResult.resourcePermissions.filter((item) => item.systemActorId === groupId)[0]
-          const thisGroupIsAdministrator = (userGroupAcl && (userGroupAcl.rolePermissions & service.authPermissionsByName['USER_ADMIN'].permissions)) > 0
-          userGroupIsAdministrator |= thisGroupIsAdministrator
+        .then((result) => {
+          aclResult = result.data
+          // Get the acl entry corresponding to the currently logged in user
+          var userAcl = aclResult.resourcePermissions.filter((item) => item.systemActorId === service.loggedInUser.id)[0]
+          if (!!userAcl) {
+            service.loggedInUser.systemPermissions = userAcl.rolePermissions
+          }
+          return $http.get(`/service/auth/users/${service.loggedInUser.id}`)
         })
+        .then((result) => {
+          service.loggedInUser.groupIds = result.data.groupIds
 
-        service.loggedInUser.isAdministrator = (userGroupIsAdministrator
+          var userGroupIsAdministrator = false
+          result.data.groupIds.forEach((groupId) => {
+            const userGroupAcl = aclResult.resourcePermissions.filter((item) => item.systemActorId === groupId)[0]
+            const thisGroupIsAdministrator = (userGroupAcl && (userGroupAcl.rolePermissions & service.authPermissionsByName['USER_ADMIN'].permissions)) > 0
+            userGroupIsAdministrator |= thisGroupIsAdministrator
+          })
+          service.loggedInUser.isAdministrator = (userGroupIsAdministrator
             || !!(service.loggedInUser.systemPermissions & service.authPermissionsByName['USER_ADMIN'].permissions))
-
-      })
-      .catch((err) => console.error(err))
+        })
+        .catch((err) => console.error(err))
 
       var initializeToDefaultCoords = (plan) => {
         service.requestSetMapCenter.next({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
@@ -1821,6 +1823,7 @@ class State {
       loadConfigurationFromServer: () => dispatch(UiActions.loadConfigurationFromServer()),
       getStyleValues: () => dispatch(UiActions.getStyleValues()),
       setLoggedInUserRedux: loggedInUser => dispatch(UserActions.setLoggedInUser(loggedInUser)),
+      loadSystemActorsRedux: () => dispatch(UserActions.loadSystemActors()),
       setPlanRedux: plan => dispatch(PlanActions.setActivePlan(plan)),
       setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId)),
       addPlanTargets: (planId, planTargets) => dispatch(SelectionActions.addPlanTargets(planId, planTargets)),
