@@ -14,6 +14,7 @@ export class RfpStatusSearch extends Component {
   render () {
     return <div className='input-group mb-3'>
       <input
+        id='txtRfpPlanSearch'
         type='text'
         className='form-control'
         placeholder='Enter search term...'
@@ -25,6 +26,7 @@ export class RfpStatusSearch extends Component {
       />
       <div className='input-group-append'>
         <button
+          id='btnRfpPlanSearch'
           className='btn btn-primary'
           onClick={event => this.doSearch()}
           disabled={this.props.isLoadingRfpPlans}
