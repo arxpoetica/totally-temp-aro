@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import React, { Component } from 'react'
 // import { PropTypes } from 'prop-types'
 import reduxStore from '../../../redux-store'
@@ -337,5 +336,3 @@ const mapDispatchToProps = dispatch => ({
 
 const RingEditComponent = wrapComponentWithProvider(reduxStore, RingEdit, mapStateToProps, mapDispatchToProps)
 export default RingEditComponent
-=======
->>>>>>> refs/heads/master
