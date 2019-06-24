@@ -13,6 +13,8 @@ export class RingButton extends Component {
   // ToDo: abstract and combine with Coverage Button and RFP Button
   constructor (props) {
     super(props)
+    // todo: abstract this
+    // also in  ring-edit 
     this.StatusTypes = Object.freeze({
       UNINITIALIZED: 'UNINITIALIZED',
       START_STATE: 'START_STATE',

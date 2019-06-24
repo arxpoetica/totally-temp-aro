@@ -17,28 +17,28 @@ export class RingEdit extends Component {
   
   constructor (props) {
     super(props)
+    this.StatusTypes = Object.freeze({
+      UNINITIALIZED: 'UNINITIALIZED',
+      START_STATE: 'START_STATE',
+      STARTED: 'STARTED',
+      COMPLETED: 'COMPLETED'
+    })
     this.createdMapObjects = []
     this.mapObjectListeners = []
+    this.canEdit = true
   }
   
   render () {
+    this.canEdit = (this.props.status == this.StatusTypes.START_STATE 
+                    || this.props.status == this.StatusTypes.UNINITIALIZED)
     this.drawRings()
     return <div>
-      <div className='m-2 p-2'>
-        <button id='btnRingNewRing'
-          className='btn btn-sm btn-light'
-          onClick={() => this.requestAddNewRing()}>
-          <i className='fas fa-pencil-alt' /> Add Ring
-        </button>
-      </div>
+      {this.renderAddButton()}
       <div className='m-2 p-2'>
         <h4>Rings</h4>
         <table className='table table-sm table-striped'>
           <tbody>
           {
-            //Object.keys(this.props.rings).map((key) => (
-            //  this.renderRingRow(this.props.rings[key])
-            //))
             this.renderRingRows(this.props.rings)
           }
           </tbody>
@@ -48,6 +48,20 @@ export class RingEdit extends Component {
     </div>
   }
   
+  renderAddButton () {
+    if (this.canEdit){
+      return <div className='m-2 p-2'>
+        <button id='btnRingNewRing'
+          className='btn btn-sm btn-light'
+          onClick={() => this.requestAddNewRing()}>
+          <i className='fas fa-pencil-alt' /> Add Ring
+        </button>
+      </div>
+    }else{
+      return 
+    }
+  }
+
   renderRingRows (rings) {
     // reverse order, new ones first
     var revOrder = []
@@ -68,21 +82,25 @@ export class RingEdit extends Component {
         <td className='ring-table-item-selected'> 
           <div className='ring-table-item-title ring-table-item-title-selected clearfix'>
             {ring.name} 
-            
-            <button className="btn btn-sm btn-outline-danger ring-del-btn" 
-                    onClick={() => this.requestDeleteRing(ring)}
-                    data-toggle="tooltip" data-placement="bottom" title="Delete">
-              <i className="fa ei-button-icon ng-scope fa-trash-alt"></i>
-            </button>
-            
-            <input
-              id={`inpRingName_${ring.id}`}
-              type='text'
-              className='form-control form-control-sm ring-text-inp'
-              placeholder='rename'
-              onBlur={event => this.renameRing(ring.id, event.target.value)}
-              onKeyDown={event => {if (event.key === 'Enter') this.renameRing(ring.id, event.target.value) }}
-            />
+
+            {(() => {if (this.canEdit) return (
+              <button className="btn btn-sm btn-outline-danger ring-del-btn" 
+                      onClick={() => this.requestDeleteRing(ring)}
+                      data-toggle="tooltip" data-placement="bottom" title="Delete">
+                <i className="fa ei-button-icon ng-scope fa-trash-alt"></i>
+              </button>
+            )})()}
+
+            {(() => {if (this.canEdit) return (
+              <input
+                id={`inpRingName_${ring.id}`}
+                type='text'
+                className='form-control form-control-sm ring-text-inp'
+                placeholder='rename'
+                onBlur={event => this.renameRing(ring.id, event.target.value)}
+                onKeyDown={event => {if (event.key === 'Enter') this.renameRing(ring.id, event.target.value) }}
+              />
+            )})()}
 
           </div>
           <div className='ring-sub-table'>
@@ -93,11 +111,15 @@ export class RingEdit extends Component {
                     <tr className='m-2 p-2' key={ring.id+'_'+node.objectId}>
                       <td>
                         {node.siteClli || node.objectId} 
-                        <button className="btn btn-sm btn-outline-danger ring-del-btn" 
-                                onClick={() => this.deleteNode(ring, node.objectId)}
-                                data-toggle="tooltip" data-placement="bottom" title="Delete">
-                          <i className="fa ei-button-icon ng-scope fa-trash-alt"></i>
-                        </button>
+                        
+                        {(() => {if (this.canEdit) return (
+                          <button className="btn btn-sm btn-outline-danger ring-del-btn" 
+                                  onClick={() => this.deleteNode(ring, node.objectId)}
+                                  data-toggle="tooltip" data-placement="bottom" title="Delete">
+                            <i className="fa ei-button-icon ng-scope fa-trash-alt"></i>
+                          </button>
+                        )})()}
+                        
                       </td>
                     </tr>
                   ))
@@ -166,7 +188,7 @@ export class RingEdit extends Component {
             strokeWeight: 2,
             fillColor: '#FF1493',
             fillOpacity: 0.4, 
-            editable: true
+            editable: this.canEdit
           }
         }
 
@@ -322,7 +344,8 @@ const mapStateToProps = (state) => ({
   selectedRingId: state.ringEdit.selectedRingId, 
   plan: state.plan, 
   user: state.user, 
-  map: state.map
+  map: state.map, 
+  status: state.plan.activePlan && state.plan.activePlan.planState 
 })
 
 const mapDispatchToProps = dispatch => ({
