@@ -325,7 +325,7 @@ class TileComponentController {
 
                 // var menuItem = this.contextMenuService.makeMenuItem(name, data, options)
                 const menuItemType = this.utils.getFeatureMenuItemType(feature)
-                var name = this.utils.getFeatureDisplayName(feature)
+                var name = this.utils.getFeatureDisplayName(feature, this.state)
                 var menuItem = new MenuItem(menuItemType, name, options)
                 menuItems.push(menuItem)
                 // menuItemsById[feature.objectId] = menuItem

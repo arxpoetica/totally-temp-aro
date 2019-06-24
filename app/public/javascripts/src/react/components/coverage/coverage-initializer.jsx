@@ -25,7 +25,7 @@ export class CoverageInitializer extends Component {
     }
   }
   displayGeographies () {
-    if (this.props.activeSelectionModeId !== 'SELECTED_ALL_SERVICE_AREAS') {
+    if (this.props.activeSelectionModeId !== 'ALL_SERVICE_AREAS') {
       return (<tr><td width='50%'>Selected<br /> Geographies</td><td><PlanTargetList /></td></tr>)
     }
   }

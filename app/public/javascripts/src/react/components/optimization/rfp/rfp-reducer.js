@@ -11,18 +11,17 @@ const defaultState = {
   targets: [],
   clickMapToAddTarget: false,
   selectedTarget: null,
-  showRfpStatusModal: false,
-  status: RfpStatusTypes.UNINITIALIZED
+  status: RfpStatusTypes.UNINITIALIZED,
+  showAllRfpStatus: false,
+  rfpPlans: [],
+  rfpReportDefinitions: [],
+  isLoadingRfpPlans: false,
+  planListOffset: 0,
+  planListLimit: 10
 }
 
 function clearState () {
   return JSON.parse(JSON.stringify(defaultState))
-}
-
-function setRfpStatusModalVisibility (state, showRfpStatusModal) {
-  return { ...state,
-    showRfpStatusModal: showRfpStatusModal
-  }
 }
 
 function addTargets (state, targets) {
@@ -67,13 +66,38 @@ function setClickMapToAddTarget (state, clickMapToAddTarget) {
   }
 }
 
+function setShowAllRfpStatus (state, showAllRfpStatus) {
+  return { ...state,
+    showAllRfpStatus: showAllRfpStatus
+  }
+}
+
+function setRfpPlans (state, rfpPlans, rfpReportDefinitions, isLoadingRfpPlans) {
+  return { ...state,
+    rfpPlans: rfpPlans,
+    rfpReportDefinitions: rfpReportDefinitions,
+    isLoadingRfpPlans: isLoadingRfpPlans,
+    planListOffset: defaultState.planListOffset,
+    planListLimit: defaultState.planListLimit
+  }
+}
+
+function setIsLoadingRfpPlans (state, isLoadingRfpPlans) {
+  return { ...state,
+    isLoadingRfpPlans: isLoadingRfpPlans
+  }
+}
+
+function setPlanListOffset (state, planListOffset) {
+  return { ...state,
+    planListOffset: planListOffset
+  }
+}
+
 function rfpReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.RFP_CLEAR_STATE:
       return clearState(state)
-
-    case Actions.RFP_SHOW_HIDE_STATUS_MODAL:
-      return setRfpStatusModalVisibility(state, action.payload)
 
     case Actions.RFP_ADD_TARGETS:
       return addTargets(state, action.payload)
@@ -90,8 +114,20 @@ function rfpReducer (state = defaultState, action) {
     case Actions.RFP_SET_STATUS:
       return setStatus(state, action.payload)
 
+    case Actions.RFP_SHOW_HIDE_ALL_RFP_STATUS:
+      return setShowAllRfpStatus(state, action.payload)
+
+    case Actions.RFP_SET_PLANS:
+      return setRfpPlans(state, action.payload.rfpPlans, action.payload.rfpReportDefinitions, action.payload.isLoadingRfpPlans)
+
     case Actions.RFP_SET_CLICK_MAP_TO_ADD_TARGET:
       return setClickMapToAddTarget(state, action.payload)
+
+    case Actions.RFP_SET_IS_LOADING_RFP_PLANS:
+      return setIsLoadingRfpPlans(state, action.payload)
+
+    case Actions.RFP_SET_PLAN_LIST_OFFSET:
+      return setPlanListOffset(state, action.payload)
 
     default:
       return state

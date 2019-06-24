@@ -6,6 +6,10 @@ class PlanInputsModalController {
     this.initModalData()
   }
 
+  $onInit () {
+    this.$element.find('#plan_inputs_modal > .modal-dialog').css('width', '350') // Ugh.. But.. legacy code. Leave for now
+  }
+
   initModalData () {
     this.planName = null
     this.parentPlan = null
@@ -16,10 +20,28 @@ class PlanInputsModalController {
       this.parentPlan = currentPlan
     }
     this.parentPlanSelectorExpanded = false
-    this.planTypeEnum = [
-      {label:'Standard Plan', value:'UNDEFINED'}, 
-      {label:'Ring Plan', value:'RING'}
-    ]
+    this.allPlanTypes = {
+      UNDEFINED: 'Standard Plan',
+      NETWORK_PLAN: 'Network Build',
+      NETWORK_ANALYSIS: 'Network Analysis',
+      COVERAGE: 'Coverage Plan',
+      MANUAL: 'Manual Plan',
+      RFP: 'RFP',
+      RING: 'Ring Plan'
+    }
+    // Users can control the list of allowed plan types via a database setting
+    var allPlanTypes = []
+    var allowedPlanTypes = []
+    this.planTypes = {}
+    try {
+      allPlanTypes = this.state.configuration.plan.allPlanTypes
+      allowedPlanTypes = this.state.configuration.plan.allowedPlanTypes
+      allowedPlanTypes.forEach(allowedPlanType => { this.planTypes[allowedPlanType] = allPlanTypes[allowedPlanType] })
+    } catch (err) {
+      console.error('Error when determining the list of plan types to display. Plan configuration is:')
+      console.error(this.state.configuration.plan)
+      console.error(err)
+    }
   }
 
   close () {
@@ -125,10 +147,6 @@ class PlanInputsModalController {
 
   clearParentPlan () {
     this.parentPlan = null
-  }
-
-  $onInit () {
-    this.$element.find('#plan_inputs_modal > .modal-dialog').css('width', '350')
   }
 }
 

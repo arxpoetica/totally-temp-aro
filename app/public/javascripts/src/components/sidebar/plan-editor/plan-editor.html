@@ -66,8 +66,8 @@
           <!-- Buttons to commit or discard a transaction -->
           <div class="text-center">
             <div class="btn-group ">
-              <button class="btn btn-light" ng-click="$ctrl.commitTransaction()"><i class="fa fa-check-circle"></i>&nbsp;&nbsp;Commit</button>
-              <button class="btn btn-light" ng-click="$ctrl.discardTransaction()"><i class="fa fa-times-circle"></i>&nbsp;&nbsp;Discard</button>
+              <button class="btn btn-light" ng-click="$ctrl.commitTransaction($ctrl.currentTransaction.id)"><i class="fa fa-check-circle"></i>&nbsp;&nbsp;Commit</button>
+              <button class="btn btn-light" ng-click="$ctrl.discardTransaction($ctrl.currentTransaction.id)"><i class="fa fa-times-circle"></i>&nbsp;&nbsp;Discard</button>
             </div>
           </div>
           <br>
@@ -181,10 +181,10 @@
                 <span>{{$ctrl.viewLabel}}</span>
                 
                 <button ng-class="{ 'btn ei-panel-header-btn-set ei-foldout-header-btn': true,
-                  'btn-light': $ctrl.viewFeature.deploymentType !== 'PLANNED' && !$ctrl.state.configuration.planEditor.editExistingObjects,
-                  'btn-primary': !($ctrl.viewFeature.deploymentType !== 'PLANNED' && !$ctrl.state.configuration.planEditor.editExistingObjects) }"
-                  ng-disabled="$ctrl.viewFeature.deploymentType !== 'PLANNED' && !$ctrl.state.configuration.planEditor.editExistingObjects"
-                  ng-click="$ctrl.editViewObject()">edit</button>
+                  'btn-light': $ctrl.viewFeature.attributes.is_locked === 'true',
+                  'btn-primary': $ctrl.viewFeature.attributes.is_locked !== 'true' }"
+                  ng-disabled="$ctrl.viewFeature.attributes.is_locked === 'true'"
+                  ng-click="$ctrl.editViewObject()">Edit</button>
                 <div class="sidebar-header-subinfo">
                   <div class="sidebar-header-subinfo-item">lat: {{$ctrl.viewEventFeature.geometry.coordinates[1] | number : 6}}</div>
                   <div class="sidebar-header-subinfo-item">long: {{$ctrl.viewEventFeature.geometry.coordinates[0] | number : 6}}</div>
@@ -291,10 +291,10 @@
                   <div class="sidebar-table-header">
                     <span>Site Boundary</span>
                     <button ng-class="{ 'btn ei-panel-header-btn-set ei-foldout-header-btn': true,
-                    'btn-light': $ctrl.viewSiteBoundaryEventFeature.deploymentType !== 'PLANNED' && !$ctrl.state.configuration.planEditor.editExistingObjects,
-                    'btn-primary': !($ctrl.viewSiteBoundaryEventFeature.deploymentType !== 'PLANNED' && !$ctrl.state.configuration.planEditor.editExistingObjects) }"
-                    ng-disabled="$ctrl.viewSiteBoundaryEventFeature.deploymentType !== 'PLANNED' && !$ctrl.state.configuration.planEditor.editExistingObjects"                  
-                    ng-click="$ctrl.editViewSiteBoundaryObject()">edit</button>
+                      'btn-light': $ctrl.viewSiteBoundaryEventFeature.attributes.is_locked === 'true',
+                      'btn-primary': $ctrl.viewSiteBoundaryEventFeature.attributes.is_locked !== 'true' }"
+                  	  ng-disabled="$ctrl.viewSiteBoundaryEventFeature.attributes.is_locked === 'true'"
+                  	  ng-click="$ctrl.editViewSiteBoundaryObject()">Edit</button>
                   </div>
               </thead>
               <tbody>

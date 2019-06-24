@@ -277,12 +277,12 @@
       <i class="fa fa-cube"></i>
   </button>
 
-  <button ng-click="$ctrl.showRfpStatusModal()"
+  <button ng-if="$ctrl.state.configuration.toolbar.showRfpStatus"
+    ng-click="$ctrl.showRfpWindow()"
     class="btn"
-    data-toggle="tooltip"
-    data-placement="bottom" 
+    data-toggle="tooltip" data-placement="bottom" 
     title="Show RFP status">
-      <i class="fas fa-cloud-download-alt"></i>
+      <i class="fa fa-cloud"></i>
   </button>
 
   <div class="dropdown" ng-hide="!$ctrl.showDropDown" ng-style="{ 'border-left': '#eee 1px dotted', width: $ctrl.dropdownWidthPixels }">

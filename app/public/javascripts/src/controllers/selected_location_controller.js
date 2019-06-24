@@ -1,6 +1,6 @@
 /* global app config $ encodeURIComponent _ tinycolor swal location Chart angular */
 // Selected location controller
-app.controller('selected_location_controller', ($rootScope, $scope, $http, $filter, map_layers, map_tools, state) => {
+app.controller('selected_location_controller', ($rootScope, $scope, $http, $filter, map_tools, state) => {
   $scope.location = {}
   $scope.show_households = config.ui.map_tools.locations.view.indexOf('residential') >= 0
   $scope.config = config
@@ -17,23 +17,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, $filt
 
   $scope.state = state
 
-  $scope.select_random_location = () => {
-    var map_layer = map_layers.getFeatureLayer('locations')
-    var feature
-    map_layer.data_layer.forEach((f) => {
-      feature = feature || f
-    })
-    var options = {
-      add: (text, func) => {
-        if (text === 'See more information') {
-          func(map_layer, feature)
-        }
-      }
-    }
-    $rootScope.$broadcast('contextual_menu_feature', options, map_layer, feature)
-  }
-
-  $rootScope.$on('map_layer_clicked_feature', (event, options, map_layer) => {
+  $rootScope.$on('map_layer_clicked_feature', (event, options) => {
     if (!map_tools.is_visible(map_tools.TOOL_IDS.LOCATIONS)) {
       return // Process the click only if we have the locations layer open
     }

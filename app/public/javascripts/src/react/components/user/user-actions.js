@@ -100,6 +100,41 @@ function setLoggedInUser (loggedInUser) {
   }
 }
 
+// Load the list of system actors (i.e. users and groups)
+function loadSystemActors () {
+  return dispatch => {
+    Promise.all([
+      AroHttp.get('/service/auth/groups'),
+      AroHttp.get('/service/auth/users')
+    ])
+      .then(results => {
+        // Add a property specifying if an actor is a group or a user. Also, keep only a few
+        // properties (e.g. do not save email ids, those are also the login usernames)
+        var systemActors = {} // System actors will be keyed by id
+        results[0].data.forEach(group => {
+          systemActors[group.id] = {
+            ...group,
+            type: 'group'
+          }
+        })
+        results[1].data.forEach(user => {
+          systemActors[user.id] = {
+            id: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            type: 'user'
+          }
+        })
+        dispatch({
+          type: Actions.USER_SET_SYSTEM_ACTORS,
+          payload: systemActors
+        })
+      })
+      .catch(err => console.error(err))
+  }
+}
+
 export default {
-  setLoggedInUser: setLoggedInUser
+  loadSystemActors,
+  setLoggedInUser
 }

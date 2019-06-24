@@ -1544,6 +1544,7 @@ class State {
 
       // Set the logged in user in the Redux store
       service.setLoggedInUserRedux(user)
+      service.loadSystemActorsRedux()
 
       service.equipmentLayerTypeVisibility.existing = service.configuration.networkEquipment.visibility.defaultShowExistingEquipment
       service.equipmentLayerTypeVisibility.planned = service.configuration.networkEquipment.visibility.defaultShowPlannedEquipment
@@ -1562,7 +1563,7 @@ class State {
       // either globally or on a resource
       service.loggedInUser.hasPermissions = (permissionsLevel, resourcePermissions) => {
         var hasPerms = !!(permissionsLevel & service.loggedInUser.systemPermissions)
-        if (!hasPerms && 'undefined' != typeof resourcePermissions){
+        if (!hasPerms && 'undefined' != typeof resourcePermissions) {
           hasPerms = hasPerms || !!(permissionsLevel & resourcePermissions)
         }
         return hasPerms
@@ -1570,30 +1571,28 @@ class State {
 
       var aclResult = null
       $http.get(`/service/auth/acl/SYSTEM/1`)
-      .then((result) => {
-        aclResult = result.data
-        // Get the acl entry corresponding to the currently logged in user
-        var userAcl = aclResult.resourcePermissions.filter((item) => item.systemActorId === service.loggedInUser.id)[0]
-        if (!!userAcl){
-          service.loggedInUser.systemPermissions = userAcl.rolePermissions
-        }
-        return $http.get(`/service/auth/users/${service.loggedInUser.id}`)
-      })
-      .then((result) => {
-        service.loggedInUser.groupIds = result.data.groupIds
-
-        var userGroupIsAdministrator = false
-        result.data.groupIds.forEach((groupId) => {
-          const userGroupAcl = aclResult.resourcePermissions.filter((item) => item.systemActorId === groupId)[0]
-          const thisGroupIsAdministrator = (userGroupAcl && (userGroupAcl.rolePermissions & service.authPermissionsByName['USER_ADMIN'].permissions)) > 0
-          userGroupIsAdministrator |= thisGroupIsAdministrator
+        .then((result) => {
+          aclResult = result.data
+          // Get the acl entry corresponding to the currently logged in user
+          var userAcl = aclResult.resourcePermissions.filter((item) => item.systemActorId === service.loggedInUser.id)[0]
+          if (!!userAcl) {
+            service.loggedInUser.systemPermissions = userAcl.rolePermissions
+          }
+          return $http.get(`/service/auth/users/${service.loggedInUser.id}`)
         })
+        .then((result) => {
+          service.loggedInUser.groupIds = result.data.groupIds
 
-        service.loggedInUser.isAdministrator = (userGroupIsAdministrator
+          var userGroupIsAdministrator = false
+          result.data.groupIds.forEach((groupId) => {
+            const userGroupAcl = aclResult.resourcePermissions.filter((item) => item.systemActorId === groupId)[0]
+            const thisGroupIsAdministrator = (userGroupAcl && (userGroupAcl.rolePermissions & service.authPermissionsByName['USER_ADMIN'].permissions)) > 0
+            userGroupIsAdministrator |= thisGroupIsAdministrator
+          })
+          service.loggedInUser.isAdministrator = (userGroupIsAdministrator
             || !!(service.loggedInUser.systemPermissions & service.authPermissionsByName['USER_ADMIN'].permissions))
-
-      })
-      .catch((err) => console.error(err))
+        })
+        .catch((err) => console.error(err))
 
       var initializeToDefaultCoords = (plan) => {
         service.requestSetMapCenter.next({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
@@ -1694,107 +1693,6 @@ class State {
     }
 
     service.planEditorChanged = new Rx.BehaviorSubject(false)
-
-    // Ask the user if they want to "steal" and existing transaction from another user.
-    // If yes, steal it. If not, throw a rejection
-    service.stealOrRejectTransaction = (transaction) => {
-      // Get the name of the current owner of the transaction
-      return $http.get(`/service/odata/userentity?$select=firstName,lastName&$filter=id eq ${transaction.userId}`)
-        .then((result) => {
-          const user = result.data[0]
-          return new Promise((resolve, reject) => {
-            swal({
-              title: 'Overwrite transaction?',
-              text: `${user.firstName} ${user.lastName} already has a transaction open for this plan. Do you want to overwrite this transaction?`,
-              type: 'warning',
-              confirmButtonColor: '#DD6B55',
-              confirmButtonText: 'Yes, overwrite',
-              cancelButtonText: 'No',
-              showCancelButton: true,
-              closeOnConfirm: true
-            }, (stealTransaction) => {
-              resolve(stealTransaction)
-            })
-          })
-        })
-        .then((stealTransaction) => {
-          if (stealTransaction) {
-            tracker.trackEvent(tracker.CATEGORIES.STEAL_PLAN_TRANSACTION, tracker.ACTIONS.CLICK)
-            return $http.post(`/service/plan-transactions?force=true`, { userId: service.loggedInUser.id, planId: service.plan.id })
-          } else {
-            return Promise.reject('User does not want to steal the transaction')
-          }
-        })
-    }
-
-    service.deleteBadTransactionsAndCreateNew = (transactionsForPlan) => {
-      // Sometimes we will get into a state where we have multiple open transactions for the same plan. Ask the
-      // user whether they want to delete all and start a new transaction
-      return new Promise((resolve, reject) => {
-        swal({
-          title: 'Multiple transactions',
-          text: `There are multiple open transactions for this plan. You can only have one open transaction per plan. Delete older open transactions and start a new one?`,
-          type: 'warning',
-          confirmButtonColor: '#DD6B55',
-          confirmButtonText: 'Yes, delete old',
-          cancelButtonText: 'No',
-          showCancelButton: true,
-          closeOnConfirm: true
-        }, (deleteOldTransactions) => {
-          if (deleteOldTransactions) {
-            var deletePromises = []
-            transactionsForPlan.forEach(transactionForPlan => deletePromises.push($http.delete(`/service/plan-transactions/transaction/${transactionForPlan.id}`)))
-            const currentPlanId = service.plan.id
-            Promise.all(deletePromises)
-              .then(res => $http.post(`/service/plan-transactions`, { userId: service.loggedInUser.id, planId: currentPlanId }))
-              .then(res => resolve(res))
-              .catch(err => reject(err))
-          } else {
-            reject('User does not want to delete multiple transactions')
-          }
-        })
-      })
-    }
-
-    service.resumeOrCreateTransaction = () => {
-      // Workflow:
-      // 1. If we don't have any transaction for this plan, create one
-      // 2. If we have multiple transactions for this plan, we are in a bad state. Ask the user if they want to delete all but one.
-      // 3. If we have a transaction for this plan BUT not for the current user
-      //    a. Ask if we want to steal the transaction. If yes, steal it. If not, show error message
-      // 4. If we have a transaction for this plan and for this user, resume it
-
-      // Get a list of all open transactions in the system (Do NOT send in userId so we get transactions across all users)
-      return $http.get(`/service/plan-transaction`)
-        .then((result) => {
-          const currentPlanId = service.plan.id
-          const transactionsForPlan = result.data.filter((item) => item.planId === currentPlanId)
-          const transactionsForUserAndPlan = transactionsForPlan.filter((item) => item.userId === service.loggedInUser.id)
-          if (transactionsForPlan.length === 0) {
-            // A transaction does not exist. Create it.
-            tracker.trackEvent(tracker.CATEGORIES.NEW_PLAN_TRANSACTION, tracker.ACTIONS.CLICK)
-            return $http.post(`/service/plan-transactions`, { userId: service.loggedInUser.id, planId: currentPlanId })
-          } else if (transactionsForPlan > 1) {
-            // We have multiple transactions for this plan. We should never get into this state, but can happen
-            // due to race conditions, network issues, etc.
-            return service.deleteBadTransactionsAndCreateNew(transactionsForPlan)
-          } else if (transactionsForUserAndPlan.length === 1) {
-            // We have one open transaction for this user and plan combo. Resume it.
-            tracker.trackEvent(tracker.CATEGORIES.RESUME_PLAN_TRANSACTION, tracker.ACTIONS.CLICK, 'TransactionID', transactionsForUserAndPlan[0].id)
-            return Promise.resolve({ data: transactionsForUserAndPlan[0] }) // Using {data:} so that the signature is consistent
-          } else if (transactionsForPlan.length === 1) {
-            // We have one open transaction for this plan, but it was not started by this user. Ask the user what to do.
-            return service.stealOrRejectTransaction(transactionsForPlan[0])
-          }
-        })
-        .catch((err) => {
-          // For transaction resume errors, log it and rethrow the exception
-          console.warn(err)
-          return Promise.reject(err)
-        })
-    }
-
-
     service.serviceLayers = []
     service.nameToServiceLayers = {}
     service.loadServiceLayers = () => {
@@ -1917,11 +1815,12 @@ class State {
     service.handleTileInvalidationMessage = msg => {
       // If the tileBox is null, use a tile box that covers the entire world
       const tileBox = msg.payload.tileBox || wholeWorldTileBox
+      const layerNames = msg.payload.layerNames
       // First, mark the HTML cache so we know which tiles are invalidated
-      tileDataService.displayInvalidatedTiles(tileBox)
+      tileDataService.displayInvalidatedTiles(layerNames, tileBox)
 
       // Then delete items from the tile data cache and the tile provider cache
-      tileDataService.clearCacheInTileBox(msg.payload.layerNames, tileBox)
+      tileDataService.clearCacheInTileBox(layerNames, tileBox)
 
       // Refresh map layers
       service.requestMapLayerRefresh.next(null)
@@ -1949,6 +1848,7 @@ class State {
       loadConfigurationFromServer: () => dispatch(UiActions.loadConfigurationFromServer()),
       getStyleValues: () => dispatch(UiActions.getStyleValues()),
       setLoggedInUserRedux: loggedInUser => dispatch(UserActions.setLoggedInUser(loggedInUser)),
+      loadSystemActorsRedux: () => dispatch(UserActions.loadSystemActors()),
       setPlanRedux: plan => dispatch(PlanActions.setActivePlan(plan)),
       setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId)),
       addPlanTargets: (planId, planTargets) => dispatch(SelectionActions.addPlanTargets(planId, planTargets)),

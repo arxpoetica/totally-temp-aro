@@ -47,8 +47,9 @@ function loadConfiguration() {
     'mapType',
     'locationDetailProperties',
     'perspectives',
+    'plan',
+    'toolbar',
     'optimizationOptions',
-    'planEditor',
     'resourceEditors'
   ]
 
