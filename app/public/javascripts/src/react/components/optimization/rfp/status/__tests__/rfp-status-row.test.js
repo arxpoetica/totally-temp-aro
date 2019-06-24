@@ -1,7 +1,7 @@
 /* global test expect */
 import React from 'react'
 import { shallow } from 'enzyme'
-import RfpStatusRow from '../rfp-status-row.jsx'
+import { RfpStatusRow } from '../rfp-status-row.jsx'
 
 const plan = {
   id: 42,

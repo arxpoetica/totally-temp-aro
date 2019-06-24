@@ -1,9 +1,10 @@
 import React, { Component } from 'react'
+import { connect } from 'react-redux'
 import { PropTypes } from 'prop-types'
 import ReportDefinitionPropType from './report-definition-prop-type'
 import RfpReportDownloadCell from './rfp-report-download-cell.jsx'
 
-export default class RfpStatusRow extends Component {
+export class RfpStatusRow extends Component {
   render () {
     const planStateToBadgeColor = {
       UNDEFINED: 'badge-danger',
@@ -39,3 +40,14 @@ RfpStatusRow.propTypes = {
   reportDefinitions: ReportDefinitionPropType,
   userId: PropTypes.number
 }
+
+const mapStateToProps = state => ({
+  systemActors: state.user.systemActors,
+  userId: state.user.loggedInUser && state.user.loggedInUser.id
+})
+
+const mapDispatchToProps = dispatch => ({
+})
+
+const RfpStatusRowComponent = connect(mapStateToProps, mapDispatchToProps)(RfpStatusRow)
+export default RfpStatusRowComponent

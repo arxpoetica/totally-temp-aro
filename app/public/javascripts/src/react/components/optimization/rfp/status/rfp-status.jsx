@@ -8,13 +8,6 @@ import RfpStatusRow from './rfp-status-row.jsx'
 import RfpStatusSearch from './rfp-status-search.jsx'
 
 export class RfpStatus extends Component {
-  constructor (props) {
-    super(props)
-    this.state = {
-      searchTerm: ''
-    }
-  }
-
   render () {
     return <div className='container pt-5'>
       <h2>RFP Plan Status</h2>
@@ -68,9 +61,7 @@ export class RfpStatus extends Component {
         name={rfpPlan.name}
         createdById={rfpPlan.createdBy}
         status={rfpPlan.planState}
-        systemActors={this.props.systemActors}
         reportDefinitions={this.props.rfpReportDefinitions}
-        userId={this.props.userId}
       />
     ))
   }
@@ -90,19 +81,19 @@ export class RfpStatus extends Component {
     var pageBlocks = []
     if (activePageNumber > 1) {
       pageBlocks.push(<li key={'Previous'} className='page-item'>
-        <a className='page-link' href='#' onClick={event => this.props.setPlanListOffset(offsetOnClick(activePageNumber - 1))}>Prev</a>
+        <a id='rfpPagePrev' className='page-link' href='#' onClick={event => this.props.setPlanListOffset(offsetOnClick(activePageNumber - 1))}>Prev</a>
       </li>)
     }
     for (var iPage = startPage; iPage <= endPage; ++iPage) {
       const liClassName = 'page-item' + (iPage === activePageNumber ? ' active' : '')
       const copyIPage = iPage
       pageBlocks.push(<li key={iPage} className={liClassName}>
-        <a className='page-link' href='#' onClick={event => this.props.setPlanListOffset(offsetOnClick(copyIPage))}>{iPage}</a>
+        <a id={`rfpPage_${iPage}`} className='page-link' href='#' onClick={event => this.props.setPlanListOffset(offsetOnClick(copyIPage))}>{iPage}</a>
       </li>)
     }
     if (activePageNumber !== numPages) {
       pageBlocks.push(<li key={'Next'} className='page-item'>
-        <a className='page-link' href='#' onClick={event => this.props.setPlanListOffset(offsetOnClick(activePageNumber + 1))}>Next</a>
+        <a id='rfpPageNext' className='page-link' href='#' onClick={event => this.props.setPlanListOffset(offsetOnClick(activePageNumber + 1))}>Next</a>
       </li>)
     }
     return <nav aria-label='RFP plan pagination'>
@@ -127,7 +118,6 @@ RfpStatus.propTypes = {
   isLoadingRfpPlans: PropTypes.bool,
   planListOffset: PropTypes.number,
   planListLimit: PropTypes.number,
-  systemActors: PropTypes.object,
   userId: PropTypes.number
 }
 
@@ -137,7 +127,6 @@ const mapStateToProps = state => ({
   isLoadingRfpPlans: state.optimization.rfp.isLoadingRfpPlans,
   planListOffset: state.optimization.rfp.planListOffset,
   planListLimit: state.optimization.rfp.planListLimit,
-  systemActors: state.user.systemActors,
   userId: state.user.loggedInUser && state.user.loggedInUser.id
 })
 
