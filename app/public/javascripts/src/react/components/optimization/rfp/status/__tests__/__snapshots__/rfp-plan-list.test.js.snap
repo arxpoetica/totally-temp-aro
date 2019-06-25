@@ -2,11 +2,8 @@
 
 exports[`Component pagination navigation 1`] = `
 <div
-  className="container pt-5"
+  className="pt-3"
 >
-  <h2>
-    RFP Plan Status
-  </h2>
   <div
     className="row"
   >
@@ -191,11 +188,8 @@ exports[`Component pagination navigation 1`] = `
 
 exports[`Component pagination navigation 2`] = `
 <div
-  className="container pt-5"
+  className="pt-3"
 >
-  <h2>
-    RFP Plan Status
-  </h2>
   <div
     className="row"
   >
@@ -393,11 +387,8 @@ exports[`Component pagination navigation 2`] = `
 
 exports[`Component pagination navigation 3`] = `
 <div
-  className="container pt-5"
+  className="pt-3"
 >
-  <h2>
-    RFP Plan Status
-  </h2>
   <div
     className="row"
   >
@@ -582,11 +573,8 @@ exports[`Component pagination navigation 3`] = `
 
 exports[`Component pagination navigation 4`] = `
 <div
-  className="container pt-5"
+  className="pt-3"
 >
-  <h2>
-    RFP Plan Status
-  </h2>
   <div
     className="row"
   >
@@ -784,11 +772,8 @@ exports[`Component pagination navigation 4`] = `
 
 exports[`Component pagination navigation 5`] = `
 <div
-  className="container pt-5"
+  className="pt-3"
 >
-  <h2>
-    RFP Plan Status
-  </h2>
   <div
     className="row"
   >
@@ -973,11 +958,8 @@ exports[`Component pagination navigation 5`] = `
 
 exports[`Component pagination render 1`] = `
 <div
-  className="container pt-5"
+  className="pt-3"
 >
-  <h2>
-    RFP Plan Status
-  </h2>
   <div
     className="row"
   >

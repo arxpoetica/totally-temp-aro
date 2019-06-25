@@ -153,6 +153,13 @@ function clearRfpState () {
   }
 }
 
+function setSelectedTabId (selectedTabId) {
+  return {
+    type: Actions.RFP_SET_SELECTED_TAB_ID,
+    payload: selectedTabId
+  }
+}
+
 export default {
   addTargets,
   clearRfpState,
@@ -165,5 +172,6 @@ export default {
   setSelectedTarget,
   setClickMapToAddTarget,
   setPlanListOffset,
-  showOrHideAllRfpStatus
+  showOrHideAllRfpStatus,
+  setSelectedTabId
 }

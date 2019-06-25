@@ -13,6 +13,11 @@ const defaultState = {
   selectedTarget: null,
   status: RfpStatusTypes.UNINITIALIZED,
   showAllRfpStatus: false,
+  tabs: [
+    { id: 'LIST_PLANS', description: 'List all plans' },
+    { id: 'UPLOAD_RFP', description: 'Upload RFP' }
+  ],
+  selectedTabId: 'LIST_PLANS',
   rfpPlans: [],
   rfpReportDefinitions: [],
   isLoadingRfpPlans: false,
@@ -94,6 +99,12 @@ function setPlanListOffset (state, planListOffset) {
   }
 }
 
+function setSelectedTabId (state, selectedTabId) {
+  return { ...state,
+    selectedTabId: selectedTabId
+  }
+}
+
 function rfpReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.RFP_CLEAR_STATE:
@@ -128,6 +139,9 @@ function rfpReducer (state = defaultState, action) {
 
     case Actions.RFP_SET_PLAN_LIST_OFFSET:
       return setPlanListOffset(state, action.payload)
+
+    case Actions.RFP_SET_SELECTED_TAB_ID:
+      return setSelectedTabId(state, action.payload)
 
     default:
       return state

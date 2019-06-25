@@ -9,8 +9,7 @@ import RfpStatusSearch from './rfp-status-search.jsx'
 
 export class RfpPlanList extends Component {
   render () {
-    return <div className='container pt-5'>
-      <h2>RFP Plan Status</h2>
+    return <div className='pt-3'>
       <div className='row'>
         <div className='col-md-6' />
         <div className='col-md-6'>
