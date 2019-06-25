@@ -1,7 +1,7 @@
 /* global jest test expect */
 import React from 'react'
 import { shallow } from 'enzyme'
-import { RfpStatus } from '../rfp-status.jsx'
+import { RfpPlanList } from '../rfp-plan-list.jsx'
 
 // Create a bunch of RFP plans so we can test the pagination
 var rfpPlans = []
@@ -18,7 +18,7 @@ test('Component initialization and teardown', () => {
   const mockLoadRfpPlans = jest.fn()
   const mockClearRfpPlans = jest.fn()
   const component = shallow(
-    <RfpStatus
+    <RfpPlanList
       rfpPlans={[]}
       userId={42}
       loadRfpPlans={mockLoadRfpPlans}
@@ -35,7 +35,7 @@ test('Component initialization and teardown', () => {
 test('Component pagination render', () => {
   const mockLoadRfpPlans = jest.fn()
   const component = shallow(
-    <RfpStatus
+    <RfpPlanList
       rfpPlans={rfpPlans}
       userId={42}
       planListOffset={0}
@@ -52,7 +52,7 @@ test('Component pagination navigation', () => {
   const mockSetPlanListOffset = jest.fn()
   const PLANS_PER_PAGE = 10
   const component = shallow(
-    <RfpStatus
+    <RfpPlanList
       rfpPlans={rfpPlans}
       userId={42}
       planListOffset={0}
