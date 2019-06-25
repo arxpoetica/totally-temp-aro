@@ -4,12 +4,13 @@ import reduxStore from '../../../../../redux-store'
 import wrapComponentWithProvider from '../../../../common/provider-wrapped-component'
 import RfpActions from '../rfp-actions'
 import RfpPlanList from './rfp-plan-list.jsx'
+import RfpSubmitter from './rfp-submitter.jsx'
 
 export class RfpStatus extends Component {
   render () {
     return <div className='container pt-5 pb-5'>
       <h2>RFP Plans</h2>
-      <ul className='nav nav-tabs'>
+      <ul className='nav nav-tabs mb-3'>
         {
           this.props.tabs.map(tab => (
             <li key={tab.id} className='nav-item'>
@@ -24,12 +25,21 @@ export class RfpStatus extends Component {
           ))
         }
       </ul>
-      {
-        this.props.selectedTabId === 'LIST_PLANS'
-          ? <RfpPlanList />
-          : null
-      }
+      {this.renderActiveComponent()}
     </div>
+  }
+
+  renderActiveComponent () {
+    switch (this.props.selectedTabId) {
+      case 'LIST_PLANS':
+        return <RfpPlanList />
+
+      case 'SUBMIT_RFP':
+        return <RfpSubmitter />
+
+      default:
+        return <div>ERROR: Unknown tab selected</div>
+    }
   }
 }
 

@@ -9,7 +9,7 @@ import RfpStatusSearch from './rfp-status-search.jsx'
 
 export class RfpPlanList extends Component {
   render () {
-    return <div className='pt-3'>
+    return <div>
       <div className='row'>
         <div className='col-md-6' />
         <div className='col-md-6'>

@@ -46,4 +46,8 @@ module.exports = class UiSettings {
     return database.query(sql, [aroClient, stylesheetsValue])
   }
 
+  static getAllRfpTemplates () {
+    const sql = 'SELECT * FROM ui.rfp_template;'
+    return database.query(sql)
+  }
 }

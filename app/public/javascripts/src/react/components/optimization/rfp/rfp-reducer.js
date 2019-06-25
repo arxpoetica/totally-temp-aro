@@ -15,9 +15,12 @@ const defaultState = {
   showAllRfpStatus: false,
   tabs: [
     { id: 'LIST_PLANS', description: 'List all plans' },
-    { id: 'UPLOAD_RFP', description: 'Upload RFP' }
+    { id: 'SUBMIT_RFP', description: 'Submit RFP' }
   ],
   selectedTabId: 'LIST_PLANS',
+  templates: [],
+  selectedTemplateId: null,
+  submitResult: null,
   rfpPlans: [],
   rfpReportDefinitions: [],
   isLoadingRfpPlans: false,
@@ -105,6 +108,19 @@ function setSelectedTabId (state, selectedTabId) {
   }
 }
 
+function setRfpTemplates (state, rfpTemplates) {
+  return { ...state,
+    templates: rfpTemplates,
+    selectedTemplateId: rfpTemplates[0].id
+  }
+}
+
+function setSubmitResult (state, submitResult) {
+  return { ...state,
+    submitResult: submitResult
+  }
+}
+
 function rfpReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.RFP_CLEAR_STATE:
@@ -142,6 +158,12 @@ function rfpReducer (state = defaultState, action) {
 
     case Actions.RFP_SET_SELECTED_TAB_ID:
       return setSelectedTabId(state, action.payload)
+
+    case Actions.RFP_SET_TEMPLATES:
+      return setRfpTemplates(state, action.payload)
+
+    case Actions.RFP_SET_SUBMIT_RESULT:
+      return setSubmitResult(state, action.payload)
 
     default:
       return state

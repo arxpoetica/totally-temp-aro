@@ -70,6 +70,31 @@ function initializeRfpReport (planId, userId, projectId, rfpId, fiberRoutingMode
   }
 }
 
+function submitRfpReport (userId, requestBody) {
+  return dispatch => {
+    AroHttp.post(`/service/rfp/process?user_id=${userId}`, requestBody)
+      .then(result => {
+        dispatch({
+          type: Actions.RFP_SET_SUBMIT_RESULT,
+          payload: {
+            type: 'success',
+            message: 'The RFP was submitted successfully to the server'
+          }
+        })
+      })
+      .catch(err => {
+        console.error(err)
+        dispatch({
+          type: Actions.RFP_SET_SUBMIT_RESULT,
+          payload: {
+            type: 'error',
+            message: `Error when submitting the RFP.\n ${err.message}`
+          }
+        })
+      })
+  }
+}
+
 function modifyRfpReport () {
   return {
     type: Actions.RFP_CLEAR_STATE
@@ -160,10 +185,29 @@ function setSelectedTabId (selectedTabId) {
   }
 }
 
+function loadRfpTemplates () {
+  return dispatch => {
+    AroHttp.get('/ui/rfp_templates')
+      .then(result => dispatch({
+        type: Actions.RFP_SET_TEMPLATES,
+        payload: result.data
+      }))
+      .catch(err => console.error(err))
+  }
+}
+
+function setSelectedTemplateId (selectedTemplateId) {
+  return {
+    type: Actions.RFP_SET_SELECTED_TEMPLATE_ID,
+    payload: selectedTemplateId
+  }
+}
+
 export default {
   addTargets,
   clearRfpState,
   initializeRfpReport,
+  submitRfpReport,
   clearRfpPlans,
   loadRfpPlans,
   modifyRfpReport,
@@ -173,5 +217,7 @@ export default {
   setClickMapToAddTarget,
   setPlanListOffset,
   showOrHideAllRfpStatus,
-  setSelectedTabId
+  setSelectedTabId,
+  loadRfpTemplates,
+  setSelectedTemplateId
 }
