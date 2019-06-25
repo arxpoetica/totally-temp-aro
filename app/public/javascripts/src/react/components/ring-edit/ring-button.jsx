@@ -33,8 +33,6 @@ export class RingButton extends Component {
   }
 
   render () {
-    console.log(this.props)
-    
     switch (this.props.status) {
       case this.StatusTypes.START_STATE: 
       case this.StatusTypes.UNINITIALIZED:
@@ -89,7 +87,6 @@ export class RingButton extends Component {
   }
   
   requestSubNet(){
-    console.log(this.props)
     //this.props.onModify()
     var ringIds = []
     for (var key in this.props.rings) {

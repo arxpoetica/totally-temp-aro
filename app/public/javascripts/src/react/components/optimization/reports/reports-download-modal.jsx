@@ -51,7 +51,6 @@ ReportsDownloadRow.propTypes = {
 
 export class ReportsDownloadModal extends Component {
   render () {
-    console.log(JSON.parse( JSON.stringify(this.props) ))
     const reportTypes = (this.props.reportTypes || [])
     const visibleReports = (this.props.reportsMetaData || []).filter(report => reportTypes.indexOf(report.reportType) >= 0)
     return <div

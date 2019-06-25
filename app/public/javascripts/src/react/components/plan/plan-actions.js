@@ -7,7 +7,6 @@ import RingEditActions from '../ring-edit/ring-edit-actions'
 
 // Set the plan
 function setActivePlan (plan) {
-  console.log(plan)
   return (dispatch, getState) => {
     getState().plan.activePlan && getState().plan.activePlan.id &&
       socketManager.leavePlanRoom(getState().plan.activePlan.id) // leave previous plan
