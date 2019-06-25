@@ -74,6 +74,10 @@ class AroHttp {
         const res = this.IsValidJSONString(result)
         if (res === true) {
           const parsedResult = (result === '') ? {} : JSON.parse(result)
+          if (parsedResult.status && // Parsed result has a "status" field. This comes from service.
+              !(parsedResult.status >= 200 && parsedResult.status <= 299)) {
+            return Promise.reject(parsedResult)
+          }
           return Promise.resolve(parsedResult)
         } else {
           const parsedResult = result

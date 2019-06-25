@@ -41,6 +41,10 @@ export class RfpStatus extends Component {
         return <div>ERROR: Unknown tab selected</div>
     }
   }
+
+  componentWillUnmount () {
+    this.props.clearRfpState()
+  }
 }
 
 RfpStatus.propTypes = {
@@ -54,7 +58,8 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  setSelectedTabId: selectedTabId => dispatch(RfpActions.setSelectedTabId(selectedTabId))
+  setSelectedTabId: selectedTabId => dispatch(RfpActions.setSelectedTabId(selectedTabId)),
+  clearRfpState: () => dispatch(RfpActions.clearRfpState())
 })
 
 const RfpStatusComponent = wrapComponentWithProvider(reduxStore, RfpStatus, mapStateToProps, mapDispatchToProps)
