@@ -25,7 +25,12 @@ export class RfpStatusRow extends Component {
         <div className={`badge ${planStateToBadgeColor[this.props.status]}`}>{this.props.status}</div>
       </td>
       <td>
-        <RfpReportDownloadCell planId={this.props.planId} userId={this.props.userId} reportDefinitions={this.props.reportDefinitions} />
+        <RfpReportDownloadCell
+          planId={this.props.planId}
+          userId={this.props.userId}
+          projectId={this.props.projectId}
+          reportDefinitions={this.props.reportDefinitions}
+        />
       </td>
     </tr>
   }
@@ -38,12 +43,14 @@ RfpStatusRow.propTypes = {
   status: PropTypes.string,
   systemActors: PropTypes.object,
   reportDefinitions: ReportDefinitionPropType,
-  userId: PropTypes.number
+  userId: PropTypes.number,
+  projectId: PropTypes.number
 }
 
 const mapStateToProps = state => ({
   systemActors: state.user.systemActors,
-  userId: state.user.loggedInUser && state.user.loggedInUser.id
+  userId: state.user.loggedInUser && state.user.loggedInUser.id,
+  projectId: state.user.loggedInUser.projectId
 })
 
 const mapDispatchToProps = dispatch => ({

@@ -37,6 +37,7 @@ export default class RfpReportDownloadCell extends Component {
               .replace('{planId}', this.props.planId)
               .replace('{mediaType}', mediaType)
               .replace('{userId}', this.props.userId)
+              .replace('{projectId}', this.props.projectId)
             return <a
               key={mediaType}
               className='btn btn-light'
@@ -55,5 +56,6 @@ export default class RfpReportDownloadCell extends Component {
 RfpReportDownloadCell.propTypes = {
   planId: PropTypes.number,
   reportDefinitions: ReportDefinitionPropType,
-  userId: PropTypes.number
+  userId: PropTypes.number,
+  projectId: PropTypes.number
 }

@@ -126,7 +126,7 @@ function loadRfpPlans (userId, searchTerm = '') {
         )
           .map(reportDefinition => {
             // user_id should come from service. Manually adding it here until service does it.
-            reportDefinition.href += '?user_id={userId}'
+            reportDefinition.href += '&user_id={userId}'
             return reportDefinition
           })
         dispatch({
