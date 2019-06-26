@@ -15,6 +15,8 @@ export class RfpTemplateManager extends Component {
 
   render () {
     return <div>
+      {this.renderExistingTemplates()}
+      <hr />
       <h4>Upload new template</h4>
       <div className='row'>
         <div className='col-md-4'>
@@ -51,6 +53,38 @@ export class RfpTemplateManager extends Component {
     </div>
   }
 
+  renderExistingTemplates () {
+    return <div>
+      <h4>Existing templates</h4>
+      <table className='table table-striped'>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Value</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {this.props.templates.map(template => (
+            <tr key={template.id}>
+              <td>{template.name}</td>
+              <td>
+                <pre>
+                  {JSON.stringify(template.value, null, 2)}
+                </pre>
+              </td>
+              <td>
+                <button className='btn btn-danger' onClick={event => this.props.deleteRfpTemplate(template.id)}>
+                  <i className='fa fa-trash-alt' /> Delete
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  }
+
   uploadTemplate () {
     const templateFile = this.fileInput.current.files[0]
     const self = this
@@ -60,6 +94,10 @@ export class RfpTemplateManager extends Component {
       self.props.addRfpTemplate(self.state.newTemplateName, template)
     }
     reader.readAsText(templateFile)
+  }
+
+  componentDidMount () {
+    this.props.loadRfpTemplates()
   }
 }
 
@@ -72,7 +110,9 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  addRfpTemplate: (name, template) => dispatch(RfpActions.addRfpTemplate(name, template))
+  addRfpTemplate: (name, template) => dispatch(RfpActions.addRfpTemplate(name, template)),
+  deleteRfpTemplate: templateId => dispatch(RfpActions.deleteRfpTemplate(templateId)),
+  loadRfpTemplates: () => dispatch(RfpActions.loadRfpTemplates())
 })
 
 const RfpTemplateManagerComponent = connect(mapStateToProps, mapDispatchToProps)(RfpTemplateManager)

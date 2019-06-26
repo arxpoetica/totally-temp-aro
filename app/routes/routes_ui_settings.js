@@ -55,4 +55,11 @@ exports.configure = (api, middleware) => {
       .then(jsonSuccess(res, next))
       .catch(next)
   })
+
+  api.delete('/ui/rfp_template/:id', (req, res, next) => {
+    const templateId = req.params.id
+    models.UiSettings.deleteRfpTemplate(templateId)
+      .then(jsonSuccess(res, next))
+      .catch(next)
+  })
 }

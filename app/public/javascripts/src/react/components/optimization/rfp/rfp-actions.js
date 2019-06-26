@@ -208,6 +208,14 @@ function addRfpTemplate (name, template) {
   }
 }
 
+function deleteRfpTemplate (templateId) {
+  return dispatch => {
+    AroHttp.delete(`/ui/rfp_template/${templateId}`)
+      .then(result => dispatch(loadRfpTemplates()))
+      .catch(err => console.error(err))
+  }
+}
+
 function setSelectedTemplateId (selectedTemplateId) {
   return {
     type: Actions.RFP_SET_SELECTED_TEMPLATE_ID,
@@ -232,5 +240,6 @@ export default {
   setSelectedTabId,
   loadRfpTemplates,
   addRfpTemplate,
+  deleteRfpTemplate,
   setSelectedTemplateId
 }

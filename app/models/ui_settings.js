@@ -62,4 +62,9 @@ module.exports = class UiSettings {
     `
     return database.query(sql, [name, value])
   }
+
+  static deleteRfpTemplate (id) {
+    const sql = 'DELETE FROM ui.rfp_template WHERE id = $1'
+    return database.query(sql, [id])
+  }
 }
