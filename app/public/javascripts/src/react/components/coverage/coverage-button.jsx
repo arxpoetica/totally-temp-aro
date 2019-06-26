@@ -6,10 +6,20 @@ import CoverageActions from '../coverage/coverage-actions'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import CoverageStatusTypes from './constants'
 import socketManager from '../../../react/common/socket-manager'
+import ProgressButton from '../common/progress-button.jsx'
 
-export class CoverageButton extends Component {
+
+export class CoverageButton extends ProgressButton {
   constructor (props) {
     super(props)
+
+    // override 
+    this.statusTypes = {
+      UNINITIALIZED: CoverageStatusTypes.UNINITIALIZED,
+      RUNNING: CoverageStatusTypes.RUNNING,
+      FINISHED: CoverageStatusTypes.FINISHED
+    }
+
     this.unsubscriber = socketManager.subscribe('PROGRESS_MESSAGE_DATA', (progressData) => {
       if (progressData.data.processType === 'coverage') {
         this.props.setCoverageProgress(progressData.data)
@@ -17,51 +27,6 @@ export class CoverageButton extends Component {
     })
   }
 
-  render () {
-    switch (this.props.status) {
-      case CoverageStatusTypes.UNINITIALIZED:
-        return this.renderUninitializedButton()
-
-      case CoverageStatusTypes.RUNNING:
-        return this.renderProgressbar()
-
-      case CoverageStatusTypes.FINISHED:
-        return this.renderFinishedButton()
-
-      default:
-        return <div>ERROR: Unknown coverage status - {this.props.status}</div>
-    }
-  }
-
-  renderUninitializedButton () {
-    return (
-      <button className={'btn btn-block btn-primary'} style={{ marginBottom: '10px' }}
-        onClick={() => this.props.initializeCoverageReport(this.props.userId, this.props.planId, this.props.projectId, this.props.activeSelectionModeId,
-          this.props.locationLayers.filter(item => item.checked).map(item => item.plannerKey),
-          this.props.boundaryLayers, this.props.initializationParams)}>
-        <i className='fa fa-bolt' /> Run
-      </button>
-    )
-  }
-
-  renderProgressbar () {
-    return <div className={'progress'} style={{ height: '34px', position: 'relative', marginBottom: '10px' }}>
-      <div className={'progress-bar progress-bar-optimization'} role='progressbar' aria-valuenow={this.props.progress}
-        aria-valuemin='0' aria-valuemax='1' style={{ lineHeight: '34px', width: (this.props.progress * 100) + '%' }} />
-      <div style={{ position: 'absolute',
-        top: '50%',
-        left: '50%',
-        backgroundColor: 'rgba(0, 0, 0, 0.4)',
-        color: 'white',
-        transform: 'translateX(-50%) translateY(-50%)',
-        width: '80px',
-        textAlign: 'center',
-        borderRadius: '3px',
-        fontWeight: 'bold' }}>
-        {Math.round(this.props.progress * 100) + '%'}
-      </div>
-    </div>
-  }
 
   renderFinishedButton () {
     return (
@@ -71,6 +36,23 @@ export class CoverageButton extends Component {
       </button>
     )
   }
+
+  // override 
+  onRun () {
+    this.props.initializeCoverageReport(this.props.userId, this.props.planId, this.props.projectId, this.props.activeSelectionModeId,
+      this.props.locationLayers.filter(item => item.checked).map(item => item.plannerKey),
+      this.props.boundaryLayers, this.props.initializationParams)
+  } 
+  
+  // override 
+  onModify () {
+    this.props.modifyCoverageReport(this.props.report.reportId)
+  }
+
+  componentWillUnmount () {
+    this.unsubscriber()
+  }
+
 }
 
 CoverageButton.propTypes = {
