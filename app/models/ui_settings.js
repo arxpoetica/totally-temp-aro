@@ -50,4 +50,16 @@ module.exports = class UiSettings {
     const sql = 'SELECT * FROM ui.rfp_template;'
     return database.query(sql)
   }
+
+  static createRfpTemplate (name, value) {
+    const sql = `
+      INSERT INTO ui.rfp_template(name, value, service_request_schema_id)
+      VALUES(
+        $1,
+        $2,
+        (SELECT id FROM ui.service_request_schema WHERE name='/rfp/process')
+      );
+    `
+    return database.query(sql, [name, value])
+  }
 }

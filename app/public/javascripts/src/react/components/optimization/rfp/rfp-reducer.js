@@ -15,7 +15,8 @@ const defaultState = {
   showAllRfpStatus: false,
   tabs: [
     { id: 'LIST_PLANS', description: 'List all plans' },
-    { id: 'SUBMIT_RFP', description: 'Submit RFP' }
+    { id: 'SUBMIT_RFP', description: 'Submit RFP' },
+    { id: 'MANAGE_RFP_TEMPLATES', description: 'Manage RFP templates' }
   ],
   selectedTabId: 'LIST_PLANS',
   templates: [],

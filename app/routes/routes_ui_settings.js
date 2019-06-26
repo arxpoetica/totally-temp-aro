@@ -47,4 +47,12 @@ exports.configure = (api, middleware) => {
       .then(jsonSuccess(res, next))
       .catch(next)
   })
+
+  api.post('/ui/rfp_template', (req, res, next) => {
+    const name = req.body.name
+    const value = req.body.value
+    models.UiSettings.createRfpTemplate(name, value)
+      .then(jsonSuccess(res, next))
+      .catch(next)
+  })
 }

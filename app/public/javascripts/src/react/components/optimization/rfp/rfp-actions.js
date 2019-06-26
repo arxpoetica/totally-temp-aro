@@ -196,6 +196,18 @@ function loadRfpTemplates () {
   }
 }
 
+function addRfpTemplate (name, template) {
+  return dispatch => {
+    const requestBody = {
+      name: name,
+      value: template
+    }
+    AroHttp.post('/ui/rfp_template', requestBody)
+      .then(result => dispatch(loadRfpTemplates()))
+      .catch(err => console.error(err))
+  }
+}
+
 function setSelectedTemplateId (selectedTemplateId) {
   return {
     type: Actions.RFP_SET_SELECTED_TEMPLATE_ID,
@@ -219,5 +231,6 @@ export default {
   showOrHideAllRfpStatus,
   setSelectedTabId,
   loadRfpTemplates,
+  addRfpTemplate,
   setSelectedTemplateId
 }

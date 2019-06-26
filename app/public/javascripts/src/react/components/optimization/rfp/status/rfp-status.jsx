@@ -5,6 +5,7 @@ import wrapComponentWithProvider from '../../../../common/provider-wrapped-compo
 import RfpActions from '../rfp-actions'
 import RfpPlanList from './rfp-plan-list.jsx'
 import RfpSubmitter from './rfp-submitter.jsx'
+import RfpTemplateManager from './rfp-template-manager.jsx'
 
 export class RfpStatus extends Component {
   render () {
@@ -36,6 +37,9 @@ export class RfpStatus extends Component {
 
       case 'SUBMIT_RFP':
         return <RfpSubmitter />
+
+      case 'MANAGE_RFP_TEMPLATES':
+        return <RfpTemplateManager />
 
       default:
         return <div>ERROR: Unknown tab selected</div>
