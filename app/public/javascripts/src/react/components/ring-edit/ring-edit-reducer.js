@@ -1,13 +1,14 @@
 import Actions from '../../common/actions'
 import FeatureSets from '../../common/featureSets'
 import Ring from '../../common/ring'
+import RingStatusTypes from './constants'
 
 
 const defaultState = {
   rings: {},
   selectedRingId: null, 
   analysis: {
-    status: 'UNINITIALIZED',
+    status: RingStatusTypes.START_STATE,
     progress: 0, 
     report: null
   }

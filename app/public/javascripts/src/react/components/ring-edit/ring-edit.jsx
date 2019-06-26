@@ -10,27 +10,22 @@ import Ring from '../../common/ring.js'
 import ReportsDownloadModal from '../optimization/reports/reports-download-modal.jsx'
 import ReportActions from '../optimization/reports/reports-actions'
 import './ring-edit.css'
-
 import socketManager from '../../../react/common/socket-manager'
+import RingStatusTypes from './constants'
+
 
 export class RingEdit extends Component {
   
   constructor (props) {
     super(props)
-    this.StatusTypes = Object.freeze({
-      UNINITIALIZED: 'UNINITIALIZED',
-      START_STATE: 'START_STATE',
-      STARTED: 'STARTED',
-      COMPLETED: 'COMPLETED'
-    })
+    
     this.createdMapObjects = []
     this.mapObjectListeners = []
     this.canEdit = true
   }
   
   render () {
-    this.canEdit = (this.props.status == this.StatusTypes.START_STATE 
-                    || this.props.status == this.StatusTypes.UNINITIALIZED)
+    this.canEdit = (this.props.status == RingStatusTypes.START_STATE)
     this.drawRings()
     return <div>
       {this.renderAddButton()}
@@ -119,7 +114,7 @@ export class RingEdit extends Component {
                             <i className="fa ei-button-icon ng-scope fa-trash-alt"></i>
                           </button>
                         )})()}
-                        
+
                       </td>
                     </tr>
                   ))
