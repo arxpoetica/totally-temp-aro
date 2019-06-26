@@ -3,6 +3,7 @@ import CoverageActions from '../coverage/coverage-actions'
 import SelectionActions from '../selection/selection-actions'
 import RfpActions from '../optimization/rfp/rfp-actions'
 import socketManager from '../../../react/common/socket-manager'
+import RingEditActions from '../ring-edit/ring-edit-actions'
 
 // Set the plan
 function setActivePlan (plan) {
@@ -25,6 +26,8 @@ function setActivePlan (plan) {
     dispatch(SelectionActions.loadPlanTargetSelectionsFromServer(plan.id))
     // Clear RFP state
     dispatch(RfpActions.clearRfpState())
+    // load rings
+    dispatch(RingEditActions.loadRings(plan.id))
   }
 }
 

@@ -43,6 +43,7 @@ class SocketManager {
   }
 
   unsubscribe (fn) {
+    console.log('unsubscribe')
     Object.keys(this.router).forEach(messageType => {
       var subscriberIndex = this.router[messageType].findIndex(item => item === fn)
       while (subscriberIndex >= 0) {

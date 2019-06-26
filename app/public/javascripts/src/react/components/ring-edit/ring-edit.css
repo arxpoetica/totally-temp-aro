@@ -1,0 +1,40 @@
+.ring-table-item-selected, table td.ring-table-item-selected{
+  padding-left: 0px;
+  padding-right: 0px;
+  padding-bottom: 0px;
+}
+
+.ring-sub-table{
+  padding-left: 21px;
+  padding-bottom: 16px;
+  background-color: #ffffff;
+  border-left: 1px #eeeeee dashed;
+}
+
+.ring-sub-table > table{
+  border-left: 1px #eeeeee solid;
+  margin-bottom: 0px;
+}
+
+.ring-table-item-title{
+  
+}
+
+.ring-table-item-selected .ring-table-item-title{
+  padding: .3rem .3rem 0px .3rem;
+}
+
+.ring-table-item-title-selected{
+  border-bottom: 2px solid #888888;
+  font-weight: bold;
+}
+
+.ring-del-btn{
+  float: right;
+  margin-bottom: 0.3rem;
+}
+
+.ring-text-inp{
+  width: 50%;
+  margin-bottom: 0.3rem;
+}

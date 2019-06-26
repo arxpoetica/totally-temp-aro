@@ -13,6 +13,7 @@ import SelectionActions from '../react/components/selection/selection-actions'
 import PlanStates from '../react/components/plan/plan-states'
 import SelectionModes from '../react/components/selection/selection-modes'
 import SocketManager from '../react/common/socket-manager'
+import RingEditActions from '../react/components/ring-edit/ring-edit-actions'
 
 // We need a selector, else the .toJS() call will create an infinite digest loop
 const getAllLocationLayers = reduxState => reduxState.mapLayers.location
@@ -168,9 +169,16 @@ class State {
     // The selected panel when in the edit plan mode
     service.EditPlanPanels = Object.freeze({
       EDIT_PLAN: 'EDIT_PLAN',
-      PLAN_SUMMARY: 'PLAN_SUMMARY'
+      PLAN_SUMMARY: 'PLAN_SUMMARY', 
+      EDIT_RINGS: 'EDIT_RINGS'
     })
     service.activeEditPlanPanel = service.EditPlanPanels.EDIT_PLAN
+    
+    service.EditRingsPanels = Object.freeze({
+      EDIT_RINGS: 'EDIT_RINGS', 
+      OUTPUT: 'OUTPUT'
+    })
+    service.activeEditRingsPanel = service.EditRingsPanels.EDIT_RINGS
 
     service.routingModes = {
       DIRECT_ROUTING: { id: 'DIRECT_ROUTING', label: 'Direct Routing' },
@@ -274,11 +282,6 @@ class State {
     }
     service.expertModeScopeContext = null
 
-    service.hackRaiseEvent = (features) => {
-      $rootScope.$broadcast('map_layer_clicked_feature', features, {})
-    }
-    service.mapFeaturesSelectedEvent = new Rx.BehaviorSubject({})
-
     // Raise an event requesting locations within a polygon to be selected. Coordinates are relative to the visible map.
     service.requestPolygonSelect = new Rx.BehaviorSubject({})
 
@@ -294,6 +297,7 @@ class State {
     service.displayModes = Object.freeze({
       VIEW: 'VIEW',
       ANALYSIS: 'ANALYSIS',
+      EDIT_RINGS: 'EDIT_RINGS', 
       EDIT_PLAN: 'EDIT_PLAN',
       PLAN_SETTINGS: 'PLAN_SETTINGS',
       DEBUG: 'DEBUG'
@@ -418,6 +422,27 @@ class State {
       ],
       selectedRenderingOption: null
     }
+    
+    // feature clicked on map
+    service.hackRaiseEvent = (features) => {
+      $rootScope.$broadcast('map_layer_clicked_feature', features, {})
+    }
+    service.mapFeaturesSelectedEvent = new Rx.BehaviorSubject({})
+    
+    service.mapFeaturesSelectedEvent.subscribe((options) => {
+      // ToDo: this check may need to move into REACT
+      if (service.selectedDisplayMode.getValue() == service.displayModes.EDIT_RINGS
+        && service.activeEditRingsPanel == service.EditRingsPanels.EDIT_RINGS){
+        /*
+        $ngRedux.dispatch({
+          type: Actions.MAP_SET_SELECTED_FEATURES,
+          payload: options
+        })
+        */
+        service.onFeatureSelectedRedux(options)
+      }
+    })
+    
 
     // Function to convert from hsv to rgb color values.
     // https://stackoverflow.com/questions/17242144/javascript-convert-hsb-hsv-color-to-rgb-accurately
@@ -1830,7 +1855,8 @@ class State {
       removePlanTargets: (planId, planTargets) => dispatch(SelectionActions.removePlanTargets(planId, planTargets)),
       setActivePlanState: planState => dispatch(PlanActions.setActivePlanState(planState)),
       setGoogleMapsReference: mapRef => dispatch(MapActions.setGoogleMapsReference(mapRef)),
-      updateShowSiteBoundary: isVisible => dispatch(MapLayerActions.setShowSiteBoundary(isVisible))
+      updateShowSiteBoundary: isVisible => dispatch(MapLayerActions.setShowSiteBoundary(isVisible)), 
+      onFeatureSelectedRedux: features => dispatch(RingEditActions.onFeatureSelected(features))
     }
   }
 }
