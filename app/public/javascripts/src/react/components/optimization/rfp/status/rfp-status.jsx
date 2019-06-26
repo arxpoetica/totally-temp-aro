@@ -16,6 +16,7 @@ export class RfpStatus extends Component {
           this.props.tabs.map(tab => (
             <li key={tab.id} className='nav-item'>
               <a
+                id={`rfpStatusTab_${tab.id}`}
                 className={`nav-link ${tab.id === this.props.selectedTabId ? 'active' : ''}`}
                 href='#'
                 onClick={() => this.props.setSelectedTabId(tab.id)}
