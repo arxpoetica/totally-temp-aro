@@ -32,6 +32,7 @@ export class RfpSubmitter extends Component {
         </div>
         <div className='col-md-8'>
           <input
+            className='form-control-file'
             type='file'
             ref={this.fileInput}
           />
