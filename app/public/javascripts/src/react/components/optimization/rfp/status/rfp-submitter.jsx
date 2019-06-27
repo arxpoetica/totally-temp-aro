@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { PropTypes } from 'prop-types'
-import RfpActions from '../rfp-actions'
+import RfpStatusActions from './actions'
 import RfpFileImporterUtils from '../rfp-file-importer-utils'
 
 export class RfpSubmitter extends Component {
@@ -122,9 +122,9 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  submitRfpReport: (userId, requestBody) => dispatch(RfpActions.submitRfpReport(userId, requestBody)),
-  setSelectedTemplateId: selectedTemplateId => dispatch(RfpActions.setSelectedTemplateId(selectedTemplateId)),
-  loadRfpTemplates: () => dispatch(RfpActions.loadRfpTemplates())
+  submitRfpReport: (userId, requestBody) => dispatch(RfpStatusActions.submitRfpReport(userId, requestBody)),
+  setSelectedTemplateId: selectedTemplateId => dispatch(RfpStatusActions.setSelectedTemplateId(selectedTemplateId)),
+  loadRfpTemplates: () => dispatch(RfpStatusActions.loadRfpTemplates())
 })
 
 const RfpSubmitterComponent = connect(mapStateToProps, mapDispatchToProps)(RfpSubmitter)

@@ -3,6 +3,7 @@ import { PropTypes } from 'prop-types'
 import reduxStore from '../../../../../redux-store'
 import wrapComponentWithProvider from '../../../../common/provider-wrapped-component'
 import RfpActions from '../rfp-actions'
+import RfpStatusActions from './actions'
 import RfpPlanList from './rfp-plan-list.jsx'
 import RfpSubmitter from './rfp-submitter.jsx'
 import RfpTemplateManager from './rfp-template-manager.jsx'
@@ -63,7 +64,7 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  setSelectedTabId: selectedTabId => dispatch(RfpActions.setSelectedTabId(selectedTabId)),
+  setSelectedTabId: selectedTabId => dispatch(RfpStatusActions.setSelectedTabId(selectedTabId)),
   clearRfpState: () => dispatch(RfpActions.clearRfpState())
 })
 

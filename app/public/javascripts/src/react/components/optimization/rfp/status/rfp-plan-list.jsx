@@ -3,6 +3,7 @@ import { PropTypes } from 'prop-types'
 import reduxStore from '../../../../../redux-store'
 import wrapComponentWithProvider from '../../../../common/provider-wrapped-component'
 import RfpActions from '../rfp-actions'
+import RfpStatusActions from './actions'
 import ReportDefinitionPropType from './report-definition-prop-type'
 import RfpStatusRow from './rfp-status-row.jsx'
 import RfpStatusSearch from './rfp-status-search.jsx'
@@ -130,9 +131,9 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  clearRfpPlans: () => dispatch(RfpActions.clearRfpPlans()),
+  clearRfpPlans: () => dispatch(RfpStatusActions.clearRfpPlans()),
   loadRfpPlans: (userId) => dispatch(RfpActions.loadRfpPlans(userId)),
-  setPlanListOffset: planListOffset => dispatch(RfpActions.setPlanListOffset(planListOffset))
+  setPlanListOffset: planListOffset => dispatch(RfpStatusActions.setPlanListOffset(planListOffset))
 })
 
 const RfpPlanListComponent = wrapComponentWithProvider(reduxStore, RfpPlanList, mapStateToProps, mapDispatchToProps)

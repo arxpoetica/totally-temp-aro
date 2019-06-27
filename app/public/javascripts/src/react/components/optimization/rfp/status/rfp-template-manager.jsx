@@ -2,7 +2,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { PropTypes } from 'prop-types'
-import RfpActions from '../rfp-actions'
+import RfpStatusActions from './actions'
 
 export class RfpTemplateManager extends Component {
   constructor (props) {
@@ -110,9 +110,9 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  addRfpTemplate: (name, template) => dispatch(RfpActions.addRfpTemplate(name, template)),
-  deleteRfpTemplate: templateId => dispatch(RfpActions.deleteRfpTemplate(templateId)),
-  loadRfpTemplates: () => dispatch(RfpActions.loadRfpTemplates())
+  addRfpTemplate: (name, template) => dispatch(RfpStatusActions.addRfpTemplate(name, template)),
+  deleteRfpTemplate: templateId => dispatch(RfpStatusActions.deleteRfpTemplate(templateId)),
+  loadRfpTemplates: () => dispatch(RfpStatusActions.loadRfpTemplates())
 })
 
 const RfpTemplateManagerComponent = connect(mapStateToProps, mapDispatchToProps)(RfpTemplateManager)
