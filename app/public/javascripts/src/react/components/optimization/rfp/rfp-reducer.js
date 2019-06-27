@@ -26,11 +26,14 @@ const defaultState = {
   rfpReportDefinitions: [],
   isLoadingRfpPlans: false,
   planListOffset: 0,
-  planListLimit: 10
+  planListLimit: 10,
+  reportsBeingDownloaded: new Set() // A set of URLs that are being downloaded (the server can take time to generate reports)
 }
 
 function clearState () {
-  return JSON.parse(JSON.stringify(defaultState))
+  const newState = JSON.parse(JSON.stringify(defaultState))
+  newState.reportsBeingDownloaded = new Set()
+  return newState
 }
 
 function addTargets (state, targets) {
@@ -122,6 +125,22 @@ function setSubmitResult (state, submitResult) {
   }
 }
 
+function startDownloadingRfpReport (state, reportUrl) {
+  var reportsBeingDownloaded = new Set(state.reportsBeingDownloaded)
+  reportsBeingDownloaded.add(reportUrl)
+  return { ...state,
+    reportsBeingDownloaded: reportsBeingDownloaded
+  }
+}
+
+function endDownloadingRfpReport (state, reportUrl) {
+  var reportsBeingDownloaded = new Set(state.reportsBeingDownloaded)
+  reportsBeingDownloaded.delete(reportUrl)
+  return { ...state,
+    reportsBeingDownloaded: reportsBeingDownloaded
+  }
+}
+
 function rfpReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.RFP_CLEAR_STATE:
@@ -165,6 +184,12 @@ function rfpReducer (state = defaultState, action) {
 
     case Actions.RFP_SET_SUBMIT_RESULT:
       return setSubmitResult(state, action.payload)
+
+    case Actions.RFP_START_DOWNLOADING_REPORT:
+      return startDownloadingRfpReport(state, action.payload)
+
+    case Actions.RFP_END_DOWNLOADING_REPORT:
+      return endDownloadingRfpReport(state, action.payload)
 
     default:
       return state

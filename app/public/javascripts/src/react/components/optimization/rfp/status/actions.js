@@ -1,4 +1,5 @@
-/* globals */
+/* globals Blob */
+import { saveAs } from 'file-saver'
 import Actions from '../../../../common/actions'
 import AroHttp from '../../../../common/aro-http'
 
@@ -34,6 +35,39 @@ function clearRfpPlans () {
       rfpPlans: [],
       isLoadingRfpPlans: false
     }
+  }
+}
+
+function downloadRfpReport (filename, reportUrl) {
+  return dispatch => {
+    dispatch({
+      type: Actions.RFP_START_DOWNLOADING_REPORT,
+      payload: reportUrl
+    })
+    AroHttp.get(`/service-download-file/undefined.txt/${reportUrl}`)
+      .then(result => {
+        // All this type checking is really a workaround. We need to fix formats (and aro-http.js) correctly
+        var blobToSave = null
+        if (result.data.type === 'Buffer') {
+          blobToSave = new Blob([new Uint8Array(result.data.data)]) // For binary files like xls
+        } else if (typeof result.data === 'string') {
+          blobToSave = new Blob([result.data]) // For text files like csv
+        } else {
+          blobToSave = new Blob([JSON.stringify(result.data, null, 2)]) // For objects to be saved as json
+        }
+        saveAs(blobToSave, filename)
+        dispatch({
+          type: Actions.RFP_END_DOWNLOADING_REPORT,
+          payload: reportUrl
+        })
+      })
+      .catch(err => {
+        console.log(err)
+        dispatch({
+          type: Actions.RFP_END_DOWNLOADING_REPORT,
+          payload: reportUrl
+        })
+      })
   }
 }
 
@@ -92,6 +126,7 @@ function setSelectedTemplateId (selectedTemplateId) {
 export default {
   submitRfpReport,
   clearRfpPlans,
+  downloadRfpReport,
   setPlanListOffset,
   setSelectedTabId,
   loadRfpTemplates,

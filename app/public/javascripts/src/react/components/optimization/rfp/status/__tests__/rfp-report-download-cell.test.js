@@ -1,7 +1,7 @@
 /* global jest test expect */
 import React from 'react'
 import { shallow } from 'enzyme'
-import RfpReportDownloadCell from '../rfp-report-download-cell.jsx'
+import { RfpReportDownloadCell } from '../rfp-report-download-cell.jsx'
 
 const PLAN_ID = 42
 const reportDefinitions = [
@@ -43,6 +43,7 @@ test('Default component render', () => {
     <RfpReportDownloadCell
       planId={PLAN_ID}
       reportDefinitions={reportDefinitions}
+      reportsBeingDownloaded={new Set()}
       userId={1}
     />
   )
@@ -57,10 +58,26 @@ test('When selected report changes', () => {
     <RfpReportDownloadCell
       planId={PLAN_ID}
       reportDefinitions={reportDefinitions}
+      reportsBeingDownloaded={new Set()}
       userId={1}
     />
   )
   expect(component).toMatchSnapshot()
   component.find('#selectRfpReportDefinition').simulate('change', { target: { value: reportDefinitions[1].reportData.id } })
+  expect(component).toMatchSnapshot()
+})
+
+// -----------------------------------------------------------------------------
+test('When a report is being downloaded', () => {
+  // Mock the Date.now() function so that the test is determinstic
+  Date.now = jest.fn(() => 1561358770689)
+  const component = shallow(
+    <RfpReportDownloadCell
+      planId={PLAN_ID}
+      reportDefinitions={reportDefinitions}
+      reportsBeingDownloaded={new Set([`/rfp/${PLAN_ID}/report/coverage/13.csv`])}
+      userId={1}
+    />
+  )
   expect(component).toMatchSnapshot()
 })
