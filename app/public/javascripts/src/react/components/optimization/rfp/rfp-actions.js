@@ -96,6 +96,7 @@ function loadRfpPlans (userId, searchTerm = '') {
     ])
       .then(results => {
         const rfpPlans = results[0].data
+        rfpPlans.sort((a, b) => a.id > b.id ? -1 : 1) // Sort plans in descending order by ID (so newest plans appear first)
         const rfpReportDefinitions = results[1].data.filter(reportDefinition =>
           (reportDefinition.reportData.reportType === 'COVERAGE' || reportDefinition.reportData.reportType === 'RFP')
         )
