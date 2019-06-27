@@ -8,10 +8,25 @@ export class RfpSubmitter extends Component {
   constructor (props) {
     super(props)
     this.fileInput = React.createRef()
+    this.state = {
+      newRfpPlanName: 'undefined'
+    }
   }
 
   render () {
     return <div>
+      <div className='row'>
+        <div className='col-md-4'>
+          RFP plan name
+        </div>
+        <div className='col-md-8'>
+          <input
+            className='form-control'
+            value={this.state.newRfpPlanName}
+            onChange={event => this.setState({ newRfpPlanName: event.target.value })}
+          />
+        </div>
+      </div>
       <div className='row'>
         <div className='col-md-4'>
           RFP Template
@@ -75,7 +90,7 @@ export class RfpSubmitter extends Component {
     RfpFileImporterUtils.loadPointsFromFile(this.fileInput.current.files[0])
       .then(targets => {
         var requestBody = JSON.parse(JSON.stringify(selectedTemplate.value))
-        requestBody.rfpId = Math.random().toString()
+        requestBody.rfpId = this.state.newRfpPlanName
         requestBody.targets = targets.map(target => ({
           id: target.id,
           point: {
