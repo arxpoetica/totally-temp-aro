@@ -44,12 +44,29 @@ export default class RfpReportDownloadCell extends Component {
               style={{ whiteSpace: 'nowrap' }}
               href={`/service-download-file/${downloadFileName}${downloadUrl}`}
               download>
-              <i className='fa fa-download' /> {mediaType}
+              {this.renderDownloadIcon(mediaType)} {mediaType}
             </a>
           })
         }
       </div>
     </div>
+  }
+
+  renderDownloadIcon (mediaType) {
+    switch (mediaType) {
+      case 'csv':
+        return <i className='fas fa-file-csv' />
+
+      case 'json':
+        return <span style={{ fontFamily: 'monospace' }}>{'{}'}</span>
+
+      case 'xls':
+      case 'xlsx':
+        return <i className='fas fa-file-excel' />
+
+      default:
+        return <i className='fa fa-download' />
+    }
   }
 }
 
