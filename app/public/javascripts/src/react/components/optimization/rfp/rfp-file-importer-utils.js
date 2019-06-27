@@ -20,10 +20,12 @@ export default class RfpPointImporterUtils {
         if (firstLine !== 'id,latitude,longitude') {
           throw new Error('In RfpFileImporter: The csv file format is incorrect. The first line should be "id,latitude,longitude"')
         }
-        var targets = lines.map(line => {
-          const columns = line.split(',')
-          return new Point(+columns[1], +columns[2], columns[0])
-        })
+        var targets = lines
+          .filter(line => line) // Ignore null or empty strings
+          .map(line => {
+            const columns = line.split(',')
+            return new Point(+columns[1], +columns[2], columns[0])
+          })
         resolve(targets)
       }
       reader.readAsText(file)
