@@ -1,8 +1,10 @@
 <div>
   <!-- The ROIC Reports component-->
   <div style="position: relative; width: 100%;">
+    {{$ctrl.r_planState}}
     <network-build-roic-reports plan-id="$ctrl.state.plan.id"
                   optimization-state="$ctrl.state.plan.planState"
+                  r-optimization-state="$ctrl.r_planState"
                   report-size="'small'">
     </network-build-roic-reports>
   </div>

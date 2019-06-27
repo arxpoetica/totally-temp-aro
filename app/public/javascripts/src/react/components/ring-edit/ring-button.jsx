@@ -25,7 +25,6 @@ export class RingButton extends ProgressButton {
 
     this.unsubscriber = socketManager.subscribe('PROGRESS_MESSAGE_DATA', (progressData) => {
       if (progressData.data.processType === 'ring') {
-        //this.props.setAnalysisStatus(progressData.data.optimizationState)
         this.props.setActivePlanState(progressData.data.optimizationState)
         this.props.setAnalysisProgress(progressData.data.progress)
       }
@@ -94,13 +93,6 @@ const mapStateToProps = (state) => {
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  /*
-  modifyCoverageReport: (reportId) => dispatch(CoverageActions.modifyCoverageReport(reportId)),
-  initializeCoverageReport: (userId, planId, projectId, activeSelectionMode, locationTypes, boundaryLayers, initializationParams) => {
-    dispatch(CoverageActions.initializeCoverageReport(userId, planId, projectId, activeSelectionMode, locationTypes,
-      boundaryLayers, initializationParams))
-  },
-  */
   //setAnalysisStatus: (status) => dispatch(RingActions.setAnalysisStatus(status)), 
   setActivePlanState: (status) => dispatch(PlanActions.setActivePlanState(status)), 
   setAnalysisProgress: (progress) => dispatch(RingActions.setAnalysisProgress(progress))
