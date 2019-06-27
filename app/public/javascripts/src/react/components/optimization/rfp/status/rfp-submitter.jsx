@@ -9,7 +9,7 @@ export class RfpSubmitter extends Component {
     super(props)
     this.fileInput = React.createRef()
     this.state = {
-      newRfpPlanName: 'undefined'
+      newRfpPlanName: 'unnamed'
     }
   }
 
