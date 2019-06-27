@@ -5,8 +5,16 @@ import AroHttp from '../../../../common/aro-http'
 
 function submitRfpReport (userId, requestBody) {
   return dispatch => {
+    dispatch({
+      type: Actions.RFP_SET_IS_SUBMITTING_RESULT,
+      payload: true
+    })
     AroHttp.post(`/service/rfp/process?user_id=${userId}`, requestBody)
       .then(result => {
+        dispatch({
+          type: Actions.RFP_SET_IS_SUBMITTING_RESULT,
+          payload: false
+        })
         dispatch({
           type: Actions.RFP_SET_SUBMIT_RESULT,
           payload: {
@@ -17,6 +25,10 @@ function submitRfpReport (userId, requestBody) {
       })
       .catch(err => {
         console.error(err)
+        dispatch({
+          type: Actions.RFP_SET_IS_SUBMITTING_RESULT,
+          payload: false
+        })
         dispatch({
           type: Actions.RFP_SET_SUBMIT_RESULT,
           payload: {

@@ -15,6 +15,28 @@ export class RfpSubmitter extends Component {
 
   render () {
     return <div>
+      {/* Render inputs for new RFP (or a spinner if we have already submitted a RFP) */}
+      {
+        this.props.isSubmittingRfp
+          ? this.renderSubmittingSpinner()
+          : this.renderNewRfpInputs()
+      }
+      {/* Render the result of a RFP submission */}
+      { this.renderSubmitResult() }
+    </div>
+  }
+
+  renderSubmittingSpinner () {
+    return <div className='row p-5 text-center' style={{ height: '300px', width: '100%' }}>
+      <div style={{ width: '100%' }}>
+        <div className='fa fa-5x fa-spin fa-spinner mb-4' />
+        <h4>Submitting RFP...</h4>
+      </div>
+    </div>
+  }
+
+  renderNewRfpInputs () {
+    return <div>
       <div className='row'>
         <div className='col-md-4'>
           RFP plan name
@@ -63,11 +85,6 @@ export class RfpSubmitter extends Component {
           </button>
         </div>
       </div>
-      <div className='row'>
-        <div className='col-md-12'>
-          { this.renderSubmitResult() }
-        </div>
-      </div>
     </div>
   }
 
@@ -76,8 +93,12 @@ export class RfpSubmitter extends Component {
       return null
     }
     const alertClass = 'alert' + ((this.props.submitResult.type === 'success') ? ' alert-success' : ' alert-danger')
-    return <div className={alertClass}>
-      {this.props.submitResult.message}
+    return <div className='row'>
+      <div className='col-md-12'>
+        <div className={alertClass}>
+          {this.props.submitResult.message}
+        </div>
+      </div>
     </div>
   }
 
@@ -105,6 +126,7 @@ export class RfpSubmitter extends Component {
 }
 
 RfpSubmitter.propTypes = {
+  isSubmittingRfp: PropTypes.bool,
   submitResult: PropTypes.shape({
     type: PropTypes.string,
     message: PropTypes.string
@@ -115,6 +137,7 @@ RfpSubmitter.propTypes = {
 }
 
 const mapStateToProps = state => ({
+  isSubmittingRfp: state.optimization.rfp.isSubmittingRfp,
   submitResult: state.optimization.rfp.submitResult,
   selectedTemplateId: state.optimization.rfp.selectedTemplateId,
   templates: state.optimization.rfp.templates,

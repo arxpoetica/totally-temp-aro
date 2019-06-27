@@ -21,6 +21,7 @@ const defaultState = {
   selectedTabId: 'LIST_PLANS',
   templates: [],
   selectedTemplateId: null,
+  isSubmittingRfp: false,
   submitResult: null,
   rfpPlans: [],
   rfpReportDefinitions: [],
@@ -119,6 +120,12 @@ function setRfpTemplates (state, rfpTemplates) {
   }
 }
 
+function setIsSubmittingRfp (state, isSubmittingRfp) {
+  return { ...state,
+    isSubmittingRfp: isSubmittingRfp
+  }
+}
+
 function setSubmitResult (state, submitResult) {
   return { ...state,
     submitResult: submitResult
@@ -181,6 +188,9 @@ function rfpReducer (state = defaultState, action) {
 
     case Actions.RFP_SET_TEMPLATES:
       return setRfpTemplates(state, action.payload)
+
+    case Actions.RFP_SET_IS_SUBMITTING_RESULT:
+      return setIsSubmittingRfp(state, action.payload)
 
     case Actions.RFP_SET_SUBMIT_RESULT:
       return setSubmitResult(state, action.payload)
