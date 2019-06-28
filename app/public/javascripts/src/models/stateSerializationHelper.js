@@ -188,6 +188,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     state.networkAnalysisTypes.forEach((analysisType) => {
       if (analysisType.id === planInputs.analysis_type) {
         state.networkAnalysisType = analysisType
+        //console.log(analysisType)
       }
     })
   }

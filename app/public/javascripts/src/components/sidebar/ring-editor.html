@@ -26,7 +26,7 @@
     <accordion-panel-title id="output-bar" title="'Output'" panel-id="$ctrl.state.EditRingsPanels.OUTPUT"></accordion-panel-title>
     <accordion-panel-contents panel-id="$ctrl.state.EditRingsPanels.OUTPUT">
       <!-- Ring output here -->
-      <network-build-output report-types="['RING']"></network-build-output>
+      <network-build-output ng-if="$ctrl.state.activeEditRingsPanel === $ctrl.state.EditRingsPanels.OUTPUT" report-types="['RING']"></network-build-output>
     </accordion-panel-contents>
     
   </accordion>
