@@ -1,89 +1,49 @@
-/* global jest test expect */
+/* global test expect jest */
 import React from 'react'
 import { shallow } from 'enzyme'
 import { RfpStatus } from '../rfp-status.jsx'
 
-// Create a bunch of RFP plans so we can test the pagination
-var rfpPlans = []
-for (var iPlan = 0; iPlan < 30; ++iPlan) {
-  rfpPlans.push({
-    id: iPlan,
-    name: `RFP Plan ${iPlan}`,
-    createdBy: 4
-  })
-}
+const tabs = [
+  { id: 'LIST_PLANS', description: 'List all plans' },
+  { id: 'SUBMIT_RFP', description: 'Submit RFP' },
+  { id: 'MANAGE_RFP_TEMPLATES', description: 'Manage RFP templates' }
+]
 
 // -----------------------------------------------------------------------------
-test('Component initialization and teardown', () => {
-  const mockLoadRfpPlans = jest.fn()
-  const mockClearRfpPlans = jest.fn()
+test('Default render and tab navigation', () => {
+  const mockSetSelectedTabId = jest.fn()
   const component = shallow(
     <RfpStatus
-      rfpPlans={[]}
-      userId={42}
-      loadRfpPlans={mockLoadRfpPlans}
-      clearRfpPlans={mockClearRfpPlans}
+      tabs={tabs}
+      selectedTabId={tabs[0].id}
+      setSelectedTabId={mockSetSelectedTabId}
     />
   )
-  expect(mockLoadRfpPlans).toHaveBeenCalledWith(42)
+  expect(component).toMatchSnapshot()
 
+  component.find('#rfpStatusTab_SUBMIT_RFP').simulate('click')
+  expect(component).toMatchSnapshot()
+  expect(mockSetSelectedTabId).toHaveBeenCalledWith('SUBMIT_RFP')
+
+  component.find('#rfpStatusTab_MANAGE_RFP_TEMPLATES').simulate('click')
+  expect(component).toMatchSnapshot()
+  expect(mockSetSelectedTabId).toHaveBeenCalledWith('MANAGE_RFP_TEMPLATES')
+
+  component.find('#rfpStatusTab_LIST_PLANS').simulate('click')
+  expect(component).toMatchSnapshot()
+  expect(mockSetSelectedTabId).toHaveBeenCalledWith('LIST_PLANS')
+})
+
+// -----------------------------------------------------------------------------
+test('RFP state cleared on unmount', () => {
+  const mockClearRfpState = jest.fn()
+  const component = shallow(
+    <RfpStatus
+      tabs={tabs}
+      selectedTabId={tabs[0].id}
+      clearRfpState={mockClearRfpState}
+    />
+  )
   component.unmount()
-  expect(mockClearRfpPlans).toHaveBeenCalled()
-})
-
-// -----------------------------------------------------------------------------
-test('Component pagination render', () => {
-  const mockLoadRfpPlans = jest.fn()
-  const component = shallow(
-    <RfpStatus
-      rfpPlans={rfpPlans}
-      userId={42}
-      planListOffset={0}
-      planListLimit={10}
-      loadRfpPlans={mockLoadRfpPlans}
-    />
-  )
-  expect(component).toMatchSnapshot()
-})
-
-// -----------------------------------------------------------------------------
-test('Component pagination navigation', () => {
-  const mockLoadRfpPlans = jest.fn()
-  const mockSetPlanListOffset = jest.fn()
-  const PLANS_PER_PAGE = 10
-  const component = shallow(
-    <RfpStatus
-      rfpPlans={rfpPlans}
-      userId={42}
-      planListOffset={0}
-      planListLimit={PLANS_PER_PAGE}
-      loadRfpPlans={mockLoadRfpPlans}
-      setPlanListOffset={mockSetPlanListOffset}
-    />
-  )
-  // We are at page 1
-  expect(component).toMatchSnapshot()
-  component.find('#rfpPageNext').simulate('click')
-  // We are at page 2
-  expect(mockSetPlanListOffset).toHaveBeenCalledWith(1 * PLANS_PER_PAGE)
-  component.setProps({ planListOffset: PLANS_PER_PAGE })
-  expect(component).toMatchSnapshot()
-  component.find('#rfpPagePrev').simulate('click')
-  // We are at page 1
-  expect(mockSetPlanListOffset).toHaveBeenCalledWith(0 * PLANS_PER_PAGE)
-  component.setProps({ planListOffset: 0 })
-
-  // Click on page 2
-  expect(component).toMatchSnapshot()
-  component.find('#rfpPage_2').simulate('click')
-  component.setProps({ planListOffset: PLANS_PER_PAGE })
-  expect(mockSetPlanListOffset).toHaveBeenCalledWith(1 * PLANS_PER_PAGE)
-
-  // Click on page 3
-  expect(component).toMatchSnapshot()
-  component.find('#rfpPage_3').simulate('click')
-  component.setProps({ planListOffset: 2 * PLANS_PER_PAGE })
-  expect(mockSetPlanListOffset).toHaveBeenCalledWith(2 * PLANS_PER_PAGE)
-
-  expect(component).toMatchSnapshot()
+  expect(mockClearRfpState).toHaveBeenCalled()
 })

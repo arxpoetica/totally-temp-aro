@@ -38,7 +38,6 @@ class State {
     var Rx = require('rxjs')
 
     var service = {}
-    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(service)
     service.INVALID_PLAN_ID = -1
     service.MAX_EXPORTABLE_AREA = 11000000000 // 25000000
 
@@ -986,7 +985,7 @@ class State {
         .then((result) => {
           if (result.status >= 200 && result.status <= 299) {
             // Plan has been saved in the DB. Reload it
-            service.setPlan(result.data)
+            service.setPlanRedux(result.data)
           } else {
             console.error('Unable to make plan permanent')
             console.error(result)
@@ -1047,7 +1046,7 @@ class State {
           return Promise.resolve()
         })
         .then(() => {
-          return service.setPlan(plan) // This will also create overlay, tiles, etc.
+          return service.setPlanRedux(plan) // This will also create overlay, tiles, etc.
         })
     }
 
@@ -1067,21 +1066,13 @@ class State {
         .catch((err) => console.error(err))
     }
 
-    service.setPlan = (plan) => {
-      service.plan = plan
-
-      // ToDo: refactor all instinces of networkAnalysisType to use planType
-      //console.log(service.networkAnalysisTypes.filter((item) => item.id == plan.planType)[0])
-      //service.networkAnalysisType = service.networkAnalysisTypes.filter((item) => item.id == plan.planType)[0] || service.networkAnalysisTypes[0]
-
+    service.onActivePlanChanged = () => {
       service.planChanged.next(null)
 
-      service.currentPlanTags = service.listOfTags.filter(tag => _.contains(plan.tagMapping.global, tag.id))
-      service.currentPlanServiceAreaTags = service.listOfServiceAreaTags.filter(tag => _.contains(plan.tagMapping.linkTags.serviceAreaIds, tag.id))
+      service.currentPlanTags = service.listOfTags.filter(tag => _.contains(service.plan.tagMapping.global, tag.id))
+      service.currentPlanServiceAreaTags = service.listOfServiceAreaTags.filter(tag => _.contains(service.plan.tagMapping.linkTags.serviceAreaIds, tag.id))
 
-      service.setPlanRedux(plan)
-
-      return service.loadPlanInputs(plan.id)
+      return service.loadPlanInputs(service.plan.id)
         .then(() => service.recreateTilesAndCache())
         .catch((err) => console.error(err))
     }
@@ -1170,7 +1161,7 @@ class State {
         return $http.post(url, {})
           .then((result) => {
             if (result.status >= 200 && result.status <= 299) {
-              service.setPlan(result.data, true)
+              service.setPlanRedux(result.data, true)
               return Promise.resolve()
             }
           })
@@ -1602,7 +1593,7 @@ class State {
       var initializeToDefaultCoords = (plan) => {
         service.requestSetMapCenter.next({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
         service.requestSetMapZoom.next(service.defaultPlanCoordinates.zoom)
-        service.setPlan(plan)
+        service.setPlanRedux(plan)
       }
       var plan = null
       service.getOrCreateEphemeralPlan() // Will be called once when the page loads, since state.js is a service
@@ -1635,7 +1626,7 @@ class State {
               })
               const ZOOM_FOR_OPEN_PLAN = 14
               service.requestSetMapZoom.next(ZOOM_FOR_OPEN_PLAN)
-              service.setPlan(plan)
+              service.setPlanRedux(plan)
             })
           } else {
             // Set it to the default so that the map gets initialized
@@ -1833,11 +1824,26 @@ class State {
 
     service.unsubscribeTileInvalidationHandler = SocketManager.subscribe('TILES_INVALIDATED', service.handleTileInvalidationMessage.bind(service))
 
+    service.mergeToTarget = (nextState, actions) => {
+      const currentActivePlan = service.plan
+
+      // merge state and actions onto controller
+      Object.assign(service, nextState)
+      Object.assign(service, actions)
+
+      if ((currentActivePlan !== nextState.plan) && (nextState.plan)) {
+        // The active plan has changed
+        service.onActivePlanChanged()
+      }
+    }
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(service.mergeToTarget.bind(service))
+
     return service
   }
 
-  mapStateToThis(reduxState) {
+  mapStateToThis (reduxState) {
     return {
+      plan: reduxState.plan.activePlan,
       locationLayers: getLocationLayersList(reduxState),
       networkEquipmentLayers: getNetworkEquipmentLayersList(reduxState),
       boundaries: getBoundaryLayersList(reduxState),
@@ -1848,7 +1854,7 @@ class State {
     }
   }
 
-  mapDispatchToTarget(dispatch) {
+  mapDispatchToTarget (dispatch) {
     return {
       loadConfigurationFromServer: () => dispatch(UiActions.loadConfigurationFromServer()),
       getStyleValues: () => dispatch(UiActions.getStyleValues()),

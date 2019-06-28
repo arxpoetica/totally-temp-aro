@@ -5,7 +5,7 @@ import SelectionActions from '../../../react/components/selection/selection-acti
 
 // Get a copy of selection modes as our combo box will add "objectHash" keys to the modes
 const getSelectionModes = state => state.selection.selectionModes
-const getAllSelectionModes = createSelector([getSelectionModes], (selectionModes) => angular.copy(selectionModes))
+const getAllSelectionModes = createSelector([getSelectionModes], (selectionModes) => angular.copy(selectionModes).filter(mode => mode.id !== 'ALL_PLAN_AREAS'))
 
 class NetworkAnalysisBuildController {
   constructor ($http, $timeout, $ngRedux, state) {

@@ -73,6 +73,7 @@ workflows:
                 - master
                 - Ring_UI
                 - optional_building
+                - rfpUploader
 
       - deploy:
           requires:

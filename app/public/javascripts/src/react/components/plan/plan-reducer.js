@@ -1,5 +1,9 @@
 import Actions from '../../common/actions'
 
+const defaultState = {
+  activePlan: null
+}
+
 // Set the superuser flag for the currently logged in user
 function setActivePlan (state, plan) {
   return { ...state, activePlan: plan }
@@ -13,7 +17,7 @@ function setActivePlanState (state, planState) {
   }
 }
 
-function planReducer (state = { }, action) {
+function planReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.PLAN_SET_ACTIVE_PLAN:
       return setActivePlan(state, action.payload.plan)

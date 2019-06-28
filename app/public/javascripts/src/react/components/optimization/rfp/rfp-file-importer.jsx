@@ -1,12 +1,10 @@
-/* globals FileReader */
 import React, { Component } from 'react'
 // import { PropTypes } from 'prop-types'
 import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
 import RfpActions from './rfp-actions'
-import Point from '../../../common/point'
+import RfpPointImporterUtils from './rfp-file-importer-utils'
 import './rfp-file-importer.css'
-const MAX_FILE_SIZE_IN_BYTES = 1000000
 
 export class RfpFileImporter extends Component {
   render () {
@@ -19,31 +17,10 @@ export class RfpFileImporter extends Component {
   }
 
   loadPointsFromFile (event) {
-    const self = this
     const file = event.target.files[0]
-    if (!file) {
-      console.warn('No file selected')
-      return
-    }
-    if (file.size > MAX_FILE_SIZE_IN_BYTES) {
-      throw new Error(`File too large. Maximum file size for selecting targets is ${MAX_FILE_SIZE_IN_BYTES} bytes.`)
-    }
-    var reader = new FileReader()
-    reader.onload = function (e) {
-      const contents = e.target.result
-      // Split by lines
-      var lines = contents.split(/\r?\n/) // NOTE: Has to accept both Windows and Linux line endings
-      const firstLine = lines.splice(0, 1)[0] // The first line is assumed to be a column header, ignore it
-      if (firstLine !== 'id,latitude,longitude') {
-        throw new Error('In RfpFileImporter: The csv file format is incorrect. The first line should be "id,latitude,longitude"')
-      }
-      var targets = lines.map(line => {
-        const columns = line.split(',')
-        return new Point(+columns[1], +columns[2], columns[0])
-      })
-      self.props.addTargets(targets)
-    }
-    reader.readAsText(file)
+    RfpPointImporterUtils.loadPointsFromFile(file)
+      .then(targets => this.props.addTargets(targets))
+      .catch(err => console.error(err))
   }
 }
 

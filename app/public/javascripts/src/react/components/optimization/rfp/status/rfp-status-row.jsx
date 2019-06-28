@@ -3,6 +3,8 @@ import { connect } from 'react-redux'
 import { PropTypes } from 'prop-types'
 import ReportDefinitionPropType from './report-definition-prop-type'
 import RfpReportDownloadCell from './rfp-report-download-cell.jsx'
+import PlanActions from '../../../plan/plan-actions'
+import FullScreenActions from '../../../full-screen/full-screen-actions'
 
 export class RfpStatusRow extends Component {
   render () {
@@ -19,15 +21,32 @@ export class RfpStatusRow extends Component {
     const createdByName = createdByActor ? `${createdByActor.firstName} ${createdByActor.lastName}` : `UserID: ${this.props.createdById}`
     return <tr style={{ textAlign: 'center' }}>
       <td>{this.props.planId}</td>
-      <td>{this.props.name}</td>
+      <td className='text-left pl-5'>
+        <a
+          href='#'
+          onClick={() => this.onClickLoadPlan()}
+        >
+          {this.props.name}
+        </a>
+      </td>
       <td>{createdByName}</td>
       <td>
         <div className={`badge ${planStateToBadgeColor[this.props.status]}`}>{this.props.status}</div>
       </td>
       <td>
-        <RfpReportDownloadCell planId={this.props.planId} userId={this.props.userId} reportDefinitions={this.props.reportDefinitions} />
+        <RfpReportDownloadCell
+          planId={this.props.planId}
+          userId={this.props.userId}
+          projectId={this.props.projectId}
+          reportDefinitions={this.props.reportDefinitions}
+        />
       </td>
     </tr>
+  }
+
+  onClickLoadPlan () {
+    this.props.loadPlan(this.props.planId, this.props.userId)
+    this.props.hideFullScreenContainer()
   }
 }
 
@@ -38,15 +57,19 @@ RfpStatusRow.propTypes = {
   status: PropTypes.string,
   systemActors: PropTypes.object,
   reportDefinitions: ReportDefinitionPropType,
-  userId: PropTypes.number
+  userId: PropTypes.number,
+  projectId: PropTypes.number
 }
 
 const mapStateToProps = state => ({
   systemActors: state.user.systemActors,
-  userId: state.user.loggedInUser && state.user.loggedInUser.id
+  userId: state.user.loggedInUser && state.user.loggedInUser.id,
+  projectId: state.user.loggedInUser.projectId
 })
 
 const mapDispatchToProps = dispatch => ({
+  loadPlan: (planId, userId) => dispatch(PlanActions.loadPlan(planId, userId)),
+  hideFullScreenContainer: () => dispatch(FullScreenActions.showOrHideFullScreenContainer(false))
 })
 
 const RfpStatusRowComponent = connect(mapStateToProps, mapDispatchToProps)(RfpStatusRow)

@@ -96,6 +96,7 @@ function loadRfpPlans (userId, searchTerm = '') {
     ])
       .then(results => {
         const rfpPlans = results[0].data
+        rfpPlans.sort((a, b) => a.id > b.id ? -1 : 1) // Sort plans in descending order by ID (so newest plans appear first)
         const rfpReportDefinitions = results[1].data.filter(reportDefinition =>
           (reportDefinition.reportData.reportType === 'COVERAGE' || reportDefinition.reportData.reportType === 'RFP')
         )
@@ -133,10 +134,9 @@ function clearRfpPlans () {
   }
 }
 
-function setPlanListOffset (planListOffset) {
+function clearRfpState () {
   return {
-    type: Actions.RFP_SET_PLAN_LIST_OFFSET,
-    payload: planListOffset
+    type: Actions.RFP_CLEAR_STATE
   }
 }
 
@@ -144,12 +144,6 @@ function showOrHideAllRfpStatus (show) {
   return {
     type: Actions.RFP_SHOW_HIDE_ALL_RFP_STATUS,
     payload: show
-  }
-}
-
-function clearRfpState () {
-  return {
-    type: Actions.RFP_CLEAR_STATE
   }
 }
 
@@ -164,6 +158,5 @@ export default {
   replaceTarget,
   setSelectedTarget,
   setClickMapToAddTarget,
-  setPlanListOffset,
   showOrHideAllRfpStatus
 }

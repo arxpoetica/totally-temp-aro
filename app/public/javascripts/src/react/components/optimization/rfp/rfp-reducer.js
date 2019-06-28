@@ -13,15 +13,28 @@ const defaultState = {
   selectedTarget: null,
   status: RfpStatusTypes.UNINITIALIZED,
   showAllRfpStatus: false,
+  tabs: [
+    { id: 'LIST_PLANS', description: 'List all plans' },
+    { id: 'SUBMIT_RFP', description: 'Submit RFP' },
+    { id: 'MANAGE_RFP_TEMPLATES', description: 'Manage RFP templates' }
+  ],
+  selectedTabId: 'LIST_PLANS',
+  templates: [],
+  selectedTemplateId: null,
+  isSubmittingRfp: false,
+  submitResult: null,
   rfpPlans: [],
   rfpReportDefinitions: [],
   isLoadingRfpPlans: false,
   planListOffset: 0,
-  planListLimit: 10
+  planListLimit: 10,
+  reportsBeingDownloaded: new Set() // A set of URLs that are being downloaded (the server can take time to generate reports)
 }
 
 function clearState () {
-  return JSON.parse(JSON.stringify(defaultState))
+  const newState = JSON.parse(JSON.stringify(defaultState))
+  newState.reportsBeingDownloaded = new Set()
+  return newState
 }
 
 function addTargets (state, targets) {
@@ -94,6 +107,53 @@ function setPlanListOffset (state, planListOffset) {
   }
 }
 
+function setSelectedTabId (state, selectedTabId) {
+  return { ...state,
+    selectedTabId: selectedTabId
+  }
+}
+
+function setRfpTemplates (state, rfpTemplates) {
+  return { ...state,
+    templates: rfpTemplates,
+    selectedTemplateId: rfpTemplates[0].id
+  }
+}
+
+function setSelectedTemplateId (state, selectedTemplateId) {
+  return { ...state,
+    selectedTemplateId: selectedTemplateId
+  }
+}
+
+function setIsSubmittingRfp (state, isSubmittingRfp) {
+  return { ...state,
+    isSubmittingRfp: isSubmittingRfp
+  }
+}
+
+function setSubmitResult (state, submitResult) {
+  return { ...state,
+    submitResult: submitResult
+  }
+}
+
+function startDownloadingRfpReport (state, reportUrl) {
+  var reportsBeingDownloaded = new Set(state.reportsBeingDownloaded)
+  reportsBeingDownloaded.add(reportUrl)
+  return { ...state,
+    reportsBeingDownloaded: reportsBeingDownloaded
+  }
+}
+
+function endDownloadingRfpReport (state, reportUrl) {
+  var reportsBeingDownloaded = new Set(state.reportsBeingDownloaded)
+  reportsBeingDownloaded.delete(reportUrl)
+  return { ...state,
+    reportsBeingDownloaded: reportsBeingDownloaded
+  }
+}
+
 function rfpReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.RFP_CLEAR_STATE:
@@ -128,6 +188,27 @@ function rfpReducer (state = defaultState, action) {
 
     case Actions.RFP_SET_PLAN_LIST_OFFSET:
       return setPlanListOffset(state, action.payload)
+
+    case Actions.RFP_SET_SELECTED_TAB_ID:
+      return setSelectedTabId(state, action.payload)
+
+    case Actions.RFP_SET_TEMPLATES:
+      return setRfpTemplates(state, action.payload)
+
+    case Actions.RFP_SET_SELECTED_TEMPLATE_ID:
+      return setSelectedTemplateId(state, action.payload)
+
+    case Actions.RFP_SET_IS_SUBMITTING_RESULT:
+      return setIsSubmittingRfp(state, action.payload)
+
+    case Actions.RFP_SET_SUBMIT_RESULT:
+      return setSubmitResult(state, action.payload)
+
+    case Actions.RFP_START_DOWNLOADING_REPORT:
+      return startDownloadingRfpReport(state, action.payload)
+
+    case Actions.RFP_END_DOWNLOADING_REPORT:
+      return endDownloadingRfpReport(state, action.payload)
 
     default:
       return state

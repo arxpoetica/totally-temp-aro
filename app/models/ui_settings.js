@@ -46,4 +46,25 @@ module.exports = class UiSettings {
     return database.query(sql, [aroClient, stylesheetsValue])
   }
 
+  static getAllRfpTemplates () {
+    const sql = 'SELECT * FROM ui.rfp_template;'
+    return database.query(sql)
+  }
+
+  static createRfpTemplate (name, value) {
+    const sql = `
+      INSERT INTO ui.rfp_template(name, value, service_request_schema_id)
+      VALUES(
+        $1,
+        $2,
+        (SELECT id FROM ui.service_request_schema WHERE name='/rfp/process')
+      );
+    `
+    return database.query(sql, [name, value])
+  }
+
+  static deleteRfpTemplate (id) {
+    const sql = 'DELETE FROM ui.rfp_template WHERE id = $1'
+    return database.query(sql, [id])
+  }
 }

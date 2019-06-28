@@ -3,137 +3,69 @@ import { PropTypes } from 'prop-types'
 import reduxStore from '../../../../../redux-store'
 import wrapComponentWithProvider from '../../../../common/provider-wrapped-component'
 import RfpActions from '../rfp-actions'
-import ReportDefinitionPropType from './report-definition-prop-type'
-import RfpStatusRow from './rfp-status-row.jsx'
-import RfpStatusSearch from './rfp-status-search.jsx'
+import RfpStatusActions from './actions'
+import RfpPlanList from './rfp-plan-list.jsx'
+import RfpSubmitter from './rfp-submitter.jsx'
+import RfpTemplateManager from './rfp-template-manager.jsx'
 
 export class RfpStatus extends Component {
   render () {
-    return <div className='container pt-5'>
-      <h2>RFP Plan Status</h2>
-      <div className='row'>
-        <div className='col-md-6' />
-        <div className='col-md-6'>
-          <RfpStatusSearch />
-        </div>
-      </div>
-      <div className='row'>
-        <div className='col-md-12'>
-          <table className='table table-sm table-striped'>
-            <thead className='thead-light'>
-              <tr style={{ textAlign: 'center' }}>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Created by</th>
-                <th>Status</th>
-                <th style={{ width: '400px' }}>Reports</th>
-              </tr>
-            </thead>
-            <tbody>
-              {
-                this.props.isLoadingRfpPlans
-                  ? this.renderLoadingIconRow()
-                  : this.renderRfpPlanRows()
-              }
-            </tbody>
-          </table>
-          {this.renderPagination()}
-        </div>
-      </div>
+    return <div className='container pt-5 pb-5 d-flex flex-column' style={{ height: '100%' }}>
+      <h2>RFP Plans</h2>
+      <ul className='nav nav-tabs mb-3'>
+        {
+          this.props.tabs.map(tab => (
+            <li key={tab.id} className='nav-item'>
+              <a
+                id={`rfpStatusTab_${tab.id}`}
+                className={`nav-link ${tab.id === this.props.selectedTabId ? 'active' : ''}`}
+                href='#'
+                onClick={() => this.props.setSelectedTabId(tab.id)}
+              >
+                {tab.description}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      {this.renderActiveComponent()}
     </div>
   }
 
-  renderLoadingIconRow () {
-    return <tr>
-      <td colSpan={5} className='p-5 text-center'>
-        <div className='fa fa-5x fa-spin fa-spinner mb-4' />
-        <h4>Loading RFP Plans...</h4>
-      </td>
-    </tr>
-  }
+  renderActiveComponent () {
+    switch (this.props.selectedTabId) {
+      case 'LIST_PLANS':
+        return <RfpPlanList />
 
-  renderRfpPlanRows () {
-    const plansToRender = this.props.rfpPlans.slice(this.props.planListOffset, this.props.planListOffset + this.props.planListLimit)
-    return plansToRender.map(rfpPlan => (
-      <RfpStatusRow
-        key={rfpPlan.id}
-        planId={rfpPlan.id}
-        name={rfpPlan.name}
-        createdById={rfpPlan.createdBy}
-        status={rfpPlan.planState}
-        reportDefinitions={this.props.rfpReportDefinitions}
-      />
-    ))
-  }
+      case 'SUBMIT_RFP':
+        return <RfpSubmitter />
 
-  renderPagination () {
-    const numPlans = this.props.rfpPlans.length
-    if (numPlans === 0) {
-      return null
-    }
-    const activePageNumber = Math.round(this.props.planListOffset / this.props.planListLimit) + 1
-    const numPages = Math.ceil(numPlans / this.props.planListLimit)
-    const NUM_PAGES_TO_SHOW = 4 // Number of pages to show before/after the active page
-    const startPage = Math.max(activePageNumber - NUM_PAGES_TO_SHOW, 1)
-    const endPage = Math.min(activePageNumber + NUM_PAGES_TO_SHOW, numPages)
-    const planListLimit = this.props.planListLimit
-    const offsetOnClick = pageToLoad => (pageToLoad - 1) * planListLimit
-    var pageBlocks = []
-    if (activePageNumber > 1) {
-      pageBlocks.push(<li key={'Previous'} className='page-item'>
-        <a id='rfpPagePrev' className='page-link' href='#' onClick={event => this.props.setPlanListOffset(offsetOnClick(activePageNumber - 1))}>Prev</a>
-      </li>)
-    }
-    for (var iPage = startPage; iPage <= endPage; ++iPage) {
-      const liClassName = 'page-item' + (iPage === activePageNumber ? ' active' : '')
-      const copyIPage = iPage
-      pageBlocks.push(<li key={iPage} className={liClassName}>
-        <a id={`rfpPage_${iPage}`} className='page-link' href='#' onClick={event => this.props.setPlanListOffset(offsetOnClick(copyIPage))}>{iPage}</a>
-      </li>)
-    }
-    if (activePageNumber !== numPages) {
-      pageBlocks.push(<li key={'Next'} className='page-item'>
-        <a id='rfpPageNext' className='page-link' href='#' onClick={event => this.props.setPlanListOffset(offsetOnClick(activePageNumber + 1))}>Next</a>
-      </li>)
-    }
-    return <nav aria-label='RFP plan pagination'>
-      <ul className='pagination justify-content-center'>
-        {pageBlocks}
-      </ul>
-    </nav>
-  }
+      case 'MANAGE_RFP_TEMPLATES':
+        return <RfpTemplateManager />
 
-  componentDidMount () {
-    this.props.loadRfpPlans(this.props.userId)
+      default:
+        return <div>ERROR: Unknown tab selected</div>
+    }
   }
 
   componentWillUnmount () {
-    this.props.clearRfpPlans()
+    this.props.clearRfpState()
   }
 }
 
 RfpStatus.propTypes = {
-  rfpPlans: PropTypes.array,
-  rfpReportDefinitions: ReportDefinitionPropType,
-  isLoadingRfpPlans: PropTypes.bool,
-  planListOffset: PropTypes.number,
-  planListLimit: PropTypes.number,
-  userId: PropTypes.number
+  tabs: PropTypes.array,
+  selectedTabId: PropTypes.string
 }
 
 const mapStateToProps = state => ({
-  rfpPlans: state.optimization.rfp.rfpPlans,
-  rfpReportDefinitions: state.optimization.rfp.rfpReportDefinitions,
-  isLoadingRfpPlans: state.optimization.rfp.isLoadingRfpPlans,
-  planListOffset: state.optimization.rfp.planListOffset,
-  planListLimit: state.optimization.rfp.planListLimit,
-  userId: state.user.loggedInUser && state.user.loggedInUser.id
+  tabs: state.optimization.rfp.tabs,
+  selectedTabId: state.optimization.rfp.selectedTabId
 })
 
 const mapDispatchToProps = dispatch => ({
-  clearRfpPlans: () => dispatch(RfpActions.clearRfpPlans()),
-  loadRfpPlans: (userId) => dispatch(RfpActions.loadRfpPlans(userId)),
-  setPlanListOffset: planListOffset => dispatch(RfpActions.setPlanListOffset(planListOffset))
+  setSelectedTabId: selectedTabId => dispatch(RfpStatusActions.setSelectedTabId(selectedTabId)),
+  clearRfpState: () => dispatch(RfpActions.clearRfpState())
 })
 
 const RfpStatusComponent = wrapComponentWithProvider(reduxStore, RfpStatus, mapStateToProps, mapDispatchToProps)

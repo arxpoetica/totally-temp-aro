@@ -1,8 +1,9 @@
 import React, { Component } from 'react'
+import { connect } from 'react-redux'
 import { PropTypes } from 'prop-types'
-import ReportDefinitionPropType from './report-definition-prop-type'
+import RfpStatusActions from './actions'
 
-export default class RfpReportDownloadCell extends Component {
+export class RfpReportDownloadCell extends Component {
   constructor (props) {
     super(props)
     this.state = {
@@ -37,23 +38,54 @@ export default class RfpReportDownloadCell extends Component {
               .replace('{planId}', this.props.planId)
               .replace('{mediaType}', mediaType)
               .replace('{userId}', this.props.userId)
-            return <a
+            return <button
               key={mediaType}
               className='btn btn-light'
-              style={{ whiteSpace: 'nowrap' }}
-              href={`/service-download-file/${downloadFileName}${downloadUrl}`}
-              download>
-              <i className='fa fa-download' /> {mediaType}
-            </a>
+              style={{ whiteSpace: 'nowrap', width: '75px' }}
+              onClick={event => this.props.downloadRfpReport(downloadFileName, downloadUrl)}
+              disabled={this.props.reportsBeingDownloaded.has(downloadUrl)}
+            >
+              {
+                this.props.reportsBeingDownloaded.has(downloadUrl)
+                  ? <i className='fa fa-spinner fa-spin' />
+                  : this.renderDownloadButtonContent(mediaType)
+              }
+            </button>
           })
         }
       </div>
     </div>
   }
+
+  renderDownloadButtonContent (mediaType) {
+    switch (mediaType) {
+      case 'csv':
+        return <span><i className='fas fa-file-csv' /> {mediaType}</span>
+
+      case 'json':
+        return <span><span style={{ fontFamily: 'monospace' }}>{'{}'}</span> {mediaType}</span>
+
+      case 'xls':
+      case 'xlsx':
+        return <span><i className='fas fa-file-excel' /> {mediaType}</span>
+
+      default:
+        return <span><i className='fa fa-download' /> {mediaType}</span>
+    }
+  }
 }
 
 RfpReportDownloadCell.propTypes = {
-  planId: PropTypes.number,
-  reportDefinitions: ReportDefinitionPropType,
-  userId: PropTypes.number
+  reportsBeingDownloaded: PropTypes.instanceOf(Set)
 }
+
+const mapStateToProps = state => ({
+  reportsBeingDownloaded: state.optimization.rfp.reportsBeingDownloaded
+})
+
+const mapDispatchToProps = dispatch => ({
+  downloadRfpReport: (filename, reportUrl) => dispatch(RfpStatusActions.downloadRfpReport(filename, reportUrl))
+})
+
+const RfpReportDownloadCellComponent = connect(mapStateToProps, mapDispatchToProps)(RfpReportDownloadCell)
+export default RfpReportDownloadCellComponent

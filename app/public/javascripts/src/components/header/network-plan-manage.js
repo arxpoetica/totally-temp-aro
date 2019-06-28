@@ -1,7 +1,9 @@
+import PlanActions from '../../react/components/plan/plan-actions'
 class NetworkPlanModalController {
-  constructor ($http, state) {
+  constructor ($http, $ngRedux, state) {
     this.$http = $http
     this.state = state
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
 
     this.views = Object.freeze({
       Plan_Info: 0,
@@ -37,7 +39,7 @@ class NetworkPlanModalController {
               resolve()
               return this.state.getOrCreateEphemeralPlan()
             })
-            .then((ephemeralPlan) => this.state.setPlan(ephemeralPlan.data))
+            .then((ephemeralPlan) => this.setPlan(ephemeralPlan.data))
             .catch((err) => reject(err))
         } else {
           resolve()
@@ -89,9 +91,19 @@ class NetworkPlanModalController {
 
     return this.$http.put(`/service/v1/plan?user_id=${this.state.loggedInUser.id}`, updatePlan)
   }
+  mapStateToThis (reduxState) {
+    return {
+    }
+  }
+
+  mapDispatchToTarget (dispatch) {
+    return {
+      setPlan: plan => dispatch(PlanActions.setActivePlan(plan))
+    }
+  }
 }
 
-NetworkPlanModalController.$inject = ['$http', 'state']
+NetworkPlanModalController.$inject = ['$http', '$ngRedux', 'state']
 
 let networkPlanManage = {
   templateUrl: '/components/header/network-plan-manage.html',
