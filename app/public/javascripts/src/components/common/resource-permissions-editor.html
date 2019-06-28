@@ -26,7 +26,7 @@
       <ui-select-match placeholder="Select User">
           {{$item.name}}
       </ui-select-match>
-      <ui-select-choices class="ui-select-choices-style" repeat="person.name as person in $ctrl.systemActors">
+      <ui-select-choices class="ui-select-choices-style" repeat="value.name as (key, value) in $ctrl.systemActors">
         <div>
           {{person.name}}
         </div>

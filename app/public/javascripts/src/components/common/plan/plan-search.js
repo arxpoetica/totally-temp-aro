@@ -24,7 +24,9 @@ class PlanSearchController {
 
   $onChanges (changesObj) {
     if (changesObj && changesObj.systemActors) {
-      this.systemUsers = this.systemActors
+      const arrayOfSystemActors = []
+      Object.keys(this.systemActors).forEach(actorId => arrayOfSystemActors.push(this.systemActors[actorId]))
+      this.systemUsers = arrayOfSystemActors
         .filter((item) => item.type === 'user')
         .map(item => {
           var user = angular.copy(item)

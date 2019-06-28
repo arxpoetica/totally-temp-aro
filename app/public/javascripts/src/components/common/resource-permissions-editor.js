@@ -138,9 +138,6 @@ class ResourcePermissionsEditorController {
     return this.$http.get(`/service/auth/acl/${this.resourceType}/${this.resourceId}`)
       .then((result) => {
         this.rows = []
-        var idToSystemActor = {}
-        this.systemActors.forEach((systemActor) => idToSystemActor[systemActor.id] = systemActor)
-        console.log("systemActors",this.systemActors)
         this.isOwner = false
         this.actionsParam = null
         //if (!!(this.state.loggedInUser.systemPermissions & this.state.authPermissionsByName['RESOURCE_ADMIN'].permissions)){
@@ -153,7 +150,7 @@ class ResourcePermissionsEditorController {
         result.data.resourcePermissions.forEach((access) => {
           this.rows.push({
             'systemActorId': access.systemActorId, 
-            'name': idToSystemActor[access.systemActorId].name, 
+            'name': this.systemActors[access.systemActorId].name, 
             'rolePermissions': access.rolePermissions
           })
           // check for user and group permissions 
