@@ -4,8 +4,9 @@ import SelectionActions from '../selection/selection-actions'
 import RfpActions from '../optimization/rfp/rfp-actions'
 import socketManager from '../../../react/common/socket-manager'
 import RingEditActions from '../ring-edit/ring-edit-actions'
+import AroHttp from '../../common/aro-http';
 
-// Set the plan
+// Set the currently active plan
 function setActivePlan (plan) {
   return (dispatch, getState) => {
     getState().plan.activePlan && getState().plan.activePlan.id &&
@@ -38,7 +39,17 @@ function setActivePlanState (planState) {
   }
 }
 
+// Loads a plan with the specified plan id from the server, then sets it as the active plan
+function loadPlan (planId, userId) {
+  return dispatch => {
+    AroHttp.get(`/service/v1/plan/${planId}?user_id=${userId}`)
+      .then(result => dispatch(setActivePlan(result.data)))
+      .catch(err => console.error(err))
+  }
+}
+
 export default {
-  setActivePlan: setActivePlan,
-  setActivePlanState: setActivePlanState
+  setActivePlan,
+  setActivePlanState,
+  loadPlan
 }

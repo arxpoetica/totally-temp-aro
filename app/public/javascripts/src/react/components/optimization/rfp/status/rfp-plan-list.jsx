@@ -23,7 +23,7 @@ export class RfpPlanList extends Component {
             <thead className='thead-light'>
               <tr style={{ textAlign: 'center' }}>
                 <th>ID</th>
-                <th>Name</th>
+                <th className='text-left pl-5'>Name</th>
                 <th>Created by</th>
                 <th>Status</th>
                 <th style={{ width: '400px' }}>Reports</th>
