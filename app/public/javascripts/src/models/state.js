@@ -567,7 +567,7 @@ class State {
         { id: 'EXPERT_MODE', label: 'Expert Mode', type: 'Expert' }
       ]
       service.networkAnalysisType = service.networkAnalysisTypes[0]
-
+      //console.log('set networkAnalysisType to default')
       // Upload Data Sources
       service.uploadDataSources = []
       service.pristineDataItems = {}
@@ -1069,6 +1069,11 @@ class State {
 
     service.setPlan = (plan) => {
       service.plan = plan
+
+      // ToDo: refactor all instinces of networkAnalysisType to use planType
+      //console.log(service.networkAnalysisTypes.filter((item) => item.id == plan.planType)[0])
+      //service.networkAnalysisType = service.networkAnalysisTypes.filter((item) => item.id == plan.planType)[0] || service.networkAnalysisTypes[0]
+
       service.planChanged.next(null)
 
       service.currentPlanTags = service.listOfTags.filter(tag => _.contains(plan.tagMapping.global, tag.id))

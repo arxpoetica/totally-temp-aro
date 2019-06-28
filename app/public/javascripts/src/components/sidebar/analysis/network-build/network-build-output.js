@@ -14,7 +14,6 @@ class NetworkBuildOutputController {
   }
 
   mapStateToThis (reduxState) {
-    console.log(reduxState)
     return {
       r_planState: reduxState.plan.activePlan.planState
     }

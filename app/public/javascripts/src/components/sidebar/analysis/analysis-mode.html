@@ -50,10 +50,12 @@
     <accordion-panel-title title="'Input'" panel-id="$ctrl.analysisModePanels.INPUT"></accordion-panel-title>
     <accordion-panel-contents panel-id="$ctrl.analysisModePanels.INPUT">
       <div class="col-xs-7" style="left: 20%;border: 10px solid white;">
+        <!-- pull this out -->
         <select class="form-control"
           ng-model="$ctrl.state.networkAnalysisType"
           ng-options="item as item.label for item in $ctrl.state.networkAnalysisTypes">
         </select>
+        
       </div>
       
       <div style="height: 100%;" ng-if="$ctrl.state.networkAnalysisType.id === 'NETWORK_PLAN' || $ctrl.state.networkAnalysisType.id === 'NETWORK_ANALYSIS'">
