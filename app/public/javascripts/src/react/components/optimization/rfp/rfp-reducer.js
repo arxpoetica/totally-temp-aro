@@ -120,6 +120,12 @@ function setRfpTemplates (state, rfpTemplates) {
   }
 }
 
+function setSelectedTemplateId (state, selectedTemplateId) {
+  return { ...state,
+    selectedTemplateId: selectedTemplateId
+  }
+}
+
 function setIsSubmittingRfp (state, isSubmittingRfp) {
   return { ...state,
     isSubmittingRfp: isSubmittingRfp
@@ -188,6 +194,9 @@ function rfpReducer (state = defaultState, action) {
 
     case Actions.RFP_SET_TEMPLATES:
       return setRfpTemplates(state, action.payload)
+
+    case Actions.RFP_SET_SELECTED_TEMPLATE_ID:
+      return setSelectedTemplateId(state, action.payload)
 
     case Actions.RFP_SET_IS_SUBMITTING_RESULT:
       return setIsSubmittingRfp(state, action.payload)

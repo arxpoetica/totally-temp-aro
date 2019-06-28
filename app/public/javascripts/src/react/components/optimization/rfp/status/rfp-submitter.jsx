@@ -57,7 +57,7 @@ export class RfpSubmitter extends Component {
           <select
             className='form-control'
             value={this.props.selectedTemplateId || ''}
-            onChange={event => this.props.setSelectedTemplateId(event.target.value)}
+            onChange={event => this.props.setSelectedTemplateId(+event.target.value)}
           >
             {this.props.templates.map(template => <option key={template.id} value={template.id}>{template.name}</option>)}
           </select>
