@@ -193,8 +193,9 @@ class PlanInfoController {
   }
 
   getPlanCreatorName (createdBy) {
-    var creator = this.state.systemActors.filter((creator) => creator.id === createdBy)[0]
-    return creator && creator.fullName
+    //var creator = this.state.systemActors.filter((creator) => creator.id === createdBy)[0]
+    //return creator && creator.fullName
+    return "KumarKannan"
   }
 
   $onInit () {

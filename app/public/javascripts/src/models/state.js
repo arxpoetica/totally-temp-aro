@@ -1507,33 +1507,34 @@ class State {
     service.reloadAuthPermissions()
 
 
-    service.systemActors = [] // All the system actors (i.e. users and groups)
-    service.reloadSystemActors = () => {
-      var newSystemActors = []
-      return $http.get('/service/auth/groups')
-        .then((result) => {
-          result.data.forEach((group) => {
-            group.originalName = group.name
-            group.type = 'group'
-            // This is just horrible - get rid of this trustAsHtml asap. And no html in object properties!
-            group.name = $sce.trustAsHtml(`<i class="fa fa-users" aria-hidden="true"></i> ${group.name}`)
-            newSystemActors.push(group)
-          })
-          return $http.get('/service/auth/users')
-        })
-        .then((result) => {
-          result.data.forEach((user) => {
-            user.type = 'user'
-            // This is just horrible - get rid of this trustAsHtml asap. And no html in object properties!
-            user.name = $sce.trustAsHtml(`<i class="fa fa-user" aria-hidden="true"></i> ${user.firstName} ${user.lastName}`)
-            newSystemActors.push(user)
-          })
-          service.systemActors = newSystemActors
-          $timeout()
-        })
-        .catch((err) => console.error(err))
-    }
-    service.reloadSystemActors()
+    //service.systemActors = [] // All the system actors (i.e. users and groups)
+    service.systemActors
+    // service.reloadSystemActors = () => {
+    //   var newSystemActors = []
+    //   return $http.get('/service/auth/groups')
+    //     .then((result) => {
+    //       result.data.forEach((group) => {
+    //         group.originalName = group.name
+    //         group.type = 'group'
+    //         // This is just horrible - get rid of this trustAsHtml asap. And no html in object properties!
+    //         group.name = $sce.trustAsHtml(`<i class="fa fa-users" aria-hidden="true"></i> ${group.name}`)
+    //         newSystemActors.push(group)
+    //       })
+    //       return $http.get('/service/auth/users')
+    //     })
+    //     .then((result) => {
+    //       result.data.forEach((user) => {
+    //         user.type = 'user'
+    //         // This is just horrible - get rid of this trustAsHtml asap. And no html in object properties!
+    //         user.name = $sce.trustAsHtml(`<i class="fa fa-user" aria-hidden="true"></i> ${user.firstName} ${user.lastName}`)
+    //         newSystemActors.push(user)
+    //       })
+    //       service.systemActors = newSystemActors
+    //       $timeout()
+    //     })
+    //     .catch((err) => console.error(err))
+    // }
+    // service.reloadSystemActors()
 
     // The logged in user is currently set by using the AngularJS injector in index.html
     service.loggedInUser = null
@@ -1852,7 +1853,8 @@ class State {
       reduxPlanTargets: reduxState.selection.planTargets,
       showSiteBoundary: reduxState.mapLayers.showSiteBoundary,
       boundaryTypes: getBoundaryTypesList(reduxState),
-      selectedBoundaryType: getSelectedBoundaryType(reduxState)
+      selectedBoundaryType: getSelectedBoundaryType(reduxState),
+      systemActors: reduxState.user.systemActors
     }
   }
 

@@ -13,7 +13,7 @@ class ResourcePermissionsEditorController {
       'RESOURCE_VIEWER': 'Viewer'
     }
     
-    this.isOwner = false
+    this.isOwner = true
     
     // these vals will be replaced by vals from state
     this.defaultPermissions = 4
@@ -89,11 +89,26 @@ class ResourcePermissionsEditorController {
     if (typeof this.enabled === 'undefined') {
       this.enabled = true // If not defined, then make it true
     }
+    // this.systemActorsnew = [{id: 1, name: "Administrators", description: "Administrators can create, update and delete users in the system", deleted: false, type: "group"},
+    // {id: 2, name: "SuperUsers", description: "Super users have full access to the system and all plans", deleted: false, type: "group"},
+    // {id: 3, name: "Public", description: "Public users have read access to library items created during ETL", deleted: false, type: "group"},
+    // {id: 4, firstName: "Admin", lastName: "User", type: "user"},
+    // {id: 5, firstName: "Kumar", lastName: "nonadmin", type: "user"}]
     
-    this.actorsById = this.systemActors.reduce((map, item) => {
-      map[item.id] = item
-      return map
-    }, {})
+    // this.actorsById = this.systemActors.reduce((map, item) => {
+    //   map[item.id] = item
+    //   return map
+    // }, {})
+
+    // this.systemActors.forEach(user => {
+    //   alert(user.id);
+    //   systemActors[user.id] = {
+    //     id: user.id,
+    //     firstName: user.firstName,
+    //     lastName: user.lastName,
+    //     type: 'user'
+    //   }
+    // })
     
     this.loadResourceAccess()
     this.registerSaveAccessCallback && this.registerSaveAccessCallback({ saveResourceAccess: this.saveResourceAccess.bind(this) })
@@ -125,6 +140,7 @@ class ResourcePermissionsEditorController {
         this.rows = []
         var idToSystemActor = {}
         this.systemActors.forEach((systemActor) => idToSystemActor[systemActor.id] = systemActor)
+        console.log("systemActors",this.systemActors)
         this.isOwner = false
         this.actionsParam = null
         //if (!!(this.state.loggedInUser.systemPermissions & this.state.authPermissionsByName['RESOURCE_ADMIN'].permissions)){
