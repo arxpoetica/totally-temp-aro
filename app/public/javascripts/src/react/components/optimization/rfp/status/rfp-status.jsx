@@ -10,7 +10,7 @@ import RfpTemplateManager from './rfp-template-manager.jsx'
 
 export class RfpStatus extends Component {
   render () {
-    return <div className='container pt-5 pb-5'>
+    return <div className='container pt-5 pb-5 d-flex flex-column' style={{ height: '100%' }}>
       <h2>RFP Plans</h2>
       <ul className='nav nav-tabs mb-3'>
         {

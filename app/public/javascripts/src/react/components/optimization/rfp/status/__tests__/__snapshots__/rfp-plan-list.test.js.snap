@@ -1,7 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Component pagination navigation 1`] = `
-<div>
+<div
+  style={
+    Object {
+      "overflowX": "hidden",
+      "overflowY": "auto",
+    }
+  }
+>
   <div
     className="row"
   >
@@ -36,7 +43,9 @@ exports[`Component pagination navigation 1`] = `
             <th>
               ID
             </th>
-            <th>
+            <th
+              className="text-left pl-5"
+            >
               Name
             </th>
             <th>
@@ -185,7 +194,14 @@ exports[`Component pagination navigation 1`] = `
 `;
 
 exports[`Component pagination navigation 2`] = `
-<div>
+<div
+  style={
+    Object {
+      "overflowX": "hidden",
+      "overflowY": "auto",
+    }
+  }
+>
   <div
     className="row"
   >
@@ -220,7 +236,9 @@ exports[`Component pagination navigation 2`] = `
             <th>
               ID
             </th>
-            <th>
+            <th
+              className="text-left pl-5"
+            >
               Name
             </th>
             <th>
@@ -382,7 +400,14 @@ exports[`Component pagination navigation 2`] = `
 `;
 
 exports[`Component pagination navigation 3`] = `
-<div>
+<div
+  style={
+    Object {
+      "overflowX": "hidden",
+      "overflowY": "auto",
+    }
+  }
+>
   <div
     className="row"
   >
@@ -417,7 +442,9 @@ exports[`Component pagination navigation 3`] = `
             <th>
               ID
             </th>
-            <th>
+            <th
+              className="text-left pl-5"
+            >
               Name
             </th>
             <th>
@@ -566,7 +593,14 @@ exports[`Component pagination navigation 3`] = `
 `;
 
 exports[`Component pagination navigation 4`] = `
-<div>
+<div
+  style={
+    Object {
+      "overflowX": "hidden",
+      "overflowY": "auto",
+    }
+  }
+>
   <div
     className="row"
   >
@@ -601,7 +635,9 @@ exports[`Component pagination navigation 4`] = `
             <th>
               ID
             </th>
-            <th>
+            <th
+              className="text-left pl-5"
+            >
               Name
             </th>
             <th>
@@ -763,7 +799,14 @@ exports[`Component pagination navigation 4`] = `
 `;
 
 exports[`Component pagination navigation 5`] = `
-<div>
+<div
+  style={
+    Object {
+      "overflowX": "hidden",
+      "overflowY": "auto",
+    }
+  }
+>
   <div
     className="row"
   >
@@ -798,7 +841,9 @@ exports[`Component pagination navigation 5`] = `
             <th>
               ID
             </th>
-            <th>
+            <th
+              className="text-left pl-5"
+            >
               Name
             </th>
             <th>
@@ -947,7 +992,14 @@ exports[`Component pagination navigation 5`] = `
 `;
 
 exports[`Component pagination render 1`] = `
-<div>
+<div
+  style={
+    Object {
+      "overflowX": "hidden",
+      "overflowY": "auto",
+    }
+  }
+>
   <div
     className="row"
   >
@@ -982,7 +1034,9 @@ exports[`Component pagination render 1`] = `
             <th>
               ID
             </th>
-            <th>
+            <th
+              className="text-left pl-5"
+            >
               Name
             </th>
             <th>

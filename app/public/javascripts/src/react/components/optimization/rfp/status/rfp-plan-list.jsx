@@ -10,7 +10,7 @@ import RfpStatusSearch from './rfp-status-search.jsx'
 
 export class RfpPlanList extends Component {
   render () {
-    return <div>
+    return <div style={{ overflowX: 'hidden', overflowY: 'auto' }}>
       <div className='row'>
         <div className='col-md-6' />
         <div className='col-md-6'>
