@@ -1,0 +1,80 @@
+import React, { Component } from 'react'
+import { PropTypes } from 'prop-types'
+
+
+export default class ProgressButton extends Component {
+  // ToDo: abstract and combine with Coverage Button and RFP Button
+  constructor (props) {
+    super(props)
+
+    // can be overridden 
+    this.statusTypes = {
+      UNINITIALIZED: 'UNINITIALIZED',
+      RUNNING: 'RUNNING',
+      FINISHED: 'FINISHED'
+    }
+  }
+
+  onRun () {} // to be overridden 
+  onModify () {} // to be overridden 
+
+  render () {
+    switch (this.props.status) {
+      case this.statusTypes.UNINITIALIZED:
+        return this.renderUninitializedButton()
+
+      case this.statusTypes.RUNNING:
+        return this.renderProgressbar()
+
+      case this.statusTypes.FINISHED:
+        return this.renderFinishedButton()
+
+      default:
+        return <div>ERROR: Unknown coverage status - {this.props.status}</div>
+    }
+  }
+
+  renderUninitializedButton () {
+    return (
+      <button className={'btn btn-block btn-primary'} style={{ marginBottom: '10px' }}
+        onClick={() => this.onRun()}>
+        <i className='fa fa-bolt' /> Run
+      </button>
+    )
+  }
+
+  renderProgressbar () {
+    return <div className={'progress'} style={{ height: '34px', position: 'relative', marginBottom: '10px' }}>
+      <div className={'progress-bar progress-bar-optimization'} role='progressbar' aria-valuenow={this.props.progress}
+        aria-valuemin='0' aria-valuemax='1' style={{ lineHeight: '34px', width: (this.props.progress * 100) + '%' }} />
+      <div style={{ position: 'absolute',
+        top: '50%',
+        left: '50%',
+        backgroundColor: 'rgba(0, 0, 0, 0.4)',
+        color: 'white',
+        transform: 'translateX(-50%) translateY(-50%)',
+        width: '80px',
+        textAlign: 'center',
+        borderRadius: '3px',
+        fontWeight: 'bold' }}>
+        {Math.round(this.props.progress * 100) + '%'}
+      </div>
+    </div>
+  }
+
+  renderFinishedButton () {
+    return (
+      <button className={'btn btn-block modify-coverage-button'} style={{ marginBottom: '10px' }}
+        onClick={() => this.onModify()}>
+        <i className='fa fa-edit' /> Modify
+      </button>
+    )
+  }
+}
+
+// --- //
+
+ProgressButton.propTypes = {
+  status: PropTypes.string,
+  progress: PropTypes.number
+}

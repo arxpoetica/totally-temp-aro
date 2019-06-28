@@ -11,6 +11,7 @@ import Constants from '../common/constants'
 import SelectionModes from '../../react/components/selection/selection-modes'
 import MenuAction, { MenuActionTypes } from '../common/context-menu/menu-action'
 import MenuItem, { MenuItemTypes } from '../common/context-menu/menu-item'
+import FeatureSets from '../../react/common/featureSets'
 
 class TileComponentController {
   // MapLayer objects contain the following information
@@ -471,6 +472,7 @@ class TileComponentController {
           })
 
           // ToDo: formalize this
+          // var hitFeatures = new FeatureSets() // need to import the class BUT it's over in React land, ask Parag
           var hitFeatures = {
             latLng: latLng,
             locations: locationFeatures,
@@ -481,7 +483,10 @@ class TileComponentController {
             censusFeatures: censusFeatures,
             fiberFeatures: fiberFeatures
           }
-
+          
+          //var hitFeatures = new FeatureSets()
+          
+          
           return hitFeatures
         /*
         //console.log(hitFeatures)

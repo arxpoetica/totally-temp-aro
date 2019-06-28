@@ -29,6 +29,7 @@ class PlanInputsModalController {
       RING: 'Ring Plan'
     }
     // Users can control the list of allowed plan types via a database setting
+    /*
     var allPlanTypes = []
     var allowedPlanTypes = []
     this.planTypes = {}
@@ -41,6 +42,7 @@ class PlanInputsModalController {
       console.error(this.state.configuration.plan)
       console.error(err)
     }
+    */
   }
 
   close () {

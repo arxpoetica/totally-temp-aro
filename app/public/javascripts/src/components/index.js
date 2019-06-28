@@ -12,6 +12,8 @@ import ReportModuleList from '../react/components/configuration/report/report-mo
 import ReportsDownloadModal from '../react/components/optimization/reports/reports-download-modal.jsx'
 import RfpAnalyzer from '../react/components/optimization/rfp/rfp-analyzer.jsx'
 import RfpStatus from '../react/components/optimization/rfp/status/rfp-status.jsx'
+import RingEdit from '../react/components/ring-edit/ring-edit.jsx'
+import RingButton from '../react/components/ring-edit/ring-button.jsx'
 
 import boundaryDetail from './sidebar/view/boundary-detail'
 import equipmentDetail from './sidebar/view/equipment-detail'
@@ -46,6 +48,7 @@ import coverageReportDownloader from './sidebar/analysis/coverage/coverage-repor
 import networkBuildOutput from './sidebar/analysis/network-build/network-build-output'
 import aroDebug from './sidebar/debug/aro-debug'
 import viewSettings from './sidebar/debug/view-settings'
+import ringEditor from './sidebar/ring-editor'
 import draggableButton from './sidebar/plan-editor/draggable-button'
 import planEditor from './sidebar/plan-editor/plan-editor'
 import planSummary from './sidebar/plan-editor/plan-summary'
@@ -153,6 +156,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('networkBuildOutput', networkBuildOutput)
   .component('aroDebug', aroDebug)
   .component('viewSettings', viewSettings)
+  .component('ringEditor', ringEditor)
   .component('planEditor', planEditor)
   .component('planSummary', planSummary)
   .component('serviceLayerEditor', serviceLayerEditor)
@@ -233,6 +237,8 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rReportsDownloadModal', react2angular(ReportsDownloadModal, ['reportTypes', 'title'])) // Some properties are passed in manually, not through redux.
   .component('rRfpAnalyzer', react2angular(RfpAnalyzer))
   .component('rRfpStatus', react2angular(RfpStatus))
+  .component('rRingEdit', react2angular(RingEdit))
+  .component('rRingButton', react2angular(RingButton, ['onModify']))
   .component('rToastContainer', react2angular(ToastContainer))
   .service('Utils', utils)
   .service('state', state)

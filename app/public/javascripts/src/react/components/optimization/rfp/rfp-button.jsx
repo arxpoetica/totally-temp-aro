@@ -7,60 +7,32 @@ import wrapComponentWithProvider from '../../../common/provider-wrapped-componen
 import RfpStatusTypes from './constants'
 import uuidv4 from 'uuid/v4'
 import Constants from '../../../common/constants'
+import ProgressButton from '../../common/progress-button.jsx'
 const selector = formValueSelector(Constants.RFP_OPTIONS_FORM)
 
-export class RfpButton extends Component {
-  render () {
-    switch (this.props.status) {
-      case RfpStatusTypes.UNINITIALIZED:
-        return this.renderUninitializedButton()
 
-      case RfpStatusTypes.RUNNING:
-        return this.renderProgressbar()
+export class RfpButton extends ProgressButton {
+  constructor (props) {
+    super(props)
 
-      case RfpStatusTypes.FINISHED:
-        return this.renderFinishedButton()
-
-      default:
-        return <div>ERROR: Unknown coverage status - {this.props.status}</div>
+    // override 
+    this.statusTypes = {
+      UNINITIALIZED: RfpStatusTypes.UNINITIALIZED,
+      RUNNING: RfpStatusTypes.RUNNING,
+      FINISHED: RfpStatusTypes.FINISHED
     }
-  }
 
-  renderUninitializedButton () {
-    return (
-      <button className={'btn btn-block btn-primary'} style={{ marginBottom: '10px' }}
-        onClick={() => this.props.initializeRfpReport(this.props.planId, this.props.userId, this.props.projectId, uuidv4(), this.props.fiberRoutingMode, this.props.targets)}>
-        <i className='fa fa-bolt' /> Run
-      </button>
-    )
   }
-
-  renderProgressbar () {
-    return <div className={'progress'} style={{ height: '34px', position: 'relative', marginBottom: '10px' }}>
-      <div className={'progress-bar progress-bar-optimization'} role='progressbar' aria-valuenow={this.props.progress}
-        aria-valuemin='0' aria-valuemax='1' style={{ lineHeight: '34px', width: (this.props.progress * 100) + '%' }} />
-      <div style={{ position: 'absolute',
-        top: '50%',
-        left: '50%',
-        backgroundColor: 'rgba(0, 0, 0, 0.4)',
-        color: 'white',
-        transform: 'translateX(-50%) translateY(-50%)',
-        width: '80px',
-        textAlign: 'center',
-        borderRadius: '3px',
-        fontWeight: 'bold' }}>
-        Running RFP
-      </div>
-    </div>
-  }
-
-  renderFinishedButton () {
-    return (
-      <button className={'btn btn-block modify-coverage-button'} style={{ marginBottom: '10px' }}
-        onClick={() => this.props.modifyRfpReport()}>
-        <i className='fa fa-edit' /> Modify
-      </button>
-    )
+  
+  
+  // override 
+  onRun () {
+    this.props.initializeRfpReport(this.props.planId, this.props.userId, this.props.projectId, uuidv4(), this.props.fiberRoutingMode, this.props.targets)
+  } 
+  
+  // override 
+  onModify () {
+    this.props.modifyRfpReport()
   }
 }
 

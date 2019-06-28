@@ -10,7 +10,14 @@ class NetworkBuildRoicReportsController {
   }
 
   $onChanges (changesObj) {
-    if (changesObj.planId || changesObj.optimizationState) {
+    if (changesObj.planId 
+      || (changesObj.optimizationState 
+          && (changesObj.optimizationState.currentValue == 'COMPLETED'
+              || changesObj.optimizationState.currentValue == 'FINISHED'))
+      || (changesObj.rOptimizationState 
+          && (changesObj.rOptimizationState.currentValue == 'COMPLETED'
+              || changesObj.rOptimizationState.currentValue == 'FINISHED'))) {
+      
       this.$timeout(() => {this.refreshData()}, 0)
     }
   }
@@ -20,7 +27,6 @@ class NetworkBuildRoicReportsController {
       console.error('Plan ID not available')
       return
     }
-
     this.loadROICResultsForPlan(this.planId)
   }
 
@@ -40,6 +46,7 @@ let networkBuildRoicReports = {
   bindings: {
     planId: '<',
     optimizationState: '<',
+    rOptimizationState: '<', 
     reportSize: '<',
     isLocation: '<'
   },

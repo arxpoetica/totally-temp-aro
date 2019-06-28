@@ -5,12 +5,17 @@ class NetworkBuildOutputController {
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }
 
+  $onInit () {
+    this.reportTypes = this.reportTypes || ['GENERAL', 'PARAM_QUERY']
+  }
+
   showDetailedOutput () {
     this.state.showRoicReportsModal = true
   }
 
   mapStateToThis (reduxState) {
     return {
+      r_planState: reduxState.plan.activePlan.planState
     }
   }
 
@@ -29,7 +34,9 @@ NetworkBuildOutputController.$inject = ['$ngRedux', 'state']
 
 let networkBuildOutput = {
   templateUrl: '/components/sidebar/analysis/network-build/network-build-output.html',
-  bindings: {},
+  bindings: {
+    reportTypes: '<'
+  },
   controller: NetworkBuildOutputController
 }
 
