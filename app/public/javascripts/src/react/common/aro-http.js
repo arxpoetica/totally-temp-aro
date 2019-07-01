@@ -3,8 +3,8 @@ import fetch from 'cross-fetch'
 
 class AroHttp {
   // Make a HTTP GET request
-  static get (url) {
-    return this._fetch(url)
+  static get (url, returnRawResult = false) {
+    return this._fetch(url, {}, returnRawResult)
   }
 
   // Make a HTTP POST request
@@ -47,16 +47,9 @@ class AroHttp {
     }
     return this._fetch(url, options)
   }
-  static IsValidJSONString (str) {
-    try {
-      JSON.parse(str)
-    } catch (e) {
-      return false
-    }
-    return true
-  }
+
   // Internal fetch() implementation. Rejects all HTTP response codes other than 200-299
-  static _fetch (url, options) {
+  static _fetch (url, options, returnRawResult) {
     var status
     return fetch(url, options)
       .then(response => {
@@ -71,25 +64,17 @@ class AroHttp {
         }
       })
       .then(result => {
-        const res = this.IsValidJSONString(result)
-        if (res === true) {
-          const parsedResult = (result === '') ? {} : JSON.parse(result)
-          if (parsedResult.status && // Parsed result has a "status" field. This comes from service.
-              !(parsedResult.status >= 200 && parsedResult.status <= 299)) {
-            return Promise.reject(parsedResult)
+        var resultToSend = returnRawResult
+          ? result
+          : {
+            status: status,
+            data: JSON.parse(result || '{}')
           }
-          return Promise.resolve(parsedResult)
+        if (status >= 200 && status <= 299) {
+          return Promise.resolve(resultToSend)
         } else {
-          const parsedResult = result
-          return Promise.resolve(parsedResult)
+          return Promise.reject(resultToSend)
         }
-      })
-      .then(result => {
-        // We have all the data from the request. Send it back
-        return Promise.resolve({
-          status: status,
-          data: result
-        })
       })
   }
 }

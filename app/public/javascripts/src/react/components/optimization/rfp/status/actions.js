@@ -56,16 +56,14 @@ function downloadRfpReport (filename, reportUrl) {
       type: Actions.RFP_START_DOWNLOADING_REPORT,
       payload: reportUrl
     })
-    AroHttp.get(`/service${reportUrl}`)
+    AroHttp.get(`/service${reportUrl}`, true)
       .then(result => {
-        // All this type checking is really a workaround. We need to fix formats (and aro-http.js) correctly
-        var blobToSave = null
-        if (result.data.type === 'Buffer') {
-          blobToSave = new Blob([new Uint8Array(result.data.data)]) // For binary files like xls
-        } else if (typeof result.data === 'string') {
-          blobToSave = new Blob([result.data]) // For text files like csv
+        var blobToSave = ''
+        if (typeof result === 'string') {
+          blobToSave = new Blob([result])
         } else {
-          blobToSave = new Blob([JSON.stringify(result.data, null, 2)]) // For objects to be saved as json
+          // We got back a binary response. Save it.
+          blobToSave = new Blob([new Uint8Array(result)])
         }
         saveAs(blobToSave, filename)
         dispatch({

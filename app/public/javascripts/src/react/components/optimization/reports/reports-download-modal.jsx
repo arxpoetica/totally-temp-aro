@@ -9,7 +9,6 @@ import '../../common-styles/modal.css'
 export class ReportsDownloadRow extends Component {
   constructor (props) {
     super(props)
-    console.log(JSON.parse( JSON.stringify(this.props) ))
     this.state = {
       selectedFormat: this.props.mediaTypes[0]
     }
