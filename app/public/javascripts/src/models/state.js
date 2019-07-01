@@ -1073,7 +1073,14 @@ class State {
       service.currentPlanServiceAreaTags = service.listOfServiceAreaTags.filter(tag => _.contains(service.plan.tagMapping.linkTags.serviceAreaIds, tag.id))
 
       return service.loadPlanInputs(service.plan.id)
-        .then(() => service.recreateTilesAndCache())
+        .then(() => {
+          service.requestSetMapCenter.next({
+            latitude: service.plan.latitude || service.defaultPlanCoordinates.latitude,
+            longitude: service.plan.longitude || service.defaultPlanCoordinates.longitude
+          })
+          service.requestSetMapZoom.next(service.plan.zoomIndex || service.defaultPlanCoordinates.zoom)
+          service.recreateTilesAndCache()
+        })
         .catch((err) => console.error(err))
     }
 
