@@ -917,7 +917,6 @@ class State {
           return $http.get(`/service/auth/users/${service.loggedInUser.id}/configuration`)
         })
         .then((result) => {
-          const userId = service.loggedInUser.id
           var apiEndpoint = `/service/v1/plan?project_template_id=${result.data.projectTemplateId}`
           if (!isEphemeral && parentPlan) {
             // associate selected tags to child plan
@@ -941,7 +940,6 @@ class State {
 
     // Gets the last ephemeral plan in use, or creates a new one if no ephemeral plan exists.
     service.getOrCreateEphemeralPlan = () => {
-      var userId = service.loggedInUser.id
       return $http.get(`/service/v1/plan/ephemeral/latest`)
         .then((result) => {
           // We have a valid ephemeral plan if we get back an object with *some* properties
@@ -1612,7 +1610,7 @@ class State {
           service.loggedInUser.perspective = result.data.perspective || 'default'
           service.configuration.loadPerspective(service.loggedInUser.perspective)
           service.initializeState()
-          return Promise.resolve({}) //$http.get(`/search/addresses?text=${searchLocation}&sessionToken=${Utils.getInsecureV4UUID()}`)
+          return $http.get(`/search/addresses?text=${searchLocation}&sessionToken=${Utils.getInsecureV4UUID()}`)
         })
         .then((result) => {
           if (result.data && result.data.length > 0 && result.data[0].type === 'placeId') {
