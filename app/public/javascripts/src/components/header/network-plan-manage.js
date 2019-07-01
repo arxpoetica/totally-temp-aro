@@ -34,7 +34,7 @@ class NetworkPlanModalController {
         closeOnConfirm: true
       }, (deletePlan) => {
         if (deletePlan) {
-          this.$http.delete(`/service/v1/plan/${plan.id}?user_id=${this.state.loggedInUser.id}`)
+          this.$http.delete(`/service/v1/plan/${plan.id}`)
             .then((response) => {
               resolve()
               return this.state.getOrCreateEphemeralPlan()
@@ -89,7 +89,7 @@ class NetworkPlanModalController {
       updatePlan.tagMapping.global = _.without(updatePlan.tagMapping.global, removeTag.tag.id)
     }
 
-    return this.$http.put(`/service/v1/plan?user_id=${this.state.loggedInUser.id}`, updatePlan)
+    return this.$http.put(`/service/v1/plan`, updatePlan)
   }
   mapStateToThis (reduxState) {
     return {

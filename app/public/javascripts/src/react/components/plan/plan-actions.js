@@ -42,7 +42,7 @@ function setActivePlanState (planState) {
 // Loads a plan with the specified plan id from the server, then sets it as the active plan
 function loadPlan (planId, userId) {
   return dispatch => {
-    AroHttp.get(`/service/v1/plan/${planId}?user_id=${userId}`)
+    AroHttp.get(`/service/v1/plan/${planId}`)
       .then(result => dispatch(setActivePlan(result.data)))
       .catch(err => console.error(err))
   }

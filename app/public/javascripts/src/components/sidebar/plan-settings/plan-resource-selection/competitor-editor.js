@@ -117,7 +117,7 @@ class CompetitorEditorController {
   
   loadCompManMeta () {
     if (!this.competitorManagerId) return
-    this.$http.get(`/service/v1/competitor-manager/${this.competitorManagerId}?user_id=${this.state.loggedInUser.id}`)
+    this.$http.get(`/service/v1/competitor-manager/${this.competitorManagerId}`)
     .then((result) => {
       this.compManMeta = result.data
     })  
@@ -195,7 +195,7 @@ class CompetitorEditorController {
     }
     //console.log(changedModels)
     if (changedModels.length > 0) {
-      this.$http.put(`/service/v1/competitor-manager/${this.competitorManagerId}/strengths?user_id=${this.state.loggedInUser.id}`, changedModels)
+      this.$http.put(`/service/v1/competitor-manager/${this.competitorManagerId}/strengths`, changedModels)
         .then((result) => {
           if (!this.doRecalc){
             this.$http.get(`/service/v1/competitor-manager/${this.competitorManagerId}/state`)
@@ -225,7 +225,7 @@ class CompetitorEditorController {
     if (this.doRecalc) {
       var compManMes = 'recalculating: '+this.compManMeta.name
       this.uiNotificationService.addNotification('main', compManMes)
-      this.$http.post(`/service/v1/competitor-manager/${this.competitorManagerId}/refresh?user_id=${this.state.loggedInUser.id}`)
+      this.$http.post(`/service/v1/competitor-manager/${this.competitorManagerId}/refresh`)
       .then((result) => {
         this.uiNotificationService.removeNotification('main', compManMes)
       })

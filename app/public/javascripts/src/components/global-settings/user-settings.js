@@ -8,7 +8,7 @@ class UserSettingsController {
 
     this.userConfiguration = {}
     this.allProjectTemplates = []
-    $http.get(`/service/v1/project-template?user_id=${state.loggedInUser.id}`)
+    $http.get(`/service/v1/project-template`)
       .then((result) => this.allProjectTemplates = result.data)
       .catch((err) => console.error(err))
 

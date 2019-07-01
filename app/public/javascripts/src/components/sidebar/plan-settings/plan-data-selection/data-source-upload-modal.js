@@ -205,7 +205,7 @@ class DataSourceUploadController {
     var dataType = this.state.uploadDataSource.name
 
     var libraryOptions = {
-      url: '/service/v1/library-entry?user_id=' + this.state.loggedInUser.id,
+      url: '/service/v1/library-entry',
       method: 'POST',
       data: {
         dataType: dataType,
@@ -244,7 +244,7 @@ class DataSourceUploadController {
 
   layerBoundary (equipmentLibraryId, serviceLayerLibraryId) {
     var boundaryOptions = {
-      url: '/service/v1/project/' + this.state.loggedInUser.projectId + '/serviceLayers-cmd?user_id=' + this.state.loggedInUser.id,
+      url: '/service/v1/project/' + this.state.loggedInUser.projectId + '/serviceLayers-cmd',
       method: 'POST',
       data: {
         action: 'GENERATE_POLYGONS',
@@ -265,7 +265,7 @@ class DataSourceUploadController {
 
   setCableConstructionType (cableType) {
     var cableOptions = {
-      url: '/service/v1/library_cable?user_id=' + this.state.loggedInUser.id,
+      url: '/service/v1/library_cable',
       method: 'POST',
       data: {
         'libraryItem': {
@@ -302,7 +302,7 @@ class DataSourceUploadController {
   }
   
   deleteDatasource (dataSource) {
-    this.$http.delete(`/service/v1/library-entry/${dataSource.identifier}?user_id=${this.state.loggedInUser.id}`)
+    this.$http.delete(`/service/v1/library-entry/${dataSource.identifier}`)
       .then(() => {
         this.state.dataItems[dataSource.dataType].allLibraryItems = this.state.dataItems[dataSource.dataType].allLibraryItems.filter(item => item.identifier !== dataSource.identifier)
         this.loadDataSources()

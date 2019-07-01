@@ -11,8 +11,15 @@ exports[`All plan states 1`] = `
   <td>
     42
   </td>
-  <td>
-    RFP plan
+  <td
+    className="text-left pl-5"
+  >
+    <a
+      href="#"
+      onClick={[Function]}
+    >
+      RFP plan
+    </a>
   </td>
   <td>
     Admin User
@@ -45,8 +52,15 @@ exports[`All plan states 2`] = `
   <td>
     42
   </td>
-  <td>
-    RFP plan
+  <td
+    className="text-left pl-5"
+  >
+    <a
+      href="#"
+      onClick={[Function]}
+    >
+      RFP plan
+    </a>
   </td>
   <td>
     Admin User
@@ -79,8 +93,15 @@ exports[`All plan states 3`] = `
   <td>
     42
   </td>
-  <td>
-    RFP plan
+  <td
+    className="text-left pl-5"
+  >
+    <a
+      href="#"
+      onClick={[Function]}
+    >
+      RFP plan
+    </a>
   </td>
   <td>
     Admin User
@@ -113,8 +134,15 @@ exports[`All plan states 4`] = `
   <td>
     42
   </td>
-  <td>
-    RFP plan
+  <td
+    className="text-left pl-5"
+  >
+    <a
+      href="#"
+      onClick={[Function]}
+    >
+      RFP plan
+    </a>
   </td>
   <td>
     Admin User
@@ -147,8 +175,15 @@ exports[`All plan states 5`] = `
   <td>
     42
   </td>
-  <td>
-    RFP plan
+  <td
+    className="text-left pl-5"
+  >
+    <a
+      href="#"
+      onClick={[Function]}
+    >
+      RFP plan
+    </a>
   </td>
   <td>
     Admin User
@@ -181,8 +216,15 @@ exports[`All plan states 6`] = `
   <td>
     42
   </td>
-  <td>
-    RFP plan
+  <td
+    className="text-left pl-5"
+  >
+    <a
+      href="#"
+      onClick={[Function]}
+    >
+      RFP plan
+    </a>
   </td>
   <td>
     Admin User
@@ -215,8 +257,15 @@ exports[`All plan states 7`] = `
   <td>
     42
   </td>
-  <td>
-    RFP plan
+  <td
+    className="text-left pl-5"
+  >
+    <a
+      href="#"
+      onClick={[Function]}
+    >
+      RFP plan
+    </a>
   </td>
   <td>
     Admin User
@@ -249,8 +298,15 @@ exports[`When system actors are loaded 1`] = `
   <td>
     42
   </td>
-  <td>
-    RFP plan
+  <td
+    className="text-left pl-5"
+  >
+    <a
+      href="#"
+      onClick={[Function]}
+    >
+      RFP plan
+    </a>
   </td>
   <td>
     Admin User
@@ -283,8 +339,15 @@ exports[`When system actors are not loaded 1`] = `
   <td>
     42
   </td>
-  <td>
-    RFP plan
+  <td
+    className="text-left pl-5"
+  >
+    <a
+      href="#"
+      onClick={[Function]}
+    >
+      RFP plan
+    </a>
   </td>
   <td>
     UserID: 4
