@@ -14,10 +14,10 @@ function loadConfigurationFromServer () {
 }
 function getStyleValues () {
   return dispatch => {
-    AroHttp.get('/ui_stylesheets')
+    AroHttp.get('/ui_stylesheets', true)
       .then(result => dispatch({
         type: Actions.CONFIGURATION_SET_STYLEVALUES,
-        payload: result.data
+        payload: result
       }))
       .catch(err => console.error(err))
   }
