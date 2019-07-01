@@ -31,7 +31,7 @@ class PlanProjectConfigurationController {
   }
 
   reloadProjects() {
-    this.$http.get(`/service/v1/project-template?user_id=${this.userId}`)
+    this.$http.get(`/service/v1/project-template`)
       .then((result) => {
         this.allProjects = result.data
         this.parentProjectForNewProject = this.allProjects[0]
@@ -55,7 +55,7 @@ class PlanProjectConfigurationController {
   }
 
   createProject (projectName, parentProject) {
-    this.$http.post(`/service/v1/project-template?user_id=${this.userId}`, { name: projectName, parentId: parentProject.id })
+    this.$http.post(`/service/v1/project-template`, { name: projectName, parentId: parentProject.id })
       .then(result => {
         this.reloadProjects()
         this.setSelectedMode(this.modes.HOME)
@@ -71,7 +71,7 @@ class PlanProjectConfigurationController {
 
   deleteProject (project) {
     project.isDeleting = true
-    this.$http.delete(`/service/v1/project-template/${project.id}?user_id=${this.userId}`)
+    this.$http.delete(`/service/v1/project-template/${project.id}`)
       .then(result => {
         project.isDeleting = false
         this.reloadProjects()
@@ -116,7 +116,7 @@ class PlanProjectConfigurationController {
     })
 
     // Save the configuration to the project
-    return this.$http.put(`/service/v1/project-template/${this.selectedProjectId}/configuration?user_id=${this.userId}`, putBody)
+    return this.$http.put(`/service/v1/project-template/${this.selectedProjectId}/configuration`, putBody)
   }
 }
 

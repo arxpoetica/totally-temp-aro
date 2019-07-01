@@ -195,7 +195,7 @@ class PlanSearchController {
       updatePlan.tagMapping.global = _.without(updatePlan.tagMapping.global, removeTag.tag.id)
     }
 
-    return this.$http.put(`/service/v1/plan?user_id=${this.state.loggedInUser.id}`, updatePlan)
+    return this.$http.put(`/service/v1/plan`, updatePlan)
       .then((response) => {
         this.loadPlans()
       })

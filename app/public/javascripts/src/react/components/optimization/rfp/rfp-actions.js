@@ -52,8 +52,8 @@ function initializeRfpReport (planId, userId, projectId, rfpId, fiberRoutingMode
       type: Actions.RFP_SET_STATUS,
       payload: RfpStatusTypes.RUNNING
     })
-    AroHttp.delete(`/service/v1/plan/${planId}/optimization-state?user_id=${userId}`)
-      .then(() => AroHttp.post(`/service/rfp/process?user_id=${userId}&plan_id=${planId}`, requestBody))
+    AroHttp.delete(`/service/v1/plan/${planId}/optimization-state`)
+      .then(() => AroHttp.post(`/service/rfp/process?plan_id=${planId}`, requestBody))
       .then(result => {
         dispatch({
           type: Actions.RFP_SET_STATUS,
@@ -92,7 +92,7 @@ function loadRfpPlans (userId, searchTerm = '') {
     const searchTermWithQuotes = searchTerm ? ` "${searchTerm}"` : ''
     Promise.all([
       AroHttp.get(`/service/v1/plan?search=type:"RFP"${searchTermWithQuotes}&user_id=${userId}`),
-      AroHttp.get(`/service/rfp/report-definition?user_id=${userId}`)
+      AroHttp.get(`/service/rfp/report-definition`)
     ])
       .then(results => {
         const rfpPlans = results[0].data
@@ -100,11 +100,6 @@ function loadRfpPlans (userId, searchTerm = '') {
         const rfpReportDefinitions = results[1].data.filter(reportDefinition =>
           (reportDefinition.reportData.reportType === 'COVERAGE' || reportDefinition.reportData.reportType === 'RFP')
         )
-          .map(reportDefinition => {
-            // user_id should come from service. Manually adding it here until service does it.
-            reportDefinition.href += '?user_id={userId}'
-            return reportDefinition
-          })
         dispatch({
           type: Actions.RFP_SET_PLANS,
           payload: {

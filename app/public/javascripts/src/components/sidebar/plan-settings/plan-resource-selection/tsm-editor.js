@@ -18,12 +18,12 @@ class TsmEditorController {
   }
 
   reloadTsmManagerConfiguration () {
-    this.$http.get(`/service/v1/tsm-manager/${this.tsmManagerId}?user_id=${this.state.loggedInUser.id}`)
+    this.$http.get(`/service/v1/tsm-manager/${this.tsmManagerId}`)
       .then((result) => {
         this.tsmManager = result.data
       })
 
-    this.$http.get(`/service/v1/tsm-manager/${this.tsmManagerId}/strengths?user_id=${this.state.loggedInUser.id}`)
+    this.$http.get(`/service/v1/tsm-manager/${this.tsmManagerId}/strengths`)
       .then((result) => {
         this.tsmManagerConfiguration = result.data
         this.pristineTsmManagerConfiguration = angular.copy(result.data)

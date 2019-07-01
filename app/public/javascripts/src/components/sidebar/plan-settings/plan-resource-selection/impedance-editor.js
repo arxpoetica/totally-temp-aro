@@ -23,13 +23,13 @@ class ImpedanceEditorController {
   }
 
   reloadImpedanceManagerConfiguration () {
-    this.$http.get(`/service/v1/impedance-manager/${this.impedanceManagerId}?user_id=${this.state.loggedInUser.id}`)
+    this.$http.get(`/service/v1/impedance-manager/${this.impedanceManagerId}`)
       .then((result) => {
         this.impedanceManager = result.data
       })
       .catch(err => console.error(err))
 
-    this.$http.get(`/service/v1/impedance-manager/${this.impedanceManagerId}/configuration?user_id=${this.state.loggedInUser.id}`)
+    this.$http.get(`/service/v1/impedance-manager/${this.impedanceManagerId}/configuration`)
       .then((result) => {
         this.impedanceManagerConfiguration = result.data
         // The map is a set of key value pairs, we convert it to a sorted array
@@ -40,7 +40,7 @@ class ImpedanceEditorController {
   }
 
   saveConfigurationToServer () {
-    this.$http.put(`/service/v1/impedance-manager/${this.impedanceManagerId}/configuration?user_id=${this.state.loggedInUser.id}`, this.impedanceManagerConfiguration)
+    this.$http.put(`/service/v1/impedance-manager/${this.impedanceManagerId}/configuration`, this.impedanceManagerConfiguration)
       .then((result) => this.exitEditingMode())
       .catch((err) => console.error(err))
   }

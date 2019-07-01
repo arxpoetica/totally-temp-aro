@@ -1,4 +1,6 @@
 const expressProxy = require('express-http-proxy')
+const URL = require('url').URL
+const URLSearchParams = require('url').URLSearchParams
 var models = require('../models')
 var helpers = require('../helpers')
 var config = helpers.config
@@ -15,12 +17,21 @@ exports.configure = (api, middleware) => {
   const SERVICE_PREFIX = '/service'
   api.all(`${SERVICE_PREFIX}/*`, expressProxy(`${config.aro_service_url}`, {
     proxyReqPathResolver: req => {
-      // Chop off '/service' from the URL
-      var serviceUrl = req.url.substring('/service/'.length - 1)
-      // Append the logged in users id to all service calls. This will replace the user id even if the
-      // client has specified it. This is to prevent authenticated clients impersonating other users.
-      req.query.user_id = req.user.id
-      return serviceUrl
+      // First construct the full url (i.e. including the http(s)://<hostname>)
+      const fullUrl = new URL(`${req.protocol}://${req.get('host')}${req.url}`)
+
+      // Now extract the existing query parameters
+      const searchParams = new URLSearchParams(fullUrl.searchParams)
+
+      // Overwrite or add the user_id query parameter. (Overwrite so that authenticated clients cannot
+      // impersonate other users). Then set the query parameters back to the original URL.
+      searchParams.set('user_id', req.user.id)
+      fullUrl.search = searchParams
+
+      // Construct the "final" URL by removing the protocol, host, etc so it looks like '/v1/plan?user_id=xxx'
+      const finalUrl = fullUrl.href.substring(fullUrl.href.indexOf('/service/') + '/service/'.length - 1)
+
+      return finalUrl
     }
   }))
 
@@ -51,12 +62,14 @@ exports.configure = (api, middleware) => {
   api.all('/service-download-file/:fileName/*', (request, response, next) => {
 
     // Chop off the prefix on this requests URL, and we get the URL to pass to aro-service
+    request.params.user_id = request.user.id
     var fileName = request.params.fileName || 'DefaultFileName'
     var serviceUrl = request.url.substring(`/service-download-file/${fileName}/`.length)
     var req = {
       url: `${config.aro_service_url}/${serviceUrl}`,
       method: request.method,
-      encoding: null    // IMPORTANT: We are getting binary data back from aro-service. Do not encode anything.
+      params: request.params,
+      encoding: null // IMPORTANT: We are getting binary data back from aro-service. Do not encode anything.
     }
 
     // Attach request body if required

@@ -116,7 +116,7 @@ class PlanInfoController {
   updatePlanTags () {
     this.currentPlanInfo.tagMapping.linkTags.serviceAreaIds = _.map(this.saPlanTags, (tag) => tag.id)
     this.currentPlanInfo.tagMapping.global = _.map(this.generalPlanTags, (tag) => tag.id)
-    this.$http.put(`/service/v1/plan?user_id=${this.state.loggedInUser.id}`, this.currentPlanInfo)
+    this.$http.put(`/service/v1/plan`, this.currentPlanInfo)
   }
 
   setPlanLocation () {
@@ -180,7 +180,7 @@ class PlanInfoController {
               self.currentPlanInfo.areaName = selectedLocation.text
               self.currentPlanInfo.latitude = results[0].geometry.location.lat()
               self.currentPlanInfo.longitude = results[0].geometry.location.lng()
-              self.$http.put(`/service/v1/plan?user_id=${self.state.loggedInUser.id}`, self.currentPlanInfo)
+              self.$http.put(`/service/v1/plan`, self.currentPlanInfo)
             })
           } else {
             console.error(`Unsupported search result type ${selectedLocation.type}`)

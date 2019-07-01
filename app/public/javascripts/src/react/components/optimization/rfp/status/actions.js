@@ -9,7 +9,7 @@ function submitRfpReport (userId, requestBody) {
       type: Actions.RFP_SET_IS_SUBMITTING_RESULT,
       payload: true
     })
-    AroHttp.post(`/service/rfp/process?user_id=${userId}`, requestBody)
+    AroHttp.post(`/service/rfp/process`, requestBody)
       .then(result => {
         dispatch({
           type: Actions.RFP_SET_IS_SUBMITTING_RESULT,

@@ -169,7 +169,7 @@ class ResourcePermissionsEditorController {
         }
       })
     }
-    return this.$http.put(`/service/auth/acl/${this.resourceType}/${this.resourceId}?user_id=${this.state.loggedInUser.id}`, putBody)
+    return this.$http.put(`/service/auth/acl/${this.resourceType}/${this.resourceId}`, putBody)
   }
   
 }

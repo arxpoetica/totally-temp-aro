@@ -48,7 +48,7 @@ class ConicTileSystemUploaderController {
     postBody.param.param_type = 'ts'
 
     // Then make the call that will provide us with the library id
-    return this.$http.post(`/service/v1/project/${this.projectId}/library_ts?user_id=${this.userId}`, postBody)
+    return this.$http.post(`/service/v1/project/${this.projectId}/library_ts`, postBody)
       .then((result) => Promise.resolve(result.data.libraryItem.identifier))
       .catch((err) => console.error(err))
   }

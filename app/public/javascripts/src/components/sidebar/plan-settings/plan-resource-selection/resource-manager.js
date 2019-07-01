@@ -136,20 +136,21 @@ class ResourceManagerController {
     }
 
     var props = ''
-    
-    if (this.searchText.trim() != '') {
+    if (this.searchText.trim() !== '') {
       props += `&name=${this.searchText}`
     }
-    if (this.selectedResourceKey && 'all' != this.selectedResourceKey) {
+    if (this.selectedResourceKey && (this.selectedResourceKey !== 'all')) {
       props += `&resourceType=${this.selectedResourceKey}`
     }
-    
-    this.$http.get(`service/v2/resource-manager?user_id=${this.state.loggedInUser.id}${props}`)
+    if (props !== '') {
+      props = '?' + props
+    }
+    this.$http.get(`service/v2/resource-manager${props}`)
       .then((result) => {
         var newRows = []
         var i
-        for (i = 0; i<result.data.length; i++){
-          if (!result.data[i].deleted){
+        for (i = 0; i<result.data.length; i++) {
+          if (!result.data[i].deleted) {
             var row = result.data[i]
             newRows.push(row)
           }
@@ -158,8 +159,7 @@ class ResourceManagerController {
       })
     // end promise
   }
-  
-  
+
   createByEditMode (createMode, sourceId) {
     this.setEditingManagerId({ newId: sourceId })
     this.setEditingMode({ mode: createMode })
@@ -232,7 +232,7 @@ class ResourceManagerController {
   }
 
   deleteManager (selectedManager) {
-    this.$http.delete(`service/v2/resource-manager/${selectedManager.id}?user_id=${this.state.loggedInUser.id}`)
+    this.$http.delete(`service/v2/resource-manager/${selectedManager.id}`)
       .then((result) => {
         this.onManagersChanged && this.onManagersChanged()
       // this.resourceItems[this.selectedResourceKey].selectedManager = this.resourceItems[this.selectedResourceKey].allManagers[0]

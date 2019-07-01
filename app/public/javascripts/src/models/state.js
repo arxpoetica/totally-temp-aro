@@ -671,8 +671,8 @@ class State {
       var currentPlan = service.plan
       var promises = [
         $http.get('/service/odata/datatypeentity'),
-        $http.get(`/service/v1/library-entry?user_id=${service.loggedInUser.id}`),
-        $http.get(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${service.loggedInUser.id}`)
+        $http.get(`/service/v1/library-entry`),
+        $http.get(`/service/v1/plan/${currentPlan.id}/configuration`)
       ]
 
       return Promise.all(promises)
@@ -761,7 +761,7 @@ class State {
       return Promise.all([
         $http.get('/service/odata/resourcetypeentity'), // The types of resource managers
         $http.get('/service/odata/resourcemanager?$select=name,id,description,managerType,deleted'), // All resource managers in the system
-        $http.get(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${service.loggedInUser.id}`)
+        $http.get(`/service/v1/plan/${currentPlan.id}/configuration`)
       ])
         .then((results) => {
           var resourceManagerTypes = results[0].data
@@ -809,7 +809,7 @@ class State {
 
     service.loadNetworkConfigurationFromServer = () => {
       return service.getDefaultProjectForUser(service.loggedInUser.id)
-        .then((projectTemplateId) => $http.get(`/service/v1/project-template/${projectTemplateId}/network_configuration?user_id=${service.loggedInUser.id}`))
+        .then((projectTemplateId) => $http.get(`/service/v1/project-template/${projectTemplateId}/network_configuration`))
         .then((result) => {
           service.networkConfigurations = {}
           result.data.forEach((networkConfiguration) => {
@@ -841,7 +841,7 @@ class State {
 
       var currentPlan = service.plan
       // Save the configuration to the server
-      $http.put(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${service.loggedInUser.id}`, putBody)
+      $http.put(`/service/v1/plan/${currentPlan.id}/configuration`, putBody)
     }
 
     // Save the plan resource selections to the server
@@ -868,7 +868,7 @@ class State {
 
       // Save the configuration to the server
       var currentPlan = service.plan
-      $http.put(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${service.loggedInUser.id}`, putBody)
+      $http.put(`/service/v1/plan/${currentPlan.id}/configuration`, putBody)
     }
 
     // Save the Network Configurations to the server
@@ -882,7 +882,7 @@ class State {
           Object.keys(service.networkConfigurations).forEach((networkConfigurationKey) => {
             networkConfigurationsArray.push(service.networkConfigurations[networkConfigurationKey])
           })
-          var url = `/service/v1/project-template/${projectTemplateId}/network_configuration?user_id=${service.loggedInUser.id}`
+          var url = `/service/v1/project-template/${projectTemplateId}/network_configuration`
           $http.put(url, networkConfigurationsArray)
         })
         .catch((err) => console.error(err))
@@ -918,7 +918,7 @@ class State {
         })
         .then((result) => {
           const userId = service.loggedInUser.id
-          var apiEndpoint = `/service/v1/plan?user_id=${userId}&project_template_id=${result.data.projectTemplateId}`
+          var apiEndpoint = `/service/v1/plan?project_template_id=${result.data.projectTemplateId}`
           if (!isEphemeral && parentPlan) {
             // associate selected tags to child plan
             planOptions.tagMapping = {
@@ -942,7 +942,7 @@ class State {
     // Gets the last ephemeral plan in use, or creates a new one if no ephemeral plan exists.
     service.getOrCreateEphemeralPlan = () => {
       var userId = service.loggedInUser.id
-      return $http.get(`/service/v1/plan/ephemeral/latest?user_id=${userId}`)
+      return $http.get(`/service/v1/plan/ephemeral/latest`)
         .then((result) => {
           // We have a valid ephemeral plan if we get back an object with *some* properties
           var isValidEphemeralPlan = Object.getOwnPropertyNames(result.data).length > 0
@@ -979,8 +979,7 @@ class State {
       service.getAddressFor(newPlan.latitude, newPlan.longitude)
         .then((address) => {
           newPlan.areaName = address
-          var userId = service.loggedInUser.id
-          return $http.put(`/service/v1/plan?user_id=${userId}`, newPlan)
+          return $http.put(`/service/v1/plan`, newPlan)
         })
         .then((result) => {
           if (result.status >= 200 && result.status <= 299) {
@@ -1007,7 +1006,7 @@ class State {
         }
       })
       var userId = service.loggedInUser.id
-      var url = `/service/v1/plan-command/copy?user_id=${userId}&source_plan_id=${service.plan.id}&is_ephemeral=${newPlan.ephemeral}&name=${newPlan.name}`
+      var url = `/service/v1/plan-command/copy?source_plan_id=${service.plan.id}&is_ephemeral=${newPlan.ephemeral}&name=${newPlan.name}`
 
       return $http.post(url, {})
         .then((result) => {
@@ -1016,7 +1015,7 @@ class State {
             result.data.latitude = center.lat()
             result.data.longitude = center.lng()
             result.data.planType = planType || 'UNDEFINED'
-            return $http.put(`/service/v1/plan?user_id=${userId}`, result.data)
+            return $http.put(`/service/v1/plan`, result.data)
           } else {
             console.error('Unable to copy plan')
             console.error(result)
@@ -1031,9 +1030,8 @@ class State {
     service.loadPlan = (planId) => {
       tracker.trackEvent(tracker.CATEGORIES.LOAD_PLAN, tracker.ACTIONS.CLICK, 'PlanID', planId)
       service.selectedDisplayMode.next(service.displayModes.VIEW)
-      var userId = service.loggedInUser.id
       var plan = null
-      return $http.get(`/service/v1/plan/${planId}?user_id=${userId}`)
+      return $http.get(`/service/v1/plan/${planId}`)
         .then((result) => {
           plan = result.data
           return service.getAddressFor(plan.latitude, plan.longitude)
@@ -1087,7 +1085,7 @@ class State {
     // Load the plan inputs for the given plan and populate them in state
     service.loadPlanInputs = (planId) => {
       var userId = service.loggedInUser.id
-      return $http.get(`/service/v1/plan/${planId}/inputs?user_id=${userId}`)
+      return $http.get(`/service/v1/plan/${planId}/inputs`)
         .then((result) => {
           var planInputs = Object.keys(result.data).length > 0 ? result.data : service.getDefaultPlanInputs()
           stateSerializationHelper.loadStateFromJSON(service, service.getDispatchers(), planInputs)
@@ -1161,10 +1159,9 @@ class State {
 
     service.handleModifyClicked = () => {
       var currentPlan = service.plan
-      var userId = service.loggedInUser.id
       if (currentPlan.ephemeral) {
         // This is an ephemeral plan. Don't show any dialogs to the user, simply copy this plan over to a new ephemeral plan
-        var url = `/service/v1/plan-command/copy?user_id=${userId}&source_plan_id=${currentPlan.id}&is_ephemeral=${currentPlan.ephemeral}`
+        var url = `/service/v1/plan-command/copy?source_plan_id=${currentPlan.id}&is_ephemeral=${currentPlan.ephemeral}`
         return $http.post(url, {})
           .then((result) => {
             if (result.status >= 200 && result.status <= 299) {
@@ -1199,8 +1196,8 @@ class State {
                 })
               })
             } else if (result === service.modifyDialogResult.OVERWRITE) {
-              return $http.delete(`/service/v1/plan/${currentPlan.id}/optimization-state?user_id=${service.loggedInUser.id}`)
-                .then(() => $http.get(`/service/v1/plan/${currentPlan.id}/optimization-state?user_id=${service.loggedInUser.id}`))
+              return $http.delete(`/service/v1/plan/${currentPlan.id}/optimization-state`)
+                .then(() => $http.get(`/service/v1/plan/${currentPlan.id}/optimization-state`))
                 .then(result => {
                   service.plan.planState = result.data
                   service.setActivePlanState(result.data)
@@ -1328,7 +1325,7 @@ class State {
       $http.delete(`/service/optimization/processes/${service.plan.optimizationId}`)
         .then((response) => {
           // Optimization process was cancelled. Get the plan status from the server
-          return $http.get(`/service/v1/plan/${service.plan.id}?user_id=${service.loggedInUser.id}`)
+          return $http.get(`/service/v1/plan/${service.plan.id}`)
         })
         .then((response) => {
           service.isCanceling = false
@@ -1615,7 +1612,7 @@ class State {
           service.loggedInUser.perspective = result.data.perspective || 'default'
           service.configuration.loadPerspective(service.loggedInUser.perspective)
           service.initializeState()
-          return $http.get(`/search/addresses?text=${searchLocation}&sessionToken=${Utils.getInsecureV4UUID()}`)
+          return Promise.resolve({}) //$http.get(`/search/addresses?text=${searchLocation}&sessionToken=${Utils.getInsecureV4UUID()}`)
         })
         .then((result) => {
           if (result.data && result.data.length > 0 && result.data[0].type === 'placeId') {

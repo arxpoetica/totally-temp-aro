@@ -109,7 +109,7 @@ class ServiceLayerEditorController {
     this.currentTransaction = null
     // See if we have an existing transaction for the currently selected location library
     var selectedLibraryItem = this.state.dataItems.service_layer.selectedLibraryItems[0]
-    this.$http.get(`/service/library/transaction?user_id=${this.state.loggedInUser.id}`)
+    this.$http.get(`/service/library/transaction`)
       .then((result) => {
         var existingTransactions = result.data.filter((item) => item.libraryId === selectedLibraryItem.identifier)
         if (existingTransactions.length > 0) {

@@ -24,11 +24,11 @@ class RateReachEditorController {
   }
 
   reloadRateReachManagerConfiguration () {
-    this.$http.get(`/service/rate-reach-matrix/resource/${this.rateReachManagerId}?user_id=${this.state.loggedInUser.id}`)
+    this.$http.get(`/service/rate-reach-matrix/resource/${this.rateReachManagerId}`)
       .then(result => this.rateReachManager = result.data)
       .catch(err => console.error(err))
 
-    this.$http.get(`/service/rate-reach-matrix/resource/${this.rateReachManagerId}/config?user_id=${this.state.loggedInUser.id}`)
+    this.$http.get(`/service/rate-reach-matrix/resource/${this.rateReachManagerId}/config`)
       .then(result => {
         this.rateReachConfig = result.data
         return this.loadAllTechnologyTypeDetails()
@@ -117,7 +117,7 @@ class RateReachEditorController {
   saveConfigurationToServer () {
     var configuration = JSON.parse(angular.toJson(this.rateReachConfig)) // Remove angularjs-specific properties from object
     configuration = this.orderedArrayToMatrixMaps(configuration) // Transform object in aro-service format
-    this.$http.put(`/service/rate-reach-matrix/resource/${this.rateReachManagerId}/config?user_id=${this.state.loggedInUser.id}`, configuration)
+    this.$http.put(`/service/rate-reach-matrix/resource/${this.rateReachManagerId}/config`, configuration)
       .then(result => this.exitEditingMode())
       .catch(err => console.error(err))
   }
