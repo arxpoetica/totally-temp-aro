@@ -56,7 +56,7 @@ function downloadRfpReport (filename, reportUrl) {
       type: Actions.RFP_START_DOWNLOADING_REPORT,
       payload: reportUrl
     })
-    AroHttp.get(`/service-download-file/undefined.txt/${reportUrl}`)
+    AroHttp.get(`/service${reportUrl}`)
       .then(result => {
         // All this type checking is really a workaround. We need to fix formats (and aro-http.js) correctly
         var blobToSave = null
