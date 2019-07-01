@@ -24,15 +24,18 @@
   
   <!-- <span ng-repeat="(key, value) in $ctrl.systemActors">{{value.name}}</span> -->
   
-  <ui-select multiple limit="1" ng-model="$ctrl.newActorId"
+  <ui-select limit="1" ng-model="$ctrl.newActorId"
       theme="bootstrap" close-on-select="false">
       <ui-select-match placeholder="Select User">
-          {{value.name}}
+          {{$item.name}}
       </ui-select-match>
-      <ui-select-choices class="ui-select-choices-style" repeat="value.id as (key, value) in $ctrl.systemActors">
-        <div ng-bind-html="value.name">{{value.name}}</div>
+      <ui-select-choices class="ui-select-choices-style" repeat="person.name as person in $ctrl.systemActors">
+        <div>
+          {{person.name}}
+        </div>
       </ui-select-choices>
     </ui-select>
+
     <!-- <div class="text-center" style="margin-top:2px">
       <button id="apply-filter" ng-class="{'btn btn-sm': true, 'btn-primary': $ctrl.selectedItems.length > 0 }" 
         ng-click="$ctrl.applySearch({selectedFilters:$ctrl.selectedItems})"

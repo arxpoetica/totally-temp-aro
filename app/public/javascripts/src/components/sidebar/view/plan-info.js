@@ -204,7 +204,7 @@ class PlanInfoController {
 
   $onDestroy () {
     this.commitUpdatestoPlan(true)
-    this.planObserver.unsubscribe()
+    // this.planObserver.unsubscribe()
   }
 }
 

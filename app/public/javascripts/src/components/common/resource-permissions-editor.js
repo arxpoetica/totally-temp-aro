@@ -1,18 +1,28 @@
+
+import { createSelector } from 'reselect'
+
+const getAllSystemActors = reduxState => reduxState.user.systemActors
+const getAllSystemActorsArray = createSelector([getAllSystemActors], systemActors => {
+  var systemActorsArray = []
+  Object.keys(systemActors).forEach(actorKey => systemActorsArray.push(systemActors[actorKey]))
+  return systemActorsArray
+})
+
 class ResourcePermissionsEditorController {
-  constructor ($http, $timeout, state) {
+  constructor ($http, $timeout, $ngRedux, state) {
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
-    
+
     this.authRollsEnum = []
     this.actorsById = {}
-    
+
     var requestedRolls = {
       'RESOURCE_OWNER': 'Owner',
       'RESOURCE_MODIFIER': 'Modifier',
       'RESOURCE_VIEWER': 'Viewer'
     }
-    
+
     this.isOwner = true
     
     // these vals will be replaced by vals from state
@@ -62,7 +72,6 @@ class ResourcePermissionsEditorController {
         'editable': true,
         'visible': true
       }
-      
     ]
     
     this.actionsParam = null
@@ -82,6 +91,7 @@ class ResourcePermissionsEditorController {
     this.filterNewActorList = (value, index, array) => {
       return !this.rows.find((obj)=>{return obj.systemActorId === value.id})
     }
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }
   
   
@@ -184,17 +194,30 @@ class ResourcePermissionsEditorController {
     }
     return this.$http.put(`/service/auth/acl/${this.resourceType}/${this.resourceId}`, putBody)
   }
-  
+
+  $onDestroy () {
+    this.unsubscribeRedux()
+  }
+
+  mapStateToThis (reduxState) {
+    return {
+      systemActors: getAllSystemActorsArray(reduxState)
+    }
+  }
+
+  mapDispatchToTarget (dispatch) {
+    return {
+    }
+  }
 }
 
-ResourcePermissionsEditorController.$inject = ['$http', '$timeout', 'state']
+ResourcePermissionsEditorController.$inject = ['$http', '$timeout', '$ngRedux', 'state']
 
 let resourcePermissionsEditor = {
   templateUrl: '/components/common/resource-permissions-editor.html',
   bindings: {
     resourceType: '@',
     resourceId: '@',
-    systemActors: '<',
     enabled: '<',
     registerSaveAccessCallback: '&', // To be called to register a callback, which will save the access list
     onSelectionChanged: '&'
