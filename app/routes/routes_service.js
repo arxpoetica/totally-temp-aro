@@ -1,41 +1,33 @@
+const expressProxy = require('express-http-proxy')
 var models = require('../models')
 var helpers = require('../helpers')
 var config = helpers.config
 var fs = require('fs')
 var multer = require('multer')
 var os = require('os')
-var upload = multer({ dest: os.tmpDir() })
+var upload = multer({ dest: os.tmpdir() })
 
 exports.configure = (api, middleware) => {
   var jsonSuccess = middleware.jsonSuccess
 
   // Get all requests (POST/GET/DELETE/PUT,etc) that start with /service, and then pass those
   // on to ARO-Service. Do NOT modify any data - this is intended to be a pass-through service
-  // api.all('/service/*', (request, response, next) => {
+  const SERVICE_PREFIX = '/service'
+  api.all(`${SERVICE_PREFIX}/*`, expressProxy(`${config.aro_service_url}`, {
+    proxyReqPathResolver: req => {
+      // Chop off '/service' from the URL
+      var serviceUrl = req.url.substring('/service/'.length - 1)
+      // Append the logged in users id to all service calls. This will replace the user id even if the
+      // client has specified it. This is to prevent authenticated clients impersonating other users.
+      req.query.user_id = req.user.id
+      return serviceUrl
+    }
+  }))
 
-  //   // Chop off the prefix on this requests URL, and we get the URL to pass to aro-service
-  //   var serviceUrl = request.url.substring('/service/'.length)
-  //   var req = {
-  //     url: `${config.aro_service_url}/${serviceUrl}`,
-  //     method: request.method,
-  //     params: request.params,
-  //     json: true
-  //   }
-
-  //   // Attach request body if required
-  //   if (request.method !== 'GET') {
-  //     req.body = request.body
-  //   }
-
-  //   models.AROService.request(req)
-  //     .then(jsonSuccess(response, next))
-  //     .catch(next)
-  // })
-
-  // Get all requests (POST/GET/DELETE/PUT,etc) that start with /service, and then pass those
+  // Get all requests (POST/GET/DELETE/PUT,etc) that start with /uploadservice, and then pass those
   // on to ARO-Service. Do NOT modify any data - this is intended to be a pass-through service
   api.post('/uploadservice/*', upload.single('file'), uploadDataSourceFiles)
-  
+
   function uploadDataSourceFiles (request, response, next) {
 
     // Chop off the prefix on this requests URL, and we get the URL to pass to aro-service
@@ -54,7 +46,7 @@ exports.configure = (api, middleware) => {
       .then(jsonSuccess(response, next))
       .catch(next)
   }
-  
+
   // For Reports, we have to send back the result as an attachment.
   api.all('/service-download-file/:fileName/*', (request, response, next) => {
 

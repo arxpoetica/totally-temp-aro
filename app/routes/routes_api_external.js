@@ -85,14 +85,4 @@ exports.configure = (api, middleware) => {
   // Do NOT modify any data - this is intended to be a pass-through service
   const EXTERNAL_API_PREFIX = '/v1/api-ext'
   api.all(`${EXTERNAL_API_PREFIX}/*`, bearerTokenCheckMiddleware, expressProxy(`${config.aro_service_url}`))
-
-  const SERVICE_PREFIX = '/service'
-  api.all(`${SERVICE_PREFIX}/*`, expressProxy(`${config.aro_service_url}`, {
-    proxyReqPathResolver: req => {
-      var serviceUrl = req.url.substring('/service/'.length - 1)
-      // req.query.user_id = 10
-      console.log(req.query)
-      return serviceUrl
-    }
-  }))
 }
