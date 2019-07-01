@@ -6,7 +6,7 @@ var compression = require('compression')
 const morgan = require('morgan')
 
 var app = module.exports = express()
-app.use(morgan('combined'))
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'))
 app.use(compression())
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
