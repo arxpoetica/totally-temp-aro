@@ -1,16 +1,8 @@
 import React, { Component } from 'react'
-// import { PropTypes } from 'prop-types'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import ringActions from './ring-edit-actions.js'
-import uuidv4 from 'uuid/v4'
-// import Utilities from '../../../components/common/utilities'
-import AroHttp from '../../common/aro-http'
-import Ring from '../../common/ring.js'
-import ReportsDownloadModal from '../optimization/reports/reports-download-modal.jsx'
-import ReportActions from '../optimization/reports/reports-actions'
 import './ring-edit.css'
-import socketManager from '../../../react/common/socket-manager'
 import RingStatusTypes from './constants'
 
 
@@ -28,7 +20,7 @@ export class RingEdit extends Component {
     this.canEdit = (this.props.status == RingStatusTypes.START_STATE)
     this.drawRings()
     return <div>
-      {this.renderAddButton()}
+      { this.renderAddButton() }
       <div className='m-2 p-2'>
         <h4>Rings</h4>
         <table className='table table-sm table-striped'>
@@ -39,7 +31,6 @@ export class RingEdit extends Component {
           </tbody>
         </table>
       </div>
-      
     </div>
   }
   

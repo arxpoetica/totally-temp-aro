@@ -1,34 +1,32 @@
 import Actions from '../../common/actions'
-import FeatureSets from '../../common/featureSets'
-import Ring from '../../common/ring'
 import RingStatusTypes from './constants'
 
 
 const defaultState = {
   rings: {},
-  selectedRingId: null, 
+  selectedRingId: null,
   analysis: {
     status: RingStatusTypes.START_STATE,
-    progress: 0, 
+    progress: 0,
     report: null
   }
 }
 
 function setAnalysisStatus (state, status) {
-  return { ...state, 
-    analysis: { ...state.analysis, status: status}
+  return { ...state,
+    analysis: { ...state.analysis, status: status }
   }
 }
 
 function setAnalysisProgress (state, progress) {
-  return { ...state, 
-    analysis: { ...state.analysis, progress: progress}
+  return { ...state,
+    analysis: { ...state.analysis, progress: progress }
   }
 }
 
 function setAnalysisReport (state, report) {
-  return { ...state, 
-    analysis: { ...state.analysis, report: report}
+  return { ...state,
+    analysis: { ...state.analysis, report: report }
   }
 }
 

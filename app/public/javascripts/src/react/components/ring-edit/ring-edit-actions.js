@@ -33,7 +33,6 @@ function newRing (planId, userId) {
           type: Actions.RING_SET_SELECTED_RING_ID,
           payload: ring.id
         })
-        
       }).catch(err => console.error(err))
   }
 }
@@ -47,9 +46,9 @@ function removeAllRings () {
 function addNode (ring, feature, planId, userId) {
   return (dispatch) => {
     var ringClone = ring.clone()
-    var featureIndex = ringClone.nodes.findIndex((ele) => ele.objectId == feature.objectId)
+    var featureIndex = ringClone.nodes.findIndex((ele) => ele.objectId === feature.objectId)
 
-    if (featureIndex != -1) return
+    if (featureIndex !== -1) return
     ringClone.addNode(feature)
 
     // todo make ring update action
@@ -67,8 +66,8 @@ function addNode (ring, feature, planId, userId) {
 function removeNode (ring, featureId, planId, userId) {
   return (dispatch) => {
     var ringClone = ring.clone()
-    var featureIndex = ringClone.nodes.findIndex((ele) => ele.objectId == featureId)
-    if (featureIndex == -1) return
+    var featureIndex = ringClone.nodes.findIndex((ele) => ele.objectId === featureId)
+    if (-1 === featureIndex) return
     ringClone.removeNode(featureId)
 
     // todo make ring update action
@@ -140,15 +139,15 @@ function onFeatureSelected (features) {
       // add selected feature to selected ring
       // OR delete selected feature from selected ring
       var validNodes = features.equipmentFeatures.filter(feature => feature._data_type.includes('central_office'))
-      if (validNodes.length == 0) return // {type:null}
+      if (validNodes.length === 0) return // {type:null}
       var feature = { ...validNodes[0] }
       feature.objectId = feature.object_id
       var ring = state.ringEdit.rings[state.ringEdit.selectedRingId]
-      var featureIndex = ring.nodes.findIndex((ele) => ele.objectId == feature.objectId)
+      var featureIndex = ring.nodes.findIndex((ele) => ele.objectId === feature.objectId)
       const planId = state.plan.activePlan.id
       const userId = state.user.loggedInUser.id
 
-      if (featureIndex != -1) {
+      if (-1 !== featureIndex) {
         // remove node
         dispatch(removeNode(ring, feature.objectId, planId, userId))
       } else {
@@ -171,31 +170,30 @@ function loadRings (planId) {
     const userId = state.user.loggedInUser.id
     
     AroHttp.get(`/service/plan/${planId}/ring-config?planId=${planId}`)
-      .then(result => {
-
-        var promisses = []
-        
-        result.data.forEach(ringData => {
-          promisses.push(Ring.parseData(ringData, planId, userId))
+    .then(result => {
+      var promisses = []
+      
+      result.data.forEach(ringData => {
+        promisses.push(Ring.parseData(ringData, planId, userId))
+      })
+      
+      Promise.all(promisses)
+      .then(results => {
+        var rings = []
+        results.forEach(result => {
+          rings.push(result)
         })
-        
-        Promise.all(promisses)
-        .then(results => {
-          var rings = []
-          results.forEach(result => {
-            rings.push(result)
-          })
 
-          dispatch({
-            type: Actions.RING_REMOVE_ALL_RINGS
-          })
-          dispatch({
-            type: Actions.RING_ADD_RINGS,
-            payload: rings
-          })
+        dispatch({
+          type: Actions.RING_REMOVE_ALL_RINGS
+        })
+        dispatch({
+          type: Actions.RING_ADD_RINGS,
+          payload: rings
         })
       })
-      .catch(err => console.error(err)) 
+    })
+    .catch(err => console.error(err))
   }
 }
 
@@ -222,9 +220,8 @@ export default {
   onFeatureSelected,
   loadRings,
   addNode,
-  removeNode, 
-  saveRingChangesToServer, 
-  renameRing, 
-  setAnalysisStatus, 
+  saveRingChangesToServer,
+  renameRing,
+  setAnalysisStatus,
   setAnalysisProgress
 }

@@ -8,16 +8,13 @@ export default class Ring {
     this.name = name || id
     this.nodes = []
     this.nodesById = {}
-    //this.exchangeLinks = []
+    // this.exchangeLinks = []
     this.linkData = []
   }
 
   static parseData (data, planId, userId) {
     var parsedRing = new Ring(data.id, data.name)
-    //exchangeLinks = data.exchangeLinks
     
-    // ToDo: Should probably return a Promise 
-
     if (data.exchangeLinks.length > 0) {
       var nodeIds = [ data.exchangeLinks[0].fromOid ]
       data.exchangeLinks.forEach(link => {
@@ -32,8 +29,8 @@ export default class Ring {
         .then(results => {
         // ToDo protect against fail returns
           results.forEach(result => {
-            var index = nodeIds.findIndex((ele) => ele == result.data.objectId)
-            if (index != -1) {
+            var index = nodeIds.findIndex((ele) => ele === result.data.objectId)
+            if (index !== -1) {
               parsedRing.nodes[index] = {
                 objectId: result.data.objectId,
                 data: result.data
@@ -45,27 +42,27 @@ export default class Ring {
             var fromNode = parsedRing.nodesById[link.fromOid]
             var toNode = parsedRing.nodesById[link.toOid]
             var geom = []
-            if (!link.geomPath || 0 == link.geomPath.length) {
-              geom = parsedRing.figureRangeIntersectOffset(fromNode, toNode) 
-            }else{
+            if (!link.geomPath || 0 === link.geomPath.length) {
+              geom = parsedRing.figureRangeIntersectOffset(fromNode, toNode)
+            } else {
               geom = parsedRing.importGeom(link.geomPath)
             }
             parsedRing.linkData[i] = {
               exchangeLinkOid: link.exchangeLinkOid,
-              fromNode: fromNode, 
+              fromNode: fromNode,
               toNode: toNode,
               geom: geom
             }
           })
           return parsedRing
         }).catch(err => console.error(err))
-    }else{
+    } else {
       return new Promise((resolve, reject) => {
         resolve(parsedRing)
       }).catch(err => console.error(err))
     }
 
-    //return parsedRing
+    // return parsedRing
   }
 
   // todo: each object can keep track of their own polygon
@@ -85,21 +82,21 @@ export default class Ring {
       this.linkData.push({
         exchangeLinkOid: linkId,
         fromNode: fromNode,
-        toNode: node, 
-        geom: this.figureRangeIntersectOffset(fromNode, node) 
+        toNode: node,
+        geom: this.figureRangeIntersectOffset(fromNode, node)
       })
     }
     this.nodes.push(node)
   }
 
   removeNode (nodeId) {
-    var nodeIndex = this.nodes.findIndex(ele => ele.objectId == nodeId)
-    if (nodeIndex == -1) return
+    var nodeIndex = this.nodes.findIndex(ele => ele.objectId === nodeId)
+    if (-1 === nodeIndex) return
     this.nodes.splice(nodeIndex, 1)
     delete this.nodesById[nodeId]
     if (nodeIndex >= this.linkData.length) {
       // must be the last one, thus no From
-      //this.exchangeLinks.pop()
+      // this.exchangeLinks.pop()
       this.linkData.pop()
     } else {
       /*
@@ -117,8 +114,9 @@ export default class Ring {
     }
   }
 
-  
-  figureRangeIntersectOffset(nodeA, nodeB){
+  // --- //
+
+  figureRangeIntersectOffset (nodeA, nodeB) {
     // given lat/long points A and B we'll find the offset (relitive to point A)
     // where the line AB intersects circle A with radius Range
     const coordsA = nodeA.data.geometry.coordinates
@@ -143,7 +141,7 @@ export default class Ring {
       exchangeLinks[i] = {
         exchangeLinkOid: link.exchangeLinkOid,
         fromOid: link.fromNode.objectId,
-        toOid: link.toNode.objectId, 
+        toOid: link.toNode.objectId,
         geomPath: {
           "type": "MultiPolygon", 
           coordinates: [
@@ -166,7 +164,7 @@ export default class Ring {
         [pt.lng(), pt.lat()]
       )
     })
-    if (link.geom.length > 0){
+    if (link.geom.length > 0) {
       geom.push(
         [link.geom[0].lng(), link.geom[0].lat()]
       )
@@ -187,8 +185,8 @@ export default class Ring {
     var cloneRing = new Ring(this.id, this.name)
     cloneRing.nodes = this.nodes.slice(0) // keep references
     cloneRing.linkData = this.linkData.splice(0)
-    cloneRing.nodesById = {...this.nodesById}
-    //cloneRing.exchangeLinks = JSON.parse(JSON.stringify(this.exchangeLinks)) // do NOT keep references
+    cloneRing.nodesById = { ...this.nodesById }
+    // cloneRing.exchangeLinks = JSON.parse(JSON.stringify(this.exchangeLinks)) // do NOT keep references
     return cloneRing
   }
   // todo make helper classes

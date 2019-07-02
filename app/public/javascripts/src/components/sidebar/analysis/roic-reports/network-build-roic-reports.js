@@ -1,4 +1,3 @@
-import Constants from '../../../common/constants'
 
 class NetworkBuildRoicReportsController {
   constructor ($http, $timeout, state) {
@@ -10,15 +9,14 @@ class NetworkBuildRoicReportsController {
   }
 
   $onChanges (changesObj) {
-    if (changesObj.planId 
-      || (changesObj.optimizationState 
-          && (changesObj.optimizationState.currentValue == 'COMPLETED'
-              || changesObj.optimizationState.currentValue == 'FINISHED'))
-      || (changesObj.rOptimizationState 
-          && (changesObj.rOptimizationState.currentValue == 'COMPLETED'
-              || changesObj.rOptimizationState.currentValue == 'FINISHED'))) {
-      
-      this.$timeout(() => {this.refreshData()}, 0)
+    if (changesObj.planId ||
+      (changesObj.optimizationState &&
+        (changesObj.optimizationState.currentValue === 'COMPLETED' ||
+          changesObj.optimizationState.currentValue === 'FINISHED')) ||
+      (changesObj.rOptimizationState &&
+        (changesObj.rOptimizationState.currentValue === 'COMPLETED' ||
+          changesObj.rOptimizationState.currentValue === 'FINISHED'))) {
+      this.$timeout(() => { this.refreshData() }, 0)
     }
   }
 
@@ -46,7 +44,7 @@ let networkBuildRoicReports = {
   bindings: {
     planId: '<',
     optimizationState: '<',
-    rOptimizationState: '<', 
+    rOptimizationState: '<',
     reportSize: '<',
     isLocation: '<'
   },

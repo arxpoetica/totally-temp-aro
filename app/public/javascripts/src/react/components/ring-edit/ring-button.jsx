@@ -1,5 +1,3 @@
-import React, { Component } from 'react'
-import ImmutablePropTypes from 'react-immutable-proptypes'
 import { PropTypes } from 'prop-types'
 import reduxStore from '../../../redux-store'
 import RingActions from './ring-edit-actions.js'
@@ -16,7 +14,7 @@ export class RingButton extends ProgressButton {
   constructor (props) {
     super(props)
 
-    // override 
+    // override
     this.statusTypes = {
       UNINITIALIZED: RingStatusTypes.START_STATE,
       RUNNING: RingStatusTypes.STARTED,
@@ -33,34 +31,34 @@ export class RingButton extends ProgressButton {
   }
 
   
-  requestSubNet(){
-    //this.props.onModify()
+  requestSubNet () {
+    // this.props.onModify()
     var ringIds = []
     for (var key in this.props.rings) {
-      ringIds.push(''+this.props.rings[key].id)
+      ringIds.push('' + this.props.rings[key].id)
     }
     const planId = this.props.planId
-    const userId = this.props.userId
+    // const userId = this.props.userId
     var locationTypes = []
     this.props.mapLayers.location.forEach(item => {
       if (item.checked) locationTypes.push(item.plannerKey)
-    });
-    //this.props.calculateSubNet(ringIds, planId, userId)
-    AroHttp.post(`/service/plan/${planId}/ring-cmd`, {ringIds: ringIds, locationTypes: locationTypes})
+    })
+    // this.props.calculateSubNet(ringIds, planId, userId)
+    AroHttp.post(`/service/plan/${planId}/ring-cmd`, { ringIds: ringIds, locationTypes: locationTypes })
     .then(result => {
-      //ToDo check for error
+      // ToDo check for error
     }).catch(err => console.error(err))
   }
 
-  // override 
+  // override
   onRun () {
     this.requestSubNet()
-  } 
+  }
   
-  // override 
+  // override
   onModify () {
     this.props.onModify()
-  } 
+  }
 
   componentWillUnmount () {
     this.unsubscriber()
@@ -75,26 +73,26 @@ RingButton.propTypes = {
   progress: PropTypes.number,
   userId: PropTypes.number,
   planId: PropTypes.number,
-  projectId: PropTypes.number, 
+  projectId: PropTypes.number,
   onModify: PropTypes.func
 }
 
 const mapStateToProps = (state) => {
   return {
-    //status: state.ringEdit.analysis.status,
-    status: state.plan.activePlan && state.plan.activePlan.planState, 
+    // status: state.ringEdit.analysis.status,
+    status: state.plan.activePlan && state.plan.activePlan.planState,
     progress: state.ringEdit.analysis.progress,
     userId: state.user.loggedInUser.id,
     planId: state.plan.activePlan && state.plan.activePlan.id,
     projectId: state.user.loggedInUser.projectId,
-    rings: state.ringEdit.rings, 
+    rings: state.ringEdit.rings,
     mapLayers: state.mapLayers
   }
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  //setAnalysisStatus: (status) => dispatch(RingActions.setAnalysisStatus(status)), 
-  setActivePlanState: (status) => dispatch(PlanActions.setActivePlanState(status)), 
+  // setAnalysisStatus: (status) => dispatch(RingActions.setAnalysisStatus(status)),
+  setActivePlanState: (status) => dispatch(PlanActions.setActivePlanState(status)),
   setAnalysisProgress: (progress) => dispatch(RingActions.setAnalysisProgress(progress))
 })
 
