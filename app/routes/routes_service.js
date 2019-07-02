@@ -8,6 +8,7 @@ var fs = require('fs')
 var multer = require('multer')
 var os = require('os')
 var upload = multer({ dest: os.tmpdir() })
+const socketManager = require('../sockets/socketManager').socketManager
 
 exports.configure = (api, middleware) => {
   var jsonSuccess = middleware.jsonSuccess
@@ -32,6 +33,39 @@ exports.configure = (api, middleware) => {
       const finalUrl = fullUrl.href.substring(fullUrl.href.indexOf('/service/') + '/service/'.length - 1)
 
       return finalUrl
+    }
+  }))
+
+  // For vector tile requests that return data via websockets, save the request uuid. Then pass the
+  // request through to service
+  const TILE_SOCKET_SERVICE_PREFIX = '/service-tile-sockets'
+  api.post(`${TILE_SOCKET_SERVICE_PREFIX}/*`, expressProxy(`${config.aro_service_url}`, {
+    proxyReqPathResolver: req => {
+      // Remove /service-tile-sockets from the beginning of the url to get the final url
+      return req.url.substring(TILE_SOCKET_SERVICE_PREFIX.length)
+    },
+    proxyReqBodyDecorator: (bodyContent, srcReq) => {
+      // First construct the full url (i.e. including the http(s)://<hostname>)
+      const fullUrl = new URL(`${srcReq.protocol}://${srcReq.get('host')}${srcReq.url}`)
+
+      // Now extract the existing query parameters
+      const searchParams = new URLSearchParams(fullUrl.searchParams)
+
+      // Get the request_uuid query parameter
+      const requestUuid = searchParams.get('request_uuid')
+      if (!requestUuid) {
+        return Promise.reject(new Error('You must specify a request_uuid query parameter for socket routing to work'))
+      }
+
+      // Get the websocketId body parameter
+      const websocketSessionId = srcReq.body.websocketSessionId
+      if (!websocketSessionId) {
+        return Promise.reject(new Error('You must specify a websocketSessionId body parameter for socket routing to work'))
+      }
+      socketManager().mapVectorTileUuidToClientId(requestUuid, websocketSessionId)
+
+      // For the request to service, we have to pass only the layerDefinitions
+      return bodyContent.layerDefinitions
     }
   }))
 
