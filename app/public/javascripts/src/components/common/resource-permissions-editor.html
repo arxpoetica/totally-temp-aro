@@ -22,25 +22,17 @@
     <option ng-repeat="item in $ctrl.systemActors | orderBy:'name' | limitTo:10 " value="{{item.id}}" ng-bind-html="item.name"></option>
   </select> -->
   
-  <!-- <span ng-repeat="(key, value) in $ctrl.systemActors">{{value.name}}</span> -->
-  
   <ui-select limit="1" ng-model="$ctrl.newActorId"
-      theme="bootstrap" close-on-select="false">
+      theme="bootstrap" close-on-select="true">
       <ui-select-match placeholder="Select User">
-          {{$item.name}}
+          {{$select.selected.name}}
       </ui-select-match>
-      <ui-select-choices class="ui-select-choices-style" repeat="person.name as person in $ctrl.systemActors">
+      <ui-select-choices class="ui-select-choices-style" repeat="person.id as person in $ctrl.systemActors | filter: $select.search">
         <div>
           {{person.name}}
         </div>
       </ui-select-choices>
     </ui-select>
-
-    <!-- <div class="text-center" style="margin-top:2px">
-      <button id="apply-filter" ng-class="{'btn btn-sm': true, 'btn-primary': $ctrl.selectedItems.length > 0 }" 
-        ng-click="$ctrl.applySearch({selectedFilters:$ctrl.selectedItems})"
-        ng-disabled="$ctrl.selectedItems.length < 0">Apply</button>
-    </div> -->
   <div class="input-group-append">
 	  <button type="button" class="btn btn-sm btn-primary" 
 	          ng-click="$ctrl.addActor()" 
