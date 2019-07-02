@@ -72,7 +72,7 @@ function downloadRfpReport (filename, reportUrl) {
         })
       })
       .catch(err => {
-        console.log(err)
+        console.error(err)
         dispatch({
           type: Actions.RFP_END_DOWNLOADING_REPORT,
           payload: reportUrl
