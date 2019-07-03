@@ -33,7 +33,7 @@ const getSelectedBoundaryType = createSelector([getselectedBoundaryType], (selec
 
 /* global app localStorage map */
 class State {
-  constructor($rootScope, $http, $document, $timeout, $sce, $ngRedux, stateSerializationHelper, $filter, tileDataService, Utils, tracker, Notification) {
+  constructor ($rootScope, $http, $document, $timeout, $sce, $ngRedux, stateSerializationHelper, $filter, tileDataService, Utils, tracker, Notification) {
     // Important: RxJS must have been included using browserify before this point
     var Rx = require('rxjs')
 
@@ -168,13 +168,13 @@ class State {
     // The selected panel when in the edit plan mode
     service.EditPlanPanels = Object.freeze({
       EDIT_PLAN: 'EDIT_PLAN',
-      PLAN_SUMMARY: 'PLAN_SUMMARY', 
+      PLAN_SUMMARY: 'PLAN_SUMMARY',
       EDIT_RINGS: 'EDIT_RINGS'
     })
     service.activeEditPlanPanel = service.EditPlanPanels.EDIT_PLAN
     
     service.EditRingsPanels = Object.freeze({
-      EDIT_RINGS: 'EDIT_RINGS', 
+      EDIT_RINGS: 'EDIT_RINGS',
       OUTPUT: 'OUTPUT'
     })
     service.activeEditRingsPanel = service.EditRingsPanels.EDIT_RINGS
@@ -296,7 +296,7 @@ class State {
     service.displayModes = Object.freeze({
       VIEW: 'VIEW',
       ANALYSIS: 'ANALYSIS',
-      EDIT_RINGS: 'EDIT_RINGS', 
+      EDIT_RINGS: 'EDIT_RINGS',
       EDIT_PLAN: 'EDIT_PLAN',
       PLAN_SETTINGS: 'PLAN_SETTINGS',
       DEBUG: 'DEBUG'
@@ -430,7 +430,7 @@ class State {
     
     service.mapFeaturesSelectedEvent.subscribe((options) => {
       // ToDo: this check may need to move into REACT
-      if (service.selectedDisplayMode.getValue() == service.displayModes.EDIT_RINGS
+      if (service.selectedDisplayMode.getValue() === service.displayModes.EDIT_RINGS
         && service.activeEditRingsPanel == service.EditRingsPanels.EDIT_RINGS){
         /*
         $ngRedux.dispatch({
@@ -526,7 +526,7 @@ class State {
         roadSegments: new Set(),
         serviceAreaId: null,
         fiberSegments: new Set(),
-        siteBoundaryId: null,
+        siteBoundaryId: null
       },
       editable: {
         equipment: {},
@@ -566,7 +566,7 @@ class State {
         { id: 'EXPERT_MODE', label: 'Expert Mode', type: 'Expert' }
       ]
       service.networkAnalysisType = service.networkAnalysisTypes[0]
-      //console.log('set networkAnalysisType to default')
+      // console.log('set networkAnalysisType to default')
       // Upload Data Sources
       service.uploadDataSources = []
       service.pristineDataItems = {}
@@ -1147,7 +1147,7 @@ class State {
 
     // optimization services
     service.modifyDialogResult = Object.freeze({
-      SAVEAS: 0,
+      CANCEL: 0,
       OVERWRITE: 1
     })
     service.progressMessagePollingInterval = null
@@ -1175,25 +1175,7 @@ class State {
         // This is not an ephemeral plan. Show a dialog to the user asking whether to overwrite current plan or save as a new one.
         return service.showModifyQuestionDialog()
           .then((result) => {
-            if (result === service.modifyDialogResult.SAVEAS) {
-              // Ask for the name to save this plan as, then save it
-              return new Promise((resolve, reject) => {
-                swal({
-                  title: 'Plan name required',
-                  text: 'Enter a name for saving the plan',
-                  type: 'input',
-                  showCancelButton: true,
-                  confirmButtonColor: '#DD6B55',
-                  confirmButtonText: 'Create Plan'
-                },
-                planName => {
-                  if (planName) {
-                    return service.copyCurrentPlanTo(planName)
-                      .then(() => { return resolve() })
-                  }
-                })
-              })
-            } else if (result === service.modifyDialogResult.OVERWRITE) {
+            if (result === service.modifyDialogResult.OVERWRITE) {
               return $http.delete(`/service/v1/plan/${currentPlan.id}/optimization-state`)
                 .then(() => $http.get(`/service/v1/plan/${currentPlan.id}/optimization-state`))
                 .then(result => {
@@ -1215,16 +1197,16 @@ class State {
       return new Promise((resolve, reject) => {
         swal({
           title: '',
-          text: 'You are modifying a plan with a completed analysis. Do you wish to save into a new plan or overwrite the existing plan?  Overwriting will clear all results which were previously run.',
+          text: 'You are modifying a plan with a completed analysis. Do you wish to overwrite the existing plan?  Overwriting will clear all results which were previously run.',
           type: 'info',
           confirmButtonColor: '#b9b9b9',
-          confirmButtonText: 'Save as',
+          confirmButtonText: 'Overwrite',
           cancelButtonColor: '#DD6B55',
-          cancelButtonText: 'Overwrite',
+          cancelButtonText: 'Cancel',
           showCancelButton: true,
-          closeOnConfirm: false
+          closeOnConfirm: true
         }, (wasConfirmClicked) => {
-          resolve(wasConfirmClicked ? service.modifyDialogResult.SAVEAS : service.modifyDialogResult.OVERWRITE)
+          resolve(wasConfirmClicked ? service.modifyDialogResult.OVERWRITE : service.modifyDialogResult.CANCEL)
         })
       })
     }
@@ -1345,7 +1327,7 @@ class State {
         var seconds = Math.ceil(diff % 60)
         service.progressMessage = `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds} Runtime`
         $timeout()
-      },1000)
+      }, 1000)
     }
 
     service.stopProgressMessagePolling = () => {
