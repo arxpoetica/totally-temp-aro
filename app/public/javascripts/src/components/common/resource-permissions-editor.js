@@ -111,18 +111,23 @@ class ResourcePermissionsEditorController {
 
   addActor () {
     var newActor = this.systemActors.filter(actor => actor.id === this.newActorId)[0]
-    if (newActor.type === 'group') {
-      this.rows.push({
-        'systemActorId': newActor.id,
-        'name': newActor.name,
-        'rolePermissions': this.defaultPermissions
-      })
-    } else {
-      this.rows.push({
-        'systemActorId': newActor.id,
-        'name': newActor.firstName + ' ' + newActor.lastName,
-        'rolePermissions': this.defaultPermissions
-      })
+    var isExitingActorId = false
+    isExitingActorId = this.rows.some(user => user.systemActorId === newActor.id);
+    console.log("isExitingActorId",isExitingActorId);
+    if(isExitingActorId === false){
+      if (newActor.type === 'group') {
+        this.rows.push({
+          'systemActorId': newActor.id,
+          'name': newActor.name,
+          'rolePermissions': this.defaultPermissions
+        })
+      } else {
+        this.rows.push({
+          'systemActorId': newActor.id,
+          'name': newActor.firstName + ' ' + newActor.lastName,
+          'rolePermissions': this.defaultPermissions
+        })
+      }
     }
     this.onSelectionChanged()
   }

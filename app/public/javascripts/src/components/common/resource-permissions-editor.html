@@ -26,9 +26,15 @@
       <ui-select-match placeholder="Select User">
         {{$select.selected.name}}
       </ui-select-match>
-      <ui-select-choices repeat="person.id as person in $ctrl.systemActors | filter: { name: $select.search }">
-        <div ng-bind-html="person.name | highlight: $select.search"></div>
+      <ui-select-choices repeat="person.id as person in $ctrl.systemActors | filter: { name: $select.search }| orderBy:'name' | limitTo:10 ">
+        <i ng-if="person.type === 'user'" class="fa fas fa-user"></i>
+        <i ng-if="person.type === 'group'" class="fa fas fa-users"></i>
+        &nbsp;<span ng-bind-html="person.name | highlight: $select.search"></span>
       </ui-select-choices>
+    </ui-select>
+      <!-- <ui-select-choices repeat="person.id as person in $ctrl.systemActors | filter: { name: $select.search }">
+        <div ng-bind-html="person.name | highlight: $select.search"></div>
+      </ui-select-choices> -->
     </ui-select>
   <div class="input-group-append">
 	  <button type="button" class="btn btn-sm btn-primary" 
