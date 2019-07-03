@@ -3,13 +3,6 @@
   appears clipped to the div.
 */
 
-.ui-select-choices {
-  position: fixed;
-  top: auto;
-  left: auto;
-  width: 100%;
-}
-
 .ui-select-width-300 {
   width: 300px!important; /* Hate to use !important but don't see a way out for now */
 }
