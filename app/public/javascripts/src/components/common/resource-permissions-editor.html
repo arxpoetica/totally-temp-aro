@@ -21,16 +21,13 @@
 
     <option ng-repeat="item in $ctrl.systemActors | orderBy:'name' | limitTo:10 " value="{{item.id}}" ng-bind-html="item.name"></option>
   </select> -->
-  
   <ui-select limit="1" ng-model="$ctrl.newActorId"
       theme="bootstrap" close-on-select="true">
       <ui-select-match placeholder="Select User">
-          {{$select.selected.name}}
+        {{$select.selected.name}}
       </ui-select-match>
-      <ui-select-choices class="ui-select-choices-style" repeat="person.id as person in $ctrl.systemActors | filter: $select.search">
-        <div>
-          {{person.name}}
-        </div>
+      <ui-select-choices repeat="person.id as person in $ctrl.systemActors | filter: { name: $select.search }">
+        <div ng-bind-html="person.name | highlight: $select.search"></div>
       </ui-select-choices>
     </ui-select>
   <div class="input-group-append">

@@ -4,12 +4,19 @@ import { createSelector } from 'reselect'
 const getAllSystemActors = reduxState => reduxState.user.systemActors
 const getAllSystemActorsArray = createSelector([getAllSystemActors], systemActors => {
   var systemActorsArray = []
-  Object.keys(systemActors).forEach(actorKey => systemActorsArray.push(systemActors[actorKey]))
+  Object.keys(systemActors).forEach(actorKey => {
+    var copyOfActor = angular.copy(systemActors[actorKey])
+    if (copyOfActor.type === 'user') {
+      copyOfActor.name = `${copyOfActor.firstName} ${copyOfActor.lastName}`
+    }
+    systemActorsArray.push(copyOfActor)
+  })
   return systemActorsArray
 })
 
 class ResourcePermissionsEditorController {
   constructor ($http, $timeout, $ngRedux, state) {
+    this.tempUsers = [{ name: 'Dan', description: 'Dan is a winner', id: 1234 }]
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
@@ -93,72 +100,40 @@ class ResourcePermissionsEditorController {
     }
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }
-  
-  
+
   $onInit () {
     if (typeof this.enabled === 'undefined') {
       this.enabled = true // If not defined, then make it true
     }
-    
-    this.actorsById = this.systemActors.reduce((map, item) => {
-      map[item.id] = item
-      return map
-    }, {})
-    var systemActorsArray = []
-    var systemActors = []
-    this.systemActors.forEach(user => {
-      if(user.type=="group"){
-        systemActorsArray[user.id] = {
-        id: user.id,
-        name: user.name,
-        type: 'group'
-      }
-      }
-      if(user.type=="user"){
-        systemActorsArray[user.id] = {
-        id: user.id,
-        name: user.firstName+" "+user.lastName,
-        type: 'user'
-      }
-      }
-      console.log("finally",systemActorsArray);
-      this.systemActors = systemActorsArray;
-    })
-    
     this.loadResourceAccess()
     this.registerSaveAccessCallback && this.registerSaveAccessCallback({ saveResourceAccess: this.saveResourceAccess.bind(this) })
   }
-  
+
   addActor () {
-    if (this.actorsById.hasOwnProperty(this.newActorId)){
-      var newActor = this.actorsById[this.newActorId]
-      if(newActor.type=="group"){
-        this.rows.push({
-          'systemActorId': newActor.id, 
-          'name': newActor.name, 
-          'rolePermissions': this.defaultPermissions
-        })
-      }
-      else{
-        this.rows.push({
-          'systemActorId': newActor.id, 
-          'name': newActor.firstName+" "+newActor.lastName, 
-          'rolePermissions': this.defaultPermissions
-        })
-      }
-      
-      this.onSelectionChanged()
+    var newActor = this.systemActors.filter(actor => actor.id === this.newActorId)[0]
+    if (newActor.type === 'group') {
+      this.rows.push({
+        'systemActorId': newActor.id,
+        'name': newActor.name,
+        'rolePermissions': this.defaultPermissions
+      })
+    } else {
+      this.rows.push({
+        'systemActorId': newActor.id,
+        'name': newActor.firstName + ' ' + newActor.lastName,
+        'rolePermissions': this.defaultPermissions
+      })
     }
-  }
-  
-  removeActor (row) {
-    this.rows = this.rows.filter(function(value, index, arr){
-      return value != row;
-    });
     this.onSelectionChanged()
   }
 
-  
+  removeActor (row) {
+    this.rows = this.rows.filter(function(value, index, arr) {
+      return value != row;
+    })
+    this.onSelectionChanged()
+  }
+
   loadResourceAccess () {
     return this.$http.get(`/service/auth/acl/${this.resourceType}/${this.resourceId}`)
       .then((result) => {
@@ -215,6 +190,7 @@ class ResourcePermissionsEditorController {
   }
 
   mapStateToThis (reduxState) {
+    // console.log(JSON.stringify(getAllSystemActorsArray(reduxState)))
     return {
       systemActors: getAllSystemActorsArray(reduxState)
     }
