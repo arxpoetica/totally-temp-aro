@@ -33,11 +33,21 @@
           </div>
 
           <div class="form-group row" ng-if="$ctrl.state.uploadDataSource.name === 'fiber'">
+            <label class="col-sm-4 col-form-label">Spatial Edge Type</label>
+            <div class="col-sm-8">
+              <select class="form-control"
+                ng-model="$ctrl.selectedSpatialEdgeType"
+                ng-options="item as item.description for item in $ctrl.spatialEdgeTypes">
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group row" ng-if="$ctrl.state.uploadDataSource.name === 'fiber' && !$ctrl.selectedSpatialEdgeType.conduit">
             <label class="col-sm-4 col-form-label">Cable Type</label>
             <div class="col-sm-8">
               <select class="form-control"
-                ng-model="$ctrl.selectedcableType"
-                ng-options="item as item for item in $ctrl.cableTypes">
+                ng-model="$ctrl.selectedCableType"
+                ng-options="item as item.description for item in $ctrl.cableTypes">
               </select>
             </div>
           </div>
