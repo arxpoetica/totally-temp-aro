@@ -204,8 +204,8 @@ class PlanSearchController {
   }
 
   getPlanCreatorName (createdBy) {
-    var creator = this.state.systemActors.filter((creator) => creator.id === createdBy)[0]
-    return creator && creator.fullName
+    var creator = this.systemActors[createdBy]
+    return creator && ((creator.type === 'group') ? creator.name : `${creator.firstName} ${creator.lastName}`)
   }
 
   searchCreatorsList (filter) {
