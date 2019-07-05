@@ -110,11 +110,9 @@ class ResourcePermissionsEditorController {
   }
 
   addActor () {
-    var newActor = this.systemActors.filter(actor => actor.id === this.newActorId)[0]
-    var isExitingActorId = false
-    isExitingActorId = this.rows.some(user => user.systemActorId === newActor.id);
-    console.log("isExitingActorId",isExitingActorId);
-    if(isExitingActorId === false){
+    var newActor = this.systemActors[this.newActorId]
+    var isExistingActorId = this.rows.some(user => user.systemActorId === newActor.id)
+    if (!isExistingActorId) {
       if (newActor.type === 'group') {
         this.rows.push({
           'systemActorId': newActor.id,
@@ -145,21 +143,21 @@ class ResourcePermissionsEditorController {
         this.rows = []
         this.isOwner = false
         this.actionsParam = null
-        //if (!!(this.state.loggedInUser.systemPermissions & this.state.authPermissionsByName['RESOURCE_ADMIN'].permissions)){
-          
-        if ( this.state.loggedInUser.hasPermissions(this.state.authPermissionsByName['RESOURCE_ADMIN'].permissions) ){  
+
+        if (this.state.loggedInUser.hasPermissions(this.state.authPermissionsByName['RESOURCE_ADMIN'].permissions)) {  
           this.isOwner = true
           this.actionsParam = this.actions
         }
-        
         result.data.resourcePermissions.forEach((access) => {
+          const actor = this.systemActors[access.systemActorId]
+          const name = (actor.type === 'group') ? actor.name : `${actor.firstName} ${actor.lastName}`
           this.rows.push({
-            'systemActorId': access.systemActorId, 
-            'name': this.systemActors[access.systemActorId].name, 
-            'rolePermissions': access.rolePermissions
+            systemActorId: access.systemActorId,
+            name: name,
+            rolePermissions: access.rolePermissions
           })
           // check for user and group permissions 
-          if ( !this.isOwner 
+          if (!this.isOwner 
               && (
                   this.state.loggedInUser.hasPermissions(this.state.authPermissionsByName['RESOURCE_ADMIN'].permissions, access.rolePermissions)
                   && (
@@ -197,7 +195,8 @@ class ResourcePermissionsEditorController {
   mapStateToThis (reduxState) {
     // console.log(JSON.stringify(getAllSystemActorsArray(reduxState)))
     return {
-      systemActors: getAllSystemActorsArray(reduxState)
+      systemActors: getAllSystemActors(reduxState),
+      systemActorsArray: getAllSystemActorsArray(reduxState)
     }
   }
 

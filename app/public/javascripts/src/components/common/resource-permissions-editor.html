@@ -11,31 +11,17 @@
   <div class="ei-input-label">
     Add User: 
   </div>
-  <!-- <select class="form-control with-margin"
-  ng-model="$ctrl.newActorId"
-  ng-options="key as value.name for (key, value) in $ctrl.systemActors">
-</select> -->
-
-  <!-- <select class="custom-select ei-input-select ei-input-select-autosize" 
-      ng-model="$ctrl.newActorId">
-
-    <option ng-repeat="item in $ctrl.systemActors | orderBy:'name' | limitTo:10 " value="{{item.id}}" ng-bind-html="item.name"></option>
-  </select> -->
-  <ui-select limit="1" ng-model="$ctrl.newActorId"
+ <ui-select limit="1" ng-model="$ctrl.newActorId"
       theme="bootstrap" close-on-select="true">
       <ui-select-match placeholder="Select User">
         {{$select.selected.name}}
       </ui-select-match>
-      <ui-select-choices repeat="person.id as person in $ctrl.systemActors | filter: { name: $select.search }| orderBy:'name' | limitTo:10 "
+      <ui-select-choices repeat="person.id as person in $ctrl.systemActorsArray | filter: { name: $select.search }| orderBy:'name' | limitTo:10 "
         group-by="'type'">
         <i ng-if="person.type === 'user'" class="fa fas fa-user"></i>
         <i ng-if="person.type === 'group'" class="fa fas fa-users"></i>
         &nbsp;<span ng-bind-html="person.name | highlight: $select.search"></span>
       </ui-select-choices>
-    </ui-select>
-      <!-- <ui-select-choices repeat="person.id as person in $ctrl.systemActors | filter: { name: $select.search }">
-        <div ng-bind-html="person.name | highlight: $select.search"></div>
-      </ui-select-choices> -->
     </ui-select>
   <div class="input-group-append">
 	  <button type="button" class="btn btn-sm btn-primary" 
