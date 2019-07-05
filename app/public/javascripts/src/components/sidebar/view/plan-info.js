@@ -1,7 +1,7 @@
 import Constants from '../../common/constants'
 
 class PlanInfoController {
-  constructor ($http, state, $timeout, Utils) {
+  constructor ($http, state, $timeout, $ngRedux, Utils) {
     this.$http = $http
     this.state = state
     this.$timeout = $timeout
@@ -18,7 +18,6 @@ class PlanInfoController {
     this.currentPlanInfo = state.plan
     this.getPlanTagDetails()
     this.updateEditableStatus()
-      
 
     // Save the permission bits for resource read, write and admin
     this.accessTypes = Object.freeze({
@@ -26,6 +25,7 @@ class PlanInfoController {
       RESOURCE_WRITE: { displayName: 'Write', permissionBits: null, actors: [] },
       RESOURCE_ADMIN: { displayName: 'Owner', permissionBits: null, actors: [] }
     })
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }
 
   updateEditableStatus () {
@@ -193,8 +193,19 @@ class PlanInfoController {
   }
 
   getPlanCreatorName (createdBy) {
-    var creator = this.state.systemActors.filter((creator) => creator.id === createdBy)[0]
-    return creator && creator.fullName
+    var creator = this.systemActors[createdBy]
+    return creator && ((creator.type === 'group') ? creator.name : `${creator.firstName} ${creator.lastName}`)
+  }
+
+  mapStateToThis (reduxState) {
+    return {
+      systemActors: reduxState.user.systemActors
+    }
+  }
+
+  mapDispatchToTarget (dispatch) {
+    return {
+    }
   }
 
   $onInit () {
@@ -203,11 +214,11 @@ class PlanInfoController {
 
   $onDestroy () {
     this.commitUpdatestoPlan(true)
-    this.planObserver.unsubscribe()
+    // this.planObserver.unsubscribe()
   }
 }
 
-PlanInfoController.$inject = ['$http', 'state', '$timeout', 'Utils']
+PlanInfoController.$inject = ['$http', 'state', '$timeout', '$ngRedux', 'Utils']
 
 let planInfo = {
   templateUrl: '/components/sidebar/view/plan-info.html',

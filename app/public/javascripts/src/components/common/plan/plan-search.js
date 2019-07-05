@@ -24,7 +24,9 @@ class PlanSearchController {
 
   $onChanges (changesObj) {
     if (changesObj && changesObj.systemActors) {
-      this.systemUsers = this.systemActors
+      const arrayOfSystemActors = []
+      Object.keys(this.systemActors).forEach(actorId => arrayOfSystemActors.push(this.systemActors[actorId]))
+      this.systemUsers = arrayOfSystemActors
         .filter((item) => item.type === 'user')
         .map(item => {
           var user = angular.copy(item)
@@ -202,8 +204,8 @@ class PlanSearchController {
   }
 
   getPlanCreatorName (createdBy) {
-    var creator = this.state.systemActors.filter((creator) => creator.id === createdBy)[0]
-    return creator && creator.fullName
+    var creator = this.systemActors[createdBy]
+    return creator && ((creator.type === 'group') ? creator.name : `${creator.firstName} ${creator.lastName}`)
   }
 
   searchCreatorsList (filter) {
