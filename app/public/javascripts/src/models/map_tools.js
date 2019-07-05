@@ -102,6 +102,7 @@ app.service('map_tools', ['$rootScope', 'tracker', 'state', '$document', ($rootS
   tools.TOOL_IDS = {
     LOCATIONS: 'locations',
     CABLES: 'cables',
+    CONDUITS: 'conduits',
     NETWORK_NODES: 'network_nodes',
     AREA_NETWORK_PLANNING: 'area_network_planning',
     TARGET_BUILDER: 'target_builder',
@@ -125,9 +126,9 @@ app.service('map_tools', ['$rootScope', 'tracker', 'state', '$document', ($rootS
       icon: 'fab fa-usb fa-2x'
     },
     {
-      id: tools.TOOL_IDS.CONSTRUCTION_SITES,
-      name: 'Construction Sites',
-      icon: 'fa fa-wrench fa-2x'
+      id: tools.TOOL_IDS.CONDUITS,
+      name: 'Conduits',
+      icon: 'fas fa-road fa-2x'
     },
     {
       id: 'fiber_plant',
