@@ -31,13 +31,28 @@
       <div class="card-body map-tools-card-body" ng-show="$ctrl.map_tools.is_expanded('cables')">
   
         <!-- New implementation of cable equipments -->
-        <div class="row">
+        <div class="row" style="padding-bottom: 5px;">
+            <div class="col-md-4">
+              <strong style="padding-left: 5px;">Type</strong>
+            </div>
+            <div class="col-md-4" ng-if="$ctrl.state.configuration.perspective.networkEquipment.showExisting">
+              <input type="checkbox" class="checkboxfill layer-type-checkboxes" ng-model="$ctrl.state.equipmentLayerTypeVisibility.existing"
+                ng-change="$ctrl.updateMapLayers()">
+              <span>&nbsp;Existing</span>
+            </div>
+            <div class="col-md-4" ng-if="$ctrl.state.configuration.perspective.networkEquipment.showPlanned">
+              <input type="checkbox" class="checkboxfill layer-type-checkboxes" ng-model="$ctrl.state.equipmentLayerTypeVisibility.planned"
+                ng-change="$ctrl.updateMapLayers()">
+              <span>&nbsp;Planned</span>
+            </div>
+          </div>
+          <div class="row">
           <div class="col-md-12">
             <table class="table table-sm">
               <tbody>
                 <tr ng-repeat="cableLayer in $ctrl.cablesArray | orderBy: 'listIndex'">
                   <td>
-                    <div class="box" ng-style="{ 'background-color': $ctrl.getBackgroungColor(cableLayer) }"></div>{{cableLayer.label}}</td>
+                    <div class="box" ng-style="{ 'background-color': $ctrl.getBackgroundColor(cableLayer) }"></div>{{cableLayer.label}}</td>
                   <td>
                     <input type="checkbox" class="checkboxfill" ng-checked="cableLayer.checked" ng-click="$ctrl.updateLayerVisibility('cables', cableLayer, !cableLayer.checked)">
                   </td>

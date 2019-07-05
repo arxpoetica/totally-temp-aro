@@ -69,43 +69,19 @@ class CablesController {
     this.objectKeyReplace(tileDefinition, '{libraryId}', libraryId)
     this.objectKeyReplace(tileDefinition, '{rootPlanId}', rootPlanId)
 
-    if (networkEquipment.equipmentType === 'point') {
-      var pointTransform = this.getPointTransformForLayer(+networkEquipment.aggregateZoomThreshold)
-      this.objectKeyReplace(tileDefinition, '{pointTransform}', pointTransform)
-    } else if (networkEquipment.equipmentType === 'line') {
+    if (networkEquipment.equipmentType === 'line') {
       var lineTransform = this.getLineTransformForLayer(+networkEquipment.aggregateZoomThreshold)
       this.objectKeyReplace(tileDefinition, '{lineTransform}', lineTransform)
-    } else if (networkEquipment.equipmentType === 'polygon') {
-      var polygonTransform = this.getPolygonTransformForLayer(+networkEquipment.aggregateZoomThreshold)
-      this.objectKeyReplace(tileDefinition, '{polygonTransform}', polygonTransform)
     }
 
     // For equipments, we are going to filter out features that are planned and deleted
-    var featureFilter = null
     var drawingOptions = angular.copy(networkEquipment.drawingOptions)
-    if (categoryType === 'equipment') {
-      featureFilter = (feature) => {
-        // For now, just hide equipment features that are Planned and Deleted
-        return (!feature.properties.deployment_type ||
-          (feature.properties.deployment_type === 1) ||
-          (feature.properties.is_deleted !== 'true'))
-      }
-      if (this.state.showEquipmentLabels && this.mapRef.getZoom() > this.networkEquipmentLayers.labelDrawingOptions.visibilityZoomThreshold) {
-        drawingOptions.labels = this.networkEquipmentLayers.labelDrawingOptions
-      }
-    } else if (categoryType === 'boundaries') {
-      featureFilter = (feature) => {
-        // Show boundaries with the currently selected boundary type AND that are not marked as deleted
-        return (feature.properties.boundary_type === this.state.selectedBoundaryType.id) &&
-          (feature.properties.is_deleted !== 'true')
-      }
-    }
     return {
       tileDefinitions: [tileDefinition],
       iconUrl: networkEquipment.iconUrl,
       greyOutIconUrl: networkEquipment.greyOutIconUrl,
       renderMode: 'PRIMITIVE_FEATURES', // Always render equipment nodes as primitives
-      featureFilter: featureFilter,
+      featureFilter: null,
       strokeStyle: networkEquipment.drawingOptions.strokeStyle,
       lineWidth: networkEquipment.drawingOptions.lineWidth || 2,
       fillStyle: networkEquipment.drawingOptions.fillStyle,
@@ -127,7 +103,7 @@ class CablesController {
       if (networkEquipment.equipmentType !== 'point' ||
         this.usePointAggregate ||
         this.mapRef.getZoom() > networkEquipment.aggregateZoomThreshold) {
-        if (networkEquipment.checked) {
+        if (this.state.equipmentLayerTypeVisibility.existing && networkEquipment.checked) {
           // We need to show the existing network equipment. Loop through all the selected library ids.
           this.state.dataItems && this.state.dataItems[networkEquipment.dataItemKey] &&
             this.state.dataItems[networkEquipment.dataItemKey].selectedLibraryItems.forEach((selectedLibraryItem) => {
@@ -138,7 +114,7 @@ class CablesController {
         }
 
         const planId = this.state.plan && this.state.plan && this.state.plan.id
-        if (networkEquipment.checked && planId) {
+        if (this.state.equipmentLayerTypeVisibility.planned && networkEquipment.checked && planId) {
           // We need to show the planned network equipment for this plan.
           var mapLayerKey = `${categoryItemKey}_planned`
           mapLayers[mapLayerKey] = this.createSingleMapLayer(categoryItemKey, categoryType, networkEquipment, 'planned', null, planId)
@@ -148,43 +124,6 @@ class CablesController {
 
       // Sync ruler option
       networkEquipment.key === 'COPPER' && this.syncRulerOptions(networkEquipment.key, networkEquipment.checked)
-    })
-  }
-
-  createMapLayersForBoundaryCategory (categoryItems, categoryType, mapLayers, createdMapLayerKeys) {
-    // First loop through all the equipment types
-    this.mapZoom = this.mapRef.getZoom()
-    // Boundary selection depends on showSiteBoundary checkbox and the selected boundary type in the dropdown
-    categoryItems && Object.keys(categoryItems).forEach((categoryItemKey) => {
-      var networkEquipment = categoryItems[categoryItemKey]
-
-      var selectedBoundaryName
-      this.state.selectedBoundaryType.name !== 'fiveg_coverage' ? selectedBoundaryName = 'siteBoundaries' : selectedBoundaryName = 'fiveg_coverage'
-
-      // Type of Boundary to show
-      if ((networkEquipment.equipmentType !== 'point' ||
-        this.usePointAggregate ||
-        this.mapZoom > networkEquipment.aggregateZoomThreshold) && selectedBoundaryName === categoryItemKey) {
-        // Existing Boundaries
-        if (this.state.showSiteBoundary) {
-          // We need to show the existing network equipment. Loop through all the selected library ids.
-          this.state.dataItems && this.state.dataItems[networkEquipment.dataItemKey] &&
-            this.state.dataItems[networkEquipment.dataItemKey].selectedLibraryItems.forEach((selectedLibraryItem) => {
-              var mapLayerKey = `${categoryItemKey}_existing_${selectedLibraryItem.identifier}`
-              mapLayers[mapLayerKey] = this.createSingleMapLayer(categoryItemKey, categoryType, networkEquipment, 'existing', selectedLibraryItem.identifier, null)
-              createdMapLayerKeys.add(mapLayerKey)
-            })
-        }
-
-        // Planned Boundaries
-        const planId = this.state.plan && this.state.plan && this.state.plan.id
-        if (this.state.showSiteBoundary && planId) {
-          // We need to show the planned network equipment for this plan.
-          var mapLayerKey = `${categoryItemKey}_planned`
-          mapLayers[mapLayerKey] = this.createSingleMapLayer(categoryItemKey, categoryType, networkEquipment, 'planned', null, planId)
-          createdMapLayerKeys.add(mapLayerKey)
-        }
-      }
     })
   }
 
@@ -214,16 +153,6 @@ class CablesController {
     this.updateMapLayers()
   }
 
-  zoomTo (zoomLevel) {
-    zoomLevel = Number(zoomLevel) + 1
-    // console.log(zoomLevel)
-    this.state.requestSetMapZoom.next(zoomLevel)
-  }
-
-  getBackgroungColor (layer) {
-    return layer.drawingOptions.strokeStyle
-  }
-
   syncRulerOptions (layerKey, isLayerEnabled) {
     if (isLayerEnabled) {
       !this.state.rulerActions.includes(this.state.allRulerActions.COPPER) &&
@@ -235,6 +164,10 @@ class CablesController {
         }
       }
     }
+  }
+
+  getBackgroundColor(layer) {
+    return layer.drawingOptions.strokeStyle
   }
 
   mapStateToThis (reduxState) {

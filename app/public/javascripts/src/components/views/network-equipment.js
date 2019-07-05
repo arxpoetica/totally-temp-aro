@@ -263,10 +263,6 @@ class NetworkEquipmentController {
     this.state.requestSetMapZoom.next(zoomLevel)
   }
 
-  getBackgroungColor(layer) {
-    return layer.drawingOptions.strokeStyle
-  }
-
   mapStateToThis (reduxState) {
     return {
       networkEquipmentLayers: getNetworkEquipmentLayersList(reduxState),
