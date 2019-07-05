@@ -77,6 +77,7 @@ import boundaries from './views/boundaries'
 import locations from './views/locations'
 import constructionSites from './views/construction-sites'
 import networkEquipment from './views/network-equipment'
+import cables from './views/cables'
 import mapSplit from './map/map-split'
 import mapSelectorPlanTarget from './map/map-selector-plan-target'
 import mapSelectorExportLocations from './map/map-selector-export-locations'
@@ -185,6 +186,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('locations', locations)
   .component('constructionSites', constructionSites)
   .component('networkEquipment', networkEquipment)
+  .component('cables', cables)
   .component('mapSplit', mapSplit)
   .component('mapSelectorPlanTarget', mapSelectorPlanTarget)
   .component('mapSelectorExportLocations', mapSelectorExportLocations)

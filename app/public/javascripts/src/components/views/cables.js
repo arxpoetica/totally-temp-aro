@@ -1,17 +1,10 @@
+/* globals angular */
 import { createSelector } from 'reselect'
-import { List } from 'immutable'
 import MapLayerActions from '../../react/components/map-layers/map-layer-actions'
 
 // We need a selector, else the .toJS() call will create an infinite digest loop
 const getAllNetworkEquipmentLayers = reduxState => reduxState.mapLayers.networkEquipment
 const getNetworkEquipmentLayersList = createSelector([getAllNetworkEquipmentLayers], networkEquipmentLayers => networkEquipmentLayers)
-const getEquipmentsArray = createSelector([getAllNetworkEquipmentLayers], networkEquipmentLayers => {
-  var equipmentsArray = []
-  if (networkEquipmentLayers.equipments) {
-    Object.keys(networkEquipmentLayers.equipments).forEach(key => equipmentsArray.push(networkEquipmentLayers.equipments[key]))
-  }
-  return equipmentsArray
-})
 const getCablesArray = createSelector([getAllNetworkEquipmentLayers], networkEquipmentLayers => {
   var cablesArray = []
   if (networkEquipmentLayers.cables) {
@@ -20,14 +13,11 @@ const getCablesArray = createSelector([getAllNetworkEquipmentLayers], networkEqu
   return cablesArray
 })
 
-class NetworkEquipmentController {
-  constructor($rootScope, $http, $location, $ngRedux, map_tools, state) {
+class CablesController {
+  constructor ($rootScope, $ngRedux, map_tools, state) {
     this.map_tools = map_tools
     this.state = state
     this.currentUser = state.loggedInUser
-    this.mapZoom = 0// map.getZoom()
-    this.equ_tdc_order = ['central_office', 'splice_point', 'fiber_distribution_hub', 'fiber_distribution_terminal', 'multiple_dwelling_unit', 'bulk_distribution_terminal', 'dslam', 'cell_5g', 'loop_extender', 'network_anchor']
-    this.usePointAggregate = false // aggregating multiple pieces of equipment under one marker causes problems with Equipment Selection
 
     // When the map zoom changes, map layers can change
     $rootScope.$on('map_zoom_changed', () => this.updateMapLayers())
@@ -51,47 +41,16 @@ class NetworkEquipmentController {
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
   }
 
-  $doCheck() {
-    const networkEquipments = this.state.configuration.networkEquipment && this.state.configuration.networkEquipment.equipments
-    if (networkEquipments && (this.cachedNetworkEquipments !== networkEquipments)) {
-      if (this.state.configuration && (this.state.configuration.ARO_CLIENT === 'tdc')) {
-        var equ = angular.copy(this.state.configuration.networkEquipment.equipments)
-        this.state.configuration.networkEquipment.equipments = {}
-        this.equ_tdc_order.forEach((key) => {
-          this.state.configuration.networkEquipment.equipments[key] = equ[key]
-        })
-      }
-      this.setNetworkEquipmentLayers(this.state.configuration.networkEquipment)
-      this.cachedNetworkEquipments = networkEquipments
-    }
-  }
-
-  // Get the point transformation mode with the current zoom level
-  getPointTransformForLayer(zoomThreshold) {
-    var mapZoom = map.getZoom()
-    // If we are zoomed in beyond a threshold, use 'select'. If we are zoomed out, use 'aggregate'
-    // (Google maps zoom starts at 0 for the entire world and increases as you zoom in)
-    return (mapZoom > zoomThreshold) ? 'select' : 'aggregate'
-  }
-
   // Get the line transformation mode with the current zoom level
-  getLineTransformForLayer(zoomThreshold) {
-    var mapZoom = map.getZoom()
+  getLineTransformForLayer (zoomThreshold) {
+    var mapZoom = this.mapRef.getZoom()
     // If we are zoomed in beyond a threshold, use 'select'. If we are zoomed out, use 'aggregate'
     // (Google maps zoom starts at 0 for the entire world and increases as you zoom in)
     return (mapZoom > zoomThreshold) ? 'select' : 'smooth_absolute'
   }
 
-  // Get the polygon transformation mode with the current zoom level
-  getPolygonTransformForLayer(zoomThreshold) {
-    var mapZoom = map.getZoom()
-    // If we are zoomed in beyond a threshold, use 'select'. If we are zoomed out, use 'aggregate'
-    // (Google maps zoom starts at 0 for the entire world and increases as you zoom in)
-    return (mapZoom > zoomThreshold) ? 'select' : 'smooth'
-  }
-
   // Replaces any occurrences of searchText by replaceText in the keys of an object
-  objectKeyReplace(obj, searchText, replaceText) {
+  objectKeyReplace (obj, searchText, replaceText) {
     Object.keys(obj).forEach((key) => {
       if (typeof obj[key] === 'string') {
         obj[key] = obj[key].replace(searchText, replaceText)
@@ -101,7 +60,7 @@ class NetworkEquipmentController {
   }
 
   // Creates a single map layer by substituting tileDefinition parameters
-  createSingleMapLayer(equipmentOrFiberKey, categoryType, networkEquipment, existingOrPlanned, libraryId, rootPlanId) {
+  createSingleMapLayer (equipmentOrFiberKey, categoryType, networkEquipment, existingOrPlanned, libraryId, rootPlanId) {
     var existingOrPlannedzIndex = this.state.configuration.networkEquipment.tileDefinitions[categoryType][existingOrPlanned].zIndex
     delete this.state.configuration.networkEquipment.tileDefinitions[categoryType][existingOrPlanned].zIndex
     var tileDefinition = angular.copy(this.state.configuration.networkEquipment.tileDefinitions[categoryType][existingOrPlanned])
@@ -131,7 +90,7 @@ class NetworkEquipmentController {
           (feature.properties.deployment_type === 1) ||
           (feature.properties.is_deleted !== 'true'))
       }
-      if (this.state.showEquipmentLabels && map.getZoom() > this.networkEquipmentLayers.labelDrawingOptions.visibilityZoomThreshold) {
+      if (this.state.showEquipmentLabels && this.mapRef.getZoom() > this.networkEquipmentLayers.labelDrawingOptions.visibilityZoomThreshold) {
         drawingOptions.labels = this.networkEquipmentLayers.labelDrawingOptions
       }
     } else if (categoryType === 'boundaries') {
@@ -160,16 +119,15 @@ class NetworkEquipmentController {
   }
 
   // Creates map layers for a specified category (e.g. "equipment")
-  createMapLayersForCategory(categoryItems, categoryType, mapLayers, createdMapLayerKeys) {
+  createMapLayersForCategory (categoryItems, categoryType, mapLayers, createdMapLayerKeys) {
     // First loop through all the equipment types (e.g. central_office)
-    this.mapZoom = map.getZoom()
     categoryItems && Object.keys(categoryItems).forEach((categoryItemKey) => {
       var networkEquipment = categoryItems[categoryItemKey]
 
       if (networkEquipment.equipmentType !== 'point' ||
         this.usePointAggregate ||
-        this.mapZoom > networkEquipment.aggregateZoomThreshold) {
-        if (this.state.equipmentLayerTypeVisibility.existing && networkEquipment.checked) {
+        this.mapRef.getZoom() > networkEquipment.aggregateZoomThreshold) {
+        if (networkEquipment.checked) {
           // We need to show the existing network equipment. Loop through all the selected library ids.
           this.state.dataItems && this.state.dataItems[networkEquipment.dataItemKey] &&
             this.state.dataItems[networkEquipment.dataItemKey].selectedLibraryItems.forEach((selectedLibraryItem) => {
@@ -180,19 +138,22 @@ class NetworkEquipmentController {
         }
 
         const planId = this.state.plan && this.state.plan && this.state.plan.id
-        if (this.state.equipmentLayerTypeVisibility.planned && networkEquipment.checked && planId) {
+        if (networkEquipment.checked && planId) {
           // We need to show the planned network equipment for this plan.
           var mapLayerKey = `${categoryItemKey}_planned`
           mapLayers[mapLayerKey] = this.createSingleMapLayer(categoryItemKey, categoryType, networkEquipment, 'planned', null, planId)
           createdMapLayerKeys.add(mapLayerKey)
         }
       }
+
+      // Sync ruler option
+      networkEquipment.key === 'COPPER' && this.syncRulerOptions(networkEquipment.key, networkEquipment.checked)
     })
   }
 
-  createMapLayersForBoundaryCategory(categoryItems, categoryType, mapLayers, createdMapLayerKeys) {
+  createMapLayersForBoundaryCategory (categoryItems, categoryType, mapLayers, createdMapLayerKeys) {
     // First loop through all the equipment types
-    this.mapZoom = map.getZoom()
+    this.mapZoom = this.mapRef.getZoom()
     // Boundary selection depends on showSiteBoundary checkbox and the selected boundary type in the dropdown
     categoryItems && Object.keys(categoryItems).forEach((categoryItemKey) => {
       var networkEquipment = categoryItems[categoryItemKey]
@@ -200,13 +161,12 @@ class NetworkEquipmentController {
       var selectedBoundaryName
       this.state.selectedBoundaryType.name !== 'fiveg_coverage' ? selectedBoundaryName = 'siteBoundaries' : selectedBoundaryName = 'fiveg_coverage'
 
-      //Type of Boundary to show
+      // Type of Boundary to show
       if ((networkEquipment.equipmentType !== 'point' ||
         this.usePointAggregate ||
         this.mapZoom > networkEquipment.aggregateZoomThreshold) && selectedBoundaryName === categoryItemKey) {
-
-        //Existing Boundaries
-        if (this.state.equipmentLayerTypeVisibility.existing && this.state.showSiteBoundary) {
+        // Existing Boundaries
+        if (this.state.showSiteBoundary) {
           // We need to show the existing network equipment. Loop through all the selected library ids.
           this.state.dataItems && this.state.dataItems[networkEquipment.dataItemKey] &&
             this.state.dataItems[networkEquipment.dataItemKey].selectedLibraryItems.forEach((selectedLibraryItem) => {
@@ -216,21 +176,20 @@ class NetworkEquipmentController {
             })
         }
 
-        //Planned Boundaries
+        // Planned Boundaries
         const planId = this.state.plan && this.state.plan && this.state.plan.id
-        if (this.state.equipmentLayerTypeVisibility.planned && this.state.showSiteBoundary && planId) {
+        if (this.state.showSiteBoundary && planId) {
           // We need to show the planned network equipment for this plan.
           var mapLayerKey = `${categoryItemKey}_planned`
           mapLayers[mapLayerKey] = this.createSingleMapLayer(categoryItemKey, categoryType, networkEquipment, 'planned', null, planId)
           createdMapLayerKeys.add(mapLayerKey)
         }
       }
-
     })
   }
 
-  updateMapLayers() {
-    if(!this.networkEquipmentLayers) return
+  updateMapLayers () {
+    if (!this.networkEquipmentLayers) return
     // Make a copy of the state mapLayers. We will update this
     var oldMapLayers = angular.copy(this.state.mapLayers.getValue())
 
@@ -241,9 +200,7 @@ class NetworkEquipmentController {
 
     // Create layers for network equipment nodes and cables
     this.createdMapLayerKeys.clear()
-    this.createMapLayersForCategory(this.networkEquipmentLayers.equipments, 'equipment', oldMapLayers, this.createdMapLayerKeys)
-    this.createMapLayersForCategory(this.networkEquipmentLayers.cables, 'cable', oldMapLayers, this.createdMapLayerKeys)    
-    this.createMapLayersForBoundaryCategory(this.networkEquipmentLayers.boundaries, 'boundaries', oldMapLayers, this.createdMapLayerKeys)
+    this.createMapLayersForCategory(this.networkEquipmentLayers.cables, 'cable', oldMapLayers, this.createdMapLayerKeys)
 
     // "oldMapLayers" now contains the new layers. Set it in the state
     this.state.mapLayers.next(oldMapLayers)
@@ -251,29 +208,40 @@ class NetworkEquipmentController {
 
   // Change the visibility of a network equipment layer. layerObj should refer to an object
   // in state.js --> networkEquipments[x].layers
-  changeLayerVisibility(layerObj, isVisible) {
+  changeLayerVisibility (layerObj, isVisible) {
     // "visibilityType" allows us to distinguish between planned and existing layers
     layerObj.checked = isVisible
     this.updateMapLayers()
   }
 
-  zoomTo(zoomLevel) {
+  zoomTo (zoomLevel) {
     zoomLevel = Number(zoomLevel) + 1
     // console.log(zoomLevel)
     this.state.requestSetMapZoom.next(zoomLevel)
   }
 
-  getBackgroungColor(layer) {
+  getBackgroungColor (layer) {
     return layer.drawingOptions.strokeStyle
+  }
+
+  syncRulerOptions (layerKey, isLayerEnabled) {
+    if (isLayerEnabled) {
+      !this.state.rulerActions.includes(this.state.allRulerActions.COPPER) &&
+        this.state.rulerActions.push(this.state.allRulerActions.COPPER)
+    } else {
+      for (var i in this.state.rulerActions) {
+        if (this.state.rulerActions[i].id == layerKey) {
+          this.state.rulerActions.splice(i, 1);
+        }
+      }
+    }
   }
 
   mapStateToThis (reduxState) {
     return {
       networkEquipmentLayers: getNetworkEquipmentLayersList(reduxState),
-      equipmentsArray: getEquipmentsArray(reduxState),
       cablesArray: getCablesArray(reduxState),
-      showSiteBoundary: reduxState.mapLayers.showSiteBoundary,
-      selectedBoundaryType: reduxState.mapLayers.selectedBoundaryType
+      mapRef: reduxState.map.googleMaps
     }
   }
 
@@ -292,16 +260,12 @@ class NetworkEquipmentController {
 
   mergeToTarget (nextState, actions) {
     const currentNetworkEquipmentLayers = this.networkEquipmentLayers
-    const currentSelectedBoundaryType = this.selectedBoundaryType
-    const currentShowSiteBoundary = this.showSiteBoundary
 
     // merge state and actions onto controller
     Object.assign(this, nextState)
     Object.assign(this, actions)
 
-    if (currentNetworkEquipmentLayers !== nextState.networkEquipmentLayers ||
-      currentSelectedBoundaryType !== nextState.selectedBoundaryType ||
-      currentShowSiteBoundary !== nextState.showSiteBoundary) {
+    if (currentNetworkEquipmentLayers !== nextState.networkEquipmentLayers) {
       this.updateMapLayers()
     }
   }
@@ -311,12 +275,12 @@ class NetworkEquipmentController {
   }
 }
 
-NetworkEquipmentController.$inject = ['$rootScope', '$http', '$location', '$ngRedux', 'map_tools', 'state']
+CablesController.$inject = ['$rootScope', '$ngRedux', 'map_tools', 'state']
 
-let networkEquipment = {
-  templateUrl: '/components/views/network-equipment.html',
+let cables = {
+  templateUrl: '/components/views/cables.html',
   bindings: {},
-  controller: NetworkEquipmentController
+  controller: CablesController
 }
 
-export default networkEquipment
+export default cables
