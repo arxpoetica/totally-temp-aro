@@ -71,9 +71,8 @@ workflows:
             branches:
               only: 
                 - master
-                - Ring_UI
                 - optional_building
-                - rfpUploader
+                - devJuly2019
 
       - deploy:
           requires:
