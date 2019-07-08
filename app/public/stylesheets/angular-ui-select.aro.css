@@ -1,13 +1,19 @@
 /*
-  This file contains a workaround. When angular-ui-select is inside a div with overflow: auto, the dropdown
-  appears clipped to the div.
+  Style the dropdown header in ui-select-choices
 */
+.ui-select-choices-group-label,dropdown-header {
+  padding: 0px 10px;
+  background-color: #eee;
+  color: black;
+  font-weight: bold;
+  border-top: 1px #aaa solid;
+  border-bottom: 1px #aaa solid;
+  line-height: 28px;
+}
 
 .ui-select-choices {
-  position: fixed;
-  top: auto;
-  left: auto;
-  width: 100%;
+  padding-bottom: 0px;
+  padding-top: 0px;
 }
 
 .ui-select-width-300 {
