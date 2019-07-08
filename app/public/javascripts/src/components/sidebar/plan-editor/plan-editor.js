@@ -63,7 +63,8 @@ class PlanEditorController {
       'bulk_distribution_terminal',
       'loop_extender',
       'network_anchor',
-      'multiple_dwelling_unit'
+      'multiple_dwelling_unit',
+      'network_connector'
     ]
     this.allEditableNetworkNodeTypes = []
     this.state.configuration.perspective.networkEquipment.areVisible.forEach((equipmentType) => {
@@ -408,6 +409,9 @@ class PlanEditorController {
       networkNodeEquipment: objectProperties.networkNodeEquipment,
       deploymentType: objectProperties.deploymentType
     }
+    if (objectProperties.targetType) {
+      serviceFeature.target_type = objectProperties.targetType
+    }
     // console.log(serviceFeature.geometry)
     return serviceFeature
   }
@@ -719,7 +723,7 @@ class PlanEditorController {
             var networkNodeEquipment = equipmentFeature.networkNodeEquipment
 
             var equipmentProperties = new EquipmentProperties(networkNodeEquipment.siteInfo.siteClli, networkNodeEquipment.siteInfo.siteName,
-              equipmentFeature.networkNodeType, null, networkNodeEquipment, result.data.deploymentType)
+              equipmentFeature.networkNodeType, null, networkNodeEquipment, result.data.deploymentType, result.data.target_type)
             // this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties(networkNodeEquipment.siteInfo.siteClli, networkNodeEquipment.siteInfo.siteName,
             //                                                                        equipmentFeature.networkNodeType, null, networkNodeEquipment, result.data.deploymentType)
             this.objectIdToProperties[mapObject.objectId] = equipmentProperties
@@ -758,7 +762,7 @@ class PlanEditorController {
         equipmentNode.objectId = mapObject.objectId
         this.addEquipmentNodes([equipmentNode])
         var blankNetworkNodeEquipment = equipmentNode.networkNodeEquipment
-        this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties('', '', feature.networkNodeType, this.lastSelectedEquipmentType, blankNetworkNodeEquipment, 'PLANNED')
+        this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties('', '', feature.networkNodeType, this.lastSelectedEquipmentType, blankNetworkNodeEquipment, 'PLANNED', 'sewer')
         var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
         this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
           .then(() => this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`))
