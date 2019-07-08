@@ -20,8 +20,25 @@ class DataSourceUploadController {
     this.saCreationType
     this.selectedEquipment
 
-    this.cableTypes = ['FEEDER', 'DISTRIBUTION', 'IOF', 'UNKNOWN', 'COPPER']
-    this.selectedcableType = this.cableTypes[0]
+    // Get all spatial edge types from server
+    this.spatialEdgeTypes = []
+    $http.get('/service/odata/SpatialEdgeTypeEntity')
+      .then(result => {
+        this.spatialEdgeTypes = result.data
+        this.selectedSpatialEdgeType = this.spatialEdgeTypes[0]
+        $timeout()
+      })
+      .catch(err => console.error(err))
+
+    this.cableTypes = []
+    $http.get('/service/odata/FiberTypeEntity')
+      .then(result => {
+        this.cableTypes = result.data
+        this.selectedCableType = this.cableTypes[0]
+        $timeout()
+      })
+      .catch(err => console.error(err))
+
     // Default Polygon radius in meters
     this.radius = 20000
 
@@ -191,7 +208,7 @@ class DataSourceUploadController {
       }
       // For uploading fiber no need to create library using getLibraryId()
       if (this.state.uploadDataSource.name === 'fiber') {
-        this.setCableConstructionType(this.selectedcableType)
+        this.setCableConstructionType()
       } else {
         this.getLibraryId()
           .then((library) => {
@@ -263,39 +280,41 @@ class DataSourceUploadController {
       })
   }
 
-  setCableConstructionType (cableType) {
+  setCableConstructionType () {
     var cableOptions = {
       url: '/service/v1/library_cable',
       method: 'POST',
       data: {
-        'libraryItem': {
-          'dataType': this.state.uploadDataSource.name,
-          'name': $('#data_source_upload_modal input[type=text]').get(0).value
+        libraryItem: {
+          dataType: this.state.uploadDataSource.name,
+          name: $('#data_source_upload_modal input[type=text]').get(0).value
         },
-        'param': {
-          'param_type': 'cable_param',
-          'fiberType': cableType
+        param: {
+          param_type: 'cable_param',
+          spatialEdgeType: this.selectedSpatialEdgeType.name
         }
       },
       json: true
     }
 
+    if (!this.selectedSpatialEdgeType.conduit) {
+      // This is not a conduit, also send the fiber type
+      cableOptions.data.param.fiberType = this.selectedCableType.name
+    }
     return this.$http(cableOptions)
       .then((response) => {
         this.submit(response.data.libraryItem.identifier)
       })
   }
-  
-  
+
   // --- date source table view --- //
-  
   onUploadSourceChange () {
     this.state.uploadDataSource = this.tableSource = this.uploadSource
     this.loadDataSources()
   }
   
   onTableSourceChange () {
-    if ('all' != this.tableSource.name){
+    if ('all' !== this.tableSource.name){
       this.state.uploadDataSource = this.uploadSource = this.tableSource
     }
     this.loadDataSources()

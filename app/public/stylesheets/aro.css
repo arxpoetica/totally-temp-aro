@@ -884,6 +884,7 @@ ui-select-font {
 
 .ui-select-match span {
   font-size: 14px;
+  vertical-align: -webkit-baseline-middle;
 }
 
 .ui-select-match > span .tag {

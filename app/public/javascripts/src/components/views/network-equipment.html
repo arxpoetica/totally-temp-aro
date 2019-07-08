@@ -70,16 +70,6 @@
                     ng-checked="equipmentLayer.checked" ng-click="$ctrl.updateLayerVisibility('equipments', equipmentLayer, !equipmentLayer.checked)">
                 </td>
               </tr>
-              <tr>
-                <td colspan="2"><strong>Cable Plant</strong></td>
-              </tr>
-              <tr ng-repeat="equipmentLayer in $ctrl.cablesArray | orderBy: 'listIndex'">
-                <td>
-                  <div class="box" ng-style="{ 'background-color': $ctrl.getBackgroungColor(equipmentLayer) }"></div>{{equipmentLayer.label}}</td>
-                <td>
-                  <input type="checkbox" class="checkboxfill" ng-checked="equipmentLayer.checked" ng-click="$ctrl.updateLayerVisibility('cables', equipmentLayer, !equipmentLayer.checked)">
-                </td>
-              </tr>
             </tbody>
           </table>
         </div>

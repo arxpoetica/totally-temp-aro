@@ -1,19 +1,36 @@
+
+import { createSelector } from 'reselect'
+
+const getAllSystemActors = reduxState => reduxState.user.systemActors
+const getAllSystemActorsArray = createSelector([getAllSystemActors], systemActors => {
+  var systemActorsArray = []
+  Object.keys(systemActors).forEach(actorKey => {
+    var copyOfActor = angular.copy(systemActors[actorKey])
+    if (copyOfActor.type === 'user') {
+      copyOfActor.name = `${copyOfActor.firstName} ${copyOfActor.lastName}`
+    }
+    systemActorsArray.push(copyOfActor)
+  })
+  return systemActorsArray
+})
+
 class ResourcePermissionsEditorController {
-  constructor ($http, $timeout, state) {
+  constructor ($http, $timeout, $ngRedux, state) {
+    this.tempUsers = [{ name: 'Dan', description: 'Dan is a winner', id: 1234 }]
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
-    
+
     this.authRollsEnum = []
     this.actorsById = {}
-    
+
     var requestedRolls = {
       'RESOURCE_OWNER': 'Owner',
       'RESOURCE_MODIFIER': 'Modifier',
       'RESOURCE_VIEWER': 'Viewer'
     }
-    
-    this.isOwner = false
+
+    this.isOwner = true
     
     // these vals will be replaced by vals from state
     this.defaultPermissions = 4
@@ -62,7 +79,6 @@ class ResourcePermissionsEditorController {
         'editable': true,
         'visible': true
       }
-      
     ]
     
     this.actionsParam = null
@@ -82,66 +98,66 @@ class ResourcePermissionsEditorController {
     this.filterNewActorList = (value, index, array) => {
       return !this.rows.find((obj)=>{return obj.systemActorId === value.id})
     }
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }
-  
-  
+
   $onInit () {
     if (typeof this.enabled === 'undefined') {
       this.enabled = true // If not defined, then make it true
     }
-    
-    this.actorsById = this.systemActors.reduce((map, item) => {
-      map[item.id] = item
-      return map
-    }, {})
-    
     this.loadResourceAccess()
     this.registerSaveAccessCallback && this.registerSaveAccessCallback({ saveResourceAccess: this.saveResourceAccess.bind(this) })
   }
-  
+
   addActor () {
-    if (this.actorsById.hasOwnProperty(this.newActorId)){
-      var newActor = this.actorsById[this.newActorId]
-      this.rows.push({
-        'systemActorId': newActor.id, 
-        'name': newActor.name, 
-        'rolePermissions': this.defaultPermissions
-      })
-      this.onSelectionChanged()
+    var newActor = this.systemActors[this.newActorId]
+    var isExistingActorId = this.rows.some(user => user.systemActorId === newActor.id)
+    if (!isExistingActorId) {
+      if (newActor.type === 'group') {
+        this.rows.push({
+          'systemActorId': newActor.id,
+          'name': newActor.name,
+          'rolePermissions': this.defaultPermissions
+        })
+      } else {
+        this.rows.push({
+          'systemActorId': newActor.id,
+          'name': newActor.firstName + ' ' + newActor.lastName,
+          'rolePermissions': this.defaultPermissions
+        })
+      }
     }
-  }
-  
-  removeActor (row) {
-    this.rows = this.rows.filter(function(value, index, arr){
-      return value != row;
-    });
     this.onSelectionChanged()
   }
 
-  
+  removeActor (row) {
+    this.rows = this.rows.filter(function(value, index, arr) {
+      return value != row;
+    })
+    this.onSelectionChanged()
+  }
+
   loadResourceAccess () {
     return this.$http.get(`/service/auth/acl/${this.resourceType}/${this.resourceId}`)
       .then((result) => {
         this.rows = []
-        var idToSystemActor = {}
-        this.systemActors.forEach((systemActor) => idToSystemActor[systemActor.id] = systemActor)
         this.isOwner = false
         this.actionsParam = null
-        //if (!!(this.state.loggedInUser.systemPermissions & this.state.authPermissionsByName['RESOURCE_ADMIN'].permissions)){
-          
-        if ( this.state.loggedInUser.hasPermissions(this.state.authPermissionsByName['RESOURCE_ADMIN'].permissions) ){  
+
+        if (this.state.loggedInUser.hasPermissions(this.state.authPermissionsByName['RESOURCE_ADMIN'].permissions)) {  
           this.isOwner = true
           this.actionsParam = this.actions
         }
-        
         result.data.resourcePermissions.forEach((access) => {
+          const actor = this.systemActors[access.systemActorId]
+          const name = (actor.type === 'group') ? actor.name : `${actor.firstName} ${actor.lastName}`
           this.rows.push({
-            'systemActorId': access.systemActorId, 
-            'name': idToSystemActor[access.systemActorId].name, 
-            'rolePermissions': access.rolePermissions
+            systemActorId: access.systemActorId,
+            name: name,
+            rolePermissions: access.rolePermissions
           })
           // check for user and group permissions 
-          if ( !this.isOwner 
+          if (!this.isOwner 
               && (
                   this.state.loggedInUser.hasPermissions(this.state.authPermissionsByName['RESOURCE_ADMIN'].permissions, access.rolePermissions)
                   && (
@@ -171,17 +187,32 @@ class ResourcePermissionsEditorController {
     }
     return this.$http.put(`/service/auth/acl/${this.resourceType}/${this.resourceId}`, putBody)
   }
-  
+
+  $onDestroy () {
+    this.unsubscribeRedux()
+  }
+
+  mapStateToThis (reduxState) {
+    // console.log(JSON.stringify(getAllSystemActorsArray(reduxState)))
+    return {
+      systemActors: getAllSystemActors(reduxState),
+      systemActorsArray: getAllSystemActorsArray(reduxState)
+    }
+  }
+
+  mapDispatchToTarget (dispatch) {
+    return {
+    }
+  }
 }
 
-ResourcePermissionsEditorController.$inject = ['$http', '$timeout', 'state']
+ResourcePermissionsEditorController.$inject = ['$http', '$timeout', '$ngRedux', 'state']
 
 let resourcePermissionsEditor = {
   templateUrl: '/components/common/resource-permissions-editor.html',
   bindings: {
     resourceType: '@',
     resourceId: '@',
-    systemActors: '<',
     enabled: '<',
     registerSaveAccessCallback: '&', // To be called to register a callback, which will save the access list
     onSelectionChanged: '&'

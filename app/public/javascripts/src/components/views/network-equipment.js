@@ -187,9 +187,6 @@ class NetworkEquipmentController {
           createdMapLayerKeys.add(mapLayerKey)
         }
       }
-
-      //Sync ruler option
-      networkEquipment.key == "COPPER" && this.syncRulerOptions(networkEquipment.key,networkEquipment.checked)
     })
   }
 
@@ -264,23 +261,6 @@ class NetworkEquipmentController {
     zoomLevel = Number(zoomLevel) + 1
     // console.log(zoomLevel)
     this.state.requestSetMapZoom.next(zoomLevel)
-  }
-
-  getBackgroungColor(layer) {
-    return layer.drawingOptions.strokeStyle
-  }
-
-  syncRulerOptions(layerKey, isLayerEnabled) {
-    if (isLayerEnabled) {
-      !this.state.rulerActions.includes(this.state.allRulerActions.COPPER) &&
-        this.state.rulerActions.push(this.state.allRulerActions.COPPER)
-    } else {
-      for (var i in this.state.rulerActions) {
-        if (this.state.rulerActions[i].id == layerKey) {
-          this.state.rulerActions.splice(i, 1);
-        }
-      }
-    }
   }
 
   mapStateToThis (reduxState) {
