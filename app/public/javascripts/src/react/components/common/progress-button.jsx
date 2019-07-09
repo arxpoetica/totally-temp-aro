@@ -1,13 +1,12 @@
 import React, { Component } from 'react'
 import { PropTypes } from 'prop-types'
 
-
 export default class ProgressButton extends Component {
   // ToDo: abstract and combine with Coverage Button and RFP Button
   constructor (props) {
     super(props)
 
-    // can be overridden 
+    // can be overridden
     this.statusTypes = {
       UNINITIALIZED: 'UNINITIALIZED',
       RUNNING: 'RUNNING',
@@ -15,8 +14,8 @@ export default class ProgressButton extends Component {
     }
   }
 
-  onRun () {} // to be overridden 
-  onModify () {} // to be overridden 
+  onRun () {} // to be overridden
+  onModify () {} // to be overridden
 
   render () {
     switch (this.props.status) {

@@ -4,7 +4,7 @@ import SelectionActions from '../selection/selection-actions'
 import RfpActions from '../optimization/rfp/rfp-actions'
 import socketManager from '../../../react/common/socket-manager'
 import RingEditActions from '../ring-edit/ring-edit-actions'
-import AroHttp from '../../common/aro-http';
+import AroHttp from '../../common/aro-http'
 
 // Set the currently active plan
 function setActivePlan (plan) {

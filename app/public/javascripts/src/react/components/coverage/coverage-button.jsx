@@ -1,4 +1,3 @@
-import React, { Component } from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import { PropTypes } from 'prop-types'
 import reduxStore from '../../../redux-store'
@@ -7,7 +6,6 @@ import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import CoverageStatusTypes from './constants'
 import socketManager from '../../../react/common/socket-manager'
 import ProgressButton from '../common/progress-button.jsx'
-
 
 export class CoverageButton extends ProgressButton {
   constructor (props) {
@@ -26,7 +24,6 @@ export class CoverageButton extends ProgressButton {
       }
     })
   }
-
 
   renderFinishedButton () {
     return (
@@ -52,7 +49,6 @@ export class CoverageButton extends ProgressButton {
   componentWillUnmount () {
     this.unsubscriber()
   }
-
 }
 
 CoverageButton.propTypes = {

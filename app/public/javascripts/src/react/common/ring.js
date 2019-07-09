@@ -1,3 +1,4 @@
+/* global google */
 import RingUtils from '../components/ring-edit/ring-utils'
 import uuidv4 from 'uuid/v4'
 
