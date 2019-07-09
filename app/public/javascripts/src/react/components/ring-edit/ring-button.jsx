@@ -8,7 +8,6 @@ import AroHttp from '../../common/aro-http'
 import RingStatusTypes from './constants'
 import ProgressButton from '../common/progress-button.jsx'
 
-
 export class RingButton extends ProgressButton {
   // ToDo: abstract and combine with Coverage Button and RFP Button
   constructor (props) {
@@ -27,10 +26,8 @@ export class RingButton extends ProgressButton {
         this.props.setAnalysisProgress(progressData.data.progress)
       }
     })
-    
   }
 
-  
   requestSubNet () {
     // this.props.onModify()
     var ringIds = []
@@ -45,16 +42,16 @@ export class RingButton extends ProgressButton {
     })
     // this.props.calculateSubNet(ringIds, planId, userId)
     AroHttp.post(`/service/plan/${planId}/ring-cmd`, { ringIds: ringIds, locationTypes: locationTypes })
-    .then(result => {
-      // ToDo check for error
-    }).catch(err => console.error(err))
+      .then(result => {
+        // ToDo check for error
+      }).catch(err => console.error(err))
   }
 
   // override
   onRun () {
     this.requestSubNet()
   }
-  
+
   // override
   onModify () {
     this.props.onModify()
@@ -63,7 +60,6 @@ export class RingButton extends ProgressButton {
   componentWillUnmount () {
     this.unsubscriber()
   }
-
 }
 
 // --- //

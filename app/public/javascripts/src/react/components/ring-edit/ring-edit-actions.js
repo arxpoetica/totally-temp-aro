@@ -67,7 +67,7 @@ function removeNode (ring, featureId, planId, userId) {
   return (dispatch) => {
     var ringClone = ring.clone()
     var featureIndex = ringClone.nodes.findIndex((ele) => ele.objectId === featureId)
-    if (-1 === featureIndex) return
+    if (featureIndex === -1) return
     ringClone.removeNode(featureId)
 
     // todo make ring update action
@@ -98,15 +98,15 @@ function removeRing (ringId, planId, userId) {
 function saveRingChangesToServer (ring, planId, userId) {
   return (dispatch) => {
     AroHttp.put(`/service/plan/${planId}/ring-config/${ring.id}`, ring.getDataExport())
-    .then(result => {
-      // ToDo protect against fail returns
-      /* // no need to update state, we don't need a redraw
-      dispatch({
-        type: Actions.RING_UPDATE_RING,
-        payload: ringClone
-      })
-      */
-    }).catch(err => console.error(err))
+      .then(result => {
+        // ToDo protect against fail returns
+        /* // no need to update state, we don't need a redraw
+        dispatch({
+          type: Actions.RING_UPDATE_RING,
+          payload: ringClone
+        })
+        */
+      }).catch(err => console.error(err))
   }
 }
 
@@ -115,13 +115,13 @@ function renameRing (ring, name, planId, userId) {
     var ringClone = ring.clone()
     ringClone.name = name
     AroHttp.put(`/service/plan/${planId}/ring-config/${ringClone.id}`, ringClone.getDataExport())
-    .then(result => {
-      // ToDo protect against fail returns
-      dispatch({
-        type: Actions.RING_UPDATE_RING,
-        payload: ringClone
-      })
-    }).catch(err => console.error(err))
+      .then(result => {
+        // ToDo protect against fail returns
+        dispatch({
+          type: Actions.RING_UPDATE_RING,
+          payload: ringClone
+        })
+      }).catch(err => console.error(err))
   }
 }
 
@@ -147,7 +147,7 @@ function onFeatureSelected (features) {
       const planId = state.plan.activePlan.id
       const userId = state.user.loggedInUser.id
 
-      if (-1 !== featureIndex) {
+      if (featureIndex !== -1) {
         // remove node
         dispatch(removeNode(ring, feature.objectId, planId, userId))
       } else {
@@ -168,32 +168,32 @@ function loadRings (planId) {
   return (dispatch, getState) => {
     const state = getState()
     const userId = state.user.loggedInUser.id
-    
+
     AroHttp.get(`/service/plan/${planId}/ring-config?planId=${planId}`)
-    .then(result => {
-      var promisses = []
-      
-      result.data.forEach(ringData => {
-        promisses.push(Ring.parseData(ringData, planId, userId))
-      })
-      
-      Promise.all(promisses)
-      .then(results => {
-        var rings = []
-        results.forEach(result => {
-          rings.push(result)
+      .then(result => {
+        var promisses = []
+
+        result.data.forEach(ringData => {
+          promisses.push(Ring.parseData(ringData, planId, userId))
         })
 
-        dispatch({
-          type: Actions.RING_REMOVE_ALL_RINGS
-        })
-        dispatch({
-          type: Actions.RING_ADD_RINGS,
-          payload: rings
-        })
+        Promise.all(promisses)
+          .then(results => {
+            var rings = []
+            results.forEach(result => {
+              rings.push(result)
+            })
+
+            dispatch({
+              type: Actions.RING_REMOVE_ALL_RINGS
+            })
+            dispatch({
+              type: Actions.RING_ADD_RINGS,
+              payload: rings
+            })
+          })
       })
-    })
-    .catch(err => console.error(err))
+      .catch(err => console.error(err))
   }
 }
 

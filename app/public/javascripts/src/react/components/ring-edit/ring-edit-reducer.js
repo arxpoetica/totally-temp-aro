@@ -1,7 +1,6 @@
 import Actions from '../../common/actions'
 import RingStatusTypes from './constants'
 
-
 const defaultState = {
   rings: {},
   selectedRingId: null,

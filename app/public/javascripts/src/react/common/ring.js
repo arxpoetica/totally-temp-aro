@@ -1,4 +1,3 @@
-
 import RingUtils from '../components/ring-edit/ring-utils'
 import uuidv4 from 'uuid/v4'
 
@@ -14,7 +13,7 @@ export default class Ring {
 
   static parseData (data, planId, userId) {
     var parsedRing = new Ring(data.id, data.name)
-    
+
     if (data.exchangeLinks.length > 0) {
       var nodeIds = [ data.exchangeLinks[0].fromOid ]
       data.exchangeLinks.forEach(link => {
@@ -42,7 +41,7 @@ export default class Ring {
             var fromNode = parsedRing.nodesById[link.fromOid]
             var toNode = parsedRing.nodesById[link.toOid]
             var geom = []
-            if (!link.geomPath || 0 === link.geomPath.length) {
+            if (!link.geomPath || link.geomPath.length === 0) {
               geom = parsedRing.figureRangeIntersectOffset(fromNode, toNode)
             } else {
               geom = parsedRing.importGeom(link.geomPath)
@@ -91,7 +90,7 @@ export default class Ring {
 
   removeNode (nodeId) {
     var nodeIndex = this.nodes.findIndex(ele => ele.objectId === nodeId)
-    if (-1 === nodeIndex) return
+    if (nodeIndex === -1) return
     this.nodes.splice(nodeIndex, 1)
     delete this.nodesById[nodeId]
     if (nodeIndex >= this.linkData.length) {
@@ -123,17 +122,16 @@ export default class Ring {
     const coordsB = nodeB.data.geometry.coordinates
     var latLngA = new google.maps.LatLng(coordsA[1], coordsA[0])
     var latLngB = new google.maps.LatLng(coordsB[1], coordsB[0])
-    var heading = google.maps.geometry.spherical.computeHeading(latLngA, latLngB);
-    
+    var heading = google.maps.geometry.spherical.computeHeading(latLngA, latLngB)
+
     var bounds = []
-    bounds.push( google.maps.geometry.spherical.computeOffset(latLngA, 1000.0, heading + 90) )
-    bounds.push( google.maps.geometry.spherical.computeOffset(latLngA, 1000.0, heading - 90) )
-    bounds.push( google.maps.geometry.spherical.computeOffset(latLngB, 1000.0, heading - 90) )
-    bounds.push( google.maps.geometry.spherical.computeOffset(latLngB, 1000.0, heading + 90) )
-    
+    bounds.push(google.maps.geometry.spherical.computeOffset(latLngA, 1000.0, heading + 90))
+    bounds.push(google.maps.geometry.spherical.computeOffset(latLngA, 1000.0, heading - 90))
+    bounds.push(google.maps.geometry.spherical.computeOffset(latLngB, 1000.0, heading - 90))
+    bounds.push(google.maps.geometry.spherical.computeOffset(latLngB, 1000.0, heading + 90))
+
     return bounds
   }
-  
 
   getDataExport () {
     var exchangeLinks = []
@@ -143,7 +141,7 @@ export default class Ring {
         fromOid: link.fromNode.objectId,
         toOid: link.toNode.objectId,
         geomPath: {
-          "type": "MultiPolygon", 
+          type: 'MultiPolygon',
           coordinates: [
             [this.exportGeom(link)]
           ]
@@ -156,7 +154,7 @@ export default class Ring {
       exchangeLinks: exchangeLinks
     }
   }
-  
+
   exportGeom (link) {
     var geom = []
     link.geom.forEach(pt => {

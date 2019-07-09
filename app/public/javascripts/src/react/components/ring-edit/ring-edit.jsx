@@ -5,7 +5,6 @@ import ringActions from './ring-edit-actions.js'
 import './ring-edit.css'
 import RingStatusTypes from './constants'
 
-
 export class RingEdit extends Component {
   
   constructor (props) {
@@ -20,7 +19,7 @@ export class RingEdit extends Component {
     this.canEdit = (this.props.status == RingStatusTypes.START_STATE)
     this.drawRings()
     return <div>
-      { this.renderAddButton() }
+      {this.renderAddButton()}
       <div className='m-2 p-2'>
         <h4>Rings</h4>
         <table className='table table-sm table-striped'>
@@ -125,7 +124,6 @@ export class RingEdit extends Component {
       </tr>
     }
   }
-  
 
   requestAddNewRing () {
     //var ringId = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)// ToDo: replace this with proper get ID
@@ -136,13 +134,13 @@ export class RingEdit extends Component {
     const userId = this.props.user.loggedInUser.id
     this.props.newRing(planId, userId)
   }
-  
+
   renameRing (ringId, val) {
     const planId = this.props.plan.activePlan.id
     const userId = this.props.user.loggedInUser.id
     this.props.renameRing(this.props.rings[ringId], val, planId, userId)
   }
-  
+
   drawRings(){
     // clear prev lines
     this.clearRendering()
@@ -286,9 +284,9 @@ export class RingEdit extends Component {
     });
     //this.props.calculateSubNet(ringIds, planId, userId)
     AroHttp.post(`/service/plan/${planId}/ring-cmd`, {ringIds: ringIds, locationTypes: locationTypes})
-    .then(result => {
-      //ToDo check for error
-    }).catch(err => console.error(err))
+      .then(result => {
+        //ToDo check for error
+      }).catch(err => console.error(err))
   }
   */
   clearRendering(){
@@ -317,7 +315,6 @@ export class RingEdit extends Component {
   componentWillUnmount () {
     this.clearRendering()
   }
-  
 }
 
 // --- //
