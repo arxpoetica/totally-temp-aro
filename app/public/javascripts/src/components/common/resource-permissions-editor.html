@@ -12,11 +12,13 @@
     Add User: 
   </div>
  <ui-select limit="1" ng-model="$ctrl.newActorId"
-      theme="bootstrap" close-on-select="true">
-      <ui-select-match placeholder="Select User">
-        {{$select.selected.name}}
+      theme="bootstrap" close-on-select="true"
+      on-select="$ctrl.onSelectionChanged()"
+		  on-remove="$ctrl.onSelectionChanged()">
+      <ui-select-match placeholder="Select User" allow-clear="true">
+        <span>{{$select.selected.name}}</span>
       </ui-select-match>
-      <ui-select-choices repeat="person.id as person in $ctrl.systemActorsArray | filter: { name: $select.search }| orderBy:'name' | limitTo:10 "
+      <ui-select-choices repeat="person.id as person in $ctrl.systemActorsArray | filter: { name: $select.search } | filter: $ctrl.filterNewActorList| orderBy:'name' | limitTo:10 "
         group-by="'type'">
         <i ng-if="person.type === 'user'" class="fa fas fa-user"></i>
         <i ng-if="person.type === 'group'" class="fa fas fa-users"></i>
@@ -25,7 +27,7 @@
     </ui-select>
   <div class="input-group-append">
 	  <button type="button" class="btn btn-sm btn-primary" 
-	          ng-click="$ctrl.addActor()" 
+	          ng-click="$ctrl.addActor($event)" 
 	          ng-disabled="!$ctrl.newActorId">
 	    <i class="fa fa-plus"></i> Add
 	  </button>
