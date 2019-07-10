@@ -105,7 +105,6 @@ class ResourcePermissionsEditorController {
     if (typeof this.enabled === 'undefined') {
       this.enabled = true // If not defined, then make it true
     }
-    console.log("systemActors..",this.systemActors);
     this.loadResourceAccess()
     this.registerSaveAccessCallback && this.registerSaveAccessCallback({ saveResourceAccess: this.saveResourceAccess.bind(this) })
   }
@@ -133,7 +132,6 @@ class ResourcePermissionsEditorController {
   }
 
   onSelectionChanged () {
-    //this.newActorId = null;
   }
 
   removeActor (row) {
