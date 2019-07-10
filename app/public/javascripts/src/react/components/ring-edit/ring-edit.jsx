@@ -2,9 +2,11 @@
 import React, { Component } from 'react'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
+import { PropTypes } from 'prop-types'
 import ringActions from './ring-edit-actions.js'
 import './ring-edit.css'
 import RingStatusTypes from './constants'
+import Ring from '../../common/ring'
 
 export class RingEdit extends Component {
   constructor (props) {
@@ -61,7 +63,7 @@ export class RingEdit extends Component {
   }
 
   renderRingRow (ring) {
-    if (ring.id == this.props.selectedRingId) {
+    if (ring.id === this.props.selectedRingId) {
       // selected ring
       return <tr key={ring.id}>
         <td className='ring-table-item-selected'>
@@ -144,6 +146,7 @@ export class RingEdit extends Component {
     // for (let [ringId, ring] of Object.entries(this.props.rings)) {
     Object.keys(this.props.rings).forEach(ringId => {
       const ring = this.props.rings[ringId]
+      ringId = parseInt(ringId)
       if (ring.nodes.length > 0) {
         var pathCoords = []
 
@@ -161,7 +164,7 @@ export class RingEdit extends Component {
           editable: false
         }
 
-        if (ringId == this.props.selectedRingId) {
+        if (ringId === this.props.selectedRingId) {
           polygonOptions = {
             strokeColor: '#FF1493',
             strokeOpacity: 0.8,
@@ -181,7 +184,7 @@ export class RingEdit extends Component {
           polygon.setOptions(polygonOptions)
           polygon.setMap(this.props.map.googleMaps)
           this.createdMapObjects.push(polygon)
-          if (ringId == this.props.selectedRingId) {
+          if (ringId === this.props.selectedRingId) {
             const planId = this.props.plan.activePlan.id
             const userId = this.props.user.loggedInUser.id
             var onPathChange = (path) => {
@@ -208,7 +211,7 @@ export class RingEdit extends Component {
           }
         })
 
-        if (ringId == this.props.selectedRingId) {
+        if (ringId === this.props.selectedRingId) {
           if (ring.nodes.length > 0) {
             const coords = ring.nodes[0].data.geometry.coordinates
             var mapMarker = new google.maps.Marker({
@@ -281,6 +284,7 @@ export class RingEdit extends Component {
 
   selectNewestRing () {
     var ringId = Object.keys(this.props.rings).sort().pop()
+    console.log(typeof ringId)
     this.props.setSelectedRingId(ringId)
   }
 
@@ -298,6 +302,11 @@ export class RingEdit extends Component {
 // --- //
 
 RingEdit.propTypes = {
+  rings: PropTypes.objectOf(PropTypes.instanceOf(Ring)),
+  selectedRingId: PropTypes.number,
+  plan: PropTypes.object,
+  user: PropTypes.object,
+  map: PropTypes.object
 }
 
 const mapStateToProps = (state) => ({

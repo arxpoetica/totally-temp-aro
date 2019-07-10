@@ -5,6 +5,7 @@ import RingUtils from './ring-utils'
 import Ring from '../../common/ring'
 
 function setSelectedRingId (ringId) {
+  ringId = parseInt(ringId)
   return {
     type: Actions.RING_SET_SELECTED_RING_ID,
     payload: ringId
