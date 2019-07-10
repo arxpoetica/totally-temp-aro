@@ -12,6 +12,13 @@ const getConduitsArray = createSelector([getAllNetworkEquipmentLayers], networkE
   }
   return conduitsArray
 })
+const getRoadsArray = createSelector([getAllNetworkEquipmentLayers], networkEquipmentLayers => {
+  var roadsArray = []
+  if (networkEquipmentLayers.roads) {
+    Object.keys(networkEquipmentLayers.roads).forEach(key => roadsArray.push(networkEquipmentLayers.roads[key]))
+  }
+  return roadsArray
+})
 
 class ConduitsController {
   constructor ($rootScope, $ngRedux, map_tools, state) {
@@ -125,6 +132,7 @@ class ConduitsController {
     // Create layers for network equipment nodes and cables
     this.createdMapLayerKeys.clear()
     this.createMapLayersForCategory(this.networkEquipmentLayers.conduits, 'conduit', oldMapLayers, this.createdMapLayerKeys)
+    this.createMapLayersForCategory(this.networkEquipmentLayers.roads, 'road', oldMapLayers, this.createdMapLayerKeys)
 
     // "oldMapLayers" now contains the new layers. Set it in the state
     this.state.mapLayers.next(oldMapLayers)
@@ -146,6 +154,7 @@ class ConduitsController {
     return {
       networkEquipmentLayers: getNetworkEquipmentLayersList(reduxState),
       conduitsArray: getConduitsArray(reduxState),
+      roadsArray: getRoadsArray(reduxState),
       mapRef: reduxState.map.googleMaps
     }
   }

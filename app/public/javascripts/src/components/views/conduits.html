@@ -35,6 +35,13 @@
       <div class="col-md-12">
         <table class="table table-sm">
           <tbody>
+            <tr ng-repeat="roadLayer in $ctrl.roadsArray | orderBy: 'listIndex'">
+              <td>
+                <div class="box" ng-style="{ 'background-color': $ctrl.getBackgroundColor(roadLayer) }"></div>{{roadLayer.label}}</td>
+              <td>
+                <input type="checkbox" class="checkboxfill" ng-checked="roadLayer.checked" ng-click="$ctrl.updateLayerVisibility('roads', roadLayer, !roadLayer.checked)">
+              </td>
+            </tr>
             <tr ng-repeat="conduitLayer in $ctrl.conduitsArray | orderBy: 'listIndex'">
               <td>
                 <div class="box" ng-style="{ 'background-color': $ctrl.getBackgroundColor(conduitLayer) }"></div>{{conduitLayer.label}}</td>
