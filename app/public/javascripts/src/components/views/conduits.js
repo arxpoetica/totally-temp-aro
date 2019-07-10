@@ -78,7 +78,7 @@ class ConduitsController {
 
     // For equipments, we are going to filter out features that are planned and deleted
     var drawingOptions = angular.copy(networkEquipment.drawingOptions)
-    drawingOptions.lineWidth = feature => networkEquipment.drawingOptions.lineWidths[feature.size_category]
+    drawingOptions.lineWidth = feature => networkEquipment.drawingOptions.lineWidths[feature.size_category] || networkEquipment.drawingOptions.lineWidths.default
     return {
       tileDefinitions: [tileDefinition],
       iconUrl: networkEquipment.iconUrl,
