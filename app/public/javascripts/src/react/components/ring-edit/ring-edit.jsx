@@ -57,7 +57,7 @@ export class RingEdit extends Component {
     ))
     var jsx = []
     revOrder.forEach((ring) => {
-      jsx.push( this.renderRingRow(ring) )
+      jsx.push(this.renderRingRow(ring))
     })
     return jsx
   }
@@ -70,24 +70,30 @@ export class RingEdit extends Component {
           <div className='ring-table-item-title ring-table-item-title-selected clearfix'>
             {ring.name}
 
-            {(() => {if (this.canEdit) return (
-              <button className="btn btn-sm btn-outline-danger ring-del-btn"
-                      onClick={() => this.requestDeleteRing(ring)}
-                      data-toggle="tooltip" data-placement="bottom" title="Delete">
-                <i className="fa ei-button-icon ng-scope fa-trash-alt"></i>
-              </button>
-            )})()}
+            {(this.canEdit)
+              ? (
+                <button className='btn btn-sm btn-outline-danger ring-del-btn'
+                  onClick={() => this.requestDeleteRing(ring)}
+                  data-toggle='tooltip' data-placement='bottom' title='Delete'>
+                  <i className='fa ei-button-icon ng-scope fa-trash-alt'></i>
+                </button>
+              )
+              : ''
+            }
 
-            {(() => {if (this.canEdit) return (
-              <input
-                id={`inpRingName_${ring.id}`}
-                type='text'
-                className='form-control form-control-sm ring-text-inp'
-                placeholder='rename'
-                onBlur={event => this.renameRing(ring.id, event.target.value)}
-                onKeyDown={event => {if (event.key === 'Enter') this.renameRing(ring.id, event.target.value) }}
-              />
-            )})()}
+            {(this.canEdit)
+              ? (
+                <input
+                  id={`inpRingName_${ring.id}`}
+                  type='text'
+                  className='form-control form-control-sm ring-text-inp'
+                  placeholder='rename'
+                  onBlur={event => this.renameRing(ring.id, event.target.value)}
+                  onKeyDown={event => { if (event.key === 'Enter') this.renameRing(ring.id, event.target.value) }}
+                />
+              )
+              : ''
+            }
 
           </div>
           <div className='ring-sub-table'>
@@ -95,17 +101,20 @@ export class RingEdit extends Component {
               <tbody>
                 {
                   ring.nodes.map((node, index) => (
-                    <tr className='m-2 p-2' key={ring.id+'_'+node.objectId}>
+                    <tr className='m-2 p-2' key={ring.id + '_' + node.objectId}>
                       <td>
                         {node.siteClli || node.objectId}
 
-                        {(() => {if (this.canEdit) return (
-                          <button className="btn btn-sm btn-outline-danger ring-del-btn" 
-                                  onClick={() => this.deleteNode(ring, node.objectId)}
-                                  data-toggle="tooltip" data-placement="bottom" title="Delete">
-                            <i className="fa ei-button-icon ng-scope fa-trash-alt"></i>
-                          </button>
-                        )})()}
+                        {(this.canEdit)
+                          ? (
+                            <button className='btn btn-sm btn-outline-danger ring-del-btn'
+                              onClick={() => this.deleteNode(ring, node.objectId)}
+                              data-toggle='tooltip' data-placement='bottom' title='Delete'>
+                              <i className='fa ei-button-icon ng-scope fa-trash-alt'></i>
+                            </button>
+                          )
+                          : ''
+                        }
 
                       </td>
                     </tr>
@@ -284,7 +293,6 @@ export class RingEdit extends Component {
 
   selectNewestRing () {
     var ringId = Object.keys(this.props.rings).sort().pop()
-    console.log(typeof ringId)
     this.props.setSelectedRingId(ringId)
   }
 
