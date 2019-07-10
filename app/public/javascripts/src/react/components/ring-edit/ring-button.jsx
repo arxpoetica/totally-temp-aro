@@ -48,8 +48,8 @@ export class RingButton extends ProgressButton {
   }
 
   // override
-  onRun () {
-    this.requestSubNet()
+  onRun(){
+    this.requestSubNet() 
   }
 
   // override
