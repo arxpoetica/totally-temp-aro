@@ -126,8 +126,12 @@ class ResourcePermissionsEditorController {
           'rolePermissions': this.defaultPermissions
         })
       }
+      this.newActorId = null;
     }
     this.onSelectionChanged()
+  }
+
+  onSelectionChanged () {
   }
 
   removeActor (row) {

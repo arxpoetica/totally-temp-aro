@@ -1803,8 +1803,13 @@ class State {
       // Then delete items from the tile data cache and the tile provider cache
       tileDataService.clearCacheInTileBox(layerNames, tileBox)
 
-      // Refresh map layers
-      service.requestMapLayerRefresh.next(null)
+      // Load list of modified features, and then refresh map layers. Note that this will make a call to
+      // load modified features EVERY TIME an invalidation message is received. As of now there is no other
+      // way to keep the data in-sync. Maybe we can get a flag from service as this is required only after
+      // we commit a transaction.
+      service.loadModifiedFeatures(service.plan.id)
+        .then(() => service.requestMapLayerRefresh.next(null))
+        .catch(err => console.error(err))
     }
 
     service.unsubscribeTileInvalidationHandler = SocketManager.subscribe('TILES_INVALIDATED', service.handleTileInvalidationMessage.bind(service))
