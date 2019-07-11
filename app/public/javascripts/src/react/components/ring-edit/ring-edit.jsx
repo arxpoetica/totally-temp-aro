@@ -7,7 +7,40 @@ import ringActions from './ring-edit-actions.js'
 import './ring-edit.css'
 import RingStatusTypes from './constants'
 import Ring from '../../common/ring'
+import RingOptions from './ring-options.jsx'
 
+// We are declaring the options here for now. Once service provides endpoints to read the options
+// back, this should move to the redux state.
+const ringOptions = {
+  maxLocationEdgeDistance: {
+    displayName: 'Max location-edge distance',
+    value: 400
+  },
+  locationBufferSize: {
+    displayName: 'Location buffer size',
+    value: 500
+  },
+  conduitBufferSize: {
+    displayName: 'Conduit buffer size',
+    value: 10
+  },
+  snappingDistance: {
+    displayName: 'Snapping distance',
+    value: 1
+  },
+  maxConnectionDistance: {
+    displayName: 'Connection distance',
+    value: 20
+  },
+  maxWormholeDistance: {
+    displayName: 'Wormhole distance',
+    value: 40
+  },
+  ringComplexityCount: {
+    displayName: 'Ring complexity',
+    value: 3000000
+  }
+}
 export class RingEdit extends Component {
   constructor (props) {
     super(props)
@@ -32,6 +65,7 @@ export class RingEdit extends Component {
           </tbody>
         </table>
       </div>
+      <RingOptions initialValues={ringOptions} enableReinitialize />
     </div>
   }
 
@@ -70,29 +104,29 @@ export class RingEdit extends Component {
           <div className='ring-table-item-title ring-table-item-title-selected clearfix'>
             {ring.name}
 
-            {(this.canEdit)
-              ? (
-                <button className='btn btn-sm btn-outline-danger ring-del-btn'
-                  onClick={() => this.requestDeleteRing(ring)}
-                  data-toggle='tooltip' data-placement='bottom' title='Delete'>
-                  <i className='fa ei-button-icon ng-scope fa-trash-alt'></i>
-                </button>
-              )
-              : ''
+            {this.canEdit
+              ? <button className='btn btn-sm btn-outline-danger ring-del-btn'
+                onClick={() => this.requestDeleteRing(ring)}
+                data-toggle='tooltip' data-placement='bottom' title='Delete'>
+                <i className='fa ei-button-icon ng-scope fa-trash-alt' />
+              </button>
+              : null
             }
 
-            {(this.canEdit)
-              ? (
-                <input
-                  id={`inpRingName_${ring.id}`}
-                  type='text'
-                  className='form-control form-control-sm ring-text-inp'
-                  placeholder='rename'
-                  onBlur={event => this.renameRing(ring.id, event.target.value)}
-                  onKeyDown={event => { if (event.key === 'Enter') this.renameRing(ring.id, event.target.value) }}
-                />
-              )
-              : ''
+            {this.canEdit
+              ? <input
+                id={`inpRingName_${ring.id}`}
+                type='text'
+                className='form-control form-control-sm ring-text-inp'
+                placeholder='rename'
+                onBlur={event => this.renameRing(ring.id, event.target.value)}
+                onKeyDown={event => {
+                  if (event.key === 'Enter') {
+                    this.renameRing(ring.id, event.target.value)
+                  }
+                }}
+              />
+              : null
             }
 
           </div>
@@ -105,15 +139,13 @@ export class RingEdit extends Component {
                       <td>
                         {node.siteClli || node.objectId}
 
-                        {(this.canEdit)
-                          ? (
-                            <button className='btn btn-sm btn-outline-danger ring-del-btn'
-                              onClick={() => this.deleteNode(ring, node.objectId)}
-                              data-toggle='tooltip' data-placement='bottom' title='Delete'>
-                              <i className='fa ei-button-icon ng-scope fa-trash-alt'></i>
-                            </button>
-                          )
-                          : ''
+                        {this.canEdit
+                          ? <button className='btn btn-sm btn-outline-danger ring-del-btn'
+                            onClick={() => this.deleteNode(ring, node.objectId)}
+                            data-toggle='tooltip' data-placement='bottom' title='Delete'>
+                            <i className='fa ei-button-icon ng-scope fa-trash-alt' />
+                          </button>
+                          : null
                         }
 
                       </td>
