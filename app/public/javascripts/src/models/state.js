@@ -1815,14 +1815,15 @@ class State {
     service.unsubscribeTileInvalidationHandler = SocketManager.subscribe('TILES_INVALIDATED', service.handleTileInvalidationMessage.bind(service))
 
     service.mergeToTarget = (nextState, actions) => {
-      const currentActivePlan = service.plan
+      const currentActivePlanId = service.plan && service.plan.id
+      const newActivePlanId = nextState.plan && nextState.plan.id
 
       // merge state and actions onto controller
       Object.assign(service, nextState)
       Object.assign(service, actions)
 
-      if ((currentActivePlan !== nextState.plan) && (nextState.plan)) {
-        // The active plan has changed
+      if ((currentActivePlanId !== newActivePlanId) && (nextState.plan)) {
+        // The active plan has changed. Note that we are comparing ids because a change in plan state also causes the plan object to update.
         service.onActivePlanChanged()
       }
     }
