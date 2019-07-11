@@ -17,14 +17,15 @@ class DataSourceUploadController {
       { id: 'polygon_equipment', label: 'Create Polygon From Equipment' },
       { id: 'draw_polygon', label: 'Draw service areas on map' }
     ]
+    // ToDo: get this from service odata once implemented 
     this.conduitSizes = [
-      { id: 1, label: 'Small' },
-      { id: 2, label: 'Medium' },
-      { id: 3, label: 'Large' }
+      { id: 1, name: 'small', description: 'Small' },
+      { id: 2, name: 'medium', description: 'Medium' },
+      { id: 3, name: 'large', description: 'Large' }
     ]
     this.saCreationType
     this.selectedEquipment
-    this.selectedConduitSize = this.conduitSizes[1].id
+    this.selectedConduitSize = this.conduitSizes[0].id
 
     // Get all spatial edge types from server
     this.spatialEdgeTypes = []
@@ -288,7 +289,7 @@ class DataSourceUploadController {
 
   setCableConstructionType () {
     var cableOptions = {
-      url: '/service/v1/library_cable',
+      url: `/service/v1/library_cable?defaultSizeCategory=${this.selectedConduitSize}`,
       method: 'POST',
       data: {
         libraryItem: {
@@ -297,8 +298,7 @@ class DataSourceUploadController {
         },
         param: {
           param_type: 'cable_param',
-          spatialEdgeType: this.selectedSpatialEdgeType.name,
-          sizeCategory: this.selectedConduitSize
+          spatialEdgeType: this.selectedSpatialEdgeType.name
         }
       },
       json: true
