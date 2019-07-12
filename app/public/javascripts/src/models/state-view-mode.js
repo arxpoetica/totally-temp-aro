@@ -48,13 +48,13 @@ class StateViewMode {
       })
   }
 
-  static loadListOfSAPlanTags ($http, state, filterObj, ishardreload) {
+  static loadListOfSAPlanTags ($http, state, dataItems, filterObj, ishardreload) {
     const MAX_SERVICE_AREAS_FROM_ODATA = 10
     // var filter = "layer/id eq 1"
     var libraryItems = []
     var filter = ''
 
-    var selectedServiceLayerLibraries = state.dataItems && state.dataItems.service_layer && state.dataItems.service_layer.selectedLibraryItems
+    var selectedServiceLayerLibraries = dataItems && dataItems.service_layer && dataItems.service_layer.selectedLibraryItems
     if (selectedServiceLayerLibraries) libraryItems = selectedServiceLayerLibraries.map(selectedLibraryItem => selectedLibraryItem.name)
     if (libraryItems.length > 0) {
       // Filter using selected serviceLayer id

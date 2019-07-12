@@ -663,89 +663,6 @@ class State {
       })
     }
 
-    service.loadPlanDataSelectionFromServer = () => {
-      if (!service.plan) {
-        return Promise.resolve()
-      }
-
-      var currentPlan = service.plan
-      var promises = [
-        $http.get('/service/odata/datatypeentity'),
-        $http.get(`/service/v1/library-entry`),
-        $http.get(`/service/v1/plan/${currentPlan.id}/configuration`)
-      ]
-
-      return Promise.all(promises)
-        .then((results) => {
-          // Results will be returned in the same order as the promises array
-          var dataTypeEntityResult = results[0].data
-          var libraryResult = results[1].data
-          var configurationResult = results[2].data
-
-          service.uploadDataSources = []
-          dataTypeEntityResult.forEach((dataTypeEntity) => {
-            if (dataTypeEntity.uploadSupported) {
-              /*
-              service.uploadDataSources.push({
-                id: dataTypeEntity.id,
-                label: dataTypeEntity.description,
-                name: dataTypeEntity.name
-              })
-              */
-
-              dataTypeEntity.label = dataTypeEntity.description
-              service.uploadDataSources.push(dataTypeEntity)
-            }
-          })
-
-          var newDataItems = {}
-          dataTypeEntityResult.forEach((dataTypeEntity) => {
-            if (dataTypeEntity.maxValue > 0) {
-              newDataItems[dataTypeEntity.name] = {
-                id: dataTypeEntity.id,
-                description: dataTypeEntity.description,
-                minValue: dataTypeEntity.minValue,
-                maxValue: dataTypeEntity.maxValue,
-                uploadSupported: dataTypeEntity.uploadSupported,
-                isMinValueSelectionValid: true,
-                isMaxValueSelectionValid: true,
-                selectedLibraryItems: [],
-                allLibraryItems: []
-              }
-            }
-          })
-
-          // For each data item, construct the list of all available library items
-          Object.keys(newDataItems).forEach((dataItemKey) => {
-            // Add the list of all library items for this data type
-            libraryResult.forEach((libraryItem) => {
-              if (libraryItem.dataType === dataItemKey) {
-                newDataItems[dataItemKey].allLibraryItems.push(libraryItem)
-              }
-            })
-          })
-
-          // For each data item, construct the list of selected library items
-          configurationResult.configurationItems.forEach((configurationItem) => {
-            // For this configuration item, find the data item based on the dataType
-            var dataItem = newDataItems[configurationItem.dataType]
-            // Find the item from the allLibraryItems based on the library id
-            var selectedLibraryItems = configurationItem.libraryItems
-            selectedLibraryItems.forEach((selectedLibraryItem) => {
-              var matchedLibraryItem = dataItem.allLibraryItems.filter((libraryItem) => libraryItem.identifier === selectedLibraryItem.identifier)
-              dataItem.selectedLibraryItems = dataItem.selectedLibraryItems.concat(matchedLibraryItem) // Technically there will be only one matched item
-            })
-          })
-
-          service.dataItems = newDataItems
-          service.pristineDataItems = angular.copy(service.dataItems)
-          service.dataItemsChanged.next(service.dataItems)
-          // get the service area for selected service layer datasource
-          service.StateViewMode.loadListOfSAPlanTags($http, service, '', true)
-          return Promise.resolve()
-        })
-    }
-
     // Shows the modal for editing plan resources
     service.showPlanResourceEditor = (resourceKey) => {
       service.editingPlanResourceKey = resourceKey
@@ -1090,13 +1007,11 @@ class State {
 
     // Load the plan inputs for the given plan and populate them in state
     service.loadPlanInputs = (planId) => {
-      var userId = service.loggedInUser.id
       return $http.get(`/service/v1/plan/${planId}/inputs`)
         .then((result) => {
           var planInputs = Object.keys(result.data).length > 0 ? result.data : service.getDefaultPlanInputs()
           stateSerializationHelper.loadStateFromJSON(service, service.getDispatchers(), planInputs)
           return Promise.all([
-            service.loadPlanDataSelectionFromServer(),
             service.loadPlanResourceSelectionFromServer(),
             service.loadNetworkConfigurationFromServer()
           ])
@@ -1825,6 +1740,7 @@ class State {
     service.mergeToTarget = (nextState, actions) => {
       const currentActivePlanId = service.plan && service.plan.id
       const newActivePlanId = nextState.plan && nextState.plan.id
+      const oldDataItems = service.dataItems
 
       // merge state and actions onto controller
       Object.assign(service, nextState)
@@ -1833,6 +1749,9 @@ class State {
       if ((currentActivePlanId !== newActivePlanId) && (nextState.plan)) {
         // The active plan has changed. Note that we are comparing ids because a change in plan state also causes the plan object to update.
         service.onActivePlanChanged()
+      }
+      if (oldDataItems !== nextState.dataItems) {
+        service.StateViewMode.loadListOfSAPlanTags($http, service, nextState.dataItems, '', true)
       }
     }
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(service.mergeToTarget.bind(service))

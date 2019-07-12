@@ -46,7 +46,7 @@
       search-property="code"
       search-list="$ctrl.state.listOfServiceAreaTags"
       apply-search="$ctrl.applySearchFilter(selectedFilters, 'svc')"
-      refresh-tag-list="$ctrl.state.StateViewMode.loadListOfSAPlanTags($ctrl.$http,$ctrl.state,searchObj)"></plan-search-filter>
+      refresh-tag-list="$ctrl.state.StateViewMode.loadListOfSAPlanTags($ctrl.$http, $ctrl.state, $ctrl.dataItems, searchObj)"></plan-search-filter>
     <plan-search-filter style="flex: 0 1 auto;"
       object-name="Creator"
       search-property="fullName"
