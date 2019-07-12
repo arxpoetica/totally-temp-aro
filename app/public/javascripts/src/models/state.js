@@ -929,7 +929,6 @@ class State {
         })
         .then((address) => {
           plan.areaName = address
-          service.requestDestroyMapOverlay.next(null) // Make sure to destroy the map overlay before panning/zooming
           service.requestSetMapCenter.next({ latitude: plan.latitude, longitude: plan.longitude })
           service.requestSetMapZoom.next(plan.zoomIndex)
           return Promise.resolve()
