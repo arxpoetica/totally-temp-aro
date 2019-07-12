@@ -8,6 +8,7 @@
             <aro-multi-select datasource-type={{itemKey}}
                               model="itemValue.selectedLibraryItems"
                               all-items="itemValue.allLibraryItems"
+                              track-by="identifier"
                               selection-changed="$ctrl.onSelectionChanged(dataSource)"
                               style="flex: 1 1 auto;">
             </aro-multi-select>
