@@ -26,6 +26,26 @@ function setDataItems (state, dataItems, uploadDataSources) {
   }
 }
 
+function setSelectedDataItems (state, dataItemKey, selectedLibraryItems) {
+  return { ...state,
+    dataItems: { ...state.dataItems,
+      [dataItemKey]: { ...state.dataItems[dataItemKey],
+        selectedLibraryItems: [].concat(selectedLibraryItems)
+      }
+    }
+  }
+}
+
+function setAllLibraryItems (state, dataItemKey, allLibraryItems) {
+  return { ...state,
+    dataItems: { ...state.dataItems,
+      [dataItemKey]: { ...state.dataItems[dataItemKey],
+        allLibraryItems: [].concat(allLibraryItems)
+      }
+    }
+  }
+}
+
 function planReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.PLAN_SET_ACTIVE_PLAN:
@@ -36,6 +56,12 @@ function planReducer (state = defaultState, action) {
 
     case Actions.PLAN_SET_DATA_ITEMS:
       return setDataItems(state, action.payload.dataItems, action.payload.uploadDataSources)
+
+    case Actions.PLAN_SET_SELECTED_DATA_ITEMS:
+      return setSelectedDataItems(state, action.payload.dataItemKey, action.payload.selectedLibraryItems)
+
+    case Actions.PLAN_SET_ALL_LIBRARY_ITEMS:
+      return setAllLibraryItems(state, action.payload.dataItemKey, action.payload.allLibraryItems)
 
     default:
       return state

@@ -1,7 +1,7 @@
 <div style="position: relative;">
   <table class="table table-sm table-striped">
     <tbody>
-      <tr ng-repeat="(itemKey, itemValue) in $ctrl.allDataItems" ng-if="!itemValue.hidden">
+      <tr ng-repeat="(itemKey, itemValue) in $ctrl.dataItems" ng-if="!itemValue.hidden">
         <td style="vertical-align: middle">{{itemValue.description}}</td>
         <td>
           <div style="display:flex">

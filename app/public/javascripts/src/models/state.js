@@ -737,30 +737,6 @@ class State {
         .catch((err) => console.log(err))
     }
 
-    // Saves the plan Data Selection configuration to the server
-    service.saveDataSelectionToServer = () => {
-      service.pristineDataItems = angular.copy(service.dataItems)
-      var putBody = {
-        configurationItems: [],
-        resourceConfigItems: []
-      }
-
-      Object.keys(service.dataItems).forEach((dataItemKey) => {
-        // An example of dataItemKey is 'location'
-        if (service.dataItems[dataItemKey].selectedLibraryItems.length > 0) {
-          var configurationItem = {
-            dataType: dataItemKey,
-            libraryItems: service.dataItems[dataItemKey].selectedLibraryItems
-          }
-          putBody.configurationItems.push(configurationItem)
-        }
-      })
-
-      var currentPlan = service.plan
-      // Save the configuration to the server
-      $http.put(`/service/v1/plan/${currentPlan.id}/configuration`, putBody)
-    }
-
     // Save the plan resource selections to the server
     service.savePlanResourceSelectionToServer = () => {
       service.pristineResourceItems = angular.copy(service.resourceItems)

@@ -124,8 +124,30 @@ function setActivePlan (plan) {
   }
 }
 
+function selectDataItems (dataItemKey, selectedLibraryItems) {
+  return {
+    type: Actions.PLAN_SET_SELECTED_DATA_ITEMS,
+    payload: {
+      dataItemKey,
+      selectedLibraryItems
+    }
+  }
+}
+
+function setAllLibraryItems (dataItemKey, allLibraryItems) {
+  return {
+    type: Actions.PLAN_SET_ALL_LIBRARY_ITEMS,
+    payload: {
+      dataItemKey,
+      allLibraryItems
+    }
+  }
+}
+
 export default {
   setActivePlan,
   setActivePlanState,
-  loadPlan
+  loadPlan,
+  selectDataItems,
+  setAllLibraryItems
 }

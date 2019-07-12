@@ -1,7 +1,7 @@
 import Constants from '../../common/constants'
 
 class PlanSettingsController {
-  constructor ($http, state, $timeout, tracker) {
+  constructor ($http, state, $timeout, $ngRedux, tracker) {
     this.$http = $http
     this.state = state
     this.currentUser = state.loggedInUser
@@ -12,10 +12,11 @@ class PlanSettingsController {
     tracker.trackEvent(tracker.CATEGORIES.ENTER_PLAN_SETTINGS_MODE, tracker.ACTIONS.CLICK)
     this.childSettingsPanels = {}
     this.resetChildSettingsPanels()
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }
 
   $onInit () {
-    this.childSettingsPanels.dataSelection.isChanged = !angular.equals(this.state.dataItems, this.state.pristineDataItems)
+    this.childSettingsPanels.dataSelection.isChanged = !angular.equals(this.dataItems, this.state.pristineDataItems)
     this.childSettingsPanels.resourceSelection.isChanged = !angular.equals(this.state.resourceItems, this.state.pristineResourceItems)
     this.childSettingsPanels.networkConfiguration.isChanged = !angular.equals(this.state.networkConfigurations, this.state.pristineNetworkConfigurations)
 
@@ -90,7 +91,7 @@ class PlanSettingsController {
     this.isSaveEnabled = false
     // for each child save and on success rest the object
     if (this.childSettingsPanels.dataSelection.isChanged && this.childSettingsPanels.dataSelection.isValid) {
-      this.state.saveDataSelectionToServer()
+      this.saveDataSelectionToServer()
       this.resetChildSettingsPanels('dataSelection')
       // Clear the selected Service area when modify the optimization
       this.clearAllSelectedSA()
@@ -107,15 +108,34 @@ class PlanSettingsController {
     }
   }
 
+  // Saves the plan Data Selection configuration to the server
+  saveDataSelectionToServer () {
+    var putBody = {
+      configurationItems: [],
+      resourceConfigItems: []
+    }
+
+    Object.keys(this.dataItems).forEach(dataItemKey => {
+      // An example of dataItemKey is 'location'
+      if (this.dataItems[dataItemKey].selectedLibraryItems.length > 0) {
+        var configurationItem = {
+          dataType: dataItemKey,
+          libraryItems: this.dataItems[dataItemKey].selectedLibraryItems
+        }
+        putBody.configurationItems.push(configurationItem)
+      }
+    })
+
+    // Save the configuration to the server
+    this.$http.put(`/service/v1/plan/${this.planId}/configuration`, putBody)
+  }
+
   discardChanges () {
     this.isSaveEnabled = false
     this.resetChildSettingsPanels()
 
     this.state.networkConfigurations = angular.copy(this.state.pristineNetworkConfigurations)
     this.state.resourceItems = angular.copy(this.state.pristineResourceItems)
-
-    this.state.dataItems = angular.copy(this.state.pristineDataItems)
-    this.state.dataItemsChanged.next(this.state.dataItems)
   }
 
   clearAllSelectedSA () {
@@ -191,10 +211,24 @@ class PlanSettingsController {
         })
       }
     }
+    this.unsubscribeRedux()
+  }
+
+  mapStateToThis (reduxState) {
+    return {
+      dataItems: reduxState.plan.dataItems,
+      planId: reduxState.plan.activePlan.id,
+    }
+  }
+
+  mapDispatchToTarget (dispatch) {
+    return {
+      selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems))
+    }
   }
 }
 
-PlanSettingsController.$inject = ['$http', 'state', '$timeout', 'tracker']
+PlanSettingsController.$inject = ['$http', 'state', '$timeout', '$ngRedux', 'tracker']
 
 let planSettings = {
   templateUrl: '/components/sidebar/plan-settings/plan-settings.html',
