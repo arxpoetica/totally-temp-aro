@@ -1,6 +1,6 @@
 
 class PlanProjectConfigurationController {
-  constructor ($http, $timeout, state) {
+  constructor ($http, $timeout, $ngRedux, state) {
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
@@ -19,6 +19,7 @@ class PlanProjectConfigurationController {
       COPY_PLAN_TO_PROJECT: 'COPY_PLAN_TO_PROJECT'
     })
     this.selectedMode = this.modes.HOME
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }
 
   $onInit () {
@@ -91,12 +92,12 @@ class PlanProjectConfigurationController {
       resourceConfigItems: []
     }
 
-    Object.keys(this.state.dataItems).forEach((dataItemKey) => {
+    Object.keys(this.dataItems).forEach((dataItemKey) => {
       // An example of dataItemKey is 'location'
-      if (this.state.dataItems[dataItemKey].selectedLibraryItems.length > 0) {
+      if (this.dataItems[dataItemKey].selectedLibraryItems.length > 0) {
         var configurationItem = {
           dataType: dataItemKey,
-          libraryItems: this.state.dataItems[dataItemKey].selectedLibraryItems
+          libraryItems: this.dataItems[dataItemKey].selectedLibraryItems
         }
         putBody.configurationItems.push(configurationItem)
       }
@@ -118,9 +119,24 @@ class PlanProjectConfigurationController {
     // Save the configuration to the project
     return this.$http.put(`/service/v1/project-template/${this.selectedProjectId}/configuration`, putBody)
   }
+
+  mapStateToThis (reduxState) {
+    return {
+      dataItems: reduxState.plan.dataItems
+    }
+  }
+
+  mapDispatchToTarget (dispatch) {
+    return {
+    }
+  }
+
+  $onDestroy () {
+    this.unsubscribeRedux()
+  }
 }
 
-PlanProjectConfigurationController.$inject = ['$http', '$timeout', 'state']
+PlanProjectConfigurationController.$inject = ['$http', '$timeout', '$ngRedux', 'state']
 
 let planProjectConfiguration = {
   templateUrl: '/components/sidebar/plan-settings/plan-project-configuration/plan-project-configuration.html',

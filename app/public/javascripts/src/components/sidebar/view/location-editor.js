@@ -71,7 +71,7 @@ class LocationEditorController {
     this.currentTransaction = null
     this.lastUsedNumberOfLocations = 1
     // See if we have an existing transaction for the currently selected location library
-    var selectedLibraryItem = this.state.dataItems.location.selectedLibraryItems[0]
+    var selectedLibraryItem = this.dataItems.location.selectedLibraryItems[0]
     this.$http.get(`/service/library/transaction`)
       .then((result) => {
         var existingTransactions = result.data.filter((item) => item.libraryId === selectedLibraryItem.identifier)
@@ -370,9 +370,10 @@ class LocationEditorController {
     this.isExpandLocAttributes = false
   }
 
-  mapStateToThis (state) {
+  mapStateToThis (reduxState) {
     return {
-      locationLayers: getLocationLayersList(state)
+      locationLayers: getLocationLayersList(reduxState),
+      dataItems: reduxState.plan.dataItems
     }
   }
 

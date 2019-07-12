@@ -26,12 +26,7 @@ class CablesController {
       this.updateMapLayers()
     })
 
-    // Update map layers when the dataItems property of state changes
-    state.dataItemsChanged
-      .skip(1)
-      .subscribe((newValue) => this.updateMapLayers())
-
-    // Update map layers when the dataItems property of state changes
+    // Update map layers when the view settings change
     state.viewSettingsChanged
       .skip(1)
       .subscribe((newValue) => this.updateMapLayers())
@@ -105,8 +100,8 @@ class CablesController {
         this.mapRef.getZoom() > networkEquipment.aggregateZoomThreshold) {
         if (this.state.equipmentLayerTypeVisibility.existing && networkEquipment.checked) {
           // We need to show the existing network equipment. Loop through all the selected library ids.
-          this.state.dataItems && this.state.dataItems[networkEquipment.dataItemKey] &&
-            this.state.dataItems[networkEquipment.dataItemKey].selectedLibraryItems.forEach((selectedLibraryItem) => {
+          this.dataItems && this.dataItems[networkEquipment.dataItemKey] &&
+            this.dataItems[networkEquipment.dataItemKey].selectedLibraryItems.forEach((selectedLibraryItem) => {
               var mapLayerKey = `${categoryItemKey}_existing_${selectedLibraryItem.identifier}`
               mapLayers[mapLayerKey] = this.createSingleMapLayer(categoryItemKey, categoryType, networkEquipment, 'existing', selectedLibraryItem.identifier, null)
               createdMapLayerKeys.add(mapLayerKey)
@@ -174,6 +169,7 @@ class CablesController {
     return {
       networkEquipmentLayers: getNetworkEquipmentLayersList(reduxState),
       cablesArray: getCablesArray(reduxState),
+      dataItems: reduxState.plan.dataItems,
       mapRef: reduxState.map.googleMaps
     }
   }
@@ -193,12 +189,15 @@ class CablesController {
 
   mergeToTarget (nextState, actions) {
     const currentNetworkEquipmentLayers = this.networkEquipmentLayers
+    const currentSelectedLibrary = this.dataItems && this.dataItems.fiber && this.dataItems.fiber.selectedLibraryItems
 
     // merge state and actions onto controller
     Object.assign(this, nextState)
     Object.assign(this, actions)
 
-    if (currentNetworkEquipmentLayers !== nextState.networkEquipmentLayers) {
+    const newSelectedLibrary = this.dataItems && this.dataItems.fiber && this.dataItems.fiber.selectedLibraryItems
+    if ((currentNetworkEquipmentLayers !== nextState.networkEquipmentLayers) ||
+      (currentSelectedLibrary !== newSelectedLibrary)) {
       this.updateMapLayers()
     }
   }

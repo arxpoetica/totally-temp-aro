@@ -43,11 +43,6 @@ class LocationsController {
     state.mapTileOptions
       .subscribe((newValue) => this.updateMapLayers())
 
-    // Update map layers when the dataItems property of state changes
-    state.dataItemsChanged
-      .skip(1)
-      .subscribe((newValue) => this.updateMapLayers())
-
     // Update map layers when the display mode button changes
     state.selectedDisplayMode.subscribe((newValue) => this.updateMapLayers())
 
@@ -139,7 +134,7 @@ class LocationsController {
     }
 
     // Add map layers based on the selection
-    var selectedLocationLibraries = this.state.dataItems && this.state.dataItems.location && this.state.dataItems.location.selectedLibraryItems
+    var selectedLocationLibraries = this.dataItems && this.dataItems.location && this.dataItems.location.selectedLibraryItems
     if (selectedLocationLibraries) {
       selectedLocationLibraries.forEach((selectedLocationLibrary) => {
         // Loop through the location types
@@ -246,9 +241,10 @@ class LocationsController {
     this.updateMapLayers()
   }
 
-  mapStateToThis (state) {
+  mapStateToThis (reduxState) {
     return {
-      locationLayers: getLocationLayersList(state)
+      locationLayers: getLocationLayersList(reduxState),
+      dataItems: reduxState.plan.dataItems
     }
   }
 
@@ -263,12 +259,15 @@ class LocationsController {
 
   mergeToTarget (nextState, actions) {
     const currentLocationLayers = this.locationLayers
+    const currentSelectedLibrary = this.dataItems && this.dataItems.location && this.dataItems.location.selectedLibraryItems
 
     // merge state and actions onto controller
     Object.assign(this, nextState)
     Object.assign(this, actions)
 
-    if (currentLocationLayers !== nextState.locationLayers) {
+    const nextSelectedLibrary = this.dataItems && this.dataItems.location && this.dataItems.location.selectedLibraryItems
+    if ((currentLocationLayers !== nextState.locationLayers) ||
+      (currentSelectedLibrary !== nextSelectedLibrary)) {
       this.updateMapLayers()
     }
   }
