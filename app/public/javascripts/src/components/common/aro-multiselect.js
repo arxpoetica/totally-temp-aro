@@ -58,7 +58,7 @@ let aroMultiSelect = {
     model: '=', // Will be passed in as a ng-model to our select. Two Way binding for now!
     allItems: '<', // All the items to show.
     selectionChanged: '&', // [Optional] Called when the selected items change
-    trackBy: '<', // [Optional] The property for the items to be used for tracking by. Defaults to 'id'
+    trackBy: '@', // [Optional] The property for the items to be used for tracking by. Defaults to 'id'
     enableSearch: '@',
     enableHtml: '@',
     placeholder: '@' // [optional] placeholder to show
