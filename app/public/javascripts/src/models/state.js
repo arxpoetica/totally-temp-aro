@@ -1068,11 +1068,19 @@ class State {
       service.currentPlanTags = service.listOfTags.filter(tag => _.contains(service.plan.tagMapping.global, tag.id))
       service.currentPlanServiceAreaTags = service.listOfServiceAreaTags.filter(tag => _.contains(service.plan.tagMapping.linkTags.serviceAreaIds, tag.id))
 
+      // Logic for setting plan center in different scenarios:
+      // 1. The user logs in to the app from the login page: User will be in ephemeral plan, use the default plan location for the user.
+      // 2. The user refreshes the browser when in a saved plan: User will be in ephemeral plan, use the default plan location for the user.
+      // 3. The user refreshes the browser when in an ephemeral plan: User will be in ephemeral plan, use the default plan location for the user.
+      // 4. The user creates a new ephemeral plan: Map should remain where it is (no pan, no zoom)
+      // 5. The user opens a saved plan: The plan location saved in the plan.
+
       return service.loadPlanInputs(service.plan.id)
         .then(() => {
+          const planCoordinates = service.plan.ephemeral ? service.defaultPlanCoordinates : { latitude: service.plan.latitude, longitude: service.plan.longitude }
           service.requestSetMapCenter.next({
-            latitude: service.plan.latitude || service.defaultPlanCoordinates.latitude,
-            longitude: service.plan.longitude || service.defaultPlanCoordinates.longitude
+            latitude: planCoordinates.latitude || service.defaultPlanCoordinates.latitude,
+            longitude: planCoordinates.longitude || service.defaultPlanCoordinates.longitude
           })
           service.requestSetMapZoom.next(service.plan.zoomIndex || service.defaultPlanCoordinates.zoom)
           service.recreateTilesAndCache()
@@ -1833,14 +1841,15 @@ class State {
     service.unsubscribeTileInvalidationHandler = SocketManager.subscribe('TILES_INVALIDATED', service.handleTileInvalidationMessage.bind(service))
 
     service.mergeToTarget = (nextState, actions) => {
-      const currentActivePlan = service.plan
+      const currentActivePlanId = service.plan && service.plan.id
+      const newActivePlanId = nextState.plan && nextState.plan.id
 
       // merge state and actions onto controller
       Object.assign(service, nextState)
       Object.assign(service, actions)
 
-      if ((currentActivePlan !== nextState.plan) && (nextState.plan)) {
-        // The active plan has changed
+      if ((currentActivePlanId !== newActivePlanId) && (nextState.plan)) {
+        // The active plan has changed. Note that we are comparing ids because a change in plan state also causes the plan object to update.
         service.onActivePlanChanged()
       }
     }
