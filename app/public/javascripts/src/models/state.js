@@ -624,7 +624,7 @@ class State {
     service.loadOptimizationOptionsFromJSON = (json) => {
       // Note that we are NOT returning the state (the state is set after the call), but a promise
       // that resolves once all the geographies have been loaded
-      return stateSerializationHelper.loadStateFromJSON(service, service.getDispatchers(), json)
+      return stateSerializationHelper.loadStateFromJSON(service, $ngRedux.getState(), service.getDispatchers(), json)
     }
 
     $document.ready(() => {
@@ -986,7 +986,7 @@ class State {
       return $http.get(`/service/v1/plan/${planId}/inputs`)
         .then((result) => {
           var planInputs = Object.keys(result.data).length > 0 ? result.data : service.getDefaultPlanInputs()
-          stateSerializationHelper.loadStateFromJSON(service, service.getDispatchers(), planInputs)
+          stateSerializationHelper.loadStateFromJSON(service, $ngRedux.getState(), service.getDispatchers(), planInputs)
           return Promise.all([
             service.loadPlanResourceSelectionFromServer(),
             service.loadNetworkConfigurationFromServer()
@@ -1684,7 +1684,8 @@ class State {
       return {
         setSelectionTypeById: service.setSelectionTypeById,
         addPlanTargets: service.addPlanTargets,
-        removePlanTargets: service.removePlanTargets
+        removePlanTargets: service.removePlanTargets,
+        selectDataItems: service.selectDataItems
       }
     }
 
@@ -1760,8 +1761,9 @@ class State {
       addPlanTargets: (planId, planTargets) => dispatch(SelectionActions.addPlanTargets(planId, planTargets)),
       removePlanTargets: (planId, planTargets) => dispatch(SelectionActions.removePlanTargets(planId, planTargets)),
       setActivePlanState: planState => dispatch(PlanActions.setActivePlanState(planState)),
+      selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems)),
       setGoogleMapsReference: mapRef => dispatch(MapActions.setGoogleMapsReference(mapRef)),
-      updateShowSiteBoundary: isVisible => dispatch(MapLayerActions.setShowSiteBoundary(isVisible)), 
+      updateShowSiteBoundary: isVisible => dispatch(MapLayerActions.setShowSiteBoundary(isVisible)),
       onFeatureSelectedRedux: features => dispatch(RingEditActions.onFeatureSelected(features))
     }
   }
