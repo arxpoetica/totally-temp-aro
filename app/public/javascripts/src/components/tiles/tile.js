@@ -292,35 +292,26 @@ class TileComponentController {
           var boundsByNetworkNodeObjectId = {}
           featureCats.forEach((cat) => {
             hitFeatures[cat].forEach((feature) => {
-              var objectId = null
+              var menuItemFeatureId = null
 
               if (feature.hasOwnProperty('object_id')) {
-                objectId = feature.objectId = feature.object_id
+                menuItemFeatureId = feature.objectId = feature.object_id
               } else if (feature.hasOwnProperty('objectId')) {
-                objectId = feature.objectId
+                menuItemFeatureId = feature.objectId
               } else if (feature.hasOwnProperty('location_id')) {
-                objectId = feature.location_id
+                menuItemFeatureId = feature.location_id
+              } else if (feature._data_type === 'census_block') {
+                menuItemFeatureId = `census_block_${feature.id}`
               }
 
               // if ( feature.hasOwnProperty('objectId') && !menuItemsById.hasOwnProperty(feature.objectId) ){
-              if (objectId && !menuItemsById.hasOwnProperty(objectId)) {
+              if (menuItemFeatureId && !menuItemsById.menuItemFeatureId) {
               // ToDo: formalize this
                 var singleHitFeature = {}
                 singleHitFeature.latLng = hitFeatures.latLng
                 singleHitFeature[cat] = [feature]
 
-                var data = {
-                // 'objectId': feature.objectId,
-                  'objectId': objectId,
-                  // 'dataTypeList': dataTypeList,
-                  'feature': feature,
-                  'latLng': hitFeatures.latLng
-                }
-
                 var options = []
-                // options.push(this.contextMenuService.makeItemOption('Select', 'fa-eye', () => {
-                //   this.state.mapFeaturesSelectedEvent.next(singleHitFeature)
-                // }))
                 options.push(new MenuAction(MenuActionTypes.SELECT, () => this.state.mapFeaturesSelectedEvent.next(singleHitFeature)))
 
                 // var menuItem = this.contextMenuService.makeMenuItem(name, data, options)
@@ -329,7 +320,7 @@ class TileComponentController {
                 var menuItem = new MenuItem(menuItemType, name, options)
                 menuItems.push(menuItem)
                 // menuItemsById[feature.objectId] = menuItem
-                menuItemsById[objectId] = menuItem
+                menuItemsById[menuItemFeatureId] = menuItem
                 if (feature.hasOwnProperty('network_node_object_id')) {
                   bounds.push(feature)
                   boundsByNetworkNodeObjectId[feature.network_node_object_id] = menuItem
