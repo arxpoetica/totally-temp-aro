@@ -70,7 +70,8 @@ class Utilities {
       location: MenuItemTypes.LOCATION,
       equipment: MenuItemTypes.EQUIPMENT,
       equipment_boundary: MenuItemTypes.BOUNDARY,
-      service_layer: MenuItemTypes.SERVICE_AREA
+      service_layer: MenuItemTypes.SERVICE_AREA,
+      census: MenuItemTypes.CENSUS
     }
     return dataTypeToMenuItemType[dataType]
   }
