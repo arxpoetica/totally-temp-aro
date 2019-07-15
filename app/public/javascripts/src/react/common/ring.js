@@ -1,5 +1,5 @@
 /* global google */
-import RingUtils from '../components/ring-edit/ring-utils'
+import RingActions from '../components/ring-edit/ring-edit-actions'
 import uuidv4 from 'uuid/v4'
 
 export default class Ring {
@@ -8,7 +8,6 @@ export default class Ring {
     this.name = name || id
     this.nodes = []
     this.nodesById = {}
-    // this.exchangeLinks = []
     this.linkData = []
   }
 
@@ -22,7 +21,7 @@ export default class Ring {
       })
       var promisses = []
       nodeIds.forEach(id => {
-        promisses.push(RingUtils.getEquipmentDataPromise(id, planId, userId))
+        promisses.push(RingActions.getEquipmentDataPromise(id, planId, userId))
       })
 
       return Promise.all(promisses)
@@ -61,23 +60,11 @@ export default class Ring {
         resolve(parsedRing)
       }).catch(err => console.error(err))
     }
-
-    // return parsedRing
   }
-
-  // todo: each object can keep track of their own polygon
 
   addNode (node) {
     var linkId = uuidv4() // ToDo: use /src/components/common/utilitias.js > getUUID()
-    // todo use helper class
     if (this.nodes.length > 0) {
-      /*
-      this.exchangeLinks.push({
-        exchangeLinkOid: linkId,
-        fromOid: this.nodes[this.nodes.length - 1].objectId,
-        toOid: node.objectId
-      })
-      */
       var fromNode = this.nodes[this.nodes.length - 1]
       this.linkData.push({
         exchangeLinkOid: linkId,
@@ -96,15 +83,8 @@ export default class Ring {
     delete this.nodesById[nodeId]
     if (nodeIndex >= this.linkData.length) {
       // must be the last one, thus no From
-      // this.exchangeLinks.pop()
       this.linkData.pop()
     } else {
-      /*
-      this.exchangeLinks.splice(nodeIndex, 1)
-      if (nodeIndex > 0) {
-        this.exchangeLinks[nodeIndex - 1].toOid = this.nodes[nodeIndex].objectId
-      }
-      */
       this.linkData.splice(nodeIndex, 1)
       if (nodeIndex > 0) {
         var link = this.linkData[nodeIndex - 1]
@@ -185,8 +165,6 @@ export default class Ring {
     cloneRing.nodes = this.nodes.slice(0) // keep references
     cloneRing.linkData = this.linkData.splice(0)
     cloneRing.nodesById = { ...this.nodesById }
-    // cloneRing.exchangeLinks = JSON.parse(JSON.stringify(this.exchangeLinks)) // do NOT keep references
     return cloneRing
   }
-  // todo make helper classes
 }
