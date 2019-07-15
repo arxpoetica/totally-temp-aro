@@ -2,7 +2,8 @@ export const MenuItemTypes = Object.freeze({
   BOUNDARY: 'BOUNDARY',
   EQUIPMENT: 'EQUIPMENT',
   LOCATION: 'LOCATION',
-  SERVICE_AREA: 'SERVICE_AREA'
+  SERVICE_AREA: 'SERVICE_AREA',
+  CENSUS: 'CENSUS'
 })
 
 export default class MenuItem {
