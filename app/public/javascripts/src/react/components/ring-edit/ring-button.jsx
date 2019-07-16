@@ -79,7 +79,7 @@ const mapStateToProps = state => {
     planId: state.plan.activePlan && state.plan.activePlan.id,
     projectId: state.user.loggedInUser.projectId,
     rings: state.ringEdit.rings,
-    ringOptions: selector(state, 'spatialEdgeType', 'snappingDistance', 'maxConnectionDistance', 'maxWormholeDistance', 'ringComplexityCount', 'maxLocationEdgeDistance', 'locationBufferSize', 'conduitBufferSize'),
+    ringOptions: selector(state, 'spatialEdgeType', 'snappingDistance', 'maxConnectionDistance', 'maxWormholeDistance', 'ringComplexityCount', 'maxLocationEdgeDistance', 'locationBufferSize', 'conduitBufferSize', 'targetEdgeTypes'),
     mapLayers: state.mapLayers
   }
 }

@@ -39,7 +39,22 @@ const ringOptions = {
   ringComplexityCount: {
     displayName: 'Ring complexity',
     value: 3000000
+  }/*,
+  targetEdgeTypes: {
+    road: {
+      displayName: 'Road',
+      value: true
+    },
+    sewer: {
+      displayName: 'Sewer',
+      value: true
+    },
+    duct: {
+      displayName: 'Duct',
+      value: true
+    }
   }
+  */
 }
 export class RingEdit extends Component {
   constructor (props) {
