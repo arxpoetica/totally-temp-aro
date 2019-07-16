@@ -77,7 +77,7 @@ export class RingOptions extends Component {
       
     </div>
   }
-
+/*
   renderList () {
 
   }
@@ -114,6 +114,7 @@ export class RingOptions extends Component {
             </td>
           </tr>
   }
+  */
 }
 
 let RingOptionsForm = reduxForm({
