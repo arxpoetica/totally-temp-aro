@@ -27,7 +27,7 @@ export default class TransactionManager {
           return Promise.resolve({ data: transactionsForUserAndPlan[0] }) // Using {data:} so that the signature is consistent
         } else if (transactionsForPlan.length === 1) {
           // We have one open transaction for this plan, but it was not started by this user. Ask the user what to do.
-          return TransactionManager.stealOrRejectTransaction(transactionsForPlan[0])
+          return TransactionManager.stealOrRejectTransaction(transactionsForPlan[0], planId, userId)
         }
       })
       .catch((err) => {
