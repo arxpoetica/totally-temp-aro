@@ -19,7 +19,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     }
 
     addLocationTypesToBody(state, reduxState, optimizationBody)
-    addDataSelectionsToBody(state, optimizationBody)
+    addDataSelectionsToBody(state, reduxState.plan.dataItems, optimizationBody)
     addAlgorithmParametersToBody(state, optimizationBody)
     addFiberNetworkConstraintsToBody(state, optimizationBody)
     optimizationBody.generatedDataRequest = state.optimizationOptions.generatedDataRequest
@@ -65,13 +65,13 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   }
 
   // Add selected plan settings -> Data Selection to a POST body that we will send to aro-service for performing optimization
-  var addDataSelectionsToBody = (state, postBody) => {
+  var addDataSelectionsToBody = (state, dataItems, postBody) => {
     if (!postBody.overridenConfiguration) {
       postBody.overridenConfiguration = []
     }
 
-    Object.keys(state.dataItems).forEach((dataItemKey) => {
-      var dataItem = state.dataItems[dataItemKey]
+    Object.keys(dataItems).forEach((dataItemKey) => {
+      var dataItem = dataItems[dataItemKey]
       var libraryItems = []
       dataItem.selectedLibraryItems.forEach((selectedLibraryItem) => libraryItems.push({ identifier: selectedLibraryItem.identifier }))
       postBody.overridenConfiguration.push({
@@ -174,10 +174,10 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   // ------------------------------------------------------------------------------------------------------------------
 
   // Load optimization options from a JSON string
-  stateSerializationHelper.loadStateFromJSON = (state, dispatchers, planInputs) => {
+  stateSerializationHelper.loadStateFromJSON = (state, reduxState, dispatchers, planInputs) => {
     loadAnalysisTypeFromBody(state, planInputs)
-    loadLocationTypesFromBody(state, planInputs)
-    loadSelectedExistingFiberFromBody(state, planInputs)
+    loadLocationTypesFromBody(state, reduxState, dispatchers, planInputs)
+    loadSelectedExistingFiberFromBody(state, reduxState, dispatchers, planInputs)
     loadAlgorithmParametersFromBody(state, dispatchers, planInputs)
     loadFiberNetworkConstraintsFromBody(state, planInputs)
     loadTechnologiesFromBody(state, planInputs)
@@ -194,7 +194,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   }
 
   // Load location types from a POST body object that is sent to the optimization engine
-  var loadLocationTypesFromBody = (state, postBody) => {
+  var loadLocationTypesFromBody = (state, dataItems, dispatchers, postBody) => {
     state.locationLayers.forEach((locationLayer) => {
       const isVisible = (postBody.locationConstraints.locationTypes.indexOf(locationLayer.plannerKey) >= 0)
       state.setLayerVisibility(locationLayer, isVisible)
@@ -212,32 +212,34 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     }
     // Select data source ids from the list of all data sources
     var mapLibraryIdToLibrary = {}
-    if (state.dataItems && state.dataItems.location) {
-      state.dataItems.location.allLibraryItems.forEach((libraryItem) => {
+    if (dataItems && dataItems.location) {
+      dataItems.location.allLibraryItems.forEach((libraryItem) => {
         mapLibraryIdToLibrary[libraryItem.identifier] = libraryItem
       })
-      state.dataItems.location.selectedLibraryItems = []
-      libraryIdsToSelect.forEach((libraryId) => state.dataItems.location.selectedLibraryItems.push(mapLibraryIdToLibrary[libraryId]))
+      var selectedLibraryItems = []
+      libraryIdsToSelect.forEach((libraryId) => selectedLibraryItems.push(mapLibraryIdToLibrary[libraryId]))
+      dispatchers.selectDataItems('location', selectedLibraryItems)
     }
   }
 
   // Load the selected existing fiber from a POST body object that is sent to the optimization engine
-  var loadSelectedExistingFiberFromBody = (state, postBody) => {
-    if (!state.dataItems.fiber) {
+  var loadSelectedExistingFiberFromBody = (state, dataItems, dispatchers, postBody) => {
+    if (!dataItems.fiber) {
       return
     }
-    state.dataItems.fiber.selectedLibraryItems = []
     if (postBody.overridenConfiguration) {
+      var selectedLibraryItems = []
       postBody.overridenConfiguration.forEach((overridenConfiguration) => {
         if (overridenConfiguration.dataType === 'fiber') {
           overridenConfiguration.libraryItems.forEach((libraryItem) => {
-            var matchingFibers = state.dataItems.fiber.allLibraryItems.filter((item) => item.identifier === libraryItem.identifier)
+            var matchingFibers = dataItems.fiber.allLibraryItems.filter((item) => item.identifier === libraryItem.identifier)
             if (matchingFibers.length === 1) {
-              state.dataItems.fiber.selectedLibraryItems.push(matchingFibers[0])
+              selectedLibraryItems.push(matchingFibers[0])
             }
           })
         }
       })
+      dispatchers.selectDataItems('fiber', selectedLibraryItems)
     }
   }
 

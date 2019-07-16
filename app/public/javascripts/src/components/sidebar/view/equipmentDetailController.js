@@ -1,7 +1,7 @@
 import AroFeatureFactory from '../../../service-typegen/dist/AroFeatureFactory'
 
 class EquipmentDetailController {
-  constructor ($http, $timeout, state, tileDataService) {
+  constructor ($http, $timeout, $ngRedux, state, tileDataService) {
     this.angular = angular
     this.$http = $http
     this.$timeout = $timeout
@@ -78,12 +78,8 @@ class EquipmentDetailController {
         this.clearSelection()
       }
     })
-    /*
-    this.viewSeetingsSubscription = this.state.viewSettingsChanged.subscribe((change) => {
-      console.log(change)
-      this.checkForBounds()
-    })
-    */
+
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }
 
   clearSelection () {
@@ -232,9 +228,21 @@ class EquipmentDetailController {
     this.isComponentDestroyed = true
     this.mapFeatureSelectedSubscriber.unsubscribe()
     this.clearViewModeSubscription.unsubscribe()
+    this.unsubscribeRedux()
+  }
+
+  mapStateToThis (reduxState) {
+    return {
+      dataItems: reduxState.plan.dataItems
+    }
+  }
+
+  mapDispatchToTarget (dispatch) {
+    return {
+    }
   }
 }
 
-EquipmentDetailController.$inject = ['$http', '$timeout', 'state', 'tileDataService']
+EquipmentDetailController.$inject = ['$http', '$timeout', '$ngRedux', 'state', 'tileDataService']
 
 export default EquipmentDetailController

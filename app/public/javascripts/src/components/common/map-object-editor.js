@@ -7,7 +7,7 @@ import MenuAction, { MenuActionTypes } from '../common/context-menu/menu-action'
 import MenuItem, { MenuItemTypes } from '../common/context-menu/menu-item'
 
 class MapObjectEditorController {
-  constructor ($http, $element, $compile, $document, $timeout, state, tileDataService, contextMenuService, Utils) {
+  constructor ($http, $element, $compile, $document, $timeout, $ngRedux, state, tileDataService, contextMenuService, Utils) {
     this.$http = $http
     this.$element = $element
     this.$compile = $compile
@@ -47,6 +47,7 @@ class MapObjectEditorController {
       fillColor: '#FF1493',
       fillOpacity: 0.4
     }
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }
 
   $onInit () {
@@ -938,7 +939,7 @@ class MapObjectEditorController {
       var serviceArea = event.serviceAreas[0]
       feature.isExistingObject = true
       // Get the Service area geometry from aro-service
-      featurePromise = this.state.StateViewMode.loadEntityList(this.$http, this.state, 'ServiceAreaView', serviceArea.id, 'id,code,name,sourceId,geom', 'id')
+      featurePromise = this.state.StateViewMode.loadEntityList(this.$http, this.state, this.dataItems, 'ServiceAreaView', serviceArea.id, 'id,code,name,sourceId,geom', 'id')
         .then((result) => {
           // ToDo: check for empty object, reject on true
           if (!result[0].hasOwnProperty('geom')) {
@@ -1254,25 +1255,27 @@ class MapObjectEditorController {
 
     // Go back to the default map cursor
     this.mapRef.setOptions({ draggableCursor: null })
-
-    /*
-    // Remove the context menu from the document body
-    this.$timeout(() => {
-      var documentBody = this.$document.find('body')[0]
-      documentBody.removeChild(this.contextMenuElement)
-      var mapCanvas = this.$document.find(`#${this.mapContainerId}`)[0]
-      mapCanvas.removeChild(this.dropTargetElement)
-    }, 0)
-    */
+    this.unsubscribeRedux()
 
     // Remove any dragging DOM event listeners
     var mapCanvas = this.$document.find(`#${this.mapContainerId}`)[0]
     mapCanvas.ondragover = null
     mapCanvas.ondrop = null
   }
+
+  mapStateToThis (reduxState) {
+    return {
+      dataItems: reduxState.plan.dataItems
+    }
+  }
+
+  mapDispatchToTarget (dispatch) {
+    return {
+    }
+  }
 }
 
-MapObjectEditorController.$inject = ['$http', '$element', '$compile', '$document', '$timeout', 'state', 'tileDataService', 'contextMenuService', 'Utils']
+MapObjectEditorController.$inject = ['$http', '$element', '$compile', '$document', '$timeout', '$ngRedux', 'state', 'tileDataService', 'contextMenuService', 'Utils']
 
 let mapObjectEditor = {
   templateUrl: '/components/common/map-object-editor.html',

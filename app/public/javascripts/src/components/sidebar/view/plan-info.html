@@ -80,7 +80,7 @@
               object-name="Service Area"
               search-list="$ctrl.state.listOfServiceAreaTags"
               selected-list="$ctrl.saPlanTags"
-              refresh-tag-list="$ctrl.state.StateViewMode.loadListOfSAPlanTags($ctrl.$http,$ctrl.state,searchObj)"></edit-plan-tag>
+              refresh-tag-list="$ctrl.state.StateViewMode.loadListOfSAPlanTags($ctrl.$http, $ctrl.state, $ctrl.dataItems, searchObj)"></edit-plan-tag>
             <span><i class="fa fa-plus pointer" ng-if="$ctrl.isEditMode && !$ctrl.addSATags" ng-click="$ctrl.addSATags = true"></i></span>
           </td>
         </tr>

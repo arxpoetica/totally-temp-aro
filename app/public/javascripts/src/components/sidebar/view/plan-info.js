@@ -199,7 +199,8 @@ class PlanInfoController {
 
   mapStateToThis (reduxState) {
     return {
-      systemActors: reduxState.user.systemActors
+      systemActors: reduxState.user.systemActors,
+      dataItems: reduxState.plan.dataItems
     }
   }
 
@@ -214,7 +215,7 @@ class PlanInfoController {
 
   $onDestroy () {
     this.commitUpdatestoPlan(true)
-    // this.planObserver.unsubscribe()
+    this.unsubscribeRedux()
   }
 }
 

@@ -624,7 +624,7 @@ class State {
     service.loadOptimizationOptionsFromJSON = (json) => {
       // Note that we are NOT returning the state (the state is set after the call), but a promise
       // that resolves once all the geographies have been loaded
-      return stateSerializationHelper.loadStateFromJSON(service, service.getDispatchers(), json)
+      return stateSerializationHelper.loadStateFromJSON(service, $ngRedux.getState(), service.getDispatchers(), json)
     }
 
     $document.ready(() => {
@@ -661,89 +661,6 @@ class State {
           resolve(address) // Always resolve, even if reverse geocoding failed
         })
       })
-    }
-
-    service.loadPlanDataSelectionFromServer = () => {
-      if (!service.plan) {
-        return Promise.resolve()
-      }
-
-      var currentPlan = service.plan
-      var promises = [
-        $http.get('/service/odata/datatypeentity'),
-        $http.get(`/service/v1/library-entry`),
-        $http.get(`/service/v1/plan/${currentPlan.id}/configuration`)
-      ]
-
-      return Promise.all(promises)
-        .then((results) => {
-          // Results will be returned in the same order as the promises array
-          var dataTypeEntityResult = results[0].data
-          var libraryResult = results[1].data
-          var configurationResult = results[2].data
-
-          service.uploadDataSources = []
-          dataTypeEntityResult.forEach((dataTypeEntity) => {
-            if (dataTypeEntity.uploadSupported) {
-              /*
-              service.uploadDataSources.push({
-                id: dataTypeEntity.id,
-                label: dataTypeEntity.description,
-                name: dataTypeEntity.name
-              })
-              */
-
-              dataTypeEntity.label = dataTypeEntity.description
-              service.uploadDataSources.push(dataTypeEntity)
-            }
-          })
-
-          var newDataItems = {}
-          dataTypeEntityResult.forEach((dataTypeEntity) => {
-            if (dataTypeEntity.maxValue > 0) {
-              newDataItems[dataTypeEntity.name] = {
-                id: dataTypeEntity.id,
-                description: dataTypeEntity.description,
-                minValue: dataTypeEntity.minValue,
-                maxValue: dataTypeEntity.maxValue,
-                uploadSupported: dataTypeEntity.uploadSupported,
-                isMinValueSelectionValid: true,
-                isMaxValueSelectionValid: true,
-                selectedLibraryItems: [],
-                allLibraryItems: []
-              }
-            }
-          })
-
-          // For each data item, construct the list of all available library items
-          Object.keys(newDataItems).forEach((dataItemKey) => {
-            // Add the list of all library items for this data type
-            libraryResult.forEach((libraryItem) => {
-              if (libraryItem.dataType === dataItemKey) {
-                newDataItems[dataItemKey].allLibraryItems.push(libraryItem)
-              }
-            })
-          })
-
-          // For each data item, construct the list of selected library items
-          configurationResult.configurationItems.forEach((configurationItem) => {
-            // For this configuration item, find the data item based on the dataType
-            var dataItem = newDataItems[configurationItem.dataType]
-            // Find the item from the allLibraryItems based on the library id
-            var selectedLibraryItems = configurationItem.libraryItems
-            selectedLibraryItems.forEach((selectedLibraryItem) => {
-              var matchedLibraryItem = dataItem.allLibraryItems.filter((libraryItem) => libraryItem.identifier === selectedLibraryItem.identifier)
-              dataItem.selectedLibraryItems = dataItem.selectedLibraryItems.concat(matchedLibraryItem) // Technically there will be only one matched item
-            })
-          })
-
-          service.dataItems = newDataItems
-          service.pristineDataItems = angular.copy(service.dataItems)
-          service.dataItemsChanged.next(service.dataItems)
-          // get the service area for selected service layer datasource
-          service.StateViewMode.loadListOfSAPlanTags($http, service, '', true)
-          return Promise.resolve()
-        })
     }
 
     // Shows the modal for editing plan resources
@@ -818,30 +735,6 @@ class State {
           service.pristineNetworkConfigurations = angular.copy(service.networkConfigurations)
         })
         .catch((err) => console.log(err))
-    }
-
-    // Saves the plan Data Selection configuration to the server
-    service.saveDataSelectionToServer = () => {
-      service.pristineDataItems = angular.copy(service.dataItems)
-      var putBody = {
-        configurationItems: [],
-        resourceConfigItems: []
-      }
-
-      Object.keys(service.dataItems).forEach((dataItemKey) => {
-        // An example of dataItemKey is 'location'
-        if (service.dataItems[dataItemKey].selectedLibraryItems.length > 0) {
-          var configurationItem = {
-            dataType: dataItemKey,
-            libraryItems: service.dataItems[dataItemKey].selectedLibraryItems
-          }
-          putBody.configurationItems.push(configurationItem)
-        }
-      })
-
-      var currentPlan = service.plan
-      // Save the configuration to the server
-      $http.put(`/service/v1/plan/${currentPlan.id}/configuration`, putBody)
     }
 
     // Save the plan resource selections to the server
@@ -1036,7 +929,6 @@ class State {
         })
         .then((address) => {
           plan.areaName = address
-          service.requestDestroyMapOverlay.next(null) // Make sure to destroy the map overlay before panning/zooming
           service.requestSetMapCenter.next({ latitude: plan.latitude, longitude: plan.longitude })
           service.requestSetMapZoom.next(plan.zoomIndex)
           return Promise.resolve()
@@ -1090,13 +982,11 @@ class State {
 
     // Load the plan inputs for the given plan and populate them in state
     service.loadPlanInputs = (planId) => {
-      var userId = service.loggedInUser.id
       return $http.get(`/service/v1/plan/${planId}/inputs`)
         .then((result) => {
           var planInputs = Object.keys(result.data).length > 0 ? result.data : service.getDefaultPlanInputs()
-          stateSerializationHelper.loadStateFromJSON(service, service.getDispatchers(), planInputs)
+          stateSerializationHelper.loadStateFromJSON(service, $ngRedux.getState(), service.getDispatchers(), planInputs)
           return Promise.all([
-            service.loadPlanDataSelectionFromServer(),
             service.loadPlanResourceSelectionFromServer(),
             service.loadNetworkConfigurationFromServer()
           ])
@@ -1793,7 +1683,8 @@ class State {
       return {
         setSelectionTypeById: service.setSelectionTypeById,
         addPlanTargets: service.addPlanTargets,
-        removePlanTargets: service.removePlanTargets
+        removePlanTargets: service.removePlanTargets,
+        selectDataItems: service.selectDataItems
       }
     }
 
@@ -1825,6 +1716,7 @@ class State {
     service.mergeToTarget = (nextState, actions) => {
       const currentActivePlanId = service.plan && service.plan.id
       const newActivePlanId = nextState.plan && nextState.plan.id
+      const oldDataItems = service.dataItems
 
       // merge state and actions onto controller
       Object.assign(service, nextState)
@@ -1833,6 +1725,9 @@ class State {
       if ((currentActivePlanId !== newActivePlanId) && (nextState.plan)) {
         // The active plan has changed. Note that we are comparing ids because a change in plan state also causes the plan object to update.
         service.onActivePlanChanged()
+      }
+      if (oldDataItems !== nextState.dataItems) {
+        service.StateViewMode.loadListOfSAPlanTags($http, service, nextState.dataItems, '', true)
       }
     }
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(service.mergeToTarget.bind(service))
@@ -1865,8 +1760,9 @@ class State {
       addPlanTargets: (planId, planTargets) => dispatch(SelectionActions.addPlanTargets(planId, planTargets)),
       removePlanTargets: (planId, planTargets) => dispatch(SelectionActions.removePlanTargets(planId, planTargets)),
       setActivePlanState: planState => dispatch(PlanActions.setActivePlanState(planState)),
+      selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems)),
       setGoogleMapsReference: mapRef => dispatch(MapActions.setGoogleMapsReference(mapRef)),
-      updateShowSiteBoundary: isVisible => dispatch(MapLayerActions.setShowSiteBoundary(isVisible)), 
+      updateShowSiteBoundary: isVisible => dispatch(MapLayerActions.setShowSiteBoundary(isVisible)),
       onFeatureSelectedRedux: features => dispatch(RingEditActions.onFeatureSelected(features))
     }
   }

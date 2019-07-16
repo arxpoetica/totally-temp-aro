@@ -10,6 +10,7 @@ class AroMultiSelectController {
   }
 
   $onInit () {
+    this.trackBy = this.trackBy || 'id' // The property used to track ng-options. Default to 'id' if not specified
     // Call the bootstrap-multiselect library's multiselect() method on our '<select>' child element.
     this.selectElement = this.$element.find('select')
     setTimeout(() => this.selectElement.multiselect({
@@ -49,7 +50,7 @@ let aroMultiSelect = {
   template: `
     <select multiple="multiple"
             ng-model="$ctrl.model"
-            ng-options="item.name || item.code for item in $ctrl.allItems">
+            ng-options="item.name || item.code for item in $ctrl.allItems track by item[$ctrl.trackBy]">
     </select>
   `,
   bindings: {
@@ -57,6 +58,7 @@ let aroMultiSelect = {
     model: '=', // Will be passed in as a ng-model to our select. Two Way binding for now!
     allItems: '<', // All the items to show.
     selectionChanged: '&', // [Optional] Called when the selected items change
+    trackBy: '@', // [Optional] The property for the items to be used for tracking by. Defaults to 'id'
     enableSearch: '@',
     enableHtml: '@',
     placeholder: '@' // [optional] placeholder to show

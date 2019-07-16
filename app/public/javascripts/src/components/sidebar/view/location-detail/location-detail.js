@@ -1,5 +1,5 @@
 class LocationDetailController {
-  constructor ($http, $timeout, state, locationDetailPropertiesFactory) {
+  constructor ($http, $timeout, $ngRedux, state, locationDetailPropertiesFactory) {
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
@@ -57,6 +57,7 @@ class LocationDetailController {
         this.updateSelectedState()
       }
     })
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }
 
   getAttributeValue (attributes, key) {
@@ -141,10 +142,22 @@ class LocationDetailController {
   $onDestroy () {
     this.mapFeaturesSelectedSubscription.unsubscribe()
     this.clearViewModeSubscription.unsubscribe()
+    this.unsubscribeRedux()
+  }
+
+  mapStateToThis (reduxState) {
+    return {
+      dataItems: reduxState.plan.dataItems
+    }
+  }
+
+  mapDispatchToTarget (dispatch) {
+    return {
+    }
   }
 }
 
-LocationDetailController.$inject = ['$http', '$timeout', 'state', 'locationDetailPropertiesFactory']
+LocationDetailController.$inject = ['$http', '$timeout', '$ngRedux', 'state', 'locationDetailPropertiesFactory']
 
 let locationDetail = {
   templateUrl: '/components/sidebar/view/location-detail/location-detail.html',

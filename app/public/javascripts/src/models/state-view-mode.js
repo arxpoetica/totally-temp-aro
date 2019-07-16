@@ -48,13 +48,13 @@ class StateViewMode {
       })
   }
 
-  static loadListOfSAPlanTags ($http, state, filterObj, ishardreload) {
+  static loadListOfSAPlanTags ($http, state, dataItems, filterObj, ishardreload) {
     const MAX_SERVICE_AREAS_FROM_ODATA = 10
     // var filter = "layer/id eq 1"
     var libraryItems = []
     var filter = ''
 
-    var selectedServiceLayerLibraries = state.dataItems && state.dataItems.service_layer && state.dataItems.service_layer.selectedLibraryItems
+    var selectedServiceLayerLibraries = dataItems && dataItems.service_layer && dataItems.service_layer.selectedLibraryItems
     if (selectedServiceLayerLibraries) libraryItems = selectedServiceLayerLibraries.map(selectedLibraryItem => selectedLibraryItem.name)
     if (libraryItems.length > 0) {
       // Filter using selected serviceLayer id
@@ -111,18 +111,18 @@ class StateViewMode {
     return flattenDeep(selectedEquipmentIds)
   }
 
-  static loadBoundaryEntityList ($http, state, filterObj) {
+  static loadBoundaryEntityList ($http, state, dataItems, filterObj) {
     if (filterObj == '') return
     if (state.selectedBoundaryTypeforSearch) {
       var visibleBoundaryLayer = state.selectedBoundaryTypeforSearch
 
-      visibleBoundaryLayer.type === 'census_blocks' && StateViewMode.loadEntityList($http, state, 'CensusBlocksEntity', filterObj, 'id,tabblockId', 'tabblockId')
-      visibleBoundaryLayer.type === 'wirecenter' && StateViewMode.loadEntityList($http, state, 'ServiceAreaView', filterObj, 'id,code,name,centroid', 'code,name')
-      visibleBoundaryLayer.type === 'analysis_layer' && StateViewMode.loadEntityList($http, state, 'AnalysisArea', filterObj, 'id,code,centroid', 'code')
+      visibleBoundaryLayer.type === 'census_blocks' && StateViewMode.loadEntityList($http, state, dataItems, 'CensusBlocksEntity', filterObj, 'id,tabblockId', 'tabblockId')
+      visibleBoundaryLayer.type === 'wirecenter' && StateViewMode.loadEntityList($http, state, dataItems, 'ServiceAreaView', filterObj, 'id,code,name,centroid', 'code,name')
+      visibleBoundaryLayer.type === 'analysis_layer' && StateViewMode.loadEntityList($http, state, dataItems, 'AnalysisArea', filterObj, 'id,code,centroid', 'code')
     }
   }
 
-  static loadEntityList ($http, state, entityType, filterObj, select, searchColumn, configuration) {
+  static loadEntityList ($http, state, dataItems, entityType, filterObj, select, searchColumn, configuration) {
     if (filterObj == '') return
     var entityListUrl = `/service/odata/${entityType}?$select=${select}`
     if (entityType !== 'AnalysisLayer') {
@@ -158,7 +158,7 @@ class StateViewMode {
 
     var libraryItems = []
     if (entityType === 'LocationObjectEntity') {
-      var selectedLocationLibraries = state.dataItems && state.dataItems.location && state.dataItems.location.selectedLibraryItems
+      var selectedLocationLibraries = dataItems && dataItems.location && dataItems.location.selectedLibraryItems
       if (selectedLocationLibraries) libraryItems = selectedLocationLibraries.map(selectedLibraryItem => selectedLibraryItem.identifier)
       if (libraryItems.length > 0) {
         var libfilter = libraryItems.map(id => `libraryId eq ${id}`).join(' or ')
@@ -179,7 +179,7 @@ class StateViewMode {
 
     if (entityType === 'ServiceAreaView') {
       // filter = filter ? filter.concat(' and layer/id eq 1') : filter
-      var selectedServiceLayerLibraries = state.dataItems && state.dataItems.service_layer && state.dataItems.service_layer.selectedLibraryItems
+      var selectedServiceLayerLibraries = dataItems && dataItems.service_layer && dataItems.service_layer.selectedLibraryItems
       if (selectedServiceLayerLibraries) libraryItems = selectedServiceLayerLibraries.map(selectedLibraryItem => selectedLibraryItem.name)
       if (libraryItems.length > 0) {
         // Filter using selected serviceLayer id
