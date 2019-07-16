@@ -328,10 +328,10 @@ exports.configure = (api, middleware) => {
         bt.description
       FROM client.plan p
       CROSS JOIN client.site_boundary_type bt
-      WHERE bt.name = '${site_boundary}' AND p.id = ${plan_id} 
-    ),
+      WHERE bt.name = '${site_boundary}' AND p.id = ${plan_id}
+      ),
       
-    selected_service_layer AS (
+      selected_service_layer AS (
       SELECT
            *
       FROM inputs i
@@ -385,7 +385,7 @@ exports.configure = (api, middleware) => {
       SELECT
         *   
       FROM modified_boundaries
-        ),
+        )         ,
       
       location_ds_ids as (
         select unnest(ds.parent_path || ds.id) as ds_id,
@@ -397,7 +397,8 @@ exports.configure = (api, middleware) => {
         join aro_core.data_source ds
           on ds.id = ads.data_source_id
           LEFT JOIN aro_core.global_library g ON ds.id = g.data_source_id
-      ),
+      ) 
+      ,
       
       boundary_locations AS (
         SELECT
@@ -410,8 +411,11 @@ exports.configure = (api, middleware) => {
            l.number_of_households,
            lds.data_source_name,
            l.workflow_state_id,
-																l.attributes,
-           b.*
+																l.attributes
+		,b.id
+		,b.object_id
+		,b.network_node_object_id
+																--,           b.*
         FROM
           inputs i
           cross join selected_service_layer ssl
@@ -445,7 +449,7 @@ exports.configure = (api, middleware) => {
           JOIN client.service_area sa
             on sal.id = sa.id
                AND ST_Contains(sa.geom, l.geom)
-      ),
+      )  ,
       
       reconciled_locations AS (
       
@@ -470,7 +474,8 @@ exports.configure = (api, middleware) => {
       FULL OUTER JOIN boundary_locations bl
           ON bl.location_object_id = sl.object_id
       
-      ),
+      )      
+      ,
       
       matched_equipment AS (
         SELECT 
@@ -544,6 +549,7 @@ exports.configure = (api, middleware) => {
         ON rl.equipment_object_id = e.object_id
       JOIN aro.workflow_state ws
         ON rl.workflow_state_id = ws.id
+        
     `;
 
     return database.findOne('SELECT name FROM client.active_plan WHERE id=$1', [plan_id])
