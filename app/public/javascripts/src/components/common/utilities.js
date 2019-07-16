@@ -70,7 +70,8 @@ class Utilities {
       location: MenuItemTypes.LOCATION,
       equipment: MenuItemTypes.EQUIPMENT,
       equipment_boundary: MenuItemTypes.BOUNDARY,
-      service_layer: MenuItemTypes.SERVICE_AREA
+      service_layer: MenuItemTypes.SERVICE_AREA,
+      census_block: MenuItemTypes.CENSUS
     }
     return dataTypeToMenuItemType[dataType]
   }
@@ -97,7 +98,8 @@ class Utilities {
         }
         return name
       },
-      service_layer: feature => feature.code || feature.siteClli || 'Unnamed service area'
+      service_layer: feature => feature.code || feature.siteClli || 'Unnamed service area',
+      census_block: feature => feature.id
     }
 
     const defaultNameExtractor = () => {

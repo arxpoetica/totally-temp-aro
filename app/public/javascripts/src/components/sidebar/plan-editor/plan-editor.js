@@ -1063,14 +1063,16 @@ class PlanEditorController {
         var lastResult = Promise.resolve()
         setOfCOIds.forEach((centralOfficeObjectId) => {
           lastResult = lastResult.then((result) => {
-            if (result) {
+            if (result && result.data.objectId) {
               recalculatedSubnets[result.data.objectId] = result
             }
             return this.$http.get(`/service/plan-transaction/${this.currentTransaction.id}/subnet-feature/${centralOfficeObjectId}`)
           })
         })
         lastResult = lastResult.then((result) => {
-          recalculatedSubnets[result.data.objectId] = result
+          if (result && result.data.objectId) {
+            recalculatedSubnets[result.data.objectId] = result
+          }
           return Promise.resolve()
         })
         return lastResult

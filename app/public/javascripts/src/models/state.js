@@ -1716,7 +1716,10 @@ class State {
     service.mergeToTarget = (nextState, actions) => {
       const currentActivePlanId = service.plan && service.plan.id
       const newActivePlanId = nextState.plan && nextState.plan.id
+<<<<<<< HEAD
       const oldDataItems = service.dataItems
+=======
+>>>>>>> master
 
       // merge state and actions onto controller
       Object.assign(service, nextState)
