@@ -93,8 +93,7 @@ class PointFeatureRenderer {
         ctx.globalAlpha = 0.5
       }
       // Increase the size of household icon if entity_count > 1
-      const imageToDraw = (feature.v2Result && feature.v2Result.icon) || entityImage
-      ctx.drawImage(imageToDraw, x, y)
+      ctx.drawImage(entityImage, x, y)
       ctx.globalAlpha = originalAlpha
     }
     const overlaySize = 12
