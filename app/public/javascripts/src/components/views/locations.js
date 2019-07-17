@@ -208,7 +208,8 @@ class LocationsController {
                 renderMode: 'PRIMITIVE_FEATURES',
                 zIndex: locationType.zIndex,
                 selectable: true,
-                featureFilter: featureFilter
+                featureFilter: featureFilter,
+                v2Filters: this.selectedFilters
               }
               this.createdMapLayerKeys.add(mapLayerKey)
             }
@@ -233,7 +234,8 @@ class LocationsController {
         iconUrl: `${baseUrl}${firstLocation.iconUrl}`,
         renderMode: 'HEATMAP',
         zIndex: 6500,
-        aggregateMode: 'FLATTEN'
+        aggregateMode: 'FLATTEN',
+        v2Filters: this.selectedFilters
       }
       this.createdMapLayerKeys.add(mapLayerKey)
     }
