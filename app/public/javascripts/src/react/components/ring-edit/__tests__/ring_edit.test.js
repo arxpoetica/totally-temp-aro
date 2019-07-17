@@ -2,6 +2,46 @@ import React from 'react'
 import { shallow } from 'enzyme'
 import { RingEdit } from '../ring-edit'
 
+const mockSetMap = jest.fn()
+const mockSetPosition = jest.fn()
+const mockGetPath = jest.fn()
+const mockSetOptions = jest.fn()
+const mockMarkerConstructor = jest.fn(markerObj => {
+  return { ...markerObj,
+    setMap: mockSetMap
+  }
+})
+const mockPolylineConstructor = jest.fn(polylineObj => {
+  return { ...polylineObj,
+    setMap: mockSetMap
+  }
+})
+const mockPolygonConstructor = jest.fn(polygonObj => {
+  return { ...polygonObj,
+    setMap: mockSetMap,
+    setOptions: mockSetOptions,
+    getPath: mockGetPath
+  }
+})
+const mockLatLngConstructor = jest.fn(latLngObj => {
+  // Return an object with a mock for setPosition(), that will be called by our component
+  return latLngObj
+})
+const mockAddListener = jest.fn()
+
+const globalGoogle = {
+  maps: {
+    Marker: mockMarkerConstructor,
+    Polygon: mockPolygonConstructor,
+    Polyline: mockPolylineConstructor,
+    LatLng: mockLatLngConstructor,
+    event: {
+      addListener: mockAddListener
+    },
+    setOptions: () => {}
+  }
+}
+
 // may have to change this
 const rings = {
   "45":{
@@ -648,3 +688,19 @@ test('With no rings', () => {
   )
   expect(component).toMatchSnapshot()
 })
+
+test('With rings', () => {
+  global.google = globalGoogle
+  const mockSetSelectedRingId = jest.fn()
+  const mockGoogleMaps = {}
+  
+  const component = shallow(
+    <RingEdit rings={rings}
+      setSelectedRingId={mockSetSelectedRingId}
+      map={{googleMaps: mockGoogleMaps}}
+    />
+  )
+  expect(component).toMatchSnapshot()
+})
+
+
