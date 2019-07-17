@@ -32,7 +32,7 @@
         <div ng-repeat="(filterName, filter) in $ctrl.state.configuration.locationCategories.filters">
 
           <ui-select multiple ng-model="$ctrl.selectedFilters"
-            theme="bootstrap" on-select="onSelectedItemsChanged()" on-remove="onSelectedItemsChanged()">
+            theme="bootstrap" on-select="$ctrl.updateMapLayers()" on-remove="$ctrl.updateMapLayers()">
             <ui-select-match placeholder="Select...">
               <span>{{$item.value.description}}</span>
             </ui-select-match>
