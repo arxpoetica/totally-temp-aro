@@ -294,7 +294,6 @@ class MapTileRenderer {
         numNeighbors: numNeighbors,
         dataPromises: [],
         data: [],
-        entityImages: [],
         dataOffsets: []
       }
 
@@ -341,18 +340,20 @@ class MapTileRenderer {
         if (htmlCache && htmlCache.isDirty && isLatestVersion) {
           htmlCache.backBufferCanvas.getContext('2d').clearRect(0, 0, htmlCache.backBufferCanvas.width, htmlCache.backBufferCanvas.height)
           htmlCache.heatmapCanvas.getContext('2d').clearRect(0, 0, htmlCache.heatmapCanvas.width, htmlCache.heatmapCanvas.height)
-          this.renderSingleTileFull(zoom, coord, renderingData, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage, htmlCache.backBufferCanvas, htmlCache.heatmapCanvas)
-
-          // Copy the back buffer image onto the front buffer
-          var ctx = htmlCache.frontBufferCanvas.getContext('2d')
-          ctx.clearRect(0, 0, htmlCache.frontBufferCanvas.width, htmlCache.frontBufferCanvas.height)
-          ctx.drawImage(htmlCache.backBufferCanvas, 0, 0)
-          // All rendering has been done. Mark the cached HTML tile as not-dirty
-          // Do NOT use this.tileDataService.tileHtmlCache[tileId], that object reference may have changed
-          htmlCache.isDirty = false
+          return this.renderSingleTileFull(zoom, coord, renderingData, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage, htmlCache.backBufferCanvas, htmlCache.heatmapCanvas)
+            .then(() => {
+              // Copy the back buffer image onto the front buffer
+              var ctx = htmlCache.frontBufferCanvas.getContext('2d')
+              ctx.clearRect(0, 0, htmlCache.frontBufferCanvas.width, htmlCache.frontBufferCanvas.height)
+              ctx.drawImage(htmlCache.backBufferCanvas, 0, 0)
+              // All rendering has been done. Mark the cached HTML tile as not-dirty
+              // Do NOT use this.tileDataService.tileHtmlCache[tileId], that object reference may have changed
+              htmlCache.isDirty = false
+              this.hideStaleDataMarker(zoom, coord.x, coord.y)
+              return Promise.resolve()
+            })
+            .catch(err => console.error(err))
         }
-        this.hideStaleDataMarker(zoom, coord.x, coord.y)
-        return Promise.resolve()
       })
       .catch((err) => {
         console.error(err)
@@ -374,40 +375,45 @@ class MapTileRenderer {
     var heatMapData = []
 
     // Render all features
+    var renderPromises = []
     Object.keys(renderingData).forEach((mapLayerKey) => {
       var mapLayer = this.mapLayers[mapLayerKey]
       if (mapLayer) { // Its possible that this.mapLayers has changed until we reach this point
         renderingData[mapLayerKey].data.forEach((featureData, index) => {
           var features = []
           Object.keys(featureData.layerToFeatures).forEach((layerKey) => features = features.concat(featureData.layerToFeatures[layerKey]))
-          this.renderFeatures(ctx, zoom, coord, features, featureData, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage, renderingData[mapLayerKey].dataOffsets[index], heatMapData, this.mapTileOptions.selectedHeatmapOption.id, mapLayer)
+          const renderPromise = this.renderFeatures(ctx, zoom, coord, features, featureData, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage, renderingData[mapLayerKey].dataOffsets[index], heatMapData, this.mapTileOptions.selectedHeatmapOption.id, mapLayer)
+          renderPromises.push(renderPromise)
         })
       }
     })
 
-    if (heatMapData.length > 0 && this.mapTileOptions.selectedHeatmapOption.id === 'HEATMAP_ON') {
-      // Note that we render the heatmap to another canvas, then copy that image over to the main canvas. This
-      // is because the heatmap library clears the canvas before rendering
-      var heatmapCtx = heatmapCanvas.getContext('2d')
-      heatmapCtx.globalAlpha = 1.0
-      var heatMapRenderer = simpleheat(heatmapCanvas)
-      heatMapRenderer.data(heatMapData)
-      var maxValue = 1.0
-      if (this.mapTileOptions.heatMap.useAbsoluteMax) {
-        // Simply use the maximum value for the heatmap
-        maxValue = this.mapTileOptions.heatMap.maxValue
-      } else {
-        // We have an input from the user specifying the max value at zoom level 1. Find the max value at our zoom level
-        maxValue = this.mapTileOptions.heatMap.worldMaxValue / Math.pow(2.0, zoom)
-      }
-      heatMapRenderer.max(maxValue)
-      heatMapRenderer.radius(20, 20)
-      heatMapRenderer.draw(0.0)
-      // Draw the heatmap onto the main canvas
-      ctx.drawImage(heatmapCanvas, 0, 0)
-    }
-    var tileCoordinateString = `z / x / y : ${zoom} / ${coord.x} / ${coord.y}`
-    this.renderTileInformation(canvas, ctx, tileCoordinateString)
+    return Promise.all(renderPromises)
+      .then(() => {
+        if (heatMapData.length > 0 && this.mapTileOptions.selectedHeatmapOption.id === 'HEATMAP_ON') {
+          // Note that we render the heatmap to another canvas, then copy that image over to the main canvas. This
+          // is because the heatmap library clears the canvas before rendering
+          var heatmapCtx = heatmapCanvas.getContext('2d')
+          heatmapCtx.globalAlpha = 1.0
+          var heatMapRenderer = simpleheat(heatmapCanvas)
+          heatMapRenderer.data(heatMapData)
+          var maxValue = 1.0
+          if (this.mapTileOptions.heatMap.useAbsoluteMax) {
+            // Simply use the maximum value for the heatmap
+            maxValue = this.mapTileOptions.heatMap.maxValue
+          } else {
+            // We have an input from the user specifying the max value at zoom level 1. Find the max value at our zoom level
+            maxValue = this.mapTileOptions.heatMap.worldMaxValue / Math.pow(2.0, zoom)
+          }
+          heatMapRenderer.max(maxValue)
+          heatMapRenderer.radius(20, 20)
+          heatMapRenderer.draw(0.0)
+          // Draw the heatmap onto the main canvas
+          ctx.drawImage(heatmapCanvas, 0, 0)
+        }
+        var tileCoordinateString = `z / x / y : ${zoom} / ${coord.x} / ${coord.y}`
+        this.renderTileInformation(canvas, ctx, tileCoordinateString)
+      })
   }
 
   // Render tile information
@@ -454,162 +460,200 @@ class MapTileRenderer {
       // No V2 filters selected. Use all features
       filteredFeatures = v1FilteredFeatures
     }
-    var closedPolygonFeatureLayersList = []
-    var pointFeatureRendererList = []
-    for (var iFeature = 0; iFeature < filteredFeatures.length; ++iFeature) {
-      // Parse the geometry out.
-      var feature = filteredFeatures[iFeature]
-
-      if (feature.properties) {
-        // Try object_id first, else try location_id
-        var featureId = feature.properties.object_id || feature.properties.location_id
-
-        if (this.selectedDisplayMode == this.displayModes.EDIT_PLAN &&
-            this.tileDataService.featuresToExclude.has(featureId) &&
-            !(feature.properties._data_type && feature.properties._data_type == 'location')) {
-          // This feature is to be excluded. Do not render it. (edit: ONLY in edit mode)
-          continue
-        }
-        if (this.selectedDisplayMode == this.displayModes.VIEW &&
-            (this.state.activeViewModePanel == this.viewModePanels.EDIT_LOCATIONS ||
-              this.state.activeViewModePanel == this.viewModePanels.EDIT_SERVICE_LAYER) &&
-            this.tileDataService.featuresToExclude.has(featureId) &&
-            feature.properties._data_type && (feature.properties._data_type == 'location' ||
-              feature.properties._data_type == 'service_layer')) {
-          // this is a location/Service area that is being edited
-          continue
-        }
+    // Get a list of all new icon urls generated by the filter
+    const v2FilterIconUrls = [...new Set(filteredFeatures.map(feature => feature.v2Result && feature.v2Result.iconUrl).filter(iconUrl => iconUrl))]
+    var filterIconUrlPromises = []
+    v2FilterIconUrls.forEach(iconUrl => {
+      if (!this.tileDataService.getEntityImageForLayer(iconUrl)) {
+        this.tileDataService.addEntityImageForLayer(iconUrl, iconUrl)
       }
+      filterIconUrlPromises.push(this.tileDataService.getEntityImageForLayer(iconUrl))
+    })
 
-      var selectedListType = null
-      var selectedListId = null
-      var entityImage = featureData.icon
-      if (feature.properties.hasOwnProperty('_data_type') && feature.properties._data_type != '') {
-        var fullDataType = feature.properties._data_type + '.'
-        selectedListType = fullDataType.substr(0, fullDataType.indexOf('.'))
-        if (feature.properties.hasOwnProperty('location_id')) {
-          selectedListId = feature.properties.location_id
-        } else if (feature.properties.hasOwnProperty('object_id')) {
-          selectedListId = feature.properties.object_id
-          // greyout an RT with hsiEanbled true for frontier client
-          if (this.state.configuration.ARO_CLIENT === 'frontier' &&
-            (feature.properties._data_type === 'equipment.central_office' || feature.properties._data_type === 'equipment.dslam') &&
-            (feature.properties.hsiEnabled !== 'true')) {
-            entityImage = featureData.greyOutIcon
+    return Promise.all(filterIconUrlPromises)
+      .then(filterIcons => {
+        filteredFeatures.forEach(filteredFeature => {
+          if (filteredFeature.v2Result) {
+            const iconUrlIndex = v2FilterIconUrls.indexOf(filteredFeature.v2Result.iconUrl)
+            filteredFeature.v2Result.icon = filterIcons[iconUrlIndex]
           }
-        } else if (feature.properties.hasOwnProperty('id')) {
-          selectedListId = feature.properties.id
-        }
-      }
+        })
 
-      var geometry = feature.loadGeometry()
-      // Geometry is an array of shapes
-      var imageWidthBy2 = entityImage ? entityImage.width / 2 : 0
-      var imageHeightBy2 = entityImage ? entityImage.height / 2 : 0
 
-      geometry.forEach((rawShape) => {
-        const shape = TileUtilities.pixelCoordinatesFromScaledTileCoordinates(rawShape)
-        if (shape.length == 1) {
-  	      // This is a point
-  	      var x = shape[0].x + geometryOffset.x - imageWidthBy2
-  	      var y = shape[0].y + geometryOffset.y - (imageHeightBy2 * 2)
 
-  	      // Draw the location icons with its original color
-  	      ctx.globalCompositeOperation = 'source-over'
-  	      if (heatmapID === 'HEATMAP_OFF' || heatmapID === 'HEATMAP_DEBUG' || mapLayer.renderMode === 'PRIMITIVE_FEATURES') {
-            var featureObj = {
-              'ctx': ctx,
-              'shape': shape,
-              'feature': feature,
-              'featureData': featureData,
-              'geometryOffset': geometryOffset,
-              'mapLayer': mapLayer,
-              'mapLayers': this.mapLayers,
-              'tileDataService': this.tileDataService,
-              'selection': this.selection,
-              oldSelection: this.oldSelection,
-              'selectedLocationImage': selectedLocationImage,
-              'lockOverlayImage': lockOverlayImage,
-              'invalidatedOverlayImage': invalidatedOverlayImage,
-              'selectedDisplayMode': this.selectedDisplayMode,
-              'displayModes': this.displayModes,
-              'analysisSelectionMode': this.analysisSelectionMode,
-              'selectionModes': this.selectionModes,
-              'equipmentLayerTypeVisibility': this.state.equipmentLayerTypeVisibility
+
+
+
+
+
+
+
+
+        var closedPolygonFeatureLayersList = []
+        var pointFeatureRendererList = []
+        for (var iFeature = 0; iFeature < filteredFeatures.length; ++iFeature) {
+          // Parse the geometry out.
+          var feature = filteredFeatures[iFeature]
+    
+          if (feature.properties) {
+            // Try object_id first, else try location_id
+            var featureId = feature.properties.object_id || feature.properties.location_id
+    
+            if (this.selectedDisplayMode == this.displayModes.EDIT_PLAN &&
+                this.tileDataService.featuresToExclude.has(featureId) &&
+                !(feature.properties._data_type && feature.properties._data_type == 'location')) {
+              // This feature is to be excluded. Do not render it. (edit: ONLY in edit mode)
+              continue
             }
-            pointFeatureRendererList.push(featureObj)
-  	      } else {
-  	        // Display heatmap
-  	        var aggregationProperty = feature.properties.entity_count || feature.properties.weight
-  	        if (aggregationProperty) {
-  	          var adjustedWeight = Math.pow(+aggregationProperty, this.mapTileOptions.heatMap.powerExponent)
-  	          heatMapData.push([x, y, adjustedWeight])
-  	        }
-  	      }
-        } else {
-          // Check if this is a closed polygon
-          var firstPoint = shape[0]
-          var lastPoint = shape[shape.length - 1]
-          var isClosedPolygon = (firstPoint.x === lastPoint.x && firstPoint.y === lastPoint.y)
-
-          if (isClosedPolygon) {
-            // First draw a filled polygon with the fill color
-            // show siteboundaries for the equipments that are selected
-            if (this.state.isFeatureLayerOnForBoundary(feature)) {
-              var featureObj = { 'feature': feature,
-                'shape': shape,
-                'geometryOffset': geometryOffset,
-                'ctx': ctx,
-                'mapLayer': mapLayer,
-                'censusCategories': this.censusCategories,
-                'tileDataService': this.tileDataService,
-                'styles': this.styles,
-                'tileSize': this.tileSize,
-                'selectedDisplayMode': this.selectedDisplayMode,
-                'displayModes': this.displayModes,
-                'analysisSelectionMode': this.analysisSelectionMode,
-                'selectionModes': this.selectionModes }
-              closedPolygonFeatureLayersList.push(featureObj)
-              ctx.globalAlpha = 1.0
-            } else {
-
+            if (this.selectedDisplayMode == this.displayModes.VIEW &&
+                (this.state.activeViewModePanel == this.viewModePanels.EDIT_LOCATIONS ||
+                  this.state.activeViewModePanel == this.viewModePanels.EDIT_SERVICE_LAYER) &&
+                this.tileDataService.featuresToExclude.has(featureId) &&
+                feature.properties._data_type && (feature.properties._data_type == 'location' ||
+                  feature.properties._data_type == 'service_layer')) {
+              // this is a location/Service area that is being edited
+              continue
             }
-          } else {
-            // This is not a closed polygon. Render lines only
-            ctx.globalAlpha = 1.0
-            if ((this.oldSelection.details.roadSegments.size > 0 && this.highlightPolyline(feature, this.oldSelection.details.roadSegments)) ||
-              (this.oldSelection.details.fiberSegments.size > 0 && this.highlightPolyline(feature, this.oldSelection.details.fiberSegments))) {
-              // Highlight the Selected Polyline
-              var drawingStyles = {
-                lineWidth: mapLayer.drawingOptions.lineWidth * 2,
-                strokeStyle: mapLayer.drawingOptions.strokeStyle
+          }
+    
+          var selectedListType = null
+          var selectedListId = null
+          var entityImage = featureData.icon
+          if (feature.properties.hasOwnProperty('_data_type') && feature.properties._data_type != '') {
+            var fullDataType = feature.properties._data_type + '.'
+            selectedListType = fullDataType.substr(0, fullDataType.indexOf('.'))
+            if (feature.properties.hasOwnProperty('location_id')) {
+              selectedListId = feature.properties.location_id
+            } else if (feature.properties.hasOwnProperty('object_id')) {
+              selectedListId = feature.properties.object_id
+              // greyout an RT with hsiEanbled true for frontier client
+              if (this.state.configuration.ARO_CLIENT === 'frontier' &&
+                (feature.properties._data_type === 'equipment.central_office' || feature.properties._data_type === 'equipment.dslam') &&
+                (feature.properties.hsiEnabled !== 'true')) {
+                entityImage = featureData.greyOutIcon
               }
-              if (mapLayer.highlightStyle) {
-                drawingStyles = {
-                  lineWidth: mapLayer.highlightStyle.lineWidth,
-                  strokeStyle: mapLayer.highlightStyle.strokeStyle
+            } else if (feature.properties.hasOwnProperty('id')) {
+              selectedListId = feature.properties.id
+            }
+          }
+    
+          var geometry = feature.loadGeometry()
+          // Geometry is an array of shapes
+          var imageWidthBy2 = entityImage ? entityImage.width / 2 : 0
+          var imageHeightBy2 = entityImage ? entityImage.height / 2 : 0
+    
+          geometry.forEach((rawShape) => {
+            const shape = TileUtilities.pixelCoordinatesFromScaledTileCoordinates(rawShape)
+            if (shape.length == 1) {
+              // This is a point
+              var x = shape[0].x + geometryOffset.x - imageWidthBy2
+              var y = shape[0].y + geometryOffset.y - (imageHeightBy2 * 2)
+    
+              // Draw the location icons with its original color
+              ctx.globalCompositeOperation = 'source-over'
+              if (heatmapID === 'HEATMAP_OFF' || heatmapID === 'HEATMAP_DEBUG' || mapLayer.renderMode === 'PRIMITIVE_FEATURES') {
+                var featureObj = {
+                  'ctx': ctx,
+                  'shape': shape,
+                  'feature': feature,
+                  'featureData': featureData,
+                  'geometryOffset': geometryOffset,
+                  'mapLayer': mapLayer,
+                  'mapLayers': this.mapLayers,
+                  'tileDataService': this.tileDataService,
+                  'selection': this.selection,
+                  oldSelection: this.oldSelection,
+                  'selectedLocationImage': selectedLocationImage,
+                  'lockOverlayImage': lockOverlayImage,
+                  'invalidatedOverlayImage': invalidatedOverlayImage,
+                  'selectedDisplayMode': this.selectedDisplayMode,
+                  'displayModes': this.displayModes,
+                  'analysisSelectionMode': this.analysisSelectionMode,
+                  'selectionModes': this.selectionModes,
+                  'equipmentLayerTypeVisibility': this.state.equipmentLayerTypeVisibility
+                }
+                pointFeatureRendererList.push(featureObj)
+              } else {
+                // Display heatmap
+                var aggregationProperty = feature.properties.entity_count || feature.properties.weight
+                if (aggregationProperty) {
+                  var adjustedWeight = Math.pow(+aggregationProperty, this.mapTileOptions.heatMap.powerExponent)
+                  heatMapData.push([x, y, adjustedWeight])
                 }
               }
-              PolylineFeatureRenderer.renderFeature(shape, geometryOffset, ctx, mapLayer, drawingStyles, false, this.tileSize)
-            } else if (this.state.showFiberSize && feature.properties._data_type === 'fiber' && this.state.viewSetting.selectedFiberOption.id !== 1) {
-              var selectedFiberOption = this.state.viewSetting.selectedFiberOption
-              var viewOption = selectedFiberOption.pixelWidth
-              var drawingStyles = {
-                lineWidth: TileUtilities.getFiberStrandSize(selectedFiberOption.field, feature.properties.fiber_strands, viewOption.min, viewOption.max, viewOption.divisor, viewOption.atomicDivisor),
-                strokeStyle: mapLayer.strokeStyle
-              }
-              PolylineFeatureRenderer.renderFeature(shape, geometryOffset, ctx, mapLayer, drawingStyles, false, this.tileSize)
             } else {
-              PolylineFeatureRenderer.renderFeature(shape, geometryOffset, ctx, mapLayer, null, false, this.tileSize)
+              // Check if this is a closed polygon
+              var firstPoint = shape[0]
+              var lastPoint = shape[shape.length - 1]
+              var isClosedPolygon = (firstPoint.x === lastPoint.x && firstPoint.y === lastPoint.y)
+    
+              if (isClosedPolygon) {
+                // First draw a filled polygon with the fill color
+                // show siteboundaries for the equipments that are selected
+                if (this.state.isFeatureLayerOnForBoundary(feature)) {
+                  var featureObj = { 'feature': feature,
+                    'shape': shape,
+                    'geometryOffset': geometryOffset,
+                    'ctx': ctx,
+                    'mapLayer': mapLayer,
+                    'censusCategories': this.censusCategories,
+                    'tileDataService': this.tileDataService,
+                    'styles': this.styles,
+                    'tileSize': this.tileSize,
+                    'selectedDisplayMode': this.selectedDisplayMode,
+                    'displayModes': this.displayModes,
+                    'analysisSelectionMode': this.analysisSelectionMode,
+                    'selectionModes': this.selectionModes }
+                  closedPolygonFeatureLayersList.push(featureObj)
+                  ctx.globalAlpha = 1.0
+                } else {
+    
+                }
+              } else {
+                // This is not a closed polygon. Render lines only
+                ctx.globalAlpha = 1.0
+                if ((this.oldSelection.details.roadSegments.size > 0 && this.highlightPolyline(feature, this.oldSelection.details.roadSegments)) ||
+                  (this.oldSelection.details.fiberSegments.size > 0 && this.highlightPolyline(feature, this.oldSelection.details.fiberSegments))) {
+                  // Highlight the Selected Polyline
+                  var drawingStyles = {
+                    lineWidth: mapLayer.drawingOptions.lineWidth * 2,
+                    strokeStyle: mapLayer.drawingOptions.strokeStyle
+                  }
+                  if (mapLayer.highlightStyle) {
+                    drawingStyles = {
+                      lineWidth: mapLayer.highlightStyle.lineWidth,
+                      strokeStyle: mapLayer.highlightStyle.strokeStyle
+                    }
+                  }
+                  PolylineFeatureRenderer.renderFeature(shape, geometryOffset, ctx, mapLayer, drawingStyles, false, this.tileSize)
+                } else if (this.state.showFiberSize && feature.properties._data_type === 'fiber' && this.state.viewSetting.selectedFiberOption.id !== 1) {
+                  var selectedFiberOption = this.state.viewSetting.selectedFiberOption
+                  var viewOption = selectedFiberOption.pixelWidth
+                  var drawingStyles = {
+                    lineWidth: TileUtilities.getFiberStrandSize(selectedFiberOption.field, feature.properties.fiber_strands, viewOption.min, viewOption.max, viewOption.divisor, viewOption.atomicDivisor),
+                    strokeStyle: mapLayer.strokeStyle
+                  }
+                  PolylineFeatureRenderer.renderFeature(shape, geometryOffset, ctx, mapLayer, drawingStyles, false, this.tileSize)
+                } else {
+                  PolylineFeatureRenderer.renderFeature(shape, geometryOffset, ctx, mapLayer, null, false, this.tileSize)
+                }
+              }
             }
-          }
+          })
         }
+        // render point feature
+        PointFeatureRenderer.renderFeatures(pointFeatureRendererList, this.state.configuration.ARO_CLIENT)
+        // render polygon feature
+        PolygonFeatureRenderer.renderFeatures(closedPolygonFeatureLayersList, this.selection, this.oldSelection)
+
+
+
+
+
+
+
+
       })
-    }
-    // render point feature
-    PointFeatureRenderer.renderFeatures(pointFeatureRendererList, this.state.configuration.ARO_CLIENT)
-    // render polygon feature
-    PolygonFeatureRenderer.renderFeatures(closedPolygonFeatureLayersList, this.selection, this.oldSelection)
   }
 
   highlightPolyline (feature, polylines) {

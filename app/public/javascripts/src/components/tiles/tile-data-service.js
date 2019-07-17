@@ -334,13 +334,9 @@ class TileDataService {
     this.entityImageCache[layerKey] = imageLoadedPromise
   }
 
-  // Returns a promise for the image associated with a layer key
+  // Returns a promise for the image associated with a layer key. Can return null
   getEntityImageForLayer(layerKey) {
-    var entityImagePromise = this.entityImageCache[layerKey]
-    if (!entityImagePromise) {
-      throw 'No promise for image with layerKey ' + layerKey
-    }
-    return entityImagePromise
+    return this.entityImageCache[layerKey]
   }
 
   // Add a specified location ID to the set of features to be excluded from the render
