@@ -59,6 +59,9 @@ const bearerTokenCheckMiddleware = (req, res, next) => {
     checkUserAuthJWT(authTokens[1]) // Replace with checkUserAuthToken if you want to use jdbc tokens
       .then(result => database.findOne('SELECT id FROM auth.users WHERE email=$1', [result.user_name]))
       .then(user => {
+        if (!user || !user.id) {
+          return Promise.reject({ statusCode: 401, error: 'User ID not found in users table' })
+        }
         req.userIdFromJWT = user.id
         next() // Success, we can forward the request to service. The forwarding will be handled by the next middleware in the chain.
       })
