@@ -5,7 +5,7 @@ const URLSearchParams = require('url').URLSearchParams
 // query parameter to the request URL and returns the URL
 // E.g. for userid=xxx, input url='/service/do_something', returns '/service/do_something?user_id=xxx'
 //      for userid=xxx, input url='/service/do_something?user_id=yyy', returns '/service/do_something?user_id=xxx'
-module.exports = (request, userId) => {
+module.exports = (request, extPrefix, servicePrefix, userId) => {
   // First construct the full url (i.e. including the http(s)://<hostname>)
   const fullUrl = new URL(`${request.protocol}://${request.get('host')}${request.url}`)
 
@@ -18,6 +18,6 @@ module.exports = (request, userId) => {
   fullUrl.search = searchParams
 
   // Construct the "final" URL by removing the protocol, host, etc so it looks like '/v1/plan?user_id=xxx'
-  const finalUrl = fullUrl.href.substring(fullUrl.href.indexOf('/service/') + '/service/'.length - 1)
+  const finalUrl = servicePrefix + fullUrl.href.substring(fullUrl.href.indexOf(extPrefix) + extPrefix.length)
   return finalUrl
 }

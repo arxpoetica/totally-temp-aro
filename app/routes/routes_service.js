@@ -15,7 +15,7 @@ exports.configure = (api, middleware) => {
   // on to ARO-Service. Do NOT modify any data - this is intended to be a pass-through service
   const SERVICE_PREFIX = '/service'
   api.all(`${SERVICE_PREFIX}/*`, expressProxy(`${config.aro_service_url}`, {
-    proxyReqPathResolver: req => userIdInjector(req, req.user.id)
+    proxyReqPathResolver: req => userIdInjector(req, SERVICE_PREFIX, '', req.user.id)
   }))
 
   // Get all requests (POST/GET/DELETE/PUT,etc) that start with /uploadservice, and then pass those

@@ -82,6 +82,6 @@ exports.configure = (api, middleware) => {
   // Do NOT modify any data - this is intended to be a pass-through service
   const EXTERNAL_API_PREFIX = '/v1/api-ext'
   api.all(`${EXTERNAL_API_PREFIX}/*`, bearerTokenCheckMiddleware, expressProxy(`${config.aro_service_url}`, {
-    proxyReqPathResolver: req => userIdInjector(req, req.userIdFromJWT)
+    proxyReqPathResolver: req => userIdInjector(req, EXTERNAL_API_PREFIX, EXTERNAL_API_PREFIX, req.userIdFromJWT)
   }))
 }
