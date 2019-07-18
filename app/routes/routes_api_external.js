@@ -80,7 +80,7 @@ exports.configure = (api, middleware) => {
   // Get all requests (POST/GET/DELETE/PUT,etc) that start with /v1/api-ext, and then pass those
   // on to ARO-Service if the bearer token is authenticated.
   // Do NOT modify any data - this is intended to be a pass-through service
-  const EXTERNAL_API_PREFIX = '/v1/api-ext'
+  const EXTERNAL_API_PREFIX = '/api-ext'
   api.all(`${EXTERNAL_API_PREFIX}/*`, bearerTokenCheckMiddleware, expressProxy(`${config.aro_service_url}`, {
     proxyReqPathResolver: req => userIdInjector(req, EXTERNAL_API_PREFIX, EXTERNAL_API_PREFIX, req.userIdFromJWT)
   }))
