@@ -14,25 +14,26 @@ export class RingOptions extends Component {
             {
               Object.keys(this.props.initialValues).map(optionKey => (
                 // var option = this.props.initialValues[optionKey]
-                // if (typeof option === 'object' && option.hasOwnProperty('displayName'))
-                <tr key={optionKey}>
-                  <td>{this.props.initialValues[optionKey].displayName}</td>
-                  <td>
-                    <Field
-                      id={`field_${optionKey}`}
-                      name={`${optionKey}.value`}
-                      className='form-control form-control-sm'
-                      component='input'
-                      type='text' />
-                  </td>
-                </tr>
+                this.isLeafVal(this.props.initialValues[optionKey])
+                  ? <tr key={optionKey}>
+                    <td>{this.props.initialValues[optionKey].displayName}</td>
+                    <td>
+                      <Field
+                        id={`field_${optionKey}`}
+                        name={`${optionKey}.value`}
+                        className='form-control form-control-sm'
+                        component='input'
+                        type='text' />
+                    </td>
+                  </tr>
+                  : null
               ))
             }
           </tbody>
         </table>
       </form>
       <br />
-      <h4>Edge Types</h4>
+      <h4>Location Edge Connection</h4>
       <form className='d-flex flex-column rfp-options'
         style={{ height: '100%' }}
         onSubmit={event => event.preventDefault()}>
@@ -76,6 +77,13 @@ export class RingOptions extends Component {
       </form>
       
     </div>
+  }
+
+  isLeafVal (option) {
+    return (typeof option === 'object' && 
+            option.hasOwnProperty('displayName') && 
+            option.hasOwnProperty('value')
+    )
   }
 /*
   renderList () {

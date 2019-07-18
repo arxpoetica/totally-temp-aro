@@ -22,7 +22,7 @@ const ringOptions = {
   },
   conduitBufferSize: {
     displayName: 'Conduit buffer size',
-    value: 10
+    value: 500
   },
   snappingDistance: {
     displayName: 'Snapping distance',
@@ -39,7 +39,10 @@ const ringOptions = {
   ringComplexityCount: {
     displayName: 'Ring complexity',
     value: 3000000
-  }/*,
+  },
+  test: {
+    displayName: 'test name'
+  },
   targetEdgeTypes: {
     road: {
       displayName: 'Road',
@@ -47,14 +50,13 @@ const ringOptions = {
     },
     sewer: {
       displayName: 'Sewer',
-      value: true
+      value: false
     },
     duct: {
       displayName: 'Duct',
-      value: true
+      value: false
     }
   }
-  */
 }
 export class RingEdit extends Component {
   constructor (props) {
@@ -74,9 +76,7 @@ export class RingEdit extends Component {
         <h4>Rings</h4>
         <table className='table table-sm table-striped'>
           <tbody>
-            {
-              this.renderRingRows(this.props.rings)
-            }
+            {this.renderRingRows(this.props.rings)}
           </tbody>
         </table>
       </div>
