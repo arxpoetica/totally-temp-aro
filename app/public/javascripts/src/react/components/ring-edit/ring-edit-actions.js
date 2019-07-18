@@ -186,9 +186,11 @@ function loadRings (planId) {
 function requestSubNet (planId, ringIds, locationTypes, ringOptions) {
   return () => {
     var targetEdgeTypes = []
-    Object.keys(ringOptions.targetEdgeTypes).map(optionKey => {
-      if (ringOptions.targetEdgeTypes[optionKey].value) targetEdgeTypes.push(optionKey)
-    })
+    if (!!ringOptions.targetEdgeTypes) {
+      Object.keys(ringOptions.targetEdgeTypes).map(optionKey => {
+        if (ringOptions.targetEdgeTypes[optionKey].value) targetEdgeTypes.push(optionKey)
+      })
+    }
     const postBody = {
       ringIds: ringIds,
       locationTypes: locationTypes,

@@ -73,7 +73,7 @@ class DataSourceUploadController {
     // ---
     
     this.tableSource = this.uploadSource = this.state.uploadDataSource
-    this.tableSources = this.uploadSources = this.state.uploadDataSources
+    this.tableSources = angular.copy(this.uploadDataSources)
     this.rootSourceDescs = {}
     
     this.rows = []
@@ -135,8 +135,7 @@ class DataSourceUploadController {
     this.state.showDataSourceUploadModal.next(true)
     
     this.tableSource = this.uploadSource = this.state.uploadDataSource
-    this.uploadSources = this.state.uploadDataSources
-    this.tableSources = [{'label':'all', 'name':'all'}].concat( this.state.uploadDataSources )
+    this.tableSources = [{'label':'all', 'name':'all'}].concat( this.uploadDataSources )
     // some of the sources are alaises for others (construction_location for location)
     // and we want to avoid duplications 
     this.rootSourceDescs = {}
@@ -372,7 +371,7 @@ class DataSourceUploadController {
     if (this.isDataManagementView) {
       this.rows = []
 
-      this.state.uploadDataSources.forEach((uploadSource) => {
+      this.uploadDataSources.forEach((uploadSource) => {
         if (('all' == this.tableSource.name && !uploadSource.proxyFor) || uploadSource.name === this.tableSource.name) {
           this.dataItems[uploadSource.name].allLibraryItems.forEach((item, index) => {
             item.id = item.identifier // we need to standardize ID property names
@@ -394,14 +393,15 @@ class DataSourceUploadController {
 
   mapStateToThis (reduxState) {
     return {
-      dataItems: reduxState.plan.dataItems
+      dataItems: reduxState.plan.dataItems,
+      uploadDataSources: reduxState.plan.uploadDataSources
     }
   }
 
   mapDispatchToTarget (dispatch) {
     return {
       selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems)),
-      setAllDataItems: (dataItemKey, allLibraryItems) => dispatch(PlanActions.setAllLibraryItems(dataItemKey, allLibraryItems))
+      setAllLibraryItems: (dataItemKey, allLibraryItems) => dispatch(PlanActions.setAllLibraryItems(dataItemKey, allLibraryItems))
     }
   }
 
