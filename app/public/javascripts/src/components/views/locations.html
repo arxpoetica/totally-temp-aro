@@ -30,21 +30,18 @@
           Location Filters
         </div>
         <div ng-repeat="(filterName, filter) in $ctrl.state.configuration.locationCategories.filters">
-
-          <ui-select multiple ng-model="$ctrl.selectedFilters"
-            theme="bootstrap" on-select="$ctrl.updateMapLayers()" on-remove="$ctrl.updateMapLayers()">
-            <ui-select-match placeholder="Select...">
-              <span>{{$item.value.description}}</span>
-            </ui-select-match>
-            <ui-select-choices class="ui-select-choices-style" repeat="rule.value as (id, rule) in filter.rules | filter: $select.search"
-              refresh=""
-              refresh-delay="250">
-              <div ng-bind-html="rule.value.description"></div>
-              <!-- <div>
-                {{rule.description}}asdf
-              </div> -->
-            </ui-select-choices>
-          </ui-select>
+          <ul class="customer-type">
+            <!-- Loop through all location types -->
+            <li ng-repeat="(ruleId, rule) in filter.rules">
+              <!-- <div class="ctype-icon" ng-if="locationType.showIcon"><img ng-src="{{locationType.iconUrl}}" style="width:16px;margin-right:10px"></div> -->
+              <div class="ctype-name">{{rule.description}}</div>
+              <div class="ctype-checkbox">
+                <input type="checkbox" class="checkboxfill" ng-style="stylebtn"
+                        ng-checked="rule.isChecked"
+                        ng-click="$ctrl.setRuleChecked(rule, !rule.isChecked)">
+              </div>
+            </li>
+          </ul>
 
         </div>
   

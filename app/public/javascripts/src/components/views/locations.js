@@ -139,6 +139,16 @@ class LocationsController {
     }
 
     // Add map layers based on the selection
+    const v2Filters = []
+    const filtersObj = (this.state.configuration && this.state.configuration.locationCategories && this.state.configuration.locationCategories.filters) || {}
+    Object.keys(filtersObj).forEach(filterKey => {
+      const filter = filtersObj[filterKey]
+      Object.keys(filter.rules).forEach(ruleKey => {
+        if (filter.rules[ruleKey].isChecked) {
+          v2Filters.push(filter.rules[ruleKey])
+        }
+      })
+    })
     var selectedLocationLibraries = this.state.dataItems && this.state.dataItems.location && this.state.dataItems.location.selectedLibraryItems
     if (selectedLocationLibraries) {
       selectedLocationLibraries.forEach((selectedLocationLibrary) => {
@@ -209,7 +219,7 @@ class LocationsController {
                 zIndex: locationType.zIndex,
                 selectable: true,
                 featureFilter: featureFilter,
-                v2Filters: this.selectedFilters
+                v2Filters: v2Filters
               }
               this.createdMapLayerKeys.add(mapLayerKey)
             }
@@ -235,7 +245,7 @@ class LocationsController {
         renderMode: 'HEATMAP',
         zIndex: 6500,
         aggregateMode: 'FLATTEN',
-        v2Filters: this.selectedFilters
+        v2Filters: v2Filters
       }
       this.createdMapLayerKeys.add(mapLayerKey)
     }
@@ -245,6 +255,11 @@ class LocationsController {
 
   // Update old and new map layers when data sources change
   onSelectedDataSourcesChanged () {
+    this.updateMapLayers()
+  }
+
+  setRuleChecked (rule, isChecked) {
+    rule.isChecked = isChecked
     this.updateMapLayers()
   }
 
