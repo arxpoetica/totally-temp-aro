@@ -31,9 +31,9 @@
         </div>
         <div ng-repeat="(filterName, filter) in $ctrl.state.configuration.locationCategories.filters">
           <ul class="customer-type">
-            <!-- Loop through all location types -->
+            <!-- Loop through all filter types -->
             <li ng-repeat="(ruleId, rule) in filter.rules">
-              <!-- <div class="ctype-icon" ng-if="locationType.showIcon"><img ng-src="{{locationType.iconUrl}}" style="width:16px;margin-right:10px"></div> -->
+              <div class="ctype-icon"><img ng-src="{{rule.onPass.iconUrl}}" style="width:16px;margin-right:10px"></div>
               <div class="ctype-name">{{rule.description}}</div>
               <div class="ctype-checkbox">
                 <input type="checkbox" class="checkboxfill" ng-style="stylebtn"
@@ -51,7 +51,7 @@
         <form>
           <ul class="customer-type">
             <!-- Loop through all location types -->
-            <li ng-repeat="locationType in $ctrl.locationLayers | orderBy: '-key'">
+            <li ng-repeat="locationType in $ctrl.locationLayers | orderBy: '-key'" ng-if="locationType.show">
               <div class="ctype-icon" ng-if="locationType.showIcon"><img ng-src="{{locationType.iconUrl}}" style="width:16px;margin-right:10px"></div>
               <div class="ctype-name">{{locationType.label}}</div>
               <div class="ctype-checkbox">
