@@ -220,7 +220,8 @@ function requestSubNet (planId, ringIds, locationTypes, ringOptions) {
         maxConnectionDistance: +ringOptions.maxConnectionDistance.value,
         maxWormholeDistance: +ringOptions.maxWormholeDistance.value,
         ringComplexityCount: +ringOptions.ringComplexityCount.value,
-        targetEdgeTypes: targetEdgeTypes
+        targetEdgeTypes: targetEdgeTypes,
+        sourceEdgeTypes: targetEdgeTypes
       }
     }
 
