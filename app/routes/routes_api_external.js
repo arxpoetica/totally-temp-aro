@@ -2,9 +2,11 @@
 
 const helpers = require('../helpers')
 const config = helpers.config
+const database = helpers.database
 const expressProxy = require('express-http-proxy')
 const requestPromise = require('request-promise-native')
 const jwt = require('jsonwebtoken')
+const userIdInjector = require('./user-id-injector')
 
 const OAUTH_CONNECTION_STRING = `http://${config.oauth_server_host}`
 
@@ -23,35 +25,25 @@ const authSigningKey = requestPromise({
 
 // A promise that resolves if the user is authenticated correctly, using JWT strategy (will decrypt JWT without calls to the auth server)
 const checkUserAuthJWT = (jwtToken) => authSigningKey
-    .then(signingKey => {
-      return new Promise((resolve, reject) => {
-        jwt.verify(jwtToken, signingKey, (err, decoded) => {
-          if (err) {
-            console.error(err)
-            reject({
-              statusCode: 400,
-              error: 'ERROR: Unable to verify JWT token'
-            })
-          } else {
-            resolve(decoded)
-          }
-        })
+  .then(signingKey => {
+    return new Promise((resolve, reject) => {
+      jwt.verify(jwtToken, signingKey, (err, decoded) => {
+        if (err) {
+          console.error(err)
+          reject({
+            statusCode: 400,
+            error: 'ERROR: Unable to verify JWT token'
+          })
+        } else {
+          resolve(decoded)
+        }
       })
     })
-    .catch(err => {
-      console.error(err)
-      return Promise.reject(err)
-    })
-
-// A promise that resolves if the user is authenticated correctly, using token strategy (will call auth server every)
-const checkUserAuthToken = (token) => requestPromise({
-  method: 'POST',
-  uri: `${OAUTH_CONNECTION_STRING}/oauth/check_token`,
-  qs: {
-    token: authTokens[1]
-  },
-  json: true
-})
+  })
+  .catch(err => {
+    console.error(err)
+    return Promise.reject(err)
+  })
 
 // Middleware to check the validity of a bearer token
 const bearerTokenCheckMiddleware = (req, res, next) => {
@@ -64,9 +56,14 @@ const bearerTokenCheckMiddleware = (req, res, next) => {
     }
 
     // We have a bearer token, check with our OAuth server to see if it is valid
-    checkUserAuthJWT(authTokens[1])   // Replace with checkUserAuthToken if you want to use jdbc tokens
-      .then(result => {
-        next()  // Success, we can forward the request to service. The forwarding will be handled by the next middleware in the chain.
+    checkUserAuthJWT(authTokens[1]) // Replace with checkUserAuthToken if you want to use jdbc tokens
+      .then(result => database.findOne('SELECT id FROM auth.users WHERE email=$1', [result.user_name]))
+      .then(user => {
+        if (!user || !user.id) {
+          return Promise.reject({ statusCode: 401, error: 'User ID not found in users table' })
+        }
+        req.userIdFromJWT = user.id
+        next() // Success, we can forward the request to service. The forwarding will be handled by the next middleware in the chain.
       })
       .catch(err => {
         // Error when authenticating the token. Send it back
@@ -83,6 +80,8 @@ exports.configure = (api, middleware) => {
   // Get all requests (POST/GET/DELETE/PUT,etc) that start with /v1/api-ext, and then pass those
   // on to ARO-Service if the bearer token is authenticated.
   // Do NOT modify any data - this is intended to be a pass-through service
-  const EXTERNAL_API_PREFIX = '/v1/api-ext'
-  api.all(`${EXTERNAL_API_PREFIX}/*`, bearerTokenCheckMiddleware, expressProxy(`${config.aro_service_url}`))
+  const EXTERNAL_API_PREFIX = '/api-ext'
+  api.all(`${EXTERNAL_API_PREFIX}/*`, bearerTokenCheckMiddleware, expressProxy(`${config.aro_service_url}`, {
+    proxyReqPathResolver: req => userIdInjector(req, EXTERNAL_API_PREFIX, EXTERNAL_API_PREFIX, req.userIdFromJWT)
+  }))
 }

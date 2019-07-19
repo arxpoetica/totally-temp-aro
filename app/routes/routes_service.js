@@ -1,6 +1,4 @@
 const expressProxy = require('express-http-proxy')
-const URL = require('url').URL
-const URLSearchParams = require('url').URLSearchParams
 var models = require('../models')
 var helpers = require('../helpers')
 var config = helpers.config
@@ -9,6 +7,7 @@ var multer = require('multer')
 var os = require('os')
 var upload = multer({ dest: os.tmpdir() })
 const socketManager = require('../sockets/socketManager').socketManager
+const userIdInjector = require('./user-id-injector')
 
 exports.configure = (api, middleware) => {
   var jsonSuccess = middleware.jsonSuccess
@@ -17,23 +16,7 @@ exports.configure = (api, middleware) => {
   // on to ARO-Service. Do NOT modify any data - this is intended to be a pass-through service
   const SERVICE_PREFIX = '/service'
   api.all(`${SERVICE_PREFIX}/*`, expressProxy(`${config.aro_service_url}`, {
-    proxyReqPathResolver: req => {
-      // First construct the full url (i.e. including the http(s)://<hostname>)
-      const fullUrl = new URL(`${req.protocol}://${req.get('host')}${req.url}`)
-
-      // Now extract the existing query parameters
-      const searchParams = new URLSearchParams(fullUrl.searchParams)
-
-      // Overwrite or add the user_id query parameter. (Overwrite so that authenticated clients cannot
-      // impersonate other users). Then set the query parameters back to the original URL.
-      searchParams.set('user_id', req.user.id)
-      fullUrl.search = searchParams
-
-      // Construct the "final" URL by removing the protocol, host, etc so it looks like '/v1/plan?user_id=xxx'
-      const finalUrl = fullUrl.href.substring(fullUrl.href.indexOf('/service/') + '/service/'.length - 1)
-
-      return finalUrl
-    }
+    proxyReqPathResolver: req => userIdInjector(req, SERVICE_PREFIX, '', req.user.id)
   }))
 
   // For vector tile requests that return data via websockets, save the request uuid. Then pass the
