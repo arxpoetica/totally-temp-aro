@@ -1,6 +1,8 @@
 import React from 'react'
 import { shallow } from 'enzyme'
 import { RingEdit } from '../ring-edit'
+import RingStatusTypes from '../constants'
+import Ring from '../../../common/ring'
 
 const mockSetMap = jest.fn()
 const mockSetPosition = jest.fn()
@@ -43,6 +45,8 @@ const globalGoogle = {
 }
 
 // may have to change this
+//const ring45 = new Ring()
+
 const rings = {
   "45":{
     "id":45,
@@ -688,8 +692,8 @@ test('With no rings', () => {
   )
   expect(component).toMatchSnapshot()
 })
-
-test('With rings', () => {
+/*
+test("With rings, can't edit", () => {
   global.google = globalGoogle
   const mockSetSelectedRingId = jest.fn()
   const mockGoogleMaps = {}
@@ -698,9 +702,10 @@ test('With rings', () => {
     <RingEdit rings={rings}
       setSelectedRingId={mockSetSelectedRingId}
       map={{googleMaps: mockGoogleMaps}}
+      status={RingStatusTypes.COMPLETED}
     />
   )
   expect(component).toMatchSnapshot()
 })
-
+*/
 
