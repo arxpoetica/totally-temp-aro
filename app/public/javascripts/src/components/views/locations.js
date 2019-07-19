@@ -267,6 +267,11 @@ class LocationsController {
     return this.locationLayers.filter(layer => layer.show).length > 0
   }
 
+  areAnyLocationFiltersVisible () {
+    const filtersObj = (this.state.configuration && this.state.configuration.locationCategories && this.state.configuration.locationCategories.filters) || {}
+    return Object.keys(filtersObj).length > 0
+  }
+
   mapStateToThis (state) {
     return {
       locationLayers: getLocationLayersList(state)

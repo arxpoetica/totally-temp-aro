@@ -26,7 +26,7 @@
       <div class="card-body map-tools-card-body" style="padding-top: 0px; max-height: 600px; overflow-y: auto; overflow-x: hidden;"
            ng-show="$ctrl.map_tools.is_expanded('locations')">
 
-        <div class="row location-category-title">
+        <div class="row location-category-title" ng-if="$ctrl.areAnyLocationFiltersVisible()">
           Location Filters
         </div>
         <div ng-repeat="(filterName, filter) in $ctrl.state.configuration.locationCategories.filters">
