@@ -170,10 +170,20 @@ class TileDataService {
   }
 
   // Flattens all URLs and returns tile data that is a simple union of all features
-  getTileDataFlatten(mapLayer, zoom, tileX, tileY) {
+  getTileDataFlatten (mapLayer, zoom, tileX, tileY) {
     // We have multiple URLs where data is coming from, and we want a simple union of the results
     var promises = []
     mapLayer.tileDefinitions.forEach((tileDefinition) => promises.push(this.getTileDataSingleDefinition(tileDefinition, zoom, tileX, tileY)))
+
+    // Get all icons that can potentially be used for the filters
+    const v2Filters = mapLayer.v2Filters || []
+    const filterIconUrls = [...new Set(v2Filters.map(v2Filter => v2Filter.onPass.iconUrl))]
+    filterIconUrls.forEach(filterIconUrl => {
+      if (!this.getEntityImageForLayer(filterIconUrl)) {
+        this.addEntityImageForLayer(filterIconUrl, filterIconUrl)
+      }
+      promises.push(this.getEntityImageForLayer(filterIconUrl))
+    })
 
     // A promise that will return an Image from a URL
     var imagePromise = (url) => new Promise((resolve, reject) => {
@@ -213,7 +223,7 @@ class TileDataService {
     return Promise.all(promises)
       .then((results) => {
         var allFeatures = []
-        var numDataResults = results.length - (hasIcon + hasSelectedIcon + hasGreyedOutIcon + hasMDUIcon) // booleans are 0 or 1 so True + True = 2
+        var numDataResults = mapLayer.tileDefinitions.length
 
         for (var iResult = 0; iResult < numDataResults; ++iResult) {
           var result = results[iResult]
@@ -226,6 +236,12 @@ class TileDataService {
           layerToFeatures: {
             FEATURES_FLATTENED: allFeatures
           }
+        }
+
+        tileData.v2FilterIcons = {}
+        for (iResult = 0; iResult < filterIconUrls.length; ++iResult) {
+          const iconResult = results[numDataResults + iResult]
+          tileData.v2FilterIcons[filterIconUrls[iResult]] = iconResult
         }
 
         if (hasIcon) {
@@ -245,7 +261,7 @@ class TileDataService {
   }
 
   // Returns aggregated results for a tile
-  getTileDataAggregated(mapLayer, zoom, tileX, tileY) {
+  getTileDataAggregated (mapLayer, zoom, tileX, tileY) {
     // We have multiple URLs where data is coming from. Return the aggregated result
     var promises = []
     mapLayer.tileDefinitions.forEach((tileDefinition) => promises.push(this.getTileDataSingleDefinition(tileDefinition, zoom, tileX, tileY)))
@@ -315,7 +331,7 @@ class TileDataService {
   }
 
   // Adds a layer key and url to the tile data service
-  addEntityImageForLayer(layerKey, imageUrl) {
+  addEntityImageForLayer (layerKey, imageUrl) {
     if (this.entityImageCache[layerKey]) {
       // This has already been added. Nothing to do.
       return
@@ -334,37 +350,33 @@ class TileDataService {
     this.entityImageCache[layerKey] = imageLoadedPromise
   }
 
-  // Returns a promise for the image associated with a layer key
-  getEntityImageForLayer(layerKey) {
-    var entityImagePromise = this.entityImageCache[layerKey]
-    if (!entityImagePromise) {
-      throw 'No promise for image with layerKey ' + layerKey
-    }
-    return entityImagePromise
+  // Returns a promise for the image associated with a layer key. Can return null
+  getEntityImageForLayer (layerKey) {
+    return this.entityImageCache[layerKey]
   }
 
   // Add a specified location ID to the set of features to be excluded from the render
-  addFeatureToExclude(featureId) {
+  addFeatureToExclude (featureId) {
     this.featuresToExclude.add(featureId)
   }
 
   // Add a specified location ID to the set of features to be excluded from the render
-  removeFeatureToExclude(featureId) {
+  removeFeatureToExclude (featureId) {
     this.featuresToExclude.delete(featureId)
   }
 
   // Add a modified feature to the set of modified features
-  addModifiedFeature(feature) {
+  addModifiedFeature (feature) {
     this.modifiedFeatures[feature.objectId] = feature
   }
 
   // Add a modified boundary to the set of modified features
-  addModifiedBoundary(feature) {
+  addModifiedBoundary (feature) {
     this.modifiedBoundaries[feature.objectId] = feature
   }
 
   // Clear the entire tile data cache
-  clearDataCache() {
+  clearDataCache () {
     this.tileDataCache = {}
     this.tileProviderCache = {}
     this.featuresToExclude = new Set()

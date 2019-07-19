@@ -437,6 +437,7 @@ class MapTileRenderer {
     ctx.globalAlpha = 1.0
     // If a filtering function is provided for this layer, apply it to filter out features
     var v1FilteredFeatures = mapLayer.featureFilter ? features.filter(mapLayer.featureFilter) : features
+    v1FilteredFeatures.forEach(v1Feature => delete v1Feature.v2Result)
 
     // V2 filtering
     var filteredFeatures = []

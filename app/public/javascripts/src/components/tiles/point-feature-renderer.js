@@ -131,6 +131,10 @@ class PointFeatureRenderer {
 
   static getEntityImageForFeature (feature, featureData, ARO_CLIENT, mapLayer) {
     var entityImage = featureData.icon
+    if (feature.v2Result && feature.v2Result.iconUrl) {
+      entityImage = featureData.v2FilterIcons[feature.v2Result.iconUrl]
+    }
+
     if (feature.properties.hasOwnProperty('_data_type') && feature.properties._data_type != '') {
       if (feature.properties.hasOwnProperty('object_id')) {
         // greyout an RT with hsiEanbled true for frontier client
