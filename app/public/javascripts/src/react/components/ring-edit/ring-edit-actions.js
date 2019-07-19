@@ -175,7 +175,6 @@ function loadRings (planId) {
               type: Actions.RING_ADD_RINGS,
               payload: rings
             })
-            
           })
       }).catch(err => console.error(err))
   }

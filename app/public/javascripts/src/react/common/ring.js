@@ -1,5 +1,4 @@
 /* global google */
-import RingActions from '../components/ring-edit/ring-edit-actions'
 import uuidv4 from 'uuid/v4'
 
 export default class Ring {
