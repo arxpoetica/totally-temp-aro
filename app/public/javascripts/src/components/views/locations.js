@@ -263,6 +263,10 @@ class LocationsController {
     this.updateMapLayers()
   }
 
+  areAnyLocationLayersVisible () {
+    return this.locationLayers.filter(layer => layer.show).length > 0
+  }
+
   mapStateToThis (state) {
     return {
       locationLayers: getLocationLayersList(state)
