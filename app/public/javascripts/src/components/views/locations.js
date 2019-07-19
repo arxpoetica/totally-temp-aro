@@ -139,17 +139,21 @@ class LocationsController {
     }
 
     // Add map layers based on the selection
-    var v2Filters = []
+    var v2Filters = null // If not null, the renderer will display zero objects
     const filtersObj = (this.state.configuration && this.state.configuration.locationCategories && this.state.configuration.locationCategories.filters) || {}
-    Object.keys(filtersObj).forEach(filterKey => {
-      const filter = filtersObj[filterKey]
-      Object.keys(filter.rules).forEach(ruleKey => {
-        if (filter.rules[ruleKey].isChecked) {
-          v2Filters.push(filter.rules[ruleKey])
-        }
+    if (Object.keys(filtersObj).length > 0) {
+      // Define the v2Filters object ONLY if there are some filters defined in the system
+      v2Filters = []
+      Object.keys(filtersObj).forEach(filterKey => {
+        const filter = filtersObj[filterKey]
+        Object.keys(filter.rules).forEach(ruleKey => {
+          if (filter.rules[ruleKey].isChecked) {
+            v2Filters.push(filter.rules[ruleKey])
+          }
+        })
       })
-    })
-    v2Filters = (v2Filters.length > 0) ? v2Filters : null // Specifically null if we don't have any valid filters
+    }
+
     var selectedLocationLibraries = this.state.dataItems && this.state.dataItems.location && this.state.dataItems.location.selectedLibraryItems
     if (selectedLocationLibraries) {
       selectedLocationLibraries.forEach((selectedLocationLibrary) => {
