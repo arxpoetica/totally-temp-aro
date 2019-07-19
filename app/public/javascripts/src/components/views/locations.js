@@ -139,7 +139,7 @@ class LocationsController {
     }
 
     // Add map layers based on the selection
-    const v2Filters = []
+    var v2Filters = []
     const filtersObj = (this.state.configuration && this.state.configuration.locationCategories && this.state.configuration.locationCategories.filters) || {}
     Object.keys(filtersObj).forEach(filterKey => {
       const filter = filtersObj[filterKey]
@@ -149,6 +149,7 @@ class LocationsController {
         }
       })
     })
+    v2Filters = (v2Filters.length > 0) ? v2Filters : null // Specifically null if we don't have any valid filters
     var selectedLocationLibraries = this.state.dataItems && this.state.dataItems.location && this.state.dataItems.location.selectedLibraryItems
     if (selectedLocationLibraries) {
       selectedLocationLibraries.forEach((selectedLocationLibrary) => {
