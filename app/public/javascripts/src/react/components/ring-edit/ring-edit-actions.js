@@ -157,19 +157,17 @@ function loadRings (planId) {
 
     AroHttp.get(`/service/plan/${planId}/ring-config?planId=${planId}`)
       .then(result => {
-        var promisses = []
-
+        var rings = []
+        var ringPromisses = []
         result.data.forEach(ringData => {
-          promisses.push(Ring.parseData(ringData, planId, userId))
+          ringPromisses.push(this.getExchangeLinksPromise(ringData, planId, userId)
+            .then(result => {
+              rings.push(Ring.parseData(ringData, result))
+            }))
         })
 
-        Promise.all(promisses)
-          .then(results => {
-            var rings = []
-            results.forEach(result => {
-              rings.push(result)
-            })
-
+        Promise.all(ringPromisses)
+          .then(() => {
             dispatch({
               type: Actions.RING_REMOVE_ALL_RINGS
             })
@@ -178,9 +176,29 @@ function loadRings (planId) {
               payload: rings
             })
           })
-      })
-      .catch(err => console.error(err))
+      }).catch(err => console.error(err))
   }
+}
+
+function getExchangeLinksPromise (ringData, planId, userId) {
+  return new Promise((resolve, reject) => {
+    if (ringData.exchangeLinks.length > 0) {
+      var nodeIds = [ ringData.exchangeLinks[0].fromOid ]
+      ringData.exchangeLinks.forEach(link => {
+        nodeIds.push(link.toOid)
+      })
+      var promisses = []
+      nodeIds.forEach(id => {
+        promisses.push(this.getEquipmentDataPromise(id, planId, userId))
+      })
+      Promise.all(promisses)
+        .then(results => {
+          resolve(results.map(result => result.data))
+        })
+    } else {
+      resolve([])
+    }
+  }).catch(err => console.error(err))
 }
 
 function requestSubNet (planId, ringIds, locationTypes, ringOptions) {
@@ -240,6 +258,7 @@ export default {
   removeAllRings,
   onFeatureSelected,
   loadRings,
+  getExchangeLinksPromise,
   addNode,
   saveRingChangesToServer,
   renameRing,

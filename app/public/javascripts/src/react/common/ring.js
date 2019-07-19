@@ -1,5 +1,4 @@
 /* global google */
-import RingActions from '../components/ring-edit/ring-edit-actions'
 import uuidv4 from 'uuid/v4'
 
 export default class Ring {
@@ -11,58 +10,45 @@ export default class Ring {
     this.linkData = []
   }
 
-  static parseData (data, planId, userId) {
-    var parsedRing = new Ring(data.id, data.name)
+  static parseData (ringData, equipmentData) {
+    console.log('---data---')
+    console.log(ringData)
+    console.log(equipmentData)
+    var parsedRing = new Ring(ringData.id, ringData.name)
 
-    if (data.exchangeLinks.length > 0) {
-      var nodeIds = [ data.exchangeLinks[0].fromOid ]
-      data.exchangeLinks.forEach(link => {
-        nodeIds.push(link.toOid)
-      })
-      var promisses = []
-      nodeIds.forEach(id => {
-        promisses.push(RingActions.getEquipmentDataPromise(id, planId, userId))
+    if (ringData.exchangeLinks.length > 0) {
+      equipmentData.forEach(node => {
+        parsedRing.nodesById[node.objectId] = {
+          objectId: node.objectId,
+          data: node
+        }
       })
 
-      return Promise.all(promisses)
-        .then(results => {
-        // ToDo protect against fail returns
-          results.forEach(result => {
-            var index = nodeIds.findIndex((ele) => ele === result.data.objectId)
-            if (index !== -1) {
-              parsedRing.nodes[index] = {
-                objectId: result.data.objectId,
-                data: result.data
-              }
-              parsedRing.nodesById[result.data.objectId] = parsedRing.nodes[index]
-            }
-          })
-          data.exchangeLinks.forEach((link, i) => {
-            var fromNode = parsedRing.nodesById[link.fromOid]
-            var toNode = parsedRing.nodesById[link.toOid]
-            var geom = []
-            if (!link.geomPath || link.geomPath.length === 0) {
-              geom = parsedRing.figureRangeIntersectOffset(fromNode, toNode)
-            } else {
-              geom = parsedRing.importGeom(link.geomPath)
-            }
-            parsedRing.linkData[i] = {
-              exchangeLinkOid: link.exchangeLinkOid,
-              fromNode: fromNode,
-              toNode: toNode,
-              geom: geom
-            }
-          })
-          return parsedRing
-        }).catch(err => console.error(err))
-    } else {
-      return new Promise((resolve, reject) => {
-        resolve(parsedRing)
-      }).catch(err => console.error(err))
+      parsedRing.nodes[0] = parsedRing.nodesById[ringData.exchangeLinks[0].fromOid]
+      ringData.exchangeLinks.forEach((link, i) => {
+        var fromNode = parsedRing.nodesById[link.fromOid]
+        var toNode = parsedRing.nodesById[link.toOid]
+        var geom = []
+        parsedRing.nodes.push(toNode)
+        if (!link.geomPath || link.geomPath.length === 0) {
+          geom = parsedRing.figureRangeIntersectOffset(fromNode, toNode)
+        } else {
+          geom = parsedRing.importGeom(link.geomPath)
+        }
+        parsedRing.linkData[i] = {
+          exchangeLinkOid: link.exchangeLinkOid,
+          fromNode: fromNode,
+          toNode: toNode,
+          geom: geom
+        }
+      })
     }
+
+    return parsedRing
   }
 
   addNode (node) {
+    // move to caller
     var linkId = uuidv4() // ToDo: use /src/components/common/utilitias.js > getUUID()
     if (this.nodes.length > 0) {
       var fromNode = this.nodes[this.nodes.length - 1]

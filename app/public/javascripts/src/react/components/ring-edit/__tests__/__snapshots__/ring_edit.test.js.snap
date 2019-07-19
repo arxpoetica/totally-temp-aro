@@ -1,0 +1,265 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`With no rings 1`] = `
+<div>
+  <div
+    className="m-2 p-2"
+  >
+    <h4>
+      Rings
+    </h4>
+    <table
+      className="table table-sm table-striped"
+    >
+      <tbody />
+    </table>
+  </div>
+  <ReduxForm
+    destroyOnUnmount={true}
+    enableReinitialize={true}
+    forceUnregisterOnUnmount={false}
+    form="ringOptions"
+    getFormState={[Function]}
+    initialValues={
+      Object {
+        "conduitBufferSize": Object {
+          "displayName": "Conduit buffer size",
+          "value": 10,
+        },
+        "locationBufferSize": Object {
+          "displayName": "Location buffer size",
+          "value": 500,
+        },
+        "maxConnectionDistance": Object {
+          "displayName": "Connection distance",
+          "value": 20,
+        },
+        "maxLocationEdgeDistance": Object {
+          "displayName": "Max location-edge distance",
+          "value": 400,
+        },
+        "maxWormholeDistance": Object {
+          "displayName": "Wormhole distance",
+          "value": 40,
+        },
+        "ringComplexityCount": Object {
+          "displayName": "Ring complexity",
+          "value": 3000000,
+        },
+        "snappingDistance": Object {
+          "displayName": "Snapping distance",
+          "value": 1,
+        },
+      }
+    }
+    keepDirtyOnReinitialize={false}
+    persistentSubmitErrors={false}
+    pure={true}
+    shouldAsyncValidate={[Function]}
+    shouldError={[Function]}
+    shouldValidate={[Function]}
+    shouldWarn={[Function]}
+    submitAsSideEffect={false}
+    touchOnBlur={true}
+    touchOnChange={false}
+    updateUnregisteredFields={false}
+  />
+</div>
+`;
+
+exports[`With rings 1`] = `
+<div>
+  <div
+    className="m-2 p-2"
+  >
+    <h4>
+      Rings
+    </h4>
+    <table
+      className="table table-sm table-striped"
+    >
+      <tbody>
+        <tr
+          key="47"
+        >
+          <td>
+            <div
+              onClick={[Function]}
+            >
+              south
+            </div>
+          </td>
+        </tr>
+        <tr
+          key="45"
+        >
+          <td>
+            <div
+              onClick={[Function]}
+            >
+              north
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <ReduxForm
+    destroyOnUnmount={true}
+    enableReinitialize={true}
+    forceUnregisterOnUnmount={false}
+    form="ringOptions"
+    getFormState={[Function]}
+    initialValues={
+      Object {
+        "conduitBufferSize": Object {
+          "displayName": "Conduit buffer size",
+          "value": 10,
+        },
+        "locationBufferSize": Object {
+          "displayName": "Location buffer size",
+          "value": 500,
+        },
+        "maxConnectionDistance": Object {
+          "displayName": "Connection distance",
+          "value": 20,
+        },
+        "maxLocationEdgeDistance": Object {
+          "displayName": "Max location-edge distance",
+          "value": 400,
+        },
+        "maxWormholeDistance": Object {
+          "displayName": "Wormhole distance",
+          "value": 40,
+        },
+        "ringComplexityCount": Object {
+          "displayName": "Ring complexity",
+          "value": 3000000,
+        },
+        "snappingDistance": Object {
+          "displayName": "Snapping distance",
+          "value": 1,
+        },
+      }
+    }
+    keepDirtyOnReinitialize={false}
+    persistentSubmitErrors={false}
+    pure={true}
+    shouldAsyncValidate={[Function]}
+    shouldError={[Function]}
+    shouldValidate={[Function]}
+    shouldWarn={[Function]}
+    submitAsSideEffect={false}
+    touchOnBlur={true}
+    touchOnChange={false}
+    updateUnregisteredFields={false}
+  />
+</div>
+`;
+
+exports[`With rings, can't edit 1`] = `
+<div>
+  <div
+    className="m-2 p-2"
+  >
+    <h4>
+      Rings
+    </h4>
+    <table
+      className="table table-sm table-striped"
+    >
+      <tbody>
+        <tr
+          key="47"
+        >
+          <td>
+            <div
+              onClick={[Function]}
+            >
+              south
+            </div>
+          </td>
+        </tr>
+        <tr
+          key="45"
+        >
+          <td>
+            <div
+              onClick={[Function]}
+            >
+              north
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <ReduxForm
+    destroyOnUnmount={true}
+    enableReinitialize={true}
+    forceUnregisterOnUnmount={false}
+    form="ringOptions"
+    getFormState={[Function]}
+    initialValues={
+      Object {
+        "conduitBufferSize": Object {
+          "displayName": "Conduit buffer size",
+          "value": 500,
+        },
+        "locationBufferSize": Object {
+          "displayName": "Location buffer size",
+          "value": 500,
+        },
+        "maxConnectionDistance": Object {
+          "displayName": "Connection distance",
+          "value": 20,
+        },
+        "maxLocationEdgeDistance": Object {
+          "displayName": "Max location-edge distance",
+          "value": 400,
+        },
+        "maxWormholeDistance": Object {
+          "displayName": "Wormhole distance",
+          "value": 40,
+        },
+        "ringComplexityCount": Object {
+          "displayName": "Ring complexity",
+          "value": 3000000,
+        },
+        "snappingDistance": Object {
+          "displayName": "Snapping distance",
+          "value": 1,
+        },
+        "targetEdgeTypes": Object {
+          "duct": Object {
+            "displayName": "Duct",
+            "value": false,
+          },
+          "road": Object {
+            "displayName": "Road",
+            "value": true,
+          },
+          "sewer": Object {
+            "displayName": "Sewer",
+            "value": false,
+          },
+        },
+        "test": Object {
+          "displayName": "test name",
+        },
+      }
+    }
+    keepDirtyOnReinitialize={false}
+    persistentSubmitErrors={false}
+    pure={true}
+    shouldAsyncValidate={[Function]}
+    shouldError={[Function]}
+    shouldValidate={[Function]}
+    shouldWarn={[Function]}
+    submitAsSideEffect={false}
+    touchOnBlur={true}
+    touchOnChange={false}
+    updateUnregisteredFields={false}
+  />
+</div>
+`;
