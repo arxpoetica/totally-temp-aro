@@ -441,7 +441,7 @@ class MapTileRenderer {
 
     // V2 filtering
     var filteredFeatures = []
-    if (mapLayer.v2Filters && mapLayer.v2Filters.length > 0) {
+    if (mapLayer.v2Filters) {
       mapLayer.v2Filters.forEach(v2Filter => {
         const rule = new Rule(v2Filter.condition)
         v1FilteredFeatures.forEach(feature => {
