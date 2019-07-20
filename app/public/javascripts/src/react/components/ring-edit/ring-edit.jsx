@@ -40,9 +40,6 @@ const ringOptions = {
     displayName: 'Ring complexity',
     value: 3000000
   },
-  test: {
-    displayName: 'test name'
-  },
   targetEdgeTypes: {
     road: {
       displayName: 'Road',
@@ -120,7 +117,9 @@ export class RingEdit extends Component {
             {ring.name}
 
             {this.canEdit
-              ? <button className='btn btn-sm btn-outline-danger ring-del-btn'
+              ? <button 
+                id={`btnRingDel_${ring.id}`}
+                className='btn btn-sm btn-outline-danger ring-del-btn'
                 onClick={() => this.requestDeleteRing(ring)}
                 data-toggle='tooltip' data-placement='bottom' title='Delete'>
                 <i className='fa ei-button-icon ng-scope fa-trash-alt' />
@@ -155,7 +154,7 @@ export class RingEdit extends Component {
                         {node.siteClli || node.objectId}
 
                         {this.canEdit
-                          ? <button className='btn btn-sm btn-outline-danger ring-del-btn'
+                          ? <button id={`btnNodeDel_${ring.id}-${node.objectId}`} className='btn btn-sm btn-outline-danger ring-del-btn'
                             onClick={() => this.deleteNode(ring, node.objectId)}
                             data-toggle='tooltip' data-placement='bottom' title='Delete'>
                             <i className='fa ei-button-icon ng-scope fa-trash-alt' />
@@ -175,7 +174,7 @@ export class RingEdit extends Component {
     } else {
       return <tr key={ring.id}>
         <td>
-          <div onClick={() => this.props.setSelectedRingId(ring.id)}>
+          <div id={`btnRingSelect_${ring.id}`} onClick={() => this.props.setSelectedRingId(ring.id)}>
             {ring.name}
           </div>
         </td>
