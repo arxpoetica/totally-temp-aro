@@ -42,7 +42,7 @@
   },
   "threshold": 0,
   "preIrrThreshold": 1.0,
-  "budget": 10000,
+  "budget": 100000,
   "customOptimization": null,
   "routeGenerationOptions": [
     {
@@ -89,7 +89,7 @@
   "optimization": {
     "algorithmType": "DEFAULT",
     "algorithm": "UNCONSTRAINED"
-  },
+  }, 
   "competitionConfiguration": {
     "providerStrength": 1.0
   }

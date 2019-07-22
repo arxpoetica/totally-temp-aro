@@ -4,6 +4,7 @@ import PolygonFeatureRenderer from './polygon-feature-renderer'
 import TileUtilities from './tile-utilities'
 import AsyncPriorityQueue from 'async/priorityQueue'
 import Constants from '../common/constants'
+import Rule from './rule'
 
 class MapTileRenderer {
   constructor (tileSize, tileDataService, mapTileOptions, censusCategories, selectedDisplayMode, selectionModes, analysisSelectionMode, displayModes,
@@ -435,17 +436,25 @@ class MapTileRenderer {
   renderFeatures (ctx, zoom, tileCoords, features, featureData, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage, geometryOffset, heatMapData, heatmapID, mapLayer) {
     ctx.globalAlpha = 1.0
     // If a filtering function is provided for this layer, apply it to filter out features
-    const filteredFeatures = mapLayer.featureFilter ? features.filter(mapLayer.featureFilter) : features
-    /*
-    if (features.length > 0){
-      console.log(features)
-      console.log(filteredFeatures)
-      console.log(mapLayer.tileDefinitions[0].vtlType)
-      console.log(this.tileDataService.featuresToExclude)
-      console.log(this.tileDataService.modifiedBoundaries)
-    }
-    // */
+    var v1FilteredFeatures = mapLayer.featureFilter ? features.filter(mapLayer.featureFilter) : features
+    v1FilteredFeatures.forEach(v1Feature => delete v1Feature.v2Result)
 
+    // V2 filtering
+    var filteredFeatures = []
+    if (mapLayer.v2Filters) {
+      mapLayer.v2Filters.forEach(v2Filter => {
+        const rule = new Rule(v2Filter.condition)
+        v1FilteredFeatures.forEach(feature => {
+          if (rule.checkCondition(feature.properties)) {
+            feature.v2Result = v2Filter.onPass
+            filteredFeatures.push(feature)
+          }
+        })
+      })
+    } else {
+      // No V2 filters selected. Use all features
+      filteredFeatures = v1FilteredFeatures
+    }
     var closedPolygonFeatureLayersList = []
     var pointFeatureRendererList = []
     for (var iFeature = 0; iFeature < filteredFeatures.length; ++iFeature) {

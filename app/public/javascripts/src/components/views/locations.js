@@ -134,6 +134,21 @@ class LocationsController {
     }
 
     // Add map layers based on the selection
+    var v2Filters = null // If not null, the renderer will display zero objects
+    const filtersObj = (this.state.configuration && this.state.configuration.locationCategories && this.state.configuration.locationCategories.filters) || {}
+    if (Object.keys(filtersObj).length > 0) {
+      // Define the v2Filters object ONLY if there are some filters defined in the system
+      v2Filters = []
+      Object.keys(filtersObj).forEach(filterKey => {
+        const filter = filtersObj[filterKey]
+        Object.keys(filter.rules).forEach(ruleKey => {
+          if (filter.rules[ruleKey].isChecked) {
+            v2Filters.push(filter.rules[ruleKey])
+          }
+        })
+      })
+    }
+
     var selectedLocationLibraries = this.dataItems && this.dataItems.location && this.dataItems.location.selectedLibraryItems
     if (selectedLocationLibraries) {
       selectedLocationLibraries.forEach((selectedLocationLibrary) => {
@@ -203,7 +218,8 @@ class LocationsController {
                 renderMode: 'PRIMITIVE_FEATURES',
                 zIndex: locationType.zIndex,
                 selectable: true,
-                featureFilter: featureFilter
+                featureFilter: featureFilter,
+                v2Filters: v2Filters
               }
               this.createdMapLayerKeys.add(mapLayerKey)
             }
@@ -228,7 +244,8 @@ class LocationsController {
         iconUrl: `${baseUrl}${firstLocation.iconUrl}`,
         renderMode: 'HEATMAP',
         zIndex: 6500,
-        aggregateMode: 'FLATTEN'
+        aggregateMode: 'FLATTEN',
+        v2Filters: v2Filters
       }
       this.createdMapLayerKeys.add(mapLayerKey)
     }
@@ -239,6 +256,20 @@ class LocationsController {
   // Update old and new map layers when data sources change
   onSelectedDataSourcesChanged () {
     this.updateMapLayers()
+  }
+
+  setRuleChecked (rule, isChecked) {
+    rule.isChecked = isChecked
+    this.updateMapLayers()
+  }
+
+  areAnyLocationLayersVisible () {
+    return this.locationLayers.filter(layer => layer.show).length > 0
+  }
+
+  areAnyLocationFiltersVisible () {
+    const filtersObj = (this.state.configuration && this.state.configuration.locationCategories && this.state.configuration.locationCategories.filters) || {}
+    return Object.keys(filtersObj).length > 0
   }
 
   mapStateToThis (reduxState) {
