@@ -268,8 +268,7 @@ class TileComponentController {
     }
 
     this.overlayRightclickListener = this.mapRef.addListener('rightclick', (event) => {
-      if (this.state.selectedDisplayMode.getValue() != this.state.displayModes.VIEW ||
-          this.state.activeViewModePanel == this.state.viewModePanels.EDIT_LOCATIONS ||
+      if (this.state.selectedDisplayMode.getValue() != this.state.displayModes.VIEW  ||
           this.state.activeViewModePanel == this.state.viewModePanels.EDIT_SERVICE_LAYER
       ) return
 
