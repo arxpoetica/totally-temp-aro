@@ -72,7 +72,7 @@ workflows:
               only: 
                 - master
                 - optional_building
-                - Ring_UI
+                - devJuly2019
 
       - deploy:
           requires:
