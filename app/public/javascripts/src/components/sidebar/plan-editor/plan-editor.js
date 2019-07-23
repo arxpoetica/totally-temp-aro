@@ -64,7 +64,8 @@ class PlanEditorController {
       'loop_extender',
       'network_anchor',
       'multiple_dwelling_unit',
-      'network_connector'
+      'network_connector',
+      'location_connector'
     ]
     this.allEditableNetworkNodeTypes = []
     this.state.configuration.perspective.networkEquipment.areVisible.forEach((equipmentType) => {
