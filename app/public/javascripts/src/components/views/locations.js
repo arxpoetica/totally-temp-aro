@@ -79,6 +79,17 @@ class LocationsController {
         this.toggleMeasuringStick()
       }
     })
+
+    this.filterToOrderedRules = {}
+  }
+
+  getOrderedRulesForFilter (filter) {
+    // We are going to cache the ordered rules so we don't compute them every digest cycle. Using "description" as the cache key.
+    if (!this.filterToOrderedRules[filter.description]) {
+      var orderedRules = Object.keys(filter.rules).map(ruleKey => filter.rules[ruleKey]).sort((a, b) => a.listIndex > b.listIndex ? 1 : -1)
+      this.filterToOrderedRules[filter.description] = orderedRules
+    }
+    return this.filterToOrderedRules[filter.description]
   }
 
   toggleMeasuringStick () {

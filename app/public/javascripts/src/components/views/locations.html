@@ -32,7 +32,7 @@
         <div ng-repeat="(filterName, filter) in $ctrl.state.configuration.locationCategories.filters">
           <ul class="customer-type">
             <!-- Loop through all filter types -->
-            <li ng-repeat="(ruleId, rule) in filter.rules">
+            <li ng-repeat="rule in $ctrl.getOrderedRulesForFilter(filter)">
               <div class="ctype-icon"><img ng-src="{{rule.onPass.iconUrl}}" style="width:16px;margin-right:10px"></div>
               <div class="ctype-name">{{rule.description}}</div>
               <div class="ctype-checkbox">
