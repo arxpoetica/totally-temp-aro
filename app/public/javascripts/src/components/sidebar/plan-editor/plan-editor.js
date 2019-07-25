@@ -856,6 +856,7 @@ class PlanEditorController {
       console.log( this.objectIdToProperties[this.selectedMapObject.objectId].networkNodeEquipment.getDisplayProperties() )
     }
     // */
+    console.log(this.getSelectedNetworkConfig())
 
     this.$timeout()
   }

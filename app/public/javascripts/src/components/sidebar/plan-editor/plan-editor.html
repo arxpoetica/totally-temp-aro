@@ -245,7 +245,9 @@
                   </form>
                 </div>
             </div>
-            
+            <div ng-if="$ctrl.getSelectedNetworkConfig().key === 'location_connector'">
+              Location Connector edit section
+            </div>
             <!-- A table containing the editable properties of the selected object -->
             <editor-interface-tree 
                                 on-change="$ctrl.markSelectedEquipmentPropertiesDirty()"
