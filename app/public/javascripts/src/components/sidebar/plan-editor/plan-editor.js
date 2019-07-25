@@ -393,6 +393,7 @@ class PlanEditorController {
   formatEquipmentForService (objectId) {
     // Format the object and send it over to aro-service
     var mapObject = this.objectIdToMapObject[objectId]
+    // console.log(mapObject)
     var objectProperties = this.objectIdToProperties[objectId]
     var serviceFeature = {
       objectId: objectId,
@@ -1022,6 +1023,7 @@ class PlanEditorController {
   }
 
   recalculateSubnetForEquipmentChange (equipmentFeature, subnetsToDelete) {
+    // console.log(equipmentFeature)
     var recalculatedSubnets = {}
     var setOfCOIds = new Set()
     var equipmentObject = this.formatEquipmentForService(equipmentFeature.objectId)
