@@ -154,6 +154,7 @@ class MapObjectEditorController {
     this.overlayRightClickListener = this.mapRef.addListener('rightclick', (event) => {
       // ToDo: this should be in plan-editor
       console.log(event)
+      console.log(this)
       if (this.featureType == 'equipment' || this.featureType == 'serviceArea') { // we're editing a equipment and eqipment bounds NOT locations
         var eventXY = this.getXYFromEvent(event)
         if (!eventXY) return

@@ -268,6 +268,7 @@ class TileComponentController {
     }
 
     this.overlayRightclickListener = this.mapRef.addListener('rightclick', (event) => {
+      console.log('R Click')
       if (this.state.selectedDisplayMode.getValue() != this.state.displayModes.VIEW  ||
           this.state.activeViewModePanel == this.state.viewModePanels.EDIT_SERVICE_LAYER
       ) return
@@ -371,6 +372,7 @@ class TileComponentController {
     })
 
     this.overlayClickListener = this.mapRef.addListener('click', (event) => {
+      console.log('click')
       if (this.contextMenuService.isMenuVisible.getValue()) {
         this.contextMenuService.menuOff()
         this.$timeout()
