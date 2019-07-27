@@ -442,6 +442,10 @@ class State {
       }
     })
     
+    // ToDo: move these to React
+    service.mapFeaturesClickedEvent = new Rx.BehaviorSubject({})
+    service.mapFeaturesRightClickedEvent = new Rx.BehaviorSubject({})
+    service.mapFeaturesCtrlClickedEvent = new Rx.BehaviorSubject({})
 
     // Function to convert from hsv to rgb color values.
     // https://stackoverflow.com/questions/17242144/javascript-convert-hsb-hsv-color-to-rgb-accurately

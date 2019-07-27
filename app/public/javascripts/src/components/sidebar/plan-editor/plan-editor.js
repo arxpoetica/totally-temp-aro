@@ -830,6 +830,7 @@ class PlanEditorController {
   }
 
   handleSelectedObjectChanged (mapObject) {
+    console.log(mapObject)
     if (this.currentTransaction === null) return
     if (mapObject != null) {
       this.updateSelectedState()
