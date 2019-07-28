@@ -106,6 +106,21 @@ class PlanEditorController {
     }
     this.mapRef = window[this.mapGlobalObjectName]
 
+    this.rightClickObserver = this.state.mapFeaturesRightClickedEvent.skip(1).subscribe((hitFeatures) => {
+      console.log('right click')
+      if (hitFeatures.locations.length > 0) {
+        console.log(' --- ')
+        console.log('toggle the following locations')
+        console.log(hitFeatures.locations)
+        console.log(' --- ')
+      }
+    })
+
+    this.ctrlClickObserver = this.state.mapFeaturesCtrlClickedEvent.skip(1).subscribe((hitFeatures) => {
+      console.log('ctrl click')
+      console.log('select multiple')
+    })
+
     // Select the first transaction in the list
     this.resumeOrCreateTransaction(this.planId, this.userId)
   }
@@ -279,7 +294,7 @@ class PlanEditorController {
 
     var equipmentObjectId = mapObject.objectId
     this.isWorkingOnCoverage = true
-    
+
     this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
       .then((result) => {
       // The user may have destroyed the component before we get here. In that case, just return
@@ -1212,6 +1227,8 @@ class PlanEditorController {
   $onDestroy () {
     // Useful for cases where the boundary is still generating, but the component has been destroyed. We do not want to create map objects in that case.
     this.isComponentDestroyed = true
+    this.rightClickObserver.unsubscribe()
+    this.ctrlClickObserver.unsubscribe()
     this.clearAllSubnetMapObjects()
     this.clearTransaction()
     this.unsubscribeRedux()
