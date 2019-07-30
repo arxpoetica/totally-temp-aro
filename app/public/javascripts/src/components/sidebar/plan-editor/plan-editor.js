@@ -1239,9 +1239,28 @@ class PlanEditorController {
     this.rightClickObserver.unsubscribe()
     this.keyClickObserver.unsubscribe()
     this.clickObserver.unsubscribe()
-    this.clearAllSubnetMapObjects()
-    this.clearTransaction()
-    this.unsubscribeRedux()
+    
+    // todo: if keep unsaved, still can't run analysis 
+    swal({
+      title: 'Save changes?',
+      text: 'Do you want to save your changes?',
+      type: 'warning',
+      confirmButtonColor: '#DD6B55',
+      confirmButtonText: 'Save', // 'Yes',
+      showCancelButton: true,
+      cancelButtonText: 'Keep Unsaved', // 'No',
+      closeOnConfirm: true
+    }, (result) => {
+      console.log(this.currentTransaction.id)
+      if (result) {
+        this.commitTransaction(this.currentTransaction.id)
+      } else {
+        //this.discardTransaction(this.currentTransaction.id)
+      }
+      this.clearAllSubnetMapObjects()
+      this.clearTransaction()
+      this.unsubscribeRedux()
+    })
   }
 
   mapStateToThis (reduxState) {
