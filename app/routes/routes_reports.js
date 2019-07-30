@@ -536,6 +536,12 @@ exports.configure = (api, middleware) => {
                                                      FROM aro_core.category
                                                      WHERE description =
                                                            'CAF Phase II') :: text) :: int))        AS "CAF Phase II Tag",
+        (SELECT description
+         FROM aro_core.tag
+         WHERE id = ((cb.tags -> 'category_map' ->> (SELECT id
+                                                     FROM aro_core.category
+                                                     WHERE description =
+                                                           'State Funding') :: text) :: int))        AS "State Funding Tag",
 		rl.attributes
                                 
       FROM reconciled_locations rl
