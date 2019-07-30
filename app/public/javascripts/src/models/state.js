@@ -443,6 +443,7 @@ class State {
     })
     
     // ToDo: move these to React
+    service.isShiftPressed = false
     service.mapFeaturesClickedEvent = new Rx.BehaviorSubject({})
     service.mapFeaturesRightClickedEvent = new Rx.BehaviorSubject({})
     service.mapFeaturesKeyClickedEvent = new Rx.BehaviorSubject({})

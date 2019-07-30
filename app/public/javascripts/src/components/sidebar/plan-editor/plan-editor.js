@@ -106,6 +106,8 @@ class PlanEditorController {
     }
     this.mapRef = window[this.mapGlobalObjectName]
 
+    // --- these should be part of map-object-editor ... but only when it's used here with plan-editor
+    //     so basically this and map-object-editor need to be refactored
     this.rightClickObserver = this.state.mapFeaturesRightClickedEvent.skip(1).subscribe((hitFeatures) => {
       console.log('right click')
       // if location and selected feature type in Location connector then toggle location association to selected locvation Connecotor
@@ -126,6 +128,7 @@ class PlanEditorController {
       console.log('unfiltered click')
       // if location select associated Location Connector
     })
+    // -----
 
     // Select the first transaction in the list
     this.resumeOrCreateTransaction(this.planId, this.userId)

@@ -262,7 +262,7 @@ class TileComponentController {
       MapUtilities.getPixelCoordinatesWithinTile.bind(this)
     ))
     this.OVERLAY_MAP_INDEX = this.mapRef.overlayMapTypes.getLength() - 1
-    this.isShiftPressed = false // make this per-overlay or move it somewhere more global
+    //this.state.isShiftPressed = false // make this per-overlay or move it somewhere more global
     
     // Update the selection in the renderer. We should have a bound "this.oldSelection" at this point
     if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
@@ -273,12 +273,12 @@ class TileComponentController {
     // listener for ctrl key
     this.keydownListener = this.$window.addEventListener('keydown', (event) => {
       console.log(event.key)
-      if (event.key === 'Shift') this.isShiftPressed = true
+      if (event.key === 'Shift') this.state.isShiftPressed = true
     })
     
     this.keyupListener = this.$window.addEventListener('keyup', (event) => {
-      console.log(this.isShiftPressed)
-      if (event.key === 'Shift') this.isShiftPressed = false
+      console.log(this.state.isShiftPressed)
+      if (event.key === 'Shift') this.state.isShiftPressed = false
     })
     
     this.overlayRightclickListener = this.mapRef.addListener('rightclick', (event) => {
@@ -391,7 +391,7 @@ class TileComponentController {
     })
 
     this.overlayClickListener = this.mapRef.addListener('click', (event) => {
-      var wasCtrlPressed = this.isShiftPressed
+      var wasCtrlPressed = this.state.isShiftPressed
       console.log('click')
       console.log(event)
       // ToDo: depricate getFilteredFeaturesUnderLatLng switch to this

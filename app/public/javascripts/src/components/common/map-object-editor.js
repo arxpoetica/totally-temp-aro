@@ -51,6 +51,7 @@ class MapObjectEditorController {
   }
 
   $onInit () {
+    console.log('MAKE map object editor')
     // We should have a map variable at this point
     if (!window[this.mapGlobalObjectName]) {
       console.error('ERROR: Map Object Editor component initialized, but a map object is not available at this time.')
@@ -751,6 +752,9 @@ class MapObjectEditorController {
         // Set up listeners on the map object
         mapObject.addListener('dragend', (event) => this.onModifyObject && this.onModifyObject({ mapObject }))
         mapObject.addListener('click', (event) => {
+          if (this.state.isShiftPressed) {
+            console.log('Shift press of map object')
+          }
           // Select this map object
           this.selectMapObject(mapObject)
         })
@@ -1264,6 +1268,8 @@ class MapObjectEditorController {
     var mapCanvas = this.$document.find(`#${this.mapContainerId}`)[0]
     mapCanvas.ondragover = null
     mapCanvas.ondrop = null
+    
+    console.log('DESTROY map object editor')
   }
 
   mapStateToThis (reduxState) {
