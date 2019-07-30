@@ -108,6 +108,7 @@ class PlanEditorController {
 
     this.rightClickObserver = this.state.mapFeaturesRightClickedEvent.skip(1).subscribe((hitFeatures) => {
       console.log('right click')
+      // if location and selected feature type in Location connector then toggle location association to selected locvation Connecotor
       if (hitFeatures.locations.length > 0) {
         console.log(' --- ')
         console.log('toggle the following locations')
@@ -116,9 +117,14 @@ class PlanEditorController {
       }
     })
 
-    this.ctrlClickObserver = this.state.mapFeaturesCtrlClickedEvent.skip(1).subscribe((hitFeatures) => {
-      console.log('ctrl click')
-      console.log('select multiple')
+    this.keyClickObserver = this.state.mapFeaturesKeyClickedEvent.skip(1).subscribe((hitFeatures) => {
+      console.log('key click')
+      // select multiple of same type, onlt for certain types (currently only Location Connectors)
+    })
+
+    this.clickObserver = this.state.mapFeaturesClickedEvent.skip(1).subscribe((hitFeatures) => {
+      console.log('unfiltered click')
+      // if location select associated Location Connector
     })
 
     // Select the first transaction in the list
@@ -1228,7 +1234,8 @@ class PlanEditorController {
     // Useful for cases where the boundary is still generating, but the component has been destroyed. We do not want to create map objects in that case.
     this.isComponentDestroyed = true
     this.rightClickObserver.unsubscribe()
-    this.ctrlClickObserver.unsubscribe()
+    this.keyClickObserver.unsubscribe()
+    this.clickObserver.unsubscribe()
     this.clearAllSubnetMapObjects()
     this.clearTransaction()
     this.unsubscribeRedux()

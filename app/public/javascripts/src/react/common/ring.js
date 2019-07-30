@@ -11,14 +11,14 @@ export default class Ring {
   }
 
   static parseData (ringData, equipmentData) {
-    // console.log('---data---')
-    // console.log(ringData)
-    // console.log(equipmentData)
+     console.log('---data---')
+     console.log(ringData)
+     console.log(equipmentData)
     var parsedRing = new Ring(ringData.id, ringData.name)
 
     if (ringData.exchangeLinks.length > 0) {
       equipmentData.forEach(node => {
-        parsedRing.nodesById[node.objectId] = {
+        parsedRing.nodesById[node.objectId] = { // this object is to simulate the object type of a feature
           objectId: node.objectId,
           data: node
         }
@@ -48,7 +48,11 @@ export default class Ring {
   }
 
   addNode (node) {
-    // move to caller
+    console.log(node)
+    if (this.nodesById.hasOwnProperty(node.objectId)) {
+      console.warn(`node with ID "${node.objectId}" is already in this Ring`)
+      return
+    }
     var linkId = uuidv4() // ToDo: use /src/components/common/utilitias.js > getUUID()
     if (this.nodes.length > 0) {
       var fromNode = this.nodes[this.nodes.length - 1]
@@ -59,6 +63,7 @@ export default class Ring {
         geom: this.figureRangeIntersectOffset(fromNode, node)
       })
     }
+    this.nodesById[node.objectId] = node
     this.nodes.push(node)
   }
 
