@@ -1,5 +1,5 @@
 class EquipmentProperties {
-  constructor (siteIdentifier, siteName, siteNetworkNodeType, selectedEquipmentType, networkNodeEquipment, deploymentType, targetType) {
+  constructor (siteIdentifier, siteName, siteNetworkNodeType, selectedEquipmentType, networkNodeEquipment, deploymentType, targetType, locationIDs) {
     this.siteIdentifier = siteIdentifier || ''
     this.siteName = siteName || ''
     this.siteNetworkNodeType = siteNetworkNodeType
@@ -17,6 +17,14 @@ class EquipmentProperties {
     this.deploymentType = deploymentType || 'PLANNED'
     this.isDirty = false
     this.targetType = targetType
+    this.connectedLocations = {}
+    if (locationIDs) {
+      console.log(locationIDs)
+      var ids = locationIDs.split(',')
+      ids.forEach(id => {
+        this.connectedLocations[id] = {}
+      })
+    }
   }
 }
 

@@ -124,7 +124,6 @@ class TileComponentController {
     })
 
     this.state.requestPolygonSelect.subscribe((args) => {
-      // console.log(args)
       if (!this.mapRef || !args.coords) {
         return
       }
@@ -219,7 +218,6 @@ class TileComponentController {
           })
 
           function processArea () {
-            // console.log(google.maps)
             return google.maps.geometry.spherical.computeArea(new google.maps.Polygon({ paths: args.coords.map((a) => {
               if (a.hasOwnProperty('lat')) {
                 return { lat: a.lat(), lng: a.lng() }
@@ -272,17 +270,14 @@ class TileComponentController {
     
     // listener for ctrl key
     this.keydownListener = this.$window.addEventListener('keydown', (event) => {
-      console.log(event.key)
       if (event.key === 'Shift') this.state.isShiftPressed = true
     })
     
     this.keyupListener = this.$window.addEventListener('keyup', (event) => {
-      console.log(this.state.isShiftPressed)
       if (event.key === 'Shift') this.state.isShiftPressed = false
     })
     
     this.overlayRightclickListener = this.mapRef.addListener('rightclick', (event) => {
-      console.log('R Click')
       this.getFeaturesUnderLatLng(event.latLng)
       .then((hitFeatures) => {
         this.state.mapFeaturesRightClickedEvent.next(hitFeatures)
@@ -392,8 +387,6 @@ class TileComponentController {
 
     this.overlayClickListener = this.mapRef.addListener('click', (event) => {
       var wasCtrlPressed = this.state.isShiftPressed
-      console.log('click')
-      console.log(event)
       // ToDo: depricate getFilteredFeaturesUnderLatLng switch to this
       this.getFeaturesUnderLatLng(event.latLng)
       .then((hitFeatures) => {
@@ -412,7 +405,6 @@ class TileComponentController {
 
       this.getFilteredFeaturesUnderLatLng(event.latLng)
         .then((hitFeatures) => {
-          // console.log(hitFeatures)
           if (hitFeatures) {
             if (hitFeatures.locations.length > 0) {
               this.state.hackRaiseEvent(hitFeatures.locations)
@@ -450,7 +442,6 @@ class TileComponentController {
           var fiberFeatures = new Set()
 
           results.forEach((result) => {
-            console.log(result)
             // ToDo: need a better way to differentiate feature types. An explicit way like featureType, also we can then generalize these feature arrays
             // ToDo: filter out deleted etc
             if (result.location_id) {

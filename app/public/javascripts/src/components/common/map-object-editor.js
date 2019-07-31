@@ -734,6 +734,7 @@ class MapObjectEditorController {
   }
 
   createMapObject (feature, iconUrl, usingMapClick, existingObjectOverride, deleteExistingBoundary) {
+    console.log(feature)
     if (typeof existingObjectOverride === 'undefined') {
       existingObjectOverride = false
     }

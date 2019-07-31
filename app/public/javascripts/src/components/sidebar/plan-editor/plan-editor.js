@@ -115,6 +115,29 @@ class PlanEditorController {
         console.log(' --- ')
         console.log('toggle the following locations')
         console.log(hitFeatures.locations)
+        if (this.selectedObjectId && this.isEditFeatureProps) {
+          var objectProperties = this.objectIdToProperties[this.selectedObjectId]
+          console.log(objectProperties)
+          if (objectProperties.siteNetworkNodeType === 'location_connector') {
+            hitFeatures.locations.forEach(location => {
+              var locationId = location.objectId || location.object_id
+              if (objectProperties.connectedLocations.hasOwnProperty(locationId)) {
+                console.log(`delete ${locationId}`)
+                delete objectProperties.connectedLocations[locationId]
+              } else {
+                // ToDo: REMOVE LOCATION FROM PREVIOUS CONNECTOR
+                objectProperties.connectedLocations[locationId] = location
+                console.log(objectProperties)
+                console.log(locationId)
+                console.log(`add ${locationId}`)
+              }
+            })
+
+
+            console.log(this.objectIdToProperties[this.selectedObjectId])
+            this.saveSelectedEquipmentProperties()
+          }
+        }
         console.log(' --- ')
       }
     })
@@ -159,11 +182,12 @@ class PlanEditorController {
         var typedEquipmentNodes = []
         transactionFeatures.forEach((feature) => {
           const attributes = feature.attributes
+          const locationIDs = attributes.internal_oid || null
           const typedEquipmentNode = AroFeatureFactory.createObject(feature)
           var networkNodeEquipment = typedEquipmentNode.networkNodeEquipment
           typedEquipmentNodes.push(typedEquipmentNode)
           const properties = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName, feature.networkNodeType,
-            attributes.selectedEquipmentType, networkNodeEquipment, feature.deploymentType)
+            attributes.selectedEquipmentType, networkNodeEquipment, feature.deploymentType, null, locationIDs)
           this.objectIdToProperties[feature.objectId] = properties
         })
         this.addEquipmentNodes(typedEquipmentNodes)
@@ -365,7 +389,6 @@ class PlanEditorController {
     // optimizationBody.spatialEdgeType = spatialEdgeType;
     optimizationBody.directed = directed // directed analysis if thats what the user wants
     
-    var equipmentObjectId = mapObject.objectId
     this.isWorkingOnCoverage = true
     this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
       .then((result) => {
@@ -419,6 +442,12 @@ class PlanEditorController {
     var mapObject = this.objectIdToMapObject[objectId]
     // console.log(mapObject)
     var objectProperties = this.objectIdToProperties[objectId]
+    console.log('--- update locations in location connector ---')
+    console.log(objectProperties)
+    console.log(mapObject)
+    console.log(this.objectIdToOriginalAttributes[objectId])
+
+
     var serviceFeature = {
       objectId: objectId,
       geometry: {
@@ -429,6 +458,7 @@ class PlanEditorController {
       attributes: {
         siteIdentifier: objectProperties.siteIdentifier,
         siteName: objectProperties.siteName,
+        //internal_oid: ""
         selectedEquipmentType: objectProperties.selectedEquipmentType
       },
       dataType: 'equipment',
@@ -438,6 +468,16 @@ class PlanEditorController {
     if (objectProperties.targetType) {
       serviceFeature.target_type = objectProperties.targetType
     }
+
+    if (objectProperties.siteNetworkNodeType === 'location_connector') {
+      var internal_oid = ''
+      Object.keys(objectProperties.connectedLocations).forEach(id => {
+        internal_oid += `${id},`
+      })
+      if (internal_oid.length > 0) internal_oid = internal_oid.slice(0, -1)
+      serviceFeature.attributes.internal_oid = internal_oid
+    }
+
     // console.log(serviceFeature.geometry)
     return serviceFeature
   }
@@ -577,12 +617,24 @@ class PlanEditorController {
 
   updateSelectedState (selectedFeature, featureId) {
     // tell state
+    console.log('--- tell state ---')
+    console.log(selectedFeature)
     var newSelection = this.state.cloneSelection()
     newSelection.editable.equipment = {}
     if (typeof selectedFeature !== 'undefined' && typeof featureId !== 'undefined') {
       newSelection.editable.equipment[ featureId ] = selectedFeature
     }
     this.state.selection = newSelection
+  }
+
+  highlightLocations () {
+    console.log('--- highlight locations ---')
+    /*
+    var newSelection = this.state.cloneSelection()
+    newSelection.editable.location = {}
+    newSelection.editable.location[ '7d4fface-8bf7-11e9-aa16-63f04598453d' ] = {"salesType":"","workflow_state_id":1,"entity_count":1,"location_entity_type":3,"netType":"","opportunitySize":"","_data_type":"location","locationType":"","competitiveness":"","object_id":"7d4fface-8bf7-11e9-aa16-63f04598453d","location_id":145389,"monthly_spend":247382.8962053958,"locationCategory":"","propensity":"","residentialOrBusiness":"","objectId":"7d4fface-8bf7-11e9-aa16-63f04598453d"}
+    this.state.selection = newSelection
+    */
   }
 
   clearViewSelection () {
@@ -606,9 +658,9 @@ class PlanEditorController {
       newSelection.details.siteBoundaryId = feature.objectId
       this.state.selection = newSelection
       this.displaySiteBoundaryViewObject(feature, iconUrl)      
-    }
-    else
+    } else {
       this.displayEquipmentViewObject(feature,iconUrl)
+    }
   }
 
   displayEditObject(feature) {
@@ -629,16 +681,21 @@ class PlanEditorController {
       var planId = this.state.plan.id
       this.$http.get(`/service/plan-feature/${planId}/equipment/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
         .then((result) => {
+          console.log('------- on view object -------')
+          console.log(result)
           if (result.data.hasOwnProperty('geometry')) {
             this.viewEventFeature = feature
             // use feature's coord NOT the event's coords
             this.viewEventFeature.geometry.coordinates = result.data.geometry.coordinates
             this.viewFeature = AroFeatureFactory.createObject(result.data)
+            console.log(this.viewFeature)
+            console.log(this.viewEventFeature)
             var viewConfig = this.state.configuration.networkEquipment.equipments[this.viewFeature.networkNodeType]
             this.viewLabel = viewConfig.label
             this.viewIconUrl = viewConfig.iconUrl
             this.isEditFeatureProps = false
             // this.updateSelectedState(feature, feature.objectId)
+            this.highlightLocations()
             this.getViewObjectSBTypes(feature.objectId)
           } else {
             // clear selection
@@ -743,13 +800,12 @@ class PlanEditorController {
           })
           .then((result) => {
             var attributes = result.data.attributes
-            // console.log(result.data)
             const equipmentFeature = AroFeatureFactory.createObject(result.data)
             this.addEquipmentNodes([equipmentFeature])
             var networkNodeEquipment = equipmentFeature.networkNodeEquipment
-
+            const locationIDs = attributes.internal_oid || null
             var equipmentProperties = new EquipmentProperties(networkNodeEquipment.siteInfo.siteClli, networkNodeEquipment.siteInfo.siteName,
-              equipmentFeature.networkNodeType, null, networkNodeEquipment, result.data.deploymentType, result.data.target_type)
+              equipmentFeature.networkNodeType, null, networkNodeEquipment, result.data.deploymentType, result.data.target_type, locationIDs)
             // this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties(networkNodeEquipment.siteInfo.siteClli, networkNodeEquipment.siteInfo.siteName,
             //                                                                        equipmentFeature.networkNodeType, null, networkNodeEquipment, result.data.deploymentType)
             this.objectIdToProperties[mapObject.objectId] = equipmentProperties
@@ -785,6 +841,7 @@ class PlanEditorController {
       } else {
         // nope it's new
         const equipmentNode = AroFeatureFactory.createObject({ dataType: 'equipment' })
+        // --- new be sure to set subnet ---
         equipmentNode.objectId = mapObject.objectId
         this.addEquipmentNodes([equipmentNode])
         var blankNetworkNodeEquipment = equipmentNode.networkNodeEquipment
@@ -861,6 +918,9 @@ class PlanEditorController {
       this.isEditFeatureProps = true
       this.isBoundaryEditMode = true
       this.selectedObjectId = mapObject.objectId || mapObject.object_id
+      console.log('--- selected ---')
+      console.log(this.objectIdToProperties[this.selectedObjectId])
+      console.log(this.viewFeature)
     } else {
       this.selectedObjectId = null
     }
@@ -881,8 +941,7 @@ class PlanEditorController {
       console.log( this.objectIdToProperties[this.selectedMapObject.objectId].networkNodeEquipment.getDisplayProperties() )
     }
     // */
-    console.log(this.getSelectedNetworkConfig())
-
+    
     this.$timeout()
   }
 
@@ -1241,26 +1300,32 @@ class PlanEditorController {
     this.clickObserver.unsubscribe()
     
     // todo: if keep unsaved, still can't run analysis 
-    swal({
-      title: 'Save changes?',
-      text: 'Do you want to save your changes?',
-      type: 'warning',
-      confirmButtonColor: '#DD6B55',
-      confirmButtonText: 'Save', // 'Yes',
-      showCancelButton: true,
-      cancelButtonText: 'Keep Unsaved', // 'No',
-      closeOnConfirm: true
-    }, (result) => {
-      console.log(this.currentTransaction.id)
-      if (result) {
-        this.commitTransaction(this.currentTransaction.id)
-      } else {
-        //this.discardTransaction(this.currentTransaction.id)
-      }
+    console.log(this.currentTransaction)
+    if (this.currentTransaction) {
+      swal({
+        title: 'Save changes?',
+        text: 'Do you want to save your changes?',
+        type: 'warning',
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Save', // 'Yes',
+        showCancelButton: true,
+        cancelButtonText: 'Keep Unsaved', // 'No',
+        closeOnConfirm: true
+      }, (result) => {
+        if (result) {
+          this.commitTransaction(this.currentTransaction.id)
+        } else {
+          //this.discardTransaction(this.currentTransaction.id)
+        }
+        this.clearAllSubnetMapObjects()
+        this.clearTransaction()
+        this.unsubscribeRedux()
+      })
+    } else {
       this.clearAllSubnetMapObjects()
       this.clearTransaction()
       this.unsubscribeRedux()
-    })
+    }
   }
 
   mapStateToThis (reduxState) {
