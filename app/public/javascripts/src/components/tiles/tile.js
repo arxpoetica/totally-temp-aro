@@ -313,12 +313,10 @@ class TileComponentController {
                 var options = []
                 options.push(new MenuAction(MenuActionTypes.SELECT, () => this.state.mapFeaturesSelectedEvent.next(singleHitFeature)))
 
-                // var menuItem = this.contextMenuService.makeMenuItem(name, data, options)
                 const menuItemType = this.utils.getFeatureMenuItemType(feature)
                 var name = this.utils.getFeatureDisplayName(feature, this.state)
                 var menuItem = new MenuItem(menuItemType, name, options)
                 menuItems.push(menuItem)
-                // menuItemsById[feature.objectId] = menuItem
                 menuItemsById[menuItemFeatureId] = menuItem
                 if (feature.hasOwnProperty('network_node_object_id')) {
                   bounds.push(feature)
@@ -332,9 +330,8 @@ class TileComponentController {
             this.utils.getBoundsCLLIs(bounds, this.state)
               .then((results) => {
                 results.data.forEach((result) => {
-                  if (result.clli) {
-                    boundsByNetworkNodeObjectId[result.objectId].label += `: ${result.clli}`
-                  }
+                  const clliCode = (result.attributes && result.attributes.siteIdentifier) || '(empty CLLI code)'
+                  boundsByNetworkNodeObjectId[result.objectId].displayName = `Boundary: ${clliCode}`
                 })
 
                 var eventXY = this.getXYFromEvent(event)
