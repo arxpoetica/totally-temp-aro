@@ -84,9 +84,7 @@ class Utilities {
     // Have a map of functions that will extract feature names based on the feature type
     const dataTypeToNameExtractor = {
       location: feature => feature.name || (feature.objectId && feature.objectId.substring(feature.objectId.length - 7)) || 'Location',
-      equipment_boundary: feature => {
-        this.getBoundsCLLIs([feature], state)
-      },
+      equipment_boundary: feature => this.getBoundsCLLIs([feature], state),
       equipment: feature => {
         const nnType = (feature['_data_type']).split('.')[1]
         var name = nnType
