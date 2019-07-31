@@ -85,7 +85,6 @@ class Utilities {
     const dataTypeToNameExtractor = {
       location: feature => feature.name || (feature.objectId && feature.objectId.substring(feature.objectId.length - 7)) || 'Location',
       equipment_boundary: feature => this.getBoundsCLLIs([feature], state),
-      //equipment_boundary: feature => feature.network_node_object_id, 
       equipment: feature => {
         const nnType = (feature['_data_type']).split('.')[1]
         var name = nnType
