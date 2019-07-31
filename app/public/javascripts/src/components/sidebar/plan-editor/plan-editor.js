@@ -52,6 +52,7 @@ class PlanEditorController {
     this.isBoundaryEditMode = false
     this.mapObjectEditorComms = {}
     this.networkNodeSBTypes = {}
+    this.locationMarkers = []
     // Create a list of all the network node types that we MAY allow the user to edit (add onto the map)
     const editableNetworkNodeTypes = [
       'central_office',
@@ -109,36 +110,24 @@ class PlanEditorController {
     // --- these should be part of map-object-editor ... but only when it's used here with plan-editor
     //     so basically this and map-object-editor need to be refactored
     this.rightClickObserver = this.state.mapFeaturesRightClickedEvent.skip(1).subscribe((hitFeatures) => {
-      console.log('right click')
       // if location and selected feature type in Location connector then toggle location association to selected locvation Connecotor
       if (hitFeatures.locations.length > 0) {
-        console.log(' --- ')
-        console.log('toggle the following locations')
-        console.log(hitFeatures.locations)
         if (this.selectedObjectId && this.isEditFeatureProps) {
           var objectProperties = this.objectIdToProperties[this.selectedObjectId]
-          console.log(objectProperties)
           if (objectProperties.siteNetworkNodeType === 'location_connector') {
             hitFeatures.locations.forEach(location => {
               var locationId = location.objectId || location.object_id
               if (objectProperties.connectedLocations.hasOwnProperty(locationId)) {
-                console.log(`delete ${locationId}`)
                 delete objectProperties.connectedLocations[locationId]
               } else {
                 // ToDo: REMOVE LOCATION FROM PREVIOUS CONNECTOR
                 objectProperties.connectedLocations[locationId] = location
-                console.log(objectProperties)
-                console.log(locationId)
-                console.log(`add ${locationId}`)
               }
             })
-
-
-            console.log(this.objectIdToProperties[this.selectedObjectId])
+            this.highlightLocations(this.selectedObjectId)
             this.saveSelectedEquipmentProperties()
           }
         }
-        console.log(' --- ')
       }
     })
 
@@ -617,8 +606,6 @@ class PlanEditorController {
 
   updateSelectedState (selectedFeature, featureId) {
     // tell state
-    console.log('--- tell state ---')
-    console.log(selectedFeature)
     var newSelection = this.state.cloneSelection()
     newSelection.editable.equipment = {}
     if (typeof selectedFeature !== 'undefined' && typeof featureId !== 'undefined') {
@@ -627,14 +614,40 @@ class PlanEditorController {
     this.state.selection = newSelection
   }
 
-  highlightLocations () {
+  highlightLocations (objectId) {
     console.log('--- highlight locations ---')
-    /*
-    var newSelection = this.state.cloneSelection()
-    newSelection.editable.location = {}
-    newSelection.editable.location[ '7d4fface-8bf7-11e9-aa16-63f04598453d' ] = {"salesType":"","workflow_state_id":1,"entity_count":1,"location_entity_type":3,"netType":"","opportunitySize":"","_data_type":"location","locationType":"","competitiveness":"","object_id":"7d4fface-8bf7-11e9-aa16-63f04598453d","location_id":145389,"monthly_spend":247382.8962053958,"locationCategory":"","propensity":"","residentialOrBusiness":"","objectId":"7d4fface-8bf7-11e9-aa16-63f04598453d"}
-    this.state.selection = newSelection
-    */
+    this.locationMarkers.forEach(marker => {
+      marker.setMap(null)
+    })
+    this.locationMarkers = []
+    if (objectId && this.objectIdToProperties.hasOwnProperty(objectId)) {
+      var objectProperties = this.objectIdToProperties[this.selectedObjectId]
+      if (objectProperties.siteNetworkNodeType === 'location_connector') {
+        Object.keys(objectProperties.connectedLocations).forEach((locationId) => {
+          var location = objectProperties.connectedLocations[locationId]
+          console.log(location)
+          // --- NEED TO HAVE LAT LONG FOR LOCATIONS ---
+          if (false) {
+            var mapMarker = new google.maps.Marker({
+              position: new google.maps.LatLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]),
+              icon: {
+                url: iconUrl
+                // anchor: this.iconAnchors[this.objectIconUrl]
+              },
+              label: {
+                text: '◯',
+                color: '#009900',
+                fontSize: '36px'
+              },
+              draggable: false, 
+              clickable: false, 
+              map: this.mapRef
+            })
+            this.locationMarkers.push(mapMarker)
+          }
+        })
+      }
+    }
   }
 
   clearViewSelection () {
@@ -681,21 +694,18 @@ class PlanEditorController {
       var planId = this.state.plan.id
       this.$http.get(`/service/plan-feature/${planId}/equipment/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
         .then((result) => {
-          console.log('------- on view object -------')
-          console.log(result)
           if (result.data.hasOwnProperty('geometry')) {
             this.viewEventFeature = feature
             // use feature's coord NOT the event's coords
             this.viewEventFeature.geometry.coordinates = result.data.geometry.coordinates
             this.viewFeature = AroFeatureFactory.createObject(result.data)
-            console.log(this.viewFeature)
-            console.log(this.viewEventFeature)
             var viewConfig = this.state.configuration.networkEquipment.equipments[this.viewFeature.networkNodeType]
             this.viewLabel = viewConfig.label
             this.viewIconUrl = viewConfig.iconUrl
             this.isEditFeatureProps = false
             // this.updateSelectedState(feature, feature.objectId)
-            this.highlightLocations()
+            // --- IF THERE ARE LOCATION PROPERTIES WITH OUT LAT LONGS GET THEM NOW ---
+            this.highlightLocations(feature.objectId)
             this.getViewObjectSBTypes(feature.objectId)
           } else {
             // clear selection
@@ -918,9 +928,6 @@ class PlanEditorController {
       this.isEditFeatureProps = true
       this.isBoundaryEditMode = true
       this.selectedObjectId = mapObject.objectId || mapObject.object_id
-      console.log('--- selected ---')
-      console.log(this.objectIdToProperties[this.selectedObjectId])
-      console.log(this.viewFeature)
     } else {
       this.selectedObjectId = null
     }
@@ -1298,7 +1305,7 @@ class PlanEditorController {
     this.rightClickObserver.unsubscribe()
     this.keyClickObserver.unsubscribe()
     this.clickObserver.unsubscribe()
-    
+    this.highlightLocations()
     // todo: if keep unsaved, still can't run analysis 
     console.log(this.currentTransaction)
     if (this.currentTransaction) {
