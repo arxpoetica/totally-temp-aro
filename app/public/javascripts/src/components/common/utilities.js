@@ -84,7 +84,13 @@ class Utilities {
     // Have a map of functions that will extract feature names based on the feature type
     const dataTypeToNameExtractor = {
       location: feature => feature.name || (feature.objectId && feature.objectId.substring(feature.objectId.length - 7)) || 'Location',
-      equipment_boundary: feature => 'Boundary',
+      equipment_boundary: feature => {
+        var features = []
+        features.push(feature)
+        this.getBoundsCLLIs(features, state)
+      }
+      ,
+      //equipment_boundary: feature => feature.network_node_object_id, 
       equipment: feature => {
         const nnType = (feature['_data_type']).split('.')[1]
         var name = nnType
@@ -120,7 +126,7 @@ class Utilities {
 
     if (doCall) {
       filter = filter.substring(0, filter.length - 4) + ')'
-      return this.$http.get(`/service/odata/NetworkEquipmentEntity?$select=id,objectId,clli&$filter=${filter}`)
+      return this.$http.get(`/service/odata/NetworkEquipmentEntity?$select=id,objectId,attributes&$filter=${filter}`)
     } else {
       return Promise.resolve({ 'data': [] })
     }
