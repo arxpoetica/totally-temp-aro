@@ -64,7 +64,8 @@ class PlanEditorController {
       'loop_extender',
       'network_anchor',
       'multiple_dwelling_unit',
-      'network_connector'
+      'network_connector',
+      'location_connector'
     ]
     this.allEditableNetworkNodeTypes = []
     this.state.configuration.perspective.networkEquipment.areVisible.forEach((equipmentType) => {
@@ -392,6 +393,7 @@ class PlanEditorController {
   formatEquipmentForService (objectId) {
     // Format the object and send it over to aro-service
     var mapObject = this.objectIdToMapObject[objectId]
+    // console.log(mapObject)
     var objectProperties = this.objectIdToProperties[objectId]
     var serviceFeature = {
       objectId: objectId,
@@ -1021,6 +1023,7 @@ class PlanEditorController {
   }
 
   recalculateSubnetForEquipmentChange (equipmentFeature, subnetsToDelete) {
+    // console.log(equipmentFeature)
     var recalculatedSubnets = {}
     var setOfCOIds = new Set()
     var equipmentObject = this.formatEquipmentForService(equipmentFeature.objectId)

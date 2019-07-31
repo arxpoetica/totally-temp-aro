@@ -218,6 +218,8 @@
             <div class="sidebar-table-header" ng-if="$ctrl.getSelectedNetworkConfig()">
                 <img ng-src="{{$ctrl.getSelectedNetworkConfig().iconUrl}}" style="vertical-align:middle; padding-right: 10px">
                 <span>{{$ctrl.getSelectedNetworkConfig().label}}</span>
+                <button class="btn btn-danger ei-panel-header-btn-set ei-foldout-header-btn"
+                  ng-click="$ctrl.deleteObjectWithId($ctrl.selectedMapObject.objectId)">Delete</button>
                 <div class="sidebar-header-subinfo">
                   <!-- <div class="sidebar-header-subinfo-item">lat: {{$ctrl.selectedMapObject.position.lat()}}</div>
                   <div class="sidebar-header-subinfo-item">long: {{$ctrl.selectedMapObject.position.lng()}}</div> -->
