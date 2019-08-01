@@ -110,7 +110,7 @@ class Utilities {
   }
 
   getBoundsCLLIs (features, state) {
-    var clliPromises = features.map(feature => this.$http.get(`/service/plan-feature/${state.plan.id}/equipment/${feature.network_node_object_id}?userId=4`))
+    var clliPromises = features.map(feature => this.$http.get(`/service/plan-feature/${state.plan.id}/equipment/${feature.network_node_object_id}?userId=${state.loggedInUser.id}`))
     return Promise.all(clliPromises)
   }
 
