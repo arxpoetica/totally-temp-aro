@@ -329,9 +329,9 @@ class TileComponentController {
           if (menuItems.length > 0) {
             this.utils.getBoundsCLLIs(bounds, this.state)
               .then((results) => {
-                results.data.forEach((result) => {
-                  const clliCode = (result.attributes && result.attributes.siteIdentifier) || '(empty CLLI code)'
-                  boundsByNetworkNodeObjectId[result.objectId].displayName = `Boundary: ${clliCode}`
+                results.forEach(result => {
+                  const clliCode = (result.data.networkNodeEquipment.siteInfo.siteClli) || '(empty CLLI code)'
+                  boundsByNetworkNodeObjectId[result.data.objectId].displayName = `Boundary: ${clliCode}`
                 })
 
                 var eventXY = this.getXYFromEvent(event)
