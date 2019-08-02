@@ -139,10 +139,6 @@ class PlanEditorController {
               if (locationId) locationIds.push(locationId)
             })
             this.getLocationsInfoPromise(locationIds)
-              .then(result => {
-                console.log(result)
-                this.highlightLocations(locationIds)
-              })
               .then(results => {
                 this.highlightLocations(Object.keys(objectProperties.connectedLocations))
               })
