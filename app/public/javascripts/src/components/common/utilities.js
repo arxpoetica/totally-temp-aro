@@ -110,6 +110,7 @@ class Utilities {
   }
 
   getBoundsCLLIs (features, state) {
+<<<<<<< HEAD
     var cllisByObjectId = {}
     var doCall = false
     var filter = `planId eq ${state.plan.id} and (`
@@ -124,6 +125,10 @@ class Utilities {
     } else {
       return Promise.resolve({ 'data': [] })
     }
+=======
+    var clliPromises = features.map(feature => this.$http.get(`/service/plan-feature/${state.plan.id}/equipment/${feature.network_node_object_id}?userId=${state.loggedInUser.id}`))
+    return Promise.all(clliPromises)
+>>>>>>> master
   }
 
   // ---
