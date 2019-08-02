@@ -110,25 +110,8 @@ class Utilities {
   }
 
   getBoundsCLLIs (features, state) {
-<<<<<<< HEAD
-    var cllisByObjectId = {}
-    var doCall = false
-    var filter = `planId eq ${state.plan.id} and (`
-    features.forEach((feature) => {
-      filter += `objectId eq guid'${feature.network_node_object_id}' or `
-      doCall = true
-    })
-
-    if (doCall) {
-      filter = filter.substring(0, filter.length - 4) + ')'
-      return this.$http.get(`/service/odata/NetworkEquipmentEntity?$select=id,objectId,attributes&$filter=${filter}`)
-    } else {
-      return Promise.resolve({ 'data': [] })
-    }
-=======
     var clliPromises = features.map(feature => this.$http.get(`/service/plan-feature/${state.plan.id}/equipment/${feature.network_node_object_id}?userId=${state.loggedInUser.id}`))
     return Promise.all(clliPromises)
->>>>>>> master
   }
 
   // ---
