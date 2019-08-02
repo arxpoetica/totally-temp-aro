@@ -210,10 +210,9 @@ class MapObjectEditorController {
 
     this.utils.getBoundsCLLIs(bounds, this.state)
       .then((results) => {
-        results.data.forEach((result) => {
-          if (result.clli) {
-            boundsByNetworkNodeObjectId[result.objectId].label += `: ${result.clli}`
-          }
+        results.forEach((result) => {
+          const clliCode = (result.data.networkNodeEquipment.siteInfo.siteClli) || '(empty CLLI code)'
+          boundsByNetworkNodeObjectId[result.data.objectId].displayName = `Boundary: ${clliCode}`
         })
 
         this.contextMenuService.populateMenu(menuItems)

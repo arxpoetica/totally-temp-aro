@@ -331,7 +331,7 @@ exports.configure = (api, middleware) => {
       WHERE bt.name = '${site_boundary}' AND p.id = ${plan_id}
       ),
       
-      selected_service_layer AS (
+     selected_service_layer AS (
       SELECT
            *
       FROM inputs i
@@ -411,6 +411,9 @@ exports.configure = (api, middleware) => {
            l.number_of_households,
            lds.data_source_name,
            l.workflow_state_id,
+           l.number_of_employees,
+           l.industry_id,
+           l.location_category,
 																l.attributes
 		,b.id
 		,b.object_id
@@ -469,7 +472,10 @@ exports.configure = (api, middleware) => {
         COALESCE(bl.number_of_households, sl.number_of_households) AS number_of_households,
         COALESCE(bl.data_source_name, sl.data_source_name) AS data_source_name,
         COALESCE(bl.workflow_state_id, sl.workflow_state_id) AS workflow_state_id,
-        COALESCE(bl.attributes, sl.attributes) AS attributes
+        COALESCE(bl.attributes, sl.attributes) AS attributes,
+        COALESCE(bl.number_of_employees, sl.number_of_employees) AS number_of_employees,
+        COALESCE(bl.industry_id, sl.industry_id) AS industry_id,
+        COALESCE(bl.location_category, sl.location_category) AS location_category
       FROM service_area_locations sl
       FULL OUTER JOIN boundary_locations bl
           ON bl.location_object_id = sl.object_id
@@ -506,7 +512,14 @@ exports.configure = (api, middleware) => {
       rl.location_object_id                                                                         AS "Location Object ID",
         rl.data_source_name                                                                         AS "Data Source",
         rl.number_of_households                                                                                                             AS "Location Count",
-        rl.location_type                                                                            AS "Location Type",
+        case 
+          WHEN rl.location_category = 2 THEN 'Tower'::text
+          WHEN rl.location_category = 1 THEN 'Household'::text
+          when c.id = 1 then 'Small Business'::text
+          when c.id = 2 then 'Medium Business'::text
+          when c.id = 3 then 'Large Business'::text
+          else 'Unknown'
+         end AS "Location Type",
         ws.name                                                                                     AS "Location Status",  
         ST_Y(
             rl.geom)                                                                                AS "Location Latitude",
@@ -536,6 +549,12 @@ exports.configure = (api, middleware) => {
                                                      FROM aro_core.category
                                                      WHERE description =
                                                            'CAF Phase II') :: text) :: int))        AS "CAF Phase II Tag",
+        (SELECT description
+         FROM aro_core.tag
+         WHERE id = ((cb.tags -> 'category_map' ->> (SELECT id
+                                                     FROM aro_core.category
+                                                     WHERE description =
+                                                           'State Funding') :: text) :: int))        AS "State Funding Tag",
 		rl.attributes
                                 
       FROM reconciled_locations rl
@@ -549,6 +568,7 @@ exports.configure = (api, middleware) => {
         ON rl.equipment_object_id = e.object_id
       JOIN aro.workflow_state ws
         ON rl.workflow_state_id = ws.id
+      left join client.business_category c ON rl.number_of_employees >= c.min_value AND rl.number_of_employees < c.max_value
         
     `;
 

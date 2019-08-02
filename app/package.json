@@ -31,7 +31,7 @@
     "@babel/core": "^7.2.2",
     "@babel/preset-env": "^7.2.3",
     "@babel/preset-react": "^7.0.0",
-    "amqplib": "^0.5.3",
+    "amqplib": "0.5.3",
     "async": "^2.6.1",
     "aws-sdk": "^2.2.22",
     "babel-loader": "^8.0.5",

@@ -84,8 +84,7 @@ class Utilities {
     // Have a map of functions that will extract feature names based on the feature type
     const dataTypeToNameExtractor = {
       location: feature => feature.name || (feature.objectId && feature.objectId.substring(feature.objectId.length - 7)) || 'Location',
-      equipment_boundary: feature => this.getBoundsCLLIs(feature, state),
-      //equipment_boundary: feature => feature.network_node_object_id, 
+      equipment_boundary: feature => this.getBoundsCLLIs([feature], state),
       equipment: feature => {
         const nnType = (feature['_data_type']).split('.')[1]
         var name = nnType
@@ -111,20 +110,8 @@ class Utilities {
   }
 
   getBoundsCLLIs (features, state) {
-    var cllisByObjectId = {}
-    var doCall = false
-    var filter = `planId eq ${state.plan.id} and (`
-    features.forEach((feature) => {
-      filter += `objectId eq guid'${feature.network_node_object_id}' or `
-      doCall = true
-    })
-
-    if (doCall) {
-      filter = filter.substring(0, filter.length - 4) + ')'
-      return this.$http.get(`/service/odata/NetworkEquipmentEntity?$select=id,objectId,attributes&$filter=${filter}`)
-    } else {
-      return Promise.resolve({ 'data': [] })
-    }
+    var clliPromises = features.map(feature => this.$http.get(`/service/plan-feature/${state.plan.id}/equipment/${feature.network_node_object_id}?userId=${state.loggedInUser.id}`))
+    return Promise.all(clliPromises)
   }
 
   // ---

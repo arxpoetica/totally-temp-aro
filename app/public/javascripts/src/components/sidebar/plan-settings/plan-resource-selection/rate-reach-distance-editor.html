@@ -22,8 +22,14 @@
     background-color: #c5c5c5;
     cursor: pointer;
   }
+  #verticalscroll {
+    height: 240px;
+    float: left;
+    overflow: auto;
+    overflow-x:hidden;
+}
 </style>
-
+<div id="verticalscroll">
 <table id="tblrateReachConfig" class="table table-sm table-striped">
   <thead class="thead-dark">
     <tr>
@@ -69,5 +75,6 @@
     </tr>
   </tbody>
 </table>
+</div>
 <!-- If the user is allowed to edit categories, show a button to add categories -->
 <button class="btn btn-light" ng-click="$ctrl.addCategory()">Add</button>
