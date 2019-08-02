@@ -231,8 +231,7 @@ class PlanEditorController {
         if (transactionFeatures.length > 0) {
           var allCentralOfficeIds = new Set()
           transactionFeatures.forEach((item) => !!item.subnetId && allCentralOfficeIds.add(item.subnetId))
-          // ToDo: below causes errors 
-          // this.recalculateSubnetForEquipmentChange(transactionFeatures[0], Array.from(allCentralOfficeIds))
+          this.recalculateSubnetForEquipmentChange(transactionFeatures[0], Array.from(allCentralOfficeIds))
         }
       })
       .catch((err) => {
@@ -874,6 +873,11 @@ class PlanEditorController {
             //                                                                        equipmentFeature.networkNodeType, null, networkNodeEquipment, result.data.deploymentType)
             this.objectIdToProperties[mapObject.objectId] = equipmentProperties
             var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
+            // if selected show locations 
+            if (this.selectedObjectId === mapObject.objectId && equipmentProperties.hasOwnProperty('connectedLocations')) {
+              this.highlightLocations(Object.keys(equipmentProperties.connectedLocations))
+            }
+            
             this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
               .then(() => this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`))
               .then((result) => {
@@ -1180,6 +1184,9 @@ class PlanEditorController {
   }
 
   recalculateSubnetForEquipmentChange (equipmentFeature, subnetsToDelete) {
+    // have to turn this off for now
+    return 
+    // ------------------------------------------------------- fix this
     var recalculatedSubnets = {}
     var setOfCOIds = new Set()
     var equipmentObject = this.formatEquipmentForService(equipmentFeature.objectId)
@@ -1211,11 +1218,11 @@ class PlanEditorController {
       .then((result) => {
       // Recalculate for all central offices
         const recalcBody = {
-          subNets: []
+          subnetIds: []
         }
         subnetsToDelete.forEach((centralOfficeObjectId) => setOfCOIds.add(centralOfficeObjectId))
         setOfCOIds.add(closestCentralOfficeId)
-        setOfCOIds.forEach((centralOfficeObjectId) => recalcBody.subNets.push({ objectId: centralOfficeObjectId }))
+        setOfCOIds.forEach((centralOfficeObjectId) => recalcBody.subnetIds.push(centralOfficeObjectId))
         return this.$http.post(`/service/plan-transaction/${this.currentTransaction.id}/subnets-recalc`, recalcBody)
       })
       .then((result) => {
