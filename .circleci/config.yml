@@ -73,6 +73,7 @@ workflows:
                 - master
                 - optional_building
                 - devJuly2019
+                - RingPlanEdit
 
       - deploy:
           requires:
