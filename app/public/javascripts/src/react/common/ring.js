@@ -11,9 +11,6 @@ export default class Ring {
   }
 
   static parseData (ringData, equipmentData) {
-     console.log('---data---')
-     console.log(ringData)
-     console.log(equipmentData)
     var parsedRing = new Ring(ringData.id, ringData.name)
 
     if (ringData.exchangeLinks.length > 0) {

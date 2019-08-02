@@ -51,7 +51,6 @@ class MapObjectEditorController {
   }
 
   $onInit () {
-    console.log('MAKE map object editor')
     // We should have a map variable at this point
     if (!window[this.mapGlobalObjectName]) {
       console.error('ERROR: Map Object Editor component initialized, but a map object is not available at this time.')

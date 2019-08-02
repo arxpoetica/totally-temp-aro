@@ -6,10 +6,14 @@ import AroHttp from '../../common/aro-http'
 function resumeOrCreateTransaction (planId, userId) {
   return dispatch => {
     TransactionManager.resumeOrCreateTransaction(planId, userId)
-      .then(result => dispatch({
-        type: Actions.PLAN_EDITOR_SET_TRANSACTION,
-        payload: Transaction.fromServiceObject(result.data)
-      }))
+      .then(result => {
+        // console.log(result)
+        // todo: get equipment in subnets
+        dispatch({
+          type: Actions.PLAN_EDITOR_SET_TRANSACTION,
+          payload: Transaction.fromServiceObject(result.data)
+        })
+      })
       .catch(err => console.error(err))
   }
 }

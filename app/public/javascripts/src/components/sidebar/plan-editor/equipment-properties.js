@@ -19,10 +19,9 @@ class EquipmentProperties {
     this.targetType = targetType
     this.connectedLocations = {}
     if (locationIDs) {
-      console.log(locationIDs)
       var ids = locationIDs.split(',')
       ids.forEach(id => {
-        this.connectedLocations[id] = {}
+        this.connectedLocations[id] = true
       })
     }
   }
