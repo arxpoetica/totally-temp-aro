@@ -121,6 +121,9 @@ class PlanEditorController {
                 delete objectProperties.connectedLocations[locationId]
               } else {
                 // ToDo: REMOVE LOCATION FROM PREVIOUS CONNECTOR
+                // check if the previous connector is in the transaction
+                // if not get it and add it
+                // then remove this location from that connector
                 objectProperties.connectedLocations[locationId] = location
               }
             })
@@ -212,7 +215,8 @@ class PlanEditorController {
         if (transactionFeatures.length > 0) {
           var allCentralOfficeIds = new Set()
           transactionFeatures.forEach((item) => !!item.subnetId && allCentralOfficeIds.add(item.subnetId))
-          this.recalculateSubnetForEquipmentChange(transactionFeatures[0], Array.from(allCentralOfficeIds))
+          // ToDo: below causes errors 
+          // this.recalculateSubnetForEquipmentChange(transactionFeatures[0], Array.from(allCentralOfficeIds))
         }
       })
       .catch((err) => {
@@ -429,13 +433,11 @@ class PlanEditorController {
   formatEquipmentForService (objectId) {
     // Format the object and send it over to aro-service
     var mapObject = this.objectIdToMapObject[objectId]
-    // console.log(mapObject)
     var objectProperties = this.objectIdToProperties[objectId]
-    console.log('--- update locations in location connector ---')
+    console.log('--- formatEquipmentForService ---')
     console.log(objectProperties)
     console.log(mapObject)
     console.log(this.objectIdToOriginalAttributes[objectId])
-
 
     var serviceFeature = {
       objectId: objectId,
@@ -447,7 +449,6 @@ class PlanEditorController {
       attributes: {
         siteIdentifier: objectProperties.siteIdentifier,
         siteName: objectProperties.siteName,
-        //internal_oid: ""
         selectedEquipmentType: objectProperties.selectedEquipmentType
       },
       dataType: 'equipment',
@@ -459,12 +460,12 @@ class PlanEditorController {
     }
 
     if (objectProperties.siteNetworkNodeType === 'location_connector') {
-      var internal_oid = ''
+      var internalOID = ''
       Object.keys(objectProperties.connectedLocations).forEach(id => {
-        internal_oid += `${id},`
+        internalOID += `${id},`
       })
-      if (internal_oid.length > 0) internal_oid = internal_oid.slice(0, -1)
-      serviceFeature.attributes.internal_oid = internal_oid
+      if (internalOID.length > 0) internalOID = internalOID.slice(0, -1)
+      serviceFeature.attributes.internal_oid = internalOID
     }
 
     // console.log(serviceFeature.geometry)
@@ -523,6 +524,7 @@ class PlanEditorController {
   }
 
   // Saves the properties of the selected location to aro-service
+  // todo split this up to be able to save non-selected features, possibly even ones not on the map
   saveSelectedEquipmentProperties () {
     if (this.selectedMapObject && this.isMarker(this.selectedMapObject)) {
       var selectedMapObject = this.selectedMapObject // May change while the $http.post() is returning
@@ -544,6 +546,16 @@ class PlanEditorController {
         })
         .catch((err) => console.error(err))
     }
+  }
+
+  saveEquipmentProperties (objectId) {
+    var equipmentObjectForService = this.formatEquipmentForService(objectId)
+    this.$http.put(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObjectForService)
+      .then((result) => {
+        this.objectIdToProperties[objectId].isDirty = false
+        this.$timeout()
+      })
+      .catch((err) => console.error(err))
   }
 
   // Saves the properties of the selected boundary to aro-service
@@ -621,23 +633,32 @@ class PlanEditorController {
     })
     this.locationMarkers = []
     if (objectId && this.objectIdToProperties.hasOwnProperty(objectId)) {
+      console.log('we have properties')
       var objectProperties = this.objectIdToProperties[this.selectedObjectId]
       if (objectProperties.siteNetworkNodeType === 'location_connector') {
-        Object.keys(objectProperties.connectedLocations).forEach((locationId) => {
-          var location = objectProperties.connectedLocations[locationId]
+        // Object.keys(objectProperties.connectedLocations).forEach((locationId) => {
+          // var location = objectProperties.connectedLocations[locationId]
+         // for test
+          var connectedLocations = {
+           '637a6cf6-8bf7-11e9-aa15-8fa75f580825': {
+             geometry: {
+               coordinates: [
+                 -122.327268,
+                 47.61
+               ]
+             }
+           }
+         }
+          Object.keys(connectedLocations).forEach((locationId) => {
+          var location = connectedLocations[locationId] 
           console.log(location)
           // --- NEED TO HAVE LAT LONG FOR LOCATIONS ---
-          if (false) {
+          if (true) {
             var mapMarker = new google.maps.Marker({
-              position: new google.maps.LatLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]),
+              position: new google.maps.LatLng(location.geometry.coordinates[1], location.geometry.coordinates[0]),
               icon: {
-                url: iconUrl
-                // anchor: this.iconAnchors[this.objectIconUrl]
-              },
-              label: {
-                text: '◯',
-                color: '#009900',
-                fontSize: '36px'
+                url: '/images/map_icons/aro/green_circle.png',
+                anchor: new google.maps.Point(16, 24)
               },
               draggable: false, 
               clickable: false, 
@@ -676,7 +697,7 @@ class PlanEditorController {
     }
   }
 
-  displayEditObject(feature) {
+  displayEditObject (feature) {
     if (feature.type && feature.type === "equipment_boundary.select")
       return this.displaySiteBoundaryViewObject(feature)
         .then((result) => {
@@ -689,8 +710,9 @@ class PlanEditorController {
         })
   }
 
-  displayEquipmentViewObject(feature, iconUrl) {
+  displayEquipmentViewObject (feature, iconUrl) {
     return new Promise((resolve, reject) => {
+      console.log('display equipment obj')
       var planId = this.state.plan.id
       this.$http.get(`/service/plan-feature/${planId}/equipment/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
         .then((result) => {
@@ -705,7 +727,7 @@ class PlanEditorController {
             this.isEditFeatureProps = false
             // this.updateSelectedState(feature, feature.objectId)
             // --- IF THERE ARE LOCATION PROPERTIES WITH OUT LAT LONGS GET THEM NOW ---
-            this.highlightLocations(feature.objectId)
+            //this.highlightLocations(feature.objectId)
             this.getViewObjectSBTypes(feature.objectId)
           } else {
             // clear selection
@@ -922,7 +944,10 @@ class PlanEditorController {
 
   handleSelectedObjectChanged (mapObject) {
     console.log(mapObject)
-    if (this.currentTransaction === null) return
+    if (this.currentTransaction === null) {
+      this.highlightLocations()
+      return
+    }
     if (mapObject != null) {
       this.updateSelectedState()
       this.isEditFeatureProps = true
@@ -938,7 +963,7 @@ class PlanEditorController {
     var lng = mapObject && mapObject.position && mapObject.position.lng()
     this.selectedMapObjectLat = mapObject && mapObject.position && +this.$filter('number')(+lat, 6)
     this.selectedMapObjectLng = mapObject && mapObject.position && +this.$filter('number')(+lng, 6)
-
+    this.highlightLocations(this.selectedObjectId)
     // debug
     // console.log(this.selectedMapObject)
     /*
