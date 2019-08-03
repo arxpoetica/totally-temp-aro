@@ -865,10 +865,11 @@ class MapObjectEditorController {
       let filteredList = []
       for (let i = 0; i < featureList.length; i++) {
         let feature = featureList[i]
-        if (!feature.object_id ||
-            (!this.createdMapObjects.hasOwnProperty(feature.object_id) &&
-                !this.createdMapObjects.hasOwnProperty(feature.object_id + '_lockIconOverlay') &&
-                !this.createdMapObjects.hasOwnProperty(feature.object_id + '_invalidatedIconOverlay') &&
+        var objectId = feature.objectId || feature.object_id
+        if (!objectId ||
+            (!this.createdMapObjects.hasOwnProperty(objectId) &&
+                !this.createdMapObjects.hasOwnProperty(objectId + '_lockIconOverlay') &&
+                !this.createdMapObjects.hasOwnProperty(objectId + '_invalidatedIconOverlay') &&
                 this.filterFeatureForSelection(feature)
             )
         ) {
@@ -881,6 +882,7 @@ class MapObjectEditorController {
     var equipmentFeatures = []
     if (event.equipmentFeatures) {
       equipmentFeatures = filterArrayByObjectId(event.equipmentFeatures)
+      console.log(equipmentFeatures)
     }
 
     var locations = []
@@ -916,7 +918,7 @@ class MapObjectEditorController {
     } else if (this.featureType === 'equipment' && equipmentFeatures.length > 0) {
       // The map was clicked on, and there was an equipmentFeature under the cursor
       const clickedObject = this.state.getValidEquipmentFeaturesList(equipmentFeatures)[0] // Filter Deleted equipments
-      feature.objectId = clickedObject.object_id
+      feature.objectId = feature.objectId || clickedObject.object_id
       feature.isExistingObject = true
       feature.type = clickedObject._data_type
       feature.deployment_type = clickedObject.deployment_type

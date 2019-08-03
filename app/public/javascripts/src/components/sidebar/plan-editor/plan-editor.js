@@ -154,10 +154,38 @@ class PlanEditorController {
 
     this.clickObserver = this.state.mapFeaturesClickedEvent.skip(1).subscribe((hitFeatures) => {
       console.log('unfiltered click')
+      console.log(hitFeatures)
       // if location select associated Location Connector
       // hitFeatures['latLng'] = latLng
       // hitFeatures['equipmentFeatures'] = [feature] // location connector 
       // this.state.mapFeaturesSelectedEvent.next(hitFeatures)
+      
+      if (hitFeatures.locations && hitFeatures.locations.length > 0) {
+        var locationId = hitFeatures.locations[0].objectId || hitFeatures.locations[0].object_id
+        
+        this.$http.post(`/service/ring/plan-transaction/${this.currentTransaction.id}/ring/location-equipment/query-cmd`, {"locationIds": [locationId]})
+          .then((results) => {
+            if (results.data && results.data.length > 0 && results.data[0].equipmentId) {
+              this.$http.get(`/service/plan-feature/${this.state.plan.id}/equipment/${results.data[0].equipmentId}?userId=${this.state.loggedInUser.id}`)
+                .then(result => {
+                  if (result.data && result.data.geometry) {
+                    var hitFeatures = {
+                      latLng: {
+                        lat: () => {return result.data.geometry.coordinates[1]},
+                        lng: () => {return result.data.geometry.coordinates[0]}
+                      },
+                      equipmentFeatures: [result.data]
+                    }
+                    // ToDo: hit feature is the wrong type
+                    this.state.mapFeaturesSelectedEvent.next(hitFeatures)
+                  }
+                })
+            }
+          }).catch((err) => {
+            console.error(err)
+          })
+      }
+      
     })
     // -----
 
@@ -651,9 +679,10 @@ class PlanEditorController {
     if (locations && typeof locations === 'object') {
       console.log('we have properties')
       locations.forEach((locationId) => {
+        console.log(this.locationsById)
         var location = this.locationsById[locationId]
         // --- NEED TO HAVE LAT LONG FOR LOCATIONS ---
-        if (location.hasOwnProperty('geometry')) {
+        if (location && location.hasOwnProperty('geometry')) {
           var mapMarker = new google.maps.Marker({
             position: new google.maps.LatLng(location.geometry.coordinates[1], location.geometry.coordinates[0]),
             icon: {
@@ -767,7 +796,6 @@ class PlanEditorController {
         result.data.forEach(location => {
           this.locationsById[location.objectId] = location
         })
-        //this.highlightLocations(locationIds)
         return result
       })
   }
@@ -874,8 +902,12 @@ class PlanEditorController {
             this.objectIdToProperties[mapObject.objectId] = equipmentProperties
             var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
             // if selected show locations 
-            if (this.selectedObjectId === mapObject.objectId && equipmentProperties.hasOwnProperty('connectedLocations')) {
-              this.highlightLocations(Object.keys(equipmentProperties.connectedLocations))
+            if (equipmentProperties.hasOwnProperty('connectedLocations')) {
+              var locationIds = Object.keys(equipmentProperties.connectedLocations)
+              this.getLocationsInfoPromise(locationIds)
+                .then(results => {
+                  if (this.selectedObjectId === mapObject.objectId) this.highlightLocations(locationIds)
+                })
             }
             
             this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
