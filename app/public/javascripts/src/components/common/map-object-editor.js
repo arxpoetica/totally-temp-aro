@@ -74,7 +74,6 @@ class MapObjectEditorController {
 
     // Note we are using skip(1) to skip the initial value (that is fired immediately) from the RxJS stream.
     this.mapFeaturesSelectedEventObserver = this.state.mapFeaturesSelectedEvent.skip(1).subscribe((event) => {
-      console.log(event)
       if (this.state.isRulerEnabled) return // disable any click action when ruler is enabled
       this.handleMapEntitySelected(event)
     })
@@ -93,7 +92,6 @@ class MapObjectEditorController {
       return !(hasEntityType || hasBoundaryType) // false == allow dropping
     }
     this.dragStartEventObserver = this.state.dragEndEvent.skip(1).subscribe((event) => {
-      // console.log('drag ... start?')
       this.objectIdToDropCSS = {} // So that we will regenerate the CSS in case the map has zoomed/panned
       this.$timeout()
     })
@@ -153,8 +151,6 @@ class MapObjectEditorController {
 
     this.overlayRightClickListener = this.mapRef.addListener('rightclick', (event) => {
       // ToDo: this should be in plan-editor
-      console.log(event)
-      console.log(this)
       if (this.featureType == 'equipment' || this.featureType == 'serviceArea') { // we're editing a equipment and eqipment bounds NOT locations
         var eventXY = this.getXYFromEvent(event)
         if (!eventXY) return
@@ -732,7 +728,6 @@ class MapObjectEditorController {
   }
 
   createMapObject (feature, iconUrl, usingMapClick, existingObjectOverride, deleteExistingBoundary) {
-    console.log(feature)
     if (typeof existingObjectOverride === 'undefined') {
       existingObjectOverride = false
     }
@@ -882,7 +877,6 @@ class MapObjectEditorController {
     var equipmentFeatures = []
     if (event.equipmentFeatures) {
       equipmentFeatures = filterArrayByObjectId(event.equipmentFeatures)
-      console.log(equipmentFeatures)
     }
 
     var locations = []
@@ -1269,8 +1263,6 @@ class MapObjectEditorController {
     var mapCanvas = this.$document.find(`#${this.mapContainerId}`)[0]
     mapCanvas.ondragover = null
     mapCanvas.ondrop = null
-    
-    console.log('DESTROY map object editor')
   }
 
   mapStateToThis (reduxState) {
