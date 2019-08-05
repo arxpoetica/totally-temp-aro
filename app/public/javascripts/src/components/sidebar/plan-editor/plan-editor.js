@@ -108,7 +108,6 @@ class PlanEditorController {
       return
     }
     this.mapRef = window[this.mapGlobalObjectName]
-
     // --- these should be part of map-object-editor ... but only when it's used here with plan-editor
     //     so basically this and map-object-editor need to be refactored
     this.rightClickObserver = this.state.mapFeaturesRightClickedEvent.skip(1).subscribe((hitFeatures) => {
@@ -168,15 +167,23 @@ class PlanEditorController {
             if (results.data && results.data.length > 0 && results.data[0].equipmentId) {
               this.$http.get(`/service/plan-feature/${this.state.plan.id}/equipment/${results.data[0].equipmentId}?userId=${this.state.loggedInUser.id}`)
                 .then(result => {
+                  console.log(result.data)
                   if (result.data && result.data.geometry) {
+                    // ToDo: this is kind of janky
                     var hitFeatures = {
                       latLng: {
                         lat: () => {return result.data.geometry.coordinates[1]},
                         lng: () => {return result.data.geometry.coordinates[0]}
                       },
-                      equipmentFeatures: [result.data]
+                      equipmentFeatures: [{
+                        is_deleted: 'false',
+                        is_locked: 'false',
+                        object_id: results.data[0].equipmentId,
+                        siteClli: 'unkown',
+                        _data_type: 'equipment.location_connector'
+                      }]
                     }
-                    // ToDo: hit feature is the wrong type
+                    
                     this.state.mapFeaturesSelectedEvent.next(hitFeatures)
                   }
                 })
