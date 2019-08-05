@@ -67,7 +67,7 @@ class PlanSearchController {
       promises.push(this.$http.get(`/service/odata/servicearea?$select=id,code&$filter=${filter}&$orderby=id&$top=10000`))
     }
 
-    return this.state.StateViewMode.loadListOfSAPlanTagsById(this.$http, this.state, this.dataItems, promises)
+    return this.state.StateViewMode.loadListOfSAPlanTagsById(this.state, promises)
       .then((result) => {
         result.forEach((serviceArea) => this.idToServiceAreaCode[serviceArea.id] = serviceArea.code)
         this.$timeout()

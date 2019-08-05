@@ -72,7 +72,7 @@ class StateViewMode {
     }
   }
 
-  static loadListOfSAPlanTagsById ($http, state, promises) {
+  static loadListOfSAPlanTagsById (state, promises) {
     if (promises) {
       return Promise.all(promises)
         .then((results) => {
