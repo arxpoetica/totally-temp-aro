@@ -1240,7 +1240,7 @@ class PlanEditorController {
         // First remove this equipment feature from any subnets
         var removePromises = subnetDefinitions.map(subnetDefinition => {
           const newLinkMapping = subnetDefinition.linkMapping.filter(link => link.equipmentId !== equipmentFeature.objectId)
-          if (newLinkMapping.length !== subnetDefinition.linkMapping) {
+          if (newLinkMapping.length !== subnetDefinition.linkMapping.length) {
             // This means that this subnet contained this equipment and has changed
             subnetDefinition.linkMapping = newLinkMapping
             return this.$http.post(`/service/plan-transaction/${this.currentTransaction.id}/subnets-definition`, subnetDefinition)
