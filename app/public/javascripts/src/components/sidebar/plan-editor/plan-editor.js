@@ -1311,7 +1311,7 @@ class PlanEditorController {
       subnetIds: subnetIdsToRebuild
     }
     this.clearSubnetMapObjects(subnetIdsToRebuild)
-    return this.$http.post(`/service/plan-transaction/${this.currentTransaction.id}/subnets-recalc`, recalcBody)
+    return this.$http.post(`/service/plan-transaction/${this.currentTransaction.id}/subnets-recalc?saveFeature=true`, recalcBody)
       .then(subnetResult => {
         this.state.planEditorChanged.next(true)
         subnetResult.data.forEach(subnet => {
