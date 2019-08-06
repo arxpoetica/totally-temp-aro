@@ -41,7 +41,6 @@ class PlanEditorController {
     this.isWorkingOnCoverage = false
     this.autoRecalculateSubnet = true
     this.stickyAssignment = true
-    this.coSearchType = 'SERVICE_AREA'
     this.viewEventFeature = {}
     this.viewSiteBoundaryEventFeature = {}
     this.viewFeature = {}
@@ -1219,23 +1218,50 @@ class PlanEditorController {
   }
 
   assignSubnetParent (equipmentFeature) {
-    return Promise.resolve()  // For now :)
     const searchBody = {
       nodeType: equipmentFeature.networkNodeType,
       point: {
         type: 'Point',
         coordinates: equipmentFeature.geometry.coordinates
       },
-      searchType: this.coSearchType
+      searchType: 'CLOSEST'
     }
-    var closestCentralOfficeId = null
+    var closestSubnetId = null
+    var subnetDefinitions = null
     return this.$http.post(`/service/plan-transaction/${this.currentTransaction.id}/subnets-search`, searchBody)
-      .then((result) => {
-        closestCentralOfficeId = result.data.objectId
-        equipmentFeature.subnetId = closestCentralOfficeId
+      .then(result => {
+        closestSubnetId = result.data.objectId
+        equipmentFeature.subnetId = closestSubnetId
         return this.$http.put(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentFeature)
       })
-      .then(() => Promise.resolve(closestCentralOfficeId))
+      .then(result => this.$http.get(`/service/plan-transaction/${this.currentTransaction.id}/subnets-definition`))
+      .then(result => {
+        subnetDefinitions = result.data
+        // First remove this equipment feature from any subnets
+        var removePromises = subnetDefinitions.map(subnetDefinition => {
+          const newLinkMapping = subnetDefinition.linkMapping.filter(link => link.equipmentId !== equipmentFeature.objectId)
+          if (newLinkMapping.length !== subnetDefinition.linkMapping) {
+            // This means that this subnet contained this equipment and has changed
+            subnetDefinition.linkMapping = newLinkMapping
+            return this.$http.post(`/service/plan-transaction/${this.currentTransaction.id}/subnets-definition`, subnetDefinition)
+          } else {
+            return Promise.resolve()
+          }
+        })
+        return Promise.all(removePromises)
+      })
+      .then(() => {
+        // Then, add the equipment feature to the closest subnet
+        var subnetToAddTo = subnetDefinitions.filter(subnet => subnet.subnetId === closestSubnetId)[0]
+        subnetToAddTo.linkMapping.push({
+          equipmentId: equipmentFeature.objectId,
+          nodeType: equipmentFeature.networkNodeType,
+          fiberStrandDemand: 1,
+          atomicUnits: 32
+        })
+        return this.$http.post(`/service/plan-transaction/${this.currentTransaction.id}/subnets-definition`, subnetToAddTo)
+      })
+      .then(() => Promise.resolve(closestSubnetId))
   }
 
   recalculateSubnetForEquipmentChange (equipmentFeature) {
