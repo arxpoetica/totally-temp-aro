@@ -140,7 +140,6 @@ class PlanEditorController {
                       this.highlightLocations(Object.keys(objectProperties.connectedLocations))
                     })
                 })
-                
             }
           }
         }
@@ -153,14 +152,9 @@ class PlanEditorController {
     })
 
     this.clickObserver = this.state.mapFeaturesClickedEvent.skip(1).subscribe((hitFeatures) => {
-      // if location select associated Location Connector
-      // hitFeatures['latLng'] = latLng
-      // hitFeatures['equipmentFeatures'] = [feature] // location connector 
-      // this.state.mapFeaturesSelectedEvent.next(hitFeatures)
-      
       if (hitFeatures.locations && hitFeatures.locations.length > 0) {
         var locationId = hitFeatures.locations[0].objectId || hitFeatures.locations[0].object_id
-        
+
         this.$http.post(`/service/ring/plan-transaction/${this.currentTransaction.id}/ring/location-equipment/query-cmd`, {"locationIds": [locationId]})
           .then((results) => {
             if (results.data && results.data.length > 0 && results.data[0].equipmentId) {
@@ -966,7 +960,7 @@ class PlanEditorController {
               })
               .then(() => {
                 if (this.autoRecalculateSubnet) {
-                  this.recalculateSubnetForEquipmentChange(feature, Object.keys(this.subnetMapObjects))
+                  this.recalculateSubnetForEquipmentChange(feature)
                 }
               })
               .catch((err) => {
@@ -1003,7 +997,7 @@ class PlanEditorController {
           })
           .then(() => {
             if (this.autoRecalculateSubnet) {
-              this.recalculateSubnetForEquipmentChange(feature, Object.keys(this.subnetMapObjects))
+              this.recalculateSubnetForEquipmentChange(feature)
             }
           })
           .catch((err) => {
@@ -1078,7 +1072,6 @@ class PlanEditorController {
       locations = Object.keys(this.objectIdToProperties[this.selectedObjectId].connectedLocations)
     }
     this.highlightLocations(locations)
-    
     this.$timeout()
   }
 
@@ -1107,7 +1100,7 @@ class PlanEditorController {
                 coordinates: [mapObject.position.lng(), mapObject.position.lat()]
               }
             }
-            this.recalculateSubnetForEquipmentChange(equipmentToRecalculate, Object.keys(this.subnetMapObjects))
+            this.recalculateSubnetForEquipmentChange(equipmentToRecalculate)
           }
           this.$timeout()
         })
@@ -1164,7 +1157,7 @@ class PlanEditorController {
       .then((result) => {
         if (result && result.data.length > 0) {
           // There is at least one piece of equipment in the transaction. Use that for routing
-          this.recalculateSubnetForEquipmentChange(result.data[0], Object.keys(this.subnetMapObjects))
+          this.recalculateSubnetForEquipmentChange(result.data[0])
         } else {
           // There is no equipment left in the transaction. Just remove the subnet map objects
           this.clearAllSubnetMapObjects()
@@ -1226,6 +1219,7 @@ class PlanEditorController {
   }
 
   assignSubnetParent (equipmentFeature) {
+    return Promise.resolve()  // For now :)
     const searchBody = {
       nodeType: equipmentFeature.networkNodeType,
       point: {
@@ -1244,22 +1238,16 @@ class PlanEditorController {
       .then(() => Promise.resolve(closestCentralOfficeId))
   }
 
-  recalculateSubnetForEquipmentChange (equipmentFeature, subnetsToDelete) {
-    // have to turn this off for now
-    return 
-    // ------------------------------------------------------- fix this
-    var recalculatedSubnets = {}
-    var setOfCOIds = new Set()
-    var equipmentObject = this.formatEquipmentForService(equipmentFeature.objectId)
-    var closestCentralOfficeId = null
+  recalculateSubnetForEquipmentChange (equipmentFeature) {
+    var subnetIdsToDelete = []
     return this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`)
       .then((result) => {
         var currentEquipmentWithSubnetId = result.data.filter((item) => item.objectId === equipmentFeature.objectId)[0]
         if (this.stickyAssignment && currentEquipmentWithSubnetId.subnetId) {
-        // "Sticky" assignment means that once we assign a RT to a CO, the assignment does not change
+          // "Sticky" assignment means that once we assign a RT to a CO, the assignment does not change
           return Promise.resolve(currentEquipmentWithSubnetId.subnetId)
         } else {
-        // Either we don't have a "Sticky" assignment, OR this is the first time we are calculating assignment
+          // Either we don't have a "Sticky" assignment, OR this is the first time we are calculating assignment
           if (this.networkNodeTypeCanHaveSubnet(equipmentFeature.networkNodeType)) {
             return this.assignSubnetParent(currentEquipmentWithSubnetId)
           } else {
@@ -1267,66 +1255,42 @@ class PlanEditorController {
           }
         }
       })
-      .then((closestCO) => {
-        closestCentralOfficeId = closestCO
-        // Delete subnet features for all specified central offices.
-        var lastResult = Promise.resolve()
-        subnetsToDelete.forEach((centralOfficeObjectId) => {
-          lastResult = lastResult.then(() => this.$http.delete(`/service/plan-transaction/${this.currentTransaction.id}/subnet-feature/${centralOfficeObjectId}`))
+      .then(result => this.$http.get(`/service/plan-transaction/${this.currentTransaction.id}/subnets-definition`))
+      .then(subnetDefinitions => {
+        subnetIdsToDelete = subnetDefinitions.data.filter(subnetDefinition => {
+          return subnetDefinition.linkMapping.filter(linkMapping => linkMapping.equipmentId === equipmentFeature.objectId).length > 0
         })
-        return lastResult
-      })
-      .then((result) => {
-      // Recalculate for all central offices
-        const recalcBody = {
-          subnetIds: []
-        }
-        subnetsToDelete.forEach((centralOfficeObjectId) => setOfCOIds.add(centralOfficeObjectId))
-        setOfCOIds.add(closestCentralOfficeId)
-        setOfCOIds.forEach((centralOfficeObjectId) => recalcBody.subnetIds.push(centralOfficeObjectId))
-        return this.$http.post(`/service/plan-transaction/${this.currentTransaction.id}/subnets-recalc`, recalcBody)
-      })
-      .then((result) => {
-        var lastResult = Promise.resolve()
-        setOfCOIds.forEach((centralOfficeObjectId) => {
-          lastResult = lastResult.then((result) => {
-            if (result && result.data.objectId) {
-              recalculatedSubnets[result.data.objectId] = result
-            }
-            return this.$http.get(`/service/plan-transaction/${this.currentTransaction.id}/subnet-feature/${centralOfficeObjectId}`)
-          })
-        })
-        lastResult = lastResult.then((result) => {
-          if (result && result.data.objectId) {
-            recalculatedSubnets[result.data.objectId] = result
-          }
-          return Promise.resolve()
-        })
-        return lastResult
+          .map(subnetDefinition => subnetDefinition.subnetId)
+
+        return Promise.all(subnetIdsToDelete.map(subnetId => this.$http.delete(`/service/plan-transaction/${this.currentTransaction.id}/subnet-feature/${subnetId}`)))
       })
       .then(() => {
+        // Recalculate for all central offices
+        const recalcBody = {
+          subnetIds: subnetIdsToDelete
+        }
+        // setOfCOIds.forEach((centralOfficeObjectId) => recalcBody.subnetIds.push(centralOfficeObjectId))
+        return this.$http.post(`/service/plan-transaction/${this.currentTransaction.id}/subnets-recalc`, recalcBody)
+      })
+      .then(subnetResult => {
         this.clearAllSubnetMapObjects()
         this.state.planEditorChanged.next(true)
-        Object.keys(recalculatedSubnets).forEach((centralOfficeObjectId) => {
-        // We have the fiber in result.data.subnetLinks
-          const subnetKey = `${centralOfficeObjectId}`
-          this.subnetMapObjects[subnetKey] = []
-          const result = recalculatedSubnets[centralOfficeObjectId]
-          if (result.data.hasOwnProperty('subnetLinks')) {
-            result.data.subnetLinks.forEach((subnetLink) => {
-              subnetLink.geometry.coordinates.forEach((line) => {
-                var polylineGeometry = []
-                line.forEach((lineCoordinate) => polylineGeometry.push({ lat: lineCoordinate[1], lng: lineCoordinate[0] }))
-                var subnetLineMapObject = new google.maps.Polyline({
-                  path: polylineGeometry,
-                  strokeColor: '#0000FF',
-                  strokeWeight: 2,
-                  map: this.mapRef
-                })
-                this.subnetMapObjects[subnetKey].push(subnetLineMapObject)
+        subnetResult.data.forEach(subnet => {
+          this.subnetMapObjects[subnet.objectId] = []
+          subnet.subnetLinks.forEach(subnetLink => {
+            subnetLink.geometry.coordinates.forEach((line) => {
+              var polylineGeometry = []
+              line.forEach((lineCoordinate) => polylineGeometry.push({ lat: lineCoordinate[1], lng: lineCoordinate[0] }))
+              var subnetLineMapObject = new google.maps.Polyline({
+                path: polylineGeometry,
+                // strokeColor: '#0000FF',
+                strokeColor: `rgb(${Math.round(Math.random() * 255)}, ${Math.round(Math.random() * 255)}, ${Math.round(Math.random() * 255)})`,
+                strokeWeight: 4,
+                map: this.mapRef
               })
+              this.subnetMapObjects[subnet.objectId].push(subnetLineMapObject)
             })
-          }
+          })
         })
       })
       .catch((err) => {
