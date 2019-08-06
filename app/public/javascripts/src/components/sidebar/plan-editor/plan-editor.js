@@ -9,6 +9,7 @@ import EquipmentBoundaryFeature from '../../../service-typegen/dist/EquipmentBou
 // import MarketableEquipment from '../../../service-typegen/dist/MarketableEquipment'
 import TileUtilities from '../../tiles/tile-utilities.js'
 import PlanEditorActions from '../../../react/components/plan-editor/plan-editor-actions'
+import MapLayerActions from '../../../react/components/map-layers/map-layer-actions'
 
 class PlanEditorController {
   constructor ($timeout, $http, $element, $filter, $ngRedux, state, Utils, tileDataService, tracker) {
@@ -52,6 +53,7 @@ class PlanEditorController {
     this.mapObjectEditorComms = {}
     this.networkNodeSBTypes = {}
     this.locationMarkers = []
+    this.isFiberVisiblePreTransaction = false
     // refactor this into redux, use the subnets hook when get transaction
     this.locationsById = {}
     // Create a list of all the network node types that we MAY allow the user to edit (add onto the map)
@@ -226,6 +228,9 @@ class PlanEditorController {
   }
 
   onCurrentTransactionChanged () {
+    // Turn off feeder fiber
+    this.isFiberVisiblePreTransaction = this.feederFiberLayer.checked
+    this.setNetworkEquipmentLayerVisibility(this.feederFiberLayer, false)
     this.removeMapObjects && this.removeMapObjects()
     var transactionFeatures = []
     // See if we have an existing transaction for the currently selected location library
@@ -307,6 +312,8 @@ class PlanEditorController {
   }
 
   exitPlanEditMode () {
+    this.setNetworkEquipmentLayerVisibility(this.feederFiberLayer, this.isFiberVisiblePreTransaction)
+
     // You should no longer hide any of the object ids that have been committed or discarded
     var planId = this.state.plan.id
     Object.keys(this.objectIdToProperties).forEach((objectId) => {
@@ -1458,6 +1465,7 @@ class PlanEditorController {
 
   mapStateToThis (reduxState) {
     return {
+      feederFiberLayer: reduxState.mapLayers.networkEquipment.cables.FEEDER,
       planId: reduxState.plan.activePlan.id,
       currentTransaction: reduxState.planEditor.transaction,
       isPlanEditorActive: reduxState.planEditor.isPlanEditorActive,
@@ -1471,7 +1479,8 @@ class PlanEditorController {
       commitTransaction: transactionId => dispatch(PlanEditorActions.commitTransaction(transactionId)),
       discardTransaction: transactionId => dispatch(PlanEditorActions.discardTransaction(transactionId)),
       resumeOrCreateTransaction: (planId, userId) => dispatch(PlanEditorActions.resumeOrCreateTransaction(planId, userId)),
-      addEquipmentNodes: equipmentNodes => dispatch(PlanEditorActions.addEquipmentNodes(equipmentNodes))
+      addEquipmentNodes: equipmentNodes => dispatch(PlanEditorActions.addEquipmentNodes(equipmentNodes)),
+      setNetworkEquipmentLayerVisibility: (layer, isVisible) => dispatch(MapLayerActions.setNetworkEquipmentLayerVisibility('cables', layer, isVisible))
     }
   }
 
