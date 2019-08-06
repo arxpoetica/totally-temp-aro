@@ -292,12 +292,11 @@ class PlanEditorController {
           .filter((item) => item.crudAction !== 'delete')
           .map((item) => item.feature)
         this.createMapObjects && this.createMapObjects(features)
-        // If we have at least one transaction feature, do a recalculate subnet on it. Pass in all connected COs in the transaction.
-        if (transactionFeatures.length > 0) {
-          var allCentralOfficeIds = new Set()
-          transactionFeatures.forEach((item) => !!item.subnetId && allCentralOfficeIds.add(item.subnetId))
-          this.recalculateSubnetForEquipmentChange(transactionFeatures[0], Array.from(allCentralOfficeIds))
-        }
+        return this.$http.get(`/service/plan-transaction/${this.currentTransaction.id}/subnets-definition`)
+      })
+      .then(result => {
+        const subnetIdsToRebuild = result.data.map(subnetDefinition => subnetDefinition.subnetId)
+        return this.rebuildSubnets(subnetIdsToRebuild)
       })
       .catch((err) => {
       // Log the error, then get out of "plan edit" mode.
@@ -1297,14 +1296,21 @@ class PlanEditorController {
 
         return Promise.all(subnetIdsToDelete.map(subnetId => this.$http.delete(`/service/plan-transaction/${this.currentTransaction.id}/subnet-feature/${subnetId}`)))
       })
-      .then(() => {
-        // Recalculate for all central offices
-        const recalcBody = {
-          subnetIds: subnetIdsToDelete
+      .then(() => this.rebuildSubnets(subnetIdsToDelete))
+      .catch((err) => {
+        if (err.softReject) {
+          console.info(err.message)
+        } else {
+          console.error(err)
         }
-        // setOfCOIds.forEach((centralOfficeObjectId) => recalcBody.subnetIds.push(centralOfficeObjectId))
-        return this.$http.post(`/service/plan-transaction/${this.currentTransaction.id}/subnets-recalc`, recalcBody)
       })
+  }
+
+  rebuildSubnets (subnetIdsToRebuild) {
+    const recalcBody = {
+      subnetIds: subnetIdsToRebuild
+    }
+    return this.$http.post(`/service/plan-transaction/${this.currentTransaction.id}/subnets-recalc`, recalcBody)
       .then(subnetResult => {
         this.clearAllSubnetMapObjects()
         this.state.planEditorChanged.next(true)
@@ -1325,13 +1331,7 @@ class PlanEditorController {
           })
         })
       })
-      .catch((err) => {
-        if (err.softReject) {
-          console.info(err.message)
-        } else {
-          console.error(err)
-        }
-      })
+      .catch(err => console.error(err))
   }
 
   updateObjectIdsToHide () {
