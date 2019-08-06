@@ -1310,9 +1310,9 @@ class PlanEditorController {
     const recalcBody = {
       subnetIds: subnetIdsToRebuild
     }
+    this.clearSubnetMapObjects(subnetIdsToRebuild)
     return this.$http.post(`/service/plan-transaction/${this.currentTransaction.id}/subnets-recalc`, recalcBody)
       .then(subnetResult => {
-        this.clearAllSubnetMapObjects()
         this.state.planEditorChanged.next(true)
         subnetResult.data.forEach(subnet => {
           this.subnetMapObjects[subnet.objectId] = []
@@ -1347,10 +1347,14 @@ class PlanEditorController {
   }
 
   clearAllSubnetMapObjects () {
-    Object.keys(this.subnetMapObjects).forEach((key) => {
-      this.subnetMapObjects[key].forEach((subnetLineMapObject) => subnetLineMapObject.setMap(null))
+    this.clearSubnetMapObjects(Object.keys(this.subnetMapObjects))
+  }
+
+  clearSubnetMapObjects (subnetIds) {
+    subnetIds.forEach((key) => {
+      (this.subnetMapObjects[key] || []).forEach((subnetLineMapObject) => subnetLineMapObject.setMap(null))
+      delete this.subnetMapObjects[key]
     })
-    this.subnetMapObjects = {}
   }
 
   // Returns a promise that resolves to the iconUrl for a given object id
