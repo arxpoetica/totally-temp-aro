@@ -102,6 +102,10 @@ class PlanEditorController {
     this.deleteCreatedMapObjectWithId = deleteCreatedMapObject
   }
 
+  registerSelectProposedFeature (selectProposedFeature) {
+    this.selectProposedFeature = selectProposedFeature
+  }
+
   $onInit () {
     // We should have a map variable at this point
     if (!window[this.mapGlobalObjectName]) {
@@ -115,9 +119,9 @@ class PlanEditorController {
       // if location and selected feature type in Location connector then toggle location association to selected locvation Connecotor
       if (hitFeatures.locations.length > 0) {
         if (this.selectedObjectId && this.isEditFeatureProps) {
+          var selectedLatLng = [this.selectedMapObjectLng, this.selectedMapObjectLat]
           var objectProperties = this.objectIdToProperties[this.selectedObjectId]
           if (objectProperties.siteNetworkNodeType === 'location_connector') {
-            
             var location = hitFeatures.locations[0]
             var locationId = location.objectId || location.object_id
             if (objectProperties.connectedLocations.hasOwnProperty(locationId)) {
@@ -125,7 +129,7 @@ class PlanEditorController {
               this.saveSelectedEquipmentProperties()
               this.getLocationsInfoPromise([locationId])
                 .then(results => {
-                  this.highlightLocations(Object.keys(objectProperties.connectedLocations))
+                  this.highlightLocations(Object.keys(objectProperties.connectedLocations), selectedLatLng)
                 })
             } else {
               // check if the previous connector is in the transaction
@@ -138,7 +142,7 @@ class PlanEditorController {
 
                   this.getLocationsInfoPromise([locationId])
                     .then(results => {
-                      this.highlightLocations(Object.keys(objectProperties.connectedLocations))
+                      this.highlightLocations(Object.keys(objectProperties.connectedLocations), selectedLatLng)
                     })
                 })
             }
@@ -159,27 +163,32 @@ class PlanEditorController {
         this.$http.post(`/service/ring/plan-transaction/${this.currentTransaction.id}/ring/location-equipment/query-cmd`, {"locationIds": [locationId]})
           .then((results) => {
             if (results.data && results.data.length > 0 && results.data[0].equipmentId) {
-              this.$http.get(`/service/plan-feature/${this.state.plan.id}/equipment/${results.data[0].equipmentId}?userId=${this.state.loggedInUser.id}`)
-                .then(result => {
-                  if (result.data && result.data.geometry) {
-                    // ToDo: this is kind of janky
-                    var hitFeatures = {
-                      latLng: {
-                        lat: () => {return result.data.geometry.coordinates[1]},
-                        lng: () => {return result.data.geometry.coordinates[0]}
-                      },
-                      equipmentFeatures: [{
-                        is_deleted: 'false',
-                        is_locked: 'false',
-                        object_id: results.data[0].equipmentId,
-                        siteClli: 'unkown',
-                        _data_type: 'equipment.location_connector'
-                      }]
+              const equipmentId = results.data[0].equipmentId
+              if (!this.selectProposedFeature(equipmentId)) {
+              
+                this.$http.get(`/service/plan-feature/${this.state.plan.id}/equipment/${equipmentId}?userId=${this.state.loggedInUser.id}`)
+                  .then(result => {
+                    if (result.data && result.data.geometry) {
+
+                      // ToDo: this is kind of janky
+                      var hitFeatures = {
+                        latLng: {
+                          lat: () => {return result.data.geometry.coordinates[1]},
+                          lng: () => {return result.data.geometry.coordinates[0]}
+                        },
+                        equipmentFeatures: [{
+                          is_deleted: 'false',
+                          is_locked: 'false',
+                          object_id: equipmentId,
+                          siteClli: 'unkown',
+                          _data_type: 'equipment.location_connector'
+                        }]
+                      }
+                      
+                      this.state.mapFeaturesSelectedEvent.next(hitFeatures)
                     }
-                    
-                    this.state.mapFeaturesSelectedEvent.next(hitFeatures)
-                  }
-                })
+                  })
+              }
             }
           }).catch((err) => {
             console.error(err)
@@ -710,7 +719,7 @@ class PlanEditorController {
     this.state.selection = newSelection
   }
 
-  highlightLocations (locations) {
+  highlightLocations (locations, hubLatLng) {
     this.locationMarkers.forEach(marker => {
       marker.setMap(null)
     })
@@ -731,6 +740,26 @@ class PlanEditorController {
             map: this.mapRef
           })
           this.locationMarkers.push(mapMarker)
+          if (hubLatLng) {
+            // draw line to connector
+            var lineGeometry = [
+              {
+                lat: location.geometry.coordinates[1],
+                lng: location.geometry.coordinates[0]
+              },
+              {
+                lat: hubLatLng[1],
+                lng: hubLatLng[0]
+              }
+            ]
+            var lineMapObject = new google.maps.Polyline({
+              path: lineGeometry,
+              strokeColor: '#009900',
+              strokeWeight: 1,
+              map: this.mapRef
+            })
+            this.locationMarkers.push(lineMapObject)
+          }
         }
       })
     }
@@ -809,7 +838,7 @@ class PlanEditorController {
                 */
               this.getLocationsInfoPromise(locationIds)
                 .then(result => {
-                  this.highlightLocations(locationIds)
+                  this.highlightLocations(locationIds, this.viewEventFeature.geometry.coordinates)
                 })
             }
 
@@ -947,7 +976,7 @@ class PlanEditorController {
               var locationIds = Object.keys(equipmentProperties.connectedLocations)
               this.getLocationsInfoPromise(locationIds)
                 .then(results => {
-                  if (this.selectedObjectId === mapObject.objectId) this.highlightLocations(locationIds)
+                  if (this.selectedObjectId === mapObject.objectId) this.highlightLocations(locationIds, result.data.geometry.coordinates)
                 })
             }
             
@@ -1076,7 +1105,7 @@ class PlanEditorController {
       this.objectIdToProperties[this.selectedObjectId].hasOwnProperty('connectedLocations')) {
       locations = Object.keys(this.objectIdToProperties[this.selectedObjectId].connectedLocations)
     }
-    this.highlightLocations(locations)
+    this.highlightLocations(locations, [lng, lat])
     this.$timeout()
   }
 
