@@ -1316,8 +1316,7 @@ class PlanEditorController {
               line.forEach((lineCoordinate) => polylineGeometry.push({ lat: lineCoordinate[1], lng: lineCoordinate[0] }))
               var subnetLineMapObject = new google.maps.Polyline({
                 path: polylineGeometry,
-                // strokeColor: '#0000FF',
-                strokeColor: `rgb(${Math.round(Math.random() * 255)}, ${Math.round(Math.random() * 255)}, ${Math.round(Math.random() * 255)})`,
+                strokeColor: '#0000FF',
                 strokeWeight: 4,
                 map: this.mapRef
               })
