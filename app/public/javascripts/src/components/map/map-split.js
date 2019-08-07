@@ -1,5 +1,5 @@
 class MapSplitController {
-  constructor ($document, $timeout, $scope, state, $compile) {
+  constructor ($document, $timeout, $scope, state, $compile, $ngRedux) {
     this.$timeout = $timeout
     this.state = state
     this.displayModes = state.displayModes
@@ -38,6 +38,7 @@ class MapSplitController {
       element[0].index = 3
       map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(element[0])
     })
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }
 
   toggleCollapseSideBar () {
@@ -61,9 +62,20 @@ class MapSplitController {
     }
     this.state.splitterObj.next(this.splitterObj)
   }
+
+  mapStateToThis (reduxState) {
+    return {
+      isMapEnabled: reduxState.map.isEnabled
+    }
+  }
+
+  mapDispatchToTarget (dispatch) {
+    return {
+    }
+  }
 }
 
-MapSplitController.$inject = ['$document', '$timeout', '$scope', 'state', '$compile']
+MapSplitController.$inject = ['$document', '$timeout', '$scope', 'state', '$compile', '$ngRedux']
 
 let mapSplit = {
   // NOTE: Cannot use a templateUrl for this component, as there is code in index.html that depends upon the "map-canvas"
@@ -161,6 +173,13 @@ let mapSplit = {
       <map-selector-export-locations map-global-object-name="map" ng-if="$ctrl.selectedDisplayMode === $ctrl.displayModes.VIEW
         "></map-selector-export-locations>
       <r-toast-container></r-toast-container>
+      <!-- A div that overlays on the map to denote disabled state. When shown, it will prevent any keyboard/mouse interactions with the map.
+           Useful when you have made a slow-ish request to service and want to prevent further map interactions till you get a response. -->
+      <div ng-if="!$ctrl.isMapEnabled" style="background-color: white; opacity: 0.5; position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px;">
+        <div class="d-flex" style="height: 100%; text-align: center; align-items: center;">
+          <i class="fa fa-5x fa-spinner fa-spin" style="width: 100%;"></i>
+        </div>
+      </div>
     </div>
 
     <!-- Define the sidebar -->

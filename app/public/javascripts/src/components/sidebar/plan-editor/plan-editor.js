@@ -10,6 +10,7 @@ import EquipmentBoundaryFeature from '../../../service-typegen/dist/EquipmentBou
 import TileUtilities from '../../tiles/tile-utilities.js'
 import PlanEditorActions from '../../../react/components/plan-editor/plan-editor-actions'
 import MapLayerActions from '../../../react/components/map-layers/map-layer-actions'
+import MapActions from '../../../react/components/map/map-actions'
 
 class PlanEditorController {
   constructor ($timeout, $http, $element, $filter, $ngRedux, state, Utils, tileDataService, tracker) {
@@ -1340,6 +1341,7 @@ class PlanEditorController {
       subnetIds: subnetIdsToRebuild
     }
     this.clearSubnetMapObjects(subnetIdsToRebuild)
+    this.setIsMapEnabled(false)
     return this.$http.post(`/service/plan-transaction/${this.currentTransaction.id}/subnets-recalc?saveFeature=true`, recalcBody)
       .then(subnetResult => {
         this.state.planEditorChanged.next(true)
@@ -1359,8 +1361,12 @@ class PlanEditorController {
             })
           })
         })
+        this.setIsMapEnabled(true)
       })
-      .catch(err => console.error(err))
+      .catch(err => {
+        this.setIsMapEnabled(true)
+        console.error(err)
+      })
   }
 
   updateObjectIdsToHide () {
@@ -1512,7 +1518,8 @@ class PlanEditorController {
       discardTransaction: transactionId => dispatch(PlanEditorActions.discardTransaction(transactionId)),
       resumeOrCreateTransaction: (planId, userId) => dispatch(PlanEditorActions.resumeOrCreateTransaction(planId, userId)),
       addEquipmentNodes: equipmentNodes => dispatch(PlanEditorActions.addEquipmentNodes(equipmentNodes)),
-      setNetworkEquipmentLayerVisibility: (layer, isVisible) => dispatch(MapLayerActions.setNetworkEquipmentLayerVisibility('cables', layer, isVisible))
+      setNetworkEquipmentLayerVisibility: (layer, isVisible) => dispatch(MapLayerActions.setNetworkEquipmentLayerVisibility('cables', layer, isVisible)),
+      setIsMapEnabled: isMapEnabled => dispatch(MapActions.setIsMapEnabled(isMapEnabled))
     }
   }
 
