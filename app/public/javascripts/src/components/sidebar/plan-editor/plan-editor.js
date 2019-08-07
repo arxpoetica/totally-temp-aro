@@ -1137,6 +1137,11 @@ class PlanEditorController {
             }
             this.recalculateSubnetForEquipmentChange(equipmentToRecalculate)
           }
+          if (this.selectedObjectId === mapObject.objectId && 
+            this.objectIdToProperties[this.selectedObjectId].hasOwnProperty('connectedLocations')) {
+            var locations = Object.keys(this.objectIdToProperties[this.selectedObjectId].connectedLocations)
+            this.highlightLocations(locations, [mapObject.position.lng(), mapObject.position.lat()])
+          }
           this.$timeout()
         })
         .catch((err) => console.error(err))
