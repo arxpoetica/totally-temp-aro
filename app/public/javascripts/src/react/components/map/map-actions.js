@@ -8,13 +8,6 @@ function setGoogleMapsReference (googleMapsReference) {
   }
 }
 
-function setIsMapEnabled (isEnabled) {
-  return {
-    type: Actions.MAP_SET_ENABLED,
-    payload: isEnabled
-  }
-}
-
 function setSelectedMapFeatures (features) {
   return {
     type: Actions.MAP_SET_SELECTED_FEATURES,
@@ -24,6 +17,5 @@ function setSelectedMapFeatures (features) {
 
 export default {
   setGoogleMapsReference,
-  setIsMapEnabled,
   setSelectedMapFeatures
 }

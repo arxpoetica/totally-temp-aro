@@ -68,11 +68,19 @@ function removeEquipmentNode (objectId) {
   }
 }
 
+function setIsCalculatingSubnets (isCalculatingSubnets) {
+  return {
+    type: Actions.PLAN_EDITOR_SET_IS_CALCULATING_SUBNETS,
+    payload: isCalculatingSubnets
+  }
+}
+
 export default {
   commitTransaction,
   clearTransaction,
   discardTransaction,
   resumeOrCreateTransaction,
   addEquipmentNodes,
-  removeEquipmentNode
+  removeEquipmentNode,
+  setIsCalculatingSubnets
 }

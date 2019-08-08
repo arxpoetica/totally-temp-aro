@@ -255,24 +255,6 @@
             </button>
           </div>
 
-          <!-- Section to show properties when the selected map object is an equipment boundary -->
-          <!-- <div class="clearfix" ng-if="!$ctrl.isBoundaryEditMode && $ctrl.viewBoundaryProps.length > 0" style="margin-top: 10px"> -->
-          <!-- Section header showing the type of the selected object -->
-          <!-- <div class="sidebar-table-header">
-              <span>Site Boundary</span>
-              
-              <button class="btn btn-primary ei-panel-header-btn-set ei-foldout-header-btn" 
-                  ng-click="$ctrl.editViewObject()"
-                  >edit</button>
-          </div> -->
-          
-          <!-- A table containing the editable properties of the selected equipment boundary -->
-          <!-- <editor-interface-tree 
-            ng-if="!$ctrl.isBoundaryEditMode"
-            object-to-view="$ctrl.viewBoundaryProps" 
-            is-edit="false">
-          </editor-interface-tree> -->
-
           <!-- Section to show properties when the selected map object is an equipment boundary - view-->
           <div class="plan-editor-bounds-contain" ng-if="$ctrl.state.showSiteBoundary && $ctrl.viewBoundaryProps && !$ctrl.isBoundaryEditMode">
             <!-- A table containing the editable properties of the selected object -->
@@ -392,7 +374,7 @@
           
           <!-- Add a div that will overlay all the controls above. The div will be visible when the controls need to be disabled. -->
           <div class="disable-sibling-controls"
-              ng-hide="$ctrl.currentTransaction">
+               ng-show="!$ctrl.currentTransaction || $ctrl.isCalculatingSubnets">
           </div>
         </div>
       </div>

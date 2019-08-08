@@ -65,7 +65,7 @@ class MapSplitController {
 
   mapStateToThis (reduxState) {
     return {
-      isMapEnabled: reduxState.map.isEnabled
+      disableMap: reduxState.planEditor.isCalculatingSubnets  // Disable map when plan editor is calculating subnets
     }
   }
 
@@ -175,7 +175,7 @@ let mapSplit = {
       <r-toast-container></r-toast-container>
       <!-- A div that overlays on the map to denote disabled state. When shown, it will prevent any keyboard/mouse interactions with the map.
            Useful when you have made a slow-ish request to service and want to prevent further map interactions till you get a response. -->
-      <div ng-if="!$ctrl.isMapEnabled" style="background-color: white; opacity: 0.5; position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px;">
+      <div ng-if="$ctrl.disableMap" style="background-color: white; opacity: 0.5; position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px;">
         <div class="d-flex" style="height: 100%; text-align: center; align-items: center;">
           <i class="fa fa-5x fa-spinner fa-spin" style="width: 100%;"></i>
         </div>
