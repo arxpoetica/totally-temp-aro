@@ -1429,6 +1429,7 @@ class State {
       // Set the logged in user in the Redux store
       service.setLoggedInUserRedux(user)
       service.loadSystemActorsRedux()
+      SocketManager.joinRoom('user', user.id)
 
       service.equipmentLayerTypeVisibility.existing = service.configuration.networkEquipment.visibility.defaultShowExistingEquipment
       service.equipmentLayerTypeVisibility.planned = service.configuration.networkEquipment.visibility.defaultShowPlannedEquipment

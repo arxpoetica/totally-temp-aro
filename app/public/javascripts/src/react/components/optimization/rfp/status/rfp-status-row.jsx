@@ -45,7 +45,7 @@ export class RfpStatusRow extends Component {
   }
 
   onClickLoadPlan () {
-    this.props.loadPlan(this.props.planId, this.props.userId)
+    this.props.loadPlan(this.props.planId)
     this.props.hideFullScreenContainer()
   }
 }
@@ -68,7 +68,7 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  loadPlan: (planId, userId) => dispatch(PlanActions.loadPlan(planId, userId)),
+  loadPlan: (planId) => dispatch(PlanActions.loadPlan(planId)),
   hideFullScreenContainer: () => dispatch(FullScreenActions.showOrHideFullScreenContainer(false))
 })
 

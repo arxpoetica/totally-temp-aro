@@ -1,39 +1,30 @@
 import io from 'socket.io-client'
+import SocketNamespaces from './socket-namespaces'
 
 class SocketManager {
   constructor () {
     this.router = {}
     this.websocketSessionId = null
-    this.sockets = {
-      clients: io('/clients'),
-      plans: io('/plans'),
-      broadcast: io('/broadcast'),
-      tileInvalidation: io('/tileInvalidation')
-    }
+    // Connect to all socket namespaces
+    this.sockets = {}
+    SocketNamespaces.forEach(socketNamespace => {
+      this.sockets[socketNamespace] = io(`/${socketNamespace}`)
+    })
     Object.keys(this.sockets).forEach(namespaceKey => {
       this.sockets[namespaceKey].on('message', message => this.routeMessage(message))
     })
   }
 
+  joinRoom (namespace, room) {
+    this.sockets[namespace].emit('SOCKET_JOIN_ROOM', room)
+  }
+
+  leaveRoom (namespace, room) {
+    this.sockets[namespace].emit('SOCKET_LEAVE_ROOM', room)
+  }
+
   initializeSession (websocketSessionId) {
     this.websocketSessionId = websocketSessionId
-    this.joinRoom(websocketSessionId)
-  }
-
-  joinRoom (roomId) {
-    this.sockets.clients.emit('SOCKET_JOIN_ROOM', roomId)
-  }
-
-  joinPlanRoom (roomId) {
-    this.sockets.plans.emit('SOCKET_JOIN_PLAN_ROOM', roomId)
-  }
-
-  leaveRoom (roomId) {
-    this.sockets.clients.emit('SOCKET_LEAVE_ROOM', roomId)
-  }
-
-  leavePlanRoom (roomId) {
-    this.sockets.plans.emit('SOCKET_LEAVE_PLAN_ROOM', roomId)
   }
 
   subscribe (messageType, callback) {

@@ -2,7 +2,7 @@ import Actions from '../../common/actions'
 import CoverageActions from '../coverage/coverage-actions'
 import SelectionActions from '../selection/selection-actions'
 import RfpActions from '../optimization/rfp/rfp-actions'
-import socketManager from '../../../react/common/socket-manager'
+import SocketManager from '../../../react/common/socket-manager'
 import RingEditActions from '../ring-edit/ring-edit-actions'
 import AroHttp from '../../common/aro-http'
 
@@ -14,7 +14,7 @@ function setActivePlanState (planState) {
 }
 
 // Loads a plan with the specified plan id from the server, then sets it as the active plan
-function loadPlan (planId, userId) {
+function loadPlan (planId) {
   return dispatch => {
     AroHttp.get(`/service/v1/plan/${planId}`)
       .then(result => dispatch(setActivePlan(result.data)))
@@ -100,7 +100,7 @@ function loadPlanDataSelectionFromServer (planId) {
 function setActivePlan (plan) {
   return (dispatch, getState) => {
     getState().plan.activePlan && getState().plan.activePlan.id &&
-      socketManager.leavePlanRoom(getState().plan.activePlan.id) // leave previous plan
+      SocketManager.leaveRoom('plan', getState().plan.activePlan.id) // leave previous plan
 
     dispatch({
       type: Actions.PLAN_SET_ACTIVE_PLAN,
@@ -109,8 +109,8 @@ function setActivePlan (plan) {
       }
     })
 
-    socketManager.joinPlanRoom(plan.id) // Join new plan
-
+    // Join room for this plan
+    SocketManager.joinRoom('plan', plan.id)
     // Get current plan data items
     dispatch(loadPlanDataSelectionFromServer(plan.id))
     // Update details on the coverage report
