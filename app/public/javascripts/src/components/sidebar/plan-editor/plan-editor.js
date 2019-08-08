@@ -729,6 +729,8 @@ class PlanEditorController {
         var location = this.locationsById[locationId]
         // --- NEED TO HAVE LAT LONG FOR LOCATIONS ---
         if (location && location.hasOwnProperty('geometry')) {
+          // console.log(location)
+          // console.log(this.state.locationInputSelected(location.locationCategory))
           var mapMarker = new google.maps.Marker({
             position: new google.maps.LatLng(location.geometry.coordinates[1], location.geometry.coordinates[0]),
             icon: {
@@ -1508,6 +1510,7 @@ class PlanEditorController {
   mapStateToThis (reduxState) {
     return {
       feederFiberLayer: reduxState.mapLayers.networkEquipment.cables.FEEDER,
+      // locationsLayer: reduxState.mapLayers.location,
       planId: reduxState.plan.activePlan.id,
       currentTransaction: reduxState.planEditor.transaction,
       isPlanEditorActive: reduxState.planEditor.isPlanEditorActive,
