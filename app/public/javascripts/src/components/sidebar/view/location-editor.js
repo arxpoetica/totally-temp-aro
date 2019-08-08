@@ -139,9 +139,8 @@ class LocationEditorController {
         this.isCommiting = false
         // Do not recreate tiles and/or data cache. That will be handled by the tile invalidation messages from aro-service
         Object.keys(this.objectIdToMapObject).forEach(objectId => this.tileDataService.removeFeatureToExclude(objectId))
-        return this.state.loadModifiedFeatures(this.state.plan.id)
+        this.resumeOrCreateTransaction()
       })
-      .then(() => this.resumeOrCreateTransaction())
       .catch((err) => {
         this.currentTransaction = null
         this.isCommiting = false
