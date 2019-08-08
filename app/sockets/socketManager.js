@@ -3,15 +3,23 @@ const Sockets = require('./sockets')
 const MessageQueueManager = require('./message-queue-manager')
 const Consumer = require('./consumer')
 const config = helpers.config
-const VECTOR_TILE_DATA_MESSAGE = 'VECTOR_TILE_DATA'
-const VECTOR_TILE_EXCHANGE = 'aro_vt'
-const VECTOR_TILE_QUEUE = 'vectorTileQueue'
-const TILE_INVALIDATION_MESSAGE = 'TILES_INVALIDATED'
-const TILE_INVALIDATION_EXCHANGE = 'tile_invalidation'
-const TILE_INVALIDATION_QUEUE = 'tileInvalidationQueue'
-const PROGRESS_MESSAGE = 'PROGRESS_MESSAGE_DATA'
-const PROGRESS_EXCHANGE = 'aro_progress'
-const PROGRESS_QUEUE = 'progressQueue'
+const socketConfig = Object.freeze({
+  vectorTile: {
+    message: 'VECTOR_TILE_DATA',
+    exchange: 'aro_vt',
+    queue: 'vectorTileQueue'
+  },
+  invalidation: {
+    message: 'TILES_INVALIDATED',
+    exchange: 'tile_invalidation',
+    queue: 'tileInvalidationQueue'
+  },
+  progress: {
+    message: 'PROGRESS_MESSAGE_DATA',
+    exchange: 'aro_progress',
+    queue: 'progressQueue'
+  }
+})
 
 class SocketManager {
   constructor (app) {
@@ -72,10 +80,10 @@ class SocketManager {
       } else {
         console.log(`Vector Tile Socket: Routing message with UUID ${uuid} to /${clientId}`)
         delete self.vectorTileRequestToRoom[uuid]
-        self.sockets.clients.to(`/${clientId}`).emit('message', { type: VECTOR_TILE_DATA_MESSAGE, data: msg })
+        self.sockets.clients.to(`/${clientId}`).emit('message', { type: socketConfig.vectorTile.message, data: msg })
       }
     }
-    return new Consumer(VECTOR_TILE_QUEUE, VECTOR_TILE_EXCHANGE, messageHandler)
+    return new Consumer(socketConfig.vectorTile.queue, socketConfig.vectorTile.exchange, messageHandler)
   }
 
   // Map a vector tile request UUID to a client ID.
@@ -91,11 +99,11 @@ class SocketManager {
       console.log('Received tile invalidation message from service')
       console.log(msg.content.toString())
       self.sockets.tileInvalidation.emit('message', {
-        type: TILE_INVALIDATION_MESSAGE,
+        type: socketConfig.invalidation.message,
         payload: JSON.parse(msg.content.toString())
       })
     }
-    return new Consumer(TILE_INVALIDATION_QUEUE, TILE_INVALIDATION_EXCHANGE, messageHandler)
+    return new Consumer(socketConfig.invalidation.queue, socketConfig.invalidation.exchange, messageHandler)
   }
 
   getOptimizationProgressConsumer () {
@@ -111,10 +119,10 @@ class SocketManager {
         // UI dependent on optimizationState at so many places TODO: need to remove optimizationstate
         data.progress = (data.jobsCompleted + 1) / (data.totalJobs + 1)
         data.optimizationState = data.progress != 1 ? 'STARTED' : 'COMPLETED'
-        self.sockets.plans.to(`/${processId}`).emit('message', { type: PROGRESS_MESSAGE, data: data })
+        self.sockets.plans.to(`/${processId}`).emit('message', { type: socketConfig.progress.message, data: data })
       }
     }
-    return new Consumer(PROGRESS_QUEUE, PROGRESS_EXCHANGE, messageHandler)
+    return new Consumer(socketConfig.progress.queue, socketConfig.progress.exchange, messageHandler)
   }
 
   broadcastMessage (msg) {
