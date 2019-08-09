@@ -6,7 +6,10 @@ const defaultState = {
   features: {
     equipmentNodes: [],
     boundaries: []
-  }
+  },
+  isCalculatingSubnets: false,
+  isCreatingObject: false,
+  isModifyingObject: false
 }
 
 function setTransaction (state, transaction) {
@@ -39,6 +42,24 @@ function removeEquipmentNode (state, objectId) {
   }
 }
 
+function setIsCalculatingSubnets (state, isCalculatingSubnets) {
+  return { ...state,
+    isCalculatingSubnets: isCalculatingSubnets
+  }
+}
+
+function setIsCreatingObject (state, isCreatingObject) {
+  return { ...state,
+    isCreatingObject: isCreatingObject
+  }
+}
+
+function setIsModifyingObject (state, isModifyingObject) {
+  return { ...state,
+    isModifyingObject: isModifyingObject
+  }
+}
+
 function planEditorReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.PLAN_EDITOR_CLEAR_TRANSACTION:
@@ -52,6 +73,15 @@ function planEditorReducer (state = defaultState, action) {
 
     case Actions.PLAN_EDITOR_REMOVE_EQUIPMENT_NODE:
       return removeEquipmentNode(state, action.payload)
+
+    case Actions.PLAN_EDITOR_SET_IS_CALCULATING_SUBNETS:
+      return setIsCalculatingSubnets(state, action.payload)
+
+    case Actions.PLAN_EDITOR_SET_IS_CREATING_OBJECT:
+      return setIsCreatingObject(state, action.payload)
+
+    case Actions.PLAN_EDITOR_SET_IS_MODIFYING_OBJECT:
+      return setIsModifyingObject(state, action.payload)
 
     default:
       return state

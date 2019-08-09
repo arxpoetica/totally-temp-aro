@@ -47,6 +47,11 @@ class MapObjectEditorController {
       fillColor: '#FF1493',
       fillOpacity: 0.4
     }
+    
+    this.directToEditTypes = {
+      'equipment.location_connector': true
+    }
+    
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }
 
@@ -165,7 +170,8 @@ class MapObjectEditorController {
     this.registerRemoveMapObjectsCallback && this.registerRemoveMapObjectsCallback({ removeMapObjects: this.removeCreatedMapObjects.bind(this) })
     this.registerCreateEditableExistingMapObject && this.registerCreateEditableExistingMapObject({ createEditableExistingMapObject: this.createEditableExistingMapObject.bind(this) })
     this.registerDeleteCreatedMapObject && this.registerDeleteCreatedMapObject({ deleteCreatedMapObject: this.deleteCreatedMapObject.bind(this) })
-
+    this.registerSelectProposedFeature && this.registerSelectProposedFeature({ selectProposedFeature: this.selectProposedFeature.bind(this) })
+    
     this.state.clearEditingMode.skip(1).subscribe((clear) => {
       if (clear) {
         this.selectMapObject(null) // deselects the selected equipment
@@ -228,7 +234,9 @@ class MapObjectEditorController {
   }
 
   selectProposedFeature (objectId) {
+    if (!this.createdMapObjects.hasOwnProperty(objectId)) return false
     this.selectMapObject(this.createdMapObjects[objectId])
+    return true
   }
 
   startDrawingBoundaryForId (objectId) {
@@ -925,14 +933,18 @@ class MapObjectEditorController {
         this.state.selection = newSelection
         return
       } else {
-        // Quickfix - Display the equipment and return, do not make multiple calls to aro-service #159544541
-        this.displayViewObject({ feature: feature })
-        this.selectMapObject(null)
-        // Update selected feature in state so it is rendered correctly
-        newSelection.details.siteBoundaryId = {}
-        newSelection.editable.equipment = {}
-        newSelection.editable.equipment[feature.objectId] = feature
-        this.state.selection = newSelection
+        if (this.directToEditTypes.hasOwnProperty(feature.type)) {
+          this.displayEditObject({ feature: feature })
+        } else {
+          // Quickfix - Display the equipment and return, do not make multiple calls to aro-service #159544541
+          this.displayViewObject({ feature: feature })
+          this.selectMapObject(null)
+          // Update selected feature in state so it is rendered correctly
+          newSelection.details.siteBoundaryId = {}
+          newSelection.editable.equipment = {}
+          newSelection.editable.equipment[feature.objectId] = feature
+          this.state.selection = newSelection
+        }
         return
       }
     } else if (this.featureType === 'serviceArea' && event.hasOwnProperty('serviceAreas') &&
@@ -1306,7 +1318,8 @@ let mapObjectEditor = {
     registerCreateMapObjectsCallback: '&', // To be called to register a callback, which will create map objects for existing objectIds
     registerRemoveMapObjectsCallback: '&', // To be called to register a callback, which will remove all created map objects
     registerCreateEditableExistingMapObject: '&', // To be called to register a callback, which will create a map object from and existing object
-    registerDeleteCreatedMapObject: '&'
+    registerDeleteCreatedMapObject: '&',
+    registerSelectProposedFeature: '&'
   },
   controller: MapObjectEditorController
 }

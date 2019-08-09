@@ -1429,6 +1429,7 @@ class State {
       // Set the logged in user in the Redux store
       service.setLoggedInUserRedux(user)
       service.loadSystemActorsRedux()
+      SocketManager.joinRoom('user', user.id)
 
       service.equipmentLayerTypeVisibility.existing = service.configuration.networkEquipment.visibility.defaultShowExistingEquipment
       service.equipmentLayerTypeVisibility.planned = service.configuration.networkEquipment.visibility.defaultShowPlannedEquipment
@@ -1546,7 +1547,6 @@ class State {
           service.setOptimizationOptions()
           tileDataService.setLocationStateIcon(tileDataService.locationStates.LOCK_ICON_KEY, service.configuration.locationCategories.entityLockIcon)
           tileDataService.setLocationStateIcon(tileDataService.locationStates.INVALIDATED_ICON_KEY, service.configuration.locationCategories.entityInvalidatedIcon)
-          SocketManager.initializeSession(result.data.sessionWebsocketId)
           service.getReleaseVersions()
           if (service.configuration.ARO_CLIENT === 'frontier' || service.configuration.ARO_CLIENT === 'sse') {
             heatmapOptions.selectedHeatmapOption = service.viewSetting.heatmapOptions.filter((option) => option.id === 'HEATMAP_OFF')[0]
@@ -1699,8 +1699,9 @@ class State {
     const wholeWorldTileBox = { zoom: WORLD_ZOOM, x1: 0, y1: 0, x2: MAX_TILE_XY_AT_WORLD_ZOOM, y2: MAX_TILE_XY_AT_WORLD_ZOOM }
     service.handleTileInvalidationMessage = msg => {
       // If the tileBox is null, use a tile box that covers the entire world
-      const tileBox = msg.payload.tileBox || wholeWorldTileBox
-      const layerNames = msg.payload.layerNames
+      const content = JSON.parse(new TextDecoder('utf-8').decode(new Uint8Array(msg.content)))
+      const tileBox = content.vectorTileUpdate.tileBox || wholeWorldTileBox
+      const layerNames = content.vectorTileUpdate.layerNames
       // First, mark the HTML cache so we know which tiles are invalidated
       tileDataService.displayInvalidatedTiles(layerNames, tileBox)
 
@@ -1716,7 +1717,7 @@ class State {
         .catch(err => console.error(err))
     }
 
-    service.unsubscribeTileInvalidationHandler = SocketManager.subscribe('TILES_INVALIDATED', service.handleTileInvalidationMessage.bind(service))
+    service.unsubscribeTileInvalidationHandler = SocketManager.subscribe('COMMIT_TRANSACTION', service.handleTileInvalidationMessage.bind(service))
 
     service.mergeToTarget = (nextState, actions) => {
       const currentActivePlanId = service.plan && service.plan.id

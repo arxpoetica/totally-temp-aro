@@ -1,4 +1,6 @@
 const expressProxy = require('express-http-proxy')
+const URL = require('url').URL
+const URLSearchParams = require('url').URLSearchParams
 var models = require('../models')
 var helpers = require('../helpers')
 var config = helpers.config

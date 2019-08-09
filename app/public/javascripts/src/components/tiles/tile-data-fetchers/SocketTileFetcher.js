@@ -27,11 +27,14 @@ class SocketTileFetcher {
       return ldCopy
     })
     const mapDataPromise = new Promise((resolve, reject) => {
-      const requestBody = {
-        websocketSessionId: socketManager.websocketSessionId,
-        layerDefinitions: layerDefinitionsWithoutDataId
-      }
-      AroHttp.post(`/service-tile-sockets/v1/async/tiles/layers/${zoom}/${tileX}/${tileY}.mvt?request_uuid=${requestUuid}`, requestBody)
+      socketManager.getSessionId()
+        .then(sessionId => {
+          const requestBody = {
+            websocketSessionId: sessionId,
+            layerDefinitions: layerDefinitionsWithoutDataId
+          }
+          return AroHttp.post(`/service-tile-sockets/v1/async/tiles/layers/${zoom}/${tileX}/${tileY}.mvt?request_uuid=${requestUuid}`, requestBody)
+        })
         .then(result => {
           if (this.tileReceivers[requestUuid]) {
             // This means that our websocket has already received data for this request. Go ahead and proces it.
@@ -64,7 +67,7 @@ class SocketTileFetcher {
 
   _receiveSocketData (message) {
     // Is there a better way to perform the arraybuffer decoding?
-    const stringMessage = new TextDecoder('utf-8').decode(new Uint8Array(message.data.content))
+    const stringMessage = new TextDecoder('utf-8').decode(new Uint8Array(message.content))
     const messageObj = JSON.parse(stringMessage)
     const mvtData = Uint8Array.from(atob(messageObj.data), c => c.charCodeAt(0))
     var mapboxVectorTile = new VectorTile(new Protobuf(mvtData))
@@ -101,7 +104,7 @@ class SocketTileFetcher {
 
   _processSocketData (receiver) {
     // Is there a better way to perform the arraybuffer decoding?
-    const stringMessage = new TextDecoder('utf-8').decode(new Uint8Array(receiver.binaryMessage.data.content))
+    const stringMessage = new TextDecoder('utf-8').decode(new Uint8Array(receiver.binaryMessage.content))
     const messageObj = JSON.parse(stringMessage)
     const mvtData = Uint8Array.from(atob(messageObj.data), c => c.charCodeAt(0))
     var mapboxVectorTile = new VectorTile(new Protobuf(mvtData))

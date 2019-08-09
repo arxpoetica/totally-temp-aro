@@ -68,11 +68,35 @@ function removeEquipmentNode (objectId) {
   }
 }
 
+function setIsCalculatingSubnets (isCalculatingSubnets) {
+  return {
+    type: Actions.PLAN_EDITOR_SET_IS_CALCULATING_SUBNETS,
+    payload: isCalculatingSubnets
+  }
+}
+
+function setIsCreatingObject (isCreatingObject) {
+  return {
+    type: Actions.PLAN_EDITOR_SET_IS_CREATING_OBJECT,
+    payload: isCreatingObject
+  }
+}
+
+function setIsModifyingObject (isModifyingObject) {
+  return {
+    type: Actions.PLAN_EDITOR_SET_IS_MODIFYING_OBJECT,
+    payload: isModifyingObject
+  }
+}
+
 export default {
   commitTransaction,
   clearTransaction,
   discardTransaction,
   resumeOrCreateTransaction,
   addEquipmentNodes,
-  removeEquipmentNode
+  removeEquipmentNode,
+  setIsCalculatingSubnets,
+  setIsCreatingObject,
+  setIsModifyingObject
 }

@@ -58,7 +58,8 @@
                           register-create-map-objects-callback="$ctrl.registerCreateMapObjectsCallback(createMapObjects)"
                           register-remove-map-objects-callback="$ctrl.registerRemoveMapObjectsCallback(removeMapObjects)"
                           register-create-editable-existing-map-object="$ctrl.registerCreateEditableExistingMapObject(createEditableExistingMapObject)"
-                          register-delete-created-map-object="$ctrl.registerDeleteCreatedMapObject(deleteCreatedMapObject)">
+                          register-delete-created-map-object="$ctrl.registerDeleteCreatedMapObject(deleteCreatedMapObject)"
+                          register-select-proposed-feature="$ctrl.registerSelectProposedFeature(selectProposedFeature)">
         </map-object-editor>
 
         <div style="margin: 10px">
@@ -156,19 +157,6 @@
                   <span>Sticky assignment</span>
                 </td>
               </tr>
-              <tr>
-                <td>Fiber source</td>
-                <td>
-                  <input type="radio" class="checkboxfill layer-type-checkboxes" style="margin: 0px;" name="closestCOFinder"
-                          ng-model="$ctrl.coSearchType" value="SERVICE_AREA">
-                  <span>Service Area</span>
-                </td>
-                <td>
-                  <input type="radio" class="checkboxfill layer-type-checkboxes" style="margin: 0px;" name="closestCOFinder"
-                          ng-model="$ctrl.coSearchType" value="CLOSEST">
-                  <span>Closest</span>
-                </td>
-              </tr>
             </tbody>
           </table>
           
@@ -245,8 +233,8 @@
                   </form>
                 </div>
             </div>
-            <div ng-if="$ctrl.getSelectedNetworkConfig().key === 'location_connector'">
-              Location Connector edit section
+            <div ng-if="$ctrl.getSelectedNetworkConfig().key === 'location_connector'" class="alert alert-warning" style="margin: 1rem 0 0 0">
+              right-click locations to toggle their connection
             </div>
             <!-- A table containing the editable properties of the selected object -->
             <editor-interface-tree 
@@ -266,24 +254,6 @@
               <i class="fa fa-save"></i>&nbsp;&nbsp;Save equipment properties
             </button>
           </div>
-
-          <!-- Section to show properties when the selected map object is an equipment boundary -->
-          <!-- <div class="clearfix" ng-if="!$ctrl.isBoundaryEditMode && $ctrl.viewBoundaryProps.length > 0" style="margin-top: 10px"> -->
-          <!-- Section header showing the type of the selected object -->
-          <!-- <div class="sidebar-table-header">
-              <span>Site Boundary</span>
-              
-              <button class="btn btn-primary ei-panel-header-btn-set ei-foldout-header-btn" 
-                  ng-click="$ctrl.editViewObject()"
-                  >edit</button>
-          </div> -->
-          
-          <!-- A table containing the editable properties of the selected equipment boundary -->
-          <!-- <editor-interface-tree 
-            ng-if="!$ctrl.isBoundaryEditMode"
-            object-to-view="$ctrl.viewBoundaryProps" 
-            is-edit="false">
-          </editor-interface-tree> -->
 
           <!-- Section to show properties when the selected map object is an equipment boundary - view-->
           <div class="plan-editor-bounds-contain" ng-if="$ctrl.state.showSiteBoundary && $ctrl.viewBoundaryProps && !$ctrl.isBoundaryEditMode">
@@ -404,7 +374,7 @@
           
           <!-- Add a div that will overlay all the controls above. The div will be visible when the controls need to be disabled. -->
           <div class="disable-sibling-controls"
-              ng-hide="$ctrl.currentTransaction">
+               ng-show="!$ctrl.currentTransaction || $ctrl.isCalculatingSubnets || $ctrl.isCreatingObject || $ctrl.isModifyingObject">
           </div>
         </div>
       </div>
