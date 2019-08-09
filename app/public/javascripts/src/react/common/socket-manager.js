@@ -4,9 +4,20 @@ import SocketNamespaces from './socket-namespaces'
 class SocketManager {
   constructor () {
     this.router = {}
-    this.websocketSessionId = null
-    // Connect to all socket namespaces
+
+    // Initialize websocket
     this.sockets = {}
+    this.sockets.default = io()
+    this.sessionIdPromise = new Promise((resolve, reject) => {
+      this.sockets.default.on('connect', () => {
+        const sessionId = this.sockets.default.io.engine.id
+        this.joinRoom('client', sessionId)
+        resolve(sessionId)
+      })
+      this.sockets.default.on('connect_error', err => console.error(err)) // Not sure if I should reject here - what if it tries to reconnect?
+    })
+
+    // Connect to all socket namespaces
     SocketNamespaces.forEach(socketNamespace => {
       this.sockets[socketNamespace] = io(`/${socketNamespace}`)
     })
@@ -23,9 +34,8 @@ class SocketManager {
     this.sockets[namespace].emit('SOCKET_LEAVE_ROOM', room)
   }
 
-  initializeSession (websocketSessionId) {
-    this.websocketSessionId = websocketSessionId
-    this.joinRoom('client', websocketSessionId)
+  getSessionId () {
+    return this.sessionIdPromise
   }
 
   subscribe (messageType, callback) {
