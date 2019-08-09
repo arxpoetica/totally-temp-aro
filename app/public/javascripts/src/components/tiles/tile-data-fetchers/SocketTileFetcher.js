@@ -27,11 +27,14 @@ class SocketTileFetcher {
       return ldCopy
     })
     const mapDataPromise = new Promise((resolve, reject) => {
-      const requestBody = {
-        websocketSessionId: socketManager.websocketSessionId,
-        layerDefinitions: layerDefinitionsWithoutDataId
-      }
-      AroHttp.post(`/service-tile-sockets/v1/async/tiles/layers/${zoom}/${tileX}/${tileY}.mvt?request_uuid=${requestUuid}`, requestBody)
+      socketManager.getSessionId()
+        .then(sessionId => {
+          const requestBody = {
+            websocketSessionId: sessionId,
+            layerDefinitions: layerDefinitionsWithoutDataId
+          }
+          return AroHttp.post(`/service-tile-sockets/v1/async/tiles/layers/${zoom}/${tileX}/${tileY}.mvt?request_uuid=${requestUuid}`, requestBody)
+        })
         .then(result => {
           if (this.tileReceivers[requestUuid]) {
             // This means that our websocket has already received data for this request. Go ahead and proces it.
