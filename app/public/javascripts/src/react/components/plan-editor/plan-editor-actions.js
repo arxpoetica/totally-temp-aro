@@ -75,6 +75,20 @@ function setIsCalculatingSubnets (isCalculatingSubnets) {
   }
 }
 
+function setIsCreatingObject (isCreatingObject) {
+  return {
+    type: Actions.PLAN_EDITOR_SET_IS_CREATING_OBJECT,
+    payload: isCreatingObject
+  }
+}
+
+function setIsModifyingObject (isModifyingObject) {
+  return {
+    type: Actions.PLAN_EDITOR_SET_IS_MODIFYING_OBJECT,
+    payload: isModifyingObject
+  }
+}
+
 export default {
   commitTransaction,
   clearTransaction,
@@ -82,5 +96,7 @@ export default {
   resumeOrCreateTransaction,
   addEquipmentNodes,
   removeEquipmentNode,
-  setIsCalculatingSubnets
+  setIsCalculatingSubnets,
+  setIsCreatingObject,
+  setIsModifyingObject
 }

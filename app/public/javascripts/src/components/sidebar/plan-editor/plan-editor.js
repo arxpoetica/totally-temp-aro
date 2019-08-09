@@ -945,11 +945,11 @@ class PlanEditorController {
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     if (usingMapClick && this.isMarker(mapObject)) {
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
-      var isNew = true
       if (feature.isExistingObject) {
         // clone of existing or planned equipment
         const planId = this.state.plan.id
         // Add modified features to vector tiles and do the rendering, etc.
+        this.setIsCreatingObject(true)
         this.state.loadModifiedFeatures(planId)
           .then(() => {
             this.state.requestMapLayerRefresh.next(null)
@@ -994,22 +994,23 @@ class PlanEditorController {
                   return Promise.reject({ softReject: true, message: `Network node type ${equipmentFeature.networkNodeType} does not support subnet calculation.` })
                 }
               })
-              .then(() => {
-                if (this.autoRecalculateSubnet) {
-                  this.recalculateSubnetForEquipmentChange(feature)
-                }
-              })
+              .then(() => this.autoRecalculateSubnet ? this.recalculateSubnetForEquipmentChange(feature) : Promise.resolve())
+              .then(() => { this.setIsCreatingObject(false) })
               .catch((err) => {
                 if (err.softReject) {
                   console.info(err.message)
                 } else {
                   console.error(err)
                 }
+                this.setIsCreatingObject(false)
               })
             this.getViewObjectSBTypes(mapObject.objectId)
             this.$timeout()
           })
-          .catch((err) => console.error(err))
+          .catch((err) => {
+            console.error(err)
+            this.setIsCreatingObject(false)
+          })
       } else {
         // nope it's new
         const equipmentNode = AroFeatureFactory.createObject({ dataType: 'equipment' })
@@ -1019,6 +1020,7 @@ class PlanEditorController {
         var blankNetworkNodeEquipment = equipmentNode.networkNodeEquipment
         this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties('', '', feature.networkNodeType, this.lastSelectedEquipmentType, blankNetworkNodeEquipment, 'PLANNED', 'sewer')
         var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
+        this.setIsCreatingObject(true)
         this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
           .then(() => this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`))
           .then((result) => {
@@ -1031,17 +1033,15 @@ class PlanEditorController {
               return Promise.reject({ softReject: true, message: `Network node type ${feature.networkNodeType} does not support subnet calculation.` })
             }
           })
-          .then(() => {
-            if (this.autoRecalculateSubnet) {
-              this.recalculateSubnetForEquipmentChange(feature)
-            }
-          })
+          .then(() => this.autoRecalculateSubnet ? this.recalculateSubnetForEquipmentChange(feature) : Promise.resolve())
+          .then(() => { this.setIsCreatingObject(false) })
           .catch((err) => {
             if (err.softReject) {
               console.info(err.message)
             } else {
               console.error(err)
             }
+            this.setIsCreatingObject(false)
           })
       }
     } else if (!this.isMarker(mapObject)) {
@@ -1120,6 +1120,7 @@ class PlanEditorController {
         this.selectedMapObjectLng = mapObject && mapObject.position && +this.$filter('number')(+lng, 6)
       }
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
+      this.setIsModifyingObject(true)
       this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`)
         .then((result) => {
           var equipmentObject = result.data.filter((item) => item.objectId === mapObject.objectId)[0]
@@ -1128,24 +1129,26 @@ class PlanEditorController {
         })
         .then((result) => {
           this.objectIdToProperties[mapObject.objectId].isDirty = false
-          if (this.autoRecalculateSubnet) {
-            const equipmentToRecalculate = {
-              objectId: mapObject.objectId,
-              networkNodeType: this.objectIdToProperties[mapObject.objectId].siteNetworkNodeType,
-              geometry: {
-                coordinates: [mapObject.position.lng(), mapObject.position.lat()]
-              }
-            }
-            this.recalculateSubnetForEquipmentChange(equipmentToRecalculate)
-          }
           if (this.selectedObjectId === mapObject.objectId && 
             this.objectIdToProperties[this.selectedObjectId].hasOwnProperty('connectedLocations')) {
             var locations = Object.keys(this.objectIdToProperties[this.selectedObjectId].connectedLocations)
             this.highlightLocations(locations, [mapObject.position.lng(), mapObject.position.lat()])
           }
+          const equipmentToRecalculate = {
+            objectId: mapObject.objectId,
+            networkNodeType: this.objectIdToProperties[mapObject.objectId].siteNetworkNodeType,
+            geometry: {
+              coordinates: [mapObject.position.lng(), mapObject.position.lat()]
+            }
+          }
           this.$timeout()
+          return this.autoRecalculateSubnet ? this.recalculateSubnetForEquipmentChange(equipmentToRecalculate) : Promise.resolve()
         })
-        .catch((err) => console.error(err))
+        .then(() => { this.setIsModifyingObject(false) })
+        .catch((err) => {
+          console.error(err)
+          this.setIsModifyingObject(false)
+        })
 
       // Get the associated boundary (if any)
       const boundaryObjectId = this.equipmentIdToBoundaryId[mapObject.objectId]
@@ -1515,6 +1518,8 @@ class PlanEditorController {
       currentTransaction: reduxState.planEditor.transaction,
       isPlanEditorActive: reduxState.planEditor.isPlanEditorActive,
       isCalculatingSubnets: reduxState.planEditor.isCalculatingSubnets,
+      isCreatingObject: reduxState.planEditor.isCreatingObject,
+      isModifyingObject: reduxState.planEditor.isModifyingObject,
       userId: reduxState.user.loggedInUser.id
     }
   }
@@ -1527,7 +1532,9 @@ class PlanEditorController {
       resumeOrCreateTransaction: (planId, userId) => dispatch(PlanEditorActions.resumeOrCreateTransaction(planId, userId)),
       addEquipmentNodes: equipmentNodes => dispatch(PlanEditorActions.addEquipmentNodes(equipmentNodes)),
       setNetworkEquipmentLayerVisibility: (layer, isVisible) => dispatch(MapLayerActions.setNetworkEquipmentLayerVisibility('cables', layer, isVisible)),
-      setIsCalculatingSubnets: isCalculatingSubnets => dispatch(PlanEditorActions.setIsCalculatingSubnets(isCalculatingSubnets))
+      setIsCalculatingSubnets: isCalculatingSubnets => dispatch(PlanEditorActions.setIsCalculatingSubnets(isCalculatingSubnets)),
+      setIsCreatingObject: isCreatingObject => dispatch(PlanEditorActions.setIsCreatingObject(isCreatingObject)),
+      setIsModifyingObject: isModifyingObject => dispatch(PlanEditorActions.setIsModifyingObject(isModifyingObject))
     }
   }
 
