@@ -39,28 +39,28 @@ class Sockets {
 
   // Emit a message to a single connected client (i.e. a browser session).
   emitToClient (clientId, payload) {
-    this.sockets.client.to(`/${clientId}`).emit('message', payload)
+    this.sockets.client.to(`${clientId}`).emit('message', payload)
   }
 
   // Emit a message to a particular user. The user CAN be logged in on multiple clients.
   emitToUser (userId, payload) {
-    this.sockets.user.to(`/${userId}`).emit('message', payload)
+    this.sockets.user.to(`${userId}`).emit('message', payload)
   }
 
   // Emit a message to everyone that has a plan open. Multiple users can potentially have the same plan open.
   emitToPlan (planId, payload) {
-    this.sockets.plan.to(`/${planId}`).emit('message', payload)
+    this.sockets.plan.to(`${planId}`).emit('message', payload)
   }
 
   // Emit a message to everyone that is interested in a library. A lot of users can potentially have this
   // library selected in their settings.
   emitToLibrary (libraryId, payload) {
-    this.sockets.library.to(`/${libraryId}`).emit('message', payload)
+    this.sockets.library.to(`${libraryId}`).emit('message', payload)
   }
 
   // Emit a message to EVERYONE connected via websockets. Use sparingly, if used at all.
   emitToAll (payload) {
-    this.sockets.client.to(`/broadcast`).emit('message', payload)
+    this.sockets.client.to(`broadcast`).emit('message', payload)
   }
 }
 

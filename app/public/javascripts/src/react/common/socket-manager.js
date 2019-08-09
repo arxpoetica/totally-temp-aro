@@ -25,6 +25,7 @@ class SocketManager {
 
   initializeSession (websocketSessionId) {
     this.websocketSessionId = websocketSessionId
+    this.joinRoom('client', websocketSessionId)
   }
 
   subscribe (messageType, callback) {
