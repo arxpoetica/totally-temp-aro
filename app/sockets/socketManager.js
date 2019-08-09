@@ -20,7 +20,6 @@ const socketConfig = Object.freeze({
     queue: 'progress'
   },
   plan: {
-    message: 'PLAN_EVENT',
     exchange: 'plan_event',
     queue: 'planEvent'
   },
@@ -41,6 +40,7 @@ class SocketManager {
     messageQueueManager.addConsumer(this.getVectorTileConsumer())
     messageQueueManager.addConsumer(this.getTileInvalidationConsumer())
     messageQueueManager.addConsumer(this.getOptimizationProgressConsumer())
+    messageQueueManager.addConsumer(this.getPlanEventConsumer())
     messageQueueManager.connectToPublisher()
   }
 
@@ -56,7 +56,7 @@ class SocketManager {
       } else {
         console.log(`Vector Tile Socket: Routing message with UUID ${uuid} to /${clientId}`)
         delete self.vectorTileRequestToRoom[uuid]
-        self.sockets.emitToClient(clientId, { type: socketConfig.vectorTile.message, data: msg })
+        self.sockets.emitToClient(clientId, { type: socketConfig.vectorTile.message, payload: msg })
       }
     }
     return new Consumer(socketConfig.vectorTile.queue, socketConfig.vectorTile.exchange, messageHandler)
@@ -90,15 +90,24 @@ class SocketManager {
       if (!processId) {
         console.error(`ERROR: No socket roomId found for processId ${processId}`)
       } else {
-        console.log(`Optimization Progress Socket: Routing message with UUID ${processId} to /${processId}`)
+        console.log(`Optimization Progress Socket: Routing message with UUID ${processId} to plan/${processId}`)
         var data = JSON.parse(msg.content.toString())
         // UI dependent on optimizationState at so many places TODO: need to remove optimizationstate
         data.progress = (data.jobsCompleted + 1) / (data.totalJobs + 1)
         data.optimizationState = data.progress != 1 ? 'STARTED' : 'COMPLETED'
-        self.sockets.emitToPlan(processId, { type: socketConfig.progress.message, data: data })
+        self.sockets.emitToPlan(processId, { type: socketConfig.progress.message, payload: data })
       }
     }
     return new Consumer(socketConfig.progress.queue, socketConfig.progress.exchange, messageHandler)
+  }
+
+  getPlanEventConsumer () {
+    const self = this
+    const messageHandler = msg => {
+      const messageContent = JSON.parse(msg.content.toString())
+      self.sockets.emitToPlan(messageContent.planId, { type: messageContent.eventType, payload: messageContent })
+    }
+    return new Consumer(socketConfig.plan.queue, socketConfig.plan.exchange, messageHandler)
   }
 
   broadcastMessage (msg) {

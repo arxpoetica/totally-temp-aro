@@ -1699,8 +1699,8 @@ class State {
     const wholeWorldTileBox = { zoom: WORLD_ZOOM, x1: 0, y1: 0, x2: MAX_TILE_XY_AT_WORLD_ZOOM, y2: MAX_TILE_XY_AT_WORLD_ZOOM }
     service.handleTileInvalidationMessage = msg => {
       // If the tileBox is null, use a tile box that covers the entire world
-      const tileBox = msg.payload.tileBox || wholeWorldTileBox
-      const layerNames = msg.payload.layerNames
+      const tileBox = msg.payload.vectorTileUpdate.tileBox || wholeWorldTileBox
+      const layerNames = msg.payload.vectorTileUpdate.layerNames
       // First, mark the HTML cache so we know which tiles are invalidated
       tileDataService.displayInvalidatedTiles(layerNames, tileBox)
 
@@ -1716,7 +1716,7 @@ class State {
         .catch(err => console.error(err))
     }
 
-    service.unsubscribeTileInvalidationHandler = SocketManager.subscribe('TILES_INVALIDATED', service.handleTileInvalidationMessage.bind(service))
+    service.unsubscribeTileInvalidationHandler = SocketManager.subscribe('COMMIT_TRANSACTION', service.handleTileInvalidationMessage.bind(service))
 
     service.mergeToTarget = (nextState, actions) => {
       const currentActivePlanId = service.plan && service.plan.id
