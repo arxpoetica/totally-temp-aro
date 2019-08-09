@@ -67,7 +67,7 @@ class SocketTileFetcher {
 
   _receiveSocketData (message) {
     // Is there a better way to perform the arraybuffer decoding?
-    const stringMessage = new TextDecoder('utf-8').decode(new Uint8Array(message.payload.content))
+    const stringMessage = new TextDecoder('utf-8').decode(new Uint8Array(message.content))
     const messageObj = JSON.parse(stringMessage)
     const mvtData = Uint8Array.from(atob(messageObj.data), c => c.charCodeAt(0))
     var mapboxVectorTile = new VectorTile(new Protobuf(mvtData))
@@ -104,7 +104,7 @@ class SocketTileFetcher {
 
   _processSocketData (receiver) {
     // Is there a better way to perform the arraybuffer decoding?
-    const stringMessage = new TextDecoder('utf-8').decode(new Uint8Array(receiver.binaryMessage.payload.content))
+    const stringMessage = new TextDecoder('utf-8').decode(new Uint8Array(receiver.binaryMessage.content))
     const messageObj = JSON.parse(stringMessage)
     const mvtData = Uint8Array.from(atob(messageObj.data), c => c.charCodeAt(0))
     var mapboxVectorTile = new VectorTile(new Protobuf(mvtData))

@@ -56,7 +56,8 @@ class SocketManager {
       } else {
         console.log(`Vector Tile Socket: Routing message with UUID ${uuid} to /${clientId}`)
         delete self.vectorTileRequestToRoom[uuid]
-        self.sockets.emitToClient(clientId, { type: socketConfig.vectorTile.message, payload: msg })
+        msg.properties.headers.aroMessageType = socketConfig.vectorTile.message
+        self.sockets.emitToClient(clientId, msg)
       }
     }
     return new Consumer(socketConfig.vectorTile.queue, socketConfig.vectorTile.exchange, messageHandler)
@@ -74,10 +75,8 @@ class SocketManager {
     const messageHandler = msg => {
       console.log('Received tile invalidation message from service')
       console.log(msg.content.toString())
-      self.sockets.sockets.tileInvalidation.emit('message', {
-        type: socketConfig.invalidation.message,
-        payload: JSON.parse(msg.content.toString())
-      })
+      msg.properties.headers.aroMessageType = socketConfig.invalidation.message
+      self.sockets.sockets.tileInvalidation.emit('message', msg)
     }
     return new Consumer(socketConfig.invalidation.queue, socketConfig.invalidation.exchange, messageHandler)
   }
@@ -91,11 +90,12 @@ class SocketManager {
         console.error(`ERROR: No socket roomId found for processId ${processId}`)
       } else {
         console.log(`Optimization Progress Socket: Routing message with UUID ${processId} to plan/${processId}`)
-        var data = JSON.parse(msg.content.toString())
+        msg.properties.headers.aroMessageType = socketConfig.progress.message
         // UI dependent on optimizationState at so many places TODO: need to remove optimizationstate
-        data.progress = (data.jobsCompleted + 1) / (data.totalJobs + 1)
-        data.optimizationState = data.progress != 1 ? 'STARTED' : 'COMPLETED'
-        self.sockets.emitToPlan(processId, { type: socketConfig.progress.message, payload: data })
+        msg.data = JSON.parse(msg.content.toString()) // Shove it in here for now. Its in too many places in the front end.
+        msg.data.progress = (msg.data.jobsCompleted + 1) / (msg.data.totalJobs + 1)
+        msg.data.optimizationState = msg.data.progress !== 1 ? 'STARTED' : 'COMPLETED'
+        self.sockets.emitToPlan(processId, msg)
       }
     }
     return new Consumer(socketConfig.progress.queue, socketConfig.progress.exchange, messageHandler)
@@ -105,7 +105,8 @@ class SocketManager {
     const self = this
     const messageHandler = msg => {
       const messageContent = JSON.parse(msg.content.toString())
-      self.sockets.emitToPlan(messageContent.planId, { type: messageContent.eventType, payload: messageContent })
+      msg.properties.headers.aroMessageType = messageContent.eventType
+      self.sockets.emitToPlan(messageContent.planId, msg)
     }
     return new Consumer(socketConfig.plan.queue, socketConfig.plan.exchange, messageHandler)
   }
