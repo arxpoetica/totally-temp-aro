@@ -601,7 +601,7 @@ class MapTileRenderer {
     // render point feature
     PointFeatureRenderer.renderFeatures(pointFeatureRendererList, this.state.configuration.ARO_CLIENT)
     // render polygon feature
-    PolygonFeatureRenderer.renderFeatures(closedPolygonFeatureLayersList, this.selection, this.oldSelection)
+    PolygonFeatureRenderer.renderFeatures(closedPolygonFeatureLayersList, featureData, this.selection, this.oldSelection)
   }
 
   highlightPolyline (feature, polylines) {
