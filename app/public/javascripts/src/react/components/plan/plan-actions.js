@@ -22,6 +22,16 @@ function loadPlan (planId) {
   }
 }
 
+function manageLibrarySubscriptions (currentSelectedLibraryItems, newSelectedLibraryItems) {
+  // Subscribe to events from any new library items, unsubscribe from any removed library items
+  const currentSelectedLibraryIds = new Set(currentSelectedLibraryItems.map(libraryItem => libraryItem.identifier))
+  const newSelectedLibraryIds = new Set(newSelectedLibraryItems.map(libraryItem => libraryItem.identifier))
+  const subscriptionsToAdd = [...newSelectedLibraryIds].filter(item => !currentSelectedLibraryIds.has(item))
+  const subscriptionsToDelete = [...currentSelectedLibraryIds].filter(item => !newSelectedLibraryIds.has(item))
+  subscriptionsToDelete.forEach(libraryId => SocketManager.leaveRoom('library', libraryId))
+  subscriptionsToAdd.forEach(libraryId => SocketManager.joinRoom('library', libraryId))
+}
+
 function loadPlanDataSelectionFromServer (planId) {
   return dispatch => {
     const promises = [
@@ -84,6 +94,11 @@ function loadPlanDataSelectionFromServer (planId) {
           })
         })
 
+        Object.keys(newDataItems).forEach(dataItemKey => {
+          const dataItem = newDataItems[dataItemKey]
+          manageLibrarySubscriptions([], dataItem.selectedLibraryItems)
+        })
+
         dispatch({
           type: Actions.PLAN_SET_DATA_ITEMS,
           payload: {
@@ -125,12 +140,16 @@ function setActivePlan (plan) {
 }
 
 function selectDataItems (dataItemKey, selectedLibraryItems) {
-  return {
-    type: Actions.PLAN_SET_SELECTED_DATA_ITEMS,
-    payload: {
-      dataItemKey,
-      selectedLibraryItems
-    }
+  return (dispatch, getState) => {
+    manageLibrarySubscriptions(getState().plan.dataItems[dataItemKey].selectedLibraryItems, selectedLibraryItems)
+    // Subscriptions taken care of, now set the state
+    dispatch({
+      type: Actions.PLAN_SET_SELECTED_DATA_ITEMS,
+      payload: {
+        dataItemKey,
+        selectedLibraryItems
+      }
+    })
   }
 }
 

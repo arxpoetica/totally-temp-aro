@@ -56,7 +56,7 @@ class SocketManager {
   }
 
   routeMessage (message) {
-    const subscribers = this.router[message.properties.headers.aroMessageType] || []
+    const subscribers = this.router[message.properties.headers.eventType] || []
     subscribers.forEach(subscriber => subscriber(message))
   }
 }

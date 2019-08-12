@@ -24,7 +24,6 @@ const socketConfig = Object.freeze({
     queue: 'planEvent'
   },
   library: {
-    message: 'LIBRARY_EVENT',
     exchange: 'library_event',
     queue: 'libraryEvent'
   }
@@ -41,6 +40,7 @@ class SocketManager {
     messageQueueManager.addConsumer(this.getTileInvalidationConsumer())
     messageQueueManager.addConsumer(this.getOptimizationProgressConsumer())
     messageQueueManager.addConsumer(this.getPlanEventConsumer())
+    messageQueueManager.addConsumer(this.getLibraryEventConsumer())
     messageQueueManager.connectToPublisher()
   }
 
@@ -56,7 +56,7 @@ class SocketManager {
       } else {
         console.log(`Vector Tile Socket: Routing message with UUID ${uuid} to /${clientId}`)
         delete self.vectorTileRequestToRoom[uuid]
-        msg.properties.headers.aroMessageType = socketConfig.vectorTile.message
+        msg.properties.headers.eventType = socketConfig.vectorTile.message
         self.sockets.emitToClient(clientId, msg)
       }
     }
@@ -75,7 +75,7 @@ class SocketManager {
     const messageHandler = msg => {
       console.log('Received tile invalidation message from service')
       console.log(msg.content.toString())
-      msg.properties.headers.aroMessageType = socketConfig.invalidation.message
+      msg.properties.headers.eventType = socketConfig.invalidation.message
       self.sockets.sockets.tileInvalidation.emit('message', msg)
     }
     return new Consumer(socketConfig.invalidation.queue, socketConfig.invalidation.exchange, messageHandler)
@@ -90,7 +90,7 @@ class SocketManager {
         console.error(`ERROR: No socket roomId found for processId ${processId}`)
       } else {
         console.log(`Optimization Progress Socket: Routing message with UUID ${processId} to plan/${processId}`)
-        msg.properties.headers.aroMessageType = socketConfig.progress.message
+        msg.properties.headers.eventType = socketConfig.progress.message
         // UI dependent on optimizationState at so many places TODO: need to remove optimizationstate
         msg.data = JSON.parse(msg.content.toString()) // Shove it in here for now. Its in too many places in the front end.
         msg.data.progress = (msg.data.jobsCompleted + 1) / (msg.data.totalJobs + 1)
@@ -104,11 +104,17 @@ class SocketManager {
   getPlanEventConsumer () {
     const self = this
     const messageHandler = msg => {
-      const messageContent = JSON.parse(msg.content.toString())
-      msg.properties.headers.aroMessageType = messageContent.eventType
-      self.sockets.emitToPlan(messageContent.planId, msg)
+      self.sockets.emitToPlan(msg.properties.headers.planId, msg)
     }
     return new Consumer(socketConfig.plan.queue, socketConfig.plan.exchange, messageHandler)
+  }
+
+  getLibraryEventConsumer () {
+    const self = this
+    const messageHandler = msg => {
+      self.sockets.emitToLibrary(msg.properties.headers.libraryId, msg)
+    }
+    return new Consumer(socketConfig.library.queue, socketConfig.library.exchange, messageHandler)
   }
 
   broadcastMessage (msg) {

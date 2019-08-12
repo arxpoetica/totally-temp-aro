@@ -264,7 +264,6 @@ class State {
     service.showDetailedLocationInfo = new Rx.BehaviorSubject()
     service.showDetailedEquipmentInfo = new Rx.BehaviorSubject()
     service.showDataSourceUploadModal = new Rx.BehaviorSubject(false)
-    service.dataItemsChanged = new Rx.BehaviorSubject({})
     service.viewSettingsChanged = new Rx.BehaviorSubject()
     service.measuredDistance = new Rx.BehaviorSubject()
     service.dragStartEvent = new Rx.BehaviorSubject()
@@ -603,7 +602,7 @@ class State {
     }
 
     service.setLayerVisibilityByKey = (keyType, layerKey, isVisible) => {
-      // First find the layer corresponding to the ID
+      // First find the layer correspying to the ID
       const layerState = $ngRedux.getState().mapLayers
       var layerToChange = null
       Object.keys(layerState).forEach(layerType => {
@@ -1697,16 +1696,21 @@ class State {
     const WORLD_ZOOM = 22
     const MAX_TILE_XY_AT_WORLD_ZOOM = Math.pow(2, WORLD_ZOOM) - 1
     const wholeWorldTileBox = { zoom: WORLD_ZOOM, x1: 0, y1: 0, x2: MAX_TILE_XY_AT_WORLD_ZOOM, y2: MAX_TILE_XY_AT_WORLD_ZOOM }
-    service.handleTileInvalidationMessage = msg => {
-      // If the tileBox is null, use a tile box that covers the entire world
-      const content = JSON.parse(new TextDecoder('utf-8').decode(new Uint8Array(msg.content)))
-      const tileBox = content.vectorTileUpdate.tileBox || wholeWorldTileBox
-      const layerNames = content.vectorTileUpdate.layerNames
+
+    const invalidateLayersInTileBox = (tileBox, layerNames) => {
       // First, mark the HTML cache so we know which tiles are invalidated
       tileDataService.displayInvalidatedTiles(layerNames, tileBox)
 
       // Then delete items from the tile data cache and the tile provider cache
       tileDataService.clearCacheInTileBox(layerNames, tileBox)
+    }
+
+    service.handlePlanModifiedEvent = msg => {
+      // If the tileBox is null, use a tile box that covers the entire world
+      const content = JSON.parse(new TextDecoder('utf-8').decode(new Uint8Array(msg.content)))
+      const tileBox = content.tileBox || wholeWorldTileBox
+      const layerNames = content.layerNames
+      invalidateLayersInTileBox(tileBox, layerNames)
 
       // Load list of modified features, and then refresh map layers. Note that this will make a call to
       // load modified features EVERY TIME an invalidation message is received. As of now there is no other
@@ -1717,7 +1721,18 @@ class State {
         .catch(err => console.error(err))
     }
 
-    service.unsubscribeTileInvalidationHandler = SocketManager.subscribe('COMMIT_TRANSACTION', service.handleTileInvalidationMessage.bind(service))
+    service.handleLibraryModifiedEvent = msg => {
+      // If the tileBox is null, use a tile box that covers the entire world
+      const content = JSON.parse(new TextDecoder('utf-8').decode(new Uint8Array(msg.content)))
+      const tileBox = content.tileBox || wholeWorldTileBox
+      const layerNames = content.layerNames
+      invalidateLayersInTileBox(tileBox, layerNames)
+      service.requestMapLayerRefresh.next(null)
+    }
+
+    service.unsubscribePlanEvent = SocketManager.subscribe('COMMIT_TRANSACTION', service.handlePlanModifiedEvent.bind(service))
+    service.unsubscribeLibraryEvent1 = SocketManager.subscribe('USER_TRANSACTION', service.handleLibraryModifiedEvent.bind(service))
+    service.unsubscribeLibraryEvent1 = SocketManager.subscribe('ETL_ADD', service.handleLibraryModifiedEvent.bind(service))
 
     service.mergeToTarget = (nextState, actions) => {
       const currentActivePlanId = service.plan && service.plan.id
