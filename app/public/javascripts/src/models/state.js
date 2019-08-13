@@ -2,6 +2,7 @@ import { List, Map } from 'immutable'
 import { createSelector } from 'reselect'
 import format from './string-template'
 import StateViewMode from './state-view-mode'
+import MapLayerHelper from './map-layer-helper'
 import Constants from '../components/common/constants'
 import Actions from '../react/common/actions'
 import UiActions from '../react/components/configuration/ui/ui-actions'
@@ -1697,20 +1698,20 @@ class State {
     const MAX_TILE_XY_AT_WORLD_ZOOM = Math.pow(2, WORLD_ZOOM) - 1
     const wholeWorldTileBox = { zoom: WORLD_ZOOM, x1: 0, y1: 0, x2: MAX_TILE_XY_AT_WORLD_ZOOM, y2: MAX_TILE_XY_AT_WORLD_ZOOM }
 
-    const invalidateLayersInTileBox = (tileBox, layerNames) => {
+    const invalidateLayersInTileBox = (tileBox, layerNameRegexStrings) => {
       // First, mark the HTML cache so we know which tiles are invalidated
-      tileDataService.displayInvalidatedTiles(layerNames, tileBox)
+      tileDataService.displayInvalidatedTiles(layerNameRegexStrings, tileBox)
 
       // Then delete items from the tile data cache and the tile provider cache
-      tileDataService.clearCacheInTileBox(layerNames, tileBox)
+      tileDataService.clearCacheInTileBox(layerNameRegexStrings, tileBox)
     }
 
     service.handlePlanModifiedEvent = msg => {
       // If the tileBox is null, use a tile box that covers the entire world
       const content = JSON.parse(new TextDecoder('utf-8').decode(new Uint8Array(msg.content)))
       const tileBox = content.tileBox || wholeWorldTileBox
-      const layerNames = content.layerNames
-      invalidateLayersInTileBox(tileBox, layerNames)
+      const layerNameRegexStrings = MapLayerHelper.getRegexForAllDataIds(service.mapLayersRedux, service.plan.id)
+      invalidateLayersInTileBox(tileBox, layerNameRegexStrings)
 
       // Load list of modified features, and then refresh map layers. Note that this will make a call to
       // load modified features EVERY TIME an invalidation message is received. As of now there is no other
@@ -1725,8 +1726,8 @@ class State {
       // If the tileBox is null, use a tile box that covers the entire world
       const content = JSON.parse(new TextDecoder('utf-8').decode(new Uint8Array(msg.content)))
       const tileBox = content.tileBox || wholeWorldTileBox
-      const layerNames = content.layerNames
-      invalidateLayersInTileBox(tileBox, layerNames)
+      const layerNameRegexStrings = MapLayerHelper.getRegexForAllDataIds(service.mapLayersRedux, null, msg.properties.headers.libraryId)
+      invalidateLayersInTileBox(tileBox, layerNameRegexStrings)
       service.requestMapLayerRefresh.next(null)
     }
 
@@ -1759,6 +1760,7 @@ class State {
   mapStateToThis (reduxState) {
     return {
       plan: reduxState.plan.activePlan,
+      mapLayersRedux: reduxState.mapLayers,
       locationLayers: getLocationLayersList(reduxState),
       networkEquipmentLayers: getNetworkEquipmentLayersList(reduxState),
       boundaries: getBoundaryLayersList(reduxState),

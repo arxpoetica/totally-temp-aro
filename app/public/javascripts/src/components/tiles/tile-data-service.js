@@ -386,7 +386,7 @@ class TileDataService {
     this.modifiedBoundaries = {}
   }
 
-  _clearCacheInTileBox (cache, setOfInvalidatedLayers, tileBox) {
+  _clearCacheInTileBox (cache, regexes, tileBox) {
     Object.keys(cache).forEach(cacheKey => {
       // Get the zoom, x and y from the html cache key
       const components = cacheKey.split('-')
@@ -397,7 +397,7 @@ class TileDataService {
         // Delete all invalidated layers
         const tileCache = cache[cacheKey]
         Object.keys(tileCache).forEach(tileCacheKey => {
-          if (setOfInvalidatedLayers.has(tileCacheKey)) {
+          if (this.doesNamePassAnyRegex(tileCacheKey, regexes)) {
             delete tileCache[tileCacheKey]
           }
         })
@@ -405,14 +405,14 @@ class TileDataService {
     })
   }
 
-  clearCacheInTileBox (invalidatedLayersArray, tileBox) {
-    const invalidatedLayers = new Set(invalidatedLayersArray)
-    this._clearCacheInTileBox(this.tileDataCache, invalidatedLayers, tileBox)
-    this._clearCacheInTileBox(this.tileProviderCache, invalidatedLayers, tileBox)
+  clearCacheInTileBox (layerNameRegexStrings, tileBox) {
+    const regexes = layerNameRegexStrings.map(layerNameRegexString => new RegExp(layerNameRegexString, 'g'))
+    this._clearCacheInTileBox(this.tileDataCache, regexes, tileBox)
+    this._clearCacheInTileBox(this.tileProviderCache, regexes, tileBox)
   }
 
-  displayInvalidatedTiles (layerNames, tileBox) {
-    const setOfLayerNames = new Set(layerNames)
+  displayInvalidatedTiles (layerNameRegexStrings, tileBox) {
+    const regexes = layerNameRegexStrings.map(layerNameRegexString => new RegExp(layerNameRegexString, 'g'))
     Object.keys(this.tileHtmlCache).forEach(htmlCacheKey => {
       // Get the zoom, x and y from the html cache key
       const components = htmlCacheKey.split('-')
@@ -425,7 +425,7 @@ class TileDataService {
         const tileData = this.tileDataCache[tileDataKey]
         var hasInvalidatedLayer = false
         Object.keys(tileData).forEach(key => {
-          if (setOfLayerNames.has(key)) {
+          if (this.doesNamePassAnyRegex(key, regexes)) {
             hasInvalidatedLayer = true
           }
         })
@@ -436,6 +436,18 @@ class TileDataService {
         }
       }
     })
+  }
+
+  // Returns true if the layer name passes any of the regex strings in the list
+  doesNamePassAnyRegex (layerName, regexes) {
+    var regexPassed = false
+    for (var iRegex = 0; iRegex < regexes.length; ++iRegex) {
+      if (regexes[iRegex].test(layerName)) {
+        regexPassed = true
+        break
+      }
+    }
+    return regexPassed
   }
 
   // Mark all tiles in the HTML cache as dirty
