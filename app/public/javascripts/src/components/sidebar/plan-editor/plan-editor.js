@@ -134,11 +134,7 @@ class PlanEditorController {
             if (objectProperties.connectedLocations.hasOwnProperty(locationId)) {
               delete objectProperties.connectedLocations[locationId]
               this.saveSelectedEquipmentProperties()
-              this.getLocationsInfoPromise([locationId])
-                .then(results => {
-                  this.clearAllLocationHighlights()
-                  this.highlightLocations(Object.keys(objectProperties.connectedLocations), selectedLatLng)
-                })
+              this.highlightLocations(Object.keys(objectProperties.connectedLocations), selectedLatLng)
             } else {
               // check if the previous connector is in the transaction
               // if not get it and add it
@@ -148,11 +144,7 @@ class PlanEditorController {
                   objectProperties.connectedLocations[locationId] = true
                   this.saveSelectedEquipmentProperties()
 
-                  this.getLocationsInfoPromise([locationId])
-                    .then(results => {
-                      this.clearAllLocationHighlights()
-                      this.highlightLocations(Object.keys(objectProperties.connectedLocations), selectedLatLng)
-                    })
+                  this.highlightLocations(Object.keys(objectProperties.connectedLocations), selectedLatLng)
                 })
             }
           }
@@ -223,13 +215,13 @@ class PlanEditorController {
     const selectedFeatureType = this.selectedMapObject.feature.type
     // if object is the same type as selected object
     // additionalSelectionsById
-    var validIds = []
+    // var validIds = []
     var featuresToMake = []
     features.forEach(feature => {
       var objectId = feature.objectId || feature.object_id || null
       var featureType = feature.type || feature._data_type || null
       if (objectId && featureType && featureType === selectedFeatureType) {
-        validIds.push(objectId)
+        // validIds.push(objectId)
         console.log(objectId)
         if (this.additionalSelectionsById.hasOwnProperty(objectId)) {
           console.log('delete')
@@ -243,6 +235,7 @@ class PlanEditorController {
           if (this.objectIdToMapObject.hasOwnProperty(objectId)) console.log(this.objectIdToMapObject[objectId])
           
           if (!this.objectIdToMapObject.hasOwnProperty(objectId)) {
+            // no map object, make one
             // createMapObject(feature, iconUrl, false, existingObjectOverride)
             // this.createMapObjects && this.createMapObjects(transactionFeatures)
             console.log(this.state.configuration.networkEquipment.equipments)
@@ -788,6 +781,7 @@ class PlanEditorController {
   }
 
   updateSelectedState (selectedFeature, featureId) {
+    // is this still used?
     // tell state
     var newSelection = this.state.cloneSelection()
     newSelection.editable.equipment = {}
@@ -816,47 +810,51 @@ class PlanEditorController {
   highlightLocations (locationIds, hubLatLng) {
     console.log(locationIds)
     if (locationIds && typeof locationIds === 'object') { 
-      locationIds.forEach((locationId) => {
-        var location = this.locationsById[locationId]
-        // --- NEED TO HAVE LAT LONG FOR LOCATIONS ---
-        if (location && location.hasOwnProperty('geometry')) {
-          // console.log(location)
-          // console.log(this.state.locationInputSelected(location.locationCategory))
-          this.clearLocationHighlights([locationId])
-          this.locationMarkersById[locationId] = []
-          var mapMarker = new google.maps.Marker({
-            position: new google.maps.LatLng(location.geometry.coordinates[1], location.geometry.coordinates[0]),
-            icon: {
-              url: '/images/map_icons/aro/green_circle.png',
-              anchor: new google.maps.Point(16, 24)
-            },
-            draggable: false, 
-            clickable: false, 
-            map: this.mapRef
-          })
-          this.locationMarkersById[locationId].push(mapMarker)
-          if (hubLatLng) {
-            // draw line to connector
-            var lineGeometry = [
-              {
-                lat: location.geometry.coordinates[1],
-                lng: location.geometry.coordinates[0]
-              },
-              {
-                lat: hubLatLng[1],
-                lng: hubLatLng[0]
+      this.getLocationsInfoPromise(locationIds)
+        .then(result => {
+          locationIds.forEach((locationId) => {
+            var location = this.locationsById[locationId]
+            // --- NEED TO HAVE LAT LONG FOR LOCATIONS ---
+            if (location && location.hasOwnProperty('geometry')) {
+              // console.log(location)
+              // console.log(this.state.locationInputSelected(location.locationCategory))
+              this.clearLocationHighlights([locationId])
+              this.locationMarkersById[locationId] = []
+              var mapMarker = new google.maps.Marker({
+                position: new google.maps.LatLng(location.geometry.coordinates[1], location.geometry.coordinates[0]),
+                icon: {
+                  url: '/images/map_icons/aro/green_circle.png',
+                  anchor: new google.maps.Point(16, 24)
+                },
+                draggable: false,
+                clickable: false,
+                map: this.mapRef
+              })
+              this.locationMarkersById[locationId].push(mapMarker)
+              if (hubLatLng) {
+                // draw line to connector
+                var lineGeometry = [
+                  {
+                    lat: location.geometry.coordinates[1],
+                    lng: location.geometry.coordinates[0]
+                  },
+                  {
+                    lat: hubLatLng[1],
+                    lng: hubLatLng[0]
+                  }
+                ]
+                var lineMapObject = new google.maps.Polyline({
+                  path: lineGeometry,
+                  strokeColor: '#009900',
+                  strokeWeight: 1,
+                  clickable: false,
+                  map: this.mapRef
+                })
+                this.locationMarkersById[locationId].push(lineMapObject)
               }
-            ]
-            var lineMapObject = new google.maps.Polyline({
-              path: lineGeometry,
-              strokeColor: '#009900',
-              strokeWeight: 1,
-              map: this.mapRef
-            })
-            this.locationMarkersById[locationId].push(lineMapObject)
-          }
-        }
-      })
+            }
+          })
+        })
     }
   }
 
@@ -915,20 +913,17 @@ class PlanEditorController {
             this.isEditFeatureProps = false
             this.getViewObjectSBTypes(feature.objectId)
             // --- IF THERE ARE LOCATION PROPERTIES WITH OUT LAT LONGS GET THEM NOW ---
-
+            /*
             if (this.viewFeature.networkNodeType === 'location_connector') {
               var locationIds = this.viewFeature.attributes.internal_oid.split(',')
               if (this.objectIdToProperties.hasOwnProperty(feature.objectId)) {
                 locationIds = Object.keys(this.objectIdToProperties[feature.objectId].connectedLocations)
               }
               
-              this.getLocationsInfoPromise(locationIds)
-                .then(result => {
-                  this.clearAllLocationHighlights()
-                  this.highlightLocations(locationIds, this.viewEventFeature.geometry.coordinates)
-                })
+              this.clearAllLocationHighlights()
+              this.highlightLocations(locationIds, this.viewEventFeature.geometry.coordinates)
             }
-
+            */
           } else {
             // clear selection
             this.clearViewSelection()
@@ -942,7 +937,7 @@ class PlanEditorController {
   }
 
   getLocationsInfoPromise (locationIds) {
-    // ToDo: check this.locationsById to see if we already have them
+    // check this.locationsById to see if we already have them
     var returnLocations = {}
     var locationIdsToGet = []
     locationIds.forEach(id => {
@@ -1079,13 +1074,16 @@ class PlanEditorController {
             // if selected show locations <--------------------------------------------------
             
             if (equipmentProperties.hasOwnProperty('connectedLocations')) {
+              console.log('--- object created ---')
               var locationIds = Object.keys(equipmentProperties.connectedLocations)
               this.getLocationsInfoPromise(locationIds)
                 .then(results => {
-                  if (this.selectedObjectId === mapObject.objectId) {
-                    this.clearAllLocationHighlights()
+                  const isMultSelect = this.additionalSelectionsById.hasOwnProperty(mapObject.objectId)
+                  if (this.selectedObjectId === mapObject.objectId || isMultSelect) {
+                    if (!isMultSelect) this.clearAllLocationHighlights()
                     this.highlightLocations(locationIds, result.data.geometry.coordinates)
                   }
+                  
                 })
             }
             
@@ -1195,27 +1193,34 @@ class PlanEditorController {
       //this.highlightLocations()
       return
     }
+    var mapObjectId = null
+    var isMultSelect = false
+
     if (mapObject != null) {
-      this.updateSelectedState()
-      this.isEditFeatureProps = true
-      this.isBoundaryEditMode = true
-      this.selectedObjectId = mapObject.objectId || mapObject.object_id
-    } else {
-      this.selectedObjectId = null
-    }
-
-    this.selectedMapObject = mapObject
-
+      mapObjectId = mapObject.objectId || mapObject.object_id
+      isMultSelect = !!(mapObjectId && this.additionalSelectionsById.hasOwnProperty(mapObjectId))
+    } 
     var lat = mapObject && mapObject.position && mapObject.position.lat()
     var lng = mapObject && mapObject.position && mapObject.position.lng()
-    this.selectedMapObjectLat = mapObject && mapObject.position && +this.$filter('number')(+lat, 6)
-    this.selectedMapObjectLng = mapObject && mapObject.position && +this.$filter('number')(+lng, 6)
-    var locations = null
-    if (this.objectIdToProperties.hasOwnProperty(this.selectedObjectId) &&
-      this.objectIdToProperties[this.selectedObjectId].hasOwnProperty('connectedLocations')) {
-      locations = Object.keys(this.objectIdToProperties[this.selectedObjectId].connectedLocations)
+    if (!isMultSelect) {
+      if (mapObject != null) {
+        this.updateSelectedState()
+        this.isEditFeatureProps = true
+        this.isBoundaryEditMode = true
+        this.selectedObjectId = mapObjectId
+      } else {
+        this.selectedObjectId = null
+      }
+      this.selectedMapObject = mapObject
+      this.selectedMapObjectLat = mapObject && mapObject.position && +this.$filter('number')(+lat, 6)
+      this.selectedMapObjectLng = mapObject && mapObject.position && +this.$filter('number')(+lng, 6)
     }
-    this.clearAllLocationHighlights()
+    var locations = null
+    if (this.objectIdToProperties.hasOwnProperty(mapObjectId) &&
+      this.objectIdToProperties[mapObjectId].hasOwnProperty('connectedLocations')) {
+      locations = Object.keys(this.objectIdToProperties[mapObjectId].connectedLocations)
+    }
+    if (!isMultSelect) this.clearAllLocationHighlights()
     this.highlightLocations(locations, [lng, lat])
     this.$timeout()
   }
@@ -1241,7 +1246,7 @@ class PlanEditorController {
           if (this.selectedObjectId === mapObject.objectId && 
             this.objectIdToProperties[this.selectedObjectId].hasOwnProperty('connectedLocations')) {
             var locations = Object.keys(this.objectIdToProperties[this.selectedObjectId].connectedLocations)
-            this.clearAllLocationHighlights()
+            // this.clearAllLocationHighlights()
             this.highlightLocations(locations, [mapObject.position.lng(), mapObject.position.lat()])
           }
           const equipmentToRecalculate = {
@@ -1474,6 +1479,7 @@ class PlanEditorController {
                 path: polylineGeometry,
                 strokeColor: '#0000FF',
                 strokeWeight: 4,
+                clickable: false,
                 map: this.mapRef
               })
               this.subnetMapObjects[subnet.objectId].push(subnetLineMapObject)
