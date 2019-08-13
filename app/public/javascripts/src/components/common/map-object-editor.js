@@ -171,6 +171,8 @@ class MapObjectEditorController {
     this.registerCreateEditableExistingMapObject && this.registerCreateEditableExistingMapObject({ createEditableExistingMapObject: this.createEditableExistingMapObject.bind(this) })
     this.registerDeleteCreatedMapObject && this.registerDeleteCreatedMapObject({ deleteCreatedMapObject: this.deleteCreatedMapObject.bind(this) })
     this.registerSelectProposedFeature && this.registerSelectProposedFeature({ selectProposedFeature: this.selectProposedFeature.bind(this) })
+    this.registerMapObjectFromEvent && this.registerMapObjectFromEvent({ mapObjectFromEvent: this.handleMapEntitySelected.bind(this) })
+    
     
     this.state.clearEditingMode.skip(1).subscribe((clear) => {
       if (clear) {
@@ -573,8 +575,9 @@ class MapObjectEditorController {
 
   createMapObjects (features) {
     // "features" is an array that comes directly from aro-service. Create map objects for these features
+    console.log(features)
     features.forEach((feature) => {
-      this.createMapObject(feature, feature.iconUrl, false) // Feature is not created usin a map click
+      this.createMapObject(feature, feature.iconUrl, false) // Feature is not created using a map click
     })
   }
 
@@ -756,6 +759,11 @@ class MapObjectEditorController {
         mapObject.addListener('click', (event) => {
           if (this.state.isShiftPressed) {
             console.log('Shift press of map object')
+            console.log(feature)
+            console.log(event)
+            var features = [feature]
+            this.onObjectKeyClicked && this.onObjectKeyClicked({features: features, latLng: event.latLng})
+            return
           }
           // Select this map object
           this.selectMapObject(mapObject)
@@ -1314,12 +1322,14 @@ let mapObjectEditor = {
     displayViewObject: '&',
     displayEditObject: '&',
     onObjectDroppedOnMarker: '&',
+    onObjectKeyClicked: '&',
     registerObjectDeleteCallback: '&', // To be called to register a callback, which will delete the selected object
     registerCreateMapObjectsCallback: '&', // To be called to register a callback, which will create map objects for existing objectIds
     registerRemoveMapObjectsCallback: '&', // To be called to register a callback, which will remove all created map objects
     registerCreateEditableExistingMapObject: '&', // To be called to register a callback, which will create a map object from and existing object
     registerDeleteCreatedMapObject: '&',
-    registerSelectProposedFeature: '&'
+    registerSelectProposedFeature: '&',
+    registerMapObjectFromEvent: '&'
   },
   controller: MapObjectEditorController
 }

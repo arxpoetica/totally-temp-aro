@@ -383,23 +383,26 @@ class TileComponentController {
     })
 
     this.overlayClickListener = this.mapRef.addListener('click', (event) => {
-      var wasCtrlPressed = this.state.isShiftPressed
-      // ToDo: depricate getFilteredFeaturesUnderLatLng switch to this
-      this.getFeaturesUnderLatLng(event.latLng)
-      .then((hitFeatures) => {
-        if (wasCtrlPressed) {
-          this.state.mapFeaturesKeyClickedEvent.next(hitFeatures)
-        } else {
-          this.state.mapFeaturesClickedEvent.next(hitFeatures)
-        }
-      })
+      var wasShiftPressed = this.state.isShiftPressed
       
       if (this.contextMenuService.isMenuVisible.getValue()) {
         this.contextMenuService.menuOff()
         this.$timeout()
         return
       }
-
+      
+      // ToDo: depricate getFilteredFeaturesUnderLatLng switch to this
+      this.getFeaturesUnderLatLng(event.latLng)
+      .then((hitFeatures) => {
+        if (wasShiftPressed) {
+          this.state.mapFeaturesKeyClickedEvent.next(hitFeatures)
+        } else {
+          this.state.mapFeaturesClickedEvent.next(hitFeatures)
+        }
+      })
+      
+      if (wasShiftPressed) return
+      
       this.getFilteredFeaturesUnderLatLng(event.latLng)
         .then((hitFeatures) => {
           if (hitFeatures) {

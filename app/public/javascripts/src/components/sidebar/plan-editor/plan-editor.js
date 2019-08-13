@@ -78,6 +78,9 @@ class PlanEditorController {
       }
     })
 
+    this.multiselectTypes = ['location_connector', 'equipment.location_connector']
+    this.additionalSelectionsById = {}
+
     this.coverageOutput = {}
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
   }
@@ -104,6 +107,10 @@ class PlanEditorController {
 
   registerSelectProposedFeature (selectProposedFeature) {
     this.selectProposedFeature = selectProposedFeature
+  }
+
+  registerMapObjectFromEvent (mapObjectFromEvent) {
+    this.mapObjectFromEvent = mapObjectFromEvent
   }
 
   $onInit () {
@@ -153,7 +160,11 @@ class PlanEditorController {
 
     this.keyClickObserver = this.state.mapFeaturesKeyClickedEvent.skip(1).subscribe((hitFeatures) => {
       console.log('key click')
+      console.log(hitFeatures)
       // select multiple of same type, onlt for certain types (currently only Location Connectors)
+      // for the moment we'll just look at equipment
+      this.onMultiSelect(hitFeatures.equipmentFeatures, hitFeatures.latLng)
+      
     })
 
     this.clickObserver = this.state.mapFeaturesClickedEvent.skip(1).subscribe((hitFeatures) => {
@@ -200,6 +211,71 @@ class PlanEditorController {
 
     // Select the first transaction in the list
     this.resumeOrCreateTransaction(this.planId, this.userId)
+  }
+
+  onMultiSelect (features, latLng) {
+    console.log(features)
+    // if selected object is allowed to have multi select
+    if (!this.selectedMapObject || !this.selectedMapObject.feature.type ||
+      this.multiselectTypes.indexOf(this.selectedMapObject.feature.type) < 0) return
+    const selectedFeatureType = this.selectedMapObject.feature.type
+    // if object is the same type as selected object
+    // additionalSelectionsById
+    var validIds = []
+    var featuresToMake = []
+    features.forEach(feature => {
+      var objectId = feature.objectId || feature.object_id || null
+      var featureType = feature.type || feature._data_type || null
+      if (objectId && featureType && featureType === selectedFeatureType) {
+        validIds.push(objectId)
+        console.log(objectId)
+        if (this.additionalSelectionsById.hasOwnProperty(objectId)) {
+          console.log('delete')
+          delete this.additionalSelectionsById[objectId]
+          // un-highlight map object 
+        } else {
+          console.log('add')
+          this.additionalSelectionsById[objectId] = true
+          
+          if (this.objectIdToProperties.hasOwnProperty(objectId)) console.log(this.objectIdToProperties[objectId])
+          if (this.objectIdToMapObject.hasOwnProperty(objectId)) console.log(this.objectIdToMapObject[objectId])
+          
+          if (!this.objectIdToMapObject.hasOwnProperty(objectId)) {
+            // createMapObject(feature, iconUrl, false, existingObjectOverride)
+            // this.createMapObjects && this.createMapObjects(transactionFeatures)
+            console.log(this.state.configuration.networkEquipment.equipments)
+            feature.iconUrl = this.state.configuration.networkEquipment.equipments['location_connector'].iconUrl
+            //featuresToMake.push(feature)
+            // highlight?
+            var mockEvent = {
+              latLng: latLng,
+              equipmentFeatures: [
+                feature
+              ]
+            }
+            this.mapObjectFromEvent(mockEvent)
+          } else {
+            // highlight map object
+          }
+
+          // check if in transaction / has map object
+          // if not get info from server and do those things
+          // add objectId to additionalSelectionsById
+          /*
+          var feature = {
+            objectId: this.utils.getUUID(),
+            geometry: {
+              type: 'Point',
+              coordinates: [dropLatLng.lng(), dropLatLng.lat()]
+            },
+            networkNodeType: event.dataTransfer.getData(Constants.DRAG_DROP_ENTITY_DETAILS_KEY)
+          }
+          */
+          // highlight mapobject
+        }
+      }
+    })
+    //this.createMapObjects && this.createMapObjects(featuresToMake) // then highlight ?
   }
 
   removeLocationFromConnector (locationId) {

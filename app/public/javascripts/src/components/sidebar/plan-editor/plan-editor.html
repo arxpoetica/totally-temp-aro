@@ -54,12 +54,14 @@
                           display-view-object="$ctrl.displayViewObject(feature)"
                           display-edit-object="$ctrl.displayEditObject(feature)"
                           on-object-dropped-on-marker="$ctrl.handleObjectDroppedOnMarker({dropEvent: dropEvent, targetObjectId: targetObjectId})"
+                          on-object-key-clicked="$ctrl.onMultiSelect(features, latLng)"
                           register-object-delete-callback="$ctrl.registerObjectDeleteCallback(deleteObjectWithId)"
                           register-create-map-objects-callback="$ctrl.registerCreateMapObjectsCallback(createMapObjects)"
                           register-remove-map-objects-callback="$ctrl.registerRemoveMapObjectsCallback(removeMapObjects)"
                           register-create-editable-existing-map-object="$ctrl.registerCreateEditableExistingMapObject(createEditableExistingMapObject)"
                           register-delete-created-map-object="$ctrl.registerDeleteCreatedMapObject(deleteCreatedMapObject)"
-                          register-select-proposed-feature="$ctrl.registerSelectProposedFeature(selectProposedFeature)">
+                          register-select-proposed-feature="$ctrl.registerSelectProposedFeature(selectProposedFeature)"
+                          register-map-object-from-event="$ctrl.registerMapObjectFromEvent(mapObjectFromEvent)">
         </map-object-editor>
 
         <div style="margin: 10px">
@@ -235,6 +237,7 @@
             </div>
             <div ng-if="$ctrl.getSelectedNetworkConfig().key === 'location_connector'" class="alert alert-warning" style="margin: 1rem 0 0 0">
               right-click locations to toggle their connection
+              <br>shift + click to select multiple Location Connectors
             </div>
             <!-- A table containing the editable properties of the selected object -->
             <editor-interface-tree 
