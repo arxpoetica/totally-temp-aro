@@ -49,10 +49,10 @@
                           check-create-object="$ctrl.checkCanCreateObject(feature, usingMapClick)"
                           on-create-object="$ctrl.handleObjectCreated(mapObject, usingMapClick, feature, deleteExistingBoundary)"
                           on-modify-object="$ctrl.handleObjectModified(mapObject)"
-                          on-select-object="$ctrl.handleSelectedObjectChanged(mapObject)"
+                          on-select-object="$ctrl.handleSelectedObjectChanged(mapObject, isMult)"
                           on-delete-object="$ctrl.handleObjectDeleted(mapObject)"
                           display-view-object="$ctrl.displayViewObject(feature)"
-                          display-edit-object="$ctrl.displayEditObject(feature)"
+                          display-edit-object="$ctrl.displayEditObject(feature, isMult)"
                           on-object-dropped-on-marker="$ctrl.handleObjectDroppedOnMarker({dropEvent: dropEvent, targetObjectId: targetObjectId})"
                           on-object-key-clicked="$ctrl.onMultiSelect(features, latLng)"
                           register-object-delete-callback="$ctrl.registerObjectDeleteCallback(deleteObjectWithId)"
@@ -61,7 +61,9 @@
                           register-create-editable-existing-map-object="$ctrl.registerCreateEditableExistingMapObject(createEditableExistingMapObject)"
                           register-delete-created-map-object="$ctrl.registerDeleteCreatedMapObject(deleteCreatedMapObject)"
                           register-select-proposed-feature="$ctrl.registerSelectProposedFeature(selectProposedFeature)"
-                          register-map-object-from-event="$ctrl.registerMapObjectFromEvent(mapObjectFromEvent)">
+                          register-map-object-from-event="$ctrl.registerMapObjectFromEvent(mapObjectFromEvent)"
+                          register-highlight-map-object="$ctrl.registerHighlightMapObject(highlightMapObject)"
+                          register-dehighlight-map-object="$ctrl.registerDehighlightMapObject(dehighlightMapObject)">
         </map-object-editor>
 
         <div style="margin: 10px">

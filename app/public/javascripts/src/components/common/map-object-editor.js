@@ -172,7 +172,8 @@ class MapObjectEditorController {
     this.registerDeleteCreatedMapObject && this.registerDeleteCreatedMapObject({ deleteCreatedMapObject: this.deleteCreatedMapObject.bind(this) })
     this.registerSelectProposedFeature && this.registerSelectProposedFeature({ selectProposedFeature: this.selectProposedFeature.bind(this) })
     this.registerMapObjectFromEvent && this.registerMapObjectFromEvent({ mapObjectFromEvent: this.handleMapEntitySelected.bind(this) })
-    
+    this.registerHighlightMapObject && this.registerHighlightMapObject({ highlightMapObject: this.highlightMapObject.bind(this) })
+    this.registerDehighlightMapObject && this.registerDehighlightMapObject({ dehighlightMapObject: this.dehighlightMapObject.bind(this) })
     
     this.state.clearEditingMode.skip(1).subscribe((clear) => {
       if (clear) {
@@ -575,7 +576,6 @@ class MapObjectEditorController {
 
   createMapObjects (features) {
     // "features" is an array that comes directly from aro-service. Create map objects for these features
-    console.log(features)
     features.forEach((feature) => {
       this.createMapObject(feature, feature.iconUrl, false) // Feature is not created using a map click
     })
@@ -734,11 +734,11 @@ class MapObjectEditorController {
     return (deltaLat < TOLERANCE) && (deltaLng < TOLERANCE)
   }
 
-  createEditableExistingMapObject (feature, iconUrl) {
-    this.createMapObject(feature, iconUrl, true, true, true)
+  createEditableExistingMapObject (feature, iconUrl, isMult) {
+    this.createMapObject(feature, iconUrl, true, true, true, isMult)
   }
 
-  createMapObject (feature, iconUrl, usingMapClick, existingObjectOverride, deleteExistingBoundary) {
+  createMapObject (feature, iconUrl, usingMapClick, existingObjectOverride, deleteExistingBoundary, isMult) {
     if (typeof existingObjectOverride === 'undefined') {
       existingObjectOverride = false
     }
@@ -758,9 +758,6 @@ class MapObjectEditorController {
         mapObject.addListener('dragend', (event) => this.onModifyObject && this.onModifyObject({ mapObject }))
         mapObject.addListener('click', (event) => {
           if (this.state.isShiftPressed) {
-            console.log('Shift press of map object')
-            console.log(feature)
-            console.log(event)
             var features = [feature]
             this.onObjectKeyClicked && this.onObjectKeyClicked({features: features, latLng: event.latLng})
             return
@@ -862,14 +859,14 @@ class MapObjectEditorController {
     this.createdMapObjects[mapObject.objectId] = mapObject
     this.onCreateObject && this.onCreateObject({ mapObject: mapObject, usingMapClick: usingMapClick, feature: feature, deleteExistingBoundary: !deleteExistingBoundary })
 
-    if (usingMapClick) this.selectMapObject(mapObject)
+    if (usingMapClick) this.selectMapObject(mapObject, isMult)
   }
 
-  handleMapEntitySelected (event) {
+  handleMapEntitySelected (event, isMult) {
     if (!event || !event.latLng) {
       return
     }
-
+    if (typeof isMult === 'undefined') isMult = false
     // filter out equipment and locations already in the list
     // ToDo: should we do this for all types of features?
     var filterArrayByObjectId = (featureList) => {
@@ -942,7 +939,7 @@ class MapObjectEditorController {
         return
       } else {
         if (this.directToEditTypes.hasOwnProperty(feature.type)) {
-          this.displayEditObject({ feature: feature })
+          this.displayEditObject({ feature: feature, isMult: isMult })
         } else {
           // Quickfix - Display the equipment and return, do not make multiple calls to aro-service #159544541
           this.displayViewObject({ feature: feature })
@@ -1012,9 +1009,11 @@ class MapObjectEditorController {
     return mapObject && mapObject.icon
   }
 
-  selectMapObject (mapObject) {
+  selectMapObject (mapObject, isMult) {
+    if (typeof isMult === 'undefined') isMult = false
+    // --- clear mult select?
     // First de-select the currently selected map object (if any)
-    if (this.selectedMapObject) {
+    if (this.selectedMapObject && !isMult) {
       this.dehighlightMapObject(this.selectedMapObject)
     }
 
@@ -1023,12 +1022,12 @@ class MapObjectEditorController {
       this.highlightMapObject(mapObject)
     }
 
-    this.selectedMapObject = mapObject
+    if (!isMult) this.selectedMapObject = mapObject
     if (mapObject && !this.isMarker(mapObject)) { // If selected mapobject is boundary store the geom
       this.selectedMapObjectPreviousShape[mapObject.objectId] = mapObject.feature.geometry
     }
 
-    this.onSelectObject && this.onSelectObject({ mapObject })
+    this.onSelectObject && this.onSelectObject({ mapObject, isMult })
   }
 
   highlightMapObject (mapObject) {
@@ -1322,7 +1321,9 @@ let mapObjectEditor = {
     registerCreateEditableExistingMapObject: '&', // To be called to register a callback, which will create a map object from and existing object
     registerDeleteCreatedMapObject: '&',
     registerSelectProposedFeature: '&',
-    registerMapObjectFromEvent: '&'
+    registerMapObjectFromEvent: '&',
+    registerHighlightMapObject: '&',
+    registerDehighlightMapObject: '&'
   },
   controller: MapObjectEditorController
 }

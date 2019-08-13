@@ -113,6 +113,14 @@ class PlanEditorController {
     this.mapObjectFromEvent = mapObjectFromEvent
   }
 
+  registerHighlightMapObject (highlightMapObject) {
+    this.highlightMapObject = highlightMapObject
+  }
+
+  registerDehighlightMapObject (dehighlightMapObject) {
+    this.dehighlightMapObject = dehighlightMapObject
+  }
+
   $onInit () {
     // We should have a map variable at this point
     if (!window[this.mapGlobalObjectName]) {
@@ -124,7 +132,7 @@ class PlanEditorController {
     //     so basically this and map-object-editor need to be refactored
     this.rightClickObserver = this.state.mapFeaturesRightClickedEvent.skip(1).subscribe((hitFeatures) => {
       // if location and selected feature type in Location connector then toggle location association to selected locvation Connecotor
-      if (hitFeatures.locations.length > 0) {
+      if (hitFeatures.locations.length > 0 && !this.isMultSelectActive()) {
         if (this.selectedObjectId && this.isEditFeatureProps) {
           var selectedLatLng = [this.selectedMapObjectLng, this.selectedMapObjectLat]
           var objectProperties = this.objectIdToProperties[this.selectedObjectId]
@@ -158,10 +166,10 @@ class PlanEditorController {
       // select multiple of same type, onlt for certain types (currently only Location Connectors)
       // for the moment we'll just look at equipment
       this.onMultiSelect(hitFeatures.equipmentFeatures, hitFeatures.latLng)
-      
     })
 
     this.clickObserver = this.state.mapFeaturesClickedEvent.skip(1).subscribe((hitFeatures) => {
+      // on location click highlight associated location connector
       if (hitFeatures.locations && hitFeatures.locations.length > 0) {
         var locationId = hitFeatures.locations[0].objectId || hitFeatures.locations[0].object_id
 
@@ -207,70 +215,60 @@ class PlanEditorController {
     this.resumeOrCreateTransaction(this.planId, this.userId)
   }
 
+  isMultSelectActive () {
+    return (Object.keys(this.additionalSelectionsById).length > 0)
+  }
+
+  clearMultiSelect () {
+    // clear highlighting
+    Object.keys(this.additionalSelectionsById).forEach(id => {
+      this.dehighlightMapObject(this.objectIdToMapObject[id])
+    })
+    this.additionalSelectionsById = {}
+  }
+
   onMultiSelect (features, latLng) {
-    console.log(features)
     // if selected object is allowed to have multi select
-    if (!this.selectedMapObject || !this.selectedMapObject.feature.type ||
+    if (features.length === 0 || 
+      !this.selectedMapObject || !this.selectedMapObject.feature.type ||
       this.multiselectTypes.indexOf(this.selectedMapObject.feature.type) < 0) return
     const selectedFeatureType = this.selectedMapObject.feature.type
     // if object is the same type as selected object
-    // additionalSelectionsById
-    // var validIds = []
-    var featuresToMake = []
     features.forEach(feature => {
       var objectId = feature.objectId || feature.object_id || null
       var featureType = feature.type || feature._data_type || null
       if (objectId && featureType && featureType === selectedFeatureType) {
-        // validIds.push(objectId)
-        console.log(objectId)
         if (this.additionalSelectionsById.hasOwnProperty(objectId)) {
-          console.log('delete')
           delete this.additionalSelectionsById[objectId]
           // un-highlight map object 
+          var clearLocationIds = Object.keys(this.objectIdToProperties[objectId].connectedLocations)
+          this.dehighlightMapObject(this.objectIdToMapObject[objectId])
+          this.clearLocationHighlights(clearLocationIds)
         } else {
-          console.log('add')
           this.additionalSelectionsById[objectId] = true
-          
-          if (this.objectIdToProperties.hasOwnProperty(objectId)) console.log(this.objectIdToProperties[objectId])
-          if (this.objectIdToMapObject.hasOwnProperty(objectId)) console.log(this.objectIdToMapObject[objectId])
           
           if (!this.objectIdToMapObject.hasOwnProperty(objectId)) {
             // no map object, make one
-            // createMapObject(feature, iconUrl, false, existingObjectOverride)
-            // this.createMapObjects && this.createMapObjects(transactionFeatures)
-            console.log(this.state.configuration.networkEquipment.equipments)
             feature.iconUrl = this.state.configuration.networkEquipment.equipments['location_connector'].iconUrl
-            //featuresToMake.push(feature)
-            // highlight?
             var mockEvent = {
               latLng: latLng,
               equipmentFeatures: [
                 feature
               ]
             }
-            this.mapObjectFromEvent(mockEvent)
+            this.mapObjectFromEvent(mockEvent, true)
           } else {
             // highlight map object
+            this.highlightMapObject(this.objectIdToMapObject[objectId])
+            if (this.objectIdToProperties[objectId].hasOwnProperty('connectedLocations')) {
+              var locationIds = Object.keys(this.objectIdToProperties[objectId].connectedLocations)
+              var featureLatLng = this.objectIdToMapObject[objectId].feature.geometry.coordinates
+              this.highlightLocations(locationIds, featureLatLng)
+            }
           }
-
-          // check if in transaction / has map object
-          // if not get info from server and do those things
-          // add objectId to additionalSelectionsById
-          /*
-          var feature = {
-            objectId: this.utils.getUUID(),
-            geometry: {
-              type: 'Point',
-              coordinates: [dropLatLng.lng(), dropLatLng.lat()]
-            },
-            networkNodeType: event.dataTransfer.getData(Constants.DRAG_DROP_ENTITY_DETAILS_KEY)
-          }
-          */
-          // highlight mapobject
         }
       }
     })
-    //this.createMapObjects && this.createMapObjects(featuresToMake) // then highlight ?
   }
 
   removeLocationFromConnector (locationId) {
@@ -796,7 +794,6 @@ class PlanEditorController {
   }
 
   clearLocationHighlights (locationIds) {
-    console.log(`clear: ${locationIds}`)
     locationIds.forEach(id => {
       if (this.locationMarkersById.hasOwnProperty(id)) {
         this.locationMarkersById[id].forEach(marker => {
@@ -808,7 +805,6 @@ class PlanEditorController {
   }
 
   highlightLocations (locationIds, hubLatLng) {
-    console.log(locationIds)
     if (locationIds && typeof locationIds === 'object') { 
       this.getLocationsInfoPromise(locationIds)
         .then(result => {
@@ -816,8 +812,6 @@ class PlanEditorController {
             var location = this.locationsById[locationId]
             // --- NEED TO HAVE LAT LONG FOR LOCATIONS ---
             if (location && location.hasOwnProperty('geometry')) {
-              // console.log(location)
-              // console.log(this.state.locationInputSelected(location.locationCategory))
               this.clearLocationHighlights([locationId])
               this.locationMarkersById[locationId] = []
               var mapMarker = new google.maps.Marker({
@@ -884,7 +878,7 @@ class PlanEditorController {
     }
   }
 
-  displayEditObject (feature) {
+  displayEditObject (feature, isMult) {
     if (feature.type && feature.type === "equipment_boundary.select")
       return this.displaySiteBoundaryViewObject(feature)
         .then((result) => {
@@ -893,7 +887,7 @@ class PlanEditorController {
     else
       return this.displayEquipmentViewObject(feature)
         .then((result) => {
-          return this.editViewObject()
+          return this.editViewObject(isMult)
         })
   }
 
@@ -1031,8 +1025,8 @@ class PlanEditorController {
       })
   }
 
-  editViewObject () {
-    this.createEditableExistingMapObject && this.createEditableExistingMapObject(this.viewEventFeature, this.viewIconUrl)
+  editViewObject (isMult) {
+    this.createEditableExistingMapObject && this.createEditableExistingMapObject(this.viewEventFeature, this.viewIconUrl, isMult)
   }
 
   editViewSiteBoundaryObject () {
@@ -1074,7 +1068,6 @@ class PlanEditorController {
             // if selected show locations <--------------------------------------------------
             
             if (equipmentProperties.hasOwnProperty('connectedLocations')) {
-              console.log('--- object created ---')
               var locationIds = Object.keys(equipmentProperties.connectedLocations)
               this.getLocationsInfoPromise(locationIds)
                 .then(results => {
@@ -1187,12 +1180,17 @@ class PlanEditorController {
     this.deleteCreatedMapObjectWithId && this.deleteCreatedMapObjectWithId(boundaryId) // Delete Boundary from map
   }
 
-  handleSelectedObjectChanged (mapObject) {
+  handleSelectedObjectChanged (mapObject, isMult) {
+    if (typeof isMult === 'undefined') isMult = false
+    if (!isMult) {
+      this.clearMultiSelect()
+    }
     if (this.currentTransaction === null) {
       this.clearAllLocationHighlights()
       //this.highlightLocations()
       return
     }
+    
     var mapObjectId = null
     var isMultSelect = false
 
