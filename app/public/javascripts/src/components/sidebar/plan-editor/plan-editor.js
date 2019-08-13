@@ -690,22 +690,25 @@ class PlanEditorController {
   }
 
   // Saves the properties of the selected location to aro-service
-  // todo split this up to be able to save non-selected features, possibly even ones not on the map
   saveSelectedEquipmentProperties () {
     if (this.selectedMapObject && this.isMarker(this.selectedMapObject)) {
       var selectedMapObject = this.selectedMapObject // May change while the $http.post() is returning
       var equipmentObjectForService = this.formatEquipmentForService(selectedMapObject.objectId)
-      this.selectedMapObjectLat = +this.$element.find('#selectedMapObjectLat')[0].value
-      this.selectedMapObjectLng = +this.$element.find('#selectedMapObjectLng')[0].value
+      // this.selectedMapObjectLat = +this.$element.find('#selectedMapObjectLat')[0].value
+      // this.selectedMapObjectLng = +this.$element.find('#selectedMapObjectLng')[0].value
+      this.selectedMapObjectLat = +equipmentObjectForService.geometry.coordinates[1]
+      this.selectedMapObjectLng = +equipmentObjectForService.geometry.coordinates[0]
       this.setSelectedMapObjectLoc()
       // save the mapobject location if changed
+      /*
       if (this.selectedMapObjectLat && this.selectedMapObjectLat > -90 && this.selectedMapObjectLat < 90) {
         equipmentObjectForService.geometry.coordinates[1] = this.selectedMapObjectLat.toFixed(6)
       }
       if (this.selectedMapObjectLng && this.selectedMapObjectLng > -180 && this.selectedMapObjectLng < 180) {
         equipmentObjectForService.geometry.coordinates[0] = this.selectedMapObjectLng.toFixed(6)
       }
-      this.$http.put(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObjectForService)
+      */
+      return this.$http.put(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObjectForService)
         .then((result) => {
           this.objectIdToProperties[selectedMapObject.objectId].isDirty = false
           this.$timeout()
@@ -716,7 +719,7 @@ class PlanEditorController {
 
   saveEquipmentProperties (objectId) {
     var equipmentObjectForService = this.formatEquipmentForService(objectId)
-    this.$http.put(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObjectForService)
+    return this.$http.put(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObjectForService)
       .then((result) => {
         this.objectIdToProperties[objectId].isDirty = false
         this.$timeout()
@@ -1069,8 +1072,7 @@ class PlanEditorController {
               this.objectIdToProperties[mapObject.objectId] = equipmentProperties
             }
             var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
-            // if selected show locations <--------------------------------------------------
-            
+            // if selected show locations
             if (equipmentProperties.hasOwnProperty('connectedLocations')) {
               var locationIds = Object.keys(equipmentProperties.connectedLocations)
               this.getLocationsInfoPromise(locationIds)
@@ -1307,12 +1309,31 @@ class PlanEditorController {
   }
 
   mergeMultiSelectGroup () {
-
+    var selectedId = this.selectedObjectId
+    var rootProperties = this.objectIdToProperties[selectedId]
+    // var locationIds = []
+    var savePromises = []
+    Object.keys(this.additionalSelectionsById).forEach(objectId => {
+      var objectProperties = this.objectIdToProperties[objectId]
+      Object.keys(objectProperties.connectedLocations).forEach(locationId => {
+        rootProperties.connectedLocations[locationId] = true
+      })
+      objectProperties.connectedLocations = {}
+      savePromises.push(this.saveEquipmentProperties(objectId))
+    })
+    savePromises.push(this.saveSelectedEquipmentProperties())
+    Promise.all(savePromises)
+      .then(() => {
+        this.deleteMultiSelectGroup(true)
+        // reselect
+        this.selectProposedFeature(selectedId)
+      })
   }
 
-  deleteMultiSelectGroup () {
+  deleteMultiSelectGroup (leaveRoot) {
+    if (typeof leaveRoot === 'undefined') leaveRoot = false
     var idsToDelete = JSON.parse(JSON.stringify(this.additionalSelectionsById))
-    idsToDelete[this.selectedMapObject.objectId] = true
+    if (!leaveRoot) idsToDelete[this.selectedMapObject.objectId] = true
     this.clearMultiSelect()
     this.clearViewSelection()
     Object.keys(idsToDelete).forEach(id => {
