@@ -52,7 +52,7 @@ class PlanEditorController {
     this.isBoundaryEditMode = false
     this.mapObjectEditorComms = {}
     this.networkNodeSBTypes = {}
-    this.locationMarkers = []
+    this.locationMarkersById = {} // location ids -> array of associated markers (for circle and line)
     this.isFiberVisiblePreTransaction = false
     // refactor this into redux, use the subnets hook when get transaction
     this.locationsById = {}
@@ -136,6 +136,7 @@ class PlanEditorController {
               this.saveSelectedEquipmentProperties()
               this.getLocationsInfoPromise([locationId])
                 .then(results => {
+                  this.clearAllLocationHighlights()
                   this.highlightLocations(Object.keys(objectProperties.connectedLocations), selectedLatLng)
                 })
             } else {
@@ -149,6 +150,7 @@ class PlanEditorController {
 
                   this.getLocationsInfoPromise([locationId])
                     .then(results => {
+                      this.clearAllLocationHighlights()
                       this.highlightLocations(Object.keys(objectProperties.connectedLocations), selectedLatLng)
                     })
                 })
@@ -795,18 +797,33 @@ class PlanEditorController {
     this.state.selection = newSelection
   }
 
-  highlightLocations (locations, hubLatLng) {
-    this.locationMarkers.forEach(marker => {
-      marker.setMap(null)
+  clearAllLocationHighlights () {
+    this.clearLocationHighlights(Object.keys(this.locationMarkersById))
+  }
+
+  clearLocationHighlights (locationIds) {
+    console.log(`clear: ${locationIds}`)
+    locationIds.forEach(id => {
+      if (this.locationMarkersById.hasOwnProperty(id)) {
+        this.locationMarkersById[id].forEach(marker => {
+          marker.setMap(null)
+        })
+        delete this.locationMarkersById[id]
+      }
     })
-    this.locationMarkers = []
-    if (locations && typeof locations === 'object') {
-      locations.forEach((locationId) => {
+  }
+
+  highlightLocations (locationIds, hubLatLng) {
+    console.log(locationIds)
+    if (locationIds && typeof locationIds === 'object') { 
+      locationIds.forEach((locationId) => {
         var location = this.locationsById[locationId]
         // --- NEED TO HAVE LAT LONG FOR LOCATIONS ---
         if (location && location.hasOwnProperty('geometry')) {
           // console.log(location)
           // console.log(this.state.locationInputSelected(location.locationCategory))
+          this.clearLocationHighlights([locationId])
+          this.locationMarkersById[locationId] = []
           var mapMarker = new google.maps.Marker({
             position: new google.maps.LatLng(location.geometry.coordinates[1], location.geometry.coordinates[0]),
             icon: {
@@ -817,7 +834,7 @@ class PlanEditorController {
             clickable: false, 
             map: this.mapRef
           })
-          this.locationMarkers.push(mapMarker)
+          this.locationMarkersById[locationId].push(mapMarker)
           if (hubLatLng) {
             // draw line to connector
             var lineGeometry = [
@@ -836,7 +853,7 @@ class PlanEditorController {
               strokeWeight: 1,
               map: this.mapRef
             })
-            this.locationMarkers.push(lineMapObject)
+            this.locationMarkersById[locationId].push(lineMapObject)
           }
         }
       })
@@ -865,7 +882,7 @@ class PlanEditorController {
       this.state.selection = newSelection
       this.displaySiteBoundaryViewObject(feature, iconUrl)      
     } else {
-      this.displayEquipmentViewObject(feature,iconUrl)
+      this.displayEquipmentViewObject(feature, iconUrl)
     }
   }
 
@@ -904,18 +921,10 @@ class PlanEditorController {
               if (this.objectIdToProperties.hasOwnProperty(feature.objectId)) {
                 locationIds = Object.keys(this.objectIdToProperties[feature.objectId].connectedLocations)
               }
-              // ToDo: check cache first
-              /*
-              this.$http.post(`/service/plan-feature/${this.state.plan.id}/location?userId=${this.state.loggedInUser.id}`, {objectIds: locationIds})
-                .then((result) => {
-                  result.data.forEach(location => {
-                    this.locationsById[location.objectId] = location
-                  })
-                  this.highlightLocations(locationIds)
-                })
-                */
+              
               this.getLocationsInfoPromise(locationIds)
                 .then(result => {
+                  this.clearAllLocationHighlights()
                   this.highlightLocations(locationIds, this.viewEventFeature.geometry.coordinates)
                 })
             }
@@ -933,13 +942,31 @@ class PlanEditorController {
   }
 
   getLocationsInfoPromise (locationIds) {
-    return this.$http.post(`/service/plan-feature/${this.state.plan.id}/location?userId=${this.state.loggedInUser.id}`, {objectIds: locationIds})
-      .then((result) => {
-        result.data.forEach(location => {
-          this.locationsById[location.objectId] = location
-        })
-        return result
+    // ToDo: check this.locationsById to see if we already have them
+    var returnLocations = {}
+    var locationIdsToGet = []
+    locationIds.forEach(id => {
+      if (this.locationsById.hasOwnProperty(id)) {
+        returnLocations[id] = this.locationsById[id]
+      } else {
+        locationIdsToGet.push(id)
+      }
+    })
+
+    if (locationIdsToGet.length === 0) {
+      return new Promise((resolve, reject) => {
+        resolve(returnLocations)
       })
+    } else {
+      return this.$http.post(`/service/plan-feature/${this.state.plan.id}/location?userId=${this.state.loggedInUser.id}`, {objectIds: locationIdsToGet})
+        .then((result) => {
+          result.data.forEach(location => {
+            this.locationsById[location.objectId] = location
+            returnLocations[location.objectId] = location
+          })
+          return returnLocations
+        })
+    }
   }
 
   displaySiteBoundaryViewObject(feature, iconUrl) {
@@ -1049,12 +1076,16 @@ class PlanEditorController {
               this.objectIdToProperties[mapObject.objectId] = equipmentProperties
             }
             var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
-            // if selected show locations 
+            // if selected show locations <--------------------------------------------------
+            
             if (equipmentProperties.hasOwnProperty('connectedLocations')) {
               var locationIds = Object.keys(equipmentProperties.connectedLocations)
               this.getLocationsInfoPromise(locationIds)
                 .then(results => {
-                  if (this.selectedObjectId === mapObject.objectId) this.highlightLocations(locationIds, result.data.geometry.coordinates)
+                  if (this.selectedObjectId === mapObject.objectId) {
+                    this.clearAllLocationHighlights()
+                    this.highlightLocations(locationIds, result.data.geometry.coordinates)
+                  }
                 })
             }
             
@@ -1160,7 +1191,8 @@ class PlanEditorController {
 
   handleSelectedObjectChanged (mapObject) {
     if (this.currentTransaction === null) {
-      this.highlightLocations()
+      this.clearAllLocationHighlights()
+      //this.highlightLocations()
       return
     }
     if (mapObject != null) {
@@ -1183,6 +1215,7 @@ class PlanEditorController {
       this.objectIdToProperties[this.selectedObjectId].hasOwnProperty('connectedLocations')) {
       locations = Object.keys(this.objectIdToProperties[this.selectedObjectId].connectedLocations)
     }
+    this.clearAllLocationHighlights()
     this.highlightLocations(locations, [lng, lat])
     this.$timeout()
   }
@@ -1208,6 +1241,7 @@ class PlanEditorController {
           if (this.selectedObjectId === mapObject.objectId && 
             this.objectIdToProperties[this.selectedObjectId].hasOwnProperty('connectedLocations')) {
             var locations = Object.keys(this.objectIdToProperties[this.selectedObjectId].connectedLocations)
+            this.clearAllLocationHighlights()
             this.highlightLocations(locations, [mapObject.position.lng(), mapObject.position.lat()])
           }
           const equipmentToRecalculate = {
@@ -1557,7 +1591,8 @@ class PlanEditorController {
     this.rightClickObserver.unsubscribe()
     this.keyClickObserver.unsubscribe()
     this.clickObserver.unsubscribe()
-    this.highlightLocations()
+    this.clearAllLocationHighlights()
+    //this.highlightLocations()
     // todo: if keep unsaved, still can't run analysis 
     if (this.currentTransaction) {
       swal({

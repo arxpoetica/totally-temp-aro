@@ -1015,31 +1015,12 @@ class MapObjectEditorController {
   selectMapObject (mapObject) {
     // First de-select the currently selected map object (if any)
     if (this.selectedMapObject) {
-      if (this.isMarker(this.selectedMapObject)) {
-        // this.setMapObjectIcon(this.selectedMapObject, this.getIconsByFeatureType(this.selectedMapObject.featureType).iconUrl)
-        // this.selectedMapObject.label.color = "black"
-        var label = this.selectedMapObject.getLabel()
-        label.color = '#000000'
-        this.selectedMapObject.setLabel(label)
-      } else {
-        this.selectedMapObject.setOptions(this.polygonOptions)
-        this.selectedMapObject.setEditable(false)
-      }
+      this.dehighlightMapObject(this.selectedMapObject)
     }
 
     // Then select the map object
     if (mapObject) { // Can be null if we are de-selecting everything
-      if (this.isMarker(mapObject)) {
-        // this.setMapObjectIcon(mapObject, this.getIconsByFeatureType(mapObject.featureType).selectedIconUrl)
-        // mapObject.label.color = "green"
-        var label = mapObject.getLabel()
-        label.color = '#009900'
-        mapObject.setLabel(label)
-        // mapObject.label:
-      } else {
-        mapObject.setOptions(this.selectedPolygonOptions)
-        mapObject.setEditable(true)
-      }
+      this.highlightMapObject(mapObject)
     }
 
     this.selectedMapObject = mapObject
@@ -1050,15 +1031,27 @@ class MapObjectEditorController {
     this.onSelectObject && this.onSelectObject({ mapObject })
   }
 
-  /*
-  toggleEditSelectedPolygon() {
-    if (!this.selectedMapObject || this.isMarker(this.selectedMapObject)) {
-      return
+  highlightMapObject (mapObject) {
+    if (this.isMarker(mapObject)) {
+      var label = mapObject.getLabel()
+      label.color = '#009900'
+      mapObject.setLabel(label)
+    } else {
+      mapObject.setOptions(this.selectedPolygonOptions)
+      mapObject.setEditable(true)
     }
-    var isEditable = this.selectedMapObject.getEditable()
-    this.selectedMapObject.setEditable(!isEditable)
   }
-  */
+  
+  dehighlightMapObject (mapObject) {
+    if (this.isMarker(mapObject)) {
+      var label = mapObject.getLabel()
+      label.color = '#000000'
+      mapObject.setLabel(label)
+    } else {
+      mapObject.setOptions(this.polygonOptions)
+      mapObject.setEditable(false)
+    }
+  }
 
   removeCreatedMapObjects () {
     // Remove created objects from map
