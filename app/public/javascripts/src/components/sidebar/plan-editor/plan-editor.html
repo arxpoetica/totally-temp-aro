@@ -78,7 +78,7 @@
           <br>
 
           <!-- Section that allows the user to drag and drop equipment and boundaries onto the map -->
-          <div style="width: 100%">
+          <div style="width: 100%" ng-if="!$ctrl.isMultSelectActive()">
             <p class="text-center">Click and drag equipment/boundary onto the map</p>
             <hr class="plan-editor-hr">
             <!-- Equipment buttons. Only add the ones in the allEditableNetworkNodeTypes list -->
@@ -164,9 +164,52 @@
             </tbody>
           </table>
           
+
+
+
+
+
+
+          <!-- Section for multi select actions -->
+          <div class="clearfix" ng-if="$ctrl.selectedMapObject && $ctrl.isMarker($ctrl.selectedMapObject) && $ctrl.isMultSelectActive()" style="margin-top: 10px">
+            <!-- Section header showing the type of the selected object -->
+            <div class="sidebar-table-header" ng-if="$ctrl.getSelectedNetworkConfig()">
+                <img ng-src="{{$ctrl.getSelectedNetworkConfig().iconUrl}}" style="vertical-align:middle; padding-right: 10px">
+                <span>{{$ctrl.getSelectedNetworkConfig().label}}</span>
+                <div class="sidebar-header-subinfo">
+                  <div class="sidebar-header-subinfo-item">lat: {{$ctrl.selectedMapObjectLat}}</div>
+                  <div class="sidebar-header-subinfo-item">long: {{$ctrl.selectedMapObjectLng}}</div>
+                </div>
+            </div>
+            <div ng-if="$ctrl.getSelectedNetworkConfig().key === 'location_connector'" class="alert alert-warning" style="margin: 1rem 0 0 0">
+              shift + click to select multiple Location Connectors
+            </div>
+            <div style="margin: 1rem 0 0 0">
+              <button class="btn btn-danger float-right"
+                      ng-click="$ctrl.requestDeleteMultiSelectGroup()"
+                      style="margin-bottom: 10px">
+                <i class="fa fa-trash-alt text-white"></i>&nbsp;&nbsp;Delete {{$ctrl.getMultiSelectCount()}}
+              </button>
+              <button class="btn btn-light float-right"
+                      ng-click="$ctrl.mergeMultiSelectGroup()"
+                      style="margin-bottom: 10px">
+                <i class="fa fa-compress"></i>&nbsp;&nbsp;Merge {{$ctrl.getMultiSelectCount()}}
+              </button>
+            </div>
+            <div>
+
+            </div>
+          </div>
           
+
+
+
+
+
+
+
           <!-- Section to show properties when the selected map object is an equipment node -->
-          <div class="clearfix" ng-if="!$ctrl.isEditFeatureProps && $ctrl.viewFeature" style="margin-top: 10px">
+          <div class="clearfix" ng-if="!$ctrl.isEditFeatureProps && $ctrl.viewFeature && !$ctrl.isMultSelectActive()" style="margin-top: 10px">
             <!-- Section header showing the type of the selected object -->
             <div class="sidebar-table-header">
                 <img ng-src="{{$ctrl.viewIconUrl}}" style="vertical-align:middle; padding-right: 10px">
@@ -205,7 +248,7 @@
           
           
           <!-- Section to show properties when the selected map object is an equipment node -->
-          <div class="clearfix" ng-if="$ctrl.isEditFeatureProps && $ctrl.selectedMapObject && $ctrl.isMarker($ctrl.selectedMapObject)" style="margin-top: 10px">
+          <div class="clearfix" ng-if="$ctrl.isEditFeatureProps && $ctrl.selectedMapObject && $ctrl.isMarker($ctrl.selectedMapObject) && !$ctrl.isMultSelectActive()" style="margin-top: 10px">
             <!-- Section header showing the type of the selected object -->
             <div class="sidebar-table-header" ng-if="$ctrl.getSelectedNetworkConfig()">
                 <img ng-src="{{$ctrl.getSelectedNetworkConfig().iconUrl}}" style="vertical-align:middle; padding-right: 10px">
@@ -261,7 +304,7 @@
           </div>
 
           <!-- Section to show properties when the selected map object is an equipment boundary - view-->
-          <div class="plan-editor-bounds-contain" ng-if="$ctrl.state.showSiteBoundary && $ctrl.viewBoundaryProps && !$ctrl.isBoundaryEditMode">
+          <div class="plan-editor-bounds-contain" ng-if="$ctrl.state.showSiteBoundary && $ctrl.viewBoundaryProps && !$ctrl.isBoundaryEditMode && !$ctrl.isMultSelectActive()">
             <!-- A table containing the editable properties of the selected object -->
             <table id="tblBoundaryProperties" class="table table-sm table-striped sidebar-table" style="margin-bottom: 10px">
               <thead>
@@ -300,7 +343,7 @@
           </div>
           
           <!-- Section to show properties when the selected map object is an equipment boundary - edit -->
-          <div class="plan-editor-bounds-contain" ng-if="$ctrl.selectedMapObject && !$ctrl.isMarker($ctrl.selectedMapObject) && $ctrl.isBoundaryEditMode">
+          <div class="plan-editor-bounds-contain" ng-if="$ctrl.selectedMapObject && !$ctrl.isMarker($ctrl.selectedMapObject) && $ctrl.isBoundaryEditMode && !$ctrl.isMultSelectActive()">
             <!-- Section header showing the type of the selected object -->
             <div class="sidebar-table-header" ng-if="$ctrl.getSelectedBoundaryNetworkConfig()">
                 <img src="/images/map_icons/aro/boundary_road_segments.png" style="vertical-align:middle; padding-right: 10px">

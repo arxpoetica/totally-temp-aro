@@ -207,7 +207,6 @@ class PlanEditorController {
             console.error(err)
           })
       }
-      
     })
     // -----
 
@@ -217,6 +216,10 @@ class PlanEditorController {
 
   isMultSelectActive () {
     return (Object.keys(this.additionalSelectionsById).length > 0)
+  }
+
+  getMultiSelectCount () {
+    return Object.keys(this.additionalSelectionsById).length + 1
   }
 
   clearMultiSelect () {
@@ -229,7 +232,7 @@ class PlanEditorController {
 
   onMultiSelect (features, latLng) {
     // if selected object is allowed to have multi select
-    if (features.length === 0 || 
+    if (features.length === 0 ||
       !this.selectedMapObject || !this.selectedMapObject.feature.type ||
       this.multiselectTypes.indexOf(this.selectedMapObject.feature.type) < 0) return
     const selectedFeatureType = this.selectedMapObject.feature.type
@@ -240,13 +243,13 @@ class PlanEditorController {
       if (objectId && featureType && featureType === selectedFeatureType) {
         if (this.additionalSelectionsById.hasOwnProperty(objectId)) {
           delete this.additionalSelectionsById[objectId]
-          // un-highlight map object 
+          // un-highlight map object
           var clearLocationIds = Object.keys(this.objectIdToProperties[objectId].connectedLocations)
           this.dehighlightMapObject(this.objectIdToMapObject[objectId])
           this.clearLocationHighlights(clearLocationIds)
         } else {
           this.additionalSelectionsById[objectId] = true
-          
+
           if (!this.objectIdToMapObject.hasOwnProperty(objectId)) {
             // no map object, make one
             feature.iconUrl = this.state.configuration.networkEquipment.equipments['location_connector'].iconUrl
@@ -269,6 +272,7 @@ class PlanEditorController {
         }
       }
     })
+    this.$timeout()
   }
 
   removeLocationFromConnector (locationId) {
@@ -1282,6 +1286,38 @@ class PlanEditorController {
       this.$http.put(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`, serviceFeature)
         .catch((err) => console.error(err))
     }
+  }
+
+  requestDeleteMultiSelectGroup () {
+    var label = this.getSelectedNetworkConfig().label
+    swal({
+      title: 'Delete all?',
+      text: `Are you sure you want to delete ${this.getMultiSelectCount()} ${label}s?`,
+      type: 'warning',
+      confirmButtonColor: '#DD6B55',
+      confirmButtonText: 'Delete', // 'Yes',
+      showCancelButton: true,
+      cancelButtonText: 'Cancel', // 'No',
+      closeOnConfirm: true
+    }, (result) => {
+      if (result) {
+        this.deleteMultiSelectGroup()
+      }
+    })
+  }
+
+  mergeMultiSelectGroup () {
+
+  }
+
+  deleteMultiSelectGroup () {
+    var idsToDelete = JSON.parse(JSON.stringify(this.additionalSelectionsById))
+    idsToDelete[this.selectedMapObject.objectId] = true
+    this.clearMultiSelect()
+    this.clearViewSelection()
+    Object.keys(idsToDelete).forEach(id => {
+      this.deleteObjectWithId(id)
+    })
   }
 
   handleObjectDeleted (mapObject) {
