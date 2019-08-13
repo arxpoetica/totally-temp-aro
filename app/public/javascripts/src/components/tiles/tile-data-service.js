@@ -200,6 +200,7 @@ class TileDataService {
       }
     })
 
+    promises.push(imagePromise('/images/backgrounds/disabled-boundary.png'))
     const hasIcon = Boolean(mapLayer.iconUrl)
     if (mapLayer.iconUrl) {
       promises.push(imagePromise(mapLayer.iconUrl))
@@ -226,7 +227,7 @@ class TileDataService {
         var numDataResults = mapLayer.tileDefinitions.length
 
         for (var iResult = 0; iResult < numDataResults; ++iResult) {
-          var result = results[iResult]
+          var result = results.splice(0, 1)[0]
           var layerToFeatures = result
           Object.keys(layerToFeatures).forEach((layerKey) => {
             allFeatures = allFeatures.concat(layerToFeatures[layerKey])
@@ -244,17 +245,18 @@ class TileDataService {
           tileData.v2FilterIcons[filterIconUrls[iResult]] = iconResult
         }
 
+        tileData.disabledBoundaryPattern = results.splice(0, 1)[0]
         if (hasIcon) {
-          tileData.icon = results[results.length - (hasIcon + hasSelectedIcon + hasGreyedOutIcon + hasMDUIcon)]
+          tileData.icon = results.splice(0, 1)[0]
         }
         if (hasSelectedIcon) {
-          tileData.selectedIcon = results[results.length - (hasIcon + hasGreyedOutIcon + hasMDUIcon)]
+          tileData.selectedIcon = results.splice(0, 1)[0]
         }
         if (hasGreyedOutIcon) {
-          tileData.greyOutIcon = results[results.length - (hasGreyedOutIcon + hasMDUIcon)]
+          tileData.greyOutIcon = results.splice(0, 1)[0]
         }
         if (hasMDUIcon) {
-          tileData.mduIcon = results[results.length - 1]
+          tileData.mduIcon = results.splice(0, 1)[0]
         }
         return Promise.resolve(tileData)
       })
