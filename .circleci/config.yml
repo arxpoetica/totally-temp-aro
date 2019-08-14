@@ -72,7 +72,7 @@ workflows:
               only: 
                 - master
                 - optional_building
-                - newSubnetRecalculation
+                - RingPlanEdit
 
       - deploy:
           requires:
