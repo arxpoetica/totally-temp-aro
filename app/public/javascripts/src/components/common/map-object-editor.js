@@ -1073,11 +1073,11 @@ class MapObjectEditorController {
       // Deselect the currently selected object, as it is about to be deleted.
       this.selectMapObject(null)
     }
-    var mapObjectToDelete = this.createdMapObjects[objectId]
-    if (mapObjectToDelete) {
-      this.onDeleteObject && this.onDeleteObject({ mapObject: mapObjectToDelete })
-    }
     this.closeContextMenu()
+    var mapObjectToDelete = this.createdMapObjects[objectId]
+    if (mapObjectToDelete && this.onDeleteObject) {
+      return this.onDeleteObject({ mapObject: mapObjectToDelete })
+    }
   }
 
   deleteCreatedMapObject (objectId) {

@@ -1336,24 +1336,25 @@ class PlanEditorController {
     if (!leaveRoot) idsToDelete[this.selectedMapObject.objectId] = true
     this.clearMultiSelect()
     this.clearViewSelection()
+    var lastResult = Promise.resolve()
     Object.keys(idsToDelete).forEach(id => {
-      this.deleteObjectWithId(id)
+      lastResult = lastResult.then(() => this.deleteObjectWithId(id))
     })
   }
 
   handleObjectDeleted (mapObject) {
     if (this.isMarker(mapObject)) {
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
-      this.checkIfBoundaryExists(mapObject)
+      return this.checkIfBoundaryExists(mapObject)
         .then((deleteObject) => {
           if (deleteObject) {
             this.deleteCreatedMapObjectWithId(mapObject.objectId) // Delete the marker from map
-            this.deleteMarker(mapObject) // Delete the marker
+            return this.deleteMarker(mapObject) // Delete the marker
           }
         })
     } else {
       this.deleteCreatedMapObjectWithId(mapObject.objectId) // Delete the boundary from map
-      this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary/${mapObject.objectId}`)
+      return this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary/${mapObject.objectId}`)
         .then(() => {
           this.refreshViewObjectSBTypes(mapObject.objectId) // refresh network node SB type
           this.state.planEditorChanged.next(true) // recaluculate plansummary
@@ -1362,7 +1363,7 @@ class PlanEditorController {
   }
 
   deleteMarker (mapObject) {
-    this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment/${mapObject.objectId}`)
+    return this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment/${mapObject.objectId}`)
       .then(() => {
         return this.autoRecalculateSubnet
           ? this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`)
@@ -1371,23 +1372,25 @@ class PlanEditorController {
       .then((result) => {
         if (result && result.data.length > 0) {
           // There is at least one piece of equipment in the transaction. Use that for routing
-          this.recalculateSubnetForEquipmentChange(result.data[0])
+          return this.recalculateSubnetForEquipmentChange(result.data[0])
         } else {
           // There is no equipment left in the transaction. Just remove the subnet map objects
-          this.clearAllSubnetMapObjects()
+          return this.clearAllSubnetMapObjects()
+        }
+      })
+      .then(() => {
+        // If this is an equipment, delete its associated boundary (if any)
+        const boundaryObjectId = this.equipmentIdToBoundaryId[mapObject.objectId]
+        if (!boundaryObjectId) {
+          this.state.boundaryTypes.forEach((boundaryType) => {
+            boundaryType.name !== 'fiveg_coverage' && this.getAndDeleteAssociatedEquSiteBoundary(mapObject.objectId,boundaryType.id)        
+          })
+        } else {
+          this.deleteBoundary(boundaryObjectId) // boundary is in edit mode
         }
         this.state.planEditorChanged.next(true) // recaluculate plansummary
       })
       .catch((err) => console.error(err))
-    // If this is an equipment, delete its associated boundary (if any)
-    const boundaryObjectId = this.equipmentIdToBoundaryId[mapObject.objectId]
-    if (!boundaryObjectId) {
-      this.state.boundaryTypes.forEach((boundaryType) => {
-        boundaryType.name !== 'fiveg_coverage' && this.getAndDeleteAssociatedEquSiteBoundary(mapObject.objectId,boundaryType.id)        
-      })
-    } else {
-      this.deleteBoundary(boundaryObjectId) // boundary is in edit mode
-    }
   }
 
   getAndDeleteAssociatedEquSiteBoundary (objectId, boundaryTypeId) {
