@@ -8,6 +8,10 @@ export default class Ring {
     this.nodes = []
     this.nodesById = {}
     this.linkData = []
+    // nodes is an ordered list of linked equipment: A, B, C
+    // linkData is a derived ordered list of the links those nodes form: AB, BC
+    // thus linkData.length will always be one element shorter than nodes.length
+    // except in the case of a "flat ring" which is a ring containing a single link that links back on its self
   }
 
   static parseData (ringData, equipmentData) {
@@ -26,9 +30,17 @@ export default class Ring {
         var fromNode = parsedRing.nodesById[link.fromOid]
         var toNode = parsedRing.nodesById[link.toOid]
         var geom = []
-        parsedRing.nodes.push(toNode)
+        var isFlatRing = false
+        if (link.fromOid === link.toOid) isFlatRing = true
+        
+        if (!isFlatRing) parsedRing.nodes.push(toNode)
+
         if (!link.geomPath || link.geomPath.length === 0) {
-          geom = parsedRing.figureRangeIntersectOffset(fromNode, toNode)
+          if (isFlatRing) {
+            geom = parsedRing.figureSingleNodeBounds(fromNode)
+          } else {
+            geom = parsedRing.figureRangeIntersectOffset(fromNode, toNode)
+          }
         } else {
           geom = parsedRing.importGeom(link.geomPath)
         }
@@ -45,13 +57,25 @@ export default class Ring {
   }
 
   addNode (node) {
-    console.log(node)
     if (this.nodesById.hasOwnProperty(node.objectId)) {
       console.warn(`node with ID "${node.objectId}" is already in this Ring`)
       return
     }
     var linkId = uuidv4() // ToDo: use /src/components/common/utilitias.js > getUUID()
-    if (this.nodes.length > 0) {
+    if (this.nodes.length === 0) {
+      // one node, make a flat ring
+      this.linkData.push({
+        exchangeLinkOid: linkId,
+        fromNode: node,
+        toNode: node,
+        geom: this.figureSingleNodeBounds(node)
+      })
+    } else if (this.nodes.length === 1) {
+      // currently a flat ring, convert to a standard ring
+      var flatLink = this.linkData[0]
+      flatLink.toNode = node
+      flatLink.geom = this.figureRangeIntersectOffset(flatLink.fromNode, flatLink.toNode)
+    } else {
       var fromNode = this.nodes[this.nodes.length - 1]
       this.linkData.push({
         exchangeLinkOid: linkId,
@@ -60,6 +84,7 @@ export default class Ring {
         geom: this.figureRangeIntersectOffset(fromNode, node)
       })
     }
+
     this.nodesById[node.objectId] = node
     this.nodes.push(node)
   }
@@ -69,8 +94,13 @@ export default class Ring {
     if (nodeIndex === -1) return
     this.nodes.splice(nodeIndex, 1)
     delete this.nodesById[nodeId]
-    if (nodeIndex >= this.linkData.length) {
-      // must be the last one, thus no From
+
+    if (this.nodes.length === 1 && this.linkData.length === 1) {
+      var flatLink = this.linkData[0]
+      flatLink.toNode = flatLink.fromNode = this.nodes[0]
+      flatLink.geom = this.figureSingleNodeBounds(flatLink.fromNode)
+    } else if (nodeIndex >= this.linkData.length) {
+      // must be the last node in the list, thus no splice needed
       this.linkData.pop()
     } else {
       this.linkData.splice(nodeIndex, 1)
@@ -98,6 +128,18 @@ export default class Ring {
     bounds.push(google.maps.geometry.spherical.computeOffset(latLngA, 1000.0, heading - 90))
     bounds.push(google.maps.geometry.spherical.computeOffset(latLngB, 1000.0, heading - 90))
     bounds.push(google.maps.geometry.spherical.computeOffset(latLngB, 1000.0, heading + 90))
+
+    return bounds
+  }
+
+  figureSingleNodeBounds (node) {
+    const coords = node.data.geometry.coordinates
+    var latLng = new google.maps.LatLng(coords[1], coords[0])
+    var bounds = []
+    bounds.push(google.maps.geometry.spherical.computeOffset(latLng, 1000.0, -45))
+    bounds.push(google.maps.geometry.spherical.computeOffset(latLng, 1000.0, 45))
+    bounds.push(google.maps.geometry.spherical.computeOffset(latLng, 1000.0, 135))
+    bounds.push(google.maps.geometry.spherical.computeOffset(latLng, 1000.0, 225))
 
     return bounds
   }
