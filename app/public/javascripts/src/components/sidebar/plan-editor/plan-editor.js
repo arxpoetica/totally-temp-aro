@@ -209,9 +209,6 @@ class PlanEditorController {
       }
     })
     // -----
-
-    // Select the first transaction in the list
-    this.resumeOrCreateTransaction(this.planId, this.userId)
   }
 
   isMultSelectActive () {
@@ -1625,14 +1622,6 @@ class PlanEditorController {
     })
   }
 
-  commitTransactionAndReloadModified () {
-    // Quick fix to ease load on server. Commit the transaction, wait for some time and then reload modified features.
-    // VERY temporary fix. Issue #167741691
-    this.commitTransaction(this.currentTransaction.id)
-    const TIME_TO_WAIT_BEFORE_RELOAD = 1000 // Why 1000? Why not?
-    setTimeout(() => this.state.loadModifiedFeatures(this.planId), TIME_TO_WAIT_BEFORE_RELOAD)
-  }
-
   setSelectedMapObjectLoc () {
     var isValid = TileUtilities.isValidLatLong(this.selectedMapObjectLat, this.selectedMapObjectLng)
     if (!isValid) return
@@ -1712,7 +1701,6 @@ class PlanEditorController {
       clearTransaction: () => dispatch(PlanEditorActions.clearTransaction()),
       commitTransaction: transactionId => dispatch(PlanEditorActions.commitTransaction(transactionId)),
       discardTransaction: transactionId => dispatch(PlanEditorActions.discardTransaction(transactionId)),
-      resumeOrCreateTransaction: (planId, userId) => dispatch(PlanEditorActions.resumeOrCreateTransaction(planId, userId)),
       addEquipmentNodes: equipmentNodes => dispatch(PlanEditorActions.addEquipmentNodes(equipmentNodes)),
       setNetworkEquipmentLayerVisibility: (layer, isVisible) => dispatch(MapLayerActions.setNetworkEquipmentLayerVisibility('cables', layer, isVisible)),
       setIsCalculatingSubnets: isCalculatingSubnets => dispatch(PlanEditorActions.setIsCalculatingSubnets(isCalculatingSubnets)),
