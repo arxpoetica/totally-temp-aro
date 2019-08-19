@@ -142,7 +142,8 @@ class PlanEditorController {
             if (objectProperties.connectedLocations.hasOwnProperty(locationId)) {
               delete objectProperties.connectedLocations[locationId]
               this.saveSelectedEquipmentProperties()
-              this.highlightLocations(Object.keys(objectProperties.connectedLocations), selectedLatLng)
+              this.clearLocationHighlights([locationId])
+              // this.highlightLocations(Object.keys(objectProperties.connectedLocations), selectedLatLng)
             } else {
               // check if the previous connector is in the transaction
               // if not get it and add it
@@ -161,8 +162,6 @@ class PlanEditorController {
     })
 
     this.keyClickObserver = this.state.mapFeaturesKeyClickedEvent.skip(1).subscribe((hitFeatures) => {
-      console.log('key click')
-      console.log(hitFeatures)
       // select multiple of same type, onlt for certain types (currently only Location Connectors)
       // for the moment we'll just look at equipment
       this.onMultiSelect(hitFeatures.equipmentFeatures, hitFeatures.latLng)
