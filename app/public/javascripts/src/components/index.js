@@ -17,6 +17,7 @@ import RfpAnalyzer from '../react/components/optimization/rfp/rfp-analyzer.jsx'
 import RfpStatus from '../react/components/optimization/rfp/status/rfp-status.jsx'
 import RingEdit from '../react/components/ring-edit/ring-edit.jsx'
 import RingButton from '../react/components/ring-edit/ring-button.jsx'
+import LocationInfo from '../react/components/location-info/location-info.jsx'
 
 import boundaryDetail from './sidebar/view/boundary-detail'
 import equipmentDetail from './sidebar/view/equipment-detail'
@@ -248,6 +249,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rRingEdit', react2angular(RingEdit))
   .component('rRingButton', react2angular(RingButton, ['onModify']))
   .component('rToastContainer', react2angular(ToastContainer))
+  .component('rLocationInfo', react2angular(LocationInfo))
   .service('Utils', utils)
   .service('state', state)
   .service('aclManager', aclManager)
