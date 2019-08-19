@@ -7,12 +7,19 @@ function resumeOrCreateTransaction (planId, userId) {
   return dispatch => {
     TransactionManager.resumeOrCreateTransaction(planId, userId)
       .then(result => {
-        // console.log(result)
-        // todo: get equipment in subnets
         dispatch({
           type: Actions.PLAN_EDITOR_SET_TRANSACTION,
           payload: Transaction.fromServiceObject(result.data)
         })
+        const transactionId = result.data.id
+        return Promise.all([
+          AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/equipment`),
+          AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/equipment_boundary`)
+        ])
+      })
+      .then(results => {
+        dispatch(addTransactionEquipment(results[0].data))
+        dispatch(addTransactionEquipmentBoundary(results[1].data))
       })
       .catch(err => console.error(err))
   }
@@ -54,16 +61,30 @@ function discardTransaction (transactionId) {
   }
 }
 
-function addEquipmentNodes (equipmentNodes) {
+function addTransactionEquipment (equipmentNodes) {
   return {
     type: Actions.PLAN_EDITOR_ADD_EQUIPMENT_NODES,
     payload: equipmentNodes
   }
 }
 
-function removeEquipmentNode (objectId) {
+function removeTransactionEquipment (objectId) {
   return {
     type: Actions.PLAN_EDITOR_REMOVE_EQUIPMENT_NODE,
+    payload: objectId
+  }
+}
+
+function addTransactionEquipmentBoundary (equipmentBoundaries) {
+  return {
+    type: Actions.PLAN_EDITOR_ADD_EQUIPMENT_BOUNDARY,
+    payload: equipmentBoundaries
+  }
+}
+
+function removeTransactionEquipmentBoundary (objectId) {
+  return {
+    type: Actions.PLAN_EDITOR_REMOVE_EQUIPMENT_BOUNDARY,
     payload: objectId
   }
 }
@@ -94,8 +115,10 @@ export default {
   clearTransaction,
   discardTransaction,
   resumeOrCreateTransaction,
-  addEquipmentNodes,
-  removeEquipmentNode,
+  addTransactionEquipment,
+  removeTransactionEquipment,
+  addTransactionEquipmentBoundary,
+  removeTransactionEquipmentBoundary,
   setIsCalculatingSubnets,
   setIsCreatingObject,
   setIsModifyingObject

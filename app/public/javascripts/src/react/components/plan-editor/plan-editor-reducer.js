@@ -4,8 +4,8 @@ const defaultState = {
   isPlanEditorActive: false,
   transaction: null,
   features: {
-    equipmentNodes: [],
-    boundaries: []
+    equipments: {},
+    boundaries: {}
   },
   isCalculatingSubnets: false,
   isCreatingObject: false,
@@ -23,21 +23,42 @@ function clearTransaction () {
   return JSON.parse(JSON.stringify(defaultState))
 }
 
-function addEquipmentNodes (state, equipmentNodes) {
+function addTransactionEquipment (state, equipments) {
+  var newEquipments = { ...state.features.equipments }
+  equipments.forEach(equipment => { newEquipments[equipment.feature.objectId] = equipment })
   return { ...state,
     features: { ...state.features,
-      equipmentNodes: state.features.equipmentNodes.concat(equipmentNodes)
+      equipments: newEquipments
     }
   }
 }
 
-function removeEquipmentNode (state, objectId) {
-  const indexToRemove = state.features.equipmentNodes.findIndex(equipmentNode => equipmentNode.objectId === objectId)
-  var newEquipmentNodes = [].concat(state.features.equipmentNodes)
-  newEquipmentNodes.splice(indexToRemove, 1)
+function removeTransactionEquipment (state, objectId) {
+  var newEquipments = { ...state.features.equipments }
+  delete newEquipments[objectId]
   return { ...state,
     features: { ...state.features,
-      equipmentNodes: newEquipmentNodes
+      equipments: newEquipments
+    }
+  }
+}
+
+function addTransactionEquipmentBoundary (state, equipmentBoundaries) {
+  var newEquipmentBoundaries = { ...state.features.boundaries }
+  equipmentBoundaries.forEach(boundary => { newEquipmentBoundaries[boundary.feature.objectId] = boundary })
+  return { ...state,
+    features: { ...state.features,
+      boundaries: newEquipmentBoundaries
+    }
+  }
+}
+
+function removeTransactionEquipmentBoundary (state, objectId) {
+  var newEquipmentBoundaries = { ...state.features.boundaries }
+  delete newEquipmentBoundaries[objectId]
+  return { ...state,
+    features: { ...state.features,
+      boundaries: newEquipmentBoundaries
     }
   }
 }
@@ -69,10 +90,16 @@ function planEditorReducer (state = defaultState, action) {
       return setTransaction(state, action.payload)
 
     case Actions.PLAN_EDITOR_ADD_EQUIPMENT_NODES:
-      return addEquipmentNodes(state, action.payload)
+      return addTransactionEquipment(state, action.payload)
 
     case Actions.PLAN_EDITOR_REMOVE_EQUIPMENT_NODE:
-      return removeEquipmentNode(state, action.payload)
+      return removeTransactionEquipment(state, action.payload)
+
+    case Actions.PLAN_EDITOR_ADD_EQUIPMENT_BOUNDARY:
+      return addTransactionEquipmentBoundary(state, action.payload)
+
+    case Actions.PLAN_EDITOR_REMOVE_EQUIPMENT_BOUNDARY:
+      return removeTransactionEquipmentBoundary(state, action.payload)
 
     case Actions.PLAN_EDITOR_SET_IS_CALCULATING_SUBNETS:
       return setIsCalculatingSubnets(state, action.payload)

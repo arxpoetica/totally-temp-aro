@@ -289,7 +289,6 @@ class PlanEditorController {
                   // todo: similar code to handleObjectCreated 
                   var attributes = result.data.attributes
                   const equipmentFeature = AroFeatureFactory.createObject(result.data)
-                  this.addEquipmentNodes([equipmentFeature])
                   var networkNodeEquipment = equipmentFeature.networkNodeEquipment
                   const locationIDs = attributes.internal_oid || null
                   var equipmentProperties = new EquipmentProperties(networkNodeEquipment.siteInfo.siteClli, networkNodeEquipment.siteInfo.siteName,
@@ -342,7 +341,6 @@ class PlanEditorController {
             attributes.selectedEquipmentType, networkNodeEquipment, feature.deploymentType, null, locationIDs)
           this.objectIdToProperties[feature.objectId] = properties
         })
-        this.addEquipmentNodes(typedEquipmentNodes)
         transactionFeatures.forEach((feature) => {
           this.getViewObjectSBTypes(feature.objectId)
         })
@@ -1054,7 +1052,6 @@ class PlanEditorController {
           .then((result) => {
             var attributes = result.data.attributes
             const equipmentFeature = AroFeatureFactory.createObject(result.data)
-            this.addEquipmentNodes([equipmentFeature])
             var networkNodeEquipment = equipmentFeature.networkNodeEquipment
             var equipmentProperties = null
             const locationIDs = attributes.internal_oid || null
@@ -1117,7 +1114,6 @@ class PlanEditorController {
         const equipmentNode = AroFeatureFactory.createObject({ dataType: 'equipment' })
         // --- new be sure to set subnet ---
         equipmentNode.objectId = mapObject.objectId
-        this.addEquipmentNodes([equipmentNode])
         var blankNetworkNodeEquipment = equipmentNode.networkNodeEquipment
         this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties('', '', feature.networkNodeType, this.lastSelectedEquipmentType, blankNetworkNodeEquipment, 'PLANNED', 'sewer')
         var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
@@ -1701,7 +1697,6 @@ class PlanEditorController {
       clearTransaction: () => dispatch(PlanEditorActions.clearTransaction()),
       commitTransaction: transactionId => dispatch(PlanEditorActions.commitTransaction(transactionId)),
       discardTransaction: transactionId => dispatch(PlanEditorActions.discardTransaction(transactionId)),
-      addEquipmentNodes: equipmentNodes => dispatch(PlanEditorActions.addEquipmentNodes(equipmentNodes)),
       setNetworkEquipmentLayerVisibility: (layer, isVisible) => dispatch(MapLayerActions.setNetworkEquipmentLayerVisibility('cables', layer, isVisible)),
       setIsCalculatingSubnets: isCalculatingSubnets => dispatch(PlanEditorActions.setIsCalculatingSubnets(isCalculatingSubnets)),
       setIsCreatingObject: isCreatingObject => dispatch(PlanEditorActions.setIsCreatingObject(isCreatingObject)),
