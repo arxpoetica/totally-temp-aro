@@ -32,7 +32,7 @@ export default class Ring {
         var geom = []
         var isFlatRing = false
         if (link.fromOid === link.toOid) isFlatRing = true
-        
+
         if (!isFlatRing) parsedRing.nodes.push(toNode)
 
         if (!link.geomPath || link.geomPath.length === 0) {
