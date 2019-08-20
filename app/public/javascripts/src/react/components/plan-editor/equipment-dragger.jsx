@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { PropTypes } from 'prop-types'
 import DraggableButton from './draggable-button.jsx'
+import Constants from './constants'
 
 export class EquipmentDragger extends Component {
   render () {
@@ -12,7 +13,7 @@ export class EquipmentDragger extends Component {
           <DraggableButton
             key={editableEquipmentType}
             icon={this.props.equipmentDefinitions[editableEquipmentType].iconUrl}
-            entityType={'networkEquipment'}
+            entityType={Constants.DRAG_DROP_NETWORK_EQUIPMENT}
             entityDetails={this.props.equipmentDefinitions[editableEquipmentType].networkNodeType}
             isBoundary={false}
           />

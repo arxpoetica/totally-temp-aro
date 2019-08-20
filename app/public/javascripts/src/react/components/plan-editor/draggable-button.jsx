@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { PropTypes } from 'prop-types'
 import { connect } from 'react-redux'
-import Constants from '../../common/constants'
+import Constants from './constants'
 import PlanEditorActions from './plan-editor-actions'
 
 export class DraggableButton extends Component {
@@ -39,10 +39,6 @@ export class DraggableButton extends Component {
     dragEvent.dataTransfer.setData(Constants.DRAG_DROP_GRAB_OFFSET_Y, dragEvent.nativeEvent.offsetY)
     dragEvent.dataTransfer.setData(Constants.DRAG_DROP_GRAB_ICON_W, this.state.imageWidth)
     dragEvent.dataTransfer.setData(Constants.DRAG_DROP_GRAB_ICON_H, this.state.imageHeight)
-
-    if (this.props.isBoundary) {
-      dragEvent.dataTransfer.setData(Constants.DRAG_IS_BOUNDARY, 'true')
-    }
     return true
   }
 
