@@ -10,6 +10,7 @@ import EquipmentBoundaryFeature from '../../../service-typegen/dist/EquipmentBou
 import TileUtilities from '../../tiles/tile-utilities.js'
 import PlanEditorActions from '../../../react/components/plan-editor/plan-editor-actions'
 import MapLayerActions from '../../../react/components/map-layers/map-layer-actions'
+import uuidStore from '../../../shared-utils/uuid-store'
 
 class PlanEditorController {
   constructor ($timeout, $http, $element, $filter, $ngRedux, state, Utils, tileDataService, tracker) {
@@ -491,7 +492,7 @@ class PlanEditorController {
           optimizationBody.spatialEdgeType, optimizationBody.directed, mapObject.featureType)
         // ToDo: this should use AroFeatureFactory
         var feature = {
-          objectId: this.utils.getUUID(),
+          objectId: uuidStore.getUUID(),
           networkNodeType: boundaryProperties.networkNodeType,
           networkObjectId: equipmentObjectId,
           geometry: {

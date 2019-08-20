@@ -4,6 +4,7 @@ import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import Constants from './constants'
 import MapUtils from '../../common/map-utils'
+import uuidStore from '../../../shared-utils/uuid-store'
 import './equipment-drop-target.css'
 
 export class EquipmentDropTarget extends Component {
@@ -51,7 +52,7 @@ export class EquipmentDropTarget extends Component {
       const networkNodeType = event.dataTransfer.getData(Constants.DRAG_DROP_ENTITY_DETAILS_KEY)
 
       const featureToCreate = {
-        objectId: '1',
+        objectId: uuidStore.getUUID(),
         geometry: {
           type: 'Point',
           coordinates: [dropLatLng.lng(), dropLatLng.lat()]
