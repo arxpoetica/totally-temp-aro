@@ -1,6 +1,6 @@
 import Actions from '../../common/actions'
 
-const defaultState = {
+const getDefaultState = () => ({
   isPlanEditorActive: false,
   transaction: null,
   features: {},
@@ -9,7 +9,7 @@ const defaultState = {
   isCalculatingSubnets: false,
   isCreatingObject: false,
   isModifyingObject: false
-}
+})
 
 function setTransaction (state, transaction) {
   return { ...state,
@@ -19,7 +19,7 @@ function setTransaction (state, transaction) {
 }
 
 function clearTransaction () {
-  return JSON.parse(JSON.stringify(defaultState))
+  return getDefaultState()
 }
 
 function addTransactionEquipment (state, equipments) {
@@ -88,7 +88,7 @@ function setIsModifyingObject (state, isModifyingObject) {
   }
 }
 
-function planEditorReducer (state = defaultState, action) {
+function planEditorReducer (state = getDefaultState(), action) {
   switch (action.type) {
     case Actions.PLAN_EDITOR_CLEAR_TRANSACTION:
       return clearTransaction()

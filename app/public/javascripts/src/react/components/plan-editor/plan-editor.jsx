@@ -3,6 +3,7 @@ import { PropTypes } from 'prop-types'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import PlanEditorActions from './plan-editor-actions'
+import EquipmentDragger from './equipment-dragger.jsx'
 
 export class PlanEditor extends Component {
   render () {
@@ -25,6 +26,7 @@ export class PlanEditor extends Component {
             <i className='fa fa-times-circle' />&nbsp;&nbsp;Discard
           </button>
         </div>
+        <EquipmentDragger />
       </div>
     </div>
   }
