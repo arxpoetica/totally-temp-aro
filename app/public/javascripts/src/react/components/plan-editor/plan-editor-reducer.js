@@ -3,10 +3,9 @@ import Actions from '../../common/actions'
 const defaultState = {
   isPlanEditorActive: false,
   transaction: null,
-  features: {
-    equipments: {},
-    boundaries: {}
-  },
+  features: {},
+  equipments: new Set(),
+  boundaries: new Set(),
   isCalculatingSubnets: false,
   isCreatingObject: false,
   isModifyingObject: false
@@ -24,42 +23,50 @@ function clearTransaction () {
 }
 
 function addTransactionEquipment (state, equipments) {
-  var newEquipments = { ...state.features.equipments }
-  equipments.forEach(equipment => { newEquipments[equipment.feature.objectId] = equipment })
+  var newFeatures = { ...state.features }
+  var newEquipments = new Set(state.equipments)
+  equipments.forEach(equipment => {
+    newFeatures[equipment.feature.objectId] = equipment
+    newEquipments.add(equipment.feature.objectId)
+  })
   return { ...state,
-    features: { ...state.features,
-      equipments: newEquipments
-    }
+    features: newFeatures,
+    equipments: newEquipments
   }
 }
 
 function removeTransactionEquipment (state, objectId) {
-  var newEquipments = { ...state.features.equipments }
-  delete newEquipments[objectId]
+  var newFeatures = { ...state.features }
+  delete newFeatures[objectId]
+  var newEquipments = new Set(state.equipments)
+  newEquipments.remove(objectId)
   return { ...state,
-    features: { ...state.features,
-      equipments: newEquipments
-    }
+    features: newFeatures,
+    equipments: newEquipments
   }
 }
 
 function addTransactionEquipmentBoundary (state, equipmentBoundaries) {
-  var newEquipmentBoundaries = { ...state.features.boundaries }
-  equipmentBoundaries.forEach(boundary => { newEquipmentBoundaries[boundary.feature.objectId] = boundary })
+  var newFeatures = { ...state.features }
+  var newEquipmentBoundaries = new Set(state.boundaries)
+  equipmentBoundaries.forEach(boundary => {
+    newFeatures[boundary.feature.objectId] = boundary
+    newEquipmentBoundaries.add(boundary.feature.objectId)
+  })
   return { ...state,
-    features: { ...state.features,
-      boundaries: newEquipmentBoundaries
-    }
+    features: newFeatures,
+    boundaries: newEquipmentBoundaries
   }
 }
 
 function removeTransactionEquipmentBoundary (state, objectId) {
-  var newEquipmentBoundaries = { ...state.features.boundaries }
-  delete newEquipmentBoundaries[objectId]
+  var newFeatures = { ...state.features }
+  delete newFeatures[objectId]
+  var newEquipmentBoundaries = new Set(state.boundaries)
+  newEquipmentBoundaries.remove(objectId)
   return { ...state,
-    features: { ...state.features,
-      boundaries: newEquipmentBoundaries
-    }
+    features: newFeatures,
+    boundaries: newEquipmentBoundaries
   }
 }
 
