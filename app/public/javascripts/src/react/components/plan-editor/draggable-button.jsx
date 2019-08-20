@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import { PropTypes } from 'prop-types'
+import { connect } from 'react-redux'
 import Constants from '../../common/constants'
+import PlanEditorActions from './plan-editor-actions'
 
 export class DraggableButton extends Component {
   constructor (props) {
@@ -10,13 +12,16 @@ export class DraggableButton extends Component {
       imageHeight: 0
     }
     this.onImageLoad = this.onImageLoad.bind(this)
+    this.handleDragStart = this.handleDragStart.bind(this)
+    this.handleDragEnd = this.handleDragEnd.bind(this)
   }
 
   render () {
     return <button
       className='btn btn-light'
-      style={{ border: 'none' }}
-      onDragStart={dragEvent => this.handleDragEvent(dragEvent)}
+      style={{ border: 'none', background: 'none' }}
+      onDragStart={this.handleDragStart}
+      onDragEnd={this.handleDragEnd}
     >
       <img
         src={this.props.icon}
@@ -25,7 +30,8 @@ export class DraggableButton extends Component {
     </button>
   }
 
-  handleDragEvent (dragEvent) {
+  handleDragStart (dragEvent) {
+    this.props.startDragging()
     dragEvent.dataTransfer.setData(Constants.DRAG_DROP_ENTITY_KEY, this.props.entityType)
     dragEvent.dataTransfer.setData(Constants.DRAG_DROP_ENTITY_DETAILS_KEY, this.props.entityDetails)
 
@@ -38,6 +44,10 @@ export class DraggableButton extends Component {
       dragEvent.dataTransfer.setData(Constants.DRAG_IS_BOUNDARY, 'true')
     }
     return true
+  }
+
+  handleDragEnd () {
+    this.props.stopDragging()
   }
 
   onImageLoad (e) {
@@ -55,4 +65,13 @@ DraggableButton.propTypes = {
   isBoundary: PropTypes.bool
 }
 
-export default DraggableButton
+const mapStateToProps = (state) => ({
+})
+
+const mapDispatchToProps = dispatch => ({
+  startDragging: () => dispatch(PlanEditorActions.setIsDraggingFeatureForDrop(true)),
+  stopDragging: () => dispatch(PlanEditorActions.setIsDraggingFeatureForDrop(false))
+})
+
+const DraggableButtonComponent = connect(mapStateToProps, mapDispatchToProps)(DraggableButton)
+export default DraggableButtonComponent
