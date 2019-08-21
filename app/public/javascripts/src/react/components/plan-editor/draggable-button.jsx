@@ -3,6 +3,7 @@ import { PropTypes } from 'prop-types'
 import { connect } from 'react-redux'
 import Constants from './constants'
 import PlanEditorActions from './plan-editor-actions'
+import './draggable-button.css'
 
 export class DraggableButton extends Component {
   constructor (props) {
@@ -18,8 +19,7 @@ export class DraggableButton extends Component {
 
   render () {
     return <button
-      className='btn btn-light'
-      style={{ border: 'none', background: 'none' }}
+      className='btn btn-light draggable-button'
       onDragStart={this.handleDragStart}
       onDragEnd={this.handleDragEnd}
     >

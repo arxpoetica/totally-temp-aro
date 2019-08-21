@@ -5,27 +5,60 @@ import DraggableButton from './draggable-button.jsx'
 import Constants from './constants'
 
 export class EquipmentDragger extends Component {
+  constructor (props) {
+    super(props)
+    this.state = {
+      selectedEquipmentType: null
+    }
+  }
+
+  componentDidMount () {
+    this.setState({
+      selectedEquipmentType: this.getEditableEquipmentTypes()[0]
+    })
+  }
+
   render () {
     const editableEquipmentTypes = this.getEditableEquipmentTypes()
+    const selectedEquipmentType = this.state.selectedEquipmentType || editableEquipmentTypes[0]
     return <div>
-      {
-        editableEquipmentTypes.map(editableEquipmentType => (
-          <DraggableButton
-            key={editableEquipmentType}
-            icon={this.props.equipmentDefinitions[editableEquipmentType].iconUrl}
-            entityType={Constants.DRAG_DROP_NETWORK_EQUIPMENT}
-            entityDetails={this.props.equipmentDefinitions[editableEquipmentType].networkNodeType}
-            isBoundary={false}
-          />
-        ))
-      }
+      <div className='d-flex flex-row' style={{ alignItems: 'center' }}>
+
+        {/* The button that will be dragged onto the map */}
+        <DraggableButton
+          className='flex-grow-0 m-3'
+          key={this.state.selectedEquipmentType}
+          icon={this.props.equipmentDefinitions[selectedEquipmentType].iconUrl}
+          entityType={Constants.DRAG_DROP_NETWORK_EQUIPMENT}
+          entityDetails={this.props.equipmentDefinitions[selectedEquipmentType].networkNodeType}
+          isBoundary={false}
+        />
+
+        {/* A dropdown to select the equipment type to drag */}
+        <select
+          className='flex-grow-1 m-2 form-control'
+          value={selectedEquipmentType}
+          onChange={e => this.setState({ selectedEquipmentType: e.target.value })}
+        >
+          {
+            editableEquipmentTypes.map(editableEquipmentType => <option key={editableEquipmentType} value={editableEquipmentType}>
+              {this.props.equipmentDefinitions[editableEquipmentType].label}
+            </option>)
+          }
+        </select>
+
+        {/* Help text */}
+        <div className='flex-shrink-0 m-3'>
+          (drag icon onto map)
+        </div>
+      </div>
     </div>
   }
 
   getEditableEquipmentTypes () {
     const editableNetworkNodeTypes = new Set([
-      'central_office',
       'dslam',
+      'central_office',
       'fiber_distribution_hub',
       'fiber_distribution_terminal',
       'cell_5g',
