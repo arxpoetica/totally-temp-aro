@@ -19,5 +19,5 @@ function getLocationInfo (planId,id) {
 
 
 export default {
-  getLocationInfo: getLocationInfo,
+  getLocationInfo: getLocationInfo
 }
