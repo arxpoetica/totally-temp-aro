@@ -7,6 +7,9 @@ import LocationInfoActions from './locationInfo-actions'
 export class LocationInfo extends Component {
   constructor (props) {
     super(props)
+    this.state = {
+      locationInfo: props.locationInfoDetails,
+    }
   }
 
   componentDidUpdate (prevProps) {
@@ -17,6 +20,7 @@ export class LocationInfo extends Component {
     if (newLocationId !== oldLocationId) {
       // We have exactly one location selected. Get the location details
       console.log(`Exactly one location selected. Getting details for id ${newLocationId}`)
+      this.props.getLocationInfo(this.props.planId,newLocationId)
     }
   }
 
@@ -59,13 +63,13 @@ export class LocationInfo extends Component {
           <tr>
             <td>HouseHold Count</td>
             <td>
-             kk
+             {this.props.planId}
             </td>
           </tr>
           <tr>
             <td>HouseHold IDs</td>
             <td>
-             kk
+            {this.state.locationInfo.number_of_households}
             </td>
           </tr>
           <tr>
@@ -99,16 +103,18 @@ export class LocationInfo extends Component {
 }
 
 LocationInfo.propTypes = {
-  planId: PropTypes.number
+  planId: PropTypes.number,
+  selectedLocations: PropTypes.number
 }
 
 const mapStateToProps = state => ({
   planId: state.plan.activePlan && state.plan.activePlan.id,
-  selectedLocations: state.selection.locations
+  selectedLocations: state.selection.locations,
+  locationInfoDetails: state.locationInfo.planId
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  getLocationInfo: planId => dispatch(LocationInfoActions.getLocationInfo(planId, "1"))
+  getLocationInfo: (planId,selectedLocations) => dispatch(LocationInfoActions.getLocationInfo(planId, selectedLocations))
 })
 
 const LocationInfoComponent = wrapComponentWithProvider(reduxStore, LocationInfo, mapStateToProps, mapDispatchToProps)
