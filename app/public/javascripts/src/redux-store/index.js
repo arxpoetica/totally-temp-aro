@@ -25,6 +25,8 @@ import user from '../react/components/user/user-reducer'
 
 import ringEdit from '../react/components/ring-edit/ring-edit-reducer'
 
+import locationInfo from '../react/components/location-info/locationInfo-reducer'
+
 const logger = createLogger({
   level: 'info',
   collapsed: true
@@ -43,7 +45,8 @@ let reducer = combineReducers({
   selection,
   user,
   form, 
-  ringEdit
+  ringEdit,
+  locationInfo
 })
 
 // Add support for Redux devtools extension. Yes, even in production.
