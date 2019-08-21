@@ -9,6 +9,17 @@ export class LocationInfo extends Component {
     super(props)
   }
 
+  componentDidUpdate (prevProps) {
+    // We can have multiple locations for the same point (e.g. when we have multiple households at the same lat long)
+    // In this case show the properties of the first point
+    const oldLocationId = prevProps.selectedLocations.values().next().value
+    const newLocationId = this.props.selectedLocations.values().next().value
+    if (newLocationId !== oldLocationId) {
+      // We have exactly one location selected. Get the location details
+      console.log(`Exactly one location selected. Getting details for id ${newLocationId}`)
+    }
+  }
+
   render () {
     return <div>
       <table id='table-coverage-initializer' className='table table-sm table-striped sidebar-options-table'>
@@ -92,7 +103,8 @@ LocationInfo.propTypes = {
 }
 
 const mapStateToProps = state => ({
-  planId: state.plan.activePlan && state.plan.activePlan.id
+  planId: state.plan.activePlan && state.plan.activePlan.id,
+  selectedLocations: state.selection.locations
 })
 
 const mapDispatchToProps = (dispatch) => ({

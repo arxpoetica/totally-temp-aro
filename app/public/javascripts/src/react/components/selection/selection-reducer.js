@@ -19,7 +19,8 @@ const defaultState = {
     locations: {},
     serviceAreas: {},
     analysisAreas: {}
-  }
+  },
+  locations: new Set()
 }
 
 function setActiveSelectionModeById (state, newSelectionModeId) {
@@ -100,6 +101,12 @@ function addPlanTargetDescriptions (state, planTargetDescriptions) {
   return newState
 }
 
+function addLocations (state, locationIds) {
+  return { ...state,
+    locations: new Set(locationIds)
+  }
+}
+
 function selectionReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.SELECTION_SET_ACTIVE_MODE:
@@ -116,6 +123,9 @@ function selectionReducer (state = defaultState, action) {
 
     case Actions.SELECTION_ADD_PLAN_TARGET_DESCRIPTIONS:
       return addPlanTargetDescriptions(state, action.payload)
+
+    case Actions.SELECTION_SET_LOCATIONS:
+      return addLocations(state, action.payload)
 
     default:
       return state
