@@ -97,10 +97,18 @@ function removePlanTargets (planId, planTargets) {
   }
 }
 
+function setLocations (locationIds) {
+  return {
+    type: Actions.SELECTION_SET_LOCATIONS,
+    payload: locationIds
+  }
+}
+
 export default {
-  setActiveSelectionMode: setActiveSelectionMode,
-  clearAllPlanTargets: clearAllPlanTargets,
-  loadPlanTargetSelectionsFromServer: loadPlanTargetSelectionsFromServer,
-  addPlanTargets: addPlanTargets,
-  removePlanTargets: removePlanTargets
+  setActiveSelectionMode,
+  clearAllPlanTargets,
+  loadPlanTargetSelectionsFromServer,
+  addPlanTargets,
+  removePlanTargets,
+  setLocations
 }
