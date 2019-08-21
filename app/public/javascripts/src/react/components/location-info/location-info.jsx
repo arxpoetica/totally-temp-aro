@@ -1,17 +1,14 @@
 import React, { Component } from 'react'
-// import { PropTypes } from 'prop-types'
-// import { createSelector } from 'reselect'
-// import reduxStore from '../../../redux-store'
-// import wrapComponentWithProvider from '../../common/provider-wrapped-component'
-// import CoverageActions from './coverage-actions'
-// import SelectionActions from '../selection/selection-actions'
-// import PlanTargetList from '../selection/plan-target-list.jsx'
+import { PropTypes } from 'prop-types'
+import reduxStore from '../../../redux-store'
+import wrapComponentWithProvider from '../../common/provider-wrapped-component'
+import LocationInfoActions from './locationInfo-actions'
 
 export class LocationInfo extends Component {
   constructor (props) {
     super(props)
   }
-  
+
   render () {
     return <div>
       <table id='table-coverage-initializer' className='table table-sm table-striped sidebar-options-table'>
@@ -92,43 +89,18 @@ export class LocationInfo extends Component {
   }
 }
 
-// CoverageInitializer.propTypes = {
-//   activeSelectionModeId: PropTypes.string,
-//   selectionModes: PropTypes.array,
-//   coverageType: PropTypes.string,
-//   groupKeyType: PropTypes.string,
-//   useMarketableTechnologies: PropTypes.bool,
-//   useMaxSpeed: PropTypes.bool,
-//   useExistingFiber: PropTypes.bool,
-//   usePlannedFiber: PropTypes.bool,
-//   coverageReport: PropTypes.object
-// }
+LocationInfo.propTypes = {
+  planId: PropTypes.string,
+}
 
-// const getAllSelectionModes = state => state.selection.selectionModes
-// const getAllowedSelectionModes = createSelector([getAllSelectionModes],
-//   (selectionModes) => selectionModes.filter(item => item.id !== 'SELECTED_LOCATIONS'))
 
-// const mapStateToProps = state => ({
-//   activeSelectionModeId: state.selection.activeSelectionMode.id,
-//   selectionModes: getAllowedSelectionModes(state),
-//   coverageType: state.coverage.initializationParams.coverageType,
-//   groupKeyType: state.coverage.initializationParams.groupKeyType,
-//   useMarketableTechnologies: state.coverage.initializationParams.useMarketableTechnologies,
-//   useMaxSpeed: state.coverage.initializationParams.useMaxSpeed,
-//   useExistingFiber: state.coverage.initializationParams.useExistingFiber,
-//   usePlannedFiber: state.coverage.initializationParams.usePlannedFiber,
-//   coverageReport: state.coverage.report
-// })
+const mapStateToProps = state => ({
+  planId: state.plan.activePlan.id,
+})
 
-// const mapDispatchToProps = (dispatch) => ({
-//   setCoverageType: coverageType => dispatch(CoverageActions.setCoverageType(coverageType)),
-//   setGroupKeyType: groupKeyType => dispatch(CoverageActions.setGroupKeyType(groupKeyType)),
-//   setLimitMarketableTechnology: limitMarketableTechnology => dispatch(CoverageActions.setLimitMarketableTechnology(limitMarketableTechnology)),
-//   setLimitMaxSpeed: limitMaxSpeed => dispatch(CoverageActions.setLimitMaxSpeed(limitMaxSpeed)),
-//   setExistingFiber: existingFiber => dispatch(CoverageActions.setExistingFiber(existingFiber)),
-//   setPlannedFiber: plannedFiber => dispatch(CoverageActions.setPlannedFiber(plannedFiber)),
-//   setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId))
-// })
+const mapDispatchToProps = (dispatch) => ({
+  getLocationInfo: planId => dispatch(LocationInfoActions.getLocationInfo(planId,"1")),
+})
 
-//const CoverageInitializerComponent = wrapComponentWithProvider(reduxStore, CoverageInitializer, mapStateToProps, mapDispatchToProps)
-export default LocationInfo
+const LocationInfoComponent = wrapComponentWithProvider(reduxStore, LocationInfo, mapStateToProps, mapDispatchToProps)
+export default LocationInfoComponent

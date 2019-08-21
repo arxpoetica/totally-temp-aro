@@ -133,7 +133,7 @@ const Actions = Object.freeze({
   RING_UPDATE_RING: 'RING_UPDATE_RING',
 
   //Location Info
-  LOCATIONINFO: 'LOCATIONINFO'
+  LOCATIONINFO_SHOW: 'LOCATIONINFO_SHOW'
 })
 
 export default Actions
