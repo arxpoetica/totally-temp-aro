@@ -83,23 +83,20 @@ export class LocationInfo extends Component {
           </tr>
         </tbody>
       </table>
-
-     
     </div>
   }
 }
 
 LocationInfo.propTypes = {
-  planId: PropTypes.string,
+  planId: PropTypes.number
 }
 
-
 const mapStateToProps = state => ({
-  planId: state.plan.activePlan.id,
+  planId: state.plan.activePlan && state.plan.activePlan.id
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  getLocationInfo: planId => dispatch(LocationInfoActions.getLocationInfo(planId,"1")),
+  getLocationInfo: planId => dispatch(LocationInfoActions.getLocationInfo(planId, "1"))
 })
 
 const LocationInfoComponent = wrapComponentWithProvider(reduxStore, LocationInfo, mapStateToProps, mapDispatchToProps)
