@@ -241,7 +241,7 @@ class TileDataService {
 
         tileData.v2FilterIcons = {}
         for (iResult = 0; iResult < filterIconUrls.length; ++iResult) {
-          const iconResult = results[numDataResults + iResult]
+          const iconResult = results.splice(0, 1)[0]
           tileData.v2FilterIcons[filterIconUrls[iResult]] = iconResult
         }
 
