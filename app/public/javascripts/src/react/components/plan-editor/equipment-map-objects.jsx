@@ -25,13 +25,8 @@ export class EquipmentMapObjects extends Component {
     const idsToCreate = [...allEquipmentIds].filter(objectId => !createdIds.has(objectId))
     const idsToDelete = [...createdIds].filter(objectId => !allEquipmentIds.has(objectId))
     const idsToUpdate = [...allEquipmentIds].filter(objectId => createdIds.has(objectId))
-    console.log('----- Creating map objects')
-    console.log(idsToCreate)
     idsToCreate.forEach(objectId => this.createMapObject(objectId))
-    console.log('----- Deleting map objects')
-    console.log(idsToDelete)
-    console.log('----- Updating map objects')
-    console.log(idsToUpdate)
+    idsToDelete.forEach(objectId => this.deleteMapObject(objectId))
     idsToUpdate.forEach(objectId => this.updateMapObjectPosition(objectId))
   }
 
