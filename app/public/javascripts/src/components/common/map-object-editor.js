@@ -1,5 +1,5 @@
 import Constants from './constants'
-import WorkflowState from './workflow-state'
+import WorkflowState from '../../shared-utils/workflow-state'
 import MapUtilities from './plan/map-utilities'
 import FeatureSelector from '../tiles/feature-selector'
 import Utilities from './utilities'

@@ -71,6 +71,20 @@ function removeTransactionEquipmentBoundary (state, objectId) {
   }
 }
 
+function modifyTransactionEquipments (state, newEquipments) {
+  var newFeatures = { ...state.features }
+  newEquipments.forEach(equipment => {
+    if (newFeatures[equipment.feature.objectId]) {
+      newFeatures[equipment.feature.objectId] = equipment
+    } else {
+      throw new Error(`Trying to modify equipment with objectId ${equipment.feature.objectId}, but it is not in the existing list of equipments`)
+    }
+  })
+  return { ...state,
+    features: newFeatures
+  }
+}
+
 function setIsCalculatingSubnets (state, isCalculatingSubnets) {
   return { ...state,
     isCalculatingSubnets: isCalculatingSubnets
@@ -114,6 +128,9 @@ function planEditorReducer (state = getDefaultState(), action) {
 
     case Actions.PLAN_EDITOR_REMOVE_EQUIPMENT_BOUNDARY:
       return removeTransactionEquipmentBoundary(state, action.payload)
+
+    case Actions.PLAN_EDITOR_MODIFY_EQUIPMENT_NODES:
+      return modifyTransactionEquipments(state, action.payload)
 
     case Actions.PLAN_EDITOR_SET_IS_CALCULATING_SUBNETS:
       return setIsCalculatingSubnets(state, action.payload)

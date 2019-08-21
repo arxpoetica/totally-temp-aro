@@ -1,6 +1,6 @@
 import { createSelector } from 'reselect'
 
-import WorkflowState from '../../common/workflow-state'
+import WorkflowState from '../../../shared-utils/workflow-state'
 import MapLayerActions from '../../../react/components/map-layers/map-layer-actions'
 
 // We need a selector, else the .toJS() call will create an infinite digest loop

@@ -61,10 +61,10 @@ function discardTransaction (transactionId) {
   }
 }
 
-function createEquipment (transactionId, equipment) {
+function createEquipment (transactionId, feature) {
   return dispatch => {
     // Do a POST to send the equipment over to service
-    AroHttp.post(`/service/plan-transactions/${transactionId}/modified-features/equipment`, equipment)
+    AroHttp.post(`/service/plan-transactions/${transactionId}/modified-features/equipment`, feature)
       .then(result => {
         // Decorate the created equipment with some default values
         const createdEquipment = {
@@ -74,6 +74,25 @@ function createEquipment (transactionId, equipment) {
           feature: result.data
         }
         dispatch(addTransactionEquipment([createdEquipment]))
+      })
+      .catch(err => console.error(err))
+  }
+}
+
+function modifyEquipment (transactionId, equipment) {
+  return dispatch => {
+    // Do a PUT to send the equipment over to service
+    AroHttp.put(`/service/plan-transactions/${transactionId}/modified-features/equipment`, equipment.feature)
+      .then(result => {
+        // Decorate the created equipment with some default values
+        const newEquipment = {
+          ...equipment,
+          feature: result.data
+        }
+        dispatch({
+          type: Actions.PLAN_EDITOR_MODIFY_EQUIPMENT_NODES,
+          payload: [newEquipment]
+        })
       })
       .catch(err => console.error(err))
   }
@@ -141,6 +160,7 @@ export default {
   discardTransaction,
   resumeOrCreateTransaction,
   createEquipment,
+  modifyEquipment,
   addTransactionEquipment,
   removeTransactionEquipment,
   addTransactionEquipmentBoundary,

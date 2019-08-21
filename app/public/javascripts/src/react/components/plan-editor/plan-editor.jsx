@@ -4,6 +4,7 @@ import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import PlanEditorActions from './plan-editor-actions'
 import EquipmentDragger from './equipment-dragger.jsx'
+import EquipmentMapObjects from './equipment-map-objects.jsx'
 
 export class PlanEditor extends Component {
   render () {
@@ -28,6 +29,7 @@ export class PlanEditor extends Component {
         </div>
         <EquipmentDragger />
       </div>
+      <EquipmentMapObjects />
     </div>
   }
 
