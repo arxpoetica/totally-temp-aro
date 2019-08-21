@@ -5,6 +5,7 @@ import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import Constants from './constants'
 import MapUtils from '../../common/map-utils'
 import uuidStore from '../../../shared-utils/uuid-store'
+import PlanEditorActions from './plan-editor-actions'
 import './equipment-drop-target.css'
 
 export class EquipmentDropTarget extends Component {
@@ -57,24 +58,51 @@ export class EquipmentDropTarget extends Component {
           type: 'Point',
           coordinates: [dropLatLng.lng(), dropLatLng.lat()]
         },
-        networkNodeType: networkNodeType
+        networkNodeType: networkNodeType,
+        dataType: 'equipment',
+        target_type: 'sewer',
+        attributes: {
+          siteName: '',
+          siteIdentifier: '',
+          selectedEquipmentType: 'Generic ADSL'
+        },
+        networkNodeEquipment: {
+          siteInfo: {
+            siteClli: '',
+            siteName: '',
+            address: '',
+            dpiEnvironment: '',
+            hsiOfficeCode: '',
+            hsiEnabled: true,
+            t1: false,
+            fiberAvailable: false,
+            physicallyLinked: false
+          },
+          existingEquipment: [],
+          plannedEquipment: [],
+          notes: ''
+        },
+        deploymentType: 'PLANNED'
       }
-      console.log(featureToCreate)
+      this.props.createEquipment(this.props.transactionId, featureToCreate)
     }
   }
 }
 
 EquipmentDropTarget.propTypes = {
+  transactionId: PropTypes.number,
   isDraggingFeatureForDrop: PropTypes.bool,
   googleMaps: PropTypes.object
 }
 
 const mapStateToProps = state => ({
+  transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
   isDraggingFeatureForDrop: state.planEditor.isDraggingFeatureForDrop,
   googleMaps: state.map.googleMaps
 })
 
 const mapDispatchToProps = dispatch => ({
+  createEquipment: (transactionId, equipment) => dispatch(PlanEditorActions.createEquipment(transactionId, equipment))
 })
 
 const EquipmentDropTargetComponent = wrapComponentWithProvider(reduxStore, EquipmentDropTarget, mapStateToProps, mapDispatchToProps)

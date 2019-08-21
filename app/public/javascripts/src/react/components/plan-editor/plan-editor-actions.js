@@ -61,6 +61,24 @@ function discardTransaction (transactionId) {
   }
 }
 
+function createEquipment (transactionId, equipment) {
+  return dispatch => {
+    // Do a POST to send the equipment over to service
+    AroHttp.post(`/service/plan-transactions/${transactionId}/modified-features/equipment`, equipment)
+      .then(result => {
+        // Decorate the created equipment with some default values
+        const createdEquipment = {
+          crudAction: 'create',
+          deleted: false,
+          valid: true,
+          feature: result.data
+        }
+        dispatch(addTransactionEquipment([createdEquipment]))
+      })
+      .catch(err => console.error(err))
+  }
+}
+
 function addTransactionEquipment (equipmentNodes) {
   return {
     type: Actions.PLAN_EDITOR_ADD_EQUIPMENT_NODES,
@@ -122,6 +140,7 @@ export default {
   clearTransaction,
   discardTransaction,
   resumeOrCreateTransaction,
+  createEquipment,
   addTransactionEquipment,
   removeTransactionEquipment,
   addTransactionEquipmentBoundary,
