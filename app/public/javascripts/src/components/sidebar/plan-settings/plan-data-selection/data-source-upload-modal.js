@@ -71,7 +71,6 @@ class DataSourceUploadController {
     })
     
     // ---
-    
     this.tableSource = this.uploadSource = this.state.uploadDataSource
     this.tableSources = angular.copy(this.uploadDataSources)
     this.rootSourceDescs = {}
@@ -134,7 +133,7 @@ class DataSourceUploadController {
   modalShown () {
     this.state.showDataSourceUploadModal.next(true)
     
-    this.tableSource = this.uploadSource = this.uploadDataSources[0]
+    this.tableSource = this.uploadSource = this.state.uploadDataSource = this.uploadDataSources[0]
     this.tableSources = [{'label':'all', 'name':'all'}].concat( this.uploadDataSources )
     // some of the sources are alaises for others (construction_location for location)
     // and we want to avoid duplications 

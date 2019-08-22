@@ -4,8 +4,8 @@ import Constants from '../../common/constants'
 import AroFeatureFactory from '../../../service-typegen/dist/AroFeatureFactory'
 import TrackedEquipment from '../../../service-typegen/dist/TrackedEquipment'
 import EquipmentComponent from '../../../service-typegen/dist/EquipmentComponent'
-import EquipmentFeature from '../../../service-typegen/dist/EquipmentFeature'
-import EquipmentBoundaryFeature from '../../../service-typegen/dist/EquipmentBoundaryFeature'
+// import EquipmentFeature from '../../../service-typegen/dist/EquipmentFeature'
+// import EquipmentBoundaryFeature from '../../../service-typegen/dist/EquipmentBoundaryFeature'
 // import MarketableEquipment from '../../../service-typegen/dist/MarketableEquipment'
 import TileUtilities from '../../tiles/tile-utilities.js'
 import PlanEditorActions from '../../../react/components/plan-editor/plan-editor-actions'
@@ -143,7 +143,8 @@ class PlanEditorController {
             if (objectProperties.connectedLocations.hasOwnProperty(locationId)) {
               delete objectProperties.connectedLocations[locationId]
               this.saveSelectedEquipmentProperties()
-              this.highlightLocations(Object.keys(objectProperties.connectedLocations), selectedLatLng)
+              this.clearLocationHighlights([locationId])
+              // this.highlightLocations(Object.keys(objectProperties.connectedLocations), selectedLatLng)
             } else {
               // check if the previous connector is in the transaction
               // if not get it and add it
@@ -162,8 +163,6 @@ class PlanEditorController {
     })
 
     this.keyClickObserver = this.state.mapFeaturesKeyClickedEvent.skip(1).subscribe((hitFeatures) => {
-      console.log('key click')
-      console.log(hitFeatures)
       // select multiple of same type, onlt for certain types (currently only Location Connectors)
       // for the moment we'll just look at equipment
       this.onMultiSelect(hitFeatures.equipmentFeatures, hitFeatures.latLng)
@@ -174,21 +173,19 @@ class PlanEditorController {
       if (hitFeatures.locations && hitFeatures.locations.length > 0) {
         var locationId = hitFeatures.locations[0].objectId || hitFeatures.locations[0].object_id
 
-        this.$http.post(`/service/ring/plan-transaction/${this.currentTransaction.id}/ring/location-equipment/query-cmd`, {"locationIds": [locationId]})
+        this.$http.post(`/service/ring/plan-transaction/${this.currentTransaction.id}/ring/location-equipment/query-cmd`, { 'locationIds': [locationId] })
           .then((results) => {
             if (results.data && results.data.length > 0 && results.data[0].equipmentId) {
               const equipmentId = results.data[0].equipmentId
               if (!this.selectProposedFeature(equipmentId)) {
-              
                 this.$http.get(`/service/plan-feature/${this.state.plan.id}/equipment/${equipmentId}?userId=${this.state.loggedInUser.id}`)
                   .then(result => {
                     if (result.data && result.data.geometry) {
-
                       // ToDo: this is kind of janky
                       var hitFeatures = {
                         latLng: {
-                          lat: () => {return result.data.geometry.coordinates[1]},
-                          lng: () => {return result.data.geometry.coordinates[0]}
+                          lat: () => { return result.data.geometry.coordinates[1] },
+                          lng: () => { return result.data.geometry.coordinates[0] }
                         },
                         equipmentFeatures: [{
                           is_deleted: 'false',
@@ -198,7 +195,7 @@ class PlanEditorController {
                           _data_type: 'equipment.location_connector'
                         }]
                       }
-                      
+
                       this.state.mapFeaturesSelectedEvent.next(hitFeatures)
                     }
                   })
@@ -274,7 +271,7 @@ class PlanEditorController {
   }
 
   removeLocationFromConnector (locationId) {
-    return this.$http.post(`/service/ring/plan-transaction/${this.currentTransaction.id}/ring/location-equipment/query-cmd`, {"locationIds": [locationId]})
+    return this.$http.post(`/service/ring/plan-transaction/${this.currentTransaction.id}/ring/location-equipment/query-cmd`, { 'locationIds': [locationId] })
       .then((results) => {
         if (results.data && results.data.length > 0 && results.data[0].equipmentId) {
           const equipmentId = results.data[0].equipmentId
@@ -287,7 +284,7 @@ class PlanEditorController {
             this.$http.get(`/service/plan-feature/${this.state.plan.id}/equipment/${equipmentId}?userId=${this.state.loggedInUser.id}`)
               .then(result => {
                 if (result.data) {
-                  // todo: similar code to handleObjectCreated 
+                  // todo: similar code to handleObjectCreated
                   var attributes = result.data.attributes
                   const equipmentFeature = AroFeatureFactory.createObject(result.data)
                   var networkNodeEquipment = equipmentFeature.networkNodeEquipment
@@ -540,7 +537,7 @@ class PlanEditorController {
 
     // optimizationBody.spatialEdgeType = spatialEdgeType;
     optimizationBody.directed = directed // directed analysis if thats what the user wants
-    
+
     this.isWorkingOnCoverage = true
     this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
       .then((result) => {
@@ -593,7 +590,7 @@ class PlanEditorController {
     // Format the object and send it over to aro-service
     var mapObject = this.objectIdToMapObject[objectId]
     var objectProperties = this.objectIdToProperties[objectId]
-    
+
     var serviceFeature = {
       objectId: objectId,
       /*
@@ -767,15 +764,15 @@ class PlanEditorController {
 
   // ToDo: change this out for a dynamic version
   getNewListItem (type) {
-    if (type == 'plannedEquipment' || type == 'subComponents') {
+    if (type === 'plannedEquipment' || type === 'subComponents') {
       return new EquipmentComponent()
     }
 
-    if (type == 'existingEquipment') {
+    if (type === 'existingEquipment') {
       return new TrackedEquipment()
     }
 
-    if (type == 'marketableEquipments') {
+    if (type === 'marketableEquipments') {
       console.log('marketableEquipments is no more')
       // return new MarketableEquipment()
     }
@@ -808,7 +805,7 @@ class PlanEditorController {
   }
 
   highlightLocations (locationIds, hubLatLng) {
-    if (locationIds && typeof locationIds === 'object') { 
+    if (locationIds && typeof locationIds === 'object') {
       this.getLocationsInfoPromise(locationIds)
         .then(result => {
           locationIds.forEach((locationId) => {
@@ -871,27 +868,28 @@ class PlanEditorController {
     this.isEditFeatureProps = false
     this.viewSiteBoundaryEventFeature = this.viewBoundaryProps = null
     this.isBoundaryEditMode = false
-    if (feature.type && feature.type === "equipment_boundary.select") {
+    if (feature.type && feature.type === 'equipment_boundary.select') {
       var newSelection = this.state.cloneSelection()
       newSelection.details.siteBoundaryId = feature.objectId
       this.state.selection = newSelection
-      this.displaySiteBoundaryViewObject(feature, iconUrl)      
+      this.displaySiteBoundaryViewObject(feature, iconUrl)
     } else {
       this.displayEquipmentViewObject(feature, iconUrl)
     }
   }
 
   displayEditObject (feature, isMult) {
-    if (feature.type && feature.type === "equipment_boundary.select")
+    if (feature.type && feature.type === 'equipment_boundary.select') {
       return this.displaySiteBoundaryViewObject(feature)
         .then((result) => {
           return this.editViewSiteBoundaryObject()
         })
-    else
+    } else {
       return this.displayEquipmentViewObject(feature)
         .then((result) => {
           return this.editViewObject(isMult)
         })
+    }
   }
 
   displayEquipmentViewObject (feature, iconUrl) {
@@ -916,7 +914,7 @@ class PlanEditorController {
               if (this.objectIdToProperties.hasOwnProperty(feature.objectId)) {
                 locationIds = Object.keys(this.objectIdToProperties[feature.objectId].connectedLocations)
               }
-              
+
               this.clearAllLocationHighlights()
               this.highlightLocations(locationIds, this.viewEventFeature.geometry.coordinates)
             }
@@ -950,7 +948,7 @@ class PlanEditorController {
         resolve(returnLocations)
       })
     } else {
-      return this.$http.post(`/service/plan-feature/${this.state.plan.id}/location?userId=${this.state.loggedInUser.id}`, {objectIds: locationIdsToGet})
+      return this.$http.post(`/service/plan-feature/${this.state.plan.id}/location?userId=${this.state.loggedInUser.id}`, { objectIds: locationIdsToGet })
         .then((result) => {
           result.data.forEach(location => {
             this.locationsById[location.objectId] = location
@@ -961,7 +959,7 @@ class PlanEditorController {
     }
   }
 
-  displaySiteBoundaryViewObject(feature, iconUrl) {
+  displaySiteBoundaryViewObject (feature, iconUrl) {
     return new Promise((resolve, reject) => {
       var planId = this.state.plan.id
       this.$http.get(`/service/plan-feature/${planId}/equipment_boundary/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
@@ -1033,7 +1031,7 @@ class PlanEditorController {
   }
 
   editViewSiteBoundaryObject () {
-    this.createEditableExistingMapObject && this.createEditableExistingMapObject(this.viewSiteBoundaryEventFeature, null)    
+    this.createEditableExistingMapObject && this.createEditableExistingMapObject(this.viewSiteBoundaryEventFeature, null)
   }
 
   handleObjectCreated (mapObject, usingMapClick, feature, deleteExistingBoundary) {
@@ -1077,10 +1075,9 @@ class PlanEditorController {
                     if (!isMultSelect) this.clearAllLocationHighlights()
                     this.highlightLocations(locationIds, result.data.geometry.coordinates)
                   }
-                  
                 })
             }
-            
+
             this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
               .then(() => this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`))
               .then((result) => {
@@ -1187,17 +1184,17 @@ class PlanEditorController {
     }
     if (this.currentTransaction === null) {
       this.clearAllLocationHighlights()
-      //this.highlightLocations()
+      // this.highlightLocations()
       return
     }
-    
+
     var mapObjectId = null
     var isMultSelect = false
 
     if (mapObject != null) {
       mapObjectId = mapObject.objectId || mapObject.object_id
       isMultSelect = !!(mapObjectId && this.additionalSelectionsById.hasOwnProperty(mapObjectId))
-    } 
+    }
     var lat = mapObject && mapObject.position && mapObject.position.lat()
     var lng = mapObject && mapObject.position && mapObject.position.lng()
     if (!isMultSelect) {
@@ -1241,7 +1238,7 @@ class PlanEditorController {
         })
         .then((result) => {
           this.objectIdToProperties[mapObject.objectId].isDirty = false
-          if (this.selectedObjectId === mapObject.objectId && 
+          if (this.selectedObjectId === mapObject.objectId &&
             this.objectIdToProperties[this.selectedObjectId].hasOwnProperty('connectedLocations')) {
             var locations = Object.keys(this.objectIdToProperties[this.selectedObjectId].connectedLocations)
             // this.clearAllLocationHighlights()
@@ -1377,7 +1374,7 @@ class PlanEditorController {
         const boundaryObjectId = this.equipmentIdToBoundaryId[mapObject.objectId]
         if (!boundaryObjectId) {
           this.state.boundaryTypes.forEach((boundaryType) => {
-            boundaryType.name !== 'fiveg_coverage' && this.getAndDeleteAssociatedEquSiteBoundary(mapObject.objectId,boundaryType.id)        
+            boundaryType.name !== 'fiveg_coverage' && this.getAndDeleteAssociatedEquSiteBoundary(mapObject.objectId, boundaryType.id)
           })
         } else {
           this.deleteBoundary(boundaryObjectId) // boundary is in edit mode
@@ -1401,7 +1398,7 @@ class PlanEditorController {
       })
   }
 
-  deleteBoundaryInNonEditMode(boundaryId) {
+  deleteBoundaryInNonEditMode (boundaryId) {
     this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary/${boundaryId}`)
       .then(() => {
         // Once commited boundary will be deleted until then it's excluded from showing on the map
@@ -1650,8 +1647,8 @@ class PlanEditorController {
     this.keyClickObserver.unsubscribe()
     this.clickObserver.unsubscribe()
     this.clearAllLocationHighlights()
-    //this.highlightLocations()
-    // todo: if keep unsaved, still can't run analysis 
+    // this.highlightLocations()
+    // todo: if keep unsaved, still can't run analysis
     if (this.currentTransaction) {
       swal({
         title: 'Save changes?',
@@ -1666,7 +1663,7 @@ class PlanEditorController {
         if (result) {
           this.commitTransaction(this.currentTransaction.id)
         } else {
-          //this.discardTransaction(this.currentTransaction.id)
+          // this.discardTransaction(this.currentTransaction.id)
         }
         this.clearAllSubnetMapObjects()
         this.clearTransaction()
