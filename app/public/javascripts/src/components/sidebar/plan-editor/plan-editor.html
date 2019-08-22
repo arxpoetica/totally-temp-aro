@@ -34,10 +34,10 @@
     <accordion-panel-title title="'Edit Plan'" panel-id="$ctrl.state.EditPlanPanels.EDIT_PLAN"></accordion-panel-title>
     <accordion-panel-contents panel-id="$ctrl.state.EditPlanPanels.EDIT_PLAN">
       <div>
-        <r-plan-editor ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.EDIT_PLAN">
-        </r-plan-editor>
+        <!-- <r-plan-editor ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.EDIT_PLAN">
+        </r-plan-editor> -->
         <!-- Add a component to handle map editing -->
-        <!-- <map-object-editor ng-if="$ctrl.currentTransaction"
+        <map-object-editor ng-if="$ctrl.currentTransaction"
                           map-global-object-name="{{$ctrl.mapGlobalObjectName}}"
                           map-container-id="map-canvas-container"
                           get-object-icon-url="$ctrl.getObjectIconUrl({objectKey, objectValue})"
@@ -65,9 +65,9 @@
                           register-map-object-from-event="$ctrl.registerMapObjectFromEvent(mapObjectFromEvent)"
                           register-highlight-map-object="$ctrl.registerHighlightMapObject(highlightMapObject)"
                           register-dehighlight-map-object="$ctrl.registerDehighlightMapObject(dehighlightMapObject)">
-        </map-object-editor> -->
+        </map-object-editor>
 
-        <div style="margin: 10px; background-color: #a05050">
+        <div style="margin: 10px;">
 
           <!-- Buttons to commit or discard a transaction -->
           <div class="text-center">

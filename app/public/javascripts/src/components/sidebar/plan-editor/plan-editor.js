@@ -4,8 +4,8 @@ import Constants from '../../common/constants'
 import AroFeatureFactory from '../../../service-typegen/dist/AroFeatureFactory'
 import TrackedEquipment from '../../../service-typegen/dist/TrackedEquipment'
 import EquipmentComponent from '../../../service-typegen/dist/EquipmentComponent'
-// import EquipmentFeature from '../../../service-typegen/dist/EquipmentFeature'
-// import EquipmentBoundaryFeature from '../../../service-typegen/dist/EquipmentBoundaryFeature'
+import EquipmentFeature from '../../../service-typegen/dist/EquipmentFeature'
+import EquipmentBoundaryFeature from '../../../service-typegen/dist/EquipmentBoundaryFeature'
 // import MarketableEquipment from '../../../service-typegen/dist/MarketableEquipment'
 import TileUtilities from '../../tiles/tile-utilities.js'
 import PlanEditorActions from '../../../react/components/plan-editor/plan-editor-actions'
@@ -207,6 +207,8 @@ class PlanEditorController {
       }
     })
     // -----
+    // Select the first transaction in the list
+    this.resumeOrCreateTransaction(this.planId, this.userId)
   }
 
   isMultSelectActive () {
@@ -287,6 +289,7 @@ class PlanEditorController {
                   // todo: similar code to handleObjectCreated
                   var attributes = result.data.attributes
                   const equipmentFeature = AroFeatureFactory.createObject(result.data)
+                  this.addEquipmentNodes([{ feature: equipmentFeature }])
                   var networkNodeEquipment = equipmentFeature.networkNodeEquipment
                   const locationIDs = attributes.internal_oid || null
                   var equipmentProperties = new EquipmentProperties(networkNodeEquipment.siteInfo.siteClli, networkNodeEquipment.siteInfo.siteName,
@@ -339,6 +342,7 @@ class PlanEditorController {
             attributes.selectedEquipmentType, networkNodeEquipment, feature.deploymentType, null, locationIDs)
           this.objectIdToProperties[feature.objectId] = properties
         })
+        this.addEquipmentNodes(typedEquipmentNodes.map(node => ({ feature: node })))
         transactionFeatures.forEach((feature) => {
           this.getViewObjectSBTypes(feature.objectId)
         })
@@ -1051,6 +1055,7 @@ class PlanEditorController {
           .then((result) => {
             var attributes = result.data.attributes
             const equipmentFeature = AroFeatureFactory.createObject(result.data)
+            this.addEquipmentNodes([{ feature: equipmentFeature }])
             var networkNodeEquipment = equipmentFeature.networkNodeEquipment
             var equipmentProperties = null
             const locationIDs = attributes.internal_oid || null
@@ -1112,6 +1117,7 @@ class PlanEditorController {
         const equipmentNode = AroFeatureFactory.createObject({ dataType: 'equipment' })
         // --- new be sure to set subnet ---
         equipmentNode.objectId = mapObject.objectId
+        this.addEquipmentNodes([{ feature: equipmentNode }])
         var blankNetworkNodeEquipment = equipmentNode.networkNodeEquipment
         this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties('', '', feature.networkNodeType, this.lastSelectedEquipmentType, blankNetworkNodeEquipment, 'PLANNED', 'sewer')
         var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
@@ -1695,6 +1701,8 @@ class PlanEditorController {
       clearTransaction: () => dispatch(PlanEditorActions.clearTransaction()),
       commitTransaction: transactionId => dispatch(PlanEditorActions.commitTransaction(transactionId)),
       discardTransaction: transactionId => dispatch(PlanEditorActions.discardTransaction(transactionId)),
+      resumeOrCreateTransaction: (planId, userId) => dispatch(PlanEditorActions.resumeOrCreateTransaction(planId, userId)),	
+      addEquipmentNodes: equipmentNodes => dispatch(PlanEditorActions.addTransactionEquipment(equipmentNodes)),
       setNetworkEquipmentLayerVisibility: (layer, isVisible) => dispatch(MapLayerActions.setNetworkEquipmentLayerVisibility('cables', layer, isVisible)),
       setIsCalculatingSubnets: isCalculatingSubnets => dispatch(PlanEditorActions.setIsCalculatingSubnets(isCalculatingSubnets)),
       setIsCreatingObject: isCreatingObject => dispatch(PlanEditorActions.setIsCreatingObject(isCreatingObject)),
