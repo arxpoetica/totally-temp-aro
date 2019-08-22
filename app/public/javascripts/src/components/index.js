@@ -8,6 +8,8 @@ import CoverageButton from '../react/components/coverage/coverage-button.jsx'
 import RfpButton from '../react/components/optimization/rfp/rfp-button.jsx'
 import NetworkAnalysisOutput from '../react/components/optimization/network-analysis/network-analysis-output.jsx'
 import PlanTargetList from '../react/components/selection/plan-target-list.jsx'
+import PlanEditor from '../react/components/plan-editor/plan-editor.jsx'
+import EquipmentDropTarget from '../react/components/plan-editor/equipment-drop-target.jsx'
 import ReportModuleList from '../react/components/configuration/report/report-module-list.jsx'
 import ReportsDownloadModal from '../react/components/optimization/reports/reports-download-modal.jsx'
 import RfpAnalyzer from '../react/components/optimization/rfp/rfp-analyzer.jsx'
@@ -235,6 +237,8 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rRfpButton', react2angular(RfpButton))
   .component('rNetworkAnalysisOutput', react2angular(NetworkAnalysisOutput))
   .component('rPlanTargetList', react2angular(PlanTargetList))
+  .component('rPlanEditor', react2angular(PlanEditor))
+  .component('rEquipmentDropTarget', react2angular(EquipmentDropTarget))
   .component('rReportModuleList', react2angular(ReportModuleList))
   .component('rReportsDownloadModal', react2angular(ReportsDownloadModal, ['reportTypes', 'title'])) // Some properties are passed in manually, not through redux.
   .component('rRfpAnalyzer', react2angular(RfpAnalyzer))

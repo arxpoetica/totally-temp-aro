@@ -1,16 +1,16 @@
 import Actions from '../../common/actions'
 
-const defaultState = {
+const getDefaultState = () => ({
   isPlanEditorActive: false,
   transaction: null,
-  features: {
-    equipmentNodes: [],
-    boundaries: []
-  },
+  features: {},
+  equipments: new Set(),
+  boundaries: new Set(),
   isCalculatingSubnets: false,
   isCreatingObject: false,
-  isModifyingObject: false
-}
+  isModifyingObject: false,
+  isDraggingFeatureForDrop: false
+})
 
 function setTransaction (state, transaction) {
   return { ...state,
@@ -20,25 +20,68 @@ function setTransaction (state, transaction) {
 }
 
 function clearTransaction () {
-  return JSON.parse(JSON.stringify(defaultState))
+  return getDefaultState()
 }
 
-function addEquipmentNodes (state, equipmentNodes) {
+function addTransactionEquipment (state, equipments) {
+  var newFeatures = { ...state.features }
+  var newEquipments = new Set(state.equipments)
+  equipments.forEach(equipment => {
+    newFeatures[equipment.feature.objectId] = equipment
+    newEquipments.add(equipment.feature.objectId)
+  })
   return { ...state,
-    features: { ...state.features,
-      equipmentNodes: state.features.equipmentNodes.concat(equipmentNodes)
-    }
+    features: newFeatures,
+    equipments: newEquipments
   }
 }
 
-function removeEquipmentNode (state, objectId) {
-  const indexToRemove = state.features.equipmentNodes.findIndex(equipmentNode => equipmentNode.objectId === objectId)
-  var newEquipmentNodes = [].concat(state.features.equipmentNodes)
-  newEquipmentNodes.splice(indexToRemove, 1)
+function removeTransactionEquipment (state, objectId) {
+  var newFeatures = { ...state.features }
+  delete newFeatures[objectId]
+  var newEquipments = new Set(state.equipments)
+  newEquipments.remove(objectId)
   return { ...state,
-    features: { ...state.features,
-      equipmentNodes: newEquipmentNodes
+    features: newFeatures,
+    equipments: newEquipments
+  }
+}
+
+function addTransactionEquipmentBoundary (state, equipmentBoundaries) {
+  var newFeatures = { ...state.features }
+  var newEquipmentBoundaries = new Set(state.boundaries)
+  equipmentBoundaries.forEach(boundary => {
+    newFeatures[boundary.feature.objectId] = boundary
+    newEquipmentBoundaries.add(boundary.feature.objectId)
+  })
+  return { ...state,
+    features: newFeatures,
+    boundaries: newEquipmentBoundaries
+  }
+}
+
+function removeTransactionEquipmentBoundary (state, objectId) {
+  var newFeatures = { ...state.features }
+  delete newFeatures[objectId]
+  var newEquipmentBoundaries = new Set(state.boundaries)
+  newEquipmentBoundaries.remove(objectId)
+  return { ...state,
+    features: newFeatures,
+    boundaries: newEquipmentBoundaries
+  }
+}
+
+function modifyTransactionEquipments (state, newEquipments) {
+  var newFeatures = { ...state.features }
+  newEquipments.forEach(equipment => {
+    if (newFeatures[equipment.feature.objectId]) {
+      newFeatures[equipment.feature.objectId] = equipment
+    } else {
+      throw new Error(`Trying to modify equipment with objectId ${equipment.feature.objectId}, but it is not in the existing list of equipments`)
     }
+  })
+  return { ...state,
+    features: newFeatures
   }
 }
 
@@ -60,7 +103,13 @@ function setIsModifyingObject (state, isModifyingObject) {
   }
 }
 
-function planEditorReducer (state = defaultState, action) {
+function setIsDraggingFeatureForDrop (state, isDraggingFeatureForDrop) {
+  return { ...state,
+    isDraggingFeatureForDrop: isDraggingFeatureForDrop
+  }
+}
+
+function planEditorReducer (state = getDefaultState(), action) {
   switch (action.type) {
     case Actions.PLAN_EDITOR_CLEAR_TRANSACTION:
       return clearTransaction()
@@ -69,10 +118,19 @@ function planEditorReducer (state = defaultState, action) {
       return setTransaction(state, action.payload)
 
     case Actions.PLAN_EDITOR_ADD_EQUIPMENT_NODES:
-      return addEquipmentNodes(state, action.payload)
+      return addTransactionEquipment(state, action.payload)
 
     case Actions.PLAN_EDITOR_REMOVE_EQUIPMENT_NODE:
-      return removeEquipmentNode(state, action.payload)
+      return removeTransactionEquipment(state, action.payload)
+
+    case Actions.PLAN_EDITOR_ADD_EQUIPMENT_BOUNDARY:
+      return addTransactionEquipmentBoundary(state, action.payload)
+
+    case Actions.PLAN_EDITOR_REMOVE_EQUIPMENT_BOUNDARY:
+      return removeTransactionEquipmentBoundary(state, action.payload)
+
+    case Actions.PLAN_EDITOR_MODIFY_EQUIPMENT_NODES:
+      return modifyTransactionEquipments(state, action.payload)
 
     case Actions.PLAN_EDITOR_SET_IS_CALCULATING_SUBNETS:
       return setIsCalculatingSubnets(state, action.payload)
@@ -82,6 +140,9 @@ function planEditorReducer (state = defaultState, action) {
 
     case Actions.PLAN_EDITOR_SET_IS_MODIFYING_OBJECT:
       return setIsModifyingObject(state, action.payload)
+
+    case Actions.PLAN_EDITOR_SET_IS_DRAGGING_FEATURE_FOR_DROP:
+      return setIsDraggingFeatureForDrop(state, action.payload)
 
     default:
       return state

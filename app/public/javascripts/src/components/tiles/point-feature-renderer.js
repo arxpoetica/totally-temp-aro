@@ -1,4 +1,4 @@
-import WorkflowState from '../common/workflow-state'
+import WorkflowState from '../../shared-utils/workflow-state'
 
 class PointFeatureRenderer {
   static renderFeatures (pointFeatureRendererList, ARO_CLIENT) {

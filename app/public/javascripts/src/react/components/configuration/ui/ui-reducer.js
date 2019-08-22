@@ -1,6 +1,7 @@
 import Actions from '../../../common/actions'
 
 const defaultState = {
+  perspective: null,
   items: [],
   assetKeys: [],
   styleValues: ''
@@ -9,6 +10,12 @@ const defaultState = {
 function setConfiguration (state, configuration) {
   return { ...state,
     items: configuration
+  }
+}
+
+function setPerspective (state, perspective) {
+  return { ...state,
+    perspective: perspective
   }
 }
 
@@ -34,6 +41,9 @@ function configurationReducer (state = defaultState, action) {
 
     case Actions.CONFIGURATION_SET_STYLEVALUES:
       return setStyleValues(state, action.payload)
+
+    case Actions.CONFIGURATION_SET_PERSPECTIVE:
+      return setPerspective(state, action.payload)
 
     default:
       return state

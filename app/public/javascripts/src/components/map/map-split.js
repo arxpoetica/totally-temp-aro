@@ -182,6 +182,7 @@ let mapSplit = {
           <i class="fa fa-5x fa-spinner fa-spin" style="width: 100%;"></i>
         </div>
       </div>
+      <r-equipment-drop-target></r-equipment-drop-target>
     </div>
 
     <!-- Define the sidebar -->

@@ -1,10 +1,11 @@
 import Constants from './constants'
-import WorkflowState from './workflow-state'
+import WorkflowState from '../../shared-utils/workflow-state'
 import MapUtilities from './plan/map-utilities'
 import FeatureSelector from '../tiles/feature-selector'
 import Utilities from './utilities'
 import MenuAction, { MenuActionTypes } from '../common/context-menu/menu-action'
 import MenuItem, { MenuItemTypes } from '../common/context-menu/menu-item'
+import uuidStore from '../../shared-utils/uuid-store'
 
 class MapObjectEditorController {
   constructor ($http, $element, $compile, $document, $timeout, $ngRedux, state, tileDataService, contextMenuService, Utils) {
@@ -125,7 +126,7 @@ class MapObjectEditorController {
       if (event.dataTransfer.getData(Constants.DRAG_DROP_ENTITY_DETAILS_KEY) !== Constants.MAP_OBJECT_CREATE_SERVICE_AREA) {
         // ToDo feature should probably be a class
         var feature = {
-          objectId: this.utils.getUUID(),
+          objectId: uuidStore.getUUID(),
           geometry: {
             type: 'Point',
             coordinates: [dropLatLng.lng(), dropLatLng.lat()]
@@ -141,7 +142,7 @@ class MapObjectEditorController {
         var radius = (40000 / Math.pow(2, this.mapRef.getZoom())) * 2 * 256 // radius in meters
         var path = this.generateHexagonPath(position, radius)
         var feature = {
-          objectId: this.utils.getUUID(),
+          objectId: uuidStore.getUUID(),
           geometry: {
             type: 'MultiPolygon',
             coordinates: [[path]]
@@ -981,7 +982,7 @@ class MapObjectEditorController {
       if (!this.createObjectOnClick) {
         return // We do not want to create the map object on click
       }
-      feature.objectId = this.utils.getUUID()
+      feature.objectId = uuidStore.getUUID()
       feature.isExistingObject = false
       featurePromise = Promise.resolve(feature)
     }
@@ -1113,7 +1114,7 @@ class MapObjectEditorController {
       // the polygon object coordinates to aro-service format, and then back to google.maps.Polygon() paths later.
       // We keep it this way because the object creation workflow does other things like set up events, etc.
       var feature = {
-        objectId: self.utils.getUUID(),
+        objectId: uuidStore.getUUID(),
         geometry: {
           type: 'Polygon',
           coordinates: []
@@ -1162,7 +1163,7 @@ class MapObjectEditorController {
       // the polygon object coordinates to aro-service format, and then back to google.maps.Polygon() paths later.
       // We keep it this way because the object creation workflow does other things like set up events, etc.
       var feature = {
-        objectId: self.utils.getUUID(),
+        objectId: uuidStore.getUUID(),
         geometry: {
           type: 'MultiPolygon',
           coordinates: [[]]

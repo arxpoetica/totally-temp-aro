@@ -4,8 +4,6 @@ class Utilities {
   constructor ($document, $http) {
     this.$document = $document
     this.$http = $http
-    this.uuidStore = []
-    this.getUUIDsFromServer()
   }
 
   static displayErrorMessage (errorMsg) {
@@ -23,27 +21,6 @@ class Utilities {
     a.download = fileName
     a.click()
     this.$document[0].body.removeChild(a)
-  }
-
-  // Get a list of UUIDs from the server
-  getUUIDsFromServer () {
-    const numUUIDsToFetch = 20
-    this.$http.get(`/service/library/uuids/${numUUIDsToFetch}`)
-      .then((result) => {
-        this.uuidStore = this.uuidStore.concat(result.data)
-      })
-      .catch((err) => console.error(err))
-  }
-  // Get a UUID from the store
-  getUUID () {
-    if (this.uuidStore.length < 7) {
-      // We are running low on UUIDs. Get some new ones from aro-this while returning one of the ones that we have
-      this.getUUIDsFromServer()
-    }
-    if (this.uuidStore.length === 0) {
-      throw 'ERROR: No UUIDs in store'
-    }
-    return this.uuidStore.pop()
   }
 
   // Generate CRYPTOGRAPHICALLY INSECURE v4 UUIDs. These are fine for use as (for example) Google Autocomplete tokens.

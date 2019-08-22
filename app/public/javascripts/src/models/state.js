@@ -1541,6 +1541,7 @@ class State {
             const defaultPerspective = service.configuration.perspectives.filter(item => item.name === 'default')[0]
             const thisPerspective = service.configuration.perspectives.filter(item => item.name === perspective)[0]
             service.configuration.perspective = thisPerspective || defaultPerspective
+            service.setPerspective(service.configuration.perspective)
           }
           service.configuration.loadPerspective(result.data.user.perspective)
           service.setLoggedInUser(result.data.user)
@@ -1775,6 +1776,7 @@ class State {
   mapDispatchToTarget (dispatch) {
     return {
       loadConfigurationFromServer: () => dispatch(UiActions.loadConfigurationFromServer()),
+      setPerspective: perspective => dispatch(UiActions.setPerspective(perspective)),
       getStyleValues: () => dispatch(UiActions.getStyleValues()),
       setLoggedInUserRedux: loggedInUser => dispatch(UserActions.setLoggedInUser(loggedInUser)),
       loadSystemActorsRedux: () => dispatch(UserActions.loadSystemActors()),

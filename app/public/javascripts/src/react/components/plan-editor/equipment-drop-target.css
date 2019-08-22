@@ -1,0 +1,23 @@
+.equipment-drop-target {
+  background-color: white;
+  opacity: 0.3;
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+}
+
+.equipment-drop-target-help {
+  position: relative;
+  top: -100px;
+  opacity: 0.8;
+  background-color: white;
+  padding: 15px;
+  text-align: center;
+  pointer-events: none;
+  width: 50%;
+  margin: 0 auto;
+  font-size: 20px;
+  border: dashed 2px darkgray;
+}
