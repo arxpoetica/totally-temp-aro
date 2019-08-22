@@ -1,22 +1,25 @@
-.map-object-editor-context-menu-container {
+.context-menu-backdrop {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+}
+
+.context-menu-container {
   line-height: 22px; /* Any property will do */
-  position: 'absolute';
+  position: absolute;
   bottom: 25px;
 }
-.map-object-editor-context-menu {
+
+.context-menu {
   line-height: 22px; /* Any property will do */
 }
-.map-object-editor-context-menu-dropdown {
-  line-height: 22px; /* Any property will do */
+
+.context-menu-dropdown {
   max-height: 80vh;
   top: auto;
   padding: 0px;
-}
-.map-object-editor-context-menu-dropdown-section{
-  margin-bottom: 6px;
-}
-.context-menu-dropdown{
-  height: 100%;
 }
 
 /* left: 100% is leaving a single pixel gap which causes the menu to then get hidden. Making 99% for now */

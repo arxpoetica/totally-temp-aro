@@ -58,7 +58,8 @@ export class EquipmentMapObjects extends Component {
       const menuItemAction = new MenuItemAction('DELETE', 'Delete', PlanEditorActions.removeTransactionEquipment(mapObject.objectId))
       const menuItemFeature = new MenuItemFeature('EQUIPMENT', 'Equipment', [menuItemAction])
       this.props.setContextMenuItems([menuItemFeature])
-      this.props.showContextMenu(100, 100)
+      const eventXY = this.getXYFromEvent(event)
+      this.props.showContextMenu(eventXY.x, eventXY.y)
     })
     this.objectIdToMapObject[objectId] = mapObject
   }
@@ -72,6 +73,19 @@ export class EquipmentMapObjects extends Component {
   deleteMapObject (objectId) {
     this.objectIdToMapObject[objectId].setMap(null)
     delete this.objectIdToMapObject[objectId]
+  }
+
+  getXYFromEvent (event) {
+    var mouseEvent = null
+    Object.keys(event).forEach((eventKey) => {
+      if (event[eventKey] instanceof MouseEvent) {
+        mouseEvent = event[eventKey]
+      }
+    })
+    return {
+      x: mouseEvent.clientX,
+      y: mouseEvent.clientY
+    }
   }
 
   componentWillUnmount () {
