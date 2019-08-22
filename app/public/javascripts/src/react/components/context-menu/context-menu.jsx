@@ -71,9 +71,11 @@ export class ContextMenu extends Component {
     }
     return <div className='dropdown-item aro-dropdown-item' href='#' key={menuItemIndex}>
       {/* Render the label based on the equipment type */}
-      <div className={featureTypeToLabel[menuItem.type].cssClass}>
+      <div className={`${featureTypeToLabel[menuItem.type].cssClass} mr-2`}>
         {featureTypeToLabel[menuItem.type].text}
       </div>
+      {menuItem.label}
+      <i class='fa-caret-right fas ml-2' />
       {/* Render actions */}
       { this.renderMenuItemActions(menuItem.actions, menuItemIndex, numberOfMenuItems) }
     </div>
@@ -109,9 +111,10 @@ export class ContextMenu extends Component {
         menuItemActions.map((menuItemAction, actionIndex) => {
           return <li className='dropdown-item aro-dropdown-item' key={actionIndex}>
             <a href='#' className='dropdown-item aro-dropdown-item' style={{ padding: 0 }}>
-              <i className={actionTypeToLabel[menuItemAction.type].cssClass}>
+              <div>
+                <i className={actionTypeToLabel[menuItemAction.type].cssClass} />
                 {actionTypeToLabel[menuItemAction.type].text}
-              </i>
+              </div>
             </a>
           </li>
         })
