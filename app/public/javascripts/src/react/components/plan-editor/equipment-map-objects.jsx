@@ -4,6 +4,9 @@ import { PropTypes } from 'prop-types'
 import { connect } from 'react-redux'
 import WorkflowState from '../../../shared-utils/workflow-state'
 import PlanEditorActions from './plan-editor-actions'
+import ContextMenuActions from '../context-menu/actions'
+import MenuItemFeature from '../context-menu/menu-item-feature'
+import MenuItemAction from '../context-menu/menu-item-action'
 
 export class EquipmentMapObjects extends Component {
   constructor (props) {
@@ -51,6 +54,12 @@ export class EquipmentMapObjects extends Component {
       newEquipment.feature.geometry.coordinates = [event.latLng.lng(), event.latLng.lat()]
       this.props.modifyEquipment(this.props.transactionId, newEquipment)
     })
+    mapObject.addListener('rightclick', event => {
+      const menuItemAction = new MenuItemAction('DELETE', 'Delete', PlanEditorActions.removeTransactionEquipment(mapObject.objectId))
+      const menuItemFeature = new MenuItemFeature('EQUIPMENT', 'Equipment', [menuItemAction])
+      this.props.setContextMenuItems([menuItemFeature])
+      this.props.showContextMenu(100, 100)
+    })
     this.objectIdToMapObject[objectId] = mapObject
   }
 
@@ -85,7 +94,9 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  modifyEquipment: (transactionId, equipment) => dispatch(PlanEditorActions.modifyEquipment(transactionId, equipment))
+  modifyEquipment: (transactionId, equipment) => dispatch(PlanEditorActions.modifyEquipment(transactionId, equipment)),
+  setContextMenuItems: menuItemFeatures => dispatch(ContextMenuActions.setContextMenuItems(menuItemFeatures)),
+  showContextMenu: (x, y) => dispatch(ContextMenuActions.showContextMenu(x, y))
 })
 
 const EquipmentMapObjectsComponent = connect(mapStateToProps, mapDispatchToProps)(EquipmentMapObjects)
