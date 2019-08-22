@@ -12,12 +12,23 @@ const getCablesArray = createSelector([getAllNetworkEquipmentLayers], networkEqu
   }
   return cablesArray
 })
+const getConduitsArray = createSelector([getAllNetworkEquipmentLayers], networkEquipmentLayers => {
+  var conduitsArray = []
+  if (networkEquipmentLayers.roads) {
+    Object.keys(networkEquipmentLayers.roads).forEach(key => conduitsArray.push(networkEquipmentLayers.roads[key]))
+  }
+  if (networkEquipmentLayers.conduits) {
+    Object.keys(networkEquipmentLayers.conduits).forEach(key => conduitsArray.push(networkEquipmentLayers.conduits[key]))
+  }
+  return conduitsArray
+})
 
 class CablesController {
   constructor ($rootScope, $ngRedux, map_tools, state) {
     this.map_tools = map_tools
     this.state = state
     this.currentUser = state.loggedInUser
+    this.openRow = null
 
     // When the map zoom changes, map layers can change
     $rootScope.$on('map_zoom_changed', () => this.updateMapLayers())
@@ -34,6 +45,14 @@ class CablesController {
     this.createdMapLayerKeys = new Set()
 
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
+  }
+
+  toggleOpenRow (rowId) {
+    if (this.openRow === rowId) {
+      this.openRow = null
+    } else {
+      this.openRow = rowId
+    }
   }
 
   // Get the line transformation mode with the current zoom level
@@ -161,7 +180,7 @@ class CablesController {
     }
   }
 
-  getBackgroundColor(layer) {
+  getBackgroundColor (layer) {
     return layer.drawingOptions.strokeStyle
   }
 
@@ -169,6 +188,7 @@ class CablesController {
     return {
       networkEquipmentLayers: getNetworkEquipmentLayersList(reduxState),
       cablesArray: getCablesArray(reduxState),
+      conduitsArray: getConduitsArray(reduxState),
       dataItems: reduxState.plan.dataItems,
       mapRef: reduxState.map.googleMaps
     }
@@ -181,6 +201,7 @@ class CablesController {
         // First set the visibility of the current layer
         dispatch(MapLayerActions.setNetworkEquipmentLayerVisibility(layerType, layer, isVisible))
       },
+      setCableConduitVisibility: (cableKey, conduitKey, isVisible) => dispatch(MapLayerActions.setCableConduitVisibility(cableKey, conduitKey, isVisible)),
       updateType: (visibilityType, isVisible) => {
         dispatch(MapLayerActions.setNetworkEquipmentLayerVisibilityType(visibilityType, isVisible))
       }

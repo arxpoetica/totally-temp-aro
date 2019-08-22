@@ -12,6 +12,13 @@ const defaultState = {
 }
 
 function setLayers (state, layerKey, layers) {
+  // ToDo: this doesn't belong here
+  if (layerKey === 'networkEquipment' && layers.hasOwnProperty('cables')) {
+    Object.keys(layers.cables).forEach(key => {
+      if (!layers.cables[key].hasOwnProperty('checked')) layers.cables[key].checked = false
+      if (!layers.cables[key].hasOwnProperty('conduitVisibility')) layers.cables[key].conduitVisibility = {}
+    })
+  }
   return { ...state, [layerKey]: layers }
 }
 
@@ -40,6 +47,24 @@ function setNetworkEquipmentLayerVisibility (state, layerType, layer, visibility
       }
     }
   }
+
+  return newState
+}
+
+function setCableConduitVisibility (state, cableKey, conduitKey, visibility) {
+  /*
+  newState = { ...state,
+    networkEquipment: { ...state.networkEquipment,
+      cables: { ...state.networkEquipment.cables,
+        [cableKey]: { ...state.networkEquipment.cables[],
+
+        }
+      }
+    }
+  }
+  */
+  var newState = { ...state }
+  newState.networkEquipment.cables[cableKey].conduitVisibility[conduitKey] = visibility
 
   return newState
 }
@@ -79,6 +104,9 @@ function mapLayersReducer (state = defaultState, action) {
 
     case Actions.LAYERS_SET_NETWORK_EQUIPMENT_VISIBILITY:
       return setNetworkEquipmentLayerVisibility(state, action.payload.layerType, action.payload.layer, action.payload.visibility)
+
+    case Actions.LAYERS_SET_CABLE_CONDUIT_VISIBILITY:
+      return setCableConduitVisibility(state, action.payload.cableKey, action.payload.conduitKey, action.payload.visibility)
 
     case Actions.LAYERS_SET_CONSTRUCTION_SITE:
       return setLayers(state, 'constructionSite', action.payload)

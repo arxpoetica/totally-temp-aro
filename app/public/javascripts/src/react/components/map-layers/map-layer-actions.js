@@ -22,6 +22,17 @@ function setNetworkEquipmentLayerVisibility (layerType, layer, newVisibility) {
   }
 }
 
+function setCableConduitVisibility (cableKey, conduitKey, newVisibility) {
+  return {
+    type: Actions.LAYERS_SET_CABLE_CONDUIT_VISIBILITY,
+    payload: {
+      cableKey: cableKey,
+      conduitKey: conduitKey,
+      visibility: newVisibility
+    }
+  }
+}
+
 function setNetworkEquipmentLayers (networkEquipmentLayers) {
   return {
     type: Actions.LAYERS_SET_NETWORK_EQUIPMENT,
@@ -55,6 +66,7 @@ function setShowSiteBoundary (newVisibility) {
 export default {
   setLayerVisibility: setLayerVisibility,
   setNetworkEquipmentLayerVisibility: setNetworkEquipmentLayerVisibility,
+  setCableConduitVisibility: setCableConduitVisibility,
   setNetworkEquipmentLayers: setNetworkEquipmentLayers,
   setConstructionSiteLayers: setConstructionSiteLayers,
   setBoundaryLayers: setBoundaryLayers,

@@ -504,6 +504,9 @@ class MapTileRenderer {
       }
 
       var geometry = feature.loadGeometry()
+      // console.log(feature) // I'm assuming there will be a property in here that will tell conduit type
+      // then we just check if show conduit is on for that fiber type and change color accordingly
+      // console.log(geometry)
       // Geometry is an array of shapes
       var imageWidthBy2 = entityImage ? entityImage.width / 2 : 0
       var imageHeightBy2 = entityImage ? entityImage.height / 2 : 0
