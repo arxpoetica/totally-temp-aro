@@ -6,6 +6,7 @@ const getDefaultState = () => ({
   features: {},
   equipments: new Set(),
   boundaries: new Set(),
+  isDrawingBoundaryFor: null,
   isCalculatingSubnets: false,
   isCreatingObject: false,
   isModifyingObject: false,
@@ -85,6 +86,12 @@ function modifyTransactionEquipments (state, newEquipments) {
   }
 }
 
+function setIsDrawingBoundaryFor (state, isDrawingBoundaryFor) {
+  return { ...state,
+    isDrawingBoundaryFor: isDrawingBoundaryFor
+  }
+}
+
 function setIsCalculatingSubnets (state, isCalculatingSubnets) {
   return { ...state,
     isCalculatingSubnets: isCalculatingSubnets
@@ -143,6 +150,9 @@ function planEditorReducer (state = getDefaultState(), action) {
 
     case Actions.PLAN_EDITOR_SET_IS_DRAGGING_FEATURE_FOR_DROP:
       return setIsDraggingFeatureForDrop(state, action.payload)
+
+    case Actions.PLAN_EDITOR_SET_IS_DRAWING_BOUNDARY_FOR:
+      return setIsDrawingBoundaryFor(state, action.payload)
 
     default:
       return state

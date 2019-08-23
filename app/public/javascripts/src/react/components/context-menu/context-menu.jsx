@@ -89,7 +89,7 @@ export class ContextMenu extends Component {
     // For the sub-menu, the top is calculated by offsetting by the index of the item, plus the
     // height of the scroll button (if it exists). Would be better if these constants can be removed
     const actionTypeToLabel = {
-      ADD_BOUNDAR: {
+      ADD_BOUNDARY: {
         text: 'Add boundary',
         cssClass: 'fas fa-plus pl-2 pr-2'
       },
