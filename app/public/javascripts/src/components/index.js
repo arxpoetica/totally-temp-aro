@@ -3,6 +3,7 @@ import { ToastContainer } from 'react-toastify'
 
 import Broadcast from '../react/components/global-settings/broadcast.jsx'
 import ConfigurationEditor from '../react/components/configuration/ui/configuration-editor.jsx'
+import ContextMenu from '../react/components/context-menu/context-menu.jsx'
 import CoverageInitializer from '../react/components/coverage/coverage-initializer.jsx'
 import CoverageButton from '../react/components/coverage/coverage-button.jsx'
 import RfpButton from '../react/components/optimization/rfp/rfp-button.jsx'
@@ -231,6 +232,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
 // ReactJS components
   .component('rBroadcast', react2angular(Broadcast))
+  .component('rContextMenu', react2angular(ContextMenu))
   .component('rConfigurationEditor', react2angular(ConfigurationEditor))
   .component('rCoverageInitializer', react2angular(CoverageInitializer))
   .component('rCoverageButton', react2angular(CoverageButton))

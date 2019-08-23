@@ -5,6 +5,7 @@ import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import PlanEditorActions from './plan-editor-actions'
 import EquipmentDragger from './equipment-dragger.jsx'
 import EquipmentMapObjects from './equipment-map-objects.jsx'
+import BoundaryDrawCreator from './boundary-draw-creator.jsx'
 
 export class PlanEditor extends Component {
   render () {
@@ -30,6 +31,8 @@ export class PlanEditor extends Component {
         <EquipmentDragger />
       </div>
       <EquipmentMapObjects />
+      { /* If we are in "draw boundary mode" for any equipment, render the drawing component */ }
+      { this.props.isDrawingBoundaryFor ? <BoundaryDrawCreator /> : null }
     </div>
   }
 
@@ -41,14 +44,16 @@ export class PlanEditor extends Component {
 PlanEditor.propTypes = {
   planId: PropTypes.number,
   userId: PropTypes.number,
-  transactionId: PropTypes.number
+  transactionId: PropTypes.number,
+  isDrawingBoundaryFor: PropTypes.string
 }
 
 const mapStateToProps = state => {
   return {
     planId: state.plan.activePlan.id,
     userId: state.user.loggedInUser.id,
-    transactionId: state.planEditor.transaction && state.planEditor.transaction.id
+    transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
+    isDrawingBoundaryFor: state.planEditor.isDrawingBoundaryFor
   }
 }
 

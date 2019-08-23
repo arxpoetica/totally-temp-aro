@@ -1,5 +1,5 @@
 /* globals google */
-import React, { Component } from 'react'
+import { Component } from 'react'
 import { PropTypes } from 'prop-types'
 import { connect } from 'react-redux'
 import WorkflowState from '../../../shared-utils/workflow-state'
@@ -51,6 +51,10 @@ export class EquipmentMapObjects extends Component {
       newEquipment.feature.geometry.coordinates = [event.latLng.lng(), event.latLng.lat()]
       this.props.modifyEquipment(this.props.transactionId, newEquipment)
     })
+    mapObject.addListener('rightclick', event => {
+      const eventXY = this.getXYFromEvent(event)
+      this.props.showContextMenuForEquipment(this.props.planId, this.props.transactionId, this.props.selectedBoundaryTypeId, mapObject.objectId, eventXY.x, eventXY.y)
+    })
     this.objectIdToMapObject[objectId] = mapObject
   }
 
@@ -65,6 +69,19 @@ export class EquipmentMapObjects extends Component {
     delete this.objectIdToMapObject[objectId]
   }
 
+  getXYFromEvent (event) {
+    var mouseEvent = null
+    Object.keys(event).forEach((eventKey) => {
+      if (event[eventKey] instanceof MouseEvent) {
+        mouseEvent = event[eventKey]
+      }
+    })
+    return {
+      x: mouseEvent.clientX,
+      y: mouseEvent.clientY
+    }
+  }
+
   componentWillUnmount () {
     Object.keys(this.objectIdToMapObject).forEach(objectId => this.deleteMapObject(objectId))
   }
@@ -74,18 +91,24 @@ EquipmentMapObjects.propTypes = {
   transactionId: PropTypes.number,
   transactionFeatures: PropTypes.object,
   equipmentDefinitions: PropTypes.object,
+  selectedBoundaryTypeId: PropTypes.number,
   googleMaps: PropTypes.object
 }
 
 const mapStateToProps = state => ({
+  planId: state.plan.activePlan.id,
   transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
   transactionFeatures: state.planEditor.features,
   equipmentDefinitions: state.mapLayers.networkEquipment.equipments,
+  selectedBoundaryTypeId: state.mapLayers.selectedBoundaryType.id,
   googleMaps: state.map.googleMaps
 })
 
 const mapDispatchToProps = dispatch => ({
-  modifyEquipment: (transactionId, equipment) => dispatch(PlanEditorActions.modifyEquipment(transactionId, equipment))
+  modifyEquipment: (transactionId, equipment) => dispatch(PlanEditorActions.modifyEquipment(transactionId, equipment)),
+  showContextMenuForEquipment: (planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y) => {
+    dispatch(PlanEditorActions.showContextMenuForEquipment(planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y))
+  }
 })
 
 const EquipmentMapObjectsComponent = connect(mapStateToProps, mapDispatchToProps)(EquipmentMapObjects)

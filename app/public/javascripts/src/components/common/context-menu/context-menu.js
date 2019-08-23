@@ -85,7 +85,7 @@ class ContextMenuController {
       // we can silent fail this
     }
 
-    var parentH = this.$element.find('.context-menu-dropdown')[0].offsetHeight
+    var parentH = this.$element.find('.angular-context-menu-dropdown')[0].offsetHeight
     var contentH = this.$element.find('.map-object-editor-context-menu-dropdown')[0].offsetHeight
     // console.log({'contentH': contentH, 'parentH': parentH})
     if (contentH < parentH) {
