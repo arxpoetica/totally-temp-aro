@@ -52,20 +52,9 @@ function setNetworkEquipmentLayerVisibility (state, layerType, layer, visibility
 }
 
 function setCableConduitVisibility (state, cableKey, conduitKey, visibility) {
-  /*
-  newState = { ...state,
-    networkEquipment: { ...state.networkEquipment,
-      cables: { ...state.networkEquipment.cables,
-        [cableKey]: { ...state.networkEquipment.cables[],
-
-        }
-      }
-    }
-  }
-  */
   var newState = { ...state }
   newState.networkEquipment.cables[cableKey].conduitVisibility[conduitKey] = visibility
-
+  
   return newState
 }
 
