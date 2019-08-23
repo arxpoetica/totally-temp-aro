@@ -3,6 +3,7 @@ import { PropTypes } from 'prop-types'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import ContextMenuActions from '../context-menu/actions'
+import PlanEditorActions from '../plan-editor/plan-editor-actions'
 import MenuItemFeature from './menu-item-feature'
 import './context-menu.css'
 
@@ -11,6 +12,9 @@ export class ContextMenu extends Component {
     super(props)
     this.MAX_MENU_ITEMS = 6
     this.handleBackdropMouseDown = this.handleBackdropMouseDown.bind(this)
+    this.actionModules = {
+      PlanEditorActions: PlanEditorActions
+    }
   }
 
   render () {
@@ -75,7 +79,7 @@ export class ContextMenu extends Component {
         {featureTypeToLabel[menuItem.type].text}
       </div>
       {menuItem.label}
-      <i class='fa-caret-right fas ml-2' />
+      <i className='fa-caret-right fas ml-2' />
       {/* Render actions */}
       { this.renderMenuItemActions(menuItem.actions, menuItemIndex, numberOfMenuItems) }
     </div>
@@ -109,7 +113,12 @@ export class ContextMenu extends Component {
     return <ul className='dropdown-menu sub-menu' style={{ top: (menuItemIndex * 38 + (numberOfMenuItems > this.MAX_MENU_ITEMS ? 20 : 0)) + 'px', padding: '0px' }}>
       {
         menuItemActions.map((menuItemAction, actionIndex) => {
-          return <li className='dropdown-item aro-dropdown-item' key={actionIndex}>
+          return <li
+            className='dropdown-item aro-dropdown-item'
+            key={actionIndex}
+            onClick={event => this.handleActionClicked(event, menuItemAction)}
+            onMouseDown={event => event.stopPropagation()} // Stop propagation, else the menu will be hidden and no click will be registered
+          >
             <a href='#' className='dropdown-item aro-dropdown-item' style={{ padding: 0 }}>
               <div>
                 <i className={actionTypeToLabel[menuItemAction.type].cssClass} />
@@ -125,6 +134,18 @@ export class ContextMenu extends Component {
   handleBackdropMouseDown (event) {
     // When the backdrop is clicked, hide the context menu. Note that when a user clicks on a menu item,
     // that click event will also propagate to the backdrop. Prevent further propagation.
+    this.props.hideContextMenu()
+    event.stopPropagation()
+  }
+
+  handleActionClicked (event, menuItemAction) {
+    // Get the action creator to fire
+    const actionCreator = this.actionModules[menuItemAction.actionCreatorClass][menuItemAction.actionCreatorMethod]
+    if (actionCreator) {
+      this.props.dispatchActionCreator(actionCreator, menuItemAction.payload)
+    } else {
+      console.error(`Menu item was clicked but action creator not found: ${menuItemAction.actionCreatorClass}.${menuItemAction.actionCreatorMethod}`)
+    }
     this.props.hideContextMenu()
     event.stopPropagation()
   }
@@ -145,7 +166,8 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  hideContextMenu: () => dispatch(ContextMenuActions.hideContextMenu())
+  hideContextMenu: () => dispatch(ContextMenuActions.hideContextMenu()),
+  dispatchActionCreator: (actionCreator, payload) => dispatch(actionCreator(...payload))
 })
 
 const ContextMenuComponent = wrapComponentWithProvider(reduxStore, ContextMenu, mapStateToProps, mapDispatchToProps)

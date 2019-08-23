@@ -1,11 +1,10 @@
 class MenuAction {
-  constructor (type, label, action) {
+  constructor (type, label, actionCreatorClass, actionCreatorMethod, ...payload) {
     this.type = type
     this.label = label
-    this.action = action
-    if (typeof action !== 'object') {
-      throw new Error('MenuItem classes must be serializable. The action property must be a POJO and not an action creator')
-    }
+    this.actionCreatorClass = actionCreatorClass
+    this.actionCreatorMethod = actionCreatorMethod
+    this.payload = payload
   }
 }
 

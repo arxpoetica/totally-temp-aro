@@ -55,7 +55,7 @@ export class EquipmentMapObjects extends Component {
       this.props.modifyEquipment(this.props.transactionId, newEquipment)
     })
     mapObject.addListener('rightclick', event => {
-      const menuItemAction = new MenuItemAction('DELETE', 'Delete', PlanEditorActions.removeTransactionEquipment(mapObject.objectId))
+      const menuItemAction = new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteEquipment', this.props.transactionId, mapObject.objectId)
       const menuItemFeature = new MenuItemFeature('EQUIPMENT', 'Equipment', [menuItemAction])
       this.props.setContextMenuItems([menuItemFeature])
       const eventXY = this.getXYFromEvent(event)

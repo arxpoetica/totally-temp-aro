@@ -40,7 +40,7 @@ function removeTransactionEquipment (state, objectId) {
   var newFeatures = { ...state.features }
   delete newFeatures[objectId]
   var newEquipments = new Set(state.equipments)
-  newEquipments.remove(objectId)
+  newEquipments.delete(objectId)
   return { ...state,
     features: newFeatures,
     equipments: newEquipments

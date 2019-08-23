@@ -98,6 +98,14 @@ function modifyEquipment (transactionId, equipment) {
   }
 }
 
+function deleteEquipment (transactionId, objectIdToDelete) {
+  return dispatch => {
+    AroHttp.delete(`/service/plan-transactions/${transactionId}/modified-features/equipment/${objectIdToDelete}`)
+      .then(result => dispatch(removeTransactionEquipment(objectIdToDelete)))
+      .catch(err => console.error(err))
+  }
+}
+
 function addTransactionEquipment (equipmentNodes) {
   return {
     type: Actions.PLAN_EDITOR_ADD_EQUIPMENT_NODES,
@@ -161,6 +169,7 @@ export default {
   resumeOrCreateTransaction,
   createEquipment,
   modifyEquipment,
+  deleteEquipment,
   addTransactionEquipment,
   removeTransactionEquipment,
   addTransactionEquipmentBoundary,
