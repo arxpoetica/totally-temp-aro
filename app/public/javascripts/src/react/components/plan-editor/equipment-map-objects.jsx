@@ -4,6 +4,7 @@ import { PropTypes } from 'prop-types'
 import { connect } from 'react-redux'
 import WorkflowState from '../../../shared-utils/workflow-state'
 import PlanEditorActions from './plan-editor-actions'
+import Utils from './utils'
 
 export class EquipmentMapObjects extends Component {
   constructor (props) {
@@ -37,7 +38,7 @@ export class EquipmentMapObjects extends Component {
                           (equipment.workflow_state_id & WorkflowState.INVALIDATED.id))
     const mapObject = new google.maps.Marker({
       objectId: equipment.objectId, // Not used by Google Maps
-      position: new google.maps.LatLng(equipment.geometry.coordinates[1], equipment.geometry.coordinates[0]),
+      position: Utils.getGoogleMapLatLngFromGeometry(equipment.geometry),
       icon: {
         url: this.props.equipmentDefinitions[equipment.networkNodeType].iconUrl
       },
@@ -59,9 +60,8 @@ export class EquipmentMapObjects extends Component {
   }
 
   updateMapObjectPosition (objectId) {
-    const coordinates = this.props.transactionFeatures[objectId].feature.geometry.coordinates
-    const position = new google.maps.LatLng(coordinates[1], coordinates[0])
-    this.objectIdToMapObject[objectId].setPosition(position)
+    const geometry = this.props.transactionFeatures[objectId].feature.geometry
+    this.objectIdToMapObject[objectId].setPosition(Utils.getGoogleMapLatLngFromGeometry(geometry))
   }
 
   deleteMapObject (objectId) {

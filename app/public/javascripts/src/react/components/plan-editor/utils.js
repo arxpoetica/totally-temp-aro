@@ -1,5 +1,24 @@
+/* global google */
 class Utils {
-  static getGeometryFromPaths (paths) {
+
+  // Converts a Google Maps LatLng object into a WKT Point Geometry object
+  static getGeometryFromGoogleMapLatLng (latLng) {
+    return {
+      type: 'Point',
+      coordinates: [latLng.lng(), latLng.lat()]
+    }
+  }
+
+  // Converts a WKT Point Geometry object into a Google Maps LatLng object
+  static getGoogleMapLatLngFromGeometry (geometry) {
+    if (geometry.type !== 'Point') {
+      throw new Error(`getGoogleMapLatLngFromGeometry() expects geometry of type Point, received ${geometry.type}`)
+    }
+    return new google.maps.LatLng(geometry.coordinates[1], geometry.coordinates[0])
+  }
+
+  // Converts a Google Maps Path object into a WKT MultiPolygon Geometry object
+  static getGeometryFromGoogleMapPaths (paths) {
     var geometry = {
       type: 'MultiPolygon',
       coordinates: [[]]
@@ -13,7 +32,11 @@ class Utils {
     return geometry
   }
 
-  static getPathFromGeometry (geometry) {
+  // Converts a WKT MultiPolygon Geometry object into a Google Maps Path object
+  static getGoogleMapPathsFromGeometry (geometry) {
+    if (geometry.type !== 'MultiPolygon') {
+      throw new Error(`getGoogleMapPathsFromGeometry() expects geometry of type MultiPolygon, received ${geometry.type}`)
+    }
     var polygonPath = []
     geometry.coordinates[0][0].forEach((polygonVertex) => {
       polygonPath.push({

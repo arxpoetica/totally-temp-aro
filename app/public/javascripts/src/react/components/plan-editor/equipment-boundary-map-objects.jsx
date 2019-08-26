@@ -41,7 +41,7 @@ export class EquipmentBoundaryMapObjects extends Component {
     const equipmentBoundary = this.props.transactionFeatures[objectId].feature
     const mapObject = new google.maps.Polygon({
       objectId: equipmentBoundary.objectId, // Not used by Google Maps
-      paths: Utils.getPathFromGeometry(equipmentBoundary.geometry),
+      paths: Utils.getGoogleMapPathsFromGeometry(equipmentBoundary.geometry),
       clickable: true,
       draggable: false,
       editable: true,
@@ -88,12 +88,12 @@ export class EquipmentBoundaryMapObjects extends Component {
 
   updateBoundaryShapeFromStore (objectId) {
     const geometry = this.props.transactionFeatures[objectId].feature.geometry
-    this.objectIdToMapObject[objectId].setPath(Utils.getPathFromGeometry(geometry))
+    this.objectIdToMapObject[objectId].setPath(Utils.getGoogleMapPathsFromGeometry(geometry))
   }
 
   modifyBoundaryShape (mapObject) {
     var newEquipment = JSON.parse(JSON.stringify(this.props.transactionFeatures[mapObject.objectId]))
-    newEquipment.feature.geometry = Utils.getGeometryFromPaths(mapObject.getPaths())
+    newEquipment.feature.geometry = Utils.getGeometryFromGoogleMapPaths(mapObject.getPaths())
     this.props.modifyEquipmentBoundary(this.props.transactionId, newEquipment)
   }
 

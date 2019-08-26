@@ -28,7 +28,7 @@ export class BoundaryDrawCreator extends Component {
       // Create a boundary object.
       var boundaryFeature = {
         objectId: uuidStore.getUUID(),
-        geometry: Utils.getGeometryFromPaths(event.overlay.getPaths()),
+        geometry: Utils.getGeometryFromGoogleMapPaths(event.overlay.getPaths()),
         dataType: 'equipment_boundary',
         attributes: {
           network_node_object_id: self.props.isDrawingBoundaryFor
