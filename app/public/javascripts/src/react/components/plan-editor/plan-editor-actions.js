@@ -104,7 +104,7 @@ function modifyEquipment (transactionId, equipment) {
 function deleteEquipment (transactionId, objectIdToDelete) {
   return dispatch => {
     AroHttp.delete(`/service/plan-transactions/${transactionId}/modified-features/equipment/${objectIdToDelete}`)
-      .then(result => dispatch(removeTransactionEquipment(objectIdToDelete)))
+      .then(result => dispatch(removeTransactionFeature(objectIdToDelete)))
       .catch(err => console.error(err))
   }
 }
@@ -116,9 +116,9 @@ function addTransactionEquipment (equipmentNodes) {
   }
 }
 
-function removeTransactionEquipment (objectId) {
+function removeTransactionFeature (objectId) {
   return {
-    type: Actions.PLAN_EDITOR_REMOVE_EQUIPMENT_NODE,
+    type: Actions.PLAN_EDITOR_REMOVE_TRANSACTION_FEATURE,
     payload: objectId
   }
 }
@@ -141,17 +141,28 @@ function createEquipmentBoundary (transactionId, feature) {
   }
 }
 
+function modifyEquipmentBoundary (transactionId, equipmentBoundary) {
+  return dispatch => {
+    // Do a PUT to send the equipment over to service
+    AroHttp.put(`/service/plan-transactions/${transactionId}/modified-features/equipment_boundary`, equipmentBoundary.feature)
+      .then(result => {
+        const newEquipmentBoundary = {
+          ...equipmentBoundary,
+          feature: result.data
+        }
+        dispatch({
+          type: Actions.PLAN_EDITOR_MODIFY_EQUIPMENT_BOUNDARIES,
+          payload: [newEquipmentBoundary]
+        })
+      })
+      .catch(err => console.error(err))
+  }
+}
+
 function addTransactionEquipmentBoundary (equipmentBoundaries) {
   return {
     type: Actions.PLAN_EDITOR_ADD_EQUIPMENT_BOUNDARY,
     payload: equipmentBoundaries
-  }
-}
-
-function removeTransactionEquipmentBoundary (objectId) {
-  return {
-    type: Actions.PLAN_EDITOR_REMOVE_EQUIPMENT_BOUNDARY,
-    payload: objectId
   }
 }
 
@@ -226,10 +237,10 @@ export default {
   modifyEquipment,
   deleteEquipment,
   addTransactionEquipment,
-  removeTransactionEquipment,
+  removeTransactionFeature,
   createEquipmentBoundary,
+  modifyEquipmentBoundary,
   addTransactionEquipmentBoundary,
-  removeTransactionEquipmentBoundary,
   showContextMenuForEquipment,
   startDrawingBoundaryFor,
   stopDrawingBoundary,

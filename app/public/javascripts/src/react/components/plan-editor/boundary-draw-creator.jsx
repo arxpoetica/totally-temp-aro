@@ -4,6 +4,7 @@ import { PropTypes } from 'prop-types'
 import { connect } from 'react-redux'
 import PlanEditorActions from './plan-editor-actions'
 import uuidStore from '../../../shared-utils/uuid-store'
+import Utils from './utils'
 
 export class BoundaryDrawCreator extends Component {
 
@@ -27,21 +28,12 @@ export class BoundaryDrawCreator extends Component {
       // Create a boundary object.
       var boundaryFeature = {
         objectId: uuidStore.getUUID(),
-        geometry: {
-          type: 'Polygon',
-          coordinates: []
-        },
+        geometry: Utils.getGeometryFromPaths(event.overlay.getPaths()),
         dataType: 'equipment_boundary',
         attributes: {
           network_node_object_id: self.props.isDrawingBoundaryFor
         }
       }
-      event.overlay.getPaths().forEach((path) => {
-        var pathPoints = []
-        path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
-        pathPoints.push(pathPoints[0]) // Close the polygon
-        boundaryFeature.geometry.coordinates.push(pathPoints)
-      })
 
       // Check if polygon is valid, if valid create a map object
       self.props.stopDrawingBoundary()

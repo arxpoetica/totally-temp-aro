@@ -5,6 +5,7 @@ import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import PlanEditorActions from './plan-editor-actions'
 import EquipmentDragger from './equipment-dragger.jsx'
 import EquipmentMapObjects from './equipment-map-objects.jsx'
+import EquipmentBoundaryMapObjects from './equipment-boundary-map-objects.jsx'
 import BoundaryDrawCreator from './boundary-draw-creator.jsx'
 
 export class PlanEditor extends Component {
@@ -31,6 +32,7 @@ export class PlanEditor extends Component {
         <EquipmentDragger />
       </div>
       <EquipmentMapObjects />
+      <EquipmentBoundaryMapObjects />
       { /* If we are in "draw boundary mode" for any equipment, render the drawing component */ }
       { this.props.isDrawingBoundaryFor ? <BoundaryDrawCreator /> : null }
     </div>
