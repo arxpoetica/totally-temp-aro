@@ -101,9 +101,9 @@ function modifyEquipment (transactionId, equipment) {
   }
 }
 
-function deleteEquipment (transactionId, objectIdToDelete) {
+function deleteTransactionFeature (transactionId, featureType, objectIdToDelete) {
   return dispatch => {
-    AroHttp.delete(`/service/plan-transactions/${transactionId}/modified-features/equipment/${objectIdToDelete}`)
+    AroHttp.delete(`/service/plan-transactions/${transactionId}/modified-features/${featureType}/${objectIdToDelete}`)
       .then(result => dispatch(removeTransactionFeature(objectIdToDelete)))
       .catch(err => console.error(err))
   }
@@ -176,13 +176,24 @@ function showContextMenuForEquipment (planId, transactionId, selectedBoundaryTyp
         if (isAddBoundaryAllowed) {
           menuActions.push(new MenuItemAction('ADD_BOUNDARY', 'Add boundary', 'PlanEditorActions', 'startDrawingBoundaryFor', equipmentObjectId))
         }
-        menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteEquipment', transactionId, equipmentObjectId))
+        menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteTransactionFeature', transactionId, 'equipment', equipmentObjectId))
         const menuItemFeature = new MenuItemFeature('EQUIPMENT', 'Equipment', menuActions)
         // Show context menu
         dispatch(ContextMenuActions.setContextMenuItems([menuItemFeature]))
         dispatch(ContextMenuActions.showContextMenu(x, y))
       })
       .catch(err => console.error(err))
+  }
+}
+
+function showContextMenuForEquipmentBoundary (transactionId, equipmentObjectId, x, y) {
+  return dispatch => {
+    var menuActions = []
+    menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteTransactionFeature', transactionId, 'equipment_boundary', equipmentObjectId))
+    const menuItemFeature = new MenuItemFeature('BOUNDARY', 'Equipment Boundary', menuActions)
+    // Show context menu
+    dispatch(ContextMenuActions.setContextMenuItems([menuItemFeature]))
+    dispatch(ContextMenuActions.showContextMenu(x, y))
   }
 }
 
@@ -235,13 +246,14 @@ export default {
   resumeOrCreateTransaction,
   createEquipment,
   modifyEquipment,
-  deleteEquipment,
+  deleteTransactionFeature,
   addTransactionEquipment,
   removeTransactionFeature,
   createEquipmentBoundary,
   modifyEquipmentBoundary,
   addTransactionEquipmentBoundary,
   showContextMenuForEquipment,
+  showContextMenuForEquipmentBoundary,
   startDrawingBoundaryFor,
   stopDrawingBoundary,
   setIsCalculatingSubnets,

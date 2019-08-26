@@ -53,7 +53,7 @@ export class EquipmentMapObjects extends Component {
       this.props.modifyEquipment(this.props.transactionId, newEquipment)
     })
     mapObject.addListener('rightclick', event => {
-      const eventXY = this.getXYFromEvent(event)
+      const eventXY = Utils.getXYFromEvent(event)
       this.props.showContextMenuForEquipment(this.props.planId, this.props.transactionId, this.props.selectedBoundaryTypeId, mapObject.objectId, eventXY.x, eventXY.y)
     })
     this.objectIdToMapObject[objectId] = mapObject
@@ -67,19 +67,6 @@ export class EquipmentMapObjects extends Component {
   deleteMapObject (objectId) {
     this.objectIdToMapObject[objectId].setMap(null)
     delete this.objectIdToMapObject[objectId]
-  }
-
-  getXYFromEvent (event) {
-    var mouseEvent = null
-    Object.keys(event).forEach((eventKey) => {
-      if (event[eventKey] instanceof MouseEvent) {
-        mouseEvent = event[eventKey]
-      }
-    })
-    return {
-      x: mouseEvent.clientX,
-      y: mouseEvent.clientY
-    }
   }
 
   componentWillUnmount () {

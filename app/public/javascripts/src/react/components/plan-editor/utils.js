@@ -1,6 +1,5 @@
-/* global google */
+/* global google MouseEvent */
 class Utils {
-
   // Converts a Google Maps LatLng object into a WKT Point Geometry object
   static getGeometryFromGoogleMapLatLng (latLng) {
     return {
@@ -55,6 +54,20 @@ class Utils {
     const deltaLng = Math.abs(firstPoint.lng() - lastPoint.lng())
     const TOLERANCE = 0.0001
     return (deltaLat < TOLERANCE) && (deltaLng < TOLERANCE)
+  }
+
+  // Returns the x, y coordinates in pixels from a map object rightclick event
+  static getXYFromEvent (event) {
+    var mouseEvent = null
+    Object.keys(event).forEach((eventKey) => {
+      if (event[eventKey] instanceof MouseEvent) {
+        mouseEvent = event[eventKey]
+      }
+    })
+    return {
+      x: mouseEvent.clientX,
+      y: mouseEvent.clientY
+    }
   }
 }
 

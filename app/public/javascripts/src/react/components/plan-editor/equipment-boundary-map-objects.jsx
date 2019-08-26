@@ -50,10 +50,10 @@ export class EquipmentBoundaryMapObjects extends Component {
     mapObject.setOptions(this.polygonOptions)
     this.setupListenersForMapObject(mapObject)
 
-    // mapObject.addListener('rightclick', event => {
-    //   const eventXY = this.getXYFromEvent(event)
-    //   this.props.showContextMenuForEquipment(this.props.planId, this.props.transactionId, this.props.selectedBoundaryTypeId, mapObject.objectId, eventXY.x, eventXY.y)
-    // })
+    mapObject.addListener('rightclick', event => {
+      const eventXY = Utils.getXYFromEvent(event)
+      this.props.showContextMenuForEquipmentBoundary(this.props.transactionId, mapObject.objectId, eventXY.x, eventXY.y)
+    })
     this.objectIdToMapObject[objectId] = mapObject
   }
 
@@ -103,19 +103,6 @@ export class EquipmentBoundaryMapObjects extends Component {
     })
   }
 
-  getXYFromEvent (event) {
-    var mouseEvent = null
-    Object.keys(event).forEach((eventKey) => {
-      if (event[eventKey] instanceof MouseEvent) {
-        mouseEvent = event[eventKey]
-      }
-    })
-    return {
-      x: mouseEvent.clientX,
-      y: mouseEvent.clientY
-    }
-  }
-
   componentWillUnmount () {
     Object.keys(this.objectIdToMapObject).forEach(objectId => this.deleteMapObject(objectId))
   }
@@ -137,10 +124,10 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  modifyEquipmentBoundary: (transactionId, equipmentBoundary) => dispatch(PlanEditorActions.modifyEquipmentBoundary(transactionId, equipmentBoundary))
-  // showContextMenuForEquipment: (planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y) => {
-  //   dispatch(PlanEditorActions.showContextMenuForEquipment(planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y))
-  // }
+  modifyEquipmentBoundary: (transactionId, equipmentBoundary) => dispatch(PlanEditorActions.modifyEquipmentBoundary(transactionId, equipmentBoundary)),
+  showContextMenuForEquipmentBoundary: (planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y) => {
+    dispatch(PlanEditorActions.showContextMenuForEquipmentBoundary(planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y))
+  }
 })
 
 const EquipmentBoundaryMapObjectsComponent = connect(mapStateToProps, mapDispatchToProps)(EquipmentBoundaryMapObjects)
