@@ -48,6 +48,34 @@ export class EquipmentBoundaryMapObjects extends Component {
       map: this.props.googleMaps
     })
     mapObject.setOptions(this.polygonOptions)
+    this.setupListenersForMapObject(mapObject)
+
+    // mapObject.addListener('rightclick', event => {
+    //   const eventXY = this.getXYFromEvent(event)
+    //   this.props.showContextMenuForEquipment(this.props.planId, this.props.transactionId, this.props.selectedBoundaryTypeId, mapObject.objectId, eventXY.x, eventXY.y)
+    // })
+    this.objectIdToMapObject[objectId] = mapObject
+  }
+
+  deleteMapObject (objectId) {
+    this.objectIdToMapObject[objectId].setMap(null)
+    delete this.objectIdToMapObject[objectId]
+  }
+
+  updateBoundaryShapeFromStore (objectId) {
+    const geometry = this.props.transactionFeatures[objectId].feature.geometry
+    const mapObject = this.objectIdToMapObject[objectId]
+    mapObject.setPath(Utils.getGoogleMapPathsFromGeometry(geometry))
+    this.setupListenersForMapObject(mapObject)
+  }
+
+  modifyBoundaryShape (mapObject) {
+    var newEquipment = JSON.parse(JSON.stringify(this.props.transactionFeatures[mapObject.objectId]))
+    newEquipment.feature.geometry = Utils.getGeometryFromGoogleMapPaths(mapObject.getPaths())
+    this.props.modifyEquipmentBoundary(this.props.transactionId, newEquipment)
+  }
+
+  setupListenersForMapObject (mapObject) {
     const self = this
     mapObject.getPaths().forEach(function (path, index) {
       google.maps.event.addListener(path, 'insert_at', function () {
@@ -73,28 +101,6 @@ export class EquipmentBoundaryMapObjects extends Component {
         }
       })
     })
-
-    // mapObject.addListener('rightclick', event => {
-    //   const eventXY = this.getXYFromEvent(event)
-    //   this.props.showContextMenuForEquipment(this.props.planId, this.props.transactionId, this.props.selectedBoundaryTypeId, mapObject.objectId, eventXY.x, eventXY.y)
-    // })
-    this.objectIdToMapObject[objectId] = mapObject
-  }
-
-  deleteMapObject (objectId) {
-    this.objectIdToMapObject[objectId].setMap(null)
-    delete this.objectIdToMapObject[objectId]
-  }
-
-  updateBoundaryShapeFromStore (objectId) {
-    const geometry = this.props.transactionFeatures[objectId].feature.geometry
-    this.objectIdToMapObject[objectId].setPath(Utils.getGoogleMapPathsFromGeometry(geometry))
-  }
-
-  modifyBoundaryShape (mapObject) {
-    var newEquipment = JSON.parse(JSON.stringify(this.props.transactionFeatures[mapObject.objectId]))
-    newEquipment.feature.geometry = Utils.getGeometryFromGoogleMapPaths(mapObject.getPaths())
-    this.props.modifyEquipmentBoundary(this.props.transactionId, newEquipment)
   }
 
   getXYFromEvent (event) {
