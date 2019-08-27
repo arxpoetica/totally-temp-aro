@@ -406,13 +406,13 @@ class TileDataService {
   }
 
   clearCacheInTileBox (layerNameRegexStrings, tileBox) {
-    const regexes = layerNameRegexStrings.map(layerNameRegexString => new RegExp(layerNameRegexString, 'g'))
+    const regexes = layerNameRegexStrings.map(layerNameRegexString => new RegExp(layerNameRegexString))
     this._clearCacheInTileBox(this.tileDataCache, regexes, tileBox)
     this._clearCacheInTileBox(this.tileProviderCache, regexes, tileBox)
   }
 
   displayInvalidatedTiles (layerNameRegexStrings, tileBox) {
-    const regexes = layerNameRegexStrings.map(layerNameRegexString => new RegExp(layerNameRegexString, 'g'))
+    const regexes = layerNameRegexStrings.map(layerNameRegexString => new RegExp(layerNameRegexString))
     Object.keys(this.tileHtmlCache).forEach(htmlCacheKey => {
       // Get the zoom, x and y from the html cache key
       const components = htmlCacheKey.split('-')
