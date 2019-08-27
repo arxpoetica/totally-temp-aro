@@ -3,21 +3,18 @@ import { PropTypes } from 'prop-types'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import LocationInfoActions from './locationInfo-actions'
+import ShowAuditLog from './locationInfo-auditlog.jsx'
 import '../../../../../stylesheets/editor-interfaces.css'
-// const divStyle = {
-//   font-weight: bold,
-//   width: '100%',
-//   padding-left: '5px',
-//   padding-top: '26px',
-//   padding-bottom: '4px',
-//   border-bottom: '2px solid #888888',
-//   cursor: pointer,
-//   margin-bottom: '6px'
-// }
 
 export class LocationInfo extends Component {
   constructor (props) {
-    super(props)  
+    super(props)
+    this.state={
+      toggleAuditLog: false,
+      toggleAttributes: false
+    } 
+    this.toggle = this.toggle.bind(this);
+    //this.toggleattrib = this.toggleattrib.bind(this);
   }
 
   componentDidUpdate (prevProps) {
@@ -28,7 +25,7 @@ export class LocationInfo extends Component {
     if (newLocationId !== oldLocationId) {
       // We have exactly one location selected. Get the location details
       console.log(`Exactly one location selected. Getting details for id ${newLocationId}`)
-      this.props.getLocationInfo(this.props.planId,newLocationId)
+      this.props.setLocationInfo(this.props.planId,newLocationId)
       this.props.getLocationAuditLog(this.props.planId,newLocationId)
     }
   }
@@ -36,19 +33,25 @@ export class LocationInfo extends Component {
   getLocationAuditLog () {
      return (
       <tbody>
-        {this.props.auditLogDetails.libraryAudit.map(v => <tr><td>{v.modifiedDate}</td><td>{v.userName}</td><td>{v.crudAction}</td></tr>)}
+        { this.props.auditLogDetails.libraryAudit.map(v => <tr><td>{v.modifiedDate}</td><td>{v.userName}</td><td>{v.crudAction}</td></tr>) }
       </tbody>
     );
   }
 
   selctionAttributes () {
     return (
-      <tbody>
-        {this.props.locationInfoDetails.attributes.map(v => <tr><td>{v.key}</td><td>{v.value}</td></tr>)}
-      </tbody>
+      <table className="table table-sm table-striped">
+        <tbody>
+          {this.props.locationInfoDetails.attributes.map(v => <tr><td>{v.key}</td><td>{v.value}</td></tr>)}
+        </tbody>
+      </table>
     );
   }
-  
+
+  toggle () {
+    const currentState = this.state.toggleAuditLog
+    this.setState({ toggleAuditLog: !currentState }); 
+}
   render () {
     return !this.props.locationInfoDetails ? null : <div><div>
       <table id='table-coverage-initializer' className='table table-sm table-striped sidebar-options-table'>
@@ -125,9 +128,14 @@ export class LocationInfo extends Component {
         </tbody>
       </table>
       </div>
+
       <div>
-       <div className="ei-header">Audit Log</div>
-        <table class="table table-sm table-striped">
+       <div className="ei-header" onClick={this.toggle}>
+          <i className={this.state.toggleAuditLog ? 'far fa-minus-square ei-foldout-icon' : 'far fa-plus-square ei-foldout-icon'}  ></i>
+         Audit Log</div>
+        {this.state.toggleAuditLog ?  
+        <span>
+        <table className="table table-sm table-striped">
         <thead>
           <tr>
             <th>Timestamp</th>
@@ -135,15 +143,20 @@ export class LocationInfo extends Component {
             <th>Action</th>
           </tr>      
         </thead>
-        {this.getLocationAuditLog()}
+        <ShowAuditLog auditLog={this.props.auditLogDetails}/> 
         </table>
+        </span> : ''}
       </div>
+
       <div>
-      <div className="ei-header">Other Attributes</div>
-        <table class="table table-sm table-striped">
+      <div className="ei-header" onClick={this.toggleattrib}>
+        <i className={this.state.toggleAttributes ? 'far fa-minus-square ei-foldout-icon' : 'far fa-plus-square ei-foldout-icon'}></i>Other Attributes</div>
+        {this.state.toggleAttributes ?  
+        <span>
           {this.selctionAttributes()}
-        </table>
+        </span> : ''}
       </div>
+
     </div>
   }
 }
@@ -161,7 +174,7 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  getLocationInfo: (planId,selectedLocations) => dispatch(LocationInfoActions.getLocationInfo(planId, selectedLocations)),
+  setLocationInfo: (planId,selectedLocations) => dispatch(LocationInfoActions.setLocationInfo(planId, selectedLocations)),
   getLocationAuditLog: (planId,selectedLocations) => dispatch(LocationInfoActions.getLocationAuditLog(planId, selectedLocations))
 })
 

@@ -4,7 +4,7 @@ const defaultStatus = {
   locationInfo: null
 }
 
-function getLocationInfo (state, locationInfo) {
+function setLocationInfo (state, locationInfo) {
   return { ...state, locationInfo }
 }
 
@@ -14,10 +14,10 @@ function getLocationAuditLog (state, auditLog) {
 
 function locationInfoReducer (state = defaultStatus, action) {
   switch (action.type) {
-    case Actions.LOCATIONINFO_SHOW:
-      return getLocationInfo(state, action.payload)
+    case Actions.LOCATIONINFO_SET:
+      return setLocationInfo(state, action.payload)
 
-    case Actions.LOCATIONAUDIT_LOG_SHOW:
+    case Actions.LOCATIONINFO_SHOW_AUDIT_LOG:
       return getLocationAuditLog(state, action.payload)
 
     default:
