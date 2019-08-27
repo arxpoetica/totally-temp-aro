@@ -90,6 +90,7 @@ class SocketManager {
         console.error(`ERROR: No socket roomId found for processId ${processId}`)
       } else {
         console.log(`Optimization Progress Socket: Routing message with UUID ${processId} to plan/${processId}`)
+        console.log(`SOCKET EMIT plan:${processId}, payload: ${JSON.stringify(msg)}`)
         msg.properties.headers.eventType = socketConfig.progress.message
         // UI dependent on optimizationState at so many places TODO: need to remove optimizationstate
         msg.data = JSON.parse(msg.content.toString()) // Shove it in here for now. Its in too many places in the front end.

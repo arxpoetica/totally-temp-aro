@@ -39,28 +39,47 @@ class Sockets {
 
   // Emit a message to a single connected client (i.e. a browser session).
   emitToClient (clientId, payload) {
+    console.log(`SOCKET EMIT client:${clientId}, payload: ${this.formatPayloadForLogging(payload)}`)
     this.sockets.client.to(`${clientId}`).emit('message', payload)
   }
 
   // Emit a message to a particular user. The user CAN be logged in on multiple clients.
   emitToUser (userId, payload) {
+    console.log(`SOCKET EMIT user:${userId}, payload: ${this.formatPayloadForLogging(payload)}`)
     this.sockets.user.to(`${userId}`).emit('message', payload)
   }
 
   // Emit a message to everyone that has a plan open. Multiple users can potentially have the same plan open.
   emitToPlan (planId, payload) {
+    console.log(`SOCKET EMIT plan:${planId}, payload: ${this.formatPayloadForLogging(payload)}`)
     this.sockets.plan.to(`${planId}`).emit('message', payload)
   }
 
   // Emit a message to everyone that is interested in a library. A lot of users can potentially have this
   // library selected in their settings.
   emitToLibrary (libraryId, payload) {
+    console.log(`SOCKET EMIT library:${libraryId}, payload: ${this.formatPayloadForLogging(payload)}`)
     this.sockets.library.to(`${libraryId}`).emit('message', payload)
   }
 
   // Emit a message to EVERYONE connected via websockets. Use sparingly, if used at all.
   emitToAll (payload) {
+    console.log(`SOCKET EMIT broadcast, payload: ${this.formatPayloadForLogging(payload)}`)
     this.sockets.client.to(`broadcast`).emit('message', payload)
+  }
+
+  // Formats a payload for logging. Show only a subset of the content
+  formatPayloadForLogging (payload) {
+    return JSON.stringify(payload, (key, value) => {
+      if (key === 'content') {
+        return {
+          type: value.type,
+          data: `Length: ${value.data.length}`
+        }
+      } else {
+        return value
+      }
+    }, 2)
   }
 }
 
