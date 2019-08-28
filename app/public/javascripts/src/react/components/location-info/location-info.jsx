@@ -29,14 +29,6 @@ export class LocationInfo extends Component {
     }
   }
 
-  getLocationAuditLog () {
-    return (
-      <tbody>
-        {this.props.auditLog.libraryAudit.map(v => <tr><td>{v.modifiedDate}</td><td>{v.userName}</td><td>{v.crudAction}</td></tr>)}
-      </tbody>
-    )
-  }
-
   selectionAttributes () {
     return (
       <table className='table table-sm table-striped'>
