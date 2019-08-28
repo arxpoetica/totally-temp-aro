@@ -59,112 +59,101 @@ export class LocationInfo extends Component {
     return !this.props.locationInfoDetails
       ? null
       : <div>
-        <table id='table-coverage-initializer' className='table table-sm table-striped sidebar-options-table'>
-          <tbody>
-            <tr>
-              <td>Name</td>
-              <td>
-                {this.props.locationInfoDetails.name}
-              </td>
-            </tr>
-            <tr>
-              <td>Address</td>
-              <td>
-                {this.props.locationInfoDetails.address}
-              </td>
-            </tr>
-            <tr>
-              <td>Latitude</td>
-              <td>
-                {this.props.locationInfoDetails.geog.coordinates[1]}
-              </td>
-            </tr>
-            <tr>
-              <td>Longitude</td>
-              <td>
-                {this.props.locationInfoDetails.geog.coordinates[0]}
-              </td>
-            </tr>
-            <tr>
-              <td>Census Block</td>
-              <td>
-                {this.props.locationInfoDetails.tabblock_id}
-              </td>
-            </tr>
-
-            <tr>
-              <td>HouseHold Count</td>
-              <td>
-                {this.props.locationInfoDetails.number_of_households}
-              </td>
-            </tr>
-            <tr>
-              <td>HouseHold IDs</td>
-              <td>
-                {this.props.locationInfoDetails.location_id}
-              </td>
-            </tr>
-            <tr>
-              <td>Business Count</td>
-              <td>
-                {this.props.locationInfoDetails.number_of_businesses}
-              </td>
-            </tr>
-
-            <tr>
-              <td>Tower Count</td>
-              <td>
-                {this.props.locationInfoDetails.number_of_towers}
-              </td>
-            </tr>
-
-            <tr>
-              <td>Distance From Existing Network</td>
-              <td>
-                {this.props.locationInfoDetails.distance_to_client_fiber}m
-              </td>
-            </tr>
-            <tr>
-              <td>Distance from Planned Network</td>
-              <td>
-                {this.props.locationInfoDetails.distance_to_planned_network}m
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div>
-          <div className='ei-header' onClick={this.toggleAuditLogIsExpanded}>
-            <i className={this.state.isAuditLogExpanded ? 'far fa-minus-square ei-foldout-icon' : 'far fa-plus-square ei-foldout-icon'} />
-            Audit Log</div>
-          {
-            this.state.isAuditLogExpanded
-              ? <span>
-                <table className='table table-sm table-striped'>
-                  <thead>
-                    <tr>
-                      <th>Timestamp</th>
-                      <th>User</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <ShowAuditLog auditLog={this.props.auditLogDetails} />
-                </table>
-              </span>
-              : null
-          }
-        </div>
-
-        <div>
-          <div className='ei-header' onClick={this.toggleAreAttributesExpanded}>
-            <i className={this.state.areAttributesExpanded ? 'far fa-minus-square ei-foldout-icon' : 'far fa-plus-square ei-foldout-icon'} />Other Attributes</div>
-          {
-            this.state.areAttributesExpanded
-              ? <span>{ this.selectionAttributes() }</span>
-              : null
-          }
-        </div>
+        {this.renderLocationDetails()}
+        {this.renderAuditLog()}
+        {this.renderAttributes()}
       </div>
+  }
+
+  renderLocationDetails () {
+    return <table id='table-coverage-initializer' className='table table-sm table-striped sidebar-options-table'>
+      <tbody>
+        <tr>
+          <td>Name</td>
+          <td>{this.props.locationInfoDetails.name}</td>
+        </tr>
+        <tr>
+          <td>Address</td>
+          <td>{this.props.locationInfoDetails.address}</td>
+        </tr>
+        <tr>
+          <td>Latitude</td>
+          <td>{this.props.locationInfoDetails.geog.coordinates[1]}</td>
+        </tr>
+        <tr>
+          <td>Longitude</td>
+          <td>{this.props.locationInfoDetails.geog.coordinates[0]}</td>
+        </tr>
+        <tr>
+          <td>Census Block</td>
+          <td>{this.props.locationInfoDetails.tabblock_id}</td>
+        </tr>
+
+        <tr>
+          <td>HouseHold Count</td>
+          <td>{this.props.locationInfoDetails.number_of_households}</td>
+        </tr>
+        <tr>
+          <td>HouseHold IDs</td>
+          <td>{this.props.locationInfoDetails.location_id}</td>
+        </tr>
+        <tr>
+          <td>Business Count</td>
+          <td>{this.props.locationInfoDetails.number_of_businesses}</td>
+        </tr>
+
+        <tr>
+          <td>Tower Count</td>
+          <td>{this.props.locationInfoDetails.number_of_towers}</td>
+        </tr>
+
+        <tr>
+          <td>Distance From Existing Network</td>
+          <td>{this.props.locationInfoDetails.distance_to_client_fiber}m</td>
+        </tr>
+        <tr>
+          <td>Distance from Planned Network</td>
+          <td>{this.props.locationInfoDetails.distance_to_planned_network}m</td>
+        </tr>
+      </tbody>
+    </table>
+  }
+
+  renderAuditLog () {
+    return <div>
+      <div className='ei-header' onClick={this.toggleAuditLogIsExpanded}>
+        <i className={this.state.isAuditLogExpanded ? 'far fa-minus-square ei-foldout-icon' : 'far fa-plus-square ei-foldout-icon'} />
+        Audit Log
+      </div>
+      {
+        this.state.isAuditLogExpanded
+          ? <span>
+            <table className='table table-sm table-striped'>
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>User</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <ShowAuditLog auditLog={this.props.auditLogDetails} />
+            </table>
+          </span>
+          : null
+      }
+    </div>
+  }
+
+  renderAttributes () {
+    return <div>
+      <div className='ei-header' onClick={this.toggleAreAttributesExpanded}>
+        <i className={this.state.areAttributesExpanded ? 'far fa-minus-square ei-foldout-icon' : 'far fa-plus-square ei-foldout-icon'} />Other Attributes</div>
+      {
+        this.state.areAttributesExpanded
+          ? <span>{ this.selectionAttributes() }</span>
+          : null
+      }
+    </div>
   }
 }
 
