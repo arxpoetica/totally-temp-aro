@@ -48,11 +48,11 @@ export class LocationInfo extends Component {
   }
 
   toggleAuditLogIsExpanded () {
-    this.setState({ toggleAuditLog: !this.state.isAuditLogExpanded })
+    this.setState({ isAuditLogExpanded: !this.state.isAuditLogExpanded })
   }
 
   toggleAreAttributesExpanded () {
-    this.setState({ toggleAttributes: !this.state.areAttributesExpanded })
+    this.setState({ areAttributesExpanded: !this.state.areAttributesExpanded })
   }
 
   render () {
