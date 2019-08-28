@@ -2,12 +2,12 @@ import AroHttp from '../../common/aro-http'
 import Actions from '../../common/actions'
 
 // Fetch the getLocationInfo
-function setLocationInfo (planId, id) {
+function getLocationInfo (planId, id) {
   return dispatch => {
     AroHttp.get(`/locations/${planId}/${id}/show`)
       .then(result => {
         if (result.data) {
-          dispatch({ type: Actions.LOCATIONINFO_SET, payload: result.data })
+          dispatch({ type: Actions.LOCATION_INFO_SET_DETAILS, payload: result.data })
         }
       })
       .catch(err => console.error(err))
@@ -19,7 +19,7 @@ function getLocationAuditLog (planId, id) {
     AroHttp.get(`/service/audit/location/trail/bd983214-6cd9-11e9-8e12-9fd844c9846b?plan_id=${planId}`)
       .then(result => {
         if (result.data) {
-          dispatch({ type: Actions.LOCATIONINFO_SHOW_AUDIT_LOG, payload: result.data })
+          dispatch({ type: Actions.LOCATION_INFO_SET_AUDIT_LOG, payload: result.data })
         }
       })
       .catch(err => console.error(err))
@@ -27,6 +27,6 @@ function getLocationAuditLog (planId, id) {
 }
 
 export default {
-  setLocationInfo: setLocationInfo,
-  getLocationAuditLog: getLocationAuditLog
+  getLocationInfo,
+  getLocationAuditLog
 }

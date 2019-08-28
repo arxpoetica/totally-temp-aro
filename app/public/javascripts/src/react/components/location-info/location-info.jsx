@@ -24,7 +24,7 @@ export class LocationInfo extends Component {
     const newLocationId = this.props.selectedLocations.values().next().value
     if (newLocationId !== oldLocationId) {
       // We have exactly one location selected. Get the location details
-      this.props.setLocationInfo(this.props.planId, newLocationId)
+      this.props.getLocationInfo(this.props.planId, newLocationId)
       this.props.getLocationAuditLog(this.props.planId, newLocationId)
     }
   }
@@ -32,7 +32,7 @@ export class LocationInfo extends Component {
   getLocationAuditLog () {
     return (
       <tbody>
-        {this.props.auditLogDetails.libraryAudit.map(v => <tr><td>{v.modifiedDate}</td><td>{v.userName}</td><td>{v.crudAction}</td></tr>)}
+        {this.props.auditLog.libraryAudit.map(v => <tr><td>{v.modifiedDate}</td><td>{v.userName}</td><td>{v.crudAction}</td></tr>)}
       </tbody>
     )
   }
@@ -136,7 +136,7 @@ export class LocationInfo extends Component {
                   <th>Action</th>
                 </tr>
               </thead>
-              <ShowAuditLog auditLog={this.props.auditLogDetails} />
+              <ShowAuditLog auditLog={this.props.auditLog} />
             </table>
           </span>
           : null
@@ -159,18 +159,18 @@ export class LocationInfo extends Component {
 
 LocationInfo.propTypes = {
   planId: PropTypes.number,
-  selectedLocations: PropTypes.number
+  selectedLocations: PropTypes.object
 }
 
 const mapStateToProps = state => ({
   planId: state.plan.activePlan && state.plan.activePlan.id,
   selectedLocations: state.selection.locations,
-  locationInfoDetails: state.locationInfo.locationInfo,
-  auditLogDetails: state.locationInfo.auditLog
+  locationInfoDetails: state.locationInfo.details,
+  auditLog: state.locationInfo.auditLog
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  setLocationInfo: (planId, selectedLocations) => dispatch(LocationInfoActions.setLocationInfo(planId, selectedLocations)),
+  getLocationInfo: (planId, selectedLocations) => dispatch(LocationInfoActions.getLocationInfo(planId, selectedLocations)),
   getLocationAuditLog: (planId, selectedLocations) => dispatch(LocationInfoActions.getLocationAuditLog(planId, selectedLocations))
 })
 
