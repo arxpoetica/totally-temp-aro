@@ -59,21 +59,6 @@ export class LocationInfo extends Component {
       : null
   }
 
-  getHouseholdIds () {
-    return (<span>{this.props.locationInfoDetails.locSourceIds.hhSourceIds.object_ids.map(v => <span>{v}</span>)}</span>
-     );  
-  }
-
-  getBusinessIds () {
-    return (<span>{this.props.locationInfoDetails.locSourceIds.bizSourceIds.object_ids.map(v => <span>{v}</span>)}</span>
-     );  
-  }
-
-  getTowersourceIds () {
-    return (<span>{this.props.locationInfoDetails.locSourceIds.towerSourceIds.object_ids.map(v => <span>{v}</span>)}</span>
-     );  
-  }
-
   toggleAreAttributesExpanded () {
     this.setState({ areAttributesExpanded: !this.state.areAttributesExpanded })
   }
