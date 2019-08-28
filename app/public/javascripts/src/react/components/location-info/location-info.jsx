@@ -3,17 +3,15 @@ import { PropTypes } from 'prop-types'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import LocationInfoActions from './locationInfo-actions'
-import ShowAuditLog from './locationInfo-auditlog.jsx'
+import AuditLog from './audit-log.jsx'
 import '../../../../../stylesheets/editor-interfaces.css'
 
 export class LocationInfo extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      isAuditLogExpanded: false,
       areAttributesExpanded: false
     }
-    this.toggleAuditLogIsExpanded = this.toggleAuditLogIsExpanded.bind(this)
     this.toggleAreAttributesExpanded = this.toggleAreAttributesExpanded.bind(this)
   }
 
@@ -39,10 +37,6 @@ export class LocationInfo extends Component {
     )
   }
 
-  toggleAuditLogIsExpanded () {
-    this.setState({ isAuditLogExpanded: !this.state.isAuditLogExpanded })
-  }
-
   toggleAreAttributesExpanded () {
     this.setState({ areAttributesExpanded: !this.state.areAttributesExpanded })
   }
@@ -52,7 +46,7 @@ export class LocationInfo extends Component {
       ? null
       : <div>
         {this.renderLocationDetails()}
-        {this.renderAuditLog()}
+        <AuditLog auditLog={this.props.auditLog} />
         {this.renderAttributes()}
       </div>
   }
@@ -109,31 +103,6 @@ export class LocationInfo extends Component {
         </tr>
       </tbody>
     </table>
-  }
-
-  renderAuditLog () {
-    return <div>
-      <div className='ei-header' onClick={this.toggleAuditLogIsExpanded}>
-        <i className={this.state.isAuditLogExpanded ? 'far fa-minus-square ei-foldout-icon' : 'far fa-plus-square ei-foldout-icon'} />
-        Audit Log
-      </div>
-      {
-        this.state.isAuditLogExpanded
-          ? <span>
-            <table className='table table-sm table-striped'>
-              <thead>
-                <tr>
-                  <th>Timestamp</th>
-                  <th>User</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <ShowAuditLog auditLog={this.props.auditLog} />
-            </table>
-          </span>
-          : null
-      }
-    </div>
   }
 
   renderAttributes () {
