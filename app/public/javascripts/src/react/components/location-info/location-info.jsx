@@ -4,7 +4,11 @@ import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import LocationInfoActions from './locationInfo-actions'
 import AuditLog from './audit-log.jsx'
+<<<<<<< HEAD
 import '../../../../../javascripts/src/shared-utils/editor-interfaces.css'
+=======
+import '../../../../../stylesheets/editor-interfaces.css'
+>>>>>>> fe3009632b70b8248dfa2de45f996c1599ad18af
 
 export class LocationInfo extends Component {
   constructor (props) {
