@@ -1,9 +1,5 @@
 import React, { Component } from 'react'
-import { PropTypes } from 'prop-types'
-import reduxStore from '../../../redux-store'
-import wrapComponentWithProvider from '../../common/provider-wrapped-component'
-import LocationInfoActions from './locationInfo-actions'
-import '../../../../../stylesheets/editor-interfaces.css'
+import '../../../../../javascripts/src/shared-utils/editor-interfaces.css'
 
 export class LocationInfoAuditLog extends Component {
   constructor (props) {

@@ -4,7 +4,7 @@ import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import LocationInfoActions from './locationInfo-actions'
 import AuditLog from './audit-log.jsx'
-import '../../../../../stylesheets/editor-interfaces.css'
+import '../../../../../javascripts/src/shared-utils/editor-interfaces.css'
 
 export class LocationInfo extends Component {
   constructor (props) {
@@ -37,10 +37,47 @@ export class LocationInfo extends Component {
     )
   }
 
+  renderLocationTypeTitle (title, count) {
+    return <tr>
+      <td>{title}</td>
+      <td>{count}</td>
+    </tr>
+  }
+
+  renderLocationIdDetails (title, objectIds) {
+    return objectIds && objectIds.length > 0
+      ? <tr>
+        <td>{title}</td>
+        <span>
+          <td>
+            <ul style={{ listStyleType: 'none', padding: 0, marginBottom: 0 }}>
+              {objectIds.map(objectId => <li className='item'>{objectId}</li>)}
+            </ul>
+          </td>
+        </span>
+      </tr>
+      : null
+  }
+
+  getHouseholdIds () {
+    return (<span>{this.props.locationInfoDetails.locSourceIds.hhSourceIds.object_ids.map(v => <span>{v}</span>)}</span>
+     );  
+  }
+
+  getBusinessIds () {
+    return (<span>{this.props.locationInfoDetails.locSourceIds.bizSourceIds.object_ids.map(v => <span>{v}</span>)}</span>
+     );  
+  }
+
+  getTowersourceIds () {
+    return (<span>{this.props.locationInfoDetails.locSourceIds.towerSourceIds.object_ids.map(v => <span>{v}</span>)}</span>
+     );  
+  }
+
   toggleAreAttributesExpanded () {
     this.setState({ areAttributesExpanded: !this.state.areAttributesExpanded })
   }
-
+  
   render () {
     return !this.props.locationInfoDetails
       ? null
@@ -52,54 +89,46 @@ export class LocationInfo extends Component {
   }
 
   renderLocationDetails () {
+    const LocationDetails = this.props.locationInfoDetails
     return <table id='table-coverage-initializer' className='table table-sm table-striped sidebar-options-table'>
       <tbody>
         <tr>
           <td>Name</td>
-          <td>{this.props.locationInfoDetails.name}</td>
+          <td>{LocationDetails.name}</td>
         </tr>
         <tr>
           <td>Address</td>
-          <td>{this.props.locationInfoDetails.address}</td>
+          <td>{LocationDetails.address}</td>
         </tr>
         <tr>
           <td>Latitude</td>
-          <td>{this.props.locationInfoDetails.geog.coordinates[1]}</td>
+          <td>{LocationDetails.geog.coordinates[1]}</td>
         </tr>
         <tr>
           <td>Longitude</td>
-          <td>{this.props.locationInfoDetails.geog.coordinates[0]}</td>
+          <td>{LocationDetails.geog.coordinates[0]}</td>
         </tr>
         <tr>
           <td>Census Block</td>
-          <td>{this.props.locationInfoDetails.tabblock_id}</td>
+          <td>{LocationDetails.tabblock_id}</td>
         </tr>
 
-        <tr>
-          <td>HouseHold Count</td>
-          <td>{this.props.locationInfoDetails.number_of_households}</td>
-        </tr>
-        <tr>
-          <td>HouseHold IDs</td>
-          <td>{this.props.locationInfoDetails.location_id}</td>
-        </tr>
-        <tr>
-          <td>Business Count</td>
-          <td>{this.props.locationInfoDetails.number_of_businesses}</td>
-        </tr>
+        {this.renderLocationTypeTitle('HouseHold Count', LocationDetails.number_of_households)}
+        {this.renderLocationIdDetails('HouseHold IDs', LocationDetails.locSourceIds.hhSourceIds.object_ids)}
 
-        <tr>
-          <td>Tower Count</td>
-          <td>{this.props.locationInfoDetails.number_of_towers}</td>
-        </tr>
+        {this.renderLocationTypeTitle('Business Count', LocationDetails.number_of_businesses)}
+        {this.renderLocationIdDetails('Business IDs', LocationDetails.locSourceIds.bizSourceIds.object_ids)}
+
+        {this.renderLocationTypeTitle('Tower Count', LocationDetails.number_of_towers)}
+        {this.renderLocationIdDetails('Tower IDs', LocationDetails.locSourceIds.towerSourceIds.object_ids)}
 
         <tr>
           <td>Distance From Existing Network</td>
-          <td>{this.props.locationInfoDetails.distance_to_client_fiber}m</td>
+          <td>{LocationDetails.distance_to_client_fiber}m</td>
         </tr>
         <tr>
           <td>Distance from Planned Network</td>
-          <td>{this.props.locationInfoDetails.distance_to_planned_network}m</td>
+          <td>{LocationDetails.distance_to_planned_network}m</td>
         </tr>
       </tbody>
     </table>
