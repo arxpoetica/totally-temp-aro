@@ -97,10 +97,18 @@ function removePlanTargets (planId, planTargets) {
   }
 }
 
+function setPlanEditorFeatures (planEditorFeatures) {
+  return {
+    type: Actions.SELECTION_SET_PLAN_EDITOR_FEATURES,
+    payload: planEditorFeatures
+  }
+}
+
 export default {
-  setActiveSelectionMode: setActiveSelectionMode,
-  clearAllPlanTargets: clearAllPlanTargets,
-  loadPlanTargetSelectionsFromServer: loadPlanTargetSelectionsFromServer,
-  addPlanTargets: addPlanTargets,
-  removePlanTargets: removePlanTargets
+  setActiveSelectionMode,
+  clearAllPlanTargets,
+  loadPlanTargetSelectionsFromServer,
+  addPlanTargets,
+  removePlanTargets,
+  setPlanEditorFeatures
 }
