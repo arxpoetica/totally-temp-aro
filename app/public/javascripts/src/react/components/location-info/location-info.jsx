@@ -14,7 +14,7 @@ export class LocationInfo extends Component {
       toggleAttributes: false
     } 
     this.toggle = this.toggle.bind(this);
-    //this.toggleattrib = this.toggleattrib.bind(this);
+    this.toggleattrib = this.toggleattrib.bind(this);
   }
 
   componentDidUpdate (prevProps) {
@@ -50,8 +50,14 @@ export class LocationInfo extends Component {
 
   toggle () {
     const currentState = this.state.toggleAuditLog
-    this.setState({ toggleAuditLog: !currentState }); 
-}
+    this.setState({ toggleAuditLog: !currentState })
+  }
+
+  toggleattrib () {
+    const currentState = this.state.toggleAttributes
+    this.setState({ toggleAttributes: !currentState })
+  }
+
   render () {
     return !this.props.locationInfoDetails ? null : <div><div>
       <table id='table-coverage-initializer' className='table table-sm table-striped sidebar-options-table'>
