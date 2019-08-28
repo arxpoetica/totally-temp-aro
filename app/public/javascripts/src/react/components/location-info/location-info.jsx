@@ -9,12 +9,12 @@ import '../../../../../stylesheets/editor-interfaces.css'
 export class LocationInfo extends Component {
   constructor (props) {
     super(props)
-    this.state={
-      toggleAuditLog: false,
-      toggleAttributes: false
-    } 
-    this.toggle = this.toggle.bind(this);
-    this.toggleattrib = this.toggleattrib.bind(this);
+    this.state = {
+      isAuditLogExpanded: false,
+      areAttributesExpanded: false
+    }
+    this.toggleAuditLogIsExpanded = this.toggleAuditLogIsExpanded.bind(this)
+    this.toggleAreAttributesExpanded = this.toggleAreAttributesExpanded.bind(this)
   }
 
   componentDidUpdate (prevProps) {
@@ -24,152 +24,153 @@ export class LocationInfo extends Component {
     const newLocationId = this.props.selectedLocations.values().next().value
     if (newLocationId !== oldLocationId) {
       // We have exactly one location selected. Get the location details
-      console.log(`Exactly one location selected. Getting details for id ${newLocationId}`)
-      this.props.setLocationInfo(this.props.planId,newLocationId)
-      this.props.getLocationAuditLog(this.props.planId,newLocationId)
+      this.props.setLocationInfo(this.props.planId, newLocationId)
+      this.props.getLocationAuditLog(this.props.planId, newLocationId)
     }
   }
 
   getLocationAuditLog () {
-     return (
+    return (
       <tbody>
-        { this.props.auditLogDetails.libraryAudit.map(v => <tr><td>{v.modifiedDate}</td><td>{v.userName}</td><td>{v.crudAction}</td></tr>) }
+        {this.props.auditLogDetails.libraryAudit.map(v => <tr><td>{v.modifiedDate}</td><td>{v.userName}</td><td>{v.crudAction}</td></tr>)}
       </tbody>
-    );
+    )
   }
 
-  selctionAttributes () {
+  selectionAttributes () {
     return (
-      <table className="table table-sm table-striped">
+      <table className='table table-sm table-striped'>
         <tbody>
           {this.props.locationInfoDetails.attributes.map(v => <tr><td>{v.key}</td><td>{v.value}</td></tr>)}
         </tbody>
       </table>
-    );
+    )
   }
 
-  toggle () {
-    const currentState = this.state.toggleAuditLog
-    this.setState({ toggleAuditLog: !currentState })
+  toggleAuditLogIsExpanded () {
+    this.setState({ toggleAuditLog: !this.state.isAuditLogExpanded })
   }
 
-  toggleattrib () {
-    const currentState = this.state.toggleAttributes
-    this.setState({ toggleAttributes: !currentState })
+  toggleAreAttributesExpanded () {
+    this.setState({ toggleAttributes: !this.state.areAttributesExpanded })
   }
 
   render () {
-    return !this.props.locationInfoDetails ? null : <div><div>
-      <table id='table-coverage-initializer' className='table table-sm table-striped sidebar-options-table'>
-        <tbody>
-          <tr>
-            <td>Name</td>
-            <td>
-             {this.props.locationInfoDetails.name}
-            </td>
-          </tr>
-          <tr>
-            <td>Address</td>
-            <td>
-            {this.props.locationInfoDetails.address}
-            </td>
-          </tr>
-          <tr>
-            <td>Latitude</td>
-            <td>
-            {this.props.locationInfoDetails.geog.coordinates[1]}
-            </td>
-          </tr>
-          <tr>
-            <td>Longitude</td>
-            <td>
-            {this.props.locationInfoDetails.geog.coordinates[0]}
-            </td>
-          </tr>
-          <tr>
-            <td>Census Block</td>
-            <td>
-            {this.props.locationInfoDetails.tabblock_id}
-            </td>
-          </tr>
-          
-          <tr>
-            <td>HouseHold Count</td>
-            <td>
-             {this.props.locationInfoDetails.number_of_households}
-            </td>
-          </tr>
-          <tr>
-            <td>HouseHold IDs</td>
-            <td>
-            {this.props.locationInfoDetails.location_id}
-            </td>
-          </tr>
-          <tr>
-            <td>Business Count</td>
-            <td>
-            {this.props.locationInfoDetails.number_of_businesses}
-            </td>
-          </tr>
-          
-          <tr>
-            <td>Tower Count</td>
-            <td>
-            {this.props.locationInfoDetails.number_of_towers}
-            </td>
-          </tr>
-         
-          <tr>
-            <td>Distance From Existing Network</td>
-            <td>
-            {this.props.locationInfoDetails.distance_to_client_fiber}m
-            </td>
-          </tr>
-          <tr>
-            <td>Distance from Planned Network</td>
-            <td>
-            {this.props.locationInfoDetails.distance_to_planned_network}m
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      </div>
+    return !this.props.locationInfoDetails
+      ? null
+      : <div>
+        <table id='table-coverage-initializer' className='table table-sm table-striped sidebar-options-table'>
+          <tbody>
+            <tr>
+              <td>Name</td>
+              <td>
+                {this.props.locationInfoDetails.name}
+              </td>
+            </tr>
+            <tr>
+              <td>Address</td>
+              <td>
+                {this.props.locationInfoDetails.address}
+              </td>
+            </tr>
+            <tr>
+              <td>Latitude</td>
+              <td>
+                {this.props.locationInfoDetails.geog.coordinates[1]}
+              </td>
+            </tr>
+            <tr>
+              <td>Longitude</td>
+              <td>
+                {this.props.locationInfoDetails.geog.coordinates[0]}
+              </td>
+            </tr>
+            <tr>
+              <td>Census Block</td>
+              <td>
+                {this.props.locationInfoDetails.tabblock_id}
+              </td>
+            </tr>
 
-      <div>
-       <div className="ei-header" onClick={this.toggle}>
-          <i className={this.state.toggleAuditLog ? 'far fa-minus-square ei-foldout-icon' : 'far fa-plus-square ei-foldout-icon'}  ></i>
-         Audit Log</div>
-        {this.state.toggleAuditLog ?  
-        <span>
-        <table className="table table-sm table-striped">
-        <thead>
-          <tr>
-            <th>Timestamp</th>
-            <th>User</th>
-            <th>Action</th>
-          </tr>      
-        </thead>
-        <ShowAuditLog auditLog={this.props.auditLogDetails}/> 
+            <tr>
+              <td>HouseHold Count</td>
+              <td>
+                {this.props.locationInfoDetails.number_of_households}
+              </td>
+            </tr>
+            <tr>
+              <td>HouseHold IDs</td>
+              <td>
+                {this.props.locationInfoDetails.location_id}
+              </td>
+            </tr>
+            <tr>
+              <td>Business Count</td>
+              <td>
+                {this.props.locationInfoDetails.number_of_businesses}
+              </td>
+            </tr>
+
+            <tr>
+              <td>Tower Count</td>
+              <td>
+                {this.props.locationInfoDetails.number_of_towers}
+              </td>
+            </tr>
+
+            <tr>
+              <td>Distance From Existing Network</td>
+              <td>
+                {this.props.locationInfoDetails.distance_to_client_fiber}m
+              </td>
+            </tr>
+            <tr>
+              <td>Distance from Planned Network</td>
+              <td>
+                {this.props.locationInfoDetails.distance_to_planned_network}m
+              </td>
+            </tr>
+          </tbody>
         </table>
-        </span> : ''}
-      </div>
 
-      <div>
-      <div className="ei-header" onClick={this.toggleattrib}>
-        <i className={this.state.toggleAttributes ? 'far fa-minus-square ei-foldout-icon' : 'far fa-plus-square ei-foldout-icon'}></i>Other Attributes</div>
-        {this.state.toggleAttributes ?  
-        <span>
-          {this.selctionAttributes()}
-        </span> : ''}
-      </div>
+        <div>
+          <div className='ei-header' onClick={this.toggleAuditLogIsExpanded}>
+            <i className={this.state.isAuditLogExpanded ? 'far fa-minus-square ei-foldout-icon' : 'far fa-plus-square ei-foldout-icon'} />
+            Audit Log</div>
+          {
+            this.state.isAuditLogExpanded
+              ? <span>
+                <table className='table table-sm table-striped'>
+                  <thead>
+                    <tr>
+                      <th>Timestamp</th>
+                      <th>User</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <ShowAuditLog auditLog={this.props.auditLogDetails} />
+                </table>
+              </span>
+              : null
+          }
+        </div>
 
-    </div>
+        <div>
+          <div className='ei-header' onClick={this.toggleAreAttributesExpanded}>
+            <i className={this.state.areAttributesExpanded ? 'far fa-minus-square ei-foldout-icon' : 'far fa-plus-square ei-foldout-icon'} />Other Attributes</div>
+          {
+            this.state.areAttributesExpanded
+              ? <span>{ this.selectionAttributes() }</span>
+              : null
+          }
+        </div>
+      </div>
   }
 }
 
 LocationInfo.propTypes = {
   planId: PropTypes.number,
-  selectedLocations: PropTypes.number,
+  selectedLocations: PropTypes.number
 }
 
 const mapStateToProps = state => ({
@@ -180,8 +181,8 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  setLocationInfo: (planId,selectedLocations) => dispatch(LocationInfoActions.setLocationInfo(planId, selectedLocations)),
-  getLocationAuditLog: (planId,selectedLocations) => dispatch(LocationInfoActions.getLocationAuditLog(planId, selectedLocations))
+  setLocationInfo: (planId, selectedLocations) => dispatch(LocationInfoActions.setLocationInfo(planId, selectedLocations)),
+  getLocationAuditLog: (planId, selectedLocations) => dispatch(LocationInfoActions.getLocationAuditLog(planId, selectedLocations))
 })
 
 const LocationInfoComponent = wrapComponentWithProvider(reduxStore, LocationInfo, mapStateToProps, mapDispatchToProps)
