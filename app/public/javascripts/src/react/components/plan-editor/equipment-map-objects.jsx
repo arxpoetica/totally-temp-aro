@@ -63,7 +63,7 @@ export class EquipmentMapObjects extends Component {
       const eventXY = Utils.getXYFromEvent(event)
       this.props.showContextMenuForEquipment(this.props.planId, this.props.transactionId, this.props.selectedBoundaryTypeId, mapObject.objectId, eventXY.x, eventXY.y)
     })
-    mapObject.addListener('click', event => this.props.selectEquipment(objectId))
+    mapObject.addListener('click', () => this.props.selectEquipment(objectId))
     this.objectIdToMapObject[objectId] = mapObject
   }
 

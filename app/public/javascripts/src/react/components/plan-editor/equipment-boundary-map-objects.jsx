@@ -3,6 +3,7 @@ import { Component } from 'react'
 import { PropTypes } from 'prop-types'
 import { connect } from 'react-redux'
 import PlanEditorActions from './plan-editor-actions'
+import SelectionActions from '../selection/selection-actions'
 import Utils from './utils'
 
 export class EquipmentBoundaryMapObjects extends Component {
@@ -13,6 +14,13 @@ export class EquipmentBoundaryMapObjects extends Component {
       strokeColor: '#FF1493',
       strokeOpacity: 0.8,
       strokeWeight: 2,
+      fillColor: '#FF1493',
+      fillOpacity: 0.4
+    }
+    this.selectedPolygonOptions = {
+      strokeColor: '#000000',
+      strokeOpacity: 0.8,
+      strokeWeight: 3,
       fillColor: '#FF1493',
       fillOpacity: 0.4
     }
@@ -35,6 +43,7 @@ export class EquipmentBoundaryMapObjects extends Component {
     idsToCreate.forEach(objectId => this.createMapObject(objectId))
     idsToDelete.forEach(objectId => this.deleteMapObject(objectId))
     idsToUpdate.forEach(objectId => this.updateBoundaryShapeFromStore(objectId))
+    this.highlightSelectedBoundaries()
   }
 
   createMapObject (objectId) {
@@ -54,6 +63,7 @@ export class EquipmentBoundaryMapObjects extends Component {
       const eventXY = Utils.getXYFromEvent(event)
       this.props.showContextMenuForEquipmentBoundary(this.props.transactionId, mapObject.objectId, eventXY.x, eventXY.y)
     })
+    mapObject.addListener('click', () => this.props.selectBoundary(objectId))
     this.objectIdToMapObject[objectId] = mapObject
   }
 
@@ -103,6 +113,20 @@ export class EquipmentBoundaryMapObjects extends Component {
     })
   }
 
+  highlightSelectedBoundaries () {
+    Object.keys(this.objectIdToMapObject).forEach(objectId => {
+      if (this.props.selectedFeatures.indexOf(objectId) >= 0) {
+        // This boundary is selected.
+        this.objectIdToMapObject[objectId].setOptions(this.selectedPolygonOptions)
+        this.objectIdToMapObject[objectId].setEditable(true)
+      } else {
+        // This boundary is not selected.
+        this.objectIdToMapObject[objectId].setOptions(this.polygonOptions)
+        this.objectIdToMapObject[objectId].setEditable(false)
+      }
+    })
+  }
+
   componentWillUnmount () {
     Object.keys(this.objectIdToMapObject).forEach(objectId => this.deleteMapObject(objectId))
   }
@@ -112,6 +136,7 @@ EquipmentBoundaryMapObjects.propTypes = {
   transactionId: PropTypes.number,
   transactionFeatures: PropTypes.object,
   selectedBoundaryTypeId: PropTypes.number,
+  selectedFeatures: PropTypes.arrayOf(PropTypes.string),
   googleMaps: PropTypes.object
 }
 
@@ -120,6 +145,7 @@ const mapStateToProps = state => ({
   transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
   transactionFeatures: state.planEditor.features,
   selectedBoundaryTypeId: state.mapLayers.selectedBoundaryType.id,
+  selectedFeatures: state.selection.planEditorFeatures,
   googleMaps: state.map.googleMaps
 })
 
@@ -127,7 +153,8 @@ const mapDispatchToProps = dispatch => ({
   modifyEquipmentBoundary: (transactionId, equipmentBoundary) => dispatch(PlanEditorActions.modifyEquipmentBoundary(transactionId, equipmentBoundary)),
   showContextMenuForEquipmentBoundary: (planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y) => {
     dispatch(PlanEditorActions.showContextMenuForEquipmentBoundary(planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y))
-  }
+  },
+  selectBoundary: objectId => dispatch(SelectionActions.setPlanEditorFeatures([objectId]))
 })
 
 const EquipmentBoundaryMapObjectsComponent = connect(mapStateToProps, mapDispatchToProps)(EquipmentBoundaryMapObjects)
