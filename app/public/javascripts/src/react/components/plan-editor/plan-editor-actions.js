@@ -29,22 +29,22 @@ function resumeOrCreateTransaction (planId, userId) {
 }
 
 function clearTransaction () {
-  return {
-    type: Actions.PLAN_EDITOR_CLEAR_TRANSACTION
+  return dispatch => {
+    dispatch({ type: Actions.PLAN_EDITOR_CLEAR_TRANSACTION })
+    dispatch({
+      type: Actions.SELECTION_SET_PLAN_EDITOR_FEATURES,
+      payload: []
+    })
   }
 }
 
 function commitTransaction (transactionId) {
   return dispatch => {
     AroHttp.put(`/service/plan-transactions/${transactionId}`)
-      .then(() => dispatch({
-        type: Actions.PLAN_EDITOR_CLEAR_TRANSACTION
-      }))
+      .then(() => dispatch(clearTransaction()))
       .catch(err => {
         console.error(err)
-        dispatch({
-          type: Actions.PLAN_EDITOR_CLEAR_TRANSACTION
-        })
+        dispatch(clearTransaction())
       })
   }
 }
@@ -52,14 +52,10 @@ function commitTransaction (transactionId) {
 function discardTransaction (transactionId) {
   return dispatch => {
     TransactionManager.discardTransaction(transactionId)
-      .then(res => dispatch({
-        type: Actions.PLAN_EDITOR_CLEAR_TRANSACTION
-      }))
+      .then(() => dispatch(clearTransaction()))
       .catch(err => {
         console.error(err)
-        dispatch({
-          type: Actions.PLAN_EDITOR_CLEAR_TRANSACTION
-        })
+        dispatch(clearTransaction())
       })
   }
 }
