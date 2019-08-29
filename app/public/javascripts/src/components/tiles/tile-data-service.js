@@ -190,7 +190,8 @@ class TileDataService {
       }
     })
 
-    promises.push(imagePromise('/images/backgrounds/disabled-boundary.png'))
+    //promises.push(imagePromise('/images/backgrounds/disabled-boundary.png'))
+    
     const hasIcon = Boolean(mapLayer.iconUrl)
     if (mapLayer.iconUrl) {
       promises.push(imagePromise(mapLayer.iconUrl))

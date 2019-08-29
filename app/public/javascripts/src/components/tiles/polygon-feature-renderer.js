@@ -100,8 +100,8 @@ class PolygonFeatureRenderer {
       drawingStyles.lineWidth = mapLayer.highlightStyle.lineWidth
     } else if ((feature.properties._data_type) &&
       feature.properties._data_type === 'equipment_boundary.select' && feature.properties.is_locked === 'true') {
-      drawingStyles.strokeStyle = '#75b9f9'
-      drawingStyles.fillStyle = ctx.createPattern(featureData.disabledBoundaryPattern, 'repeat')
+      drawingStyles.strokeStyle = '#0101F6'
+      drawingStyles.fillStyle = mapLayer.highlightStyle.fillStyle
       drawingStyles.lineOpacity = styles.modifiedBoundary.lineOpacity
     }
     // console.log(feature)
