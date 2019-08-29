@@ -29,22 +29,22 @@ function resumeOrCreateTransaction (planId, userId) {
 }
 
 function clearTransaction () {
-  return {
-    type: Actions.PLAN_EDITOR_CLEAR_TRANSACTION
+  return dispatch => {
+    dispatch({ type: Actions.PLAN_EDITOR_CLEAR_TRANSACTION })
+    dispatch({
+      type: Actions.SELECTION_SET_PLAN_EDITOR_FEATURES,
+      payload: []
+    })
   }
 }
 
 function commitTransaction (transactionId) {
   return dispatch => {
     AroHttp.put(`/service/plan-transactions/${transactionId}`)
-      .then(() => dispatch({
-        type: Actions.PLAN_EDITOR_CLEAR_TRANSACTION
-      }))
+      .then(() => dispatch(clearTransaction()))
       .catch(err => {
         console.error(err)
-        dispatch({
-          type: Actions.PLAN_EDITOR_CLEAR_TRANSACTION
-        })
+        dispatch(clearTransaction())
       })
   }
 }
@@ -52,14 +52,10 @@ function commitTransaction (transactionId) {
 function discardTransaction (transactionId) {
   return dispatch => {
     TransactionManager.discardTransaction(transactionId)
-      .then(res => dispatch({
-        type: Actions.PLAN_EDITOR_CLEAR_TRANSACTION
-      }))
+      .then(() => dispatch(clearTransaction()))
       .catch(err => {
         console.error(err)
-        dispatch({
-          type: Actions.PLAN_EDITOR_CLEAR_TRANSACTION
-        })
+        dispatch(clearTransaction())
       })
   }
 }
@@ -101,10 +97,10 @@ function modifyEquipment (transactionId, equipment) {
   }
 }
 
-function deleteEquipment (transactionId, objectIdToDelete) {
+function deleteTransactionFeature (transactionId, featureType, objectIdToDelete) {
   return dispatch => {
-    AroHttp.delete(`/service/plan-transactions/${transactionId}/modified-features/equipment/${objectIdToDelete}`)
-      .then(result => dispatch(removeTransactionEquipment(objectIdToDelete)))
+    AroHttp.delete(`/service/plan-transactions/${transactionId}/modified-features/${featureType}/${objectIdToDelete}`)
+      .then(result => dispatch(removeTransactionFeature(objectIdToDelete)))
       .catch(err => console.error(err))
   }
 }
@@ -116,9 +112,9 @@ function addTransactionEquipment (equipmentNodes) {
   }
 }
 
-function removeTransactionEquipment (objectId) {
+function removeTransactionFeature (objectId) {
   return {
-    type: Actions.PLAN_EDITOR_REMOVE_EQUIPMENT_NODE,
+    type: Actions.PLAN_EDITOR_REMOVE_TRANSACTION_FEATURE,
     payload: objectId
   }
 }
@@ -141,17 +137,28 @@ function createEquipmentBoundary (transactionId, feature) {
   }
 }
 
+function modifyEquipmentBoundary (transactionId, equipmentBoundary) {
+  return dispatch => {
+    // Do a PUT to send the equipment over to service
+    AroHttp.put(`/service/plan-transactions/${transactionId}/modified-features/equipment_boundary`, equipmentBoundary.feature)
+      .then(result => {
+        const newEquipmentBoundary = {
+          ...equipmentBoundary,
+          feature: result.data
+        }
+        dispatch({
+          type: Actions.PLAN_EDITOR_MODIFY_EQUIPMENT_BOUNDARIES,
+          payload: [newEquipmentBoundary]
+        })
+      })
+      .catch(err => console.error(err))
+  }
+}
+
 function addTransactionEquipmentBoundary (equipmentBoundaries) {
   return {
     type: Actions.PLAN_EDITOR_ADD_EQUIPMENT_BOUNDARY,
     payload: equipmentBoundaries
-  }
-}
-
-function removeTransactionEquipmentBoundary (objectId) {
-  return {
-    type: Actions.PLAN_EDITOR_REMOVE_EQUIPMENT_BOUNDARY,
-    payload: objectId
   }
 }
 
@@ -165,13 +172,24 @@ function showContextMenuForEquipment (planId, transactionId, selectedBoundaryTyp
         if (isAddBoundaryAllowed) {
           menuActions.push(new MenuItemAction('ADD_BOUNDARY', 'Add boundary', 'PlanEditorActions', 'startDrawingBoundaryFor', equipmentObjectId))
         }
-        menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteEquipment', transactionId, equipmentObjectId))
+        menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteTransactionFeature', transactionId, 'equipment', equipmentObjectId))
         const menuItemFeature = new MenuItemFeature('EQUIPMENT', 'Equipment', menuActions)
         // Show context menu
         dispatch(ContextMenuActions.setContextMenuItems([menuItemFeature]))
         dispatch(ContextMenuActions.showContextMenu(x, y))
       })
       .catch(err => console.error(err))
+  }
+}
+
+function showContextMenuForEquipmentBoundary (transactionId, equipmentObjectId, x, y) {
+  return dispatch => {
+    var menuActions = []
+    menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteTransactionFeature', transactionId, 'equipment_boundary', equipmentObjectId))
+    const menuItemFeature = new MenuItemFeature('BOUNDARY', 'Equipment Boundary', menuActions)
+    // Show context menu
+    dispatch(ContextMenuActions.setContextMenuItems([menuItemFeature]))
+    dispatch(ContextMenuActions.showContextMenu(x, y))
   }
 }
 
@@ -224,13 +242,14 @@ export default {
   resumeOrCreateTransaction,
   createEquipment,
   modifyEquipment,
-  deleteEquipment,
+  deleteTransactionFeature,
   addTransactionEquipment,
-  removeTransactionEquipment,
+  removeTransactionFeature,
   createEquipmentBoundary,
+  modifyEquipmentBoundary,
   addTransactionEquipmentBoundary,
-  removeTransactionEquipmentBoundary,
   showContextMenuForEquipment,
+  showContextMenuForEquipmentBoundary,
   startDrawingBoundaryFor,
   stopDrawingBoundary,
   setIsCalculatingSubnets,

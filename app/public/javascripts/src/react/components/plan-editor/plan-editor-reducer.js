@@ -32,7 +32,7 @@ function addTransactionEquipment (state, equipments) {
   }
 }
 
-function removeTransactionEquipment (state, objectId) {
+function removeTransactionFeature (state, objectId) {
   var newFeatures = { ...state.features }
   delete newFeatures[objectId]
   return { ...state,
@@ -50,14 +50,6 @@ function addTransactionEquipmentBoundary (state, equipmentBoundaries) {
   }
 }
 
-function removeTransactionEquipmentBoundary (state, objectId) {
-  var newFeatures = { ...state.features }
-  delete newFeatures[objectId]
-  return { ...state,
-    features: newFeatures
-  }
-}
-
 function modifyTransactionEquipments (state, newEquipments) {
   var newFeatures = { ...state.features }
   newEquipments.forEach(equipment => {
@@ -65,6 +57,20 @@ function modifyTransactionEquipments (state, newEquipments) {
       newFeatures[equipment.feature.objectId] = equipment
     } else {
       throw new Error(`Trying to modify equipment with objectId ${equipment.feature.objectId}, but it is not in the existing list of equipments`)
+    }
+  })
+  return { ...state,
+    features: newFeatures
+  }
+}
+
+function modifyTransactionEquipmentBoundaries (state, newEquipmentBoundaries) {
+  var newFeatures = { ...state.features }
+  newEquipmentBoundaries.forEach(equipmentBoundary => {
+    if (newFeatures[equipmentBoundary.feature.objectId]) {
+      newFeatures[equipmentBoundary.feature.objectId] = equipmentBoundary
+    } else {
+      throw new Error(`Trying to modify equipment with objectId ${equipmentBoundary.feature.objectId}, but it is not in the existing list of equipments`)
     }
   })
   return { ...state,
@@ -113,17 +119,17 @@ function planEditorReducer (state = defaultState, action) {
     case Actions.PLAN_EDITOR_ADD_EQUIPMENT_NODES:
       return addTransactionEquipment(state, action.payload)
 
-    case Actions.PLAN_EDITOR_REMOVE_EQUIPMENT_NODE:
-      return removeTransactionEquipment(state, action.payload)
+    case Actions.PLAN_EDITOR_REMOVE_TRANSACTION_FEATURE:
+      return removeTransactionFeature(state, action.payload)
 
     case Actions.PLAN_EDITOR_ADD_EQUIPMENT_BOUNDARY:
       return addTransactionEquipmentBoundary(state, action.payload)
 
-    case Actions.PLAN_EDITOR_REMOVE_EQUIPMENT_BOUNDARY:
-      return removeTransactionEquipmentBoundary(state, action.payload)
-
     case Actions.PLAN_EDITOR_MODIFY_EQUIPMENT_NODES:
       return modifyTransactionEquipments(state, action.payload)
+
+    case Actions.PLAN_EDITOR_MODIFY_EQUIPMENT_BOUNDARIES:
+      return modifyTransactionEquipmentBoundaries(state, action.payload)
 
     case Actions.PLAN_EDITOR_SET_IS_CALCULATING_SUBNETS:
       return setIsCalculatingSubnets(state, action.payload)
