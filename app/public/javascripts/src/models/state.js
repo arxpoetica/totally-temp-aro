@@ -29,9 +29,6 @@ const getBoundaryLayersList = createSelector([getAllBoundaryLayers], (boundaries
 const getAllBoundaryTypesList = reduxState => reduxState.mapLayers.boundaryTypes
 const getBoundaryTypesList = createSelector([getAllBoundaryTypesList], (boundaryTypes) => boundaryTypes.toJS())
 
-const getselectedBoundaryType = reduxState => reduxState.mapLayers.selectedBoundaryType
-const getSelectedBoundaryType = createSelector([getselectedBoundaryType], (selectedBoundaryType) => selectedBoundaryType.toJS())
-
 /* global app localStorage map */
 class State {
   constructor ($rootScope, $http, $document, $timeout, $sce, $ngRedux, stateSerializationHelper, $filter, tileDataService, Utils, tracker, Notification) {
@@ -1292,7 +1289,7 @@ class State {
     service.setSelectedBoundaryType = function (selectedBoundaryType) {
       $ngRedux.dispatch({
         type: Actions.LAYERS_SET_SELECTED_BOUNDARY_TYPE,
-        payload: new Map(selectedBoundaryType)
+        payload: selectedBoundaryType
       })
     }
 
@@ -1768,7 +1765,7 @@ class State {
       reduxPlanTargets: reduxState.selection.planTargets,
       showSiteBoundary: reduxState.mapLayers.showSiteBoundary,
       boundaryTypes: getBoundaryTypesList(reduxState),
-      selectedBoundaryType: getSelectedBoundaryType(reduxState),
+      selectedBoundaryType: reduxState.mapLayers.selectedBoundaryType,
       systemActors: reduxState.user.systemActors
     }
   }

@@ -2,6 +2,9 @@ import Actions from '../../common/actions'
 import TransactionManager from './transaction-manager'
 import Transaction from './transaction'
 import AroHttp from '../../common/aro-http'
+import MenuItemFeature from '../context-menu/menu-item-feature'
+import MenuItemAction from '../context-menu/menu-item-action'
+import ContextMenuActions from '../context-menu/actions'
 
 function resumeOrCreateTransaction (planId, userId) {
   return dispatch => {
@@ -26,22 +29,22 @@ function resumeOrCreateTransaction (planId, userId) {
 }
 
 function clearTransaction () {
-  return {
-    type: Actions.PLAN_EDITOR_CLEAR_TRANSACTION
+  return dispatch => {
+    dispatch({ type: Actions.PLAN_EDITOR_CLEAR_TRANSACTION })
+    dispatch({
+      type: Actions.SELECTION_SET_PLAN_EDITOR_FEATURES,
+      payload: []
+    })
   }
 }
 
 function commitTransaction (transactionId) {
   return dispatch => {
     AroHttp.put(`/service/plan-transactions/${transactionId}`)
-      .then(() => dispatch({
-        type: Actions.PLAN_EDITOR_CLEAR_TRANSACTION
-      }))
+      .then(() => dispatch(clearTransaction()))
       .catch(err => {
         console.error(err)
-        dispatch({
-          type: Actions.PLAN_EDITOR_CLEAR_TRANSACTION
-        })
+        dispatch(clearTransaction())
       })
   }
 }
@@ -49,14 +52,10 @@ function commitTransaction (transactionId) {
 function discardTransaction (transactionId) {
   return dispatch => {
     TransactionManager.discardTransaction(transactionId)
-      .then(res => dispatch({
-        type: Actions.PLAN_EDITOR_CLEAR_TRANSACTION
-      }))
+      .then(() => dispatch(clearTransaction()))
       .catch(err => {
         console.error(err)
-        dispatch({
-          type: Actions.PLAN_EDITOR_CLEAR_TRANSACTION
-        })
+        dispatch(clearTransaction())
       })
   }
 }
@@ -98,6 +97,14 @@ function modifyEquipment (transactionId, equipment) {
   }
 }
 
+function deleteTransactionFeature (transactionId, featureType, objectIdToDelete) {
+  return dispatch => {
+    AroHttp.delete(`/service/plan-transactions/${transactionId}/modified-features/${featureType}/${objectIdToDelete}`)
+      .then(result => dispatch(removeTransactionFeature(objectIdToDelete)))
+      .catch(err => console.error(err))
+  }
+}
+
 function addTransactionEquipment (equipmentNodes) {
   return {
     type: Actions.PLAN_EDITOR_ADD_EQUIPMENT_NODES,
@@ -105,10 +112,46 @@ function addTransactionEquipment (equipmentNodes) {
   }
 }
 
-function removeTransactionEquipment (objectId) {
+function removeTransactionFeature (objectId) {
   return {
-    type: Actions.PLAN_EDITOR_REMOVE_EQUIPMENT_NODE,
+    type: Actions.PLAN_EDITOR_REMOVE_TRANSACTION_FEATURE,
     payload: objectId
+  }
+}
+
+function createEquipmentBoundary (transactionId, feature) {
+  return dispatch => {
+    // Do a POST to send the equipment over to service
+    AroHttp.post(`/service/plan-transactions/${transactionId}/modified-features/equipment_boundary`, feature)
+      .then(result => {
+        // Decorate the created equipment with some default values
+        const createdEquipment = {
+          crudAction: 'create',
+          deleted: false,
+          valid: true,
+          feature: result.data
+        }
+        dispatch(addTransactionEquipmentBoundary([createdEquipment]))
+      })
+      .catch(err => console.error(err))
+  }
+}
+
+function modifyEquipmentBoundary (transactionId, equipmentBoundary) {
+  return dispatch => {
+    // Do a PUT to send the equipment over to service
+    AroHttp.put(`/service/plan-transactions/${transactionId}/modified-features/equipment_boundary`, equipmentBoundary.feature)
+      .then(result => {
+        const newEquipmentBoundary = {
+          ...equipmentBoundary,
+          feature: result.data
+        }
+        dispatch({
+          type: Actions.PLAN_EDITOR_MODIFY_EQUIPMENT_BOUNDARIES,
+          payload: [newEquipmentBoundary]
+        })
+      })
+      .catch(err => console.error(err))
   }
 }
 
@@ -119,10 +162,48 @@ function addTransactionEquipmentBoundary (equipmentBoundaries) {
   }
 }
 
-function removeTransactionEquipmentBoundary (objectId) {
+function showContextMenuForEquipment (planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y) {
+  return dispatch => {
+    // Get details on the boundary (if any) for this equipment
+    AroHttp.get(`/boundary/for_network_node/${planId}/${equipmentObjectId}/${selectedBoundaryTypeId}`)
+      .then(result => {
+        var menuActions = []
+        var isAddBoundaryAllowed = (result.data.length === 0) // No results for this combination of planid, object_id, selectedBoundaryTypeId. Allow users to add boundary
+        if (isAddBoundaryAllowed) {
+          menuActions.push(new MenuItemAction('ADD_BOUNDARY', 'Add boundary', 'PlanEditorActions', 'startDrawingBoundaryFor', equipmentObjectId))
+        }
+        menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteTransactionFeature', transactionId, 'equipment', equipmentObjectId))
+        const menuItemFeature = new MenuItemFeature('EQUIPMENT', 'Equipment', menuActions)
+        // Show context menu
+        dispatch(ContextMenuActions.setContextMenuItems([menuItemFeature]))
+        dispatch(ContextMenuActions.showContextMenu(x, y))
+      })
+      .catch(err => console.error(err))
+  }
+}
+
+function showContextMenuForEquipmentBoundary (transactionId, equipmentObjectId, x, y) {
+  return dispatch => {
+    var menuActions = []
+    menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteTransactionFeature', transactionId, 'equipment_boundary', equipmentObjectId))
+    const menuItemFeature = new MenuItemFeature('BOUNDARY', 'Equipment Boundary', menuActions)
+    // Show context menu
+    dispatch(ContextMenuActions.setContextMenuItems([menuItemFeature]))
+    dispatch(ContextMenuActions.showContextMenu(x, y))
+  }
+}
+
+function startDrawingBoundaryFor (equipmentObjectId) {
   return {
-    type: Actions.PLAN_EDITOR_REMOVE_EQUIPMENT_BOUNDARY,
-    payload: objectId
+    type: Actions.PLAN_EDITOR_SET_IS_DRAWING_BOUNDARY_FOR,
+    payload: equipmentObjectId
+  }
+}
+
+function stopDrawingBoundary () {
+  return {
+    type: Actions.PLAN_EDITOR_SET_IS_DRAWING_BOUNDARY_FOR,
+    payload: null
   }
 }
 
@@ -161,10 +242,16 @@ export default {
   resumeOrCreateTransaction,
   createEquipment,
   modifyEquipment,
+  deleteTransactionFeature,
   addTransactionEquipment,
-  removeTransactionEquipment,
+  removeTransactionFeature,
+  createEquipmentBoundary,
+  modifyEquipmentBoundary,
   addTransactionEquipmentBoundary,
-  removeTransactionEquipmentBoundary,
+  showContextMenuForEquipment,
+  showContextMenuForEquipmentBoundary,
+  startDrawingBoundaryFor,
+  stopDrawingBoundary,
   setIsCalculatingSubnets,
   setIsCreatingObject,
   setIsModifyingObject,

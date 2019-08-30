@@ -183,6 +183,7 @@ let mapSplit = {
         </div>
       </div>
       <r-equipment-drop-target></r-equipment-drop-target>
+      <r-context-menu></r-context-menu>
     </div>
 
     <!-- Define the sidebar -->
