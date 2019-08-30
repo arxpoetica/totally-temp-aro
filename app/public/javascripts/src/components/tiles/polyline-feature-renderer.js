@@ -6,9 +6,15 @@ class PolylineFeatureRenderer {
       ctx.globalAlpha = drawingStyleOverrides.lineOpacity
     }
 
-    ctx.strokeStyle = drawingStyleOverrides ? drawingStyleOverrides.strokeStyle : mapLayer.drawingOptions.strokeStyle
+    if (drawingStyleOverrides && drawingStyleOverrides.strokeStyle) {
+      ctx.strokeStyle = drawingStyleOverrides.strokeStyle
+    } else {
+      ctx.strokeStyle = mapLayer.drawingOptions.strokeStyle
+    }
+    // ctx.strokeStyle = drawingStyleOverrides ? drawingStyleOverrides.strokeStyle : mapLayer.drawingOptions.strokeStyle
+    
     var lineWidth = null
-    if (drawingStyleOverrides) {
+    if (drawingStyleOverrides && drawingStyleOverrides.lineWidth) {
       lineWidth = drawingStyleOverrides.lineWidth
     } else {
       if (typeof mapLayer.drawingOptions.lineWidth === 'function') {

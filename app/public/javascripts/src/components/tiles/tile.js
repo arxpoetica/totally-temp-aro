@@ -253,6 +253,7 @@ class TileComponentController {
       this.state.selectedDisplayMode.getValue(),
       SelectionModes,
       this.activeSelectionModeId,
+      this.stateMapLayers,
       this.state.displayModes,
       this.state.viewModePanels,
       this.state,
@@ -268,7 +269,7 @@ class TileComponentController {
       this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setSelection(this.selection)
     }
     
-    // listener for ctrl key
+    // listener for shift key
     this.keydownListener = this.$window.addEventListener('keydown', (event) => {
       if (event.key === 'Shift') this.state.isShiftPressed = true
     })
@@ -663,7 +664,8 @@ class TileComponentController {
     return {
       activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
       selectionModes: reduxState.selection.selectionModes,
-      selection: reduxState.selection
+      selection: reduxState.selection,
+      stateMapLayers: reduxState.mapLayers
     }
   }
 
