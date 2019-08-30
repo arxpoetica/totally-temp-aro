@@ -676,18 +676,28 @@ class TileComponentController {
   mergeToTarget (nextState, actions) {
     const currentSelectionModeId = this.activeSelectionModeId
     const oldPlanTargets = this.selection && this.selection.planTargets
+    const prevStateMapLayers = {...this.stateMapLayers} 
+    var needRefresh = false
+    var doConduitUpdate = this.doesConduitNeedUpdate(prevStateMapLayers, nextState.stateMapLayers)
+    needRefresh = doConduitUpdate
     // merge state and actions onto controller
     Object.assign(this, nextState)
     Object.assign(this, actions)
-
+    
+    if (doConduitUpdate) this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setStateMapLayers(nextState.stateMapLayers)
+    
     if (currentSelectionModeId !== nextState.activeSelectionModeId ||
         this.hasPlanTargetSelectionChanged(oldPlanTargets, nextState.selection && nextState.selection.planTargets)) {
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
         this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setAnalysisSelectionMode(nextState.activeSelectionModeId)
         this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setSelection(nextState.selection)
-        this.tileDataService.markHtmlCacheDirty()
-        this.refreshMapTiles()
+        needRefresh = true
       }
+    }
+    
+    if (needRefresh){
+      this.tileDataService.markHtmlCacheDirty()
+      this.refreshMapTiles()
     }
   }
 
@@ -710,6 +720,35 @@ class TileComponentController {
 
     return strOldSelection !== strNewSelection
   }
+  
+  doesConduitNeedUpdate (prevStateMapLayers, stateMapLayers) {
+    // ToDo: this is so wrong! 
+    //    find what triggers an update on setNetworkEquipmentLayerVisibility
+    //    and have it also trigger an update on setCableConduitVisibility when parent is visible
+    if (!prevStateMapLayers || !stateMapLayers ||
+        !prevStateMapLayers.networkEquipment ||
+        !stateMapLayers.networkEquipment ||
+        !prevStateMapLayers.networkEquipment.cables ||
+        !stateMapLayers.networkEquipment.cables ||
+        JSON.stringify(prevStateMapLayers) === JSON.stringify(stateMapLayers)) {
+      return false
+    }
+    var needUpdate = false
+    Object.keys(stateMapLayers.networkEquipment.cables).forEach(cableType => {
+      // still looking for a reason to update?
+      if (!needUpdate) {
+        const cable = stateMapLayers.networkEquipment.cables[cableType]
+        const prevCable = prevStateMapLayers.networkEquipment.cables[cableType]
+        // is this layer visible? (if it was previously not visible this will be taken care of elsewhere 
+        //  (I know! We're depending on outside behaviour, this all needs to be redone))
+        if (cable.checked && prevCable.checked) {
+          if (JSON.stringify(cable.conduitVisibility) !== JSON.stringify(prevCable.conduitVisibility)) needUpdate = true
+        }
+      }
+    })
+    return needUpdate
+  }
+  
 }
 
 TileComponentController.$inject = ['$window', '$document', '$timeout', '$ngRedux', 'state', 'tileDataService', 'uiNotificationService', 'contextMenuService', 'Utils']

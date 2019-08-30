@@ -94,6 +94,10 @@ class MapTileRenderer {
     this.tileDataService.markHtmlCacheDirty()
   }
 
+  setStateMapLayers (stateMapLayers) {
+    this.stateMapLayers = stateMapLayers
+  }
+
   // ToDo: move this to a place of utility functions
   // utility function NOTE: will apply default val to source object items
   getOrderedKeys (obj, orderPram, defaultVal) {
@@ -342,11 +346,7 @@ class MapTileRenderer {
         if (htmlCache && htmlCache.isDirty && isLatestVersion) {
           htmlCache.backBufferCanvas.getContext('2d').clearRect(0, 0, htmlCache.backBufferCanvas.width, htmlCache.backBufferCanvas.height)
           htmlCache.heatmapCanvas.getContext('2d').clearRect(0, 0, htmlCache.heatmapCanvas.width, htmlCache.heatmapCanvas.height)
-          
-          // if (coord.x == 10486 && coord.y == 22896) {
-          //   console.log(singleTileResults)
-          // }
-          
+
           this.renderSingleTileFull(zoom, coord, renderingData, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage, htmlCache.backBufferCanvas, htmlCache.heatmapCanvas)
 
           // Copy the back buffer image onto the front buffer
@@ -510,19 +510,6 @@ class MapTileRenderer {
       }
 
       var geometry = feature.loadGeometry()
-      // I'm assuming there will be a property in here that will tell conduit type
-      // then we just check if show conduit is on for that fiber type and change color accordingly
-      if (feature.type == 2 && tileCoords.x == 10486 && tileCoords.y == 22896) {
-        console.log(feature)
-        console.log(tileCoords)
-        console.log(featureData)
-        console.log(mapLayer)
-        console.log(this.mapTileOptions)
-        console.log(geometry)
-        console.log(this.mapLayers)
-        console.log(this.stateMapLayers)
-        console.log(' --- ')
-      }
       // Geometry is an array of shapes
       var imageWidthBy2 = entityImage ? entityImage.width / 2 : 0
       var imageHeightBy2 = entityImage ? entityImage.height / 2 : 0
@@ -598,7 +585,7 @@ class MapTileRenderer {
             // This is not a closed polygon. Render lines only
             ctx.globalAlpha = 1.0
             
-            var drawingStyles = null
+            var drawingStyles = {}
 
             if ((this.oldSelection.details.roadSegments.size > 0 && this.highlightPolyline(feature, this.oldSelection.details.roadSegments)) ||
               (this.oldSelection.details.fiberSegments.size > 0 && this.highlightPolyline(feature, this.oldSelection.details.fiberSegments))) {
@@ -613,7 +600,6 @@ class MapTileRenderer {
                   strokeStyle: mapLayer.highlightStyle.strokeStyle
                 }
               }
-              // PolylineFeatureRenderer.renderFeature(feature, shape, geometryOffset, ctx, mapLayer, drawingStyles, false, this.tileSize)
             } else if (this.state.showFiberSize && feature.properties._data_type === 'fiber' && this.state.viewSetting.selectedFiberOption.id !== 1) {
               var selectedFiberOption = this.state.viewSetting.selectedFiberOption
               var viewOption = selectedFiberOption.pixelWidth
@@ -621,12 +607,10 @@ class MapTileRenderer {
                 lineWidth: TileUtilities.getFiberStrandSize(selectedFiberOption.field, feature.properties.fiber_strands, viewOption.min, viewOption.max, viewOption.divisor, viewOption.atomicDivisor),
                 strokeStyle: mapLayer.strokeStyle
               }
-              // PolylineFeatureRenderer.renderFeature(feature, shape, geometryOffset, ctx, mapLayer, drawingStyles, false, this.tileSize)
-            } else {
-              // PolylineFeatureRenderer.renderFeature(feature, shape, geometryOffset, ctx, mapLayer, null, false, this.tileSize)
             }
-
-            // this needs to be generalized 
+            // check if show conduit is on for this fiber type and change color accordingly
+            // ToDo: this needs to be generalized to work with all types,
+            //    .conduits and .roads shouldn't be hardcoded, they are dynamic from service
             if (feature.properties.spatial_edge_type &&
               mapLayer && mapLayer.tileDefinitions && 
               mapLayer.tileDefinitions.length > 0 && mapLayer.tileDefinitions[0].fiberType) {
@@ -636,9 +620,12 @@ class MapTileRenderer {
               if (this.stateMapLayers.networkEquipment.cables[fiberType] &&
                 this.stateMapLayers.networkEquipment.cables[fiberType].conduitVisibility[edgeType]) {
                 
-                var strokeStyle = this.stateMapLayers.networkEquipment.conduits[edgeType].drawingOptions.strokeStyle
-                if (!drawingStyles) drawingStyles = {}
-                drawingStyles.strokeStyle = strokeStyle
+                if (this.stateMapLayers.networkEquipment.conduits[edgeType]) {
+                  drawingStyles.strokeStyle = this.stateMapLayers.networkEquipment.conduits[edgeType].drawingOptions.strokeStyle
+                } else if (this.stateMapLayers.networkEquipment.roads[edgeType]) {
+                  drawingStyles.strokeStyle = this.stateMapLayers.networkEquipment.roads[edgeType].drawingOptions.strokeStyle
+                }
+                
               }
             }
 
