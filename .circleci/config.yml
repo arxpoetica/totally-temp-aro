@@ -72,7 +72,7 @@ workflows:
               only: 
                 - master
                 - optional_building
-                - devJuly2019
+                - Fiber_and_Conduit
 
       - deploy:
           requires:
