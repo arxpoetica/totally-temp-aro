@@ -47,7 +47,7 @@ const ringOptions = {
     },
     sewer: {
       displayName: 'Sewer',
-      value: false
+      value: true
     },
     duct: {
       displayName: 'Duct',
