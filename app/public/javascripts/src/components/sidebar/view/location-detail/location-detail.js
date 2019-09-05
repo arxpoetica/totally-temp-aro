@@ -9,7 +9,6 @@ class LocationDetailController {
     this.currentUser = state.loggedInUser
     this.selectedLocation = null
     this.toggleOtherAttributes = false
-    this.roicPlanSettings = null
 
     this.mapFeaturesSelectedSubscription = state.mapFeaturesSelectedEvent.subscribe((options) => {
       // In ruler mode click should not perform any view action's
@@ -79,13 +78,6 @@ class LocationDetailController {
           if (result.data.locSourceIds.hasOwnProperty('towerSourceIds') && result.data.locSourceIds.towerSourceIds.object_ids) {
             locationIds = locationIds.concat(result.data.locSourceIds.towerSourceIds.object_ids)
           }
-        }
-
-        this.roicPlanSettings = {
-          'analysis_type': 'LOCATION_ROIC',
-          'locationIds': locationIds,
-          'planId': planId,
-          'projectTemplateId': 1
         }
 
         if (this.state.configuration.perspective.locationDetails.showDefaultDetails) {
