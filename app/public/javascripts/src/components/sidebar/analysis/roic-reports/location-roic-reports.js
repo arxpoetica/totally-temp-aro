@@ -16,12 +16,6 @@ class LocationRoicReportsController {
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
   }
 
-  $onChanges (changesObj) {
-    if (changesObj.roicPlanSettings) {
-      this.refreshData()
-    }
-  }
-
   refreshData () {
     if (!this.roicPlanSettings) {
       return
@@ -61,6 +55,7 @@ class LocationRoicReportsController {
           'planId': planId,
           'projectTemplateId': 1
         }
+        this.refreshData()
       })
       .catch((err) => console.error(err))
   }
@@ -71,31 +66,28 @@ class LocationRoicReportsController {
 
   mapStateToThis (reduxState) {
     return {
-      dataItems: reduxState.plan.dataItems
+      planId: reduxState.plan.activePlan && reduxState.plan.activePlan.id,
+      selectedLocations: reduxState.selection.locations
     }
   }
 
   mapDispatchToTarget (dispatch) {
     return {
-      setSelectedLocations: locationIds => dispatch(SelectionActions.setLocations(locationIds))
     }
   }
 
   mergeToTarget (nextState, actions) {
-    // const oldTransaction = this.currentTransaction
+    const oldSelectedLocations = this.selectedLocations
+
     // merge state and actions onto controller
     Object.assign(this, nextState)
     Object.assign(this, actions)
-    console.log('nextState', nextState)
-    console.log('actions', actions)
-    // Why so complicated? Because in the first render, isPlanEditorActive will be false and we will exit plan edit mode.
-    // So we only exit plan edit mode if isPlanEditorActive === false AND we have an older transaction. All this because
-    // the plan editor (this component) closes itself after a commit/discard. Let it be for now, as this will move to React anyways.
-    // if (!nextState.isPlanEditorActive && oldTransaction) {
-    //   this.exitPlanEditMode() // The user did a commit or discard on the current transaction
-    // } else if ((oldTransaction !== nextState.currentTransaction) && nextState.currentTransaction) {
-    //   this.onCurrentTransactionChanged() // A new transaction was created
-    // }
+
+    if ((oldSelectedLocations !== this.selectedLocations)
+        && (this.selectedLocations.size > 0)) {
+      const firstSelectedLocationId = this.selectedLocations.values().next().value
+      this.getLocationInfo(this.planId, firstSelectedLocationId)
+    }
   }
 }
 
