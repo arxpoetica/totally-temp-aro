@@ -32,7 +32,7 @@ export class LocationInfoAuditLog extends Component {
                 </tr>
               </thead>
               <tbody>
-              { this.props.auditLog.libraryAudit.map(v => <tr><td>{v.modifiedDate}</td><td>{v.userName}</td><td>{v.crudAction}</td></tr>) }
+              { this.props.auditLog.libraryAudit.map((element, index) => <tr key={index}><td>{element.modifiedDate}</td><td>{element.userName}</td><td>{element.crudAction}</td></tr>) }
               </tbody> 
             </table>
           </span>

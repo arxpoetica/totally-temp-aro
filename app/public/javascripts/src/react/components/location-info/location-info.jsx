@@ -31,30 +31,28 @@ export class LocationInfo extends Component {
     return (
       <table className='table table-sm table-striped'>
         <tbody>
-          {this.props.locationInfoDetails.attributes.map(v => <tr><td>{v.key}</td><td>{v.value}</td></tr>)}
+          {this.props.locationInfoDetails.attributes.map((element, index) => <tr key={index}><td>{element.key}</td><td>{element.value}</td></tr>)}
         </tbody>
       </table>
     )
   }
 
-  renderLocationTypeTitle (title, count) {
-    return <tr>
+  renderLocationTypeTitle (title, count, rowid) {
+    return <tr key={rowid}>
       <td>{title}</td>
       <td>{count}</td>
     </tr>
   }
 
-  renderLocationIdDetails (title, objectIds) {
+  renderLocationIdDetails (title, objectIds, rowid) {
     return objectIds && objectIds.length > 0
-      ? <tr>
+      ? <tr key={rowid}>
         <td>{title}</td>
-        <span>
           <td>
             <ul style={{ listStyleType: 'none', padding: 0, marginBottom: 0 }}>
-              {objectIds.map(objectId => <li className='item'>{objectId}</li>)}
+              {objectIds.map((objectId, index) => <li className='item' key={index}>{objectId}</li>)}
             </ul>
           </td>
-        </span>
       </tr>
       : null
   }
@@ -98,14 +96,14 @@ export class LocationInfo extends Component {
           <td>{LocationDetails.tabblock_id}</td>
         </tr>
 
-        {this.renderLocationTypeTitle('HouseHold Count', LocationDetails.number_of_households)}
-        {this.renderLocationIdDetails('HouseHold IDs', LocationDetails.locSourceIds.hhSourceIds.object_ids)}
+        {this.renderLocationTypeTitle('HouseHold Count', LocationDetails.number_of_households,1)}
+        {this.renderLocationIdDetails('HouseHold IDs', LocationDetails.locSourceIds.hhSourceIds.object_ids,2)}
 
-        {this.renderLocationTypeTitle('Business Count', LocationDetails.number_of_businesses)}
-        {this.renderLocationIdDetails('Business IDs', LocationDetails.locSourceIds.bizSourceIds.object_ids)}
+        {this.renderLocationTypeTitle('Business Count', LocationDetails.number_of_businesses,3)}
+        {this.renderLocationIdDetails('Business IDs', LocationDetails.locSourceIds.bizSourceIds.object_ids,4)}
 
-        {this.renderLocationTypeTitle('Tower Count', LocationDetails.number_of_towers)}
-        {this.renderLocationIdDetails('Tower IDs', LocationDetails.locSourceIds.towerSourceIds.object_ids)}
+        {this.renderLocationTypeTitle('Tower Count', LocationDetails.number_of_towers,5)}
+        {this.renderLocationIdDetails('Tower IDs', LocationDetails.locSourceIds.towerSourceIds.object_ids,6)}
 
         <tr>
           <td>Distance From Existing Network</td>
