@@ -424,7 +424,8 @@ class State {
       $rootScope.$broadcast('map_layer_clicked_feature', features, {})
     }
     service.mapFeaturesSelectedEvent = new Rx.BehaviorSubject({})
-    
+    service.mapFeaturesClickedEvent = new Rx.BehaviorSubject({})
+
     service.mapFeaturesSelectedEvent.skip(1).subscribe((options) => {
       // ToDo: this check may need to move into REACT
       if (service.selectedDisplayMode.getValue() == service.displayModes.EDIT_RINGS

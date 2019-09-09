@@ -394,14 +394,15 @@ class TileComponentController {
       
       // ToDo: depricate getFilteredFeaturesUnderLatLng switch to this
       this.getFeaturesUnderLatLng(event.latLng)
-      .then((hitFeatures) => {
-        if (wasShiftPressed) {
-          this.state.mapFeaturesKeyClickedEvent.next(hitFeatures)
-        } else {
-          this.state.mapFeaturesClickedEvent.next(hitFeatures)
-        }
-      })
-      
+        .then((hitFeatures) => {
+          if (wasShiftPressed) {
+            this.state.mapFeaturesKeyClickedEvent.next(hitFeatures)
+          } else {
+            this.state.mapFeaturesClickedEvent.next(hitFeatures)
+          }
+        })
+        .catch(err => console.error(err))
+        
       if (wasShiftPressed) return
       
       this.getFilteredFeaturesUnderLatLng(event.latLng)
