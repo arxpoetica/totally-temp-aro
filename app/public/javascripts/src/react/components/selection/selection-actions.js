@@ -104,11 +104,19 @@ function setLocations (locationIds) {
   }
 }
 
+function setPlanEditorFeatures (planEditorFeatures) {
+  return {
+    type: Actions.SELECTION_SET_PLAN_EDITOR_FEATURES,
+    payload: planEditorFeatures
+  }
+}
+
 export default {
   setActiveSelectionMode,
   clearAllPlanTargets,
   loadPlanTargetSelectionsFromServer,
   addPlanTargets,
   removePlanTargets,
-  setLocations
+  setLocations,
+  setPlanEditorFeatures
 }

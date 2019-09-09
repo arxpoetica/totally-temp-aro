@@ -15,6 +15,24 @@
       margin-right: 15px;
       float: left
     }
+
+    .row-left {
+      display: inline-block;
+      cursor: pointer;
+    }
+
+    .row-right {
+      float: right;
+    }
+
+    .cable-foldout {
+      padding: 4px 31px;
+    }
+
+    .cable-foldout-title {
+      margin-left: -14px;
+      padding-bottom: 2px;
+    }
   </style>
   
   <div class="map-tool-wrapper">
@@ -52,9 +70,29 @@
               <tbody>
                 <tr ng-repeat="cableLayer in $ctrl.cablesArray | orderBy: 'listIndex'">
                   <td>
-                    <div class="box" ng-style="{ 'background-color': $ctrl.getBackgroundColor(cableLayer) }"></div>{{cableLayer.label}}</td>
-                  <td>
-                    <input type="checkbox" class="checkboxfill" ng-checked="cableLayer.checked" ng-click="$ctrl.updateLayerVisibility('cables', cableLayer, !cableLayer.checked)">
+                    <div>
+                      <div class="row-left" ng-click="$ctrl.toggleOpenRow(cableLayer.key)">
+                        <div class="box">
+                          <i class="far fa-plus-square" ng-if="$ctrl.openRow !== cableLayer.key"></i>
+                          <i class="far fa-minus-square" ng-if="$ctrl.openRow === cableLayer.key"></i>
+                        </div>
+                        <div class="box" ng-style="{ 'background-color': $ctrl.getBackgroundColor(cableLayer) }"></div>{{cableLayer.label}}
+                      </div>
+                      <div class="row-right">
+                        <input type="checkbox" class="checkboxfill" ng-checked="cableLayer.checked" ng-click="$ctrl.updateLayerVisibility('cables', cableLayer, !cableLayer.checked)">
+                      </div>
+                    </div>
+                    <div class="cable-foldout" ng-if="$ctrl.openRow === cableLayer.key">
+                      <div class="cable-foldout-title"><strong>Conduit Visibility</strong></div>
+                      <div ng-repeat="conduitLayer in $ctrl.conduitsArray | orderBy: 'listIndex'">
+                        <div class="row-left">
+                          <div class="box" ng-style="{ 'background-color': $ctrl.getBackgroundColor(conduitLayer) }"></div>{{conduitLayer.label}}
+                        </div>
+                        <div class="row-right">
+                          <input type="checkbox" class="checkboxfill" ng-checked="cableLayer.conduitVisibility[conduitLayer.key]" ng-click="$ctrl.setCableConduitVisibility(cableLayer.key, conduitLayer.key, !cableLayer.conduitVisibility[conduitLayer.key])">
+                        </div>
+                      </div>
+                    </div>
                   </td>
                 </tr>
               </tbody>

@@ -18,7 +18,7 @@ class ResourceManagerDetailController {
       this.saveResourceAccess()
       // --- ToDo: check that this section is still needed 
       .then(() => Promise.all([
-        this.state.loadPlanDataSelectionFromServer(),
+        // this.state.loadPlanDataSelectionFromServer(),
         this.state.loadPlanResourceSelectionFromServer(),
         this.state.loadNetworkConfigurationFromServer()
       ]))
