@@ -16,9 +16,6 @@
     <accordion style="position: relative; flex: 1 1 auto;" toggle-expanded-panel="$ctrl.state.activeViewModePanel">
       <accordion-panel-title title="'Location Info'" panel-id="$ctrl.state.viewModePanels.LOCATION_INFO"></accordion-panel-title>
       <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.LOCATION_INFO">
-        <!-- <location-detail ng-if="($ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW)
-                                && ($ctrl.state.configuration.perspective.showViewModePanels[$ctrl.state.viewModePanels.LOCATION_INFO])">
-        </location-detail> -->
         <aro-search ng-if="$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.LOCATION_INFO" 
           object-name="location"
           label-id="objectId"
