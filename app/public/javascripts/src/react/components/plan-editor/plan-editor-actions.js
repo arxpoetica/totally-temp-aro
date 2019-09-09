@@ -235,6 +235,13 @@ function setIsDraggingFeatureForDrop (isDraggingFeatureForDrop) {
   }
 }
 
+function setIsEditingFeatureProperties (isEditingFeatureProperties) {
+  return {
+    type: Actions.PLAN_EDITOR_SET_IS_EDITING_FEATURE_PROPERTIES,
+    payload: isEditingFeatureProperties
+  }
+}
+
 export default {
   commitTransaction,
   clearTransaction,
@@ -255,5 +262,6 @@ export default {
   setIsCalculatingSubnets,
   setIsCreatingObject,
   setIsModifyingObject,
-  setIsDraggingFeatureForDrop
+  setIsDraggingFeatureForDrop,
+  setIsEditingFeatureProperties
 }

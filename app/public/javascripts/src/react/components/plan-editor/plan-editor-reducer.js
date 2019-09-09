@@ -8,7 +8,8 @@ const defaultState = {
   isCalculatingSubnets: false,
   isCreatingObject: false,
   isModifyingObject: false,
-  isDraggingFeatureForDrop: false
+  isDraggingFeatureForDrop: false,
+  isEditingFeatureProperties: false
 }
 
 function setTransaction (state, transaction) {
@@ -108,6 +109,12 @@ function setIsDraggingFeatureForDrop (state, isDraggingFeatureForDrop) {
   }
 }
 
+function setIsEditingFeatureProperties (state, isEditingFeatureProperties) {
+  return { ...state,
+    isEditingFeatureProperties: isEditingFeatureProperties
+  }
+}
+
 function planEditorReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.PLAN_EDITOR_CLEAR_TRANSACTION:
@@ -145,6 +152,9 @@ function planEditorReducer (state = defaultState, action) {
 
     case Actions.PLAN_EDITOR_SET_IS_DRAWING_BOUNDARY_FOR:
       return setIsDrawingBoundaryFor(state, action.payload)
+
+    case Actions.PLAN_EDITOR_SET_IS_EDITING_FEATURE_PROPERTIES:
+      return setIsEditingFeatureProperties(state, action.payload)
 
     default:
       return state

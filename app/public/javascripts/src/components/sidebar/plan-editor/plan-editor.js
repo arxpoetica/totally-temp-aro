@@ -49,7 +49,6 @@ class PlanEditorController {
     this.viewBoundaryProps = null
     this.viewIconUrl = ''
     this.viewLabel = ''
-    this.isEditFeatureProps = true
     this.isBoundaryEditMode = false
     this.mapObjectEditorComms = {}
     this.networkNodeSBTypes = {}
@@ -134,7 +133,7 @@ class PlanEditorController {
     this.rightClickObserver = this.state.mapFeaturesRightClickedEvent.skip(1).subscribe((hitFeatures) => {
       // if location and selected feature type in Location connector then toggle location association to selected locvation Connecotor
       if (hitFeatures.locations.length > 0 && !this.isMultSelectActive()) {
-        if (this.selectedObjectId && this.isEditFeatureProps) {
+        if (this.selectedObjectId && this.isEditingEquipmentProperties) {
           var selectedLatLng = [this.selectedMapObjectLng, this.selectedMapObjectLat]
           var objectProperties = this.objectIdToProperties[this.selectedObjectId]
           if (objectProperties.siteNetworkNodeType === 'location_connector') {
@@ -861,7 +860,7 @@ class PlanEditorController {
     this.viewFeature = {}
     this.viewIconUrl = ''
     this.viewLabel = ''
-    this.isEditFeatureProps = true
+    this.setIsEditingFeatureProperties(true)
     this.isBoundaryEditMode = false
     this.updateSelectedState()
   }
@@ -869,7 +868,7 @@ class PlanEditorController {
   displayViewObject (feature, iconUrl) {
     // First deselect all equipment and boundary features
     this.viewEventFeature = this.viewFeature = this.viewLabel = this.viewIconUrl = null
-    this.isEditFeatureProps = false
+    this.setIsEditingFeatureProperties(false)
     this.viewSiteBoundaryEventFeature = this.viewBoundaryProps = null
     this.isBoundaryEditMode = false
     if (feature.type && feature.type === 'equipment_boundary.select') {
@@ -909,7 +908,7 @@ class PlanEditorController {
             var viewConfig = this.state.configuration.networkEquipment.equipments[this.viewFeature.networkNodeType]
             this.viewLabel = viewConfig.label
             this.viewIconUrl = viewConfig.iconUrl
-            this.isEditFeatureProps = false
+            this.setIsEditingFeatureProperties(false)
             this.getViewObjectSBTypes(feature.objectId)
             // --- IF THERE ARE LOCATION PROPERTIES WITH OUT LAT LONGS GET THEM NOW ---
             /*
@@ -1206,7 +1205,7 @@ class PlanEditorController {
     if (!isMultSelect) {
       if (mapObject != null) {
         this.updateSelectedState()
-        this.isEditFeatureProps = true
+        this.setIsEditingFeatureProperties(true)
         this.isBoundaryEditMode = true
         this.selectedObjectId = mapObjectId
       } else {
@@ -1706,7 +1705,8 @@ class PlanEditorController {
       setNetworkEquipmentLayerVisibility: (layer, isVisible) => dispatch(MapLayerActions.setNetworkEquipmentLayerVisibility('cables', layer, isVisible)),
       setIsCalculatingSubnets: isCalculatingSubnets => dispatch(PlanEditorActions.setIsCalculatingSubnets(isCalculatingSubnets)),
       setIsCreatingObject: isCreatingObject => dispatch(PlanEditorActions.setIsCreatingObject(isCreatingObject)),
-      setIsModifyingObject: isModifyingObject => dispatch(PlanEditorActions.setIsModifyingObject(isModifyingObject))
+      setIsModifyingObject: isModifyingObject => dispatch(PlanEditorActions.setIsModifyingObject(isModifyingObject)),
+      setIsEditingFeatureProperties: isEditing => dispatch(PlanEditorActions.setIsEditingFeatureProperties(isEditing))
     }
   }
 
