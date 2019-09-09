@@ -200,7 +200,6 @@ class TileDataService {
       }
     })
 
-    promises.push(imagePromise('/images/backgrounds/disabled-boundary.png'))
     const hasIcon = Boolean(mapLayer.iconUrl)
     if (mapLayer.iconUrl) {
       promises.push(imagePromise(mapLayer.iconUrl))
@@ -245,7 +244,6 @@ class TileDataService {
           tileData.v2FilterIcons[filterIconUrls[iResult]] = iconResult
         }
 
-        tileData.disabledBoundaryPattern = results.splice(0, 1)[0]
         if (hasIcon) {
           tileData.icon = results.splice(0, 1)[0]
         }
