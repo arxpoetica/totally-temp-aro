@@ -10,7 +10,9 @@ class EquipmentPropertiesEditorController {
 
   mapStateToThis (reduxState) {
     return {
-      isEditingFeatureProperties: reduxState.planEditor.isEditingFeatureProperties
+      isEditingFeatureProperties: reduxState.planEditor.isEditingFeatureProperties,
+      transactionFeatures: reduxState.planEditor.features,
+      selectedFeatures: reduxState.selection.planEditor
     }
   }
 

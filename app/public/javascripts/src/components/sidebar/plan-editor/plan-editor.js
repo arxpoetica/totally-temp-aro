@@ -45,10 +45,7 @@ class PlanEditorController {
     this.stickyAssignment = true
     this.viewEventFeature = {}
     this.viewSiteBoundaryEventFeature = {}
-    this.viewFeature = {}
     this.viewBoundaryProps = null
-    this.viewIconUrl = ''
-    this.viewLabel = ''
     this.isBoundaryEditMode = false
     this.mapObjectEditorComms = {}
     this.networkNodeSBTypes = {}
@@ -857,9 +854,6 @@ class PlanEditorController {
 
   clearViewSelection () {
     this.viewEventFeature = {}
-    this.viewFeature = {}
-    this.viewIconUrl = ''
-    this.viewLabel = ''
     this.setIsEditingFeatureProperties(true)
     this.isBoundaryEditMode = false
     this.updateSelectedState()
@@ -867,7 +861,7 @@ class PlanEditorController {
 
   displayViewObject (feature, iconUrl) {
     // First deselect all equipment and boundary features
-    this.viewEventFeature = this.viewFeature = this.viewLabel = this.viewIconUrl = null
+    this.viewEventFeature = null
     this.setIsEditingFeatureProperties(false)
     this.viewSiteBoundaryEventFeature = this.viewBoundaryProps = null
     this.isBoundaryEditMode = false
@@ -896,6 +890,8 @@ class PlanEditorController {
   }
 
   displayEquipmentViewObject (feature, iconUrl) {
+    this.viewEquipmentProperties(this.planId, feature.objectId, this.transactionFeatures)
+    return
     return new Promise((resolve, reject) => {
       var planId = this.state.plan.id
       this.$http.get(`/service/plan-feature/${planId}/equipment/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
@@ -1687,6 +1683,7 @@ class PlanEditorController {
       // locationsLayer: reduxState.mapLayers.location,
       planId: reduxState.plan.activePlan.id,
       currentTransaction: reduxState.planEditor.transaction,
+      transactionFeatures: reduxState.planEditor.features,
       isPlanEditorActive: reduxState.planEditor.isPlanEditorActive,
       isCalculatingSubnets: reduxState.planEditor.isCalculatingSubnets,
       isCreatingObject: reduxState.planEditor.isCreatingObject,
@@ -1706,7 +1703,8 @@ class PlanEditorController {
       setIsCalculatingSubnets: isCalculatingSubnets => dispatch(PlanEditorActions.setIsCalculatingSubnets(isCalculatingSubnets)),
       setIsCreatingObject: isCreatingObject => dispatch(PlanEditorActions.setIsCreatingObject(isCreatingObject)),
       setIsModifyingObject: isModifyingObject => dispatch(PlanEditorActions.setIsModifyingObject(isModifyingObject)),
-      setIsEditingFeatureProperties: isEditing => dispatch(PlanEditorActions.setIsEditingFeatureProperties(isEditing))
+      setIsEditingFeatureProperties: isEditing => dispatch(PlanEditorActions.setIsEditingFeatureProperties(isEditing)),
+      viewEquipmentProperties: (planId, equipmentObjectId, transactionFeatures) => dispatch(PlanEditorActions.viewEquipmentProperties(planId, equipmentObjectId, transactionFeatures))
     }
   }
 

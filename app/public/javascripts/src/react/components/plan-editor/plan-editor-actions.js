@@ -5,6 +5,7 @@ import AroHttp from '../../common/aro-http'
 import MenuItemFeature from '../context-menu/menu-item-feature'
 import MenuItemAction from '../context-menu/menu-item-action'
 import ContextMenuActions from '../context-menu/actions'
+import SelectionActions from '../selection/selection-actions'
 
 function resumeOrCreateTransaction (planId, userId) {
   return dispatch => {
@@ -193,6 +194,32 @@ function showContextMenuForEquipmentBoundary (transactionId, equipmentObjectId, 
   }
 }
 
+function viewEquipmentProperties (planId, equipmentObjectId, transactionFeatures) {
+  return dispatch => {
+    var equipmentPromise = null
+    if (transactionFeatures[equipmentObjectId]) {
+      equipmentPromise = Promise.resolve()
+    } else {
+      equipmentPromise = AroHttp.get(`/service/plan-feature/${planId}/equipment/${equipmentObjectId}`)
+        .then(result => {
+          // Decorate the equipment with some default values. Technically this is not yet "created" equipment
+          // but will have to do for now.
+          const createdEquipment = {
+            crudAction: 'create',
+            deleted: false,
+            valid: true,
+            feature: result.data
+          }
+          return dispatch(addTransactionEquipment([createdEquipment]))
+        })
+    }
+    // At this point we are guaranteed to have a created equipment object
+    equipmentPromise
+      .then(result => dispatch(SelectionActions.setPlanEditorFeatures([equipmentObjectId])))
+      .catch(err => console.error(err))
+  }
+}
+
 function startDrawingBoundaryFor (equipmentObjectId) {
   return {
     type: Actions.PLAN_EDITOR_SET_IS_DRAWING_BOUNDARY_FOR,
@@ -257,6 +284,7 @@ export default {
   addTransactionEquipmentBoundary,
   showContextMenuForEquipment,
   showContextMenuForEquipmentBoundary,
+  viewEquipmentProperties,
   startDrawingBoundaryFor,
   stopDrawingBoundary,
   setIsCalculatingSubnets,
