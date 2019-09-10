@@ -6,6 +6,7 @@ import Utilities from './utilities'
 import MenuAction, { MenuActionTypes } from '../common/context-menu/menu-action'
 import MenuItem, { MenuItemTypes } from '../common/context-menu/menu-item'
 import uuidStore from '../../shared-utils/uuid-store'
+import SelectionActions from '../../react/components/selection/selection-actions'
 
 class MapObjectEditorController {
   constructor ($http, $element, $compile, $document, $timeout, $ngRedux, state, tileDataService, contextMenuService, Utils) {
@@ -1021,6 +1022,7 @@ class MapObjectEditorController {
     // Then select the map object
     if (mapObject) { // Can be null if we are de-selecting everything
       this.highlightMapObject(mapObject)
+      this.selectObjectRedux(mapObject.objectId)
     }
 
     if (!isMult) this.selectedMapObject = mapObject
@@ -1286,6 +1288,7 @@ class MapObjectEditorController {
 
   mapDispatchToTarget (dispatch) {
     return {
+      selectObjectRedux: objectId => dispatch(SelectionActions.setPlanEditorFeatures([objectId]))
     }
   }
 }

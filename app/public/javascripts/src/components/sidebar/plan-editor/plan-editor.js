@@ -762,22 +762,6 @@ class PlanEditorController {
     return mapObject && mapObject.icon
   }
 
-  // ToDo: change this out for a dynamic version
-  getNewListItem (type) {
-    if (type === 'plannedEquipment' || type === 'subComponents') {
-      return new EquipmentComponent()
-    }
-
-    if (type === 'existingEquipment') {
-      return new TrackedEquipment()
-    }
-
-    if (type === 'marketableEquipments') {
-      console.log('marketableEquipments is no more')
-      // return new MarketableEquipment()
-    }
-  }
-
   updateSelectedState (selectedFeature, featureId) {
     // is this still used?
     // tell state

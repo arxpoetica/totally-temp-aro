@@ -3,9 +3,10 @@
     padding: 0px 5px;
   }
 </style>
+
 <!-- Section to show properties when the selected map object is an equipment node -->
-<div class="clearfix" ng-if="!$ctrl.isEditingFeatureProperties && $ctrl.viewFeature"
-  style="margin-top: 10px">
+<div class="clearfix" ng-if="$ctrl.viewFeature && $ctrl.viewFeature.dataType === 'equipment'" style="margin-top: 10px">
+
   <!-- Section header showing the type of the selected object -->
   <div class="sidebar-table-header">
     <img
@@ -23,26 +24,41 @@
     </button>
     <div class='d-flex flex-row mt-2'>
       <div class='flex-grow-1 flex-shrink-1'></div>
-      <div class='flex-grow-0 flex-shrink-0 equipment-properties-lat-lng-label'><div class="badge badge-dark">LATITUDE</div></div>
-      <div class='flex-grow-0 flex-shrink-0 equipment-properties-lat-lng-label'><pre style="display: inline;">{{$ctrl.viewFeature.geometry.coordinates[1] | number : 6}}</pre></div>
+      <div class='flex-grow-0 flex-shrink-0 equipment-properties-lat-lng-label'>
+        <div class="badge badge-dark">LATITUDE</div>
+      </div>
+      <div class='flex-grow-0 flex-shrink-0 equipment-properties-lat-lng-label'>
+        <pre style="display: inline;">{{$ctrl.viewFeature.geometry.coordinates[1] | number : 6}}</pre>
+      </div>
       <div class='flex-grow-0 flex-shrink-0' style="width: 10px;"></div>
-      <div class='flex-grow-0 flex-shrink-0 equipment-properties-lat-lng-label'><div class="badge badge-dark">LONGITUDE</div></div>
-      <div class='flex-grow-0 flex-shrink-0 equipment-properties-lat-lng-label'><pre style="display: inline;">{{$ctrl.viewFeature.geometry.coordinates[0] | number : 6}}</pre></div>
+      <div class='flex-grow-0 flex-shrink-0 equipment-properties-lat-lng-label'>
+        <div class="badge badge-dark">LONGITUDE</div>
+      </div>
+      <div class='flex-grow-0 flex-shrink-0 equipment-properties-lat-lng-label'>
+        <pre style="display: inline;">{{$ctrl.viewFeature.geometry.coordinates[0] | number : 6}}</pre>
+      </div>
       <div class='flex-grow-1 flex-shrink-1'></div>
     </div>
   </div>
 
   <!-- A table containing the editable properties of the selected object -->
-  <editor-interface-tree ng-if="!$ctrl.isEditingFeatureProperties" object-to-view="$ctrl.viewFeature.networkNodeEquipment"
-    is-edit="false" root-meta-data="{'networkNodeType':$ctrl.viewFeature.networkNodeType}">
+  <editor-interface-tree
+    object-to-view="$ctrl.viewFeature.networkNodeEquipment"
+    is-edit="$ctrl.isEditingFeatureProperties"
+    root-meta-data="{'networkNodeType':$ctrl.viewFeature.networkNodeType}"
+    get-new-list-item="$ctrl.getNewListItem"
+    on-change="$ctrl.markAsDirty()">
   </editor-interface-tree>
 
-
-  <button ng-if="$ctrl.isEditingFeatureProperties" ng-class="{ 'btn float-right': true,
-                            'btn-light': !$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty,
-                            'btn-primary': $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty }"
-    ng-disabled="!$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty"
-    ng-click="$ctrl.saveSelectedEquipmentProperties()" style="margin-bottom: 10px">
+  <!-- A button to save equipment properties TODO: DIRTY FLAG -->
+  <button
+    ng-if="$ctrl.isEditingFeatureProperties"
+    ng-class="{ 'btn float-right': true,
+                'btn-light': !$ctrl.isDirty,
+                'btn-primary': $ctrl.isDirty }"
+    ng-disabled="!$ctrl.isDirty"
+    ng-click="$ctrl.saveEquipmentProperties()"
+    style="margin-bottom: 10px">
     <i class="fa fa-save"></i>&nbsp;&nbsp;Save equipment properties
   </button>
 </div>
