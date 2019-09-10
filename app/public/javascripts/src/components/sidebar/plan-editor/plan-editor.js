@@ -335,7 +335,9 @@ class PlanEditorController {
         transactionFeatures.forEach((feature) => {
           const attributes = feature.attributes
           const locationIDs = attributes.internal_oid || null
+          console.log(feature)
           const typedEquipmentNode = AroFeatureFactory.createObject(feature)
+          console.log(typedEquipmentNode)
           var networkNodeEquipment = typedEquipmentNode.networkNodeEquipment
           typedEquipmentNodes.push(typedEquipmentNode)
           const properties = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName, feature.networkNodeType,

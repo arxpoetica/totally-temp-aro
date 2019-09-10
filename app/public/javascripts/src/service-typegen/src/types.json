@@ -124,13 +124,13 @@
           "hsiEnabled": {
             "type": "boolean"
           },
-          "physicallyLinked": {
-            "type": "boolean"
-          },
           "t1": {
             "type": "boolean"
           },
           "fiberAvailable": {
+            "type": "boolean"
+          },
+          "physicallyLinked": {
             "type": "boolean"
           }
         }
@@ -405,8 +405,14 @@
           "dslam",
           "loop_extender",
           "network_anchor",
-          "multiple_dwelling_unit"
+          "multiple_dwelling_unit",
+          "location_connector",
+          "subnet_node",
+          "network_connector"
         ]
+      },
+      "subtypeId": {
+        "type": "integer"
       },
       "networkNodeEquipment": {
         "type": "object",
@@ -438,13 +444,13 @@
               "hsiEnabled": {
                 "type": "boolean"
               },
-              "physicallyLinked": {
-                "type": "boolean"
-              },
               "t1": {
                 "type": "boolean"
               },
               "fiberAvailable": {
+                "type": "boolean"
+              },
+              "physicallyLinked": {
                 "type": "boolean"
               }
             }
@@ -623,7 +629,10 @@
           "dslam",
           "loop_extender",
           "network_anchor",
-          "multiple_dwelling_unit"
+          "multiple_dwelling_unit",
+          "location_connector",
+          "subnet_node",
+          "network_connector"
         ]
       },
       "networkObjectId": {
@@ -711,13 +720,13 @@
       "hsiEnabled": {
         "type": "boolean"
       },
-      "physicallyLinked": {
-        "type": "boolean"
-      },
       "t1": {
         "type": "boolean"
       },
       "fiberAvailable": {
+        "type": "boolean"
+      },
+      "physicallyLinked": {
         "type": "boolean"
       }
     }
