@@ -182,9 +182,15 @@
     </div>
 
     <!-- Section to show properties when the selected map object is an equipment node -->
-    <equipment-properties ng-if="!$ctrl.isMultSelectActive()">
-    </equipment-properties>
+    <equipment-properties-editor ng-if="!$ctrl.isMultSelectActive()">
+    </equipment-properties-editor>
 
+
+    <div ng-if="$ctrl.getSelectedNetworkConfig().key === 'location_connector'" class="alert alert-warning"
+      style="margin: 1rem 0 0 0">
+      right-click locations to toggle their connection
+      <br>shift + click to select multiple Location Connectors
+    </div>
     <!-- Section to show properties when the selected map object is an equipment boundary - view-->
     <div class="plan-editor-bounds-contain" ng-if="$ctrl.state.showSiteBoundary && $ctrl.viewBoundaryProps && !$ctrl.isBoundaryEditMode && !$ctrl.isMultSelectActive()">
       <!-- A table containing the editable properties of the selected object -->

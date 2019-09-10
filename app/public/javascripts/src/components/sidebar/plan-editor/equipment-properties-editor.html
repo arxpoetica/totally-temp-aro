@@ -1,26 +1,38 @@
+<style>
+  .equipment-properties-lat-lng-label {
+    padding: 0px 5px;
+  }
+</style>
 <!-- Section to show properties when the selected map object is an equipment node -->
-<div class="clearfix" ng-if="!$ctrl.isEditingFeatureProperties && $ctrl.viewFeature && !$ctrl.isMultSelectActive()"
+<div class="clearfix" ng-if="!$ctrl.isEditingFeatureProperties && $ctrl.viewFeature"
   style="margin-top: 10px">
   <!-- Section header showing the type of the selected object -->
   <div class="sidebar-table-header">
-    <img ng-src="{{$ctrl.viewIconUrl}}" style="vertical-align:middle; padding-right: 10px">
-    <span>{{$ctrl.viewLabel}}</span>
+    <img
+      ng-src="{{$ctrl.state.configuration.networkEquipment.equipments[$ctrl.viewFeature.networkNodeType].iconUrl}}"
+      style="vertical-align:middle; padding-right: 10px">
+    <span>
+      {{$ctrl.state.configuration.networkEquipment.equipments[$ctrl.viewFeature.networkNodeType].label}}
+    </span>
 
-    <button ng-class="{ 'btn ei-panel-header-btn-set ei-foldout-header-btn': true,
+    <button ng-class="{ 'btn ei-panel-header-btn-set ei-foldout-header-btn mt-1': true,
               'btn-light': $ctrl.viewFeature.attributes.is_locked === 'true',
               'btn-primary': $ctrl.viewFeature.attributes.is_locked !== 'true' }"
       ng-disabled="$ctrl.viewFeature.attributes.is_locked === 'true'" ng-click="$ctrl.editViewObject()">Edit</button>
-    <div class="sidebar-header-subinfo">
-      <div class="sidebar-header-subinfo-item">lat: {{$ctrl.viewEventFeature.geometry.coordinates[1] | number : 6}}
-      </div>
-      <div class="sidebar-header-subinfo-item">long: {{$ctrl.viewEventFeature.geometry.coordinates[0] | number : 6}}
-      </div>
+    <div class='d-flex flex-row mt-2'>
+      <div class='flex-grow-1 flex-shrink-1'></div>
+      <div class='flex-grow-0 flex-shrink-0 equipment-properties-lat-lng-label'><div class="badge badge-dark">LATITUDE</div></div>
+      <div class='flex-grow-0 flex-shrink-0 equipment-properties-lat-lng-label'><pre style="display: inline;">{{$ctrl.viewFeature.geometry.coordinates[1] | number : 6}}</pre></div>
+      <div class='flex-grow-0 flex-shrink-0' style="width: 10px;"></div>
+      <div class='flex-grow-0 flex-shrink-0 equipment-properties-lat-lng-label'><div class="badge badge-dark">LONGITUDE</div></div>
+      <div class='flex-grow-0 flex-shrink-0 equipment-properties-lat-lng-label'><pre style="display: inline;">{{$ctrl.viewFeature.geometry.coordinates[0] | number : 6}}</pre></div>
+      <div class='flex-grow-1 flex-shrink-1'></div>
     </div>
   </div>
 
   <!-- A table containing the editable properties of the selected object -->
   <editor-interface-tree ng-if="!$ctrl.isEditingFeatureProperties" object-to-view="$ctrl.viewFeature.networkNodeEquipment"
-    is-edit="false" root-meta-data="{'networkNodeType':$ctrl.viewFeature.siteNetworkNodeType}">
+    is-edit="false" root-meta-data="{'networkNodeType':$ctrl.viewFeature.networkNodeType}">
   </editor-interface-tree>
 
 
@@ -33,10 +45,9 @@
   </button>
 </div>
 
-
 <!-- Section to show properties when the selected map object is an equipment node -->
 <div class="clearfix"
-  ng-if="$ctrl.isEditingFeatureProperties && $ctrl.selectedMapObject && $ctrl.isMarker($ctrl.selectedMapObject) && !$ctrl.isMultSelectActive()"
+  ng-if="$ctrl.isEditingFeatureProperties && $ctrl.selectedMapObject && $ctrl.isMarker($ctrl.selectedMapObject)"
   style="margin-top: 10px">
   <!-- Section header showing the type of the selected object -->
   <div class="sidebar-table-header" ng-if="$ctrl.getSelectedNetworkConfig()">
@@ -63,11 +74,7 @@
       </form>
     </div>
   </div>
-  <div ng-if="$ctrl.getSelectedNetworkConfig().key === 'location_connector'" class="alert alert-warning"
-    style="margin: 1rem 0 0 0">
-    right-click locations to toggle their connection
-    <br>shift + click to select multiple Location Connectors
-  </div>
+
   <!-- A table containing the editable properties of the selected object -->
   <editor-interface-tree on-change="$ctrl.markSelectedEquipmentPropertiesDirty()"
     object-to-view="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].networkNodeEquipment" is-edit="true"
