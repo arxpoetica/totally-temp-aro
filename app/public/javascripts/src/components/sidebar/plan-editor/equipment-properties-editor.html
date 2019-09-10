@@ -22,20 +22,28 @@
       ng-disabled="$ctrl.viewFeature.attributes.is_locked === 'true'" ng-click="$ctrl.requestEditViewObject()">
       Edit
     </button>
-    <div class='d-flex flex-row mt-2'>
+    <div class='d-flex flex-row mt-2' style="align-items: center;">
       <div class='flex-grow-1 flex-shrink-1'></div>
       <div class='flex-grow-0 flex-shrink-0 equipment-properties-lat-lng-label'>
         <div class="badge badge-dark">LATITUDE</div>
       </div>
       <div class='flex-grow-0 flex-shrink-0 equipment-properties-lat-lng-label'>
-        <pre style="display: inline;">{{$ctrl.viewFeature.geometry.coordinates[1] | number : 6}}</pre>
+        <pre ng-if="!$ctrl.isEditingFeatureProperties" style="display: inline;">{{$ctrl.viewFeature.geometry.coordinates[1] | number : 6}}</pre>
+
+        <input ng-if="$ctrl.isEditingFeatureProperties" type="number" class="form-control form-control-sm"
+          ng-model="$ctrl.viewFeature.geometry.coordinates[1]" ng-model-options="{ debounce: 100 }" step="0.000001"
+          ng-change="$ctrl.markAsDirty()" style="width: 95px;">
       </div>
       <div class='flex-grow-0 flex-shrink-0' style="width: 10px;"></div>
       <div class='flex-grow-0 flex-shrink-0 equipment-properties-lat-lng-label'>
         <div class="badge badge-dark">LONGITUDE</div>
       </div>
       <div class='flex-grow-0 flex-shrink-0 equipment-properties-lat-lng-label'>
-        <pre style="display: inline;">{{$ctrl.viewFeature.geometry.coordinates[0] | number : 6}}</pre>
+        <pre ng-if="!$ctrl.isEditingFeatureProperties" style="display: inline;">{{$ctrl.viewFeature.geometry.coordinates[0] | number : 6}}</pre>
+
+        <input ng-if="$ctrl.isEditingFeatureProperties" type="number" class="form-control form-control-sm"
+          ng-model="$ctrl.viewFeature.geometry.coordinates[0]" ng-model-options="{ debounce: 100 }" step="0.000001"
+          ng-change="$ctrl.markAsDirty()" style="width: 95px;">
       </div>
       <div class='flex-grow-1 flex-shrink-1'></div>
     </div>
@@ -59,51 +67,6 @@
     ng-disabled="!$ctrl.isDirty"
     ng-click="$ctrl.saveEquipmentProperties()"
     style="margin-bottom: 10px">
-    <i class="fa fa-save"></i>&nbsp;&nbsp;Save equipment properties
-  </button>
-</div>
-
-<!-- Section to show properties when the selected map object is an equipment node -->
-<div class="clearfix"
-  ng-if="$ctrl.isEditingFeatureProperties && $ctrl.selectedMapObject && $ctrl.isMarker($ctrl.selectedMapObject)"
-  style="margin-top: 10px">
-  <!-- Section header showing the type of the selected object -->
-  <div class="sidebar-table-header" ng-if="$ctrl.getSelectedNetworkConfig()">
-    <img ng-src="{{$ctrl.getSelectedNetworkConfig().iconUrl}}" style="vertical-align:middle; padding-right: 10px">
-    <span>{{$ctrl.getSelectedNetworkConfig().label}}</span>
-    <button class="btn btn-danger ei-panel-header-btn-set ei-foldout-header-btn"
-      ng-click="$ctrl.deleteObjectWithId($ctrl.selectedMapObject.objectId)">Delete</button>
-    <div class="sidebar-header-subinfo">
-      <!-- <div class="sidebar-header-subinfo-item">lat: {{$ctrl.selectedMapObject.position.lat()}}</div>
-              <div class="sidebar-header-subinfo-item">long: {{$ctrl.selectedMapObject.position.lng()}}</div> -->
-      <form class="form-inline">
-        <div class="form-group" style="margin-bottom: 2px;">
-          <label for="selectedMapObjectLat">lat: </label>
-          <input type="number" class="form-control" id="selectedMapObjectLat" placeholder="lat"
-            ng-model="$ctrl.selectedMapObjectLat" ng-model-options="{ debounce: 100 }" step="0.000001"
-            ng-change="$ctrl.markSelectedEquipmentPropertiesDirty()">
-        </div>
-        <div class="form-group" style="margin-bottom: 2px;">
-          <label for="selectedMapObjectLng">long: </label>
-          <input type="number" class="form-control" id="selectedMapObjectLng" placeholder="long"
-            ng-model="$ctrl.selectedMapObjectLng" ng-model-options="{ debounce: 100 }" step="0.000001"
-            ng-change="$ctrl.markSelectedEquipmentPropertiesDirty()">
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- A table containing the editable properties of the selected object -->
-  <editor-interface-tree on-change="$ctrl.markSelectedEquipmentPropertiesDirty()"
-    object-to-view="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].networkNodeEquipment" is-edit="true"
-    root-meta-data="{'networkNodeType':$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].siteNetworkNodeType}"
-    get-new-list-item="$ctrl.getNewListItem"></editor-interface-tree>
-
-  <button ng-class="{ 'btn float-right': true,
-                            'btn-light': !$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty,
-                            'btn-primary': $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty }"
-    ng-disabled="!$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty"
-    ng-click="$ctrl.saveSelectedEquipmentProperties()" style="margin-bottom: 10px">
     <i class="fa fa-save"></i>&nbsp;&nbsp;Save equipment properties
   </button>
 </div>
