@@ -424,26 +424,17 @@ class State {
       $rootScope.$broadcast('map_layer_clicked_feature', features, {})
     }
     service.mapFeaturesSelectedEvent = new Rx.BehaviorSubject({})
-    
-    service.mapFeaturesSelectedEvent.subscribe((options) => {
+    service.mapFeaturesClickedEvent = new Rx.BehaviorSubject({})
+
+    service.mapFeaturesSelectedEvent.skip(1).subscribe((options) => {
       // ToDo: this check may need to move into REACT
-      if (service.selectedDisplayMode.getValue() === service.displayModes.EDIT_RINGS
-        && service.activeEditRingsPanel == service.EditRingsPanels.EDIT_RINGS){
-        /*
-        $ngRedux.dispatch({
-          type: Actions.MAP_SET_SELECTED_FEATURES,
-          payload: options
-        })
-        */
+      if (service.selectedDisplayMode.getValue() == service.displayModes.EDIT_RINGS
+        && service.activeEditRingsPanel == service.EditRingsPanels.EDIT_RINGS) {
         service.onFeatureSelectedRedux(options)
+      } else {
+        service.setSelectedLocations(options.locations.map(location => location.location_id))
       }
     })
-    
-    // ToDo: move these to React
-    service.isShiftPressed = false
-    service.mapFeaturesClickedEvent = new Rx.BehaviorSubject({})
-    service.mapFeaturesRightClickedEvent = new Rx.BehaviorSubject({})
-    service.mapFeaturesKeyClickedEvent = new Rx.BehaviorSubject({})
 
     // Function to convert from hsv to rgb color values.
     // https://stackoverflow.com/questions/17242144/javascript-convert-hsb-hsv-color-to-rgb-accurately
@@ -1781,6 +1772,7 @@ class State {
       setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId)),
       addPlanTargets: (planId, planTargets) => dispatch(SelectionActions.addPlanTargets(planId, planTargets)),
       removePlanTargets: (planId, planTargets) => dispatch(SelectionActions.removePlanTargets(planId, planTargets)),
+      setSelectedLocations: locationIds => dispatch(SelectionActions.setLocations(locationIds)),
       setActivePlanState: planState => dispatch(PlanActions.setActivePlanState(planState)),
       selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems)),
       setGoogleMapsReference: mapRef => dispatch(MapActions.setGoogleMapsReference(mapRef)),
