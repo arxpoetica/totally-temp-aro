@@ -182,7 +182,9 @@
     </div>
 
     <!-- Section to show properties when the selected map object is an equipment node -->
-    <equipment-properties-editor ng-if="!$ctrl.isMultSelectActive()">
+    <equipment-properties-editor
+      ng-if="!$ctrl.isMultSelectActive()"
+      request-edit-view-object='$ctrl.editViewObject()'>
     </equipment-properties-editor>
 
 

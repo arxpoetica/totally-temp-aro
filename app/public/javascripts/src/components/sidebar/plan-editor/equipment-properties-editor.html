@@ -18,7 +18,9 @@
     <button ng-class="{ 'btn ei-panel-header-btn-set ei-foldout-header-btn mt-1': true,
               'btn-light': $ctrl.viewFeature.attributes.is_locked === 'true',
               'btn-primary': $ctrl.viewFeature.attributes.is_locked !== 'true' }"
-      ng-disabled="$ctrl.viewFeature.attributes.is_locked === 'true'" ng-click="$ctrl.editViewObject()">Edit</button>
+      ng-disabled="$ctrl.viewFeature.attributes.is_locked === 'true'" ng-click="$ctrl.requestEditViewObject()">
+      Edit
+    </button>
     <div class='d-flex flex-row mt-2'>
       <div class='flex-grow-1 flex-shrink-1'></div>
       <div class='flex-grow-0 flex-shrink-0 equipment-properties-lat-lng-label'><div class="badge badge-dark">LATITUDE</div></div>

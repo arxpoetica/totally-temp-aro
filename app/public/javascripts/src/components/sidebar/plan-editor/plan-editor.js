@@ -891,7 +891,6 @@ class PlanEditorController {
 
   displayEquipmentViewObject (feature, iconUrl) {
     this.viewEquipmentProperties(this.planId, feature.objectId, this.transactionFeatures)
-    return
     return new Promise((resolve, reject) => {
       var planId = this.state.plan.id
       this.$http.get(`/service/plan-feature/${planId}/equipment/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
@@ -900,24 +899,12 @@ class PlanEditorController {
             this.viewEventFeature = feature
             // use feature's coord NOT the event's coords
             this.viewEventFeature.geometry.coordinates = result.data.geometry.coordinates
-            this.viewFeature = AroFeatureFactory.createObject(result.data)
-            var viewConfig = this.state.configuration.networkEquipment.equipments[this.viewFeature.networkNodeType]
+            const viewFeature = AroFeatureFactory.createObject(result.data)
+            var viewConfig = this.state.configuration.networkEquipment.equipments[viewFeature.networkNodeType]
             this.viewLabel = viewConfig.label
             this.viewIconUrl = viewConfig.iconUrl
             this.setIsEditingFeatureProperties(false)
             this.getViewObjectSBTypes(feature.objectId)
-            // --- IF THERE ARE LOCATION PROPERTIES WITH OUT LAT LONGS GET THEM NOW ---
-            /*
-            if (this.viewFeature.networkNodeType === 'location_connector') {
-              var locationIds = this.viewFeature.attributes.internal_oid.split(',')
-              if (this.objectIdToProperties.hasOwnProperty(feature.objectId)) {
-                locationIds = Object.keys(this.objectIdToProperties[feature.objectId].connectedLocations)
-              }
-
-              this.clearAllLocationHighlights()
-              this.highlightLocations(locationIds, this.viewEventFeature.geometry.coordinates)
-            }
-            */
           } else {
             // clear selection
             this.clearViewSelection()
