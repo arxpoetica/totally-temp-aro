@@ -31,10 +31,10 @@
                                  is-edit="false">
           </editor-interface-tree>
         </div>
-        <div style="position: relative; width: 100%; max-height: 100%;">
-          <location-roic-reports report-size="'small'" ng-if="($ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW)">
-          </location-roic-reports>
-        </div>
+        <location-roic-reports
+          ng-if="($ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW) && $ctrl.locationInfoDetails"
+          report-size="'small'">
+        </location-roic-reports>
       </accordion-panel-contents>
 
       <accordion-panel-title title="'Equipment Info'" panel-id="$ctrl.state.viewModePanels.EQUIPMENT_INFO" ng-if="$ctrl.state.configuration.perspective.showViewModePanels[$ctrl.state.viewModePanels.EQUIPMENT_INFO]"></accordion-panel-title>

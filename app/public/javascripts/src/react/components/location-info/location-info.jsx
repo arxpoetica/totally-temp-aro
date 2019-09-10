@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { PropTypes } from 'prop-types'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
-import LocationInfoActions from './locationInfo-actions'
+import LocationInfoActions from './location-info-actions'
 import AuditLog from './audit-log.jsx'
 import '../../../../../javascripts/src/shared-utils/editor-interfaces.css'
 
@@ -48,11 +48,11 @@ export class LocationInfo extends Component {
     return objectIds && objectIds.length > 0
       ? <tr key={rowid}>
         <td>{title}</td>
-          <td>
-            <ul style={{ listStyleType: 'none', padding: 0, marginBottom: 0 }}>
-              {objectIds.map((objectId, index) => <li className='item' key={index}>{objectId}</li>)}
-            </ul>
-          </td>
+        <td>
+          <ul style={{ listStyleType: 'none', padding: 0, marginBottom: 0 }}>
+            {objectIds.map((objectId, index) => <li className='item' key={index}>{objectId}</li>)}
+          </ul>
+        </td>
       </tr>
       : null
   }
@@ -60,7 +60,7 @@ export class LocationInfo extends Component {
   toggleAreAttributesExpanded () {
     this.setState({ areAttributesExpanded: !this.state.areAttributesExpanded })
   }
-  
+
   render () {
     return !this.props.locationInfoDetails
       ? null

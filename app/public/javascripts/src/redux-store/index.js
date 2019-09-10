@@ -26,7 +26,7 @@ import user from '../react/components/user/user-reducer'
 
 import ringEdit from '../react/components/ring-edit/ring-edit-reducer'
 
-import locationInfo from '../react/components/location-info/locationInfo-reducer'
+import locationInfo from '../react/components/location-info/location-info-reducer'
 
 const logger = createLogger({
   level: 'info',

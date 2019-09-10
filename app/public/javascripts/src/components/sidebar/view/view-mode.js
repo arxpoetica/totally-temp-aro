@@ -37,7 +37,8 @@ class ViewModeController {
   mapStateToThis (reduxState) {
     return {
       dataItems: reduxState.plan.dataItems,
-      selectedLocations: reduxState.selection.locations
+      selectedLocations: reduxState.selection.locations,
+      locationInfoDetails: reduxState.locationInfo.details
     }
   }
 
