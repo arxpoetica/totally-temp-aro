@@ -45,7 +45,6 @@ class PlanEditorController {
     this.stickyAssignment = true
     this.viewEventFeature = {}
     this.viewSiteBoundaryEventFeature = {}
-    this.viewBoundaryProps = null
     this.isBoundaryEditMode = false
     this.mapObjectEditorComms = {}
     this.networkNodeSBTypes = {}
@@ -740,10 +739,6 @@ class PlanEditorController {
     return this.getNetworkConfig(this.selectedMapObject.objectId)
   }
 
-  getSelectedBoundaryNetworkConfig () {
-    return this.selectedMapObject && this.getNetworkConfig(this.boundaryIdToEquipmentId[this.selectedMapObject.objectId])
-  }
-
   getNetworkConfig (objectId) {
     if (!this.objectIdToProperties.hasOwnProperty(objectId)) {
       return
@@ -847,7 +842,7 @@ class PlanEditorController {
     // First deselect all equipment and boundary features
     this.viewEventFeature = null
     this.setIsEditingFeatureProperties(false)
-    this.viewSiteBoundaryEventFeature = this.viewBoundaryProps = null
+    this.viewSiteBoundaryEventFeature = null
     this.isBoundaryEditMode = false
     if (feature.type && feature.type === 'equipment_boundary.select') {
       var newSelection = this.state.cloneSelection()
@@ -874,7 +869,7 @@ class PlanEditorController {
   }
 
   displayEquipmentViewObject (feature, iconUrl) {
-    this.viewFeatureProperties(this.planId, feature.objectId, this.transactionFeatures)
+    this.viewEquipmentProperties(this.planId, feature.objectId, this.transactionFeatures)
     return new Promise((resolve, reject) => {
       var planId = this.state.plan.id
       this.$http.get(`/service/plan-feature/${planId}/equipment/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
@@ -930,6 +925,7 @@ class PlanEditorController {
   }
 
   displaySiteBoundaryViewObject (feature, iconUrl) {
+    this.viewBoundaryProperties(this.planId, feature.objectId, this.transactionFeatures)
     return new Promise((resolve, reject) => {
       var planId = this.state.plan.id
       this.$http.get(`/service/plan-feature/${planId}/equipment_boundary/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
@@ -941,16 +937,6 @@ class PlanEditorController {
             this.viewSiteBoundaryEventFeature.attributes.network_node_object_id = this.viewSiteBoundaryEventFeature.networkObjectId
             this.viewSiteBoundaryEventFeature.attributes.networkNodeType = this.viewSiteBoundaryEventFeature.networkNodeType
             this.viewSiteBoundaryEventFeature.isExistingObject = true
-
-            // use feature's coord NOT the event's coords
-            var boundaryProps = AroFeatureFactory.createObject(result.data)
-
-            this.viewBoundaryProps = new BoundaryProperties(boundaryProps.boundaryTypeId, 'Auto-redraw', 'Road Distance',
-              null, null, boundaryProps.attributes, boundaryProps.deploymentType)
-
-            this.viewBoundaryProps.selectedSiteBoundaryType =
-              this.state.boundaryTypes.filter((boundary) => boundary.id === this.viewBoundaryProps.selectedSiteBoundaryTypeId)[0]
-
             this.isBoundaryEditMode = false
           } else {
             // clear selection
@@ -1675,7 +1661,8 @@ class PlanEditorController {
       setIsCreatingObject: isCreatingObject => dispatch(PlanEditorActions.setIsCreatingObject(isCreatingObject)),
       setIsModifyingObject: isModifyingObject => dispatch(PlanEditorActions.setIsModifyingObject(isModifyingObject)),
       setIsEditingFeatureProperties: isEditing => dispatch(PlanEditorActions.setIsEditingFeatureProperties(isEditing)),
-      viewFeatureProperties: (planId, equipmentObjectId, transactionFeatures) => dispatch(PlanEditorActions.viewFeatureProperties('equipment', planId, equipmentObjectId, transactionFeatures))
+      viewEquipmentProperties: (planId, equipmentObjectId, transactionFeatures) => dispatch(PlanEditorActions.viewFeatureProperties('equipment', planId, equipmentObjectId, transactionFeatures)),
+      viewBoundaryProperties: (planId, boundaryObjectId, transactionFeatures) => dispatch(PlanEditorActions.viewFeatureProperties('equipment_boundary', planId, boundaryObjectId, transactionFeatures))
     }
   }
 

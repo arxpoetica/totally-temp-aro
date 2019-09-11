@@ -151,13 +151,13 @@ function showContextMenuForEquipmentBoundary (transactionId, equipmentObjectId, 
   }
 }
 
-function viewFeatureProperties (featureType, planId, equipmentObjectId, transactionFeatures) {
+function viewFeatureProperties (featureType, planId, objectId, transactionFeatures) {
   return dispatch => {
     var equipmentPromise = null
-    if (transactionFeatures[equipmentObjectId]) {
+    if (transactionFeatures[objectId]) {
       equipmentPromise = Promise.resolve()
     } else {
-      equipmentPromise = AroHttp.get(`/service/plan-feature/${planId}/${featureType}/${equipmentObjectId}`)
+      equipmentPromise = AroHttp.get(`/service/plan-feature/${planId}/${featureType}/${objectId}`)
         .then(result => {
           // Decorate the equipment with some default values. Technically this is not yet "created" equipment
           // but will have to do for now.
@@ -172,7 +172,7 @@ function viewFeatureProperties (featureType, planId, equipmentObjectId, transact
     }
     // At this point we are guaranteed to have a created equipment object
     equipmentPromise
-      .then(result => dispatch(SelectionActions.setPlanEditorFeatures([equipmentObjectId])))
+      .then(result => dispatch(SelectionActions.setPlanEditorFeatures([objectId])))
       .catch(err => console.error(err))
   }
 }

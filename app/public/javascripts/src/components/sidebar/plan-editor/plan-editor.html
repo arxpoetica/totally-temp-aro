@@ -12,12 +12,6 @@
     margin-top: 10px;
     margin-bottom: 10px;
   }
-  .plan-editor-bounds-contain{
-    margin-top: 10px; 
-    position: absolute;
-    width: 100%;
-    padding-right: 20px;
-  }
 </style>
 
 <div>
@@ -193,123 +187,10 @@
       right-click locations to toggle their connection
       <br>shift + click to select multiple Location Connectors
     </div>
-    <!-- Section to show properties when the selected map object is an equipment boundary - view-->
-    <div class="plan-editor-bounds-contain" ng-if="$ctrl.state.showSiteBoundary && $ctrl.viewBoundaryProps && !$ctrl.isBoundaryEditMode && !$ctrl.isMultSelectActive()">
-      <!-- A table containing the editable properties of the selected object -->
-      <table id="tblBoundaryProperties" class="table table-sm table-striped sidebar-table" style="margin-bottom: 10px">
-        <thead>
-          <div class="clearfix" style="margin-top: 10px">
-            <!-- Section header showing the type of the selected object -->
-            <div class="sidebar-table-header">
-              <span>Site Boundary</span>
-              <button ng-class="{ 'btn ei-panel-header-btn-set ei-foldout-header-btn': true,
-                'btn-light': $ctrl.viewSiteBoundaryEventFeature.attributes.is_locked === 'true',
-                'btn-primary': $ctrl.viewSiteBoundaryEventFeature.attributes.is_locked !== 'true' }"
-                ng-disabled="$ctrl.viewSiteBoundaryEventFeature.attributes.is_locked === 'true'"
-                ng-click="$ctrl.editViewSiteBoundaryObject()">Edit</button>
-            </div>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Site boundary type</td>
-            <td>
-              {{$ctrl.viewBoundaryProps.selectedSiteBoundaryType.description}}
-            </td>
-          </tr>
-          <tr>
-            <td>Site move update</td>
-            <td>
-              {{$ctrl.viewBoundaryProps.selectedSiteMoveUpdate}}
-            </td>
-          </tr>
-          <tr>
-            <td>Site boundary generation</td>
-            <td>
-              {{$ctrl.viewBoundaryProps.selectedSiteBoundaryGeneration}}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    
-    <!-- Section to show properties when the selected map object is an equipment boundary - edit -->
-    <div class="plan-editor-bounds-contain" ng-if="$ctrl.selectedMapObject && !$ctrl.isMarker($ctrl.selectedMapObject) && $ctrl.isBoundaryEditMode && !$ctrl.isMultSelectActive()">
-      <!-- Section header showing the type of the selected object -->
-      <div class="sidebar-table-header" ng-if="$ctrl.getSelectedBoundaryNetworkConfig()">
-          <img src="/images/map_icons/aro/boundary_road_segments.png" style="vertical-align:middle; padding-right: 10px">
-          <span>{{$ctrl.getSelectedBoundaryNetworkConfig().label}} boundary</span>
-      </div>
-      <!-- A table containing the editable properties of the selected object -->
-      <table id="tblBoundaryProperties"
-            class="table table-sm table-striped sidebar-table"
-            style="margin-bottom: 10px">
-        <thead>
-          <div class="clearfix" ng-if="!$ctrl.getSelectedBoundaryNetworkConfig()" style="margin-top: 10px">
-            <!-- Section header showing the type of the selected object -->
-            <div class="sidebar-table-header">
-              <span>Site Boundary</span>
-            </div>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Site boundary type</td>
-            <td>
-              <select class="form-control"
-                ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].selectedSiteBoundaryTypeId"
-                ng-options="item.id as item.description for item in $ctrl.state.boundaryTypes"
-                ng-change="$ctrl.markSelectedBoundaryPropertiesDirty(); $ctrl.handleSiteBoundaryTypeChanged();">
-              </select>
-            </td>
-          </tr>
-          <tr>
-            <td>Site move update</td>
-            <td>
-              <select class="form-control"
-                ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].selectedSiteMoveUpdate"
-                ng-options="item as item for item in $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].siteMoveUpdates"
-                ng-change="$ctrl.markSelectedBoundaryPropertiesDirty()">
-              </select>
-            </td>
-          </tr>
-          <tr>
-            <td>Site boundary generation</td>
-            <td>
-              <select class="form-control"
-                ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].selectedSiteBoundaryGeneration"
-                ng-options="item as item for item in $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].siteBoundaryGenerations"
-                ng-change="$ctrl.markSelectedBoundaryPropertiesDirty()">
-              </select>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="clearfix">
-        <button ng-class="{ 'btn float-right': true,
-                            'btn-light': !$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty,
-                            'btn-primary': $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty }"
-                ng-disabled="!$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty"
-                ng-click="$ctrl.saveSelectedBoundaryProperties()"
-                style="margin-bottom: 10px">
-          <i class="fa fa-save"></i>&nbsp;&nbsp;Save boundary properties
-        </button>
-      </div>
-      
-      <hr class="plan-editor-hr">
-      
-      <button class="btn btn-primary btn-sm" 
-              ng-click="$ctrl.onRequestCalculateCoverage()">
-        calculate coverage
-      </button>
-      
-      <boundary-coverage 
-        bounds-input="$ctrl.coverageOutput"
-        parent-selected-object-id="$ctrl.selectedObjectId"
-        is-working-override="$ctrl.isWorkingOnCoverage">
-      </boundary-coverage>
-      
-    </div>
-    
-    
+
+    <boundary-properties-editor
+      ng-if="!$ctrl.isMultSelectActive()">
+    </boundary-properties-editor>
     <!-- Add a div that will overlay all the controls above. The div will be visible when the controls need to be disabled. -->
     <div class="disable-sibling-controls"
           ng-show="!$ctrl.currentTransaction || $ctrl.isCalculatingSubnets || $ctrl.isCreatingObject || $ctrl.isModifyingObject">

@@ -8,23 +8,31 @@ import PlanEditorActions from '../../../react/components/plan-editor/plan-editor
 
 const getAllPlanFeatures = reduxState => reduxState.planEditor.features
 const getSelectedPlanFeatures = reduxState => reduxState.selection.planEditorFeatures
-const getEquipment = createSelector([getAllPlanFeatures, getSelectedPlanFeatures], (allPlanFeatures, selectedPlanFeatures) => {
+const getEquipmentBoundary = createSelector([getAllPlanFeatures, getSelectedPlanFeatures], (allPlanFeatures, selectedPlanFeatures) => {
   if (selectedPlanFeatures.length !== 1) {
     return null
   }
   const planFeature = allPlanFeatures[selectedPlanFeatures[0]]
   if (planFeature) {
+    console.log(AroFeatureFactory.createObject(planFeature.feature))
     return AroFeatureFactory.createObject(planFeature.feature)
   } else {
     return null
   }
 })
 
-class EquipmentPropertiesEditorController {
+class BoundaryPropertiesEditorController {
   constructor (state, $ngRedux) {
     this.state = state
     this.isEditingFeatureProperties = false
     this.isDirty = false
+    this.siteMoveUpdates = [
+      'Auto-redraw',
+      'Don\'t update'
+    ]
+    this.siteBoundaryGenerations = [
+      'Road Distance'
+    ]
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
   }
 
@@ -58,7 +66,7 @@ class EquipmentPropertiesEditorController {
       transactionId: reduxState.planEditor.transaction && reduxState.planEditor.transaction.id,
       transactionFeatures: reduxState.planEditor.features,
       selectedFeatures: reduxState.selection.planEditorFeatures,
-      viewFeature: getEquipment(reduxState)
+      viewBoundaryProps: getEquipmentBoundary(reduxState)
     }
   }
 
@@ -80,14 +88,14 @@ class EquipmentPropertiesEditorController {
   }
 }
 
-EquipmentPropertiesEditorController.$inject = ['state', '$ngRedux']
+BoundaryPropertiesEditorController.$inject = ['state', '$ngRedux']
 
-let equipmentPropertiesEditor = {
-  templateUrl: '/components/sidebar/plan-editor/equipment-properties-editor.html',
+let boundaryPropertiesEditor = {
+  templateUrl: '/components/sidebar/plan-editor/boundary-properties-editor.html',
   bindings: {
     requestEditViewObject: '&'
   },
-  controller: EquipmentPropertiesEditorController
+  controller: BoundaryPropertiesEditorController
 }
 
-export default equipmentPropertiesEditor
+export default boundaryPropertiesEditor
