@@ -72,6 +72,16 @@
                   ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfLocations">
           </td>
         </tr>
+        <tr>
+          <td colspan="2">
+            <input type="radio" value="1" ng-change="$ctrl.markSelectedLocationPropertiesDirty();$ctrl.setWorkflowStateId($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId);"
+            ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId">Created
+            <input type="radio" value="2" ng-change="$ctrl.markSelectedLocationPropertiesDirty();$ctrl.setWorkflowStateId($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId);"
+            ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId">Locked
+            <input type="radio" value="4" ng-change="$ctrl.markSelectedLocationPropertiesDirty();$ctrl.setWorkflowStateId($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId);"
+            ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId">Invalidated
+          </td>
+        </tr>
       </table>
 
       <button ng-class="{ 'btn btn-block': true,
@@ -95,10 +105,10 @@
       </button>
 
       <!-- Add a div that will overlay all the controls above. The div will be visible when the controls need to be disabled. -->
-      <div class="disable-sibling-controls"
+      <!-- <div class="disable-sibling-controls"
            ng-hide="!(($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId == $ctrl.WorkflowState.LOCKED.id) || ($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId == $ctrl.WorkflowState.INVALIDATED.id))">
         <i class="fa fa-5x fa-lock" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"></i>
-      </div>
+      </div> -->
 
     </div>
     <br>
