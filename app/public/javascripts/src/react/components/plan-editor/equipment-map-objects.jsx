@@ -57,7 +57,7 @@ export class EquipmentMapObjects extends Component {
     mapObject.addListener('dragend', event => {
       var newEquipment = JSON.parse(JSON.stringify(this.props.transactionFeatures[mapObject.objectId]))
       newEquipment.feature.geometry.coordinates = [event.latLng.lng(), event.latLng.lat()]
-      this.props.modifyEquipment(this.props.transactionId, newEquipment)
+      this.props.modifyFeature(this.props.transactionId, newEquipment)
     })
     mapObject.addListener('rightclick', event => {
       const eventXY = Utils.getXYFromEvent(event)
@@ -132,7 +132,7 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  modifyEquipment: (transactionId, equipment) => dispatch(PlanEditorActions.modifyEquipment(transactionId, equipment)),
+  modifyFeature: (transactionId, equipment) => dispatch(PlanEditorActions.modifyFeature('equipment', transactionId, equipment)),
   showContextMenuForEquipment: (planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y) => {
     dispatch(PlanEditorActions.showContextMenuForEquipment(planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y))
   },

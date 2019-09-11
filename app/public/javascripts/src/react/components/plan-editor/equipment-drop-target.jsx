@@ -82,7 +82,7 @@ export class EquipmentDropTarget extends Component {
         },
         deploymentType: 'PLANNED'
       }
-      this.props.createEquipment(this.props.transactionId, featureToCreate)
+      this.props.createFeature(this.props.transactionId, featureToCreate)
     }
   }
 }
@@ -100,7 +100,7 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  createEquipment: (transactionId, equipment) => dispatch(PlanEditorActions.createEquipment(transactionId, equipment))
+  createFeature: (transactionId, equipment) => dispatch(PlanEditorActions.createFeature('equipment', transactionId, equipment))
 })
 
 const EquipmentDropTargetComponent = wrapComponentWithProvider(reduxStore, EquipmentDropTarget, mapStateToProps, mapDispatchToProps)

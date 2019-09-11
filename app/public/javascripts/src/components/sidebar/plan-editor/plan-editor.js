@@ -874,7 +874,7 @@ class PlanEditorController {
   }
 
   displayEquipmentViewObject (feature, iconUrl) {
-    this.viewEquipmentProperties(this.planId, feature.objectId, this.transactionFeatures)
+    this.viewFeatureProperties(this.planId, feature.objectId, this.transactionFeatures)
     return new Promise((resolve, reject) => {
       var planId = this.state.plan.id
       this.$http.get(`/service/plan-feature/${planId}/equipment/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
@@ -1675,7 +1675,7 @@ class PlanEditorController {
       setIsCreatingObject: isCreatingObject => dispatch(PlanEditorActions.setIsCreatingObject(isCreatingObject)),
       setIsModifyingObject: isModifyingObject => dispatch(PlanEditorActions.setIsModifyingObject(isModifyingObject)),
       setIsEditingFeatureProperties: isEditing => dispatch(PlanEditorActions.setIsEditingFeatureProperties(isEditing)),
-      viewEquipmentProperties: (planId, equipmentObjectId, transactionFeatures) => dispatch(PlanEditorActions.viewEquipmentProperties(planId, equipmentObjectId, transactionFeatures))
+      viewFeatureProperties: (planId, equipmentObjectId, transactionFeatures) => dispatch(PlanEditorActions.viewFeatureProperties(planId, equipmentObjectId, transactionFeatures))
     }
   }
 

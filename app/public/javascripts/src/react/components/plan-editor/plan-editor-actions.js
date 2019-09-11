@@ -22,8 +22,8 @@ function resumeOrCreateTransaction (planId, userId) {
         ])
       })
       .then(results => {
-        dispatch(addTransactionEquipment(results[0].data))
-        dispatch(addTransactionEquipmentBoundary(results[1].data))
+        dispatch(addTransactionFeatures(results[0].data))
+        dispatch(addTransactionFeatures(results[1].data))
       })
       .catch(err => console.error(err))
   }
@@ -61,37 +61,37 @@ function discardTransaction (transactionId) {
   }
 }
 
-function createEquipment (transactionId, feature) {
+function createFeature (featureType, transactionId, feature) {
   return dispatch => {
     // Do a POST to send the equipment over to service
-    AroHttp.post(`/service/plan-transactions/${transactionId}/modified-features/equipment`, feature)
+    AroHttp.post(`/service/plan-transactions/${transactionId}/modified-features/${featureType}`, feature)
       .then(result => {
-        // Decorate the created equipment with some default values
-        const createdEquipment = {
+        // Decorate the created feature with some default values
+        const createdFeature = {
           crudAction: 'create',
           deleted: false,
           valid: true,
           feature: result.data
         }
-        dispatch(addTransactionEquipment([createdEquipment]))
+        dispatch(addTransactionFeatures([createdFeature]))
       })
       .catch(err => console.error(err))
   }
 }
 
-function modifyEquipment (transactionId, equipment) {
+function modifyFeature (featureType, transactionId, feature) {
   return dispatch => {
     // Do a PUT to send the equipment over to service
-    AroHttp.put(`/service/plan-transactions/${transactionId}/modified-features/equipment`, equipment.feature)
+    AroHttp.put(`/service/plan-transactions/${transactionId}/modified-features/${featureType}`, feature.feature)
       .then(result => {
-        // Decorate the created equipment with some default values
-        const newEquipment = {
-          ...equipment,
+        // Decorate the created feature with some default values
+        const newFeature = {
+          ...feature,
           feature: result.data
         }
         dispatch({
-          type: Actions.PLAN_EDITOR_MODIFY_EQUIPMENT_NODES,
-          payload: [newEquipment]
+          type: Actions.PLAN_EDITOR_MODIFY_FEATURES,
+          payload: [newFeature]
         })
       })
       .catch(err => console.error(err))
@@ -106,10 +106,10 @@ function deleteTransactionFeature (transactionId, featureType, objectIdToDelete)
   }
 }
 
-function addTransactionEquipment (equipmentNodes) {
+function addTransactionFeatures (features) {
   return {
-    type: Actions.PLAN_EDITOR_ADD_EQUIPMENT_NODES,
-    payload: equipmentNodes
+    type: Actions.PLAN_EDITOR_ADD_FEATURES,
+    payload: features
   }
 }
 
@@ -117,42 +117,6 @@ function removeTransactionFeature (objectId) {
   return {
     type: Actions.PLAN_EDITOR_REMOVE_TRANSACTION_FEATURE,
     payload: objectId
-  }
-}
-
-function createEquipmentBoundary (transactionId, feature) {
-  return dispatch => {
-    // Do a POST to send the equipment over to service
-    AroHttp.post(`/service/plan-transactions/${transactionId}/modified-features/equipment_boundary`, feature)
-      .then(result => {
-        // Decorate the created equipment with some default values
-        const createdEquipment = {
-          crudAction: 'create',
-          deleted: false,
-          valid: true,
-          feature: result.data
-        }
-        dispatch(addTransactionEquipmentBoundary([createdEquipment]))
-      })
-      .catch(err => console.error(err))
-  }
-}
-
-function modifyEquipmentBoundary (transactionId, equipmentBoundary) {
-  return dispatch => {
-    // Do a PUT to send the equipment over to service
-    AroHttp.put(`/service/plan-transactions/${transactionId}/modified-features/equipment_boundary`, equipmentBoundary.feature)
-      .then(result => {
-        const newEquipmentBoundary = {
-          ...equipmentBoundary,
-          feature: result.data
-        }
-        dispatch({
-          type: Actions.PLAN_EDITOR_MODIFY_EQUIPMENT_BOUNDARIES,
-          payload: [newEquipmentBoundary]
-        })
-      })
-      .catch(err => console.error(err))
   }
 }
 
@@ -194,13 +158,13 @@ function showContextMenuForEquipmentBoundary (transactionId, equipmentObjectId, 
   }
 }
 
-function viewEquipmentProperties (planId, equipmentObjectId, transactionFeatures) {
+function viewFeatureProperties (featureType, planId, equipmentObjectId, transactionFeatures) {
   return dispatch => {
     var equipmentPromise = null
     if (transactionFeatures[equipmentObjectId]) {
       equipmentPromise = Promise.resolve()
     } else {
-      equipmentPromise = AroHttp.get(`/service/plan-feature/${planId}/equipment/${equipmentObjectId}`)
+      equipmentPromise = AroHttp.get(`/service/plan-feature/${planId}/${featureType}/${equipmentObjectId}`)
         .then(result => {
           // Decorate the equipment with some default values. Technically this is not yet "created" equipment
           // but will have to do for now.
@@ -210,7 +174,7 @@ function viewEquipmentProperties (planId, equipmentObjectId, transactionFeatures
             valid: true,
             feature: result.data
           }
-          return dispatch(addTransactionEquipment([createdEquipment]))
+          return dispatch(addTransactionFeatures([createdEquipment]))
         })
     }
     // At this point we are guaranteed to have a created equipment object
@@ -274,17 +238,15 @@ export default {
   clearTransaction,
   discardTransaction,
   resumeOrCreateTransaction,
-  createEquipment,
-  modifyEquipment,
+  createFeature,
+  modifyFeature,
   deleteTransactionFeature,
-  addTransactionEquipment,
+  addTransactionFeatures,
   removeTransactionFeature,
-  createEquipmentBoundary,
-  modifyEquipmentBoundary,
   addTransactionEquipmentBoundary,
   showContextMenuForEquipment,
   showContextMenuForEquipmentBoundary,
-  viewEquipmentProperties,
+  viewFeatureProperties,
   startDrawingBoundaryFor,
   stopDrawingBoundary,
   setIsCalculatingSubnets,
