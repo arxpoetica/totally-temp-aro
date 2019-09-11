@@ -8,7 +8,7 @@ const getAllLocationLayers = state => state.mapLayers.location
 const getLocationLayersList = createSelector([getAllLocationLayers], (locationLayers) => locationLayers.toJS())
 
 class LocationProperties {
-  constructor (workflowStateId = 1, numberOfLocations = 1) {
+  constructor (workflowStateId, numberOfLocations = 1) {
     this.locationTypes = ['Household']
     this.selectedLocationType = this.locationTypes[0]
     this.numberOfLocations = numberOfLocations
@@ -196,10 +196,6 @@ class LocationEditorController {
     this.lastUsedNumberOfLocations = +newValue < 1 ? 1 : +newValue
   }
 
-  setWorkflowStateId (newValue) {
-    this.lastWorkFlowStateId = +newValue < 1 ? 1 : +newValue
-  }
-
   // Marks the properties of the selected location as dirty (changed).
   markSelectedLocationPropertiesDirty () {
     if (this.selectedMapObject) {
@@ -258,16 +254,16 @@ class LocationEditorController {
 
   handleObjectCreated (mapObject, usingMapClick, feature) {
     var numberOfLocations = this.lastUsedNumberOfLocations // use last used number of locations until commit
-    var workFlowStateId = this.lastWorkFlowStateId 
     if (feature.attributes && feature.attributes.number_of_households) {
       numberOfLocations = +feature.attributes.number_of_households
     }
-    this.objectIdToProperties[mapObject.objectId] = new LocationProperties(workFlowStateId, numberOfLocations)
+    const workflowStateId = feature.workflow_state_id || WorkflowState.CREATED.id
+    this.objectIdToProperties[mapObject.objectId] = new LocationProperties(workflowStateId, numberOfLocations)
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     var locationObject = this.formatLocationForService(mapObject.objectId)
     // The marker is editable if the state is not LOCKED or INVALIDATED
-    const isEditable = !((workFlowStateId & WorkflowState.LOCKED.id) ||
-                          (workFlowStateId & WorkflowState.INVALIDATED.id))
+    const isEditable = !((workflowStateId & WorkflowState.LOCKED.id) ||
+                          (workflowStateId & WorkflowState.INVALIDATED.id))
 
     if (isEditable) {
       this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`, locationObject)

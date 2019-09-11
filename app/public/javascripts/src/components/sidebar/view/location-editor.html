@@ -74,12 +74,12 @@
         </tr>
         <tr>
           <td colspan="2">
-            <input type="radio" value="1" ng-change="$ctrl.markSelectedLocationPropertiesDirty();$ctrl.setWorkflowStateId($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId);"
-            ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId">Created
-            <input type="radio" value="2" ng-change="$ctrl.markSelectedLocationPropertiesDirty();$ctrl.setWorkflowStateId($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId);"
-            ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId">Locked
-            <input type="radio" value="4" ng-change="$ctrl.markSelectedLocationPropertiesDirty();$ctrl.setWorkflowStateId($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId);"
-            ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId">Invalidated
+            <input type="radio" ng-value="1" ng-change="$ctrl.markSelectedLocationPropertiesDirty()"
+              ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId">Created{{$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId}}
+            <input type="radio" ng-value="2" ng-change="$ctrl.markSelectedLocationPropertiesDirty()"
+              ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId">Locked{{$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId}}
+            <input type="radio" ng-value="4" ng-change="$ctrl.markSelectedLocationPropertiesDirty()"
+              ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId">Invalidated{{$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId}}
           </td>
         </tr>
       </table>
