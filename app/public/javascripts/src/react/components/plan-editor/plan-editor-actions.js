@@ -120,13 +120,6 @@ function removeTransactionFeature (objectId) {
   }
 }
 
-function addTransactionEquipmentBoundary (equipmentBoundaries) {
-  return {
-    type: Actions.PLAN_EDITOR_ADD_EQUIPMENT_BOUNDARY,
-    payload: equipmentBoundaries
-  }
-}
-
 function showContextMenuForEquipment (planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y) {
   return dispatch => {
     // Get details on the boundary (if any) for this equipment
@@ -243,7 +236,6 @@ export default {
   deleteTransactionFeature,
   addTransactionFeatures,
   removeTransactionFeature,
-  addTransactionEquipmentBoundary,
   showContextMenuForEquipment,
   showContextMenuForEquipmentBoundary,
   viewFeatureProperties,
