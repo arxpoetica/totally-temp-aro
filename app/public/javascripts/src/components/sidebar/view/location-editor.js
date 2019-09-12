@@ -1,6 +1,7 @@
 import { createSelector } from 'reselect'
 
 import WorkflowState from '../../../shared-utils/workflow-state'
+import Permissions from '../../../shared-utils/permissions'
 import MapLayerActions from '../../../react/components/map-layers/map-layer-actions'
 
 // We need a selector, else the .toJS() call will create an infinite digest loop
@@ -34,7 +35,7 @@ class LocationEditorController {
     this.isCommiting = false
     this.WorkflowState = WorkflowState
     this.isExpandLocAttributes = false
-    this.userCanChangeWorkflowState = true
+    this.userCanChangeWorkflowState = false
 
     this.availableAttributesKeyList = ['loop_extended']
     this.availableAttributesValueList = ['true', 'false']
@@ -91,6 +92,7 @@ class LocationEditorController {
       })
       .then((result) => {
         this.currentTransaction = result.data
+        this.reloadWorkflowStatePermissions() // Can continue in parallel, no need to wait for promise
         return this.$http.get(`/service/library/transaction/${this.currentTransaction.id}/transaction_features`)
       })
       .then((result) => {
@@ -382,10 +384,25 @@ class LocationEditorController {
     return this.userCanChangeWorkflowState && isLockedOrInvalid
   }
 
+  reloadWorkflowStatePermissions () {
+    // Make sure that the currently logged in user is allowed to change the workflow state of objects for the current library/transaction.
+    this.userCanChangeWorkflowState = false
+    const odataQuery = `/service/odata/UserLibraryViewEntity?$filter=dataSourceId eq ${this.currentTransaction.libraryId}&$top=1`
+    return this.$http.get(odataQuery)
+      .then(result => {
+        console.log(result)
+        const libraryViewEntity = result.data[0]
+        this.userCanChangeWorkflowState = Boolean(libraryViewEntity.permissions & Permissions.RESOURCE_WORKFLOW)
+        this.$timeout()
+      })
+      .catch(err => console.error(err))
+  }
+
   mapStateToThis (reduxState) {
     return {
       locationLayers: getLocationLayersList(reduxState),
-      dataItems: reduxState.plan.dataItems
+      dataItems: reduxState.plan.dataItems,
+      loggedInUser: reduxState.user.loggedInUser
     }
   }
 
