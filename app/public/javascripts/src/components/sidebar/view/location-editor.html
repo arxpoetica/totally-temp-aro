@@ -73,10 +73,11 @@
           </td>
         </tr>
         <tr>
-          <td>Workflow state</td>
+          <td style="vertical-align: top;">Workflow state</td>
           <td>
             <input
               type="radio"
+              class="radiofill"
               ng-disabled="!$ctrl.isWorkflowStateEditable()"
               ng-value="1"
               ng-change="$ctrl.markSelectedLocationPropertiesDirty()"
@@ -84,6 +85,7 @@
               Created<br>
             <input
               type="radio"
+              class="radiofill"
               ng-disabled="!$ctrl.isWorkflowStateEditable()"
               ng-value="2"
               ng-change="$ctrl.markSelectedLocationPropertiesDirty()"
@@ -91,6 +93,7 @@
               Locked<br>
             <input
               type="radio"
+              class="radiofill"
               ng-disabled="!$ctrl.isWorkflowStateEditable()"
               ng-value="4"
               ng-change="$ctrl.markSelectedLocationPropertiesDirty()"
