@@ -34,6 +34,7 @@ class LocationEditorController {
     this.isCommiting = false
     this.WorkflowState = WorkflowState
     this.isExpandLocAttributes = false
+    this.userCanChangeWorkflowState = true
 
     this.availableAttributesKeyList = ['loop_extended']
     this.availableAttributesValueList = ['true', 'false']
@@ -369,6 +370,16 @@ class LocationEditorController {
 
   modalHide () {
     this.isExpandLocAttributes = false
+  }
+
+  isWorkflowStateEditable () {
+    // Workflow state is editable only if the workflow state is Invalidated or Locked. Which means that the workflow state
+    // for a default created object cannot be changed (since it is "Created" by default). So someone has to go into the DB,
+    // change the state to Invalidated or Locked, and then the user can toggle between them. This logic supplied by
+    // Frontier, and this is how we do it for now!
+    const currentWorkflowState = this.objectIdToProperties[this.selectedMapObject.objectId].workflowStateId
+    const isLockedOrInvalid = (currentWorkflowState === WorkflowState.LOCKED.id) || (currentWorkflowState === WorkflowState.INVALIDATED.id)
+    return this.userCanChangeWorkflowState && isLockedOrInvalid
   }
 
   mapStateToThis (reduxState) {
