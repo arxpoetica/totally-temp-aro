@@ -33,6 +33,8 @@ class BoundaryPropertiesEditorController {
     this.siteBoundaryGenerations = [
       'Road Distance'
     ]
+    this.boundaryIdToName = {}
+    this.state.boundaryTypes.forEach(boundaryType => { this.boundaryIdToName[boundaryType.id] = boundaryType.name })
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
   }
 
