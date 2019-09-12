@@ -13,7 +13,7 @@ const getEquipment = createSelector([getAllPlanFeatures, getSelectedPlanFeatures
     return null
   }
   const planFeature = allPlanFeatures[selectedPlanFeatures[0]]
-  if (planFeature) {
+  if (planFeature && planFeature.dataType === 'equipment') {
     return AroFeatureFactory.createObject(planFeature.feature)
   } else {
     return null
@@ -39,6 +39,7 @@ class EquipmentPropertiesEditorController {
   saveEquipmentProperties () {
     // Our equipment object is a copy of the one in the redux store.
     this.modifyEquipment(this.transactionId, { feature: this.viewFeature })
+    this.isDirty = false
   }
 
   // Legacy method
@@ -64,7 +65,7 @@ class EquipmentPropertiesEditorController {
 
   mapDispatchToTarget (dispatch) {
     return {
-      modifyEquipment: (transactionId, equipment) => dispatch(PlanEditorActions.modifyEquipment(transactionId, equipment))
+      modifyEquipment: (transactionId, equipment) => dispatch(PlanEditorActions.modifyFeature('equipment', transactionId, equipment))
     }
   }
 

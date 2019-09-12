@@ -35,7 +35,7 @@
             ng-if="$ctrl.isEditingFeatureProperties"
             ng-model="$ctrl.viewBoundaryProps.attributes.boundary_type_id"
             ng-options="(+item.id).toString() as item.description for item in $ctrl.state.boundaryTypes"
-            ng-change="$ctrl.markSelectedBoundaryPropertiesDirty(); $ctrl.handleSiteBoundaryTypeChanged();">
+            ng-change="$ctrl.markAsDirty()">
           </select>
           <!-- Show text if not editing -->
           <span ng-if="!$ctrl.isEditingFeatureProperties">
@@ -51,7 +51,7 @@
             ng-if="$ctrl.isEditingFeatureProperties"
             ng-model="$ctrl.viewBoundaryProps.attributes.selected_site_move_update"
             ng-options="item as item for item in $ctrl.siteMoveUpdates"
-            ng-change="$ctrl.markSelectedBoundaryPropertiesDirty()">
+            ng-change="$ctrl.markAsDirty()">
           </select>
           <!-- Show text if not editing -->
           <span ng-if="!$ctrl.isEditingFeatureProperties">
@@ -67,7 +67,7 @@
             ng-if="$ctrl.isEditingFeatureProperties"
             ng-model="$ctrl.viewBoundaryProps.attributes.selected_site_boundary_generation"
             ng-options="item as item for item in $ctrl.siteBoundaryGenerations"
-            ng-change="$ctrl.markSelectedBoundaryPropertiesDirty()">
+            ng-change="$ctrl.markAsDirty()">
           </select>
           <!-- Show text if not editing -->
           <span ng-if="!$ctrl.isEditingFeatureProperties">
@@ -77,12 +77,12 @@
       </tr>
     </tbody>
   </table>
-  <div class="clearfix"> <!-- TODO TODO -->
+  <div class="clearfix">
     <button ng-class="{ 'btn float-right': true,
-                        'btn-light': !$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty,
-                        'btn-primary': $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty }"
-            ng-disabled="!$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty"
-            ng-click="$ctrl.saveSelectedBoundaryProperties()"
+                        'btn-light': !$ctrl.isDirty,
+                        'btn-primary': $ctrl.isDirty }"
+            ng-disabled="!$ctrl.isDirty"
+            ng-click="$ctrl.saveBoundaryProperties()"
             style="margin-bottom: 10px">
       <i class="fa fa-save"></i>&nbsp;&nbsp;Save boundary properties
     </button>

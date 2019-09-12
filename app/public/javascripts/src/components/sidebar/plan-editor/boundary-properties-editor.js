@@ -13,8 +13,7 @@ const getEquipmentBoundary = createSelector([getAllPlanFeatures, getSelectedPlan
     return null
   }
   const planFeature = allPlanFeatures[selectedPlanFeatures[0]]
-  if (planFeature) {
-    console.log(AroFeatureFactory.createObject(planFeature.feature))
+  if (planFeature && planFeature.dataType === 'equipment_boundary') {
     return AroFeatureFactory.createObject(planFeature.feature)
   } else {
     return null
@@ -46,9 +45,12 @@ class BoundaryPropertiesEditorController {
     this.isDirty = true
   }
 
-  saveEquipmentProperties () {
-    // Our equipment object is a copy of the one in the redux store.
-    this.modifyEquipment(this.transactionId, { feature: this.viewFeature })
+  saveBoundaryProperties () {
+    // Some error when trying to save a default blank product. Delete it. Note that this.viewBoundaryProps is a copy too.
+    var boundaryToSave = JSON.parse(JSON.stringify(this.viewBoundaryProps))
+    delete boundaryToSave.product
+    this.modifyBoundary(this.transactionId, { feature: boundaryToSave })
+    this.isDirty = false
   }
 
   // Legacy method
@@ -74,7 +76,7 @@ class BoundaryPropertiesEditorController {
 
   mapDispatchToTarget (dispatch) {
     return {
-      modifyEquipment: (transactionId, equipment) => dispatch(PlanEditorActions.modifyEquipment(transactionId, equipment))
+      modifyBoundary: (transactionId, boundary) => dispatch(PlanEditorActions.modifyFeature('equipment_boundary', transactionId, boundary))
     }
   }
 
