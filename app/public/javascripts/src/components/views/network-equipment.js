@@ -136,7 +136,8 @@ class NetworkEquipmentController {
           (feature.properties.is_deleted !== 'true')
       }
     }
-    return {
+    console.log(networkEquipment)
+    return { // ToDo: this needs to be a class and the same class as in the reducer
       tileDefinitions: [tileDefinition],
       iconUrl: networkEquipment.iconUrl,
       greyOutIconUrl: networkEquipment.greyOutIconUrl,
@@ -150,7 +151,8 @@ class NetworkEquipmentController {
       selectable: true,
       zIndex: networkEquipment.zIndex + (existingOrPlannedzIndex || 0),
       showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection && this.state.showDirectedCable, // Showing Direction
-      highlightStyle: networkEquipment.highlightStyle
+      highlightStyle: networkEquipment.highlightStyle,
+      subtypes: { ...networkEquipment.subtypes }
     }
   }
 

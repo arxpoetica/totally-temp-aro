@@ -191,7 +191,7 @@ exports[`Can edit 1`] = `
           },
           "sewer": Object {
             "displayName": "Sewer",
-            "value": false,
+            "value": true,
           },
         },
       }
@@ -332,7 +332,7 @@ exports[`Can't edit 1`] = `
           },
           "sewer": Object {
             "displayName": "Sewer",
-            "value": false,
+            "value": true,
           },
         },
       }
@@ -543,7 +543,7 @@ exports[`Delete ring 1`] = `
           },
           "sewer": Object {
             "displayName": "Sewer",
-            "value": false,
+            "value": true,
           },
         },
       }
@@ -624,7 +624,7 @@ exports[`With no rings 1`] = `
           },
           "sewer": Object {
             "displayName": "Sewer",
-            "value": false,
+            "value": true,
           },
         },
       }

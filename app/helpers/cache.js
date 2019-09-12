@@ -53,6 +53,13 @@ function loadConfiguration() {
     'resourceEditors'
   ]
 
+  const configTypeToSubtype = {
+    'networkEquipment': {
+      'dataType': 'equipment',
+      'subType': 'NetworkNodeSubtypeEntity'
+    }
+  }
+  // get /odata/NetworkNodeSubtypeEntity?$top=1000
   var configurationPromises = []
   configurationTypes.forEach(configurationType => configurationPromises.push(UIConfiguration.getConfigurationSet(configurationType)))
   return Promise.all(configurationPromises)

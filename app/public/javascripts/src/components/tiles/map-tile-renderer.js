@@ -145,7 +145,7 @@ class MapTileRenderer {
     }
 
     this.mapLayers = mapLayers // Set the object in any case (why? this should go in the above if)
-
+    console.log(mapLayers)
     // Set the map layers in the data service too, so that we can download all layer data in a single call
     this.tileDataService.setMapLayers(mapLayers)
   }
@@ -347,6 +347,15 @@ class MapTileRenderer {
           htmlCache.backBufferCanvas.getContext('2d').clearRect(0, 0, htmlCache.backBufferCanvas.width, htmlCache.backBufferCanvas.height)
           htmlCache.heatmapCanvas.getContext('2d').clearRect(0, 0, htmlCache.heatmapCanvas.width, htmlCache.heatmapCanvas.height)
 
+
+          if (zoom == 14 &&  coord.x == 2621 && coord.y == 5724) {
+            console.log(singleTileResults)
+            // properties.subtype_id 
+            // only present if set
+          }
+
+
+
           this.renderSingleTileFull(zoom, coord, renderingData, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage, htmlCache.backBufferCanvas, htmlCache.heatmapCanvas)
 
           // Copy the back buffer image onto the front buffer
@@ -470,6 +479,16 @@ class MapTileRenderer {
       if (feature.properties) {
         // Try object_id first, else try location_id
         var featureId = feature.properties.object_id || feature.properties.location_id
+
+        if (mapLayer.hasOwnProperty('subtypes')) {
+          if (feature.properties.hasOwnProperty('subtype_id')) {
+            // filter off subtypes
+            if (!mapLayer.subtypes[feature.properties.subtype_id]) continue
+          } else {
+            // check that the root layer is on
+            if (!mapLayer.subtypes[0]) continue
+          }
+        }
 
         if (this.selectedDisplayMode == this.displayModes.EDIT_PLAN &&
             this.tileDataService.featuresToExclude.has(featureId) &&

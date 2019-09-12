@@ -17,6 +17,19 @@ function setNetworkEquipmentLayerVisibility (layerType, layer, newVisibility) {
     payload: {
       layerType: layerType,
       layer: layer,
+      subtype: 0,
+      visibility: newVisibility
+    }
+  }
+}
+
+function setNetworkEquipmentSubtypeVisibility (layerType, layer, subtype, newVisibility) {
+  return {
+    type: Actions.LAYERS_SET_NETWORK_EQUIPMENT_VISIBILITY,
+    payload: {
+      layerType: layerType,
+      layer: layer,
+      subtype: subtype,
       visibility: newVisibility
     }
   }
@@ -66,6 +79,7 @@ function setShowSiteBoundary (newVisibility) {
 export default {
   setLayerVisibility: setLayerVisibility,
   setNetworkEquipmentLayerVisibility: setNetworkEquipmentLayerVisibility,
+  setNetworkEquipmentSubtypeVisibility: setNetworkEquipmentSubtypeVisibility,
   setCableConduitVisibility: setCableConduitVisibility,
   setNetworkEquipmentLayers: setNetworkEquipmentLayers,
   setConstructionSiteLayers: setConstructionSiteLayers,
