@@ -95,7 +95,7 @@ BoundaryPropertiesEditorController.$inject = ['state', '$ngRedux']
 let boundaryPropertiesEditor = {
   templateUrl: '/components/sidebar/plan-editor/boundary-properties-editor.html',
   bindings: {
-    requestEditViewObject: '&'
+    requestCalculateCoverage: '&'
   },
   controller: BoundaryPropertiesEditorController
 }
