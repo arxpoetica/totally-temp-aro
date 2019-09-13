@@ -4,7 +4,7 @@ import { PropTypes } from 'prop-types'
 import { connect } from 'react-redux'
 import PlanEditorActions from './plan-editor-actions'
 import uuidStore from '../../../shared-utils/uuid-store'
-import Utils from './utils'
+import WktUtils from '../../../shared-utils/wkt-utils'
 
 export class BoundaryDrawCreator extends Component {
 
@@ -28,7 +28,7 @@ export class BoundaryDrawCreator extends Component {
       // Create a boundary object.
       var boundaryFeature = {
         objectId: uuidStore.getUUID(),
-        geometry: Utils.getGeometryFromGoogleMapPaths(event.overlay.getPaths()),
+        geometry: WktUtils.getWKTMultiPolygonFromGoogleMapPaths(event.overlay.getPaths()),
         dataType: 'equipment_boundary',
         attributes: {
           network_node_object_id: self.props.isDrawingBoundaryFor

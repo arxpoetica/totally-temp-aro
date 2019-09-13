@@ -4,7 +4,7 @@ import { PropTypes } from 'prop-types'
 import { connect } from 'react-redux'
 import PlanEditorActions from './plan-editor-actions'
 import SelectionActions from '../selection/selection-actions'
-import Utils from './utils'
+import WktUtils from '../../../shared-utils/wkt-utils'
 
 export class EquipmentBoundaryMapObjects extends Component {
   constructor (props) {
@@ -50,7 +50,7 @@ export class EquipmentBoundaryMapObjects extends Component {
     const equipmentBoundary = this.props.transactionFeatures[objectId].feature
     const mapObject = new google.maps.Polygon({
       objectId: equipmentBoundary.objectId, // Not used by Google Maps
-      paths: Utils.getGoogleMapPathsFromGeometry(equipmentBoundary.geometry),
+      paths: WktUtils.getGoogleMapPathsFromWKTMultiPolygon(equipmentBoundary.geometry),
       clickable: true,
       draggable: false,
       editable: true,
@@ -60,7 +60,7 @@ export class EquipmentBoundaryMapObjects extends Component {
     this.setupListenersForMapObject(mapObject)
 
     mapObject.addListener('rightclick', event => {
-      const eventXY = Utils.getXYFromEvent(event)
+      const eventXY = WktUtils.getXYFromEvent(event)
       this.props.showContextMenuForEquipmentBoundary(this.props.transactionId, mapObject.objectId, eventXY.x, eventXY.y)
     })
     mapObject.addListener('click', () => this.props.selectBoundary(objectId))
@@ -75,13 +75,13 @@ export class EquipmentBoundaryMapObjects extends Component {
   updateBoundaryShapeFromStore (objectId) {
     const geometry = this.props.transactionFeatures[objectId].feature.geometry
     const mapObject = this.objectIdToMapObject[objectId]
-    mapObject.setPath(Utils.getGoogleMapPathsFromGeometry(geometry))
+    mapObject.setPath(WktUtils.getGoogleMapPathsFromWKTMultiPolygon(geometry))
     this.setupListenersForMapObject(mapObject)
   }
 
   modifyBoundaryShape (mapObject) {
     var newEquipment = JSON.parse(JSON.stringify(this.props.transactionFeatures[mapObject.objectId]))
-    newEquipment.feature.geometry = Utils.getGeometryFromGoogleMapPaths(mapObject.getPaths())
+    newEquipment.feature.geometry = WktUtils.getWKTMultiPolygonFromGoogleMapPaths(mapObject.getPaths())
     this.props.modifyEquipmentBoundary(this.props.transactionId, newEquipment)
   }
 
@@ -95,7 +95,7 @@ export class EquipmentBoundaryMapObjects extends Component {
         self.modifyBoundaryShape(mapObject)
       })
       google.maps.event.addListener(path, 'set_at', function () {
-        if (!Utils.isClosedPath(path)) {
+        if (!WktUtils.isClosedPath(path)) {
           // IMPORTANT to check if it is already a closed path, otherwise we will get into an infinite loop when trying to keep it closed
           if (index === 0) {
             // The first point has been moved, move the last point of the polygon (to keep it a valid, closed polygon)

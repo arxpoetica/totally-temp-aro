@@ -6,7 +6,7 @@ import Constants from './constants'
 import MapUtils from '../../common/map-utils'
 import uuidStore from '../../../shared-utils/uuid-store'
 import PlanEditorActions from './plan-editor-actions'
-import Utils from './utils'
+import WktUtils from '../../../shared-utils/wkt-utils'
 import './equipment-drop-target.css'
 
 export class EquipmentDropTarget extends Component {
@@ -55,7 +55,7 @@ export class EquipmentDropTarget extends Component {
 
       const featureToCreate = {
         objectId: uuidStore.getUUID(),
-        geometry: Utils.getGeometryFromGoogleMapLatLng(dropLatLng),
+        geometry: WktUtils.getWKTPointFromGoogleMapLatLng(dropLatLng),
         networkNodeType: networkNodeType,
         dataType: 'equipment',
         target_type: 'sewer',
