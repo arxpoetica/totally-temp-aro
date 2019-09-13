@@ -9,11 +9,6 @@
   
 <div class="plan-editor-bounds-contain"
   ng-if="$ctrl.viewBoundaryProps.dataType === 'equipment_boundary'">
-  <!-- Section header showing the type of the selected object -->
-  <div class="sidebar-table-header" ng-if="$ctrl.state.configuration.networkEquipment.equipments[$ctrl.transactionFeatures[$ctrl.selectedFeatures[0]].siteNetworkNodeType]">
-      <img src="/images/map_icons/aro/boundary_road_segments.png" style="vertical-align:middle; padding-right: 10px">
-      <span>{{$ctrl.state.configuration.networkEquipment.equipments[$ctrl.transactionFeatures[$ctrl.selectedFeatures[0]].siteNetworkNodeType].label}} boundary</span>
-  </div>
   <!-- A table containing the editable properties of the selected object -->
   <table id="tblBoundaryProperties"
         class="table table-sm table-striped sidebar-table"
@@ -23,6 +18,13 @@
         <!-- Section header showing the type of the selected object -->
         <div class="sidebar-table-header">
           <span>Site Boundary</span>
+          <button
+            ng-if="!$ctrl.isEditingFeatureProperties"
+            ng-class="{ 'btn ei-panel-header-btn-set ei-foldout-header-btn': true,
+              'btn-light': $ctrl.viewBoundaryProps.attributes.is_locked === 'true',
+              'btn-primary': $ctrl.viewBoundaryProps.attributes.is_locked !== 'true' }"
+            ng-disabled="$ctrl.viewBoundaryProps.attributes.is_locked === 'true'"
+            ng-click="$ctrl.requestEditViewObject()">Edit</button>
         </div>
     </thead>
     <tbody>

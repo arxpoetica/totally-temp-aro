@@ -13,7 +13,7 @@ const getEquipment = createSelector([getAllPlanFeatures, getSelectedPlanFeatures
     return null
   }
   const planFeature = allPlanFeatures[selectedPlanFeatures[0]]
-  if (planFeature && planFeature.dataType === 'equipment') {
+  if (planFeature && planFeature.feature.dataType === 'equipment') {
     return AroFeatureFactory.createObject(planFeature.feature)
   } else {
     return null

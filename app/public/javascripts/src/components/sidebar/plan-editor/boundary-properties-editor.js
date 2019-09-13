@@ -13,7 +13,7 @@ const getEquipmentBoundary = createSelector([getAllPlanFeatures, getSelectedPlan
     return null
   }
   const planFeature = allPlanFeatures[selectedPlanFeatures[0]]
-  if (planFeature && planFeature.dataType === 'equipment_boundary') {
+  if (planFeature && planFeature.feature.dataType === 'equipment_boundary') {
     return AroFeatureFactory.createObject(planFeature.feature)
   } else {
     return null
@@ -97,6 +97,7 @@ BoundaryPropertiesEditorController.$inject = ['state', '$ngRedux']
 let boundaryPropertiesEditor = {
   templateUrl: '/components/sidebar/plan-editor/boundary-properties-editor.html',
   bindings: {
+    requestEditViewObject: '&',
     requestCalculateCoverage: '&'
   },
   controller: BoundaryPropertiesEditorController
