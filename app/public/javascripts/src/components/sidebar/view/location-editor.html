@@ -93,6 +93,7 @@
               ng-change="$ctrl.markSelectedLocationPropertiesDirty()"
               ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId">
               <span><img src="/images/map_icons/aro/households_default.png" style="vertical-align:middle; padding-right: 7px"></span>
+              <!-- <span><img ng-src="{{$ctrl.iconUrl}}" style="vertical-align:middle; padding-right: 7px"></span> -->
               Created<br>
             <input
               type="radio"
@@ -130,6 +131,7 @@
         <i class="far fa-trash-alt"></i>&nbsp;&nbsp;Delete selected location
       </button>
       <button class="btn btn-block btn-primary"
+        ng-disabled="(($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId == $ctrl.WorkflowState.LOCKED.id) || ($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId == $ctrl.WorkflowState.INVALIDATED.id))"
         ng-click="$ctrl.isExpandLocAttributes = true">
         <i class="fa fa-pencil"></i>&nbsp;&nbsp;Expand
       </button>
