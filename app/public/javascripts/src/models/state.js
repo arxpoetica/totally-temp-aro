@@ -425,6 +425,7 @@ class State {
     }
     service.mapFeaturesSelectedEvent = new Rx.BehaviorSubject({})
     service.mapFeaturesRightClickedEvent = new Rx.BehaviorSubject({})
+    service.mapFeaturesKeyClickedEvent = new Rx.BehaviorSubject({})
     service.mapFeaturesClickedEvent = new Rx.BehaviorSubject({})
 
     service.mapFeaturesSelectedEvent.skip(1).subscribe((options) => {
