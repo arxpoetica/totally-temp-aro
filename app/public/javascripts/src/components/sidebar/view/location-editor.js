@@ -390,10 +390,8 @@ class LocationEditorController {
     const odataQuery = `/service/odata/UserLibraryViewEntity?$filter=dataSourceId eq ${this.currentTransaction.libraryId} and userId eq ${this.loggedInUser.id}&$top=1`
     return this.$http.get(odataQuery)
       .then(result => {
-        console.log(result)
         const libraryViewEntity = result.data[0]
-        //this.userCanChangeWorkflowState = Boolean(libraryViewEntity.permissions & Permissions.RESOURCE_WORKFLOW)
-        this.userCanChangeWorkflowState = true
+        this.userCanChangeWorkflowState = Boolean(libraryViewEntity.permissions & Permissions.RESOURCE_WORKFLOW)
         this.$timeout()
       })
       .catch(err => console.error(err))
