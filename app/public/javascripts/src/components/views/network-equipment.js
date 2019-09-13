@@ -278,6 +278,10 @@ class NetworkEquipmentController {
         // First set the visibility of the current layer
         dispatch(MapLayerActions.setNetworkEquipmentLayerVisibility(layerType, layer, isVisible))
       },
+      setNetworkEquipmentSubtypeVisibility: (layerType, layer, subtypeId, isVisible) => {
+        // First set the visibility of the current layer
+        dispatch(MapLayerActions.setNetworkEquipmentSubtypeVisibility(layerType, layer, subtypeId, isVisible))
+      },
       updateType: (visibilityType, isVisible) => {
         dispatch(MapLayerActions.setNetworkEquipmentLayerVisibilityType(visibilityType, isVisible))
       }

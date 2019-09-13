@@ -23,13 +23,13 @@ function setNetworkEquipmentLayerVisibility (layerType, layer, newVisibility) {
   }
 }
 
-function setNetworkEquipmentSubtypeVisibility (layerType, layer, subtype, newVisibility) {
+function setNetworkEquipmentSubtypeVisibility (layerType, layer, subtypeId, newVisibility) {
   return {
     type: Actions.LAYERS_SET_NETWORK_EQUIPMENT_VISIBILITY,
     payload: {
       layerType: layerType,
       layer: layer,
-      subtype: subtype,
+      subtype: subtypeId,
       visibility: newVisibility
     }
   }

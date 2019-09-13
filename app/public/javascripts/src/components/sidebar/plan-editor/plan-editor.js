@@ -596,7 +596,7 @@ class PlanEditorController {
     // Format the object and send it over to aro-service
     var mapObject = this.objectIdToMapObject[objectId]
     var objectProperties = this.objectIdToProperties[objectId]
-
+    console.log(objectProperties)
     var serviceFeature = {
       objectId: objectId,
       /*
@@ -606,6 +606,7 @@ class PlanEditorController {
       },
       */
       networkNodeType: objectProperties.siteNetworkNodeType,
+      // subtypeId: 2, // objectProperties.subtypeId, // <---------------------- CHANGE (move to react) -----<<<
       attributes: {
         siteIdentifier: objectProperties.siteIdentifier,
         siteName: objectProperties.siteName,
