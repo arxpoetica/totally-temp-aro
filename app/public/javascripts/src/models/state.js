@@ -424,6 +424,7 @@ class State {
       $rootScope.$broadcast('map_layer_clicked_feature', features, {})
     }
     service.mapFeaturesSelectedEvent = new Rx.BehaviorSubject({})
+    service.mapFeaturesRightClickedEvent = new Rx.BehaviorSubject({})
     service.mapFeaturesClickedEvent = new Rx.BehaviorSubject({})
 
     service.mapFeaturesSelectedEvent.skip(1).subscribe((options) => {
