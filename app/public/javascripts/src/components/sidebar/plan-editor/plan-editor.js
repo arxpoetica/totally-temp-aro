@@ -11,6 +11,7 @@ import TileUtilities from '../../tiles/tile-utilities.js'
 import PlanEditorActions from '../../../react/components/plan-editor/plan-editor-actions'
 import MapLayerActions from '../../../react/components/map-layers/map-layer-actions'
 import uuidStore from '../../../shared-utils/uuid-store'
+import WktUtils from '../../../shared-utils/wkt-utils'
 
 class PlanEditorController {
   constructor ($timeout, $http, $element, $filter, $ngRedux, state, Utils, tileDataService, tracker) {
@@ -1478,12 +1479,16 @@ class PlanEditorController {
         this.state.planEditorChanged.next(true)
         subnetResult.data.forEach(subnet => {
           this.subnetMapObjects[subnet.objectId] = []
-          subnet.subnetLinks.forEach(subnetLink => {
-            subnetLink.geometry.coordinates.forEach((line) => {
-              var polylineGeometry = []
-              line.forEach((lineCoordinate) => polylineGeometry.push({ lat: lineCoordinate[1], lng: lineCoordinate[0] }))
+          subnet.feature.subnetLinks.forEach(subnetLink => {
+            var polylines = []
+            if (subnetLink.geometry.type === 'LineString') {
+              polylines.push(WktUtils.getGoogleMapPathsFromWKTLineString(subnetLink.geometry))
+            } else if (subnetLink.geometry.type === 'MultiLineString') {
+              polylines = WktUtils.getGoogleMapPathsFromWKTMultiLineString(subnetLink.geometry)
+            }
+            polylines.forEach(polyline => {
               var subnetLineMapObject = new google.maps.Polyline({
-                path: polylineGeometry,
+                path: polyline,
                 strokeColor: '#0000FF',
                 strokeWeight: 4,
                 clickable: false,
