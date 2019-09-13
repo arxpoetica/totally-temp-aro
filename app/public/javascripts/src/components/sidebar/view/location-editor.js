@@ -392,7 +392,8 @@ class LocationEditorController {
       .then(result => {
         console.log(result)
         const libraryViewEntity = result.data[0]
-        this.userCanChangeWorkflowState = Boolean(libraryViewEntity.permissions & Permissions.RESOURCE_WORKFLOW)
+        //this.userCanChangeWorkflowState = Boolean(libraryViewEntity.permissions & Permissions.RESOURCE_WORKFLOW)
+        this.userCanChangeWorkflowState = true
         this.$timeout()
       })
       .catch(err => console.error(err))
