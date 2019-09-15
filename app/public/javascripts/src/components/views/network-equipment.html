@@ -79,7 +79,7 @@
                     </div>
                     <div class="row-right">
                       <input type="checkbox" class="checkboxfill" ng-disabled="$ctrl.mapZoom <= equipmentLayer.aggregateZoomThreshold && 'point' === equipmentLayer.equipmentType"
-                        ng-checked="equipmentLayer.subtype[0]" ng-click="$ctrl.updateLayerVisibility('equipments', equipmentLayer, !equipmentLayer.checked)">
+                        ng-checked="equipmentLayer.subtypes[0]" ng-click="$ctrl.updateLayerVisibility('equipments', equipmentLayer, !equipmentLayer.subtypes[0])">
                     </div>
                   </div>
                   <div ng-if="equipmentLayer.subtypeLayers">
@@ -93,7 +93,7 @@
                       </div>
                       <div class="row-right">
                         <input type="checkbox" class="checkboxfill" ng-disabled="$ctrl.mapZoom <= equipmentLayer.aggregateZoomThreshold && 'point' === equipmentLayer.equipmentType"
-                          ng-checked="equipmentLayer.subtype[subtypeLayer.id]" ng-click="$ctrl.setNetworkEquipmentSubtypeVisibility('equipments', equipmentLayer, subtypeLayer.id, !equipmentLayer.checked)">
+                          ng-checked="equipmentLayer.subtypes[subtypeLayer.id]" ng-click="$ctrl.setNetworkEquipmentSubtypeVisibility('equipments', equipmentLayer, subtypeLayer.id, !equipmentLayer.subtypes[subtypeLayer.id])">
                       </div>
                     </div>
                   </div>

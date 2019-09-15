@@ -136,7 +136,7 @@ class NetworkEquipmentController {
           (feature.properties.is_deleted !== 'true')
       }
     }
-    console.log(networkEquipment)
+
     return { // ToDo: this needs to be a class and the same class as in the reducer
       tileDefinitions: [tileDefinition],
       iconUrl: networkEquipment.iconUrl,
@@ -157,7 +157,7 @@ class NetworkEquipmentController {
   }
 
   // Creates map layers for a specified category (e.g. "equipment")
-  createMapLayersForCategory(categoryItems, categoryType, mapLayers, createdMapLayerKeys) {
+  createMapLayersForCategory (categoryItems, categoryType, mapLayers, createdMapLayerKeys) {
     // First loop through all the equipment types (e.g. central_office)
     this.mapZoom = map.getZoom()
     categoryItems && Object.keys(categoryItems).forEach((categoryItemKey) => {
@@ -197,12 +197,12 @@ class NetworkEquipmentController {
       var selectedBoundaryName
       this.state.selectedBoundaryType.name !== 'fiveg_coverage' ? selectedBoundaryName = 'siteBoundaries' : selectedBoundaryName = 'fiveg_coverage'
 
-      //Type of Boundary to show
+      // Type of Boundary to show
       if ((networkEquipment.equipmentType !== 'point' ||
         this.usePointAggregate ||
         this.mapZoom > networkEquipment.aggregateZoomThreshold) && selectedBoundaryName === categoryItemKey) {
 
-        //Existing Boundaries
+        // Existing Boundaries
         if (this.state.equipmentLayerTypeVisibility.existing && this.state.showSiteBoundary) {
           // We need to show the existing network equipment. Loop through all the selected library ids.
           this.dataItems && this.dataItems[networkEquipment.dataItemKey] &&
@@ -213,7 +213,7 @@ class NetworkEquipmentController {
             })
         }
 
-        //Planned Boundaries
+        // Planned Boundaries
         const planId = this.state.plan && this.state.plan && this.state.plan.id
         if (this.state.equipmentLayerTypeVisibility.planned && this.state.showSiteBoundary && planId) {
           // We need to show the planned network equipment for this plan.
@@ -275,11 +275,9 @@ class NetworkEquipmentController {
     return {
       setNetworkEquipmentLayers: (networkEquipmentLayers) => dispatch(MapLayerActions.setNetworkEquipmentLayers(networkEquipmentLayers)),
       updateLayerVisibility: (layerType, layer, isVisible) => {
-        // First set the visibility of the current layer
         dispatch(MapLayerActions.setNetworkEquipmentLayerVisibility(layerType, layer, isVisible))
       },
       setNetworkEquipmentSubtypeVisibility: (layerType, layer, subtypeId, isVisible) => {
-        // First set the visibility of the current layer
         dispatch(MapLayerActions.setNetworkEquipmentSubtypeVisibility(layerType, layer, subtypeId, isVisible))
       },
       updateType: (visibilityType, isVisible) => {

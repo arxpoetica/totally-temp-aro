@@ -145,7 +145,6 @@ class MapTileRenderer {
     }
 
     this.mapLayers = mapLayers // Set the object in any case (why? this should go in the above if)
-    console.log(mapLayers)
     // Set the map layers in the data service too, so that we can download all layer data in a single call
     this.tileDataService.setMapLayers(mapLayers)
   }
@@ -483,10 +482,10 @@ class MapTileRenderer {
         if (mapLayer.hasOwnProperty('subtypes')) {
           if (feature.properties.hasOwnProperty('subtype_id')) {
             // filter off subtypes
-            if (!mapLayer.subtypes[feature.properties.subtype_id]) continue
+            if (!mapLayer.subtypes.hasOwnProperty(feature.properties.subtype_id) || !mapLayer.subtypes[feature.properties.subtype_id]) continue
           } else {
             // check that the root layer is on
-            if (!mapLayer.subtypes[0]) continue
+            if (!mapLayer.subtypes.hasOwnProperty('0') || !mapLayer.subtypes[0]) continue
           }
         }
 

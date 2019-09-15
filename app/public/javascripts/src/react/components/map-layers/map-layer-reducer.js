@@ -51,7 +51,7 @@ function setNetworkEquipmentLayerVisibility (state, layerType, layer, subtype, v
     Object.keys(subtypes).forEach(key => {
       // if any of the subtypes are visible we need to get the whole layer 
       // then tile renderer will filter by subtype
-      anyVisibility = anyVisibility || subtypes[subtype]
+      anyVisibility = anyVisibility || subtypes[key]
     })
   }
   // Create a new layer with the checked flag set
