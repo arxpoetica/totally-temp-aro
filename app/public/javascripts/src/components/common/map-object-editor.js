@@ -322,9 +322,12 @@ class MapObjectEditorController {
               !menuItemsById.hasOwnProperty(result.objectId)) {
               validFeature = this.filterFeatureForSelection(result)
             }
-            // If this feature is part of an open transaction, do not show the menu
-            const featureIsInTransaction = this.transactionFeatures[result.objectId]
-            validFeature = validFeature && !featureIsInTransaction
+
+            // If this feature is part of an open transaction AND we have clicked on vector tiles (not map objects), do not show the menu
+            if (!clickedMapObject) {
+              const featureIsInTransaction = this.transactionFeatures[result.objectId]
+              validFeature = validFeature && !featureIsInTransaction
+            }
 
             if (validFeature) {
               var feature = result
