@@ -1478,7 +1478,7 @@ class PlanEditorController {
       .then(subnetResult => {
         this.state.planEditorChanged.next(true)
         subnetResult.data.forEach(subnet => {
-          this.subnetMapObjects[subnet.objectId] = []
+          this.subnetMapObjects[subnet.feature.objectId] = []
           subnet.feature.subnetLinks.forEach(subnetLink => {
             var polylines = []
             if (subnetLink.geometry.type === 'LineString') {
@@ -1494,7 +1494,7 @@ class PlanEditorController {
                 clickable: false,
                 map: this.mapRef
               })
-              this.subnetMapObjects[subnet.objectId].push(subnetLineMapObject)
+              this.subnetMapObjects[subnet.feature.objectId].push(subnetLineMapObject)
             })
           })
         })
