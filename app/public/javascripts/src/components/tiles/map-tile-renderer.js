@@ -8,7 +8,7 @@ import Rule from './rule'
 
 class MapTileRenderer {
   constructor (tileSize, tileDataService, mapTileOptions, censusCategories, selectedDisplayMode, selectionModes, analysisSelectionMode, stateMapLayers, displayModes,
-    viewModePanels, state, uiNotificationService, getPixelCoordinatesWithinTile, mapLayers = []) {
+    viewModePanels, state, uiNotificationService, getPixelCoordinatesWithinTile, transactionFeatureIds, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
@@ -26,6 +26,7 @@ class MapTileRenderer {
     this.uiNotificationService = uiNotificationService
     this.getPixelCoordinatesWithinTile = getPixelCoordinatesWithinTile
     this.latestTileUniqueId = 0
+    this.transactionFeatureIds = transactionFeatureIds
 
     const MAX_CONCURRENT_VECTOR_TILE_RENDERS = 5
     this.tileRenderThrottle = new AsyncPriorityQueue((task, callback) => {
@@ -96,6 +97,10 @@ class MapTileRenderer {
 
   setStateMapLayers (stateMapLayers) {
     this.stateMapLayers = stateMapLayers
+  }
+
+  setTransactionFeatureIds (transactionFeatureIds) {
+    this.transactionFeatureIds = transactionFeatureIds
   }
 
   // ToDo: move this to a place of utility functions
@@ -470,6 +475,10 @@ class MapTileRenderer {
       if (feature.properties) {
         // Try object_id first, else try location_id
         var featureId = feature.properties.object_id || feature.properties.location_id
+
+        if (this.transactionFeatureIds.has(featureId)) {
+          continue // Do not render any features that are part of a transaction
+        }
 
         if (this.selectedDisplayMode == this.displayModes.EDIT_PLAN &&
             this.tileDataService.featuresToExclude.has(featureId) &&

@@ -3,6 +3,7 @@
  */
 'use strict'
 
+import { createSelector } from 'reselect'
 import MapTileRenderer from './map-tile-renderer'
 import TileUtilities from './tile-utilities'
 import MapUtilities from '../common/plan/map-utilities'
@@ -12,6 +13,11 @@ import SelectionModes from '../../react/components/selection/selection-modes'
 import MenuAction, { MenuActionTypes } from '../common/context-menu/menu-action'
 import MenuItem, { MenuItemTypes } from '../common/context-menu/menu-item'
 import FeatureSets from '../../react/common/featureSets'
+
+const getTransactionFeatures = reduxState => reduxState.planEditor.features
+const getTransactionFeatureIds = createSelector([getTransactionFeatures], transactionFeatures => {
+  return new Set(Object.keys(transactionFeatures))
+})
 
 class TileComponentController {
   // MapLayer objects contain the following information
@@ -258,7 +264,8 @@ class TileComponentController {
       this.state.viewModePanels,
       this.state,
       this.uiNotificationService,
-      MapUtilities.getPixelCoordinatesWithinTile.bind(this)
+      MapUtilities.getPixelCoordinatesWithinTile.bind(this),
+      this.transactionFeatureIds
     ))
     this.OVERLAY_MAP_INDEX = this.mapRef.overlayMapTypes.getLength() - 1
     //this.state.isShiftPressed = false // make this per-overlay or move it somewhere more global
@@ -666,7 +673,8 @@ class TileComponentController {
       activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
       selectionModes: reduxState.selection.selectionModes,
       selection: reduxState.selection,
-      stateMapLayers: reduxState.mapLayers
+      stateMapLayers: reduxState.mapLayers,
+      transactionFeatureIds: getTransactionFeatureIds(reduxState)
     }
   }
 
@@ -677,16 +685,19 @@ class TileComponentController {
   mergeToTarget (nextState, actions) {
     const currentSelectionModeId = this.activeSelectionModeId
     const oldPlanTargets = this.selection && this.selection.planTargets
-    const prevStateMapLayers = {...this.stateMapLayers} 
+    const prevStateMapLayers = { ...this.stateMapLayers }
+    const currentTransactionFeatureIds = this.transactionFeatureIds
     var needRefresh = false
     var doConduitUpdate = this.doesConduitNeedUpdate(prevStateMapLayers, nextState.stateMapLayers)
     needRefresh = doConduitUpdate
     // merge state and actions onto controller
     Object.assign(this, nextState)
     Object.assign(this, actions)
-    
-    if (doConduitUpdate) this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setStateMapLayers(nextState.stateMapLayers)
-    
+
+    if (doConduitUpdate) {
+      this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setStateMapLayers(nextState.stateMapLayers)
+    }
+
     if (currentSelectionModeId !== nextState.activeSelectionModeId ||
         this.hasPlanTargetSelectionChanged(oldPlanTargets, nextState.selection && nextState.selection.planTargets)) {
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
@@ -695,8 +706,13 @@ class TileComponentController {
         needRefresh = true
       }
     }
-    
-    if (needRefresh){
+
+    if (currentTransactionFeatureIds !== nextState.transactionFeatureIds) {
+      this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setTransactionFeatureIds(nextState.transactionFeatureIds)
+      needRefresh = true
+    }
+
+    if (needRefresh) {
       this.tileDataService.markHtmlCacheDirty()
       this.refreshMapTiles()
     }
