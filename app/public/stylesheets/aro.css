@@ -796,7 +796,6 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
   font-weight: 700;
   background-color: #eee;
   border: solid 1px #ccc;
-  border-bottom: none;
 }
 
 .sidebar-table {

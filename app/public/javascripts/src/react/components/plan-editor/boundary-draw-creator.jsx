@@ -39,7 +39,7 @@ export class BoundaryDrawCreator extends Component {
       self.props.stopDrawingBoundary()
       var isValidPolygon = true // TODO: FIX MapUtilities.isPolygonValid({ type: 'Feature', geometry: boundaryFeature.geometry })
       if (isValidPolygon) {
-        self.props.createEquipmentBoundary(self.props.transactionId, boundaryFeature)
+        self.props.createFeature(self.props.transactionId, boundaryFeature)
       } else {
         console.error('Invalid polygon. Boundary will not be created.')
       }
@@ -73,7 +73,7 @@ const mapStateToProps = (state) => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  createEquipmentBoundary: (transactionId, feature) => dispatch(PlanEditorActions.createEquipmentBoundary(transactionId, feature)),
+  createFeature: (transactionId, feature) => dispatch(PlanEditorActions.createFeature('equipment_boundary', transactionId, feature)),
   stopDrawingBoundary: () => dispatch(PlanEditorActions.stopDrawingBoundary())
 })
 

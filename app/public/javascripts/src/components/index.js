@@ -56,6 +56,8 @@ import ringEditor from './sidebar/ring-editor'
 import draggableButton from './sidebar/plan-editor/draggable-button'
 import planEditor from './sidebar/plan-editor/plan-editor'
 import planEditorContainer from './sidebar/plan-editor/plan-editor-container'
+import equipmentPropertiesEditor from './sidebar/plan-editor/equipment-properties-editor'
+import boundaryPropertiesEditor from './sidebar/plan-editor/boundary-properties-editor'
 import planSummary from './sidebar/plan-editor/plan-summary'
 import serviceLayerEditor from './sidebar/plan-editor/service-layer-editor'
 import conicTileSystemUploader from './sidebar/plan-settings/plan-data-selection/conic-tile-system-uploader'
@@ -164,6 +166,8 @@ app.component('boundaryDetail', boundaryDetail)
   .component('ringEditor', ringEditor)
   .component('planEditor', planEditor)
   .component('planEditorContainer', planEditorContainer)
+  .component('equipmentPropertiesEditor', equipmentPropertiesEditor)
+  .component('boundaryPropertiesEditor', boundaryPropertiesEditor)
   .component('planSummary', planSummary)
   .component('serviceLayerEditor', serviceLayerEditor)
   .component('draggableButton', draggableButton)

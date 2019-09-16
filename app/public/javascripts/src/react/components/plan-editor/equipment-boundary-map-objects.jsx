@@ -82,7 +82,7 @@ export class EquipmentBoundaryMapObjects extends Component {
   modifyBoundaryShape (mapObject) {
     var newEquipment = JSON.parse(JSON.stringify(this.props.transactionFeatures[mapObject.objectId]))
     newEquipment.feature.geometry = WktUtils.getWKTMultiPolygonFromGoogleMapPaths(mapObject.getPaths())
-    this.props.modifyEquipmentBoundary(this.props.transactionId, newEquipment)
+    this.props.modifyFeature(this.props.transactionId, newEquipment)
   }
 
   setupListenersForMapObject (mapObject) {
@@ -150,7 +150,7 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  modifyEquipmentBoundary: (transactionId, equipmentBoundary) => dispatch(PlanEditorActions.modifyEquipmentBoundary(transactionId, equipmentBoundary)),
+  modifyFeature: (transactionId, equipmentBoundary) => dispatch(PlanEditorActions.modifyFeature('equipment_boundary', transactionId, equipmentBoundary)),
   showContextMenuForEquipmentBoundary: (planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y) => {
     dispatch(PlanEditorActions.showContextMenuForEquipmentBoundary(planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y))
   },
