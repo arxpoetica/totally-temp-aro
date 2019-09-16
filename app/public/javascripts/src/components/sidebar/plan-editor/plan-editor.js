@@ -11,6 +11,7 @@ import TileUtilities from '../../tiles/tile-utilities.js'
 import PlanEditorActions from '../../../react/components/plan-editor/plan-editor-actions'
 import MapLayerActions from '../../../react/components/map-layers/map-layer-actions'
 import uuidStore from '../../../shared-utils/uuid-store'
+import WktUtils from '../../../shared-utils/wkt-utils'
 
 class PlanEditorController {
   constructor ($timeout, $http, $element, $filter, $ngRedux, state, Utils, tileDataService, tracker) {
@@ -45,11 +46,6 @@ class PlanEditorController {
     this.stickyAssignment = true
     this.viewEventFeature = {}
     this.viewSiteBoundaryEventFeature = {}
-    this.viewFeature = {}
-    this.viewBoundaryProps = null
-    this.viewIconUrl = ''
-    this.viewLabel = ''
-    this.isEditFeatureProps = true
     this.isBoundaryEditMode = false
     this.mapObjectEditorComms = {}
     this.networkNodeSBTypes = {}
@@ -134,7 +130,7 @@ class PlanEditorController {
     this.rightClickObserver = this.state.mapFeaturesRightClickedEvent.skip(1).subscribe((hitFeatures) => {
       // if location and selected feature type in Location connector then toggle location association to selected locvation Connecotor
       if (hitFeatures.locations.length > 0 && !this.isMultSelectActive()) {
-        if (this.selectedObjectId && this.isEditFeatureProps) {
+        if (this.selectedObjectId && this.isEditingEquipmentProperties) {
           var selectedLatLng = [this.selectedMapObjectLng, this.selectedMapObjectLat]
           var objectProperties = this.objectIdToProperties[this.selectedObjectId]
           if (objectProperties.siteNetworkNodeType === 'location_connector') {
@@ -747,10 +743,6 @@ class PlanEditorController {
     return this.getNetworkConfig(this.selectedMapObject.objectId)
   }
 
-  getSelectedBoundaryNetworkConfig () {
-    return this.selectedMapObject && this.getNetworkConfig(this.boundaryIdToEquipmentId[this.selectedMapObject.objectId])
-  }
-
   getNetworkConfig (objectId) {
     if (!this.objectIdToProperties.hasOwnProperty(objectId)) {
       return
@@ -767,22 +759,6 @@ class PlanEditorController {
 
   isMarker (mapObject) {
     return mapObject && mapObject.icon
-  }
-
-  // ToDo: change this out for a dynamic version
-  getNewListItem (type) {
-    if (type === 'plannedEquipment' || type === 'subComponents') {
-      return new EquipmentComponent()
-    }
-
-    if (type === 'existingEquipment') {
-      return new TrackedEquipment()
-    }
-
-    if (type === 'marketableEquipments') {
-      console.log('marketableEquipments is no more')
-      // return new MarketableEquipment()
-    }
   }
 
   updateSelectedState (selectedFeature, featureId) {
@@ -861,19 +837,16 @@ class PlanEditorController {
 
   clearViewSelection () {
     this.viewEventFeature = {}
-    this.viewFeature = {}
-    this.viewIconUrl = ''
-    this.viewLabel = ''
-    this.isEditFeatureProps = true
+    this.setIsEditingFeatureProperties(true)
     this.isBoundaryEditMode = false
     this.updateSelectedState()
   }
 
   displayViewObject (feature, iconUrl) {
     // First deselect all equipment and boundary features
-    this.viewEventFeature = this.viewFeature = this.viewLabel = this.viewIconUrl = null
-    this.isEditFeatureProps = false
-    this.viewSiteBoundaryEventFeature = this.viewBoundaryProps = null
+    this.viewEventFeature = null
+    this.setIsEditingFeatureProperties(false)
+    this.viewSiteBoundaryEventFeature = null
     this.isBoundaryEditMode = false
     if (feature.type && feature.type === 'equipment_boundary.select') {
       var newSelection = this.state.cloneSelection()
@@ -900,6 +873,7 @@ class PlanEditorController {
   }
 
   displayEquipmentViewObject (feature, iconUrl) {
+    this.viewEquipmentProperties(this.planId, feature.objectId, this.transactionFeatures)
     return new Promise((resolve, reject) => {
       var planId = this.state.plan.id
       this.$http.get(`/service/plan-feature/${planId}/equipment/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
@@ -908,24 +882,12 @@ class PlanEditorController {
             this.viewEventFeature = feature
             // use feature's coord NOT the event's coords
             this.viewEventFeature.geometry.coordinates = result.data.geometry.coordinates
-            this.viewFeature = AroFeatureFactory.createObject(result.data)
-            var viewConfig = this.state.configuration.networkEquipment.equipments[this.viewFeature.networkNodeType]
+            const viewFeature = AroFeatureFactory.createObject(result.data)
+            var viewConfig = this.state.configuration.networkEquipment.equipments[viewFeature.networkNodeType]
             this.viewLabel = viewConfig.label
             this.viewIconUrl = viewConfig.iconUrl
-            this.isEditFeatureProps = false
+            this.setIsEditingFeatureProperties(false)
             this.getViewObjectSBTypes(feature.objectId)
-            // --- IF THERE ARE LOCATION PROPERTIES WITH OUT LAT LONGS GET THEM NOW ---
-            /*
-            if (this.viewFeature.networkNodeType === 'location_connector') {
-              var locationIds = this.viewFeature.attributes.internal_oid.split(',')
-              if (this.objectIdToProperties.hasOwnProperty(feature.objectId)) {
-                locationIds = Object.keys(this.objectIdToProperties[feature.objectId].connectedLocations)
-              }
-
-              this.clearAllLocationHighlights()
-              this.highlightLocations(locationIds, this.viewEventFeature.geometry.coordinates)
-            }
-            */
           } else {
             // clear selection
             this.clearViewSelection()
@@ -967,6 +929,7 @@ class PlanEditorController {
   }
 
   displaySiteBoundaryViewObject (feature, iconUrl) {
+    this.viewBoundaryProperties(this.planId, feature.objectId, this.transactionFeatures)
     return new Promise((resolve, reject) => {
       var planId = this.state.plan.id
       this.$http.get(`/service/plan-feature/${planId}/equipment_boundary/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
@@ -978,16 +941,6 @@ class PlanEditorController {
             this.viewSiteBoundaryEventFeature.attributes.network_node_object_id = this.viewSiteBoundaryEventFeature.networkObjectId
             this.viewSiteBoundaryEventFeature.attributes.networkNodeType = this.viewSiteBoundaryEventFeature.networkNodeType
             this.viewSiteBoundaryEventFeature.isExistingObject = true
-
-            // use feature's coord NOT the event's coords
-            var boundaryProps = AroFeatureFactory.createObject(result.data)
-
-            this.viewBoundaryProps = new BoundaryProperties(boundaryProps.boundaryTypeId, 'Auto-redraw', 'Road Distance',
-              null, null, boundaryProps.attributes, boundaryProps.deploymentType)
-
-            this.viewBoundaryProps.selectedSiteBoundaryType =
-              this.state.boundaryTypes.filter((boundary) => boundary.id === this.viewBoundaryProps.selectedSiteBoundaryTypeId)[0]
-
             this.isBoundaryEditMode = false
           } else {
             // clear selection
@@ -1209,7 +1162,7 @@ class PlanEditorController {
     if (!isMultSelect) {
       if (mapObject != null) {
         this.updateSelectedState()
-        this.isEditFeatureProps = true
+        this.setIsEditingFeatureProperties(true)
         this.isBoundaryEditMode = true
         this.selectedObjectId = mapObjectId
       } else {
@@ -1363,7 +1316,7 @@ class PlanEditorController {
   }
 
   deleteMarker (mapObject) {
-    return this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment/${mapObject.objectId}`)
+    return this.deleteTransactionFeature(this.currentTransaction.id, 'equipment', this.transactionFeatures[mapObject.objectId])
       .then(() => {
         return this.autoRecalculateSubnet
           ? this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`)
@@ -1528,19 +1481,23 @@ class PlanEditorController {
       .then(subnetResult => {
         this.state.planEditorChanged.next(true)
         subnetResult.data.forEach(subnet => {
-          this.subnetMapObjects[subnet.objectId] = []
-          subnet.subnetLinks.forEach(subnetLink => {
-            subnetLink.geometry.coordinates.forEach((line) => {
-              var polylineGeometry = []
-              line.forEach((lineCoordinate) => polylineGeometry.push({ lat: lineCoordinate[1], lng: lineCoordinate[0] }))
+          this.subnetMapObjects[subnet.feature.objectId] = []
+          subnet.feature.subnetLinks.forEach(subnetLink => {
+            var polylines = []
+            if (subnetLink.geometry.type === 'LineString') {
+              polylines.push(WktUtils.getGoogleMapPathsFromWKTLineString(subnetLink.geometry))
+            } else if (subnetLink.geometry.type === 'MultiLineString') {
+              polylines = WktUtils.getGoogleMapPathsFromWKTMultiLineString(subnetLink.geometry)
+            }
+            polylines.forEach(polyline => {
               var subnetLineMapObject = new google.maps.Polyline({
-                path: polylineGeometry,
+                path: polyline,
                 strokeColor: '#0000FF',
                 strokeWeight: 4,
                 clickable: false,
                 map: this.mapRef
               })
-              this.subnetMapObjects[subnet.objectId].push(subnetLineMapObject)
+              this.subnetMapObjects[subnet.feature.objectId].push(subnetLineMapObject)
             })
           })
         })
@@ -1691,6 +1648,7 @@ class PlanEditorController {
       // locationsLayer: reduxState.mapLayers.location,
       planId: reduxState.plan.activePlan.id,
       currentTransaction: reduxState.planEditor.transaction,
+      transactionFeatures: reduxState.planEditor.features,
       isPlanEditorActive: reduxState.planEditor.isPlanEditorActive,
       isCalculatingSubnets: reduxState.planEditor.isCalculatingSubnets,
       isCreatingObject: reduxState.planEditor.isCreatingObject,
@@ -1704,12 +1662,16 @@ class PlanEditorController {
       clearTransaction: () => dispatch(PlanEditorActions.clearTransaction()),
       commitTransaction: transactionId => dispatch(PlanEditorActions.commitTransaction(transactionId)),
       discardTransaction: transactionId => dispatch(PlanEditorActions.discardTransaction(transactionId)),
-      resumeOrCreateTransaction: (planId, userId) => dispatch(PlanEditorActions.resumeOrCreateTransaction(planId, userId)),	
-      addEquipmentNodes: equipmentNodes => dispatch(PlanEditorActions.addTransactionEquipment(equipmentNodes)),
+      resumeOrCreateTransaction: (planId, userId) => dispatch(PlanEditorActions.resumeOrCreateTransaction(planId, userId)),
+      deleteTransactionFeature: (transactionId, featureType, transactionFeature) => dispatch(PlanEditorActions.deleteTransactionFeature(transactionId, featureType, transactionFeature)),
+      addEquipmentNodes: equipmentNodes => dispatch(PlanEditorActions.addTransactionFeatures(equipmentNodes)),
       setNetworkEquipmentLayerVisibility: (layer, isVisible) => dispatch(MapLayerActions.setNetworkEquipmentLayerVisibility('cables', layer, isVisible)),
       setIsCalculatingSubnets: isCalculatingSubnets => dispatch(PlanEditorActions.setIsCalculatingSubnets(isCalculatingSubnets)),
       setIsCreatingObject: isCreatingObject => dispatch(PlanEditorActions.setIsCreatingObject(isCreatingObject)),
-      setIsModifyingObject: isModifyingObject => dispatch(PlanEditorActions.setIsModifyingObject(isModifyingObject))
+      setIsModifyingObject: isModifyingObject => dispatch(PlanEditorActions.setIsModifyingObject(isModifyingObject)),
+      setIsEditingFeatureProperties: isEditing => dispatch(PlanEditorActions.setIsEditingFeatureProperties(isEditing)),
+      viewEquipmentProperties: (planId, equipmentObjectId, transactionFeatures) => dispatch(PlanEditorActions.viewFeatureProperties('equipment', planId, equipmentObjectId, transactionFeatures)),
+      viewBoundaryProperties: (planId, boundaryObjectId, transactionFeatures) => dispatch(PlanEditorActions.viewFeatureProperties('equipment_boundary', planId, boundaryObjectId, transactionFeatures))
     }
   }
 

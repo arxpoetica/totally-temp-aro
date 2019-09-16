@@ -97,6 +97,13 @@ function removePlanTargets (planId, planTargets) {
   }
 }
 
+function setLocations (locationIds) {
+  return {
+    type: Actions.SELECTION_SET_LOCATIONS,
+    payload: locationIds
+  }
+}
+
 function setPlanEditorFeatures (planEditorFeatures) {
   return {
     type: Actions.SELECTION_SET_PLAN_EDITOR_FEATURES,
@@ -110,5 +117,6 @@ export default {
   loadPlanTargetSelectionsFromServer,
   addPlanTargets,
   removePlanTargets,
+  setLocations,
   setPlanEditorFeatures
 }

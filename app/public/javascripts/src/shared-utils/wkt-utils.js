@@ -1,7 +1,7 @@
 /* global google MouseEvent */
-class Utils {
+class WktUtils {
   // Converts a Google Maps LatLng object into a WKT Point Geometry object
-  static getGeometryFromGoogleMapLatLng (latLng) {
+  static getWKTPointFromGoogleMapLatLng (latLng) {
     return {
       type: 'Point',
       coordinates: [latLng.lng(), latLng.lat()]
@@ -9,15 +9,15 @@ class Utils {
   }
 
   // Converts a WKT Point Geometry object into a Google Maps LatLng object
-  static getGoogleMapLatLngFromGeometry (geometry) {
+  static getGoogleMapLatLngFromWKTPoint (geometry) {
     if (geometry.type !== 'Point') {
-      throw new Error(`getGoogleMapLatLngFromGeometry() expects geometry of type Point, received ${geometry.type}`)
+      throw new Error(`getGoogleMapLatLngFromWKTPoint() expects geometry of type Point, received ${geometry.type}`)
     }
     return new google.maps.LatLng(geometry.coordinates[1], geometry.coordinates[0])
   }
 
   // Converts a Google Maps Path object into a WKT MultiPolygon Geometry object
-  static getGeometryFromGoogleMapPaths (paths) {
+  static getWKTMultiPolygonFromGoogleMapPaths (paths) {
     var geometry = {
       type: 'MultiPolygon',
       coordinates: [[]]
@@ -32,9 +32,9 @@ class Utils {
   }
 
   // Converts a WKT MultiPolygon Geometry object into a Google Maps Path object
-  static getGoogleMapPathsFromGeometry (geometry) {
+  static getGoogleMapPathsFromWKTMultiPolygon (geometry) {
     if (geometry.type !== 'MultiPolygon') {
-      throw new Error(`getGoogleMapPathsFromGeometry() expects geometry of type MultiPolygon, received ${geometry.type}`)
+      throw new Error(`getGoogleMapPathsFromWKTMultiPolygon() expects geometry of type MultiPolygon, received ${geometry.type}`)
     }
     var polygonPath = []
     geometry.coordinates[0][0].forEach((polygonVertex) => {
@@ -44,6 +44,28 @@ class Utils {
       })
     })
     return polygonPath
+  }
+
+  // Converts a WKT LineString Geometry object into a Google Maps Path
+  static getGoogleMapPathsFromWKTLineString (geometry) {
+    if (geometry.type !== 'LineString') {
+      throw new Error(`getGoogleMapPathsFromWKTLineString() expects geometry of type LineString, received ${geometry.type}`)
+    }
+    var linePaths = geometry.coordinates.map(vertex => ({ lat: vertex[1], lng: vertex[0] }))
+    return linePaths
+  }
+
+  // Converts a WKT MultiLineString Geometry object into a Google Maps Path
+  static getGoogleMapPathsFromWKTMultiLineString (geometry) {
+    if (geometry.type !== 'MultiLineString') {
+      throw new Error(`getGoogleMapPathsFromWKTMultiLineString() expects geometry of type MultiLineString, received ${geometry.type}`)
+    }
+    var linePaths = []
+    geometry.coordinates.forEach(line => {
+      var linePath = line.map(vertex => ({ lat: vertex[1], lng: vertex[0] }))
+      linePaths.push(linePath)
+    })
+    return linePaths
   }
 
   // Return true if the given path is a closed path
@@ -71,4 +93,4 @@ class Utils {
   }
 }
 
-export default Utils
+export default WktUtils

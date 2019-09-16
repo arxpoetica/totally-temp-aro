@@ -6,7 +6,7 @@ import Constants from './constants'
 import MapUtils from '../../common/map-utils'
 import uuidStore from '../../../shared-utils/uuid-store'
 import PlanEditorActions from './plan-editor-actions'
-import Utils from './utils'
+import WktUtils from '../../../shared-utils/wkt-utils'
 import './equipment-drop-target.css'
 
 export class EquipmentDropTarget extends Component {
@@ -55,7 +55,7 @@ export class EquipmentDropTarget extends Component {
 
       const featureToCreate = {
         objectId: uuidStore.getUUID(),
-        geometry: Utils.getGeometryFromGoogleMapLatLng(dropLatLng),
+        geometry: WktUtils.getWKTPointFromGoogleMapLatLng(dropLatLng),
         networkNodeType: networkNodeType,
         dataType: 'equipment',
         target_type: 'sewer',
@@ -82,7 +82,7 @@ export class EquipmentDropTarget extends Component {
         },
         deploymentType: 'PLANNED'
       }
-      this.props.createEquipment(this.props.transactionId, featureToCreate)
+      this.props.createFeature(this.props.transactionId, featureToCreate)
     }
   }
 }
@@ -100,7 +100,7 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  createEquipment: (transactionId, equipment) => dispatch(PlanEditorActions.createEquipment(transactionId, equipment))
+  createFeature: (transactionId, equipment) => dispatch(PlanEditorActions.createFeature('equipment', transactionId, equipment))
 })
 
 const EquipmentDropTargetComponent = wrapComponentWithProvider(reduxStore, EquipmentDropTarget, mapStateToProps, mapDispatchToProps)

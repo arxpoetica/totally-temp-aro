@@ -8,7 +8,7 @@ import Rule from './rule'
 
 class MapTileRenderer {
   constructor (tileSize, tileDataService, mapTileOptions, censusCategories, selectedDisplayMode, selectionModes, analysisSelectionMode, stateMapLayers, displayModes,
-    viewModePanels, state, uiNotificationService, getPixelCoordinatesWithinTile, mapLayers = []) {
+    viewModePanels, state, uiNotificationService, getPixelCoordinatesWithinTile, transactionFeatureIds, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
@@ -26,6 +26,7 @@ class MapTileRenderer {
     this.uiNotificationService = uiNotificationService
     this.getPixelCoordinatesWithinTile = getPixelCoordinatesWithinTile
     this.latestTileUniqueId = 0
+    this.transactionFeatureIds = transactionFeatureIds
 
     const MAX_CONCURRENT_VECTOR_TILE_RENDERS = 5
     this.tileRenderThrottle = new AsyncPriorityQueue((task, callback) => {
@@ -98,6 +99,10 @@ class MapTileRenderer {
     this.stateMapLayers = stateMapLayers
   }
 
+  setTransactionFeatureIds (transactionFeatureIds) {
+    this.transactionFeatureIds = transactionFeatureIds
+  }
+
   // ToDo: move this to a place of utility functions
   // utility function NOTE: will apply default val to source object items
   getOrderedKeys (obj, orderPram, defaultVal) {
@@ -145,6 +150,7 @@ class MapTileRenderer {
     }
 
     this.mapLayers = mapLayers // Set the object in any case (why? this should go in the above if)
+
     // Set the map layers in the data service too, so that we can download all layer data in a single call
     this.tileDataService.setMapLayers(mapLayers)
   }
@@ -346,15 +352,6 @@ class MapTileRenderer {
           htmlCache.backBufferCanvas.getContext('2d').clearRect(0, 0, htmlCache.backBufferCanvas.width, htmlCache.backBufferCanvas.height)
           htmlCache.heatmapCanvas.getContext('2d').clearRect(0, 0, htmlCache.heatmapCanvas.width, htmlCache.heatmapCanvas.height)
 
-
-          if (zoom == 14 &&  coord.x == 2621 && coord.y == 5724) {
-            console.log(singleTileResults)
-            // properties.subtype_id 
-            // only present if set
-          }
-
-
-
           this.renderSingleTileFull(zoom, coord, renderingData, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage, htmlCache.backBufferCanvas, htmlCache.heatmapCanvas)
 
           // Copy the back buffer image onto the front buffer
@@ -478,6 +475,10 @@ class MapTileRenderer {
       if (feature.properties) {
         // Try object_id first, else try location_id
         var featureId = feature.properties.object_id || feature.properties.location_id
+
+				if (this.transactionFeatureIds.has(featureId)) {
+          continue // Do not render any features that are part of a transaction
+        }
 
         if (mapLayer.hasOwnProperty('subtypes')) {
           if (feature.properties.hasOwnProperty('subtype_id')) {
@@ -659,8 +660,6 @@ class MapTileRenderer {
   }
 
   highlightPolyline (feature, polylines) {
-    var ishighlight = false
-
     var ishighlight = [...polylines].filter(function (polyline) {
       if (feature.properties && feature.properties._data_type && feature.properties._data_type == 'fiber') { return polyline.link_id === feature.properties.link_id } else if (feature.properties && feature.properties._data_type && feature.properties._data_type == 'existing_fiber.') { return polyline.id === feature.properties.id } else if (feature.properties && feature.properties._data_type && feature.properties._data_type == 'edge') { return polyline.gid === feature.properties.gid }
     }).length > 0

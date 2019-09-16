@@ -6,6 +6,7 @@ import Utilities from './utilities'
 import MenuAction, { MenuActionTypes } from '../common/context-menu/menu-action'
 import MenuItem, { MenuItemTypes } from '../common/context-menu/menu-item'
 import uuidStore from '../../shared-utils/uuid-store'
+import SelectionActions from '../../react/components/selection/selection-actions'
 
 class MapObjectEditorController {
   constructor ($http, $element, $compile, $document, $timeout, $ngRedux, state, tileDataService, contextMenuService, Utils) {
@@ -320,6 +321,12 @@ class MapObjectEditorController {
             if ((featureType === MenuItemTypes.EQUIPMENT || featureType === MenuItemTypes.BOUNDARY) &&
               !menuItemsById.hasOwnProperty(result.objectId)) {
               validFeature = this.filterFeatureForSelection(result)
+            }
+
+            // If this feature is part of an open transaction AND we have clicked on vector tiles (not map objects), do not show the menu
+            if (!clickedMapObject) {
+              const featureIsInTransaction = this.transactionFeatures[result.objectId]
+              validFeature = validFeature && !featureIsInTransaction
             }
 
             if (validFeature) {
@@ -747,7 +754,6 @@ class MapObjectEditorController {
     if (feature.geometry.type === 'Point') {
       var canCreateObject = this.checkCreateObject && this.checkCreateObject({ feature: feature, usingMapClick: usingMapClick })
       if (canCreateObject) {
-        if (usingMapClick && this.state.areTilesRendering) return // Don't create when tiles are rendering
         // if an existing object just show don't edit
         if (feature.isExistingObject && !existingObjectOverride) {
           this.displayViewObject({ feature: feature })
@@ -1021,6 +1027,7 @@ class MapObjectEditorController {
     // Then select the map object
     if (mapObject) { // Can be null if we are de-selecting everything
       this.highlightMapObject(mapObject)
+      this.selectObjectRedux(mapObject.objectId)
     }
 
     if (!isMult) this.selectedMapObject = mapObject
@@ -1280,12 +1287,14 @@ class MapObjectEditorController {
 
   mapStateToThis (reduxState) {
     return {
-      dataItems: reduxState.plan.dataItems
+      dataItems: reduxState.plan.dataItems,
+      transactionFeatures: reduxState.planEditor.features
     }
   }
 
   mapDispatchToTarget (dispatch) {
     return {
+      selectObjectRedux: objectId => dispatch(SelectionActions.setPlanEditorFeatures([objectId]))
     }
   }
 }

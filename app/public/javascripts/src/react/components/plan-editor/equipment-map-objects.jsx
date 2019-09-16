@@ -5,7 +5,7 @@ import { connect } from 'react-redux'
 import WorkflowState from '../../../shared-utils/workflow-state'
 import PlanEditorActions from './plan-editor-actions'
 import SelectionActions from '../selection/selection-actions'
-import Utils from './utils'
+import WktUtils from '../../../shared-utils/wkt-utils'
 
 const SELECTION_Z_INDEX = 1
 const MAP_OBJECT_Z_INDEX = SELECTION_Z_INDEX + 1
@@ -44,7 +44,7 @@ export class EquipmentMapObjects extends Component {
                           (equipment.workflow_state_id & WorkflowState.INVALIDATED.id))
     const mapObject = new google.maps.Marker({
       objectId: equipment.objectId, // Not used by Google Maps
-      position: Utils.getGoogleMapLatLngFromGeometry(equipment.geometry),
+      position: WktUtils.getGoogleMapLatLngFromWKTPoint(equipment.geometry),
       icon: {
         url: this.props.equipmentDefinitions[equipment.networkNodeType].iconUrl
       },
@@ -57,10 +57,10 @@ export class EquipmentMapObjects extends Component {
     mapObject.addListener('dragend', event => {
       var newEquipment = JSON.parse(JSON.stringify(this.props.transactionFeatures[mapObject.objectId]))
       newEquipment.feature.geometry.coordinates = [event.latLng.lng(), event.latLng.lat()]
-      this.props.modifyEquipment(this.props.transactionId, newEquipment)
+      this.props.modifyFeature(this.props.transactionId, newEquipment)
     })
     mapObject.addListener('rightclick', event => {
-      const eventXY = Utils.getXYFromEvent(event)
+      const eventXY = WktUtils.getXYFromEvent(event)
       this.props.showContextMenuForEquipment(this.props.planId, this.props.transactionId, this.props.selectedBoundaryTypeId, mapObject.objectId, eventXY.x, eventXY.y)
     })
     mapObject.addListener('click', () => this.props.selectEquipment(objectId))
@@ -69,7 +69,7 @@ export class EquipmentMapObjects extends Component {
 
   updateMapObject (objectId) {
     const geometry = this.props.transactionFeatures[objectId].feature.geometry
-    this.objectIdToMapObject[objectId].setPosition(Utils.getGoogleMapLatLngFromGeometry(geometry))
+    this.objectIdToMapObject[objectId].setPosition(WktUtils.getGoogleMapLatLngFromWKTPoint(geometry))
   }
 
   deleteMapObject (objectId) {
@@ -132,7 +132,7 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  modifyEquipment: (transactionId, equipment) => dispatch(PlanEditorActions.modifyEquipment(transactionId, equipment)),
+  modifyFeature: (transactionId, equipment) => dispatch(PlanEditorActions.modifyFeature('equipment', transactionId, equipment)),
   showContextMenuForEquipment: (planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y) => {
     dispatch(PlanEditorActions.showContextMenuForEquipment(planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y))
   },
