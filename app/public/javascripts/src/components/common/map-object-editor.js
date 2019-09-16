@@ -322,10 +322,9 @@ class MapObjectEditorController {
               !menuItemsById.hasOwnProperty(result.objectId)) {
               validFeature = this.filterFeatureForSelection(result)
             }
-            // If this feature is part of an open transaction AND it has been deleted, do not show the menu
-            const transactionFeature = this.transactionFeatures[result.objectId]
-            const isTransactionFeatureDeleted = Boolean(transactionFeature && (transactionFeature.crudAction === 'delete'))
-            validFeature = validFeature && !isTransactionFeatureDeleted
+            // If this feature is part of an open transaction, do not show the menu
+            const featureIsInTransaction = this.transactionFeatures[result.objectId]
+            validFeature = validFeature && !featureIsInTransaction
 
             if (validFeature) {
               var feature = result
