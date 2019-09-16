@@ -754,7 +754,6 @@ class MapObjectEditorController {
     if (feature.geometry.type === 'Point') {
       var canCreateObject = this.checkCreateObject && this.checkCreateObject({ feature: feature, usingMapClick: usingMapClick })
       if (canCreateObject) {
-        if (usingMapClick && this.state.areTilesRendering) return // Don't create when tiles are rendering
         // if an existing object just show don't edit
         if (feature.isExistingObject && !existingObjectOverride) {
           this.displayViewObject({ feature: feature })
