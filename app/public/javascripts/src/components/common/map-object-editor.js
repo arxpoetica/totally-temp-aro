@@ -322,6 +322,10 @@ class MapObjectEditorController {
               !menuItemsById.hasOwnProperty(result.objectId)) {
               validFeature = this.filterFeatureForSelection(result)
             }
+            // If this feature is part of an open transaction AND it has been deleted, do not show the menu
+            const transactionFeature = this.transactionFeatures[result.objectId]
+            const isTransactionFeatureDeleted = Boolean(transactionFeature && (transactionFeature.crudAction === 'delete'))
+            validFeature = validFeature && !isTransactionFeatureDeleted
 
             if (validFeature) {
               var feature = result
@@ -1282,7 +1286,8 @@ class MapObjectEditorController {
 
   mapStateToThis (reduxState) {
     return {
-      dataItems: reduxState.plan.dataItems
+      dataItems: reduxState.plan.dataItems,
+      transactionFeatures: reduxState.planEditor.features
     }
   }
 

@@ -1313,7 +1313,7 @@ class PlanEditorController {
   }
 
   deleteMarker (mapObject) {
-    return this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment/${mapObject.objectId}`)
+    return this.deleteTransactionFeature(this.currentTransaction.id, 'equipment', this.transactionFeatures[mapObject.objectId])
       .then(() => {
         return this.autoRecalculateSubnet
           ? this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`)
@@ -1659,7 +1659,8 @@ class PlanEditorController {
       clearTransaction: () => dispatch(PlanEditorActions.clearTransaction()),
       commitTransaction: transactionId => dispatch(PlanEditorActions.commitTransaction(transactionId)),
       discardTransaction: transactionId => dispatch(PlanEditorActions.discardTransaction(transactionId)),
-      resumeOrCreateTransaction: (planId, userId) => dispatch(PlanEditorActions.resumeOrCreateTransaction(planId, userId)),	
+      resumeOrCreateTransaction: (planId, userId) => dispatch(PlanEditorActions.resumeOrCreateTransaction(planId, userId)),
+      deleteTransactionFeature: (transactionId, featureType, transactionFeature) => dispatch(PlanEditorActions.deleteTransactionFeature(transactionId, featureType, transactionFeature)),
       addEquipmentNodes: equipmentNodes => dispatch(PlanEditorActions.addTransactionFeatures(equipmentNodes)),
       setNetworkEquipmentLayerVisibility: (layer, isVisible) => dispatch(MapLayerActions.setNetworkEquipmentLayerVisibility('cables', layer, isVisible)),
       setIsCalculatingSubnets: isCalculatingSubnets => dispatch(PlanEditorActions.setIsCalculatingSubnets(isCalculatingSubnets)),

@@ -33,11 +33,13 @@ function addTransactionFeature (state, equipments) {
   }
 }
 
-function removeTransactionFeature (state, objectId) {
-  var newFeatures = { ...state.features }
-  delete newFeatures[objectId]
+function deleteTransactionFeature (state, objectId) {
+  var newFeature = { ...state.features[objectId] }
+  newFeature.crudAction = 'delete'
   return { ...state,
-    features: newFeatures
+    features: { ...state.features,
+      [objectId]: newFeature
+    }
   }
 }
 
@@ -102,8 +104,8 @@ function planEditorReducer (state = defaultState, action) {
     case Actions.PLAN_EDITOR_ADD_FEATURES:
       return addTransactionFeature(state, action.payload)
 
-    case Actions.PLAN_EDITOR_REMOVE_TRANSACTION_FEATURE:
-      return removeTransactionFeature(state, action.payload)
+    case Actions.PLAN_EDITOR_DELETE_TRANSACTION_FEATURE:
+      return deleteTransactionFeature(state, action.payload)
 
     case Actions.PLAN_EDITOR_MODIFY_FEATURES:
       return modifyTransactionFeatures(state, action.payload)

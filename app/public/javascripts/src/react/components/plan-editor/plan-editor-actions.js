@@ -98,10 +98,13 @@ function modifyFeature (featureType, transactionId, feature) {
   }
 }
 
-function deleteTransactionFeature (transactionId, featureType, objectIdToDelete) {
+function deleteTransactionFeature (transactionId, featureType, transactionFeature) {
   return dispatch => {
-    AroHttp.delete(`/service/plan-transactions/${transactionId}/modified-features/${featureType}/${objectIdToDelete}`)
-      .then(result => dispatch(removeTransactionFeature(objectIdToDelete)))
+    return AroHttp.delete(`/service/plan-transactions/${transactionId}/modified-features/${featureType}/${transactionFeature.feature.objectId}`)
+      .then(result => dispatch({
+        type: Actions.PLAN_EDITOR_DELETE_TRANSACTION_FEATURE,
+        payload: transactionFeature.feature.objectId
+      }))
       .catch(err => console.error(err))
   }
 }
@@ -110,13 +113,6 @@ function addTransactionFeatures (features) {
   return {
     type: Actions.PLAN_EDITOR_ADD_FEATURES,
     payload: features
-  }
-}
-
-function removeTransactionFeature (objectId) {
-  return {
-    type: Actions.PLAN_EDITOR_REMOVE_TRANSACTION_FEATURE,
-    payload: objectId
   }
 }
 
@@ -235,7 +231,6 @@ export default {
   modifyFeature,
   deleteTransactionFeature,
   addTransactionFeatures,
-  removeTransactionFeature,
   showContextMenuForEquipment,
   showContextMenuForEquipmentBoundary,
   viewFeatureProperties,
