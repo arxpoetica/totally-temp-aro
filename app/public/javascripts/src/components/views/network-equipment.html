@@ -3,16 +3,13 @@
     padding-left: 5px;
     padding-right: 5px;
   }
-
+  /*
   .label-message {
     display: inline-block;
-    /*
-    color: #888888;
-    */
     float: right;
     cursor: pointer;
   }
-
+  */
   .box {
     width: 16px;
     height: 16px;
@@ -27,6 +24,10 @@
 
     .row-right {
       float: right;
+    }
+
+    .right-btn {
+
     }
 </style>
 
@@ -73,11 +74,11 @@
                     <div class="row-left">
                       <img ng-src="{{equipmentLayer.iconUrl}}" style="width: 16px; margin-right: 15px">{{equipmentLayer.label}}
 
-                      <button type="button" class="btn btn-primary btn-thin label-message" ng-if="$ctrl.mapZoom <= equipmentLayer.aggregateZoomThreshold && 'point' === equipmentLayer.equipmentType"
-                        ng-click="$ctrl.zoomTo(equipmentLayer.aggregateZoomThreshold)" data-toggle="tooltip" title="Zoom To"><span class="fa fa-expand"></span></button>
-
                     </div>
                     <div class="row-right">
+                      <button type="button" class="btn btn-primary btn-thin" ng-if="$ctrl.mapZoom <= equipmentLayer.aggregateZoomThreshold && 'point' === equipmentLayer.equipmentType"
+                        ng-click="$ctrl.zoomTo(equipmentLayer.aggregateZoomThreshold)" data-toggle="tooltip" title="Zoom To"><span class="fa fa-expand"></span></button>
+
                       <input type="checkbox" class="checkboxfill" ng-disabled="$ctrl.mapZoom <= equipmentLayer.aggregateZoomThreshold && 'point' === equipmentLayer.equipmentType"
                         ng-checked="equipmentLayer.subtypes[0]" ng-click="$ctrl.updateLayerVisibility('equipments', equipmentLayer, !equipmentLayer.subtypes[0])">
                     </div>
@@ -87,11 +88,11 @@
                       <div class="row-left">
                         <img ng-src="{{equipmentLayer.iconUrl}}" style="width: 16px; margin-right: 15px">{{subtypeLayer.description}}
 
-                        <button type="button" class="btn btn-primary btn-thin label-message" ng-if="$ctrl.mapZoom <= equipmentLayer.aggregateZoomThreshold && 'point' === equipmentLayer.equipmentType"
-                          ng-click="$ctrl.zoomTo(equipmentLayer.aggregateZoomThreshold)" data-toggle="tooltip" title="Zoom To"><span class="fa fa-expand"></span></button>
-
                       </div>
                       <div class="row-right">
+                        <button type="button" class="btn btn-primary btn-thin" ng-if="$ctrl.mapZoom <= equipmentLayer.aggregateZoomThreshold && 'point' === equipmentLayer.equipmentType"
+                          ng-click="$ctrl.zoomTo(equipmentLayer.aggregateZoomThreshold)" data-toggle="tooltip" title="Zoom To"><span class="fa fa-expand"></span></button>
+
                         <input type="checkbox" class="checkboxfill" ng-disabled="$ctrl.mapZoom <= equipmentLayer.aggregateZoomThreshold && 'point' === equipmentLayer.equipmentType"
                           ng-checked="equipmentLayer.subtypes[subtypeLayer.id]" ng-click="$ctrl.setNetworkEquipmentSubtypeVisibility('equipments', equipmentLayer, subtypeLayer.id, !equipmentLayer.subtypes[subtypeLayer.id])">
                       </div>
