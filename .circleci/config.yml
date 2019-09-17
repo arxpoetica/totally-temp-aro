@@ -72,7 +72,7 @@ workflows:
               only: 
                 - master
                 - optional_building
-                - node_subtypes
+                - devJuly2019
 
       - deploy:
           requires:
