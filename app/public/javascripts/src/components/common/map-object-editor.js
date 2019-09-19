@@ -294,8 +294,9 @@ class MapObjectEditorController {
     if (this.featureType === 'equipment') { // ToDo: need a better way to do this, should be in plan-editor
       this.getFeaturesAtPoint(latLng)
         .then((results) => {
-        // We may have come here when the user clicked an existing map object. For now, just add it to the list.
-        // This should be replaced by something that loops over all created map objects and picks those that are under the cursor.
+          // We may have come here when the user clicked an existing map object. For now, just add it to the list.
+          // This should be replaced by something that loops over all created map objects and picks those that are under the cursor.
+          var mapObjectIndex = -1
           if (clickedMapObject) {
             var clickedFeature = {
               _data_type: this.isMarker(clickedMapObject) ? `equipment.${clickedMapObject.feature.networkNodeType}` : 'equipment_boundary.undefined',
@@ -303,6 +304,7 @@ class MapObjectEditorController {
               is_deleted: false
             }
             results.push(clickedFeature)
+            mapObjectIndex = results.length - 1
           }
 
           var menuItems = []
@@ -310,7 +312,7 @@ class MapObjectEditorController {
           var allMenuPromises = []
           var locationConnectors = []
 
-          results.forEach((result) => {
+          results.forEach((result, iResult) => {
             // populate context menu aray here
             // we may need different behavour for different controllers using this
             const featureType = this.utils.getFeatureMenuItemType(result)
@@ -325,7 +327,8 @@ class MapObjectEditorController {
             }
 
             // If this feature is part of an open transaction AND we have clicked on vector tiles (not map objects), do not show the menu
-            if (!clickedMapObject) {
+            const checkInTransaction = (iResult !== mapObjectIndex)
+            if (checkInTransaction) {
               const featureIsInTransaction = this.transactionFeatures[result.objectId]
               validFeature = validFeature && !featureIsInTransaction
             }
