@@ -131,11 +131,26 @@
         <tr>
           <td>Fiber routing logic</td>
           <td>
-            <input type="checkbox" class="checkboxfill layer-type-checkboxes" style="margin: 0px;"
-                  ng-model="$ctrl.autoRecalculateSubnet">
+            <input
+              type="checkbox"
+              class="checkboxfill layer-type-checkboxes"
+              style="margin: 0px;"
+              ng-model="$ctrl.autoRecalculateSubnet"
+              ng-change="$ctrl.onAutoRecalculateSubnetChanged()">
               <span>Auto recalculate</span>
           </td>
           <td>
+            <button
+              ng-class="{ 'btn btn-sm float-right': true, 'btn-primary': !$ctrl.autoRecalculateSubnet, 'btn-light': $ctrl.autoRecalculateSubnet }"
+              ng-disabled="$ctrl.autoRecalculateSubnet"
+              ng-click="$ctrl.rebuildAllTransactionSubnets()">
+              {{$ctrl.autoRecalculateSubnet ? 'Up-to date' : 'Calculate now'}}
+            </button>
+          </td>
+        </tr>
+        <tr>
+          <td></td>
+          <td colspan="2">
             <input type="checkbox" class="checkboxfill layer-type-checkboxes" style="margin: 0px;"
                   ng-model="$ctrl.stickyAssignment">
             <span>Sticky assignment</span>

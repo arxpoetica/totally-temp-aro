@@ -369,11 +369,7 @@ class PlanEditorController {
           .filter((item) => item.crudAction !== 'delete')
           .map((item) => item.feature)
         this.createMapObjects && this.createMapObjects(features)
-        return this.$http.get(`/service/plan-transaction/${this.currentTransaction.id}/subnets-definition`)
-      })
-      .then(result => {
-        const subnetIdsToRebuild = result.data.map(subnetDefinition => subnetDefinition.subnetId)
-        return this.rebuildSubnets(subnetIdsToRebuild)
+        return this.rebuildAllTransactionSubnets()
       })
       .catch((err) => {
       // Log the error, then get out of "plan edit" mode.
@@ -381,6 +377,22 @@ class PlanEditorController {
         this.$timeout()
         console.error(err)
       })
+  }
+
+  rebuildAllTransactionSubnets () {
+    return this.$http.get(`/service/plan-transaction/${this.currentTransaction.id}/subnets-definition`)
+      .then(result => {
+        const subnetIdsToRebuild = result.data.map(subnetDefinition => subnetDefinition.subnetId)
+        return this.rebuildSubnets(subnetIdsToRebuild)
+      })
+      .catch(err => console.error(err))
+  }
+
+  onAutoRecalculateSubnetChanged () {
+    if (this.autoRecalculateSubnet) {
+      // Auto-recalculate was turned on. Recalculate all subnets in case equipment was moved.
+      this.rebuildAllTransactionSubnets()
+    }
   }
 
   getFeaturesCount () {
