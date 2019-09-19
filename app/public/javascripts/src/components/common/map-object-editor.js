@@ -345,7 +345,7 @@ class MapObjectEditorController {
           })
           if (locationConnectors.length > 1) {
             // If we have multiple location connectors, add a menu item that will allow us to merge them
-            const mergeLocationConnectors = new MenuAction(MenuActionTypes.EDIT_LOCATION_CONNECTORS, () => {
+            const mergeLocationConnectors = new MenuAction(MenuActionTypes.MERGE_LOCATION_CONNECTORS, () => {
               console.log('MERGING LOCATION CONNECTORS')
               var mergeResult = Promise.resolve()
               var useMultiSelectMode = false
@@ -365,6 +365,7 @@ class MapObjectEditorController {
                 .then(() => {
                   console.log('Firing multiselect')
                   this.onObjectKeyClicked && this.onObjectKeyClicked({ features: locationConnectors.splice(locationConnectors.length - 1), latLng: latLng })
+                  this.mergeSelectedEquipment && this.mergeSelectedEquipment()
                 })
                 .catch(err => console.error(err))
             })
@@ -1352,7 +1353,7 @@ let mapObjectEditor = {
     displayEditObject: '&',
     onObjectDroppedOnMarker: '&',
     onObjectKeyClicked: '&',
-    multiSelectObjects: '&',
+    mergeSelectedEquipment: '&',
     registerObjectDeleteCallback: '&', // To be called to register a callback, which will delete the selected object
     registerCreateMapObjectsCallback: '&', // To be called to register a callback, which will create map objects for existing objectIds
     registerRemoveMapObjectsCallback: '&', // To be called to register a callback, which will remove all created map objects

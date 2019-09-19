@@ -35,6 +35,7 @@
                     display-edit-object="$ctrl.displayEditObject(feature, isMult)"
                     on-object-dropped-on-marker="$ctrl.handleObjectDroppedOnMarker({dropEvent: dropEvent, targetObjectId: targetObjectId})"
                     on-object-key-clicked="$ctrl.onMultiSelect(features, latLng)"
+                    merge-selected-equipment="$ctrl.mergeMultiSelectGroup()"
                     register-object-delete-callback="$ctrl.registerObjectDeleteCallback(deleteObjectWithId)"
                     register-create-map-objects-callback="$ctrl.registerCreateMapObjectsCallback(createMapObjects)"
                     register-remove-map-objects-callback="$ctrl.registerRemoveMapObjectsCallback(removeMapObjects)"
