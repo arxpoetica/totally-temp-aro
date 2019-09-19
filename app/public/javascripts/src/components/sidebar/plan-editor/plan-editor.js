@@ -1338,12 +1338,16 @@ class PlanEditorController {
           : Promise.resolve()
       })
       .then((result) => {
-        if (result && result.data.length > 0) {
-          // There is at least one piece of equipment in the transaction. Use that for routing
-          return this.recalculateSubnetForEquipmentChange(result.data[0])
+        if (this.autoRecalculateSubnet) {
+          if (result && result.data.length > 0) {
+            // There is at least one piece of equipment in the transaction. Use that for routing
+            return this.recalculateSubnetForEquipmentChange(result.data[0])
+          } else {
+            // There is no equipment left in the transaction. Just remove the subnet map objects
+            return this.clearAllSubnetMapObjects()
+          }
         } else {
-          // There is no equipment left in the transaction. Just remove the subnet map objects
-          return this.clearAllSubnetMapObjects()
+          return Promise.resolve()
         }
       })
       .then(() => {
