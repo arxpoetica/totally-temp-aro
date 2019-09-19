@@ -987,7 +987,7 @@ class PlanEditorController {
   }
 
   editViewObject (isMult) {
-    this.createEditableExistingMapObject && this.createEditableExistingMapObject(this.viewEventFeature, this.viewIconUrl, isMult)
+    return this.createEditableExistingMapObject && this.createEditableExistingMapObject(this.viewEventFeature, this.viewIconUrl, isMult)
   }
 
   editViewSiteBoundaryObject () {
@@ -996,6 +996,7 @@ class PlanEditorController {
 
   handleObjectCreated (mapObject, usingMapClick, feature, deleteExistingBoundary) {
     this.objectIdToMapObject[mapObject.objectId] = mapObject
+    var promiseToReturn = null
     if (usingMapClick && this.isMarker(mapObject)) {
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
       if (feature.isExistingObject) {
@@ -1003,7 +1004,7 @@ class PlanEditorController {
         const planId = this.state.plan.id
         // Add modified features to vector tiles and do the rendering, etc.
         this.setIsCreatingObject(true)
-        this.state.loadModifiedFeatures(planId)
+        promiseToReturn = this.state.loadModifiedFeatures(planId)
           .then(() => {
             this.state.requestMapLayerRefresh.next(null)
             return this.$http.get(`/service/plan-feature/${planId}/equipment/${mapObject.objectId}?userId=${this.state.loggedInUser.id}`)
@@ -1039,7 +1040,9 @@ class PlanEditorController {
                 })
             }
 
-            this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
+            this.getViewObjectSBTypes(mapObject.objectId)
+            this.$timeout()
+            return this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
               .then(() => this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`))
               .then((result) => {
               // Always assign subnet parent on object creation, even if we are not creating a route. This way, if the user
@@ -1061,8 +1064,6 @@ class PlanEditorController {
                 }
                 this.setIsCreatingObject(false)
               })
-            this.getViewObjectSBTypes(mapObject.objectId)
-            this.$timeout()
           })
           .catch((err) => {
             console.error(err)
@@ -1078,7 +1079,7 @@ class PlanEditorController {
         this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties('', '', feature.networkNodeType, this.lastSelectedEquipmentType, blankNetworkNodeEquipment, 'PLANNED', 'sewer')
         var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
         this.setIsCreatingObject(true)
-        this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
+        promiseToReturn = this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
           .then(() => this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`))
           .then((result) => {
           // Always assign subnet parent on object creation, even if we are not creating a route. This way, if the user
@@ -1123,11 +1124,13 @@ class PlanEditorController {
         // Refresh map tiles ONLY if this is not a boundary that we have computed. The other case is when the user clicks to edit an existing boundary
         this.state.requestMapLayerRefresh.next(null)
       }
-      this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`, serviceFeature)
+      promiseToReturn = this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`, serviceFeature)
         .catch((err) => console.error(err))
     }
     this.updateObjectIdsToHide()
     this.$timeout()
+    console.log('Returning from handleObjectCreated()')
+    return promiseToReturn
   }
 
   deleteBoundary (boundaryId) {

@@ -176,7 +176,7 @@ class MapObjectEditorController {
     this.registerMapObjectFromEvent && this.registerMapObjectFromEvent({ mapObjectFromEvent: this.handleMapEntitySelected.bind(this) })
     this.registerHighlightMapObject && this.registerHighlightMapObject({ highlightMapObject: this.highlightMapObject.bind(this) })
     this.registerDehighlightMapObject && this.registerDehighlightMapObject({ dehighlightMapObject: this.dehighlightMapObject.bind(this) })
-    
+
     this.state.clearEditingMode.skip(1).subscribe((clear) => {
       if (clear) {
         this.selectMapObject(null) // deselects the selected equipment
@@ -308,10 +308,11 @@ class MapObjectEditorController {
           var menuItems = []
           var menuItemsById = {}
           var allMenuPromises = []
+          var locationConnectors = []
 
           results.forEach((result) => {
-          // populate context menu aray here
-          // we may need different behavour for different controllers using this
+            // populate context menu aray here
+            // we may need different behavour for different controllers using this
             const featureType = this.utils.getFeatureMenuItemType(result)
 
             if (result.hasOwnProperty('object_id')) result.objectId = result.object_id
@@ -337,8 +338,38 @@ class MapObjectEditorController {
                 .then(options => menuItems.push(new MenuItem(featureType, name, options, feature)))
 
               allMenuPromises = allMenuPromises.concat(thisFeatureMenuPromise)
+              if (feature._data_type === 'equipment.location_connector') {
+                locationConnectors.push(feature)
+              }
             }
           })
+          if (locationConnectors.length > 1) {
+            // If we have multiple location connectors, add a menu item that will allow us to merge them
+            const mergeLocationConnectors = new MenuAction(MenuActionTypes.EDIT_LOCATION_CONNECTORS, () => {
+              console.log('MERGING LOCATION CONNECTORS')
+              var mergeResult = Promise.resolve()
+              var useMultiSelectMode = false
+              locationConnectors.forEach((locationConnector, lcIndex) => {
+                mergeResult = mergeResult.then(() => {
+                  console.log(`Starting editExistingFeature for ${locationConnector.objectId}`)
+                  const editPromise = this.editExistingFeature(locationConnector, latLng, useMultiSelectMode)
+                  useMultiSelectMode = true // From the second time onwards, use multi select mode
+                  return editPromise
+                })
+                  .then(() => {
+                    console.log(`Finished editExistingFeature for ${locationConnector.objectId}`)
+                    return Promise.resolve()
+                  })
+              })
+              mergeResult
+                .then(() => {
+                  console.log('Firing multiselect')
+                  this.onObjectKeyClicked && this.onObjectKeyClicked({ features: locationConnectors.splice(locationConnectors.length - 1), latLng: latLng })
+                })
+                .catch(err => console.error(err))
+            })
+            menuItems.push(new MenuItem(MenuItemTypes.EQUIPMENT, `${locationConnectors.length} Location Connectors`, [mergeLocationConnectors], locationConnectors))
+          }
           Promise.all(allMenuPromises)
             .then(() => {
               if (menuItems.length <= 0) {
@@ -443,7 +474,7 @@ class MapObjectEditorController {
       options.push(new MenuAction(MenuActionTypes.VIEW, () => this.viewExistingFeature(feature, latLng)))
       // Note that feature.is_locked comes in as a string from the vector tiles
       if (feature.is_locked === 'false') {
-        options.push(new MenuAction(MenuActionTypes.EDIT, () => this.editExistingFeature(feature, latLng)))
+        options.push(new MenuAction(MenuActionTypes.EDIT, () => this.editExistingFeature(feature, latLng, false)))
       }
     }
 
@@ -743,7 +774,7 @@ class MapObjectEditorController {
   }
 
   createEditableExistingMapObject (feature, iconUrl, isMult) {
-    this.createMapObject(feature, iconUrl, true, true, true, isMult)
+    return this.createMapObject(feature, iconUrl, true, true, true, isMult)
   }
 
   createMapObject (feature, iconUrl, usingMapClick, existingObjectOverride, deleteExistingBoundary, isMult) {
@@ -864,9 +895,8 @@ class MapObjectEditorController {
     })
 
     this.createdMapObjects[mapObject.objectId] = mapObject
-    this.onCreateObject && this.onCreateObject({ mapObject: mapObject, usingMapClick: usingMapClick, feature: feature, deleteExistingBoundary: !deleteExistingBoundary })
-
     if (usingMapClick) this.selectMapObject(mapObject, isMult)
+    return this.onCreateObject && this.onCreateObject({ mapObject: mapObject, usingMapClick: usingMapClick, feature: feature, deleteExistingBoundary: !deleteExistingBoundary })
   }
 
   handleMapEntitySelected (event, isMult) {
@@ -1227,21 +1257,18 @@ class MapObjectEditorController {
     }
   }
 
-  editExistingFeature(clickedObject,latLng) {
-    return new Promise((resolve, reject) => {
-      var feature = {
-        objectId: clickedObject.object_id,
-        geometry: {
-          type: 'Point',
-          coordinates: [latLng.lng(), latLng.lat()]
-        },
-        type: clickedObject._data_type,
-        deployment_type: clickedObject.deployment_type,
-        isExistingObject: true
-      }
-      this.displayEditObject({ feature: feature })
-      .then(() => resolve())
-    })
+  editExistingFeature (clickedObject, latLng, isMultiSelect) {
+    var feature = {
+      objectId: clickedObject.object_id,
+      geometry: {
+        type: 'Point',
+        coordinates: [latLng.lng(), latLng.lat()]
+      },
+      type: clickedObject._data_type,
+      deployment_type: clickedObject.deployment_type,
+      isExistingObject: true
+    }
+    return this.displayEditObject({ feature: feature, isMult: isMultiSelect })
   }
 
   $onChanges (changesObj) {
@@ -1325,6 +1352,7 @@ let mapObjectEditor = {
     displayEditObject: '&',
     onObjectDroppedOnMarker: '&',
     onObjectKeyClicked: '&',
+    multiSelectObjects: '&',
     registerObjectDeleteCallback: '&', // To be called to register a callback, which will delete the selected object
     registerCreateMapObjectsCallback: '&', // To be called to register a callback, which will create map objects for existing objectIds
     registerRemoveMapObjectsCallback: '&', // To be called to register a callback, which will remove all created map objects
