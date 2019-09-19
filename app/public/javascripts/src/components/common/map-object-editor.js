@@ -49,11 +49,6 @@ class MapObjectEditorController {
       fillColor: '#FF1493',
       fillOpacity: 0.4
     }
-    
-    this.directToEditTypes = {
-      'equipment.location_connector': true
-    }
-    
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }
 
@@ -977,18 +972,7 @@ class MapObjectEditorController {
         this.state.selection = newSelection
         return
       } else {
-        if (this.directToEditTypes.hasOwnProperty(feature.type)) {
-          this.displayEditObject({ feature: feature, isMult: isMult })
-        } else {
-          // Quickfix - Display the equipment and return, do not make multiple calls to aro-service #159544541
-          this.displayViewObject({ feature: feature })
-          this.selectMapObject(null)
-          // Update selected feature in state so it is rendered correctly
-          newSelection.details.siteBoundaryId = {}
-          newSelection.editable.equipment = {}
-          newSelection.editable.equipment[feature.objectId] = feature
-          this.state.selection = newSelection
-        }
+        this.displayEditObject({ feature: feature, isMult: isMult })
         return
       }
     } else if (this.featureType === 'serviceArea' && event.hasOwnProperty('serviceAreas') &&
