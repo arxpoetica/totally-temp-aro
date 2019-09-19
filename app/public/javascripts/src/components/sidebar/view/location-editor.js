@@ -1,6 +1,7 @@
 import { createSelector } from 'reselect'
 
 import WorkflowState from '../../../shared-utils/workflow-state'
+import Permissions from '../../../shared-utils/permissions'
 import MapLayerActions from '../../../react/components/map-layers/map-layer-actions'
 
 // We need a selector, else the .toJS() call will create an infinite digest loop
@@ -34,6 +35,7 @@ class LocationEditorController {
     this.isCommiting = false
     this.WorkflowState = WorkflowState
     this.isExpandLocAttributes = false
+    this.userCanChangeWorkflowState = false
 
     this.availableAttributesKeyList = ['loop_extended']
     this.availableAttributesValueList = ['true', 'false']
@@ -90,6 +92,7 @@ class LocationEditorController {
       })
       .then((result) => {
         this.currentTransaction = result.data
+        this.reloadWorkflowStatePermissions() // Can continue in parallel, no need to wait for promise
         return this.$http.get(`/service/library/transaction/${this.currentTransaction.id}/transaction_features`)
       })
       .then((result) => {
@@ -233,7 +236,8 @@ class LocationEditorController {
         number_of_households: objectProperties.numberOfLocations
       },
       dataType: 'location',
-      workflowState: WorkflowState.CREATED.name
+      // workflowState: WorkflowState.CREATED.name
+      workflowState: objectProperties.workflowStateId
     }
 
     if (!mapObject.feature.hasOwnProperty('attributes')) {
@@ -256,12 +260,13 @@ class LocationEditorController {
     if (feature.attributes && feature.attributes.number_of_households) {
       numberOfLocations = +feature.attributes.number_of_households
     }
-    this.objectIdToProperties[mapObject.objectId] = new LocationProperties(feature.workflow_state_id, numberOfLocations)
+    const workflowStateId = feature.workflow_state_id || WorkflowState.CREATED.id
+    this.objectIdToProperties[mapObject.objectId] = new LocationProperties(workflowStateId, numberOfLocations)
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     var locationObject = this.formatLocationForService(mapObject.objectId)
     // The marker is editable if the state is not LOCKED or INVALIDATED
-    const isEditable = !((feature.workflow_state_id & WorkflowState.LOCKED.id) ||
-                          (feature.workflow_state_id & WorkflowState.INVALIDATED.id))
+    const isEditable = !((workflowStateId & WorkflowState.LOCKED.id) ||
+                          (workflowStateId & WorkflowState.INVALIDATED.id))
 
     if (isEditable) {
       this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`, locationObject)
@@ -369,10 +374,34 @@ class LocationEditorController {
     this.isExpandLocAttributes = false
   }
 
+  isWorkflowStateEditable () {
+    // Workflow state is editable only if the workflow state is Invalidated or Locked. Which means that the workflow state
+    // for a default created object cannot be changed (since it is "Created" by default). So someone has to go into the DB,
+    // change the state to Invalidated or Locked, and then the user can toggle between them. This logic supplied by
+    // Frontier, and this is how we do it for now!
+    const currentWorkflowState = this.objectIdToProperties[this.selectedMapObject.objectId].workflowStateId
+    const isLockedOrInvalid = (currentWorkflowState === WorkflowState.LOCKED.id) || (currentWorkflowState === WorkflowState.INVALIDATED.id)
+    return this.userCanChangeWorkflowState && isLockedOrInvalid
+  }
+
+  reloadWorkflowStatePermissions () {
+    // Make sure that the currently logged in user is allowed to change the workflow state of objects for the current library/transaction.
+    this.userCanChangeWorkflowState = false
+    const odataQuery = `/service/odata/UserLibraryViewEntity?$filter=dataSourceId eq ${this.currentTransaction.libraryId} and userId eq ${this.loggedInUser.id}&$top=1`
+    return this.$http.get(odataQuery)
+      .then(result => {
+        const libraryViewEntity = result.data[0]
+        this.userCanChangeWorkflowState = Boolean(libraryViewEntity.permissions & Permissions.RESOURCE_WORKFLOW)
+        this.$timeout()
+      })
+      .catch(err => console.error(err))
+  }
+
   mapStateToThis (reduxState) {
     return {
       locationLayers: getLocationLayersList(reduxState),
-      dataItems: reduxState.plan.dataItems
+      dataItems: reduxState.plan.dataItems,
+      loggedInUser: reduxState.user.loggedInUser
     }
   }
 
