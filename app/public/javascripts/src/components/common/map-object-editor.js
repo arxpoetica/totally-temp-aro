@@ -348,12 +348,10 @@ class MapObjectEditorController {
             const mergeLocationConnectors = new MenuAction(MenuActionTypes.MERGE_LOCATION_CONNECTORS, () => {
               console.log('MERGING LOCATION CONNECTORS')
               var mergeResult = Promise.resolve()
-              var useMultiSelectMode = false
               locationConnectors.forEach((locationConnector, lcIndex) => {
                 mergeResult = mergeResult.then(() => {
                   console.log(`Starting editExistingFeature for ${locationConnector.objectId}`)
-                  const editPromise = this.editExistingFeature(locationConnector, latLng, useMultiSelectMode)
-                  useMultiSelectMode = true // From the second time onwards, use multi select mode
+                  const editPromise = this.editExistingFeature(locationConnector, latLng, false)
                   return editPromise
                 })
                   .then(() => {
@@ -364,7 +362,7 @@ class MapObjectEditorController {
               mergeResult
                 .then(() => {
                   console.log('Firing multiselect')
-                  this.onObjectKeyClicked && this.onObjectKeyClicked({ features: locationConnectors.splice(locationConnectors.length - 1), latLng: latLng })
+                  this.onObjectKeyClicked && this.onObjectKeyClicked({ features: locationConnectors.slice(0, locationConnectors.length - 1), latLng: latLng })
                   this.mergeSelectedEquipment && this.mergeSelectedEquipment()
                 })
                 .catch(err => console.error(err))
