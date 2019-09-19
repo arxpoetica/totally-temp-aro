@@ -130,7 +130,7 @@ class PlanEditorController {
     this.rightClickObserver = this.state.mapFeaturesRightClickedEvent.skip(1).subscribe((hitFeatures) => {
       // if location and selected feature type in Location connector then toggle location association to selected locvation Connecotor
       if (hitFeatures.locations.length > 0 && !this.isMultSelectActive()) {
-        if (this.selectedObjectId && this.isEditingEquipmentProperties) {
+        if (this.selectedObjectId && this.isEditingFeatureProperties) {
           var selectedLatLng = [this.selectedMapObjectLng, this.selectedMapObjectLat]
           var objectProperties = this.objectIdToProperties[this.selectedObjectId]
           if (objectProperties.siteNetworkNodeType === 'location_connector') {
@@ -1672,6 +1672,7 @@ class PlanEditorController {
       isCalculatingSubnets: reduxState.planEditor.isCalculatingSubnets,
       isCreatingObject: reduxState.planEditor.isCreatingObject,
       isModifyingObject: reduxState.planEditor.isModifyingObject,
+      isEditingFeatureProperties: reduxState.planEditor.isEditingFeatureProperties,
       userId: reduxState.user.loggedInUser.id
     }
   }
