@@ -72,7 +72,7 @@ workflows:
               only: 
                 - master
                 - optional_building
-                - locationLayerState
+                - devJuly2019
 
       - deploy:
           requires:
