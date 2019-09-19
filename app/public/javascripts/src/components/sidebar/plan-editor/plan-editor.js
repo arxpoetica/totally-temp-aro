@@ -42,7 +42,7 @@ class PlanEditorController {
     this.deleteObjectWithId = null // A function into the child map object editor, requesting the specified map object to be deleted
     this.isComponentDestroyed = false // Useful for cases where the user destroys the component while we are generating boundaries
     this.isWorkingOnCoverage = false
-    this.autoRecalculateSubnet = true
+    this.autoRecalculateSubnet = false
     this.stickyAssignment = true
     this.viewEventFeature = {}
     this.viewSiteBoundaryEventFeature = {}
