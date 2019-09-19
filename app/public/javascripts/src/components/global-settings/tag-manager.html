@@ -15,10 +15,10 @@
     </thead>
     <tbody>
       <tr ng-repeat="tag in $ctrl.globalSettingsService.tagsList">
-        <td><a href="javascript:void(0)" 
+        <td><span class="aro-faux-anchor" 
           ng-click="$ctrl.updateTag(tag)">
             {{tag.name}}
-          </a>
+          </span>
         </td>
         <td>{{tag.description}}</td>
         <td>{{tag.colourHue}}</td>
