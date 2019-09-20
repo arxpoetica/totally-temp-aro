@@ -345,9 +345,7 @@ class PlanEditorController {
         transactionFeatures.forEach((feature) => {
           const attributes = feature.attributes
           const locationIDs = attributes.internal_oid || null
-          console.log(feature)
           const typedEquipmentNode = AroFeatureFactory.createObject(feature)
-          console.log(typedEquipmentNode)
           var networkNodeEquipment = typedEquipmentNode.networkNodeEquipment
           typedEquipmentNodes.push(typedEquipmentNode)
           const properties = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName, feature.networkNodeType,
@@ -1524,10 +1522,15 @@ class PlanEditorController {
               } else if (planConduit.geometry.type === 'MultiLineString') {
                 polylines = WktUtils.getGoogleMapPathsFromWKTMultiLineString(planConduit.geometry)
               }
+              // Spatial edges type can be a conduit type or a road type. If we don't find any definition, use a default color.
+              const pcSpatialEdgeType = planConduit.ref.spatialEdgeType
+              const conduitColor = this.conduitMapLayers[pcSpatialEdgeType] && this.conduitMapLayers[pcSpatialEdgeType].drawingOptions && this.conduitMapLayers[pcSpatialEdgeType].drawingOptions.strokeStyle
+              const roadColor = this.roadMapLayers[pcSpatialEdgeType] && this.roadMapLayers[pcSpatialEdgeType].drawingOptions && this.roadMapLayers[pcSpatialEdgeType].drawingOptions.strokeStyle
+              const strokeColor = conduitColor || roadColor || 'black'
               polylines.forEach(polyline => {
                 var subnetLineMapObject = new google.maps.Polyline({
                   path: polyline,
-                  strokeColor: '#0000FF',
+                  strokeColor: strokeColor,
                   strokeWeight: 4,
                   clickable: false,
                   map: this.mapRef
@@ -1690,7 +1693,9 @@ class PlanEditorController {
       isCreatingObject: reduxState.planEditor.isCreatingObject,
       isModifyingObject: reduxState.planEditor.isModifyingObject,
       isEditingFeatureProperties: reduxState.planEditor.isEditingFeatureProperties,
-      userId: reduxState.user.loggedInUser.id
+      userId: reduxState.user.loggedInUser.id,
+      conduitMapLayers: reduxState.mapLayers.networkEquipment.conduits,
+      roadMapLayers: reduxState.mapLayers.networkEquipment.roads
     }
   }
 
