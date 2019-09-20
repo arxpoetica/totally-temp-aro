@@ -7,6 +7,14 @@
   #tblLocationProperties td {
     line-height: 33px;  /* To vertically align text */
   }
+  .overlay-close {
+    position: absolute;
+    margin-top: 20px;
+  }
+  .overlay-lock {
+    position: absolute;
+    margin-top: 5px;
+  }
 </style>
 <div class="view-mode-container">
 
@@ -58,6 +66,7 @@
           <td>Location type:</td>
           <td>
             <select class="form-control"
+                    ng-disabled="(($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId == $ctrl.WorkflowState.LOCKED.id) || ($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId == $ctrl.WorkflowState.INVALIDATED.id))"
                     ng-change="$ctrl.markSelectedLocationPropertiesDirty()"
                     ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].selectedLocationType"
                     ng-options="item for item in $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].locationTypes">
@@ -68,8 +77,39 @@
           <td>Number of locations:</td>
           <td>
             <input class="form-control"
+                  ng-disabled="(($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId == $ctrl.WorkflowState.LOCKED.id) || ($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId == $ctrl.WorkflowState.INVALIDATED.id))"
                   ng-change="$ctrl.markSelectedLocationPropertiesDirty();$ctrl.setLastUsedNumberOfLocations($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfLocations);"
                   ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfLocations">
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">Workflow state</td>
+          <td>
+            <input
+              type="radio"
+              class="radiofill"
+              ng-value="1"
+              ng-disabled="true"
+              ng-change="$ctrl.markSelectedLocationPropertiesDirty()"
+              ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId">
+              <span><img src="/images/map_icons/aro/households_default.png" style="vertical-align:middle; padding-right: 7px"></span>
+              Created<br>
+            <input
+              type="radio"
+              class="radiofill"
+              ng-value="2"
+              ng-change="$ctrl.markSelectedLocationPropertiesDirty()"
+              ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId">
+              <span><img class="overlay-lock" src="/images/map_icons/aro/lock_overlay.png" style="vertical-align:bottom; padding-right: 5px"><img src="/images/map_icons/aro/households_default.png" style="vertical-align:middle; padding-right: 10px"></span>
+              Locked<br>
+            <input
+              type="radio"
+              class="radiofill"
+              ng-value="4"
+              ng-change="$ctrl.markSelectedLocationPropertiesDirty()"
+              ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId">
+              <span><img class="overlay-close" src="/images/map_icons/aro/invalidated_overlay.png" style="vertical-align:bottom; padding-right: 5px"><img src="/images/map_icons/aro/households_default.png" style="vertical-align:middle; padding-right: 10px"></span>
+              Invalidated<br>
           </td>
         </tr>
       </table>
@@ -90,15 +130,16 @@
         <i class="far fa-trash-alt"></i>&nbsp;&nbsp;Delete selected location
       </button>
       <button class="btn btn-block btn-primary"
+        ng-disabled="(($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId == $ctrl.WorkflowState.LOCKED.id) || ($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId == $ctrl.WorkflowState.INVALIDATED.id))"
         ng-click="$ctrl.isExpandLocAttributes = true">
         <i class="fa fa-pencil"></i>&nbsp;&nbsp;Expand
       </button>
 
       <!-- Add a div that will overlay all the controls above. The div will be visible when the controls need to be disabled. -->
-      <div class="disable-sibling-controls"
+      <!-- <div class="disable-sibling-controls"
            ng-hide="!(($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId == $ctrl.WorkflowState.LOCKED.id) || ($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId == $ctrl.WorkflowState.INVALIDATED.id))">
         <i class="fa fa-5x fa-lock" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"></i>
-      </div>
+      </div> -->
 
     </div>
     <br>
