@@ -54,7 +54,7 @@ class DataSelectionController {
     if (this.isDataSourceEditable[dataSourceKey]) {
       // We still think this is editable, now check for ACL by making a call to service
       const libraryId = this.dataItems[dataSourceKey].selectedLibraryItems[0].identifier  // Guaranteed to have 1 selection at this point
-      const dataSourceFilterString = `dataSourceId eq ${libraryId}`
+      const dataSourceFilterString = `metaDataId eq ${libraryId}`
       const filterString = `${dataSourceFilterString} and userId eq ${this.state.loggedInUser.id}`
       this.$http.get(`/service/odata/UserLibraryViewEntity?$select=dataSourceId,permissions&$filter=${filterString}&$top=1000`)
         .then(result => {
