@@ -374,16 +374,6 @@ class LocationEditorController {
     this.isExpandLocAttributes = false
   }
 
-  isWorkflowStateEditable () {
-    // Workflow state is editable only if the workflow state is Invalidated or Locked. Which means that the workflow state
-    // for a default created object cannot be changed (since it is "Created" by default). So someone has to go into the DB,
-    // change the state to Invalidated or Locked, and then the user can toggle between them. This logic supplied by
-    // Frontier, and this is how we do it for now!
-    const currentWorkflowState = this.objectIdToProperties[this.selectedMapObject.objectId].workflowStateId
-    const isLockedOrInvalid = (currentWorkflowState === WorkflowState.LOCKED.id) || (currentWorkflowState === WorkflowState.INVALIDATED.id)
-    return this.userCanChangeWorkflowState && isLockedOrInvalid
-  }
-
   reloadWorkflowStatePermissions () {
     // Make sure that the currently logged in user is allowed to change the workflow state of objects for the current library/transaction.
     this.userCanChangeWorkflowState = false

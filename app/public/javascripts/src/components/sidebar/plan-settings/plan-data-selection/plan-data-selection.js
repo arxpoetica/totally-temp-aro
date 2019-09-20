@@ -1,5 +1,6 @@
 /* globals angular */
 import PlanActions from '../../../../react/components/plan/plan-actions'
+import Constants from '../../../../components/common/constants'
 import { createSelector } from 'reselect'
 
 // Make a copy of data items because the UI component will mutate them directly
@@ -52,11 +53,16 @@ class DataSelectionController {
                                                 (this.dataItems[dataSourceKey].selectedLibraryItems.length === 1)
     if (this.isDataSourceEditable[dataSourceKey]) {
       // We still think this is editable, now check for ACL by making a call to service
-      this.aclManager.getEffectivePermissions('LIBRARY', this.dataItems[dataSourceKey].selectedLibraryItems[0].identifier, this.state.loggedInUser)
-        .then(permissions => {
-          this.isDataSourceEditable[dataSourceKey] = permissions && (permissions[this.aclManager.PERMISSIONS.WRITE] ||
-                                                                    permissions[this.aclManager.PERMISSIONS.ADMIN] ||
-                                                                    permissions[this.aclManager.PERMISSIONS.IS_SUPERUSER])
+      const libraryId = this.dataItems[dataSourceKey].selectedLibraryItems[0].identifier  // Guaranteed to have 1 selection at this point
+      const dataSourceFilterString = `dataSourceId eq ${libraryId}`
+      const filterString = `${dataSourceFilterString} and userId eq ${this.state.loggedInUser.id}`
+      this.$http.get(`/service/odata/UserLibraryViewEntity?$select=dataSourceId,permissions&$filter=${filterString}&$top=1000`)
+        .then(result => {
+          const permissions = (result.data.length === 1) ? result.data[0].permissions : 0
+          const hasWrite = Boolean(permissions & Constants.PERMISSION_RESOURCE_WRITE)
+          const hasAdmin = Boolean(permissions & Constants.PERMISSION_RESOURCE_ADMIN)
+          const hasResourceWorkflow = Boolean(permissions & Constants.PERMISSION_RESOURCE_WORKFLOW)
+          this.isDataSourceEditable[dataSourceKey] = hasWrite || hasAdmin || hasResourceWorkflow
           this.$timeout()
         })
         .catch(err => console.error(err))
