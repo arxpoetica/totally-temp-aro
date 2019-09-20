@@ -1524,8 +1524,8 @@ class PlanEditorController {
               }
               // Spatial edges type can be a conduit type or a road type. If we don't find any definition, use a default color.
               const pcSpatialEdgeType = planConduit.ref.spatialEdgeType
-              const conduitColor = this.conduitMapLayers[pcSpatialEdgeType] && this.conduitMapLayers[pcSpatialEdgeType].drawingOptions && this.conduitMapLayers[pcSpatialEdgeType].drawingOptions.strokeStyle
-              const roadColor = this.roadMapLayers[pcSpatialEdgeType] && this.roadMapLayers[pcSpatialEdgeType].drawingOptions && this.roadMapLayers[pcSpatialEdgeType].drawingOptions.strokeStyle
+              const conduitColor = this.conduitMapLayers && this.conduitMapLayers[pcSpatialEdgeType] && this.conduitMapLayers[pcSpatialEdgeType].drawingOptions && this.conduitMapLayers[pcSpatialEdgeType].drawingOptions.strokeStyle
+              const roadColor = this.roadMapLayers && this.roadMapLayers[pcSpatialEdgeType] && this.roadMapLayers[pcSpatialEdgeType].drawingOptions && this.roadMapLayers[pcSpatialEdgeType].drawingOptions.strokeStyle
               const strokeColor = conduitColor || roadColor || 'black'
               polylines.forEach(polyline => {
                 var subnetLineMapObject = new google.maps.Polyline({
