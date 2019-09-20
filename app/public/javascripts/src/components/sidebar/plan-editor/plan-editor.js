@@ -1517,21 +1517,23 @@ class PlanEditorController {
         subnetResult.data.forEach(subnet => {
           this.subnetMapObjects[subnet.feature.objectId] = []
           subnet.feature.subnetLinks.forEach(subnetLink => {
-            var polylines = []
-            if (subnetLink.geometry.type === 'LineString') {
-              polylines.push(WktUtils.getGoogleMapPathsFromWKTLineString(subnetLink.geometry))
-            } else if (subnetLink.geometry.type === 'MultiLineString') {
-              polylines = WktUtils.getGoogleMapPathsFromWKTMultiLineString(subnetLink.geometry)
-            }
-            polylines.forEach(polyline => {
-              var subnetLineMapObject = new google.maps.Polyline({
-                path: polyline,
-                strokeColor: '#0000FF',
-                strokeWeight: 4,
-                clickable: false,
-                map: this.mapRef
+            subnetLink.conduitLinkSummary.planConduits.forEach(planConduit => {
+              var polylines = []
+              if (planConduit.geometry.type === 'LineString') {
+                polylines.push(WktUtils.getGoogleMapPathsFromWKTLineString(planConduit.geometry))
+              } else if (planConduit.geometry.type === 'MultiLineString') {
+                polylines = WktUtils.getGoogleMapPathsFromWKTMultiLineString(planConduit.geometry)
+              }
+              polylines.forEach(polyline => {
+                var subnetLineMapObject = new google.maps.Polyline({
+                  path: polyline,
+                  strokeColor: '#0000FF',
+                  strokeWeight: 4,
+                  clickable: false,
+                  map: this.mapRef
+                })
+                this.subnetMapObjects[subnet.feature.objectId].push(subnetLineMapObject)
               })
-              this.subnetMapObjects[subnet.feature.objectId].push(subnetLineMapObject)
             })
           })
         })
