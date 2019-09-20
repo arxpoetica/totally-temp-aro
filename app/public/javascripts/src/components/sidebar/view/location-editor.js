@@ -374,6 +374,12 @@ class LocationEditorController {
     this.isExpandLocAttributes = false
   }
 
+  isWorkflowStatePermission () {
+    const currentWorkflowState = this.objectIdToProperties[this.selectedMapObject.objectId].workflowStateId
+    const isLockedOrInvalid = (currentWorkflowState === WorkflowState.CREATED.id)
+    return isLockedOrInvalid
+  }
+
   isWorkflowStateEditable () {
     // Workflow state is editable only if the workflow state is Invalidated or Locked. Which means that the workflow state
     // for a default created object cannot be changed (since it is "Created" by default). So someone has to go into the DB,
