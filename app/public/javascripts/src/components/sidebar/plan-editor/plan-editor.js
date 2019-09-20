@@ -268,36 +268,50 @@ class PlanEditorController {
     this.$timeout()
   }
 
+  bringLocationConnectorIntoTransaction (equipmentId) {
+    return this.$http.get(`/service/plan-feature/${this.state.plan.id}/equipment/${equipmentId}?userId=${this.state.loggedInUser.id}`)
+      .then(result => {
+        var attributes = result.data.attributes
+        const equipmentFeature = AroFeatureFactory.createObject(result.data)
+        this.addEquipmentNodes([{ feature: equipmentFeature }])
+        var networkNodeEquipment = equipmentFeature.networkNodeEquipment
+        const locationIDs = attributes.internal_oid || null
+        var equipmentProperties = new EquipmentProperties(networkNodeEquipment.siteInfo.siteClli, networkNodeEquipment.siteInfo.siteName,
+          equipmentFeature.networkNodeType, null, networkNodeEquipment, result.data.deploymentType, result.data.target_type, locationIDs)
+        this.objectIdToProperties[equipmentId] = equipmentProperties
+        return Promise.resolve()
+      })
+      .catch(err => console.error(err))
+  }
+
   removeLocationFromConnector (locationId) {
+    var equipmentId = -1
+    var locationConnectorFeature = null
     return this.$http.post(`/service/ring/plan-transaction/${this.currentTransaction.id}/ring/location-equipment/query-cmd`, { 'locationIds': [locationId] })
       .then((results) => {
         if (results.data && results.data.length > 0 && results.data[0].equipmentId) {
-          const equipmentId = results.data[0].equipmentId
-          if (this.objectIdToProperties.hasOwnProperty(equipmentId)) {
-            // location connector is already in the transaction
-            delete this.objectIdToProperties[equipmentId].connectedLocations[locationId]
-            this.saveEquipmentProperties(equipmentId)
-          } else {
-            // location connector is not in the transaction
-            this.$http.get(`/service/plan-feature/${this.state.plan.id}/equipment/${equipmentId}?userId=${this.state.loggedInUser.id}`)
-              .then(result => {
-                if (result.data) {
-                  // todo: similar code to handleObjectCreated
-                  var attributes = result.data.attributes
-                  const equipmentFeature = AroFeatureFactory.createObject(result.data)
-                  this.addEquipmentNodes([{ feature: equipmentFeature }])
-                  var networkNodeEquipment = equipmentFeature.networkNodeEquipment
-                  const locationIDs = attributes.internal_oid || null
-                  var equipmentProperties = new EquipmentProperties(networkNodeEquipment.siteInfo.siteClli, networkNodeEquipment.siteInfo.siteName,
-                    equipmentFeature.networkNodeType, null, networkNodeEquipment, result.data.deploymentType, result.data.target_type, locationIDs)
-                  delete equipmentProperties.connectedLocations[locationId]
-                  this.objectIdToProperties[equipmentId] = equipmentProperties
-                  this.saveEquipmentProperties(equipmentId)
-                }
-              })
-          }
+          locationConnectorFeature = results.data[0]
+          equipmentId = locationConnectorFeature.equipmentId
+          const locationConnectorIsInTransaction = Boolean(this.objectIdToProperties[equipmentId])
+          return locationConnectorIsInTransaction ? Promise.resolve() : this.bringLocationConnectorIntoTransaction(equipmentId)
+        } else {
+          return Promise.reject(new Error(`No location connector found for location id ${locationId}`))
         }
-      }).catch((err) => {
+      })
+      .then(() => {
+        delete this.objectIdToProperties[equipmentId].connectedLocations[locationId]
+        return this.saveEquipmentProperties(equipmentId)
+      })
+      .then(() => {
+        if (this.objectIdToProperties[equipmentId].connectedLocations.length > 0) {
+          // Location connector still has some location(s) connected to it, bring it into the transaction as an editable object
+          this.displayEditObject(locationConnectorFeature, false)
+        } else {
+          // Location connector does not have any locations connected to it. Delete the connector in the transaction.
+          this.deleteEquipment(equipmentId)
+        }
+      })
+      .catch((err) => {
         console.error(err)
       })
   }
@@ -731,6 +745,7 @@ class PlanEditorController {
       .then((result) => {
         this.objectIdToProperties[objectId].isDirty = false
         this.$timeout()
+        return Promise.resolve()
       })
       .catch((err) => console.error(err))
   }
@@ -1317,7 +1332,7 @@ class PlanEditorController {
         .then((deleteObject) => {
           if (deleteObject) {
             this.deleteCreatedMapObjectWithId(mapObject.objectId) // Delete the marker from map
-            return this.deleteMarker(mapObject) // Delete the marker
+            return this.deleteEquipment(mapObject.objectId) // Delete the marker
           }
         })
     } else {
@@ -1330,8 +1345,8 @@ class PlanEditorController {
     }
   }
 
-  deleteMarker (mapObject) {
-    return this.deleteTransactionFeature(this.currentTransaction.id, 'equipment', this.transactionFeatures[mapObject.objectId])
+  deleteEquipment (equipmentObjectId) {
+    return this.deleteTransactionFeature(this.currentTransaction.id, 'equipment', this.transactionFeatures[equipmentObjectId])
       .then(() => {
         return this.autoRecalculateSubnet
           ? this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`)
@@ -1352,10 +1367,10 @@ class PlanEditorController {
       })
       .then(() => {
         // If this is an equipment, delete its associated boundary (if any)
-        const boundaryObjectId = this.equipmentIdToBoundaryId[mapObject.objectId]
+        const boundaryObjectId = this.equipmentIdToBoundaryId[equipmentObjectId]
         if (!boundaryObjectId) {
           this.state.boundaryTypes.forEach((boundaryType) => {
-            boundaryType.name !== 'fiveg_coverage' && this.getAndDeleteAssociatedEquSiteBoundary(mapObject.objectId, boundaryType.id)
+            boundaryType.name !== 'fiveg_coverage' && this.getAndDeleteAssociatedEquSiteBoundary(equipmentObjectId, boundaryType.id)
           })
         } else {
           this.deleteBoundary(boundaryObjectId) // boundary is in edit mode
