@@ -9,9 +9,13 @@ const getAllLocationLayers = state => state.mapLayers.location
 const getLocationLayersList = createSelector([getAllLocationLayers], (locationLayers) => locationLayers.toJS())
 
 class LocationProperties {
-  constructor (workflowStateId, numberOfLocations = 1) {
-    this.locationTypes = ['Household']
-    this.selectedLocationType = this.locationTypes[0]
+  constructor (workflowStateId, selectedLocationType, numberOfLocations = 1) {
+    this.locationTypes = {
+      household: 'Households',
+      business: 'Businesses',
+      celltower: 'Celltowers'
+    }
+    this.selectedLocationType = selectedLocationType || 'household'
     this.numberOfLocations = numberOfLocations
     this.workflowStateId = workflowStateId
     this.isDirty = false
@@ -261,7 +265,7 @@ class LocationEditorController {
       numberOfLocations = +feature.attributes.number_of_households
     }
     const workflowStateId = feature.workflow_state_id || WorkflowState.CREATED.id
-    this.objectIdToProperties[mapObject.objectId] = new LocationProperties(workflowStateId, numberOfLocations)
+    this.objectIdToProperties[mapObject.objectId] = new LocationProperties(workflowStateId, feature.locationCategory, numberOfLocations)
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     var locationObject = this.formatLocationForService(mapObject.objectId)
     // The marker is editable if the state is not LOCKED or INVALIDATED

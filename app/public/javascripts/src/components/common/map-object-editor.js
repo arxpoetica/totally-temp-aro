@@ -953,6 +953,7 @@ class MapObjectEditorController {
           // use feature's coord NOT the event's coords
           feature.geometry.coordinates = serviceFeature.geometry.coordinates
           feature.attributes = serviceFeature.attributes
+          feature.locationCategory = serviceFeature.locationCategory
           feature.directlyEditExistingFeature = true
           return Promise.resolve(feature)
         })
