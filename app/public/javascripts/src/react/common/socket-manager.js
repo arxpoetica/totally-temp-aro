@@ -12,6 +12,7 @@ class SocketManager {
     // Initialize websocket
     this.sockets = {}
     this.sockets.default = io()
+    this.setupResilientConnection(this.sockets.default)
     this.sessionIdPromise = new Promise((resolve, reject) => {
       this.sockets.default.on('connect', () => {
         const sessionId = this.sockets.default.io.engine.id
@@ -37,7 +38,7 @@ class SocketManager {
 
   leaveRoom (namespace, room) {
     this.sockets[namespace].emit('SOCKET_LEAVE_ROOM', room)
-    this.roomConnections[namespace].remove(room)
+    this.roomConnections[namespace].delete(room)
   }
 
   // After a disconnect and reconnect, make sure that we re-subscribe to the older rooms and namespaces
