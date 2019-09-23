@@ -18,6 +18,7 @@ import RfpStatus from '../react/components/optimization/rfp/status/rfp-status.js
 import RingEdit from '../react/components/ring-edit/ring-edit.jsx'
 import RingButton from '../react/components/ring-edit/ring-button.jsx'
 import LocationInfo from '../react/components/location-info/location-info.jsx'
+import ResourcePermissions from '../react/components/resource-management/resource-permissions/resource-permissions.jsx'
 
 import boundaryDetail from './sidebar/view/boundary-detail'
 import equipmentDetail from './sidebar/view/equipment-detail'
@@ -255,6 +256,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rRingButton', react2angular(RingButton, ['onModify']))
   .component('rToastContainer', react2angular(ToastContainer))
   .component('rLocationInfo', react2angular(LocationInfo))
+  .component('rResourcePermissions', react2angular(ResourcePermissions))
   .service('Utils', utils)
   .service('state', state)
   .service('aclManager', aclManager)
