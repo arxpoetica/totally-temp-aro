@@ -5,16 +5,21 @@ class SocketManager {
   constructor () {
     this.router = {}
 
+    // Hold the current namespace+room connections. Useful to re-connect to rooms after a socket disconnect/reconnect.
+    this.roomConnections = {}
+    SocketNamespaces.forEach(socketNamespace => { this.roomConnections[socketNamespace] = new Set() })
+
     // Initialize websocket
     this.sockets = {}
     this.sockets.default = io()
+    this.setupResilientConnection(this.sockets.default)
     this.sessionIdPromise = new Promise((resolve, reject) => {
       this.sockets.default.on('connect', () => {
         const sessionId = this.sockets.default.io.engine.id
         this.joinRoom('client', sessionId)
         resolve(sessionId)
       })
-      this.sockets.default.on('connect_error', err => console.error(err)) // Not sure if I should reject here - what if it tries to reconnect?
+      this.sockets.default.on('connect_error', err => console.error(err))
     })
 
     // Connect to all socket namespaces
@@ -28,10 +33,30 @@ class SocketManager {
 
   joinRoom (namespace, room) {
     this.sockets[namespace].emit('SOCKET_JOIN_ROOM', room)
+    this.roomConnections[namespace].add(room)
   }
 
   leaveRoom (namespace, room) {
     this.sockets[namespace].emit('SOCKET_LEAVE_ROOM', room)
+    this.roomConnections[namespace].delete(room)
+  }
+
+  // After a disconnect and reconnect, make sure that we re-subscribe to the older rooms and namespaces
+  setupResilientConnection (ioObject) {
+    ioObject.on('connect_error', err => { console.error(err) })
+    ioObject.on('connect_timeout', err => { console.error(err) })
+    ioObject.on('reconnect_error', err => { console.error(err) })
+    ioObject.on('reconnect_failed', () => { console.error(`Fatal - unable to reconnect to websocket`) })
+    ioObject.on('reconnect', attempt => {
+      console.log(`Successfully reconnected to websocket after ${attempt} attempts`)
+      // Rewrite the session id promise
+      const sessionId = this.sockets.default.io.engine.id
+      this.sessionIdPromise = Promise.resolve(sessionId)
+      // Restore namespace+room connections.
+      Object.keys(this.roomConnections).forEach(namespaceKey => {
+        this.roomConnections[namespaceKey].forEach(room => this.joinRoom(namespaceKey, room))
+      })
+    })
   }
 
   getSessionId () {
@@ -45,7 +70,6 @@ class SocketManager {
   }
 
   unsubscribe (fn) {
-    console.log('unsubscribe')
     Object.keys(this.router).forEach(messageType => {
       var subscriberIndex = this.router[messageType].findIndex(item => item === fn)
       while (subscriberIndex >= 0) {
