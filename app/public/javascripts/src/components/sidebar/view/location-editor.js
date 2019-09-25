@@ -158,9 +158,15 @@ class LocationEditorController {
       })
   }
 
-  getObjectIconUrl () {
+  getObjectIconUrl (locationDetails) {
     // Hardcoded for now
-    return Promise.resolve('/images/map_icons/aro/households_modified.png')
+    if (locationDetails.objectValue.locationCategory === 'household') {
+      return Promise.resolve('/images/map_icons/aro/households_modified.png')
+    } else if (locationDetails.objectValue.locationCategory === 'business') {
+      return Promise.resolve('/images/map_icons/aro/businesses_small_selected.png')
+    } else {
+      return Promise.resolve('/images/map_icons/aro/tower.png')
+    }
   }
 
   getObjectSelectedIconUrl () {
