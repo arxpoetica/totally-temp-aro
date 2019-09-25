@@ -15,7 +15,7 @@
       theme="bootstrap" close-on-select="true"
       on-select="$ctrl.onSelectionChanged()"
 		  on-remove="$ctrl.onSelectionChanged()">
-      <ui-select-match placeholder="Select User" allow-clear="true">
+      <ui-select-match placeholder="User Search" allow-clear="true">
         <span>{{$select.selected.name}}</span>
       </ui-select-match>
       <ui-select-choices repeat="person.id as person in $ctrl.systemActorsArray | filter: { name: $select.search } | filter: $ctrl.filterNewActorList| orderBy:'name' "
