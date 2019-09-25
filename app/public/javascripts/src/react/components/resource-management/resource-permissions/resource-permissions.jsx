@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
 import { PropTypes } from 'prop-types'
+import PermissionsTable from './permissions-table.jsx'
 
 export class ResourcePermissions extends Component {
   constructor (props) {
@@ -22,15 +23,19 @@ export class ResourcePermissions extends Component {
               <th></th>
               <th className="ei-table-col-head-sortable ng-binding ng-scope" onClick={event => {console.log('reorder')}}>
                 Name
+                {/*
                 <div className="ei-table-col-sort-icon ng-scope">
                   <i className="fa fa-chevron-down ng-scope" aria-hidden="true"> </i>
                 </div>
+                */}
               </th>
               <th className="ei-table-col-head-sortable ng-binding ng-scope" onClick={event => {console.log('reorder')}}>
                 Data Type
+                {/*
                 <div className="ei-table-col-sort-icon ng-scope">
                   <i className="fa fa-chevron-down ng-scope" aria-hidden="true"> </i>
                 </div>
+                */}
               </th>
               <th></th>
             </tr>
@@ -39,6 +44,7 @@ export class ResourcePermissions extends Component {
             {this.renderDataRows()}
           </tbody>
         </table>
+        {/* also need pagination */}
       </div>
     </div>
   }
@@ -76,7 +82,8 @@ export class ResourcePermissions extends Component {
       </tr>,
       <tr className='ei-foldout-row' key={dataItem.identifier + '_b'}>
         <td colSpan='999'>
-          user table
+          <PermissionsTable resource={dataItem} />
+          <br/>add user
         </td>
       </tr>
     ]
@@ -106,28 +113,13 @@ ResourcePermissions.propTypes = {
 
 const mapStateToProps = (state) => ({
   dataItems: state.plan.dataItems,
-  uploadDataSources: state.plan.uploadDataSources
-  /*
-  rings: state.ringEdit.rings,
-  selectedRingId: state.ringEdit.selectedRingId,
-  plan: state.plan,
-  user: state.user,
-  map: state.map,
-  status: state.plan.activePlan && state.plan.activePlan.planState
-  */
+  uploadDataSources: state.plan.uploadDataSources,
+  systemActors: state.user.systemActors
 })
 
 const mapDispatchToProps = dispatch => ({
   selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems)),
   setAllLibraryItems: (dataItemKey, allLibraryItems) => dispatch(PlanActions.setAllLibraryItems(dataItemKey, allLibraryItems))
-  /*
-  setSelectedRingId: ringId => dispatch(ringActions.setSelectedRingId(ringId)),
-  newRing: (planId, userId) => dispatch(ringActions.newRing(planId, userId)),
-  removeRing: (ringId, planId, userId) => dispatch(ringActions.removeRing(ringId, planId, userId)),
-  removeNode: (ring, featureId, planId, userId) => dispatch(ringActions.removeNode(ring, featureId, planId, userId)),
-  saveRingChangesToServer: (ring, planId, userId) => dispatch(ringActions.saveRingChangesToServer(ring, planId, userId)),
-  renameRing: (ring, name, planId, userId) => dispatch(ringActions.renameRing(ring, name, planId, userId))
-  */
 })
 
 const ResourcePermissionsComponent = wrapComponentWithProvider(reduxStore, ResourcePermissions, mapStateToProps, mapDispatchToProps)
