@@ -3,58 +3,21 @@ import React, { Component } from 'react'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import { PropTypes } from 'prop-types'
+import { createSelector } from 'reselect'
 import ringActions from './ring-edit-actions.js'
 import './ring-edit.css'
 import RingStatusTypes from './constants'
 import Ring from '../../common/ring'
-import RingOptions from './ring-options.jsx'
+import RingOptionsBasic from './ring-options-basic.jsx'
+import RingOptionsConnectivityDefinition from './ring-options-connectivity-definition.jsx'
 
-// We are declaring the options here for now. Once service provides endpoints to read the options
-// back, this should move to the redux state.
-const ringOptions = {
-  maxLocationEdgeDistance: {
-    displayName: 'Max location-edge distance',
-    value: 400
-  },
-  locationBufferSize: {
-    displayName: 'Location buffer size',
-    value: 500
-  },
-  conduitBufferSize: {
-    displayName: 'Conduit buffer size',
-    value: 500
-  },
-  snappingDistance: {
-    displayName: 'Snapping distance',
-    value: 1
-  },
-  maxConnectionDistance: {
-    displayName: 'Connection distance',
-    value: 20
-  },
-  maxWormholeDistance: {
-    displayName: 'Wormhole distance',
-    value: 40
-  },
-  ringComplexityCount: {
-    displayName: 'Ring complexity',
-    value: 3000000
-  },
-  targetEdgeTypes: {
-    road: {
-      displayName: 'Road',
-      value: true
-    },
-    sewer: {
-      displayName: 'Sewer',
-      value: true
-    },
-    duct: {
-      displayName: 'Duct',
-      value: false
-    }
-  }
-}
+const getAllRingOptions = state => state.ringEdit.options
+const getRingOptionsBasic = createSelector([getAllRingOptions], allRingOptions => {
+  var ringOptionsBasic = { ...allRingOptions }
+  delete ringOptionsBasic.connectivityDefinition
+  return ringOptionsBasic
+})
+
 export class RingEdit extends Component {
   constructor (props) {
     super(props)
@@ -77,7 +40,8 @@ export class RingEdit extends Component {
           </tbody>
         </table>
       </div>
-      <RingOptions initialValues={ringOptions} enableReinitialize />
+      <RingOptionsBasic initialValues={this.props.ringOptionsBasic} enableReinitialize />
+      <RingOptionsConnectivityDefinition enableReinitialize />
     </div>
   }
 
@@ -369,7 +333,8 @@ const mapStateToProps = (state) => ({
   plan: state.plan,
   user: state.user,
   map: state.map,
-  status: state.plan.activePlan && state.plan.activePlan.planState
+  status: state.plan.activePlan && state.plan.activePlan.planState,
+  ringOptionsBasic: getRingOptionsBasic(state)
 })
 
 const mapDispatchToProps = dispatch => ({

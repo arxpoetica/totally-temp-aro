@@ -250,6 +250,16 @@ function setAnalysisProgress (progress) {
   }
 }
 
+function setRingOptionsConnectivityDefinition (spatialEdgeType, networkConnectivityType) {
+  return {
+    type: Actions.RING_OPTIONS_SET_CONNECTIVITY,
+    payload: {
+      spatialEdgeType,
+      networkConnectivityType
+    }
+  }
+}
+
 export default {
   setSelectedRingId,
   newRing,
@@ -265,5 +275,6 @@ export default {
   requestSubNet,
   getEquipmentDataPromise,
   setAnalysisStatus,
-  setAnalysisProgress
+  setAnalysisProgress,
+  setRingOptionsConnectivityDefinition
 }

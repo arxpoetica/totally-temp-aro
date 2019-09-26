@@ -9,7 +9,7 @@ import socketManager from '../../../react/common/socket-manager'
 import RingStatusTypes from './constants'
 import ProgressButton from '../common/progress-button.jsx'
 import Constants from '../../common/constants'
-const selector = formValueSelector(Constants.RING_OPTIONS_FORM)
+const selector = formValueSelector(Constants.RING_OPTIONS_BASIC_FORM)
 
 export class RingButton extends ProgressButton {
   constructor (props) {
