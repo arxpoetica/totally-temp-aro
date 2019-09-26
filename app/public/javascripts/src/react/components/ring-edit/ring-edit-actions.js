@@ -203,12 +203,6 @@ function getExchangeLinksPromise (ringData, planId, userId) {
 
 function requestSubNet (planId, ringIds, locationTypes, ringOptions) {
   return () => {
-    var targetEdgeTypes = []
-    if (!!ringOptions.targetEdgeTypes) {
-      Object.keys(ringOptions.targetEdgeTypes).map(optionKey => {
-        if (ringOptions.targetEdgeTypes[optionKey].value) targetEdgeTypes.push(optionKey)
-      })
-    }
     const postBody = {
       ringIds: ringIds,
       locationTypes: locationTypes,
@@ -220,15 +214,11 @@ function requestSubNet (planId, ringIds, locationTypes, ringOptions) {
         maxConnectionDistance: +ringOptions.maxConnectionDistance.value,
         maxWormholeDistance: +ringOptions.maxWormholeDistance.value,
         ringComplexityCount: +ringOptions.ringComplexityCount.value,
-        targetEdgeTypes: targetEdgeTypes,
-        sourceEdgeTypes: targetEdgeTypes
+        connectivityDefinition: ringOptions.connectivityDefinition
       }
     }
-
     AroHttp.post(`/service/plan/${planId}/ring-cmd`, postBody)
-      .then(result => {
-        // ToDo check for error
-      }).catch(err => console.error(err))
+      .catch(err => console.error(err))
   }
 }
 

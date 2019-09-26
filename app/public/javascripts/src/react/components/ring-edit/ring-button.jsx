@@ -41,7 +41,11 @@ export class RingButton extends ProgressButton {
     this.props.mapLayers.location.forEach(item => {
       if (item.checked) locationTypes.push(item.plannerKey)
     })
-    this.props.requestSubNet(planId, ringIds, locationTypes, this.props.ringOptions)
+    const ringOptions = {
+      ...this.props.ringOptionsBasic,
+      connectivityDefinition: this.props.ringOptions.connectivityDefinition
+    }
+    this.props.requestSubNet(planId, ringIds, locationTypes, ringOptions)
   }
 
   // override
@@ -79,7 +83,8 @@ const mapStateToProps = state => {
     planId: state.plan.activePlan && state.plan.activePlan.id,
     projectId: state.user.loggedInUser.projectId,
     rings: state.ringEdit.rings,
-    ringOptions: selector(state, 'spatialEdgeType', 'snappingDistance', 'maxConnectionDistance', 'maxWormholeDistance', 'ringComplexityCount', 'maxLocationEdgeDistance', 'locationBufferSize', 'conduitBufferSize', 'targetEdgeTypes'),
+    ringOptionsBasic: selector(state, 'spatialEdgeType', 'snappingDistance', 'maxConnectionDistance', 'maxWormholeDistance', 'ringComplexityCount', 'maxLocationEdgeDistance', 'locationBufferSize', 'conduitBufferSize', 'targetEdgeTypes'),
+    ringOptions: state.ringEdit.options,
     mapLayers: state.mapLayers
   }
 }
