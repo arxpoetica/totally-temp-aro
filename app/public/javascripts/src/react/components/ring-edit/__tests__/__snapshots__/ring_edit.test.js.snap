@@ -148,54 +148,8 @@ exports[`Can edit 1`] = `
     destroyOnUnmount={true}
     enableReinitialize={true}
     forceUnregisterOnUnmount={false}
-    form="ringOptions"
+    form="ringOptionsBasic"
     getFormState={[Function]}
-    initialValues={
-      Object {
-        "conduitBufferSize": Object {
-          "displayName": "Conduit buffer size",
-          "value": 500,
-        },
-        "locationBufferSize": Object {
-          "displayName": "Location buffer size",
-          "value": 500,
-        },
-        "maxConnectionDistance": Object {
-          "displayName": "Connection distance",
-          "value": 20,
-        },
-        "maxLocationEdgeDistance": Object {
-          "displayName": "Max location-edge distance",
-          "value": 400,
-        },
-        "maxWormholeDistance": Object {
-          "displayName": "Wormhole distance",
-          "value": 40,
-        },
-        "ringComplexityCount": Object {
-          "displayName": "Ring complexity",
-          "value": 3000000,
-        },
-        "snappingDistance": Object {
-          "displayName": "Snapping distance",
-          "value": 1,
-        },
-        "targetEdgeTypes": Object {
-          "duct": Object {
-            "displayName": "Duct",
-            "value": false,
-          },
-          "road": Object {
-            "displayName": "Road",
-            "value": true,
-          },
-          "sewer": Object {
-            "displayName": "Sewer",
-            "value": true,
-          },
-        },
-      }
-    }
     keepDirtyOnReinitialize={false}
     persistentSubmitErrors={false}
     pure={true}
@@ -207,6 +161,9 @@ exports[`Can edit 1`] = `
     touchOnBlur={true}
     touchOnChange={false}
     updateUnregisteredFields={false}
+  />
+  <Connect(RingOptionsConnectivityDefinition)
+    enableReinitialize={true}
   />
 </div>
 `;
@@ -289,54 +246,8 @@ exports[`Can't edit 1`] = `
     destroyOnUnmount={true}
     enableReinitialize={true}
     forceUnregisterOnUnmount={false}
-    form="ringOptions"
+    form="ringOptionsBasic"
     getFormState={[Function]}
-    initialValues={
-      Object {
-        "conduitBufferSize": Object {
-          "displayName": "Conduit buffer size",
-          "value": 500,
-        },
-        "locationBufferSize": Object {
-          "displayName": "Location buffer size",
-          "value": 500,
-        },
-        "maxConnectionDistance": Object {
-          "displayName": "Connection distance",
-          "value": 20,
-        },
-        "maxLocationEdgeDistance": Object {
-          "displayName": "Max location-edge distance",
-          "value": 400,
-        },
-        "maxWormholeDistance": Object {
-          "displayName": "Wormhole distance",
-          "value": 40,
-        },
-        "ringComplexityCount": Object {
-          "displayName": "Ring complexity",
-          "value": 3000000,
-        },
-        "snappingDistance": Object {
-          "displayName": "Snapping distance",
-          "value": 1,
-        },
-        "targetEdgeTypes": Object {
-          "duct": Object {
-            "displayName": "Duct",
-            "value": false,
-          },
-          "road": Object {
-            "displayName": "Road",
-            "value": true,
-          },
-          "sewer": Object {
-            "displayName": "Sewer",
-            "value": true,
-          },
-        },
-      }
-    }
     keepDirtyOnReinitialize={false}
     persistentSubmitErrors={false}
     pure={true}
@@ -348,6 +259,9 @@ exports[`Can't edit 1`] = `
     touchOnBlur={true}
     touchOnChange={false}
     updateUnregisteredFields={false}
+  />
+  <Connect(RingOptionsConnectivityDefinition)
+    enableReinitialize={true}
   />
 </div>
 `;
@@ -500,54 +414,8 @@ exports[`Delete ring 1`] = `
     destroyOnUnmount={true}
     enableReinitialize={true}
     forceUnregisterOnUnmount={false}
-    form="ringOptions"
+    form="ringOptionsBasic"
     getFormState={[Function]}
-    initialValues={
-      Object {
-        "conduitBufferSize": Object {
-          "displayName": "Conduit buffer size",
-          "value": 500,
-        },
-        "locationBufferSize": Object {
-          "displayName": "Location buffer size",
-          "value": 500,
-        },
-        "maxConnectionDistance": Object {
-          "displayName": "Connection distance",
-          "value": 20,
-        },
-        "maxLocationEdgeDistance": Object {
-          "displayName": "Max location-edge distance",
-          "value": 400,
-        },
-        "maxWormholeDistance": Object {
-          "displayName": "Wormhole distance",
-          "value": 40,
-        },
-        "ringComplexityCount": Object {
-          "displayName": "Ring complexity",
-          "value": 3000000,
-        },
-        "snappingDistance": Object {
-          "displayName": "Snapping distance",
-          "value": 1,
-        },
-        "targetEdgeTypes": Object {
-          "duct": Object {
-            "displayName": "Duct",
-            "value": false,
-          },
-          "road": Object {
-            "displayName": "Road",
-            "value": true,
-          },
-          "sewer": Object {
-            "displayName": "Sewer",
-            "value": true,
-          },
-        },
-      }
-    }
     keepDirtyOnReinitialize={false}
     persistentSubmitErrors={false}
     pure={true}
@@ -559,6 +427,9 @@ exports[`Delete ring 1`] = `
     touchOnBlur={true}
     touchOnChange={false}
     updateUnregisteredFields={false}
+  />
+  <Connect(RingOptionsConnectivityDefinition)
+    enableReinitialize={true}
   />
 </div>
 `;
@@ -581,54 +452,8 @@ exports[`With no rings 1`] = `
     destroyOnUnmount={true}
     enableReinitialize={true}
     forceUnregisterOnUnmount={false}
-    form="ringOptions"
+    form="ringOptionsBasic"
     getFormState={[Function]}
-    initialValues={
-      Object {
-        "conduitBufferSize": Object {
-          "displayName": "Conduit buffer size",
-          "value": 500,
-        },
-        "locationBufferSize": Object {
-          "displayName": "Location buffer size",
-          "value": 500,
-        },
-        "maxConnectionDistance": Object {
-          "displayName": "Connection distance",
-          "value": 20,
-        },
-        "maxLocationEdgeDistance": Object {
-          "displayName": "Max location-edge distance",
-          "value": 400,
-        },
-        "maxWormholeDistance": Object {
-          "displayName": "Wormhole distance",
-          "value": 40,
-        },
-        "ringComplexityCount": Object {
-          "displayName": "Ring complexity",
-          "value": 3000000,
-        },
-        "snappingDistance": Object {
-          "displayName": "Snapping distance",
-          "value": 1,
-        },
-        "targetEdgeTypes": Object {
-          "duct": Object {
-            "displayName": "Duct",
-            "value": false,
-          },
-          "road": Object {
-            "displayName": "Road",
-            "value": true,
-          },
-          "sewer": Object {
-            "displayName": "Sewer",
-            "value": true,
-          },
-        },
-      }
-    }
     keepDirtyOnReinitialize={false}
     persistentSubmitErrors={false}
     pure={true}
@@ -640,6 +465,9 @@ exports[`With no rings 1`] = `
     touchOnBlur={true}
     touchOnChange={false}
     updateUnregisteredFields={false}
+  />
+  <Connect(RingOptionsConnectivityDefinition)
+    enableReinitialize={true}
   />
 </div>
 `;
