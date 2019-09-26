@@ -164,8 +164,11 @@ class LocationEditorController {
       return Promise.resolve('/images/map_icons/aro/households_modified.png')
     } else if (locationDetails.objectValue.locationCategory === 'business') {
       return Promise.resolve('/images/map_icons/aro/businesses_small_selected.png')
-    } else {
+    } else if (locationDetails.objectValue.locationCategory === 'celltower') {
       return Promise.resolve('/images/map_icons/aro/tower.png')
+    } else {
+      // Always default to households
+      return Promise.resolve('/images/map_icons/aro/households_modified.png')
     }
   }
 
@@ -243,10 +246,12 @@ class LocationEditorController {
         coordinates: [mapObject.position.lng(), mapObject.position.lat()] // Note - longitude, then latitude
       },
       attributes: {
-        number_of_households: objectProperties.numberOfLocations
+        number_of_households: objectProperties.numberOfLocations,
+        number_of_employees: 5,
+        industry_id: '8071'
       },
       dataType: 'location',
-      // workflowState: WorkflowState.CREATED.name
+      locationCategory: objectProperties.selectedLocationType,
       workflowState: objectProperties.workflowStateId
     }
 
