@@ -13,14 +13,22 @@ export class AuditLog extends Component {
     this.setAuditLogExpanded = this.setAuditLogExpanded.bind(this)
   }
 
-  setAuditLogExpanded (isExpanded) {
-    if (isExpanded &&
+  componentDidUpdate (prevProps, prevState) {
+    // We can have multiple locations for the same point (e.g. when we have multiple households at the same lat long)
+    // In this case show the properties of the first point
+    const didLocationInfoDetailsChange = (this.props.locationInfoDetails !== prevProps.locationInfoDetails)
+    const didIsExpandedChange = (this.state.isExpanded !== prevState.isExpanded)
+    if ((didLocationInfoDetailsChange || didIsExpandedChange) &&
+      this.state.isExpanded &&
       this.props.locationInfoDetails &&
       this.props.locationInfoDetails.locSourceIds.hhSourceIds.object_ids.length > 0) {
       const firstHouseholdId = this.props.locationInfoDetails.locSourceIds.hhSourceIds.object_ids[0]
       this.props.getLocationAuditLog(this.props.planId, firstHouseholdId)
     }
-    this.setState({ isExpanded: !this.state.isExpanded })
+  }
+
+  setAuditLogExpanded (isExpanded) {
+    this.setState({ isExpanded: isExpanded })
   }
 
   render () {
