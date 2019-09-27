@@ -16,36 +16,34 @@ export class ResourcePermissions extends Component {
   render () {
     console.log(this.props.dataItems)
     return <div>
-      <div>
-        <table className="table table-sm ei-table-foldout-striped" style={{'borderBottom': '1px solid #dee2e6'}}>
-          <thead className="thead-dark">
-	          <tr>
-              <th></th>
-              <th className="ei-table-col-head-sortable ng-binding ng-scope" onClick={event => {console.log('reorder')}}>
-                Name
-                {/*
-                <div className="ei-table-col-sort-icon ng-scope">
-                  <i className="fa fa-chevron-down ng-scope" aria-hidden="true"> </i>
-                </div>
-                */}
-              </th>
-              <th className="ei-table-col-head-sortable ng-binding ng-scope" onClick={event => {console.log('reorder')}}>
-                Data Type
-                {/*
-                <div className="ei-table-col-sort-icon ng-scope">
-                  <i className="fa fa-chevron-down ng-scope" aria-hidden="true"> </i>
-                </div>
-                */}
-              </th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {this.renderDataRows()}
-          </tbody>
-        </table>
-        {/* also need pagination */}
-      </div>
+      <table className="table table-sm ei-table-foldout-striped" style={{'borderBottom': '1px solid #dee2e6'}}>
+        <thead className="thead-dark">
+          <tr>
+            <th></th>
+            <th className="ei-table-col-head-sortable ng-binding ng-scope" onClick={event => {console.log('reorder')}}>
+              Name
+              {/*
+              <div className="ei-table-col-sort-icon ng-scope">
+                <i className="fa fa-chevron-down ng-scope" aria-hidden="true"> </i>
+              </div>
+              */}
+            </th>
+            <th className="ei-table-col-head-sortable ng-binding ng-scope" onClick={event => {console.log('reorder')}}>
+              Data Type
+              {/*
+              <div className="ei-table-col-sort-icon ng-scope">
+                <i className="fa fa-chevron-down ng-scope" aria-hidden="true"> </i>
+              </div>
+              */}
+            </th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {this.renderDataRows()}
+        </tbody>
+      </table>
+      {/* also need pagination */}
     </div>
   }
 
