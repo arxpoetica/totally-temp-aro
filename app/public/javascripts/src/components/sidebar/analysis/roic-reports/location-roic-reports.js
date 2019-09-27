@@ -58,7 +58,6 @@ class LocationRoicReportsController {
   mapStateToThis (reduxState) {
     return {
       planId: reduxState.plan.activePlan && reduxState.plan.activePlan.id,
-      selectedLocations: reduxState.selection.locations,
       locationInfoDetails: reduxState.locationInfo.details
     }
   }
@@ -69,19 +68,14 @@ class LocationRoicReportsController {
   }
 
   mergeToTarget (nextState, actions) {
-    const oldSelectedLocations = this.selectedLocations
     const oldLocationInfoDetails = this.locationInfoDetails
 
     // merge state and actions onto controller
     Object.assign(this, nextState)
     Object.assign(this, actions)
 
-    const hasSelectionChanged = (oldSelectedLocations !== this.selectedLocations)
-    const haveAtLeastOneSelectedLocation = this.selectedLocations.size > 0
-    const hasLocationInfoDetailsChanged = (oldLocationInfoDetails !== this.locationInfoDetails)
-    if ((hasSelectionChanged || hasLocationInfoDetailsChanged) && haveAtLeastOneSelectedLocation) {
-      const firstSelectedLocationId = this.selectedLocations.values().next().value
-      this.getLocationInfo(this.planId, firstSelectedLocationId)
+    if (oldLocationInfoDetails !== this.locationInfoDetails) {
+      this.getLocationInfo(this.planId)
     }
   }
 }
