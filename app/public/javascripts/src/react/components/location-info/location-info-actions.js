@@ -14,9 +14,9 @@ function getLocationInfo (planId, id) {
   }
 }
 
-function getLocationAuditLog (planId, id) {
+function getLocationAuditLog (planId, objectId) {
   return dispatch => {
-    AroHttp.get(`/service/audit/location/trail/bd983214-6cd9-11e9-8e12-9fd844c9846b?plan_id=${planId}`)
+    AroHttp.get(`/service/audit/location/trail/${objectId}?plan_id=${planId}`)
       .then(result => {
         if (result.data) {
           dispatch({ type: Actions.LOCATION_INFO_SET_AUDIT_LOG, payload: result.data })
