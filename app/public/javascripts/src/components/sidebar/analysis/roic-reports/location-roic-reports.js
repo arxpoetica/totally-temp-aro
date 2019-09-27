@@ -1,5 +1,3 @@
-import Constants from '../../../common/constants'
-import SelectionActions from '../../../../react/components/selection/selection-actions'
 
 class LocationRoicReportsController {
   constructor ($http, state, $ngRedux) {
@@ -60,7 +58,7 @@ class LocationRoicReportsController {
       .catch((err) => console.error(err))
   }
 
-  onDestroy () {
+  $onDestroy () {
     this.unsubscribeRedux()
   }
 
