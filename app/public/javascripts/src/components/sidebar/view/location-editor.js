@@ -7,6 +7,13 @@ import MapLayerActions from '../../../react/components/map-layers/map-layer-acti
 // We need a selector, else the .toJS() call will create an infinite digest loop
 const getAllLocationLayers = state => state.mapLayers.location
 const getLocationLayersList = createSelector([getAllLocationLayers], (locationLayers) => locationLayers.toJS())
+const getLocationTypeToIconUrl = createSelector([getAllLocationLayers], locationLayers => {
+  var locationTypeToIcon = {}
+  locationLayers.forEach(locationLayer => {
+    locationTypeToIcon[locationLayer.categoryKey] = locationLayer.iconUrl
+  })
+  return locationTypeToIcon
+})
 
 class LocationProperties {
   constructor (workflowStateId, selectedLocationType, numberOfLocations = 1) {
@@ -410,9 +417,18 @@ class LocationEditorController {
       .catch(err => console.error(err))
   }
 
+  getWorkflowStateIcon () {
+    var locationCategory = this.locationTypeToAdd
+    if (this.selectedMapObject) {
+      locationCategory = this.objectIdToProperties[this.selectedMapObject.objectId].selectedLocationType
+    }
+    return this.locationTypeToIconUrl[locationCategory]
+  }
+
   mapStateToThis (reduxState) {
     return {
       locationLayers: getLocationLayersList(reduxState),
+      locationTypeToIconUrl: getLocationTypeToIconUrl(reduxState),
       dataItems: reduxState.plan.dataItems,
       loggedInUser: reduxState.user.loggedInUser
     }

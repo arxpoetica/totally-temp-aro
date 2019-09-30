@@ -96,7 +96,7 @@
               ng-disabled="true"
               ng-change="$ctrl.markSelectedLocationPropertiesDirty()"
               ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId">
-              <span><img src="/images/map_icons/aro/households_default.png" style="vertical-align:middle; padding-right: 7px"></span>
+              <span><img ng-src="{{$ctrl.getWorkflowStateIcon()}}" style="vertical-align:middle; padding-right: 7px"></span>
               Created<br>
             <input
               type="radio"
@@ -105,7 +105,9 @@
               ng-disabled="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId == $ctrl.WorkflowState.CREATED.id"
               ng-change="$ctrl.markSelectedLocationPropertiesDirty()"
               ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId">
-              <span><img class="overlay-lock" src="/images/map_icons/aro/lock_overlay.png" style="vertical-align:bottom; padding-right: 5px"><img src="/images/map_icons/aro/households_default.png" style="vertical-align:middle; padding-right: 10px"></span>
+              <span><img class="overlay-lock" src="/images/map_icons/aro/lock_overlay.png" style="vertical-align:bottom; padding-right: 5px">
+                <img ng-src="{{$ctrl.getWorkflowStateIcon()}}" style="vertical-align:middle; padding-right: 10px">
+              </span>
               Locked<br>
             <input
               type="radio"
@@ -114,7 +116,9 @@
               ng-disabled="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId == $ctrl.WorkflowState.CREATED.id"
               ng-change="$ctrl.markSelectedLocationPropertiesDirty()"
               ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId">
-              <span><img class="overlay-close" src="/images/map_icons/aro/invalidated_overlay.png" style="vertical-align:bottom; padding-right: 5px"><img src="/images/map_icons/aro/households_default.png" style="vertical-align:middle; padding-right: 10px"></span>
+              <span><img class="overlay-close" src="/images/map_icons/aro/invalidated_overlay.png" style="vertical-align:bottom; padding-right: 5px">
+                <img ng-src="{{$ctrl.getWorkflowStateIcon()}}" style="vertical-align:middle; padding-right: 10px">
+              </span>
               Invalidated<br>
           </td>
         </tr>
@@ -142,13 +146,6 @@
         ng-click="$ctrl.isExpandLocAttributes = true">
         <i class="fa fa-pencil"></i>&nbsp;&nbsp;Expand
       </button>
-
-      <!-- Add a div that will overlay all the controls above. The div will be visible when the controls need to be disabled. -->
-      <!-- <div class="disable-sibling-controls"
-           ng-hide="!(($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId == $ctrl.WorkflowState.LOCKED.id) || ($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId == $ctrl.WorkflowState.INVALIDATED.id))">
-        <i class="fa fa-5x fa-lock" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"></i>
-      </div> -->
-
     </div>
     <br>
     Number of changes in transaction: {{$ctrl.getFeaturesCount()}}
@@ -188,17 +185,6 @@
 
         <tr ng-if="val != null && val != 'null' && key != 'number_of_households' && key != 'location_category'" 
           ng-repeat="(key, val) in $ctrl.objectIdToMapObject[$ctrl.selectedMapObject.objectId].feature.attributes">
-
-          <!-- while using tagging can add new attribute but it will not show in a dropdown -->
-          <!-- <td>
-            <ui-select theme="bootstrap" ng-model="key" tagging tagging-label="false" close-on-select="true" on-select="$ctrl.markSelectedLocationPropertiesDirty();
-              $ctrl.editLocationAttributes($index,$select.selected,val)">
-              <ui-select-match placeholder="Create or search a attribute Key">{{ $select.selected}}</ui-select-match>
-              <ui-select-choices class="ui-select-choices-tag-style" repeat="attrKey in $ctrl.availableAttributesKeyList | filter: $select.search">
-                <div> {{attrKey}} </div>
-              </ui-select-choices>
-            </ui-select>
-          </td> -->
 
             <!-- instead of using tagging adding a search value to list so that can see search value in dropdown list -->
             <td>
