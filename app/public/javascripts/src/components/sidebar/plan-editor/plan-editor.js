@@ -1073,13 +1073,15 @@ class PlanEditorController {
               // Always assign subnet parent on object creation, even if we are not creating a route. This way, if the user
               // later turns on auto-recalculate, it will generate the entire subnet.
                 var currentEquipmentWithSubnetId = result.data.filter((item) => item.objectId === equipmentObject.objectId)[0]
-                if (this.networkNodeTypeCanHaveSubnet(equipmentFeature.networkNodeType)) {
+                if (!this.state.configuration.planEditor.calculateSubnets) {
+                  return Promise.resolve()  // Never calculate subnets
+                } else if (this.networkNodeTypeCanHaveSubnet(equipmentFeature.networkNodeType)) {
                   return this.assignSubnetParent(currentEquipmentWithSubnetId)
                 } else {
                   return Promise.reject({ softReject: true, message: `Network node type ${equipmentFeature.networkNodeType} does not support subnet calculation.` })
                 }
               })
-              .then(() => this.autoRecalculateSubnet ? this.recalculateSubnetForEquipmentChange(feature) : Promise.resolve())
+              .then(() => (this.autoRecalculateSubnet && this.state.configuration.planEditor.calculateSubnets) ? this.recalculateSubnetForEquipmentChange(feature) : Promise.resolve())
               .then(() => { this.setIsCreatingObject(false) })
               .catch((err) => {
                 if (err.softReject) {
@@ -1107,16 +1109,16 @@ class PlanEditorController {
         promiseToReturn = this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
           .then(() => this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`))
           .then((result) => {
-          // Always assign subnet parent on object creation, even if we are not creating a route. This way, if the user
-          // later turns on auto-recalculate, it will generate the entire subnet.
             var currentEquipmentWithSubnetId = result.data.filter((item) => item.objectId === equipmentObject.objectId)[0]
-            if (this.networkNodeTypeCanHaveSubnet(feature.networkNodeType)) {
+            if (!this.state.configuration.planEditor.calculateSubnets) {
+              return Promise.resolve()  // Never calculate subnets
+            } else if (this.networkNodeTypeCanHaveSubnet(feature.networkNodeType)) {
               return this.assignSubnetParent(currentEquipmentWithSubnetId)
             } else {
               return Promise.reject({ softReject: true, message: `Network node type ${feature.networkNodeType} does not support subnet calculation.` })
             }
           })
-          .then(() => this.autoRecalculateSubnet ? this.recalculateSubnetForEquipmentChange(feature) : Promise.resolve())
+          .then(() => (this.autoRecalculateSubnet && this.state.configuration.planEditor.calculateSubnets) ? this.recalculateSubnetForEquipmentChange(feature) : Promise.resolve())
           .then(() => { this.setIsCreatingObject(false) })
           .catch((err) => {
             if (err.softReject) {
@@ -1242,7 +1244,7 @@ class PlanEditorController {
             }
           }
           this.$timeout()
-          return this.autoRecalculateSubnet ? this.recalculateSubnetForEquipmentChange(equipmentToRecalculate) : Promise.resolve()
+          return (this.autoRecalculateSubnet && this.state.configuration.planEditor.calculateSubnets) ? this.recalculateSubnetForEquipmentChange(equipmentToRecalculate) : Promise.resolve()
         })
         .then(() => { this.setIsModifyingObject(false) })
         .catch((err) => {

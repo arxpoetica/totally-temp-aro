@@ -23,7 +23,6 @@ export class LocationInfo extends Component {
     if (newLocationId !== oldLocationId) {
       // We have exactly one location selected. Get the location details
       this.props.getLocationInfo(this.props.planId, newLocationId)
-      this.props.getLocationAuditLog(this.props.planId, newLocationId)
     }
   }
 
@@ -72,46 +71,46 @@ export class LocationInfo extends Component {
   }
 
   renderLocationDetails () {
-    const LocationDetails = this.props.locationInfoDetails
+    const locationDetails = this.props.locationInfoDetails
     return <table id='table-coverage-initializer' className='table table-sm table-striped sidebar-options-table'>
       <tbody>
         <tr>
           <td>Name</td>
-          <td>{LocationDetails.name}</td>
+          <td>{locationDetails.name}</td>
         </tr>
         <tr>
           <td>Address</td>
-          <td>{LocationDetails.address}</td>
+          <td>{locationDetails.address}</td>
         </tr>
         <tr>
           <td>Latitude</td>
-          <td>{LocationDetails.geog.coordinates[1]}</td>
+          <td>{locationDetails.geog.coordinates[1]}</td>
         </tr>
         <tr>
           <td>Longitude</td>
-          <td>{LocationDetails.geog.coordinates[0]}</td>
+          <td>{locationDetails.geog.coordinates[0]}</td>
         </tr>
         <tr>
           <td>Census Block</td>
-          <td>{LocationDetails.tabblock_id}</td>
+          <td>{locationDetails.tabblock_id}</td>
         </tr>
 
-        {this.renderLocationTypeTitle('HouseHold Count', LocationDetails.number_of_households,1)}
-        {this.renderLocationIdDetails('HouseHold IDs', LocationDetails.locSourceIds.hhSourceIds.object_ids,2)}
+        {this.renderLocationTypeTitle('HouseHold Count', locationDetails.number_of_households, 1)}
+        {this.renderLocationIdDetails('HouseHold IDs', locationDetails.locSourceIds.hhSourceIds.object_ids, 2)}
 
-        {this.renderLocationTypeTitle('Business Count', LocationDetails.number_of_businesses,3)}
-        {this.renderLocationIdDetails('Business IDs', LocationDetails.locSourceIds.bizSourceIds.object_ids,4)}
+        {this.renderLocationTypeTitle('Business Count', locationDetails.number_of_businesses, 3)}
+        {this.renderLocationIdDetails('Business IDs', locationDetails.locSourceIds.bizSourceIds.object_ids, 4)}
 
-        {this.renderLocationTypeTitle('Tower Count', LocationDetails.number_of_towers,5)}
-        {this.renderLocationIdDetails('Tower IDs', LocationDetails.locSourceIds.towerSourceIds.object_ids,6)}
+        {this.renderLocationTypeTitle('Tower Count', locationDetails.number_of_towers, 5)}
+        {this.renderLocationIdDetails('Tower IDs', locationDetails.locSourceIds.towerSourceIds.object_ids, 6)}
 
         <tr>
           <td>Distance From Existing Network</td>
-          <td>{LocationDetails.distance_to_client_fiber}m</td>
+          <td>{locationDetails.distance_to_client_fiber}m</td>
         </tr>
         <tr>
           <td>Distance from Planned Network</td>
-          <td>{LocationDetails.distance_to_planned_network}m</td>
+          <td>{locationDetails.distance_to_planned_network}m</td>
         </tr>
       </tbody>
     </table>
@@ -138,13 +137,11 @@ LocationInfo.propTypes = {
 const mapStateToProps = state => ({
   planId: state.plan.activePlan && state.plan.activePlan.id,
   selectedLocations: state.selection.locations,
-  locationInfoDetails: state.locationInfo.details,
-  auditLog: state.locationInfo.auditLog
+  locationInfoDetails: state.locationInfo.details
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  getLocationInfo: (planId, selectedLocations) => dispatch(LocationInfoActions.getLocationInfo(planId, selectedLocations)),
-  getLocationAuditLog: (planId, selectedLocations) => dispatch(LocationInfoActions.getLocationAuditLog(planId, selectedLocations))
+  getLocationInfo: (planId, selectedLocations) => dispatch(LocationInfoActions.getLocationInfo(planId, selectedLocations))
 })
 
 const LocationInfoComponent = wrapComponentWithProvider(reduxStore, LocationInfo, mapStateToProps, mapDispatchToProps)
