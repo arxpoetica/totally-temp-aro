@@ -74,12 +74,7 @@
         <tr>
           <td>Location type:</td>
           <td>
-            <select class="form-control"
-                    ng-disabled="(($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId == $ctrl.WorkflowState.LOCKED.id) || ($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId == $ctrl.WorkflowState.INVALIDATED.id))"
-                    ng-change="$ctrl.markSelectedLocationPropertiesDirty()"
-                    ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].selectedLocationType"
-                    ng-options="key as value for (key, value) in $ctrl.locationTypes">
-            </select>
+            {{$ctrl.locationTypes[$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].selectedLocationType]}}
           </td>
         </tr>
         <tr>

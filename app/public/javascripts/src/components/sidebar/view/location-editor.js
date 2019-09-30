@@ -159,9 +159,10 @@ class LocationEditorController {
       })
   }
 
-  getObjectIconUrl () {
+  getObjectIconUrl (locationDetails) {
+    const locationType = locationDetails.objectValue.isExistingObject ? locationDetails.objectValue.locationCategory : this.locationTypeToAdd
     var iconUrl = null
-    switch (this.locationTypeToAdd) {
+    switch (locationType) {
       case 'business':
         iconUrl = '/images/map_icons/aro/businesses_small_selected.png'
         break
@@ -282,7 +283,8 @@ class LocationEditorController {
       numberOfLocations = +feature.attributes.number_of_households
     }
     const workflowStateId = feature.workflow_state_id || WorkflowState.CREATED.id
-    this.objectIdToProperties[mapObject.objectId] = new LocationProperties(workflowStateId, this.locationTypeToAdd, numberOfLocations)
+    const locationCategory = feature.locationCategory || this.locationTypeToAdd
+    this.objectIdToProperties[mapObject.objectId] = new LocationProperties(workflowStateId, locationCategory, numberOfLocations)
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     var locationObject = this.formatLocationForService(mapObject.objectId)
     // The marker is editable if the state is not LOCKED or INVALIDATED
