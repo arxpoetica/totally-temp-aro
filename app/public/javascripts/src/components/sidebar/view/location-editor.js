@@ -10,11 +10,6 @@ const getLocationLayersList = createSelector([getAllLocationLayers], (locationLa
 
 class LocationProperties {
   constructor (workflowStateId, selectedLocationType, numberOfLocations = 1) {
-    this.locationTypes = {
-      household: 'Households',
-      business: 'Businesses',
-      celltower: 'Celltowers'
-    }
     this.selectedLocationType = selectedLocationType || 'household'
     this.numberOfLocations = numberOfLocations
     this.workflowStateId = workflowStateId
@@ -40,6 +35,12 @@ class LocationEditorController {
     this.WorkflowState = WorkflowState
     this.isExpandLocAttributes = false
     this.userCanChangeWorkflowState = false
+    this.locationTypes = {
+      household: 'Households',
+      business: 'Businesses',
+      celltower: 'Celltowers'
+    }
+    this.locationTypeToAdd = 'household'
 
     this.availableAttributesKeyList = ['loop_extended']
     this.availableAttributesValueList = ['true', 'false']
@@ -158,18 +159,23 @@ class LocationEditorController {
       })
   }
 
-  getObjectIconUrl (locationDetails) {
-    // Hardcoded for now
-    if (locationDetails.objectValue.locationCategory === 'household') {
-      return Promise.resolve('/images/map_icons/aro/households_modified.png')
-    } else if (locationDetails.objectValue.locationCategory === 'business') {
-      return Promise.resolve('/images/map_icons/aro/businesses_small_selected.png')
-    } else if (locationDetails.objectValue.locationCategory === 'celltower') {
-      return Promise.resolve('/images/map_icons/aro/tower.png')
-    } else {
-      // Always default to households
-      return Promise.resolve('/images/map_icons/aro/households_modified.png')
+  getObjectIconUrl () {
+    var iconUrl = null
+    switch (this.locationTypeToAdd) {
+      case 'business':
+        iconUrl = '/images/map_icons/aro/businesses_small_selected.png'
+        break
+
+      case 'celltower':
+        iconUrl = '/images/map_icons/aro/tower.png'
+        break
+
+      case 'household':
+      default:
+        iconUrl = '/images/map_icons/aro/households_modified.png'
+        break
     }
+    return Promise.resolve(iconUrl)
   }
 
   getObjectSelectedIconUrl () {

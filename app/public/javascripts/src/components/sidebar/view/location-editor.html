@@ -59,6 +59,18 @@
       </div>
     </div>
     <br>
+    <div>
+      {{$ctrl.locationTypes | json}}
+    </div>
+    <div class='btn btn-group'>
+      <button ng-repeat="(locationType, locationTypeDescription) in $ctrl.locationTypes"
+        ng-class="{ 'btn': true,
+                    'btn-primary': locationType === $ctrl.locationTypeToAdd,
+                    'btn-light': locationType !== $ctrl.locationTypeToAdd }"
+        ng-click="$ctrl.locationTypeToAdd = locationType">
+        {{locationTypeDescription}}
+      </button>
+    </div>
     <div ng-if="$ctrl.selectedMapObject" style="position: relative;">
       <!-- <div style="position: relative;"> -->
       <table id="tblLocationProperties" class="table table-sm table-striped" style="margin-bottom: 10px">
@@ -69,7 +81,7 @@
                     ng-disabled="(($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId == $ctrl.WorkflowState.LOCKED.id) || ($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId == $ctrl.WorkflowState.INVALIDATED.id))"
                     ng-change="$ctrl.markSelectedLocationPropertiesDirty()"
                     ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].selectedLocationType"
-                    ng-options="key as value for (key, value) in $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].locationTypes">
+                    ng-options="key as value for (key, value) in $ctrl.locationTypes">
             </select>
           </td>
         </tr>
@@ -163,7 +175,7 @@
             <select class="form-control"
                     ng-change="$ctrl.markSelectedLocationPropertiesDirty()"
                     ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].selectedLocationType"
-                    ng-options="item for item in $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].locationTypes">
+                    ng-options="item for item in $ctrl.locationTypes">
             </select>
           </td>
         </tr>
