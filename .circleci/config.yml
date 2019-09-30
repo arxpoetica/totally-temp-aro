@@ -73,7 +73,6 @@ workflows:
                 - master
                 - optional_building
                 - devJuly2019
-                - frontierFixesSep2019
 
       - deploy:
           requires:
