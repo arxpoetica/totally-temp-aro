@@ -119,6 +119,7 @@ class NetworkEquipmentController {
     // For equipments, we are going to filter out features that are planned and deleted
     var featureFilter = null
     var drawingOptions = angular.copy(networkEquipment.drawingOptions)
+    var subtypes = null
     if (categoryType === 'equipment') {
       featureFilter = (feature) => {
         // For now, just hide equipment features that are Planned and Deleted
@@ -129,12 +130,16 @@ class NetworkEquipmentController {
       if (this.state.showEquipmentLabels && map.getZoom() > this.networkEquipmentLayers.labelDrawingOptions.visibilityZoomThreshold) {
         drawingOptions.labels = this.networkEquipmentLayers.labelDrawingOptions
       }
+      subtypes = { ...networkEquipment.subtypes }
     } else if (categoryType === 'boundaries') {
       featureFilter = (feature) => {
         // Show boundaries with the currently selected boundary type AND that are not marked as deleted
         return (feature.properties.boundary_type === this.state.selectedBoundaryType.id) &&
           (feature.properties.is_deleted !== 'true')
       }
+      // Why this hack for boundaries? Because boundary layers are not explicitly shown via a checkbox in the UI.
+      // So we just turn on the "0" subtype for all boundary layers. The filter will take care of hiding based on boundary type.
+      subtypes = { 0: true }
     }
 
     return { // ToDo: this needs to be a class and the same class as in the reducer
@@ -152,7 +157,7 @@ class NetworkEquipmentController {
       zIndex: networkEquipment.zIndex + (existingOrPlannedzIndex || 0),
       showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection && this.state.showDirectedCable, // Showing Direction
       highlightStyle: networkEquipment.highlightStyle,
-      subtypes: { ...networkEquipment.subtypes }
+      subtypes: subtypes
     }
   }
 
