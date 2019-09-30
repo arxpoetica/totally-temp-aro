@@ -80,8 +80,10 @@ export class ResourcePermissions extends Component {
       </tr>,
       <tr className='ei-foldout-row' key={dataItem.identifier + '_b'}>
         <td colSpan='999'>
-          <PermissionsTable resource={dataItem} />
-          <br/>add user
+          <div style={{'padding': '0px 20px 0px 20px'}}>
+            <PermissionsTable resource={dataItem} />
+            <br/>add user
+          </div>
         </td>
       </tr>
     ]

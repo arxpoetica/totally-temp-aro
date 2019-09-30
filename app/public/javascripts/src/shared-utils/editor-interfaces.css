@@ -288,12 +288,13 @@ editor-interface-tree .ei-header{
 }
 
 
-.ei-table-foldout-striped tbody>tr{
+.ei-table-striped>tbody>tr, .ei-table-foldout-striped>tbody>tr{
 	background-color: transparent;
 }
-.ei-table-foldout-striped tbody>tr:nth-of-type(4n-3), 
-.ei-table-foldout-striped tbody>tr:nth-of-type(4n-2) {
-    background-color: rgba(0,0,0,.05);
+.ei-table-striped>tbody>tr:nth-of-type(odd),
+.ei-table-foldout-striped>tbody>tr:nth-of-type(4n-3), 
+.ei-table-foldout-striped>tbody>tr:nth-of-type(4n-2) {
+  background-color: rgba(0,0,0,.05);
 }
 
 .ei-foldout-row td {

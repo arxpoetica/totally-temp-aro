@@ -11,9 +11,9 @@ export class PermissionsTable extends Component {
   }
 
   render () {
-    return <div>
-      <table className="table table-sm ei-table-foldout-striped" style={{'borderBottom': '1px solid #dee2e6'}}>
-        <thead className="thead-dark">
+    return (
+      <table className="table table-sm ei-table-striped" style={{'borderBottom': '1px solid #dee2e6'}}>
+        <thead>
           <tr>
             <th className="ei-table-col-head-sortable ng-binding ng-scope" onClick={event => {console.log('reorder')}}>
               Name
@@ -38,8 +38,7 @@ export class PermissionsTable extends Component {
           {this.renderDataRows()}
         </tbody>
       </table>
-      {/* also need pagination */}
-    </div>
+    )
   }
 
   renderDataRows () {
