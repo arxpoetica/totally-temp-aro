@@ -54,8 +54,8 @@ export class PermissionsTable extends Component {
   }
 
   renderDataRow (dataItem) {
-    console.log(this.props.systemActors)
-    console.log(dataItem)
+    // console.log(this.props.systemActors)
+    // console.log(dataItem)
     const systemActor = this.props.systemActors[dataItem.systemActorId]
     if (!systemActor) return
     if (!systemActor.hasOwnProperty('name')) systemActor.name = `${systemActor.firstName} ${systemActor.lastName}`

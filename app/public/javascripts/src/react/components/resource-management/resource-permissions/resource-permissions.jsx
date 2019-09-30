@@ -113,6 +113,7 @@ ResourcePermissions.propTypes = {
 
 const mapStateToProps = (state) => ({
   dataItems: state.plan.dataItems,
+  loggedInUser: state.user.loggedInUser,
   uploadDataSources: state.plan.uploadDataSources,
   systemActors: state.user.systemActors
 })
