@@ -1,5 +1,3 @@
-import Constants from '../../../common/constants'
-import SelectionActions from '../../../../react/components/selection/selection-actions'
 
 class LocationRoicReportsController {
   constructor ($http, state, $ngRedux) {
@@ -7,12 +5,6 @@ class LocationRoicReportsController {
     this.state = state
 
     this.roicResultsData = null
-    // this.roicPlanSettings = {
-    //   analysis_type: 'LOCATION_ROIC',
-    //   locationIds: locationIds,
-    //   planId: planId,
-    //   projectTemplateId: 1
-    // }
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
   }
 
@@ -33,41 +25,40 @@ class LocationRoicReportsController {
       .catch(err => console.error(err))
   }
 
-  getLocationInfo (planId, id) {
-    return this.$http.get(`/locations/${planId}/${id}/show`)// note: change this for a service endpoint?
-      .then((result) => {
-        var locationIds = []
-        if (result.data.hasOwnProperty('locSourceIds')) {
-          if (result.data.locSourceIds.hasOwnProperty('bizSourceIds') && result.data.locSourceIds.bizSourceIds.object_ids) {
-            locationIds = locationIds.concat(result.data.locSourceIds.bizSourceIds.object_ids)
-          }
-          if (result.data.locSourceIds.hasOwnProperty('hhSourceIds') && result.data.locSourceIds.hhSourceIds.object_ids) {
-            locationIds = locationIds.concat(result.data.locSourceIds.hhSourceIds.object_ids)
-          }
-          if (result.data.locSourceIds.hasOwnProperty('towerSourceIds') && result.data.locSourceIds.towerSourceIds.object_ids) {
-            locationIds = locationIds.concat(result.data.locSourceIds.towerSourceIds.object_ids)
-          }
+  getLocationInfo (planId) {
+    const locationInfoDetails = this.locationInfoDetails
+    if (locationInfoDetails) {
+      var locationIds = []
+      if (locationInfoDetails.hasOwnProperty('locSourceIds')) {
+        if (locationInfoDetails.locSourceIds.hasOwnProperty('bizSourceIds') && locationInfoDetails.locSourceIds.bizSourceIds.object_ids) {
+          locationIds = locationIds.concat(locationInfoDetails.locSourceIds.bizSourceIds.object_ids)
         }
+        if (locationInfoDetails.locSourceIds.hasOwnProperty('hhSourceIds') && locationInfoDetails.locSourceIds.hhSourceIds.object_ids) {
+          locationIds = locationIds.concat(locationInfoDetails.locSourceIds.hhSourceIds.object_ids)
+        }
+        if (locationInfoDetails.locSourceIds.hasOwnProperty('towerSourceIds') && locationInfoDetails.locSourceIds.towerSourceIds.object_ids) {
+          locationIds = locationIds.concat(locationInfoDetails.locSourceIds.towerSourceIds.object_ids)
+        }
+      }
 
-        this.roicPlanSettings = {
-          'analysis_type': 'LOCATION_ROIC',
-          'locationIds': locationIds,
-          'planId': planId,
-          'projectTemplateId': 1
-        }
-        this.refreshData()
-      })
-      .catch((err) => console.error(err))
+      this.roicPlanSettings = {
+        'analysis_type': 'LOCATION_ROIC',
+        'locationIds': locationIds,
+        'planId': planId,
+        'projectTemplateId': 1
+      }
+      this.refreshData()
+    }
   }
 
-  onDestroy () {
+  $onDestroy () {
     this.unsubscribeRedux()
   }
 
   mapStateToThis (reduxState) {
     return {
       planId: reduxState.plan.activePlan && reduxState.plan.activePlan.id,
-      selectedLocations: reduxState.selection.locations
+      locationInfoDetails: reduxState.locationInfo.details
     }
   }
 
@@ -77,16 +68,14 @@ class LocationRoicReportsController {
   }
 
   mergeToTarget (nextState, actions) {
-    const oldSelectedLocations = this.selectedLocations
+    const oldLocationInfoDetails = this.locationInfoDetails
 
     // merge state and actions onto controller
     Object.assign(this, nextState)
     Object.assign(this, actions)
 
-    if ((oldSelectedLocations !== this.selectedLocations)
-        && (this.selectedLocations.size > 0)) {
-      const firstSelectedLocationId = this.selectedLocations.values().next().value
-      this.getLocationInfo(this.planId, firstSelectedLocationId)
+    if (oldLocationInfoDetails !== this.locationInfoDetails) {
+      this.getLocationInfo(this.planId)
     }
   }
 }

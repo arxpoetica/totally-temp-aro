@@ -7,11 +7,17 @@ import MapLayerActions from '../../../react/components/map-layers/map-layer-acti
 // We need a selector, else the .toJS() call will create an infinite digest loop
 const getAllLocationLayers = state => state.mapLayers.location
 const getLocationLayersList = createSelector([getAllLocationLayers], (locationLayers) => locationLayers.toJS())
+const getLocationTypeToIconUrl = createSelector([getAllLocationLayers], locationLayers => {
+  var locationTypeToIcon = {}
+  locationLayers.forEach(locationLayer => {
+    locationTypeToIcon[locationLayer.categoryKey] = locationLayer.iconUrl
+  })
+  return locationTypeToIcon
+})
 
 class LocationProperties {
-  constructor (workflowStateId, numberOfLocations = 1) {
-    this.locationTypes = ['Household']
-    this.selectedLocationType = this.locationTypes[0]
+  constructor (workflowStateId, selectedLocationType, numberOfLocations = 1) {
+    this.selectedLocationType = selectedLocationType || 'household'
     this.numberOfLocations = numberOfLocations
     this.workflowStateId = workflowStateId
     this.isDirty = false
@@ -36,6 +42,12 @@ class LocationEditorController {
     this.WorkflowState = WorkflowState
     this.isExpandLocAttributes = false
     this.userCanChangeWorkflowState = false
+    this.locationTypes = {
+      household: 'Households',
+      business: 'Businesses',
+      celltower: 'Celltowers'
+    }
+    this.locationTypeToAdd = 'household'
 
     this.availableAttributesKeyList = ['loop_extended']
     this.availableAttributesValueList = ['true', 'false']
@@ -154,9 +166,24 @@ class LocationEditorController {
       })
   }
 
-  getObjectIconUrl () {
-    // Hardcoded for now
-    return Promise.resolve('/images/map_icons/aro/households_modified.png')
+  getObjectIconUrl (locationDetails) {
+    const locationType = locationDetails.objectValue.isExistingObject ? locationDetails.objectValue.locationCategory : this.locationTypeToAdd
+    var iconUrl = null
+    switch (locationType) {
+      case 'business':
+        iconUrl = '/images/map_icons/aro/businesses_small_selected.png'
+        break
+
+      case 'celltower':
+        iconUrl = '/images/map_icons/aro/tower.png'
+        break
+
+      case 'household':
+      default:
+        iconUrl = '/images/map_icons/aro/households_modified.png'
+        break
+    }
+    return Promise.resolve(iconUrl)
   }
 
   getObjectSelectedIconUrl () {
@@ -233,10 +260,12 @@ class LocationEditorController {
         coordinates: [mapObject.position.lng(), mapObject.position.lat()] // Note - longitude, then latitude
       },
       attributes: {
-        number_of_households: objectProperties.numberOfLocations
+        number_of_households: objectProperties.numberOfLocations,
+        number_of_employees: 5,
+        industry_id: '8071'
       },
       dataType: 'location',
-      // workflowState: WorkflowState.CREATED.name
+      locationCategory: objectProperties.selectedLocationType,
       workflowState: objectProperties.workflowStateId
     }
 
@@ -261,7 +290,8 @@ class LocationEditorController {
       numberOfLocations = +feature.attributes.number_of_households
     }
     const workflowStateId = feature.workflow_state_id || WorkflowState.CREATED.id
-    this.objectIdToProperties[mapObject.objectId] = new LocationProperties(workflowStateId, numberOfLocations)
+    const locationCategory = feature.locationCategory || this.locationTypeToAdd
+    this.objectIdToProperties[mapObject.objectId] = new LocationProperties(workflowStateId, locationCategory, numberOfLocations)
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     var locationObject = this.formatLocationForService(mapObject.objectId)
     // The marker is editable if the state is not LOCKED or INVALIDATED
@@ -387,9 +417,18 @@ class LocationEditorController {
       .catch(err => console.error(err))
   }
 
+  getWorkflowStateIcon () {
+    var locationCategory = this.locationTypeToAdd
+    if (this.selectedMapObject) {
+      locationCategory = this.objectIdToProperties[this.selectedMapObject.objectId].selectedLocationType
+    }
+    return this.locationTypeToIconUrl[locationCategory]
+  }
+
   mapStateToThis (reduxState) {
     return {
       locationLayers: getLocationLayersList(reduxState),
+      locationTypeToIconUrl: getLocationTypeToIconUrl(reduxState),
       dataItems: reduxState.plan.dataItems,
       loggedInUser: reduxState.user.loggedInUser
     }

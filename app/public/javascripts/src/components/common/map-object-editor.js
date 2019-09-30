@@ -953,6 +953,7 @@ class MapObjectEditorController {
           // use feature's coord NOT the event's coords
           feature.geometry.coordinates = serviceFeature.geometry.coordinates
           feature.attributes = serviceFeature.attributes
+          feature.locationCategory = serviceFeature.locationCategory
           feature.directlyEditExistingFeature = true
           return Promise.resolve(feature)
         })
@@ -1015,7 +1016,7 @@ class MapObjectEditorController {
         featureToUse = result
         // When we are modifying existing objects, the iconUrl to use is provided by the parent control via a function.
 
-        return this.getObjectIconUrl && this.getObjectIconUrl({ objectKey: iconKey, objectValue: featureToUse.objectId })
+        return this.getObjectIconUrl({ objectKey: iconKey, objectValue: featureToUse })
       })
       .then((iconUrl) => this.createMapObject(featureToUse, iconUrl, true, featureToUse.directlyEditExistingFeature))
       .then(() => {
