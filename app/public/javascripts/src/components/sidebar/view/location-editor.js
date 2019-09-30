@@ -282,7 +282,7 @@ class LocationEditorController {
       numberOfLocations = +feature.attributes.number_of_households
     }
     const workflowStateId = feature.workflow_state_id || WorkflowState.CREATED.id
-    this.objectIdToProperties[mapObject.objectId] = new LocationProperties(workflowStateId, feature.locationCategory, numberOfLocations)
+    this.objectIdToProperties[mapObject.objectId] = new LocationProperties(workflowStateId, this.locationTypeToAdd, numberOfLocations)
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     var locationObject = this.formatLocationForService(mapObject.objectId)
     // The marker is editable if the state is not LOCKED or INVALIDATED
