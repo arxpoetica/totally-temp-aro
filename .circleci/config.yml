@@ -73,6 +73,7 @@ workflows:
                 - master
                 - optional_building
                 - devJuly2019
+                - editBusinessesAndTowers
 
       - deploy:
           requires:
