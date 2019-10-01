@@ -41,10 +41,10 @@ function loadAuthPermissions () {
           var displayName = authPermissionEntity.name
           displayName = displayName.replace('_', ' ')
           displayName = displayName.toLowerCase()
-          displayName = displayName.replace(/(^| )(\w)/g, function(initial) {
-            return initial.toUpperCase();
+          displayName = displayName.replace(/(^| )(\w)/g, (initial) => {
+            return initial.toUpperCase()
           })
-          authPermissions[authPermissionEntity.name] = { ...authPermissionEntity, 
+          authPermissions[authPermissionEntity.name] = { ...authPermissionEntity,
             permissionBits: authPermissionEntity.id,
             displayName: displayName
           }
@@ -68,10 +68,10 @@ function loadAuthRoles () {
           var displayName = authRolesEntity.name
           displayName = displayName.replace('_', ' ')
           displayName = displayName.toLowerCase()
-          displayName = displayName.replace(/(^| )(\w)/g, function(initial) {
-            return initial.toUpperCase();
+          displayName = displayName.replace(/(^| )(\w)/g, (initial) => {
+            return initial.toUpperCase()
           })
-          authRoles[authRolesEntity.name] = { ...authRolesEntity, 
+          authRoles[authRolesEntity.name] = { ...authRolesEntity,
             permissionBits: authRolesEntity.permissions,
             displayName: displayName
           }

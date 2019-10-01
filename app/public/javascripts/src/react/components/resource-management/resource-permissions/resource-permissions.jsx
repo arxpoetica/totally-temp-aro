@@ -8,13 +8,19 @@ export class ResourcePermissions extends Component {
   constructor (props) {
     super(props)
     
+    this.isOwner = false
+
     this.state = {
       'openRowId': null
     }
   }
 
   render () {
-    console.log(this.props.dataItems)
+    if (!this.props.loggedInUser || !this.props.authPermissions['RESOURCE_ADMIN']) return null // maybe fix this little hard code?
+    this.isOwner = false
+    if (this.props.loggedInUser.hasPermissions(this.props.authPermissions['RESOURCE_ADMIN'].permissionBits)) {
+      this.isOwner = true
+    }
     return <div>
       <table className="table table-sm ei-table-foldout-striped" style={{'borderBottom': '1px solid #dee2e6'}}>
         <thead className="thead-dark">
@@ -60,6 +66,7 @@ export class ResourcePermissions extends Component {
   }
 
   renderDataRow (dataItem) {
+    // ToDo: check for ownership of dataItem to overide isOwner
     return [
       <tr className={this.state.openRowId === dataItem.identifier ? 'ei-foldout-table-open' : ''} key={dataItem.identifier + '_a'}>
         <td onClick={event => {this.toggleRow(dataItem.identifier)}}>
@@ -73,7 +80,10 @@ export class ResourcePermissions extends Component {
           {dataItem.dataType}
         </td>
         <td className="ei-table-cell ei-table-button-cell">
-          <button className="btn btn-sm btn-outline-danger" onClick={event => {console.log('delete')}} data-toggle="tooltip" data-placement="bottom" title="Delete">
+          <button className="btn btn-sm btn-outline-danger" 
+          onClick={event => {console.log('delete')}} 
+          data-toggle="tooltip" data-placement="bottom" title="Delete"
+          disabled={(this.isOwner ? null : "disabled")}>
             <i className="fa ei-button-icon fa-trash-alt"></i>
           </button>
         </td>
@@ -115,7 +125,8 @@ const mapStateToProps = (state) => ({
   dataItems: state.plan.dataItems,
   loggedInUser: state.user.loggedInUser,
   uploadDataSources: state.plan.uploadDataSources,
-  systemActors: state.user.systemActors
+  systemActors: state.user.systemActors, 
+  authPermissions: state.user.authPermissions
 })
 
 const mapDispatchToProps = dispatch => ({
