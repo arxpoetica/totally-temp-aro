@@ -975,7 +975,9 @@ class MapObjectEditorController {
         this.state.selection = newSelection
         return
       } else {
-        this.displayEditObject({ feature: feature, isMult: isMult })
+        if (clickedObject.is_locked === 'false') {
+          this.displayEditObject({ feature: feature, isMult: isMult })
+        }
         return
       }
     } else if (this.featureType === 'serviceArea' && event.hasOwnProperty('serviceAreas') &&
