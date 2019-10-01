@@ -72,18 +72,27 @@
       <!-- <div style="position: relative;"> -->
       <table id="tblLocationProperties" class="table table-sm table-striped" style="margin-bottom: 10px">
         <tr>
-          <td>Location type:</td>
+          <td>Location type</td>
           <td>
-            {{$ctrl.locationTypes[$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].selectedLocationType]}}
+            {{$ctrl.locationTypes[$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].locationCategory]}}
           </td>
         </tr>
-        <tr>
-          <td>Number of locations:</td>
+        <tr ng-if="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].locationCategory === 'household'">
+          <td>Number of locations</td>
           <td>
             <input class="form-control"
                   ng-disabled="(($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId == $ctrl.WorkflowState.LOCKED.id) || ($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId == $ctrl.WorkflowState.INVALIDATED.id))"
-                  ng-change="$ctrl.markSelectedLocationPropertiesDirty();$ctrl.setLastUsedNumberOfLocations($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfLocations);"
-                  ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfLocations">
+                  ng-change="$ctrl.markSelectedLocationPropertiesDirty();$ctrl.setLastUsedNumberOfHouseholds($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfHouseholds);"
+                  ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfHouseholds">
+          </td>
+        </tr>
+        <tr ng-if="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].locationCategory === 'business'">
+          <td>Number of employees</td>
+          <td>
+            <input class="form-control"
+                  ng-disabled="(($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId == $ctrl.WorkflowState.LOCKED.id) || ($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId == $ctrl.WorkflowState.INVALIDATED.id))"
+                  ng-change="$ctrl.markSelectedLocationPropertiesDirty(); $ctrl.setLastUsedNumberOfEmployees($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfEmployees);"
+                  ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfEmployees">
           </td>
         </tr>
         <tr>
@@ -126,11 +135,11 @@
 
       <button ng-class="{ 'btn btn-block': true,
                           'btn-light': !$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty ||
-                          $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfLocations < 1,
+                          $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfHouseholds < 1,
                           'btn-primary': $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty && 
-                          $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfLocations >= 1 }"
+                          $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfHouseholds >= 1 }"
               ng-disabled="!$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty ||
-                $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfLocations < 1"
+                $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfHouseholds < 1"
               style="margin-top: 10px"
               ng-click="$ctrl.saveSelectedLocationAndProperties()">
         <i class="fa fa-save"></i>&nbsp;&nbsp;Save properties
@@ -163,17 +172,27 @@
           <td colspan="2">
             <select class="form-control"
                     ng-change="$ctrl.markSelectedLocationPropertiesDirty()"
-                    ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].selectedLocationType"
+                    ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].locationCategory"
                     ng-options="item for item in $ctrl.locationTypes">
             </select>
           </td>
         </tr>
-        <tr>
-          <td>Number of locations:</td>
-          <td colspan="2">
+        <tr ng-if="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].locationCategory === 'household'">
+          <td>Number of locations</td>
+          <td>
             <input class="form-control"
-                  ng-change="$ctrl.markSelectedLocationPropertiesDirty();$ctrl.setLastUsedNumberOfLocations($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfLocations);"
-                  ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfLocations">
+                  ng-disabled="(($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId == $ctrl.WorkflowState.LOCKED.id) || ($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId == $ctrl.WorkflowState.INVALIDATED.id))"
+                  ng-change="$ctrl.markSelectedLocationPropertiesDirty();$ctrl.setLastUsedNumberOfHouseholds($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfHouseholds);"
+                  ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfHouseholds">
+          </td>
+        </tr>
+        <tr ng-if="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].locationCategory === 'business'">
+          <td>Number of employees</td>
+          <td>
+            <input class="form-control"
+                  ng-disabled="(($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId == $ctrl.WorkflowState.LOCKED.id) || ($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId == $ctrl.WorkflowState.INVALIDATED.id))"
+                  ng-change="$ctrl.markSelectedLocationPropertiesDirty(); $ctrl.setLastUsedNumberOfEmployees($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfEmployees);"
+                  ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfEmployees">
           </td>
         </tr>
         </tbody>
@@ -238,11 +257,11 @@
       </button>
       <button ng-class="{ 'btn': true,
       'btn-light': !$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty ||
-        $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfLocations < 1,
+        $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfHouseholds < 1,
       'btn-primary': $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty && 
-        $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfLocations >= 1}" 
+        $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfHouseholds >= 1}" 
         ng-disabled="!$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty ||
-          $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfLocations < 1"
+          $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfHouseholds < 1"
         ng-click="$ctrl.saveSelectedLocationAndProperties()">
         <i class="fa fa-save action-button-icon"></i>Save properties
       </button>
