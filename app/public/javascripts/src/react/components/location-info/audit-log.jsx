@@ -20,10 +20,13 @@ export class AuditLog extends Component {
     const didIsExpandedChange = (this.state.isExpanded !== prevState.isExpanded)
     if ((didLocationInfoDetailsChange || didIsExpandedChange) &&
       this.state.isExpanded &&
-      this.props.locationInfoDetails &&
-      this.props.locationInfoDetails.locSourceIds.hhSourceIds.object_ids.length > 0) {
-      const firstHouseholdId = this.props.locationInfoDetails.locSourceIds.hhSourceIds.object_ids[0]
-      this.props.getLocationAuditLog(this.props.planId, firstHouseholdId)
+      this.props.locationInfoDetails) {
+      // This can be a business, household or celltower. Pick the first object id that we find
+      const locSourceIds = this.props.locationInfoDetails.locSourceIds
+      const locationIds = Object.keys(locSourceIds).flatMap(sourceType => (locSourceIds[sourceType].object_ids || []))
+      if (locationIds.length > 0) {
+        this.props.getLocationAuditLog(this.props.planId, locationIds[0])
+      }
     }
   }
 
