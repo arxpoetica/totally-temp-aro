@@ -16,9 +16,10 @@ const getLocationTypeToIconUrl = createSelector([getAllLocationLayers], location
 })
 
 class LocationProperties {
-  constructor (workflowStateId, selectedLocationType, numberOfLocations = 1) {
-    this.selectedLocationType = selectedLocationType || 'household'
-    this.numberOfLocations = numberOfLocations
+  constructor (workflowStateId, locationCategory, numberOfHouseholds, numberOfEmployees) {
+    this.locationCategory = locationCategory || 'household'
+    this.numberOfHouseholds = numberOfHouseholds || 1
+    this.numberOfEmployees = numberOfEmployees || 1
     this.workflowStateId = workflowStateId
     this.isDirty = false
   }
@@ -83,7 +84,8 @@ class LocationEditorController {
   resumeOrCreateTransaction () {
     this.removeMapObjects && this.removeMapObjects()
     this.currentTransaction = null
-    this.lastUsedNumberOfLocations = 1
+    this.lastUsedNumberOfHouseholds = 1
+    this.lastUsedNumberOfEmployees = 1
     // See if we have an existing transaction for the currently selected location library
     var selectedLibraryItem = this.dataItems.location.selectedLibraryItems[0]
     this.$http.get(`/service/library/transaction`)
@@ -124,7 +126,7 @@ class LocationEditorController {
         // We now have objectIdToMapObject populated.
         features.forEach((feature) => {
           var locationProperties = new LocationProperties()
-          locationProperties.numberOfLocations = feature.attributes.number_of_households
+          locationProperties.numberOfHouseholds = feature.attributes.number_of_households
           this.objectIdToProperties[feature.objectId] = locationProperties
         })
       })
@@ -221,9 +223,14 @@ class LocationEditorController {
     })
   }
 
-  // Sets the last-used number-of-locations property so we can use it for new locations
-  setLastUsedNumberOfLocations (newValue) {
-    this.lastUsedNumberOfLocations = +newValue < 1 ? 1 : +newValue
+  // Sets the last-used number-of-households property so we can use it for new locations
+  setLastUsedNumberOfHouseholds (newValue) {
+    this.lastUsedNumberOfHouseholds = +newValue < 1 ? 1 : +newValue
+  }
+
+  // Sets the last-used number-of-employees property so we can use it for new locations
+  setLastUsedNumberOfEmployees (newValue) {
+    this.lastUsedNumberOfEmployees = +newValue < 1 ? 1 : +newValue
   }
 
   // Marks the properties of the selected location as dirty (changed).
@@ -260,13 +267,17 @@ class LocationEditorController {
         coordinates: [mapObject.position.lng(), mapObject.position.lat()] // Note - longitude, then latitude
       },
       attributes: {
-        number_of_households: objectProperties.numberOfLocations,
-        number_of_employees: 5,
         industry_id: '8071'
       },
       dataType: 'location',
-      locationCategory: objectProperties.selectedLocationType,
+      locationCategory: objectProperties.locationCategory,
       workflowState: objectProperties.workflowStateId
+    }
+
+    if (objectProperties.locationCategory === 'household') {
+      featureObj.attributes.number_of_households = objectProperties.numberOfHouseholds
+    } else if (objectProperties.locationCategory === 'business') {
+      featureObj.attributes.number_of_employees = objectProperties.numberOfEmployees
     }
 
     if (!mapObject.feature.hasOwnProperty('attributes')) {
@@ -276,7 +287,7 @@ class LocationEditorController {
     // featureObj.attributes = mapObject.feature.attributes
     Object.keys(mapObject.feature.attributes).forEach((key) => {
       if (mapObject.feature.attributes[key] != null && mapObject.feature.attributes[key] != 'null' &&
-        key != 'number_of_households') {
+        key !== 'number_of_households' && key !== 'number_of_employees') {
         featureObj.attributes[key] = mapObject.feature.attributes[key]
       }
     })
@@ -285,13 +296,17 @@ class LocationEditorController {
   }
 
   handleObjectCreated (mapObject, usingMapClick, feature) {
-    var numberOfLocations = this.lastUsedNumberOfLocations // use last used number of locations until commit
-    if (feature.attributes && feature.attributes.number_of_households) {
-      numberOfLocations = +feature.attributes.number_of_households
+    var numberOfHouseholds = this.lastUsedNumberOfHouseholds // use last used number of locations until commit
+    if (feature.locationCategory === 'household' && feature.attributes && feature.attributes.number_of_households) {
+      numberOfHouseholds = +feature.attributes.number_of_households
+    }
+    var numberOfEmployees = this.lastUsedNumberOfEmployees
+    if (feature.locationCategory === 'business' && feature.attributes && feature.attributes.number_of_employees) {
+      numberOfEmployees = +feature.attributes.number_of_employees
     }
     const workflowStateId = feature.workflow_state_id || WorkflowState.CREATED.id
     const locationCategory = feature.locationCategory || this.locationTypeToAdd
-    this.objectIdToProperties[mapObject.objectId] = new LocationProperties(workflowStateId, locationCategory, numberOfLocations)
+    this.objectIdToProperties[mapObject.objectId] = new LocationProperties(workflowStateId, locationCategory, numberOfHouseholds, numberOfEmployees)
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     var locationObject = this.formatLocationForService(mapObject.objectId)
     // The marker is editable if the state is not LOCKED or INVALIDATED
@@ -420,7 +435,7 @@ class LocationEditorController {
   getWorkflowStateIcon () {
     var locationCategory = this.locationTypeToAdd
     if (this.selectedMapObject) {
-      locationCategory = this.objectIdToProperties[this.selectedMapObject.objectId].selectedLocationType
+      locationCategory = this.objectIdToProperties[this.selectedMapObject.objectId].locationCategory
     }
     return this.locationTypeToIconUrl[locationCategory]
   }
