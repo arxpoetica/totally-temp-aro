@@ -1417,6 +1417,8 @@ class State {
       tracker.trackEvent(tracker.CATEGORIES.LOGIN, tracker.ACTIONS.CLICK, 'UserID', user.id)
 
       // Set the logged in user in the Redux store
+      service.loadAuthPermissionsRedux()
+      service.loadAuthRolesRedux()
       service.setLoggedInUserRedux(user)
       service.loadSystemActorsRedux()
       SocketManager.joinRoom('user', user.id)
@@ -1768,6 +1770,8 @@ class State {
       loadConfigurationFromServer: () => dispatch(UiActions.loadConfigurationFromServer()),
       setPerspective: perspective => dispatch(UiActions.setPerspective(perspective)),
       getStyleValues: () => dispatch(UiActions.getStyleValues()),
+      loadAuthPermissionsRedux: () => dispatch(UserActions.loadAuthPermissions()),
+      loadAuthRolesRedux: () => dispatch(UserActions.loadAuthRoles()),
       setLoggedInUserRedux: loggedInUser => dispatch(UserActions.setLoggedInUser(loggedInUser)),
       loadSystemActorsRedux: () => dispatch(UserActions.loadSystemActors()),
       setPlanRedux: plan => dispatch(PlanActions.setActivePlan(plan)),
