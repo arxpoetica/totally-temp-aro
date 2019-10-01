@@ -442,12 +442,8 @@ class MapObjectEditorController {
             this.openContextMenu(x, y, menuItems)
           }
         })
-    } else if (this.featureType === 'location') {
+    } else if (this.featureType === 'location' && this.isFeatureEditable(this.selectedMapObject.feature)) {
       var name = 'Location'
-      // var options = [ this.contextMenuService.makeItemOption('Delete', 'fa-trash-alt', () => {
-      //   this.deleteObjectWithId(this.selectedMapObject.objectId)
-      //   this.deleteCreatedMapObject(this.selectedMapObject.objectId)
-      // }) ]
       var options = [ new MenuAction(MenuActionTypes.DELETE, () => {
         this.deleteObjectWithId(this.selectedMapObject.objectId)
         this.deleteCreatedMapObject(this.selectedMapObject.objectId)
@@ -617,11 +613,16 @@ class MapObjectEditorController {
     })
   }
 
+  isFeatureEditable (feature) {
+    // The marker is editable if the state is not LOCKED or INVALIDATED
+    return !((feature.workflow_state_id & WorkflowState.LOCKED.id) ||
+             (feature.workflow_state_id & WorkflowState.INVALIDATED.id))
+  }
+
   createPointMapObject (feature, iconUrl) {
     // Create a "point" map object - a marker
     // The marker is editable if the state is not LOCKED or INVALIDATED
-    const isEditable = !((feature.workflow_state_id & WorkflowState.LOCKED.id) ||
-                          (feature.workflow_state_id & WorkflowState.INVALIDATED.id))
+    const isEditable = this.isFeatureEditable(feature)
     var mapMarker = new google.maps.Marker({
       objectId: feature.objectId, // Not used by Google Maps
       featureType: feature.networkNodeType,
@@ -641,7 +642,6 @@ class MapObjectEditorController {
     })
 
     if (!isEditable) {
-      mapMarker.setOptions({ clickable: false }) // Don't allow right click for locked markers
       if (feature.workflow_state_id & WorkflowState.LOCKED.id) {
         var lockIconOverlay = new google.maps.Marker({
           icon: {
