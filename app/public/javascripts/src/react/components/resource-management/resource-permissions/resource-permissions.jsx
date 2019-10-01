@@ -8,7 +8,7 @@ export class ResourcePermissions extends Component {
   constructor (props) {
     super(props)
     
-    this.isOwner = false
+    this.isAdmin = false
 
     this.state = {
       'openRowId': null
@@ -17,9 +17,9 @@ export class ResourcePermissions extends Component {
 
   render () {
     if (!this.props.loggedInUser || !this.props.authPermissions['RESOURCE_ADMIN']) return null // maybe fix this little hard code?
-    this.isOwner = false
+    this.isAdmin = false
     if (this.props.loggedInUser.hasPermissions(this.props.authPermissions['RESOURCE_ADMIN'].permissionBits)) {
-      this.isOwner = true
+      this.isAdmin = true
     }
     return <div>
       <table className="table table-sm ei-table-foldout-striped" style={{'borderBottom': '1px solid #dee2e6'}}>
@@ -66,7 +66,12 @@ export class ResourcePermissions extends Component {
   }
 
   renderDataRow (dataItem) {
-    // ToDo: check for ownership of dataItem to overide isOwner
+    var isOwner = this.isAdmin
+    if (!isOwner) {
+      if (this.props.loggedInUser.hasPermissions(this.props.authPermissions['RESOURCE_ADMIN'].permissionBits, dataItem.permissions)) {
+        isOwner = true
+      }
+    }
     return [
       <tr className={this.state.openRowId === dataItem.identifier ? 'ei-foldout-table-open' : ''} key={dataItem.identifier + '_a'}>
         <td onClick={event => {this.toggleRow(dataItem.identifier)}}>
@@ -83,7 +88,7 @@ export class ResourcePermissions extends Component {
           <button className="btn btn-sm btn-outline-danger" 
           onClick={event => {console.log('delete')}} 
           data-toggle="tooltip" data-placement="bottom" title="Delete"
-          disabled={(this.isOwner ? null : "disabled")}>
+          disabled={(isOwner ? null : "disabled")}>
             <i className="fa ei-button-icon fa-trash-alt"></i>
           </button>
         </td>
@@ -91,7 +96,7 @@ export class ResourcePermissions extends Component {
       <tr className='ei-foldout-row' key={dataItem.identifier + '_b'}>
         <td colSpan='999'>
           <div style={{'padding': '0px 20px 0px 20px'}}>
-            <PermissionsTable resource={dataItem} />
+            <PermissionsTable resource={dataItem} isOwner={isOwner} />
             <br/>add user
           </div>
         </td>

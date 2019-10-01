@@ -67,7 +67,10 @@ export class PermissionsTable extends Component {
         {dataItem.rolePermissions}
       </td>
       <td className="ei-table-cell ei-table-button-cell">
-        <button className="btn btn-sm btn-outline-danger" onClick={event => {console.log('delete')}} data-toggle="tooltip" data-placement="bottom" title="Delete">
+        <button className="btn btn-sm btn-outline-danger" 
+        onClick={event => {console.log('delete')}} 
+        data-toggle="tooltip" data-placement="bottom" title="Delete"
+        disabled={(this.props.isOwner ? null : "disabled")}>
           <i className="fa ei-button-icon fa-trash-alt"></i>
         </button>
       </td>
