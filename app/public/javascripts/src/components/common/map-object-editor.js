@@ -967,7 +967,9 @@ class MapObjectEditorController {
       var newSelection = this.state.cloneSelection()
       if (clickedObject._data_type === 'equipment_boundary.select') {
         iconKey = Constants.MAP_OBJECT_CREATE_KEY_EQUIPMENT_BOUNDARY
-        this.displayViewObject({ feature: feature })
+        if (clickedObject.is_locked === 'false') {
+          this.displayEditObject({ feature: feature })
+        }
         this.selectMapObject(null)
         newSelection.editable.equipment = {}
         this.state.selection = newSelection
