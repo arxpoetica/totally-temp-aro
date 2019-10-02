@@ -1,3 +1,4 @@
+/* global app */
 import { react2angular } from 'react2angular'
 import { ToastContainer } from 'react-toastify'
 
@@ -18,8 +19,8 @@ import RfpStatus from '../react/components/optimization/rfp/status/rfp-status.js
 import RingEdit from '../react/components/ring-edit/ring-edit.jsx'
 import RingButton from '../react/components/ring-edit/ring-button.jsx'
 import LocationInfo from '../react/components/location-info/location-info.jsx'
-import ResourcePermissions from '../react/components/resource-management/resource-permissions/resource-permissions.jsx'
-import PermissionsTable from '../react/components/resource-management/resource-permissions/permissions-table.jsx'
+import ResourcePermissions from '../react/components/acl/resource-permissions/resource-permissions.jsx'
+import PermissionsTable from '../react/components/acl/resource-permissions/permissions-table.jsx'
 
 import boundaryDetail from './sidebar/view/boundary-detail'
 import equipmentDetail from './sidebar/view/equipment-detail'

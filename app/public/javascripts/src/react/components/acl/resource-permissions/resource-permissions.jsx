@@ -87,7 +87,7 @@ export class ResourcePermissions extends Component {
         </td>
         <td className='ei-table-cell ei-table-button-cell'>
           <button className='btn btn-sm btn-outline-danger'
-            onClick={event => { console.log('delete') }}
+            onClick={event => { this.deleteResource(dataItem.identifier) }}
             data-toggle='tooltip' data-placement='bottom' title='Delete'
             disabled={(isOwner ? null : 'disabled')}>
             <i className='fa ei-button-icon fa-trash-alt' />
@@ -102,6 +102,13 @@ export class ResourcePermissions extends Component {
         </td>
       </tr>
     ]
+  }
+
+  // --- //
+
+  deleteResource (resourceId) {
+    console.log(`delete ${resourceId}`)
+    // confirm popup
   }
 
   toggleRow (rowId) {

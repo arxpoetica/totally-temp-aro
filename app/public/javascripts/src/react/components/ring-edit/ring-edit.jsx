@@ -81,7 +81,7 @@ export class RingEdit extends Component {
             {ring.name}
 
             {this.canEdit
-              ? <button 
+              ? <button
                 id={`btnRingDel_${ring.id}`}
                 className='btn btn-sm btn-outline-danger ring-del-btn'
                 onClick={() => this.requestDeleteRing(ring)}

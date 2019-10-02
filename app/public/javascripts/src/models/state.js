@@ -1350,39 +1350,38 @@ class State {
     service.authRollsByName = {}
     service.reloadAuthRolls = () => {
       return $http.get('/service/auth/roles')
-      .then((result) => {
-        service.authRolls = result.data
-        service.authRollsByName = {}
-        service.authRolls.forEach((authRoll) => {
-          if (authRoll.hasOwnProperty('name')){
-            service.authRollsByName[authRoll.name] = authRoll
-          }
+        .then((result) => {
+          service.authRolls = result.data
+          service.authRollsByName = {}
+          service.authRolls.forEach((authRoll) => {
+            if (authRoll.hasOwnProperty('name')) {
+              service.authRollsByName[authRoll.name] = authRoll
+            }
+          })
         })
-      })
-      .catch((err) => console.error(err))
+        .catch((err) => console.error(err))
     }
     service.reloadAuthRolls()
 
     service.authPermissionsByName = {}
     service.reloadAuthPermissions = () => {
       return $http.get('/service/auth/permissions')
-      .then((result) => {
-        service.authPermissionsByName = {}
-        result.data.forEach((auth) => {
-          if (auth.hasOwnProperty('name')){
-            if (!auth.hasOwnProperty('permissions') && auth.hasOwnProperty('id')){
-              auth.permissions = auth.id
+        .then((result) => {
+          service.authPermissionsByName = {}
+          result.data.forEach((auth) => {
+            if (auth.hasOwnProperty('name')) {
+              if (!auth.hasOwnProperty('permissions') && auth.hasOwnProperty('id')) {
+                auth.permissions = auth.id
+              }
+              service.authPermissionsByName[auth.name] = auth
             }
-            service.authPermissionsByName[auth.name] = auth
-          }
+          })
         })
-      })
-      .catch((err) => console.error(err))
+        .catch((err) => console.error(err))
     }
     service.reloadAuthPermissions()
 
-
-    //service.systemActors = [] // All the system actors (i.e. users and groups)
+    // service.systemActors = [] // All the system actors (i.e. users and groups)
     service.systemActors
     // service.reloadSystemActors = () => {
     //   var newSystemActors = []

@@ -23,7 +23,7 @@ import selection from '../react/components/selection/selection-reducer'
 import user from '../react/components/user/user-reducer'
 import ringEdit from '../react/components/ring-edit/ring-edit-reducer'
 import locationInfo from '../react/components/location-info/location-info-reducer'
-import resourcePermissions from '../react/components/resource-management/resource-permissions/resource-permissions-reducer'
+import acl from '../react/components/acl/acl-reducer'
 
 const logger = createLogger({
   level: 'info',
@@ -43,10 +43,10 @@ let reducer = combineReducers({
   planEditor,
   selection,
   user,
-  form, 
+  form,
   ringEdit,
   locationInfo,
-  resourcePermissions
+  acl
 })
 
 // Add support for Redux devtools extension. Yes, even in production.

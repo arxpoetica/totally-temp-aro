@@ -2,15 +2,15 @@ import React, { Component, Fragment } from 'react'
 import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
 // import { PropTypes } from 'prop-types'
-import resourcePermissionsActions from './resource-permissions-actions.js'
+import aclActions from '../acl-actions.js'
 
 export class PermissionsTable extends Component {
-  /*
   constructor (props) {
     super(props)
 
+    this.newActorId = null
+    console.log('construct')
   }
-  */
 
   render () {
     return (
@@ -50,19 +50,17 @@ export class PermissionsTable extends Component {
 
   renderDataRows () {
     var jsx = []
-    var resourceAccess = this.props.accessById[this.props.resource.identifier]
-    if (resourceAccess && this.props.systemActors) {
-      Object.keys(resourceAccess).forEach((key) => {
-        // systemActorId, rolePermissions
-        jsx.push(this.renderDataRow(resourceAccess[key]))
-      })
-    }
+    this.props.acl.forEach((aclItem) => {
+      // systemActorId, rolePermissions
+      jsx.push(this.renderDataRow(aclItem))
+    })
+
+    console.log(jsx)
     return jsx
   }
 
   renderDataRow (dataItem) {
-    // console.log(this.props.systemActors)
-    // console.log(dataItem)
+    console.log(dataItem)
     const systemActor = this.props.systemActors[dataItem.systemActorId]
     if (!systemActor) return
     if (!systemActor.hasOwnProperty('name')) systemActor.name = `${systemActor.firstName} ${systemActor.lastName}`
@@ -84,8 +82,14 @@ export class PermissionsTable extends Component {
     </tr>
   }
 
+  // --- //
+
+  deleteAuthItem () {
+
+  }
+
   componentWillMount () {
-    this.props.loadResourceAccess('LIBRARY', this.props.resource.identifier)
+    this.props.getAcl('LIBRARY', this.props.resource.identifier)
   }
 }
 
@@ -101,13 +105,21 @@ PermissionsTable.propTypes = {
   */
 }
 
-const mapStateToProps = (state) => ({
-  accessById: state.resourcePermissions.accessById,
-  systemActors: state.user.systemActors
-})
+const mapStateToProps = (state, ownProps) => {
+  var acl = []
+  // acl may not be loaded
+  if (state.acl.aclByType.hasOwnProperty('LIBRARY') &&
+    state.acl.aclByType['LIBRARY'].hasOwnProperty(ownProps.resource.identifier)) {
+    acl = state.acl.aclByType['LIBRARY'][ownProps.resource.identifier]
+  }
+  return {
+    acl: acl,
+    systemActors: state.user.systemActors
+  }
+}
 
 const mapDispatchToProps = dispatch => ({
-  loadResourceAccess: (resourceType, resourceId, doForceUpdate = false) => dispatch(resourcePermissionsActions.loadResourceAccess(resourceType, resourceId, doForceUpdate))
+  getAcl: (resourceType, resourceId, doForceUpdate = false) => dispatch(aclActions.getAcl(resourceType, resourceId, doForceUpdate))
 })
 
 const PermissionsTableComponent = wrapComponentWithProvider(reduxStore, PermissionsTable, mapStateToProps, mapDispatchToProps)
