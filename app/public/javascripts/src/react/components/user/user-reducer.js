@@ -2,8 +2,8 @@ import Actions from '../../common/actions'
 
 const defaultState = {
   isSuperUser: false,
-  systemActors: [], 
-  authRoles: {}, 
+  systemActors: [],
+  authRoles: {},
   authPermissions: {}
 }
 
