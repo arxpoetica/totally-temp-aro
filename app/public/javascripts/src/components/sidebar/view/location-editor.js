@@ -310,10 +310,13 @@ class LocationEditorController {
     if (feature.locationCategory === 'business' && feature.attributes && feature.attributes.number_of_employees) {
       numberOfEmployees = +feature.attributes.number_of_employees
     }
-    var workflowStateId = feature.workflow_state_id // workflow_state_id is encoded in vector tile features
-    if (feature.workflowState) {
+    var workflowStateId = null
+    if (!feature.isExistingObject) {
+      workflowStateId = WorkflowState.CREATED.id
+    } else {
+      // workflow_state_id is encoded in vector tile features
       // workflowState is encoded in aro-service features (that do not come in from vector tiles)
-      workflowStateId = WorkflowState[feature.workflowState].id
+      workflowStateId = feature.workflow_state_id || WorkflowState[feature.workflowState].id
     }
     const locationCategory = feature.locationCategory || this.locationTypeToAdd
     this.objectIdToProperties[mapObject.objectId] = new LocationProperties(workflowStateId, locationCategory, numberOfHouseholds, numberOfEmployees)

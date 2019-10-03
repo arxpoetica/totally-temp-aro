@@ -614,11 +614,15 @@ class MapObjectEditorController {
   }
 
   isFeatureEditable (feature) {
-    // The marker is editable if the state is not LOCKED or INVALIDATED
-    // Vector tile features come in as "workflow_state_id", transaction features as "workflowState"
-    var workflowStateId = feature.workflow_state_id || WorkflowState[feature.workflowState].id
-    return !((workflowStateId & WorkflowState.LOCKED.id) ||
-             (workflowStateId & WorkflowState.INVALIDATED.id))
+    if (feature.isExistingObject) {
+      // The marker is editable if the state is not LOCKED or INVALIDATED
+      // Vector tile features come in as "workflow_state_id", transaction features as "workflowState"
+      var workflowStateId = feature.workflow_state_id || WorkflowState[feature.workflowState].id
+      return !((workflowStateId & WorkflowState.LOCKED.id) ||
+              (workflowStateId & WorkflowState.INVALIDATED.id))
+    } else {
+      return true // New objects are always editable
+    }
   }
 
   createPointMapObject (feature, iconUrl) {
