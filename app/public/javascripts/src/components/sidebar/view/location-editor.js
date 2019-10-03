@@ -311,7 +311,7 @@ class LocationEditorController {
       numberOfEmployees = +feature.attributes.number_of_employees
     }
     var workflowStateId = null
-    if (!feature.isExistingObject) {
+    if (!(feature.workflow_state_id || feature.workflowState)) {
       workflowStateId = WorkflowState.CREATED.id
     } else {
       // workflow_state_id is encoded in vector tile features
