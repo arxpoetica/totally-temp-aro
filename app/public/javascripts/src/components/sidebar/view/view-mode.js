@@ -5,6 +5,16 @@ class ViewModeController {
     this.state = state
     this.$http = $http
     this.currentUser = state.loggedInUser
+    // Hook into a legacy system for clearing selection
+    this.clearViewModeSubscription = state.clearViewMode.skip(1).subscribe(clear => {
+      if (clear) {
+        this.clearSelectedLocations() // Clear redux selection
+        // Clear old state selection
+        var newSelection = this.state.cloneSelection()
+        newSelection.editable.location = {}
+        this.state.selection = newSelection
+      }
+    })
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
   }
 
@@ -31,6 +41,7 @@ class ViewModeController {
   }
 
   $onDestroy () {
+    this.clearViewModeSubscription.unsubscribe()
     this.unsubscribeRedux()
   }
 
@@ -44,7 +55,8 @@ class ViewModeController {
 
   mapDispatchToTarget (dispatch) {
     return {
-      setSelectedLocations: locationIds => dispatch(SelectionActions.setLocations(locationIds))
+      setSelectedLocations: locationIds => dispatch(SelectionActions.setLocations(locationIds)),
+      clearSelectedLocations: () => dispatch(SelectionActions.setLocations([]))
     }
   }
 

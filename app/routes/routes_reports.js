@@ -516,8 +516,8 @@ exports.configure = (api, middleware) => {
           WHEN rl.location_category = 2 THEN 'Tower'::text
           WHEN rl.location_category = 1 THEN 'Household'::text
           when c.id = 1 then 'Small Business'::text
-          when c.id = 2 then 'Medium Business'::text
-          when c.id = 3 then 'Large Business'::text
+          when c.id = 2 then 'CAF 1.2 Reported'::text
+          when c.id = 3 then 'Community Anchor Institution'::text
           else 'Unknown'
          end AS "Location Type",
         ws.name                                                                                     AS "Location Status",  

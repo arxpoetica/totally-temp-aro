@@ -20,7 +20,9 @@ export class LocationInfo extends Component {
     // In this case show the properties of the first point
     const oldLocationId = prevProps.selectedLocations.values().next().value
     const newLocationId = this.props.selectedLocations.values().next().value
-    if (newLocationId !== oldLocationId) {
+    if (!newLocationId) {
+      this.props.clearLocationInfo() // Clear redux selection
+    } else if (newLocationId !== oldLocationId) {
       // We have exactly one location selected. Get the location details
       this.props.getLocationInfo(this.props.planId, newLocationId)
     }
@@ -141,7 +143,8 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  getLocationInfo: (planId, selectedLocations) => dispatch(LocationInfoActions.getLocationInfo(planId, selectedLocations))
+  getLocationInfo: (planId, selectedLocations) => dispatch(LocationInfoActions.getLocationInfo(planId, selectedLocations)),
+  clearLocationInfo: () => dispatch(LocationInfoActions.clearLocationInfo())
 })
 
 const LocationInfoComponent = wrapComponentWithProvider(reduxStore, LocationInfo, mapStateToProps, mapDispatchToProps)

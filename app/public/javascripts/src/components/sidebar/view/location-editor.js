@@ -3,6 +3,7 @@ import { createSelector } from 'reselect'
 import WorkflowState from '../../../shared-utils/workflow-state'
 import Permissions from '../../../shared-utils/permissions'
 import MapLayerActions from '../../../react/components/map-layers/map-layer-actions'
+import SelectionActions from '../../../react/components/selection/selection-actions'
 
 // We need a selector, else the .toJS() call will create an infinite digest loop
 const getAllLocationLayers = state => state.mapLayers.location
@@ -76,8 +77,12 @@ class LocationEditorController {
   }
 
   $onDestroy () {
-    // to bring bakc the hidden locations
-    this.state.requestMapLayerRefresh.next(null)
+    Object.keys(this.objectIdToMapObject).forEach(objectId => this.tileDataService.removeFeatureToExclude(objectId))
+    this.clearSelectedLocations() // Clear redux selection
+    // Clear old state selection
+    const newSelection = this.state.cloneSelection()
+    newSelection.editable.location = {}
+    this.state.selection = newSelection
     this.unsubscribeRedux()
   }
 
@@ -125,7 +130,7 @@ class LocationEditorController {
         this.createMapObjects && this.createMapObjects(features)
         // We now have objectIdToMapObject populated.
         features.forEach((feature) => {
-          var locationProperties = new LocationProperties()
+          var locationProperties = new LocationProperties(WorkflowState[feature.workflowState].id)
           locationProperties.numberOfHouseholds = feature.attributes.number_of_households
           this.objectIdToProperties[feature.objectId] = locationProperties
         })
@@ -210,6 +215,7 @@ class LocationEditorController {
         this.$http.delete(`/service/library/transaction/${this.currentTransaction.id}`)
           .then((result) => {
             // Transaction has been discarded, start a new one
+            Object.keys(this.objectIdToMapObject).forEach(objectId => this.tileDataService.removeFeatureToExclude(objectId))
             this.state.recreateTilesAndCache()
             return this.resumeOrCreateTransaction()
           })
@@ -259,6 +265,8 @@ class LocationEditorController {
   formatLocationForService (objectId) {
     var mapObject = this.objectIdToMapObject[objectId]
     var objectProperties = this.objectIdToProperties[objectId]
+    const workflowStateKey = Object.keys(WorkflowState).filter(key => WorkflowState[key].id === objectProperties.workflowStateId)[0]
+    const workflowStateName = WorkflowState[workflowStateKey].name
 
     var featureObj = {
       objectId: objectId,
@@ -271,7 +279,7 @@ class LocationEditorController {
       },
       dataType: 'location',
       locationCategory: objectProperties.locationCategory,
-      workflowState: objectProperties.workflowStateId
+      workflowState: workflowStateName
     }
 
     if (objectProperties.locationCategory === 'household') {
@@ -304,7 +312,14 @@ class LocationEditorController {
     if (feature.locationCategory === 'business' && feature.attributes && feature.attributes.number_of_employees) {
       numberOfEmployees = +feature.attributes.number_of_employees
     }
-    const workflowStateId = feature.workflow_state_id || WorkflowState.CREATED.id
+    var workflowStateId = null
+    if (!(feature.workflow_state_id || feature.workflowState)) {
+      workflowStateId = WorkflowState.CREATED.id
+    } else {
+      // workflow_state_id is encoded in vector tile features
+      // workflowState is encoded in aro-service features (that do not come in from vector tiles)
+      workflowStateId = feature.workflow_state_id || WorkflowState[feature.workflowState].id
+    }
     const locationCategory = feature.locationCategory || this.locationTypeToAdd
     this.objectIdToProperties[mapObject.objectId] = new LocationProperties(workflowStateId, locationCategory, numberOfHouseholds, numberOfEmployees)
     this.objectIdToMapObject[mapObject.objectId] = mapObject
@@ -456,7 +471,8 @@ class LocationEditorController {
           // First set the visibility of the current layer
           dispatch(MapLayerActions.setLayerVisibility(layer, true))
         })
-      }
+      },
+      clearSelectedLocations: () => dispatch(SelectionActions.setLocations([]))
     }
   }
 }

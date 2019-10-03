@@ -14,6 +14,13 @@ function getLocationInfo (planId, id) {
   }
 }
 
+function clearLocationInfo () {
+  return {
+    type: Actions.LOCATION_INFO_SET_DETAILS,
+    payload: null
+  }
+}
+
 function getLocationAuditLog (planId, objectId) {
   return dispatch => {
     AroHttp.get(`/service/audit/location/trail/${objectId}?plan_id=${planId}`)
@@ -28,5 +35,6 @@ function getLocationAuditLog (planId, objectId) {
 
 export default {
   getLocationInfo,
+  clearLocationInfo,
   getLocationAuditLog
 }
