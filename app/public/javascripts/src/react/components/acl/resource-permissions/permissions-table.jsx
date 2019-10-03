@@ -3,6 +3,7 @@ import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
 // import { PropTypes } from 'prop-types'
 import aclActions from '../acl-actions.js'
+// import { DropdownList } from 'react-widgets'
 
 export class PermissionsTable extends Component {
   constructor (props) {
@@ -54,8 +55,6 @@ export class PermissionsTable extends Component {
       // systemActorId, rolePermissions
       jsx.push(this.renderDataRow(aclItem))
     })
-
-    console.log(jsx)
     return jsx
   }
 
@@ -69,7 +68,17 @@ export class PermissionsTable extends Component {
         {systemActor.name}
       </td>
       <td>
-        {dataItem.rolePermissions}
+        {this.props.isOwner
+          ? (
+            {/* <DropdownList
+              data={this.props.filteredAuthRoles}
+              valueField='permissions'
+              textField='displayName'
+              value={dataItem.rolePermissions}
+            /> */}
+          )
+          : dataItem.rolePermissions
+        }
       </td>
       <td className='ei-table-cell ei-table-button-cell'>
         <button className='btn btn-sm btn-outline-danger'
@@ -81,7 +90,42 @@ export class PermissionsTable extends Component {
       </td>
     </tr>
   }
-
+  /*
+  renderUserDropdown () {
+    var jsx = null
+    if (this.props.isOwner) {
+      jsx = (
+        <div className="input-group">
+          <div className="ei-input-label">
+            Add User:
+          </div>
+        <ui-select limit="1" ng-model="$ctrl.newActorId"
+              theme="bootstrap" close-on-select="true"
+              on-select="$ctrl.onSelectionChanged()"
+              on-remove="$ctrl.onSelectionChanged()">
+              <ui-select-match placeholder="User Search" allow-clear="true">
+                <span>{{$select.selected.name}}</span>
+              </ui-select-match>
+              <ui-select-choices repeat="person.id as person in $ctrl.systemActorsArray | filter: { name: $select.search } | filter: $ctrl.filterNewActorList| orderBy:'name' "
+                group-by="'type'">
+                <i ng-if="person.type === 'user'" className="fa fas fa-user"></i>
+                <i ng-if="person.type === 'group'" className="fa fas fa-users"></i>
+                &nbsp;<span ng-bind-html="person.name | highlight: $select.search"></span>
+              </ui-select-choices>
+            </ui-select>
+          <div className="input-group-append">
+            <button type="button" className="btn btn-sm btn-primary"
+                    ng-click="$ctrl.addActor($event)"
+                    ng-disabled="!$ctrl.newActorId">
+              <i className="fa fa-plus"></i> Add
+            </button>
+          </div>
+        </div>
+      )
+    }
+    return jsx
+  }
+*/
   // --- //
 
   deleteAuthItem () {
@@ -112,9 +156,14 @@ const mapStateToProps = (state, ownProps) => {
     state.acl.aclByType['LIBRARY'].hasOwnProperty(ownProps.resource.identifier)) {
     acl = state.acl.aclByType['LIBRARY'][ownProps.resource.identifier]
   }
+  var filteredAuthRoles = []
+  Object.keys(state.user.authRoles).forEach(key => {
+    if (key.slice(0, 9) === 'RESOURCE_') filteredAuthRoles.push(state.user.authRoles[key])
+  })
   return {
     acl: acl,
-    systemActors: state.user.systemActors
+    systemActors: state.user.systemActors,
+    filteredAuthRoles: filteredAuthRoles
   }
 }
 
