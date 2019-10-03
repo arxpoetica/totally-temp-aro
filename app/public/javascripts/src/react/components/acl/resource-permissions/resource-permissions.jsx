@@ -1,4 +1,5 @@
-import React, { Component } from 'react'
+/* globals swal */
+import React, { Component, Fragment } from 'react'
 import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
 // import { PropTypes } from 'prop-types'
@@ -10,7 +11,8 @@ export class ResourcePermissions extends Component {
 
     this.isAdmin = false
     this.state = {
-      'openRowId': null
+      'openRowId': null,
+      'selectedSourceName': 'all'
     }
   }
 
@@ -20,95 +22,104 @@ export class ResourcePermissions extends Component {
     if (this.props.loggedInUser.hasPermissions(this.props.authPermissions['RESOURCE_ADMIN'].permissionBits)) {
       this.isAdmin = true
     }
+    
     return (
-      <div>
-        <table className='table table-sm ei-table-foldout-striped' style={{ 'borderBottom': '1px solid #dee2e6' }}>
-          <thead className='thead-dark'>
-            <tr>
-              <th />
-              <th className='ei-table-col-head-sortable ng-binding ng-scope' onClick={event => { console.log('reorder') }}>
-                Name
-                {/*
-                <div className="ei-table-col-sort-icon ng-scope">
-                  <i className="fa fa-chevron-down ng-scope" aria-hidden="true"> </i>
-                </div>
-                */}
-              </th>
-              <th className='ei-table-col-head-sortable ng-binding ng-scope' onClick={event => { console.log('reorder') }}>
-                Data Type
-                {/*
-                <div className="ei-table-col-sort-icon ng-scope">
-                  <i className="fa fa-chevron-down ng-scope" aria-hidden="true"> </i>
-                </div>
-                */}
-              </th>
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            {this.renderDataRows()}
-          </tbody>
-        </table>
-        {/* also need pagination */}
-      </div>
+      <Fragment>
+        <div className='form-group row'>
+          <label className='col-sm-4 col-form-label'>Data Type</label>
+          <div className='col-sm-8'>
+            <select className='form-control' onChange={event => { this.onSelectSource(event) }}>
+              <option key={`data-source-dropdown-option-all`} value='all'>all</option>
+              {this.props.uploadDataSources.map((source, index) => (
+                <option key={`data-source-dropdown-option-${source.id}`} value={source.name}>{source.description}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div className='ei-table-contain'>
+          <table className='table table-sm ei-table-foldout-striped' style={{ 'borderBottom': '1px solid #dee2e6' }}>
+            <thead className='thead-dark'>
+              <tr>
+                <th />
+                <th className='ei-table-col-head-sortable ng-binding ng-scope' onClick={event => { console.log('reorder') }}>
+                  Name
+                  {/*
+                  <div className="ei-table-col-sort-icon ng-scope">
+                    <i className="fa fa-chevron-down ng-scope" aria-hidden="true"> </i>
+                  </div>
+                  */}
+                </th>
+                <th className='ei-table-col-head-sortable ng-binding ng-scope' onClick={event => { console.log('reorder') }}>
+                  Data Type
+                  {/*
+                  <div className="ei-table-col-sort-icon ng-scope">
+                    <i className="fa fa-chevron-down ng-scope" aria-hidden="true"> </i>
+                  </div>
+                  */}
+                </th>
+                <th />
+              </tr>
+            </thead>
+            <tbody>
+              {this.renderDataRows()}
+            </tbody>
+          </table>
+          {/* also need pagination */}
+        </div>
+      </Fragment>
     )
   }
 
   renderDataRows () {
     var jsx = []
     Object.keys(this.props.dataItems).forEach((dataKey) => {
-      if (dataKey === 'equipment') { // check dropdown type val
-        this.props.dataItems[dataKey].allLibraryItems.forEach((dataItem) => {
-          jsx = jsx.concat(this.renderDataRow(dataItem))
+      if (dataKey === this.state.selectedSourceName ||
+        (this.state.selectedSourceName === 'all' &&
+        !this.props.dataItems[dataKey].proxyFor)) { // proxyFor means this list is itentical to another list, this is to avoid duplicates
+        this.props.dataItems[dataKey].allLibraryItems.forEach((libItem) => {
+          jsx = jsx.concat(this.renderDataRow(libItem, dataKey))
         })
       }
     })
     return jsx
   }
 
-  renderDataRow (dataItem) {
+  renderDataRow (libItem, dataKey) {
     var isOwner = this.isAdmin
     if (!isOwner) {
-      if (this.props.loggedInUser.hasPermissions(this.props.authPermissions['RESOURCE_ADMIN'].permissionBits, dataItem.permissions)) {
+      if (this.props.loggedInUser.hasPermissions(this.props.authPermissions['RESOURCE_ADMIN'].permissionBits, libItem.permissions)) {
         isOwner = true
       }
     }
     return [
-      <tr className={this.state.openRowId === dataItem.identifier ? 'ei-foldout-table-open' : ''} key={dataItem.identifier + '_a'}>
-        <td onClick={event => { this.toggleRow(dataItem.identifier) }}>
+      <tr className={this.state.openRowId === libItem.identifier ? 'ei-foldout-table-open' : ''} key={dataKey + libItem.identifier + '_a'}>
+        <td onClick={event => { this.toggleRow(libItem.identifier) }}>
           <i className='far fa-minus-square ei-foldout-icon ei-foldout-icon-table-open' />
           <i className='far fa-plus-square ei-foldout-icon ei-foldout-icon-table-closed' />
         </td>
         <td>
-          {dataItem.name}
+          {libItem.name}
         </td>
         <td>
-          {dataItem.dataType}
+          {libItem.dataType}
         </td>
         <td className='ei-table-cell ei-table-button-cell'>
           <button className='btn btn-sm btn-outline-danger'
-            onClick={event => { this.deleteResource(dataItem.identifier) }}
+            onClick={event => { this.onDeleteRequest(libItem) }}
             data-toggle='tooltip' data-placement='bottom' title='Delete'
             disabled={(isOwner ? null : 'disabled')}>
             <i className='fa ei-button-icon fa-trash-alt' />
           </button>
         </td>
       </tr>,
-      <tr className='ei-foldout-row' key={dataItem.identifier + '_b'}>
+      <tr className='ei-foldout-row' key={dataKey + libItem.identifier + '_b'}>
         <td colSpan='999'>
           <div style={{ 'padding': '0px 20px 0px 20px' }}>
-            <PermissionsTable resource={dataItem} isOwner={isOwner} />
+            <PermissionsTable resource={libItem} isOwner={isOwner} />
           </div>
         </td>
       </tr>
     ]
-  }
-
-  // --- //
-
-  deleteResource (resourceId) {
-    console.log(`delete ${resourceId}`)
-    // confirm popup
   }
 
   toggleRow (rowId) {
@@ -117,6 +128,46 @@ export class ResourcePermissions extends Component {
     }
 
     this.setState({ ...this.state, 'openRowId': rowId })
+  }
+
+  onSelectSource (event) {
+    this.setState({ ...this.state, 'selectedSourceName': event.target.value })
+  }
+
+  // --- //
+
+  onDeleteRequest (libItem) {
+    this.confirmDelete(libItem.name)
+      .then((okToDelete) => {
+        if (okToDelete) {
+          this.deleteLibItem(libItem)
+        }
+      })
+      .catch((err) => console.error(err))
+  }
+
+  confirmDelete (name) {
+    return new Promise((resolve, reject) => {
+      swal({
+        title: 'Delete data source?',
+        text: `Are you sure you want to delete "${name}"?`,
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No'
+      }, (result) => {
+        if (result) {
+          resolve(true)
+        } else {
+          resolve(false)
+        }
+      })
+    })
+  }
+
+  deleteLibItem (libItem) {
+    console.log('delete lib item')
   }
 }
 

@@ -70,12 +70,12 @@ export class PermissionsTable extends Component {
       <td>
         {this.props.isOwner
           ? (
-            {/* <DropdownList
+            null /* <DropdownList
               data={this.props.filteredAuthRoles}
               valueField='permissions'
               textField='displayName'
               value={dataItem.rolePermissions}
-            /> */}
+            /> */
           )
           : dataItem.rolePermissions
         }
