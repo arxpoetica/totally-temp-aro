@@ -125,7 +125,7 @@ class LocationEditorController {
         this.createMapObjects && this.createMapObjects(features)
         // We now have objectIdToMapObject populated.
         features.forEach((feature) => {
-          var locationProperties = new LocationProperties()
+          var locationProperties = new LocationProperties(WorkflowState[feature.workflowState].id)
           locationProperties.numberOfHouseholds = feature.attributes.number_of_households
           this.objectIdToProperties[feature.objectId] = locationProperties
         })
@@ -259,6 +259,8 @@ class LocationEditorController {
   formatLocationForService (objectId) {
     var mapObject = this.objectIdToMapObject[objectId]
     var objectProperties = this.objectIdToProperties[objectId]
+    const workflowStateKey = Object.keys(WorkflowState).filter(key => WorkflowState[key].id === objectProperties.workflowStateId)[0]
+    const workflowStateName = WorkflowState[workflowStateKey].name
 
     var featureObj = {
       objectId: objectId,
@@ -271,7 +273,7 @@ class LocationEditorController {
       },
       dataType: 'location',
       locationCategory: objectProperties.locationCategory,
-      workflowState: objectProperties.workflowStateId
+      workflowState: workflowStateName
     }
 
     if (objectProperties.locationCategory === 'household') {
@@ -304,7 +306,11 @@ class LocationEditorController {
     if (feature.locationCategory === 'business' && feature.attributes && feature.attributes.number_of_employees) {
       numberOfEmployees = +feature.attributes.number_of_employees
     }
-    const workflowStateId = feature.workflow_state_id || WorkflowState.CREATED.id
+    var workflowStateId = feature.workflow_state_id // workflow_state_id is encoded in vector tile features
+    if (feature.workflowState) {
+      // workflowState is encoded in aro-service features (that do not come in from vector tiles)
+      workflowStateId = WorkflowState[feature.workflowState].id
+    }
     const locationCategory = feature.locationCategory || this.locationTypeToAdd
     this.objectIdToProperties[mapObject.objectId] = new LocationProperties(workflowStateId, locationCategory, numberOfHouseholds, numberOfEmployees)
     this.objectIdToMapObject[mapObject.objectId] = mapObject

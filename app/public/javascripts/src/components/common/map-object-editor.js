@@ -615,8 +615,10 @@ class MapObjectEditorController {
 
   isFeatureEditable (feature) {
     // The marker is editable if the state is not LOCKED or INVALIDATED
-    return !((feature.workflow_state_id & WorkflowState.LOCKED.id) ||
-             (feature.workflow_state_id & WorkflowState.INVALIDATED.id))
+    // Vector tile features come in as "workflow_state_id", transaction features as "workflowState"
+    var workflowStateId = feature.workflow_state_id || WorkflowState[feature.workflowState].id
+    return !((workflowStateId & WorkflowState.LOCKED.id) ||
+             (workflowStateId & WorkflowState.INVALIDATED.id))
   }
 
   createPointMapObject (feature, iconUrl) {
@@ -642,7 +644,9 @@ class MapObjectEditorController {
     })
 
     if (!isEditable) {
-      if (feature.workflow_state_id & WorkflowState.LOCKED.id) {
+      // Vector tile features come in as "workflow_state_id", transaction features as "workflowState"
+      var workflowStateId = feature.workflow_state_id || WorkflowState[feature.workflowState].id
+      if (workflowStateId & WorkflowState.LOCKED.id) {
         var lockIconOverlay = new google.maps.Marker({
           icon: {
             url: this.state.configuration.locationCategories.entityLockIcon,
@@ -654,7 +658,7 @@ class MapObjectEditorController {
         lockIconOverlay.bindTo('position', mapMarker, 'position')
         this.createdMapObjects[`${feature.objectId}_lockIconOverlay`] = lockIconOverlay
       }
-      if (feature.workflow_state_id & WorkflowState.INVALIDATED.id) {
+      if (workflowStateId & WorkflowState.INVALIDATED.id) {
         var lockIconOverlay = new google.maps.Marker({
           icon: {
             url: this.state.configuration.locationCategories.entityInvalidatedIcon,
