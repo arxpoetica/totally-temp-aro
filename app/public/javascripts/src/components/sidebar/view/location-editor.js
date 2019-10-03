@@ -77,6 +77,7 @@ class LocationEditorController {
   }
 
   $onDestroy () {
+    Object.keys(this.objectIdToMapObject).forEach(objectId => this.tileDataService.removeFeatureToExclude(objectId))
     this.clearSelectedLocations() // Clear redux selection
     // Clear old state selection
     const newSelection = this.state.cloneSelection()
@@ -214,6 +215,7 @@ class LocationEditorController {
         this.$http.delete(`/service/library/transaction/${this.currentTransaction.id}`)
           .then((result) => {
             // Transaction has been discarded, start a new one
+            Object.keys(this.objectIdToMapObject).forEach(objectId => this.tileDataService.removeFeatureToExclude(objectId))
             this.state.recreateTilesAndCache()
             return this.resumeOrCreateTransaction()
           })
