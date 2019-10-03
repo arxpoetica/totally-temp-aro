@@ -6,7 +6,7 @@ class ViewModeController {
     this.$http = $http
     this.currentUser = state.loggedInUser
     // Hook into a legacy system for clearing selection
-    this.clearViewModeSubscription = state.clearViewMode.subscribe(clear => {
+    this.clearViewModeSubscription = state.clearViewMode.skip(1).subscribe(clear => {
       if (clear) {
         this.clearSelectedLocations() // Clear redux selection
         // Clear old state selection
