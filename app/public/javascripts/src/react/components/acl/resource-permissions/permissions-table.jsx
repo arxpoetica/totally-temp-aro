@@ -10,7 +10,6 @@ export class PermissionsTable extends Component {
     super(props)
 
     this.newActorId = null
-    console.log('construct')
   }
 
   render () {
@@ -59,7 +58,6 @@ export class PermissionsTable extends Component {
   }
 
   renderDataRow (dataItem) {
-    console.log(dataItem)
     const systemActor = this.props.systemActors[dataItem.systemActorId]
     if (!systemActor) return
     if (!systemActor.hasOwnProperty('name')) systemActor.name = `${systemActor.firstName} ${systemActor.lastName}`
@@ -70,14 +68,13 @@ export class PermissionsTable extends Component {
       <td>
         {this.props.isOwner
           ? (
-            null /* <DropdownList
-              data={this.props.filteredAuthRoles}
-              valueField='permissions'
-              textField='displayName'
-              value={dataItem.rolePermissions}
-            /> */
+            <select className='form-control' onChange={event => { this.onSelectRoll(event, dataItem.systemActorId) }} value={dataItem.rolePermissions}>
+              {Object.values(this.props.filteredAuthRoles).map((role) => (
+                <option key={`data-item-${dataItem.systemActorId}-dropdown-option-${role.id}`} value={role.permissions}>{role.displayName}</option>
+              ))}
+            </select>
           )
-          : dataItem.rolePermissions
+          : Object.values(this.props.filteredAuthRoles).filter(role => role.permissions === dataItem.rolePermissions)[0].displayName
         }
       </td>
       <td className='ei-table-cell ei-table-button-cell'>
@@ -128,12 +125,18 @@ export class PermissionsTable extends Component {
 */
   // --- //
 
+  onSelectRoll (event, systemActorId) {
+    console.log([event.target.value, systemActorId])
+    var permissionsBit = parseInt(event.target.value)
+    this.props.setUserAcl(this.props.resource.identifier, systemActorId, permissionsBit)
+  }
+
   deleteAuthItem () {
 
   }
 
   componentWillMount () {
-    this.props.getAcl('LIBRARY', this.props.resource.identifier)
+    this.props.getAcl(this.props.resource.identifier)
   }
 }
 
@@ -152,9 +155,9 @@ PermissionsTable.propTypes = {
 const mapStateToProps = (state, ownProps) => {
   var acl = []
   // acl may not be loaded
-  if (state.acl.aclByType.hasOwnProperty('LIBRARY') &&
-    state.acl.aclByType['LIBRARY'].hasOwnProperty(ownProps.resource.identifier)) {
-    acl = state.acl.aclByType['LIBRARY'][ownProps.resource.identifier]
+  if (state.acl.aclByType.hasOwnProperty(ownProps.resourceType) &&
+    state.acl.aclByType[ownProps.resourceType].hasOwnProperty(ownProps.resource.identifier)) {
+    acl = state.acl.aclByType[ownProps.resourceType][ownProps.resource.identifier]
   }
   var filteredAuthRoles = []
   Object.keys(state.user.authRoles).forEach(key => {
@@ -167,8 +170,9 @@ const mapStateToProps = (state, ownProps) => {
   }
 }
 
-const mapDispatchToProps = dispatch => ({
-  getAcl: (resourceType, resourceId, doForceUpdate = false) => dispatch(aclActions.getAcl(resourceType, resourceId, doForceUpdate))
+const mapDispatchToProps = (dispatch, ownProps) => ({
+  getAcl: (resourceId, doForceUpdate = false) => dispatch(aclActions.getAcl(ownProps.resourceType, resourceId, doForceUpdate)),
+  setUserAcl: (resourceId, userId, permissionsBit) => dispatch(aclActions.setUserAcl(ownProps.resourceType, resourceId, userId, permissionsBit))
 })
 
 const PermissionsTableComponent = wrapComponentWithProvider(reduxStore, PermissionsTable, mapStateToProps, mapDispatchToProps)

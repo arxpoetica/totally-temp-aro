@@ -25,7 +25,7 @@ function getAcl (resourceType, resourceId, doForceUpdate = false) {
 
 function putAcl (resourceType, resourceId, acl) {
   return (dispatch) => {
-    AroHttp.put(`/service/auth/acl/${resourceType}/${resourceId}`)
+    AroHttp.put(`/service/auth/acl/${resourceType}/${resourceId}`, { 'resourcePermissions': acl })
       .then(result => {
         // wait for success before updating local state, keep in sync
         dispatch({

@@ -22,15 +22,15 @@ export class ResourcePermissions extends Component {
     if (this.props.loggedInUser.hasPermissions(this.props.authPermissions['RESOURCE_ADMIN'].permissionBits)) {
       this.isAdmin = true
     }
-    
+
     return (
       <Fragment>
         <div className='form-group row'>
           <label className='col-sm-4 col-form-label'>Data Type</label>
           <div className='col-sm-8'>
-            <select className='form-control' onChange={event => { this.onSelectSource(event) }}>
+            <select className='form-control' onChange={event => { this.onSelectSource(event) }} value={this.state.selectedSourceName}>
               <option key={`data-source-dropdown-option-all`} value='all'>all</option>
-              {this.props.uploadDataSources.map((source, index) => (
+              {this.props.uploadDataSources.map((source) => (
                 <option key={`data-source-dropdown-option-${source.id}`} value={source.name}>{source.description}</option>
               ))}
             </select>
@@ -115,7 +115,7 @@ export class ResourcePermissions extends Component {
       <tr className='ei-foldout-row' key={dataKey + libItem.identifier + '_b'}>
         <td colSpan='999'>
           <div style={{ 'padding': '0px 20px 0px 20px' }}>
-            <PermissionsTable resource={libItem} isOwner={isOwner} />
+            <PermissionsTable resource={libItem} resourceType='LIBRARY' isOwner={isOwner} />
           </div>
         </td>
       </tr>
