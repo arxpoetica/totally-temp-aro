@@ -41,7 +41,7 @@ class ViewModeController {
   }
 
   $onDestroy () {
-    this.clearViewModeSubscription()
+    this.clearViewModeSubscription.unsubscribe()
     this.unsubscribeRedux()
   }
 
