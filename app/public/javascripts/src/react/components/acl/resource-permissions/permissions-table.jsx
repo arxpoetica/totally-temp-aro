@@ -79,7 +79,7 @@ export class PermissionsTable extends Component {
       </td>
       <td className='ei-table-cell ei-table-button-cell'>
         <button className='btn btn-sm btn-outline-danger'
-          onClick={event => { console.log('delete') }}
+          onClick={event => { this.deleteAuthItem(event, dataItem.systemActorId) }}
           data-toggle='tooltip' data-placement='bottom' title='Delete'
           disabled={(this.props.isOwner ? null : 'disabled')}>
           <i className='fa ei-button-icon fa-trash-alt' />
@@ -131,8 +131,8 @@ export class PermissionsTable extends Component {
     this.props.setUserAcl(this.props.resource.identifier, systemActorId, permissionsBit)
   }
 
-  deleteAuthItem () {
-
+  deleteAuthItem (event, systemActorId) {
+    this.props.deleteUserAcl(this.props.resource.identifier, systemActorId)
   }
 
   componentWillMount () {
@@ -172,7 +172,8 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
   getAcl: (resourceId, doForceUpdate = false) => dispatch(aclActions.getAcl(ownProps.resourceType, resourceId, doForceUpdate)),
-  setUserAcl: (resourceId, userId, permissionsBit) => dispatch(aclActions.setUserAcl(ownProps.resourceType, resourceId, userId, permissionsBit))
+  setUserAcl: (resourceId, userId, permissionsBit) => dispatch(aclActions.setUserAcl(ownProps.resourceType, resourceId, userId, permissionsBit)),
+  deleteUserAcl: (resourceId, userId) => dispatch(aclActions.deleteUserAcl(ownProps.resourceType, resourceId, userId))
 })
 
 const PermissionsTableComponent = wrapComponentWithProvider(reduxStore, PermissionsTable, mapStateToProps, mapDispatchToProps)
