@@ -614,7 +614,7 @@ class MapObjectEditorController {
   }
 
   isFeatureEditable (feature) {
-    if (feature.isExistingObject) {
+    if (feature.workflow_state_id || feature.workflowState) {
       // The marker is editable if the state is not LOCKED or INVALIDATED
       // Vector tile features come in as "workflow_state_id", transaction features as "workflowState"
       var workflowStateId = feature.workflow_state_id || WorkflowState[feature.workflowState].id
