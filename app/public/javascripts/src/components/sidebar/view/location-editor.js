@@ -3,6 +3,7 @@ import { createSelector } from 'reselect'
 import WorkflowState from '../../../shared-utils/workflow-state'
 import Permissions from '../../../shared-utils/permissions'
 import MapLayerActions from '../../../react/components/map-layers/map-layer-actions'
+import SelectionActions from '../../../react/components/selection/selection-actions'
 
 // We need a selector, else the .toJS() call will create an infinite digest loop
 const getAllLocationLayers = state => state.mapLayers.location
@@ -76,8 +77,11 @@ class LocationEditorController {
   }
 
   $onDestroy () {
-    // to bring bakc the hidden locations
-    this.state.requestMapLayerRefresh.next(null)
+    this.clearSelectedLocations() // Clear redux selection
+    // Clear old state selection
+    const newSelection = this.state.cloneSelection()
+    newSelection.editable.location = {}
+    this.state.selection = newSelection
     this.unsubscribeRedux()
   }
 
@@ -462,7 +466,8 @@ class LocationEditorController {
           // First set the visibility of the current layer
           dispatch(MapLayerActions.setLayerVisibility(layer, true))
         })
-      }
+      },
+      clearSelectedLocations: () => dispatch(SelectionActions.setLocations([]))
     }
   }
 }
