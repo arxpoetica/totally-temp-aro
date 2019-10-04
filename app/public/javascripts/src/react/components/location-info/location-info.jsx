@@ -26,6 +26,16 @@ export class LocationInfo extends Component {
       // We have exactly one location selected. Get the location details
       this.props.getLocationInfo(this.props.planId, newLocationId)
     }
+
+    if ((prevProps.locationInfoDetails !== this.props.locationInfoDetails) &&
+      this.props.locationInfoDetails) {
+      this.props.googleMaps.setCenter({
+        lat: this.props.locationInfoDetails.geog.coordinates[1],
+        lng: this.props.locationInfoDetails.geog.coordinates[0]
+      })
+      const ZOOM_FOR_LOCATION_SEARCH = 17
+      this.props.googleMaps.setZoom(ZOOM_FOR_LOCATION_SEARCH)
+    }
   }
 
   selectionAttributes () {
@@ -133,13 +143,16 @@ export class LocationInfo extends Component {
 
 LocationInfo.propTypes = {
   planId: PropTypes.number,
-  selectedLocations: PropTypes.object
+  selectedLocations: PropTypes.object,
+  locationInfoDetails: PropTypes.object,
+  googleMaps: PropTypes.object
 }
 
 const mapStateToProps = state => ({
   planId: state.plan.activePlan && state.plan.activePlan.id,
   selectedLocations: state.selection.locations,
-  locationInfoDetails: state.locationInfo.details
+  locationInfoDetails: state.locationInfo.details,
+  googleMaps: state.map.googleMaps
 })
 
 const mapDispatchToProps = (dispatch) => ({
