@@ -20,6 +20,16 @@ class ViewModeController {
 
   onSearchResult (selectedLocation) {
     this.setSelectedLocations([selectedLocation.id])
+    this.$http.get(`/locations/coordinates/${selectedLocation.id}`)
+      .then(result => {
+        this.state.requestSetMapCenter.next({
+          latitude: result.data.geometry.coordinates[1],
+          longitude: result.data.geometry.coordinates[0]
+        })
+        const ZOOM_FOR_LOCATION_SEARCH = 17
+        this.state.requestSetMapZoom.next(ZOOM_FOR_LOCATION_SEARCH)
+      })
+      .catch(err => console.error(err))
   }
 
   updateSelectedState (locationId) {
