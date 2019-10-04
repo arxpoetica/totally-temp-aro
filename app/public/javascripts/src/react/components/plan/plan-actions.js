@@ -163,10 +163,25 @@ function setAllLibraryItems (dataItemKey, allLibraryItems) {
   }
 }
 
+function deleteLibraryEntry (dataSource) {
+  return (dispatch, getState) => {
+    const state = getState()
+    const dataType = dataSource.dataType
+    const updatedLib = state.plan.dataItems[dataType].allLibraryItems.filter(item => item.identifier !== dataSource.identifier)
+    AroHttp.delete(`/service/v1/library-entry/${dataSource.identifier}`)
+      .then(() => {
+        // wait for success before updating local state, keep in sync
+        dispatch(setAllLibraryItems(dataType, updatedLib))
+      })
+      .catch((err) => console.error(err))
+  }
+}
+
 export default {
   setActivePlan,
   setActivePlanState,
   loadPlan,
   selectDataItems,
-  setAllLibraryItems
+  setAllLibraryItems,
+  deleteLibraryEntry
 }

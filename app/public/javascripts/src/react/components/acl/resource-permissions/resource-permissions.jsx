@@ -4,6 +4,7 @@ import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
 // import { PropTypes } from 'prop-types'
 import PermissionsTable from './permissions-table.jsx'
+import PlanActions from '../../plan/plan-actions.js'
 
 export class ResourcePermissions extends Component {
   constructor (props) {
@@ -140,7 +141,7 @@ export class ResourcePermissions extends Component {
     this.confirmDelete(libItem.name)
       .then((okToDelete) => {
         if (okToDelete) {
-          this.deleteLibItem(libItem)
+          this.props.deleteLibraryEntry(libItem)
         }
       })
       .catch((err) => console.error(err))
@@ -165,10 +166,6 @@ export class ResourcePermissions extends Component {
       })
     })
   }
-
-  deleteLibItem (libItem) {
-    console.log('delete lib item')
-  }
 }
 
 // --- //
@@ -192,6 +189,7 @@ const mapStateToProps = (state) => ({
 })
 
 const mapDispatchToProps = dispatch => ({
+  deleteLibraryEntry: (dataSource) => dispatch(PlanActions.deleteLibraryEntry(dataSource))
   // selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems)),
   // setAllLibraryItems: (dataItemKey, allLibraryItems) => dispatch(PlanActions.setAllLibraryItems(dataItemKey, allLibraryItems))
 })
