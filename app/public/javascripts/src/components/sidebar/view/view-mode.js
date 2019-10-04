@@ -20,11 +20,12 @@ class ViewModeController {
 
   onSearchResult (selectedLocation) {
     this.setSelectedLocations([selectedLocation.id])
-    this.$http.get(`/locations/coordinates/${selectedLocation.id}`)
+    this.$http.get(`/service/odata/LocationObjectEntity?$select=id,geom&$filter=id eq ${selectedLocation.id}&$top=1`)
       .then(result => {
+        const location = result.data[0]
         this.state.requestSetMapCenter.next({
-          latitude: result.data.geometry.coordinates[1],
-          longitude: result.data.geometry.coordinates[0]
+          latitude: location.geom.coordinates[1],
+          longitude: location.geom.coordinates[0]
         })
         const ZOOM_FOR_LOCATION_SEARCH = 17
         this.state.requestSetMapZoom.next(ZOOM_FOR_LOCATION_SEARCH)

@@ -206,12 +206,6 @@ module.exports = class Location {
       })
   }
 
-  // Get the coordinates of a location entity
-  static getLocationEntityCoordinates (location_entity_id) {
-    const sql = 'SELECT ST_AsGeojson(geog)::json as geometry FROM aro.location_entity WHERE id=$1'
-    return database.findOne(sql, [location_entity_id])
-  }
-
   // Get summary information for a given location
   static showInformation (plan_id, location_id) {
     var info,locationInfo,locationSources
