@@ -67,6 +67,7 @@ workflows:
   build_deploy:
     jobs:
       - build:
+          context: aro_qa_builds
           filters:
             branches:
               only: 
@@ -76,6 +77,7 @@ workflows:
                 - rfpUploader
 
       - deploy:
+          context: aro_qa_builds
           requires:
             - build
           filters:
