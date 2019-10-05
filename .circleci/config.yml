@@ -48,7 +48,6 @@ jobs:
                 python docker/publish_version.py qa-${BRANCH} app $CIRCLE_BUILD_NUM
             fi
             
-
   deploy:
     docker:
       - image: circleci/python:2.7
@@ -59,14 +58,12 @@ jobs:
           command: |
             sudo pip install boto3
             python docker/update_stack.py qa update
-
-
-
 workflows:
   version: 2
   build_deploy:
     jobs:
       - build:
+          context: aro_qa_builds
           filters:
             branches:
               only: 
@@ -75,9 +72,9 @@ workflows:
                 - devJuly2019
 
       - deploy:
+          context: aro_qa_builds
           requires:
             - build
           filters:
             branches:
               only: master
-
