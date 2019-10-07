@@ -116,6 +116,8 @@ export default class TransactionManager {
               console.error(err)
               reject(err)
             })
+        } else {
+          reject(new Error(`The user does not want to discard the transaction`))
         }
       })
     })
