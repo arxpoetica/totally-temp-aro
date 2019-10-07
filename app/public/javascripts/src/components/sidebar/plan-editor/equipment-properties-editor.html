@@ -17,9 +17,9 @@
     </span>
 
     <button ng-class="{ 'btn ei-panel-header-btn-set ei-foldout-header-btn mt-1': true,
-              'btn-light': $ctrl.viewFeature.attributes.is_locked === 'true',
-              'btn-primary': $ctrl.viewFeature.attributes.is_locked !== 'true' }"
-      ng-disabled="$ctrl.viewFeature.attributes.is_locked === 'true'" ng-click="$ctrl.requestEditViewObject()">
+              'btn-light': $ctrl.viewFeature.attributes.is_locked === 'true' || $ctrl.transactionFeatures[$ctrl.viewFeature.objectId],
+              'btn-primary': $ctrl.viewFeature.attributes.is_locked !== 'true' && !$ctrl.transactionFeatures[$ctrl.viewFeature.objectId] }"
+      ng-disabled="$ctrl.viewFeature.attributes.is_locked === 'true' || $ctrl.transactionFeatures[$ctrl.viewFeature.objectId]" ng-click="$ctrl.requestEditViewObject()">
       Edit
     </button>
     <div class='d-flex flex-row mt-2' style="align-items: center;">

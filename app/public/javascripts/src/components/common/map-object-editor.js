@@ -977,6 +977,8 @@ class MapObjectEditorController {
         iconKey = Constants.MAP_OBJECT_CREATE_KEY_EQUIPMENT_BOUNDARY
         if (clickedObject.is_locked === 'false') {
           this.displayEditObject({ feature: feature })
+        } else {
+          this.displayViewObject({ feature: feature })
         }
         this.selectMapObject(null)
         newSelection.editable.equipment = {}
@@ -985,6 +987,8 @@ class MapObjectEditorController {
       } else {
         if (clickedObject.is_locked === 'false') {
           this.displayEditObject({ feature: feature, isMult: isMult })
+        } else {
+          this.displayViewObject({ feature: feature, isMult: isMult })
         }
         return
       }
