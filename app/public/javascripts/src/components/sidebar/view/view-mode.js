@@ -81,6 +81,7 @@ class ViewModeController {
     if (currentSelectedLocations !== nextState.selectedLocations) {
       const firstLocationId = nextState.selectedLocations.values().next().value
       this.updateSelectedState(firstLocationId)
+      this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO
     }
   }
 }
