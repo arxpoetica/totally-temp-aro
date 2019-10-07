@@ -1,17 +1,26 @@
 import { createSelector } from 'reselect'
 
-import WorkflowState from '../../common/workflow-state'
+import WorkflowState from '../../../shared-utils/workflow-state'
+import Permissions from '../../../shared-utils/permissions'
 import MapLayerActions from '../../../react/components/map-layers/map-layer-actions'
+import SelectionActions from '../../../react/components/selection/selection-actions'
 
 // We need a selector, else the .toJS() call will create an infinite digest loop
 const getAllLocationLayers = state => state.mapLayers.location
 const getLocationLayersList = createSelector([getAllLocationLayers], (locationLayers) => locationLayers.toJS())
+const getLocationTypeToIconUrl = createSelector([getAllLocationLayers], locationLayers => {
+  var locationTypeToIcon = {}
+  locationLayers.forEach(locationLayer => {
+    locationTypeToIcon[locationLayer.categoryKey] = locationLayer.iconUrl
+  })
+  return locationTypeToIcon
+})
 
 class LocationProperties {
-  constructor (workflowStateId, numberOfLocations = 1) {
-    this.locationTypes = ['Household']
-    this.selectedLocationType = this.locationTypes[0]
-    this.numberOfLocations = numberOfLocations
+  constructor (workflowStateId, locationCategory, numberOfHouseholds, numberOfEmployees) {
+    this.locationCategory = locationCategory || 'household'
+    this.numberOfHouseholds = numberOfHouseholds || 1
+    this.numberOfEmployees = numberOfEmployees || 1
     this.workflowStateId = workflowStateId
     this.isDirty = false
   }
@@ -34,6 +43,13 @@ class LocationEditorController {
     this.isCommiting = false
     this.WorkflowState = WorkflowState
     this.isExpandLocAttributes = false
+    this.userCanChangeWorkflowState = false
+    this.locationTypes = {
+      household: 'Households',
+      business: 'Businesses',
+      celltower: 'Celltowers'
+    }
+    this.locationTypeToAdd = 'household'
 
     this.availableAttributesKeyList = ['loop_extended']
     this.availableAttributesValueList = ['true', 'false']
@@ -61,17 +77,22 @@ class LocationEditorController {
   }
 
   $onDestroy () {
-    // to bring bakc the hidden locations
-    this.state.requestMapLayerRefresh.next(null)
+    Object.keys(this.objectIdToMapObject).forEach(objectId => this.tileDataService.removeFeatureToExclude(objectId))
+    this.clearSelectedLocations() // Clear redux selection
+    // Clear old state selection
+    const newSelection = this.state.cloneSelection()
+    newSelection.editable.location = {}
+    this.state.selection = newSelection
     this.unsubscribeRedux()
   }
 
   resumeOrCreateTransaction () {
     this.removeMapObjects && this.removeMapObjects()
     this.currentTransaction = null
-    this.lastUsedNumberOfLocations = 1
+    this.lastUsedNumberOfHouseholds = 1
+    this.lastUsedNumberOfEmployees = 1
     // See if we have an existing transaction for the currently selected location library
-    var selectedLibraryItem = this.state.dataItems.location.selectedLibraryItems[0]
+    var selectedLibraryItem = this.dataItems.location.selectedLibraryItems[0]
     this.$http.get(`/service/library/transaction`)
       .then((result) => {
         var existingTransactions = result.data.filter((item) => item.libraryId === selectedLibraryItem.identifier)
@@ -90,6 +111,7 @@ class LocationEditorController {
       })
       .then((result) => {
         this.currentTransaction = result.data
+        this.reloadWorkflowStatePermissions() // Can continue in parallel, no need to wait for promise
         return this.$http.get(`/service/library/transaction/${this.currentTransaction.id}/transaction_features`)
       })
       .then((result) => {
@@ -108,8 +130,8 @@ class LocationEditorController {
         this.createMapObjects && this.createMapObjects(features)
         // We now have objectIdToMapObject populated.
         features.forEach((feature) => {
-          var locationProperties = new LocationProperties()
-          locationProperties.numberOfLocations = feature.attributes.number_of_households
+          var locationProperties = new LocationProperties(WorkflowState[feature.workflowState].id)
+          locationProperties.numberOfHouseholds = feature.attributes.number_of_households
           this.objectIdToProperties[feature.objectId] = locationProperties
         })
       })
@@ -151,9 +173,24 @@ class LocationEditorController {
       })
   }
 
-  getObjectIconUrl () {
-    // Hardcoded for now
-    return Promise.resolve('/images/map_icons/aro/households_modified.png')
+  getObjectIconUrl (locationDetails) {
+    const locationType = locationDetails.objectValue.isExistingObject ? locationDetails.objectValue.locationCategory : this.locationTypeToAdd
+    var iconUrl = null
+    switch (locationType) {
+      case 'business':
+        iconUrl = '/images/map_icons/aro/businesses_small_selected.png'
+        break
+
+      case 'celltower':
+        iconUrl = '/images/map_icons/aro/tower.png'
+        break
+
+      case 'household':
+      default:
+        iconUrl = '/images/map_icons/aro/households_modified.png'
+        break
+    }
+    return Promise.resolve(iconUrl)
   }
 
   getObjectSelectedIconUrl () {
@@ -178,6 +215,7 @@ class LocationEditorController {
         this.$http.delete(`/service/library/transaction/${this.currentTransaction.id}`)
           .then((result) => {
             // Transaction has been discarded, start a new one
+            Object.keys(this.objectIdToMapObject).forEach(objectId => this.tileDataService.removeFeatureToExclude(objectId))
             this.state.recreateTilesAndCache()
             return this.resumeOrCreateTransaction()
           })
@@ -191,9 +229,14 @@ class LocationEditorController {
     })
   }
 
-  // Sets the last-used number-of-locations property so we can use it for new locations
-  setLastUsedNumberOfLocations (newValue) {
-    this.lastUsedNumberOfLocations = +newValue < 1 ? 1 : +newValue
+  // Sets the last-used number-of-households property so we can use it for new locations
+  setLastUsedNumberOfHouseholds (newValue) {
+    this.lastUsedNumberOfHouseholds = +newValue < 1 ? 1 : +newValue
+  }
+
+  // Sets the last-used number-of-employees property so we can use it for new locations
+  setLastUsedNumberOfEmployees (newValue) {
+    this.lastUsedNumberOfEmployees = +newValue < 1 ? 1 : +newValue
   }
 
   // Marks the properties of the selected location as dirty (changed).
@@ -222,6 +265,8 @@ class LocationEditorController {
   formatLocationForService (objectId) {
     var mapObject = this.objectIdToMapObject[objectId]
     var objectProperties = this.objectIdToProperties[objectId]
+    const workflowStateKey = Object.keys(WorkflowState).filter(key => WorkflowState[key].id === objectProperties.workflowStateId)[0]
+    const workflowStateName = WorkflowState[workflowStateKey].name
 
     var featureObj = {
       objectId: objectId,
@@ -230,10 +275,17 @@ class LocationEditorController {
         coordinates: [mapObject.position.lng(), mapObject.position.lat()] // Note - longitude, then latitude
       },
       attributes: {
-        number_of_households: objectProperties.numberOfLocations
+        industry_id: '8071'
       },
       dataType: 'location',
-      workflowState: WorkflowState.CREATED.name
+      locationCategory: objectProperties.locationCategory,
+      workflowState: workflowStateName
+    }
+
+    if (objectProperties.locationCategory === 'household') {
+      featureObj.attributes.number_of_households = objectProperties.numberOfHouseholds
+    } else if (objectProperties.locationCategory === 'business') {
+      featureObj.attributes.number_of_employees = objectProperties.numberOfEmployees
     }
 
     if (!mapObject.feature.hasOwnProperty('attributes')) {
@@ -243,7 +295,7 @@ class LocationEditorController {
     // featureObj.attributes = mapObject.feature.attributes
     Object.keys(mapObject.feature.attributes).forEach((key) => {
       if (mapObject.feature.attributes[key] != null && mapObject.feature.attributes[key] != 'null' &&
-        key != 'number_of_households') {
+        key !== 'number_of_households' && key !== 'number_of_employees') {
         featureObj.attributes[key] = mapObject.feature.attributes[key]
       }
     })
@@ -252,16 +304,29 @@ class LocationEditorController {
   }
 
   handleObjectCreated (mapObject, usingMapClick, feature) {
-    var numberOfLocations = this.lastUsedNumberOfLocations // use last used number of locations until commit
-    if (feature.attributes && feature.attributes.number_of_households) {
-      numberOfLocations = +feature.attributes.number_of_households
+    var numberOfHouseholds = this.lastUsedNumberOfHouseholds // use last used number of locations until commit
+    if (feature.locationCategory === 'household' && feature.attributes && feature.attributes.number_of_households) {
+      numberOfHouseholds = +feature.attributes.number_of_households
     }
-    this.objectIdToProperties[mapObject.objectId] = new LocationProperties(feature.workflow_state_id, numberOfLocations)
+    var numberOfEmployees = this.lastUsedNumberOfEmployees
+    if (feature.locationCategory === 'business' && feature.attributes && feature.attributes.number_of_employees) {
+      numberOfEmployees = +feature.attributes.number_of_employees
+    }
+    var workflowStateId = null
+    if (!(feature.workflow_state_id || feature.workflowState)) {
+      workflowStateId = WorkflowState.CREATED.id
+    } else {
+      // workflow_state_id is encoded in vector tile features
+      // workflowState is encoded in aro-service features (that do not come in from vector tiles)
+      workflowStateId = feature.workflow_state_id || WorkflowState[feature.workflowState].id
+    }
+    const locationCategory = feature.locationCategory || this.locationTypeToAdd
+    this.objectIdToProperties[mapObject.objectId] = new LocationProperties(workflowStateId, locationCategory, numberOfHouseholds, numberOfEmployees)
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     var locationObject = this.formatLocationForService(mapObject.objectId)
     // The marker is editable if the state is not LOCKED or INVALIDATED
-    const isEditable = !((feature.workflow_state_id & WorkflowState.LOCKED.id) ||
-                          (feature.workflow_state_id & WorkflowState.INVALIDATED.id))
+    const isEditable = !((workflowStateId & WorkflowState.LOCKED.id) ||
+                          (workflowStateId & WorkflowState.INVALIDATED.id))
 
     if (isEditable) {
       this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`, locationObject)
@@ -369,9 +434,33 @@ class LocationEditorController {
     this.isExpandLocAttributes = false
   }
 
-  mapStateToThis (state) {
+  reloadWorkflowStatePermissions () {
+    // Make sure that the currently logged in user is allowed to change the workflow state of objects for the current library/transaction.
+    this.userCanChangeWorkflowState = false
+    const odataQuery = `/service/odata/UserLibraryViewEntity?$filter=dataSourceId eq ${this.currentTransaction.libraryId} and userId eq ${this.loggedInUser.id}&$top=1`
+    return this.$http.get(odataQuery)
+      .then(result => {
+        const libraryViewEntity = result.data[0]
+        this.userCanChangeWorkflowState = Boolean(libraryViewEntity.permissions & Permissions.RESOURCE_WORKFLOW)
+        this.$timeout()
+      })
+      .catch(err => console.error(err))
+  }
+
+  getWorkflowStateIcon () {
+    var locationCategory = this.locationTypeToAdd
+    if (this.selectedMapObject) {
+      locationCategory = this.objectIdToProperties[this.selectedMapObject.objectId].locationCategory
+    }
+    return this.locationTypeToIconUrl[locationCategory]
+  }
+
+  mapStateToThis (reduxState) {
     return {
-      locationLayers: getLocationLayersList(state)
+      locationLayers: getLocationLayersList(reduxState),
+      locationTypeToIconUrl: getLocationTypeToIconUrl(reduxState),
+      dataItems: reduxState.plan.dataItems,
+      loggedInUser: reduxState.user.loggedInUser
     }
   }
 
@@ -382,7 +471,8 @@ class LocationEditorController {
           // First set the visibility of the current layer
           dispatch(MapLayerActions.setLayerVisibility(layer, true))
         })
-      }
+      },
+      clearSelectedLocations: () => dispatch(SelectionActions.setLocations([]))
     }
   }
 }

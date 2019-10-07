@@ -101,6 +101,9 @@ app.service('map_tools', ['$rootScope', 'tracker', 'state', '$document', ($rootS
 
   tools.TOOL_IDS = {
     LOCATIONS: 'locations',
+    CABLES: 'cables',
+    CONDUITS: 'conduits',
+    NETWORK_NODES: 'network_nodes',
     AREA_NETWORK_PLANNING: 'area_network_planning',
     TARGET_BUILDER: 'target_builder',
     CONSTRUCTION_SITES: 'construction_sites'
@@ -110,31 +113,31 @@ app.service('map_tools', ['$rootScope', 'tracker', 'state', '$document', ($rootS
     {
       id: tools.TOOL_IDS.LOCATIONS,
       name: 'Locations',
-      short_name: 'L',
       icon: 'fa fa-building fa-2x'
     },
     {
-      id: 'network_nodes',
+      id: tools.TOOL_IDS.NETWORK_NODES,
       name: 'Network Equipment',
-      short_name: 'E',
       icon: 'fa fa-sitemap fa-2x'
     },
     {
-      id: tools.TOOL_IDS.CONSTRUCTION_SITES,
-      name: 'Construction Sites',
-      short_name: 'C',
-      icon: 'fa fa-wrench fa-2x'
+      id: tools.TOOL_IDS.CABLES,
+      name: 'Cables',
+      icon: 'fab fa-usb fa-2x'
+    },
+    {
+      id: tools.TOOL_IDS.CONDUITS,
+      name: 'Conduits',
+      icon: 'fas fa-road fa-2x'
     },
     {
       id: 'fiber_plant',
       name: 'Competitor Networks',
-      short_name: 'F',
       icon: 'fa fa-flag-checkered fa-2x'
     },
     {
       id: 'boundaries',
       name: 'Boundaries',
-      short_name: 'B',
       icon: 'fa fa-th fa-2x'
     }
   ]

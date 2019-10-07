@@ -8,6 +8,8 @@ var fs = require('fs')
 var multer = require('multer')
 var os = require('os')
 var upload = multer({ dest: os.tmpdir() })
+const socketManager = require('../sockets/socketManager').socketManager
+const userIdInjector = require('./user-id-injector')
 
 exports.configure = (api, middleware) => {
   var jsonSuccess = middleware.jsonSuccess
@@ -16,22 +18,39 @@ exports.configure = (api, middleware) => {
   // on to ARO-Service. Do NOT modify any data - this is intended to be a pass-through service
   const SERVICE_PREFIX = '/service'
   api.all(`${SERVICE_PREFIX}/*`, expressProxy(`${config.aro_service_url}`, {
+    proxyReqPathResolver: req => userIdInjector(req, SERVICE_PREFIX, '', req.user.id)
+  }))
+
+  // For vector tile requests that return data via websockets, save the request uuid. Then pass the
+  // request through to service
+  const TILE_SOCKET_SERVICE_PREFIX = '/service-tile-sockets'
+  api.post(`${TILE_SOCKET_SERVICE_PREFIX}/*`, expressProxy(`${config.aro_service_url}`, {
     proxyReqPathResolver: req => {
+      // Remove /service-tile-sockets from the beginning of the url to get the final url
+      return req.url.substring(TILE_SOCKET_SERVICE_PREFIX.length)
+    },
+    proxyReqBodyDecorator: (bodyContent, srcReq) => {
       // First construct the full url (i.e. including the http(s)://<hostname>)
-      const fullUrl = new URL(`${req.protocol}://${req.get('host')}${req.url}`)
+      const fullUrl = new URL(`${srcReq.protocol}://${srcReq.get('host')}${srcReq.url}`)
 
       // Now extract the existing query parameters
       const searchParams = new URLSearchParams(fullUrl.searchParams)
 
-      // Overwrite or add the user_id query parameter. (Overwrite so that authenticated clients cannot
-      // impersonate other users). Then set the query parameters back to the original URL.
-      searchParams.set('user_id', req.user.id)
-      fullUrl.search = searchParams
+      // Get the request_uuid query parameter
+      const requestUuid = searchParams.get('request_uuid')
+      if (!requestUuid) {
+        return Promise.reject(new Error('You must specify a request_uuid query parameter for socket routing to work'))
+      }
 
-      // Construct the "final" URL by removing the protocol, host, etc so it looks like '/v1/plan?user_id=xxx'
-      const finalUrl = fullUrl.href.substring(fullUrl.href.indexOf('/service/') + '/service/'.length - 1)
+      // Get the websocketId body parameter
+      const websocketSessionId = srcReq.body.websocketSessionId
+      if (!websocketSessionId) {
+        return Promise.reject(new Error('You must specify a websocketSessionId body parameter for socket routing to work'))
+      }
+      socketManager().mapVectorTileUuidToClientId(requestUuid, websocketSessionId)
 
-      return finalUrl
+      // For the request to service, we have to pass only the layerDefinitions
+      return bodyContent.layerDefinitions
     }
   }))
 

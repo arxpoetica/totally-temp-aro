@@ -2,6 +2,7 @@ import { List, Map } from 'immutable'
 import { createSelector } from 'reselect'
 import format from './string-template'
 import StateViewMode from './state-view-mode'
+import MapLayerHelper from './map-layer-helper'
 import Constants from '../components/common/constants'
 import Actions from '../react/common/actions'
 import UiActions from '../react/components/configuration/ui/ui-actions'
@@ -28,12 +29,9 @@ const getBoundaryLayersList = createSelector([getAllBoundaryLayers], (boundaries
 const getAllBoundaryTypesList = reduxState => reduxState.mapLayers.boundaryTypes
 const getBoundaryTypesList = createSelector([getAllBoundaryTypesList], (boundaryTypes) => boundaryTypes.toJS())
 
-const getselectedBoundaryType = reduxState => reduxState.mapLayers.selectedBoundaryType
-const getSelectedBoundaryType = createSelector([getselectedBoundaryType], (selectedBoundaryType) => selectedBoundaryType.toJS())
-
 /* global app localStorage map */
 class State {
-  constructor($rootScope, $http, $document, $timeout, $sce, $ngRedux, stateSerializationHelper, $filter, tileDataService, Utils, tracker, Notification) {
+  constructor ($rootScope, $http, $document, $timeout, $sce, $ngRedux, stateSerializationHelper, $filter, tileDataService, Utils, tracker, Notification) {
     // Important: RxJS must have been included using browserify before this point
     var Rx = require('rxjs')
 
@@ -168,13 +166,13 @@ class State {
     // The selected panel when in the edit plan mode
     service.EditPlanPanels = Object.freeze({
       EDIT_PLAN: 'EDIT_PLAN',
-      PLAN_SUMMARY: 'PLAN_SUMMARY', 
+      PLAN_SUMMARY: 'PLAN_SUMMARY',
       EDIT_RINGS: 'EDIT_RINGS'
     })
     service.activeEditPlanPanel = service.EditPlanPanels.EDIT_PLAN
     
     service.EditRingsPanels = Object.freeze({
-      EDIT_RINGS: 'EDIT_RINGS', 
+      EDIT_RINGS: 'EDIT_RINGS',
       OUTPUT: 'OUTPUT'
     })
     service.activeEditRingsPanel = service.EditRingsPanels.EDIT_RINGS
@@ -264,7 +262,6 @@ class State {
     service.showDetailedLocationInfo = new Rx.BehaviorSubject()
     service.showDetailedEquipmentInfo = new Rx.BehaviorSubject()
     service.showDataSourceUploadModal = new Rx.BehaviorSubject(false)
-    service.dataItemsChanged = new Rx.BehaviorSubject({})
     service.viewSettingsChanged = new Rx.BehaviorSubject()
     service.measuredDistance = new Rx.BehaviorSubject()
     service.dragStartEvent = new Rx.BehaviorSubject()
@@ -296,7 +293,7 @@ class State {
     service.displayModes = Object.freeze({
       VIEW: 'VIEW',
       ANALYSIS: 'ANALYSIS',
-      EDIT_RINGS: 'EDIT_RINGS', 
+      EDIT_RINGS: 'EDIT_RINGS',
       EDIT_PLAN: 'EDIT_PLAN',
       PLAN_SETTINGS: 'PLAN_SETTINGS',
       DEBUG: 'DEBUG'
@@ -427,21 +424,19 @@ class State {
       $rootScope.$broadcast('map_layer_clicked_feature', features, {})
     }
     service.mapFeaturesSelectedEvent = new Rx.BehaviorSubject({})
-    
-    service.mapFeaturesSelectedEvent.subscribe((options) => {
+    service.mapFeaturesRightClickedEvent = new Rx.BehaviorSubject({})
+    service.mapFeaturesKeyClickedEvent = new Rx.BehaviorSubject({})
+    service.mapFeaturesClickedEvent = new Rx.BehaviorSubject({})
+
+    service.mapFeaturesSelectedEvent.skip(1).subscribe((options) => {
       // ToDo: this check may need to move into REACT
       if (service.selectedDisplayMode.getValue() == service.displayModes.EDIT_RINGS
-        && service.activeEditRingsPanel == service.EditRingsPanels.EDIT_RINGS){
-        /*
-        $ngRedux.dispatch({
-          type: Actions.MAP_SET_SELECTED_FEATURES,
-          payload: options
-        })
-        */
+        && service.activeEditRingsPanel == service.EditRingsPanels.EDIT_RINGS) {
         service.onFeatureSelectedRedux(options)
+      } else {
+        service.setSelectedLocations(options.locations.map(location => location.location_id))
       }
     })
-    
 
     // Function to convert from hsv to rgb color values.
     // https://stackoverflow.com/questions/17242144/javascript-convert-hsb-hsv-color-to-rgb-accurately
@@ -526,7 +521,7 @@ class State {
         roadSegments: new Set(),
         serviceAreaId: null,
         fiberSegments: new Set(),
-        siteBoundaryId: null,
+        siteBoundaryId: null
       },
       editable: {
         equipment: {},
@@ -566,7 +561,7 @@ class State {
         { id: 'EXPERT_MODE', label: 'Expert Mode', type: 'Expert' }
       ]
       service.networkAnalysisType = service.networkAnalysisTypes[0]
-      //console.log('set networkAnalysisType to default')
+      // console.log('set networkAnalysisType to default')
       // Upload Data Sources
       service.uploadDataSources = []
       service.pristineDataItems = {}
@@ -581,7 +576,7 @@ class State {
         var location = locations[locationKey]
 
         if (service.configuration.perspective.visibleLocationCategories.indexOf(locationKey) >= 0) {
-          location.checked = location.selected
+          location.checked = location.initiallySelected
           location.uiLayerId = uiLayerId++
           locationTypesForRedux = locationTypesForRedux.push(JSON.parse(angular.toJson(location))) // angular.toJson will strip out the $$hashkey key
         }
@@ -598,7 +593,7 @@ class State {
     }
 
     service.setLayerVisibilityByKey = (keyType, layerKey, isVisible) => {
-      // First find the layer corresponding to the ID
+      // First find the layer correspying to the ID
       const layerState = $ngRedux.getState().mapLayers
       var layerToChange = null
       Object.keys(layerState).forEach(layerType => {
@@ -624,7 +619,7 @@ class State {
     service.loadOptimizationOptionsFromJSON = (json) => {
       // Note that we are NOT returning the state (the state is set after the call), but a promise
       // that resolves once all the geographies have been loaded
-      return stateSerializationHelper.loadStateFromJSON(service, service.getDispatchers(), json)
+      return stateSerializationHelper.loadStateFromJSON(service, $ngRedux.getState(), service.getDispatchers(), json)
     }
 
     $document.ready(() => {
@@ -661,89 +656,6 @@ class State {
           resolve(address) // Always resolve, even if reverse geocoding failed
         })
       })
-    }
-
-    service.loadPlanDataSelectionFromServer = () => {
-      if (!service.plan) {
-        return Promise.resolve()
-      }
-
-      var currentPlan = service.plan
-      var promises = [
-        $http.get('/service/odata/datatypeentity'),
-        $http.get(`/service/v1/library-entry`),
-        $http.get(`/service/v1/plan/${currentPlan.id}/configuration`)
-      ]
-
-      return Promise.all(promises)
-        .then((results) => {
-          // Results will be returned in the same order as the promises array
-          var dataTypeEntityResult = results[0].data
-          var libraryResult = results[1].data
-          var configurationResult = results[2].data
-
-          service.uploadDataSources = []
-          dataTypeEntityResult.forEach((dataTypeEntity) => {
-            if (dataTypeEntity.uploadSupported) {
-              /*
-              service.uploadDataSources.push({
-                id: dataTypeEntity.id,
-                label: dataTypeEntity.description,
-                name: dataTypeEntity.name
-              })
-              */
-
-              dataTypeEntity.label = dataTypeEntity.description
-              service.uploadDataSources.push(dataTypeEntity)
-            }
-          })
-
-          var newDataItems = {}
-          dataTypeEntityResult.forEach((dataTypeEntity) => {
-            if (dataTypeEntity.maxValue > 0) {
-              newDataItems[dataTypeEntity.name] = {
-                id: dataTypeEntity.id,
-                description: dataTypeEntity.description,
-                minValue: dataTypeEntity.minValue,
-                maxValue: dataTypeEntity.maxValue,
-                uploadSupported: dataTypeEntity.uploadSupported,
-                isMinValueSelectionValid: true,
-                isMaxValueSelectionValid: true,
-                selectedLibraryItems: [],
-                allLibraryItems: []
-              }
-            }
-          })
-
-          // For each data item, construct the list of all available library items
-          Object.keys(newDataItems).forEach((dataItemKey) => {
-            // Add the list of all library items for this data type
-            libraryResult.forEach((libraryItem) => {
-              if (libraryItem.dataType === dataItemKey) {
-                newDataItems[dataItemKey].allLibraryItems.push(libraryItem)
-              }
-            })
-          })
-
-          // For each data item, construct the list of selected library items
-          configurationResult.configurationItems.forEach((configurationItem) => {
-            // For this configuration item, find the data item based on the dataType
-            var dataItem = newDataItems[configurationItem.dataType]
-            // Find the item from the allLibraryItems based on the library id
-            var selectedLibraryItems = configurationItem.libraryItems
-            selectedLibraryItems.forEach((selectedLibraryItem) => {
-              var matchedLibraryItem = dataItem.allLibraryItems.filter((libraryItem) => libraryItem.identifier === selectedLibraryItem.identifier)
-              dataItem.selectedLibraryItems = dataItem.selectedLibraryItems.concat(matchedLibraryItem) // Technically there will be only one matched item
-            })
-          })
-
-          service.dataItems = newDataItems
-          service.pristineDataItems = angular.copy(service.dataItems)
-          service.dataItemsChanged.next(service.dataItems)
-          // get the service area for selected service layer datasource
-          service.StateViewMode.loadListOfSAPlanTags($http, service, '', true)
-          return Promise.resolve()
-        })
     }
 
     // Shows the modal for editing plan resources
@@ -818,30 +730,6 @@ class State {
           service.pristineNetworkConfigurations = angular.copy(service.networkConfigurations)
         })
         .catch((err) => console.log(err))
-    }
-
-    // Saves the plan Data Selection configuration to the server
-    service.saveDataSelectionToServer = () => {
-      service.pristineDataItems = angular.copy(service.dataItems)
-      var putBody = {
-        configurationItems: [],
-        resourceConfigItems: []
-      }
-
-      Object.keys(service.dataItems).forEach((dataItemKey) => {
-        // An example of dataItemKey is 'location'
-        if (service.dataItems[dataItemKey].selectedLibraryItems.length > 0) {
-          var configurationItem = {
-            dataType: dataItemKey,
-            libraryItems: service.dataItems[dataItemKey].selectedLibraryItems
-          }
-          putBody.configurationItems.push(configurationItem)
-        }
-      })
-
-      var currentPlan = service.plan
-      // Save the configuration to the server
-      $http.put(`/service/v1/plan/${currentPlan.id}/configuration`, putBody)
     }
 
     // Save the plan resource selections to the server
@@ -1036,7 +924,6 @@ class State {
         })
         .then((address) => {
           plan.areaName = address
-          service.requestDestroyMapOverlay.next(null) // Make sure to destroy the map overlay before panning/zooming
           service.requestSetMapCenter.next({ latitude: plan.latitude, longitude: plan.longitude })
           service.requestSetMapZoom.next(plan.zoomIndex)
           return Promise.resolve()
@@ -1090,13 +977,11 @@ class State {
 
     // Load the plan inputs for the given plan and populate them in state
     service.loadPlanInputs = (planId) => {
-      var userId = service.loggedInUser.id
       return $http.get(`/service/v1/plan/${planId}/inputs`)
         .then((result) => {
           var planInputs = Object.keys(result.data).length > 0 ? result.data : service.getDefaultPlanInputs()
-          stateSerializationHelper.loadStateFromJSON(service, service.getDispatchers(), planInputs)
+          stateSerializationHelper.loadStateFromJSON(service, $ngRedux.getState(), service.getDispatchers(), planInputs)
           return Promise.all([
-            service.loadPlanDataSelectionFromServer(),
             service.loadPlanResourceSelectionFromServer(),
             service.loadNetworkConfigurationFromServer()
           ])
@@ -1155,7 +1040,7 @@ class State {
 
     // optimization services
     service.modifyDialogResult = Object.freeze({
-      SAVEAS: 0,
+      CANCEL: 0,
       OVERWRITE: 1
     })
     service.progressMessagePollingInterval = null
@@ -1183,25 +1068,7 @@ class State {
         // This is not an ephemeral plan. Show a dialog to the user asking whether to overwrite current plan or save as a new one.
         return service.showModifyQuestionDialog()
           .then((result) => {
-            if (result === service.modifyDialogResult.SAVEAS) {
-              // Ask for the name to save this plan as, then save it
-              return new Promise((resolve, reject) => {
-                swal({
-                  title: 'Plan name required',
-                  text: 'Enter a name for saving the plan',
-                  type: 'input',
-                  showCancelButton: true,
-                  confirmButtonColor: '#DD6B55',
-                  confirmButtonText: 'Create Plan'
-                },
-                planName => {
-                  if (planName) {
-                    return service.copyCurrentPlanTo(planName)
-                      .then(() => { return resolve() })
-                  }
-                })
-              })
-            } else if (result === service.modifyDialogResult.OVERWRITE) {
+            if (result === service.modifyDialogResult.OVERWRITE) {
               return $http.delete(`/service/v1/plan/${currentPlan.id}/optimization-state`)
                 .then(() => $http.get(`/service/v1/plan/${currentPlan.id}/optimization-state`))
                 .then(result => {
@@ -1223,16 +1090,16 @@ class State {
       return new Promise((resolve, reject) => {
         swal({
           title: '',
-          text: 'You are modifying a plan with a completed analysis. Do you wish to save into a new plan or overwrite the existing plan?  Overwriting will clear all results which were previously run.',
+          text: 'You are modifying a plan with a completed analysis. Do you wish to overwrite the existing plan?  Overwriting will clear all results which were previously run.',
           type: 'info',
           confirmButtonColor: '#b9b9b9',
-          confirmButtonText: 'Save as',
+          confirmButtonText: 'Overwrite',
           cancelButtonColor: '#DD6B55',
-          cancelButtonText: 'Overwrite',
+          cancelButtonText: 'Cancel',
           showCancelButton: true,
-          closeOnConfirm: false
+          closeOnConfirm: true
         }, (wasConfirmClicked) => {
-          resolve(wasConfirmClicked ? service.modifyDialogResult.SAVEAS : service.modifyDialogResult.OVERWRITE)
+          resolve(wasConfirmClicked ? service.modifyDialogResult.OVERWRITE : service.modifyDialogResult.CANCEL)
         })
       })
     }
@@ -1353,7 +1220,7 @@ class State {
         var seconds = Math.ceil(diff % 60)
         service.progressMessage = `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds} Runtime`
         $timeout()
-      },1000)
+      }, 1000)
     }
 
     service.stopProgressMessagePolling = () => {
@@ -1415,7 +1282,7 @@ class State {
     service.setSelectedBoundaryType = function (selectedBoundaryType) {
       $ngRedux.dispatch({
         type: Actions.LAYERS_SET_SELECTED_BOUNDARY_TYPE,
-        payload: new Map(selectedBoundaryType)
+        payload: selectedBoundaryType
       })
     }
 
@@ -1552,6 +1419,7 @@ class State {
       // Set the logged in user in the Redux store
       service.setLoggedInUserRedux(user)
       service.loadSystemActorsRedux()
+      SocketManager.joinRoom('user', user.id)
 
       service.equipmentLayerTypeVisibility.existing = service.configuration.networkEquipment.visibility.defaultShowExistingEquipment
       service.equipmentLayerTypeVisibility.planned = service.configuration.networkEquipment.visibility.defaultShowPlannedEquipment
@@ -1663,13 +1531,13 @@ class State {
             const defaultPerspective = service.configuration.perspectives.filter(item => item.name === 'default')[0]
             const thisPerspective = service.configuration.perspectives.filter(item => item.name === perspective)[0]
             service.configuration.perspective = thisPerspective || defaultPerspective
+            service.setPerspective(service.configuration.perspective)
           }
           service.configuration.loadPerspective(result.data.user.perspective)
           service.setLoggedInUser(result.data.user)
           service.setOptimizationOptions()
           tileDataService.setLocationStateIcon(tileDataService.locationStates.LOCK_ICON_KEY, service.configuration.locationCategories.entityLockIcon)
           tileDataService.setLocationStateIcon(tileDataService.locationStates.INVALIDATED_ICON_KEY, service.configuration.locationCategories.entityInvalidatedIcon)
-          SocketManager.initializeSession(result.data.sessionWebsocketId)
           service.getReleaseVersions()
           if (service.configuration.ARO_CLIENT === 'frontier' || service.configuration.ARO_CLIENT === 'sse') {
             heatmapOptions.selectedHeatmapOption = service.viewSetting.heatmapOptions.filter((option) => option.id === 'HEATMAP_OFF')[0]
@@ -1811,7 +1679,8 @@ class State {
       return {
         setSelectionTypeById: service.setSelectionTypeById,
         addPlanTargets: service.addPlanTargets,
-        removePlanTargets: service.removePlanTargets
+        removePlanTargets: service.removePlanTargets,
+        selectDataItems: service.selectDataItems
       }
     }
 
@@ -1819,23 +1688,48 @@ class State {
     const WORLD_ZOOM = 22
     const MAX_TILE_XY_AT_WORLD_ZOOM = Math.pow(2, WORLD_ZOOM) - 1
     const wholeWorldTileBox = { zoom: WORLD_ZOOM, x1: 0, y1: 0, x2: MAX_TILE_XY_AT_WORLD_ZOOM, y2: MAX_TILE_XY_AT_WORLD_ZOOM }
-    service.handleTileInvalidationMessage = msg => {
-      // If the tileBox is null, use a tile box that covers the entire world
-      const tileBox = msg.payload.tileBox || wholeWorldTileBox
-      const layerNames = msg.payload.layerNames
+
+    const invalidateLayersInTileBox = (tileBox, layerNameRegexStrings) => {
       // First, mark the HTML cache so we know which tiles are invalidated
-      tileDataService.displayInvalidatedTiles(layerNames, tileBox)
+      tileDataService.displayInvalidatedTiles(layerNameRegexStrings, tileBox)
 
       // Then delete items from the tile data cache and the tile provider cache
-      tileDataService.clearCacheInTileBox(layerNames, tileBox)
+      tileDataService.clearCacheInTileBox(layerNameRegexStrings, tileBox)
+    }
+
+    service.handlePlanModifiedEvent = msg => {
+      // If the tileBox is null, use a tile box that covers the entire world
+      const content = JSON.parse(new TextDecoder('utf-8').decode(new Uint8Array(msg.content)))
+      const tileBox = (content.vectorTileUpdate && content.vectorTileUpdate.tileBox) || wholeWorldTileBox
+      const layerNameRegexStrings = MapLayerHelper.getRegexForAllDataIds(service.mapLayersRedux, service.plan.id)
+      invalidateLayersInTileBox(tileBox, layerNameRegexStrings)
+
+      // Load list of modified features, and then refresh map layers. Note that this will make a call to
+      // load modified features EVERY TIME an invalidation message is received. As of now there is no other
+      // way to keep the data in-sync. Maybe we can get a flag from service as this is required only after
+      // we commit a transaction.
+      service.loadModifiedFeatures(service.plan.id)
+        .then(() => service.requestMapLayerRefresh.next(null))
+        .catch(err => console.error(err))
+    }
+
+    service.handleLibraryModifiedEvent = msg => {
+      // If the tileBox is null, use a tile box that covers the entire world
+      const content = JSON.parse(new TextDecoder('utf-8').decode(new Uint8Array(msg.content)))
+      const tileBox = content.tileBox || wholeWorldTileBox
+      const layerNameRegexStrings = MapLayerHelper.getRegexForAllDataIds(service.mapLayersRedux, null, msg.properties.headers.libraryId)
+      invalidateLayersInTileBox(tileBox, layerNameRegexStrings)
       service.requestMapLayerRefresh.next(null)
     }
 
-    service.unsubscribeTileInvalidationHandler = SocketManager.subscribe('TILES_INVALIDATED', service.handleTileInvalidationMessage.bind(service))
+    service.unsubscribePlanEvent = SocketManager.subscribe('COMMIT_TRANSACTION', service.handlePlanModifiedEvent.bind(service))
+    service.unsubscribeLibraryEvent1 = SocketManager.subscribe('USER_TRANSACTION', service.handleLibraryModifiedEvent.bind(service))
+    service.unsubscribeLibraryEvent1 = SocketManager.subscribe('ETL_ADD', service.handleLibraryModifiedEvent.bind(service))
 
     service.mergeToTarget = (nextState, actions) => {
       const currentActivePlanId = service.plan && service.plan.id
       const newActivePlanId = nextState.plan && nextState.plan.id
+      const oldDataItems = service.dataItems
 
       // merge state and actions onto controller
       Object.assign(service, nextState)
@@ -1844,6 +1738,9 @@ class State {
       if ((currentActivePlanId !== newActivePlanId) && (nextState.plan)) {
         // The active plan has changed. Note that we are comparing ids because a change in plan state also causes the plan object to update.
         service.onActivePlanChanged()
+      }
+      if (oldDataItems !== nextState.dataItems) {
+        service.StateViewMode.loadListOfSAPlanTags($http, service, nextState.dataItems, '', true)
       }
     }
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(service.mergeToTarget.bind(service))
@@ -1854,13 +1751,14 @@ class State {
   mapStateToThis (reduxState) {
     return {
       plan: reduxState.plan.activePlan,
+      mapLayersRedux: reduxState.mapLayers,
       locationLayers: getLocationLayersList(reduxState),
       networkEquipmentLayers: getNetworkEquipmentLayersList(reduxState),
       boundaries: getBoundaryLayersList(reduxState),
       reduxPlanTargets: reduxState.selection.planTargets,
       showSiteBoundary: reduxState.mapLayers.showSiteBoundary,
       boundaryTypes: getBoundaryTypesList(reduxState),
-      selectedBoundaryType: getSelectedBoundaryType(reduxState),
+      selectedBoundaryType: reduxState.mapLayers.selectedBoundaryType,
       systemActors: reduxState.user.systemActors
     }
   }
@@ -1868,6 +1766,7 @@ class State {
   mapDispatchToTarget (dispatch) {
     return {
       loadConfigurationFromServer: () => dispatch(UiActions.loadConfigurationFromServer()),
+      setPerspective: perspective => dispatch(UiActions.setPerspective(perspective)),
       getStyleValues: () => dispatch(UiActions.getStyleValues()),
       setLoggedInUserRedux: loggedInUser => dispatch(UserActions.setLoggedInUser(loggedInUser)),
       loadSystemActorsRedux: () => dispatch(UserActions.loadSystemActors()),
@@ -1875,9 +1774,11 @@ class State {
       setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId)),
       addPlanTargets: (planId, planTargets) => dispatch(SelectionActions.addPlanTargets(planId, planTargets)),
       removePlanTargets: (planId, planTargets) => dispatch(SelectionActions.removePlanTargets(planId, planTargets)),
+      setSelectedLocations: locationIds => dispatch(SelectionActions.setLocations(locationIds)),
       setActivePlanState: planState => dispatch(PlanActions.setActivePlanState(planState)),
+      selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems)),
       setGoogleMapsReference: mapRef => dispatch(MapActions.setGoogleMapsReference(mapRef)),
-      updateShowSiteBoundary: isVisible => dispatch(MapLayerActions.setShowSiteBoundary(isVisible)), 
+      updateShowSiteBoundary: isVisible => dispatch(MapLayerActions.setShowSiteBoundary(isVisible)),
       onFeatureSelectedRedux: features => dispatch(RingEditActions.onFeatureSelected(features))
     }
   }

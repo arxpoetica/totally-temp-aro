@@ -24,8 +24,9 @@ class ResourcePermissionsEditorController {
     this.authRollsEnum = []
     this.actorsById = {}
 
-    var requestedRolls = {
+    var requestedRoles = {
       'RESOURCE_OWNER': 'Owner',
+      'RESOURCE_ADMINISTRATOR': 'Resource Admin',
       'RESOURCE_MODIFIER': 'Modifier',
       'RESOURCE_VIEWER': 'Viewer'
     }
@@ -36,12 +37,12 @@ class ResourcePermissionsEditorController {
     this.defaultPermissions = 4
     this.ownerPermissions = 7
     this.superuserPermissions = 31
-    
+
     this.state.authRolls.forEach((authRoll) => {
-      if (requestedRolls.hasOwnProperty(authRoll.name)) {
+      if (requestedRoles.hasOwnProperty(authRoll.name)) {
         this.authRollsEnum.push({
           'id': authRoll.permissions, 
-          'description': requestedRolls[authRoll.name], 
+          'description': requestedRoles[authRoll.name], 
           'name': authRoll.name
         })
       }

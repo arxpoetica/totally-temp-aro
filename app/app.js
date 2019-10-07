@@ -6,10 +6,15 @@ var compression = require('compression')
 const morgan = require('morgan')
 
 var app = module.exports = express()
-app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'))
+morgan.token('body', req => JSON.stringify(req.body))
+const loggerFormat = ':method :url :status :response-time ms - :res[content-length] :body' // Same as "dev" but with the :body added to it
+app.use(morgan(loggerFormat, {
+  skip: (req, res) => req.url.indexOf('/service/v1/tiles/') === 0 // Skip logging for all vector tile calls
+}))
+
 app.use(compression())
 app.use(bodyParser.urlencoded({ extended: false }))
-app.use(bodyParser.json())
+app.use(bodyParser.json({ limit: '2mb' }))
 app.use(require('cookie-session')({
   name: 'session',
   keys: ['key1', 'key2']
@@ -44,7 +49,6 @@ var routes = [
   'network',
   'boundary',
   'service',
-  'tiles',
   'market_size',
   'network_plan',
   'admin_users',

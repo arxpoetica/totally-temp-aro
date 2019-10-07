@@ -3,24 +3,25 @@ import { ToastContainer } from 'react-toastify'
 
 import Broadcast from '../react/components/global-settings/broadcast.jsx'
 import ConfigurationEditor from '../react/components/configuration/ui/configuration-editor.jsx'
+import ContextMenu from '../react/components/context-menu/context-menu.jsx'
 import CoverageInitializer from '../react/components/coverage/coverage-initializer.jsx'
 import CoverageButton from '../react/components/coverage/coverage-button.jsx'
 import RfpButton from '../react/components/optimization/rfp/rfp-button.jsx'
 import NetworkAnalysisOutput from '../react/components/optimization/network-analysis/network-analysis-output.jsx'
 import PlanTargetList from '../react/components/selection/plan-target-list.jsx'
+import PlanEditor from '../react/components/plan-editor/plan-editor.jsx'
+import EquipmentDropTarget from '../react/components/plan-editor/equipment-drop-target.jsx'
 import ReportModuleList from '../react/components/configuration/report/report-module-list.jsx'
 import ReportsDownloadModal from '../react/components/optimization/reports/reports-download-modal.jsx'
 import RfpAnalyzer from '../react/components/optimization/rfp/rfp-analyzer.jsx'
 import RfpStatus from '../react/components/optimization/rfp/status/rfp-status.jsx'
 import RingEdit from '../react/components/ring-edit/ring-edit.jsx'
 import RingButton from '../react/components/ring-edit/ring-button.jsx'
+import LocationInfo from '../react/components/location-info/location-info.jsx'
 
 import boundaryDetail from './sidebar/view/boundary-detail'
 import equipmentDetail from './sidebar/view/equipment-detail'
 import equipmentDetailList from './sidebar/view/equipment-detail-list'
-import locationDetail from './sidebar/view/location-detail/location-detail'
-import locationAuditLog from './sidebar/view/location-audit-log'
-import locationDetailPropertiesFactory from '../components/sidebar/view/location-detail/location-detail-properties-factory'
 import roadSegmentDetail from './sidebar/view/road-segment-detail'
 import coverageBoundary from './sidebar/view/coverage-boundary'
 import locationEditor from './sidebar/view/location-editor'
@@ -51,6 +52,9 @@ import viewSettings from './sidebar/debug/view-settings'
 import ringEditor from './sidebar/ring-editor'
 import draggableButton from './sidebar/plan-editor/draggable-button'
 import planEditor from './sidebar/plan-editor/plan-editor'
+import planEditorContainer from './sidebar/plan-editor/plan-editor-container'
+import equipmentPropertiesEditor from './sidebar/plan-editor/equipment-properties-editor'
+import boundaryPropertiesEditor from './sidebar/plan-editor/boundary-properties-editor'
 import planSummary from './sidebar/plan-editor/plan-summary'
 import serviceLayerEditor from './sidebar/plan-editor/service-layer-editor'
 import conicTileSystemUploader from './sidebar/plan-settings/plan-data-selection/conic-tile-system-uploader'
@@ -75,8 +79,9 @@ import rateReachManagerCreator from './sidebar/plan-settings/plan-resource-selec
 import rateReachDistanceEditor from './sidebar/plan-settings/plan-resource-selection/rate-reach-distance-editor'
 import boundaries from './views/boundaries'
 import locations from './views/locations'
-import constructionSites from './views/construction-sites'
 import networkEquipment from './views/network-equipment'
+import cables from './views/cables'
+import conduits from './views/conduits'
 import mapSplit from './map/map-split'
 import mapSelectorPlanTarget from './map/map-selector-plan-target'
 import mapSelectorExportLocations from './map/map-selector-export-locations'
@@ -129,8 +134,6 @@ import reduxConfig from '../redux-config'
 app.component('boundaryDetail', boundaryDetail)
   .component('equipmentDetail', equipmentDetail)
   .component('equipmentDetailList', equipmentDetailList)
-  .component('locationDetail', locationDetail)
-  .component('locationAuditLog', locationAuditLog)
   .component('roadSegmentDetail', roadSegmentDetail)
   .component('coverageBoundary', coverageBoundary)
   .component('locationEditor', locationEditor)
@@ -158,6 +161,9 @@ app.component('boundaryDetail', boundaryDetail)
   .component('viewSettings', viewSettings)
   .component('ringEditor', ringEditor)
   .component('planEditor', planEditor)
+  .component('planEditorContainer', planEditorContainer)
+  .component('equipmentPropertiesEditor', equipmentPropertiesEditor)
+  .component('boundaryPropertiesEditor', boundaryPropertiesEditor)
   .component('planSummary', planSummary)
   .component('serviceLayerEditor', serviceLayerEditor)
   .component('draggableButton', draggableButton)
@@ -183,8 +189,9 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rateReachDistanceEditor', rateReachDistanceEditor)
   .component('boundaries', boundaries)
   .component('locations', locations)
-  .component('constructionSites', constructionSites)
   .component('networkEquipment', networkEquipment)
+  .component('cables', cables)
+  .component('conduits', conduits)
   .component('mapSplit', mapSplit)
   .component('mapSelectorPlanTarget', mapSelectorPlanTarget)
   .component('mapSelectorExportLocations', mapSelectorExportLocations)
@@ -227,12 +234,15 @@ app.component('boundaryDetail', boundaryDetail)
   .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
 // ReactJS components
   .component('rBroadcast', react2angular(Broadcast))
+  .component('rContextMenu', react2angular(ContextMenu))
   .component('rConfigurationEditor', react2angular(ConfigurationEditor))
   .component('rCoverageInitializer', react2angular(CoverageInitializer))
   .component('rCoverageButton', react2angular(CoverageButton))
   .component('rRfpButton', react2angular(RfpButton))
   .component('rNetworkAnalysisOutput', react2angular(NetworkAnalysisOutput))
   .component('rPlanTargetList', react2angular(PlanTargetList))
+  .component('rPlanEditor', react2angular(PlanEditor))
+  .component('rEquipmentDropTarget', react2angular(EquipmentDropTarget))
   .component('rReportModuleList', react2angular(ReportModuleList))
   .component('rReportsDownloadModal', react2angular(ReportsDownloadModal, ['reportTypes', 'title'])) // Some properties are passed in manually, not through redux.
   .component('rRfpAnalyzer', react2angular(RfpAnalyzer))
@@ -240,9 +250,9 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rRingEdit', react2angular(RingEdit))
   .component('rRingButton', react2angular(RingButton, ['onModify']))
   .component('rToastContainer', react2angular(ToastContainer))
+  .component('rLocationInfo', react2angular(LocationInfo))
   .service('Utils', utils)
   .service('state', state)
   .service('aclManager', aclManager)
   .service('tileDataService', tileDataService)
-  .service('locationDetailPropertiesFactory', locationDetailPropertiesFactory)
   .config(reduxConfig)

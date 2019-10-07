@@ -37,11 +37,6 @@ class NetworkEquipmentController {
     })
 
     // Update map layers when the dataItems property of state changes
-    state.dataItemsChanged
-      .skip(1)
-      .subscribe((newValue) => this.updateMapLayers())
-
-    // Update map layers when the dataItems property of state changes
     state.viewSettingsChanged
       .skip(1)
       .subscribe((newValue) => this.updateMapLayers())
@@ -124,6 +119,7 @@ class NetworkEquipmentController {
     // For equipments, we are going to filter out features that are planned and deleted
     var featureFilter = null
     var drawingOptions = angular.copy(networkEquipment.drawingOptions)
+    var subtypes = null
     if (categoryType === 'equipment') {
       featureFilter = (feature) => {
         // For now, just hide equipment features that are Planned and Deleted
@@ -134,14 +130,19 @@ class NetworkEquipmentController {
       if (this.state.showEquipmentLabels && map.getZoom() > this.networkEquipmentLayers.labelDrawingOptions.visibilityZoomThreshold) {
         drawingOptions.labels = this.networkEquipmentLayers.labelDrawingOptions
       }
+      subtypes = { ...networkEquipment.subtypes }
     } else if (categoryType === 'boundaries') {
       featureFilter = (feature) => {
         // Show boundaries with the currently selected boundary type AND that are not marked as deleted
         return (feature.properties.boundary_type === this.state.selectedBoundaryType.id) &&
           (feature.properties.is_deleted !== 'true')
       }
+      // Why this hack for boundaries? Because boundary layers are not explicitly shown via a checkbox in the UI.
+      // So we just turn on the "0" subtype for all boundary layers. The filter will take care of hiding based on boundary type.
+      subtypes = { 0: true }
     }
-    return {
+
+    return { // ToDo: this needs to be a class and the same class as in the reducer
       tileDefinitions: [tileDefinition],
       iconUrl: networkEquipment.iconUrl,
       greyOutIconUrl: networkEquipment.greyOutIconUrl,
@@ -155,12 +156,13 @@ class NetworkEquipmentController {
       selectable: true,
       zIndex: networkEquipment.zIndex + (existingOrPlannedzIndex || 0),
       showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection && this.state.showDirectedCable, // Showing Direction
-      highlightStyle: networkEquipment.highlightStyle
+      highlightStyle: networkEquipment.highlightStyle,
+      subtypes: subtypes
     }
   }
 
   // Creates map layers for a specified category (e.g. "equipment")
-  createMapLayersForCategory(categoryItems, categoryType, mapLayers, createdMapLayerKeys) {
+  createMapLayersForCategory (categoryItems, categoryType, mapLayers, createdMapLayerKeys) {
     // First loop through all the equipment types (e.g. central_office)
     this.mapZoom = map.getZoom()
     categoryItems && Object.keys(categoryItems).forEach((categoryItemKey) => {
@@ -171,8 +173,8 @@ class NetworkEquipmentController {
         this.mapZoom > networkEquipment.aggregateZoomThreshold) {
         if (this.state.equipmentLayerTypeVisibility.existing && networkEquipment.checked) {
           // We need to show the existing network equipment. Loop through all the selected library ids.
-          this.state.dataItems && this.state.dataItems[networkEquipment.dataItemKey] &&
-            this.state.dataItems[networkEquipment.dataItemKey].selectedLibraryItems.forEach((selectedLibraryItem) => {
+          this.dataItems && this.dataItems[networkEquipment.dataItemKey] &&
+            this.dataItems[networkEquipment.dataItemKey].selectedLibraryItems.forEach((selectedLibraryItem) => {
               var mapLayerKey = `${categoryItemKey}_existing_${selectedLibraryItem.identifier}`
               mapLayers[mapLayerKey] = this.createSingleMapLayer(categoryItemKey, categoryType, networkEquipment, 'existing', selectedLibraryItem.identifier, null)
               createdMapLayerKeys.add(mapLayerKey)
@@ -187,9 +189,6 @@ class NetworkEquipmentController {
           createdMapLayerKeys.add(mapLayerKey)
         }
       }
-
-      //Sync ruler option
-      networkEquipment.key == "COPPER" && this.syncRulerOptions(networkEquipment.key,networkEquipment.checked)
     })
   }
 
@@ -203,23 +202,23 @@ class NetworkEquipmentController {
       var selectedBoundaryName
       this.state.selectedBoundaryType.name !== 'fiveg_coverage' ? selectedBoundaryName = 'siteBoundaries' : selectedBoundaryName = 'fiveg_coverage'
 
-      //Type of Boundary to show
+      // Type of Boundary to show
       if ((networkEquipment.equipmentType !== 'point' ||
         this.usePointAggregate ||
         this.mapZoom > networkEquipment.aggregateZoomThreshold) && selectedBoundaryName === categoryItemKey) {
 
-        //Existing Boundaries
+        // Existing Boundaries
         if (this.state.equipmentLayerTypeVisibility.existing && this.state.showSiteBoundary) {
           // We need to show the existing network equipment. Loop through all the selected library ids.
-          this.state.dataItems && this.state.dataItems[networkEquipment.dataItemKey] &&
-            this.state.dataItems[networkEquipment.dataItemKey].selectedLibraryItems.forEach((selectedLibraryItem) => {
+          this.dataItems && this.dataItems[networkEquipment.dataItemKey] &&
+            this.dataItems[networkEquipment.dataItemKey].selectedLibraryItems.forEach((selectedLibraryItem) => {
               var mapLayerKey = `${categoryItemKey}_existing_${selectedLibraryItem.identifier}`
               mapLayers[mapLayerKey] = this.createSingleMapLayer(categoryItemKey, categoryType, networkEquipment, 'existing', selectedLibraryItem.identifier, null)
               createdMapLayerKeys.add(mapLayerKey)
             })
         }
 
-        //Planned Boundaries
+        // Planned Boundaries
         const planId = this.state.plan && this.state.plan && this.state.plan.id
         if (this.state.equipmentLayerTypeVisibility.planned && this.state.showSiteBoundary && planId) {
           // We need to show the planned network equipment for this plan.
@@ -266,28 +265,12 @@ class NetworkEquipmentController {
     this.state.requestSetMapZoom.next(zoomLevel)
   }
 
-  getBackgroungColor(layer) {
-    return layer.drawingOptions.strokeStyle
-  }
-
-  syncRulerOptions(layerKey, isLayerEnabled) {
-    if (isLayerEnabled) {
-      !this.state.rulerActions.includes(this.state.allRulerActions.COPPER) &&
-        this.state.rulerActions.push(this.state.allRulerActions.COPPER)
-    } else {
-      for (var i in this.state.rulerActions) {
-        if (this.state.rulerActions[i].id == layerKey) {
-          this.state.rulerActions.splice(i, 1);
-        }
-      }
-    }
-  }
-
   mapStateToThis (reduxState) {
     return {
       networkEquipmentLayers: getNetworkEquipmentLayersList(reduxState),
       equipmentsArray: getEquipmentsArray(reduxState),
       cablesArray: getCablesArray(reduxState),
+      dataItems: reduxState.plan.dataItems,
       showSiteBoundary: reduxState.mapLayers.showSiteBoundary,
       selectedBoundaryType: reduxState.mapLayers.selectedBoundaryType
     }
@@ -297,8 +280,10 @@ class NetworkEquipmentController {
     return {
       setNetworkEquipmentLayers: (networkEquipmentLayers) => dispatch(MapLayerActions.setNetworkEquipmentLayers(networkEquipmentLayers)),
       updateLayerVisibility: (layerType, layer, isVisible) => {
-        // First set the visibility of the current layer
         dispatch(MapLayerActions.setNetworkEquipmentLayerVisibility(layerType, layer, isVisible))
+      },
+      setNetworkEquipmentSubtypeVisibility: (layerType, layer, subtypeId, isVisible) => {
+        dispatch(MapLayerActions.setNetworkEquipmentSubtypeVisibility(layerType, layer, subtypeId, isVisible))
       },
       updateType: (visibilityType, isVisible) => {
         dispatch(MapLayerActions.setNetworkEquipmentLayerVisibilityType(visibilityType, isVisible))
@@ -310,14 +295,17 @@ class NetworkEquipmentController {
     const currentNetworkEquipmentLayers = this.networkEquipmentLayers
     const currentSelectedBoundaryType = this.selectedBoundaryType
     const currentShowSiteBoundary = this.showSiteBoundary
+    const currentSelectedLibrary = this.dataItems && this.dataItems.equipment && this.dataItems.equipment.selectedLibraryItems
 
     // merge state and actions onto controller
     Object.assign(this, nextState)
     Object.assign(this, actions)
 
-    if (currentNetworkEquipmentLayers !== nextState.networkEquipmentLayers ||
-      currentSelectedBoundaryType !== nextState.selectedBoundaryType ||
-      currentShowSiteBoundary !== nextState.showSiteBoundary) {
+    const newSelectedLibrary = this.dataItems && this.dataItems.equipment && this.dataItems.equipment.selectedLibraryItems
+    if ((currentNetworkEquipmentLayers !== nextState.networkEquipmentLayers) ||
+      (currentSelectedBoundaryType !== nextState.selectedBoundaryType) ||
+      (currentShowSiteBoundary !== nextState.showSiteBoundary) ||
+      (currentSelectedLibrary !== newSelectedLibrary)) {
       this.updateMapLayers()
     }
   }

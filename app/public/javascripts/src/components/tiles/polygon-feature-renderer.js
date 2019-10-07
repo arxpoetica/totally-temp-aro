@@ -131,7 +131,7 @@ class PolygonFeatureRenderer {
 
     // Then draw a polyline except for the lines that are along the tile extents
     // Override the layers drawing styles by passing it through to the rendering function
-    PolylineFeatureRenderer.renderFeature(shape, geometryOffset, ctx, mapLayer, drawingStyles, true, tileSize)
+    PolylineFeatureRenderer.renderFeature(feature, shape, geometryOffset, ctx, mapLayer, drawingStyles, true, tileSize)
   }
 
   // Computes the fill and stroke styles for polygon features

@@ -48,7 +48,6 @@ jobs:
                 python docker/publish_version.py qa-${BRANCH} app $CIRCLE_BUILD_NUM
             fi
             
-
   deploy:
     docker:
       - image: circleci/python:2.7
@@ -59,9 +58,6 @@ jobs:
           command: |
             sudo pip install boto3
             python docker/update_stack.py qa update
-
-
-
 workflows:
   version: 2
   build_deploy:
@@ -72,9 +68,8 @@ workflows:
             branches:
               only: 
                 - master
-                - Ring_UI
                 - optional_building
-                - rfpUploader
+                - devJuly2019
 
       - deploy:
           context: aro_qa_builds
@@ -83,4 +78,3 @@ workflows:
           filters:
             branches:
               only: master
-

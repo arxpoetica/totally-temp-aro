@@ -1,34 +1,68 @@
 import Actions from '../../common/actions'
-import FeatureSets from '../../common/featureSets'
-import Ring from '../../common/ring'
 import RingStatusTypes from './constants'
-
+import SpatialEdgeType from './spatial-edge-type'
+import NetworkConnectivityType from './network-connectivity-type'
 
 const defaultState = {
   rings: {},
-  selectedRingId: null, 
+  selectedRingId: null,
   analysis: {
     status: RingStatusTypes.START_STATE,
-    progress: 0, 
+    progress: 0,
     report: null
+  },
+  options: {
+    maxLocationEdgeDistance: {
+      displayName: 'Max location-edge distance',
+      value: 400
+    },
+    locationBufferSize: {
+      displayName: 'Location buffer size',
+      value: 500
+    },
+    conduitBufferSize: {
+      displayName: 'Conduit buffer size',
+      value: 500
+    },
+    snappingDistance: {
+      displayName: 'Snapping distance',
+      value: 1
+    },
+    maxConnectionDistance: {
+      displayName: 'Connection distance',
+      value: 20
+    },
+    maxWormholeDistance: {
+      displayName: 'Wormhole distance',
+      value: 40
+    },
+    ringComplexityCount: {
+      displayName: 'Ring complexity',
+      value: 3000000
+    },
+    connectivityDefinition: {
+      [SpatialEdgeType.road.id]: NetworkConnectivityType.snapToEdge.id,
+      [SpatialEdgeType.sewer.id]: NetworkConnectivityType.snapToWormhole.id,
+      [SpatialEdgeType.duct.id]: NetworkConnectivityType.none.id
+    }
   }
 }
 
 function setAnalysisStatus (state, status) {
-  return { ...state, 
-    analysis: { ...state.analysis, status: status}
+  return { ...state,
+    analysis: { ...state.analysis, status: status }
   }
 }
 
 function setAnalysisProgress (state, progress) {
-  return { ...state, 
-    analysis: { ...state.analysis, progress: progress}
+  return { ...state,
+    analysis: { ...state.analysis, progress: progress }
   }
 }
 
 function setAnalysisReport (state, report) {
-  return { ...state, 
-    analysis: { ...state.analysis, report: report}
+  return { ...state,
+    analysis: { ...state.analysis, report: report }
   }
 }
 
@@ -74,24 +108,44 @@ function updateRing (state, ring) {
   }
 }
 
+function setRingOptionsConnectivity (state, spatialEdgeType, networkConnectivityType) {
+  return { ...state,
+    options: { ...state.options,
+      connectivityDefinition: { ...state.options.connectivityDefinition,
+        [spatialEdgeType]: networkConnectivityType
+      }
+    }
+  }
+}
+
 function ringEditReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.RING_SET_ANALYSIS_STATUS:
       return setAnalysisStatus(state, action.payload)
+
     case Actions.RING_SET_ANALYSIS_PROGRESS:
       return setAnalysisProgress(state, action.payload)
+
     case Actions.RING_SET_ANALYSIS_REPORT:
       return setAnalysisReport(state, action.payload)
+
     case Actions.RING_SET_SELECTED_RING_ID:
       return setSelectedRingId(state, action.payload)
+
     case Actions.RING_ADD_RINGS:
       return addRings(state, action.payload)
+
     case Actions.RING_REMOVE_RING:
       return removeRing(state, action.payload)
+
     case Actions.RING_REMOVE_ALL_RINGS:
       return removeAllRings(state)
+
     case Actions.RING_UPDATE_RING:
       return updateRing(state, action.payload)
+
+    case Actions.RING_OPTIONS_SET_CONNECTIVITY:
+      return setRingOptionsConnectivity(state, action.payload.spatialEdgeType, action.payload.networkConnectivityType)
 
     default:
       return state

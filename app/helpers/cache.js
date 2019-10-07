@@ -48,21 +48,60 @@ function loadConfiguration() {
     'locationDetailProperties',
     'perspectives',
     'plan',
+    'planEditor',
     'toolbar',
     'optimizationOptions',
     'resourceEditors'
   ]
 
-  var configurationPromises = []
-  configurationTypes.forEach(configurationType => configurationPromises.push(UIConfiguration.getConfigurationSet(configurationType)))
-  return Promise.all(configurationPromises)
-    .then(results => {
-      exports.configuration = {}
-      configurationTypes.forEach((configurationType, index) => {
-        exports.configuration[configurationType] = results[index]
+  const configTypeToSubtype = {
+    'networkEquipment': [
+      'equipments'
+    ]
+  }
+
+  // ToDo: not a fan of this, front end shouldn't be accessing the DB directly, should always use the API
+  // get /odata/NetworkNodeSubtypeEntity
+  const sql = `SELECT client.network_node_subtype.*, client.network_node_types.name network_node_type 
+    FROM client.network_node_subtype
+    LEFT JOIN client.network_node_types ON client.network_node_subtype.node_type_id = client.network_node_types.id`
+  database.query(sql)
+    .then((response) => {
+      console.log(response)
+      var subtypesByType = {}
+      response.forEach(subtype => {
+        if (!subtypesByType.hasOwnProperty(subtype.network_node_type)) {
+          subtypesByType[subtype.network_node_type] = []
+        }
+        subtypesByType[subtype.network_node_type].push(subtype)
       })
-      exports.configuration.ARO_CLIENT = process.env.ARO_CLIENT
-      return Promise.resolve()
+
+      var configurationPromises = []
+      configurationTypes.forEach(configurationType => configurationPromises.push(UIConfiguration.getConfigurationSet(configurationType)))
+      return Promise.all(configurationPromises)
+        .then(results => {
+          exports.configuration = {}
+          configurationTypes.forEach((configurationType, index) => {
+            exports.configuration[configurationType] = results[index]
+            
+            // attach subtype data to types that have them
+            if (configTypeToSubtype.hasOwnProperty(configurationType)) {
+              configTypeToSubtype[configurationType].forEach(subtypeParent => {
+                if (exports.configuration[configurationType].hasOwnProperty(subtypeParent)) {
+                  Object.keys(subtypesByType).forEach(nodeType => {
+                    if (exports.configuration[configurationType][subtypeParent].hasOwnProperty(nodeType)) {
+                      exports.configuration[configurationType][subtypeParent][nodeType].subtypeLayers = subtypesByType[nodeType]
+                    }
+                  })
+                }
+              })
+            }
+            
+          })
+
+          exports.configuration.ARO_CLIENT = process.env.ARO_CLIENT
+          return Promise.resolve()
+        })
     })
     .catch(err => console.error(err))
 }

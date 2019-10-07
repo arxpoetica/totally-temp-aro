@@ -1,31 +1,34 @@
+/* global google, swal */
 import React, { Component } from 'react'
-// import { PropTypes } from 'prop-types'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
+import { PropTypes } from 'prop-types'
+import { createSelector } from 'reselect'
 import ringActions from './ring-edit-actions.js'
-import uuidv4 from 'uuid/v4'
-// import Utilities from '../../../components/common/utilities'
-import AroHttp from '../../common/aro-http'
-import Ring from '../../common/ring.js'
-import ReportsDownloadModal from '../optimization/reports/reports-download-modal.jsx'
-import ReportActions from '../optimization/reports/reports-actions'
 import './ring-edit.css'
-import socketManager from '../../../react/common/socket-manager'
 import RingStatusTypes from './constants'
+import Ring from '../../common/ring'
+import RingOptionsBasic from './ring-options-basic.jsx'
+import RingOptionsConnectivityDefinition from './ring-options-connectivity-definition.jsx'
 
+const getAllRingOptions = state => state.ringEdit.options
+const getRingOptionsBasic = createSelector([getAllRingOptions], allRingOptions => {
+  var ringOptionsBasic = { ...allRingOptions }
+  delete ringOptionsBasic.connectivityDefinition
+  return ringOptionsBasic
+})
 
 export class RingEdit extends Component {
-  
   constructor (props) {
     super(props)
-    
+
     this.createdMapObjects = []
     this.mapObjectListeners = []
     this.canEdit = true
   }
-  
+
   render () {
-    this.canEdit = (this.props.status == RingStatusTypes.START_STATE)
+    this.canEdit = (this.props.status === RingStatusTypes.START_STATE)
     this.drawRings()
     return <div>
       {this.renderAddButton()}
@@ -33,18 +36,17 @@ export class RingEdit extends Component {
         <h4>Rings</h4>
         <table className='table table-sm table-striped'>
           <tbody>
-          {
-            this.renderRingRows(this.props.rings)
-          }
+            {this.renderRingRows(this.props.rings)}
           </tbody>
         </table>
       </div>
-      
+      <RingOptionsBasic initialValues={this.props.ringOptionsBasic} enableReinitialize />
+      <RingOptionsConnectivityDefinition enableReinitialize />
     </div>
   }
-  
+
   renderAddButton () {
-    if (this.canEdit){
+    if (this.canEdit) {
       return <div className='m-2 p-2'>
         <button id='btnRingNewRing'
           className='btn btn-sm btn-light'
@@ -52,8 +54,8 @@ export class RingEdit extends Component {
           <i className='fas fa-pencil-alt' /> Add Ring
         </button>
       </div>
-    }else{
-      return 
+    } else {
+      return ''
     }
   }
 
@@ -65,37 +67,45 @@ export class RingEdit extends Component {
     ))
     var jsx = []
     revOrder.forEach((ring) => {
-      jsx.push( this.renderRingRow(ring) )
+      jsx.push(this.renderRingRow(ring))
     })
     return jsx
   }
 
   renderRingRow (ring) {
-    if (ring.id == this.props.selectedRingId){
+    if (ring.id === this.props.selectedRingId) {
       // selected ring
       return <tr key={ring.id}>
-        <td className='ring-table-item-selected'> 
+        <td className='ring-table-item-selected'>
           <div className='ring-table-item-title ring-table-item-title-selected clearfix'>
-            {ring.name} 
+            {ring.name}
 
-            {(() => {if (this.canEdit) return (
-              <button className="btn btn-sm btn-outline-danger ring-del-btn" 
-                      onClick={() => this.requestDeleteRing(ring)}
-                      data-toggle="tooltip" data-placement="bottom" title="Delete">
-                <i className="fa ei-button-icon ng-scope fa-trash-alt"></i>
+            {this.canEdit
+              ? <button 
+                id={`btnRingDel_${ring.id}`}
+                className='btn btn-sm btn-outline-danger ring-del-btn'
+                onClick={() => this.requestDeleteRing(ring)}
+                data-toggle='tooltip' data-placement='bottom' title='Delete'>
+                <i className='fa ei-button-icon ng-scope fa-trash-alt' />
               </button>
-            )})()}
+              : null
+            }
 
-            {(() => {if (this.canEdit) return (
-              <input
+            {this.canEdit
+              ? <input
                 id={`inpRingName_${ring.id}`}
                 type='text'
                 className='form-control form-control-sm ring-text-inp'
                 placeholder='rename'
                 onBlur={event => this.renameRing(ring.id, event.target.value)}
-                onKeyDown={event => {if (event.key === 'Enter') this.renameRing(ring.id, event.target.value) }}
+                onKeyDown={event => {
+                  if (event.key === 'Enter') {
+                    this.renameRing(ring.id, event.target.value)
+                  }
+                }}
               />
-            )})()}
+              : null
+            }
 
           </div>
           <div className='ring-sub-table'>
@@ -103,17 +113,18 @@ export class RingEdit extends Component {
               <tbody>
                 {
                   ring.nodes.map((node, index) => (
-                    <tr className='m-2 p-2' key={ring.id+'_'+node.objectId}>
+                    <tr className='m-2 p-2' key={ring.id + '_' + node.objectId}>
                       <td>
-                        {node.siteClli || node.objectId} 
-                        
-                        {(() => {if (this.canEdit) return (
-                          <button className="btn btn-sm btn-outline-danger ring-del-btn" 
-                                  onClick={() => this.deleteNode(ring, node.objectId)}
-                                  data-toggle="tooltip" data-placement="bottom" title="Delete">
-                            <i className="fa ei-button-icon ng-scope fa-trash-alt"></i>
+                        {node.siteClli || node.objectId}
+
+                        {this.canEdit
+                          ? <button id={`btnNodeDel_${ring.id}-${node.objectId}`} className='btn btn-sm btn-outline-danger ring-del-btn'
+                            onClick={() => this.deleteNode(ring, node.objectId)}
+                            data-toggle='tooltip' data-placement='bottom' title='Delete'>
+                            <i className='fa ei-button-icon ng-scope fa-trash-alt' />
                           </button>
-                        )})()}
+                          : null
+                        }
 
                       </td>
                     </tr>
@@ -124,65 +135,61 @@ export class RingEdit extends Component {
           </div>
         </td>
       </tr>
-    }else{
+    } else {
       return <tr key={ring.id}>
         <td>
-          <div onClick={() => this.props.setSelectedRingId(ring.id)}>
+          <div id={`btnRingSelect_${ring.id}`} onClick={() => this.props.setSelectedRingId(ring.id)}>
             {ring.name}
           </div>
         </td>
       </tr>
     }
   }
-  
 
   requestAddNewRing () {
-    //var ringId = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)// ToDo: replace this with proper get ID
-    //var ringId = uuidv4() // ToDo: use /src/components/common/utilitias.js > getUUID()
-    //var ringId = Utilities.getUUID
-    //var ring = new Ring(ringId)
     const planId = this.props.plan.activePlan.id
     const userId = this.props.user.loggedInUser.id
     this.props.newRing(planId, userId)
   }
-  
+
   renameRing (ringId, val) {
     const planId = this.props.plan.activePlan.id
     const userId = this.props.user.loggedInUser.id
     this.props.renameRing(this.props.rings[ringId], val, planId, userId)
   }
-  
-  drawRings(){
+
+  drawRings () {
     // clear prev lines
     this.clearRendering()
 
     // for (let [ringId, ring] of Object.entries(this.props.rings)) {
     Object.keys(this.props.rings).forEach(ringId => {
       const ring = this.props.rings[ringId]
-      if (ring.nodes.length > 0){
+      ringId = parseInt(ringId)
+      if (ring.nodes.length > 0) {
         var pathCoords = []
-        
+
         ring.nodes.forEach(node => {
           const coords = node.data.geometry.coordinates
-          pathCoords.push({lat:coords[1],lng:coords[0]})
+          pathCoords.push({ lat: coords[1], lng: coords[0] })
         })
-        
+
         var polygonOptions = {
           strokeColor: '#888888',
           strokeOpacity: 0.8,
           strokeWeight: 1,
           fillColor: '#888888',
-          fillOpacity: 0.3, 
+          fillOpacity: 0.3,
           editable: false
         }
-        
-        if (ringId == this.props.selectedRingId){
+
+        if (ringId === this.props.selectedRingId) {
           polygonOptions = {
             strokeColor: '#FF1493',
             strokeOpacity: 0.8,
             strokeWeight: 2,
             fillColor: '#FF1493',
-            fillOpacity: 0.4, 
+            fillOpacity: 0.4,
             editable: this.canEdit
           }
         }
@@ -196,14 +203,14 @@ export class RingEdit extends Component {
           polygon.setOptions(polygonOptions)
           polygon.setMap(this.props.map.googleMaps)
           this.createdMapObjects.push(polygon)
-          if (ringId == this.props.selectedRingId){
+          if (ringId === this.props.selectedRingId) {
             const planId = this.props.plan.activePlan.id
             const userId = this.props.user.loggedInUser.id
             var onPathChange = (path) => {
               var newPath = []
               var vertices = polygon.getPath()
 
-              for (var i =0; i < vertices.getLength(); i++) {
+              for (var i = 0; i < vertices.getLength(); i++) {
                 newPath.push(vertices.getAt(i))
               }
               link.geom = newPath
@@ -223,18 +230,18 @@ export class RingEdit extends Component {
           }
         })
 
-        if (ringId == this.props.selectedRingId){
-          if (ring.nodes.length > 0){
+        if (ringId === this.props.selectedRingId) {
+          if (ring.nodes.length > 0) {
             const coords = ring.nodes[0].data.geometry.coordinates
             var mapMarker = new google.maps.Marker({
               position: new google.maps.LatLng(coords[1], coords[0]),
               icon: {
                 path: google.maps.SymbolPath.CIRCLE,
-                scale: 22, 
-                strokeWeight: 2, 
+                scale: 22,
+                strokeWeight: 2,
                 strokeColor: '#543500'
-              }, 
-              draggable: false, 
+              },
+              draggable: false,
               clickable: false
             })
             mapMarker.setMap(this.props.map.googleMaps)
@@ -247,7 +254,7 @@ export class RingEdit extends Component {
           geodesic: true,
           strokeColor: '#543500',
           strokeOpacity: 1.0,
-          strokeWeight: 1, 
+          strokeWeight: 1,
           clickable: false,
           draggable: false
         })
@@ -256,8 +263,8 @@ export class RingEdit extends Component {
       }
     })
   }
-  
-  requestDeleteRing(ring){
+
+  requestDeleteRing (ring) {
     swal({
       title: 'Delete Ring?',
       text: 'Are you sure you want to delete Ring: ' + ring.name + '?',
@@ -273,34 +280,16 @@ export class RingEdit extends Component {
         const userId = this.props.user.loggedInUser.id
         this.props.removeRing(ring.id, planId, userId)
       }
-    });
+    })
   }
-  
-  deleteNode(ring, nodeId){
+
+  deleteNode (ring, nodeId) {
     const planId = this.props.plan.activePlan.id
     const userId = this.props.user.loggedInUser.id
     this.props.removeNode(ring, nodeId, planId, userId)
   }
-  /*
-  requestSubNet(){
-    var ringIds = []
-    for (var key in this.props.rings) {
-      ringIds.push(''+this.props.rings[key].id)
-    }
-    const planId = this.props.plan.activePlan.id
-    const userId = this.props.user.loggedInUser.id
-    var locationTypes = []
-    this.props.mapLayers.location.forEach(item => {
-      if (item.checked) locationTypes.push(item.plannerKey)
-    });
-    //this.props.calculateSubNet(ringIds, planId, userId)
-    AroHttp.post(`/service/plan/${planId}/ring-cmd`, {ringIds: ringIds, locationTypes: locationTypes})
-    .then(result => {
-      //ToDo check for error
-    }).catch(err => console.error(err))
-  }
-  */
-  clearRendering(){
+
+  clearRendering () {
     this.createdMapObjects.forEach(path => {
       path.setMap(null)
     })
@@ -315,40 +304,45 @@ export class RingEdit extends Component {
   selectNewestRing () {
     var ringId = Object.keys(this.props.rings).sort().pop()
     this.props.setSelectedRingId(ringId)
-  } 
-  
+  }
+
   componentDidMount () {
-    if (!this.props.selectedRingId){
+    if (!this.props.selectedRingId) {
       this.selectNewestRing()
     }
   }
-  
+
   componentWillUnmount () {
     this.clearRendering()
   }
-  
 }
 
 // --- //
 
 RingEdit.propTypes = {
+  rings: PropTypes.objectOf(PropTypes.instanceOf(Ring)),
+  selectedRingId: PropTypes.number,
+  plan: PropTypes.object,
+  user: PropTypes.object,
+  map: PropTypes.object
 }
 
 const mapStateToProps = (state) => ({
-  rings: state.ringEdit.rings, 
-  selectedRingId: state.ringEdit.selectedRingId, 
-  plan: state.plan, 
-  user: state.user, 
-  map: state.map, 
-  status: state.plan.activePlan && state.plan.activePlan.planState 
+  rings: state.ringEdit.rings,
+  selectedRingId: state.ringEdit.selectedRingId,
+  plan: state.plan,
+  user: state.user,
+  map: state.map,
+  status: state.plan.activePlan && state.plan.activePlan.planState,
+  ringOptionsBasic: getRingOptionsBasic(state)
 })
 
 const mapDispatchToProps = dispatch => ({
-  setSelectedRingId: ringId => dispatch(ringActions.setSelectedRingId(ringId)), 
-  newRing: (planId, userId) => dispatch(ringActions.newRing(planId, userId)), 
+  setSelectedRingId: ringId => dispatch(ringActions.setSelectedRingId(ringId)),
+  newRing: (planId, userId) => dispatch(ringActions.newRing(planId, userId)),
   removeRing: (ringId, planId, userId) => dispatch(ringActions.removeRing(ringId, planId, userId)),
-  removeNode: (ring, featureId, planId, userId) => dispatch( ringActions.removeNode(ring, featureId, planId, userId) ), 
-  saveRingChangesToServer: (ring, planId, userId) => dispatch(ringActions.saveRingChangesToServer(ring, planId, userId)), 
+  removeNode: (ring, featureId, planId, userId) => dispatch(ringActions.removeNode(ring, featureId, planId, userId)),
+  saveRingChangesToServer: (ring, planId, userId) => dispatch(ringActions.saveRingChangesToServer(ring, planId, userId)),
   renameRing: (ring, name, planId, userId) => dispatch(ringActions.renameRing(ring, name, planId, userId))
 })
 

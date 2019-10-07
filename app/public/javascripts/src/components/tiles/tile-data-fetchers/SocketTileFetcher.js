@@ -1,3 +1,4 @@
+/* globals angular atob  */
 // Helper class to fetch tile data using websockets
 import { VectorTile } from 'vector-tile'
 import Protobuf from 'pbf'
@@ -7,24 +8,33 @@ import socketManager from '../../../react/common/socket-manager'
 
 class SocketTileFetcher {
 
-  constructor() {
+  constructor () {
     this.tileReceivers = {}
     this.unsubscriber = socketManager.subscribe('VECTOR_TILE_DATA', message => this._receiveSocketData(message))
   }
 
   // Returns a promise that will eventually provide map data for all the layer definitions in the specified tile
-  getMapData(layerDefinitions, zoom, tileX, tileY) {
+  getMapData (layerDefinitions, zoom, tileX, tileY) {
 
     // We are going to fire a POST request to get the vector tile data. The POST request returns a UUID for that
     // request, and we get the (uuid+actual tile data) via websockets. Sometimes, the websocket returns tile data
     // even before the POST request returns. We have to handle both the cases.
     const requestUuid = uuidv4()  // Not cryptographically secure but good enough for our purposes
+    // Service will not accept the 'dataId' field in layer definitions. Remove it.
+    var layerDefinitionsWithoutDataId = layerDefinitions.map(ld => {
+      var ldCopy = angular.copy(ld)
+      delete ldCopy.dataId
+      return ldCopy
+    })
     const mapDataPromise = new Promise((resolve, reject) => {
-      const requestBody = {
-        websocketSessionId: socketManager.websocketSessionId,
-        layerDefinitions: layerDefinitions
-      }
-      AroHttp.post(`/tile-sockets/v1/async/tiles/layers/${zoom}/${tileX}/${tileY}.mvt?request_uuid=${requestUuid}`, requestBody)
+      socketManager.getSessionId()
+        .then(sessionId => {
+          const requestBody = {
+            websocketSessionId: sessionId,
+            layerDefinitions: layerDefinitionsWithoutDataId
+          }
+          return AroHttp.post(`/service-tile-sockets/v1/async/tiles/layers/${zoom}/${tileX}/${tileY}.mvt?request_uuid=${requestUuid}`, requestBody)
+        })
         .then(result => {
           if (this.tileReceivers[requestUuid]) {
             // This means that our websocket has already received data for this request. Go ahead and proces it.
@@ -55,9 +65,9 @@ class SocketTileFetcher {
     return mapDataPromise
   }
 
-  _receiveSocketData(message) {
+  _receiveSocketData (message) {
     // Is there a better way to perform the arraybuffer decoding?
-    const stringMessage = new TextDecoder('utf-8').decode(new Uint8Array(message.data.content))
+    const stringMessage = new TextDecoder('utf-8').decode(new Uint8Array(message.content))
     const messageObj = JSON.parse(stringMessage)
     const mvtData = Uint8Array.from(atob(messageObj.data), c => c.charCodeAt(0))
     var mapboxVectorTile = new VectorTile(new Protobuf(mvtData))
@@ -92,9 +102,9 @@ class SocketTileFetcher {
     }
   }
 
-  _processSocketData(receiver) {
+  _processSocketData (receiver) {
     // Is there a better way to perform the arraybuffer decoding?
-    const stringMessage = new TextDecoder('utf-8').decode(new Uint8Array(receiver.binaryMessage.data.content))
+    const stringMessage = new TextDecoder('utf-8').decode(new Uint8Array(receiver.binaryMessage.content))
     const messageObj = JSON.parse(stringMessage)
     const mvtData = Uint8Array.from(atob(messageObj.data), c => c.charCodeAt(0))
     var mapboxVectorTile = new VectorTile(new Protobuf(mvtData))
@@ -123,17 +133,17 @@ class SocketTileFetcher {
     receiver.resolve(layerToFeatures)
   }
 
-  formatCensusBlockData(cBlock) {
+  formatCensusBlockData (cBlock) {
     let sepA = ';'
     let sepB = ':'
     cBlock.properties.layerType = 'census_block' // ToDo: once we have server-side feature naming we wont need this
-  	let kvPairs = cBlock.properties.tags.split(sepA)
-  	cBlock.properties.tags = {}
-  	kvPairs.forEach((pair) => {
-  	  let kv = pair.split(sepB)
-  	  // incase there are extra ':'s in the value we join all but the first together
-  	  if (kv[0] != '') cBlock.properties.tags[ kv[0] + '' ] = kv.slice(1).join(sepB)
-  	})
+    let kvPairs = cBlock.properties.tags.split(sepA)
+    cBlock.properties.tags = {}
+    kvPairs.forEach((pair) => {
+      let kv = pair.split(sepB)
+      // incase there are extra ':'s in the value we join all but the first together
+      if (kv[0] !== '') cBlock.properties.tags[ kv[0] + '' ] = kv.slice(1).join(sepB)
+    })
   }
 }
 

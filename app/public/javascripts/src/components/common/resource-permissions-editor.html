@@ -18,7 +18,7 @@
       <ui-select-match placeholder="Select User" allow-clear="true">
         <span>{{$select.selected.name}}</span>
       </ui-select-match>
-      <ui-select-choices repeat="person.id as person in $ctrl.systemActorsArray | filter: { name: $select.search } | filter: $ctrl.filterNewActorList| orderBy:'name' | limitTo:10 "
+      <ui-select-choices repeat="person.id as person in $ctrl.systemActorsArray | filter: { name: $select.search } | filter: $ctrl.filterNewActorList| orderBy:'name' "
         group-by="'type'">
         <i ng-if="person.type === 'user'" class="fa fas fa-user"></i>
         <i ng-if="person.type === 'group'" class="fa fas fa-users"></i>

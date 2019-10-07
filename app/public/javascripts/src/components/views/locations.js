@@ -43,11 +43,6 @@ class LocationsController {
     state.mapTileOptions
       .subscribe((newValue) => this.updateMapLayers())
 
-    // Update map layers when the dataItems property of state changes
-    state.dataItemsChanged
-      .skip(1)
-      .subscribe((newValue) => this.updateMapLayers())
-
     // Update map layers when the display mode button changes
     state.selectedDisplayMode.subscribe((newValue) => this.updateMapLayers())
 
@@ -84,6 +79,17 @@ class LocationsController {
         this.toggleMeasuringStick()
       }
     })
+
+    this.filterToOrderedRules = {}
+  }
+
+  getOrderedRulesForFilter (filter) {
+    // We are going to cache the ordered rules so we don't compute them every digest cycle. Using "description" as the cache key.
+    if (!this.filterToOrderedRules[filter.description]) {
+      var orderedRules = Object.keys(filter.rules).map(ruleKey => filter.rules[ruleKey]).sort((a, b) => a.listIndex > b.listIndex ? 1 : -1)
+      this.filterToOrderedRules[filter.description] = orderedRules
+    }
+    return this.filterToOrderedRules[filter.description]
   }
 
   toggleMeasuringStick () {
@@ -139,7 +145,22 @@ class LocationsController {
     }
 
     // Add map layers based on the selection
-    var selectedLocationLibraries = this.state.dataItems && this.state.dataItems.location && this.state.dataItems.location.selectedLibraryItems
+    var v2Filters = null // If not null, the renderer will display zero objects
+    const filtersObj = (this.state.configuration && this.state.configuration.locationCategories && this.state.configuration.locationCategories.filters) || {}
+    if (Object.keys(filtersObj).length > 0) {
+      // Define the v2Filters object ONLY if there are some filters defined in the system
+      v2Filters = []
+      Object.keys(filtersObj).forEach(filterKey => {
+        const filter = filtersObj[filterKey]
+        Object.keys(filter.rules).forEach(ruleKey => {
+          if (filter.rules[ruleKey].isChecked) {
+            v2Filters.push(filter.rules[ruleKey])
+          }
+        })
+      })
+    }
+
+    var selectedLocationLibraries = this.dataItems && this.dataItems.location && this.dataItems.location.selectedLibraryItems
     if (selectedLocationLibraries) {
       selectedLocationLibraries.forEach((selectedLocationLibrary) => {
         // Loop through the location types
@@ -208,7 +229,8 @@ class LocationsController {
                 renderMode: 'PRIMITIVE_FEATURES',
                 zIndex: locationType.zIndex,
                 selectable: true,
-                featureFilter: featureFilter
+                featureFilter: featureFilter,
+                v2Filters: v2Filters
               }
               this.createdMapLayerKeys.add(mapLayerKey)
             }
@@ -233,7 +255,8 @@ class LocationsController {
         iconUrl: `${baseUrl}${firstLocation.iconUrl}`,
         renderMode: 'HEATMAP',
         zIndex: 6500,
-        aggregateMode: 'FLATTEN'
+        aggregateMode: 'FLATTEN',
+        v2Filters: v2Filters
       }
       this.createdMapLayerKeys.add(mapLayerKey)
     }
@@ -246,9 +269,24 @@ class LocationsController {
     this.updateMapLayers()
   }
 
-  mapStateToThis (state) {
+  setRuleChecked (rule, isChecked) {
+    rule.isChecked = isChecked
+    this.updateMapLayers()
+  }
+
+  areAnyLocationLayersVisible () {
+    return this.locationLayers.filter(layer => layer.show).length > 0
+  }
+
+  areAnyLocationFiltersVisible () {
+    const filtersObj = (this.state.configuration && this.state.configuration.locationCategories && this.state.configuration.locationCategories.filters) || {}
+    return Object.keys(filtersObj).length > 0
+  }
+
+  mapStateToThis (reduxState) {
     return {
-      locationLayers: getLocationLayersList(state)
+      locationLayers: getLocationLayersList(reduxState),
+      dataItems: reduxState.plan.dataItems
     }
   }
 
@@ -263,12 +301,15 @@ class LocationsController {
 
   mergeToTarget (nextState, actions) {
     const currentLocationLayers = this.locationLayers
+    const currentSelectedLibrary = this.dataItems && this.dataItems.location && this.dataItems.location.selectedLibraryItems
 
     // merge state and actions onto controller
     Object.assign(this, nextState)
     Object.assign(this, actions)
 
-    if (currentLocationLayers !== nextState.locationLayers) {
+    const nextSelectedLibrary = this.dataItems && this.dataItems.location && this.dataItems.location.selectedLibraryItems
+    if ((currentLocationLayers !== nextState.locationLayers) ||
+      (currentSelectedLibrary !== nextSelectedLibrary)) {
       this.updateMapLayers()
     }
   }

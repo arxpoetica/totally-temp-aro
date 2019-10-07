@@ -1,6 +1,14 @@
+/* globals angular */
+import PlanActions from '../../../../react/components/plan/plan-actions'
+import Constants from '../../../../components/common/constants'
+import { createSelector } from 'reselect'
+
+// Make a copy of data items because the UI component will mutate them directly
+const getDataItems = reduxState => reduxState.plan.dataItems
+const getDataItemsCopy = createSelector([getDataItems], dataItems => angular.copy(dataItems))
 
 class DataSelectionController {
-  constructor ($http, $timeout, $rootScope, state, aclManager) {
+  constructor ($http, $timeout, $rootScope, $ngRedux, state, aclManager) {
     this.$http = $http
     this.$timeout = $timeout
     this.$rootScope = $rootScope
@@ -10,11 +18,12 @@ class DataSelectionController {
     this.sales_role_remove = ['cable_construction_area', 'construction_location', 'edge', 'construction_location', 'tile_system', 'construction_area']
 
     this.isDataSourceEditable = {}
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }
 
   $onInit () {
     this.updateSelectionValidation()
-    Object.keys(this.allDataItems).forEach(dataSourceKey => {
+    Object.keys(this.dataItems).forEach(dataSourceKey => {
       this.isDataSourceEditable[dataSourceKey] = false
       this.updateDataSourceEditableStatus(dataSourceKey)
     })
@@ -24,14 +33,14 @@ class DataSelectionController {
   }
 
   $doCheck () {
-    if (this.allDataItems != this.cachedDataItems) {
+    if (this.dataItems != this.cachedDataItems) {
       this.updateSelectionValidation()
-      this.cachedDataItems = this.allDataItems
+      this.cachedDataItems = this.dataItems
     }
   }
 
   onSelectionChanged (dataSource) {
-    this.state.dataItemsChanged.next(this.state.dataItems)
+    this.selectDataItems(dataSource, this.dataItems[dataSource].selectedLibraryItems.map(item => JSON.parse(angular.toJson(item))))
     this.updateSelectionValidation()
     this.updateDataSourceEditableStatus(dataSource)
 
@@ -41,14 +50,19 @@ class DataSelectionController {
 
   updateDataSourceEditableStatus (dataSourceKey) {
     this.isDataSourceEditable[dataSourceKey] = (dataSourceKey === 'location' || dataSourceKey === 'service_layer') &&
-                                                (this.allDataItems[dataSourceKey].selectedLibraryItems.length === 1)
+                                                (this.dataItems[dataSourceKey].selectedLibraryItems.length === 1)
     if (this.isDataSourceEditable[dataSourceKey]) {
       // We still think this is editable, now check for ACL by making a call to service
-      this.aclManager.getEffectivePermissions('LIBRARY', this.allDataItems[dataSourceKey].selectedLibraryItems[0].identifier, this.state.loggedInUser)
-        .then(permissions => {
-          this.isDataSourceEditable[dataSourceKey] = permissions && (permissions[this.aclManager.PERMISSIONS.WRITE] ||
-                                                                    permissions[this.aclManager.PERMISSIONS.ADMIN] ||
-                                                                    permissions[this.aclManager.PERMISSIONS.IS_SUPERUSER])
+      const libraryId = this.dataItems[dataSourceKey].selectedLibraryItems[0].identifier  // Guaranteed to have 1 selection at this point
+      const dataSourceFilterString = `metaDataId eq ${libraryId}`
+      const filterString = `${dataSourceFilterString} and userId eq ${this.state.loggedInUser.id}`
+      this.$http.get(`/service/odata/UserLibraryViewEntity?$select=dataSourceId,permissions&$filter=${filterString}&$top=1000`)
+        .then(result => {
+          const permissions = (result.data.length === 1) ? result.data[0].permissions : 0
+          const hasWrite = Boolean(permissions & Constants.PERMISSION_RESOURCE_WRITE)
+          const hasAdmin = Boolean(permissions & Constants.PERMISSION_RESOURCE_ADMIN)
+          const hasResourceWorkflow = Boolean(permissions & Constants.PERMISSION_RESOURCE_WORKFLOW)
+          this.isDataSourceEditable[dataSourceKey] = hasWrite || hasAdmin || hasResourceWorkflow
           this.$timeout()
         })
         .catch(err => console.error(err))
@@ -57,12 +71,12 @@ class DataSelectionController {
 
   // Updates the 'valid' flags for all data items
   updateSelectionValidation () {
-    Object.keys(this.allDataItems).forEach((dataItemKey) => {
+    Object.keys(this.dataItems).forEach((dataItemKey) => {
       if (this.currentUser.perspective === 'sales' && this.sales_role_remove.indexOf(dataItemKey) !== -1) {
-        this.allDataItems[dataItemKey].hidden = true
+        this.dataItems[dataItemKey].hidden = true
       }
 
-      var dataItem = this.allDataItems[dataItemKey]
+      var dataItem = this.dataItems[dataItemKey]
       dataItem.isMinValueSelectionValid = dataItem.selectedLibraryItems.length >= dataItem.minValue
       dataItem.isMaxValueSelectionValid = dataItem.selectedLibraryItems.length <= dataItem.maxValue
     })
@@ -71,8 +85,8 @@ class DataSelectionController {
 
   areAllSelectionsValid () {
     var areAllSelectionsValid = true
-    Object.keys(this.allDataItems).forEach((dataItemKey) => {
-      var dataItem = this.allDataItems[dataItemKey]
+    Object.keys(this.dataItems).forEach((dataItemKey) => {
+      var dataItem = this.dataItems[dataItemKey]
       if (!dataItem.isMinValueSelectionValid || !dataItem.isMaxValueSelectionValid) {
         areAllSelectionsValid = false
       }
@@ -106,9 +120,26 @@ class DataSelectionController {
     this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
     this.state.activeViewModePanel = this.state.viewModePanels.EDIT_SERVICE_LAYER
   }
+
+  mapStateToThis (reduxState) {
+    // Make a copy of data items because the UI component will mutate them directly
+    return {
+      dataItems: getDataItemsCopy(reduxState)
+    }
+  }
+
+  mapDispatchToTarget (dispatch) {
+    return {
+      selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems))
+    }
+  }
+
+  $onDestroy () {
+    this.unsubscribeRedux()
+  }
 }
 
-DataSelectionController.$inject = ['$http', '$timeout', '$rootScope', 'state', 'aclManager']
+DataSelectionController.$inject = ['$http', '$timeout', '$rootScope', '$ngRedux', 'state', 'aclManager']
 
 // Component did not work when it was called 'dataSelection'
 let planDataSelection = {
@@ -117,8 +148,7 @@ let planDataSelection = {
     userId: '<',
     planId: '<',
     key: '<',
-    onChange: '&',
-    allDataItems: '='
+    onChange: '&'
   },
   controller: DataSelectionController
 }

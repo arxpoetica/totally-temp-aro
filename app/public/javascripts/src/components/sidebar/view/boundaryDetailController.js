@@ -1,5 +1,5 @@
 class BoundaryDetailController {
-  constructor ($http, $timeout, state) {
+  constructor ($http, $timeout, $ngRedux, state) {
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
@@ -65,12 +65,13 @@ class BoundaryDetailController {
 
       }
     })
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }
 
   viewServiceAreaInfo (serviceArea) {
     this.selectedBoundaryInfo = null
     this.selectedAnalysisAreaInfo = null
-    this.state.StateViewMode.loadEntityList(this.$http, this.state, 'ServiceAreaView', serviceArea.id, 'id,code,name', 'id')
+    this.state.StateViewMode.loadEntityList(this.$http, this.state, this.dataItems, 'ServiceAreaView', serviceArea.id, 'id,code,name', 'id')
       .then((serviceAreaInfos) => {
         this.selectedSAInfo = serviceAreaInfos[0]
       })
@@ -91,7 +92,7 @@ class BoundaryDetailController {
   }
 
   getAnalysisAreaInfo (analysisAreaId) {
-    return this.state.StateViewMode.loadEntityList(this.$http, this.state, 'AnalysisArea', analysisAreaId, 'id,code', 'id')
+    return this.state.StateViewMode.loadEntityList(this.$http, this.state, this.dataItems, 'AnalysisArea', analysisAreaId, 'id,code', 'id')
       .then((analysisAreaInfo) => {
         return analysisAreaInfo[0]
       })
@@ -180,9 +181,21 @@ class BoundaryDetailController {
     this.mapFeaturesSelectedEventObserver.unsubscribe()
     this.resetSearchObserver.unsubscribe()
     this.clearViewModeObserver.unsubscribe()
+    this.unsubscribeRedux()
+  }
+
+  mapStateToThis (reduxState) {
+    return {
+      dataItems: reduxState.plan.dataItems
+    }
+  }
+
+  mapDispatchToTarget (dispatch) {
+    return {
+    }
   }
 }
 
-BoundaryDetailController.$inject = ['$http', '$timeout', 'state']
+BoundaryDetailController.$inject = ['$http', '$timeout', '$ngRedux', 'state']
 
 export default BoundaryDetailController

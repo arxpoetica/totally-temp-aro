@@ -8,12 +8,12 @@
 <div class="map-tool-wrapper" ng-controller="fiber_plant_controller">
   <div ng-show="map_tools.is_visible('fiber_plant')" class="card map-tool">
     <div class="card-header map-tools-card-header bg-primary text-white">
-      <a href="javascript:void(0)" class="float-right" ng-show="map_tools.is_expanded('fiber_plant')" ng-click="map_tools.collapse('fiber_plant')">
+      <span class="float-right aro-pointer" ng-show="map_tools.is_expanded('fiber_plant')" ng-click="map_tools.collapse('fiber_plant')">
         <span style="color:white" class="fa fa-chevron-up"></span>
-      </a>
-      <a href="javascript:void(0)" class="float-right" ng-show="!map_tools.is_expanded('fiber_plant')" ng-click="map_tools.expand('fiber_plant')">
+      </span>
+      <span class="float-right aro-pointer" ng-show="!map_tools.is_expanded('fiber_plant')" ng-click="map_tools.expand('fiber_plant')">
         <span style="color:white" class="fa fa-chevron-down"></span>
-      </a>
+      </span>
       <h5 class="map-tool-title-text">Construction Sites</h5>
     </div>
     <div class="card-body map-tools-card-body" ng-show="map_tools.is_expanded('fiber_plant')">
@@ -23,6 +23,10 @@
 </div>
 
 <network-equipment></network-equipment>
+
+<cables></cables>
+
+<conduits></conduits>
 
 <div class="map-tools-buttons-container">
   <div ng-controller="map_tools_controller"

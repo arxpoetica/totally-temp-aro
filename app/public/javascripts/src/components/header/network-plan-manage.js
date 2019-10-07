@@ -74,7 +74,7 @@ class NetworkPlanModalController {
       promises.push(this.$http.get(`/service/odata/ServiceAreaView?$select=id,code,name&$filter=${filter}&$orderby=id&$top=10000`))
     }
 
-    return this.state.StateViewMode.loadListOfSAPlanTagsById(this.$http, this.state, promises)
+    return this.state.StateViewMode.loadListOfSAPlanTagsById(this.state, promises)
       .then((result) => {
         return Promise.resolve(this.state.listOfServiceAreaTags.filter(tag => _.contains(currentSATags, tag.id)))
       })
@@ -93,6 +93,7 @@ class NetworkPlanModalController {
   }
   mapStateToThis (reduxState) {
     return {
+      dataItems: reduxState.plan.dataItems
     }
   }
 

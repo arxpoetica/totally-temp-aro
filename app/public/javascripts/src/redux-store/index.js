@@ -14,6 +14,7 @@ import networkAnalysis from '../react/components/optimization/network-analysis/n
 import opReport from '../react/components/optimization/reports/reports-reducer'
 import rfp from '../react/components/optimization/rfp/rfp-reducer'
 
+import contextMenu from '../react/components/context-menu/reducer'
 import coverage from '../react/components/coverage/coverage-reducer'
 import fullScreen from '../react/components/full-screen/full-screen-reducer'
 import map from '../react/components/map/map-reducer'
@@ -25,6 +26,8 @@ import user from '../react/components/user/user-reducer'
 
 import ringEdit from '../react/components/ring-edit/ring-edit-reducer'
 
+import locationInfo from '../react/components/location-info/location-info-reducer'
+
 const logger = createLogger({
   level: 'info',
   collapsed: true
@@ -33,6 +36,7 @@ const socketMiddleware = createSocketMiddleware()
 
 let reducer = combineReducers({
   configuration: combineReducers({ report, ui }),
+  contextMenu,
   coverage,
   fullScreen,
   map,
@@ -43,7 +47,8 @@ let reducer = combineReducers({
   selection,
   user,
   form, 
-  ringEdit
+  ringEdit,
+  locationInfo
 })
 
 // Add support for Redux devtools extension. Yes, even in production.

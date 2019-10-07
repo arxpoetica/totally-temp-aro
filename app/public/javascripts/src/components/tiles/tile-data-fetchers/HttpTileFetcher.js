@@ -7,7 +7,7 @@ class HttpTileFetcher {
     return new Promise((resolve, reject) => {
       // Getting binary data from the server. Directly use XMLHttpRequest()
       var oReq = new XMLHttpRequest()
-      oReq.open('POST', `/tile/v1/tiles/layers/${zoom}/${tileX}/${tileY}.mvt`, true)
+      oReq.open('POST', `/service/v1/tiles/layers/${zoom}/${tileX}/${tileY}.mvt`, true)
       oReq.setRequestHeader('Content-Type', 'application/json')
       oReq.responseType = 'arraybuffer'
 
@@ -46,7 +46,13 @@ class HttpTileFetcher {
           reject(`ERROR: Tile data URL returned status code ${oReq.status}`)
         }
       }
-      oReq.send(JSON.stringify(layerDefinitions))
+      // Service will not accept the 'dataId' field in layer definitions. Remove it.
+      var layerDefinitionsWithoutDataId = layerDefinitions.map(ld => {
+        var ldCopy = angular.copy(ld)
+        delete ldCopy.dataId
+        return ldCopy
+      })
+      oReq.send(JSON.stringify(layerDefinitionsWithoutDataId))
     })
   }
 

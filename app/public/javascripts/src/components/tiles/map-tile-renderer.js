@@ -4,10 +4,11 @@ import PolygonFeatureRenderer from './polygon-feature-renderer'
 import TileUtilities from './tile-utilities'
 import AsyncPriorityQueue from 'async/priorityQueue'
 import Constants from '../common/constants'
+import Rule from './rule'
 
 class MapTileRenderer {
-  constructor (tileSize, tileDataService, mapTileOptions, censusCategories, selectedDisplayMode, selectionModes, analysisSelectionMode, displayModes,
-    viewModePanels, state, uiNotificationService, getPixelCoordinatesWithinTile, mapLayers = []) {
+  constructor (tileSize, tileDataService, mapTileOptions, censusCategories, selectedDisplayMode, selectionModes, analysisSelectionMode, stateMapLayers, displayModes,
+    viewModePanels, state, uiNotificationService, getPixelCoordinatesWithinTile, transactionFeatureIds, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
@@ -17,6 +18,7 @@ class MapTileRenderer {
     this.selectedDisplayMode = selectedDisplayMode
     this.selectionModes = selectionModes
     this.analysisSelectionMode = analysisSelectionMode
+    this.stateMapLayers = stateMapLayers
     this.censusCategories = censusCategories
     this.displayModes = displayModes
     this.viewModePanels = viewModePanels
@@ -24,6 +26,7 @@ class MapTileRenderer {
     this.uiNotificationService = uiNotificationService
     this.getPixelCoordinatesWithinTile = getPixelCoordinatesWithinTile
     this.latestTileUniqueId = 0
+    this.transactionFeatureIds = transactionFeatureIds
 
     const MAX_CONCURRENT_VECTOR_TILE_RENDERS = 5
     this.tileRenderThrottle = new AsyncPriorityQueue((task, callback) => {
@@ -90,6 +93,14 @@ class MapTileRenderer {
   setAnalysisSelectionMode (analysisSelectionMode) {
     this.analysisSelectionMode = analysisSelectionMode
     this.tileDataService.markHtmlCacheDirty()
+  }
+
+  setStateMapLayers (stateMapLayers) {
+    this.stateMapLayers = stateMapLayers
+  }
+
+  setTransactionFeatureIds (transactionFeatureIds) {
+    this.transactionFeatureIds = transactionFeatureIds
   }
 
   // ToDo: move this to a place of utility functions
@@ -340,6 +351,7 @@ class MapTileRenderer {
         if (htmlCache && htmlCache.isDirty && isLatestVersion) {
           htmlCache.backBufferCanvas.getContext('2d').clearRect(0, 0, htmlCache.backBufferCanvas.width, htmlCache.backBufferCanvas.height)
           htmlCache.heatmapCanvas.getContext('2d').clearRect(0, 0, htmlCache.heatmapCanvas.width, htmlCache.heatmapCanvas.height)
+
           this.renderSingleTileFull(zoom, coord, renderingData, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage, htmlCache.backBufferCanvas, htmlCache.heatmapCanvas)
 
           // Copy the back buffer image onto the front buffer
@@ -435,17 +447,25 @@ class MapTileRenderer {
   renderFeatures (ctx, zoom, tileCoords, features, featureData, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage, geometryOffset, heatMapData, heatmapID, mapLayer) {
     ctx.globalAlpha = 1.0
     // If a filtering function is provided for this layer, apply it to filter out features
-    const filteredFeatures = mapLayer.featureFilter ? features.filter(mapLayer.featureFilter) : features
-    /*
-    if (features.length > 0){
-      console.log(features)
-      console.log(filteredFeatures)
-      console.log(mapLayer.tileDefinitions[0].vtlType)
-      console.log(this.tileDataService.featuresToExclude)
-      console.log(this.tileDataService.modifiedBoundaries)
-    }
-    // */
+    var v1FilteredFeatures = mapLayer.featureFilter ? features.filter(mapLayer.featureFilter) : features
+    v1FilteredFeatures.forEach(v1Feature => delete v1Feature.v2Result)
 
+    // V2 filtering
+    var filteredFeatures = []
+    if (mapLayer.v2Filters) {
+      mapLayer.v2Filters.forEach(v2Filter => {
+        const rule = new Rule(v2Filter.condition)
+        v1FilteredFeatures.forEach(feature => {
+          if (rule.checkCondition(feature.properties)) {
+            feature.v2Result = v2Filter.onPass
+            filteredFeatures.push(feature)
+          }
+        })
+      })
+    } else {
+      // No V2 filters selected. Use all features
+      filteredFeatures = v1FilteredFeatures
+    }
     var closedPolygonFeatureLayersList = []
     var pointFeatureRendererList = []
     for (var iFeature = 0; iFeature < filteredFeatures.length; ++iFeature) {
@@ -455,6 +475,20 @@ class MapTileRenderer {
       if (feature.properties) {
         // Try object_id first, else try location_id
         var featureId = feature.properties.object_id || feature.properties.location_id
+
+				if (this.transactionFeatureIds.has(featureId)) {
+          // continue // Do not render any features that are part of a transaction
+        }
+
+        if (mapLayer.hasOwnProperty('subtypes')) {
+          if (feature.properties.hasOwnProperty('subtype_id')) {
+            // filter off subtypes
+            if (!mapLayer.subtypes.hasOwnProperty(feature.properties.subtype_id) || !mapLayer.subtypes[feature.properties.subtype_id]) continue
+          } else {
+            // check that the root layer is on
+            if (!mapLayer.subtypes.hasOwnProperty('0') || !mapLayer.subtypes[0]) continue
+          }
+        }
 
         if (this.selectedDisplayMode == this.displayModes.EDIT_PLAN &&
             this.tileDataService.featuresToExclude.has(featureId) &&
@@ -569,10 +603,13 @@ class MapTileRenderer {
           } else {
             // This is not a closed polygon. Render lines only
             ctx.globalAlpha = 1.0
+            
+            var drawingStyles = {}
+
             if ((this.oldSelection.details.roadSegments.size > 0 && this.highlightPolyline(feature, this.oldSelection.details.roadSegments)) ||
               (this.oldSelection.details.fiberSegments.size > 0 && this.highlightPolyline(feature, this.oldSelection.details.fiberSegments))) {
               // Highlight the Selected Polyline
-              var drawingStyles = {
+              drawingStyles = {
                 lineWidth: mapLayer.drawingOptions.lineWidth * 2,
                 strokeStyle: mapLayer.drawingOptions.strokeStyle
               }
@@ -582,18 +619,36 @@ class MapTileRenderer {
                   strokeStyle: mapLayer.highlightStyle.strokeStyle
                 }
               }
-              PolylineFeatureRenderer.renderFeature(shape, geometryOffset, ctx, mapLayer, drawingStyles, false, this.tileSize)
             } else if (this.state.showFiberSize && feature.properties._data_type === 'fiber' && this.state.viewSetting.selectedFiberOption.id !== 1) {
               var selectedFiberOption = this.state.viewSetting.selectedFiberOption
               var viewOption = selectedFiberOption.pixelWidth
-              var drawingStyles = {
+              drawingStyles = {
                 lineWidth: TileUtilities.getFiberStrandSize(selectedFiberOption.field, feature.properties.fiber_strands, viewOption.min, viewOption.max, viewOption.divisor, viewOption.atomicDivisor),
                 strokeStyle: mapLayer.strokeStyle
               }
-              PolylineFeatureRenderer.renderFeature(shape, geometryOffset, ctx, mapLayer, drawingStyles, false, this.tileSize)
-            } else {
-              PolylineFeatureRenderer.renderFeature(shape, geometryOffset, ctx, mapLayer, null, false, this.tileSize)
             }
+            // check if show conduit is on for this fiber type and change color accordingly
+            // ToDo: this needs to be generalized to work with all types,
+            //    .conduits and .roads shouldn't be hardcoded, they are dynamic from service
+            if (feature.properties.spatial_edge_type &&
+              mapLayer && mapLayer.tileDefinitions && 
+              mapLayer.tileDefinitions.length > 0 && mapLayer.tileDefinitions[0].fiberType) {
+              
+              var edgeType = feature.properties.spatial_edge_type
+              var fiberType = mapLayer.tileDefinitions[0].fiberType
+              if (this.stateMapLayers.networkEquipment.cables[fiberType] &&
+                this.stateMapLayers.networkEquipment.cables[fiberType].conduitVisibility[edgeType]) {
+                
+                if (this.stateMapLayers.networkEquipment.conduits[edgeType]) {
+                  drawingStyles.strokeStyle = this.stateMapLayers.networkEquipment.conduits[edgeType].drawingOptions.strokeStyle
+                } else if (this.stateMapLayers.networkEquipment.roads[edgeType]) {
+                  drawingStyles.strokeStyle = this.stateMapLayers.networkEquipment.roads[edgeType].drawingOptions.strokeStyle
+                }
+                
+              }
+            }
+
+            PolylineFeatureRenderer.renderFeature(feature, shape, geometryOffset, ctx, mapLayer, drawingStyles, false, this.tileSize)
           }
         }
       })
@@ -605,8 +660,6 @@ class MapTileRenderer {
   }
 
   highlightPolyline (feature, polylines) {
-    var ishighlight = false
-
     var ishighlight = [...polylines].filter(function (polyline) {
       if (feature.properties && feature.properties._data_type && feature.properties._data_type == 'fiber') { return polyline.link_id === feature.properties.link_id } else if (feature.properties && feature.properties._data_type && feature.properties._data_type == 'existing_fiber.') { return polyline.id === feature.properties.id } else if (feature.properties && feature.properties._data_type && feature.properties._data_type == 'edge') { return polyline.gid === feature.properties.gid }
     }).length > 0

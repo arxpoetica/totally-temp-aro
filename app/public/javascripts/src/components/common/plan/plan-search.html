@@ -46,7 +46,7 @@
       search-property="code"
       search-list="$ctrl.state.listOfServiceAreaTags"
       apply-search="$ctrl.applySearchFilter(selectedFilters, 'svc')"
-      refresh-tag-list="$ctrl.state.StateViewMode.loadListOfSAPlanTags($ctrl.$http,$ctrl.state,searchObj)"></plan-search-filter>
+      refresh-tag-list="$ctrl.state.StateViewMode.loadListOfSAPlanTags($ctrl.$http, $ctrl.state, $ctrl.dataItems, searchObj)"></plan-search-filter>
     <plan-search-filter style="flex: 0 1 auto;"
       object-name="Creator"
       search-property="fullName"
@@ -64,7 +64,7 @@
       <tbody>
         <tr ng-repeat="plan in $ctrl.plans | orderBy:$ctrl.sortField:$ctrl.descending">
           <td>
-            <b><a href="javascript:void(0)" ng-click="$ctrl.onPlanClicked(plan)">{{plan.name}}</a></b>
+            <b><span class="aro-faux-anchor" ng-click="$ctrl.onPlanClicked(plan)">{{plan.name}}</span></b>
             <div ng-if="plan.createdBy"><i>{{$ctrl.getPlanCreatorName(plan.createdBy) || 'loading...'}}</i></div>
             <div class="tags">
               <div ng-repeat="tag in $ctrl.getTagCategories(plan.tagMapping.global) track by tag.id" 
@@ -94,17 +94,17 @@
     <nav class="text-center" style="max-height: 35px">
       <ul class="pagination" style="margin: 0px">
         <li ng-class="{ 'page-item': true, disabled: $ctrl.currentPage === 1 }">
-          <a class="page-link" href="javascript:void(0)" aria-label="Previous" ng-click="$ctrl.loadPlans($ctrl.currentPage - 1)">
+          <span class="page-link" aria-label="Previous" ng-click="$ctrl.loadPlans($ctrl.currentPage - 1)">
             <span aria-hidden="true">&laquo;</span>
-          </a>
+          </span>
         </li>
         <li ng-repeat="page in $ctrl.pages" ng-class="{ 'page-item': true, active: page === $ctrl.currentPage }">
-          <a class="page-link"  href="javascript:void(0)" ng-click="$ctrl.loadPlans(page)">{{ page }}</a>
+          <span class="page-link" ng-click="$ctrl.loadPlans(page)">{{ page }}</span>
         </li>
         <li ng-class="{ 'page-item': true, disabled: $ctrl.currentPage === $ctrl.pages[$ctrl.pages.length - 1] }">
-          <a class="page-link"  href="javascript:void(0)" aria-label="Next" ng-click="$ctrl.loadPlans($ctrl.pages[$ctrl.pages.length - 1])">
+          <span class="page-link" aria-label="Next" ng-click="$ctrl.loadPlans($ctrl.pages[$ctrl.pages.length - 1])">
             <span aria-hidden="true">&raquo;</span>
-          </a>
+          </span>
         </li>
       </ul>
     </nav>

@@ -1,4 +1,3 @@
-import React, { Component } from 'react'
 import { PropTypes } from 'prop-types'
 import reduxStore from '../../../../redux-store'
 import { formValueSelector } from 'redux-form'
@@ -10,27 +9,24 @@ import Constants from '../../../common/constants'
 import ProgressButton from '../../common/progress-button.jsx'
 const selector = formValueSelector(Constants.RFP_OPTIONS_FORM)
 
-
 export class RfpButton extends ProgressButton {
   constructor (props) {
     super(props)
 
-    // override 
+    // override
     this.statusTypes = {
       UNINITIALIZED: RfpStatusTypes.UNINITIALIZED,
       RUNNING: RfpStatusTypes.RUNNING,
       FINISHED: RfpStatusTypes.FINISHED
     }
-
   }
-  
-  
-  // override 
+
+  // override
   onRun () {
     this.props.initializeRfpReport(this.props.planId, this.props.userId, this.props.projectId, uuidv4(), this.props.fiberRoutingMode, this.props.targets)
-  } 
-  
-  // override 
+  }
+
+  // override
   onModify () {
     this.props.modifyRfpReport()
   }

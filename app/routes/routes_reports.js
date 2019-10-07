@@ -319,7 +319,7 @@ exports.configure = (api, middleware) => {
     var plan_id = request.params.plan_id
     var site_boundary = request.params.site_boundary
     var planQ = `
-    --location summary
+--location summary
     WITH inputs AS (
       SELECT
         p.id AS plan_id,
@@ -511,7 +511,7 @@ exports.configure = (api, middleware) => {
       SELECT 
       rl.location_object_id                                                                         AS "Location Object ID",
         rl.data_source_name                                                                         AS "Data Source",
-        rl.number_of_households                                                                                                             AS "Location Count",
+        COALESCE(rl.number_of_households,1)    AS "Location Count",
         case 
           WHEN rl.location_category = 2 THEN 'Tower'::text
           WHEN rl.location_category = 1 THEN 'Household'::text
@@ -569,6 +569,7 @@ exports.configure = (api, middleware) => {
       JOIN aro.workflow_state ws
         ON rl.workflow_state_id = ws.id
       left join client.business_category c ON rl.number_of_employees >= c.min_value AND rl.number_of_employees < c.max_value
+        
         
     `;
 

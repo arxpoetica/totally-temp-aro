@@ -1,13 +1,29 @@
 class PolylineFeatureRenderer {
   // Renders a polyline feature onto the canvas
-  static renderFeature (shape, geometryOffset, ctx, mapLayer, drawingStyleOverrides, isPolygonBorder, tileSize) {
+  static renderFeature (feature, shape, geometryOffset, ctx, mapLayer, drawingStyleOverrides, isPolygonBorder, tileSize) {
     const oldOpacity = ctx.globalAlpha
     if (drawingStyleOverrides && drawingStyleOverrides.lineOpacity) {
       ctx.globalAlpha = drawingStyleOverrides.lineOpacity
     }
 
-    ctx.strokeStyle = drawingStyleOverrides ? drawingStyleOverrides.strokeStyle : mapLayer.drawingOptions.strokeStyle
-    ctx.lineWidth = drawingStyleOverrides ? drawingStyleOverrides.lineWidth : (mapLayer.drawingOptions.lineWidth || 1)
+    if (drawingStyleOverrides && drawingStyleOverrides.strokeStyle) {
+      ctx.strokeStyle = drawingStyleOverrides.strokeStyle
+    } else {
+      ctx.strokeStyle = mapLayer.drawingOptions.strokeStyle
+    }
+    // ctx.strokeStyle = drawingStyleOverrides ? drawingStyleOverrides.strokeStyle : mapLayer.drawingOptions.strokeStyle
+    
+    var lineWidth = null
+    if (drawingStyleOverrides && drawingStyleOverrides.lineWidth) {
+      lineWidth = drawingStyleOverrides.lineWidth
+    } else {
+      if (typeof mapLayer.drawingOptions.lineWidth === 'function') {
+        lineWidth = mapLayer.drawingOptions.lineWidth(feature)
+      } else {
+        lineWidth = mapLayer.drawingOptions.lineWidth
+      }
+    }
+    ctx.lineWidth = lineWidth || 1
 
     var xPrev = shape[0].x + geometryOffset.x
     var yPrev = shape[0].y + geometryOffset.y

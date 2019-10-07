@@ -1,0 +1,9 @@
+.draggable-button,.draggable-button:hover,.draggable-button:active {
+  border: none;
+  background: none;
+  cursor: move!important;
+}
+
+.draggable-button:focus {
+  box-shadow: none;
+}

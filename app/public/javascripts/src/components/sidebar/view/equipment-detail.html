@@ -40,7 +40,7 @@
 			object-name="Equipment" label-id="clli"
 			search-list="$ctrl.state.entityTypeList.NetworkEquipmentEntity"
 			selected="$ctrl.selectedEquipment"
-			refresh-tag-list="$ctrl.state.StateViewMode.loadEntityList($ctrl.$http,$ctrl.state,'NetworkEquipmentEntity',searchObj,'id,clli,objectId','clli',$ctrl.state.configuration)"
+			refresh-tag-list="$ctrl.state.StateViewMode.loadEntityList($ctrl.$http, $ctrl.state, $ctrl.dataItems, 'NetworkEquipmentEntity',searchObj,'id,clli,objectId','clli',$ctrl.state.configuration)"
 			on-selection-changed="$ctrl.viewSelectedEquipment(selectedObj,isZoom)">
 		</aro-search>
 	</div>
