@@ -36,11 +36,13 @@ function clearTransaction () {
       type: Actions.SELECTION_SET_PLAN_EDITOR_FEATURES,
       payload: []
     })
+    dispatch(setIsCommittingTransaction(false))
   }
 }
 
 function commitTransaction (transactionId) {
   return dispatch => {
+    dispatch(setIsCommittingTransaction(true))
     AroHttp.put(`/service/plan-transactions/${transactionId}`)
       .then(() => dispatch(clearTransaction()))
       .catch(err => {
@@ -52,6 +54,7 @@ function commitTransaction (transactionId) {
 
 function discardTransaction (transactionId) {
   return dispatch => {
+    dispatch(setIsCommittingTransaction(true))
     TransactionManager.discardTransaction(transactionId)
       .then(() => dispatch(clearTransaction()))
       .catch(err => {
@@ -222,6 +225,13 @@ function setIsEditingFeatureProperties (isEditingFeatureProperties) {
   }
 }
 
+function setIsCommittingTransaction (isCommittingTransaction) {
+  return {
+    type: Actions.PLAN_EDITOR_SET_IS_COMMITTING_TRANSACTION,
+    payload: isCommittingTransaction
+  }
+}
+
 export default {
   commitTransaction,
   clearTransaction,
@@ -240,5 +250,6 @@ export default {
   setIsCreatingObject,
   setIsModifyingObject,
   setIsDraggingFeatureForDrop,
-  setIsEditingFeatureProperties
+  setIsEditingFeatureProperties,
+  setIsCommittingTransaction
 }
