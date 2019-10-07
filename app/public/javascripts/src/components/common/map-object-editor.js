@@ -464,7 +464,7 @@ class MapObjectEditorController {
       options.push(new MenuAction(MenuActionTypes.SELECT, () => this.selectProposedFeature(feature.objectId)))
       options.push(new MenuAction(MenuActionTypes.DELETE, () => this.deleteObjectWithId(feature.objectId)))
     } else {
-      options.push(new MenuAction(MenuActionTypes.VIEW, () => this.viewExistingFeature(feature, latLng)))
+      options.push(new MenuAction(MenuActionTypes.VIEW, () => this.displayViewObject({ feature: feature })))
       // Note that feature.is_locked comes in as a string from the vector tiles
       if (feature.is_locked === 'false') {
         options.push(new MenuAction(MenuActionTypes.EDIT, () => this.editExistingFeature(feature, latLng, false)))

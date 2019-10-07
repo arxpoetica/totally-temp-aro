@@ -907,7 +907,7 @@ class PlanEditorController {
           if (result.data.hasOwnProperty('geometry')) {
             this.viewEventFeature = feature
             // use feature's coord NOT the event's coords
-            this.viewEventFeature.geometry.coordinates = result.data.geometry.coordinates
+            this.viewEventFeature.geometry = result.data.geometry
             const viewFeature = AroFeatureFactory.createObject(result.data)
             var viewConfig = this.state.configuration.networkEquipment.equipments[viewFeature.networkNodeType]
             this.viewLabel = viewConfig.label
