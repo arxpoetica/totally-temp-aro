@@ -211,7 +211,8 @@
     </boundary-properties-editor>
     <!-- Add a div that will overlay all the controls above. The div will be visible when the controls need to be disabled. -->
     <div class="disable-sibling-controls"
-          ng-show="!$ctrl.currentTransaction || $ctrl.isCalculatingSubnets || $ctrl.isCreatingObject || $ctrl.isModifyingObject">
+          ng-show="!$ctrl.currentTransaction || $ctrl.isCalculatingSubnets || $ctrl.isCreatingObject ||
+          $ctrl.isModifyingObject || $ctrl.isCommittingTransaction">
     </div>
   </div>
 </div>

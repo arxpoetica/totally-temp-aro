@@ -464,7 +464,7 @@ class MapObjectEditorController {
       options.push(new MenuAction(MenuActionTypes.SELECT, () => this.selectProposedFeature(feature.objectId)))
       options.push(new MenuAction(MenuActionTypes.DELETE, () => this.deleteObjectWithId(feature.objectId)))
     } else {
-      options.push(new MenuAction(MenuActionTypes.VIEW, () => this.viewExistingFeature(feature, latLng)))
+      options.push(new MenuAction(MenuActionTypes.VIEW, () => this.displayViewObject({ feature: feature })))
       // Note that feature.is_locked comes in as a string from the vector tiles
       if (feature.is_locked === 'false') {
         options.push(new MenuAction(MenuActionTypes.EDIT, () => this.editExistingFeature(feature, latLng, false)))
@@ -977,6 +977,8 @@ class MapObjectEditorController {
         iconKey = Constants.MAP_OBJECT_CREATE_KEY_EQUIPMENT_BOUNDARY
         if (clickedObject.is_locked === 'false') {
           this.displayEditObject({ feature: feature })
+        } else {
+          this.displayViewObject({ feature: feature })
         }
         this.selectMapObject(null)
         newSelection.editable.equipment = {}
@@ -985,6 +987,8 @@ class MapObjectEditorController {
       } else {
         if (clickedObject.is_locked === 'false') {
           this.displayEditObject({ feature: feature, isMult: isMult })
+        } else {
+          this.displayViewObject({ feature: feature, isMult: isMult })
         }
         return
       }

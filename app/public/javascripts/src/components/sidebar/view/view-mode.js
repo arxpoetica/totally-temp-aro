@@ -20,6 +20,17 @@ class ViewModeController {
 
   onSearchResult (selectedLocation) {
     this.setSelectedLocations([selectedLocation.id])
+    this.$http.get(`/service/odata/LocationObjectEntity?$select=id,geom&$filter=id eq ${selectedLocation.id}&$top=1`)
+      .then(result => {
+        const location = result.data[0]
+        this.state.requestSetMapCenter.next({
+          latitude: location.geom.coordinates[1],
+          longitude: location.geom.coordinates[0]
+        })
+        const ZOOM_FOR_LOCATION_SEARCH = 17
+        this.state.requestSetMapZoom.next(ZOOM_FOR_LOCATION_SEARCH)
+      })
+      .catch(err => console.error(err))
   }
 
   updateSelectedState (locationId) {
@@ -70,6 +81,7 @@ class ViewModeController {
     if (currentSelectedLocations !== nextState.selectedLocations) {
       const firstLocationId = nextState.selectedLocations.values().next().value
       this.updateSelectedState(firstLocationId)
+      this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO
     }
   }
 }

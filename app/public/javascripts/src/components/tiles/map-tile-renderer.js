@@ -477,7 +477,7 @@ class MapTileRenderer {
         var featureId = feature.properties.object_id || feature.properties.location_id
 
 				if (this.transactionFeatureIds.has(featureId)) {
-          continue // Do not render any features that are part of a transaction
+          // continue // Do not render any features that are part of a transaction
         }
 
         if (mapLayer.hasOwnProperty('subtypes')) {

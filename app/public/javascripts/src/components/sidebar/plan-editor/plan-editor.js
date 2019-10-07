@@ -786,13 +786,14 @@ class PlanEditorController {
     return mapObject && mapObject.icon
   }
 
-  updateSelectedState (selectedFeature, featureId) {
+  selectEquipment (selectedFeature, featureId) {
     // is this still used?
     // tell state
     var newSelection = this.state.cloneSelection()
     newSelection.editable.equipment = {}
-    if (typeof selectedFeature !== 'undefined' && typeof featureId !== 'undefined') {
-      newSelection.editable.equipment[ featureId ] = selectedFeature
+    if (selectedFeature && featureId) {
+      newSelection.details.siteBoundaryId = null
+      newSelection.editable.equipment[featureId] = selectedFeature
     }
     this.state.selection = newSelection
   }
@@ -864,7 +865,7 @@ class PlanEditorController {
     this.viewEventFeature = {}
     this.setIsEditingFeatureProperties(true)
     this.isBoundaryEditMode = false
-    this.updateSelectedState()
+    this.selectEquipment()
   }
 
   displayViewObject (feature, iconUrl) {
@@ -906,13 +907,14 @@ class PlanEditorController {
           if (result.data.hasOwnProperty('geometry')) {
             this.viewEventFeature = feature
             // use feature's coord NOT the event's coords
-            this.viewEventFeature.geometry.coordinates = result.data.geometry.coordinates
+            this.viewEventFeature.geometry = result.data.geometry
             const viewFeature = AroFeatureFactory.createObject(result.data)
             var viewConfig = this.state.configuration.networkEquipment.equipments[viewFeature.networkNodeType]
             this.viewLabel = viewConfig.label
             this.viewIconUrl = viewConfig.iconUrl
             this.setIsEditingFeatureProperties(false)
             this.getViewObjectSBTypes(feature.objectId)
+            this.selectEquipment(result.data, feature.objectId)
           } else {
             // clear selection
             this.clearViewSelection()
@@ -1191,7 +1193,7 @@ class PlanEditorController {
     var lng = mapObject && mapObject.position && mapObject.position.lng()
     if (!isMultSelect) {
       if (mapObject != null) {
-        this.updateSelectedState()
+        this.selectEquipment()
         this.setIsEditingFeatureProperties(true)
         this.isBoundaryEditMode = true
         this.selectedObjectId = mapObjectId
@@ -1695,6 +1697,7 @@ class PlanEditorController {
       isCreatingObject: reduxState.planEditor.isCreatingObject,
       isModifyingObject: reduxState.planEditor.isModifyingObject,
       isEditingFeatureProperties: reduxState.planEditor.isEditingFeatureProperties,
+      isCommittingTransaction: reduxState.planEditor.isCommittingTransaction,
       userId: reduxState.user.loggedInUser.id,
       conduitMapLayers: reduxState.mapLayers.networkEquipment.conduits,
       roadMapLayers: reduxState.mapLayers.networkEquipment.roads

@@ -133,7 +133,8 @@ export class LocationInfo extends Component {
 
 LocationInfo.propTypes = {
   planId: PropTypes.number,
-  selectedLocations: PropTypes.object
+  selectedLocations: PropTypes.object,
+  locationInfoDetails: PropTypes.object
 }
 
 const mapStateToProps = state => ({

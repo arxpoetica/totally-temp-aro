@@ -16,7 +16,8 @@ export class PlanEditor extends Component {
           {/* A button to commit the transaction */}
           <button
             className='btn btn-light'
-            onClick={() => this.props.commitTransaction(this.props.transactionId)}
+            onClick={() => this.checkAndCommitTransaction()}
+            disabled={this.props.isCommittingTransaction}
           >
             <i className='fa fa-check-circle' />&nbsp;&nbsp;Commit
           </button>
@@ -41,6 +42,13 @@ export class PlanEditor extends Component {
   componentWillMount () {
     this.props.resumeOrCreateTransaction(this.props.planId, this.props.userId)
   }
+
+  checkAndCommitTransaction () {
+    if (this.props.isCommittingTransaction) {
+      return
+    }
+    this.props.commitTransaction(this.props.transactionId)
+  }
 }
 
 PlanEditor.propTypes = {
@@ -55,6 +63,7 @@ const mapStateToProps = state => {
     planId: state.plan.activePlan.id,
     userId: state.user.loggedInUser.id,
     transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
+    isCommittingTransaction: state.planEditor.isCommittingTransaction,
     isDrawingBoundaryFor: state.planEditor.isDrawingBoundaryFor
   }
 }
