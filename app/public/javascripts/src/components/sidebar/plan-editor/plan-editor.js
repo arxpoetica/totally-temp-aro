@@ -1103,6 +1103,8 @@ class PlanEditorController {
         const equipmentNode = AroFeatureFactory.createObject({ dataType: 'equipment' })
         // --- new be sure to set subnet ---
         equipmentNode.objectId = mapObject.objectId
+        equipmentNode.geometry = JSON.parse(JSON.stringify(mapObject.feature.geometry))
+        equipmentNode.networkNodeType = mapObject.feature.networkNodeType
         this.addEquipmentNodes([{ feature: equipmentNode }])
         var blankNetworkNodeEquipment = equipmentNode.networkNodeEquipment
         this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties('', '', feature.networkNodeType, this.lastSelectedEquipmentType, blankNetworkNodeEquipment, 'PLANNED', 'sewer')
