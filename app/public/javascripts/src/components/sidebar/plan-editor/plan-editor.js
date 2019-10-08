@@ -381,7 +381,7 @@ class PlanEditorController {
           .filter((item) => item.crudAction !== 'delete')
           .map((item) => item.feature)
         this.createMapObjects && this.createMapObjects(features)
-        return this.rebuildAllTransactionSubnets()
+        return this.state.configuration.planEditor.calculateSubnets ? this.rebuildAllTransactionSubnets() : Promise.resolve()
       })
       .catch((err) => {
       // Log the error, then get out of "plan edit" mode.
