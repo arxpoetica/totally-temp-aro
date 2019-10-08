@@ -4,15 +4,26 @@ import wrapComponentWithProvider from '../../../common/provider-wrapped-componen
 // import { PropTypes } from 'prop-types'
 import aclActions from '../acl-actions.js'
 // import { DropdownList } from 'react-widgets'
+import SearchableSelect from '../../common/searchable-select.jsx'
 
 export class PermissionsTable extends Component {
+  /*
   constructor (props) {
     super(props)
-
-    this.newActorId = null
   }
-
+  */
   render () {
+    var userLists = {}
+    Object.values(this.props.systemActors).forEach(systemActor => {
+      var actorClone = { ...systemActor }
+      if (!userLists.hasOwnProperty(actorClone.type)) userLists[actorClone.type] = []
+      if (!actorClone.hasOwnProperty('name')) {
+        actorClone.name = actorClone.id // default
+        if (actorClone.hasOwnProperty('firstName') && actorClone.hasOwnProperty('lastName')) actorClone.name = `${actorClone.firstName} ${actorClone.lastName}`
+      }
+      userLists[actorClone.type].push(actorClone)
+    })
+
     return (
       <Fragment>
         <table className='table table-sm ei-table-striped' style={{ 'borderBottom': '1px solid #dee2e6' }}>
@@ -42,7 +53,7 @@ export class PermissionsTable extends Component {
           </tbody>
         </table>
         <div>
-          add user
+          <SearchableSelect optionLists={userLists} resultsMax={10} />
         </div>
       </Fragment>
     )
