@@ -15,10 +15,7 @@ const getEquipment = createSelector([getAllPlanFeatures, getSelectedPlanFeatures
   const planFeature = allPlanFeatures[selectedPlanFeatures[0]]
   if (planFeature && planFeature.feature.dataType === 'equipment') {
     var returnFeature = AroFeatureFactory.createObject(planFeature.feature)
-    // We are going to create a new geometry object, otherwise the two way data-binding on lat/longs creates very odd behavior.
-    // From https://www.pivotaltracker.com/story/show/169002467 - If I add a new equipment, if I change the site name etc. and
-    // then click commit, it doesn't show up.  But if i just add it without any attributes, then click commit,
-    // then go back into edit and add teh attributes, then commit, it shows up fine and records the attributes
+    // We are going to create a new geometry object, we do not want to inadvertently mutate the redux state.
     returnFeature.geometry = JSON.parse(JSON.stringify(planFeature.feature.geometry))
     return returnFeature
   } else {

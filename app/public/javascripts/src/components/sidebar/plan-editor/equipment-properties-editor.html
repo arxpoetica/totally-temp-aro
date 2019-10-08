@@ -31,7 +31,7 @@
         <pre ng-if="!$ctrl.isEditingFeatureProperties" style="display: inline;">{{$ctrl.viewFeature.geometry.coordinates[1] | number : 6}}</pre>
 
         <input ng-if="$ctrl.isEditingFeatureProperties" type="number" class="form-control form-control-sm"
-          ng-model="$ctrl.viewFeature.geometry.coordinates[1]" ng-model-options="{ debounce: 100 }" step="0.000001"
+          ng-model="$ctrl.viewFeature.geometry.coordinates[1]" ng-model-options="{ allowInvalid: true, debounce: 100 }" step="0.000001"
           ng-change="$ctrl.markAsDirty()" style="width: 95px;">
       </div>
       <div class='flex-grow-0 flex-shrink-0' style="width: 10px;"></div>
@@ -42,7 +42,7 @@
         <pre ng-if="!$ctrl.isEditingFeatureProperties" style="display: inline;">{{$ctrl.viewFeature.geometry.coordinates[0] | number : 6}}</pre>
 
         <input ng-if="$ctrl.isEditingFeatureProperties" type="number" class="form-control form-control-sm"
-          ng-model="$ctrl.viewFeature.geometry.coordinates[0]" ng-model-options="{ debounce: 100 }" step="0.000001"
+          ng-model="$ctrl.viewFeature.geometry.coordinates[0]" ng-model-options="{ allowInvalid: true, debounce: 100 }" step="0.000001"
           ng-change="$ctrl.markAsDirty()" style="width: 95px;">
       </div>
       <div class='flex-grow-1 flex-shrink-1'></div>

@@ -1694,6 +1694,7 @@ class PlanEditorController {
       planId: reduxState.plan.activePlan.id,
       currentTransaction: reduxState.planEditor.transaction,
       transactionFeatures: reduxState.planEditor.features,
+      selectedFeatures: reduxState.selection.planEditorFeatures,
       isPlanEditorActive: reduxState.planEditor.isPlanEditorActive,
       isCalculatingSubnets: reduxState.planEditor.isCalculatingSubnets,
       isCreatingObject: reduxState.planEditor.isCreatingObject,
