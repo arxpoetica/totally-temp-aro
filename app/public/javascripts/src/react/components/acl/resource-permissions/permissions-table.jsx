@@ -53,7 +53,7 @@ export class PermissionsTable extends Component {
           </tbody>
         </table>
         <div>
-          <SearchableSelect optionLists={userLists} resultsMax={10} onButton={item => { console.log(item) }} btnLabel='Add' />
+          <SearchableSelect optionLists={userLists} resultsMax={10} onButton={item => { this.addAuthItem(item.id) }} btnLabel='Add' />
         </div>
       </Fragment>
     )
@@ -90,6 +90,7 @@ export class PermissionsTable extends Component {
       </td>
       <td className='ei-table-cell ei-table-button-cell'>
         <button className='btn btn-sm btn-outline-danger'
+          type='button'
           onClick={event => { this.deleteAuthItem(event, dataItem.systemActorId) }}
           data-toggle='tooltip' data-placement='bottom' title='Delete'
           disabled={(this.props.isOwner ? null : 'disabled')}>
@@ -98,52 +99,21 @@ export class PermissionsTable extends Component {
       </td>
     </tr>
   }
-  /*
-  renderUserDropdown () {
-    var jsx = null
-    if (this.props.isOwner) {
-      jsx = (
-        <div className="input-group">
-          <div className="ei-input-label">
-            Add User:
-          </div>
-        <ui-select limit="1" ng-model="$ctrl.newActorId"
-              theme="bootstrap" close-on-select="true"
-              on-select="$ctrl.onSelectionChanged()"
-              on-remove="$ctrl.onSelectionChanged()">
-              <ui-select-match placeholder="User Search" allow-clear="true">
-                <span>{{$select.selected.name}}</span>
-              </ui-select-match>
-              <ui-select-choices repeat="person.id as person in $ctrl.systemActorsArray | filter: { name: $select.search } | filter: $ctrl.filterNewActorList| orderBy:'name' "
-                group-by="'type'">
-                <i ng-if="person.type === 'user'" className="fa fas fa-user"></i>
-                <i ng-if="person.type === 'group'" className="fa fas fa-users"></i>
-                &nbsp;<span ng-bind-html="person.name | highlight: $select.search"></span>
-              </ui-select-choices>
-            </ui-select>
-          <div className="input-group-append">
-            <button type="button" className="btn btn-sm btn-primary"
-                    ng-click="$ctrl.addActor($event)"
-                    ng-disabled="!$ctrl.newActorId">
-              <i className="fa fa-plus"></i> Add
-            </button>
-          </div>
-        </div>
-      )
-    }
-    return jsx
-  }
-*/
+
   // --- //
 
   onSelectRoll (event, systemActorId) {
-    console.log([event.target.value, systemActorId])
     var permissionsBit = parseInt(event.target.value)
     this.props.setUserAcl(this.props.resource.identifier, systemActorId, permissionsBit)
   }
 
   deleteAuthItem (event, systemActorId) {
     this.props.deleteUserAcl(this.props.resource.identifier, systemActorId)
+  }
+
+  addAuthItem (systemActorId) {
+    var permissionsBit = this.props.authRoles['RESOURCE_VIEWER'].permissions
+    this.props.setUserAcl(this.props.resource.identifier, systemActorId, permissionsBit)
   }
 
   componentWillMount () {
@@ -177,6 +147,7 @@ const mapStateToProps = (state, ownProps) => {
   return {
     acl: acl,
     systemActors: state.user.systemActors,
+    authRoles: state.user.authRoles,
     filteredAuthRoles: filteredAuthRoles
   }
 }

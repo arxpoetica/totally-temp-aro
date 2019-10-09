@@ -134,3 +134,5 @@ docker/docker-compose.yml
 /.gitignore
 
 .vscode
+app/e10a3e3428ad30a25cb162cce65e73af
+.gitignore

@@ -27,9 +27,9 @@ export class SearchableSelect extends Component {
           data-toggle='dropdown' aria-haspopup='true' aria-expanded='false' />
         {this.props.onButton
           ? (
-            <button className='btn btn-primary'
+            <button className={'btn ' + (this.state.selectedItem ? 'btn-primary' : 'btn-secondary')}
               onClick={(event) => { this.props.onButton(this.state.selectedItem, event) }}
-              type='button' id='dropdownMenu'
+              type='button' id='dropdownMenuBtn'
               disabled={(this.state.selectedItem ? null : 'disabled')}>
               {this.props.btnLabel}
             </button>
@@ -64,6 +64,7 @@ export class SearchableSelect extends Component {
   }
 
   onSearchInput (event) {
+    // ToDo: only trigger this after typing has stopped for say 200ms
     var searchTerm = event.target.value
     var searchResults = this.filterLists(event.target.value)
     var resultsArrays = Object.values(searchResults)

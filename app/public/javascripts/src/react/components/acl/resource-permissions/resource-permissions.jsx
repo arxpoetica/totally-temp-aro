@@ -106,6 +106,7 @@ export class ResourcePermissions extends Component {
         </td>
         <td className='ei-table-cell ei-table-button-cell'>
           <button className='btn btn-sm btn-outline-danger'
+            type='button'
             onClick={event => { this.onDeleteRequest(libItem) }}
             data-toggle='tooltip' data-placement='bottom' title='Delete'
             disabled={(isOwner ? null : 'disabled')}>
