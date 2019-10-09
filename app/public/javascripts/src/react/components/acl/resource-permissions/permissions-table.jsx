@@ -53,7 +53,7 @@ export class PermissionsTable extends Component {
           </tbody>
         </table>
         <div>
-          <SearchableSelect optionLists={userLists} resultsMax={10} />
+          <SearchableSelect optionLists={userLists} resultsMax={10} onButton={item => { console.log(item) }} btnLabel='Add' />
         </div>
       </Fragment>
     )

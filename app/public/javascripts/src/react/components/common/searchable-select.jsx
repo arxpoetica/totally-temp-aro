@@ -11,8 +11,7 @@ export class SearchableSelect extends Component {
     this.state = {
       searchResults: {}, // group of named arrays
       searchTerm: '',
-      newUserId: null,
-      newUserName: ''
+      selectedItem: null
     }
   }
 
@@ -26,9 +25,17 @@ export class SearchableSelect extends Component {
           value={this.state.searchTerm}
           id='dropdownMenu'
           data-toggle='dropdown' aria-haspopup='true' aria-expanded='false' />
-        <button className='btn btn-secondary dropdown-toggle' type='button' id='dropdownMenu' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>
-          {this.state.newUserName}
-        </button>
+        {this.props.onButton
+          ? (
+            <button className='btn btn-primary'
+              onClick={(event) => { this.props.onButton(this.state.selectedItem, event) }}
+              type='button' id='dropdownMenu'
+              disabled={(this.state.selectedItem ? null : 'disabled')}>
+              {this.props.btnLabel}
+            </button>
+          )
+          : null
+        }
         {this.renderOptions()}
       </div>
     )
@@ -59,7 +66,11 @@ export class SearchableSelect extends Component {
   onSearchInput (event) {
     var searchTerm = event.target.value
     var searchResults = this.filterLists(event.target.value)
+    var resultsArrays = Object.values(searchResults)
+    var selectedItem = null
+    if (resultsArrays[0] && resultsArrays[0].length === 1 && resultsArrays[0][0].name === searchTerm) selectedItem = { ...resultsArrays[0][0] }
     this.setState({ ...this.state,
+      selectedItem: selectedItem,
       searchResults: searchResults,
       searchTerm: searchTerm
     })
@@ -80,8 +91,7 @@ export class SearchableSelect extends Component {
   onSelectChange (event, item) {
     var searchResults = this.filterLists(item.name)
     this.setState({ ...this.state,
-      newUserId: item.id,
-      newUserName: item.name,
+      selectedItem: item,
       searchResults: searchResults,
       searchTerm: item.name
     })
@@ -102,6 +112,11 @@ export class SearchableSelect extends Component {
     this.searchPool = searchResults
     this.setState({ ...this.state, searchResults: searchResults })
   }
+}
+
+SearchableSelect.defaultProps = {
+  resultsMax: 10,
+  btnLabel: 'Select'
 }
 
 export default SearchableSelect
