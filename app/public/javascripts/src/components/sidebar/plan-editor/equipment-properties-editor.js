@@ -14,7 +14,10 @@ const getEquipment = createSelector([getAllPlanFeatures, getSelectedPlanFeatures
   }
   const planFeature = allPlanFeatures[selectedPlanFeatures[0]]
   if (planFeature && planFeature.feature.dataType === 'equipment') {
-    return AroFeatureFactory.createObject(planFeature.feature)
+    var returnFeature = AroFeatureFactory.createObject(planFeature.feature)
+    // We are going to create a new geometry object, we do not want to inadvertently mutate the redux state.
+    returnFeature.geometry = JSON.parse(JSON.stringify(planFeature.feature.geometry))
+    return returnFeature
   } else {
     return null
   }
@@ -39,6 +42,7 @@ class EquipmentPropertiesEditorController {
   saveEquipmentProperties () {
     // Our equipment object is a copy of the one in the redux store.
     this.modifyEquipment(this.transactionId, { feature: this.viewFeature })
+    this.updateMapObjectPosition && this.updateMapObjectPosition({ objectId: this.viewFeature.objectId, lat: this.viewFeature.geometry.coordinates[1], lng: this.viewFeature.geometry.coordinates[0] })
     this.isDirty = false
   }
 
@@ -86,7 +90,8 @@ EquipmentPropertiesEditorController.$inject = ['state', '$ngRedux']
 let equipmentPropertiesEditor = {
   templateUrl: '/components/sidebar/plan-editor/equipment-properties-editor.html',
   bindings: {
-    requestEditViewObject: '&'
+    requestEditViewObject: '&',
+    updateMapObjectPosition: '&'
   },
   controller: EquipmentPropertiesEditorController
 }

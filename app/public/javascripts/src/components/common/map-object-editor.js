@@ -171,6 +171,7 @@ class MapObjectEditorController {
     this.registerMapObjectFromEvent && this.registerMapObjectFromEvent({ mapObjectFromEvent: this.handleMapEntitySelected.bind(this) })
     this.registerHighlightMapObject && this.registerHighlightMapObject({ highlightMapObject: this.highlightMapObject.bind(this) })
     this.registerDehighlightMapObject && this.registerDehighlightMapObject({ dehighlightMapObject: this.dehighlightMapObject.bind(this) })
+    this.registerUpdateMapObjectPosition && this.registerUpdateMapObjectPosition({ updateMapObjectPosition: this.updateMapObjectPosition.bind(this) })
 
     this.state.clearEditingMode.skip(1).subscribe((clear) => {
       if (clear) {
@@ -1060,7 +1061,9 @@ class MapObjectEditorController {
     // Then select the map object
     if (mapObject) { // Can be null if we are de-selecting everything
       this.highlightMapObject(mapObject)
-      this.selectObjectRedux(mapObject.objectId)
+      this.selectObjectRedux([mapObject.objectId])
+    } else {
+      this.selectObjectRedux([])
     }
 
     if (!isMult) this.selectedMapObject = mapObject
@@ -1090,6 +1093,13 @@ class MapObjectEditorController {
     } else {
       mapObject.setOptions(this.polygonOptions)
       mapObject.setEditable(false)
+    }
+  }
+
+  updateMapObjectPosition (objectId, lat, lng) {
+    const mapObject = this.createdMapObjects[objectId]
+    if (mapObject) {
+      mapObject.setPosition(new google.maps.LatLng(lat, lng))
     }
   }
 
@@ -1324,7 +1334,7 @@ class MapObjectEditorController {
 
   mapDispatchToTarget (dispatch) {
     return {
-      selectObjectRedux: objectId => dispatch(SelectionActions.setPlanEditorFeatures([objectId]))
+      selectObjectRedux: objectIds => dispatch(SelectionActions.setPlanEditorFeatures(objectIds))
     }
   }
 }
@@ -1364,7 +1374,8 @@ let mapObjectEditor = {
     registerSelectProposedFeature: '&',
     registerMapObjectFromEvent: '&',
     registerHighlightMapObject: '&',
-    registerDehighlightMapObject: '&'
+    registerDehighlightMapObject: '&',
+    registerUpdateMapObjectPosition: '&'
   },
   controller: MapObjectEditorController
 }
