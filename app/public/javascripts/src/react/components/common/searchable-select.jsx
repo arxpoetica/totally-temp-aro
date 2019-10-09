@@ -6,9 +6,11 @@ export class SearchableSelect extends Component {
 
     // props.optionLists - can be array of options OR group of named arrays of options
     // props.resultsMax - integer, max length of dropdown results
+    this.dropdownRef = React.createRef()
     this.searchPool = {}
     this.state = {
       searchResults: {}, // group of named arrays
+      searchTerm: '',
       newUserId: null,
       newUserName: ''
     }
@@ -18,23 +20,23 @@ export class SearchableSelect extends Component {
     return (
       <div className='btn-group'>
         <input type='text'
-          onInput={event => this.onSearchInput(event)}
+          onChange={event => this.onSearchInput(event)}
           placeholder='Search Users'
           className='form-control'
+          value={this.state.searchTerm}
           id='dropdownMenu'
           data-toggle='dropdown' aria-haspopup='true' aria-expanded='false' />
         <button className='btn btn-secondary dropdown-toggle' type='button' id='dropdownMenu' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>
           {this.state.newUserName}
         </button>
-        <div className='dropdown-menu' aria-labelledby='dropdownMenu'>
-          {this.renderOptions()}
-        </div>
+        {this.renderOptions()}
       </div>
     )
   }
 
   renderOptions () {
     var jsx = []
+    var itemCount = 0
     Object.keys(this.state.searchResults).forEach((key) => {
       if (key) {
         jsx.push(<h6 key={`search-select-header-${key}`} className='dropdown-header'>-- {key} --</h6>)
@@ -42,27 +44,46 @@ export class SearchableSelect extends Component {
       }
 
       this.state.searchResults[key].forEach(item => {
+        itemCount++
         jsx.push(<button onClick={(event) => this.onSelectChange(event, item)} key={`search-select-option-${key}-${item.id}`} className='dropdown-item' type='button'>{item.name}</button>)
       })
     })
 
-    return jsx
+    return (
+      <div id='dropdownItem' ref={this.dropdownRef} className='dropdown-menu' aria-labelledby='dropdownMenu' data-num-items={itemCount}>
+        {jsx}
+      </div>
+    )
   }
 
   onSearchInput (event) {
     var searchTerm = event.target.value
+    var searchResults = this.filterLists(event.target.value)
+    this.setState({ ...this.state,
+      searchResults: searchResults,
+      searchTerm: searchTerm
+    })
+    // React.findDOMNode(this.dropdownRef).dropdown('update')
+    // $('#dropdownItem').dropdown('update')
+    // ToDo: need to run .dropdown('update') on dropdown to refigure the offset after changing the number list items
+  }
+
+  filterLists (searchTerm) {
     var searchResults = {}
     Object.keys(this.searchPool).forEach((key) => {
       searchResults[key] = this.searchPool[key].filter(item => { return this.filterItem(item, searchTerm) })
       if (searchResults[key].length === 0) delete searchResults[key]
     })
-    this.setState({ ...this.state, 'searchResults': searchResults })
+    return searchResults
   }
 
   onSelectChange (event, item) {
+    var searchResults = this.filterLists(item.name)
     this.setState({ ...this.state,
       newUserId: item.id,
-      newUserName: item.name
+      newUserName: item.name,
+      searchResults: searchResults,
+      searchTerm: item.name
     })
   }
 
@@ -79,7 +100,7 @@ export class SearchableSelect extends Component {
       searchResults = this.props.optionLists
     }
     this.searchPool = searchResults
-    this.setState({ ...this.state, 'searchResults': searchResults })
+    this.setState({ ...this.state, searchResults: searchResults })
   }
 }
 
