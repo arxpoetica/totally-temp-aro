@@ -171,6 +171,7 @@ class MapObjectEditorController {
     this.registerMapObjectFromEvent && this.registerMapObjectFromEvent({ mapObjectFromEvent: this.handleMapEntitySelected.bind(this) })
     this.registerHighlightMapObject && this.registerHighlightMapObject({ highlightMapObject: this.highlightMapObject.bind(this) })
     this.registerDehighlightMapObject && this.registerDehighlightMapObject({ dehighlightMapObject: this.dehighlightMapObject.bind(this) })
+    this.registerUpdateMapObjectPosition && this.registerUpdateMapObjectPosition({ updateMapObjectPosition: this.updateMapObjectPosition.bind(this) })
 
     this.state.clearEditingMode.skip(1).subscribe((clear) => {
       if (clear) {
@@ -1095,6 +1096,13 @@ class MapObjectEditorController {
     }
   }
 
+  updateMapObjectPosition (objectId, lat, lng) {
+    const mapObject = this.createdMapObjects[objectId]
+    if (mapObject) {
+      mapObject.setPosition(new google.maps.LatLng(lat, lng))
+    }
+  }
+
   removeCreatedMapObjects () {
     // Remove created objects from map
     this.selectMapObject(null)
@@ -1366,7 +1374,8 @@ let mapObjectEditor = {
     registerSelectProposedFeature: '&',
     registerMapObjectFromEvent: '&',
     registerHighlightMapObject: '&',
-    registerDehighlightMapObject: '&'
+    registerDehighlightMapObject: '&',
+    registerUpdateMapObjectPosition: '&'
   },
   controller: MapObjectEditorController
 }

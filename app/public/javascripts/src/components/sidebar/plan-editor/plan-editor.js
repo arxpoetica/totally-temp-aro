@@ -118,6 +118,10 @@ class PlanEditorController {
     this.dehighlightMapObject = dehighlightMapObject
   }
 
+  registerUpdateMapObjectPosition (updateMapObjectPosition) {
+    this.updateMapObjectPosition = updateMapObjectPosition
+  }
+
   $onInit () {
     // We should have a map variable at this point
     if (!window[this.mapGlobalObjectName]) {

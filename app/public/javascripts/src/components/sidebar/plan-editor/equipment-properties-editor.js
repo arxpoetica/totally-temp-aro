@@ -42,6 +42,7 @@ class EquipmentPropertiesEditorController {
   saveEquipmentProperties () {
     // Our equipment object is a copy of the one in the redux store.
     this.modifyEquipment(this.transactionId, { feature: this.viewFeature })
+    this.updateMapObjectPosition && this.updateMapObjectPosition({ objectId: this.viewFeature.objectId, lat: this.viewFeature.geometry.coordinates[1], lng: this.viewFeature.geometry.coordinates[0] })
     this.isDirty = false
   }
 
@@ -89,7 +90,8 @@ EquipmentPropertiesEditorController.$inject = ['state', '$ngRedux']
 let equipmentPropertiesEditor = {
   templateUrl: '/components/sidebar/plan-editor/equipment-properties-editor.html',
   bindings: {
-    requestEditViewObject: '&'
+    requestEditViewObject: '&',
+    updateMapObjectPosition: '&'
   },
   controller: EquipmentPropertiesEditorController
 }

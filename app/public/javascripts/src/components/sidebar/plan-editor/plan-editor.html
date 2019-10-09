@@ -44,7 +44,8 @@
                     register-select-proposed-feature="$ctrl.registerSelectProposedFeature(selectProposedFeature)"
                     register-map-object-from-event="$ctrl.registerMapObjectFromEvent(mapObjectFromEvent)"
                     register-highlight-map-object="$ctrl.registerHighlightMapObject(highlightMapObject)"
-                    register-dehighlight-map-object="$ctrl.registerDehighlightMapObject(dehighlightMapObject)">
+                    register-dehighlight-map-object="$ctrl.registerDehighlightMapObject(dehighlightMapObject)"
+                    register-update-map-object-position="$ctrl.registerUpdateMapObjectPosition(updateMapObjectPosition)">
   </map-object-editor>
   <div style="margin: 10px;">
 
@@ -194,7 +195,8 @@
     <!-- Section to show properties when the selected map object is an equipment node -->
     <equipment-properties-editor
       ng-if="!$ctrl.isMultSelectActive() && ($ctrl.selectedFeatures.length === 1) && ($ctrl.transactionFeatures[$ctrl.selectedFeatures[0]])"
-      request-edit-view-object='$ctrl.editViewObject()'>
+      request-edit-view-object='$ctrl.editViewObject()'
+      update-map-object-position="$ctrl.updateMapObjectPosition(objectId, lat, lng)">
     </equipment-properties-editor>
 
 
