@@ -39,7 +39,7 @@ function putAcl (resourceType, resourceId, acl) {
       }).catch(err => console.error(err))
   }
 }
-
+// make add user fn that ensures user is not already in list then calls setUser
 function setUserAcl (resourceType, resourceId, userId, permissionsBit) {
   return (dispatch, getState) => {
     const state = getState()

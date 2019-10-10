@@ -14,15 +14,22 @@ export class PermissionsTable extends Component {
   */
   render () {
     var userLists = {}
-    Object.values(this.props.systemActors).forEach(systemActor => {
-      var actorClone = { ...systemActor }
-      if (!userLists.hasOwnProperty(actorClone.type)) userLists[actorClone.type] = []
-      if (!actorClone.hasOwnProperty('name')) {
-        actorClone.name = actorClone.id // default
-        if (actorClone.hasOwnProperty('firstName') && actorClone.hasOwnProperty('lastName')) actorClone.name = `${actorClone.firstName} ${actorClone.lastName}`
-      }
-      userLists[actorClone.type].push(actorClone)
-    })
+    if (this.props.isOwner) {
+      Object.values(this.props.systemActors).forEach(systemActor => {
+        // filter out users already in the list
+        var index = this.props.acl.findIndex(element => element.systemActorId === systemActor.id)
+        if (index === -1) {
+          var actorClone = { ...systemActor }
+
+          if (!userLists.hasOwnProperty(actorClone.type)) userLists[actorClone.type] = []
+          if (!actorClone.hasOwnProperty('name')) {
+            actorClone.name = actorClone.id // default
+            if (actorClone.hasOwnProperty('firstName') && actorClone.hasOwnProperty('lastName')) actorClone.name = `${actorClone.firstName} ${actorClone.lastName}`
+          }
+          userLists[actorClone.type].push(actorClone)
+        }
+      })
+    }
 
     return (
       <Fragment>
@@ -53,7 +60,10 @@ export class PermissionsTable extends Component {
           </tbody>
         </table>
         <div>
-          <SearchableSelect optionLists={userLists} resultsMax={10} onButton={item => { this.addAuthItem(item.id) }} btnLabel='Add' />
+          {this.props.isOwner
+            ? <SearchableSelect optionLists={{ ...userLists }} resultsMax={10} onButton={item => { this.addAuthItem(item.id) }} btnLabel='Add' />
+            : null
+          }
         </div>
       </Fragment>
     )
