@@ -195,7 +195,6 @@
     <!-- Section to show properties when the selected map object is an equipment node -->
     <equipment-properties-editor
       ng-if="!$ctrl.isMultSelectActive() && ($ctrl.selectedFeatures.length === 1) && ($ctrl.transactionFeatures[$ctrl.selectedFeatures[0]])"
-      request-edit-view-object='$ctrl.editViewObject()'
       update-map-object-position="$ctrl.updateMapObjectPosition(objectId, lat, lng)">
     </equipment-properties-editor>
 
@@ -208,7 +207,6 @@
 
     <boundary-properties-editor
       ng-if="!$ctrl.isMultSelectActive()"
-      request-edit-view-object='$ctrl.editViewSiteBoundaryObject()'
       request-calculate-coverage="$ctrl.onRequestCalculateCoverage()">
     </boundary-properties-editor>
     <!-- Add a div that will overlay all the controls above. The div will be visible when the controls need to be disabled. -->

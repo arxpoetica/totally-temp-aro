@@ -90,7 +90,6 @@ EquipmentPropertiesEditorController.$inject = ['state', '$ngRedux']
 let equipmentPropertiesEditor = {
   templateUrl: '/components/sidebar/plan-editor/equipment-properties-editor.html',
   bindings: {
-    requestEditViewObject: '&',
     updateMapObjectPosition: '&'
   },
   controller: EquipmentPropertiesEditorController
