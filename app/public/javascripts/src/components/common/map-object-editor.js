@@ -205,7 +205,7 @@ class MapObjectEditorController {
     var boundsByNetworkNodeObjectId = {}
     menuItems.forEach((menuItem) => {
       var feature = menuItem.feature
-      if (feature && feature.hasOwnProperty('network_node_object_id')) {
+      if (feature && feature.network_node_object_id) {
         bounds.push(feature)
         boundsByNetworkNodeObjectId[feature.network_node_object_id] = menuItem
       }
@@ -294,11 +294,11 @@ class MapObjectEditorController {
           // This should be replaced by something that loops over all created map objects and picks those that are under the cursor.
           var mapObjectIndex = -1
           if (clickedMapObject) {
-            var clickedFeature = {
-              _data_type: this.isMarker(clickedMapObject) ? `equipment.${clickedMapObject.feature.networkNodeType}` : 'equipment_boundary.undefined',
-              object_id: clickedMapObject.objectId,
-              is_deleted: false
-            }
+            var clickedFeature = { ...clickedMapObject.feature }
+            clickedFeature._data_type = clickedFeature.dataType
+            clickedFeature.object_id = clickedFeature.objectId
+            clickedFeature.network_node_object_id = clickedFeature.networkObjectId
+            clickedFeature.is_deleted = false
             results.push(clickedFeature)
             mapObjectIndex = results.length - 1
           }
