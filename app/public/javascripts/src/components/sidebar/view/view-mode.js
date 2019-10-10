@@ -77,8 +77,8 @@ class ViewModeController {
     // merge state and actions onto controller
     Object.assign(this, nextState)
     Object.assign(this, actions)
-
-    if (currentSelectedLocations !== nextState.selectedLocations) {
+    if ((currentSelectedLocations !== nextState.selectedLocations) &&
+      (this.state.activeViewModePanel !== this.state.viewModePanels.EDIT_LOCATIONS)) {
       const firstLocationId = nextState.selectedLocations.values().next().value
       this.updateSelectedState(firstLocationId)
       if (firstLocationId) {
