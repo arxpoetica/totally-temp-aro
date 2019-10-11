@@ -69,7 +69,7 @@ workflows:
               only: 
                 - master
                 - optional_building
-                - devJuly2019
+                - resource_permission_react
 
       - deploy:
           context: aro_qa_builds
