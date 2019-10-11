@@ -16,8 +16,7 @@
 
 <div>
   <!-- Add a component to handle map editing -->
-  <map-object-editor ng-if="$ctrl.currentTransaction"
-                    map-global-object-name="{{$ctrl.mapGlobalObjectName}}"
+  <map-object-editor map-global-object-name="{{$ctrl.mapGlobalObjectName}}"
                     map-container-id="map-canvas-container"
                     get-object-icon-url="$ctrl.getObjectIconUrl({objectKey, objectValue})"
                     object-selected-icon-url="$ctrl.getObjectIconUrl({objectKey, objectValue})"
