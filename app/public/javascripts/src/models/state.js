@@ -1137,8 +1137,10 @@ class State {
 
             // Get the optimization options that we will pass to the server
             var optimizationBody = service.getOptimizationBody()
-            optimizationBody.fusionRuleConfig = {
-              connectivityDefinition: service.networkAnalysisConnectivityDefinition
+            optimizationBody.networkConfigurationOverride = {
+              fusionRuleConfig: {
+                connectivityDefinition: service.networkAnalysisConnectivityDefinition
+              }
             }
             // Make the API call that starts optimization calculations on aro-service
             var apiUrl = (service.networkAnalysisType.type === 'NETWORK_ANALYSIS') ? '/service/v1/analyze/masterplan' : '/service/v1/optimize/masterplan'
