@@ -1,7 +1,6 @@
 import Actions from '../../common/actions'
+import ConnectivityDefinition from '../common/optimization-options/connectivity-definition'
 import RingStatusTypes from './constants'
-import SpatialEdgeType from './spatial-edge-type'
-import NetworkConnectivityType from './network-connectivity-type'
 
 const defaultState = {
   rings: {},
@@ -40,11 +39,7 @@ const defaultState = {
       displayName: 'Ring complexity',
       value: 3000000
     },
-    connectivityDefinition: {
-      [SpatialEdgeType.road.id]: NetworkConnectivityType.snapToEdge.id,
-      [SpatialEdgeType.sewer.id]: NetworkConnectivityType.snapToWormhole.id,
-      [SpatialEdgeType.duct.id]: NetworkConnectivityType.none.id
-    }
+    connectivityDefinition: ConnectivityDefinition()
   }
 }
 
