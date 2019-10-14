@@ -11,13 +11,6 @@ import Ring from '../../common/ring'
 import RingOptionsBasic from './ring-options-basic.jsx'
 import RingOptionsConnectivityDefinition from './ring-options-connectivity-definition.jsx'
 
-const getAllRingOptions = state => state.ringEdit.options
-const getRingOptionsBasic = createSelector([getAllRingOptions], allRingOptions => {
-  var ringOptionsBasic = { ...allRingOptions }
-  delete ringOptionsBasic.connectivityDefinition
-  return ringOptionsBasic
-})
-
 export class RingEdit extends Component {
   constructor (props) {
     super(props)
@@ -334,7 +327,7 @@ const mapStateToProps = (state) => ({
   user: state.user,
   map: state.map,
   status: state.plan.activePlan && state.plan.activePlan.planState,
-  ringOptionsBasic: getRingOptionsBasic(state)
+  ringOptionsBasic: state.ringEdit.aroNetworkConstraints
 })
 
 const mapDispatchToProps = dispatch => ({

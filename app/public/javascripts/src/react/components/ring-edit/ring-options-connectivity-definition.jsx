@@ -3,14 +3,8 @@ import { createSelector } from 'reselect'
 import { ConduitConnectivityDefinition } from '../optimization/conduit-connectivity-definition.jsx'
 import RingEditActions from './ring-edit-actions'
 
-const getAllRingOptions = state => state.ringEdit.options
-const getRingOptionsConnectivityDefinition = createSelector([getAllRingOptions], allRingOptions => {
-  return allRingOptions.connectivityDefinition
-})
-
-
 const mapStateToProps = (state) => ({
-  ringOptionsConnectivityDefinition: getRingOptionsConnectivityDefinition(state)
+  ringOptionsConnectivityDefinition: state.ringEdit.connectivityDefinition
 })
 
 const mapDispatchToProps = dispatch => ({

@@ -1,6 +1,10 @@
 import Actions from '../../../common/actions'
+import AroNetworkConstraints from '../../common/optimization-options/aro-network-constraints'
+import ConnectivityDefinition from '../../common/optimization-options/connectivity-definition'
 
 const defaultState = {
+  constraints: AroNetworkConstraints(),
+  connectivityDefinition: ConnectivityDefinition(),
   chartReport: null,
   chartReportMetaData: null,
   chartReportDefinition: null
