@@ -32,7 +32,8 @@ class OptimizeButtonController {
   mapStateToThis (reduxState) {
     return {
       activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
-      planTargets: reduxState.selection.planTargets
+      planTargets: reduxState.selection.planTargets,
+      connectivityDefinition: reduxState.optimization.networkAnalysis.connectivityDefinition
     }
   }
 

@@ -1759,7 +1759,8 @@ class State {
       showSiteBoundary: reduxState.mapLayers.showSiteBoundary,
       boundaryTypes: getBoundaryTypesList(reduxState),
       selectedBoundaryType: reduxState.mapLayers.selectedBoundaryType,
-      systemActors: reduxState.user.systemActors
+      systemActors: reduxState.user.systemActors,
+      networkAnalysisConnectivityDefinition: reduxState.optimization.networkAnalysis.connectivityDefinition
     }
   }
 
