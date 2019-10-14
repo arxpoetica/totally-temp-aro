@@ -19,6 +19,7 @@ class NetworkAnalysisBuildController {
     this.analysisAreas = []
     this.rateReachCategories = []
     this.toggleAdvanceSettings = false
+    this.isNetworkSettingsExpanded = false
 
     this.budgetDisplay = this.state.optimizationOptions.budget
     this.SelectionModes = SelectionModes

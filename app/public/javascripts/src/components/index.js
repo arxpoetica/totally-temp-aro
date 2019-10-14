@@ -7,6 +7,7 @@ import ContextMenu from '../react/components/context-menu/context-menu.jsx'
 import CoverageInitializer from '../react/components/coverage/coverage-initializer.jsx'
 import CoverageButton from '../react/components/coverage/coverage-button.jsx'
 import RfpButton from '../react/components/optimization/rfp/rfp-button.jsx'
+import NetworkAnalysisConnectivityDefinition from '../react/components/optimization/network-analysis/network-analysis-connectivity-definition.jsx'
 import NetworkAnalysisOutput from '../react/components/optimization/network-analysis/network-analysis-output.jsx'
 import PlanTargetList from '../react/components/selection/plan-target-list.jsx'
 import PlanEditor from '../react/components/plan-editor/plan-editor.jsx'
@@ -239,6 +240,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rCoverageInitializer', react2angular(CoverageInitializer))
   .component('rCoverageButton', react2angular(CoverageButton))
   .component('rRfpButton', react2angular(RfpButton))
+  .component('rNetworkAnalysisConnectivityDefinition', react2angular(NetworkAnalysisConnectivityDefinition))
   .component('rNetworkAnalysisOutput', react2angular(NetworkAnalysisOutput))
   .component('rPlanTargetList', react2angular(PlanTargetList))
   .component('rPlanEditor', react2angular(PlanEditor))

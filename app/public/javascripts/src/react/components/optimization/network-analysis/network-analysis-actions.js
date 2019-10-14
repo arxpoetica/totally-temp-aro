@@ -39,6 +39,17 @@ function loadReport (planId) {
   }
 }
 
+function setNetworkAnalysisConnectivityDefinition (spatialEdgeType, networkConnectivityType) {
+  return {
+    type: Actions.NETWORK_ANALYSIS_SET_CONNECTIVITY,
+    payload: {
+      spatialEdgeType,
+      networkConnectivityType
+    }
+  }
+}
+
 export default {
-  loadReport: loadReport
+  loadReport,
+  setNetworkAnalysisConnectivityDefinition
 }

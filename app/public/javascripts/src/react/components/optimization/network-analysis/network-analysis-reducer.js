@@ -28,6 +28,14 @@ function setChartReportDefinition (state, chartReportDefinition) {
   }
 }
 
+function setNetworkAnalysisConnectivity (state, spatialEdgeType, networkConnectivityType) {
+  return { ...state,
+    connectivityDefinition: { ...state.connectivityDefinition,
+      [spatialEdgeType]: networkConnectivityType
+    }
+  }
+}
+
 function configurationReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.NETWORK_ANALYSIS_SET_CHART_REPORT:
@@ -39,6 +47,9 @@ function configurationReducer (state = defaultState, action) {
     case Actions.NETWORK_ANALYSIS_SET_CHART_REPORT_DEFINITION:
       return setChartReportDefinition(state, action.payload)
 
+    case Actions.NETWORK_ANALYSIS_SET_CONNECTIVITY:
+      return setNetworkAnalysisConnectivity(state, action.payload.spatialEdgeType, action.payload.networkConnectivityType)
+  
     default:
       return state
   }

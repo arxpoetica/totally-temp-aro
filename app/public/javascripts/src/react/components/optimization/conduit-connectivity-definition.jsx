@@ -20,8 +20,8 @@ export class ConduitConnectivityDefinition extends Component {
           </thead>
           <tbody>
             {
-              Object.keys(this.props.ringOptionsConnectivityDefinition).map(spatialEdgeType => {
-                const networkConnectivityId = this.props.ringOptionsConnectivityDefinition[spatialEdgeType]
+              Object.keys(this.props.connectivityDefinition).map(spatialEdgeType => {
+                const networkConnectivityId = this.props.connectivityDefinition[spatialEdgeType]
                 return <tr key={spatialEdgeType}>
                   <td>{SpatialEdgeType[spatialEdgeType].displayName}</td>
                   <td className='text-center'>
@@ -29,7 +29,7 @@ export class ConduitConnectivityDefinition extends Component {
                       type='checkbox'
                       className='checkboxfill'
                       checked={networkConnectivityId !== NetworkConnectivityType.none.id}
-                      onChange={event => this.props.setRingOptionsConnectivityDefinition(spatialEdgeType, event.target.checked ? NetworkConnectivityType.snapToEdge.id : NetworkConnectivityType.none.id)}
+                      onChange={event => this.props.setConnectivityDefinition(spatialEdgeType, event.target.checked ? NetworkConnectivityType.snapToEdge.id : NetworkConnectivityType.none.id)}
                     />
                   </td>
                   <td>
@@ -39,7 +39,7 @@ export class ConduitConnectivityDefinition extends Component {
                           className='form-control form-control-sm'
                           value={networkConnectivityId}
                           disabled={networkConnectivityId === NetworkConnectivityType.none.id}
-                          onChange={event => this.props.setRingOptionsConnectivityDefinition(spatialEdgeType, event.target.value)}
+                          onChange={event => this.props.setConnectivityDefinition(spatialEdgeType, event.target.value)}
                         >
                           {
                             Object.keys(NetworkConnectivityType).map(networkConnectivityId => {
@@ -64,7 +64,8 @@ export class ConduitConnectivityDefinition extends Component {
 }
 
 ConduitConnectivityDefinition.propTypes = {
-  ringOptionsConnectivityDefinition: PropTypes.object
+  connectivityDefinition: PropTypes.object,
+  setConnectivityDefinition: PropTypes.func.isRequired
 }
 
 export default ConduitConnectivityDefinition
