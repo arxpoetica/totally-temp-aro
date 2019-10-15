@@ -8,6 +8,7 @@ export class SearchableSelect extends Component {
     // props.resultsMax - integer, max length of dropdown results
     this.dropdownRef = React.createRef()
     this.state = {
+      prevProps: {}, // HACK to get around the fact that getDerivedStateFromProps is fired from state change as well, will find a different way
       searchPool: {},
       searchResults: {}, // group of named arrays
       searchTerm: '',
@@ -79,13 +80,13 @@ export class SearchableSelect extends Component {
   onSearchInput (event) {
     // ToDo: only trigger this after typing has stopped for say 200ms
     var searchTerm = event.target.value
-    var searchResults = this.filterThisLists(event.target.value)
-    var resultsArrays = Object.values(searchResults)
+    var newSearchResults = this.filterThisLists(event.target.value)
+    var resultsArrays = Object.values(newSearchResults) // convert to array
     var selectedItem = null
     if (resultsArrays[0] && resultsArrays[0].length === 1 && resultsArrays[0][0].name === searchTerm) selectedItem = { ...resultsArrays[0][0] }
     this.setState({ ...this.state,
       selectedItem: selectedItem,
-      searchResults: searchResults,
+      searchResults: newSearchResults,
       searchTerm: searchTerm
     })
     // React.findDOMNode(this.dropdownRef).dropdown('update')
@@ -130,6 +131,7 @@ export class SearchableSelect extends Component {
   }
 
   static getDerivedStateFromProps (props, state) {
+    if (JSON.stringify(props) === JSON.stringify(state.prevProps)) return null
     // tokenize name here
     var optionLists = {}
     if (Array.isArray(props.optionLists)) {
@@ -140,6 +142,7 @@ export class SearchableSelect extends Component {
     // this.state.searchPool = optionLists
     var searchResults = SearchableSelect.filterLists('', optionLists, props.resultsMax)
     return {
+      prevProps: { ...props },
       searchPool: optionLists,
       searchResults: searchResults
     }
