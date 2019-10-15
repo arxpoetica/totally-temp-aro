@@ -80,13 +80,13 @@ export class SearchableSelect extends Component {
   onSearchInput (event) {
     // ToDo: only trigger this after typing has stopped for say 200ms
     var searchTerm = event.target.value
-    var newSearchResults = this.filterThisLists(event.target.value)
-    var resultsArrays = Object.values(newSearchResults) // convert to array
+    var searchResults = this.filterThisLists(event.target.value)
+    var resultsArrays = Object.values(searchResults) // convert to array
     var selectedItem = null
     if (resultsArrays[0] && resultsArrays[0].length === 1 && resultsArrays[0][0].name === searchTerm) selectedItem = { ...resultsArrays[0][0] }
     this.setState({ ...this.state,
       selectedItem: selectedItem,
-      searchResults: newSearchResults,
+      searchResults: searchResults,
       searchTerm: searchTerm
     })
     // React.findDOMNode(this.dropdownRef).dropdown('update')
