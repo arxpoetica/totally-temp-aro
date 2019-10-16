@@ -118,6 +118,10 @@ class PlanEditorController {
     this.dehighlightMapObject = dehighlightMapObject
   }
 
+  registerUpdateMapObjectPosition (updateMapObjectPosition) {
+    this.updateMapObjectPosition = updateMapObjectPosition
+  }
+
   $onInit () {
     // We should have a map variable at this point
     if (!window[this.mapGlobalObjectName]) {
@@ -381,7 +385,7 @@ class PlanEditorController {
           .filter((item) => item.crudAction !== 'delete')
           .map((item) => item.feature)
         this.createMapObjects && this.createMapObjects(features)
-        return this.rebuildAllTransactionSubnets()
+        return this.state.configuration.planEditor.calculateSubnets ? this.rebuildAllTransactionSubnets() : Promise.resolve()
       })
       .catch((err) => {
       // Log the error, then get out of "plan edit" mode.
@@ -1103,6 +1107,8 @@ class PlanEditorController {
         const equipmentNode = AroFeatureFactory.createObject({ dataType: 'equipment' })
         // --- new be sure to set subnet ---
         equipmentNode.objectId = mapObject.objectId
+        equipmentNode.geometry = JSON.parse(JSON.stringify(mapObject.feature.geometry))
+        equipmentNode.networkNodeType = mapObject.feature.networkNodeType
         this.addEquipmentNodes([{ feature: equipmentNode }])
         var blankNetworkNodeEquipment = equipmentNode.networkNodeEquipment
         this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties('', '', feature.networkNodeType, this.lastSelectedEquipmentType, blankNetworkNodeEquipment, 'PLANNED', 'sewer')
@@ -1228,7 +1234,8 @@ class PlanEditorController {
         .then((result) => {
           var equipmentObject = result.data.filter((item) => item.objectId === mapObject.objectId)[0]
           equipmentObject.geometry.coordinates = [mapObject.position.lng().toFixed(6), mapObject.position.lat().toFixed(6)] // Note - longitude, then latitude
-          return this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
+          // return this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
+          return this.modifyEquipmentFeature(this.currentTransaction.id, { feature: equipmentObject })
         })
         .then((result) => {
           this.objectIdToProperties[mapObject.objectId].isDirty = false
@@ -1692,6 +1699,7 @@ class PlanEditorController {
       planId: reduxState.plan.activePlan.id,
       currentTransaction: reduxState.planEditor.transaction,
       transactionFeatures: reduxState.planEditor.features,
+      selectedFeatures: reduxState.selection.planEditorFeatures,
       isPlanEditorActive: reduxState.planEditor.isPlanEditorActive,
       isCalculatingSubnets: reduxState.planEditor.isCalculatingSubnets,
       isCreatingObject: reduxState.planEditor.isCreatingObject,
@@ -1712,6 +1720,7 @@ class PlanEditorController {
       resumeOrCreateTransaction: (planId, userId) => dispatch(PlanEditorActions.resumeOrCreateTransaction(planId, userId)),
       deleteTransactionFeature: (transactionId, featureType, transactionFeature) => dispatch(PlanEditorActions.deleteTransactionFeature(transactionId, featureType, transactionFeature)),
       addEquipmentNodes: equipmentNodes => dispatch(PlanEditorActions.addTransactionFeatures(equipmentNodes)),
+      modifyEquipmentFeature: (transactionId, feature) => dispatch(PlanEditorActions.modifyFeature('equipment', transactionId, feature)),
       setNetworkEquipmentLayerVisibility: (layer, isVisible) => dispatch(MapLayerActions.setNetworkEquipmentLayerVisibility('cables', layer, isVisible)),
       setIsCalculatingSubnets: isCalculatingSubnets => dispatch(PlanEditorActions.setIsCalculatingSubnets(isCalculatingSubnets)),
       setIsCreatingObject: isCreatingObject => dispatch(PlanEditorActions.setIsCreatingObject(isCreatingObject)),
