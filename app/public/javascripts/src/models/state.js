@@ -1142,12 +1142,15 @@ class State {
             var optimizationBody = service.getOptimizationBody()
             optimizationBody.networkConfigurationOverride = {
               fusionRuleConfig: {
-                connectivityDefinition: service.networkAnalysisConnectivityDefinition
+                connectivityDefinition: service.networkAnalysisConnectivityDefinition,
+                snappingDistance: service.networkAnalysisConstraints.snappingDistance.value,
+                maxConnectionDistance: service.networkAnalysisConstraints.maxConnectionDistance.value,
+                maxWormholeDistance: service.networkAnalysisConstraints.maxWormholeDistance.value
+              },
+              fiberConstraintConfig: {
+                maxLocationToEdgeDistance: service.networkAnalysisConstraints.maxLocationEdgeDistance.value
               }
             }
-            Object.keys(service.networkAnalysisConstraints).forEach(constraintKey => {
-              optimizationBody.networkConstraints[constraintKey] = service.networkAnalysisConstraints[constraintKey].value
-            })
             // Make the API call that starts optimization calculations on aro-service
             var apiUrl = (service.networkAnalysisType.type === 'NETWORK_ANALYSIS') ? '/service/v1/analyze/masterplan' : '/service/v1/optimize/masterplan'
             apiUrl += `?userId=${service.loggedInUser.id}`
