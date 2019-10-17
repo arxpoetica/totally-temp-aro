@@ -12,7 +12,7 @@ const getSelectedBoundaryCoverage = createSelector([getBoundariesCoverage, getSe
   if (selectedPlanFeatures.length !== 1) {
     return null
   }
-  return boundariesCoverage[selectedPlanFeatures[0]]
+  return angular.copy(boundariesCoverage[selectedPlanFeatures[0]])
 })
 
 class BoundaryCoverageController {
@@ -22,8 +22,6 @@ class BoundaryCoverageController {
     this.$element = $element
     this.state = state
     this.utils = Utils
-
-    this.boundaryCoverageById = {}
 
     this.isWorking = false
     this.isChartInit = false
