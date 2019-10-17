@@ -78,7 +78,6 @@ class PlanEditorController {
     this.multiselectTypes = ['location_connector', 'equipment.location_connector']
     this.additionalSelectionsById = {}
 
-    this.coverageOutput = {}
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
   }
 
@@ -458,36 +457,6 @@ class PlanEditorController {
     }
   }
 
-  onRequestCalculateCoverage () {
-    if (this.selectedMapObject && !this.isMarker(this.selectedMapObject)) {
-      var mapObject = this.selectedMapObject
-      // ToDo: fix. more of these terrible discrepancies
-      var networkObjectId = mapObject.feature.networkObjectId
-      if (typeof networkObjectId === 'undefined') {
-        networkObjectId = mapObject.feature.attributes.network_node_object_id
-      }
-
-      var equipmentPoint = {
-        type: 'Point',
-        coordinates: []
-      }
-
-      if (this.objectIdToMapObject.hasOwnProperty(networkObjectId)) {
-        // we have an edited version of the equipment point
-        equipmentPoint.coordinates = [this.objectIdToMapObject[networkObjectId].position.lng(), this.objectIdToMapObject[networkObjectId].position.lat()]
-        this.calculateCoverage(mapObject, equipmentPoint)
-      } else {
-        // we do not have an edited version of the equipment point, get ti from the server
-        var planId = this.state.plan.id
-        this.$http.get(`/service/plan-feature/${planId}/equipment/${networkObjectId}?userId=${this.state.loggedInUser.id}`)
-          .then((result) => {
-            equipmentPoint = result.data.geometry
-            this.calculateCoverage(mapObject, equipmentPoint)
-          })
-      }
-    }
-  }
-
   // Note: similar code as calculateCoverage(), not sure we can combine them
   calculateAutoBoundary (mapObject, spatialEdgeType, directed) {
     // Get the POST body for optimization based on the current application state
@@ -551,45 +520,6 @@ class PlanEditorController {
         console.error(err)
         this.isWorkingOnCoverage = false
       })
-  }
-
-  // Note: similar code as calculateAutoBoundary(), not sure we can combine them
-  calculateCoverage (mapObject, equipmentPoint, directed) {
-    // Get the POST body for optimization based on the current application state
-    var optimizationBody = this.state.getOptimizationBody()
-    // Replace analysis_type and add a point and radius
-    optimizationBody.boundaryCalculationType = 'FIXED_POLYGON'
-    optimizationBody.analysis_type = 'COVERAGE'
-
-    optimizationBody.point = equipmentPoint
-    // Get the polygon from the mapObject, not mapObject.feature.geometry, as the user may have edited the map object
-    optimizationBody.polygon = this.polygonPathsToWKT(mapObject.getPaths())
-
-    // optimizationBody.spatialEdgeType = spatialEdgeType;
-    optimizationBody.directed = directed // directed analysis if thats what the user wants
-
-    this.isWorkingOnCoverage = true
-    this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
-      .then((result) => {
-      // The user may have destroyed the component before we get here. In that case, just return
-        if (this.isComponentDestroyed) {
-          console.warn('Plan editor was closed while a boundary was being calculated')
-          return
-        }
-        this.computedBoundaries.add(mapObject.feature.objectId)
-        this.digestBoundaryCoverage(mapObject.feature, result.data, true)
-
-        this.isWorkingOnCoverage = false
-      })
-      .catch((err) => {
-        console.error(err)
-        this.isWorkingOnCoverage = false
-      })
-  }
-
-  digestBoundaryCoverage (feature, coverageData, forceUpdate) {
-    if (typeof forceUpdate === 'undefined') forceUpdate = false
-    this.coverageOutput = { 'feature': feature, 'data': coverageData, 'forceUpdate': forceUpdate }
   }
 
   objKeys (obj) {

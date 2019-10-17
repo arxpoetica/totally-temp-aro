@@ -5,6 +5,7 @@ import EquipmentComponent from '../../../service-typegen/dist/EquipmentComponent
 import EquipmentFeature from '../../../service-typegen/dist/EquipmentFeature'
 import EquipmentBoundaryFeature from '../../../service-typegen/dist/EquipmentBoundaryFeature'
 import PlanEditorActions from '../../../react/components/plan-editor/plan-editor-actions'
+import CoverageActions from '../../../react/components/coverage/coverage-actions'
 
 const getAllPlanFeatures = reduxState => reduxState.planEditor.features
 const getSelectedPlanFeatures = reduxState => reduxState.selection.planEditorFeatures
@@ -70,13 +71,15 @@ class BoundaryPropertiesEditorController {
       transactionId: reduxState.planEditor.transaction && reduxState.planEditor.transaction.id,
       transactionFeatures: reduxState.planEditor.features,
       selectedFeatures: reduxState.selection.planEditorFeatures,
-      viewBoundaryProps: getEquipmentBoundary(reduxState)
+      viewBoundaryProps: getEquipmentBoundary(reduxState),
+      isBoundaryCoverageVisible: reduxState.coverage.isBoundaryCoverageVisible
     }
   }
 
   mapDispatchToTarget (dispatch) {
     return {
-      modifyBoundary: (transactionId, boundary) => dispatch(PlanEditorActions.modifyFeature('equipment_boundary', transactionId, boundary))
+      modifyBoundary: (transactionId, boundary) => dispatch(PlanEditorActions.modifyFeature('equipment_boundary', transactionId, boundary)),
+      showBoundaryCoverage: () => dispatch(CoverageActions.setBoundaryCoverageVisibility(true))
     }
   }
 
@@ -96,9 +99,7 @@ BoundaryPropertiesEditorController.$inject = ['state', '$ngRedux']
 
 let boundaryPropertiesEditor = {
   templateUrl: '/components/sidebar/plan-editor/boundary-properties-editor.html',
-  bindings: {
-    requestCalculateCoverage: '&'
-  },
+  bindings: { },
   controller: BoundaryPropertiesEditorController
 }
 

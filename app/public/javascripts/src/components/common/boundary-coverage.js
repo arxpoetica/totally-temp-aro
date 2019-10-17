@@ -1,6 +1,27 @@
+import { createSelector } from 'reselect'
+import AroFeatureFactory from '../../service-typegen/dist/AroFeatureFactory'
+import TrackedEquipment from '../../service-typegen/dist/TrackedEquipment'
+import EquipmentComponent from '../../service-typegen/dist/EquipmentComponent'
+import EquipmentFeature from '../../service-typegen/dist/EquipmentFeature'
+import EquipmentBoundaryFeature from '../../service-typegen/dist/EquipmentBoundaryFeature'
+import CoverageActions from '../../react/components/coverage/coverage-actions'
+
+const getAllPlanFeatures = reduxState => reduxState.planEditor.features
+const getSelectedPlanFeatures = reduxState => reduxState.selection.planEditorFeatures
+const getEquipmentBoundary = createSelector([getAllPlanFeatures, getSelectedPlanFeatures], (allPlanFeatures, selectedPlanFeatures) => {
+  if (selectedPlanFeatures.length !== 1) {
+    return null
+  }
+  const planFeature = allPlanFeatures[selectedPlanFeatures[0]]
+  if (planFeature && planFeature.feature.dataType === 'equipment_boundary') {
+    return AroFeatureFactory.createObject(planFeature.feature)
+  } else {
+    return null
+  }
+})
 
 class BoundaryCoverageController {
-  constructor ($timeout, $http, $element, state, Utils) {
+  constructor ($timeout, $http, $element, $ngRedux, state, Utils) {
     this.$timeout = $timeout
     this.$http = $http
     this.$element = $element
@@ -56,19 +77,11 @@ class BoundaryCoverageController {
         data: []
       }
     }
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
   }
 
-  $onChanges (changesObj) {
-    if (changesObj.hasOwnProperty('parentSelectedObjectId')) {
-      if (this.isChartInit) this.showCoverageChart()
-    }
-    if (changesObj.hasOwnProperty('boundsInput')) {
-      var newBoundsInput = changesObj.boundsInput.currentValue
-      // this.feature = newBoundsInput.feature
-      if (newBoundsInput.feature && newBoundsInput.feature.hasOwnProperty('objectId') && (newBoundsInput.forceUpdate || !this.boundaryCoverageById.hasOwnProperty(newBoundsInput.feature.objectId))) {
-        this.digestBoundaryCoverage(newBoundsInput.feature.objectId, newBoundsInput.data)
-      }
-    }
+  $onDestroy () {
+    this.unsubscribeRedux()
   }
 
   makeCoverageLocationData () {
@@ -177,7 +190,6 @@ class BoundaryCoverageController {
 
   showCoverageChart () {
     // ToDo: check for previous chart
-    // var objectId = this.feature.objectId
     var objectId = this.parentSelectedObjectId
 
     if (!this.boundaryCoverageById.hasOwnProperty(this.parentSelectedObjectId)) return
@@ -275,9 +287,80 @@ class BoundaryCoverageController {
     if (typeof obj === 'undefined') obj = {}
     return Object.keys(obj)
   }
+
+  getEquipmentCoordinates () {
+    const equipmentId = this.selectedBoundary.networkObjectId
+    if (this.transactionFeatures[equipmentId]) {
+      // The equipment is in the transaction, return its geometry
+      return Promise.resolve(this.transactionFeatures[equipmentId].feature.geometry)
+    } else {
+      // The equipment is not part of the transaction. Get its coordinates from the server.
+      return this.$http.get(`/service/plan-feature/${this.planId}/equipment/${equipmentId}`)
+        .then(result => Promise.resolve(result.data.geometry))
+        .catch(err => console.error(err))
+    }
+  }
+
+  calculateCoverage () {
+    if (!this.selectedBoundary || this.boundaryCoverage[this.selectedBoundary.objectId]) {
+      return // We already have results for this boundary. Nothing to do.
+    }
+
+    return this.getEquipmentCoordinates()
+      .then(equipmentPoint => {
+        // Get the POST body for optimization based on the current application state
+        var optimizationBody = this.state.getOptimizationBody()
+        // Replace analysis_type and add a point and radius
+        optimizationBody.boundaryCalculationType = 'FIXED_POLYGON'
+        optimizationBody.analysis_type = 'COVERAGE'
+
+        optimizationBody.point = equipmentPoint
+        // Get the polygon from the mapObject, not mapObject.feature.geometry, as the user may have edited the map object
+        optimizationBody.polygon = this.selectedBoundary.geometry
+        optimizationBody.directed = false
+        return this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
+      })
+      .then(result => this.addBoundaryCoverage(this.selectedBoundary.objectId, result.data))
+      .catch((err) => {
+        console.error(err)
+        this.isWorkingOnCoverage = false
+      })
+  }
+
+  mapStateToThis (reduxState) {
+    return {
+      planId: reduxState.plan.activePlan && reduxState.plan.activePlan.id,
+      transactionFeatures: reduxState.planEditor.features,
+      selectedFeatures: reduxState.selection.planEditorFeatures,
+      selectedBoundary: getEquipmentBoundary(reduxState),
+      boundaryCoverage: reduxState.coverage.boundaries
+    }
+  }
+
+  mapDispatchToTarget (dispatch) {
+    return {
+      modifyBoundary: (transactionId, boundary) => dispatch(PlanEditorActions.modifyFeature('equipment_boundary', transactionId, boundary)),
+      addBoundaryCoverage: (objectId, coverage) => dispatch(CoverageActions.addBoundaryCoverage(objectId, coverage))
+    }
+  }
+
+  mergeToTarget (nextState, actions) {
+    const oldSelectedFeatures = this.selectedFeatures
+    const oldBoundaryCoverage = this.boundaryCoverage
+    // merge state and actions onto controller
+    Object.assign(this, nextState)
+    Object.assign(this, actions)
+
+    if (oldSelectedFeatures !== this.selectedFeatures) {
+      this.calculateCoverage()
+    }
+    if (oldBoundaryCoverage !== this.boundaryCoverage) {
+      this.showCoverageChart()
+    }
+  }
 }
 
-BoundaryCoverageController.$inject = ['$timeout', '$http', '$element', 'state', 'Utils']
+BoundaryCoverageController.$inject = ['$timeout', '$http', '$element', '$ngRedux', 'state', 'Utils']
 
 let boundaryCoverage = {
   templateUrl: '/components/common/boundary-coverage.html',
