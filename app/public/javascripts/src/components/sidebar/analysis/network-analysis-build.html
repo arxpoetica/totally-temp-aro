@@ -384,7 +384,10 @@
         <i class="far fa-minus-square ei-foldout-icon" ng-if="$ctrl.isNetworkSettingsExpanded"></i>
         <strong>Network Settings</strong>
       </div>
-      <r-network-analysis-connectivity-definition ng-if="$ctrl.isNetworkSettingsExpanded">
+      <r-network-analysis-constraints ng-show="$ctrl.isNetworkSettingsExpanded"
+        initial-values=$ctrl.networkAnalysisConstraints enableReinitialize>
+      </r-network-analysis-constraints>
+      <r-network-analysis-connectivity-definition ng-show="$ctrl.isNetworkSettingsExpanded">
       </r-network-analysis-connectivity-definition>
     </div>
     <!-- Add a div that will overlay all the controls above. The div will be visible when the controls need to be disabled. -->

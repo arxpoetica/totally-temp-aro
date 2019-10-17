@@ -94,7 +94,8 @@ class NetworkAnalysisBuildController {
   mapStateToThis (reduxState) {
     return {
       activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
-      allSelectionModes: getAllSelectionModes(reduxState)
+      allSelectionModes: getAllSelectionModes(reduxState),
+      networkAnalysisConstraints: reduxState.optimization.networkAnalysis.constraints
     }
   }
 
