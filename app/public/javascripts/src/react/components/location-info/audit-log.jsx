@@ -55,7 +55,7 @@ export class AuditLog extends Component {
               <tbody>
                 { this.props.auditLog.libraryAudit.map((element, index) => (
                   <tr key={index}>
-                    <td>{moment(element.modifiedDate).format('MM/DD/YYYY')}</td>
+                    <td>{moment(element.modifiedDate).format('MM/DD/YYYY H:mm ([GMT] ZZ)')}</td>
                     <td>{element.userName}</td>
                     <td>{element.crudAction}</td>
                   </tr>
