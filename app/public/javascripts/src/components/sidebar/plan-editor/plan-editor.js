@@ -12,6 +12,8 @@ import PlanEditorActions from '../../../react/components/plan-editor/plan-editor
 import MapLayerActions from '../../../react/components/map-layers/map-layer-actions'
 import uuidStore from '../../../shared-utils/uuid-store'
 import WktUtils from '../../../shared-utils/wkt-utils'
+import coverageActions from '../../../react/components/coverage/coverage-actions'
+import CoverageStatusTypes from '../../../react/components/coverage/constants'
 
 class PlanEditorController {
   constructor ($timeout, $http, $element, $filter, $ngRedux, state, Utils, tileDataService, tracker) {
@@ -1205,6 +1207,7 @@ class PlanEditorController {
       // This is a boundary feature. If it is modified, change the update style to 'Don't update'
       const boundaryProperties = this.objectIdToProperties[mapObject.objectId]
       boundaryProperties.selectedSiteMoveUpdate = 'Don\'t update'
+      this.clearCoverageForBoundary(mapObject.objectId)
       this.$timeout()
       var serviceFeature = this.formatBoundaryForService(mapObject.objectId)
       this.$http.put(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`, serviceFeature)
@@ -1593,6 +1596,7 @@ class PlanEditorController {
     this.keyClickObserver.unsubscribe()
     this.clickObserver.unsubscribe()
     this.clearAllLocationHighlights()
+    this.clearBoundaryCoverage()
     // this.highlightLocations()
     // todo: if keep unsaved, still can't run analysis
     if (this.currentTransaction) {
@@ -1657,7 +1661,9 @@ class PlanEditorController {
       setIsModifyingObject: isModifyingObject => dispatch(PlanEditorActions.setIsModifyingObject(isModifyingObject)),
       setIsEditingFeatureProperties: isEditing => dispatch(PlanEditorActions.setIsEditingFeatureProperties(isEditing)),
       viewEquipmentProperties: (planId, equipmentObjectId, transactionFeatures) => dispatch(PlanEditorActions.viewFeatureProperties('equipment', planId, equipmentObjectId, transactionFeatures)),
-      viewBoundaryProperties: (planId, boundaryObjectId, transactionFeatures) => dispatch(PlanEditorActions.viewFeatureProperties('equipment_boundary', planId, boundaryObjectId, transactionFeatures))
+      viewBoundaryProperties: (planId, boundaryObjectId, transactionFeatures) => dispatch(PlanEditorActions.viewFeatureProperties('equipment_boundary', planId, boundaryObjectId, transactionFeatures)),
+      clearCoverageForBoundary: objectId => dispatch(coverageActions.addBoundaryCoverage(objectId, null)),
+      clearBoundaryCoverage: () => dispatch(coverageActions.clearBoundaryCoverage())
     }
   }
 

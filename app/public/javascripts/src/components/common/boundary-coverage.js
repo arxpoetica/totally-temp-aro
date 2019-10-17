@@ -6,18 +6,13 @@ import EquipmentFeature from '../../service-typegen/dist/EquipmentFeature'
 import EquipmentBoundaryFeature from '../../service-typegen/dist/EquipmentBoundaryFeature'
 import CoverageActions from '../../react/components/coverage/coverage-actions'
 
-const getAllPlanFeatures = reduxState => reduxState.planEditor.features
+const getBoundariesCoverage = reduxState => reduxState.coverage.boundaries
 const getSelectedPlanFeatures = reduxState => reduxState.selection.planEditorFeatures
-const getEquipmentBoundary = createSelector([getAllPlanFeatures, getSelectedPlanFeatures], (allPlanFeatures, selectedPlanFeatures) => {
+const getSelectedBoundaryCoverage = createSelector([getBoundariesCoverage, getSelectedPlanFeatures], (boundariesCoverage, selectedPlanFeatures) => {
   if (selectedPlanFeatures.length !== 1) {
     return null
   }
-  const planFeature = allPlanFeatures[selectedPlanFeatures[0]]
-  if (planFeature && planFeature.feature.dataType === 'equipment_boundary') {
-    return AroFeatureFactory.createObject(planFeature.feature)
-  } else {
-    return null
-  }
+  return boundariesCoverage[selectedPlanFeatures[0]]
 })
 
 class BoundaryCoverageController {
@@ -92,20 +87,24 @@ class BoundaryCoverageController {
     }
   }
 
-  digestBoundaryCoverage (objectId, boundaryData) {
+  digestBoundaryCoverage () {
     var boundsCoverage = {
       totalLocations: 0,
       tagCounts: {},
       locations: {}
     }
 
+    if (!this.selectedBoundaryCoverage) {
+      return boundsCoverage
+    }
+
     var baseCBCount = {}
-    for (const locationType in boundaryData.coverageInfo) {
+    for (const locationType in this.selectedBoundaryCoverage.coverageInfo) {
       baseCBCount[locationType] = 0
     }
 
-    for (const locationType in boundaryData.coverageInfo) {
-      var locData = boundaryData.coverageInfo[locationType]
+    for (const locationType in this.selectedBoundaryCoverage.coverageInfo) {
+      var locData = this.selectedBoundaryCoverage.coverageInfo[locationType]
       var locCoverage = this.makeCoverageLocationData()
       locCoverage.locationType = locationType
       // locCoverage.totalCount = locData.length // entityCount
@@ -151,11 +150,6 @@ class BoundaryCoverageController {
 
         var dist = location.distance
         var barIndex = Math.floor(dist / 1000)
-        /*
-        if (barIndex >= locCoverage.barChartData.length || typeof locCoverage.barChartData[barIndex] === 'undefined') {
-          locCoverage.barChartData[barIndex] = 0
-        }
-        */
         if (barIndex >= locCoverage.barChartData.length) {
           var prevLen = locCoverage.barChartData.length
           locCoverage.barChartData[barIndex] = 0
@@ -170,8 +164,7 @@ class BoundaryCoverageController {
       boundsCoverage.locations[locationType] = locCoverage
     }
 
-    this.boundaryCoverageById[objectId] = boundsCoverage
-    if (this.isChartInit) this.showCoverageChart()
+    return boundsCoverage
   }
 
   // ToDo: very similar to the code in tile-data-service.js
@@ -189,11 +182,6 @@ class BoundaryCoverageController {
   }
 
   showCoverageChart () {
-    // ToDo: check for previous chart
-    var objectId = this.parentSelectedObjectId
-
-    if (!this.boundaryCoverageById.hasOwnProperty(this.parentSelectedObjectId)) return
-
     if (this.coverageChart) {
       this.coverageChart.destroy()
       this.coverageChart = null
@@ -205,10 +193,11 @@ class BoundaryCoverageController {
     var ctx = ele.getContext('2d')
 
     // a dataset for each location type
+    const coverageData = this.digestBoundaryCoverage()
     var datasets = []
     var colCount = 0
-    for (const locationType in this.boundaryCoverageById[objectId].locations) {
-      var locCoverage = this.boundaryCoverageById[objectId].locations[locationType]
+    for (const locationType in coverageData.locations) {
+      var locCoverage = coverageData.locations[locationType]
       if (locCoverage.barChartData.length > colCount) colCount = locCoverage.barChartData.length
 
       var locDataset = {}
@@ -288,73 +277,28 @@ class BoundaryCoverageController {
     return Object.keys(obj)
   }
 
-  getEquipmentCoordinates () {
-    const equipmentId = this.selectedBoundary.networkObjectId
-    if (this.transactionFeatures[equipmentId]) {
-      // The equipment is in the transaction, return its geometry
-      return Promise.resolve(this.transactionFeatures[equipmentId].feature.geometry)
-    } else {
-      // The equipment is not part of the transaction. Get its coordinates from the server.
-      return this.$http.get(`/service/plan-feature/${this.planId}/equipment/${equipmentId}`)
-        .then(result => Promise.resolve(result.data.geometry))
-        .catch(err => console.error(err))
-    }
-  }
-
-  calculateCoverage () {
-    if (!this.selectedBoundary || this.boundaryCoverage[this.selectedBoundary.objectId]) {
-      return // We already have results for this boundary. Nothing to do.
-    }
-
-    return this.getEquipmentCoordinates()
-      .then(equipmentPoint => {
-        // Get the POST body for optimization based on the current application state
-        var optimizationBody = this.state.getOptimizationBody()
-        // Replace analysis_type and add a point and radius
-        optimizationBody.boundaryCalculationType = 'FIXED_POLYGON'
-        optimizationBody.analysis_type = 'COVERAGE'
-
-        optimizationBody.point = equipmentPoint
-        // Get the polygon from the mapObject, not mapObject.feature.geometry, as the user may have edited the map object
-        optimizationBody.polygon = this.selectedBoundary.geometry
-        optimizationBody.directed = false
-        return this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
-      })
-      .then(result => this.addBoundaryCoverage(this.selectedBoundary.objectId, result.data))
-      .catch((err) => {
-        console.error(err)
-        this.isWorkingOnCoverage = false
-      })
-  }
-
   mapStateToThis (reduxState) {
     return {
-      planId: reduxState.plan.activePlan && reduxState.plan.activePlan.id,
       transactionFeatures: reduxState.planEditor.features,
       selectedFeatures: reduxState.selection.planEditorFeatures,
-      selectedBoundary: getEquipmentBoundary(reduxState),
-      boundaryCoverage: reduxState.coverage.boundaries
+      selectedBoundaryCoverage: getSelectedBoundaryCoverage(reduxState)
     }
   }
 
   mapDispatchToTarget (dispatch) {
     return {
-      modifyBoundary: (transactionId, boundary) => dispatch(PlanEditorActions.modifyFeature('equipment_boundary', transactionId, boundary)),
-      addBoundaryCoverage: (objectId, coverage) => dispatch(CoverageActions.addBoundaryCoverage(objectId, coverage))
+      modifyBoundary: (transactionId, boundary) => dispatch(PlanEditorActions.modifyFeature('equipment_boundary', transactionId, boundary))
     }
   }
 
   mergeToTarget (nextState, actions) {
-    const oldSelectedFeatures = this.selectedFeatures
-    const oldBoundaryCoverage = this.boundaryCoverage
+    const oldSelectedBoundaryCoverage = this.selectedBoundaryCoverage
     // merge state and actions onto controller
     Object.assign(this, nextState)
     Object.assign(this, actions)
 
-    if (oldSelectedFeatures !== this.selectedFeatures) {
-      this.calculateCoverage()
-    }
-    if (oldBoundaryCoverage !== this.boundaryCoverage) {
+    if ((oldSelectedBoundaryCoverage !== this.selectedBoundaryCoverage) &&
+      this.selectedBoundaryCoverage) {
       this.showCoverageChart()
     }
   }

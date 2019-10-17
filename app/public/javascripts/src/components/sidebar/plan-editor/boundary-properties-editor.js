@@ -22,8 +22,9 @@ const getEquipmentBoundary = createSelector([getAllPlanFeatures, getSelectedPlan
 })
 
 class BoundaryPropertiesEditorController {
-  constructor (state, $ngRedux) {
+  constructor (state, $http, $ngRedux) {
     this.state = state
+    this.$http = $http
     this.isEditingFeatureProperties = false
     this.isDirty = false
     this.siteMoveUpdates = [
@@ -65,13 +66,55 @@ class BoundaryPropertiesEditorController {
     }
   }
 
+  getEquipmentCoordinates () {
+    const equipmentId = this.viewBoundaryProps.networkObjectId
+    if (this.transactionFeatures[equipmentId]) {
+      // The equipment is in the transaction, return its geometry
+      return Promise.resolve(this.transactionFeatures[equipmentId].feature.geometry)
+    } else {
+      // The equipment is not part of the transaction. Get its coordinates from the server.
+      return this.$http.get(`/service/plan-feature/${this.planId}/equipment/${equipmentId}`)
+        .then(result => Promise.resolve(result.data.geometry))
+        .catch(err => console.error(err))
+    }
+  }
+
+  calculateCoverage () {
+    if (!this.viewBoundaryProps || this.boundaryCoverage[this.viewBoundaryProps.objectId]) {
+      return // We already have results for this boundary. Nothing to do.
+    }
+
+    return this.getEquipmentCoordinates()
+      .then(equipmentPoint => {
+        // Get the POST body for optimization based on the current application state
+        var optimizationBody = this.state.getOptimizationBody()
+        // Replace analysis_type and add a point and radius
+        optimizationBody.boundaryCalculationType = 'FIXED_POLYGON'
+        optimizationBody.analysis_type = 'COVERAGE'
+
+        optimizationBody.point = equipmentPoint
+        // Get the polygon from the mapObject, not mapObject.feature.geometry, as the user may have edited the map object
+        optimizationBody.polygon = this.viewBoundaryProps.geometry
+        optimizationBody.directed = false
+        return this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
+      })
+      .then(result => this.addBoundaryCoverage(this.viewBoundaryProps.objectId, result.data))
+      .then(() => this.showBoundaryCoverage())
+      .catch((err) => {
+        console.error(err)
+        this.isWorkingOnCoverage = false
+      })
+  }
+
   mapStateToThis (reduxState) {
     return {
+      planId: reduxState.plan.activePlan && reduxState.plan.activePlan.id,
       isEditingFeatureProperties: reduxState.planEditor.isEditingFeatureProperties,
       transactionId: reduxState.planEditor.transaction && reduxState.planEditor.transaction.id,
       transactionFeatures: reduxState.planEditor.features,
       selectedFeatures: reduxState.selection.planEditorFeatures,
       viewBoundaryProps: getEquipmentBoundary(reduxState),
+      boundaryCoverage: reduxState.coverage.boundaries,
       isBoundaryCoverageVisible: reduxState.coverage.isBoundaryCoverageVisible
     }
   }
@@ -79,7 +122,8 @@ class BoundaryPropertiesEditorController {
   mapDispatchToTarget (dispatch) {
     return {
       modifyBoundary: (transactionId, boundary) => dispatch(PlanEditorActions.modifyFeature('equipment_boundary', transactionId, boundary)),
-      showBoundaryCoverage: () => dispatch(CoverageActions.setBoundaryCoverageVisibility(true))
+      showBoundaryCoverage: () => dispatch(CoverageActions.setBoundaryCoverageVisibility(true)),
+      addBoundaryCoverage: (objectId, coverage) => dispatch(CoverageActions.addBoundaryCoverage(objectId, coverage))
     }
   }
 
@@ -95,7 +139,7 @@ class BoundaryPropertiesEditorController {
   }
 }
 
-BoundaryPropertiesEditorController.$inject = ['state', '$ngRedux']
+BoundaryPropertiesEditorController.$inject = ['state', '$http', '$ngRedux']
 
 let boundaryPropertiesEditor = {
   templateUrl: '/components/sidebar/plan-editor/boundary-properties-editor.html',
