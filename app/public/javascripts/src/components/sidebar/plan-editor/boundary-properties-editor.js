@@ -6,6 +6,7 @@ import EquipmentFeature from '../../../service-typegen/dist/EquipmentFeature'
 import EquipmentBoundaryFeature from '../../../service-typegen/dist/EquipmentBoundaryFeature'
 import PlanEditorActions from '../../../react/components/plan-editor/plan-editor-actions'
 import CoverageActions from '../../../react/components/coverage/coverage-actions'
+import WktUtils from '../../../shared-utils/wkt-utils'
 
 const getAllPlanFeatures = reduxState => reduxState.planEditor.features
 const getSelectedPlanFeatures = reduxState => reduxState.selection.planEditorFeatures
@@ -80,10 +81,6 @@ class BoundaryPropertiesEditorController {
   }
 
   calculateCoverage () {
-    if (!this.viewBoundaryProps || this.boundaryCoverage[this.viewBoundaryProps.objectId]) {
-      return // We already have results for this boundary. Nothing to do.
-    }
-
     return this.getEquipmentCoordinates()
       .then(equipmentPoint => {
         // Get the POST body for optimization based on the current application state

@@ -1207,11 +1207,12 @@ class PlanEditorController {
       // This is a boundary feature. If it is modified, change the update style to 'Don't update'
       const boundaryProperties = this.objectIdToProperties[mapObject.objectId]
       boundaryProperties.selectedSiteMoveUpdate = 'Don\'t update'
-      this.clearCoverageForBoundary(mapObject.objectId)
       this.$timeout()
       var serviceFeature = this.formatBoundaryForService(mapObject.objectId)
-      this.$http.put(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`, serviceFeature)
-        .catch((err) => console.error(err))
+      // Update the geometry
+      serviceFeature.geometry = WktUtils.getWKTPolygonFromGoogleMapPath(mapObject.getPaths().getAt(0))
+      this.modifyEquipmentBoundaryFeature(this.currentTransaction.id, { feature: serviceFeature })
+      this.clearCoverageForBoundary(mapObject.objectId)
     }
   }
 
@@ -1655,6 +1656,7 @@ class PlanEditorController {
       deleteTransactionFeature: (transactionId, featureType, transactionFeature) => dispatch(PlanEditorActions.deleteTransactionFeature(transactionId, featureType, transactionFeature)),
       addEquipmentNodes: equipmentNodes => dispatch(PlanEditorActions.addTransactionFeatures(equipmentNodes)),
       modifyEquipmentFeature: (transactionId, feature) => dispatch(PlanEditorActions.modifyFeature('equipment', transactionId, feature)),
+      modifyEquipmentBoundaryFeature: (transactionId, feature) => dispatch(PlanEditorActions.modifyFeature('equipment_boundary', transactionId, feature)),
       setNetworkEquipmentLayerVisibility: (layer, isVisible) => dispatch(MapLayerActions.setNetworkEquipmentLayerVisibility('cables', layer, isVisible)),
       setIsCalculatingSubnets: isCalculatingSubnets => dispatch(PlanEditorActions.setIsCalculatingSubnets(isCalculatingSubnets)),
       setIsCreatingObject: isCreatingObject => dispatch(PlanEditorActions.setIsCreatingObject(isCreatingObject)),
