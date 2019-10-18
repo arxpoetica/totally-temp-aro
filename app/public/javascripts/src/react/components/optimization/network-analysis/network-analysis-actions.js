@@ -49,7 +49,15 @@ function setNetworkAnalysisConnectivityDefinition (spatialEdgeType, networkConne
   }
 }
 
+function setNetworkAnalysisConstraints (aroNetworkConstraints) {
+  return {
+    type: Actions.NETWORK_ANALYSIS_SET_CONSTRAINTS,
+    payload: aroNetworkConstraints
+  }
+}
+
 export default {
   loadReport,
-  setNetworkAnalysisConnectivityDefinition
+  setNetworkAnalysisConnectivityDefinition,
+  setNetworkAnalysisConstraints
 }

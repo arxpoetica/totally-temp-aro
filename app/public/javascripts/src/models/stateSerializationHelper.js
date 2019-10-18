@@ -194,13 +194,14 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   // ------------------------------------------------------------------------------------------------------------------
 
   // Load optimization options from a JSON string
-  stateSerializationHelper.loadStateFromJSON = (state, reduxState, dispatchers, planInputs) => {
+  stateSerializationHelper.loadStateFromJSON = (state, reduxState, dispatchers, planInputs, defaultNetworkConstraints) => {
     loadAnalysisTypeFromBody(state, planInputs)
     loadLocationTypesFromBody(state, reduxState, dispatchers, planInputs)
     loadSelectedExistingFiberFromBody(state, reduxState, dispatchers, planInputs)
     loadAlgorithmParametersFromBody(state, dispatchers, planInputs)
     loadFiberNetworkConstraintsFromBody(state, planInputs)
     loadTechnologiesFromBody(state, planInputs)
+    loadNetworkConfigurationOverrideFromBody(dispatchers, planInputs, defaultNetworkConstraints)
   }
 
   // Load analysis type from a POST body object that is sent to the optimization engine
@@ -350,6 +351,24 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       var matchedTechnology = Object.keys(state.optimizationOptions.technologies).filter((technologyKey) => technologyKey.toUpperCase() === networkType.toUpperCase())[0]
       state.optimizationOptions.technologies[matchedTechnology].checked = true
     })
+  }
+
+  var loadNetworkConfigurationOverrideFromBody = (dispatchers, planInputs, defaultNetworkConstraints) => {
+    if (planInputs.networkConfigurationOverride) {
+      // We have a network configuration override, set the network constraints
+      var aroNetworkConstraints = angular.copy(defaultNetworkConstraints)
+      const frConfig = planInputs.networkConfigurationOverride.fusionRuleConfig
+      if (frConfig) {
+        aroNetworkConstraints.snappingDistance.value = frConfig.snappingDistance
+        aroNetworkConstraints.maxConnectionDistance.value = frConfig.maxConnectionDistance
+        aroNetworkConstraints.maxWormholeDistance.value = frConfig.maxWormholeDistance
+      }
+      const fcConfig = planInputs.networkConfigurationOverride.fiberConstraintConfig
+      if (fcConfig) {
+        aroNetworkConstraints.maxLocationEdgeDistance.value = fcConfig.maxLocationToEdgeDistance
+      }
+      dispatchers.setNetworkAnalysisConstraints(aroNetworkConstraints)
+    }
   }
 
   // ------------------------------------------------------------------------------------------------------------------

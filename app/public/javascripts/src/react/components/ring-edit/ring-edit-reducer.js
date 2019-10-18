@@ -1,5 +1,5 @@
 import Actions from '../../common/actions'
-import AroNetworkConstraints from '../common/optimization-options/aro-network-constraints'
+import AroNetworkConstraints from '../../../shared-utils/aro-network-constraints'
 import ConnectivityDefinition from '../common/optimization-options/connectivity-definition'
 import RingStatusTypes from './constants'
 

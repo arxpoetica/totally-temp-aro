@@ -1,5 +1,5 @@
 import Actions from '../../../common/actions'
-import AroNetworkConstraints from '../../common/optimization-options/aro-network-constraints'
+import AroNetworkConstraints from '../../../../shared-utils/aro-network-constraints'
 import ConnectivityDefinition from '../../common/optimization-options/connectivity-definition'
 
 const defaultState = {
@@ -36,6 +36,12 @@ function setNetworkAnalysisConnectivity (state, spatialEdgeType, networkConnecti
   }
 }
 
+function setConstraints (state, aroNetworkConstraints) {
+  return { ...state,
+    constraints: aroNetworkConstraints
+  }
+}
+
 function configurationReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.NETWORK_ANALYSIS_SET_CHART_REPORT:
@@ -50,6 +56,9 @@ function configurationReducer (state = defaultState, action) {
     case Actions.NETWORK_ANALYSIS_SET_CONNECTIVITY:
       return setNetworkAnalysisConnectivity(state, action.payload.spatialEdgeType, action.payload.networkConnectivityType)
   
+    case Actions.NETWORK_ANALYSIS_SET_CONSTRAINTS:
+      return setConstraints(state, action.payload)
+
     default:
       return state
   }
