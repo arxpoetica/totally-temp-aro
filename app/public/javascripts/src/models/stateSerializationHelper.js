@@ -362,6 +362,11 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
         aroNetworkConstraints.snappingDistance.value = frConfig.snappingDistance
         aroNetworkConstraints.maxConnectionDistance.value = frConfig.maxConnectionDistance
         aroNetworkConstraints.maxWormholeDistance.value = frConfig.maxWormholeDistance
+        if (frConfig.connectivityDefinition) {
+          Object.keys(frConfig.connectivityDefinition).forEach(spatialEdgeType => {
+            dispatchers.setNetworkAnalysisConnectivityDefinition(spatialEdgeType, frConfig.connectivityDefinition[spatialEdgeType])
+          })
+        }
       }
       const fcConfig = planInputs.networkConfigurationOverride.fiberConstraintConfig
       if (fcConfig) {

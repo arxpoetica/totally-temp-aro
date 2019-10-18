@@ -18,7 +18,7 @@ import SocketManager from '../react/common/socket-manager'
 import RingEditActions from '../react/components/ring-edit/ring-edit-actions'
 import ReactComponentConstants from '../react/common/constants'
 import AroNetworkConstraints from '../shared-utils/aro-network-constraints'
-import networkAnalysisActions from '../react/components/optimization/network-analysis/network-analysis-actions'
+import NetworkAnalysisActions from '../react/components/optimization/network-analysis/network-analysis-actions'
 const networkAnalysisConstraintsSelector = formValueSelector(ReactComponentConstants.NETWORK_ANALYSIS_CONSTRAINTS)
 
 // We need a selector, else the .toJS() call will create an infinite digest loop
@@ -1687,7 +1687,8 @@ class State {
         addPlanTargets: service.addPlanTargets,
         removePlanTargets: service.removePlanTargets,
         selectDataItems: service.selectDataItems,
-        setNetworkAnalysisConstraints: service.setNetworkAnalysisConstraints
+        setNetworkAnalysisConstraints: service.setNetworkAnalysisConstraints,
+        setNetworkAnalysisConnectivityDefinition: service.setNetworkAnalysisConnectivityDefinition
       }
     }
 
@@ -1789,7 +1790,8 @@ class State {
       setGoogleMapsReference: mapRef => dispatch(MapActions.setGoogleMapsReference(mapRef)),
       updateShowSiteBoundary: isVisible => dispatch(MapLayerActions.setShowSiteBoundary(isVisible)),
       onFeatureSelectedRedux: features => dispatch(RingEditActions.onFeatureSelected(features)),
-      setNetworkAnalysisConstraints: aroNetworkConstraints => dispatch(networkAnalysisActions.setNetworkAnalysisConstraints(aroNetworkConstraints))
+      setNetworkAnalysisConstraints: aroNetworkConstraints => dispatch(NetworkAnalysisActions.setNetworkAnalysisConstraints(aroNetworkConstraints)),
+      setNetworkAnalysisConnectivityDefinition: (spatialEdgeType, networkConnectivityType) => dispatch(NetworkAnalysisActions.setNetworkAnalysisConnectivityDefinition(spatialEdgeType, networkConnectivityType))
     }
   }
 }
