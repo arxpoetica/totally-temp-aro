@@ -615,7 +615,7 @@ class State {
 
     // Get a POST body that we will send to aro-service for performing optimization
     service.getOptimizationBody = () => {
-      return stateSerializationHelper.getOptimizationBody(service, $ngRedux.getState())
+      return stateSerializationHelper.getOptimizationBody(service, service.networkAnalysisConstraints, service.networkConfigurations, $ngRedux.getState())
     }
 
     // Load optimization options from a JSON string
@@ -1140,19 +1140,7 @@ class State {
 
             // Get the optimization options that we will pass to the server
             var optimizationBody = service.getOptimizationBody()
-            const routingMode = optimizationBody.networkConstraints.routingMode
-            if (service.networkConfigurations[routingMode]) {
-              optimizationBody.networkConfigurationOverride = angular.copy(service.networkConfigurations[routingMode])
 
-              optimizationBody.networkConfigurationOverride.fusionRuleConfig = optimizationBody.networkConfigurationOverride.fusionRuleConfig || {}
-              optimizationBody.networkConfigurationOverride.fusionRuleConfig.connectivityDefinition = service.networkAnalysisConnectivityDefinition
-              optimizationBody.networkConfigurationOverride.fusionRuleConfig.snappingDistance = +service.networkAnalysisConstraints.snappingDistance.value
-              optimizationBody.networkConfigurationOverride.fusionRuleConfig.maxConnectionDistance = +service.networkAnalysisConstraints.maxConnectionDistance.value
-              optimizationBody.networkConfigurationOverride.fusionRuleConfig.maxWormholeDistance = +service.networkAnalysisConstraints.maxWormholeDistance.value
-
-              optimizationBody.networkConfigurationOverride.fiberConstraintConfig = optimizationBody.networkConfigurationOverride.fiberConstraintConfig || {}
-              optimizationBody.networkConfigurationOverride.fiberConstraintConfig.maxLocationToEdgeDistance = +service.networkAnalysisConstraints.maxLocationEdgeDistance.value
-            }
             // Make the API call that starts optimization calculations on aro-service
             var apiUrl = (service.networkAnalysisType.type === 'NETWORK_ANALYSIS') ? '/service/v1/analyze/masterplan' : '/service/v1/optimize/masterplan'
             apiUrl += `?userId=${service.loggedInUser.id}`
