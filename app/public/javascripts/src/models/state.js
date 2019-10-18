@@ -1140,16 +1140,18 @@ class State {
 
             // Get the optimization options that we will pass to the server
             var optimizationBody = service.getOptimizationBody()
-            optimizationBody.networkConfigurationOverride = {
-              fusionRuleConfig: {
-                connectivityDefinition: service.networkAnalysisConnectivityDefinition,
-                snappingDistance: service.networkAnalysisConstraints.snappingDistance.value,
-                maxConnectionDistance: service.networkAnalysisConstraints.maxConnectionDistance.value,
-                maxWormholeDistance: service.networkAnalysisConstraints.maxWormholeDistance.value
-              },
-              fiberConstraintConfig: {
-                maxLocationToEdgeDistance: service.networkAnalysisConstraints.maxLocationEdgeDistance.value
-              }
+            const routingMode = optimizationBody.networkConstraints.routingMode
+            if (service.networkConfigurations[routingMode]) {
+              optimizationBody.networkConfigurationOverride = angular.copy(service.networkConfigurations[routingMode])
+
+              optimizationBody.networkConfigurationOverride.fusionRuleConfig = optimizationBody.networkConfigurationOverride.fusionRuleConfig || {}
+              optimizationBody.networkConfigurationOverride.fusionRuleConfig.connectivityDefinition = service.networkAnalysisConnectivityDefinition
+              optimizationBody.networkConfigurationOverride.fusionRuleConfig.snappingDistance = +service.networkAnalysisConstraints.snappingDistance.value
+              optimizationBody.networkConfigurationOverride.fusionRuleConfig.maxConnectionDistance = +service.networkAnalysisConstraints.maxConnectionDistance.value
+              optimizationBody.networkConfigurationOverride.fusionRuleConfig.maxWormholeDistance = +service.networkAnalysisConstraints.maxWormholeDistance.value
+
+              optimizationBody.networkConfigurationOverride.fiberConstraintConfig = optimizationBody.networkConfigurationOverride.fiberConstraintConfig || {}
+              optimizationBody.networkConfigurationOverride.fiberConstraintConfig.maxLocationToEdgeDistance = +service.networkAnalysisConstraints.maxLocationEdgeDistance.value
             }
             // Make the API call that starts optimization calculations on aro-service
             var apiUrl = (service.networkAnalysisType.type === 'NETWORK_ANALYSIS') ? '/service/v1/analyze/masterplan' : '/service/v1/optimize/masterplan'
