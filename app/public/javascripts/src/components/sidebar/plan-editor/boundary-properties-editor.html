@@ -86,14 +86,11 @@
   <hr class="plan-editor-hr">
   
   <button class="btn btn-primary btn-sm" 
-    ng-click="$ctrl.requestCalculateCoverage()">
+    ng-click="$ctrl.calculateCoverage()">
     Calculate Coverage
   </button>
-<!--   
-  <boundary-coverage 
-    bounds-input="$ctrl.coverageOutput"
-    parent-selected-object-id="$ctrl.selectedObjectId"
-    is-working-override="$ctrl.isWorkingOnCoverage">
+  
+  <boundary-coverage ng-if="$ctrl.isBoundaryCoverageVisible">
   </boundary-coverage>
-   -->
+  
 </div>

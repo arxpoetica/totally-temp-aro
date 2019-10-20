@@ -12,7 +12,9 @@ const defaultStatus = {
     useMaxSpeed: false,
     useExistingFiber: true,
     usePlannedFiber: true
-  }
+  },
+  isBoundaryCoverageVisible: false,
+  boundaries: {}
 }
 
 function setCoverageStatus (state, status) {
@@ -84,6 +86,27 @@ function setPlannedFiber (state, plannedFiber) {
     } }
 }
 
+function addBoundaryCoverage (state, objectId, coverage) {
+  return { ...state,
+    boundaries: { ...state.boundaries,
+      [objectId]: coverage
+    }
+  }
+}
+
+function clearBoundaryCoverage (state) {
+  return { ...state,
+    isBoundaryCoverageVisible: false,
+    boundaries: {}
+  }
+}
+
+function setBoundaryCoverageVisibility (state, isVisible) {
+  return { ...state,
+    isBoundaryCoverageVisible: isVisible
+  }
+}
+
 function coverageReducer (state = defaultStatus, action) {
   switch (action.type) {
     case Actions.COVERAGE_SET_DETAILS:
@@ -118,6 +141,15 @@ function coverageReducer (state = defaultStatus, action) {
 
     case Actions.COVERAGE_SET_PLANNED_FIBER:
       return setPlannedFiber(state, action.payload)
+
+    case Actions.COVERAGE_ADD_BOUNDARY_COVERAGE:
+      return addBoundaryCoverage(state, action.payload.objectId, action.payload.coverage)
+
+    case Actions.COVERAGE_CLEAR_BOUNDARY_COVERAGE:
+      return clearBoundaryCoverage(state)
+
+    case Actions.COVERAGE_SET_BOUNDARY_COVERAGE_VISIBILITY:
+      return setBoundaryCoverageVisibility(state, action.payload)
 
     default:
       return state

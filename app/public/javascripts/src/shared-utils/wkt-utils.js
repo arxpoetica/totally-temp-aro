@@ -31,6 +31,19 @@ class WktUtils {
     return geometry
   }
 
+  // Converts a Google Maps Path object into a WKT Polygon Geometry object
+  static getWKTPolygonFromGoogleMapPath (path) {
+    var geometry = {
+      type: 'Polygon',
+      coordinates: []
+    }
+    var pathPoints = []
+    path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
+    pathPoints.push(pathPoints[0]) // Close the polygon
+    geometry.coordinates.push(pathPoints)
+    return geometry
+  }
+
   // Converts a WKT MultiPolygon Geometry object into a Google Maps Path object
   static getGoogleMapPathsFromWKTMultiPolygon (geometry) {
     if (geometry.type !== 'MultiPolygon') {
