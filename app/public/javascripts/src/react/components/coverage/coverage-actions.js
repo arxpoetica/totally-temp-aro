@@ -153,16 +153,42 @@ function setCoverageProgress (progress) {
   }
 }
 
+function addBoundaryCoverage (objectId, coverage) {
+  return {
+    type: Actions.COVERAGE_ADD_BOUNDARY_COVERAGE,
+    payload: {
+      objectId: objectId,
+      coverage: coverage
+    }
+  }
+}
+
+function clearBoundaryCoverage () {
+  return {
+    type: Actions.COVERAGE_CLEAR_BOUNDARY_COVERAGE
+  }
+}
+
+function setBoundaryCoverageVisibility (isVisible) {
+  return {
+    type: Actions.COVERAGE_SET_BOUNDARY_COVERAGE_VISIBILITY,
+    payload: isVisible
+  }
+}
+
 export default {
-  updateCoverageStatus: updateCoverageStatus,
-  initializeCoverageReport: initializeCoverageReport,
-  modifyCoverageReport: modifyCoverageReport,
-  setCoverageType: setCoverageType,
-  setGroupKeyType: setGroupKeyType,
-  setLimitMarketableTechnology: setLimitMarketableTechnology,
-  setLimitMaxSpeed: setLimitMaxSpeed,
-  setExistingFiber: setExistingFiber,
-  setPlannedFiber: setPlannedFiber,
-  setSiteAssignment: setSiteAssignment,
-  setCoverageProgress: setCoverageProgress
+  updateCoverageStatus,
+  initializeCoverageReport,
+  modifyCoverageReport,
+  setCoverageType,
+  setGroupKeyType,
+  setLimitMarketableTechnology,
+  setLimitMaxSpeed,
+  setExistingFiber,
+  setPlannedFiber,
+  setSiteAssignment,
+  setCoverageProgress,
+  addBoundaryCoverage,
+  clearBoundaryCoverage,
+  setBoundaryCoverageVisibility
 }

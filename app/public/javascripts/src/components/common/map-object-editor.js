@@ -171,6 +171,7 @@ class MapObjectEditorController {
     this.registerMapObjectFromEvent && this.registerMapObjectFromEvent({ mapObjectFromEvent: this.handleMapEntitySelected.bind(this) })
     this.registerHighlightMapObject && this.registerHighlightMapObject({ highlightMapObject: this.highlightMapObject.bind(this) })
     this.registerDehighlightMapObject && this.registerDehighlightMapObject({ dehighlightMapObject: this.dehighlightMapObject.bind(this) })
+    this.registerUpdateMapObjectPosition && this.registerUpdateMapObjectPosition({ updateMapObjectPosition: this.updateMapObjectPosition.bind(this) })
 
     this.state.clearEditingMode.skip(1).subscribe((clear) => {
       if (clear) {
@@ -204,7 +205,7 @@ class MapObjectEditorController {
     var boundsByNetworkNodeObjectId = {}
     menuItems.forEach((menuItem) => {
       var feature = menuItem.feature
-      if (feature && feature.hasOwnProperty('network_node_object_id')) {
+      if (feature && feature.network_node_object_id) {
         bounds.push(feature)
         boundsByNetworkNodeObjectId[feature.network_node_object_id] = menuItem
       }
@@ -293,11 +294,11 @@ class MapObjectEditorController {
           // This should be replaced by something that loops over all created map objects and picks those that are under the cursor.
           var mapObjectIndex = -1
           if (clickedMapObject) {
-            var clickedFeature = {
-              _data_type: this.isMarker(clickedMapObject) ? `equipment.${clickedMapObject.feature.networkNodeType}` : 'equipment_boundary.undefined',
-              object_id: clickedMapObject.objectId,
-              is_deleted: false
-            }
+            var clickedFeature = { ...clickedMapObject.feature }
+            clickedFeature._data_type = clickedFeature.dataType
+            clickedFeature.object_id = clickedFeature.objectId
+            clickedFeature.network_node_object_id = clickedFeature.networkObjectId
+            clickedFeature.is_deleted = false
             results.push(clickedFeature)
             mapObjectIndex = results.length - 1
           }
@@ -1060,7 +1061,9 @@ class MapObjectEditorController {
     // Then select the map object
     if (mapObject) { // Can be null if we are de-selecting everything
       this.highlightMapObject(mapObject)
-      this.selectObjectRedux(mapObject.objectId)
+      this.selectObjectRedux([mapObject.objectId])
+    } else {
+      this.selectObjectRedux([])
     }
 
     if (!isMult) this.selectedMapObject = mapObject
@@ -1090,6 +1093,13 @@ class MapObjectEditorController {
     } else {
       mapObject.setOptions(this.polygonOptions)
       mapObject.setEditable(false)
+    }
+  }
+
+  updateMapObjectPosition (objectId, lat, lng) {
+    const mapObject = this.createdMapObjects[objectId]
+    if (mapObject) {
+      mapObject.setPosition(new google.maps.LatLng(lat, lng))
     }
   }
 
@@ -1324,7 +1334,7 @@ class MapObjectEditorController {
 
   mapDispatchToTarget (dispatch) {
     return {
-      selectObjectRedux: objectId => dispatch(SelectionActions.setPlanEditorFeatures([objectId]))
+      selectObjectRedux: objectIds => dispatch(SelectionActions.setPlanEditorFeatures(objectIds))
     }
   }
 }
@@ -1364,7 +1374,8 @@ let mapObjectEditor = {
     registerSelectProposedFeature: '&',
     registerMapObjectFromEvent: '&',
     registerHighlightMapObject: '&',
-    registerDehighlightMapObject: '&'
+    registerDehighlightMapObject: '&',
+    registerUpdateMapObjectPosition: '&'
   },
   controller: MapObjectEditorController
 }

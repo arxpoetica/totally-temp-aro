@@ -16,8 +16,7 @@
 
 <div>
   <!-- Add a component to handle map editing -->
-  <map-object-editor ng-if="$ctrl.currentTransaction"
-                    map-global-object-name="{{$ctrl.mapGlobalObjectName}}"
+  <map-object-editor map-global-object-name="{{$ctrl.mapGlobalObjectName}}"
                     map-container-id="map-canvas-container"
                     get-object-icon-url="$ctrl.getObjectIconUrl({objectKey, objectValue})"
                     object-selected-icon-url="$ctrl.getObjectIconUrl({objectKey, objectValue})"
@@ -44,7 +43,8 @@
                     register-select-proposed-feature="$ctrl.registerSelectProposedFeature(selectProposedFeature)"
                     register-map-object-from-event="$ctrl.registerMapObjectFromEvent(mapObjectFromEvent)"
                     register-highlight-map-object="$ctrl.registerHighlightMapObject(highlightMapObject)"
-                    register-dehighlight-map-object="$ctrl.registerDehighlightMapObject(dehighlightMapObject)">
+                    register-dehighlight-map-object="$ctrl.registerDehighlightMapObject(dehighlightMapObject)"
+                    register-update-map-object-position="$ctrl.registerUpdateMapObjectPosition(updateMapObjectPosition)">
   </map-object-editor>
   <div style="margin: 10px;">
 
@@ -193,8 +193,8 @@
 
     <!-- Section to show properties when the selected map object is an equipment node -->
     <equipment-properties-editor
-      ng-if="!$ctrl.isMultSelectActive()"
-      request-edit-view-object='$ctrl.editViewObject()'>
+      ng-if="!$ctrl.isMultSelectActive() && ($ctrl.selectedFeatures.length === 1) && ($ctrl.transactionFeatures[$ctrl.selectedFeatures[0]])"
+      update-map-object-position="$ctrl.updateMapObjectPosition(objectId, lat, lng)">
     </equipment-properties-editor>
 
 
@@ -205,9 +205,7 @@
     </div>
 
     <boundary-properties-editor
-      ng-if="!$ctrl.isMultSelectActive()"
-      request-edit-view-object='$ctrl.editViewSiteBoundaryObject()'
-      request-calculate-coverage="$ctrl.onRequestCalculateCoverage()">
+      ng-if="!$ctrl.isMultSelectActive()">
     </boundary-properties-editor>
     <!-- Add a div that will overlay all the controls above. The div will be visible when the controls need to be disabled. -->
     <div class="disable-sibling-controls"

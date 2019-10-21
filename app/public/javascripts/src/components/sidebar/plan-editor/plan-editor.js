@@ -12,6 +12,8 @@ import PlanEditorActions from '../../../react/components/plan-editor/plan-editor
 import MapLayerActions from '../../../react/components/map-layers/map-layer-actions'
 import uuidStore from '../../../shared-utils/uuid-store'
 import WktUtils from '../../../shared-utils/wkt-utils'
+import coverageActions from '../../../react/components/coverage/coverage-actions'
+import CoverageStatusTypes from '../../../react/components/coverage/constants'
 
 class PlanEditorController {
   constructor ($timeout, $http, $element, $filter, $ngRedux, state, Utils, tileDataService, tracker) {
@@ -78,7 +80,6 @@ class PlanEditorController {
     this.multiselectTypes = ['location_connector', 'equipment.location_connector']
     this.additionalSelectionsById = {}
 
-    this.coverageOutput = {}
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
   }
 
@@ -116,6 +117,10 @@ class PlanEditorController {
 
   registerDehighlightMapObject (dehighlightMapObject) {
     this.dehighlightMapObject = dehighlightMapObject
+  }
+
+  registerUpdateMapObjectPosition (updateMapObjectPosition) {
+    this.updateMapObjectPosition = updateMapObjectPosition
   }
 
   $onInit () {
@@ -381,7 +386,7 @@ class PlanEditorController {
           .filter((item) => item.crudAction !== 'delete')
           .map((item) => item.feature)
         this.createMapObjects && this.createMapObjects(features)
-        return this.rebuildAllTransactionSubnets()
+        return this.state.configuration.planEditor.calculateSubnets ? this.rebuildAllTransactionSubnets() : Promise.resolve()
       })
       .catch((err) => {
       // Log the error, then get out of "plan edit" mode.
@@ -454,36 +459,6 @@ class PlanEditorController {
     }
   }
 
-  onRequestCalculateCoverage () {
-    if (this.selectedMapObject && !this.isMarker(this.selectedMapObject)) {
-      var mapObject = this.selectedMapObject
-      // ToDo: fix. more of these terrible discrepancies
-      var networkObjectId = mapObject.feature.networkObjectId
-      if (typeof networkObjectId === 'undefined') {
-        networkObjectId = mapObject.feature.attributes.network_node_object_id
-      }
-
-      var equipmentPoint = {
-        type: 'Point',
-        coordinates: []
-      }
-
-      if (this.objectIdToMapObject.hasOwnProperty(networkObjectId)) {
-        // we have an edited version of the equipment point
-        equipmentPoint.coordinates = [this.objectIdToMapObject[networkObjectId].position.lng(), this.objectIdToMapObject[networkObjectId].position.lat()]
-        this.calculateCoverage(mapObject, equipmentPoint)
-      } else {
-        // we do not have an edited version of the equipment point, get ti from the server
-        var planId = this.state.plan.id
-        this.$http.get(`/service/plan-feature/${planId}/equipment/${networkObjectId}?userId=${this.state.loggedInUser.id}`)
-          .then((result) => {
-            equipmentPoint = result.data.geometry
-            this.calculateCoverage(mapObject, equipmentPoint)
-          })
-      }
-    }
-  }
-
   // Note: similar code as calculateCoverage(), not sure we can combine them
   calculateAutoBoundary (mapObject, spatialEdgeType, directed) {
     // Get the POST body for optimization based on the current application state
@@ -547,45 +522,6 @@ class PlanEditorController {
         console.error(err)
         this.isWorkingOnCoverage = false
       })
-  }
-
-  // Note: similar code as calculateAutoBoundary(), not sure we can combine them
-  calculateCoverage (mapObject, equipmentPoint, directed) {
-    // Get the POST body for optimization based on the current application state
-    var optimizationBody = this.state.getOptimizationBody()
-    // Replace analysis_type and add a point and radius
-    optimizationBody.boundaryCalculationType = 'FIXED_POLYGON'
-    optimizationBody.analysis_type = 'COVERAGE'
-
-    optimizationBody.point = equipmentPoint
-    // Get the polygon from the mapObject, not mapObject.feature.geometry, as the user may have edited the map object
-    optimizationBody.polygon = this.polygonPathsToWKT(mapObject.getPaths())
-
-    // optimizationBody.spatialEdgeType = spatialEdgeType;
-    optimizationBody.directed = directed // directed analysis if thats what the user wants
-
-    this.isWorkingOnCoverage = true
-    this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
-      .then((result) => {
-      // The user may have destroyed the component before we get here. In that case, just return
-        if (this.isComponentDestroyed) {
-          console.warn('Plan editor was closed while a boundary was being calculated')
-          return
-        }
-        this.computedBoundaries.add(mapObject.feature.objectId)
-        this.digestBoundaryCoverage(mapObject.feature, result.data, true)
-
-        this.isWorkingOnCoverage = false
-      })
-      .catch((err) => {
-        console.error(err)
-        this.isWorkingOnCoverage = false
-      })
-  }
-
-  digestBoundaryCoverage (feature, coverageData, forceUpdate) {
-    if (typeof forceUpdate === 'undefined') forceUpdate = false
-    this.coverageOutput = { 'feature': feature, 'data': coverageData, 'forceUpdate': forceUpdate }
   }
 
   objKeys (obj) {
@@ -1103,6 +1039,8 @@ class PlanEditorController {
         const equipmentNode = AroFeatureFactory.createObject({ dataType: 'equipment' })
         // --- new be sure to set subnet ---
         equipmentNode.objectId = mapObject.objectId
+        equipmentNode.geometry = JSON.parse(JSON.stringify(mapObject.feature.geometry))
+        equipmentNode.networkNodeType = mapObject.feature.networkNodeType
         this.addEquipmentNodes([{ feature: equipmentNode }])
         var blankNetworkNodeEquipment = equipmentNode.networkNodeEquipment
         this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties('', '', feature.networkNodeType, this.lastSelectedEquipmentType, blankNetworkNodeEquipment, 'PLANNED', 'sewer')
@@ -1228,7 +1166,8 @@ class PlanEditorController {
         .then((result) => {
           var equipmentObject = result.data.filter((item) => item.objectId === mapObject.objectId)[0]
           equipmentObject.geometry.coordinates = [mapObject.position.lng().toFixed(6), mapObject.position.lat().toFixed(6)] // Note - longitude, then latitude
-          return this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
+          // return this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
+          return this.modifyEquipmentFeature(this.currentTransaction.id, { feature: equipmentObject })
         })
         .then((result) => {
           this.objectIdToProperties[mapObject.objectId].isDirty = false
@@ -1270,8 +1209,10 @@ class PlanEditorController {
       boundaryProperties.selectedSiteMoveUpdate = 'Don\'t update'
       this.$timeout()
       var serviceFeature = this.formatBoundaryForService(mapObject.objectId)
-      this.$http.put(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`, serviceFeature)
-        .catch((err) => console.error(err))
+      // Update the geometry
+      serviceFeature.geometry = WktUtils.getWKTPolygonFromGoogleMapPath(mapObject.getPaths().getAt(0))
+      this.modifyEquipmentBoundaryFeature(this.currentTransaction.id, { feature: serviceFeature })
+      this.clearCoverageForBoundary(mapObject.objectId)
     }
   }
 
@@ -1656,6 +1597,7 @@ class PlanEditorController {
     this.keyClickObserver.unsubscribe()
     this.clickObserver.unsubscribe()
     this.clearAllLocationHighlights()
+    this.clearBoundaryCoverage()
     // this.highlightLocations()
     // todo: if keep unsaved, still can't run analysis
     if (this.currentTransaction) {
@@ -1692,6 +1634,7 @@ class PlanEditorController {
       planId: reduxState.plan.activePlan.id,
       currentTransaction: reduxState.planEditor.transaction,
       transactionFeatures: reduxState.planEditor.features,
+      selectedFeatures: reduxState.selection.planEditorFeatures,
       isPlanEditorActive: reduxState.planEditor.isPlanEditorActive,
       isCalculatingSubnets: reduxState.planEditor.isCalculatingSubnets,
       isCreatingObject: reduxState.planEditor.isCreatingObject,
@@ -1712,13 +1655,17 @@ class PlanEditorController {
       resumeOrCreateTransaction: (planId, userId) => dispatch(PlanEditorActions.resumeOrCreateTransaction(planId, userId)),
       deleteTransactionFeature: (transactionId, featureType, transactionFeature) => dispatch(PlanEditorActions.deleteTransactionFeature(transactionId, featureType, transactionFeature)),
       addEquipmentNodes: equipmentNodes => dispatch(PlanEditorActions.addTransactionFeatures(equipmentNodes)),
+      modifyEquipmentFeature: (transactionId, feature) => dispatch(PlanEditorActions.modifyFeature('equipment', transactionId, feature)),
+      modifyEquipmentBoundaryFeature: (transactionId, feature) => dispatch(PlanEditorActions.modifyFeature('equipment_boundary', transactionId, feature)),
       setNetworkEquipmentLayerVisibility: (layer, isVisible) => dispatch(MapLayerActions.setNetworkEquipmentLayerVisibility('cables', layer, isVisible)),
       setIsCalculatingSubnets: isCalculatingSubnets => dispatch(PlanEditorActions.setIsCalculatingSubnets(isCalculatingSubnets)),
       setIsCreatingObject: isCreatingObject => dispatch(PlanEditorActions.setIsCreatingObject(isCreatingObject)),
       setIsModifyingObject: isModifyingObject => dispatch(PlanEditorActions.setIsModifyingObject(isModifyingObject)),
       setIsEditingFeatureProperties: isEditing => dispatch(PlanEditorActions.setIsEditingFeatureProperties(isEditing)),
       viewEquipmentProperties: (planId, equipmentObjectId, transactionFeatures) => dispatch(PlanEditorActions.viewFeatureProperties('equipment', planId, equipmentObjectId, transactionFeatures)),
-      viewBoundaryProperties: (planId, boundaryObjectId, transactionFeatures) => dispatch(PlanEditorActions.viewFeatureProperties('equipment_boundary', planId, boundaryObjectId, transactionFeatures))
+      viewBoundaryProperties: (planId, boundaryObjectId, transactionFeatures) => dispatch(PlanEditorActions.viewFeatureProperties('equipment_boundary', planId, boundaryObjectId, transactionFeatures)),
+      clearCoverageForBoundary: objectId => dispatch(coverageActions.addBoundaryCoverage(objectId, null)),
+      clearBoundaryCoverage: () => dispatch(coverageActions.clearBoundaryCoverage())
     }
   }
 

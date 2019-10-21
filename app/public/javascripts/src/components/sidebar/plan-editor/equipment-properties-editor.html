@@ -15,13 +15,6 @@
     <span>
       {{$ctrl.state.configuration.networkEquipment.equipments[$ctrl.viewFeature.networkNodeType].label}}
     </span>
-
-    <button ng-class="{ 'btn ei-panel-header-btn-set ei-foldout-header-btn mt-1': true,
-              'btn-light': $ctrl.viewFeature.attributes.is_locked === 'true' || $ctrl.transactionFeatures[$ctrl.viewFeature.objectId],
-              'btn-primary': $ctrl.viewFeature.attributes.is_locked !== 'true' && !$ctrl.transactionFeatures[$ctrl.viewFeature.objectId] }"
-      ng-disabled="$ctrl.viewFeature.attributes.is_locked === 'true' || $ctrl.transactionFeatures[$ctrl.viewFeature.objectId]" ng-click="$ctrl.requestEditViewObject()">
-      Edit
-    </button>
     <div class='d-flex flex-row mt-2' style="align-items: center;">
       <div class='flex-grow-1 flex-shrink-1'></div>
       <div class='flex-grow-0 flex-shrink-0 equipment-properties-lat-lng-label'>
@@ -31,7 +24,7 @@
         <pre ng-if="!$ctrl.isEditingFeatureProperties" style="display: inline;">{{$ctrl.viewFeature.geometry.coordinates[1] | number : 6}}</pre>
 
         <input ng-if="$ctrl.isEditingFeatureProperties" type="number" class="form-control form-control-sm"
-          ng-model="$ctrl.viewFeature.geometry.coordinates[1]" ng-model-options="{ debounce: 100 }" step="0.000001"
+          ng-model="$ctrl.viewFeature.geometry.coordinates[1]" ng-model-options="{ allowInvalid: true, debounce: 100 }" step="0.000001"
           ng-change="$ctrl.markAsDirty()" style="width: 95px;">
       </div>
       <div class='flex-grow-0 flex-shrink-0' style="width: 10px;"></div>
@@ -42,7 +35,7 @@
         <pre ng-if="!$ctrl.isEditingFeatureProperties" style="display: inline;">{{$ctrl.viewFeature.geometry.coordinates[0] | number : 6}}</pre>
 
         <input ng-if="$ctrl.isEditingFeatureProperties" type="number" class="form-control form-control-sm"
-          ng-model="$ctrl.viewFeature.geometry.coordinates[0]" ng-model-options="{ debounce: 100 }" step="0.000001"
+          ng-model="$ctrl.viewFeature.geometry.coordinates[0]" ng-model-options="{ allowInvalid: true, debounce: 100 }" step="0.000001"
           ng-change="$ctrl.markAsDirty()" style="width: 95px;">
       </div>
       <div class='flex-grow-1 flex-shrink-1'></div>

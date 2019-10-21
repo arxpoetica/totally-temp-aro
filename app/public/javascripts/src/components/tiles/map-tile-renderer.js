@@ -480,7 +480,7 @@ class MapTileRenderer {
           // continue // Do not render any features that are part of a transaction
         }
 
-        if (mapLayer.hasOwnProperty('subtypes')) {
+        if (mapLayer.subtypes) {
           if (feature.properties.hasOwnProperty('subtype_id')) {
             // filter off subtypes
             if (!mapLayer.subtypes.hasOwnProperty(feature.properties.subtype_id) || !mapLayer.subtypes[feature.properties.subtype_id]) continue

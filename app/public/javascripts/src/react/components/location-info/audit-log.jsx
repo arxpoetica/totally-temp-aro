@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { PropTypes } from 'prop-types'
+import moment from 'moment'
 import '../../../../../javascripts/src/shared-utils/editor-interfaces.css'
 import LocationInfoActions from './location-info-actions'
 
@@ -53,7 +54,11 @@ export class AuditLog extends Component {
               </thead>
               <tbody>
                 { this.props.auditLog.libraryAudit.map((element, index) => (
-                  <tr key={index}><td>{element.modifiedDate}</td><td>{element.userName}</td><td>{element.crudAction}</td></tr>
+                  <tr key={index}>
+                    <td>{moment(element.modifiedDate).format('MM/DD/YYYY H:mm ([GMT] ZZ)')}</td>
+                    <td>{element.userName}</td>
+                    <td>{element.crudAction}</td>
+                  </tr>
                 ))}
               </tbody>
             </table>

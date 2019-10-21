@@ -85,7 +85,7 @@ function createFeature (featureType, transactionId, feature) {
 function modifyFeature (featureType, transactionId, feature) {
   return dispatch => {
     // Do a PUT to send the equipment over to service
-    AroHttp.put(`/service/plan-transactions/${transactionId}/modified-features/${featureType}`, feature.feature)
+    return AroHttp.put(`/service/plan-transactions/${transactionId}/modified-features/${featureType}`, feature.feature)
       .then(result => {
         // Decorate the created feature with some default values
         const newFeature = {
@@ -96,6 +96,7 @@ function modifyFeature (featureType, transactionId, feature) {
           type: Actions.PLAN_EDITOR_MODIFY_FEATURES,
           payload: [newFeature]
         })
+        return Promise.resolve()
       })
       .catch(err => console.error(err))
   }
