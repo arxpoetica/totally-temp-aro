@@ -18,13 +18,6 @@
         <!-- Section header showing the type of the selected object -->
         <div class="sidebar-table-header">
           <span>Site Boundary</span>
-          <button
-            ng-if="!$ctrl.isEditingFeatureProperties"
-            ng-class="{ 'btn ei-panel-header-btn-set ei-foldout-header-btn': true,
-              'btn-light': $ctrl.viewBoundaryProps.attributes.is_locked === 'true',
-              'btn-primary': $ctrl.viewBoundaryProps.attributes.is_locked !== 'true' }"
-            ng-disabled="$ctrl.viewBoundaryProps.attributes.is_locked === 'true'"
-            ng-click="$ctrl.requestEditViewObject()">Edit</button>
         </div>
     </thead>
     <tbody>
@@ -93,14 +86,11 @@
   <hr class="plan-editor-hr">
   
   <button class="btn btn-primary btn-sm" 
-    ng-click="$ctrl.requestCalculateCoverage()">
+    ng-click="$ctrl.calculateCoverage()">
     Calculate Coverage
   </button>
-<!--   
-  <boundary-coverage 
-    bounds-input="$ctrl.coverageOutput"
-    parent-selected-object-id="$ctrl.selectedObjectId"
-    is-working-override="$ctrl.isWorkingOnCoverage">
+  
+  <boundary-coverage ng-if="$ctrl.isBoundaryCoverageVisible">
   </boundary-coverage>
-   -->
+  
 </div>

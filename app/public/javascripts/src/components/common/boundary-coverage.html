@@ -37,10 +37,10 @@
 </div>
 
 
-<div ng-if="$ctrl.boundaryCoverageById.hasOwnProperty($ctrl.parentSelectedObjectId)">
+<div ng-if="$ctrl.selectedBoundaryCoverage">
   <div class="ei-header bounds-coverage-header">
-    Site boundary coverage: {{$ctrl.boundaryCoverageById[$ctrl.parentSelectedObjectId].totalLocations}} 
-    <div class="bounds-coverage-header-sub" ng-repeat="(locationType, locationData) in $ctrl.boundaryCoverageById[$ctrl.parentSelectedObjectId].locations">
+    Site boundary coverage: {{$ctrl.selectedBoundaryCoverage.totalLocations}} 
+    <div class="bounds-coverage-header-sub" ng-repeat="(locationType, locationData) in $ctrl.selectedBoundaryCoverage.locations">
       {{locationData.locationType}}: {{locationData.totalCount}}
     </div>
   </div>
@@ -49,8 +49,8 @@
     <div class="ei-header bounds-coverage-header">
       Locations by Census Block Tag
     </div>
-    <div class="bounds-coverage-census-tag" ng-if="$ctrl.objKeys($ctrl.boundaryCoverageById[$ctrl.parentSelectedObjectId].tagCounts).length < 1">none</div>
-    <div ng-repeat="cat in $ctrl.boundaryCoverageById[$ctrl.parentSelectedObjectId].tagCounts">
+    <div class="bounds-coverage-census-tag" ng-if="$ctrl.objKeys($ctrl.selectedBoundaryCoverage.tagCounts).length < 1">none</div>
+    <div ng-repeat="cat in $ctrl.selectedBoundaryCoverage.tagCounts">
       <div class="ei-property-item bounds-coverage-census-cat">
         {{cat.description}}
       </div>
