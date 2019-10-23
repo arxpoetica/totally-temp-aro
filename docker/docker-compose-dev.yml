@@ -42,6 +42,7 @@ services:
             - ../../aro-data:/srv/www/aro/data
         ports:
             - "8000:8000"
+            - "9229:9229"
         links:
             - db:arodb
             - service:aro-service
