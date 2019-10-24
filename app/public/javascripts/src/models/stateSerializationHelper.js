@@ -11,7 +11,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   // ------------------------------------------------------------------------------------------------------------------
 
   // Get a POST body that we will send to aro-service for performing optimization
-  stateSerializationHelper.getOptimizationBody = (state, reduxState) => {
+  stateSerializationHelper.getOptimizationBody = (state, networkAnalysisConstraints, projectNetworkConfiguration, reduxState) => {
     var optimizationBody = {
       planId: state.plan.id,
       projectTemplateId: state.loggedInUser.projectId,
@@ -26,6 +26,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     optimizationBody.fronthaulOptimization = state.optimizationOptions.fronthaulOptimization
 
     addNetworkAnalysisType(state, optimizationBody)
+    addNetworkConfigurationOverride(state, networkAnalysisConstraints, projectNetworkConfiguration, optimizationBody)
 
     return optimizationBody
   }
@@ -165,6 +166,25 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     }
   }
 
+  var addNetworkConfigurationOverride = (state, networkAnalysisConstraints, projectNetworkConfiguration, postBody) => {
+    const routingMode = state.optimizationOptions.networkConstraints.routingMode
+    if (projectNetworkConfiguration[routingMode]) {
+      // Make a copy of the network configuration for the current routing mode (e.g. ODN_1, etc)
+      postBody.networkConfigurationOverride = angular.copy(projectNetworkConfiguration[routingMode])
+
+      // Add overrides
+      postBody.networkConfigurationOverride.fusionRuleConfig = postBody.networkConfigurationOverride.fusionRuleConfig || {}
+      postBody.networkConfigurationOverride.fusionRuleConfig.connectivityDefinition = state.networkAnalysisConnectivityDefinition
+
+      postBody.networkConfigurationOverride.fusionRuleConfig.snappingDistance = +networkAnalysisConstraints.snappingDistance.value
+      postBody.networkConfigurationOverride.fusionRuleConfig.maxConnectionDistance = +networkAnalysisConstraints.maxConnectionDistance.value
+      postBody.networkConfigurationOverride.fusionRuleConfig.maxWormholeDistance = +networkAnalysisConstraints.maxWormholeDistance.value
+
+      postBody.networkConfigurationOverride.fiberConstraintConfig = postBody.networkConfigurationOverride.fiberConstraintConfig || {}
+      postBody.networkConfigurationOverride.fiberConstraintConfig.maxLocationToEdgeDistance = +networkAnalysisConstraints.maxLocationEdgeDistance.value
+    }
+  }
+
   // ------------------------------------------------------------------------------------------------------------------
   // End section - state to POST body
   // ------------------------------------------------------------------------------------------------------------------
@@ -174,13 +194,14 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   // ------------------------------------------------------------------------------------------------------------------
 
   // Load optimization options from a JSON string
-  stateSerializationHelper.loadStateFromJSON = (state, reduxState, dispatchers, planInputs) => {
+  stateSerializationHelper.loadStateFromJSON = (state, reduxState, dispatchers, planInputs, defaultNetworkConstraints) => {
     loadAnalysisTypeFromBody(state, planInputs)
     loadLocationTypesFromBody(state, reduxState, dispatchers, planInputs)
     loadSelectedExistingFiberFromBody(state, reduxState, dispatchers, planInputs)
     loadAlgorithmParametersFromBody(state, dispatchers, planInputs)
     loadFiberNetworkConstraintsFromBody(state, planInputs)
     loadTechnologiesFromBody(state, planInputs)
+    loadNetworkConfigurationOverrideFromBody(dispatchers, planInputs, defaultNetworkConstraints)
   }
 
   // Load analysis type from a POST body object that is sent to the optimization engine
@@ -330,6 +351,29 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       var matchedTechnology = Object.keys(state.optimizationOptions.technologies).filter((technologyKey) => technologyKey.toUpperCase() === networkType.toUpperCase())[0]
       state.optimizationOptions.technologies[matchedTechnology].checked = true
     })
+  }
+
+  var loadNetworkConfigurationOverrideFromBody = (dispatchers, planInputs, defaultNetworkConstraints) => {
+    if (planInputs.networkConfigurationOverride) {
+      // We have a network configuration override, set the network constraints
+      var aroNetworkConstraints = angular.copy(defaultNetworkConstraints)
+      const frConfig = planInputs.networkConfigurationOverride.fusionRuleConfig
+      if (frConfig) {
+        aroNetworkConstraints.snappingDistance.value = frConfig.snappingDistance
+        aroNetworkConstraints.maxConnectionDistance.value = frConfig.maxConnectionDistance
+        aroNetworkConstraints.maxWormholeDistance.value = frConfig.maxWormholeDistance
+        if (frConfig.connectivityDefinition) {
+          Object.keys(frConfig.connectivityDefinition).forEach(spatialEdgeType => {
+            dispatchers.setNetworkAnalysisConnectivityDefinition(spatialEdgeType, frConfig.connectivityDefinition[spatialEdgeType])
+          })
+        }
+      }
+      const fcConfig = planInputs.networkConfigurationOverride.fiberConstraintConfig
+      if (fcConfig) {
+        aroNetworkConstraints.maxLocationEdgeDistance.value = fcConfig.maxLocationToEdgeDistance
+      }
+      dispatchers.setNetworkAnalysisConstraints(aroNetworkConstraints)
+    }
   }
 
   // ------------------------------------------------------------------------------------------------------------------

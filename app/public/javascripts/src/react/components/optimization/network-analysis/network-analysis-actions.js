@@ -39,6 +39,25 @@ function loadReport (planId) {
   }
 }
 
+function setNetworkAnalysisConnectivityDefinition (spatialEdgeType, networkConnectivityType) {
+  return {
+    type: Actions.NETWORK_ANALYSIS_SET_CONNECTIVITY,
+    payload: {
+      spatialEdgeType,
+      networkConnectivityType
+    }
+  }
+}
+
+function setNetworkAnalysisConstraints (aroNetworkConstraints) {
+  return {
+    type: Actions.NETWORK_ANALYSIS_SET_CONSTRAINTS,
+    payload: aroNetworkConstraints
+  }
+}
+
 export default {
-  loadReport: loadReport
+  loadReport,
+  setNetworkAnalysisConnectivityDefinition,
+  setNetworkAnalysisConstraints
 }

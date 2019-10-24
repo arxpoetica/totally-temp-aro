@@ -41,348 +41,361 @@
     
   </style>
   <div ng-style="!$ctrl.areControlsEnabled() && {'position':'relative'}" style="height: 100%">
-  <table id="tblNetworkAnalysisBuild" class="table table-sm table-striped">
-    
-    
-    <!-- NETWORK_PLAN only section -->
-    <tbody ng-if="$ctrl.state.networkAnalysisType.id === 'NETWORK_PLAN'">
-      <tr class="liteStripe">
-        <td>Optimization Type</td>
-        <td> 
-          <select class="form-control"
-            ng-model="$ctrl.state.optimizationOptions.uiSelectedAlgorithm"
-            ng-options="item as item.label for item in $ctrl.state.optimizationOptions.uiAlgorithms">
-          </select>
-        </td>
-      </tr>
-      <tr class="mergeRowAbove" ng-if="$ctrl.state.optimizationOptions.uiSelectedAlgorithm.id === 'IRR_THRESH'">
-        <td>Segment IRR Floor</td>
-        <td>
-          <div class="form-group form-group-sm">
-            <div class="input-group input-group-sm">
-              <input
-                type="number" step="0.1"
-                ng-model="$ctrl.state.optimizationOptions.preIrrThreshold"
-                class="form-control text-right"
-                percentage-input>
-              <div class="input-group-addon">%</div>
-            </div>
-          </div>
-        </td>
-      </tr>
-      <tr class="mergeRowAbove" ng-if="$ctrl.state.optimizationOptions.uiSelectedAlgorithm.id === 'IRR_TARGET'">
-        <td>Plan IRR Floor</td>
-        <td>
-          <div class="form-group form-group-sm">
-            <div class="input-group input-group-sm">
-              <input
-                type="number" step="0.1"
-                ng-model="$ctrl.state.optimizationOptions.threshold"
-                class="form-control text-right"
-                percentage-input>
-              <div class="input-group-addon">%</div>
-            </div>
-          </div>
-        </td>
-      </tr>
-      <tr class="mergeRowAbove" ng-if="$ctrl.state.optimizationOptions.uiSelectedAlgorithm.id === 'BUDGET' || $ctrl.state.optimizationOptions.uiSelectedAlgorithm.id === 'IRR_TARGET'">
-        <td>Target Capital <div class="line-break-item">({{ $ctrl.config.currency_symbol }} thousands)</div></td>
-        <td> 
-          <div class="input-group input-group-sm">
-            <input type="text" class="form-control text-right" placeholder="Amount"
-              ng-model="$ctrl.budgetDisplay"
-              ng-change="$ctrl.onBudgetChange()"
-              ng-model-options="{ debounce: 500 }"
-              format="number">
-            <div class="input-group-addon">{{ $ctrl.config.currency_symbol }}K</div>
-          </div>
-        </td>
-      </tr>
-      <tr class="mergeRowAbove" ng-if="$ctrl.state.optimizationOptions.uiSelectedAlgorithm.id === 'COVERAGE'">
-        <td>Coverage Target</td>
-        <td>
-          <div class="row">
-             <div class="col-md-6">
-               <input
-                 type="range"
-                 min="0"
-                 max="1"
-                 step="0.001"
-                 ng-model="$ctrl.state.optimizationOptions.threshold"
-                 style="margin-top: 10px; width:100%">
-             </div>
-             <div class="col-md-6">
-               <div class="form-group form-group-sm">
-                 <div class="input-group input-group-sm">
-                   <input id="coverageTargetValue"
-                     type="number" step="0.1"
-                     ng-model="$ctrl.state.optimizationOptions.threshold"
-                     class="form-control text-right"
-                     percentage-input>
-                   <div class="input-group-addon">%</div>
-                 </div>
-               </div>
-             </div>
-          </div>
-        </td>
-      </tr>
-    </tbody>  
-    
-    
-    <!-- NETWORK_ANALYSIS only section -->
-    <!-- 
-    <tbody ng-if="$ctrl.state.networkAnalysisType.id === 'NETWORK_ANALYSIS'">
-    </tbody>  
-    -->
-    
-    
-    <!-- common NETWORK_PLAN and NETWORK_ANALYSIS section -->
-    <tbody>
-      <tr>
-        <td>Endpoint Technology</td>
-        <td>
-          <button ng-class="{'btn btn-sm': true, 'btn-light': !$ctrl.state.optimizationOptions.technologies.Fiber.checked,
-                             'btn-primary': $ctrl.state.optimizationOptions.technologies.Fiber.checked }"
-            ng-click="$ctrl.onFiberClicked()">
-            Fiber
-          </button>
-          <div class="btn-group btn-group-sm">
-            <button ng-class="{'btn': true, 'btn-light': !$ctrl.state.optimizationOptions.technologies.FiveG.checked,
-                               'btn-primary': $ctrl.state.optimizationOptions.technologies.FiveG.checked}"
-                    ng-click="$ctrl.onFiveGClicked(technologyKey)">
-              5G
-            </button>
-            <button ng-class="{'btn': true, 'btn-light': !$ctrl.state.optimizationOptions.technologies.Copper.checked,
-                               'btn-primary': $ctrl.state.optimizationOptions.technologies.Copper.checked}"
-                    ng-click="$ctrl.onCopperClicked(technologyKey)">
-              DSL
-            </button>
-          </div>
-          <button ng-class="{'btn btn-sm': true, 'btn-light': !$ctrl.state.optimizationOptions.networkConstraints.advancedAnalysis,
-                             'btn-primary': $ctrl.state.optimizationOptions.networkConstraints.advancedAnalysis}"
-                             ng-click="$ctrl.onAdvancedAnalysisClicked()">
-            Advanced
-          </button>
-        </td>
-      </tr>
-      <!-- Options to show if 5G is selected-->
-      <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked || $ctrl.state.optimizationOptions.networkConstraints.advancedAnalysis">
-        <td class="indent-1">Polygon Type</td>
-        <td> 
-          <select class="form-control"
-                  ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.polygonStrategy">
-            <option value="FIXED_RADIUS">Fixed Radius</option>
-            <option value="AVERAGE_RADIUS">Average Radius</option>
-            <option value="RAY_TRACING">Ray Tracing</option>
-          </select>
-        </td>
-      </tr>
-      <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked || $ctrl.state.optimizationOptions.networkConstraints.advancedAnalysis">
-        <td class="indent-1">Radius (m)</td>
-        <td> 
-          <input type="text" class="form-control text-right" placeholder="Cell Radius"
-            ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.cellRadius">
-        </td>
-      </tr>
-      <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked || $ctrl.state.optimizationOptions.networkConstraints.advancedAnalysis">
-        <td class="indent-1">Granularity Ratio</td>
-        <td>
-          <input type="text" class="form-control text-right" placeholder="Granularity Ratio"
-            ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.cellGranularityRatio">
-        </td>
-      </tr>
-      <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked || $ctrl.state.optimizationOptions.networkConstraints.advancedAnalysis">
-        <td class="indent-1">Minimum Ray Length</td>
-        <td>
-          <input type="text" class="form-control text-right" placeholder="Minimum Ray Length"
-            ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.minimumRayLength">
-        </td>
-      </tr>
-
-      <!-- Options to show if Copper (DSL) is selected -->
-      <tr ng-if="$ctrl.state.optimizationOptions.technologies.Copper.checked">
-        <td class="indent-1">Placement interval (m)</td>
-        <td> 
-          <input type="text" class="form-control text-right" placeholder="Placement interval"
-            ng-model="$ctrl.state.optimizationOptions.networkConstraints.dslamNodeConstraints.cellRadius">
-        </td>
-      </tr>
-      <tr ng-if="$ctrl.state.optimizationOptions.technologies.Copper.checked">
-        <td class="indent-1">Target speed</td>
-        <td>
-          <!-- <input type="text" class="form-control text-right" placeholder="Target speed"
-            ng-model="$ctrl.state.optimizationOptions.networkConstraints.dslamNodeConstraints.optimizationSpeedMbs"> -->
-          <select class="form-control"
-                  ng-model="$ctrl.state.optimizationOptions.networkConstraints.dslamNodeConstraints.optimizationSpeedMbs"
-                  ng-options="item.speed as item.description for item in $ctrl.rateReachCategories">
-          </select>
-        </td>
-      </tr>
-
-      <tr>
-        <td width="48%">Network Construction</td>
-        <td> 
-          <select class="form-control"
-                  ng-model="$ctrl.state.optimizationOptions.networkConstraints.routingMode"
-                  ng-options="key as value.label for (key, value) in $ctrl.state.routingModes">
-          </select>
-        </td>
-      </tr>
-      <tr>
-        <th colspan=2 id="pointer" ng-click="$ctrl.toggleAdvanceSettings = !$ctrl.toggleAdvanceSettings"
-          style="cursor: pointer; vertical-align: middle;">
-          <i class="far fa-plus-square ei-foldout-icon" ng-if="!$ctrl.toggleAdvanceSettings"></i>
-          <i class="far fa-minus-square ei-foldout-icon" ng-if="$ctrl.toggleAdvanceSettings"></i>
-          Advanced Settings
-        </th>
-      </tr>  
-      <tr ng-if="$ctrl.toggleAdvanceSettings">
-        <td>Other Settings</td>
-        <td> 
-          <input type="checkbox"
-                 class="checkboxfill"
-                 ng-model="$ctrl.state.optimizationOptions.generatedDataRequest.generatePlanLocationLinks"
-                 name="ctype-name"> Save Routed Locations
-          <br><input type="checkbox"
-                 class="checkboxfill"
-                 ng-model="$ctrl.state.optimizationOptions.generatedDataRequest.generateSubnetLinking"
-                 name="ctype-name"> Equipment Linking
-          <br><input type="checkbox"
-                 class="checkboxfill"
-                 ng-model="$ctrl.state.optimizationOptions.networkConstraints.routeFromFiber"
-                 name="ctype-name"> Route From Existing Fiber                 
-        </td>
-      </tr>
-      <tr ng-if="$ctrl.toggleAdvanceSettings">
-        <td>Pruning Strategy</td>
-        <td>
-          <select class="form-control"
-            ng-model="$ctrl.state.optimizationOptions.fronthaulOptimization.optimizationMode"
-            ng-options="item.id as item.label for item in $ctrl.state.pruningStrategyTypes">
-          </select>
-        </td>
-      </tr>
-      <tr ng-if="$ctrl.toggleAdvanceSettings">
-        <td>Discount Rate</td>
-        <td>
-          <div class="input-group input-group-sm">
-            <input type="number" step="0.1"
-              ng-model="$ctrl.state.optimizationOptions.financialConstraints.discountRate"
-              class="form-control text-right"
-              min="0" max="500"
-              percentage-input>
-            <div class="input-group-addon">%</div>
-          </div>
-        </td>
-      </tr>
+    <table id="tblNetworkAnalysisBuild" class="table table-sm table-striped">
       
-      <tr ng-if="$ctrl.toggleAdvanceSettings">
-        <td>
-          Terminal Value
-          
-          <div class="additional-cell-row"
-            ng-if="$ctrl.state.terminalValueStrategyTypes['FIXED_MULTIPLIER'].id === $ctrl.state.optimizationOptions.financialConstraints.terminalValueStrategy.terminalValueStrategyType">
-            Terminal Multiple
-          </div>
-          
-          <div class="additional-cell-row"
-            ng-if="$ctrl.state.terminalValueStrategyTypes['PERPUTUAL_GROWTH'].id === $ctrl.state.optimizationOptions.financialConstraints.terminalValueStrategy.terminalValueStrategyType">
-            Growth Rate
-          </div>
-          
-        </td>
-        <td>
-          <select class="form-control"
-            ng-model="$ctrl.state.optimizationOptions.financialConstraints.terminalValueStrategy.terminalValueStrategyType"
-            ng-options="item.id as item.label for item in $ctrl.state.terminalValueStrategyTypes">
-          </select>
-          
-          <div class="additional-cell-row"
-            ng-if="$ctrl.state.terminalValueStrategyTypes['FIXED_MULTIPLIER'].id === $ctrl.state.optimizationOptions.financialConstraints.terminalValueStrategy.terminalValueStrategyType">
-            <input type="number" step="0.1"
-              ng-model="$ctrl.state.optimizationOptions.financialConstraints.terminalValueStrategy.value"
-              class="form-control text-right"
-              min="0.0">
-          </div>
-          
-          <div ng-if="$ctrl.state.terminalValueStrategyTypes['PERPUTUAL_GROWTH'].id === $ctrl.state.optimizationOptions.financialConstraints.terminalValueStrategy.terminalValueStrategyType">
-            <div class="input-group input-group-sm additional-cell-row">
+      
+      <!-- NETWORK_PLAN only section -->
+      <tbody ng-if="$ctrl.state.networkAnalysisType.id === 'NETWORK_PLAN'">
+        <tr class="liteStripe">
+          <td>Optimization Type</td>
+          <td> 
+            <select class="form-control"
+              ng-model="$ctrl.state.optimizationOptions.uiSelectedAlgorithm"
+              ng-options="item as item.label for item in $ctrl.state.optimizationOptions.uiAlgorithms">
+            </select>
+          </td>
+        </tr>
+        <tr class="mergeRowAbove" ng-if="$ctrl.state.optimizationOptions.uiSelectedAlgorithm.id === 'IRR_THRESH'">
+          <td>Segment IRR Floor</td>
+          <td>
+            <div class="form-group form-group-sm">
+              <div class="input-group input-group-sm">
+                <input
+                  type="number" step="0.1"
+                  ng-model="$ctrl.state.optimizationOptions.preIrrThreshold"
+                  class="form-control text-right"
+                  percentage-input>
+                <div class="input-group-addon">%</div>
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr class="mergeRowAbove" ng-if="$ctrl.state.optimizationOptions.uiSelectedAlgorithm.id === 'IRR_TARGET'">
+          <td>Plan IRR Floor</td>
+          <td>
+            <div class="form-group form-group-sm">
+              <div class="input-group input-group-sm">
+                <input
+                  type="number" step="0.1"
+                  ng-model="$ctrl.state.optimizationOptions.threshold"
+                  class="form-control text-right"
+                  percentage-input>
+                <div class="input-group-addon">%</div>
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr class="mergeRowAbove" ng-if="$ctrl.state.optimizationOptions.uiSelectedAlgorithm.id === 'BUDGET' || $ctrl.state.optimizationOptions.uiSelectedAlgorithm.id === 'IRR_TARGET'">
+          <td>Target Capital <div class="line-break-item">({{ $ctrl.config.currency_symbol }} thousands)</div></td>
+          <td> 
+            <div class="input-group input-group-sm">
+              <input type="text" class="form-control text-right" placeholder="Amount"
+                ng-model="$ctrl.budgetDisplay"
+                ng-change="$ctrl.onBudgetChange()"
+                ng-model-options="{ debounce: 500 }"
+                format="number">
+              <div class="input-group-addon">{{ $ctrl.config.currency_symbol }}K</div>
+            </div>
+          </td>
+        </tr>
+        <tr class="mergeRowAbove" ng-if="$ctrl.state.optimizationOptions.uiSelectedAlgorithm.id === 'COVERAGE'">
+          <td>Coverage Target</td>
+          <td>
+            <div class="row">
+              <div class="col-md-6">
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.001"
+                  ng-model="$ctrl.state.optimizationOptions.threshold"
+                  style="margin-top: 10px; width:100%">
+              </div>
+              <div class="col-md-6">
+                <div class="form-group form-group-sm">
+                  <div class="input-group input-group-sm">
+                    <input id="coverageTargetValue"
+                      type="number" step="0.1"
+                      ng-model="$ctrl.state.optimizationOptions.threshold"
+                      class="form-control text-right"
+                      percentage-input>
+                    <div class="input-group-addon">%</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>  
+      
+      
+      <!-- NETWORK_ANALYSIS only section -->
+      <!-- 
+      <tbody ng-if="$ctrl.state.networkAnalysisType.id === 'NETWORK_ANALYSIS'">
+      </tbody>  
+      -->
+      
+      
+      <!-- common NETWORK_PLAN and NETWORK_ANALYSIS section -->
+      <tbody>
+        <tr>
+          <td>Endpoint Technology</td>
+          <td>
+            <button ng-class="{'btn btn-sm': true, 'btn-light': !$ctrl.state.optimizationOptions.technologies.Fiber.checked,
+                              'btn-primary': $ctrl.state.optimizationOptions.technologies.Fiber.checked }"
+              ng-click="$ctrl.onFiberClicked()">
+              Fiber
+            </button>
+            <div class="btn-group btn-group-sm">
+              <button ng-class="{'btn': true, 'btn-light': !$ctrl.state.optimizationOptions.technologies.FiveG.checked,
+                                'btn-primary': $ctrl.state.optimizationOptions.technologies.FiveG.checked}"
+                      ng-click="$ctrl.onFiveGClicked(technologyKey)">
+                5G
+              </button>
+              <button ng-class="{'btn': true, 'btn-light': !$ctrl.state.optimizationOptions.technologies.Copper.checked,
+                                'btn-primary': $ctrl.state.optimizationOptions.technologies.Copper.checked}"
+                      ng-click="$ctrl.onCopperClicked(technologyKey)">
+                DSL
+              </button>
+            </div>
+            <button ng-class="{'btn btn-sm': true, 'btn-light': !$ctrl.state.optimizationOptions.networkConstraints.advancedAnalysis,
+                              'btn-primary': $ctrl.state.optimizationOptions.networkConstraints.advancedAnalysis}"
+                              ng-click="$ctrl.onAdvancedAnalysisClicked()">
+              Advanced
+            </button>
+          </td>
+        </tr>
+        <!-- Options to show if 5G is selected-->
+        <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked || $ctrl.state.optimizationOptions.networkConstraints.advancedAnalysis">
+          <td class="indent-1">Polygon Type</td>
+          <td> 
+            <select class="form-control"
+                    ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.polygonStrategy">
+              <option value="FIXED_RADIUS">Fixed Radius</option>
+              <option value="AVERAGE_RADIUS">Average Radius</option>
+              <option value="RAY_TRACING">Ray Tracing</option>
+            </select>
+          </td>
+        </tr>
+        <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked || $ctrl.state.optimizationOptions.networkConstraints.advancedAnalysis">
+          <td class="indent-1">Radius (m)</td>
+          <td> 
+            <input type="text" class="form-control text-right" placeholder="Cell Radius"
+              ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.cellRadius">
+          </td>
+        </tr>
+        <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked || $ctrl.state.optimizationOptions.networkConstraints.advancedAnalysis">
+          <td class="indent-1">Granularity Ratio</td>
+          <td>
+            <input type="text" class="form-control text-right" placeholder="Granularity Ratio"
+              ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.cellGranularityRatio">
+          </td>
+        </tr>
+        <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked || $ctrl.state.optimizationOptions.networkConstraints.advancedAnalysis">
+          <td class="indent-1">Minimum Ray Length</td>
+          <td>
+            <input type="text" class="form-control text-right" placeholder="Minimum Ray Length"
+              ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.minimumRayLength">
+          </td>
+        </tr>
+
+        <!-- Options to show if Copper (DSL) is selected -->
+        <tr ng-if="$ctrl.state.optimizationOptions.technologies.Copper.checked">
+          <td class="indent-1">Placement interval (m)</td>
+          <td> 
+            <input type="text" class="form-control text-right" placeholder="Placement interval"
+              ng-model="$ctrl.state.optimizationOptions.networkConstraints.dslamNodeConstraints.cellRadius">
+          </td>
+        </tr>
+        <tr ng-if="$ctrl.state.optimizationOptions.technologies.Copper.checked">
+          <td class="indent-1">Target speed</td>
+          <td>
+            <!-- <input type="text" class="form-control text-right" placeholder="Target speed"
+              ng-model="$ctrl.state.optimizationOptions.networkConstraints.dslamNodeConstraints.optimizationSpeedMbs"> -->
+            <select class="form-control"
+                    ng-model="$ctrl.state.optimizationOptions.networkConstraints.dslamNodeConstraints.optimizationSpeedMbs"
+                    ng-options="item.speed as item.description for item in $ctrl.rateReachCategories">
+            </select>
+          </td>
+        </tr>
+
+        <tr>
+          <td width="48%">Network Construction</td>
+          <td> 
+            <select class="form-control"
+                    ng-model="$ctrl.state.optimizationOptions.networkConstraints.routingMode"
+                    ng-options="key as value.label for (key, value) in $ctrl.state.routingModes">
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th colspan=2 id="pointer" ng-click="$ctrl.toggleAdvanceSettings = !$ctrl.toggleAdvanceSettings"
+            style="cursor: pointer; vertical-align: middle;">
+            <i class="far fa-plus-square ei-foldout-icon" ng-if="!$ctrl.toggleAdvanceSettings"></i>
+            <i class="far fa-minus-square ei-foldout-icon" ng-if="$ctrl.toggleAdvanceSettings"></i>
+            Advanced Settings
+          </th>
+        </tr>  
+        <tr ng-if="$ctrl.toggleAdvanceSettings">
+          <td>Other Settings</td>
+          <td> 
+            <input type="checkbox"
+                  class="checkboxfill"
+                  ng-model="$ctrl.state.optimizationOptions.generatedDataRequest.generatePlanLocationLinks"
+                  name="ctype-name"> Save Routed Locations
+            <br><input type="checkbox"
+                  class="checkboxfill"
+                  ng-model="$ctrl.state.optimizationOptions.generatedDataRequest.generateSubnetLinking"
+                  name="ctype-name"> Equipment Linking
+            <br><input type="checkbox"
+                  class="checkboxfill"
+                  ng-model="$ctrl.state.optimizationOptions.networkConstraints.routeFromFiber"
+                  name="ctype-name"> Route From Existing Fiber                 
+          </td>
+        </tr>
+        <tr ng-if="$ctrl.toggleAdvanceSettings">
+          <td>Pruning Strategy</td>
+          <td>
+            <select class="form-control"
+              ng-model="$ctrl.state.optimizationOptions.fronthaulOptimization.optimizationMode"
+              ng-options="item.id as item.label for item in $ctrl.state.pruningStrategyTypes">
+            </select>
+          </td>
+        </tr>
+        <tr ng-if="$ctrl.toggleAdvanceSettings">
+          <td>Discount Rate</td>
+          <td>
+            <div class="input-group input-group-sm">
+              <input type="number" step="0.1"
+                ng-model="$ctrl.state.optimizationOptions.financialConstraints.discountRate"
+                class="form-control text-right"
+                min="0" max="500"
+                percentage-input>
+              <div class="input-group-addon">%</div>
+            </div>
+          </td>
+        </tr>
+        
+        <tr ng-if="$ctrl.toggleAdvanceSettings">
+          <td>
+            Terminal Value
+            
+            <div class="additional-cell-row"
+              ng-if="$ctrl.state.terminalValueStrategyTypes['FIXED_MULTIPLIER'].id === $ctrl.state.optimizationOptions.financialConstraints.terminalValueStrategy.terminalValueStrategyType">
+              Terminal Multiple
+            </div>
+            
+            <div class="additional-cell-row"
+              ng-if="$ctrl.state.terminalValueStrategyTypes['PERPUTUAL_GROWTH'].id === $ctrl.state.optimizationOptions.financialConstraints.terminalValueStrategy.terminalValueStrategyType">
+              Growth Rate
+            </div>
+            
+          </td>
+          <td>
+            <select class="form-control"
+              ng-model="$ctrl.state.optimizationOptions.financialConstraints.terminalValueStrategy.terminalValueStrategyType"
+              ng-options="item.id as item.label for item in $ctrl.state.terminalValueStrategyTypes">
+            </select>
+            
+            <div class="additional-cell-row"
+              ng-if="$ctrl.state.terminalValueStrategyTypes['FIXED_MULTIPLIER'].id === $ctrl.state.optimizationOptions.financialConstraints.terminalValueStrategy.terminalValueStrategyType">
               <input type="number" step="0.1"
                 ng-model="$ctrl.state.optimizationOptions.financialConstraints.terminalValueStrategy.value"
                 class="form-control text-right"
-                max="{{ ($ctrl.state.optimizationOptions.financialConstraints.discountRate * 100) - 0.1 }}" 
-                percentage-input>
-              <div class="input-group-addon">%</div>
+                min="0.0">
             </div>
-            <div class="input-note">must be < Discount Rate</div>
-          </div>
             
-        </td>
-      </tr>
-      
-      <tr ng-if="$ctrl.toggleAdvanceSettings">
-        <td>Analysis years</td>
-        <td>
-          <input type="number"
-                 ng-model="$ctrl.state.optimizationOptions.financialConstraints.years"
-                 class="form-control text-right"
-                 min="0" max="100">
-        </td>
-      </tr>
+            <div ng-if="$ctrl.state.terminalValueStrategyTypes['PERPUTUAL_GROWTH'].id === $ctrl.state.optimizationOptions.financialConstraints.terminalValueStrategy.terminalValueStrategyType">
+              <div class="input-group input-group-sm additional-cell-row">
+                <input type="number" step="0.1"
+                  ng-model="$ctrl.state.optimizationOptions.financialConstraints.terminalValueStrategy.value"
+                  class="form-control text-right"
+                  max="{{ ($ctrl.state.optimizationOptions.financialConstraints.discountRate * 100) - 0.1 }}" 
+                  percentage-input>
+                <div class="input-group-addon">%</div>
+              </div>
+              <div class="input-note">must be < Discount Rate</div>
+            </div>
+              
+          </td>
+        </tr>
+        
+        <tr ng-if="$ctrl.toggleAdvanceSettings">
+          <td>Analysis years</td>
+          <td>
+            <input type="number"
+                  ng-model="$ctrl.state.optimizationOptions.financialConstraints.years"
+                  class="form-control text-right"
+                  min="0" max="100">
+          </td>
+        </tr>
 
-      <tr ng-if="$ctrl.toggleAdvanceSettings">
-        <td>Penetration Analysis</td>
-        <td>
-          <select class="form-control"
-            ng-model="$ctrl.state.optimizationOptions.financialConstraints.penetrationAnalysisStrategy"
-            ng-options="item.id as item.label for item in $ctrl.state.penetrationAnalysisStrategies">
-          </select>
-        </td>
-      </tr>
+        <tr ng-if="$ctrl.toggleAdvanceSettings">
+          <td>Penetration Analysis</td>
+          <td>
+            <select class="form-control"
+              ng-model="$ctrl.state.optimizationOptions.financialConstraints.penetrationAnalysisStrategy"
+              ng-options="item.id as item.label for item in $ctrl.state.penetrationAnalysisStrategies">
+            </select>
+          </td>
+        </tr>
 
-      <tr ng-if="$ctrl.toggleAdvanceSettings">
-        <td>Connection Cost</td>
-        <td>
-          <select class="form-control"
-            ng-model="$ctrl.state.optimizationOptions.financialConstraints.connectionCostStrategy"
-            ng-options="item.id as item.label for item in $ctrl.state.connectionCostStrategies">
-          </select>
-        </td>
-      </tr>
-      
-      <tr ng-if="$ctrl.toggleAdvanceSettings">
-        <td>Brand Strength</td>
-        <td>
-          <input type="number" step="0.001"
-              ng-model="$ctrl.state.optimizationOptions.competitionConfiguration.providerStrength"
-              class="form-control text-right"
-              min="0" max="10">
-        </td>
-      </tr>
+        <tr ng-if="$ctrl.toggleAdvanceSettings">
+          <td>Connection Cost</td>
+          <td>
+            <select class="form-control"
+              ng-model="$ctrl.state.optimizationOptions.financialConstraints.connectionCostStrategy"
+              ng-options="item.id as item.label for item in $ctrl.state.connectionCostStrategies">
+            </select>
+          </td>
+        </tr>
+        
+        <tr ng-if="$ctrl.toggleAdvanceSettings">
+          <td>Brand Strength</td>
+          <td>
+            <input type="number" step="0.001"
+                ng-model="$ctrl.state.optimizationOptions.competitionConfiguration.providerStrength"
+                class="form-control text-right"
+                min="0" max="10">
+          </td>
+        </tr>
 
-      <tr>
-        <td>Selection Type</td>
-        <td>
-          <select class="form-control" 
-                  ng-model="$ctrl.activeSelectionModeId"
-                  ng-change="$ctrl.onSelectionTypeChange($ctrl.activeSelectionModeId)"
-                  ng-options="item.id as item.description for item in $ctrl.allSelectionModes">
-          </select>
-        </td>
-      </tr>
-      <!-- This tr will be hided for while selecting all service areas -->
-      <tr ng-if="$ctrl.activeSelectionModeId !== $ctrl.SelectionModes.ALL_SERVICE_AREAS">
-        <td>Selected Geographies</td>
-        <td><r-plan-target-list></r-plan-target-list></td>
-      </tr>
-    </tbody>
-  </table>
-  </div>
-  <!-- Add a div that will overlay all the controls above. The div will be visible when the controls need to be disabled. -->
-  <!-- Hack - Set the top of the disabler so that people can access the Analysis Type dropdown. Remove this after we get
-              a proper analysis type from service -->
-  <div class="disable-sibling-controls"
-       style="top: 50px;"
-       ng-hide="$ctrl.areControlsEnabled()">
+        <tr>
+          <td>Selection Type</td>
+          <td>
+            <select class="form-control" 
+                    ng-model="$ctrl.activeSelectionModeId"
+                    ng-change="$ctrl.onSelectionTypeChange($ctrl.activeSelectionModeId)"
+                    ng-options="item.id as item.description for item in $ctrl.allSelectionModes">
+            </select>
+          </td>
+        </tr>
+        <!-- This tr will be hided for while selecting all service areas -->
+        <tr ng-if="$ctrl.activeSelectionModeId !== $ctrl.SelectionModes.ALL_SERVICE_AREAS">
+          <td>Selected Geographies</td>
+          <td><r-plan-target-list></r-plan-target-list></td>
+        </tr>
+      </tbody>
+    </table>
+    <div>
+      <div ng-click="$ctrl.isNetworkSettingsExpanded = !$ctrl.isNetworkSettingsExpanded"
+        style="height: 30px; cursor: pointer;">
+        <i class="far fa-plus-square ei-foldout-icon" ng-if="!$ctrl.isNetworkSettingsExpanded"></i>
+        <i class="far fa-minus-square ei-foldout-icon" ng-if="$ctrl.isNetworkSettingsExpanded"></i>
+        <strong>Network Settings</strong>
+      </div>
+      <r-network-analysis-constraints ng-show="$ctrl.isNetworkSettingsExpanded"
+        initial-values=$ctrl.networkAnalysisConstraints enableReinitialize>
+      </r-network-analysis-constraints>
+      <r-network-analysis-connectivity-definition ng-show="$ctrl.isNetworkSettingsExpanded">
+      </r-network-analysis-connectivity-definition>
+    </div>
+    <!-- Add a div that will overlay all the controls above. The div will be visible when the controls need to be disabled. -->
+    <!-- Hack - Set the top of the disabler so that people can access the Analysis Type dropdown. Remove this after we get
+                a proper analysis type from service -->
+    <div class="disable-sibling-controls"
+        style="top: 50px;"
+        ng-hide="$ctrl.areControlsEnabled()">
+    </div>
   </div>
 </div>

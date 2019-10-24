@@ -1,7 +1,7 @@
 import Actions from '../../common/actions'
+import AroNetworkConstraints from '../../../shared-utils/aro-network-constraints'
+import ConnectivityDefinition from '../common/optimization-options/connectivity-definition'
 import RingStatusTypes from './constants'
-import SpatialEdgeType from './spatial-edge-type'
-import NetworkConnectivityType from './network-connectivity-type'
 
 const defaultState = {
   rings: {},
@@ -11,41 +11,8 @@ const defaultState = {
     progress: 0,
     report: null
   },
-  options: {
-    maxLocationEdgeDistance: {
-      displayName: 'Max location-edge distance',
-      value: 400
-    },
-    locationBufferSize: {
-      displayName: 'Location buffer size',
-      value: 500
-    },
-    conduitBufferSize: {
-      displayName: 'Conduit buffer size',
-      value: 500
-    },
-    snappingDistance: {
-      displayName: 'Snapping distance',
-      value: 1
-    },
-    maxConnectionDistance: {
-      displayName: 'Connection distance',
-      value: 20
-    },
-    maxWormholeDistance: {
-      displayName: 'Wormhole distance',
-      value: 40
-    },
-    ringComplexityCount: {
-      displayName: 'Ring complexity',
-      value: 3000000
-    },
-    connectivityDefinition: {
-      [SpatialEdgeType.road.id]: NetworkConnectivityType.snapToEdge.id,
-      [SpatialEdgeType.sewer.id]: NetworkConnectivityType.snapToWormhole.id,
-      [SpatialEdgeType.duct.id]: NetworkConnectivityType.none.id
-    }
-  }
+  aroNetworkConstraints: AroNetworkConstraints(),
+  connectivityDefinition: ConnectivityDefinition()
 }
 
 function setAnalysisStatus (state, status) {
@@ -110,10 +77,8 @@ function updateRing (state, ring) {
 
 function setRingOptionsConnectivity (state, spatialEdgeType, networkConnectivityType) {
   return { ...state,
-    options: { ...state.options,
-      connectivityDefinition: { ...state.options.connectivityDefinition,
-        [spatialEdgeType]: networkConnectivityType
-      }
+    connectivityDefinition: { ...state.connectivityDefinition,
+      [spatialEdgeType]: networkConnectivityType
     }
   }
 }
