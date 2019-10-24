@@ -94,9 +94,7 @@
 			<button class="btn btn-primary btn-sm"
 				ng-click="$ctrl.onRequestCalculateCoverage()">calculate coverage</button>
 
-			<boundary-coverage bounds-input="$ctrl.coverageOutput"
-				parent-selected-object-id="$ctrl.boundsObjectId"
-				is-working-override="$ctrl.isWorkingOnCoverage">
+			<boundary-coverage ng-if="$ctrl.showCoverageOutput" selected-boundary-coverage="$ctrl.coverageOutput">
 			</boundary-coverage>
 		</div>
 	</div>

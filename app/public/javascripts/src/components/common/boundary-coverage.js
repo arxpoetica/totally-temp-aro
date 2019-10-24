@@ -6,15 +6,6 @@ import EquipmentFeature from '../../service-typegen/dist/EquipmentFeature'
 import EquipmentBoundaryFeature from '../../service-typegen/dist/EquipmentBoundaryFeature'
 import CoverageActions from '../../react/components/coverage/coverage-actions'
 
-const getBoundariesCoverage = reduxState => reduxState.coverage.boundaries
-const getSelectedPlanFeatures = reduxState => reduxState.selection.planEditorFeatures
-const getSelectedBoundaryCoverage = createSelector([getBoundariesCoverage, getSelectedPlanFeatures], (boundariesCoverage, selectedPlanFeatures) => {
-  if (selectedPlanFeatures.length !== 1) {
-    return null
-  }
-  return angular.copy(boundariesCoverage[selectedPlanFeatures[0]])
-})
-
 class BoundaryCoverageController {
   constructor ($timeout, $http, $element, $ngRedux, state, Utils) {
     this.$timeout = $timeout
@@ -71,6 +62,18 @@ class BoundaryCoverageController {
       }
     }
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
+  }
+
+  $onChanges (changesObj) {
+    if (changesObj.selectedBoundaryCoverage) {
+      this.showCoverageChart()
+    }
+  }
+
+  $onInit () {
+    if (this.selectedBoundaryCoverage) {
+      this.showCoverageChart()
+    }
   }
 
   $onDestroy () {
@@ -279,7 +282,6 @@ class BoundaryCoverageController {
     return {
       transactionFeatures: reduxState.planEditor.features,
       selectedFeatures: reduxState.selection.planEditorFeatures,
-      selectedBoundaryCoverage: getSelectedBoundaryCoverage(reduxState)
     }
   }
 
@@ -290,15 +292,9 @@ class BoundaryCoverageController {
   }
 
   mergeToTarget (nextState, actions) {
-    const oldSelectedBoundaryCoverage = this.selectedBoundaryCoverage
     // merge state and actions onto controller
     Object.assign(this, nextState)
     Object.assign(this, actions)
-
-    if ((oldSelectedBoundaryCoverage !== this.selectedBoundaryCoverage) &&
-      this.selectedBoundaryCoverage) {
-      this.showCoverageChart()
-    }
   }
 }
 
@@ -307,9 +303,7 @@ BoundaryCoverageController.$inject = ['$timeout', '$http', '$element', '$ngRedux
 let boundaryCoverage = {
   templateUrl: '/components/common/boundary-coverage.html',
   bindings: {
-    boundsInput: '<',
-    parentSelectedObjectId: '<',
-    isWorkingOverride: '<'
+    selectedBoundaryCoverage: '<'
   },
   controller: BoundaryCoverageController
 }
