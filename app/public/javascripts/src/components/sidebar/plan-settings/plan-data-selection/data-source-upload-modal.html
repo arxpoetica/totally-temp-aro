@@ -1,11 +1,22 @@
 <modal visible="$ctrl.state.showDataSourceUploadModal.value" backdrop="static" on-show="$ctrl.modalShown()" on-hide="$ctrl.modalHide()" modal-size="'modal-lg'">
   <modal-header title="{{!$ctrl.isDataManagementView && 'Upload Data Sources' || 'Data Management'}}"></modal-header>
   <modal-body id="data_source_upload_modal">
-    <form class="form-horizontal">
+    <div class="form-horizontal" id="data_source_upload_modal_form">
       <div class="form-group row">
         <div class="col-sm-8"></div>
         <div class="col-sm-4">
-          <button class="btn float-right" style="margin-right:15px"  ng-class="{true: 'btn-primary', false: 'btn-danger'}[!patient.archived]" ng-click="$ctrl.toggleView()">{{!$ctrl.isDataManagementView && 'Data Management' || 'File Upload'}}</button>
+          <button class="btn float-right"
+            type="button"
+            style="margin-right:15px"
+            ng-class="{true: 'btn-primary', false: 'btn-danger'}[!patient.archived]"
+            ng-if="!$ctrl.isDataManagementView"
+            ng-click="$ctrl.toggleView()">Data Management</button>
+          <button class="btn float-right"
+            type="button"
+            style="margin-right:15px"
+            ng-class="{true: 'btn-primary', false: 'btn-danger'}[!patient.archived]"
+            ng-if="$ctrl.isDataManagementView"
+            ng-click="$ctrl.toggleView()">File Upload</button>
         </div>
       </div>
 
@@ -100,7 +111,7 @@
 
       <!-- Data Management view -->
       <div ng-show="$ctrl.isDataManagementView">
-        
+        <!--
         <div class="form-group row">
           <label class="col-sm-4 col-form-label">Data Type</label>
 	        <div class="col-sm-8">
@@ -121,10 +132,12 @@
                           rows-per-page="10"
                           root-meta-data="{}">
         </editor-interface-table>
-        
+        -->
+        <r-resource-permissions></r-resource-permissions>
+
       </div>
 
-    </form>
+    </div>
   </modal-body>
   <modal-footer class="justify-content-between" ng-show="!$ctrl.isDataManagementView">
     <a href="/csv/{{$ctrl.downloads[$ctrl.state.uploadDataSource.name].fileName}}" class="btn btn-primary" role="button" download="{{$ctrl.downloads[$ctrl.state.uploadDataSource.name].fileName}}">Download upload template</a>    

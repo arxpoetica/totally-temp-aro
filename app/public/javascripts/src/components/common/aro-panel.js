@@ -20,7 +20,8 @@ let aroPanel = {
   template: `
   <div class="map-tool panel panel-primary" id="measuring-stick-result" ng-show="$ctrl.showPanel">
     <div class="panel-heading">
-      {{ $ctrl.panelInfo }} {{ $ctrl.measuredDistance * 3.28084 | number: 0 }} ft
+      {{ $ctrl.panelInfo }} {{ $ctrl.measuredDistance * $ctrl.state.configuration.units.meters_to_length_units | number: 0 }}
+      {{ $ctrl.state.configuration.units.length_units }}
     </div>
   </div>
   `,

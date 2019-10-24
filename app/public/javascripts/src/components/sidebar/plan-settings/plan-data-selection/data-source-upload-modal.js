@@ -65,7 +65,8 @@ class DataSourceUploadController {
           $('#data_source_upload_modal input[type=file]').get(0).value = ''
           $('#data_source_upload_modal input[type=text]').get(0).value = ''
 
-          form = $('#data_source_upload_modal form').get(0)
+          // form = $('#data_source_upload_modal form').get(0)
+          form = $('#data_source_upload_modal_form').get(0)
         }
       }, 0)
     })

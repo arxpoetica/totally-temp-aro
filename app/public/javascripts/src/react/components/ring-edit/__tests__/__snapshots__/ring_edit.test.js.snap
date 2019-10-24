@@ -162,7 +162,7 @@ exports[`Can edit 1`] = `
     touchOnChange={false}
     updateUnregisteredFields={false}
   />
-  <Connect(RingOptionsConnectivityDefinition)
+  <Connect(ConduitConnectivityDefinition)
     enableReinitialize={true}
   />
 </div>
@@ -260,7 +260,7 @@ exports[`Can't edit 1`] = `
     touchOnChange={false}
     updateUnregisteredFields={false}
   />
-  <Connect(RingOptionsConnectivityDefinition)
+  <Connect(ConduitConnectivityDefinition)
     enableReinitialize={true}
   />
 </div>
@@ -428,7 +428,7 @@ exports[`Delete ring 1`] = `
     touchOnChange={false}
     updateUnregisteredFields={false}
   />
-  <Connect(RingOptionsConnectivityDefinition)
+  <Connect(ConduitConnectivityDefinition)
     enableReinitialize={true}
   />
 </div>
@@ -466,7 +466,7 @@ exports[`With no rings 1`] = `
     touchOnChange={false}
     updateUnregisteredFields={false}
   />
-  <Connect(RingOptionsConnectivityDefinition)
+  <Connect(ConduitConnectivityDefinition)
     enableReinitialize={true}
   />
 </div>

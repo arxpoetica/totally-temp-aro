@@ -15,7 +15,8 @@
       <td>
         <input type="text" class="form-control" placeholder="Name"
           ng-change="$ctrl.markSelectedServiceAreaPropertiesDirty()"
-          ng-model="$ctrl.selectedMapObject.feature.name">
+          ng-model="$ctrl.selectedMapObject.feature.name"
+          ng-disabled="!$ctrl.selectedMapObject">
       </td>
     </tr>
     <tr>
@@ -23,7 +24,8 @@
       <td>
         <input type="text" class="form-control" placeholder="Code"
           ng-change="$ctrl.markSelectedServiceAreaPropertiesDirty()"
-          ng-model="$ctrl.selectedMapObject.feature.code">
+          ng-model="$ctrl.selectedMapObject.feature.code"
+          ng-disabled="!$ctrl.selectedMapObject">
       </td>
     </tr>
   </table>

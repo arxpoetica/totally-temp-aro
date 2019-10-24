@@ -147,6 +147,7 @@ class ServiceLayerEditorController {
         return this.state.loadModifiedFeatures(this.state.plan.id)
       })
       .then(() => this.resumeOrCreateTransaction())
+      .then(() => this.state.recreateTilesAndCache())
       .catch((err) => {
         this.discardChanges = true
         this.currentTransaction = null

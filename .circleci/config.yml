@@ -69,7 +69,6 @@ workflows:
               only: 
                 - master
                 - optional_building
-                - frontierPlanEditFixes
 
       - deploy:
           context: aro_qa_builds
