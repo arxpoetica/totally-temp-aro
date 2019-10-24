@@ -69,7 +69,6 @@ workflows:
               only: 
                 - master
                 - optional_building
-                - planAdvancedSettings
 
       - deploy:
           context: aro_qa_builds

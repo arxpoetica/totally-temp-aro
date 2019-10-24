@@ -2,6 +2,7 @@ import AroHttp from '../../common/aro-http'
 import Actions from '../../common/actions'
 import Constants from '../../../components/common/constants'
 
+// ToDo: DEPRICATED
 const PERMISSIONS = Object.freeze({
   READ: 'READ',
   WRITE: 'WRITE',
@@ -9,6 +10,7 @@ const PERMISSIONS = Object.freeze({
   IS_SUPERUSER: 'IS_SUPERUSER'
 })
 
+// ToDo: DEPRICATED
 function getPermissionBits () {
   // Get the permission bits from aro-service
   const accessTypes = Object.freeze({
@@ -29,7 +31,62 @@ function getPermissionBits () {
     .catch(err => console.log(err))
 }
 
+function loadAuthPermissions () {
+  // Get the permission bits from aro-service
+  var authPermissions = {}
+  return (dispatch) => {
+    AroHttp.get('/service/auth/permissions')
+      .then(result => {
+        result.data.forEach((authPermissionEntity) => {
+          var displayName = authPermissionEntity.name
+          displayName = displayName.replace('_', ' ')
+          displayName = displayName.toLowerCase()
+          displayName = displayName.replace(/(^| )(\w)/g, (initial) => {
+            return initial.toUpperCase()
+          })
+          authPermissions[authPermissionEntity.name] = { ...authPermissionEntity,
+            permissionBits: authPermissionEntity.id,
+            displayName: displayName
+          }
+        })
+        dispatch({
+          type: Actions.USER_SET_AUTH_PERMISSIONS,
+          payload: authPermissions
+        })
+      })
+      .catch(err => console.log(err))
+  }
+}
+
+function loadAuthRoles () {
+  // Get the permission bits from aro-service
+  var authRoles = {}
+  return (dispatch) => {
+    AroHttp.get('/service/auth/roles')
+      .then(result => {
+        result.data.forEach((authRolesEntity) => {
+          var displayName = authRolesEntity.name
+          displayName = displayName.replace('_', ' ')
+          displayName = displayName.toLowerCase()
+          displayName = displayName.replace(/(^| )(\w)/g, (initial) => {
+            return initial.toUpperCase()
+          })
+          authRoles[authRolesEntity.name] = { ...authRolesEntity,
+            permissionBits: authRolesEntity.permissions,
+            displayName: displayName
+          }
+        })
+        dispatch({
+          type: Actions.USER_SET_AUTH_ROLES,
+          payload: authRoles
+        })
+      })
+      .catch(err => console.log(err))
+  }
+}
+
 // Gets the effective permissions for a given resourceType (e.g. PLAN, SYSTEM) and resourceId (e.g. plan id, user id)
+// ToDo: DEPRICATED
 function getEffectivePermissions (resourceType, resourceId, loggedInUser) {
   return Promise.all([
     getPermissionBits(),
@@ -69,6 +126,7 @@ function getEffectivePermissions (resourceType, resourceId, loggedInUser) {
     .catch(err => console.error(err))
 }
 
+// ToDo: DEPRICATED
 // Set the superuser flag for the specified user
 function setSuperUserFlag (isSuperUser) {
   return {
@@ -77,6 +135,7 @@ function setSuperUserFlag (isSuperUser) {
   }
 }
 
+// ToDo: DEPRICATED
 // Get the superuser flag for the specified user from the server
 function getSuperUserFlag (userId) {
   return (dispatch) => {
@@ -135,6 +194,8 @@ function loadSystemActors () {
 }
 
 export default {
+  loadAuthPermissions,
+  loadAuthRoles,
   loadSystemActors,
   setLoggedInUser
 }

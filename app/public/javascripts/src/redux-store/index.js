@@ -9,11 +9,9 @@ import createSocketMiddleware from './middleware/websockets'
 // Reducers
 import ui from '../react/components/configuration/ui/ui-reducer'
 import report from '../react/components/configuration/report/report-reducer'
-
 import networkAnalysis from '../react/components/optimization/network-analysis/network-analysis-reducer'
 import opReport from '../react/components/optimization/reports/reports-reducer'
 import rfp from '../react/components/optimization/rfp/rfp-reducer'
-
 import contextMenu from '../react/components/context-menu/reducer'
 import coverage from '../react/components/coverage/coverage-reducer'
 import fullScreen from '../react/components/full-screen/full-screen-reducer'
@@ -23,10 +21,9 @@ import plan from '../react/components/plan/plan-reducer'
 import planEditor from '../react/components/plan-editor/plan-editor-reducer'
 import selection from '../react/components/selection/selection-reducer'
 import user from '../react/components/user/user-reducer'
-
 import ringEdit from '../react/components/ring-edit/ring-edit-reducer'
-
 import locationInfo from '../react/components/location-info/location-info-reducer'
+import acl from '../react/components/acl/acl-reducer'
 
 const logger = createLogger({
   level: 'info',
@@ -46,9 +43,10 @@ let reducer = combineReducers({
   planEditor,
   selection,
   user,
-  form, 
+  form,
   ringEdit,
-  locationInfo
+  locationInfo,
+  acl
 })
 
 // Add support for Redux devtools extension. Yes, even in production.

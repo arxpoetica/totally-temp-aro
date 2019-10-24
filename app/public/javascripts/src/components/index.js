@@ -1,3 +1,4 @@
+/* global app */
 import { react2angular } from 'react2angular'
 import { ToastContainer } from 'react-toastify'
 
@@ -20,6 +21,9 @@ import RfpStatus from '../react/components/optimization/rfp/status/rfp-status.js
 import RingEdit from '../react/components/ring-edit/ring-edit.jsx'
 import RingButton from '../react/components/ring-edit/ring-button.jsx'
 import LocationInfo from '../react/components/location-info/location-info.jsx'
+import ResourcePermissions from '../react/components/acl/resource-permissions/resource-permissions.jsx'
+import PermissionsTable from '../react/components/acl/resource-permissions/permissions-table.jsx'
+import SearchableSelect from '../react/components/common/searchable-select.jsx'
 
 import boundaryDetail from './sidebar/view/boundary-detail'
 import equipmentDetail from './sidebar/view/equipment-detail'
@@ -255,6 +259,9 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rRingButton', react2angular(RingButton, ['onModify']))
   .component('rToastContainer', react2angular(ToastContainer))
   .component('rLocationInfo', react2angular(LocationInfo))
+  .component('rResourcePermissions', react2angular(ResourcePermissions))
+  .component('rPermissionsTable', react2angular(PermissionsTable))
+  .component('rSearchableSelect', react2angular(SearchableSelect))
   .service('Utils', utils)
   .service('state', state)
   .service('aclManager', aclManager)
