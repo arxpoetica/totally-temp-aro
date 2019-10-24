@@ -1105,6 +1105,10 @@ class State {
     }
 
     var checkToDisplayPopup = function () {
+      if (!service.configuration.plan.showHouseholdsDirectRoutingWarning) {
+        // No need to show any messagebox.
+        return Promise.resolve(true)
+      }
       return new Promise((resolve, reject) => {
         var locationLayers = angular.copy(service.locationLayers)
         var isHouseholdSelected = locationLayers.filter((locationType) => locationType.key === 'household')[0].checked
