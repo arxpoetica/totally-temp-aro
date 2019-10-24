@@ -1,5 +1,6 @@
 import { List, Map } from 'immutable'
 import { createSelector } from 'reselect'
+import { formValueSelector } from 'redux-form'
 import format from './string-template'
 import StateViewMode from './state-view-mode'
 import MapLayerHelper from './map-layer-helper'
@@ -15,6 +16,10 @@ import PlanStates from '../react/components/plan/plan-states'
 import SelectionModes from '../react/components/selection/selection-modes'
 import SocketManager from '../react/common/socket-manager'
 import RingEditActions from '../react/components/ring-edit/ring-edit-actions'
+import ReactComponentConstants from '../react/common/constants'
+import AroNetworkConstraints from '../shared-utils/aro-network-constraints'
+import NetworkAnalysisActions from '../react/components/optimization/network-analysis/network-analysis-actions'
+const networkAnalysisConstraintsSelector = formValueSelector(ReactComponentConstants.NETWORK_ANALYSIS_CONSTRAINTS)
 
 // We need a selector, else the .toJS() call will create an infinite digest loop
 const getAllLocationLayers = reduxState => reduxState.mapLayers.location
@@ -612,14 +617,14 @@ class State {
 
     // Get a POST body that we will send to aro-service for performing optimization
     service.getOptimizationBody = () => {
-      return stateSerializationHelper.getOptimizationBody(service, $ngRedux.getState())
+      return stateSerializationHelper.getOptimizationBody(service, service.networkAnalysisConstraints, service.networkConfigurations, $ngRedux.getState())
     }
 
     // Load optimization options from a JSON string
     service.loadOptimizationOptionsFromJSON = (json) => {
       // Note that we are NOT returning the state (the state is set after the call), but a promise
       // that resolves once all the geographies have been loaded
-      return stateSerializationHelper.loadStateFromJSON(service, $ngRedux.getState(), service.getDispatchers(), json)
+      return stateSerializationHelper.loadStateFromJSON(service, $ngRedux.getState(), service.getDispatchers(), json, new AroNetworkConstraints())
     }
 
     $document.ready(() => {
@@ -980,7 +985,7 @@ class State {
       return $http.get(`/service/v1/plan/${planId}/inputs`)
         .then((result) => {
           var planInputs = Object.keys(result.data).length > 0 ? result.data : service.getDefaultPlanInputs()
-          stateSerializationHelper.loadStateFromJSON(service, $ngRedux.getState(), service.getDispatchers(), planInputs)
+          stateSerializationHelper.loadStateFromJSON(service, $ngRedux.getState(), service.getDispatchers(), planInputs, new AroNetworkConstraints())
           return Promise.all([
             service.loadPlanResourceSelectionFromServer(),
             service.loadNetworkConfigurationFromServer()
@@ -1105,6 +1110,10 @@ class State {
     }
 
     var checkToDisplayPopup = function () {
+      if (!service.configuration.plan.showHouseholdsDirectRoutingWarning) {
+        // No need to show any messagebox.
+        return Promise.resolve(true)
+      }
       return new Promise((resolve, reject) => {
         var locationLayers = angular.copy(service.locationLayers)
         var isHouseholdSelected = locationLayers.filter((locationType) => locationType.key === 'household')[0].checked
@@ -1137,6 +1146,7 @@ class State {
 
             // Get the optimization options that we will pass to the server
             var optimizationBody = service.getOptimizationBody()
+
             // Make the API call that starts optimization calculations on aro-service
             var apiUrl = (service.networkAnalysisType.type === 'NETWORK_ANALYSIS') ? '/service/v1/analyze/masterplan' : '/service/v1/optimize/masterplan'
             apiUrl += `?userId=${service.loggedInUser.id}`
@@ -1681,7 +1691,9 @@ class State {
         setSelectionTypeById: service.setSelectionTypeById,
         addPlanTargets: service.addPlanTargets,
         removePlanTargets: service.removePlanTargets,
-        selectDataItems: service.selectDataItems
+        selectDataItems: service.selectDataItems,
+        setNetworkAnalysisConstraints: service.setNetworkAnalysisConstraints,
+        setNetworkAnalysisConnectivityDefinition: service.setNetworkAnalysisConnectivityDefinition
       }
     }
 
@@ -1760,7 +1772,9 @@ class State {
       showSiteBoundary: reduxState.mapLayers.showSiteBoundary,
       boundaryTypes: getBoundaryTypesList(reduxState),
       selectedBoundaryType: reduxState.mapLayers.selectedBoundaryType,
-      systemActors: reduxState.user.systemActors
+      systemActors: reduxState.user.systemActors,
+      networkAnalysisConnectivityDefinition: reduxState.optimization.networkAnalysis.connectivityDefinition,
+      networkAnalysisConstraints: networkAnalysisConstraintsSelector(reduxState, 'spatialEdgeType', 'snappingDistance', 'maxConnectionDistance', 'maxWormholeDistance', 'ringComplexityCount', 'maxLocationEdgeDistance', 'locationBufferSize', 'conduitBufferSize', 'targetEdgeTypes')
     }
   }
 
@@ -1782,7 +1796,9 @@ class State {
       selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems)),
       setGoogleMapsReference: mapRef => dispatch(MapActions.setGoogleMapsReference(mapRef)),
       updateShowSiteBoundary: isVisible => dispatch(MapLayerActions.setShowSiteBoundary(isVisible)),
-      onFeatureSelectedRedux: features => dispatch(RingEditActions.onFeatureSelected(features))
+      onFeatureSelectedRedux: features => dispatch(RingEditActions.onFeatureSelected(features)),
+      setNetworkAnalysisConstraints: aroNetworkConstraints => dispatch(NetworkAnalysisActions.setNetworkAnalysisConstraints(aroNetworkConstraints)),
+      setNetworkAnalysisConnectivityDefinition: (spatialEdgeType, networkConnectivityType) => dispatch(NetworkAnalysisActions.setNetworkAnalysisConnectivityDefinition(spatialEdgeType, networkConnectivityType))
     }
   }
 }

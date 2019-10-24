@@ -41,11 +41,7 @@ export class RingButton extends ProgressButton {
     this.props.mapLayers.location.forEach(item => {
       if (item.checked) locationTypes.push(item.plannerKey)
     })
-    const ringOptions = {
-      ...this.props.ringOptionsBasic,
-      connectivityDefinition: this.props.ringOptions.connectivityDefinition
-    }
-    this.props.requestSubNet(planId, ringIds, locationTypes, ringOptions)
+    this.props.requestSubNet(planId, ringIds, locationTypes, this.props.ringOptionsBasic, this.props.connectivityDefinition)
   }
 
   // override
@@ -84,13 +80,13 @@ const mapStateToProps = state => {
     projectId: state.user.loggedInUser.projectId,
     rings: state.ringEdit.rings,
     ringOptionsBasic: selector(state, 'spatialEdgeType', 'snappingDistance', 'maxConnectionDistance', 'maxWormholeDistance', 'ringComplexityCount', 'maxLocationEdgeDistance', 'locationBufferSize', 'conduitBufferSize', 'targetEdgeTypes'),
-    ringOptions: state.ringEdit.options,
+    connectivityDefinition: state.ringEdit.connectivityDefinition,
     mapLayers: state.mapLayers
   }
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  requestSubNet: (planId, ringIds, locationTypes, ringOptions) => dispatch(RingActions.requestSubNet(planId, ringIds, locationTypes, ringOptions)),
+  requestSubNet: (planId, ringIds, locationTypes, ringOptions, connectivityDefinition) => dispatch(RingActions.requestSubNet(planId, ringIds, locationTypes, ringOptions, connectivityDefinition)),
   setActivePlanState: (status) => dispatch(PlanActions.setActivePlanState(status)),
   setAnalysisProgress: (progress) => dispatch(RingActions.setAnalysisProgress(progress))
 })

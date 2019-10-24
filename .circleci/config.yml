@@ -69,8 +69,6 @@ workflows:
               only: 
                 - master
                 - optional_building
-                - resource_permission_react
-                - frontierPlanEditFixes
 
       - deploy:
           context: aro_qa_builds
