@@ -47,10 +47,10 @@ class MapLayerHelper {
     dataIds.add(networkTileDefs.boundaries.planned.dataId)
     dataIds.add(networkTileDefs.cable.existing.dataId)
     dataIds.add(networkTileDefs.cable.planned.dataId)
-    dataIds.add(networkTileDefs.conduit.dataId)
+    if (networkTileDefs.conduit) dataIds.add(networkTileDefs.conduit.dataId)
     dataIds.add(networkTileDefs.equipment.existing.dataId)
     dataIds.add(networkTileDefs.equipment.planned.dataId)
-    dataIds.add(networkTileDefs.road.dataId)
+    if (networkTileDefs.road) dataIds.add(networkTileDefs.road.dataId)
 
     return [...dataIds]
   }
