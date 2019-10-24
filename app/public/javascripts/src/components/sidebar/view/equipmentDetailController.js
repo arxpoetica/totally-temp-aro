@@ -12,7 +12,8 @@ class EquipmentDetailController {
     this.equipmentFeature = {}
     this.equipmentData = null
     this.boundsObjectId = null
-    this.coverageOutput = {}
+    this.coverageOutput = null
+    this.showCoverageOutput = false
     this.isWorkingOnCoverage = false
     this.boundsData = null
     this.headerIcon = ''
@@ -105,6 +106,8 @@ class EquipmentDetailController {
   }
 
   displayEquipment (planId, objectId) {
+    this.coverageOutput = null
+    this.showCoverageOutput = false
 	  return this.$http.get(`/service/plan-feature/${planId}/equipment/${objectId}?userId=${this.state.loggedInUser.id}`)
       .then((result) => {
         const equipmentInfo = result.data
@@ -187,40 +190,26 @@ class EquipmentDetailController {
     // Replace analysis_type and add a point and radius
     optimizationBody.boundaryCalculationType = 'FIXED_POLYGON'
     optimizationBody.analysis_type = 'COVERAGE'
-
     optimizationBody.point = equipmentPoint
     optimizationBody.polygon = boundsData.geom
-
-    // optimizationBody.spatialEdgeType = spatialEdgeType;
     optimizationBody.directed = directed // directed analysis if thats what the user wants
-
-    var equipmentObjectId = boundsData.objectId
     this.isWorkingOnCoverage = true
 
-    // console.log(optimizationBody)
     this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
-      .then((result) => {
-      // console.log(result)
-      // console.log(this.state.censusCategories.getValue())
-
-        // The user may have destroyed the component before we get here. In that case, just return
+      .then(result => {
+        // // The user may have destroyed the component before we get here. In that case, just return
         if (this.isComponentDestroyed) {
-          console.warn('Plan editor was closed while a boundary was being calculated')
-          return
+          return Promise.reject(new Error('Plan editor was closed while a boundary was being calculated'))
         }
-        this.digestBoundaryCoverage(boundsData, result.data, true)
-
+        this.coverageOutput = result.data
+        this.showCoverageOutput = true
         this.isWorkingOnCoverage = false
+        this.$timeout()
       })
       .catch((err) => {
         console.error(err)
         this.isWorkingOnCoverage = false
       })
-  }
-
-  digestBoundaryCoverage (feature, coverageData, forceUpdate) {
-    if (typeof forceUpdate === 'undefined') forceUpdate = false
-    this.coverageOutput = { 'feature': feature, 'data': coverageData, 'forceUpdate': forceUpdate }
   }
 
   $onDestroy () {

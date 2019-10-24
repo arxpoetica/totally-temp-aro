@@ -21,6 +21,13 @@ const getEquipmentBoundary = createSelector([getAllPlanFeatures, getSelectedPlan
     return null
   }
 })
+const getBoundariesCoverage = reduxState => reduxState.coverage.boundaries
+const getSelectedBoundaryCoverage = createSelector([getBoundariesCoverage, getSelectedPlanFeatures], (boundariesCoverage, selectedPlanFeatures) => {
+  if (selectedPlanFeatures.length !== 1) {
+    return null
+  }
+  return angular.copy(boundariesCoverage[selectedPlanFeatures[0]])
+})
 
 class BoundaryPropertiesEditorController {
   constructor (state, $http, $ngRedux) {
@@ -111,8 +118,8 @@ class BoundaryPropertiesEditorController {
       transactionFeatures: reduxState.planEditor.features,
       selectedFeatures: reduxState.selection.planEditorFeatures,
       viewBoundaryProps: getEquipmentBoundary(reduxState),
-      boundaryCoverage: reduxState.coverage.boundaries,
-      isBoundaryCoverageVisible: reduxState.coverage.isBoundaryCoverageVisible
+      isBoundaryCoverageVisible: reduxState.coverage.isBoundaryCoverageVisible,
+      selectedBoundaryCoverage: getSelectedBoundaryCoverage(reduxState)
     }
   }
 
