@@ -9,7 +9,7 @@ import SpatialEdgeType from '../../common/optimization-options/spatial-edge-type
 export class NetworkAnalysisNetworkDefinition extends Component {
   render () {
     return <div className='p-2 m-2'>
-      <h4>Network definition</h4>
+      <h4>Network Rules</h4>
       <table className='table table-sm table-striped'>
         <thead>
           <tr>
