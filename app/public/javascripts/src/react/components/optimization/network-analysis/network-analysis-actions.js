@@ -56,8 +56,24 @@ function setNetworkAnalysisConstraints (aroNetworkConstraints) {
   }
 }
 
+function setPrimarySpatialEdge (primarySpatialEdge) {
+  return {
+    type: Actions.NETWORK_ANALYSIS_SET_PRIMARY_SPATIAL_EDGE,
+    payload: primarySpatialEdge
+  }
+}
+
+function setAutoFuseEdgeTypes (autoFuseEdgeTypes) {
+  return {
+    type: Actions.NETWORK_ANALYSIS_SET_AUTOFUSE_EDGE_TYPES,
+    payload: autoFuseEdgeTypes
+  }
+}
+
 export default {
   loadReport,
   setNetworkAnalysisConnectivityDefinition,
-  setNetworkAnalysisConstraints
+  setNetworkAnalysisConstraints,
+  setPrimarySpatialEdge,
+  setAutoFuseEdgeTypes
 }
