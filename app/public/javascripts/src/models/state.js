@@ -1580,6 +1580,8 @@ class State {
 
     service.planEditorChanged = new Rx.BehaviorSubject(false)
     service.serviceLayers = []
+    // ToDo: Do not select service layers by name
+    // we need a change in service GET /v1/library-entry needs to send id, identifier is not the same thing
     service.nameToServiceLayers = {}
     service.loadServiceLayers = () => {
       $http.get('/service/odata/ServiceLayer?$select=id,name,description')
