@@ -617,7 +617,8 @@ class State {
 
     // Get a POST body that we will send to aro-service for performing optimization
     service.getOptimizationBody = () => {
-      return stateSerializationHelper.getOptimizationBody(service, service.networkAnalysisConstraints, service.networkConfigurations, $ngRedux.getState())
+      return stateSerializationHelper.getOptimizationBody(service, service.networkAnalysisConstraints,
+        service.primarySpatialEdge, service.autoFuseEdgeTypes, service.networkConfigurations, $ngRedux.getState())
     }
 
     // Load optimization options from a JSON string
@@ -1693,7 +1694,9 @@ class State {
         removePlanTargets: service.removePlanTargets,
         selectDataItems: service.selectDataItems,
         setNetworkAnalysisConstraints: service.setNetworkAnalysisConstraints,
-        setNetworkAnalysisConnectivityDefinition: service.setNetworkAnalysisConnectivityDefinition
+        setNetworkAnalysisConnectivityDefinition: service.setNetworkAnalysisConnectivityDefinition,
+        setPrimarySpatialEdge: service.setPrimarySpatialEdge,
+        setAutoFuseEdgeTypes: service.setAutoFuseEdgeTypes
       }
     }
 
@@ -1774,7 +1777,9 @@ class State {
       selectedBoundaryType: reduxState.mapLayers.selectedBoundaryType,
       systemActors: reduxState.user.systemActors,
       networkAnalysisConnectivityDefinition: reduxState.optimization.networkAnalysis.connectivityDefinition,
-      networkAnalysisConstraints: networkAnalysisConstraintsSelector(reduxState, 'spatialEdgeType', 'snappingDistance', 'maxConnectionDistance', 'maxWormholeDistance', 'ringComplexityCount', 'maxLocationEdgeDistance', 'locationBufferSize', 'conduitBufferSize', 'targetEdgeTypes')
+      networkAnalysisConstraints: networkAnalysisConstraintsSelector(reduxState, 'spatialEdgeType', 'snappingDistance', 'maxConnectionDistance', 'maxWormholeDistance', 'ringComplexityCount', 'maxLocationEdgeDistance', 'locationBufferSize', 'conduitBufferSize', 'targetEdgeTypes'),
+      primarySpatialEdge: reduxState.optimization.networkAnalysis.primarySpatialEdge,
+      autoFuseEdgeTypes: reduxState.optimization.networkAnalysis.autoFuseEdgeTypes
     }
   }
 
@@ -1798,7 +1803,9 @@ class State {
       updateShowSiteBoundary: isVisible => dispatch(MapLayerActions.setShowSiteBoundary(isVisible)),
       onFeatureSelectedRedux: features => dispatch(RingEditActions.onFeatureSelected(features)),
       setNetworkAnalysisConstraints: aroNetworkConstraints => dispatch(NetworkAnalysisActions.setNetworkAnalysisConstraints(aroNetworkConstraints)),
-      setNetworkAnalysisConnectivityDefinition: (spatialEdgeType, networkConnectivityType) => dispatch(NetworkAnalysisActions.setNetworkAnalysisConnectivityDefinition(spatialEdgeType, networkConnectivityType))
+      setNetworkAnalysisConnectivityDefinition: (spatialEdgeType, networkConnectivityType) => dispatch(NetworkAnalysisActions.setNetworkAnalysisConnectivityDefinition(spatialEdgeType, networkConnectivityType)),
+      setPrimarySpatialEdge: primarySpatialEdge => dispatch(NetworkAnalysisActions.setPrimarySpatialEdge(primarySpatialEdge)),
+      setAutoFuseEdgeTypes: autoFuseEdgeTypes => dispatch(NetworkAnalysisActions.setAutoFuseEdgeTypes(autoFuseEdgeTypes))
     }
   }
 }
