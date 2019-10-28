@@ -47,9 +47,9 @@ make stage_mx_reference
 make reset_view
 make load_view
 
-make reset_mx_public
-make load_mx_public
+# make reset_mx_public
+# make load_mx_public
 
-make refresh_materialized_view
+# make refresh_materialized_view
 
 node ../app/cli/register_user -f Admin -l User -e $ADMIN_USER_EMAIL -p $ADMIN_USER_PASSWORD -r admin
