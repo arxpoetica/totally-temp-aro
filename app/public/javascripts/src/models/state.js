@@ -1754,9 +1754,15 @@ class State {
         // The active plan has changed. Note that we are comparing ids because a change in plan state also causes the plan object to update.
         service.onActivePlanChanged()
       }
+      /*
+      // ToDo: this code seems to be depricated,
+        oldDataItems is never set and
+        nextState.dataItems is always undefined, do we mean nextState.plan.dataItems?
+        also, should this be in the above if block? This will run every time state is changed
       if (oldDataItems !== nextState.dataItems) {
         service.StateViewMode.loadListOfSAPlanTags($http, service, nextState.dataItems, '', true)
       }
+      */
     }
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(service.mergeToTarget.bind(service))
 
