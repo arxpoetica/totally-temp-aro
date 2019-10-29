@@ -69,6 +69,7 @@ workflows:
               only: 
                 - master
                 - optional_building
+                - bug_fixes
 
       - deploy:
           context: aro_qa_builds
