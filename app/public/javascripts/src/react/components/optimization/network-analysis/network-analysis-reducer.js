@@ -1,10 +1,13 @@
 import Actions from '../../../common/actions'
 import AroNetworkConstraints from '../../../../shared-utils/aro-network-constraints'
 import ConnectivityDefinition from '../../common/optimization-options/connectivity-definition'
+import SpatialEdgeType from '../../common/optimization-options/spatial-edge-type'
 
 const defaultState = {
   constraints: AroNetworkConstraints(),
   connectivityDefinition: ConnectivityDefinition(),
+  primarySpatialEdge: SpatialEdgeType.road.id,
+  autoFuseEdgeTypes: [],
   chartReport: null,
   chartReportMetaData: null,
   chartReportDefinition: null
@@ -42,6 +45,18 @@ function setConstraints (state, aroNetworkConstraints) {
   }
 }
 
+function setPrimarySpatialEdge (state, primarySpatialEdge) {
+  return { ...state,
+    primarySpatialEdge: primarySpatialEdge
+  }
+}
+
+function setAutoFuseEdgeTypes (state, autoFuseEdgeTypes) {
+  return { ...state,
+    autoFuseEdgeTypes: autoFuseEdgeTypes
+  }
+}
+
 function configurationReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.NETWORK_ANALYSIS_SET_CHART_REPORT:
@@ -55,9 +70,15 @@ function configurationReducer (state = defaultState, action) {
 
     case Actions.NETWORK_ANALYSIS_SET_CONNECTIVITY:
       return setNetworkAnalysisConnectivity(state, action.payload.spatialEdgeType, action.payload.networkConnectivityType)
-  
+
     case Actions.NETWORK_ANALYSIS_SET_CONSTRAINTS:
       return setConstraints(state, action.payload)
+
+    case Actions.NETWORK_ANALYSIS_SET_PRIMARY_SPATIAL_EDGE:
+      return setPrimarySpatialEdge(state, action.payload)
+
+    case Actions.NETWORK_ANALYSIS_SET_AUTOFUSE_EDGE_TYPES:
+      return setAutoFuseEdgeTypes(state, action.payload)
 
     default:
       return state

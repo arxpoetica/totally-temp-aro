@@ -70,6 +70,7 @@ workflows:
                 - master
                 - optional_building
                 - bug_fixes
+                - autoFuse
 
       - deploy:
           context: aro_qa_builds

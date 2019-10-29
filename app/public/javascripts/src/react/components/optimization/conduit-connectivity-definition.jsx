@@ -6,7 +6,7 @@ import NetworkConnectivityType from '../common/optimization-options/network-conn
 export class ConduitConnectivityDefinition extends Component {
   render () {
     return <div className='p-2 m-2'>
-      <h4>Connectivity</h4>
+      <h4>Location/Equipment Connectivity</h4>
       <form className='d-flex flex-column rfp-options'
         style={{ height: '100%' }}
         onSubmit={event => event.preventDefault()}>
