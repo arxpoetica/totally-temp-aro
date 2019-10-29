@@ -41,15 +41,15 @@ psql -c "CREATE EXTENSION IF NOT EXISTS unaccent;" # this is also a hack. for so
 psql -c "CREATE EXTENSION IF NOT EXISTS "\"uuid-ossp\"";" # this is also a hack. for some reason resetting the schema drops this extension.
 make load_schema
 
-make reset_mx_stage_reference
-make stage_mx_reference
+make reset_mx_stage_public
+make load_mx_stage_public
 
 make reset_view
 make load_view
 
-# make reset_mx_public
-# make load_mx_public
+make reset_mx_public
+make load_mx_public
 
-# make refresh_materialized_view
+make refresh_materialized_view
 
 node ../app/cli/register_user -f Admin -l User -e $ADMIN_USER_EMAIL -p $ADMIN_USER_PASSWORD -r admin
