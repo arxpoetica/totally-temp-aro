@@ -1,3 +1,10 @@
+<style>
+  #data_source_upload_modal{
+    max-height: calc(100vh - 7rem);
+    overflow: scroll;
+  }
+</style>
+
 <modal visible="$ctrl.state.showDataSourceUploadModal.value" backdrop="static" on-show="$ctrl.modalShown()" on-hide="$ctrl.modalHide()" modal-size="'modal-lg'">
   <modal-header title="{{!$ctrl.isDataManagementView && 'Upload Data Sources' || 'Data Management'}}"></modal-header>
   <modal-body id="data_source_upload_modal">
@@ -111,30 +118,7 @@
 
       <!-- Data Management view -->
       <div ng-show="$ctrl.isDataManagementView">
-        <!--
-        <div class="form-group row">
-          <label class="col-sm-4 col-form-label">Data Type</label>
-	        <div class="col-sm-8">
-	          <select class="form-control" ng-change="$ctrl.onTableSourceChange()"
-	            ng-model="$ctrl.tableSource"
-	            ng-options="item as item.label for item in $ctrl.tableSources">
-	          </select>
-	        </div>
-        </div>
-        
-        <editor-interface-table display-props="$ctrl.displayProps"
-                          id-prop="$ctrl.idProp"
-                          rows="$ctrl.rows"
-                          detail-view="'resource-manager-detail'"
-                          detail-data="{'resourceType':'LIBRARY'}"
-                          is-edit="false" 
-                          actions="$ctrl.actions"
-                          rows-per-page="10"
-                          root-meta-data="{}">
-        </editor-interface-table>
-        -->
         <r-resource-permissions></r-resource-permissions>
-
       </div>
 
     </div>
