@@ -1,10 +1,3 @@
-<style>
-  #data_source_upload_modal{
-    max-height: calc(100vh - 7rem);
-    overflow: scroll;
-  }
-</style>
-
 <modal visible="$ctrl.state.showDataSourceUploadModal.value" backdrop="static" on-show="$ctrl.modalShown()" on-hide="$ctrl.modalHide()" modal-size="'modal-lg'">
   <modal-header title="{{!$ctrl.isDataManagementView && 'Upload Data Sources' || 'Data Management'}}"></modal-header>
   <modal-body id="data_source_upload_modal">
