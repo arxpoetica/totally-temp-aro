@@ -14,8 +14,8 @@
    },
   "length": {
 		"length_units": "meters",
-		"length_units_to_meters": "1000",
-		"meters_to_length_units": "0.001"
+		"length_units_to_meters": "1",
+		"meters_to_length_units": "1"
   },
   "ui": {
     "title": "ARO",
