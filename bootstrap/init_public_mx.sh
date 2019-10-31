@@ -26,7 +26,7 @@ exec 3>&1 1>>${ETL_LOG_FILE} 2> >(tee /dev/fd/3)  # I think it works, though psq
 source ${DIR}/../db/lib/lookup_codes.sh
 
 if [ -z "$STATE_CODES" ]; then
-  export STATE_CODES='ags,bcn,bcs,cmp,chp,chh,cdz,col,dtd,drn,gnj,grr,hdl,jls,mex,mdo,mrl,nyr,nle,oax,pue,qda,qro,slp,sin,son,tbs,tml,tlx,vll,yct,zct'
+  export STATE_CODES='ags,bcn,bcs,cmp,coa,col,chp,chh,dtd,drn,gnj,grr,hdl,jls,mex,mic,mor,nay,nle,oax,pue,que,roo,slp,sin,son,tab,tam,tla,ver,yuc,zac'
 fi
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the script is running from
