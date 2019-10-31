@@ -117,7 +117,10 @@ export class ResourcePermissions extends Component {
       <tr className='ei-foldout-row' key={dataKey + libItem.identifier + '_b'}>
         <td colSpan='999'>
           <div style={{ 'padding': '0px 20px 0px 20px' }}>
-            <PermissionsTable resource={libItem} resourceType='LIBRARY' isOwner={isOwner} />
+            {this.state.openRowId === libItem.identifier
+              ? <PermissionsTable resource={libItem} resourceType='LIBRARY' isOwner={isOwner} />
+              : ''
+            }
           </div>
         </td>
       </tr>

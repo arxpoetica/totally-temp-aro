@@ -55,6 +55,8 @@ class StateViewMode {
     var filter = ''
 
     var selectedServiceLayerLibraries = dataItems && dataItems.service_layer && dataItems.service_layer.selectedLibraryItems
+    // ToDo: Do not select service layers by name
+    // we need a change in service GET /v1/library-entry needs to send id, identifier is not the same thing
     if (selectedServiceLayerLibraries) libraryItems = selectedServiceLayerLibraries.map(selectedLibraryItem => selectedLibraryItem.name)
     if (libraryItems.length > 0) {
       // Filter using selected serviceLayer id
@@ -180,6 +182,8 @@ class StateViewMode {
     if (entityType === 'ServiceAreaView') {
       // filter = filter ? filter.concat(' and layer/id eq 1') : filter
       var selectedServiceLayerLibraries = dataItems && dataItems.service_layer && dataItems.service_layer.selectedLibraryItems
+      // ToDo: Do not select service layers by name
+      // we need a change in service GET /v1/library-entry needs to send id, identifier is not the same thing
       if (selectedServiceLayerLibraries) libraryItems = selectedServiceLayerLibraries.map(selectedLibraryItem => selectedLibraryItem.name)
       if (libraryItems.length > 0) {
         // Filter using selected serviceLayer id

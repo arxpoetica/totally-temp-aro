@@ -1001,8 +1001,8 @@ class MapObjectEditorController {
       // Get the Service area geometry from aro-service
       featurePromise = this.state.StateViewMode.loadEntityList(this.$http, this.state, this.dataItems, 'ServiceAreaView', serviceArea.id, 'id,code,name,sourceId,geom', 'id')
         .then((result) => {
-          // ToDo: check for empty object, reject on true
-          if (!result[0].hasOwnProperty('geom')) {
+          // check for empty object, reject on true
+          if (!result[0] || !result[0].geom) {
             return Promise.reject(`object: ${serviceArea.object_id} may have been deleted`)
           }
 

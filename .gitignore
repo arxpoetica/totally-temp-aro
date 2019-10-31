@@ -34,7 +34,7 @@ app/v8-compile-cache*/**
 *.settings
 *.classpath
 *.component
-
+*.vscode
 
 ###############################
 
@@ -131,8 +131,5 @@ bootstrap/etl.log
 
 docker/docker-compose.yml
 /node_modules/
-/.gitignore
-
+/app/.gitignore
 .vscode
-app/e10a3e3428ad30a25cb162cce65e73af
-.gitignore
