@@ -1,18 +1,16 @@
 import PlanActions from '../../../../react/components/plan/plan-actions'
 
 class DataSourceUploadController {
-  constructor ($http, $timeout, $ngRedux, state, aclManager) {
+  constructor ($http, $timeout, $ngRedux, state) {
     this.state = state
     this.$http = $http
     this.$timeout = $timeout
-    this.aclManager = aclManager
     this.conicTileSystemUploaderApi = null // Will be set if the conic tile uploader is active
     this.editingDataset = {
       name: ''
     }
     this.isUpLoad = false
     this.isUpLoading = false
-    //this.dataSourceMeta = {} // Metadata for a data source (e.g. isLoading)
 
     this.saCreationTypes = [
       { id: 'upload_file', label: 'Upload From File' },
@@ -410,7 +408,7 @@ class DataSourceUploadController {
   }
 }
 
-DataSourceUploadController.$inject = ['$http', '$timeout', '$ngRedux', 'state', 'aclManager']
+DataSourceUploadController.$inject = ['$http', '$timeout', '$ngRedux', 'state']
 
 let globalDataSourceUploadModal = {
   templateUrl: '/components/sidebar/plan-settings/plan-data-selection/data-source-upload-modal.html',

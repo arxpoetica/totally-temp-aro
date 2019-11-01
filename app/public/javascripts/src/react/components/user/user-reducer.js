@@ -1,18 +1,9 @@
 import Actions from '../../common/actions'
 
 const defaultState = {
-  isSuperUser: false,
   systemActors: [],
   authRoles: {},
   authPermissions: {}
-}
-
-// ToDo: DEPRICATED
-// Set the superuser flag for the currently logged in user
-function setSuperUserFlag (state, isSuperUser) {
-  return { ...state,
-    isSuperUser: isSuperUser
-  }
 }
 
 // Set the currently logged in user
