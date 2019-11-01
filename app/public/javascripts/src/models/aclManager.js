@@ -62,6 +62,7 @@ class AclManager {
         // Next, check the global namespace to see if this user or groups have "SuperUser" permissions
         systemPermissions.resourcePermissions.forEach((access) => {
           // We are checking if the logged in user or any of the users groups have permission to write.
+          // ToDo: depricate Constants.PERMISSIONS (also there is no such thing as Constants.SUPER_USER_PERMISSIONS)
           if ((loggedInUser.id === access.systemActorId) || (loggedInUser.groupIds.indexOf(access.systemActorId) >= 0)) {
             accessResult[this.PERMISSIONS.IS_SUPERUSER] = (access.rolePermissions === Constants.SUPER_USER_PERMISSIONS)
           }
