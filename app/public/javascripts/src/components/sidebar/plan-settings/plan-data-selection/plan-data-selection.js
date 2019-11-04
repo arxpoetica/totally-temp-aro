@@ -1,6 +1,5 @@
 /* globals angular */
 import PlanActions from '../../../../react/components/plan/plan-actions'
-import Constants from '../../../../components/common/constants'
 import { createSelector } from 'reselect'
 
 // Make a copy of data items because the UI component will mutate them directly
@@ -59,9 +58,13 @@ class DataSelectionController {
       this.$http.get(`/service/odata/UserLibraryViewEntity?$select=dataSourceId,permissions&$filter=${filterString}&$top=1000`)
         .then(result => {
           const permissions = (result.data.length === 1) ? result.data[0].permissions : 0
-          const hasWrite = Boolean(permissions & Constants.PERMISSION_RESOURCE_WRITE)
-          const hasAdmin = Boolean(permissions & Constants.PERMISSION_RESOURCE_ADMIN)
-          const hasResourceWorkflow = Boolean(permissions & Constants.PERMISSION_RESOURCE_WORKFLOW)
+          // const hasWrite = Boolean(permissions & Constants.PERMISSION_RESOURCE_WRITE)
+          // const hasAdmin = Boolean(permissions & Constants.PERMISSION_RESOURCE_ADMIN)
+          // const hasResourceWorkflow = Boolean(permissions & Constants.PERMISSION_RESOURCE_WORKFLOW)
+          const hasWrite = Boolean(permissions & this.authPermissions.RESOURCE_WRITE.permissions)
+          const hasAdmin = Boolean(permissions & this.authPermissions.RESOURCE_ADMIN.permissions)
+          const hasResourceWorkflow = Boolean(permissions & this.authPermissions.RESOURCE_WORKFLOW.permissions)
+          
           this.isDataSourceEditable[dataSourceKey] = hasWrite || hasAdmin || hasResourceWorkflow
           this.$timeout()
         })
@@ -124,6 +127,7 @@ class DataSelectionController {
   mapStateToThis (reduxState) {
     // Make a copy of data items because the UI component will mutate them directly
     return {
+      authPermissions: reduxState.user.authPermissions,
       dataItems: getDataItemsCopy(reduxState)
     }
   }
