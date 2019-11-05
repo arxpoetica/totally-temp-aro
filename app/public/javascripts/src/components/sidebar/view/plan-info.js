@@ -61,7 +61,6 @@ class PlanInfoController {
           // We are checking if the logged in user or any of the users groups have permission to write.
           if ((this.state.loggedInUser.id === access.systemActorId) ||
               (this.state.loggedInUser.groupIds.indexOf(access.systemActorId) >= 0)) {
-            // const currentUserIsGod = (access.rolePermissions === Constants.SUPER_USER_PERMISSIONS)
             const currentUserIsGod = (access.rolePermissions === this.authRoles.SUPER_USER.permissions)
             this.currentUserCanEdit = this.currentUserCanEdit || currentUserIsGod
           }
