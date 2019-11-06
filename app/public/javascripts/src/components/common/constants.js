@@ -5,15 +5,6 @@ var Constants = Object.freeze({
   // Map tile size in pixels
   TILE_SIZE: 256,
 
-  // Permissions bits for super users
-  PERMISSION_SUPER_USER: 63,
-  PERMISSION_RESOURCE_ADMIN: 1,
-  PERMISSION_RESOURCE_WRITE: 2,
-  PERMISSION_RESOURCE_READ: 4,
-  PERMISSION_USER_ADMIN: 8,
-  PERMISSION_USER_VIEW: 16,
-  PERMISSION_RESOURCE_WORKFLOW: 32,
-
   // Plan states
   PLAN_STATE: Object.freeze({
     INITIALIZED: 'INITIALIZED',

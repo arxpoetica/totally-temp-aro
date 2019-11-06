@@ -133,7 +133,6 @@ import editorInterfaceNullableNumber from './common/editor-interfaces/editor-int
 import utils from './common/utilities'
 
 import state from '../models/state'
-import aclManager from '../models/aclManager'
 import tileDataService from '../components/tiles/tile-data-service'
 
 import reduxConfig from '../redux-config'
@@ -266,6 +265,5 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rSearchableSelect', react2angular(SearchableSelect))
   .service('Utils', utils)
   .service('state', state)
-  .service('aclManager', aclManager)
   .service('tileDataService', tileDataService)
   .config(reduxConfig)

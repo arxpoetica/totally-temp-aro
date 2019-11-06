@@ -7,12 +7,11 @@ const getDataItems = reduxState => reduxState.plan.dataItems
 const getDataItemsCopy = createSelector([getDataItems], dataItems => angular.copy(dataItems))
 
 class DataSelectionController {
-  constructor ($http, $timeout, $rootScope, $ngRedux, state, aclManager) {
+  constructor ($http, $timeout, $rootScope, $ngRedux, state) {
     this.$http = $http
     this.$timeout = $timeout
     this.$rootScope = $rootScope
     this.state = state
-    this.aclManager = aclManager
     this.currentUser = state.loggedInUser
     this.sales_role_remove = ['cable_construction_area', 'construction_location', 'edge', 'construction_location', 'tile_system', 'construction_area']
 
@@ -58,13 +57,9 @@ class DataSelectionController {
       this.$http.get(`/service/odata/UserLibraryViewEntity?$select=dataSourceId,permissions&$filter=${filterString}&$top=1000`)
         .then(result => {
           const permissions = (result.data.length === 1) ? result.data[0].permissions : 0
-          // const hasWrite = Boolean(permissions & Constants.PERMISSION_RESOURCE_WRITE)
-          // const hasAdmin = Boolean(permissions & Constants.PERMISSION_RESOURCE_ADMIN)
-          // const hasResourceWorkflow = Boolean(permissions & Constants.PERMISSION_RESOURCE_WORKFLOW)
-          const hasWrite = Boolean(permissions & this.authPermissions.RESOURCE_WRITE.permissions)
-          const hasAdmin = Boolean(permissions & this.authPermissions.RESOURCE_ADMIN.permissions)
-          const hasResourceWorkflow = Boolean(permissions & this.authPermissions.RESOURCE_WORKFLOW.permissions)
-          
+          const hasWrite = Boolean(permissions & this.authPermissions.RESOURCE_WRITE.permissionBits)
+          const hasAdmin = Boolean(permissions & this.authPermissions.RESOURCE_ADMIN.permissionBits)
+          const hasResourceWorkflow = Boolean(permissions & this.authPermissions.RESOURCE_WORKFLOW.permissionBits)
           this.isDataSourceEditable[dataSourceKey] = hasWrite || hasAdmin || hasResourceWorkflow
           this.$timeout()
         })
@@ -143,7 +138,7 @@ class DataSelectionController {
   }
 }
 
-DataSelectionController.$inject = ['$http', '$timeout', '$rootScope', '$ngRedux', 'state', 'aclManager']
+DataSelectionController.$inject = ['$http', '$timeout', '$rootScope', '$ngRedux', 'state']
 
 // Component did not work when it was called 'dataSelection'
 let planDataSelection = {
