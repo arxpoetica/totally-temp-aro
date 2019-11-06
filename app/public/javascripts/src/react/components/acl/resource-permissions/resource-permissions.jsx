@@ -37,7 +37,7 @@ export class ResourcePermissions extends Component {
             </select>
           </div>
         </div>
-        <div className='ei-table-contain'>
+        <div className='ei-table-contain' style={{ 'maxHeight': 'calc(100vh - 17rem)', 'overflow': 'scroll' }}>
           <table className='table table-sm ei-table-foldout-striped' style={{ 'borderBottom': '1px solid #dee2e6' }}>
             <thead className='thead-dark'>
               <tr>

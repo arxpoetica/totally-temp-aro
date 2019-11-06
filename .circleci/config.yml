@@ -69,7 +69,6 @@ workflows:
               only: 
                 - master
                 - optional_building
-                - depricate_constants_permissions
 
       - deploy:
           context: aro_qa_builds
