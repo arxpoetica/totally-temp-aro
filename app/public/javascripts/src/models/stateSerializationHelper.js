@@ -3,6 +3,8 @@
  * This service helps us to convert the "state" object to and from this POST body.
  * Services like "state" and "region" are intentionally not injected into this, instead we send them in as parameters.
  */
+// Optimization options in Redux
+// get rid of this
 app.service('stateSerializationHelper', ['$q', ($q) => {
   var stateSerializationHelper = {}
 
