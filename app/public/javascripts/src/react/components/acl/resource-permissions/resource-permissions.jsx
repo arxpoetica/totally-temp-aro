@@ -11,6 +11,7 @@ export class ResourcePermissions extends Component {
     super(props)
 
     this.isAdmin = false
+    this.sortedRows = []
     this.state = {
       'openRowId': null,
       'selectedSourceName': 'all'
@@ -23,6 +24,18 @@ export class ResourcePermissions extends Component {
     if (this.props.loggedInUser.hasPermissions(this.props.authPermissions['RESOURCE_ADMIN'].permissionBits)) {
       this.isAdmin = true
     }
+
+    this.sortedRows = []
+    if (this.state.selectedSourceName === 'all') {
+      Object.keys(this.props.dataItems).forEach((dataKey) => {
+        if (!this.props.dataItems[dataKey].proxyFor) {
+          this.sortedRows = this.sortedRows.concat(this.props.dataItems[dataKey].allLibraryItems)
+        }
+      })
+    } else {
+      this.sortedRows = this.props.dataItems[this.state.selectedSourceName].allLibraryItems
+    }
+    this.sortedRows.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase()) ? 1 : -1)
 
     return (
       <Fragment>
@@ -42,21 +55,11 @@ export class ResourcePermissions extends Component {
             <thead className='thead-dark'>
               <tr>
                 <th />
-                <th className='ei-table-col-head-sortable ng-binding ng-scope' onClick={event => { console.log('reorder') }}>
+                <th>
                   Name
-                  {/*
-                  <div className="ei-table-col-sort-icon ng-scope">
-                    <i className="fa fa-chevron-down ng-scope" aria-hidden="true"> </i>
-                  </div>
-                  */}
                 </th>
-                <th className='ei-table-col-head-sortable ng-binding ng-scope' onClick={event => { console.log('reorder') }}>
+                <th>
                   Data Type
-                  {/*
-                  <div className="ei-table-col-sort-icon ng-scope">
-                    <i className="fa fa-chevron-down ng-scope" aria-hidden="true"> </i>
-                  </div>
-                  */}
                 </th>
                 <th />
               </tr>
@@ -73,19 +76,14 @@ export class ResourcePermissions extends Component {
 
   renderDataRows () {
     var jsx = []
-    Object.keys(this.props.dataItems).forEach((dataKey) => {
-      if (dataKey === this.state.selectedSourceName ||
-        (this.state.selectedSourceName === 'all' &&
-        !this.props.dataItems[dataKey].proxyFor)) { // proxyFor means this list is itentical to another list, this is to avoid duplicates
-        this.props.dataItems[dataKey].allLibraryItems.forEach((libItem) => {
-          jsx = jsx.concat(this.renderDataRow(libItem, dataKey))
-        })
-      }
+    this.sortedRows.forEach((libItem) => {
+      jsx = jsx.concat(this.renderDataRow(libItem))
     })
+
     return jsx
   }
 
-  renderDataRow (libItem, dataKey) {
+  renderDataRow (libItem) {
     var isOwner = this.isAdmin
     if (!isOwner) {
       if (this.props.loggedInUser.hasPermissions(this.props.authPermissions['RESOURCE_ADMIN'].permissionBits, libItem.permissions)) {
@@ -93,7 +91,7 @@ export class ResourcePermissions extends Component {
       }
     }
     return [
-      <tr className={this.state.openRowId === libItem.identifier ? 'ei-foldout-table-open' : ''} key={dataKey + libItem.identifier + '_a'}>
+      <tr className={this.state.openRowId === libItem.identifier ? 'ei-foldout-table-open' : ''} key={libItem.dataType + libItem.identifier + '_a'}>
         <td onClick={event => { this.toggleRow(libItem.identifier) }}>
           <i className='far fa-minus-square ei-foldout-icon ei-foldout-icon-table-open' />
           <i className='far fa-plus-square ei-foldout-icon ei-foldout-icon-table-closed' />
@@ -114,7 +112,7 @@ export class ResourcePermissions extends Component {
           </button>
         </td>
       </tr>,
-      <tr className='ei-foldout-row' key={dataKey + libItem.identifier + '_b'}>
+      <tr className='ei-foldout-row' key={libItem.dataType + libItem.identifier + '_b'}>
         <td colSpan='999'>
           <div style={{ 'padding': '0px 20px 0px 20px' }}>
             {this.state.openRowId === libItem.identifier

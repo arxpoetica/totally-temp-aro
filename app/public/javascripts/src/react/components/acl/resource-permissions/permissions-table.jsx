@@ -7,12 +7,19 @@ import aclActions from '../acl-actions.js'
 import SearchableSelect from '../../common/searchable-select.jsx'
 
 export class PermissionsTable extends Component {
-  /*
   constructor (props) {
     super(props)
+
+    this.sortableColumns = { 'NAME': 'name', 'PERMISSIONS': 'permissions' }
+    this.sortedRows = []
+    this.state = {
+      'selectedColumn': this.sortableColumns.PERMISSIONS,
+      'isOrderDesc': false
+    }
   }
-  */
+
   render () {
+    console.log(this.props.acl)
     var userLists = {}
     if (this.props.isOwner) {
       Object.values(this.props.systemActors).forEach(systemActor => {
@@ -30,27 +37,54 @@ export class PermissionsTable extends Component {
         }
       })
     }
+    console.log(this.props.systemActors)
+    console.log(this.props.authRolesByPermission)
+    this.sortedRows = this.props.acl.slice(0)
+    this.sortedRows.sort((a, b) => {
+      var aVal = ''
+      var bVal = ''
+      if (this.state.selectedColumn === this.sortableColumns.NAME) {
+        aVal = this.getActorNameById(a.systemActorId)
+        bVal = this.getActorNameById(b.systemActorId)
+      } else if (this.state.selectedColumn === this.sortableColumns.PERMISSIONS) {
+        aVal = this.props.authRolesByPermission[a.rolePermissions] ? this.props.authRolesByPermission[a.rolePermissions].displayName : ''
+        bVal = this.props.authRolesByPermission[b.rolePermissions] ? this.props.authRolesByPermission[b.rolePermissions].displayName : ''
+        console.log(a.rolePermissions)
+        // aVal = this.props.authRolesByPermission[a.rolePermissions].displayName
+        // bVal = this.props.authRolesByPermission[b.rolePermissions].displayName
+      }
 
+      if (this.state.isOrderDesc) {
+        var holder = aVal
+        aVal = bVal
+        bVal = holder
+      }
+      console.log([aVal, bVal])
+      return aVal.toLowerCase() > bVal.toLowerCase() ? 1 : -1
+    })
+    console.log(this.sortedRows)
     return (
       <Fragment>
         <table className='table table-sm ei-table-striped' style={{ 'borderBottom': '1px solid #dee2e6' }}>
           <thead>
             <tr>
-              <th className='ei-table-col-head-sortable ng-binding ng-scope' onClick={event => { console.log('reorder') }}>
+              <th className='ei-table-col-head-sortable ng-binding ng-scope' onClick={event => { this.onSortClick(this.sortableColumns.NAME) }}>
                 Name
-                {/*
-                <div className="ei-table-col-sort-icon ng-scope">
-                  <i className="fa fa-chevron-down ng-scope" aria-hidden="true"> </i>
-                </div>
-                */}
+                {this.state.selectedColumn === this.sortableColumns.NAME
+                  ? <div className='ei-table-col-sort-icon ng-scope'>
+                      <i className={'fa' + (this.state.isOrderDesc ? ' fa-chevron-up' : ' fa-chevron-down')} aria-hidden='true'> </i>
+                    </div>
+                  : ''
+                }
               </th>
-              <th className='ei-table-col-head-sortable ng-binding ng-scope' onClick={event => { console.log('reorder') }}>
+              <th className='ei-table-col-head-sortable ng-binding ng-scope' onClick={event => { this.onSortClick(this.sortableColumns.PERMISSIONS) }}>
                 Role Permissions
-                {/*
-                <div className="ei-table-col-sort-icon ng-scope">
-                  <i className="fa fa-chevron-down ng-scope" aria-hidden="true"> </i>
-                </div>
-                */}
+                {this.state.selectedColumn === this.sortableColumns.PERMISSIONS
+                  ? <div className='ei-table-col-sort-icon ng-scope'>
+                      <i className={'fa' + (this.state.isOrderDesc ? ' fa-chevron-up' : ' fa-chevron-down')} aria-hidden='true'> </i>
+                    </div>
+                  : ''
+                }
               </th>
               <th />
             </tr>
@@ -71,7 +105,8 @@ export class PermissionsTable extends Component {
 
   renderDataRows () {
     var jsx = []
-    this.props.acl.forEach((aclItem) => {
+    // this.props.acl.forEach((aclItem) => {
+    this.sortedRows.forEach((aclItem) => {
       // systemActorId, rolePermissions
       jsx.push(this.renderDataRow(aclItem))
     })
@@ -110,7 +145,21 @@ export class PermissionsTable extends Component {
     </tr>
   }
 
+  getActorNameById (id) {
+    const systemActor = this.props.systemActors[id]
+    if (!systemActor) return ''
+    return systemActor.name || `${systemActor.firstName} ${systemActor.lastName}`
+  }
   // --- //
+
+  onSortClick (colName) {
+    console.log(colName)
+    if (this.state.selectedColumn === colName) {
+      this.setState({ ...this.state, 'isOrderDesc': !this.state.isOrderDesc })
+    } else {
+      this.setState({ ...this.state, 'selectedColumn': colName })
+    }
+  }
 
   onSelectRoll (event, systemActorId) {
     var permissionsBit = parseInt(event.target.value)
@@ -151,14 +200,19 @@ const mapStateToProps = (state, ownProps) => {
     acl = state.acl.aclByType[ownProps.resourceType][ownProps.resource.identifier]
   }
   var filteredAuthRoles = []
+  var authRolesByPermission = {}
   Object.keys(state.user.authRoles).forEach(key => {
-    if (key.slice(0, 9) === 'RESOURCE_') filteredAuthRoles.push(state.user.authRoles[key])
+    if (key.slice(0, 9) === 'RESOURCE_') {
+      filteredAuthRoles.push(state.user.authRoles[key])
+      authRolesByPermission[state.user.authRoles[key].permissions] = state.user.authRoles[key]
+    }
   })
   return {
     acl: acl,
     systemActors: state.user.systemActors,
     authRoles: state.user.authRoles,
-    filteredAuthRoles: filteredAuthRoles
+    filteredAuthRoles: filteredAuthRoles,
+    authRolesByPermission: authRolesByPermission
   }
 }
 
