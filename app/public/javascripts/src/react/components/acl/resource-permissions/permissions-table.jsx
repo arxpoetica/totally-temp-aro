@@ -19,7 +19,6 @@ export class PermissionsTable extends Component {
   }
 
   render () {
-    console.log(this.props.acl)
     var userLists = {}
     if (this.props.isOwner) {
       Object.values(this.props.systemActors).forEach(systemActor => {
@@ -37,8 +36,7 @@ export class PermissionsTable extends Component {
         }
       })
     }
-    console.log(this.props.systemActors)
-    console.log(this.props.authRolesByPermission)
+
     this.sortedRows = this.props.acl.slice(0)
     this.sortedRows.sort((a, b) => {
       var aVal = ''
@@ -49,26 +47,23 @@ export class PermissionsTable extends Component {
       } else if (this.state.selectedColumn === this.sortableColumns.PERMISSIONS) {
         aVal = this.props.authRolesByPermission[a.rolePermissions] ? this.props.authRolesByPermission[a.rolePermissions].displayName : ''
         bVal = this.props.authRolesByPermission[b.rolePermissions] ? this.props.authRolesByPermission[b.rolePermissions].displayName : ''
-        console.log(a.rolePermissions)
         // aVal = this.props.authRolesByPermission[a.rolePermissions].displayName
         // bVal = this.props.authRolesByPermission[b.rolePermissions].displayName
       }
-
       if (this.state.isOrderDesc) {
         var holder = aVal
         aVal = bVal
         bVal = holder
       }
-      console.log([aVal, bVal])
       return aVal.toLowerCase() > bVal.toLowerCase() ? 1 : -1
     })
-    console.log(this.sortedRows)
+
     return (
       <Fragment>
         <table className='table table-sm ei-table-striped' style={{ 'borderBottom': '1px solid #dee2e6' }}>
           <thead>
             <tr>
-              <th className='ei-table-col-head-sortable ng-binding ng-scope' onClick={event => { this.onSortClick(this.sortableColumns.NAME) }}>
+              <th className='ei-table-col-head-sortable ng-binding ng-scope' onClick={event => { this.onSortClick(this.sortableColumns.NAME) }} style={{'cursor': 'pointer'}}>
                 Name
                 {this.state.selectedColumn === this.sortableColumns.NAME
                   ? <div className='ei-table-col-sort-icon ng-scope'>
@@ -77,7 +72,7 @@ export class PermissionsTable extends Component {
                   : ''
                 }
               </th>
-              <th className='ei-table-col-head-sortable ng-binding ng-scope' onClick={event => { this.onSortClick(this.sortableColumns.PERMISSIONS) }}>
+              <th className='ei-table-col-head-sortable ng-binding ng-scope' onClick={event => { this.onSortClick(this.sortableColumns.PERMISSIONS) }} style={{'cursor': 'pointer'}}>
                 Role Permissions
                 {this.state.selectedColumn === this.sortableColumns.PERMISSIONS
                   ? <div className='ei-table-col-sort-icon ng-scope'>
