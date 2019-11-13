@@ -8,6 +8,7 @@ function loadReportsMetaData () {
       .then(result => {
         var reportsMetaData = result.data
         reportsMetaData.forEach(reportMetaData => { reportMetaData.isDownloading = false }) // Set a flag that shows whether the report is downloading
+        reportsMetaData.sort((a, b) => (a.displayName > b.displayName) ? 1 : -1) // Sort reports by display name
         dispatch({
           type: Actions.OPTIMIZATION_REPORTS_SET_REPORTS_METADATA,
           payload: reportsMetaData
