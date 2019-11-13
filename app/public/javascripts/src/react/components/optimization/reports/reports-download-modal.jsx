@@ -71,12 +71,12 @@ export class ReportsDownloadModal extends Component {
               &times;
             </button>
           </div>
-          <div className='modal-body'>
+          <div className='modal-body aro-modal-body'>
             <table className='table table-sm table-striped'>
               <thead>
                 <tr>
                   <th>Report</th>
-                  <th>Format</th>
+                  <th style={{ minWidth: '70px' }}>Format</th>
                   <th />
                 </tr>
               </thead>
