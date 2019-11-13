@@ -67,7 +67,8 @@ function loadPlanDataSelectionFromServer (planId) {
               isMinValueSelectionValid: true,
               isMaxValueSelectionValid: true,
               selectedLibraryItems: [],
-              allLibraryItems: []
+              allLibraryItems: [],
+              proxyFor: dataTypeEntity.proxyFor || null
             }
           }
         })
