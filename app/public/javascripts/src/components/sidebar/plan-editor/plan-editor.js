@@ -1641,6 +1641,7 @@ class PlanEditorController {
       isModifyingObject: reduxState.planEditor.isModifyingObject,
       isEditingFeatureProperties: reduxState.planEditor.isEditingFeatureProperties,
       isCommittingTransaction: reduxState.planEditor.isCommittingTransaction,
+      isEnteringTransaction: reduxState.planEditor.isEnteringTransaction,
       userId: reduxState.user.loggedInUser.id,
       conduitMapLayers: reduxState.mapLayers.networkEquipment.conduits,
       roadMapLayers: reduxState.mapLayers.networkEquipment.roads
