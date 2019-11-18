@@ -1546,7 +1546,7 @@ class State {
             service.setPerspective(service.configuration.perspective)
           }
           service.configuration.loadPerspective(result.data.user.perspective)
-          service.setWormholeFusionConfiguration(result.data.appConfiguration.wormholeFusionTypes)
+          service.setWormholeFusionConfiguration(result.data.appConfiguration.wormholeFusionTypes || {})
           service.setLoggedInUser(result.data.user)
           service.setOptimizationOptions()
           tileDataService.setLocationStateIcon(tileDataService.locationStates.LOCK_ICON_KEY, service.configuration.locationCategories.entityLockIcon)
