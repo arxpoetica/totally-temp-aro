@@ -618,7 +618,7 @@ class State {
     // Get a POST body that we will send to aro-service for performing optimization
     service.getOptimizationBody = () => {
       return stateSerializationHelper.getOptimizationBody(service, service.networkAnalysisConstraints,
-        service.primarySpatialEdge, service.networkConfigurations, $ngRedux.getState())
+        service.primarySpatialEdge, service.wormholeFuseDefinitions, service.networkConfigurations, $ngRedux.getState())
     }
 
     // Load optimization options from a JSON string
@@ -1698,7 +1698,9 @@ class State {
         selectDataItems: service.selectDataItems,
         setNetworkAnalysisConstraints: service.setNetworkAnalysisConstraints,
         setNetworkAnalysisConnectivityDefinition: service.setNetworkAnalysisConnectivityDefinition,
-        setPrimarySpatialEdge: service.setPrimarySpatialEdge
+        setPrimarySpatialEdge: service.setPrimarySpatialEdge,
+        clearWormholeFuseDefinitions: service.clearWormholeFuseDefinitions,
+        setWormholeFuseDefinition: service.setWormholeFuseDefinition
       }
     }
 
@@ -1786,7 +1788,8 @@ class State {
       systemActors: reduxState.user.systemActors,
       networkAnalysisConnectivityDefinition: reduxState.optimization.networkAnalysis.connectivityDefinition,
       networkAnalysisConstraints: networkAnalysisConstraintsSelector(reduxState, 'spatialEdgeType', 'snappingDistance', 'maxConnectionDistance', 'maxWormholeDistance', 'ringComplexityCount', 'maxLocationEdgeDistance', 'locationBufferSize', 'conduitBufferSize', 'targetEdgeTypes'),
-      primarySpatialEdge: reduxState.optimization.networkAnalysis.primarySpatialEdge
+      primarySpatialEdge: reduxState.optimization.networkAnalysis.primarySpatialEdge,
+      wormholeFuseDefinitions: reduxState.optimization.networkAnalysis.wormholeFuseDefinitions
     }
   }
 
@@ -1812,6 +1815,8 @@ class State {
       setNetworkAnalysisConstraints: aroNetworkConstraints => dispatch(NetworkAnalysisActions.setNetworkAnalysisConstraints(aroNetworkConstraints)),
       setNetworkAnalysisConnectivityDefinition: (spatialEdgeType, networkConnectivityType) => dispatch(NetworkAnalysisActions.setNetworkAnalysisConnectivityDefinition(spatialEdgeType, networkConnectivityType)),
       setPrimarySpatialEdge: primarySpatialEdge => dispatch(NetworkAnalysisActions.setPrimarySpatialEdge(primarySpatialEdge)),
+      clearWormholeFuseDefinitions: () => dispatch(NetworkAnalysisActions.clearWormholeFuseDefinitions()),
+      setWormholeFuseDefinition: (spatialEdgeType, wormholeFusionTypeId) => dispatch(NetworkAnalysisActions.setWormholeFuseDefinition(spatialEdgeType, wormholeFusionTypeId)),
       setWormholeFusionConfiguration: wormholeFusionConfiguration => dispatch(UiActions.setWormholeFusionConfiguration(wormholeFusionConfiguration))
     }
   }

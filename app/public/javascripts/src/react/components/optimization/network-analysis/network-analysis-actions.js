@@ -63,7 +63,7 @@ function setPrimarySpatialEdge (primarySpatialEdge) {
   }
 }
 
-function clearWormholeFuseDefinition () {
+function clearWormholeFuseDefinitions () {
   return {
     type: Actions.NETWORK_ANALYSIS_CLEAR_WORMHOLE_FUSE_DEFINITION
   }
@@ -84,6 +84,6 @@ export default {
   setNetworkAnalysisConnectivityDefinition,
   setNetworkAnalysisConstraints,
   setPrimarySpatialEdge,
-  clearWormholeFuseDefinition,
+  clearWormholeFuseDefinitions,
   setWormholeFuseDefinition
 }
