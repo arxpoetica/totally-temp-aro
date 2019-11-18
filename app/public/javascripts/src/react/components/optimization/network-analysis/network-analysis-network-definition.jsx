@@ -7,6 +7,20 @@ import NetworkAnalysisActions from './network-analysis-actions'
 import SpatialEdgeType from '../../common/optimization-options/spatial-edge-type'
 import WormholeFusionType from '../../../../shared-utils/wormhole-fusion-type'
 
+const getWormholeFusionConfig = state => state.configuration.ui.wormholeFusion
+const getOrderedSpatialEdgeDefinitions = createSelector([getWormholeFusionConfig], wormholeFusionConfig => {
+  // Error checking, as we are getting these settings from a database
+  Object.keys(wormholeFusionConfig).forEach(spatialEdgeType => {
+    if (!SpatialEdgeType[spatialEdgeType]) {
+      throw new Error(`Error: key ${spatialEdgeType} is not defined in class SpatialEdgeType`)
+    }
+  })
+  // Return ordered spatial edge types
+  return Object.keys(wormholeFusionConfig)
+    .map(spatialEdgeType => wormholeFusionConfig[spatialEdgeType])
+    .sort((a, b) => (a.index > b.index) ? 1 : -1)
+})
+
 export class NetworkAnalysisNetworkDefinition extends Component {
   render () {
     return <div className='p-2 m-2'>
@@ -22,34 +36,34 @@ export class NetworkAnalysisNetworkDefinition extends Component {
         </thead>
         <tbody>
           {
-            Object.keys(SpatialEdgeType).map(edgeTypeKey => <tr key={edgeTypeKey}>
+            this.props.spatialEdgeDefinitions.map(spatialEdgeDefinition => <tr key={spatialEdgeDefinition.key}>
 
               {/* The edge type */}
-              <td>{SpatialEdgeType[edgeTypeKey].displayName}</td>
+              <td>{spatialEdgeDefinition.description}</td>
 
               {/* A radio button that depicts if this is the primary edge type */}
               <td>
                 <input
                   type='radio'
                   className='radiofill'
-                  value={SpatialEdgeType[edgeTypeKey].id}
-                  checked={SpatialEdgeType[edgeTypeKey].id === this.props.primarySpatialEdge}
-                  onChange={event => this.handlePrimarySpatialEdgeChanged(SpatialEdgeType[edgeTypeKey].id)}
+                  value={spatialEdgeDefinition.key}
+                  checked={spatialEdgeDefinition.key === this.props.primarySpatialEdge}
+                  onChange={event => this.handlePrimarySpatialEdgeChanged(spatialEdgeDefinition.key)}
                 />
               </td>
 
               {/* A checkbox (shown only for non-primary edges) that depicts whether to auto-fuse or hybrid-fuse this edge type */}
               <td>
                 {
-                  (SpatialEdgeType[edgeTypeKey].id === this.props.primarySpatialEdge)
+                  (spatialEdgeDefinition.key === this.props.primarySpatialEdge)
                     ? null
                     : <input
                       type='checkbox'
                       className='checkboxfill'
-                      checked={(this.props.wormholeFuseDefinitions[edgeTypeKey] === WormholeFusionType.auto.id) ||
-                        (this.props.wormholeFuseDefinitions[edgeTypeKey] === WormholeFusionType.hybrid.id)}
-                      onChange={event => this.handleAutoFuseDefinitionChanged(edgeTypeKey, event.target.checked)}
-                      value={SpatialEdgeType[edgeTypeKey].id}
+                      checked={(this.props.wormholeFuseDefinitions[spatialEdgeDefinition.key] === WormholeFusionType.auto.id) ||
+                        (this.props.wormholeFuseDefinitions[spatialEdgeDefinition.key] === WormholeFusionType.hybrid.id)}
+                      onChange={event => this.handleAutoFuseDefinitionChanged(spatialEdgeDefinition.key, event.target.checked)}
+                      value={spatialEdgeDefinition.key}
                     />
                 }
               </td>
@@ -57,15 +71,15 @@ export class NetworkAnalysisNetworkDefinition extends Component {
               {/* A checkbox (shown only for non-primary edges) that depicts whether to manual-fuse or hybrid-fuse this edge type */}
               <td>
                 {
-                  (SpatialEdgeType[edgeTypeKey].id === this.props.primarySpatialEdge)
+                  (spatialEdgeDefinition.key === this.props.primarySpatialEdge)
                     ? null
                     : <input
                       type='checkbox'
                       className='checkboxfill'
-                      checked={(this.props.wormholeFuseDefinitions[edgeTypeKey] === WormholeFusionType.manual.id) ||
-                        (this.props.wormholeFuseDefinitions[edgeTypeKey] === WormholeFusionType.hybrid.id)}
-                      onChange={event => this.handleManualFuseDefinitionChanged(edgeTypeKey, event.target.checked)}
-                      value={SpatialEdgeType[edgeTypeKey].id}
+                      checked={(this.props.wormholeFuseDefinitions[spatialEdgeDefinition.key] === WormholeFusionType.manual.id) ||
+                        (this.props.wormholeFuseDefinitions[spatialEdgeDefinition.key] === WormholeFusionType.hybrid.id)}
+                      onChange={event => this.handleManualFuseDefinitionChanged(spatialEdgeDefinition.key, event.target.checked)}
+                      value={spatialEdgeDefinition.key}
                     />
                 }
               </td>
@@ -176,11 +190,13 @@ export class NetworkAnalysisNetworkDefinition extends Component {
 
 NetworkAnalysisNetworkDefinition.propTypes = {
   primarySpatialEdge: PropTypes.string,
+  spatialEdgeDefinitions: PropTypes.array,
   wormholeFuseDefinitions: PropTypes.object
 }
 
 const mapStateToProps = state => ({
   primarySpatialEdge: state.optimization.networkAnalysis.primarySpatialEdge,
+  spatialEdgeDefinitions: getOrderedSpatialEdgeDefinitions(state),
   wormholeFuseDefinitions: state.optimization.networkAnalysis.wormholeFuseDefinitions
 })
 
