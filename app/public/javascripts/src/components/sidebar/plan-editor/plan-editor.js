@@ -1401,13 +1401,17 @@ class PlanEditorController {
       .then(() => {
         // Then, add the equipment feature to the closest subnet
         var subnetToAddTo = subnetDefinitions.filter(subnet => subnet.subnetId === closestSubnetId)[0]
-        subnetToAddTo.linkMapping.push({
-          equipmentId: equipmentFeature.objectId,
-          nodeType: equipmentFeature.networkNodeType,
-          fiberStrandDemand: 1,
-          atomicUnits: 32
-        })
-        return this.$http.post(`/service/plan-transaction/${this.currentTransaction.id}/subnets-definition`, subnetToAddTo)
+        if (subnetToAddTo) {
+          subnetToAddTo.linkMapping.push({
+            equipmentId: equipmentFeature.objectId,
+            nodeType: equipmentFeature.networkNodeType,
+            fiberStrandDemand: 1,
+            atomicUnits: 32
+          })
+          return this.$http.post(`/service/plan-transaction/${this.currentTransaction.id}/subnets-definition`, subnetToAddTo)
+        } else {
+          return Promise.resolve()
+        }
       })
       .then(() => Promise.resolve(closestSubnetId))
   }
