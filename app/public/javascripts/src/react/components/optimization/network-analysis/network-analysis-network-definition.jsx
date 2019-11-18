@@ -77,8 +77,12 @@ export class NetworkAnalysisNetworkDefinition extends Component {
     </div>
   }
 
-  handlePrimarySpatialEdgeChanged (edgeType) {
-    this.props.setPrimarySpatialEdge(edgeType)
+  handlePrimarySpatialEdgeChanged (spatialEdgeType) {
+    this.props.setPrimarySpatialEdge(spatialEdgeType)
+    // Make sure that the wormhole fusion type for the primary edge is set to null
+    if (this.props.wormholeFuseDefinitions[spatialEdgeType]) {
+      this.props.setWormholeFuseDefinition(spatialEdgeType, WormholeFusionType.none.id)
+    }
   }
 
   handleAutoFuseDefinitionChanged (spatialEdgeType, isAutoFuseSelected) {
