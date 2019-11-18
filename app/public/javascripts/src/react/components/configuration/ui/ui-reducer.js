@@ -4,7 +4,8 @@ const defaultState = {
   perspective: null,
   items: [],
   assetKeys: [],
-  styleValues: ''
+  styleValues: '',
+  wormholeFusion: {}
 }
 
 function setConfiguration (state, configuration) {
@@ -31,6 +32,12 @@ function setStyleValues (state, styleValues) {
   }
 }
 
+function setWorhmholeFusionConfiguration (state, wormholeFusion) {
+  return { ...state,
+    wormholeFusion: wormholeFusion
+  }
+}
+
 function configurationReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.CONFIGURATION_SET_CONFIGURATION:
@@ -44,6 +51,9 @@ function configurationReducer (state = defaultState, action) {
 
     case Actions.CONFIGURATION_SET_PERSPECTIVE:
       return setPerspective(state, action.payload)
+
+    case Actions.CONFIGURATION_SET_WORMHOLE_FUSION_CONFIGURATION:
+      return setWorhmholeFusionConfiguration(state, action.payload)
 
     default:
       return state

@@ -1546,6 +1546,7 @@ class State {
             service.setPerspective(service.configuration.perspective)
           }
           service.configuration.loadPerspective(result.data.user.perspective)
+          service.setWormholeFusionConfiguration(result.data.appConfiguration.wormholeFusionTypes)
           service.setLoggedInUser(result.data.user)
           service.setOptimizationOptions()
           tileDataService.setLocationStateIcon(tileDataService.locationStates.LOCK_ICON_KEY, service.configuration.locationCategories.entityLockIcon)
@@ -1813,7 +1814,8 @@ class State {
       setNetworkAnalysisConstraints: aroNetworkConstraints => dispatch(NetworkAnalysisActions.setNetworkAnalysisConstraints(aroNetworkConstraints)),
       setNetworkAnalysisConnectivityDefinition: (spatialEdgeType, networkConnectivityType) => dispatch(NetworkAnalysisActions.setNetworkAnalysisConnectivityDefinition(spatialEdgeType, networkConnectivityType)),
       setPrimarySpatialEdge: primarySpatialEdge => dispatch(NetworkAnalysisActions.setPrimarySpatialEdge(primarySpatialEdge)),
-      setAutoFuseEdgeTypes: autoFuseEdgeTypes => dispatch(NetworkAnalysisActions.setAutoFuseEdgeTypes(autoFuseEdgeTypes))
+      setAutoFuseEdgeTypes: autoFuseEdgeTypes => dispatch(NetworkAnalysisActions.setAutoFuseEdgeTypes(autoFuseEdgeTypes)),
+      setWormholeFusionConfiguration: wormholeFusionConfiguration => dispatch(UiActions.setWormholeFusionConfiguration(wormholeFusionConfiguration))
     }
   }
 }
