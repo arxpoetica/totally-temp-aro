@@ -63,9 +63,27 @@ function setPrimarySpatialEdge (primarySpatialEdge) {
   }
 }
 
+function clearWormholeFuseDefinition () {
+  return {
+    type: Actions.NETWORK_ANALYSIS_CLEAR_WORMHOLE_FUSE_DEFINITION
+  }
+}
+
+function setWormholeFuseDefinition (spatialEdgeType, wormholeFusionTypeId) {
+  return {
+    type: Actions.NETWORK_ANALYSIS_SET_WORMHOLE_FUSE_DEFINITION,
+    payload: {
+      spatialEdgeType,
+      wormholeFusionTypeId
+    }
+  }
+}
+
 export default {
   loadReport,
   setNetworkAnalysisConnectivityDefinition,
   setNetworkAnalysisConstraints,
-  setPrimarySpatialEdge
+  setPrimarySpatialEdge,
+  clearWormholeFuseDefinition,
+  setWormholeFuseDefinition
 }
