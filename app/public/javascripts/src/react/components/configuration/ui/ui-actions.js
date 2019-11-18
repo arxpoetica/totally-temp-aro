@@ -68,6 +68,13 @@ function uploadAssetToServer (assetKey, file) {
   }
 }
 
+function setWormholeFusionConfiguration (wormholeFusionTypes) {
+  return {
+    type: Actions.CONFIGURATION_SET_WORMHOLE_FUSION_CONFIGURATION,
+    payload: wormholeFusionTypes
+  }
+}
+
 export default {
   loadConfigurationFromServer,
   saveConfigurationToServerAndReload,
@@ -75,5 +82,6 @@ export default {
   getStyleValues,
   saveStylesheetsToServerAndReload,
   uploadAssetToServer,
-  setPerspective
+  setPerspective,
+  setWormholeFusionConfiguration
 }

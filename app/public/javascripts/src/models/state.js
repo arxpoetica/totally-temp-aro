@@ -618,7 +618,7 @@ class State {
     // Get a POST body that we will send to aro-service for performing optimization
     service.getOptimizationBody = () => {
       return stateSerializationHelper.getOptimizationBody(service, service.networkAnalysisConstraints,
-        service.primarySpatialEdge, service.autoFuseEdgeTypes, service.networkConfigurations, $ngRedux.getState())
+        service.primarySpatialEdge, service.wormholeFuseDefinitions, service.networkConfigurations, $ngRedux.getState())
     }
 
     // Load optimization options from a JSON string
@@ -1550,6 +1550,7 @@ class State {
             service.setPerspective(service.configuration.perspective)
           }
           service.configuration.loadPerspective(result.data.user.perspective)
+          service.setWormholeFusionConfiguration(result.data.appConfiguration.wormholeFusionTypes || {})
           service.setLoggedInUser(result.data.user)
           service.setOptimizationOptions()
           tileDataService.setLocationStateIcon(tileDataService.locationStates.LOCK_ICON_KEY, service.configuration.locationCategories.entityLockIcon)
@@ -1702,7 +1703,8 @@ class State {
         setNetworkAnalysisConstraints: service.setNetworkAnalysisConstraints,
         setNetworkAnalysisConnectivityDefinition: service.setNetworkAnalysisConnectivityDefinition,
         setPrimarySpatialEdge: service.setPrimarySpatialEdge,
-        setAutoFuseEdgeTypes: service.setAutoFuseEdgeTypes
+        clearWormholeFuseDefinitions: service.clearWormholeFuseDefinitions,
+        setWormholeFuseDefinition: service.setWormholeFuseDefinition
       }
     }
 
@@ -1791,7 +1793,7 @@ class State {
       networkAnalysisConnectivityDefinition: reduxState.optimization.networkAnalysis.connectivityDefinition,
       networkAnalysisConstraints: networkAnalysisConstraintsSelector(reduxState, 'spatialEdgeType', 'snappingDistance', 'maxConnectionDistance', 'maxWormholeDistance', 'ringComplexityCount', 'maxLocationEdgeDistance', 'locationBufferSize', 'conduitBufferSize', 'targetEdgeTypes'),
       primarySpatialEdge: reduxState.optimization.networkAnalysis.primarySpatialEdge,
-      autoFuseEdgeTypes: reduxState.optimization.networkAnalysis.autoFuseEdgeTypes
+      wormholeFuseDefinitions: reduxState.optimization.networkAnalysis.wormholeFuseDefinitions
     }
   }
 
@@ -1817,7 +1819,9 @@ class State {
       setNetworkAnalysisConstraints: aroNetworkConstraints => dispatch(NetworkAnalysisActions.setNetworkAnalysisConstraints(aroNetworkConstraints)),
       setNetworkAnalysisConnectivityDefinition: (spatialEdgeType, networkConnectivityType) => dispatch(NetworkAnalysisActions.setNetworkAnalysisConnectivityDefinition(spatialEdgeType, networkConnectivityType)),
       setPrimarySpatialEdge: primarySpatialEdge => dispatch(NetworkAnalysisActions.setPrimarySpatialEdge(primarySpatialEdge)),
-      setAutoFuseEdgeTypes: autoFuseEdgeTypes => dispatch(NetworkAnalysisActions.setAutoFuseEdgeTypes(autoFuseEdgeTypes))
+      clearWormholeFuseDefinitions: () => dispatch(NetworkAnalysisActions.clearWormholeFuseDefinitions()),
+      setWormholeFuseDefinition: (spatialEdgeType, wormholeFusionTypeId) => dispatch(NetworkAnalysisActions.setWormholeFuseDefinition(spatialEdgeType, wormholeFusionTypeId)),
+      setWormholeFusionConfiguration: wormholeFusionConfiguration => dispatch(UiActions.setWormholeFusionConfiguration(wormholeFusionConfiguration))
     }
   }
 }
