@@ -7,7 +7,6 @@ const defaultState = {
   constraints: AroNetworkConstraints(),
   connectivityDefinition: ConnectivityDefinition(),
   primarySpatialEdge: SpatialEdgeType.road.id,
-  autoFuseEdgeTypes: [],
   chartReport: null,
   chartReportMetaData: null,
   chartReportDefinition: null
@@ -51,12 +50,6 @@ function setPrimarySpatialEdge (state, primarySpatialEdge) {
   }
 }
 
-function setAutoFuseEdgeTypes (state, autoFuseEdgeTypes) {
-  return { ...state,
-    autoFuseEdgeTypes: autoFuseEdgeTypes
-  }
-}
-
 function configurationReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.NETWORK_ANALYSIS_SET_CHART_REPORT:
@@ -76,9 +69,6 @@ function configurationReducer (state = defaultState, action) {
 
     case Actions.NETWORK_ANALYSIS_SET_PRIMARY_SPATIAL_EDGE:
       return setPrimarySpatialEdge(state, action.payload)
-
-    case Actions.NETWORK_ANALYSIS_SET_AUTOFUSE_EDGE_TYPES:
-      return setAutoFuseEdgeTypes(state, action.payload)
 
     default:
       return state

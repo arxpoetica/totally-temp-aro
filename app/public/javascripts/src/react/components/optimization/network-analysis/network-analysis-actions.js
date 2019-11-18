@@ -63,17 +63,9 @@ function setPrimarySpatialEdge (primarySpatialEdge) {
   }
 }
 
-function setAutoFuseEdgeTypes (autoFuseEdgeTypes) {
-  return {
-    type: Actions.NETWORK_ANALYSIS_SET_AUTOFUSE_EDGE_TYPES,
-    payload: autoFuseEdgeTypes
-  }
-}
-
 export default {
   loadReport,
   setNetworkAnalysisConnectivityDefinition,
   setNetworkAnalysisConstraints,
-  setPrimarySpatialEdge,
-  setAutoFuseEdgeTypes
+  setPrimarySpatialEdge
 }

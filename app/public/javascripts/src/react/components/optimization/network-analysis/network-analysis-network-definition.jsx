@@ -45,7 +45,6 @@ export class NetworkAnalysisNetworkDefinition extends Component {
                       type='checkbox'
                       className='checkboxfill'
                       value={SpatialEdgeType[edgeTypeKey].id}
-                      checked={this.props.autoFuseEdgeTypesSet.has(SpatialEdgeType[edgeTypeKey].id)}
                       onChange={event => this.handleAutoFuseEdgeTypeChanged(SpatialEdgeType[edgeTypeKey].id, event.target.checked)}
                     />
                 }
@@ -59,40 +58,19 @@ export class NetworkAnalysisNetworkDefinition extends Component {
 
   handlePrimarySpatialEdgeChanged (edgeType) {
     this.props.setPrimarySpatialEdge(edgeType)
-    // Make sure that the current autofuse edge types do not include the primary spatial edge type
-    if (this.props.autoFuseEdgeTypesSet.has(edgeType)) {
-      // Remove the new primary edge from the auto fuse edge types
-      const newAutoFuseEdgeTypes = [...this.props.autoFuseEdgeTypesSet].filter(item => item !== edgeType)
-      this.props.setAutoFuseEdgeTypes(newAutoFuseEdgeTypes)
-    }
-  }
-  handleAutoFuseEdgeTypeChanged (edgeType, autoFuse) {
-    // Get an array of the current autofuse edge types
-    const currentAutoFuseEdgeTypes = [...this.props.autoFuseEdgeTypesSet]
-    const newAutoFuseEdgeTypes = autoFuse
-      ? currentAutoFuseEdgeTypes.concat([edgeType]) // Add the current edge type
-      : currentAutoFuseEdgeTypes.filter(item => item !== edgeType)  // Remove the current edge type
-
-    this.props.setAutoFuseEdgeTypes(newAutoFuseEdgeTypes)
   }
 }
 
 NetworkAnalysisNetworkDefinition.propTypes = {
-  primarySpatialEdge: PropTypes.string,
-  autoFuseEdgeTypesSet: PropTypes.instanceOf(Set)
+  primarySpatialEdge: PropTypes.string
 }
 
-const getAutoFuseEdgeTypesArray = state => state.optimization.networkAnalysis.autoFuseEdgeTypes
-const getAutoFuseEdgeTypesSet = createSelector([getAutoFuseEdgeTypesArray], autoFuseEdgeTypes => new Set(autoFuseEdgeTypes))
-
 const mapStateToProps = state => ({
-  primarySpatialEdge: state.optimization.networkAnalysis.primarySpatialEdge,
-  autoFuseEdgeTypesSet: getAutoFuseEdgeTypesSet(state)
+  primarySpatialEdge: state.optimization.networkAnalysis.primarySpatialEdge
 })
 
 const mapDispatchToProps = dispatch => ({
-  setPrimarySpatialEdge: primarySpatialEdge => dispatch(NetworkAnalysisActions.setPrimarySpatialEdge(primarySpatialEdge)),
-  setAutoFuseEdgeTypes: autoFuseEdgeTypes => dispatch(NetworkAnalysisActions.setAutoFuseEdgeTypes(autoFuseEdgeTypes))
+  setPrimarySpatialEdge: primarySpatialEdge => dispatch(NetworkAnalysisActions.setPrimarySpatialEdge(primarySpatialEdge))
 })
 
 const NetworkAnalysisNetworkDefinitionComponent = wrapComponentWithProvider(reduxStore, NetworkAnalysisNetworkDefinition, mapStateToProps, mapDispatchToProps)
