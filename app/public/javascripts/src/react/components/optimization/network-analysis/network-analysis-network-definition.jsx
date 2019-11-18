@@ -10,11 +10,11 @@ import WormholeFusionType from '../../../../shared-utils/wormhole-fusion-type'
 const getWormholeFusionConfig = state => state.configuration.ui.wormholeFusion
 const getOrderedSpatialEdgeDefinitions = createSelector([getWormholeFusionConfig], wormholeFusionConfig => {
   // Error checking, as we are getting these settings from a database
-  Object.keys(wormholeFusionConfig).forEach(spatialEdgeType => {
-    if (!SpatialEdgeType[spatialEdgeType]) {
-      throw new Error(`Error: key ${spatialEdgeType} is not defined in class SpatialEdgeType`)
-    }
-  })
+  // Object.keys(wormholeFusionConfig).forEach(spatialEdgeType => {
+  //   if (!SpatialEdgeType[spatialEdgeType]) {
+  //     throw new Error(`Error: key ${spatialEdgeType} is not defined in class SpatialEdgeType`)
+  //   }
+  // })
   // Return ordered spatial edge types
   return Object.keys(wormholeFusionConfig)
     .map(spatialEdgeType => wormholeFusionConfig[spatialEdgeType])
