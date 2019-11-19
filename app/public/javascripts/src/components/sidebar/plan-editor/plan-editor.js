@@ -821,16 +821,15 @@ class PlanEditorController {
   }
 
   displayEditObject (feature, isMult) {
+    this.setIsCreatingObject(true)
     if (feature.type && feature.type === 'equipment_boundary.select') {
       return this.displaySiteBoundaryViewObject(feature)
-        .then((result) => {
-          return this.editViewSiteBoundaryObject()
-        })
+        .then(result => this.editViewSiteBoundaryObject())
+        .catch(err => console.error(err))
     } else {
       return this.displayEquipmentViewObject(feature)
-        .then((result) => {
-          return this.editViewObject(isMult)
-        })
+        .then(result => this.editViewObject(isMult))
+        .catch(err => console.error(err))
     }
   }
 
@@ -1071,6 +1070,7 @@ class PlanEditorController {
       }
     } else if (!this.isMarker(mapObject)) {
       // If the user has drawn the boundary, we will have an associated object in the "feature" attributes. Save associations.
+      this.setIsCreatingObject(true)
       if (usingMapClick && feature && feature.attributes && feature.attributes.network_node_object_id) {
         // If the associated equipment has a boundary associated with it, first delete *that* boundary
         var existingBoundaryId = this.equipmentIdToBoundaryId[feature.attributes.network_node_object_id]
@@ -1092,7 +1092,11 @@ class PlanEditorController {
         this.state.requestMapLayerRefresh.next(null)
       }
       promiseToReturn = this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`, serviceFeature)
-        .catch((err) => console.error(err))
+        .then(() => this.setIsCreatingObject(false))
+        .catch((err) => {
+          console.error(err)
+          this.setIsCreatingObject(false)
+        })
     }
     this.updateObjectIdsToHide()
     this.$timeout()
