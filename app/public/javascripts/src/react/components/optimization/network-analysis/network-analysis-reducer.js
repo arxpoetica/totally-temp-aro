@@ -3,6 +3,7 @@ import AroNetworkConstraints from '../../../../shared-utils/aro-network-constrai
 import ConnectivityDefinition from '../../common/optimization-options/connectivity-definition'
 import SpatialEdgeType from '../../common/optimization-options/spatial-edge-type'
 import WormholeFusionType from '../../../../shared-utils/wormhole-fusion-type'
+import DefaultOptimizationInputs from '../../common/optimization-options/default-optimization-inputs'
 
 const defaultState = {
   constraints: AroNetworkConstraints(),
@@ -11,7 +12,8 @@ const defaultState = {
   wormholeFuseDefinitions: {},
   chartReport: null,
   chartReportMetaData: null,
-  chartReportDefinition: null
+  chartReportDefinition: null,
+  optimizationInputs: DefaultOptimizationInputs
 }
 
 function setChartReport (state, chartReport) {
@@ -71,6 +73,13 @@ function setWormholeFuseDefinition (state, spatialEdgeType, wormholeFusionTypeId
   return newState
 }
 
+function setOptimizationInputs (state, inputs) {
+  var newState = { ...state,
+    optimizationInputs: { ...state.optimizationInputs, inputs }
+  }
+  return newState
+}
+
 function configurationReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.NETWORK_ANALYSIS_SET_CHART_REPORT:
@@ -96,6 +105,9 @@ function configurationReducer (state = defaultState, action) {
 
     case Actions.NETWORK_ANALYSIS_SET_WORMHOLE_FUSE_DEFINITION:
       return setWormholeFuseDefinition(state, action.payload.spatialEdgeType, action.payload.wormholeFusionTypeId)
+
+    case Actions.NETWORK_ANALYSIS_SET_OPTIMIZATION_INPUTS:
+      return setOptimizationInputs(state, action.payload)
 
     default:
       return state
