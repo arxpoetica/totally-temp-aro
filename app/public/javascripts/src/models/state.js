@@ -616,6 +616,8 @@ class State {
     service.getVisibleAnalysisLayers = () => $ngRedux.getState().mapLayers.boundary.filter(item => item.checked && (item.key === 'analysis_layer'))
 
     // Get a POST body that we will send to aro-service for performing optimization
+    // Optimization options in Redux
+    // replace this with redux post
     service.getOptimizationBody = () => {
       return stateSerializationHelper.getOptimizationBody(service, service.networkAnalysisConstraints,
         service.primarySpatialEdge, service.wormholeFuseDefinitions, service.networkConfigurations, $ngRedux.getState())
@@ -1568,6 +1570,9 @@ class State {
 
     }
 
+    // Optimization options in Redux
+    // service.optimizationOptions nneds to be moved to redux
+    // add these to the deafult JSON
     service.setOptimizationOptions = () => {
       service.optimizationOptions = angular.copy(service.configuration.optimizationOptions)
 
@@ -1582,6 +1587,7 @@ class State {
       ]
 
       service.optimizationOptions.uiSelectedAlgorithm = service.optimizationOptions.uiAlgorithms[0]
+      console.log(service.optimizationOptions)
     }
 
     service.planEditorChanged = new Rx.BehaviorSubject(false)

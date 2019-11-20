@@ -34,6 +34,8 @@ class NetworkAnalysisBuildController {
     this.setSelectionTypeById(selectionType)
   }
 
+  // Optimization options in Redux
+  // replace this.state.optimizationOptions.* with redux object
   onBudgetChange () {
     // this.state.optimizationOptions.budget = this.budgetDisplay * 1000
     this.state.optimizationOptions.budget = this.budgetDisplay
