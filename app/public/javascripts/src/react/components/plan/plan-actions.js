@@ -80,6 +80,7 @@ function loadPlanDataSelectionFromServer (planId) {
               newDataItems[dataItemKey].allLibraryItems.push(libraryItem)
             }
           })
+          newDataItems[dataItemKey].allLibraryItems.sort((a, b) => (a.name > b.name) ? 1 : -1)
         })
 
         // For each data item, construct the list of selected library items

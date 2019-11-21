@@ -29,10 +29,15 @@ export class ReportsDownloadRow extends Component {
         </select>
       </td>
       <td style={{ textAlign: 'center' }}>
-        <a className='btn btn-sm btn-light'
+        <a className={this.props.isDownloading ? 'btn btn-sm btn-light disabled' : 'btn btn-sm btn-primary'}
           href={`/service-download-file/${downloadFileName}/v2/report-extended/${this.props.reportId}/${this.props.planId}.${this.state.selectedFormat}`}
+          onClick={event => this.props.setIsDownloadingReport()}
           download>
-          <i className='fa fa-download' /> Download
+          {
+            this.props.isDownloading
+              ? <span><i className='fa fa-spinner fa-spin' /> Downloading...</span>
+              : <span><i className='fa fa-download' /> Download</span>
+          }
         </a>
       </td>
     </tr>
@@ -45,7 +50,9 @@ ReportsDownloadRow.propTypes = {
   reportName: PropTypes.string,
   displayName: PropTypes.string,
   mediaTypes: PropTypes.array,
-  title: PropTypes.string
+  isDownloading: PropTypes.bool,
+  title: PropTypes.string,
+  setIsDownloadingReport: PropTypes.func
 }
 
 export class ReportsDownloadModal extends Component {
@@ -71,12 +78,12 @@ export class ReportsDownloadModal extends Component {
               &times;
             </button>
           </div>
-          <div className='modal-body'>
+          <div className='modal-body aro-modal-body'>
             <table className='table table-sm table-striped'>
               <thead>
                 <tr>
                   <th>Report</th>
-                  <th>Format</th>
+                  <th style={{ minWidth: '70px' }}>Format</th>
                   <th />
                 </tr>
               </thead>
@@ -89,7 +96,10 @@ export class ReportsDownloadModal extends Component {
                       reportName={report.name}
                       displayName={report.displayName}
                       mediaTypes={report.media_types}
-                      planId={this.props.planId} />
+                      isDownloading={report.isDownloading}
+                      planId={this.props.planId}
+                      setIsDownloadingReport={() => this.props.setIsDownloadingReport(index)}
+                    />
                   ))
                 }
               </tbody>
@@ -133,6 +143,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
   loadReportsMetaData: () => dispatch(ReportsActions.loadReportsMetaData()),
+  setIsDownloadingReport: index => dispatch(ReportsActions.setIsDownloadingReport(index, true)),
   showOrHideReportModal: showReportModal => dispatch(ReportsActions.showOrHideReportModal(showReportModal))
 })
 

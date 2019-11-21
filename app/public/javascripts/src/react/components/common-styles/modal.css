@@ -1,3 +1,8 @@
 .modal {
   background-color: rgba(0, 0, 0, 0.6);
 }
+
+.aro-modal-body {
+  max-height: 500px;
+  overflow-y: auto;
+}
