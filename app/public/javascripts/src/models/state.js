@@ -704,6 +704,7 @@ class State {
             if (!resourceManager.deleted) {
               newResourceItems[resourceManager.managerType].allManagers.push(resourceManager)
             }
+            newResourceItems[resourceManager.managerType].allManagers.sort((a, b) => (a.name > b.name) ? 1 : -1)
           })
 
           // Then select the appropriate manager for each type

@@ -194,11 +194,11 @@ class BoundaryCoverageController {
     var ctx = ele.getContext('2d')
 
     // a dataset for each location type
-    const coverageData = this.digestBoundaryCoverage()
+    this.boundsCoverage = this.digestBoundaryCoverage()
     var datasets = []
     var colCount = 0
-    for (const locationType in coverageData.locations) {
-      var locCoverage = coverageData.locations[locationType]
+    for (const locationType in this.boundsCoverage.locations) {
+      var locCoverage = this.boundsCoverage.locations[locationType]
       if (locCoverage.barChartData.length > colCount) colCount = locCoverage.barChartData.length
 
       var locDataset = {}
@@ -215,7 +215,7 @@ class BoundaryCoverageController {
     
     var i = 0
     // move unreachable col to end
-    for (i=0; i<datasets.length; i++){
+    for (i=0; i<datasets.length; i++) {
       var prevLen = datasets[i].data.length
       // prevLen should be <= colCount or something has gone wrong
       datasets[i].data[colCount] = datasets[i].data[0]

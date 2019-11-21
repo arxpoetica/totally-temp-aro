@@ -68,7 +68,8 @@ class MapSplitController {
       disableMap: reduxState.planEditor.isCalculatingSubnets ||
         reduxState.planEditor.isCreatingObject ||
         reduxState.planEditor.isModifyingObject ||
-        reduxState.planEditor.isCommittingTransaction
+        reduxState.planEditor.isCommittingTransaction ||
+        reduxState.planEditor.isEnteringTransaction
     }
   }
 

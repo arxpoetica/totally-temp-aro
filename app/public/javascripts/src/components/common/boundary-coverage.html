@@ -49,8 +49,8 @@
     <div class="ei-header bounds-coverage-header">
       Locations by Census Block Tag
     </div>
-    <div class="bounds-coverage-census-tag" ng-if="$ctrl.objKeys($ctrl.selectedBoundaryCoverage.tagCounts).length < 1">none</div>
-    <div ng-repeat="cat in $ctrl.selectedBoundaryCoverage.tagCounts">
+    <div class="bounds-coverage-census-tag" ng-if="$ctrl.objKeys($ctrl.boundsCoverage.tagCounts).length < 1">none</div>
+    <div ng-repeat="cat in $ctrl.boundsCoverage.tagCounts">
       <div class="ei-property-item bounds-coverage-census-cat">
         {{cat.description}}
       </div>
