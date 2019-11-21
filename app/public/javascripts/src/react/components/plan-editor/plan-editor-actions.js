@@ -9,6 +9,10 @@ import SelectionActions from '../selection/selection-actions'
 
 function resumeOrCreateTransaction (planId, userId) {
   return dispatch => {
+    dispatch({
+      type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION,
+      payload: true
+    })
     TransactionManager.resumeOrCreateTransaction(planId, userId)
       .then(result => {
         dispatch({
@@ -24,8 +28,18 @@ function resumeOrCreateTransaction (planId, userId) {
       .then(results => {
         dispatch(addTransactionFeatures(results[0].data))
         dispatch(addTransactionFeatures(results[1].data))
+        dispatch({
+          type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION,
+          payload: false
+        })
       })
-      .catch(err => console.error(err))
+      .catch(err => {
+        console.error(err)
+        dispatch({
+          type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION,
+          payload: false
+        })
+      })
   }
 }
 
@@ -233,6 +247,13 @@ function setIsCommittingTransaction (isCommittingTransaction) {
   }
 }
 
+function setIsEnteringTransaction (isEnteringTransaction) {
+  return {
+    type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION,
+    payload: isEnteringTransaction
+  }
+}
+
 export default {
   commitTransaction,
   clearTransaction,
@@ -252,5 +273,6 @@ export default {
   setIsModifyingObject,
   setIsDraggingFeatureForDrop,
   setIsEditingFeatureProperties,
-  setIsCommittingTransaction
+  setIsCommittingTransaction,
+  setIsEnteringTransaction
 }

@@ -10,7 +10,7 @@ export default class TransactionManager {
   // 4. If we have a transaction for this plan and for this user, resume it
   static resumeOrCreateTransaction (planId, userId) {
     // Get a list of all open transactions in the system (Do NOT send in userId so we get transactions across all users)
-    return AroHttp.get(`/service/plan-transaction`)
+    return AroHttp.get(`/service/plan-transaction?plan_id=${planId}`)
       .then((result) => {
         const currentPlanId = planId
         const transactionsForPlan = result.data.filter((item) => item.planId === currentPlanId)
