@@ -1,4 +1,5 @@
-/* globals */
+/* globals Blob */
+import { saveAs } from 'file-saver'
 import Actions from '../../../common/actions'
 import AroHttp from '../../../common/aro-http'
 
@@ -28,6 +29,28 @@ function setIsDownloadingReport (index, isDownloading) {
   }
 }
 
+function downloadReport (reportId, reportFormat, planId) {
+  return (dispatch, getState) => {
+    const report = getState().optimization.report.reportsMetaData.filter(report => report.id === reportId)[0]
+    const reportIndex = getState().optimization.report.reportsMetaData.findIndex(report => report.id === reportId)
+    // "(new Date()).toISOString().split('T')[0]" will give "YYYY-MM-DD"
+    // Note that we are doing (new Date(Date.now())) so that we can have deterministic tests (by replacing the Date.now() function when testing)
+    const downloadFileName = `${(new Date(Date.now())).toISOString().split('T')[0]}_${report.name}.${reportFormat}`
+    const reportUrl = `/service-download-file/${downloadFileName}/v2/report-extended/${report.id}/${planId}.${reportFormat}`
+
+    dispatch(setIsDownloadingReport(reportIndex, true))
+    AroHttp.get(reportUrl, true)
+      .then(rawResult => {
+        saveAs(new Blob([rawResult]), downloadFileName)
+        dispatch(setIsDownloadingReport(reportIndex, false))
+      })
+      .catch(err => {
+        console.error(err)
+        dispatch(setIsDownloadingReport(reportIndex, false))
+      })
+  }
+}
+
 function clearOutput () {
   return {
     type: Actions.OPTIMIZATION_REPORTS_CLEAR_OUTPUT
@@ -43,7 +66,7 @@ function showOrHideReportModal (showReportModal) {
 
 export default {
   loadReportsMetaData,
-  setIsDownloadingReport,
   clearOutput,
-  showOrHideReportModal
+  showOrHideReportModal,
+  downloadReport
 }
