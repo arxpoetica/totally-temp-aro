@@ -176,15 +176,16 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       postBody.networkConfigurationOverride.fusionRuleConfig = postBody.networkConfigurationOverride.fusionRuleConfig || {}
       postBody.networkConfigurationOverride.fusionRuleConfig.connectivityDefinition = state.networkAnalysisConnectivityDefinition
 
-      postBody.networkConfigurationOverride.fusionRuleConfig.snappingDistance = +networkAnalysisConstraints.snappingDistance.value
-      postBody.networkConfigurationOverride.fusionRuleConfig.maxConnectionDistance = +networkAnalysisConstraints.maxConnectionDistance.value
-      postBody.networkConfigurationOverride.fusionRuleConfig.maxWormholeDistance = +networkAnalysisConstraints.maxWormholeDistance.value
-
+      if (networkAnalysisConstraints.snappingDistance && networkAnalysisConstraints.maxConnectionDistance
+        && networkAnalysisConstraints.maxWormholeDistance && networkAnalysisConstraints.maxLocationEdgeDistance) {
+        postBody.networkConfigurationOverride.fusionRuleConfig.snappingDistance = +networkAnalysisConstraints.snappingDistance.value
+        postBody.networkConfigurationOverride.fusionRuleConfig.maxConnectionDistance = +networkAnalysisConstraints.maxConnectionDistance.value
+        postBody.networkConfigurationOverride.fusionRuleConfig.maxWormholeDistance = +networkAnalysisConstraints.maxWormholeDistance.value
+        postBody.networkConfigurationOverride.fiberConstraintConfig = postBody.networkConfigurationOverride.fiberConstraintConfig || {}
+        postBody.networkConfigurationOverride.fiberConstraintConfig.maxLocationToEdgeDistance = +networkAnalysisConstraints.maxLocationEdgeDistance.value
+      }
       postBody.networkConfigurationOverride.fusionRuleConfig.primarySpatialEdge = primarySpatialEdge
       postBody.networkConfigurationOverride.fusionRuleConfig.wormholeFuseDefinitions = wormholeFuseDefinitions
-
-      postBody.networkConfigurationOverride.fiberConstraintConfig = postBody.networkConfigurationOverride.fiberConstraintConfig || {}
-      postBody.networkConfigurationOverride.fiberConstraintConfig.maxLocationToEdgeDistance = +networkAnalysisConstraints.maxLocationEdgeDistance.value
     }
   }
 

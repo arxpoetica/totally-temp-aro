@@ -11,6 +11,16 @@ function setReportsMetaData (state, reportsMetaData) {
   }
 }
 
+function setIsDownloading (state, index, isDownloading) {
+  var newReportsMetaData = state.reportsMetaData.slice()
+  newReportsMetaData[index] = { ...newReportsMetaData[index],
+    isDownloading: isDownloading
+  }
+  return { ...state,
+    reportsMetaData: newReportsMetaData
+  }
+}
+
 function clearOutput (state) {
   return { ...state,
     reportsMetaData: null,
@@ -34,6 +44,9 @@ function configurationReducer (state = defaultState, action) {
 
     case Actions.OPTIMIZATION_REPORTS_SHOW_HIDE_REPORT_MODAL:
       return setReportModalVisibility(state, action.payload)
+
+    case Actions.OPTIMIZATION_REPORTS_SET_IS_DOWNLOADING:
+      return setIsDownloading(state, action.payload.index, action.payload.isDownloading)
 
     default:
       return state
