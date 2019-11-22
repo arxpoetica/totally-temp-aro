@@ -11,7 +11,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   // ------------------------------------------------------------------------------------------------------------------
 
   // Get a POST body that we will send to aro-service for performing optimization
-  stateSerializationHelper.getOptimizationBody = (state, networkAnalysisConstraints, primarySpatialEdge, autoFuseEdgeTypes, projectNetworkConfiguration, reduxState) => {
+  stateSerializationHelper.getOptimizationBody = (state, networkAnalysisConstraints, primarySpatialEdge, wormholeFuseDefinitions, projectNetworkConfiguration, reduxState) => {
     var optimizationBody = {
       planId: state.plan.id,
       projectTemplateId: state.loggedInUser.projectId,
@@ -26,7 +26,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     optimizationBody.fronthaulOptimization = state.optimizationOptions.fronthaulOptimization
 
     addNetworkAnalysisType(state, optimizationBody)
-    addNetworkConfigurationOverride(state, networkAnalysisConstraints, primarySpatialEdge, autoFuseEdgeTypes, projectNetworkConfiguration, optimizationBody)
+    addNetworkConfigurationOverride(state, networkAnalysisConstraints, primarySpatialEdge, wormholeFuseDefinitions, projectNetworkConfiguration, optimizationBody)
 
     return optimizationBody
   }
@@ -166,7 +166,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     }
   }
 
-  var addNetworkConfigurationOverride = (state, networkAnalysisConstraints, primarySpatialEdge, autoFuseEdgeTypes, projectNetworkConfiguration, postBody) => {
+  var addNetworkConfigurationOverride = (state, networkAnalysisConstraints, primarySpatialEdge, wormholeFuseDefinitions, projectNetworkConfiguration, postBody) => {
     const routingMode = state.optimizationOptions.networkConstraints.routingMode
     if (projectNetworkConfiguration[routingMode]) {
       // Make a copy of the network configuration for the current routing mode (e.g. ODN_1, etc)
@@ -185,7 +185,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
         postBody.networkConfigurationOverride.fiberConstraintConfig.maxLocationToEdgeDistance = +networkAnalysisConstraints.maxLocationEdgeDistance.value
       }
       postBody.networkConfigurationOverride.fusionRuleConfig.primarySpatialEdge = primarySpatialEdge
-      postBody.networkConfigurationOverride.fusionRuleConfig.autoFuseEdgeTypes = autoFuseEdgeTypes
+      postBody.networkConfigurationOverride.fusionRuleConfig.wormholeFuseDefinitions = wormholeFuseDefinitions
     }
   }
 
@@ -372,7 +372,10 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
           })
         }
         dispatchers.setPrimarySpatialEdge(frConfig.primarySpatialEdge)
-        dispatchers.setAutoFuseEdgeTypes(frConfig.autoFuseEdgeTypes)
+        dispatchers.clearWormholeFuseDefinitions()
+        Object.keys(frConfig.wormholeFuseDefinitions).forEach(spatialEdgeType => {
+          dispatchers.setWormholeFuseDefinition(spatialEdgeType, frConfig.wormholeFuseDefinitions[spatialEdgeType])
+        })
       }
       const fcConfig = planInputs.networkConfigurationOverride.fiberConstraintConfig
       if (fcConfig) {
