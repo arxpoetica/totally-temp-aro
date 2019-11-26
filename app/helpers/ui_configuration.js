@@ -60,6 +60,41 @@ module.exports = class UIConfiguration {
       .catch(err => console.error(err))
   }
 
+  getUiStrings () {
+    const sql = `
+      SELECT module, key, value
+      FROM ui.string
+      WHERE client_id=(SELECT id FROM ui.client WHERE name=$1)
+        AND locale_id=(SELECT id FROM ui.locale WHERE locale='en-US');
+    `
+    return Promise.all([
+      database.query(sql, ['base']),
+      database.query(sql, [process.env.ARO_CLIENT])
+    ])
+      .then(results => {
+        // Create a UI strings object keyed by module name
+        const baseStringDefinitions = results[0]
+        const clientStringDefinitions = results[1]
+        var uiStrings = {}
+        // First populate the base definitions
+        baseStringDefinitions.forEach(baseStringDefinition => {
+          uiStrings[baseStringDefinition.module] = uiStrings[baseStringDefinition.module] || {}
+          uiStrings[baseStringDefinition.module][baseStringDefinition.key] = baseStringDefinition.value
+        })
+        // Then override with the client definitions. The client does not need to define all strings.
+        clientStringDefinitions.forEach(clientStringDefinition => {
+          if (uiStrings[clientStringDefinition.module] && uiStrings[clientStringDefinition.module][clientStringDefinition.key]) {
+            uiStrings[clientStringDefinition.module][clientStringDefinition.key] = clientStringDefinition.value
+          } else {
+            throw new Error('A client string definition was encountered, but there is no corresponding base definition. Always define the base definition')
+          }
+        })
+        console.log('UI Strings loaded from database')
+        return Promise.resolve(uiStrings)
+      })
+      .catch(err => console.error(err))
+  }
+
   getConfigurationSet (configSet) {
     if (!this.configurations[configSet]) {
       // This configuration set has not been loaded yet. Load it.
