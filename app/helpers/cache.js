@@ -107,6 +107,12 @@ function loadConfiguration() {
     .catch(err => console.error(err))
 }
 
+function loadUiStrings () {
+  UIConfiguration.getUiStrings()
+    .then(result => { exports.uiStrings = result })
+    .catch(err => console.error(err))
+}
+
 exports.clearUiConfigurationCache = () => UIConfiguration.clearCache()
 
 exports.refresh = () => {
@@ -114,7 +120,8 @@ exports.refresh = () => {
     loadAnalysisLayers(),
     loadServiceLayers(),
     loadFiberTypes(),
-    loadConfiguration()
+    loadConfiguration(),
+    loadUiStrings()
   ])
     .then(() => console.log(`Cache loaded ${exports.serviceLayers.length} service areas, ${exports.analysisLayers.length} analysis layers`))
 }
