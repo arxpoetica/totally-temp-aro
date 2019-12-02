@@ -60,10 +60,14 @@ module.exports = class UIConfiguration {
       .catch(err => console.error(err))
   }
 
-  getUiStrings () {
+  getEnumStrings () {
     const sql = `
-      SELECT module, key, value
-      FROM ui.string
+      SELECT p.name as package, c.name as class, es.key, es.description
+      FROM ui.enum_string es
+      JOIN ui.package p
+        ON p.id=es.package_id
+      JOIN ui.class c
+        ON c.id=es.class_id
       WHERE client_id=(SELECT id FROM ui.client WHERE name=$1)
         AND locale_id=(SELECT id FROM ui.locale WHERE locale='en-US');
     `
@@ -75,22 +79,25 @@ module.exports = class UIConfiguration {
         // Create a UI strings object keyed by module name
         const baseStringDefinitions = results[0]
         const clientStringDefinitions = results[1]
-        var uiStrings = {}
+        var enumStrings = {}
         // First populate the base definitions
         baseStringDefinitions.forEach(baseStringDefinition => {
-          uiStrings[baseStringDefinition.module] = uiStrings[baseStringDefinition.module] || {}
-          uiStrings[baseStringDefinition.module][baseStringDefinition.key] = baseStringDefinition.value
+          enumStrings[baseStringDefinition.package] = enumStrings[baseStringDefinition.package] || {}
+          enumStrings[baseStringDefinition.package][baseStringDefinition.class] = enumStrings[baseStringDefinition.package][baseStringDefinition.class] || {}
+          enumStrings[baseStringDefinition.package][baseStringDefinition.class][baseStringDefinition.key] = baseStringDefinition.description
         })
         // Then override with the client definitions. The client does not need to define all strings.
         clientStringDefinitions.forEach(clientStringDefinition => {
-          if (uiStrings[clientStringDefinition.module] && uiStrings[clientStringDefinition.module][clientStringDefinition.key]) {
-            uiStrings[clientStringDefinition.module][clientStringDefinition.key] = clientStringDefinition.value
+          if (enumStrings[clientStringDefinition.package] &&
+            enumStrings[clientStringDefinition.package][clientStringDefinition.class] &&
+            enumStrings[clientStringDefinition.package][clientStringDefinition.class][clientStringDefinition.key]) {
+            enumStrings[clientStringDefinition.package][clientStringDefinition.key] = clientStringDefinition.description
           } else {
             throw new Error('A client string definition was encountered, but there is no corresponding base definition. Always define the base definition')
           }
         })
-        console.log('UI Strings loaded from database')
-        return Promise.resolve(uiStrings)
+        console.log('Enum Strings loaded from database')
+        return Promise.resolve(enumStrings)
       })
       .catch(err => console.error(err))
   }

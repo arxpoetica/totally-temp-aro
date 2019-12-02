@@ -30,7 +30,7 @@ exports.configure = (api, middleware) => {
     response.status(200).json({
       user: request.user,
       appConfiguration: cache.configuration,
-      uiStrings: cache.uiStrings,
+      enumStrings: cache.enumStrings,
       // For google maps licensing, specify one of the following:
       // 1. Nothing (no API_KEY, no CLIENT_ID, no CHANNEL)
       // 2. API_KEY only
