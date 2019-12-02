@@ -81,17 +81,17 @@ module.exports = class UIConfiguration {
         const clientStringDefinitions = results[1]
         var enumStrings = {}
         // First populate the base definitions
-        baseStringDefinitions.forEach(baseStringDefinition => {
-          enumStrings[baseStringDefinition.package] = enumStrings[baseStringDefinition.package] || {}
-          enumStrings[baseStringDefinition.package][baseStringDefinition.class] = enumStrings[baseStringDefinition.package][baseStringDefinition.class] || {}
-          enumStrings[baseStringDefinition.package][baseStringDefinition.class][baseStringDefinition.key] = baseStringDefinition.description
+        baseStringDefinitions.forEach(baseDef => {
+          enumStrings[baseDef.package] = enumStrings[baseDef.package] || {}
+          enumStrings[baseDef.package][baseDef.class] = enumStrings[baseDef.package][baseDef.class] || {}
+          enumStrings[baseDef.package][baseDef.class][baseDef.key] = baseDef.description
         })
         // Then override with the client definitions. The client does not need to define all strings.
-        clientStringDefinitions.forEach(clientStringDefinition => {
-          if (enumStrings[clientStringDefinition.package] &&
-            enumStrings[clientStringDefinition.package][clientStringDefinition.class] &&
-            enumStrings[clientStringDefinition.package][clientStringDefinition.class][clientStringDefinition.key]) {
-            enumStrings[clientStringDefinition.package][clientStringDefinition.key] = clientStringDefinition.description
+        clientStringDefinitions.forEach(clientDef => {
+          if (enumStrings[clientDef.package] &&
+            enumStrings[clientDef.package][clientDef.class] &&
+            enumStrings[clientDef.package][clientDef.class][clientDef.key]) {
+            enumStrings[clientDef.package][clientDef.class][clientDef.key] = clientDef.description
           } else {
             throw new Error('A client string definition was encountered, but there is no corresponding base definition. Always define the base definition')
           }
