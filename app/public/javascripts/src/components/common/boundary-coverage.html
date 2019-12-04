@@ -39,8 +39,8 @@
 
 <div ng-if="$ctrl.selectedBoundaryCoverage">
   <div class="ei-header bounds-coverage-header">
-    Site boundary coverage: {{$ctrl.selectedBoundaryCoverage.totalLocations}} 
-    <div class="bounds-coverage-header-sub" ng-repeat="(locationType, locationData) in $ctrl.selectedBoundaryCoverage.locations">
+    Site boundary coverage: {{$ctrl.boundsCoverage.totalLocations}} 
+    <div class="bounds-coverage-header-sub" ng-repeat="(locationType, locationData) in $ctrl.boundsCoverage.locations">
       {{locationData.locationType}}: {{locationData.totalCount}}
     </div>
   </div>
