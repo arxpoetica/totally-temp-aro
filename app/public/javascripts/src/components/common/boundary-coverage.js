@@ -194,11 +194,11 @@ class BoundaryCoverageController {
     var ctx = ele.getContext('2d')
 
     // a dataset for each location type
-    this.boundsCoverage = this.digestBoundaryCoverage()
+    this.computedCoverage = this.digestBoundaryCoverage()
     var datasets = []
     var colCount = 0
-    for (const locationType in this.boundsCoverage.locations) {
-      var locCoverage = this.boundsCoverage.locations[locationType]
+    for (const locationType in this.computedCoverage.locations) {
+      var locCoverage = this.computedCoverage.locations[locationType]
       if (locCoverage.barChartData.length > colCount) colCount = locCoverage.barChartData.length
 
       var locDataset = {}
