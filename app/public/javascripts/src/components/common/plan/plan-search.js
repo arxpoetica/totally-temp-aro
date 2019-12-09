@@ -96,7 +96,9 @@ class PlanSearchController {
         .then((response) => {
           this.planOptions.params = {}
           this.$http.get('/optimization/processes').then((running) => {
-            response.data.forEach((plan) => {
+            this.totalData = []
+            this.totalData = response.data.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase()) ? 1 : -1)
+            this.totalData.forEach((plan) => {
               var info = running.data.find((status) => status.planId === +plan.id)
               if (info) {
                 var diff = (Date.now() - new Date(info.startDate).getTime()) / 1000
@@ -108,7 +110,8 @@ class PlanSearchController {
                 plan.optimizationState = info.optimizationState
               }
             })
-            this.allPlans = _.sortBy(response.data, 'name')
+            // this.allPlans = _.sortBy(response.data, 'name')
+            this.allPlans = response.data
             this.plans = this.allPlans.slice(0, this.maxResults)
             this.loadServiceAreaInfo(this.plans)
             this.pages = []
