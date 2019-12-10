@@ -619,6 +619,7 @@ class State {
     // Optimization options in Redux
     // replace this with redux post
     service.getOptimizationBody = () => {
+      console.log('GOB')
       return stateSerializationHelper.getOptimizationBody(service, service.networkAnalysisConstraints,
         service.primarySpatialEdge, service.wormholeFuseDefinitions, service.networkConfigurations, $ngRedux.getState())
     }

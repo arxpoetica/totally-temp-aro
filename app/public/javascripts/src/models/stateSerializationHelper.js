@@ -29,7 +29,8 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
     addNetworkAnalysisType(state, optimizationBody)
     addNetworkConfigurationOverride(state, networkAnalysisConstraints, primarySpatialEdge, wormholeFuseDefinitions, projectNetworkConfiguration, optimizationBody)
-
+    console.log('get opt bod')
+    console.log(state.optimizationBody)
     return optimizationBody
   }
 
@@ -37,7 +38,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   var addNetworkAnalysisType = (state, postBody) => {
     postBody.analysis_type = state.networkAnalysisType.type
 
-    if (postBody.analysis_type === 'NETWORK_ANALYSIS') {
+    if (postBody.analysis_type === 'NETWORK_ANALYSIS') { // problem
       delete postBody.fronthaulOptimization
       delete postBody.generatedDataRequest
     }
@@ -211,6 +212,8 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     loadFiberNetworkConstraintsFromBody(state, planInputs)
     loadTechnologiesFromBody(state, planInputs)
     loadNetworkConfigurationOverrideFromBody(dispatchers, planInputs, defaultNetworkConstraints)
+    console.log('load from JSON')
+    console.log(state.optimizationOptions)
   }
 
   // Load analysis type from a POST body object that is sent to the optimization engine
@@ -225,9 +228,10 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
   // Load location types from a POST body object that is sent to the optimization engine
   var loadLocationTypesFromBody = (state, dataItems, dispatchers, postBody) => {
+    console.log(state.locationLayers)
     state.locationLayers.forEach((locationLayer) => {
       const isVisible = (postBody.locationConstraints.locationTypes.indexOf(locationLayer.plannerKey) >= 0)
-      state.setLayerVisibility(locationLayer, isVisible)
+      state.setLayerVisibility(locationLayer, isVisible) // this goes directly to redux MapLayerActions.setLayerVisibility
     })
 
     // Load the selected data sources

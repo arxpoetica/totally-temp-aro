@@ -13,7 +13,7 @@ const defaultState = {
   chartReport: null,
   chartReportMetaData: null,
   chartReportDefinition: null,
-  optimizationInputs: DefaultOptimizationInputs
+  optimizationInputs: DefaultOptimizationInputs // serialization helper
 }
 
 function setChartReport (state, chartReport) {
@@ -73,12 +73,15 @@ function setWormholeFuseDefinition (state, spatialEdgeType, wormholeFusionTypeId
   return newState
 }
 
+// serialization helper
 function setOptimizationInputs (state, inputs) {
   var newState = { ...state,
     optimizationInputs: { ...state.optimizationInputs, inputs }
   }
   return newState
 }
+
+// --- //
 
 function configurationReducer (state = defaultState, action) {
   switch (action.type) {
