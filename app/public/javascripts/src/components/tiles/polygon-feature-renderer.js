@@ -99,7 +99,7 @@ class PolygonFeatureRenderer {
       // Highlight the selected siteBoundary in Edit mode on selection
       drawingStyles.lineWidth = mapLayer.highlightStyle.lineWidth
     } else if ((feature.properties._data_type) &&
-      feature.properties._data_type === 'equipment_boundary.select' && feature.properties.is_locked === 'true') {
+      feature.properties._data_type === 'equipment_boundary.select' && feature.properties.workflow_state_id === 2) {
       drawingStyles.strokeStyle = '#0101F6'
       drawingStyles.fillStyle = mapLayer.highlightStyle.fillStyle
       drawingStyles.lineOpacity = styles.modifiedBoundary.lineOpacity
