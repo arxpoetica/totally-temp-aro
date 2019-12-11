@@ -83,13 +83,7 @@
     </div>
 
     <div ng-controller="selected_location_controller">
-
-      <% if (env_is_test) { %>
-        <a class="float-right" ng-click="select_random_location()">.</a>
-      <% } %>
-
       <% include modal_selected_location.html %>
-
     </div>
 
     <map-split></map-split>
@@ -202,7 +196,7 @@
         map.setStreetView(panorama);
 
         // At this point, our angular app and the document is initialized. Perform any further initialization via the state service.
-        angular.element(document.body).injector().get('state').initializeApp()
+        angular.element(document.body).injector().get('state').initializeApp(<%- initialState || 'undefined' %>)
       }
 
       function openReleaseNotes() {
@@ -290,8 +284,6 @@
           leftcol.addClass('left-col-expanded')
         }
       })
-
-      swal.setDefaults({ animation: <%- env_is_test ? 'null' : 'true' %> })
 
       // prevent tabs from changing the URL
       $('.nav-tabs a').click((e) => {

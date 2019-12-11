@@ -1488,7 +1488,7 @@ class State {
         service.setPlanRedux(plan)
       }
       var plan = null
-      service.getOrCreateEphemeralPlan() // Will be called once when the page loads, since state.js is a service
+      return service.getOrCreateEphemeralPlan() // Will be called once when the page loads, since state.js is a service
         .then((result) => {
           plan = result.data
           // Get the default location for this user
@@ -1504,25 +1504,28 @@ class State {
         })
         .then((result) => {
           if (result.data && result.data.length > 0 && result.data[0].type === 'placeId') {
-            var geocoder = new google.maps.Geocoder()
-            geocoder.geocode({ 'placeId': result.data[0].value }, function (geocodeResults, status) {
-              if (status !== 'OK') {
-                console.error('Geocoder failed: ' + status)
-                console.error('Setting map coordinates to default')
-                initializeToDefaultCoords(plan)
-                return
-              }
-              service.requestSetMapCenter.next({
-                latitude: geocodeResults[0].geometry.location.lat(),
-                longitude: geocodeResults[0].geometry.location.lng()
+            return new Promise((resolve, reject) => {
+              var geocoder = new google.maps.Geocoder()
+              geocoder.geocode({ 'placeId': result.data[0].value }, function (geocodeResults, status) {
+                if (status !== 'OK') {
+                  console.error('Geocoder failed: ' + status)
+                  console.error('Setting map coordinates to default')
+                  initializeToDefaultCoords(plan)
+                  return resolve()
+                }
+                service.requestSetMapCenter.next({
+                  latitude: geocodeResults[0].geometry.location.lat(),
+                  longitude: geocodeResults[0].geometry.location.lng()
+                })
+                const ZOOM_FOR_OPEN_PLAN = 14
+                service.requestSetMapZoom.next(ZOOM_FOR_OPEN_PLAN)
+                service.setPlanRedux(plan)
+                resolve()
               })
-              const ZOOM_FOR_OPEN_PLAN = 14
-              service.requestSetMapZoom.next(ZOOM_FOR_OPEN_PLAN)
-              service.setPlanRedux(plan)
             })
           } else {
             // Set it to the default so that the map gets initialized
-            initializeToDefaultCoords(plan)
+            return initializeToDefaultCoords(plan)
           }
         })
         .catch((err) => {
@@ -1533,7 +1536,7 @@ class State {
     }
 
     service.configuration = {}
-    service.initializeApp = () => {
+    service.initializeApp = initialState => {
       // Get application configuration from the server
       $http.get('/configuration')
         .then(result => {
@@ -1549,7 +1552,9 @@ class State {
           }
           service.configuration.loadPerspective(result.data.user.perspective)
           service.setWormholeFusionConfiguration(result.data.appConfiguration.wormholeFusionTypes || {})
-          service.setLoggedInUser(result.data.user)
+          return service.setLoggedInUser(result.data.user)
+        })
+        .then(() => {
           service.setOptimizationOptions()
           tileDataService.setLocationStateIcon(tileDataService.locationStates.LOCK_ICON_KEY, service.configuration.locationCategories.entityLockIcon)
           tileDataService.setLocationStateIcon(tileDataService.locationStates.INVALIDATED_ICON_KEY, service.configuration.locationCategories.entityInvalidatedIcon)
@@ -1557,13 +1562,12 @@ class State {
           if (service.configuration.ARO_CLIENT === 'frontier' || service.configuration.ARO_CLIENT === 'sse') {
             heatmapOptions.selectedHeatmapOption = service.viewSetting.heatmapOptions.filter((option) => option.id === 'HEATMAP_OFF')[0]
           }
+          // Fire a redux action to get configuration for the redux side. This will result in two calls to /configuration for the time being.
+          service.getStyleValues()
+          return service.loadConfigurationFromServer()
         })
+        .then(() => console.log(initialState))
         .catch(err => console.error(err))
-
-      // Fire a redux action to get configuration for the redux side. This will result in two calls to /configuration for the time being.
-      service.loadConfigurationFromServer()
-      service.getStyleValues()
-
     }
 
     service.setOptimizationOptions = () => {
