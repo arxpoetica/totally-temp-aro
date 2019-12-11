@@ -15,9 +15,6 @@ export class ReportsDownloadRow extends Component {
   }
 
   render () {
-    // "(new Date()).toISOString().split('T')[0]" will give "YYYY-MM-DD"
-    // Note that we are doing (new Date(Date.now())) so that we can have deterministic tests (by replacing the Date.now() function when testing)
-    const downloadFileName = `${(new Date(Date.now())).toISOString().split('T')[0]}_${this.props.reportName}.${this.state.selectedFormat}`
     return <tr>
       <td>{this.props.displayName}</td>
       <td>
@@ -29,16 +26,17 @@ export class ReportsDownloadRow extends Component {
         </select>
       </td>
       <td style={{ textAlign: 'center' }}>
-        <a className={this.props.isDownloading ? 'btn btn-sm btn-light disabled' : 'btn btn-sm btn-primary'}
-          href={`/service-download-file/${downloadFileName}/v2/report-extended/${this.props.reportId}/${this.props.planId}.${this.state.selectedFormat}`}
-          onClick={event => this.props.setIsDownloadingReport()}
-          download>
+        <button className={this.props.isDownloading ? 'btn btn-sm btn-light' : 'btn btn-sm btn-primary'}
+          style={{ minWidth: '120px' }}
+          onClick={event => this.props.downloadReport(this.props.reportId, this.state.selectedFormat, this.props.planId)}
+          disabled={this.props.isDownloading}
+        >
           {
             this.props.isDownloading
               ? <span><i className='fa fa-spinner fa-spin' /> Downloading...</span>
               : <span><i className='fa fa-download' /> Download</span>
           }
-        </a>
+        </button>
       </td>
     </tr>
   }
@@ -47,12 +45,10 @@ export class ReportsDownloadRow extends Component {
 ReportsDownloadRow.propTypes = {
   planId: PropTypes.number,
   reportId: PropTypes.number,
-  reportName: PropTypes.string,
   displayName: PropTypes.string,
   mediaTypes: PropTypes.array,
   isDownloading: PropTypes.bool,
-  title: PropTypes.string,
-  setIsDownloadingReport: PropTypes.func
+  downloadReport: PropTypes.func
 }
 
 export class ReportsDownloadModal extends Component {
@@ -89,18 +85,17 @@ export class ReportsDownloadModal extends Component {
               </thead>
               <tbody>
                 {
-                  visibleReports.map((report, index) => (
-                    <ReportsDownloadRow
+                  visibleReports.map((report, index) => {
+                    return <ReportsDownloadRow
                       key={index}
+                      planId={this.props.planId}
                       reportId={report.id}
-                      reportName={report.name}
                       displayName={report.displayName}
                       mediaTypes={report.media_types}
                       isDownloading={report.isDownloading}
-                      planId={this.props.planId}
-                      setIsDownloadingReport={() => this.props.setIsDownloadingReport(index)}
+                      downloadReport={this.props.downloadReport}
                     />
-                  ))
+                  })
                 }
               </tbody>
             </table>
@@ -143,7 +138,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
   loadReportsMetaData: () => dispatch(ReportsActions.loadReportsMetaData()),
-  setIsDownloadingReport: index => dispatch(ReportsActions.setIsDownloadingReport(index, true)),
+  downloadReport: (reportId, reportFormat, planId) => dispatch(ReportsActions.downloadReport(reportId, reportFormat, planId)),
   showOrHideReportModal: showReportModal => dispatch(ReportsActions.showOrHideReportModal(showReportModal))
 })
 

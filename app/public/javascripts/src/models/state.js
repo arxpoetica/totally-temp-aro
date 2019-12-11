@@ -1546,6 +1546,7 @@ class State {
         .then(result => {
           service.configuration = result.data.appConfiguration
           service.googleMapsLicensing = result.data.googleMapsLicensing
+          service.uiStrings = result.data.uiStrings
           service.configuration.loadPerspective = (perspective) => {
             // If a perspective is not found, go to the default
             const defaultPerspective = service.configuration.perspectives.filter(item => item.name === 'default')[0]

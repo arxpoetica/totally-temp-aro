@@ -467,7 +467,7 @@ class MapObjectEditorController {
     } else {
       options.push(new MenuAction(MenuActionTypes.VIEW, () => this.displayViewObject({ feature: feature })))
       // Note that feature.is_locked comes in as a string from the vector tiles
-      if (feature.is_locked === 'false') {
+      if (feature.workflow_state_id !== 2) {
         options.push(new MenuAction(MenuActionTypes.EDIT, () => this.editExistingFeature(feature, latLng, false)))
       }
     }
@@ -976,7 +976,7 @@ class MapObjectEditorController {
       var newSelection = this.state.cloneSelection()
       if (clickedObject._data_type === 'equipment_boundary.select') {
         iconKey = Constants.MAP_OBJECT_CREATE_KEY_EQUIPMENT_BOUNDARY
-        if (clickedObject.is_locked === 'false') {
+        if (clickedObject.workflow_state_id !== 2) {
           this.displayEditObject({ feature: feature })
         } else {
           this.displayViewObject({ feature: feature })
@@ -986,7 +986,7 @@ class MapObjectEditorController {
         this.state.selection = newSelection
         return
       } else {
-        if (clickedObject.is_locked === 'false') {
+        if (clickedObject.workflow_state_id !== 2) {
           this.displayEditObject({ feature: feature, isMult: isMult })
         } else {
           this.displayViewObject({ feature: feature, isMult: isMult })

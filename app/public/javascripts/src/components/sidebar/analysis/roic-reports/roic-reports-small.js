@@ -1,6 +1,8 @@
 class RoicReportsSmallController {
   constructor (state) {
     this.state = state
+    this.FIBER_STRINGS = this.state.uiStrings['com.altvil.aro.service.entity']
+    this.CABLE_CONSTRUCTION_STRINGS = this.state.uiStrings['com.altvil.interfaces']
     this.series = ['Series A', 'Series B']
     this.config = config // Ugh - A global from a time long ago!
   }

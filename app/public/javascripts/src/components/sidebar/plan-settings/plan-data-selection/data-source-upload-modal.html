@@ -39,7 +39,7 @@
           <div class="form-group row">
             <label class="col-sm-4 col-form-label">Data Source Name</label>
             <div class="col-sm-8">
-              <input type="text" name="name" class="form-control" placeholder="Data Source Name">
+              <input type="text" name="name" ng-model="$ctrl.datasourceName" class="form-control" placeholder="Data Source Name">
             </div>
           </div>
 
@@ -118,6 +118,7 @@
   </modal-body>
   <modal-footer class="justify-content-between" ng-show="!$ctrl.isDataManagementView">
     <a href="/csv/{{$ctrl.downloads[$ctrl.state.uploadDataSource.name].fileName}}" class="btn btn-primary" role="button" download="{{$ctrl.downloads[$ctrl.state.uploadDataSource.name].fileName}}">Download upload template</a>    
-    <button class="btn btn-primary" ng-disabled="$ctrl.isUploading" ng-click="$ctrl.save()"><span ng-show="$ctrl.isUpLoad" class="fa fa-spinner fa-spin"></span> Save</button>
+    <button class="btn btn-primary" ng-class="$ctrl.datasourceName == '' ? 'btn btn-light' : 'btn btn-primary'" ng-disabled="$ctrl.isUploading || $ctrl.datasourceName === ''"
+    ng-click="$ctrl.save()"><span ng-show="$ctrl.isUpLoad" class="fa fa-spinner fa-spin"></span> Save</button>
   </modal-footer>
 </modal>

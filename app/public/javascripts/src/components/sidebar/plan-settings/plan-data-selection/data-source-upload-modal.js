@@ -11,6 +11,7 @@ class DataSourceUploadController {
     }
     this.isUpLoad = false
     this.isUpLoading = false
+    this.datasourceName = ''
 
     this.saCreationTypes = [
       { id: 'upload_file', label: 'Upload From File' },
