@@ -10,6 +10,7 @@ import createSocketMiddleware from './middleware/websockets'
 import ui from '../react/components/configuration/ui/ui-reducer'
 import report from '../react/components/configuration/report/report-reducer'
 import networkAnalysis from '../react/components/optimization/network-analysis/network-analysis-reducer'
+import networkOptimization from '../react/components/optimization/network-optimization/network-optimization-reducer'
 import opReport from '../react/components/optimization/reports/reports-reducer'
 import rfp from '../react/components/optimization/rfp/rfp-reducer'
 import contextMenu from '../react/components/context-menu/reducer'
@@ -38,7 +39,7 @@ let reducer = combineReducers({
   fullScreen,
   map,
   mapLayers,
-  optimization: combineReducers({ networkAnalysis, report: opReport, rfp }),
+  optimization: combineReducers({ networkOptimization, networkAnalysis, report: opReport, rfp }),
   plan,
   planEditor,
   selection,

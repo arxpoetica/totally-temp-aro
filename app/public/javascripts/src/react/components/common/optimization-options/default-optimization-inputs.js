@@ -1,4 +1,52 @@
 export default Object.freeze({
+  'advancedAnalysis': true,
+  'analysis_type': 'NETWORK_PLAN',
+  'backhaulOptimization': {
+    'backhaulOptimizationType': 'LINKED_NODES'
+  },
+  'fronthaulOptimization': {
+    'optimizationMode': 'INTER_WIRECENTER'
+  },
+  'generatedDataRequest': {
+    'aggregatedBOM': true,
+    'generateFiberLinks': true,
+    'generateOptimizationAnalysis': true,
+    'generatePlanLocationLinks': true,
+    'generatePrunnedNetwork': true,
+    'generateSubnetLinking': true,
+    'persistJunctionNodes': true,
+    'selectedCalcTypes': [
+      'undefined'
+    ]
+  },
+  'locationConstraints': {
+    'analysisLayerId': 0,
+    'analysisSelectionMode': 'SELECTED_AREAS',
+    'locationTypes': [
+      'large'
+    ]
+  },
+  'networkTypes': [
+    'Undefined'
+  ],
+  'optimization': {
+    'algorithm': 'UNCONSTRAINED',
+    'algorithmType': 'DEFAULT',
+    'budget': 0,
+    'customOptimization': {
+      'map': {},
+      'name': 'string'
+    },
+    'preIrrThreshold': 0,
+    'threshold': 0
+  },
+  'planId': 0,
+  'projectTemplateId': 1,
+  'routingMode': 'ODN_1'
+})
+
+/*
+export default Object.freeze({
   'analysis_type': 'NETWORK_PLAN',
   'uiAlgorithms': [],
   'uiSelectedAlgorithm': null,
@@ -94,3 +142,4 @@ export default Object.freeze({
     'providerStrength': 1.0
   }
 })
+*/

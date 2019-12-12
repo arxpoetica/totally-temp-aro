@@ -8,14 +8,16 @@ class AnalysisModeController {
     tracker.trackEvent(tracker.CATEGORIES.ENTER_ANALYSIS_MODE, tracker.ACTIONS.CLICK)
     this.accordions = Object.freeze({
       INPUT: 0,
-      OUTPUT: 1
+      OUTPUT: 1,
+      TEST: 2
     })
 
     this.expandedAccordionIndex = this.accordions.INPUT
 
     this.analysisModePanels = Object.freeze({
       INPUT: 'INPUT',
-      OUTPUT: 'OUTPUT'
+      OUTPUT: 'OUTPUT',
+      TEST: 'TEST'
     })
 
     this.analysisModePanel = this.analysisModePanels.INPUT

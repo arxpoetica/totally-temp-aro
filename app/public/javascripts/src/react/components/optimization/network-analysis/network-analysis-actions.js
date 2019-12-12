@@ -79,8 +79,6 @@ function setWormholeFuseDefinition (spatialEdgeType, wormholeFusionTypeId) {
   }
 }
 
-// serialization helper
-
 export default {
   loadReport,
   setNetworkAnalysisConnectivityDefinition,
