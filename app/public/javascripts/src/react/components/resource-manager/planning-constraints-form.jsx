@@ -3,8 +3,6 @@ import { connect } from 'react-redux'
 import { PropTypes } from 'prop-types'
 import { Field, reduxForm } from 'redux-form'
 import Constants from '../../common/constants'
-import AroCellNodeConstraints from './aro-cell-node-constraints-form.jsx'
-import AroDslamNodeConstraints from './aro-dslam-node-constraints-form.jsx'
 
 export class PlanningConstraints extends Component {
   render () {
@@ -15,14 +13,95 @@ export class PlanningConstraints extends Component {
           onSubmit={event => event.preventDefault()}>
           <table className='table table-sm table-striped'>
             <tbody>
+
               <tr>
                 <td colSpan={2}>Cell Node Constraints</td>
               </tr>
-              <AroCellNodeConstraints initialValues={this.props.initialValues.cellNodeConstraints} enableReinitialize />
+              <tr>
+                <td className='pl-4'>Placement Strategy</td>
+                <td>
+                  <Field name='cellNodeConstraints.placementStrategy'
+                    className='form-control form-control-sm' component='select' type='text'>
+                    <option value='RANDOM'>Random</option>
+                    <option value='EXISTING_LOCATIONS'>Existing Locations</option>
+                    <option value='EXISTING_AND_RANDOM'>Existing and Random</option>
+                  </Field>
+                </td>
+              </tr>
+              <tr>
+                <td className='pl-4'>Cell Radius (m)</td>
+                <td>
+                  <Field name='cellNodeConstraints.cellRadius'
+                    className='form-control form-control-sm' component='input' type='text' />
+                </td>
+              </tr>
+              <tr>
+                <td className='pl-4'>Cell Granularity Ratio</td>
+                <td>
+                  <Field name='cellNodeConstraints.cellGranularityRatio'
+                    className='form-control form-control-sm' component='input' type='text' />
+                </td>
+              </tr>
+              <tr>
+                <td className='pl-4'>Minimum Ray Length (m)</td>
+                <td>
+                  <Field name='cellNodeConstraints.minimumRayLength'
+                    className='form-control form-control-sm' component='input' type='text' />
+                </td>
+              </tr>
+              <tr>
+                <td className='pl-4'>Snapping Distance (m)</td>
+                <td>
+                  <Field name='cellNodeConstraints.snappingDistanceMeters'
+                    className='form-control form-control-sm' component='input' type='text' />
+                </td>
+              </tr>
+
               <tr>
                 <td colSpan={2}>DSLAM Node Constraints</td>
               </tr>
-              <AroDslamNodeConstraints initialValues={this.props.initialValues.dslamNodeConstraints} enableReinitialize />
+              <tr>
+                <td className='pl-4'>Placement Strategy</td>
+                <td>
+                  <Field name='dslamNodeConstraints.placementStrategy'
+                    className='form-control form-control-sm' component='select' type='text'>
+                    <option value='RANDOM'>Random</option>
+                    <option value='EXISTING_LOCATIONS'>Existing Locations</option>
+                    <option value='EXISTING_AND_RANDOM'>Existing and Random</option>
+                  </Field>
+                </td>
+              </tr>
+              <tr>
+                <td className='pl-4'>Cell Radius (m)</td>
+                <td>
+                  <Field name='dslamNodeConstraints.cellRadius'
+                    className='form-control form-control-sm' component='input' type='text' />
+                </td>
+              </tr>
+              <tr>
+                <td className='pl-4'>Cell Granularity Ratio</td>
+                <td>
+                  <Field name='dslamNodeConstraints.cellGranularityRatio'
+                    className='form-control form-control-sm' component='input' type='text' />
+                </td>
+              </tr>
+              <tr>
+                <td className='pl-4'>Snapping Distance (m)</td>
+                <td>
+                  <Field name='dslamNodeConstraints.snappingDistanceMeters'
+                    className='form-control form-control-sm' component='input' type='text' />
+                </td>
+              </tr>
+              <tr>
+                <td className='pl-4'>Optimization Speed (Mbs)</td>
+                <td>
+                  <Field name='dslamNodeConstraints.optimizationSpeedMbs'
+                    className='form-control form-control-sm' component='input' type='text' />
+                </td>
+              </tr>
+
+
+
               <tr>
                 <td>Fiber routing mode</td>
                 <td>
@@ -72,7 +151,6 @@ export class PlanningConstraints extends Component {
           </table>
         </form>
       </div>
-      <button className='btn btn-primary float-right'>Save</button>
     </div>
   }
 }
