@@ -7,8 +7,8 @@ import PlanningConstraints from './planning-constraints-form.jsx'
 
 export class PlanningConstraintsEditor extends Component {
   render () {
-    return <div>
-      <h4>{this.props.name}</h4>
+    return <div className='p-5'>
+      <h3>{this.props.name}</h3>
       <PlanningConstraints initialValues={this.props.definition} enableReinitialize />
     </div>
   }
