@@ -37,8 +37,21 @@ function clearResourceManagers () {
   }
 }
 
+function setConnectivityDefinition (resourceManagerId, spatialEdgeType, networkConnectivityType) {
+  // At this point we are assuming that the resource manager being edited is a fusion_manager
+  return {
+    type: Actions.RESOURCE_MANAGER_SET_CONNECTIVITY_DEFINITION,
+    payload: {
+      resourceManagerId,
+      spatialEdgeType,
+      networkConnectivityType
+    }
+  }
+}
+
 export default {
   startEditingResourceManager,
   saveResourceManagerDefinition,
-  clearResourceManagers
+  clearResourceManagers,
+  setConnectivityDefinition
 }
