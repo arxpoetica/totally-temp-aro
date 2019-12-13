@@ -53,10 +53,8 @@ function mockLoadResourceManagerDefinition (resourceManagerId, managerType) {
 
 function saveResourceManagerDefinition (resourceManagerId, managerType, definition) {
   return dispatch => {
-    console.log(`/service/v2/resource-manager/${resourceManagerId}/${managerType}`)
-    console.log(definition)
-    // AroHttp.put(`/service/v2/resource-manager/${resourceManagerId}/${managerType}`, definition)
-    //   .catch(err => console.error(err))
+    AroHttp.put(`/service/v2/resource-manager/${resourceManagerId}/${managerType}`, definition)
+      .catch(err => console.error(err))
   }
 }
 
