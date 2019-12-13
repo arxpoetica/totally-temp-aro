@@ -22,6 +22,7 @@ function mockLoadResourceManagerDefinition (resourceManagerId, managerType) {
       type: Actions.RESOURCE_MANAGER_SET_MANAGER_DEFINITION,
       payload: {
         resourceManagerId: resourceManagerId,
+        name: 'Plan Settings Resource Manager',
         definition: {
           cellNodeConstraints: {
             placementStrategy: 'EXISTING_AND_RANDOM',

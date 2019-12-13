@@ -5,10 +5,10 @@ const defaultState = {
   editingManager: null
 }
 
-function setResourceManagerDefinition (state, resourceManagerId, definition) {
+function setResourceManagerDefinition (state, manager) {
   return { ...state,
     managers: { ...state.manager,
-      [resourceManagerId]: definition
+      [manager.resourceManagerId]: manager
     }
   }
 }
@@ -25,7 +25,7 @@ function setResourceManagerEditing (state, id, type) {
 function resourceManagerReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.RESOURCE_MANAGER_SET_MANAGER_DEFINITION:
-      return setResourceManagerDefinition(state, action.payload.resourceManagerId, action.payload.definition)
+      return setResourceManagerDefinition(state, action.payload)
 
     case Actions.RESOURCE_MANAGER_SET_EDITING_MANAGER:
       return setResourceManagerEditing(state, action.payload.id, action.payload.type)
