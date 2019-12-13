@@ -27,6 +27,7 @@ import PermissionsTable from '../react/components/acl/resource-permissions/permi
 import SearchableSelect from '../react/components/common/searchable-select.jsx'
 import PlanningConstraintsEditor from '../react/components/resource-manager/planning-constraints-editor.jsx'
 import FusionEditor from '../react/components/resource-manager/fusion-editor.jsx'
+import NetworkArchitectureEditor from '../react/components/resource-manager/network-architecture-editor.jsx'
 
 import boundaryDetail from './sidebar/view/boundary-detail'
 import equipmentDetail from './sidebar/view/equipment-detail'
@@ -267,6 +268,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rSearchableSelect', react2angular(SearchableSelect))
   .component('rPlanningConstraintsEditor', react2angular(PlanningConstraintsEditor))
   .component('rFusionEditor', react2angular(FusionEditor))
+  .component('rNetworkArchitectureEditor', react2angular(NetworkArchitectureEditor))
   .service('Utils', utils)
   .service('state', state)
   .service('tileDataService', tileDataService)

@@ -2,6 +2,7 @@ export default Object.freeze({
   NETWORK_ANALYSIS_CONSTRAINTS: 'networkAnalysisConstraints',
   PLANNING_CONSTRAINTS_FORM: 'planningConstraints',
   FUSION_FORM: 'fusion',
+  NETWORK_ARCHITECTURE: 'networkArchitecture',
   REPORT_DEFINITION_EDITOR_FORM: 'reportDefinitionEditor',
   RFP_OPTIONS_FORM: 'rfpOptions',
   RING_OPTIONS_BASIC_FORM: 'ringOptionsBasic',
