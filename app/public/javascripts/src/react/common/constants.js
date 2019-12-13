@@ -1,4 +1,5 @@
 export default Object.freeze({
+  ARO_CELL_NODE_CONSTRAINTS_FORM: 'aroCellNodeConstraints',
   NETWORK_ANALYSIS_CONSTRAINTS: 'networkAnalysisConstraints',
   PLANNING_CONSTRAINTS_FORM: 'planningConstraints',
   REPORT_DEFINITION_EDITOR_FORM: 'reportDefinitionEditor',
