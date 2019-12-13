@@ -298,6 +298,10 @@ class ResourceManagerController {
     })
   }
 
+  $onDestroy () {
+    this.unsubscribeRedux()
+  }
+
   mapStateToThis (reduxState) {
     return {
     }

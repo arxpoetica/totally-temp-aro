@@ -217,7 +217,7 @@ class PlanSettingsController {
   mapStateToThis (reduxState) {
     return {
       dataItems: reduxState.plan.dataItems,
-      planId: reduxState.plan.activePlan.id,
+      planId: reduxState.plan.activePlan.id
     }
   }
 
