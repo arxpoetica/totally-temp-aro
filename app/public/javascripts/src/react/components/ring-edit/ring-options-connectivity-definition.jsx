@@ -1,5 +1,5 @@
 import { connect } from 'react-redux'
-import { ConduitConnectivityDefinition } from '../optimization/conduit-connectivity-definition.jsx'
+import { ConduitConnectivityDefinition } from '../common/conduit-connectivity-definition.jsx'
 import RingEditActions from './ring-edit-actions'
 
 const mapStateToProps = (state) => ({

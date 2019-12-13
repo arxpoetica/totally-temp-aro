@@ -1,5 +1,7 @@
+import ResourceManagerActions from '../../../../react/components/resource-manager/resource-manager-actions'
+
 class ResourceManagerController {
-  constructor ($http, $document, state) {
+  constructor ($http, $document, $ngRedux, state) {
     this.$http = $http
     this.$document = $document
     this.state = state
@@ -15,10 +17,10 @@ class ResourceManagerController {
       competition_manager: 'competitor-manager',
       rate_reach_manager: 'rate-reach-matrix'
     }
-    
+
     // ToDo: once server can make new versions of all types this won't be needed
     this.canMakeNewFilter = {'price_book':true, 'rate_reach_manager':true, 'competition_manager':true}
-    
+
     this.managerIdString = 'MANAGER_ID'
     this.rows = []
 
@@ -33,7 +35,7 @@ class ResourceManagerController {
         'defaultValue': '',
         'editable': true,
         'visible': true
-      }, 
+      },
       {
         'propertyName': 'resourceType', //'managerType',
         'levelOfDetail': 0,
@@ -46,9 +48,9 @@ class ResourceManagerController {
         'visible': true
       }
     ]
-    
+
     this.idProp = 'id' // unique id of each row
-    
+
     this.actions = [
       {
         buttonText: 'Edit', // Edit
@@ -83,10 +85,10 @@ class ResourceManagerController {
           this.deleteSelectedResourceManager(row)
         }
       }
-      
     ]
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }
-  
+
   canEdit (row) {
     return this.state.loggedInUser.hasPermissions(this.state.authPermissionsByName['RESOURCE_WRITE'].permissions, row.permissions)
   }
@@ -94,13 +96,11 @@ class ResourceManagerController {
   canAdmin (row) {
     return this.state.loggedInUser.hasPermissions(this.state.authPermissionsByName['RESOURCE_ADMIN'].permissions, row.permissions)
   }
-  
+
   $onChanges (changes) {
     if (changes.hasOwnProperty('resourceItems') || changes.hasOwnProperty('selectedResourceKey')) {
-      //this.buildRows()
       this.getRows()
     }
-    
     if (changes.hasOwnProperty('resourceItems')) {
       this.buildFilterOptions()
     }
@@ -129,7 +129,6 @@ class ResourceManagerController {
     }
     this.filterByOptions = newFilterByOptions
   }
-  
   onSearch () {
     this.getRows()
   }
@@ -168,16 +167,15 @@ class ResourceManagerController {
     this.setEditingManagerId({ newId: sourceId })
     this.setEditingMode({ mode: createMode })
   }
-  
+
   cloneSelectedManagerFromSource (selectedManager) {
     this.newManager(selectedManager.resourceType, selectedManager.id)
   }
-  
-  //cloneSelectedManagerFromSource (selectedManager) {
+
   newManager (resourceType, sourceId) {
     if ('undefined' == typeof sourceId) sourceId = null // new one
     this.setCurrentSelectedResourceKey({ resourceKey: resourceType })
-    
+
     // TODO: once endpoint is ready use v2/resource-manager for pricebook and rate-reach-matrix as well
     var managerId = this.resourceKeyToEndpointId[resourceType]
     if (managerId === 'pricebook') {
@@ -186,7 +184,6 @@ class ResourceManagerController {
     } else if (managerId === 'rate-reach-matrix') {
       this.createByEditMode(this.createRateReachManagerMode, sourceId)
     } else {
-      
       // Create a resource manager
       this.getNewResourceDetailsFromUser()
         .then((resourceName) => {
@@ -198,7 +195,6 @@ class ResourceManagerController {
         })
         .then((result) => this.onManagerCreated(result.data.id))
         .catch((err) => console.error(err))
-      
     }
   }
 
@@ -213,6 +209,7 @@ class ResourceManagerController {
     this.setEditingManagerId({ newId: selectedManager.id })
     this.setEditingMode({ mode: this.editMode })
     this.setCurrentSelectedResourceKey({ resourceKey: selectedManager.resourceType })
+    this.startEditingResourceManager(selectedManager.id, selectedManager.resourceType)
   }
 
   askUserToConfirmManagerDelete (managerName) {
@@ -300,9 +297,24 @@ class ResourceManagerController {
       })
     })
   }
+
+  $onDestroy () {
+    this.unsubscribeRedux()
+  }
+
+  mapStateToThis (reduxState) {
+    return {
+    }
+  }
+
+  mapDispatchToTarget (dispatch) {
+    return {
+      startEditingResourceManager: (id, type) => dispatch(ResourceManagerActions.startEditingResourceManager(id, type))
+    }
+  }
 }
 
-ResourceManagerController.$inject = ['$http', '$document', 'state']
+ResourceManagerController.$inject = ['$http', '$document', '$ngRedux', 'state']
 
 let resourceManager = {
   templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/resource-manager.html',

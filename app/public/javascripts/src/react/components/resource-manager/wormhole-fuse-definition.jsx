@@ -1,27 +1,12 @@
 import React, { Component } from 'react'
 import { PropTypes } from 'prop-types'
 import { createSelector } from 'reselect'
-import reduxStore from '../../../../redux-store'
-import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
-import NetworkAnalysisActions from './network-analysis-actions'
-import SpatialEdgeType from '../../common/optimization-options/spatial-edge-type'
-import WormholeFusionType from '../../../../shared-utils/wormhole-fusion-type'
+import reduxStore from '../../../redux-store'
+import wrapComponentWithProvider from '../../common/provider-wrapped-component'
+import SpatialEdgeType from '../common/optimization-options/spatial-edge-type'
+import WormholeFusionType from '../../../shared-utils/wormhole-fusion-type'
 
-const getWormholeFusionConfig = state => state.configuration.ui.wormholeFusion
-const getOrderedSpatialEdgeDefinitions = createSelector([getWormholeFusionConfig], wormholeFusionConfig => {
-  // Error checking, as we are getting these settings from a database
-  // Object.keys(wormholeFusionConfig).forEach(spatialEdgeType => {
-  //   if (!SpatialEdgeType[spatialEdgeType]) {
-  //     throw new Error(`Error: key ${spatialEdgeType} is not defined in class SpatialEdgeType`)
-  //   }
-  // })
-  // Return ordered spatial edge types
-  return Object.keys(wormholeFusionConfig)
-    .map(spatialEdgeType => wormholeFusionConfig[spatialEdgeType])
-    .sort((a, b) => (a.index > b.index) ? 1 : -1)
-})
-
-export class NetworkAnalysisNetworkDefinition extends Component {
+export class WormholeFuseDefinition extends Component {
   render () {
     return <div className='p-2 m-2'>
       <h4>Network Rules</h4>
@@ -188,22 +173,10 @@ export class NetworkAnalysisNetworkDefinition extends Component {
   }
 }
 
-NetworkAnalysisNetworkDefinition.propTypes = {
+WormholeFuseDefinition.propTypes = {
   primarySpatialEdge: PropTypes.string,
   spatialEdgeDefinitions: PropTypes.array,
   wormholeFuseDefinitions: PropTypes.object
 }
 
-const mapStateToProps = state => ({
-  primarySpatialEdge: state.optimization.networkAnalysis.primarySpatialEdge,
-  spatialEdgeDefinitions: getOrderedSpatialEdgeDefinitions(state),
-  wormholeFuseDefinitions: state.optimization.networkAnalysis.wormholeFuseDefinitions
-})
-
-const mapDispatchToProps = dispatch => ({
-  setPrimarySpatialEdge: primarySpatialEdge => dispatch(NetworkAnalysisActions.setPrimarySpatialEdge(primarySpatialEdge)),
-  setWormholeFuseDefinition: (spatialEdgeType, wormholeFusionTypeId) => dispatch(NetworkAnalysisActions.setWormholeFuseDefinition(spatialEdgeType, wormholeFusionTypeId))
-})
-
-const NetworkAnalysisNetworkDefinitionComponent = wrapComponentWithProvider(reduxStore, NetworkAnalysisNetworkDefinition, mapStateToProps, mapDispatchToProps)
-export default NetworkAnalysisNetworkDefinitionComponent
+export default WormholeFuseDefinition
