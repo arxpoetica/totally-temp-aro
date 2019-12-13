@@ -16,7 +16,20 @@ export default Object.freeze({
     'generateSubnetLinking': true,
     'persistJunctionNodes': true,
     'selectedCalcTypes': [
-      'undefined'
+      'premises',
+      'penetration',
+      'new_connections',
+      'new_customers',
+      'customers',
+      'revenue',
+      'opex_expenses',
+      'maintenance_expenses',
+      'new_connections_cost',
+      'cashFlow',
+      'arpu_curve',
+      'tam_curve',
+      'build_cost',
+      'customer_penetration'
     ]
   },
   'locationConstraints': {
@@ -27,7 +40,7 @@ export default Object.freeze({
     ]
   },
   'networkTypes': [
-    'Undefined'
+    'Fiber'
   ],
   'optimization': {
     'algorithm': 'UNCONSTRAINED',

@@ -717,6 +717,7 @@ class State {
             }
           })
           service.resourceItems = newResourceItems
+          console.log(service.resourceItems)
           service.pristineResourceItems = angular.copy(service.resourceItems)
           $timeout() // Trigger a digest cycle so that components can update
           return Promise.resolve()
