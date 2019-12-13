@@ -75,6 +75,10 @@
     ng-if="($ctrl.selectedEditingMode === $ctrl.editingModes.EDIT_RESOURCE_MANAGER) && ($ctrl.reduxEditingManagerType === 'planning_constraints_manager')">
   </r-planning-constraints-editor>
 
+  <r-fusion-editor
+    ng-if="($ctrl.selectedEditingMode === $ctrl.editingModes.EDIT_RESOURCE_MANAGER) && ($ctrl.reduxEditingManagerType === 'fusion_manager')">
+  </r-fusion-editor>
+
   <!-- Show modal footer only if we are listing resource managers. Editors will show their own buttons -->
   <modal-footer ng-if="$ctrl.selectedEditingMode === $ctrl.editingModes.LIST_RESOURCE_MANAGERS || $ctrl.reduxEditingManagerType === 'planning_constraints_manager'">
     <button class="btn btn-primary" ng-click="$ctrl.modalHide()">Close</button>
