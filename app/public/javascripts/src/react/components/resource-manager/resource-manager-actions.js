@@ -49,9 +49,34 @@ function setConnectivityDefinition (resourceManagerId, spatialEdgeType, networkC
   }
 }
 
+function setPrimarySpatialEdge (resourceManagerId, primarySpatialEdge) {
+  // At this point we are assuming that the resource manager being edited is a fusion_manager
+  return {
+    type: Actions.RESOURCE_MANAGER_SET_PRIMARY_SPATIAL_EDGE,
+    payload: {
+      resourceManagerId,
+      primarySpatialEdge
+    }
+  }
+}
+
+function setWormholeFuseDefinition (resourceManagerId, spatialEdgeType, wormholeFusionTypeId) {
+  // At this point we are assuming that the resource manager being edited is a fusion_manager
+  return {
+    type: Actions.RESOURCE_MANAGER_SET_WORMHOLE_FUSE_DEFINITION,
+    payload: {
+      resourceManagerId,
+      spatialEdgeType,
+      wormholeFusionTypeId
+    }
+  }
+}
+
 export default {
   startEditingResourceManager,
   saveResourceManagerDefinition,
   clearResourceManagers,
-  setConnectivityDefinition
+  setConnectivityDefinition,
+  setPrimarySpatialEdge,
+  setWormholeFuseDefinition
 }
