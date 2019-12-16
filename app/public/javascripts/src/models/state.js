@@ -148,6 +148,10 @@ class State {
       existing: false,
       planned: false
     }
+    service.cableLayerTypeVisibility = {
+      existing: false,
+      planned: false
+    }
 
     service.fiberRoutingModes = {
       ROUTE_FROM_NODES: 'ROUTE_FROM_NODES',
