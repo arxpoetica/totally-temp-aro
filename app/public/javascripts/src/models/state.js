@@ -56,6 +56,12 @@ class State {
       COVERAGE: { id: 'COVERAGE', algorithm: 'COVERAGE', label: 'Coverage Target' }
     }
 
+    service.cashFlowStrategyTypes = {
+      COMPUTED_ROIC: { id: 'COMPUTED_ROIC', label: 'Computed ROIC' },
+      ESTIMATED_ROIC: { id: 'ESTIMATED_ROIC', label: 'Estimated ROIC' },
+      EXTERNAL: { id: 'EXTERNAL', label: 'External' }
+    }
+
     service.pruningStrategyTypes = {
       INTER_WIRECENTER: { id: 'INTER_WIRECENTER', label: 'Inter Service Area' },
       INTRA_WIRECENTER: { id: 'INTRA_WIRECENTER', label: 'Intra Service Area' }
