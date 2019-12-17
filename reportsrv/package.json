@@ -9,7 +9,8 @@
   "author": "Parag Patwardhan",
   "license": "SEE LICENSE IN LICENSE.md",
   "dependencies": {
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "pdfkit": "^0.11.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.2"

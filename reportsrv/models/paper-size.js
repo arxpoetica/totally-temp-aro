@@ -10,10 +10,15 @@ class PaperSize {
     const a0Sizes = { x: 0.841, y: 1.189 }
     var paperSizeDefinitions = {}
     // Build sizes from A0 through A6
+    var lastX = a0Sizes.y, lastY = a0Sizes.x * 2
     for (var i = 0; i <= 6; ++i) {
-      const multiplier = 1.0 / Math.pow(2, i)
-      paperSizeDefinitions[`A${i}`] = { sizeX: a0Sizes.x * multiplier, sizeY: a0Sizes.y * multiplier}
+      const sizeX = lastY / 2
+      const sizeY = lastX
+      paperSizeDefinitions[`A${i}`] = { sizeX, sizeY }
+      lastX = sizeX
+      lastY = sizeY
     }
+    console.log(paperSizeDefinitions)
     return new PaperSize(type, paperSizeDefinitions[type].sizeX, paperSizeDefinitions[type].sizeY)
   }
 

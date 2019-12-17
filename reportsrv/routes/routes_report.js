@@ -1,4 +1,6 @@
 const puppeteer = require('puppeteer')
+const PDFDocument = require('pdfkit')
+const fs = require('fs')
 
 const MapScale = require('../models/map-scale')
 const PaperSize = require('../models/paper-size')
@@ -39,18 +41,26 @@ exports.configure = api => {
       value: 'eyJmbGFzaCI6e30sInBhc3Nwb3J0Ijp7InVzZXIiOnsiaWQiOjQsIm11bHRpRmFjdG9yQXV0aGVudGljYXRpb25Eb25lIjp0cnVlLCJ2ZXJzaW9uIjoiMSJ9fX0=',
       url: 'http://app_upgrade2:8000/'
     })
-    page.on('console', msg => console.log('PAGE LOG:', msg));
-    // await page.setViewport({
-    //   width: 1024,
-    //   height: 768,
-    //   deviceScaleFactor: 1
-    // })
+    // page.on('console', msg => console.log('PAGE LOG:', msg));
     await page._client.send('Emulation.clearDeviceMetricsOverride')
     await page.goto('http://app_upgrade2:8000/')
     const sleep = m => new Promise(r => setTimeout(r, m))
     await sleep(3000)
     await page.screenshot({ path: 'example.png' })
-    await browser.close();
-    response.sendFile(__dirname + 'example.png')
+    await browser.close()
+    const doc = new PDFDocument({ autoFirstPage: false })
+    doc.pipe(fs.createWriteStream('output.pdf'))
+    console.log(captureSettings)
+    // PDFKit uses sizes in "PDF points" which is 72 points per inch :(
+    console.log(pageSetup.dpi)
+    const PDF_POINTS_MULTIPLIER = 72 / pageSetup.dpi
+    const sizePdfPoints = {
+      x: captureSettings.pageSizePixels.x * PDF_POINTS_MULTIPLIER,
+      y: captureSettings.pageSizePixels.y * PDF_POINTS_MULTIPLIER
+    }
+    doc.addPage({ size: [sizePdfPoints.x, sizePdfPoints.y ]})
+    doc.image('example.png', 0, 0, { width: sizePdfPoints.x, height: sizePdfPoints.y })
+    doc.end()
+    response.sendFile(__dirname + '/output.pdf')
   })
 }
