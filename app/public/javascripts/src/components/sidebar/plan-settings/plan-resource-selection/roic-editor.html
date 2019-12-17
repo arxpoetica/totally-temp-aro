@@ -12,12 +12,35 @@
   .pill-parent:hover span {
     display: block;
   }
+  .nav-item {
+    cursor: pointer;
+  }
+  .nav-item.active {
+    cursor: unset;
+  }
 </style>
 
 <modal-header title="{{$ctrl.roicManager.name}}"></modal-header>
 <modal-body>
-  <div class="container" style="max-height: 500px;">
-    <div class="row">
+
+  <!-- Create tabs -->
+  <ul class="nav nav-tabs" role="tablist">
+    <li ng-repeat="tab in $ctrl.tabs"
+        role="presentation"
+        ng-class="{ 'nav-item': true, 'active': $ctrl.activeTab === tab.key }">
+      <a ng-click="$ctrl.selectTab(tab.key)" class="nav-link" role="tab" data-toggle="tab"
+        ng-class="{ 'active': $ctrl.activeTab === tab.key }">
+        {{tab.label}}
+      </a>
+    </li>
+  </ul>
+
+  <div class="container" style="max-height: 520px; overflow-y: auto; margin-top: 10px;">
+    <div class="row" ng-if="$ctrl.activeTab === 'roicSettingsConfiguration'">
+      roicSettingsConfiguration: <br />
+      {{ $ctrl.roicManagerConfiguration.roicSettingsConfiguration }}
+    </div>
+    <div class="row" ng-if="$ctrl.activeTab === 'inputs'">
       <!-- On the left, show a list of ROIC models that the user can edit -->
       <div class="col-md-4">
         <ul class="nav nav-pills flex-column" style="max-height: 380px; overflow-y: auto;">
