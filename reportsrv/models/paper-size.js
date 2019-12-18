@@ -18,7 +18,6 @@ class PaperSize {
       lastX = sizeX
       lastY = sizeY
     }
-    console.log(paperSizeDefinitions)
     return new PaperSize(type, paperSizeDefinitions[type].sizeX, paperSizeDefinitions[type].sizeY)
   }
 

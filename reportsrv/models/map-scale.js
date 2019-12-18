@@ -1,7 +1,7 @@
 class MapScale {
-  constructor (worldLengthPerMetreOfPaper) {
+  constructor (worldLengthPerMeterOfPaper) {
     // All lengths are in meters
-    this.worldLengthPerMetreOfPaper = worldLengthPerMetreOfPaper
+    this.worldLengthPerMeterOfPaper = worldLengthPerMeterOfPaper
   }
 }
 
