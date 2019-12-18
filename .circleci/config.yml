@@ -28,7 +28,7 @@ jobs:
             curl -O https://bootstrap.pypa.io/get-pip.py
             sudo python3 get-pip.py 
             export PATH=~/.local/bin:$PATH
-            sudo pip install awscli boto3
+            sudo pip3 install awscli boto3
             eval $(aws ecr get-login --region us-east-1 --no-include-email --registry-ids 976168524097)
             export IMAGE_TAG=${IMAGE_NAME}:${CIRCLE_BUILD_NUM}
             export ECR_IMAGE_TAG=${ECR_IMAGE_NAME}:${CIRCLE_BUILD_NUM}
@@ -44,7 +44,7 @@ jobs:
                 docker push ${IMAGE_NAME}:latest
                 docker tag ${IMAGE_TAG} ${ECR_IMAGE_NAME}:latest
                 docker push ${ECR_IMAGE_NAME}:latest
-                python docker/publish_version.py qa-${BRANCH} app $CIRCLE_BUILD_NUM
+                python3 docker/publish_version.py qa-${BRANCH} app $CIRCLE_BUILD_NUM
             fi
             
   deploy:
