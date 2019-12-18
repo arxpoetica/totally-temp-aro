@@ -13,6 +13,21 @@ const ReportPage = require('../models/report-page')
 const ScreenshotManager = require('../utilities/screenshot-manager')
 
 exports.configure = api => {
+  // Sample body
+  // [
+  //   {
+  //     "paperSize": "A4",
+  //     "worldLengthPerMeterOfPaper": 100000,
+  //     "dpi": 72,
+  //     "orientation": "portrait",
+  //     "mapCenter": {
+  //       "latitude": 47.6062,
+  //       "longitude": -122.3321
+  //     },
+  //     "planId": 3,
+  //     "visibleLayers": ["small_business"]
+  //   }
+  // ]
   api.post('/report', async (req, res, next) => {
     const doc = new PDFDocument({ autoFirstPage: false })
     const PDF_FILE = os.tmpdir() + '/' + uuidv4() + '.pdf'
@@ -52,6 +67,7 @@ exports.configure = api => {
     res.sendFile(PDF_FILE, err => {
       if (err) {
         console.error(err)
+        next()
       }
       // File has been sent, delete it
       fs.unlink(PDF_FILE, () => console.log(`File ${PDF_FILE} deleted`))
