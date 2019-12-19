@@ -104,7 +104,7 @@
   flex: 1 1 50%;
 }
 
-.ei-row-odd{
+.ei-row-odd, .ei-items-contain > .ei-property-item:nth-child(2n+1){
   background-color: #f9f9f9;
 }
 .ei-row-even{
@@ -184,7 +184,8 @@ select.ei-input-select-autosize{
 
 
 /* === object editor === */
- aro-object-editor .ei-internal-gen > .ei-gen-level{
+ aro-object-editor .ei-internal-gen > .ei-gen-level,
+ .object-editor .ei-internal-gen > .ei-gen-level{
   margin-top: -6px;
 }
 

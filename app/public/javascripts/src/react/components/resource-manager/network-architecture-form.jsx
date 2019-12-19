@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import { PropTypes } from 'prop-types'
 import { Field, reduxForm } from 'redux-form'
 import Constants from '../../common/constants'
+import ObjectEditor from '../common/editor-interface/object-editor.jsx'
 
 /*
 {
@@ -539,11 +540,11 @@ export class NetworkArchitecture extends Component {
             'maxFiberDistance': { _meta: { type: 'number' } },
             'maxNetworkNodeToEdgeDistance': { _meta: { type: 'number' } },
             'maxLocationToEdgeDistance': { _meta: { type: 'number' } },
+            'inferCoWhenAbsent': { _meta: { type: 'checkbox' } },
             'entityDistanceMap': {
               _meta: { type: 'object' },
               'celltower': { _meta: { type: 'number' } }
-            },
-            'inferCoWhenAbsent': { _meta: { type: 'checkbox' } }
+            }
           }
         }
       }
@@ -551,20 +552,21 @@ export class NetworkArchitecture extends Component {
   }
 
   render () {
+    // ToDo: the maxHeight style bit needs to go into the parent modal
+    //  along with the close button
     return <div>
-      <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
+      <div style={{ maxHeight: 'calc(100vh - 17rem)', overflow: 'scroll' }}>
         <form className='d-flex flex-column rfp-options'
           style={{ height: '100%' }}
           onSubmit={event => event.preventDefault()}>
-
-          {this.renderObject(this.meta, 'Net Man', '', 0)}
-
+          <ObjectEditor metaData={this.meta} title={'Net Config'}></ObjectEditor>
         </form>
       </div>
     </div>
   }
 
   // we're using recursion so we gaurd against edge case
+  /*
   renderObject (meta, name, nameChain, depth) {
     if (depth > 200) return <div>...</div>
     var jsxItems = []
@@ -605,6 +607,7 @@ export class NetworkArchitecture extends Component {
       </div>
     )
   }
+*/
 /*
   renderItem (item) {
     return <div className='ei-property-item'>
