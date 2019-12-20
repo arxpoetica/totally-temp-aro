@@ -31,7 +31,7 @@ export class ObjectEditor extends Component {
           var newPropChain = propChain + key
           if (prop._meta.displayType === ObjectEditor.displayTypes.OBJECT) {
             // jsxItems.push(this.renderObject(prop, key, newPropChain + '.', depth + 1))
-            jsxItems.push(<ObjectEditor key={newPropChain} metaData={prop} title={key} propChain={newPropChain + '.'} depth={depth + 1}></ObjectEditor>)
+            jsxItems.push(<ObjectEditor key={newPropChain} metaData={prop} title={key} propChain={newPropChain + '.'} depth={depth + 1} leftIndent={this.props.leftIndent}></ObjectEditor>)
           } else {
             jsxItems.push(this.renderItem(prop._meta, key, newPropChain))
           }
@@ -49,7 +49,7 @@ export class ObjectEditor extends Component {
             }
             {name}
           </div>
-          <div className='ei-gen-level ei-internal-level' style={{ paddingLeft: '21px' }}>
+          <div className='ei-gen-level ei-internal-level' style={{ paddingLeft: this.props.leftIndent + 'px' }}>
             <div className='ei-items-contain'>
               {jsxItems}
             </div>
@@ -166,7 +166,8 @@ ObjectEditor.defaultProps = {
   title: 'Object',
   propChain: '',
   editable: true,
-  depth: 0
+  depth: 0,
+  leftIndent: 21
 }
 
 ObjectEditor.displayTypes = {

@@ -542,7 +542,7 @@ export class NetworkArchitecture extends Component {
         <form className='d-flex flex-column rfp-options'
           style={{ height: '100%' }}
           onSubmit={event => event.preventDefault()}>
-          <ObjectEditor metaData={this.meta} title={'Net Config'}></ObjectEditor>
+          <ObjectEditor metaData={this.meta} title={'Net Config'} leftIndent={11}></ObjectEditor>
         </form>
       </div>
     </div>
