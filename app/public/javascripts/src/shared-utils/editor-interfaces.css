@@ -95,6 +95,8 @@
   width: 100%; 
   padding-top: 3px; 
   padding-bottom: 3px; 
+  padding-right: 8px;
+  padding-left: 8px;
   border-bottom: 1px solid #888888;
   margin-top: 1px;
   margin-bottom: -1px;
@@ -104,7 +106,7 @@
   flex: 1 1 50%;
 }
 
-.ei-row-odd, .ei-items-contain > .ei-property-item:nth-child(2n+1){
+.ei-row-odd, .object-editor .ei-items-contain > .ei-property-item:nth-child(2n+1){
   background-color: #f9f9f9;
 }
 .ei-row-even{
@@ -185,10 +187,10 @@ select.ei-input-select-autosize{
 
 /* === object editor === */
  aro-object-editor .ei-internal-gen > .ei-gen-level,
- .object-editor .ei-internal-gen > .ei-gen-level{
+ .object-editor .ei-internal-gen > .ei-gen-level,
+ .object-editor .ei-internal-level {
   margin-top: -6px;
 }
-
 
 /* === tree === */
 editor-interface-tree .ei-header{

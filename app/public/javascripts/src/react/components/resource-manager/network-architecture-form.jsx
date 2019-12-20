@@ -529,21 +529,71 @@ import ObjectEditor from '../common/editor-interface/object-editor.jsx'
 export class NetworkArchitecture extends Component {
   constructor (props) {
     super(props)
-
+    console.log(props)
     this.meta = {
       'networkConfigurations': {
-        _meta: { type: 'object' },
+        _meta: { displayType: 'object' },
         'ODN_3': {
-          _meta: { type: 'object' },
+          _meta: { displayType: 'object' },
           'fiberConstraintConfig': {
-            _meta: { type: 'object' },
-            'maxFiberDistance': { _meta: { type: 'number' } },
-            'maxNetworkNodeToEdgeDistance': { _meta: { type: 'number' } },
-            'maxLocationToEdgeDistance': { _meta: { type: 'number' } },
-            'inferCoWhenAbsent': { _meta: { type: 'checkbox' } },
+            _meta: { displayType: 'object' },
+            'maxFiberDistance': { _meta: { displayType: 'number' } },
+            'maxNetworkNodeToEdgeDistance': { _meta: { displayType: 'number' } },
+            'maxLocationToEdgeDistance': { _meta: { displayType: 'number' } },
+            'inferCoWhenAbsent': { _meta: { displayType: 'checkbox' } },
             'entityDistanceMap': {
-              _meta: { type: 'object' },
-              'celltower': { _meta: { type: 'number' } }
+              _meta: { displayType: 'object' },
+              'celltower': { _meta: { displayType: 'number' } }
+            }
+          },
+          'hubConfiguration': {
+            _meta: { displayType: 'object' },
+            'inputPort': {
+              _meta: { displayType: 'object' },
+              'min': { _meta: { displayType: 'number' } },
+              'target': { _meta: { displayType: 'number' } },
+              'max': { _meta: { displayType: 'number' } },
+              'types': {
+                _meta: { 
+                  displayType: 'multiSelect',
+                  options: [
+                    'FS_1X1',
+                    'FS_1X4',
+                    'FS_1X8',
+                    'FS_1X32'
+                  ]
+                }
+              }
+            }
+          }
+        },
+        'DIRECT_ROUTING': {
+          _meta: { displayType: 'object' },
+          'bulkFiberConfig': {
+            _meta: { displayType: 'object' },
+            'bulkConnectorConfig': {
+              _meta: { displayType: 'object' },
+              0: {
+                _meta: { displayType: 'object' },
+                'supportedFiberTypes': {
+                  _meta: { 
+                    displayType: 'multiSelect',
+                    options: [
+                      'FEEDER', 'TEST1', 'UNKNOWN'
+                    ]
+                  }
+                },
+                'supportedNetworkTypes': {
+                  _meta: { 
+                    displayType: 'multiSelect',
+                    options: [
+                      'Fiber',
+                      'Copper',
+                      'FiveG'
+                    ]
+                  }
+                }
+              }
             }
           }
         }
@@ -555,7 +605,7 @@ export class NetworkArchitecture extends Component {
     // ToDo: the maxHeight style bit needs to go into the parent modal
     //  along with the close button
     return <div>
-      <div style={{ maxHeight: 'calc(100vh - 17rem)', overflow: 'scroll' }}>
+      <div style={{ maxHeight: 'calc(100vh - 17rem)', overflow: 'scroll', paddingRight: '16px', marginRight: '-16px' }}>
         <form className='d-flex flex-column rfp-options'
           style={{ height: '100%' }}
           onSubmit={event => event.preventDefault()}>
