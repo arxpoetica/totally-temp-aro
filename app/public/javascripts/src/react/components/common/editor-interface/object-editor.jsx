@@ -9,9 +9,9 @@ export class ObjectEditor extends Component {
 
   constructor (props) {
     super(props)
-    console.log(props)
+
     this.state = {
-      isOpen: true // !props.depth
+      isOpen: !props.depth // true // !props.depth
     }
   }
 
@@ -66,49 +66,59 @@ export class ObjectEditor extends Component {
 
   renderItem (meta, name, propChain) {
     var field = ''
-    switch (meta.displayType) {
-      case ObjectEditor.displayTypes.CHECKBOX:
-        field = (
-          <Field name={propChain}
-            className='checkboxfill' component='input' type={meta.displayType} />
-        )
-        break
-      case ObjectEditor.displayTypes.MULTI_SELECT:
-        field = (
-          <Field
-            name={propChain}
-            component={this.renderMultiselect}
-            data={meta.options}
-          />
-        )
-        break
-      case ObjectEditor.displayTypes.DROPDOWN_LIST:
-        // when we get fancier with the options we can include on the <Field> tag: 
-        // valueField="value"
-        // textField="displayName"
-        // for options that look like: {displayName: 'Feeder Fiber', value: 'FEEDER'}
-        field = (
-          <Field
-            name={propChain}
-            component={this.renderDropdownList}
-            data={meta.options}
-          />
-        )
-        break
-      case ObjectEditor.displayTypes.SELECT_LIST:
-        field = (
-          <Field
-            name={propChain}
-            component={this.renderSelectList}
-            data={meta.options}
-          />
-        )
-        break
-      default:
-        field = (
-          <Field name={propChain}
-            className='form-control form-control-sm' component='input' type={meta.displayType} />
-        )
+
+    if (!this.props.editable || meta.displayOnly) {
+      field = (
+        <Field
+          name={propChain}
+          component={this.renderDisplayOnly}
+        />
+      )
+    } else {
+      switch (meta.displayType) {
+        case ObjectEditor.displayTypes.CHECKBOX:
+          field = (
+            <Field name={propChain}
+              className='checkboxfill' component='input' type={meta.displayType} />
+          )
+          break
+        case ObjectEditor.displayTypes.MULTI_SELECT:
+          field = (
+            <Field
+              name={propChain}
+              component={this.renderMultiselect}
+              data={meta.options}
+            />
+          )
+          break
+        case ObjectEditor.displayTypes.DROPDOWN_LIST:
+          // when we get fancier with the options we can include on the <Field> tag: 
+          // valueField="value"
+          // textField="displayName"
+          // for options that look like: {displayName: 'Feeder Fiber', value: 'FEEDER'}
+          field = (
+            <Field
+              name={propChain}
+              component={this.renderDropdownList}
+              data={meta.options}
+            />
+          )
+          break
+        case ObjectEditor.displayTypes.SELECT_LIST:
+          field = (
+            <Field
+              name={propChain}
+              component={this.renderSelectList}
+              data={meta.options}
+            />
+          )
+          break
+        default:
+          field = (
+            <Field name={propChain}
+              className='form-control form-control-sm' component='input' type={meta.displayType} />
+          )
+      }
     }
 
     return (
@@ -124,13 +134,15 @@ export class ObjectEditor extends Component {
   }
 
   // --- react-widgets wrappers --- //
+  renderDisplayOnly ({ input, ...rest }) {
+    return (
+      <div>{input.value}</div>
+    )
+  }
 
   renderMultiselect ({ input, ...rest }) {
     return (
-      <Multiselect {...input}
-        onBlur={() => input.onBlur()}
-        value={input.value || []} // requires value to be an array
-        {...rest} />
+      <Multiselect {...input} onBlur={() => input.onBlur()} value={input.value || []} {...rest} />
     )
   }
 
@@ -154,6 +166,7 @@ ObjectEditor.defaultProps = {
   metaData: null,
   title: 'Object',
   propChain: '',
+  editable: true,
   depth: 0
 }
 
@@ -171,8 +184,35 @@ Object.freeze(ObjectEditor.displayTypes)
 // --- utility functions --- //
 
 ObjectEditor.addMeta = (prop, ...args) => {
-  var meta = new ObjectEditorMeta(args)
-  return { ...prop, _meta: meta }
+  var meta = new ObjectEditorMeta( ...args)
+  // return { ...prop, _meta: meta }
+  return { _meta: meta }
+}
+
+ObjectEditor.buildMeta = (prop) => {
+  var meta = {}
+  var type = typeof prop
+  if (type === 'object') {
+    // run iterative
+    meta = ObjectEditor.addMeta(prop, ObjectEditor.displayTypes.OBJECT)
+    Object.keys(prop).forEach(key => {
+      if (key !== '_meta') {
+        meta[key] = ObjectEditor.buildMeta(prop[key])
+      }
+    })
+    return meta
+  } else {
+    var displayType = ObjectEditor.displayTypes.TEXT
+    switch (type) {
+      case 'number':
+        displayType = ObjectEditor.displayTypes.NUMBER
+        break
+      case 'boolean':
+        displayType = ObjectEditor.displayTypes.CHECKBOX
+        break
+    }
+    return ObjectEditor.addMeta(prop, displayType)
+  }
 }
 
 export class ObjectEditorMeta {

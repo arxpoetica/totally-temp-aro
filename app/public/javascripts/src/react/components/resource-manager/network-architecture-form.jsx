@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import { PropTypes } from 'prop-types'
 import { Field, reduxForm } from 'redux-form'
 import Constants from '../../common/constants'
+import NetworkArchitectureFormMeta from './network-architecture-form-meta'
 import ObjectEditor from '../common/editor-interface/object-editor.jsx'
 
 /*
@@ -529,7 +530,9 @@ import ObjectEditor from '../common/editor-interface/object-editor.jsx'
 export class NetworkArchitecture extends Component {
   constructor (props) {
     super(props)
-    console.log(props)
+
+    this.meta = NetworkArchitectureFormMeta
+    /*
     this.meta = {
       'networkConfigurations': {
         _meta: { displayType: 'object' },
@@ -599,6 +602,7 @@ export class NetworkArchitecture extends Component {
         }
       }
     }
+    */
   }
 
   render () {
