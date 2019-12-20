@@ -126,7 +126,7 @@ export class ObjectEditor extends Component {
         <div className='ei-property-label'>
           {name}
         </div>
-        <div>
+        <div className='ei-property-value'>
           {field}
         </div>
       </div>
@@ -147,7 +147,7 @@ export class ObjectEditor extends Component {
   }
 
   renderDropdownList ({ input, ...rest }) {
-    return <DropdownList {...input} {...rest} />
+    return <DropdownList {...input} onBlur={() => input.onBlur()} {...rest} />
   }
 
   renderSelectList ({ input, ...rest }) {
