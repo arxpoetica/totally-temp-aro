@@ -59,12 +59,9 @@ export class FusionEditor extends Component {
   }
 
   saveSettings () {
-    // Compile all the forms into a definition
-    var modifiedDefinition = { ...this.props.definition,
-      config: { ...this.props.definition.config,
-        connectivityDefinition: this.props.definition.config.connectivityDefinition,
-        wormholeFuseDefinitions: this.props.definition.config.wormholeFuseDefinitions
-      }
+    var modifiedDefinition = {
+      managerType: 'fusion_manager',
+      config: this.props.modifiedFusion
     }
     this.props.saveResourceManagerDefinition(this.props.editingManager.id, this.props.editingManager.type, modifiedDefinition)
   }

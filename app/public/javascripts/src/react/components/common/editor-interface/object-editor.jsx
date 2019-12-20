@@ -30,7 +30,6 @@ export class ObjectEditor extends Component {
           var prop = meta[key]
           var newPropChain = propChain + key
           if (prop._meta.displayType === ObjectEditor.displayTypes.OBJECT) {
-            // jsxItems.push(this.renderObject(prop, key, newPropChain + '.', depth + 1))
             jsxItems.push(<ObjectEditor key={newPropChain} metaData={prop} title={key} propChain={newPropChain + '.'} depth={depth + 1} leftIndent={this.props.leftIndent}></ObjectEditor>)
           } else {
             jsxItems.push(this.renderItem(prop._meta, key, newPropChain))
@@ -92,7 +91,7 @@ export class ObjectEditor extends Component {
           )
           break
         case ObjectEditor.displayTypes.DROPDOWN_LIST:
-          // when we get fancier with the options we can include on the <Field> tag: 
+          // when we get fancier with the options we can include on the <Field> tag:
           // valueField="value"
           // textField="displayName"
           // for options that look like: {displayName: 'Feeder Fiber', value: 'FEEDER'}
