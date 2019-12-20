@@ -158,7 +158,6 @@ export class ObjectEditor extends Component {
 
   toggleFoldout () {
     this.setState({ isOpen: !this.state.isOpen })
-    console.log(this.state.isOpen)
   }
 }
 
