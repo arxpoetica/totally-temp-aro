@@ -437,7 +437,7 @@ class LocationEditorController {
   reloadWorkflowStatePermissions () {
     // Make sure that the currently logged in user is allowed to change the workflow state of objects for the current library/transaction.
     this.userCanChangeWorkflowState = false
-    const odataQuery = `/service/odata/UserLibraryViewEntity?$filter=dataSourceId eq ${this.currentTransaction.libraryId} and userId eq ${this.loggedInUser.id}&$top=1`
+    const odataQuery = `/service/odata/UserLibraryViewEntity?$filter=metaDataId eq ${this.currentTransaction.libraryId} and userId eq ${this.loggedInUser.id}&$top=1`
     return this.$http.get(odataQuery)
       .then(result => {
         const libraryViewEntity = result.data[0]
