@@ -34,10 +34,14 @@ class ScreenshotManager {
       }
     });
     await page._client.send('Emulation.clearDeviceMetricsOverride')
-    await page.goto('http://app_upgrade2:8000/')
+    const url = `http://app_upgrade2:8000?reportPage='${JSON.stringify(reportPage)}'`
+    if (url.length > 2000) {
+      throw new Exception(`ERROR: URL length is ${url.length}, cannot exceed 2000 characters. Unable to get a report with these parameters`)
+    }
+    await page.goto(url)
 
     const sleep = m => new Promise(r => setTimeout(r, m))
-    await sleep(3000)
+    await sleep(8000)
     const screenshot = await page.screenshot({ encoding: 'binary' })
     await browser.close()
     return screenshot
