@@ -20,7 +20,7 @@ exports.configure = (api, middleware) => {
       mapType: process.env.ARO_CLIENT === 'frontier' ? 'SATELLITE' : 'ROADMAP',
       analyticsTrackingKey: process.env.ANALYTICS_TRACKING_KEY,
       ARO_CLIENT_DONOT_USE_IN_CODE: process.env.ARO_CLIENT,
-      initialState: request.query.initialState
+      reportPage: request.query.reportPage ? JSON.parse(request.query.reportPage) : undefined
     })
   })
 

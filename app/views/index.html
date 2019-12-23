@@ -196,7 +196,7 @@
         map.setStreetView(panorama);
 
         // At this point, our angular app and the document is initialized. Perform any further initialization via the state service.
-        angular.element(document.body).injector().get('state').initializeApp(<%- initialState || 'undefined' %>)
+        angular.element(document.body).injector().get('state').initializeApp(<%- JSON.stringify(reportPage)  %>)
       }
 
       function openReleaseNotes() {
