@@ -1424,7 +1424,7 @@ class State {
 
     // The logged in user is currently set by using the AngularJS injector in index.html
     service.loggedInUser = null
-    service.setLoggedInUser = (user) => {
+    service.setLoggedInUser = (user, initialState) => {
       tracker.trackEvent(tracker.CATEGORIES.LOGIN, tracker.ACTIONS.CLICK, 'UserID', user.id)
 
       // Set the logged in user in the Redux store
@@ -1488,7 +1488,8 @@ class State {
         service.setPlanRedux(plan)
       }
       var plan = null
-      return service.getOrCreateEphemeralPlan() // Will be called once when the page loads, since state.js is a service
+      const planPromise = initialState ? $http.get(`/service/v1/plan/${initialState.planId}`) : service.getOrCreateEphemeralPlan()
+      return planPromise // Will be called once when the page loads, since state.js is a service
         .then((result) => {
           plan = result.data
           // Get the default location for this user
@@ -1500,10 +1501,18 @@ class State {
           service.loggedInUser.perspective = result.data.perspective || 'default'
           service.configuration.loadPerspective(service.loggedInUser.perspective)
           service.initializeState()
-          return $http.get(`/search/addresses?text=${searchLocation}&sessionToken=${Utils.getInsecureV4UUID()}`)
+          if (initialState && initialState.mapCenter) {
+            service.requestSetMapCenter.next({ latitude: initialState.mapCenter.latitude, longitude: initialState.mapCenter.longitude })
+            if (initialState.mapZoom) {
+              service.requestSetMapZoom.next(initialState.mapZoom)
+            }
+            return Promise.resolve()
+          } else {
+            return $http.get(`/search/addresses?text=${searchLocation}&sessionToken=${Utils.getInsecureV4UUID()}`)
+          }
         })
         .then((result) => {
-          if (result.data && result.data.length > 0 && result.data[0].type === 'placeId') {
+          if (result && result.data && result.data.length > 0 && result.data[0].type === 'placeId') {
             return new Promise((resolve, reject) => {
               var geocoder = new google.maps.Geocoder()
               geocoder.geocode({ 'placeId': result.data[0].value }, function (geocodeResults, status) {
@@ -1524,8 +1533,10 @@ class State {
               })
             })
           } else {
-            // Set it to the default so that the map gets initialized
-            return initializeToDefaultCoords(plan)
+            if (!(initialState && initialState.mapCenter)) {  // If we have an initial state then this has alredy been set
+              // Set it to the default so that the map gets initialized
+              return initializeToDefaultCoords(plan)
+            }
           }
         })
         .catch((err) => {
@@ -1538,12 +1549,12 @@ class State {
     service.configuration = {}
     service.initializeApp = initialState => {
       // Get application configuration from the server
-      $http.get('/configuration')
+      return $http.get('/configuration')
         .then(result => {
           service.configuration = result.data.appConfiguration
           service.googleMapsLicensing = result.data.googleMapsLicensing
           service.uiStrings = result.data.uiStrings
-          service.configuration.loadPerspective = (perspective) => {
+          service.configuration.loadPerspective = perspective => {
             // If a perspective is not found, go to the default
             const defaultPerspective = service.configuration.perspectives.filter(item => item.name === 'default')[0]
             const thisPerspective = service.configuration.perspectives.filter(item => item.name === perspective)[0]
@@ -1552,7 +1563,7 @@ class State {
           }
           service.configuration.loadPerspective(result.data.user.perspective)
           service.setWormholeFusionConfiguration(result.data.appConfiguration.wormholeFusionTypes || {})
-          return service.setLoggedInUser(result.data.user)
+          return service.setLoggedInUser(result.data.user, initialState)
         })
         .then(() => {
           service.setOptimizationOptions()
@@ -1566,7 +1577,7 @@ class State {
           service.getStyleValues()
           return service.loadConfigurationFromServer()
         })
-        .then(() => console.log(initialState))
+        .then(() => console.error(initialState))
         .catch(err => console.error(err))
     }
 
