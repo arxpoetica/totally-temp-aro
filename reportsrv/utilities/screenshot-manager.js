@@ -34,7 +34,7 @@ class ScreenshotManager {
       }
     });
     await page._client.send('Emulation.clearDeviceMetricsOverride')
-    const url = `http://app_upgrade2:8000?reportPage='${JSON.stringify(reportPage)}'`
+    const url = `http://app_upgrade2:8000?reportPage=${JSON.stringify(reportPage)}`
     if (url.length > 2000) {
       throw new Exception(`ERROR: URL length is ${url.length}, cannot exceed 2000 characters. Unable to get a report with these parameters`)
     }
