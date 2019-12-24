@@ -1506,6 +1506,7 @@ class State {
             if (initialState.mapZoom) {
               service.requestSetMapZoom.next(initialState.mapZoom)
             }
+            service.setPlanRedux(plan)
             return Promise.resolve()
           } else {
             return $http.get(`/search/addresses?text=${searchLocation}&sessionToken=${Utils.getInsecureV4UUID()}`)
