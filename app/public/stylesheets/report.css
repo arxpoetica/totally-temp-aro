@@ -1,0 +1,9 @@
+/* This stylesheet will prepare the application for printing. Mostly disables a lot of the components */
+
+.tool-bar,.map-tools-buttons-container,.network-plan,.latest-updates {
+  display: none;
+}
+
+#map-canvas-container {
+  width: 100%;
+}

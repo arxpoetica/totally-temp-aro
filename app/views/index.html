@@ -23,6 +23,14 @@
     <link rel="stylesheet" type="text/css" href="/javascripts/src/shared-utils/editor-interfaces.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/client_<%= ARO_CLIENT_DONOT_USE_IN_CODE %>.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/layout_<%= config.ui.layout %>.css">
+    <%if (reportPage) { %>
+      <script>
+        window.GLOBAL_MAP_SPLITTER_INITIAL_WIDTH = 100
+        window.GLOBAL_SIDEBAR_INITIAL_WIDTH = 0
+      </script>
+      <link rel="stylesheet" type="text/css" href="/stylesheets/report.css">
+    <% } %>
+
     <link href="/ui_stylesheets" rel="stylesheet">
 
     <!-- Putting google maps include here because sometimes our app code loads before maps, and tries to use the map. It is going
