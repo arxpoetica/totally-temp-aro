@@ -1543,7 +1543,10 @@ class State {
         .then(result => {
           service.configuration = result.data.appConfiguration
           service.googleMapsLicensing = result.data.googleMapsLicensing
-          service.uiStrings = result.data.uiStrings
+          service.enumStrings = result.data.enumStrings
+          if (!service.enumStrings) {
+            throw new Error('No enumeration strings object found. Please check your server logs for errors in the UI schema.')
+          }
           service.configuration.loadPerspective = (perspective) => {
             // If a perspective is not found, go to the default
             const defaultPerspective = service.configuration.perspectives.filter(item => item.name === 'default')[0]

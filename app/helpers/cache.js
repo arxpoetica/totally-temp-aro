@@ -97,9 +97,7 @@ function loadConfiguration() {
                 }
               })
             }
-            
           })
-
           exports.configuration.ARO_CLIENT = process.env.ARO_CLIENT
           return Promise.resolve()
         })
@@ -107,9 +105,9 @@ function loadConfiguration() {
     .catch(err => console.error(err))
 }
 
-function loadUiStrings () {
-  UIConfiguration.getUiStrings()
-    .then(result => { exports.uiStrings = result })
+function loadEnumStrings () {
+  UIConfiguration.getEnumStrings()
+    .then(result => { exports.enumStrings = result })
     .catch(err => console.error(err))
 }
 
@@ -121,7 +119,7 @@ exports.refresh = () => {
     loadServiceLayers(),
     loadFiberTypes(),
     loadConfiguration(),
-    loadUiStrings()
+    loadEnumStrings()
   ])
     .then(() => console.log(`Cache loaded ${exports.serviceLayers.length} service areas, ${exports.analysisLayers.length} analysis layers`))
 }
