@@ -1540,6 +1540,23 @@ class State {
             }
           }
         })
+        .then(() => {
+          if (initialState && initialState.visibleLayers) {
+            // We have an initial state, wait for a few seconds (HACKY) and turn layers on/off as per request
+            const timeoutPromise = new Promise((resolve, reject) => { setTimeout(() => resolve(), 2000) })
+            return timeoutPromise
+              .then(() => {
+                // Set layer visibility as per the initial state
+                const setOfVisibleLayers = new Set(initialState.visibleLayers)
+                service.mapLayersRedux.location.forEach(layer => {
+                  const isVisible = setOfVisibleLayers.has(layer.key)
+                  service.setLayerVisibility(layer, isVisible)
+                })
+              })
+          } else {
+            return Promise.resolve()
+          }
+        })
         .catch((err) => {
           console.error(err)
           // Set it to the default so that the map gets initialized
