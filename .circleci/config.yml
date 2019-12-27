@@ -69,9 +69,7 @@ workflows:
               only: 
                 - master
                 - optional_building
-                - depricate_constants_permissions
-                - wormholeFusion
-                - coverageFix
+                - network_optimization_redux
 
       - deploy:
           context: aro_qa_builds
