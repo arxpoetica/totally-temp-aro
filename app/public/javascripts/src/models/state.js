@@ -1552,6 +1552,13 @@ class State {
                   const isVisible = setOfVisibleLayers.has(layer.key)
                   service.setLayerVisibility(layer, isVisible)
                 })
+                service.equipmentLayerTypeVisibility.planned = true
+                Object.keys(service.mapLayersRedux.networkEquipment).forEach(layerType => {
+                  Object.keys(service.mapLayersRedux.networkEquipment[layerType]).forEach(layerKey => {
+                    const isVisible = setOfVisibleLayers.has(layerKey)
+                    service.setNetworkEquipmentLayerVisiblity(layerType, service.mapLayersRedux.networkEquipment[layerType][layerKey], isVisible)
+                  })
+                })
               })
           } else {
             return Promise.resolve()
@@ -1832,6 +1839,7 @@ class State {
 
   mapDispatchToTarget (dispatch) {
     return {
+      setNetworkEquipmentLayerVisiblity: (layerType, layer, newVisibility) => dispatch(MapLayerActions.setNetworkEquipmentLayerVisibility(layerType, layer, newVisibility)),
       loadConfigurationFromServer: () => dispatch(UiActions.loadConfigurationFromServer()),
       setPerspective: perspective => dispatch(UiActions.setPerspective(perspective)),
       getStyleValues: () => dispatch(UiActions.getStyleValues()),
