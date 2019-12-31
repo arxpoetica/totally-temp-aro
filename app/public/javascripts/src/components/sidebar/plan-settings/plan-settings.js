@@ -1,4 +1,5 @@
 import Constants from '../../common/constants'
+import SelectionActions from '../../../react/components/selection/selection-actions'
 
 class PlanSettingsController {
   constructor ($http, state, $timeout, $ngRedux, tracker) {
@@ -93,7 +94,6 @@ class PlanSettingsController {
     if (this.childSettingsPanels.dataSelection.isChanged && this.childSettingsPanels.dataSelection.isValid) {
       this.saveDataSelectionToServer()
       this.resetChildSettingsPanels('dataSelection')
-      // Clear the selected Service area when modify the optimization
       this.clearAllSelectedSA()
     }
 
@@ -139,13 +139,17 @@ class PlanSettingsController {
   }
 
   clearAllSelectedSA () {
-    var plan = this.state.plan
-
-    this.$http.delete(`/service_areas/${plan.id}/removeAllServiceAreaTargets`, { })
-      .then(() => {
-        this.state.reloadSelectedServiceAreas()
-        return Promise.resolve()
+    // Get a list of selected service areas that are valid, given the (possibly) changed service area library selection
+    const selectedServiceAreaLibraryId = this.dataItems.service_layer.selectedLibraryItems[0].identifier
+    this.$http.get(`/service_areas/${this.planId}/selectedServiceAreasInLibrary?libraryId=${selectedServiceAreaLibraryId}`)
+      .then(result => {
+        const validServiceAreas = new Set(result.data)
+        var invalidServiceAreas = [...this.selectedServiceAreas].filter(serviceAreaId => !validServiceAreas.has(serviceAreaId))
+        if (invalidServiceAreas.length > 0) {
+          this.removePlanTargets(this.planId, { serviceAreas: new Set(invalidServiceAreas) })
+        }
       })
+      .catch(err => console.error(err))
   }
 
   getChangeList () {
@@ -218,12 +222,13 @@ class PlanSettingsController {
     return {
       dataItems: reduxState.plan.dataItems,
       planId: reduxState.plan.activePlan.id,
+      selectedServiceAreas: reduxState.selection.planTargets.serviceAreas
     }
   }
 
   mapDispatchToTarget (dispatch) {
     return {
-      selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems))
+      removePlanTargets: (planId, planTargets) => dispatch(SelectionActions.removePlanTargets(planId, planTargets))
     }
   }
 }

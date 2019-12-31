@@ -56,8 +56,17 @@ exports.configure = (api, middleware) => {
   api.get('/service_areas/:planId/selectedServiceAreaIds', (request, response, next) => {
     var planId = request.params.planId
     models.Wirecenter.selectedServiceAreaIds(planId)
-    .then(jsonSuccess(response, next))
-    .catch(next)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  // Get the library id for a set of service areas
+  api.get('/service_areas/:planId/selectedServiceAreasInLibrary', (req, res, next) => {
+    const planId = req.params.planId
+    const libraryId = req.query.libraryId
+    models.Wirecenter.getSelectedServiceAreasInLibrary(planId, libraryId)
+      .then(jsonSuccess(res, next))
+      .catch(next)
   })
 
   // Add analysis area targets to a plan
