@@ -2,19 +2,40 @@
   .action-button-icon {
     padding-right: 10px;
   }
+  .pb-label-height {
+    line-height: 30px;
+  }
 </style>
 <modal-header title="{{$ctrl.currentPriceBook.name}}"></modal-header>
 <modal-body>
   <!-- Allow the user to select the state for which this strategy will be applied -->
   <form class="form-horizontal">
     <div class="form-group">
-      <label class="col-sm-8 control-label">{{$ctrl.allStrategies[$ctrl.currentPriceBook.priceStrategy].description}} code: </label>
-      <div class="col-sm-4">
-        <select class="form-control"
-                ng-model="$ctrl.selectedStateForStrategy"
-                ng-options="item for item in $ctrl.statesForStrategy"
-                ng-change="$ctrl.definePriceBookForSelectedState()">
-        </select>
+      <div class="row">
+        <!-- A combobox for the state  -->
+        <label class="col-sm-3 control-label pb-label-height">{{$ctrl.allStrategies[$ctrl.currentPriceBook.priceStrategy].description}} code: </label>
+        <div class="col-sm-3">
+          <select class="form-control form-control-sm"
+                  ng-model="$ctrl.selectedStateForStrategy"
+                  ng-options="item for item in $ctrl.statesForStrategy"
+                  ng-change="$ctrl.definePriceBookForSelectedState()">
+          </select>
+        </div>
+        <!-- Filter equipment items -->
+        <label class="col-sm-2 control-label pb-label-height">Filters:</label>
+        <div class="col-sm-4">
+          <ui-select tag-on-blur tagging tagging-label="false" multiple ng-model="$ctrl.selectedEquipmentTags"
+            theme="bootstrap" close-on-select="true" on-select="$ctrl.updateSetOfSelectedEquipmentTags()" on-remove="$ctrl.updateSetOfSelectedEquipmentTags()">
+            <ui-select-match placeholder="Filter equipment...">
+              {{$item.description}}
+            </ui-select-match>
+            <ui-select-choices class="ui-select-width-300 ui-select-font" repeat="equipmentTag in $ctrl.equipmentTags | filter: $select.search">
+              <div>
+                <span>{{equipmentTag.description}}</span>
+              </div>
+            </ui-select-choices>
+          </ui-select>
+        </div>
       </div>
     </div>
   </form>
@@ -60,7 +81,7 @@
               </td>
             </tr>
             <!-- Display all rows EXCEPT installed fiber, that is calculated above -->
-            <tr ng-repeat="definitionItem in priceBookDefinition.items" ng-if="definitionItem.name !== 'install_estimated'">
+            <tr ng-repeat="definitionItem in priceBookDefinition.items | filter: $ctrl.equipmentTagFilter" ng-if="definitionItem.name !== 'install_estimated'">
               <td>{{definitionItem.description}}</td>
               <td>
                 <input type="text" ng-model="definitionItem.costAssignment.cost" class="form-control">
@@ -81,7 +102,7 @@
       <table class="table table-striped" ng-if="priceBookDefinition.id !== 'fiberLaborList'">
 
         <!-- Loop through each item in the priceBookDefinition -->
-        <tr ng-repeat="definitionItem in priceBookDefinition.items">
+        <tr ng-repeat="definitionItem in priceBookDefinition.items | filter: $ctrl.equipmentTagFilter">
 
           <!-- Description of this item -->
           <td style="padding: 20px;">
