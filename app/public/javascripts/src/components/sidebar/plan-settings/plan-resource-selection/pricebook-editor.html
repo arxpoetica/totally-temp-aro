@@ -81,7 +81,7 @@
               </td>
             </tr>
             <!-- Display all rows EXCEPT installed fiber, that is calculated above -->
-            <tr ng-repeat="definitionItem in priceBookDefinition.items | filter: $ctrl.equipmentTagFilter" ng-if="definitionItem.name !== 'install_estimated'">
+            <tr ng-repeat="definitionItem in filteredItems = (priceBookDefinition.items | filter: $ctrl.equipmentTagFilter)" ng-if="definitionItem.name !== 'install_estimated'">
               <td>{{definitionItem.description}}</td>
               <td>
                 <input type="text" ng-model="definitionItem.costAssignment.cost" class="form-control">
@@ -93,6 +93,14 @@
                   percentage-input>
               </td>
             </tr>
+            <!-- Show a warning if we have selected any filters AND all rows are filtered out. -->
+            <tr ng-if="($ctrl.selectedEquipmentTags.length > 0) && (filteredItems.length === 0)">
+              <td colspan="4">
+                <div class="alert alert-warning m-0">
+                  No items to show with the current filters.
+                </div>
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -102,7 +110,7 @@
       <table class="table table-striped" ng-if="priceBookDefinition.id !== 'fiberLaborList'">
 
         <!-- Loop through each item in the priceBookDefinition -->
-        <tr ng-repeat="definitionItem in priceBookDefinition.items | filter: $ctrl.equipmentTagFilter">
+        <tr ng-repeat="definitionItem in filteredItems = (priceBookDefinition.items | filter: $ctrl.equipmentTagFilter)">
 
           <!-- Description of this item -->
           <td class="p-2 pl-3">
@@ -119,7 +127,7 @@
                   <tr>
                     <td style="vertical-align: middle">Cost:</td>
                     <td style="width: 100px; border-right: none;">
-                      <input type="text" ng-model="definitionItem.costAssignment.cost" class="form-control">
+                      <input type="text" ng-model="definitionItem.costAssignment.cost" class="form-control form-control-sm">
                     </td>
                     <td style="vertical-align: middle; border-left: none; width: 10px;">{{definitionItem.unitOfMeasure}}</td>
                   </tr>
@@ -159,6 +167,14 @@
                   </tr>
                 </table>
               </div>
+            </div>
+          </td>
+        </tr>
+        <!-- Show a warning if we have selected any filters AND all rows are filtered out. -->
+        <tr ng-if="($ctrl.selectedEquipmentTags.length > 0) && (filteredItems.length === 0)">
+          <td colspan="4">
+            <div class="alert alert-warning m-0">
+              No items to show with the current filters.
             </div>
           </td>
         </tr>
