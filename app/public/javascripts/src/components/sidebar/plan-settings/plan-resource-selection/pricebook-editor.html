@@ -88,7 +88,7 @@
               </td>
               <td>{{definitionItem.unitOfMeasure}}</td>
               <td>
-                <input class="form-control"
+                <input class="form-control form-control-sm"
                   ng-model="$ctrl.constructionRatios[$ctrl.selectedStateForStrategy].constructionRatios.cableConstructionRatios[definitionItem.cableConstructionType].ratio"
                   percentage-input>
               </td>
@@ -105,54 +105,60 @@
         <tr ng-repeat="definitionItem in priceBookDefinition.items | filter: $ctrl.equipmentTagFilter">
 
           <!-- Description of this item -->
-          <td style="padding: 20px;">
-            <div style="font-weight: 700">{{definitionItem.description}}</div>
-
-            <!-- IF a cost assignment is defined for this item, provide the ability to edit it -->
-            <div ng-if="definitionItem.costAssignment" class="row" style="width: 100%; margin: 0px;">
-              <table class="table table-bordered" style="margin-bottom: 0px">
-                <tr>
-                  <td style="vertical-align: middle">Cost:</td>
-                  <td style="width: 100px; border-right: none;">
-                    <input type="text" ng-model="definitionItem.costAssignment.cost" class="form-control">
-                  </td>
-                  <td style="vertical-align: middle; border-left: none; width: 10px;">{{definitionItem.unitOfMeasure}}</td>
-                </tr>
-              </table>
+          <td class="p-2 pl-3">
+            <div style="font-weight: 700; cursor: pointer;" ng-click="definitionItem.isExpanded = !definitionItem.isExpanded">
+              <i ng-if="!definitionItem.isExpanded" class="far fa-plus-square"></i>
+              <i ng-if="definitionItem.isExpanded" class="far fa-minus-square"></i>
+              <span class="pl-2">{{definitionItem.description}}</span>
             </div>
 
-            <!-- Display details for sub-items if we have at least one sub-item -->
-            <div ng-if="definitionItem.subItems && definitionItem.subItems.length > 0">
-              SubItems:
-            </div>
-            <div style="padding-left: 20px; width: 100%">
-              <table class="table table-bordered" style="margin-bottom: 0px">
-                <!-- Loop through all sub-items in this item -->
-                <tr ng-repeat="subItem in definitionItem.subItems">
+            <div ng-if="definitionItem.isExpanded">
+              <!-- IF a cost assignment is defined for this item, provide the ability to edit it -->
+              <div ng-if="definitionItem.costAssignment" class="row" style="width: 100%; margin: 0px;">
+                <table class="table table-bordered" style="margin-bottom: 0px">
+                  <tr>
+                    <td style="vertical-align: middle">Cost:</td>
+                    <td style="width: 100px; border-right: none;">
+                      <input type="text" ng-model="definitionItem.costAssignment.cost" class="form-control">
+                    </td>
+                    <td style="vertical-align: middle; border-left: none; width: 10px;">{{definitionItem.unitOfMeasure}}</td>
+                  </tr>
+                </table>
+              </div>
 
-                  <!-- START TD block for sub-items with detailType === 'reference' -->
-                  <td ng-if="subItem.detailType === 'reference'" style="vertical-align: middle;">{{subItem.item.description}}</td>
-                  <td ng-if="subItem.detailType === 'reference'" style="width: 100px; border-right: none;">
-                    <input type="text" ng-model="subItem.detailAssignment.quantity" class="form-control">
-                  </td>
-                  <td ng-if="subItem.detailType === 'reference'" style="vertical-align: middle; border-left: none;">
-                    <!-- "UnitPerHour" becomes "Hours", etc. -->
-                    {{subItem.item.unitOfMeasure.replace('UnitPer', '') + 's'}}
-                  </td>
-                  <!-- END TD block for sub-items with detailType === 'reference' -->
+              <!-- Display details for sub-items if we have at least one sub-item -->
+              <div ng-if="definitionItem.subItems && definitionItem.subItems.length > 0">
+                SubItems:
+              </div>
+              <div style="padding-left: 20px; width: 100%">
+                <table class="table table-bordered" style="margin-bottom: 0px">
+                  <!-- Loop through all sub-items in this item -->
+                  <tr ng-repeat="subItem in definitionItem.subItems">
 
-                  <!-- START TD block for sub-items with detailType === 'value' -->
-                  <td ng-if="subItem.detailType === 'value'" style="vertical-align: middle;">{{subItem.item.description}}</td>
-                  <td ng-if="subItem.detailType === 'value'" style="width: 100px; border-right: none;">
-                    <input type="text" ng-model="subItem.costAssignment.cost" class="form-control">
-                  </td>
-                  <td ng-if="subItem.detailType === 'value'" style="vertical-align: middle; border-left: none;">
-                    {{subItem.item.unitOfMeasure}}
-                  </td>
-                  <!-- END TD block for sub-items with detailType === 'value' -->
+                    <!-- START TD block for sub-items with detailType === 'reference' -->
+                    <td ng-if="subItem.detailType === 'reference'" style="vertical-align: middle;">{{subItem.item.description}}</td>
+                    <td ng-if="subItem.detailType === 'reference'" style="width: 100px; border-right: none;">
+                      <input type="text" ng-model="subItem.detailAssignment.quantity" class="form-control form-control-sm">
+                    </td>
+                    <td ng-if="subItem.detailType === 'reference'" style="vertical-align: middle; border-left: none;">
+                      <!-- "UnitPerHour" becomes "Hours", etc. -->
+                      {{subItem.item.unitOfMeasure.replace('UnitPer', '') + 's'}}
+                    </td>
+                    <!-- END TD block for sub-items with detailType === 'reference' -->
 
-                </tr>
-              </table>
+                    <!-- START TD block for sub-items with detailType === 'value' -->
+                    <td ng-if="subItem.detailType === 'value'" style="vertical-align: middle;">{{subItem.item.description}}</td>
+                    <td ng-if="subItem.detailType === 'value'" style="width: 100px; border-right: none;">
+                      <input type="text" ng-model="subItem.costAssignment.cost" class="form-control form-control-sm">
+                    </td>
+                    <td ng-if="subItem.detailType === 'value'" style="vertical-align: middle; border-left: none;">
+                      {{subItem.item.unitOfMeasure}}
+                    </td>
+                    <!-- END TD block for sub-items with detailType === 'value' -->
+
+                  </tr>
+                </table>
+              </div>
             </div>
           </td>
         </tr>
