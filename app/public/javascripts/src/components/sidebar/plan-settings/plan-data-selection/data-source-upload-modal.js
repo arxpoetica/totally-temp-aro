@@ -289,7 +289,7 @@ class DataSourceUploadController {
 
   setCableConstructionType () {
     var cableOptions = {
-      url: `/service/v1/library_cable?defaultSizeCategory=${this.selectedConduitSize}`,
+      url: `/service/v1/library_cable`,
       method: 'POST',
       data: {
         libraryItem: {
@@ -297,6 +297,7 @@ class DataSourceUploadController {
           name: $('#data_source_upload_modal input[type=text]').get(0).value
         },
         param: {
+          defaultCableSize: this.selectedConduitSize,
           param_type: 'cable_param',
           spatialEdgeType: this.selectedSpatialEdgeType.name
         }
