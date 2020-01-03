@@ -2,19 +2,40 @@
   .action-button-icon {
     padding-right: 10px;
   }
+  .pb-label-height {
+    line-height: 30px;
+  }
 </style>
 <modal-header title="{{$ctrl.currentPriceBook.name}}"></modal-header>
 <modal-body>
   <!-- Allow the user to select the state for which this strategy will be applied -->
   <form class="form-horizontal">
     <div class="form-group">
-      <label class="col-sm-8 control-label">{{$ctrl.allStrategies[$ctrl.currentPriceBook.priceStrategy].description}} code: </label>
-      <div class="col-sm-4">
-        <select class="form-control"
-                ng-model="$ctrl.selectedStateForStrategy"
-                ng-options="item for item in $ctrl.statesForStrategy"
-                ng-change="$ctrl.definePriceBookForSelectedState()">
-        </select>
+      <div class="row">
+        <!-- A combobox for the state  -->
+        <label class="col-sm-3 control-label pb-label-height">{{$ctrl.allStrategies[$ctrl.currentPriceBook.priceStrategy].description}} code: </label>
+        <div class="col-sm-3">
+          <select class="form-control form-control-sm"
+                  ng-model="$ctrl.selectedStateForStrategy"
+                  ng-options="item for item in $ctrl.statesForStrategy"
+                  ng-change="$ctrl.definePriceBookForSelectedState()">
+          </select>
+        </div>
+        <!-- Filter equipment items -->
+        <label class="col-sm-2 control-label pb-label-height">Filters:</label>
+        <div class="col-sm-4">
+          <ui-select tag-on-blur tagging tagging-label="false" multiple ng-model="$ctrl.selectedEquipmentTags"
+            theme="bootstrap" close-on-select="true" on-select="$ctrl.updateSetOfSelectedEquipmentTags()" on-remove="$ctrl.updateSetOfSelectedEquipmentTags()">
+            <ui-select-match placeholder="Filter equipment...">
+              {{$item.description}}
+            </ui-select-match>
+            <ui-select-choices class="ui-select-width-300 ui-select-font" repeat="equipmentTag in $ctrl.equipmentTags | filter: $select.search">
+              <div>
+                <span>{{equipmentTag.description}}</span>
+              </div>
+            </ui-select-choices>
+          </ui-select>
+        </div>
       </div>
     </div>
   </form>
@@ -60,16 +81,24 @@
               </td>
             </tr>
             <!-- Display all rows EXCEPT installed fiber, that is calculated above -->
-            <tr ng-repeat="definitionItem in priceBookDefinition.items" ng-if="definitionItem.name !== 'install_estimated'">
+            <tr ng-repeat="definitionItem in filteredItems = (priceBookDefinition.items | filter: $ctrl.equipmentTagFilter)" ng-if="definitionItem.name !== 'install_estimated'">
               <td>{{definitionItem.description}}</td>
               <td>
                 <input type="text" ng-model="definitionItem.costAssignment.cost" class="form-control">
               </td>
               <td>{{definitionItem.unitOfMeasure}}</td>
               <td>
-                <input class="form-control"
+                <input class="form-control form-control-sm"
                   ng-model="$ctrl.constructionRatios[$ctrl.selectedStateForStrategy].constructionRatios.cableConstructionRatios[definitionItem.cableConstructionType].ratio"
                   percentage-input>
+              </td>
+            </tr>
+            <!-- Show a warning if we have selected any filters AND all rows are filtered out. -->
+            <tr ng-if="($ctrl.selectedEquipmentTags.length > 0) && (filteredItems.length === 0)">
+              <td colspan="4">
+                <div class="alert alert-warning m-0">
+                  No items to show with the current filters.
+                </div>
               </td>
             </tr>
           </tbody>
@@ -81,57 +110,71 @@
       <table class="table table-striped" ng-if="priceBookDefinition.id !== 'fiberLaborList'">
 
         <!-- Loop through each item in the priceBookDefinition -->
-        <tr ng-repeat="definitionItem in priceBookDefinition.items">
+        <tr ng-repeat="definitionItem in filteredItems = (priceBookDefinition.items | filter: $ctrl.equipmentTagFilter)">
 
           <!-- Description of this item -->
-          <td style="padding: 20px;">
-            <div style="font-weight: 700">{{definitionItem.description}}</div>
-
-            <!-- IF a cost assignment is defined for this item, provide the ability to edit it -->
-            <div ng-if="definitionItem.costAssignment" class="row" style="width: 100%; margin: 0px;">
-              <table class="table table-bordered" style="margin-bottom: 0px">
-                <tr>
-                  <td style="vertical-align: middle">Cost:</td>
-                  <td style="width: 100px; border-right: none;">
-                    <input type="text" ng-model="definitionItem.costAssignment.cost" class="form-control">
-                  </td>
-                  <td style="vertical-align: middle; border-left: none; width: 10px;">{{definitionItem.unitOfMeasure}}</td>
-                </tr>
-              </table>
+          <td class="p-2 pl-3">
+            <div style="font-weight: 700; cursor: pointer;" ng-click="definitionItem.isExpanded = !definitionItem.isExpanded">
+              <i ng-if="!definitionItem.isExpanded" class="far fa-plus-square"></i>
+              <i ng-if="definitionItem.isExpanded" class="far fa-minus-square"></i>
+              <span class="pl-2">{{definitionItem.description}}</span>
             </div>
 
-            <!-- Display details for sub-items if we have at least one sub-item -->
-            <div ng-if="definitionItem.subItems && definitionItem.subItems.length > 0">
-              SubItems:
+            <div ng-if="definitionItem.isExpanded">
+              <!-- IF a cost assignment is defined for this item, provide the ability to edit it -->
+              <div ng-if="definitionItem.costAssignment" class="row" style="width: 100%; margin: 0px;">
+                <table class="table table-bordered" style="margin-bottom: 0px">
+                  <tr>
+                    <td style="vertical-align: middle">Cost:</td>
+                    <td style="width: 100px; border-right: none;">
+                      <input type="text" ng-model="definitionItem.costAssignment.cost" class="form-control form-control-sm">
+                    </td>
+                    <td style="vertical-align: middle; border-left: none; width: 10px;">{{definitionItem.unitOfMeasure}}</td>
+                  </tr>
+                </table>
+              </div>
+
+              <!-- Display details for sub-items if we have at least one sub-item -->
+              <div ng-if="definitionItem.subItems && definitionItem.subItems.length > 0">
+                SubItems:
+              </div>
+              <div style="padding-left: 20px; width: 100%">
+                <table class="table table-bordered" style="margin-bottom: 0px">
+                  <!-- Loop through all sub-items in this item -->
+                  <tr ng-repeat="subItem in definitionItem.subItems">
+
+                    <!-- START TD block for sub-items with detailType === 'reference' -->
+                    <td ng-if="subItem.detailType === 'reference'" style="vertical-align: middle;">{{subItem.item.description}}</td>
+                    <td ng-if="subItem.detailType === 'reference'" style="width: 100px; border-right: none;">
+                      <input type="text" ng-model="subItem.detailAssignment.quantity" class="form-control form-control-sm">
+                    </td>
+                    <td ng-if="subItem.detailType === 'reference'" style="vertical-align: middle; border-left: none;">
+                      <!-- "UnitPerHour" becomes "Hours", etc. -->
+                      {{subItem.item.unitOfMeasure.replace('UnitPer', '') + 's'}}
+                    </td>
+                    <!-- END TD block for sub-items with detailType === 'reference' -->
+
+                    <!-- START TD block for sub-items with detailType === 'value' -->
+                    <td ng-if="subItem.detailType === 'value'" style="vertical-align: middle;">{{subItem.item.description}}</td>
+                    <td ng-if="subItem.detailType === 'value'" style="width: 100px; border-right: none;">
+                      <input type="text" ng-model="subItem.costAssignment.cost" class="form-control form-control-sm">
+                    </td>
+                    <td ng-if="subItem.detailType === 'value'" style="vertical-align: middle; border-left: none;">
+                      {{subItem.item.unitOfMeasure}}
+                    </td>
+                    <!-- END TD block for sub-items with detailType === 'value' -->
+
+                  </tr>
+                </table>
+              </div>
             </div>
-            <div style="padding-left: 20px; width: 100%">
-              <table class="table table-bordered" style="margin-bottom: 0px">
-                <!-- Loop through all sub-items in this item -->
-                <tr ng-repeat="subItem in definitionItem.subItems">
-
-                  <!-- START TD block for sub-items with detailType === 'reference' -->
-                  <td ng-if="subItem.detailType === 'reference'" style="vertical-align: middle;">{{subItem.item.description}}</td>
-                  <td ng-if="subItem.detailType === 'reference'" style="width: 100px; border-right: none;">
-                    <input type="text" ng-model="subItem.detailAssignment.quantity" class="form-control">
-                  </td>
-                  <td ng-if="subItem.detailType === 'reference'" style="vertical-align: middle; border-left: none;">
-                    <!-- "UnitPerHour" becomes "Hours", etc. -->
-                    {{subItem.item.unitOfMeasure.replace('UnitPer', '') + 's'}}
-                  </td>
-                  <!-- END TD block for sub-items with detailType === 'reference' -->
-
-                  <!-- START TD block for sub-items with detailType === 'value' -->
-                  <td ng-if="subItem.detailType === 'value'" style="vertical-align: middle;">{{subItem.item.description}}</td>
-                  <td ng-if="subItem.detailType === 'value'" style="width: 100px; border-right: none;">
-                    <input type="text" ng-model="subItem.costAssignment.cost" class="form-control">
-                  </td>
-                  <td ng-if="subItem.detailType === 'value'" style="vertical-align: middle; border-left: none;">
-                    {{subItem.item.unitOfMeasure}}
-                  </td>
-                  <!-- END TD block for sub-items with detailType === 'value' -->
-
-                </tr>
-              </table>
+          </td>
+        </tr>
+        <!-- Show a warning if we have selected any filters AND all rows are filtered out. -->
+        <tr ng-if="($ctrl.selectedEquipmentTags.length > 0) && (filteredItems.length === 0)">
+          <td colspan="4">
+            <div class="alert alert-warning m-0">
+              No items to show with the current filters.
             </div>
           </td>
         </tr>
