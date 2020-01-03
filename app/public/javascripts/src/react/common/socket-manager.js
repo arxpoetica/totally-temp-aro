@@ -1,39 +1,66 @@
 import io from 'socket.io-client'
+import SocketNamespaces from './socket-namespaces'
 
 class SocketManager {
   constructor () {
     this.router = {}
-    this.websocketSessionId = null
-    this.sockets = {
-      clients: io('/clients'),
-      plans: io('/plans'),
-      broadcast: io('/broadcast'),
-      tileInvalidation: io('/tileInvalidation')
-    }
+
+    // Hold the current namespace+room connections. Useful to re-connect to rooms after a socket disconnect/reconnect.
+    this.roomConnections = {}
+    SocketNamespaces.forEach(socketNamespace => { this.roomConnections[socketNamespace] = new Set() })
+
+    // Initialize websocket
+    this.sockets = {}
+    this.sockets.default = io()
+    this.setupResilientConnection(this.sockets.default)
+    this.sessionIdPromise = new Promise((resolve, reject) => {
+      this.sockets.default.on('connect', () => {
+        const sessionId = this.sockets.default.io.engine.id
+        this.joinRoom('client', sessionId)
+        resolve(sessionId)
+      })
+      this.sockets.default.on('connect_error', err => console.error(err))
+    })
+
+    // Connect to all socket namespaces
+    SocketNamespaces.forEach(socketNamespace => {
+      this.sockets[socketNamespace] = io(`/${socketNamespace}`)
+    })
     Object.keys(this.sockets).forEach(namespaceKey => {
       this.sockets[namespaceKey].on('message', message => this.routeMessage(message))
     })
   }
 
-  initializeSession (websocketSessionId) {
-    this.websocketSessionId = websocketSessionId
-    this.joinRoom(websocketSessionId)
+  joinRoom (namespace, room) {
+    this.sockets[namespace].emit('SOCKET_JOIN_ROOM', room)
+    this.roomConnections[namespace].add(room)
   }
 
-  joinRoom (roomId) {
-    this.sockets.clients.emit('SOCKET_JOIN_ROOM', roomId)
+  leaveRoom (namespace, room) {
+    this.sockets[namespace].emit('SOCKET_LEAVE_ROOM', room)
+    this.roomConnections[namespace].delete(room)
   }
 
-  joinPlanRoom (roomId) {
-    this.sockets.plans.emit('SOCKET_JOIN_PLAN_ROOM', roomId)
+  // After a disconnect and reconnect, make sure that we re-subscribe to the older rooms and namespaces
+  setupResilientConnection (ioObject) {
+    ioObject.on('connect_error', err => { console.error(err) })
+    ioObject.on('connect_timeout', err => { console.error(err) })
+    ioObject.on('reconnect_error', err => { console.error(err) })
+    ioObject.on('reconnect_failed', () => { console.error(`Fatal - unable to reconnect to websocket`) })
+    ioObject.on('reconnect', attempt => {
+      console.log(`Successfully reconnected to websocket after ${attempt} attempts`)
+      // Rewrite the session id promise
+      const sessionId = this.sockets.default.io.engine.id
+      this.sessionIdPromise = Promise.resolve(sessionId)
+      // Restore namespace+room connections.
+      Object.keys(this.roomConnections).forEach(namespaceKey => {
+        this.roomConnections[namespaceKey].forEach(room => this.joinRoom(namespaceKey, room))
+      })
+    })
   }
 
-  leaveRoom (roomId) {
-    this.sockets.clients.emit('SOCKET_LEAVE_ROOM', roomId)
-  }
-
-  leavePlanRoom (roomId) {
-    this.sockets.plans.emit('SOCKET_LEAVE_PLAN_ROOM', roomId)
+  getSessionId () {
+    return this.sessionIdPromise
   }
 
   subscribe (messageType, callback) {
@@ -43,7 +70,6 @@ class SocketManager {
   }
 
   unsubscribe (fn) {
-    console.log('unsubscribe')
     Object.keys(this.router).forEach(messageType => {
       var subscriberIndex = this.router[messageType].findIndex(item => item === fn)
       while (subscriberIndex >= 0) {
@@ -54,7 +80,7 @@ class SocketManager {
   }
 
   routeMessage (message) {
-    const subscribers = this.router[message.type] || []
+    const subscribers = this.router[message.properties.headers.eventType] || []
     subscribers.forEach(subscriber => subscriber(message))
   }
 }

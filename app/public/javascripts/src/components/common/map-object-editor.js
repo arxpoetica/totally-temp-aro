@@ -1,13 +1,15 @@
 import Constants from './constants'
-import WorkflowState from './workflow-state'
+import WorkflowState from '../../shared-utils/workflow-state'
 import MapUtilities from './plan/map-utilities'
 import FeatureSelector from '../tiles/feature-selector'
 import Utilities from './utilities'
 import MenuAction, { MenuActionTypes } from '../common/context-menu/menu-action'
 import MenuItem, { MenuItemTypes } from '../common/context-menu/menu-item'
+import uuidStore from '../../shared-utils/uuid-store'
+import SelectionActions from '../../react/components/selection/selection-actions'
 
 class MapObjectEditorController {
-  constructor ($http, $element, $compile, $document, $timeout, state, tileDataService, contextMenuService, Utils) {
+  constructor ($http, $element, $compile, $document, $timeout, $ngRedux, state, tileDataService, contextMenuService, Utils) {
     this.$http = $http
     this.$element = $element
     this.$compile = $compile
@@ -47,6 +49,7 @@ class MapObjectEditorController {
       fillColor: '#FF1493',
       fillOpacity: 0.4
     }
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }
 
   $onInit () {
@@ -91,7 +94,6 @@ class MapObjectEditorController {
       return !(hasEntityType || hasBoundaryType) // false == allow dropping
     }
     this.dragStartEventObserver = this.state.dragEndEvent.skip(1).subscribe((event) => {
-      // console.log('drag ... start?')
       this.objectIdToDropCSS = {} // So that we will regenerate the CSS in case the map has zoomed/panned
       this.$timeout()
     })
@@ -120,7 +122,7 @@ class MapObjectEditorController {
       if (event.dataTransfer.getData(Constants.DRAG_DROP_ENTITY_DETAILS_KEY) !== Constants.MAP_OBJECT_CREATE_SERVICE_AREA) {
         // ToDo feature should probably be a class
         var feature = {
-          objectId: this.utils.getUUID(),
+          objectId: uuidStore.getUUID(),
           geometry: {
             type: 'Point',
             coordinates: [dropLatLng.lng(), dropLatLng.lat()]
@@ -136,7 +138,7 @@ class MapObjectEditorController {
         var radius = (40000 / Math.pow(2, this.mapRef.getZoom())) * 2 * 256 // radius in meters
         var path = this.generateHexagonPath(position, radius)
         var feature = {
-          objectId: this.utils.getUUID(),
+          objectId: uuidStore.getUUID(),
           geometry: {
             type: 'MultiPolygon',
             coordinates: [[path]]
@@ -165,6 +167,11 @@ class MapObjectEditorController {
     this.registerRemoveMapObjectsCallback && this.registerRemoveMapObjectsCallback({ removeMapObjects: this.removeCreatedMapObjects.bind(this) })
     this.registerCreateEditableExistingMapObject && this.registerCreateEditableExistingMapObject({ createEditableExistingMapObject: this.createEditableExistingMapObject.bind(this) })
     this.registerDeleteCreatedMapObject && this.registerDeleteCreatedMapObject({ deleteCreatedMapObject: this.deleteCreatedMapObject.bind(this) })
+    this.registerSelectProposedFeature && this.registerSelectProposedFeature({ selectProposedFeature: this.selectProposedFeature.bind(this) })
+    this.registerMapObjectFromEvent && this.registerMapObjectFromEvent({ mapObjectFromEvent: this.handleMapEntitySelected.bind(this) })
+    this.registerHighlightMapObject && this.registerHighlightMapObject({ highlightMapObject: this.highlightMapObject.bind(this) })
+    this.registerDehighlightMapObject && this.registerDehighlightMapObject({ dehighlightMapObject: this.dehighlightMapObject.bind(this) })
+    this.registerUpdateMapObjectPosition && this.registerUpdateMapObjectPosition({ updateMapObjectPosition: this.updateMapObjectPosition.bind(this) })
 
     this.state.clearEditingMode.skip(1).subscribe((clear) => {
       if (clear) {
@@ -198,7 +205,7 @@ class MapObjectEditorController {
     var boundsByNetworkNodeObjectId = {}
     menuItems.forEach((menuItem) => {
       var feature = menuItem.feature
-      if (feature && feature.hasOwnProperty('network_node_object_id')) {
+      if (feature && feature.network_node_object_id) {
         bounds.push(feature)
         boundsByNetworkNodeObjectId[feature.network_node_object_id] = menuItem
       }
@@ -206,10 +213,9 @@ class MapObjectEditorController {
 
     this.utils.getBoundsCLLIs(bounds, this.state)
       .then((results) => {
-        results.data.forEach((result) => {
-          if (result.clli) {
-            boundsByNetworkNodeObjectId[result.objectId].label += `: ${result.clli}`
-          }
+        results.forEach((result) => {
+          const clliCode = (result.data.networkNodeEquipment.siteInfo.siteClli) || '(empty CLLI code)'
+          boundsByNetworkNodeObjectId[result.data.objectId].displayName = `Boundary: ${clliCode}`
         })
 
         this.contextMenuService.populateMenu(menuItems)
@@ -229,7 +235,9 @@ class MapObjectEditorController {
   }
 
   selectProposedFeature (objectId) {
+    if (!this.createdMapObjects.hasOwnProperty(objectId)) return false
     this.selectMapObject(this.createdMapObjects[objectId])
+    return true
   }
 
   startDrawingBoundaryForId (objectId) {
@@ -282,24 +290,27 @@ class MapObjectEditorController {
     if (this.featureType === 'equipment') { // ToDo: need a better way to do this, should be in plan-editor
       this.getFeaturesAtPoint(latLng)
         .then((results) => {
-        // We may have come here when the user clicked an existing map object. For now, just add it to the list.
-        // This should be replaced by something that loops over all created map objects and picks those that are under the cursor.
+          // We may have come here when the user clicked an existing map object. For now, just add it to the list.
+          // This should be replaced by something that loops over all created map objects and picks those that are under the cursor.
+          var mapObjectIndex = -1
           if (clickedMapObject) {
-            var clickedFeature = {
-              _data_type: this.isMarker(clickedMapObject) ? `equipment.${clickedMapObject.feature.networkNodeType}` : 'equipment_boundary.undefined',
-              object_id: clickedMapObject.objectId,
-              is_deleted: false
-            }
+            var clickedFeature = { ...clickedMapObject.feature }
+            clickedFeature._data_type = clickedFeature.dataType
+            clickedFeature.object_id = clickedFeature.objectId
+            clickedFeature.network_node_object_id = clickedFeature.networkObjectId
+            clickedFeature.is_deleted = false
             results.push(clickedFeature)
+            mapObjectIndex = results.length - 1
           }
 
           var menuItems = []
           var menuItemsById = {}
           var allMenuPromises = []
+          var locationConnectors = []
 
-          results.forEach((result) => {
-          // populate context menu aray here
-          // we may need different behavour for different controllers using this
+          results.forEach((result, iResult) => {
+            // populate context menu aray here
+            // we may need different behavour for different controllers using this
             const featureType = this.utils.getFeatureMenuItemType(result)
 
             if (result.hasOwnProperty('object_id')) result.objectId = result.object_id
@@ -311,6 +322,13 @@ class MapObjectEditorController {
               validFeature = this.filterFeatureForSelection(result)
             }
 
+            // If this feature is part of an open transaction AND we have clicked on vector tiles (not map objects), do not show the menu
+            const checkInTransaction = (iResult !== mapObjectIndex)
+            if (checkInTransaction) {
+              const featureIsInTransaction = this.transactionFeatures[result.objectId]
+              validFeature = validFeature && !featureIsInTransaction
+            }
+
             if (validFeature) {
               var feature = result
               menuItemsById[feature.objectId] = true
@@ -319,8 +337,37 @@ class MapObjectEditorController {
                 .then(options => menuItems.push(new MenuItem(featureType, name, options, feature)))
 
               allMenuPromises = allMenuPromises.concat(thisFeatureMenuPromise)
+              if (feature._data_type === 'equipment.location_connector') {
+                locationConnectors.push(feature)
+              }
             }
           })
+          if (locationConnectors.length > 1) {
+            // If we have multiple location connectors, add a menu item that will allow us to merge them
+            const mergeLocationConnectors = new MenuAction(MenuActionTypes.MERGE_LOCATION_CONNECTORS, () => {
+              console.log('MERGING LOCATION CONNECTORS')
+              var mergeResult = Promise.resolve()
+              locationConnectors.forEach((locationConnector, lcIndex) => {
+                mergeResult = mergeResult.then(() => {
+                  console.log(`Starting editExistingFeature for ${locationConnector.objectId}`)
+                  const editPromise = this.editExistingFeature(locationConnector, latLng, false)
+                  return editPromise
+                })
+                  .then(() => {
+                    console.log(`Finished editExistingFeature for ${locationConnector.objectId}`)
+                    return Promise.resolve()
+                  })
+              })
+              mergeResult
+                .then(() => {
+                  console.log('Firing multiselect')
+                  this.onObjectKeyClicked && this.onObjectKeyClicked({ features: locationConnectors.slice(0, locationConnectors.length - 1), latLng: latLng })
+                  this.mergeSelectedEquipment && this.mergeSelectedEquipment()
+                })
+                .catch(err => console.error(err))
+            })
+            menuItems.push(new MenuItem(MenuItemTypes.EQUIPMENT, `${locationConnectors.length} Location Connectors`, [mergeLocationConnectors], locationConnectors))
+          }
           Promise.all(allMenuPromises)
             .then(() => {
               if (menuItems.length <= 0) {
@@ -396,12 +443,8 @@ class MapObjectEditorController {
             this.openContextMenu(x, y, menuItems)
           }
         })
-    } else if (this.featureType === 'location') {
+    } else if (this.featureType === 'location' && this.isFeatureEditable(this.selectedMapObject.feature)) {
       var name = 'Location'
-      // var options = [ this.contextMenuService.makeItemOption('Delete', 'fa-trash-alt', () => {
-      //   this.deleteObjectWithId(this.selectedMapObject.objectId)
-      //   this.deleteCreatedMapObject(this.selectedMapObject.objectId)
-      // }) ]
       var options = [ new MenuAction(MenuActionTypes.DELETE, () => {
         this.deleteObjectWithId(this.selectedMapObject.objectId)
         this.deleteCreatedMapObject(this.selectedMapObject.objectId)
@@ -422,10 +465,10 @@ class MapObjectEditorController {
       options.push(new MenuAction(MenuActionTypes.SELECT, () => this.selectProposedFeature(feature.objectId)))
       options.push(new MenuAction(MenuActionTypes.DELETE, () => this.deleteObjectWithId(feature.objectId)))
     } else {
-      options.push(new MenuAction(MenuActionTypes.VIEW, () => this.viewExistingFeature(feature, latLng)))
+      options.push(new MenuAction(MenuActionTypes.VIEW, () => this.displayViewObject({ feature: feature })))
       // Note that feature.is_locked comes in as a string from the vector tiles
-      if (feature.is_locked === 'false') {
-        options.push(new MenuAction(MenuActionTypes.EDIT, () => this.editExistingFeature(feature, latLng)))
+      if (feature.workflow_state_id !== 2) {
+        options.push(new MenuAction(MenuActionTypes.EDIT, () => this.editExistingFeature(feature, latLng, false)))
       }
     }
 
@@ -567,15 +610,26 @@ class MapObjectEditorController {
   createMapObjects (features) {
     // "features" is an array that comes directly from aro-service. Create map objects for these features
     features.forEach((feature) => {
-      this.createMapObject(feature, feature.iconUrl, false) // Feature is not created usin a map click
+      this.createMapObject(feature, feature.iconUrl, false) // Feature is not created using a map click
     })
+  }
+
+  isFeatureEditable (feature) {
+    if (feature.workflow_state_id || feature.workflowState) {
+      // The marker is editable if the state is not LOCKED or INVALIDATED
+      // Vector tile features come in as "workflow_state_id", transaction features as "workflowState"
+      var workflowStateId = feature.workflow_state_id || WorkflowState[feature.workflowState].id
+      return !((workflowStateId & WorkflowState.LOCKED.id) ||
+              (workflowStateId & WorkflowState.INVALIDATED.id))
+    } else {
+      return true // New objects are always editable
+    }
   }
 
   createPointMapObject (feature, iconUrl) {
     // Create a "point" map object - a marker
     // The marker is editable if the state is not LOCKED or INVALIDATED
-    const isEditable = !((feature.workflow_state_id & WorkflowState.LOCKED.id) ||
-                          (feature.workflow_state_id & WorkflowState.INVALIDATED.id))
+    const isEditable = this.isFeatureEditable(feature)
     var mapMarker = new google.maps.Marker({
       objectId: feature.objectId, // Not used by Google Maps
       featureType: feature.networkNodeType,
@@ -595,8 +649,9 @@ class MapObjectEditorController {
     })
 
     if (!isEditable) {
-      mapMarker.setOptions({ clickable: false }) // Don't allow right click for locked markers
-      if (feature.workflow_state_id & WorkflowState.LOCKED.id) {
+      // Vector tile features come in as "workflow_state_id", transaction features as "workflowState"
+      var workflowStateId = feature.workflow_state_id || WorkflowState[feature.workflowState].id
+      if (workflowStateId & WorkflowState.LOCKED.id) {
         var lockIconOverlay = new google.maps.Marker({
           icon: {
             url: this.state.configuration.locationCategories.entityLockIcon,
@@ -608,7 +663,7 @@ class MapObjectEditorController {
         lockIconOverlay.bindTo('position', mapMarker, 'position')
         this.createdMapObjects[`${feature.objectId}_lockIconOverlay`] = lockIconOverlay
       }
-      if (feature.workflow_state_id & WorkflowState.INVALIDATED.id) {
+      if (workflowStateId & WorkflowState.INVALIDATED.id) {
         var lockIconOverlay = new google.maps.Marker({
           icon: {
             url: this.state.configuration.locationCategories.entityInvalidatedIcon,
@@ -724,11 +779,11 @@ class MapObjectEditorController {
     return (deltaLat < TOLERANCE) && (deltaLng < TOLERANCE)
   }
 
-  createEditableExistingMapObject (feature, iconUrl) {
-    this.createMapObject(feature, iconUrl, true, true, true)
+  createEditableExistingMapObject (feature, iconUrl, isMult) {
+    return this.createMapObject(feature, iconUrl, true, true, true, isMult)
   }
 
-  createMapObject (feature, iconUrl, usingMapClick, existingObjectOverride, deleteExistingBoundary) {
+  createMapObject (feature, iconUrl, usingMapClick, existingObjectOverride, deleteExistingBoundary, isMult) {
     if (typeof existingObjectOverride === 'undefined') {
       existingObjectOverride = false
     }
@@ -736,7 +791,6 @@ class MapObjectEditorController {
     if (feature.geometry.type === 'Point') {
       var canCreateObject = this.checkCreateObject && this.checkCreateObject({ feature: feature, usingMapClick: usingMapClick })
       if (canCreateObject) {
-        if (usingMapClick && this.state.areTilesRendering) return // Don't create when tiles are rendering
         // if an existing object just show don't edit
         if (feature.isExistingObject && !existingObjectOverride) {
           this.displayViewObject({ feature: feature })
@@ -747,6 +801,11 @@ class MapObjectEditorController {
         // Set up listeners on the map object
         mapObject.addListener('dragend', (event) => this.onModifyObject && this.onModifyObject({ mapObject }))
         mapObject.addListener('click', (event) => {
+          if (this.state.isShiftPressed) {
+            var features = [feature]
+            this.onObjectKeyClicked && this.onObjectKeyClicked({features: features, latLng: event.latLng})
+            return
+          }
           // Select this map object
           this.selectMapObject(mapObject)
         })
@@ -842,26 +901,26 @@ class MapObjectEditorController {
     })
 
     this.createdMapObjects[mapObject.objectId] = mapObject
-    this.onCreateObject && this.onCreateObject({ mapObject: mapObject, usingMapClick: usingMapClick, feature: feature, deleteExistingBoundary: !deleteExistingBoundary })
-
-    if (usingMapClick) this.selectMapObject(mapObject)
+    if (usingMapClick) this.selectMapObject(mapObject, isMult)
+    return this.onCreateObject && this.onCreateObject({ mapObject: mapObject, usingMapClick: usingMapClick, feature: feature, deleteExistingBoundary: !deleteExistingBoundary })
   }
 
-  handleMapEntitySelected (event) {
+  handleMapEntitySelected (event, isMult) {
     if (!event || !event.latLng) {
       return
     }
-
+    if (typeof isMult === 'undefined') isMult = false
     // filter out equipment and locations already in the list
     // ToDo: should we do this for all types of features?
     var filterArrayByObjectId = (featureList) => {
       let filteredList = []
       for (let i = 0; i < featureList.length; i++) {
         let feature = featureList[i]
-        if (!feature.object_id ||
-            (!this.createdMapObjects.hasOwnProperty(feature.object_id) &&
-                !this.createdMapObjects.hasOwnProperty(feature.object_id + '_lockIconOverlay') &&
-                !this.createdMapObjects.hasOwnProperty(feature.object_id + '_invalidatedIconOverlay') &&
+        var objectId = feature.objectId || feature.object_id
+        if (!objectId ||
+            (!this.createdMapObjects.hasOwnProperty(objectId) &&
+                !this.createdMapObjects.hasOwnProperty(objectId + '_lockIconOverlay') &&
+                !this.createdMapObjects.hasOwnProperty(objectId + '_invalidatedIconOverlay') &&
                 this.filterFeatureForSelection(feature)
             )
         ) {
@@ -903,33 +962,35 @@ class MapObjectEditorController {
           // use feature's coord NOT the event's coords
           feature.geometry.coordinates = serviceFeature.geometry.coordinates
           feature.attributes = serviceFeature.attributes
+          feature.locationCategory = serviceFeature.locationCategory
           feature.directlyEditExistingFeature = true
           return Promise.resolve(feature)
         })
     } else if (this.featureType === 'equipment' && equipmentFeatures.length > 0) {
       // The map was clicked on, and there was an equipmentFeature under the cursor
       const clickedObject = this.state.getValidEquipmentFeaturesList(equipmentFeatures)[0] // Filter Deleted equipments
-      feature.objectId = clickedObject.object_id
+      feature.objectId = feature.objectId || clickedObject.object_id
       feature.isExistingObject = true
       feature.type = clickedObject._data_type
       feature.deployment_type = clickedObject.deployment_type
       var newSelection = this.state.cloneSelection()
       if (clickedObject._data_type === 'equipment_boundary.select') {
         iconKey = Constants.MAP_OBJECT_CREATE_KEY_EQUIPMENT_BOUNDARY
-        this.displayViewObject({ feature: feature })
+        if (clickedObject.workflow_state_id !== 2) {
+          this.displayEditObject({ feature: feature })
+        } else {
+          this.displayViewObject({ feature: feature })
+        }
         this.selectMapObject(null)
         newSelection.editable.equipment = {}
         this.state.selection = newSelection
         return
       } else {
-        // Quickfix - Display the equipment and return, do not make multiple calls to aro-service #159544541
-        this.displayViewObject({ feature: feature })
-        this.selectMapObject(null)
-        // Update selected feature in state so it is rendered correctly
-        newSelection.details.siteBoundaryId = {}
-        newSelection.editable.equipment = {}
-        newSelection.editable.equipment[feature.objectId] = feature
-        this.state.selection = newSelection
+        if (clickedObject.workflow_state_id !== 2) {
+          this.displayEditObject({ feature: feature, isMult: isMult })
+        } else {
+          this.displayViewObject({ feature: feature, isMult: isMult })
+        }
         return
       }
     } else if (this.featureType === 'serviceArea' && event.hasOwnProperty('serviceAreas') &&
@@ -938,10 +999,10 @@ class MapObjectEditorController {
       var serviceArea = event.serviceAreas[0]
       feature.isExistingObject = true
       // Get the Service area geometry from aro-service
-      featurePromise = this.state.StateViewMode.loadEntityList(this.$http, this.state, 'ServiceAreaView', serviceArea.id, 'id,code,name,sourceId,geom', 'id')
+      featurePromise = this.state.StateViewMode.loadEntityList(this.$http, this.state, this.dataItems, 'ServiceAreaView', serviceArea.id, 'id,code,name,sourceId,geom', 'id')
         .then((result) => {
-          // ToDo: check for empty object, reject on true
-          if (!result[0].hasOwnProperty('geom')) {
+          // check for empty object, reject on true
+          if (!result[0] || !result[0].geom) {
             return Promise.reject(`object: ${serviceArea.object_id} may have been deleted`)
           }
 
@@ -961,7 +1022,7 @@ class MapObjectEditorController {
       if (!this.createObjectOnClick) {
         return // We do not want to create the map object on click
       }
-      feature.objectId = this.utils.getUUID()
+      feature.objectId = uuidStore.getUUID()
       feature.isExistingObject = false
       featurePromise = Promise.resolve(feature)
     }
@@ -972,7 +1033,7 @@ class MapObjectEditorController {
         featureToUse = result
         // When we are modifying existing objects, the iconUrl to use is provided by the parent control via a function.
 
-        return this.getObjectIconUrl && this.getObjectIconUrl({ objectKey: iconKey, objectValue: featureToUse.objectId })
+        return this.getObjectIconUrl({ objectKey: iconKey, objectValue: featureToUse })
       })
       .then((iconUrl) => this.createMapObject(featureToUse, iconUrl, true, featureToUse.directlyEditExistingFeature))
       .then(() => {
@@ -989,53 +1050,58 @@ class MapObjectEditorController {
     return mapObject && mapObject.icon
   }
 
-  selectMapObject (mapObject) {
+  selectMapObject (mapObject, isMult) {
+    if (typeof isMult === 'undefined') isMult = false
+    // --- clear mult select?
     // First de-select the currently selected map object (if any)
-    if (this.selectedMapObject) {
-      if (this.isMarker(this.selectedMapObject)) {
-        // this.setMapObjectIcon(this.selectedMapObject, this.getIconsByFeatureType(this.selectedMapObject.featureType).iconUrl)
-        // this.selectedMapObject.label.color = "black"
-        var label = this.selectedMapObject.getLabel()
-        label.color = '#000000'
-        this.selectedMapObject.setLabel(label)
-      } else {
-        this.selectedMapObject.setOptions(this.polygonOptions)
-        this.selectedMapObject.setEditable(false)
-      }
+    if (this.selectedMapObject && !isMult) {
+      this.dehighlightMapObject(this.selectedMapObject)
     }
 
     // Then select the map object
     if (mapObject) { // Can be null if we are de-selecting everything
-      if (this.isMarker(mapObject)) {
-        // this.setMapObjectIcon(mapObject, this.getIconsByFeatureType(mapObject.featureType).selectedIconUrl)
-        // mapObject.label.color = "green"
-        var label = mapObject.getLabel()
-        label.color = '#009900'
-        mapObject.setLabel(label)
-        // mapObject.label:
-      } else {
-        mapObject.setOptions(this.selectedPolygonOptions)
-        mapObject.setEditable(true)
-      }
+      this.highlightMapObject(mapObject)
+      this.selectObjectRedux([mapObject.objectId])
+    } else {
+      this.selectObjectRedux([])
     }
 
-    this.selectedMapObject = mapObject
+    if (!isMult) this.selectedMapObject = mapObject
     if (mapObject && !this.isMarker(mapObject)) { // If selected mapobject is boundary store the geom
       this.selectedMapObjectPreviousShape[mapObject.objectId] = mapObject.feature.geometry
     }
 
-    this.onSelectObject && this.onSelectObject({ mapObject })
+    this.onSelectObject && this.onSelectObject({ mapObject, isMult })
   }
 
-  /*
-  toggleEditSelectedPolygon() {
-    if (!this.selectedMapObject || this.isMarker(this.selectedMapObject)) {
-      return
+  highlightMapObject (mapObject) {
+    if (this.isMarker(mapObject)) {
+      var label = mapObject.getLabel()
+      label.color = '#009900'
+      mapObject.setLabel(label)
+    } else {
+      mapObject.setOptions(this.selectedPolygonOptions)
+      mapObject.setEditable(true)
     }
-    var isEditable = this.selectedMapObject.getEditable()
-    this.selectedMapObject.setEditable(!isEditable)
   }
-  */
+  
+  dehighlightMapObject (mapObject) {
+    if (this.isMarker(mapObject)) {
+      var label = mapObject.getLabel()
+      label.color = '#000000'
+      mapObject.setLabel(label)
+    } else {
+      mapObject.setOptions(this.polygonOptions)
+      mapObject.setEditable(false)
+    }
+  }
+
+  updateMapObjectPosition (objectId, lat, lng) {
+    const mapObject = this.createdMapObjects[objectId]
+    if (mapObject) {
+      mapObject.setPosition(new google.maps.LatLng(lat, lng))
+    }
+  }
 
   removeCreatedMapObjects () {
     // Remove created objects from map
@@ -1058,11 +1124,11 @@ class MapObjectEditorController {
       // Deselect the currently selected object, as it is about to be deleted.
       this.selectMapObject(null)
     }
-    var mapObjectToDelete = this.createdMapObjects[objectId]
-    if (mapObjectToDelete) {
-      this.onDeleteObject && this.onDeleteObject({ mapObject: mapObjectToDelete })
-    }
     this.closeContextMenu()
+    var mapObjectToDelete = this.createdMapObjects[objectId]
+    if (mapObjectToDelete && this.onDeleteObject) {
+      return this.onDeleteObject({ mapObject: mapObjectToDelete })
+    }
   }
 
   deleteCreatedMapObject (objectId) {
@@ -1098,7 +1164,7 @@ class MapObjectEditorController {
       // the polygon object coordinates to aro-service format, and then back to google.maps.Polygon() paths later.
       // We keep it this way because the object creation workflow does other things like set up events, etc.
       var feature = {
-        objectId: self.utils.getUUID(),
+        objectId: uuidStore.getUUID(),
         geometry: {
           type: 'Polygon',
           coordinates: []
@@ -1147,7 +1213,7 @@ class MapObjectEditorController {
       // the polygon object coordinates to aro-service format, and then back to google.maps.Polygon() paths later.
       // We keep it this way because the object creation workflow does other things like set up events, etc.
       var feature = {
-        objectId: self.utils.getUUID(),
+        objectId: uuidStore.getUUID(),
         geometry: {
           type: 'MultiPolygon',
           coordinates: [[]]
@@ -1204,21 +1270,18 @@ class MapObjectEditorController {
     }
   }
 
-  editExistingFeature(clickedObject,latLng) {
-    return new Promise((resolve, reject) => {
-      var feature = {
-        objectId: clickedObject.object_id,
-        geometry: {
-          type: 'Point',
-          coordinates: [latLng.lng(), latLng.lat()]
-        },
-        type: clickedObject._data_type,
-        deployment_type: clickedObject.deployment_type,
-        isExistingObject: true
-      }
-      this.displayEditObject({ feature: feature })
-      .then(() => resolve())
-    })
+  editExistingFeature (clickedObject, latLng, isMultiSelect) {
+    var feature = {
+      objectId: clickedObject.object_id,
+      geometry: {
+        type: 'Point',
+        coordinates: [latLng.lng(), latLng.lat()]
+      },
+      type: clickedObject._data_type,
+      deployment_type: clickedObject.deployment_type,
+      isExistingObject: true
+    }
+    return this.displayEditObject({ feature: feature, isMult: isMultiSelect })
   }
 
   $onChanges (changesObj) {
@@ -1254,25 +1317,29 @@ class MapObjectEditorController {
 
     // Go back to the default map cursor
     this.mapRef.setOptions({ draggableCursor: null })
-
-    /*
-    // Remove the context menu from the document body
-    this.$timeout(() => {
-      var documentBody = this.$document.find('body')[0]
-      documentBody.removeChild(this.contextMenuElement)
-      var mapCanvas = this.$document.find(`#${this.mapContainerId}`)[0]
-      mapCanvas.removeChild(this.dropTargetElement)
-    }, 0)
-    */
+    this.unsubscribeRedux()
 
     // Remove any dragging DOM event listeners
     var mapCanvas = this.$document.find(`#${this.mapContainerId}`)[0]
     mapCanvas.ondragover = null
     mapCanvas.ondrop = null
   }
+
+  mapStateToThis (reduxState) {
+    return {
+      dataItems: reduxState.plan.dataItems,
+      transactionFeatures: reduxState.planEditor.features
+    }
+  }
+
+  mapDispatchToTarget (dispatch) {
+    return {
+      selectObjectRedux: objectIds => dispatch(SelectionActions.setPlanEditorFeatures(objectIds))
+    }
+  }
 }
 
-MapObjectEditorController.$inject = ['$http', '$element', '$compile', '$document', '$timeout', 'state', 'tileDataService', 'contextMenuService', 'Utils']
+MapObjectEditorController.$inject = ['$http', '$element', '$compile', '$document', '$timeout', '$ngRedux', 'state', 'tileDataService', 'contextMenuService', 'Utils']
 
 let mapObjectEditor = {
   templateUrl: '/components/common/map-object-editor.html',
@@ -1297,11 +1364,18 @@ let mapObjectEditor = {
     displayViewObject: '&',
     displayEditObject: '&',
     onObjectDroppedOnMarker: '&',
+    onObjectKeyClicked: '&',
+    mergeSelectedEquipment: '&',
     registerObjectDeleteCallback: '&', // To be called to register a callback, which will delete the selected object
     registerCreateMapObjectsCallback: '&', // To be called to register a callback, which will create map objects for existing objectIds
     registerRemoveMapObjectsCallback: '&', // To be called to register a callback, which will remove all created map objects
     registerCreateEditableExistingMapObject: '&', // To be called to register a callback, which will create a map object from and existing object
-    registerDeleteCreatedMapObject: '&'
+    registerDeleteCreatedMapObject: '&',
+    registerSelectProposedFeature: '&',
+    registerMapObjectFromEvent: '&',
+    registerHighlightMapObject: '&',
+    registerDehighlightMapObject: '&',
+    registerUpdateMapObjectPosition: '&'
   },
   controller: MapObjectEditorController
 }

@@ -21,9 +21,6 @@ class BoundariesController {
     // When the map zoom changes, map layers can change
     $rootScope.$on('map_zoom_changed', this.updateMapLayers.bind(this))
 
-    // Update map layers when the dataItems property of state changes
-    this.state.dataItemsChanged.skip(1).subscribe((newValue) => this.updateMapLayers())
-
     // Update map layers when the display mode button changes
     this.state.selectedDisplayMode.subscribe((newValue) => this.updateMapLayers())
 
@@ -36,7 +33,7 @@ class BoundariesController {
   }
 
   reloadVisibleLayers () {
-    return this.state.StateViewMode.loadEntityList(this.$http, this.state, 'AnalysisLayer', null, 'id,name,description', null)
+    return this.state.StateViewMode.loadEntityList(this.$http, this.state, this.dataItems, 'AnalysisLayer', null, 'id,name,description', null)
       .then(() => {
         var newTileLayers = []
         var filteredGlobalServiceLayers = globalServiceLayers
@@ -134,7 +131,7 @@ class BoundariesController {
     this.createdMapLayerKeys.clear()
 
     // Add map layers based on the selection
-    var selectedServiceAreaLibraries = this.state.dataItems && this.state.dataItems.service_layer && this.state.dataItems.service_layer.selectedLibraryItems
+    var selectedServiceAreaLibraries = this.dataItems && this.dataItems.service_layer && this.dataItems.service_layer.selectedLibraryItems
     if (selectedServiceAreaLibraries) {
       selectedServiceAreaLibraries.forEach((selectedServiceAreaLibrary) => {
         this.boundaryLayers.forEach((layer) => {
@@ -185,9 +182,10 @@ class BoundariesController {
     this.unsubscribeRedux()
   }
 
-  mapStateToThis (state) {
+  mapStateToThis (reduxState) {
     return {
-      boundaryLayers: getBoundaryLayersList(state)
+      boundaryLayers: getBoundaryLayersList(reduxState),
+      dataItems: reduxState.plan.dataItems
     }
   }
 
@@ -203,12 +201,15 @@ class BoundariesController {
 
   mergeToTarget (nextState, actions) {
     const currentBoundaryLayers = this.boundaryLayers
+    const currentSelectedLibrary = this.dataItems && this.dataItems.service_layer && this.dataItems.service_layer.selectedLibraryItems
 
     // merge state and actions onto controller
     Object.assign(this, nextState)
     Object.assign(this, actions)
 
-    if (currentBoundaryLayers !== nextState.boundaryLayers) {
+    const nextSelectedLibrary = this.dataItems && this.dataItems.service_layer && this.dataItems.service_layer.selectedLibraryItems
+    if ((currentBoundaryLayers !== nextState.boundaryLayers) ||
+      (currentSelectedLibrary !== nextSelectedLibrary)) {
       this.updateMapLayers()
     }
   }

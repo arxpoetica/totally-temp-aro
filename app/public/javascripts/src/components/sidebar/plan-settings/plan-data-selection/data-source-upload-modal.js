@@ -1,16 +1,17 @@
+import PlanActions from '../../../../react/components/plan/plan-actions'
+
 class DataSourceUploadController {
-  constructor ($http, $timeout, state, aclManager) {
+  constructor ($http, $timeout, $ngRedux, state) {
     this.state = state
     this.$http = $http
     this.$timeout = $timeout
-    this.aclManager = aclManager
     this.conicTileSystemUploaderApi = null // Will be set if the conic tile uploader is active
     this.editingDataset = {
       name: ''
     }
     this.isUpLoad = false
     this.isUpLoading = false
-    //this.dataSourceMeta = {} // Metadata for a data source (e.g. isLoading)
+    this.datasourceName = ''
 
     this.saCreationTypes = [
       { id: 'upload_file', label: 'Upload From File' },
@@ -70,15 +71,15 @@ class DataSourceUploadController {
           $('#data_source_upload_modal input[type=file]').get(0).value = ''
           $('#data_source_upload_modal input[type=text]').get(0).value = ''
 
-          form = $('#data_source_upload_modal form').get(0)
+          // form = $('#data_source_upload_modal form').get(0)
+          form = $('#data_source_upload_modal_form').get(0)
         }
       }, 0)
     })
     
     // ---
-    
     this.tableSource = this.uploadSource = this.state.uploadDataSource
-    this.tableSources = this.uploadSources = this.state.uploadDataSources
+    this.tableSources = angular.copy(this.uploadDataSources)
     this.rootSourceDescs = {}
     
     this.rows = []
@@ -124,13 +125,13 @@ class DataSourceUploadController {
         }
       }
     ]
-    
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }
-  
+
   canEdit (row) {
     return this.state.loggedInUser.hasPermissions(this.state.authPermissionsByName['RESOURCE_ADMIN'].permissions, row.permissions)
   }
-  
+
   close () {
     this.state.showDataSourceUploadModal.next(false)
     this.isDataManagementView = false
@@ -139,9 +140,8 @@ class DataSourceUploadController {
   modalShown () {
     this.state.showDataSourceUploadModal.next(true)
     
-    this.tableSource = this.uploadSource = this.state.uploadDataSource
-    this.uploadSources = this.state.uploadDataSources
-    this.tableSources = [{'label':'all', 'name':'all'}].concat( this.state.uploadDataSources )
+    this.tableSource = this.uploadSource = this.state.uploadDataSource = this.uploadDataSources[0]
+    this.tableSources = [{'label':'all', 'name':'all'}].concat( this.uploadDataSources )
     // some of the sources are alaises for others (construction_location for location)
     // and we want to avoid duplications 
     this.rootSourceDescs = {}
@@ -192,7 +192,7 @@ class DataSourceUploadController {
           this.close()
           this.addDatasource(result)
           // Put the application in "Edit Service Layer" mode
-          this.state.dataItems.service_layer.selectedLibraryItems[0] = result
+          this.selectDataItems('service_layer', [result])
           this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
           this.state.activeViewModePanel = this.state.viewModePanels.EDIT_SERVICE_LAYER
           this.state.loadServiceLayers()
@@ -281,7 +281,7 @@ class DataSourceUploadController {
 
     return this.$http(boundaryOptions)
       .then((e) => {
-        this.state.dataItems['service_layer'].allLibraryItems.push(e.data.serviceLayerLibrary)
+        this.setAllLibraryItems('service_layer', this.dataItems['service_layer'].allLibraryItems.concat(e.data.serviceLayerLibrary))
         this.isUpLoad = false
         this.close()
       })
@@ -331,7 +331,7 @@ class DataSourceUploadController {
   deleteDatasource (dataSource) {
     this.$http.delete(`/service/v1/library-entry/${dataSource.identifier}`)
       .then(() => {
-        this.state.dataItems[dataSource.dataType].allLibraryItems = this.state.dataItems[dataSource.dataType].allLibraryItems.filter(item => item.identifier !== dataSource.identifier)
+        this.setAllLibraryItems(dataSource.dataType, this.dataItems[dataSource.dataType].allLibraryItems.filter(item => item.identifier !== dataSource.identifier))
         this.loadDataSources()
         this.$timeout()
       })
@@ -366,23 +366,23 @@ class DataSourceUploadController {
       })
     })
   }
-  
+
   addDatasource (data) {
-    this.state.dataItems[data.dataType].allLibraryItems.push(data)
+    this.setAllLibraryItems(data.dataType, this.dataItems[data.dataType].allLibraryItems.concat(data))
   }
-  
+
   loadDataSources () {
     if (!this.tableSource) {
       return // When items in state.js are being refreshed, state.uploadDataSource may be null as the combobox has a two-way binding to the model.
     }
     if (this.isDataManagementView) {
       this.rows = []
-      
-      this.state.uploadDataSources.forEach((uploadSource) => {
-        if (('all' == this.tableSource.name && !uploadSource.proxyFor) || uploadSource.name == this.tableSource.name){
-          this.state.dataItems[uploadSource.name].allLibraryItems.forEach((item, index) => {
+
+      this.uploadDataSources.forEach((uploadSource) => {
+        if (('all' == this.tableSource.name && !uploadSource.proxyFor) || uploadSource.name === this.tableSource.name) {
+          this.dataItems[uploadSource.name].allLibraryItems.forEach((item, index) => {
             item.id = item.identifier // we need to standardize ID property names
-            if ('all' == this.tableSource.name && this.rootSourceDescs.hasOwnProperty(item.dataType)){
+            if ('all' == this.tableSource.name && this.rootSourceDescs.hasOwnProperty(item.dataType)) {
               item.dataType = this.rootSourceDescs[item.dataType]
             }
             this.rows.push(item)
@@ -397,9 +397,27 @@ class DataSourceUploadController {
     this.isDataManagementView = !this.isDataManagementView
     this.loadDataSources()
   }
+
+  mapStateToThis (reduxState) {
+    return {
+      dataItems: reduxState.plan.dataItems,
+      uploadDataSources: reduxState.plan.uploadDataSources
+    }
+  }
+
+  mapDispatchToTarget (dispatch) {
+    return {
+      selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems)),
+      setAllLibraryItems: (dataItemKey, allLibraryItems) => dispatch(PlanActions.setAllLibraryItems(dataItemKey, allLibraryItems))
+    }
+  }
+
+  $onDestroy () {
+    this.unsubscribeRedux()
+  }
 }
 
-DataSourceUploadController.$inject = ['$http', '$timeout', 'state', 'aclManager']
+DataSourceUploadController.$inject = ['$http', '$timeout', '$ngRedux', 'state']
 
 let globalDataSourceUploadModal = {
   templateUrl: '/components/sidebar/plan-settings/plan-data-selection/data-source-upload-modal.html',

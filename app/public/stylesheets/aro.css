@@ -635,7 +635,22 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
   color: #c0c0c0;
 }
 
-.checkboxfill{
+.aro-faux-anchor {
+  cursor: pointer;
+  color: #007bff;
+  text-decoration: none;
+}
+
+.aro-faux-anchor:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+.aro-pointer {
+  cursor: pointer;
+}
+
+.checkboxfill {
     -webkit-appearance: initial;
     width: 18px;
     height: 18px;
@@ -796,7 +811,6 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
   font-weight: 700;
   background-color: #eee;
   border: solid 1px #ccc;
-  border-bottom: none;
 }
 
 .sidebar-table {

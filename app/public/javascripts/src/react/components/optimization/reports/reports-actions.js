@@ -1,4 +1,5 @@
-/* globals */
+/* globals Blob */
+import { saveAs } from 'file-saver'
 import Actions from '../../../common/actions'
 import AroHttp from '../../../common/aro-http'
 
@@ -6,12 +7,47 @@ function loadReportsMetaData () {
   return dispatch => {
     AroHttp.get('/service/v2/installed/report/meta-data')
       .then(result => {
+        var reportsMetaData = result.data
+        reportsMetaData.forEach(reportMetaData => { reportMetaData.isDownloading = false }) // Set a flag that shows whether the report is downloading
+        reportsMetaData.sort((a, b) => (a.displayName > b.displayName) ? 1 : -1) // Sort reports by display name
         dispatch({
           type: Actions.OPTIMIZATION_REPORTS_SET_REPORTS_METADATA,
-          payload: result.data
+          payload: reportsMetaData
         })
       })
       .catch(err => console.error(err))
+  }
+}
+
+function setIsDownloadingReport (index, isDownloading) {
+  return {
+    type: Actions.OPTIMIZATION_REPORTS_SET_IS_DOWNLOADING,
+    payload: {
+      index: index,
+      isDownloading: isDownloading
+    }
+  }
+}
+
+function downloadReport (reportId, reportFormat, planId) {
+  return (dispatch, getState) => {
+    const report = getState().optimization.report.reportsMetaData.filter(report => report.id === reportId)[0]
+    const reportIndex = getState().optimization.report.reportsMetaData.findIndex(report => report.id === reportId)
+    // "(new Date()).toISOString().split('T')[0]" will give "YYYY-MM-DD"
+    // Note that we are doing (new Date(Date.now())) so that we can have deterministic tests (by replacing the Date.now() function when testing)
+    const downloadFileName = `${(new Date(Date.now())).toISOString().split('T')[0]}_${report.name}.${reportFormat}`
+    const reportUrl = `/service-download-file/${downloadFileName}/v2/report-extended/${report.id}/${planId}.${reportFormat}`
+
+    dispatch(setIsDownloadingReport(reportIndex, true))
+    AroHttp.get(reportUrl, true)
+      .then(rawResult => {
+        saveAs(new Blob([rawResult]), downloadFileName)
+        dispatch(setIsDownloadingReport(reportIndex, false))
+      })
+      .catch(err => {
+        console.error(err)
+        dispatch(setIsDownloadingReport(reportIndex, false))
+      })
   }
 }
 
@@ -29,7 +65,8 @@ function showOrHideReportModal (showReportModal) {
 }
 
 export default {
-  clearOutput: clearOutput,
-  loadReportsMetaData: loadReportsMetaData,
-  showOrHideReportModal: showOrHideReportModal
+  loadReportsMetaData,
+  clearOutput,
+  showOrHideReportModal,
+  downloadReport
 }

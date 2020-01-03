@@ -1,13 +1,18 @@
+import { createSelector } from 'reselect'
+import AroFeatureFactory from '../../service-typegen/dist/AroFeatureFactory'
+import TrackedEquipment from '../../service-typegen/dist/TrackedEquipment'
+import EquipmentComponent from '../../service-typegen/dist/EquipmentComponent'
+import EquipmentFeature from '../../service-typegen/dist/EquipmentFeature'
+import EquipmentBoundaryFeature from '../../service-typegen/dist/EquipmentBoundaryFeature'
+import CoverageActions from '../../react/components/coverage/coverage-actions'
 
 class BoundaryCoverageController {
-  constructor ($timeout, $http, $element, state, Utils) {
+  constructor ($timeout, $http, $element, $ngRedux, state, Utils) {
     this.$timeout = $timeout
     this.$http = $http
     this.$element = $element
     this.state = state
     this.utils = Utils
-
-    this.boundaryCoverageById = {}
 
     this.isWorking = false
     this.isChartInit = false
@@ -56,19 +61,23 @@ class BoundaryCoverageController {
         data: []
       }
     }
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
   }
 
   $onChanges (changesObj) {
-    if (changesObj.hasOwnProperty('parentSelectedObjectId')) {
-      if (this.isChartInit) this.showCoverageChart()
+    if (changesObj.selectedBoundaryCoverage) {
+      this.showCoverageChart()
     }
-    if (changesObj.hasOwnProperty('boundsInput')) {
-      var newBoundsInput = changesObj.boundsInput.currentValue
-      // this.feature = newBoundsInput.feature
-      if (newBoundsInput.feature && newBoundsInput.feature.hasOwnProperty('objectId') && (newBoundsInput.forceUpdate || !this.boundaryCoverageById.hasOwnProperty(newBoundsInput.feature.objectId))) {
-        this.digestBoundaryCoverage(newBoundsInput.feature.objectId, newBoundsInput.data)
-      }
+  }
+
+  $onInit () {
+    if (this.selectedBoundaryCoverage) {
+      this.showCoverageChart()
     }
+  }
+
+  $onDestroy () {
+    this.unsubscribeRedux()
   }
 
   makeCoverageLocationData () {
@@ -79,20 +88,24 @@ class BoundaryCoverageController {
     }
   }
 
-  digestBoundaryCoverage (objectId, boundaryData) {
+  digestBoundaryCoverage () {
     var boundsCoverage = {
       totalLocations: 0,
       tagCounts: {},
       locations: {}
     }
 
+    if (!this.selectedBoundaryCoverage) {
+      return boundsCoverage
+    }
+
     var baseCBCount = {}
-    for (const locationType in boundaryData.coverageInfo) {
+    for (const locationType in this.selectedBoundaryCoverage.coverageInfo) {
       baseCBCount[locationType] = 0
     }
 
-    for (const locationType in boundaryData.coverageInfo) {
-      var locData = boundaryData.coverageInfo[locationType]
+    for (const locationType in this.selectedBoundaryCoverage.coverageInfo) {
+      var locData = this.selectedBoundaryCoverage.coverageInfo[locationType]
       var locCoverage = this.makeCoverageLocationData()
       locCoverage.locationType = locationType
       // locCoverage.totalCount = locData.length // entityCount
@@ -138,11 +151,6 @@ class BoundaryCoverageController {
 
         var dist = location.distance
         var barIndex = Math.floor(dist / 1000)
-        /*
-        if (barIndex >= locCoverage.barChartData.length || typeof locCoverage.barChartData[barIndex] === 'undefined') {
-          locCoverage.barChartData[barIndex] = 0
-        }
-        */
         if (barIndex >= locCoverage.barChartData.length) {
           var prevLen = locCoverage.barChartData.length
           locCoverage.barChartData[barIndex] = 0
@@ -157,8 +165,7 @@ class BoundaryCoverageController {
       boundsCoverage.locations[locationType] = locCoverage
     }
 
-    this.boundaryCoverageById[objectId] = boundsCoverage
-    if (this.isChartInit) this.showCoverageChart()
+    return boundsCoverage
   }
 
   // ToDo: very similar to the code in tile-data-service.js
@@ -176,12 +183,6 @@ class BoundaryCoverageController {
   }
 
   showCoverageChart () {
-    // ToDo: check for previous chart
-    // var objectId = this.feature.objectId
-    var objectId = this.parentSelectedObjectId
-
-    if (!this.boundaryCoverageById.hasOwnProperty(this.parentSelectedObjectId)) return
-
     if (this.coverageChart) {
       this.coverageChart.destroy()
       this.coverageChart = null
@@ -193,10 +194,11 @@ class BoundaryCoverageController {
     var ctx = ele.getContext('2d')
 
     // a dataset for each location type
+    this.computedCoverage = this.digestBoundaryCoverage()
     var datasets = []
     var colCount = 0
-    for (const locationType in this.boundaryCoverageById[objectId].locations) {
-      var locCoverage = this.boundaryCoverageById[objectId].locations[locationType]
+    for (const locationType in this.computedCoverage.locations) {
+      var locCoverage = this.computedCoverage.locations[locationType]
       if (locCoverage.barChartData.length > colCount) colCount = locCoverage.barChartData.length
 
       var locDataset = {}
@@ -213,7 +215,7 @@ class BoundaryCoverageController {
     
     var i = 0
     // move unreachable col to end
-    for (i=0; i<datasets.length; i++){
+    for (i=0; i<datasets.length; i++) {
       var prevLen = datasets[i].data.length
       // prevLen should be <= colCount or something has gone wrong
       datasets[i].data[colCount] = datasets[i].data[0]
@@ -275,16 +277,33 @@ class BoundaryCoverageController {
     if (typeof obj === 'undefined') obj = {}
     return Object.keys(obj)
   }
+
+  mapStateToThis (reduxState) {
+    return {
+      transactionFeatures: reduxState.planEditor.features,
+      selectedFeatures: reduxState.selection.planEditorFeatures,
+    }
+  }
+
+  mapDispatchToTarget (dispatch) {
+    return {
+      modifyBoundary: (transactionId, boundary) => dispatch(PlanEditorActions.modifyFeature('equipment_boundary', transactionId, boundary))
+    }
+  }
+
+  mergeToTarget (nextState, actions) {
+    // merge state and actions onto controller
+    Object.assign(this, nextState)
+    Object.assign(this, actions)
+  }
 }
 
-BoundaryCoverageController.$inject = ['$timeout', '$http', '$element', 'state', 'Utils']
+BoundaryCoverageController.$inject = ['$timeout', '$http', '$element', '$ngRedux', 'state', 'Utils']
 
 let boundaryCoverage = {
   templateUrl: '/components/common/boundary-coverage.html',
   bindings: {
-    boundsInput: '<',
-    parentSelectedObjectId: '<',
-    isWorkingOverride: '<'
+    selectedBoundaryCoverage: '<'
   },
   controller: BoundaryCoverageController
 }

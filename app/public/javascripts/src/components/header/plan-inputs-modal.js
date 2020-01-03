@@ -1,8 +1,9 @@
 class PlanInputsModalController {
-  constructor (state, $element, $http) {
+  constructor (state, $element, $http, $ngRedux) {
     this.state = state
     this.$element = $element
     this.$http = $http
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }
 
   $onInit () {
@@ -147,9 +148,23 @@ class PlanInputsModalController {
   clearParentPlan () {
     this.parentPlan = null
   }
+
+  mapStateToThis (reduxState) {
+    return {
+      dataItems: reduxState.plan.dataItems
+    }
+  }
+
+  mapDispatchToTarget (dispatch) {
+    return { }
+  }
+
+  $onDestroy () {
+    this.unsubscribeRedux()
+  }
 }
 
-PlanInputsModalController.$inject = ['state', '$element', '$http']
+PlanInputsModalController.$inject = ['state', '$element', '$http', '$ngRedux']
 
 let planInputsModal = {
   templateUrl: '/components/header/plan-inputs-modal.html',

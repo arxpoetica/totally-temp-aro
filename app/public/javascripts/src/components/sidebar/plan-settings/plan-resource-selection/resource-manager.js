@@ -77,7 +77,7 @@ class ResourceManagerController {
         iconClass: 'fa-trash-alt',
         toolTip: 'Delete',
         isEnabled: (row, index) => {
-          return this.canEdit(row)
+          return this.canAdmin(row)
         },
         callBack: (row, index) => {
           this.deleteSelectedResourceManager(row)
@@ -88,6 +88,10 @@ class ResourceManagerController {
   }
   
   canEdit (row) {
+    return this.state.loggedInUser.hasPermissions(this.state.authPermissionsByName['RESOURCE_WRITE'].permissions, row.permissions)
+  }
+
+  canAdmin (row) {
     return this.state.loggedInUser.hasPermissions(this.state.authPermissionsByName['RESOURCE_ADMIN'].permissions, row.permissions)
   }
   

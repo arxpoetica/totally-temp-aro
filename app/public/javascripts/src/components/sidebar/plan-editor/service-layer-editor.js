@@ -1,7 +1,7 @@
 import Constants from '../../common/constants'
 
 class ServiceLayerEditorController {
-  constructor ($http, $timeout, state, Utils, tileDataService) {
+  constructor ($http, $timeout, $ngRedux, state, Utils, tileDataService) {
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
@@ -17,6 +17,7 @@ class ServiceLayerEditorController {
 
     this.objectIdToMapObject = {}
     this.selectedMapObject = null
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }
 
   $onInit () {
@@ -108,17 +109,17 @@ class ServiceLayerEditorController {
   resumeOrCreateTransaction () {
     this.currentTransaction = null
     // See if we have an existing transaction for the currently selected location library
-    var selectedLibraryItem = this.state.dataItems.service_layer.selectedLibraryItems[0]
+    var selectedLibraryItemId = this.dataItems.service_layer.selectedLibraryItems[0].identifier
     this.$http.get(`/service/library/transaction`)
       .then((result) => {
-        var existingTransactions = result.data.filter((item) => item.libraryId === selectedLibraryItem.identifier)
+        var existingTransactions = result.data.filter((item) => item.libraryId === selectedLibraryItemId)
         if (existingTransactions.length > 0) {
           // We have an existing transaction for this library item. Use it.
           return Promise.resolve({ data: existingTransactions[0] })
         } else {
           // Create a new transaction and return it
           return this.$http.post('/service/library/transaction', {
-            libraryId: selectedLibraryItem.identifier,
+            libraryId: selectedLibraryItemId,
             userId: this.state.loggedInUser.id
           })
         }
@@ -146,6 +147,7 @@ class ServiceLayerEditorController {
         return this.state.loadModifiedFeatures(this.state.plan.id)
       })
       .then(() => this.resumeOrCreateTransaction())
+      .then(() => this.state.recreateTilesAndCache())
       .catch((err) => {
         this.discardChanges = true
         this.currentTransaction = null
@@ -216,9 +218,23 @@ class ServiceLayerEditorController {
         .catch((err) => console.error(err))
     }
   }
+
+  mapStateToThis (reduxState) {
+    return {
+      dataItems: reduxState.plan.dataItems
+    }
+  }
+
+  mapDispatchToTarget (dispatch) {
+    return { }
+  }
+
+  $onDestroy () {
+    this.unsubscribeRedux()
+  }
 }
 
-ServiceLayerEditorController.$inject = ['$http', '$timeout', 'state', 'Utils', 'tileDataService']
+ServiceLayerEditorController.$inject = ['$http', '$timeout', '$ngRedux', 'state', 'Utils', 'tileDataService']
 
 let serviceLayerEditor = {
   templateUrl: '/components/sidebar/plan-editor/service-layer-editor.html',

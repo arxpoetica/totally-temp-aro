@@ -3,61 +3,45 @@ const Sockets = require('./sockets')
 const MessageQueueManager = require('./message-queue-manager')
 const Consumer = require('./consumer')
 const config = helpers.config
-const VECTOR_TILE_DATA_MESSAGE = 'VECTOR_TILE_DATA'
-const VECTOR_TILE_EXCHANGE = 'aro_vt'
-const VECTOR_TILE_QUEUE = 'vectorTileQueue'
-const TILE_INVALIDATION_MESSAGE = 'TILES_INVALIDATED'
-const TILE_INVALIDATION_EXCHANGE = 'tile_invalidation'
-const TILE_INVALIDATION_QUEUE = 'tileInvalidationQueue'
-const PROGRESS_MESSAGE = 'PROGRESS_MESSAGE_DATA'
-const PROGRESS_EXCHANGE = 'aro_progress'
-const PROGRESS_QUEUE = 'progressQueue'
+const socketConfig = Object.freeze({
+  vectorTile: {
+    message: 'VECTOR_TILE_DATA',
+    exchange: 'aro_vt',
+    queue: 'vectorTile'
+  },
+  invalidation: {
+    message: 'TILES_INVALIDATED',
+    exchange: 'tile_invalidation',
+    queue: 'tileInvalidation'
+  },
+  progress: {
+    message: 'PROGRESS_MESSAGE_DATA',
+    exchange: 'aro_progress',
+    queue: 'progress'
+  },
+  plan: {
+    exchange: 'plan_event',
+    queue: 'planEvent'
+  },
+  library: {
+    exchange: 'library_event',
+    queue: 'libraryEvent'
+  }
+})
 
 class SocketManager {
   constructor (app) {
     this.vectorTileRequestToRoom = {}
     this.sockets = new Sockets(app)
-    this.setupPerClientSocket()
-    this.setupPerPlanSocket()
 
     // Set up a message queue manager to get messages from ARO-Service
     const messageQueueManager = new MessageQueueManager(config.rabbitmq.server, config.rabbitmq.username, config.rabbitmq.password)
     messageQueueManager.addConsumer(this.getVectorTileConsumer())
     messageQueueManager.addConsumer(this.getTileInvalidationConsumer())
     messageQueueManager.addConsumer(this.getOptimizationProgressConsumer())
+    messageQueueManager.addConsumer(this.getPlanEventConsumer())
+    messageQueueManager.addConsumer(this.getLibraryEventConsumer())
     messageQueueManager.connectToPublisher()
-  }
-
-  // Set up the per-client socket namespace. Each client connected to the server will register with this namespace.
-  setupPerClientSocket () {
-    this.sockets.clients.on('connection', (socket) => {
-      console.log(`Connected socket with session id ${socket.client.id}`)
-
-      socket.on('SOCKET_JOIN_ROOM', (roomId) => {
-        console.log(`Joining socket room: /${roomId}`)
-        socket.join(`/${roomId}`)
-      })
-      socket.on('SOCKET_LEAVE_ROOM', (roomId) => {
-        console.log(`Leaving socket room: /${roomId}`)
-        socket.leave(`/${roomId}`)
-      })
-    })
-  }
-
-  // Set up the per-plan socket namespace. Each client connected to the server will register with this namespace.
-  setupPerPlanSocket () {
-    this.sockets.plans.on('connection', (socket) => {
-      console.log(`Connected socket with session id ${socket.client.id}`)
-
-      socket.on('SOCKET_JOIN_PLAN_ROOM', (roomId) => {
-        console.log(`Joining socket plan room: /${roomId}`)
-        socket.join(`/${roomId}`)
-      })
-      socket.on('SOCKET_LEAVE_PLAN_ROOM', (roomId) => {
-        console.log(`Leaving socket plan room: /${roomId}`)
-        socket.leave(`/${roomId}`)
-      })
-    })
   }
 
   // Set up a connection to the aro-service RabbitMQ server for getting vector tile data. This function is also
@@ -72,10 +56,11 @@ class SocketManager {
       } else {
         console.log(`Vector Tile Socket: Routing message with UUID ${uuid} to /${clientId}`)
         delete self.vectorTileRequestToRoom[uuid]
-        self.sockets.clients.to(`/${clientId}`).emit('message', { type: VECTOR_TILE_DATA_MESSAGE, data: msg })
+        msg.properties.headers.eventType = socketConfig.vectorTile.message
+        self.sockets.emitToClient(clientId, msg)
       }
     }
-    return new Consumer(VECTOR_TILE_QUEUE, VECTOR_TILE_EXCHANGE, messageHandler)
+    return new Consumer(socketConfig.vectorTile.queue, socketConfig.vectorTile.exchange, messageHandler)
   }
 
   // Map a vector tile request UUID to a client ID.
@@ -90,12 +75,10 @@ class SocketManager {
     const messageHandler = msg => {
       console.log('Received tile invalidation message from service')
       console.log(msg.content.toString())
-      self.sockets.tileInvalidation.emit('message', {
-        type: TILE_INVALIDATION_MESSAGE,
-        payload: JSON.parse(msg.content.toString())
-      })
+      msg.properties.headers.eventType = socketConfig.invalidation.message
+      self.sockets.sockets.tileInvalidation.emit('message', msg)
     }
-    return new Consumer(TILE_INVALIDATION_QUEUE, TILE_INVALIDATION_EXCHANGE, messageHandler)
+    return new Consumer(socketConfig.invalidation.queue, socketConfig.invalidation.exchange, messageHandler)
   }
 
   getOptimizationProgressConsumer () {
@@ -106,20 +89,38 @@ class SocketManager {
       if (!processId) {
         console.error(`ERROR: No socket roomId found for processId ${processId}`)
       } else {
-        console.log(`Optimization Progress Socket: Routing message with UUID ${processId} to /${processId}`)
-        var data = JSON.parse(msg.content.toString())
+        console.log(`Optimization Progress Socket: Routing message with UUID ${processId} to plan/${processId}`)
+        console.log(`SOCKET EMIT plan:${processId}, payload: ${JSON.stringify(msg)}`)
+        msg.properties.headers.eventType = socketConfig.progress.message
         // UI dependent on optimizationState at so many places TODO: need to remove optimizationstate
-        data.progress = (data.jobsCompleted + 1) / (data.totalJobs + 1)
-        data.optimizationState = data.progress != 1 ? 'STARTED' : 'COMPLETED'
-        self.sockets.plans.to(`/${processId}`).emit('message', { type: PROGRESS_MESSAGE, data: data })
+        msg.data = JSON.parse(msg.content.toString()) // Shove it in here for now. Its in too many places in the front end.
+        msg.data.progress = (msg.data.jobsCompleted + 1) / (msg.data.totalJobs + 1)
+        msg.data.optimizationState = msg.data.progress !== 1 ? 'STARTED' : 'COMPLETED'
+        self.sockets.emitToPlan(processId, msg)
       }
     }
-    return new Consumer(PROGRESS_QUEUE, PROGRESS_EXCHANGE, messageHandler)
+    return new Consumer(socketConfig.progress.queue, socketConfig.progress.exchange, messageHandler)
+  }
+
+  getPlanEventConsumer () {
+    const self = this
+    const messageHandler = msg => {
+      self.sockets.emitToPlan(msg.properties.headers.planId, msg)
+    }
+    return new Consumer(socketConfig.plan.queue, socketConfig.plan.exchange, messageHandler)
+  }
+
+  getLibraryEventConsumer () {
+    const self = this
+    const messageHandler = msg => {
+      self.sockets.emitToLibrary(msg.properties.headers.libraryId, msg)
+    }
+    return new Consumer(socketConfig.library.queue, socketConfig.library.exchange, messageHandler)
   }
 
   broadcastMessage (msg) {
     // Sending to all clients in namespace 'broadcast', including sender
-    this.sockets.broadcast.emit('message', {
+    this.sockets.emitToAll({
       type: 'NOTIFICATION_SHOW',
       payload: msg
     })

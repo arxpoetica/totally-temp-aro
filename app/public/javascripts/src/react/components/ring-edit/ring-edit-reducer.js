@@ -1,4 +1,6 @@
 import Actions from '../../common/actions'
+import AroNetworkConstraints from '../../../shared-utils/aro-network-constraints'
+import ConnectivityDefinition from '../common/optimization-options/connectivity-definition'
 import RingStatusTypes from './constants'
 
 const defaultState = {
@@ -8,7 +10,9 @@ const defaultState = {
     status: RingStatusTypes.START_STATE,
     progress: 0,
     report: null
-  }
+  },
+  aroNetworkConstraints: AroNetworkConstraints(),
+  connectivityDefinition: ConnectivityDefinition()
 }
 
 function setAnalysisStatus (state, status) {
@@ -71,24 +75,42 @@ function updateRing (state, ring) {
   }
 }
 
+function setRingOptionsConnectivity (state, spatialEdgeType, networkConnectivityType) {
+  return { ...state,
+    connectivityDefinition: { ...state.connectivityDefinition,
+      [spatialEdgeType]: networkConnectivityType
+    }
+  }
+}
+
 function ringEditReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.RING_SET_ANALYSIS_STATUS:
       return setAnalysisStatus(state, action.payload)
+
     case Actions.RING_SET_ANALYSIS_PROGRESS:
       return setAnalysisProgress(state, action.payload)
+
     case Actions.RING_SET_ANALYSIS_REPORT:
       return setAnalysisReport(state, action.payload)
+
     case Actions.RING_SET_SELECTED_RING_ID:
       return setSelectedRingId(state, action.payload)
+
     case Actions.RING_ADD_RINGS:
       return addRings(state, action.payload)
+
     case Actions.RING_REMOVE_RING:
       return removeRing(state, action.payload)
+
     case Actions.RING_REMOVE_ALL_RINGS:
       return removeAllRings(state)
+
     case Actions.RING_UPDATE_RING:
       return updateRing(state, action.payload)
+
+    case Actions.RING_OPTIONS_SET_CONNECTIVITY:
+      return setRingOptionsConnectivity(state, action.payload.spatialEdgeType, action.payload.networkConnectivityType)
 
     default:
       return state

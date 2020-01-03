@@ -10,14 +10,14 @@ export default class TransactionManager {
   // 4. If we have a transaction for this plan and for this user, resume it
   static resumeOrCreateTransaction (planId, userId) {
     // Get a list of all open transactions in the system (Do NOT send in userId so we get transactions across all users)
-    return AroHttp.get(`/service/plan-transaction`)
+    return AroHttp.get(`/service/plan-transaction?plan_id=${planId}`)
       .then((result) => {
         const currentPlanId = planId
         const transactionsForPlan = result.data.filter((item) => item.planId === currentPlanId)
         const transactionsForUserAndPlan = transactionsForPlan.filter((item) => item.userId === userId)
         if (transactionsForPlan.length === 0) {
           // A transaction does not exist. Create it.
-          return AroHttp.post(`/service/plan-transactions`, { userId: userId, planId: currentPlanId })
+          return AroHttp.post(`/service/plan-transactions`, { planId: currentPlanId })
         } else if (transactionsForPlan > 1) {
           // We have multiple transactions for this plan. We should never get into this state, but can happen
           // due to race conditions, network issues, etc.
@@ -27,7 +27,7 @@ export default class TransactionManager {
           return Promise.resolve({ data: transactionsForUserAndPlan[0] }) // Using {data:} so that the signature is consistent
         } else if (transactionsForPlan.length === 1) {
           // We have one open transaction for this plan, but it was not started by this user. Ask the user what to do.
-          return TransactionManager.stealOrRejectTransaction(transactionsForPlan[0])
+          return TransactionManager.stealOrRejectTransaction(transactionsForPlan[0], planId, userId)
         }
       })
       .catch((err) => {
@@ -37,7 +37,7 @@ export default class TransactionManager {
       })
   }
 
-  static deleteBadTransactionsAndCreateNew (transactionsForPlan, currentPlanId, userId) {
+  static deleteBadTransactionsAndCreateNew (transactionsForPlan, currentPlanId) {
     // Sometimes we will get into a state where we have multiple open transactions for the same plan. Ask the
     // user whether they want to delete all and start a new transaction
     return new Promise((resolve, reject) => {
@@ -55,7 +55,7 @@ export default class TransactionManager {
           var deletePromises = []
           transactionsForPlan.forEach(transactionForPlan => deletePromises.push(AroHttp.delete(`/service/plan-transactions/transaction/${transactionForPlan.id}`)))
           Promise.all(deletePromises)
-            .then(res => AroHttp.post(`/service/plan-transactions`, { userId: userId, planId: currentPlanId }))
+            .then(res => AroHttp.post(`/service/plan-transactions`, { planId: currentPlanId }))
             .then(res => resolve(res))
             .catch(err => reject(err))
         } else {
@@ -67,7 +67,7 @@ export default class TransactionManager {
 
   // Ask the user if they want to "steal" and existing transaction from another user.
   // If yes, steal it. If not, throw a rejection
-  static stealOrRejectTransaction (transaction, planId, userId) {
+  static stealOrRejectTransaction (transaction, planId) {
     // Get the name of the current owner of the transaction
     return AroHttp.get(`/service/odata/userentity?$select=firstName,lastName&$filter=id eq ${transaction.userId}`)
       .then(result => {
@@ -89,7 +89,7 @@ export default class TransactionManager {
       })
       .then((stealTransaction) => {
         if (stealTransaction) {
-          return AroHttp.post(`/service/plan-transactions?force=true`, { planId: planId, userId: userId })
+          return AroHttp.post(`/service/plan-transactions?force=true`, { planId: planId })
         } else {
           return Promise.reject(new Error('User does not want to steal the transaction'))
         }
@@ -116,6 +116,8 @@ export default class TransactionManager {
               console.error(err)
               reject(err)
             })
+        } else {
+          reject(new Error(`The user does not want to discard the transaction`))
         }
       })
     })

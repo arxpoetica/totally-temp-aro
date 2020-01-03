@@ -1,6 +1,8 @@
 class RoicReportsLargeController {
   constructor (state, $timeout) {
     this.state = state
+    this.FIBER_STRINGS = this.state.enumStrings['com.altvil.aro.service.entity']['FiberType']
+    this.CABLE_CONSTRUCTION_STRINGS = this.state.enumStrings['com.altvil.interfaces']['CableConstructionEnum']
     this.$timeout = $timeout
     this.series = ['Series A', 'Series B']
     this.config = config // Ugh - A global from a time long ago!

@@ -3,7 +3,8 @@ export const MenuActionTypes = Object.freeze({
   SELECT: 'SELECT',
   VIEW: 'VIEW',
   EDIT: 'EDIT',
-  DELETE: 'DELETE'
+  DELETE: 'DELETE',
+  MERGE_LOCATION_CONNECTORS: 'MERGE_LOCATION_CONNECTORS'
 })
 
 export default class MenuAction {

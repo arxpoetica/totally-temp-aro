@@ -170,10 +170,20 @@ class TileDataService {
   }
 
   // Flattens all URLs and returns tile data that is a simple union of all features
-  getTileDataFlatten(mapLayer, zoom, tileX, tileY) {
+  getTileDataFlatten (mapLayer, zoom, tileX, tileY) {
     // We have multiple URLs where data is coming from, and we want a simple union of the results
     var promises = []
     mapLayer.tileDefinitions.forEach((tileDefinition) => promises.push(this.getTileDataSingleDefinition(tileDefinition, zoom, tileX, tileY)))
+
+    // Get all icons that can potentially be used for the filters
+    const v2Filters = mapLayer.v2Filters || []
+    const filterIconUrls = [...new Set(v2Filters.map(v2Filter => v2Filter.onPass.iconUrl))]
+    filterIconUrls.forEach(filterIconUrl => {
+      if (!this.getEntityImageForLayer(filterIconUrl)) {
+        this.addEntityImageForLayer(filterIconUrl, filterIconUrl)
+      }
+      promises.push(this.getEntityImageForLayer(filterIconUrl))
+    })
 
     // A promise that will return an Image from a URL
     var imagePromise = (url) => new Promise((resolve, reject) => {
@@ -213,10 +223,10 @@ class TileDataService {
     return Promise.all(promises)
       .then((results) => {
         var allFeatures = []
-        var numDataResults = results.length - (hasIcon + hasSelectedIcon + hasGreyedOutIcon + hasMDUIcon) // booleans are 0 or 1 so True + True = 2
+        var numDataResults = mapLayer.tileDefinitions.length
 
         for (var iResult = 0; iResult < numDataResults; ++iResult) {
-          var result = results[iResult]
+          var result = results.splice(0, 1)[0]
           var layerToFeatures = result
           Object.keys(layerToFeatures).forEach((layerKey) => {
             allFeatures = allFeatures.concat(layerToFeatures[layerKey])
@@ -228,24 +238,30 @@ class TileDataService {
           }
         }
 
+        tileData.v2FilterIcons = {}
+        for (iResult = 0; iResult < filterIconUrls.length; ++iResult) {
+          const iconResult = results.splice(0, 1)[0]
+          tileData.v2FilterIcons[filterIconUrls[iResult]] = iconResult
+        }
+
         if (hasIcon) {
-          tileData.icon = results[results.length - (hasIcon + hasSelectedIcon + hasGreyedOutIcon + hasMDUIcon)]
+          tileData.icon = results.splice(0, 1)[0]
         }
         if (hasSelectedIcon) {
-          tileData.selectedIcon = results[results.length - (hasIcon + hasGreyedOutIcon + hasMDUIcon)]
+          tileData.selectedIcon = results.splice(0, 1)[0]
         }
         if (hasGreyedOutIcon) {
-          tileData.greyOutIcon = results[results.length - (hasGreyedOutIcon + hasMDUIcon)]
+          tileData.greyOutIcon = results.splice(0, 1)[0]
         }
         if (hasMDUIcon) {
-          tileData.mduIcon = results[results.length - 1]
+          tileData.mduIcon = results.splice(0, 1)[0]
         }
         return Promise.resolve(tileData)
       })
   }
 
   // Returns aggregated results for a tile
-  getTileDataAggregated(mapLayer, zoom, tileX, tileY) {
+  getTileDataAggregated (mapLayer, zoom, tileX, tileY) {
     // We have multiple URLs where data is coming from. Return the aggregated result
     var promises = []
     mapLayer.tileDefinitions.forEach((tileDefinition) => promises.push(this.getTileDataSingleDefinition(tileDefinition, zoom, tileX, tileY)))
@@ -315,7 +331,7 @@ class TileDataService {
   }
 
   // Adds a layer key and url to the tile data service
-  addEntityImageForLayer(layerKey, imageUrl) {
+  addEntityImageForLayer (layerKey, imageUrl) {
     if (this.entityImageCache[layerKey]) {
       // This has already been added. Nothing to do.
       return
@@ -334,37 +350,33 @@ class TileDataService {
     this.entityImageCache[layerKey] = imageLoadedPromise
   }
 
-  // Returns a promise for the image associated with a layer key
-  getEntityImageForLayer(layerKey) {
-    var entityImagePromise = this.entityImageCache[layerKey]
-    if (!entityImagePromise) {
-      throw 'No promise for image with layerKey ' + layerKey
-    }
-    return entityImagePromise
+  // Returns a promise for the image associated with a layer key. Can return null
+  getEntityImageForLayer (layerKey) {
+    return this.entityImageCache[layerKey]
   }
 
   // Add a specified location ID to the set of features to be excluded from the render
-  addFeatureToExclude(featureId) {
+  addFeatureToExclude (featureId) {
     this.featuresToExclude.add(featureId)
   }
 
   // Add a specified location ID to the set of features to be excluded from the render
-  removeFeatureToExclude(featureId) {
+  removeFeatureToExclude (featureId) {
     this.featuresToExclude.delete(featureId)
   }
 
   // Add a modified feature to the set of modified features
-  addModifiedFeature(feature) {
+  addModifiedFeature (feature) {
     this.modifiedFeatures[feature.objectId] = feature
   }
 
   // Add a modified boundary to the set of modified features
-  addModifiedBoundary(feature) {
+  addModifiedBoundary (feature) {
     this.modifiedBoundaries[feature.objectId] = feature
   }
 
   // Clear the entire tile data cache
-  clearDataCache() {
+  clearDataCache () {
     this.tileDataCache = {}
     this.tileProviderCache = {}
     this.featuresToExclude = new Set()
@@ -372,7 +384,7 @@ class TileDataService {
     this.modifiedBoundaries = {}
   }
 
-  _clearCacheInTileBox (cache, setOfInvalidatedLayers, tileBox) {
+  _clearCacheInTileBox (cache, regexes, tileBox) {
     Object.keys(cache).forEach(cacheKey => {
       // Get the zoom, x and y from the html cache key
       const components = cacheKey.split('-')
@@ -383,7 +395,7 @@ class TileDataService {
         // Delete all invalidated layers
         const tileCache = cache[cacheKey]
         Object.keys(tileCache).forEach(tileCacheKey => {
-          if (setOfInvalidatedLayers.has(tileCacheKey)) {
+          if (this.doesNamePassAnyRegex(tileCacheKey, regexes)) {
             delete tileCache[tileCacheKey]
           }
         })
@@ -391,14 +403,14 @@ class TileDataService {
     })
   }
 
-  clearCacheInTileBox (invalidatedLayersArray, tileBox) {
-    const invalidatedLayers = new Set(invalidatedLayersArray)
-    this._clearCacheInTileBox(this.tileDataCache, invalidatedLayers, tileBox)
-    this._clearCacheInTileBox(this.tileProviderCache, invalidatedLayers, tileBox)
+  clearCacheInTileBox (layerNameRegexStrings, tileBox) {
+    const regexes = layerNameRegexStrings.map(layerNameRegexString => new RegExp(layerNameRegexString))
+    this._clearCacheInTileBox(this.tileDataCache, regexes, tileBox)
+    this._clearCacheInTileBox(this.tileProviderCache, regexes, tileBox)
   }
 
-  displayInvalidatedTiles (layerNames, tileBox) {
-    const setOfLayerNames = new Set(layerNames)
+  displayInvalidatedTiles (layerNameRegexStrings, tileBox) {
+    const regexes = layerNameRegexStrings.map(layerNameRegexString => new RegExp(layerNameRegexString))
     Object.keys(this.tileHtmlCache).forEach(htmlCacheKey => {
       // Get the zoom, x and y from the html cache key
       const components = htmlCacheKey.split('-')
@@ -411,7 +423,7 @@ class TileDataService {
         const tileData = this.tileDataCache[tileDataKey]
         var hasInvalidatedLayer = false
         Object.keys(tileData).forEach(key => {
-          if (setOfLayerNames.has(key)) {
+          if (this.doesNamePassAnyRegex(key, regexes)) {
             hasInvalidatedLayer = true
           }
         })
@@ -422,6 +434,18 @@ class TileDataService {
         }
       }
     })
+  }
+
+  // Returns true if the layer name passes any of the regex strings in the list
+  doesNamePassAnyRegex (layerName, regexes) {
+    var regexPassed = false
+    for (var iRegex = 0; iRegex < regexes.length; ++iRegex) {
+      if (regexes[iRegex].test(layerName)) {
+        regexPassed = true
+        break
+      }
+    }
+    return regexPassed
   }
 
   // Mark all tiles in the HTML cache as dirty

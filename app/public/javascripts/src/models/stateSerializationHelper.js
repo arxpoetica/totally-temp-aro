@@ -11,7 +11,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   // ------------------------------------------------------------------------------------------------------------------
 
   // Get a POST body that we will send to aro-service for performing optimization
-  stateSerializationHelper.getOptimizationBody = (state, reduxState) => {
+  stateSerializationHelper.getOptimizationBody = (state, networkAnalysisConstraints, primarySpatialEdge, wormholeFuseDefinitions, projectNetworkConfiguration, reduxState) => {
     var optimizationBody = {
       planId: state.plan.id,
       projectTemplateId: state.loggedInUser.projectId,
@@ -19,13 +19,14 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     }
 
     addLocationTypesToBody(state, reduxState, optimizationBody)
-    addDataSelectionsToBody(state, optimizationBody)
+    addDataSelectionsToBody(state, reduxState.plan.dataItems, optimizationBody)
     addAlgorithmParametersToBody(state, optimizationBody)
     addFiberNetworkConstraintsToBody(state, optimizationBody)
     optimizationBody.generatedDataRequest = state.optimizationOptions.generatedDataRequest
     optimizationBody.fronthaulOptimization = state.optimizationOptions.fronthaulOptimization
 
     addNetworkAnalysisType(state, optimizationBody)
+    addNetworkConfigurationOverride(state, networkAnalysisConstraints, primarySpatialEdge, wormholeFuseDefinitions, projectNetworkConfiguration, optimizationBody)
 
     return optimizationBody
   }
@@ -65,13 +66,13 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   }
 
   // Add selected plan settings -> Data Selection to a POST body that we will send to aro-service for performing optimization
-  var addDataSelectionsToBody = (state, postBody) => {
+  var addDataSelectionsToBody = (state, dataItems, postBody) => {
     if (!postBody.overridenConfiguration) {
       postBody.overridenConfiguration = []
     }
 
-    Object.keys(state.dataItems).forEach((dataItemKey) => {
-      var dataItem = state.dataItems[dataItemKey]
+    Object.keys(dataItems).forEach((dataItemKey) => {
+      var dataItem = dataItems[dataItemKey]
       var libraryItems = []
       dataItem.selectedLibraryItems.forEach((selectedLibraryItem) => libraryItems.push({ identifier: selectedLibraryItem.identifier }))
       postBody.overridenConfiguration.push({
@@ -165,6 +166,29 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     }
   }
 
+  var addNetworkConfigurationOverride = (state, networkAnalysisConstraints, primarySpatialEdge, wormholeFuseDefinitions, projectNetworkConfiguration, postBody) => {
+    const routingMode = state.optimizationOptions.networkConstraints.routingMode
+    if (projectNetworkConfiguration[routingMode]) {
+      // Make a copy of the network configuration for the current routing mode (e.g. ODN_1, etc)
+      postBody.networkConfigurationOverride = angular.copy(projectNetworkConfiguration[routingMode])
+
+      // Add overrides
+      postBody.networkConfigurationOverride.fusionRuleConfig = postBody.networkConfigurationOverride.fusionRuleConfig || {}
+      postBody.networkConfigurationOverride.fusionRuleConfig.connectivityDefinition = state.networkAnalysisConnectivityDefinition
+
+      if (networkAnalysisConstraints.snappingDistance && networkAnalysisConstraints.maxConnectionDistance
+        && networkAnalysisConstraints.maxWormholeDistance && networkAnalysisConstraints.maxLocationEdgeDistance) {
+        postBody.networkConfigurationOverride.fusionRuleConfig.snappingDistance = +networkAnalysisConstraints.snappingDistance.value
+        postBody.networkConfigurationOverride.fusionRuleConfig.maxConnectionDistance = +networkAnalysisConstraints.maxConnectionDistance.value
+        postBody.networkConfigurationOverride.fusionRuleConfig.maxWormholeDistance = +networkAnalysisConstraints.maxWormholeDistance.value
+        postBody.networkConfigurationOverride.fiberConstraintConfig = postBody.networkConfigurationOverride.fiberConstraintConfig || {}
+        postBody.networkConfigurationOverride.fiberConstraintConfig.maxLocationToEdgeDistance = +networkAnalysisConstraints.maxLocationEdgeDistance.value
+      }
+      postBody.networkConfigurationOverride.fusionRuleConfig.primarySpatialEdge = primarySpatialEdge
+      postBody.networkConfigurationOverride.fusionRuleConfig.wormholeFuseDefinitions = wormholeFuseDefinitions
+    }
+  }
+
   // ------------------------------------------------------------------------------------------------------------------
   // End section - state to POST body
   // ------------------------------------------------------------------------------------------------------------------
@@ -174,13 +198,14 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   // ------------------------------------------------------------------------------------------------------------------
 
   // Load optimization options from a JSON string
-  stateSerializationHelper.loadStateFromJSON = (state, dispatchers, planInputs) => {
+  stateSerializationHelper.loadStateFromJSON = (state, reduxState, dispatchers, planInputs, defaultNetworkConstraints) => {
     loadAnalysisTypeFromBody(state, planInputs)
-    loadLocationTypesFromBody(state, planInputs)
-    loadSelectedExistingFiberFromBody(state, planInputs)
+    loadLocationTypesFromBody(state, reduxState, dispatchers, planInputs)
+    loadSelectedExistingFiberFromBody(state, reduxState, dispatchers, planInputs)
     loadAlgorithmParametersFromBody(state, dispatchers, planInputs)
     loadFiberNetworkConstraintsFromBody(state, planInputs)
     loadTechnologiesFromBody(state, planInputs)
+    loadNetworkConfigurationOverrideFromBody(dispatchers, planInputs, defaultNetworkConstraints)
   }
 
   // Load analysis type from a POST body object that is sent to the optimization engine
@@ -194,7 +219,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   }
 
   // Load location types from a POST body object that is sent to the optimization engine
-  var loadLocationTypesFromBody = (state, postBody) => {
+  var loadLocationTypesFromBody = (state, dataItems, dispatchers, postBody) => {
     state.locationLayers.forEach((locationLayer) => {
       const isVisible = (postBody.locationConstraints.locationTypes.indexOf(locationLayer.plannerKey) >= 0)
       state.setLayerVisibility(locationLayer, isVisible)
@@ -212,32 +237,34 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     }
     // Select data source ids from the list of all data sources
     var mapLibraryIdToLibrary = {}
-    if (state.dataItems && state.dataItems.location) {
-      state.dataItems.location.allLibraryItems.forEach((libraryItem) => {
+    if (dataItems && dataItems.location) {
+      dataItems.location.allLibraryItems.forEach((libraryItem) => {
         mapLibraryIdToLibrary[libraryItem.identifier] = libraryItem
       })
-      state.dataItems.location.selectedLibraryItems = []
-      libraryIdsToSelect.forEach((libraryId) => state.dataItems.location.selectedLibraryItems.push(mapLibraryIdToLibrary[libraryId]))
+      var selectedLibraryItems = []
+      libraryIdsToSelect.forEach((libraryId) => selectedLibraryItems.push(mapLibraryIdToLibrary[libraryId]))
+      dispatchers.selectDataItems('location', selectedLibraryItems)
     }
   }
 
   // Load the selected existing fiber from a POST body object that is sent to the optimization engine
-  var loadSelectedExistingFiberFromBody = (state, postBody) => {
-    if (!state.dataItems.fiber) {
+  var loadSelectedExistingFiberFromBody = (state, dataItems, dispatchers, postBody) => {
+    if (!dataItems.fiber) {
       return
     }
-    state.dataItems.fiber.selectedLibraryItems = []
     if (postBody.overridenConfiguration) {
+      var selectedLibraryItems = []
       postBody.overridenConfiguration.forEach((overridenConfiguration) => {
         if (overridenConfiguration.dataType === 'fiber') {
           overridenConfiguration.libraryItems.forEach((libraryItem) => {
-            var matchingFibers = state.dataItems.fiber.allLibraryItems.filter((item) => item.identifier === libraryItem.identifier)
+            var matchingFibers = dataItems.fiber.allLibraryItems.filter((item) => item.identifier === libraryItem.identifier)
             if (matchingFibers.length === 1) {
-              state.dataItems.fiber.selectedLibraryItems.push(matchingFibers[0])
+              selectedLibraryItems.push(matchingFibers[0])
             }
           })
         }
       })
+      dispatchers.selectDataItems('fiber', selectedLibraryItems)
     }
   }
 
@@ -328,6 +355,34 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       var matchedTechnology = Object.keys(state.optimizationOptions.technologies).filter((technologyKey) => technologyKey.toUpperCase() === networkType.toUpperCase())[0]
       state.optimizationOptions.technologies[matchedTechnology].checked = true
     })
+  }
+
+  var loadNetworkConfigurationOverrideFromBody = (dispatchers, planInputs, defaultNetworkConstraints) => {
+    if (planInputs.networkConfigurationOverride) {
+      // We have a network configuration override, set the network constraints
+      var aroNetworkConstraints = angular.copy(defaultNetworkConstraints)
+      const frConfig = planInputs.networkConfigurationOverride.fusionRuleConfig
+      if (frConfig) {
+        aroNetworkConstraints.snappingDistance.value = frConfig.snappingDistance
+        aroNetworkConstraints.maxConnectionDistance.value = frConfig.maxConnectionDistance
+        aroNetworkConstraints.maxWormholeDistance.value = frConfig.maxWormholeDistance
+        if (frConfig.connectivityDefinition) {
+          Object.keys(frConfig.connectivityDefinition).forEach(spatialEdgeType => {
+            dispatchers.setNetworkAnalysisConnectivityDefinition(spatialEdgeType, frConfig.connectivityDefinition[spatialEdgeType])
+          })
+        }
+        dispatchers.setPrimarySpatialEdge(frConfig.primarySpatialEdge)
+        dispatchers.clearWormholeFuseDefinitions()
+        Object.keys(frConfig.wormholeFuseDefinitions).forEach(spatialEdgeType => {
+          dispatchers.setWormholeFuseDefinition(spatialEdgeType, frConfig.wormholeFuseDefinitions[spatialEdgeType])
+        })
+      }
+      const fcConfig = planInputs.networkConfigurationOverride.fiberConstraintConfig
+      if (fcConfig) {
+        aroNetworkConstraints.maxLocationEdgeDistance.value = fcConfig.maxLocationToEdgeDistance
+      }
+      dispatchers.setNetworkAnalysisConstraints(aroNetworkConstraints)
+    }
   }
 
   // ------------------------------------------------------------------------------------------------------------------

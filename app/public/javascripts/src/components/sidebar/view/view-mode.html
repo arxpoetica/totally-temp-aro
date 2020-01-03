@@ -16,9 +16,25 @@
     <accordion style="position: relative; flex: 1 1 auto;" toggle-expanded-panel="$ctrl.state.activeViewModePanel">
       <accordion-panel-title title="'Location Info'" panel-id="$ctrl.state.viewModePanels.LOCATION_INFO"></accordion-panel-title>
       <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.LOCATION_INFO">
-        <location-detail ng-if="($ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW)
-                                && ($ctrl.state.configuration.perspective.showViewModePanels[$ctrl.state.viewModePanels.LOCATION_INFO])">
-        </location-detail>
+        <aro-search ng-if="$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.LOCATION_INFO" 
+          object-name="location"
+          label-id="objectId"
+          search-list="$ctrl.state.entityTypeList.LocationObjectEntity" 
+          selected="$ctrl.selectedLocation" 
+          refresh-tag-list="$ctrl.state.StateViewMode.loadEntityList($ctrl.$http, $ctrl.state, $ctrl.dataItems, 'LocationObjectEntity',searchObj,'id,objectId','objectId')"
+          on-selection-changed="$ctrl.onSearchResult(selectedObj)">
+        </aro-search>
+        <r-location-info>
+        </r-location-info>
+        <div ng-if="$ctrl.state.configuration.perspective.locationDetails.showSalesDetails" style="width: 100%; padding-right: 10px;">
+          <editor-interface-tree object-to-view="$ctrl.selectedLocationInfo"
+                                 is-edit="false">
+          </editor-interface-tree>
+        </div>
+        <location-roic-reports
+          ng-if="($ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW) && $ctrl.locationInfoDetails"
+          report-size="'small'">
+        </location-roic-reports>
       </accordion-panel-contents>
 
       <accordion-panel-title title="'Equipment Info'" panel-id="$ctrl.state.viewModePanels.EQUIPMENT_INFO" ng-if="$ctrl.state.configuration.perspective.showViewModePanels[$ctrl.state.viewModePanels.EQUIPMENT_INFO]"></accordion-panel-title>

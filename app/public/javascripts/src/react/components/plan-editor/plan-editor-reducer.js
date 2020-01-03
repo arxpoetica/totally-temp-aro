@@ -3,10 +3,15 @@ import Actions from '../../common/actions'
 const defaultState = {
   isPlanEditorActive: false,
   transaction: null,
-  features: {
-    equipmentNodes: [],
-    boundaries: []
-  }
+  features: {},
+  isDrawingBoundaryFor: null,
+  isCalculatingSubnets: false,
+  isCreatingObject: false,
+  isModifyingObject: false,
+  isDraggingFeatureForDrop: false,
+  isEditingFeatureProperties: false,
+  isEnteringTransaction: false,
+  isCommittingTransaction: false
 }
 
 function setTransaction (state, transaction) {
@@ -20,22 +25,85 @@ function clearTransaction () {
   return JSON.parse(JSON.stringify(defaultState))
 }
 
-function addEquipmentNodes (state, equipmentNodes) {
+function addTransactionFeature (state, equipments) {
+  var newFeatures = { ...state.features }
+  equipments.forEach(equipment => {
+    newFeatures[equipment.feature.objectId] = equipment
+  })
+  return { ...state,
+    features: newFeatures
+  }
+}
+
+function deleteTransactionFeature (state, objectId) {
+  var newFeature = { ...state.features[objectId] }
+  newFeature.crudAction = 'delete'
   return { ...state,
     features: { ...state.features,
-      equipmentNodes: state.features.equipmentNodes.concat(equipmentNodes)
+      [objectId]: newFeature
     }
   }
 }
 
-function removeEquipmentNode (state, objectId) {
-  const indexToRemove = state.features.equipmentNodes.findIndex(equipmentNode => equipmentNode.objectId === objectId)
-  var newEquipmentNodes = [].concat(state.features.equipmentNodes)
-  newEquipmentNodes.splice(indexToRemove, 1)
-  return { ...state,
-    features: { ...state.features,
-      equipmentNodes: newEquipmentNodes
+function modifyTransactionFeatures (state, newEquipments) {
+  var newFeatures = { ...state.features }
+  newEquipments.forEach(equipment => {
+    if (newFeatures[equipment.feature.objectId]) {
+      newFeatures[equipment.feature.objectId] = equipment
+    } else {
+      throw new Error(`Trying to modify equipment with objectId ${equipment.feature.objectId}, but it is not in the existing list of equipments`)
     }
+  })
+  return { ...state,
+    features: newFeatures
+  }
+}
+
+function setIsDrawingBoundaryFor (state, isDrawingBoundaryFor) {
+  return { ...state,
+    isDrawingBoundaryFor: isDrawingBoundaryFor
+  }
+}
+
+function setIsCalculatingSubnets (state, isCalculatingSubnets) {
+  return { ...state,
+    isCalculatingSubnets: isCalculatingSubnets
+  }
+}
+
+function setIsCreatingObject (state, isCreatingObject) {
+  return { ...state,
+    isCreatingObject: isCreatingObject
+  }
+}
+
+function setIsModifyingObject (state, isModifyingObject) {
+  return { ...state,
+    isModifyingObject: isModifyingObject
+  }
+}
+
+function setIsDraggingFeatureForDrop (state, isDraggingFeatureForDrop) {
+  return { ...state,
+    isDraggingFeatureForDrop: isDraggingFeatureForDrop
+  }
+}
+
+function setIsEditingFeatureProperties (state, isEditingFeatureProperties) {
+  return { ...state,
+    isEditingFeatureProperties: isEditingFeatureProperties
+  }
+}
+
+function setIsCommittingTransaction (state, isCommittingTransaction) {
+  return { ...state,
+    isCommittingTransaction: isCommittingTransaction
+  }
+}
+
+function setIsEnteringTransaction (state, isEnteringTransaction) {
+  return { ...state,
+    isEnteringTransaction: isEnteringTransaction
   }
 }
 
@@ -47,11 +115,38 @@ function planEditorReducer (state = defaultState, action) {
     case Actions.PLAN_EDITOR_SET_TRANSACTION:
       return setTransaction(state, action.payload)
 
-    case Actions.PLAN_EDITOR_ADD_EQUIPMENT_NODES:
-      return addEquipmentNodes(state, action.payload)
+    case Actions.PLAN_EDITOR_ADD_FEATURES:
+      return addTransactionFeature(state, action.payload)
 
-    case Actions.PLAN_EDITOR_REMOVE_EQUIPMENT_NODE:
-      return removeEquipmentNode(state, action.payload)
+    case Actions.PLAN_EDITOR_DELETE_TRANSACTION_FEATURE:
+      return deleteTransactionFeature(state, action.payload)
+
+    case Actions.PLAN_EDITOR_MODIFY_FEATURES:
+      return modifyTransactionFeatures(state, action.payload)
+
+    case Actions.PLAN_EDITOR_SET_IS_CALCULATING_SUBNETS:
+      return setIsCalculatingSubnets(state, action.payload)
+
+    case Actions.PLAN_EDITOR_SET_IS_CREATING_OBJECT:
+      return setIsCreatingObject(state, action.payload)
+
+    case Actions.PLAN_EDITOR_SET_IS_MODIFYING_OBJECT:
+      return setIsModifyingObject(state, action.payload)
+
+    case Actions.PLAN_EDITOR_SET_IS_DRAGGING_FEATURE_FOR_DROP:
+      return setIsDraggingFeatureForDrop(state, action.payload)
+
+    case Actions.PLAN_EDITOR_SET_IS_DRAWING_BOUNDARY_FOR:
+      return setIsDrawingBoundaryFor(state, action.payload)
+
+    case Actions.PLAN_EDITOR_SET_IS_EDITING_FEATURE_PROPERTIES:
+      return setIsEditingFeatureProperties(state, action.payload)
+
+    case Actions.PLAN_EDITOR_SET_IS_COMMITTING_TRANSACTION:
+      return setIsCommittingTransaction(state, action.payload)
+
+    case Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION:
+      return setIsEnteringTransaction(state, action.payload)
 
     default:
       return state

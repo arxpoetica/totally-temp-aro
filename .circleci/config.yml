@@ -7,7 +7,7 @@ jobs:
 
   build:
     docker:
-      - image: circleci/node:6
+      - image: circleci/node:12
     environment:
       IMAGE_NAME: avco/aro-app
       ECR_IMAGE_NAME: 976168524097.dkr.ecr.us-east-1.amazonaws.com/aro/aro-app
@@ -18,7 +18,7 @@ jobs:
       - run:
           name: dependencies
           command: |
-            sudo apt-get install python-dev
+            # sudo apt-get install python-dev
             sudo npm install -g mocha
       
       - run:
@@ -26,16 +26,15 @@ jobs:
           command: |
             docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
             curl -O https://bootstrap.pypa.io/get-pip.py
-            sudo python get-pip.py 
+            sudo python3 get-pip.py 
             export PATH=~/.local/bin:$PATH
-            sudo pip install awscli boto3
+            sudo pip3 install awscli boto3
             eval $(aws ecr get-login --region us-east-1 --no-include-email --registry-ids 976168524097)
             export IMAGE_TAG=${IMAGE_NAME}:${CIRCLE_BUILD_NUM}
             export ECR_IMAGE_TAG=${ECR_IMAGE_NAME}:${CIRCLE_BUILD_NUM}
             export BRANCH_LOWER="$(tr '[:upper:]' '[:lower:]' <<< "$CIRCLE_BRANCH")"
             export BRANCH="$(tr '_' '-' <<< "$BRANCH_LOWER")"
-            docker/build.sh
-            docker build -t ${IMAGE_TAG} ./target
+            docker build -t ${IMAGE_TAG} .
             docker push ${IMAGE_TAG}
             docker tag ${IMAGE_TAG} ${ECR_IMAGE_TAG}
             docker push ${ECR_IMAGE_TAG}
@@ -45,10 +44,9 @@ jobs:
                 docker push ${IMAGE_NAME}:latest
                 docker tag ${IMAGE_TAG} ${ECR_IMAGE_NAME}:latest
                 docker push ${ECR_IMAGE_NAME}:latest
-                python docker/publish_version.py qa-${BRANCH} app $CIRCLE_BUILD_NUM
+                python3 docker/publish_version.py qa-${BRANCH} app $CIRCLE_BUILD_NUM
             fi
             
-
   deploy:
     docker:
       - image: circleci/python:2.7
@@ -59,25 +57,25 @@ jobs:
           command: |
             sudo pip install boto3
             python docker/update_stack.py qa update
-
-
-
 workflows:
   version: 2
   build_deploy:
     jobs:
       - build:
+          context: aro_qa_builds
           filters:
             branches:
               only: 
                 - master
                 - optional_building
-                - devJuly2019
+                - wormholeFusion
+                - coverageFix
+                - platform_upgrade
 
       - deploy:
+          context: aro_qa_builds
           requires:
             - build
           filters:
             branches:
               only: master
-

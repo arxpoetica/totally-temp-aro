@@ -16,6 +16,6 @@ function setSelectedMapFeatures (features) {
 }
 
 export default {
-  setGoogleMapsReference: setGoogleMapsReference,
-  setSelectedMapFeatures: setSelectedMapFeatures
+  setGoogleMapsReference,
+  setSelectedMapFeatures
 }

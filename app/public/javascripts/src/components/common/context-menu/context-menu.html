@@ -18,7 +18,7 @@
   .map-object-editor-context-menu-dropdown-section{
     margin-bottom: 6px;
   }
-  .context-menu-dropdown{
+  .angular-context-menu-dropdown{
     height: 100%;
   }
   
@@ -74,7 +74,7 @@
 
 
 <div class="map-object-editor-context-menu-container" ng-style="$ctrl.contextMenuCss"> <!-- This ng-style will position the menu -->
-  <div class="dropdown open context-menu-dropdown">
+  <div class="dropdown open angular-context-menu-dropdown">
     <div class="dropdown-menu map-object-editor-context-menu-dropdown" oncontextmenu="return false">
       <!-- Show a button at the top IF there are too many menu items. The button will scroll the menu items -->
       <button ng-if="$ctrl.menuItems.length > $ctrl.MAX_MENU_ITEMS"
@@ -91,6 +91,7 @@
           <div ng-switch-when="EQUIPMENT" class="badge badge-primary badge-equipment">Equipment</div>
           <div ng-switch-when="LOCATION" class="badge badge-primary badge-location">Location</div>
           <div ng-switch-when="SERVICE_AREA" class="badge badge-primary badge-service-area">Service Area</div>
+          <div ng-switch-when="CENSUS" class="badge badge-primary badge-service-area">Census</div>
           {{menuItem.displayName}}
           <i class="fa-caret-right fas ml-2"></i>
         </div>
@@ -118,6 +119,9 @@
                 <div ng-switch-when="DELETE">
                   <i class="fas fa-trash-alt pl-2 pr-2"></i> Delete
                 </div>
+                <div ng-switch-when="MERGE_LOCATION_CONNECTORS">
+                  <i class="fas far fa-object-group pl-2 pr-2"></i> Merge all
+                </div>              
               </div>
               {{option.label}}
             </a>

@@ -26,6 +26,15 @@ class PriceBookEditorController {
         result.data.forEach((strategy) => this.allStrategies[strategy.name] = strategy)
       })
       .catch((err) => console.error(err))
+    this.equipmentTagFilter = this.equipmentTagFilter.bind(this)
+    this.equipmentTags = []
+    this.setOfSelectedEquipmentTags = new Set()
+    this.$http.get('/service/category-tags/equipment/tags')
+      .then(result => {
+        this.equipmentTags = result.data
+        this.$timeout()
+      })
+      .catch((err) => console.error(err))
   }
 
   $onChanges (changesObj) {
@@ -119,7 +128,8 @@ class PriceBookEditorController {
           unitOfMeasure: definitionItem.unitOfMeasure,
           costAssignment: itemIdToCostAssignment[definitionItem.id],
           cableConstructionType: definitionItem.cableConstructionType,
-          subItems: []
+          subItems: [],
+          tagMapping: definitionItem.tagMapping
         }
         definitionItem.subItems.forEach((subItem) => {
           var subItemToPush = {
@@ -250,6 +260,21 @@ class PriceBookEditorController {
 
   exitEditingMode () {
     this.setEditingMode({ mode: this.listMode })
+  }
+
+  updateSetOfSelectedEquipmentTags () {
+    // Keep a set of IDs that we want to filter.
+    this.setOfSelectedEquipmentTags = new Set(this.selectedEquipmentTags.map(equipmentTag => equipmentTag.id))
+  }
+
+  equipmentTagFilter (item) {
+    if (this.setOfSelectedEquipmentTags.size === 0) {
+      return true // No filters applied
+    } else {
+      const tags = item.tagMapping || [] // tagMapping can be null
+      const itemHasTag = tags.filter(tagId => this.setOfSelectedEquipmentTags.has(tagId)).length > 0
+      return itemHasTag
+    }
   }
 }
 

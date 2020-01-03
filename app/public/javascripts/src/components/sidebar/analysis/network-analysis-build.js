@@ -19,6 +19,7 @@ class NetworkAnalysisBuildController {
     this.analysisAreas = []
     this.rateReachCategories = []
     this.toggleAdvanceSettings = false
+    this.isNetworkSettingsExpanded = false
 
     this.budgetDisplay = this.state.optimizationOptions.budget
     this.SelectionModes = SelectionModes
@@ -93,7 +94,8 @@ class NetworkAnalysisBuildController {
   mapStateToThis (reduxState) {
     return {
       activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
-      allSelectionModes: getAllSelectionModes(reduxState)
+      allSelectionModes: getAllSelectionModes(reduxState),
+      networkAnalysisConstraints: reduxState.optimization.networkAnalysis.constraints
     }
   }
 

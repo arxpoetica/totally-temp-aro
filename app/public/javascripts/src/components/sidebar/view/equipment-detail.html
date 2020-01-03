@@ -40,7 +40,7 @@
 			object-name="Equipment" label-id="clli"
 			search-list="$ctrl.state.entityTypeList.NetworkEquipmentEntity"
 			selected="$ctrl.selectedEquipment"
-			refresh-tag-list="$ctrl.state.StateViewMode.loadEntityList($ctrl.$http,$ctrl.state,'NetworkEquipmentEntity',searchObj,'id,clli,objectId','clli',$ctrl.state.configuration)"
+			refresh-tag-list="$ctrl.state.StateViewMode.loadEntityList($ctrl.$http, $ctrl.state, $ctrl.dataItems, 'NetworkEquipmentEntity',searchObj,'id,clli,objectId','clli',$ctrl.state.configuration)"
 			on-selection-changed="$ctrl.viewSelectedEquipment(selectedObj,isZoom)">
 		</aro-search>
 	</div>
@@ -94,9 +94,7 @@
 			<button class="btn btn-primary btn-sm"
 				ng-click="$ctrl.onRequestCalculateCoverage()">calculate coverage</button>
 
-			<boundary-coverage bounds-input="$ctrl.coverageOutput"
-				parent-selected-object-id="$ctrl.boundsObjectId"
-				is-working-override="$ctrl.isWorkingOnCoverage">
+			<boundary-coverage ng-if="$ctrl.showCoverageOutput" selected-boundary-coverage="$ctrl.coverageOutput">
 			</boundary-coverage>
 		</div>
 	</div>

@@ -3,6 +3,7 @@
  */
 'use strict'
 
+import { createSelector } from 'reselect'
 import MapTileRenderer from './map-tile-renderer'
 import TileUtilities from './tile-utilities'
 import MapUtilities from '../common/plan/map-utilities'
@@ -12,6 +13,11 @@ import SelectionModes from '../../react/components/selection/selection-modes'
 import MenuAction, { MenuActionTypes } from '../common/context-menu/menu-action'
 import MenuItem, { MenuItemTypes } from '../common/context-menu/menu-item'
 import FeatureSets from '../../react/common/featureSets'
+
+const getTransactionFeatures = reduxState => reduxState.planEditor.features
+const getTransactionFeatureIds = createSelector([getTransactionFeatures], transactionFeatures => {
+  return new Set(Object.keys(transactionFeatures))
+})
 
 class TileComponentController {
   // MapLayer objects contain the following information
@@ -39,9 +45,10 @@ class TileComponentController {
   // fillStyle: (Optional) For polygon features, this is the fill color
   // opacity: (Optional, default 1.0) This is the maximum opacity of anything drawn on the map layer. Aggregate layers will have features of varying opacity, but none exceeding this value
 
-  constructor ($document, $timeout, $ngRedux, state, tileDataService, uiNotificationService, contextMenuService, Utils) {
+  constructor ($window, $document, $timeout, $ngRedux, state, tileDataService, uiNotificationService, contextMenuService, Utils) {
     this.layerIdToMapTilesIndex = {}
     this.mapRef = null // Will be set in $document.ready()
+    this.$window = $window
     this.$timeout = $timeout
     this.$ngRedux = $ngRedux
     this.state = state
@@ -123,7 +130,6 @@ class TileComponentController {
     })
 
     this.state.requestPolygonSelect.subscribe((args) => {
-      // console.log(args)
       if (!this.mapRef || !args.coords) {
         return
       }
@@ -218,7 +224,6 @@ class TileComponentController {
           })
 
           function processArea () {
-            // console.log(google.maps)
             return google.maps.geometry.spherical.computeArea(new google.maps.Polygon({ paths: args.coords.map((a) => {
               if (a.hasOwnProperty('lat')) {
                 return { lat: a.lat(), lng: a.lng() }
@@ -236,6 +241,7 @@ class TileComponentController {
       this.mapRef = window[this.mapGlobalObjectName]
       this.createMapOverlay()
       this.unsubscribeRedux = this.$ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
+      
     })
   }
 
@@ -253,27 +259,43 @@ class TileComponentController {
       this.state.selectedDisplayMode.getValue(),
       SelectionModes,
       this.activeSelectionModeId,
+      this.stateMapLayers,
       this.state.displayModes,
       this.state.viewModePanels,
       this.state,
       this.uiNotificationService,
-      MapUtilities.getPixelCoordinatesWithinTile.bind(this)
+      MapUtilities.getPixelCoordinatesWithinTile.bind(this),
+      this.transactionFeatureIds
     ))
     this.OVERLAY_MAP_INDEX = this.mapRef.overlayMapTypes.getLength() - 1
-
+    //this.state.isShiftPressed = false // make this per-overlay or move it somewhere more global
+    
     // Update the selection in the renderer. We should have a bound "this.oldSelection" at this point
     if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
       this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setOldSelection(this.state && this.state.selection)
       this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setSelection(this.selection)
     }
-
+    
+    // listener for shift key
+    this.keydownListener = this.$window.addEventListener('keydown', (event) => {
+      if (event.key === 'Shift') this.state.isShiftPressed = true
+    })
+    
+    this.keyupListener = this.$window.addEventListener('keyup', (event) => {
+      if (event.key === 'Shift') this.state.isShiftPressed = false
+    })
+    
     this.overlayRightclickListener = this.mapRef.addListener('rightclick', (event) => {
-      if (this.state.selectedDisplayMode.getValue() != this.state.displayModes.VIEW ||
-          this.state.activeViewModePanel == this.state.viewModePanels.EDIT_LOCATIONS ||
+      this.getFeaturesUnderLatLng(event.latLng)
+      .then((hitFeatures) => {
+        this.state.mapFeaturesRightClickedEvent.next(hitFeatures)
+      })
+      
+      if (this.state.selectedDisplayMode.getValue() != this.state.displayModes.VIEW  ||
           this.state.activeViewModePanel == this.state.viewModePanels.EDIT_SERVICE_LAYER
       ) return
 
-      this.getFeaturesUnderLatLng(event.latLng)
+      this.getFilteredFeaturesUnderLatLng(event.latLng)
         .then((hitFeatures) => {
           var menuItems = []
           var menuItemsById = {}
@@ -292,44 +314,33 @@ class TileComponentController {
           var boundsByNetworkNodeObjectId = {}
           featureCats.forEach((cat) => {
             hitFeatures[cat].forEach((feature) => {
-              var objectId = null
+              var menuItemFeatureId = null
 
               if (feature.hasOwnProperty('object_id')) {
-                objectId = feature.objectId = feature.object_id
+                menuItemFeatureId = feature.objectId = feature.object_id
               } else if (feature.hasOwnProperty('objectId')) {
-                objectId = feature.objectId
+                menuItemFeatureId = feature.objectId
               } else if (feature.hasOwnProperty('location_id')) {
-                objectId = feature.location_id
+                menuItemFeatureId = feature.location_id
+              } else if (feature._data_type === 'census_block') {
+                menuItemFeatureId = `census_block_${feature.id}`
               }
 
               // if ( feature.hasOwnProperty('objectId') && !menuItemsById.hasOwnProperty(feature.objectId) ){
-              if (objectId && !menuItemsById.hasOwnProperty(objectId)) {
+              if (menuItemFeatureId && !menuItemsById.menuItemFeatureId) {
               // ToDo: formalize this
                 var singleHitFeature = {}
                 singleHitFeature.latLng = hitFeatures.latLng
                 singleHitFeature[cat] = [feature]
 
-                var data = {
-                // 'objectId': feature.objectId,
-                  'objectId': objectId,
-                  // 'dataTypeList': dataTypeList,
-                  'feature': feature,
-                  'latLng': hitFeatures.latLng
-                }
-
                 var options = []
-                // options.push(this.contextMenuService.makeItemOption('Select', 'fa-eye', () => {
-                //   this.state.mapFeaturesSelectedEvent.next(singleHitFeature)
-                // }))
                 options.push(new MenuAction(MenuActionTypes.SELECT, () => this.state.mapFeaturesSelectedEvent.next(singleHitFeature)))
 
-                // var menuItem = this.contextMenuService.makeMenuItem(name, data, options)
                 const menuItemType = this.utils.getFeatureMenuItemType(feature)
                 var name = this.utils.getFeatureDisplayName(feature, this.state)
                 var menuItem = new MenuItem(menuItemType, name, options)
                 menuItems.push(menuItem)
-                // menuItemsById[feature.objectId] = menuItem
-                menuItemsById[objectId] = menuItem
+                menuItemsById[menuItemFeatureId] = menuItem
                 if (feature.hasOwnProperty('network_node_object_id')) {
                   bounds.push(feature)
                   boundsByNetworkNodeObjectId[feature.network_node_object_id] = menuItem
@@ -341,10 +352,9 @@ class TileComponentController {
           if (menuItems.length > 0) {
             this.utils.getBoundsCLLIs(bounds, this.state)
               .then((results) => {
-                results.data.forEach((result) => {
-                  if (result.clli) {
-                    boundsByNetworkNodeObjectId[result.objectId].label += `: ${result.clli}`
-                  }
+                results.forEach(result => {
+                  const clliCode = (result.data.networkNodeEquipment.siteInfo.siteClli) || '(empty CLLI code)'
+                  boundsByNetworkNodeObjectId[result.data.objectId].displayName = `Boundary: ${clliCode}`
                 })
 
                 var eventXY = this.getXYFromEvent(event)
@@ -381,15 +391,29 @@ class TileComponentController {
     })
 
     this.overlayClickListener = this.mapRef.addListener('click', (event) => {
+      var wasShiftPressed = this.state.isShiftPressed
+      
       if (this.contextMenuService.isMenuVisible.getValue()) {
         this.contextMenuService.menuOff()
         this.$timeout()
         return
       }
-
+      
+      // ToDo: depricate getFilteredFeaturesUnderLatLng switch to this
       this.getFeaturesUnderLatLng(event.latLng)
         .then((hitFeatures) => {
-        // console.log(hitFeatures)
+          if (wasShiftPressed) {
+            this.state.mapFeaturesKeyClickedEvent.next(hitFeatures)
+          } else {
+            this.state.mapFeaturesClickedEvent.next(hitFeatures)
+          }
+        })
+        .catch(err => console.error(err))
+        
+      if (wasShiftPressed) return
+      
+      this.getFilteredFeaturesUnderLatLng(event.latLng)
+        .then((hitFeatures) => {
           if (hitFeatures) {
             if (hitFeatures.locations.length > 0) {
               this.state.hackRaiseEvent(hitFeatures.locations)
@@ -401,7 +425,7 @@ class TileComponentController {
           }
         })
     })
-
+    
     this.getFeaturesUnderLatLng = function (latLng) {
       // Get latitiude and longitude
       var lat = latLng.lat()
@@ -418,14 +442,61 @@ class TileComponentController {
         this.state.mapLayers.getValue(), zoom, tileCoords.x, tileCoords.y,
         clickedPointPixels.x, clickedPointPixels.y, this.state.selectedBoundaryType.id)
         .then((results) => {
-          var locationFeatures = []
-          var analysisAreaFeatures = []
-          var serviceAreaFeatures = []
+          var locations = []
+          var analysisAreas = []
+          var serviceAreas = []
           var roadSegments = new Set()
           var equipmentFeatures = []
           var censusFeatures = []
           var fiberFeatures = new Set()
 
+          results.forEach((result) => {
+            // ToDo: need a better way to differentiate feature types. An explicit way like featureType, also we can then generalize these feature arrays
+            // ToDo: filter out deleted etc
+            if (result.location_id) {
+              locations = locations.concat(result)
+            } else if (result.hasOwnProperty('_data_type') &&
+            result.code && result._data_type === 'analysis_area') {
+              analysisAreas.push(result)
+            } else if (result.code) {
+              serviceAreas = serviceAreas.concat(result)
+            } else if (result.gid) {
+              roadSegments.add(result)
+            } else if (result.hasOwnProperty('layerType') && result.layerType == 'census_block') {
+              censusFeatures.push(result)
+            } else if (result.id && (result._data_type.indexOf('equipment') >= 0)) {
+              equipmentFeatures = equipmentFeatures.concat(result)
+            } else if ((result.id || result.link_id) && (result._data_type.indexOf('fiber') >= 0)) {
+              // fiberFeatures = fiberFeatures.concat(result)
+              fiberFeatures.add(result)
+            }
+          })
+
+          // ToDo: formalize this
+          // var hitFeatures = new FeatureSets() // need to import the class BUT it's over in React land, ask Parag
+          var hitFeatures = {
+            latLng: latLng,
+            locations: locations,
+            serviceAreas: serviceAreas,
+            analysisAreas: analysisAreas,
+            roadSegments: roadSegments,
+            equipmentFeatures: equipmentFeatures,
+            censusFeatures: censusFeatures,
+            fiberFeatures: fiberFeatures
+          }
+          //var hitFeatures = new FeatureSets()
+          return hitFeatures
+        })
+        .catch((err) => {
+          console.error(err)
+        })
+    }
+    
+    // ToDo: we need to refactor this. Tile should just send out the event that a list of things have been clicked
+    // then leave it up to the listeners whether they respond
+    this.getFilteredFeaturesUnderLatLng = function (latLng) {
+      return this.getFeaturesUnderLatLng(latLng)
+        .then((hitFeatures) => {
           var canSelectLoc = false
           var canSelectSA = false
 
@@ -444,61 +515,20 @@ class TileComponentController {
           } else if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.VIEW) {
             canSelectSA = true
           }
-
-          results.forEach((result) => {
-          // console.log(result)
-          // ToDo: need a better way to differentiate feature types. An explicit way like featureType, also we can then generalize these feature arrays
-          // ToDo: filter out deleted etc
-            if (result.location_id && (canSelectLoc ||
-              this.state.selectedDisplayMode.getValue() === this.state.displayModes.VIEW)) {
-              locationFeatures = locationFeatures.concat(result)
-            } else if (result.hasOwnProperty('_data_type') &&
-            result.code && result._data_type === 'analysis_area') {
-              analysisAreaFeatures.push(result)
-            } else if (result.code && canSelectSA) {
-              serviceAreaFeatures = serviceAreaFeatures.concat(result)
-            } else if (result.gid) {
-              roadSegments.add(result)
-            } else if (result.hasOwnProperty('layerType') &&
-                      result.layerType == 'census_block' &&
-                      this.state.selectedDisplayMode.getValue() === this.state.displayModes.VIEW) {
-              censusFeatures.push(result)
-            } else if (result.id && (result._data_type.indexOf('equipment') >= 0)) {
-              equipmentFeatures = equipmentFeatures.concat(result)
-            } else if ((result.id || result.link_id) && (result._data_type.indexOf('fiber') >= 0)) {
-            // fiberFeatures = fiberFeatures.concat(result)
-              fiberFeatures.add(result)
-            }
-          })
-
-          // ToDo: formalize this
-          // var hitFeatures = new FeatureSets() // need to import the class BUT it's over in React land, ask Parag
-          var hitFeatures = {
-            latLng: latLng,
-            locations: locationFeatures,
-            serviceAreas: serviceAreaFeatures,
-            analysisAreas: analysisAreaFeatures,
-            roadSegments: roadSegments,
-            equipmentFeatures: equipmentFeatures,
-            censusFeatures: censusFeatures,
-            fiberFeatures: fiberFeatures
+          
+          // filter the lists 
+          if (!canSelectLoc &&
+            this.state.selectedDisplayMode.getValue() !== this.state.displayModes.VIEW) {
+            hitFeatures.locations = []
+          }
+          if (!canSelectSA) {
+            hitFeatures.serviceAreas = []
+          }
+          if (this.state.selectedDisplayMode.getValue() !== this.state.displayModes.VIEW) {
+            hitFeatures.censusFeatures = []
           }
           
-          //var hitFeatures = new FeatureSets()
-          
-          
           return hitFeatures
-        /*
-        //console.log(hitFeatures)
-
-        if (locationFeatures.length > 0) {
-          this.state.hackRaiseEvent(locationFeatures)
-        }
-
-        //Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
-        // ToDo: now that we have types these categories should to be dynamic
-        this.state.mapFeaturesSelectedEvent.next(hitFeatures)
-        // */
         })
         .catch((err) => {
           console.error(err)
@@ -522,7 +552,17 @@ class TileComponentController {
       google.maps.event.removeListener(this.overlayDragstartListener)
       this.overlayDragstartListener = null
     }
-
+    
+    if (this.keydownListener) {
+      this.$window.removeListener(this.keydownListener)
+      this.keydownListener = null
+    }
+    
+    if (this.keyupListener) {
+      this.$window.removeListener(this.keyupListener)
+      this.keyupListener = null
+    }
+    
     this.mapRef.overlayMapTypes.clear()
   }
 
@@ -632,7 +672,9 @@ class TileComponentController {
     return {
       activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
       selectionModes: reduxState.selection.selectionModes,
-      selection: reduxState.selection
+      selection: reduxState.selection,
+      stateMapLayers: reduxState.mapLayers,
+      transactionFeatureIds: getTransactionFeatureIds(reduxState)
     }
   }
 
@@ -643,18 +685,36 @@ class TileComponentController {
   mergeToTarget (nextState, actions) {
     const currentSelectionModeId = this.activeSelectionModeId
     const oldPlanTargets = this.selection && this.selection.planTargets
+    const prevStateMapLayers = { ...this.stateMapLayers }
+    const currentTransactionFeatureIds = this.transactionFeatureIds
+    var needRefresh = false
+    var doConduitUpdate = this.doesConduitNeedUpdate(prevStateMapLayers, nextState.stateMapLayers)
+    needRefresh = doConduitUpdate
     // merge state and actions onto controller
     Object.assign(this, nextState)
     Object.assign(this, actions)
+
+    if (doConduitUpdate) {
+      this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setStateMapLayers(nextState.stateMapLayers)
+    }
 
     if (currentSelectionModeId !== nextState.activeSelectionModeId ||
         this.hasPlanTargetSelectionChanged(oldPlanTargets, nextState.selection && nextState.selection.planTargets)) {
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
         this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setAnalysisSelectionMode(nextState.activeSelectionModeId)
         this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setSelection(nextState.selection)
-        this.tileDataService.markHtmlCacheDirty()
-        this.refreshMapTiles()
+        needRefresh = true
       }
+    }
+
+    if (currentTransactionFeatureIds !== nextState.transactionFeatureIds) {
+      this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setTransactionFeatureIds(nextState.transactionFeatureIds)
+      needRefresh = true
+    }
+
+    if (needRefresh) {
+      this.tileDataService.markHtmlCacheDirty()
+      this.refreshMapTiles()
     }
   }
 
@@ -677,9 +737,38 @@ class TileComponentController {
 
     return strOldSelection !== strNewSelection
   }
+  
+  doesConduitNeedUpdate (prevStateMapLayers, stateMapLayers) {
+    // ToDo: this is so wrong! 
+    //    find what triggers an update on setNetworkEquipmentLayerVisibility
+    //    and have it also trigger an update on setCableConduitVisibility when parent is visible
+    if (!prevStateMapLayers || !stateMapLayers ||
+        !prevStateMapLayers.networkEquipment ||
+        !stateMapLayers.networkEquipment ||
+        !prevStateMapLayers.networkEquipment.cables ||
+        !stateMapLayers.networkEquipment.cables ||
+        JSON.stringify(prevStateMapLayers) === JSON.stringify(stateMapLayers)) {
+      return false
+    }
+    var needUpdate = false
+    Object.keys(stateMapLayers.networkEquipment.cables).forEach(cableType => {
+      // still looking for a reason to update?
+      if (!needUpdate) {
+        const cable = stateMapLayers.networkEquipment.cables[cableType]
+        const prevCable = prevStateMapLayers.networkEquipment.cables[cableType]
+        // is this layer visible? (if it was previously not visible this will be taken care of elsewhere 
+        //  (I know! We're depending on outside behaviour, this all needs to be redone))
+        if (cable.checked && prevCable.checked) {
+          if (JSON.stringify(cable.conduitVisibility) !== JSON.stringify(prevCable.conduitVisibility)) needUpdate = true
+        }
+      }
+    })
+    return needUpdate
+  }
+  
 }
 
-TileComponentController.$inject = ['$document', '$timeout', '$ngRedux', 'state', 'tileDataService', 'uiNotificationService', 'contextMenuService', 'Utils']
+TileComponentController.$inject = ['$window', '$document', '$timeout', '$ngRedux', 'state', 'tileDataService', 'uiNotificationService', 'contextMenuService', 'Utils']
 
 let tile = {
   template: '',

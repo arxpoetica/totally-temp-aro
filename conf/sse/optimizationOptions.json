@@ -37,7 +37,7 @@
     "optimizationMode": "INTER_WIRECENTER"
   },
   "locationConstraints": {
-    "locationTypes": [],
+    "locationTypes": ["small", "medium", "large", "household", "celltower"],
     "analysisSelectionMode": "SELECTED_AREAS"
   },
   "threshold": 0,

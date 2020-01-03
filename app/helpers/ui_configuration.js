@@ -60,10 +60,52 @@ module.exports = class UIConfiguration {
       .catch(err => console.error(err))
   }
 
+  getEnumStrings () {
+    const sql = `
+      SELECT p.name as package, c.name as class, es.key, es.description
+      FROM ui.enum_string es
+      JOIN ui.package p
+        ON p.id=es.package_id
+      JOIN ui.class c
+        ON c.id=es.class_id
+      WHERE client_id=(SELECT id FROM ui.client WHERE name=$1)
+        AND locale_id=(SELECT id FROM ui.locale WHERE locale='en-US');
+    `
+    return Promise.all([
+      database.query(sql, ['base']),
+      database.query(sql, [process.env.ARO_CLIENT])
+    ])
+      .then(results => {
+        // Create a UI strings object keyed by module name
+        const baseStringDefinitions = results[0]
+        const clientStringDefinitions = results[1]
+        var enumStrings = {}
+        // First populate the base definitions
+        baseStringDefinitions.forEach(baseDef => {
+          enumStrings[baseDef.package] = enumStrings[baseDef.package] || {}
+          enumStrings[baseDef.package][baseDef.class] = enumStrings[baseDef.package][baseDef.class] || {}
+          enumStrings[baseDef.package][baseDef.class][baseDef.key] = baseDef.description
+        })
+        // Then override with the client definitions. The client does not need to define all strings.
+        clientStringDefinitions.forEach(clientDef => {
+          if (enumStrings[clientDef.package] &&
+            enumStrings[clientDef.package][clientDef.class] &&
+            enumStrings[clientDef.package][clientDef.class][clientDef.key]) {
+            enumStrings[clientDef.package][clientDef.class][clientDef.key] = clientDef.description
+          } else {
+            throw new Error('A client string definition was encountered, but there is no corresponding base definition. Always define the base definition')
+          }
+        })
+        console.log('Enum Strings loaded from database')
+        return Promise.resolve(enumStrings)
+      })
+      .catch(err => console.error(err))
+  }
+
   getConfigurationSet (configSet) {
     if (!this.configurations[configSet]) {
       // This configuration set has not been loaded yet. Load it.
-      const dbConfigSets = ['locationCategories', 'networkEquipment', 'plan', 'perspectives', 'toolbar']
+      const dbConfigSets = ['boundaryCategories', 'locationCategories', 'networkEquipment', 'plan', 'perspectives', 'toolbar', 'wormholeFusionTypes']
       if (dbConfigSets.indexOf(configSet) >= 0) {
         // These configuration settings are stored in the database
         this.configurations[configSet] = this.getConfigurationSetFromDatabase(configSet)

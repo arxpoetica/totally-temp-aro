@@ -3,44 +3,14 @@ import React, { Component } from 'react'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import { PropTypes } from 'prop-types'
+import { createSelector } from 'reselect'
 import ringActions from './ring-edit-actions.js'
 import './ring-edit.css'
 import RingStatusTypes from './constants'
 import Ring from '../../common/ring'
-import RingOptions from './ring-options.jsx'
+import RingOptionsBasic from './ring-options-basic.jsx'
+import RingOptionsConnectivityDefinition from './ring-options-connectivity-definition.jsx'
 
-// We are declaring the options here for now. Once service provides endpoints to read the options
-// back, this should move to the redux state.
-const ringOptions = {
-  maxLocationEdgeDistance: {
-    displayName: 'Max location-edge distance',
-    value: 400
-  },
-  locationBufferSize: {
-    displayName: 'Location buffer size',
-    value: 500
-  },
-  conduitBufferSize: {
-    displayName: 'Conduit buffer size',
-    value: 10
-  },
-  snappingDistance: {
-    displayName: 'Snapping distance',
-    value: 1
-  },
-  maxConnectionDistance: {
-    displayName: 'Connection distance',
-    value: 20
-  },
-  maxWormholeDistance: {
-    displayName: 'Wormhole distance',
-    value: 40
-  },
-  ringComplexityCount: {
-    displayName: 'Ring complexity',
-    value: 3000000
-  }
-}
 export class RingEdit extends Component {
   constructor (props) {
     super(props)
@@ -59,13 +29,12 @@ export class RingEdit extends Component {
         <h4>Rings</h4>
         <table className='table table-sm table-striped'>
           <tbody>
-            {
-              this.renderRingRows(this.props.rings)
-            }
+            {this.renderRingRows(this.props.rings)}
           </tbody>
         </table>
       </div>
-      <RingOptions initialValues={ringOptions} enableReinitialize />
+      <RingOptionsBasic initialValues={this.props.ringOptionsBasic} enableReinitialize />
+      <RingOptionsConnectivityDefinition enableReinitialize />
     </div>
   }
 
@@ -105,7 +74,9 @@ export class RingEdit extends Component {
             {ring.name}
 
             {this.canEdit
-              ? <button className='btn btn-sm btn-outline-danger ring-del-btn'
+              ? <button
+                id={`btnRingDel_${ring.id}`}
+                className='btn btn-sm btn-outline-danger ring-del-btn'
                 onClick={() => this.requestDeleteRing(ring)}
                 data-toggle='tooltip' data-placement='bottom' title='Delete'>
                 <i className='fa ei-button-icon ng-scope fa-trash-alt' />
@@ -140,7 +111,7 @@ export class RingEdit extends Component {
                         {node.siteClli || node.objectId}
 
                         {this.canEdit
-                          ? <button className='btn btn-sm btn-outline-danger ring-del-btn'
+                          ? <button id={`btnNodeDel_${ring.id}-${node.objectId}`} className='btn btn-sm btn-outline-danger ring-del-btn'
                             onClick={() => this.deleteNode(ring, node.objectId)}
                             data-toggle='tooltip' data-placement='bottom' title='Delete'>
                             <i className='fa ei-button-icon ng-scope fa-trash-alt' />
@@ -160,7 +131,7 @@ export class RingEdit extends Component {
     } else {
       return <tr key={ring.id}>
         <td>
-          <div onClick={() => this.props.setSelectedRingId(ring.id)}>
+          <div id={`btnRingSelect_${ring.id}`} onClick={() => this.props.setSelectedRingId(ring.id)}>
             {ring.name}
           </div>
         </td>
@@ -355,7 +326,8 @@ const mapStateToProps = (state) => ({
   plan: state.plan,
   user: state.user,
   map: state.map,
-  status: state.plan.activePlan && state.plan.activePlan.planState
+  status: state.plan.activePlan && state.plan.activePlan.planState,
+  ringOptionsBasic: state.ringEdit.aroNetworkConstraints
 })
 
 const mapDispatchToProps = dispatch => ({

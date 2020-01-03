@@ -14,7 +14,7 @@ app.use(morgan(loggerFormat, {
 
 app.use(compression())
 app.use(bodyParser.urlencoded({ extended: false }))
-app.use(bodyParser.json())
+app.use(bodyParser.json({ limit: '2mb' }))
 app.use(require('cookie-session')({
   name: 'session',
   keys: ['key1', 'key2']

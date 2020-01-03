@@ -1,5 +1,5 @@
 class PlanSearchController {
-  constructor ($http, $timeout, state) {
+  constructor ($http, $timeout, $ngRedux, state) {
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
@@ -16,6 +16,7 @@ class PlanSearchController {
     }
     this.idToServiceAreaCode = {}
     this.creatorsSearchList = []
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }
 
   $onInit () {
@@ -66,7 +67,7 @@ class PlanSearchController {
       promises.push(this.$http.get(`/service/odata/servicearea?$select=id,code&$filter=${filter}&$orderby=id&$top=10000`))
     }
 
-    return this.state.StateViewMode.loadListOfSAPlanTagsById(this.$http, this.state, promises)
+    return this.state.StateViewMode.loadListOfSAPlanTagsById(this.state, promises)
       .then((result) => {
         result.forEach((serviceArea) => this.idToServiceAreaCode[serviceArea.id] = serviceArea.code)
         this.$timeout()
@@ -95,7 +96,9 @@ class PlanSearchController {
         .then((response) => {
           this.planOptions.params = {}
           this.$http.get('/optimization/processes').then((running) => {
-            response.data.forEach((plan) => {
+            this.totalData = []
+            this.totalData = response.data.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase()) ? 1 : -1)
+            this.totalData.forEach((plan) => {
               var info = running.data.find((status) => status.planId === +plan.id)
               if (info) {
                 var diff = (Date.now() - new Date(info.startDate).getTime()) / 1000
@@ -107,7 +110,8 @@ class PlanSearchController {
                 plan.optimizationState = info.optimizationState
               }
             })
-            this.allPlans = _.sortBy(response.data, 'name')
+            // this.allPlans = _.sortBy(response.data, 'name')
+            this.allPlans = response.data
             this.plans = this.allPlans.slice(0, this.maxResults)
             this.loadServiceAreaInfo(this.plans)
             this.pages = []
@@ -216,14 +220,27 @@ class PlanSearchController {
     }
     url = url + `&$top=${MAX_CREATORS_FROM_ODATA}`
     return this.$http.get(url)
-    .then((response) => {
-      this.creatorsSearchList = response.data
-    })
+      .then((response) => {
+        this.creatorsSearchList = response.data
+      })
   }
 
+  mapStateToThis (reduxState) {
+    return {
+      dataItems: reduxState.plan.dataItems
+    }
+  }
+
+  mapDispatchToTarget (dispatch) {
+    return { }
+  }
+
+  $onDestroy () {
+    this.unsubscribeRedux()
+  }
 }
 
-PlanSearchController.$inject = ['$http', '$timeout', 'state']
+PlanSearchController.$inject = ['$http', '$timeout', '$ngRedux', 'state']
 
 let planSearch = {
   templateUrl: '/components/common/plan/plan-search.html',

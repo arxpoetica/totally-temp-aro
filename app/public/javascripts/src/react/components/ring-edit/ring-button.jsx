@@ -5,14 +5,13 @@ import RingActions from './ring-edit-actions.js'
 import PlanActions from '../plan/plan-actions'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import socketManager from '../../../react/common/socket-manager'
-import AroHttp from '../../common/aro-http'
+// import AroHttp from '../../common/aro-http'
 import RingStatusTypes from './constants'
 import ProgressButton from '../common/progress-button.jsx'
 import Constants from '../../common/constants'
-const selector = formValueSelector(Constants.RING_OPTIONS_FORM)
+const selector = formValueSelector(Constants.RING_OPTIONS_BASIC_FORM)
 
 export class RingButton extends ProgressButton {
-  // ToDo: abstract and combine with Coverage Button and RFP Button
   constructor (props) {
     super(props)
 
@@ -31,8 +30,7 @@ export class RingButton extends ProgressButton {
     })
   }
 
-  requestSubNet () {
-    // this.props.onModify()
+  runSubNet () {
     var ringIds = []
     for (var key in this.props.rings) {
       ringIds.push('' + this.props.rings[key].id)
@@ -43,30 +41,12 @@ export class RingButton extends ProgressButton {
     this.props.mapLayers.location.forEach(item => {
       if (item.checked) locationTypes.push(item.plannerKey)
     })
-
-    const postBody = {
-      ringIds: ringIds,
-      locationTypes: locationTypes,
-      maxLocationEdgeDistance: +this.props.ringOptions.maxLocationEdgeDistance.value,
-      locationBufferSize: +this.props.ringOptions.locationBufferSize.value,
-      conduitBufferSize: +this.props.ringOptions.conduitBufferSize.value,
-      aroRingRule: {
-        snappingDistance: +this.props.ringOptions.snappingDistance.value,
-        maxConnectionDistance: +this.props.ringOptions.maxConnectionDistance.value,
-        maxWormholeDistance: +this.props.ringOptions.maxWormholeDistance.value,
-        ringComplexityCount: +this.props.ringOptions.ringComplexityCount.value
-      }
-    }
-    // No POST in components! This should be an action
-    AroHttp.post(`/service/plan/${planId}/ring-cmd`, postBody)
-      .then(result => {
-        // ToDo check for error
-      }).catch(err => console.error(err))
+    this.props.requestSubNet(planId, ringIds, locationTypes, this.props.ringOptionsBasic, this.props.connectivityDefinition)
   }
 
   // override
   onRun () {
-    this.requestSubNet()
+    this.runSubNet()
   }
 
   // override
@@ -99,13 +79,14 @@ const mapStateToProps = state => {
     planId: state.plan.activePlan && state.plan.activePlan.id,
     projectId: state.user.loggedInUser.projectId,
     rings: state.ringEdit.rings,
-    ringOptions: selector(state, 'spatialEdgeType', 'snappingDistance', 'maxConnectionDistance', 'maxWormholeDistance', 'ringComplexityCount', 'maxLocationEdgeDistance', 'locationBufferSize', 'conduitBufferSize'),
+    ringOptionsBasic: selector(state, 'spatialEdgeType', 'snappingDistance', 'maxConnectionDistance', 'maxWormholeDistance', 'ringComplexityCount', 'maxLocationEdgeDistance', 'locationBufferSize', 'conduitBufferSize', 'targetEdgeTypes'),
+    connectivityDefinition: state.ringEdit.connectivityDefinition,
     mapLayers: state.mapLayers
   }
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  // setAnalysisStatus: (status) => dispatch(RingActions.setAnalysisStatus(status)),
+  requestSubNet: (planId, ringIds, locationTypes, ringOptions, connectivityDefinition) => dispatch(RingActions.requestSubNet(planId, ringIds, locationTypes, ringOptions, connectivityDefinition)),
   setActivePlanState: (status) => dispatch(PlanActions.setActivePlanState(status)),
   setAnalysisProgress: (progress) => dispatch(RingActions.setAnalysisProgress(progress))
 })

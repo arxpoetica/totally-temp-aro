@@ -15,25 +15,43 @@
   <div class="map-tool-wrapper">
     <div ng-show="$ctrl.map_tools.is_visible('locations')" class="card map-tool">
       <div class="card-header map-tools-card-header bg-primary text-white">
-        <a href="javascript:void(0)" class="float-right" ng-show="$ctrl.map_tools.is_expanded('locations')" ng-click="$ctrl.map_tools.collapse('locations')">
+        <span class="float-right aro-pointer" ng-show="$ctrl.map_tools.is_expanded('locations')" ng-click="$ctrl.map_tools.collapse('locations')">
           <span style="color:white" class="fa fa-chevron-up"></span>
-        </a>
-        <a href="javascript:void(0)" class="float-right" ng-show="!$ctrl.map_tools.is_expanded('locations')" ng-click="$ctrl.map_tools.expand('locations')">
+        </span>
+        <span class="float-right aro-pointer" ng-show="!$ctrl.map_tools.is_expanded('locations')" ng-click="$ctrl.map_tools.expand('locations')">
           <span style="color:white" class="fa fa-chevron-down"></span>
-        </a>
+        </span>
         <h5 class="map-tool-title-text">Locations</h5>
       </div>
       <div class="card-body map-tools-card-body" style="padding-top: 0px; max-height: 600px; overflow-y: auto; overflow-x: hidden;"
            ng-show="$ctrl.map_tools.is_expanded('locations')">
 
+        <div class="row location-category-title" ng-if="$ctrl.areAnyLocationFiltersVisible()">
+          Location Filters
+        </div>
+        <div ng-repeat="(filterName, filter) in $ctrl.state.configuration.locationCategories.filters">
+          <ul class="customer-type">
+            <!-- Loop through all filter types -->
+            <li ng-repeat="rule in $ctrl.getOrderedRulesForFilter(filter)">
+              <div class="ctype-icon"><img ng-src="{{rule.onPass.iconUrl}}" style="width:16px;margin-right:10px"></div>
+              <div class="ctype-name">{{rule.description}}</div>
+              <div class="ctype-checkbox">
+                <input type="checkbox" class="checkboxfill" ng-style="stylebtn"
+                        ng-checked="rule.isChecked"
+                        ng-click="$ctrl.setRuleChecked(rule, !rule.isChecked)">
+              </div>
+            </li>
+          </ul>
 
-        <div class="row location-category-title">
+        </div>
+  
+        <div class="row location-category-title" ng-if="$ctrl.areAnyLocationLayersVisible()">
           Location Types
         </div>
         <form>
           <ul class="customer-type">
             <!-- Loop through all location types -->
-            <li ng-repeat="locationType in $ctrl.locationLayers | orderBy: '-key'">
+            <li ng-repeat="locationType in $ctrl.locationLayers | orderBy: '-key'" ng-if="locationType.show">
               <div class="ctype-icon" ng-if="locationType.showIcon"><img ng-src="{{locationType.iconUrl}}" style="width:16px;margin-right:10px"></div>
               <div class="ctype-name">{{locationType.label}}</div>
               <div class="ctype-checkbox">

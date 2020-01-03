@@ -1,5 +1,5 @@
 class PlanSummaryController {
-  constructor (state, Utils, $http, $timeout) {
+  constructor (state, Utils, $http, $timeout, $ngRedux) {
     this.state = state
     this.Utils = Utils
     this.$http = $http
@@ -36,6 +36,7 @@ class PlanSummaryController {
         })
       })
     })
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
   }
 
   $onInit () {
@@ -185,13 +186,6 @@ class PlanSummaryController {
     this.locTagCoverage[selectedCoverageLoc] = groupByTagDeploymentType
   }
 
-  $onChanges (changesObj) {
-    if (changesObj.currentTransaction) {
-      // Current transaction has changed. Recalculate plan summary.
-      this.getPlanSummary()
-    }
-  }
-
   $doCheck () {
     // Selected boundary type has changed
     if (this.selectedBoundaryType.id !== this.state.selectedBoundaryType.id) {
@@ -205,16 +199,38 @@ class PlanSummaryController {
     this.planEditorChangedObserver.unsubscribe()
     this.censusTagCategoriesObserver.unsubscribe()
     this.locTagCoverage = []
+    this.unsubscribeRedux()
+  }
+
+  mapStateToThis (reduxState) {
+    return {
+      currentTransaction: reduxState.planEditor.transaction
+    }
+  }
+
+  mapDispatchToTarget (dispatch) {
+    return {
+    }
+  }
+
+  mergeToTarget (nextState, actions) {
+    const oldTransaction = this.currentTransaction
+    // merge state and actions onto controller
+    Object.assign(this, nextState)
+    Object.assign(this, actions)
+
+    if (oldTransaction !== this.currentTransaction) {
+      // Current transaction has changed. Recalculate plan summary.
+      this.getPlanSummary()
+    }
   }
 }
 
-PlanSummaryController.$inject = ['state', 'Utils', '$http', '$timeout']
+PlanSummaryController.$inject = ['state', 'Utils', '$http', '$timeout', '$ngRedux']
 
 let planSummary = {
   templateUrl: '/components/sidebar/plan-editor/plan-summary.html',
-  bindings: {
-    currentTransaction: '<'
-  },
+  bindings: {},
   controller: PlanSummaryController
 }
 

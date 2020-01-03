@@ -1,5 +1,3 @@
-import Constants from '../../common/constants'
-
 class PlanInfoController {
   constructor ($http, state, $timeout, $ngRedux, Utils) {
     this.$http = $http
@@ -63,7 +61,7 @@ class PlanInfoController {
           // We are checking if the logged in user or any of the users groups have permission to write.
           if ((this.state.loggedInUser.id === access.systemActorId) ||
               (this.state.loggedInUser.groupIds.indexOf(access.systemActorId) >= 0)) {
-            const currentUserIsGod = (access.rolePermissions === Constants.SUPER_USER_PERMISSIONS)
+            const currentUserIsGod = (access.rolePermissions === this.authRoles.SUPER_USER.permissions)
             this.currentUserCanEdit = this.currentUserCanEdit || currentUserIsGod
           }
         })
@@ -199,7 +197,9 @@ class PlanInfoController {
 
   mapStateToThis (reduxState) {
     return {
-      systemActors: reduxState.user.systemActors
+      systemActors: reduxState.user.systemActors,
+      authRoles: reduxState.user.authRoles,
+      dataItems: reduxState.plan.dataItems
     }
   }
 
@@ -214,7 +214,7 @@ class PlanInfoController {
 
   $onDestroy () {
     this.commitUpdatestoPlan(true)
-    // this.planObserver.unsubscribe()
+    this.unsubscribeRedux()
   }
 }
 

@@ -12,6 +12,7 @@ function loadConfigurationFromServer () {
       .catch(err => console.error(err))
   }
 }
+
 function getStyleValues () {
   return dispatch => {
     AroHttp.get('/ui_stylesheets', true)
@@ -22,6 +23,14 @@ function getStyleValues () {
       .catch(err => console.error(err))
   }
 }
+
+function setPerspective (perspective) {
+  return {
+    type: Actions.CONFIGURATION_SET_PERSPECTIVE,
+    payload: perspective
+  }
+}
+
 function saveConfigurationToServerAndReload (type, configuration) {
   return dispatch => {
     AroHttp.post(`/ui_settings/save/${type}`, { configuration: configuration })
@@ -29,6 +38,7 @@ function saveConfigurationToServerAndReload (type, configuration) {
       .catch(err => console.error(err))
   }
 }
+
 function saveStylesheetsToServerAndReload (Stylesheetvalues) {
   return dispatch => {
     AroHttp.post('/ui_stylesheets', { configuration: Stylesheetvalues })
@@ -36,6 +46,7 @@ function saveStylesheetsToServerAndReload (Stylesheetvalues) {
       .catch(err => console.error(err))
   }
 }
+
 function getAssetKeys (offset, limit) {
   return dispatch => {
     AroHttp.get(`/ui_assets/list/assetKeys?offset=${offset}&limit=${limit}`)
@@ -57,11 +68,20 @@ function uploadAssetToServer (assetKey, file) {
   }
 }
 
+function setWormholeFusionConfiguration (wormholeFusionTypes) {
+  return {
+    type: Actions.CONFIGURATION_SET_WORMHOLE_FUSION_CONFIGURATION,
+    payload: wormholeFusionTypes
+  }
+}
+
 export default {
-  loadConfigurationFromServer: loadConfigurationFromServer,
-  saveConfigurationToServerAndReload: saveConfigurationToServerAndReload,
-  getAssetKeys: getAssetKeys,
-  getStyleValues: getStyleValues,
-  saveStylesheetsToServerAndReload: saveStylesheetsToServerAndReload,
-  uploadAssetToServer: uploadAssetToServer
+  loadConfigurationFromServer,
+  saveConfigurationToServerAndReload,
+  getAssetKeys,
+  getStyleValues,
+  saveStylesheetsToServerAndReload,
+  uploadAssetToServer,
+  setPerspective,
+  setWormholeFusionConfiguration
 }

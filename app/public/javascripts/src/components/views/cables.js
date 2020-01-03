@@ -12,12 +12,23 @@ const getCablesArray = createSelector([getAllNetworkEquipmentLayers], networkEqu
   }
   return cablesArray
 })
+const getConduitsArray = createSelector([getAllNetworkEquipmentLayers], networkEquipmentLayers => {
+  var conduitsArray = []
+  if (networkEquipmentLayers.roads) {
+    Object.keys(networkEquipmentLayers.roads).forEach(key => conduitsArray.push(networkEquipmentLayers.roads[key]))
+  }
+  if (networkEquipmentLayers.conduits) {
+    Object.keys(networkEquipmentLayers.conduits).forEach(key => conduitsArray.push(networkEquipmentLayers.conduits[key]))
+  }
+  return conduitsArray
+})
 
 class CablesController {
   constructor ($rootScope, $ngRedux, map_tools, state) {
     this.map_tools = map_tools
     this.state = state
     this.currentUser = state.loggedInUser
+    this.openRow = null
 
     // When the map zoom changes, map layers can change
     $rootScope.$on('map_zoom_changed', () => this.updateMapLayers())
@@ -26,12 +37,7 @@ class CablesController {
       this.updateMapLayers()
     })
 
-    // Update map layers when the dataItems property of state changes
-    state.dataItemsChanged
-      .skip(1)
-      .subscribe((newValue) => this.updateMapLayers())
-
-    // Update map layers when the dataItems property of state changes
+    // Update map layers when the view settings change
     state.viewSettingsChanged
       .skip(1)
       .subscribe((newValue) => this.updateMapLayers())
@@ -39,6 +45,14 @@ class CablesController {
     this.createdMapLayerKeys = new Set()
 
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
+  }
+
+  toggleOpenRow (rowId) {
+    if (this.openRow === rowId) {
+      this.openRow = null
+    } else {
+      this.openRow = rowId
+    }
   }
 
   // Get the line transformation mode with the current zoom level
@@ -103,10 +117,10 @@ class CablesController {
       if (networkEquipment.equipmentType !== 'point' ||
         this.usePointAggregate ||
         this.mapRef.getZoom() > networkEquipment.aggregateZoomThreshold) {
-        if (this.state.equipmentLayerTypeVisibility.existing && networkEquipment.checked) {
+        if (this.state.cableLayerTypeVisibility.existing && networkEquipment.checked) {
           // We need to show the existing network equipment. Loop through all the selected library ids.
-          this.state.dataItems && this.state.dataItems[networkEquipment.dataItemKey] &&
-            this.state.dataItems[networkEquipment.dataItemKey].selectedLibraryItems.forEach((selectedLibraryItem) => {
+          this.dataItems && this.dataItems[networkEquipment.dataItemKey] &&
+            this.dataItems[networkEquipment.dataItemKey].selectedLibraryItems.forEach((selectedLibraryItem) => {
               var mapLayerKey = `${categoryItemKey}_existing_${selectedLibraryItem.identifier}`
               mapLayers[mapLayerKey] = this.createSingleMapLayer(categoryItemKey, categoryType, networkEquipment, 'existing', selectedLibraryItem.identifier, null)
               createdMapLayerKeys.add(mapLayerKey)
@@ -114,7 +128,7 @@ class CablesController {
         }
 
         const planId = this.state.plan && this.state.plan && this.state.plan.id
-        if (this.state.equipmentLayerTypeVisibility.planned && networkEquipment.checked && planId) {
+        if (this.state.cableLayerTypeVisibility.planned && networkEquipment.checked && planId) {
           // We need to show the planned network equipment for this plan.
           var mapLayerKey = `${categoryItemKey}_planned`
           mapLayers[mapLayerKey] = this.createSingleMapLayer(categoryItemKey, categoryType, networkEquipment, 'planned', null, planId)
@@ -166,7 +180,7 @@ class CablesController {
     }
   }
 
-  getBackgroundColor(layer) {
+  getBackgroundColor (layer) {
     return layer.drawingOptions.strokeStyle
   }
 
@@ -174,6 +188,8 @@ class CablesController {
     return {
       networkEquipmentLayers: getNetworkEquipmentLayersList(reduxState),
       cablesArray: getCablesArray(reduxState),
+      conduitsArray: getConduitsArray(reduxState),
+      dataItems: reduxState.plan.dataItems,
       mapRef: reduxState.map.googleMaps
     }
   }
@@ -185,6 +201,7 @@ class CablesController {
         // First set the visibility of the current layer
         dispatch(MapLayerActions.setNetworkEquipmentLayerVisibility(layerType, layer, isVisible))
       },
+      setCableConduitVisibility: (cableKey, conduitKey, isVisible) => dispatch(MapLayerActions.setCableConduitVisibility(cableKey, conduitKey, isVisible)),
       updateType: (visibilityType, isVisible) => {
         dispatch(MapLayerActions.setNetworkEquipmentLayerVisibilityType(visibilityType, isVisible))
       }
@@ -193,12 +210,15 @@ class CablesController {
 
   mergeToTarget (nextState, actions) {
     const currentNetworkEquipmentLayers = this.networkEquipmentLayers
+    const currentSelectedLibrary = this.dataItems && this.dataItems.fiber && this.dataItems.fiber.selectedLibraryItems
 
     // merge state and actions onto controller
     Object.assign(this, nextState)
     Object.assign(this, actions)
 
-    if (currentNetworkEquipmentLayers !== nextState.networkEquipmentLayers) {
+    const newSelectedLibrary = this.dataItems && this.dataItems.fiber && this.dataItems.fiber.selectedLibraryItems
+    if ((currentNetworkEquipmentLayers !== nextState.networkEquipmentLayers) ||
+      (currentSelectedLibrary !== newSelectedLibrary)) {
       this.updateMapLayers()
     }
   }

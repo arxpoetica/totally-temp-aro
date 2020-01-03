@@ -1,26 +1,34 @@
+/* global app */
 import { react2angular } from 'react2angular'
 import { ToastContainer } from 'react-toastify'
 
 import Broadcast from '../react/components/global-settings/broadcast.jsx'
 import ConfigurationEditor from '../react/components/configuration/ui/configuration-editor.jsx'
+import ContextMenu from '../react/components/context-menu/context-menu.jsx'
 import CoverageInitializer from '../react/components/coverage/coverage-initializer.jsx'
 import CoverageButton from '../react/components/coverage/coverage-button.jsx'
 import RfpButton from '../react/components/optimization/rfp/rfp-button.jsx'
+import NetworkAnalysisConstraints from '../react/components/optimization/network-analysis/network-analysis-constraints.jsx'
+import NetworkAnalysisConnectivityDefinition from '../react/components/optimization/network-analysis/network-analysis-connectivity-definition.jsx'
+import NetworkAnalysisNetworkDefinition from '../react/components/optimization/network-analysis/network-analysis-network-definition.jsx'
 import NetworkAnalysisOutput from '../react/components/optimization/network-analysis/network-analysis-output.jsx'
 import PlanTargetList from '../react/components/selection/plan-target-list.jsx'
+import PlanEditor from '../react/components/plan-editor/plan-editor.jsx'
+import EquipmentDropTarget from '../react/components/plan-editor/equipment-drop-target.jsx'
 import ReportModuleList from '../react/components/configuration/report/report-module-list.jsx'
 import ReportsDownloadModal from '../react/components/optimization/reports/reports-download-modal.jsx'
 import RfpAnalyzer from '../react/components/optimization/rfp/rfp-analyzer.jsx'
 import RfpStatus from '../react/components/optimization/rfp/status/rfp-status.jsx'
 import RingEdit from '../react/components/ring-edit/ring-edit.jsx'
 import RingButton from '../react/components/ring-edit/ring-button.jsx'
+import LocationInfo from '../react/components/location-info/location-info.jsx'
+import ResourcePermissions from '../react/components/acl/resource-permissions/resource-permissions.jsx'
+import PermissionsTable from '../react/components/acl/resource-permissions/permissions-table.jsx'
+import SearchableSelect from '../react/components/common/searchable-select.jsx'
 
 import boundaryDetail from './sidebar/view/boundary-detail'
 import equipmentDetail from './sidebar/view/equipment-detail'
 import equipmentDetailList from './sidebar/view/equipment-detail-list'
-import locationDetail from './sidebar/view/location-detail/location-detail'
-import locationAuditLog from './sidebar/view/location-audit-log'
-import locationDetailPropertiesFactory from '../components/sidebar/view/location-detail/location-detail-properties-factory'
 import roadSegmentDetail from './sidebar/view/road-segment-detail'
 import coverageBoundary from './sidebar/view/coverage-boundary'
 import locationEditor from './sidebar/view/location-editor'
@@ -51,6 +59,9 @@ import viewSettings from './sidebar/debug/view-settings'
 import ringEditor from './sidebar/ring-editor'
 import draggableButton from './sidebar/plan-editor/draggable-button'
 import planEditor from './sidebar/plan-editor/plan-editor'
+import planEditorContainer from './sidebar/plan-editor/plan-editor-container'
+import equipmentPropertiesEditor from './sidebar/plan-editor/equipment-properties-editor'
+import boundaryPropertiesEditor from './sidebar/plan-editor/boundary-properties-editor'
 import planSummary from './sidebar/plan-editor/plan-summary'
 import serviceLayerEditor from './sidebar/plan-editor/service-layer-editor'
 import conicTileSystemUploader from './sidebar/plan-settings/plan-data-selection/conic-tile-system-uploader'
@@ -122,7 +133,6 @@ import editorInterfaceNullableNumber from './common/editor-interfaces/editor-int
 import utils from './common/utilities'
 
 import state from '../models/state'
-import aclManager from '../models/aclManager'
 import tileDataService from '../components/tiles/tile-data-service'
 
 import reduxConfig from '../redux-config'
@@ -130,8 +140,6 @@ import reduxConfig from '../redux-config'
 app.component('boundaryDetail', boundaryDetail)
   .component('equipmentDetail', equipmentDetail)
   .component('equipmentDetailList', equipmentDetailList)
-  .component('locationDetail', locationDetail)
-  .component('locationAuditLog', locationAuditLog)
   .component('roadSegmentDetail', roadSegmentDetail)
   .component('coverageBoundary', coverageBoundary)
   .component('locationEditor', locationEditor)
@@ -159,6 +167,9 @@ app.component('boundaryDetail', boundaryDetail)
   .component('viewSettings', viewSettings)
   .component('ringEditor', ringEditor)
   .component('planEditor', planEditor)
+  .component('planEditorContainer', planEditorContainer)
+  .component('equipmentPropertiesEditor', equipmentPropertiesEditor)
+  .component('boundaryPropertiesEditor', boundaryPropertiesEditor)
   .component('planSummary', planSummary)
   .component('serviceLayerEditor', serviceLayerEditor)
   .component('draggableButton', draggableButton)
@@ -229,12 +240,18 @@ app.component('boundaryDetail', boundaryDetail)
   .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
 // ReactJS components
   .component('rBroadcast', react2angular(Broadcast))
+  .component('rContextMenu', react2angular(ContextMenu))
   .component('rConfigurationEditor', react2angular(ConfigurationEditor))
   .component('rCoverageInitializer', react2angular(CoverageInitializer))
   .component('rCoverageButton', react2angular(CoverageButton))
   .component('rRfpButton', react2angular(RfpButton))
+  .component('rNetworkAnalysisConnectivityDefinition', react2angular(NetworkAnalysisConnectivityDefinition))
+  .component('rNetworkAnalysisNetworkDefinition', react2angular(NetworkAnalysisNetworkDefinition))
+  .component('rNetworkAnalysisConstraints', react2angular(NetworkAnalysisConstraints, ['initialValues', 'enableReinitialize']))
   .component('rNetworkAnalysisOutput', react2angular(NetworkAnalysisOutput))
   .component('rPlanTargetList', react2angular(PlanTargetList))
+  .component('rPlanEditor', react2angular(PlanEditor))
+  .component('rEquipmentDropTarget', react2angular(EquipmentDropTarget))
   .component('rReportModuleList', react2angular(ReportModuleList))
   .component('rReportsDownloadModal', react2angular(ReportsDownloadModal, ['reportTypes', 'title'])) // Some properties are passed in manually, not through redux.
   .component('rRfpAnalyzer', react2angular(RfpAnalyzer))
@@ -242,9 +259,11 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rRingEdit', react2angular(RingEdit))
   .component('rRingButton', react2angular(RingButton, ['onModify']))
   .component('rToastContainer', react2angular(ToastContainer))
+  .component('rLocationInfo', react2angular(LocationInfo))
+  .component('rResourcePermissions', react2angular(ResourcePermissions))
+  .component('rPermissionsTable', react2angular(PermissionsTable))
+  .component('rSearchableSelect', react2angular(SearchableSelect))
   .service('Utils', utils)
   .service('state', state)
-  .service('aclManager', aclManager)
   .service('tileDataService', tileDataService)
-  .service('locationDetailPropertiesFactory', locationDetailPropertiesFactory)
   .config(reduxConfig)

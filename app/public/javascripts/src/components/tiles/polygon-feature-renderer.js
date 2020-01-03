@@ -3,7 +3,7 @@ import PolylineFeatureRenderer from './polyline-feature-renderer'
 class PolygonFeatureRenderer {
   // First renders unselected polygon's then selected polygons
   // So selected polygon styles will be visible
-  static renderFeatures (closedPolygonFeatureLayersList, selection, oldSelection) {
+  static renderFeatures (closedPolygonFeatureLayersList, featureData, selection, oldSelection) {
     var unselectedClosedPolygonFeatureLayersList = closedPolygonFeatureLayersList.filter((featureObj) => {
       if (featureObj.selectedDisplayMode == featureObj.displayModes.VIEW && featureObj.feature.properties.id != oldSelection.details.serviceAreaId) {
         return featureObj
@@ -23,20 +23,20 @@ class PolygonFeatureRenderer {
     })
 
     unselectedClosedPolygonFeatureLayersList.forEach((Obj) => {
-      PolygonFeatureRenderer.renderFeature(Obj.feature, Obj.shape, Obj.geometryOffset, Obj.ctx, Obj.mapLayer, Obj.censusCategories, Obj.tileDataService, Obj.styles,
+      PolygonFeatureRenderer.renderFeature(Obj.feature, featureData, Obj.shape, Obj.geometryOffset, Obj.ctx, Obj.mapLayer, Obj.censusCategories, Obj.tileDataService, Obj.styles,
         Obj.tileSize, selection, oldSelection, Obj.selectedDisplayMode, Obj.displayModes,
         Obj.analysisSelectionMode, Obj.selectionModes)
     })
 
     selectedClosedPolygonFeatureLayersList.forEach((Obj) => {
-      PolygonFeatureRenderer.renderFeature(Obj.feature, Obj.shape, Obj.geometryOffset, Obj.ctx, Obj.mapLayer, Obj.censusCategories, Obj.tileDataService, Obj.styles,
+      PolygonFeatureRenderer.renderFeature(Obj.feature, featureData, Obj.shape, Obj.geometryOffset, Obj.ctx, Obj.mapLayer, Obj.censusCategories, Obj.tileDataService, Obj.styles,
         Obj.tileSize, selection, oldSelection, Obj.selectedDisplayMode, Obj.displayModes,
         Obj.analysisSelectionMode, Obj.selectionModes)
     })
   }
 
   // Renders a polygon feature onto the canvas
-  static renderFeature (feature, shape, geometryOffset, ctx, mapLayer, censusCategories, tileDataService, styles, tileSize,
+  static renderFeature (feature, featureData, shape, geometryOffset, ctx, mapLayer, censusCategories, tileDataService, styles, tileSize,
     selection, oldSelection, selectedDisplayMode, displayModes, analysisSelectionMode, selectionModes) {
     ctx.lineCap = 'round'
     // Get the drawing styles for rendering the polygon
@@ -98,6 +98,11 @@ class PolygonFeatureRenderer {
       selectedDisplayMode == displayModes.EDIT_PLAN) {
       // Highlight the selected siteBoundary in Edit mode on selection
       drawingStyles.lineWidth = mapLayer.highlightStyle.lineWidth
+    } else if ((feature.properties._data_type) &&
+      feature.properties._data_type === 'equipment_boundary.select' && feature.properties.workflow_state_id === 2) {
+      drawingStyles.strokeStyle = '#0101F6'
+      drawingStyles.fillStyle = mapLayer.highlightStyle.fillStyle
+      drawingStyles.lineOpacity = styles.modifiedBoundary.lineOpacity
     }
     // console.log(feature)
     if (tileDataService.modifiedBoundaries.hasOwnProperty(feature.properties.object_id) &&

@@ -1,0 +1,72 @@
+.context-menu-backdrop {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+}
+
+.context-menu-container {
+  line-height: 22px; /* Any property will do */
+  position: absolute;
+  bottom: 25px;
+}
+
+.context-menu {
+  line-height: 22px; /* Any property will do */
+}
+
+.context-menu-dropdown {
+  max-height: 80vh;
+  top: auto;
+  padding: 0px;
+}
+
+/* left: 100% is leaving a single pixel gap which causes the menu to then get hidden. Making 99% for now */
+.dropdown-menu .sub-menu {
+    left: 99%;
+    position: absolute;
+    top: 0;
+    visibility: hidden;
+    margin-top: -1px;
+    padding: 0px;
+}
+
+.dropdown-item:hover .sub-menu, .dropdown-menu div:hover .sub-menu, .sub-menu:hover {
+    visibility: visible;
+}
+
+.dropdown:hover .dropdown-menu {
+    display: block;
+}
+
+.dropdown-menu {
+    margin-top: 0;
+}
+
+.dropdown-item:hover {
+  color: white;
+  background-color: #007bff;
+}
+
+.aro-dropdown-item {
+  color: black;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.badge-boundary {
+  background-color: #a04040;
+}
+
+.badge-equipment {
+  background-color: #002792;
+}
+
+.badge-location {
+  background-color: #5a40a0;
+}
+
+.badge-service-area {
+  background-color: #40a040;
+}

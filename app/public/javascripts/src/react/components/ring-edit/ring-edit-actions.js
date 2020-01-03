@@ -1,7 +1,6 @@
 /* globals */
 import Actions from '../../common/actions'
 import AroHttp from '../../common/aro-http'
-import RingUtils from './ring-utils'
 import Ring from '../../common/ring'
 
 function setSelectedRingId (ringId) {
@@ -14,22 +13,14 @@ function setSelectedRingId (ringId) {
 
 function newRing (planId, userId) {
   return (dispatch) => {
-    /*
-    var promisses = []
-    rings.forEach(ring => {
-      promisses.push(AroHttp.post(`/service/plan/${planId}/ring-config`, ring.getDataExport()))
-    })
-    */
-    // Promise.all(promisses)
     AroHttp.post(`/service/plan/${planId}/ring-config`, {})
       .then(result => {
-      // ToDo protect against fail returns
+        // ToDo protect against fail returns
         var ring = new Ring(result.data.id)
         dispatch({
           type: Actions.RING_ADD_RINGS,
           payload: [ring]
         })
-        // ToDo: this should be in ringEdit in a .then()
         dispatch({
           type: Actions.RING_SET_SELECTED_RING_ID,
           payload: ring.id
@@ -55,7 +46,7 @@ function addNode (ring, feature, planId, userId) {
     // todo make ring update action
     AroHttp.put(`/service/plan/${planId}/ring-config/${ring.id}`, ringClone.getDataExport())
       .then(result => {
-      // ToDo protect against fail returns
+        // ToDo protect against fail returns
         dispatch({
           type: Actions.RING_UPDATE_RING,
           payload: ringClone
@@ -74,7 +65,7 @@ function removeNode (ring, featureId, planId, userId) {
     // todo make ring update action
     AroHttp.put(`/service/plan/${planId}/ring-config/${ring.id}`, ringClone.getDataExport())
       .then(result => {
-      // ToDo protect against fail returns
+        // ToDo protect against fail returns
         dispatch({
           type: Actions.RING_UPDATE_RING,
           payload: ringClone
@@ -87,7 +78,7 @@ function removeRing (ringId, planId, userId) {
   return (dispatch) => {
     AroHttp.delete(`/service/plan/${planId}/ring-config/${ringId}`)
       .then(result => {
-      // ToDo protect against fail returns
+        // ToDo protect against fail returns
         dispatch({
           type: Actions.RING_REMOVE_RING,
           payload: ringId
@@ -101,12 +92,6 @@ function saveRingChangesToServer (ring, planId, userId) {
     AroHttp.put(`/service/plan/${planId}/ring-config/${ring.id}`, ring.getDataExport())
       .then(result => {
         // ToDo protect against fail returns
-        /* // no need to update state, we don't need a redraw
-        dispatch({
-          type: Actions.RING_UPDATE_RING,
-          payload: ringClone
-        })
-        */
       }).catch(err => console.error(err))
   }
 }
@@ -155,7 +140,7 @@ function onFeatureSelected (features) {
         // add node
         // get feature lat long
 
-        RingUtils.getEquipmentDataPromise(feature.objectId, planId, userId)
+        getEquipmentDataPromise(feature.objectId, planId, userId)
           .then(result => {
             feature.data = result.data
             dispatch(addNode(ring, feature, planId, userId))
@@ -172,19 +157,17 @@ function loadRings (planId) {
 
     AroHttp.get(`/service/plan/${planId}/ring-config?planId=${planId}`)
       .then(result => {
-        var promisses = []
-
+        var rings = []
+        var ringPromisses = []
         result.data.forEach(ringData => {
-          promisses.push(Ring.parseData(ringData, planId, userId))
+          ringPromisses.push(this.getExchangeLinksPromise(ringData, planId, userId)
+            .then(result => {
+              rings.push(Ring.parseData(ringData, result))
+            }))
         })
 
-        Promise.all(promisses)
-          .then(results => {
-            var rings = []
-            results.forEach(result => {
-              rings.push(result)
-            })
-
+        Promise.all(ringPromisses)
+          .then(() => {
             dispatch({
               type: Actions.RING_REMOVE_ALL_RINGS
             })
@@ -193,9 +176,54 @@ function loadRings (planId) {
               payload: rings
             })
           })
+      }).catch(err => console.error(err))
+  }
+}
+
+function getExchangeLinksPromise (ringData, planId, userId) {
+  return new Promise((resolve, reject) => {
+    if (ringData.exchangeLinks.length > 0) {
+      var nodeIds = [ ringData.exchangeLinks[0].fromOid ]
+      ringData.exchangeLinks.forEach(link => {
+        nodeIds.push(link.toOid)
       })
+      var promisses = []
+      nodeIds.forEach(id => {
+        promisses.push(this.getEquipmentDataPromise(id, planId, userId))
+      })
+      Promise.all(promisses)
+        .then(results => {
+          resolve(results.map(result => result.data))
+        })
+    } else {
+      resolve([])
+    }
+  }).catch(err => console.error(err))
+}
+
+function requestSubNet (planId, ringIds, locationTypes, ringOptions, connectivityDefinition) {
+  return () => {
+    const postBody = {
+      ringIds: ringIds,
+      locationTypes: locationTypes,
+      maxLocationEdgeDistance: +ringOptions.maxLocationEdgeDistance.value,
+      locationBufferSize: +ringOptions.locationBufferSize.value,
+      conduitBufferSize: +ringOptions.conduitBufferSize.value,
+      aroRingRule: {
+        snappingDistance: +ringOptions.snappingDistance.value,
+        maxConnectionDistance: +ringOptions.maxConnectionDistance.value,
+        maxWormholeDistance: +ringOptions.maxWormholeDistance.value,
+        ringComplexityCount: +ringOptions.ringComplexityCount.value,
+        connectivityDefinition: connectivityDefinition
+      }
+    }
+    AroHttp.post(`/service/plan/${planId}/ring-cmd`, postBody)
       .catch(err => console.error(err))
   }
+}
+
+function getEquipmentDataPromise (equipmentId, planId, userId) {
+  return AroHttp.get(`/service/plan-feature/${planId}/equipment/${equipmentId}?userId=${userId}`)
 }
 
 function setAnalysisStatus (status) {
@@ -212,6 +240,16 @@ function setAnalysisProgress (progress) {
   }
 }
 
+function setRingOptionsConnectivityDefinition (spatialEdgeType, networkConnectivityType) {
+  return {
+    type: Actions.RING_OPTIONS_SET_CONNECTIVITY,
+    payload: {
+      spatialEdgeType,
+      networkConnectivityType
+    }
+  }
+}
+
 export default {
   setSelectedRingId,
   newRing,
@@ -220,9 +258,13 @@ export default {
   removeAllRings,
   onFeatureSelected,
   loadRings,
+  getExchangeLinksPromise,
   addNode,
   saveRingChangesToServer,
   renameRing,
+  requestSubNet,
+  getEquipmentDataPromise,
   setAnalysisStatus,
-  setAnalysisProgress
+  setAnalysisProgress,
+  setRingOptionsConnectivityDefinition
 }
