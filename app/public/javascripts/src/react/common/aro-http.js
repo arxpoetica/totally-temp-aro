@@ -8,7 +8,7 @@ class AroHttp {
   }
 
   // Make a HTTP POST request
-  static post (url, body = {}) {
+  static post (url, body = {}, returnRawResult = false) {
     const options = {
       method: 'POST',
       headers: {
@@ -16,7 +16,7 @@ class AroHttp {
       },
       body: JSON.stringify(body)
     }
-    return this._fetch(url, options)
+    return this._fetch(url, options, returnRawResult)
   }
 
   // Make a HTTP POST request, without converting to JSON
@@ -60,7 +60,7 @@ class AroHttp {
           // We have a response.
           status = response.status
           // We cannot do response.json() on an empty response (which is sometimes returned by service)
-          return response.text()
+          return returnRawResult ? response.blob() : response.text()
         }
       })
       .then(result => {
