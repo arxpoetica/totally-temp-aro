@@ -28,9 +28,8 @@ exports.configure = api => {
   // ]
   api.post('/report', async (req, res, next) => {
     const doc = new PDFDocument({ autoFirstPage: false })
-    const PDF_FILE = os.tmpdir() + '/' + uuidv4() + '.pdf'
-    const writeStream = fs.createWriteStream(PDF_FILE)
-    doc.pipe(writeStream)
+    res.setHeader('Content-Type', 'application/pdf');
+    doc.pipe(res)
     const reportPages = req.body
     for (var iReport = 0; iReport < reportPages.length; ++iReport) {
       // Construct a ReportPage object for this report page
@@ -50,25 +49,5 @@ exports.configure = api => {
       doc.image(screenshot, 0, 0, { width: sizePdfPoints.x, height: sizePdfPoints.y })
     }
     doc.end()
-    await new Promise((resolve, reject) => writeStream.on('finish', err => {
-      if (err) {
-        console.error(err)
-        reject(err)
-      } else {
-        resolve()
-      }
-    }))
-    const stats = fs.statSync(PDF_FILE)
-    res.setHeader('Content-Length', stats.size)
-    res.setHeader('Content-Type', 'application/pdf');
-    // res.setHeader('Content-Disposition', 'attachment; filename=report.pdf');
-    res.sendFile(PDF_FILE, err => {
-      if (err) {
-        console.error(err)
-        next()
-      }
-      // File has been sent, delete it
-      fs.unlink(PDF_FILE, () => console.log(`File ${PDF_FILE} deleted`))
-    })
   })
 }
