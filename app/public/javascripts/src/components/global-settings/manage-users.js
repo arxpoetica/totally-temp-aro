@@ -179,7 +179,7 @@ class ManageUsersController {
       showCancelButton: true,
       closeOnConfirm: true
     }, () => {
-      this.$http.post('/admin/users/delete', { user: user.id }).then((response) => {
+      this.$http.delete(`/service/auth/users/${user.id}`).then((response) => {
         this.loadUsers()
       })
     })

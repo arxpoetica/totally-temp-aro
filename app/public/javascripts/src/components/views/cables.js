@@ -117,7 +117,7 @@ class CablesController {
       if (networkEquipment.equipmentType !== 'point' ||
         this.usePointAggregate ||
         this.mapRef.getZoom() > networkEquipment.aggregateZoomThreshold) {
-        if (this.state.equipmentLayerTypeVisibility.existing && networkEquipment.checked) {
+        if (this.state.cableLayerTypeVisibility.existing && networkEquipment.checked) {
           // We need to show the existing network equipment. Loop through all the selected library ids.
           this.dataItems && this.dataItems[networkEquipment.dataItemKey] &&
             this.dataItems[networkEquipment.dataItemKey].selectedLibraryItems.forEach((selectedLibraryItem) => {
@@ -128,7 +128,7 @@ class CablesController {
         }
 
         const planId = this.state.plan && this.state.plan && this.state.plan.id
-        if (this.state.equipmentLayerTypeVisibility.planned && networkEquipment.checked && planId) {
+        if (this.state.cableLayerTypeVisibility.planned && networkEquipment.checked && planId) {
           // We need to show the planned network equipment for this plan.
           var mapLayerKey = `${categoryItemKey}_planned`
           mapLayers[mapLayerKey] = this.createSingleMapLayer(categoryItemKey, categoryType, networkEquipment, 'planned', null, planId)
