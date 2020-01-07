@@ -80,6 +80,23 @@ module.exports = class Wirecenter {
     return database.query(sql, [planId])
   }
 
+  static getSelectedServiceAreasInLibrary (planId, libraryId) {
+    const sql = `
+      SELECT sa.id AS service_area_id
+      FROM client.service_area sa
+      JOIN client.selected_service_area ssa
+        ON ssa.service_area_id = sa.id
+      JOIN client.service_layer sl
+        ON sl.id = sa.service_layer_id
+      JOIN aro_core.library dspl
+        ON dspl.data_source_id = sl.data_source_id
+      WHERE ssa.plan_id = $1
+        AND dspl.meta_data_id = $2;
+    `
+    return database.query(sql, [planId, libraryId])
+      .then(result => Promise.resolve(result.map(item => item.service_area_id)))
+  }
+
   static addAnalysisAreaTargets (plan_id, analysis_area_ids) {
     if (!_.isArray(analysis_area_ids) || analysis_area_ids.length === 0) return Promise.resolve()
 

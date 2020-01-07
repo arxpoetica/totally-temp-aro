@@ -1,8 +1,8 @@
 class RoicReportsSmallController {
   constructor (state) {
     this.state = state
-    this.FIBER_STRINGS = this.state.uiStrings['com.altvil.aro.service.entity']
-    this.CABLE_CONSTRUCTION_STRINGS = this.state.uiStrings['com.altvil.interfaces']
+    this.FIBER_STRINGS = this.state.enumStrings['com.altvil.aro.service.entity']['FiberType']
+    this.CABLE_CONSTRUCTION_STRINGS = this.state.enumStrings['com.altvil.interfaces']['CableConstructionEnum']
     this.series = ['Series A', 'Series B']
     this.config = config // Ugh - A global from a time long ago!
   }
