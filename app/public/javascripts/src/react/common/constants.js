@@ -7,5 +7,6 @@ export default Object.freeze({
   RFP_OPTIONS_FORM: 'rfpOptions',
   RING_OPTIONS_BASIC_FORM: 'ringOptionsBasic',
   RING_OPTIONS_CONNECTIVITY_DEFINITION: 'ringOptionsConnectivityDefinition',
+  NETWORK_OPTIMIZATION_INPUT_FORM: 'NetworkOptimizationInputForm',
   LAT_LONG_DISPLAY_PRECISION: 5 // Number of decimal places to show
 })

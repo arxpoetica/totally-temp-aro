@@ -37,6 +37,19 @@ function runOptimization () {
   }
 }
 
+function loadOptimizationInputs () {
+  return (dispatch, getState) => {
+    const state = getState()
+    var userId = state.user.loggedInUser.id
+    var planId = state.plan.activePlan.id
+    var apiUrl = `/service/v1/plan/${planId}/inputs?user_id=${userId}`
+    AroHttp.get(apiUrl)
+      .then((response) => {
+        this.setOptimizationInputs(response.data)
+      })
+  }
+}
+
 function setOptimizationInputs (inputs) {
   return {
     type: Actions.NETWORK_OPTIMIZATION_SET_OPTIMIZATION_INPUTS,
@@ -45,6 +58,7 @@ function setOptimizationInputs (inputs) {
 }
 
 export default {
+  loadOptimizationInputs,
   setOptimizationInputs,
   runOptimization
 }

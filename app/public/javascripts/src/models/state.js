@@ -19,6 +19,7 @@ import RingEditActions from '../react/components/ring-edit/ring-edit-actions'
 import ReactComponentConstants from '../react/common/constants'
 import AroNetworkConstraints from '../shared-utils/aro-network-constraints'
 import NetworkAnalysisActions from '../react/components/optimization/network-analysis/network-analysis-actions'
+import NetworkOptimizationActions from '../react/components/optimization/network-optimization/network-optimization-actions'
 const networkAnalysisConstraintsSelector = formValueSelector(ReactComponentConstants.NETWORK_ANALYSIS_CONSTRAINTS)
 
 // We need a selector, else the .toJS() call will create an infinite digest loop
@@ -1785,6 +1786,8 @@ class State {
       if ((currentActivePlanId !== newActivePlanId) && (nextState.plan)) {
         // The active plan has changed. Note that we are comparing ids because a change in plan state also causes the plan object to update.
         service.onActivePlanChanged()
+        // ToDo: move this from anuglar
+        service.loadOptimizationInputs()
       }
       /*
       // ToDo: this code seems to be depricated,
@@ -1844,7 +1847,8 @@ class State {
       setPrimarySpatialEdge: primarySpatialEdge => dispatch(NetworkAnalysisActions.setPrimarySpatialEdge(primarySpatialEdge)),
       clearWormholeFuseDefinitions: () => dispatch(NetworkAnalysisActions.clearWormholeFuseDefinitions()),
       setWormholeFuseDefinition: (spatialEdgeType, wormholeFusionTypeId) => dispatch(NetworkAnalysisActions.setWormholeFuseDefinition(spatialEdgeType, wormholeFusionTypeId)),
-      setWormholeFusionConfiguration: wormholeFusionConfiguration => dispatch(UiActions.setWormholeFusionConfiguration(wormholeFusionConfiguration))
+      setWormholeFusionConfiguration: wormholeFusionConfiguration => dispatch(UiActions.setWormholeFusionConfiguration(wormholeFusionConfiguration)),
+      loadOptimizationInputs: () => dispatch(NetworkOptimizationActions.loadOptimizationInputs())
     }
   }
 }
