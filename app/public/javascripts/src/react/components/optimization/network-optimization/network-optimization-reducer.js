@@ -1,5 +1,5 @@
 import Actions from '../../../common/actions'
-import DefaultOptimizationInputs from '../../common/optimization-options/default-optimization-inputs'
+import DefaultOptimizationInputs from './default-optimization-inputs'
 
 const defaultState = {
   optimizationInputs: DefaultOptimizationInputs // serialization helper

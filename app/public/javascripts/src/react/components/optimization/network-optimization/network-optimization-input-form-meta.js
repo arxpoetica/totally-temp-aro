@@ -1,3 +1,53 @@
+const AnalysisTypes = [
+  'UNDEFINED',
+  'NETWORK_PLAN',
+  'NETWORK_ANALYSIS',
+  'COVERAGE', 'MANUAL',
+  'POINT_TO_POINT',
+  'LOCATION_ROIC',
+  'RFP',
+  'RING'
+]
+
+const RoutingModes = [
+  'UNDEFINED',
+  'DEFAULT',
+  'DIRECT_ROUTING',
+  'ODN_1',
+  'ODN_2',
+  'ODN_3'
+]
+
+const OptimizationModes = [
+  'INTER_WIRECENTER',
+  'INTRA_WIRECENTER'
+]
+
+const AnalysisSelectionModes = [
+  'UNDEFINED',
+  'SELECTED_LOCATIONS',
+  'SELECTED_AREAS',
+  'SELECTED_ANALYSIS_AREAS',
+  'ALL_SERVICE_AREAS',
+  'ALL_PLAN_AREAS'
+]
+
+const AlgorithmNames = [
+  'UNCONSTRAINED',
+  'SUPER_LAYER_ROUTING',
+  'CAPEX',
+  'COVERAGE',
+  'IRR',
+  'NPV',
+  'CUSTOM'
+]
+
+const AlgorithmTypes = [
+  'DEFAULT',
+  'PLANNING',
+  'PRUNING',
+  'ROUTING'
+]
 
 const NetworkOptimizationInputFormMeta = Object.freeze({
   '_meta': {
@@ -14,16 +64,16 @@ const NetworkOptimizationInputFormMeta = Object.freeze({
   },
   'analysis_type': {
     '_meta': {
-      'displayType': 'text',
+      'displayType': 'dropdownList',
       'displayName': '',
-      'options': []
+      'options': AnalysisTypes
     }
   },
   'fronthaulOptimization.optimizationMode': {
     '_meta': {
-      'displayType': 'text',
+      'displayType': 'dropdownList',
       'displayName': '',
-      'options': []
+      'options': OptimizationModes
     }
   },
   'locationConstraints': {
@@ -41,9 +91,9 @@ const NetworkOptimizationInputFormMeta = Object.freeze({
     },
     'analysisSelectionMode': {
       '_meta': {
-        'displayType': 'text',
+        'displayType': 'dropdownList',
         'displayName': '',
-        'options': []
+        'options': AnalysisSelectionModes
       }
     },
     'locationTypes': {
@@ -83,16 +133,16 @@ const NetworkOptimizationInputFormMeta = Object.freeze({
     },
     'algorithm': {
       '_meta': {
-        'displayType': 'text',
+        'displayType': 'dropdownList',
         'displayName': '',
-        'options': []
+        'options': AlgorithmNames
       }
     },
     'algorithmType': {
       '_meta': {
-        'displayType': 'text',
+        'displayType': 'dropdownList',
         'displayName': '',
-        'options': []
+        'options': AlgorithmTypes
       }
     },
     'budget': {
@@ -138,6 +188,7 @@ const NetworkOptimizationInputFormMeta = Object.freeze({
       }
     }
   },
+  /*
   'planId': {
     '_meta': {
       'displayType': 'number',
@@ -145,11 +196,12 @@ const NetworkOptimizationInputFormMeta = Object.freeze({
       'options': []
     }
   },
+  */
   'routingMode': {
     '_meta': {
-      'displayType': 'text',
+      'displayType': 'dropdownList',
       'displayName': '',
-      'options': []
+      'options': RoutingModes
     }
   }
 })
