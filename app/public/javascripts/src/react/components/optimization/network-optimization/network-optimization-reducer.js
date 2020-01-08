@@ -7,7 +7,7 @@ const defaultState = {
 
 function setOptimizationInputs (state, inputs) {
   var newState = { ...state,
-    optimizationInputs: { ...state.optimizationInputs, inputs }
+    optimizationInputs: { ...state.optimizationInputs, ...inputs }
   }
   return newState
 }

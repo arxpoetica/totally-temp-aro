@@ -4,6 +4,7 @@ import SelectionActions from '../selection/selection-actions'
 import RfpActions from '../optimization/rfp/rfp-actions'
 import SocketManager from '../../../react/common/socket-manager'
 import RingEditActions from '../ring-edit/ring-edit-actions'
+import NetworkOptimizationActions from '../optimization/network-optimization/network-optimization-actions'
 import AroHttp from '../../common/aro-http'
 
 function setActivePlanState (planState) {
@@ -136,6 +137,8 @@ function setActivePlan (plan) {
     dispatch(SelectionActions.loadPlanTargetSelectionsFromServer(plan.id))
     // Clear RFP state
     dispatch(RfpActions.clearRfpState())
+    // load optomize inputs
+    dispatch(NetworkOptimizationActions.loadOptimizationInputs())
     // load rings
     dispatch(RingEditActions.loadRings(plan.id))
   }

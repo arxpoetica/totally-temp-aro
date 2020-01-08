@@ -45,7 +45,7 @@ function loadOptimizationInputs () {
     var apiUrl = `/service/v1/plan/${planId}/inputs?user_id=${userId}`
     AroHttp.get(apiUrl)
       .then((response) => {
-        this.setOptimizationInputs(response.data)
+        dispatch(this.setOptimizationInputs(response.data))
       })
   }
 }
