@@ -1,6 +1,7 @@
 /* globals Blob */
 import { saveAs } from 'file-saver'
 import AroHttp from '../../common/aro-http'
+import Actions from '../../common/actions'
 
 function downloadReport (planId) {
   return dispatch => {
@@ -35,6 +36,32 @@ function downloadReport (planId) {
   }
 }
 
+function setLayers (layerNames) {
+  return {
+    type: Actions.MAP_REPORTS_SET_LAYERS,
+    payload: layerNames
+  }
+}
+
+function setLayerIsChecked (layerName, isChecked) {
+  return {
+    type: Actions.MAP_REPORTS_SET_LAYER_IS_CHECKED,
+    payload: {
+      layerName: layerName,
+      isChecked: isChecked
+    }
+  }
+}
+
+function clearMapReports () {
+  return {
+    type: Actions.MAP_REPORTS_CLEAR
+  }
+}
+
 export default {
-  downloadReport
+  downloadReport,
+  setLayers,
+  setLayerIsChecked,
+  clearMapReports
 }

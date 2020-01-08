@@ -13,6 +13,10 @@ export class MapReportsDownloader extends Component {
       </button>
     </div>
   }
+
+  componentWillUnmount () {
+    this.props.clearMapReports()
+  }
 }
 
 MapReportsDownloader.propTypes = {
@@ -24,7 +28,10 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  downloadReport: planId => dispatch(MapReportActions.downloadReport(planId))
+  downloadReport: planId => dispatch(MapReportActions.downloadReport(planId)),
+  setLayers: layerNames => dispatch(MapReportActions.setLayers(layerNames)),
+  setLayerIsChecked: (layerName, isChecked) => dispatch(MapReportActions.setLayerIsChecked(layerName, isChecked)),
+  clearMapReports: () => dispatch(MapReportActions.clearMapReports())
 })
 
 const MapReportsDownloaderComponent = wrapComponentWithProvider(reduxStore, MapReportsDownloader, mapStateToProps, mapDispatchToProps)
