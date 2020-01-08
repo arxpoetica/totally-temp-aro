@@ -191,6 +191,7 @@ class PlanEditorController {
                         equipmentFeatures: [{
                           is_deleted: 'false',
                           is_locked: 'false',
+                          workflow_state_id: 1,
                           object_id: equipmentId,
                           siteClli: 'unkown',
                           _data_type: 'equipment.location_connector'

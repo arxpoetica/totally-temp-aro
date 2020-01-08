@@ -148,6 +148,10 @@ class State {
       existing: false,
       planned: false
     }
+    service.cableLayerTypeVisibility = {
+      existing: false,
+      planned: false
+    }
 
     service.fiberRoutingModes = {
       ROUTE_FROM_NODES: 'ROUTE_FROM_NODES',
@@ -1578,8 +1582,11 @@ class State {
         .then(result => {
           service.configuration = result.data.appConfiguration
           service.googleMapsLicensing = result.data.googleMapsLicensing
-          service.uiStrings = result.data.uiStrings
-          service.configuration.loadPerspective = perspective => {
+          service.enumStrings = result.data.enumStrings
+          if (!service.enumStrings) {
+            throw new Error('No enumeration strings object found. Please check your server logs for errors in the UI schema.')
+          }
+          service.configuration.loadPerspective = (perspective) => {
             // If a perspective is not found, go to the default
             const defaultPerspective = service.configuration.perspectives.filter(item => item.name === 'default')[0]
             const thisPerspective = service.configuration.perspectives.filter(item => item.name === perspective)[0]

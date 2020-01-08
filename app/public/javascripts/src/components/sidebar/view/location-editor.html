@@ -111,7 +111,7 @@
               type="radio"
               class="radiofill"
               ng-value="2"
-              ng-disabled="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId == $ctrl.WorkflowState.CREATED.id"
+              ng-disabled="!$ctrl.userCanChangeWorkflowState || ($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId === $ctrl.WorkflowState.CREATED.id)"
               ng-change="$ctrl.markSelectedLocationPropertiesDirty()"
               ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId">
               <span><img class="overlay-lock" src="/images/map_icons/aro/lock_overlay.png" style="vertical-align:bottom; padding-right: 5px">
@@ -122,7 +122,7 @@
               type="radio"
               class="radiofill"
               ng-value="4"
-              ng-disabled="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId == $ctrl.WorkflowState.CREATED.id"
+              ng-disabled="!$ctrl.userCanChangeWorkflowState || ($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId === $ctrl.WorkflowState.CREATED.id)"
               ng-change="$ctrl.markSelectedLocationPropertiesDirty()"
               ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId">
               <span><img class="overlay-close" src="/images/map_icons/aro/invalidated_overlay.png" style="vertical-align:bottom; padding-right: 5px">
