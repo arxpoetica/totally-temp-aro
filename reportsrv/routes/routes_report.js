@@ -1,7 +1,4 @@
 const PDFDocument = require('pdfkit')
-const fs = require('fs')
-const os = require('os')
-const uuidv4 = require('uuid/v4')
 
 const MapScale = require('../models/map-scale')
 const PaperSize = require('../models/paper-size')
