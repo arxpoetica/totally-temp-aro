@@ -100,8 +100,6 @@ export class PlanningConstraints extends Component {
                 </td>
               </tr>
 
-
-
               <tr>
                 <td>Fiber routing mode</td>
                 <td>
@@ -147,6 +145,43 @@ export class PlanningConstraints extends Component {
                     className='form-control form-control-sm' component='input' type='text' />
                 </td>
               </tr>
+
+              <tr>
+                <td>Summarize Service Mods</td>
+                <td>
+                  <Field name='summarizeServiceMods'
+                    className='checkboxfill' component='input' type='checkbox' />
+                </td>
+              </tr>
+              <tr>
+                <td>Generate Plan Location Links</td>
+                <td>
+                  <Field name='generatePlanLocationLinks'
+                    className='checkboxfill' component='input' type='checkbox' />
+                </td>
+              </tr>
+              <tr>
+                <td>Generate Subnet Linking</td>
+                <td>
+                  <Field name='generateSubnetLinking'
+                    className='checkboxfill' component='input' type='checkbox' />
+                </td>
+              </tr>
+              <tr>
+                <td>Persist Junction Nodes</td>
+                <td>
+                  <Field name='persistJunctionNodes'
+                    className='checkboxfill' component='input' type='checkbox' />
+                </td>
+              </tr>
+              <tr>
+                <td>Aggregated BOM</td>
+                <td>
+                  <Field name='aggregatedBOM'
+                    className='checkboxfill' component='input' type='checkbox' />
+                </td>
+              </tr>
+              
             </tbody>
           </table>
         </form>
