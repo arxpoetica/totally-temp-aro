@@ -3,7 +3,7 @@ import { saveAs } from 'file-saver'
 import AroHttp from '../../common/aro-http'
 import Actions from '../../common/actions'
 
-function downloadReport (planId) {
+function downloadReport (planId, visibleLayers) {
   return dispatch => {
     const reportUrl = `/map-reports/report`
     const postBody = [
@@ -17,10 +17,7 @@ function downloadReport (planId) {
           longitude: -122.3321
         },
         planId: planId,
-        visibleLayers: [
-          'FEEDER',
-          'fiber_distribution_hub'
-        ]
+        visibleLayers: visibleLayers
       }
     ]
     // "(new Date()).toISOString().split('T')[0]" will give "YYYY-MM-DD"

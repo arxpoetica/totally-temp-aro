@@ -8,10 +8,24 @@ export class MapReportsDownloader extends Component {
   render () {
     return <div>
       <h3>Map Reports</h3>
-      <button className='btn btn-primary' onClick={() => this.props.downloadReport(this.props.planId)}>
+      <button className='btn btn-primary' onClick={() => this.doDownloadReport()}>
         <i className='fa fa-download' />Download
       </button>
     </div>
+  }
+
+  doDownloadReport () {
+    // From maplayers, get the layers that we want to display in the report
+    var visibleLayers = this.props.mapLayers.location.filter(layer => layer.checked).map(layer => layer.key).toJS();
+    ['boundaries', 'cables', 'conduits', 'equipments', 'roads'].forEach(networkEquipmentCategory => {
+      const category = this.props.mapLayers.networkEquipment[networkEquipmentCategory]
+      Object.keys(category).forEach(categoryKey => {
+        if (category[categoryKey].checked) {
+          visibleLayers.push(category[categoryKey].key)
+        }
+      })
+    })
+    this.props.downloadReport(this.props.planId, visibleLayers)
   }
 
   componentWillUnmount () {
@@ -20,17 +34,17 @@ export class MapReportsDownloader extends Component {
 }
 
 MapReportsDownloader.propTypes = {
-  planId: PropTypes.number
+  planId: PropTypes.number,
+  mapLayers: PropTypes.object
 }
 
 const mapStateToProps = state => ({
-  planId: state.plan.activePlan.id
+  planId: state.plan.activePlan.id,
+  mapLayers: state.mapLayers
 })
 
 const mapDispatchToProps = dispatch => ({
-  downloadReport: planId => dispatch(MapReportActions.downloadReport(planId)),
-  setLayers: layerNames => dispatch(MapReportActions.setLayers(layerNames)),
-  setLayerIsChecked: (layerName, isChecked) => dispatch(MapReportActions.setLayerIsChecked(layerName, isChecked)),
+  downloadReport: (planId, visibleLayers) => dispatch(MapReportActions.downloadReport(planId, visibleLayers)),
   clearMapReports: () => dispatch(MapReportActions.clearMapReports())
 })
 
