@@ -6,12 +6,17 @@ import DropdownList from 'react-widgets/lib/DropdownList'
 import SelectList from 'react-widgets/lib/SelectList'
 
 export class ObjectEditor extends Component {
-
   constructor (props) {
     super(props)
 
+    this.isCollapsible = props.collapsible
+    var isOpen = !props.depth // true // !props.depth
+    if (!this.isCollapsible) {
+      isOpen = true
+    }
+
     this.state = {
-      isOpen: !props.depth // true // !props.depth
+      isOpen: isOpen
     }
   }
 
@@ -30,7 +35,7 @@ export class ObjectEditor extends Component {
           var prop = meta[key]
           var newPropChain = propChain + key
           if (prop._meta.displayType === ObjectEditor.displayTypes.OBJECT) {
-            jsxItems.push(<ObjectEditor key={newPropChain} metaData={prop} title={key} propChain={newPropChain + '.'} depth={depth + 1} leftIndent={this.props.leftIndent}></ObjectEditor>)
+            jsxItems.push(<ObjectEditor key={newPropChain} metaData={prop} title={key} propChain={newPropChain + '.'} depth={depth + 1} leftIndent={this.props.leftIndent} collapsible></ObjectEditor>)
           } else {
             jsxItems.push(this.renderItem(prop._meta, key, newPropChain))
           }
@@ -41,10 +46,13 @@ export class ObjectEditor extends Component {
     return (
       <div className='ei-items-contain object-editor' key={propChain}>
         <div className='ei-foldout'>
-          <div className='ei-header' onClick={() => this.toggleFoldout()}>
-            {this.state.isOpen
-              ? <i className='far fa-minus-square ei-foldout-icon' ng-if='$ctrl.isKeyExpanded[foldoutIndex]'></i>
-              : <i className='far fa-plus-square ei-foldout-icon' ng-if='!$ctrl.isKeyExpanded[foldoutIndex]'></i>
+          <div className={`ei-header ${this.isCollapsible ? '' : 'ei-no-pointer'}`} onClick={() => this.toggleFoldout()} >
+            {this.isCollapsible
+              ? (this.state.isOpen
+                ? <i className='far fa-minus-square ei-foldout-icon' ng-if='$ctrl.isKeyExpanded[foldoutIndex]'></i>
+                : <i className='far fa-plus-square ei-foldout-icon' ng-if='!$ctrl.isKeyExpanded[foldoutIndex]'></i>
+              )
+              : ''
             }
             {name}
           </div>
@@ -53,9 +61,12 @@ export class ObjectEditor extends Component {
               {jsxItems}
             </div>
           </div>
-          {this.state.isOpen
-            ? <div className='ei-foldout-state-label-bottom'
-              onClick={() => this.toggleFoldout()}>[ - ]</div>
+          {this.isCollapsible
+            ? (this.state.isOpen
+              ? <div className='ei-foldout-state-label-bottom'
+                onClick={() => this.toggleFoldout()}>[ - ]</div>
+              : ''
+            )
             : ''
           }
         </div>
@@ -156,7 +167,7 @@ export class ObjectEditor extends Component {
   // --- //
 
   toggleFoldout () {
-    this.setState({ isOpen: !this.state.isOpen })
+    if (this.isCollapsible) this.setState({ isOpen: !this.state.isOpen })
   }
 }
 
@@ -166,7 +177,8 @@ ObjectEditor.defaultProps = {
   propChain: '',
   editable: true,
   depth: 0,
-  leftIndent: 21
+  leftIndent: 21,
+  collapsible: false
 }
 
 ObjectEditor.displayTypes = {

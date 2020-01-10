@@ -88,6 +88,9 @@
   padding-left: 0px;
   padding-right: 4px;
 }
+.ei-no-pointer{
+  cursor: inherit;
+}
 
 .ei-property-item{
   display: flex; 
