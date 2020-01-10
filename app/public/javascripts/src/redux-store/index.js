@@ -17,6 +17,7 @@ import coverage from '../react/components/coverage/coverage-reducer'
 import fullScreen from '../react/components/full-screen/full-screen-reducer'
 import map from '../react/components/map/map-reducer'
 import mapLayers from '../react/components/map-layers/map-layer-reducer'
+import mapReports from '../react/components/map-reports/map-reports-reducer'
 import plan from '../react/components/plan/plan-reducer'
 import planEditor from '../react/components/plan-editor/plan-editor-reducer'
 import selection from '../react/components/selection/selection-reducer'
@@ -38,6 +39,7 @@ let reducer = combineReducers({
   fullScreen,
   map,
   mapLayers,
+  mapReports,
   optimization: combineReducers({ networkAnalysis, report: opReport, rfp }),
   plan,
   planEditor,
