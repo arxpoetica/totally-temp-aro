@@ -28,7 +28,7 @@ export class PlanTargetList extends Component {
       return <div>(no items selected)</div>
     } else {
       return <div>
-        <div style={{ backgroundColor: '#e0e0e0', paddingLeft: '10px' }}>
+        <div style={{ 'backgroundColor': '#e0e0e0', 'paddingLeft': '10px', 'display': 'inline-block', 'width': '100%' }}>
           <span>{geometries.size} items selected</span>
           <button className='btn btn-outline-danger btn-sm float-right'
             style={{ marginTop: '3px' }}
@@ -37,7 +37,7 @@ export class PlanTargetList extends Component {
             <i className='far fa-trash-alt' />
           </button>
         </div>
-        <ul style={{ listStyleType: 'none', paddingLeft: '0px', maxHeight: '200px', overflowY: 'auto', marginBottom: '0px' }}>
+        <ul style={{ 'listStyleType': 'none', 'paddingLeft': '0px', 'maxHeight': '200px', 'overflowY': 'auto', 'marginBottom': '0px' }}>
           {
             [...geometries].map(item => {
               const description = this.props.planTargetDescriptions[geometryKey][item]

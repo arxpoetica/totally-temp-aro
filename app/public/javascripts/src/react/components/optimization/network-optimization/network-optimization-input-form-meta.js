@@ -55,6 +55,7 @@ const NetworkOptimizationInputFormMeta = Object.freeze({
     'displayName': '',
     'options': []
   },
+  /*
   'advancedAnalysis': {
     '_meta': {
       'displayType': 'checkbox',
@@ -62,6 +63,7 @@ const NetworkOptimizationInputFormMeta = Object.freeze({
       'options': []
     }
   },
+  */
   'analysis_type': {
     '_meta': {
       'displayType': 'dropdownList',

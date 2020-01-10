@@ -3,6 +3,7 @@ import React, { Component } from 'react'
 import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
 import NetworkOptimizationActions from './network-optimization-actions'
+import PlanTargetListComponent from '../../selection/plan-target-list.jsx'
 import NetworkOptimizationInputForm from './network-optimization-input-form.jsx'
 import Constants from '../../../common/constants'
 import { getFormValues } from 'redux-form'
@@ -18,11 +19,16 @@ export class NetworkOptimizationInput extends Component {
         {JSON.stringify(this.props.optimizationInputs)}
       </div>
       <NetworkOptimizationInputForm initialValues={this.props.optimizationInputs} enableReinitialize />
+      <div className='ei-property-item'>
+        <div className='ei-property-label'>Selected Geographies</div>
+        <div className='ei-property-value'><PlanTargetListComponent /></div>
+      </div>
     </div>
   }
 
   onRunOptimization () {
     this.props.setOptimizationInputs(this.props.modifiedNetworkOptimizationInput)
+    this.props.runOptimization()
   }
 }
 

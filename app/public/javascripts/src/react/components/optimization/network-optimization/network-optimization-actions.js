@@ -11,9 +11,8 @@ function runOptimization () {
     // Get the optimization options that we will pass to the server
     var optimizationInputs = state.optimization.networkOptimization.optimizationInputs
     // clone
-    optimizationInputs = JSON.parse(JSON.stringify(optimizationInputs))
+    // optimizationInputs = JSON.parse(JSON.stringify(optimizationInputs))
     var userId = state.user.loggedInUser.id
-    optimizationInputs.planId = state.plan.activePlan.id
     console.log(optimizationInputs)
     // Make the API call that starts optimization calculations on aro-service
     var apiUrl = `/service/v1/optimize/masterplan?userId=${userId}`
@@ -33,6 +32,7 @@ function runOptimization () {
           console.error(response)
         }
         */
+        // dispatch(PlanActions.setActivePlanState(planState))
       })
   }
 }
@@ -50,10 +50,20 @@ function loadOptimizationInputs () {
   }
 }
 
-function setOptimizationInputs (inputs) {
-  return {
-    type: Actions.NETWORK_OPTIMIZATION_SET_OPTIMIZATION_INPUTS,
-    payload: inputs
+function setOptimizationInputs (inputs, autoPopulate = true) {
+  return (dispatch, getState) => {
+    if (autoPopulate) {
+      const state = getState()
+      inputs.planId = state.plan.activePlan.id
+      // inputs.locationConstraints.locationTypes =
+      // inputs.networkTypes =
+      // inputs. = plan.selection.planTargets ???
+    }
+
+    dispatch({
+      type: Actions.NETWORK_OPTIMIZATION_SET_OPTIMIZATION_INPUTS,
+      payload: inputs
+    })
   }
 }
 

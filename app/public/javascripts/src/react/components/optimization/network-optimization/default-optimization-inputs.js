@@ -1,5 +1,5 @@
 export default Object.freeze({
-  'advancedAnalysis': true,
+  // 'advancedAnalysis': false,
   'analysis_type': 'NETWORK_PLAN',
   'fronthaulOptimization': {
     'optimizationMode': 'INTER_WIRECENTER'
