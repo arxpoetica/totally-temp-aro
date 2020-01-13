@@ -24,8 +24,8 @@
   },
   "financialConstraints": {
     "cashFlowStrategyType": "EXTERNAL",
-    "discountRate": 0.06,
-    "years": 5,
+    "discountRate": 0.10,
+    "years": 10,
     "terminalValueStrategy": {
       "value": 0.0,
       "terminalValueStrategyType": "NONE"
