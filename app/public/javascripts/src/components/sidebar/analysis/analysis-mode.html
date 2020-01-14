@@ -96,7 +96,7 @@
 
     <accordion-panel-title title="'Optimize Test'" panel-id="$ctrl.analysisModePanels.TEST"></accordion-panel-title>
     <accordion-panel-contents panel-id="$ctrl.analysisModePanels.TEST">
-      <r-network-optimization-input></r-network-optimization-input>
+      <r-network-optimization-input on-modify="$ctrl.state.handleModifyClicked" test-prop="'test prop'"></r-network-optimization-input>
     </accordion-panel-contents>
   </accordion>
 </div>

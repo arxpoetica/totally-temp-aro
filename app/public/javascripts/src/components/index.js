@@ -12,6 +12,7 @@ import NetworkAnalysisConstraints from '../react/components/optimization/network
 import NetworkAnalysisConnectivityDefinition from '../react/components/optimization/network-analysis/network-analysis-connectivity-definition.jsx'
 import NetworkAnalysisOutput from '../react/components/optimization/network-analysis/network-analysis-output.jsx'
 import NetworkOptimizationInput from '../react/components/optimization/network-optimization/network-optimization-input.jsx'
+import NetworkOptimizationButton from '../react/components/optimization/network-optimization/network-optimization-button.jsx'
 import PlanTargetList from '../react/components/selection/plan-target-list.jsx'
 import PlanEditor from '../react/components/plan-editor/plan-editor.jsx'
 import EquipmentDropTarget from '../react/components/plan-editor/equipment-drop-target.jsx'
@@ -251,7 +252,8 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rNetworkAnalysisConnectivityDefinition', react2angular(NetworkAnalysisConnectivityDefinition))
   .component('rNetworkAnalysisConstraints', react2angular(NetworkAnalysisConstraints, ['initialValues', 'enableReinitialize']))
   .component('rNetworkAnalysisOutput', react2angular(NetworkAnalysisOutput))
-  .component('rNetworkOptimizationInput', react2angular(NetworkOptimizationInput))
+  .component('rNetworkOptimizationInput', react2angular(NetworkOptimizationInput, ['onModify']))
+  .component('rNetworkOptimizationButton', react2angular(NetworkOptimizationButton, ['onModify']))
   .component('rPlanTargetList', react2angular(PlanTargetList))
   .component('rPlanEditor', react2angular(PlanEditor))
   .component('rEquipmentDropTarget', react2angular(EquipmentDropTarget))

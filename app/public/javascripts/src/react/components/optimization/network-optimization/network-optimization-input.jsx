@@ -5,6 +5,7 @@ import wrapComponentWithProvider from '../../../common/provider-wrapped-componen
 import NetworkOptimizationActions from './network-optimization-actions'
 import PlanTargetListComponent from '../../selection/plan-target-list.jsx'
 import NetworkOptimizationInputForm from './network-optimization-input-form.jsx'
+import NetworkOptimizationButton from './network-optimization-button.jsx'
 import Constants from '../../../common/constants'
 import AngConstants from '../../../../components/common/constants' // ToDo: merge constants, put in Redux?
 import { getFormValues } from 'redux-form'
@@ -12,7 +13,10 @@ const networkOptimizationInputSelector = getFormValues(Constants.NETWORK_OPTIMIZ
 
 export class NetworkOptimizationInput extends Component {
   render () {
+    console.log(this.props)
     return <div style={{ paddingRight: '16px' }}>
+      <NetworkOptimizationButton onRun={() => this.onRunOptimization()} onModify={() => this.props.onModify()}></NetworkOptimizationButton>
+
       <button onClick={() => this.onRunOptimization()}>
         <i className='fa fa-bolt'></i> Run
       </button>

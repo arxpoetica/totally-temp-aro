@@ -1,6 +1,7 @@
 import Constants from '../common/constants'
 import SelectionModes from '../../react/components/selection/selection-modes'
 
+// DEPRICATED
 class OptimizeButtonController {
   constructor ($ngRedux, state) {
     this.state = state
