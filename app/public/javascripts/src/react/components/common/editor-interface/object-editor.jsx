@@ -35,7 +35,7 @@ export class ObjectEditor extends Component {
           var prop = meta[key]
           var newPropChain = propChain + key
           if (prop._meta.displayType === ObjectEditor.displayTypes.OBJECT) {
-            jsxItems.push(<ObjectEditor key={newPropChain} metaData={prop} title={key} propChain={newPropChain + '.'} depth={depth + 1} leftIndent={this.props.leftIndent} collapsible></ObjectEditor>)
+            jsxItems.push(<ObjectEditor key={newPropChain} metaData={prop} title={key} propChain={newPropChain + '.'} depth={depth + 1} leftIndent={this.props.leftIndent} displayOnly={this.props.displayOnly} collapsible></ObjectEditor>)
           } else {
             jsxItems.push(this.renderItem(prop._meta, key, newPropChain))
           }
@@ -77,7 +77,7 @@ export class ObjectEditor extends Component {
   renderItem (meta, name, propChain) {
     var field = ''
 
-    if (!this.props.editable || meta.displayOnly) {
+    if (this.props.displayOnly || meta.displayOnly) {
       field = (
         <Field
           name={propChain}
@@ -175,7 +175,7 @@ ObjectEditor.defaultProps = {
   metaData: null,
   title: 'Object',
   propChain: '',
-  editable: true,
+  displayOnly: false,
   depth: 0,
   leftIndent: 21,
   collapsible: false

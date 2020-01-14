@@ -49,6 +49,12 @@ const AlgorithmTypes = [
   'ROUTING'
 ]
 
+const NetworkTypes = [ // swap out for grouped list
+  'Fiber', // Fiber
+  'FiveG', // 5G
+  'Copper' // DSL
+]
+
 const NetworkOptimizationInputFormMeta = Object.freeze({
   '_meta': {
     'displayType': 'object',
@@ -78,53 +84,18 @@ const NetworkOptimizationInputFormMeta = Object.freeze({
       'options': OptimizationModes
     }
   },
-  'locationConstraints': {
+  'locationConstraints.analysisSelectionMode': {
     '_meta': {
-      'displayType': 'object',
+      'displayType': 'dropdownList',
       'displayName': '',
-      'options': []
-    },
-    'analysisLayerId': {
-      '_meta': {
-        'displayType': 'number',
-        'displayName': '',
-        'options': []
-      }
-    },
-    'analysisSelectionMode': {
-      '_meta': {
-        'displayType': 'dropdownList',
-        'displayName': '',
-        'options': AnalysisSelectionModes
-      }
-    },
-    'locationTypes': {
-      '0': {
-        '_meta': {
-          'displayType': 'text',
-          'displayName': '',
-          'options': []
-        }
-      },
-      '_meta': {
-        'displayType': 'object',
-        'displayName': '',
-        'options': []
-      }
+      'options': AnalysisSelectionModes
     }
   },
   'networkTypes': {
-    '0': {
-      '_meta': {
-        'displayType': 'text',
-        'displayName': '',
-        'options': []
-      }
-    },
     '_meta': {
-      'displayType': 'object',
+      'displayType': 'multiSelect',
       'displayName': '',
-      'options': []
+      'options': NetworkTypes
     }
   },
   'optimization': {
@@ -154,6 +125,7 @@ const NetworkOptimizationInputFormMeta = Object.freeze({
         'options': []
       }
     },
+/*
     'customOptimization': {
       '_meta': {
         'displayType': 'object',
@@ -175,6 +147,7 @@ const NetworkOptimizationInputFormMeta = Object.freeze({
         }
       }
     },
+*/
     'preIrrThreshold': {
       '_meta': {
         'displayType': 'number',

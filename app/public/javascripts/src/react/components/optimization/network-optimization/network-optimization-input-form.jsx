@@ -9,7 +9,7 @@ import ObjectEditor from '../../common/editor-interface/object-editor.jsx'
 export class NetworkOptimizationInputFormProto extends Component {
   constructor (props) {
     super(props)
-
+    console.log(props)
     this.meta = NetworkOptimizationInputFormMeta
   }
 
@@ -20,7 +20,7 @@ export class NetworkOptimizationInputFormProto extends Component {
       <form className='d-flex flex-column rfp-options'
         style={{ height: '100%' }}
         onSubmit={event => event.preventDefault()}>
-        <ObjectEditor metaData={this.meta} title={'Net Config'} leftIndent={11}></ObjectEditor>
+        <ObjectEditor metaData={this.meta} title={'Net Config'} leftIndent={11} displayOnly={this.props.displayOnly} ></ObjectEditor>
       </form>
     </div>
   }

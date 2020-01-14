@@ -138,7 +138,7 @@ function setActivePlan (plan) {
     // Clear RFP state
     dispatch(RfpActions.clearRfpState())
     // load optomize inputs
-    dispatch(NetworkOptimizationActions.loadOptimizationInputs())
+    dispatch(NetworkOptimizationActions.loadOptimizationInputs(plan.id))
     // load rings
     dispatch(RingEditActions.loadRings(plan.id))
   }
