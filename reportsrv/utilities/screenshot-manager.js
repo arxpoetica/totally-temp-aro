@@ -3,8 +3,8 @@ const puppeteer = require('puppeteer')
 const CaptureSettings = require('../models/capture-settings')
 
 class ScreenshotManager {
-  static async getScreenshotForReportPage (reportPage) {
-    const captureSettings = CaptureSettings.fromPageSetup(reportPage.pageSetup)
+  static async getScreenshotForReportPage (reportPage, latitude) {
+    const captureSettings = CaptureSettings.fromPageSetup(reportPage.pageSetup, latitude)
     const browser = await puppeteer.launch({
       args: [
         // Required for Docker version of Puppeteer
@@ -34,14 +34,16 @@ class ScreenshotManager {
       }
     });
     await page._client.send('Emulation.clearDeviceMetricsOverride')
-    const url = `http://app_upgrade2:8000?reportPage=${JSON.stringify(reportPage)}`
+    const reportPageWithZoom = JSON.parse(JSON.stringify(reportPage))
+    reportPageWithZoom.mapZoom = captureSettings.zoom
+    const url = `http://app_upgrade2:8000?reportPage=${JSON.stringify(reportPageWithZoom)}`
     if (url.length > 2000) {
       throw new Exception(`ERROR: URL length is ${url.length}, cannot exceed 2000 characters. Unable to get a report with these parameters`)
     }
     await page.goto(url)
 
     const sleep = m => new Promise(r => setTimeout(r, m))
-    await sleep(8000)
+    await sleep(10000)
     const screenshot = await page.screenshot({ encoding: 'binary' })
     await browser.close()
     return screenshot

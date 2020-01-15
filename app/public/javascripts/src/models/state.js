@@ -227,6 +227,7 @@ class State {
     service.currentRulerAction = service.allRulerActions.STRAIGHT_LINE
 
     service.isRulerEnabled = false
+    service.isReportMode = false
 
     // Boundary Layer Mode
     service.boundaryLayerMode = Object.freeze({
@@ -976,11 +977,13 @@ class State {
       return service.loadPlanInputs(service.plan.id)
         .then(() => {
           const planCoordinates = service.plan.ephemeral ? service.defaultPlanCoordinates : { latitude: service.plan.latitude, longitude: service.plan.longitude }
-          service.requestSetMapCenter.next({
-            latitude: planCoordinates.latitude || service.defaultPlanCoordinates.latitude,
-            longitude: planCoordinates.longitude || service.defaultPlanCoordinates.longitude
-          })
-          service.requestSetMapZoom.next(service.plan.zoomIndex || service.defaultPlanCoordinates.zoom)
+          if (!service.isReportMode) {
+            service.requestSetMapCenter.next({
+              latitude: planCoordinates.latitude || service.defaultPlanCoordinates.latitude,
+              longitude: planCoordinates.longitude || service.defaultPlanCoordinates.longitude
+            })
+            service.requestSetMapZoom.next(service.plan.zoomIndex || service.defaultPlanCoordinates.zoom)
+          }
           service.recreateTilesAndCache()
         })
         .catch((err) => console.error(err))
@@ -1505,13 +1508,18 @@ class State {
           service.loggedInUser.perspective = result.data.perspective || 'default'
           service.configuration.loadPerspective(service.loggedInUser.perspective)
           service.initializeState()
+          service.isReportMode = Boolean(initialState)
           if (initialState && initialState.mapCenter) {
-            service.requestSetMapCenter.next({ latitude: initialState.mapCenter.latitude, longitude: initialState.mapCenter.longitude })
-            if (initialState.mapZoom) {
-              service.requestSetMapZoom.next(initialState.mapZoom)
-            }
-            service.setPlanRedux(plan)
-            return Promise.resolve()
+            return service.mapReadyPromise
+              .then(() => {
+                service.setPlanRedux(plan)
+                service.requestSetMapCenter.next({ latitude: initialState.mapCenter.latitude, longitude: initialState.mapCenter.longitude })
+                if (initialState.mapZoom) {
+                  service.requestSetMapZoom.next(initialState.mapZoom)
+                }
+                return Promise.resolve()
+              })
+              .catch(err => console.error(err))
           } else {
             return $http.get(`/search/addresses?text=${searchLocation}&sessionToken=${Utils.getInsecureV4UUID()}`)
           }
@@ -1810,15 +1818,6 @@ class State {
         // The active plan has changed. Note that we are comparing ids because a change in plan state also causes the plan object to update.
         service.onActivePlanChanged()
       }
-      /*
-      // ToDo: this code seems to be depricated,
-        oldDataItems is never set and
-        nextState.dataItems is always undefined, do we mean nextState.plan.dataItems?
-        also, should this be in the above if block? This will run every time state is changed
-      if (oldDataItems !== nextState.dataItems) {
-        service.StateViewMode.loadListOfSAPlanTags($http, service, nextState.dataItems, '', true)
-      }
-      */
     }
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(service.mergeToTarget.bind(service))
 
