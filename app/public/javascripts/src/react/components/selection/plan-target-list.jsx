@@ -31,8 +31,9 @@ export class PlanTargetList extends Component {
         <div style={{ 'backgroundColor': '#e0e0e0', 'paddingLeft': '10px', 'display': 'inline-block', 'width': '100%' }}>
           <span>{geometries.size} items selected</span>
           <button className='btn btn-outline-danger btn-sm float-right'
+            disabled={this.props.displayOnly}
             style={{ marginTop: '3px' }}
-            onClick={() => this.props.removePlanTargets(this.props.planId, { [geometryKey]: this.props.planTargets[geometryKey] })}
+            onClick={() => this.onRemovePlanTargets({ [geometryKey]: this.props.planTargets[geometryKey] })}
           >
             <i className='far fa-trash-alt' />
           </button>
@@ -45,8 +46,9 @@ export class PlanTargetList extends Component {
                 : 'loading...'
               return <li key={item}>
                 <button className='btn btn-thin btn-outline-danger'
+                  disabled={this.props.displayOnly}
                   style={{ border: 'none' }}
-                  onClick={() => this.props.removePlanTargets(this.props.planId, { [geometryKey]: new Set([item]) })}
+                  onClick={() => this.onRemovePlanTargets({ [geometryKey]: new Set([item]) })}
                 >
                   <i className='far fa-trash-alt' />
                 </button>
@@ -58,6 +60,16 @@ export class PlanTargetList extends Component {
       </div>
     }
   }
+
+  onRemovePlanTargets (planTargets) {
+    if (!this.props.displayOnly) {
+      this.props.removePlanTargets(this.props.planId, planTargets)
+    }
+  }
+}
+
+PlanTargetList.defaultProps = {
+  displayOnly: false
 }
 
 PlanTargetList.propTypes = {

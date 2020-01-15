@@ -23,7 +23,7 @@ export class NetworkOptimizationInput extends Component {
       <NetworkOptimizationInputForm initialValues={this.props.optimizationInputs} displayOnly={!this.areControlsEnabled()} enableReinitialize />
       <div className='ei-property-item'>
         <div className='ei-property-label'>Selected Geographies</div>
-        <div className='ei-property-value'><PlanTargetListComponent /></div>
+        <div className='ei-property-value'><PlanTargetListComponent displayOnly={!this.areControlsEnabled()} /></div>
       </div>
     </div>
   }

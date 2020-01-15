@@ -24,6 +24,7 @@ exports[`Render when analysis area targets are being shown 1`] = `
     </span>
     <button
       className="btn btn-outline-danger btn-sm float-right"
+      disabled={false}
       onClick={[Function]}
       style={
         Object {
@@ -50,6 +51,7 @@ exports[`Render when analysis area targets are being shown 1`] = `
     <li>
       <button
         className="btn btn-thin btn-outline-danger"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -74,6 +76,7 @@ exports[`Render when analysis area targets are being shown 1`] = `
     <li>
       <button
         className="btn btn-thin btn-outline-danger"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -98,6 +101,7 @@ exports[`Render when analysis area targets are being shown 1`] = `
     <li>
       <button
         className="btn btn-thin btn-outline-danger"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -141,6 +145,7 @@ exports[`Render when location targets are being shown 1`] = `
     </span>
     <button
       className="btn btn-outline-danger btn-sm float-right"
+      disabled={false}
       onClick={[Function]}
       style={
         Object {
@@ -167,6 +172,7 @@ exports[`Render when location targets are being shown 1`] = `
     <li>
       <button
         className="btn btn-thin btn-outline-danger"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -191,6 +197,7 @@ exports[`Render when location targets are being shown 1`] = `
     <li>
       <button
         className="btn btn-thin btn-outline-danger"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -215,6 +222,7 @@ exports[`Render when location targets are being shown 1`] = `
     <li>
       <button
         className="btn btn-thin btn-outline-danger"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -258,6 +266,7 @@ exports[`Render when service area targets are being shown 1`] = `
     </span>
     <button
       className="btn btn-outline-danger btn-sm float-right"
+      disabled={false}
       onClick={[Function]}
       style={
         Object {
@@ -284,6 +293,7 @@ exports[`Render when service area targets are being shown 1`] = `
     <li>
       <button
         className="btn btn-thin btn-outline-danger"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -308,6 +318,7 @@ exports[`Render when service area targets are being shown 1`] = `
     <li>
       <button
         className="btn btn-thin btn-outline-danger"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -332,6 +343,7 @@ exports[`Render when service area targets are being shown 1`] = `
     <li>
       <button
         className="btn btn-thin btn-outline-danger"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
