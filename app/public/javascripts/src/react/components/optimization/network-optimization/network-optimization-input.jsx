@@ -13,13 +13,8 @@ const networkOptimizationInputSelector = getFormValues(Constants.NETWORK_OPTIMIZ
 
 export class NetworkOptimizationInput extends Component {
   render () {
-    console.log(this.props)
-    return <div style={{ paddingRight: '16px' }}>
-      <NetworkOptimizationButton onRun={() => this.onRunOptimization()} onModify={() => this.props.onModify()}></NetworkOptimizationButton>
-
-      <button onClick={() => this.onRunOptimization()}>
-        <i className='fa fa-bolt'></i> Run
-      </button>
+    return <div style={{ paddingRight: '16px', paddingTop: '8px' }}>
+      <NetworkOptimizationButton onRun={() => this.onRunOptimization()} onModify={() => this.props.onModify()} />
       <NetworkOptimizationInputForm initialValues={this.props.optimizationInputs} displayOnly={!this.areControlsEnabled()} enableReinitialize />
       <div className='ei-property-item'>
         <div className='ei-property-label'>Selected Geographies</div>

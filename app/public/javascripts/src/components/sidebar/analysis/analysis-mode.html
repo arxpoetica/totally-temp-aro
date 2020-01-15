@@ -47,6 +47,13 @@
     </div>
   </div>
   <accordion style="position: relative; flex: 1 1 auto;" toggle-expanded-panel="$ctrl.analysisModePanel">
+    
+    <accordion-panel-title title="'R Input'" panel-id="$ctrl.analysisModePanels.R_INPUT"></accordion-panel-title>
+    <accordion-panel-contents panel-id="$ctrl.analysisModePanels.R_INPUT">
+      <r-network-optimization-input on-modify="$ctrl.state.handleModifyClicked"></r-network-optimization-input>
+    </accordion-panel-contents>
+    
+    
     <accordion-panel-title title="'Input'" panel-id="$ctrl.analysisModePanels.INPUT"></accordion-panel-title>
     <accordion-panel-contents panel-id="$ctrl.analysisModePanels.INPUT">
       <div class="col-xs-7" style="left: 20%;border: 10px solid white;">
@@ -94,9 +101,5 @@
       </div>
     </accordion-panel-contents>
 
-    <accordion-panel-title title="'Optimize Test'" panel-id="$ctrl.analysisModePanels.TEST"></accordion-panel-title>
-    <accordion-panel-contents panel-id="$ctrl.analysisModePanels.TEST">
-      <r-network-optimization-input on-modify="$ctrl.state.handleModifyClicked" test-prop="'test prop'"></r-network-optimization-input>
-    </accordion-panel-contents>
   </accordion>
 </div>

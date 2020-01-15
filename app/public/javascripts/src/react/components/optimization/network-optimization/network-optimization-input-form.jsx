@@ -20,7 +20,7 @@ export class NetworkOptimizationInputFormProto extends Component {
       <form className='d-flex flex-column rfp-options'
         style={{ height: '100%' }}
         onSubmit={event => event.preventDefault()}>
-        <ObjectEditor metaData={this.meta} title={'Net Config'} leftIndent={11} displayOnly={this.props.displayOnly} ></ObjectEditor>
+        <ObjectEditor metaData={this.meta} title={''} leftIndent={11} displayOnly={this.props.displayOnly} ></ObjectEditor>
       </form>
     </div>
   }

@@ -113,6 +113,10 @@
   flex: auto;
 }
 
+.ei-property-value ul.rw-multiselect-taglist{
+  vertical-align: top;
+}
+
 .ei-row-odd, .object-editor .ei-items-contain > .ei-property-item:nth-child(2n+1){
   background-color: #f9f9f9;
 }
@@ -190,7 +194,6 @@ select.ei-input-select-autosize{
 	border: solid 2px #990000;
 	border-radius: 6px;
 }
-
 
 /* === object editor === */
  aro-object-editor .ei-internal-gen > .ei-gen-level,
