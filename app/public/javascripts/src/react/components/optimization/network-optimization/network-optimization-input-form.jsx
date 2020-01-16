@@ -20,8 +20,37 @@ export class NetworkOptimizationInputFormProto extends Component {
         <ObjectEditor metaData={this.meta} title={''}
           handleChange={(val, newVal, prevVal, propChain) => this.handleChange(newVal, prevVal, propChain)}
           leftIndent={11} displayOnly={this.props.displayOnly} />
+        {this.renderManualForm()}
       </form>
     </div>
+  }
+
+  renderManualForm () {
+    return (
+      <div className='ei-items-contain object-editor'>
+        <div className='ei-foldout'>
+          <div className='ei-header ei-no-pointer'></div>
+          <div className='ei-gen-level ei-internal-level' style='padding-left: 11px;'>
+            <div className='ei-items-contain'>
+
+              <div className='ei-property-item'>
+                <div className='ei-property-label'>analysis_type</div>
+                <div className='ei-property-value'>
+                <Field
+                  onChange={this.props.handleChange}
+                  name={propChain}
+                  component={this.renderDropdownList}
+                  data={meta.options}
+                />
+                </div>
+              </div>
+
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   handleChange (newVal, prevVal, propChain) {
