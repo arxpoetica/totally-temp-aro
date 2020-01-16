@@ -21,21 +21,6 @@
                   ng-change="$ctrl.definePriceBookForSelectedState()">
           </select>
         </div>
-        <!-- Filter equipment items -->
-        <label class="col-sm-2 control-label pb-label-height">Filters:</label>
-        <div class="col-sm-4">
-          <ui-select tag-on-blur tagging tagging-label="false" multiple ng-model="$ctrl.selectedEquipmentTags"
-            theme="bootstrap" close-on-select="true" on-select="$ctrl.updateSetOfSelectedEquipmentTags()" on-remove="$ctrl.updateSetOfSelectedEquipmentTags()">
-            <ui-select-match placeholder="Filter equipment...">
-              {{$item.description}}
-            </ui-select-match>
-            <ui-select-choices class="ui-select-width-300 ui-select-font" repeat="equipmentTag in $ctrl.equipmentTags | filter: $select.search">
-              <div>
-                <span>{{equipmentTag.description}}</span>
-              </div>
-            </ui-select-choices>
-          </ui-select>
-        </div>
       </div>
     </div>
   </form>
@@ -44,7 +29,9 @@
   <ul class="nav nav-tabs" role="tablist">
     <li ng-repeat="priceBookDefinition in $ctrl.structuredPriceBookDefinitions"
         role="presentation"
-        ng-class="{ 'nav-item': true, 'active': $index === 0 }">
+        ng-class="{ 'nav-item': true, 'active': $ctrl.selectedDefinitionId === priceBookDefinition.id }"
+        ng-click="$ctrl.selectedDefinitionId = priceBookDefinition.id"
+    >
       <a href="#{{priceBookDefinition.id}}" class="nav-link" role="tab" data-toggle="tab">
         {{priceBookDefinition.description}}
       </a>
@@ -56,8 +43,26 @@
 
     <div ng-repeat="priceBookDefinition in $ctrl.structuredPriceBookDefinitions"
         role="tabpanel"
-        ng-class="{ 'tab-pane': true, 'active': $index === 0 }"
+        ng-class="{ 'tab-pane': true, 'active': $ctrl.selectedDefinitionId === priceBookDefinition.id }"
         id="{{priceBookDefinition.id}}">
+
+      <!-- Filter equipment items -->
+      <div class="row pt-3 pb-2 pl-2" ng-if="priceBookDefinition.id !== 'fiberLaborList'">
+        <label class="col-sm-2 control-label pb-label-height" style="line-height: 32px;">Filters:</label>
+        <div class="col-sm-4">
+          <ui-select tag-on-blur tagging tagging-label="false" multiple ng-model="$ctrl.selectedEquipmentTags[priceBookDefinition.id]"
+            theme="bootstrap" close-on-select="true" on-select="$ctrl.updateSetOfSelectedEquipmentTags($ctrl.selectedDefinitionId)" on-remove="$ctrl.updateSetOfSelectedEquipmentTags($ctrl.selectedDefinitionId)">
+            <ui-select-match placeholder="Filter equipment...">
+              {{$item.description}}
+            </ui-select-match>
+            <ui-select-choices class="ui-select-width-300 ui-select-font" repeat="equipmentTag in $ctrl.equipmentTags | filter: $select.search">
+              <div>
+                <span>{{equipmentTag.description}}</span>
+              </div>
+            </ui-select-choices>
+          </ui-select>
+        </div>
+      </div>
 
       <!-- Special case for fiberLaborList -->
       <div ng-if="priceBookDefinition.id === 'fiberLaborList'" class="p-4">
@@ -81,7 +86,7 @@
               </td>
             </tr>
             <!-- Display all rows EXCEPT installed fiber, that is calculated above -->
-            <tr ng-repeat="definitionItem in filteredItems = (priceBookDefinition.items | filter: $ctrl.equipmentTagFilter)" ng-if="definitionItem.name !== 'install_estimated'">
+            <tr ng-repeat="definitionItem in filteredItems = priceBookDefinition.item" ng-if="definitionItem.name !== 'install_estimated'">
               <td>{{definitionItem.description}}</td>
               <td>
                 <input type="text" ng-model="definitionItem.costAssignment.cost" class="form-control">
@@ -91,14 +96,6 @@
                 <input class="form-control form-control-sm"
                   ng-model="$ctrl.constructionRatios[$ctrl.selectedStateForStrategy].constructionRatios.cableConstructionRatios[definitionItem.cableConstructionType].ratio"
                   percentage-input>
-              </td>
-            </tr>
-            <!-- Show a warning if we have selected any filters AND all rows are filtered out. -->
-            <tr ng-if="($ctrl.selectedEquipmentTags.length > 0) && (filteredItems.length === 0)">
-              <td colspan="4">
-                <div class="alert alert-warning m-0">
-                  No items to show with the current filters.
-                </div>
               </td>
             </tr>
           </tbody>
