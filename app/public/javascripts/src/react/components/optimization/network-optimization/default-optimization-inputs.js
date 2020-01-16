@@ -5,7 +5,7 @@ export default Object.freeze({
     'optimizationMode': 'INTER_WIRECENTER'
   },
   'locationConstraints': {
-    'analysisLayerId': 0,
+    // 'analysisLayerId': 0,
     'analysisSelectionMode': 'SELECTED_AREAS',
     'locationTypes': [
       'large'
@@ -16,15 +16,17 @@ export default Object.freeze({
   ],
   'optimization': {
     'algorithm': 'UNCONSTRAINED',
-    'algorithmType': 'DEFAULT',
+    // 'algorithmType': 'DEFAULT',
     'budget': 0,
+    /*
     'customOptimization': {
       'map': {},
       'name': 'string'
     },
+    */
     'preIrrThreshold': 0,
     'threshold': 0
   },
-  'planId': 0,
+  // 'planId': 0,
   'routingMode': 'ODN_1'
 })

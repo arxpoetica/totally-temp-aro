@@ -111,6 +111,7 @@ const NetworkOptimizationInputFormMeta = Object.freeze({
         'options': AlgorithmNames
       }
     },
+    /*
     'algorithmType': {
       '_meta': {
         'displayType': 'dropdownList',
@@ -118,6 +119,7 @@ const NetworkOptimizationInputFormMeta = Object.freeze({
         'options': AlgorithmTypes
       }
     },
+    */
     'budget': {
       '_meta': {
         'displayType': 'number',

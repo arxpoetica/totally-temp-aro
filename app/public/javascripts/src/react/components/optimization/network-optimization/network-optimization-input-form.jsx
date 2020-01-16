@@ -17,7 +17,9 @@ export class NetworkOptimizationInputFormProto extends Component {
       <form className='d-flex flex-column rfp-options'
         style={{ height: '100%' }}
         onSubmit={event => event.preventDefault()}>
-        <ObjectEditor metaData={this.meta} title={''} handleChange={(val, newVal, prevVal, propChain) => this.handleChange(newVal, prevVal, propChain)} leftIndent={11} displayOnly={this.props.displayOnly} ></ObjectEditor>
+        <ObjectEditor metaData={this.meta} title={''}
+          handleChange={(val, newVal, prevVal, propChain) => this.handleChange(newVal, prevVal, propChain)}
+          leftIndent={11} displayOnly={this.props.displayOnly} />
       </form>
     </div>
   }
