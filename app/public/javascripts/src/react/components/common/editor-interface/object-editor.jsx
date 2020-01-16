@@ -35,7 +35,7 @@ export class ObjectEditor extends Component {
           var prop = meta[key]
           var newPropChain = propChain + key
           if (prop._meta.displayType === ObjectEditor.displayTypes.OBJECT) {
-            jsxItems.push(<ObjectEditor key={newPropChain} metaData={prop} title={key} propChain={newPropChain + '.'} depth={depth + 1} leftIndent={this.props.leftIndent} displayOnly={this.props.displayOnly} collapsible></ObjectEditor>)
+            jsxItems.push(<ObjectEditor key={newPropChain} metaData={prop} title={key} propChain={newPropChain + '.'} depth={depth + 1} leftIndent={this.props.leftIndent} handleChange={this.props.handleChange} displayOnly={this.props.displayOnly} collapsible></ObjectEditor>)
           } else {
             jsxItems.push(this.renderItem(prop._meta, key, newPropChain))
           }
@@ -80,6 +80,7 @@ export class ObjectEditor extends Component {
     if (this.props.displayOnly || meta.displayOnly) {
       field = (
         <Field
+          onChange={this.props.handleChange}
           name={propChain}
           component={this.renderDisplayOnly}
         />
@@ -89,12 +90,14 @@ export class ObjectEditor extends Component {
         case ObjectEditor.displayTypes.CHECKBOX:
           field = (
             <Field name={propChain}
+              onChange={this.props.handleChange}
               className='checkboxfill' component='input' type={meta.displayType} />
           )
           break
         case ObjectEditor.displayTypes.MULTI_SELECT:
           field = (
             <Field
+              onChange={this.props.handleChange}
               name={propChain}
               component={this.renderMultiselect}
               data={meta.options}
@@ -108,6 +111,7 @@ export class ObjectEditor extends Component {
           // for options that look like: {displayName: 'Feeder Fiber', value: 'FEEDER'}
           field = (
             <Field
+              onChange={this.props.handleChange}
               name={propChain}
               component={this.renderDropdownList}
               data={meta.options}
@@ -117,6 +121,7 @@ export class ObjectEditor extends Component {
         case ObjectEditor.displayTypes.SELECT_LIST:
           field = (
             <Field
+              onChange={this.props.handleChange}
               name={propChain}
               component={this.renderSelectList}
               data={meta.options}
@@ -126,6 +131,7 @@ export class ObjectEditor extends Component {
         default:
           field = (
             <Field name={propChain}
+              onChange={this.props.handleChange}
               className='form-control form-control-sm' component='input' type={meta.displayType} />
           )
       }
@@ -178,7 +184,8 @@ ObjectEditor.defaultProps = {
   displayOnly: false,
   depth: 0,
   leftIndent: 21,
-  collapsible: false
+  collapsible: false,
+  handleChange: (...args) => {}
 }
 
 ObjectEditor.displayTypes = {
