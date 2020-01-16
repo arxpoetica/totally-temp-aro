@@ -6,10 +6,26 @@ import Constants from '../../../common/constants'
 import NetworkOptimizationInputFormMeta from './network-optimization-input-form-meta'
 import ObjectEditor from '../../common/editor-interface/object-editor.jsx'
 
+import Multiselect from 'react-widgets/lib/Multiselect'
+import DropdownList from 'react-widgets/lib/DropdownList'
+import SelectList from 'react-widgets/lib/SelectList'
+
+
 export class NetworkOptimizationInputFormProto extends Component {
   constructor (props) {
     super(props)
     this.meta = NetworkOptimizationInputFormMeta
+
+    this.AnalysisTypes = [
+      'UNDEFINED',
+      'NETWORK_PLAN',
+      'NETWORK_ANALYSIS',
+      'COVERAGE', 'MANUAL',
+      'POINT_TO_POINT',
+      'LOCATION_ROIC',
+      'RFP',
+      'RING'
+    ]
   }
 
   render () {
@@ -30,17 +46,17 @@ export class NetworkOptimizationInputFormProto extends Component {
       <div className='ei-items-contain object-editor'>
         <div className='ei-foldout'>
           <div className='ei-header ei-no-pointer'></div>
-          <div className='ei-gen-level ei-internal-level' style='padding-left: 11px;'>
+          <div className='ei-gen-level ei-internal-level' style={{ paddingLeft: '11px' }}>
             <div className='ei-items-contain'>
 
               <div className='ei-property-item'>
                 <div className='ei-property-label'>analysis_type</div>
                 <div className='ei-property-value'>
                 <Field
-                  onChange={this.props.handleChange}
-                  name={propChain}
+                  onChange={this.handleChange}
+                  name={'analysis_type'}
                   component={this.renderDropdownList}
-                  data={meta.options}
+                  data={this.AnalysisTypes}
                 />
                 </div>
               </div>
@@ -51,6 +67,10 @@ export class NetworkOptimizationInputFormProto extends Component {
         </div>
       </div>
     )
+  }
+
+  renderDropdownList ({ input, ...rest }) {
+    return <DropdownList {...input} onBlur={() => input.onBlur()} {...rest} />
   }
 
   handleChange (newVal, prevVal, propChain) {
@@ -64,6 +84,7 @@ export class NetworkOptimizationInputFormProto extends Component {
   onAlgorithmChange (newVal, prevVal, propChain) {
     console.log('change optimization.algorithm')
   }
+
 }
 
 let NetworkOptimizationInputForm = reduxForm({
