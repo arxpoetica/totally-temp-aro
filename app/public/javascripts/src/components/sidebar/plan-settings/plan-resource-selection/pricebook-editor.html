@@ -46,8 +46,8 @@
         ng-class="{ 'tab-pane': true, 'active': $ctrl.selectedDefinitionId === priceBookDefinition.id }"
         id="{{priceBookDefinition.id}}">
 
-      <!-- Filter equipment items -->
-      <div class="row pt-3 pb-2 pl-2" ng-if="priceBookDefinition.id !== 'fiberLaborList'">
+      <!-- Filter equipment items. Only for equipmentItemList -->
+      <div class="row pt-3 pb-2 pl-2" ng-if="priceBookDefinition.id === 'equipmentItemList'">
         <label class="col-sm-2 control-label pb-label-height" style="line-height: 32px;">Filters:</label>
         <div class="col-sm-4">
           <ui-select tag-on-blur tagging tagging-label="false" multiple ng-model="$ctrl.selectedEquipmentTags[priceBookDefinition.id]"
@@ -86,10 +86,10 @@
               </td>
             </tr>
             <!-- Display all rows EXCEPT installed fiber, that is calculated above -->
-            <tr ng-repeat="definitionItem in filteredItems = priceBookDefinition.item" ng-if="definitionItem.name !== 'install_estimated'">
+            <tr ng-repeat="definitionItem in priceBookDefinition.items" ng-if="definitionItem.name !== 'install_estimated'">
               <td>{{definitionItem.description}}</td>
               <td>
-                <input type="text" ng-model="definitionItem.costAssignment.cost" class="form-control">
+                <input type="text" ng-model="definitionItem.costAssignment.cost" class="form-control form-control-sm">
               </td>
               <td>{{definitionItem.unitOfMeasure}}</td>
               <td>
