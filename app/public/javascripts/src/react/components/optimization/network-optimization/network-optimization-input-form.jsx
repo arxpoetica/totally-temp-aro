@@ -78,13 +78,26 @@ export class NetworkOptimizationInputFormProto extends Component {
       case 'optimization.algorithm':
         this.onAlgorithmChange(newVal, prevVal, propChain)
         break
+      case 'analysis_type':
+        this.onAnalysisTypeChange(newVal, prevVal, propChain)
+        break
     }
+
+    this.props.handleChange(newVal, prevVal, propChain)
   }
 
   onAlgorithmChange (newVal, prevVal, propChain) {
     console.log('change optimization.algorithm')
   }
 
+  onAnalysisTypeChange (newVal, prevVal, propChain) {
+    console.log('change onAnalysisTypeChange')
+  }
+
+}
+
+NetworkOptimizationInputFormProto.defaultProps = {
+  handleChange: (...args) => {}
 }
 
 let NetworkOptimizationInputForm = reduxForm({

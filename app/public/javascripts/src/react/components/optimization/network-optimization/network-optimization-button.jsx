@@ -31,21 +31,7 @@ export class NetworkOptimizationButton extends ProgressButton {
       }
     })
   }
-/*
-  runOptimization () {
-    var ringIds = []
-    for (var key in this.props.rings) {
-      ringIds.push('' + this.props.rings[key].id)
-    }
-    const planId = this.props.planId
-    // const userId = this.props.userId
-    var locationTypes = []
-    this.props.mapLayers.location.forEach(item => {
-      if (item.checked) locationTypes.push(item.plannerKey)
-    })
-    this.props.requestSubNet(planId, ringIds, locationTypes, this.props.ringOptionsBasic, this.props.connectivityDefinition)
-  }
-*/
+
   // override
   onRun () {
     // this.runOptimization()
