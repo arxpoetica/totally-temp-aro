@@ -27,8 +27,7 @@ export class NetworkOptimizationInput extends Component {
           handleChange={(newVal, prevVal, propChain) => this.handleChange(newVal, prevVal, propChain)}
           initialValues={this.props.optimizationInputs} 
           displayOnly={!this.areControlsEnabled()} enableReinitialize />
-        {// target selection type here} dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId)) 
-        }
+
         <div className='ei-header ei-no-pointer' style={{ marginBottom: '0px' }}>Geography Selection</div>
         <div className='ei-gen-level ei-internal-level' style={{ paddingLeft: '11px' }}>
           <div className='ei-items-contain'>

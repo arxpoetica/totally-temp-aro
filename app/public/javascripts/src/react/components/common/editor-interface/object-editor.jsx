@@ -82,7 +82,7 @@ export class ObjectEditor extends Component {
         <Field
           onChange={this.props.handleChange}
           name={propChain}
-          component={this.renderDisplayOnly}
+          component={FieldComponents.renderDisplayOnly}
         />
       )
     } else {
@@ -99,7 +99,7 @@ export class ObjectEditor extends Component {
             <Field
               onChange={this.props.handleChange}
               name={propChain}
-              component={this.renderMultiselect}
+              component={FieldComponents.renderMultiselect}
               data={meta.options}
             />
           )
@@ -113,7 +113,7 @@ export class ObjectEditor extends Component {
             <Field
               onChange={this.props.handleChange}
               name={propChain}
-              component={this.renderDropdownList}
+              component={FieldComponents.renderDropdownList}
               data={meta.options}
             />
           )
@@ -123,7 +123,7 @@ export class ObjectEditor extends Component {
             <Field
               onChange={this.props.handleChange}
               name={propChain}
-              component={this.renderSelectList}
+              component={FieldComponents.renderSelectList}
               data={meta.options}
             />
           )
@@ -147,27 +147,6 @@ export class ObjectEditor extends Component {
         </div>
       </div>
     )
-  }
-
-  // --- react-widgets wrappers --- //
-  renderDisplayOnly ({ input, ...rest }) {
-    return (
-      <div>{input.value}</div>
-    )
-  }
-
-  renderMultiselect ({ input, ...rest }) {
-    return (
-      <Multiselect {...input} onBlur={() => input.onBlur()} value={input.value || []} {...rest} />
-    )
-  }
-
-  renderDropdownList ({ input, ...rest }) {
-    return <DropdownList {...input} onBlur={() => input.onBlur()} {...rest} />
-  }
-
-  renderSelectList ({ input, ...rest }) {
-    return <SelectList {...input} onBlur={() => input.onBlur()} {...rest} />
   }
 
   // --- //
@@ -238,6 +217,29 @@ export class ObjectEditorMeta {
     this.displayType = displayType
     this.displayName = displayName
     this.options = options
+  }
+}
+
+// --- react-widgets wrappers, now for export! --- //
+export class FieldComponents {
+  static renderDisplayOnly ({ input, ...rest }) {
+    return (
+      <div>{input.value}</div>
+    )
+  }
+
+  static renderMultiselect ({ input, ...rest }) {
+    return (
+      <Multiselect {...input} onBlur={() => input.onBlur()} value={input.value || []} {...rest} />
+    )
+  }
+
+  static renderDropdownList ({ input, ...rest }) {
+    return <DropdownList {...input} onBlur={() => input.onBlur()} {...rest} />
+  }
+
+  static renderSelectList ({ input, ...rest }) {
+    return <SelectList {...input} onBlur={() => input.onBlur()} {...rest} />
   }
 }
 

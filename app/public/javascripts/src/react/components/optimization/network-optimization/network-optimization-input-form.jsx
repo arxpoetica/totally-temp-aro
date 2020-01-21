@@ -4,11 +4,7 @@ import { connect } from 'react-redux'
 import { Field, reduxForm } from 'redux-form'
 import Constants from '../../../common/constants'
 import NetworkOptimizationInputFormMeta from './network-optimization-input-form-meta'
-import ObjectEditor from '../../common/editor-interface/object-editor.jsx'
-
-import Multiselect from 'react-widgets/lib/Multiselect'
-import DropdownList from 'react-widgets/lib/DropdownList'
-import SelectList from 'react-widgets/lib/SelectList'
+import { ObjectEditor, FieldComponents } from '../../common/editor-interface/object-editor.jsx'
 
 
 export class NetworkOptimizationInputFormProto extends Component {
@@ -44,35 +40,53 @@ export class NetworkOptimizationInputFormProto extends Component {
   renderManualForm () {
     return (
       <div className='ei-items-contain object-editor'>
-        <div className='ei-foldout'>
-          <div className='ei-header ei-no-pointer'></div>
-          <div className='ei-gen-level ei-internal-level' style={{ paddingLeft: '11px' }}>
-            <div className='ei-items-contain'>
+        <div className='ei-header ei-no-pointer'>Settings</div>
+        <div className='ei-gen-level ei-internal-level' style={{ paddingLeft: '11px' }}>
+          <div className='ei-items-contain'>
 
-              <div className='ei-property-item'>
-                <div className='ei-property-label'>analysis_type</div>
-                <div className='ei-property-value'>
+            <div className='ei-property-item'>
+              <div className='ei-property-label'>analysis_type</div>
+              <div className='ei-property-value'>
                 <Field
                   onChange={this.handleChange}
                   name={'analysis_type'}
-                  component={this.renderDropdownList}
+                  component={this.filterComponent(FieldComponents.renderDropdownList)}
                   data={this.AnalysisTypes}
                 />
-                </div>
               </div>
-
-              
             </div>
+{/*
+            <div className='ei-property-item'>
+              <div className='ei-property-label'></div>
+              <div className='ei-property-value'>
+                <Field
+                  onChange={this.handleChange}
+                  name={''}
+                  component={this.renderDropdownList}
+                  data={}
+                />
+              </div>
+            </div>
+*/}
+            
           </div>
         </div>
       </div>
     )
   }
 
+  filterComponent (component) {
+    if (this.props.displayOnly) {
+      return FieldComponents.renderDisplayOnly
+    } else {
+      return component
+    }
+  }
+/*
   renderDropdownList ({ input, ...rest }) {
     return <DropdownList {...input} onBlur={() => input.onBlur()} {...rest} />
   }
-
+*/
   handleChange (newVal, prevVal, propChain) {
     switch (propChain) {
       case 'optimization.algorithm':
