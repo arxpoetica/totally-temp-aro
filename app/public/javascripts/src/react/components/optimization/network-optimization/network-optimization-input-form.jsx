@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 // import { PropTypes } from 'prop-types'
-import { Field, reduxForm, getFormValues } from 'redux-form'
+import { Field, reduxForm, getFormValues, change } from 'redux-form'
 import Constants from '../../../common/constants'
 import NetworkOptimizationInputFormMeta from './network-optimization-input-form-meta'
 import { ObjectEditor, FieldComponents } from '../../common/editor-interface/object-editor.jsx'
@@ -102,6 +102,9 @@ export class NetworkOptimizationInputFormProto extends Component {
     let algorithm = this.props.initialValues.optimization.algorithm
     if (this.props.values && this.props.values.optimization) algorithm = this.props.values.optimization.algorithm
 
+    let networkTypes = this.props.initialValues.networkTypes
+    if (this.props.values && this.props.values.networkTypes) networkTypes = this.props.values.networkTypes
+    console.log(networkTypes)
     return (
       <div className='ei-items-contain object-editor'>
         <div className='ei-header ei-no-pointer'>Settings</div>
@@ -139,7 +142,24 @@ export class NetworkOptimizationInputFormProto extends Component {
             <div className='ei-property-item'>
               <div className='ei-property-label'>Endpoint Technology</div>
               <div className='ei-property-value'>
-                networkTypes
+                
+                <button className={'btn btn-sm ' + (networkTypes.includes('Fiber') ? 'btn-primary' : 'btn-light')}
+                  onClick={() => this.toggleNetworkType('Fiber')}>
+                  Fiber
+                </button>
+                
+                <div className='btn-group btn-group-sm' style={{ marginLeft: '5px' }}>
+                  <button className={'btn btn-sm ' + (networkTypes.includes('FiveG') ? 'btn-primary' : 'btn-light')}
+                    onClick={() => this.toggleNetworkType('FiveG')}>
+                    5G
+                  </button>
+
+                  <button className={'btn btn-sm ' + (networkTypes.includes('Copper') ? 'btn-primary' : 'btn-light')}
+                    onClick={() => this.toggleNetworkType('Copper')}>
+                    DSL
+                  </button>
+                </div>
+                
               </div>
             </div>
 
@@ -232,6 +252,27 @@ export class NetworkOptimizationInputFormProto extends Component {
         </div>
       </div>
     )
+  }
+
+  toggleNetworkType (networkType) {
+    var networkTypes = JSON.parse(JSON.stringify(this.props.values.networkTypes))
+    if (networkTypes.includes(networkType)) {
+      networkTypes.splice(networkTypes.indexOf(networkType), 1)
+      networkTypes = this.removeByVal(networkTypes, networkType)
+    } else {
+      networkTypes.push(networkType)
+      if (networkType === 'FiveG') networkTypes = this.removeByVal(networkTypes, 'Copper')
+      if (networkType === 'Copper') networkTypes = this.removeByVal(networkTypes, 'FiveG')
+    }
+    this.props.dispatch(change(Constants.NETWORK_OPTIMIZATION_INPUT_FORM, 'networkTypes', networkTypes))
+  }
+
+  removeByVal (arr, val) {
+    arr = JSON.parse(JSON.stringify(arr))
+    if (arr.includes(val)) {
+      arr.splice(arr.indexOf(val), 1)
+    }
+    return arr
   }
 
   filterComponent (component) {
