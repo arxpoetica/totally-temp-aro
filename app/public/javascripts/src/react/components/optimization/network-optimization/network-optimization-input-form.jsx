@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 // import { PropTypes } from 'prop-types'
-import { Field, reduxForm } from 'redux-form'
+import { Field, reduxForm, getFormValues } from 'redux-form'
 import Constants from '../../../common/constants'
 import NetworkOptimizationInputFormMeta from './network-optimization-input-form-meta'
 import { ObjectEditor, FieldComponents } from '../../common/editor-interface/object-editor.jsx'
@@ -99,6 +99,9 @@ export class NetworkOptimizationInputFormProto extends Component {
   renderManualForm () {
     console.log(this)
     // console.log(this.props.initialValues.optimization.algorithm)
+    let algorithm = this.props.initialValues.optimization.algorithm
+    if (this.props.values && this.props.values.optimization) algorithm = this.props.values.optimization.algorithm
+
     return (
       <div className='ei-items-contain object-editor'>
         <div className='ei-header ei-no-pointer'>Settings</div>
@@ -173,7 +176,23 @@ export class NetworkOptimizationInputFormProto extends Component {
                 />
               </div>
             </div>
-            {this.props.initialValues.optimization.algorithm === 'IRR'
+            {algorithm === 'IRR' // IRR_THRESH
+              ? (
+                <div className='ei-property-item'>
+                  <div className='ei-property-label'>Segment IRR Floor</div>
+                  <div className='ei-property-value'>
+                    <Field
+                      onChange={(val, newVal, prevVal, propChain) => this.handleChange(newVal, prevVal, propChain)}
+                      name={'optimization.preIrrThreshold'}
+                      component={this.filterComponent('input')}
+                      type='number'
+                    />
+                  </div>
+                </div>
+              )
+              : ''
+            }
+            {algorithm === 'IRR' // BUDGET || IRR_TARGET
               ? (
                 <div className='ei-property-item'>
                   <div className='ei-property-label'>Target Capital</div>
@@ -189,33 +208,26 @@ export class NetworkOptimizationInputFormProto extends Component {
               )
               : ''
             }
-            <div className='ei-property-item'>
-              <div className='ei-property-label'>Segment IRR Floor</div>
-              <div className='ei-property-value'>
-                <Field
-                  onChange={(val, newVal, prevVal, propChain) => this.handleChange(newVal, prevVal, propChain)}
-                  name={'optimization.preIrrThreshold'}
-                  component={this.filterComponent('input')}
-                  type='number'
-                />
-              </div>
-            </div>
+            {algorithm === 'IRR' || algorithm === 'COVERAGE' // IRR_TARGET || COVERAGE
+              ? (
+                <div className='ei-property-item'>
+                  <div className='ei-property-label'>
+                    {algorithm === 'IRR' ? 'Plan IRR Floor' : ''}
+                    {algorithm === 'COVERAGE' ? 'Coverage Target' : ''}
+                  </div>
+                  <div className='ei-property-value'>
+                    <Field
+                      onChange={(val, newVal, prevVal, propChain) => this.handleChange(newVal, prevVal, propChain)}
+                      name={'optimization.threshold'}
+                      component={this.filterComponent('input')}
+                      type='number'
+                    />
+                  </div>
+                </div>
+              )
+              : ''
+            }
 
-            <div className='ei-property-item'>
-              <div className='ei-property-label'>Plan IRR Floor / Coverage Target</div>
-              <div className='ei-property-value'>
-                <Field
-                  onChange={(val, newVal, prevVal, propChain) => this.handleChange(newVal, prevVal, propChain)}
-                  name={'optimization.threshold'}
-                  component={this.filterComponent('input')}
-                  type='number'
-                />
-              </div>
-            </div>
-
-            
-
-            
           </div>
         </div>
       </div>
@@ -267,8 +279,14 @@ NetworkOptimizationInputFormProto.defaultProps = {
   handleChange: (...args) => {}
 }
 
+const mapStateToProps = (state) => ({
+  values: getFormValues(Constants.NETWORK_OPTIMIZATION_INPUT_FORM)(state)
+})
+
 let NetworkOptimizationInputForm = reduxForm({
   form: Constants.NETWORK_OPTIMIZATION_INPUT_FORM
-})(NetworkOptimizationInputFormProto)
+})(
+  connect(mapStateToProps)(NetworkOptimizationInputFormProto)
+)
 
 export default NetworkOptimizationInputForm
