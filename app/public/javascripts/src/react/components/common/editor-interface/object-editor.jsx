@@ -235,7 +235,15 @@ export class FieldComponents {
   }
 
   static renderDropdownList ({ input, ...rest }) {
-    return <DropdownList {...input} onBlur={() => input.onBlur()} {...rest} />
+    const { valueField } = rest
+    function handleChange (item) {
+      let value = item
+      if (valueField) {
+        value = item[valueField]
+      }
+      input.onChange(value)
+    }
+    return <DropdownList {...input} onBlur={() => input.onBlur()} {...rest} onChange={handleChange} />
   }
 
   static renderSelectList ({ input, ...rest }) {
