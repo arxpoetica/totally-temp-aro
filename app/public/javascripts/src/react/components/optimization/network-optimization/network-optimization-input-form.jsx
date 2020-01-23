@@ -4,8 +4,7 @@ import { connect } from 'react-redux'
 import { Field, reduxForm, getFormValues, change } from 'redux-form'
 import Constants from '../../../common/constants'
 import NetworkOptimizationInputFormMeta from './network-optimization-input-form-meta'
-import { ObjectEditor, FieldComponents } from '../../common/editor-interface/object-editor.jsx'
-
+import { FieldComponents } from '../../common/editor-interface/object-editor.jsx'
 
 export class NetworkOptimizationInputFormProto extends Component {
   constructor (props) {
@@ -24,7 +23,7 @@ export class NetworkOptimizationInputFormProto extends Component {
       { label: 'Ring', value: 'RING' }
     ]
     /*
-    { label: '', value: 
+    { label: '', value:
     { id: 'NETWORK_PLAN', label: 'Network Build', type: 'NETWORK_PLAN' },
     { id: 'NETWORK_ANALYSIS', label: 'Network Analysis', type: 'NETWORK_ANALYSIS' },
     { id: 'COVERAGE_ANALYSIS', label: 'Coverage Analysis', type: 'COVERAGE' },
@@ -46,7 +45,7 @@ export class NetworkOptimizationInputFormProto extends Component {
       { label: 'Inter Service Area', value: 'INTER_WIRECENTER' },
       { label: 'Intra Service Area', value: 'INTRA_WIRECENTER' }
     ]
-/*
+    /*
     this.AnalysisSelectionModes = [
       'UNDEFINED',
       'SELECTED_LOCATIONS',
@@ -55,7 +54,7 @@ export class NetworkOptimizationInputFormProto extends Component {
       'ALL_SERVICE_AREAS',
       'ALL_PLAN_AREAS'
     ]
-*/
+    */
     this.AlgorithmNames = [
       { label: 'Full Coverage', value: 'UNCONSTRAINED' },
       { label: 'Super Layer Routing', value: 'SUPER_LAYER_ROUTING' },
@@ -65,8 +64,8 @@ export class NetworkOptimizationInputFormProto extends Component {
       { label: 'NPV', value: 'NPV' },
       { label: 'Custom', value: 'CUSTOM' }
     ]
-/*
-{
+    /*
+    {
       UNCONSTRAINED: { id: 'UNCONSTRAINED', algorithm: 'UNCONSTRAINED', label: 'Full Coverage' },
       MAX_IRR: { id: 'MAX_IRR', algorithm: 'IRR', label: 'Maximum IRR' },
       BUDGET: { id: 'BUDGET', algorithm: 'IRR', label: 'Budget' },
@@ -75,7 +74,7 @@ export class NetworkOptimizationInputFormProto extends Component {
       TABC: { id: 'TABC', algorithm: 'CUSTOM', label: 'ABCD analysis' }, // Verizon-specific
       COVERAGE: { id: 'COVERAGE', algorithm: 'COVERAGE', label: 'Coverage Target' }
     }
-*/
+    */
     this.NetworkTypes = [ // swap out for grouped list
       'Fiber', // Fiber
       'FiveG', // 5G
@@ -142,13 +141,13 @@ export class NetworkOptimizationInputFormProto extends Component {
             <div className='ei-property-item'>
               <div className='ei-property-label'>Endpoint Technology</div>
               <div className='ei-property-value'>
-                
+
                 <button className={'btn btn-sm ' + (networkTypes.includes('Fiber') ? 'btn-primary' : 'btn-light')}
                   onClick={() => this.toggleNetworkType('Fiber')}
                   disabled={this.props.displayOnly}>
                   Fiber
                 </button>
-                
+
                 <div className='btn-group btn-group-sm' style={{ marginLeft: '5px' }}>
                   <button className={'btn btn-sm ' + (networkTypes.includes('FiveG') ? 'btn-primary' : 'btn-light')}
                     onClick={() => this.toggleNetworkType('FiveG')}
@@ -162,7 +161,7 @@ export class NetworkOptimizationInputFormProto extends Component {
                     DSL
                   </button>
                 </div>
-                
+
               </div>
             </div>
 
@@ -312,7 +311,6 @@ export class NetworkOptimizationInputFormProto extends Component {
   onAnalysisTypeChange (newVal, prevVal, propChain) {
     console.log('change onAnalysisTypeChange')
   }
-
 }
 
 NetworkOptimizationInputFormProto.defaultProps = {

@@ -41,14 +41,14 @@ const AlgorithmNames = [
   'NPV',
   'CUSTOM'
 ]
-
+/*
 const AlgorithmTypes = [
   'DEFAULT',
   'PLANNING',
   'PRUNING',
   'ROUTING'
 ]
-
+*/
 const NetworkTypes = [ // swap out for grouped list
   'Fiber', // Fiber
   'FiveG', // 5G
@@ -127,7 +127,7 @@ const NetworkOptimizationInputFormMeta = Object.freeze({
         'options': []
       }
     },
-/*
+    /*
     'customOptimization': {
       '_meta': {
         'displayType': 'object',

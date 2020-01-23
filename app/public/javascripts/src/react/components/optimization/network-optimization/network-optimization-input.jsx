@@ -15,17 +15,16 @@ import { getFormValues } from 'redux-form'
 
 const networkOptimizationInputSelector = getFormValues(Constants.NETWORK_OPTIMIZATION_INPUT_FORM)
 const getSelectionModes = state => state.selection.selectionModes
-const getAllSelectionModes = createSelector([getSelectionModes], (selectionModes) => angular.copy(selectionModes).filter(mode => mode.id !== 'ALL_PLAN_AREAS'))
+const getAllSelectionModes = createSelector([getSelectionModes], (selectionModes) => JSON.parse(JSON.stringify(selectionModes)).filter(mode => mode.id !== 'ALL_PLAN_AREAS'))
 
 export class NetworkOptimizationInput extends Component {
   render () {
-    console.log(this.props.allSelectionModes)
     return (
       <div style={{ paddingRight: '16px', paddingTop: '8px' }}>
         <NetworkOptimizationButton onRun={() => this.onRunOptimization()} onModify={() => this.props.onModify()} />
         <NetworkOptimizationInputForm
           handleChange={(newVal, prevVal, propChain) => this.handleChange(newVal, prevVal, propChain)}
-          initialValues={this.props.optimizationInputs} 
+          initialValues={this.props.optimizationInputs}
           displayOnly={!this.areControlsEnabled()} enableReinitialize />
 
         <div className='ei-header ei-no-pointer' style={{ marginBottom: '0px' }}>Geography Selection</div>
