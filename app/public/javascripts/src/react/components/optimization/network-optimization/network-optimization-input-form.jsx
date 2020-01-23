@@ -88,9 +88,11 @@ export class NetworkOptimizationInputFormProto extends Component {
       <form className='d-flex flex-column rfp-options'
         style={{ height: '100%' }}
         onSubmit={event => event.preventDefault()}>
+        {/*
         <ObjectEditor metaData={this.meta} title={''}
           handleChange={(val, newVal, prevVal, propChain) => this.handleChange(newVal, prevVal, propChain)}
           leftIndent={11} displayOnly={this.props.displayOnly} />
+        */}
         {this.renderManualForm()}
       </form>
     </div>
@@ -144,18 +146,21 @@ export class NetworkOptimizationInputFormProto extends Component {
               <div className='ei-property-value'>
                 
                 <button className={'btn btn-sm ' + (networkTypes.includes('Fiber') ? 'btn-primary' : 'btn-light')}
-                  onClick={() => this.toggleNetworkType('Fiber')}>
+                  onClick={() => this.toggleNetworkType('Fiber')}
+                  disabled={this.props.displayOnly}>
                   Fiber
                 </button>
                 
                 <div className='btn-group btn-group-sm' style={{ marginLeft: '5px' }}>
                   <button className={'btn btn-sm ' + (networkTypes.includes('FiveG') ? 'btn-primary' : 'btn-light')}
-                    onClick={() => this.toggleNetworkType('FiveG')}>
+                    onClick={() => this.toggleNetworkType('FiveG')}
+                    disabled={this.props.displayOnly}>
                     5G
                   </button>
 
                   <button className={'btn btn-sm ' + (networkTypes.includes('Copper') ? 'btn-primary' : 'btn-light')}
-                    onClick={() => this.toggleNetworkType('Copper')}>
+                    onClick={() => this.toggleNetworkType('Copper')}
+                    disabled={this.props.displayOnly}>
                     DSL
                   </button>
                 </div>
@@ -255,6 +260,7 @@ export class NetworkOptimizationInputFormProto extends Component {
   }
 
   toggleNetworkType (networkType) {
+    if (this.props.displayOnly) return
     var networkTypes = JSON.parse(JSON.stringify(this.props.values.networkTypes))
     if (networkTypes.includes(networkType)) {
       networkTypes.splice(networkTypes.indexOf(networkType), 1)
