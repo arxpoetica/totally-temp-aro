@@ -68,10 +68,7 @@ workflows:
               only:
                 - master
                 - optional_building
-                - wormholeFusion
-                - coverageFix
-                - platform_upgrade
-                - axtel_client
+                - shp_reports
 
       - deploy:
           context: aro_qa_builds
