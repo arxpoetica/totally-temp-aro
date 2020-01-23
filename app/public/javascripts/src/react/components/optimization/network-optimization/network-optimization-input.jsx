@@ -75,13 +75,11 @@ export class NetworkOptimizationInput extends Component {
   }
 
   handleChange (newVal, prevVal, propChain) {
-    console.log('--- from parent ---')
-    console.log([newVal, prevVal, propChain])
+    // console.log('--- from parent ---')
+    // console.log([newVal, prevVal, propChain])
   }
 
   onSelectionModeChange (val, event) {
-    console.log('selection mode change')
-    console.log(val)
     this.props.setSelectionTypeById(val.id)
   }
 

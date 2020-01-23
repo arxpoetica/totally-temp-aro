@@ -99,14 +99,12 @@ export class NetworkOptimizationInputFormProto extends Component {
   }
 
   renderManualForm () {
-    console.log(this)
-    // console.log(this.props.initialValues.optimization.algorithm)
     let algorithm = this.props.initialValues.optimization.algorithm
     if (this.props.values && this.props.values.optimization) algorithm = this.props.values.optimization.algorithm
 
     let networkTypes = this.props.initialValues.networkTypes
     if (this.props.values && this.props.values.networkTypes) networkTypes = this.props.values.networkTypes
-    console.log(networkTypes)
+
     return (
       <div className='ei-items-contain object-editor'>
         <div className='ei-header ei-no-pointer'>Settings</div>
@@ -288,13 +286,8 @@ export class NetworkOptimizationInputFormProto extends Component {
       return component
     }
   }
-/*
-  renderDropdownList ({ input, ...rest }) {
-    return <DropdownList {...input} onBlur={() => input.onBlur()} {...rest} />
-  }
-*/
+
   handleChange (newVal, prevVal, propChain) {
-    console.log({ newVal, prevVal, propChain })
     switch (propChain) {
       case 'optimization.algorithm':
         this.onAlgorithmChange(newVal, prevVal, propChain)

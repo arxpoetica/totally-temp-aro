@@ -1223,6 +1223,7 @@ class State {
       }
     }
 
+    // ToDo: move to redux
     service.cancelOptimization = () => {
       service.isCanceling = true
       $http.delete(`/service/optimization/processes/${service.plan.optimizationId}`)
