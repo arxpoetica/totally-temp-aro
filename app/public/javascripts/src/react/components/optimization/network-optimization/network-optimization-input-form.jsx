@@ -12,7 +12,7 @@ export class NetworkOptimizationInputFormProto extends Component {
     this.meta = NetworkOptimizationInputFormMeta
 
     this.AnalysisTypes = [
-      { label: 'Near-net Analysis', value: 'UNDEFINED' },
+      { label: 'Near-net Analysis', value: 'UNDEFINED' }, // different endpoint
       { label: 'Network Build', value: 'NETWORK_PLAN' },
       { label: 'Network Analysis', value: 'NETWORK_ANALYSIS' },
       { label: 'Coverage Analysis', value: 'COVERAGE' },
@@ -125,20 +125,6 @@ export class NetworkOptimizationInputFormProto extends Component {
             </div>
 
             <div className='ei-property-item'>
-              <div className='ei-property-label'>Pruning Strategy</div>
-              <div className='ei-property-value'>
-                <Field
-                  onChange={(val, newVal, prevVal, propChain) => this.handleChange(newVal, prevVal, propChain)}
-                  name={'fronthaulOptimization.optimizationMode'}
-                  component={this.filterComponent(FieldComponents.renderDropdownList)}
-                  valueField='value'
-                  textField='label'
-                  data={this.OptimizationModes}
-                />
-              </div>
-            </div>
-
-            <div className='ei-property-item'>
               <div className='ei-property-label'>Endpoint Technology</div>
               <div className='ei-property-value'>
 
@@ -184,6 +170,20 @@ export class NetworkOptimizationInputFormProto extends Component {
         <div className='ei-header ei-no-pointer'>Optimization</div>
         <div className='ei-gen-level ei-internal-level' style={{ paddingLeft: '11px' }}>
           <div className='ei-items-contain'>
+
+            <div className='ei-property-item'>
+              <div className='ei-property-label'>Pruning Strategy</div>
+              <div className='ei-property-value'>
+                <Field
+                  onChange={(val, newVal, prevVal, propChain) => this.handleChange(newVal, prevVal, propChain)}
+                  name={'fronthaulOptimization.optimizationMode'}
+                  component={this.filterComponent(FieldComponents.renderDropdownList)}
+                  valueField='value'
+                  textField='label'
+                  data={this.OptimizationModes}
+                />
+              </div>
+            </div>
 
             <div className='ei-property-item'>
               <div className='ei-property-label'>Optimization Type</div>
@@ -254,6 +254,10 @@ export class NetworkOptimizationInputFormProto extends Component {
         </div>
       </div>
     )
+  }
+
+  selectOptimizationType (optimizationType) {
+    // this.props.dispatch(change(Constants.NETWORK_OPTIMIZATION_INPUT_FORM, 'optimization.algorithm', networkTypes))
   }
 
   toggleNetworkType (networkType) {

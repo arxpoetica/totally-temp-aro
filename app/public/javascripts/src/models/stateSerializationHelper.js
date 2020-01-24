@@ -288,7 +288,15 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     } else {
       if (postBody.optimization.algorithm === 'IRR') {
         if (!postBody.optimization.preIrrThreshold && !postBody.optimization.threshold &&
-          !Number.isFinite(+postBody.optimization.budget)) { state.optimizationOptions.uiSelectedAlgorithm = state.OPTIMIZATION_TYPES.MAX_IRR } else if (!postBody.optimization.preIrrThreshold && !postBody.optimization.threshold) { state.optimizationOptions.uiSelectedAlgorithm = state.OPTIMIZATION_TYPES.BUDGET } else if (!postBody.optimization.preIrrThreshold) { state.optimizationOptions.uiSelectedAlgorithm = state.OPTIMIZATION_TYPES.IRR_TARGET } else { state.optimizationOptions.uiSelectedAlgorithm = state.OPTIMIZATION_TYPES.IRR_THRESH }
+            !Number.isFinite(+postBody.optimization.budget)) {
+          state.optimizationOptions.uiSelectedAlgorithm = state.OPTIMIZATION_TYPES.MAX_IRR
+        } else if (!postBody.optimization.preIrrThreshold && !postBody.optimization.threshold) {
+          state.optimizationOptions.uiSelectedAlgorithm = state.OPTIMIZATION_TYPES.BUDGET
+        } else if (!postBody.optimization.preIrrThreshold) {
+          state.optimizationOptions.uiSelectedAlgorithm = state.OPTIMIZATION_TYPES.IRR_TARGET
+        } else {
+          state.optimizationOptions.uiSelectedAlgorithm = state.OPTIMIZATION_TYPES.IRR_THRESH
+        }
       }
     }
 
