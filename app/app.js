@@ -7,8 +7,29 @@ const morgan = require('morgan')
 
 var app = module.exports = express()
 morgan.token('body', req => JSON.stringify(req.body))
-const loggerFormat = ':method :url :status :response-time ms - :res[content-length] :body' // Same as "dev" but with the :body added to it
-app.use(morgan(loggerFormat, {
+const loggerFunction = (tokens, req, res) => {
+  if (req.url === '/login') {
+    // Do not log post body for login requests, or else the users password will get logged
+    return [
+      tokens.method(req, res),
+      tokens.url(req, res),
+      tokens.status(req, res),
+      tokens.res(req, res, 'content-length'), '-',
+      tokens['response-time'](req, res), 'ms'
+    ].join(' ')
+  } else {
+    // Same as "dev" but with the :body added to it
+    return [
+      tokens.method(req, res),
+      tokens.url(req, res),
+      tokens.status(req, res),
+      tokens.res(req, res, 'content-length'), '-',
+      tokens['response-time'](req, res), 'ms',
+      tokens.body(req, res)
+    ].join(' ')
+  }
+}
+app.use(morgan(loggerFunction, {
   skip: (req, res) => req.url.indexOf('/service/v1/tiles/') === 0 // Skip logging for all vector tile calls
 }))
 

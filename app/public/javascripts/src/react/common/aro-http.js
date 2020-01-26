@@ -60,7 +60,7 @@ class AroHttp {
           // We have a response.
           status = response.status
           // We cannot do response.json() on an empty response (which is sometimes returned by service)
-          return response.text()
+          return returnRawResult ? response.arrayBuffer() : response.text()
         }
       })
       .then(result => {

@@ -35,7 +35,9 @@ function downloadReport (reportId, reportFormat, planId) {
     const reportIndex = getState().optimization.report.reportsMetaData.findIndex(report => report.id === reportId)
     // "(new Date()).toISOString().split('T')[0]" will give "YYYY-MM-DD"
     // Note that we are doing (new Date(Date.now())) so that we can have deterministic tests (by replacing the Date.now() function when testing)
-    const downloadFileName = `${(new Date(Date.now())).toISOString().split('T')[0]}_${report.name}.${reportFormat}`
+    // For shapefiles (.shp) the endpoint ends with .shp but it is a zip file. Change the extension out before saving.
+    const extension = (reportFormat === 'shp') ? 'zip' : reportFormat
+    const downloadFileName = `${(new Date(Date.now())).toISOString().split('T')[0]}_${report.name}.${extension}`
     const reportUrl = `/service-download-file/${downloadFileName}/v2/report-extended/${report.id}/${planId}.${reportFormat}`
 
     dispatch(setIsDownloadingReport(reportIndex, true))

@@ -15,6 +15,7 @@ class PriceBookEditorController {
     this.state = state
     this.priceBookDefinitions = []
     this.structuredPriceBookDefinitions = []
+    this.selectedDefinitionId = null
     this.pristineAssignments = []
     this.currentPriceBook = null
     this.DEFAULT_STATE_CODE = '*'
@@ -28,7 +29,8 @@ class PriceBookEditorController {
       .catch((err) => console.error(err))
     this.equipmentTagFilter = this.equipmentTagFilter.bind(this)
     this.equipmentTags = []
-    this.setOfSelectedEquipmentTags = new Set()
+    this.selectedEquipmentTags = {}
+    this.setOfSelectedEquipmentTags = {}
     this.$http.get('/service/category-tags/equipment/tags')
       .then(result => {
         this.equipmentTags = result.data
@@ -112,6 +114,7 @@ class PriceBookEditorController {
 
     // Build the pricebookdefinitions
     this.structuredPriceBookDefinitions = []
+    this.selectedEquipmentTags = {}
     Object.keys(this.priceBookDefinitions).forEach((definitionKey) => {
       var definitionItems = this.priceBookDefinitions[definitionKey]
       var definition = {
@@ -147,8 +150,10 @@ class PriceBookEditorController {
         definition.items.push(item)
       })
       this.structuredPriceBookDefinitions.push(definition)
+      this.selectedEquipmentTags[definition.id] = []
+      this.setOfSelectedEquipmentTags[definition.id] = new Set()
     })
-
+    this.selectedDefinitionId = this.structuredPriceBookDefinitions[0].id
     // Save construction ratios keyed by state
     this.defineConstructionRatiosForSelectedState()
   }
@@ -262,17 +267,17 @@ class PriceBookEditorController {
     this.setEditingMode({ mode: this.listMode })
   }
 
-  updateSetOfSelectedEquipmentTags () {
+  updateSetOfSelectedEquipmentTags (definitionId) {
     // Keep a set of IDs that we want to filter.
-    this.setOfSelectedEquipmentTags = new Set(this.selectedEquipmentTags.map(equipmentTag => equipmentTag.id))
+    this.setOfSelectedEquipmentTags[definitionId] = new Set(this.selectedEquipmentTags[definitionId].map(equipmentTag => equipmentTag.id))
   }
 
   equipmentTagFilter (item) {
-    if (this.setOfSelectedEquipmentTags.size === 0) {
+    if (this.setOfSelectedEquipmentTags[this.selectedDefinitionId].size === 0) {
       return true // No filters applied
     } else {
       const tags = item.tagMapping || [] // tagMapping can be null
-      const itemHasTag = tags.filter(tagId => this.setOfSelectedEquipmentTags.has(tagId)).length > 0
+      const itemHasTag = tags.filter(tagId => this.setOfSelectedEquipmentTags[this.selectedDefinitionId].has(tagId)).length > 0
       return itemHasTag
     }
   }
