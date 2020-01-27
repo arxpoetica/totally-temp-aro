@@ -20,13 +20,13 @@ jobs:
           command: |
             # sudo apt-get install python-dev
             sudo npm install -g mocha
-      
+
       - run:
           name: build and register
           command: |
             docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
             curl -O https://bootstrap.pypa.io/get-pip.py
-            sudo python3 get-pip.py 
+            sudo python3 get-pip.py
             export PATH=~/.local/bin:$PATH
             sudo pip3 install awscli boto3
             eval $(aws ecr get-login --region us-east-1 --no-include-email --registry-ids 976168524097)
@@ -46,7 +46,7 @@ jobs:
                 docker push ${ECR_IMAGE_NAME}:latest
                 python3 docker/publish_version.py qa-${BRANCH} app $CIRCLE_BUILD_NUM
             fi
-            
+
   deploy:
     docker:
       - image: circleci/python:2.7
@@ -65,12 +65,10 @@ workflows:
           context: aro_qa_builds
           filters:
             branches:
-              only: 
+              only:
                 - master
                 - optional_building
-                - wormholeFusion
-                - coverageFix
-                - platform_upgrade
+                - shp_reports
 
       - deploy:
           context: aro_qa_builds
