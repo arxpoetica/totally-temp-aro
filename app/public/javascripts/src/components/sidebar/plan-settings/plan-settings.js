@@ -25,7 +25,7 @@ class PlanSettingsController {
   }
 
   areControlsEnabled () {
-    return (this.state.plan.planState === Constants.PLAN_STATE.START_STATE) || (this.state.plan.planState === Constants.PLAN_STATE.INITIALIZED)
+    return this.plan && ((this.plan.planState === Constants.PLAN_STATE.START_STATE) || (this.plan.planState === Constants.PLAN_STATE.INITIALIZED))
   }
 
   resetChildSettingsPanels (childKey) {
@@ -127,7 +127,7 @@ class PlanSettingsController {
     })
 
     // Save the configuration to the server
-    this.$http.put(`/service/v1/plan/${this.planId}/configuration`, putBody)
+    this.$http.put(`/service/v1/plan/${this.plan.id}/configuration`, putBody)
   }
 
   discardChanges () {
@@ -141,12 +141,12 @@ class PlanSettingsController {
   clearAllSelectedSA () {
     // Get a list of selected service areas that are valid, given the (possibly) changed service area library selection
     const selectedServiceAreaLibraryId = this.dataItems.service_layer.selectedLibraryItems[0].identifier
-    this.$http.get(`/service_areas/${this.planId}/selectedServiceAreasInLibrary?libraryId=${selectedServiceAreaLibraryId}`)
+    this.$http.get(`/service_areas/${this.plan.id}/selectedServiceAreasInLibrary?libraryId=${selectedServiceAreaLibraryId}`)
       .then(result => {
         const validServiceAreas = new Set(result.data)
         var invalidServiceAreas = [...this.selectedServiceAreas].filter(serviceAreaId => !validServiceAreas.has(serviceAreaId))
         if (invalidServiceAreas.length > 0) {
-          this.removePlanTargets(this.planId, { serviceAreas: new Set(invalidServiceAreas) })
+          this.removePlanTargets(this.plan.id, { serviceAreas: new Set(invalidServiceAreas) })
         }
       })
       .catch(err => console.error(err))
@@ -221,7 +221,7 @@ class PlanSettingsController {
   mapStateToThis (reduxState) {
     return {
       dataItems: reduxState.plan.dataItems,
-      planId: reduxState.plan.activePlan.id,
+      plan: reduxState.plan.activePlan,
       selectedServiceAreas: reduxState.selection.planTargets.serviceAreas
     }
   }
