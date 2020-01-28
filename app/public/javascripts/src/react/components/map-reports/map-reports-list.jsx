@@ -2,7 +2,8 @@ import React, { Component } from 'react'
 import { PropTypes } from 'prop-types'
 import { connect } from 'react-redux'
 import MapReportActions from './map-reports-actions'
-
+import ScalingFactors from './scaling-factors'
+import Orientations from './orientations'
 export class MapReportsList extends Component {
   constructor (props) {
     super(props)
@@ -16,6 +17,7 @@ export class MapReportsList extends Component {
           this.props.reportPages.map((reportPage, index) => (
             <li
               className={'list-group-item' + ((this.props.activePageIndex === index) ? ' active' : '')}
+              key={index}
               style={{ cursor: 'pointer', lineHeight: '28px' }}
               onClick={() => this.props.setActivePageIndex(index)}
             >
@@ -28,6 +30,13 @@ export class MapReportsList extends Component {
                     <i className='fa fa-trash-alt'/>
                   </button>
                 </div>
+              </div>
+              <div>
+                <span className='badge badge-light mr-2'>{reportPage.paperSize}</span>
+                <span className='badge badge-light mr-2'>{ScalingFactors[reportPage.worldLengthPerMeterOfPaper] || ScalingFactors.default}</span>
+                <span className='badge badge-light mr-2'>{reportPage.dpi} dpi</span>
+                <span className='badge badge-light mr-2'>{Orientations[reportPage.orientation]}</span>
+                <span className='badge badge-light mr-2'>Center: {reportPage.mapCenter.latitude}, {reportPage.mapCenter.longitude} </span>
               </div>
             </li>
           ))
