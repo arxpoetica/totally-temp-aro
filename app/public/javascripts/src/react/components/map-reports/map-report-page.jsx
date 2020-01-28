@@ -12,6 +12,13 @@ export class MapReportPage extends Component {
       <h4>Page definition</h4>
       <table className='table table-sm table-striped'>
         <tbody>
+          {/* The page title */}
+          <tr>
+            <td>Title</td>
+            <td><Field id='fieldPageTitle' name='title' className='form-control form-control-sm'
+              component='input' type='text' />
+            </td>
+          </tr>
           {/* The paper size */}
           <tr>
             <td>Paper Size</td>
@@ -24,7 +31,7 @@ export class MapReportPage extends Component {
           {/* The scaling factor */}
           <tr>
             <td>Scaling factor</td>
-            <td><Field id='fieldPageSize' name='worldLengthPerMeterOfPaper' className='form-control form-control-sm'
+            <td><Field id='fieldPageScalingFactor' name='worldLengthPerMeterOfPaper' className='form-control form-control-sm'
               component='select' type='text'>
                 { Object.keys(ScalingFactors)
                   .filter(scalingFactorId => scalingFactorId !== 'default')
@@ -35,14 +42,14 @@ export class MapReportPage extends Component {
           {/* The print DPI */}
           <tr>
             <td>Resolution (dpi)</td>
-            <td><Field id='fieldPageSize' name='dpi' className='form-control form-control-sm'
+            <td><Field id='fieldPageResolution' name='dpi' className='form-control form-control-sm'
               component='input' type='number' normalize={val => Math.max(1, Math.min(300, val))} />
             </td>
           </tr>
           {/* The orientation */}
           <tr>
             <td>Orientation</td>
-            <td><Field id='fieldPageSize' name='orientation' className='form-control form-control-sm'
+            <td><Field id='fieldPageOrientation' name='orientation' className='form-control form-control-sm'
               component='select' type='text'>
                 { Object.keys(Orientation).map(orientationId => <option key={orientationId} value={orientationId}>{Orientation[orientationId]}</option>) }
               </Field>

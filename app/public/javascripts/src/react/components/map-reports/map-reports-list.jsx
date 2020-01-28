@@ -9,6 +9,7 @@ export class MapReportsList extends Component {
     super(props)
     this.handleRemovePageClicked = this.handleRemovePageClicked.bind(this)
     this.handleAddPageClicked = this.handleAddPageClicked.bind(this)
+    this.handleEditPageClicked = this.handleEditPageClicked.bind(this)
   }
   render () {
     return <div>
@@ -24,12 +25,17 @@ export class MapReportsList extends Component {
               <div className='d-flex'>
                 <div className='flex-grow-1'>{reportPage.title}</div>
                 <div className='flex-grow-0'>
+                  <button className='btn btn-sm btn-light'
+                    onClick={event => this.handleEditPageClicked(event, index)}
+                  >
+                    <i className='fa fa-edit'/>
+                  </button>
                   <button className='btn btn-sm btn-danger'
                     onClick={event => this.handleRemovePageClicked(event, index)}
                   >
                     <i className='fa fa-trash-alt'/>
-                  </button>
-                </div>
+                </button>
+              </div>
               </div>
               <div>
                 <span className='badge badge-light mr-2'>{reportPage.paperSize}</span>
@@ -43,10 +49,10 @@ export class MapReportsList extends Component {
         }
       </ul>
       <button
-        className='btn btn-light'
+        className='btn btn-light mt-2'
         onClick={this.handleAddPageClicked}
       >
-        Add
+        <i className='fa fa-plus mr-2' />Add Page
       </button>
     </div>
   }
@@ -60,6 +66,11 @@ export class MapReportsList extends Component {
     var newPage = JSON.parse(JSON.stringify(this.props.reportPages[0]))
     newPage.title = 'New Page'
     this.props.addPage(newPage)
+  }
+
+  handleEditPageClicked (event, index) {
+    this.props.setEditingPageIndex(index)
+    event.stopPropagation()
   }
 }
 
@@ -76,7 +87,8 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
   addPage: pageDefinition => dispatch(MapReportActions.addPage(pageDefinition)),
   removePage: index => dispatch(MapReportActions.removePage(index)),
-  setActivePageIndex: index => dispatch(MapReportActions.setActivePageIndex(index))
+  setActivePageIndex: index => dispatch(MapReportActions.setActivePageIndex(index)),
+  setEditingPageIndex: index => dispatch(MapReportActions.setEditingPageIndex(index))
 })
 
 const MapReportsDownloaderComponent = connect(mapStateToProps, mapDispatchToProps)(MapReportsList)

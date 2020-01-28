@@ -12,7 +12,7 @@ const pageDefinitionSelector = formValueSelector(Constants.MAP_REPORTS_PAGE_FORM
 export class MapReportPageEditor extends Component {
   render () {
     return <div style={{ overflow: 'auto' }}>
-      <MapReportPage initialValues={this.props.reportPages[0]} />
+      <MapReportPage initialValues={this.props.reportPages[this.props.editingPageIndex]} />
       <button className='btn btn-primary float-right' onClick={() => this.savePageDefinition()}>
         <i className='fa fa-save' />Save
       </button>
@@ -26,24 +26,28 @@ export class MapReportPageEditor extends Component {
       latitude: mapCenter.lat(),
       longitude: mapCenter.lng()
     }
-    this.props.savePageDefinition(0, pageDefinition)
+    this.props.savePageDefinition(this.props.editingPageIndex, pageDefinition)
+    this.props.setEditingPageIndex(-1)
   }
 }
 
 MapReportPageEditor.propTypes = {
   reportPages: PropTypes.array,
   pageDefinition: PropTypes.object,
-  googleMaps: PropTypes.object
+  googleMaps: PropTypes.object,
+  editingPageIndex: PropTypes.number
 }
 
 const mapStateToProps = state => ({
   reportPages: state.mapReports.pages,
-  pageDefinition: pageDefinitionSelector(state, 'paperSize', 'worldLengthPerMeterOfPaper', 'dpi', 'orientation'),
-  googleMaps: state.map.googleMaps
+  pageDefinition: pageDefinitionSelector(state, 'title', 'paperSize', 'worldLengthPerMeterOfPaper', 'dpi', 'orientation'),
+  googleMaps: state.map.googleMaps,
+  editingPageIndex: state.mapReports.editingPageIndex
 })
 
 const mapDispatchToProps = dispatch => ({
-  savePageDefinition: (index, pageDefinition) => dispatch(MapReportActions.savePageDefinition(index, pageDefinition))
+  savePageDefinition: (index, pageDefinition) => dispatch(MapReportActions.savePageDefinition(index, pageDefinition)),
+  setEditingPageIndex: index => dispatch(MapReportActions.setEditingPageIndex(index))
 })
 
 const MapReportPageEditorComponent = wrapComponentWithProvider(reduxStore, MapReportPageEditor, mapStateToProps, mapDispatchToProps)

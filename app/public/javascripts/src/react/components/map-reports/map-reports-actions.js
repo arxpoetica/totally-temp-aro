@@ -73,6 +73,13 @@ function setActivePageIndex (index) {
   }
 }
 
+function setEditingPageIndex (index) {
+  return {
+    type: Actions.MAP_REPORTS_SET_EDITING_PAGE_INDEX,
+    payload: index
+  }
+}
+
 export default {
   downloadReport,
   setLayers,
@@ -81,5 +88,6 @@ export default {
   clearMapReports,
   addPage,
   removePage,
-  setActivePageIndex
+  setActivePageIndex,
+  setEditingPageIndex
 }

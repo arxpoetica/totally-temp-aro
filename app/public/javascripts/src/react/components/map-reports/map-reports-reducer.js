@@ -15,6 +15,7 @@ const defaultState = {
     }
   ],
   activePageIndex: 0,
+  editingPageIndex: -1,
   isDownloading: false
 }
 
@@ -52,6 +53,12 @@ function setActivePageIndex (state, index) {
   }
 }
 
+function setEditingPageIndex (state, index) {
+  return { ...state,
+    editingPageIndex: index
+  }
+}
+
 function mapReportsReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.MAP_REPORTS_SET_PAGE_DEFINITION:
@@ -68,6 +75,9 @@ function mapReportsReducer (state = defaultState, action) {
 
     case Actions.MAP_REPORTS_SET_ACTIVE_PAGE_INDEX:
       return setActivePageIndex(state, action.payload)
+
+    case Actions.MAP_REPORTS_SET_EDITING_PAGE_INDEX:
+      return setEditingPageIndex(state, action.payload)
 
     default:
       return state
