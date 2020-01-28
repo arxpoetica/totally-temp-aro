@@ -52,10 +52,34 @@ function clearMapReports () {
   }
 }
 
+function addPage (pageDefinition) {
+  return {
+    type: Actions.MAP_REPORTS_ADD_PAGE,
+    payload: pageDefinition
+  }
+}
+
+function removePage (index) {
+  return {
+    type: Actions.MAP_REPORTS_REMOVE_PAGE,
+    payload: index
+  }
+}
+
+function setActivePageIndex (index) {
+  return {
+    type: Actions.MAP_REPORTS_SET_ACTIVE_PAGE_INDEX,
+    payload: index
+  }
+}
+
 export default {
   downloadReport,
   setLayers,
   setLayerIsChecked,
   savePageDefinition,
-  clearMapReports
+  clearMapReports,
+  addPage,
+  removePage,
+  setActivePageIndex
 }

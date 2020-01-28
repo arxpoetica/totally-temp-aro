@@ -4,11 +4,13 @@ import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import MapReportActions from './map-reports-actions'
 import MapReportPageEditor from './map-report-page-editor.jsx'
+import MapReportsList from './map-reports-list.jsx'
 
 export class MapReportsDownloader extends Component {
   render () {
     return <div>
       <h3>Map Reports</h3>
+      <MapReportsList />
       <MapReportPageEditor />
       <button className='btn btn-primary' onClick={() => this.doDownloadReport()}>
         <i className='fa fa-download' />Download
