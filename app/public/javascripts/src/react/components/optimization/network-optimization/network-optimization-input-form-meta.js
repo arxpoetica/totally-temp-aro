@@ -1,3 +1,4 @@
+// ToDo: DEPRICATED, we can delete this
 const AnalysisTypes = [
   'UNDEFINED',
   'NETWORK_PLAN',

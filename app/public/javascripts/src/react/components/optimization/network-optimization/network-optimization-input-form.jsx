@@ -3,14 +3,14 @@ import { connect } from 'react-redux'
 // import { PropTypes } from 'prop-types'
 import { Field, reduxForm, getFormValues, change } from 'redux-form'
 import Constants from '../../../common/constants'
-import NetworkOptimizationInputFormMeta from './network-optimization-input-form-meta'
+// import NetworkOptimizationInputFormMeta from './network-optimization-input-form-meta'
 import { FieldComponents } from '../../common/editor-interface/object-editor.jsx'
 import DropdownList from 'react-widgets/lib/DropdownList'
 
 export class NetworkOptimizationInputFormProto extends Component {
   constructor (props) {
     super(props)
-    this.meta = NetworkOptimizationInputFormMeta
+    // this.meta = NetworkOptimizationInputFormMeta
 
     this.AnalysisTypes = [
       { label: 'Near-net Analysis', value: 'UNDEFINED' }, // different endpoint
@@ -147,7 +147,8 @@ export class NetworkOptimizationInputFormProto extends Component {
   }
 
   renderManualForm () {
-    // console.log('render opt form')
+    console.log('render opt form')
+
     let networkTypes = this.props.initialValues.networkTypes
     if (this.props.values && this.props.values.networkTypes) networkTypes = this.props.values.networkTypes
 
@@ -156,10 +157,11 @@ export class NetworkOptimizationInputFormProto extends Component {
         <div className='ei-header ei-no-pointer'>Settings</div>
         <div className='ei-gen-level ei-internal-level' style={{ paddingLeft: '11px' }}>
           <div className='ei-items-contain'>
-
+            {/*
             <div className='ei-property-item'>
               <div className='ei-property-label'>Analysis Type</div>
               <div className='ei-property-value'>
+                {
                 <Field
                   onChange={(val, newVal, prevVal, propChain) => this.handleChange(newVal, prevVal, propChain)}
                   name={'analysis_type'}
@@ -168,9 +170,11 @@ export class NetworkOptimizationInputFormProto extends Component {
                   textField='label'
                   data={this.AnalysisTypes}
                 />
+                }
+                {this.props.networkAnalysisTypeId}
               </div>
             </div>
-
+            */}
             <div className='ei-property-item'>
               <div className='ei-property-label'>Endpoint Technology</div>
               <div className='ei-property-value' style={{ flex: 'inherit' }}>
@@ -228,7 +232,17 @@ export class NetworkOptimizationInputFormProto extends Component {
 
           </div>
         </div>
+        {
+          this.props.networkAnalysisTypeId === 'NETWORK_PLAN' ? this.renderOptimizationOptions() : ''
+        }
+      </div>
+    )
+  }
 
+  renderOptimizationOptions () {
+    // possibly make this its own component
+    return (
+      <div>
         <div className='ei-header ei-no-pointer'>Optimization</div>
         <div className='ei-gen-level ei-internal-level' style={{ paddingLeft: '11px' }}>
           <div className='ei-items-contain'>

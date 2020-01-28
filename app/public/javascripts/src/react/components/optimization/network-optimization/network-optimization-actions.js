@@ -16,9 +16,12 @@ function runOptimization (inputs, userId) { // shouldn't be getting userId from 
     console.log(inputs)
     // Make the API call that starts optimization calculations on aro-service
     var apiUrl = `/service/v1/optimize/masterplan?userId=${userId}`
+    if (inputs.analysis_type === 'NETWORK_ANALYSIS') apiUrl = `/service/v1/analyze/masterplan?userId=${userId}`
+
     AroHttp.post(apiUrl, inputs)
       .then((response) => {
         console.log(response)
+        // ToDo: listen for analysis report
         // loadOptimizationInputs
         /*
         if (response.status >= 200 && response.status <= 299) {

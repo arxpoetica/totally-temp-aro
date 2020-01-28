@@ -25,6 +25,7 @@ export class NetworkOptimizationInput extends Component {
         <NetworkOptimizationInputForm
           handleChange={(newVal, prevVal, propChain) => this.handleChange(newVal, prevVal, propChain)}
           initialValues={this.props.optimizationInputs}
+          networkAnalysisTypeId={this.props.networkAnalysisTypeId}
           displayOnly={!this.areControlsEnabled()} enableReinitialize />
 
         <div className='ei-header ei-no-pointer' style={{ marginBottom: '0px' }}>Geography Selection</div>
@@ -63,6 +64,7 @@ export class NetworkOptimizationInput extends Component {
     // if we do validation we'll need to make it a selector
     // plan.selection.planTargets are sent seperately to the server
     var inputs = JSON.parse(JSON.stringify(optimizationInputs))
+    inputs.analysis_type = this.props.networkAnalysisTypeId
     inputs.planId = this.props.planId
     inputs.locationConstraints = {}
     inputs.locationConstraints.locationTypes = []

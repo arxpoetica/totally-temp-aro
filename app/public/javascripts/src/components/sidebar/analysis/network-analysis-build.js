@@ -3,6 +3,8 @@ import Constants from '../../common/constants'
 import SelectionModes from '../../../react/components/selection/selection-modes'
 import SelectionActions from '../../../react/components/selection/selection-actions'
 
+// ToDo: DEPRICATED, you can delete this
+
 // Get a copy of selection modes as our combo box will add "objectHash" keys to the modes
 const getSelectionModes = state => state.selection.selectionModes
 const getAllSelectionModes = createSelector([getSelectionModes], (selectionModes) => angular.copy(selectionModes).filter(mode => mode.id !== 'ALL_PLAN_AREAS'))

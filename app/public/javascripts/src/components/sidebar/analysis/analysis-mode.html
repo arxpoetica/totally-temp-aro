@@ -40,20 +40,14 @@
 <div class="analysis-mode-container">
   <div class="analysis-type">
     <h4 style="text-align: center; margin-top: 20px;">Analysis Type:{{$ctrl.state.networkAnalysisType.label}}</h4>
-    <div ng-switch="$ctrl.state.networkAnalysisType.id">
-      <r-coverage-button ng-switch-when="COVERAGE_ANALYSIS"></r-coverage-button>
-      <r-rfp-button ng-switch-when="RFP"></r-rfp-button>
-      <optimize-button ng-switch-default></optimize-button>
-    </div>
   </div>
   <accordion style="position: relative; flex: 1 1 auto;" toggle-expanded-panel="$ctrl.analysisModePanel">
-    
+    <!--
     <accordion-panel-title title="'R Input'" panel-id="$ctrl.analysisModePanels.R_INPUT"></accordion-panel-title>
     <accordion-panel-contents panel-id="$ctrl.analysisModePanels.R_INPUT">
       <r-network-optimization-input on-modify="$ctrl.state.handleModifyClicked"></r-network-optimization-input>
     </accordion-panel-contents>
-    
-    
+  -->
     <accordion-panel-title title="'Input'" panel-id="$ctrl.analysisModePanels.INPUT"></accordion-panel-title>
     <accordion-panel-contents panel-id="$ctrl.analysisModePanels.INPUT">
       <div class="col-xs-7" style="left: 20%;border: 10px solid white;">
@@ -64,13 +58,22 @@
         </select>
         
       </div>
-      
+      <div ng-switch="$ctrl.state.networkAnalysisType.id">
+        <r-coverage-button ng-switch-when="COVERAGE_ANALYSIS"></r-coverage-button>
+        <r-rfp-button ng-switch-when="RFP"></r-rfp-button>
+        <ng-container ng-switch-when="NETWORK_PLAN"></ng-container>
+        <ng-container ng-switch-when="NETWORK_ANALYSIS"></ng-container>
+        <optimize-button ng-switch-default></optimize-button>
+      </div>
       <div style="height: 100%;" ng-if="$ctrl.state.networkAnalysisType.id === 'NETWORK_PLAN' || $ctrl.state.networkAnalysisType.id === 'NETWORK_ANALYSIS'">
+        <!--
         <network-analysis-build 
           remove-target="$ctrl.removeTarget(target)" 
           zoom-target="$ctrl.zoomTarget(target)" 
           selection="$ctrl.state.selection">
         </network-analysis-build>
+        -->
+        <r-network-optimization-input on-modify="$ctrl.state.handleModifyClicked" network-analysis-type-id="$ctrl.state.networkAnalysisType.id"></r-network-optimization-input>
       </div>
       
       <div style="height: 100%;" ng-if="$ctrl.state.networkAnalysisType.id === 'EXPERT_MODE'">
