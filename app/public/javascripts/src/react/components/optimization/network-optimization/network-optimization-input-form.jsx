@@ -5,6 +5,7 @@ import { Field, reduxForm, getFormValues, change } from 'redux-form'
 import Constants from '../../../common/constants'
 import NetworkOptimizationInputFormMeta from './network-optimization-input-form-meta'
 import { FieldComponents } from '../../common/editor-interface/object-editor.jsx'
+import DropdownList from 'react-widgets/lib/DropdownList'
 
 export class NetworkOptimizationInputFormProto extends Component {
   constructor (props) {
@@ -64,25 +65,73 @@ export class NetworkOptimizationInputFormProto extends Component {
       { label: 'NPV', value: 'NPV' },
       { label: 'Custom', value: 'CUSTOM' }
     ]
+
+    this.AlgorithmComposites = [
+      { id: 'UNCONSTRAINED', algorithm: 'UNCONSTRAINED', label: 'Full Coverage',
+        excludedFields: [
+          'optimization.preIrrThreshold',
+          'optimization.threshold',
+          'optimization.budget'
+        ]
+      },
+      /*
+      { id: 'MAX_IRR', algorithm: 'IRR', label: 'Maximum IRR',
+        excludedFields: [
+          'optimization.preIrrThreshold',
+          'optimization.threshold',
+          'optimization.budget'
+        ]
+      },
+      */
+      { id: 'BUDGET', algorithm: 'IRR', label: 'Budget',
+        excludedFields: [
+          'optimization.preIrrThreshold',
+          'optimization.threshold'
+        ]
+      },
+      { id: 'IRR_TARGET', algorithm: 'IRR', label: 'Plan IRR Floor',
+        excludedFields: [
+          'optimization.preIrrThreshold'
+        ]
+      },
+      { id: 'IRR_THRESH', algorithm: 'IRR', label: 'Segment IRR Floor',
+        excludedFields: [
+          'optimization.threshold',
+          'optimization.budget'
+        ]
+      },
+      /*
+      // Verizon-specific
+      { id: 'TABC', algorithm: 'CUSTOM', label: 'ABCD analysis',
+        excludedFields: [
+          'optimization.preIrrThreshold',
+          'optimization.threshold',
+          'optimization.budget'
+        ]
+      },
+      */
+      { id: 'COVERAGE', algorithm: 'COVERAGE', label: 'Coverage Target',
+        excludedFields: [
+          'optimization.preIrrThreshold',
+          'optimization.budget'
+        ]
+      }
+    ]
     /*
-    {
-      UNCONSTRAINED: { id: 'UNCONSTRAINED', algorithm: 'UNCONSTRAINED', label: 'Full Coverage' },
-      MAX_IRR: { id: 'MAX_IRR', algorithm: 'IRR', label: 'Maximum IRR' },
-      BUDGET: { id: 'BUDGET', algorithm: 'IRR', label: 'Budget' },
-      IRR_TARGET: { id: 'IRR_TARGET', algorithm: 'IRR', label: 'Plan IRR Floor' },
-      IRR_THRESH: { id: 'IRR_THRESH', algorithm: 'IRR', label: 'Segment IRR Floor' },
-      TABC: { id: 'TABC', algorithm: 'CUSTOM', label: 'ABCD analysis' }, // Verizon-specific
-      COVERAGE: { id: 'COVERAGE', algorithm: 'COVERAGE', label: 'Coverage Target' }
-    }
-    */
     this.NetworkTypes = [ // swap out for grouped list
       'Fiber', // Fiber
       'FiveG', // 5G
       'Copper' // DSL
     ]
+    */
+
+    this.state = {
+      algorithmComposite: this.getAlgorithmComposite(this.props.initialValues)
+    }
   }
 
   render () {
+    if (!this.props.values) return ''
     return <div>
       <form className='d-flex flex-column rfp-options'
         style={{ height: '100%' }}
@@ -98,9 +147,7 @@ export class NetworkOptimizationInputFormProto extends Component {
   }
 
   renderManualForm () {
-    let algorithm = this.props.initialValues.optimization.algorithm
-    if (this.props.values && this.props.values.optimization) algorithm = this.props.values.optimization.algorithm
-
+    console.log('render opt form')
     let networkTypes = this.props.initialValues.networkTypes
     if (this.props.values && this.props.values.networkTypes) networkTypes = this.props.values.networkTypes
 
@@ -126,7 +173,7 @@ export class NetworkOptimizationInputFormProto extends Component {
 
             <div className='ei-property-item'>
               <div className='ei-property-label'>Endpoint Technology</div>
-              <div className='ei-property-value'>
+              <div className='ei-property-value' style={{ flex: 'inherit' }}>
 
                 <button className={'btn btn-sm ' + (networkTypes.includes('Fiber') ? 'btn-primary' : 'btn-light')}
                   onClick={() => this.toggleNetworkType('Fiber')}
@@ -164,12 +211,6 @@ export class NetworkOptimizationInputFormProto extends Component {
                 />
               </div>
             </div>
-          </div>
-        </div>
-
-        <div className='ei-header ei-no-pointer'>Optimization</div>
-        <div className='ei-gen-level ei-internal-level' style={{ paddingLeft: '11px' }}>
-          <div className='ei-items-contain'>
 
             <div className='ei-property-item'>
               <div className='ei-property-label'>Pruning Strategy</div>
@@ -185,8 +226,29 @@ export class NetworkOptimizationInputFormProto extends Component {
               </div>
             </div>
 
+          </div>
+        </div>
+
+        <div className='ei-header ei-no-pointer'>Optimization</div>
+        <div className='ei-gen-level ei-internal-level' style={{ paddingLeft: '11px' }}>
+          <div className='ei-items-contain'>
+
             <div className='ei-property-item'>
               <div className='ei-property-label'>Optimization Type</div>
+              <div className='ei-property-value'>
+                <DropdownList
+                  data={this.AlgorithmComposites}
+                  valueField='id'
+                  textField='label'
+                  value={this.state.algorithmComposite}
+                  readOnly={this.props.displayOnly}
+                  onChange={(val, event) => this.onAlgorithmChange(val, event)}
+                />
+              </div>
+            </div>
+            {/*
+            <div className='ei-property-item'>
+              <div className='ei-property-label'>Optimization Name</div>
               <div className='ei-property-value'>
                 <Field
                   onChange={(val, newVal, prevVal, propChain) => this.handleChange(newVal, prevVal, propChain)}
@@ -198,52 +260,89 @@ export class NetworkOptimizationInputFormProto extends Component {
                 />
               </div>
             </div>
-            {algorithm === 'IRR' // IRR_THRESH
+            */}
+            {!this.state.algorithmComposite.excludedFields.includes('optimization.preIrrThreshold') // algorithm === 'IRR' // IRR_THRESH
               ? (
                 <div className='ei-property-item'>
                   <div className='ei-property-label'>Segment IRR Floor</div>
-                  <div className='ei-property-value'>
+                  <div className='ei-property-value' style={{ flex: 'inherit' }}>
                     <Field
+                      className='text-right'
+                      step='0.1'
                       onChange={(val, newVal, prevVal, propChain) => this.handleChange(newVal, prevVal, propChain)}
                       name={'optimization.preIrrThreshold'}
                       component={this.filterComponent('input')}
                       type='number'
-                    />
+                    />%
+                    <div>
+                      <Field
+                        min='0'
+                        max='1'
+                        step='0.001'
+                        name={'optimization.preIrrThreshold'}
+                        style={{ marginTop: '10px', width: '100%' }}
+                        component={this.filterComponent('input')}
+                        type='range'
+                      />
+                    </div>
                   </div>
                 </div>
               )
               : ''
             }
-            {algorithm === 'IRR' // BUDGET || IRR_TARGET
-              ? (
-                <div className='ei-property-item'>
-                  <div className='ei-property-label'>Target Capital</div>
-                  <div className='ei-property-value'>
-                    <Field
-                      onChange={(val, newVal, prevVal, propChain) => this.handleChange(newVal, prevVal, propChain)}
-                      name={'optimization.budget'}
-                      component={this.filterComponent('input')}
-                      type='number'
-                    />
-                  </div>
-                </div>
-              )
-              : ''
-            }
-            {algorithm === 'IRR' || algorithm === 'COVERAGE' // IRR_TARGET || COVERAGE
+            {!this.state.algorithmComposite.excludedFields.includes('optimization.threshold') // algorithm === 'IRR' || algorithm === 'COVERAGE' // IRR_TARGET || COVERAGE
               ? (
                 <div className='ei-property-item'>
                   <div className='ei-property-label'>
-                    {algorithm === 'IRR' ? 'Plan IRR Floor' : ''}
-                    {algorithm === 'COVERAGE' ? 'Coverage Target' : ''}
+                    {this.state.algorithmComposite.id === 'IRR_TARGET' ? 'Plan IRR Floor' : ''}
+                    {this.state.algorithmComposite.id === 'COVERAGE' ? 'Coverage Target' : ''}
                   </div>
-                  <div className='ei-property-value'>
+                  <div className='ei-property-value' style={{ flex: 'inherit' }}>
                     <Field
+                      className='text-right'
+                      step='0.1'
                       onChange={(val, newVal, prevVal, propChain) => this.handleChange(newVal, prevVal, propChain)}
                       name={'optimization.threshold'}
                       component={this.filterComponent('input')}
                       type='number'
-                    />
+                    />%
+                    <div>
+                      <Field
+                        min='0'
+                        max='1'
+                        step='0.001'
+                        name={'optimization.threshold'}
+                        style={{ marginTop: '10px', width: '100%' }}
+                        component={this.filterComponent('input')}
+                        type='range'
+                      />
+                    </div>
+                  </div>
+                </div>
+              )
+              : ''
+            }
+            {!this.state.algorithmComposite.excludedFields.includes('optimization.budget') // algorithm === 'IRR' // BUDGET || IRR_TARGET
+              ? (
+                <div className='ei-property-item'>
+                  <div className='ei-property-label'>Target Capital (thousands)</div>
+                  <div className='ei-property-value' style={{ flex: 'inherit' }}>
+                    {/*
+                    <Field
+                      className='text-right'
+                      onChange={(val, newVal, prevVal, propChain) => this.handleChange(newVal, prevVal, propChain)}
+                      name={'optimization.budget'}
+                      component={this.filterComponent('input')}
+                      type='number'
+                    />K
+                    */}
+                    <input
+                      className='text-right'
+                      type='number'
+                      value={this.props.values.optimization.budget / 1000}
+                      onChange={(event) => this.onBudgetChange(event)}
+                      disabled={this.props.displayOnly}
+                    />K
                   </div>
                 </div>
               )
@@ -254,10 +353,6 @@ export class NetworkOptimizationInputFormProto extends Component {
         </div>
       </div>
     )
-  }
-
-  selectOptimizationType (optimizationType) {
-    // this.props.dispatch(change(Constants.NETWORK_OPTIMIZATION_INPUT_FORM, 'optimization.algorithm', networkTypes))
   }
 
   toggleNetworkType (networkType) {
@@ -291,29 +386,44 @@ export class NetworkOptimizationInputFormProto extends Component {
   }
 
   handleChange (newVal, prevVal, propChain) {
-    switch (propChain) {
-      case 'optimization.algorithm':
-        this.onAlgorithmChange(newVal, prevVal, propChain)
-        break
-      case 'analysis_type':
-        this.onAnalysisTypeChange(newVal, prevVal, propChain)
-        break
+    this.props.handleChange(newVal, prevVal, propChain)
+  }
+
+  getAlgorithmComposite (vals) {
+    console.log('- get opt vals -')
+    console.log(vals)
+    console.log(this.AlgorithmComposites)
+    if (!vals) return this.AlgorithmComposites[0]
+    // ToDo: get rid of this polymorphism and composite settings
+    var algorithm = vals.optimization.algorithm
+    if (algorithm === 'IRR') {
+      /*
+      if (!vals.optimization.preIrrThreshold && !vals.optimization.threshold && !Number.isFinite(+vals.optimization.budget)) {
+        algorithm = 'MAX_IRR'
+      } else */
+      if (!vals.optimization.preIrrThreshold && !vals.optimization.threshold) {
+        algorithm = 'BUDGET'
+      } else if (!vals.optimization.preIrrThreshold) {
+        algorithm = 'IRR_TARGET'
+      } else {
+        algorithm = 'IRR_THRESH'
+      }
     }
 
-    this.props.handleChange(newVal, prevVal, propChain)
-    /*
-    var filterVal = newVal
-    if (typeof filterVal === 'object' && filterVal.hasOwnProperty('value')) filterVal = filterVal.value
-    return filterVal
-    */
+    return this.AlgorithmComposites.find(item => item.id === algorithm)
   }
 
-  onAlgorithmChange (newVal, prevVal, propChain) {
-    console.log('change optimization.algorithm')
+  onAlgorithmChange (newVal, event) {
+    this.setState({ algorithmComposite: newVal })
+    this.props.dispatch(change(Constants.NETWORK_OPTIMIZATION_INPUT_FORM, 'optimization.algorithm', newVal.algorithm))
+
+    newVal.excludedFields.forEach(fieldName => {
+      this.props.dispatch(change(Constants.NETWORK_OPTIMIZATION_INPUT_FORM, fieldName, null))
+    })
   }
 
-  onAnalysisTypeChange (newVal, prevVal, propChain) {
-    console.log('change onAnalysisTypeChange')
+  onBudgetChange (event) {
+    this.props.dispatch(change(Constants.NETWORK_OPTIMIZATION_INPUT_FORM, 'optimization.budget', event.target.value * 1000))
   }
 }
 
