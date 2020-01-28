@@ -15,7 +15,6 @@ const selector = formValueSelector(Constants.RING_OPTIONS_BASIC_FORM)
 export class NetworkOptimizationButton extends ProgressButton {
   constructor (props) {
     super(props)
-    console.log(props)
     // override
     this.statusTypes = {
       UNINITIALIZED: AngConstants.PLAN_STATE.START_STATE,
@@ -24,7 +23,6 @@ export class NetworkOptimizationButton extends ProgressButton {
     }
 
     this.unsubscriber = socketManager.subscribe('PROGRESS_MESSAGE_DATA', (progressData) => {
-      console.log(progressData)
       if (progressData.data.processType === 'optimization') {
         this.props.setActivePlanState(progressData.data.optimizationState)
         this.props.setAnalysisProgress(progressData.data.progress)
@@ -41,6 +39,11 @@ export class NetworkOptimizationButton extends ProgressButton {
   // override
   onModify () {
     this.props.onModify()
+  }
+
+  // override
+  onCancel () {
+    this.props.onCancel()
   }
 
   componentWillUnmount () {

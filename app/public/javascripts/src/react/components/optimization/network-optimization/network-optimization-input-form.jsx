@@ -147,8 +147,6 @@ export class NetworkOptimizationInputFormProto extends Component {
   }
 
   renderManualForm () {
-    console.log('render opt form')
-
     let networkTypes = this.props.initialValues.networkTypes
     if (this.props.values && this.props.values.networkTypes) networkTypes = this.props.values.networkTypes
 

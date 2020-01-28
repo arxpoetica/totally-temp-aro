@@ -21,7 +21,12 @@ export class NetworkOptimizationInput extends Component {
   render () {
     return (
       <div style={{ paddingRight: '16px', paddingTop: '8px' }}>
-        <NetworkOptimizationButton onRun={() => this.onRunOptimization()} onModify={() => this.props.onModify()} />
+        <NetworkOptimizationButton
+          onRun={() => this.onRunOptimization()}
+          onModify={() => this.props.onModify()}
+          onCancel={() => this.onCancelOptimization()}
+          isCanceling={this.props.isCanceling}
+        />
         <NetworkOptimizationInputForm
           handleChange={(newVal, prevVal, propChain) => this.handleChange(newVal, prevVal, propChain)}
           initialValues={this.props.optimizationInputs}
@@ -75,6 +80,11 @@ export class NetworkOptimizationInput extends Component {
     return inputs
   }
 
+  onCancelOptimization () {
+    console.log('CANCEL')
+    this.props.cancelOptimization(this.props.planId, this.props.optimizationId)
+  }
+
   handleChange (newVal, prevVal, propChain) {
     // console.log('--- from parent ---')
     // console.log([newVal, prevVal, propChain])
@@ -97,6 +107,8 @@ const mapStateToProps = (state) => ({
   planId: state.plan.activePlan.id,
   planState: state.plan.activePlan.planState,
   locationsLayers: state.mapLayers.location,
+  optimizationId: state.optimization.networkOptimization.optimizationId,
+  isCanceling: state.optimization.networkOptimization.isCanceling,
   optimizationInputs: state.optimization.networkOptimization.optimizationInputs,
   modifiedNetworkOptimizationInput: networkOptimizationInputSelector(state),
   allSelectionModes: getAllSelectionModes(state),
@@ -105,6 +117,7 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = dispatch => ({
   runOptimization: (inputs, userId) => dispatch(NetworkOptimizationActions.runOptimization(inputs, userId)),
+  cancelOptimization: (planId, optimizationId) => dispatch(NetworkOptimizationActions.cancelOptimization(planId, optimizationId)),
   setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId))
 })
 

@@ -576,7 +576,6 @@ class State {
         { id: 'EXPERT_MODE', label: 'Expert Mode', type: 'Expert' }
       ]
       service.networkAnalysisType = service.networkAnalysisTypes[0]
-      // console.log('set networkAnalysisType to default')
       // Upload Data Sources
       service.uploadDataSources = []
       service.pristineDataItems = {}
@@ -629,7 +628,6 @@ class State {
     // Optimization options in Redux
     // replace this with redux post
     service.getOptimizationBody = () => {
-      console.log('GOB')
       return stateSerializationHelper.getOptimizationBody(service, service.networkAnalysisConstraints,
         service.primarySpatialEdge, service.wormholeFuseDefinitions, service.networkConfigurations, $ngRedux.getState())
     }
@@ -727,7 +725,6 @@ class State {
             }
           })
           service.resourceItems = newResourceItems
-          console.log(service.resourceItems)
           service.pristineResourceItems = angular.copy(service.resourceItems)
           $timeout() // Trigger a digest cycle so that components can update
           return Promise.resolve()
@@ -1605,7 +1602,6 @@ class State {
       ]
 
       service.optimizationOptions.uiSelectedAlgorithm = service.optimizationOptions.uiAlgorithms[0]
-      console.log(service.optimizationOptions)
     }
 
     service.planEditorChanged = new Rx.BehaviorSubject(false)
