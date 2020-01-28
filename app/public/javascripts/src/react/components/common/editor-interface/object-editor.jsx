@@ -223,8 +223,13 @@ export class ObjectEditorMeta {
 // --- react-widgets wrappers, now for export! --- //
 export class FieldComponents {
   static renderDisplayOnly ({ input, ...rest }) {
+    var display = input.value
+    if (rest.textField && rest.valueField && rest.data) {
+      display = rest.data.find(item => item[rest.valueField] === input.value)[rest.textField]
+    }
+    if (typeof display === 'undefined') display = input.value
     return (
-      <div>{input.value}</div>
+      <div style={{ display: 'inline-block' }}>{display}</div>
     )
   }
 

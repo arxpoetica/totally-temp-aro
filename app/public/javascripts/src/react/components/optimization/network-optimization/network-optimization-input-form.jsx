@@ -147,7 +147,7 @@ export class NetworkOptimizationInputFormProto extends Component {
   }
 
   renderManualForm () {
-    console.log('render opt form')
+    // console.log('render opt form')
     let networkTypes = this.props.initialValues.networkTypes
     if (this.props.values && this.props.values.networkTypes) networkTypes = this.props.values.networkTypes
 
@@ -268,27 +268,34 @@ export class NetworkOptimizationInputFormProto extends Component {
                   <div className='ei-property-value' style={{ flex: 'inherit' }}>
                     <Field
                       className='text-right'
+                      min='0.0'
+                      max='100.0'
                       step='0.1'
                       onChange={(val, newVal, prevVal, propChain) => this.handleChange(newVal, prevVal, propChain)}
                       name={'optimization.preIrrThreshold'}
                       component={this.filterComponent('input')}
                       type='number'
+                      format={this.formatPercent}
+                      normalize={this.normalizePercent}
                     />%
-                    <div>
-                      <Field
-                        min='0'
-                        max='1'
-                        step='0.001'
-                        name={'optimization.preIrrThreshold'}
-                        style={{ marginTop: '10px', width: '100%' }}
-                        component={this.filterComponent('input')}
-                        type='range'
-                      />
-                    </div>
+                    {!this.props.displayOnly
+                      ? (
+                        <div>
+                          <Field
+                            min='0.0'
+                            max='1.0'
+                            step='0.001'
+                            name={'optimization.preIrrThreshold'}
+                            style={{ marginTop: '10px', width: '100%' }}
+                            component={this.filterComponent('input')}
+                            type='range'
+                          />
+                        </div>
+                      ) : ''
+                    }
                   </div>
                 </div>
-              )
-              : ''
+              ) : ''
             }
             {!this.state.algorithmComposite.excludedFields.includes('optimization.threshold') // algorithm === 'IRR' || algorithm === 'COVERAGE' // IRR_TARGET || COVERAGE
               ? (
@@ -300,53 +307,52 @@ export class NetworkOptimizationInputFormProto extends Component {
                   <div className='ei-property-value' style={{ flex: 'inherit' }}>
                     <Field
                       className='text-right'
+                      min='0.0'
+                      max='100.0'
                       step='0.1'
                       onChange={(val, newVal, prevVal, propChain) => this.handleChange(newVal, prevVal, propChain)}
                       name={'optimization.threshold'}
                       component={this.filterComponent('input')}
                       type='number'
+                      format={this.formatPercent}
+                      normalize={this.normalizePercent}
                     />%
-                    <div>
-                      <Field
-                        min='0'
-                        max='1'
-                        step='0.001'
-                        name={'optimization.threshold'}
-                        style={{ marginTop: '10px', width: '100%' }}
-                        component={this.filterComponent('input')}
-                        type='range'
-                      />
-                    </div>
+                    {!this.props.displayOnly
+                      ? (
+                        <div>
+                          <Field
+                            min='0'
+                            max='1'
+                            step='0.001'
+                            name={'optimization.threshold'}
+                            style={{ marginTop: '10px', width: '100%' }}
+                            component={this.filterComponent('input')}
+                            type='range'
+                          />
+                        </div>
+                      ) : ''
+                    }
                   </div>
                 </div>
-              )
-              : ''
+              ) : ''
             }
             {!this.state.algorithmComposite.excludedFields.includes('optimization.budget') // algorithm === 'IRR' // BUDGET || IRR_TARGET
               ? (
                 <div className='ei-property-item'>
                   <div className='ei-property-label'>Target Capital (thousands)</div>
                   <div className='ei-property-value' style={{ flex: 'inherit' }}>
-                    {/*
                     <Field
                       className='text-right'
                       onChange={(val, newVal, prevVal, propChain) => this.handleChange(newVal, prevVal, propChain)}
                       name={'optimization.budget'}
                       component={this.filterComponent('input')}
                       type='number'
-                    />K
-                    */}
-                    <input
-                      className='text-right'
-                      type='number'
-                      value={this.props.values.optimization.budget / 1000}
-                      onChange={(event) => this.onBudgetChange(event)}
-                      disabled={this.props.displayOnly}
+                      format={this.formatThousands}
+                      normalize={this.normalizeThousands}
                     />K
                   </div>
                 </div>
-              )
-              : ''
+              ) : ''
             }
 
           </div>
@@ -390,9 +396,6 @@ export class NetworkOptimizationInputFormProto extends Component {
   }
 
   getAlgorithmComposite (vals) {
-    console.log('- get opt vals -')
-    console.log(vals)
-    console.log(this.AlgorithmComposites)
     if (!vals) return this.AlgorithmComposites[0]
     // ToDo: get rid of this polymorphism and composite settings
     var algorithm = vals.optimization.algorithm
@@ -422,8 +425,20 @@ export class NetworkOptimizationInputFormProto extends Component {
     })
   }
 
-  onBudgetChange (event) {
-    this.props.dispatch(change(Constants.NETWORK_OPTIMIZATION_INPUT_FORM, 'optimization.budget', event.target.value * 1000))
+  formatPercent (val, prevVal) { // store -> UI
+    return parseFloat(val * 100.0).toFixed(1)
+  }
+
+  normalizePercent (val, prevVal) { // UI -> store
+    return parseFloat(val * 0.01).toFixed(3)
+  }
+
+  formatThousands (val, prevVal) { // store -> UI
+    return parseFloat(val * 0.001).toFixed(0)
+  }
+
+  normalizeThousands (val, prevVal) { // UI -> store
+    return parseFloat(val * 1000.0).toFixed(0)
   }
 }
 
