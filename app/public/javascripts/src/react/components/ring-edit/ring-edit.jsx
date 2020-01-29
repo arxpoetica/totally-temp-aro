@@ -33,8 +33,10 @@ export class RingEdit extends Component {
           </tbody>
         </table>
       </div>
+      {/*
       <RingOptionsBasic initialValues={this.props.ringOptionsBasic} enableReinitialize />
       <RingOptionsConnectivityDefinition enableReinitialize />
+      */}
     </div>
   }
 

@@ -89,7 +89,6 @@ function cancelOptimization (planId, optimizationId) {
 }
 
 function loadOptimizationInputs (planId) {
-  console.log(planId)
   // if (typeof planId === 'undefined') return {} ToDo: figure this out
   return (dispatch, getState) => {
     const state = getState()

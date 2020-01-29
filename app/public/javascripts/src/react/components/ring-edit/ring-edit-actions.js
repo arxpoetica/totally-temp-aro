@@ -113,7 +113,6 @@ function renameRing (ring, name, planId, userId) {
 
 function onFeatureSelected (features) {
   // this may be a bit funky, revisit this
-
   return (dispatch, getState) => {
     const state = getState()
 
@@ -139,7 +138,6 @@ function onFeatureSelected (features) {
       } else {
         // add node
         // get feature lat long
-
         getEquipmentDataPromise(feature.objectId, planId, userId)
           .then(result => {
             feature.data = result.data
@@ -205,7 +203,7 @@ function requestSubNet (planId, ringIds, locationTypes, ringOptions, connectivit
   return () => {
     const postBody = {
       ringIds: ringIds,
-      locationTypes: locationTypes,
+      locationTypes: locationTypes /*,
       maxLocationEdgeDistance: +ringOptions.maxLocationEdgeDistance.value,
       locationBufferSize: +ringOptions.locationBufferSize.value,
       conduitBufferSize: +ringOptions.conduitBufferSize.value,
@@ -216,6 +214,7 @@ function requestSubNet (planId, ringIds, locationTypes, ringOptions, connectivit
         ringComplexityCount: +ringOptions.ringComplexityCount.value,
         connectivityDefinition: connectivityDefinition
       }
+      */
     }
     AroHttp.post(`/service/plan/${planId}/ring-cmd`, postBody)
       .catch(err => console.error(err))
