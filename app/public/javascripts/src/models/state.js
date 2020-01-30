@@ -629,7 +629,7 @@ class State {
     // replace this with redux post
     service.getOptimizationBody = () => {
       return stateSerializationHelper.getOptimizationBody(service, service.networkAnalysisConstraints,
-        service.primarySpatialEdge, service.wormholeFuseDefinitions, service.networkConfigurations, $ngRedux.getState())
+        service.primarySpatialEdge, service.wormholeFuseDefinitions, $ngRedux.getState())
     }
 
     // Load optimization options from a JSON string
@@ -737,6 +737,8 @@ class State {
         .catch((err) => console.error(err))
     }
 
+    // ToDo: depricated net config
+    /*
     service.loadNetworkConfigurationFromServer = () => {
       return service.getDefaultProjectForUser(service.loggedInUser.id)
         .then((projectTemplateId) => $http.get(`/service/v1/project-template/${projectTemplateId}/network_configuration`))
@@ -749,6 +751,7 @@ class State {
         })
         .catch((err) => console.log(err))
     }
+    */
 
     // Save the plan resource selections to the server
     service.savePlanResourceSelectionToServer = () => {
@@ -777,7 +780,9 @@ class State {
       $http.put(`/service/v1/plan/${currentPlan.id}/configuration`, putBody)
     }
 
+    // ToDo: depricated net config
     // Save the Network Configurations to the server
+    /*
     service.saveNetworkConfigurationToDefaultProject = () => {
       return service.getDefaultProjectForUser(service.loggedInUser.id)
         .then((projectTemplateId) => {
@@ -793,6 +798,7 @@ class State {
         })
         .catch((err) => console.error(err))
     }
+    */
 
     // Get the default project template id for a given user
     service.getDefaultProjectTemplate = (userId) => {
@@ -1002,8 +1008,8 @@ class State {
           var planInputs = Object.keys(result.data).length > 0 ? result.data : service.getDefaultPlanInputs()
           stateSerializationHelper.loadStateFromJSON(service, $ngRedux.getState(), service.getDispatchers(), planInputs, new AroNetworkConstraints())
           return Promise.all([
-            service.loadPlanResourceSelectionFromServer(),
-            service.loadNetworkConfigurationFromServer()
+            service.loadPlanResourceSelectionFromServer() // ,
+            // service.loadNetworkConfigurationFromServer()
           ])
         })
         .catch((err) => {

@@ -71,7 +71,6 @@ import serviceLayerEditor from './sidebar/plan-editor/service-layer-editor'
 import conicTileSystemUploader from './sidebar/plan-settings/plan-data-selection/conic-tile-system-uploader'
 import globalDataSourceUploadModal from './sidebar/plan-settings/plan-data-selection/data-source-upload-modal'
 import planDataSelection from './sidebar/plan-settings/plan-data-selection/plan-data-selection'
-import planNetworkConfiguration from './sidebar/plan-settings/plan-network-configuration/plan-network-configuration'
 import planProjectConfiguration from './sidebar/plan-settings/plan-project-configuration/plan-project-configuration'
 import planSettings from './sidebar/plan-settings/plan-settings'
 import arpuEditor from './sidebar/plan-settings/plan-resource-selection/arpu-editor'
@@ -180,7 +179,6 @@ app.component('boundaryDetail', boundaryDetail)
   .component('conicTileSystemUploader', conicTileSystemUploader)
   .component('globalDataSourceUploadModal', globalDataSourceUploadModal)
   .component('planDataSelection', planDataSelection)
-  .component('planNetworkConfiguration', planNetworkConfiguration)
   .component('planProjectConfiguration', planProjectConfiguration)
   .component('planSettings', planSettings)
   .component('arpuEditor', arpuEditor)

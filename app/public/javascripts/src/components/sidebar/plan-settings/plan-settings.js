@@ -19,7 +19,7 @@ class PlanSettingsController {
   $onInit () {
     this.childSettingsPanels.dataSelection.isChanged = !angular.equals(this.dataItems, this.state.pristineDataItems)
     this.childSettingsPanels.resourceSelection.isChanged = !angular.equals(this.state.resourceItems, this.state.pristineResourceItems)
-    this.childSettingsPanels.networkConfiguration.isChanged = !angular.equals(this.state.networkConfigurations, this.state.pristineNetworkConfigurations)
+    // this.childSettingsPanels.networkConfiguration.isChanged = !angular.equals(this.state.networkConfigurations, this.state.pristineNetworkConfigurations)
 
     this.updateUIState()
   }
@@ -41,12 +41,12 @@ class PlanSettingsController {
           displayName: 'Resource Selection',
           isChanged: false,
           isValid: true
-        },
+        }/*,
         networkConfiguration: {
           displayName: 'Network Configuration',
           isChanged: false,
           isValid: true
-        }
+        }*/
       }
     } else {
       // if child key, reset only that one
@@ -101,11 +101,12 @@ class PlanSettingsController {
       this.state.savePlanResourceSelectionToServer()
       this.resetChildSettingsPanels('resourceSelection')
     }
-
+    /*
     if (this.childSettingsPanels.networkConfiguration.isChanged && this.childSettingsPanels.networkConfiguration.isValid) {
       this.state.saveNetworkConfigurationToDefaultProject()
       this.resetChildSettingsPanels('networkConfiguration')
     }
+    */
   }
 
   // Saves the plan Data Selection configuration to the server
@@ -134,7 +135,7 @@ class PlanSettingsController {
     this.isSaveEnabled = false
     this.resetChildSettingsPanels()
 
-    this.state.networkConfigurations = angular.copy(this.state.pristineNetworkConfigurations)
+    // this.state.networkConfigurations = angular.copy(this.state.pristineNetworkConfigurations)
     this.state.resourceItems = angular.copy(this.state.pristineResourceItems)
   }
 
