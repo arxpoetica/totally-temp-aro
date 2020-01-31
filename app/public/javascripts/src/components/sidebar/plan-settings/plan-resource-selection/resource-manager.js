@@ -19,7 +19,11 @@ class ResourceManagerController {
     }
 
     // ToDo: once server can make new versions of all types this won't be needed
-    this.canMakeNewFilter = {'price_book':true, 'rate_reach_manager':true, 'competition_manager':true}
+    this.canMakeNewFilter = {
+      'price_book': true,
+      'rate_reach_manager': true,
+      'competition_manager': true
+    }
 
     this.managerIdString = 'MANAGER_ID'
     this.rows = []
@@ -37,7 +41,7 @@ class ResourceManagerController {
         'visible': true
       },
       {
-        'propertyName': 'resourceType', //'managerType',
+        'propertyName': 'resourceType', // 'managerType',
         'levelOfDetail': 0,
         'format': '',
         'displayName': 'Resource Type',
@@ -132,7 +136,7 @@ class ResourceManagerController {
   onSearch () {
     this.getRows()
   }
-  
+
   getRows () {
     if (!this.state.loggedInUser) {
       return
@@ -152,7 +156,7 @@ class ResourceManagerController {
       .then((result) => {
         var newRows = []
         var i
-        for (i = 0; i<result.data.length; i++) {
+        for (i = 0; i < result.data.length; i++) {
           if (!result.data[i].deleted) {
             var row = result.data[i]
             newRows.push(row)
@@ -173,7 +177,7 @@ class ResourceManagerController {
   }
 
   newManager (resourceType, sourceId) {
-    if ('undefined' == typeof sourceId) sourceId = null // new one
+    if ('undefined' === typeof sourceId) sourceId = null // new one
     this.setCurrentSelectedResourceKey({ resourceKey: resourceType })
 
     // TODO: once endpoint is ready use v2/resource-manager for pricebook and rate-reach-matrix as well
@@ -191,25 +195,30 @@ class ResourceManagerController {
           var idParam = ''
           if (null != sourceId) idParam = `resourceManagerId=${sourceId}&`
           return this.$http.post(`/service/v2/resource-manager?${idParam}user_id=${this.state.loggedInUser.id}`,
-            {resourceType: resourceType, name: resourceName, description: resourceName })
+            { resourceType: resourceType, name: resourceName, description: resourceName })
         })
-        .then((result) => this.onManagerCreated(result.data.id))
+        .then((result) => {
+          // this.onManagerCreated(result.data.id)
+          // server is returning null for resourceType, until that's fixed:
+          if (result.data && result.data.resourceType === null) result.data.resourceType = resourceType
+          this.editSelectedManager(result.data)
+        })
         .catch((err) => console.error(err))
     }
   }
-
+  /*
   onManagerCreated (createdManagerId) {
     this.setEditingManagerId({ newId: createdManagerId })
     this.setEditingMode({ mode: this.editMode })
     this.onManagersChanged && this.onManagersChanged()
     return Promise.resolve()
   }
-
+  */
   editSelectedManager (selectedManager) {
     this.setEditingManagerId({ newId: selectedManager.id })
-    this.setEditingMode({ mode: this.editMode })
     this.setCurrentSelectedResourceKey({ resourceKey: selectedManager.resourceType })
-    this.startEditingResourceManager(selectedManager.id, selectedManager.resourceType)
+    this.startEditingResourceManager(selectedManager.id, selectedManager.resourceType, selectedManager.name)
+    this.setEditingMode({ mode: this.editMode })
   }
 
   askUserToConfirmManagerDelete (managerName) {
@@ -309,7 +318,7 @@ class ResourceManagerController {
 
   mapDispatchToTarget (dispatch) {
     return {
-      startEditingResourceManager: (id, type) => dispatch(ResourceManagerActions.startEditingResourceManager(id, type))
+      startEditingResourceManager: (id, type, name) => dispatch(ResourceManagerActions.startEditingResourceManager(id, type, name))
     }
   }
 }

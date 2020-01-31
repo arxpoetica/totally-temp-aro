@@ -8,7 +8,7 @@ function saveResourceManagerDefinition (resourceManagerId, managerType, definiti
   }
 }
 
-function startEditingResourceManager (resourceManagerId, managerType) {
+function startEditingResourceManager (resourceManagerId, managerType, resourceManagerName) {
   return dispatch => {
     AroHttp.get(`/service/v2/resource-manager/${resourceManagerId}/${managerType}`)
       .then(result => {
@@ -16,6 +16,7 @@ function startEditingResourceManager (resourceManagerId, managerType) {
           type: Actions.RESOURCE_MANAGER_SET_MANAGER_DEFINITION,
           payload: {
             resourceManagerId: resourceManagerId,
+            resourceManagerName: resourceManagerName,
             definition: result.data
           }
         })

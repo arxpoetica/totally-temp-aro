@@ -13,8 +13,8 @@ export class NetworkArchitectureEditor extends Component {
   render () {
     return (
       <div>
-        <div className='modal-header ng-isolate-scope' title='Your File Name Here'>
-          <h5 className='modal-title ng-binding ng-scope'>Your File Name Here</h5>
+        <div className='modal-header ng-isolate-scope' title={this.props.resourceManagerName}>
+          <h5 className='modal-title ng-binding ng-scope'>{this.props.resourceManagerName}</h5>
           <button type='button' className='close ng-scope' data-dismiss='modal' aria-label='Close'>
             <span aria-hidden='true'>×</span>
           </button>
@@ -32,6 +32,7 @@ export class NetworkArchitectureEditor extends Component {
 
   saveSettings () {
     this.props.saveResourceManagerDefinition(this.props.editingManager.id, this.props.editingManager.type, this.props.modifiedNetworkArchitecture)
+    this.props.onDiscard()
   }
 }
 
@@ -41,7 +42,7 @@ NetworkArchitectureEditor.propTypes = {
 
 const mapStateToProps = state => ({
   editingManager: state.resourceManager.editingManager,
-  // name: state.resourceManager.editingManager && state.resourceManager.managers[state.resourceManager.editingManager.id].name,
+  resourceManagerName: state.resourceManager.editingManager && state.resourceManager.managers[state.resourceManager.editingManager.id].resourceManagerName,
   definition: state.resourceManager.editingManager && state.resourceManager.managers[state.resourceManager.editingManager.id].definition,
   modifiedNetworkArchitecture: planningConstraintsSelector(state)
 })

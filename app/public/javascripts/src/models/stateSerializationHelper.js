@@ -183,8 +183,8 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     loadFiberNetworkConstraintsFromBody(state, planInputs)
     loadTechnologiesFromBody(state, planInputs)
     loadNetworkConfigurationOverrideFromBody(dispatchers, planInputs, defaultNetworkConstraints)
-    console.log('load from JSON')
-    console.log(state.optimizationOptions)
+    // console.log('load from JSON')
+    // console.log(state.optimizationOptions)
   }
 
   // Load analysis type from a POST body object that is sent to the optimization engine
@@ -199,7 +199,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
   // Load location types from a POST body object that is sent to the optimization engine
   var loadLocationTypesFromBody = (state, dataItems, dispatchers, postBody) => {
-    console.log(state.locationLayers)
+    // console.log(state.locationLayers)
     state.locationLayers.forEach((locationLayer) => {
       const isVisible = (postBody.locationConstraints.locationTypes.indexOf(locationLayer.plannerKey) >= 0)
       state.setLayerVisibility(locationLayer, isVisible) // this goes directly to redux MapLayerActions.setLayerVisibility
