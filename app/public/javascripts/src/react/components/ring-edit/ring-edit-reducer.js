@@ -10,10 +10,7 @@ const defaultState = {
     status: RingStatusTypes.START_STATE,
     progress: 0,
     report: null
-  }/*,
-  aroNetworkConstraints: AroNetworkConstraints(),
-  connectivityDefinition: ConnectivityDefinition()
-  */
+  }
 }
 
 function setAnalysisStatus (state, status) {
@@ -75,15 +72,7 @@ function updateRing (state, ring) {
     rings: { ...state.rings, ...newRings }
   }
 }
-/*
-function setRingOptionsConnectivity (state, spatialEdgeType, networkConnectivityType) {
-  return { ...state,
-    connectivityDefinition: { ...state.connectivityDefinition,
-      [spatialEdgeType]: networkConnectivityType
-    }
-  }
-}
-*/
+
 function ringEditReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.RING_SET_ANALYSIS_STATUS:
@@ -109,10 +98,7 @@ function ringEditReducer (state = defaultState, action) {
 
     case Actions.RING_UPDATE_RING:
       return updateRing(state, action.payload)
-    /*
-    case Actions.RING_OPTIONS_SET_CONNECTIVITY:
-      return setRingOptionsConnectivity(state, action.payload.spatialEdgeType, action.payload.networkConnectivityType)
-    */
+
     default:
       return state
   }
