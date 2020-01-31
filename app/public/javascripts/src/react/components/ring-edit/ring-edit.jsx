@@ -8,8 +8,8 @@ import ringActions from './ring-edit-actions.js'
 import './ring-edit.css'
 import RingStatusTypes from './constants'
 import Ring from '../../common/ring'
-import RingOptionsBasic from './ring-options-basic.jsx'
-import RingOptionsConnectivityDefinition from './ring-options-connectivity-definition.jsx'
+// import RingOptionsBasic from './ring-options-basic.jsx'
+// import RingOptionsConnectivityDefinition from './ring-options-connectivity-definition.jsx'
 
 export class RingEdit extends Component {
   constructor (props) {

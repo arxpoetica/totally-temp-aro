@@ -199,22 +199,11 @@ function getExchangeLinksPromise (ringData, planId, userId) {
   }).catch(err => console.error(err))
 }
 
-function requestSubNet (planId, ringIds, locationTypes, ringOptions, connectivityDefinition) {
+function requestSubNet (planId, ringIds, locationTypes) {
   return () => {
     const postBody = {
       ringIds: ringIds,
-      locationTypes: locationTypes /*,
-      maxLocationEdgeDistance: +ringOptions.maxLocationEdgeDistance.value,
-      locationBufferSize: +ringOptions.locationBufferSize.value,
-      conduitBufferSize: +ringOptions.conduitBufferSize.value,
-      aroRingRule: {
-        snappingDistance: +ringOptions.snappingDistance.value,
-        maxConnectionDistance: +ringOptions.maxConnectionDistance.value,
-        maxWormholeDistance: +ringOptions.maxWormholeDistance.value,
-        ringComplexityCount: +ringOptions.ringComplexityCount.value,
-        connectivityDefinition: connectivityDefinition
-      }
-      */
+      locationTypes: locationTypes
     }
     AroHttp.post(`/service/plan/${planId}/ring-cmd`, postBody)
       .catch(err => console.error(err))
@@ -239,16 +228,6 @@ function setAnalysisProgress (progress) {
   }
 }
 
-function setRingOptionsConnectivityDefinition (spatialEdgeType, networkConnectivityType) {
-  return {
-    type: Actions.RING_OPTIONS_SET_CONNECTIVITY,
-    payload: {
-      spatialEdgeType,
-      networkConnectivityType
-    }
-  }
-}
-
 export default {
   setSelectedRingId,
   newRing,
@@ -264,6 +243,5 @@ export default {
   requestSubNet,
   getEquipmentDataPromise,
   setAnalysisStatus,
-  setAnalysisProgress,
-  setRingOptionsConnectivityDefinition
+  setAnalysisProgress
 }

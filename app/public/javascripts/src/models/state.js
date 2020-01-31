@@ -626,13 +626,14 @@ class State {
 
     // Get a POST body that we will send to aro-service for performing optimization
     // Optimization options in Redux
-    // replace this with redux post
+    // ToDo: depricate stateSerializationHelper, replace with redux store
     service.getOptimizationBody = () => {
       return stateSerializationHelper.getOptimizationBody(service, service.networkAnalysisConstraints,
         service.primarySpatialEdge, service.wormholeFuseDefinitions, $ngRedux.getState())
     }
 
     // Load optimization options from a JSON string
+    // ToDo: depricate stateSerializationHelper, replace with redux store
     service.loadOptimizationOptionsFromJSON = (json) => {
       // Note that we are NOT returning the state (the state is set after the call), but a promise
       // that resolves once all the geographies have been loaded
@@ -1001,7 +1002,7 @@ class State {
 
     // Load the plan inputs for the given plan and populate them in state
     // Optimization options in Redux
-    // move to Redux
+    // ToDo: depricate stateSerializationHelper, replace with redux store
     service.loadPlanInputs = (planId) => {
       return $http.get(`/service/v1/plan/${planId}/inputs`)
         .then((result) => {

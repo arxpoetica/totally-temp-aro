@@ -71,14 +71,11 @@ const mapStateToProps = state => {
     planId: state.plan.activePlan && state.plan.activePlan.id,
     projectId: state.user.loggedInUser.projectId,
     rings: state.ringEdit.rings,
-    ringOptionsBasic: selector(state, 'spatialEdgeType', 'snappingDistance', 'maxConnectionDistance', 'maxWormholeDistance', 'ringComplexityCount', 'maxLocationEdgeDistance', 'locationBufferSize', 'conduitBufferSize', 'targetEdgeTypes'),
-    connectivityDefinition: state.ringEdit.connectivityDefinition,
     mapLayers: state.mapLayers
   }
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  requestSubNet: (planId, ringIds, locationTypes, ringOptions, connectivityDefinition) => dispatch(RingActions.requestSubNet(planId, ringIds, locationTypes, ringOptions, connectivityDefinition)),
   setActivePlanState: (status) => dispatch(PlanActions.setActivePlanState(status)),
   setAnalysisProgress: (progress) => dispatch(RingActions.setAnalysisProgress(progress))
 })
