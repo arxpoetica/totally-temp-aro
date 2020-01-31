@@ -45,14 +45,13 @@ class TileComponentController {
   // fillStyle: (Optional) For polygon features, this is the fill color
   // opacity: (Optional, default 1.0) This is the maximum opacity of anything drawn on the map layer. Aggregate layers will have features of varying opacity, but none exceeding this value
 
-  constructor ($window, $document, $timeout, $ngRedux, state, tileDataService, uiNotificationService, contextMenuService, Utils) {
+  constructor ($window, $document, $timeout, $ngRedux, state, tileDataService, contextMenuService, Utils) {
     this.layerIdToMapTilesIndex = {}
     this.mapRef = null // Will be set in $document.ready()
     this.$window = $window
     this.$timeout = $timeout
     this.$ngRedux = $ngRedux
     this.state = state
-    this.uiNotificationService = uiNotificationService
     this.tileDataService = tileDataService
     this.contextMenuService = contextMenuService
     this.utils = Utils
@@ -263,7 +262,6 @@ class TileComponentController {
       this.state.displayModes,
       this.state.viewModePanels,
       this.state,
-      this.uiNotificationService,
       MapUtilities.getPixelCoordinatesWithinTile.bind(this),
       this.transactionFeatureIds
     ))
@@ -768,7 +766,7 @@ class TileComponentController {
   
 }
 
-TileComponentController.$inject = ['$window', '$document', '$timeout', '$ngRedux', 'state', 'tileDataService', 'uiNotificationService', 'contextMenuService', 'Utils']
+TileComponentController.$inject = ['$window', '$document', '$timeout', '$ngRedux', 'state', 'tileDataService', 'contextMenuService', 'Utils']
 
 let tile = {
   template: '',
