@@ -6,8 +6,8 @@ import Constants from '../../common/constants'
 
 export class PlanningConstraints extends Component {
   render () {
-    return <div>
-      <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
+    return (
+      <div>
         <form className='d-flex flex-column rfp-options'
           style={{ height: '100%' }}
           onSubmit={event => event.preventDefault()}>
@@ -181,12 +181,11 @@ export class PlanningConstraints extends Component {
                     className='checkboxfill' component='input' type='checkbox' />
                 </td>
               </tr>
-              
             </tbody>
           </table>
         </form>
       </div>
-    </div>
+    )
   }
 }
 

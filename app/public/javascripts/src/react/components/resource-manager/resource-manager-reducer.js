@@ -8,7 +8,7 @@ const defaultState = {
 
 function setResourceManagerDefinition (state, manager) {
   return { ...state,
-    managers: { ...state.manager,
+    managers: { ...state.managers,
       [manager.resourceManagerId]: manager
     }
   }

@@ -537,15 +537,15 @@ export class NetworkArchitecture extends Component {
   render () {
     // ToDo: the maxHeight style bit needs to go into the parent modal
     //  along with the close button
-    return <div>
-      <div style={{ maxHeight: 'calc(100vh - 17rem)', overflow: 'scroll', paddingRight: '16px', marginRight: '-16px' }}>
+    return (
+      <div style={{ paddingRight: '16px', marginRight: '-16px' }}>
         <form className='d-flex flex-column rfp-options'
           style={{ height: '100%' }}
           onSubmit={event => event.preventDefault()}>
           <ObjectEditor metaData={this.meta} title={'Net Config'} leftIndent={11}></ObjectEditor>
         </form>
       </div>
-    </div>
+    )
   }
 }
 
