@@ -8,7 +8,7 @@ import Rule from './rule'
 
 class MapTileRenderer {
   constructor (tileSize, tileDataService, mapTileOptions, censusCategories, selectedDisplayMode, selectionModes, analysisSelectionMode, stateMapLayers, displayModes,
-    viewModePanels, state, uiNotificationService, getPixelCoordinatesWithinTile, transactionFeatureIds, mapLayers = []) {
+    viewModePanels, state, getPixelCoordinatesWithinTile, transactionFeatureIds, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
@@ -23,7 +23,6 @@ class MapTileRenderer {
     this.displayModes = displayModes
     this.viewModePanels = viewModePanels
     this.state = state
-    this.uiNotificationService = uiNotificationService
     this.getPixelCoordinatesWithinTile = getPixelCoordinatesWithinTile
     this.latestTileUniqueId = 0
     this.transactionFeatureIds = transactionFeatureIds
@@ -330,8 +329,7 @@ class MapTileRenderer {
     singleTilePromises.push(this.tileDataService.getEntityImageForLayer(this.tileDataService.locationStates.LOCK_ICON_KEY))
     singleTilePromises.push(this.tileDataService.getEntityImageForLayer(this.tileDataService.locationStates.INVALIDATED_ICON_KEY))
 
-    this.uiNotificationService.addNotification('main', 'rendering tiles')
-    this.state.areTilesRendering = true
+    this.state.setAreTilesRendering(true)
     // Get all the data for this tile
     return Promise.all(singleTilePromises)
       .then((singleTileResults) => {
@@ -363,18 +361,13 @@ class MapTileRenderer {
           htmlCache.isDirty = false
         }
         this.hideStaleDataMarker(zoom, coord.x, coord.y)
+        this.state.setAreTilesRendering(false)
         return Promise.resolve()
       })
       .catch((err) => {
         console.error(err)
+        this.state.setAreTilesRendering(false)
         this.hideStaleDataMarker(zoom, coord.x, coord.y)
-        this.uiNotificationService.removeNotification('main', 'rendering tiles')
-        this.state.areTilesRendering = false
-      })
-      .then(() => {
-        this.uiNotificationService.removeNotification('main', 'rendering tiles')
-        this.state.areTilesRendering = false
-        return Promise.resolve()
       })
   }
 
