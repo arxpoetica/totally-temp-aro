@@ -68,7 +68,7 @@
       <plan-data-selection project-id="$ctrl.state.getProjectId()" 
                            user-id="$ctrl.userId" 
                            plan-id="$ctrl.plan.id" 
-                           on-change="$ctrl.onChange({childKey:childKey, isValid:isValid, isInit:isInit})"
+                           on-change="$ctrl.onDataSelectionChange({childKey:childKey, isValid:isValid, isInit:isInit})"
                            key="'dataSelection'"></plan-data-selection>
       <div class="disable-sibling-controls"
         ng-hide="$ctrl.areControlsEnabled()">

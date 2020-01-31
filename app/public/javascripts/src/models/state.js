@@ -297,6 +297,10 @@ class State {
     service.requestPolygonSelect = new Rx.BehaviorSubject({})
 
     service.areTilesRendering = false
+    service.setAreTilesRendering = newValue => {
+      service.areTilesRendering = newValue
+      $timeout()
+    }
 
     service.censusCategories = new Rx.BehaviorSubject()
     service.reloadCensusCategories = (censusCategories) => {

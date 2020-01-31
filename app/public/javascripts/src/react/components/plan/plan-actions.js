@@ -168,6 +168,13 @@ function setAllLibraryItems (dataItemKey, allLibraryItems) {
   }
 }
 
+function setHaveDataItemsChanged (haveDataItemsChanged) {
+  return {
+    type: Actions.PLAN_SET_HAVE_DATA_ITEMS_CHANGED,
+    payload: haveDataItemsChanged
+  }
+}
+
 function deleteLibraryEntry (dataSource) {
   return (dispatch, getState) => {
     const state = getState()
@@ -188,5 +195,6 @@ export default {
   loadPlan,
   selectDataItems,
   setAllLibraryItems,
+  setHaveDataItemsChanged,
   deleteLibraryEntry
 }

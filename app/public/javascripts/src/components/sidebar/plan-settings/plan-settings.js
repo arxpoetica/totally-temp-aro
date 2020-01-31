@@ -1,5 +1,6 @@
 import Constants from '../../common/constants'
 import SelectionActions from '../../../react/components/selection/selection-actions'
+import PlanActions from '../../../react/components/plan/plan-actions'
 
 class PlanSettingsController {
   constructor ($http, state, $timeout, $ngRedux, tracker) {
@@ -17,7 +18,6 @@ class PlanSettingsController {
   }
 
   $onInit () {
-    this.childSettingsPanels.dataSelection.isChanged = !angular.equals(this.dataItems, this.state.pristineDataItems)
     this.childSettingsPanels.resourceSelection.isChanged = !angular.equals(this.state.resourceItems, this.state.pristineResourceItems)
     // this.childSettingsPanels.networkConfiguration.isChanged = !angular.equals(this.state.networkConfigurations, this.state.pristineNetworkConfigurations)
 
@@ -25,18 +25,13 @@ class PlanSettingsController {
   }
 
   areControlsEnabled () {
-    return (this.state.plan.planState === Constants.PLAN_STATE.START_STATE) || (this.state.plan.planState === Constants.PLAN_STATE.INITIALIZED)
+    return this.plan && ((this.plan.planState === Constants.PLAN_STATE.START_STATE) || (this.plan.planState === Constants.PLAN_STATE.INITIALIZED))
   }
 
   resetChildSettingsPanels (childKey) {
     if (typeof childKey === 'undefined') {
       // if no child key, reset all
       this.childSettingsPanels = {
-        dataSelection: {
-          displayName: 'Data Selection',
-          isChanged: false,
-          isValid: true
-        },
         resourceSelection: {
           displayName: 'Resource Selection',
           isChanged: false,
@@ -72,6 +67,12 @@ class PlanSettingsController {
     }
   }
 
+  onDataSelectionChange (args) {
+    // Update the isDataSelectionValid state manually
+    this.isDataSelectionValid = args.isValid
+    this.updateUIState()
+  }
+
   updateUIState () {
     // update buttons and error list
     var childData = this.getChangeList()
@@ -91,9 +92,9 @@ class PlanSettingsController {
     if (!this.isSaveEnabled) return
     this.isSaveEnabled = false
     // for each child save and on success rest the object
-    if (this.childSettingsPanels.dataSelection.isChanged && this.childSettingsPanels.dataSelection.isValid) {
+    if (this.haveDataItemsChanged && this.isDataSelectionValid) {
       this.saveDataSelectionToServer()
-      this.resetChildSettingsPanels('dataSelection')
+      this.setHaveDataItemsChanged(false)
       this.clearAllSelectedSA()
     }
 
@@ -128,7 +129,7 @@ class PlanSettingsController {
     })
 
     // Save the configuration to the server
-    this.$http.put(`/service/v1/plan/${this.planId}/configuration`, putBody)
+    this.$http.put(`/service/v1/plan/${this.plan.id}/configuration`, putBody)
   }
 
   discardChanges () {
@@ -142,12 +143,12 @@ class PlanSettingsController {
   clearAllSelectedSA () {
     // Get a list of selected service areas that are valid, given the (possibly) changed service area library selection
     const selectedServiceAreaLibraryId = this.dataItems.service_layer.selectedLibraryItems[0].identifier
-    this.$http.get(`/service_areas/${this.planId}/selectedServiceAreasInLibrary?libraryId=${selectedServiceAreaLibraryId}`)
+    this.$http.get(`/service_areas/${this.plan.id}/selectedServiceAreasInLibrary?libraryId=${selectedServiceAreaLibraryId}`)
       .then(result => {
         const validServiceAreas = new Set(result.data)
         var invalidServiceAreas = [...this.selectedServiceAreas].filter(serviceAreaId => !validServiceAreas.has(serviceAreaId))
         if (invalidServiceAreas.length > 0) {
-          this.removePlanTargets(this.planId, { serviceAreas: new Set(invalidServiceAreas) })
+          this.removePlanTargets(this.plan.id, { serviceAreas: new Set(invalidServiceAreas) })
         }
       })
       .catch(err => console.error(err))
@@ -160,6 +161,18 @@ class PlanSettingsController {
     for (var childKey in this.childSettingsPanels) {
       if (this.childSettingsPanels[childKey].isChanged) changesList.push(this.childSettingsPanels[childKey])
       if (!this.childSettingsPanels[childKey].isValid) invalidList.push(this.childSettingsPanels[childKey])
+    }
+    // Just follow this same pattern for data selection, even if the code is convoluted.
+    const dataItemsMeta = {
+      displayName: 'Data Selection',
+      isValid: this.isDataSelectionValid,
+      isChanged: this.haveDataItemsChanged
+    }
+    if (this.haveDataItemsChanged) {
+      changesList.push(dataItemsMeta)
+    }
+    if (!this.isDataSelectionValid) {
+      invalidList.push(dataItemsMeta)
     }
 
     return { changesList: changesList, invalidList: invalidList }
@@ -222,14 +235,16 @@ class PlanSettingsController {
   mapStateToThis (reduxState) {
     return {
       dataItems: reduxState.plan.dataItems,
-      planId: reduxState.plan.activePlan.id,
+      haveDataItemsChanged: reduxState.plan.haveDataItemsChanged,
+      plan: reduxState.plan.activePlan,
       selectedServiceAreas: reduxState.selection.planTargets.serviceAreas
     }
   }
 
   mapDispatchToTarget (dispatch) {
     return {
-      removePlanTargets: (planId, planTargets) => dispatch(SelectionActions.removePlanTargets(planId, planTargets))
+      removePlanTargets: (planId, planTargets) => dispatch(SelectionActions.removePlanTargets(planId, planTargets)),
+      setHaveDataItemsChanged: haveDataItemsChanged => dispatch(PlanActions.setHaveDataItemsChanged(haveDataItemsChanged))
     }
   }
 }
