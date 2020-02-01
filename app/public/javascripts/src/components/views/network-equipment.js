@@ -98,8 +98,8 @@ class NetworkEquipmentController {
   // Creates a single map layer by substituting tileDefinition parameters
   createSingleMapLayer(equipmentOrFiberKey, categoryType, networkEquipment, existingOrPlanned, libraryId, rootPlanId) {
     var existingOrPlannedzIndex = this.state.configuration.networkEquipment.tileDefinitions[categoryType][existingOrPlanned].zIndex
-    delete this.state.configuration.networkEquipment.tileDefinitions[categoryType][existingOrPlanned].zIndex
     var tileDefinition = angular.copy(this.state.configuration.networkEquipment.tileDefinitions[categoryType][existingOrPlanned])
+    delete tileDefinition.zIndex
     this.objectKeyReplace(tileDefinition, '{networkNodeType}', equipmentOrFiberKey)
     this.objectKeyReplace(tileDefinition, '{fiberType}', equipmentOrFiberKey)
     this.objectKeyReplace(tileDefinition, '{libraryId}', libraryId)
