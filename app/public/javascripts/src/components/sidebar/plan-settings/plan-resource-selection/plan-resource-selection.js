@@ -6,6 +6,10 @@ class ResourceSelectionController {
     this.state = state
   }
 
+  getResourceItemsArray () {
+    return Object.values(this.state.resourceItems)
+  }
+
   onSelectionChanged () {
     this.onChange({ childKey: this.key, isValid: true })
   }

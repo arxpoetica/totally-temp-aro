@@ -702,14 +702,30 @@ class State {
           var allResourceManagers = results[1].data
           var selectedResourceManagers = results[2].data.resourceConfigItems
 
+          var resourceManOrder = [
+            'planning_constraints_manager',
+            'price_book',
+            'arpu_manager',
+            'roic_manager',
+            'rate_reach_manager',
+            'impedance_mapping_manager',
+            'tsm_manager',
+            'competition_manager',
+            'fusion_manager',
+            'network_architecture_manager'
+          ]
+
           // First set up the resource items so that we display all types in the UI
           var newResourceItems = {}
           resourceManagerTypes.forEach((resourceManager) => {
+            if (!resourceManOrder.includes(resourceManager.name)) resourceManOrder.push(resourceManager.name)
+
             newResourceItems[resourceManager.name] = {
               id: resourceManager.id,
               description: resourceManager.description,
               allManagers: [],
-              selectedManager: null
+              selectedManager: null,
+              order: resourceManOrder.indexOf(resourceManager.name)
             }
           })
 
@@ -720,7 +736,7 @@ class State {
             }
             newResourceItems[resourceManager.managerType].allManagers.sort((a, b) => (a.name > b.name) ? 1 : -1)
           })
-
+          
           // Then select the appropriate manager for each type
           selectedResourceManagers.forEach((selectedResourceManager) => {
             var allManagers = newResourceItems[selectedResourceManager.aroResourceType].allManagers

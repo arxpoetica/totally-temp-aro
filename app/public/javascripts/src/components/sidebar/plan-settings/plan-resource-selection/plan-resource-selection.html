@@ -1,7 +1,7 @@
 <div style="position: relative; height: 100%;">
   <table class="table table-sm table-striped">
     <tbody>
-      <tr ng-repeat="(itemKey, itemValue) in $ctrl.state.resourceItems">
+      <tr ng-repeat="(itemKey, itemValue) in $ctrl.getResourceItemsArray() | orderBy:'order'">
         <td style="vertical-align: middle">{{itemValue.description}}</td>
         <td>
           <div style="display:flex">
