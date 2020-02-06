@@ -72,6 +72,7 @@ export class NetworkOptimizationInput extends Component {
     inputs.analysis_type = this.props.networkAnalysisTypeId
     inputs.planId = this.props.planId
     inputs.locationConstraints = {}
+    inputs.locationConstraints.analysisSelectionMode = this.props.activeSelectionModeId
     inputs.locationConstraints.locationTypes = []
     this.props.locationsLayers.forEach(locationsLayer => {
       if (locationsLayer.checked) inputs.locationConstraints.locationTypes.push(locationsLayer.plannerKey)
@@ -81,7 +82,6 @@ export class NetworkOptimizationInput extends Component {
   }
 
   onCancelOptimization () {
-    console.log('CANCEL')
     this.props.cancelOptimization(this.props.planId, this.props.optimizationId)
   }
 
