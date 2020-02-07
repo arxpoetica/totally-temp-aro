@@ -4,17 +4,6 @@ import PlanActions from '../../plan/plan-actions'
 
 function runOptimization (inputs, userId) { // shouldn't be getting userId from caller
   return (dispatch, getState) => {
-    // const state = getState()
-
-    // tileDataService.markHtmlCacheDirty()
-    // service.requestMapLayerRefresh.next(null)
-
-    // Get the optimization options that we will pass to the server
-    // var optimizationInputs = state.optimization.networkOptimization.optimizationInputs
-    // clone
-    // optimizationInputs = JSON.parse(JSON.stringify(optimizationInputs))
-    // var userId = state.user.loggedInUser.id
-    console.log(inputs)
     // Make the API call that starts optimization calculations on aro-service
     var apiUrl = `/service/v1/optimize/masterplan?userId=${userId}`
     if (inputs.analysis_type === 'NETWORK_ANALYSIS') apiUrl = `/service/v1/analyze/masterplan?userId=${userId}`
@@ -26,21 +15,6 @@ function runOptimization (inputs, userId) { // shouldn't be getting userId from 
           type: Actions.NETWORK_OPTIMIZATION_SET_OPTIMIZATION_ID,
           payload: response.data.optimizationIdentifier
         })
-        // loadOptimizationInputs
-        /*
-        if (response.status >= 200 && response.status <= 299) {
-          service.plan.optimizationId = response.data.optimizationIdentifier
-          // service.startPolling()
-          service.plan.planState = Constants.PLAN_STATE.STARTED
-          service.progressPercent = 0
-          service.startProgressMessagePolling(response.data.startDate)
-          service.getOptimizationProgress(service.plan)
-          service.setActivePlanState(PlanStates.START_STATE)
-        } else {
-          console.error(response)
-        }
-        */
-        // dispatch(PlanActions.setActivePlanState(planState))
       })
   }
 }
@@ -56,8 +30,6 @@ function cancelOptimization (planId, optimizationId) {
     AroHttp.delete(`/service/optimization/processes/${optimizationId}`)
       .then((response) => {
         // Optimization process was cancelled. Get the plan status from the server
-        //return AroHttp.get(`/service/v1/plan/${service.plan.id}`)
-        // above is plan actions loadPlan
         return dispatch(PlanActions.loadPlan(planId))
       })
       .then((response) => {
