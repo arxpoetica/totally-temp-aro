@@ -1,5 +1,6 @@
 const amqp = require('amqplib')
 const Consumer = require('./consumer')
+const helpers = require('../helpers')
 const RETRY_CONNECTION_IN_MSEC = 10000
 
 class MessageQueueManager {
@@ -11,7 +12,7 @@ class MessageQueueManager {
 
   addConsumer (consumer) {
     if (!(consumer instanceof Consumer)) {
-      console.error('ERROR: In MessageQueueManager.addConsumer(), input must be an object of type Consumer. Consumer will not be added to list.')
+      helpers.logger.error('ERROR: In MessageQueueManager.addConsumer(), input must be an object of type Consumer. Consumer will not be added to list.')
       return
     }
     this.consumers.push({
@@ -23,35 +24,35 @@ class MessageQueueManager {
 
   connectToPublisher () {
     // Attempt to connect to the publisher
-    console.log('Attempting to connect to the RabbitMQ server')
+    helpers.logger.info('Attempting to connect to the RabbitMQ server')
     amqp.connect(this.connectionString)
       .then(connection => {
-        console.log('Successfully created a connection to the RabbitMQ server')
+        helpers.logger.info('Successfully created a connection to the RabbitMQ server')
         connection.on('close', () => {
-          console.log(`RabbitMQ connection has closed. Attempting to reconnect in ${RETRY_CONNECTION_IN_MSEC} msec`)
+          helpers.logger.info(`RabbitMQ connection has closed. Attempting to reconnect in ${RETRY_CONNECTION_IN_MSEC} msec`)
           setTimeout(() => this.connectToPublisher(), RETRY_CONNECTION_IN_MSEC)
         })
         connection.on('error', err => {
-          console.error(`ERROR from RabbitMQ connection:`)
-          console.error(err)
+          helpers.logger.error(`ERROR from RabbitMQ connection:`)
+          helpers.logger.error(err)
         })
         return connection.createChannel()
       })
       .then(channel => {
-        console.log('Successfully created a channel with the RabbitMQ server')
+        helpers.logger.info('Successfully created a channel with the RabbitMQ server')
         // Assert queues and set handlers for all the consumers
         this.consumers.forEach(consumer => {
           channel.assertQueue(consumer.queue, { durable: false })
           channel.assertExchange(consumer.exchange, 'topic')
           channel.bindQueue(consumer.queue, consumer.exchange, '#')
           channel.consume(consumer.queue, consumer.messageHandler, { noAck: true })
-          console.log(`Successfully set up a handler for consumer ${JSON.stringify(consumer)}`)
+          helpers.logger.info(`Successfully set up a handler for consumer ${JSON.stringify(consumer)}`)
         })
       })
       .catch(err => {
-        console.error('ERROR when connecting to the RabbitMQ server')
-        console.error(err)
-        console.error(`Will attempt to reconnect to RabbitMQ server in ${RETRY_CONNECTION_IN_MSEC} msec`)
+        helpers.logger.error('ERROR when connecting to the RabbitMQ server')
+        helpers.logger.error(err)
+        helpers.logger.error(`Will attempt to reconnect to RabbitMQ server in ${RETRY_CONNECTION_IN_MSEC} msec`)
         setTimeout(() => this.connectToPublisher(), RETRY_CONNECTION_IN_MSEC)
       })
   }

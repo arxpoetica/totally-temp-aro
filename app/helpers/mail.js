@@ -2,6 +2,7 @@ var nodemailer = require('nodemailer')
 var ses = require('nodemailer-ses-transport')
 var AWS = require('aws-sdk')
 var config = require('./config')
+const logger = require('./logger')
 // Find the URL hostname. Cant use the NodeJS URL class because our container is at v6.11
 const searchStr = '://'   // Can be http:// or https://
 var APP_BASE_HOST = config.base_url.substr(config.base_url.indexOf(searchStr) + searchStr.length)
@@ -26,9 +27,9 @@ exports.sendMail = (options) => {
     transporter.sendMail(options, (err, info) => {
       if (err) {
         reject(err)
-        return console.log(err)
+        return logger.error(err)
       }
-      console.log('Message sent:', info)
+      logger.info('Message sent:', info)
       resolve()
     })
   })

@@ -1,5 +1,6 @@
 const path = require('path')
 const deepmerge = require('deepmerge')
+const logger = require('./logger')
 
 var aro_client = process.env.ARO_CLIENT || ''
 var extension = (aro_client && '_' + aro_client) + '.json'
@@ -11,11 +12,11 @@ var configuration = null
 
 try {
   configuration = deepmerge(defaultConfiguration, require(filename))
-  console.log('Loaded', filename, 'successfully')
+  logger.info('Loaded', filename, 'successfully')
 } catch (e) {
   // default configuration
   configuration = defaultConfiguration
-  console.log('File', filename, 'not found. Using default configuration file', defaultConfiguration)
+  logger.info('File', filename, 'not found. Using default configuration file', defaultConfiguration)
 }
 
 configuration.base_url = process.env.APP_BASE_URL || 'http://localhost:8000'

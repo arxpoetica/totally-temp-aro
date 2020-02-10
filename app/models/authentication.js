@@ -18,7 +18,7 @@ class Authentication {
         // NOTE: Can return null if we don't have a config
         return Promise.resolve(result && (result.length > 0) && result[0].config)
       })
-      .catch((err) => console.error(err))
+      .catch((err) => helpers.logger.error(err))
   }
 }
 

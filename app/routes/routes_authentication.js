@@ -20,20 +20,21 @@ exports.configure = (app, middleware) => {
     authenticationConfigPromise
       .then((authenticationConfig) => {
         if (authenticationConfig && authenticationConfig.enabled) {
-          console.log(`Attempting LDAP login for user ${email}`)
+          helpers.logger.info(`Attempting LDAP login for user ${email}`)
           models.User.loginLDAP(email, password)
             .then((user) => {
-              console.log(`Successfully logged in user ${email} with LDAP`)
-              console.log(user)
+              helpers.logger.info(`Successfully logged in user ${email} with LDAP`)
+              helpers.logger.info(JSON.stringify(user))
               user.multiFactorAuthenticationDone = true   // For now, no two-factor for ldap
               return callback(null, user)
             })
-            .catch((err) => {
-              console.warn(`LDAP login failed for user ${email}. Trying local login`)
+            .catch(err => {
+              helpers.logger.warn(`LDAP login failed for user ${email}. Trying local login`)
+              helpers.logger.warn(JSON.stringify(err))
               var loggedInUser = null
               models.User.login(email, password)
                 .then((user) => { 
-                  console.log(`Logged in user ${email} with local cached login (fallback from LDAP login)`)
+                  helpers.logger.info(`Logged in user ${email} with local cached login (fallback from LDAP login)`)
                   loggedInUser = {
                     id: user.id
                   }
@@ -44,7 +45,7 @@ exports.configure = (app, middleware) => {
                   return callback(null, loggedInUser) 
                 })
                 .catch((err) => {
-                  console.error(`Could not log in user ${email} with either LDAP or local login`)
+                  helpers.logger.error(`Could not log in user ${email} with either LDAP or local login`)
                   if (!require('node-errors').isCustomError(err)) return callback(err)
                   return callback(null, false, { message: err.message })
                 })
@@ -54,7 +55,7 @@ exports.configure = (app, middleware) => {
           var loggedInUser = null
           models.User.login(email, password)
           .then((user) => {
-            console.log(`Logged in user ${email} with local login`)
+            helpers.logger.info(`Logged in user ${email} with local login`)
             loggedInUser = {
               id: user.id
             }
@@ -65,16 +66,16 @@ exports.configure = (app, middleware) => {
             return callback(null, loggedInUser)
           })
           .catch((err) => {
-            console.error(`Could not log in user ${email} with local login`)
-            console.error(err)
+            helpers.logger.error(`Could not log in user ${email} with local login`)
+            helpers.logger.error(JSON.stringify(err))
             if (!require('node-errors').isCustomError(err)) return callback(err)
             return callback(null, false, { message: err.message })
           })
         }
       })
       .catch((err) => {
-        console.error(`Error when getting authentication configuration`)
-        console.error(err)
+        helpers.logger.error(`Error when getting authentication configuration`)
+        helpers.logger.error(err)
         if (!require('node-errors').isCustomError(err)) return callback(err)
         return callback(null, false, { message: err.message })
       })
@@ -86,12 +87,12 @@ exports.configure = (app, middleware) => {
       const errorMessage = 'The OTP code was invalid. If you are using an authenticator app, please ensure that your device time is correct'
       models.MultiFactor.verifyTotp(req.user.id, verificationCode)
         .then(result => {
-          console.log(`Successfully verified OTP for user with id ${req.user.id}`)
+          helpers.logger.info(`Successfully verified OTP for user with id ${req.user.id}`)
           req.user.multiFactorAuthenticationDone = true
           callback(null, req.user)
         })
         .catch(err => {
-          console.error(err)
+          helpers.logger.error(JSON.stringify(err))
           callback(null, false, { message: errorMessage })
         })
     }

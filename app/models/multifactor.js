@@ -117,9 +117,9 @@ module.exports = class MultiFactor {
           to: user.email,
           text: text
         })
-        console.log('************************************** OTP email **************************************')
-        console.log(`Sent to: ${user.email}`)
-        console.log(text)
+        helpers.logger.info('************************************** OTP email **************************************')
+        helpers.logger.info(`Sent to: ${user.email}`)
+        helpers.logger.info(text)
       })
   }
 }

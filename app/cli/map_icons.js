@@ -47,7 +47,7 @@ database.query('(SELECT name FROM client.service_layer WHERE is_user_defined=fal
           if (layer.name === 'all') {
             var buff = fs.readFileSync(fullPath(`${nodeType}.png`))
             fs.writeFileSync(filename, buff)
-            console.log(filename)
+            helpers.logger.info(filename)
             return resolve()
           }
           gm()
@@ -56,7 +56,7 @@ database.query('(SELECT name FROM client.service_layer WHERE is_user_defined=fal
             .in(fullPath(`${nodeType}.png`))
             .in(fullPath(`service_layer_${layer.name}.png`))
             .write(filename, (err) => {
-              err ? reject(err) : (console.log(filename) || resolve())
+              err ? reject(err) : (helpers.logger.info(filename) || resolve())
             })
         })
       })
@@ -64,5 +64,5 @@ database.query('(SELECT name FROM client.service_layer WHERE is_user_defined=fal
   ))
   .then(() => process.exit())
   .catch((err) => {
-    console.log('err', err.stack)
+    helpers.logger.error('err', err.stack)
   })

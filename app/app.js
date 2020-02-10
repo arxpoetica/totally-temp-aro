@@ -4,6 +4,7 @@ var passport = require('passport')
 var bodyParser = require('body-parser')
 var compression = require('compression')
 const morgan = require('morgan')
+const helpers = require('./helpers')
 
 var app = module.exports = express()
 morgan.token('body', req => JSON.stringify(req.body))
@@ -30,7 +31,16 @@ const loggerFunction = (tokens, req, res) => {
   }
 }
 app.use(morgan(loggerFunction, {
-  skip: (req, res) => req.url.indexOf('/service/v1/tiles/') === 0 // Skip logging for all vector tile calls
+  skip: (req, res) => {
+    const isVectorTileRequest = (req.url.indexOf('/service/v1/tiles/') === 0)
+    if (isVectorTileRequest) {
+      // This is a vector tile request. Log it only if it is unsuccessful
+      return res.status !== 200
+    } else {
+      return false // Not a vector tile request, log it (do not skip).
+    }
+  },
+  'stream': helpers.logger.stream
 }))
 
 app.use(compression())
@@ -89,7 +99,7 @@ app.use(api)
 
 // Do not start app if ARO_CLIENT is not set
 if (!process.env.ARO_CLIENT) {
-  console.log('**** Error: The ARO_CLIENT environment variable must be set before starting the application.')
+  helpers.logger.error('**** Error: The ARO_CLIENT environment variable must be set before starting the application.')
   process.exit(1)
 }
 

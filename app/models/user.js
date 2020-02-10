@@ -52,11 +52,11 @@ module.exports = class User {
       setTimeout(() => reject('LDAP bind timed out'), 4000)
       ldapClient.bind(distinguishedName, password, (err) => {
         if (err) {
-          console.log('LDAP: ldapBind() had an error:')
-          console.log(err)
+          helpers.logger.info('LDAP: ldapBind() had an error:')
+          helpers.logger.info(JSON.stringify(err))
           reject(err) // There was an error binding with the given credentials
         }
-        console.log('LDAP: ldapBind() was successful')
+        helpers.logger.info('LDAP: ldapBind() was successful')
         resolve() // Successfully bound with the given credentials
       })
     })
@@ -68,8 +68,8 @@ module.exports = class User {
     return new Promise((resolve, reject) => {
       authenticationConfigPromise
         .then((authenticationConfig) => {
-          console.log('LDAP: ldapGetAttributes() config is')
-          console.log(authenticationConfig)
+          helpers.logger.info('LDAP: ldapGetAttributes() config is')
+          helpers.logger.info(JSON.stringify(authenticationConfig))
           // Time out if the LDAP bind fails (setting timeout on the client does not help).
           // The LDAP server may be unreachable, or may not be sending a response.
           setTimeout(() => {
@@ -81,19 +81,19 @@ module.exports = class User {
             scope: 'sub',
             attributes: [authenticationConfig.firstNameAttribute, authenticationConfig.lastNameAttribute, authenticationConfig.groupsAttribute]
           };
-          console.log('LDAP: using ldapOpts')
-          console.log(ldapOpts)
+          helpers.logger.info('LDAP: using ldapOpts')
+          helpers.logger.info(ldapOpts)
           ldapClient.search(authenticationConfig.base, ldapOpts, (err, search) => {
             if (err) {
-              console.log('LDAP search returned error:')
-              console.log(err)
+              helpers.logger.error('LDAP search returned error:')
+              helpers.logger.error(JSON.stringify(err))
               sessionDetails.login_status_id = LoginStatus.LDAP_ERROR_GETTING_ATTRIBUTES
               reject(err) // There was an error when performing the search
             }
             search.on('searchEntry', (entry) => {
-              console.log('LDAP search returned success:')
-              console.log(entry)
-              console.log(entry.object)
+              helpers.logger.info('LDAP search returned success:')
+              helpers.logger.info(JSON.stringify(entry))
+              helpers.logger.info(JSON.stringify(entry.object))
               resolve({
                 firstName: entry.object[authenticationConfig.firstNameAttribute],
                 lastName: entry.object[authenticationConfig.lastNameAttribute],
@@ -103,8 +103,8 @@ module.exports = class User {
               })
             })
             search.on('error', (err) => {
-              console.log('LDAP search.on.error')
-              console.log(err)
+              helpers.logger.error('LDAP search.on.error')
+              helpers.logger.error(JSON.stringify(err))
               sessionDetails.login_status_id = LoginStatus.UNDEFINED_ERROR
               reject(err)
             })
@@ -166,15 +166,15 @@ module.exports = class User {
 
     return authenticationConfigPromise
       .then((authenticationConfig) => {
-        console.log('LDAP: authenticationConfig is')
-        console.log(authenticationConfig)
+        helpers.logger.info('LDAP: authenticationConfig is')
+        helpers.logger.info(JSON.stringify(authenticationConfig))
         // Create a LDAP client that we will user for authentication
         ldapClient = ldap.createClient({
           url: authenticationConfig.url
         });
         ldapClient.on('error', (err) => {
-          console.error('Error from ldap client:')
-          console.log(err)
+          helpers.logger.error('Error from ldap client:')
+          helpers.logger.error(JSON.stringify(err))
           sessionDetails.login_status_id = LoginStatus.UNDEFINED_ERROR
         })
         // Create a Distinguished Name (DN) that we represents the user that is trying to login
@@ -182,31 +182,31 @@ module.exports = class User {
         return this.ldapBind(ldapClient, distinguishedName, password)
       })
       .then(() => {
-        console.log('LDAP: Returned from ldapBind()')
+        helpers.logger.info('LDAP: Returned from ldapBind()')
         return this.ldapGetAttributes(ldapClient, username, sessionDetails)
       })
       .then((userDetails) => {
-        console.log('LDAP: Returned from ldapGetAttributes(). userDetails is now')
-        console.log(userDetails)
+        helpers.logger.info('LDAP: Returned from ldapGetAttributes(). userDetails is now')
+        helpers.logger.info(JSON.stringify(userDetails))
         return this.findOrCreateUser(userDetails, username, password)
       })
       .then(() => {
-        console.log('LDAP: Returned from findOrCreateUser()')
+        helpers.logger.info('LDAP: Returned from findOrCreateUser()')
         var sql = 'SELECT id, first_name, last_name, email, password, company_name FROM auth.users WHERE email=$1'
         return database.findOne(sql, [username])
       })
       .then((user) => {
         // At this point the login is 'successful'. Cache the user password so that we can log in even when LDAP is offline.
         this.saveCachedPasswordForUser(username, password)   // Even if this fails, we should continue
-        console.log('LDAP - returned from database.findOne()')
+        helpers.logger.info('LDAP - returned from database.findOne()')
         delete user.password
         sessionDetails.login_status_id = LoginStatus.LOGIN_SUCCESSFUL_EXTERNAL_AUTH
         this.saveLoginAudit(user.id, sessionDetails)
         return user
       })
       .catch((err) => {
-        console.error('**** Error when logging in with LDAP')
-        console.error(err)
+        helpers.logger.error('**** Error when logging in with LDAP')
+        helpers.logger.error(err)
         return Promise.reject(err)
       })
   }
@@ -221,10 +221,10 @@ module.exports = class User {
         `
         return database.query(sql)
       })
-      .then(() => console.log(`LDAP - successfully updated cached password for user ${email}`))
+      .then(() => helpers.logger.info(`LDAP - successfully updated cached password for user ${email}`))
       .catch((err) => {
-        console.log(`LDAP - error when updating cached password for user ${email}`)
-        console.log(err)
+        helpers.logger.error(`LDAP - error when updating cached password for user ${email}`)
+        helpers.logger.error(JSON.stringify(err))
       })
   }
 
@@ -268,8 +268,8 @@ module.exports = class User {
       })
     } catch (err) {
       // We do not want to stop logins in case of any errors when saving session audits.
-      console.error('ERROR when trying to save login audit:')
-      console.error(err)
+      helpers.logger.error('ERROR when trying to save login audit:')
+      helpers.logger.error(err)
     }
   }
 
@@ -358,7 +358,7 @@ module.exports = class User {
       } else {
         // Password was not specified - try sending a reset link (will fail on localhost)
         this.resendLink(createdUserId)
-          .catch((err) => console.error(err))
+          .catch((err) => helpers.logger.error(err))
       }
       return database.query(`UPDATE auth.users SET ${setString} WHERE id=${createdUserId};`)
     })
@@ -385,8 +385,8 @@ module.exports = class User {
     })
     .then(() => Promise.resolve(createdUserId))
     .catch((err) => {
-      console.error('--------------------------------------------')
-      console.error(err)
+      helpers.logger.error('--------------------------------------------')
+      helpers.logger.error(err)
       if (err.message.indexOf('duplicate key') >= 0) {
         return Promise.reject(errors.request('There\'s already a user with that email address (%s)', user.email))
       }
@@ -478,8 +478,8 @@ module.exports = class User {
           to: user.email,
           text: text
         })
-        console.log('************************************** Password reset email **************************************')
-        console.log(text)
+        helpers.logger.info('************************************** Password reset email **************************************')
+        helpers.logger.info(text)
       })
   }
 
