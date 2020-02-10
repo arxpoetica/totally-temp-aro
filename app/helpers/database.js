@@ -4,6 +4,7 @@ var pg = require('pg')
 var _ = require('underscore')
 var config = require('./config')
 var geojson = require('./geojson')
+const logger = require('./logger')
 
 module.exports = class Database {
 
@@ -41,7 +42,7 @@ module.exports = class Database {
         if (err) return reject(err)
         sql = this._processQuery(sql, params)
         client.query(sql, params, (err, result) => {
-          if (err) console.log('sql failed', sql, params, err.message)
+          if (err) logger.info('sql failed', sql, params, err.message)
           done()
           err ? reject(err) : resolve(result)
         })
@@ -194,4 +195,4 @@ module.exports.findOne("SELECT split_part(PostGIS_version(), ' ', 1) AS version"
   .then((result) => {
     postgisversion = result.version
   })
-  .catch((err) => console.error(err.stack))
+  .catch((err) => logger.error(err.stack))

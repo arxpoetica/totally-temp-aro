@@ -198,7 +198,7 @@ exports.configure = (api, middleware) => {
       json: true
     }
     return models.AROService.request(req)
-      .then((output) => console.log('', output) || response.send(output))
+      .then((output) => helpers.logger.info(output) || response.send(output))
       .catch(next)
   })
 

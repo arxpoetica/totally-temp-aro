@@ -20,7 +20,7 @@ function cacheable (request, response, next) {
     if (!value) {
       response.cache_key = key
       if (err) {
-        console.log('err', err)
+        helpers.logger.error('err', err)
         return next()
       }
       return next()
@@ -157,10 +157,8 @@ if (module.id === require.main.id) {
     query: querystring.parse('nelat=43.12129441054818&nelon=-89.31565700358885&swlat=42.91470789848055&swlon=-89.66138301677245&threshold=0&zoom=12')
   }
   viewport(req, null, (err) => {
-    if (err) return console.log('err', err)
-    console.log('viewport', req.viewport.linestring)
-    console.log()
-    console.log()
-    console.log('intersects', database.intersects(req.viewport, 'geom', 'WHERE'))
+    if (err) return helpers.logger.error(err)
+    helpers.logger.info(req.viewport.linestring)
+    helpers.logger.info(database.intersects(req.viewport, 'geom', 'WHERE'))
   })
 }

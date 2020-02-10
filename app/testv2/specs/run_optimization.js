@@ -53,8 +53,6 @@ describe('Run Optimization', function() {
     // browser.middleClick('//div[contains(@id, "map-canvas")]/div/div/div[1]/div[2]', 412, 200)
     // browser.middleClick('//div[contains(@id, "map-canvas")]/div/div/div[1]/div[3]', 412, 200)
 
-    // console.log($('//div[contains(@class, "tool-bar")]//button[@title="Global Settings..."]').getLocation())
-    // console.log($('//div[contains(@id, "map-canvas")]/div/div/div[1]/div[2]').getLocation())
 
     browser.waitForVisible('//*[@id="map-canvas"]/div/div/div[1]/div[3]', 10000)
     $('//*[@id="map-canvas"]/div/div/div[1]/div[3]').click()
