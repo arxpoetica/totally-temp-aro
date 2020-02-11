@@ -34,8 +34,8 @@ export class NetworkOptimizationInputFormProto extends Component {
     */
 
     this.RoutingModes = [// Network Construction
-      { label: 'Undefined', value: 'UNDEFINED' },
-      { label: 'Default', value: 'DEFAULT' },
+      // { label: 'Undefined', value: 'UNDEFINED' },
+      // { label: 'Default', value: 'DEFAULT' },
       { label: 'Direct Routing', value: 'DIRECT_ROUTING' },
       { label: 'Hub-only split', value: 'ODN_1' },
       { label: 'Hub-distribution split', value: 'ODN_2' },
