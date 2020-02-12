@@ -281,7 +281,7 @@ export class NetworkOptimizationInputFormProto extends Component {
                       className='text-right'
                       min='0.0'
                       max='100.0'
-                      step='0.1'
+                      step='1.0'
                       onChange={(val, newVal, prevVal, propChain) => this.handleChange(newVal, prevVal, propChain)}
                       name={'optimization.preIrrThreshold'}
                       component={this.filterComponent('input')}
@@ -295,7 +295,7 @@ export class NetworkOptimizationInputFormProto extends Component {
                           <Field
                             min='0.0'
                             max='1.0'
-                            step='0.001'
+                            step='0.01'
                             name={'optimization.preIrrThreshold'}
                             style={{ marginTop: '10px', width: '100%' }}
                             component={this.filterComponent('input')}
@@ -320,7 +320,7 @@ export class NetworkOptimizationInputFormProto extends Component {
                       className='text-right'
                       min='0.0'
                       max='100.0'
-                      step='0.1'
+                      step='1.0'
                       onChange={(val, newVal, prevVal, propChain) => this.handleChange(newVal, prevVal, propChain)}
                       name={'optimization.threshold'}
                       component={this.filterComponent('input')}
@@ -334,7 +334,7 @@ export class NetworkOptimizationInputFormProto extends Component {
                           <Field
                             min='0'
                             max='1'
-                            step='0.001'
+                            step='0.01'
                             name={'optimization.threshold'}
                             style={{ marginTop: '10px', width: '100%' }}
                             component={this.filterComponent('input')}
@@ -437,11 +437,14 @@ export class NetworkOptimizationInputFormProto extends Component {
   }
 
   formatPercent (val, prevVal) { // store -> UI
-    return parseFloat(val * 100.0).toFixed(1)
+    return parseFloat(val * 100.0).toFixed(0)
   }
 
   normalizePercent (val, prevVal) { // UI -> store
-    return parseFloat(val * 0.01).toFixed(3)
+    var newVal = parseFloat(val * 0.01).toFixed(2)
+    if (newVal < 0.0) newVal = 0.00
+    if (newVal > 1.0) newVal = 1.00
+    return newVal
   }
 
   formatThousands (val, prevVal) { // store -> UI
