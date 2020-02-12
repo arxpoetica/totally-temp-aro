@@ -181,10 +181,10 @@ module.exports = class Settings {
     }
     models.AROService.request(req)
       .then((data) => {
-        helpers.logger.info(JSON.stringify(data))
+        console.log('data', data)
       })
       .catch((err) => {
-        helpers.logger.info(JSON.stringify(err))
+        console.log('err', err)
       })
   }
 

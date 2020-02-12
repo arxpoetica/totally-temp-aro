@@ -1,5 +1,4 @@
 var database = require('./database')
-const helpers = require('../helpers')
 const UIConfigurationClass = require('./ui_configuration')
 const UIConfiguration = new UIConfigurationClass()
 
@@ -69,7 +68,7 @@ function loadConfiguration() {
     LEFT JOIN client.network_node_types ON client.network_node_subtype.node_type_id = client.network_node_types.id`
   database.query(sql)
     .then((response) => {
-      helpers.logger.info(response)
+      console.log(response)
       var subtypesByType = {}
       response.forEach(subtype => {
         if (!subtypesByType.hasOwnProperty(subtype.network_node_type)) {
@@ -103,13 +102,13 @@ function loadConfiguration() {
           return Promise.resolve()
         })
     })
-    .catch(err => helpers.logger.error(err))
+    .catch(err => console.error(err))
 }
 
 function loadEnumStrings () {
   UIConfiguration.getEnumStrings()
     .then(result => { exports.enumStrings = result })
-    .catch(err => helpers.logger.error(err))
+    .catch(err => console.error(err))
 }
 
 exports.clearUiConfigurationCache = () => UIConfiguration.clearCache()
@@ -122,8 +121,8 @@ exports.refresh = () => {
     loadConfiguration(),
     loadEnumStrings()
   ])
-    .then(() => helpers.logger.info(`Cache loaded ${exports.serviceLayers.length} service areas, ${exports.analysisLayers.length} analysis layers`))
+    .then(() => console.log(`Cache loaded ${exports.serviceLayers.length} service areas, ${exports.analysisLayers.length} analysis layers`))
 }
 
 exports.refresh()
-  .catch((err) => helpers.logger.error('Error refreshing cache', err.stack))
+  .catch((err) => console.log('Error refreshing cache', err.stack))

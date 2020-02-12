@@ -3,7 +3,6 @@ var _ = require('underscore')
 var fs = require('fs')
 var path = require('path')
 var temp = require('temp')
-const helpers = require('../helpers')
 
 exports.configure = (api, middleware) => {
   var jsonSuccess = middleware.jsonSuccess
@@ -32,10 +31,10 @@ exports.configure = (api, middleware) => {
     var userid = request.user.id
     var t = timer(5,
       (seconds) => {
-        helpers.logger.info('Generating CSV ' + filename + ' ' + seconds + ' seconds')
+        console.log('Generating CSV', filename, seconds, 'seconds')
         response.write(seconds + '.')
       },
-      (seconds) => helpers.logger.info('Finished exporting CSV ' + filename + ' ' + seconds + ' seconds')
+      (seconds) => console.log('Finished exporting CSV', filename, seconds, 'seconds')
     )
     return (output) => {
       t.stop()

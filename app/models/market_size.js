@@ -101,7 +101,7 @@ module.exports = class MarketSize {
         var year = String(new Date().getFullYear())
         total = businesses.reduce((total, business) => total + (business[year] || 0), 0)
         businesses = _.values(businesses).map((business) => columns.map((col) => business[col]))
-        helpers.logger.info('Market size total for current year: ' + total)
+        console.log('Market size total for current year:', total)
         return new Promise((resolve, reject) => {
           stringify(businesses, (err, csv) => {
             err ? reject(err) : resolve(csv)

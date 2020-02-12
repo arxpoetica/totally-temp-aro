@@ -99,7 +99,7 @@ app.use(api)
 
 // Do not start app if ARO_CLIENT is not set
 if (!process.env.ARO_CLIENT) {
-  helpers.logger.error('**** Error: The ARO_CLIENT environment variable must be set before starting the application.')
+  console.log('**** Error: The ARO_CLIENT environment variable must be set before starting the application.')
   process.exit(1)
 }
 

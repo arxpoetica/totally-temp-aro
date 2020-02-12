@@ -57,7 +57,7 @@ module.exports = class UIConfiguration {
         UIConfiguration.basicDeepObjMerge(baseConfig, clientConfig)
         return Promise.resolve(baseConfig)
       })
-      .catch(err => helpers.logger.error(err))
+      .catch(err => console.error(err))
   }
 
   getEnumStrings () {
@@ -96,10 +96,10 @@ module.exports = class UIConfiguration {
             throw new Error('A client string definition was encountered, but there is no corresponding base definition. Always define the base definition')
           }
         })
-        helpers.logger.info('Enum Strings loaded from database')
+        console.log('Enum Strings loaded from database')
         return Promise.resolve(enumStrings)
       })
-      .catch(err => helpers.logger.error(err))
+      .catch(err => console.error(err))
   }
 
   getConfigurationSet (configSet) {

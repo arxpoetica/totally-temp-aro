@@ -355,7 +355,7 @@ module.exports = class NetworkPlan {
             output.metadata.fiber_summary.reduce((total, item) => total + item.lengthMeters * 0.000621371, 0)
           ])
           .catch((err) => {
-            helpers.logger.error(JSON.stringify(err))
+            console.log('err', err)
           })
 
         if (metadata_only) delete output.feature_collection
@@ -976,8 +976,8 @@ module.exports = class NetworkPlan {
           queryParameters.radius = BIAS_RADIUS
         }
         const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json`
-        helpers.logger.info(`Getting autocomplete results from ${url} with query parameters:`)
-        helpers.logger.info(JSON.stringify(queryParameters))
+        console.log(`Getting autocomplete results from ${url} with query parameters:`)
+        console.log(queryParameters)
         return request({url: url, qs: queryParameters, json: true})
           .then((result) => {
             var compressedResults = []

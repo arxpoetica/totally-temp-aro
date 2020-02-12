@@ -826,7 +826,7 @@ module.exports = class Location {
       WHERE data_source_id = $1
       ${database.intersects(viewport, 'geom', 'AND')}
     `, [dataSourceId], true, viewport)
-    .then((foo) => helpers.logger.info(JSON.stringify(foo)) || foo)
+    .then((foo) => console.log('foo', foo) || foo)
   }
 
   static saveMorphology (user, tileSystemId, projectId, name, file, mappings) {

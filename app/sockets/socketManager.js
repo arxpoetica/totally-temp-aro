@@ -52,9 +52,9 @@ class SocketManager {
       const uuid = JSON.parse(msg.content.toString()).uuid
       const clientId = self.vectorTileRequestToRoom[uuid]
       if (!clientId) {
-        helpers.logger.error(`ERROR: No socket clientId found for vector tile UUID ${uuid}`)
+        console.error(`ERROR: No socket clientId found for vector tile UUID ${uuid}`)
       } else {
-        helpers.logger.info(`Vector Tile Socket: Routing message with UUID ${uuid} to /${clientId}`)
+        console.log(`Vector Tile Socket: Routing message with UUID ${uuid} to /${clientId}`)
         delete self.vectorTileRequestToRoom[uuid]
         msg.properties.headers.eventType = socketConfig.vectorTile.message
         self.sockets.emitToClient(clientId, msg)
@@ -73,8 +73,8 @@ class SocketManager {
   getTileInvalidationConsumer () {
     const self = this
     const messageHandler = msg => {
-      helpers.logger.info('Received tile invalidation message from service')
-      helpers.logger.info(msg.content.toString())
+      console.log('Received tile invalidation message from service')
+      console.log(msg.content.toString())
       msg.properties.headers.eventType = socketConfig.invalidation.message
       self.sockets.sockets.tileInvalidation.emit('message', msg)
     }
@@ -87,10 +87,10 @@ class SocketManager {
     const messageHandler = msg => {
       const processId = JSON.parse(msg.content.toString()).processId
       if (!processId) {
-        helpers.logger.error(`ERROR: No socket roomId found for processId ${processId}`)
+        console.error(`ERROR: No socket roomId found for processId ${processId}`)
       } else {
-        helpers.logger.info(`Optimization Progress Socket: Routing message with UUID ${processId} to plan/${processId}`)
-        helpers.logger.info(`SOCKET EMIT plan:${processId}, payload: ${JSON.stringify(msg)}`)
+        console.log(`Optimization Progress Socket: Routing message with UUID ${processId} to plan/${processId}`)
+        console.log(`SOCKET EMIT plan:${processId}, payload: ${JSON.stringify(msg)}`)
         msg.properties.headers.eventType = socketConfig.progress.message
         // UI dependent on optimizationState at so many places TODO: need to remove optimizationstate
         msg.data = JSON.parse(msg.content.toString()) // Shove it in here for now. Its in too many places in the front end.
