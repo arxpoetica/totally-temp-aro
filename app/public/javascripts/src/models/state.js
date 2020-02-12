@@ -686,9 +686,14 @@ class State {
       service.showPlanResourceEditorModal = true
     }
 
+    // not quite sure where to put the defaults
+    service.resourceItems = {}
     // Load the plan resource selections from the server
     service.loadPlanResourceSelectionFromServer = () => {
+      console.log(' --- loadPlanResourceSelectionFromServer')
+      console.log(service.plan)
       if (!service.plan) {
+        console.log(' --- No PLAN')
         return Promise.resolve()
       }
       var currentPlan = service.plan
@@ -747,6 +752,8 @@ class State {
           })
           service.resourceItems = newResourceItems
           service.pristineResourceItems = angular.copy(service.resourceItems)
+          console.log(' --- loaded resourceItems')
+          console.log(service.resourceItems)
           $timeout() // Trigger a digest cycle so that components can update
           return Promise.resolve()
         })
