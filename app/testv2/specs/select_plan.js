@@ -31,6 +31,7 @@ describe('Select a Plan', function() {
     // browser.waitForVisible('//table[contains(@id, "tblSelectPlans")]//tbody/descendant::td/b/a[contains(text(), ' + planToSearch + ')]', 10000)
     // $('//table[contains(@id, "tblSelectPlans")]//tbody/descendant::td/b/a[contains(text(), ' + planToSearch + ')]').click()
 
+    console.log($('#selectedPlan').getText())
     //assert.equal($('#selectedPlan').getText(),planToSearch)
   });
 });

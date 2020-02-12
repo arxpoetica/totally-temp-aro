@@ -42,6 +42,7 @@ module.exports = class Network {
       WHERE source_name=$1
       ${database.intersects(viewport, 'geom', 'AND')}
     `
+    console.log('sql', sourceName)
     return database.lines(sql, [sourceName], true, viewport)
   }
   
@@ -506,7 +507,7 @@ module.exports = class Network {
             return callback()
           })
           .catch((err) => {
-            helpers.logger.error(JSON.stringify(err))
+            console.log('err', err)
             errors++
             return callback()
           })

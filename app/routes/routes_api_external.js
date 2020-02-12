@@ -18,9 +18,9 @@ const authSigningKey = requestPromise({
 })
   .then(res => res.value)
   .catch(err => {
-    helpers.logger.error('********************** Error when getting token key from OAuth server')
-    helpers.logger.error('If you don\'t have a OAuth server setup, then you can ignore this error')
-    helpers.logger.error(err.error)
+    console.error('********************** Error when getting token key from OAuth server')
+    console.error('If you don\'t have a OAuth server setup, then you can ignore this error')
+    console.error(err.error)
   })
 
 // A promise that resolves if the user is authenticated correctly, using JWT strategy (will decrypt JWT without calls to the auth server)
@@ -29,7 +29,7 @@ const checkUserAuthJWT = (jwtToken) => authSigningKey
     return new Promise((resolve, reject) => {
       jwt.verify(jwtToken, signingKey, (err, decoded) => {
         if (err) {
-          helpers.logger.error(err)
+          console.error(err)
           reject({
             statusCode: 400,
             error: 'ERROR: Unable to verify JWT token'
@@ -41,7 +41,7 @@ const checkUserAuthJWT = (jwtToken) => authSigningKey
     })
   })
   .catch(err => {
-    helpers.logger.error(err)
+    console.error(err)
     return Promise.reject(err)
   })
 
@@ -67,7 +67,7 @@ const bearerTokenCheckMiddleware = (req, res, next) => {
       })
       .catch(err => {
         // Error when authenticating the token. Send it back
-        helpers.logger.error(err)
+        console.error(err)
         res.status(err.statusCode).json(err.error)
       })
   }

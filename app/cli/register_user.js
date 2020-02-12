@@ -49,7 +49,7 @@ var createdUserId = null
 models.User.registerFromETL(argv, argv.password)
   .then((userId) => {
     createdUserId = userId
-    helpers.logger.info('User registered successfully with id =', userId)
+    console.log('User registered successfully with id =', userId)
     // Add the user to the Public group
     return addUserToGroup(argv.email, 'Public')
   })
@@ -60,6 +60,6 @@ models.User.registerFromETL(argv, argv.password)
     process.exit(0)
   })
   .catch((err) => {
-    helpers.logger.error('Error', err)
+    console.log('Error', err)
     process.exit(1)
   })
