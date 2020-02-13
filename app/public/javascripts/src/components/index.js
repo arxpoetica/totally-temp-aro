@@ -55,7 +55,6 @@ import roicReports from './sidebar/analysis/roic-reports/roic-reports'
 import roicReportsLarge from './sidebar/analysis/roic-reports/roic-reports-large'
 import roicReportsSmall from './sidebar/analysis/roic-reports/roic-reports-small'
 import roicReportsModal from './sidebar/analysis/roic-reports/roic-reports-modal'
-import networkAnalysisBuild from './sidebar/analysis/network-analysis-build'
 import coverageReportDownloader from './sidebar/analysis/coverage/coverage-report-downloader'
 import networkBuildOutput from './sidebar/analysis/network-build/network-build-output'
 import aroDebug from './sidebar/debug/aro-debug'
@@ -157,7 +156,6 @@ app.component('boundaryDetail', boundaryDetail)
   .component('summaryReports', summaryReports)
   .component('analysisExpertMode', analysisExpertMode)
   .component('analysisMode', analysisMode)
-  .component('networkAnalysisBuild', networkAnalysisBuild)
   .component('locationRoicReports', locationRoicReports)
   .component('networkBuildRoicReports', networkBuildRoicReports)
   .component('roicReports', roicReports)

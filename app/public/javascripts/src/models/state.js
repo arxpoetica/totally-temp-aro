@@ -752,11 +752,12 @@ class State {
           })
           service.resourceItems = newResourceItems
           service.pristineResourceItems = angular.copy(service.resourceItems)
-          console.log(' --- loaded resourceItems')
+          console.log(' --- LOADED resourceItems')
           console.log(service.resourceItems)
           $timeout() // Trigger a digest cycle so that components can update
           return Promise.resolve()
         })
+        .catch((err) => console.error(err))
     }
 
     service.getDefaultProjectForUser = (userId) => {
@@ -1002,6 +1003,7 @@ class State {
     }
 
     service.onActivePlanChanged = () => {
+      console.log(' --- onActivePlanChanged')
       service.planChanged.next(null)
 
       service.currentPlanTags = service.listOfTags.filter(tag => _.contains(service.plan.tagMapping.global, tag.id))
@@ -1033,7 +1035,17 @@ class State {
     service.loadPlanInputs = (planId) => {
       return $http.get(`/service/v1/plan/${planId}/inputs`)
         .then((result) => {
-          var planInputs = Object.keys(result.data).length > 0 ? result.data : service.getDefaultPlanInputs()
+          console.log(' --- loadPlanInputs return')
+          console.log(result)
+          var defaultPlanInputs = service.getDefaultPlanInputs()
+          var planInputs = Object.keys(result.data).length > 0 ? result.data : defaultPlanInputs
+          
+          // OK, this is kind of a mess. We have a lot of semi-depricated code that we are clearing out
+          //    that depends on depricated planInputs schema.
+          //    for the moment we'll merge with default to avoid crashes.
+          //    i know it's not the best, I'll be back.
+          planInputs = { ...defaultPlanInputs, ...planInputs }
+          
           stateSerializationHelper.loadStateFromJSON(service, $ngRedux.getState(), service.getDispatchers(), planInputs, new AroNetworkConstraints())
           return Promise.all([
             service.loadPlanResourceSelectionFromServer() // ,
@@ -1158,6 +1170,8 @@ class State {
       })
     }
 
+    /*
+    // ToDo: redux version?
     var checkToDisplayPopup = function () {
       if (!service.configuration.plan.showHouseholdsDirectRoutingWarning) {
         // No need to show any messagebox.
@@ -1185,9 +1199,11 @@ class State {
         }
       })
     }
+    */
 
     // Optimization options in Redux
     // move this to redux
+    /*
     service.runOptimization = () => {
       checkToDisplayPopup()
         .then((result) => {
@@ -1220,6 +1236,7 @@ class State {
           }
         })
     }
+    */
 
     service.getOptimizationProgress = (newPlan) => {
       if (!service.plan.planState) {
@@ -1242,6 +1259,7 @@ class State {
               tileDataService.markHtmlCacheDirty()
               service.requestMapLayerRefresh.next(null)
               delete service.plan.optimizationId
+              console.log(' >>> getOptimizationProgress > loadPlanInputs')
               service.loadPlanInputs(newPlan.id)
               service.setActivePlanState(progressData.data.optimizationState)
               service.stopProgressMessagePolling()
@@ -1813,7 +1831,12 @@ class State {
       Object.assign(service, nextState)
       Object.assign(service, actions)
 
+      console.log(' --- mergeToTarget')
       if ((currentActivePlanId !== newActivePlanId) && (nextState.plan)) {
+        console.log(' ---v--- ')
+        console.log(`${currentActivePlanId} | ${newActivePlanId}`)
+        console.log(nextState)
+        console.log(' ---^--- ')
         // The active plan has changed. Note that we are comparing ids because a change in plan state also causes the plan object to update.
         service.onActivePlanChanged()
       }
