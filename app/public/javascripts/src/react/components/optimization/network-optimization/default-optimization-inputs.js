@@ -17,15 +17,15 @@ export default Object.freeze({
   'optimization': {
     'algorithm': 'UNCONSTRAINED',
     // 'algorithmType': 'DEFAULT',
-    'budget': 0,
+    'budget': null,
     /*
     'customOptimization': {
       'map': {},
       'name': 'string'
     },
     */
-    'preIrrThreshold': 0,
-    'threshold': 0
+    'preIrrThreshold': null,
+    'threshold': null
   },
   // 'planId': 0,
   'routingMode': 'ODN_1'
