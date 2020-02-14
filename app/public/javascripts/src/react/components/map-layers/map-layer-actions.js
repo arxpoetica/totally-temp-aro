@@ -76,13 +76,53 @@ function setShowSiteBoundary (newVisibility) {
   }
 }
 
+function setAnnotations (annotations) {
+  return {
+    type: Actions.LAYERS_SET_ANNOTATIONS,
+    payload: annotations
+  }
+}
+
+function addAnnotation (annotation) {
+  return {
+    type: Actions.LAYERS_ADD_ANNOTATION,
+    payload: annotation
+  }
+}
+
+function updateAnnotation (annotation) {
+  return {
+    type: Actions.LAYERS_UPDATE_ANNOTATION,
+    payload: annotation
+  }
+}
+
+function removeAnnotation (annotation) {
+  return {
+    type: Actions.LAYERS_REMOVE_ANNOTATION,
+    payload: annotation
+  }
+}
+
+function setAnnotationListVisibility (isVisible) {
+  return {
+    type: Actions.LAYERS_SHOW_ANNOTATION_LIST,
+    payload: isVisible
+  }
+}
+
 export default {
-  setLayerVisibility: setLayerVisibility,
-  setNetworkEquipmentLayerVisibility: setNetworkEquipmentLayerVisibility,
-  setNetworkEquipmentSubtypeVisibility: setNetworkEquipmentSubtypeVisibility,
-  setCableConduitVisibility: setCableConduitVisibility,
-  setNetworkEquipmentLayers: setNetworkEquipmentLayers,
-  setConstructionSiteLayers: setConstructionSiteLayers,
-  setBoundaryLayers: setBoundaryLayers,
-  setShowSiteBoundary: setShowSiteBoundary
+  setLayerVisibility,
+  setNetworkEquipmentLayerVisibility,
+  setNetworkEquipmentSubtypeVisibility,
+  setCableConduitVisibility,
+  setNetworkEquipmentLayers,
+  setConstructionSiteLayers,
+  setBoundaryLayers,
+  setShowSiteBoundary,
+  setAnnotations,
+  addAnnotation,
+  updateAnnotation,
+  removeAnnotation,
+  setAnnotationListVisibility
 }

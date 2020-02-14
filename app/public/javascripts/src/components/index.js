@@ -25,6 +25,7 @@ import LocationInfo from '../react/components/location-info/location-info.jsx'
 import ResourcePermissions from '../react/components/acl/resource-permissions/resource-permissions.jsx'
 import PermissionsTable from '../react/components/acl/resource-permissions/permissions-table.jsx'
 import SearchableSelect from '../react/components/common/searchable-select.jsx'
+import ToolBox from '../react/components/map-layers/tool-box.jsx'
 
 import boundaryDetail from './sidebar/view/boundary-detail'
 import equipmentDetail from './sidebar/view/equipment-detail'
@@ -263,6 +264,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rResourcePermissions', react2angular(ResourcePermissions))
   .component('rPermissionsTable', react2angular(PermissionsTable))
   .component('rSearchableSelect', react2angular(SearchableSelect))
+  .component('rToolBox', react2angular(ToolBox))
   .service('Utils', utils)
   .service('state', state)
   .service('tileDataService', tileDataService)

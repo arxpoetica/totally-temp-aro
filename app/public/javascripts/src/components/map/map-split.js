@@ -69,7 +69,8 @@ class MapSplitController {
         reduxState.planEditor.isCreatingObject ||
         reduxState.planEditor.isModifyingObject ||
         reduxState.planEditor.isCommittingTransaction ||
-        reduxState.planEditor.isEnteringTransaction
+        reduxState.planEditor.isEnteringTransaction,
+      showToolBox: reduxState.mapLayers.annotation.showList // For now, later this will be a tool box flag
     }
   }
 
@@ -178,6 +179,7 @@ let mapSplit = {
       <div id="header-bar-container" style="position: absolute; top: 0px; width: 100%; height: 55px; display: flex; flex-direction: row;">
         <div style="flex: 0 0 70px;"></div>
         <tool-bar map-global-object-name="map" style="flex: 1 1 auto; position: relative;"></tool-bar>
+        <r-tool-box ng-if="$ctrl.showToolBox"></r-tool-box>
         <network-plan style="flex: 0 0 auto; margin: auto;"></network-plan>
         <div id="spacerForIconOnSidebar" style="flex: 0 0 40px;"></div>
       </div>
