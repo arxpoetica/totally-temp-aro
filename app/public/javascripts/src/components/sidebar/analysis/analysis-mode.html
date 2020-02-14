@@ -66,13 +66,6 @@
         <optimize-button ng-switch-default></optimize-button>
       </div>
       <div style="height: 100%;" ng-if="$ctrl.state.networkAnalysisType.id === 'NETWORK_PLAN' || $ctrl.state.networkAnalysisType.id === 'NETWORK_ANALYSIS'">
-        <!--
-        <network-analysis-build 
-          remove-target="$ctrl.removeTarget(target)" 
-          zoom-target="$ctrl.zoomTarget(target)" 
-          selection="$ctrl.state.selection">
-        </network-analysis-build>
-        -->
         <r-network-optimization-input on-modify="$ctrl.state.handleModifyClicked" network-analysis-type-id="$ctrl.state.networkAnalysisType.id"></r-network-optimization-input>
       </div>
       

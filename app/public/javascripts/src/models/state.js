@@ -690,10 +690,10 @@ class State {
     service.resourceItems = {}
     // Load the plan resource selections from the server
     service.loadPlanResourceSelectionFromServer = () => {
-      console.log(' --- loadPlanResourceSelectionFromServer')
-      console.log(service.plan)
+      // console.log(' --- loadPlanResourceSelectionFromServer')
+      // console.log(service.plan)
       if (!service.plan) {
-        console.log(' --- No PLAN')
+        // console.log(' --- No PLAN')
         return Promise.resolve()
       }
       var currentPlan = service.plan
@@ -752,8 +752,8 @@ class State {
           })
           service.resourceItems = newResourceItems
           service.pristineResourceItems = angular.copy(service.resourceItems)
-          console.log(' --- LOADED resourceItems')
-          console.log(service.resourceItems)
+          // console.log(' --- LOADED resourceItems')
+          // console.log(service.resourceItems)
           $timeout() // Trigger a digest cycle so that components can update
           return Promise.resolve()
         })
@@ -1003,7 +1003,7 @@ class State {
     }
 
     service.onActivePlanChanged = () => {
-      console.log(' --- onActivePlanChanged')
+      // console.log(' --- onActivePlanChanged')
       service.planChanged.next(null)
 
       service.currentPlanTags = service.listOfTags.filter(tag => _.contains(service.plan.tagMapping.global, tag.id))
@@ -1035,8 +1035,8 @@ class State {
     service.loadPlanInputs = (planId) => {
       return $http.get(`/service/v1/plan/${planId}/inputs`)
         .then((result) => {
-          console.log(' --- loadPlanInputs return')
-          console.log(result)
+          // console.log(' --- loadPlanInputs return')
+          // console.log(result)
           var defaultPlanInputs = service.getDefaultPlanInputs()
           var planInputs = Object.keys(result.data).length > 0 ? result.data : defaultPlanInputs
           
@@ -1259,7 +1259,7 @@ class State {
               tileDataService.markHtmlCacheDirty()
               service.requestMapLayerRefresh.next(null)
               delete service.plan.optimizationId
-              console.log(' >>> getOptimizationProgress > loadPlanInputs')
+              // console.log(' >>> getOptimizationProgress > loadPlanInputs')
               service.loadPlanInputs(newPlan.id)
               service.setActivePlanState(progressData.data.optimizationState)
               service.stopProgressMessagePolling()
@@ -1831,12 +1831,12 @@ class State {
       Object.assign(service, nextState)
       Object.assign(service, actions)
 
-      console.log(' --- mergeToTarget')
+      // console.log(' --- mergeToTarget')
       if ((currentActivePlanId !== newActivePlanId) && (nextState.plan)) {
-        console.log(' ---v--- ')
-        console.log(`${currentActivePlanId} | ${newActivePlanId}`)
-        console.log(nextState)
-        console.log(' ---^--- ')
+        // console.log(' ---v--- ')
+        // console.log(`${currentActivePlanId} | ${newActivePlanId}`)
+        // console.log(nextState)
+        // console.log(' ---^--- ')
         // The active plan has changed. Note that we are comparing ids because a change in plan state also causes the plan object to update.
         service.onActivePlanChanged()
       }
