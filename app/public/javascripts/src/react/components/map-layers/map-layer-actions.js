@@ -1,4 +1,5 @@
 import Actions from '../../common/actions'
+import AroHttp from '../../common/aro-http'
 
 // Sets the visibility for a specified layer
 function setLayerVisibility (layer, newVisibility) {
@@ -76,10 +77,30 @@ function setShowSiteBoundary (newVisibility) {
   }
 }
 
-function setAnnotations (annotations) {
-  return {
-    type: Actions.LAYERS_SET_ANNOTATIONS,
-    payload: annotations
+function loadAnnotationsForUser (userId) {
+  return dispatch => {
+    AroHttp.get(`/service/auth/users/${userId}/configuration`)
+      .then(result => {
+        const annotations = result.data.annotations || [{ name: 'Default Annotation', geometry: [] }]
+        dispatch({
+          type: Actions.LAYERS_SET_ANNOTATIONS,
+          payload: annotations
+        })
+      })
+      .catch(err => console.error(err))
+  }
+}
+
+function saveAnnotationsForUser (userId, annotations) {
+  return dispatch => {
+    AroHttp.get(`/service/auth/users/${userId}/configuration`)
+      .then(result => {
+        const newConfiguration = { ...result.data,
+          annotations: annotations // Replace just the annotations
+        }
+        return AroHttp.post(`/service/auth/users/${userId}/configuration`, newConfiguration)
+      })
+      .catch(err => console.error(err))
   }
 }
 
@@ -120,7 +141,8 @@ export default {
   setConstructionSiteLayers,
   setBoundaryLayers,
   setShowSiteBoundary,
-  setAnnotations,
+  loadAnnotationsForUser,
+  saveAnnotationsForUser,
   addAnnotation,
   updateAnnotation,
   removeAnnotation,

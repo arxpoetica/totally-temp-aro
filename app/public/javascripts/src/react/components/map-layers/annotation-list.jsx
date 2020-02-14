@@ -11,7 +11,7 @@ export class AnnotationList extends Component {
 
   render () {
     return <div>
-      <table className='table table-sm table-striped'>
+      {/* <table className='table table-sm table-striped'>
         <tbody>
           {Object.keys(this.props.annotations).map(annotationKey => {
             const annotation = this.props.annotations[annotationKey]
@@ -34,6 +34,15 @@ export class AnnotationList extends Component {
         onClick={event => this.onAddAnnotationClicked(event)}
         >
         Add
+      </button> */}
+      <h4>Map Annotations</h4>
+      <button className='btn btn-primary'
+        onClick={() => this.props.saveAnnotationsForUser(this.props.userId, this.props.annotations)}
+      >
+        <i className='fa fa-save pr-1' />Save
+      </button>
+      <button className='btn btn-danger'>
+        <i className='fa fa-trash-alt pr-1' />Clear
       </button>
     </div>
   }
@@ -45,18 +54,23 @@ export class AnnotationList extends Component {
       name: 'New Annotation'
     })
   }
+
+  componentDidMount () {
+    this.props.loadAnnotationsForUser(this.props.userId)
+  }
 }
 
 AnnotationList.propTypes = {
 }
 
 const mapStateToProps = state => ({
-  annotations: state.mapLayers.annotation.collections
+  annotations: state.mapLayers.annotation.collections,
+  userId: state.user.loggedInUser.id
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  addAnnotation: annotation => dispatch(MapLayerActions.addAnnotation(annotation)),
-  removeAnnotation: annotation => dispatch(MapLayerActions.removeAnnotation(annotation))
+  loadAnnotationsForUser: userId => dispatch(MapLayerActions.loadAnnotationsForUser(userId)),
+  saveAnnotationsForUser: (userId, annotations) => dispatch(MapLayerActions.saveAnnotationsForUser(userId, annotations))
 })
 
 const AnnotationListComponent = connect(mapStateToProps, mapDispatchToProps)(AnnotationList)
