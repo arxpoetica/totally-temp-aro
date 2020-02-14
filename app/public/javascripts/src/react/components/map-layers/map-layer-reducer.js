@@ -1,5 +1,5 @@
 import Actions from '../../common/actions'
-import { List, Map } from 'immutable'
+import { List, Map, remove } from 'immutable'
 
 const defaultState = {
   location: new List(),
@@ -8,7 +8,12 @@ const defaultState = {
   boundary: new List(),
   showSiteBoundary: false,
   selectedBoundaryType: new Map(),
-  boundaryTypes: new List()
+  boundaryTypes: new List(),
+  annotation: {
+    showList: false,
+    selectedIndex: 0,
+    collections: []
+  }
 }
 
 // ToDo: reafctor "checked" to be a collection of subtypes, also make a class 
@@ -117,6 +122,61 @@ function setShowSiteBoundary (state, visibility) {
   return { ...state, showSiteBoundary: visibility }
 }
 
+function setAnnotations (state, annotations) {
+  return { ...state,
+    annotation: { ...state.annotation,
+      selectedIndex: 0,
+      collections: annotations
+    }
+  }
+}
+
+function addAnnotation (state, annotation) {
+  return { ...state,
+    annotation: { ...state.annotation,
+      collections: state.annotation.collections.concat(annotation)
+    }
+  }
+}
+
+function updateAnnotation (state, indexToUpdate, annotation) {
+  var newCollections = [].concat(state.annotation.collections)
+  newCollections.splice(indexToUpdate, 1, annotation)
+  return { ...state,
+    annotation: { ...state.annotation,
+      collections: newCollections
+    }
+  }
+}
+
+function removeAnnotation (state, annotation) {
+  const indexToRemove = state.annotation.collections.findIndex(item => item.id === annotation.id)
+  var newCollections = [].concat(state.annotation.collections)
+  newCollections.splice(indexToRemove, 1)
+  return { ...state,
+    annotation: { ...state.annotation,
+      collections: newCollections
+    }
+  }
+}
+
+function setShowAnnotationsList (state, showAnnotationsList) {
+  return { ...state,
+    annotation: { ...state.annotation,
+      showList: showAnnotationsList
+    }
+  }
+}
+
+function clearAllAnnotations (state) {
+  return { ...state,
+    annotation: { ...state.annotation,
+      collections: [],
+      selectedIndex: 0
+    }
+  }
+}
+
 function mapLayersReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.LAYERS_SET_LOCATION:
@@ -148,6 +208,24 @@ function mapLayersReducer (state = defaultState, action) {
 
     case Actions.LAYERS_SET_SITE_BOUNDARY:
       return setShowSiteBoundary(state, action.payload.visibility)
+
+    case Actions.LAYERS_SET_ANNOTATIONS:
+      return setAnnotations(state, action.payload)
+
+    case Actions.LAYERS_ADD_ANNOTATION:
+      return addAnnotation(state, action.payload)
+
+    case Actions.LAYERS_UPDATE_ANNOTATION:
+      return updateAnnotation(state, action.payload.index, action.payload.annotation)
+
+    case Actions.LAYERS_REMOVE_ANNOTATION:
+      return removeAnnotation(state, action.payload)
+
+    case Actions.LAYERS_SHOW_ANNOTATION_LIST:
+      return setShowAnnotationsList(state, action.payload)
+
+    case Actions.LAYERS_CLEAR_ALL_ANNOTATIONS:
+      return clearAllAnnotations(state)
 
     default:
       return state
