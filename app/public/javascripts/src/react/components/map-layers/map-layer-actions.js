@@ -1,4 +1,5 @@
 import Actions from '../../common/actions'
+import AroHttp from '../../common/aro-http'
 
 // Sets the visibility for a specified layer
 function setLayerVisibility (layer, newVisibility) {
@@ -76,13 +77,84 @@ function setShowSiteBoundary (newVisibility) {
   }
 }
 
+function loadAnnotationsForUser (userId) {
+  return dispatch => {
+    return AroHttp.get(`/service/auth/users/${userId}/configuration`)
+      .then(result => {
+        const annotations = result.data.annotations || [{ name: 'Default Annotation', geometries: [] }]
+        dispatch({
+          type: Actions.LAYERS_SET_ANNOTATIONS,
+          payload: annotations
+        })
+      })
+      .catch(err => console.error(err))
+  }
+}
+
+function saveAnnotationsForUser (userId, annotations) {
+  return dispatch => {
+    return AroHttp.get(`/service/auth/users/${userId}/configuration`)
+      .then(result => {
+        const newConfiguration = { ...result.data,
+          annotations: annotations // Replace just the annotations
+        }
+        return AroHttp.post(`/service/auth/users/${userId}/configuration`, newConfiguration)
+      })
+      .catch(err => console.error(err))
+  }
+}
+
+function addAnnotation (annotation) {
+  return {
+    type: Actions.LAYERS_ADD_ANNOTATION,
+    payload: annotation
+  }
+}
+
+function updateAnnotation (index, annotation) {
+  return {
+    type: Actions.LAYERS_UPDATE_ANNOTATION,
+    payload: {
+      index,
+      annotation
+    }
+  }
+}
+
+function removeAnnotation (annotation) {
+  return {
+    type: Actions.LAYERS_REMOVE_ANNOTATION,
+    payload: annotation
+  }
+}
+
+function setAnnotationListVisibility (isVisible) {
+  return {
+    type: Actions.LAYERS_SHOW_ANNOTATION_LIST,
+    payload: isVisible
+  }
+}
+
+function clearAllAnnotations () {
+  return {
+    type: Actions.LAYERS_CLEAR_ALL_ANNOTATIONS
+  }
+}
+
 export default {
-  setLayerVisibility: setLayerVisibility,
-  setNetworkEquipmentLayerVisibility: setNetworkEquipmentLayerVisibility,
-  setNetworkEquipmentSubtypeVisibility: setNetworkEquipmentSubtypeVisibility,
-  setCableConduitVisibility: setCableConduitVisibility,
-  setNetworkEquipmentLayers: setNetworkEquipmentLayers,
-  setConstructionSiteLayers: setConstructionSiteLayers,
-  setBoundaryLayers: setBoundaryLayers,
-  setShowSiteBoundary: setShowSiteBoundary
+  setLayerVisibility,
+  setNetworkEquipmentLayerVisibility,
+  setNetworkEquipmentSubtypeVisibility,
+  setCableConduitVisibility,
+  setNetworkEquipmentLayers,
+  setConstructionSiteLayers,
+  setBoundaryLayers,
+  setShowSiteBoundary,
+  loadAnnotationsForUser,
+  saveAnnotationsForUser,
+  addAnnotation,
+  updateAnnotation,
+  removeAnnotation,
+  setAnnotationListVisibility,
+  clearAllAnnotations
 }

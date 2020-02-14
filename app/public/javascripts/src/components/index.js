@@ -29,6 +29,7 @@ import SearchableSelect from '../react/components/common/searchable-select.jsx'
 import PlanningConstraintsEditor from '../react/components/resource-manager/planning-constraints-editor.jsx'
 import FusionEditor from '../react/components/resource-manager/fusion-editor.jsx'
 import NetworkArchitectureEditor from '../react/components/resource-manager/network-architecture-editor.jsx'
+import ToolBox from '../react/components/map-layers/tool-box.jsx'
 
 import boundaryDetail from './sidebar/view/boundary-detail'
 import equipmentDetail from './sidebar/view/equipment-detail'
@@ -267,6 +268,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rPlanningConstraintsEditor', react2angular(PlanningConstraintsEditor, ['onDiscard']))
   .component('rFusionEditor', react2angular(FusionEditor, ['onDiscard']))
   .component('rNetworkArchitectureEditor', react2angular(NetworkArchitectureEditor, ['onDiscard']))
+  .component('rToolBox', react2angular(ToolBox))
   .service('Utils', utils)
   .service('state', state)
   .service('tileDataService', tileDataService)

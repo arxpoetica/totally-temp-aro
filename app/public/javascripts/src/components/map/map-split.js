@@ -69,7 +69,8 @@ class MapSplitController {
         reduxState.planEditor.isCreatingObject ||
         reduxState.planEditor.isModifyingObject ||
         reduxState.planEditor.isCommittingTransaction ||
-        reduxState.planEditor.isEnteringTransaction
+        reduxState.planEditor.isEnteringTransaction,
+      showToolBox: reduxState.mapLayers.annotation.showList // For now, later this will be a tool box flag
     }
   }
 
@@ -181,6 +182,7 @@ let mapSplit = {
         <network-plan style="flex: 0 0 auto; margin: auto;"></network-plan>
         <div id="spacerForIconOnSidebar" style="flex: 0 0 40px;"></div>
       </div>
+      <r-tool-box ng-if="$ctrl.showToolBox"></r-tool-box>
       <!-- Plan target map selector should be active only if we are in analysis mode -->
       <map-selector-plan-target map-global-object-name="map"
         ng-if="(!$ctrl.state.selectedToolBarAction || $ctrl.state.selectedToolBarAction === $ctrl.state.toolbarActions.POLYGON_SELECT)
