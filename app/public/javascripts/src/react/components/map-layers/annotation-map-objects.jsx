@@ -25,11 +25,11 @@ export class AnnotationMapObjects extends Component {
         drawingModes: [google.maps.drawing.OverlayType.POLYLINE, google.maps.drawing.OverlayType.POLYGON]
       },
       polylineOptions: {
-        editable: this.editable
+        editable: true
       },
       polygonOptions: {
         fillColor: 'transparent',
-        editable: this.editable
+        editable: true
       }
     })
     this.drawingManager.setMap(this.props.googleMaps)
@@ -52,11 +52,12 @@ export class AnnotationMapObjects extends Component {
       }
       this.props.updateAnnotation(this.props.selectedAnnotationIndex, newAnnotation)
       this.props.saveAnnotationsForUser(this.props.userId, this.props.annotations)
+      e.overlay.setMap(null)  // Why? Because all map objects in the redux state will be created later
     })
   }
 
   componentDidUpdate (prevProps, prevState, snapshot) {
-    if (this.props.annotations !== prevProps.annotations) {
+    if (this.props.annotations !== prevProps.annotations && this.props.annotations && this.props.annotations.length > 0) {
       // Remove all old features from data layer
       this.createdMapObjects.forEach(mapObject => mapObject.setMap(null))
       // Annotations have changed. Create map objects

@@ -168,6 +168,15 @@ function setShowAnnotationsList (state, showAnnotationsList) {
   }
 }
 
+function clearAllAnnotations (state) {
+  return { ...state,
+    annotation: { ...state.annotation,
+      collections: [],
+      selectedIndex: 0
+    }
+  }
+}
+
 function mapLayersReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.LAYERS_SET_LOCATION:
@@ -214,6 +223,9 @@ function mapLayersReducer (state = defaultState, action) {
 
     case Actions.LAYERS_SHOW_ANNOTATION_LIST:
       return setShowAnnotationsList(state, action.payload)
+
+    case Actions.LAYERS_CLEAR_ALL_ANNOTATIONS:
+      return clearAllAnnotations(state)
 
     default:
       return state

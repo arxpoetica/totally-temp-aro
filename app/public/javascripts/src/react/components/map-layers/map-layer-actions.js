@@ -79,7 +79,7 @@ function setShowSiteBoundary (newVisibility) {
 
 function loadAnnotationsForUser (userId) {
   return dispatch => {
-    AroHttp.get(`/service/auth/users/${userId}/configuration`)
+    return AroHttp.get(`/service/auth/users/${userId}/configuration`)
       .then(result => {
         const annotations = result.data.annotations || [{ name: 'Default Annotation', geometries: [] }]
         dispatch({
@@ -135,6 +135,12 @@ function setAnnotationListVisibility (isVisible) {
   }
 }
 
+function clearAllAnnotations () {
+  return {
+    type: Actions.LAYERS_CLEAR_ALL_ANNOTATIONS
+  }
+}
+
 export default {
   setLayerVisibility,
   setNetworkEquipmentLayerVisibility,
@@ -149,5 +155,6 @@ export default {
   addAnnotation,
   updateAnnotation,
   removeAnnotation,
-  setAnnotationListVisibility
+  setAnnotationListVisibility,
+  clearAllAnnotations
 }

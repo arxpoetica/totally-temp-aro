@@ -8,6 +8,7 @@ export class AnnotationList extends Component {
   constructor (props) {
     super(props)
     this.onAddAnnotationClicked = this.onAddAnnotationClicked.bind(this)
+    this.onClearAllAnnotationsClicked = this.onClearAllAnnotationsClicked.bind(this)
   }
 
   render () {
@@ -36,13 +37,15 @@ export class AnnotationList extends Component {
         >
         Add
       </button> */}
-      <h4>Map Annotations</h4>
-      <button className='btn btn-primary'
+      <p>Map annotations will be auto-saved as you draw them.</p>
+      {/* <button className='btn btn-primary'
         onClick={() => this.props.saveAnnotationsForUser(this.props.userId, this.props.annotations)}
       >
         <i className='fa fa-save pr-1' />Save
-      </button>
-      <button className='btn btn-danger'>
+      </button> */}
+      <button className='btn btn-danger'
+        onClick={() => this.onClearAllAnnotationsClicked()}
+      >
         <i className='fa fa-trash-alt pr-1' />Clear
       </button>
       <AnnotationMapObjects />
@@ -55,6 +58,13 @@ export class AnnotationList extends Component {
       id: maxAnnotationId + 1,
       name: 'New Annotation'
     })
+  }
+
+  onClearAllAnnotationsClicked () {
+    this.props.clearAllAnnotations()
+    this.props.saveAnnotationsForUser(this.props.userId, null)
+      .then(() => this.props.loadAnnotationsForUser(this.props.userId))
+      .catch(err => console.error(err))
   }
 
   componentDidMount () {
@@ -72,7 +82,8 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = (dispatch) => ({
   loadAnnotationsForUser: userId => dispatch(MapLayerActions.loadAnnotationsForUser(userId)),
-  saveAnnotationsForUser: (userId, annotations) => dispatch(MapLayerActions.saveAnnotationsForUser(userId, annotations))
+  saveAnnotationsForUser: (userId, annotations) => dispatch(MapLayerActions.saveAnnotationsForUser(userId, annotations)),
+  clearAllAnnotations: () => dispatch(MapLayerActions.clearAllAnnotations())
 })
 
 const AnnotationListComponent = connect(mapStateToProps, mapDispatchToProps)(AnnotationList)

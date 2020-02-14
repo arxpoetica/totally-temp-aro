@@ -6,8 +6,13 @@ import AnnotationList from './annotation-list.jsx'
 
 export class ToolBox extends Component {
   render () {
-    return <div style={ { position: 'absolute', top: '100px', left: '100px', width: '300px', backgroundColor: '#eeeeee', border: 'solid 1px #a0a0a0'} }>
-      <AnnotationList />
+    return <div className='card' style={ { position: 'absolute', bottom: '30px', left: '5px', width: '300px'} }>
+      <div className='card-header map-tools-card-header bg-primary text-white'>
+        Toolbox: Map Annotations
+      </div>
+      <div className='card-body'>
+        <AnnotationList />
+      </div>
     </div>
   }
 }
