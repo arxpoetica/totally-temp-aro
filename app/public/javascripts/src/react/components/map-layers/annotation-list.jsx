@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { PropTypes } from 'prop-types'
 import { connect } from 'react-redux'
 import MapLayerActions from './map-layer-actions'
+import AnnotationMapObjects from './annotation-map-objects.jsx'
 
 export class AnnotationList extends Component {
   constructor (props) {
@@ -44,6 +45,7 @@ export class AnnotationList extends Component {
       <button className='btn btn-danger'>
         <i className='fa fa-trash-alt pr-1' />Clear
       </button>
+      <AnnotationMapObjects />
     </div>
   }
 

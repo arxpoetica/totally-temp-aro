@@ -93,7 +93,7 @@ function loadAnnotationsForUser (userId) {
 
 function saveAnnotationsForUser (userId, annotations) {
   return dispatch => {
-    AroHttp.get(`/service/auth/users/${userId}/configuration`)
+    return AroHttp.get(`/service/auth/users/${userId}/configuration`)
       .then(result => {
         const newConfiguration = { ...result.data,
           annotations: annotations // Replace just the annotations
@@ -111,10 +111,13 @@ function addAnnotation (annotation) {
   }
 }
 
-function updateAnnotation (annotation) {
+function updateAnnotation (index, annotation) {
   return {
     type: Actions.LAYERS_UPDATE_ANNOTATION,
-    payload: annotation
+    payload: {
+      index,
+      annotation
+    }
   }
 }
 

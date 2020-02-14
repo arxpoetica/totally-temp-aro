@@ -11,7 +11,7 @@ const defaultState = {
   boundaryTypes: new List(),
   annotation: {
     showList: false,
-    selectedId: null,
+    selectedIndex: 0,
     collections: []
   }
 }
@@ -125,7 +125,7 @@ function setShowSiteBoundary (state, visibility) {
 function setAnnotations (state, annotations) {
   return { ...state,
     annotation: { ...state.annotation,
-      selectedId: -1,
+      selectedIndex: 0,
       collections: annotations
     }
   }
@@ -139,8 +139,7 @@ function addAnnotation (state, annotation) {
   }
 }
 
-function updateAnnotation (state, annotation) {
-  const indexToUpdate = state.annotation.collections.findIndex(item => item.id === annotation.id)
+function updateAnnotation (state, indexToUpdate, annotation) {
   var newCollections = [].concat(state.annotation.collections)
   newCollections.splice(indexToUpdate, 1, [annotation])
   return { ...state,
@@ -208,7 +207,7 @@ function mapLayersReducer (state = defaultState, action) {
       return addAnnotation(state, action.payload)
 
     case Actions.LAYERS_UPDATE_ANNOTATION:
-      return updateAnnotation(state, action.payload)
+      return updateAnnotation(state, action.payload.index, action.payload.annotation)
 
     case Actions.LAYERS_REMOVE_ANNOTATION:
       return removeAnnotation(state, action.payload)
