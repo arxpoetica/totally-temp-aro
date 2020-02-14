@@ -141,7 +141,7 @@ function addAnnotation (state, annotation) {
 
 function updateAnnotation (state, indexToUpdate, annotation) {
   var newCollections = [].concat(state.annotation.collections)
-  newCollections.splice(indexToUpdate, 1, [annotation])
+  newCollections.splice(indexToUpdate, 1, annotation)
   return { ...state,
     annotation: { ...state.annotation,
       collections: newCollections

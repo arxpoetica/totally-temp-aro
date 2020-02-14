@@ -81,7 +81,7 @@ function loadAnnotationsForUser (userId) {
   return dispatch => {
     AroHttp.get(`/service/auth/users/${userId}/configuration`)
       .then(result => {
-        const annotations = result.data.annotations || [{ name: 'Default Annotation', geometry: [] }]
+        const annotations = result.data.annotations || [{ name: 'Default Annotation', geometries: [] }]
         dispatch({
           type: Actions.LAYERS_SET_ANNOTATIONS,
           payload: annotations
