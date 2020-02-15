@@ -10,6 +10,7 @@ import createSocketMiddleware from './middleware/websockets'
 import ui from '../react/components/configuration/ui/ui-reducer'
 import report from '../react/components/configuration/report/report-reducer'
 import networkAnalysis from '../react/components/optimization/network-analysis/network-analysis-reducer'
+import networkOptimization from '../react/components/optimization/network-optimization/network-optimization-reducer'
 import opReport from '../react/components/optimization/reports/reports-reducer'
 import rfp from '../react/components/optimization/rfp/rfp-reducer'
 import contextMenu from '../react/components/context-menu/reducer'
@@ -24,6 +25,7 @@ import user from '../react/components/user/user-reducer'
 import ringEdit from '../react/components/ring-edit/ring-edit-reducer'
 import locationInfo from '../react/components/location-info/location-info-reducer'
 import acl from '../react/components/acl/acl-reducer'
+import resourceManager from '../react/components/resource-manager/resource-manager-reducer'
 
 const logger = createLogger({
   level: 'info',
@@ -38,7 +40,7 @@ let reducer = combineReducers({
   fullScreen,
   map,
   mapLayers,
-  optimization: combineReducers({ networkAnalysis, report: opReport, rfp }),
+  optimization: combineReducers({ networkOptimization, networkAnalysis, report: opReport, rfp }),
   plan,
   planEditor,
   selection,
@@ -46,7 +48,8 @@ let reducer = combineReducers({
   form,
   ringEdit,
   locationInfo,
-  acl
+  acl,
+  resourceManager
 })
 
 // Add support for Redux devtools extension. Yes, even in production.

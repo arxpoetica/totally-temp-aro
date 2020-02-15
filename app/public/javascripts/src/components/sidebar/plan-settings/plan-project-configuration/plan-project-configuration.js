@@ -49,7 +49,7 @@ class PlanProjectConfigurationController {
     // Making these calls in parallel causes a crash in aro-service. Call sequentially.
     this.savePlanDataAndResourceSelectionToProject()
       .then(() => {
-        this.state.saveNetworkConfigurationToDefaultProject()
+        // this.state.saveNetworkConfigurationToDefaultProject()
         this.setSelectedMode(this.modes.HOME)
       })
       .catch((err) => console.error(err))

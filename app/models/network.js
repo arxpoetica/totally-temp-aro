@@ -332,7 +332,7 @@ module.exports = class Network {
                        [plan_id, options.locationTypes, options.algorithm])
       .then((results) => {
         if (options.analysis_type === 'NETWORK_PLAN') {
-          req.url = `${config.aro_service_url}/v1/optimize/masterplan`
+          req.url = `${config.aro_service_url}/v1/optimize/masterplan` // ToDo: are we still using this? If so we nned to change over to the redux action
         } else if (options.analysis_type === 'NETWORK_ANALYSIS') {
           req.url = `${config.aro_service_url}/v1/analyze/masterplan`
           delete options.backhaulOptimization

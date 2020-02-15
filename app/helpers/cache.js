@@ -11,6 +11,7 @@ function loadFiberTypes () {
     .then((rows) => { exports.fiberTypes = rows })
 }
 
+// service_layer_node_type no longer exists, depricate this
 function loadServiceLayers () {
   return database.query('SELECT * FROM client.service_layer WHERE is_user_defined=false AND show_in_boundaries=true ORDER BY id ASC')
     .then((response) => {

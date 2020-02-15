@@ -74,6 +74,7 @@
         ng-hide="$ctrl.areControlsEnabled()">
       </div>
     </accordion-panel-contents>
+    
     <accordion-panel-title title="'Resource Selection'" panel-id="'RESOURCE_SELECTION'"></accordion-panel-title>
     <accordion-panel-contents panel-id="'RESOURCE_SELECTION'">
       <plan-resource-selection project-id="$ctrl.state.getProjectId()" 
@@ -85,17 +86,7 @@
         ng-hide="$ctrl.areControlsEnabled()">
       </div>
     </accordion-panel-contents>
-    <accordion-panel-title title="'Network Configuration'" panel-id="'NETWORK_CONFIGURATION'"></accordion-panel-title>
-    <accordion-panel-contents panel-id="'NETWORK_CONFIGURATION'">
-      <plan-network-configuration project-id="$ctrl.state.getProjectId()" 
-                                  user-id="$ctrl.userId" 
-                                  on-change="$ctrl.onChange({childKey:childKey, isValid:isValid, isInit:isInit})"
-                                  key="'networkConfiguration'"
-                                  plan-id="$ctrl.plan.id"></plan-network-configuration>
-      <div class="disable-sibling-controls"
-        ng-hide="$ctrl.areControlsEnabled()">
-      </div>
-    </accordion-panel-contents>
+
     <accordion-panel-title title="'Project Configuration'" panel-id="'PROJECT_CONFIGURATION'"></accordion-panel-title>
     <accordion-panel-contents panel-id="'PROJECT_CONFIGURATION'">
       <plan-project-configuration project-id="$ctrl.state.getProjectId()" 

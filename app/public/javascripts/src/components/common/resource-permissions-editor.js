@@ -16,7 +16,6 @@ const getAllSystemActorsArray = createSelector([getAllSystemActors], systemActor
 
 class ResourcePermissionsEditorController {
   constructor ($http, $timeout, $ngRedux, state) {
-    this.tempUsers = [{ name: 'Dan', description: 'Dan is a winner', id: 1234 }]
     this.$http = $http
     this.$timeout = $timeout
     this.state = state

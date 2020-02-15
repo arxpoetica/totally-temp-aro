@@ -12,12 +12,159 @@
   .pill-parent:hover span {
     display: block;
   }
+  .nav-item {
+    cursor: pointer;
+  }
+  .nav-item.active {
+    cursor: unset;
+  }
 </style>
 
 <modal-header title="{{$ctrl.roicManager.name}}"></modal-header>
 <modal-body>
-  <div class="container" style="max-height: 500px;">
-    <div class="row">
+
+  <!-- Create tabs -->
+  <ul class="nav nav-tabs" role="tablist">
+    <li ng-repeat="tab in $ctrl.tabs"
+        role="presentation"
+        ng-class="{ 'nav-item': true, 'active': $ctrl.activeTab === tab.key }">
+      <a ng-click="$ctrl.selectTab(tab.key)" class="nav-link" role="tab" data-toggle="tab"
+        ng-class="{ 'active': $ctrl.activeTab === tab.key }">
+        {{tab.label}}
+      </a>
+    </li>
+  </ul>
+
+  <div class="container" style="max-height: 520px; overflow-y: auto; margin-top: 10px;">
+    <div class="row" ng-if="$ctrl.activeTab === 'roicSettingsConfiguration'">
+      
+      <div class="ei-items-contain">
+        <div class="ei-foldout">
+          <div class="ei-header" style="cursor: unset;">
+            Financial Constraints
+          </div>
+          <div class="ei-gen-level" style="padding-left: 21px; padding-right: 10px;">
+            <div class="ei-items-contain">
+              
+              <div class="ei-property-item">
+                <div class="ei-property-label">
+                  Cash Flow Strategy Type
+                </div>
+                <div>
+                  <select class="form-control"
+                    ng-model="$ctrl.roicManagerConfiguration.roicSettingsConfiguration.financialConstraints.cashFlowStrategyType"
+                    ng-options="item.id as item.label for item in $ctrl.state.cashFlowStrategyTypes">
+                  </select>
+                </div>
+              </div>
+
+              <div class="ei-property-item">
+                <div class="ei-property-label">
+                  Discount Rate
+                </div>
+                <div>
+                  <input 
+                    ng-model="$ctrl.roicManagerConfiguration.roicSettingsConfiguration.financialConstraints.discountRate" 
+                    class="form-control input-sm">
+                </div>
+              </div>
+
+              <div class="ei-property-item">
+                <div class="ei-property-label">
+                  Starting Year
+                </div>
+                <div>
+                  <input 
+                    ng-model="$ctrl.roicManagerConfiguration.roicSettingsConfiguration.financialConstraints.startYear" 
+                    class="form-control input-sm">
+                </div>
+              </div>
+
+              <div class="ei-property-item">
+                <div class="ei-property-label">
+                  Years
+                </div>
+                <div>
+                  <input 
+                    ng-model="$ctrl.roicManagerConfiguration.roicSettingsConfiguration.financialConstraints.years" 
+                    class="form-control input-sm">
+                </div>
+              </div>
+
+              <div class="ei-property-item">
+                <div class="ei-property-label">
+                  Penetration Analysis Strategy
+                </div>
+                <div>
+                  <select class="form-control"
+                    ng-model="$ctrl.roicManagerConfiguration.roicSettingsConfiguration.financialConstraints.penetrationAnalysisStrategy"
+                    ng-options="item.id as item.label for item in $ctrl.state.penetrationAnalysisStrategies">
+                  </select>
+                </div>
+              </div>
+
+              <div class="ei-property-item">
+                <div class="ei-property-label">
+                  Connection Cost Strategy
+                </div>
+                <div>
+                  <select class="form-control"
+                    ng-model="$ctrl.roicManagerConfiguration.roicSettingsConfiguration.financialConstraints.connectionCostStrategy"
+                    ng-options="item.id as item.label for item in $ctrl.state.connectionCostStrategies">
+                  </select>
+                </div>
+              </div>
+
+              <div class="ei-property-item">
+                <div class="ei-property-label">
+                  Competition Provider Strength
+                </div>
+                <div>
+                  <input 
+                    ng-model="$ctrl.roicManagerConfiguration.roicSettingsConfiguration.competitionConfiguration.providerStrength" 
+                    class="form-control input-sm">
+                </div>
+              </div>
+
+              <div class="ei-foldout">
+                <div class="ei-header" style="cursor: unset;">
+                  Terminal Value Strategy
+                </div>
+                <div class="ei-gen-level" style="padding-left: 21px; padding-right: 10px;">
+                  <div class="ei-items-contain">
+                    
+                    <div class="ei-property-item">
+                      <div class="ei-property-label">
+                        Terminal Value Strategy Type
+                      </div>
+                      <div>
+                        <select class="form-control"
+                          ng-model="$ctrl.roicManagerConfiguration.roicSettingsConfiguration.financialConstraints.terminalValueStrategy.terminalValueStrategyType"
+                          ng-options="item.id as item.label for item in $ctrl.state.terminalValueStrategyTypes">
+                        </select>
+                      </div>
+                    </div>
+                    <div class="ei-property-item">
+                      <div class="ei-property-label">
+                        Value
+                      </div>
+                      <div>
+                        <input 
+                          ng-model="$ctrl.roicManagerConfiguration.roicSettingsConfiguration.financialConstraints.terminalValueStrategy.value" 
+                          class="form-control input-sm">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="row" ng-if="$ctrl.activeTab === 'inputs'">
       <!-- On the left, show a list of ROIC models that the user can edit -->
       <div class="col-md-4">
         <ul class="nav nav-pills flex-column" style="max-height: 380px; overflow-y: auto;">

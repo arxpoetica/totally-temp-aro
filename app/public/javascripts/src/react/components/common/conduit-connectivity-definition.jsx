@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { PropTypes } from 'prop-types'
-import SpatialEdgeType from '../common/optimization-options/spatial-edge-type'
-import NetworkConnectivityType from '../common/optimization-options/network-connectivity-type'
+import SpatialEdgeType from './optimization-options/spatial-edge-type'
+import NetworkConnectivityType from './optimization-options/network-connectivity-type'
 
 export class ConduitConnectivityDefinition extends Component {
   render () {

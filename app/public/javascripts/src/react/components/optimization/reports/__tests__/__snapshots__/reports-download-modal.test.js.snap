@@ -38,16 +38,22 @@ exports[`ReportsDownloadRow render 1`] = `
       }
     }
   >
-    <a
-      className="btn btn-sm btn-light"
-      download={true}
-      href="/service-download-file/2019-05-09_optimization_analysis_report.csv/v2/report-extended/287/100.csv"
+    <button
+      className="btn btn-sm btn-primary"
+      onClick={[Function]}
+      style={
+        Object {
+          "minWidth": "120px",
+        }
+      }
     >
-      <i
-        className="fa fa-download"
-      />
-       Download
-    </a>
+      <span>
+        <i
+          className="fa fa-download"
+        />
+         Download
+      </span>
+    </button>
   </td>
 </tr>
 `;
@@ -87,7 +93,7 @@ exports[`When modal is hidden 1`] = `
         </button>
       </div>
       <div
-        className="modal-body"
+        className="modal-body aro-modal-body"
       >
         <table
           className="table table-sm table-striped"
@@ -97,7 +103,13 @@ exports[`When modal is hidden 1`] = `
               <th>
                 Report
               </th>
-              <th>
+              <th
+                style={
+                  Object {
+                    "minWidth": "70px",
+                  }
+                }
+              >
                 Format
               </th>
               <th />
@@ -158,7 +170,7 @@ exports[`When modal is initially hidden and then shown 1`] = `
         </button>
       </div>
       <div
-        className="modal-body"
+        className="modal-body aro-modal-body"
       >
         <table
           className="table table-sm table-striped"
@@ -168,7 +180,13 @@ exports[`When modal is initially hidden and then shown 1`] = `
               <th>
                 Report
               </th>
-              <th>
+              <th
+                style={
+                  Object {
+                    "minWidth": "70px",
+                  }
+                }
+              >
                 Format
               </th>
               <th />
@@ -229,7 +247,7 @@ exports[`When modal is initially hidden and then shown 2`] = `
         </button>
       </div>
       <div
-        className="modal-body"
+        className="modal-body aro-modal-body"
       >
         <table
           className="table table-sm table-striped"
@@ -239,7 +257,13 @@ exports[`When modal is initially hidden and then shown 2`] = `
               <th>
                 Report
               </th>
-              <th>
+              <th
+                style={
+                  Object {
+                    "minWidth": "70px",
+                  }
+                }
+              >
                 Format
               </th>
               <th />
@@ -300,7 +324,7 @@ exports[`When modal is shown 1`] = `
         </button>
       </div>
       <div
-        className="modal-body"
+        className="modal-body aro-modal-body"
       >
         <table
           className="table table-sm table-striped"
@@ -310,7 +334,13 @@ exports[`When modal is shown 1`] = `
               <th>
                 Report
               </th>
-              <th>
+              <th
+                style={
+                  Object {
+                    "minWidth": "70px",
+                  }
+                }
+              >
                 Format
               </th>
               <th />
@@ -371,7 +401,7 @@ exports[`When reports metadata is defined 1`] = `
         </button>
       </div>
       <div
-        className="modal-body"
+        className="modal-body aro-modal-body"
       >
         <table
           className="table table-sm table-striped"
@@ -381,7 +411,13 @@ exports[`When reports metadata is defined 1`] = `
               <th>
                 Report
               </th>
-              <th>
+              <th
+                style={
+                  Object {
+                    "minWidth": "70px",
+                  }
+                }
+              >
                 Format
               </th>
               <th />
@@ -400,7 +436,6 @@ exports[`When reports metadata is defined 1`] = `
               }
               planId={100}
               reportId={4}
-              reportName="optimization_analysis"
             />
           </tbody>
         </table>
@@ -457,7 +492,7 @@ exports[`When reports metadata is null 1`] = `
         </button>
       </div>
       <div
-        className="modal-body"
+        className="modal-body aro-modal-body"
       >
         <table
           className="table table-sm table-striped"
@@ -467,7 +502,13 @@ exports[`When reports metadata is null 1`] = `
               <th>
                 Report
               </th>
-              <th>
+              <th
+                style={
+                  Object {
+                    "minWidth": "70px",
+                  }
+                }
+              >
                 Format
               </th>
               <th />

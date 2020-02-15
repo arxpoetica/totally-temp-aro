@@ -68,6 +68,10 @@ workflows:
               only:
                 - master
                 - optional_building
+                - network_optimization_redux
+                - wormholeFusion
+                - coverageFix
+                - platform_upgrade
                 - shp_reports
 
       - deploy:

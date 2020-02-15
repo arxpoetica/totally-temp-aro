@@ -1,7 +1,7 @@
 <div style="position: relative; height: 100%;">
   <table class="table table-sm table-striped">
     <tbody>
-      <tr ng-repeat="(itemKey, itemValue) in $ctrl.state.resourceItems">
+      <tr ng-repeat="(itemKey, itemValue) in $ctrl.getResourceItemsArray() | orderBy:'order'">
         <td style="vertical-align: middle">{{itemValue.description}}</td>
         <td>
           <div style="display:flex">
@@ -11,7 +11,7 @@
                     ng-change="$ctrl.onSelectionChanged()"
                     style="flex: 1 1 auto;">
             </select>
-            <button class="btn btn-light" style="flex: 0 0 auto;" ng-click="$ctrl.state.showPlanResourceEditor(itemKey)">
+            <button class="btn btn-light" style="flex: 0 0 auto;" ng-click="$ctrl.state.showPlanResourceEditor(itemValue.allManagers[0].managerType)">
               <span class="fa fa-edit"></span>
             </button>
           </div>

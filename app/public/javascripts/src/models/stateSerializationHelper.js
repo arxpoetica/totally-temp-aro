@@ -3,6 +3,8 @@
  * This service helps us to convert the "state" object to and from this POST body.
  * Services like "state" and "region" are intentionally not injected into this, instead we send them in as parameters.
  */
+// Optimization options in Redux
+// get rid of this
 app.service('stateSerializationHelper', ['$q', ($q) => {
   var stateSerializationHelper = {}
 
@@ -11,7 +13,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   // ------------------------------------------------------------------------------------------------------------------
 
   // Get a POST body that we will send to aro-service for performing optimization
-  stateSerializationHelper.getOptimizationBody = (state, networkAnalysisConstraints, primarySpatialEdge, wormholeFuseDefinitions, projectNetworkConfiguration, reduxState) => {
+  stateSerializationHelper.getOptimizationBody = (state, networkAnalysisConstraints, primarySpatialEdge, wormholeFuseDefinitions, reduxState) => {
     var optimizationBody = {
       planId: state.plan.id,
       projectTemplateId: state.loggedInUser.projectId,
@@ -26,8 +28,6 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     optimizationBody.fronthaulOptimization = state.optimizationOptions.fronthaulOptimization
 
     addNetworkAnalysisType(state, optimizationBody)
-    addNetworkConfigurationOverride(state, networkAnalysisConstraints, primarySpatialEdge, wormholeFuseDefinitions, projectNetworkConfiguration, optimizationBody)
-
     return optimizationBody
   }
 
@@ -35,7 +35,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   var addNetworkAnalysisType = (state, postBody) => {
     postBody.analysis_type = state.networkAnalysisType.type
 
-    if (postBody.analysis_type === 'NETWORK_ANALYSIS') {
+    if (postBody.analysis_type === 'NETWORK_ANALYSIS') { // problem
       delete postBody.fronthaulOptimization
       delete postBody.generatedDataRequest
     }
@@ -128,10 +128,10 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   var addFiberNetworkConstraintsToBody = (state, postBody) => {
     postBody.networkConstraints = {}
     postBody.networkConstraints.routingMode = state.optimizationOptions.networkConstraints.routingMode
-    postBody.networkConstraints.advancedAnalysis = state.optimizationOptions.networkConstraints.advancedAnalysis
+    // postBody.networkConstraints.advancedAnalysis = state.optimizationOptions.networkConstraints.advancedAnalysis
 
     var fiveGEnabled = state.optimizationOptions.technologies.FiveG.checked
-    if (fiveGEnabled || state.optimizationOptions.networkConstraints.advancedAnalysis) {
+    if (fiveGEnabled) {
       postBody.networkConstraints.cellNodeConstraints = {}
       postBody.networkConstraints.cellNodeConstraints.polygonStrategy = state.optimizationOptions.networkConstraints.cellNodeConstraints.polygonStrategy
       // Cell radius should be added only for fixed radius
@@ -166,29 +166,6 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     }
   }
 
-  var addNetworkConfigurationOverride = (state, networkAnalysisConstraints, primarySpatialEdge, wormholeFuseDefinitions, projectNetworkConfiguration, postBody) => {
-    const routingMode = state.optimizationOptions.networkConstraints.routingMode
-    if (projectNetworkConfiguration[routingMode]) {
-      // Make a copy of the network configuration for the current routing mode (e.g. ODN_1, etc)
-      postBody.networkConfigurationOverride = angular.copy(projectNetworkConfiguration[routingMode])
-
-      // Add overrides
-      postBody.networkConfigurationOverride.fusionRuleConfig = postBody.networkConfigurationOverride.fusionRuleConfig || {}
-      postBody.networkConfigurationOverride.fusionRuleConfig.connectivityDefinition = state.networkAnalysisConnectivityDefinition
-
-      if (networkAnalysisConstraints.snappingDistance && networkAnalysisConstraints.maxConnectionDistance
-        && networkAnalysisConstraints.maxWormholeDistance && networkAnalysisConstraints.maxLocationEdgeDistance) {
-        postBody.networkConfigurationOverride.fusionRuleConfig.snappingDistance = +networkAnalysisConstraints.snappingDistance.value
-        postBody.networkConfigurationOverride.fusionRuleConfig.maxConnectionDistance = +networkAnalysisConstraints.maxConnectionDistance.value
-        postBody.networkConfigurationOverride.fusionRuleConfig.maxWormholeDistance = +networkAnalysisConstraints.maxWormholeDistance.value
-        postBody.networkConfigurationOverride.fiberConstraintConfig = postBody.networkConfigurationOverride.fiberConstraintConfig || {}
-        postBody.networkConfigurationOverride.fiberConstraintConfig.maxLocationToEdgeDistance = +networkAnalysisConstraints.maxLocationEdgeDistance.value
-      }
-      postBody.networkConfigurationOverride.fusionRuleConfig.primarySpatialEdge = primarySpatialEdge
-      postBody.networkConfigurationOverride.fusionRuleConfig.wormholeFuseDefinitions = wormholeFuseDefinitions
-    }
-  }
-
   // ------------------------------------------------------------------------------------------------------------------
   // End section - state to POST body
   // ------------------------------------------------------------------------------------------------------------------
@@ -206,6 +183,8 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     loadFiberNetworkConstraintsFromBody(state, planInputs)
     loadTechnologiesFromBody(state, planInputs)
     loadNetworkConfigurationOverrideFromBody(dispatchers, planInputs, defaultNetworkConstraints)
+    // console.log('load from JSON')
+    // console.log(state.optimizationOptions)
   }
 
   // Load analysis type from a POST body object that is sent to the optimization engine
@@ -220,9 +199,10 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
   // Load location types from a POST body object that is sent to the optimization engine
   var loadLocationTypesFromBody = (state, dataItems, dispatchers, postBody) => {
+    // console.log(state.locationLayers)
     state.locationLayers.forEach((locationLayer) => {
       const isVisible = (postBody.locationConstraints.locationTypes.indexOf(locationLayer.plannerKey) >= 0)
-      state.setLayerVisibility(locationLayer, isVisible)
+      state.setLayerVisibility(locationLayer, isVisible) // this goes directly to redux MapLayerActions.setLayerVisibility
     })
 
     // Load the selected data sources
@@ -282,7 +262,15 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     } else {
       if (postBody.optimization.algorithm === 'IRR') {
         if (!postBody.optimization.preIrrThreshold && !postBody.optimization.threshold &&
-          !Number.isFinite(+postBody.optimization.budget)) { state.optimizationOptions.uiSelectedAlgorithm = state.OPTIMIZATION_TYPES.MAX_IRR } else if (!postBody.optimization.preIrrThreshold && !postBody.optimization.threshold) { state.optimizationOptions.uiSelectedAlgorithm = state.OPTIMIZATION_TYPES.BUDGET } else if (!postBody.optimization.preIrrThreshold) { state.optimizationOptions.uiSelectedAlgorithm = state.OPTIMIZATION_TYPES.IRR_TARGET } else { state.optimizationOptions.uiSelectedAlgorithm = state.OPTIMIZATION_TYPES.IRR_THRESH }
+            !Number.isFinite(+postBody.optimization.budget)) {
+          state.optimizationOptions.uiSelectedAlgorithm = state.OPTIMIZATION_TYPES.MAX_IRR
+        } else if (!postBody.optimization.preIrrThreshold && !postBody.optimization.threshold) {
+          state.optimizationOptions.uiSelectedAlgorithm = state.OPTIMIZATION_TYPES.BUDGET
+        } else if (!postBody.optimization.preIrrThreshold) {
+          state.optimizationOptions.uiSelectedAlgorithm = state.OPTIMIZATION_TYPES.IRR_TARGET
+        } else {
+          state.optimizationOptions.uiSelectedAlgorithm = state.OPTIMIZATION_TYPES.IRR_THRESH
+        }
       }
     }
 
@@ -349,7 +337,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
   // Load technologies from a POST body object that is sent to the optimization engine
   var loadTechnologiesFromBody = (state, postBody) => {
-    state.optimizationOptions.networkConstraints.advancedAnalysis = postBody.networkConstraints.advancedAnalysis
+    // state.optimizationOptions.networkConstraints.advancedAnalysis = postBody.networkConstraints.advancedAnalysis
     Object.keys(state.optimizationOptions.technologies).forEach((technologyKey) => state.optimizationOptions.technologies[technologyKey].checked = false)
     postBody.networkConstraints.networkTypes.forEach((networkType) => {
       var matchedTechnology = Object.keys(state.optimizationOptions.technologies).filter((technologyKey) => technologyKey.toUpperCase() === networkType.toUpperCase())[0]
