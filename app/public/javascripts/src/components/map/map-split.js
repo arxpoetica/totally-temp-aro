@@ -181,8 +181,8 @@ let mapSplit = {
         <tool-bar map-global-object-name="map" style="flex: 1 1 auto; position: relative;"></tool-bar>
         <network-plan style="flex: 0 0 auto; margin: auto;"></network-plan>
         <div id="spacerForIconOnSidebar" style="flex: 0 0 40px;"></div>
+        <r-tool-box ng-if="$ctrl.showToolBox"></r-tool-box>
       </div>
-      <r-tool-box ng-if="$ctrl.showToolBox"></r-tool-box>
       <!-- Plan target map selector should be active only if we are in analysis mode -->
       <map-selector-plan-target map-global-object-name="map"
         ng-if="(!$ctrl.state.selectedToolBarAction || $ctrl.state.selectedToolBarAction === $ctrl.state.toolbarActions.POLYGON_SELECT)

@@ -12,7 +12,7 @@ export class AnnotationList extends Component {
   }
 
   render () {
-    return <div>
+    return <div className='text-center'>
       {/* <table className='table table-sm table-striped'>
         <tbody>
           {Object.keys(this.props.annotations).map(annotationKey => {
@@ -37,13 +37,13 @@ export class AnnotationList extends Component {
         >
         Add
       </button> */}
-      <p>Map annotations will be auto-saved as you draw them.</p>
+      <p>Annotations will be auto-saved as you draw them.</p>
       {/* <button className='btn btn-primary'
         onClick={() => this.props.saveAnnotationsForUser(this.props.userId, this.props.annotations)}
       >
         <i className='fa fa-save pr-1' />Save
       </button> */}
-      <button className='btn btn-danger'
+      <button className='btn btn-danger btn-sm'
         onClick={() => this.onClearAllAnnotationsClicked()}
       >
         <i className='fa fa-trash-alt pr-1' />Clear
