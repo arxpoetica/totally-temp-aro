@@ -12,7 +12,8 @@ const defaultState = {
   annotation: {
     showList: false,
     selectedIndex: 0,
-    collections: []
+    collections: [],
+    maxGeometries: 200
   }
 }
 

@@ -12,16 +12,28 @@ export class AnnotationList extends Component {
   }
 
   render () {
-    const NUM_ANNOTATIONS_TO_CLEAR = 1  // Clear 100 of the oldest annotations
+    const NUM_GEOMETRIES_TO_CLEAR = this.props.maxGeometries / 2
+    const numGeometries = this.props.annotations[0] ? this.props.annotations[0].geometries.length : 0
+    const showTooManyGeometriesWarning = (numGeometries >= this.props.maxGeometries / 2)
     return <div className='text-center'>
       <p>Annotations will be auto-saved as you draw them.</p>
-      <button className='btn btn-danger btn-sm mr-2'
-        onClick={() => this.onClearAnnotationsClicked(NUM_ANNOTATIONS_TO_CLEAR)}
-      >
-        <i className='fa fa-trash-alt pr-1' />Clear old geometries
-      </button>
+      { showTooManyGeometriesWarning
+        ? <div className='alert alert-warning'>You have used {numGeometries} out of {this.props.maxGeometries} annotation geometries.
+          Please clear older geometries.
+        </div>
+        : null
+      }
+      {
+        showTooManyGeometriesWarning
+        ? <button className='btn btn-danger btn-sm mr-2'
+          onClick={() => this.onClearAnnotationsClicked(NUM_GEOMETRIES_TO_CLEAR)}
+        >
+          <i className='fa fa-trash-alt pr-1' />Clear old geometries
+        </button>
+        : null
+      }
       <button className='btn btn-danger btn-sm'
-        onClick={() => this.onClearAnnotationsClicked(this.props.annotations[0].geometries.length)}
+        onClick={() => this.onClearAnnotationsClicked(numGeometries)}
       >
         <i className='fa fa-trash-alt pr-1' />Clear All
       </button>
@@ -51,9 +63,13 @@ export class AnnotationList extends Component {
 }
 
 AnnotationList.propTypes = {
+  maxGeometries: PropTypes.number,
+  annotations: PropTypes.array,
+  userId: PropTypes.number
 }
 
 const mapStateToProps = state => ({
+  maxGeometries: state.mapLayers.annotation.maxGeometries,
   annotations: state.mapLayers.annotation.collections,
   userId: state.user.loggedInUser.id
 })
