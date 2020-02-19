@@ -135,9 +135,10 @@ function setAnnotationListVisibility (isVisible) {
   }
 }
 
-function clearAllAnnotations () {
+function clearOlderAnnotations (numberToClear) {
   return {
-    type: Actions.LAYERS_CLEAR_ALL_ANNOTATIONS
+    type: Actions.LAYERS_CLEAR_OLD_ANNOTATIONS,
+    payload: numberToClear
   }
 }
 
@@ -156,5 +157,5 @@ export default {
   updateAnnotation,
   removeAnnotation,
   setAnnotationListVisibility,
-  clearAllAnnotations
+  clearOlderAnnotations
 }
