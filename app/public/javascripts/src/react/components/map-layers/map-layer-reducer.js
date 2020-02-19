@@ -12,7 +12,8 @@ const defaultState = {
   annotation: {
     showList: false,
     selectedIndex: 0,
-    collections: []
+    collections: [],
+    maxGeometries: 200
   }
 }
 
@@ -168,10 +169,17 @@ function setShowAnnotationsList (state, showAnnotationsList) {
   }
 }
 
-function clearAllAnnotations (state) {
+function clearOlderGeometries (state, annotationIndex, numberOfGeometries) {
+  var updatedGeometries = state.annotation.collections[annotationIndex].geometries
+  updatedGeometries = updatedGeometries.splice(0, numberOfGeometries) // Index 0 will be the "oldest" geometry
+  const updatedAnnotation = { ...state.annotation.collections[annotationIndex],
+    geometries: updatedGeometries
+  }
+  var newCollections = [].concat(state.annotation.collections)
+  newCollections.splice(annotationIndex, 1, updatedAnnotation)
   return { ...state,
     annotation: { ...state.annotation,
-      collections: [],
+      collections: newCollections,
       selectedIndex: 0
     }
   }
@@ -224,8 +232,8 @@ function mapLayersReducer (state = defaultState, action) {
     case Actions.LAYERS_SHOW_ANNOTATION_LIST:
       return setShowAnnotationsList(state, action.payload)
 
-    case Actions.LAYERS_CLEAR_ALL_ANNOTATIONS:
-      return clearAllAnnotations(state)
+    case Actions.LAYERS_CLEAR_OLD_ANNOTATIONS:
+      return clearOlderGeometries(state, 0, action.payload) // Always clear geometries from the 0th annotation collection
 
     default:
       return state
