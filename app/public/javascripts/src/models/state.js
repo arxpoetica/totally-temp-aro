@@ -708,7 +708,6 @@ class State {
           var selectedResourceManagers = results[2].data.resourceConfigItems
 
           var resourceManOrder = [
-            'planning_constraints_manager',
             'price_book',
             'arpu_manager',
             'roic_manager',
@@ -717,7 +716,8 @@ class State {
             'tsm_manager',
             'competition_manager',
             'fusion_manager',
-            'network_architecture_manager'
+            'network_architecture_manager',
+            'planning_constraints_manager'
           ]
 
           // First set up the resource items so that we display all types in the UI
