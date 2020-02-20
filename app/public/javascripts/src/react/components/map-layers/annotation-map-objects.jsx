@@ -81,6 +81,19 @@ export class AnnotationMapObjects extends Component {
         }
       })
     }
+
+    if ((this.props.annotations !== prevProps.annotations) || (this.props.maxGeometries !== prevProps.maxGeometries)) {
+      // Disable drawing manager if we have too many geometries
+      var drawingMode = google.maps.drawing.OverlayType.POLYLINE
+      const numGeometries = this.props.annotations[0] ? this.props.annotations[0].geometries.length : 0
+      if (numGeometries >= this.props.maxGeometries) {
+        drawingMode = null
+      }
+      this.drawingManager.setOptions({
+        drawingMode,
+        drawingControl: numGeometries < this.props.maxGeometries
+      })
+    }
   }
 
   componentWillUnmount () {
@@ -91,11 +104,16 @@ export class AnnotationMapObjects extends Component {
 }
 
 AnnotationMapObjects.propTypes = {
-  googleMaps: PropTypes.object
+  googleMaps: PropTypes.object,
+  maxGeometries: PropTypes.number,
+  annotations: PropTypes.array,
+  selectedAnnotationIndex: PropTypes.number,
+  userId: PropTypes.number
 }
 
 const mapStateToProps = state => ({
   googleMaps: state.map.googleMaps,
+  maxGeometries: state.mapLayers.annotation.maxGeometries,
   annotations: state.mapLayers.annotation.collections,
   selectedAnnotationIndex: state.mapLayers.annotation.selectedIndex,
   userId: state.user.loggedInUser.id
