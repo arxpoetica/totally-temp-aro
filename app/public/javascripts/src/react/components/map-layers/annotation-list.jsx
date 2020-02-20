@@ -8,45 +8,34 @@ export class AnnotationList extends Component {
   constructor (props) {
     super(props)
     this.onAddAnnotationClicked = this.onAddAnnotationClicked.bind(this)
-    this.onClearAllAnnotationsClicked = this.onClearAllAnnotationsClicked.bind(this)
+    this.onClearAllAnnotationsClicked = this.onClearAnnotationsClicked.bind(this)
   }
 
   render () {
+    const NUM_GEOMETRIES_TO_CLEAR = this.props.maxGeometries / 2
+    const numGeometries = this.props.annotations[0] ? this.props.annotations[0].geometries.length : 0
+    const showTooManyGeometriesWarning = (numGeometries >= this.props.maxGeometries / 2)
     return <div className='text-center'>
-      {/* <table className='table table-sm table-striped'>
-        <tbody>
-          {Object.keys(this.props.annotations).map(annotationKey => {
-            const annotation = this.props.annotations[annotationKey]
-            return <tr>
-              <td>{annotation.id}</td>
-              <td>{annotation.name}</td>
-              <td>
-                <button className='btn btn-sm btn-danger'
-                  onClick={() => this.props.removeAnnotation(annotation)}
-                >
-                  <i className='fa fa-trash-alt' />
-                </button>
-              </td>
-            </tr>
-          })}
-        </tbody>
-      </table>
-      <button
-        className='btn btn-sm btn-primary'
-        onClick={event => this.onAddAnnotationClicked(event)}
-        >
-        Add
-      </button> */}
       <p>Annotations will be auto-saved as you draw them.</p>
-      {/* <button className='btn btn-primary'
-        onClick={() => this.props.saveAnnotationsForUser(this.props.userId, this.props.annotations)}
-      >
-        <i className='fa fa-save pr-1' />Save
-      </button> */}
+      { showTooManyGeometriesWarning
+        ? <div className='alert alert-warning'>You have used {numGeometries} out of {this.props.maxGeometries} annotation geometries.
+          Please clear older geometries.
+        </div>
+        : null
+      }
+      {
+        showTooManyGeometriesWarning
+        ? <button className='btn btn-danger btn-sm mr-2'
+          onClick={() => this.onClearAnnotationsClicked(NUM_GEOMETRIES_TO_CLEAR)}
+        >
+          <i className='fa fa-trash-alt pr-1' />Clear old geometries
+        </button>
+        : null
+      }
       <button className='btn btn-danger btn-sm'
-        onClick={() => this.onClearAllAnnotationsClicked()}
+        onClick={() => this.onClearAnnotationsClicked(numGeometries)}
       >
-        <i className='fa fa-trash-alt pr-1' />Clear
+        <i className='fa fa-trash-alt pr-1' />Clear All
       </button>
       <AnnotationMapObjects />
     </div>
@@ -60,9 +49,10 @@ export class AnnotationList extends Component {
     })
   }
 
-  onClearAllAnnotationsClicked () {
-    this.props.clearAllAnnotations()
-    this.props.saveAnnotationsForUser(this.props.userId, null)
+  onClearAnnotationsClicked (numberToClear) {
+    // Clears the oldest annotations
+    this.props.clearOlderAnnotations(numberToClear)
+    this.props.saveAnnotationsForUser(this.props.userId, this.props.annotations)
       .then(() => this.props.loadAnnotationsForUser(this.props.userId))
       .catch(err => console.error(err))
   }
@@ -73,9 +63,13 @@ export class AnnotationList extends Component {
 }
 
 AnnotationList.propTypes = {
+  maxGeometries: PropTypes.number,
+  annotations: PropTypes.array,
+  userId: PropTypes.number
 }
 
 const mapStateToProps = state => ({
+  maxGeometries: state.mapLayers.annotation.maxGeometries,
   annotations: state.mapLayers.annotation.collections,
   userId: state.user.loggedInUser.id
 })
@@ -83,7 +77,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = (dispatch) => ({
   loadAnnotationsForUser: userId => dispatch(MapLayerActions.loadAnnotationsForUser(userId)),
   saveAnnotationsForUser: (userId, annotations) => dispatch(MapLayerActions.saveAnnotationsForUser(userId, annotations)),
-  clearAllAnnotations: () => dispatch(MapLayerActions.clearAllAnnotations())
+  clearOlderAnnotations: numberToClear => dispatch(MapLayerActions.clearOlderAnnotations(numberToClear))
 })
 
 const AnnotationListComponent = connect(mapStateToProps, mapDispatchToProps)(AnnotationList)
