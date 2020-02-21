@@ -92,6 +92,7 @@ class CoverageBoundaryController {
   calculateCoverage () {
     // Get the POST body for optimization based on the current application state
     var optimizationBody = this.state.getOptimizationBody()
+    console.log(optimizationBody)
     // Replace analysis_type and add a point and radius
     optimizationBody.analysis_type = 'COVERAGE'
     optimizationBody.point = {

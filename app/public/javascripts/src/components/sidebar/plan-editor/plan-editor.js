@@ -464,6 +464,7 @@ class PlanEditorController {
   calculateAutoBoundary (mapObject, spatialEdgeType, directed) {
     // Get the POST body for optimization based on the current application state
     var optimizationBody = this.state.getOptimizationBody()
+    console.log(optimizationBody)
     // Replace analysis_type and add a point and radius
     optimizationBody.boundaryCalculationType = 'FIXED_RADIUS'
     optimizationBody.analysis_type = 'COVERAGE'
