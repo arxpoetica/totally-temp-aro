@@ -632,8 +632,23 @@ class State {
     // Optimization options in Redux
     // ToDo: depricate stateSerializationHelper, replace with redux store
     service.getOptimizationBody = () => {
+      /*
       return stateSerializationHelper.getOptimizationBody(service, service.networkAnalysisConstraints,
         service.primarySpatialEdge, service.wormholeFuseDefinitions, $ngRedux.getState())
+      */
+      
+      var inputs = JSON.parse(JSON.stringify(service.optimizationInputs))
+      // inputs.analysis_type = service.networkAnalysisTypeId
+      // inputs.planId = service.planId
+      inputs.locationConstraints = {}
+      inputs.locationConstraints.analysisSelectionMode = service.activeSelectionModeId
+      inputs.locationConstraints.locationTypes = []
+      service.locationLayers.forEach(locationsLayer => {
+        if (locationsLayer.checked) inputs.locationConstraints.locationTypes.push(locationsLayer.plannerKey)
+      })
+      console.log('--- service.getOptimizationBody ---')
+      console.log(inputs)
+      return inputs
     }
 
     // Load optimization options from a JSON string
@@ -1870,7 +1885,9 @@ class State {
       networkAnalysisConnectivityDefinition: reduxState.optimization.networkAnalysis.connectivityDefinition,
       networkAnalysisConstraints: networkAnalysisConstraintsSelector(reduxState, 'spatialEdgeType', 'snappingDistance', 'maxConnectionDistance', 'maxWormholeDistance', 'ringComplexityCount', 'maxLocationEdgeDistance', 'locationBufferSize', 'conduitBufferSize', 'targetEdgeTypes'),
       primarySpatialEdge: reduxState.optimization.networkAnalysis.primarySpatialEdge,
-      wormholeFuseDefinitions: reduxState.optimization.networkAnalysis.wormholeFuseDefinitions
+      wormholeFuseDefinitions: reduxState.optimization.networkAnalysis.wormholeFuseDefinitions,
+      activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
+      optimizationInputs: reduxState.optimization.networkOptimization.optimizationInputs
     }
   }
 

@@ -92,7 +92,7 @@ class BoundaryPropertiesEditorController {
       .then(equipmentPoint => {
         // Get the POST body for optimization based on the current application state
         var optimizationBody = this.state.getOptimizationBody()
-        console.log(optimizationBody)
+        
         // Replace analysis_type and add a point and radius
         optimizationBody.boundaryCalculationType = 'FIXED_POLYGON'
         optimizationBody.analysis_type = 'COVERAGE'
@@ -101,6 +101,8 @@ class BoundaryPropertiesEditorController {
         // Get the polygon from the mapObject, not mapObject.feature.geometry, as the user may have edited the map object
         optimizationBody.polygon = this.viewBoundaryProps.geometry
         optimizationBody.directed = false
+        console.log('--- boundary prop edit ---')
+        console.log(optimizationBody)
         return this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
       })
       .then(result => this.addBoundaryCoverage(this.viewBoundaryProps.objectId, result.data))

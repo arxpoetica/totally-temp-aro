@@ -464,7 +464,6 @@ class PlanEditorController {
   calculateAutoBoundary (mapObject, spatialEdgeType, directed) {
     // Get the POST body for optimization based on the current application state
     var optimizationBody = this.state.getOptimizationBody()
-    console.log(optimizationBody)
     // Replace analysis_type and add a point and radius
     optimizationBody.boundaryCalculationType = 'FIXED_RADIUS'
     optimizationBody.analysis_type = 'COVERAGE'
@@ -479,7 +478,7 @@ class PlanEditorController {
 
     var equipmentObjectId = mapObject.objectId
     this.isWorkingOnCoverage = true
-
+    console.log(optimizationBody)
     this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
       .then((result) => {
       // The user may have destroyed the component before we get here. In that case, just return
@@ -515,7 +514,8 @@ class PlanEditorController {
         this.computedBoundaries.add(feature.objectId)
         this.createMapObjects && this.createMapObjects([feature])
 
-        this.digestBoundaryCoverage(feature, result.data, true)
+        // ToDo: this is no longer a thing, what did it used to do?
+        // this.digestBoundaryCoverage(feature, result.data, true)
 
         this.isWorkingOnCoverage = false
         this.state.planEditorChanged.next(true) // recaluculate plansummary

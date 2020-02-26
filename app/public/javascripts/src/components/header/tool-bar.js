@@ -465,7 +465,7 @@ class ToolBarController {
     }
     // Get the POST body for optimization based on the current application state
     var optimizationBody = this.state.getOptimizationBody()
-    console.log(optimizationBody)
+    
     // Replace analysis_type and add a point and radius
     optimizationBody.analysis_type = 'POINT_TO_POINT'
     optimizationBody.pointFrom = {
@@ -480,10 +480,11 @@ class ToolBarController {
     var spatialEdgeType = this.state.currentRulerAction.id === this.state.allRulerActions.COPPER.id ? this.Constants.SPATIAL_EDGE_COPPER : this.Constants.SPATIAL_EDGE_ROAD
     optimizationBody.spatialEdgeType = spatialEdgeType
     optimizationBody.directed = false
-
+    console.log(optimizationBody)
     this.$http.post('/service/v1/network-analysis/p2p', optimizationBody)
       .then((result) => {
-      // get copper properties
+        console.log(result)
+        // get copper properties
         var geoJson = {
           'type': 'FeatureCollection',
           'features': [{
