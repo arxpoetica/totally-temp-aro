@@ -1649,12 +1649,12 @@ class State {
       // Fire a redux action to get configuration for the redux side. This will result in two calls to /configuration for the time being.
       service.loadConfigurationFromServer()
       service.getStyleValues()
-
     }
 
     // Optimization options in Redux
     // service.optimizationOptions nneds to be moved to redux
     // add these to the deafult JSON
+    /*
     service.setOptimizationOptions = () => {
       service.optimizationOptions = angular.copy(service.configuration.optimizationOptions)
 
@@ -1670,6 +1670,7 @@ class State {
 
       service.optimizationOptions.uiSelectedAlgorithm = service.optimizationOptions.uiAlgorithms[0]
     }
+    */
 
     service.planEditorChanged = new Rx.BehaviorSubject(false)
     service.serviceLayers = []
