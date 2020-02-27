@@ -579,6 +579,8 @@ class State {
         // { id: 'NEARNET_ANALYSIS', label: 'Near-net Analysis', type: 'UNDEFINED' },
         { id: 'EXPERT_MODE', label: 'Expert Mode', type: 'Expert' }
       ]
+      // ToDo: replace with reduxState.optimization.networkOptimization.optimizationInputs.analysis_type
+      console.log('replace with reduxState.optimization.networkOptimization.optimizationInputs.analysis_type')
       service.networkAnalysisType = service.networkAnalysisTypes[0]
       // Upload Data Sources
       service.uploadDataSources = []
@@ -1636,7 +1638,7 @@ class State {
           service.configuration.loadPerspective(result.data.user.perspective)
           service.setWormholeFusionConfiguration(result.data.appConfiguration.wormholeFusionTypes || {})
           service.setLoggedInUser(result.data.user)
-          service.setOptimizationOptions()
+          // service.setOptimizationOptions()
           tileDataService.setLocationStateIcon(tileDataService.locationStates.LOCK_ICON_KEY, service.configuration.locationCategories.entityLockIcon)
           tileDataService.setLocationStateIcon(tileDataService.locationStates.INVALIDATED_ICON_KEY, service.configuration.locationCategories.entityInvalidatedIcon)
           service.getReleaseVersions()
