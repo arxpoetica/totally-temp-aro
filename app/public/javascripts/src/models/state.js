@@ -1052,17 +1052,23 @@ class State {
     service.loadPlanInputs = (planId) => {
       return $http.get(`/service/v1/plan/${planId}/inputs`)
         .then((result) => {
-          // console.log(' --- loadPlanInputs return')
-          // console.log(result)
+          console.log(' --- loadPlanInputs return')
+          console.log(result)
+          // OK here's the plan
+          // track down every thing that depends on this function
+          // loadStateFromJSON() / state.whatever
+          // then replace all their state.X with the redux object
           var defaultPlanInputs = service.getDefaultPlanInputs()
+          console.log(defaultPlanInputs)
+
           var planInputs = Object.keys(result.data).length > 0 ? result.data : defaultPlanInputs
-          
+
           // OK, this is kind of a mess. We have a lot of semi-depricated code that we are clearing out
           //    that depends on depricated planInputs schema.
           //    for the moment we'll merge with default to avoid crashes.
           //    i know it's not the best, I'll be back.
           planInputs = { ...defaultPlanInputs, ...planInputs }
-          
+
           stateSerializationHelper.loadStateFromJSON(service, $ngRedux.getState(), service.getDispatchers(), planInputs, new AroNetworkConstraints())
           return Promise.all([
             service.loadPlanResourceSelectionFromServer() // ,

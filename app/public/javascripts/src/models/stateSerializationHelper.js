@@ -188,16 +188,19 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   }
 
   // Load analysis type from a POST body object that is sent to the optimization engine
+  // ToDo: replace with reduxState.optimization.networkOptimization.optimizationInputs.analysis_type
+  //  mostly need to change the selection box at the top of Optimize/Inputs to trigger a change in Redux
   var loadAnalysisTypeFromBody = (state, planInputs) => {
     state.networkAnalysisTypes.forEach((analysisType) => {
       if (analysisType.id === planInputs.analysis_type) {
+        console.log(analysisType)
         state.networkAnalysisType = analysisType
-        //console.log(analysisType)
       }
     })
   }
 
   // Load location types from a POST body object that is sent to the optimization engine
+  // ToDo: move this to the Redux actions, this thing just triggers redux actions anyway
   var loadLocationTypesFromBody = (state, dataItems, dispatchers, postBody) => {
     // console.log(state.locationLayers)
     state.locationLayers.forEach((locationLayer) => {
@@ -228,6 +231,8 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   }
 
   // Load the selected existing fiber from a POST body object that is sent to the optimization engine
+  // ToDo: Is this suppose to set layer visibility?
+  //  Either way, similar to location types, this just calls a Redux dispatch, move this Redux action
   var loadSelectedExistingFiberFromBody = (state, dataItems, dispatchers, postBody) => {
     if (!dataItems.fiber) {
       return
@@ -249,6 +254,8 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   }
 
   // Load algorithm parameters from a POST body object that is sent to the optimization engine
+  // ToDo: We've already gotten rid of state.optimizationOptions
+  //  figure out the layer viz and dispatch biz
   var loadAlgorithmParametersFromBody = (state, dispatchers, postBody) => {
     if (!postBody.optimization) {
       console.warn('No optimization in postBody. This can happen when we have manually edited plans.')
@@ -296,6 +303,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   }
 
   // Load fiber network constraints from a POST body object that is sent to the optimization engine
+  // ToDo: We've already gotten rid of state.optimizationOptions so this one may be done
   var loadFiberNetworkConstraintsFromBody = (state, postBody) => {
     if (postBody.networkConstraints && postBody.networkConstraints.routingMode) {
       state.optimizationOptions.networkConstraints.routingMode = postBody.networkConstraints.routingMode
@@ -336,6 +344,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   }
 
   // Load technologies from a POST body object that is sent to the optimization engine
+  // ToDo: We've already gotten rid of state.optimizationOptions so this one may be done
   var loadTechnologiesFromBody = (state, postBody) => {
     // state.optimizationOptions.networkConstraints.advancedAnalysis = postBody.networkConstraints.advancedAnalysis
     Object.keys(state.optimizationOptions.technologies).forEach((technologyKey) => state.optimizationOptions.technologies[technologyKey].checked = false)
@@ -345,6 +354,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     })
   }
 
+  // ToDo: Move all these Redux dispatches to a redux action. Uggh
   var loadNetworkConfigurationOverrideFromBody = (dispatchers, planInputs, defaultNetworkConstraints) => {
     if (planInputs.networkConfigurationOverride) {
       // We have a network configuration override, set the network constraints
