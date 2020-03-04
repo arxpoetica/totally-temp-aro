@@ -180,8 +180,8 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     loadLocationTypesFromBody(state, reduxState, dispatchers, planInputs)
     loadSelectedExistingFiberFromBody(state, reduxState, dispatchers, planInputs)
     loadAlgorithmParametersFromBody(state, dispatchers, planInputs)
-    loadFiberNetworkConstraintsFromBody(state, planInputs)
-    loadTechnologiesFromBody(state, planInputs)
+    // loadFiberNetworkConstraintsFromBody(state, planInputs)
+    // loadTechnologiesFromBody(state, planInputs)
     loadNetworkConfigurationOverrideFromBody(dispatchers, planInputs, defaultNetworkConstraints)
     // console.log('load from JSON')
     // console.log(state.optimizationOptions)
@@ -261,7 +261,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       console.warn('No optimization in postBody. This can happen when we have manually edited plans.')
       return
     }
-
+    /*
     if (postBody.optimization.algorithm === 'UNCONSTRAINED') {
       state.optimizationOptions.uiSelectedAlgorithm = state.OPTIMIZATION_TYPES.UNCONSTRAINED
     } else if (postBody.optimization.algorithm === 'COVERAGE') {
@@ -280,7 +280,8 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
         }
       }
     }
-
+    */
+    /*
     if (postBody.financialConstraints) {
       state.optimizationOptions.financialConstraints = JSON.parse(JSON.stringify(postBody.financialConstraints))
     }
@@ -296,6 +297,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     if (postBody.optimization.budget && Number.isFinite(+postBody.optimization.budget)) {
       state.optimizationOptions.budget = +postBody.optimization.budget / 1000
     }
+    */
     dispatchers.setSelectionTypeById(postBody.locationConstraints.analysisSelectionMode)
     if (postBody.locationConstraints.analysisSelectionMode === 'SELECTED_ANALYSIS_AREAS') {
       state.setLayerVisibilityByKey('analysisLayerId', postBody.locationConstraints.analysisLayerId, true)
@@ -304,6 +306,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
   // Load fiber network constraints from a POST body object that is sent to the optimization engine
   // ToDo: We've already gotten rid of state.optimizationOptions so this one may be done
+  /*
   var loadFiberNetworkConstraintsFromBody = (state, postBody) => {
     if (postBody.networkConstraints && postBody.networkConstraints.routingMode) {
       state.optimizationOptions.networkConstraints.routingMode = postBody.networkConstraints.routingMode
@@ -342,9 +345,11 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       state.optimizationOptions.networkConstraints.routeFromFiber = true
     }
   }
+  */
 
   // Load technologies from a POST body object that is sent to the optimization engine
   // ToDo: We've already gotten rid of state.optimizationOptions so this one may be done
+  /*
   var loadTechnologiesFromBody = (state, postBody) => {
     // state.optimizationOptions.networkConstraints.advancedAnalysis = postBody.networkConstraints.advancedAnalysis
     Object.keys(state.optimizationOptions.technologies).forEach((technologyKey) => state.optimizationOptions.technologies[technologyKey].checked = false)
@@ -353,6 +358,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       state.optimizationOptions.technologies[matchedTechnology].checked = true
     })
   }
+  */
 
   // ToDo: Move all these Redux dispatches to a redux action. Uggh
   var loadNetworkConfigurationOverrideFromBody = (dispatchers, planInputs, defaultNetworkConstraints) => {

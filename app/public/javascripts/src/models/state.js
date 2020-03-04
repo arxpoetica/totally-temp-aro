@@ -707,10 +707,10 @@ class State {
     service.resourceItems = {}
     // Load the plan resource selections from the server
     service.loadPlanResourceSelectionFromServer = () => {
-      // console.log(' --- loadPlanResourceSelectionFromServer')
-      // console.log(service.plan)
+      console.log(' --- loadPlanResourceSelectionFromServer')
+      console.log(service.plan)
       if (!service.plan) {
-        // console.log(' --- No PLAN')
+        console.log(' --- No PLAN')
         return Promise.resolve()
       }
       var currentPlan = service.plan
@@ -720,6 +720,7 @@ class State {
         $http.get(`/service/v1/plan/${currentPlan.id}/configuration`)
       ])
         .then((results) => {
+          console.log(results)
           var resourceManagerTypes = results[0].data
           var allResourceManagers = results[1].data
           var selectedResourceManagers = results[2].data.resourceConfigItems
@@ -1068,7 +1069,7 @@ class State {
           //    for the moment we'll merge with default to avoid crashes.
           //    i know it's not the best, I'll be back.
           planInputs = { ...defaultPlanInputs, ...planInputs }
-
+          console.log(planInputs)
           stateSerializationHelper.loadStateFromJSON(service, $ngRedux.getState(), service.getDispatchers(), planInputs, new AroNetworkConstraints())
           return Promise.all([
             service.loadPlanResourceSelectionFromServer() // ,
