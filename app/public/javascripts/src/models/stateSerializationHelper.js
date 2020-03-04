@@ -13,6 +13,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   // ------------------------------------------------------------------------------------------------------------------
 
   // Get a POST body that we will send to aro-service for performing optimization
+  /*
   stateSerializationHelper.getOptimizationBody = (state, networkAnalysisConstraints, primarySpatialEdge, wormholeFuseDefinitions, reduxState) => {
     var optimizationBody = {
       planId: state.plan.id,
@@ -30,8 +31,10 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     addNetworkAnalysisType(state, optimizationBody)
     return optimizationBody
   }
+  */
 
   // Add Network Analysis types to a POST body that we will send to aro-service for performing optimization its either network plan or network analysis or coverage
+  /*
   var addNetworkAnalysisType = (state, postBody) => {
     postBody.analysis_type = state.networkAnalysisType.type
 
@@ -40,8 +43,10 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       delete postBody.generatedDataRequest
     }
   }
+  */
 
   // Add location types to a POST body that we will send to aro-service for performing optimization
+  /*
   var addLocationTypesToBody = (state, reduxState, postBody) => {
     var selectedLocationLayers = state.locationLayers.filter((item) => item.checked)
     postBody.locationConstraints = {
@@ -64,8 +69,10 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       postBody.locationConstraints.analysisLayerId = visibleAnalysisLayers.get(0).analysisLayerId
     }
   }
+  */
 
   // Add selected plan settings -> Data Selection to a POST body that we will send to aro-service for performing optimization
+  /*
   var addDataSelectionsToBody = (state, dataItems, postBody) => {
     if (!postBody.overridenConfiguration) {
       postBody.overridenConfiguration = []
@@ -81,8 +88,10 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       })
     })
   }
+  */
 
   // Add algorithm parameters to a POST body that we will send to aro-service for performing optimization
+  /*
   var addAlgorithmParametersToBody = (state, postBody) => {
     // All this "uiSelectedAlgorithm" stuff is because the UI has muliple options that map to (postBody.algorithm === 'IRR')
     postBody.optimization = {
@@ -123,8 +132,10 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     postBody.financialConstraints = JSON.parse(JSON.stringify(state.optimizationOptions.financialConstraints)) // Quick deep copy
     postBody.competitionConfiguration = JSON.parse(JSON.stringify(state.optimizationOptions.competitionConfiguration)) // Quick deep copy
   }
+  */
 
   // Add fiber network constraints to a POST body that we will send to aro-service for optimization
+  /*
   var addFiberNetworkConstraintsToBody = (state, postBody) => {
     postBody.networkConstraints = {}
     postBody.networkConstraints.routingMode = state.optimizationOptions.networkConstraints.routingMode
@@ -165,6 +176,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       postBody.networkConstraints.fiberRoutingMode = state.fiberRoutingModes.ROUTE_FROM_FIBER
     }
   }
+  */
 
   // ------------------------------------------------------------------------------------------------------------------
   // End section - state to POST body
