@@ -7,7 +7,6 @@ class ResourceSelectionController {
   }
 
   getResourceItemsArray () {
-    console.log(this.state.resourceItems)
     return Object.values(this.state.resourceItems)
   }
 
