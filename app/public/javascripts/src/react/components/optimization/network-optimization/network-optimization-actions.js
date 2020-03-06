@@ -70,6 +70,9 @@ function loadOptimizationInputs (planId) {
     AroHttp.get(apiUrl)
       .then((response) => {
         dispatch(this.setOptimizationInputs(response.data))
+        // ToDo: sift through locations and turn on all in locations constraints, turn all others off
+        console.log(response.data)
+        // locationConstraints.locationTypes
       })
   }
 }

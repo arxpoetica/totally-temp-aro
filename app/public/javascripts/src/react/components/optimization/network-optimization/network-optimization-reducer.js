@@ -1,5 +1,6 @@
 import Actions from '../../../common/actions'
 import DefaultOptimizationInputs from './default-optimization-inputs'
+import ObjectUtils from '../../../../shared-utils/object-utils'
 
 const defaultState = {
   optimizationInputs: DefaultOptimizationInputs, // serialization helper
@@ -11,6 +12,11 @@ function setOptimizationInputs (state, inputs) {
   var newState = { ...state,
     optimizationInputs: { ...state.optimizationInputs, ...inputs }
   }
+  console.log('mask test')
+  console.log(inputs)
+  console.log(state.optimizationInputs)
+  console.log(ObjectUtils.maskedMerge(state.optimizationInputs, inputs))
+  console.log(' --- ')
   return newState
 }
 
