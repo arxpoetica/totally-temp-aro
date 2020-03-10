@@ -17,7 +17,7 @@ const defaultState = {
   }
 }
 
-// ToDo: reafctor "checked" to be a collection of subtypes, also make a class 
+// ToDo: reafctor "checked" to be a collection of subtypes
 function setLayers (state, layerKey, layers) {
   // ToDo: this doesn't belong here
   if (layerKey === 'networkEquipment') {
@@ -98,6 +98,29 @@ function setCableConduitVisibility (state, cableKey, conduitKey, visibility) {
   }
 }
 
+function setAllLayerVisibilityOff (state, layerTypes) {
+  var newState = {}
+  layerTypes.forEach(layerType => {
+    state[layerType].forEach((layer, layerIndex) => {
+      const newLayer = { ...layer, checked: false }
+      newState[layerType] = state[layerType].set(layerIndex, newLayer)
+    })
+  })
+  return { ...state, newState }
+}
+
+function setLayerVisibilityByKey (state, layerType, plannerKey, visibility) {
+  // layerType, plannerKey, visibility
+  var layer = null
+  state[layerType].forEach(stateLayer => {
+    if (stateLayer.plannerKey === plannerKey) {
+      layer = stateLayer
+    }
+  })
+  console.log(layer)
+  return setLayerVisibility(state, layer, visibility)
+}
+
 function setLayerVisibility (state, layer, visibility) {
   // First determine which category/key (e.g. 'location' the layer belongs to)
   var layerToChange = null; var layerKey = null; var layerIndex = NaN
@@ -115,6 +138,9 @@ function setLayerVisibility (state, layer, visibility) {
   })
   // Create a new layer with the checked flag set
   const newLayer = { ...layerToChange, checked: visibility }
+  if (layerKey === 'location') {
+    console.log(newLayer.plannerKey)
+  }
   // Replace this category in the state
   return { ...state, [layerKey]: state[layerKey].set(layerIndex, newLayer) }
 }
@@ -204,6 +230,12 @@ function mapLayersReducer (state = defaultState, action) {
 
     case Actions.LAYERS_SET_BOUNDARY:
       return setLayers(state, 'boundary', action.payload)
+
+    case Actions.LAYERS_SET_ALL_VISIBILITY_OFF:
+      return setAllLayerVisibilityOff(state, action.payload.layerTypes)
+
+    case Actions.LAYERS_SET_VISIBILITY_BY_KEY:
+      return setLayerVisibilityByKey(state, action.payload.layerType, action.payload.plannerKey, action.payload.visibility)
 
     case Actions.LAYERS_SET_VISIBILITY:
       return setLayerVisibility(state, action.payload.layer, action.payload.visibility)

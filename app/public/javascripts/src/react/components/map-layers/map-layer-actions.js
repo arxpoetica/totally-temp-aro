@@ -2,6 +2,7 @@ import Actions from '../../common/actions'
 import AroHttp from '../../common/aro-http'
 
 // Sets the visibility for a specified layer
+// ToDo: LOCATIONS refactor callers of this to send layer Key instead of whole layer
 function setLayerVisibility (layer, newVisibility) {
   return {
     type: Actions.LAYERS_SET_VISIBILITY,

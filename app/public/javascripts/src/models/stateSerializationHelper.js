@@ -214,7 +214,8 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   // Load location types from a POST body object that is sent to the optimization engine
   // ToDo: move this to the Redux actions, this thing just triggers redux actions anyway
   var loadLocationTypesFromBody = (state, dataItems, dispatchers, postBody) => {
-    // console.log(state.locationLayers)
+    console.log(state.locationLayers)
+    console.log(postBody.locationConstraints.locationTypes)
     state.locationLayers.forEach((locationLayer) => {
       const isVisible = (postBody.locationConstraints.locationTypes.indexOf(locationLayer.plannerKey) >= 0)
       state.setLayerVisibility(locationLayer, isVisible) // this goes directly to redux MapLayerActions.setLayerVisibility

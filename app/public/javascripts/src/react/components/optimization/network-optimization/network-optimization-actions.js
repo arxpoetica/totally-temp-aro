@@ -1,6 +1,7 @@
 import Actions from '../../../common/actions'
 import AroHttp from '../../../common/aro-http'
 import PlanActions from '../../plan/plan-actions'
+import { batch } from 'react-redux'
 
 function runOptimization (inputs, userId) { // shouldn't be getting userId from caller
   return (dispatch, getState) => {
@@ -69,9 +70,38 @@ function loadOptimizationInputs (planId) {
     var apiUrl = `/service/v1/plan/${planId}/inputs?user_id=${userId}`
     AroHttp.get(apiUrl)
       .then((response) => {
-        dispatch(this.setOptimizationInputs(response.data))
+        // batch(() => {
+          dispatch(this.setOptimizationInputs(response.data))
+          dispatch({
+            type: Actions.LAYERS_SET_ALL_VISIBILITY_OFF,
+            payload: {
+              layerTypes: ['location']
+            }
+          })
+          dispatch({
+            type: Actions.LAYERS_SET_VISIBILITY_BY_KEY,
+            payload: {
+              layerType: 'location',
+              plannerKey: 'large',
+              visibility: true
+            }
+          })
+        // })
         // ToDo: sift through locations and turn on all in locations constraints, turn all others off
         console.log(response.data)
+        // need batch
+        // need to set ALL to false then select ones to true
+        // so need list which is accross the line
+        /*
+        dispatch({
+          type: Actions.LAYERS_SET_VISIBILITY_BY_KEY,
+          payload: {
+            layerType: 'location',
+            plannerKey: '',
+            visibility: true
+          }
+        })
+        */
         // locationConstraints.locationTypes
       })
   }

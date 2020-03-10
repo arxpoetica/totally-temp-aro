@@ -74,6 +74,7 @@ export class NetworkOptimizationInput extends Component {
     inputs.locationConstraints = {}
     inputs.locationConstraints.analysisSelectionMode = this.props.activeSelectionModeId
     inputs.locationConstraints.locationTypes = []
+    // ToDo: LOCATION - change this out for a redux object that gets updated with view actions
     this.props.locationsLayers.forEach(locationsLayer => {
       if (locationsLayer.checked) inputs.locationConstraints.locationTypes.push(locationsLayer.plannerKey)
     })
