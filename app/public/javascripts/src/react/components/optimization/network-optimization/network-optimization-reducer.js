@@ -8,15 +8,37 @@ const defaultState = {
   optimizationId: null
 }
 
+function setLocationType (state, locationType, isIncluded) {
+  // optimization.networkOptimization.optimizationInputs.locationConstraints.locationTypes
+  var locationTypes = JSON.parse(JSON.stringify(state.optimizationInputs.locationConstraints.locationTypes))
+  var index = locationTypes.indexOf(locationType)
+  var currentIsIncluded = index !== -1
+  if (currentIsIncluded === isIncluded) return state
+  if (isIncluded) {
+    locationTypes.push(locationType)
+  } else {
+    locationTypes.splice(index, 1)
+  }
+  return { ...state,
+    optimizationInputs: { ...state.optimizationInputs, 
+      locationConstraints: { ...state.optimizationInputs.locationConstraints, 
+        locationTypes: locationTypes
+      }
+    }
+  }
+}
+
 function setOptimizationInputs (state, inputs) {
   var newState = { ...state,
     optimizationInputs: { ...state.optimizationInputs, ...inputs }
   }
+  /*
   console.log('mask test')
   console.log(inputs)
   console.log(state.optimizationInputs)
   console.log(ObjectUtils.maskedMerge(state.optimizationInputs, inputs))
   console.log(' --- ')
+  */
   return newState
 }
 
@@ -42,6 +64,8 @@ function optimizationReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.NETWORK_OPTIMIZATION_SET_OPTIMIZATION_INPUTS:
       return setOptimizationInputs(state, action.payload)
+    case Actions.NETWORK_OPTIMIZATION_SET_LOCATION_TYPE:
+      return setLocationType(state, action.payload.locationType, action.payload.isIncluded)
     case Actions.NETWORK_OPTIMIZATION_SET_IS_CANCELING:
       return setIsCanceling(state, action.payload)
     case Actions.NETWORK_OPTIMIZATION_SET_OPTIMIZATION_ID:

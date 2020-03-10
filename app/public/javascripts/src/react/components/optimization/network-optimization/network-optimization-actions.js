@@ -71,21 +71,25 @@ function loadOptimizationInputs (planId) {
     AroHttp.get(apiUrl)
       .then((response) => {
         // batch(() => {
-          dispatch(this.setOptimizationInputs(response.data))
-          dispatch({
-            type: Actions.LAYERS_SET_ALL_VISIBILITY_OFF,
-            payload: {
-              layerTypes: ['location']
-            }
-          })
-          dispatch({
-            type: Actions.LAYERS_SET_VISIBILITY_BY_KEY,
-            payload: {
-              layerType: 'location',
-              plannerKey: 'large',
-              visibility: true
-            }
-          })
+        
+
+        dispatch(this.setOptimizationInputs(response.data))
+        /*
+        dispatch({
+          type: Actions.LAYERS_SET_ALL_VISIBILITY_OFF,
+          payload: {
+            layerTypes: ['location']
+          }
+        })
+        dispatch({
+          type: Actions.LAYERS_SET_VISIBILITY_BY_KEY,
+          payload: {
+            layerType: 'location',
+            plannerKey: 'large',
+            visibility: true
+          }
+        })
+        */
         // })
         // ToDo: sift through locations and turn on all in locations constraints, turn all others off
         console.log(response.data)
