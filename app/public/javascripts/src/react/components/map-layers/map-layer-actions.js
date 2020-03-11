@@ -20,22 +20,17 @@ function setLayerVisibility (layer, newVisibility) {
     })
 
     if (layerType !== null) {
-      /*
-      dispatch({
-        type: Actions.LAYERS_SET_VISIBILITY,
-        payload: {
-          layer: layer,
-          visibility: newVisibility
-        }
-      })
-      */
       // ToDo: use batch()
       dispatch({
         type: Actions.LAYERS_SET_VISIBILITY_BY_KEY,
         payload: {
-          layerType: layerType,
-          plannerKey: layer.plannerKey,
-          visibility: newVisibility
+          layerKeys: [
+            {
+              layerType: layerType,
+              plannerKey: layer.plannerKey,
+              visibility: newVisibility
+            }
+          ]
         }
       })
       // if location send to Optimization
@@ -50,15 +45,6 @@ function setLayerVisibility (layer, newVisibility) {
       }
     }
   }
-  /*
-  return {
-    type: Actions.LAYERS_SET_VISIBILITY,
-    payload: {
-      layer: layer,
-      visibility: newVisibility
-    }
-  }
-  */
 }
 
 function setNetworkEquipmentLayerVisibility (layerType, layer, newVisibility) {

@@ -104,18 +104,22 @@ function setAllLayerVisibilityOff (state, layerTypes) {
   return { ...state, newState }
 }
 
-function setLayerVisibilityByKey (state, layerType, plannerKey, visibility) {
-  // layerType, plannerKey, visibility
-  var layer = null
-  state[layerType].forEach(stateLayer => {
-    if (stateLayer.plannerKey === plannerKey) {
-      layer = stateLayer
+function setLayerVisibilityByKey (state, layerKeys) {
+  // each layer key:
+  //  layerType, plannerKey, visibility
+  // (make a prototype?)
+  var newState = {}
+  layerKeys.forEach(layerKey => {
+    const index = state[layerKey.layerType].findIndex(stateLayer => stateLayer.plannerKey === layerKey.plannerKey)
+    if (index !== -1) {
+      const newLayer = { ...state[layerKey.layerType].get(index), checked: layerKey.visibility }
+      if (!newState.hasOwnProperty(layerKey.layerType)) newState[layerKey.layerType] = state[layerKey.layerType] // .slice() // will get cloned on the next line
+      newState[layerKey.layerType] = newState[layerKey.layerType].set(index, newLayer)
     }
   })
-  console.log(layer)
-  return setLayerVisibility(state, layer, visibility)
+  return { ...state, ...newState }
 }
-
+/*
 function setLayerVisibility (state, layer, visibility) {
   // First determine which category/key (e.g. 'location' the layer belongs to)
   var layerToChange = null; var layerKey = null; var layerIndex = NaN
@@ -139,7 +143,7 @@ function setLayerVisibility (state, layer, visibility) {
   // Replace this category in the state
   return { ...state, [layerKey]: state[layerKey].set(layerIndex, newLayer) }
 }
-
+*/
 function setShowSiteBoundary (state, visibility) {
   return { ...state, showSiteBoundary: visibility }
 }
@@ -230,7 +234,7 @@ function mapLayersReducer (state = defaultState, action) {
       return setAllLayerVisibilityOff(state, action.payload.layerTypes)
 
     case Actions.LAYERS_SET_VISIBILITY_BY_KEY:
-      return setLayerVisibilityByKey(state, action.payload.layerType, action.payload.plannerKey, action.payload.visibility)
+      return setLayerVisibilityByKey(state, action.payload.layerKeys)
 
     case Actions.LAYERS_SET_VISIBILITY:
       return setLayerVisibility(state, action.payload.layer, action.payload.visibility)

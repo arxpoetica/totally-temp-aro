@@ -189,7 +189,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   // Load optimization options from a JSON string
   stateSerializationHelper.loadStateFromJSON = (state, reduxState, dispatchers, planInputs, defaultNetworkConstraints) => {
     loadAnalysisTypeFromBody(state, planInputs)
-    loadLocationTypesFromBody(state, reduxState, dispatchers, planInputs)
+    // loadLocationTypesFromBody(state, reduxState, dispatchers, planInputs)
     loadSelectedExistingFiberFromBody(state, reduxState, dispatchers, planInputs)
     loadAlgorithmParametersFromBody(state, dispatchers, planInputs)
     // loadFiberNetworkConstraintsFromBody(state, planInputs)
@@ -213,6 +213,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
   // Load location types from a POST body object that is sent to the optimization engine
   // ToDo: move this to the Redux actions, this thing just triggers redux actions anyway
+  /*
   var loadLocationTypesFromBody = (state, dataItems, dispatchers, postBody) => {
     console.log(state.locationLayers)
     console.log(postBody.locationConstraints.locationTypes)
@@ -242,7 +243,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       dispatchers.selectDataItems('location', selectedLibraryItems)
     }
   }
-
+  */
   // Load the selected existing fiber from a POST body object that is sent to the optimization engine
   // ToDo: Is this suppose to set layer visibility?
   //  Either way, similar to location types, this just calls a Redux dispatch, move this Redux action

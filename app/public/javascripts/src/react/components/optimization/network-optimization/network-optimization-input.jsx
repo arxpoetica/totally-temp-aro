@@ -71,13 +71,9 @@ export class NetworkOptimizationInput extends Component {
     var inputs = JSON.parse(JSON.stringify(optimizationInputs))
     inputs.analysis_type = this.props.networkAnalysisTypeId
     inputs.planId = this.props.planId
-    inputs.locationConstraints = {}
+    
+    inputs.locationConstraints = JSON.parse(JSON.stringify(this.props.optimizationInputs.locationConstraints))
     inputs.locationConstraints.analysisSelectionMode = this.props.activeSelectionModeId
-    inputs.locationConstraints.locationTypes = []
-    // ToDo: LOCATION - change this out for a redux object that gets updated with view actions
-    this.props.locationsLayers.forEach(locationsLayer => {
-      if (locationsLayer.checked) inputs.locationConstraints.locationTypes.push(locationsLayer.plannerKey)
-    })
 
     return inputs
   }
@@ -107,7 +103,7 @@ const mapStateToProps = (state) => ({
   userId: state.user.loggedInUser.id,
   planId: state.plan.activePlan.id,
   planState: state.plan.activePlan.planState,
-  locationsLayers: state.mapLayers.location,
+  // locationsLayers: state.mapLayers.location,
   optimizationId: state.optimization.networkOptimization.optimizationId,
   isCanceling: state.optimization.networkOptimization.isCanceling,
   optimizationInputs: state.optimization.networkOptimization.optimizationInputs,

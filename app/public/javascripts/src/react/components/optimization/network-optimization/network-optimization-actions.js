@@ -70,11 +70,20 @@ function loadOptimizationInputs (planId) {
     var apiUrl = `/service/v1/plan/${planId}/inputs?user_id=${userId}`
     AroHttp.get(apiUrl)
       .then((response) => {
-        // batch(() => {
-        
+        // locationConstraints.locationTypes
+        var layerKeys = []
+        if (response.data.locationConstraints && response.data.locationConstraints.locationTypes) {
+          response.data.locationConstraints.locationTypes.forEach(plannerKey => {
+            layerKeys.push({
+              layerType: 'location',
+              plannerKey: plannerKey,
+              visibility: true
+            })
+          })
+        }
 
+        // ToDo: use batch(() => {
         dispatch(this.setOptimizationInputs(response.data))
-        /*
         dispatch({
           type: Actions.LAYERS_SET_ALL_VISIBILITY_OFF,
           payload: {
@@ -84,12 +93,10 @@ function loadOptimizationInputs (planId) {
         dispatch({
           type: Actions.LAYERS_SET_VISIBILITY_BY_KEY,
           payload: {
-            layerType: 'location',
-            plannerKey: 'large',
-            visibility: true
+            layerKeys: layerKeys
           }
         })
-        */
+        
         // })
         // ToDo: sift through locations and turn on all in locations constraints, turn all others off
         console.log(response.data)
