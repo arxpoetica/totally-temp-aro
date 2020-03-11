@@ -49,6 +49,14 @@ class SocketManager {
     ioObject.on('reconnect_failed', () => { console.error(`Fatal - unable to reconnect to websocket`) })
     ioObject.on('reconnect', attempt => {
       console.log(`Successfully reconnected to websocket after ${attempt} attempts`)
+      // This client will have previously joined the "client" namespace with a client id.
+      // Leave this room, or else we will have multiple client namespace connections with the server.
+      this.sessionIdPromise
+        .then(sessionId => {
+          console.log(`Leaving old client room with id ${sessionId}`)
+          this.leaveRoom('client', sessionId)
+        })
+        .catch(err => console.error(err))
       // Rewrite the session id promise
       const sessionId = this.sockets.default.io.engine.id
       this.sessionIdPromise = Promise.resolve(sessionId)
