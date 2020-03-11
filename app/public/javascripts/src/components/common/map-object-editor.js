@@ -488,6 +488,7 @@ class MapObjectEditorController {
                 // editing the boundary without editing the equipment object itself
                 const mockEquipmentMapObject = {
                   objectId: feature.objectId,
+                  networkNodeType: feature._data_type.split('.')[1],  // Contract with aro-service
                   icon: 'HACK to make this.isMarker() think this is a marker and not a polygon :('
                 }
                 this.startDrawingBoundaryFor(mockEquipmentMapObject)
@@ -971,7 +972,8 @@ class MapObjectEditorController {
       const clickedObject = this.state.getValidEquipmentFeaturesList(equipmentFeatures)[0] // Filter Deleted equipments
       feature.objectId = feature.objectId || clickedObject.object_id
       feature.isExistingObject = true
-      feature.type = clickedObject._data_type
+      feature.type = clickedObject._data_type // BAD! And now this is being used in multiple places
+      feature._data_type = clickedObject._data_type
       feature.deployment_type = clickedObject.deployment_type
       var newSelection = this.state.cloneSelection()
       if (clickedObject._data_type === 'equipment_boundary.select') {
@@ -1169,6 +1171,7 @@ class MapObjectEditorController {
           type: 'Polygon',
           coordinates: []
         },
+        networkNodeType: mapObject.networkNodeType,
         attributes: {
           network_node_object_id: self.drawing.markerIdForBoundary
         }
@@ -1277,7 +1280,8 @@ class MapObjectEditorController {
         type: 'Point',
         coordinates: [latLng.lng(), latLng.lat()]
       },
-      type: clickedObject._data_type,
+      type: clickedObject._data_type, // BAD! And now this is being used in multiple places
+      _data_type: clickedObject._data_type,
       deployment_type: clickedObject.deployment_type,
       isExistingObject: true
     }
