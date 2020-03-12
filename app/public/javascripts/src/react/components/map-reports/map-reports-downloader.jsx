@@ -31,11 +31,13 @@ export class MapReportsDownloader extends Component {
       pageDefinition.visibleLayers = this.props.mapLayers.location.filter(layer => layer.checked).map(layer => layer.key).toJS();
       ['boundaries', 'cables', 'conduits', 'equipments', 'roads'].forEach(networkEquipmentCategory => {
         const category = this.props.mapLayers.networkEquipment[networkEquipmentCategory]
-        Object.keys(category).forEach(categoryKey => {
-          if (category[categoryKey].checked) {
-            pageDefinition.visibleLayers.push(category[categoryKey].key)
-          }
-        })
+        if (category) {
+          Object.keys(category).forEach(categoryKey => {
+            if (category[categoryKey].checked) {
+              pageDefinition.visibleLayers.push(category[categoryKey].key)
+            }
+          })
+        }
       })
       return pageDefinition
     })
