@@ -56,6 +56,12 @@ class State {
       COVERAGE: { id: 'COVERAGE', algorithm: 'COVERAGE', label: 'Coverage Target' }
     }
 
+    service.cashFlowStrategyTypes = {
+      COMPUTED_ROIC: { id: 'COMPUTED_ROIC', label: 'Computed ROIC' },
+      ESTIMATED_ROIC: { id: 'ESTIMATED_ROIC', label: 'Estimated ROIC' },
+      EXTERNAL: { id: 'EXTERNAL', label: 'External' }
+    }
+
     service.pruningStrategyTypes = {
       INTER_WIRECENTER: { id: 'INTER_WIRECENTER', label: 'Inter Service Area' },
       INTRA_WIRECENTER: { id: 'INTRA_WIRECENTER', label: 'Intra Service Area' }
@@ -292,6 +298,10 @@ class State {
     service.requestPolygonSelect = new Rx.BehaviorSubject({})
 
     service.areTilesRendering = false
+    service.setAreTilesRendering = newValue => {
+      service.areTilesRendering = newValue
+      $timeout()
+    }
 
     service.censusCategories = new Rx.BehaviorSubject()
     service.reloadCensusCategories = (censusCategories) => {
@@ -567,11 +577,10 @@ class State {
         { id: 'NETWORK_ANALYSIS', label: 'Network Analysis', type: 'NETWORK_ANALYSIS' },
         { id: 'COVERAGE_ANALYSIS', label: 'Coverage Analysis', type: 'COVERAGE' },
         { id: 'RFP', label: 'RFP Analyzer', type: 'RFP' },
-        { id: 'NEARNET_ANALYSIS', label: 'Near-net Analysis', type: 'UNDEFINED' },
+        // { id: 'NEARNET_ANALYSIS', label: 'Near-net Analysis', type: 'UNDEFINED' },
         { id: 'EXPERT_MODE', label: 'Expert Mode', type: 'Expert' }
       ]
       service.networkAnalysisType = service.networkAnalysisTypes[0]
-      // console.log('set networkAnalysisType to default')
       // Upload Data Sources
       service.uploadDataSources = []
       service.pristineDataItems = {}
@@ -621,12 +630,15 @@ class State {
     service.getVisibleAnalysisLayers = () => $ngRedux.getState().mapLayers.boundary.filter(item => item.checked && (item.key === 'analysis_layer'))
 
     // Get a POST body that we will send to aro-service for performing optimization
+    // Optimization options in Redux
+    // ToDo: depricate stateSerializationHelper, replace with redux store
     service.getOptimizationBody = () => {
       return stateSerializationHelper.getOptimizationBody(service, service.networkAnalysisConstraints,
-        service.primarySpatialEdge, service.wormholeFuseDefinitions, service.networkConfigurations, $ngRedux.getState())
+        service.primarySpatialEdge, service.wormholeFuseDefinitions, $ngRedux.getState())
     }
 
     // Load optimization options from a JSON string
+    // ToDo: depricate stateSerializationHelper, replace with redux store
     service.loadOptimizationOptionsFromJSON = (json) => {
       // Note that we are NOT returning the state (the state is set after the call), but a promise
       // that resolves once all the geographies have been loaded
@@ -675,9 +687,14 @@ class State {
       service.showPlanResourceEditorModal = true
     }
 
+    // not quite sure where to put the defaults
+    service.resourceItems = {}
     // Load the plan resource selections from the server
     service.loadPlanResourceSelectionFromServer = () => {
+      // console.log(' --- loadPlanResourceSelectionFromServer')
+      // console.log(service.plan)
       if (!service.plan) {
+        // console.log(' --- No PLAN')
         return Promise.resolve()
       }
       var currentPlan = service.plan
@@ -691,14 +708,30 @@ class State {
           var allResourceManagers = results[1].data
           var selectedResourceManagers = results[2].data.resourceConfigItems
 
+          var resourceManOrder = [
+            'price_book',
+            'arpu_manager',
+            'roic_manager',
+            'rate_reach_manager',
+            'impedance_mapping_manager',
+            'tsm_manager',
+            'competition_manager',
+            'fusion_manager',
+            'network_architecture_manager',
+            'planning_constraints_manager'
+          ]
+
           // First set up the resource items so that we display all types in the UI
           var newResourceItems = {}
           resourceManagerTypes.forEach((resourceManager) => {
+            if (!resourceManOrder.includes(resourceManager.name)) resourceManOrder.push(resourceManager.name)
+
             newResourceItems[resourceManager.name] = {
               id: resourceManager.id,
               description: resourceManager.description,
               allManagers: [],
-              selectedManager: null
+              selectedManager: null,
+              order: resourceManOrder.indexOf(resourceManager.name)
             }
           })
 
@@ -709,7 +742,7 @@ class State {
             }
             newResourceItems[resourceManager.managerType].allManagers.sort((a, b) => (a.name > b.name) ? 1 : -1)
           })
-
+          
           // Then select the appropriate manager for each type
           selectedResourceManagers.forEach((selectedResourceManager) => {
             var allManagers = newResourceItems[selectedResourceManager.aroResourceType].allManagers
@@ -720,9 +753,12 @@ class State {
           })
           service.resourceItems = newResourceItems
           service.pristineResourceItems = angular.copy(service.resourceItems)
+          // console.log(' --- LOADED resourceItems')
+          // console.log(service.resourceItems)
           $timeout() // Trigger a digest cycle so that components can update
           return Promise.resolve()
         })
+        .catch((err) => console.error(err))
     }
 
     service.getDefaultProjectForUser = (userId) => {
@@ -731,6 +767,8 @@ class State {
         .catch((err) => console.error(err))
     }
 
+    // ToDo: depricated net config
+    /*
     service.loadNetworkConfigurationFromServer = () => {
       return service.getDefaultProjectForUser(service.loggedInUser.id)
         .then((projectTemplateId) => $http.get(`/service/v1/project-template/${projectTemplateId}/network_configuration`))
@@ -743,6 +781,7 @@ class State {
         })
         .catch((err) => console.log(err))
     }
+    */
 
     // Save the plan resource selections to the server
     service.savePlanResourceSelectionToServer = () => {
@@ -771,7 +810,9 @@ class State {
       $http.put(`/service/v1/plan/${currentPlan.id}/configuration`, putBody)
     }
 
+    // ToDo: depricated net config
     // Save the Network Configurations to the server
+    /*
     service.saveNetworkConfigurationToDefaultProject = () => {
       return service.getDefaultProjectForUser(service.loggedInUser.id)
         .then((projectTemplateId) => {
@@ -787,6 +828,7 @@ class State {
         })
         .catch((err) => console.error(err))
     }
+    */
 
     // Get the default project template id for a given user
     service.getDefaultProjectTemplate = (userId) => {
@@ -962,6 +1004,7 @@ class State {
     }
 
     service.onActivePlanChanged = () => {
+      // console.log(' --- onActivePlanChanged')
       service.planChanged.next(null)
 
       service.currentPlanTags = service.listOfTags.filter(tag => _.contains(service.plan.tagMapping.global, tag.id))
@@ -990,14 +1033,26 @@ class State {
     }
 
     // Load the plan inputs for the given plan and populate them in state
+    // Optimization options in Redux
+    // ToDo: depricate stateSerializationHelper, replace with redux store
     service.loadPlanInputs = (planId) => {
       return $http.get(`/service/v1/plan/${planId}/inputs`)
         .then((result) => {
-          var planInputs = Object.keys(result.data).length > 0 ? result.data : service.getDefaultPlanInputs()
+          // console.log(' --- loadPlanInputs return')
+          // console.log(result)
+          var defaultPlanInputs = service.getDefaultPlanInputs()
+          var planInputs = Object.keys(result.data).length > 0 ? result.data : defaultPlanInputs
+          
+          // OK, this is kind of a mess. We have a lot of semi-depricated code that we are clearing out
+          //    that depends on depricated planInputs schema.
+          //    for the moment we'll merge with default to avoid crashes.
+          //    i know it's not the best, I'll be back.
+          planInputs = { ...defaultPlanInputs, ...planInputs }
+          
           stateSerializationHelper.loadStateFromJSON(service, $ngRedux.getState(), service.getDispatchers(), planInputs, new AroNetworkConstraints())
           return Promise.all([
-            service.loadPlanResourceSelectionFromServer(),
-            service.loadNetworkConfigurationFromServer()
+            service.loadPlanResourceSelectionFromServer() // ,
+            // service.loadNetworkConfigurationFromServer()
           ])
         })
         .catch((err) => {
@@ -1118,6 +1173,8 @@ class State {
       })
     }
 
+    /*
+    // ToDo: redux version?
     var checkToDisplayPopup = function () {
       if (!service.configuration.plan.showHouseholdsDirectRoutingWarning) {
         // No need to show any messagebox.
@@ -1145,7 +1202,11 @@ class State {
         }
       })
     }
+    */
 
+    // Optimization options in Redux
+    // move this to redux
+    /*
     service.runOptimization = () => {
       checkToDisplayPopup()
         .then((result) => {
@@ -1178,6 +1239,7 @@ class State {
           }
         })
     }
+    */
 
     service.getOptimizationProgress = (newPlan) => {
       if (!service.plan.planState) {
@@ -1200,6 +1262,7 @@ class State {
               tileDataService.markHtmlCacheDirty()
               service.requestMapLayerRefresh.next(null)
               delete service.plan.optimizationId
+              // console.log(' >>> getOptimizationProgress > loadPlanInputs')
               service.loadPlanInputs(newPlan.id)
               service.setActivePlanState(progressData.data.optimizationState)
               service.stopProgressMessagePolling()
@@ -1212,6 +1275,7 @@ class State {
       }
     }
 
+    // ToDo: move to redux
     service.cancelOptimization = () => {
       service.isCanceling = true
       $http.delete(`/service/optimization/processes/${service.plan.optimizationId}`)
@@ -1623,6 +1687,9 @@ class State {
         .catch(err => console.error(err))
     }
 
+    // Optimization options in Redux
+    // service.optimizationOptions nneds to be moved to redux
+    // add these to the deafult JSON
     service.setOptimizationOptions = () => {
       service.optimizationOptions = angular.copy(service.configuration.optimizationOptions)
 
@@ -1814,7 +1881,12 @@ class State {
       Object.assign(service, nextState)
       Object.assign(service, actions)
 
+      // console.log(' --- mergeToTarget')
       if ((currentActivePlanId !== newActivePlanId) && (nextState.plan)) {
+        // console.log(' ---v--- ')
+        // console.log(`${currentActivePlanId} | ${newActivePlanId}`)
+        // console.log(nextState)
+        // console.log(' ---^--- ')
         // The active plan has changed. Note that we are comparing ids because a change in plan state also causes the plan object to update.
         service.onActivePlanChanged()
       }

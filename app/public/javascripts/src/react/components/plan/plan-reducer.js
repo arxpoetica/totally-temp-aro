@@ -3,6 +3,7 @@ import Actions from '../../common/actions'
 const defaultState = {
   activePlan: null,
   dataItems: {},
+  haveDataItemsChanged: false,
   uploadDataSources: []
 }
 
@@ -22,6 +23,7 @@ function setActivePlanState (state, planState) {
 function setDataItems (state, dataItems, uploadDataSources) {
   return { ...state,
     dataItems: dataItems,
+    haveDataItemsChanged: false,
     uploadDataSources: uploadDataSources
   }
 }
@@ -32,7 +34,8 @@ function setSelectedDataItems (state, dataItemKey, selectedLibraryItems) {
       [dataItemKey]: { ...state.dataItems[dataItemKey],
         selectedLibraryItems: [].concat(selectedLibraryItems)
       }
-    }
+    },
+    haveDataItemsChanged: true
   }
 }
 
@@ -42,7 +45,14 @@ function setAllLibraryItems (state, dataItemKey, allLibraryItems) {
       [dataItemKey]: { ...state.dataItems[dataItemKey],
         allLibraryItems: [].concat(allLibraryItems)
       }
-    }
+    },
+    haveDataItemsChanged: true
+  }
+}
+
+function setHaveDataItemsChanged (state, haveDataItemsChanged) {
+  return { ...state,
+    haveDataItemsChanged
   }
 }
 
@@ -62,6 +72,9 @@ function planReducer (state = defaultState, action) {
 
     case Actions.PLAN_SET_ALL_LIBRARY_ITEMS:
       return setAllLibraryItems(state, action.payload.dataItemKey, action.payload.allLibraryItems)
+
+    case Actions.PLAN_SET_HAVE_DATA_ITEMS_CHANGED:
+      return setHaveDataItemsChanged(state, action.payload)
 
     default:
       return state

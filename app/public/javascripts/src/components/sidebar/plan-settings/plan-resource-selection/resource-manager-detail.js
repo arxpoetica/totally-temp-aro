@@ -16,11 +16,11 @@ class ResourceManagerDetailController {
     this.isChanges = false
     if (this.saveResourceAccess) {
       this.saveResourceAccess()
-      // --- ToDo: check that this section is still needed 
+      // --- ToDo: check that this section is still needed
       .then(() => Promise.all([
         // this.state.loadPlanDataSelectionFromServer(),
-        this.state.loadPlanResourceSelectionFromServer(),
-        this.state.loadNetworkConfigurationFromServer()
+        this.state.loadPlanResourceSelectionFromServer() // ,
+        // this.state.loadNetworkConfigurationFromServer()
       ]))
       //.then(() => this.state.uploadDataSource = this.state.uploadDataSources.filter(item => item.name === dataSource.dataType)[0])
       // ---

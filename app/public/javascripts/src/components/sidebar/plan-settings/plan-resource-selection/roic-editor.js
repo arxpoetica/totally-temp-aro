@@ -3,6 +3,8 @@ class RoicEditorController {
     this.$http = $http
     this.state = state
     this.roicManagerConfiguration = []
+    this.tabs = []
+    this.activeTab = null
   }
 
   $onChanges (changesObj) {
@@ -28,10 +30,47 @@ class RoicEditorController {
             .sort((a, b) => (a.id.speedCategory < b.id.speedCategory) ? -1 : 1)
           roicModels = roicModels.concat(filteredModels)
         })
-        this.roicManagerConfiguration = { inputs: roicModels }
+        this.roicManagerConfiguration = { inputs: roicModels, roicSettingsConfiguration: result.data.roicSettingsConfiguration }
+        this.tabs = [
+          {
+            label: 'Models',
+            key: 'inputs'
+          }, {
+            label: 'Configuration',
+            key: 'roicSettingsConfiguration'
+          }
+        ]
+        this.activeTab = this.tabs[0].key
         this.selectedRoicModelIndex = 0
       })
       .catch((err) => console.error(err))
+  }
+
+  /*
+  {
+    "roicSettingsConfiguration":{
+      "managerType":"roic_manager",
+      "financialConstraints":{
+        "cashFlowStrategyType":"EXTERNAL",
+        "discountRate":0.06,
+        "startYear":2019,
+        "years":15,
+        "terminalValueStrategy":{
+          "terminalValueStrategyType":"NONE",
+          "value":0.0
+        },
+        "penetrationAnalysisStrategy":"SCURVE",
+        "connectionCostStrategy":"REUSE_CONNECTION"
+      },
+      "competitionConfiguration":{
+        "providerStrength":1.0
+      }
+    },
+    "inputs":[...]
+  }
+  */
+  selectTab (tabKey) {
+    this.activeTab = tabKey
   }
 
   selectRoicModel (index) {

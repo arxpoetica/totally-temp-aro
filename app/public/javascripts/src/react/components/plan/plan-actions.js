@@ -4,6 +4,7 @@ import SelectionActions from '../selection/selection-actions'
 import RfpActions from '../optimization/rfp/rfp-actions'
 import SocketManager from '../../../react/common/socket-manager'
 import RingEditActions from '../ring-edit/ring-edit-actions'
+import NetworkOptimizationActions from '../optimization/network-optimization/network-optimization-actions'
 import AroHttp from '../../common/aro-http'
 
 function setActivePlanState (planState) {
@@ -136,6 +137,8 @@ function setActivePlan (plan) {
     dispatch(SelectionActions.loadPlanTargetSelectionsFromServer(plan.id))
     // Clear RFP state
     dispatch(RfpActions.clearRfpState())
+    // load optomize inputs
+    dispatch(NetworkOptimizationActions.loadOptimizationInputs(plan.id))
     // load rings
     dispatch(RingEditActions.loadRings(plan.id))
   }
@@ -165,6 +168,13 @@ function setAllLibraryItems (dataItemKey, allLibraryItems) {
   }
 }
 
+function setHaveDataItemsChanged (haveDataItemsChanged) {
+  return {
+    type: Actions.PLAN_SET_HAVE_DATA_ITEMS_CHANGED,
+    payload: haveDataItemsChanged
+  }
+}
+
 function deleteLibraryEntry (dataSource) {
   return (dispatch, getState) => {
     const state = getState()
@@ -185,5 +195,6 @@ export default {
   loadPlan,
   selectDataItems,
   setAllLibraryItems,
+  setHaveDataItemsChanged,
   deleteLibraryEntry
 }

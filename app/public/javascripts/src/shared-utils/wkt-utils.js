@@ -59,6 +59,30 @@ class WktUtils {
     return polygonPath
   }
 
+  // Converts a WKT Polygon Geometry object into a Google Maps Path object
+  static getGoogleMapPathsFromWKTPolygon (geometry) {
+    if (geometry.type !== 'Polygon') {
+      throw new Error(`getGoogleMapPathsFromWKTPolygon() expects geometry of type Polygon, received ${geometry.type}`)
+    }
+    var polygonPath = []
+    geometry.coordinates[0].forEach((polygonVertex) => {
+      polygonPath.push({
+        lat: polygonVertex[1],
+        lng: polygonVertex[0]
+      })
+    })
+    return polygonPath
+  }
+
+  // Converts a Google Maps Path object into a WKT LineString Geometry object
+  static getWKTLineStringFromGoogleMapPath (path) {
+    var geometry = {
+      type: 'LineString',
+      coordinates: path.getArray().map(pathPoint => [pathPoint.lng(), pathPoint.lat()])
+    }
+    return geometry
+  }
+
   // Converts a WKT LineString Geometry object into a Google Maps Path
   static getGoogleMapPathsFromWKTLineString (geometry) {
     if (geometry.type !== 'LineString') {

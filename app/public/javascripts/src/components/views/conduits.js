@@ -64,8 +64,8 @@ class ConduitsController {
   // Creates a single map layer by substituting tileDefinition parameters
   createSingleMapLayer (conduitKey, categoryType, networkEquipment, libraryId) {
     var existingOrPlannedzIndex = this.state.configuration.networkEquipment.tileDefinitions[categoryType].zIndex
-    delete this.state.configuration.networkEquipment.tileDefinitions[categoryType].zIndex
     var tileDefinition = angular.copy(this.state.configuration.networkEquipment.tileDefinitions[categoryType])
+    delete tileDefinition.zIndex
     this.objectKeyReplace(tileDefinition, '{spatialEdgeType}', conduitKey)
     this.objectKeyReplace(tileDefinition, '{libraryId}', libraryId)
     var lineTransform = this.getLineTransformForLayer(+networkEquipment.aggregateZoomThreshold)

@@ -7,7 +7,9 @@ class FeatureSelector {
   static selectFeatures (tileDataService, tileSize, mapLayers, tileZoom, tileX, tileY, shouldFeatureBeSelected, selectedBoundaryLayerId) {
     // Build an array of promises that gets all map layer features (for the layers marked as selectable)
     var promises = []
-    Object.keys(mapLayers).forEach((mapLayerKey) => {
+    // Map layers have a z-index, use that to order items when selecting. Map layers with lower z-index should be first in the array.
+    const orderedLayerKeys = Object.keys(mapLayers).sort((a, b) => mapLayers[a].zIndex > mapLayers[b].zIndex ? -1 : 1)
+    orderedLayerKeys.forEach((mapLayerKey) => {
       var mapLayer = mapLayers[mapLayerKey]
       if (mapLayer.selectable) {
         const numNeighbors = 1

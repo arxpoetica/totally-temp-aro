@@ -11,8 +11,9 @@ import RfpButton from '../react/components/optimization/rfp/rfp-button.jsx'
 import MapReportsDownloader from '../react/components/map-reports/map-reports-downloader.jsx'
 import NetworkAnalysisConstraints from '../react/components/optimization/network-analysis/network-analysis-constraints.jsx'
 import NetworkAnalysisConnectivityDefinition from '../react/components/optimization/network-analysis/network-analysis-connectivity-definition.jsx'
-import NetworkAnalysisNetworkDefinition from '../react/components/optimization/network-analysis/network-analysis-network-definition.jsx'
 import NetworkAnalysisOutput from '../react/components/optimization/network-analysis/network-analysis-output.jsx'
+import NetworkOptimizationInput from '../react/components/optimization/network-optimization/network-optimization-input.jsx'
+import NetworkOptimizationButton from '../react/components/optimization/network-optimization/network-optimization-button.jsx'
 import PlanTargetList from '../react/components/selection/plan-target-list.jsx'
 import PlanEditor from '../react/components/plan-editor/plan-editor.jsx'
 import EquipmentDropTarget from '../react/components/plan-editor/equipment-drop-target.jsx'
@@ -26,6 +27,10 @@ import LocationInfo from '../react/components/location-info/location-info.jsx'
 import ResourcePermissions from '../react/components/acl/resource-permissions/resource-permissions.jsx'
 import PermissionsTable from '../react/components/acl/resource-permissions/permissions-table.jsx'
 import SearchableSelect from '../react/components/common/searchable-select.jsx'
+import PlanningConstraintsEditor from '../react/components/resource-manager/planning-constraints-editor.jsx'
+import FusionEditor from '../react/components/resource-manager/fusion-editor.jsx'
+import NetworkArchitectureEditor from '../react/components/resource-manager/network-architecture-editor.jsx'
+import ToolBox from '../react/components/map-layers/tool-box.jsx'
 
 import boundaryDetail from './sidebar/view/boundary-detail'
 import equipmentDetail from './sidebar/view/equipment-detail'
@@ -52,7 +57,6 @@ import roicReports from './sidebar/analysis/roic-reports/roic-reports'
 import roicReportsLarge from './sidebar/analysis/roic-reports/roic-reports-large'
 import roicReportsSmall from './sidebar/analysis/roic-reports/roic-reports-small'
 import roicReportsModal from './sidebar/analysis/roic-reports/roic-reports-modal'
-import networkAnalysisBuild from './sidebar/analysis/network-analysis-build'
 import coverageReportDownloader from './sidebar/analysis/coverage/coverage-report-downloader'
 import networkBuildOutput from './sidebar/analysis/network-build/network-build-output'
 import aroDebug from './sidebar/debug/aro-debug'
@@ -68,7 +72,6 @@ import serviceLayerEditor from './sidebar/plan-editor/service-layer-editor'
 import conicTileSystemUploader from './sidebar/plan-settings/plan-data-selection/conic-tile-system-uploader'
 import globalDataSourceUploadModal from './sidebar/plan-settings/plan-data-selection/data-source-upload-modal'
 import planDataSelection from './sidebar/plan-settings/plan-data-selection/plan-data-selection'
-import planNetworkConfiguration from './sidebar/plan-settings/plan-network-configuration/plan-network-configuration'
 import planProjectConfiguration from './sidebar/plan-settings/plan-project-configuration/plan-project-configuration'
 import planSettings from './sidebar/plan-settings/plan-settings'
 import arpuEditor from './sidebar/plan-settings/plan-resource-selection/arpu-editor'
@@ -155,7 +158,6 @@ app.component('boundaryDetail', boundaryDetail)
   .component('summaryReports', summaryReports)
   .component('analysisExpertMode', analysisExpertMode)
   .component('analysisMode', analysisMode)
-  .component('networkAnalysisBuild', networkAnalysisBuild)
   .component('locationRoicReports', locationRoicReports)
   .component('networkBuildRoicReports', networkBuildRoicReports)
   .component('roicReports', roicReports)
@@ -177,7 +179,6 @@ app.component('boundaryDetail', boundaryDetail)
   .component('conicTileSystemUploader', conicTileSystemUploader)
   .component('globalDataSourceUploadModal', globalDataSourceUploadModal)
   .component('planDataSelection', planDataSelection)
-  .component('planNetworkConfiguration', planNetworkConfiguration)
   .component('planProjectConfiguration', planProjectConfiguration)
   .component('planSettings', planSettings)
   .component('arpuEditor', arpuEditor)
@@ -248,9 +249,10 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rRfpButton', react2angular(RfpButton))
   .component('rMapReportsDownloader', react2angular(MapReportsDownloader))
   .component('rNetworkAnalysisConnectivityDefinition', react2angular(NetworkAnalysisConnectivityDefinition))
-  .component('rNetworkAnalysisNetworkDefinition', react2angular(NetworkAnalysisNetworkDefinition))
   .component('rNetworkAnalysisConstraints', react2angular(NetworkAnalysisConstraints, ['initialValues', 'enableReinitialize']))
   .component('rNetworkAnalysisOutput', react2angular(NetworkAnalysisOutput))
+  .component('rNetworkOptimizationInput', react2angular(NetworkOptimizationInput, ['onModify', 'networkAnalysisTypeId']))
+  .component('rNetworkOptimizationButton', react2angular(NetworkOptimizationButton, ['onModify']))
   .component('rPlanTargetList', react2angular(PlanTargetList))
   .component('rPlanEditor', react2angular(PlanEditor))
   .component('rEquipmentDropTarget', react2angular(EquipmentDropTarget))
@@ -265,6 +267,10 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rResourcePermissions', react2angular(ResourcePermissions))
   .component('rPermissionsTable', react2angular(PermissionsTable))
   .component('rSearchableSelect', react2angular(SearchableSelect))
+  .component('rPlanningConstraintsEditor', react2angular(PlanningConstraintsEditor, ['onDiscard']))
+  .component('rFusionEditor', react2angular(FusionEditor, ['onDiscard']))
+  .component('rNetworkArchitectureEditor', react2angular(NetworkArchitectureEditor, ['onDiscard']))
+  .component('rToolBox', react2angular(ToolBox))
   .service('Utils', utils)
   .service('state', state)
   .service('tileDataService', tileDataService)

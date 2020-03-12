@@ -69,7 +69,8 @@ class MapSplitController {
         reduxState.planEditor.isCreatingObject ||
         reduxState.planEditor.isModifyingObject ||
         reduxState.planEditor.isCommittingTransaction ||
-        reduxState.planEditor.isEnteringTransaction
+        reduxState.planEditor.isEnteringTransaction,
+      showToolBox: reduxState.mapLayers.annotation.showList // For now, later this will be a tool box flag
     }
   }
 
@@ -153,6 +154,19 @@ let mapSplit = {
       width: 9px;
       z-index: 1;
     }
+
+    .ui-note-notes-contain{
+      text-shadow: #ffffff -1px 1px;
+      position: absolute;
+      left: 25px;
+      bottom: 0px;
+      overflow: visible;
+      font-weight: bold;
+    }
+
+    .ui-note-noteline{
+      white-space: nowrap;
+    }
   </style>
   <!-- First define the container for both the map and the sidebar. -->
   <div class="app_wrapper_container {{($ctrl.state.configuration.ARO_CLIENT === 'frontier') ? 'footer' : ''}}">
@@ -167,6 +181,7 @@ let mapSplit = {
         <tool-bar map-global-object-name="map" style="flex: 1 1 auto; position: relative;"></tool-bar>
         <network-plan style="flex: 0 0 auto; margin: auto;"></network-plan>
         <div id="spacerForIconOnSidebar" style="flex: 0 0 40px;"></div>
+        <r-tool-box ng-if="$ctrl.showToolBox"></r-tool-box>
       </div>
       <!-- Plan target map selector should be active only if we are in analysis mode -->
       <map-selector-plan-target map-global-object-name="map"
@@ -228,7 +243,14 @@ let mapSplit = {
       </div>
     </div>
   </div>
-  <ui-notification style="pointer-events: none; position: absolute; left: 25px; bottom: 25px;" channel="'main'"></ui-notification>
+  <div class="ui-note" ng-if="$ctrl.state.areTilesRendering" style="pointer-events: none; position: absolute; left: 0px; bottom: 25px;" >
+    <!-- There used to be a "spinner" icon here, which has been removed. On profiling, we found that the
+        spinning animation caused the tile rendering to be two times slower (e.g. 200ms with spinner vs 100 ms without)
+        Do NOT add any kind of animated element in this control unless you suppress it when tiles are rendering -->
+    <div class="ui-note-notes-contain">
+      <div class="ui-note-noteline">Rendering Tiles</div>
+    </div>
+  </div>
   <div ng-include="'javascripts/lib/components/footer/frontier_footer.html'" ng-if="$ctrl.state.configuration.ARO_CLIENT === 'frontier'"></div>
   `,
   bindings: { },

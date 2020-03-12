@@ -1,6 +1,9 @@
+import ResourceManagerActions from '../../../../react/components/resource-manager/resource-manager-actions'
+
 class PlanResourceEditorController {
-  constructor (state) {
+  constructor ($ngRedux, state, $timeout) {
     this.state = state
+    this.$timeout = $timeout
     this.editingModes = Object.freeze({
       LIST_RESOURCE_MANAGERS: 'LIST_RESOURCE_MANAGERS',
       EDIT_RESOURCE_MANAGER: 'EDIT_RESOURCE_MANAGER',
@@ -9,11 +12,19 @@ class PlanResourceEditorController {
     })
     this.selectedEditingMode = this.editingModes.LIST_RESOURCE_MANAGERS
     this.editingManagerId = 1
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
+
+    this.onBackToList = () => {
+      this.setEditingMode(this.editingModes.LIST_RESOURCE_MANAGERS)
+      // angular doesn't seem to cause a digest when this is called from a react component
+      this.$timeout()
+    }
   }
-  
+
   modalHide () {
     this.setEditingMode(this.editingModes.LIST_RESOURCE_MANAGERS)
     this.state.showPlanResourceEditorModal = false
+    this.clearResourceManagers()
   }
 
   setEditingMode (newEditingMode) {
@@ -31,9 +42,25 @@ class PlanResourceEditorController {
   setSelectedResourceKey (resourceKey) {
     this.state.editingPlanResourceKey = resourceKey
   }
+
+  $onDestroy () {
+    this.unsubscribeRedux()
+  }
+
+  mapStateToThis (reduxState) {
+    return {
+      reduxEditingManagerType: reduxState.resourceManager.editingManager && reduxState.resourceManager.editingManager.type
+    }
+  }
+
+  mapDispatchToTarget (dispatch) {
+    return {
+      clearResourceManagers: () => dispatch(ResourceManagerActions.clearResourceManagers())
+    }
+  }
 }
 
-PlanResourceEditorController.$inject = ['state']
+PlanResourceEditorController.$inject = ['$ngRedux', 'state', '$timeout']
 
 let planResourceEditorModal = {
   templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/plan-resource-editor-modal.html',
