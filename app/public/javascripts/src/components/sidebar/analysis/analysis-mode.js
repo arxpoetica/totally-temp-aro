@@ -1,7 +1,11 @@
 import ReportsActions from '../../../react/components/optimization/reports/reports-actions'
+import NetworkOptimizationActions from '../../../react/components/optimization/network-optimization/network-optimization-actions'
+import NetworkAnalysisTypes from '../../../react/components/optimization/network-optimization/network-analysis-types'
+import AngConstants from '../../common/constants' // ToDo: merge constants, put in Redux?
 
 class AnalysisModeController {
   constructor ($scope, $ngRedux, state, tracker) {
+    this.NetworkAnalysisTypes = NetworkAnalysisTypes
     this.state = state
     this.canceler = null
     this.$scope = $scope
@@ -20,10 +24,27 @@ class AnalysisModeController {
 
     this.analysisModePanel = this.analysisModePanels.INPUT
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
+
+    var initAnalysisType = this.NetworkAnalysisTypes[0]
+    console.log(this.networkAnalysisType)
+    this.NetworkAnalysisTypes.forEach(analysisType => {
+      if (analysisType.id === this.networkAnalysisType) initAnalysisType = analysisType
+    })
+    console.log(initAnalysisType)
+    this.localAnalysisType = initAnalysisType
   }
 
   expandAccordion (expandedAccordionIndex) {
     this.expandedAccordionIndex = expandedAccordionIndex
+  }
+
+  onAnalysisTypeChange (event) {
+    this.setNetworkAnalysisType(this.localAnalysisType.id)
+  }
+
+  // ToDo: this is also in network-optimization-input.jsx
+  areControlsEnabled () {
+    return (this.planState === AngConstants.PLAN_STATE.START_STATE) || (this.planState === AngConstants.PLAN_STATE.INITIALIZED)
   }
 
   $onDestroy () {
@@ -31,15 +52,18 @@ class AnalysisModeController {
   }
 
   // Map global state to component properties
-  mapStateToThis (state) {
+  mapStateToThis (reduxState) {
     return {
-      coverageReport: state.coverage.report
+      coverageReport: reduxState.coverage.report,
+      networkAnalysisType: reduxState.optimization.networkOptimization.optimizationInputs.analysis_type,
+      planState: reduxState.plan.activePlan.planState
     }
   }
 
   mapDispatchToTarget (dispatch) {
     return {
-      showReportModal: () => dispatch(ReportsActions.showOrHideReportModal(true))
+      showReportModal: () => dispatch(ReportsActions.showOrHideReportModal(true)),
+      setNetworkAnalysisType: (networkAnalysisType) => dispatch(NetworkOptimizationActions.setNetworkAnalysisType(networkAnalysisType))
     }
   }
 }

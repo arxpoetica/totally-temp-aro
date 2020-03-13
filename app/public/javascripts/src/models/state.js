@@ -83,6 +83,7 @@ class State {
       { id: 'REUSE_CONNECTION', label: 'Reuse Connection' }
     ]
 
+    // ToDo: move this to redux state: optimize
     service.expertModeTypes = {
       OPTIMIZATION_SETTINGS: { id: 'OPTIMIZATION_SETTINGS', label: 'Optimization Settings' },
       MANUAL_PLAN_TARGET_ENTRY: { id: 'MANUAL_PLAN_TARGET_ENTRY', label: 'Manual plan Target Selection', isQueryValid: false },
@@ -570,7 +571,7 @@ class State {
     service.initializeState = function () {
       service.reloadLocationTypes()
       service.selectedDisplayMode.next(service.displayModes.VIEW)
-
+      /*
       service.networkAnalysisTypes = [
         { id: 'NETWORK_PLAN', label: 'Network Build', type: 'NETWORK_PLAN' },
         { id: 'NETWORK_ANALYSIS', label: 'Network Analysis', type: 'NETWORK_ANALYSIS' },
@@ -582,6 +583,8 @@ class State {
       // ToDo: replace with reduxState.optimization.networkOptimization.optimizationInputs.analysis_type
       console.log('replace with reduxState.optimization.networkOptimization.optimizationInputs.analysis_type')
       service.networkAnalysisType = service.networkAnalysisTypes[0]
+      */
+      
       // Upload Data Sources
       service.uploadDataSources = []
       service.pristineDataItems = {}

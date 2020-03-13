@@ -69,9 +69,10 @@ export class NetworkOptimizationInput extends Component {
     // if we do validation we'll need to make it a selector
     // plan.selection.planTargets are sent seperately to the server
     var inputs = JSON.parse(JSON.stringify(optimizationInputs))
+    // ToDo: this should come from redux NOT parent
     inputs.analysis_type = this.props.networkAnalysisTypeId
     inputs.planId = this.props.planId
-    
+
     inputs.locationConstraints = JSON.parse(JSON.stringify(this.props.optimizationInputs.locationConstraints))
     inputs.locationConstraints.analysisSelectionMode = this.props.activeSelectionModeId
 
@@ -91,6 +92,7 @@ export class NetworkOptimizationInput extends Component {
     this.props.setSelectionTypeById(val.id)
   }
 
+  // ToDo: this is also in analysis-mode.js
   areControlsEnabled () {
     return (this.props.planState === AngConstants.PLAN_STATE.START_STATE) || (this.props.planState === AngConstants.PLAN_STATE.INITIALIZED)
   }

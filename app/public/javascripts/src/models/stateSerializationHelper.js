@@ -188,7 +188,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
   // Load optimization options from a JSON string
   stateSerializationHelper.loadStateFromJSON = (state, reduxState, dispatchers, planInputs, defaultNetworkConstraints) => {
-    loadAnalysisTypeFromBody(state, planInputs)
+    // loadAnalysisTypeFromBody(state, planInputs)
     // loadLocationTypesFromBody(state, reduxState, dispatchers, planInputs)
     loadSelectedExistingFiberFromBody(state, reduxState, dispatchers, planInputs)
     loadAlgorithmParametersFromBody(state, dispatchers, planInputs)
@@ -202,6 +202,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   // Load analysis type from a POST body object that is sent to the optimization engine
   // ToDo: replace with reduxState.optimization.networkOptimization.optimizationInputs.analysis_type
   //  mostly need to change the selection box at the top of Optimize/Inputs to trigger a change in Redux
+  /*
   var loadAnalysisTypeFromBody = (state, planInputs) => {
     state.networkAnalysisTypes.forEach((analysisType) => {
       if (analysisType.id === planInputs.analysis_type) {
@@ -210,7 +211,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       }
     })
   }
-
+  */
   // Load location types from a POST body object that is sent to the optimization engine
   // ToDo: move this to the Redux actions, this thing just triggers redux actions anyway
   /*

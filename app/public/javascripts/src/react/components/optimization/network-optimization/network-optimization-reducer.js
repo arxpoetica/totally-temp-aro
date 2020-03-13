@@ -1,6 +1,6 @@
 import Actions from '../../../common/actions'
 import DefaultOptimizationInputs from './default-optimization-inputs'
-import ObjectUtils from '../../../../shared-utils/object-utils'
+// import ObjectUtils from '../../../../shared-utils/object-utils'
 
 const defaultState = {
   optimizationInputs: DefaultOptimizationInputs, // serialization helper
@@ -20,10 +20,18 @@ function setLocationType (state, locationType, isIncluded) {
     locationTypes.splice(index, 1)
   }
   return { ...state,
-    optimizationInputs: { ...state.optimizationInputs, 
-      locationConstraints: { ...state.optimizationInputs.locationConstraints, 
+    optimizationInputs: { ...state.optimizationInputs,
+      locationConstraints: { ...state.optimizationInputs.locationConstraints,
         locationTypes: locationTypes
       }
+    }
+  }
+}
+
+function setNetworkAnalysisType (state, networkAnalysisType) {
+  return { ...state,
+    optimizationInputs: { ...state.optimizationInputs,
+      analysis_type: networkAnalysisType
     }
   }
 }
@@ -64,6 +72,8 @@ function optimizationReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.NETWORK_OPTIMIZATION_SET_OPTIMIZATION_INPUTS:
       return setOptimizationInputs(state, action.payload)
+    case Actions.NETWORK_OPTIMIZATION_SET_ANALYSIS_TYPE:
+      return setNetworkAnalysisType(state, action.payload)
     case Actions.NETWORK_OPTIMIZATION_SET_LOCATION_TYPE:
       return setLocationType(state, action.payload.locationType, action.payload.isIncluded)
     case Actions.NETWORK_OPTIMIZATION_SET_IS_CANCELING:

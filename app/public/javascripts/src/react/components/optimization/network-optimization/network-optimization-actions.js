@@ -126,9 +126,17 @@ function setOptimizationInputs (inputs) {
   }
 }
 
+function setNetworkAnalysisType (networkAnalysisType) {
+  return {
+    type: Actions.NETWORK_OPTIMIZATION_SET_ANALYSIS_TYPE,
+    payload: networkAnalysisType
+  }
+}
+
 export default {
   loadOptimizationInputs,
   setOptimizationInputs,
   runOptimization,
-  cancelOptimization
+  cancelOptimization,
+  setNetworkAnalysisType
 }
