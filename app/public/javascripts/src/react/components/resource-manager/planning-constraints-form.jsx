@@ -111,10 +111,35 @@ export class PlanningConstraints extends Component {
                 </td>
               </tr>
               <tr>
+                { /*
                 <td>Infer CO when missing</td>
                 <td>
                   <Field name='inferCoWhenMissing'
                     className='checkboxfill' component='input' type='checkbox' />
+                </td>
+                */ }
+                <td>Missing CO strategy</td>
+                <td>
+                  <div>
+                    <Field name='missingCoStrategy'
+                      className='checkboxfill' component='input' type='radio' value='doNothing' /> Do nothing
+                  </div>
+                  <div>
+                    <Field name='missingCoStrategy'
+                      className='checkboxfill' component='input' type='radio' value='useExistingSplicePoints' /> Use Existing Splice Points Only
+                  </div>
+                  <div>
+                    <Field name='missingCoStrategy'
+                      className='checkboxfill' component='input' type='radio' value='useSyntheticSplicePoints' /> Use Synthetic Splice Points Only
+                  </div>
+                  <div>
+                    <Field name='missingCoStrategy'
+                      className='checkboxfill' component='input' type='radio' value='useAllSplicePoints' /> Use All Splice Points
+                  </div>
+                  <div>
+                    <Field name='missingCoStrategy'
+                      className='checkboxfill' component='input' type='radio' value='usePrimaryEdges' /> Use Primary Edges
+                  </div>
                 </td>
               </tr>
               <tr>
