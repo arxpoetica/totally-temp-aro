@@ -73,6 +73,7 @@ workflows:
                 - coverageFix
                 - platform_upgrade
                 - shp_reports
+                - AERIAL
 
       - deploy:
           context: aro_qa_builds
