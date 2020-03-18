@@ -2,20 +2,7 @@ import Actions from '../../common/actions'
 import uuidv4 from 'uuid/v4'
 
 const defaultState = {
-  pages: [
-    {
-      uuid: uuidv4(),
-      title: 'Page 1',
-      paperSize: 'A4',
-      worldLengthPerMeterOfPaper: 100000,
-      dpi: 72,
-      orientation: 'portrait',
-      mapCenter: {
-        latitude: 47.6062,
-        longitude: -122.3321
-      }
-    }
-  ],
+  pages: [],
   activePageIndex: 0,
   editingPageIndex: -1,
   isDownloading: false

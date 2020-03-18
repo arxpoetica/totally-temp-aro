@@ -64,7 +64,18 @@ export class MapReportsList extends Component {
   }
 
   handleAddPageClicked () {
-    var newPage = JSON.parse(JSON.stringify(this.props.reportPages[0]))
+    var newPage = {
+      uuid: uuidv4(),
+      title: 'Page 1',
+      paperSize: 'A4',
+      worldLengthPerMeterOfPaper: 100000,
+      dpi: 72,
+      orientation: 'portrait',
+      mapCenter: {
+        latitude: 47.6062,
+        longitude: -122.3321
+      }
+    }
     newPage.title = 'New Page'
     newPage.uuid = uuidv4()
     this.props.addPage(newPage)
