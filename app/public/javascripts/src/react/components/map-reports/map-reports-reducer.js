@@ -1,8 +1,10 @@
 import Actions from '../../common/actions'
+import uuidv4 from 'uuid/v4'
 
 const defaultState = {
   pages: [
     {
+      uuid: uuidv4(),
       title: 'Page 1',
       paperSize: 'A4',
       worldLengthPerMeterOfPaper: 100000,

@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { PropTypes } from 'prop-types'
 import { connect } from 'react-redux'
+import uuidv4 from 'uuid/v4'
 import MapReportActions from './map-reports-actions'
 import ScalingFactors from './scaling-factors'
 import Orientations from './orientations'
@@ -65,6 +66,7 @@ export class MapReportsList extends Component {
   handleAddPageClicked () {
     var newPage = JSON.parse(JSON.stringify(this.props.reportPages[0]))
     newPage.title = 'New Page'
+    newPage.uuid = uuidv4()
     this.props.addPage(newPage)
   }
 
