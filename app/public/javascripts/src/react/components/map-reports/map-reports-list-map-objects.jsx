@@ -6,6 +6,20 @@ export class MapReportsListMapObjects extends Component {
   constructor (props) {
     super(props)
     this.pageIdToMapObject = {}
+    this.polygonOptions = {
+      normal: {
+        strokeColor: '#005cbf',
+        strokeWeight: 1,
+        fillColor: '#348ee8',
+        fillOpacity: 0.2
+      },
+      selected: {
+        strokeColor: '#005cbf',
+        strokeWeight: 3,
+        fillColor: '#348ee8',
+        fillOpacity: 0.5
+      }
+    }
   }
 
   render () {
@@ -19,19 +33,24 @@ export class MapReportsListMapObjects extends Component {
     const pagesToDelete = prevProps.reportPages.filter(reportPage => !newIds.has(reportPage.uuid))
     const pagesToUpdate = this.props.reportPages.filter(reportPage => newIds.has(reportPage.uuid) && oldIds.has(reportPage.uuid))
 
-    pagesToCreate.forEach(reportPage => this.createMapObject(reportPage))
+    pagesToCreate.forEach((reportPage, index) => this.createMapObject(reportPage, index))
     pagesToDelete.forEach(reportPage => this.deleteMapObject(reportPage.uuid))
 
     // INEFFICIENT: Only recreate if objects have actually changed:
-    pagesToUpdate.forEach(reportPage => {
+    pagesToUpdate.forEach((reportPage, index) => {
       this.deleteMapObject(reportPage.uuid)
-      this.createMapObject(reportPage)
+      this.createMapObject(reportPage, index)
     })
   }
 
-  createMapObject (reportPage) {
+  createMapObject (reportPage, index) {
+    const polygonOptions = (index === this.props.activePageIndex) ? this.polygonOptions.selected : this.polygonOptions.normal
     const mapObject = new google.maps.Polygon({
       paths: this.getMapPolygonForReportPage(reportPage),
+      strokeColor: polygonOptions.strokeColor,
+      strokeWeight: polygonOptions.strokeWeight,
+      fillColor: polygonOptions.fillColor,
+      fillOpacity: polygonOptions.fillOpacity,
       map: this.props.googleMaps
     })
     this.pageIdToMapObject[reportPage.uuid] = mapObject
