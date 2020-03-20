@@ -21,6 +21,12 @@ export class MapReportsListMapObjects extends Component {
 
     pagesToCreate.forEach(reportPage => this.createMapObject(reportPage))
     pagesToDelete.forEach(reportPage => this.deleteMapObject(reportPage.uuid))
+
+    // INEFFICIENT: Only recreate if objects have actually changed:
+    pagesToUpdate.forEach(reportPage => {
+      this.deleteMapObject(reportPage.uuid)
+      this.createMapObject(reportPage)
+    })
   }
 
   createMapObject (reportPage) {

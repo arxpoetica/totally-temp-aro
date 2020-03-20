@@ -20,7 +20,10 @@ export class MapReportPageEditor extends Component {
   }
 
   savePageDefinition () {
-    var pageDefinition = JSON.parse(JSON.stringify(this.props.pageDefinition))
+    const oldPageDefinition = JSON.parse(JSON.stringify(this.props.reportPages[this.props.editingPageIndex]))
+    const newPageDefinition = this.props.pageDefinition
+    const pageDefinition = Object.assign(oldPageDefinition, newPageDefinition)
+    
     const mapCenter = this.props.googleMaps.getCenter()
     pageDefinition.mapCenter = {
       latitude: mapCenter.lat(),

@@ -77,7 +77,6 @@ export class MapReportsList extends Component {
       }
     }
     newPage.title = 'New Page'
-    newPage.uuid = uuidv4()
     this.props.addPage(newPage)
   }
 
