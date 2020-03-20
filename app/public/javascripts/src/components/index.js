@@ -70,6 +70,7 @@ import planSummary from './sidebar/plan-editor/plan-summary'
 import serviceLayerEditor from './sidebar/plan-editor/service-layer-editor'
 import conicTileSystemUploader from './sidebar/plan-settings/plan-data-selection/conic-tile-system-uploader'
 import globalDataSourceUploadModal from './sidebar/plan-settings/plan-data-selection/data-source-upload-modal'
+import projectSettingsModal from './sidebar/plan-settings/plan-project-configuration/project-settings-modal'
 import planDataSelection from './sidebar/plan-settings/plan-data-selection/plan-data-selection'
 import planProjectConfiguration from './sidebar/plan-settings/plan-project-configuration/plan-project-configuration'
 import planSettings from './sidebar/plan-settings/plan-settings'
@@ -177,6 +178,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('draggableButton', draggableButton)
   .component('conicTileSystemUploader', conicTileSystemUploader)
   .component('globalDataSourceUploadModal', globalDataSourceUploadModal)
+  .component('projectSettingsModal', projectSettingsModal)
   .component('planDataSelection', planDataSelection)
   .component('planProjectConfiguration', planProjectConfiguration)
   .component('planSettings', planSettings)

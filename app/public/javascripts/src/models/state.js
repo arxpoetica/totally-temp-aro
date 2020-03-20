@@ -277,6 +277,7 @@ class State {
     service.showDetailedLocationInfo = new Rx.BehaviorSubject()
     service.showDetailedEquipmentInfo = new Rx.BehaviorSubject()
     service.showDataSourceUploadModal = new Rx.BehaviorSubject(false)
+    service.showProjectSettingsModal = new Rx.BehaviorSubject(false)
     service.viewSettingsChanged = new Rx.BehaviorSubject()
     service.measuredDistance = new Rx.BehaviorSubject()
     service.dragStartEvent = new Rx.BehaviorSubject()

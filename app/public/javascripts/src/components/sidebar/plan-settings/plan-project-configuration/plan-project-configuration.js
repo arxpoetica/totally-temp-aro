@@ -1,4 +1,3 @@
-
 class PlanProjectConfigurationController {
   constructor ($http, $timeout, $ngRedux, state) {
     this.$http = $http
@@ -32,9 +31,27 @@ class PlanProjectConfigurationController {
   }
 
   reloadProjects() {
-    this.$http.get(`/service/v1/project-template`)
+    const filter = `deleted eq false and userId eq ${this.userId}`
+    const RESOUSRCE_READ = 4
+    this.$http.get(`/service/odata/userprojectentity?$select=id,name,permissions&$filter=${filter}&$orderby=name&$top=10000`)
       .then((result) => {
-        this.allProjects = result.data
+        let myProjects = []
+
+        // loop through the project and find check the permission bits to see
+        // if the current user has READ and ADMIN privilage to manage the resource
+        for(let i = 0; i < result.data.length; i++) {
+          const permissions = result.data[i].permissions
+          const hasView = Boolean(permissions & RESOUSRCE_READ)
+          if(hasView) {
+            const hasWrite = Boolean(permissions & this.authPermissions.RESOURCE_WRITE.permissionBits)
+            const hasAdmin = Boolean(permissions & this.authPermissions.RESOURCE_ADMIN.permissionBits)
+            const hasResourceWorkflow = Boolean(permissions & this.authPermissions.RESOURCE_WORKFLOW.permissionBits)
+            result.data[i].hasAdminPermission = hasWrite || hasAdmin || hasResourceWorkflow
+            myProjects.push(result.data[i])
+          }
+        }
+          
+        this.allProjects = myProjects
         this.parentProjectForNewProject = this.allProjects[0]
         return this.$http.get(`/service/auth/users/${this.userId}/configuration`)
       })
@@ -85,6 +102,19 @@ class PlanProjectConfigurationController {
       })
   }
 
+  editProjectSettings(srcId) {
+    this.state.showProjectSettingsModal.next(true)
+
+    //this.state.showDataSourceUploadModal.next(true)
+
+    // this.state.uploadDataSources.forEach((value) => {
+    //   if (value.id == srcId) {
+    //     this.state.uploadDataSource = value
+    //   }
+    // })
+  }
+
+
   // Saves the plan Data Selection and Resource Selection to the project
   savePlanDataAndResourceSelectionToProject () {
     var putBody = {
@@ -122,6 +152,7 @@ class PlanProjectConfigurationController {
 
   mapStateToThis (reduxState) {
     return {
+      authPermissions: reduxState.user.authPermissions,
       dataItems: reduxState.plan.dataItems
     }
   }
