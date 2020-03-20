@@ -1,11 +1,13 @@
 import React, { Component } from 'react'
 import { PropTypes } from 'prop-types'
 import { connect } from 'react-redux'
+import MapReportActions from './map-reports-actions'
 
 export class MapReportsListMapObjects extends Component {
   constructor (props) {
     super(props)
     this.pageIdToMapObject = {}
+    this.pageIdToListeners = {}
     this.polygonOptions = {
       normal: {
         strokeColor: '#005cbf',
@@ -51,14 +53,19 @@ export class MapReportsListMapObjects extends Component {
       strokeWeight: polygonOptions.strokeWeight,
       fillColor: polygonOptions.fillColor,
       fillOpacity: polygonOptions.fillOpacity,
+      clickable: true,
       map: this.props.googleMaps
     })
+    const clickListener = mapObject.addListener('click', event => this.props.setActivePageIndex(index))
+    this.pageIdToListeners[reportPage.uuid] = [clickListener]
     this.pageIdToMapObject[reportPage.uuid] = mapObject
   }
 
   deleteMapObject (pageId) {
     this.pageIdToMapObject[pageId].setMap(null)
     delete this.pageIdToMapObject[pageId]
+    this.pageIdToListeners[pageId].forEach(listener => google.maps.event.removeListener(listener))
+    delete this.pageIdToListeners[pageId]
   }
 
   // Copy paste :( server side code
@@ -111,6 +118,7 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
+  setActivePageIndex: index => dispatch(MapReportActions.setActivePageIndex(index))
 })
 
 const MapReportsListMapObjectsComponent = connect(mapStateToProps, mapDispatchToProps)(MapReportsListMapObjects)
