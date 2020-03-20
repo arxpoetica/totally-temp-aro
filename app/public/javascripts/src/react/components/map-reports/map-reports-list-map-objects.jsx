@@ -54,10 +54,23 @@ export class MapReportsListMapObjects extends Component {
       fillColor: polygonOptions.fillColor,
       fillOpacity: polygonOptions.fillOpacity,
       clickable: true,
+      draggable: true,
       map: this.props.googleMaps
     })
+    var dragStartCoordinates = null
     const clickListener = mapObject.addListener('click', event => this.props.setActivePageIndex(index))
-    this.pageIdToListeners[reportPage.uuid] = [clickListener]
+    const dragStartListener = mapObject.addListener('dragstart', event => { dragStartCoordinates = event.latLng })
+    const dragEndListener = mapObject.addListener('dragend', event => {
+      const dragEnd = event.latLng
+      const deltaLat = dragEnd.lat() - dragStartCoordinates.lat()
+      const deltaLng = dragEnd.lng() - dragStartCoordinates.lng()
+      dragStartCoordinates = null
+      var newPageDefinition = JSON.parse(JSON.stringify(this.props.reportPages[index]))
+      newPageDefinition.mapCenter.latitude += deltaLat
+      newPageDefinition.mapCenter.longitude += deltaLng
+      this.props.savePageDefinition(index, newPageDefinition)
+    })
+    this.pageIdToListeners[reportPage.uuid] = [clickListener, dragStartListener, dragEndListener]
     this.pageIdToMapObject[reportPage.uuid] = mapObject
   }
 
@@ -118,6 +131,7 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
+  savePageDefinition: (index, pageDefinition) => dispatch(MapReportActions.savePageDefinition(index, pageDefinition)),
   setActivePageIndex: index => dispatch(MapReportActions.setActivePageIndex(index))
 })
 
