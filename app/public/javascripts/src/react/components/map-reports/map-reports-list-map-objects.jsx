@@ -39,12 +39,16 @@ export class MapReportsListMapObjects extends Component {
     pagesToCreate.forEach((reportPage, index) => this.createMapObject(reportPage, index))
     pagesToDelete.forEach(reportPage => this.deleteMapObject(reportPage.uuid))
 
-    // INEFFICIENT: Only recreate if objects have actually changed:
     pagesToUpdate.forEach((reportPage, index) => {
       const oldPage = prevProps.reportPages.filter(page => page.uuid === reportPage.uuid)[0]
       const newPage = reportPage
-      this.deleteMapObject(reportPage.uuid)
-      this.createMapObject(reportPage, index)
+      if ((oldPage !== newPage) || // The page definition has changed
+        (prevProps.activePageUuid === reportPage.uuid) || // This page was previously the active page
+        (this.props.activePageUuid === reportPage.uuid) // This page is now the active page
+      ) {
+        this.deleteMapObject(reportPage.uuid)
+        this.createMapObject(reportPage, index)
+      }
     })
   }
 
@@ -68,7 +72,7 @@ export class MapReportsListMapObjects extends Component {
       const deltaLat = dragEnd.lat() - dragStartCoordinates.lat()
       const deltaLng = dragEnd.lng() - dragStartCoordinates.lng()
       dragStartCoordinates = null
-      var newPageDefinition = JSON.parse(JSON.stringify(this.props.reportPages[index]))
+      var newPageDefinition = JSON.parse(JSON.stringify(this.props.reportPages.filter(page => page.uuid === reportPage.uuid)[0]))
       newPageDefinition.mapCenter.latitude += deltaLat
       newPageDefinition.mapCenter.latitude = Math.round(newPageDefinition.mapCenter.latitude * REPORT_LAT_LONG_PRECISION) / REPORT_LAT_LONG_PRECISION
       newPageDefinition.mapCenter.longitude += deltaLng
