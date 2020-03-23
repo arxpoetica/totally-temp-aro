@@ -32,7 +32,7 @@ class PlanProjectConfigurationController {
 
   reloadProjects() {
     const filter = `deleted eq false and userId eq ${this.userId}`
-    const RESOUSRCE_READ = 4
+    // const RESOUSRCE_READ = 4
     this.$http.get(`/service/odata/userprojectentity?$select=id,name,permissions&$filter=${filter}&$orderby=name&$top=10000`)
       .then((result) => {
         let myProjects = []
@@ -41,7 +41,7 @@ class PlanProjectConfigurationController {
         // if the current user has READ and ADMIN privilage to manage the resource
         for(let i = 0; i < result.data.length; i++) {
           const permissions = result.data[i].permissions
-          const hasView = Boolean(permissions & RESOUSRCE_READ)
+          const hasView = Boolean(permissions & this.authPermissions.RESOURCE_READ.permissionBits)
           if(hasView) {
             const hasWrite = Boolean(permissions & this.authPermissions.RESOURCE_WRITE.permissionBits)
             const hasAdmin = Boolean(permissions & this.authPermissions.RESOURCE_ADMIN.permissionBits)
