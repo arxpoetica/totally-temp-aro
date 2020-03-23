@@ -67,7 +67,9 @@ export class MapReportsListMapObjects extends Component {
       dragStartCoordinates = null
       var newPageDefinition = JSON.parse(JSON.stringify(this.props.reportPages[index]))
       newPageDefinition.mapCenter.latitude += deltaLat
+      newPageDefinition.mapCenter.latitude = Math.round(newPageDefinition.mapCenter.latitude * 10000) / 10000
       newPageDefinition.mapCenter.longitude += deltaLng
+      newPageDefinition.mapCenter.longitude = Math.round(newPageDefinition.mapCenter.longitude * 10000) / 10000
       this.props.savePageDefinition(index, newPageDefinition)
     })
     this.pageIdToListeners[reportPage.uuid] = [clickListener, dragStartListener, dragEndListener]

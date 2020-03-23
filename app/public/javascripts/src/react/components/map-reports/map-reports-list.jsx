@@ -64,6 +64,7 @@ export class MapReportsList extends Component {
   }
 
   handleAddPageClicked () {
+    const mapCenter = this.props.googleMaps.getCenter()
     var newPage = {
       uuid: uuidv4(),
       title: 'Page 1',
@@ -72,8 +73,8 @@ export class MapReportsList extends Component {
       dpi: 72,
       orientation: 'portrait',
       mapCenter: {
-        latitude: 47.6062,
-        longitude: -122.3321
+        latitude: Math.round(mapCenter.lat() * 10000) / 10000,
+        longitude: Math.round(mapCenter.lng() * 10000) / 10000
       }
     }
     newPage.title = 'New Page'
@@ -88,11 +89,13 @@ export class MapReportsList extends Component {
 
 MapReportsList.propTypes = {
   activePageIndex: PropTypes.number,
+  googleMaps: PropTypes.object,
   reportPages: PropTypes.array
 }
 
 const mapStateToProps = state => ({
   activePageIndex: state.mapReports.activePageIndex,
+  googleMaps: state.map.googleMaps,
   reportPages: state.mapReports.pages
 })
 
