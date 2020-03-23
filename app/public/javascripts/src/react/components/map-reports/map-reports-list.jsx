@@ -5,6 +5,8 @@ import uuidv4 from 'uuid/v4'
 import MapReportActions from './map-reports-actions'
 import ScalingFactors from './scaling-factors'
 import Orientations from './orientations'
+import { REPORT_LAT_LONG_PRECISION } from './constants'
+
 export class MapReportsList extends Component {
   constructor (props) {
     super(props)
@@ -73,8 +75,8 @@ export class MapReportsList extends Component {
       dpi: 72,
       orientation: 'portrait',
       mapCenter: {
-        latitude: Math.round(mapCenter.lat() * 10000) / 10000,
-        longitude: Math.round(mapCenter.lng() * 10000) / 10000
+        latitude: Math.round(mapCenter.lat() * REPORT_LAT_LONG_PRECISION) / REPORT_LAT_LONG_PRECISION,
+        longitude: Math.round(mapCenter.lng() * REPORT_LAT_LONG_PRECISION) / REPORT_LAT_LONG_PRECISION
       }
     }
     newPage.title = 'New Page'

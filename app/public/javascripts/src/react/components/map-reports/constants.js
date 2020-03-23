@@ -1,0 +1,1 @@
+export const REPORT_LAT_LONG_PRECISION = 10000
