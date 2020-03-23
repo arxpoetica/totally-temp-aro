@@ -3,8 +3,8 @@ import uuidv4 from 'uuid/v4'
 
 const defaultState = {
   pages: [],
-  activePageIndex: 0,
-  editingPageIndex: -1,
+  activePageUuid: null,
+  editingPageUuid: null,
   isDownloading: false
 }
 
@@ -12,8 +12,9 @@ function clearMapReports () {
   return JSON.parse(JSON.stringify(defaultState))
 }
 
-function setPageDefinition (state, index, pageDefinition) {
+function setPageDefinition (state, uuid, pageDefinition) {
   var newPages = [].concat(state.pages)
+  const index = state.pages.findIndex(page => page.uuid === uuid)
   newPages[index] = pageDefinition
   return { ...state,
     pages: newPages
@@ -26,32 +27,32 @@ function addPage (state, pageDefinition) {
   }
 }
 
-function removePage (state, index) {
+function removePage (state, uuid) {
   var newPages = [].concat(state.pages)
+  const index = state.pages.findIndex(page => page.uuid === uuid)
   newPages.splice(index, 1)
-  const newActivePageIndex = (index <= state.activePageIndex) ? Math.max(0, state.activePageIndex - 1) : state.activePageIndex
   return { ...state,
     pages: newPages,
-    activePageIndex: newActivePageIndex
+    activePageUuid: null
   }
 }
 
-function setActivePageIndex (state, index) {
+function setActivePageUuid (state, uuid) {
   return { ...state,
-    activePageIndex: index
+    activePageUuid: uuid
   }
 }
 
-function setEditingPageIndex (state, index) {
+function setEditingPageUuid (state, uuid) {
   return { ...state,
-    editingPageIndex: index
+    editingPageUuid: uuid
   }
 }
 
 function mapReportsReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.MAP_REPORTS_SET_PAGE_DEFINITION:
-      return setPageDefinition(state, action.payload.index, action.payload.pageDefinition)
+      return setPageDefinition(state, action.payload.uuid, action.payload.pageDefinition)
 
     case Actions.MAP_REPORTS_CLEAR:
       return clearMapReports()
@@ -62,11 +63,11 @@ function mapReportsReducer (state = defaultState, action) {
     case Actions.MAP_REPORTS_REMOVE_PAGE:
       return removePage(state, action.payload)
 
-    case Actions.MAP_REPORTS_SET_ACTIVE_PAGE_INDEX:
-      return setActivePageIndex(state, action.payload)
+    case Actions.MAP_REPORTS_SET_ACTIVE_PAGE_UUID:
+      return setActivePageUuid(state, action.payload)
 
     case Actions.MAP_REPORTS_SET_EDITING_PAGE_INDEX:
-      return setEditingPageIndex(state, action.payload)
+      return setEditingPageUuid(state, action.payload)
 
     default:
       return state

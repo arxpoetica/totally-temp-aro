@@ -13,7 +13,7 @@ export class MapReportsDownloader extends Component {
       <h3>Map Reports</h3>
         <MapReportsListMapObjects />
         {
-          this.props.editingPageIndex >= 0
+          this.props.editingPageUuid
           ? <MapReportPageEditor />
           : <div>
             <MapReportsList />
@@ -55,14 +55,14 @@ MapReportsDownloader.propTypes = {
   planId: PropTypes.number,
   mapLayers: PropTypes.object,
   reportPages: PropTypes.array,
-  editingPageIndex: PropTypes.number
+  editingPageUuid: PropTypes.string
 }
 
 const mapStateToProps = state => ({
   planId: state.plan.activePlan.id,
   mapLayers: state.mapLayers,
   reportPages: state.mapReports.pages,
-  editingPageIndex: state.mapReports.editingPageIndex
+  editingPageUuid: state.mapReports.editingPageUuid
 })
 
 const mapDispatchToProps = dispatch => ({

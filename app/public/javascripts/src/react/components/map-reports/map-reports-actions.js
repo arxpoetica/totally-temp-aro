@@ -36,11 +36,11 @@ function setLayerIsChecked (layerName, isChecked) {
   }
 }
 
-function savePageDefinition (index, pageDefinition) {
+function savePageDefinition (uuid, pageDefinition) {
   return {
     type: Actions.MAP_REPORTS_SET_PAGE_DEFINITION,
     payload: {
-      index,
+      uuid,
       pageDefinition
     }
   }
@@ -59,24 +59,24 @@ function addPage (pageDefinition) {
   }
 }
 
-function removePage (index) {
+function removePage (uuid) {
   return {
     type: Actions.MAP_REPORTS_REMOVE_PAGE,
-    payload: index
+    payload: uuid
   }
 }
 
-function setActivePageIndex (index) {
+function setActivePageUuid (uuid) {
   return {
-    type: Actions.MAP_REPORTS_SET_ACTIVE_PAGE_INDEX,
-    payload: index
+    type: Actions.MAP_REPORTS_SET_ACTIVE_PAGE_UUID,
+    payload: uuid
   }
 }
 
-function setEditingPageIndex (index) {
+function setEditingPageUuid (uuid) {
   return {
     type: Actions.MAP_REPORTS_SET_EDITING_PAGE_INDEX,
-    payload: index
+    payload: uuid
   }
 }
 
@@ -88,6 +88,6 @@ export default {
   clearMapReports,
   addPage,
   removePage,
-  setActivePageIndex,
-  setEditingPageIndex
+  setActivePageUuid,
+  setEditingPageUuid
 }

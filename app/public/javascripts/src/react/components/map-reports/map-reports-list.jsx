@@ -20,21 +20,21 @@ export class MapReportsList extends Component {
         {
           this.props.reportPages.map((reportPage, index) => (
             <li
-              className={'list-group-item' + ((this.props.activePageIndex === index) ? ' active' : '')}
+              className={'list-group-item' + ((this.props.activePageUuid === reportPage.uuid) ? ' active' : '')}
               key={index}
               style={{ cursor: 'pointer', lineHeight: '28px' }}
-              onClick={() => this.props.setActivePageIndex(index)}
+              onClick={() => this.props.setActivePageUuid(reportPage.uuid)}
             >
               <div className='d-flex'>
                 <div className='flex-grow-1'>{reportPage.title}</div>
                 <div className='flex-grow-0'>
                   <button className='btn btn-sm btn-light'
-                    onClick={event => this.handleEditPageClicked(event, index)}
+                    onClick={event => this.handleEditPageClicked(event, reportPage.uuid)}
                   >
                     <i className='fa fa-edit'/>
                   </button>
                   <button className='btn btn-sm btn-danger'
-                    onClick={event => this.handleRemovePageClicked(event, index)}
+                    onClick={event => this.handleRemovePageClicked(event, reportPage.uuid)}
                   >
                     <i className='fa fa-trash-alt'/>
                 </button>
@@ -60,8 +60,8 @@ export class MapReportsList extends Component {
     </div>
   }
 
-  handleRemovePageClicked (event, index) {
-    this.props.removePage(index)
+  handleRemovePageClicked (event, uuid) {
+    this.props.removePage(uuid)
     event.stopPropagation()
   }
 
@@ -84,28 +84,28 @@ export class MapReportsList extends Component {
   }
 
   handleEditPageClicked (event, index) {
-    this.props.setEditingPageIndex(index)
+    this.props.setEditingPageUuid(index)
     event.stopPropagation()
   }
 }
 
 MapReportsList.propTypes = {
-  activePageIndex: PropTypes.number,
+  activePageUuid: PropTypes.string,
   googleMaps: PropTypes.object,
   reportPages: PropTypes.array
 }
 
 const mapStateToProps = state => ({
-  activePageIndex: state.mapReports.activePageIndex,
+  activePageUuid: state.mapReports.activePageUuid,
   googleMaps: state.map.googleMaps,
   reportPages: state.mapReports.pages
 })
 
 const mapDispatchToProps = dispatch => ({
   addPage: pageDefinition => dispatch(MapReportActions.addPage(pageDefinition)),
-  removePage: index => dispatch(MapReportActions.removePage(index)),
-  setActivePageIndex: index => dispatch(MapReportActions.setActivePageIndex(index)),
-  setEditingPageIndex: index => dispatch(MapReportActions.setEditingPageIndex(index))
+  removePage: uuid => dispatch(MapReportActions.removePage(uuid)),
+  setActivePageUuid: uuid => dispatch(MapReportActions.setActivePageUuid(uuid)),
+  setEditingPageUuid: uuid => dispatch(MapReportActions.setEditingPageUuid(uuid))
 })
 
 const MapReportsDownloaderComponent = connect(mapStateToProps, mapDispatchToProps)(MapReportsList)

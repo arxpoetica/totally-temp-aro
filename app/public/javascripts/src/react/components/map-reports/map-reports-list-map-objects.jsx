@@ -41,13 +41,15 @@ export class MapReportsListMapObjects extends Component {
 
     // INEFFICIENT: Only recreate if objects have actually changed:
     pagesToUpdate.forEach((reportPage, index) => {
+      const oldPage = prevProps.reportPages.filter(page => page.uuid === reportPage.uuid)[0]
+      const newPage = reportPage
       this.deleteMapObject(reportPage.uuid)
       this.createMapObject(reportPage, index)
     })
   }
 
   createMapObject (reportPage, index) {
-    const polygonOptions = (index === this.props.activePageIndex) ? this.polygonOptions.selected : this.polygonOptions.normal
+    const polygonOptions = (reportPage.uuid === this.props.activePageUuid) ? this.polygonOptions.selected : this.polygonOptions.normal
     const mapObject = new google.maps.Polygon({
       paths: this.getMapPolygonForReportPage(reportPage),
       strokeColor: polygonOptions.strokeColor,
@@ -59,7 +61,7 @@ export class MapReportsListMapObjects extends Component {
       map: this.props.googleMaps
     })
     var dragStartCoordinates = null
-    const clickListener = mapObject.addListener('click', event => this.props.setActivePageIndex(index))
+    const clickListener = mapObject.addListener('click', event => this.props.setActivePageUuid(reportPage.uuid))
     const dragStartListener = mapObject.addListener('dragstart', event => { dragStartCoordinates = event.latLng })
     const dragEndListener = mapObject.addListener('dragend', event => {
       const dragEnd = event.latLng
@@ -71,7 +73,7 @@ export class MapReportsListMapObjects extends Component {
       newPageDefinition.mapCenter.latitude = Math.round(newPageDefinition.mapCenter.latitude * REPORT_LAT_LONG_PRECISION) / REPORT_LAT_LONG_PRECISION
       newPageDefinition.mapCenter.longitude += deltaLng
       newPageDefinition.mapCenter.longitude = Math.round(newPageDefinition.mapCenter.longitude * REPORT_LAT_LONG_PRECISION) / REPORT_LAT_LONG_PRECISION
-      this.props.savePageDefinition(index, newPageDefinition)
+      this.props.savePageDefinition(reportPage.uuid, newPageDefinition)
     })
     this.pageIdToListeners[reportPage.uuid] = [clickListener, dragStartListener, dragEndListener]
     this.pageIdToMapObject[reportPage.uuid] = mapObject
@@ -124,20 +126,20 @@ export class MapReportsListMapObjects extends Component {
 }
 
 MapReportsListMapObjects.propTypes = {
-  activePageIndex: PropTypes.number,
+  activePageUuid: PropTypes.string,
   googleMaps: PropTypes.object,
   reportPages: PropTypes.array
 }
 
 const mapStateToProps = state => ({
-  activePageIndex: state.mapReports.activePageIndex,
+  activePageUuid: state.mapReports.activePageUuid,
   googleMaps: state.map.googleMaps,
   reportPages: state.mapReports.pages
 })
 
 const mapDispatchToProps = dispatch => ({
-  savePageDefinition: (index, pageDefinition) => dispatch(MapReportActions.savePageDefinition(index, pageDefinition)),
-  setActivePageIndex: index => dispatch(MapReportActions.setActivePageIndex(index))
+  savePageDefinition: (uuid, pageDefinition) => dispatch(MapReportActions.savePageDefinition(uuid, pageDefinition)),
+  setActivePageUuid: uuid => dispatch(MapReportActions.setActivePageUuid(uuid))
 })
 
 const MapReportsListMapObjectsComponent = connect(mapStateToProps, mapDispatchToProps)(MapReportsListMapObjects)
