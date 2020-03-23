@@ -104,8 +104,10 @@ export class MapReportsListMapObjects extends Component {
 
   getMapPolygonForReportPage (reportPage) {
     const paperSizeMeters = this.getPaperSize(reportPage.paperSize)
-    const physicalDistanceAlongLongitude = reportPage.worldLengthPerMeterOfPaper * paperSizeMeters.sizeX
-    const physicalDistanceAlongLatitude = reportPage.worldLengthPerMeterOfPaper * Math.sin(reportPage.mapCenter.latitude / 180.0 * Math.PI) * paperSizeMeters.sizeY
+    const sizeX = (reportPage.orientation === 'portrait') ? paperSizeMeters.sizeX : paperSizeMeters.sizeY
+    const sizeY = (reportPage.orientation === 'portrait') ? paperSizeMeters.sizeY : paperSizeMeters.sizeX
+    const physicalDistanceAlongLongitude = reportPage.worldLengthPerMeterOfPaper * sizeX
+    const physicalDistanceAlongLatitude = reportPage.worldLengthPerMeterOfPaper * Math.cos(reportPage.mapCenter.latitude / 180.0 * Math.PI) * sizeY
     const equatorLength = 40075016.686  // meters
     const radiusEarth = equatorLength / 2.0 / Math.PI
     // const sliceLengthAtLongitude = equatorLength * Math.sin(reportPage.mapCenter.longitude)

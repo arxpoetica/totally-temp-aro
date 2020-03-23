@@ -6,9 +6,11 @@ class CaptureSettings {
     // First, calculate the pixels required based on the page size and dpi.
     const INCHES_PER_METER = 39.3701
     const pixelsPerPaperMeter = pageSetup.dpi * INCHES_PER_METER
+    const sizeX = (pageSetup.orientation === 'portrait') ? pageSetup.paperSize.sizeX : pageSetup.paperSize.sizeY
+    const sizeY = (pageSetup.orientation === 'portrait') ? pageSetup.paperSize.sizeY : pageSetup.paperSize.sizeX
     const pageSizePixels = {
-      x: Math.round(pageSetup.paperSize.sizeX * pixelsPerPaperMeter),
-      y: Math.round(pageSetup.paperSize.sizeY * pixelsPerPaperMeter)
+      x: Math.round(sizeX * pixelsPerPaperMeter),
+      y: Math.round(sizeY * pixelsPerPaperMeter)
     }
 
     // From https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Resolution_and_Scale
