@@ -190,7 +190,11 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   stateSerializationHelper.loadStateFromJSON = (state, reduxState, dispatchers, planInputs, defaultNetworkConstraints) => {
     // loadAnalysisTypeFromBody(state, planInputs)
     // loadLocationTypesFromBody(state, reduxState, dispatchers, planInputs)
-    loadSelectedExistingFiberFromBody(state, reduxState, dispatchers, planInputs)
+
+    // loadSelectedExistingFiberFromBody was part of overridenConfiguration which is now depricated
+    // so I don't think we need to reimpliment the plan-actions.selectDataItems()
+    // loadSelectedExistingFiberFromBody(state, reduxState, dispatchers, planInputs)
+
     loadAlgorithmParametersFromBody(state, dispatchers, planInputs)
     // loadFiberNetworkConstraintsFromBody(state, planInputs)
     // loadTechnologiesFromBody(state, planInputs)
@@ -248,7 +252,13 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   // Load the selected existing fiber from a POST body object that is sent to the optimization engine
   // ToDo: Is this suppose to set layer visibility?
   //  Either way, similar to location types, this just calls a Redux dispatch, move this Redux action
+  // loadSelectedExistingFiberFromBody was part of overridenConfiguration which is now depricated
+  // so I don't think we need to reimpliment the plan-actions.selectDataItems()
+  /*
   var loadSelectedExistingFiberFromBody = (state, dataItems, dispatchers, postBody) => {
+    console.log(' --- loadSelectedExistingFiberFromBody --- ')
+    console.log(postBody)
+    console.log(dataItems)
     if (!dataItems.fiber) {
       return
     }
@@ -264,9 +274,13 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
           })
         }
       })
+
+      console.log(selectedLibraryItems)
+      console.log(' --- ')
       dispatchers.selectDataItems('fiber', selectedLibraryItems)
     }
   }
+  */
 
   // Load algorithm parameters from a POST body object that is sent to the optimization engine
   // ToDo: We've already gotten rid of state.optimizationOptions
