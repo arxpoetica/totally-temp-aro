@@ -198,7 +198,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     loadAlgorithmParametersFromBody(state, dispatchers, planInputs)
     // loadFiberNetworkConstraintsFromBody(state, planInputs)
     // loadTechnologiesFromBody(state, planInputs)
-    loadNetworkConfigurationOverrideFromBody(dispatchers, planInputs, defaultNetworkConstraints)
+    // loadNetworkConfigurationOverrideFromBody(dispatchers, planInputs, defaultNetworkConstraints)
     // console.log('load from JSON')
     // console.log(state.optimizationOptions)
   }
@@ -390,6 +390,8 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   */
 
   // ToDo: Move all these Redux dispatches to a redux action. Uggh
+  // we no longer use networkConfigurationOverride so I think this us just gone
+  /*
   var loadNetworkConfigurationOverrideFromBody = (dispatchers, planInputs, defaultNetworkConstraints) => {
     if (planInputs.networkConfigurationOverride) {
       // We have a network configuration override, set the network constraints
@@ -417,7 +419,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       dispatchers.setNetworkAnalysisConstraints(aroNetworkConstraints)
     }
   }
-
+  */
   // ------------------------------------------------------------------------------------------------------------------
   // End section - POST body to state
   // ------------------------------------------------------------------------------------------------------------------

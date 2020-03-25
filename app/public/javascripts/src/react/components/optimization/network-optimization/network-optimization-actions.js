@@ -108,7 +108,11 @@ function loadOptimizationInputs (planId) {
           }
         })
         
-        if (response.data.locationConstraints && response.data.locationConstraints.analysisSelectionMode) {
+        // to replace loadAlgorithmParametersFromBody
+        // having issues with analysisLayerId
+        /*
+        if (response.data.locationConstraints
+            && response.data.locationConstraints.analysisSelectionMode) {
           dispatch({
             type: Actions.SELECTION_SET_ACTIVE_MODE,
             payload: response.data.locationConstraints.analysisSelectionMode
@@ -118,14 +122,16 @@ function loadOptimizationInputs (planId) {
               && response.data.locationConstraints.analysisLayerId) {
             // ToDo: what is analysisLayerId
             // state.setLayerVisibilityByKey
-            /*
-            dispatch({
-              type: Actions.SELECTION_SET_ACTIVE_MODE,
-              payload: response.data.locationConstraints.analysisSelectionMode
-            })
-            */
+            
+          //  dispatch({
+          //    type: Actions.SELECTION_SET_ACTIVE_MODE,
+          //    payload: response.data.locationConstraints.analysisSelectionMode
+          //  })
+            
           }
         }
+        */
+
         // })
         // ToDo: sift through locations and turn on all in locations constraints, turn all others off
         console.log(response.data)

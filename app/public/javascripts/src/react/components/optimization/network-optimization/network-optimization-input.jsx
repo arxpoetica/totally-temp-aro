@@ -75,7 +75,8 @@ export class NetworkOptimizationInput extends Component {
 
     inputs.locationConstraints = JSON.parse(JSON.stringify(this.props.optimizationInputs.locationConstraints))
     inputs.locationConstraints.analysisSelectionMode = this.props.activeSelectionModeId
-
+    // inputs.locationConstraints.analysisLayerId
+    
     return inputs
   }
 
