@@ -616,6 +616,8 @@ class State {
     }
 
     service.setLayerVisibilityByKey = (keyType, layerKey, isVisible) => {
+      console.log('--- setLayerVisibilityByKey ---')
+      console.log({keyType:keyType, layerKey:layerKey})
       // First find the layer correspying to the ID
       const layerState = $ngRedux.getState().mapLayers
       var layerToChange = null

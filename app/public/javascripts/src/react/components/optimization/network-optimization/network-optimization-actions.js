@@ -74,9 +74,20 @@ function loadOptimizationInputs (planId) {
         var layerKeys = []
         if (response.data.locationConstraints && response.data.locationConstraints.locationTypes) {
           response.data.locationConstraints.locationTypes.forEach(plannerKey => {
+            // ToDo: bit of a hack here. once we standardize location keys we'll be able to pull out this translation
+            var plannerKeyToKey = {
+              'household': 'household',
+              'celltower': 'celltower',
+              'large': 'large_businesses',
+              'medium': 'medium_businesses',
+              'small': 'small_businesses'
+            }
+            var key = plannerKey
+            if (plannerKeyToKey[plannerKey]) key = plannerKeyToKey[plannerKey]
+
             layerKeys.push({
               layerType: 'location',
-              plannerKey: plannerKey,
+              key: key,
               visibility: true
             })
           })
@@ -97,6 +108,24 @@ function loadOptimizationInputs (planId) {
           }
         })
         
+        if (response.data.locationConstraints && response.data.locationConstraints.analysisSelectionMode) {
+          dispatch({
+            type: Actions.SELECTION_SET_ACTIVE_MODE,
+            payload: response.data.locationConstraints.analysisSelectionMode
+          })
+
+          if (response.data.locationConstraints.analysisSelectionMode === 'SELECTED_ANALYSIS_AREAS'
+              && response.data.locationConstraints.analysisLayerId) {
+            // ToDo: what is analysisLayerId
+            // state.setLayerVisibilityByKey
+            /*
+            dispatch({
+              type: Actions.SELECTION_SET_ACTIVE_MODE,
+              payload: response.data.locationConstraints.analysisSelectionMode
+            })
+            */
+          }
+        }
         // })
         // ToDo: sift through locations and turn on all in locations constraints, turn all others off
         console.log(response.data)
@@ -113,6 +142,17 @@ function loadOptimizationInputs (planId) {
           }
         })
         */
+        
+        // optimization.networkOptimization.optimizationInputs.locationConstraints.analysisSelectionMode
+        // SelectionActions.setActiveSelectionMode
+        /*
+        dispatchers.setSelectionTypeById(postBody.locationConstraints.analysisSelectionMode)
+        if (postBody.locationConstraints.analysisSelectionMode === 'SELECTED_ANALYSIS_AREAS') {
+          // optimization.networkOptimization.optimizationInputs.locationConstraints.analysisLayerId
+          state.setLayerVisibilityByKey('analysisLayerId', postBody.locationConstraints.analysisLayerId, true)
+        }
+        */
+        
         // locationConstraints.locationTypes
       })
   }

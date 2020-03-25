@@ -96,21 +96,26 @@ function setCableConduitVisibility (state, cableKey, conduitKey, visibility) {
 function setAllLayerVisibilityOff (state, layerTypes) {
   var newState = {}
   layerTypes.forEach(layerType => {
+    newState[layerType] = state[layerType] // will get cloned below
     state[layerType].forEach((layer, layerIndex) => {
       const newLayer = { ...layer, checked: false }
-      newState[layerType] = state[layerType].set(layerIndex, newLayer)
+      newState[layerType] = newState[layerType].set(layerIndex, newLayer)
     })
   })
-  return { ...state, newState }
+  return { ...state, ...newState }
 }
 
 function setLayerVisibilityByKey (state, layerKeys) {
   // each layer key:
-  //  layerType, plannerKey, visibility
+  //  layerType, key, visibility
   // (make a prototype?)
   var newState = {}
   layerKeys.forEach(layerKey => {
-    const index = state[layerKey.layerType].findIndex(stateLayer => stateLayer.plannerKey === layerKey.plannerKey)
+    // keys may not have uiLayerId
+    // ToDo: the layers need to have IDs or keys that service is aware of
+    // such that keys from, say, optomization can be sent here with out a state look up
+    const index = state[layerKey.layerType].findIndex(stateLayer => stateLayer.key === layerKey.key && (!layerKey.uiLayerId || layerKey.uiLayerId === stateLayer.uiLayerId))
+
     if (index !== -1) {
       const newLayer = { ...state[layerKey.layerType].get(index), checked: layerKey.visibility }
       if (!newState.hasOwnProperty(layerKey.layerType)) newState[layerKey.layerType] = state[layerKey.layerType] // .slice() // will get cloned on the next line
@@ -138,7 +143,7 @@ function setLayerVisibility (state, layer, visibility) {
   // Create a new layer with the checked flag set
   const newLayer = { ...layerToChange, checked: visibility }
   if (layerKey === 'location') {
-    console.log(newLayer.plannerKey)
+    console.log(newLayer.key)
   }
   // Replace this category in the state
   return { ...state, [layerKey]: state[layerKey].set(layerIndex, newLayer) }

@@ -133,7 +133,7 @@ function selectionReducer (state = defaultState, action) {
 
     case Actions.SELECTION_SET_LOCATIONS:
       return addLocations(state, action.payload)
-      
+
     case Actions.SELECTION_SET_PLAN_EDITOR_FEATURES:
       return setPlanEditorSelectedFeatures(state, action.payload)
 

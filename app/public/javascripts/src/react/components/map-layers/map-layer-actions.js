@@ -5,6 +5,7 @@ import AroHttp from '../../common/aro-http'
 // ToDo: LOCATIONS refactor callers of this to send layer Key instead of whole layer
 function setLayerVisibility (layer, newVisibility) {
   // if location send to Optimization
+  console.log(layer)
   return (dispatch, getState) => {
     // find type of layer
     const state = getState().mapLayers
@@ -20,25 +21,30 @@ function setLayerVisibility (layer, newVisibility) {
     })
 
     if (layerType !== null) {
-      // ToDo: use batch()
-      dispatch({
+      var setVisibilityByKey = {
         type: Actions.LAYERS_SET_VISIBILITY_BY_KEY,
         payload: {
           layerKeys: [
             {
               layerType: layerType,
-              plannerKey: layer.plannerKey,
+              key: layer.key,
+              uiLayerId: layer.uiLayerId,
               visibility: newVisibility
             }
           ]
         }
-      })
+      }
+      // I would like to get rid of the polymorphism
+      // if (layer.analysisLayerId) setVisibilityByKey.analysisLayerId = layer.analysisLayerId
+
+      // ToDo: use batch()
+      dispatch(setVisibilityByKey)
       // if location send to Optimization
       if (layerType === 'location') {
         dispatch({
           type: Actions.NETWORK_OPTIMIZATION_SET_LOCATION_TYPE,
           payload: {
-            locationType: layer.plannerKey,
+            locationType: layer.plannerKey, // ToDo: layer.key,
             isIncluded: newVisibility
           }
         })
