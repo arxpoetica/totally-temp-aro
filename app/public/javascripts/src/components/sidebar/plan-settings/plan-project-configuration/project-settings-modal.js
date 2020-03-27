@@ -2,18 +2,9 @@ class ProjectSettingsController {
   constructor ($http, $ngRedux, state) {
     this.state = state
     this.$http = $http
-    
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }
-
-  canEdit (row) {
-    return this.state.loggedInUser.hasPermissions(this.state.authPermissionsByName['RESOURCE_ADMIN'].permissions, row.permissions)
-  }
-
-  close () {
-    this.state.showProjectSettingsModal.next(false)
-  }
-
+ 
   modalShown () {
     this.state.showProjectSettingsModal.next(true)
   }
