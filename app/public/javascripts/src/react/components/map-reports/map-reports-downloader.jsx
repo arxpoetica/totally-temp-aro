@@ -10,18 +10,17 @@ import MapReportsListMapObjects from './map-reports-list-map-objects.jsx'
 export class MapReportsDownloader extends Component {
   render () {
     return <div>
-      <h3>Map Reports</h3>
-        <MapReportsListMapObjects />
-        {
-          this.props.editingPageUuid
-          ? <MapReportPageEditor />
-          : <div>
-            <MapReportsList />
-            <button className='btn btn-block btn-primary mt-2' onClick={() => this.doDownloadReport()}>
-              <i className='fa fa-download' />Generate and Download report
-            </button>
-          </div>
-        }
+      <MapReportsListMapObjects />
+      {
+        this.props.editingPageUuid
+        ? <MapReportPageEditor />
+        : <div>
+          <MapReportsList />
+          <button className='btn btn-block btn-primary mt-2' onClick={() => this.doDownloadReport()}>
+            <i className='fa fa-download' />Generate and Download report
+          </button>
+        </div>
+      }
     </div>
   }
 

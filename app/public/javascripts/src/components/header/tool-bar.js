@@ -547,7 +547,8 @@ class ToolBarController {
 
   mapStateToThis (reduxState) {
     return {
-      isAnnotationsListVisible: reduxState.tool.showToolBox && (reduxState.tool.activeTool === Tools.ANNOTATIONS)
+      isAnnotationsListVisible: reduxState.tool.showToolBox && (reduxState.tool.activeTool === Tools.ANNOTATION.id),
+      isMapReportsVisible: reduxState.tool.showToolBox && (reduxState.tool.activeTool === Tools.MAP_REPORTS.id)
     }
   }
 
@@ -558,7 +559,11 @@ class ToolBarController {
         dispatch(RfpActions.showOrHideAllRfpStatus(true))
       },
       setAnnotationListVisibility: isVisible => {
-        dispatch(ToolActions.setActiveTool(isVisible ? Tools.ANNOTATIONS : null))
+        dispatch(ToolActions.setActiveTool(isVisible ? Tools.ANNOTATION.id : null))
+        dispatch(ToolActions.setToolboxVisibility(isVisible))
+      },
+      setMapReportsVisibility: isVisible => {
+        dispatch(ToolActions.setActiveTool(isVisible ? Tools.MAP_REPORTS.id : null))
         dispatch(ToolActions.setToolboxVisibility(isVisible))
       }
     }

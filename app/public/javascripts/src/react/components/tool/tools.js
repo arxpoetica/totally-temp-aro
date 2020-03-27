@@ -1,4 +1,10 @@
 export default Object.freeze({
-  ANNOTATIONS: 'annotations',
-  MAP_REPORTS: 'map-reports'
+  ANNOTATION: {
+    id: 'ANNOTATION',
+    displayName: 'Map annotations'
+  },
+  MAP_REPORTS: {
+    id: 'MAP_REPORTS',
+    displayName: 'Map reports'
+  }
 })
