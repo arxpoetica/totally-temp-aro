@@ -1,9 +1,8 @@
 import Actions from '../../../common/actions'
-import DefaultOptimizationInputs from './default-optimization-inputs'
 // import ObjectUtils from '../../../../shared-utils/object-utils'
 
 const defaultState = {
-  optimizationInputs: DefaultOptimizationInputs, // serialization helper
+  optimizationInputs: {}, // will hydrate from config settings
   isCanceling: false,
   optimizationId: null
 }
