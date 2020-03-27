@@ -108,7 +108,6 @@ class PlanProjectConfigurationController {
     this.setCurrentProjectTemplateId(src.id)
   }
 
-
   // Saves the plan Data Selection and Resource Selection to the project
   savePlanDataAndResourceSelectionToProject () {
     var putBody = {

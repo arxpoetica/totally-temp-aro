@@ -1,5 +1,5 @@
 class ProjectSettingsController {
-  constructor ($http, $timeout, $ngRedux, state) {
+  constructor ($http, $ngRedux, state) {
     this.state = state
     this.$http = $http
     
@@ -38,7 +38,7 @@ class ProjectSettingsController {
   }
 }
 
-ProjectSettingsController.$inject = ['$http', '$timeout', '$ngRedux', 'state']
+ProjectSettingsController.$inject = ['$http', '$ngRedux', 'state']
 
 let projectSettingsModal = {
   templateUrl: '/components/sidebar/plan-settings/plan-project-configuration/project-settings-modal.html',
