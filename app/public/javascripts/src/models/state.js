@@ -19,6 +19,7 @@ import RingEditActions from '../react/components/ring-edit/ring-edit-actions'
 import ReactComponentConstants from '../react/common/constants'
 import AroNetworkConstraints from '../shared-utils/aro-network-constraints'
 import NetworkAnalysisActions from '../react/components/optimization/network-analysis/network-analysis-actions'
+import NetworkOptimizationActions from '../react/components/optimization/network-optimization/network-optimization-actions'
 const networkAnalysisConstraintsSelector = formValueSelector(ReactComponentConstants.NETWORK_ANALYSIS_CONSTRAINTS)
 
 // We need a selector, else the .toJS() call will create an infinite digest loop
@@ -1628,6 +1629,7 @@ class State {
           if (service.configuration.ARO_CLIENT === 'frontier' || service.configuration.ARO_CLIENT === 'sse') {
             heatmapOptions.selectedHeatmapOption = service.viewSetting.heatmapOptions.filter((option) => option.id === 'HEATMAP_OFF')[0]
           }
+          service.setOptimizationInputs(service.configuration.optimizationOptions)
         })
         .catch(err => console.error(err))
 
@@ -1895,6 +1897,7 @@ class State {
       onFeatureSelectedRedux: features => dispatch(RingEditActions.onFeatureSelected(features)),
       setNetworkAnalysisConstraints: aroNetworkConstraints => dispatch(NetworkAnalysisActions.setNetworkAnalysisConstraints(aroNetworkConstraints)),
       setNetworkAnalysisConnectivityDefinition: (spatialEdgeType, networkConnectivityType) => dispatch(NetworkAnalysisActions.setNetworkAnalysisConnectivityDefinition(spatialEdgeType, networkConnectivityType)),
+      setOptimizationInputs: inputs => dispatch(NetworkOptimizationActions.setOptimizationInputs(inputs)),
       setPrimarySpatialEdge: primarySpatialEdge => dispatch(NetworkAnalysisActions.setPrimarySpatialEdge(primarySpatialEdge)),
       clearWormholeFuseDefinitions: () => dispatch(NetworkAnalysisActions.clearWormholeFuseDefinitions()),
       setWormholeFuseDefinition: (spatialEdgeType, wormholeFusionTypeId) => dispatch(NetworkAnalysisActions.setWormholeFuseDefinition(spatialEdgeType, wormholeFusionTypeId)),

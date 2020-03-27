@@ -1,8 +1,7 @@
 import Actions from '../../../common/actions'
-import DefaultOptimizationInputs from './default-optimization-inputs'
 
 const defaultState = {
-  optimizationInputs: DefaultOptimizationInputs, // serialization helper
+  optimizationInputs: {}, // will hydrate from config settings
   isCanceling: false,
   optimizationId: null
 }
