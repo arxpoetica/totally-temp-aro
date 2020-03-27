@@ -327,6 +327,8 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       state.optimizationOptions.budget = +postBody.optimization.budget / 1000
     }
     */
+    console.log('--- postBody.locationConstraints.analysisSelectionMode ---')
+    console.log(postBody.locationConstraints.analysisSelectionMode)
     dispatchers.setSelectionTypeById(postBody.locationConstraints.analysisSelectionMode)
     if (postBody.locationConstraints.analysisSelectionMode === 'SELECTED_ANALYSIS_AREAS') {
       state.setLayerVisibilityByKey('analysisLayerId', postBody.locationConstraints.analysisLayerId, true)
