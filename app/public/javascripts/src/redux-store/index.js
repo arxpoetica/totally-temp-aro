@@ -22,6 +22,7 @@ import mapReports from '../react/components/map-reports/map-reports-reducer'
 import plan from '../react/components/plan/plan-reducer'
 import planEditor from '../react/components/plan-editor/plan-editor-reducer'
 import selection from '../react/components/selection/selection-reducer'
+import tool from '../react/components/tool/tool-reducer'
 import user from '../react/components/user/user-reducer'
 import ringEdit from '../react/components/ring-edit/ring-edit-reducer'
 import locationInfo from '../react/components/location-info/location-info-reducer'
@@ -46,6 +47,7 @@ let reducer = combineReducers({
   plan,
   planEditor,
   selection,
+  tool,
   user,
   form,
   ringEdit,

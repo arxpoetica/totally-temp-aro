@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { PropTypes } from 'prop-types'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
-import AnnotationList from './annotation-list.jsx'
+import AnnotationList from '../map-layers/annotation-list.jsx'
 
 export class ToolBox extends Component {
   constructor (props) {

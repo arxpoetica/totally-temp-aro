@@ -70,7 +70,7 @@ class MapSplitController {
         reduxState.planEditor.isModifyingObject ||
         reduxState.planEditor.isCommittingTransaction ||
         reduxState.planEditor.isEnteringTransaction,
-      showToolBox: reduxState.mapLayers.annotation.showList // For now, later this will be a tool box flag
+      showToolBox: reduxState.tool.showToolBox
     }
   }
 
