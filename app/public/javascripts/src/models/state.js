@@ -1634,6 +1634,9 @@ class State {
       // Get application configuration from the server
       $http.get('/configuration')
         .then(result => {
+          console.log('--- CONFIG ---')
+          console.log(result)
+          console.log(' --- ')
           service.configuration = result.data.appConfiguration
           service.googleMapsLicensing = result.data.googleMapsLicensing
           service.enumStrings = result.data.enumStrings
