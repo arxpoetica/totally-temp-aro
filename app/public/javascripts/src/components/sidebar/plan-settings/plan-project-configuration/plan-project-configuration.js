@@ -102,18 +102,9 @@ class PlanProjectConfigurationController {
       })
   }
 
-  editProjectSettings(srcId) {
-    this.state.showProjectSettingsModal.next(true)
-
-    //this.state.showDataSourceUploadModal.next(true)
-
-    // this.state.uploadDataSources.forEach((value) => {
-    //   if (value.id == srcId) {
-    //     this.state.uploadDataSource = value
-    //   }
-    // })
+  editProjectSettings (srcId) {
+    this.state.showProjectSettingsModal = true
   }
-
 
   // Saves the plan Data Selection and Resource Selection to the project
   savePlanDataAndResourceSelectionToProject () {
