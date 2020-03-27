@@ -12,7 +12,6 @@ function loadFiberTypes () {
 }
 
 // service_layer_node_type no longer exists, depricate this
-/*
 function loadServiceLayers () {
   return database.query('SELECT * FROM client.service_layer WHERE is_user_defined=false AND show_in_boundaries=true ORDER BY id ASC')
     .then((response) => {
@@ -31,7 +30,6 @@ function loadServiceLayers () {
       })
     })
 }
-*/
 
 function loadAnalysisLayers () {
   return database.query('SELECT * FROM client.analysis_layer ORDER BY id ASC')
@@ -119,7 +117,7 @@ exports.clearUiConfigurationCache = () => UIConfiguration.clearCache()
 exports.refresh = () => {
   return Promise.all([
     loadAnalysisLayers(),
-    // loadServiceLayers(),
+    loadServiceLayers(),
     loadFiberTypes(),
     loadConfiguration(),
     loadEnumStrings()
