@@ -16,8 +16,8 @@ export class MapReportsDownloader extends Component {
         ? <MapReportPageEditor />
         : <div>
           <MapReportsList />
-          <button className='btn btn-block btn-primary mt-2' onClick={() => this.doDownloadReport()}>
-            <i className='fa fa-download' />Generate and Download report
+          <button className='btn btn-sm btn-block btn-primary mt-2' onClick={() => this.doDownloadReport()}>
+            <i className='fa fa-download mr-2' />Generate and Download report
           </button>
         </div>
       }

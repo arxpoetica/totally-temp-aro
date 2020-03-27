@@ -6,6 +6,7 @@ import MapReportActions from './map-reports-actions'
 import ScalingFactors from './scaling-factors'
 import Orientations from './orientations'
 import { REPORT_LAT_LONG_PRECISION } from './constants'
+import './map-reports-list.css'
 
 export class MapReportsList extends Component {
   constructor (props) {
@@ -20,13 +21,13 @@ export class MapReportsList extends Component {
         {
           this.props.reportPages.map((reportPage, index) => (
             <li
-              className={'list-group-item' + ((this.props.activePageUuid === reportPage.uuid) ? ' active' : '')}
+              className={'p-1 list-group-item' + ((this.props.activePageUuid === reportPage.uuid) ? ' active' : '')}
               key={index}
               style={{ cursor: 'pointer', lineHeight: '28px' }}
               onClick={() => this.props.setActivePageUuid(reportPage.uuid)}
             >
               <div className='d-flex'>
-                <div className='flex-grow-1'>{reportPage.title}</div>
+                <strong className='flex-grow-1'>{reportPage.title}</strong>
                 <div className='flex-grow-0'>
                   <button className='btn btn-sm btn-light'
                     onClick={event => this.handleEditPageClicked(event, reportPage.uuid)}
@@ -37,22 +38,22 @@ export class MapReportsList extends Component {
                     onClick={event => this.handleRemovePageClicked(event, reportPage.uuid)}
                   >
                     <i className='fa fa-trash-alt'/>
-                </button>
+                  </button>
+                </div>
               </div>
-              </div>
-              <div>
-                <span className='badge badge-light mr-2'>{reportPage.paperSize}</span>
-                <span className='badge badge-light mr-2'>{ScalingFactors[reportPage.worldLengthPerMeterOfPaper] || ScalingFactors.default}</span>
-                <span className='badge badge-light mr-2'>{reportPage.dpi} dpi</span>
-                <span className='badge badge-light mr-2'>{Orientations[reportPage.orientation]}</span>
-                <span className='badge badge-light mr-2'>Center: {reportPage.mapCenter.latitude}, {reportPage.mapCenter.longitude} </span>
+              <div style={{ lineHeight: '20px' }}>
+                <span className='badge badge-light mr-1 map-reports-badge text-black-50'>{reportPage.paperSize}</span>
+                <span className='badge badge-light mr-1 map-reports-badge text-black-50'>{ScalingFactors[reportPage.worldLengthPerMeterOfPaper] || ScalingFactors.default}</span>
+                <span className='badge badge-light mr-1 map-reports-badge text-black-50'>{reportPage.dpi} dpi</span>
+                <span className='badge badge-light mr-1 map-reports-badge text-black-50'>{Orientations[reportPage.orientation]}</span>
+                <span className='badge badge-light mr-1 map-reports-badge text-black-50'><i className='fas fa-map-marker-alt mr-1' />{reportPage.mapCenter.latitude}, {reportPage.mapCenter.longitude} </span>
               </div>
             </li>
           ))
         }
       </ul>
       <button
-        className='btn btn-light mt-2'
+        className='btn btn-sm btn-light mt-2'
         onClick={this.handleAddPageClicked}
       >
         <i className='fa fa-plus mr-2' />Add Page

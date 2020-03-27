@@ -13,7 +13,7 @@ export class MapReportPageEditor extends Component {
   render () {
     return <div style={{ overflow: 'auto' }}>
       <MapReportPage initialValues={this.props.reportPages.filter(page => page.uuid === this.props.editingPageUuid)[0]} />
-      <button className='btn btn-primary float-right' onClick={() => this.savePageDefinition()}>
+      <button className='btn btn-sm btn-primary float-right' onClick={() => this.savePageDefinition()}>
         <i className='fa fa-save' />Save
       </button>
     </div>

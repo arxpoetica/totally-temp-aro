@@ -16,7 +16,7 @@ export class ToolBox extends Component {
 
   render () {
     // Position component so that it appears just below the toolbar.
-    return <div className='card' style={ { position: 'absolute', top: '47px', left: '80px', width: '300px'} }>
+    return <div className='card' style={ { position: 'absolute', top: '47px', left: '80px', width: '320px'} }>
       {/* A header on the toolbox. Clicking it will collapse/expand the toolbox. */}
       <div
         className='card-header map-tools-card-header bg-light text-dark p-1'
