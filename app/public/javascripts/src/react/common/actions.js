@@ -174,7 +174,10 @@ const Actions = Object.freeze({
   LOCATION_INFO_SET_AUDIT_LOG: 'LOCATIONINFO_SHOW_AUDIT_LOG',
 
   // Access Control Lists
-  ACL_SET_ACL: 'ACL_SET_ACL'
+  ACL_SET_ACL: 'ACL_SET_ACL',
+
+  // Project Template
+  SET_CURRENT_PROJECT_TEMPLATE_ID: 'SET_CURRENT_PROJECT_TEMPLATE_ID'
 })
 
 export default Actions

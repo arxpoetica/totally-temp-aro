@@ -19,6 +19,7 @@ import fullScreen from '../react/components/full-screen/full-screen-reducer'
 import map from '../react/components/map/map-reducer'
 import mapLayers from '../react/components/map-layers/map-layer-reducer'
 import plan from '../react/components/plan/plan-reducer'
+import projectTemplate from '../react/components/project-template/project-template-reducer'
 import planEditor from '../react/components/plan-editor/plan-editor-reducer'
 import selection from '../react/components/selection/selection-reducer'
 import user from '../react/components/user/user-reducer'
@@ -42,6 +43,7 @@ let reducer = combineReducers({
   mapLayers,
   optimization: combineReducers({ networkOptimization, networkAnalysis, report: opReport, rfp }),
   plan,
+  projectTemplate,
   planEditor,
   selection,
   user,

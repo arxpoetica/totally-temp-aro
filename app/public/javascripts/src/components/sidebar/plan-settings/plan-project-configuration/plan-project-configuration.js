@@ -1,3 +1,4 @@
+import ProjectTemplateActions from '../../../../react/components/project-template/project-template-actions'
 class PlanProjectConfigurationController {
   constructor ($http, $timeout, $ngRedux, state) {
     this.$http = $http
@@ -102,16 +103,9 @@ class PlanProjectConfigurationController {
       })
   }
 
-  editProjectSettings(srcId) {
+  editProjectSettings(src) {
     this.state.showProjectSettingsModal.next(true)
-
-    //this.state.showDataSourceUploadModal.next(true)
-
-    // this.state.uploadDataSources.forEach((value) => {
-    //   if (value.id == srcId) {
-    //     this.state.uploadDataSource = value
-    //   }
-    // })
+    this.setCurrentProjectTemplateId(src.id)
   }
 
 
@@ -153,12 +147,14 @@ class PlanProjectConfigurationController {
   mapStateToThis (reduxState) {
     return {
       authPermissions: reduxState.user.authPermissions,
-      dataItems: reduxState.plan.dataItems
+      dataItems: reduxState.plan.dataItems,
+      selectedProjectTemplateId: reduxState.projectTemplate.currentProjectTemplateId
     }
   }
 
   mapDispatchToTarget (dispatch) {
     return {
+      setCurrentProjectTemplateId: (selectedProjectTemplateId) => dispatch(ProjectTemplateActions.projectTemplateId(selectedProjectTemplateId))
     }
   }
 
