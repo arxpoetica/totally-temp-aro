@@ -89,18 +89,45 @@ class PlanProjectConfigurationController {
   }
 
   deleteProject (project) {
-    project.isDeleting = true
-    this.$http.delete(`/service/v1/project-template/${project.id}`)
-      .then(result => {
-        project.isDeleting = false
-        this.reloadProjects()
-        this.setSelectedMode(this.modes.HOME)
+
+    this.askUserToConfirmManagerDelete(project.name)
+    .then((okToDelete) => {
+      if (okToDelete) {
+        project.isDeleting = true
+        this.$http.delete(`/service/v1/project-template/${project.id}`)
+          .then(result => {
+            project.isDeleting = false
+            this.reloadProjects()
+            this.setSelectedMode(this.modes.HOME)
+          })
+          .catch(err => {
+            project.isDeleting = false
+            this.$timeout()
+            console.error(err)
+          })
+      }
+    })
+    .catch((err) => console.error(err))
+  }
+
+  askUserToConfirmManagerDelete (name) {
+    return new Promise((resolve, reject) => {
+      swal({
+        title: 'Delete project template?',
+        text: `Are you sure you want to delete "${name}"?`,
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No'
+      }, (result) => {
+        if (result) {
+          resolve(true)
+        } else {
+          resolve(false)
+        }
       })
-      .catch(err => {
-        project.isDeleting = false
-        this.$timeout()
-        console.error(err)
-      })
+    })
   }
 
   editProjectSettings(src) {

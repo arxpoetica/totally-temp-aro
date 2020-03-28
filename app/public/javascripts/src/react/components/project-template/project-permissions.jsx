@@ -1,8 +1,8 @@
 /* globals swal */
 import React, { Component, Fragment } from 'react'
-import reduxStore from '../../../../redux-store'
-import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
-import PermissionsTable from './permissions-table.jsx'
+import reduxStore from '../../../redux-store'
+import wrapComponentWithProvider from '../../common/provider-wrapped-component'
+import PermissionsTable from '../acl/resource-permissions/permissions-table.jsx'
 
 export class ProjectPermissions extends Component {
   constructor (props) {
