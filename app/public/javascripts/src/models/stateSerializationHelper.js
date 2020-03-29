@@ -195,7 +195,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     // so I don't think we need to reimpliment the plan-actions.selectDataItems()
     // loadSelectedExistingFiberFromBody(state, reduxState, dispatchers, planInputs)
 
-    loadAlgorithmParametersFromBody(state, dispatchers, planInputs)
+    // loadAlgorithmParametersFromBody(state, dispatchers, planInputs)
     // loadFiberNetworkConstraintsFromBody(state, planInputs)
     // loadTechnologiesFromBody(state, planInputs)
     // loadNetworkConfigurationOverrideFromBody(dispatchers, planInputs, defaultNetworkConstraints)

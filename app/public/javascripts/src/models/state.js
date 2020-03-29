@@ -616,6 +616,7 @@ class State {
       $ngRedux.dispatch(MapLayerActions.setLayerVisibility(layer, isVisible))
     }
 
+    /*
     service.setLayerVisibilityByKey = (keyType, layerKey, isVisible) => {
       console.log('--- setLayerVisibilityByKey ---')
       console.log({keyType:keyType, layerKey:layerKey})
@@ -633,6 +634,7 @@ class State {
         $ngRedux.dispatch(MapLayerActions.setLayerVisibility(layerToChange, isVisible))
       }
     }
+    */
 
     service.getVisibleAnalysisLayers = () => $ngRedux.getState().mapLayers.boundary.filter(item => item.checked && (item.key === 'analysis_layer'))
 

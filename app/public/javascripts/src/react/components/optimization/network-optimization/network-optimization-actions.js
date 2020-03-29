@@ -71,6 +71,7 @@ function loadOptimizationInputs (planId) {
     AroHttp.get(apiUrl)
       .then((response) => {
         // locationConstraints.locationTypes
+        // --- (!) --- HEY BRIAN HERE! --- ToDo: move this to setOptimizationInputs
         var layerKeys = []
         if (response.data.locationConstraints && response.data.locationConstraints.locationTypes) {
           response.data.locationConstraints.locationTypes.forEach(plannerKey => {
