@@ -72,6 +72,7 @@ function addPlanTargets (planId, planTargets) {
             allServiceAreas: []
           }
         })
+        // ToDo: turn on boundary layers for any new description that has an entry in planTargets
       })
       .catch(err => console.error(err))
   }

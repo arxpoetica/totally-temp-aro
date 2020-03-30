@@ -11,7 +11,6 @@ function runOptimization (inputs, userId) { // shouldn't be getting userId from 
 
     AroHttp.post(apiUrl, inputs)
       .then((response) => {
-        console.log(response)
         dispatch({
           type: Actions.NETWORK_OPTIMIZATION_SET_OPTIMIZATION_ID,
           payload: response.data.optimizationIdentifier
@@ -70,106 +69,67 @@ function loadOptimizationInputs (planId) {
     var apiUrl = `/service/v1/plan/${planId}/inputs?user_id=${userId}`
     AroHttp.get(apiUrl)
       .then((response) => {
-        // locationConstraints.locationTypes
-        // --- (!) --- HEY BRIAN HERE! --- ToDo: move this to setOptimizationInputs
-        var layerKeys = []
-        if (response.data.locationConstraints && response.data.locationConstraints.locationTypes) {
-          response.data.locationConstraints.locationTypes.forEach(plannerKey => {
-            // ToDo: bit of a hack here. once we standardize location keys we'll be able to pull out this translation
-            var plannerKeyToKey = {
-              'household': 'household',
-              'celltower': 'celltower',
-              'large': 'large_businesses',
-              'medium': 'medium_businesses',
-              'small': 'small_businesses'
-            }
-            var key = plannerKey
-            if (plannerKeyToKey[plannerKey]) key = plannerKeyToKey[plannerKey]
-
-            layerKeys.push({
-              layerType: 'location',
-              key: key,
-              visibility: true
-            })
-          })
-        }
-
-        // ToDo: use batch(() => {
         dispatch(this.setOptimizationInputs(response.data))
-        dispatch({
-          type: Actions.LAYERS_SET_ALL_VISIBILITY_OFF,
-          payload: {
-            layerTypes: ['location']
-          }
+      })
+  }
+}
+
+function setOptimizationInputs (inputs) {
+  return (dispatch) => {
+    var layerKeys = []
+    if (inputs.locationConstraints && inputs.locationConstraints.locationTypes) {
+      inputs.locationConstraints.locationTypes.forEach(plannerKey => {
+        // ToDo: bit of a hack here. once we standardize location keys we'll be able to pull out this translation
+        var plannerKeyToKey = {
+          'household': 'household',
+          'celltower': 'celltower',
+          'large': 'large_businesses',
+          'medium': 'medium_businesses',
+          'small': 'small_businesses'
+        }
+        var key = plannerKey
+        if (plannerKeyToKey[plannerKey]) key = plannerKeyToKey[plannerKey]
+
+        layerKeys.push({
+          layerType: 'location',
+          key: key,
+          visibility: true
         })
+      })
+    }
+
+    batch(() => {
+      // set the actual options
+      dispatch({
+        type: Actions.NETWORK_OPTIMIZATION_SET_OPTIMIZATION_INPUTS,
+        payload: inputs
+      })
+
+      // location layer visibility: turn all off then turn selected ones on
+      dispatch({
+        type: Actions.LAYERS_SET_ALL_VISIBILITY_OFF,
+        payload: {
+          layerTypes: ['location']
+        }
+      })
+      if (layerKeys.length > 0) {
         dispatch({
           type: Actions.LAYERS_SET_VISIBILITY_BY_KEY,
           payload: {
             layerKeys: layerKeys
           }
         })
-        
-        // to replace loadAlgorithmParametersFromBody
-        // having issues with analysisLayerId
-        /*
-        if (response.data.locationConstraints
-            && response.data.locationConstraints.analysisSelectionMode) {
-          dispatch({
-            type: Actions.SELECTION_SET_ACTIVE_MODE,
-            payload: response.data.locationConstraints.analysisSelectionMode
-          })
+      }
 
-          if (response.data.locationConstraints.analysisSelectionMode === 'SELECTED_ANALYSIS_AREAS'
-              && response.data.locationConstraints.analysisLayerId) {
-            // ToDo: what is analysisLayerId
-            // state.setLayerVisibilityByKey
-            
-          //  dispatch({
-          //    type: Actions.SELECTION_SET_ACTIVE_MODE,
-          //    payload: response.data.locationConstraints.analysisSelectionMode
-          //  })
-            
-          }
-        }
-        */
-
-        // })
-        // ToDo: sift through locations and turn on all in locations constraints, turn all others off
-        console.log(response.data)
-        // need batch
-        // need to set ALL to false then select ones to true
-        // so need list which is accross the line
-        /*
+      // selection -> selection mode
+      if (inputs.locationConstraints
+          && inputs.locationConstraints.analysisSelectionMode) {
         dispatch({
-          type: Actions.LAYERS_SET_VISIBILITY_BY_KEY,
-          payload: {
-            layerType: 'location',
-            plannerKey: '',
-            visibility: true
-          }
+          type: Actions.SELECTION_SET_ACTIVE_MODE,
+          payload: inputs.locationConstraints.analysisSelectionMode
         })
-        */
-        
-        // optimization.networkOptimization.optimizationInputs.locationConstraints.analysisSelectionMode
-        // SelectionActions.setActiveSelectionMode
-        /*
-        dispatchers.setSelectionTypeById(postBody.locationConstraints.analysisSelectionMode)
-        if (postBody.locationConstraints.analysisSelectionMode === 'SELECTED_ANALYSIS_AREAS') {
-          // optimization.networkOptimization.optimizationInputs.locationConstraints.analysisLayerId
-          state.setLayerVisibilityByKey('analysisLayerId', postBody.locationConstraints.analysisLayerId, true)
-        }
-        */
-        
-        // locationConstraints.locationTypes
-      })
-  }
-}
-
-function setOptimizationInputs (inputs) {
-  // weed out duplicate info?
-  return {
-    type: Actions.NETWORK_OPTIMIZATION_SET_OPTIMIZATION_INPUTS,
-    payload: inputs
+      }
+    })
   }
 }
 
