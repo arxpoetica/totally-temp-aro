@@ -36,6 +36,9 @@ app/v8-compile-cache*/**
 *.component
 *.vscode
 
+# Report server ignores
+reportsrv/node_modules
+
 ###############################
 
 

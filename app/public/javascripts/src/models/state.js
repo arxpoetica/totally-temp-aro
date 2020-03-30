@@ -233,6 +233,7 @@ class State {
     service.currentRulerAction = service.allRulerActions.STRAIGHT_LINE
 
     service.isRulerEnabled = false
+    service.isReportMode = false
 
     // Boundary Layer Mode
     service.boundaryLayerMode = Object.freeze({
@@ -1020,11 +1021,13 @@ class State {
       return service.loadPlanInputs(service.plan.id)
         .then(() => {
           const planCoordinates = service.plan.ephemeral ? service.defaultPlanCoordinates : { latitude: service.plan.latitude, longitude: service.plan.longitude }
-          service.requestSetMapCenter.next({
-            latitude: planCoordinates.latitude || service.defaultPlanCoordinates.latitude,
-            longitude: planCoordinates.longitude || service.defaultPlanCoordinates.longitude
-          })
-          service.requestSetMapZoom.next(service.plan.zoomIndex || service.defaultPlanCoordinates.zoom)
+          if (!service.isReportMode) {
+            service.requestSetMapCenter.next({
+              latitude: planCoordinates.latitude || service.defaultPlanCoordinates.latitude,
+              longitude: planCoordinates.longitude || service.defaultPlanCoordinates.longitude
+            })
+            service.requestSetMapZoom.next(service.plan.zoomIndex || service.defaultPlanCoordinates.zoom)
+          }
           service.recreateTilesAndCache()
         })
         .catch((err) => console.error(err))
@@ -1493,7 +1496,7 @@ class State {
 
     // The logged in user is currently set by using the AngularJS injector in index.html
     service.loggedInUser = null
-    service.setLoggedInUser = (user) => {
+    service.setLoggedInUser = (user, initialState) => {
       tracker.trackEvent(tracker.CATEGORIES.LOGIN, tracker.ACTIONS.CLICK, 'UserID', user.id)
 
       // Set the logged in user in the Redux store
@@ -1557,7 +1560,8 @@ class State {
         service.setPlanRedux(plan)
       }
       var plan = null
-      service.getOrCreateEphemeralPlan() // Will be called once when the page loads, since state.js is a service
+      const planPromise = initialState ? $http.get(`/service/v1/plan/${initialState.planId}`) : service.getOrCreateEphemeralPlan()
+      return planPromise // Will be called once when the page loads, since state.js is a service
         .then((result) => {
           plan = result.data
           // Get the default location for this user
@@ -1569,29 +1573,72 @@ class State {
           service.loggedInUser.perspective = result.data.perspective || 'default'
           service.configuration.loadPerspective(service.loggedInUser.perspective)
           service.initializeState()
-          return $http.get(`/search/addresses?text=${searchLocation}&sessionToken=${Utils.getInsecureV4UUID()}`)
+          service.isReportMode = Boolean(initialState)
+          if (initialState && initialState.mapCenter) {
+            return service.mapReadyPromise
+              .then(() => {
+                service.setPlanRedux(plan)
+                service.requestSetMapCenter.next({ latitude: initialState.mapCenter.latitude, longitude: initialState.mapCenter.longitude })
+                if (initialState.mapZoom) {
+                  service.requestSetMapZoom.next(initialState.mapZoom)
+                }
+                return Promise.resolve()
+              })
+              .catch(err => console.error(err))
+          } else {
+            return $http.get(`/search/addresses?text=${searchLocation}&sessionToken=${Utils.getInsecureV4UUID()}`)
+          }
         })
         .then((result) => {
-          if (result.data && result.data.length > 0 && result.data[0].type === 'placeId') {
-            var geocoder = new google.maps.Geocoder()
-            geocoder.geocode({ 'placeId': result.data[0].value }, function (geocodeResults, status) {
-              if (status !== 'OK') {
-                console.error('Geocoder failed: ' + status)
-                console.error('Setting map coordinates to default')
-                initializeToDefaultCoords(plan)
-                return
-              }
-              service.requestSetMapCenter.next({
-                latitude: geocodeResults[0].geometry.location.lat(),
-                longitude: geocodeResults[0].geometry.location.lng()
+          if (result && result.data && result.data.length > 0 && result.data[0].type === 'placeId') {
+            return new Promise((resolve, reject) => {
+              var geocoder = new google.maps.Geocoder()
+              geocoder.geocode({ 'placeId': result.data[0].value }, function (geocodeResults, status) {
+                if (status !== 'OK') {
+                  console.error('Geocoder failed: ' + status)
+                  console.error('Setting map coordinates to default')
+                  initializeToDefaultCoords(plan)
+                  return resolve()
+                }
+                service.requestSetMapCenter.next({
+                  latitude: geocodeResults[0].geometry.location.lat(),
+                  longitude: geocodeResults[0].geometry.location.lng()
+                })
+                const ZOOM_FOR_OPEN_PLAN = 14
+                service.requestSetMapZoom.next(ZOOM_FOR_OPEN_PLAN)
+                service.setPlanRedux(plan)
+                resolve()
               })
-              const ZOOM_FOR_OPEN_PLAN = 14
-              service.requestSetMapZoom.next(ZOOM_FOR_OPEN_PLAN)
-              service.setPlanRedux(plan)
             })
           } else {
-            // Set it to the default so that the map gets initialized
-            initializeToDefaultCoords(plan)
+            if (!(initialState && initialState.mapCenter)) {  // If we have an initial state then this has alredy been set
+              // Set it to the default so that the map gets initialized
+              return initializeToDefaultCoords(plan)
+            }
+          }
+        })
+        .then(() => {
+          if (initialState && initialState.visibleLayers) {
+            // We have an initial state, wait for a few seconds (HACKY) and turn layers on/off as per request
+            const timeoutPromise = new Promise((resolve, reject) => { setTimeout(() => resolve(), 2000) })
+            return timeoutPromise
+              .then(() => {
+                // Set layer visibility as per the initial state
+                const setOfVisibleLayers = new Set(initialState.visibleLayers)
+                service.mapLayersRedux.location.forEach(layer => {
+                  const isVisible = setOfVisibleLayers.has(layer.key)
+                  service.setLayerVisibility(layer, isVisible)
+                })
+                service.equipmentLayerTypeVisibility.planned = true
+                Object.keys(service.mapLayersRedux.networkEquipment).forEach(layerType => {
+                  Object.keys(service.mapLayersRedux.networkEquipment[layerType]).forEach(layerKey => {
+                    const isVisible = setOfVisibleLayers.has(layerKey)
+                    service.setNetworkEquipmentLayerVisiblity(layerType, service.mapLayersRedux.networkEquipment[layerType][layerKey], isVisible)
+                  })
+                })
+              })
+          } else {
+            return Promise.resolve()
           }
         })
         .catch((err) => {
@@ -1602,9 +1649,9 @@ class State {
     }
 
     service.configuration = {}
-    service.initializeApp = () => {
+    service.initializeApp = initialState => {
       // Get application configuration from the server
-      $http.get('/configuration')
+      return $http.get('/configuration')
         .then(result => {
           service.configuration = result.data.appConfiguration
           service.googleMapsLicensing = result.data.googleMapsLicensing
@@ -1621,21 +1668,24 @@ class State {
           }
           service.configuration.loadPerspective(result.data.user.perspective)
           service.setWormholeFusionConfiguration(result.data.appConfiguration.wormholeFusionTypes || {})
-          service.setLoggedInUser(result.data.user)
+          return service.setLoggedInUser(result.data.user, initialState)
+        })
+        .then(() => {
           service.setOptimizationOptions()
           tileDataService.setLocationStateIcon(tileDataService.locationStates.LOCK_ICON_KEY, service.configuration.locationCategories.entityLockIcon)
           tileDataService.setLocationStateIcon(tileDataService.locationStates.INVALIDATED_ICON_KEY, service.configuration.locationCategories.entityInvalidatedIcon)
-          service.getReleaseVersions()
+          if (!initialState) {
+            service.getReleaseVersions()
+          }
           if (service.configuration.ARO_CLIENT === 'frontier' || service.configuration.ARO_CLIENT === 'sse') {
             heatmapOptions.selectedHeatmapOption = service.viewSetting.heatmapOptions.filter((option) => option.id === 'HEATMAP_OFF')[0]
           }
+          // Fire a redux action to get configuration for the redux side. This will result in two calls to /configuration for the time being.
+          service.getStyleValues()
+          return service.loadConfigurationFromServer()
         })
+        .then(() => console.error(initialState))
         .catch(err => console.error(err))
-
-      // Fire a redux action to get configuration for the redux side. This will result in two calls to /configuration for the time being.
-      service.loadConfigurationFromServer()
-      service.getStyleValues()
-
     }
 
     // Optimization options in Redux
@@ -1841,15 +1891,6 @@ class State {
         // The active plan has changed. Note that we are comparing ids because a change in plan state also causes the plan object to update.
         service.onActivePlanChanged()
       }
-      /*
-      // ToDo: this code seems to be depricated,
-        oldDataItems is never set and
-        nextState.dataItems is always undefined, do we mean nextState.plan.dataItems?
-        also, should this be in the above if block? This will run every time state is changed
-      if (oldDataItems !== nextState.dataItems) {
-        service.StateViewMode.loadListOfSAPlanTags($http, service, nextState.dataItems, '', true)
-      }
-      */
     }
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(service.mergeToTarget.bind(service))
 
@@ -1877,6 +1918,7 @@ class State {
 
   mapDispatchToTarget (dispatch) {
     return {
+      setNetworkEquipmentLayerVisiblity: (layerType, layer, newVisibility) => dispatch(MapLayerActions.setNetworkEquipmentLayerVisibility(layerType, layer, newVisibility)),
       loadConfigurationFromServer: () => dispatch(UiActions.loadConfigurationFromServer()),
       setPerspective: perspective => dispatch(UiActions.setPerspective(perspective)),
       getStyleValues: () => dispatch(UiActions.getStyleValues()),
