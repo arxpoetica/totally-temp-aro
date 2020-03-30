@@ -78,7 +78,11 @@
         <td>{{project.name}}</td>
         <td>
           <div class="btn btn-group" style="padding: 0px;">
-            <button class="btn btn-danger btn-delete-project" ng-disabled="project.isDeleting" ng-click="$ctrl.deleteProject(project)">
+            <button class="btn btn-light btn-delete-project" ng-disabled="!project.hasAdminPermission" ng-click="$ctrl.editProjectSettings(project)">
+              <span class="fa fa-edit"></span>
+            </button>
+
+            <button class="btn btn-danger btn-delete-project" ng-disabled="!project.hasAdminPermission" ng-click="$ctrl.deleteProject(project)">
               <i ng-if="!project.isDeleting" class="fas fa-trash-alt"></i>
               <i ng-if="project.isDeleting" class="fa fa-spinner fa-spin"></i>
             </button>

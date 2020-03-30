@@ -13,7 +13,7 @@ class MapSplitController {
     $document.ready(() => {
       if (!this.splitterObj) {
         this.splitterObj = Split(['#map-canvas-container', '#sidebar'], {
-          sizes: [75, 25],
+          sizes: [window.GLOBAL_MAP_SPLITTER_INITIAL_WIDTH || 75, window.GLOBAL_SIDEBAR_INITIAL_WIDTH || 25],
           minSize: [680, 310],
           onDragEnd: () => {
             // Trigger a resize so that any tiles that have been uncovered will be loaded
@@ -70,7 +70,7 @@ class MapSplitController {
         reduxState.planEditor.isModifyingObject ||
         reduxState.planEditor.isCommittingTransaction ||
         reduxState.planEditor.isEnteringTransaction,
-      showToolBox: reduxState.mapLayers.annotation.showList // For now, later this will be a tool box flag
+      showToolBox: reduxState.tool.showToolBox
     }
   }
 
@@ -172,7 +172,7 @@ let mapSplit = {
   <div class="app_wrapper_container {{($ctrl.state.configuration.ARO_CLIENT === 'frontier') ? 'footer' : ''}}">
 
     <!-- Define the canvas that will hold the map. -->
-    <div id="map-canvas-container" ng-style="{ position: 'relative', float: 'left', height: '100%', width: '100%', transition: $ctrl.transitionCSS }">
+    <div id="map-canvas-container" ng-style="{ position: 'relative', float: 'left', height: '100%', transition: $ctrl.transitionCSS }">
       <div id="map-canvas" class="map-canvas" style="position: relative; overflow: hidden;"></div>
       <!-- Technically the toolbar, etc should be a child of the map canvas, but putting these elements in the map canvas
           causes the map to not show up -->

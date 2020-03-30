@@ -1,4 +1,5 @@
-
+import ProjectTemplateActions from '../../../../react/components/project-template/project-template-actions'
+import aclActions from '../../../../react/components/acl/acl-actions'
 class PlanProjectConfigurationController {
   constructor ($http, $timeout, $ngRedux, state) {
     this.$http = $http
@@ -32,9 +33,25 @@ class PlanProjectConfigurationController {
   }
 
   reloadProjects() {
-    this.$http.get(`/service/v1/project-template`)
+    const filter = `deleted eq false and userId eq ${this.userId}`
+    // const RESOUSRCE_READ = 4
+    this.$http.get(`/service/odata/userprojectentity?$select=id,name,permissions&$filter=${filter}&$orderby=name&$top=10000`)
       .then((result) => {
-        this.allProjects = result.data
+        let myProjects = []
+
+        // loop through the project and find check the permission bits to see
+        // if the current user has READ and ADMIN privilage to manage the resource
+        for(let i = 0; i < result.data.length; i++) {
+          const permissions = result.data[i].permissions
+          const hasView = Boolean(permissions & this.authPermissions.RESOURCE_READ.permissionBits)
+          if(hasView) {
+            const hasAdmin = Boolean(permissions & this.authPermissions.RESOURCE_ADMIN.permissionBits)
+            result.data[i].hasAdminPermission = hasAdmin
+            myProjects.push(result.data[i])
+          }
+        }
+          
+        this.allProjects = myProjects
         this.parentProjectForNewProject = this.allProjects[0]
         return this.$http.get(`/service/auth/users/${this.userId}/configuration`)
       })
@@ -71,18 +88,51 @@ class PlanProjectConfigurationController {
   }
 
   deleteProject (project) {
-    project.isDeleting = true
-    this.$http.delete(`/service/v1/project-template/${project.id}`)
-      .then(result => {
-        project.isDeleting = false
-        this.reloadProjects()
-        this.setSelectedMode(this.modes.HOME)
+
+    this.askUserToConfirmManagerDelete(project.name)
+    .then((okToDelete) => {
+      if (okToDelete) {
+        project.isDeleting = true
+        this.$http.delete(`/service/v1/project-template/${project.id}`)
+          .then(result => {
+            project.isDeleting = false
+            this.reloadProjects()
+            this.setSelectedMode(this.modes.HOME)
+          })
+          .catch(err => {
+            project.isDeleting = false
+            this.$timeout()
+            console.error(err)
+          })
+      }
+    })
+    .catch((err) => console.error(err))
+  }
+
+  askUserToConfirmManagerDelete (name) {
+    return new Promise((resolve, reject) => {
+      swal({
+        title: 'Delete project template?',
+        text: `Are you sure you want to delete "${name}"?`,
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No'
+      }, (result) => {
+        if (result) {
+          resolve(true)
+        } else {
+          resolve(false)
+        }
       })
-      .catch(err => {
-        project.isDeleting = false
-        this.$timeout()
-        console.error(err)
-      })
+    })
+  }
+
+  editProjectSettings(src) {
+    this.state.showProjectSettingsModal = true
+    this.getAcl(src.id)
+    this.setCurrentProjectTemplateId(src.id)
   }
 
   // Saves the plan Data Selection and Resource Selection to the project
@@ -122,12 +172,16 @@ class PlanProjectConfigurationController {
 
   mapStateToThis (reduxState) {
     return {
-      dataItems: reduxState.plan.dataItems
+      authPermissions: reduxState.user.authPermissions,
+      dataItems: reduxState.plan.dataItems,
+      selectedProjectTemplateId: reduxState.projectTemplate.currentProjectTemplateId
     }
   }
 
   mapDispatchToTarget (dispatch) {
     return {
+      getAcl: (resourceId, doForceUpdate = false) => dispatch(aclActions.getAcl("PROJECT_TEMPLATE", resourceId, doForceUpdate)),
+      setCurrentProjectTemplateId: (selectedProjectTemplateId) => dispatch(ProjectTemplateActions.setCurrentProjectTemplateId(selectedProjectTemplateId))
     }
   }
 

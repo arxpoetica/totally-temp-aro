@@ -2,6 +2,8 @@ import Constants from '../common/constants'
 import FullScreenActions from '../../react/components/full-screen/full-screen-actions'
 import RfpActions from '../../react/components/optimization/rfp/rfp-actions'
 import MapLayerActions from '../../react/components/map-layers/map-layer-actions'
+import ToolActions from '../../react/components/tool/tool-actions'
+import Tools from '../../react/components/tool/tools'
 
 class ToolBarController {
   constructor ($element, $timeout, $document, $http, $ngRedux, state, map_tools, $window) {
@@ -547,7 +549,8 @@ class ToolBarController {
 
   mapStateToThis (reduxState) {
     return {
-      isAnnotationsListVisible: reduxState.mapLayers.annotation.showList
+      isAnnotationsListVisible: reduxState.tool.showToolBox && (reduxState.tool.activeTool === Tools.ANNOTATION.id),
+      isMapReportsVisible: reduxState.tool.showToolBox && (reduxState.tool.activeTool === Tools.MAP_REPORTS.id)
     }
   }
 
@@ -557,7 +560,14 @@ class ToolBarController {
         dispatch(FullScreenActions.showOrHideFullScreenContainer(true))
         dispatch(RfpActions.showOrHideAllRfpStatus(true))
       },
-      setAnnotationListVisibility: isVisible => dispatch(MapLayerActions.setAnnotationListVisibility(isVisible))
+      setAnnotationListVisibility: isVisible => {
+        dispatch(ToolActions.setActiveTool(isVisible ? Tools.ANNOTATION.id : null))
+        dispatch(ToolActions.setToolboxVisibility(isVisible))
+      },
+      setMapReportsVisibility: isVisible => {
+        dispatch(ToolActions.setActiveTool(isVisible ? Tools.MAP_REPORTS.id : null))
+        dispatch(ToolActions.setToolboxVisibility(isVisible))
+      }
     }
   }
 }

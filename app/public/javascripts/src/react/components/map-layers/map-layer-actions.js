@@ -169,13 +169,6 @@ function removeAnnotation (annotation) {
   }
 }
 
-function setAnnotationListVisibility (isVisible) {
-  return {
-    type: Actions.LAYERS_SHOW_ANNOTATION_LIST,
-    payload: isVisible
-  }
-}
-
 function clearOlderAnnotations (numberToClear) {
   return {
     type: Actions.LAYERS_CLEAR_OLD_ANNOTATIONS,
@@ -197,6 +190,5 @@ export default {
   addAnnotation,
   updateAnnotation,
   removeAnnotation,
-  setAnnotationListVisibility,
   clearOlderAnnotations
 }

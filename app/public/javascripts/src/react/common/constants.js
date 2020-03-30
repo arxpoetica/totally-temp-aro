@@ -1,5 +1,6 @@
 export default Object.freeze({
   NETWORK_ANALYSIS_CONSTRAINTS: 'networkAnalysisConstraints',
+  MAP_REPORTS_PAGE_FORM: 'mapReportsPage',
   PLANNING_CONSTRAINTS_FORM: 'planningConstraints',
   FUSION_FORM: 'fusion',
   NETWORK_ARCHITECTURE: 'networkArchitecture',
