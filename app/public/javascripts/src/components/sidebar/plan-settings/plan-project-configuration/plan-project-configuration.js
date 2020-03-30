@@ -1,4 +1,5 @@
 import ProjectTemplateActions from '../../../../react/components/project-template/project-template-actions'
+import aclActions from '../../../../react/components/acl/acl-actions'
 class PlanProjectConfigurationController {
   constructor ($http, $timeout, $ngRedux, state) {
     this.$http = $http
@@ -44,10 +45,8 @@ class PlanProjectConfigurationController {
           const permissions = result.data[i].permissions
           const hasView = Boolean(permissions & this.authPermissions.RESOURCE_READ.permissionBits)
           if(hasView) {
-            const hasWrite = Boolean(permissions & this.authPermissions.RESOURCE_WRITE.permissionBits)
             const hasAdmin = Boolean(permissions & this.authPermissions.RESOURCE_ADMIN.permissionBits)
-            const hasResourceWorkflow = Boolean(permissions & this.authPermissions.RESOURCE_WORKFLOW.permissionBits)
-            result.data[i].hasAdminPermission = hasWrite || hasAdmin || hasResourceWorkflow
+            result.data[i].hasAdminPermission = hasAdmin
             myProjects.push(result.data[i])
           }
         }
@@ -131,7 +130,8 @@ class PlanProjectConfigurationController {
   }
 
   editProjectSettings(src) {
-    this.state.showProjectSettingsModal.next(true)
+    this.state.showProjectSettingsModal = true
+    this.getAcl(src.id)
     this.setCurrentProjectTemplateId(src.id)
   }
 
@@ -180,6 +180,7 @@ class PlanProjectConfigurationController {
 
   mapDispatchToTarget (dispatch) {
     return {
+      getAcl: (resourceId, doForceUpdate = false) => dispatch(aclActions.getAcl("PROJECT_TEMPLATE", resourceId, doForceUpdate)),
       setCurrentProjectTemplateId: (selectedProjectTemplateId) => dispatch(ProjectTemplateActions.setCurrentProjectTemplateId(selectedProjectTemplateId))
     }
   }

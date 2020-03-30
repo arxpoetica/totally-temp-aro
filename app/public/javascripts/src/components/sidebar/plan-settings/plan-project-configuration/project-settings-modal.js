@@ -6,11 +6,11 @@ class ProjectSettingsController {
   }
  
   modalShown () {
-    this.state.showProjectSettingsModal.next(true)
+    this.state.showProjectSettingsModal = true
   }
 
   modalHide () {
-    this.state.showProjectSettingsModal.next(false)
+    this.state.showProjectSettingsModal = false
   }
  
   mapStateToThis (reduxState) {
