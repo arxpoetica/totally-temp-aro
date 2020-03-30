@@ -2,7 +2,7 @@ import Actions from '../../common/actions'
 
 function setCurrentProjectTemplateId (id) {
   return {
-    type: Actions.SET_CURRENT_PROJECT_TEMPLATE_ID,
+    type: Actions.PROJECT_SET_CURRENT_PROJECT_TEMPLATE_ID,
     payload: id
   }
 }

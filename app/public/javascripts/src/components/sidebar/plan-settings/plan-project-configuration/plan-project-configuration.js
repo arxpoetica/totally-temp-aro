@@ -180,7 +180,7 @@ class PlanProjectConfigurationController {
 
   mapDispatchToTarget (dispatch) {
     return {
-      setCurrentProjectTemplateId: (selectedProjectTemplateId) => dispatch(ProjectTemplateActions.projectTemplateId(selectedProjectTemplateId))
+      setCurrentProjectTemplateId: (selectedProjectTemplateId) => dispatch(ProjectTemplateActions.setCurrentProjectTemplateId(selectedProjectTemplateId))
     }
   }
 
