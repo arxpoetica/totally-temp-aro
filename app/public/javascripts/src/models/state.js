@@ -643,6 +643,8 @@ class State {
     // Get a POST body that we will send to aro-service for performing optimization
     // Optimization options in Redux
     // ToDo: depricate stateSerializationHelper, replace with redux store
+    // service.optimizationInputs is now from Redux
+    //  but we should replace the use of this function with a redux selector
     service.getOptimizationBody = () => {
       /*
       return stateSerializationHelper.getOptimizationBody(service, service.networkAnalysisConstraints,
@@ -665,11 +667,14 @@ class State {
 
     // Load optimization options from a JSON string
     // ToDo: depricate stateSerializationHelper, replace with redux store
+    // Optomize button and expert mode
+    /*
     service.loadOptimizationOptionsFromJSON = (json) => {
       // Note that we are NOT returning the state (the state is set after the call), but a promise
       // that resolves once all the geographies have been loaded
       return stateSerializationHelper.loadStateFromJSON(service, $ngRedux.getState(), service.getDispatchers(), json, new AroNetworkConstraints())
     }
+    */
 
     $document.ready(() => {
       // We should have a map object at this point. Unfortunately, this is hardcoded for now.
@@ -1031,7 +1036,7 @@ class State {
     }
 
     service.onActivePlanChanged = () => {
-      // console.log(' --- onActivePlanChanged')
+      console.log(' --- onActivePlanChanged')
       service.planChanged.next(null)
 
       service.currentPlanTags = service.listOfTags.filter(tag => _.contains(service.plan.tagMapping.global, tag.id))
@@ -1082,7 +1087,7 @@ class State {
           //    i know it's not the best, I'll be back.
           planInputs = { ...defaultPlanInputs, ...planInputs }
           console.log(planInputs)
-          stateSerializationHelper.loadStateFromJSON(service, $ngRedux.getState(), service.getDispatchers(), planInputs, new AroNetworkConstraints())
+          // stateSerializationHelper.loadStateFromJSON(service, $ngRedux.getState(), service.getDispatchers(), planInputs, new AroNetworkConstraints())
           return Promise.all([
             service.loadPlanResourceSelectionFromServer() // ,
             // service.loadNetworkConfigurationFromServer()
@@ -1720,7 +1725,6 @@ class State {
           service.getStyleValues()
           return service.loadConfigurationFromServer()
         })
-        .then(() => console.error(initialState))
         .catch(err => console.error(err))
     }
 
