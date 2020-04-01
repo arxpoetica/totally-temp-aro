@@ -5,8 +5,8 @@
  */
 // Optimization options in Redux
 // get rid of this
-app.service('stateSerializationHelper', ['$q', ($q) => {
-  var stateSerializationHelper = {}
+//app.service('stateSerializationHelper', ['$q', ($q) => {
+//  var stateSerializationHelper = {}
 
   // ------------------------------------------------------------------------------------------------------------------
   // Begin section - state to POST body
@@ -187,7 +187,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   // ------------------------------------------------------------------------------------------------------------------
 
   // Load optimization options from a JSON string
-  stateSerializationHelper.loadStateFromJSON = (state, reduxState, dispatchers, planInputs, defaultNetworkConstraints) => {
+  //stateSerializationHelper.loadStateFromJSON = (state, reduxState, dispatchers, planInputs, defaultNetworkConstraints) => {
     // loadAnalysisTypeFromBody(state, planInputs)
     // loadLocationTypesFromBody(state, reduxState, dispatchers, planInputs)
 
@@ -201,7 +201,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     // loadNetworkConfigurationOverrideFromBody(dispatchers, planInputs, defaultNetworkConstraints)
     // console.log('load from JSON')
     // console.log(state.optimizationOptions)
-  }
+  //}
 
   // Load analysis type from a POST body object that is sent to the optimization engine
   // ToDo: replace with reduxState.optimization.networkOptimization.optimizationInputs.analysis_type
@@ -285,11 +285,13 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   // Load algorithm parameters from a POST body object that is sent to the optimization engine
   // ToDo: We've already gotten rid of state.optimizationOptions
   //  figure out the layer viz and dispatch biz
+  /*
   var loadAlgorithmParametersFromBody = (state, dispatchers, postBody) => {
     if (!postBody.optimization) {
       console.warn('No optimization in postBody. This can happen when we have manually edited plans.')
       return
     }
+    */
     /*
     if (postBody.optimization.algorithm === 'UNCONSTRAINED') {
       state.optimizationOptions.uiSelectedAlgorithm = state.OPTIMIZATION_TYPES.UNCONSTRAINED
@@ -327,6 +329,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       state.optimizationOptions.budget = +postBody.optimization.budget / 1000
     }
     */
+   /*
     console.log('--- postBody.locationConstraints.analysisSelectionMode ---')
     console.log(postBody.locationConstraints.analysisSelectionMode)
     dispatchers.setSelectionTypeById(postBody.locationConstraints.analysisSelectionMode)
@@ -334,7 +337,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       state.setLayerVisibilityByKey('analysisLayerId', postBody.locationConstraints.analysisLayerId, true)
     }
   }
-
+  */
   // Load fiber network constraints from a POST body object that is sent to the optimization engine
   // ToDo: We've already gotten rid of state.optimizationOptions so this one may be done
   /*
@@ -426,5 +429,5 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   // End section - POST body to state
   // ------------------------------------------------------------------------------------------------------------------
 
-  return stateSerializationHelper
-}])
+  //return stateSerializationHelper
+//}])

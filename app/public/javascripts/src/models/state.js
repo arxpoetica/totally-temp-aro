@@ -37,7 +37,7 @@ const getBoundaryTypesList = createSelector([getAllBoundaryTypesList], (boundary
 
 /* global app localStorage map */
 class State {
-  constructor ($rootScope, $http, $document, $timeout, $sce, $ngRedux, stateSerializationHelper, $filter, tileDataService, Utils, tracker, Notification) {
+  constructor ($rootScope, $http, $document, $timeout, $sce, $ngRedux, $filter, tileDataService, Utils, tracker, Notification) {
     // Important: RxJS must have been included using browserify before this point
     var Rx = require('rxjs')
 
@@ -654,12 +654,14 @@ class State {
       var inputs = JSON.parse(JSON.stringify(service.optimizationInputs))
       // inputs.analysis_type = service.networkAnalysisTypeId
       // inputs.planId = service.planId
+      inputs.planId = service.plan.id
       inputs.locationConstraints = {}
       inputs.locationConstraints.analysisSelectionMode = service.activeSelectionModeId
       inputs.locationConstraints.locationTypes = []
       service.locationLayers.forEach(locationsLayer => {
         if (locationsLayer.checked) inputs.locationConstraints.locationTypes.push(locationsLayer.plannerKey)
       })
+      
       console.log('--- service.getOptimizationBody ---')
       console.log(inputs)
       return inputs
@@ -1991,6 +1993,6 @@ class State {
   }
 }
 
-State.$inject = ['$rootScope', '$http', '$document', '$timeout', '$sce', '$ngRedux', 'stateSerializationHelper', '$filter', 'tileDataService', 'Utils', 'tracker', 'Notification']
+State.$inject = ['$rootScope', '$http', '$document', '$timeout', '$sce', '$ngRedux', '$filter', 'tileDataService', 'Utils', 'tracker', 'Notification']
 
 export default State
