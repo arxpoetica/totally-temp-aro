@@ -206,6 +206,13 @@ export class PlanningConstraints extends Component {
                     className='checkboxfill' component='input' type='checkbox' />
                 </td>
               </tr>
+              <tr>
+                <td>Log Request Event</td>
+                <td>
+                  <Field name='logRequestEvent'
+                    className='checkboxfill' component='input' type='checkbox' />
+                </td>
+              </tr>
             </tbody>
           </table>
         </form>
