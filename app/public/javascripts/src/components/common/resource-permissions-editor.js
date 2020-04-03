@@ -161,7 +161,7 @@ class ResourcePermissionsEditorController {
             rolePermissions: access.rolePermissions
           })
           // check for user and group permissions 
-          if (!this.isOwner 
+          if (!this.isOwner
               && (
                   this.state.loggedInUser.hasPermissions(this.state.authPermissionsByName['RESOURCE_ADMIN'].permissions, access.rolePermissions)
                   && (
@@ -197,7 +197,6 @@ class ResourcePermissionsEditorController {
   }
 
   mapStateToThis (reduxState) {
-    // console.log(JSON.stringify(getAllSystemActorsArray(reduxState)))
     return {
       systemActors: getAllSystemActors(reduxState),
       systemActorsArray: getAllSystemActorsArray(reduxState)

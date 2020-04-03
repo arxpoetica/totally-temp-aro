@@ -26,11 +26,9 @@ class AnalysisModeController {
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
 
     var initAnalysisType = this.NetworkAnalysisTypes[0]
-    console.log(this.networkAnalysisType)
     this.NetworkAnalysisTypes.forEach(analysisType => {
       if (analysisType.id === this.networkAnalysisType) initAnalysisType = analysisType
     })
-    console.log(initAnalysisType)
     this.localAnalysisType = initAnalysisType
   }
 

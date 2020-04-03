@@ -65,7 +65,6 @@ class CoverageBoundaryController {
     this.calculateCoverage()
       .then((result) => {
         // Draw the polygon onto the screen
-        console.log(result)
         this.coveragePolygon = new google.maps.Polygon({
           paths: result.coveragePolygon,
           strokeColor: '#FF1493',
@@ -92,7 +91,6 @@ class CoverageBoundaryController {
   calculateCoverage () {
     // Get the POST body for optimization based on the current application state
     var optimizationBody = this.state.getOptimizationBody()
-    console.log(optimizationBody)
     // Replace analysis_type and add a point and radius
     optimizationBody.analysis_type = 'COVERAGE'
     optimizationBody.point = {

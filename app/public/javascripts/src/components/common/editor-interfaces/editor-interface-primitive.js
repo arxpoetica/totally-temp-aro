@@ -32,7 +32,6 @@ class EditorInterfacePrimitiveController {
     if (this.displayProps.displayDataType == 'enum') {
       
       var digestEnum = (enumSet) => {
-        //console.log(enumSet)
         var oldEnumText = JSON.stringify(this.displayProps.enumSet)
         var isEnumSame = (JSON.stringify(enumSet) == oldEnumText)
 

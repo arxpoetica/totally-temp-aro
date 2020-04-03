@@ -478,7 +478,6 @@ class PlanEditorController {
 
     var equipmentObjectId = mapObject.objectId
     this.isWorkingOnCoverage = true
-    console.log(optimizationBody)
     this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
       .then((result) => {
       // The user may have destroyed the component before we get here. In that case, just return
@@ -554,7 +553,6 @@ class PlanEditorController {
     // Format the object and send it over to aro-service
     var mapObject = this.objectIdToMapObject[objectId]
     var objectProperties = this.objectIdToProperties[objectId]
-    console.log(objectProperties)
     var serviceFeature = {
       objectId: objectId,
       /*
@@ -1102,7 +1100,6 @@ class PlanEditorController {
     }
     this.updateObjectIdsToHide()
     this.$timeout()
-    console.log('Returning from handleObjectCreated()')
     return promiseToReturn
   }
 

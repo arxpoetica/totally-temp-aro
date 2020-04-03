@@ -69,7 +69,6 @@ function loadConfiguration() {
     LEFT JOIN client.network_node_types ON client.network_node_subtype.node_type_id = client.network_node_types.id`
   database.query(sql)
     .then((response) => {
-      console.log(response)
       var subtypesByType = {}
       response.forEach(subtype => {
         if (!subtypesByType.hasOwnProperty(subtype.network_node_type)) {

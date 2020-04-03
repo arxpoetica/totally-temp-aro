@@ -124,31 +124,7 @@ function setLayerVisibilityByKey (state, layerKeys) {
   })
   return { ...state, ...newState }
 }
-/*
-function setLayerVisibility (state, layer, visibility) {
-  // First determine which category/key (e.g. 'location' the layer belongs to)
-  var layerToChange = null; var layerKey = null; var layerIndex = NaN
-  const list = ['location', 'constructionSite', 'boundary']
-  // Object.keys(state).forEach(key => {
-  list.forEach(key => {
-    const layers = state[key]
-    layers.forEach((stateLayer, index) => {
-      if (stateLayer.key === layer.key && stateLayer.uiLayerId === layer.uiLayerId) {
-        layerToChange = stateLayer
-        layerKey = key
-        layerIndex = index
-      }
-    })
-  })
-  // Create a new layer with the checked flag set
-  const newLayer = { ...layerToChange, checked: visibility }
-  if (layerKey === 'location') {
-    console.log(newLayer.key)
-  }
-  // Replace this category in the state
-  return { ...state, [layerKey]: state[layerKey].set(layerIndex, newLayer) }
-}
-*/
+
 function setShowSiteBoundary (state, visibility) {
   return { ...state, showSiteBoundary: visibility }
 }

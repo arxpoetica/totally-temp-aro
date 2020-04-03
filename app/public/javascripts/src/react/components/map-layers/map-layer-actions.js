@@ -5,7 +5,6 @@ import AroHttp from '../../common/aro-http'
 // ToDo: LOCATIONS refactor callers of this to send layer Key instead of whole layer
 function setLayerVisibility (layer, newVisibility) {
   // if location send to Optimization
-  console.log(layer)
   return (dispatch, getState) => {
     // find type of layer
     const state = getState().mapLayers

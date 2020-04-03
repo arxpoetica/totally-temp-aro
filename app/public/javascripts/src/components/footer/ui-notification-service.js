@@ -24,7 +24,6 @@ app.service('uiNotificationService', ['$rootScope', '$timeout', ($rootScope, $ti
     service.channelsData[channel].queue[noteText]++
     service.channelsData[channel].queueLen++
     if (doUpdate) service.channels[channel].next(service.channelsData[channel])
-    // console.log(service.channelsData[channel].queue[noteText] +' '+ channel+', '+noteText)
   }
 
   service.removeNotification = (channel, noteText) => {
@@ -45,9 +44,6 @@ app.service('uiNotificationService', ['$rootScope', '$timeout', ($rootScope, $ti
       }
       service.channelsData[channel].queueLen--
       if (service.channelsData[channel].queueLen < 0) service.channelsData[channel].queueLen = 0
-
-      // console.log('Done: '+service.channelsData[channel].queue[noteText]+' '+channel+', '+noteText)
-
       if (doUpdate) service.channels[channel].next(service.channelsData[channel])
     }, 100)
   }

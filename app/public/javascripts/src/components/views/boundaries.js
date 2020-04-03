@@ -194,7 +194,6 @@ class BoundariesController {
       setBoundaryLayers: (boundaryLayers) => dispatch(MapLayerActions.setBoundaryLayers(boundaryLayers)),
       updateLayerVisibility: (layer, isVisible) => {
         // First set the visibility of the current layer
-        console.log(layer)
         dispatch(MapLayerActions.setLayerVisibility(layer, isVisible))
       }
     }

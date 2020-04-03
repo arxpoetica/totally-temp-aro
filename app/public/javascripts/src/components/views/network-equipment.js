@@ -261,7 +261,6 @@ class NetworkEquipmentController {
 
   zoomTo(zoomLevel) {
     zoomLevel = Number(zoomLevel) + 1
-    // console.log(zoomLevel)
     this.state.requestSetMapZoom.next(zoomLevel)
   }
 

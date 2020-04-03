@@ -101,8 +101,6 @@ class BoundaryPropertiesEditorController {
         // Get the polygon from the mapObject, not mapObject.feature.geometry, as the user may have edited the map object
         optimizationBody.polygon = this.viewBoundaryProps.geometry
         optimizationBody.directed = false
-        console.log('--- boundary prop edit ---')
-        console.log(optimizationBody)
         return this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
       })
       .then(result => this.addBoundaryCoverage(this.viewBoundaryProps.objectId, result.data))
