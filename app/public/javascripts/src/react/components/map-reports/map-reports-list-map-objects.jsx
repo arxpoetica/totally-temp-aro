@@ -127,6 +127,10 @@ export class MapReportsListMapObjects extends Component {
     paths.push({ lat: reportPage.mapCenter.latitude - latitudeDeltaBy2, lng: reportPage.mapCenter.longitude + longitudeDeltaBy2 })
     return paths
   }
+
+  componentWillUnmount () {
+    this.props.reportPages.forEach(reportPage => this.deleteMapObject(reportPage.uuid))
+  }
 }
 
 MapReportsListMapObjects.propTypes = {

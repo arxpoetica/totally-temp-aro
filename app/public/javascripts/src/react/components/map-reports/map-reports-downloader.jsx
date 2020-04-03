@@ -67,6 +67,10 @@ export class MapReportsDownloader extends Component {
     this.props.downloadReport(this.props.planId, pageDefinitions)
   }
 
+  componentDidMount () {
+    this.props.loadReportPagesForPlan(this.props.planId)
+  }
+
   componentWillUnmount () {
     this.props.clearMapReports()
   }
@@ -89,6 +93,7 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
+  loadReportPagesForPlan: planId => dispatch(MapReportActions.loadReportPagesForPlan(planId)),
   downloadReport: (planId, pageDefinitions) => dispatch(MapReportActions.downloadReport(planId, pageDefinitions)),
   clearMapReports: () => dispatch(MapReportActions.clearMapReports())
 })

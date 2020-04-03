@@ -36,6 +36,24 @@ function setLayerIsChecked (layerName, isChecked) {
   }
 }
 
+function loadReportPagesForPlan (planId) {
+  return dispatch => {
+    dispatch({ type: Actions.MAP_REPORTS_SET_IS_COMMUNICATING, payload: true })
+    AroHttp.get(`/service/v1/plan/${planId}/plan-settings`)
+      .then(result => {
+        dispatch({
+          type: Actions.MAP_REPORTS_SET_PAGES,
+          payload: result.data.printSettings.pages
+        })
+        dispatch({ type: Actions.MAP_REPORTS_SET_IS_COMMUNICATING, payload: false })
+      })
+      .catch(err => {
+        console.error(err)
+        dispatch({ type: Actions.MAP_REPORTS_SET_IS_COMMUNICATING, payload: false })
+      })
+  }
+}
+
 function savePageDefinition (uuid, pageDefinition) {
   return {
     type: Actions.MAP_REPORTS_SET_PAGE_DEFINITION,
@@ -88,6 +106,7 @@ export default {
   downloadReport,
   setLayers,
   setLayerIsChecked,
+  loadReportPagesForPlan,
   savePageDefinition,
   clearMapReports,
   setPages,
