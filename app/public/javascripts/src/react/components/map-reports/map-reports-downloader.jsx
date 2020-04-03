@@ -11,16 +11,38 @@ export class MapReportsDownloader extends Component {
   render () {
     return <div>
       <MapReportsListMapObjects />
-      {
-        this.props.editingPageUuid
-        ? <MapReportPageEditor />
-        : <div>
-          <MapReportsList />
-          <button className='btn btn-sm btn-block btn-primary mt-2' onClick={() => this.doDownloadReport()}>
-            <i className='fa fa-download mr-2' />Generate and Download report
-          </button>
-        </div>
+      { this.renderContent() }
+    </div>
+  }
+
+  renderContent () {
+    if (this.props.isCommunicating) {
+      return this.renderLoadingSpinner()
+    } else {
+      if (this.props.editingPageUuid) {
+        return this.renderEditingPage()
+      } else {
+        return this.renderReportsList()
       }
+    }
+  }
+
+  renderLoadingSpinner () {
+    return <div className='mb-4 mt-4 text-center'>
+      <i className='fa fa-5x fa-spinner fa-spin text-black-50' />
+    </div>
+  }
+
+  renderEditingPage () {
+    return <MapReportPageEditor />
+  }
+
+  renderReportsList () {
+    return <div>
+      <MapReportsList />
+      <button className='btn btn-sm btn-block btn-primary mt-2' onClick={() => this.doDownloadReport()}>
+        <i className='fa fa-download mr-2' />Generate and Download report
+      </button>
     </div>
   }
 
@@ -53,6 +75,7 @@ export class MapReportsDownloader extends Component {
 MapReportsDownloader.propTypes = {
   planId: PropTypes.number,
   mapLayers: PropTypes.object,
+  isCommunicating: PropTypes.bool,
   reportPages: PropTypes.array,
   editingPageUuid: PropTypes.string
 }
@@ -60,6 +83,7 @@ MapReportsDownloader.propTypes = {
 const mapStateToProps = state => ({
   planId: state.plan.activePlan.id,
   mapLayers: state.mapLayers,
+  isCommunicating: state.mapReports.isCommunicating,
   reportPages: state.mapReports.pages,
   editingPageUuid: state.mapReports.editingPageUuid
 })
