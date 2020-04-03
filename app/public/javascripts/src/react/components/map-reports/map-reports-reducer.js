@@ -12,15 +12,6 @@ function clearMapReports () {
   return JSON.parse(JSON.stringify(defaultState))
 }
 
-function setPageDefinition (state, uuid, pageDefinition) {
-  var newPages = [].concat(state.pages)
-  const index = state.pages.findIndex(page => page.uuid === uuid)
-  newPages[index] = pageDefinition
-  return { ...state,
-    pages: newPages
-  }
-}
-
 function setPages (state, pages) {
   return { ...state,
     pages: [].concat(pages)
@@ -47,8 +38,6 @@ function setIsCommunicating (state, isCommunicating) {
 
 function mapReportsReducer (state = defaultState, action) {
   switch (action.type) {
-    case Actions.MAP_REPORTS_SET_PAGE_DEFINITION:
-      return setPageDefinition(state, action.payload.uuid, action.payload.pageDefinition)
 
     case Actions.MAP_REPORTS_SET_PAGES:
       return setPages(state, action.payload)

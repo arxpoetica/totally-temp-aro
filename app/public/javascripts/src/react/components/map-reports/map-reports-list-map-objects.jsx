@@ -77,7 +77,9 @@ export class MapReportsListMapObjects extends Component {
       newPageDefinition.mapCenter.latitude = Math.round(newPageDefinition.mapCenter.latitude * REPORT_LAT_LONG_PRECISION) / REPORT_LAT_LONG_PRECISION
       newPageDefinition.mapCenter.longitude += deltaLng
       newPageDefinition.mapCenter.longitude = Math.round(newPageDefinition.mapCenter.longitude * REPORT_LAT_LONG_PRECISION) / REPORT_LAT_LONG_PRECISION
-      this.props.savePageDefinition(reportPage.uuid, newPageDefinition)
+      const reportPages = [].concat(this.props.reportPages)
+      reportPages.splice(index, 1, newPageDefinition)
+      this.props.setPages(this.props.planId, reportPages)
     })
     this.pageIdToListeners[reportPage.uuid] = [clickListener, dragStartListener, dragEndListener]
     this.pageIdToMapObject[reportPage.uuid] = mapObject
@@ -134,19 +136,21 @@ export class MapReportsListMapObjects extends Component {
 }
 
 MapReportsListMapObjects.propTypes = {
+  planId: PropTypes.number,
   activePageUuid: PropTypes.string,
   googleMaps: PropTypes.object,
   reportPages: PropTypes.array
 }
 
 const mapStateToProps = state => ({
+  planId: state.plan.activePlan.id,
   activePageUuid: state.mapReports.activePageUuid,
   googleMaps: state.map.googleMaps,
   reportPages: state.mapReports.pages
 })
 
 const mapDispatchToProps = dispatch => ({
-  savePageDefinition: (uuid, pageDefinition) => dispatch(MapReportActions.savePageDefinition(uuid, pageDefinition)),
+  setPages: (planId, pageDefinitions) => dispatch(MapReportActions.setPages(planId, pageDefinitions)),
   setActivePageUuid: uuid => dispatch(MapReportActions.setActivePageUuid(uuid))
 })
 

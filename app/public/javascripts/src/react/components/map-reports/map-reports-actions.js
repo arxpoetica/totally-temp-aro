@@ -54,16 +54,6 @@ function loadReportPagesForPlan (planId) {
   }
 }
 
-function savePageDefinition (uuid, pageDefinition) {
-  return {
-    type: Actions.MAP_REPORTS_SET_PAGE_DEFINITION,
-    payload: {
-      uuid,
-      pageDefinition
-    }
-  }
-}
-
 function clearMapReports () {
   return {
     type: Actions.MAP_REPORTS_CLEAR
@@ -107,7 +97,6 @@ export default {
   setLayers,
   setLayerIsChecked,
   loadReportPagesForPlan,
-  savePageDefinition,
   clearMapReports,
   setPages,
   setActivePageUuid,
