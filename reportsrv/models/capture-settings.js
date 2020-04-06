@@ -9,17 +9,14 @@ class CaptureSettings {
     const sizeY = (pageSetup.orientation === 'portrait') ? pageSetup.paperSize.sizeY : pageSetup.paperSize.sizeX
     const physicalDistanceAlongLongitude = pageSetup.mapScale.worldLengthPerMeterOfPaper * sizeX
     const physicalDistanceAlongLatitude = pageSetup.mapScale.worldLengthPerMeterOfPaper * Math.cos(pageSetup.latitude / 180.0 * Math.PI) * sizeY
-    const resolution = 156543.03 * Math.cos(pageSetup.latitude * Math.PI / 180.0) / Math.pow(2, zoom)
-
+    const physicalMetersPerPixel = this._getResolution(pageSetup, zoom)
     // For a given page setup, this function will calculate the zoom level, width and height of 
     // the map that we need to take a screenshot of.
 
     // First, calculate the pixels required based on the page size and dpi.
-    // const INCHES_PER_METER = 39.3701
-    // const pixelsPerPaperMeter = pageSetup.dpi * INCHES_PER_METER
     const pageSizePixels = {
-      x: Math.round(physicalDistanceAlongLongitude / resolution),
-      y: Math.round(physicalDistanceAlongLatitude / resolution)
+      x: Math.round(physicalDistanceAlongLongitude / physicalMetersPerPixel),
+      y: Math.round(physicalDistanceAlongLatitude / physicalMetersPerPixel)
     }
 
     return {
@@ -42,6 +39,15 @@ class CaptureSettings {
     // (2 ^ zoomlevel) = (screen_dpi * 1/0.0254 in/m * 156543.03 meters/pixel * cos(latitude)) / pageSetup.worldLengthPerMeterOfPaper
     // zoomlevel = Math.log2((screen_dpi * 1/0.0254 in/m * 156543.03 meters/pixel * cos(latitude)) / pageSetup.worldLengthPerMeterOfPaper)
     return Math.ceil(Math.log2((pageSetup.dpi * 1/0.0254 * 156543.03 * Math.cos(pageSetup.latitude *  Math.PI / 180.0)) / +pageSetup.mapScale.worldLengthPerMeterOfPaper))
+  }
+
+  static _getResolution (pageSetup, zoom) {
+    // From https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Resolution_and_Scale
+    // Exact length of the equator (according to wikipedia) is 40075.016686 km in WGS-84. At zoom 0, one pixel would equal 156543.03 meters (assuming a tile size of 256 px):
+    // 40075.016686 * 1000 / 256 ≈ 6378137.0 * 2 * pi / 256 ≈ 156543.03
+    // Which gives us a formula to calculate resolution at any given zoom:
+    // resolution = 156543.03 meters/pixel * cos(latitude) / (2 ^ zoomlevel)
+    return 156543.03 * Math.cos(pageSetup.latitude * Math.PI / 180.0) / Math.pow(2, zoom)
   }
 }
 
