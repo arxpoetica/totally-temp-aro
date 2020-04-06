@@ -170,7 +170,20 @@ export class PlanningConstraints extends Component {
                     className='form-control form-control-sm' component='input' type='text' />
                 </td>
               </tr>
-
+              <tr>
+                <td>Business cluster distance (m)</td>
+                <td>
+                  <Field name='businessClusterDistance'
+                    className='form-control form-control-sm' component='input' type='text' />
+                </td>
+              </tr>
+              <tr>
+                <td>Household cluster distance (m)</td>
+                <td>
+                  <Field name='householdClusterDistance'
+                    className='form-control form-control-sm' component='input' type='text' />
+                </td>
+              </tr>
               <tr>
                 <td>Summarize Service Mods</td>
                 <td>
@@ -203,6 +216,13 @@ export class PlanningConstraints extends Component {
                 <td>Aggregated BOM</td>
                 <td>
                   <Field name='aggregatedBOM'
+                    className='checkboxfill' component='input' type='checkbox' />
+                </td>
+              </tr>
+              <tr>
+                <td>Log Request Event</td>
+                <td>
+                  <Field name='logRequestEvent'
                     className='checkboxfill' component='input' type='checkbox' />
                 </td>
               </tr>
