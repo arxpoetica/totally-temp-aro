@@ -13,13 +13,11 @@ const OAUTH_CONNECTION_STRING = `http://${config.oauth_server_host}`
 // A promise that resolves with the public signing key of the OAuth server (which may not be online before this app server)
 const delayPromise = new Promise((resolve, reject) => setTimeout(() => resolve(), 60000))
 const authSigningKey = delayPromise
-  .then(() => {
-    requestPromise({
-      method: 'GET',
-      uri: `${OAUTH_CONNECTION_STRING}/oauth/token_key`,
-      json: true
-    })
-  })
+  .then(() => requestPromise({
+    method: 'GET',
+    uri: `${OAUTH_CONNECTION_STRING}/oauth/token_key`,
+    json: true
+  }))
   .then(res => res.value)
   .catch(err => {
     console.error('********************** Error when getting token key from OAuth server')
