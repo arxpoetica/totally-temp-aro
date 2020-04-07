@@ -69,6 +69,7 @@ workflows:
                 - master
                 - optional_building
                 - location_cluster
+                - jwtErrors
 
       - deploy:
           context: aro_qa_builds
