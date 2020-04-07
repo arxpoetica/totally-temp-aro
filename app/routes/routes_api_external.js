@@ -32,7 +32,10 @@ const checkUserAuthJWT = (jwtToken) => authSigningKey
           console.error(err)
           reject({
             statusCode: 400,
-            error: 'ERROR: Unable to verify JWT token'
+            error: {
+              short: 'ERROR: Unable to verify JWT token',
+              long: JSON.stringify(err)
+            }
           })
         } else {
           resolve(decoded)
