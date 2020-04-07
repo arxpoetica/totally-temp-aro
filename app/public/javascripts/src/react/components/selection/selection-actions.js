@@ -74,6 +74,7 @@ function addPlanTargets (planId, planTargets) {
           }
         })
         // turn on boundary layers for any new description that has an entry in planTargets
+        // there is currently no way to turn on boundaries that aren't analysis layers, not enough infor from service
         var layerKeys = []
         var analysisLayerIds = []
         Object.keys(results[2].data).forEach(key => {
