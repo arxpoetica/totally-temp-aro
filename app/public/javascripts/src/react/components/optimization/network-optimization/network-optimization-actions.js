@@ -112,7 +112,7 @@ function setOptimizationInputs (inputs) {
           layerTypes: ['location']
         }
       })
-      if (layerKeys.length > 0) {
+      if (layerKeys.length) {
         dispatch({
           type: Actions.LAYERS_SET_VISIBILITY_BY_KEY,
           payload: {

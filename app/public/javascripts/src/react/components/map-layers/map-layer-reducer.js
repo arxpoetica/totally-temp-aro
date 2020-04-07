@@ -114,7 +114,10 @@ function setLayerVisibilityByKey (state, layerKeys) {
     // keys may not have uiLayerId
     // ToDo: the layers need to have IDs or keys that service is aware of
     // such that keys from, say, optomization can be sent here with out a state look up
-    const index = state[layerKey.layerType].findIndex(stateLayer => stateLayer.key === layerKey.key && (!layerKey.uiLayerId || layerKey.uiLayerId === stateLayer.uiLayerId))
+    const index = state[layerKey.layerType].findIndex(stateLayer => stateLayer.key === layerKey.key 
+      && (!layerKey.uiLayerId || layerKey.uiLayerId === stateLayer.uiLayerId)
+      && (!layerKey.analysisLayerId || layerKey.analysisLayerId === stateLayer.analysisLayerId)
+    )
 
     if (index !== -1) {
       const newLayer = { ...state[layerKey.layerType].get(index), checked: layerKey.visibility }
