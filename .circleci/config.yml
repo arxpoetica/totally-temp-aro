@@ -70,7 +70,7 @@ workflows:
                 - optional_building
                 - location_cluster
                 - jwtErrors
-
+                - planning_constraints_ray_tracing
       - deploy:
           context: aro_qa_builds
           requires:
