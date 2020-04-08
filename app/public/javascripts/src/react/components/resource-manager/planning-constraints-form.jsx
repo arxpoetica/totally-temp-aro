@@ -111,10 +111,35 @@ export class PlanningConstraints extends Component {
                 </td>
               </tr>
               <tr>
+                { /*
                 <td>Infer CO when missing</td>
                 <td>
                   <Field name='inferCoWhenMissing'
                     className='checkboxfill' component='input' type='checkbox' />
+                </td>
+                */ }
+                <td>Missing CO strategy</td>
+                <td>
+                  <div>
+                    <Field name='missingCoStrategy'
+                      className='checkboxfill' component='input' type='radio' value='doNothing' /> Do nothing
+                  </div>
+                  <div>
+                    <Field name='missingCoStrategy'
+                      className='checkboxfill' component='input' type='radio' value='useExistingSplicePoints' /> Use Existing Splice Points Only
+                  </div>
+                  <div>
+                    <Field name='missingCoStrategy'
+                      className='checkboxfill' component='input' type='radio' value='useSyntheticSplicePoints' /> Use Synthetic Splice Points Only
+                  </div>
+                  <div>
+                    <Field name='missingCoStrategy'
+                      className='checkboxfill' component='input' type='radio' value='useAllSplicePoints' /> Use All Splice Points
+                  </div>
+                  <div>
+                    <Field name='missingCoStrategy'
+                      className='checkboxfill' component='input' type='radio' value='usePrimaryEdges' /> Use Primary Edges
+                  </div>
                 </td>
               </tr>
               <tr>
@@ -145,7 +170,20 @@ export class PlanningConstraints extends Component {
                     className='form-control form-control-sm' component='input' type='text' />
                 </td>
               </tr>
-
+              <tr>
+                <td>Business cluster distance (m)</td>
+                <td>
+                  <Field name='businessClusterDistance'
+                    className='form-control form-control-sm' component='input' type='text' />
+                </td>
+              </tr>
+              <tr>
+                <td>Household cluster distance (m)</td>
+                <td>
+                  <Field name='householdClusterDistance'
+                    className='form-control form-control-sm' component='input' type='text' />
+                </td>
+              </tr>
               <tr>
                 <td>Summarize Service Mods</td>
                 <td>
@@ -178,6 +216,13 @@ export class PlanningConstraints extends Component {
                 <td>Aggregated BOM</td>
                 <td>
                   <Field name='aggregatedBOM'
+                    className='checkboxfill' component='input' type='checkbox' />
+                </td>
+              </tr>
+              <tr>
+                <td>Log Request Event</td>
+                <td>
+                  <Field name='logRequestEvent'
                     className='checkboxfill' component='input' type='checkbox' />
                 </td>
               </tr>

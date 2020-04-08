@@ -25,4 +25,6 @@ configuration.rabbitmq = {
   username: process.env.RABBITMQ_USERNAME || 'guest',
   password: process.env.RABBITMQ_PASSWORD || 'guest'
 }
+configuration.map_reports_url = process.env.MAP_REPORTS_URL || 'http://report:7000'
+
 module.exports = configuration

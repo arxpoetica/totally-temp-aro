@@ -50,7 +50,7 @@ class DataSourceUploadController {
     // Default Polygon radius in meters
     this.radius = 20000
 
-    var form
+    var form = null
 
     this.isDataManagementView = false
 
@@ -63,6 +63,10 @@ class DataSourceUploadController {
       tile_system: {fileName: 'example_upload_tile_system.csv'},
       edge: {fileName: 'sample_edges.zip'}
     }
+    // for sse:
+    // location: {fileName: 'sse_location_upload_template.csv'}
+    // equipment: {fileName: 'sse_equipment_upload_template.csv'}
+    // see this.modalShown ()
 
     state.showDataSourceUploadModal.subscribe((newValue) => {
       setTimeout(function () {
@@ -138,6 +142,13 @@ class DataSourceUploadController {
   }
 
   modalShown () {
+    // ToDo: This check doesn't belong here.
+    //  When we refactor move this.downloads to client-dependent JSON configs.
+    if (this.state.configuration.ARO_CLIENT === 'sse') { // 'sse'
+      this.downloads.location.fileName = 'sse_location_upload_template.csv'
+      this.downloads.equipment.fileName = 'sse_equipment_upload_template.csv'
+    }
+
     this.state.showDataSourceUploadModal.next(true)
     
     this.tableSource = this.uploadSource = this.state.uploadDataSource = this.uploadDataSources[0]

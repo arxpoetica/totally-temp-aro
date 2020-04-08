@@ -13,16 +13,14 @@ exports.configure = (api, middleware) => {
   api.get('/', (request, response, next) => {
     response.render('index.html', {
       env: process.env.NODE_ENV,
-      env_is_production: process.env.NODE_ENV === 'production',
-      env_is_test: process.env.NODE_ENV === 'test',
-      user: request.user,
       config: public_config,
       serviceLayers: cache.serviceLayers,
       analysisLayers: cache.analysisLayers,
       googleMapsLicensing: googleMapsLicensing,
-      mapType: process.env.ARO_CLIENT === 'frontier' ? 'SATELLITE' : 'ROADMAP', 
+      mapType: process.env.ARO_CLIENT === 'frontier' ? 'SATELLITE' : 'ROADMAP',
       analyticsTrackingKey: process.env.ANALYTICS_TRACKING_KEY,
-      ARO_CLIENT_DONOT_USE_IN_CODE: process.env.ARO_CLIENT
+      ARO_CLIENT_DONOT_USE_IN_CODE: process.env.ARO_CLIENT,
+      reportPage: request.query.reportPage ? JSON.parse(request.query.reportPage) : undefined
     })
   })
 

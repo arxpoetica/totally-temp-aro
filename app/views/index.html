@@ -24,6 +24,14 @@
     <link rel="stylesheet" type="text/css" href="/javascripts/src/shared-utils/editor-interfaces.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/client_<%= ARO_CLIENT_DONOT_USE_IN_CODE %>.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/layout_<%= config.ui.layout %>.css">
+    <%if (reportPage) { %>
+      <script>
+        window.GLOBAL_MAP_SPLITTER_INITIAL_WIDTH = 100
+        window.GLOBAL_SIDEBAR_INITIAL_WIDTH = 0
+      </script>
+      <link rel="stylesheet" type="text/css" href="/stylesheets/report.css">
+    <% } %>
+
     <link href="/ui_stylesheets" rel="stylesheet">
 
     <!-- Putting google maps include here because sometimes our app code loads before maps, and tries to use the map. It is going
@@ -84,13 +92,7 @@
     </div>
 
     <div ng-controller="selected_location_controller">
-
-      <% if (env_is_test) { %>
-        <a class="float-right" ng-click="select_random_location()">.</a>
-      <% } %>
-
       <% include modal_selected_location.html %>
-
     </div>
 
     <map-split></map-split>
@@ -99,6 +101,7 @@
     <div growl></div>
     <fiber-strand-info></fiber-strand-info>
     <global-data-source-upload-modal></global-data-source-upload-modal>
+    <project-settings-modal></project-settings-modal>
     <global-settings></global-settings>
     <network-plan-modal></network-plan-modal>
     <report-modal></report-modal>
@@ -123,7 +126,6 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.5/angular-animate.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.5/angular-sanitize.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ngStorage/0.3.10/ngStorage.min.js"></script>
-    <script src="https://www.gstatic.com/charts/loader.js"></script>
     <script>
       window.ngRedux = require('ng-redux')
       var app = angular.module('aro', ['ngRedux', 'ngAnimate','ngStorage','ngSanitize','ui-notification', 'ui.select', 'ng-currency', 'chart.js']);
@@ -203,7 +205,7 @@
         map.setStreetView(panorama);
 
         // At this point, our angular app and the document is initialized. Perform any further initialization via the state service.
-        angular.element(document.body).injector().get('state').initializeApp()
+        angular.element(document.body).injector().get('state').initializeApp(<%- JSON.stringify(reportPage)  %>)
       }
 
       function openReleaseNotes() {
@@ -291,8 +293,6 @@
           leftcol.addClass('left-col-expanded')
         }
       })
-
-      swal.setDefaults({ animation: <%- env_is_test ? 'null' : 'true' %> })
 
       // prevent tabs from changing the URL
       $('.nav-tabs a').click((e) => {

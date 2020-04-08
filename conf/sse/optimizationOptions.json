@@ -3,7 +3,7 @@
   "uiAlgorithms": [],
   "uiSelectedAlgorithm": null,
   "networkConstraints": {
-    "routingMode": "ODN_1",
+    "routingMode": "DIRECT_ROUTING",
     "networkTypes": [
       "Fiber"
     ],

@@ -24,12 +24,13 @@ import RingEdit from '../react/components/ring-edit/ring-edit.jsx'
 import RingButton from '../react/components/ring-edit/ring-button.jsx'
 import LocationInfo from '../react/components/location-info/location-info.jsx'
 import ResourcePermissions from '../react/components/acl/resource-permissions/resource-permissions.jsx'
+import ProjectPermissions from '../react/components/project-template/project-permissions.jsx'
 import PermissionsTable from '../react/components/acl/resource-permissions/permissions-table.jsx'
 import SearchableSelect from '../react/components/common/searchable-select.jsx'
 import PlanningConstraintsEditor from '../react/components/resource-manager/planning-constraints-editor.jsx'
 import FusionEditor from '../react/components/resource-manager/fusion-editor.jsx'
 import NetworkArchitectureEditor from '../react/components/resource-manager/network-architecture-editor.jsx'
-import ToolBox from '../react/components/map-layers/tool-box.jsx'
+import ToolBox from '../react/components/tool/tool-box.jsx'
 
 import boundaryDetail from './sidebar/view/boundary-detail'
 import equipmentDetail from './sidebar/view/equipment-detail'
@@ -70,6 +71,7 @@ import planSummary from './sidebar/plan-editor/plan-summary'
 import serviceLayerEditor from './sidebar/plan-editor/service-layer-editor'
 import conicTileSystemUploader from './sidebar/plan-settings/plan-data-selection/conic-tile-system-uploader'
 import globalDataSourceUploadModal from './sidebar/plan-settings/plan-data-selection/data-source-upload-modal'
+import projectSettingsModal from './sidebar/plan-settings/plan-project-configuration/project-settings-modal'
 import planDataSelection from './sidebar/plan-settings/plan-data-selection/plan-data-selection'
 import planProjectConfiguration from './sidebar/plan-settings/plan-project-configuration/plan-project-configuration'
 import planSettings from './sidebar/plan-settings/plan-settings'
@@ -177,6 +179,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('draggableButton', draggableButton)
   .component('conicTileSystemUploader', conicTileSystemUploader)
   .component('globalDataSourceUploadModal', globalDataSourceUploadModal)
+  .component('projectSettingsModal', projectSettingsModal)
   .component('planDataSelection', planDataSelection)
   .component('planProjectConfiguration', planProjectConfiguration)
   .component('planSettings', planSettings)
@@ -264,6 +267,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rLocationInfo', react2angular(LocationInfo))
   .component('rResourcePermissions', react2angular(ResourcePermissions))
   .component('rPermissionsTable', react2angular(PermissionsTable))
+  .component('rProjectPermissions', react2angular(ProjectPermissions))
   .component('rSearchableSelect', react2angular(SearchableSelect))
   .component('rPlanningConstraintsEditor', react2angular(PlanningConstraintsEditor, ['onDiscard']))
   .component('rFusionEditor', react2angular(FusionEditor, ['onDiscard']))

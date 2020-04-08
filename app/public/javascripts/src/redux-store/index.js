@@ -18,9 +18,12 @@ import coverage from '../react/components/coverage/coverage-reducer'
 import fullScreen from '../react/components/full-screen/full-screen-reducer'
 import map from '../react/components/map/map-reducer'
 import mapLayers from '../react/components/map-layers/map-layer-reducer'
+import mapReports from '../react/components/map-reports/map-reports-reducer'
 import plan from '../react/components/plan/plan-reducer'
+import projectTemplate from '../react/components/project-template/project-template-reducer'
 import planEditor from '../react/components/plan-editor/plan-editor-reducer'
 import selection from '../react/components/selection/selection-reducer'
+import tool from '../react/components/tool/tool-reducer'
 import user from '../react/components/user/user-reducer'
 import ringEdit from '../react/components/ring-edit/ring-edit-reducer'
 import locationInfo from '../react/components/location-info/location-info-reducer'
@@ -40,10 +43,13 @@ let reducer = combineReducers({
   fullScreen,
   map,
   mapLayers,
+  mapReports,
   optimization: combineReducers({ networkOptimization, networkAnalysis, report: opReport, rfp }),
   plan,
+  projectTemplate,
   planEditor,
   selection,
+  tool,
   user,
   form,
   ringEdit,

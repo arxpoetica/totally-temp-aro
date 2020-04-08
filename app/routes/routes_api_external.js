@@ -11,11 +11,13 @@ const userIdInjector = require('./user-id-injector')
 const OAUTH_CONNECTION_STRING = `http://${config.oauth_server_host}`
 
 // A promise that resolves with the public signing key of the OAuth server (which may not be online before this app server)
-const authSigningKey = requestPromise({
-  method: 'GET',
-  uri: `${OAUTH_CONNECTION_STRING}/oauth/token_key`,
-  json: true
-})
+const delayPromise = new Promise((resolve, reject) => setTimeout(() => resolve(), 60000))
+const authSigningKey = delayPromise
+  .then(() => requestPromise({
+    method: 'GET',
+    uri: `${OAUTH_CONNECTION_STRING}/oauth/token_key`,
+    json: true
+  }))
   .then(res => res.value)
   .catch(err => {
     console.error('********************** Error when getting token key from OAuth server')
@@ -32,7 +34,10 @@ const checkUserAuthJWT = (jwtToken) => authSigningKey
           console.error(err)
           reject({
             statusCode: 400,
-            error: 'ERROR: Unable to verify JWT token'
+            error: {
+              short: 'ERROR: Unable to verify JWT token',
+              long: JSON.stringify(err)
+            }
           })
         } else {
           resolve(decoded)

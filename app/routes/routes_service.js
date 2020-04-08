@@ -14,12 +14,17 @@ const userIdInjector = require('./user-id-injector')
 exports.configure = (api, middleware) => {
   var jsonSuccess = middleware.jsonSuccess
 
-  // Get all requests (POST/GET/DELETE/PUT,etc) that start with /service, and then pass those
-  // on to ARO-Service. Do NOT modify any data - this is intended to be a pass-through service
-  const SERVICE_PREFIX = '/service'
-  api.all(`${SERVICE_PREFIX}/*`, expressProxy(`${config.aro_service_url}`, {
-    proxyReqPathResolver: req => userIdInjector(req, SERVICE_PREFIX, '', req.user.id)
-  }))
+  // Set up all our pass-through routes (e.g. urls starting with /service are routed to aro-service).
+  // Set it up as a pure pass-through route - do not modify any data
+  const passThroughs = {
+    '/service': config.aro_service_url,
+    '/map-reports': config.map_reports_url
+  }
+  Object.keys(passThroughs).forEach(prefixUrl => {
+    api.all(`${prefixUrl}/*`, expressProxy(`${passThroughs[prefixUrl]}`, {
+      proxyReqPathResolver: req => userIdInjector(req, prefixUrl, '', req.user.id)
+    }))
+  })
 
   // For vector tile requests that return data via websockets, save the request uuid. Then pass the
   // request through to service
