@@ -67,14 +67,7 @@ workflows:
             branches:
               only:
                 - master
-                - optional_building
-                - network_optimization_redux
-                - wormholeFusion
-                - coverageFix
-                - platform_upgrade
-                - shp_reports
                 - AERIAL
-
       - deploy:
           context: aro_qa_builds
           requires:
