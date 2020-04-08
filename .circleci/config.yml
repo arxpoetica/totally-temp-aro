@@ -68,12 +68,9 @@ workflows:
               only:
                 - master
                 - optional_building
-                - network_optimization_redux
-                - wormholeFusion
-                - coverageFix
-                - platform_upgrade
-                - shp_reports
-
+                - location_cluster
+                - jwtErrors
+                - planning_constraints_ray_tracing
       - deploy:
           context: aro_qa_builds
           requires:
