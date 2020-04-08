@@ -973,7 +973,7 @@ class State {
 
     // Load the plan inputs for the given plan and populate them in state
     // Optimization options in Redux
-    // ToDo: depricate stateSerializationHelper, replace with redux store
+    // ToDo: depricate loadPlanInputs, replace with redux store
     service.loadPlanInputs = (planId) => {
       return $http.get(`/service/v1/plan/${planId}/inputs`)
         .then((result) => {
