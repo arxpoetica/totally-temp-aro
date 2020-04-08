@@ -29,6 +29,17 @@ export class PlanningConstraints extends Component {
                 </td>
               </tr>
               <tr>
+                <td className='pl-4'>Polygon Strategy</td>
+                <td>
+                  <Field name='cellNodeConstraints.polygonStrategy'
+                    className='form-control form-control-sm' component='select' type='text'>
+                    <option value='FIXED_RADIUS'>Fixed Radius</option>
+                    <option value='AVERAGE_RADIUS'>Average Radius</option>
+                    <option value='RAY_TRACING'>Ray Tracing</option>
+                  </Field>
+                </td>
+              </tr>
+              <tr>
                 <td className='pl-4'>Cell Radius (m)</td>
                 <td>
                   <Field name='cellNodeConstraints.cellRadius'
