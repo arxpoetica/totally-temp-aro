@@ -188,7 +188,8 @@ class DataSourceUploadController {
       // Close dialog only after save is done, otherwise the FileList in the child control resets to 0
       this.isUploading = true
       this.conicTileSystemUploaderApi.save()
-        .then(() => {
+        .then((result) => {
+          this.addDatasource(JSON.parse(result.data))
           this.isUploading = false
           this.close()
         })
