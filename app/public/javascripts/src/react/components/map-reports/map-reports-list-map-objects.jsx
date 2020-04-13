@@ -115,11 +115,11 @@ export class MapReportsListMapObjects extends Component {
     const sizeX = (reportPage.orientation === 'portrait') ? paperSizeMeters.sizeX : paperSizeMeters.sizeY
     const sizeY = (reportPage.orientation === 'portrait') ? paperSizeMeters.sizeY : paperSizeMeters.sizeX
     const physicalDistanceAlongLongitude = reportPage.worldLengthPerMeterOfPaper * sizeX
-    const physicalDistanceAlongLatitude = reportPage.worldLengthPerMeterOfPaper * Math.cos(reportPage.mapCenter.latitude / 180.0 * Math.PI) * sizeY
+    const physicalDistanceAlongLatitude = reportPage.worldLengthPerMeterOfPaper * sizeY
     const equatorLength = 40075016.686  // meters
     const radiusEarth = equatorLength / 2.0 / Math.PI
     // const sliceLengthAtLongitude = equatorLength * Math.sin(reportPage.mapCenter.longitude)
-    const latitudeDeltaBy2 = (physicalDistanceAlongLatitude / radiusEarth * 180.0 / Math.PI) / 2
+    const latitudeDeltaBy2 = ((physicalDistanceAlongLatitude * Math.cos(reportPage.mapCenter.latitude / 180.0 * Math.PI)) / radiusEarth * 180.0 / Math.PI) / 2
     const longitudeDeltaBy2 = (physicalDistanceAlongLongitude / radiusEarth * 180.0 / Math.PI) / 2
 
     var paths = []
