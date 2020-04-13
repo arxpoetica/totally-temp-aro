@@ -32,12 +32,12 @@ exports.configure = api => {
       // Construct a ReportPage object for this report page
       const page = reportPages[iReport]
       const pageSetup = new PageSetup(PaperSize.getPaperSize(page.paperSize), new MapScale(page.worldLengthPerMeterOfPaper),
-        page.dpi, page.orientation, page.latitude)
+        page.dpi, page.orientation)
       const reportPage = new ReportPage(pageSetup, page.mapCenter, page.planId, page.visibleLayers)
       const screenshot = await ScreenshotManager.getScreenshotForReportPage(reportPage)
       // PDFKit uses sizes in "PDF points" which is 72 points per inch :(
       const PDF_POINTS_MULTIPLIER = 72 / pageSetup.dpi
-      const captureSettings = CaptureSettings.fromPageSetup(reportPage.pageSetup)
+      const captureSettings = CaptureSettings.fromPageSetup(reportPage)
       const sizePdfPoints = {
         x: captureSettings.pageSizePixels.x * PDF_POINTS_MULTIPLIER,
         y: captureSettings.pageSizePixels.y * PDF_POINTS_MULTIPLIER
