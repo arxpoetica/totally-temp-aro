@@ -173,7 +173,7 @@
             <select class="form-control"
                     ng-change="$ctrl.markSelectedLocationPropertiesDirty()"
                     ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].locationCategory"
-                    ng-options="item for item in $ctrl.locationTypes">
+                    ng-options="key as value for (key , value) in $ctrl.locationTypes">
             </select>
           </td>
         </tr>
