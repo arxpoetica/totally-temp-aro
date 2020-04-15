@@ -128,7 +128,7 @@
     </div>
   </modal-body>
   <modal-footer class="justify-content-between" ng-show="!$ctrl.isDataManagementView">
-    <a href="/csv/{{$ctrl.downloads[$ctrl.state.uploadDataSource.name].fileName}}" class="btn btn-primary" role="button" download="{{$ctrl.downloads[$ctrl.state.uploadDataSource.name].fileName}}">Download upload template</a>    
+    <a href="/download/{{$ctrl.state.uploadDataSource.name}}" class="btn btn-primary" role="button" download="{{$ctrl.downloads[$ctrl.state.uploadDataSource.name].fileName}}">Download upload template</a>    
     <button class="btn btn-primary" ng-class="$ctrl.datasourceName == '' ? 'btn btn-light' : 'btn btn-primary'" ng-disabled="$ctrl.isUploading || $ctrl.datasourceName === ''"
     ng-click="$ctrl.save()"><span ng-show="$ctrl.isUpLoad" class="fa fa-spinner fa-spin"></span> Save</button>
   </modal-footer>
