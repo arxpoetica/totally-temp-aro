@@ -3,6 +3,7 @@ import { PropTypes } from 'prop-types'
 import { connect } from 'react-redux'
 import MapReportActions from './map-reports-actions'
 import { REPORT_LAT_LONG_PRECISION } from './constants'
+import MercatorProjection from '../../../shared-utils/mercator-projection'
 
 export class MapReportsListMapObjects extends Component {
   constructor (props) {
@@ -111,22 +112,40 @@ export class MapReportsListMapObjects extends Component {
   }
 
   getMapPolygonForReportPage (reportPage) {
+
+    // We are going to generate a Google Maps polygon that will represent the page being printed.
+    // From Wikipedia https://en.wikipedia.org/wiki/Mercator_projection
+    // From EPSG:900913 (used by Google Maps), Radius of earth at the equator = 6378137
+
+    // First, decide on the sphere radius based on the scaling factor.
+    const R = 6378137 / reportPage.worldLengthPerMeterOfPaper
+    const projection = new MercatorProjection(R)
+
+    // Use the Mercator projection on our sphere to get the X, Y coordinates of the point
+    const xCenter = projection.longitudeToX(reportPage.mapCenter.longitude)
+    const yCenter = projection.latitudeToY(reportPage.mapCenter.latitude)
+
+    // Get the physical distance that we will cover along the latitude and longitude.
+    // We have chosen the radius of the sphere (R) such that we have to move by an
+    // amount equal to the paper size in meters.
     const paperSizeMeters = this.getPaperSize(reportPage.paperSize)
     const sizeX = (reportPage.orientation === 'portrait') ? paperSizeMeters.sizeX : paperSizeMeters.sizeY
     const sizeY = (reportPage.orientation === 'portrait') ? paperSizeMeters.sizeY : paperSizeMeters.sizeX
-    const physicalDistanceAlongLongitude = reportPage.worldLengthPerMeterOfPaper * sizeX
-    const physicalDistanceAlongLatitude = reportPage.worldLengthPerMeterOfPaper * sizeY
-    const equatorLength = 40075016.686  // meters
-    const radiusEarth = equatorLength / 2.0 / Math.PI
-    // const sliceLengthAtLongitude = equatorLength * Math.sin(reportPage.mapCenter.longitude)
-    const latitudeDeltaBy2 = ((physicalDistanceAlongLatitude * Math.cos(reportPage.mapCenter.latitude / 180.0 * Math.PI)) / radiusEarth * 180.0 / Math.PI) / 2
-    const longitudeDeltaBy2 = (physicalDistanceAlongLongitude / radiusEarth * 180.0 / Math.PI) / 2
 
+    // Find the corner coordinates of the page in the Mercator (X, Y) coordinate system.
+    // Note that the distance between yCenter and yMin will not be the same except at the equator
+    // and the difference will get more pronounced at higher latitudes.
+    const minLatitude = projection.yToLatitude(yCenter - sizeY / 2)
+    const minLongitude = projection.xToLongitude(xCenter - sizeX / 2)
+    const maxLatitude = projection.yToLatitude(yCenter + sizeY / 2)
+    const maxLongitude = projection.xToLongitude(xCenter + sizeX / 2)
+
+    // Finally, create a polygon from our min/max latitude/longitude pairs
     var paths = []
-    paths.push({ lat: reportPage.mapCenter.latitude - latitudeDeltaBy2, lng: reportPage.mapCenter.longitude - longitudeDeltaBy2 })
-    paths.push({ lat: reportPage.mapCenter.latitude + latitudeDeltaBy2, lng: reportPage.mapCenter.longitude - longitudeDeltaBy2 })
-    paths.push({ lat: reportPage.mapCenter.latitude + latitudeDeltaBy2, lng: reportPage.mapCenter.longitude + longitudeDeltaBy2 })
-    paths.push({ lat: reportPage.mapCenter.latitude - latitudeDeltaBy2, lng: reportPage.mapCenter.longitude + longitudeDeltaBy2 })
+    paths.push({ lat: minLatitude, lng: minLongitude })
+    paths.push({ lat: maxLatitude, lng: minLongitude })
+    paths.push({ lat: maxLatitude, lng: maxLongitude })
+    paths.push({ lat: minLatitude, lng: maxLongitude })
     return paths
   }
 
