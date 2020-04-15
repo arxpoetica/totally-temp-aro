@@ -261,6 +261,7 @@ class LocationsController {
       this.createdMapLayerKeys.add(mapLayerKey)
     }
     // "oldMapLayers" now contains the new layers. Set it in the state
+    console.log(oldMapLayers)
     this.state.mapLayers.next(oldMapLayers)
   }
 

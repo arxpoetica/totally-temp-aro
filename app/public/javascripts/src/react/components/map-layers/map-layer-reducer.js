@@ -93,12 +93,12 @@ function setCableConduitVisibility (state, cableKey, conduitKey, visibility) {
   }
 }
 
-function setAllLayerVisibilityOff (state, layerTypes) {
+function setAllLayerVisibility (state, layerTypes, visibility) {
   var newState = {}
   layerTypes.forEach(layerType => {
     newState[layerType] = state[layerType] // will get cloned below
     state[layerType].forEach((layer, layerIndex) => {
-      const newLayer = { ...layer, checked: false }
+      const newLayer = { ...layer, checked: visibility }
       newState[layerType] = newState[layerType].set(layerIndex, newLayer)
     })
   })
@@ -214,8 +214,8 @@ function mapLayersReducer (state = defaultState, action) {
     case Actions.LAYERS_SET_BOUNDARY:
       return setLayers(state, 'boundary', action.payload)
 
-    case Actions.LAYERS_SET_ALL_VISIBILITY_OFF:
-      return setAllLayerVisibilityOff(state, action.payload.layerTypes)
+    case Actions.LAYERS_SET_ALL_VISIBILITY:
+      return setAllLayerVisibility(state, action.payload.layerTypes, action.payload.visibility)
 
     case Actions.LAYERS_SET_VISIBILITY_BY_KEY:
       return setLayerVisibilityByKey(state, action.payload.layerKeys)

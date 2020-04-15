@@ -106,12 +106,24 @@ function setOptimizationInputs (inputs) {
       })
 
       // location layer visibility: turn all off then turn selected ones on
+      /*
       dispatch({
-        type: Actions.LAYERS_SET_ALL_VISIBILITY_OFF,
+        type: Actions.LAYERS_SET_ALL_VISIBILITY,
         payload: {
-          layerTypes: ['location']
+          layerTypes: ['location'],
+          visibility: false
         }
       })
+      */
+      // FOR TEST ONLY
+      dispatch({
+        type: Actions.LAYERS_SET_ALL_VISIBILITY,
+        payload: {
+          layerTypes: ['location'],
+          visibility: true
+        }
+      })
+
       if (layerKeys.length) {
         dispatch({
           type: Actions.LAYERS_SET_VISIBILITY_BY_KEY,
