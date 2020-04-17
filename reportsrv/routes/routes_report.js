@@ -30,16 +30,20 @@ exports.configure = api => {
       const page = reportPages[iReport]
       const reportPage = new ReportPage(page.paperSize, page.worldLengthPerMeterOfPaper, page.dpi,
         page.orientation, page.mapCenter, page.planId, page.visibleLayers)
-      const screenshot = await ScreenshotManager.getScreenshotForReportPage(reportPage)
       // PDFKit uses sizes in "PDF points" which is 72 points per inch :(
-      const PDF_POINTS_MULTIPLIER = 72 / reportPage.dpi
+      const paperDimensions = reportPage.getPaperDimensions()
+      const METERS_TO_PDF_POINTS = 39.3701 * 72
+      const widthPdfPoints = paperDimensions.x * METERS_TO_PDF_POINTS
+      const heightPdfPoints = paperDimensions.y * METERS_TO_PDF_POINTS
+      doc.addPage({ size: [widthPdfPoints, heightPdfPoints]})
       const captureSettings = CaptureSettings.fromPageSetup(reportPage)
-      const sizePdfPoints = {
-        x: captureSettings.pageSizePixels.x * PDF_POINTS_MULTIPLIER,
-        y: captureSettings.pageSizePixels.y * PDF_POINTS_MULTIPLIER
+      for (var iSetting = 0; iSetting < captureSettings.length; ++iSetting) {
+        const captureSetting = captureSettings[iSetting]
+        console.log(captureSetting)
+        const screenshot = await ScreenshotManager.getScreenshotForCaptureSettings(captureSetting)
+        doc.image(screenshot, captureSetting.left * widthPdfPoints, captureSetting.top * widthPdfPoints,
+          { width: captureSetting.width * widthPdfPoints, height: captureSetting.height * heightPdfPoints })
       }
-      doc.addPage({ size: [sizePdfPoints.x, sizePdfPoints.y ]})
-      doc.image(screenshot, 0, 0, { width: sizePdfPoints.x, height: sizePdfPoints.y })
     }
     doc.end()
   })

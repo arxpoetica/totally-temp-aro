@@ -1,6 +1,18 @@
 const MercatorProjection = require('./mercator-projection')
 
 class CaptureSettings {
+
+  constructor (left, top, width, height, reportPage, browserWindowSize, zoom) {
+    // left, top, right and bottom are a fraction of the page size (0 to 1.0)
+    this.left = left
+    this.top = top
+    this.width = width
+    this.height = height
+    this.reportPage = reportPage
+    this.browserWindowSize = browserWindowSize
+    this.zoom = zoom
+  }
+
   static fromPageSetup (reportPage) {
 
     // First, we are going to use a mercator sphere radius corresponding to the scale factor, and use
@@ -15,8 +27,8 @@ class CaptureSettings {
     // We have chosen the radius of the sphere (R) such that we have to move by an
     // amount equal to the paper size in meters.
     const paperDimensions = reportPage.getPaperDimensions()
-    const sizeX = (reportPage.orientation === 'portrait') ? paperDimensions.sizeX : paperDimensions.sizeY
-    const sizeY = (reportPage.orientation === 'portrait') ? paperDimensions.sizeY : paperDimensions.sizeX
+    const sizeX = (reportPage.orientation === 'portrait') ? paperDimensions.x : paperDimensions.y
+    const sizeY = (reportPage.orientation === 'portrait') ? paperDimensions.y : paperDimensions.x
     // Find the corner coordinates of the page in the Mercator (X, Y) coordinate system.
     // Note that the distance between yCenter and yMin will not be the same except at the equator
     // and the difference will get more pronounced at higher latitudes.
@@ -44,10 +56,10 @@ class CaptureSettings {
       x: Math.round(maxPrintX - minPrintX),
       y: Math.round(maxPrintY - minPrintY)
     }
-    return {
-      pageSizePixels,
-      zoom
-    }
+    return [
+      new CaptureSettings(0, 0, 0.5, 0.5, reportPage, pageSizePixels, zoom),
+      new CaptureSettings(0.5, 0, 0.5, 0.5, reportPage, pageSizePixels, zoom)
+    ]
   }
 
   static _getZoom (dpi, latitude, worldLengthPerMeterOfPaper) {

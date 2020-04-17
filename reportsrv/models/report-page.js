@@ -23,8 +23,8 @@ class ReportPage {
       lastY = sizeY
     }
     return {
-      sizeX: paperSizeDefinitions[this.paperSize].sizeX,
-      sizeY: paperSizeDefinitions[this.paperSize].sizeY
+      x: paperSizeDefinitions[this.paperSize].sizeX,
+      y: paperSizeDefinitions[this.paperSize].sizeY
     }
   }
 
