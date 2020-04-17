@@ -17,12 +17,12 @@ class ScreenshotManager {
     await page.setCookie({
       name: 'session',
       value: 'eyJmbGFzaCI6e30sInBhc3Nwb3J0Ijp7InVzZXIiOnsiaWQiOjQsIm11bHRpRmFjdG9yQXV0aGVudGljYXRpb25Eb25lIjp0cnVlLCJ2ZXJzaW9uIjoiMSJ9fX0=',
-      url: 'http://app_upgrade2:8000/'
+      url: 'http://app:8000/'
     },
     {
       name: 'session.sig',
       value: 'C9WVxl_FnwNUNFZ5dHkJw8bJT5s',
-      url: 'http://app_upgrade2:8000/'
+      url: 'http://app:8000/'
     })
     page.on('console', msg => {
       const type = msg.type()
@@ -33,7 +33,7 @@ class ScreenshotManager {
     await page._client.send('Emulation.clearDeviceMetricsOverride')
     const reportPageWithZoom = JSON.parse(JSON.stringify(captureSettings.reportPage))
     reportPageWithZoom.mapZoom = captureSettings.zoom
-    const url = `http://app_upgrade2:8000?reportPage=${JSON.stringify(reportPageWithZoom)}`
+    const url = `http://app:8000?reportPage=${JSON.stringify(reportPageWithZoom)}`
     if (url.length > 2000) {
       throw new Exception(`ERROR: URL length is ${url.length}, cannot exceed 2000 characters. Unable to get a report with these parameters`)
     }
