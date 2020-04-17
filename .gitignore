@@ -14,12 +14,12 @@ npm-debug.log
 
 ops-legacy/
 
-
 #app ignores
 
+# All node_modules folders
+**/node_modules 
 app/coverage
 app/npm-debug*.*
-app/node_modules
 app/models/test_permission.js
 app/public/javascripts/src/service-typegen/dist
 app/public/javascripts/lib/
