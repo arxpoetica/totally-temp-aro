@@ -1,2 +1,2 @@
-entity_category_id,lat,longitude,number_of_employees,industry_id,plan_monthly_revenue,plan_start_penetration,plan_competitive_strength,plan_speed,bau_monthly_revenue,bau_start_penetration,bau_competitive_strength,bau_speed,plan_cash_flows,bau_cash_flows,,
-business,42.19823165,-71.52970074,50,5099,,,,,,,,,,,,(SIC4 Code - Use 5099 where unknown)
+entity_category_id,lat,longitude,number_of_employees,industry_id,plan_monthly_revenue,plan_start_penetration,plan_fair_share,plan_speed,bau_monthly_revenue,bau_start_penetration,bau_fair_share,bau_speed,,
+business,42.19823165,-71.52970074,50,5099,,,,,,,,,,(SIC4 Code - Use 5099 where unknown)
