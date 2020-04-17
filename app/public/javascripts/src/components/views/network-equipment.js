@@ -12,13 +12,6 @@ const getEquipmentsArray = createSelector([getAllNetworkEquipmentLayers], networ
   }
   return equipmentsArray
 })
-const getCablesArray = createSelector([getAllNetworkEquipmentLayers], networkEquipmentLayers => {
-  var cablesArray = []
-  if (networkEquipmentLayers.cables) {
-    Object.keys(networkEquipmentLayers.cables).forEach(key => cablesArray.push(networkEquipmentLayers.cables[key]))
-  }
-  return cablesArray
-})
 
 class NetworkEquipmentController {
   constructor($rootScope, $http, $location, $ngRedux, map_tools, state) {
@@ -155,7 +148,6 @@ class NetworkEquipmentController {
       drawingOptions: drawingOptions,
       selectable: true,
       zIndex: networkEquipment.zIndex + (existingOrPlannedzIndex || 0),
-      showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection && this.state.showDirectedCable, // Showing Direction
       highlightStyle: networkEquipment.highlightStyle,
       subtypes: subtypes
     }
@@ -241,10 +233,9 @@ class NetworkEquipmentController {
       delete oldMapLayers[createdMapLayerKey]
     })
 
-    // Create layers for network equipment nodes and cables
+    // Create layers for network equipment nodes
     this.createdMapLayerKeys.clear()
     this.createMapLayersForCategory(this.networkEquipmentLayers.equipments, 'equipment', oldMapLayers, this.createdMapLayerKeys)
-    this.createMapLayersForCategory(this.networkEquipmentLayers.cables, 'cable', oldMapLayers, this.createdMapLayerKeys)    
     this.createMapLayersForBoundaryCategory(this.networkEquipmentLayers.boundaries, 'boundaries', oldMapLayers, this.createdMapLayerKeys)
 
     // "oldMapLayers" now contains the new layers. Set it in the state
@@ -268,7 +259,6 @@ class NetworkEquipmentController {
     return {
       networkEquipmentLayers: getNetworkEquipmentLayersList(reduxState),
       equipmentsArray: getEquipmentsArray(reduxState),
-      cablesArray: getCablesArray(reduxState),
       dataItems: reduxState.plan.dataItems,
       showSiteBoundary: reduxState.mapLayers.showSiteBoundary,
       selectedBoundaryType: reduxState.mapLayers.selectedBoundaryType

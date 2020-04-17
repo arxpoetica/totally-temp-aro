@@ -69,7 +69,7 @@ module.exports = class NetworkPlan {
   }
 
   static removeAllTargets (plan_id) {
-    var sql = 'DELETE FROM client.plan_targets WHERE plan_id=$1'    
+    var sql = 'DELETE FROM client.plan_targets WHERE plan_id=$1'
     return database.query(sql, [plan_id])
   }
 
@@ -241,13 +241,13 @@ module.exports = class NetworkPlan {
         var networkDemands = Array.isArray(demandSummary.networkDemands) ? demandSummary.networkDemands : []
 
         var cableConstructionTypes = [
-          { name: 'arial', description: 'Aerial' },
+          { name: 'aerial', description: 'Aerial' },
           { name: 'buried', description: 'Buried' },
           { name: 'underground', description: 'Underground' },
-          { name: 'obstacle', description: 'Other' },
-          { name: 'conduit', description: 'Augmented Conduit' },
-          { name: 'estimated', description: 'Estimated Medium' },
-          { name: 'planned_conduit', description: 'Overlaid on Fronthaul' }
+          { name: 'obstacle', description: 'Obstacle' },
+          { name: 'conduit', description: 'Conduit' },
+          { name: 'estimated', description: 'Estimated' },
+          { name: 'planned_conduit', description: 'Planned Conduit' }
         ]
 
         output.metadata.fiberTotals = { types: {}, totalLength: 0, totalCost: 0 }
@@ -943,12 +943,12 @@ module.exports = class NetworkPlan {
       console.warn(`Search requested for empty or invalid text - ${text}`)
       return Promise.resolve([])
     }
-    
+
     // Regex for checking if the search expression is a valid "latitude, longitude". From https://stackoverflow.com/a/18690202
     var matches = text.match(/[+-]?([0-9]*[.])?[0-9]+.[\s,]+[+-]?([0-9]*[.])?[0-9]+/)
     if (matches && matches.length > 0 && matches[0] == text) {
       // This is a valid latitude/longitude search expression (technically it is of the form "[number],[number]")
-      var latLng = text.split(/[\s,]+/).map((item) => item.trim(item)) 
+      var latLng = text.split(/[\s,]+/).map((item) => item.trim(item))
       return Promise.resolve([{
         type: 'latlng',
         displayText: `Latitude: ${latLng[0]}, Longitude: ${latLng[1]}`,
