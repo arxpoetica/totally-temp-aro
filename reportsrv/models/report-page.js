@@ -1,6 +1,6 @@
 class ReportPage {
-  constructor(paperSize, worldLengthPerMeterOfPaper, dpi, orientation, mapCenter, planId, visibleLayers) {
-    this.paperSize = paperSize
+  constructor(paperDimensions, worldLengthPerMeterOfPaper, dpi, orientation, mapCenter, planId, visibleLayers) {
+    this.paperDimensions = paperDimensions
     this.worldLengthPerMeterOfPaper = worldLengthPerMeterOfPaper
     this.dpi = dpi
     this.orientation = orientation
@@ -9,7 +9,7 @@ class ReportPage {
     this.visibleLayers = visibleLayers
   }
 
-  getPaperDimensions () {
+  static getPaperDimensions (paperType) {
     // Note that all physical size definitions are in meters
     const a0Sizes = { x: 0.841, y: 1.189 }
     var paperSizeDefinitions = {}
@@ -23,8 +23,8 @@ class ReportPage {
       lastY = sizeY
     }
     return {
-      x: paperSizeDefinitions[this.paperSize].sizeX,
-      y: paperSizeDefinitions[this.paperSize].sizeY
+      x: paperSizeDefinitions[paperType].sizeX,
+      y: paperSizeDefinitions[paperType].sizeY
     }
   }
 

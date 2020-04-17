@@ -20,15 +20,17 @@ class CaptureSettings {
     // From EPSG:900913 (used by Google Maps), Radius of earth at the equator = 6378137
     const radiusForScale = 6378137 / reportPage.worldLengthPerMeterOfPaper
     const projectionScale = new MercatorProjection(radiusForScale)
+
     // Use the Mercator projection on our sphere to get the X, Y coordinates of the map center
     const xCenter = projectionScale.longitudeToX(reportPage.mapCenter.longitude)
     const yCenter = projectionScale.latitudeToY(reportPage.mapCenter.latitude)
+
     // Get the physical distance that we will cover along the latitude and longitude.
     // We have chosen the radius of the sphere (R) such that we have to move by an
     // amount equal to the paper size in meters.
-    const paperDimensions = reportPage.getPaperDimensions()
-    const sizeX = (reportPage.orientation === 'portrait') ? paperDimensions.x : paperDimensions.y
-    const sizeY = (reportPage.orientation === 'portrait') ? paperDimensions.y : paperDimensions.x
+    const sizeX = (reportPage.orientation === 'portrait') ? reportPage.paperDimensions.x : reportPage.paperDimensions.y
+    const sizeY = (reportPage.orientation === 'portrait') ? reportPage.paperDimensions.y : reportPage.paperDimensions.x
+
     // Find the corner coordinates of the page in the Mercator (X, Y) coordinate system.
     // Note that the distance between yCenter and yMin will not be the same except at the equator
     // and the difference will get more pronounced at higher latitudes.
@@ -51,15 +53,40 @@ class CaptureSettings {
     const maxPrintX = projectionScreenshot.longitudeToX(maxLongitude)
     const maxPrintY = projectionScreenshot.latitudeToY(maxLatitude)
 
-    // First, calculate the pixels required based on the page size and dpi.
-    const pageSizePixels = {
-      x: Math.round(maxPrintX - minPrintX),
-      y: Math.round(maxPrintY - minPrintY)
+    // Headless Chrome has some limitations on how big the window size can be. Divide the page into parts for taking screenshots.
+    const MAX_BROWSER_WIDTH = 1200
+    const MAX_BROWSER_HEIGHT = 1200
+    const numColumns = Math.ceil((maxPrintX - minPrintX) / MAX_BROWSER_WIDTH)
+    const numRows = Math.ceil((maxPrintY - minPrintY) / MAX_BROWSER_HEIGHT)
+    var captureSettings = []
+    const partWidth = Math.round((maxPrintX - minPrintX) / numColumns)
+    const partHeight = Math.round((maxPrintY - minPrintY) / numRows)
+    for (var iRow = 0; iRow < numRows; ++iRow) {
+      for (var iColumn = 0; iColumn < numColumns; ++iColumn) {
+        // Get the pixel coordinates for this part
+        const minPartX = Math.round(minPrintX + iColumn * partWidth)
+        const minPartY =  Math.round(minPrintY + iRow * partHeight)
+        // Calculate the pixel coordinates of the center
+        const mapCenterXPixels = minPartX + partWidth / 2
+        const mapCenterYPixels = minPartY + partHeight / 2
+        // Now, calculate the lat/longs corresponding to the center point
+        const mapCenterPart = {
+          latitude: projectionScreenshot.yToLatitude(mapCenterYPixels),
+          longitude: projectionScreenshot.xToLongitude(mapCenterXPixels)
+        }
+        const partReportPage = JSON.parse(JSON.stringify(reportPage))
+        partReportPage.paperDimensions.x = partReportPage.paperDimensions.x / numColumns
+        partReportPage.paperDimensions.y = partReportPage.paperDimensions.y / numRows
+        partReportPage.mapCenter = mapCenterPart
+        const pageSizePixels = {
+          x: partWidth,
+          y: partHeight
+        }
+        const captureSetting = new CaptureSettings(iColumn / numColumns, (numRows - iRow - 1) / numRows, 1 / numColumns, 1 / numRows, partReportPage, pageSizePixels, zoom)
+        captureSettings.push(captureSetting)
+      }
     }
-    return [
-      new CaptureSettings(0, 0, 0.5, 0.5, reportPage, pageSizePixels, zoom),
-      new CaptureSettings(0.5, 0, 0.5, 0.5, reportPage, pageSizePixels, zoom)
-    ]
+    return captureSettings
   }
 
   static _getZoom (dpi, latitude, worldLengthPerMeterOfPaper) {
