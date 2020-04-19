@@ -1,15 +1,35 @@
 import Actions from '../../common/actions'
 import WormholeFusionType from '../../../shared-utils/wormhole-fusion-type'
 
+const editingModes = {
+  LIST_RESOURCE_MANAGERS: 'LIST_RESOURCE_MANAGERS',
+  EDIT_RESOURCE_MANAGER: 'EDIT_RESOURCE_MANAGER',
+  SHOW_PRICEBOOK_CREATOR: 'SHOW_PRICEBOOK_CREATOR',
+  SHOW_RATE_REACH_MANAGER_CREATOR: 'SHOW_RATE_REACH_MANAGER_CREATOR'
+}
+
 const defaultState = {
   managers: {},
-  editingManager: null
+  editingManager: null,
+  editingModes: editingModes,
+  selectedEditingMode: editingModes.LIST_RESOURCE_MANAGERS
 }
 
 function setResourceManagerDefinition (state, manager) {
   return { ...state,
     managers: { ...state.managers,
       [manager.resourceManagerId]: manager
+    }
+  }
+}
+
+function setEditingMode (state, editingMode) {
+  var validEditMode = undefined !== Object.keys(state.editingModes).find(key => editingModes[key] === editingMode)
+  if (!validEditMode) {
+    return state
+  } else {
+    return { ...state,
+      selectedEditingMode: editingMode
     }
   }
 }
@@ -81,6 +101,9 @@ function resourceManagerReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.RESOURCE_MANAGER_SET_MANAGER_DEFINITION:
       return setResourceManagerDefinition(state, action.payload)
+
+    case Actions.RESOURCE_MANAGER_SET_EDITING_MODE:
+      return setEditingMode(state, action.payload.editingMode)
 
     case Actions.RESOURCE_MANAGER_SET_EDITING_MANAGER:
       return setResourceManagerEditing(state, action.payload.id, action.payload.type)

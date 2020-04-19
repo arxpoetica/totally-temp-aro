@@ -264,7 +264,7 @@ class PriceBookEditorController {
   }
 
   exitEditingMode () {
-    this.setEditingMode({ mode: this.listMode })
+    this.onDiscard()
   }
 
   updateSetOfSelectedEquipmentTags (definitionId) {
@@ -289,8 +289,7 @@ let pricebookEditor = {
   templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/pricebook-editor.html',
   bindings: {
     priceBookId: '<',
-    listMode: '<',
-    setEditingMode: '&'
+    onDiscard: '&'
   },
   controller: PriceBookEditorController
 }

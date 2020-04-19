@@ -4,13 +4,15 @@ class PlanResourceEditorController {
   constructor ($ngRedux, state, $timeout) {
     this.state = state
     this.$timeout = $timeout
+    /*
     this.editingModes = Object.freeze({
       LIST_RESOURCE_MANAGERS: 'LIST_RESOURCE_MANAGERS',
       EDIT_RESOURCE_MANAGER: 'EDIT_RESOURCE_MANAGER',
       SHOW_PRICEBOOK_CREATOR: 'SHOW_PRICEBOOK_CREATOR',
       SHOW_RATE_REACH_MANAGER_CREATOR: 'SHOW_RATE_REACH_MANAGER_CREATOR'
     })
-    this.selectedEditingMode = this.editingModes.LIST_RESOURCE_MANAGERS
+    */
+    // this.selectedEditingMode = this.editingModes.LIST_RESOURCE_MANAGERS
     this.editingManagerId = 1
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
 
@@ -27,9 +29,10 @@ class PlanResourceEditorController {
     this.clearResourceManagers()
   }
 
-  setEditingMode (newEditingMode) {
-    this.selectedEditingMode = newEditingMode
-  }
+  // setEditingMode (newEditingMode) {
+    // this.selectedEditingMode = newEditingMode
+
+  // }
 
   setEditingManagerId (newId) {
     this.editingManagerId = newId
@@ -49,13 +52,16 @@ class PlanResourceEditorController {
 
   mapStateToThis (reduxState) {
     return {
-      reduxEditingManagerType: reduxState.resourceManager.editingManager && reduxState.resourceManager.editingManager.type
+      reduxEditingManagerType: reduxState.resourceManager.editingManager && reduxState.resourceManager.editingManager.type,
+      selectedEditingMode: reduxState.resourceManager.selectedEditingMode,
+      editingModes: reduxState.resourceManager.editingModes
     }
   }
 
   mapDispatchToTarget (dispatch) {
     return {
-      clearResourceManagers: () => dispatch(ResourceManagerActions.clearResourceManagers())
+      clearResourceManagers: () => dispatch(ResourceManagerActions.clearResourceManagers()),
+      setEditingMode: editingMode => dispatch(ResourceManagerActions.setEditingMode(editingMode))
     }
   }
 }
