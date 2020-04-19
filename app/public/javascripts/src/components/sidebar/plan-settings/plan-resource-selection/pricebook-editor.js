@@ -2,7 +2,7 @@ const defaultConstructionRatios = {
   code: 'MORPHOLOGY_CODE',
   constructionRatios: {
     cableConstructionRatios: [
-      { type: 'ARIEL', ratio: 0.7 },
+      { type: 'AERIAL', ratio: 0.7 },
       { type: 'BURIED', ratio: 0.3 }
     ]
   }
@@ -162,7 +162,7 @@ class PriceBookEditorController {
     this.constructionRatios = this.constructionRatios || {}
     if (!this.constructionRatios[this.selectedStateForStrategy]) {
       this.pristineAssignments.constructionRatios.forEach(ratio => {
-        // Also change the "ratio" object so that the ratios are keyed by cable type (e.g. ARIEL or BURIED)
+        // Also change the "ratio" object so that the ratios are keyed by cable type (e.g. AERIAL or BURIED)
         var ratioValues = {}
         ratio.constructionRatios.cableConstructionRatios.forEach(item => { ratioValues[item.type] = item })
         // Make sure that we have values for all types of cable construction ratios
