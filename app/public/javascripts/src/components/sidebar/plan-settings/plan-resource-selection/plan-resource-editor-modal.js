@@ -4,15 +4,6 @@ class PlanResourceEditorController {
   constructor ($ngRedux, state, $timeout) {
     this.state = state
     this.$timeout = $timeout
-    /*
-    this.editingModes = Object.freeze({
-      LIST_RESOURCE_MANAGERS: 'LIST_RESOURCE_MANAGERS',
-      EDIT_RESOURCE_MANAGER: 'EDIT_RESOURCE_MANAGER',
-      SHOW_PRICEBOOK_CREATOR: 'SHOW_PRICEBOOK_CREATOR',
-      SHOW_RATE_REACH_MANAGER_CREATOR: 'SHOW_RATE_REACH_MANAGER_CREATOR'
-    })
-    */
-    // this.selectedEditingMode = this.editingModes.LIST_RESOURCE_MANAGERS
     this.editingManagerId = 1
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
 
@@ -28,11 +19,6 @@ class PlanResourceEditorController {
     this.state.showPlanResourceEditorModal = false
     this.clearResourceManagers()
   }
-
-  // setEditingMode (newEditingMode) {
-    // this.selectedEditingMode = newEditingMode
-
-  // }
 
   setEditingManagerId (newId) {
     this.editingManagerId = newId

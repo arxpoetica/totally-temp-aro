@@ -1,6 +1,5 @@
 import Actions from '../../common/actions'
 import AroHttp from '../../common/aro-http'
-import Utilities from '../../../components/common/utilities'
 
 function saveResourceManagerDefinition (resourceManagerId, managerType, definition) {
   return dispatch => {
