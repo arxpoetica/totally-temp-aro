@@ -29,10 +29,8 @@ class MapSplitController {
               this.sizesBeforeCollapse = null
               $scope.$apply()
             }
-            state.splitterObj.next(this.splitterObj)
           }
         })
-        state.splitterObj.next(this.splitterObj)
       }
       let element = $compile('<map-toggle-component user-perspective="$ctrl.state.loggedInUser.perspective" map-global-object-name="map"></map-toggle-component>')($scope)
       element[0].index = 3
@@ -60,7 +58,6 @@ class MapSplitController {
     if (map.getStreetView().getVisible()) {
       this.$timeout(() => google.maps.event.trigger(panorama, 'resize'), this.transitionTimeMsec + 50)
     }
-    this.state.splitterObj.next(this.splitterObj)
   }
 
   mapStateToThis (reduxState) {
