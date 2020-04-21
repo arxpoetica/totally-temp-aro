@@ -39,6 +39,15 @@ class MapSplitController {
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }
 
+  $doCheck () {
+    // When we are in "Report Mode", destroy the splitter as it does a "width: calc(100% - 5px)" for the map container.
+    // The sidebar is ng-if'ed and wont show up. The map will take up 100% of the window.
+    if (this.state.isReportMode && this.splitterObj) {
+      this.splitterObj.destroy()
+      this.splitterObj = null
+    }
+  }
+
   toggleCollapseSideBar () {
     if (this.isCollapsed) {
       // The sidebar is already collapsed. Un-collapse it by restoring the saved sizes
@@ -142,7 +151,7 @@ let mapSplit = {
       color: #1a79db;
     }
 
-    #map-canvas:before {
+    .map-canvas-drop-shadow:before {
       box-shadow: -4px 0px 6px #888 inset;
       content: "";
       height: 100%;
@@ -170,7 +179,7 @@ let mapSplit = {
 
     <!-- Define the canvas that will hold the map. -->
     <div id="map-canvas-container" ng-style="{ position: 'relative', float: 'left', height: '100%', transition: $ctrl.transitionCSS }">
-      <div id="map-canvas" class="map-canvas" style="position: relative; overflow: hidden;"></div>
+      <div id="map-canvas" ng-class="{ 'map-canvas': true, 'map-canvas-drop-shadow': !$ctrl.state.isReportMode }" style="position: relative; overflow: hidden;"></div>
       <!-- Technically the toolbar, etc should be a child of the map canvas, but putting these elements in the map canvas
           causes the map to not show up -->
       <div id="header-bar-container" style="position: absolute; top: 0px; width: 100%; height: 55px; display: flex; flex-direction: row;">
@@ -201,7 +210,7 @@ let mapSplit = {
     </div>
 
     <!-- Define the sidebar -->
-    <div id="sidebar" ng-style="{ float: 'left', 'background-color': '#fff', height: '100%', padding: '10px 0px', transition: $ctrl.transitionCSS}">
+    <div ng-if="!$ctrl.state.isReportMode" id="sidebar" ng-style="{ float: 'left', 'background-color': '#fff', height: '100%', padding: '10px 0px', transition: $ctrl.transitionCSS}">
       <!-- Define the "expander widget" that can be clicked to collapse/uncollapse the sidebar. Note that putting
               the expander in one div affects the flow of elements in the sidebar, so we create a 0px by 0px div, and
               use this div to position the contents of the expander. This makes sure we don't affect flow. -->
