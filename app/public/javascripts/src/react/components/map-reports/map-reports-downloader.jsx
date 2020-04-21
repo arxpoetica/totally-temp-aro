@@ -67,6 +67,13 @@ export class MapReportsDownloader extends Component {
     this.props.downloadReport(this.props.planId, pageDefinitions)
   }
 
+  componentDidUpdate (prevProps, prevState, snapshot) {
+    if (this.props.planId && (this.props.planId !== prevProps.planId)) {
+      // Plan ID has changed. Reload the report pages.
+      this.props.loadReportPagesForPlan(this.props.planId)
+    }
+  }
+
   componentDidMount () {
     this.props.loadReportPagesForPlan(this.props.planId)
   }
