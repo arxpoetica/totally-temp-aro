@@ -106,6 +106,8 @@ function setOptimizationInputs (inputs) {
       })
 
       // location layer visibility: turn all off then turn selected ones on
+      // this will not work with SSE sub-types/filters
+      // so we'll comment this out until we can do sub-types properly
       /*
       dispatch({
         type: Actions.LAYERS_SET_ALL_VISIBILITY,
@@ -114,7 +116,7 @@ function setOptimizationInputs (inputs) {
           visibility: false
         }
       })
-      */
+      
       // FOR TEST ONLY
       dispatch({
         type: Actions.LAYERS_SET_ALL_VISIBILITY,
@@ -123,7 +125,7 @@ function setOptimizationInputs (inputs) {
           visibility: true
         }
       })
-
+      */
       if (layerKeys.length) {
         dispatch({
           type: Actions.LAYERS_SET_VISIBILITY_BY_KEY,
