@@ -84,7 +84,7 @@ class RoicEditorController {
   }
 
   exitEditingMode () {
-    this.setEditingMode({ mode: this.listMode })
+    this.onDiscard()
   }
 
   showSpeedCategoryHelp (category) {
@@ -102,9 +102,7 @@ let roicEditor = {
   templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/roic-editor.html',
   bindings: {
     roicManagerId: '<',
-    listMode: '<',
-    editMode: '<',
-    setEditingMode: '&'
+    onDiscard: '&'
   },
   controller: RoicEditorController
 }

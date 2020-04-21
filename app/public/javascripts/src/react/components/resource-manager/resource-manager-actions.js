@@ -8,10 +8,21 @@ function saveResourceManagerDefinition (resourceManagerId, managerType, definiti
   }
 }
 
-function startEditingResourceManager (resourceManagerId, managerType, resourceManagerName) {
+function setEditingMode (editingMode) {
+  return {
+    type: Actions.RESOURCE_MANAGER_SET_EDITING_MODE,
+    payload: {
+      editingMode: editingMode
+    }
+  }
+}
+
+function startEditingResourceManager (resourceManagerId, managerType, resourceManagerName, editingMode) {
   return dispatch => {
     AroHttp.get(`/service/v2/resource-manager/${resourceManagerId}/${managerType}`)
       .then(result => {
+        // ToDo: use batch here (once merged with refactor branch)
+        console.log(result)
         dispatch({
           type: Actions.RESOURCE_MANAGER_SET_MANAGER_DEFINITION,
           payload: {
@@ -27,8 +38,21 @@ function startEditingResourceManager (resourceManagerId, managerType, resourceMa
             type: managerType
           }
         })
+        dispatch({
+          type: Actions.RESOURCE_MANAGER_SET_EDITING_MODE,
+          payload: {
+            editingMode: editingMode
+          }
+        })
       })
-      .catch(err => console.error(err))
+      .catch(err => {
+        console.error(err)
+        swal({
+          title: 'Failed to load resource manager',
+          text: `ARO-Service returned status code ${err.status}`,
+          type: 'error'
+        })
+      })
   }
 }
 
@@ -75,6 +99,7 @@ function setWormholeFuseDefinition (resourceManagerId, spatialEdgeType, wormhole
 
 export default {
   startEditingResourceManager,
+  setEditingMode,
   saveResourceManagerDefinition,
   clearResourceManagers,
   setConnectivityDefinition,

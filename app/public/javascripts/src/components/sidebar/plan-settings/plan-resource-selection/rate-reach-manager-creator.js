@@ -38,8 +38,7 @@ class RateReachManagerCreatorController {
       .then(() => {
         this.onManagerCreated && this.onManagerCreated({ newId: createdRateReachManager.id })
         this.onManagersChanged && this.onManagersChanged()
-        this.setEditingMode && this.setEditingMode({ mode: this.listMode })
-        this.$timeout()
+        this.closeDialog()
       })
       .catch((err) => console.error(err))
   }
@@ -87,7 +86,7 @@ class RateReachManagerCreatorController {
   }
 
   closeDialog () {
-    this.setEditingMode && this.setEditingMode({ mode: this.listMode })
+    this.onDiscard()
   }
 }
 
@@ -97,11 +96,9 @@ let rateReachManagerCreator = {
   templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/rate-reach-manager-creator.html',
   bindings: {
     sourceRateReachManagerId: '<',
-    technologyTypeDetails: '<',
     onManagerCreated: '&',
     onManagersChanged: '&',
-    listMode: '<',
-    setEditingMode: '&'
+    onDiscard: '&'
   },
   controller: RateReachManagerCreatorController
 }

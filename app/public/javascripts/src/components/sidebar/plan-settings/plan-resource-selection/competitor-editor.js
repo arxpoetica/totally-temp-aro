@@ -216,7 +216,7 @@ class CompetitorEditorController {
   }
 
   exitEditingMode () {
-    this.setEditingMode({ mode: this.listMode })
+    this.onDiscard()
   }
   
   $onDestroy () {
@@ -264,9 +264,7 @@ let competitorEditor = {
   templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/competitor-editor.html',
   bindings: {
     competitorManagerId: '<',
-    listMode: '<',
-    editMode: '<',
-    setEditingMode: '&'
+    onDiscard: '&'
   },
   controller: CompetitorEditorController
 }
