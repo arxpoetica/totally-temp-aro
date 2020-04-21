@@ -46,7 +46,7 @@ class ImpedanceEditorController {
   }
 
   exitEditingMode () {
-    this.setEditingMode({ mode: this.listMode })
+    this.onDiscard()
   }
 }
 
@@ -56,9 +56,7 @@ let impedanceEditor = {
   templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/impedance-editor.html',
   bindings: {
     impedanceManagerId: '<',
-    listMode: '<',
-    editMode: '<',
-    setEditingMode: '&'
+    onDiscard: '&'
   },
   controller: ImpedanceEditorController
 }

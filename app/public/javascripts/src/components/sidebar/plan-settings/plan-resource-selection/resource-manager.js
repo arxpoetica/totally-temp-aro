@@ -217,8 +217,9 @@ class ResourceManagerController {
   editSelectedManager (selectedManager) {
     this.setEditingManagerId({ newId: selectedManager.id })
     this.setCurrentSelectedResourceKey({ resourceKey: selectedManager.resourceType })
-    this.startEditingResourceManager(selectedManager.id, selectedManager.resourceType, selectedManager.name)
-    this.setEditingMode({ mode: this.editMode })
+    this.startEditingResourceManager(selectedManager.id, selectedManager.resourceType, selectedManager.name, this.editMode)
+    // only run this if the above succeeds
+    // this.setEditingMode({ mode: this.editMode })
   }
 
   askUserToConfirmManagerDelete (managerName) {
@@ -318,7 +319,7 @@ class ResourceManagerController {
 
   mapDispatchToTarget (dispatch) {
     return {
-      startEditingResourceManager: (id, type, name) => dispatch(ResourceManagerActions.startEditingResourceManager(id, type, name))
+      startEditingResourceManager: (id, type, name, editingMode) => dispatch(ResourceManagerActions.startEditingResourceManager(id, type, name, editingMode))
     }
   }
 }

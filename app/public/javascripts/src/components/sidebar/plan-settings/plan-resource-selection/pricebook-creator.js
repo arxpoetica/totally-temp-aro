@@ -60,14 +60,13 @@ class PriceBookCreatorController {
       })
       .then(() => {
         this.onManagersChanged && this.onManagersChanged()
-        this.setEditingMode && this.setEditingMode({ mode: this.listMode })
-        this.$timeout()
+        this.closeDialog()
       })
       .catch((err) => console.error(err))
   }
 
   closeDialog () {
-    this.setEditingMode && this.setEditingMode({ mode: this.listMode })
+    this.onDiscard()
   }
 }
 
@@ -78,8 +77,7 @@ let priceBookCreator = {
   bindings: {
     sourcePriceBookId: '<',
     onManagersChanged: '&',
-    listMode: '<',
-    setEditingMode: '&'
+    onDiscard: '&'
   },
   controller: PriceBookCreatorController
 }

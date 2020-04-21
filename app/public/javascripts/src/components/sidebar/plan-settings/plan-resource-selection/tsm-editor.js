@@ -56,7 +56,7 @@ class TsmEditorController {
   }
 
   exitEditingMode () {
-    this.setEditingMode({ mode: this.listMode })
+    this.onDiscard()
   }
 }
 
@@ -66,9 +66,7 @@ let tsmEditor = {
   templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/tsm-editor.html',
   bindings: {
     tsmManagerId: '<',
-    listMode: '<',
-    editMode: '<',
-    setEditingMode: '&'
+    onDiscard: '&'
   },
   controller: TsmEditorController
 }

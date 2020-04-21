@@ -123,7 +123,7 @@ class RateReachEditorController {
   }
 
   exitEditingMode () {
-    this.setEditingMode({ mode: this.listMode })
+    this.onDiscard()
   }
 }
 
@@ -133,9 +133,7 @@ let rateReachEditor = {
   templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/rate-reach-editor.html',
   bindings: {
     rateReachManagerId: '<',
-    listMode: '<',
-    editMode: '<',
-    setEditingMode: '&'
+    onDiscard: '&'
   },
   controller: RateReachEditorController
 }
