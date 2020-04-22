@@ -1,4 +1,5 @@
 const puppeteer = require('puppeteer')
+const config = require('../helpers/config')
 
 class ScreenshotManager {
   static async getScreenshotForCaptureSettings (captureSettings, cookies) {
@@ -18,7 +19,7 @@ class ScreenshotManager {
     var cookiesArray = Object.keys(cookies).map(cookieName => ({
       name: cookieName,
       value: cookies[cookieName],
-      url: 'http://app:8000/'
+      url: config.APP_BASE_URL
     }))
     await page.setCookie(...cookiesArray)
     page.on('console', msg => {
@@ -30,7 +31,7 @@ class ScreenshotManager {
     await page._client.send('Emulation.clearDeviceMetricsOverride')
     const reportPageWithZoom = JSON.parse(JSON.stringify(captureSettings.reportPage))
     reportPageWithZoom.mapZoom = captureSettings.zoom
-    const url = `http://app:8000?reportPage=${JSON.stringify(reportPageWithZoom)}`
+    const url = `${config.APP_BASE_URL}?reportPage=${JSON.stringify(reportPageWithZoom)}`
     if (url.length > 2000) {
       throw new Exception(`ERROR: URL length is ${url.length}, cannot exceed 2000 characters. Unable to get a report with these parameters`)
     }
