@@ -39,7 +39,7 @@ exports.configure = api => {
       for (var iSetting = 0; iSetting < captureSettings.length; ++iSetting) {
         const captureSetting = captureSettings[iSetting]
         console.log(captureSetting)
-        const screenshot = await ScreenshotManager.getScreenshotForCaptureSettings(captureSetting)
+        const screenshot = await ScreenshotManager.getScreenshotForCaptureSettings(captureSetting, req.cookies)
         doc.image(screenshot, captureSetting.left * widthPdfPoints, captureSetting.top * heightPdfPoints,
           { width: captureSetting.width * widthPdfPoints, height: captureSetting.height * heightPdfPoints })
       }

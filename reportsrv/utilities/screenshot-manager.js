@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer')
 
 class ScreenshotManager {
-  static async getScreenshotForCaptureSettings (captureSettings) {
+  static async getScreenshotForCaptureSettings (captureSettings, cookies) {
     const browser = await puppeteer.launch({
       args: [
         // Required for Docker version of Puppeteer
@@ -14,16 +14,13 @@ class ScreenshotManager {
       ]
     });
     const page = await browser.newPage()
-    await page.setCookie({
-      name: 'session',
-      value: 'eyJmbGFzaCI6e30sInBhc3Nwb3J0Ijp7InVzZXIiOnsiaWQiOjQsIm11bHRpRmFjdG9yQXV0aGVudGljYXRpb25Eb25lIjp0cnVlLCJ2ZXJzaW9uIjoiMSJ9fX0=',
+    // Convert the cookies to a format that puppeteer uses
+    var cookiesArray = Object.keys(cookies).map(cookieName => ({
+      name: cookieName,
+      value: cookies[cookieName],
       url: 'http://app:8000/'
-    },
-    {
-      name: 'session.sig',
-      value: 'C9WVxl_FnwNUNFZ5dHkJw8bJT5s',
-      url: 'http://app:8000/'
-    })
+    }))
+    await page.setCookie(...cookiesArray)
     page.on('console', msg => {
       const type = msg.type()
       if (type === 'warning' || type === 'error') {
