@@ -80,7 +80,7 @@ class ArpuEditorController {
   }
 
   exitEditingMode () {
-    this.setEditingMode({ mode: this.listMode })
+    this.onDiscard()
   }
 }
 
@@ -90,9 +90,7 @@ let arpuEditor = {
   templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/arpu-editor.html',
   bindings: {
     arpuManagerId: '<',
-    listMode: '<',
-    editMode: '<',
-    setEditingMode: '&'
+    onDiscard: '&'
   },
   controller: ArpuEditorController
 }

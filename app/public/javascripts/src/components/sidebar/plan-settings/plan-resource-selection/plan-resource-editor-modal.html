@@ -16,59 +16,50 @@
 
   <arpu-editor ng-if="($ctrl.selectedEditingMode === $ctrl.editingModes.EDIT_RESOURCE_MANAGER) && $ctrl.state.editingPlanResourceKey === 'arpu_manager'"
                arpu-manager-id="$ctrl.editingManagerId"
-               list-mode="$ctrl.editingModes.LIST_RESOURCE_MANAGERS"
-               set-editing-mode="$ctrl.setEditingMode(mode)">
+               on-discard="$ctrl.onBackToList()">
   </arpu-editor>
 
   <competitor-editor ng-if="($ctrl.selectedEditingMode === $ctrl.editingModes.EDIT_RESOURCE_MANAGER) && $ctrl.state.editingPlanResourceKey === 'competition_manager'"
               competitor-manager-id="$ctrl.editingManagerId"
-              list-mode="$ctrl.editingModes.LIST_RESOURCE_MANAGERS"
-              set-editing-mode="$ctrl.setEditingMode(mode)">
+              on-discard="$ctrl.onBackToList()">
   </competitor-editor>
 
   <impedance-editor ng-if="($ctrl.selectedEditingMode === $ctrl.editingModes.EDIT_RESOURCE_MANAGER) && $ctrl.state.editingPlanResourceKey === 'impedance_mapping_manager'"
                 impedance-manager-id="$ctrl.editingManagerId"
-                list-mode="$ctrl.editingModes.LIST_RESOURCE_MANAGERS"
-                set-editing-mode="$ctrl.setEditingMode(mode)">
+                on-discard="$ctrl.onBackToList()">
   </impedance-editor>
 
   <pricebook-creator ng-if="$ctrl.selectedEditingMode === $ctrl.editingModes.SHOW_PRICEBOOK_CREATOR"
                       source-price-book-id="$ctrl.editingManagerId"
-                      list-mode="$ctrl.editingModes.LIST_RESOURCE_MANAGERS"
-                      set-editing-mode="$ctrl.setEditingMode(mode)"
+                      on-discard="$ctrl.onBackToList()"
                       on-managers-changed="$ctrl.onManagersChanged()">
   </pricebook-creator>
 
   <pricebook-editor ng-if="($ctrl.selectedEditingMode === $ctrl.editingModes.EDIT_RESOURCE_MANAGER) && $ctrl.state.editingPlanResourceKey === 'price_book'"
                     price-book-id="$ctrl.editingManagerId"
-                    list-mode="$ctrl.editingModes.LIST_RESOURCE_MANAGERS"
-                    set-editing-mode="$ctrl.setEditingMode(mode)">
+                    on-discard="$ctrl.onBackToList()">
   </pricebook-editor>
 
   <rate-reach-manager-creator ng-if="$ctrl.selectedEditingMode === $ctrl.editingModes.SHOW_RATE_REACH_MANAGER_CREATOR"
                       source-rate-reach-manager-id="$ctrl.editingManagerId"
-                      list-mode="$ctrl.editingModes.EDIT_RESOURCE_MANAGER"
-                      set-editing-mode="$ctrl.setEditingMode(mode)"
+                      on-discard="$ctrl.onBackToList()"
                       on-manager-created="$ctrl.setEditingManagerId(newId)"
                       on-managers-changed="$ctrl.onManagersChanged()">
   </rate-reach-manager-creator>
 
   <rate-reach-editor ng-if="($ctrl.selectedEditingMode === $ctrl.editingModes.EDIT_RESOURCE_MANAGER) && $ctrl.state.editingPlanResourceKey === 'rate_reach_manager'"
                 rate-reach-manager-id="$ctrl.editingManagerId"
-                list-mode="$ctrl.editingModes.LIST_RESOURCE_MANAGERS"
-                set-editing-mode="$ctrl.setEditingMode(mode)">
+                on-discard="$ctrl.onBackToList()">
   </rate-reach-editor>
 
   <roic-editor ng-if="($ctrl.selectedEditingMode === $ctrl.editingModes.EDIT_RESOURCE_MANAGER) && $ctrl.state.editingPlanResourceKey === 'roic_manager'"
                 roic-manager-id="$ctrl.editingManagerId"
-                list-mode="$ctrl.editingModes.LIST_RESOURCE_MANAGERS"
-                set-editing-mode="$ctrl.setEditingMode(mode)">
+                on-discard="$ctrl.onBackToList()">
   </roic-editor>
 
   <tsm-editor ng-if="($ctrl.selectedEditingMode === $ctrl.editingModes.EDIT_RESOURCE_MANAGER) && $ctrl.state.editingPlanResourceKey === 'tsm_manager'"
               tsm-manager-id="$ctrl.editingManagerId"
-              list-mode="$ctrl.editingModes.LIST_RESOURCE_MANAGERS"
-              set-editing-mode="$ctrl.setEditingMode(mode)">
+              on-discard="$ctrl.onBackToList()">
   </tsm-editor>
 
   <r-planning-constraints-editor

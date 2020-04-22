@@ -63,6 +63,7 @@ function addPlanTargets (planId, planTargets) {
     ]
     Promise.all(descriptionPromises)
       .then(results => {
+        // ToDo: use batch
         dispatch({
           type: Actions.SELECTION_ADD_PLAN_TARGET_DESCRIPTIONS,
           payload: {
@@ -72,7 +73,31 @@ function addPlanTargets (planId, planTargets) {
             allServiceAreas: []
           }
         })
-        // ToDo: turn on boundary layers for any new description that has an entry in planTargets
+        // turn on boundary layers for any new description that has an entry in planTargets
+        // there is currently no way to turn on boundaries that aren't analysis layers, not enough infor from service
+        var layerKeys = []
+        var analysisLayerIds = []
+        Object.keys(results[2].data).forEach(key => {
+          var layer = results[2].data[key]
+          if (!analysisLayerIds.includes(layer.analysis_layer_id) && planTargets.analysisAreas.includes(layer.id)) {
+            analysisLayerIds.push(layer.analysis_layer_id)
+            layerKeys.push({
+              layerType: 'boundary',
+              key: 'analysis_layer',
+              analysisLayerId: layer.analysis_layer_id,
+              visibility: true
+            })
+          }
+        })
+
+        if (layerKeys.length) {
+          dispatch({
+            type: Actions.LAYERS_SET_VISIBILITY_BY_KEY,
+            payload: {
+              layerKeys: layerKeys
+            }
+          })
+        }
       })
       .catch(err => console.error(err))
   }

@@ -581,6 +581,8 @@ class State {
       service.dataItems = {}
     }
 
+    // we still need this for the location.checked = location.initiallySelected bit
+    //  until we redo the location sub-type/filter system
     service.reloadLocationTypes = () => {
       var locationTypesForRedux = List()
       var locations = service.configuration.locationCategories.categories

@@ -93,12 +93,12 @@ function setCableConduitVisibility (state, cableKey, conduitKey, visibility) {
   }
 }
 
-function setAllLayerVisibilityOff (state, layerTypes) {
+function setAllLayerVisibility (state, layerTypes, visibility) {
   var newState = {}
   layerTypes.forEach(layerType => {
     newState[layerType] = state[layerType] // will get cloned below
     state[layerType].forEach((layer, layerIndex) => {
-      const newLayer = { ...layer, checked: false }
+      const newLayer = { ...layer, checked: visibility }
       newState[layerType] = newState[layerType].set(layerIndex, newLayer)
     })
   })
@@ -114,7 +114,10 @@ function setLayerVisibilityByKey (state, layerKeys) {
     // keys may not have uiLayerId
     // ToDo: the layers need to have IDs or keys that service is aware of
     // such that keys from, say, optomization can be sent here with out a state look up
-    const index = state[layerKey.layerType].findIndex(stateLayer => stateLayer.key === layerKey.key && (!layerKey.uiLayerId || layerKey.uiLayerId === stateLayer.uiLayerId))
+    const index = state[layerKey.layerType].findIndex(stateLayer => stateLayer.key === layerKey.key 
+      && (!layerKey.uiLayerId || layerKey.uiLayerId === stateLayer.uiLayerId)
+      && (!layerKey.analysisLayerId || layerKey.analysisLayerId === stateLayer.analysisLayerId)
+    )
 
     if (index !== -1) {
       const newLayer = { ...state[layerKey.layerType].get(index), checked: layerKey.visibility }
@@ -211,8 +214,8 @@ function mapLayersReducer (state = defaultState, action) {
     case Actions.LAYERS_SET_BOUNDARY:
       return setLayers(state, 'boundary', action.payload)
 
-    case Actions.LAYERS_SET_ALL_VISIBILITY_OFF:
-      return setAllLayerVisibilityOff(state, action.payload.layerTypes)
+    case Actions.LAYERS_SET_ALL_VISIBILITY:
+      return setAllLayerVisibility(state, action.payload.layerTypes, action.payload.visibility)
 
     case Actions.LAYERS_SET_VISIBILITY_BY_KEY:
       return setLayerVisibilityByKey(state, action.payload.layerKeys)
