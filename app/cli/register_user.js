@@ -35,9 +35,21 @@ var addUserToGroup = (email, groupName) => {
 
 // Default initialization of aro_core.user_configuration
 var initializeUserConfiguration = (userId) => {
+  console.log('initializeUserConfiguration successfully with id =', userId)
   const sql = `
     INSERT INTO aro_core.user_configuration(user_id, perspective, project_template_id)
     VALUES (${userId}, 'admin', 1);
+  `
+  return database.query(sql)
+}
+
+// Default initialization of aro_core.library_actor_permission
+var initializeUserLibraryPermission = (userId) => {
+  console.log('initializeUserLibraryPermission successfully with id =', userId)
+  const sql = `
+    INSERT INTO aro_core.library_actor_permission(actor_id, library_id, permissions)
+    VALUES (${userId}, 1, 4),(${userId}, 2, 4),(${userId}, 3, 4),(${userId}, 4, 4),
+    (${userId}, 5, 4),(${userId}, 6, 4),(${userId}, 7, 4),(${userId}, 8, 4),(${userId}, 9, 4);
   `
   return database.query(sql)
 }
@@ -56,6 +68,7 @@ models.User.registerFromETL(argv, argv.password)
   .then(() => addUserToGroup(argv.email, 'Administrators')) // Add the users to the Administrators group
   .then(() => addUserToGroup(argv.email, 'SuperUsers')) // Add the users to the SuperUsers group
   .then(() => initializeUserConfiguration(createdUserId))
+  .then(() => initializeUserLibraryPermission(createdUserId))
   .then(() => {
     process.exit(0)
   })
