@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import { PropTypes } from 'prop-types'
-import SpatialEdgeType from './optimization-options/spatial-edge-type'
 import NetworkConnectivityType from './optimization-options/network-connectivity-type'
 
 export class ConduitConnectivityDefinition extends Component {
@@ -20,10 +19,11 @@ export class ConduitConnectivityDefinition extends Component {
           </thead>
           <tbody>
             {
-              Object.keys(this.props.connectivityDefinition).map(spatialEdgeType => {
-                const networkConnectivityId = this.props.connectivityDefinition[spatialEdgeType]
+              this.props.spatialEdgeDefinitions.map(spatialEdgeDefinition => {
+                const spatialEdgeType = spatialEdgeDefinition.key
+                const networkConnectivityId = this.props.connectivityDefinition[spatialEdgeType] || NetworkConnectivityType.none.id
                 return <tr key={spatialEdgeType}>
-                  <td>{SpatialEdgeType[spatialEdgeType].displayName}</td>
+                  <td>{spatialEdgeDefinition.description}</td>
                   <td className='text-center'>
                     <input
                       type='checkbox'

@@ -1,13 +1,12 @@
 import Actions from '../../../common/actions'
 import AroNetworkConstraints from '../../../../shared-utils/aro-network-constraints'
 import ConnectivityDefinition from '../../common/optimization-options/connectivity-definition'
-import SpatialEdgeType from '../../common/optimization-options/spatial-edge-type'
 import WormholeFusionType from '../../../../shared-utils/wormhole-fusion-type'
 
 const defaultState = {
   constraints: AroNetworkConstraints(),
   connectivityDefinition: ConnectivityDefinition(),
-  primarySpatialEdge: SpatialEdgeType.road.id,
+  primarySpatialEdge: 'road', // SpatialEdgeType.road.id, // this is now in UI settings
   wormholeFuseDefinitions: {},
   chartReport: null,
   chartReportMetaData: null,

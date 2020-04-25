@@ -41,6 +41,7 @@ export class FusionEditor extends Component {
           <ConduitConnectivityDefinition
             connectivityDefinition={this.props.definition.config.connectivityDefinition}
             setConnectivityDefinition={this.setConnectivityDefinitionWithId.bind(this)}
+            spatialEdgeDefinitions={this.props.spatialEdgeDefinitions}
           />
           <WormholeFuseDefinition
             primarySpatialEdge={this.props.definition.config.primarySpatialEdge}

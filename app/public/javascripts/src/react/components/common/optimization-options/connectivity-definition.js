@@ -1,8 +1,7 @@
-import SpatialEdgeType from './spatial-edge-type'
 import NetworkConnectivityType from './network-connectivity-type'
-
+// ToDo: SpatialEdgeType come in from settings
 export default () => ({
-  [SpatialEdgeType.road.id]: NetworkConnectivityType.snapToEdge.id,
-  [SpatialEdgeType.sewer.id]: NetworkConnectivityType.snapToWormhole.id,
-  [SpatialEdgeType.duct.id]: NetworkConnectivityType.none.id
+  'road': NetworkConnectivityType.snapToEdge.id,
+  'sewer': NetworkConnectivityType.snapToWormhole.id,
+  'duct': NetworkConnectivityType.none.id
 })
