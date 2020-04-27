@@ -3,7 +3,6 @@ import { PropTypes } from 'prop-types'
 import { createSelector } from 'reselect'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
-import SpatialEdgeType from '../common/optimization-options/spatial-edge-type'
 import WormholeFusionType from '../../../shared-utils/wormhole-fusion-type'
 
 export class WormholeFuseDefinition extends Component {

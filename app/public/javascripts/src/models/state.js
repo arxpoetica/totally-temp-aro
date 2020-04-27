@@ -1489,11 +1489,16 @@ class State {
     service.configuration = {}
     service.initializeApp = initialState => {
       // Get application configuration from the server
-      return $http.get('/configuration')
+      return Promise.all([
+        $http.get('/configuration'),
+        $http.get('/service/odata/SpatialEdgeTypeEntity')
+      ])
         .then(result => {
-          service.configuration = result.data.appConfiguration
-          service.googleMapsLicensing = result.data.googleMapsLicensing
-          service.enumStrings = result.data.enumStrings
+          const config = result[0].data
+          const spatialEdgeType = result[1].data
+          service.configuration = config.appConfiguration
+          service.googleMapsLicensing = config.googleMapsLicensing
+          service.enumStrings = config.enumStrings
           if (!service.enumStrings) {
             throw new Error('No enumeration strings object found. Please check your server logs for errors in the UI schema.')
           }
@@ -1504,9 +1509,18 @@ class State {
             service.configuration.perspective = thisPerspective || defaultPerspective
             service.setPerspective(service.configuration.perspective)
           }
-          service.configuration.loadPerspective(result.data.user.perspective)
-          service.setWormholeFusionConfiguration(result.data.appConfiguration.wormholeFusionTypes || {})
-          return service.setLoggedInUser(result.data.user, initialState)
+          service.configuration.loadPerspective(config.user.perspective)
+          // check every entry in appConfiguration.wormholeFusionTypes
+          // to be sure it's in service's list of valid SpatialEdgeTypes
+          const wormholeFusionTypes = config.appConfiguration.wormholeFusionTypes || {}
+          var filteredWormholeFusionTypes = {}
+          Object.keys(wormholeFusionTypes).forEach(type => {
+            if (wormholeFusionTypes[type].show && spatialEdgeType.filter(item => item.name === type).length) {
+              filteredWormholeFusionTypes[type] = wormholeFusionTypes[type]
+            }
+          })
+          service.setWormholeFusionConfiguration(filteredWormholeFusionTypes)
+          return service.setLoggedInUser(config.user, initialState)
         })
         .then(() => {
           // service.setOptimizationOptions()

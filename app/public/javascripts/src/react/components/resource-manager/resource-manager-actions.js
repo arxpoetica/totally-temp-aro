@@ -22,7 +22,6 @@ function startEditingResourceManager (resourceManagerId, managerType, resourceMa
     AroHttp.get(`/service/v2/resource-manager/${resourceManagerId}/${managerType}`)
       .then(result => {
         // ToDo: use batch here (once merged with refactor branch)
-        console.log(result)
         dispatch({
           type: Actions.RESOURCE_MANAGER_SET_MANAGER_DEFINITION,
           payload: {
