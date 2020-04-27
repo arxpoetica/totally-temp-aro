@@ -1677,7 +1677,7 @@ class State {
           const wormholeFusionTypes = config.appConfiguration.wormholeFusionTypes || {}
           var filteredWormholeFusionTypes = {}
           Object.keys(wormholeFusionTypes).forEach(type => {
-            if (spatialEdgeType.filter(item => item.name === type).length) {
+            if (wormholeFusionTypes[type].show && spatialEdgeType.filter(item => item.name === type).length) {
               filteredWormholeFusionTypes[type] = wormholeFusionTypes[type]
             }
           })
