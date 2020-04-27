@@ -70,6 +70,7 @@ var routes = [
   'network',
   'boundary',
   'download',
+  'etl_template',
   'service',
   'market_size',
   'network_plan',

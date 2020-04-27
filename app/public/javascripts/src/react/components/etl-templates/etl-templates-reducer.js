@@ -2,11 +2,11 @@ const defaultState = {
   currentProjectTemplateId: 1
 }
 
-function dataTypeTemplateReducer (state = defaultState, action) {
+function etlTemplateReducer (state = defaultState, action) {
   switch (action.type) {
     default:
       return state
   }
 }
 
-export default dataTypeTemplateReducer
+export default etlTemplateReducer

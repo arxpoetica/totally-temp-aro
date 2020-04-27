@@ -25,7 +25,7 @@ import RingButton from '../react/components/ring-edit/ring-button.jsx'
 import LocationInfo from '../react/components/location-info/location-info.jsx'
 import ResourcePermissions from '../react/components/acl/resource-permissions/resource-permissions.jsx'
 import ProjectPermissions from '../react/components/project-template/project-permissions.jsx'
-import DatatypeTemplates from '../react/components/datatype-templates/datatype-templates.jsx'
+import EtlTemplates from '../react/components/etl-templates/etl-templates.jsx'
 import PermissionsTable from '../react/components/acl/resource-permissions/permissions-table.jsx'
 import SearchableSelect from '../react/components/common/searchable-select.jsx'
 import PlanningConstraintsEditor from '../react/components/resource-manager/planning-constraints-editor.jsx'
@@ -269,7 +269,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rResourcePermissions', react2angular(ResourcePermissions))
   .component('rPermissionsTable', react2angular(PermissionsTable))
   .component('rProjectPermissions', react2angular(ProjectPermissions))
-  .component('rDatatypeTemplates', react2angular(DatatypeTemplates))
+  .component('rEtlTemplates', react2angular(EtlTemplates))
   .component('rSearchableSelect', react2angular(SearchableSelect))
   .component('rPlanningConstraintsEditor', react2angular(PlanningConstraintsEditor, ['onDiscard']))
   .component('rFusionEditor', react2angular(FusionEditor, ['onDiscard']))

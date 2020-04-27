@@ -2,7 +2,7 @@ import React, { Component, Fragment } from 'react'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 
-export class DatatypeTemplates extends Component {
+export class EtlTemplates extends Component {
   constructor (props) {
     super(props)
   }
@@ -43,5 +43,5 @@ const mapStateToProps = (state) => ({
 const mapDispatchToProps = dispatch => ({
 })
 
-const DatatypeTemplatesComponent = wrapComponentWithProvider(reduxStore, DatatypeTemplates, mapStateToProps, mapDispatchToProps)
-export default DatatypeTemplatesComponent
+const EtlTemplatesComponent = wrapComponentWithProvider(reduxStore, EtlTemplates, mapStateToProps, mapDispatchToProps)
+export default EtlTemplatesComponent
