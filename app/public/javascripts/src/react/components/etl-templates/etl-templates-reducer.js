@@ -1,7 +1,7 @@
 import Actions from '../../common/actions'
 
 const defaultState = {
-  etlTemplates: "Test"
+  etlTemplates: null
 }
 
 function setEtlTempaltes (state, etlTemplates) {

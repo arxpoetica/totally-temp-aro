@@ -139,7 +139,7 @@ class DataSourceUploadController {
   }
 
   modalShown () {
-    this.loadEtlTemplatesFromServer(3)
+    this.loadEtlTemplatesFromServer(1)
     this.state.showDataSourceUploadModal.next(true)
     
     this.tableSource = this.uploadSource = this.state.uploadDataSource = this.uploadDataSources[0]
@@ -322,6 +322,7 @@ class DataSourceUploadController {
   onUploadSourceChange () {
     this.state.uploadDataSource = this.tableSource = this.uploadSource
     this.loadDataSources()
+    this.loadEtlTemplatesFromServer(this.uploadSource.id)
   }
   
   onTableSourceChange () {
@@ -404,7 +405,8 @@ class DataSourceUploadController {
   mapStateToThis (reduxState) {
     return {
       dataItems: reduxState.plan.dataItems,
-      uploadDataSources: reduxState.plan.uploadDataSources
+      uploadDataSources: reduxState.plan.uploadDataSources,
+      etlTemplates: reduxState.etlTemplates
     }
   }
 

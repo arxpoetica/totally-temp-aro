@@ -24,20 +24,46 @@ export class EtlTemplates extends Component {
               </tr>
             </thead>
             <tbody>
-              {/* {this.renderDataRows()} */}
-              Location
+              {this.renderTemplateRows()}
             </tbody>
           </table>
         </div>
       </Fragment>
     )
   }
+
+  renderTemplateRows () {
+    let jsx = []
+    // TODO: Use maps as suggested by Parag
+    //(this.props.etlTemplates).map(etlTemplateItem => this.renderEtlTemplateRow(etlTemplateItem))
+    if(this.props.etlTemplates.etlTemplates &&
+      this.props.etlTemplates.etlTemplates.length > 0) {
+      this.props.etlTemplates.etlTemplates.forEach((item) => {
+        jsx.push(this.renderEtlTemplateRow(item))
+      })
+    }
+    return jsx
+  }
+
+  renderEtlTemplateRow (etlTemplateItem) {
+    return <tr key={etlTemplateItem.name}>
+      <td>
+        {etlTemplateItem.name}
+      </td>
+      <td className='ei-table-cell'>
+        <button className='btn btn-sm'
+          type='button'>
+          <a href={'/etltemplate/download?id=' + etlTemplateItem.id}>
+          <i className='fa fa-download' />
+          </a>
+        </button>
+      </td>
+    </tr>
+  }
 }
 
 const mapStateToProps = (state) => ({
-  currentProjectTemplateId: state.projectTemplate.currentProjectTemplateId,
-  loggedInUser: state.user.loggedInUser,
-  authPermissions: state.user.authPermissions
+  etlTemplates: state.etlTemplates
 })
 
 const mapDispatchToProps = dispatch => ({

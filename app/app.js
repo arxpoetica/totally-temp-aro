@@ -69,7 +69,6 @@ var routes = [
   'location',
   'network',
   'boundary',
-  'download',
   'etl_template',
   'service',
   'market_size',
