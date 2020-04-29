@@ -14,10 +14,16 @@ export class EtlTemplates extends Component {
           <table className='table table-sm ei-table-striped' style={{ 'borderBottom': '1px solid #dee2e6' }}>
             <thead>
               <tr>
-                <th className='ei-table-col-head-sortable ng-binding ng-scope' onClick={event => { this.onSortClick(this.sortableColumns.NAME) }} style={{'cursor': 'pointer'}}>
+                <th>
                   Name
                 </th>
-                <th className='ei-table-col-head-sortable ng-binding ng-scope' onClick={event => { this.onSortClick(this.sortableColumns.PERMISSIONS) }} style={{'cursor': 'pointer'}}>
+                <th>
+                  Description
+                </th>
+                <th>
+                  Type
+                </th>
+                <th>
                   Download Link
                 </th>
                 <th />
@@ -49,6 +55,12 @@ export class EtlTemplates extends Component {
     return <tr key={etlTemplateItem.name}>
       <td>
         {etlTemplateItem.name}
+      </td>
+      <td>
+        {etlTemplateItem.description}
+      </td>
+      <td>
+        {etlTemplateItem.type}
       </td>
       <td className='ei-table-cell'>
         <a href={'/etltemplate/download?id=' + etlTemplateItem.id}>

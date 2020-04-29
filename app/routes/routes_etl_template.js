@@ -18,7 +18,7 @@ exports.configure = (app, middleware) => {
       .then( output => {
             console.log(output)
             response.setHeader('Content-type', "application/octet-stream")
-            response.setHeader('Content-disposition', 'attachment; filename=' + output.name)
+            response.setHeader('Content-disposition', 'attachment; filename=' + output.name + '.' + output.type)
             response.send(output.template)
       })
       .catch(next)
