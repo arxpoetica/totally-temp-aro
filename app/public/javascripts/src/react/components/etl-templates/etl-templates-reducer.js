@@ -1,12 +1,22 @@
+import Actions from '../../common/actions'
+
 const defaultState = {
-  currentProjectTemplateId: 1
+  etlTemplates: "Test"
 }
 
-function etlTemplateReducer (state = defaultState, action) {
+function setEtlTempaltes (state, etlTemplates) {
+  return { ...state,
+    etlTemplates
+  }
+}
+
+function etlTemplatesReducer (state = defaultState, action) {
   switch (action.type) {
+    case Actions.ETL_TEMPLATE_GET_BY_TYPE:
+      return setEtlTempaltes(state, action.payload)
     default:
       return state
   }
 }
 
-export default etlTemplateReducer
+export default etlTemplatesReducer

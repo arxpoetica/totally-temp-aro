@@ -1,4 +1,5 @@
 import PlanActions from '../../../../react/components/plan/plan-actions'
+import EtlTemplateActions from '../../../../react/components/etl-templates/etl-templates-actions'
 
 class DataSourceUploadController {
   constructor ($http, $timeout, $ngRedux, state) {
@@ -138,7 +139,7 @@ class DataSourceUploadController {
   }
 
   modalShown () {
-
+    this.loadEtlTemplatesFromServer(3)
     this.state.showDataSourceUploadModal.next(true)
     
     this.tableSource = this.uploadSource = this.state.uploadDataSource = this.uploadDataSources[0]
@@ -410,7 +411,8 @@ class DataSourceUploadController {
   mapDispatchToTarget (dispatch) {
     return {
       selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems)),
-      setAllLibraryItems: (dataItemKey, allLibraryItems) => dispatch(PlanActions.setAllLibraryItems(dataItemKey, allLibraryItems))
+      setAllLibraryItems: (dataItemKey, allLibraryItems) => dispatch(PlanActions.setAllLibraryItems(dataItemKey, allLibraryItems)),
+      loadEtlTemplatesFromServer: (dataType) => dispatch(EtlTemplateActions.loadEtlTemplatesFromServer(dataType))
     }
   }
 

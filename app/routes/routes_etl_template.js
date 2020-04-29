@@ -4,7 +4,8 @@ exports.configure = (app, middleware) => {
   var jsonSuccess = middleware.jsonSuccess
 
   app.get('/etltemplate', check_admin, (request, response, next) => {
-      models.UiEtlTemplate.getEtlTemplatesByType()
+      const dataType = request.query.datatype || 1
+      models.UiEtlTemplate.getEtlTemplatesByType(dataType)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
