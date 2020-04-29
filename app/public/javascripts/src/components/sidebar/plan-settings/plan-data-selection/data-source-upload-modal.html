@@ -131,9 +131,12 @@
       <r-etl-templates></r-etl-templates>
     </div>
 
-  </modal-body>
-  <modal-footer class="justify-content-between" ng-show="!$ctrl.isDataManagementView">
     <button class="btn btn-primary float-right" ng-class="$ctrl.datasourceName == '' ? 'btn btn-light float-right' : 'btn btn-primary float-right'" ng-disabled="$ctrl.isUploading || $ctrl.datasourceName === ''"
     ng-click="$ctrl.save()"><span ng-show="$ctrl.isUpLoad" class="fa fa-spinner fa-spin"></span> Save</button>
-  </modal-footer>
+ 
+  </modal-body>
+  <!-- <modal-footer class="justify-content-between" ng-show="!$ctrl.isDataManagementView">
+    <button class="btn btn-primary float-right" ng-class="$ctrl.datasourceName == '' ? 'btn btn-light float-right' : 'btn btn-primary float-right'" ng-disabled="$ctrl.isUploading || $ctrl.datasourceName === ''"
+    ng-click="$ctrl.save()"><span ng-show="$ctrl.isUpLoad" class="fa fa-spinner fa-spin"></span> Save</button>
+  </modal-footer> -->
 </modal>

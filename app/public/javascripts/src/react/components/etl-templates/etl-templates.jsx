@@ -51,19 +51,18 @@ export class EtlTemplates extends Component {
         {etlTemplateItem.name}
       </td>
       <td className='ei-table-cell'>
-        <button className='btn btn-sm'
-          type='button'>
-          <a href={'/etltemplate/download?id=' + etlTemplateItem.id}>
-          <i className='fa fa-download' />
-          </a>
-        </button>
+        <a href={'/etltemplate/download?id=' + etlTemplateItem.id}>
+          <button className={'btn btn-sm btn-primary'} style={{ minWidth: '120px' }}>
+             <span><i className='fa fa-download' /> Download</span>
+          </button>
+        </a>
       </td>
     </tr>
   }
 }
 
 const mapStateToProps = (state) => ({
-  etlTemplates: state.etlTemplates
+  etlTemplates: state.etlTemplates,
 })
 
 const mapDispatchToProps = dispatch => ({
