@@ -39,7 +39,7 @@ class NetworkEquipmentController {
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
   }
 
-  $doCheck() {
+  $doCheck() { // ToDo: this doesn't belong here, move to state, the client check should be from settings
     const networkEquipments = this.state.configuration.networkEquipment && this.state.configuration.networkEquipment.equipments
     if (networkEquipments && (this.cachedNetworkEquipments !== networkEquipments)) {
       if (this.state.configuration && (this.state.configuration.ARO_CLIENT === 'tdc')) {

@@ -1656,6 +1656,7 @@ class State {
         $http.get('/service/odata/SpatialEdgeTypeEntity')
       ])
         .then(result => {
+          console.log(result)
           const config = result[0].data
           const spatialEdgeType = result[1].data
           service.configuration = config.appConfiguration
@@ -1674,6 +1675,9 @@ class State {
           service.configuration.loadPerspective(config.user.perspective)
           // check every entry in appConfiguration.wormholeFusionTypes
           // to be sure it's in service's list of valid SpatialEdgeTypes
+          // ToDo: we have config.wormholeFusionTypes AND config.networkEquipment.conduits
+          // ToDo: move this.setNetworkEquipmentLayers(this.state.configuration.networkEquipment)
+          //  from network-equipment.js to here
           const wormholeFusionTypes = config.appConfiguration.wormholeFusionTypes || {}
           var filteredWormholeFusionTypes = {}
           Object.keys(wormholeFusionTypes).forEach(type => {
