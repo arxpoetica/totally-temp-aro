@@ -16,7 +16,6 @@ exports.configure = (app, middleware) => {
       const templateId = request.query.id
       models.UiEtlTemplate.getEtlTemplateFileText(templateId)
       .then( output => {
-            console.log(output)
             response.setHeader('Content-type', "application/octet-stream")
             response.setHeader('Content-disposition', 'attachment; filename=' + output.name + '.' + output.type)
             response.send(output.template)
