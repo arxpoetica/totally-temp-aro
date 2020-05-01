@@ -23,7 +23,7 @@ export class ConduitConnectivityDefinition extends Component {
                 const spatialEdgeType = spatialEdgeDefinition.key
                 const networkConnectivityId = this.props.connectivityDefinition[spatialEdgeType] || NetworkConnectivityType.none.id
                 return <tr key={spatialEdgeType}>
-                  <td>{spatialEdgeDefinition.description}</td>
+                  <td>{spatialEdgeDefinition.label}</td>
                   <td className='text-center'>
                     <input
                       type='checkbox'

@@ -23,7 +23,7 @@ export class WormholeFuseDefinition extends Component {
             this.props.spatialEdgeDefinitions.map(spatialEdgeDefinition => <tr key={spatialEdgeDefinition.key}>
 
               {/* The edge type */}
-              <td>{spatialEdgeDefinition.description}</td>
+              <td>{spatialEdgeDefinition.label}</td>
 
               {/* A radio button that depicts if this is the primary edge type */}
               <td>
