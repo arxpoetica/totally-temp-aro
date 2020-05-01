@@ -12,22 +12,18 @@ import Constants from '../../common/constants'
 import ResourceManagerActions from './resource-manager-actions'
 const fusionSelector = getFormValues(Constants.FUSION_FORM)
 
-const getWormholeFusionConfig = state => state.configuration.ui.wormholeFusion
-const getOrderedSpatialEdgeDefinitions = createSelector([getWormholeFusionConfig], wormholeFusionConfig => {
-  // Error checking, as we are getting these settings from a database
-  // Object.keys(wormholeFusionConfig).forEach(spatialEdgeType => {
-  //   if (!SpatialEdgeType[spatialEdgeType]) {
-  //     throw new Error(`Error: key ${spatialEdgeType} is not defined in class SpatialEdgeType`)
-  //   }
-  // })
+const getConduits = state => { return { ...state.mapLayers.networkEquipment.conduits, ...state.mapLayers.networkEquipment.roads } }
+const getOrderedSpatialEdgeDefinitions = createSelector([getConduits], conduits => {
   // Return ordered spatial edge types
-  return Object.keys(wormholeFusionConfig)
-    .map(spatialEdgeType => wormholeFusionConfig[spatialEdgeType])
-    .sort((a, b) => (a.index > b.index) ? 1 : -1)
+  return Object.keys(conduits)
+    .map(spatialEdgeType => conduits[spatialEdgeType])
+    .sort((a, b) => (a.listIndex > b.listIndex) ? 1 : -1)
 })
 
 export class FusionEditor extends Component {
   render () {
+    if (!this.props.definition) return ''
+
     return (
       <div>
         <div className='modal-header ng-isolate-scope' title={this.props.resourceManagerName}>

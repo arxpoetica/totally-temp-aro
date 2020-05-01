@@ -1489,13 +1489,24 @@ class State {
     service.configuration = {}
     service.initializeApp = initialState => {
       // Get application configuration from the server
-      return Promise.all([
-        $http.get('/configuration'),
-        $http.get('/service/odata/SpatialEdgeTypeEntity')
-      ])
+      return $http.get('/configuration')
         .then(result => {
-          const config = result[0].data
-          const spatialEdgeType = result[1].data
+          var config = result.data
+
+          // filter out conduits that are not to be shown
+          // this code may belong in cache.js instead
+          var conduits = config.appConfiguration.networkEquipment.conduits || {}
+          var filteredConduits = {}
+          Object.keys(conduits).forEach(type => {
+            var conduit = conduits[type]
+            // for backwards compatibility
+            // we only filter out IF there is a .show property AND it = false
+            if (!conduit.hasOwnProperty('show') || conduit.show) {
+              filteredConduits[type] = conduit
+            }
+          })
+          config.appConfiguration.networkEquipment.conduits = filteredConduits
+
           service.configuration = config.appConfiguration
           service.googleMapsLicensing = config.googleMapsLicensing
           service.enumStrings = config.enumStrings
@@ -1510,16 +1521,8 @@ class State {
             service.setPerspective(service.configuration.perspective)
           }
           service.configuration.loadPerspective(config.user.perspective)
-          // check every entry in appConfiguration.wormholeFusionTypes
-          // to be sure it's in service's list of valid SpatialEdgeTypes
-          const wormholeFusionTypes = config.appConfiguration.wormholeFusionTypes || {}
-          var filteredWormholeFusionTypes = {}
-          Object.keys(wormholeFusionTypes).forEach(type => {
-            if (wormholeFusionTypes[type].show && spatialEdgeType.filter(item => item.name === type).length) {
-              filteredWormholeFusionTypes[type] = wormholeFusionTypes[type]
-            }
-          })
-          service.setWormholeFusionConfiguration(filteredWormholeFusionTypes)
+          service.setNetworkEquipmentLayers(service.configuration.networkEquipment)
+          
           return service.setLoggedInUser(config.user, initialState)
         })
         .then(() => {
@@ -1764,6 +1767,7 @@ class State {
       setActivePlanState: planState => dispatch(PlanActions.setActivePlanState(planState)),
       selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems)),
       setGoogleMapsReference: mapRef => dispatch(MapActions.setGoogleMapsReference(mapRef)),
+      setNetworkEquipmentLayers: networkEquipmentLayers => dispatch(MapLayerActions.setNetworkEquipmentLayers(networkEquipmentLayers)),
       updateShowSiteBoundary: isVisible => dispatch(MapLayerActions.setShowSiteBoundary(isVisible)),
       onFeatureSelectedRedux: features => dispatch(RingEditActions.onFeatureSelected(features)),
       setNetworkAnalysisConstraints: aroNetworkConstraints => dispatch(NetworkAnalysisActions.setNetworkAnalysisConstraints(aroNetworkConstraints)),
@@ -1771,8 +1775,7 @@ class State {
       setOptimizationInputs: inputs => dispatch(NetworkOptimizationActions.setOptimizationInputs(inputs)),
       setPrimarySpatialEdge: primarySpatialEdge => dispatch(NetworkAnalysisActions.setPrimarySpatialEdge(primarySpatialEdge)),
       clearWormholeFuseDefinitions: () => dispatch(NetworkAnalysisActions.clearWormholeFuseDefinitions()),
-      setWormholeFuseDefinition: (spatialEdgeType, wormholeFusionTypeId) => dispatch(NetworkAnalysisActions.setWormholeFuseDefinition(spatialEdgeType, wormholeFusionTypeId)),
-      setWormholeFusionConfiguration: wormholeFusionConfiguration => dispatch(UiActions.setWormholeFusionConfiguration(wormholeFusionConfiguration))
+      setWormholeFuseDefinition: (spatialEdgeType, wormholeFusionTypeId) => dispatch(NetworkAnalysisActions.setWormholeFuseDefinition(spatialEdgeType, wormholeFusionTypeId))
     }
   }
 }
