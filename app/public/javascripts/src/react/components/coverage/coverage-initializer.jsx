@@ -31,8 +31,8 @@ export class CoverageInitializer extends Component {
   }
   render () {
     // If we have a valid report, then disable all controls
-    var readOnly = false
-    if (this.props.coverageReport) readOnly = true
+    var displayOnly = false
+    if (this.props.coverageReport) displayOnly = true
 
     return <div>
       <table id='table-coverage-initializer' className='table table-sm table-striped sidebar-options-table'>
@@ -44,7 +44,7 @@ export class CoverageInitializer extends Component {
             <td>
               <select id='selectCoverageType'
                 className='form-control'
-                disabled={readOnly}
+                disabled={displayOnly}
                 value={this.props.coverageType}
                 onChange={(event) => this.props.setCoverageType(event.target.value)}>
                 {this.state.coverageTypes.map(item => <option value={item.id} key={item.id}>{item.name}</option>)}
@@ -58,7 +58,7 @@ export class CoverageInitializer extends Component {
             <td>
               <select id='selectGroupKeyType'
                 className='form-control'
-                disabled={readOnly}
+                disabled={displayOnly}
                 value={this.props.groupKeyType}
                 onChange={(event) => this.props.setGroupKeyType(event.target.value)}>
                 {this.state.groupKeyTypes.map(item => <option value={item.id} key={item.id}>{item.name}</option>)}
@@ -73,7 +73,7 @@ export class CoverageInitializer extends Component {
               <input id='chkLimitMarketableTechnologies'
                 type='checkbox'
                 className='checkboxfill'
-                disabled={readOnly}
+                disabled={displayOnly}
                 checked={this.props.useMarketableTechnologies}
                 onChange={event => this.props.setLimitMarketableTechnology(event.target.checked)} />
             </td>
@@ -86,7 +86,7 @@ export class CoverageInitializer extends Component {
               <input id='chkLimitMaxSpeed'
                 type='checkbox'
                 className='checkboxfill'
-                disabled={readOnly}
+                disabled={displayOnly}
                 checked={this.props.useMaxSpeed}
                 onChange={event => this.props.setLimitMaxSpeed(event.target.checked)} />
             </td>
@@ -99,7 +99,7 @@ export class CoverageInitializer extends Component {
               <input id='chkUseExistingFiber'
                 type='checkbox'
                 className='checkboxfill'
-                disabled={readOnly}
+                disabled={displayOnly}
                 checked={this.props.useExistingFiber}
                 onChange={event => this.props.setExistingFiber(event.target.checked)} />
             </td>
@@ -112,7 +112,7 @@ export class CoverageInitializer extends Component {
               <input id='chkUsePlannedFiber'
                 type='checkbox'
                 className='checkboxfill'
-                disabled={readOnly}
+                disabled={displayOnly}
                 checked={this.props.usePlannedFiber}
                 onChange={event => this.props.setPlannedFiber(event.target.checked)} />
             </td>
@@ -123,7 +123,7 @@ export class CoverageInitializer extends Component {
             <td>Site Assignment</td>
             <td>
               <select className='form-control'
-                disabled={readOnly}
+                disabled={displayOnly}
                 value={this.state.selectedSiteAssignment}
                 onChange={event => this.setState({ selectedSiteAssignment: event.target.value })}>
                 {this.state.siteAssignments.map(item => <option value={item} key={item}>{item}</option>)}
@@ -137,7 +137,7 @@ export class CoverageInitializer extends Component {
             <td>
               <select id='selectCoverageInitializerSelectionType'
                 className='form-control'
-                disabled={readOnly}
+                disabled={displayOnly}
                 value={this.props.activeSelectionModeId}
                 onChange={event => this.props.setSelectionTypeById(event.target.value)}>
                 {this.props.selectionModes.map(item => <option value={item.id} key={item.id}>{item.description}</option>)}
@@ -145,7 +145,7 @@ export class CoverageInitializer extends Component {
             </td>
           </tr>
           {
-            this.displayGeographies(readOnly)
+            this.displayGeographies(displayOnly)
           }
         </tbody>
       </table>

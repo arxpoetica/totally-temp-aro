@@ -681,7 +681,6 @@ exports[`Click to edit a target 2`] = `
           <td>
             <button
               className="btn btn-sm btn-light"
-              disabled={false}
               id="btnSaveTarget_0"
               onClick={[Function]}
             >
@@ -888,7 +887,6 @@ exports[`Click to edit a target 3`] = `
           <td>
             <button
               className="btn btn-sm btn-light"
-              disabled={false}
               id="btnSaveTarget_0"
               onClick={[Function]}
             >
@@ -1551,7 +1549,6 @@ exports[`Click to manually add a target 2`] = `
           <td>
             <button
               className="btn btn-sm btn-primary"
-              disabled={false}
               id="btnSaveTarget"
               onClick={[Function]}
             >
@@ -2247,7 +2244,6 @@ exports[`Disable existing target save button for duplicate target id 1`] = `
           <td>
             <button
               className="btn btn-sm btn-light"
-              disabled={false}
               id="btnSaveTarget_0"
               onClick={[Function]}
             >
@@ -2661,7 +2657,6 @@ exports[`Disable existing target save button for duplicate target id 3`] = `
           <td>
             <button
               className="btn btn-sm btn-light"
-              disabled={false}
               id="btnSaveTarget_0"
               onClick={[Function]}
             >
@@ -3146,7 +3141,6 @@ exports[`Disable new target save button for duplicate target id 2`] = `
           <td>
             <button
               className="btn btn-sm btn-primary"
-              disabled={false}
               id="btnSaveTarget"
               onClick={[Function]}
             >
