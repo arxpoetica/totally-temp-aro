@@ -1653,7 +1653,22 @@ class State {
       // Get application configuration from the server
       return $http.get('/configuration')
         .then(result => {
-          const config = result.data
+          var config = result.data
+
+          // filter out conduits that are not to be shown
+          // this code may belong in cache.js instead
+          var conduits = config.appConfiguration.networkEquipment.conduits || {}
+          var filteredConduits = {}
+          Object.keys(conduits).forEach(type => {
+            var conduit = conduits[type]
+            // for backwards compatibility
+            // we only filter out IF there is a .show property AND it = false
+            if (!conduit.hasOwnProperty('show') || conduit.show) {
+              filteredConduits[type] = conduit
+            }
+          })
+          config.appConfiguration.networkEquipment.conduits = filteredConduits
+
           service.configuration = config.appConfiguration
           service.googleMapsLicensing = config.googleMapsLicensing
           service.enumStrings = config.enumStrings
