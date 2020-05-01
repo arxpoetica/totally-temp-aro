@@ -14,6 +14,7 @@ exports[`Default render 1`] = `
         <td>
           <select
             className="form-control"
+            disabled={false}
             id="selectCoverageType"
             onChange={[Function]}
           >
@@ -37,6 +38,7 @@ exports[`Default render 1`] = `
         <td>
           <select
             className="form-control"
+            disabled={false}
             id="selectGroupKeyType"
             onChange={[Function]}
           >
@@ -65,6 +67,7 @@ exports[`Default render 1`] = `
         <td>
           <input
             className="checkboxfill"
+            disabled={false}
             id="chkLimitMarketableTechnologies"
             onChange={[Function]}
             type="checkbox"
@@ -78,6 +81,7 @@ exports[`Default render 1`] = `
         <td>
           <input
             className="checkboxfill"
+            disabled={false}
             id="chkLimitMaxSpeed"
             onChange={[Function]}
             type="checkbox"
@@ -91,6 +95,7 @@ exports[`Default render 1`] = `
         <td>
           <input
             className="checkboxfill"
+            disabled={false}
             id="chkUseExistingFiber"
             onChange={[Function]}
             type="checkbox"
@@ -104,6 +109,7 @@ exports[`Default render 1`] = `
         <td>
           <input
             className="checkboxfill"
+            disabled={false}
             id="chkUsePlannedFiber"
             onChange={[Function]}
             type="checkbox"
@@ -117,6 +123,7 @@ exports[`Default render 1`] = `
         <td>
           <select
             className="form-control"
+            disabled={false}
             onChange={[Function]}
             value="Incremental"
           >
@@ -140,6 +147,7 @@ exports[`Default render 1`] = `
         <td>
           <select
             className="form-control"
+            disabled={false}
             id="selectCoverageInitializerSelectionType"
             onChange={[Function]}
           >
@@ -199,6 +207,7 @@ exports[`When we do not have an existing report 1`] = `
         <td>
           <select
             className="form-control"
+            disabled={false}
             id="selectCoverageType"
             onChange={[Function]}
           >
@@ -222,6 +231,7 @@ exports[`When we do not have an existing report 1`] = `
         <td>
           <select
             className="form-control"
+            disabled={false}
             id="selectGroupKeyType"
             onChange={[Function]}
           >
@@ -250,6 +260,7 @@ exports[`When we do not have an existing report 1`] = `
         <td>
           <input
             className="checkboxfill"
+            disabled={false}
             id="chkLimitMarketableTechnologies"
             onChange={[Function]}
             type="checkbox"
@@ -263,6 +274,7 @@ exports[`When we do not have an existing report 1`] = `
         <td>
           <input
             className="checkboxfill"
+            disabled={false}
             id="chkLimitMaxSpeed"
             onChange={[Function]}
             type="checkbox"
@@ -276,6 +288,7 @@ exports[`When we do not have an existing report 1`] = `
         <td>
           <input
             className="checkboxfill"
+            disabled={false}
             id="chkUseExistingFiber"
             onChange={[Function]}
             type="checkbox"
@@ -289,6 +302,7 @@ exports[`When we do not have an existing report 1`] = `
         <td>
           <input
             className="checkboxfill"
+            disabled={false}
             id="chkUsePlannedFiber"
             onChange={[Function]}
             type="checkbox"
@@ -302,6 +316,7 @@ exports[`When we do not have an existing report 1`] = `
         <td>
           <select
             className="form-control"
+            disabled={false}
             onChange={[Function]}
             value="Incremental"
           >
@@ -325,6 +340,7 @@ exports[`When we do not have an existing report 1`] = `
         <td>
           <select
             className="form-control"
+            disabled={false}
             id="selectCoverageInitializerSelectionType"
             onChange={[Function]}
           >
@@ -384,6 +400,7 @@ exports[`When we have an existing report 1`] = `
         <td>
           <select
             className="form-control"
+            disabled={true}
             id="selectCoverageType"
             onChange={[Function]}
           >
@@ -407,6 +424,7 @@ exports[`When we have an existing report 1`] = `
         <td>
           <select
             className="form-control"
+            disabled={true}
             id="selectGroupKeyType"
             onChange={[Function]}
           >
@@ -435,6 +453,7 @@ exports[`When we have an existing report 1`] = `
         <td>
           <input
             className="checkboxfill"
+            disabled={true}
             id="chkLimitMarketableTechnologies"
             onChange={[Function]}
             type="checkbox"
@@ -448,6 +467,7 @@ exports[`When we have an existing report 1`] = `
         <td>
           <input
             className="checkboxfill"
+            disabled={true}
             id="chkLimitMaxSpeed"
             onChange={[Function]}
             type="checkbox"
@@ -461,6 +481,7 @@ exports[`When we have an existing report 1`] = `
         <td>
           <input
             className="checkboxfill"
+            disabled={true}
             id="chkUseExistingFiber"
             onChange={[Function]}
             type="checkbox"
@@ -474,6 +495,7 @@ exports[`When we have an existing report 1`] = `
         <td>
           <input
             className="checkboxfill"
+            disabled={true}
             id="chkUsePlannedFiber"
             onChange={[Function]}
             type="checkbox"
@@ -487,6 +509,7 @@ exports[`When we have an existing report 1`] = `
         <td>
           <select
             className="form-control"
+            disabled={true}
             onChange={[Function]}
             value="Incremental"
           >
@@ -510,6 +533,7 @@ exports[`When we have an existing report 1`] = `
         <td>
           <select
             className="form-control"
+            disabled={true}
             id="selectCoverageInitializerSelectionType"
             onChange={[Function]}
           >
@@ -552,14 +576,6 @@ exports[`When we have an existing report 1`] = `
       </tr>
     </tbody>
   </table>
-  <div
-    className="disable-sibling-controls"
-    style={
-      Object {
-        "top": "50px",
-      }
-    }
-  />
 </div>
 `;
 
@@ -577,6 +593,7 @@ exports[`When we have supplied all parameters 1`] = `
         <td>
           <select
             className="form-control"
+            disabled={true}
             id="selectCoverageType"
             onChange={[Function]}
             value="location"
@@ -601,6 +618,7 @@ exports[`When we have supplied all parameters 1`] = `
         <td>
           <select
             className="form-control"
+            disabled={true}
             id="selectGroupKeyType"
             onChange={[Function]}
           >
@@ -630,6 +648,7 @@ exports[`When we have supplied all parameters 1`] = `
           <input
             checked={true}
             className="checkboxfill"
+            disabled={true}
             id="chkLimitMarketableTechnologies"
             onChange={[Function]}
             type="checkbox"
@@ -644,6 +663,7 @@ exports[`When we have supplied all parameters 1`] = `
           <input
             checked={true}
             className="checkboxfill"
+            disabled={true}
             id="chkLimitMaxSpeed"
             onChange={[Function]}
             type="checkbox"
@@ -658,6 +678,7 @@ exports[`When we have supplied all parameters 1`] = `
           <input
             checked={true}
             className="checkboxfill"
+            disabled={true}
             id="chkUseExistingFiber"
             onChange={[Function]}
             type="checkbox"
@@ -672,6 +693,7 @@ exports[`When we have supplied all parameters 1`] = `
           <input
             checked={true}
             className="checkboxfill"
+            disabled={true}
             id="chkUsePlannedFiber"
             onChange={[Function]}
             type="checkbox"
@@ -685,6 +707,7 @@ exports[`When we have supplied all parameters 1`] = `
         <td>
           <select
             className="form-control"
+            disabled={true}
             onChange={[Function]}
             value="Incremental"
           >
@@ -708,6 +731,7 @@ exports[`When we have supplied all parameters 1`] = `
         <td>
           <select
             className="form-control"
+            disabled={true}
             id="selectCoverageInitializerSelectionType"
             onChange={[Function]}
             value="SELECTED_AREAS"
@@ -751,13 +775,5 @@ exports[`When we have supplied all parameters 1`] = `
       </tr>
     </tbody>
   </table>
-  <div
-    className="disable-sibling-controls"
-    style={
-      Object {
-        "top": "50px",
-      }
-    }
-  />
 </div>
 `;
