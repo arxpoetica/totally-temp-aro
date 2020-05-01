@@ -4,6 +4,7 @@ exports[`Default component render 1`] = `
 <div>
   <ReduxForm
     destroyOnUnmount={true}
+    displayOnly={false}
     enableReinitialize={true}
     forceUnregisterOnUnmount={false}
     form="rfpOptions"
@@ -20,7 +21,9 @@ exports[`Default component render 1`] = `
     touchOnChange={false}
     updateUnregisteredFields={false}
   />
-  <Component />
+  <Component
+    displayOnly={false}
+  />
 </div>
 `;
 
@@ -28,6 +31,7 @@ exports[`Rfp finished status 1`] = `
 <div>
   <ReduxForm
     destroyOnUnmount={true}
+    displayOnly={true}
     enableReinitialize={true}
     forceUnregisterOnUnmount={false}
     form="rfpOptions"
@@ -44,9 +48,8 @@ exports[`Rfp finished status 1`] = `
     touchOnChange={false}
     updateUnregisteredFields={false}
   />
-  <Component />
-  <div
-    className="disable-sibling-controls"
+  <Component
+    displayOnly={true}
   />
 </div>
 `;
@@ -55,6 +58,7 @@ exports[`Rfp running status 1`] = `
 <div>
   <ReduxForm
     destroyOnUnmount={true}
+    displayOnly={true}
     enableReinitialize={true}
     forceUnregisterOnUnmount={false}
     form="rfpOptions"
@@ -71,9 +75,8 @@ exports[`Rfp running status 1`] = `
     touchOnChange={false}
     updateUnregisteredFields={false}
   />
-  <Component />
-  <div
-    className="disable-sibling-controls"
+  <Component
+    displayOnly={true}
   />
 </div>
 `;

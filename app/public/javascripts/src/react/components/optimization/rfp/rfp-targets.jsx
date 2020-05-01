@@ -31,14 +31,16 @@ export class RfpTargets extends Component {
           this.state.showNewTargetInputs
             ? null // Dont show button if we already have the inputs shown
             : <div className='float-right'>
-              <RfpFileImporter />
+              <RfpFileImporter displayOnly={this.props.displayOnly} />
               <button id='btnAddTargetManual'
                 className='btn btn-sm btn-light'
+                disabled={this.props.displayOnly}
                 onClick={this.startAddingNewTarget.bind(this)}>
                 <i className='fas fa-pencil-alt' /> Manual entry
               </button>
               <button id='btnClickMapToAddTarget'
                 className={'btn btn-sm ' + (this.props.clickMapToAddTarget ? 'btn-primary' : 'btn-light')}
+                disabled={this.props.displayOnly}
                 onClick={() => this.props.setClickMapToAddTarget(!this.props.clickMapToAddTarget)}>
                 <i className='fas fa-bullseye' /> Click map
               </button>
@@ -69,16 +71,16 @@ export class RfpTargets extends Component {
               this.state.showNewTargetInputs
                 ? <tr>
                   <td>
-                    <input id='txtNewTargetId' className='form-control' type='text' value={this.state.newTargetId} onChange={event => this.setState({ newTargetId: event.target.value })} />
+                    <input id='txtNewTargetId' className='form-control' type='text' disabled={this.props.displayOnly} value={this.state.newTargetId} onChange={event => this.setState({ newTargetId: event.target.value })} />
                   </td>
                   <td>
-                    <input className='form-control' type='text' value={this.state.newTargetLat} onChange={event => this.setState({ newTargetLat: event.target.value })} />
+                    <input className='form-control' type='text' disabled={this.props.displayOnly} value={this.state.newTargetLat} onChange={event => this.setState({ newTargetLat: event.target.value })} />
                   </td>
                   <td>
-                    <input className='form-control' type='text' value={this.state.newTargetLng} onChange={event => this.setState({ newTargetLng: event.target.value })} />
+                    <input className='form-control' type='text' disabled={this.props.displayOnly} value={this.state.newTargetLng} onChange={event => this.setState({ newTargetLng: event.target.value })} />
                   </td>
                   <td>
-                    <button id='btnSaveTarget' className='btn btn-sm btn-primary' disabled={disableSave} onClick={this.saveNewTarget.bind(this)}>Save</button>
+                    <button id='btnSaveTarget' className='btn btn-sm btn-primary' disabled={disableSave || this.props.displayOnly} onClick={this.saveNewTarget.bind(this)}>Save</button>
                   </td>
                 </tr>
                 : null
@@ -97,11 +99,12 @@ export class RfpTargets extends Component {
       <td>{this.limitLatLongPrecision(target.lat)}</td>
       <td>{this.limitLatLongPrecision(target.lng)}</td>
       <td>
-        <button id={`btnEditTarget_${index}`} className='btn btn-sm btn-light' onClick={() => this.startEditingTarget(index)}>
+        <button id={`btnEditTarget_${index}`} className='btn btn-sm btn-light' disabled={this.props.displayOnly} onClick={() => this.startEditingTarget(index)}>
           <i className='fa fa-edit' />
         </button>
         <button id={`btnDeleteTarget_${index}`}
           className='btn btn-sm btn-danger'
+          disabled={this.props.displayOnly}
           onClick={event => {
             this.props.removeTarget(index)
             event.stopPropagation()
@@ -126,6 +129,7 @@ export class RfpTargets extends Component {
           id={`inpTargetId_${index}`}
           type='text'
           className='form-control form-control-sm'
+          disabled={this.props.displayOnly}
           value={this.state.indexToEditableTarget[index].id}
           onChange={event => this.setEditingTargetProperty(index, 'id', event.target.value)}
         />
@@ -135,6 +139,7 @@ export class RfpTargets extends Component {
           id={`inpTargetLatitude_${index}`}
           type='text'
           className='form-control form-control-sm'
+          disabled={this.props.displayOnly}
           value={this.state.indexToEditableTarget[index].lat}
           onChange={event => this.setEditingTargetProperty(index, 'lat', event.target.value)}
         />
@@ -144,6 +149,7 @@ export class RfpTargets extends Component {
           id={`inpTargetLongitude_${index}`}
           type='text'
           className='form-control form-control-sm'
+          disabled={this.props.displayOnly}
           value={this.state.indexToEditableTarget[index].lng}
           onChange={event => this.setEditingTargetProperty(index, 'lng', event.target.value)}
         />
@@ -152,7 +158,7 @@ export class RfpTargets extends Component {
         {/* Must have a unique id. If not, disable the save button */}
         <button id={`btnSaveTarget_${index}`}
           className='btn btn-sm btn-light'
-          disabled={disableSave}
+          disabled={disableSave || this.props.displayOnly}
           onClick={event => {
             this.saveEditingTarget(index)
             event.stopPropagation()
@@ -172,6 +178,7 @@ export class RfpTargets extends Component {
   }
 
   startAddingNewTarget () {
+    if (this.props.displayOnly) return
     this.setState({
       showNewTargetInputs: true,
       newTargetId: (+this.state.newTargetId + 1).toString(),
@@ -182,6 +189,7 @@ export class RfpTargets extends Component {
   }
 
   saveNewTarget () {
+    if (this.props.displayOnly) return
     this.props.addTargets([new Point(+this.state.newTargetLat, +this.state.newTargetLng, this.state.newTargetId)])
     this.setState({
       showNewTargetInputs: false,
@@ -191,6 +199,7 @@ export class RfpTargets extends Component {
   }
 
   startEditingTarget (indexToEdit) {
+    if (this.props.displayOnly) return
     const existingTarget = this.props.targets[indexToEdit]
     var newTargetsBeingEdited = {
       ...this.state.indexToEditableTarget,
@@ -212,6 +221,7 @@ export class RfpTargets extends Component {
   }
 
   saveEditingTarget (indexToSave) {
+    if (this.props.displayOnly) return
     // Save the change to the redux store
     // Make sure that the lat/longs of the editing target are numbers
     const editedTarget = this.state.indexToEditableTarget[indexToSave]
@@ -221,6 +231,7 @@ export class RfpTargets extends Component {
   }
 
   setEditingTargetProperty (indexToEdit, property, value) {
+    if (this.props.displayOnly) return
     const oldTarget = this.state.indexToEditableTarget[indexToEdit]
     var newTarget = new Point(oldTarget.lat, oldTarget.lng, oldTarget.id)
     newTarget[property] = value
