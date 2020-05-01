@@ -1,6 +1,12 @@
-entity_category_id,lat,longitude,target_type,subtype_id,size,site_clli,
-central_office,56.07839087,12.53463843,,1 (Data Centre) or 3 (POP Site),,,Note: Only one category_id per upload file
-splice_point,56.07839087,12.53463843,,,,,
-location_connector,56.07839087,12.53463843,,,,,
-subnet_node,56.07839087,12.53463843,,,,,
-network_connector,56.07839087,12.53463843,duct or sewer,2 (Duct Network Connector),"1, 2 or 3",,
+entity_category_id,lat,longitude,target_type,subtype_id,size,site_clli,,How to use
+central_office,56.07839087,12.53463843,,,,name field,,Use this to upload Exchanges
+central_office,56.07839087,12.53463843,,1,,name field,,Use this to upload Data Centres
+central_office,56.07839087,12.53463843,,3,,name field,,Use this to upload POP Sites
+network_connector,56.07839087,12.53463843,sewer,,"1, 2 or 3",name field,,to be used with sewers
+network_connector,56.07839087,12.53463843,duct,2,"1, 2 or 3",name field,,to be used with Duct 1
+network_connector,56.07839087,12.53463843,special0,2,"1, 2 or 3",name field,,to be used with Duct 2
+network_connector,56.07839087,12.53463843,special1,2,"1, 2 or 3",name field,,to be used with Duct 3
+network_connector,56.07839087,12.53463843,special2,2,"1, 2 or 3",name field,,to be used with Duct 4
+network_connector,56.07839087,12.53463843,special3,2,"1, 2 or 3",name field,,to be used with Duct 5
+splice_point,56.07839087,12.53463843,,,,name field,,
+location_connector,56.07839087,12.53463843,,,,name field,,

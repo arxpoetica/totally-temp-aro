@@ -1,16 +1,12 @@
 class UserSettingsController {
-  constructor ($http, $timeout, state, Utils) {
+  constructor ($http, $timeout, $ngRedux, state, Utils) {
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
     this.utils = Utils
     this.searchSessionToken = this.utils.getInsecureV4UUID()
-
     this.userConfiguration = {}
     this.allProjectTemplates = []
-    $http.get(`/service/v1/project-template`)
-      .then((result) => this.allProjectTemplates = result.data)
-      .catch((err) => console.error(err))
 
     this.perspectives = [
       {
@@ -34,6 +30,8 @@ class UserSettingsController {
         perspective: 'account_exec'
       }
     ]
+
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }
 
   $onInit () {
@@ -45,6 +43,27 @@ class UserSettingsController {
         this.$timeout()
       })
       .catch((err) => console.error(err))
+
+      const filter = `deleted eq false and userId eq ${this.userId}`
+      // const RESOUSRCE_READ = 4
+      this.$http.get(`/service/odata/userprojectentity?$select=id,name,permissions&$filter=${filter}&$orderby=name&$top=10000`)
+        .then((result) => {
+          let myProjects = []
+  
+          // loop through the project and find check the permission bits to see
+          // if the current user has READ and ADMIN privilage to manage the resource
+          for(let i = 0; i < result.data.length; i++) {
+            const permissions = result.data[i].permissions
+            const hasView = Boolean(permissions & this.authPermissions.RESOURCE_READ.permissionBits)
+            if(hasView) {
+              delete result.data[i].permissions
+              myProjects.push(result.data[i])
+            }
+          }
+            
+          this.allProjectTemplates = myProjects
+        })
+        .catch((err) => console.error(err))
   }
 
   initSearchBox () {
@@ -111,9 +130,20 @@ class UserSettingsController {
       this.$timeout()
     }
   }
+
+  mapStateToThis (reduxState) {
+    return {
+      authPermissions: reduxState.user.authPermissions,
+    }
+  }
+
+  mapDispatchToTarget (dispatch) {
+    return {
+    }
+  }
 }
 
-UserSettingsController.$inject = ['$http', '$timeout', 'state', 'Utils']
+UserSettingsController.$inject = ['$http', '$timeout', '$ngRedux', 'state', 'Utils']
 
 let userSettings = {
   templateUrl: '/components/global-settings/user-settings.html',
