@@ -71,8 +71,8 @@ workflows:
                 - network_optimization_redux
                 - wormholeFusion
                 - coverageFix
-                - platform_upgrade
                 - shp_reports
+                - sseReports
 
       - deploy:
           context: aro_qa_builds
