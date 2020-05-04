@@ -8,14 +8,10 @@ import RfpStatusTypes from './constants'
 
 export class RfpAnalyzer extends Component {
   render () {
+    var displayOnly = this.props.status !== RfpStatusTypes.UNINITIALIZED
     return <div>
-      <RfpOptions initialValues={this.props.rfpOptions} enableReinitialize />
-      <RfpTargets />
-      {
-        this.props.status === RfpStatusTypes.UNINITIALIZED
-          ? null
-          : <div className='disable-sibling-controls' />
-      }
+      <RfpOptions initialValues={this.props.rfpOptions} enableReinitialize displayOnly={displayOnly} />
+      <RfpTargets displayOnly={displayOnly} />
     </div>
   }
 }
