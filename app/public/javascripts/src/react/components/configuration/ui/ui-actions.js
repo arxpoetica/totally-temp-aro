@@ -5,10 +5,12 @@ import AroHttp from '../../../common/aro-http'
 function loadConfigurationFromServer () {
   return dispatch => {
     AroHttp.get('/ui_settings')
-      .then(result => dispatch({
-        type: Actions.CONFIGURATION_SET_CONFIGURATION,
-        payload: result.data
-      }))
+      .then(result => {
+        dispatch({
+          type: Actions.CONFIGURATION_SET_CONFIGURATION,
+          payload: result.data
+        })
+      })
       .catch(err => console.error(err))
   }
 }
@@ -68,13 +70,6 @@ function uploadAssetToServer (assetKey, file) {
   }
 }
 
-function setWormholeFusionConfiguration (wormholeFusionTypes) {
-  return {
-    type: Actions.CONFIGURATION_SET_WORMHOLE_FUSION_CONFIGURATION,
-    payload: wormholeFusionTypes
-  }
-}
-
 export default {
   loadConfigurationFromServer,
   saveConfigurationToServerAndReload,
@@ -82,6 +77,5 @@ export default {
   getStyleValues,
   saveStylesheetsToServerAndReload,
   uploadAssetToServer,
-  setPerspective,
-  setWormholeFusionConfiguration
+  setPerspective
 }

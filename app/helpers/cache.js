@@ -52,8 +52,7 @@ function loadConfiguration() {
     'planEditor',
     'toolbar',
     'optimizationOptions',
-    'resourceEditors',
-    'wormholeFusionTypes'
+    'resourceEditors'
   ]
 
   const configTypeToSubtype = {

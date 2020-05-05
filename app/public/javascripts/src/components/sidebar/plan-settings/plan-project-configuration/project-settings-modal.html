@@ -1,0 +1,8 @@
+<modal visible="$ctrl.state.showProjectSettingsModal" backdrop="static" on-show="$ctrl.modalShown()" on-hide="$ctrl.modalHide()" modal-size="'modal-lg'">
+  <modal-header title="{{'Project Settings'}}"></modal-header>
+  <modal-body id="project_settings_modal">
+    <div ng-if="$ctrl.state.showProjectSettingsModal">
+      <r-project-permissions></r-project-permissions>
+    </div>
+  </modal-body>
+</modal>

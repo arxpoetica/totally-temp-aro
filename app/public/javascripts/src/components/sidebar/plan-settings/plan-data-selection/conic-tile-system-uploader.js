@@ -2,7 +2,7 @@ class ConicTileSystemUploaderController {
   constructor ($element, $http) {
     this.$element = $element
     this.$http = $http
-    this.datasetName = ''
+    // this.datasetName = ''
     this.isUploading = false
     this.initTileSystemParams()
   }
@@ -89,6 +89,7 @@ let conicTileSystemUploader = {
   bindings: {
     projectId: '<',
     userId: '<',
+    datasetName: '=',
     onInitControl: '&',
     onDestroyControl: '&'
   },

@@ -1,4 +1,5 @@
 import PlanActions from '../../../../react/components/plan/plan-actions'
+import EtlTemplateActions from '../../../../react/components/etl-templates/etl-templates-actions'
 
 class DataSourceUploadController {
   constructor ($http, $timeout, $ngRedux, state) {
@@ -63,10 +64,6 @@ class DataSourceUploadController {
       tile_system: {fileName: 'example_upload_tile_system.csv'},
       edge: {fileName: 'sample_edges.zip'}
     }
-    // for sse:
-    // location: {fileName: 'sse_location_upload_template.csv'}
-    // equipment: {fileName: 'sse_equipment_upload_template.csv'}
-    // see this.modalShown ()
 
     state.showDataSourceUploadModal.subscribe((newValue) => {
       setTimeout(function () {
@@ -142,13 +139,7 @@ class DataSourceUploadController {
   }
 
   modalShown () {
-    // ToDo: This check doesn't belong here.
-    //  When we refactor move this.downloads to client-dependent JSON configs.
-    if (this.state.configuration.ARO_CLIENT === 'sse') { // 'sse'
-      this.downloads.location.fileName = 'sse_location_upload_template.csv'
-      this.downloads.equipment.fileName = 'sse_equipment_upload_template.csv'
-    }
-
+    this.loadEtlTemplatesFromServer(1)
     this.state.showDataSourceUploadModal.next(true)
     
     this.tableSource = this.uploadSource = this.state.uploadDataSource = this.uploadDataSources[0]
@@ -188,7 +179,8 @@ class DataSourceUploadController {
       // Close dialog only after save is done, otherwise the FileList in the child control resets to 0
       this.isUploading = true
       this.conicTileSystemUploaderApi.save()
-        .then(() => {
+        .then((result) => {
+          this.addDatasource(JSON.parse(result.data))
           this.isUploading = false
           this.close()
         })
@@ -330,6 +322,7 @@ class DataSourceUploadController {
   onUploadSourceChange () {
     this.state.uploadDataSource = this.tableSource = this.uploadSource
     this.loadDataSources()
+    this.loadEtlTemplatesFromServer(this.uploadSource.id)
   }
   
   onTableSourceChange () {
@@ -412,14 +405,16 @@ class DataSourceUploadController {
   mapStateToThis (reduxState) {
     return {
       dataItems: reduxState.plan.dataItems,
-      uploadDataSources: reduxState.plan.uploadDataSources
+      uploadDataSources: reduxState.plan.uploadDataSources,
+      etlTemplates: reduxState.etlTemplates
     }
   }
 
   mapDispatchToTarget (dispatch) {
     return {
       selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems)),
-      setAllLibraryItems: (dataItemKey, allLibraryItems) => dispatch(PlanActions.setAllLibraryItems(dataItemKey, allLibraryItems))
+      setAllLibraryItems: (dataItemKey, allLibraryItems) => dispatch(PlanActions.setAllLibraryItems(dataItemKey, allLibraryItems)),
+      loadEtlTemplatesFromServer: (dataType) => dispatch(EtlTemplateActions.loadEtlTemplatesFromServer(dataType))
     }
   }
 

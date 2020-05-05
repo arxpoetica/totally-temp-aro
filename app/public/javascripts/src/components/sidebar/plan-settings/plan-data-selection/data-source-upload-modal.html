@@ -115,6 +115,7 @@
                                   project-id="$ctrl.state.loggedInUser.projectId"
                                   user-id="$ctrl.state.loggedInUser.id"
                                   on-init-control="$ctrl.onInitConicUploader(api)"
+                                  dataset-name="$ctrl.datasourceName"
                                   on-destroy-control="$ctrl.onDestroyConicUploader()">
       </conic-tile-system-uploader>
       <!-- End File upload View -->
@@ -125,10 +126,17 @@
       </div>
 
     </div>
-  </modal-body>
-  <modal-footer class="justify-content-between" ng-show="!$ctrl.isDataManagementView">
-    <a href="/csv/{{$ctrl.downloads[$ctrl.state.uploadDataSource.name].fileName}}" class="btn btn-primary" role="button" download="{{$ctrl.downloads[$ctrl.state.uploadDataSource.name].fileName}}">Download upload template</a>    
-    <button class="btn btn-primary" ng-class="$ctrl.datasourceName == '' ? 'btn btn-light' : 'btn btn-primary'" ng-disabled="$ctrl.isUploading || $ctrl.datasourceName === ''"
+
+    <div ng-show="!$ctrl.isDataManagementView">
+      <r-etl-templates></r-etl-templates>
+    </div>
+
+    <button class="btn btn-primary float-right" ng-class="$ctrl.datasourceName == '' ? 'btn btn-light float-right' : 'btn btn-primary float-right'" ng-disabled="$ctrl.isUploading || $ctrl.datasourceName === ''"
     ng-click="$ctrl.save()"><span ng-show="$ctrl.isUpLoad" class="fa fa-spinner fa-spin"></span> Save</button>
-  </modal-footer>
+ 
+  </modal-body>
+  <!-- <modal-footer class="justify-content-between" ng-show="!$ctrl.isDataManagementView">
+    <button class="btn btn-primary float-right" ng-class="$ctrl.datasourceName == '' ? 'btn btn-light float-right' : 'btn btn-primary float-right'" ng-disabled="$ctrl.isUploading || $ctrl.datasourceName === ''"
+    ng-click="$ctrl.save()"><span ng-show="$ctrl.isUpLoad" class="fa fa-spinner fa-spin"></span> Save</button>
+  </modal-footer> -->
 </modal>

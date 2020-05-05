@@ -277,6 +277,7 @@ class State {
     service.showDetailedLocationInfo = new Rx.BehaviorSubject()
     service.showDetailedEquipmentInfo = new Rx.BehaviorSubject()
     service.showDataSourceUploadModal = new Rx.BehaviorSubject(false)
+    service.showProjectSettingsModal = false
     service.viewSettingsChanged = new Rx.BehaviorSubject()
     service.measuredDistance = new Rx.BehaviorSubject()
     service.dragStartEvent = new Rx.BehaviorSubject()
@@ -1657,9 +1658,25 @@ class State {
       // Get application configuration from the server
       return $http.get('/configuration')
         .then(result => {
-          service.configuration = result.data.appConfiguration
-          service.googleMapsLicensing = result.data.googleMapsLicensing
-          service.enumStrings = result.data.enumStrings
+          var config = result.data
+
+          // filter out conduits that are not to be shown
+          // this code may belong in cache.js instead
+          var conduits = config.appConfiguration.networkEquipment.conduits || {}
+          var filteredConduits = {}
+          Object.keys(conduits).forEach(type => {
+            var conduit = conduits[type]
+            // for backwards compatibility
+            // we only filter out IF there is a .show property AND it = false
+            if (!conduit.hasOwnProperty('show') || conduit.show) {
+              filteredConduits[type] = conduit
+            }
+          })
+          config.appConfiguration.networkEquipment.conduits = filteredConduits
+
+          service.configuration = config.appConfiguration
+          service.googleMapsLicensing = config.googleMapsLicensing
+          service.enumStrings = config.enumStrings
           if (!service.enumStrings) {
             throw new Error('No enumeration strings object found. Please check your server logs for errors in the UI schema.')
           }
@@ -1670,9 +1687,10 @@ class State {
             service.configuration.perspective = thisPerspective || defaultPerspective
             service.setPerspective(service.configuration.perspective)
           }
-          service.configuration.loadPerspective(result.data.user.perspective)
-          service.setWormholeFusionConfiguration(result.data.appConfiguration.wormholeFusionTypes || {})
-          return service.setLoggedInUser(result.data.user, initialState)
+          service.configuration.loadPerspective(config.user.perspective)
+          service.setNetworkEquipmentLayers(service.configuration.networkEquipment)
+          
+          return service.setLoggedInUser(config.user, initialState)
         })
         .then(() => {
           service.setOptimizationOptions()
@@ -1688,7 +1706,6 @@ class State {
           service.getStyleValues()
           return service.loadConfigurationFromServer()
         })
-        .then(() => console.error(initialState))
         .catch(err => console.error(err))
     }
 
@@ -1939,14 +1956,14 @@ class State {
       setActivePlanState: planState => dispatch(PlanActions.setActivePlanState(planState)),
       selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems)),
       setGoogleMapsReference: mapRef => dispatch(MapActions.setGoogleMapsReference(mapRef)),
+      setNetworkEquipmentLayers: networkEquipmentLayers => dispatch(MapLayerActions.setNetworkEquipmentLayers(networkEquipmentLayers)),
       updateShowSiteBoundary: isVisible => dispatch(MapLayerActions.setShowSiteBoundary(isVisible)),
       onFeatureSelectedRedux: features => dispatch(RingEditActions.onFeatureSelected(features)),
       setNetworkAnalysisConstraints: aroNetworkConstraints => dispatch(NetworkAnalysisActions.setNetworkAnalysisConstraints(aroNetworkConstraints)),
       setNetworkAnalysisConnectivityDefinition: (spatialEdgeType, networkConnectivityType) => dispatch(NetworkAnalysisActions.setNetworkAnalysisConnectivityDefinition(spatialEdgeType, networkConnectivityType)),
       setPrimarySpatialEdge: primarySpatialEdge => dispatch(NetworkAnalysisActions.setPrimarySpatialEdge(primarySpatialEdge)),
       clearWormholeFuseDefinitions: () => dispatch(NetworkAnalysisActions.clearWormholeFuseDefinitions()),
-      setWormholeFuseDefinition: (spatialEdgeType, wormholeFusionTypeId) => dispatch(NetworkAnalysisActions.setWormholeFuseDefinition(spatialEdgeType, wormholeFusionTypeId)),
-      setWormholeFusionConfiguration: wormholeFusionConfiguration => dispatch(UiActions.setWormholeFusionConfiguration(wormholeFusionConfiguration))
+      setWormholeFuseDefinition: (spatialEdgeType, wormholeFusionTypeId) => dispatch(NetworkAnalysisActions.setWormholeFuseDefinition(spatialEdgeType, wormholeFusionTypeId))
     }
   }
 }
