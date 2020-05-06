@@ -67,7 +67,6 @@ workflows:
             branches:
               only:
                 - master
-                - AERIAL
       - deploy:
           context: aro_qa_builds
           requires:
