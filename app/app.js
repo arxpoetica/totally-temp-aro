@@ -8,7 +8,7 @@ const morgan = require('morgan')
 var app = module.exports = express()
 morgan.token('body', req => JSON.stringify(req.body))
 const loggerFunction = (tokens, req, res) => {
-  if (req.url === '/login') {
+  if (req.url === '/login' || req.url === '/oauth/token') {
     // Do not log post body for login requests, or else the users password will get logged
     return [
       tokens.method(req, res),
@@ -69,6 +69,7 @@ var routes = [
   'location',
   'network',
   'boundary',
+  'etl_template',
   'service',
   'market_size',
   'network_plan',

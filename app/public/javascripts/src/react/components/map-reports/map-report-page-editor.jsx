@@ -20,16 +20,20 @@ export class MapReportPageEditor extends Component {
   }
 
   savePageDefinition () {
-    const editingPage = this.props.reportPages.filter(page => page.uuid === this.props.editingPageUuid)[0]
+    const editingPageIndex = this.props.reportPages.findIndex(page => page.uuid === this.props.editingPageUuid)
+    const editingPage = this.props.reportPages[editingPageIndex]
     const oldPageDefinition = JSON.parse(JSON.stringify(editingPage))
     const newPageDefinition = this.props.pageDefinition
     const pageDefinition = Object.assign(oldPageDefinition, newPageDefinition)
-    this.props.savePageDefinition(this.props.editingPageUuid, pageDefinition)
+    const reportPages = [].concat(this.props.reportPages)
+    reportPages.splice(editingPageIndex, 1, pageDefinition)
+    this.props.setPages(this.props.planId, reportPages)
     this.props.setEditingPageUuid(null)
   }
 }
 
 MapReportPageEditor.propTypes = {
+  planId: PropTypes.number,
   reportPages: PropTypes.array,
   pageDefinition: PropTypes.object,
   googleMaps: PropTypes.object,
@@ -37,6 +41,7 @@ MapReportPageEditor.propTypes = {
 }
 
 const mapStateToProps = state => ({
+  planId: state.plan.activePlan.id,
   reportPages: state.mapReports.pages,
   pageDefinition: pageDefinitionSelector(state, 'title', 'paperSize', 'worldLengthPerMeterOfPaper', 'dpi', 'orientation'),
   googleMaps: state.map.googleMaps,
@@ -44,7 +49,7 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  savePageDefinition: (uuid, pageDefinition) => dispatch(MapReportActions.savePageDefinition(uuid, pageDefinition)),
+  setPages: (planId, pageDefinitions) => dispatch(MapReportActions.setPages(planId, pageDefinitions)),
   setEditingPageUuid: uuid => dispatch(MapReportActions.setEditingPageUuid(uuid))
 })
 

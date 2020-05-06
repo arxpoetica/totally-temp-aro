@@ -62,15 +62,17 @@ export class MapReportsList extends Component {
   }
 
   handleRemovePageClicked (event, uuid) {
-    this.props.removePage(uuid)
+    const indexToRemove = this.props.reportPages.findIndex(reportPage => reportPage.uuid === uuid)
+    var newPages = [].concat(this.props.reportPages)
+    newPages.splice(indexToRemove, 1)
+    this.props.setPages(this.props.planId, newPages)
     event.stopPropagation()
   }
 
   handleAddPageClicked () {
     const mapCenter = this.props.googleMaps.getCenter()
-    var newPage = {
-      uuid: uuidv4(),
-      title: 'Page 1',
+    var newPage = { // Don't set a UUID, aro-service will do that for us
+      title: 'New Page',
       paperSize: 'A4',
       worldLengthPerMeterOfPaper: 100000,
       dpi: 72,
@@ -80,8 +82,7 @@ export class MapReportsList extends Component {
         longitude: Math.round(mapCenter.lng() * REPORT_LAT_LONG_PRECISION) / REPORT_LAT_LONG_PRECISION
       }
     }
-    newPage.title = 'New Page'
-    this.props.addPage(newPage)
+    this.props.setPages(this.props.planId, this.props.reportPages.concat(newPage))
   }
 
   handleEditPageClicked (event, index) {
@@ -91,20 +92,21 @@ export class MapReportsList extends Component {
 }
 
 MapReportsList.propTypes = {
+  planId: PropTypes.number,
   activePageUuid: PropTypes.string,
   googleMaps: PropTypes.object,
   reportPages: PropTypes.array
 }
 
 const mapStateToProps = state => ({
+  planId: state.plan.activePlan.id,
   activePageUuid: state.mapReports.activePageUuid,
   googleMaps: state.map.googleMaps,
   reportPages: state.mapReports.pages
 })
 
 const mapDispatchToProps = dispatch => ({
-  addPage: pageDefinition => dispatch(MapReportActions.addPage(pageDefinition)),
-  removePage: uuid => dispatch(MapReportActions.removePage(uuid)),
+  setPages: (planId, pageDefinitions) => dispatch(MapReportActions.setPages(planId, pageDefinitions)),
   setActivePageUuid: uuid => dispatch(MapReportActions.setActivePageUuid(uuid)),
   setEditingPageUuid: uuid => dispatch(MapReportActions.setEditingPageUuid(uuid))
 })

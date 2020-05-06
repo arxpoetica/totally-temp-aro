@@ -73,7 +73,7 @@ class MapToggleController {
 MapToggleController.$inject = ['$document', 'state']
 
 let mapToggle = {
-  template: '<button class="map-toggle" ng-click="$ctrl.toggle()"><i class="fa {{$ctrl.buttonIcons[$ctrl.currentMapType]}}"></i></button>',
+  template: '<button ng-show="!$ctrl.state.isReportMode" class="map-toggle" ng-click="$ctrl.toggle()"><i class="fa {{$ctrl.buttonIcons[$ctrl.currentMapType]}}"></i></button>',
   bindings: {
     mapGlobalObjectName: '@',
     userPerspective: '<'
