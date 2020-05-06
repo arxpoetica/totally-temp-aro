@@ -52,6 +52,7 @@ aro_etl_image_name = os.environ.get('ARO_ETL_IMAGE_NAME') or 'aro/aro-etl'
 aro_app_image_name = os.environ.get('ARO_APP_IMAGE_NAME') or 'aro/aro-app'
 aro_service_image_name = os.environ.get('ARO_SERVICE_IMAGE_NAME') or 'aro/aro-service'
 aro_nginx_image_name = os.environ.get('ARO_NGINX_IMAGE_NAME') or 'aro/aro-app-nginx'
+aro_reportsrv_image_name = os.environ.get('ARO_REPORTSRV_IMAGE_NAME') or 'aro/aro-reportsrv'
 
 aro_client = os.environ.get('ARO_CLIENT') or 'aro'
 env_slug = branch_name
@@ -72,6 +73,7 @@ aro_etl_image_version = versioning.get_component_version(environment=aro_environ
 aro_nginx_image_version = versioning.get_component_version(environment=aro_environment, component='nginx') 
 aro_service_image_version = versioning.get_component_version(environment=aro_environment, component='service') 
 aro_app_image_version = versioning.get_component_version(environment=aro_environment, component='app') 
+aro_reportsrv_image_version = versioning.get_component_version(environment=aro_environment, component='reportsrv')
 
 session = Session(region_name='us-east-1')
 
@@ -194,6 +196,8 @@ def _set_environment():
             { 'Key': 'aro_app_image_name', 'Value': str(aro_app_image_name), 'Secure': False },
             { 'Key': 'aro_nginx_container_tag', 'Value': str(aro_nginx_image_version), 'Secure': False },
             { 'Key': 'aro_nginx_image_name', 'Value': str(aro_nginx_image_name), 'Secure': False },
+            { 'Key': 'aro_reportsrv_container_tag', 'Value': str(aro_reportsrv_image_version), 'Secure': False },
+            { 'Key': 'aro_reportsrv_image_name', 'Value': str(aro_reportsrv_image_name), 'Secure': False },
             { 'Key': 'aro_client', 'Value': str(aro_client), 'Secure': False },
             { 'Key': 'APP_BASE_URL', 'Value': str(app_base_url), 'Secure': False },
             { 'Key': 'AWS_REGION', 'Value': "us-east-1", 'Secure': False },
