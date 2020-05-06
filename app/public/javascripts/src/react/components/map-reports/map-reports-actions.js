@@ -36,13 +36,21 @@ function setLayerIsChecked (layerName, isChecked) {
   }
 }
 
-function savePageDefinition (uuid, pageDefinition) {
-  return {
-    type: Actions.MAP_REPORTS_SET_PAGE_DEFINITION,
-    payload: {
-      uuid,
-      pageDefinition
-    }
+function loadReportPagesForPlan (planId) {
+  return dispatch => {
+    dispatch({ type: Actions.MAP_REPORTS_SET_IS_COMMUNICATING, payload: true })
+    AroHttp.get(`/service/v1/plan/${planId}/plan-settings`)
+      .then(result => {
+        dispatch({
+          type: Actions.MAP_REPORTS_SET_PAGES,
+          payload: result.data.printSettings.pages
+        })
+        dispatch({ type: Actions.MAP_REPORTS_SET_IS_COMMUNICATING, payload: false })
+      })
+      .catch(err => {
+        console.error(err)
+        dispatch({ type: Actions.MAP_REPORTS_SET_IS_COMMUNICATING, payload: false })
+      })
   }
 }
 
@@ -52,17 +60,21 @@ function clearMapReports () {
   }
 }
 
-function addPage (pageDefinition) {
-  return {
-    type: Actions.MAP_REPORTS_ADD_PAGE,
-    payload: pageDefinition
-  }
-}
-
-function removePage (uuid) {
-  return {
-    type: Actions.MAP_REPORTS_REMOVE_PAGE,
-    payload: uuid
+function setPages (planId, pageDefinitions) {
+  return dispatch => {
+    dispatch({ type: Actions.MAP_REPORTS_SET_IS_COMMUNICATING, payload: true })
+    AroHttp.put(`/service/v1/plan/${planId}/plan-settings`, { printSettings: { pages: pageDefinitions } })
+      .then(result => {
+        dispatch({
+          type: Actions.MAP_REPORTS_SET_PAGES,
+          payload: result.data.printSettings.pages // aro-service will return the full set of pages
+        })
+        dispatch({ type: Actions.MAP_REPORTS_SET_IS_COMMUNICATING, payload: false })
+      })
+      .catch(err => {
+        console.error(err)
+        dispatch({ type: Actions.MAP_REPORTS_SET_IS_COMMUNICATING, payload: false })
+      })
   }
 }
 
@@ -84,10 +96,9 @@ export default {
   downloadReport,
   setLayers,
   setLayerIsChecked,
-  savePageDefinition,
+  loadReportPagesForPlan,
   clearMapReports,
-  addPage,
-  removePage,
+  setPages,
   setActivePageUuid,
   setEditingPageUuid
 }

@@ -274,7 +274,6 @@ class State {
     service.showNetworkAnalysisOutput = false
     service.networkPlanModal = new Rx.BehaviorSubject(false)
     service.planInputsModal = new Rx.BehaviorSubject(false)
-    service.splitterObj = new Rx.BehaviorSubject({})
     service.requestSetMapCenter = new Rx.BehaviorSubject({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
     service.requestSetMapZoom = new Rx.BehaviorSubject(service.defaultPlanCoordinates.zoom)
     service.showDetailedLocationInfo = new Rx.BehaviorSubject()
@@ -1415,6 +1414,12 @@ class State {
           if (initialState && initialState.mapCenter) {
             return service.mapReadyPromise
               .then(() => {
+                // If we are in Report mode, disable the default UI like zoom buttons, etc.
+                service.mapRef.setOptions({
+                  disableDefaultUI: true,
+                  streetViewControl: false,
+                  mapTypeControl: false
+                })
                 service.setPlanRedux(plan)
                 service.requestSetMapCenter.next({ latitude: initialState.mapCenter.latitude, longitude: initialState.mapCenter.longitude })
                 if (initialState.mapZoom) {
@@ -1735,6 +1740,7 @@ class State {
       locationLayers: getLocationLayersList(reduxState),
       networkEquipmentLayers: getNetworkEquipmentLayersList(reduxState),
       boundaries: getBoundaryLayersList(reduxState),
+      mapRef: reduxState.map.googleMaps,
       reduxPlanTargets: reduxState.selection.planTargets,
       showSiteBoundary: reduxState.mapLayers.showSiteBoundary,
       boundaryTypes: getBoundaryTypesList(reduxState),

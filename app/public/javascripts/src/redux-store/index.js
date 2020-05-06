@@ -21,6 +21,7 @@ import mapLayers from '../react/components/map-layers/map-layer-reducer'
 import mapReports from '../react/components/map-reports/map-reports-reducer'
 import plan from '../react/components/plan/plan-reducer'
 import projectTemplate from '../react/components/project-template/project-template-reducer'
+import etlTemplates from '../react/components/etl-templates/etl-templates-reducer'
 import planEditor from '../react/components/plan-editor/plan-editor-reducer'
 import selection from '../react/components/selection/selection-reducer'
 import tool from '../react/components/tool/tool-reducer'
@@ -40,6 +41,7 @@ let reducer = combineReducers({
   configuration: combineReducers({ report, ui }),
   contextMenu,
   coverage,
+  etlTemplates,
   fullScreen,
   map,
   mapLayers,
