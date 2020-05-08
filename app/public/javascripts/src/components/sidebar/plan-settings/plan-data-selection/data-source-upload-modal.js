@@ -139,6 +139,7 @@ class DataSourceUploadController {
   }
 
   modalShown () {
+
     this.loadEtlTemplatesFromServer(1)
     this.state.showDataSourceUploadModal.next(true)
     
@@ -157,11 +158,14 @@ class DataSourceUploadController {
       }
     })
     
+    this.uploadSource = this.tableSources[this.state.selectedDataTypeId]
+    this.state.uploadDataSource = this.tableSource = this.uploadSource
   }
 
   modalHide () {
     this.state.showDataSourceUploadModal.next(false)
     this.isDataManagementView = false
+    this.state.selectedDataTypeId = 1
   }
 
   onInitConicUploader (api) {
