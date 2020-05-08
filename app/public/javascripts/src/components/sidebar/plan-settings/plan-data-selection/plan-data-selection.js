@@ -17,6 +17,8 @@ class DataSelectionController {
 
     this.isDataSourceEditable = {}
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
+
+    
   }
 
   $onInit () {
@@ -93,8 +95,10 @@ class DataSelectionController {
   }
 
   uploadDataSource (srcId) {
-    this.state.showDataSourceUploadModal.next(true)
 
+    this.state.selectedDataTypeId = srcId
+    this.state.showDataSourceUploadModal.next(true)
+    
     this.state.uploadDataSources.forEach((value) => {
       if (value.id == srcId) {
         this.state.uploadDataSource = value
