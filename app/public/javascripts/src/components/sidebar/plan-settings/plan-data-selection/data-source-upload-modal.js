@@ -157,6 +157,14 @@ class DataSourceUploadController {
       }
     })
     
+    // Set Data Type as Fiber
+    this.tableSources.forEach((dataType) => {
+      var typeName = dataType.name
+      if(typeName === 'fiber'){
+        this.uploadSource = dataType
+      }
+    })
+    this.state.uploadDataSource = this.tableSource = this.uploadSource
   }
 
   modalHide () {
