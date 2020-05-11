@@ -39,7 +39,11 @@ exports.configure = (app, middleware) => {
   app.post('/etltemplate/:dataType', upload.single('file'), (request, response, next) => {
     const dataType = request.params.dataType
     const data = fs.readFileSync(request.file.path)
-    models.UiEtlTemplate.addEtlTemplate(dataType, request.file.originalname, "test", 1, data)
+    let mediaType = 3
+    if(request.file.mimetype === "text/csv")
+      mediaType = 1
+    const fileNameWithoutExtension = request.file.originalname.replace(/\.[^/.]+$/, "")
+    models.UiEtlTemplate.addEtlTemplate(dataType, fileNameWithoutExtension, fileNameWithoutExtension, mediaType, data)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
