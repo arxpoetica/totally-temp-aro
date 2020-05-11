@@ -127,11 +127,10 @@ class CablesController {
             })
         }
 
-        const planId = this.state.plan && this.state.plan && this.state.plan.id
-        if (this.state.cableLayerTypeVisibility.planned && networkEquipment.checked && planId) {
+        if (this.state.cableLayerTypeVisibility.planned && networkEquipment.checked && this.planId) {
           // We need to show the planned network equipment for this plan.
           var mapLayerKey = `${categoryItemKey}_planned`
-          mapLayers[mapLayerKey] = this.createSingleMapLayer(categoryItemKey, categoryType, networkEquipment, 'planned', null, planId)
+          mapLayers[mapLayerKey] = this.createSingleMapLayer(categoryItemKey, categoryType, networkEquipment, 'planned', null, this.planId)
           createdMapLayerKeys.add(mapLayerKey)
         }
       }
@@ -186,6 +185,7 @@ class CablesController {
 
   mapStateToThis (reduxState) {
     return {
+      planId: reduxState.plan.activePlan && reduxState.plan.activePlan.id,
       networkEquipmentLayers: getNetworkEquipmentLayersList(reduxState),
       cablesArray: getCablesArray(reduxState),
       conduitsArray: getConduitsArray(reduxState),

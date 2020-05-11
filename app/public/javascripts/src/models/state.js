@@ -1635,8 +1635,9 @@ class State {
                   const isVisible = setOfVisibleLayers.has(layer.key)
                   service.setLayerVisibility(layer, isVisible)
                 })
-                service.equipmentLayerTypeVisibility.planned = true
-                Object.keys(service.mapLayersRedux.networkEquipment).forEach(layerType => {
+                service.equipmentLayerTypeVisibility.planned = true;
+                service.cableLayerTypeVisibility.planned = true;
+                ['roads', 'cables', 'boundaries', 'equipments'].forEach(layerType => {
                   Object.keys(service.mapLayersRedux.networkEquipment[layerType]).forEach(layerKey => {
                     const isVisible = setOfVisibleLayers.has(layerKey)
                     service.setNetworkEquipmentLayerVisiblity(layerType, service.mapLayersRedux.networkEquipment[layerType][layerKey], isVisible)
