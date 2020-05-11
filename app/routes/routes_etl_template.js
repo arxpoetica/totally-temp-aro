@@ -1,5 +1,8 @@
-var models = require('../models')
-var fs = require('fs')
+const models = require('../models')
+const multer = require('multer')
+const os = require('os')
+const upload = multer({ dest: os.tmpDir() })
+const fs = require('fs')
 
 exports.configure = (app, middleware) => {
   var check_admin = middleware.check_admin
@@ -22,5 +25,22 @@ exports.configure = (app, middleware) => {
       })
       .catch(next)
       
-    })
+  })
+
+  // Remove all plan targets from a plan
+  app.delete('/etltemplate/:templateId', check_admin, (request, response, next) => {
+    var templateId = request.params.templateId
+    models.UiEtlTemplate.deleteEtlTemplate(templateId)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  // Save a binary UI asset into the database
+  app.post('/etltemplate/:dataType', upload.single('file'), (request, response, next) => {
+    const dataType = request.params.dataType
+    const data = fs.readFileSync(request.file.path)
+    models.UiEtlTemplate.addEtlTemplate(dataType, request.file.originalname, "test", 1, data)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
 }
