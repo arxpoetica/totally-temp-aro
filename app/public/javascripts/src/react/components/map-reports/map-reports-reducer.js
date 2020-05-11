@@ -36,6 +36,11 @@ function setIsCommunicating (state, isCommunicating) {
   }
 }
 
+function setIsDownloading (state, isDownloading) {
+  return { ...state,
+    isDownloading
+  }
+}
 function mapReportsReducer (state = defaultState, action) {
   switch (action.type) {
 
@@ -53,6 +58,9 @@ function mapReportsReducer (state = defaultState, action) {
 
     case Actions.MAP_REPORTS_SET_IS_COMMUNICATING:
       return setIsCommunicating(state, action.payload)
+
+    case Actions.MAP_REPORTS_SET_IS_DOWNLOADING:
+      return setIsDownloading(state, action.payload)
 
     default:
       return state
