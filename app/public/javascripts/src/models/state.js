@@ -1054,6 +1054,8 @@ class State {
     service.progressPercent = 0
     service.isCanceling = false // True when we have requested the server to cancel a request
 
+    // expert mode refactor
+    // also used by ring edit and r-network-optimization-input
     service.handleModifyClicked = () => {
       var currentPlan = service.plan
       if (currentPlan.ephemeral) {
@@ -1567,7 +1569,7 @@ class State {
     }
 
     service.loadServiceLayers()
-
+    // expert mode refactor
     service.executeManualPlanTargetsQuery = () => {
       var query = service.formatExpertModeQuery(service.expertMode[service.selectedExpertMode], service.expertModeScopeContext)
       // select id from aro.location_entity where data_source_id = 1 and id in
