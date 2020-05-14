@@ -49,8 +49,8 @@ export class EtlTemplateManager extends Component {
 
   checkValidFile() {
     if(this.fileInput.current) {
-      const fileType = this.fileInput.current.files[0].type
-      if(fileType === 'text/csv' || fileType === 'application/vnd.google-earth.kml+xml')
+      const fileExtension = this.fileInput.current.files[0].name.split('.').pop()
+      if(fileExtension === 'csv' || fileExtension === 'kml')
         this.setState({ isValidFileSelected: true })
     }
   }

@@ -35,13 +35,21 @@ exports.configure = (app, middleware) => {
       .catch(next)
   })
 
-  // Save a binary UI asset into the database
+  // Save a text template into the database
   app.post('/etltemplate/:dataType', upload.single('file'), (request, response, next) => {
     const dataType = request.params.dataType
     const data = fs.readFileSync(request.file.path)
-    let mediaType = 3
-    if(request.file.mimetype === "text/csv")
+    const ext = request.file.originalname.split('.').pop()
+    let mediaType = 3 // report.media_type kml file 
+    if(ext === "csv")
       mediaType = 1
+    else if(ext === "kml")
+      mediaType = 3
+    else {
+      console.log("Invalid template type. Template file has to be type of csv or kml.")
+      return
+    }
+
     const fileNameWithoutExtension = request.file.originalname.replace(/\.[^/.]+$/, "")
     models.UiEtlTemplate.addEtlTemplate(dataType, fileNameWithoutExtension, fileNameWithoutExtension, mediaType, data)
       .then(jsonSuccess(response, next))
