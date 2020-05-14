@@ -22,6 +22,7 @@ import RfpAnalyzer from '../react/components/optimization/rfp/rfp-analyzer.jsx'
 import RfpStatus from '../react/components/optimization/rfp/status/rfp-status.jsx'
 import RingEdit from '../react/components/ring-edit/ring-edit.jsx'
 import RingButton from '../react/components/ring-edit/ring-button.jsx'
+import MapReportsListMapObjects from '../react/components/map-reports/map-reports-list-map-objects.jsx'
 import LocationInfo from '../react/components/location-info/location-info.jsx'
 import ResourcePermissions from '../react/components/acl/resource-permissions/resource-permissions.jsx'
 import ProjectPermissions from '../react/components/project-template/project-permissions.jsx'
@@ -264,6 +265,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rRfpStatus', react2angular(RfpStatus))
   .component('rRingEdit', react2angular(RingEdit))
   .component('rRingButton', react2angular(RingButton, ['onModify']))
+  .component('rMapReportsListMapObjects', react2angular(MapReportsListMapObjects))
   .component('rToastContainer', react2angular(ToastContainer))
   .component('rLocationInfo', react2angular(LocationInfo))
   .component('rResourcePermissions', react2angular(ResourcePermissions))

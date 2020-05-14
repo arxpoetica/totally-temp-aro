@@ -1,7 +1,7 @@
 import Constants from '../common/constants'
 import FullScreenActions from '../../react/components/full-screen/full-screen-actions'
 import RfpActions from '../../react/components/optimization/rfp/rfp-actions'
-import MapLayerActions from '../../react/components/map-layers/map-layer-actions'
+import MapReportsActions from '../../react/components/map-reports/map-reports-actions'
 import ToolActions from '../../react/components/tool/tool-actions'
 import Tools from '../../react/components/tool/tools'
 
@@ -548,7 +548,8 @@ class ToolBarController {
   mapStateToThis (reduxState) {
     return {
       isAnnotationsListVisible: reduxState.tool.showToolBox && (reduxState.tool.activeTool === Tools.ANNOTATION.id),
-      isMapReportsVisible: reduxState.tool.showToolBox && (reduxState.tool.activeTool === Tools.MAP_REPORTS.id)
+      isMapReportsVisible: reduxState.tool.showToolBox && (reduxState.tool.activeTool === Tools.MAP_REPORTS.id),
+      showMapReportMapObjects: reduxState.mapReports.showMapObjects
     }
   }
 
@@ -565,6 +566,7 @@ class ToolBarController {
       setMapReportsVisibility: isVisible => {
         dispatch(ToolActions.setActiveTool(isVisible ? Tools.MAP_REPORTS.id : null))
         dispatch(ToolActions.setToolboxVisibility(isVisible))
+        dispatch(MapReportsActions.showMapObjects(isVisible))
       }
     }
   }

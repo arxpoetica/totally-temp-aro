@@ -2,6 +2,7 @@ import Actions from '../../common/actions'
 
 const defaultState = {
   pages: [],
+  showMapObjects: false,
   activePageUuid: null,
   editingPageUuid: null,
   isCommunicating: false,
@@ -15,6 +16,12 @@ function clearMapReports () {
 function setPages (state, pages) {
   return { ...state,
     pages: [].concat(pages)
+  }
+}
+
+function setShowMapObjects (state, showMapObjects) {
+  return { ...state,
+    showMapObjects
   }
 }
 
@@ -41,11 +48,15 @@ function setIsDownloading (state, isDownloading) {
     isDownloading
   }
 }
+
 function mapReportsReducer (state = defaultState, action) {
   switch (action.type) {
 
     case Actions.MAP_REPORTS_SET_PAGES:
       return setPages(state, action.payload)
+
+    case Actions.MAP_REPORTS_SET_SHOW_MAP_OBJECTS:
+      return setShowMapObjects(state, action.payload)
 
     case Actions.MAP_REPORTS_CLEAR:
       return clearMapReports()

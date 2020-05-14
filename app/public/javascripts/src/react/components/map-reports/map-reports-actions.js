@@ -81,6 +81,13 @@ function setPages (planId, pageDefinitions) {
   }
 }
 
+function showMapObjects (showMapObjects) {
+  return {
+    type: Actions.MAP_REPORTS_SET_SHOW_MAP_OBJECTS,
+    payload: showMapObjects
+  }
+}
+
 function setActivePageUuid (uuid) {
   return {
     type: Actions.MAP_REPORTS_SET_ACTIVE_PAGE_UUID,
@@ -102,6 +109,7 @@ export default {
   loadReportPagesForPlan,
   clearMapReports,
   setPages,
+  showMapObjects,
   setActivePageUuid,
   setEditingPageUuid
 }

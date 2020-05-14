@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { PropTypes } from 'prop-types'
-import { connect } from 'react-redux'
+import reduxStore from '../../../redux-store'
+import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import MapReportActions from './map-reports-actions'
 import { REPORT_LAT_LONG_PRECISION } from './constants'
 import MercatorProjection from '../../../shared-utils/mercator-projection'
@@ -173,5 +174,5 @@ const mapDispatchToProps = dispatch => ({
   setActivePageUuid: uuid => dispatch(MapReportActions.setActivePageUuid(uuid))
 })
 
-const MapReportsListMapObjectsComponent = connect(mapStateToProps, mapDispatchToProps)(MapReportsListMapObjects)
+const MapReportsListMapObjectsComponent = wrapComponentWithProvider(reduxStore, MapReportsListMapObjects, mapStateToProps, mapDispatchToProps)
 export default MapReportsListMapObjectsComponent

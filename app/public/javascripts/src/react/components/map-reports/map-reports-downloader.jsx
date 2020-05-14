@@ -10,7 +10,6 @@ import MapReportsListMapObjects from './map-reports-list-map-objects.jsx'
 export class MapReportsDownloader extends Component {
   render () {
     return <div>
-      <MapReportsListMapObjects />
       { this.renderContent() }
     </div>
   }
