@@ -17,7 +17,6 @@ import PlanStates from '../react/components/plan/plan-states'
 import SelectionModes from '../react/components/selection/selection-modes'
 import SocketManager from '../react/common/socket-manager'
 import RingEditActions from '../react/components/ring-edit/ring-edit-actions'
-import ToolActions from '../react/components/tool/tool-actions'
 import NetworkAnalysisActions from '../react/components/optimization/network-analysis/network-analysis-actions'
 import ReactComponentConstants from '../react/common/constants'
 import AroNetworkConstraints from '../shared-utils/aro-network-constraints'
@@ -1579,7 +1578,7 @@ class State {
           service.configuration.loadPerspective(service.loggedInUser.perspective)
           service.initializeState()
           service.isReportMode = Boolean(initialState.reportPage)
-          if (initialState.reportPage && initialState.reportPage.mapCenter) {
+          if (initialState.reportPage || initialState.reportOverview) {
             return service.mapReadyPromise
               .then(() => {
                 // If we are in Report mode, disable the default UI like zoom buttons, etc.
@@ -1589,9 +1588,17 @@ class State {
                   mapTypeControl: false
                 })
                 service.setPlanRedux(plan)
-                service.requestSetMapCenter.next({ latitude: initialState.reportPage.mapCenter.latitude, longitude: initialState.reportPage.mapCenter.longitude })
-                if (initialState.reportPage.mapZoom) {
-                  service.requestSetMapZoom.next(initialState.reportPage.mapZoom)
+                const mapCenter = (initialState.reportPage && initialState.reportPage.mapCenter) || (initialState.reportOverview && initialState.reportOverview.mapCenter)
+                const mapZoom = (initialState.reportPage && initialState.reportPage.mapZoom) || (initialState.reportOverview && initialState.reportOverview.mapZoom)
+                if (mapCenter) {
+                  service.requestSetMapCenter.next({ latitude: mapCenter.latitude, longitude: mapCenter.longitude })
+                }
+                if (mapZoom) {
+                  service.requestSetMapZoom.next(mapZoom)
+                }
+                if (initialState.reportOverview) {
+                  service.loadReportPagesForPlan(plan.id)
+                  service.setMapReportMapObjectsVisibility(true)
                 }
                 return Promise.resolve()
               })
@@ -1956,13 +1963,13 @@ class State {
       setLoggedInUserRedux: loggedInUser => dispatch(UserActions.setLoggedInUser(loggedInUser)),
       loadSystemActorsRedux: () => dispatch(UserActions.loadSystemActors()),
       loadReportPagesForPlan: planId => dispatch(MapReportsActions.loadReportPagesForPlan(planId)),
+      setMapReportMapObjectsVisibility: isVisible => dispatch(MapReportsActions.showMapObjects(isVisible)),
       setPlanRedux: plan => dispatch(PlanActions.setActivePlan(plan)),
       setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId)),
       addPlanTargets: (planId, planTargets) => dispatch(SelectionActions.addPlanTargets(planId, planTargets)),
       removePlanTargets: (planId, planTargets) => dispatch(SelectionActions.removePlanTargets(planId, planTargets)),
       setSelectedLocations: locationIds => dispatch(SelectionActions.setLocations(locationIds)),
       setActivePlanState: planState => dispatch(PlanActions.setActivePlanState(planState)),
-      setActiveTool: activeTool => dispatch(ToolActions.setActiveTool(activeTool)),
       selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems)),
       setGoogleMapsReference: mapRef => dispatch(MapActions.setGoogleMapsReference(mapRef)),
       setNetworkEquipmentLayers: networkEquipmentLayers => dispatch(MapLayerActions.setNetworkEquipmentLayers(networkEquipmentLayers)),
