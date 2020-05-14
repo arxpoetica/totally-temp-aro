@@ -3,6 +3,7 @@ import Actions from '../../common/actions'
 const defaultState = {
   pages: [],
   showMapObjects: false,
+  showPageNumbers: false,
   activePageUuid: null,
   editingPageUuid: null,
   isCommunicating: false,
@@ -22,6 +23,12 @@ function setPages (state, pages) {
 function setShowMapObjects (state, showMapObjects) {
   return { ...state,
     showMapObjects
+  }
+}
+
+function setShowPageNumbers (state, showPageNumbers) {
+  return { ...state,
+    showPageNumbers
   }
 }
 
@@ -57,6 +64,9 @@ function mapReportsReducer (state = defaultState, action) {
 
     case Actions.MAP_REPORTS_SET_SHOW_MAP_OBJECTS:
       return setShowMapObjects(state, action.payload)
+
+    case Actions.MAP_REPORTS_SET_SHOW_PAGE_NUMBERS:
+      return setShowPageNumbers(state, action.payload)
 
     case Actions.MAP_REPORTS_CLEAR:
       return clearMapReports()

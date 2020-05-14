@@ -9,7 +9,7 @@ import MercatorProjection from '../../../shared-utils/mercator-projection'
 export class MapReportsListMapObjects extends Component {
   constructor (props) {
     super(props)
-    this.pageIdToMapObject = {}
+    this.pageIdToMapObjects = {}
     this.pageIdToListeners = {}
     this.polygonOptions = {
       normal: {
@@ -84,12 +84,26 @@ export class MapReportsListMapObjects extends Component {
       this.props.setPages(this.props.planId, reportPages)
     })
     this.pageIdToListeners[reportPage.uuid] = [clickListener, dragStartListener, dragEndListener]
-    this.pageIdToMapObject[reportPage.uuid] = mapObject
+    this.pageIdToMapObjects[reportPage.uuid] = [mapObject]
+
+    if (this.props.showPageNumbers) {
+      const pageNumberMarker = new google.maps.Marker({
+        position: { lat: reportPage.mapCenter.latitude, lng: reportPage.mapCenter.longitude },
+        label: {
+          text: `Page ${index + 1}`,
+          fontSize: '32px',
+          color: '#303030'
+        },
+        icon: '/images/map_icons/aro/blank.png',
+        map: this.props.googleMaps
+      })
+      this.pageIdToMapObjects[reportPage.uuid].push(pageNumberMarker)
+    }
   }
 
   deleteMapObject (pageId) {
-    this.pageIdToMapObject[pageId].setMap(null)
-    delete this.pageIdToMapObject[pageId]
+    this.pageIdToMapObjects[pageId].forEach(mapObject => mapObject.setMap(null))
+    delete this.pageIdToMapObjects[pageId]
     this.pageIdToListeners[pageId].forEach(listener => google.maps.event.removeListener(listener))
     delete this.pageIdToListeners[pageId]
   }
@@ -159,14 +173,16 @@ MapReportsListMapObjects.propTypes = {
   planId: PropTypes.number,
   activePageUuid: PropTypes.string,
   googleMaps: PropTypes.object,
-  reportPages: PropTypes.array
+  reportPages: PropTypes.array,
+  showPageNumbers: PropTypes.bool
 }
 
 const mapStateToProps = state => ({
   planId: state.plan.activePlan.id,
   activePageUuid: state.mapReports.activePageUuid,
   googleMaps: state.map.googleMaps,
-  reportPages: state.mapReports.pages
+  reportPages: state.mapReports.pages,
+  showPageNumbers: state.mapReports.showPageNumbers
 })
 
 const mapDispatchToProps = dispatch => ({

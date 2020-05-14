@@ -1599,6 +1599,7 @@ class State {
                 if (initialState.reportOverview) {
                   service.loadReportPagesForPlan(plan.id)
                   service.setMapReportMapObjectsVisibility(true)
+                  service.setMapReportPageNumbersVisibility(true)
                 }
                 return Promise.resolve()
               })
@@ -1964,6 +1965,7 @@ class State {
       loadSystemActorsRedux: () => dispatch(UserActions.loadSystemActors()),
       loadReportPagesForPlan: planId => dispatch(MapReportsActions.loadReportPagesForPlan(planId)),
       setMapReportMapObjectsVisibility: isVisible => dispatch(MapReportsActions.showMapObjects(isVisible)),
+      setMapReportPageNumbersVisibility: isVisible => dispatch(MapReportsActions.showPageNumbers(isVisible)),
       setPlanRedux: plan => dispatch(PlanActions.setActivePlan(plan)),
       setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId)),
       addPlanTargets: (planId, planTargets) => dispatch(SelectionActions.addPlanTargets(planId, planTargets)),

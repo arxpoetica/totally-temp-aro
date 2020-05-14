@@ -88,6 +88,13 @@ function showMapObjects (showMapObjects) {
   }
 }
 
+function showPageNumbers (showPageNumbers) {
+  return {
+    type: Actions.MAP_REPORTS_SET_SHOW_PAGE_NUMBERS,
+    payload: showPageNumbers
+  }
+}
+
 function setActivePageUuid (uuid) {
   return {
     type: Actions.MAP_REPORTS_SET_ACTIVE_PAGE_UUID,
@@ -110,6 +117,7 @@ export default {
   clearMapReports,
   setPages,
   showMapObjects,
+  showPageNumbers,
   setActivePageUuid,
   setEditingPageUuid
 }
