@@ -1560,7 +1560,7 @@ class State {
         service.setPlanRedux(plan)
       }
       var plan = null
-      const planPromise = initialState ? $http.get(`/service/v1/plan/${initialState.planId}`) : service.getOrCreateEphemeralPlan()
+      const planPromise = initialState.reportPage ? $http.get(`/service/v1/plan/${initialState.reportPage.planId}`) : service.getOrCreateEphemeralPlan()
       return planPromise // Will be called once when the page loads, since state.js is a service
         .then((result) => {
           plan = result.data
@@ -1573,8 +1573,8 @@ class State {
           service.loggedInUser.perspective = result.data.perspective || 'default'
           service.configuration.loadPerspective(service.loggedInUser.perspective)
           service.initializeState()
-          service.isReportMode = Boolean(initialState)
-          if (initialState && initialState.mapCenter) {
+          service.isReportMode = Boolean(initialState.reportPage)
+          if (initialState.reportPage && initialState.reportPage.mapCenter) {
             return service.mapReadyPromise
               .then(() => {
                 // If we are in Report mode, disable the default UI like zoom buttons, etc.
@@ -1584,9 +1584,9 @@ class State {
                   mapTypeControl: false
                 })
                 service.setPlanRedux(plan)
-                service.requestSetMapCenter.next({ latitude: initialState.mapCenter.latitude, longitude: initialState.mapCenter.longitude })
-                if (initialState.mapZoom) {
-                  service.requestSetMapZoom.next(initialState.mapZoom)
+                service.requestSetMapCenter.next({ latitude: initialState.reportPage.mapCenter.latitude, longitude: initialState.reportPage.mapCenter.longitude })
+                if (initialState.reportPage.mapZoom) {
+                  service.requestSetMapZoom.next(initialState.reportPage.mapZoom)
                 }
                 return Promise.resolve()
               })
@@ -1617,20 +1617,20 @@ class State {
               })
             })
           } else {
-            if (!(initialState && initialState.mapCenter)) {  // If we have an initial state then this has alredy been set
+            if (!(initialState.reportPage && initialState.reportPage.mapCenter)) {  // If we have an initial state then this has alredy been set
               // Set it to the default so that the map gets initialized
               return initializeToDefaultCoords(plan)
             }
           }
         })
         .then(() => {
-          if (initialState && initialState.visibleLayers) {
+          if (initialState.reportPage && initialState.reportPage.visibleLayers) {
             // We have an initial state, wait for a few seconds (HACKY) and turn layers on/off as per request
             const timeoutPromise = new Promise((resolve, reject) => { setTimeout(() => resolve(), 2000) })
             return timeoutPromise
               .then(() => {
                 // Set layer visibility as per the initial state
-                const setOfVisibleLayers = new Set(initialState.visibleLayers)
+                const setOfVisibleLayers = new Set(initialState.reportPage.visibleLayers)
                 service.mapLayersRedux.location.forEach(layer => {
                   const isVisible = setOfVisibleLayers.has(layer.key)
                   service.setLayerVisibility(layer, isVisible)
@@ -1698,7 +1698,7 @@ class State {
           service.setOptimizationOptions()
           tileDataService.setLocationStateIcon(tileDataService.locationStates.LOCK_ICON_KEY, service.configuration.locationCategories.entityLockIcon)
           tileDataService.setLocationStateIcon(tileDataService.locationStates.INVALIDATED_ICON_KEY, service.configuration.locationCategories.entityInvalidatedIcon)
-          if (!initialState) {
+          if (!initialState.reportPage) {
             service.getReleaseVersions()
           }
           if (service.configuration.ARO_CLIENT === 'frontier' || service.configuration.ARO_CLIENT === 'sse') {
