@@ -1,4 +1,5 @@
 import AroHttp from '../../common/aro-http'
+import Actions from '../../common/actions'
 
 function broadcastMessage (message) {
   return dispatch => {
@@ -7,6 +8,18 @@ function broadcastMessage (message) {
   }
 }
 
+function loadReleaseNotes () {
+  return dispatch => {
+    AroHttp.get('/reports/releaseNotes')
+      .then(result => dispatch({
+        type: Actions.GLOBAL_SETTINGS_GET_RELEASE_NOTES,
+        payload: result.data
+      }))
+      .catch(err => console.error(err))
+  }
+}
+
 export default {
-  broadcastMessage: broadcastMessage
+  broadcastMessage,
+  loadReleaseNotes
 }

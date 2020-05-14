@@ -110,9 +110,11 @@
     <tag-manager ng-if="$ctrl.currentView === $ctrl.views.TAG_MANAGER" manager-view="$ctrl.globalSettingsService.currentTagManagerView">
     </tag-manager>
 
-    <release-notes ng-if="$ctrl.currentView === $ctrl.views.RELEASE_NOTES"
+    <!-- <release-notes ng-if="$ctrl.currentView === $ctrl.views.RELEASE_NOTES"
       release-notes-view="$ctrl.globalSettingsService.currentReleaseNotesView">
-    </release-notes>
+    </release-notes>-->
+
+    <r-release-notes ng-if="$ctrl.currentView === $ctrl.views.RELEASE_NOTES"></r-release-notes>
 
     <r-broadcast ng-if="$ctrl.currentView === $ctrl.views.BROADCAST"></r-broadcast>
     
