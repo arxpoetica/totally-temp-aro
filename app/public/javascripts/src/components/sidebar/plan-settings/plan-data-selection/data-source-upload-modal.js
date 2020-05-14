@@ -139,8 +139,11 @@ class DataSourceUploadController {
   }
 
   modalShown () {
-
     this.loadEtlTemplatesFromServer(1)
+
+    // let us hide the template delete function
+    this.setConfigView(false)
+    
     this.state.showDataSourceUploadModal.next(true)
     
     this.tableSource = this.uploadSource = this.state.uploadDataSource = this.uploadDataSources[0]
@@ -410,7 +413,7 @@ class DataSourceUploadController {
     return {
       dataItems: reduxState.plan.dataItems,
       uploadDataSources: reduxState.plan.uploadDataSources,
-      etlTemplates: reduxState.etlTemplates
+      etlTemplates: reduxState.etlTemplates,
     }
   }
 
@@ -418,7 +421,8 @@ class DataSourceUploadController {
     return {
       selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems)),
       setAllLibraryItems: (dataItemKey, allLibraryItems) => dispatch(PlanActions.setAllLibraryItems(dataItemKey, allLibraryItems)),
-      loadEtlTemplatesFromServer: (dataType) => dispatch(EtlTemplateActions.loadEtlTemplatesFromServer(dataType))
+      loadEtlTemplatesFromServer: (dataType) => dispatch(EtlTemplateActions.loadEtlTemplatesFromServer(dataType)),
+      setConfigView: (flag) => dispatch(EtlTemplateActions.setConfigView(flag))
     }
   }
 

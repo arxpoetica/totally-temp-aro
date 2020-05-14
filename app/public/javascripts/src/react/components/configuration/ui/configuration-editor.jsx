@@ -5,6 +5,7 @@ import UiActions from './ui-actions'
 import SettingsEditor from './settings-editor.jsx'
 import AssetManager from './asset-manager.jsx'
 import StylesheetsManager from './stylesheets-manager.jsx'
+import EtlTemplateManager from './etl-template-manager.jsx'
 
 export class ConfigurationEditor extends Component {
   constructor (props) {
@@ -12,7 +13,8 @@ export class ConfigurationEditor extends Component {
     this.navs = Object.freeze({
       SETTINGS: 'Settings',
       ASSET_MANAGER: 'Asset Manager',
-      STYLESHEETS: 'Stylesheets'
+      STYLESHEETS: 'Stylesheets',
+      ETL_TEMPLATE_MANAGER: 'Templates'
     })
     this.state = {
       showInitialWarning: true,
@@ -30,9 +32,13 @@ export class ConfigurationEditor extends Component {
       return (
         <AssetManager />
       )
-    } else {
+    } else if (val === 'Stylesheets') {
       return (
         <StylesheetsManager />
+      )
+    } else {
+      return (
+        <EtlTemplateManager />
       )
     }
   }
@@ -74,6 +80,11 @@ export class ConfigurationEditor extends Component {
         <li className='nav-item' onClick={() => this.setState({ selectedNav: this.navs.STYLESHEETS })}>
           <a className={`nav-link ${this.state.selectedNav === this.navs.STYLESHEETS ? 'active' : ''}`} href='#'>
             {this.navs.STYLESHEETS}
+          </a>
+        </li>
+        <li className='nav-item' onClick={() => this.setState({ selectedNav: this.navs.ETL_TEMPLATES })}>
+          <a className={`nav-link ${this.state.selectedNav === this.navs.ETL_TEMPLATES ? 'active' : ''}`} href='#'>
+            {this.navs.ETL_TEMPLATE_MANAGER}
           </a>
         </li>
       </ul>
