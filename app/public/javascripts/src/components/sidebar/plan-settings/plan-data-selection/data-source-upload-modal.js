@@ -139,7 +139,6 @@ class DataSourceUploadController {
   }
 
   modalShown () {
-    // by default loadd template for locations
     this.loadEtlTemplatesFromServer(1)
 
     // let us hide the template delete function
@@ -162,11 +161,14 @@ class DataSourceUploadController {
       }
     })
     
+    this.uploadSource = this.tableSources[this.state.selectedDataTypeId]
+    this.state.uploadDataSource = this.tableSource = this.uploadSource
   }
 
   modalHide () {
     this.state.showDataSourceUploadModal.next(false)
     this.isDataManagementView = false
+    this.state.selectedDataTypeId = 1
   }
 
   onInitConicUploader (api) {
