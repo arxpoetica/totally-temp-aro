@@ -1577,8 +1577,8 @@ class State {
           service.loggedInUser.perspective = result.data.perspective || 'default'
           service.configuration.loadPerspective(service.loggedInUser.perspective)
           service.initializeState()
-          service.isReportMode = Boolean(initialState.reportPage)
-          if (initialState.reportPage || initialState.reportOverview) {
+          service.isReportMode = Boolean(initialState.reportPage || initialState.reportOverview)
+          if (service.isReportMode) {
             return service.mapReadyPromise
               .then(() => {
                 // If we are in Report mode, disable the default UI like zoom buttons, etc.
@@ -1711,7 +1711,7 @@ class State {
           service.setOptimizationOptions()
           tileDataService.setLocationStateIcon(tileDataService.locationStates.LOCK_ICON_KEY, service.configuration.locationCategories.entityLockIcon)
           tileDataService.setLocationStateIcon(tileDataService.locationStates.INVALIDATED_ICON_KEY, service.configuration.locationCategories.entityInvalidatedIcon)
-          if (!initialState.reportPage) {
+          if (!initialState.reportPage && !initialState.reportOverview) {
             service.getReleaseVersions()
           }
           if (service.configuration.ARO_CLIENT === 'frontier' || service.configuration.ARO_CLIENT === 'sse') {
