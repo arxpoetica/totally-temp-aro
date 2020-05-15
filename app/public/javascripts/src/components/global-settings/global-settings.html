@@ -114,7 +114,9 @@
       release-notes-view="$ctrl.globalSettingsService.currentReleaseNotesView">
     </release-notes>-->
 
-    <r-release-notes ng-if="$ctrl.currentView === $ctrl.views.RELEASE_NOTES"></r-release-notes>
+    <r-release-notes ng-if="$ctrl.currentView === $ctrl.views.RELEASE_NOTES"
+      release-notes-view="$ctrl.globalSettingsService.currentReleaseNotesView">
+    </r-release-notes>
 
     <r-broadcast ng-if="$ctrl.currentView === $ctrl.views.BROADCAST"></r-broadcast>
     

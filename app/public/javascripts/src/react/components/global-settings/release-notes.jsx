@@ -2,10 +2,15 @@ import React, { Component } from 'react'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import GlobalsettingsActions from '../global-settings/globalsettings-action'
+import AroHttp from '../../common/aro-http'
 
 export class ReleaseNotes extends Component {
   constructor (props) {
     super(props)
+    this.state = {
+      versionDetails: null,
+      showVersion: false
+    }
     
   }
 
@@ -13,6 +18,15 @@ export class ReleaseNotes extends Component {
     this.props.loadReleaseNotes()
   }
 
+  onClickVersion(id){
+    AroHttp.get(`/reports/releaseNotes/${id}`)
+      .then(result => {
+        console.log(result)
+        this.setState({versionDetails:result.data,showVersion:true})
+
+      })
+      .catch(err => console.error(err))
+  }
   render () {
     return !this.props.releaseNotes
       ? null
@@ -24,12 +38,13 @@ export class ReleaseNotes extends Component {
   renderReleaseNotes () {
     const releaseNote = this.props.releaseNotes
     return (
+      !this.state.showVersion?
       <div>
         <table className="table table-sm table-striped">
           <tbody>
             {
               releaseNote.map((value,index)=>{  
-                return <tr key={index}>
+                return <tr key={index} onClick={()=>this.onClickVersion(value.id)}>
                   <td className="text-center">{value.version}</td>
                   <td> Version{value.version} </td>
                 </tr>
@@ -37,11 +52,11 @@ export class ReleaseNotes extends Component {
             }
           </tbody>
         </table>
-
-        <div>
-          <h1>Version {value.version}</h1>
-          <p>{value.name}</p>
-          </div>
+      </div>
+      :
+      <div>
+        <h1>Version {this.state.versionDetails.version}</h1>
+        <p>{this.state.versionDetails.description}</p>
       </div>
     )
   }
