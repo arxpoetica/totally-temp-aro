@@ -3,6 +3,8 @@ import React, { Component } from 'react'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import dataEditActions from './data-edit-actions.js'
+import DeleteMenu from './maps-delete-menu.js'
+import './duct-edit.css'
 
 export class DuctEdit extends Component {
   constructor (props) {
@@ -37,19 +39,22 @@ export class DuctEdit extends Component {
     this.drawLines()
     var revOrder = []
     Object.keys(this.props.ducts).sort().map((key) => (
-      revOrder.unshift(this.props.ducts[key])
+      revOrder.unshift({id: key, duct: this.props.ducts[key]})
     ))
     var jsx = []
-    jsx.push(<div key='title'>Ducts:</div>)
-    revOrder.forEach((duct) => {
-      jsx.push(this.renderDuctRow(duct))
+    jsx.push(<div key='title' onClick={(event) => { this.toggleSelect(null) }}>Ducts:</div>)
+    revOrder.forEach((ductMeta) => {
+      jsx.push(this.renderDuctRow(ductMeta.id, ductMeta.duct))
     })
     return jsx
   }
 
-  renderDuctRow (duct) {
+  renderDuctRow (ductId, duct) {
+    var onClick = (event) => { this.toggleSelect(ductId) }
+    var classList = ''
+    if (ductId === this.props.selectedDuctId) classList += ' selectedDuct'
     return (
-      <div key={duct.id} id={duct.id} onClick={this.props.setSelectedDuctId(duct.id)}>
+      <div className={classList} key={ductId} id={ductId} onClick={onClick}>
         {duct.geometry.length} delete
       </div>
     )
@@ -100,6 +105,20 @@ export class DuctEdit extends Component {
           this.mapObjectListeners.push(
             google.maps.event.addListener(ductLinePath, 'set_at', onPathChange)
           )
+
+          // --- from 
+          var deleteMenu = new DeleteMenu();
+          this.mapObjectListeners.push(
+            google.maps.event.addListener(ductLinePath, 'rightclick', function(e) {
+              // Check if click was on a vertex control point
+              console.log(e)
+              if (e.vertex == undefined) {
+                return;
+              }
+              deleteMenu.open(map, ductLinePath, e.vertex);
+            })
+          )
+          // ---
         }
 
       }
@@ -109,7 +128,7 @@ export class DuctEdit extends Component {
   addPoint (point) {
     var newDuct = null
     if (!this.props.selectedDuctId) {
-      newDuct = {geometry: [point]}
+      newDuct = { geometry: [point] }
       this.props.newDuct(newDuct)
     } else {
       var selectedDuct = this.props.ducts[this.props.selectedDuctId]
@@ -117,6 +136,11 @@ export class DuctEdit extends Component {
       newDuct = { ...selectedDuct, geometry: newGeometry }
       this.props.setDuct(this.props.selectedDuctId, newDuct)
     }
+  }
+
+  toggleSelect (ductId) {
+    if (ductId === this.props.selectedDuctId) ductId = null
+    this.props.setSelectedDuctId(ductId)
   }
 
   clearRendering () {
@@ -150,6 +174,8 @@ export class DuctEdit extends Component {
     this.mapClickListener.remove()
   }
 }
+
+
 
 const mapStateToProps = (state) => ({
   plan: state.plan,
