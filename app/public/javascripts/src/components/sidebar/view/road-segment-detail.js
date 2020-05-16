@@ -19,6 +19,7 @@ class RoadSegmentDetailController {
       if (this.state.activeViewModePanel === this.state.viewModePanels.EDIT_LOCATIONS) return
 
       if (event.roadSegments && event.roadSegments.size > 0) {
+        console.log(event)
         var newSelection = state.cloneSelection()
         newSelection.details.roadSegments = event.roadSegments
         state.selection = newSelection
@@ -47,6 +48,13 @@ class RoadSegmentDetailController {
   }
 
   generateRoadSegmentsInfo (roadSegments) {
+    var geometry = []
+    /*
+    roadSegments.forEach((roadSegment) => {
+      geometry.push(roadSegment.loadGeometry())
+    })
+    console.log(geometry)
+    */
     var roadSegmentsInfo = {
     }
 

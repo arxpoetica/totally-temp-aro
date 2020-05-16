@@ -93,5 +93,15 @@
                                   user-id="$ctrl.currentUser.id" 
                                   plan-id="$ctrl.plan.id"></plan-project-configuration>
     </accordion-panel-contents>
+
+    <accordion-panel-title title="'Data Edit'" panel-id="'DATA_EDIT'"></accordion-panel-title>
+    <accordion-panel-contents panel-id="'DATA_EDIT'">
+      <r-duct-edit display-only="!$ctrl.areControlsEnabled()" 
+                           user-id="$ctrl.userId" 
+                           plan-id="$ctrl.plan.id" 
+                           on-change="$ctrl.onDataSelectionChange({childKey:childKey, isValid:isValid, isInit:isInit})"
+                           key="'dataEdit'"></r-duct-edit>
+    </accordion-panel-contents>
+
   </accordion>
 </div>
