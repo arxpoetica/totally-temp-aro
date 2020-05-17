@@ -48,6 +48,9 @@ export class DuctEdit extends Component {
     })
     return (
       <React.Fragment>
+        <div className="ei-header ei-no-pointer">Ducts:</div>
+        <div className="ei-items-contain"></div>
+        <div key='file_selection'>file selection here</div>
         <button onClick={() => this.props.uploadDucts()}>Commit</button>
         <div className="ei-header ei-no-pointer">Ducts:</div>
         <div className="ei-items-contain">
