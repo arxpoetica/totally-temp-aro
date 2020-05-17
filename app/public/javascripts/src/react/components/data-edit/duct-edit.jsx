@@ -50,7 +50,7 @@ export class DuctEdit extends Component {
       <React.Fragment>
         <div className="ei-header ei-no-pointer">File:</div>
         <div className="ei-items-contain"></div>
-        <div key='file_selection'>file selection here</div>
+        <div key='file_selection'>{JSON.stringify(this.props.fiberLibrarys)}</div>
         <button onClick={() => this.props.uploadDucts()}>Commit</button>
         <div className="ei-header ei-no-pointer">Ducts:</div>
         <div className="ei-items-contain">
@@ -215,7 +215,8 @@ const mapStateToProps = (state) => ({
   user: state.user,
   map: state.map,
   selectedDuctId: state.dataEdit.ductEdit.selectedDuctId,
-  ducts: state.dataEdit.ductEdit.ducts
+  ducts: state.dataEdit.ductEdit.ducts,
+  fiberLibrarys: state.plan.dataItems.fiber.allLibraryItems
 })
 
 const mapDispatchToProps = dispatch => ({
