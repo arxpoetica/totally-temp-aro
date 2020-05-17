@@ -44,10 +44,16 @@ function setDuct (ductId, duct) {
   }
 }
 
+function uploadDucts () {
+  console.log('upload ducts')
+  return null
+}
+
 export default {
   setSelectedDuctId,
   deleteAllDucts,
   deleteDuct,
   newDuct,
-  setDuct
+  setDuct,
+  uploadDucts
 }

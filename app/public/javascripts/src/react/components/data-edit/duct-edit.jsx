@@ -48,6 +48,7 @@ export class DuctEdit extends Component {
     })
     return (
       <React.Fragment>
+        <button onClick={() => this.props.uploadDucts()}>Commit</button>
         <div className="ei-header ei-no-pointer">Ducts:</div>
         <div className="ei-items-contain">
           {jsx}
@@ -107,7 +108,7 @@ export class DuctEdit extends Component {
         } else {
           ductLine.setOptions(this.lineOptions)
         }
-        
+
         ductLine.setMap(this.props.map.googleMaps)
         this.createdMapObjects.push(ductLine)
 
@@ -119,7 +120,7 @@ export class DuctEdit extends Component {
             for (var i = 0; i < vertices.getLength(); i++) {
               newPath.push(vertices.getAt(i))
             }
-            
+
             var newDuct = { ...duct, geometry: newPath }
             this.props.setDuct(ductId, newDuct)
           }
@@ -219,7 +220,8 @@ const mapDispatchToProps = dispatch => ({
   deleteAllDucts: () => dispatch(dataEditActions.deleteAllDucts()),
   deleteDuct: (ductId) => dispatch(dataEditActions.deleteDuct(ductId)),
   newDuct: (duct) => dispatch(dataEditActions.newDuct(duct)),
-  setDuct: (ductId, duct) => dispatch(dataEditActions.setDuct(ductId, duct))
+  setDuct: (ductId, duct) => dispatch(dataEditActions.setDuct(ductId, duct)),
+  uploadDucts: () => dispatch(dataEditActions.uploadDucts())
 })
 
 const DuctEditComponent = wrapComponentWithProvider(reduxStore, DuctEdit, mapStateToProps, mapDispatchToProps)
