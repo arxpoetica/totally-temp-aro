@@ -16,6 +16,13 @@ function deleteAllDucts () {
   }
 }
 
+function deleteDuct (ductId) {
+  return {
+    type: Actions.DATA_DUCT_DELETE_DUCT,
+    payload: ductId
+  }
+}
+
 function newDuct (duct) {
   var newDuctId = uuidStore.getUUID()
   return {
@@ -40,6 +47,7 @@ function setDuct (ductId, duct) {
 export default {
   setSelectedDuctId,
   deleteAllDucts,
+  deleteDuct,
   newDuct,
   setDuct
 }

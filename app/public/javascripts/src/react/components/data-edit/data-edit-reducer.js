@@ -22,18 +22,21 @@ function setDuct (state, ductId, duct) {
   if (!state.ductEdit.ducts.hasOwnProperty(ductId)) newSelectedDuctId = ductId
   return { ...state,
     ductEdit: { ...state.ductEdit,
-      ducts: { ...state.ductEdit.ducts, ...newDuct},
+      ducts: { ...state.ductEdit.ducts, ...newDuct },
       selectedDuctId: newSelectedDuctId
     }
   }
 }
 
 function deleteDuct (state, ductId) {
+  var newSelectedDuctId = state.ductEdit.selectedDuctId
+  if (newSelectedDuctId === ductId) newSelectedDuctId = null
   var newDucts = { ...state.ductEdit.ducts }
   delete newDucts[ductId]
   return { ...state,
     ductEdit: { ...state.ductEdit,
-      ducts: newDucts
+      ducts: newDucts,
+      selectedDuctId: newSelectedDuctId
     }
   }
 }

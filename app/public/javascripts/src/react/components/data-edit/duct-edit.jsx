@@ -3,7 +3,7 @@ import React, { Component } from 'react'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import dataEditActions from './data-edit-actions.js'
-import DeleteMenu from './maps-delete-menu.js'
+// import DeleteMenu from './maps-delete-menu.js'
 import './duct-edit.css'
 
 export class DuctEdit extends Component {
@@ -39,14 +39,21 @@ export class DuctEdit extends Component {
     this.drawLines()
     var revOrder = []
     Object.keys(this.props.ducts).sort().map((key) => (
-      revOrder.unshift({id: key, duct: this.props.ducts[key]})
+      revOrder.unshift({ id: key, duct: this.props.ducts[key] })
     ))
     var jsx = []
-    jsx.push(<div key='title' onClick={(event) => { this.toggleSelect(null) }}>Ducts:</div>)
+    // jsx.push(<div key='title' onClick={(event) => { this.toggleSelect(null) }}>Ducts:</div>)
     revOrder.forEach((ductMeta) => {
       jsx.push(this.renderDuctRow(ductMeta.id, ductMeta.duct))
     })
-    return jsx
+    return (
+      <React.Fragment>
+        <div className="ei-header ei-no-pointer">Ducts:</div>
+        <div className="ei-items-contain">
+          {jsx}
+        </div>
+      </React.Fragment>
+    )
   }
 
   renderDuctRow (ductId, duct) {
@@ -54,8 +61,17 @@ export class DuctEdit extends Component {
     var classList = ''
     if (ductId === this.props.selectedDuctId) classList += ' selectedDuct'
     return (
-      <div className={classList} key={ductId} id={ductId} onClick={onClick}>
-        {duct.geometry.length} delete
+      <div className='ei-property-item' key={ductId} id={ductId}>
+        <div className={`ei-property-label ${classList}`} onClick={onClick}>{ductId}<br />{`${duct.geometry.length - 1} segments`}</div>
+        <div className='ei-property-value'>
+          <button
+            id={`btnDuctDel_${ductId}`}
+            className='btn btn-sm btn-outline-danger ring-del-btn'
+            onClick={() => this.props.deleteDuct(ductId)}
+            data-toggle='tooltip' data-placement='bottom' title='Delete'>
+            <i className='fa ei-button-icon ng-scope fa-trash-alt' />
+          </button>
+        </div>
       </div>
     )
   }
@@ -63,9 +79,7 @@ export class DuctEdit extends Component {
   drawLines () {
     this.clearRendering()
     Object.keys(this.props.ducts).forEach(ductId => {
-      console.log(this.props.ducts)
       const duct = this.props.ducts[ductId]
-      console.log(duct)
       if (duct.geometry.length > 0) {
         var isSelected = (ductId === this.props.selectedDuctId)
         
@@ -75,6 +89,21 @@ export class DuctEdit extends Component {
         
         if (isSelected) {
           ductLine.setOptions(this.selectedLineOptions)
+          if (duct.geometry.length > 0) {
+            var mapMarker = new google.maps.Marker({
+              position: duct.geometry[duct.geometry.length - 1],
+              icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 12,
+                strokeWeight: 1,
+                strokeColor: '#543500'
+              },
+              draggable: false,
+              clickable: false
+            })
+            mapMarker.setMap(this.props.map.googleMaps)
+            this.createdMapObjects.push(mapMarker)
+          }
         } else {
           ductLine.setOptions(this.lineOptions)
         }
@@ -107,7 +136,7 @@ export class DuctEdit extends Component {
           )
 
           // --- from 
-          var deleteMenu = new DeleteMenu();
+          // var deleteMenu = new DeleteMenu();
           this.mapObjectListeners.push(
             google.maps.event.addListener(ductLinePath, 'rightclick', function(e) {
               // Check if click was on a vertex control point
@@ -115,7 +144,7 @@ export class DuctEdit extends Component {
               if (e.vertex == undefined) {
                 return;
               }
-              deleteMenu.open(map, ductLinePath, e.vertex);
+              // deleteMenu.open(map, ductLinePath, e.vertex);
             })
           )
           // ---
@@ -188,6 +217,7 @@ const mapStateToProps = (state) => ({
 const mapDispatchToProps = dispatch => ({
   setSelectedDuctId: (ductId) => dispatch(dataEditActions.setSelectedDuctId(ductId)),
   deleteAllDucts: () => dispatch(dataEditActions.deleteAllDucts()),
+  deleteDuct: (ductId) => dispatch(dataEditActions.deleteDuct(ductId)),
   newDuct: (duct) => dispatch(dataEditActions.newDuct(duct)),
   setDuct: (ductId, duct) => dispatch(dataEditActions.setDuct(ductId, duct))
 })
