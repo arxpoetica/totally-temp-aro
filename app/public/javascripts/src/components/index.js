@@ -2,6 +2,7 @@
 import { react2angular } from 'react2angular'
 import { ToastContainer } from 'react-toastify'
 
+import MyAccount from '../react/components/global-settings/my-account.jsx'
 import ReleaseNotes from '../react/components/global-settings/release-notes.jsx'
 import Broadcast from '../react/components/global-settings/broadcast.jsx'
 import ConfigurationEditor from '../react/components/configuration/ui/configuration-editor.jsx'
@@ -245,6 +246,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('editorInterfacePrimitive', editorInterfacePrimitive)
   .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
 // ReactJS components
+  .component('rMyAccount', react2angular(MyAccount))
   .component('rReleaseNotes', react2angular(ReleaseNotes))
   .component('rBroadcast', react2angular(Broadcast))
   .component('rContextMenu', react2angular(ContextMenu))

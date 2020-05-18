@@ -90,7 +90,10 @@
       </button>
     </div>
 
+    <!-- 
     <user-account-settings ng-if="$ctrl.currentView === $ctrl.views.MY_ACCOUNT"></user-account-settings>
+    -->
+    <r-my-account ng-if="$ctrl.currentView === $ctrl.views.MY_ACCOUNT"></r-my-account>
 
     <multifactor-settings ng-if="$ctrl.currentView === $ctrl.views.MULTIFACTOR_AUTHENTICATION && $ctrl.state.configuration.perspective.globalSettings.showMultiFactorAuthentication">
     </multifactor-settings>
