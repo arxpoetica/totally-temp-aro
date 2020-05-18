@@ -1,6 +1,7 @@
 import Actions from '../../common/actions'
 import AroHttp from '../../common/aro-http'
 import uuidStore from '../../../shared-utils/uuid-store'
+import fetch from 'cross-fetch'
 
 function setSelectedDuctId (ductId) {
   return {
@@ -48,7 +49,7 @@ function uploadDucts () {
   return (dispatch, getState) => {
     const state = getState()
     const ducts = state.dataEdit.ductEdit.ducts
-    const libraryId = 25 // temporary
+    const libraryId = 28 // temporary
     var fileExtension = 'KML'
     // convert state.ducts to CSV
     var ductsList = []
@@ -59,12 +60,23 @@ function uploadDucts () {
     console.log(fileData)
     // append to form data and upload
     var form = new FormData()
-    form.append('file', new Blob([fileData], {type:'text/plain'}), 'ManuallyAddedDucts.kml')
+    form.append('file', new File([fileData], {type:'text/plain'}), 'ManuallyAddedDucts.kml')
     var url = `/uploadservice/v1/library/${libraryId}?userId=${state.user.loggedInUser.id}&media=${fileExtension}`
-    AroHttp.post(url, form)
+    /*
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': undefined
+      },
+      body: form
+    }
+    */
+    // fetch(url, options)
+    AroHttp.postRaw(url, form)
       .then(result => {
         console.log(result)
         dispatch(deleteAllDucts())
+        // NEED to invalidate cache
         // dispatch upload complete
       }).catch(err => console.error(err))
   }
