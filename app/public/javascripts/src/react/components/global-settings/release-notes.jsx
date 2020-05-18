@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
-import GlobalsettingsActions from '../global-settings/globalsettings-action'
+import globalsettingsActions from '../global-settings/globalsettings-action'
 import AroHttp from '../../common/aro-http'
 
 export class ReleaseNotes extends Component {
@@ -68,7 +68,7 @@ const mapStateToProps = (state) => ({
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  loadReleaseNotes: () => dispatch(GlobalsettingsActions.loadReleaseNotes())
+  loadReleaseNotes: () => dispatch(globalsettingsActions.loadReleaseNotes())
 })
 
 const ReleaseNotesComponent = wrapComponentWithProvider(reduxStore, ReleaseNotes, mapStateToProps, mapDispatchToProps)

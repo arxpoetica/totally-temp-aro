@@ -134,8 +134,9 @@
     <!-- Close button - show when we are in "Global Settings" mode -->
     <button ng-if="$ctrl.currentView === $ctrl.views.GLOBAL_SETTINGS" class="btn btn-primary" ng-click="$ctrl.modalHide()">Close</button>
 
+    <!--
     <button ng-if="$ctrl.currentView === $ctrl.views.MY_ACCOUNT" type="submit" class="btn btn-primary" ng-click="$ctrl.globalSettingsService.save()">Update settings</button>
-
+    -->
     <a ng-if="$ctrl.currentView === $ctrl.views.MANAGE_USERS && $ctrl.globalSettingsService.currentManageUserView === $ctrl.globalSettingsService.ManageUserViews.Users"\
        type="button" class="btn btn-light" ng-href='/admin/users/csv'>Download CSV</a>
     <a ng-if="$ctrl.currentView === $ctrl.views.MANAGE_USERS && $ctrl.globalSettingsService.currentManageUserView === $ctrl.globalSettingsService.ManageUserViews.Users"

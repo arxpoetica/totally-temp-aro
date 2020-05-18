@@ -19,7 +19,20 @@ function loadReleaseNotes () {
   }
 }
 
+function updateUserAccount (user) {
+  console.log(user)
+  return dispatch => {
+    AroHttp.post('/settings/update_settings', user)
+      .then(result => {
+        // The name/email may have changed for the current user. 
+        // Reload all actors
+        state.reloadSystemActors() 
+      })
+      .catch((err) => console.error(err))
+  }
+}
 export default {
   broadcastMessage,
-  loadReleaseNotes
+  loadReleaseNotes,
+  updateUserAccount
 }

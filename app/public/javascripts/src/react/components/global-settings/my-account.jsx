@@ -1,39 +1,26 @@
 import React, { Component } from 'react'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
-import GlobalsettingsActions from '../global-settings/globalsettings-action'
+import globalsettingsActions from '../global-settings/globalsettings-action'
 
 export class MyAccount extends Component {constructor (props) {
-            super(props)
-            this.state = {
-            accountDetails: {
-                id:'',
-                first_name:'',
-                last_name:'',
-                email:'',
-                old_password:'',
-                password:'',
-                password_confirm:''
-            }
-        }
+    super(props)
+        this.state = {
+        first_name:'',
+        last_name:'',
+        email:'',
+        old_password:'',
+        password:'',
+        password_confirm:''
     }
+}
 
-    handleChange (e) {
-        let accountDetails = this.state.accountDetails;
-        accountDetails[e.target.name] = e.target.value;
-        this.setState({ accountDetails });
-    }
-    
     componentDidMount () {
-        console.log(this.props.accountDetails)
         if(this.props.accountDetails !== null ){
-            this.state.accountDetails.id = this.props.accountDetails.id
-            this.state.accountDetails.first_name = this.props.accountDetails.first_name
-            this.state.accountDetails.last_name = this.props.accountDetails.last_name
-            this.state.accountDetails.email = this.props.accountDetails.email
-
             this.setState({
-                accountDetails: this.state.accountDetails
+                first_name: this.props.accountDetails.first_name,
+                last_name: this.props.accountDetails.last_name,
+                email: this.props.accountDetails.email
             })
         }
     }
@@ -45,8 +32,7 @@ export class MyAccount extends Component {constructor (props) {
     }
 
     renderAccountDetails () {
-        const account= this.state.accountDetails
-        
+        const account = this.props.accountDetails
         return (
             <div>
                 <form>
@@ -82,10 +68,21 @@ export class MyAccount extends Component {constructor (props) {
                             <input type="password" name="password_confirm" onChange={(e)=>this.handleChange(e)} className="form-control" placeholder="Confirm the new password"/>
                         </div>
                     </fieldset>
-                    
+
                 </form>
+                <div style={{ flex: '0 0 auto' }}>
+                    <button className={'btn btn-primary float-right'} onClick={() => this.updateAccount()}><i className={'fa fa-save'} />&nbsp;&nbsp;Update Settings</button>
+                </div>
             </div>
         )
+    }
+
+    handleChange (e) {
+        this.setState( e.target.name = e.target.value );
+    }
+
+    updateAccount () {
+        this.props.updateUserAccount(this.state)
     }
 }
 
@@ -95,7 +92,7 @@ const mapStateToProps = (state) => ({
 })
 
 const mapDispatchToProps = (dispatch) => ({
-   
+    updateUserAccount: (user) => dispatch(globalsettingsActions.updateUserAccount(user))
 })
 
 const MyAccountComponent = wrapComponentWithProvider(reduxStore, MyAccount, mapStateToProps, mapDispatchToProps)
