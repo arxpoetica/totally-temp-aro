@@ -4,6 +4,7 @@ import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import dataEditActions from './data-edit-actions.js'
 // import DeleteMenu from './maps-delete-menu.js'
+import DropdownList from 'react-widgets/lib/DropdownList'
 import './duct-edit.css'
 
 export class DuctEdit extends Component {
@@ -33,6 +34,10 @@ export class DuctEdit extends Component {
       draggable: false,
       editable: false
     }
+
+    this.state = {
+      selectedLib: null
+    }
   }
 
   render () {
@@ -48,10 +53,25 @@ export class DuctEdit extends Component {
     })
     return (
       <React.Fragment>
-        <div className="ei-header ei-no-pointer">File:</div>
-        <div className="ei-items-contain"></div>
-        <div key='file_selection'>{JSON.stringify(this.props.fiberLibrarys)}</div>
-        <button onClick={() => this.props.uploadDucts()}>Commit</button>
+        <div className="ei-header ei-no-pointer">Append to Library:</div>
+        <div className="ei-items-contain">
+          <div className='ei-property-item'>
+            <div className='ei-property-label'>Library</div>
+            <div className='ei-property-value'>
+              <DropdownList
+                data={this.props.fiberLibrarys}
+                valueField='identifier'
+                textField='name'
+                value={this.state.selectedLib}
+                readOnly={this.props.displayOnly}
+                onChange={(val, event) => this.onLibChange(val, event)}
+              />
+            </div>
+          </div>
+        </div>
+        <button onClick={() => this.onCommit()}
+          disabled={(this.canCommit() ? null : 'disabled')}
+        >Commit</button>
         <div className="ei-header ei-no-pointer">Ducts:</div>
         <div className="ei-items-contain">
           {jsx}
@@ -176,6 +196,19 @@ export class DuctEdit extends Component {
     this.props.setSelectedDuctId(ductId)
   }
 
+  onLibChange (newVal, event) {
+    this.setState({ selectedLib: newVal })
+  }
+
+  canCommit () {
+    return (!this.props.displayOnly && this.state.selectedLib) 
+  }
+
+  onCommit () {
+    console.log(this.state.selectedLib.identifier)
+    this.props.uploadDucts(this.state.selectedLib.identifier)
+  }
+
   clearRendering () {
     this.createdMapObjects.forEach(path => {
       path.setMap(null)
@@ -225,7 +258,7 @@ const mapDispatchToProps = dispatch => ({
   deleteDuct: (ductId) => dispatch(dataEditActions.deleteDuct(ductId)),
   newDuct: (duct) => dispatch(dataEditActions.newDuct(duct)),
   setDuct: (ductId, duct) => dispatch(dataEditActions.setDuct(ductId, duct)),
-  uploadDucts: () => dispatch(dataEditActions.uploadDucts())
+  uploadDucts: (libraryId) => dispatch(dataEditActions.uploadDucts(libraryId))
 })
 
 const DuctEditComponent = wrapComponentWithProvider(reduxStore, DuctEdit, mapStateToProps, mapDispatchToProps)

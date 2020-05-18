@@ -45,13 +45,12 @@ function setDuct (ductId, duct) {
   }
 }
 
-function uploadDucts () {
+function uploadDucts (libraryId) {
   return (dispatch, getState) => {
     const state = getState()
     const ducts = state.dataEdit.ductEdit.ducts
-    const libraryId = 28 // temporary
     var fileExtension = 'KML'
-    // convert state.ducts to CSV
+    // convert state.ducts to KML
     var ductsList = []
     Object.keys(ducts).forEach(key => {
       ductsList.push(ducts[key])
@@ -82,6 +81,7 @@ function uploadDucts () {
   }
 }
 
+// ToDo: make this a utility
 function pathsToKML (paths) {
   var kml = '<kml xmlns="http://www.opengis.net/kml/2.2"><Document>'
   paths.forEach(path => {
