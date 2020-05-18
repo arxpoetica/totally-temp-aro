@@ -139,7 +139,7 @@ class DataSourceUploadController {
   }
 
   modalShown () {
-    this.loadEtlTemplatesFromServer(1)
+    this.loadEtlTemplatesFromServer(this.state.selectedDataTypeId)
 
     // let us hide the template delete function
     this.setConfigView(false)
