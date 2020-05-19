@@ -67,6 +67,7 @@ workflows:
             branches:
               only:
                 - master
+                - duct_edit
       - deploy:
           context: aro_qa_builds
           requires:
