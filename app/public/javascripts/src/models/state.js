@@ -1892,11 +1892,9 @@ class State {
       service.requestMapLayerRefresh.next(null)
     }
 
-    // ToDo: if we ever need to actually unsubscribe these, store them in an array
     service.unsubscribePlanEvent = SocketManager.subscribe('COMMIT_TRANSACTION', service.handlePlanModifiedEvent.bind(service))
     service.unsubscribeLibraryEvent1 = SocketManager.subscribe('USER_TRANSACTION', service.handleLibraryModifiedEvent.bind(service))
-    service.unsubscribeLibraryEvent2 = SocketManager.subscribe('ETL_ADD', service.handleLibraryModifiedEvent.bind(service))
-    service.unsubscribeLibraryEvent3 = SocketManager.subscribe('TILES_INVALIDATED', service.handleLibraryModifiedEvent.bind(service))
+    service.unsubscribeLibraryEvent1 = SocketManager.subscribe('ETL_ADD', service.handleLibraryModifiedEvent.bind(service))
 
     service.mergeToTarget = (nextState, actions) => {
       const currentActivePlanId = service.plan && service.plan.id

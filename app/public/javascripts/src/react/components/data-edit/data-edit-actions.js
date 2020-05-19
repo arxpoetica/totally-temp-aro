@@ -70,7 +70,7 @@ function uploadDucts (libraryId) {
       .then(result => {
         console.log(result)
         // dispatch(Actions.)
-        AroHttp.put(`/service/conduits/28/fiber?user_id=${userId}`, deleteList)
+        AroHttp.put(`/service/conduits/${libraryId}/fiber?user_id=${userId}`, deleteList)
           .then(result => {
             dispatch(deleteAllDucts())
             // TileDataService.markHtmlCacheDirty()
