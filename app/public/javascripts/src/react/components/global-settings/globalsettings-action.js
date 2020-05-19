@@ -1,5 +1,7 @@
 import AroHttp from '../../common/aro-http'
 import Actions from '../../common/actions'
+import UserActions from '../user/user-actions'
+
 
 function broadcastMessage (message) {
   return dispatch => {
@@ -26,7 +28,7 @@ function updateUserAccount (user) {
       .then(result => {
         // The name/email may have changed for the current user. 
         // Reload all actors
-        // state.reloadSystemActors() 
+        UserActions.loadSystemActors()
       })
       .catch((err) => console.error(err))
   }
@@ -34,5 +36,5 @@ function updateUserAccount (user) {
 export default {
   broadcastMessage,
   loadReleaseNotes,
-  updateUserAccount
+  updateUserAccount,
 }

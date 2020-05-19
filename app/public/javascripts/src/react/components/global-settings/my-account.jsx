@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import globalsettingsActions from '../global-settings/globalsettings-action'
+import UserActions from '../user/user-actions'
 
 export class MyAccount extends Component {constructor (props) {
     super(props)
@@ -98,7 +99,8 @@ const mapStateToProps = (state) => ({
 })
 
 const mapDispatchToProps = (dispatch) => ({
-    updateUserAccount: (user) => dispatch(globalsettingsActions.updateUserAccount(user))
+    updateUserAccount: (user) => dispatch(globalsettingsActions.updateUserAccount(user)),
+    loadSystemActors: () => dispatch(UserActions.loadSystemActors())
 })
 
 const MyAccountComponent = wrapComponentWithProvider(reduxStore, MyAccount, mapStateToProps, mapDispatchToProps)
