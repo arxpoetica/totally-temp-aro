@@ -5,49 +5,53 @@ import globalsettingsActions from '../global-settings/globalsettings-action'
 
 export class MyAccount extends Component {constructor (props) {
     super(props)
-        this.state = {
-        first_name:'',
-        last_name:'',
-        email:'',
-        old_password:'',
-        password:'',
-        password_confirm:''
+    this.state = {
+        accountDetails: {
+            first_name:'',
+            last_name:'',
+            email:'',
+            old_password:'',
+            password:'',
+            password_confirm:''
+        }
     }
 }
 
     componentDidMount () {
         if(this.props.accountDetails !== null ){
+            let accountDetails = this.state.accountDetails;
+            accountDetails["first_name"] = this.props.accountDetails.first_name;
+            accountDetails["last_name"] = this.props.accountDetails.last_name;
+            accountDetails["email"] = this.props.accountDetails.email;            
+
             this.setState({
-                first_name: this.props.accountDetails.first_name,
-                last_name: this.props.accountDetails.last_name,
-                email: this.props.accountDetails.email
+                accountDetails: accountDetails
             })
         }
     }
 
     render () {
-        return !this.props.accountDetails
+        return this.props.accountDetails===null
         ? null
         : <div>{this.renderAccountDetails()}</div>
     }
 
     renderAccountDetails () {
-        const account = this.props.accountDetails
         return (
             <div>
                 <form>
                     <fieldset>
                         <div className="form-group">
                             <label>First name *</label>
-                            <input type="text" name="first_name" onChange={(e)=>this.handleChange(e)} value={account.first_name} className="form-control"/>
+                            <input type="text" name="first_name" onChange={(e)=>this.handleChange(e)} value={this.state.accountDetails.first_name} className="form-control"/>
                         </div>
                         <div className="form-group">
                             <label>Last name *</label>
-                            <input type="text" name="last_name" className="form-control" onChange={(e)=>this.handleChange(e)} value={account.last_name}/>
+                            <input type="text" name="last_name" className="form-control" onChange={(e)=>this.handleChange(e)} value={this.state.accountDetails.last_name}/>
                         </div>
                         <div className="form-group">
                             <label>Email *</label>
-                            <input type="email" name="email" className="form-control" onChange={(e)=>this.handleChange(e)} value={account.email}/>
+                            <input type="email" name="email" className="form-control" onChange={(e)=>this.handleChange(e)} value={this.state.accountDetails.email}/>
                         </div>
                     </fieldset>
 
@@ -57,15 +61,15 @@ export class MyAccount extends Component {constructor (props) {
                         <legend>Optionally change your password</legend>
                         <div className="form-group">
                             <label>Current password</label>
-                            <input type="password" name="old_password" onChange={(e)=>this.handleChange(e)} className="form-control" placeholder="Your current password"/>
+                            <input type="password" name="old_password" onChange={(e)=>this.handleChange(e)} className="form-control" value={this.state.accountDetails.old_password} placeholder="Your current password"/>
                         </div>
                         <div className="form-group">
                             <label>New password</label>
-                            <input type="password" name="password" onChange={(e)=>this.handleChange(e)} className="form-control" placeholder="The new password"/>
+                            <input type="password" name="password" onChange={(e)=>this.handleChange(e)} className="form-control" placeholder="The new password" value={this.state.accountDetails.password}/>
                         </div>
                         <div className="form-group">
                             <label>Confirm new password</label>
-                            <input type="password" name="password_confirm" onChange={(e)=>this.handleChange(e)} className="form-control" placeholder="Confirm the new password"/>
+                            <input type="password" name="password_confirm" onChange={(e)=>this.handleChange(e)} className="form-control" placeholder="Confirm the new password" value={this.state.accountDetails.password_confirm}/>
                         </div>
                     </fieldset>
 
@@ -78,11 +82,13 @@ export class MyAccount extends Component {constructor (props) {
     }
 
     handleChange (e) {
-        this.setState( e.target.name = e.target.value );
+        let accountDetails = this.state.accountDetails;
+        accountDetails[e.target.name] = e.target.value;
+        this.setState({ accountDetails: accountDetails });
     }
 
     updateAccount () {
-        this.props.updateUserAccount(this.state)
+        this.props.updateUserAccount(this.state.accountDetails)
     }
 }
 

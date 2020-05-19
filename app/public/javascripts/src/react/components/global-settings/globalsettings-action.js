@@ -26,7 +26,7 @@ function updateUserAccount (user) {
       .then(result => {
         // The name/email may have changed for the current user. 
         // Reload all actors
-        state.reloadSystemActors() 
+        // state.reloadSystemActors() 
       })
       .catch((err) => console.error(err))
   }
