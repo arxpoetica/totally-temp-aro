@@ -3,6 +3,7 @@ import React, { Component } from 'react'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import dataEditActions from './data-edit-actions.js'
+import planEditorActions from '../plan-editor/plan-editor-actions'
 // import DeleteMenu from './maps-delete-menu.js'
 import DropdownList from 'react-widgets/lib/DropdownList'
 import './duct-edit.css'
@@ -206,6 +207,7 @@ export class DuctEdit extends Component {
 
   onCommit () {
     console.log(this.state.selectedLib.identifier)
+    //this.props.resumeOrCreateTransaction(this.props.plan.activePlan.id, this.props.user.loggedInUser.id)
     this.props.uploadDucts(this.state.selectedLib.identifier)
   }
 
@@ -241,8 +243,6 @@ export class DuctEdit extends Component {
   }
 }
 
-
-
 const mapStateToProps = (state) => ({
   plan: state.plan,
   user: state.user,
@@ -258,7 +258,8 @@ const mapDispatchToProps = dispatch => ({
   deleteDuct: (ductId) => dispatch(dataEditActions.deleteDuct(ductId)),
   newDuct: (duct) => dispatch(dataEditActions.newDuct(duct)),
   setDuct: (ductId, duct) => dispatch(dataEditActions.setDuct(ductId, duct)),
-  uploadDucts: (libraryId) => dispatch(dataEditActions.uploadDucts(libraryId))
+  uploadDucts: (libraryId) => dispatch(dataEditActions.uploadDucts(libraryId)),
+  resumeOrCreateTransaction: (planId, userId) => dispatch(planEditorActions.resumeOrCreateTransaction(planId, userId))
 })
 
 const DuctEditComponent = wrapComponentWithProvider(reduxStore, DuctEdit, mapStateToProps, mapDispatchToProps)

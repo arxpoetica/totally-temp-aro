@@ -377,6 +377,7 @@ class TileDataService {
 
   // Clear the entire tile data cache
   clearDataCache () {
+    console.log('clearDataCache')
     this.tileDataCache = {}
     this.tileProviderCache = {}
     this.featuresToExclude = new Set()
@@ -461,6 +462,7 @@ class TileDataService {
       }
       this.tileHtmlCache[cacheId].isDirty = isDirty
     })
+    console.log(`markHtmlCacheDirty`)
   }
 
   // Remove the specified HTML element from the cache and from the document

@@ -1,7 +1,7 @@
 import Actions from '../../common/actions'
 import AroHttp from '../../common/aro-http'
 import uuidStore from '../../../shared-utils/uuid-store'
-import fetch from 'cross-fetch'
+// import TileDataService from '../../../components/tiles/tile-data-service'
 
 function setSelectedDuctId (ductId) {
   return {
@@ -49,6 +49,10 @@ function uploadDucts (libraryId) {
   return (dispatch, getState) => {
     const state = getState()
     const ducts = state.dataEdit.ductEdit.ducts
+    const userId = state.user.loggedInUser.id
+    var deleteList = {
+      'deletedEdges': []
+    }
     var fileExtension = 'KML'
     // convert state.ducts to KML
     var ductsList = []
@@ -60,23 +64,18 @@ function uploadDucts (libraryId) {
     // append to form data and upload
     var form = new FormData()
     form.append('file', new File([fileData], {type:'text/plain'}), 'ManuallyAddedDucts.kml')
-    var url = `/uploadservice/v1/library/${libraryId}?userId=${state.user.loggedInUser.id}&media=${fileExtension}`
-    /*
-    const options = {
-      method: 'POST',
-      headers: {
-        'Content-Type': undefined
-      },
-      body: form
-    }
-    */
-    // fetch(url, options)
+    var url = `/uploadservice/v1/library/${libraryId}?userId=${userId}&media=${fileExtension}`
+
     AroHttp.postRaw(url, form)
       .then(result => {
         console.log(result)
-        dispatch(deleteAllDucts())
-        // NEED to invalidate cache
-        // dispatch upload complete
+        // dispatch(Actions.)
+        AroHttp.put(`/service/conduits/28/fiber?user_id=${userId}`, deleteList)
+          .then(result => {
+            dispatch(deleteAllDucts())
+            // TileDataService.markHtmlCacheDirty()
+            // dispatch upload complete
+          }).catch(err => console.error(err))
       }).catch(err => console.error(err))
   }
 }
@@ -96,15 +95,6 @@ function pathsToKML (paths) {
   kml += '</Document></kml>'
   return kml
 }
-
-/*
-make new duct entry
-postData = {
-  "dataType": "fiber",
-  "name": "Manually Added Ducts"
-}
-POST http://localhost:8083/v1/library-entry?user_id=4
-*/
 
 export default {
   setSelectedDuctId,
