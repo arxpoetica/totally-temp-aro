@@ -1884,6 +1884,7 @@ class State {
 
     service.handleLibraryModifiedEvent = msg => {
       // If the tileBox is null, use a tile box that covers the entire world
+      console.log(`----- handleLibraryModifiedEvent: ${msg} ----- `)
       const content = JSON.parse(new TextDecoder('utf-8').decode(new Uint8Array(msg.content)))
       const tileBox = content.tileBox || wholeWorldTileBox
       const layerNameRegexStrings = MapLayerHelper.getRegexForAllDataIds(service.mapLayersRedux, null, msg.properties.headers.libraryId)
@@ -1891,9 +1892,11 @@ class State {
       service.requestMapLayerRefresh.next(null)
     }
 
+    // ToDo: if we ever need to actually unsubscribe these, store them in an array
     service.unsubscribePlanEvent = SocketManager.subscribe('COMMIT_TRANSACTION', service.handlePlanModifiedEvent.bind(service))
     service.unsubscribeLibraryEvent1 = SocketManager.subscribe('USER_TRANSACTION', service.handleLibraryModifiedEvent.bind(service))
-    service.unsubscribeLibraryEvent1 = SocketManager.subscribe('ETL_ADD', service.handleLibraryModifiedEvent.bind(service))
+    service.unsubscribeLibraryEvent2 = SocketManager.subscribe('ETL_ADD', service.handleLibraryModifiedEvent.bind(service))
+    service.unsubscribeLibraryEvent3 = SocketManager.subscribe('TILES_INVALIDATED', service.handleLibraryModifiedEvent.bind(service))
 
     service.mergeToTarget = (nextState, actions) => {
       const currentActivePlanId = service.plan && service.plan.id
