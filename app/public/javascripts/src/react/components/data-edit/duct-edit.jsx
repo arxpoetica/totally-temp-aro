@@ -202,7 +202,7 @@ export class DuctEdit extends Component {
   }
 
   canCommit () {
-    return (!this.props.displayOnly && this.state.selectedLib) 
+    return (!this.props.displayOnly && this.state.selectedLib && !this.props.isEditProcessing)
   }
 
   onCommit () {
@@ -249,7 +249,8 @@ const mapStateToProps = (state) => ({
   map: state.map,
   selectedDuctId: state.dataEdit.ductEdit.selectedDuctId,
   ducts: state.dataEdit.ductEdit.ducts,
-  fiberLibrarys: state.plan.dataItems.fiber.allLibraryItems
+  fiberLibrarys: state.plan.dataItems.fiber.allLibraryItems,
+  isEditProcessing: state.dataEdit.isEditProcessing
 })
 
 const mapDispatchToProps = dispatch => ({

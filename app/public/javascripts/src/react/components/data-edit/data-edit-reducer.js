@@ -4,6 +4,13 @@ const defaultState = {
   ductEdit: {
     ducts: {},
     selectedDuctId: null
+  },
+  isEditProcessing: false
+}
+
+function setIsEditProcessing (state, isEditProcessing) {
+  return { ...state,
+    isEditProcessing: isEditProcessing
   }
 }
 
@@ -54,6 +61,8 @@ function setDucts (state, ducts) {
 
 function dataEditReducer (state = defaultState, action) {
   switch (action.type) {
+    case Actions.DATA_SET_IS_EDIT_PROCESSING:
+      return setIsEditProcessing(state, action.payload)
     case Actions.DATA_DUCT_SET_SELECTED_DUCT_ID:
       return setSelectedDuctId(state, action.payload)
 

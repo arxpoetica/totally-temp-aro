@@ -47,6 +47,24 @@ function setDuct (ductId, duct) {
 
 function uploadDucts (libraryId) {
   return (dispatch, getState) => {
+    dispatch({
+      type: Actions.DATA_SET_IS_EDIT_PROCESSING,
+      payload: true
+    })
+
+    var onComplete = () => {
+      dispatch({
+        type: Actions.DATA_SET_IS_EDIT_PROCESSING,
+        payload: false
+      })
+    }
+
+    var onError = (err) => {
+      console.error(err)
+      onComplete()
+      // swal
+    }
+
     const state = getState()
     const ducts = state.dataEdit.ductEdit.ducts
     const userId = state.user.loggedInUser.id
@@ -75,8 +93,9 @@ function uploadDucts (libraryId) {
             dispatch(deleteAllDucts())
             // TileDataService.markHtmlCacheDirty()
             // dispatch upload complete
-          }).catch(err => console.error(err))
-      }).catch(err => console.error(err))
+            onComplete()
+          }).catch(err => onError(err))
+      }).catch(err => onError(err))
   }
 }
 
