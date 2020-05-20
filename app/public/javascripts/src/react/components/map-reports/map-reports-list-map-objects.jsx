@@ -56,8 +56,9 @@ export class MapReportsListMapObjects extends Component {
 
   createMapObject (reportPage, index) {
     const polygonOptions = (reportPage.uuid === this.props.activePageUuid) ? this.polygonOptions.selected : this.polygonOptions.normal
+    const polygonProjections = this.getMapPolygonForReportPage(reportPage)
     const mapObject = new google.maps.Polygon({
-      paths: this.getMapPolygonForReportPage(reportPage),
+      paths: polygonProjections.paths,
       strokeColor: polygonOptions.strokeColor,
       strokeWeight: polygonOptions.strokeWeight,
       fillColor: polygonOptions.fillColor,
@@ -87,13 +88,17 @@ export class MapReportsListMapObjects extends Component {
     this.pageIdToMapObjects[reportPage.uuid] = [mapObject]
 
     if (this.props.showPageNumbers) {
+      const deltaX = (polygonProjections.pixelExtents.maxX - polygonProjections.pixelExtents.minX)
+      const deltaY = (polygonProjections.pixelExtents.maxY - polygonProjections.pixelExtents.minY)
+      const fontSize = Math.round(deltaY / 10)
       const pageNumberMarker = new google.maps.Marker({
         position: { lat: reportPage.mapCenter.latitude, lng: reportPage.mapCenter.longitude },
         label: {
           text: `Page ${index + 1}`,
-          fontSize: '32px',
+          fontSize: `${fontSize}px`,
           color: '#303030'
         },
+        anchor: new google.maps.Point(deltaX / 2, deltaY / 2),
         icon: '/images/map_icons/aro/blank.png',
         map: this.props.googleMaps
       })
@@ -155,13 +160,28 @@ export class MapReportsListMapObjects extends Component {
     const maxLatitude = projection.yToLatitude(yCenter + sizeY / 2)
     const maxLongitude = projection.xToLongitude(xCenter + sizeX / 2)
 
-    // Finally, create a polygon from our min/max latitude/longitude pairs
+    // Create a polygon from our min/max latitude/longitude pairs
     var paths = []
     paths.push({ lat: minLatitude, lng: minLongitude })
     paths.push({ lat: maxLatitude, lng: minLongitude })
     paths.push({ lat: maxLatitude, lng: maxLongitude })
     paths.push({ lat: minLatitude, lng: maxLongitude })
-    return paths
+
+    // Calculate the radius of the sphere used for at this zoom level. The number of pixels on the X axis will
+    // correspond to the length of the equator. The tile at zoom level 0 has a pixel size of 256x256.
+    const radiusForScreenshot = 256 * Math.pow(2, this.props.googleMaps.getZoom()) / (2.0 * Math.PI)
+    const projectionScreenshot = new MercatorProjection(radiusForScreenshot)
+    const pixelExtents = {
+      minX: projectionScreenshot.longitudeToX(minLongitude),
+      minY: projectionScreenshot.latitudeToY(minLatitude),
+      maxX: projectionScreenshot.longitudeToX(maxLongitude),
+      maxY: projectionScreenshot.latitudeToY(maxLatitude)
+    }
+
+    return {
+      paths,
+      pixelExtents
+    }
   }
 
   componentWillUnmount () {
