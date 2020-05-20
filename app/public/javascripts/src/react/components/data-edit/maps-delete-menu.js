@@ -24,6 +24,7 @@ DeleteMenu.prototype.onAdd = function() {
   // mousedown anywhere on the map except on the menu div will close the
   // menu.
   this.divListener_ = google.maps.event.addDomListener(map.getDiv(), 'mousedown', function(e) {
+    e.stopPropagation()
     if (e.target != deleteMenu.div_) {
       deleteMenu.close();
     }
