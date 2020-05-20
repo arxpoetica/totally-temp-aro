@@ -2,6 +2,7 @@
 import { react2angular } from 'react2angular'
 import { ToastContainer } from 'react-toastify'
 
+import MultiFactor from '../react/components/global-settings/multi-factor.jsx'
 import MyAccount from '../react/components/global-settings/my-account.jsx'
 import ReleaseNotes from '../react/components/global-settings/release-notes.jsx'
 import Broadcast from '../react/components/global-settings/broadcast.jsx'
@@ -246,6 +247,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('editorInterfacePrimitive', editorInterfacePrimitive)
   .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
 // ReactJS components
+  .component('rMultiFactor', react2angular(MultiFactor))
   .component('rMyAccount', react2angular(MyAccount))
   .component('rReleaseNotes', react2angular(ReleaseNotes))
   .component('rBroadcast', react2angular(Broadcast))

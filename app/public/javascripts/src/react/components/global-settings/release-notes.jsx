@@ -21,9 +21,7 @@ export class ReleaseNotes extends Component {
   onClickVersion(id){
     AroHttp.get(`/reports/releaseNotes/${id}`)
       .then(result => {
-        console.log(result)
         this.setState({versionDetails:result.data,showVersion:true})
-
       })
       .catch(err => console.error(err))
   }

@@ -95,8 +95,12 @@
     -->
     <r-my-account ng-if="$ctrl.currentView === $ctrl.views.MY_ACCOUNT"></r-my-account>
 
+    <!-- 
     <multifactor-settings ng-if="$ctrl.currentView === $ctrl.views.MULTIFACTOR_AUTHENTICATION && $ctrl.state.configuration.perspective.globalSettings.showMultiFactorAuthentication">
     </multifactor-settings>
+    -->
+    <r-multi-factor ng-if="$ctrl.currentView === $ctrl.views.MULTIFACTOR_AUTHENTICATION">
+    </r-multi-factor>
 
     <manage-users ng-if="$ctrl.currentView === $ctrl.views.MANAGE_USERS"
                   manager-view="$ctrl.globalSettingsService.currentManageUserView"

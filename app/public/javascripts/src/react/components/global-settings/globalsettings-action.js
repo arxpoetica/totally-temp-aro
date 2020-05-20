@@ -22,19 +22,32 @@ function loadReleaseNotes () {
 }
 
 function updateUserAccount (user) {
-  console.log(user)
   return dispatch => {
     AroHttp.post('/settings/update_settings', user)
-      .then(result => {
-        // The name/email may have changed for the current user. 
-        // Reload all actors
+      .then(result => dispatch(
+        /*state.user.loggedInUser.first_name=user.first_name,
+        state.user.loggedInUser.last_name=user.last_name,
+        state.user.loggedInUser.email=user.email,*/
         UserActions.loadSystemActors()
-      })
+      ))
       .catch((err) => console.error(err))
   }
 }
+
+function loadMultiFactor () {
+  return dispatch => {
+    AroHttp.get('/multifactor/get-totp-status')
+      .then(result => dispatch({
+        type: Actions.GLOBAL_SETTINGS_GET_OTP_STATUS,
+        payload: result.data[0]
+      }))
+      .catch(err => console.error(err))
+  }
+}
+
 export default {
   broadcastMessage,
   loadReleaseNotes,
   updateUserAccount,
+  loadMultiFactor
 }
