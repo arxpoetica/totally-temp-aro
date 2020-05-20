@@ -206,6 +206,7 @@ export class DuctEdit extends Component {
   }
 
   onCommit () {
+    if (!this.canCommit()) return
     console.log(this.state.selectedLib.identifier)
     //this.props.resumeOrCreateTransaction(this.props.plan.activePlan.id, this.props.user.loggedInUser.id)
     this.props.uploadDucts(this.state.selectedLib.identifier)
