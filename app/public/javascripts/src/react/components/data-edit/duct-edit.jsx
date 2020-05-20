@@ -4,7 +4,7 @@ import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import dataEditActions from './data-edit-actions.js'
 import planEditorActions from '../plan-editor/plan-editor-actions'
-// import DeleteMenu from './maps-delete-menu.js'
+import DeleteMenu from './maps-delete-menu.js'
 import DropdownList from 'react-widgets/lib/DropdownList'
 import './duct-edit.css'
 
@@ -145,8 +145,12 @@ export class DuctEdit extends Component {
               newPath.push(vertices.getAt(i))
             }
 
-            var newDuct = { ...duct, geometry: newPath }
-            this.props.setDuct(ductId, newDuct)
+            if (newPath.length <= 0) {
+              this.props.deleteDuct(ductId)
+            } else {
+              var newDuct = { ...duct, geometry: newPath }
+              this.props.setDuct(ductId, newDuct)
+            }
           }
 
           var ductLinePath = ductLine.getPath()
@@ -161,15 +165,16 @@ export class DuctEdit extends Component {
           )
 
           // --- from 
-          // var deleteMenu = new DeleteMenu();
+          var deleteMenu = new DeleteMenu()
           this.mapObjectListeners.push(
-            google.maps.event.addListener(ductLinePath, 'rightclick', function(e) {
+            google.maps.event.addListener(ductLine, 'rightclick', event => {
+            // this.props.map.googleMaps.addListener(ductLinePath, 'rightclick', (e) => {
               // Check if click was on a vertex control point
-              console.log(e)
-              if (e.vertex == undefined) {
+              console.log(event)
+              if (event.vertex == undefined) {
                 return;
               }
-              // deleteMenu.open(map, ductLinePath, e.vertex);
+              deleteMenu.open(this.props.map.googleMaps, ductLinePath, event.vertex)
             })
           )
           // ---
@@ -202,7 +207,11 @@ export class DuctEdit extends Component {
   }
 
   canCommit () {
-    return (!this.props.displayOnly && this.state.selectedLib && !this.props.isEditProcessing)
+    return (!this.props.displayOnly && 
+      this.state.selectedLib && 
+      !this.props.isEditProcessing &&
+      this.props.ducts.length > 0
+    )
   }
 
   onCommit () {
@@ -236,11 +245,13 @@ export class DuctEdit extends Component {
     }
     */
     this.mapClickListener = this.props.map.googleMaps.addListener('click', event => this.addPoint(event.latLng))
+    //this.mapRightclickListener = this.props.map.googleMaps.addListener('rightclick', event => console.log(event.latLng))
   }
 
   componentWillUnmount () {
     this.clearRendering()
     this.mapClickListener.remove()
+    //this.mapRightclickListener.remove()
   }
 }
 

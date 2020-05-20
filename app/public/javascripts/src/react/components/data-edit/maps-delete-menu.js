@@ -9,7 +9,8 @@ function DeleteMenu() {
   this.div_.innerHTML = 'Delete';
 
   var menu = this;
-  google.maps.event.addDomListener(this.div_, 'click', function() {
+  google.maps.event.addDomListener(this.div_, 'click', function(event) {
+    event.stopPropagation()
     menu.removeVertex();
   });
 }
@@ -52,6 +53,7 @@ DeleteMenu.prototype.draw = function() {
   }
 
   var point = projection.fromLatLngToDivPixel(position);
+  console.log(point)
   this.div_.style.top = point.y + 'px';
   this.div_.style.left = point.x + 'px';
 };
@@ -60,6 +62,8 @@ DeleteMenu.prototype.draw = function() {
  * Opens the menu at a vertex of a given path.
  */
 DeleteMenu.prototype.open = function(map, path, vertex) {
+  console.log({map, path, vertex})
+  console.log(path.getAt(vertex))
   this.set('position', path.getAt(vertex));
   this.set('path', path);
   this.set('vertex', vertex);
