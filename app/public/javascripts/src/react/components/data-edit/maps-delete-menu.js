@@ -23,8 +23,13 @@ DeleteMenu.prototype.onAdd = function() {
 
   // mousedown anywhere on the map except on the menu div will close the
   // menu.
-  this.divListener_ = google.maps.event.addDomListener(map.getDiv(), 'mousedown', function(e) {
+  /*
+  this.stopClickListener_ = google.maps.event.addDomListener(map.getDiv(), 'click', function(e) {
     e.stopPropagation()
+  })
+  */
+  this.divListener_ = google.maps.event.addDomListener(map.getDiv(), 'mousedown', function(e) {
+    //e.stopPropagation()
     if (e.target != deleteMenu.div_) {
       deleteMenu.close();
     }
@@ -33,6 +38,7 @@ DeleteMenu.prototype.onAdd = function() {
 
 DeleteMenu.prototype.onRemove = function() {
   google.maps.event.removeListener(this.divListener_);
+  //google.maps.event.removeListener(this.stopClickListener_);
   this.div_.parentNode.removeChild(this.div_);
 
   // clean up
