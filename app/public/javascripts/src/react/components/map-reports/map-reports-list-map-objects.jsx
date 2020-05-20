@@ -32,11 +32,26 @@ export class MapReportsListMapObjects extends Component {
   }
 
   componentDidUpdate (prevProps, prevState, snapshot) {
-    const newIds = new Set(this.props.reportPages.map(reportPage => reportPage.uuid))
-    const oldIds = new Set(prevProps.reportPages.map(reportPage => reportPage.uuid))
-    const pagesToCreate = this.props.reportPages.filter(reportPage => !oldIds.has(reportPage.uuid))
-    const pagesToDelete = prevProps.reportPages.filter(reportPage => !newIds.has(reportPage.uuid))
-    const pagesToUpdate = this.props.reportPages.filter(reportPage => newIds.has(reportPage.uuid) && oldIds.has(reportPage.uuid))
+
+    var pagesToCreate = []
+    var pagesToDelete = []
+    var pagesToUpdate = []
+
+    if (prevProps.mapZoom !== this.props.mapZoom) {
+      // If the zoom level has changed, delete all existing map objects and recreate all.
+      this.props.reportPages.forEach(reportPage => {
+        if (this.pageIdToMapObjects[reportPage.uuid]) {
+          this.deleteMapObject(reportPage.uuid)
+        }
+      })
+      pagesToCreate = this.props.reportPages
+    } else {
+      const newIds = new Set(this.props.reportPages.map(reportPage => reportPage.uuid))
+      const oldIds = new Set(prevProps.reportPages.map(reportPage => reportPage.uuid))
+      pagesToCreate = this.props.reportPages.filter(reportPage => !oldIds.has(reportPage.uuid))
+      pagesToDelete = prevProps.reportPages.filter(reportPage => !newIds.has(reportPage.uuid))
+      pagesToUpdate = this.props.reportPages.filter(reportPage => newIds.has(reportPage.uuid) && oldIds.has(reportPage.uuid))
+    }
 
     pagesToCreate.forEach((reportPage, index) => this.createMapObject(reportPage, index))
     pagesToDelete.forEach(reportPage => this.deleteMapObject(reportPage.uuid))
@@ -169,7 +184,7 @@ export class MapReportsListMapObjects extends Component {
 
     // Calculate the radius of the sphere used for at this zoom level. The number of pixels on the X axis will
     // correspond to the length of the equator. The tile at zoom level 0 has a pixel size of 256x256.
-    const radiusForScreenshot = 256 * Math.pow(2, this.props.googleMaps.getZoom()) / (2.0 * Math.PI)
+    const radiusForScreenshot = 256 * Math.pow(2, this.props.mapZoom) / (2.0 * Math.PI)
     const projectionScreenshot = new MercatorProjection(radiusForScreenshot)
     const pixelExtents = {
       minX: projectionScreenshot.longitudeToX(minLongitude),
@@ -185,7 +200,7 @@ export class MapReportsListMapObjects extends Component {
   }
 
   componentWillUnmount () {
-    this.props.reportPages.forEach(reportPage => this.deleteMapObject(reportPage.uuid))
+    Object.keys(this.pageIdToMapObjects).forEach(reportPage => this.deleteMapObject(reportPage.uuid))
   }
 }
 
@@ -193,6 +208,7 @@ MapReportsListMapObjects.propTypes = {
   planId: PropTypes.number,
   activePageUuid: PropTypes.string,
   googleMaps: PropTypes.object,
+  mapZoom: PropTypes.number,
   reportPages: PropTypes.array,
   showPageNumbers: PropTypes.bool
 }
@@ -201,6 +217,7 @@ const mapStateToProps = state => ({
   planId: state.plan.activePlan.id,
   activePageUuid: state.mapReports.activePageUuid,
   googleMaps: state.map.googleMaps,
+  mapZoom: state.map.zoom,
   reportPages: state.mapReports.pages,
   showPageNumbers: state.mapReports.showPageNumbers
 })
