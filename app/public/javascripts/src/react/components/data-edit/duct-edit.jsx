@@ -14,7 +14,8 @@ export class DuctEdit extends Component {
 
     this.createdMapObjects = []
     this.mapObjectListeners = []
-    // this.mapClickListener = null
+    // this.mapClickListener
+    // this.deleteMenu
 
     this.selectedLineOptions = {
       geodesic: true,
@@ -48,14 +49,13 @@ export class DuctEdit extends Component {
       revOrder.unshift({ id: key, duct: this.props.ducts[key] })
     ))
     var jsx = []
-    // jsx.push(<div key='title' onClick={(event) => { this.toggleSelect(null) }}>Ducts:</div>)
     revOrder.forEach((ductMeta) => {
       jsx.push(this.renderDuctRow(ductMeta.id, ductMeta.duct))
     })
     return (
       <React.Fragment>
-        <div className="ei-header ei-no-pointer">Append to Library:</div>
-        <div className="ei-items-contain">
+        <div className='ei-header ei-no-pointer'>Append to Library:</div>
+        <div className='ei-items-contain'>
           <div className='ei-property-item'>
             <div className='ei-property-label'>Library</div>
             <div className='ei-property-value'>
@@ -73,8 +73,8 @@ export class DuctEdit extends Component {
         <button onClick={() => this.onCommit()}
           disabled={(this.canCommit() ? null : 'disabled')}
         >Commit</button>
-        <div className="ei-header ei-no-pointer">Ducts:</div>
-        <div className="ei-items-contain">
+        <div className='ei-header ei-no-pointer'>Ducts:</div>
+        <div className='ei-items-contain'>
           {jsx}
         </div>
       </React.Fragment>
@@ -107,11 +107,11 @@ export class DuctEdit extends Component {
       const duct = this.props.ducts[ductId]
       if (duct.geometry.length > 0) {
         var isSelected = (ductId === this.props.selectedDuctId)
-        
+
         var ductLine = new google.maps.Polyline({
           path: duct.geometry
         })
-        
+
         if (isSelected) {
           ductLine.setOptions(this.selectedLineOptions)
           if (duct.geometry.length > 0) {
@@ -138,6 +138,7 @@ export class DuctEdit extends Component {
 
         if (isSelected) {
           var onPathChange = (path) => {
+            this.deleteMenu.close()
             var newPath = []
             var vertices = ductLine.getPath()
 
@@ -164,22 +165,18 @@ export class DuctEdit extends Component {
             google.maps.event.addListener(ductLinePath, 'set_at', onPathChange)
           )
 
-          // --- from 
-          var deleteMenu = new DeleteMenu()
+          // --- from https://developers.google.com/maps/documentation/javascript/examples/delete-vertex-menu
+          // var deleteMenu = new DeleteMenu()
           this.mapObjectListeners.push(
             google.maps.event.addListener(ductLine, 'rightclick', event => {
-            // this.props.map.googleMaps.addListener(ductLinePath, 'rightclick', (e) => {
-              // Check if click was on a vertex control point
-              console.log(event)
-              if (event.vertex == undefined) {
-                return;
+              if (event.vertex === undefined) {
+                return
               }
-              deleteMenu.open(this.props.map.googleMaps, ductLinePath, event.vertex)
+              this.deleteMenu.open(this.props.map.googleMaps, ductLinePath, event.vertex)
             })
           )
           // ---
         }
-
       }
     })
   }
@@ -199,6 +196,7 @@ export class DuctEdit extends Component {
 
   toggleSelect (ductId) {
     if (ductId === this.props.selectedDuctId) ductId = null
+    this.deleteMenu.close()
     this.props.setSelectedDuctId(ductId)
   }
 
@@ -207,17 +205,18 @@ export class DuctEdit extends Component {
   }
 
   canCommit () {
-    return (!this.props.displayOnly && 
+    var isCanCommit = (!this.props.displayOnly && 
       this.state.selectedLib && 
       !this.props.isEditProcessing &&
-      this.props.ducts.length > 0
+      Object.keys(this.props.ducts).length > 0
     )
+
+    return isCanCommit
   }
 
   onCommit () {
     if (!this.canCommit()) return
-    console.log(this.state.selectedLib.identifier)
-    //this.props.resumeOrCreateTransaction(this.props.plan.activePlan.id, this.props.user.loggedInUser.id)
+    this.deleteMenu.close()
     this.props.uploadDucts(this.state.selectedLib.identifier)
   }
 
@@ -232,26 +231,16 @@ export class DuctEdit extends Component {
     })
     this.mapObjectListeners = []
   }
-  /*
-  selectNewestRing () {
-    var ringId = Object.keys(this.props.rings).sort().pop()
-    this.props.setSelectedRingId(ringId)
-  }
-  */
+
   componentDidMount () {
-    /*
-    if (!this.props.selectedRingId) {
-      this.selectNewestRing()
-    }
-    */
     this.mapClickListener = this.props.map.googleMaps.addListener('click', event => this.addPoint(event.latLng))
-    //this.mapRightclickListener = this.props.map.googleMaps.addListener('rightclick', event => console.log(event.latLng))
+    this.deleteMenu = new DeleteMenu()
   }
 
   componentWillUnmount () {
+    this.deleteMenu.close()
     this.clearRendering()
     this.mapClickListener.remove()
-    //this.mapRightclickListener.remove()
   }
 }
 

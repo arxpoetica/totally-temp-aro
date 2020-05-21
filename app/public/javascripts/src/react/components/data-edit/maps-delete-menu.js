@@ -23,22 +23,22 @@ DeleteMenu.prototype.onAdd = function() {
 
   // mousedown anywhere on the map except on the menu div will close the
   // menu.
-  /*
-  this.stopClickListener_ = google.maps.event.addDomListener(map.getDiv(), 'click', function(e) {
-    e.stopPropagation()
-  })
-  */
-  this.divListener_ = google.maps.event.addDomListener(map.getDiv(), 'mousedown', function(e) {
+  this.clickListener_ = google.maps.event.addDomListener(map.getDiv(), 'click', event => {
     //e.stopPropagation()
-    if (e.target != deleteMenu.div_) {
-      deleteMenu.close();
+    if (event.target != deleteMenu.div_) {
+      event.stopPropagation()
+      deleteMenu.close()
     }
   }, true);
+
+  this.dragListener_ = google.maps.event.addDomListener(map.getDiv(), 'dragstart', event => {
+    deleteMenu.close()
+  }, true)
 };
 
 DeleteMenu.prototype.onRemove = function() {
-  google.maps.event.removeListener(this.divListener_);
-  //google.maps.event.removeListener(this.stopClickListener_);
+  google.maps.event.removeListener(this.clickListener_);
+  google.maps.event.removeListener(this.dragListener_);
   this.div_.parentNode.removeChild(this.div_);
 
   // clean up
@@ -60,7 +60,6 @@ DeleteMenu.prototype.draw = function() {
   }
 
   var point = projection.fromLatLngToDivPixel(position);
-  console.log(point)
   this.div_.style.top = point.y + 'px';
   this.div_.style.left = point.x + 'px';
 };
@@ -69,8 +68,7 @@ DeleteMenu.prototype.draw = function() {
  * Opens the menu at a vertex of a given path.
  */
 DeleteMenu.prototype.open = function(map, path, vertex) {
-  console.log({map, path, vertex})
-  console.log(path.getAt(vertex))
+  this.close()
   this.set('position', path.getAt(vertex));
   this.set('path', path);
   this.set('vertex', vertex);
