@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import globalsettingsActions from '../global-settings/globalsettings-action'
+import { PropTypes } from 'prop-types'
 
 const status = {
     UNDEFINED: 'UNDEFINED',
@@ -15,47 +16,60 @@ export class MultiFactor extends Component {
     constructor (props) {
         super(props)
         this.state = {
-            is_totp_verified: false, 
-            is_totp_enabled: false,
-            currentState: status.UNINITIALIZED,
-            is_loaded: false
+            verificationCode:''
         }
     }
 
+    componentDidUpdate (prevProps) {
+        console.log(this.props.multiFactor)
+        console.log(this.props.secretDetails)
+        console.log(this.props.verifyDetails)
+    }
+
     componentWillMount () {
-        console.log(this.state.currentState)
-        this.props.loadMultiFactor()
-        if(this.props.multiFactor !== null){
-            console.log(this.props.otpStatus)
-            if (!this.props.otpStatus.is_totp_enabled) {
-                this.state.currentState = status.UNINITIALIZED
-            } else {
-                // TOTP is enabled. If it is not verified, then something went wrong with the verification. Set it to uninitialized.
-                this.state.currentState = this.props.otpStatus.is_totp_verified ? status.MULTIFACTOR_ALREADY_SETUP : status.UNINITIALIZED
-            }
-            this.state.is_loaded = true
-            this.setState({currentState: this.state.currentState})
-            this.setState({is_loaded: this.state.is_loaded})
-            console.log(this.state.currentState)
-        }else{
-            console.log(this.props.multiFactor)
-        }
+        this.props.loadOtpStatus()
     }
     
     render () {
         console.log(this.props.multiFactor)
-        return this.props.multiFactor !== null
-            ? null
-            : <div>
-                {this.renderMutiFactor()}
-            </div>
+        console.log(this.props.secretDetails)
+        return this.props.multiFactor !== null || this.props.secretDetails !== null
+            ? <div>
+              {this.renderMutiFactor()}
+              </div>
+            : null
     }
     renderMutiFactor () {
-        console.log(this.state.is_loaded)
+        console.log(this.props.multiFactor)
+        let currentState = status.UNDEFINED;
 
-        return (
+        if(this.props.multiFactor !== null){
+            if(!this.props.multiFactor.is_totp_enabled){
+                currentState = status.UNINITIALIZED
+            }else{
+                if(this.props.multiFactor.is_totp_verified){
+                    currentState = status.MULTIFACTOR_ALREADY_SETUP
+                }else{
+                    currentState = status.UNINITIALIZED
+                }
+            }
+        }
+
+        console.log(this.props.secretDetails)
+        if(this.props.secretDetails !== null){
+            currentState = status.SECRET_GENERATED
+        }
+
+        if(this.props.verifyDetails !== null){
+            if(this.props.verifyFlag){
+                currentState = status.SETUP_COMPLETE
+            }
+        }
+
+        console.log(currentState)
+         return (
             <div>
-                {this.state.currentState === status.MULTIFACTOR_ALREADY_SETUP && 
+                {currentState === status.MULTIFACTOR_ALREADY_SETUP && 
                 <div>
                     <p>
                         Multi-factor authentication is already set up for your account. You can either disable it
@@ -77,7 +91,7 @@ export class MultiFactor extends Component {
                 </div>
                 }
 
-                {this.state.currentState === status.UNINITIALIZED && 
+                {currentState === status.UNINITIALIZED && 
                 <div>
                     <p>
                         Multi-factor authentication secures your account by requiring a one-time password (OTP)
@@ -85,22 +99,113 @@ export class MultiFactor extends Component {
                         or using an authenticator app like Google Authenticator or Authy.
                     </p>
                     <div className="text-center">
-                        <button class="btn btn-primary">Get Started</button>
+                        <button className="btn btn-primary" onClick={() => this.getSecret()}>Get Started</button>
                     </div>
                 </div>
                 }
+
+                {currentState === status.SECRET_GENERATED &&
+                <div>
+                    <h3 className="mb-3">Step 1: Set up authenticator app</h3>
+                    <p className="mb-0">
+                    A secret key has been generated for your account. You can now use an app like Google Authenticator or Authy
+                    to sync the secret key with your account. Simply scan the QR code with the app and then enter the validation
+                    code that shows up on the app.
+                    </p>
+                    <div className="text-center">
+                        <img src={this.props.secretDetails.qrCode} />
+                    </div>
+                    
+                    {!this.props.showSecretText &&
+                    <div className="text-center mb-3">
+                        <button className="btn btn-sm btn-light" onClick={() => this.props.showSecretText = true}>Camera not working?</button>
+                    </div>
+                    }
+                    {this.props.showSecretText &&
+                    <div className="text-center mb-3">
+                        <div>Secret: {this.props.secretDetails.secret}</div>
+                    </div>
+                    }
+                    <h3 className="mb-3">Step 2: Enter current 6-digit OTP</h3>
+                    <div className="text-center">
+                    <div className="input-group">
+                        <input type="text" className="form-control" name="verificationCode" placeholder="6-digit OTP" onChange={(e)=>this.handleChange(e)} value={this.state.verificationCode}/>
+                        <div className="input-group-append">
+                            <button className="btn btn-primary" type="button" onClick={() => this.verifyOtp(this.state.verificationCode)}>Next</button>
+                        </div>
+                    </div>
+                    </div>
+                    
+                    {!this.props.totpEmailSent &&
+                    <div>
+                        <a href="#" onClick={() => this.sendOtpEmail()}>I don't have an app, email the OTP to me</a>
+                    </div>
+                    }
+                    {this.props.errorFlag &&
+                        <div className="alert alert-danger mt-3">{this.props.verifyDetails}</div>
+                    }
+                    {this.props.totpEmailSent &&
+                        <div id="#totpEmailSentMessage" className="alert alert-success mt-3">An email with the current OTP has been sent to your registered email.
+                        Please check your email.</div>
+                    }
+                </div>
+                }
+
+                {currentState === status.SETUP_COMPLETE &&
+                <div>
+                    <h3 class="mb-3">Multi-factor authentication complete</h3>
+                    <p>Congratulations! Multi-factor authentication has been successfully set up for your account. In the future, you will
+                    require a One-Time Password (OTP) to log in to your account (in addition to your account password).
+                    </p>
+                </div>
+                }
+                
             </div>
         )
     }
 
+    getSecret () {
+        this.props.overwriteSecretForUser()
+    }
+
+    showSecret () {
+        this.props.showSecretText = true
+    }
+
+    sendOtpEmail () {
+        this.props.sendOTPByEmail()
+    }
+
+    verifyOtp () {
+        console.log(this.state.verificationCode)
+        this.props.verifySecretForUser(this.state.verificationCode)
+    }
+
+    handleChange (e) {
+        this.setState({ verificationCode: e.target.value });
+    }
+}
+
+MultiFactor.propTypes = {
+    showSecretText: PropTypes.boolean
 }
 
 const mapStateToProps = (state) => ({
-    multiFactor: state.globalSettings.multiFactor
+    multiFactor: state.globalSettings.multiFactor,
+    secretDetails: state.globalSettings.secretDetails,
+    showSecretText: state.globalSettings.showSecretText,
+    totpEmailSent:  state.globalSettings.totpEmailSent,
+    verifyDetails: state.globalSettings.verifyDetails,
+    errorFlag: state.globalSettings.errorFlag,
+    verifyFlag: state.globalSettings.verifyFlag
 })
 
 const mapDispatchToProps = (dispatch) => ({
-    loadMultiFactor: () => dispatch(globalsettingsActions.loadMultiFactor())
+    loadOtpStatus: () => dispatch(globalsettingsActions.loadOtpStatus()),
+    overwriteSecretForUser: () => dispatch(globalsettingsActions.overwriteSecretForUser()),
+    updateSecret: () => dispatch(globalsettingsActions.updateSecret()),
+    sendOTPByEmail: () => dispatch(globalsettingsActions.sendOTPByEmail()),
+    verifySecretForUser: (verificationCode) => dispatch(globalsettingsActions.verifySecretForUser(verificationCode))
 })
 
 const MultiFactorComponent = wrapComponentWithProvider(reduxStore, MultiFactor, mapStateToProps, mapDispatchToProps)

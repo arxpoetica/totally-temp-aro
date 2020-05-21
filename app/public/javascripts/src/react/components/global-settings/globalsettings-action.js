@@ -1,7 +1,5 @@
 import AroHttp from '../../common/aro-http'
 import Actions from '../../common/actions'
-import UserActions from '../user/user-actions'
-
 
 function broadcastMessage (message) {
   return dispatch => {
@@ -24,17 +22,15 @@ function loadReleaseNotes () {
 function updateUserAccount (user) {
   return dispatch => {
     AroHttp.post('/settings/update_settings', user)
-      .then(result => dispatch(
-        /*state.user.loggedInUser.first_name=user.first_name,
-        state.user.loggedInUser.last_name=user.last_name,
-        state.user.loggedInUser.email=user.email,*/
-        UserActions.loadSystemActors()
-      ))
+      .then(result => dispatch({
+        type: Actions.GLOBAL_SETTINGS_UPDATE_USER,
+        payload: user
+      }))
       .catch((err) => console.error(err))
   }
 }
 
-function loadMultiFactor () {
+function loadOtpStatus () {
   return dispatch => {
     AroHttp.get('/multifactor/get-totp-status')
       .then(result => dispatch({
@@ -45,9 +41,50 @@ function loadMultiFactor () {
   }
 }
 
+function overwriteSecretForUser () {
+  return dispatch => {
+    AroHttp.get('/multifactor/overwrite-totp-secret')
+      .then(result => dispatch({
+        type: Actions.GLOBAL_SETTINGS_OVERWRITE_SECRET,
+        payload: result.data
+      }))
+      .catch(err => console.error(err))
+  }
+}
+
+function verifySecretForUser (verificationCode) {
+
+  return dispatch => {
+    AroHttp.post('/multifactor/verify-totp-secret', { verificationCode: verificationCode })
+      .then(result => dispatch({
+          type: Actions.GLOBAL_SETTINGS_VERIFY_SECRET,
+          payload: result.data
+      }))
+      .catch(error => dispatch({
+        type: Actions.GLOBAL_SETTINGS_ERROR_SECRET,
+        payload: error.data
+      }))
+  }
+}
+
+function sendOTPByEmail () {
+  return dispatch => {
+    AroHttp.post('/send-totp-by-email', {})
+      .then(result => dispatch({
+          type: Actions.GLOBAL_SETTINGS_SEND_EMAIL_OTP,
+          payload: result.data
+      }))
+      .catch((err) => console.error(err))
+  }
+  
+}
+
 export default {
   broadcastMessage,
   loadReleaseNotes,
   updateUserAccount,
-  loadMultiFactor
+  loadOtpStatus,
+  overwriteSecretForUser,
+  verifySecretForUser,
+  sendOTPByEmail
 }
