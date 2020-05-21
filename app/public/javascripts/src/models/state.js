@@ -20,7 +20,7 @@ import RingEditActions from '../react/components/ring-edit/ring-edit-actions'
 import NetworkAnalysisActions from '../react/components/optimization/network-analysis/network-analysis-actions'
 import ReactComponentConstants from '../react/common/constants'
 import AroNetworkConstraints from '../shared-utils/aro-network-constraints'
-import Tools from '../react/components/tool/tools'
+import PuppeteerMessages from '../components/common/puppeteer-messages'
 
 const networkAnalysisConstraintsSelector = formValueSelector(ReactComponentConstants.NETWORK_ANALYSIS_CONSTRAINTS)
 
@@ -1661,6 +1661,13 @@ class State {
             return Promise.resolve()
           }
         })
+        .then(() => {
+          console.log('No longer suppressing vector tiles')
+          service.suppressVectorTiles = false
+          PuppeteerMessages.suppressMessages = false
+          service.recreateTilesAndCache()
+          $timeout()
+        })
         .catch((err) => {
           console.error(err)
           // Set it to the default so that the map gets initialized
@@ -1668,6 +1675,7 @@ class State {
         })
     }
 
+    service.suppressVectorTiles = true
     service.configuration = {}
     service.initializeApp = initialState => {
       // Get application configuration from the server

@@ -1,3 +1,5 @@
+import PuppeteerMessages from '../common/puppeteer-messages'
+
 class MapSplitController {
   constructor ($document, $timeout, $scope, state, $compile, $ngRedux) {
     this.$timeout = $timeout
@@ -35,6 +37,9 @@ class MapSplitController {
       let element = $compile('<map-toggle-component user-perspective="$ctrl.state.loggedInUser.perspective" map-global-object-name="map"></map-toggle-component>')($scope)
       element[0].index = 3
       map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(element[0])
+      google.maps.event.addListenerOnce(map, 'tilesloaded', function () {
+        PuppeteerMessages.googleMapsTilesRenderedCallback()
+      })
     })
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }

@@ -1,6 +1,7 @@
 import AsyncQueue from 'async/queue'
 import SocketTileFetcher from './tile-data-fetchers/SocketTileFetcher'
 import HttpTileFetcher from './tile-data-fetchers/HttpTileFetcher'
+import PuppeteerMessages from '../common/puppeteer-messages'
 
 class TileDataService {
 
@@ -33,6 +34,10 @@ class TileDataService {
         .then((result) => callback({ status: 'success', data: result }))
         .catch((err) => callback({ status: 'failure', data: err }))
     }, MAX_CONCURRENT_VECTOR_TILE_REQUESTS)
+
+    // Detect when the queue has drained (finished fetching data). If a callback function exists on the window, call it.
+    // This is used by the PDF report generator to detect when we are finished fetching all vector tile data.
+    this.httpThrottle.drain = () => PuppeteerMessages.vectorTilesDataFetchedCallback()
 
     this.locationStates = {
       LOCK_ICON_KEY: 'LOCK_ICON_KEY',

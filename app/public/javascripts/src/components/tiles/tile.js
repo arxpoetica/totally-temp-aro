@@ -566,6 +566,10 @@ class TileComponentController {
 
   // Refresh map tiles
   refreshMapTiles (tilesToRefresh) {
+    if (this.state.suppressVectorTiles) {
+      console.warn('Suppressing map tile refresh')
+      return
+    }
     if (!this.mapRef || !this.mapRef.getBounds()) {
       return
     }
