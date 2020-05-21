@@ -1581,6 +1581,9 @@ class State {
           if (service.isReportMode) {
             return service.mapReadyPromise
               .then(() => {
+                google.maps.event.addListener(map, 'tilesloaded', function () {
+                  PuppeteerMessages.googleMapsTilesRenderedCallback()
+                })
                 // If we are in Report mode, disable the default UI like zoom buttons, etc.
                 service.mapRef.setOptions({
                   disableDefaultUI: true,

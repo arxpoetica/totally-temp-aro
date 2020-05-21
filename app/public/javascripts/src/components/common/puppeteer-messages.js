@@ -11,7 +11,7 @@ export default class PuppeteerMessages {
   }
 
   static googleMapsTilesRenderedCallback () {
-    (!PuppeteerMessages.suppressMessages) && window.googleMapsTilesRenderedCallback && window.googleMapsTilesRenderedCallback()
+    window.googleMapsTilesRenderedCallback && window.googleMapsTilesRenderedCallback()
   }
 }
 
