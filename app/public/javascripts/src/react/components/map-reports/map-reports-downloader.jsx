@@ -48,7 +48,7 @@ export class MapReportsDownloader extends Component {
             className='form-control form-control-sm'
             type='number'
             value={this.props.waitSecondsPerPage}
-            onChange={event => this.props.setWaitTimePerPage(event.target.value)}
+            onChange={event => this.props.setWaitTimePerPage(+event.target.value)}
           />
         </div>
       </div>
