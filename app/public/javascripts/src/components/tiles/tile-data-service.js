@@ -20,7 +20,7 @@ class TileDataService {
       { description: 'HTTP (legacy)', fetcher: new HttpTileFetcher() },
       { description: 'Websockets', fetcher: new SocketTileFetcher() }
     ]
-    this.activeTileFetcher = this.tileFetchers[0]
+    this.activeTileFetcher = this.tileFetchers[1]
 
     // For Chrome, Firefox 3+, Safari 5+, the browser throttles all http 1 requests to 6 maximum concurrent requests.
     // If we have a large number of vector tile requests, then any other calls to aro-service get queued after these,
