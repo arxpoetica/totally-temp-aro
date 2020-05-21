@@ -7,7 +7,8 @@ const defaultState = {
   activePageUuid: null,
   editingPageUuid: null,
   isCommunicating: false,
-  isDownloading: false
+  isDownloading: false,
+  waitSecondsPerPage: 20
 }
 
 function clearMapReports () {
@@ -56,9 +57,14 @@ function setIsDownloading (state, isDownloading) {
   }
 }
 
+function setWaitTimePerPage (state, waitSecondsPerPage) {
+  return { ...state,
+    waitSecondsPerPage
+  }
+}
+
 function mapReportsReducer (state = defaultState, action) {
   switch (action.type) {
-
     case Actions.MAP_REPORTS_SET_PAGES:
       return setPages(state, action.payload)
 
@@ -82,6 +88,9 @@ function mapReportsReducer (state = defaultState, action) {
 
     case Actions.MAP_REPORTS_SET_IS_DOWNLOADING:
       return setIsDownloading(state, action.payload)
+
+    case Actions.MAP_REPORTS_SET_WAIT_TIME_PER_PAGE:
+      return setWaitTimePerPage(state, action.payload)
 
     default:
       return state

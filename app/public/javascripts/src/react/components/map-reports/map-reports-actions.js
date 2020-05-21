@@ -109,6 +109,13 @@ function setEditingPageUuid (uuid) {
   }
 }
 
+function setWaitTimePerPage (waitSecondsPerPage) {
+  return {
+    type: Actions.MAP_REPORTS_SET_WAIT_TIME_PER_PAGE,
+    payload: waitSecondsPerPage
+  }
+}
+
 export default {
   downloadReport,
   setLayers,
@@ -119,5 +126,6 @@ export default {
   showMapObjects,
   showPageNumbers,
   setActivePageUuid,
-  setEditingPageUuid
+  setEditingPageUuid,
+  setWaitTimePerPage
 }

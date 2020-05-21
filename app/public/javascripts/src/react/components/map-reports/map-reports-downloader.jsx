@@ -39,6 +39,20 @@ export class MapReportsDownloader extends Component {
   renderReportsList () {
     return <div>
       <MapReportsList />
+      <div className='row pt-3'>
+        <div className='col-md-6' style={{ lineHeight: '30px' }}>
+          Wait time per page (sec)
+        </div>
+        <div className='col-md-6'>
+          <input
+            className='form-control form-control-sm'
+            type='number'
+            value={this.props.waitSecondsPerPage}
+            onChange={event => this.props.setWaitTimePerPage(event.target.value)}
+          />
+        </div>
+      </div>
+        
       <button
         className={'btn btn-sm btn-block mt-2' + (this.props.isDownloading ? ' btn-light' : ' btn-primary')}
         onClick={() => this.doDownloadReport()}
@@ -61,6 +75,7 @@ export class MapReportsDownloader extends Component {
       const pageDefinition = JSON.parse(JSON.stringify(reportPage))
       pageDefinition.planId = this.props.planId
       pageDefinition.planName = this.props.planName
+      pageDefinition.waitSecondsPerPage = this.props.waitSecondsPerPage // Until we detect this properly on the backend
       // From maplayers, get the layers that we want to display in the report
       pageDefinition.visibleLayers = this.props.mapLayers.location.filter(layer => layer.checked).map(layer => layer.key).toJS();
       ['boundaries', 'cables', 'conduits', 'equipments', 'roads'].forEach(networkEquipmentCategory => {
@@ -101,7 +116,8 @@ MapReportsDownloader.propTypes = {
   isCommunicating: PropTypes.bool,
   isDownloading: PropTypes.bool,
   reportPages: PropTypes.array,
-  editingPageUuid: PropTypes.string
+  editingPageUuid: PropTypes.string,
+  waitSecondsPerPage: PropTypes.number
 }
 
 const mapStateToProps = state => ({
@@ -111,13 +127,15 @@ const mapStateToProps = state => ({
   isCommunicating: state.mapReports.isCommunicating,
   isDownloading: state.mapReports.isDownloading,
   reportPages: state.mapReports.pages,
-  editingPageUuid: state.mapReports.editingPageUuid
+  editingPageUuid: state.mapReports.editingPageUuid,
+  waitSecondsPerPage: state.mapReports.waitSecondsPerPage
 })
 
 const mapDispatchToProps = dispatch => ({
   loadReportPagesForPlan: planId => dispatch(MapReportActions.loadReportPagesForPlan(planId)),
   downloadReport: (planId, pageDefinitions) => dispatch(MapReportActions.downloadReport(planId, pageDefinitions)),
-  clearMapReports: () => dispatch(MapReportActions.clearMapReports())
+  clearMapReports: () => dispatch(MapReportActions.clearMapReports()),
+  setWaitTimePerPage: waitSecondsPerPage => dispatch(MapReportActions.setWaitTimePerPage(waitSecondsPerPage))
 })
 
 const MapReportsDownloaderComponent = wrapComponentWithProvider(reduxStore, MapReportsDownloader, mapStateToProps, mapDispatchToProps)
