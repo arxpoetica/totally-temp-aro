@@ -5,6 +5,7 @@ import Actions from '../../common/actions'
 
 function downloadReport (planId, pageDefinitions) {
   return dispatch => {
+    dispatch({ type: Actions.MAP_REPORTS_SET_IS_DOWNLOADING, payload: true })
     const reportUrl = `/map-reports/report`
     // "(new Date()).toISOString().split('T')[0]" will give "YYYY-MM-DD"
     // Note that we are doing (new Date(Date.now())) so that we can have deterministic tests (by replacing the Date.now() function when testing)
@@ -12,9 +13,11 @@ function downloadReport (planId, pageDefinitions) {
     AroHttp.post(reportUrl, pageDefinitions, true)
       .then(rawResult => {
         saveAs(new Blob([rawResult]), downloadFileName)
+        dispatch({ type: Actions.MAP_REPORTS_SET_IS_DOWNLOADING, payload: false })
       })
       .catch(err => {
         console.error(err)
+        dispatch({ type: Actions.MAP_REPORTS_SET_IS_DOWNLOADING, payload: false })
       })
   }
 }
@@ -78,6 +81,20 @@ function setPages (planId, pageDefinitions) {
   }
 }
 
+function showMapObjects (showMapObjects) {
+  return {
+    type: Actions.MAP_REPORTS_SET_SHOW_MAP_OBJECTS,
+    payload: showMapObjects
+  }
+}
+
+function showPageNumbers (showPageNumbers) {
+  return {
+    type: Actions.MAP_REPORTS_SET_SHOW_PAGE_NUMBERS,
+    payload: showPageNumbers
+  }
+}
+
 function setActivePageUuid (uuid) {
   return {
     type: Actions.MAP_REPORTS_SET_ACTIVE_PAGE_UUID,
@@ -99,6 +116,8 @@ export default {
   loadReportPagesForPlan,
   clearMapReports,
   setPages,
+  showMapObjects,
+  showPageNumbers,
   setActivePageUuid,
   setEditingPageUuid
 }

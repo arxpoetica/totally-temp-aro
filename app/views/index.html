@@ -24,7 +24,7 @@
     <link rel="stylesheet" type="text/css" href="/javascripts/src/shared-utils/editor-interfaces.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/client_<%= ARO_CLIENT_DONOT_USE_IN_CODE %>.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/layout_<%= config.ui.layout %>.css">
-    <%if (reportPage) { %>
+    <%if (reportPage || reportOverview) { %>
       <script>
         window.GLOBAL_MAP_SPLITTER_INITIAL_WIDTH = 100
         window.GLOBAL_SIDEBAR_INITIAL_WIDTH = 0
@@ -205,7 +205,10 @@
         map.setStreetView(panorama);
 
         // At this point, our angular app and the document is initialized. Perform any further initialization via the state service.
-        angular.element(document.body).injector().get('state').initializeApp(<%- JSON.stringify(reportPage)  %>)
+        angular.element(document.body).injector().get('state').initializeApp({
+          reportPage: <%- JSON.stringify(reportPage) || 'null'  %>,
+          reportOverview: <%- JSON.stringify(reportOverview) || 'null'  %>
+        })
       }
 
       function openReleaseNotes() {

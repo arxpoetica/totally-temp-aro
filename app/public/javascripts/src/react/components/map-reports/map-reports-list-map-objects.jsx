@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { PropTypes } from 'prop-types'
-import { connect } from 'react-redux'
+import reduxStore from '../../../redux-store'
+import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import MapReportActions from './map-reports-actions'
 import { REPORT_LAT_LONG_PRECISION } from './constants'
 import MercatorProjection from '../../../shared-utils/mercator-projection'
@@ -8,7 +9,7 @@ import MercatorProjection from '../../../shared-utils/mercator-projection'
 export class MapReportsListMapObjects extends Component {
   constructor (props) {
     super(props)
-    this.pageIdToMapObject = {}
+    this.pageIdToMapObjects = {}
     this.pageIdToListeners = {}
     this.polygonOptions = {
       normal: {
@@ -31,11 +32,26 @@ export class MapReportsListMapObjects extends Component {
   }
 
   componentDidUpdate (prevProps, prevState, snapshot) {
-    const newIds = new Set(this.props.reportPages.map(reportPage => reportPage.uuid))
-    const oldIds = new Set(prevProps.reportPages.map(reportPage => reportPage.uuid))
-    const pagesToCreate = this.props.reportPages.filter(reportPage => !oldIds.has(reportPage.uuid))
-    const pagesToDelete = prevProps.reportPages.filter(reportPage => !newIds.has(reportPage.uuid))
-    const pagesToUpdate = this.props.reportPages.filter(reportPage => newIds.has(reportPage.uuid) && oldIds.has(reportPage.uuid))
+
+    var pagesToCreate = []
+    var pagesToDelete = []
+    var pagesToUpdate = []
+
+    if (prevProps.mapZoom !== this.props.mapZoom) {
+      // If the zoom level has changed, delete all existing map objects and recreate all.
+      this.props.reportPages.forEach(reportPage => {
+        if (this.pageIdToMapObjects[reportPage.uuid]) {
+          this.deleteMapObject(reportPage.uuid)
+        }
+      })
+      pagesToCreate = this.props.reportPages
+    } else {
+      const newIds = new Set(this.props.reportPages.map(reportPage => reportPage.uuid))
+      const oldIds = new Set(prevProps.reportPages.map(reportPage => reportPage.uuid))
+      pagesToCreate = this.props.reportPages.filter(reportPage => !oldIds.has(reportPage.uuid))
+      pagesToDelete = prevProps.reportPages.filter(reportPage => !newIds.has(reportPage.uuid))
+      pagesToUpdate = this.props.reportPages.filter(reportPage => newIds.has(reportPage.uuid) && oldIds.has(reportPage.uuid))
+    }
 
     pagesToCreate.forEach((reportPage, index) => this.createMapObject(reportPage, index))
     pagesToDelete.forEach(reportPage => this.deleteMapObject(reportPage.uuid))
@@ -55,8 +71,9 @@ export class MapReportsListMapObjects extends Component {
 
   createMapObject (reportPage, index) {
     const polygonOptions = (reportPage.uuid === this.props.activePageUuid) ? this.polygonOptions.selected : this.polygonOptions.normal
+    const polygonProjections = this.getMapPolygonForReportPage(reportPage)
     const mapObject = new google.maps.Polygon({
-      paths: this.getMapPolygonForReportPage(reportPage),
+      paths: polygonProjections.paths,
       strokeColor: polygonOptions.strokeColor,
       strokeWeight: polygonOptions.strokeWeight,
       fillColor: polygonOptions.fillColor,
@@ -83,12 +100,30 @@ export class MapReportsListMapObjects extends Component {
       this.props.setPages(this.props.planId, reportPages)
     })
     this.pageIdToListeners[reportPage.uuid] = [clickListener, dragStartListener, dragEndListener]
-    this.pageIdToMapObject[reportPage.uuid] = mapObject
+    this.pageIdToMapObjects[reportPage.uuid] = [mapObject]
+
+    if (this.props.showPageNumbers) {
+      const deltaX = (polygonProjections.pixelExtents.maxX - polygonProjections.pixelExtents.minX)
+      const deltaY = (polygonProjections.pixelExtents.maxY - polygonProjections.pixelExtents.minY)
+      const fontSize = Math.round(deltaY / 10)
+      const pageNumberMarker = new google.maps.Marker({
+        position: { lat: reportPage.mapCenter.latitude, lng: reportPage.mapCenter.longitude },
+        label: {
+          text: `Page ${index + 1}`,
+          fontSize: `${fontSize}px`,
+          color: '#303030'
+        },
+        anchor: new google.maps.Point(deltaX / 2, deltaY / 2),
+        icon: '/images/map_icons/aro/blank.png',
+        map: this.props.googleMaps
+      })
+      this.pageIdToMapObjects[reportPage.uuid].push(pageNumberMarker)
+    }
   }
 
   deleteMapObject (pageId) {
-    this.pageIdToMapObject[pageId].setMap(null)
-    delete this.pageIdToMapObject[pageId]
+    this.pageIdToMapObjects[pageId].forEach(mapObject => mapObject.setMap(null))
+    delete this.pageIdToMapObjects[pageId]
     this.pageIdToListeners[pageId].forEach(listener => google.maps.event.removeListener(listener))
     delete this.pageIdToListeners[pageId]
   }
@@ -140,17 +175,32 @@ export class MapReportsListMapObjects extends Component {
     const maxLatitude = projection.yToLatitude(yCenter + sizeY / 2)
     const maxLongitude = projection.xToLongitude(xCenter + sizeX / 2)
 
-    // Finally, create a polygon from our min/max latitude/longitude pairs
+    // Create a polygon from our min/max latitude/longitude pairs
     var paths = []
     paths.push({ lat: minLatitude, lng: minLongitude })
     paths.push({ lat: maxLatitude, lng: minLongitude })
     paths.push({ lat: maxLatitude, lng: maxLongitude })
     paths.push({ lat: minLatitude, lng: maxLongitude })
-    return paths
+
+    // Calculate the radius of the sphere used for at this zoom level. The number of pixels on the X axis will
+    // correspond to the length of the equator. The tile at zoom level 0 has a pixel size of 256x256.
+    const radiusForScreenshot = 256 * Math.pow(2, this.props.mapZoom) / (2.0 * Math.PI)
+    const projectionScreenshot = new MercatorProjection(radiusForScreenshot)
+    const pixelExtents = {
+      minX: projectionScreenshot.longitudeToX(minLongitude),
+      minY: projectionScreenshot.latitudeToY(minLatitude),
+      maxX: projectionScreenshot.longitudeToX(maxLongitude),
+      maxY: projectionScreenshot.latitudeToY(maxLatitude)
+    }
+
+    return {
+      paths,
+      pixelExtents
+    }
   }
 
   componentWillUnmount () {
-    this.props.reportPages.forEach(reportPage => this.deleteMapObject(reportPage.uuid))
+    Object.keys(this.pageIdToMapObjects).forEach(reportPage => this.deleteMapObject(reportPage.uuid))
   }
 }
 
@@ -158,14 +208,18 @@ MapReportsListMapObjects.propTypes = {
   planId: PropTypes.number,
   activePageUuid: PropTypes.string,
   googleMaps: PropTypes.object,
-  reportPages: PropTypes.array
+  mapZoom: PropTypes.number,
+  reportPages: PropTypes.array,
+  showPageNumbers: PropTypes.bool
 }
 
 const mapStateToProps = state => ({
   planId: state.plan.activePlan.id,
   activePageUuid: state.mapReports.activePageUuid,
   googleMaps: state.map.googleMaps,
-  reportPages: state.mapReports.pages
+  mapZoom: state.map.zoom,
+  reportPages: state.mapReports.pages,
+  showPageNumbers: state.mapReports.showPageNumbers
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -173,5 +227,5 @@ const mapDispatchToProps = dispatch => ({
   setActivePageUuid: uuid => dispatch(MapReportActions.setActivePageUuid(uuid))
 })
 
-const MapReportsListMapObjectsComponent = connect(mapStateToProps, mapDispatchToProps)(MapReportsListMapObjects)
+const MapReportsListMapObjectsComponent = wrapComponentWithProvider(reduxStore, MapReportsListMapObjects, mapStateToProps, mapDispatchToProps)
 export default MapReportsListMapObjectsComponent
