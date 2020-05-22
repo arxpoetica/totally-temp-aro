@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import globalsettingsActions from '../global-settings/globalsettings-action'
-import { PropTypes } from 'prop-types'
 
 const status = {
     UNDEFINED: 'UNDEFINED',
@@ -16,14 +15,10 @@ export class MultiFactor extends Component {
     constructor (props) {
         super(props)
         this.state = {
-            verificationCode:''
+            verificationCode:'',
+            disableCode:'',
+            showSecretText: false
         }
-    }
-
-    componentDidUpdate (prevProps) {
-        console.log(this.props.multiFactor)
-        console.log(this.props.secretDetails)
-        console.log(this.props.verifyDetails)
     }
 
     componentWillMount () {
@@ -31,16 +26,14 @@ export class MultiFactor extends Component {
     }
     
     render () {
-        console.log(this.props.multiFactor)
-        console.log(this.props.secretDetails)
-        return this.props.multiFactor !== null || this.props.secretDetails !== null
+        return this.props.multiFactor !== null || this.props.secretDetails !== null || this.props.verifyDetails !== null
             ? <div>
               {this.renderMutiFactor()}
               </div>
             : null
     }
     renderMutiFactor () {
-        console.log(this.props.multiFactor)
+
         let currentState = status.UNDEFINED;
 
         if(this.props.multiFactor !== null){
@@ -55,7 +48,6 @@ export class MultiFactor extends Component {
             }
         }
 
-        console.log(this.props.secretDetails)
         if(this.props.secretDetails !== null){
             currentState = status.SECRET_GENERATED
         }
@@ -66,8 +58,7 @@ export class MultiFactor extends Component {
             }
         }
 
-        console.log(currentState)
-         return (
+        return (
             <div>
                 {currentState === status.MULTIFACTOR_ALREADY_SETUP && 
                 <div>
@@ -79,15 +70,19 @@ export class MultiFactor extends Component {
                     <p>
                         In order to overwrite existing multi-factor settings, you have to enter a valid OTP below:
                     </p>
-                    <input className="form-control" placeholder="6-digit OTP"/>
-                    <a href="#">I don't have an app, email the OTP to me</a>
+                    <input className="form-control" name="disableCode" onChange={(e)=>this.handleDisable(e)} placeholder="6-digit OTP"/>
+                    <a href="#" onClick={() => this.sendOtpEmail()}>I don't have an app, email the OTP to me</a>
                     <div className="text-center mt-3">
-                        <button className="btn btn-danger" >Disable</button>
+                        <button className="btn btn-danger" onClick={() => this.disableMultiAuth(this.state.disableCode)} >Disable</button>&nbsp;&nbsp;
                         <button className="btn btn-danger" >Reset</button>
                     </div>
-                    <div className="alert alert-danger mt-3"></div>
-                    <div className="alert alert-success mt-3">An email with the current OTP has been sent to your registered email.
-                    Please check your email.</div>
+                    {this.props.errorFlag &&
+                        <div className="alert alert-danger mt-3">{this.props.verifyDetails}</div>
+                    }
+                    {this.props.totpEmailSent &&
+                        <div className="alert alert-success mt-3">An email with the current OTP has been sent to your registered email.
+                        Please check your email.</div>
+                    }
                 </div>
                 }
 
@@ -116,12 +111,12 @@ export class MultiFactor extends Component {
                         <img src={this.props.secretDetails.qrCode} />
                     </div>
                     
-                    {!this.props.showSecretText &&
+                    {!this.state.showSecretText &&
                     <div className="text-center mb-3">
-                        <button className="btn btn-sm btn-light" onClick={() => this.props.showSecretText = true}>Camera not working?</button>
+                        <button className="btn btn-sm btn-light" onClick={()=> this.setState({ showSecretText: true })}>Camera not working?</button>
                     </div>
                     }
-                    {this.props.showSecretText &&
+                    {this.state.showSecretText &&
                     <div className="text-center mb-3">
                         <div>Secret: {this.props.secretDetails.secret}</div>
                     </div>
@@ -129,7 +124,7 @@ export class MultiFactor extends Component {
                     <h3 className="mb-3">Step 2: Enter current 6-digit OTP</h3>
                     <div className="text-center">
                     <div className="input-group">
-                        <input type="text" className="form-control" name="verificationCode" placeholder="6-digit OTP" onChange={(e)=>this.handleChange(e)} value={this.state.verificationCode}/>
+                        <input type="text" className="form-control" name="verificationCode" placeholder="6-digit OTP" onChange={(e)=>this.handleVerify(e)} value={this.state.verificationCode}/>
                         <div className="input-group-append">
                             <button className="btn btn-primary" type="button" onClick={() => this.verifyOtp(this.state.verificationCode)}>Next</button>
                         </div>
@@ -153,7 +148,7 @@ export class MultiFactor extends Component {
 
                 {currentState === status.SETUP_COMPLETE &&
                 <div>
-                    <h3 class="mb-3">Multi-factor authentication complete</h3>
+                    <h3 className="mb-3">Multi-factor authentication complete</h3>
                     <p>Congratulations! Multi-factor authentication has been successfully set up for your account. In the future, you will
                     require a One-Time Password (OTP) to log in to your account (in addition to your account password).
                     </p>
@@ -168,26 +163,29 @@ export class MultiFactor extends Component {
         this.props.overwriteSecretForUser()
     }
 
-    showSecret () {
-        this.props.showSecretText = true
-    }
-
     sendOtpEmail () {
         this.props.sendOTPByEmail()
     }
 
     verifyOtp () {
-        console.log(this.state.verificationCode)
         this.props.verifySecretForUser(this.state.verificationCode)
     }
 
-    handleChange (e) {
+    disableMultiAuth () {
+        this.props.disableMultiAuth(this.state.disableCode)
+    }
+
+    resetMultiAuth () {
+        this.props.resetMultiFactorForUser(this.state.disableCode)
+    }
+
+    handleVerify (e) {
         this.setState({ verificationCode: e.target.value });
     }
-}
 
-MultiFactor.propTypes = {
-    showSecretText: PropTypes.boolean
+    handleDisable (e) {
+        this.setState({ disableCode: e.target.value });
+    }
 }
 
 const mapStateToProps = (state) => ({
@@ -203,9 +201,10 @@ const mapStateToProps = (state) => ({
 const mapDispatchToProps = (dispatch) => ({
     loadOtpStatus: () => dispatch(globalsettingsActions.loadOtpStatus()),
     overwriteSecretForUser: () => dispatch(globalsettingsActions.overwriteSecretForUser()),
-    updateSecret: () => dispatch(globalsettingsActions.updateSecret()),
     sendOTPByEmail: () => dispatch(globalsettingsActions.sendOTPByEmail()),
-    verifySecretForUser: (verificationCode) => dispatch(globalsettingsActions.verifySecretForUser(verificationCode))
+    verifySecretForUser: (verificationCode) => dispatch(globalsettingsActions.verifySecretForUser(verificationCode)),
+    disableMultiAuth: (disableCode) => dispatch(globalsettingsActions.disableMultiAuth(disableCode)),
+    resetMultiFactorForUser: (disableCode) => dispatch(globalsettingsActions.resetMultiFactorForUser(disableCode))
 })
 
 const MultiFactorComponent = wrapComponentWithProvider(reduxStore, MultiFactor, mapStateToProps, mapDispatchToProps)

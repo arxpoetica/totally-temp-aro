@@ -4,7 +4,6 @@ const defaultState = {
   releaseNotes: null,
   multiFactor:null,
   secretDetails:null,
-  showSecretText: null,
   totpEmailSent: false,
   verifyDetails:null,
   verifyFlag:false,
@@ -19,10 +18,10 @@ function setReleaseNotes (state, releaseNotes) {
 
 function updateLoggedInUser (state, user) {
   return { ...state,
-    user: { 
-      ...loggedInUser.first_name=user.first_name,
-      ...loggedInUser.last_name=user.last_name,
-      ...loggedInUser.email=user.email,
+    user: { ...state.user,
+      first_name: user.first_name,
+      last_name :user.last_name,
+      email: user.email
     }
   }
 }
@@ -30,22 +29,18 @@ function updateLoggedInUser (state, user) {
 function setOtpStatus (state, multiFactor) {
   return { ...state,
     multiFactor: multiFactor,
-    secretDetails: null
+    secretDetails: null,
+    verifyDetails:null,
+    secretDetails:null,
+    totpEmailSent: false
   }
 }
 
 function setSecretDetails (state, secret) {
   return { ...state,
     secretDetails: secret,
-    showSecretText: false,
+    totpEmailSent: false,
     multiFactor:null
-  }
-}
-
-
-function showSecret (state, secret) {
-  return { ...state,
-    showSecretText: true
   }
 }
 
@@ -62,13 +57,24 @@ function errorSecret (state, result) {
   return { ...state,
     verifyDetails: result,
     verifyFlag: false,
-    errorFlag: true
+    errorFlag: true,
+    totpEmailSent: false
   }
 }
 
 function setEmailFlag (state, secret) {
   return { ...state,
-    totpEmailSent: true
+    totpEmailSent: true,
+    errorFlag: false
+  }
+}
+
+function clearDetails(state, secret){
+  return { ...state,
+    multiFactor: null,
+    secretDetails: null,
+    verifyDetails:null,
+    secretDetails:null
   }
 }
 
@@ -85,9 +91,6 @@ function globalSettingsReducer (state = defaultState, action) {
     
     case Actions.GLOBAL_SETTINGS_OVERWRITE_SECRET:
       return setSecretDetails(state, action.payload)
-  
-    case Actions.GLOBAL_SETTINGS_UPDATE_SECRET:
-      return showSecret(state, action.payload)
     
     case Actions.GLOBAL_SETTINGS_VERIFY_SECRET:
       return verifySecret(state, action.payload)
@@ -97,7 +100,11 @@ function globalSettingsReducer (state = defaultState, action) {
 
     case Actions.GLOBAL_SETTINGS_SEND_EMAIL_OTP:
       return setEmailFlag(state, action.payload)
-    default:
+    
+      case Actions.GLOBAL_SETTINGS_DISABLE_AUTH:
+        return clearDetails(state, action.payload) 
+
+      default:
       return state
   }
 }

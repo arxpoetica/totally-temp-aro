@@ -79,6 +79,25 @@ function sendOTPByEmail () {
   
 }
 
+function disableMultiAuth (disableCode) {
+  return dispatch => {
+    AroHttp.post('multifactor/delete-totp-settings', { verificationCode: disableCode })
+      .then(result => dispatch(
+        loadOtpStatus()
+      ))
+      .catch(error => dispatch({
+        type: Actions.GLOBAL_SETTINGS_ERROR_SECRET,
+        payload: error.data
+      }))
+  }
+}
+
+ // Reset multi-factor authentication for the user
+ function resetMultiFactorForUser (disableCode) {
+    this.verifySecretForUser(disableCode)
+    .then(() => this.overwriteSecretForUser())
+    .catch(err => console.error(err))
+}
 export default {
   broadcastMessage,
   loadReleaseNotes,
@@ -86,5 +105,7 @@ export default {
   loadOtpStatus,
   overwriteSecretForUser,
   verifySecretForUser,
-  sendOTPByEmail
+  sendOTPByEmail,
+  disableMultiAuth,
+  resetMultiFactorForUser
 }
