@@ -19,17 +19,6 @@ function loadReleaseNotes () {
   }
 }
 
-function updateUserAccount (user) {
-  return dispatch => {
-    AroHttp.post('/settings/update_settings', user)
-      .then(result => dispatch({
-        type: Actions.GLOBAL_SETTINGS_UPDATE_USER,
-        payload: user
-      }))
-      .catch((err) => console.error(err))
-  }
-}
-
 function loadOtpStatus () {
   return dispatch => {
     AroHttp.get('/multifactor/get-totp-status')
@@ -101,7 +90,6 @@ function disableMultiAuth (disableCode) {
 export default {
   broadcastMessage,
   loadReleaseNotes,
-  updateUserAccount,
   loadOtpStatus,
   overwriteSecretForUser,
   verifySecretForUser,

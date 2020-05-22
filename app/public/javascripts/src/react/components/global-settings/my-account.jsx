@@ -99,7 +99,7 @@ const mapStateToProps = (state) => ({
 })
 
 const mapDispatchToProps = (dispatch) => ({
-    updateUserAccount: (user) => dispatch(globalsettingsActions.updateUserAccount(user)),
+    updateUserAccount: user => dispatch(UserActions.updateUserAccount(user)),
     loadSystemActors: () => dispatch(UserActions.loadSystemActors())
 })
 

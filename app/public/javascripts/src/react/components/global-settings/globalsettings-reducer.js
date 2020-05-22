@@ -16,16 +16,6 @@ function setReleaseNotes (state, releaseNotes) {
   }
 }
 
-function updateLoggedInUser (state, user) {
-  return { ...state,
-    user: { ...state.user,
-      first_name: user.first_name,
-      last_name :user.last_name,
-      email: user.email
-    }
-  }
-}
-
 function setOtpStatus (state, multiFactor) {
   return { ...state,
     multiFactor: multiFactor,
@@ -82,9 +72,6 @@ function globalSettingsReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.GLOBAL_SETTINGS_GET_RELEASE_NOTES:
       return setReleaseNotes(state, action.payload)
-    
-    case Actions.GLOBAL_SETTINGS_UPDATE_USER:
-      return updateLoggedInUser(state, action.payload)
     
     case Actions.GLOBAL_SETTINGS_GET_OTP_STATUS:
       return setOtpStatus(state, action.payload)
