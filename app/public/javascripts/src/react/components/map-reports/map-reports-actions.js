@@ -116,6 +116,13 @@ function setWaitTimePerPage (waitSecondsPerPage) {
   }
 }
 
+function setManualWait (manualWait) {
+  return {
+    type: Actions.MAP_REPORTS_SET_MANUAL_WAIT,
+    payload: manualWait
+  }
+}
+
 export default {
   downloadReport,
   setLayers,
@@ -127,5 +134,6 @@ export default {
   showPageNumbers,
   setActivePageUuid,
   setEditingPageUuid,
-  setWaitTimePerPage
+  setWaitTimePerPage,
+  setManualWait
 }

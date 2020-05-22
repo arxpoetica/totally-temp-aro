@@ -8,6 +8,7 @@ const defaultState = {
   editingPageUuid: null,
   isCommunicating: false,
   isDownloading: false,
+  manualWait: false,
   waitSecondsPerPage: 20
 }
 
@@ -63,6 +64,12 @@ function setWaitTimePerPage (state, waitSecondsPerPage) {
   }
 }
 
+function setManualWait (state, manualWait) {
+  return { ...state,
+    manualWait
+  }
+}
+
 function mapReportsReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.MAP_REPORTS_SET_PAGES:
@@ -91,6 +98,9 @@ function mapReportsReducer (state = defaultState, action) {
 
     case Actions.MAP_REPORTS_SET_WAIT_TIME_PER_PAGE:
       return setWaitTimePerPage(state, action.payload)
+
+    case Actions.MAP_REPORTS_SET_MANUAL_WAIT:
+      return setManualWait(state, action.payload)
 
     default:
       return state
