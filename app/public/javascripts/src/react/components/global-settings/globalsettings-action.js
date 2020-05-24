@@ -81,12 +81,19 @@ function disableMultiAuth (disableCode) {
   }
 }
 
- // Reset multi-factor authentication for the user
- function resetMultiFactorForUser (disableCode) {
-    this.verifySecretForUser(disableCode)
-    .then(() => this.overwriteSecretForUser())
-    .catch(err => console.error(err))
+function resetMultiFactorForUser (verificationCode) {
+  return dispatch => {
+    AroHttp.post('/multifactor/verify-totp-secret', { verificationCode: verificationCode })
+      .then(result => dispatch(
+        overwriteSecretForUser()
+      ))
+      .catch(error => dispatch({
+        type: Actions.GLOBAL_SETTINGS_ERROR_SECRET,
+        payload: error.data
+      }))
+  }
 }
+
 export default {
   broadcastMessage,
   loadReleaseNotes,

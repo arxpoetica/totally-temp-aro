@@ -22,7 +22,8 @@ function setOtpStatus (state, multiFactor) {
     secretDetails: null,
     verifyDetails:null,
     secretDetails:null,
-    totpEmailSent: false
+    totpEmailSent: false,
+    errorFlag: false
   }
 }
 

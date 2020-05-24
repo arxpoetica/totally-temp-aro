@@ -74,7 +74,7 @@ export class MultiFactor extends Component {
                     <a href="#" onClick={() => this.sendOtpEmail()}>I don't have an app, email the OTP to me</a>
                     <div className="text-center mt-3">
                         <button className="btn btn-danger" onClick={() => this.disableMultiAuth(this.state.disableCode)} >Disable</button>&nbsp;&nbsp;
-                        <button className="btn btn-danger" >Reset</button>
+                        <button className="btn btn-danger" onClick={() => this.resetMultiAuth(this.state.disableCode)} >Reset</button>
                     </div>
                     {this.props.errorFlag &&
                         <div className="alert alert-danger mt-3">{this.props.verifyDetails}</div>
