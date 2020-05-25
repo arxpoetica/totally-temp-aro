@@ -109,9 +109,7 @@ import networkPlanManage from './header/network-plan-manage'
 import networkPlan from './header/network-plan'
 import uiNotification from './footer/ui-notification'
 import fullScreenContainer from './full-screen/full-screen-container'
-import userAccountSettings from './global-settings/user-account-settings'
 import manageUsers from './global-settings/manage-users'
-import multifactorSettings from './global-settings/multifactor-settings'
 import manageGroups from './global-settings/manage-groups'
 import globalSettings from './global-settings/global-settings'
 import aroPanel from './common/aro-panel'
@@ -130,7 +128,6 @@ import accordionPanelTitle from './accordion/accordion-panel-title'
 import tile from './tiles/tile'
 import userSettings from './global-settings/user-settings'
 import tagManager from './global-settings/tag-manager'
-import releaseNotes from './global-settings/release-notes'
 import createUpdateTag from './global-settings/create-update-tag'
 
 import aroObjectEditor from './common/editor-interfaces/aro-object-editor'
@@ -217,9 +214,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('networkPlan', networkPlan)
   .component('uiNotification', uiNotification)
   .component('fullScreenContainer', fullScreenContainer)
-  .component('userAccountSettings', userAccountSettings)
   .component('manageUsers', manageUsers)
-  .component('multifactorSettings', multifactorSettings)
   .component('manageGroups', manageGroups)
   .component('globalSettings', globalSettings)
   .component('aroPanel', aroPanel)
@@ -238,7 +233,6 @@ app.component('boundaryDetail', boundaryDetail)
   .component('tile', tile)
   .component('userSettings', userSettings)
   .component('tagManager', tagManager)
-  .component('releaseNotes', releaseNotes)
   .component('createUpdateTag', createUpdateTag)
   .component('aroObjectEditor', aroObjectEditor)
   .component('editorInterfaceTree', editorInterfaceTree)
