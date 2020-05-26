@@ -11,15 +11,18 @@ import UserActions from '../react/components/user/user-actions'
 import PlanActions from '../react/components/plan/plan-actions'
 import MapActions from '../react/components/map/map-actions'
 import MapLayerActions from '../react/components/map-layers/map-layer-actions'
+import MapReportsActions from '../react/components/map-reports/map-reports-actions'
 import SelectionActions from '../react/components/selection/selection-actions'
 import PlanStates from '../react/components/plan/plan-states'
 import SelectionModes from '../react/components/selection/selection-modes'
 import SocketManager from '../react/common/socket-manager'
 import RingEditActions from '../react/components/ring-edit/ring-edit-actions'
+import NetworkAnalysisActions from '../react/components/optimization/network-analysis/network-analysis-actions'
 import ReactComponentConstants from '../react/common/constants'
 import AroNetworkConstraints from '../shared-utils/aro-network-constraints'
-import NetworkAnalysisActions from '../react/components/optimization/network-analysis/network-analysis-actions'
 import NetworkOptimizationActions from '../react/components/optimization/network-optimization/network-optimization-actions'
+import Tools from '../react/components/tool/tools'
+
 const networkAnalysisConstraintsSelector = formValueSelector(ReactComponentConstants.NETWORK_ANALYSIS_CONSTRAINTS)
 
 // We need a selector, else the .toJS() call will create an infinite digest loop
@@ -1400,7 +1403,8 @@ class State {
         service.setPlanRedux(plan)
       }
       var plan = null
-      const planPromise = initialState ? $http.get(`/service/v1/plan/${initialState.planId}`) : service.getOrCreateEphemeralPlan()
+      const planIdToLoad = (initialState.reportPage && initialState.reportPage.planId) || (initialState.reportOverview && initialState.reportOverview.planId)
+      const planPromise = planIdToLoad ? $http.get(`/service/v1/plan/${planIdToLoad}`) : service.getOrCreateEphemeralPlan()
       return planPromise // Will be called once when the page loads, since state.js is a service
         .then((result) => {
           plan = result.data
@@ -1413,8 +1417,8 @@ class State {
           service.loggedInUser.perspective = result.data.perspective || 'default'
           service.configuration.loadPerspective(service.loggedInUser.perspective)
           service.initializeState()
-          service.isReportMode = Boolean(initialState)
-          if (initialState && initialState.mapCenter) {
+          service.isReportMode = Boolean(initialState.reportPage || initialState.reportOverview)
+          if (service.isReportMode) {
             return service.mapReadyPromise
               .then(() => {
                 // If we are in Report mode, disable the default UI like zoom buttons, etc.
@@ -1424,9 +1428,18 @@ class State {
                   mapTypeControl: false
                 })
                 service.setPlanRedux(plan)
-                service.requestSetMapCenter.next({ latitude: initialState.mapCenter.latitude, longitude: initialState.mapCenter.longitude })
-                if (initialState.mapZoom) {
-                  service.requestSetMapZoom.next(initialState.mapZoom)
+                const mapCenter = (initialState.reportPage && initialState.reportPage.mapCenter) || (initialState.reportOverview && initialState.reportOverview.mapCenter)
+                const mapZoom = (initialState.reportPage && initialState.reportPage.mapZoom) || (initialState.reportOverview && initialState.reportOverview.mapZoom)
+                if (mapCenter) {
+                  service.requestSetMapCenter.next({ latitude: mapCenter.latitude, longitude: mapCenter.longitude })
+                }
+                if (mapZoom) {
+                  service.requestSetMapZoom.next(mapZoom)
+                }
+                if (initialState.reportOverview) {
+                  service.loadReportPagesForPlan(plan.id)
+                  service.setMapReportMapObjectsVisibility(true)
+                  service.setMapReportPageNumbersVisibility(true)
                 }
                 return Promise.resolve()
               })
@@ -1457,26 +1470,27 @@ class State {
               })
             })
           } else {
-            if (!(initialState && initialState.mapCenter)) {  // If we have an initial state then this has alredy been set
+            if (!(initialState.reportPage && initialState.reportPage.mapCenter)) {  // If we have an initial state then this has alredy been set
               // Set it to the default so that the map gets initialized
               return initializeToDefaultCoords(plan)
             }
           }
         })
         .then(() => {
-          if (initialState && initialState.visibleLayers) {
+          if (initialState.reportPage && initialState.reportPage.visibleLayers) {
             // We have an initial state, wait for a few seconds (HACKY) and turn layers on/off as per request
             const timeoutPromise = new Promise((resolve, reject) => { setTimeout(() => resolve(), 2000) })
             return timeoutPromise
               .then(() => {
                 // Set layer visibility as per the initial state
-                const setOfVisibleLayers = new Set(initialState.visibleLayers)
+                const setOfVisibleLayers = new Set(initialState.reportPage.visibleLayers)
                 service.mapLayersRedux.location.forEach(layer => {
                   const isVisible = setOfVisibleLayers.has(layer.key)
                   service.setLayerVisibility(layer, isVisible)
                 })
-                service.equipmentLayerTypeVisibility.planned = true
-                Object.keys(service.mapLayersRedux.networkEquipment).forEach(layerType => {
+                service.equipmentLayerTypeVisibility.planned = true;
+                service.cableLayerTypeVisibility.planned = true;
+                ['roads', 'cables', 'boundaries', 'equipments'].forEach(layerType => {
                   Object.keys(service.mapLayersRedux.networkEquipment[layerType]).forEach(layerKey => {
                     const isVisible = setOfVisibleLayers.has(layerKey)
                     service.setNetworkEquipmentLayerVisiblity(layerType, service.mapLayersRedux.networkEquipment[layerType][layerKey], isVisible)
@@ -1530,14 +1544,14 @@ class State {
           }
           service.configuration.loadPerspective(config.user.perspective)
           service.setNetworkEquipmentLayers(service.configuration.networkEquipment)
-          
+
           return service.setLoggedInUser(config.user, initialState)
         })
         .then(() => {
           // service.setOptimizationOptions()
           tileDataService.setLocationStateIcon(tileDataService.locationStates.LOCK_ICON_KEY, service.configuration.locationCategories.entityLockIcon)
           tileDataService.setLocationStateIcon(tileDataService.locationStates.INVALIDATED_ICON_KEY, service.configuration.locationCategories.entityInvalidatedIcon)
-          if (!initialState) {
+          if (!initialState.reportPage && !initialState.reportOverview) {
             service.getReleaseVersions()
           }
           if (service.configuration.ARO_CLIENT === 'frontier' || service.configuration.ARO_CLIENT === 'sse') {
@@ -1768,6 +1782,9 @@ class State {
       loadAuthRolesRedux: () => dispatch(UserActions.loadAuthRoles()),
       setLoggedInUserRedux: loggedInUser => dispatch(UserActions.setLoggedInUser(loggedInUser)),
       loadSystemActorsRedux: () => dispatch(UserActions.loadSystemActors()),
+      loadReportPagesForPlan: planId => dispatch(MapReportsActions.loadReportPagesForPlan(planId)),
+      setMapReportMapObjectsVisibility: isVisible => dispatch(MapReportsActions.showMapObjects(isVisible)),
+      setMapReportPageNumbersVisibility: isVisible => dispatch(MapReportsActions.showPageNumbers(isVisible)),
       setPlanRedux: plan => dispatch(PlanActions.setActivePlan(plan)),
       setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId)),
       addPlanTargets: (planId, planTargets) => dispatch(SelectionActions.addPlanTargets(planId, planTargets)),
