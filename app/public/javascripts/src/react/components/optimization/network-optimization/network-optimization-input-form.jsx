@@ -215,7 +215,7 @@ export class NetworkOptimizationInputFormProto extends Component {
             </div>
           </div>
         </div>
-        {
+        {// ToDo: props.networkAnalysisTypeId should come from redux NOT parent
           this.props.networkAnalysisTypeId === 'NETWORK_PLAN' ? this.renderOptimizationOptions() : ''
         }
       </div>

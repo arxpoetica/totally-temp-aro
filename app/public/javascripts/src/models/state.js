@@ -11,14 +11,18 @@ import UserActions from '../react/components/user/user-actions'
 import PlanActions from '../react/components/plan/plan-actions'
 import MapActions from '../react/components/map/map-actions'
 import MapLayerActions from '../react/components/map-layers/map-layer-actions'
+import MapReportsActions from '../react/components/map-reports/map-reports-actions'
 import SelectionActions from '../react/components/selection/selection-actions'
 import PlanStates from '../react/components/plan/plan-states'
 import SelectionModes from '../react/components/selection/selection-modes'
 import SocketManager from '../react/common/socket-manager'
 import RingEditActions from '../react/components/ring-edit/ring-edit-actions'
+import NetworkAnalysisActions from '../react/components/optimization/network-analysis/network-analysis-actions'
 import ReactComponentConstants from '../react/common/constants'
 import AroNetworkConstraints from '../shared-utils/aro-network-constraints'
-import NetworkAnalysisActions from '../react/components/optimization/network-analysis/network-analysis-actions'
+import NetworkOptimizationActions from '../react/components/optimization/network-optimization/network-optimization-actions'
+import Tools from '../react/components/tool/tools'
+
 const networkAnalysisConstraintsSelector = formValueSelector(ReactComponentConstants.NETWORK_ANALYSIS_CONSTRAINTS)
 
 // We need a selector, else the .toJS() call will create an infinite digest loop
@@ -36,7 +40,7 @@ const getBoundaryTypesList = createSelector([getAllBoundaryTypesList], (boundary
 
 /* global app localStorage map */
 class State {
-  constructor ($rootScope, $http, $document, $timeout, $sce, $ngRedux, stateSerializationHelper, $filter, tileDataService, Utils, tracker, Notification) {
+  constructor ($rootScope, $http, $document, $timeout, $sce, $ngRedux, $filter, tileDataService, Utils, tracker, Notification) {
     // Important: RxJS must have been included using browserify before this point
     var Rx = require('rxjs')
 
@@ -83,6 +87,7 @@ class State {
       { id: 'REUSE_CONNECTION', label: 'Reuse Connection' }
     ]
 
+    // ToDo: move this to redux state: optimize
     service.expertModeTypes = {
       OPTIMIZATION_SETTINGS: { id: 'OPTIMIZATION_SETTINGS', label: 'Optimization Settings' },
       MANUAL_PLAN_TARGET_ENTRY: { id: 'MANUAL_PLAN_TARGET_ENTRY', label: 'Manual plan Target Selection', isQueryValid: false },
@@ -573,21 +578,14 @@ class State {
       service.reloadLocationTypes()
       service.selectedDisplayMode.next(service.displayModes.VIEW)
 
-      service.networkAnalysisTypes = [
-        { id: 'NETWORK_PLAN', label: 'Network Build', type: 'NETWORK_PLAN' },
-        { id: 'NETWORK_ANALYSIS', label: 'Network Analysis', type: 'NETWORK_ANALYSIS' },
-        { id: 'COVERAGE_ANALYSIS', label: 'Coverage Analysis', type: 'COVERAGE' },
-        { id: 'RFP', label: 'RFP Analyzer', type: 'RFP' },
-        // { id: 'NEARNET_ANALYSIS', label: 'Near-net Analysis', type: 'UNDEFINED' },
-        { id: 'EXPERT_MODE', label: 'Expert Mode', type: 'Expert' }
-      ]
-      service.networkAnalysisType = service.networkAnalysisTypes[0]
       // Upload Data Sources
       service.uploadDataSources = []
       service.pristineDataItems = {}
       service.dataItems = {}
     }
 
+    // we still need this for the location.checked = location.initiallySelected bit
+    //  until we redo the location sub-type/filter system
     service.reloadLocationTypes = () => {
       var locationTypesForRedux = List()
       var locations = service.configuration.locationCategories.categories
@@ -612,38 +610,26 @@ class State {
       $ngRedux.dispatch(MapLayerActions.setLayerVisibility(layer, isVisible))
     }
 
-    service.setLayerVisibilityByKey = (keyType, layerKey, isVisible) => {
-      // First find the layer correspying to the ID
-      const layerState = $ngRedux.getState().mapLayers
-      var layerToChange = null
-      Object.keys(layerState).forEach(layerType => {
-        layerState[layerType].forEach(layer => {
-          if (layer[keyType] === layerKey) {
-            layerToChange = layer
-          }
-        })
-      })
-      if (layerToChange) {
-        $ngRedux.dispatch(MapLayerActions.setLayerVisibility(layerToChange, isVisible))
-      }
-    }
-
     service.getVisibleAnalysisLayers = () => $ngRedux.getState().mapLayers.boundary.filter(item => item.checked && (item.key === 'analysis_layer'))
 
     // Get a POST body that we will send to aro-service for performing optimization
     // Optimization options in Redux
-    // ToDo: depricate stateSerializationHelper, replace with redux store
+    // ToDo:
+    // service.optimizationInputs is now from Redux
+    //  but we should replace the use of this function with a redux selector
     service.getOptimizationBody = () => {
-      return stateSerializationHelper.getOptimizationBody(service, service.networkAnalysisConstraints,
-        service.primarySpatialEdge, service.wormholeFuseDefinitions, $ngRedux.getState())
-    }
-
-    // Load optimization options from a JSON string
-    // ToDo: depricate stateSerializationHelper, replace with redux store
-    service.loadOptimizationOptionsFromJSON = (json) => {
-      // Note that we are NOT returning the state (the state is set after the call), but a promise
-      // that resolves once all the geographies have been loaded
-      return stateSerializationHelper.loadStateFromJSON(service, $ngRedux.getState(), service.getDispatchers(), json, new AroNetworkConstraints())
+      var inputs = JSON.parse(JSON.stringify(service.optimizationInputs))
+      // inputs.analysis_type = service.networkAnalysisTypeId
+      // inputs.planId = service.planId
+      inputs.planId = service.plan.id
+      inputs.locationConstraints = {}
+      inputs.locationConstraints.analysisSelectionMode = service.activeSelectionModeId
+      inputs.locationConstraints.locationTypes = []
+      service.locationLayers.forEach(locationsLayer => {
+        if (locationsLayer.checked) inputs.locationConstraints.locationTypes.push(locationsLayer.plannerKey)
+      })
+      
+      return inputs
     }
 
     $document.ready(() => {
@@ -692,10 +678,7 @@ class State {
     service.resourceItems = {}
     // Load the plan resource selections from the server
     service.loadPlanResourceSelectionFromServer = () => {
-      // console.log(' --- loadPlanResourceSelectionFromServer')
-      // console.log(service.plan)
       if (!service.plan) {
-        // console.log(' --- No PLAN')
         return Promise.resolve()
       }
       var currentPlan = service.plan
@@ -754,8 +737,6 @@ class State {
           })
           service.resourceItems = newResourceItems
           service.pristineResourceItems = angular.copy(service.resourceItems)
-          // console.log(' --- LOADED resourceItems')
-          // console.log(service.resourceItems)
           $timeout() // Trigger a digest cycle so that components can update
           return Promise.resolve()
         })
@@ -767,22 +748,6 @@ class State {
         .then((result) => Promise.resolve(result.data.projectTemplateId))
         .catch((err) => console.error(err))
     }
-
-    // ToDo: depricated net config
-    /*
-    service.loadNetworkConfigurationFromServer = () => {
-      return service.getDefaultProjectForUser(service.loggedInUser.id)
-        .then((projectTemplateId) => $http.get(`/service/v1/project-template/${projectTemplateId}/network_configuration`))
-        .then((result) => {
-          service.networkConfigurations = {}
-          result.data.forEach((networkConfiguration) => {
-            service.networkConfigurations[networkConfiguration.routingMode] = networkConfiguration
-          })
-          service.pristineNetworkConfigurations = angular.copy(service.networkConfigurations)
-        })
-        .catch((err) => console.log(err))
-    }
-    */
 
     // Save the plan resource selections to the server
     service.savePlanResourceSelectionToServer = () => {
@@ -810,26 +775,6 @@ class State {
       var currentPlan = service.plan
       $http.put(`/service/v1/plan/${currentPlan.id}/configuration`, putBody)
     }
-
-    // ToDo: depricated net config
-    // Save the Network Configurations to the server
-    /*
-    service.saveNetworkConfigurationToDefaultProject = () => {
-      return service.getDefaultProjectForUser(service.loggedInUser.id)
-        .then((projectTemplateId) => {
-          // Making parallel calls causes a crash in aro-service. Make sequential calls.
-          service.pristineNetworkConfigurations = angular.copy(service.networkConfigurations)
-
-          var networkConfigurationsArray = []
-          Object.keys(service.networkConfigurations).forEach((networkConfigurationKey) => {
-            networkConfigurationsArray.push(service.networkConfigurations[networkConfigurationKey])
-          })
-          var url = `/service/v1/project-template/${projectTemplateId}/network_configuration`
-          $http.put(url, networkConfigurationsArray)
-        })
-        .catch((err) => console.error(err))
-    }
-    */
 
     // Get the default project template id for a given user
     service.getDefaultProjectTemplate = (userId) => {
@@ -1005,9 +950,7 @@ class State {
     }
 
     service.onActivePlanChanged = () => {
-      // console.log(' --- onActivePlanChanged')
       service.planChanged.next(null)
-
       service.currentPlanTags = service.listOfTags.filter(tag => _.contains(service.plan.tagMapping.global, tag.id))
       service.currentPlanServiceAreaTags = service.listOfServiceAreaTags.filter(tag => _.contains(service.plan.tagMapping.linkTags.serviceAreaIds, tag.id))
 
@@ -1035,22 +978,18 @@ class State {
 
     // Load the plan inputs for the given plan and populate them in state
     // Optimization options in Redux
-    // ToDo: depricate stateSerializationHelper, replace with redux store
+    // ToDo: depricate loadPlanInputs, replace with redux store
     service.loadPlanInputs = (planId) => {
       return $http.get(`/service/v1/plan/${planId}/inputs`)
         .then((result) => {
-          // console.log(' --- loadPlanInputs return')
-          // console.log(result)
           var defaultPlanInputs = service.getDefaultPlanInputs()
           var planInputs = Object.keys(result.data).length > 0 ? result.data : defaultPlanInputs
-          
+
           // OK, this is kind of a mess. We have a lot of semi-depricated code that we are clearing out
           //    that depends on depricated planInputs schema.
           //    for the moment we'll merge with default to avoid crashes.
           //    i know it's not the best, I'll be back.
           planInputs = { ...defaultPlanInputs, ...planInputs }
-          
-          stateSerializationHelper.loadStateFromJSON(service, $ngRedux.getState(), service.getDispatchers(), planInputs, new AroNetworkConstraints())
           return Promise.all([
             service.loadPlanResourceSelectionFromServer() // ,
             // service.loadNetworkConfigurationFromServer()
@@ -1118,6 +1057,8 @@ class State {
     service.progressPercent = 0
     service.isCanceling = false // True when we have requested the server to cancel a request
 
+    // expert mode refactor
+    // also used by ring edit and r-network-optimization-input
     service.handleModifyClicked = () => {
       var currentPlan = service.plan
       if (currentPlan.ephemeral) {
@@ -1174,74 +1115,6 @@ class State {
       })
     }
 
-    /*
-    // ToDo: redux version?
-    var checkToDisplayPopup = function () {
-      if (!service.configuration.plan.showHouseholdsDirectRoutingWarning) {
-        // No need to show any messagebox.
-        return Promise.resolve(true)
-      }
-      return new Promise((resolve, reject) => {
-        var locationLayers = angular.copy(service.locationLayers)
-        var isHouseholdSelected = locationLayers.filter((locationType) => locationType.key === 'household')[0].checked
-
-        if (isHouseholdSelected && service.optimizationOptions.networkConstraints.routingMode == service.routingModes.DIRECT_ROUTING.id) {
-          swal({
-            title: '',
-            text: 'Are you sure you wish to proceed with direct routing given that households are selected?',
-            type: 'warning',
-            confirmButtonColor: '#DD6B55',
-            confirmButtonText: 'Yes',
-            showCancelButton: true,
-            cancelButtonText: 'No',
-            closeOnConfirm: true
-          }, (confirmClicked) => {
-            resolve(confirmClicked)
-          })
-        } else {
-          resolve(true)
-        }
-      })
-    }
-    */
-
-    // Optimization options in Redux
-    // move this to redux
-    /*
-    service.runOptimization = () => {
-      checkToDisplayPopup()
-        .then((result) => {
-          if (result) {
-            tileDataService.markHtmlCacheDirty()
-            service.requestMapLayerRefresh.next(null)
-
-            // Get the optimization options that we will pass to the server
-            var optimizationBody = service.getOptimizationBody()
-
-            // Make the API call that starts optimization calculations on aro-service
-            var apiUrl = (service.networkAnalysisType.type === 'NETWORK_ANALYSIS') ? '/service/v1/analyze/masterplan' : '/service/v1/optimize/masterplan'
-            apiUrl += `?userId=${service.loggedInUser.id}`
-            $http.post(apiUrl, optimizationBody)
-              .then((response) => {
-                if (response.status >= 200 && response.status <= 299) {
-                  service.plan.optimizationId = response.data.optimizationIdentifier
-                  // service.startPolling()
-                  service.plan.planState = Constants.PLAN_STATE.STARTED
-                  service.progressPercent = 0
-                  service.startProgressMessagePolling(response.data.startDate)
-                  service.getOptimizationProgress(service.plan)
-                  service.setActivePlanState(PlanStates.START_STATE)
-                } else {
-                  console.error(response)
-                }
-              })
-          } else {
-
-          }
-        })
-    }
-    */
-
     service.getOptimizationProgress = (newPlan) => {
       if (!service.plan.planState) {
         service.plan.planState = PlanStates.START_STATE
@@ -1263,7 +1136,6 @@ class State {
               tileDataService.markHtmlCacheDirty()
               service.requestMapLayerRefresh.next(null)
               delete service.plan.optimizationId
-              // console.log(' >>> getOptimizationProgress > loadPlanInputs')
               service.loadPlanInputs(newPlan.id)
               service.setActivePlanState(progressData.data.optimizationState)
               service.stopProgressMessagePolling()
@@ -1320,8 +1192,6 @@ class State {
     }
 
     service.showDirectedCable = false
-    //service.boundaryTypes = []
-    //service.selectedBoundaryType = {}
 
     var loadCensusCatData = function () {
       return $http.get(`/service/tag-mapping/meta-data/census_block/categories`)
@@ -1465,35 +1335,8 @@ class State {
     }
     service.reloadAuthPermissions()
 
-    // service.systemActors = [] // All the system actors (i.e. users and groups)
-    service.systemActors
-    // service.reloadSystemActors = () => {
-    //   var newSystemActors = []
-    //   return $http.get('/service/auth/groups')
-    //     .then((result) => {
-    //       result.data.forEach((group) => {
-    //         group.originalName = group.name
-    //         group.type = 'group'
-    //         // This is just horrible - get rid of this trustAsHtml asap. And no html in object properties!
-    //         group.name = $sce.trustAsHtml(`<i class="fa fa-users" aria-hidden="true"></i> ${group.name}`)
-    //         newSystemActors.push(group)
-    //       })
-    //       return $http.get('/service/auth/users')
-    //     })
-    //     .then((result) => {
-    //       result.data.forEach((user) => {
-    //         user.type = 'user'
-    //         // This is just horrible - get rid of this trustAsHtml asap. And no html in object properties!
-    //         user.name = $sce.trustAsHtml(`<i class="fa fa-user" aria-hidden="true"></i> ${user.firstName} ${user.lastName}`)
-    //         newSystemActors.push(user)
-    //       })
-    //       service.systemActors = newSystemActors
-    //       $timeout()
-    //     })
-    //     .catch((err) => console.error(err))
-    // }
-    // service.reloadSystemActors()
-
+    // service.systemActors
+    
     // The logged in user is currently set by using the AngularJS injector in index.html
     service.loggedInUser = null
     service.setLoggedInUser = (user, initialState) => {
@@ -1560,7 +1403,8 @@ class State {
         service.setPlanRedux(plan)
       }
       var plan = null
-      const planPromise = initialState ? $http.get(`/service/v1/plan/${initialState.planId}`) : service.getOrCreateEphemeralPlan()
+      const planIdToLoad = (initialState.reportPage && initialState.reportPage.planId) || (initialState.reportOverview && initialState.reportOverview.planId)
+      const planPromise = planIdToLoad ? $http.get(`/service/v1/plan/${planIdToLoad}`) : service.getOrCreateEphemeralPlan()
       return planPromise // Will be called once when the page loads, since state.js is a service
         .then((result) => {
           plan = result.data
@@ -1573,8 +1417,8 @@ class State {
           service.loggedInUser.perspective = result.data.perspective || 'default'
           service.configuration.loadPerspective(service.loggedInUser.perspective)
           service.initializeState()
-          service.isReportMode = Boolean(initialState)
-          if (initialState && initialState.mapCenter) {
+          service.isReportMode = Boolean(initialState.reportPage || initialState.reportOverview)
+          if (service.isReportMode) {
             return service.mapReadyPromise
               .then(() => {
                 // If we are in Report mode, disable the default UI like zoom buttons, etc.
@@ -1584,9 +1428,18 @@ class State {
                   mapTypeControl: false
                 })
                 service.setPlanRedux(plan)
-                service.requestSetMapCenter.next({ latitude: initialState.mapCenter.latitude, longitude: initialState.mapCenter.longitude })
-                if (initialState.mapZoom) {
-                  service.requestSetMapZoom.next(initialState.mapZoom)
+                const mapCenter = (initialState.reportPage && initialState.reportPage.mapCenter) || (initialState.reportOverview && initialState.reportOverview.mapCenter)
+                const mapZoom = (initialState.reportPage && initialState.reportPage.mapZoom) || (initialState.reportOverview && initialState.reportOverview.mapZoom)
+                if (mapCenter) {
+                  service.requestSetMapCenter.next({ latitude: mapCenter.latitude, longitude: mapCenter.longitude })
+                }
+                if (mapZoom) {
+                  service.requestSetMapZoom.next(mapZoom)
+                }
+                if (initialState.reportOverview) {
+                  service.loadReportPagesForPlan(plan.id)
+                  service.setMapReportMapObjectsVisibility(true)
+                  service.setMapReportPageNumbersVisibility(true)
                 }
                 return Promise.resolve()
               })
@@ -1617,26 +1470,27 @@ class State {
               })
             })
           } else {
-            if (!(initialState && initialState.mapCenter)) {  // If we have an initial state then this has alredy been set
+            if (!(initialState.reportPage && initialState.reportPage.mapCenter)) {  // If we have an initial state then this has alredy been set
               // Set it to the default so that the map gets initialized
               return initializeToDefaultCoords(plan)
             }
           }
         })
         .then(() => {
-          if (initialState && initialState.visibleLayers) {
+          if (initialState.reportPage && initialState.reportPage.visibleLayers) {
             // We have an initial state, wait for a few seconds (HACKY) and turn layers on/off as per request
             const timeoutPromise = new Promise((resolve, reject) => { setTimeout(() => resolve(), 2000) })
             return timeoutPromise
               .then(() => {
                 // Set layer visibility as per the initial state
-                const setOfVisibleLayers = new Set(initialState.visibleLayers)
+                const setOfVisibleLayers = new Set(initialState.reportPage.visibleLayers)
                 service.mapLayersRedux.location.forEach(layer => {
                   const isVisible = setOfVisibleLayers.has(layer.key)
                   service.setLayerVisibility(layer, isVisible)
                 })
-                service.equipmentLayerTypeVisibility.planned = true
-                Object.keys(service.mapLayersRedux.networkEquipment).forEach(layerType => {
+                service.equipmentLayerTypeVisibility.planned = true;
+                service.cableLayerTypeVisibility.planned = true;
+                ['roads', 'cables', 'boundaries', 'equipments'].forEach(layerType => {
                   Object.keys(service.mapLayersRedux.networkEquipment[layerType]).forEach(layerKey => {
                     const isVisible = setOfVisibleLayers.has(layerKey)
                     service.setNetworkEquipmentLayerVisiblity(layerType, service.mapLayersRedux.networkEquipment[layerType][layerKey], isVisible)
@@ -1690,43 +1544,25 @@ class State {
           }
           service.configuration.loadPerspective(config.user.perspective)
           service.setNetworkEquipmentLayers(service.configuration.networkEquipment)
-          
+
           return service.setLoggedInUser(config.user, initialState)
         })
         .then(() => {
-          service.setOptimizationOptions()
+          // service.setOptimizationOptions()
           tileDataService.setLocationStateIcon(tileDataService.locationStates.LOCK_ICON_KEY, service.configuration.locationCategories.entityLockIcon)
           tileDataService.setLocationStateIcon(tileDataService.locationStates.INVALIDATED_ICON_KEY, service.configuration.locationCategories.entityInvalidatedIcon)
-          if (!initialState) {
+          if (!initialState.reportPage && !initialState.reportOverview) {
             service.getReleaseVersions()
           }
           if (service.configuration.ARO_CLIENT === 'frontier' || service.configuration.ARO_CLIENT === 'sse') {
             heatmapOptions.selectedHeatmapOption = service.viewSetting.heatmapOptions.filter((option) => option.id === 'HEATMAP_OFF')[0]
           }
+          service.setOptimizationInputs(service.configuration.optimizationOptions)
           // Fire a redux action to get configuration for the redux side. This will result in two calls to /configuration for the time being.
           service.getStyleValues()
           return service.loadConfigurationFromServer()
         })
         .catch(err => console.error(err))
-    }
-
-    // Optimization options in Redux
-    // service.optimizationOptions nneds to be moved to redux
-    // add these to the deafult JSON
-    service.setOptimizationOptions = () => {
-      service.optimizationOptions = angular.copy(service.configuration.optimizationOptions)
-
-      // 158954857: disabling some optimization types
-      service.optimizationOptions.uiAlgorithms = [
-        service.OPTIMIZATION_TYPES.UNCONSTRAINED,
-        // service.OPTIMIZATION_TYPES.MAX_IRR,
-        service.OPTIMIZATION_TYPES.BUDGET,
-        service.OPTIMIZATION_TYPES.IRR_TARGET,
-        service.OPTIMIZATION_TYPES.IRR_THRESH,
-        service.OPTIMIZATION_TYPES.COVERAGE
-      ]
-
-      service.optimizationOptions.uiSelectedAlgorithm = service.optimizationOptions.uiAlgorithms[0]
     }
 
     service.planEditorChanged = new Rx.BehaviorSubject(false)
@@ -1747,7 +1583,7 @@ class State {
     }
 
     service.loadServiceLayers()
-
+    // expert mode refactor
     service.executeManualPlanTargetsQuery = () => {
       var query = service.formatExpertModeQuery(service.expertMode[service.selectedExpertMode], service.expertModeScopeContext)
       // select id from aro.location_entity where data_source_id = 1 and id in
@@ -1905,12 +1741,7 @@ class State {
       Object.assign(service, nextState)
       Object.assign(service, actions)
 
-      // console.log(' --- mergeToTarget')
       if ((currentActivePlanId !== newActivePlanId) && (nextState.plan)) {
-        // console.log(' ---v--- ')
-        // console.log(`${currentActivePlanId} | ${newActivePlanId}`)
-        // console.log(nextState)
-        // console.log(' ---^--- ')
         // The active plan has changed. Note that we are comparing ids because a change in plan state also causes the plan object to update.
         service.onActivePlanChanged()
       }
@@ -1936,7 +1767,9 @@ class State {
       networkAnalysisConnectivityDefinition: reduxState.optimization.networkAnalysis.connectivityDefinition,
       networkAnalysisConstraints: networkAnalysisConstraintsSelector(reduxState, 'spatialEdgeType', 'snappingDistance', 'maxConnectionDistance', 'maxWormholeDistance', 'ringComplexityCount', 'maxLocationEdgeDistance', 'locationBufferSize', 'conduitBufferSize', 'targetEdgeTypes'),
       primarySpatialEdge: reduxState.optimization.networkAnalysis.primarySpatialEdge,
-      wormholeFuseDefinitions: reduxState.optimization.networkAnalysis.wormholeFuseDefinitions
+      wormholeFuseDefinitions: reduxState.optimization.networkAnalysis.wormholeFuseDefinitions,
+      activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
+      optimizationInputs: reduxState.optimization.networkOptimization.optimizationInputs
     }
   }
 
@@ -1950,6 +1783,9 @@ class State {
       loadAuthRolesRedux: () => dispatch(UserActions.loadAuthRoles()),
       setLoggedInUserRedux: loggedInUser => dispatch(UserActions.setLoggedInUser(loggedInUser)),
       loadSystemActorsRedux: () => dispatch(UserActions.loadSystemActors()),
+      loadReportPagesForPlan: planId => dispatch(MapReportsActions.loadReportPagesForPlan(planId)),
+      setMapReportMapObjectsVisibility: isVisible => dispatch(MapReportsActions.showMapObjects(isVisible)),
+      setMapReportPageNumbersVisibility: isVisible => dispatch(MapReportsActions.showPageNumbers(isVisible)),
       setPlanRedux: plan => dispatch(PlanActions.setActivePlan(plan)),
       setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId)),
       addPlanTargets: (planId, planTargets) => dispatch(SelectionActions.addPlanTargets(planId, planTargets)),
@@ -1963,6 +1799,7 @@ class State {
       onFeatureSelectedRedux: features => dispatch(RingEditActions.onFeatureSelected(features)),
       setNetworkAnalysisConstraints: aroNetworkConstraints => dispatch(NetworkAnalysisActions.setNetworkAnalysisConstraints(aroNetworkConstraints)),
       setNetworkAnalysisConnectivityDefinition: (spatialEdgeType, networkConnectivityType) => dispatch(NetworkAnalysisActions.setNetworkAnalysisConnectivityDefinition(spatialEdgeType, networkConnectivityType)),
+      setOptimizationInputs: inputs => dispatch(NetworkOptimizationActions.setOptimizationInputs(inputs)),
       setPrimarySpatialEdge: primarySpatialEdge => dispatch(NetworkAnalysisActions.setPrimarySpatialEdge(primarySpatialEdge)),
       clearWormholeFuseDefinitions: () => dispatch(NetworkAnalysisActions.clearWormholeFuseDefinitions()),
       setWormholeFuseDefinition: (spatialEdgeType, wormholeFusionTypeId) => dispatch(NetworkAnalysisActions.setWormholeFuseDefinition(spatialEdgeType, wormholeFusionTypeId))
@@ -1970,6 +1807,6 @@ class State {
   }
 }
 
-State.$inject = ['$rootScope', '$http', '$document', '$timeout', '$sce', '$ngRedux', 'stateSerializationHelper', '$filter', 'tileDataService', 'Utils', 'tracker', 'Notification']
+State.$inject = ['$rootScope', '$http', '$document', '$timeout', '$sce', '$ngRedux', '$filter', 'tileDataService', 'Utils', 'tracker', 'Notification']
 
 export default State

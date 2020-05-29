@@ -1,7 +1,7 @@
 import Constants from '../common/constants'
 import FullScreenActions from '../../react/components/full-screen/full-screen-actions'
 import RfpActions from '../../react/components/optimization/rfp/rfp-actions'
-import MapLayerActions from '../../react/components/map-layers/map-layer-actions'
+import MapReportsActions from '../../react/components/map-reports/map-reports-actions'
 import ToolActions from '../../react/components/tool/tool-actions'
 import Tools from '../../react/components/tool/tools'
 
@@ -203,7 +203,6 @@ class ToolBarController {
     if (this.rulerSegments.length) {
       total = _(this.rulerSegments).reduce((length, ruler, index) => {
         var prev
-        // console.log( 'reduce', length, ruler,index )
         // ignore the first ruler.... work from current ruler to the previous ruler
         if (index) {
           prev = this.rulerSegments[index - 1]
@@ -429,7 +428,6 @@ class ToolBarController {
     // Note we are using skip(1) to skip the initial value (that is fired immediately) from the RxJS stream.
     this.copperClicklistener = google.maps.event.addListener(this.mapRef, 'click', (event) => {
       if (!event || !event.latLng || this.state.currentRulerAction.id === this.state.allRulerActions.STRAIGHT_LINE.id) {
-        console.log(event)
         return
       }
 
@@ -467,6 +465,7 @@ class ToolBarController {
     }
     // Get the POST body for optimization based on the current application state
     var optimizationBody = this.state.getOptimizationBody()
+    
     // Replace analysis_type and add a point and radius
     optimizationBody.analysis_type = 'POINT_TO_POINT'
     optimizationBody.pointFrom = {
@@ -481,10 +480,9 @@ class ToolBarController {
     var spatialEdgeType = this.state.currentRulerAction.id === this.state.allRulerActions.COPPER.id ? this.Constants.SPATIAL_EDGE_COPPER : this.Constants.SPATIAL_EDGE_ROAD
     optimizationBody.spatialEdgeType = spatialEdgeType
     optimizationBody.directed = false
-
     this.$http.post('/service/v1/network-analysis/p2p', optimizationBody)
       .then((result) => {
-      // get copper properties
+        // get copper properties
         var geoJson = {
           'type': 'FeatureCollection',
           'features': [{
@@ -548,7 +546,8 @@ class ToolBarController {
   mapStateToThis (reduxState) {
     return {
       isAnnotationsListVisible: reduxState.tool.showToolBox && (reduxState.tool.activeTool === Tools.ANNOTATION.id),
-      isMapReportsVisible: reduxState.tool.showToolBox && (reduxState.tool.activeTool === Tools.MAP_REPORTS.id)
+      isMapReportsVisible: reduxState.tool.showToolBox && (reduxState.tool.activeTool === Tools.MAP_REPORTS.id),
+      showMapReportMapObjects: reduxState.mapReports.showMapObjects
     }
   }
 
@@ -565,6 +564,7 @@ class ToolBarController {
       setMapReportsVisibility: isVisible => {
         dispatch(ToolActions.setActiveTool(isVisible ? Tools.MAP_REPORTS.id : null))
         dispatch(ToolActions.setToolboxVisibility(isVisible))
+        dispatch(MapReportsActions.showMapObjects(isVisible))
       }
     }
   }

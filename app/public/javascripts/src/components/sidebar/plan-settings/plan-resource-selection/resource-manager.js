@@ -218,8 +218,6 @@ class ResourceManagerController {
     this.setEditingManagerId({ newId: selectedManager.id })
     this.setCurrentSelectedResourceKey({ resourceKey: selectedManager.resourceType })
     this.startEditingResourceManager(selectedManager.id, selectedManager.resourceType, selectedManager.name, this.editMode)
-    // only run this if the above succeeds
-    // this.setEditingMode({ mode: this.editMode })
   }
 
   askUserToConfirmManagerDelete (managerName) {

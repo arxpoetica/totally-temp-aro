@@ -199,7 +199,7 @@ class TileComponentController {
             if (this.activeSelectionModeId != SelectionModes.SELECTED_AREAS) {
               canSelectSA = false
             }
-            if (this.state.networkAnalysisType.id === 'RFP') {
+            if (this.networkAnalysisType === 'RFP') {
               canSelectLoc = canSelectSA = false // Do not allow any selection for RFP mode
             }
           }
@@ -507,7 +507,7 @@ class TileComponentController {
                 canSelectLoc = !canSelectLoc
                 break
             }
-            if (this.state.networkAnalysisType.id === 'RFP') {
+            if (this.networkAnalysisType === 'RFP') {
               canSelectLoc = canSelectSA = false // Do not allow any selection for RFP mode
             }
           } else if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.VIEW) {
@@ -672,7 +672,8 @@ class TileComponentController {
       selectionModes: reduxState.selection.selectionModes,
       selection: reduxState.selection,
       stateMapLayers: reduxState.mapLayers,
-      transactionFeatureIds: getTransactionFeatureIds(reduxState)
+      transactionFeatureIds: getTransactionFeatureIds(reduxState),
+      networkAnalysisType: reduxState.optimization.networkOptimization.optimizationInputs.analysis_type
     }
   }
 

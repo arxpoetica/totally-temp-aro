@@ -68,6 +68,13 @@ workflows:
               only:
                 - master
                 - duct_edit
+                - refactor-serialization-helper
+                - optional_building
+                - location_cluster
+                - jwtErrors
+                - planning_constraints_ray_tracing
+                - refactor-serialization-helper
+                - AERIAL
       - deploy:
           context: aro_qa_builds
           requires:

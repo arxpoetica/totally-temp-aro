@@ -2,6 +2,8 @@ import Actions from '../../common/actions'
 
 const defaultState = {
   pages: [],
+  showMapObjects: false,
+  showPageNumbers: false,
   activePageUuid: null,
   editingPageUuid: null,
   isCommunicating: false,
@@ -15,6 +17,18 @@ function clearMapReports () {
 function setPages (state, pages) {
   return { ...state,
     pages: [].concat(pages)
+  }
+}
+
+function setShowMapObjects (state, showMapObjects) {
+  return { ...state,
+    showMapObjects
+  }
+}
+
+function setShowPageNumbers (state, showPageNumbers) {
+  return { ...state,
+    showPageNumbers
   }
 }
 
@@ -36,11 +50,23 @@ function setIsCommunicating (state, isCommunicating) {
   }
 }
 
+function setIsDownloading (state, isDownloading) {
+  return { ...state,
+    isDownloading
+  }
+}
+
 function mapReportsReducer (state = defaultState, action) {
   switch (action.type) {
 
     case Actions.MAP_REPORTS_SET_PAGES:
       return setPages(state, action.payload)
+
+    case Actions.MAP_REPORTS_SET_SHOW_MAP_OBJECTS:
+      return setShowMapObjects(state, action.payload)
+
+    case Actions.MAP_REPORTS_SET_SHOW_PAGE_NUMBERS:
+      return setShowPageNumbers(state, action.payload)
 
     case Actions.MAP_REPORTS_CLEAR:
       return clearMapReports()
@@ -53,6 +79,9 @@ function mapReportsReducer (state = defaultState, action) {
 
     case Actions.MAP_REPORTS_SET_IS_COMMUNICATING:
       return setIsCommunicating(state, action.payload)
+
+    case Actions.MAP_REPORTS_SET_IS_DOWNLOADING:
+      return setIsDownloading(state, action.payload)
 
     default:
       return state

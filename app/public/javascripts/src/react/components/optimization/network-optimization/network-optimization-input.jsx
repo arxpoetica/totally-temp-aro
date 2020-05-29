@@ -69,15 +69,14 @@ export class NetworkOptimizationInput extends Component {
     // if we do validation we'll need to make it a selector
     // plan.selection.planTargets are sent seperately to the server
     var inputs = JSON.parse(JSON.stringify(optimizationInputs))
+    // ToDo: this should come from redux NOT parent
     inputs.analysis_type = this.props.networkAnalysisTypeId
     inputs.planId = this.props.planId
-    inputs.locationConstraints = {}
-    inputs.locationConstraints.analysisSelectionMode = this.props.activeSelectionModeId
-    inputs.locationConstraints.locationTypes = []
-    this.props.locationsLayers.forEach(locationsLayer => {
-      if (locationsLayer.checked) inputs.locationConstraints.locationTypes.push(locationsLayer.plannerKey)
-    })
 
+    inputs.locationConstraints = JSON.parse(JSON.stringify(this.props.optimizationInputs.locationConstraints))
+    inputs.locationConstraints.analysisSelectionMode = this.props.activeSelectionModeId
+    // inputs.locationConstraints.analysisLayerId
+    
     return inputs
   }
 
@@ -94,6 +93,7 @@ export class NetworkOptimizationInput extends Component {
     this.props.setSelectionTypeById(val.id)
   }
 
+  // ToDo: this is also in analysis-mode.js
   areControlsEnabled () {
     return (this.props.planState === AngConstants.PLAN_STATE.START_STATE) || (this.props.planState === AngConstants.PLAN_STATE.INITIALIZED)
   }
@@ -106,7 +106,7 @@ const mapStateToProps = (state) => ({
   userId: state.user.loggedInUser.id,
   planId: state.plan.activePlan.id,
   planState: state.plan.activePlan.planState,
-  locationsLayers: state.mapLayers.location,
+  // locationsLayers: state.mapLayers.location,
   optimizationId: state.optimization.networkOptimization.optimizationId,
   isCanceling: state.optimization.networkOptimization.isCanceling,
   optimizationInputs: state.optimization.networkOptimization.optimizationInputs,

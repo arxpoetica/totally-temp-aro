@@ -10,7 +10,6 @@ import MapReportsListMapObjects from './map-reports-list-map-objects.jsx'
 export class MapReportsDownloader extends Component {
   render () {
     return <div>
-      <MapReportsListMapObjects />
       { this.renderContent() }
     </div>
   }
@@ -40,8 +39,19 @@ export class MapReportsDownloader extends Component {
   renderReportsList () {
     return <div>
       <MapReportsList />
-      <button className='btn btn-sm btn-block btn-primary mt-2' onClick={() => this.doDownloadReport()}>
-        <i className='fa fa-download mr-2' />Generate and Download report
+      <button
+        className={'btn btn-sm btn-block mt-2' + (this.props.isDownloading ? ' btn-light' : ' btn-primary')}
+        onClick={() => this.doDownloadReport()}
+        disabled={this.props.isDownloading}
+      >
+        {
+          this.props.isDownloading
+            ? <i className='fa fa-spin fa-spinner mr-2' />
+            : <i className='fa fa-download mr-2' />
+        }
+        {
+          this.props.isDownloading ? 'Downloading...' : 'Generate and Download report'
+        }
       </button>
     </div>
   }
@@ -50,6 +60,7 @@ export class MapReportsDownloader extends Component {
     const pageDefinitions = this.props.reportPages.map(reportPage => {
       const pageDefinition = JSON.parse(JSON.stringify(reportPage))
       pageDefinition.planId = this.props.planId
+      pageDefinition.planName = this.props.planName
       // From maplayers, get the layers that we want to display in the report
       pageDefinition.visibleLayers = this.props.mapLayers.location.filter(layer => layer.checked).map(layer => layer.key).toJS();
       ['boundaries', 'cables', 'conduits', 'equipments', 'roads'].forEach(networkEquipmentCategory => {
@@ -85,16 +96,20 @@ export class MapReportsDownloader extends Component {
 
 MapReportsDownloader.propTypes = {
   planId: PropTypes.number,
+  planName: PropTypes.string,
   mapLayers: PropTypes.object,
   isCommunicating: PropTypes.bool,
+  isDownloading: PropTypes.bool,
   reportPages: PropTypes.array,
   editingPageUuid: PropTypes.string
 }
 
 const mapStateToProps = state => ({
   planId: state.plan.activePlan.id,
+  planName: state.plan.activePlan.name,
   mapLayers: state.mapLayers,
   isCommunicating: state.mapReports.isCommunicating,
+  isDownloading: state.mapReports.isDownloading,
   reportPages: state.mapReports.pages,
   editingPageUuid: state.mapReports.editingPageUuid
 })

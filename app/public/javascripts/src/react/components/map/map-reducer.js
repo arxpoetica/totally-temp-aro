@@ -3,6 +3,7 @@ import FeatureSets from '../../common/featureSets'
 
 const defaultState = {
   googleMaps: null,
+  zoom: 0,
   selectedFeatures: new FeatureSets()
 }
 
@@ -18,6 +19,12 @@ function setSelectedMapFeatures (state, features) {
   }
 }
 
+function setZoom (state, zoom) {
+  return { ...state,
+    zoom
+  }
+}
+
 function configurationReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.MAP_SET_GOOGLE_MAPS_REFERENCE:
@@ -25,6 +32,9 @@ function configurationReducer (state = defaultState, action) {
 
     case Actions.MAP_SET_SELECTED_FEATURES:
       return setSelectedMapFeatures(state, action.payload)
+
+    case Actions.MAP_SET_ZOOM:
+      return setZoom(state, action.payload)
 
     default:
       return state

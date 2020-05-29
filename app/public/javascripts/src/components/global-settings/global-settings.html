@@ -90,10 +90,10 @@
       </button>
     </div>
 
-    <user-account-settings ng-if="$ctrl.currentView === $ctrl.views.MY_ACCOUNT"></user-account-settings>
+    <r-my-account ng-if="$ctrl.currentView === $ctrl.views.MY_ACCOUNT"></r-my-account>
 
-    <multifactor-settings ng-if="$ctrl.currentView === $ctrl.views.MULTIFACTOR_AUTHENTICATION && $ctrl.state.configuration.perspective.globalSettings.showMultiFactorAuthentication">
-    </multifactor-settings>
+    <r-multi-factor ng-if="$ctrl.currentView === $ctrl.views.MULTIFACTOR_AUTHENTICATION">
+    </r-multi-factor>
 
     <manage-users ng-if="$ctrl.currentView === $ctrl.views.MANAGE_USERS"
                   manager-view="$ctrl.globalSettingsService.currentManageUserView"
@@ -110,9 +110,9 @@
     <tag-manager ng-if="$ctrl.currentView === $ctrl.views.TAG_MANAGER" manager-view="$ctrl.globalSettingsService.currentTagManagerView">
     </tag-manager>
 
-    <release-notes ng-if="$ctrl.currentView === $ctrl.views.RELEASE_NOTES"
+    <r-release-notes ng-if="$ctrl.currentView === $ctrl.views.RELEASE_NOTES"
       release-notes-view="$ctrl.globalSettingsService.currentReleaseNotesView">
-    </release-notes>
+    </r-release-notes>
 
     <r-broadcast ng-if="$ctrl.currentView === $ctrl.views.BROADCAST"></r-broadcast>
     
@@ -126,8 +126,6 @@
   <modal-footer>
     <!-- Close button - show when we are in "Global Settings" mode -->
     <button ng-if="$ctrl.currentView === $ctrl.views.GLOBAL_SETTINGS" class="btn btn-primary" ng-click="$ctrl.modalHide()">Close</button>
-
-    <button ng-if="$ctrl.currentView === $ctrl.views.MY_ACCOUNT" type="submit" class="btn btn-primary" ng-click="$ctrl.globalSettingsService.save()">Update settings</button>
 
     <a ng-if="$ctrl.currentView === $ctrl.views.MANAGE_USERS && $ctrl.globalSettingsService.currentManageUserView === $ctrl.globalSettingsService.ManageUserViews.Users"\
        type="button" class="btn btn-light" ng-href='/admin/users/csv'>Download CSV</a>
