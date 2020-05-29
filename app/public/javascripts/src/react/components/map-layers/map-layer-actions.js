@@ -2,12 +2,52 @@ import Actions from '../../common/actions'
 import AroHttp from '../../common/aro-http'
 
 // Sets the visibility for a specified layer
+// ToDo: LOCATIONS refactor callers of this to send layer Key instead of whole layer
 function setLayerVisibility (layer, newVisibility) {
-  return {
-    type: Actions.LAYERS_SET_VISIBILITY,
-    payload: {
-      layer: layer,
-      visibility: newVisibility
+  // if location send to Optimization
+  return (dispatch, getState) => {
+    // find type of layer
+    const state = getState().mapLayers
+    var layerType = null
+    const list = ['location', 'constructionSite', 'boundary']
+    list.forEach(key => {
+      const layers = state[key]
+      layers.forEach((stateLayer, index) => {
+        if (stateLayer.key === layer.key && stateLayer.uiLayerId === layer.uiLayerId) {
+          layerType = key
+        }
+      })
+    })
+
+    if (layerType !== null) {
+      var setVisibilityByKey = {
+        type: Actions.LAYERS_SET_VISIBILITY_BY_KEY,
+        payload: {
+          layerKeys: [
+            {
+              layerType: layerType,
+              key: layer.key,
+              uiLayerId: layer.uiLayerId,
+              visibility: newVisibility
+            }
+          ]
+        }
+      }
+      // I would like to get rid of the polymorphism
+      // if (layer.analysisLayerId) setVisibilityByKey.analysisLayerId = layer.analysisLayerId
+
+      // ToDo: use batch()
+      dispatch(setVisibilityByKey)
+      // if location send to Optimization
+      if (layerType === 'location') {
+        dispatch({
+          type: Actions.NETWORK_OPTIMIZATION_SET_LOCATION_TYPE,
+          payload: {
+            locationType: layer.plannerKey, // ToDo: layer.key,
+            isIncluded: newVisibility
+          }
+        })
+      }
     }
   }
 }

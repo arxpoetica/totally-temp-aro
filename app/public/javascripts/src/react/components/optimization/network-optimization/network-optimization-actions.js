@@ -1,6 +1,7 @@
 import Actions from '../../../common/actions'
 import AroHttp from '../../../common/aro-http'
 import PlanActions from '../../plan/plan-actions'
+import { batch } from 'react-redux'
 
 function runOptimization (inputs, userId) { // shouldn't be getting userId from caller
   return (dispatch, getState) => {
@@ -10,7 +11,6 @@ function runOptimization (inputs, userId) { // shouldn't be getting userId from 
 
     AroHttp.post(apiUrl, inputs)
       .then((response) => {
-        console.log(response)
         dispatch({
           type: Actions.NETWORK_OPTIMIZATION_SET_OPTIMIZATION_ID,
           payload: response.data.optimizationIdentifier
@@ -75,10 +75,82 @@ function loadOptimizationInputs (planId) {
 }
 
 function setOptimizationInputs (inputs) {
-  // weed out duplicate info?
+  return (dispatch) => {
+    var layerKeys = []
+    if (inputs.locationConstraints && inputs.locationConstraints.locationTypes) {
+      inputs.locationConstraints.locationTypes.forEach(plannerKey => {
+        // ToDo: bit of a hack here. once we standardize location keys we'll be able to pull out this translation
+        var plannerKeyToKey = {
+          'household': 'household',
+          'celltower': 'celltower',
+          'large': 'large_businesses',
+          'medium': 'medium_businesses',
+          'small': 'small_businesses'
+        }
+        var key = plannerKey
+        if (plannerKeyToKey[plannerKey]) key = plannerKeyToKey[plannerKey]
+
+        layerKeys.push({
+          layerType: 'location',
+          key: key,
+          visibility: true
+        })
+      })
+    }
+
+    batch(() => {
+      // set the actual options
+      dispatch({
+        type: Actions.NETWORK_OPTIMIZATION_SET_OPTIMIZATION_INPUTS,
+        payload: inputs
+      })
+
+      // location layer visibility: turn all off then turn selected ones on
+      // this will not work with SSE sub-types/filters
+      // so we'll comment this out until we can do sub-types properly
+      /*
+      dispatch({
+        type: Actions.LAYERS_SET_ALL_VISIBILITY,
+        payload: {
+          layerTypes: ['location'],
+          visibility: false
+        }
+      })
+      
+      // FOR TEST ONLY
+      dispatch({
+        type: Actions.LAYERS_SET_ALL_VISIBILITY,
+        payload: {
+          layerTypes: ['location'],
+          visibility: true
+        }
+      })
+      */
+      if (layerKeys.length) {
+        dispatch({
+          type: Actions.LAYERS_SET_VISIBILITY_BY_KEY,
+          payload: {
+            layerKeys: layerKeys
+          }
+        })
+      }
+
+      // selection -> selection mode
+      if (inputs.locationConstraints
+          && inputs.locationConstraints.analysisSelectionMode) {
+        dispatch({
+          type: Actions.SELECTION_SET_ACTIVE_MODE,
+          payload: inputs.locationConstraints.analysisSelectionMode
+        })
+      }
+    })
+  }
+}
+
+function setNetworkAnalysisType (networkAnalysisType) {
   return {
-    type: Actions.NETWORK_OPTIMIZATION_SET_OPTIMIZATION_INPUTS,
-    payload: inputs
+    type: Actions.NETWORK_OPTIMIZATION_SET_ANALYSIS_TYPE,
+    payload: networkAnalysisType
   }
 }
 
@@ -86,5 +158,6 @@ export default {
   loadOptimizationInputs,
   setOptimizationInputs,
   runOptimization,
-  cancelOptimization
+  cancelOptimization,
+  setNetworkAnalysisType
 }

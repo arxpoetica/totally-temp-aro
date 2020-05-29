@@ -17,7 +17,7 @@ const defaultState = {
   }
 }
 
-// ToDo: reafctor "checked" to be a collection of subtypes, also make a class 
+// ToDo: reafctor "checked" to be a collection of subtypes
 function setLayers (state, layerKey, layers) {
   // ToDo: this doesn't belong here
   if (layerKey === 'networkEquipment') {
@@ -80,16 +80,11 @@ function setNetworkEquipmentLayerVisibility (state, layerType, layer, subtype, v
 
 function setCableConduitVisibility (state, cableKey, conduitKey, visibility) {
   // ToDo: this is ugly
-  return {
-    ...state,
-    networkEquipment: {
-      ...state.networkEquipment,
-      cables: {
-        ...state.networkEquipment.cables,
-        [cableKey]: {
-          ...state.networkEquipment.cables[cableKey],
-          conduitVisibility: {
-            ...state.networkEquipment.cables[cableKey].conduitVisibility,
+  return { ...state,
+    networkEquipment: { ...state.networkEquipment,
+      cables: { ...state.networkEquipment.cables,
+        [cableKey]: { ...state.networkEquipment.cables[cableKey],
+          conduitVisibility: { ...state.networkEquipment.cables[cableKey].conduitVisibility,
             [conduitKey]: visibility
           }
         }
@@ -98,25 +93,39 @@ function setCableConduitVisibility (state, cableKey, conduitKey, visibility) {
   }
 }
 
-function setLayerVisibility (state, layer, visibility) {
-  // First determine which category/key (e.g. 'location' the layer belongs to)
-  var layerToChange = null; var layerKey = null; var layerIndex = NaN
-  const list = ['location', 'constructionSite', 'boundary']
-  // Object.keys(state).forEach(key => {
-  list.forEach(key => {
-    const layers = state[key]
-    layers.forEach((stateLayer, index) => {
-      if (stateLayer.key === layer.key && stateLayer.uiLayerId === layer.uiLayerId) {
-        layerToChange = stateLayer
-        layerKey = key
-        layerIndex = index
-      }
+function setAllLayerVisibility (state, layerTypes, visibility) {
+  var newState = {}
+  layerTypes.forEach(layerType => {
+    newState[layerType] = state[layerType] // will get cloned below
+    state[layerType].forEach((layer, layerIndex) => {
+      const newLayer = { ...layer, checked: visibility }
+      newState[layerType] = newState[layerType].set(layerIndex, newLayer)
     })
   })
-  // Create a new layer with the checked flag set
-  const newLayer = { ...layerToChange, checked: visibility }
-  // Replace this category in the state
-  return { ...state, [layerKey]: state[layerKey].set(layerIndex, newLayer) }
+  return { ...state, ...newState }
+}
+
+function setLayerVisibilityByKey (state, layerKeys) {
+  // each layer key:
+  //  layerType, key, visibility
+  // (make a prototype?)
+  var newState = {}
+  layerKeys.forEach(layerKey => {
+    // keys may not have uiLayerId
+    // ToDo: the layers need to have IDs or keys that service is aware of
+    // such that keys from, say, optomization can be sent here with out a state look up
+    const index = state[layerKey.layerType].findIndex(stateLayer => stateLayer.key === layerKey.key 
+      && (!layerKey.uiLayerId || layerKey.uiLayerId === stateLayer.uiLayerId)
+      && (!layerKey.analysisLayerId || layerKey.analysisLayerId === stateLayer.analysisLayerId)
+    )
+
+    if (index !== -1) {
+      const newLayer = { ...state[layerKey.layerType].get(index), checked: layerKey.visibility }
+      if (!newState.hasOwnProperty(layerKey.layerType)) newState[layerKey.layerType] = state[layerKey.layerType] // .slice() // will get cloned on the next line
+      newState[layerKey.layerType] = newState[layerKey.layerType].set(index, newLayer)
+    }
+  })
+  return { ...state, ...newState }
 }
 
 function setShowSiteBoundary (state, visibility) {
@@ -204,6 +213,12 @@ function mapLayersReducer (state = defaultState, action) {
 
     case Actions.LAYERS_SET_BOUNDARY:
       return setLayers(state, 'boundary', action.payload)
+
+    case Actions.LAYERS_SET_ALL_VISIBILITY:
+      return setAllLayerVisibility(state, action.payload.layerTypes, action.payload.visibility)
+
+    case Actions.LAYERS_SET_VISIBILITY_BY_KEY:
+      return setLayerVisibilityByKey(state, action.payload.layerKeys)
 
     case Actions.LAYERS_SET_VISIBILITY:
       return setLayerVisibility(state, action.payload.layer, action.payload.visibility)

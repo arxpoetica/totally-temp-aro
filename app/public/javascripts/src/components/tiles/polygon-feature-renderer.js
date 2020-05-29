@@ -104,7 +104,7 @@ class PolygonFeatureRenderer {
       drawingStyles.fillStyle = mapLayer.highlightStyle.fillStyle
       drawingStyles.lineOpacity = styles.modifiedBoundary.lineOpacity
     }
-    // console.log(feature)
+
     if (tileDataService.modifiedBoundaries.hasOwnProperty(feature.properties.object_id) &&
         mapLayer.tileDefinitions[0].vtlType == 'ExistingBoundaryPointLayer') {
       drawingStyles.strokeStyle = styles.modifiedBoundary.strokeStyle
