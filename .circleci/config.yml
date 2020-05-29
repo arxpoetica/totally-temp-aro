@@ -68,6 +68,7 @@ workflows:
               only:
                 - master
                 - duct_edit
+                - duct_edit_master_merge
                 - refactor-serialization-helper
                 - optional_building
                 - location_cluster
