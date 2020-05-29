@@ -1,8 +1,7 @@
 import React, { Component } from 'react'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
-import globalsettingsActions from '../global-settings/globalsettings-action'
-import UserActions from '../user/user-actions'
+import UserActions from './user-actions'
 
 export class MyAccount extends Component {constructor (props) {
     super(props)

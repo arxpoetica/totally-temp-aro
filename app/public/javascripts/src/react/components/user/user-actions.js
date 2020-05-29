@@ -111,10 +111,43 @@ function loadSystemActors () {
   }
 }
 
+function loadUserSettings (userId) {
+  return dispatch => {
+    AroHttp.get(`/service/auth/users/${userId}/configuration`)
+      .then(result => dispatch({
+        type: Actions.USER_SET_CONFIGURATION,
+        payload: result.data
+      }))
+      .catch((err) => console.error(err))
+
+      const filter = `deleted eq false and userId eq ${userId}`
+      // const RESOUSRCE_READ = 4
+      AroHttp.get(`/service/odata/userprojectentity?$select=id,name,permissions&$filter=${filter}&$orderby=name&$top=10000`)
+      .then(result => dispatch({
+        type: Actions.USER_PROJECT_TEMPLATES,
+        payload: result.data
+      }))
+      .catch((err) => console.error(err))
+  }
+}
+
+function saveUserSettings (userId,userConfiguration) {
+
+  return dispatch => {
+    AroHttp.post(`/service/auth/users/${userId}/configuration`, userConfiguration)
+      .then(result => dispatch(
+        loadUserSettings(userId)
+      ))
+      .catch((err) => console.error(err))
+  }
+}
+
 export default {
   loadAuthPermissions,
   loadAuthRoles,
   loadSystemActors,
   setLoggedInUser,
-  updateUserAccount
+  updateUserAccount,
+  loadUserSettings,
+  saveUserSettings
 }
