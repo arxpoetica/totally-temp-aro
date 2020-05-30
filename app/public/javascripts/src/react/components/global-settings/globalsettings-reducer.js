@@ -7,7 +7,10 @@ const defaultState = {
   totpEmailSent: false,
   verifyDetails:null,
   verifyFlag:false,
-  errorFlag: false
+  errorFlag: false,
+  permission:null,
+  acl:null,
+  groups:null
 }
 
 function setReleaseNotes (state, releaseNotes) {
@@ -69,6 +72,24 @@ function clearDetails(state, secret){
   }
 }
 
+function setPermission (state, permission) {
+  return { ...state,
+    permission: permission
+  }
+}
+
+function setAcl (state, acl) {
+  return { ...state,
+    acl: acl
+  }
+}
+
+function setGroups (state, groups) {
+  return { ...state,
+    groups: groups
+  }
+}
+
 function globalSettingsReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.GLOBAL_SETTINGS_GET_RELEASE_NOTES:
@@ -89,9 +110,18 @@ function globalSettingsReducer (state = defaultState, action) {
     case Actions.GLOBAL_SETTINGS_SEND_EMAIL_OTP:
       return setEmailFlag(state, action.payload)
     
-      case Actions.GLOBAL_SETTINGS_DISABLE_AUTH:
-        return clearDetails(state, action.payload) 
+    case Actions.GLOBAL_SETTINGS_DISABLE_AUTH:
+      return clearDetails(state, action.payload) 
 
+    case Actions.GLOBAL_SETTINGS_LOAD_PERMISSIONS:
+      return setPermission(state, action.payload) 
+
+      case Actions.GLOBAL_SETTINGS_LOAD_ACL:
+    return setAcl(state, action.payload) 
+
+    case Actions.GLOBAL_SETTINGS_LOAD_GROUPS:
+    return setGroups(state, action.payload) 
+    
       default:
       return state
   }

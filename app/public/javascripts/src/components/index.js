@@ -4,6 +4,7 @@ import { ToastContainer } from 'react-toastify'
 
 import UserSettings from '../react/components/user/user-settings.jsx'
 import MyAccount from '../react/components/user/my-account.jsx'
+import ManageGroups from '../react/components/global-settings/manage-groups.jsx'
 import MultiFactor from '../react/components/global-settings/multi-factor.jsx'
 import ReleaseNotes from '../react/components/global-settings/release-notes.jsx'
 import Broadcast from '../react/components/global-settings/broadcast.jsx'
@@ -244,6 +245,7 @@ app.component('boundaryDetail', boundaryDetail)
 // ReactJS components
   .component('rUserSettings', react2angular(UserSettings))
   .component('rMyAccount', react2angular(MyAccount))
+  .component('rManageGroups', react2angular(ManageGroups))
   .component('rMultiFactor', react2angular(MultiFactor))
   .component('rReleaseNotes', react2angular(ReleaseNotes))
   .component('rBroadcast', react2angular(Broadcast))

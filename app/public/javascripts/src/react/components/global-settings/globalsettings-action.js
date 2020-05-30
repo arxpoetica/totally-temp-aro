@@ -94,7 +94,31 @@ function resetMultiFactorForUser (verificationCode) {
   }
 }
 
+function loadGroups () {
 
+  return dispatch => {
+    AroHttp.get('/service/auth/permissions')
+      .then(result => dispatch({
+        type: Actions.GLOBAL_SETTINGS_LOAD_PERMISSIONS,
+        payload: result.data
+      }))
+      .catch((err) => console.error(err))
+
+      AroHttp.get(`/service/auth/acl/SYSTEM/1`)
+      .then(result => dispatch({
+        type: Actions.GLOBAL_SETTINGS_LOAD_ACL,
+        payload: result.data
+      }))
+      .catch((err) => console.error(err))
+
+      AroHttp.get(`/service/auth/groups`)
+      .then(result => dispatch({
+        type: Actions.GLOBAL_SETTINGS_LOAD_GROUPS,
+        payload: result.data
+      }))
+      .catch((err) => console.error(err))
+  }
+}
 
 export default {
   broadcastMessage,
@@ -104,5 +128,6 @@ export default {
   verifySecretForUser,
   sendOTPByEmail,
   disableMultiAuth,
-  resetMultiFactorForUser
+  resetMultiFactorForUser,
+  loadGroups
 }
