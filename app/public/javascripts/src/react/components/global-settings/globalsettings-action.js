@@ -120,6 +120,22 @@ function loadGroups () {
   }
 }
 
+function addGroup () {
+
+  return dispatch => {
+    AroHttp.post('/service/auth/groups', {
+      name: `Group ${Math.round(Math.random() * 10000)}`, // Try to not have a duplicate group name
+      description: 'Group Description'
+    })
+    .then(result => dispatch({
+      type: Actions.GLOBAL_SETTINGS_ADD_GROUP,
+      payload: result.data
+    }))
+    .catch((err) => console.error(err))
+  }
+
+}
+
 export default {
   broadcastMessage,
   loadReleaseNotes,
@@ -129,5 +145,6 @@ export default {
   sendOTPByEmail,
   disableMultiAuth,
   resetMultiFactorForUser,
-  loadGroups
+  loadGroups,
+  addGroup
 }

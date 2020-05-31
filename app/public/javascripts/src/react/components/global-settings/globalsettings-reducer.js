@@ -90,6 +90,21 @@ function setGroups (state, groups) {
   }
 }
 
+function addGroup (state, group) {
+  console.log(state)
+
+  var groups = state.groups
+  console.log(groups)
+  var group = group
+  group.isEditing = true
+  groups.push(group)
+  console.log(groups)
+  
+  return { ...state,
+    groups: groups
+  }
+}
+
 function globalSettingsReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.GLOBAL_SETTINGS_GET_RELEASE_NOTES:
@@ -116,14 +131,18 @@ function globalSettingsReducer (state = defaultState, action) {
     case Actions.GLOBAL_SETTINGS_LOAD_PERMISSIONS:
       return setPermission(state, action.payload) 
 
-      case Actions.GLOBAL_SETTINGS_LOAD_ACL:
-    return setAcl(state, action.payload) 
+    case Actions.GLOBAL_SETTINGS_LOAD_ACL:
+      return setAcl(state, action.payload) 
 
     case Actions.GLOBAL_SETTINGS_LOAD_GROUPS:
-    return setGroups(state, action.payload) 
+      return setGroups(state, action.payload) 
+
+    case Actions.GLOBAL_SETTINGS_ADD_GROUP:
+      return addGroup(state, action.payload) 
     
-      default:
+    default:
       return state
+
   }
 }
 

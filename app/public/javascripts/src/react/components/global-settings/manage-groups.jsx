@@ -2,16 +2,52 @@ import React, { Component } from 'react'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import GlobalsettingsActions from '../global-settings/globalsettings-action'
+import AroHttp from '../../common/aro-http'
 
 export class ManageGroups extends Component {constructor (props) {
     super(props);
     this.state = {
-
+        userMessage : {
+            show: false,
+            type: '',
+            text: ''
+        }
     }
 }
 
     componentDidMount () {
         this.props.loadGroups()
+    }
+
+    deleteGroup(id){
+        AroHttp.delete(`/service/auth/groups/${id}`)
+          .then(result => {
+            let userMessage = {
+                show: true,
+                type: 'success',
+                text: 'Group deleted successfully'
+            }
+            this.setState({userMessage: userMessage})
+          })
+          .catch(err => console.error(err))
+    }
+
+    addGroup () {
+        // Create a group in aro-service and then add it to our groups list. This ensures we will have a valid group id.
+        // Don't do anything with ACL as the default is a non-administrator group
+        /*groups.forEach((group) => group.isEditing = false)
+
+        AroHttp.post('/service/auth/groups', {
+          name: `Group ${Math.round(Math.random() * 10000)}`, // Try to not have a duplicate group name
+          description: 'Group Description'
+        })
+        .then((result) => {
+            var group = result.data
+            group.isEditing = true
+            groups.push(group)
+        })
+        .catch((err) => console.error(err))*/
+        this.props.addGroup()
     }
 
     render () {
@@ -33,16 +69,15 @@ export class ManageGroups extends Component {constructor (props) {
             userAdminPermissions = permissions.filter((item) => item.name === 'USER_ADMIN')[0].id
             
             let groupIdToGroup = {}
+            groups.forEach((group) => group.isEditing = false)
             groups.forEach((group) => groupIdToGroup[group.id] = group)
             
             // For each group, we want to determine whether the "Administrator" flag should be set.
             // The "userAdminPermissions" is a bit flag. When set, then the system actor (user/group) is an administrator.
             acls.resourcePermissions.forEach((resourcePermission) => {
                 const isAdministrator = (resourcePermission.rolePermissions & userAdminPermissions) > 0
-                const isEditing = false
                 if (groupIdToGroup.hasOwnProperty(resourcePermission.systemActorId)) {
                     groupIdToGroup[resourcePermission.systemActorId].isAdministrator = isAdministrator
-                    groupIdToGroup[resourcePermission.systemActorId].isEditing = isEditing
                 }
             })
         }
@@ -63,23 +98,12 @@ export class ManageGroups extends Component {constructor (props) {
                         
                             {
                                 groups.map((group,index)=>{  
-                                    console.log(group)
                                     return <tr key={index}>
                                         <td>
-                                            {!group.isEditing &
-                                                <div><span>{group.name}</span></div>
-                                            }
-                                            {group.isEditing &
-                                                <div><input type="text" className="form-control" value={group.name}/></div>
-                                            }
+                                            <span>{group.name}</span>
                                         </td>
                                         <td>
-                                            {!group.isEditing &
-                                                <span>{group.description}</span>
-                                            }
-                                            {group.isEditing &
-                                                <textarea type="text" className="form-control" value={group.description}/>
-                                            }
+                                            <span>{group.description}</span>
                                         </td>
                                         <td>
                                             <input type="checkbox" className="checkboxfill" />
@@ -87,7 +111,7 @@ export class ManageGroups extends Component {constructor (props) {
                                         <td>
                                             <button className="btn btn-primary btn-sm" ><i className="fa fa-pencil-alt"></i></button>
                                             <button className="btn btn-primary btn-sm" ><i className="fa fa-save"></i></button>
-                                            <button className='btn btn-danger btn-sm' ><i className="fa fa-trash-alt"></i></button>
+                                            <button className='btn btn-danger btn-sm' onClick={()=>this.deleteGroup(group.id)}><i className="fa fa-trash-alt"></i></button>
                                         </td>
                                     </tr>
                                 })
@@ -97,15 +121,14 @@ export class ManageGroups extends Component {constructor (props) {
                     </table>
                 </div>
                 <div>
-                    <button className="btn btn-light"><i className="fa fa-plus"></i>&nbsp; Add new group</button>
+                    <button className="btn btn-light" onClick={()=>this.addGroup()}><i className="fa fa-plus"></i>&nbsp; Add new group</button>
                 </div>
-                <div>
+                {!this.state.userMessage.show &
                     <div>
-                    
+                        <span>{this.state.userMessage.text}</span>
                     </div>
-                </div>
+                }
             </div>
-
         )
     }
 }
@@ -118,7 +141,8 @@ const mapStateToProps = (state) => ({
 })
 
 const mapDispatchToProps = (dispatch) => ({
-    loadGroups: () => dispatch(GlobalsettingsActions.loadGroups())
+    loadGroups: () => dispatch(GlobalsettingsActions.loadGroups()),
+    addGroup: () => dispatch(GlobalsettingsActions.addGroup())
 })
 
 const ManageGroupsComponent = wrapComponentWithProvider(reduxStore, ManageGroups, mapStateToProps, mapDispatchToProps)
