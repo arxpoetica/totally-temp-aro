@@ -10,7 +10,12 @@ const defaultState = {
   errorFlag: false,
   permission:null,
   acl:null,
-  groups:null
+  groups:null,
+  userMessage: {
+    show: false,
+    type: '',
+    text: ''
+  }
 }
 
 function setReleaseNotes (state, releaseNotes) {
@@ -84,24 +89,46 @@ function setAcl (state, acl) {
   }
 }
 
-function setGroups (state, groups) {
+function loadGroups (state, groups) {
+  return { ...state,
+    groups: groups,
+    userMessage: { ...state.userMessage,
+      show: false,
+      type: '',
+      text: ''
+    }
+  }
+}
+
+function reLoadGroups (state, groups) {
   return { ...state,
     groups: groups
   }
 }
 
 function addGroup (state, group) {
-  console.log(state)
-
   var groups = state.groups
-  console.log(groups)
   var group = group
   group.isEditing = true
   groups.push(group)
-  console.log(groups)
   
   return { ...state,
-    groups: groups
+    groups: groups,
+    userMessage: { ...state.userMessage,
+      show: true,
+      type: 'success',
+      text: 'Group added successfully'
+    }
+  }
+}
+
+function deleteGroup(state,data){
+  return { ...state,
+    userMessage: { ...state.userMessage,
+      show:true,
+      type: 'success',
+      text: 'Group deleted successfully'
+    }
   }
 }
 
@@ -135,11 +162,17 @@ function globalSettingsReducer (state = defaultState, action) {
       return setAcl(state, action.payload) 
 
     case Actions.GLOBAL_SETTINGS_LOAD_GROUPS:
-      return setGroups(state, action.payload) 
+      return loadGroups(state, action.payload) 
+      
+    case Actions.GLOBAL_SETTINGS_RELOAD_GROUPS:
+      return reLoadGroups(state, action.payload) 
 
     case Actions.GLOBAL_SETTINGS_ADD_GROUP:
       return addGroup(state, action.payload) 
-    
+
+    case Actions.GLOBAL_SETTINGS_DELETE_GROUP:
+      return deleteGroup(state, action.payload) 
+  
     default:
       return state
 

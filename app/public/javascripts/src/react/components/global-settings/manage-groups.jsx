@@ -7,11 +7,7 @@ import AroHttp from '../../common/aro-http'
 export class ManageGroups extends Component {constructor (props) {
     super(props);
     this.state = {
-        userMessage : {
-            show: false,
-            type: '',
-            text: ''
-        }
+
     }
 }
 
@@ -20,34 +16,17 @@ export class ManageGroups extends Component {constructor (props) {
     }
 
     deleteGroup(id){
-        AroHttp.delete(`/service/auth/groups/${id}`)
-          .then(result => {
-            let userMessage = {
-                show: true,
-                type: 'success',
-                text: 'Group deleted successfully'
-            }
-            this.setState({userMessage: userMessage})
-          })
-          .catch(err => console.error(err))
+        this.props.deleteGroup(id)
     }
 
     addGroup () {
-        // Create a group in aro-service and then add it to our groups list. This ensures we will have a valid group id.
-        // Don't do anything with ACL as the default is a non-administrator group
-        /*groups.forEach((group) => group.isEditing = false)
-
-        AroHttp.post('/service/auth/groups', {
-          name: `Group ${Math.round(Math.random() * 10000)}`, // Try to not have a duplicate group name
-          description: 'Group Description'
-        })
-        .then((result) => {
-            var group = result.data
-            group.isEditing = true
-            groups.push(group)
-        })
-        .catch((err) => console.error(err))*/
         this.props.addGroup()
+    }
+
+    editGroup(group){
+        console.log(group)
+        group.isEditing = true
+        console.log(group)
     }
 
     render () {
@@ -83,8 +62,9 @@ export class ManageGroups extends Component {constructor (props) {
         }
 
         return (
-            <div>
-                <div>
+            
+            <div style={{display:'flex', flexDirection: 'column', height: '100%'}}>
+                <div style={{flex: '1 1 auto', overflowY: 'auto'}}>
                     <table className="table table-striped">
                         <thead>
                             <tr>
@@ -100,16 +80,26 @@ export class ManageGroups extends Component {constructor (props) {
                                 groups.map((group,index)=>{  
                                     return <tr key={index}>
                                         <td>
-                                            <span>{group.name}</span>
+                                            {!group.isEditing &&
+                                            <div><span>{group.name}</span></div>
+                                            }
+                                            {group.isEditing &&
+                                            <div><input type="text" className="form-control" value={group.name}/></div>
+                                            }
                                         </td>
                                         <td>
+                                            {!group.isEditing &&
                                             <span>{group.description}</span>
+                                            }
+                                            {group.isEditing &&
+                                            <textarea type="text" className="form-control" value={group.description}/>
+                                            }
                                         </td>
                                         <td>
-                                            <input type="checkbox" className="checkboxfill" />
+                                            <input type="checkbox" className="checkboxfill" value={group.isAdministrator} disabled={!group.isEditing}/>
                                         </td>
-                                        <td>
-                                            <button className="btn btn-primary btn-sm" ><i className="fa fa-pencil-alt"></i></button>
+                                        <td style={{width: '120px'}}>
+                                            <button className="btn btn-primary btn-sm" onClick={()=>this.editGroup(group)}><i className="fa fa-pencil-alt"></i></button>
                                             <button className="btn btn-primary btn-sm" ><i className="fa fa-save"></i></button>
                                             <button className='btn btn-danger btn-sm' onClick={()=>this.deleteGroup(group.id)}><i className="fa fa-trash-alt"></i></button>
                                         </td>
@@ -123,9 +113,9 @@ export class ManageGroups extends Component {constructor (props) {
                 <div>
                     <button className="btn btn-light" onClick={()=>this.addGroup()}><i className="fa fa-plus"></i>&nbsp; Add new group</button>
                 </div>
-                {!this.state.userMessage.show &
-                    <div>
-                        <span>{this.state.userMessage.text}</span>
+                {this.props.userMessage.show &&
+                    <div className="alert alert-success mt-3">
+                        <span>{this.props.userMessage.text}</span>
                     </div>
                 }
             </div>
@@ -137,12 +127,14 @@ export class ManageGroups extends Component {constructor (props) {
 const mapStateToProps = (state) => ({
     permission: state.globalSettings.permission,
     acl: state.globalSettings.acl,
-    groups: state.globalSettings.groups
+    groups: state.globalSettings.groups,
+    userMessage: state.globalSettings.userMessage
 })
 
 const mapDispatchToProps = (dispatch) => ({
     loadGroups: () => dispatch(GlobalsettingsActions.loadGroups()),
-    addGroup: () => dispatch(GlobalsettingsActions.addGroup())
+    addGroup: () => dispatch(GlobalsettingsActions.addGroup()),
+    deleteGroup: (id) => dispatch(GlobalsettingsActions.deleteGroup(id))
 })
 
 const ManageGroupsComponent = wrapComponentWithProvider(reduxStore, ManageGroups, mapStateToProps, mapDispatchToProps)
