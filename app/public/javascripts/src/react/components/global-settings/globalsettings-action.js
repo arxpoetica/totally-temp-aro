@@ -136,6 +136,36 @@ function addGroup () {
 
 }
 
+function editGroup (id) {
+  return dispatch => {
+    AroHttp.get(`/service/auth/acl/SYSTEM/1`)
+    .then(result => dispatch({
+      type: Actions.GLOBAL_SETTINGS_EDIT_GROUP,
+      payload: id
+    }))
+    .catch((err) => console.error(err))
+  }
+}
+
+function saveGroup (group) {
+  return dispatch => {
+    AroHttp.post('/service/auth/groups', {
+      id: group.id,
+      name: group.name,
+      description: group.description
+    })
+    .then(result => dispatch({
+      type: Actions.GLOBAL_SETTINGS_SAVE_GROUP,
+      payload: result.data
+    }))
+    .then(result => dispatch(
+      reLoadGroups()
+    ))
+    .catch((err) => console.error(err))
+  }
+
+}
+
 function deleteGroup (id) {
 
   return dispatch => {
@@ -188,5 +218,7 @@ export default {
   resetMultiFactorForUser,
   loadGroups,
   addGroup,
-  deleteGroup
+  deleteGroup,
+  saveGroup,
+  editGroup
 }

@@ -2,12 +2,16 @@ import React, { Component } from 'react'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import GlobalsettingsActions from '../global-settings/globalsettings-action'
-import AroHttp from '../../common/aro-http'
 
 export class ManageGroups extends Component {constructor (props) {
     super(props);
     this.state = {
-
+        group: {
+            id:'',
+            name: '',
+            description:'',
+            isAdministrator: false
+        }
     }
 }
 
@@ -24,9 +28,39 @@ export class ManageGroups extends Component {constructor (props) {
     }
 
     editGroup(group){
-        console.log(group)
-        group.isEditing = true
-        console.log(group)
+        let grp = this.state.group;
+        grp["id"] = group.id;
+        grp["name"] = group.name;
+        grp["description"] = group.description;
+        //grp["isAdministrator"] = group.isAdministrator;
+        this.setState({group:grp})
+        this.props.editGroup(group.id)
+        console.log(this.state.group)
+    }
+
+    handleChange (e) {
+        let group = this.state.group;
+        group[e.target.name] = e.target.value;
+        this.setState({ group: group });
+        console.log(this.state.group)
+    }
+
+    handleAdminChange (event) {
+        let group = this.state.group;
+        group[event.target.name] = event.target.checked;
+        if (event.target.checked) {
+            group[event.target.name] = true;
+
+        } else {
+            group[event.target.name] = false;
+
+        }
+        this.setState({ group: group });
+        console.log(this.state.group)
+    }
+
+    saveGroup(){
+        this.props.saveGroup(this.state.group)
     }
 
     render () {
@@ -48,7 +82,6 @@ export class ManageGroups extends Component {constructor (props) {
             userAdminPermissions = permissions.filter((item) => item.name === 'USER_ADMIN')[0].id
             
             let groupIdToGroup = {}
-            groups.forEach((group) => group.isEditing = false)
             groups.forEach((group) => groupIdToGroup[group.id] = group)
             
             // For each group, we want to determine whether the "Administrator" flag should be set.
@@ -84,7 +117,7 @@ export class ManageGroups extends Component {constructor (props) {
                                             <div><span>{group.name}</span></div>
                                             }
                                             {group.isEditing &&
-                                            <div><input type="text" className="form-control" value={group.name}/></div>
+                                            <div><input type="text" name="name" onChange={(e)=>this.handleChange(e)} className="form-control" value={this.state.group.name}/></div>
                                             }
                                         </td>
                                         <td>
@@ -92,15 +125,24 @@ export class ManageGroups extends Component {constructor (props) {
                                             <span>{group.description}</span>
                                             }
                                             {group.isEditing &&
-                                            <textarea type="text" className="form-control" value={group.description}/>
+                                            <textarea type="text" name="description" onChange={(e)=>this.handleChange(e)} className="form-control" value={this.state.group.description}/>
                                             }
                                         </td>
                                         <td>
-                                            <input type="checkbox" className="checkboxfill" value={group.isAdministrator} disabled={!group.isEditing}/>
+                                            {!group.isEditing &&
+                                                <input type="checkbox" disabled={true} className="checkboxfill" checked={group.isAdministrator === true ? 'checked' : null}/>
+                                            }
+                                            {group.isEditing &&
+                                                <input type="checkbox" name="isAdministrator" onChange={(e)=>this.handleAdminChange(e)} className="checkboxfill" checked={this.state.group.isAdministrator === true ? 'checked' : null}/>
+                                            }
                                         </td>
-                                        <td style={{width: '120px'}}>
-                                            <button className="btn btn-primary btn-sm" onClick={()=>this.editGroup(group)}><i className="fa fa-pencil-alt"></i></button>
-                                            <button className="btn btn-primary btn-sm" ><i className="fa fa-save"></i></button>
+                                        <td style={{width: '90px'}}>
+                                            {!group.isEditing &&
+                                                <button className="btn btn-primary btn-sm" onClick={()=>this.editGroup(group)}><i className="fa fa-pencil-alt"></i></button>
+                                            }
+                                            {group.isEditing &&
+                                                <button className="btn btn-primary btn-sm" onClick={()=>this.saveGroup(group)}><i className="fa fa-save"></i></button>
+                                            }
                                             <button className='btn btn-danger btn-sm' onClick={()=>this.deleteGroup(group.id)}><i className="fa fa-trash-alt"></i></button>
                                         </td>
                                     </tr>
@@ -123,7 +165,6 @@ export class ManageGroups extends Component {constructor (props) {
     }
 }
 
-
 const mapStateToProps = (state) => ({
     permission: state.globalSettings.permission,
     acl: state.globalSettings.acl,
@@ -134,7 +175,9 @@ const mapStateToProps = (state) => ({
 const mapDispatchToProps = (dispatch) => ({
     loadGroups: () => dispatch(GlobalsettingsActions.loadGroups()),
     addGroup: () => dispatch(GlobalsettingsActions.addGroup()),
-    deleteGroup: (id) => dispatch(GlobalsettingsActions.deleteGroup(id))
+    deleteGroup: (id) => dispatch(GlobalsettingsActions.deleteGroup(id)),
+    editGroup: (id) => dispatch(GlobalsettingsActions.editGroup(id)),
+    saveGroup: (group) => dispatch(GlobalsettingsActions.saveGroup(group))
 })
 
 const ManageGroupsComponent = wrapComponentWithProvider(reduxStore, ManageGroups, mapStateToProps, mapDispatchToProps)

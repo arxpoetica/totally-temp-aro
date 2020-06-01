@@ -122,6 +122,37 @@ function addGroup (state, group) {
   }
 }
 
+function saveGroup (state,group) {
+
+  return { ...state,
+    userMessage: { ...state.userMessage,
+      show: true,
+      type: 'success',
+      text: 'Group saved successfully'
+    }
+  }
+}
+
+function editGroup (state, id) {
+  const groups = state.groups.map(group => {
+    if (group.id === id) {
+      return { ...group,
+        isEditing: true
+      }
+    } else {
+      return group
+    }
+  })
+  return { ...state,
+    groups,
+    userMessage: { ...state.userMessage,
+      show: false,
+      type: '',
+      text: ''
+    }
+  }
+}
+
 function deleteGroup(state,data){
   return { ...state,
     userMessage: { ...state.userMessage,
@@ -169,6 +200,12 @@ function globalSettingsReducer (state = defaultState, action) {
 
     case Actions.GLOBAL_SETTINGS_ADD_GROUP:
       return addGroup(state, action.payload) 
+
+    case Actions.GLOBAL_SETTINGS_EDIT_GROUP:
+      return editGroup(state, action.payload)
+
+    case Actions.GLOBAL_SETTINGS_SAVE_GROUP:
+      return saveGroup(state, action.payload)
 
     case Actions.GLOBAL_SETTINGS_DELETE_GROUP:
       return deleteGroup(state, action.payload) 
