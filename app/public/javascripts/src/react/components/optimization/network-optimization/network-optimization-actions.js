@@ -71,6 +71,9 @@ function loadOptimizationInputs (planId) {
       .then((response) => {
         dispatch(this.setOptimizationInputs(response.data))
       })
+      .catch((err) => {
+        console.error(err)
+      })
   }
 }
 
