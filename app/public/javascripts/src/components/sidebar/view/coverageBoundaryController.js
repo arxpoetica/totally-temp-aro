@@ -65,7 +65,6 @@ class CoverageBoundaryController {
     this.calculateCoverage()
       .then((result) => {
         // Draw the polygon onto the screen
-        console.log(result)
         this.coveragePolygon = new google.maps.Polygon({
           paths: result.coveragePolygon,
           strokeColor: '#FF1493',

@@ -148,7 +148,6 @@ export class PermissionsTable extends Component {
   // --- //
 
   onSortClick (colName) {
-    console.log(colName)
     if (this.state.selectedColumn === colName) {
       this.setState({ ...this.state, 'isOrderDesc': !this.state.isOrderDesc })
     } else {

@@ -32,16 +32,26 @@ function setAuthPermissions (state, authPermissions) {
   }
 }
 
+function updateLoggedInUser (state, user) {
+  return { ...state,
+    loggedInUser: { ...state.loggedInUser,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      email: user.email
+    }
+  }
+}
+
 function userReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.USER_GET_SUPERUSER_FLAG:
       return state
 
-    case Actions.USER_SET_SUPERUSER_FLAG:
-      return setSuperUserFlag(state, action.payload)
-
     case Actions.USER_SET_LOGGED_IN_USER:
       return setLoggedInUser(state, action.payload)
+
+    case Actions.USER_UPDATE_USER:
+      return updateLoggedInUser(state, action.payload)
 
     case Actions.USER_SET_SYSTEM_ACTORS:
       return setSystemActors(state, action.payload)

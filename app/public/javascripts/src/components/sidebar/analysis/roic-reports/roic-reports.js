@@ -154,8 +154,15 @@ class RoicReportsController {
 
   digestData () {
     const currentYear = (new Date()).getFullYear()
+    // number of years is number of vals in each curve, just grab the first one and get the length
+    // roicAnalysis.components['BAU'].['network.new_connections_cost'].values
+    const aComponentKey = Object.keys(this.roicResults.roicAnalysis.components)[0]
+    const component = this.roicResults.roicAnalysis.components[aComponentKey]
+    const aCurveKey = Object.keys(component)[0]
+    const yearsCount = component[aCurveKey].values.length
+
     this.xAxisLabels = []
-    for (var i = 0; i < this.state.optimizationOptions.financialConstraints.years; ++i) {
+    for (var i = 0; i < yearsCount; ++i) {
       this.xAxisLabels.push(currentYear + i)
     }
 

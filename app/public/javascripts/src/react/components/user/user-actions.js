@@ -28,6 +28,17 @@ function loadAuthPermissions () {
   }
 }
 
+function updateUserAccount (user) {
+  return dispatch => {
+    AroHttp.post('/settings/update_settings', user)
+      .then(result => dispatch({
+        type: Actions.USER_UPDATE_USER,
+        payload: user
+      }))
+      .catch((err) => console.error(err))
+  }
+}
+
 function loadAuthRoles () {
   // Get the permission bits from aro-service
   var authRoles = {}
@@ -104,5 +115,6 @@ export default {
   loadAuthPermissions,
   loadAuthRoles,
   loadSystemActors,
-  setLoggedInUser
+  setLoggedInUser,
+  updateUserAccount
 }

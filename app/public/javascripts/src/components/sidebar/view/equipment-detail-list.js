@@ -45,7 +45,6 @@ class EquipmentDetailListController {
         singleTileResults.forEach((featureData, index) => {
           var features = []
           Object.keys(featureData.layerToFeatures).forEach((layerKey) => features = features.concat(featureData.layerToFeatures[layerKey]))
-          // console.log(this.tileDataService.modifiedFeatures)
           for (var iFeature = 0; iFeature < features.length; ++iFeature) {
             // Parse the geometry out.
             var feature = features[iFeature]

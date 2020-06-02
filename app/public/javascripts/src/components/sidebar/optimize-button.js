@@ -1,5 +1,6 @@
 import Constants from '../common/constants'
 import SelectionModes from '../../react/components/selection/selection-modes'
+import NetworkOptimizationActions from '../../react/components/optimization/network-optimization/network-optimization-actions'
 
 // DEPRICATED
 class OptimizeButtonController {
@@ -26,7 +27,8 @@ class OptimizeButtonController {
   }
 
   saveExpertMode () {
-    this.state.loadOptimizationOptionsFromJSON(JSON.parse(this.state.expertMode.OPTIMIZATION_SETTINGS))
+    // this.state.loadOptimizationOptionsFromJSON(JSON.parse(this.state.expertMode.OPTIMIZATION_SETTINGS))
+    this.setOptimizationInputs(JSON.parse(this.state.expertMode.OPTIMIZATION_SETTINGS))
   }
 
   // Map global state to component properties
@@ -34,12 +36,16 @@ class OptimizeButtonController {
     return {
       activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
       planTargets: reduxState.selection.planTargets,
-      connectivityDefinition: reduxState.optimization.networkAnalysis.connectivityDefinition
+      // not used?
+      connectivityDefinition: reduxState.optimization.networkAnalysis.connectivityDefinition,
+      networkAnalysisType: reduxState.optimization.networkOptimization.optimizationInputs.analysis_type
     }
   }
 
   mapDispatchToTarget (dispatch) {
-    return { }
+    return {
+      setOptimizationInputs: inputs => dispatch(NetworkOptimizationActions.setOptimizationInputs(inputs))
+    }
   }
 
   $onDestroy () {
