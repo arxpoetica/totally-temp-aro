@@ -146,12 +146,11 @@ class LocationsController {
 
     // Add map layers based on the selection
     var v2Filters = null // If not null, the renderer will display zero objects
-    const filtersObj = (this.state.configuration && this.state.configuration.locationCategories && this.state.configuration.locationCategories.filters) || {}
-    if (Object.keys(filtersObj).length > 0) {
+    if (Object.keys(this.locationFilters).length > 0) {
       // Define the v2Filters object ONLY if there are some filters defined in the system
       v2Filters = []
-      Object.keys(filtersObj).forEach(filterKey => {
-        const filter = filtersObj[filterKey]
+      Object.keys(this.locationFilters).forEach(filterKey => {
+        const filter = this.locationFilters[filterKey]
         Object.keys(filter.rules).forEach(ruleKey => {
           if (filter.rules[ruleKey].isChecked) {
             v2Filters.push(filter.rules[ruleKey])
@@ -279,13 +278,13 @@ class LocationsController {
   }
 
   areAnyLocationFiltersVisible () {
-    const filtersObj = (this.state.configuration && this.state.configuration.locationCategories && this.state.configuration.locationCategories.filters) || {}
-    return Object.keys(filtersObj).length > 0
+    return Object.keys(this.locationFilters).length > 0
   }
 
   mapStateToThis (reduxState) {
     return {
       locationLayers: getLocationLayersList(reduxState),
+      locationFilters: reduxState.mapLayers.locationFilters,
       dataItems: reduxState.plan.dataItems
     }
   }

@@ -87,6 +87,13 @@ function setCableConduitVisibility (cableKey, conduitKey, newVisibility) {
   }
 }
 
+function setLocationFilters (locationFilters) {
+  return {
+    type: Actions.LAYERS_SET_LOCATION_FILTERS,
+    payload: locationFilters
+  }
+}
+
 function setNetworkEquipmentLayers (networkEquipmentLayers) {
   return {
     type: Actions.LAYERS_SET_NETWORK_EQUIPMENT,
@@ -180,6 +187,7 @@ export default {
   setNetworkEquipmentLayerVisibility,
   setNetworkEquipmentSubtypeVisibility,
   setCableConduitVisibility,
+  setLocationFilters,
   setNetworkEquipmentLayers,
   setConstructionSiteLayers,
   setBoundaryLayers,

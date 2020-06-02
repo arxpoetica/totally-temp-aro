@@ -1542,6 +1542,7 @@ class State {
           config.appConfiguration.networkEquipment.conduits = filteredConduits
 
           service.configuration = config.appConfiguration
+          service.setLocationFilters(service.configuration.locationCategories.filters)
           service.googleMapsLicensing = config.googleMapsLicensing
           service.enumStrings = config.enumStrings
           if (!service.enumStrings) {
@@ -1807,6 +1808,7 @@ class State {
       setGoogleMapsReference: mapRef => dispatch(MapActions.setGoogleMapsReference(mapRef)),
       setNetworkEquipmentLayers: networkEquipmentLayers => dispatch(MapLayerActions.setNetworkEquipmentLayers(networkEquipmentLayers)),
       updateShowSiteBoundary: isVisible => dispatch(MapLayerActions.setShowSiteBoundary(isVisible)),
+      setLocationFilters: locationFilters => dispatch(MapLayerActions.setLocationFilters(locationFilters)),
       onFeatureSelectedRedux: features => dispatch(RingEditActions.onFeatureSelected(features)),
       setNetworkAnalysisConstraints: aroNetworkConstraints => dispatch(NetworkAnalysisActions.setNetworkAnalysisConstraints(aroNetworkConstraints)),
       setNetworkAnalysisConnectivityDefinition: (spatialEdgeType, networkConnectivityType) => dispatch(NetworkAnalysisActions.setNetworkAnalysisConnectivityDefinition(spatialEdgeType, networkConnectivityType)),
