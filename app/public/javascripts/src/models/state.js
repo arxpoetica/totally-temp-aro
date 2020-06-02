@@ -1513,6 +1513,8 @@ class State {
       // Get application configuration from the server
       return $http.get('/configuration')
         .then(result => {
+          console.log(' --- config --- ')
+          console.log(result)
           var config = result.data
 
           // filter out conduits that are not to be shown
