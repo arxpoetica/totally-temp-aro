@@ -94,6 +94,17 @@ function setLocationFilters (locationFilters) {
   }
 }
 
+function setLocationFilterChecked (filterType, ruleKey, isChecked) {
+  return {
+    type: Actions.LAYERS_SET_LOCATION_FILTER_CHECKED,
+    payload: {
+      filterType,
+      ruleKey,
+      isChecked
+    }
+  }
+}
+
 function setNetworkEquipmentLayers (networkEquipmentLayers) {
   return {
     type: Actions.LAYERS_SET_NETWORK_EQUIPMENT,
@@ -188,6 +199,7 @@ export default {
   setNetworkEquipmentSubtypeVisibility,
   setCableConduitVisibility,
   setLocationFilters,
+  setLocationFilterChecked,
   setNetworkEquipmentLayers,
   setConstructionSiteLayers,
   setBoundaryLayers,

@@ -1500,6 +1500,7 @@ class State {
                     service.setNetworkEquipmentLayerVisiblity(layerType, service.mapLayersRedux.networkEquipment[layerType][layerKey], isVisible)
                   })
                 })
+                service.setLocationFilters(initialState.reportPage.locationFilters || {})
               })
           } else {
             return Promise.resolve()

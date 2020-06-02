@@ -82,10 +82,12 @@ export class MapReportsDownloader extends Component {
       const pageDefinition = JSON.parse(JSON.stringify(reportPage))
       pageDefinition.planId = this.props.planId
       pageDefinition.planName = this.props.planName
+      
       if (this.props.manualWait) {
         pageDefinition.waitSecondsPerPage = this.props.waitSecondsPerPage // The user has asked to manually wait for each page
       }
-      // From maplayers, get the layers that we want to display in the report
+      // From maplayers, get the layers that we want to display in the report. Also send the location filters.
+      pageDefinition.locationFilters = this.props.mapLayers.locationFilters
       pageDefinition.visibleLayers = this.props.mapLayers.location.filter(layer => layer.checked).map(layer => layer.key).toJS();
       ['boundaries', 'cables', 'conduits', 'equipments', 'roads'].forEach(networkEquipmentCategory => {
         const category = this.props.mapLayers.networkEquipment[networkEquipmentCategory]
