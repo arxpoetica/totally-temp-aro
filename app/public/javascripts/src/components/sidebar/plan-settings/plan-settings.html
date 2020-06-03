@@ -97,8 +97,14 @@
                                   plan-id="$ctrl.plan.id"></plan-project-configuration>
     </accordion-panel-contents>
 
-    <accordion-panel-title title="'Data Edit'" panel-id="'DATA_EDIT'"></accordion-panel-title>
-    <accordion-panel-contents panel-id="'DATA_EDIT'" destroy-on-hide="true">
+    <accordion-panel-title
+      ng-if="$ctrl.showPanels.EDIT_EDGES"
+      title="'Data Edit'" 
+      panel-id="'DATA_EDIT'"></accordion-panel-title>
+    <accordion-panel-contents
+      ng-if="$ctrl.showPanels.EDIT_EDGES"
+      panel-id="'DATA_EDIT'" 
+      destroy-on-hide="true">
       <r-duct-edit
         display-only="!$ctrl.areControlsEnabled()"
         user-id="$ctrl.userId" 
