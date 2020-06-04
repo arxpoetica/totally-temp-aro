@@ -317,6 +317,7 @@ class LocationsController {
   mergeToTarget (nextState, actions) {
     const currentLocationLayers = this.locationLayers
     const currentSelectedLibrary = this.dataItems && this.dataItems.location && this.dataItems.location.selectedLibraryItems
+    const currentLocationFilters = this.locationFilters
 
     // merge state and actions onto controller
     Object.assign(this, nextState)
@@ -324,7 +325,8 @@ class LocationsController {
 
     const nextSelectedLibrary = this.dataItems && this.dataItems.location && this.dataItems.location.selectedLibraryItems
     if ((currentLocationLayers !== nextState.locationLayers) ||
-      (currentSelectedLibrary !== nextSelectedLibrary)) {
+      (currentSelectedLibrary !== nextSelectedLibrary) ||
+      (currentLocationFilters !== this.locationFilters)) {
       this.updateMapLayers()
     }
   }
