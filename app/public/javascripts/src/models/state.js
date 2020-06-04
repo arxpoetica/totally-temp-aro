@@ -1343,6 +1343,9 @@ class State {
     service.setLoggedInUser = (user, initialState) => {
       tracker.trackEvent(tracker.CATEGORIES.LOGIN, tracker.ACTIONS.CLICK, 'UserID', user.id)
 
+      if (initialState.reportPage && initialState.reportPage.locationFilters) {
+        service.setLocationFilters(initialState.reportPage.locationFilters)
+      }
       // Set the logged in user in the Redux store
       service.loadAuthPermissionsRedux()
       service.loadAuthRolesRedux()
@@ -1376,6 +1379,7 @@ class State {
       var aclResult = null
       $http.get(`/service/auth/acl/SYSTEM/1`)
         .then((result) => {
+          service.v2FiltersLoaded = true
           aclResult = result.data
           // Get the acl entry corresponding to the currently logged in user
           var userAcl = aclResult.resourcePermissions.filter((item) => item.systemActorId === service.loggedInUser.id)[0]
@@ -1500,7 +1504,6 @@ class State {
                     service.setNetworkEquipmentLayerVisiblity(layerType, service.mapLayersRedux.networkEquipment[layerType][layerKey], isVisible)
                   })
                 })
-                service.setLocationFilters(initialState.reportPage.locationFilters || {})
               })
           } else {
             return Promise.resolve()
@@ -1511,6 +1514,8 @@ class State {
           service.suppressVectorTiles = false
           PuppeteerMessages.suppressMessages = false
           service.recreateTilesAndCache()
+          // Late night commit. The following line throws an error. Subtypes get rendered.
+          service.requestSetMapZoom(map.getZoom() + 1)
           $timeout()
         })
         .catch((err) => {
@@ -1810,6 +1815,7 @@ class State {
       setNetworkEquipmentLayers: networkEquipmentLayers => dispatch(MapLayerActions.setNetworkEquipmentLayers(networkEquipmentLayers)),
       updateShowSiteBoundary: isVisible => dispatch(MapLayerActions.setShowSiteBoundary(isVisible)),
       setLocationFilters: locationFilters => dispatch(MapLayerActions.setLocationFilters(locationFilters)),
+      setLocationFilterChecked: locationFilters => dispatch(MapLayerActions.setLocationFilterChecked(filterType, ruleKey, isChecked)),
       onFeatureSelectedRedux: features => dispatch(RingEditActions.onFeatureSelected(features)),
       setNetworkAnalysisConstraints: aroNetworkConstraints => dispatch(NetworkAnalysisActions.setNetworkAnalysisConstraints(aroNetworkConstraints)),
       setNetworkAnalysisConnectivityDefinition: (spatialEdgeType, networkConnectivityType) => dispatch(NetworkAnalysisActions.setNetworkAnalysisConnectivityDefinition(spatialEdgeType, networkConnectivityType)),
