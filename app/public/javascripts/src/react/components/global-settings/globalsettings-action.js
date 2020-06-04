@@ -207,6 +207,51 @@ function reLoadGroups () {
   }
 }
 
+function loadTags () {
+
+  return dispatch => {
+    AroHttp.get('/service/tag-mapping/global-tags')
+      .then(result => dispatch({
+        type: Actions.GLOBAL_SETTINGS_LOAD_TAGS,
+        payload: result.data
+      }))
+      .catch((err) => console.error(err))
+  }
+}
+
+function createTag (tag) {
+  
+  return dispatch => {
+    AroHttp.post(`/service/tag-mapping/tags?name=${tag.name}&description=${tag.description}&colourHue=${tag.colourHue}`)
+      .then(result => dispatch(
+        loadTags ()
+      ))
+      .catch((err) => console.error(err))
+  }
+}
+
+function updateTag(updatedTag) {
+  return dispatch => {
+    AroHttp.put(`/service/tag-mapping/tags`, _.omit(updatedTag, 'type'))
+      .then(result => dispatch(
+        loadTags ()
+      ))
+      .catch((err) => console.error(err))
+  }
+}
+
+function setFlag () {
+
+  return dispatch => {
+    AroHttp.get('/service/tag-mapping/global-tags')
+      .then(result => dispatch({
+        type: Actions.GLOBAL_SETTINGS_TAG_FLAG,
+        payload: null
+      }))
+      .catch((err) => console.error(err))
+  }
+}
+
 export default {
   broadcastMessage,
   loadReleaseNotes,
@@ -220,5 +265,9 @@ export default {
   addGroup,
   deleteGroup,
   saveGroup,
-  editGroup
+  editGroup,
+  loadTags,
+  setFlag,
+  createTag,
+  updateTag
 }

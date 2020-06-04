@@ -9,6 +9,8 @@ const defaultState = {
   verifyFlag:false,
   errorFlag: false,
   permission:null,
+  tags:null,
+  isCreateOrUpdate: false,
   acl:null,
   groups:null,
   userMessage: {
@@ -163,6 +165,18 @@ function deleteGroup(state,data){
   }
 }
 
+function setTags (state, tags) {
+  return { ...state,
+    tags: tags,
+    isCreateOrUpdate: false
+  }
+}
+
+function setCreateOrUpdate (state, isCreateOrUpdate) {
+  return { ...state,
+    isCreateOrUpdate: true
+  }
+}
 function globalSettingsReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.GLOBAL_SETTINGS_GET_RELEASE_NOTES:
@@ -209,6 +223,12 @@ function globalSettingsReducer (state = defaultState, action) {
 
     case Actions.GLOBAL_SETTINGS_DELETE_GROUP:
       return deleteGroup(state, action.payload) 
+    
+    case Actions.GLOBAL_SETTINGS_LOAD_TAGS:
+      return setTags(state, action.payload)
+
+    case Actions.GLOBAL_SETTINGS_TAG_FLAG:
+      return setCreateOrUpdate(state, action.payload)
   
     default:
       return state

@@ -4,6 +4,7 @@ import { ToastContainer } from 'react-toastify'
 
 import UserSettings from '../react/components/user/user-settings.jsx'
 import MyAccount from '../react/components/user/my-account.jsx'
+import TagManager from '../react/components/global-settings/tag-manager.jsx'
 import ManageGroups from '../react/components/global-settings/manage-groups.jsx'
 import MultiFactor from '../react/components/global-settings/multi-factor.jsx'
 import ReleaseNotes from '../react/components/global-settings/release-notes.jsx'
@@ -244,6 +245,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('editorInterfacePrimitive', editorInterfacePrimitive)
   .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
 // ReactJS components
+  .component('rTagManager', react2angular(TagManager))
   .component('rUserSettings', react2angular(UserSettings))
   .component('rMyAccount', react2angular(MyAccount))
   .component('rManageGroups', react2angular(ManageGroups))
