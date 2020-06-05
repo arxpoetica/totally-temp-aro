@@ -32,17 +32,15 @@ export class ManageGroups extends Component {constructor (props) {
         grp["id"] = group.id;
         grp["name"] = group.name;
         grp["description"] = group.description;
-        //grp["isAdministrator"] = group.isAdministrator;
+        grp["isAdministrator"] = group.isAdministrator;
         this.setState({group:grp})
         this.props.editGroup(group.id)
-        console.log(this.state.group)
     }
 
     handleChange (e) {
         let group = this.state.group;
         group[e.target.name] = e.target.value;
         this.setState({ group: group });
-        console.log(this.state.group)
     }
 
     handleAdminChange (event) {
@@ -56,7 +54,6 @@ export class ManageGroups extends Component {constructor (props) {
 
         }
         this.setState({ group: group });
-        console.log(this.state.group)
     }
 
     saveGroup(){
