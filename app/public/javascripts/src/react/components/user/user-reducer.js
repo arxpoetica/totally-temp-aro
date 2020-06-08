@@ -3,7 +3,9 @@ import Actions from '../../common/actions'
 const defaultState = {
   systemActors: [],
   authRoles: {},
-  authPermissions: {}
+  authPermissions: {},
+  userConfiguration: null,
+  projectTemplates: null
 }
 
 // Set the currently logged in user
@@ -42,6 +44,18 @@ function updateLoggedInUser (state, user) {
   }
 }
 
+function setUserConfiguration (state, userConfiguration) {
+  return { ...state,
+    userConfiguration: userConfiguration
+  }
+}
+
+function setProjectTemplates (state, projectTemplates) {
+  return { ...state,
+    projectTemplates: projectTemplates
+  }
+}
+
 function userReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.USER_GET_SUPERUSER_FLAG:
@@ -61,6 +75,12 @@ function userReducer (state = defaultState, action) {
 
     case Actions.USER_SET_AUTH_PERMISSIONS:
       return setAuthPermissions(state, action.payload)
+    
+    case Actions.USER_SET_CONFIGURATION:
+       return setUserConfiguration(state, action.payload)
+
+    case Actions.USER_PROJECT_TEMPLATES:
+      return setProjectTemplates(state, action.payload)
 
     default:
       return state

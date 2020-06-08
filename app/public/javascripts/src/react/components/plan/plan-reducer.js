@@ -4,7 +4,13 @@ const defaultState = {
   activePlan: null,
   dataItems: {},
   haveDataItemsChanged: false,
-  uploadDataSources: []
+  uploadDataSources: [],
+  defaultPlanCoordinates:{
+    zoom: 14,
+    latitude: 47.6062, // Seattle, WA by default. For no particular reason.
+    longitude: -122.3321, // Seattle, WA by default. For no particular reason.
+    areaName: 'Seattle, WA' // Seattle, WA by default. For no particular reason.
+  }
 }
 
 // Set the superuser flag for the currently logged in user

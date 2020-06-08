@@ -2,8 +2,11 @@
 import { react2angular } from 'react2angular'
 import { ToastContainer } from 'react-toastify'
 
+import UserSettings from '../react/components/user/user-settings.jsx'
+import MyAccount from '../react/components/user/my-account.jsx'
+import TagManager from '../react/components/global-settings/tag-manager.jsx'
+import ManageGroups from '../react/components/global-settings/manage-groups.jsx'
 import MultiFactor from '../react/components/global-settings/multi-factor.jsx'
-import MyAccount from '../react/components/global-settings/my-account.jsx'
 import ReleaseNotes from '../react/components/global-settings/release-notes.jsx'
 import Broadcast from '../react/components/global-settings/broadcast.jsx'
 import ConfigurationEditor from '../react/components/configuration/ui/configuration-editor.jsx'
@@ -218,6 +221,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('manageUsers', manageUsers)
   .component('manageGroups', manageGroups)
   .component('globalSettings', globalSettings)
+  .component('userSettings',userSettings)
   .component('aroPanel', aroPanel)
   .component('aroMultiSelect', aroMultiSelect)
   .component('mapObjectEditor', mapObjectEditor)
@@ -232,7 +236,6 @@ app.component('boundaryDetail', boundaryDetail)
   .component('accordionPanelContents', accordionPanelContents)
   .component('accordionPanelTitle', accordionPanelTitle)
   .component('tile', tile)
-  .component('userSettings', userSettings)
   .component('tagManager', tagManager)
   .component('createUpdateTag', createUpdateTag)
   .component('aroObjectEditor', aroObjectEditor)
@@ -242,8 +245,11 @@ app.component('boundaryDetail', boundaryDetail)
   .component('editorInterfacePrimitive', editorInterfacePrimitive)
   .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
 // ReactJS components
-  .component('rMultiFactor', react2angular(MultiFactor))
+  .component('rTagManager', react2angular(TagManager))
+  .component('rUserSettings', react2angular(UserSettings))
   .component('rMyAccount', react2angular(MyAccount))
+  .component('rManageGroups', react2angular(ManageGroups))
+  .component('rMultiFactor', react2angular(MultiFactor))
   .component('rReleaseNotes', react2angular(ReleaseNotes))
   .component('rBroadcast', react2angular(Broadcast))
   .component('rContextMenu', react2angular(ContextMenu))
