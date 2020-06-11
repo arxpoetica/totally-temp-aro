@@ -67,14 +67,7 @@ workflows:
             branches:
               only:
                 - master
-                - pdfReportFeedback1
-                - refactor-serialization-helper
-                - optional_building
-                - location_cluster
-                - jwtErrors
-                - planning_constraints_ray_tracing
-                - refactor-serialization-helper
-                - AERIAL
+                - sse-logo-2
       - deploy:
           context: aro_qa_builds
           requires:
