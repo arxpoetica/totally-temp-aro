@@ -18,7 +18,7 @@ export class UserSettings extends Component {constructor (props) {
 }
 
   initSearchBox () {
-    console.log("Iam here...")
+    let location = this.state.userConfig.defaultLocation
     var ids = 0
     var searchSessionToken = ''
     var search = $('#set-default-location .select2')
@@ -26,7 +26,7 @@ export class UserSettings extends Component {constructor (props) {
     search.select2({
       placeholder: 'Set an address, city, state or CLLI code',
       initSelection: function (select, callback) {
-        callback({ 'id': 0, 'text': this.state.userConfig.defaultLocation })
+        callback({ 'id': 0, 'text': location })
       },
       ajax: {
         url: '/search/addresses',
@@ -83,7 +83,7 @@ export class UserSettings extends Component {constructor (props) {
       
       return this.props.userConfiguration===null || this.props.projectTemplates===null
       ? null
-      : <div>{this.renderUserSettings()}</div>
+      : <>{this.renderUserSettings()}</>
   }
 
   renderUserSettings () {
@@ -112,9 +112,8 @@ export class UserSettings extends Component {constructor (props) {
     perspectiveList.push(<option key={'account_exec'}  value={'account_exec'}>{'Account Executive'}</option>)
 
     return (
-      <div className="no-collapse" id="set-default-location" 
-        style={{display: 'flex',flexDirection: 'column', height: '100%'}}>
-        <div>
+      <div className="no-collapse" id="set-default-location" style={{display: 'flex',flexDirection: 'column', height: '100%'}}>
+          <div style={{flex: "1 1 auto"}}>
             <table id="tblUserSettings" className="table table-sm table-striped">
             <tbody>
               <tr>
@@ -142,8 +141,8 @@ export class UserSettings extends Component {constructor (props) {
             </tbody>
             </table>
           </div>
-          <div>
-            <button className="btn btn-primary float-right" onClick={() => this.saveSettings()}><i className="fa fa-save"></i>&nbsp;&nbsp;Save Settings</button>
+          <div style={{flex: "0 0 auto"}}>
+                <button className="btn btn-primary float-right" onClick={() => this.saveSettings()}><i className="fa fa-save"></i>&nbsp;&nbsp;Save Settings</button>
           </div>
       </div>
     )
