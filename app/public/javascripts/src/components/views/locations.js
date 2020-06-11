@@ -4,7 +4,7 @@ import MapLayerActions from '../../react/components/map-layers/map-layer-actions
 // We need a selector, else the .toJS() call will create an infinite digest loop
 const getAllLocationLayers = state => state.mapLayers.location
 const getLocationLayersList = createSelector([getAllLocationLayers], (locationLayers) => locationLayers.toJS())
-const getAllLocationFilters = state => state.mapLayers.locationFilters
+const getAllLocationFilters = state => (state.mapLayers.locationFilters || {})
 const getOrderedLocationFilters = createSelector([getAllLocationFilters], locationFilters => {
   const orderedLocationFilters = JSON.parse(JSON.stringify(locationFilters))
   Object.keys(orderedLocationFilters).forEach(filterType => {
