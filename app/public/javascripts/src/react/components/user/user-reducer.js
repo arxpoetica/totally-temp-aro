@@ -5,7 +5,11 @@ const defaultState = {
   authRoles: {},
   authPermissions: {},
   userConfiguration: null,
-  projectTemplates: null
+  projectTemplates: null,
+  userList: null,
+  allGroups: null,
+  isOpenSendMail: false,
+  isOpenNewUser:false
 }
 
 // Set the currently logged in user
@@ -56,6 +60,48 @@ function setProjectTemplates (state, projectTemplates) {
   }
 }
 
+function setUserList (state, users) {
+
+  let mapIdToGroup = {}
+  state.allGroups.forEach((group) => mapIdToGroup[group.id] = group)
+
+  let allUsers = users
+  // For a user we will get the IDs of the groups that the user belongs to. Our control uses objects to bind to the model.
+  // Remove the group ids property and replace it with group objects
+  allUsers.forEach((user, index) => {
+    var selectedGroupObjects = []
+    user.groupIds.forEach((userGroupId) => selectedGroupObjects.push(mapIdToGroup[userGroupId]))
+    allUsers[index].userGroups = selectedGroupObjects // Make sure you modify the object and not a copy
+    delete allUsers[index].groupIds
+  })
+  
+  return { ...state,
+    userList: allUsers,
+    isOpenSendMail: false,
+    isOpenNewUser: false
+  }
+}
+
+function setAllGroups (state, groups) {
+  return { ...state,
+    allGroups: groups
+  }
+}
+
+function setMailFlag (state, groups) {
+  return { ...state,
+    isOpenSendMail: true,
+    isOpenNewUser: false
+  }
+}
+
+function setNewUserFlag (state, groups) {
+  return { ...state,
+    isOpenSendMail: false,
+    isOpenNewUser: true
+  }
+}
+
 function userReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.USER_GET_SUPERUSER_FLAG:
@@ -82,7 +128,19 @@ function userReducer (state = defaultState, action) {
     case Actions.USER_PROJECT_TEMPLATES:
       return setProjectTemplates(state, action.payload)
 
-    default:
+    case Actions.USER_SET_USERLIST:
+      return setUserList(state, action.payload)
+    
+    case Actions.USER_SET_GROUP:
+      return setAllGroups(state, action.payload)
+
+    case Actions.USER_SET_SEND_MAIL_FLAG:
+      return setMailFlag(state, action.payload)
+    
+    case Actions.USER_SET_NEW_USER_FLAG:
+      return setNewUserFlag(state, action.payload)
+
+      default:
       return state
   }
 }

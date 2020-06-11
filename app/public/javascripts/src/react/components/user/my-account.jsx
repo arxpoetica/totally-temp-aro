@@ -98,8 +98,7 @@ const mapStateToProps = (state) => ({
 })
 
 const mapDispatchToProps = (dispatch) => ({
-    updateUserAccount: user => dispatch(UserActions.updateUserAccount(user)),
-    loadSystemActors: () => dispatch(UserActions.loadSystemActors())
+    updateUserAccount: user => dispatch(UserActions.updateUserAccount(user))
 })
 
 const MyAccountComponent = wrapComponentWithProvider(reduxStore, MyAccount, mapStateToProps, mapDispatchToProps)

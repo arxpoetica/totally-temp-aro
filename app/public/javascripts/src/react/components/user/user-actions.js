@@ -142,6 +142,99 @@ function saveUserSettings (userId,userConfiguration) {
   }
 }
 
+function loadGroups () {
+
+  return dispatch => {
+    AroHttp.get('/service/auth/groups')
+    .then(result => dispatch({
+      type: Actions.USER_SET_GROUP,
+      payload: result.data
+    }))
+    .catch((err) => console.error(err))
+  }
+}
+
+
+function loadUsers () {
+  return dispatch => {
+    AroHttp.get(`/service/auth/users`)
+    .then(result => dispatch({
+      type: Actions.USER_SET_USERLIST,
+      payload: result.data
+    }))
+    .catch((err) => console.error(err))
+  }
+}
+
+function resendLink (user) {
+  return dispatch => {
+    AroHttp.post('/admin/users/resend', { user: user.id })
+    .then(result => dispatch(
+      loadUsers())
+    )
+    .catch((err) => console.error(err))
+  }
+}
+
+function deleteUser (user) {
+  return dispatch => {
+    AroHttp.delete(`/service/auth/users/${user.id}`)
+    .then(result => dispatch(
+      loadUsers())
+    )
+    .catch((err) => console.error(err))
+  }
+}
+
+function openSendMail () {
+
+  return dispatch => {
+    AroHttp.get('/service/auth/users')
+      .then(result => dispatch({
+        type: Actions.USER_SET_SEND_MAIL_FLAG,
+        payload: null
+      }))
+      .catch((err) => console.error(err))
+    }
+}
+
+function sendMail (mailSubject,mailBody) {
+
+  return dispatch => {
+    AroHttp.post('/admin/users/mail', { subject: mailSubject, text: mailBody}
+    .then(result => dispatch(
+      loadUsers())
+    ))
+    .catch((err) => console.error(err))
+  }
+}
+
+function openNewUser () {
+
+  return dispatch => {
+    AroHttp.get('/service/auth/users')
+      .then(result => dispatch({
+        type: Actions.USER_SET_NEW_USER_FLAG,
+        payload: null
+      }))
+      .catch((err) => console.error(err))
+    }
+}
+
+function registerUser (newUser) {
+  var serviceUser = newUser
+  serviceUser.groupIds = []
+  this.newUser.groups.forEach((group) => serviceUser.groupIds.push(group.id))
+
+  return dispatch => {
+    AroHttp.post('/admin/users/registerWithoutPassword', serviceUser)
+    .then(result => dispatch(
+      loadUsers())
+    )
+    .catch((err) => console.error(err))
+  }
+}
+
 export default {
   loadAuthPermissions,
   loadAuthRoles,
@@ -149,5 +242,13 @@ export default {
   setLoggedInUser,
   updateUserAccount,
   loadUserSettings,
-  saveUserSettings
+  saveUserSettings,
+  loadGroups,
+  loadUsers,
+  resendLink,
+  deleteUser,
+  openSendMail,
+  sendMail,
+  openNewUser,
+  registerUser
 }
