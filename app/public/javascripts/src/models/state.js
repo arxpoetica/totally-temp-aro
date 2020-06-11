@@ -20,6 +20,7 @@ import RingEditActions from '../react/components/ring-edit/ring-edit-actions'
 import NetworkAnalysisActions from '../react/components/optimization/network-analysis/network-analysis-actions'
 import ReactComponentConstants from '../react/common/constants'
 import AroNetworkConstraints from '../shared-utils/aro-network-constraints'
+import PuppeteerMessages from '../components/common/puppeteer-messages'
 import NetworkOptimizationActions from '../react/components/optimization/network-optimization/network-optimization-actions'
 import Tools from '../react/components/tool/tools'
 
@@ -1342,6 +1343,9 @@ class State {
     service.setLoggedInUser = (user, initialState) => {
       tracker.trackEvent(tracker.CATEGORIES.LOGIN, tracker.ACTIONS.CLICK, 'UserID', user.id)
 
+      if (initialState.reportPage && initialState.reportPage.locationFilters) {
+        service.setLocationFilters(initialState.reportPage.locationFilters)
+      }
       // Set the logged in user in the Redux store
       service.loadAuthPermissionsRedux()
       service.loadAuthRolesRedux()
@@ -1375,6 +1379,7 @@ class State {
       var aclResult = null
       $http.get(`/service/auth/acl/SYSTEM/1`)
         .then((result) => {
+          service.v2FiltersLoaded = true
           aclResult = result.data
           // Get the acl entry corresponding to the currently logged in user
           var userAcl = aclResult.resourcePermissions.filter((item) => item.systemActorId === service.loggedInUser.id)[0]
@@ -1421,6 +1426,9 @@ class State {
           if (service.isReportMode) {
             return service.mapReadyPromise
               .then(() => {
+                google.maps.event.addListener(map, 'tilesloaded', function () {
+                  PuppeteerMessages.googleMapsTilesRenderedCallback()
+                })
                 // If we are in Report mode, disable the default UI like zoom buttons, etc.
                 service.mapRef.setOptions({
                   disableDefaultUI: true,
@@ -1501,6 +1509,15 @@ class State {
             return Promise.resolve()
           }
         })
+        .then(() => {
+          console.log('No longer suppressing vector tiles')
+          service.suppressVectorTiles = false
+          PuppeteerMessages.suppressMessages = false
+          service.recreateTilesAndCache()
+          // Late night commit. The following line throws an error. Subtypes get rendered.
+          service.requestSetMapZoom(map.getZoom() + 1)
+          $timeout()
+        })
         .catch((err) => {
           console.error(err)
           // Set it to the default so that the map gets initialized
@@ -1508,6 +1525,7 @@ class State {
         })
     }
 
+    service.suppressVectorTiles = true
     service.configuration = {}
     service.initializeApp = initialState => {
       // Get application configuration from the server
@@ -1530,6 +1548,7 @@ class State {
           config.appConfiguration.networkEquipment.conduits = filteredConduits
 
           service.configuration = config.appConfiguration
+          service.setLocationFilters(service.configuration.locationCategories.filters)
           service.googleMapsLicensing = config.googleMapsLicensing
           service.enumStrings = config.enumStrings
           if (!service.enumStrings) {
@@ -1795,6 +1814,8 @@ class State {
       setGoogleMapsReference: mapRef => dispatch(MapActions.setGoogleMapsReference(mapRef)),
       setNetworkEquipmentLayers: networkEquipmentLayers => dispatch(MapLayerActions.setNetworkEquipmentLayers(networkEquipmentLayers)),
       updateShowSiteBoundary: isVisible => dispatch(MapLayerActions.setShowSiteBoundary(isVisible)),
+      setLocationFilters: locationFilters => dispatch(MapLayerActions.setLocationFilters(locationFilters)),
+      setLocationFilterChecked: locationFilters => dispatch(MapLayerActions.setLocationFilterChecked(filterType, ruleKey, isChecked)),
       onFeatureSelectedRedux: features => dispatch(RingEditActions.onFeatureSelected(features)),
       setNetworkAnalysisConstraints: aroNetworkConstraints => dispatch(NetworkAnalysisActions.setNetworkAnalysisConstraints(aroNetworkConstraints)),
       setNetworkAnalysisConnectivityDefinition: (spatialEdgeType, networkConnectivityType) => dispatch(NetworkAnalysisActions.setNetworkAnalysisConnectivityDefinition(spatialEdgeType, networkConnectivityType)),

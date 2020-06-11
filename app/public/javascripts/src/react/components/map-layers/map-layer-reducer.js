@@ -3,6 +3,7 @@ import { List, Map, remove } from 'immutable'
 
 const defaultState = {
   location: new List(),
+  locationFilters: {},
   networkEquipment: new Map(),
   constructionSite: new List(),
   boundary: new List(),
@@ -36,6 +37,26 @@ function setLayers (state, layerKey, layers) {
     }
   }
   return { ...state, [layerKey]: layers }
+}
+
+function setLocationFilters (state, locationFilters) {
+  return { ...state,
+    locationFilters
+  }
+}
+
+function setLocationFilterChecked (state, filterType, ruleKey, isChecked) {
+  return { ...state,
+    locationFilters: { ...state.locationFilters,
+      [filterType]: { ...state.locationFilters[filterType],
+        rules: { ...state.locationFilters[filterType].rules,
+          [ruleKey]: { ...state.locationFilters[filterType].rules[ruleKey],
+            isChecked
+          }
+        }
+      }
+    }
+  }
 }
 
 function setNetworkEquipmentLayerVisibility (state, layerType, layer, subtype, visibility) {
@@ -198,6 +219,12 @@ function mapLayersReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.LAYERS_SET_LOCATION:
       return setLayers(state, 'location', action.payload)
+
+    case Actions.LAYERS_SET_LOCATION_FILTERS:
+      return setLocationFilters(state, action.payload)
+
+    case Actions.LAYERS_SET_LOCATION_FILTER_CHECKED:
+      return setLocationFilterChecked(state, action.payload.filterType, action.payload.ruleKey, action.payload.isChecked)
 
     case Actions.LAYERS_SET_NETWORK_EQUIPMENT:
       return setLayers(state, 'networkEquipment', action.payload)

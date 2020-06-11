@@ -4,6 +4,18 @@ import MapLayerActions from '../../react/components/map-layers/map-layer-actions
 // We need a selector, else the .toJS() call will create an infinite digest loop
 const getAllLocationLayers = state => state.mapLayers.location
 const getLocationLayersList = createSelector([getAllLocationLayers], (locationLayers) => locationLayers.toJS())
+const getAllLocationFilters = state => state.mapLayers.locationFilters
+const getOrderedLocationFilters = createSelector([getAllLocationFilters], locationFilters => {
+  const orderedLocationFilters = JSON.parse(JSON.stringify(locationFilters))
+  Object.keys(orderedLocationFilters).forEach(filterType => {
+    const orderedRules = Object.keys(orderedLocationFilters[filterType].rules)
+      .map(ruleKey => ({ ...orderedLocationFilters[filterType].rules[ruleKey], ruleKey }))
+      .sort((a, b) => a.listIndex > b.listIndex ? 1 : -1)
+    orderedLocationFilters[filterType].rules = orderedRules
+  })
+  return orderedLocationFilters
+})
+
 
 class LocationsController {
   constructor ($rootScope, $location, $timeout, $ngRedux, map_tools, state) {
@@ -86,7 +98,9 @@ class LocationsController {
   getOrderedRulesForFilter (filter) {
     // We are going to cache the ordered rules so we don't compute them every digest cycle. Using "description" as the cache key.
     if (!this.filterToOrderedRules[filter.description]) {
-      var orderedRules = Object.keys(filter.rules).map(ruleKey => filter.rules[ruleKey]).sort((a, b) => a.listIndex > b.listIndex ? 1 : -1)
+      var orderedRules = Object.keys(filter.rules)
+        .map(ruleKey => ({ ...filter.rules[ruleKey], ruleKey }))
+        .sort((a, b) => a.listIndex > b.listIndex ? 1 : -1)
       this.filterToOrderedRules[filter.description] = orderedRules
     }
     return this.filterToOrderedRules[filter.description]
@@ -146,12 +160,11 @@ class LocationsController {
 
     // Add map layers based on the selection
     var v2Filters = null // If not null, the renderer will display zero objects
-    const filtersObj = (this.state.configuration && this.state.configuration.locationCategories && this.state.configuration.locationCategories.filters) || {}
-    if (Object.keys(filtersObj).length > 0) {
+    if (Object.keys(this.locationFilters).length > 0) {
       // Define the v2Filters object ONLY if there are some filters defined in the system
       v2Filters = []
-      Object.keys(filtersObj).forEach(filterKey => {
-        const filter = filtersObj[filterKey]
+      Object.keys(this.locationFilters).forEach(filterKey => {
+        const filter = this.locationFilters[filterKey]
         Object.keys(filter.rules).forEach(ruleKey => {
           if (filter.rules[ruleKey].isChecked) {
             v2Filters.push(filter.rules[ruleKey])
@@ -279,13 +292,14 @@ class LocationsController {
   }
 
   areAnyLocationFiltersVisible () {
-    const filtersObj = (this.state.configuration && this.state.configuration.locationCategories && this.state.configuration.locationCategories.filters) || {}
-    return Object.keys(filtersObj).length > 0
+    return Object.keys(this.locationFilters).length > 0
   }
 
   mapStateToThis (reduxState) {
     return {
       locationLayers: getLocationLayersList(reduxState),
+      locationFilters: reduxState.mapLayers.locationFilters,
+      orderedLocationFilters: getOrderedLocationFilters(reduxState),
       dataItems: reduxState.plan.dataItems
     }
   }
@@ -295,13 +309,15 @@ class LocationsController {
       updateLayerVisibility: (layer, isVisible, allLocationLayers) => {
         // First set the visibility of the current layer
         dispatch(MapLayerActions.setLayerVisibility(layer, isVisible))
-      }
+      },
+      setLocationFilterChecked: (filterType, ruleKey, isChecked) => dispatch(MapLayerActions.setLocationFilterChecked(filterType, ruleKey, isChecked))
     }
   }
 
   mergeToTarget (nextState, actions) {
     const currentLocationLayers = this.locationLayers
     const currentSelectedLibrary = this.dataItems && this.dataItems.location && this.dataItems.location.selectedLibraryItems
+    const currentLocationFilters = this.locationFilters
 
     // merge state and actions onto controller
     Object.assign(this, nextState)
@@ -309,7 +325,8 @@ class LocationsController {
 
     const nextSelectedLibrary = this.dataItems && this.dataItems.location && this.dataItems.location.selectedLibraryItems
     if ((currentLocationLayers !== nextState.locationLayers) ||
-      (currentSelectedLibrary !== nextSelectedLibrary)) {
+      (currentSelectedLibrary !== nextSelectedLibrary) ||
+      (currentLocationFilters !== this.locationFilters)) {
       this.updateMapLayers()
     }
   }
