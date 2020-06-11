@@ -298,7 +298,7 @@ class LocationsController {
   mapStateToThis (reduxState) {
     return {
       locationLayers: getLocationLayersList(reduxState),
-      locationFilters: reduxState.mapLayers.locationFilters,
+      locationFilters: reduxState.mapLayers.locationFilters || {},
       orderedLocationFilters: getOrderedLocationFilters(reduxState),
       dataItems: reduxState.plan.dataItems
     }
