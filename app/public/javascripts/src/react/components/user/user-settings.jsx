@@ -91,6 +91,8 @@ initSearchBox () {
 
   renderUserSettings () {
     
+    this.initSearchBox()
+    
     this.state.userConfig = this.props.userConfiguration;
 
     let projectTemplateList = []
