@@ -198,13 +198,13 @@ function openSendMail () {
     }
 }
 
-function sendMail (mailSubject,mailBody) {
+function sendEmail (mail) {
 
   return dispatch => {
-    AroHttp.post('/admin/users/mail', { subject: mailSubject, text: mailBody}
+    AroHttp.post('/admin/users/mail', { subject: mail.mailSubject, text: mail.mailBody})
     .then(result => dispatch(
       loadUsers())
-    ))
+    )
     .catch((err) => console.error(err))
   }
 }
@@ -222,12 +222,13 @@ function openNewUser () {
 }
 
 function registerUser (newUser) {
-  var serviceUser = newUser
+  console.log(newUser)
+  /*var serviceUser = newUser
   serviceUser.groupIds = []
-  this.newUser.groups.forEach((group) => serviceUser.groupIds.push(group.id))
+  this.newUser.groups.forEach((group) => serviceUser.groupIds.push(group.id))*/
 
   return dispatch => {
-    AroHttp.post('/admin/users/registerWithoutPassword', serviceUser)
+    AroHttp.post('/admin/users/registerWithoutPassword', newUser)
     .then(result => dispatch(
       loadUsers())
     )
@@ -248,7 +249,7 @@ export default {
   resendLink,
   deleteUser,
   openSendMail,
-  sendMail,
+  sendEmail,
   openNewUser,
   registerUser
 }

@@ -14,6 +14,10 @@ export class ManageUsers extends Component {constructor (props) {
         companyName: '',
         groups:{},
         isGlobalSuperUser:false
+      },
+      mail:{
+        mailSubject:'',
+        mailBody:''
       }
     }
 }
@@ -107,15 +111,15 @@ export class ManageUsers extends Component {constructor (props) {
             <form>
               <div className="form-group">
                 <label>Subject</label>
-                <input type="text" className="form-control"/>
+                <input type="text" className="form-control" name="mailSubject" onChange={(e)=>this.handleMailChange(e)} value={this.state.mail.mailSubject} />
               </div>
               <div className="form-group">
                 <label>Text</label>
-                <textarea className="form-control" rows="10"></textarea>
+                <textarea className="form-control" rows="10"  name="mailBody" onChange={(e)=>this.handleMailChange(e)} value={this.state.mail.mailBody}></textarea>
               </div>
             </form>
           </div>
-          <button type="button" onClick={() => this.sendMail()} class="btn btn-primary">Send mail</button>
+          <button type="button" onClick={() => this.sendEmail()} className="btn btn-primary float-right">Send mail</button>
         </div>
         }
 
@@ -126,31 +130,31 @@ export class ManageUsers extends Component {constructor (props) {
             <div className="form-group">
               <label className="col-sm-4 control-label">First name</label>
               <div className="col-sm-8">
-                <input type="text" className="form-control"/>
+                <input name="firstName" onChange={(e)=>this.handleUserChange(e)} value={this.state.newUser.firstName} type="text" className="form-control"/>
               </div>
             </div>
             <div className="form-group">
               <label className="col-sm-4 control-label">Last name</label>
               <div className="col-sm-8">
-                <input type="text" className="form-control"/>
+                <input name="lastName" onChange={(e)=>this.handleUserChange(e)} value={this.state.newUser.lastName} type="text" className="form-control"/>
               </div>
             </div>
             <div className="form-group">
               <label className="col-sm-4 control-label">Email</label>
               <div className="col-sm-8">
-                <input type="text" className="form-control"/>
+                <input name="email" onChange={(e)=>this.handleUserChange(e)} value={this.state.newUser.email} type="text" className="form-control"/>
               </div>
             </div>
             <div className="form-group">
               <label className="col-sm-4 control-label">Confirm email</label>
               <div className="col-sm-8">
-                <input type="text" className="form-control"/>
+                <input name="confirmEmail" onChange={(e)=>this.handleUserChange(e)} value={this.state.newUser.confirmEmail} type="text" className="form-control"/>
               </div>
             </div>
             <div className="form-group">
               <label className="col-sm-4 control-label">Company name</label>
               <div className="col-sm-8">
-                <input type="text" className="form-control"/>
+                <input name="companyName" onChange={(e)=>this.handleUserChange(e)} value={this.state.newUser.companyName} type="text" className="form-control"/>
               </div>
             </div>
         
@@ -172,6 +176,18 @@ export class ManageUsers extends Component {constructor (props) {
 
       </div>
     )
+  }
+
+  handleMailChange (e) {
+    let mail = this.state.mail;
+    mail[e.target.name] = e.target.value;
+    this.setState({ mail: mail });
+  }
+
+  handleUserChange (e) {
+    let newUser = this.state.newUser;
+    newUser[e.target.name] = e.target.value;
+    this.setState({ newUser: newUser });
   }
 
   resendLink(user) {
@@ -212,7 +228,7 @@ export class ManageUsers extends Component {constructor (props) {
   }
 
   sendEmail() {
-    this.props.sendEmail()
+    this.props.sendEmail(this.state.mail)
   }
 
   registerUser() {
@@ -243,7 +259,7 @@ const mapDispatchToProps = (dispatch) => ({
   deleteUser: (user) => dispatch(UserActions.deleteUser(user)),
   openSendMail: () => dispatch(UserActions.openSendMail()),
   openNewUser: () => dispatch(UserActions.openNewUser()),
-  sendEmail: () => dispatch(UserActions.sendEmail()),
+  sendEmail: (mail) => dispatch(UserActions.sendEmail(mail)),
   registerUser: (newUser) => dispatch(UserActions.registerUser(newUser))
 })
 
