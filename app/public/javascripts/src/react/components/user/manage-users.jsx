@@ -2,6 +2,8 @@ import React, { Component } from 'react'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import UserActions from './user-actions'
+import Select, { components } from "react-select";
+import createClass from "create-react-class";
 
 export class ManageUsers extends Component {constructor (props) {
     super(props)
@@ -13,12 +15,14 @@ export class ManageUsers extends Component {constructor (props) {
         confirmEmail:'',
         companyName: '',
         groups:{},
-        isGlobalSuperUser:false
+        isGlobalSuperUser:false,
+        groupIds: []
       },
       mail:{
         mailSubject:'',
         mailBody:''
-      }
+      },
+      selectedOption:{}
     }
 }
 
@@ -35,6 +39,9 @@ export class ManageUsers extends Component {constructor (props) {
 
   renderUserList () {
     const users = this.props.userList
+    let optionsList = this.props.allGroups.map(function(newkey) { 
+      return {"id":newkey.id, "value": newkey.name, "label": newkey.name}; 
+    });
 
     return (
       <div>
@@ -161,13 +168,23 @@ export class ManageUsers extends Component {constructor (props) {
             <div className="form-group">
               <label className="col-sm-4 control-label">Groups</label>
               <div className="col-sm-8">
-                
+                <Select
+                  closeMenuOnSelect={false}
+                  isMulti
+                  components={{ Option }}
+                  options={optionsList}
+                  hideSelectedOptions={false}
+                  backspaceRemovesValue={false}
+                  onChange={(e)=>this.handleGroupChange(e)}
+                  isSearchable={false} 
+                />
               </div>
             </div>
             <div className="form-group">
               <label className="col-sm-4 control-label">System-wide Super User</label>
               <div className="col-sm-8">
-                <input type="checkbox" className="checkboxfill"/>
+                <input type="checkbox" onChange={(e)=>this.handleSuperUser(e)} className="checkboxfill" 
+                name="isGlobalSuperUser" checked={this.state.newUser.isGlobalSuperUser === true}/>
               </div>
             </div>
           </form>
@@ -176,6 +193,23 @@ export class ManageUsers extends Component {constructor (props) {
 
       </div>
     )
+  }
+
+  handleSuperUser(event){
+    let newUser = this.state.newUser;
+    newUser['isGlobalSuperUser'] = event.target.checked;
+    if (event.target.checked) {
+      newUser['isGlobalSuperUser'] = true;
+    } else {
+      newUser['isGlobalSuperUser'] = false;
+    }
+    this.setState({ newUser: newUser });
+  }
+
+  handleGroupChange (e) {
+    let newUser = this.state.newUser;
+    newUser['groups'] = e;
+    this.setState({ newUser: newUser });
   }
 
   handleMailChange (e) {
@@ -224,6 +258,7 @@ export class ManageUsers extends Component {constructor (props) {
   }
 
   openNewUser() {
+    this.setState({ newUser: {} });
     this.props.openNewUser()
   }
 
@@ -244,6 +279,23 @@ export class ManageUsers extends Component {constructor (props) {
   }
 
 }
+
+const Option = createClass({
+  render() {
+    return (
+      <div>
+        <components.Option {...this.props}>
+          <input
+            type="checkbox"
+            checked={this.props.isSelected}
+            onChange={e => null}
+          />{" "}
+          <label>{this.props.value} </label>
+        </components.Option>
+      </div>
+    );
+  }
+});
 
 const mapStateToProps = (state) => ({
     userList: state.user.userList,

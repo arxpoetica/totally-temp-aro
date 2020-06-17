@@ -222,13 +222,12 @@ function openNewUser () {
 }
 
 function registerUser (newUser) {
-  console.log(newUser)
-  /*var serviceUser = newUser
+  var serviceUser = newUser
   serviceUser.groupIds = []
-  this.newUser.groups.forEach((group) => serviceUser.groupIds.push(group.id))*/
+  newUser.groups.forEach((group) => serviceUser.groupIds.push(group.id))
 
   return dispatch => {
-    AroHttp.post('/admin/users/registerWithoutPassword', newUser)
+    AroHttp.post('/admin/users/registerWithoutPassword', serviceUser)
     .then(result => dispatch(
       loadUsers())
     )
