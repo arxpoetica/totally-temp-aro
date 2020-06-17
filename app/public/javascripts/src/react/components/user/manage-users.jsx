@@ -6,24 +6,23 @@ import Select, { components } from "react-select";
 import createClass from "create-react-class";
 
 export class ManageUsers extends Component {constructor (props) {
-    super(props)
-    this.state = {
-      newUser:{
-        firstName:'',
-        lastName:'',
-        email:'',
-        confirmEmail:'',
-        companyName: '',
-        groups:{},
-        isGlobalSuperUser:false,
-        groupIds: []
-      },
-      mail:{
-        mailSubject:'',
-        mailBody:''
-      },
-      selectedOption:{}
+  super(props)
+  this.state = {
+    newUser:{
+      firstName:'',
+      lastName:'',
+      email:'',
+      confirmEmail:'',
+      companyName: '',
+      groups:{},
+      isGlobalSuperUser:false,
+      groupIds: []
+    },
+    mail:{
+      mailSubject:'',
+      mailBody:''
     }
+  }
 }
 
   componentDidMount () {
@@ -68,11 +67,31 @@ export class ManageUsers extends Component {constructor (props) {
               </thead>
               <tbody>
               {
+                
                 users.map((user,index)=>{  
+                  
+                  // To map groups with user
+                  let selectedGroups = user.userGroups
+                  let selectedOptions = selectedGroups.map(function(newkey) { 
+                    return {"id":newkey.id, "value": newkey.name, "label": newkey.name}; 
+                  }); 
+
                   return <tr key={index}>
                     <td>{user.firstName} {user.lastName}</td>
                     <td>{user.email}</td>
-                    <td></td>
+                    <td>
+                      <Select
+                        closeMenuOnSelect={false}
+                        isMulti
+                        components={{ Option }}
+                        defaultValue={selectedOptions}
+                        options={optionsList}
+                        hideSelectedOptions={false}
+                        backspaceRemovesValue={false}
+                        isSearchable={false} 
+                        placeholder="None Selected"
+                      />
+                    </td>
                     <td>
                       <div className="btn-group btn-group-sm float-right">
                         <button onClick={() => this.resendLink(user)} className="btn btn-xs btn-primary" data-toggle="tooltip" data-placement="bottom" title="Resend email">
@@ -177,6 +196,7 @@ export class ManageUsers extends Component {constructor (props) {
                   backspaceRemovesValue={false}
                   onChange={(e)=>this.handleGroupChange(e)}
                   isSearchable={false} 
+                  placeholder="None Selected"
                 />
               </div>
             </div>
