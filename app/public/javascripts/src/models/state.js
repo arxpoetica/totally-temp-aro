@@ -685,7 +685,7 @@ class State {
       var currentPlan = service.plan
       return Promise.all([
         $http.get('/service/odata/resourcetypeentity'), // The types of resource managers
-        $http.get('/service/odata/resourcemanager?$select=name,id,description,managerType,deleted'), // All resource managers in the system
+        $http.get('/service/v2/resource-manager'),
         $http.get(`/service/v1/plan/${currentPlan.id}/configuration`)
       ])
         .then((results) => {
@@ -722,6 +722,11 @@ class State {
 
           // Then add all the managers in the system to the appropriate type
           allResourceManagers.forEach((resourceManager) => {
+            // Once the backend supports the permission filtering on the odata API
+            // or durinng the react migration  managerType - resourceType maping can 
+            // be removed as managerType is used in many old Angular code
+            resourceManager['managerType'] = resourceManager['resourceType']
+            delete resourceManager['resourceType']
             if (!resourceManager.deleted) {
               newResourceItems[resourceManager.managerType].allManagers.push(resourceManager)
             }
