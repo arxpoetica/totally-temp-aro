@@ -4,6 +4,7 @@ import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import UserActions from './user-actions'
 import Select, { components } from "react-select";
 import createClass from "create-react-class";
+import ReactPaginate from 'react-paginate';
 
 export class ManageUsers extends Component {constructor (props) {
   super(props)
@@ -21,13 +22,24 @@ export class ManageUsers extends Component {constructor (props) {
     mail:{
       mailSubject:'',
       mailBody:''
-    }
+    },
+    selectedPage:0,
+    searchText:''
   }
 }
 
   componentDidMount () {
     this.props.loadGroups()
     this.props.loadUsers()
+  }
+
+  handlePageClick (data) { 
+    this.props.handlePageClick(data.selected)
+    this.setState({selectedPage: data.selected})
+  }
+
+  searchUsers() {
+    this.props.searchUsers(this.state.searchText)
   }
 
   render () {
@@ -37,7 +49,8 @@ export class ManageUsers extends Component {constructor (props) {
   }
 
   renderUserList () {
-    const users = this.props.userList
+    const users = this.props.pageableData.paginateData
+
     let optionsList = this.props.allGroups.map(function(newkey) { 
       return {"id":newkey.id, "value": newkey.name, "label": newkey.name}; 
     });
@@ -49,9 +62,9 @@ export class ManageUsers extends Component {constructor (props) {
           <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
             <div style={{flex: '0 0 auto'}}>
               <div className="float-right input-group" style={{maxWidth: '250px'}}>
-                <input className="form-control" type="text"/>
+                <input className="form-control" type="text" onChange={(e)=>this.handleChange(e)} name="searchText" value={this.state.searchText}/>
                 <span className="input-group-btn">
-                  <button className="btn btn-light" type="button"><i className="fa fa-search"></i></button>
+                  <button className="btn btn-light" type="button" onClick={(e) => this.searchUsers(e)}><i className="fa fa-search"></i></button>
                 </span>
               </div>
           </div>
@@ -71,8 +84,8 @@ export class ManageUsers extends Component {constructor (props) {
                 users.map((user,index)=>{  
                   
                   // To map groups with user
-                  let selectedGroups = user.userGroups
-                  let selectedOptions = selectedGroups.map(function(newkey) { 
+                  var selectedGroups = user.userGroups
+                  const selectedOptions = selectedGroups.map(function(newkey) { 
                     return {"id":newkey.id, "value": newkey.name, "label": newkey.name}; 
                   }); 
 
@@ -81,10 +94,10 @@ export class ManageUsers extends Component {constructor (props) {
                     <td>{user.email}</td>
                     <td>
                       <Select
+                        value={selectedOptions}
                         closeMenuOnSelect={false}
                         isMulti
                         components={{ Option }}
-                        defaultValue={selectedOptions}
                         options={optionsList}
                         hideSelectedOptions={false}
                         backspaceRemovesValue={false}
@@ -114,6 +127,24 @@ export class ManageUsers extends Component {constructor (props) {
               </tbody>
             </table>
           </div>
+
+          <div className="float-right" style={{flex: '0 0 auto'}}> 
+            <ReactPaginate 
+              previousLabel={'<<'} 
+              nextLabel={'>>'} 
+              breakLabel={<span className="gap">...</span>} 
+              pageCount={this.props.pageableData.pageCount} 
+              onPageChange={(e)=>this.handlePageClick(e)}
+              forcePage={this.props.pageableData.currentPage} 
+              activeClassName={"active"} 
+              containerClassName={'pagination'} 
+              pageClassName={'page-item'} 
+              pageLinkClassName={'page-link'} 
+              previousLinkClassName={'page-link'}
+              nextLinkClassName={'page-link'}
+            /> 
+          </div>
+
           <div style={{flex: '0 0 auto'}}>
             <div className="float-right" style={{flex: '0 0 auto'}}>
 
@@ -244,6 +275,11 @@ export class ManageUsers extends Component {constructor (props) {
     this.setState({ newUser: newUser });
   }
 
+  handleChange (e) {
+    let searchText = e.target.value;
+    e.target.name = searchText;
+    this.setState({ searchText: searchText });
+  }
   resendLink(user) {
     swal({
       title: 'Are you sure?',
@@ -321,7 +357,8 @@ const mapStateToProps = (state) => ({
     userList: state.user.userList,
     allGroups: state.user.allGroups,
     isOpenSendMail: state.user.isOpenSendMail,
-    isOpenNewUser: state.user.isOpenNewUser
+    isOpenNewUser: state.user.isOpenNewUser,
+    pageableData:  state.user.pageableData
 })
 
 const mapDispatchToProps = (dispatch) => ({
@@ -332,7 +369,9 @@ const mapDispatchToProps = (dispatch) => ({
   openSendMail: () => dispatch(UserActions.openSendMail()),
   openNewUser: () => dispatch(UserActions.openNewUser()),
   sendEmail: (mail) => dispatch(UserActions.sendEmail(mail)),
-  registerUser: (newUser) => dispatch(UserActions.registerUser(newUser))
+  registerUser: (newUser) => dispatch(UserActions.registerUser(newUser)),
+  handlePageClick: (selectedPage) => dispatch(UserActions.handlePageClick(selectedPage)),
+  searchUsers: (searchText) => dispatch(UserActions.searchUsers(searchText))
 })
 
 const ManageUsersComponent = wrapComponentWithProvider(reduxStore, ManageUsers, mapStateToProps, mapDispatchToProps)

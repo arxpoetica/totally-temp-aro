@@ -1,5 +1,9 @@
 import Actions from '../../common/actions'
 
+const initialOffset = 0
+const initialcurrentPage = 0
+const perPage = 2
+
 const defaultState = {
   systemActors: [],
   authRoles: {},
@@ -9,7 +13,15 @@ const defaultState = {
   userList: null,
   allGroups: null,
   isOpenSendMail: false,
-  isOpenNewUser:false
+  isOpenNewUser:false,
+  pageableData:{
+    offset: initialOffset,
+    perPage: perPage,
+    currentPage: initialcurrentPage,
+    pageCount: 0,
+    paginateData: []
+  }
+
 }
 
 // Set the currently logged in user
@@ -74,12 +86,72 @@ function setUserList (state, users) {
     allUsers[index].userGroups = selectedGroupObjects // Make sure you modify the object and not a copy
     delete allUsers[index].groupIds
   })
-  
+
+  // Set Pagination Data
+  let pageCount = Math.ceil(allUsers.length / state.pageableData.perPage)
+  let paginateData = allUsers.slice(state.pageableData.offset, state.pageableData.offset + perPage) 
+
+  let pageableData = {}
+  pageableData['pageCount'] = pageCount
+  pageableData['paginateData'] = paginateData
+  pageableData['offset'] = initialOffset
+  pageableData['perPage'] = perPage
+  pageableData['currentPage'] = initialcurrentPage
+
   return { ...state,
     userList: allUsers,
     isOpenSendMail: false,
-    isOpenNewUser: false
+    isOpenNewUser: false,
+    pageableData: pageableData
   }
+}
+
+function setPageData (state, selectedPage) {
+
+  const offset = selectedPage * perPage; 
+  let allUsers = state.userList
+  let paginateData = allUsers.slice(offset, offset + state.pageableData.perPage) 
+
+  let pageableData = state.pageableData
+  pageableData['paginateData'] = paginateData
+  pageableData['offset'] = offset
+  pageableData['currentPage'] = selectedPage
+
+  return { ...state,
+    pageableData: pageableData
+  }
+}
+
+function searchUsers (state,searchText) {
+  let filteredUsers = []
+  let userList = state.userList
+  if (searchText === '') {
+    filteredUsers = userList
+  } else {
+    // For now do search in a crude way. Will get this from the ODATA endpoint later
+    userList.forEach((user) => {
+      if ((JSON.stringify(user).toLowerCase()).indexOf(searchText.toLowerCase()) >= 0) {
+        filteredUsers.push(user)
+      }
+    })
+  }
+  
+  // Set Pagination Data
+  let pageCount = Math.ceil(filteredUsers.length / perPage)
+  let paginateData = filteredUsers.slice(state.pageableData.offset, state.pageableData.offset + perPage) 
+
+  let pageableData = {}
+  pageableData['pageCount'] = pageCount
+  pageableData['paginateData'] = paginateData
+  pageableData['offset'] = initialOffset
+  pageableData['currentPage'] = initialcurrentPage
+
+  return { ...state,
+    isOpenSendMail: false,
+    isOpenNewUser: false,
+    pageableData: pageableData
+  }
+  
 }
 
 function setAllGroups (state, groups) {
@@ -140,6 +212,12 @@ function userReducer (state = defaultState, action) {
     case Actions.USER_SET_NEW_USER_FLAG:
       return setNewUserFlag(state, action.payload)
 
+    case Actions.USER_HANDLE_PAGE_CLICK:
+      return setPageData(state, action.payload)
+
+    case Actions.USER_SEARCH_USERS:
+      return searchUsers(state, action.payload)
+      
       default:
       return state
   }

@@ -235,6 +235,24 @@ function registerUser (newUser) {
   }
 }
 
+function handlePageClick (selectedPage) {
+  return dispatch => {
+     dispatch({
+        type: Actions.USER_HANDLE_PAGE_CLICK,
+        payload: selectedPage
+      })
+  }
+}
+
+function searchUsers (searchText) {
+  return dispatch => {
+     dispatch({
+        type: Actions.USER_SEARCH_USERS,
+        payload: searchText
+      })
+  }
+}
+
 export default {
   loadAuthPermissions,
   loadAuthRoles,
@@ -250,5 +268,7 @@ export default {
   openSendMail,
   sendEmail,
   openNewUser,
-  registerUser
+  registerUser,
+  handlePageClick,
+  searchUsers
 }
