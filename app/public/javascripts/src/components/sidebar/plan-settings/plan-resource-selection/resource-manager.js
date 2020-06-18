@@ -152,7 +152,7 @@ class ResourceManagerController {
     if (props !== '') {
       props = '?' + props
     }
-    this.$http.get(`service/v2/resource-manager${props}`) // Remove after fixing PT#173370850
+    this.$http.get(`service/v2/resource-manager${props}`) // Remove after fixing PT#173394029
       .then((result) => {
         var newRows = []
         var i
