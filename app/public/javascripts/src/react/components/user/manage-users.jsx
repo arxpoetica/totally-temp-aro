@@ -63,11 +63,11 @@ export class ManageUsers extends Component {constructor (props) {
         <>
           <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
             <div style={{flex: '0 0 auto'}}>
-              <div class="form-group row float-right">
-                <div class="col-sm-12 input-group">
-                  <input type="text" class="form-control input-sm" onChange={(e)=>this.handleChange(e)} name="searchText" value={this.state.searchText}/>
-                  <button class="btn btn-light input-group-append" onClick={(e) => this.searchUsers(e)}>
-                    <span class="fa fa-search"></span>
+              <div className="form-group row float-right">
+                <div className="col-sm-12 input-group">
+                  <input type="text" className="form-control input-sm" onChange={(e)=>this.handleChange(e)} onKeyDown={(e)=>this.handleEnter(e)} name="searchText" value={this.state.searchText}/>
+                  <button className="btn btn-light input-group-append" onClick={(e) => this.searchUsers(e)}>
+                    <span className="fa fa-search"></span>
                   </button>
                 </div>
               </div>       
@@ -93,7 +93,6 @@ export class ManageUsers extends Component {constructor (props) {
                       return {"id":newkey.id, "value": newkey.name, "label": newkey.name}; 
                     }); 
                   }
-                  console.log(selectedOptions)
 
                   return <React.Fragment key={user.id}> <tbody><tr key={index}>
                     <td>{user.firstName} {user.lastName}</td>
@@ -166,7 +165,9 @@ export class ManageUsers extends Component {constructor (props) {
         </>}
         
         {this.props.isOpenSendMail && !this.props.isOpenNewUser &&
-        <>
+        <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
+          <div style={{flex: '1 1 auto', overflowY: 'auto'}}>
+
           <div>
             <i className="fa fa-refresh fa-spin"></i>
           </div>
@@ -183,8 +184,11 @@ export class ManageUsers extends Component {constructor (props) {
               </div>
             </form>
           </div>
-          <button type="button" onClick={() => this.sendEmail()} className="btn btn-primary float-right">Send mail</button>
-        </>
+          </div>
+          <div style={{flex: '0 0 auto'}}>
+            <button type="button" onClick={() => this.sendEmail()} className="btn btn-primary float-right">Send mail</button>
+          </div>
+        </div>
         }
 
         {!this.props.isOpenSendMail && this.props.isOpenNewUser &&
@@ -291,10 +295,18 @@ export class ManageUsers extends Component {constructor (props) {
     this.setState({ newUser: newUser });
   }
 
-  handleChange (e) {
-    let searchText = e.target.value;
-    e.target.name = searchText;
-    this.setState({ searchText: searchText });
+  handleChange (e) {      
+      let searchText = e.target.value;
+      e.target.name = searchText;
+      this.setState({ searchText: searchText });
+  }
+
+  handleEnter(e){
+    if(e.key === 'Enter'){
+      let searchText = this.state.searchText;
+      this.props.searchUsers(searchText)
+      this.setState({searchText: searchText})
+    }
   }
   resendLink(user) {
     swal({
