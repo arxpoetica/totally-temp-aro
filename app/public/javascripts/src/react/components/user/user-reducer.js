@@ -88,8 +88,8 @@ function setUserList (state, users) {
   })
 
   // Set Pagination Data
-  let pageCount = Math.ceil(allUsers.length / state.pageableData.perPage)
-  let paginateData = allUsers.slice(state.pageableData.offset, state.pageableData.offset + perPage) 
+  let pageCount = Math.ceil(allUsers.length / perPage)
+  let paginateData = allUsers.slice(initialOffset, initialOffset + perPage) 
 
   let pageableData = {}
   pageableData['pageCount'] = pageCount
@@ -110,7 +110,7 @@ function setPageData (state, selectedPage) {
 
   const offset = selectedPage * perPage; 
   let allUsers = state.userList
-  let paginateData = allUsers.slice(offset, offset + state.pageableData.perPage) 
+  let paginateData = allUsers.slice(offset, offset + perPage) 
 
   let pageableData = state.pageableData
   pageableData['paginateData'] = paginateData
@@ -138,7 +138,7 @@ function searchUsers (state,searchText) {
   
   // Set Pagination Data
   let pageCount = Math.ceil(filteredUsers.length / perPage)
-  let paginateData = filteredUsers.slice(state.pageableData.offset, state.pageableData.offset + perPage) 
+  let paginateData = filteredUsers.slice(initialOffset, initialOffset + perPage) 
 
   let pageableData = {}
   pageableData['pageCount'] = pageCount

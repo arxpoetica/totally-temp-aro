@@ -189,13 +189,12 @@ function deleteUser (user) {
 function openSendMail () {
 
   return dispatch => {
-    AroHttp.get('/service/auth/users')
-      .then(result => dispatch({
-        type: Actions.USER_SET_SEND_MAIL_FLAG,
-        payload: null
-      }))
-      .catch((err) => console.error(err))
-    }
+    dispatch({
+      type: Actions.USER_SET_SEND_MAIL_FLAG,
+      payload: null
+    })
+  }
+
 }
 
 function sendEmail (mail) {
@@ -212,13 +211,12 @@ function sendEmail (mail) {
 function openNewUser () {
 
   return dispatch => {
-    AroHttp.get('/service/auth/users')
-      .then(result => dispatch({
-        type: Actions.USER_SET_NEW_USER_FLAG,
-        payload: null
-      }))
-      .catch((err) => console.error(err))
-    }
+    dispatch({
+      type: Actions.USER_SET_NEW_USER_FLAG,
+      payload: null
+    })
+  }
+
 }
 
 function registerUser (newUser) {
@@ -253,6 +251,29 @@ function searchUsers (searchText) {
   }
 }
 
+function saveUsers (filteredUsers) {
+  
+  filteredUsers.forEach((user, index) => {
+  
+    // aro-service requires group ids in the user objects. replace group objects by group ids
+    var serviceUser = user
+    serviceUser.groupIds = []
+    serviceUser.userGroups.forEach((userGroup) => serviceUser.groupIds.push(userGroup.id))
+    delete serviceUser.userGroups
+    
+    // Save the user to aro-service
+    return dispatch => {
+      AroHttp.put('/service/auth/users', serviceUser)
+      .then(result => dispatch())
+      .catch((err) => console.error(err))
+    }
+
+  })
+
+  loadUsers()
+
+}
+
 export default {
   loadAuthPermissions,
   loadAuthRoles,
@@ -270,5 +291,6 @@ export default {
   openNewUser,
   registerUser,
   handlePageClick,
-  searchUsers
+  searchUsers,
+  saveUsers
 }

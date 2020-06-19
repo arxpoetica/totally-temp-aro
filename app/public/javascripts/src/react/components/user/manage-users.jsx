@@ -39,7 +39,9 @@ export class ManageUsers extends Component {constructor (props) {
   }
 
   searchUsers() {
-    this.props.searchUsers(this.state.searchText)
+    let searchText = this.state.searchText;
+    this.props.searchUsers(searchText)
+    this.setState({searchText: searchText})
   }
 
   render () {
@@ -78,23 +80,25 @@ export class ManageUsers extends Component {constructor (props) {
                   <th>Actions</th>
                 </tr>
               </thead>
-              <tbody>
               {
-                
                 users.map((user,index)=>{  
                   
                   // To map groups with user
                   var selectedGroups = user.userGroups
-                  const selectedOptions = selectedGroups.map(function(newkey) { 
-                    return {"id":newkey.id, "value": newkey.name, "label": newkey.name}; 
-                  }); 
+                  var selectedOptions = null;
+                  if(selectedGroups !== null ){
+                    selectedOptions = selectedGroups.map(function(newkey) { 
+                      return {"id":newkey.id, "value": newkey.name, "label": newkey.name}; 
+                    }); 
+                  }
+                  console.log(selectedOptions)
 
-                  return <tr key={index}>
+                  return <React.Fragment key={user.id}> <tbody><tr key={index}>
                     <td>{user.firstName} {user.lastName}</td>
                     <td>{user.email}</td>
                     <td>
                       <Select
-                        value={selectedOptions}
+                        defaultValue={selectedOptions}
                         closeMenuOnSelect={false}
                         isMulti
                         components={{ Option }}
@@ -103,6 +107,7 @@ export class ManageUsers extends Component {constructor (props) {
                         backspaceRemovesValue={false}
                         isSearchable={false} 
                         placeholder="None Selected"
+                        onChange={(e,id)=>this.handleListGroupChange(e,user.id)}
                       />
                     </td>
                     <td>
@@ -121,10 +126,9 @@ export class ManageUsers extends Component {constructor (props) {
 
                       </div>
                     </td>
-                  </tr>
+                  </tr></tbody></React.Fragment>
                 })
               }
-              </tbody>
             </table>
           </div>
 
@@ -227,7 +231,7 @@ export class ManageUsers extends Component {constructor (props) {
                   backspaceRemovesValue={false}
                   onChange={(e)=>this.handleGroupChange(e)}
                   isSearchable={false} 
-                  placeholder="None Selected"
+                  defaultValue={[optionsList[2]]}
                 />
               </div>
             </div>
@@ -255,6 +259,15 @@ export class ManageUsers extends Component {constructor (props) {
       newUser['isGlobalSuperUser'] = false;
     }
     this.setState({ newUser: newUser });
+  }
+
+  handleListGroupChange(e,id) {
+    let userList = this.props.userList;
+    userList.forEach((user) => {
+      if (user.id == id) {
+        user.userGroups = e;
+      }
+    })
   }
 
   handleGroupChange (e) {
@@ -332,6 +345,10 @@ export class ManageUsers extends Component {constructor (props) {
     }else{
       this.props.registerUser(this.state.newUser)
     }
+  }
+
+  saveUsers() {
+    this.props.saveUsers()
   }
 
 }
