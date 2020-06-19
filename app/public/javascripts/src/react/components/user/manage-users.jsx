@@ -47,7 +47,7 @@ export class ManageUsers extends Component {constructor (props) {
   render () {
       return this.props.userList===null
       ? null
-      : <div>{this.renderUserList()}</div>
+      : <>{this.renderUserList()}</>
   }
 
   renderUserList () {
@@ -58,19 +58,21 @@ export class ManageUsers extends Component {constructor (props) {
     });
 
     return (
-      <div>
+      <>
         {!this.props.isOpenSendMail && !this.props.isOpenNewUser &&
-        <div>
+        <>
           <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
             <div style={{flex: '0 0 auto'}}>
-              <div className="float-right input-group" style={{maxWidth: '250px'}}>
-                <input className="form-control" type="text" onChange={(e)=>this.handleChange(e)} name="searchText" value={this.state.searchText}/>
-                <span className="input-group-btn">
-                  <button className="btn btn-light" type="button" onClick={(e) => this.searchUsers(e)}><i className="fa fa-search"></i></button>
-                </span>
+              <div class="form-group row float-right">
+                <div class="col-sm-12 input-group">
+                  <input type="text" class="form-control input-sm" onChange={(e)=>this.handleChange(e)} name="searchText" value={this.state.searchText}/>
+                  <button class="btn btn-light input-group-append" onClick={(e) => this.searchUsers(e)}>
+                    <span class="fa fa-search"></span>
+                  </button>
+                </div>
+              </div>       
               </div>
-          </div>
-          <div style={{flex: '1 1 auto; overflow-y: auto'}}>
+          <div style={{flex: '1 1 auto', overflowY: 'auto'}}>
             <table className="table table-striped table-sm">
               <thead>
                 <tr>
@@ -132,38 +134,39 @@ export class ManageUsers extends Component {constructor (props) {
             </table>
           </div>
 
-          <div className="float-right" style={{flex: '0 0 auto'}}> 
-            <ReactPaginate 
-              previousLabel={'<<'} 
-              nextLabel={'>>'} 
-              breakLabel={<span className="gap">...</span>} 
-              pageCount={this.props.pageableData.pageCount} 
-              onPageChange={(e)=>this.handlePageClick(e)}
-              forcePage={this.props.pageableData.currentPage} 
-              activeClassName={"active"} 
-              containerClassName={'pagination'} 
-              pageClassName={'page-item'} 
-              pageLinkClassName={'page-link'} 
-              previousLinkClassName={'page-link'}
-              nextLinkClassName={'page-link'}
-            /> 
+          <div style={{flex: '0 0 auto'}}>
+            <div className="float-right"> 
+              <ReactPaginate 
+                previousLabel={'«'}
+                nextLabel={'»'}  
+                breakLabel={<span className="gap">...</span>} 
+                pageCount={this.props.pageableData.pageCount} 
+                onPageChange={(e)=>this.handlePageClick(e)}
+                forcePage={this.props.pageableData.currentPage} 
+                activeClassName={"active"} 
+                containerClassName={'pagination'} 
+                pageClassName={'page-item'} 
+                pageLinkClassName={'page-link'} 
+                previousLinkClassName={'page-link'}
+                nextLinkClassName={'page-link'}
+              /> 
+          </div>
           </div>
 
           <div style={{flex: '0 0 auto'}}>
-            <div className="float-right" style={{flex: '0 0 auto'}}>
-
-              <a type="button" className="btn btn-light" href='/admin/users/csv'>Download CSV</a>
-              <a type="button" onClick={() => this.openSendMail()} className="btn btn-light" href='#'>Send email to all users</a>
-              <a type="button" onClick={() => this.openNewUser()} className="btn btn-light" href='#'>Register a new user</a>
+            <div className="float-right">
+              <a type="button" className="btn btn-light mr-2" href='/admin/users/csv'>Download CSV</a>
+              <a type="button" onClick={() => this.openSendMail()} className="btn btn-light mr-2" href='#'>Send email to all users</a>
+              <a type="button" onClick={() => this.openNewUser()} className="btn btn-light mr-2" href='#'>Register a new user</a>
               <button className="btn btn-primary"><i className="fa fa-save"></i>&nbsp;&nbsp;Save</button>
 
             </div>
           </div>
         </div>
-        </div>}
+        </>}
         
         {this.props.isOpenSendMail && !this.props.isOpenNewUser &&
-        <div>
+        <>
           <div>
             <i className="fa fa-refresh fa-spin"></i>
           </div>
@@ -181,11 +184,11 @@ export class ManageUsers extends Component {constructor (props) {
             </form>
           </div>
           <button type="button" onClick={() => this.sendEmail()} className="btn btn-primary float-right">Send mail</button>
-        </div>
+        </>
         }
 
         {!this.props.isOpenSendMail && this.props.isOpenNewUser &&
-        <div>
+        <>
 
           <form className="form-horizontal">  
             <div className="form-group">
@@ -244,9 +247,9 @@ export class ManageUsers extends Component {constructor (props) {
             </div>
           </form>
           <button onClick={() => this.registerUser()} className="btn btn-primary float-right"><i className="fa fa-save"></i>&nbsp;&nbsp;Register user</button>
-        </div>}
-
-      </div>
+        </>
+        }
+      </>
     )
   }
 
