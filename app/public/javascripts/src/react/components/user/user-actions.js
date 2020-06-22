@@ -251,27 +251,23 @@ function searchUsers (searchText) {
   }
 }
 
-function saveUsers (filteredUsers) {
+function saveUsers (allUsers) {
+  allUsers.forEach((user, index) => {
   
-  filteredUsers.forEach((user, index) => {
-  
-    // aro-service requires group ids in the user objects. replace group objects by group ids
-    var serviceUser = user
-    serviceUser.groupIds = []
-    serviceUser.userGroups.forEach((userGroup) => serviceUser.groupIds.push(userGroup.id))
-    delete serviceUser.userGroups
-    
-    // Save the user to aro-service
-    return dispatch => {
-      AroHttp.put('/service/auth/users', serviceUser)
-      .then(result => dispatch())
-      .catch((err) => console.error(err))
+    if(user.isUpdated){
+      // aro-service requires group ids in the user objects. replace group objects by group ids
+      var serviceUser = user
+      serviceUser.groupIds = []
+      if(serviceUser.userGroups !== [] || serviceUser.userGroups !== null ){
+        serviceUser.userGroups.forEach((userGroup) => serviceUser.groupIds.push(userGroup.id))
+        delete serviceUser.userGroups
+        delete serviceUser.isUpdated
+        
+        AroHttp.put('/service/auth/users', serviceUser)
+        .catch((err) => console.error(err))
+      }
     }
-
   })
-
-  loadUsers()
-
 }
 
 export default {

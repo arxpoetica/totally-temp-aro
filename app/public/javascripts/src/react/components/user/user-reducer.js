@@ -2,7 +2,7 @@ import Actions from '../../common/actions'
 
 const initialOffset = 0
 const initialcurrentPage = 0
-const perPage = 2
+const perPage = 10
 
 const defaultState = {
   systemActors: [],
@@ -84,6 +84,7 @@ function setUserList (state, users) {
     var selectedGroupObjects = []
     user.groupIds.forEach((userGroupId) => selectedGroupObjects.push(mapIdToGroup[userGroupId]))
     allUsers[index].userGroups = selectedGroupObjects // Make sure you modify the object and not a copy
+    allUsers[index].isUpdated = false
     delete allUsers[index].groupIds
   })
 

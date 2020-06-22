@@ -76,28 +76,29 @@ export class ManageUsers extends Component {constructor (props) {
             <table className="table table-striped table-sm">
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Groups</th>
-                  <th>Actions</th>
+                  <th style={{width: '20%'}}>Name</th>
+                  <th style={{width: '20%'}}>Email</th>
+                  <th style={{width: '50%'}}>Groups</th>
+                  <th style={{width: '10%'}}>Actions</th>
                 </tr>
               </thead>
+              <tbody>
               {
                 users.map((user,index)=>{  
                   
                   // To map groups with user
                   var selectedGroups = user.userGroups
                   var selectedOptions = null;
-                  if(selectedGroups !== null ){
+                  if(selectedGroups !== null && selectedGroups !== undefined && selectedGroups !== []){
                     selectedOptions = selectedGroups.map(function(newkey) { 
                       return {"id":newkey.id, "value": newkey.name, "label": newkey.name}; 
                     }); 
                   }
 
-                  return <React.Fragment key={user.id}> <tbody><tr key={index}>
-                    <td>{user.firstName} {user.lastName}</td>
-                    <td>{user.email}</td>
-                    <td>
+                  return <React.Fragment key={user.id}> <tr key={index}>
+                    <td style={{width: '20%'}}>{user.firstName} {user.lastName}</td>
+                    <td style={{width: '20%'}}>{user.email}</td>
+                    <td style={{width: '50%'}}>
                       <Select
                         defaultValue={selectedOptions}
                         closeMenuOnSelect={false}
@@ -111,7 +112,7 @@ export class ManageUsers extends Component {constructor (props) {
                         onChange={(e,id)=>this.handleListGroupChange(e,user.id)}
                       />
                     </td>
-                    <td>
+                    <td style={{width: '10%'}}>
                       <div className="btn-group btn-group-sm float-right">
                         <button onClick={() => this.resendLink(user)} className="btn btn-xs btn-primary" data-toggle="tooltip" data-placement="bottom" title="Resend email">
                         <span className="fa fa-envelope"></span>
@@ -127,9 +128,10 @@ export class ManageUsers extends Component {constructor (props) {
 
                       </div>
                     </td>
-                  </tr></tbody></React.Fragment>
+                  </tr></React.Fragment>
                 })
               }
+              </tbody>
             </table>
           </div>
 
@@ -157,7 +159,7 @@ export class ManageUsers extends Component {constructor (props) {
               <a type="button" className="btn btn-light mr-2" href='/admin/users/csv'>Download CSV</a>
               <a type="button" onClick={() => this.openSendMail()} className="btn btn-light mr-2" href='#'>Send email to all users</a>
               <a type="button" onClick={() => this.openNewUser()} className="btn btn-light mr-2" href='#'>Register a new user</a>
-              <button className="btn btn-primary"><i className="fa fa-save"></i>&nbsp;&nbsp;Save</button>
+              <button className="btn btn-primary" onClick={() => this.saveUsers()}><i className="fa fa-save"></i>&nbsp;&nbsp;Save</button>
 
             </div>
           </div>
@@ -273,6 +275,7 @@ export class ManageUsers extends Component {constructor (props) {
     userList.forEach((user) => {
       if (user.id == id) {
         user.userGroups = e;
+        user.isUpdated = true;
       }
     })
   }
@@ -363,7 +366,9 @@ export class ManageUsers extends Component {constructor (props) {
   }
 
   saveUsers() {
-    this.props.saveUsers()
+    this.props.saveUsers(this.props.userList)
+    this.props.loadGroups()
+    this.props.loadUsers()
   }
 
 }
@@ -403,7 +408,9 @@ const mapDispatchToProps = (dispatch) => ({
   sendEmail: (mail) => dispatch(UserActions.sendEmail(mail)),
   registerUser: (newUser) => dispatch(UserActions.registerUser(newUser)),
   handlePageClick: (selectedPage) => dispatch(UserActions.handlePageClick(selectedPage)),
-  searchUsers: (searchText) => dispatch(UserActions.searchUsers(searchText))
+  searchUsers: (searchText) => dispatch(UserActions.searchUsers(searchText)),
+  saveUsers: (userList) => UserActions.saveUsers(userList),
+  openUserSettings: (userId) => UserActions.openUserSettings(userId)
 })
 
 const ManageUsersComponent = wrapComponentWithProvider(reduxStore, ManageUsers, mapStateToProps, mapDispatchToProps)
