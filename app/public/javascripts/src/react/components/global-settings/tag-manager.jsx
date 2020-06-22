@@ -58,18 +58,20 @@ export class TagManager extends Component {
   render () {
     return !this.props.tags
       ? null
-      : <div>
+      : <>
           {this.renderTags()}
-        </div>
+        </>
   }
 
   renderTags () {
     const tags = this.props.tags
 
     return (
-      <div>
-        {!this.props.isCreateOrUpdate &&
-          <div>
+      <div className="no-collapse" style={{display: 'flex',flexDirection: 'column', height: '100%'}}>
+        {
+        !this.props.isCreateOrUpdate &&
+        <>
+          <div style={{flex: "1 1 auto"}}>
             <table className="table table-striped">
               <thead>
                 <tr>
@@ -90,14 +92,16 @@ export class TagManager extends Component {
               }
               </tbody>
             </table>
+            </div>
             <div style={{ flex: '0 0 auto' }}>
               <button type="submit" className={'btn btn-primary float-right'} onClick={() => this.createTag()}>Create Tag</button>
             </div>
-          </div>
+            </>
         }
-        {this.props.isCreateOrUpdate &&
-
-          <div>
+        {
+        this.props.isCreateOrUpdate &&
+        <>
+          <div style={{flex: "1 1 auto"}}>
             <form>
               <div className="form-group row">
                 <label className="col-sm-4 col-form-label">Name</label>
@@ -125,10 +129,11 @@ export class TagManager extends Component {
               </div>  
               
             </form>
+            </div>
             <div style={{ flex: '0 0 auto' }}>
               <button className={'btn btn-primary float-right'} onClick={() => this.saveTag()}><i className={'fa fa-save'} />&nbsp;&nbsp;Save Tag</button>
             </div>
-          </div>
+          </>
         }
       </div>
     )
