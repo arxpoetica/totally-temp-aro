@@ -260,14 +260,18 @@ class DataSourceUploadController {
     var file = $('#data_source_upload_modal input[type=file]').get(0).files[0]
     fd.append('file', file)
     var fileExtension = file.name.substr(file.name.lastIndexOf('.') + 1).toUpperCase()
-    var url = `/uploadservice/v1/library/${libraryId}?userId=${this.state.loggedInUser.id}&media=${fileExtension}`
-
+    //var url = `/uploadservice/v1/library/${libraryId}?userId=${this.state.loggedInUser.id}&media=${fileExtension}`
+    //var session_id = 
+    console.log(`--- upload ${libraryId}`)
+    var url = `/uploadservice/v1/async-library/${libraryId}?userId=${this.state.loggedInUser.id}&media=${fileExtension}`
+    
     this.$http.post(url, fd, {
       withCredentials: true,
       headers: { 'Content-Type': undefined },
       transformRequest: angular.identity
     }).then((e) => {
-      this.addDatasource(JSON.parse(e.data))
+      console.log(e)
+      //this.addDatasource(JSON.parse(e.data))
       this.isUpLoad = false
       this.close()
     }).catch((e) => {
