@@ -91,20 +91,19 @@
     </div>
 
     <r-my-account ng-if="$ctrl.currentView === $ctrl.views.MY_ACCOUNT"></r-my-account>
-
-    <r-multi-factor ng-if="$ctrl.currentView === $ctrl.views.MULTIFACTOR_AUTHENTICATION">
-    </r-multi-factor>
-
-    <manage-users ng-if="$ctrl.currentView === $ctrl.views.MANAGE_USERS"
-                  manager-view="$ctrl.globalSettingsService.currentManageUserView"
-                  open-user-settings-for-user-id="$ctrl.openUserSettingsForUserId(userId)">
-    </manage-users> 
-
-    <r-manage-groups ng-if="$ctrl.currentView === $ctrl.views.MANAGE_GROUPS"></r-manage-groups>
     <r-user-settings ng-if="$ctrl.currentView === $ctrl.views.USER_SETTINGS"></r-user-settings>
+    <r-manage-users ng-if="$ctrl.currentView === $ctrl.views.MANAGE_USERS"></r-manage-users> 
+
+    <r-multi-factor ng-if="$ctrl.currentView === $ctrl.views.MULTIFACTOR_AUTHENTICATION"></r-multi-factor>
+    <r-manage-groups ng-if="$ctrl.currentView === $ctrl.views.MANAGE_GROUPS"></r-manage-groups>
     <r-tag-manager ng-if="$ctrl.currentView === $ctrl.views.TAG_MANAGER"></r-tag-manager>
 
     <!--
+    <manage-users ng-if="$ctrl.currentView === $ctrl.views.MANAGE_USERS"
+      manager-view="$ctrl.globalSettingsService.currentManageUserView"
+      open-user-settings-for-user-id="$ctrl.openUserSettingsForUserId(userId)">
+    </manage-users> 
+
     <manage-groups ng-if="$ctrl.currentView === $ctrl.views.MANAGE_GROUPS" manager-view="$ctrl.globalSettingsService.currentManageUserView">
     </manage-groups>
      
@@ -133,6 +132,7 @@
     <!-- Close button - show when we are in "Global Settings" mode -->
     <button ng-if="$ctrl.currentView === $ctrl.views.GLOBAL_SETTINGS" class="btn btn-primary" ng-click="$ctrl.modalHide()">Close</button>
 
+    <!--
     <a ng-if="$ctrl.currentView === $ctrl.views.MANAGE_USERS && $ctrl.globalSettingsService.currentManageUserView === $ctrl.globalSettingsService.ManageUserViews.Users"\
        type="button" class="btn btn-light" ng-href='/admin/users/csv'>Download CSV</a>
     <a ng-if="$ctrl.currentView === $ctrl.views.MANAGE_USERS && $ctrl.globalSettingsService.currentManageUserView === $ctrl.globalSettingsService.ManageUserViews.Users"
@@ -143,7 +143,6 @@
 
     <button ng-if="$ctrl.globalSettingsService.currentManageUserView === $ctrl.globalSettingsService.ManageUserViews.SendEmail" type="button" class="btn btn-primary" ng-click="$ctrl.globalSettingsService.sendMail()">Send mail</button>
 
-    <!--
     <button ng-if="$ctrl.currentView === $ctrl.views.TAG_MANAGER && $ctrl.globalSettingsService.currentTagManagerView === $ctrl.globalSettingsService.TagManagerViews.Tags" type="submit" class="btn btn-primary" ng-click="$ctrl.globalSettingsService.currentTagManagerView = $ctrl.globalSettingsService.TagManagerViews.CreateTag">Create Tag</button>
 
     <button ng-if="$ctrl.currentView === $ctrl.views.TAG_MANAGER && $ctrl.globalSettingsService.currentTagManagerView === $ctrl.globalSettingsService.TagManagerViews.UpdateTag" type="submit" class="btn btn-primary" ng-click="$ctrl.globalSettingsService.updateTag()">Update Tag</button>
