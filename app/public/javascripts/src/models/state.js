@@ -460,7 +460,7 @@ class State {
       if (service.selectedDisplayMode.getValue() == service.displayModes.EDIT_RINGS
         && service.activeEditRingsPanel == service.EditRingsPanels.EDIT_RINGS) {
         service.onFeatureSelectedRedux(options)
-      } else {
+      } else if (options.locations) {
         service.setSelectedLocations(options.locations.map(location => location.location_id))
       }
     })
