@@ -17,7 +17,10 @@ export class UserSettings extends Component {constructor (props) {
 }
 
 initSearchBox () {
-  let location = this.props.userConfiguration.defaultLocation
+  let location = ''
+  if(this.props.userConfiguration !== null){
+    location = this.props.userConfiguration.defaultLocation
+  }
   var ids = 0
   var searchSessionToken = ''
   var search = $('#set-default-location .select2')
@@ -69,7 +72,7 @@ initSearchBox () {
       this.props.userConfiguration.defaultLocation = selected.text
     }
   })
-  search.select2('val', this.props.userConfiguration.defaultLocation, true)
+  search.select2('val', location, true)
 }
 
   componentDidMount () {

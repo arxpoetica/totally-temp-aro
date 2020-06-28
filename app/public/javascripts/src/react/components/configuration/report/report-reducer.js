@@ -16,7 +16,8 @@ const defaultSubDefinition = {
 
 function setReportsMetaData (state, reportsMetaData) {
   return { ...state,
-    metaData: reportsMetaData
+    metaData: reportsMetaData,
+    validation: null
   }
 }
 
