@@ -105,6 +105,8 @@ class SocketManager {
   getPlanEventConsumer () {
     const self = this
     const messageHandler = msg => {
+      console.log('--- getPlanEventConsumer ---')
+      console.log(msg)
       self.sockets.emitToPlan(msg.properties.headers.planId, msg)
     }
     return new Consumer(socketConfig.plan.queue, socketConfig.plan.exchange, messageHandler)
