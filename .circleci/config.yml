@@ -67,7 +67,8 @@ workflows:
             branches:
               only:
                 - master
-                - sse-logo-2
+                - ring_bug
+                - plan_refresh_tiles
       - deploy:
           context: aro_qa_builds
           requires:

@@ -306,6 +306,18 @@
     </ul>
   </div>
 
+  <div class="separator"></div>
+  <!--
+    ng-show="$ctrl.state.configuration.perspective.showToolbarButtons.tileRefresh"
+  -->
+  <button class="btn"
+          ng-click="$ctrl.refreshTiles()"
+          data-toggle="tooltip"
+          data-placement="bottom"
+          title="Refresh tiles">
+    <i class="fa fa-sync-alt"></i>
+  </button>
+
 </div>
 <!-- Render the modal outside the .tool-bar div so that it does not pick up any toolbar button styles -->
 <r-rfp-status-modal></r-rfp-status-modal>

@@ -217,7 +217,6 @@ class MapObjectEditorController {
           const clliCode = (result.data.networkNodeEquipment.siteInfo.siteClli) || '(empty CLLI code)'
           boundsByNetworkNodeObjectId[result.data.objectId].displayName = `Boundary: ${clliCode}`
         })
-
         this.contextMenuService.populateMenu(menuItems)
         this.contextMenuService.moveMenu(x, y)
         this.contextMenuService.menuOn()
@@ -345,22 +344,18 @@ class MapObjectEditorController {
           if (locationConnectors.length > 1) {
             // If we have multiple location connectors, add a menu item that will allow us to merge them
             const mergeLocationConnectors = new MenuAction(MenuActionTypes.MERGE_LOCATION_CONNECTORS, () => {
-              console.log('MERGING LOCATION CONNECTORS')
               var mergeResult = Promise.resolve()
               locationConnectors.forEach((locationConnector, lcIndex) => {
                 mergeResult = mergeResult.then(() => {
-                  console.log(`Starting editExistingFeature for ${locationConnector.objectId}`)
                   const editPromise = this.editExistingFeature(locationConnector, latLng, false)
                   return editPromise
                 })
                   .then(() => {
-                    console.log(`Finished editExistingFeature for ${locationConnector.objectId}`)
                     return Promise.resolve()
                   })
               })
               mergeResult
                 .then(() => {
-                  console.log('Firing multiselect')
                   this.onObjectKeyClicked && this.onObjectKeyClicked({ features: locationConnectors.slice(0, locationConnectors.length - 1), latLng: latLng })
                   this.mergeSelectedEquipment && this.mergeSelectedEquipment()
                 })
@@ -421,7 +416,7 @@ class MapObjectEditorController {
                   // it's on the edit layer / in the transaction
                   feature = this.createdMapObjects[result.objectId].feature
                   options.push(new MenuAction(MenuActionTypes.SELECT, () => this.selectProposedFeature(result.objectId)))
-                  options.push(new MenuAction(MenuActionTypes.DELETE, 'fa-trash-alt', () => {
+                  options.push(new MenuAction(MenuActionTypes.DELETE, () => {
                     this.deleteObjectWithId(result.objectId)
                     this.deleteCreatedMapObject(result.objectId)
                   }))
