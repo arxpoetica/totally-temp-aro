@@ -16,6 +16,7 @@ const createSocketMiddleware = () => {
     })
 
     // --- for test
+    /*
     console.log('--- subscribe to new events ---')
     var testEvents = [
       'LIBRARY_CREATE',
@@ -31,7 +32,7 @@ const createSocketMiddleware = () => {
         console.log(' --- ')
       })
     })
-    
+    */
     // ---
 
     // next is the following action to be run after this middleware
