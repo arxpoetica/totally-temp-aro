@@ -1751,9 +1751,24 @@ class State {
       service.requestMapLayerRefresh.next(null)
     }
 
+    service.handlePlanRefreshRequest = msg => {
+      service.loadPlanRedux(service.plan.id)
+    }
+
+    service.handleETLEvents = msg => {
+      console.log('--- ETL ---')
+      console.log(msg)
+    }
+
     service.unsubscribePlanEvent = SocketManager.subscribe('COMMIT_TRANSACTION', service.handlePlanModifiedEvent.bind(service))
     service.unsubscribeLibraryEvent1 = SocketManager.subscribe('USER_TRANSACTION', service.handleLibraryModifiedEvent.bind(service))
     service.unsubscribeLibraryEvent1 = SocketManager.subscribe('ETL_ADD', service.handleLibraryModifiedEvent.bind(service))
+    service.unsubscribePlanRefresh = SocketManager.subscribe('PLAN_REFRESH', service.handlePlanRefreshRequest.bind(service))
+    
+    service.unsubscribeETLStart = SocketManager.subscribe('ETL_START', service.handleETLEvents.bind(service))
+    service.unsubscribeETLUpdate = SocketManager.subscribe('ETL_UPDATE', service.handleETLEvents.bind(service))
+    service.unsubscribeETLClose = SocketManager.subscribe('ETL_CLOSE', service.handleETLEvents.bind(service))
+
 
     service.mergeToTarget = (nextState, actions) => {
       const currentActivePlanId = service.plan && service.plan.id
