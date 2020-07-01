@@ -32,6 +32,7 @@ class SocketManager {
   }
 
   joinRoom (namespace, room) {
+    console.log(`joinRoom ${namespace} ${room}`)
     this.sockets[namespace].emit('SOCKET_JOIN_ROOM', room)
     this.roomConnections[namespace].add(room)
   }

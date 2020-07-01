@@ -1,6 +1,9 @@
 import PlanActions from '../../../../react/components/plan/plan-actions'
 import EtlTemplateActions from '../../../../react/components/etl-templates/etl-templates-actions'
 
+// temporary
+import SocketManager from '../../../../react/common/socket-manager'
+
 class DataSourceUploadController {
   constructor ($http, $timeout, $ngRedux, state) {
     this.state = state
@@ -264,6 +267,10 @@ class DataSourceUploadController {
     //var session_id = 
     console.log(`--- upload ${libraryId}`)
     var url = `/uploadservice/v1/async-library/${libraryId}?userId=${this.state.loggedInUser.id}&media=${fileExtension}`
+    
+    SocketManager.joinRoom('library', libraryId)
+    //var currentUploadSource = this.uploadSource
+    //this.selectDataItems(currentUploadSource, libraryId)
     
     this.$http.post(url, fd, {
       withCredentials: true,

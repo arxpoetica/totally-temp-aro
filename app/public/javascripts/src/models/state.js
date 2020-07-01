@@ -1755,8 +1755,18 @@ class State {
       service.loadPlanRedux(service.plan.id)
     }
 
-    service.handleETLEvents = msg => {
-      console.log('--- ETL ---')
+    service.handleETLStartEvent = msg => {
+      console.log('--- ETL Start ---')
+      console.log(msg)
+    }
+
+    service.handleETLUpdateEvent = msg => {
+      console.log('--- ETL Update ---')
+      console.log(msg)
+    }
+
+    service.handleETLCloseEvent = msg => {
+      console.log('--- ETL Close ---')
       console.log(msg)
     }
 
@@ -1765,9 +1775,9 @@ class State {
     service.unsubscribeLibraryEvent1 = SocketManager.subscribe('ETL_ADD', service.handleLibraryModifiedEvent.bind(service))
     service.unsubscribePlanRefresh = SocketManager.subscribe('PLAN_REFRESH', service.handlePlanRefreshRequest.bind(service))
     
-    service.unsubscribeETLStart = SocketManager.subscribe('ETL_START', service.handleETLEvents.bind(service))
-    service.unsubscribeETLUpdate = SocketManager.subscribe('ETL_UPDATE', service.handleETLEvents.bind(service))
-    service.unsubscribeETLClose = SocketManager.subscribe('ETL_CLOSE', service.handleETLEvents.bind(service))
+    service.unsubscribeETLStart = SocketManager.subscribe('ETL_START', service.handleETLStartEvent.bind(service))
+    service.unsubscribeETLUpdate = SocketManager.subscribe('ETL_UPDATE', service.handleETLUpdateEvent.bind(service))
+    service.unsubscribeETLClose = SocketManager.subscribe('ETL_CLOSE', service.handleETLCloseEvent.bind(service))
 
 
     service.mergeToTarget = (nextState, actions) => {
