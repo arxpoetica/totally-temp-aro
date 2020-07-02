@@ -121,15 +121,14 @@ function setCableConstructionType (uploadDetails,loggedInUser) {
 }
 
 function fileUpload (uploadDetails,libraryId,loggedInUser) {
-  var fd = new FormData()
+  var formData = new FormData()
   var file = uploadDetails.file
-  fd.append('file', file)
+  formData.append('file', file)
+
   var fileExtension = file.name.substr(file.name.lastIndexOf('.') + 1).toUpperCase()
   var url = `/uploadservice/v1/library/${libraryId}?userId=${loggedInUser.id}&media=${fileExtension}`
-  AroHttp.post(url, fd, {
-    withCredentials: true,
-    headers: { 'Content-Type': undefined }
-  }).then((e) => {
+  
+  AroHttp.postRaw(url, formData).then((e) => {
     loadMetaData()
   }).catch((e) => {
     swal('Error', e.statusText, 'error')
