@@ -10,20 +10,23 @@ export class DataUpload extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      selectedDataSourceName: 'locations',
+      dataSourceName: '',
+      selectedDataSourceName: 'location',
       selectedDataTypeId:1,
       selectedConduitSize: '',
       selectedSpatialEdgeType:'',
       selectedCreationType:'upload_file',
       selectedCableType:'',
       selectedEquipment:'',
-      radius:20000
+      radius:20000,
+      file:null
     }
+    this.props.loadMetaData()
+    
   }
 
   componentDidMount(){
-    this.props.loadMetaData()
-    this.props.loadEtlTemplatesFromServer(this.state.selectedDataTypeId)
+    this.props.loadEtlTemplatesFromServer(1)
   }
   dataTypeChange(event) {
     let selectedDataSourceName = ''
@@ -35,6 +38,21 @@ export class DataUpload extends Component {
       }
     })
     this.setState({selectedDataTypeId: event.target.value, selectedDataSourceName: selectedDataSourceName})
+
+    if(this.props.spatialEdgeTypes.length > 0 && this.props.conduitSizes !== null && 
+      this.props.saCreationTypes !== null && this.props.cableTypes.length > 0 && 
+      this.props.equipmentTypes !== null){
+      
+      let selectedSpatialEdgeType = this.props.spatialEdgeTypes[0].name;
+      let selectedConduitSize = this.props.conduitSizes[0].id;
+      let selectedCableType = this.props.cableTypes[0].name;
+      let selectedCreationType = this.props.saCreationTypes[0].id;
+      let selectedEquipment = this.props.equipmentTypes[0].identifier;
+
+      this.setState({selectedConduitSize:selectedConduitSize,selectedSpatialEdgeType:selectedSpatialEdgeType,
+        selectedCreationType: selectedCreationType,selectedCableType:selectedCableType,selectedEquipment:selectedEquipment})
+      
+    }
   }
 
   spatialEdgeChange(event) {
@@ -57,6 +75,27 @@ export class DataUpload extends Component {
     this.setState({selectedEquipment: event.target.value})
   }
 
+  handleDataSource (event) {
+    let fieldValue = event.target.value;
+    this.setState({ dataSourceName: fieldValue });
+  }
+
+  handleRadius (event) {
+    let fieldValue = event.target.value;
+    this.setState({ radius: fieldValue });
+  }
+
+  handleUpload (event) {
+    event.preventDefault();
+    let file = event.target.files[0];
+    this.setState({ file: file })
+  }
+
+  save (){
+    console.log(this.state)
+    this.props.saveDataSource(this.state,this.props.loggedInUser)
+  }
+
   render () {
     return this.props.isFileUpload
     ? <>{this.renderFileUpload()}</>
@@ -77,7 +116,7 @@ export class DataUpload extends Component {
     
     let conduitOptions = []
     this.props.conduitSizes.forEach((item) => {
-      conduitOptions.push(<option value={item.name} key={item.name} >{item.description}</option>)
+      conduitOptions.push(<option value={item.id} key={item.name} >{item.description}</option>)
     })
 
     let cableOptions = []
@@ -92,11 +131,11 @@ export class DataUpload extends Component {
 
     let equipmentTypeOptions = []
     this.props.equipmentTypes.forEach((item,index) => {
-      equipmentTypeOptions.push(<option value={item.name} key={index} >{item.name}</option>)
+      equipmentTypeOptions.push(<option value={item.identifier} key={index} >{item.name}</option>)
     })
 
     return (
-    <div className="form-horizontal" id="data_source_upload_modal_form">
+    <div className="form-horizontal" id="data_source_upload_modal">
       <div className="form-group row">
         <div className="col-sm-8"></div>
         <div className="col-sm-4">
@@ -117,7 +156,7 @@ export class DataUpload extends Component {
         <div className="form-group row">
           <label className="col-sm-4 col-form-label">Data Source Name</label>
           <div className="col-sm-8">
-            <input type="text" name="name" className="form-control" placeholder="Data Source Name"/>
+            <input type="text" onChange={(e)=>this.handleDataSource(e)} value={this.state.dataSourceName} name="dataSourceName" className="form-control" placeholder="Data Source Name"/>
           </div>
         </div>
 
@@ -168,7 +207,7 @@ export class DataUpload extends Component {
           <div className="form-group row">
             <label className="col-sm-4 col-form-label">File Location</label>
             <div className="col-sm-8">
-              <input name="file" type="file" name="dataset" className="form-control"/>
+              <input name="file" type="file" onChange={event => this.handleUpload(event)} name="dataset" className="form-control"/>
             </div>
           </div>
         }          
@@ -187,7 +226,7 @@ export class DataUpload extends Component {
             <div className="form-group row">
               <label className="col-sm-4 col-form-label">Polygon radius (meters)</label>
               <div className="col-sm-8">
-                <input name="radius" type="number" value={this.state.radius} className="form-control" onChange={(e)=>this.handleChange(e)} />
+                <input name="radius" type="number" value={this.state.radius} className="form-control" onChange={(e)=>this.handleRadius(e)} />
               </div>
             </div>
           </div>
@@ -198,15 +237,24 @@ export class DataUpload extends Component {
         <EtlTemplates />
       </div>
 
-      <button className="btn btn-primary float-right" > Save </button>
-
+      { this.state.dataSourceName === '' && 
+        <button className="btn btn-light float-right" disabled={true}> Save </button>
+      }
+      { this.state.dataSourceName !== '' && 
+        <button className="btn btn-primary float-right" disabled={this.props.isUploading} onClick={() => this.save ()} > 
+          { this.props.isUploading && 
+            <span class="fa fa-spinner fa-spin"></span>
+          }
+          Save 
+        </button>
+      }
     </div>
     )
   }
 
   renderDataManagement () {
     return(
-      <div className="form-horizontal" id="data_source_upload_modal_form">
+      <div className="form-horizontal" id="data_source_upload_modal">
         <div className="form-group row">
           <div className="col-sm-8"></div>
           <div className="col-sm-4">
@@ -224,6 +272,7 @@ export class DataUpload extends Component {
 const mapStateToProps = (state) => ({
   isDataManagement: state.dataUpload.isDataManagement,
   isFileUpload: state.dataUpload.isFileUpload,
+  isUploading: state.dataUpload.isUploading,
   conduitSizes: state.dataUpload.conduitSizes,
   saCreationTypes: state.dataUpload.saCreationTypes,
   spatialEdgeTypes: state.dataUpload.spatialEdgeTypes,
@@ -231,13 +280,15 @@ const mapStateToProps = (state) => ({
   dataTypes: state.plan.uploadDataSources,
   etlTemplates: state.etlTemplates.etlTemplates,
   dataItems: state.plan.dataItems,
-  equipmentTypes: state.plan.dataItems.equipment.allLibraryItems
+  equipmentTypes: state.plan.dataItems.equipment.allLibraryItems,
+  loggedInUser: state.user.loggedInUser
 })
 
 const mapDispatchToProps = dispatch => ({
   loadMetaData: () => dispatch(DataUploadActions.loadMetaData()),
   loadEtlTemplatesFromServer: (dataType) => dispatch(EtlTemplateActions.loadEtlTemplatesFromServer(dataType)),
-  toggleView: (viewName) => dispatch(DataUploadActions.toggleView(viewName))
+  toggleView: (viewName) => dispatch(DataUploadActions.toggleView(viewName)),
+  saveDataSource: (uploadDetails,userId) => dispatch(DataUploadActions.saveDataSource(uploadDetails,userId))
 })
 
 const DataUploadComponent = wrapComponentWithProvider(reduxStore, DataUpload, mapStateToProps, mapDispatchToProps)

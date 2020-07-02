@@ -14,7 +14,8 @@ const defaultState = {
   spatialEdgeTypes: [],
   cableTypes: [],
   isDataManagement:false,
-  isFileUpload:true
+  isFileUpload:true,
+  isUploading:false
 }
 
 function setEdgeTypes (state, spatialEdgeTypes) {
@@ -49,6 +50,18 @@ function setToggleView (state, viewName) {
   }
 }
 
+function setDataSources (state, data) {
+  let allLibraryItems = state.plan.dataItems[data.dataType];
+  console.log(allLibraryItems)
+  allLibraryItems.push(data.identifier, data.dataType,data.name)
+  console.log(allLibraryItems)
+  return { ...state,
+    dataItems: { ...state.plan.dataItems[data.dataType],
+      allLibraryItems: allLibraryItems
+    }
+  }
+}
+
 function dataUploadReducer (state = defaultState, action) {
   switch (action.type) {
     
@@ -61,6 +74,9 @@ function dataUploadReducer (state = defaultState, action) {
     case Actions.DATA_UPLOAD_TOGGLE_VIEW:
       return setToggleView(state, action.payload)
 
+    case Actions.DATA_UPLOAD_UPDATE_DATASOURCES:
+      return setDataSources(state, action.payload)
+    
     default:
       return state
   }
