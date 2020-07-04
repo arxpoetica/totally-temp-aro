@@ -67,6 +67,10 @@ function saveDataSource (uploadDetails,loggedInUser) {
             } else { 
               fileUpload(uploadDetails,library.data.identifier,loggedInUser) 
             }
+            dispatch({
+              type: Actions.PLAN_SET_ALL_LIBRARY_ITEMS,
+              payload: library
+            })
           })
       }
     }
@@ -129,7 +133,7 @@ function fileUpload (uploadDetails,libraryId,loggedInUser) {
   var url = `/uploadservice/v1/library/${libraryId}?userId=${loggedInUser.id}&media=${fileExtension}`
   
   AroHttp.postRaw(url, formData).then((e) => {
-    loadMetaData()
+    
   }).catch((e) => {
     swal('Error', e.statusText, 'error')
   })

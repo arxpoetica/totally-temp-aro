@@ -51,13 +51,19 @@ function setToggleView (state, viewName) {
 }
 
 function setDataSources (state, data) {
+  console.log("I am here....",state)
+  console.log("I am here....",state.plan)
+  
   let allLibraryItems = state.plan.dataItems[data.dataType];
   console.log(allLibraryItems)
   allLibraryItems.push(data.identifier, data.dataType,data.name)
   console.log(allLibraryItems)
+
   return { ...state,
-    dataItems: { ...state.plan.dataItems[data.dataType],
-      allLibraryItems: allLibraryItems
+    dataItems: { ...state.dataItems,
+      [dataItemKey]: { ...state.dataItems[data.dataType],
+        allLibraryItems: [].concat(allLibraryItems)
+      }
     }
   }
 }
