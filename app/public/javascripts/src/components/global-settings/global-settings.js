@@ -14,7 +14,9 @@ class GlobalSettingsController {
       RELEASE_NOTES: 'Release Notes',
       BROADCAST: 'BROADCAST',
       CONFIGURATION_EDITOR: 'Configuration Editor',
-      REPORTS_EDITOR: 'Reports Editor'
+      REPORTS_EDITOR: 'Reports Editor',
+      RESOURCE_EDITOR: 'Resource Managers'
+
     })
     this.currentView = this.views.GLOBAL_SETTINGS
     this.userIdForSettingsEdit = null
