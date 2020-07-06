@@ -134,19 +134,21 @@ class PriceBookEditorController {
           subItems: [],
           tagMapping: definitionItem.tagMapping
         }
-        definitionItem.subItems.forEach((subItem) => {
-          var subItemToPush = {
-            id: subItem.id,
-            item: subItem.item,
-            detailType: subItem.detailType
-          }
-          if (subItem.detailType === 'reference') {
-            subItemToPush.detailAssignment = itemDetailIdToDetailAssignment[subItem.id]
-          } else if (subItem.detailType === 'value') {
-            subItemToPush.costAssignment = itemIdToCostAssignment[subItem.item.id]
-          }
-          item.subItems.push(subItemToPush)
-        })
+        if(definitionItem.subItems) {
+          definitionItem.subItems.forEach((subItem) => {
+            var subItemToPush = {
+              id: subItem.id,
+              item: subItem.item,
+              detailType: subItem.detailType
+            }
+            if (subItem.detailType === 'reference') {
+              subItemToPush.detailAssignment = itemDetailIdToDetailAssignment[subItem.id]
+            } else if (subItem.detailType === 'value') {
+              subItemToPush.costAssignment = itemIdToCostAssignment[subItem.item.id]
+            }
+            item.subItems.push(subItemToPush)
+          })
+        }
         definition.items.push(item)
       })
       this.structuredPriceBookDefinitions.push(definition)
