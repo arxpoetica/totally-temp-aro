@@ -61,11 +61,10 @@ export class ManageUsers extends Component {constructor (props) {
     });
 
     return (
-      <div>
+      <>
         {this.state.selectedNav !== 'UserSettings' &&
-        <div>
+        <>
           {!this.props.isOpenSendMail && !this.props.isOpenNewUser &&
-          <div>
             <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
               <div style={{flex: '0 0 auto'}}>
                 <div className="form-group row float-right">
@@ -100,7 +99,7 @@ export class ManageUsers extends Component {constructor (props) {
                       }); 
                     }
 
-                    return <React.Fragment key={user.id}> <tr key={index}>
+                    return <React.Fragment key={user.id}><tr key={index}>
                       <td style={{width: '20%'}}>{user.firstName} {user.lastName}</td>
                       <td style={{width: '20%'}}>{user.email}</td>
                       <td style={{width: '50%'}}>
@@ -169,7 +168,7 @@ export class ManageUsers extends Component {constructor (props) {
               </div>
             </div>
           </div>
-          </div>}
+          }
           
           {this.props.isOpenSendMail && !this.props.isOpenNewUser &&
           <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
@@ -260,10 +259,10 @@ export class ManageUsers extends Component {constructor (props) {
             <button onClick={() => this.registerUser()} className="btn btn-primary float-right"><i className="fa fa-save"></i>&nbsp;&nbsp;Register user</button>
           </div>
           }
-        </div>
+        </>
         }
         {this.navSelection()}
-      </div>
+      </>
     )
   }
 

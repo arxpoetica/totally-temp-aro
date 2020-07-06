@@ -29,49 +29,92 @@ function toggleView (viewName) {
   }
 }
 
+function createLibraryId (uploadDetails, loggedInUser) {
+  // First, add some hardcoded values to the tile system params before sending it to the API.
+  var postBody = {
+    libraryItem: {
+      dataType: 'tile_system',
+      name: uploadDetails.selectedDataSourceName
+    },
+    param: JSON.parse(JSON.stringify(uploadDetails.editedTileSystemData))
+  }
+  postBody.param.param_type = 'ts'
+
+  // Then make the call that will provide us with the library id
+  return AroHttp.post(`/service/v1/project/${loggedInUser.projectId}/library_ts`, postBody)
+    .then((result) => Promise.resolve(result.data.libraryItem.identifier))
+    .catch((err) => console.error(err))
+}
+
 function saveDataSource (uploadDetails,loggedInUser) {
 
   return dispatch => {
-    if (uploadDetails.selectedDataSourceName === 'service_layer' && uploadDetails.selectedCreationType === 'draw_polygon') {
-      return getLibraryId(uploadDetails) // Just create Datasource
-        .then((result) => {
-          dispatch({
-            type: Actions.DATA_UPLOAD_UPDATE_DATASOURCES,
-            payload: result
-          })
+    if(uploadDetails.selectedDataSourceName === 'tile_system'){
+
+      dispatch({
+        type: Actions.DATA_UPLOAD_SET_IS_UP_LOADING,
+        payload: true
+      })
+      return createLibraryId(uploadDetails,loggedInUser)
+      .then((libraryId) => {
+        fileUpload(uploadDetails,libraryId,loggedInUser) 
+      })
+      .then((result) => {
+        dispatch({
+          type: Actions.DATA_UPLOAD_SET_IS_UP_LOADING,
+          payload: false
         })
-      // Draw the layer by entering edit mode
+        return Promise.resolve(result)})
+      .catch((err) => {
+        dispatch({
+          type: Actions.DATA_UPLOAD_SET_IS_UP_LOADING,
+          payload: false
+        })
+        console.error(err)
+      })
+
     } else {
-      if (uploadDetails.selectedDataSourceName !== 'service_layer' || uploadDetails.selectedCreationType !== 'polygon_equipment') {
-        var files = uploadDetails.file
-        if (uploadDetails.dataSetId && files.length > 0) {
-          return swal({
-            title: 'Are you sure?',
-            text: 'Are you sure you want to overwrite the data which is currently in this boundary layer?',
-            type: 'warning',
-            confirmButtonColor: '#DD6B55',
-            confirmButtonText: 'Yes',
-            showCancelButton: true,
-            closeOnConfirm: true
-          }, fileUpload(uploadDetails,uploadDetails.dataSetId))
-        }
-      }
-      // For uploading fiber no need to create library using getLibraryId()
-      if (uploadDetails.selectedDataSourceName === 'fiber') {
-        setCableConstructionType(uploadDetails,loggedInUser)
-      } else {
-        AroHttp.post('/service/v1/library-entry', { dataType: uploadDetails.selectedDataSourceName, name: uploadDetails.dataSourceName})
-          .then((library) => {
-            if (uploadDetails.selectedDataSourceName === 'service_layer' && uploadDetails.selectedCreationType === 'polygon_equipment') { 
-              layerBoundary(uploadDetails, library.data.identifier,loggedInUser) 
-            } else { 
-              fileUpload(uploadDetails,library.data.identifier,loggedInUser) 
-            }
+      if (uploadDetails.selectedDataSourceName === 'service_layer' && uploadDetails.selectedCreationType === 'draw_polygon') {
+        return getLibraryId(uploadDetails) // Just create Datasource
+          .then((result) => {
             dispatch({
-              type: Actions.PLAN_SET_ALL_LIBRARY_ITEMS,
-              payload: library
+              type: Actions.DATA_UPLOAD_UPDATE_DATASOURCES,
+              payload: result
             })
           })
+        // Draw the layer by entering edit mode
+      } else {
+        if (uploadDetails.selectedDataSourceName !== 'service_layer' || uploadDetails.selectedCreationType !== 'polygon_equipment') {
+          var files = uploadDetails.file
+          if (uploadDetails.dataSetId && files.length > 0) {
+            return swal({
+              title: 'Are you sure?',
+              text: 'Are you sure you want to overwrite the data which is currently in this boundary layer?',
+              type: 'warning',
+              confirmButtonColor: '#DD6B55',
+              confirmButtonText: 'Yes',
+              showCancelButton: true,
+              closeOnConfirm: true
+            }, fileUpload(uploadDetails,uploadDetails.dataSetId))
+          }
+        }
+        // For uploading fiber no need to create library using getLibraryId()
+        if (uploadDetails.selectedDataSourceName === 'fiber') {
+          setCableConstructionType(uploadDetails,loggedInUser)
+        } else {
+          AroHttp.post('/service/v1/library-entry', { dataType: uploadDetails.selectedDataSourceName, name: uploadDetails.dataSourceName})
+            .then((library) => {
+              if (uploadDetails.selectedDataSourceName === 'service_layer' && uploadDetails.selectedCreationType === 'polygon_equipment') { 
+                layerBoundary(uploadDetails, library.data.identifier,loggedInUser) 
+              } else { 
+                fileUpload(uploadDetails,library.data.identifier,loggedInUser) 
+              }
+              dispatch({
+                type: Actions.PLAN_SET_ALL_LIBRARY_ITEMS,
+                payload: library
+              })
+            })
+        }
       }
     }
   }
@@ -139,6 +182,15 @@ function fileUpload (uploadDetails,libraryId,loggedInUser) {
   })
 }
 
+function setIsUploading (status){
+  return dispatch => {
+    dispatch({
+      type: Actions.DATA_UPLOAD_SET_IS_UP_LOADING,
+      payload: status
+    })
+  }
+}
+
 export default {
   loadMetaData,
   toggleView,
@@ -146,5 +198,7 @@ export default {
   getLibraryId,
   fileUpload,
   layerBoundary,
-  setCableConstructionType
+  setCableConstructionType,
+  createLibraryId,
+  setIsUploading
 }

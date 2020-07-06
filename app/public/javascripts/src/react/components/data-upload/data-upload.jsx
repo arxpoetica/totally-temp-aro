@@ -5,6 +5,7 @@ import EtlTemplateActions from '../etl-templates/etl-templates-actions'
 import DataUploadActions from './data-upload-actions'
 import EtlTemplates from '../etl-templates/etl-templates.jsx'
 import ResourcePermission from '../acl/resource-permissions/resource-permissions.jsx'
+import ConicTileSystem from './conic-tile-system-uploader.jsx'
 
 export class DataUpload extends Component {
   constructor (props) {
@@ -19,10 +20,13 @@ export class DataUpload extends Component {
       selectedCableType:'',
       selectedEquipment:'',
       radius:20000,
-      file:null
+      file:null,
+      editedTileSystemData : ''
     }
     this.props.loadMetaData()
-    
+    this.handleDataSource = this.handleDataSource.bind(this)
+    this.handleUpload = this.handleUpload.bind(this)
+    this.handleTileSystem = this.handleTileSystem.bind(this)
   }
 
   componentDidMount(){
@@ -91,6 +95,10 @@ export class DataUpload extends Component {
     this.setState({ file: file })
   }
 
+  handleTileSystem(tileSystemData){
+    this.setState({ editedTileSystemData: tileSystemData })
+  }
+
   save (){
     console.log(this.state)
     this.props.saveDataSource(this.state,this.props.loggedInUser)
@@ -151,14 +159,16 @@ export class DataUpload extends Component {
         </select>
         </div>
       </div>
-      
+
       <div>
-        <div className="form-group row">
-          <label className="col-sm-4 col-form-label">Data Source Name</label>
-          <div className="col-sm-8">
-            <input type="text" onChange={(e)=>this.handleDataSource(e)} value={this.state.dataSourceName} name="dataSourceName" className="form-control" placeholder="Data Source Name"/>
+        {this.state.selectedDataSourceName !== 'tile_system' &&
+          <div className="form-group row">
+            <label className="col-sm-4 col-form-label">Data Source Name</label>
+            <div className="col-sm-8">
+              <input type="text" onChange={(e)=>this.handleDataSource(e)} value={this.state.dataSourceName} name="dataSourceName" className="form-control" placeholder="Data Source Name"/>
+            </div>
           </div>
-        </div>
+        }
 
         { this.state.selectedDataSourceName === 'fiber' &&
           <div>
@@ -203,14 +213,18 @@ export class DataUpload extends Component {
           </div>
         }
 
-        { (this.state.selectedDataSourceName !== 'service_layer' || this.state.selectedCreationType === 'upload_file') && 
-          <div className="form-group row">
-            <label className="col-sm-4 col-form-label">File Location</label>
-            <div className="col-sm-8">
-              <input name="file" type="file" onChange={event => this.handleUpload(event)} name="dataset" className="form-control"/>
-            </div>
-          </div>
-        }          
+        {this.state.selectedDataSourceName !== 'tile_system' &&
+          <>
+            { (this.state.selectedDataSourceName !== 'service_layer' || this.state.selectedCreationType === 'upload_file') && 
+              <div className="form-group row">
+                <label className="col-sm-4 col-form-label">File Location</label>
+                <div className="col-sm-8">
+                  <input name="file" type="file" onChange={event => this.handleUpload(event)} name="dataset" className="form-control"/>
+                </div>
+              </div>
+            } 
+          </>
+        }         
 
         { this.state.selectedDataSourceName === 'service_layer' && this.state.selectedCreationType === 'polygon_equipment' &&
           <div>
@@ -231,6 +245,14 @@ export class DataUpload extends Component {
             </div>
           </div>
         }
+
+        { (this.state.selectedDataSourceName === 'tile_system') && 
+          <ConicTileSystem 
+            onDatasetChange={this.handleDataSource}
+            onDatasetUpload={this.handleUpload}
+            onTileSystemChange={this.handleTileSystem}
+          />
+        }   
       </div>
 
       <div>
@@ -243,7 +265,7 @@ export class DataUpload extends Component {
       { this.state.dataSourceName !== '' && 
         <button className="btn btn-primary float-right" disabled={this.props.isUploading} onClick={() => this.save ()} > 
           { this.props.isUploading && 
-            <span class="fa fa-spinner fa-spin"></span>
+            <span className="fa fa-spinner fa-spin"></span>
           }
           Save 
         </button>

@@ -68,6 +68,12 @@ function setDataSources (state, data) {
   }
 }
 
+function setIsUpdating (state, isUploading) {
+  return { ...state,
+    isUploading: isUploading
+  }
+}
+
 function dataUploadReducer (state = defaultState, action) {
   switch (action.type) {
     
@@ -82,7 +88,9 @@ function dataUploadReducer (state = defaultState, action) {
 
     case Actions.DATA_UPLOAD_UPDATE_DATASOURCES:
       return setDataSources(state, action.payload)
-    
+
+    case Actions.DATA_UPLOAD_SET_IS_UP_LOADING:
+      return setIsUpdating(state, action.payload)    
     default:
       return state
   }
