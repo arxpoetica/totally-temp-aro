@@ -137,7 +137,8 @@ function setOptimizationInputs (inputs) {
 
       // selection -> selection mode
       if (inputs.locationConstraints
-          && inputs.locationConstraints.analysisSelectionMode) {
+          && inputs.locationConstraints.analysisSelectionMode
+      ) {
         dispatch({
           type: Actions.SELECTION_SET_ACTIVE_MODE,
           payload: inputs.locationConstraints.analysisSelectionMode

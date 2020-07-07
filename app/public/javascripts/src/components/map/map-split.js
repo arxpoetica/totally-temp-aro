@@ -1,3 +1,5 @@
+import PuppeteerMessages from '../common/puppeteer-messages'
+
 class MapSplitController {
   constructor ($document, $timeout, $scope, state, $compile, $ngRedux) {
     this.$timeout = $timeout

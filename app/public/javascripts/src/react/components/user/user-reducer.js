@@ -1,9 +1,27 @@
 import Actions from '../../common/actions'
 
+const initialOffset = 0
+const initialcurrentPage = 0
+const perPage = 10
+
 const defaultState = {
   systemActors: [],
   authRoles: {},
-  authPermissions: {}
+  authPermissions: {},
+  userConfiguration: null,
+  projectTemplates: null,
+  userList: null,
+  allGroups: null,
+  isOpenSendMail: false,
+  isOpenNewUser:false,
+  pageableData:{
+    offset: initialOffset,
+    perPage: perPage,
+    currentPage: initialcurrentPage,
+    pageCount: 0,
+    paginateData: []
+  }
+
 }
 
 // Set the currently logged in user
@@ -42,6 +60,121 @@ function updateLoggedInUser (state, user) {
   }
 }
 
+function setUserConfiguration (state, userConfiguration) {
+  return { ...state,
+    userConfiguration: userConfiguration
+  }
+}
+
+function setProjectTemplates (state, projectTemplates) {
+  return { ...state,
+    projectTemplates: projectTemplates
+  }
+}
+
+function setUserList (state, users) {
+
+  let mapIdToGroup = {}
+  state.allGroups.forEach((group) => mapIdToGroup[group.id] = group)
+
+  let allUsers = users
+  // For a user we will get the IDs of the groups that the user belongs to. Our control uses objects to bind to the model.
+  // Remove the group ids property and replace it with group objects
+  allUsers.forEach((user, index) => {
+    var selectedGroupObjects = []
+    user.groupIds.forEach((userGroupId) => selectedGroupObjects.push(mapIdToGroup[userGroupId]))
+    allUsers[index].userGroups = selectedGroupObjects // Make sure you modify the object and not a copy
+    allUsers[index].isUpdated = false
+    delete allUsers[index].groupIds
+  })
+
+  // Set Pagination Data
+  let pageCount = Math.ceil(allUsers.length / perPage)
+  let paginateData = allUsers.slice(initialOffset, initialOffset + perPage) 
+
+  let pageableData = {}
+  pageableData['pageCount'] = pageCount
+  pageableData['paginateData'] = paginateData
+  pageableData['offset'] = initialOffset
+  pageableData['perPage'] = perPage
+  pageableData['currentPage'] = initialcurrentPage
+
+  return { ...state,
+    userList: allUsers,
+    isOpenSendMail: false,
+    isOpenNewUser: false,
+    pageableData: pageableData
+  }
+}
+
+function setPageData (state, selectedPage) {
+
+  const offset = selectedPage * perPage; 
+  let allUsers = state.userList
+  let paginateData = allUsers.slice(offset, offset + perPage) 
+
+  let pageableData = state.pageableData
+  pageableData['paginateData'] = paginateData
+  pageableData['offset'] = offset
+  pageableData['currentPage'] = selectedPage
+
+  return { ...state,
+    pageableData: pageableData
+  }
+}
+
+function searchUsers (state,searchText) {
+  let filteredUsers = []
+  let userList = state.userList
+  if (searchText === '') {
+    filteredUsers = userList
+  } else {
+    // For now do search in a crude way. Will get this from the ODATA endpoint later
+    userList.forEach((user) => {
+      if ((JSON.stringify(user).toLowerCase()).indexOf(searchText.toLowerCase()) >= 0) {
+        filteredUsers.push(user)
+      }
+    })
+  }
+  
+  // Set Pagination Data
+  let pageCount = Math.ceil(filteredUsers.length / perPage)
+  let paginateData = filteredUsers.slice(initialOffset, initialOffset + perPage) 
+
+  let pageableData = {}
+  pageableData['pageCount'] = pageCount
+  pageableData['paginateData'] = paginateData
+  pageableData['offset'] = initialOffset
+  pageableData['currentPage'] = initialcurrentPage
+
+  return { ...state,
+    isOpenSendMail: false,
+    isOpenNewUser: false,
+    pageableData: pageableData
+  }
+  
+}
+
+function setAllGroups (state, groups) {
+  return { ...state,
+    allGroups: groups
+  }
+}
+
+function setMailFlag (state, groups) {
+  return { ...state,
+    isOpenSendMail: true,
+    isOpenNewUser: false
+  }
+}
+
+function setNewUserFlag (state, groups) {
+  return { ...state,
+    isOpenSendMail: false,
+    isOpenNewUser: true
+  }
+}
+
 function userReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.USER_GET_SUPERUSER_FLAG:
@@ -61,8 +194,32 @@ function userReducer (state = defaultState, action) {
 
     case Actions.USER_SET_AUTH_PERMISSIONS:
       return setAuthPermissions(state, action.payload)
+    
+    case Actions.USER_SET_CONFIGURATION:
+       return setUserConfiguration(state, action.payload)
 
-    default:
+    case Actions.USER_PROJECT_TEMPLATES:
+      return setProjectTemplates(state, action.payload)
+
+    case Actions.USER_SET_USERLIST:
+      return setUserList(state, action.payload)
+    
+    case Actions.USER_SET_GROUP:
+      return setAllGroups(state, action.payload)
+
+    case Actions.USER_SET_SEND_MAIL_FLAG:
+      return setMailFlag(state, action.payload)
+    
+    case Actions.USER_SET_NEW_USER_FLAG:
+      return setNewUserFlag(state, action.payload)
+
+    case Actions.USER_HANDLE_PAGE_CLICK:
+      return setPageData(state, action.payload)
+
+    case Actions.USER_SEARCH_USERS:
+      return searchUsers(state, action.payload)
+      
+      default:
       return state
   }
 }

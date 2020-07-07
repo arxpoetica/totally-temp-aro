@@ -111,10 +111,182 @@ function loadSystemActors () {
   }
 }
 
+function loadUserSettings (userId) {
+  return dispatch => {
+    AroHttp.get(`/service/auth/users/${userId}/configuration`)
+      .then(result => dispatch({
+        type: Actions.USER_SET_CONFIGURATION,
+        payload: result.data
+      }))
+      .catch((err) => console.error(err))
+
+      const filter = `deleted eq false and userId eq ${userId}`
+      // const RESOUSRCE_READ = 4
+      AroHttp.get(`/service/odata/userprojectentity?$select=id,name,permissions&$filter=${filter}&$orderby=name&$top=10000`)
+      .then(result => dispatch({
+        type: Actions.USER_PROJECT_TEMPLATES,
+        payload: result.data
+      }))
+      .catch((err) => console.error(err))
+  }
+}
+
+function saveUserSettings (userId,userConfiguration) {
+
+  return dispatch => {
+    AroHttp.post(`/service/auth/users/${userId}/configuration`, userConfiguration)
+      .then(result => dispatch(
+        loadUserSettings(userId)
+      ))
+      .catch((err) => console.error(err))
+  }
+}
+
+function loadGroups () {
+
+  return dispatch => {
+    AroHttp.get('/service/auth/groups')
+    .then(result => dispatch({
+      type: Actions.USER_SET_GROUP,
+      payload: result.data
+    }))
+    .catch((err) => console.error(err))
+  }
+}
+
+
+function loadUsers () {
+  return dispatch => {
+    AroHttp.get(`/service/auth/users`)
+    .then(result => dispatch({
+      type: Actions.USER_SET_USERLIST,
+      payload: result.data
+    }))
+    .catch((err) => console.error(err))
+  }
+}
+
+function resendLink (user) {
+  return dispatch => {
+    AroHttp.post('/admin/users/resend', { user: user.id })
+    .then(result => dispatch(
+      loadUsers())
+    )
+    .catch((err) => console.error(err))
+  }
+}
+
+function deleteUser (user) {
+  return dispatch => {
+    AroHttp.delete(`/service/auth/users/${user.id}`)
+    .then(result => dispatch(
+      loadUsers())
+    )
+    .catch((err) => console.error(err))
+  }
+}
+
+function openSendMail () {
+
+  return dispatch => {
+    dispatch({
+      type: Actions.USER_SET_SEND_MAIL_FLAG,
+      payload: null
+    })
+  }
+
+}
+
+function sendEmail (mail) {
+
+  return dispatch => {
+    AroHttp.post('/admin/users/mail', { subject: mail.mailSubject, text: mail.mailBody})
+    .then(result => dispatch(
+      loadUsers())
+    )
+    .catch((err) => console.error(err))
+  }
+}
+
+function openNewUser () {
+
+  return dispatch => {
+    dispatch({
+      type: Actions.USER_SET_NEW_USER_FLAG,
+      payload: null
+    })
+  }
+
+}
+
+function registerUser (newUser) {
+  var serviceUser = newUser
+  serviceUser.groupIds = []
+  newUser.groups.forEach((group) => serviceUser.groupIds.push(group.id))
+
+  return dispatch => {
+    AroHttp.post('/admin/users/registerWithoutPassword', serviceUser)
+    .then(result => dispatch(
+      loadUsers())
+    )
+    .catch((err) => console.error(err))
+  }
+}
+
+function handlePageClick (selectedPage) {
+  return dispatch => {
+     dispatch({
+        type: Actions.USER_HANDLE_PAGE_CLICK,
+        payload: selectedPage
+      })
+  }
+}
+
+function searchUsers (searchText) {
+  return dispatch => {
+     dispatch({
+        type: Actions.USER_SEARCH_USERS,
+        payload: searchText
+      })
+  }
+}
+
+function saveUsers (allUsers) {
+  allUsers.forEach((user, index) => {
+  
+    if(user.isUpdated){
+      // aro-service requires group ids in the user objects. replace group objects by group ids
+      var serviceUser = user
+      serviceUser.groupIds = []
+      if(serviceUser.userGroups !== [] || serviceUser.userGroups !== null ){
+        serviceUser.userGroups.forEach((userGroup) => serviceUser.groupIds.push(userGroup.id))
+        delete serviceUser.userGroups
+        delete serviceUser.isUpdated
+        
+        AroHttp.put('/service/auth/users', serviceUser)
+        .catch((err) => console.error(err))
+      }
+    }
+  })
+}
+
 export default {
   loadAuthPermissions,
   loadAuthRoles,
   loadSystemActors,
   setLoggedInUser,
-  updateUserAccount
+  updateUserAccount,
+  loadUserSettings,
+  saveUserSettings,
+  loadGroups,
+  loadUsers,
+  resendLink,
+  deleteUser,
+  openSendMail,
+  sendEmail,
+  openNewUser,
+  registerUser,
+  handlePageClick,
+  searchUsers,
+  saveUsers
 }
