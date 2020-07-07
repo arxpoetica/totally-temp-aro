@@ -1,6 +1,17 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 
+const constTileSystemParams = {
+  conicSystem: {
+    code: 'EPSG:5070',
+    srid: 5070
+  },
+  cellSize: 30,
+  systemOriginX: '-96.0009191593717',
+  systemOriginY: '23.0002109131773',
+  tileWidth: 300
+}
+
 export class AroObjectEditor extends Component {
   constructor (props) {
     super(props)
@@ -49,6 +60,7 @@ export class AroObjectEditor extends Component {
                       <AroObjectEditor 
                         objectToEdit={objValue}
                         indentationLevel = {this.state.indentationLevel + 1 }
+                        onTileSystemChange={this.props.onTileSystemChange}
                       />
                       </div>
                     }
@@ -75,8 +87,15 @@ export class AroObjectEditor extends Component {
   }
 
   handleTileSystemParams(e){
-    let tileSystemData  = this.props.objectToEdit
-    tileSystemData[e.target.name] = e.target.value
+    let tileSystemData = constTileSystemParams;
+
+    if(e.target.name === 'code' ){
+      tileSystemData['conicSystem'] = {"code" : e.target.value, "srid" : tileSystemData['conicSystem'].srid}
+    } else if(e.target.name === 'srid' ){
+      tileSystemData['conicSystem'] = {"code" : tileSystemData['conicSystem'].code, "srid" : e.target.value}
+    } else {
+      tileSystemData[e.target.name] = e.target.value
+    }
     this.props.onTileSystemChange(tileSystemData)
   }
 

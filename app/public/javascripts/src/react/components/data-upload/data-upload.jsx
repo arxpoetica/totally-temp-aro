@@ -33,6 +33,7 @@ export class DataUpload extends Component {
     this.props.loadEtlTemplatesFromServer(1)
   }
   dataTypeChange(event) {
+    console.log(this.props)
     let selectedDataSourceName = ''
     let dataId = parseInt(event.target.value);
     this.props.loadEtlTemplatesFromServer(dataId)
@@ -51,7 +52,10 @@ export class DataUpload extends Component {
       let selectedConduitSize = this.props.conduitSizes[0].id;
       let selectedCableType = this.props.cableTypes[0].name;
       let selectedCreationType = this.props.saCreationTypes[0].id;
-      let selectedEquipment = this.props.equipmentTypes[0].identifier;
+      let selectedEquipment = '';
+      if(this.props.equipmentTypes.length >0){
+        selectedEquipment = this.props.equipmentTypes[0].identifier;
+      }
 
       this.setState({selectedConduitSize:selectedConduitSize,selectedSpatialEdgeType:selectedSpatialEdgeType,
         selectedCreationType: selectedCreationType,selectedCableType:selectedCableType,selectedEquipment:selectedEquipment})
@@ -100,7 +104,6 @@ export class DataUpload extends Component {
   }
 
   save (){
-    console.log(this.state)
     this.props.saveDataSource(this.state,this.props.loggedInUser)
   }
 

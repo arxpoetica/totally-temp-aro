@@ -34,7 +34,7 @@ function createLibraryId (uploadDetails, loggedInUser) {
   var postBody = {
     libraryItem: {
       dataType: 'tile_system',
-      name: uploadDetails.selectedDataSourceName
+      name: uploadDetails.dataSourceName
     },
     param: JSON.parse(JSON.stringify(uploadDetails.editedTileSystemData))
   }
@@ -42,46 +42,38 @@ function createLibraryId (uploadDetails, loggedInUser) {
 
   // Then make the call that will provide us with the library id
   return AroHttp.post(`/service/v1/project/${loggedInUser.projectId}/library_ts`, postBody)
-    .then((result) => Promise.resolve(result.data.libraryItem.identifier))
+    .then((result) => Promise.resolve(result.data.libraryItem))
     .catch((err) => console.error(err))
 }
 
 function saveDataSource (uploadDetails,loggedInUser) {
 
   return dispatch => {
+
+    dispatch(setIsUploading(true))
+
     if(uploadDetails.selectedDataSourceName === 'tile_system'){
 
-      dispatch({
-        type: Actions.DATA_UPLOAD_SET_IS_UP_LOADING,
-        payload: true
-      })
       return createLibraryId(uploadDetails,loggedInUser)
-      .then((libraryId) => {
-        fileUpload(uploadDetails,libraryId,loggedInUser) 
+      .then((libraryItem) => {
+        fileUpload(uploadDetails,libraryItem.identifier,loggedInUser) 
+        dispatch(setAllLibraryItems(uploadDetails.dataSourceName,libraryItem))
       })
       .then((result) => {
-        dispatch({
-          type: Actions.DATA_UPLOAD_SET_IS_UP_LOADING,
-          payload: false
-        })
-        return Promise.resolve(result)})
+        dispatch(setIsUploading(false))
+        return Promise.resolve(result)
+      })
       .catch((err) => {
-        dispatch({
-          type: Actions.DATA_UPLOAD_SET_IS_UP_LOADING,
-          payload: false
-        })
+        dispatch(setIsUploading(false))
         console.error(err)
       })
-
     } else {
       if (uploadDetails.selectedDataSourceName === 'service_layer' && uploadDetails.selectedCreationType === 'draw_polygon') {
-        return getLibraryId(uploadDetails) // Just create Datasource
-          .then((result) => {
-            dispatch({
-              type: Actions.DATA_UPLOAD_UPDATE_DATASOURCES,
-              payload: result
-            })
-          })
+        // Just create Datasource
+        getLibraryId (uploadDetails)
+        .then((library) => {
+          dispatch(setAllLibraryItems(uploadDetails.dataSourceName,library.data))
+        })
         // Draw the layer by entering edit mode
       } else {
         if (uploadDetails.selectedDataSourceName !== 'service_layer' || uploadDetails.selectedCreationType !== 'polygon_equipment') {
@@ -95,24 +87,40 @@ function saveDataSource (uploadDetails,loggedInUser) {
               confirmButtonText: 'Yes',
               showCancelButton: true,
               closeOnConfirm: true
-            }, fileUpload(uploadDetails,uploadDetails.dataSetId))
+            }, 
+            fileUpload(uploadDetails,uploadDetails.dataSetId))
           }
         }
         // For uploading fiber no need to create library using getLibraryId()
         if (uploadDetails.selectedDataSourceName === 'fiber') {
-          setCableConstructionType(uploadDetails,loggedInUser)
+          return setCableConstructionType(uploadDetails,loggedInUser)
+          .then((libraryItem) => {
+            fileUpload(uploadDetails, libraryItem.identifier, loggedInUser)
+            dispatch(setAllLibraryItems(uploadDetails.dataSourceName, libraryItem))
+          })
+          .then((result) => {
+            dispatch(setIsUploading(false))
+            return Promise.resolve(result)
+          })
+          .catch((err) => {
+            dispatch(setIsUploading(false))
+          })
         } else {
-          AroHttp.post('/service/v1/library-entry', { dataType: uploadDetails.selectedDataSourceName, name: uploadDetails.dataSourceName})
+          getLibraryId (uploadDetails)
             .then((library) => {
               if (uploadDetails.selectedDataSourceName === 'service_layer' && uploadDetails.selectedCreationType === 'polygon_equipment') { 
                 layerBoundary(uploadDetails, library.data.identifier,loggedInUser) 
               } else { 
                 fileUpload(uploadDetails,library.data.identifier,loggedInUser) 
               }
-              dispatch({
-                type: Actions.PLAN_SET_ALL_LIBRARY_ITEMS,
-                payload: library
-              })
+              dispatch(setAllLibraryItems(uploadDetails.dataSourceName,library.data))
+            })
+            .then((res) => {
+              dispatch(setIsUploading(false))
+            })
+            .catch((err) => {
+              dispatch(setIsUploading(false))
+              console.error(err)
             })
         }
       }
@@ -121,10 +129,9 @@ function saveDataSource (uploadDetails,loggedInUser) {
 }
 
 function getLibraryId (uploadDetails) {
-  console.log(uploadDetails)
-  AroHttp.post('/service/v1/library-entry', { dataType: uploadDetails.selectedDataSourceName, name: uploadDetails.dataSourceName})
+  return AroHttp.post('/service/v1/library-entry', { dataType: uploadDetails.selectedDataSourceName, name: uploadDetails.dataSourceName})
   .then((response) => {
-    return Promise.resolve(response.data)
+    return Promise.resolve(response)
   })
   .catch((err) => console.error(err))
 }
@@ -140,7 +147,6 @@ function  layerBoundary (uploadDetails, serviceLayerLibraryId,loggedInUser) {
   return AroHttp.post('/service/v1/project/' + loggedInUser.projectId + '/serviceLayers-cmd', data)
     .then((e) => {
       //this.setAllLibraryItems('service_layer', this.dataItems['service_layer'].allLibraryItems.concat(e.data.serviceLayerLibrary))
-      
     })
 }
 
@@ -162,9 +168,8 @@ function setCableConstructionType (uploadDetails,loggedInUser) {
     data.param.fiberType = uploadDetails.selectedCableType
   }
   return AroHttp.post(`/service/v1/library_cable`,data)
-    .then((response) => {
-      fileUpload(uploadDetails,response.data.libraryItem.identifier,loggedInUser)
-    })
+    .then((result) => Promise.resolve(result.data.libraryItem))
+    .catch((err) => console.error(err))
 }
 
 function fileUpload (uploadDetails,libraryId,loggedInUser) {
@@ -191,6 +196,18 @@ function setIsUploading (status){
   }
 }
 
+function setAllLibraryItems (dataItemKey, allLibraryItems) {
+  return dispatch => {
+    dispatch({
+      type: Actions.PLAN_SET_ALL_LIBRARY_ITEMS,
+      payload: {
+        dataItemKey : dataItemKey,
+        allLibraryItems : allLibraryItems
+      }
+    })
+  }
+}
+
 export default {
   loadMetaData,
   toggleView,
@@ -200,5 +217,6 @@ export default {
   layerBoundary,
   setCableConstructionType,
   createLibraryId,
-  setIsUploading
+  setIsUploading,
+  setAllLibraryItems
 }
