@@ -20,8 +20,8 @@ const defaultState = {
     currentPage: initialcurrentPage,
     pageCount: 0,
     paginateData: []
-  }
-
+  },
+  defaultGroup : null
 }
 
 // Set the currently logged in user
@@ -156,8 +156,17 @@ function searchUsers (state,searchText) {
 }
 
 function setAllGroups (state, groups) {
+
+  let defaultGroup = []
+  groups.forEach((group) => {
+    if (group.name === 'Public') {
+      defaultGroup.push(group)
+    }
+  })
+
   return { ...state,
-    allGroups: groups
+    allGroups: groups,
+    defaultGroup : defaultGroup
   }
 }
 

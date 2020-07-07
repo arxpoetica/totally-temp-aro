@@ -56,16 +56,19 @@ export class ManageUsers extends Component {constructor (props) {
 
     const users = this.props.pageableData.paginateData
 
-    let optionsList = this.props.allGroups.map(function(newkey) { 
+    let defaultIndex = 0;
+    let optionsList = this.props.allGroups.map(function(newkey, index) { 
+      if(newkey.name === 'Public'){
+        defaultIndex = index
+      }
       return {"id":newkey.id, "value": newkey.name, "label": newkey.name}; 
     });
 
     return (
-      <div>
+      <>
         {this.state.selectedNav !== 'UserSettings' &&
-        <div>
+        <>
           {!this.props.isOpenSendMail && !this.props.isOpenNewUser &&
-          <div>
             <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
               <div style={{flex: '0 0 auto'}}>
                 <div className="form-group row float-right">
@@ -100,7 +103,7 @@ export class ManageUsers extends Component {constructor (props) {
                       }); 
                     }
 
-                    return <React.Fragment key={user.id}> <tr key={index}>
+                    return <React.Fragment key={user.id}><tr key={index}>
                       <td style={{width: '20%'}}>{user.firstName} {user.lastName}</td>
                       <td style={{width: '20%'}}>{user.email}</td>
                       <td style={{width: '50%'}}>
@@ -169,7 +172,7 @@ export class ManageUsers extends Component {constructor (props) {
               </div>
             </div>
           </div>
-          </div>}
+          }
           
           {this.props.isOpenSendMail && !this.props.isOpenNewUser &&
           <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
@@ -245,7 +248,7 @@ export class ManageUsers extends Component {constructor (props) {
                     backspaceRemovesValue={false}
                     onChange={(e)=>this.handleGroupChange(e)}
                     isSearchable={false} 
-                    defaultValue={[optionsList[2]]}
+                    defaultValue={[optionsList[defaultIndex]]}
                   />
                 </div>
               </div>
@@ -260,10 +263,10 @@ export class ManageUsers extends Component {constructor (props) {
             <button onClick={() => this.registerUser()} className="btn btn-primary float-right"><i className="fa fa-save"></i>&nbsp;&nbsp;Register user</button>
           </div>
           }
-        </div>
+        </>
         }
         {this.navSelection()}
-      </div>
+      </>
     )
   }
 
@@ -354,6 +357,11 @@ export class ManageUsers extends Component {constructor (props) {
 
   openNewUser() {
     this.setState({ newUser: {} });
+    if(this.props.defaultGroup !== null){
+      let newUser = this.state.newUser;
+      newUser['groups'] = this.props.defaultGroup;
+      this.setState({ newUser: newUser });
+    }
     this.props.openNewUser()
   }
 
@@ -375,8 +383,6 @@ export class ManageUsers extends Component {constructor (props) {
 
   saveUsers() {
     this.props.saveUsers(this.props.userList)
-    this.props.loadGroups()
-    this.props.loadUsers()
   }
 
   navSelection (){
@@ -411,7 +417,8 @@ const mapStateToProps = (state) => ({
     allGroups: state.user.allGroups,
     isOpenSendMail: state.user.isOpenSendMail,
     isOpenNewUser: state.user.isOpenNewUser,
-    pageableData:  state.user.pageableData
+    pageableData:  state.user.pageableData,
+    defaultGroup : state.user.defaultGroup
 })
 
 const mapDispatchToProps = (dispatch) => ({
@@ -425,7 +432,7 @@ const mapDispatchToProps = (dispatch) => ({
   registerUser: (newUser) => dispatch(UserActions.registerUser(newUser)),
   handlePageClick: (selectedPage) => dispatch(UserActions.handlePageClick(selectedPage)),
   searchUsers: (searchText) => dispatch(UserActions.searchUsers(searchText)),
-  saveUsers: (userList) => UserActions.saveUsers(userList)
+  saveUsers: (userList) => dispatch(UserActions.saveUsers(userList))
 })
 
 const ManageUsersComponent = wrapComponentWithProvider(reduxStore, ManageUsers, mapStateToProps, mapDispatchToProps)
