@@ -4,6 +4,7 @@ import PolygonFeatureRenderer from './polygon-feature-renderer'
 import TileUtilities from './tile-utilities'
 import AsyncPriorityQueue from 'async/priorityQueue'
 import Constants from '../common/constants'
+import PuppeteerMessages from '../common/puppeteer-messages'
 import Rule from './rule'
 
 class MapTileRenderer {
@@ -43,6 +44,10 @@ class MapTileRenderer {
       console.error('Error from the tile rendering throttle:')
       console.error(err)
     }
+
+    // Detect when the queue has drained (finished fetching data). If a callback function exists on the window, call it.
+    // This is used by the PDF report generator to detect when we are finished fetching all vector tile data.
+    this.tileRenderThrottle.drain = () => PuppeteerMessages.vectorTilesRenderedCallback()
 
     this.modificationTypes = Object.freeze({
       UNMODIFIED: 'UNMODIFIED',

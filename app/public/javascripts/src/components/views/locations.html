@@ -29,16 +29,17 @@
         <div class="row location-category-title" ng-if="$ctrl.areAnyLocationFiltersVisible()">
           Location Filters
         </div>
-        <div ng-repeat="(filterName, filter) in $ctrl.state.configuration.locationCategories.filters">
+        <div ng-repeat="(filterName, filter) in $ctrl.orderedLocationFilters">
           <ul class="customer-type">
             <!-- Loop through all filter types -->
-            <li ng-repeat="rule in $ctrl.getOrderedRulesForFilter(filter)">
+            <li ng-repeat="rule in filter.rules">
               <div class="ctype-icon"><img ng-src="{{rule.onPass.iconUrl}}" style="width:16px;margin-right:10px"></div>
               <div class="ctype-name">{{rule.description}}</div>
               <div class="ctype-checkbox">
-                <input type="checkbox" class="checkboxfill" ng-style="stylebtn"
-                        ng-checked="rule.isChecked"
-                        ng-click="$ctrl.setRuleChecked(rule, !rule.isChecked)">
+                <input type="checkbox" class="checkboxfill"
+                  ng-style="stylebtn"
+                  ng-checked="rule.isChecked"
+                  ng-click="$ctrl.setLocationFilterChecked(filterName, rule.ruleKey, !rule.isChecked)">
               </div>
             </li>
           </ul>

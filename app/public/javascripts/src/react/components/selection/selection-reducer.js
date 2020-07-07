@@ -25,7 +25,10 @@ const defaultState = {
 }
 
 function setActiveSelectionModeById (state, newSelectionModeId) {
-  const selectionMode = state.selectionModes.filter(item => item.id === newSelectionModeId)[0]
+  var selectionMode = state.selectionModes.filter(item => item.id === newSelectionModeId)[0]
+  if (typeof selectionMode === 'undefined') {
+    selectionMode = state.selectionModes[0]
+  }
   return { ...state, activeSelectionMode: selectionMode }
 }
 

@@ -140,7 +140,7 @@ export class MultiFactor extends Component {
                         <div className="alert alert-danger mt-3">{this.props.verifyDetails}</div>
                     }
                     {this.props.totpEmailSent &&
-                        <div id="#totpEmailSentMessage" className="alert alert-success mt-3">An email with the current OTP has been sent to your registered email.
+                        <div className="alert alert-success mt-3">An email with the current OTP has been sent to your registered email.
                         Please check your email.</div>
                     }
                 </div>

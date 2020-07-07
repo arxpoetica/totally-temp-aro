@@ -9,7 +9,8 @@ const defaultState = {
 
 function setLocationType (state, locationType, isIncluded) {
   // optimization.networkOptimization.optimizationInputs.locationConstraints.locationTypes
-  var locationTypes = JSON.parse(JSON.stringify(state.optimizationInputs.locationConstraints.locationTypes))
+  const safeLocationTypes = (state.optimizationInputs.locationConstraints && state.optimizationInputs.locationConstraints.locationTypes) || []
+  var locationTypes = JSON.parse(JSON.stringify(safeLocationTypes))
   var index = locationTypes.indexOf(locationType)
   var currentIsIncluded = index !== -1
   if (currentIsIncluded === isIncluded) return state
