@@ -21,7 +21,8 @@ const defaultState = {
     pageCount: 0,
     paginateData: []
   },
-  defaultGroup : null
+  defaultGroup : null,
+  filteredUsers : null
 }
 
 // Set the currently logged in user
@@ -103,14 +104,21 @@ function setUserList (state, users) {
     userList: allUsers,
     isOpenSendMail: false,
     isOpenNewUser: false,
-    pageableData: pageableData
+    pageableData: pageableData,
+    filteredUsers : null
   }
 }
 
 function setPageData (state, selectedPage) {
 
+  let allUsers = '';
+  if(state.filteredUsers != null){
+    allUsers = state.filteredUsers
+  } else{
+    allUsers = state.userList
+  }
+
   const offset = selectedPage * perPage; 
-  let allUsers = state.userList
   let paginateData = allUsers.slice(offset, offset + perPage) 
 
   let pageableData = state.pageableData
@@ -150,7 +158,8 @@ function searchUsers (state,searchText) {
   return { ...state,
     isOpenSendMail: false,
     isOpenNewUser: false,
-    pageableData: pageableData
+    pageableData: pageableData,
+    filteredUsers : filteredUsers
   }
   
 }
