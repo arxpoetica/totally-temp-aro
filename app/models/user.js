@@ -150,9 +150,11 @@ module.exports = class User {
 
   // Find or create a user
   static findOrCreateUser(userDetails, email, password) {
-    return database.query(`SELECT * FROM auth.users WHERE email='${email}'`)
+    // We don't care about the case to avoid duplicate user make the username/email to upper case
+    EMAIL = email.toUpperCase()
+    return database.query(`SELECT * FROM auth.users WHERE email='${EMAIL}'`)
       .then((user) => {
-        return user.length > 0 ? Promise.resolve() : this.createUser(userDetails.firstName, userDetails.lastName, email, password, userDetails.ldapGroups)
+        return user.length > 0 ? Promise.resolve() : this.createUser(userDetails.firstName, userDetails.lastName, EMAIL, password, userDetails.ldapGroups)
       })
   }
 
