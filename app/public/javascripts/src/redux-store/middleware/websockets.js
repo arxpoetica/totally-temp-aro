@@ -15,26 +15,6 @@ const createSocketMiddleware = () => {
       // storeAPI.dispatch(command)
     })
 
-    // --- for test
-    /*
-    console.log('--- subscribe to new events ---')
-    var testEvents = [
-      'LIBRARY_CREATE',
-      'LIBRARY_DELETE',
-      'ETL_START',
-      'ETL_UPDATE',
-      'ETL_CLOSE'
-    ]
-    testEvents.forEach(eventName => {
-      socketManager.subscribe(eventName, (command) => {
-        console.log(` --- ${eventName} ---`)
-        console.log(command)
-        console.log(' --- ')
-      })
-    })
-    */
-    // ---
-
     // next is the following action to be run after this middleware
     return next => action => {
       return next(action)

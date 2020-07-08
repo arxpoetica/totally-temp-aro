@@ -307,6 +307,7 @@ class State {
     service.areTilesRendering = false
     service.setAreTilesRendering = newValue => {
       service.areTilesRendering = newValue
+      // display or remove UI notification (by note)
       $timeout()
     }
 
