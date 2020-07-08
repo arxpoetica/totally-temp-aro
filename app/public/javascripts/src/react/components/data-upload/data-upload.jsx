@@ -32,8 +32,8 @@ export class DataUpload extends Component {
   componentDidMount(){
     this.props.loadEtlTemplatesFromServer(1)
   }
+  
   dataTypeChange(event) {
-    console.log(this.props)
     let selectedDataSourceName = ''
     let dataId = parseInt(event.target.value);
     this.props.loadEtlTemplatesFromServer(dataId)
@@ -146,134 +146,139 @@ export class DataUpload extends Component {
     })
 
     return (
-    <div className="form-horizontal" id="data_source_upload_modal">
-      <div className="form-group row">
-        <div className="col-sm-8"></div>
-        <div className="col-sm-4">
-            <button onClick={() => this.props.toggleView('DataManagement')} className="btn btn-primary float-right" type="button" style={{marginRight:'15px'}}>Data Management</button>
-        </div>
-      </div>
-
-      <div className="form-group row">
-        <label className="col-sm-4 col-form-label">Data Type</label>
-        <div className="col-sm-8">
-        <select className="form-control" value={this.state.selectedDataTypeId} onChange={event => this.dataTypeChange(event)}>
-          {dataTypesOptions}
-        </select>
-        </div>
-      </div>
-
-      <div>
-        {this.state.selectedDataSourceName !== 'tile_system' &&
+      <div className="form-horizontal" id="data_source_upload_modal" style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
+        <div style={{flex: '0 0 auto'}}>
           <div className="form-group row">
-            <label className="col-sm-4 col-form-label">Data Source Name</label>
-            <div className="col-sm-8">
-              <input type="text" onChange={(e)=>this.handleDataSource(e)} value={this.state.dataSourceName} name="dataSourceName" className="form-control" placeholder="Data Source Name"/>
+            <div className="col-sm-8"></div>
+            <div className="col-sm-4">
+                <button onClick={() => this.props.toggleView('DataManagement')} className="btn btn-primary float-right" type="button" style={{marginRight:'15px'}}>Data Management</button>
             </div>
           </div>
-        }
+        </div>
 
-        { this.state.selectedDataSourceName === 'fiber' &&
-          <div>
+        <div style={{flex: '0 0 auto'}}>
+        <div className="form-group row">
+          <label className="col-sm-4 col-form-label">Data Type</label>
+          <div className="col-sm-8">
+          <select className="form-control" value={this.state.selectedDataTypeId} onChange={event => this.dataTypeChange(event)}>
+            {dataTypesOptions}
+          </select>
+          </div>
+        </div>
+
+        <div>
+          {this.state.selectedDataSourceName !== 'tile_system' &&
             <div className="form-group row">
-              <label className="col-sm-4 col-form-label">Spatial Edge Type</label>
+              <label className="col-sm-4 col-form-label">Data Source Name</label>
               <div className="col-sm-8">
-                <select className="form-control" value={this.state.selectedSpatialEdgeType} onChange={event => this.spatialEdgeChange(event)}>
-                  {spatialEdgeOptions}
-                </select>
+                <input type="text" onChange={(e)=>this.handleDataSource(e)} value={this.state.dataSourceName} name="dataSourceName" className="form-control" placeholder="Data Source Name"/>
               </div>
             </div>
-            <div className="form-group row">
-              <label className="col-sm-4 col-form-label">Default Conduit Size</label>
-              <div className="col-sm-8">
-                <select className="form-control" value={this.state.selectedCableType} onChange={event => this.conduitSizeChange(event)}>
-                  {conduitOptions}
-                </select>
-              </div>
-            </div>
-          </div>
-        }
+          }
 
-        { this.state.selectedDataSourceName === 'fiber' && this.state.selectedSpatialEdgeType === 'fiber' &&
-          <div className="form-group row">
-            <label className="col-sm-4 col-form-label">Cable Type</label>
-            <div className="col-sm-8">
-              <select className="form-control" value={this.state.selectedCableType} onChange={event => this.cableTypeChange(event)}>
-                {cableOptions}
-              </select>
-            </div>
-          </div>
-        }
-
-        { this.state.selectedDataSourceName === 'service_layer' &&
-          <div className="form-group row">
-            <label className="col-sm-4 col-form-label">Creation Type</label>
-            <div className="col-sm-8">
-              <select className="form-control" value={this.state.selectedCreationType} onChange={event => this.creationTypeChange(event)}>
-                {creationTypeOptions}
-              </select>
-            </div>
-          </div>
-        }
-
-        {this.state.selectedDataSourceName !== 'tile_system' &&
-          <>
-            { (this.state.selectedDataSourceName !== 'service_layer' || this.state.selectedCreationType === 'upload_file') && 
+          { this.state.selectedDataSourceName === 'fiber' &&
+            <div>
               <div className="form-group row">
-                <label className="col-sm-4 col-form-label">File Location</label>
+                <label className="col-sm-4 col-form-label">Spatial Edge Type</label>
                 <div className="col-sm-8">
-                  <input name="file" type="file" onChange={event => this.handleUpload(event)} name="dataset" className="form-control"/>
+                  <select className="form-control" value={this.state.selectedSpatialEdgeType} onChange={event => this.spatialEdgeChange(event)}>
+                    {spatialEdgeOptions}
+                  </select>
                 </div>
               </div>
-            } 
-          </>
-        }         
+              <div className="form-group row">
+                <label className="col-sm-4 col-form-label">Default Conduit Size</label>
+                <div className="col-sm-8">
+                  <select className="form-control" value={this.state.selectedCableType} onChange={event => this.conduitSizeChange(event)}>
+                    {conduitOptions}
+                  </select>
+                </div>
+              </div>
+            </div>
+          }
 
-        { this.state.selectedDataSourceName === 'service_layer' && this.state.selectedCreationType === 'polygon_equipment' &&
-          <div>
+          { this.state.selectedDataSourceName === 'fiber' && this.state.selectedSpatialEdgeType === 'fiber' &&
             <div className="form-group row">
-              <label className="col-sm-4 col-form-label">Select Equipment layers</label>
+              <label className="col-sm-4 col-form-label">Cable Type</label>
               <div className="col-sm-8">
-                <select className="form-control" value={this.state.selectedEquipment} onChange={event => this.equipmentChange(event)}>
-                  {equipmentTypeOptions}
+                <select className="form-control" value={this.state.selectedCableType} onChange={event => this.cableTypeChange(event)}>
+                  {cableOptions}
                 </select>
               </div>
             </div>
+          }
 
+          { this.state.selectedDataSourceName === 'service_layer' &&
             <div className="form-group row">
-              <label className="col-sm-4 col-form-label">Polygon radius (meters)</label>
+              <label className="col-sm-4 col-form-label">Creation Type</label>
               <div className="col-sm-8">
-                <input name="radius" type="number" value={this.state.radius} className="form-control" onChange={(e)=>this.handleRadius(e)} />
+                <select className="form-control" value={this.state.selectedCreationType} onChange={event => this.creationTypeChange(event)}>
+                  {creationTypeOptions}
+                </select>
               </div>
             </div>
-          </div>
-        }
-
-        { (this.state.selectedDataSourceName === 'tile_system') && 
-          <ConicTileSystem 
-            onDatasetChange={this.handleDataSource}
-            onDatasetUpload={this.handleUpload}
-            onTileSystemChange={this.handleTileSystem}
-          />
-        }   
-      </div>
-
-      <div>
-        <EtlTemplates />
-      </div>
-
-      { this.state.dataSourceName === '' && 
-        <button className="btn btn-light float-right" disabled={true}> Save </button>
-      }
-      { this.state.dataSourceName !== '' && 
-        <button className="btn btn-primary float-right" disabled={this.props.isUploading} onClick={() => this.save ()} > 
-          { this.props.isUploading && 
-            <span className="fa fa-spinner fa-spin"></span>
           }
-          Save 
-        </button>
-      }
-    </div>
+
+          {this.state.selectedDataSourceName !== 'tile_system' &&
+            <>
+              { (this.state.selectedDataSourceName !== 'service_layer' || this.state.selectedCreationType === 'upload_file') && 
+                <div className="form-group row">
+                  <label className="col-sm-4 col-form-label">File Location</label>
+                  <div className="col-sm-8">
+                    <input name="file" type="file" onChange={event => this.handleUpload(event)} name="dataset" className="form-control"/>
+                  </div>
+                </div>
+              } 
+            </>
+          }         
+
+          { this.state.selectedDataSourceName === 'service_layer' && this.state.selectedCreationType === 'polygon_equipment' &&
+            <div>
+              <div className="form-group row">
+                <label className="col-sm-4 col-form-label">Select Equipment layers</label>
+                <div className="col-sm-8">
+                  <select className="form-control" value={this.state.selectedEquipment} onChange={event => this.equipmentChange(event)}>
+                    {equipmentTypeOptions}
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-group row">
+                <label className="col-sm-4 col-form-label">Polygon radius (meters)</label>
+                <div className="col-sm-8">
+                  <input name="radius" type="number" value={this.state.radius} className="form-control" onChange={(e)=>this.handleRadius(e)} />
+                </div>
+              </div>
+            </div>
+          }
+          </div>
+
+          { (this.state.selectedDataSourceName === 'tile_system') && 
+            <ConicTileSystem 
+              onDatasetChange={this.handleDataSource}
+              onDatasetUpload={this.handleUpload}
+              onTileSystemChange={this.handleTileSystem}
+            />
+          }   
+        </div>
+
+        <div style={{flex: '1 1 auto'}}>
+          <EtlTemplates />
+        </div>
+        <div style={{flex: '0 0 auto'}}>
+          { this.state.dataSourceName === '' && 
+            <button className="btn btn-light float-right" disabled={true}> Save </button>
+          }
+          { this.state.dataSourceName !== '' && 
+            <button className="btn btn-primary float-right" disabled={this.props.isUploading} onClick={() => this.save ()} > 
+              { this.props.isUploading && 
+                <span className="fa fa-spinner fa-spin"></span>
+              }
+              Save 
+            </button>
+          }
+        </div>
+      </div>
     )
   }
 
@@ -283,7 +288,7 @@ export class DataUpload extends Component {
         <div className="form-group row">
           <div className="col-sm-8"></div>
           <div className="col-sm-4">
-              <button onClick={() => this.props.toggleView('FileUpload')} className="btn btn-primary float-right" type="button" style={{marginRight:'15px'}}> File Upload </button>
+              <button onClick={() => this.handleFileUpload()} className="btn btn-primary float-right" type="button" style={{marginRight:'15px'}}> File Upload </button>
           </div>
         </div>
         <div>
@@ -291,6 +296,11 @@ export class DataUpload extends Component {
         </div>
       </div>
     )
+  }
+
+  handleFileUpload(){
+    this.setState({dataSourceName: '', file: null})
+    this.props.toggleView('FileUpload')
   }
 }
 

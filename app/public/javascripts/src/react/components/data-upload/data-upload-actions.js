@@ -57,7 +57,7 @@ function saveDataSource (uploadDetails,loggedInUser) {
       return createLibraryId(uploadDetails,loggedInUser)
       .then((libraryItem) => {
         fileUpload(uploadDetails,libraryItem.identifier,loggedInUser) 
-        dispatch(setAllLibraryItems(uploadDetails.dataSourceName,libraryItem))
+        dispatch(setAllLibraryItems(uploadDetails.selectedDataSourceName,libraryItem))
       })
       .then((result) => {
         dispatch(setIsUploading(false))
@@ -72,7 +72,10 @@ function saveDataSource (uploadDetails,loggedInUser) {
         // Just create Datasource
         getLibraryId (uploadDetails)
         .then((library) => {
-          dispatch(setAllLibraryItems(uploadDetails.dataSourceName,library.data))
+          dispatch(setAllLibraryItems(uploadDetails.selectedDataSourceName,library.data))
+        })
+        .then((result) => {
+          dispatch(setIsUploading(false))
         })
         // Draw the layer by entering edit mode
       } else {
@@ -96,7 +99,7 @@ function saveDataSource (uploadDetails,loggedInUser) {
           return setCableConstructionType(uploadDetails,loggedInUser)
           .then((libraryItem) => {
             fileUpload(uploadDetails, libraryItem.identifier, loggedInUser)
-            dispatch(setAllLibraryItems(uploadDetails.dataSourceName, libraryItem))
+            dispatch(setAllLibraryItems(uploadDetails.selectedDataSourceName, libraryItem))
           })
           .then((result) => {
             dispatch(setIsUploading(false))
@@ -113,7 +116,7 @@ function saveDataSource (uploadDetails,loggedInUser) {
               } else { 
                 fileUpload(uploadDetails,library.data.identifier,loggedInUser) 
               }
-              dispatch(setAllLibraryItems(uploadDetails.dataSourceName,library.data))
+              dispatch(setAllLibraryItems(uploadDetails.selectedDataSourceName,library.data))
             })
             .then((res) => {
               dispatch(setIsUploading(false))
@@ -199,7 +202,7 @@ function setIsUploading (status){
 function setAllLibraryItems (dataItemKey, allLibraryItems) {
   return dispatch => {
     dispatch({
-      type: Actions.PLAN_SET_ALL_LIBRARY_ITEMS,
+      type: Actions.PLAN_SET_ALL_LIBRARY_ITEMS_ADD,
       payload: {
         dataItemKey : dataItemKey,
         allLibraryItems : allLibraryItems
