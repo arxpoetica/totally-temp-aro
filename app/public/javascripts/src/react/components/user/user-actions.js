@@ -269,7 +269,6 @@ function saveUsers (allUsers) {
       }
     })
     return dispatch => {
-      console.log("i am inside dispatch")
       dispatch(
         loadUsers()
       )

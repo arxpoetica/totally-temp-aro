@@ -383,6 +383,9 @@ export class ManageUsers extends Component {constructor (props) {
 
   saveUsers() {
     this.props.saveUsers(this.props.userList)
+    this.props.loadGroups()
+    this.props.loadUsers()
+    this.setState({searchText:''})
   }
 
   navSelection (){
