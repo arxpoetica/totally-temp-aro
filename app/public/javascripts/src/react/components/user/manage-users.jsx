@@ -56,7 +56,11 @@ export class ManageUsers extends Component {constructor (props) {
 
     const users = this.props.pageableData.paginateData
 
-    let optionsList = this.props.allGroups.map(function(newkey) { 
+    let defaultIndex = 0;
+    let optionsList = this.props.allGroups.map(function(newkey, index) { 
+      if(newkey.name === 'Public'){
+        defaultIndex = index
+      }
       return {"id":newkey.id, "value": newkey.name, "label": newkey.name}; 
     });
 
@@ -139,7 +143,7 @@ export class ManageUsers extends Component {constructor (props) {
               </table>
             </div>
 
-            <div style={{flex: '0 0 auto'}}>
+            <div style={{flex: '0 0 auto', paddingTop:'10px'}}>
               <div className="float-right"> 
                 <ReactPaginate 
                   previousLabel={'«'}
@@ -244,7 +248,7 @@ export class ManageUsers extends Component {constructor (props) {
                     backspaceRemovesValue={false}
                     onChange={(e)=>this.handleGroupChange(e)}
                     isSearchable={false} 
-                    defaultValue={[optionsList[2]]}
+                    defaultValue={[optionsList[defaultIndex]]}
                   />
                 </div>
               </div>
@@ -352,7 +356,6 @@ export class ManageUsers extends Component {constructor (props) {
   }
 
   openNewUser() {
-    this.setState({ newUser: {} });
     this.props.openNewUser()
   }
 
@@ -361,6 +364,11 @@ export class ManageUsers extends Component {constructor (props) {
   }
 
   registerUser() {
+    if(this.props.defaultGroup !== null){
+      let newUser = this.state.newUser;
+      newUser['groups'] = this.props.defaultGroup;
+      this.setState({ newUser: newUser });
+    }
     if (this.state.newUser.email !== this.state.newUser.confirmEmail) {
       return swal({
         title: 'Error',
@@ -369,13 +377,12 @@ export class ManageUsers extends Component {constructor (props) {
       })
     }else{
       this.props.registerUser(this.state.newUser)
+      this.setState({ newUser: {} });
     }
   }
 
   saveUsers() {
     this.props.saveUsers(this.props.userList)
-    this.props.loadGroups()
-    this.props.loadUsers()
   }
 
   navSelection (){
@@ -410,7 +417,8 @@ const mapStateToProps = (state) => ({
     allGroups: state.user.allGroups,
     isOpenSendMail: state.user.isOpenSendMail,
     isOpenNewUser: state.user.isOpenNewUser,
-    pageableData:  state.user.pageableData
+    pageableData:  state.user.pageableData,
+    defaultGroup : state.user.defaultGroup
 })
 
 const mapDispatchToProps = (dispatch) => ({
@@ -424,7 +432,7 @@ const mapDispatchToProps = (dispatch) => ({
   registerUser: (newUser) => dispatch(UserActions.registerUser(newUser)),
   handlePageClick: (selectedPage) => dispatch(UserActions.handlePageClick(selectedPage)),
   searchUsers: (searchText) => dispatch(UserActions.searchUsers(searchText)),
-  saveUsers: (userList) => UserActions.saveUsers(userList)
+  saveUsers: (userList) => dispatch(UserActions.saveUsers(userList))
 })
 
 const ManageUsersComponent = wrapComponentWithProvider(reduxStore, ManageUsers, mapStateToProps, mapDispatchToProps)
