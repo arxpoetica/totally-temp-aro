@@ -23,8 +23,8 @@ export class TagManager extends Component {
   createTag(){
     let newTag = this.state.tag;
     newTag["id"] = '';
-    newTag["name"] = '';
-    newTag["description"] = '';
+    newTag["name"] = 'Undefined';
+    newTag["description"] = 'Undefined';
     newTag["colourHue"] = 0.5;
     this.setState({ tag: newTag });  
     this.props.setFlag()
