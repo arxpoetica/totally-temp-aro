@@ -67,7 +67,7 @@ workflows:
             branches:
               only:
                 - master
-                - ring_bug
+                - ldap_duplicate_user
       - deploy:
           context: aro_qa_builds
           requires:
