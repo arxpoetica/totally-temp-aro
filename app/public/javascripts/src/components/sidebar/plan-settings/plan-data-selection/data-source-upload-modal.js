@@ -223,13 +223,18 @@ class DataSourceUploadController {
           }, submit)
         }
       }
+
       // For uploading fiber no need to create library using getLibraryId()
       if (this.state.uploadDataSource.name === 'fiber') {
         this.setCableConstructionType()
       } else {
         this.getLibraryId()
           .then((library) => {
-            if (this.state.uploadDataSource.name === 'service_layer' && this.saCreationType.id === 'polygon_equipment') { this.layerBoundary(this.selectedEquipment.identifier, library.identifier) } else { this.submit(library.identifier) }
+            if (this.state.uploadDataSource.name === 'service_layer' && this.saCreationType.id === 'polygon_equipment') {
+              this.layerBoundary(this.selectedEquipment.identifier, library.identifier) 
+            } else {
+              this.submit(library.identifier)
+            }
           })
       }
     }
@@ -293,6 +298,7 @@ class DataSourceUploadController {
       .then((e) => {
         this.setAllLibraryItems('service_layer', this.dataItems['service_layer'].allLibraryItems.concat(e.data.serviceLayerLibrary))
         this.isUpLoad = false
+        this.state.loadServiceLayers()
         this.close()
       })
   }
