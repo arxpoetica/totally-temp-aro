@@ -219,7 +219,7 @@ export class DataUpload extends Component {
             </div>
           }
 
-          {this.state.selectedDataSourceName !== 'tile_system' &&
+          {(this.state.selectedDataSourceName !== 'tile_system' && this.state.selectedDataSourceName !== 'edge') &&
             <>
               { (this.state.selectedDataSourceName !== 'service_layer' || this.state.selectedCreationType === 'upload_file') && 
                 <div className="form-group row">

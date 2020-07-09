@@ -113,8 +113,10 @@ function saveDataSource (uploadDetails,loggedInUser) {
             .then((library) => {
               if (uploadDetails.selectedDataSourceName === 'service_layer' && uploadDetails.selectedCreationType === 'polygon_equipment') { 
                 layerBoundary(uploadDetails, library.data.identifier,loggedInUser) 
-              } else { 
-                fileUpload(uploadDetails,library.data.identifier,loggedInUser) 
+              } else {
+                if(uploadDetails.selectedDataSourceName !== 'edge'){
+                  fileUpload(uploadDetails,library.data.identifier,loggedInUser) 
+                }
               }
               dispatch(setAllLibraryItems(uploadDetails.selectedDataSourceName,library.data))
             })
