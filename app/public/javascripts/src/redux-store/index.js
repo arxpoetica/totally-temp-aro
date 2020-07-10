@@ -32,6 +32,7 @@ import acl from '../react/components/acl/acl-reducer'
 import resourceManager from '../react/components/resource-manager/resource-manager-reducer'
 import dataEdit from '../react/components/data-edit/data-edit-reducer'
 import globalSettings from '../react/components/global-settings/globalsettings-reducer'
+import dataUpload from '../react/components/data-upload/data-upload-reducer'
 
 const logger = createLogger({
   level: 'info',
@@ -60,8 +61,9 @@ let reducer = combineReducers({
   locationInfo,
   acl,
   resourceManager,
-  dataEdit,
-  globalSettings
+  dataEdit
+  globalSettings,
+  dataUpload
 })
 
 // Add support for Redux devtools extension. Yes, even in production.

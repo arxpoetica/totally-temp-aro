@@ -136,3 +136,5 @@ docker/docker-compose.yml
 /node_modules/
 /app/.gitignore
 .vscode
+docker12
+docker12/*

@@ -21,7 +21,7 @@
   }
 </style>
 <modal visible="$ctrl.state.showGlobalSettings"
-  modal-size="($ctrl.currentView === $ctrl.views.MANAGE_USERS || $ctrl.currentView === $ctrl.views.REPORTS_EDITOR) ? 'modal-lg' : 'modal-md'"
+  modal-size="($ctrl.currentView === $ctrl.views.DATA_UPLOAD || $ctrl.currentView === $ctrl.views.MANAGE_USERS || $ctrl.currentView === $ctrl.views.REPORTS_EDITOR) ? 'modal-lg' : 'modal-md'"
   backdrop="static" on-hide="$ctrl.modalHide()">
   <modal-header title="{{$ctrl.currentView}}"></modal-header>
   <modal-body style="height: 500px;overflow: auto;">
@@ -74,7 +74,7 @@
         <br>Reports Editor
       </button>
 
-      <button class="btn btn-light settings-btn" ng-click="$ctrl.uploadDataSource()">
+      <button class="btn btn-light settings-btn" ng-if="$ctrl.state.loggedInUser.isAdministrator" ng-click="$ctrl.currentView = $ctrl.views.DATA_UPLOAD">
         <i class="fa fa-2x fa-upload"></i>
         <br>Data Upload
       </button>
@@ -123,6 +123,9 @@
     
     <r-configuration-editor ng-if="$ctrl.currentView === $ctrl.views.CONFIGURATION_EDITOR">
     </r-configuration-editor>
+
+    <r-data-upload ng-if="$ctrl.currentView === $ctrl.views.DATA_UPLOAD">
+    </r-data-upload>
 
     <r-report-module-list ng-if="$ctrl.currentView === $ctrl.views.REPORTS_EDITOR">
     </r-report-module-list>
