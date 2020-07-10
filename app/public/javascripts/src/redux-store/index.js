@@ -61,7 +61,7 @@ let reducer = combineReducers({
   locationInfo,
   acl,
   resourceManager,
-  dataEdit
+  dataEdit,
   globalSettings,
   dataUpload
 })
