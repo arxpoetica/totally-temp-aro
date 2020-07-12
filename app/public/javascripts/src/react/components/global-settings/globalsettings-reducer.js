@@ -110,6 +110,8 @@ function reLoadGroups (state, groups) {
 
 function addGroup (state, group) {
   var groups = state.groups
+  groups.map((exGroup) => exGroup.isEditing = false);
+
   var group = group
   group.isEditing = true
   groups.push(group)
@@ -136,7 +138,10 @@ function saveGroup (state,group) {
 }
 
 function editGroup (state, id) {
-  const groups = state.groups.map(group => {
+  var groupsList = state.groups
+  groupsList.map((exGroup) => exGroup.isEditing = false);
+
+  const groups = groupsList.map(group => {
     if (group.id === id) {
       return { ...group,
         isEditing: true
