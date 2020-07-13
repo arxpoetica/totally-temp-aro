@@ -44,7 +44,7 @@ export class ManageGroups extends Component {constructor (props) {
 	}
 
 	editGroup(group){
-		let group = this.state.group;
+		group = this.state.group;
 		group["id"] = group.id;
 		group["name"] = group.name;
 		group["description"] = group.description;
