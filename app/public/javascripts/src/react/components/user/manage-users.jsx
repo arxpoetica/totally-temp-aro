@@ -356,7 +356,11 @@ export class ManageUsers extends Component {constructor (props) {
   }
 
   openNewUser() {
-    this.clearNewuser()
+    if(this.props.defaultGroup !== null){
+      let newUser = this.state.newUser;
+      newUser['groups'] = this.props.defaultGroup;
+      this.setState({ newUser: newUser });
+    }
     this.props.openNewUser()
   }
 
@@ -365,13 +369,7 @@ export class ManageUsers extends Component {constructor (props) {
   }
 
   registerUser() {
-    if ((this.state.newUser.groups === null) || (this.state.newUser.groups.length === 0)) {
-      return swal({
-        title: 'Error',
-        text: 'Please select one group',
-        type: 'error'
-      })
-    } else if (this.state.newUser.email !== this.state.newUser.confirmEmail) {
+   if (this.state.newUser.email !== this.state.newUser.confirmEmail) {
       return swal({
         title: 'Error',
         text: 'Emails do not match',
@@ -384,14 +382,13 @@ export class ManageUsers extends Component {constructor (props) {
   }
 
   clearNewuser(){
-    let newUser = {}
+    let newUser = this.state.newUser;
     newUser['firstName'] = ''; newUser['lastName'] = '';
     newUser['email'] = ''; newUser['confirmEmail'] = '';
     newUser['companyName'] = ''; newUser['isGlobalSuperUser'] = false;
     newUser['groupIds'] = [];
 
     if(this.props.defaultGroup !== null){
-      let newUser = this.state.newUser;
       newUser['groups'] = this.props.defaultGroup;
     }
     this.setState({ newUser: newUser });
@@ -399,8 +396,6 @@ export class ManageUsers extends Component {constructor (props) {
 
   saveUsers() {
     this.props.saveUsers(this.props.userList)
-    this.props.loadGroups()
-    this.props.loadUsers()
     this.setState({searchText:''})
   }
 
