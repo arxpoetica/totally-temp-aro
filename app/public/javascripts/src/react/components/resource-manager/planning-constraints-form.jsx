@@ -112,6 +112,31 @@ export class PlanningConstraints extends Component {
               </tr>
 
               <tr>
+                <td colSpan={2}>RFP Options</td>
+              </tr>
+              <tr>
+                <td className='pl-4'>RFP Max Points</td>
+                <td>
+                  <Field name='rfpMaxPoints'
+                    className='form-control form-control-sm' component='input' type='text' />
+                </td>
+              </tr>
+              <tr>
+                <td className='pl-4'>RFP Max Source Distance (m)</td>
+                <td>
+                  <Field name='rfpMaxSourceDistance'
+                    className='form-control form-control-sm' component='input' type='text' />
+                </td>
+              </tr>
+              <tr>
+                <td className='pl-4'>RFP Max Buffer Distance</td>
+                <td>
+                  <Field name='rfpMaxBufferDistance'
+                    className='form-control form-control-sm' component='input' type='text' />
+                </td>
+              </tr>
+              
+              <tr>
                 <td>Fiber routing mode</td>
                 <td>
                   <Field name='fiberRoutingMode'
