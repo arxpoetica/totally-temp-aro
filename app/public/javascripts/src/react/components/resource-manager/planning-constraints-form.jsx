@@ -110,7 +110,7 @@ export class PlanningConstraints extends Component {
                     className='form-control form-control-sm' component='input' type='text' />
                 </td>
               </tr>
-
+              { /*
               <tr>
                 <td colSpan={2}>RFP Options</td>
               </tr>
@@ -135,7 +135,7 @@ export class PlanningConstraints extends Component {
                     className='form-control form-control-sm' component='input' type='text' />
                 </td>
               </tr>
-              
+              */ }
               <tr>
                 <td>Fiber routing mode</td>
                 <td>
