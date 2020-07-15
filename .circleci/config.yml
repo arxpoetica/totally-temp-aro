@@ -68,7 +68,6 @@ workflows:
               only:
                 - master
                 - ring_bug
-                - constrained_splice_points
       - deploy:
           context: aro_qa_builds
           requires:
