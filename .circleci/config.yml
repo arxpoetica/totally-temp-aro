@@ -68,7 +68,6 @@ workflows:
               only:
                 - master
                 - ring_bug
-                - new-user-bug-fix
       - deploy:
           context: aro_qa_builds
           requires:
