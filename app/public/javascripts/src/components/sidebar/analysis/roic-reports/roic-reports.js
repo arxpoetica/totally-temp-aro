@@ -159,7 +159,8 @@ class RoicReportsController {
     const aComponentKey = Object.keys(this.roicResults.roicAnalysis.components)[0]
     const component = this.roicResults.roicAnalysis.components[aComponentKey]
     const aCurveKey = Object.keys(component)[0]
-    const yearsCount = component[aCurveKey].values.length
+    var yearsCount = 0
+    if (aCurveKey && component[aCurveKey].hasOwnProperty('values')) yearsCount = component[aCurveKey].values.length
 
     this.xAxisLabels = []
     for (var i = 0; i < yearsCount; ++i) {
