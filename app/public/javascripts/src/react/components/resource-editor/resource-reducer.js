@@ -13,7 +13,7 @@ import Actions from '../../common/actions'
 	const defaultState = {
 		resourceTypes: null,
 		resourceManagers: null,
-		filteredresourceManagers : null,
+		filteredresourceManagers: null,
 		pageableData:{
 			offset: initialOffset,
 			perPage: perPage,
@@ -22,17 +22,18 @@ import Actions from '../../common/actions'
 			paginateData: []
 		},
 		isMakeNewFilter: false,
-		isResourceEditor : true,
-    priceBookStrategy : null,
-    arpuManagerConfiguration : null,
-    pristineArpuManagerConfiguration : null,
-    ArpuStrategy : '',
-    ArpuRevenue : ''
+		isResourceEditor: true,
+    priceBookStrategy: null,
+    arpuManagerConfiguration: null,
+    pristineArpuManagerConfiguration: null,
+    ArpuStrategy: '',
+    ArpuRevenue: '',
+    loadStrength: {}
 	}
 
   function setResourceTypes (state, resourceTypes) {
     return { ...state,
-			isResourceEditor : true,
+			isResourceEditor: true,
 			resourceTypes: resourceTypes
     }
   }
@@ -54,10 +55,9 @@ import Actions from '../../common/actions'
     pageableData['currentPage'] = initialcurrentPage
 
 		return { ...state,
-			isResourceEditor : true,
 			resourceManagers: resourceManagers,
 			pageableData: pageableData,
-			filteredresourceManagers : null
+			filteredresourceManagers: null
 		}
   }
 
@@ -110,7 +110,7 @@ import Actions from '../../common/actions'
   
     return { ...state,
       pageableData: pageableData,
-      filteredresourceManagers : filteredresourceManagers
+      filteredresourceManagers: filteredresourceManagers
     }
   }
 
@@ -121,9 +121,9 @@ import Actions from '../../common/actions'
     }
   }
 
-  function setIsResourceEditor (state,filterText) {
+  function setIsResourceEditor (state, status) {
     return { ...state,
-      isResourceEditor: false
+      isResourceEditor: status
     }
   }
 
@@ -147,15 +147,46 @@ import Actions from '../../common/actions'
 
   function setArpuStrategy (state, ArpuStrategy) {
     return { ...state,
-      ArpuStrategy : ArpuStrategy
+      ArpuStrategy: ArpuStrategy
     }
   }
 
   function setArpuRevenue (state, ArpuRevenue) {
     return { ...state,
-      ArpuRevenue : ArpuRevenue
+      ArpuRevenue: ArpuRevenue
     }
   }
+
+  // Competition System
+
+  function setRegions (state, regions) {
+    return { ...state,
+      regions: regions
+    }
+  }
+
+  function setCompManMeta (state, compManMeta) {
+    return { ...state,
+      compManMeta: compManMeta
+    }
+  }
+
+  function setCompManForStates (state, carriersByPct) {
+    return { ...state,
+      carriersByPct: carriersByPct
+    }
+  }
+
+  function setStrengthCols (state, pristineStrengthsById, strengthsById, strengthCols) {
+    return { ...state,
+      loadStrength: {
+        pristineStrengthsById: pristineStrengthsById,
+        strengthsById: strengthsById,
+        strengthCols: strengthCols
+      }
+    }
+  }
+
 
   function resourceReducer (state = defaultState, action) {
     switch (action.type) {
@@ -190,7 +221,19 @@ import Actions from '../../common/actions'
         return setArpuStrategy(state, action.payload)    
         
       case Actions.RESOURCE_EDITOR_SET_ARPU_REVENUE:
-        return setArpuRevenue(state, action.payload)  
+        return setArpuRevenue(state, action.payload) 
+        
+      case Actions.RESOURCE_EDITOR_GET_REGIONS:
+        return setRegions(state, action.payload) 
+
+      case Actions.RESOURCE_EDITOR_CARRIERS_BY_PCT:
+        return setCompManForStates(state, action.payload)  
+        
+      case Actions.RESOURCE_EDITOR_STRENGTH_COLS:
+        return setStrengthCols(state, action.payload.pristineStrengthsById, action.payload.strengthsById, action.payload.strengthCols)           
+
+      case Actions.RESOURCE_EDITOR_COMP_MAN_META:
+        return setCompManMeta(state, action.payload)         
 
     default:
       return state
