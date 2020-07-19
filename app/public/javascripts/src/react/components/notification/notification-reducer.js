@@ -1,7 +1,7 @@
 import Actions from '../../common/actions'
 
 const defaultState = {
-  notifications: {'test':{'order': 0, 'notification':'note test'}},
+  notifications: {'1234':{'noteId': '1234', 'order': 0, 'notification':'note test'}},
   lastIndex: 0
 }
 

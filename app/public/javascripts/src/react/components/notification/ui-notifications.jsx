@@ -10,20 +10,19 @@ export class UINotifications extends Component {
   render () {
     var noteRows = []
     // inverse order
-    var notesList = Object.entries(this.props.notifications).sort((a, b) => a.order - b.order)
+    var notesList = Object.values(this.props.notifications).sort((a, b) => a.order - b.order)
+
     notesList.forEach(ele => {
-      console.log(ele)
       noteRows.push(this.renderNotificationRow(ele.notification))
     })
     return noteRows
   }
 
   renderNotificationRow (notification) {
-    return <div className="ui-note-noteline">
+    return <div key={`noteId_${notification.noteId}`} className="ui-note-noteline">
       {notification}
     </div>
   }
-
 }
 
 const mapStateToProps = state => {
