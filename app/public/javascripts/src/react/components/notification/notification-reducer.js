@@ -1,16 +1,20 @@
-import Actions from '../../../common/actions'
+import Actions from '../../common/actions'
 
 const defaultState = {
-  notifications: {},
-  lastId: 0
+  notifications: {'test':{'order': 0, 'notification':'note test'}},
+  lastIndex: 0
 }
 
-function postNotification (state, notification) {
-  const noteId = state.lastId + 1
+function postNotification (state, noteId, notification) {
+  const order = state.lastIndex + 1
   var notifications = { ...state.notifications }
-  notifications[noteId] = notification
+  notifications[noteId] = {
+    noteId,
+    notification,
+    order
+  }
   return { ...state,
-    lastId: noteId,
+    lastIndex: order,
     notifications: notifications
   }
 }
@@ -18,7 +22,7 @@ function postNotification (state, notification) {
 function updateNotification (state, noteId, notification) {
   if (!state.notifications.hasOwnProperty(noteId)) return state
   var notifications = { ...state.notifications }
-  notifications[noteId] = notification
+  notifications[noteId].notification = notification
   return { ...state,
     notifications: notifications
   }
@@ -26,13 +30,13 @@ function updateNotification (state, noteId, notification) {
 
 function removeNotification (state, noteId) {
   if (!state.notifications.hasOwnProperty(noteId)) return state
-  var newLastId = state.lastId
+  var newLastIndex = state.lastIndex
   var notifications = { ...state.notifications }
   delete notifications[noteId]
-  // if list is empty we can reset the ID counter
-  if (Object.keys(notifications).length === 0) newLastId = 0
+  // if list is empty we can reset the order counter
+  if (Object.keys(notifications).length === 0) newLastIndex = 0
   return { ...state,
-    lastId: newLastId,
+    lastIndex: newLastIndex,
     notifications: notifications
   }
 }
@@ -40,7 +44,7 @@ function removeNotification (state, noteId) {
 function notificationReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.NOTIFICATION_POST:
-      return postNotification(state, action.payload)
+      return postNotification(state, action.payload.noteId, action.payload.notification)
     case Actions.NOTIFICATION_UPDATE:
       return updateNotification(state, action.payload.noteId, action.payload.notification)
     case Actions.NOTIFICATION_REMOVE:

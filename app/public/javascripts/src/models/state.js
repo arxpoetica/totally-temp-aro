@@ -18,6 +18,7 @@ import SelectionModes from '../react/components/selection/selection-modes'
 import SocketManager from '../react/common/socket-manager'
 import RingEditActions from '../react/components/ring-edit/ring-edit-actions'
 import NetworkAnalysisActions from '../react/components/optimization/network-analysis/network-analysis-actions'
+import NotificationInterface from '../react/components/notification/notification-interface'
 import ReactComponentConstants from '../react/common/constants'
 import AroNetworkConstraints from '../shared-utils/aro-network-constraints'
 import PuppeteerMessages from '../components/common/puppeteer-messages'
@@ -305,9 +306,21 @@ class State {
     service.requestPolygonSelect = new Rx.BehaviorSubject({})
 
     service.areTilesRendering = false
+    service.noteIdTilesRendering = null
     service.setAreTilesRendering = newValue => {
+      // can't use the proper notification system because
+      //  this function is run at least once per second
+      //  for the life of the app. Fix this.
+      /*
+      if (!newValue && service.areTilesRendering) { // set to off and not off
+        console.log('---------------------------- OFF -------')
+        service.noteIdTilesRendering = service.removeNotification(service.noteIdTilesRendering)
+      } else if (newValue && !service.areTilesRendering) { // set to on and not already on
+        console.log('---------------------------- ON --------')
+        service.noteIdTilesRendering = service.postNotification('Rendering Tiles')
+      }
+      */
       service.areTilesRendering = newValue
-      // display or remove UI notification (by note)
       $timeout()
     }
 
@@ -1854,7 +1867,9 @@ class State {
       setOptimizationInputs: inputs => dispatch(NetworkOptimizationActions.setOptimizationInputs(inputs)),
       setPrimarySpatialEdge: primarySpatialEdge => dispatch(NetworkAnalysisActions.setPrimarySpatialEdge(primarySpatialEdge)),
       clearWormholeFuseDefinitions: () => dispatch(NetworkAnalysisActions.clearWormholeFuseDefinitions()),
-      setWormholeFuseDefinition: (spatialEdgeType, wormholeFusionTypeId) => dispatch(NetworkAnalysisActions.setWormholeFuseDefinition(spatialEdgeType, wormholeFusionTypeId))
+      setWormholeFuseDefinition: (spatialEdgeType, wormholeFusionTypeId) => dispatch(NetworkAnalysisActions.setWormholeFuseDefinition(spatialEdgeType, wormholeFusionTypeId)),
+      postNotification: (notification) => NotificationInterface.postNotification(dispatch, notification), // you'll not this one looks a bit different, because we need a return val of the note ID we use an interface that wraps the action creator and the dispatch is done there
+      removeNotification: (noteId) => NotificationInterface.removeNotification(dispatch, noteId)
     }
   }
 }
