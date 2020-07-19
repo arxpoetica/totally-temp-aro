@@ -1769,19 +1769,25 @@ class State {
       service.loadPlanRedux(service.plan.id)
     }
 
+    service.noteIdFileUpload = null
     service.handleETLStartEvent = msg => {
       console.log('--- ETL Start ---')
       console.log(msg)
+      service.noteIdFileUpload = service.postNotification('Uploading FIle')
+      console.log(service.noteIdFileUpload)
     }
 
     service.handleETLUpdateEvent = msg => {
       console.log('--- ETL Update ---')
       console.log(msg)
+      updateNotification(service.noteIdFileUpload, 'File Update')
     }
 
     service.handleETLCloseEvent = msg => {
       console.log('--- ETL Close ---')
       console.log(msg)
+      service.noteIdFileUpload = service.removeNotification(service.noteIdFileUpload)
+      console.log(service.noteIdFileUpload)
     }
 
     service.unsubscribePlanEvent = SocketManager.subscribe('COMMIT_TRANSACTION', service.handlePlanModifiedEvent.bind(service))
@@ -1869,6 +1875,7 @@ class State {
       clearWormholeFuseDefinitions: () => dispatch(NetworkAnalysisActions.clearWormholeFuseDefinitions()),
       setWormholeFuseDefinition: (spatialEdgeType, wormholeFusionTypeId) => dispatch(NetworkAnalysisActions.setWormholeFuseDefinition(spatialEdgeType, wormholeFusionTypeId)),
       postNotification: (notification) => NotificationInterface.postNotification(dispatch, notification), // you'll not this one looks a bit different, because we need a return val of the note ID we use an interface that wraps the action creator and the dispatch is done there
+      updateNotification: (noteId, notification) => NotificationInterface.updateNotification(dispatch, noteId, notification),
       removeNotification: (noteId) => NotificationInterface.removeNotification(dispatch, noteId)
     }
   }

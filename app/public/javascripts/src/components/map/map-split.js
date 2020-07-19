@@ -257,12 +257,7 @@ let mapSplit = {
         Do NOT add any kind of animated element in this control unless you suppress it when tiles are rendering -->
     <div class="ui-note-notes-contain">
       <div class="ui-note-noteline" ng-if="$ctrl.state.areTilesRendering">Rendering Tiles</div>
-      
-      <div class="ui-note-noteline">Notes Here</div>
-      <div class="ui-note-noteline">Notes 2 Here</div>
-
       <r-ui-notifications></r-ui-notifications>
-      
     </div>
   </div>
   <div ng-include="'javascripts/lib/components/footer/frontier_footer.html'" ng-if="$ctrl.state.configuration.ARO_CLIENT === 'frontier'"></div>
