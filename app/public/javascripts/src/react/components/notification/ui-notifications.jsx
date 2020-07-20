@@ -9,9 +9,7 @@ import reduxStore from '../../../redux-store'
 export class UINotifications extends Component {
   render () {
     var noteRows = []
-    // inverse order
     var notesList = Object.values(this.props.notifications).sort((a, b) => b.order - a.order)
-
     notesList.forEach(ele => {
       noteRows.push(this.renderNotificationRow(ele))
     })
@@ -19,7 +17,6 @@ export class UINotifications extends Component {
   }
 
   renderNotificationRow (note) {
-    console.log(note)
     return <div key={`noteId_${note.noteId}`} className="ui-note-noteline">
       {note.notification}
     </div>

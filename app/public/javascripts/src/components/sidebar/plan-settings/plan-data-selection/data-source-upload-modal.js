@@ -1,5 +1,6 @@
 import PlanActions from '../../../../react/components/plan/plan-actions'
 import EtlTemplateActions from '../../../../react/components/etl-templates/etl-templates-actions'
+import NotificationInterface from '../../../../react/components/notification/notification-interface'
 
 // temporary
 import SocketManager from '../../../../react/common/socket-manager'
@@ -263,28 +264,47 @@ class DataSourceUploadController {
     var file = $('#data_source_upload_modal input[type=file]').get(0).files[0]
     fd.append('file', file)
     var fileExtension = file.name.substr(file.name.lastIndexOf('.') + 1).toUpperCase()
-    //var url = `/uploadservice/v1/library/${libraryId}?userId=${this.state.loggedInUser.id}&media=${fileExtension}`
-    //var session_id = 
-    console.log(`--- upload ${libraryId}`)
-    var url = `/uploadservice/v1/async-library/${libraryId}?userId=${this.state.loggedInUser.id}&media=${fileExtension}`
+    var url = `/uploadservice/v1/library/${libraryId}?userId=${this.state.loggedInUser.id}&media=${fileExtension}`
+    // async-library not returning enough data
+    //var url = `/uploadservice/v1/async-library/${libraryId}?userId=${this.state.loggedInUser.id}&media=${fileExtension}`
     
     SocketManager.joinRoom('library', libraryId)
     //var currentUploadSource = this.uploadSource
     //this.selectDataItems(currentUploadSource, libraryId)
-    
+    const uploadNote = `Uploading file: ${file.name}`
+    const noteId = this.postNotification(`${uploadNote} 0.00%`)
     this.$http.post(url, fd, {
       withCredentials: true,
       headers: { 'Content-Type': undefined },
-      transformRequest: angular.identity
+      transformRequest: angular.identity,
+      uploadEventHandlers: {
+        progress: event => {
+          // console.log(event)
+          var progressNote = 'unknown%'
+          if (event.lengthComputable) {
+            const pct = ((event.loaded / event.total) * 100).toFixed(2)
+            progressNote = `${pct}%`
+          }
+          this.updateNotification(noteId, `${uploadNote} ${progressNote}`)
+        }
+      }
     }).then((e) => {
-      console.log(e)
-      //this.addDatasource(JSON.parse(e.data))
+      // console.log(e)
+      // this.addDatasource(JSON.parse(e.data))
+      var data = JSON.parse(e.data)
+      this.setAllLibraryItems(data.dataType, this.dataItems[data.dataType].allLibraryItems.concat(data))
+      // note will be auto-removed in 4 seconds
+      this.updateNotification(noteId, `${uploadNote} COMPLETE!`)
+      this.removeNotification(noteId, 4000)
       this.isUpLoad = false
-      this.close()
+      // this.close()
     }).catch((e) => {
+      console.error(e)
+      this.removeNotification(noteId)
       this.isUpLoad = false
       swal('Error', e.statusText, 'error')
     })
+    this.close()
   }
 
   layerBoundary (equipmentLibraryId, serviceLayerLibraryId) {
@@ -433,7 +453,10 @@ class DataSourceUploadController {
       selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems)),
       setAllLibraryItems: (dataItemKey, allLibraryItems) => dispatch(PlanActions.setAllLibraryItems(dataItemKey, allLibraryItems)),
       loadEtlTemplatesFromServer: (dataType) => dispatch(EtlTemplateActions.loadEtlTemplatesFromServer(dataType)),
-      setConfigView: (flag) => dispatch(EtlTemplateActions.setConfigView(flag))
+      setConfigView: (flag) => dispatch(EtlTemplateActions.setConfigView(flag)),
+      postNotification: (notification, autoExpire) => NotificationInterface.postNotification(dispatch, notification, autoExpire), // you'll not this one looks a bit different, because we need a return val of the note ID we use an interface that wraps the action creator and the dispatch is done there
+      updateNotification: (noteId, notification, autoExpire) => NotificationInterface.updateNotification(dispatch, noteId, notification, autoExpire),
+      removeNotification: (noteId, autoExpire) => NotificationInterface.removeNotification(dispatch, noteId, autoExpire)
     }
   }
 
