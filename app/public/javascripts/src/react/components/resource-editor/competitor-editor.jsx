@@ -37,14 +37,11 @@ export class CompetitorEditor extends Component {
   }
 
   componentDidMount () {
-    console.log('1')
     this.props.getRegions();
-    // this.props.loadCompManMeta(this.props.editingManager.id)
+   // this.props.loadCompManMeta(this.props.editingManager.id)
   }
 
   componentWillReceiveProps(nextProps){
-    console.log('2')
-
     if(this.props != nextProps) {
       this.setState({strengthsById: nextProps.loadStrength.strengthsById})
     }
@@ -57,15 +54,13 @@ export class CompetitorEditor extends Component {
   }
 
   renderCompetitorEditor () {
-    console.log('3')
-
     let regionsList = this.props.regions.map(function(regionValue) { 
       return {"id":regionValue.gid, "value": regionValue.stusps, "label": regionValue.name}; 
     });
 
     return (
       <div>
-        <h4>{this.props.resourceName}</h4>
+        <h4>{this.props.resourceManagerName}</h4>
         <strong>Regions</strong>
         <div className="comp_edit_flex_section">
           <div className="comp_edit_filter_row_left" id="comp_edit_region_select_list">
@@ -254,7 +249,7 @@ export class CompetitorEditor extends Component {
   }
 
   saveConfigurationToServer(){
-    this.props.saveCompManConfig(1, this.props.loadStrength.pristineStrengthsById, this.state.strengthsById)
+    this.props.saveCompManConfig(this.props.editingManager.id, this.props.loadStrength.pristineStrengthsById, this.state.strengthsById)
   }
 
   handleStrengthChange(e, strengthObj, carrierId, providerType){
@@ -303,14 +298,16 @@ export class CompetitorEditor extends Component {
   }
 
   onRegionCommit(){
-    this.props.loadCompManForStates(1, this.state.selectedRegions, this.props.loggedInUser)
+    this.props.loadCompManForStates(this.props.editingManager.id, this.state.selectedRegions, this.props.loggedInUser)
     let disableOption = this.state.selectedRegions.map(function(regionValue) { 
       var object = Object.assign({}, regionValue);
       object.isFixed = true;
       return object;
     });
-    this.setState({regionSelectEnabled: false, isClearable: false,
-                   selectedRegions: disableOption, isDisabled: true})
+    setTimeout(function () {
+      this.setState({regionSelectEnabled: false, isClearable: false,
+        selectedRegions: disableOption, isDisabled: true})
+    }.bind(this), 1000)
   }
 
   handleRegionsChange(regions) {
@@ -338,7 +335,8 @@ export class CompetitorEditor extends Component {
     loggedInUser: state.user.loggedInUser,
     loadStrength: state.resourceEditor.loadStrength,
     editingManager: state.resourceManager.editingManager,
-    compManMeta: state.resourceEditor.compManMeta
+    compManMeta: state.resourceEditor.compManMeta,
+    resourceManagerName: state.resourceManager.editingManager && state.resourceManager.managers[state.resourceManager.editingManager.id].resourceManagerName,
   })   
 
   const mapDispatchToProps = (dispatch) => ({
@@ -346,7 +344,7 @@ export class CompetitorEditor extends Component {
     loadCompManForStates: (competitorManagerId, selectedRegions, loggedInUser) => dispatch(ResourceActions.loadCompManForStates(competitorManagerId, selectedRegions, loggedInUser)),
     saveCompManConfig: (competitorManagerId, pristineStrengths, newStrengths) => dispatch(ResourceActions.saveCompManConfig(competitorManagerId, pristineStrengths, newStrengths)),
     setIsResourceEditor: (status) => dispatch(ResourceActions.setIsResourceEditor(status)),
-    loadCompManMeta: (competitorManagerId) => dispatch(ResourceActions.loadCompManMeta(competitorManagerId))
+    loadCompManMeta: (competitorManagerId) => dispatch(ResourceActions.loadCompManMeta(competitorManagerId)),
   })
 
 const CompetitorEditorComponent = connect(mapStateToProps, mapDispatchToProps)(CompetitorEditor)

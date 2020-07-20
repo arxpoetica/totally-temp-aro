@@ -14,7 +14,7 @@ export class PriceBookCreator extends Component {
     }
   }
 
-  componentWillMount () {
+  componentDidMount () {
     this.props.getPriceBookStrategy();
   }
 
@@ -98,7 +98,7 @@ export class PriceBookCreator extends Component {
   }
 
   handleBack(){
-    this.props.getResourceTypes();
+    this.props.setIsResourceEditor(true);
   }
 
   handleCreatePriceBook(){
@@ -114,7 +114,8 @@ export class PriceBookCreator extends Component {
     getResourceTypes: () => dispatch(ResourceActions.getResourceTypes()),
     searchManagers: (searchText) => dispatch(ResourceActions.searchManagers(searchText)),
     getPriceBookStrategy: () => dispatch(ResourceActions.getPriceBookStrategy()),
-    createPriceBook: (priceBook, selectedResourceForClone) => dispatch(ResourceActions.createPriceBook(priceBook, selectedResourceForClone))
+    createPriceBook: (priceBook, selectedResourceForClone) => dispatch(ResourceActions.createPriceBook(priceBook, selectedResourceForClone)),
+    setIsResourceEditor: (status) => dispatch(ResourceActions.setIsResourceEditor(status)),
   })
 
 const PriceBookCreatorComponent = connect(mapStateToProps, mapDispatchToProps)(PriceBookCreator)

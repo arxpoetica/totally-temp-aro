@@ -252,27 +252,42 @@ function searchUsers (searchText) {
 }
 
 function saveUsers (allUsers) {  
-    allUsers.forEach((user, index) => {
-    
-      if(user.isUpdated){
-        // aro-service requires group ids in the user objects. replace group objects by group ids
-        var serviceUser = user
-        serviceUser.groupIds = []
-        if(serviceUser.userGroups !== [] || serviceUser.userGroups !== null ){
-          serviceUser.userGroups.forEach((userGroup) => serviceUser.groupIds.push(userGroup.id))
-          delete serviceUser.userGroups
-          delete serviceUser.isUpdated
-          
+
+  return dispatch => {
+    var promise = new Promise(function(resolve, reject) { 
+
+      allUsers.forEach((user, index) => {
+        if(user.isUpdated){
+          // aro-service requires group ids in the user objects. replace group objects by group ids
+          var serviceUser = user
+          serviceUser.groupIds = []
+          if(serviceUser.userGroups !== null){
+            serviceUser.userGroups.forEach((userGroup) => serviceUser.groupIds.push(userGroup.id))
+            delete serviceUser.userGroups
+            delete serviceUser.isUpdated
+          } else {
+            delete serviceUser.userGroups
+            delete serviceUser.isUpdated            
+          }
+
           AroHttp.put('/service/auth/users', serviceUser)
+          .then((response) => {
+              if(response.status === 200){
+                resolve(); 
+              }
+          })
           .catch((err) => console.error(err))
         }
-      }
+      })
     })
-    return dispatch => {
+    promise
+    .then(function () { 
       dispatch(
         loadUsers()
       )
-    }
+    })
+    .catch((err) => console.error(err))
+  }
 }
 
 export default {

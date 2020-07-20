@@ -77,20 +77,46 @@ import AroHttp from '../../common/aro-http'
       .catch((err) => console.error(err))
     }
   }
+
+  function resourceKeyToEndpointId(){
+    return {
+      price_book: 'pricebook',
+      roic_manager: 'roic-manager',
+      arpu_manager: 'arpu-manager',
+      impedance_mapping_manager: 'impedance-manager',
+      tsm_manager: 'tsm-manager',
+      competition_manager: 'competitor-manager',
+      rate_reach_manager: 'rate-reach-matrix'
+    }
+  }
   
-  function newManager (resourceType, resourceName, loggedInUser) {
-    return dispatch => {
-      AroHttp.post(`/service/v2/resource-manager?user_id=${loggedInUser.id}`,{
-        resourceType: resourceType,
-        name: resourceName,
-        description: resourceName
-      })
-      .then(result => {
-        dispatch(getResourceManagers(resourceType))
-        if (result.data && result.data.resourceType === null) result.data.resourceType = resourceType
-        dispatch(editSelectedManager(result.data))
-      })
-      .catch((err) => console.error(err))
+  function newManager (resourceType, resourceName, loggedInUser, sourceId) {
+      return dispatch => {
+        if ('undefined' === typeof sourceId) sourceId = null // new one
+    
+        // TODO: once endpoint is ready use v2/resource-manager for pricebook and rate-reach-matrix as well
+        var managerId = resourceKeyToEndpointId[resourceType]
+        if (managerId === 'pricebook') {
+          // Have to put this switch in here because the API for pricebook cloning is different. Can remove once API is unified.
+          createByEditMode(createPriceBookMode, sourceId)
+        } else if (managerId === 'rate-reach-matrix') {
+          createByEditMode(createRateReachManagerMode, sourceId)
+        } else {
+          // Create a resource manager
+          var idParam = ''
+          if (null != sourceId) idParam = `resourceManagerId=${sourceId}&`
+          AroHttp.post(`/service/v2/resource-manager?${idParam}user_id=${loggedInUser.id}`,{
+            resourceType: resourceType,
+            name: resourceName,
+            description: resourceName
+          })
+        .then(result => {
+          dispatch(getResourceManagers(resourceType))
+          if (result.data && result.data.resourceType === null) result.data.resourceType = resourceType
+          dispatch(editSelectedManager(result.data))
+        })
+        .catch((err) => console.error(err))
+      }
     }
   }
 
@@ -101,7 +127,6 @@ import AroHttp from '../../common/aro-http'
   }
 
   function startEditingResourceManager (resourceManagerId, managerType, resourceManagerName, editingMode) {
-    console.log(resourceManagerId)
     return dispatch => {
       AroHttp.get(`/service/v2/resource-manager/${resourceManagerId}/${managerType}`)
         .then(result => {
@@ -190,9 +215,10 @@ import AroHttp from '../../common/aro-http'
         }
         return AroHttp.put(`/service/v1/pricebook/${createdManagerId}/assignment`, newManagerAssignments)
       })
-      .then(result => dispatch(
-        getResourceManagers('price_book')
-      ))
+      .then(result => {
+        dispatch(setIsResourceEditor(true))
+        dispatch(getResourceManagers('price_book'))
+      })
       .catch((err) => console.error(err))
     }
   }
@@ -217,9 +243,10 @@ import AroHttp from '../../common/aro-http'
         return getDefaultConfiguration(loggedInUser)
       })
       .then((defaultConfiguration) => AroHttp.put(`/service/rate-reach-matrix/resource/${createdRateReachManager.id}/config`, defaultConfiguration))
-      .then(result => dispatch(
-        getResourceManagers('rate_reach_manager')
-      ))
+      .then(result => {
+        dispatch(setIsResourceEditor(true))
+        dispatch(getResourceManagers('rate_reach_manager'))
+      })
       .catch((err) => console.error(err))
     }
   }
@@ -351,8 +378,6 @@ import AroHttp from '../../common/aro-http'
   }
 
   function loadCompManForStates (competitorManagerId, selectedRegions, loggedInUser) {
-
-    console.log(selectedRegions)
 
     return dispatch => {
 

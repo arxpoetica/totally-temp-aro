@@ -264,7 +264,6 @@ export class ResourceEditor extends Component {
 
   renderResourceManager(){
 		let clickedResource = this.state.clickedResource;
-		let clickedResourceForEdit = this.state.clickedResourceForEdit.resourceType;
     return (
 			<>
 				{
@@ -277,24 +276,24 @@ export class ResourceEditor extends Component {
 				}
 				{
 					clickedResource === 'competition_manager' &&
-						<CompetitorEditor resourceName={this.state.userEnteredResourceName}/>
+						<CompetitorEditor/>
 				}					
 				{
-					clickedResourceForEdit === 'fusion_manager' &&
+					clickedResource === 'fusion_manager' &&
 					<FusionEditor/>
 				}
 				{
-					clickedResourceForEdit === 'network_architecture_manager' &&
+					clickedResource === 'network_architecture_manager' &&
 					<NetworkArchitectureEditor/>
 				}
 				{
-					clickedResourceForEdit === 'planning_constraints_manager' &&
+					clickedResource === 'planning_constraints_manager' &&
 					<PlanningConstraintsEditor/>
 				}
 				{
-					clickedResourceForEdit === 'arpu_manager' &&
+					clickedResource === 'arpu_manager' &&
 					<ArpuEditor selectedResourceForEdit={this.state.clickedResourceForEdit}/>
-				}		
+				}			
 			</>
     )
 	}
@@ -309,8 +308,8 @@ export class ResourceEditor extends Component {
 
 	editSelectedManager(selectedManager){
 		this.props.setIsResourceEditor(false);
-		this.setState({clickedResourceForEdit: selectedManager, clickedResource:''})
 		this.props.startEditingResourceManager(selectedManager.id, selectedManager.resourceType, selectedManager.name, 'EDIT_RESOURCE_MANAGER')
+		this.setState({clickedResource: selectedManager.resourceType})
 	}
 
 	// Showing a SweetAlert from within a modal dialog does not work (The input box is not clickable).
@@ -364,8 +363,8 @@ export class ResourceEditor extends Component {
 		this.askNewResourceDetailsFromUser()
 		.then((resourceName) => {
 			if (resourceName) {
-				this.setState({userEnteredResourceName : resourceName, clickedResource: 'competition_manager'})
-				//this.props.newManager('competition_manager',resourceName,this.props.loggedInUser)
+				this.setState({userEnteredResourceName : resourceName, clickedResource: this.state.filterText})
+				this.props.newManager(this.state.filterText, resourceName,this.props.loggedInUser, this.state.selectedResourceForClone.id)
 				this.props.setIsResourceEditor(false);
 			}
 		})
@@ -373,9 +372,12 @@ export class ResourceEditor extends Component {
 	}
 
 	cloneSelectedManagerFromSource (selectedManager) {
-		this.props.setIsResourceEditor(false);
-		this.setState({clickedResource: selectedManager.resourceType,
-									selectedResourceForClone: selectedManager})
+		if(selectedManager.resourceType !== 'competition_manager' && selectedManager.resourceType !== 'planning_constraints_manager' ){
+			this.props.setIsResourceEditor(false);
+		} else {
+			this.getNewResourceDetailsFromUser()
+		}
+		this.setState({clickedResource: selectedManager.resourceType,	selectedResourceForClone: selectedManager, filterText: selectedManager.resourceType})
   }
 
 	askUserToConfirmManagerDelete (managerName) {
@@ -477,8 +479,8 @@ const mapDispatchToProps = (dispatch) => ({
 	canMakeNewFilter: (filterText) => dispatch(ResourceActions.canMakeNewFilter(filterText)),
 	setIsResourceEditor: (status) => dispatch(ResourceActions.setIsResourceEditor(status)),
 	deleteResourceManager: (selectedManager, filterText) => dispatch(ResourceActions.deleteResourceManager(selectedManager, filterText)),
-	startEditingResourceManager: (id, type, name, editingMode) => dispatch(ResourceManagerActions.startEditingResourceManager(id, type, name, editingMode)),
-	newManager: (resourceType, resourceName, loggedInUser) => dispatch(ResourceActions.newManager(resourceType, resourceName, loggedInUser))
+	startEditingResourceManager: (id, type, name, editingMode) => dispatch(ResourceActions.startEditingResourceManager(id, type, name, editingMode)),
+	newManager: (resourceType, resourceName, loggedInUser, sourceId) => dispatch(ResourceActions.newManager(resourceType, resourceName, loggedInUser, sourceId))
 
 })
 

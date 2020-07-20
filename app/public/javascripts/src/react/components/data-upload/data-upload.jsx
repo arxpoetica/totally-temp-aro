@@ -272,7 +272,7 @@ export class DataUpload extends Component {
           { this.state.dataSourceName !== '' && 
             <button className="btn btn-primary float-right" disabled={this.props.isUploading} onClick={() => this.save ()} > 
               { this.props.isUploading && 
-                <span className="fa fa-spinner fa-spin"></span>
+                <span className="fa fa-spinner fa-spin" style={{paddingRight:'8px'}}></span>
               }
               Save 
             </button>

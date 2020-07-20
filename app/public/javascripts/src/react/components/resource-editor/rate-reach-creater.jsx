@@ -95,7 +95,7 @@ export class RateReachManager extends Component {
   }
 
   handleBack(){
-    this.props.getResourceTypes();
+    this.props.setIsResourceEditor(true);
   }
 
   handleCreateRateReachManager(){
@@ -113,7 +113,8 @@ export class RateReachManager extends Component {
 	const mapDispatchToProps = (dispatch) => ({
 		getResourceTypes: () => dispatch(ResourceActions.getResourceTypes()),
 		searchManagers: (searchText) => dispatch(ResourceActions.searchManagers(searchText)),
-		createRateReachManager: (rateReachManager, selectedResourceForClone, loggedInUser) => dispatch(ResourceActions.createRateReachManager(rateReachManager, selectedResourceForClone, loggedInUser))
+    createRateReachManager: (rateReachManager, selectedResourceForClone, loggedInUser) => dispatch(ResourceActions.createRateReachManager(rateReachManager, selectedResourceForClone, loggedInUser)),
+    setIsResourceEditor: (status) => dispatch(ResourceActions.setIsResourceEditor(status)),
 	})
 
 const RateReachManagerCreatorComponent = connect(mapStateToProps, mapDispatchToProps)(RateReachManager)
