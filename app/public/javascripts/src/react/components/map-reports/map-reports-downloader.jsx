@@ -82,6 +82,7 @@ export class MapReportsDownloader extends Component {
       const pageDefinition = JSON.parse(JSON.stringify(reportPage))
       pageDefinition.planId = this.props.planId
       pageDefinition.planName = this.props.planName
+      pageDefinition.clientId = this.props.clientId
       
       if (this.props.manualWait) {
         pageDefinition.waitSecondsPerPage = this.props.waitSecondsPerPage // The user has asked to manually wait for each page
@@ -123,6 +124,7 @@ export class MapReportsDownloader extends Component {
 MapReportsDownloader.propTypes = {
   planId: PropTypes.number,
   planName: PropTypes.string,
+  clientId: PropTypes.string,
   mapLayers: PropTypes.object,
   isCommunicating: PropTypes.bool,
   isDownloading: PropTypes.bool,
@@ -135,6 +137,7 @@ MapReportsDownloader.propTypes = {
 const mapStateToProps = state => ({
   planId: state.plan.activePlan.id,
   planName: state.plan.activePlan.name,
+  clientId: state.configuration.system.ARO_CLIENT,
   mapLayers: state.mapLayers,
   isCommunicating: state.mapReports.isCommunicating,
   isDownloading: state.mapReports.isDownloading,
