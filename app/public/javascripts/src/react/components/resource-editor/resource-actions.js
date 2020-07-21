@@ -164,7 +164,7 @@ import AroHttp from '../../common/aro-http'
     }
   }
 
-  // Price-Book
+  // Price-Book Creator
 
   function getPriceBookStrategy () {
     return dispatch => {
@@ -220,6 +220,131 @@ import AroHttp from '../../common/aro-http'
         dispatch(getResourceManagers('price_book'))
       })
       .catch((err) => console.error(err))
+    }
+  }
+
+  // Pricebook editor
+
+  function rebuildPricebookDefinitions (priceBookId) {
+
+    let DEFAULT_STATE_CODE = '*'
+    let statesForStrategy = [DEFAULT_STATE_CODE]
+
+    return dispatch => {
+
+      if (!priceBookId) {
+        return
+      }
+      AroHttp.get(`/service/v1/pricebook/${priceBookId}`)
+        .then((result) => {
+
+          dispatch({
+            type: Actions.RESOURCE_EDITOR_CURRENT_PRICEBOOK,
+            payload: result.data
+          })
+
+          return Promise.all([
+            AroHttp.get(`/service/v1/pricebook-strategies/${result.data.priceStrategy}`),
+            AroHttp.get(`/service/v1/pricebook/${priceBookId}/definition`),
+            AroHttp.get(`/service/v1/pricebook/${priceBookId}/assignment`)
+          ])
+        })
+        .then((results) => {
+          statesForStrategy = [DEFAULT_STATE_CODE].concat(results[0].data)
+          // We want unique values in this.statesForStrategy (morphology returns '*' from the server)
+          statesForStrategy = [...new Set(statesForStrategy)].sort() // array --> set --> back to array
+          let selectedStateForStrategy = statesForStrategy[0]
+
+          dispatch({
+            type: Actions.RESOURCE_EDITOR_STATES_STRATEGY,
+            payload: {
+              statesForStrategy: statesForStrategy,
+              selectedStateForStrategy: selectedStateForStrategy
+            }
+          })
+
+          let priceBookDefinitions = results[1].data
+          // Save a deep copy of the result, we can use this later if we save modifications to the server
+          let pristineAssignments = angular.copy(results[2].data)
+
+          dispatch(definePriceBookForSelectedState(selectedStateForStrategy, priceBookDefinitions, pristineAssignments))
+
+        })
+        .catch((err) => console.log(err))
+    }
+  }
+
+  function definePriceBookForSelectedState (selectedStateForStrategy, priceBookDefinitions, pristineAssignments) {
+
+    return dispatch => {
+      // First ensure that we have pristine assignments for the given state code
+      //this.ensurePristineCostAssignmentsForState(selectedStateForStrategy)
+
+      // Build a map of cost assignment ids to objects
+      var itemIdToCostAssignment = {}
+      var itemDetailIdToDetailAssignment = {}
+      const costAssignmentsForState = pristineAssignments.costAssignments.filter((item) => item.state === selectedStateForStrategy)
+      costAssignmentsForState.forEach((costAssignment) => {
+        itemIdToCostAssignment[costAssignment.itemId] = costAssignment
+      })
+
+      // Build a map of detail assignment ids to objects
+      pristineAssignments.detailAssignments.forEach((detailAssignment) => {
+        itemDetailIdToDetailAssignment[detailAssignment.itemDetailId] = detailAssignment
+      })
+
+      // Build the pricebookdefinitions
+      var structuredPriceBookDefinitions = []
+      var selectedEquipmentTags = {}
+      Object.keys(priceBookDefinitions).forEach((definitionKey) => {
+        var definitionItems = priceBookDefinitions[definitionKey]
+        var definition = {
+          id: definitionKey,
+          description: definitionKey,
+          items: []
+        }
+        definitionItems.forEach((definitionItem) => {
+          // If this item id is in cost assignments, add it
+          var item = {
+            id: definitionItem.id,
+            name: definitionItem.name,
+            description: definitionItem.description,
+            unitOfMeasure: definitionItem.unitOfMeasure,
+            costAssignment: itemIdToCostAssignment[definitionItem.id],
+            cableConstructionType: definitionItem.cableConstructionType,
+            subItems: [],
+            tagMapping: definitionItem.tagMapping
+          }
+          definitionItem.subItems.forEach((subItem) => {
+            var subItemToPush = {
+              id: subItem.id,
+              item: subItem.item,
+              detailType: subItem.detailType
+            }
+            if (subItem.detailType === 'reference') {
+              subItemToPush.detailAssignment = itemDetailIdToDetailAssignment[subItem.id]
+            } else if (subItem.detailType === 'value') {
+              subItemToPush.costAssignment = itemIdToCostAssignment[subItem.item.id]
+            }
+            item.subItems.push(subItemToPush)
+          })
+          definition.items.push(item)
+        })
+        structuredPriceBookDefinitions.push(definition)
+        selectedEquipmentTags[definition.id] = []
+        var setOfSelectedEquipmentTags = {}
+        setOfSelectedEquipmentTags[definition.id] = new Set()
+      })
+      let selectedDefinitionId = structuredPriceBookDefinitions[0].id
+      dispatch({
+        type: Actions.RESOURCE_EDITOR_PRICEBOOK_DEFINITION,
+        payload: {
+          selectedDefinitionId: selectedDefinitionId,
+          structuredPriceBookDefinitions: structuredPriceBookDefinitions
+        }
+      })
+      // Save construction ratios keyed by state
+      //this.defineConstructionRatiosForSelectedState()
     }
   }
 
@@ -496,6 +621,7 @@ import AroHttp from '../../common/aro-http'
     setIsResourceEditor,
     getPriceBookStrategy,
     createPriceBook,
+    rebuildPricebookDefinitions,
     createRateReachManager,
     deleteResourceManager,
     newManager,

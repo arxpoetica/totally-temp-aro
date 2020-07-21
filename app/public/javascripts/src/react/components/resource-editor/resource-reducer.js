@@ -187,6 +187,29 @@ import Actions from '../../common/actions'
     }
   }
 
+  function setCurrentPriceBook (state, currentPriceBook) {
+    return { ...state,
+      currentPriceBook: currentPriceBook
+    }
+  }
+
+  function setStatesStrategy (state, statesForStrategy, selectedStateForStrategy) {
+    return { ...state,
+      statesStrategy: {
+        statesForStrategy: statesForStrategy,
+        selectedStateForStrategy: selectedStateForStrategy
+      }
+    }
+  }
+
+  function setPriceBookDefinition (state, selectedDefinitionId, structuredPriceBookDefinitions) {
+    return { ...state,
+      priceBookDefinition: {
+        selectedDefinitionId: selectedDefinitionId,
+        structuredPriceBookDefinitions: structuredPriceBookDefinitions
+      }
+    }
+  }
 
   function resourceReducer (state = defaultState, action) {
     switch (action.type) {
@@ -233,8 +256,17 @@ import Actions from '../../common/actions'
         return setStrengthCols(state, action.payload.pristineStrengthsById, action.payload.strengthsById, action.payload.strengthCols)           
 
       case Actions.RESOURCE_EDITOR_COMP_MAN_META:
-        return setCompManMeta(state, action.payload)         
+        return setCompManMeta(state, action.payload) 
+        
+      case Actions.RESOURCE_EDITOR_CURRENT_PRICEBOOK:
+        return setCurrentPriceBook(state, action.payload)  
+        
+      case Actions.RESOURCE_EDITOR_STATES_STRATEGY:
+        return setStatesStrategy(state, action.payload.statesForStrategy, action.payload.selectedStateForStrategy)          
 
+      case Actions.RESOURCE_EDITOR_PRICEBOOK_DEFINITION:
+        return setPriceBookDefinition(state, action.payload.selectedDefinitionId, action.payload.structuredPriceBookDefinitions)          
+  
     default:
       return state
     }

@@ -21,10 +21,10 @@ export class PriceBookCreator extends Component {
   render () {
     return this.props.priceBookStrategy === null
       ? null
-      : this.renderPriceBook()
+      : this.renderPriceBookCreator()
   }  
 
-  renderPriceBook()  {
+  renderPriceBookCreator()  {
     return (
        <>
         <h4>Create Price Book </h4>
@@ -107,7 +107,7 @@ export class PriceBookCreator extends Component {
 }
 
   const mapStateToProps = (state) => ({
-    priceBookStrategy : state.resourceEditor.priceBookStrategy,
+    priceBookStrategy: state.resourceEditor.priceBookStrategy,
   })   
 
   const mapDispatchToProps = (dispatch) => ({

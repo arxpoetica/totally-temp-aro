@@ -5,11 +5,11 @@ import ResourceActions from './resource-actions'
 import './resource-editor.css';
 import ReactPaginate from 'react-paginate';
 import PriceBookCreator  from './pricebook-creator.jsx';
+import PriceBookEditor  from './pricebook-editor.jsx';
 import RateReachManager  from './rate-reach-creater.jsx';
 import CompetitorEditor  from './competitor-editor.jsx';
 import PermissionsTable from '../acl/resource-permissions/permissions-table.jsx'
 import FusionEditor from '../resource-manager/fusion-editor.jsx'
-import ResourceManagerActions from '../resource-manager/resource-manager-actions'
 import NetworkArchitectureEditor from '../resource-manager/network-architecture-editor.jsx'
 import PlanningConstraintsEditor from '../resource-manager/planning-constraints-editor.jsx'
 import ArpuEditor from '../resource-editor/arpu-editor.jsx'
@@ -17,6 +17,8 @@ import ArpuEditor from '../resource-editor/arpu-editor.jsx'
 export class ResourceEditor extends Component {
   constructor (props) {
 		super(props)
+
+		this.handleOnDiscard = this.handleOnDiscard.bind(this)
 		
 		this.sortableColumns = { 'NAME': 'name', 'RESOURCE_TYPE': 'resource_type' }
     this.sortedRows = []
@@ -25,11 +27,11 @@ export class ResourceEditor extends Component {
 			searchText:'',
 			filterText:'',
 			selectedResourceName: '',
+			selectedResourceId: '',
 			openRowId: null,
 			clickedResource: '',
 			selectedResourceForClone: '',
 			clickedResourceForEdit: '',
-			userEnteredResourceName: ''
 		}
 		
 		this.actionsECD = [
@@ -88,6 +90,7 @@ export class ResourceEditor extends Component {
   }
 
   renderResourceEditorTable(){
+
     let paginationElement;
     if (this.props.pageableData.pageCount > 1) {
 			paginationElement = (
@@ -264,12 +267,18 @@ export class ResourceEditor extends Component {
 
   renderResourceManager(){
 		let clickedResource = this.state.clickedResource;
+		let clickedResourceForEdit = this.state.clickedResourceForEdit;
+
     return (
 			<>
 				{
-					(clickedResource === 'Price Book' || clickedResource === 'price_book')  &&
+					(clickedResource === 'Price Book' || clickedResource === 'price_book')  && 	clickedResourceForEdit !== 'price_book' &&
 					<PriceBookCreator selectedResourceForClone={this.state.selectedResourceForClone}/>
-				}  
+				} 
+				{
+					clickedResourceForEdit === 'price_book' &&
+					<PriceBookEditor selectedResourceManagerId={this.state.selectedResourceId}/>
+				}					 
 				{
 					(clickedResource === 'Rate Reach Manager'|| clickedResource === 'rate_reach_manager')  &&
 					<RateReachManager selectedResourceForClone={this.state.selectedResourceForClone}/>
@@ -280,15 +289,15 @@ export class ResourceEditor extends Component {
 				}					
 				{
 					clickedResource === 'fusion_manager' &&
-					<FusionEditor/>
+					<FusionEditor onDiscard={this.handleOnDiscard}/>
 				}
 				{
 					clickedResource === 'network_architecture_manager' &&
-					<NetworkArchitectureEditor/>
+					<NetworkArchitectureEditor onDiscard={this.handleOnDiscard}/>
 				}
 				{
 					clickedResource === 'planning_constraints_manager' &&
-					<PlanningConstraintsEditor/>
+					<PlanningConstraintsEditor onDiscard={this.handleOnDiscard}/>
 				}
 				{
 					clickedResource === 'arpu_manager' &&
@@ -296,6 +305,10 @@ export class ResourceEditor extends Component {
 				}			
 			</>
     )
+	}
+
+	handleOnDiscard(){
+		this.props.setIsResourceEditor(true);
 	}
 
 	onSortClick (colName) {
@@ -309,7 +322,7 @@ export class ResourceEditor extends Component {
 	editSelectedManager(selectedManager){
 		this.props.setIsResourceEditor(false);
 		this.props.startEditingResourceManager(selectedManager.id, selectedManager.resourceType, selectedManager.name, 'EDIT_RESOURCE_MANAGER')
-		this.setState({clickedResource: selectedManager.resourceType})
+		this.setState({clickedResource: selectedManager.resourceType, clickedResourceForEdit: selectedManager.resourceType, selectedResourceId: selectedManager.id})
 	}
 
 	// Showing a SweetAlert from within a modal dialog does not work (The input box is not clickable).
@@ -353,7 +366,8 @@ export class ResourceEditor extends Component {
         if (resourceName) {
           resolve(resourceName)
         } else {
-          reject('Cancelled')
+					reject('Cancelled')
+					this.setState({clickedResource: ''})
         }
       })
     })
@@ -363,7 +377,7 @@ export class ResourceEditor extends Component {
 		this.askNewResourceDetailsFromUser()
 		.then((resourceName) => {
 			if (resourceName) {
-				this.setState({userEnteredResourceName : resourceName, clickedResource: this.state.filterText})
+				this.setState({clickedResource: this.state.filterText})
 				this.props.newManager(this.state.filterText, resourceName,this.props.loggedInUser, this.state.selectedResourceForClone.id)
 				this.props.setIsResourceEditor(false);
 			}
@@ -372,7 +386,8 @@ export class ResourceEditor extends Component {
 	}
 
 	cloneSelectedManagerFromSource (selectedManager) {
-		if(selectedManager.resourceType !== 'competition_manager' && selectedManager.resourceType !== 'planning_constraints_manager' ){
+		let resourceType = selectedManager.resourceType
+		if(resourceType !== 'competition_manager' && resourceType !== 'planning_constraints_manager' && resourceType !== 'fusion_manager' && resourceType !== 'network_architecture_manager'){
 			this.props.setIsResourceEditor(false);
 		} else {
 			this.getNewResourceDetailsFromUser()
