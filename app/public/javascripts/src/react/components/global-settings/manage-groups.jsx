@@ -22,13 +22,13 @@ export class ManageGroups extends Component {constructor (props) {
 	componentWillReceiveProps(newProps) {
 		let groups = newProps.groups
 		if(groups !== null){
-			groups.map((group,index)=>{ 
-				if(group.isEditing){
+			groups.map((groupValue,index)=>{ 
+				if(groupValue.isEditing){
 					let group = this.state.group;
-					group["id"] = group.id;
-					group["name"] = group.name;
-					group["description"] = group.description;
-					group["isAdministrator"] = group.isAdministrator;
+					group["id"] = groupValue.id;
+					group["name"] = groupValue.name;
+					group["description"] = groupValue.description;
+					group["isAdministrator"] = groupValue.isAdministrator;
 					this.setState({group:group})
 				}
 			})
@@ -43,14 +43,14 @@ export class ManageGroups extends Component {constructor (props) {
 			this.props.addGroup()
 	}
 
-	editGroup(group){
-		group = this.state.group;
-		group["id"] = group.id;
-		group["name"] = group.name;
-		group["description"] = group.description;
-		group["isAdministrator"] = group.isAdministrator;
+	editGroup(editGroup){
+		let group = this.state.group;
+		group["id"] = editGroup.id;
+		group["name"] = editGroup.name;
+		group["description"] = editGroup.description;
+		group["isAdministrator"] = editGroup.isAdministrator;
 		this.setState({group:group})
-		this.props.editGroup(group.id)
+		this.props.editGroup(editGroup.id)
 	}
 
 	handleChange (e) {
