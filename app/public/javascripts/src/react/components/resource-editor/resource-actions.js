@@ -254,18 +254,19 @@ import AroHttp from '../../common/aro-http'
           // We want unique values in this.statesForStrategy (morphology returns '*' from the server)
           statesForStrategy = [...new Set(statesForStrategy)].sort() // array --> set --> back to array
           let selectedStateForStrategy = statesForStrategy[0]
+          let priceBookDefinitions = results[1].data
+          // Save a deep copy of the result, we can use this later if we save modifications to the server
+          let pristineAssignments = angular.copy(results[2].data)
 
           dispatch({
             type: Actions.RESOURCE_EDITOR_STATES_STRATEGY,
             payload: {
               statesForStrategy: statesForStrategy,
-              selectedStateForStrategy: selectedStateForStrategy
+              selectedStateForStrategy: selectedStateForStrategy,
+              priceBookDefinitions: priceBookDefinitions,
+              pristineAssignments: pristineAssignments
             }
           })
-
-          let priceBookDefinitions = results[1].data
-          // Save a deep copy of the result, we can use this later if we save modifications to the server
-          let pristineAssignments = angular.copy(results[2].data)
 
           dispatch(definePriceBookForSelectedState(selectedStateForStrategy, priceBookDefinitions, pristineAssignments))
 
@@ -278,7 +279,7 @@ import AroHttp from '../../common/aro-http'
 
     return dispatch => {
       // First ensure that we have pristine assignments for the given state code
-      //this.ensurePristineCostAssignmentsForState(selectedStateForStrategy)
+      //dispatch(ensurePristineCostAssignmentsForState(selectedStateForStrategy, pristineAssignments))
 
       // Build a map of cost assignment ids to objects
       var itemIdToCostAssignment = {}
@@ -344,7 +345,44 @@ import AroHttp from '../../common/aro-http'
         }
       })
       // Save construction ratios keyed by state
-      //this.defineConstructionRatiosForSelectedState()
+      dispatch(defineConstructionRatiosForSelectedState(selectedStateForStrategy,priceBookDefinitions, pristineAssignments))
+    }
+  }
+
+  function constructionRatiosValue(){
+    return {
+      cableConstructionRatios: [
+        { type: 'AERIAL', ratio: 0.7 },
+        { type: 'BURIED', ratio: 0.3 }
+      ]
+    }
+  }
+
+  function defineConstructionRatiosForSelectedState (selectedStateForStrategy,priceBookDefinitions, pristineAssignments) {
+    return dispatch => {
+      var constructionRatios = constructionRatiosValue || {}
+      if (!constructionRatios[selectedStateForStrategy]) {
+        pristineAssignments.constructionRatios.forEach(ratio => {
+          // Also change the "ratio" object so that the ratios are keyed by cable type (e.g. AERIAL or BURIED)
+          var ratioValues = {}
+          ratio.constructionRatios.cableConstructionRatios.forEach(item => { ratioValues[item.type] = item })
+          // Make sure that we have values for all types of cable construction ratios
+          priceBookDefinitions.fiberLaborList.forEach(item => {
+            if (!ratioValues[item.cableConstructionType]) {
+              ratioValues[item.cableConstructionType] = {
+                type: item.cableConstructionType,
+                ratio: 0
+              }
+            }
+          })
+          var keyedRatio = angular.copy(ratio)
+          keyedRatio.constructionRatios.cableConstructionRatios = ratioValues
+          dispatch({
+            type: Actions.RESOURCE_EDITOR_CONSTRUCTION_RATIOS,
+            payload: constructionRatios[keyedRatio.code] = keyedRatio
+          })
+        })
+      }
     }
   }
 

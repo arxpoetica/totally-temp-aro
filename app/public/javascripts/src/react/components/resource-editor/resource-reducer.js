@@ -193,11 +193,13 @@ import Actions from '../../common/actions'
     }
   }
 
-  function setStatesStrategy (state, statesForStrategy, selectedStateForStrategy) {
+  function setStatesStrategy (state, statesForStrategy, selectedStateForStrategy, priceBookDefinitions, pristineAssignments) {
     return { ...state,
       statesStrategy: {
         statesForStrategy: statesForStrategy,
-        selectedStateForStrategy: selectedStateForStrategy
+        selectedStateForStrategy: selectedStateForStrategy,
+        priceBookDefinitions: priceBookDefinitions,
+        pristineAssignments: pristineAssignments
       }
     }
   }
@@ -208,6 +210,12 @@ import Actions from '../../common/actions'
         selectedDefinitionId: selectedDefinitionId,
         structuredPriceBookDefinitions: structuredPriceBookDefinitions
       }
+    }
+  }
+
+  function setConstructionRatios (state, constructionRatios) {
+    return { ...state,
+      constructionRatios: constructionRatios
     }
   }
 
@@ -262,10 +270,13 @@ import Actions from '../../common/actions'
         return setCurrentPriceBook(state, action.payload)  
         
       case Actions.RESOURCE_EDITOR_STATES_STRATEGY:
-        return setStatesStrategy(state, action.payload.statesForStrategy, action.payload.selectedStateForStrategy)          
+        return setStatesStrategy(state, action.payload.statesForStrategy, action.payload.selectedStateForStrategy, action.payload.priceBookDefinitions,action.payload.pristineAssignments)          
 
       case Actions.RESOURCE_EDITOR_PRICEBOOK_DEFINITION:
         return setPriceBookDefinition(state, action.payload.selectedDefinitionId, action.payload.structuredPriceBookDefinitions)          
+      
+      case Actions.RESOURCE_EDITOR_CONSTRUCTION_RATIOS:
+        return setConstructionRatios(state, action.payload)      
   
     default:
       return state
