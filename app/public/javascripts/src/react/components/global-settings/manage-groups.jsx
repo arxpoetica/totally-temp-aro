@@ -43,14 +43,14 @@ export class ManageGroups extends Component {constructor (props) {
 		this.props.addGroup()
 	}
 
-	editGroup(group){
-		let editGroup = this.state.group;
-		editGroup["id"] = group.id;
-		editGroup["name"] = group.name;
-		editGroup["description"] = group.description;
-		editGroup["isAdministrator"] = group.isAdministrator;
-		this.setState({group:editGroup})
-		this.props.editGroup(group.id)
+	editGroup(editGroup){
+		let group = this.state.group;
+		group["id"] = editGroup.id;
+		group["name"] = editGroup.name;
+		group["description"] = editGroup.description;
+		group["isAdministrator"] = editGroup.isAdministrator;
+		this.setState({group:group})
+		this.props.editGroup(editGroup.id)
 	}
 
 	handleChange (e) {

@@ -16,7 +16,7 @@ export class PriceBookEditor extends Component {
   }
 
   render () {
-    return this.props.priceBookStrategy === null
+    return this.props.priceBookStrategy === null || this.props.currentPriceBook === undefined || this.props.statesStrategy === undefined || this.props.priceBookDefinition === undefined
       ? null
       : <div>{this.renderPriceBookEditor()}</div>
   }  

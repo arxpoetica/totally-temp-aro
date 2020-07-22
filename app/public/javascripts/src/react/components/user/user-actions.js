@@ -225,10 +225,27 @@ function registerUser (newUser) {
   newUser.groups.forEach((group) => serviceUser.groupIds.push(group.id))
 
   return dispatch => {
-    AroHttp.post('/admin/users/registerWithoutPassword', serviceUser)
-    .then(result => dispatch(
-      loadUsers())
-    )
+    var promise = new Promise(function(resolve, reject) { 
+
+      AroHttp.post('/admin/users/registerWithoutPassword', serviceUser)
+      .then((response) => {
+        if(response.status === 200){
+          swal({
+            title: 'Success',
+            text:  'User Registered Successfully',
+            type: 'success'
+          })
+          resolve(); 
+        }
+      })
+      .catch((err) => console.error(err))
+    })
+    promise
+    .then(function () { 
+      dispatch(
+        loadUsers()
+      )
+    })
     .catch((err) => console.error(err))
   }
 }
