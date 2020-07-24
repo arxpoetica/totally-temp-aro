@@ -3,6 +3,7 @@ import { List, Map, remove } from 'immutable'
 
 const defaultState = {
   location: new List(),
+  copper: new List(),
   locationFilters: {},
   networkEquipment: new Map(),
   constructionSite: new List(),
@@ -219,13 +220,16 @@ function mapLayersReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.LAYERS_SET_LOCATION:
       return setLayers(state, 'location', action.payload)
-
+    
     case Actions.LAYERS_SET_LOCATION_FILTERS:
       return setLocationFilters(state, action.payload)
 
     case Actions.LAYERS_SET_LOCATION_FILTER_CHECKED:
       return setLocationFilterChecked(state, action.payload.filterType, action.payload.ruleKey, action.payload.isChecked)
 
+    case Actions.LAYERS_SET_COPPER:
+      return setLayers(state, 'copper', action.payload)
+        
     case Actions.LAYERS_SET_NETWORK_EQUIPMENT:
       return setLayers(state, 'networkEquipment', action.payload)
 

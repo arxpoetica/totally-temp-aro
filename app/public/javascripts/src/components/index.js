@@ -101,6 +101,7 @@ import rateReachDistanceEditor from './sidebar/plan-settings/plan-resource-selec
 import boundaries from './views/boundaries'
 import locations from './views/locations'
 import networkEquipment from './views/network-equipment'
+import copper from './views/copper'
 import cables from './views/cables'
 import conduits from './views/conduits'
 import mapSplit from './map/map-split'
@@ -207,6 +208,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('locations', locations)
   .component('networkEquipment', networkEquipment)
   .component('cables', cables)
+  .component('copper', copper)
   .component('conduits', conduits)
   .component('mapSplit', mapSplit)
   .component('mapSelectorPlanTarget', mapSelectorPlanTarget)
