@@ -225,14 +225,24 @@ import AroHttp from '../../common/aro-http'
 
   // Pricebook editor
 
+  function getEquipmentTags () {
+    return dispatch => {
+      AroHttp.get('/service/category-tags/equipment/tags')
+      .then(result => dispatch({
+        type: Actions.RESOURCE_EDITOR_EQUIPMENT_TAGS,
+        payload: result.data
+      }))
+      .catch(err => console.error(err))
+    }
+  }
+
   function rebuildPricebookDefinitions (priceBookId) {
 
     let DEFAULT_STATE_CODE = '*'
     let statesForStrategy = [DEFAULT_STATE_CODE]
 
     return dispatch => {
-
-      if (!priceBookId) {
+            if (!priceBookId) {
         return
       }
       AroHttp.get(`/service/v1/pricebook/${priceBookId}`)
@@ -275,11 +285,46 @@ import AroHttp from '../../common/aro-http'
     }
   }
 
+  // Ensures that pristine cost assignments contain items for the specified state code.
+  // If cost assignments are not present, the ones from state code '*' are copied into the ones for statecode.
+  function ensurePristineCostAssignmentsForState (stateCode, pristineAssignments) {
+    let DEFAULT_STATE_CODE = '*'
+    const defaultConstructionRatios = {
+      code: 'MORPHOLOGY_CODE',
+      constructionRatios: {
+        cableConstructionRatios: [
+          { type: 'AERIAL', ratio: 0.7 },
+          { type: 'BURIED', ratio: 0.3 }
+        ]
+      }
+    }
+    return dispatch => {
+      const hasCostAssignmentsForState = pristineAssignments.costAssignments.filter((item) => item.state === stateCode).length > 0
+      if (!hasCostAssignmentsForState) {
+        // We don't have cost assignments for this state. Copy them over from state code '*'
+        const defaultCostAssignments = pristineAssignments.costAssignments.filter((item) => item.state === DEFAULT_STATE_CODE)
+        const stateCodeAssignments = defaultCostAssignments.map((item) => {
+          var clonedItem = JSON.parse(JSON.stringify(item)) // Trying to move away from angular.copy
+          clonedItem.state = stateCode
+          return clonedItem
+        })
+        pristineAssignments.costAssignments = pristineAssignments.costAssignments.concat(stateCodeAssignments)
+      }
+      const hasConstructionRatiosForState = pristineAssignments.constructionRatios.filter(item => item.code === stateCode).length > 0
+      if (!hasConstructionRatiosForState) {
+        // Add default construction ratios for this state
+        var constructionRatio = angular.copy(defaultConstructionRatios)
+        constructionRatio.code = stateCode
+        pristineAssignments.constructionRatios.push(constructionRatio)
+      }
+    }
+  }
+
   function definePriceBookForSelectedState (selectedStateForStrategy, priceBookDefinitions, pristineAssignments) {
 
     return dispatch => {
       // First ensure that we have pristine assignments for the given state code
-      //dispatch(ensurePristineCostAssignmentsForState(selectedStateForStrategy, pristineAssignments))
+      dispatch(ensurePristineCostAssignmentsForState(selectedStateForStrategy, pristineAssignments))
 
       // Build a map of cost assignment ids to objects
       var itemIdToCostAssignment = {}
@@ -297,6 +342,8 @@ import AroHttp from '../../common/aro-http'
       // Build the pricebookdefinitions
       var structuredPriceBookDefinitions = []
       var selectedEquipmentTags = {}
+      var setOfSelectedEquipmentTags = {}
+
       Object.keys(priceBookDefinitions).forEach((definitionKey) => {
         var definitionItems = priceBookDefinitions[definitionKey]
         var definition = {
@@ -333,7 +380,6 @@ import AroHttp from '../../common/aro-http'
         })
         structuredPriceBookDefinitions.push(definition)
         selectedEquipmentTags[definition.id] = []
-        var setOfSelectedEquipmentTags = {}
         setOfSelectedEquipmentTags[definition.id] = new Set()
       })
       let selectedDefinitionId = structuredPriceBookDefinitions[0].id
@@ -341,7 +387,8 @@ import AroHttp from '../../common/aro-http'
         type: Actions.RESOURCE_EDITOR_PRICEBOOK_DEFINITION,
         payload: {
           selectedDefinitionId: selectedDefinitionId,
-          structuredPriceBookDefinitions: structuredPriceBookDefinitions
+          structuredPriceBookDefinitions: structuredPriceBookDefinitions,
+          setOfSelectedEquipmentTags: setOfSelectedEquipmentTags
         }
       })
       // Save construction ratios keyed by state
@@ -349,18 +396,9 @@ import AroHttp from '../../common/aro-http'
     }
   }
 
-  function constructionRatiosValue(){
-    return {
-      cableConstructionRatios: [
-        { type: 'AERIAL', ratio: 0.7 },
-        { type: 'BURIED', ratio: 0.3 }
-      ]
-    }
-  }
-
   function defineConstructionRatiosForSelectedState (selectedStateForStrategy,priceBookDefinitions, pristineAssignments) {
     return dispatch => {
-      var constructionRatios = constructionRatiosValue || {}
+      var constructionRatios = constructionRatios || {}
       if (!constructionRatios[selectedStateForStrategy]) {
         pristineAssignments.constructionRatios.forEach(ratio => {
           // Also change the "ratio" object so that the ratios are keyed by cable type (e.g. AERIAL or BURIED)
@@ -377,12 +415,78 @@ import AroHttp from '../../common/aro-http'
           })
           var keyedRatio = angular.copy(ratio)
           keyedRatio.constructionRatios.cableConstructionRatios = ratioValues
+          constructionRatios[keyedRatio.code] = keyedRatio
           dispatch({
             type: Actions.RESOURCE_EDITOR_CONSTRUCTION_RATIOS,
-            payload: constructionRatios[keyedRatio.code] = keyedRatio
+            payload: constructionRatios
           })
         })
       }
+    }
+  }
+
+  function saveAssignmentsToServer (pristineAssignments, structuredPriceBookDefinitions, constructionRatios, priceBookId) {
+    return dispatch => {
+
+      // Build a map of cost assignment ids to their index within the array
+      var assignments = JSON.parse(JSON.stringify(pristineAssignments))
+      var itemIdToCostAssignmentIndex = {}
+      var itemDetailIdToDetailAssignmentIndex = {}
+      assignments.costAssignments.forEach((costAssignment, index) => {
+        itemIdToCostAssignmentIndex[`${costAssignment.itemId}_${costAssignment.state}`] = index
+      })
+
+      // Build a map of detail assignment ids to their index within the array
+      assignments.detailAssignments.forEach((detailAssignment, index) => {
+        itemDetailIdToDetailAssignmentIndex[detailAssignment.itemDetailId] = index
+      })
+
+      // Loop through the pricebook definitions
+      structuredPriceBookDefinitions.forEach((priceBookDefinition) => {
+        // Loop through items in this definition
+        priceBookDefinition.items.forEach((item) => {
+          if (item.costAssignment) {
+            // Item has a cost assignment. Save it.
+            var costAssignmentIndex = itemIdToCostAssignmentIndex[`${item.id}_${item.state}`]
+            assignments.costAssignments[costAssignmentIndex] = item.costAssignment
+          }
+          // Loop through all subitems
+          item.subItems.forEach((subItem) => {
+            if (subItem.costAssignment) {
+              // Sub item has a cost assignment. Save it.
+              var costAssignmentIndex = itemIdToCostAssignmentIndex[`${subItem.item.id}_${subItem.state}`]
+              assignments.costAssignments[costAssignmentIndex] = subItem.costAssignment
+            }
+            if (subItem.detailAssignment) {
+              // Sub item has a detail assignment. Save it.
+              var detailAssignmentIndex = itemDetailIdToDetailAssignmentIndex[subItem.id]
+              assignments.detailAssignments[detailAssignmentIndex] = subItem.detailAssignment
+            }
+          })
+        })
+      })
+      // Save cable construction ratios. Convert back from keyed to array
+      assignments.constructionRatios = []
+      Object.keys(constructionRatios).forEach(constructionRatioKey => {
+        var constructionRatio = angular.copy(constructionRatios[constructionRatioKey])
+        var cableConstructionRatios = []
+        Object.keys(constructionRatio.constructionRatios.cableConstructionRatios).forEach(ratioKey => {
+          // Only save non-zero ratios
+          if (Math.abs(constructionRatio.constructionRatios.cableConstructionRatios[ratioKey].ratio) > 0.001) {
+            cableConstructionRatios.push(constructionRatio.constructionRatios.cableConstructionRatios[ratioKey])
+          }
+        })
+        constructionRatio.constructionRatios.cableConstructionRatios = cableConstructionRatios
+        assignments.constructionRatios.push(constructionRatio)
+      })
+
+      // Save assignments to the server
+      AroHttp.put(`/service/v1/pricebook/${priceBookId}/assignment`, assignments)
+      .then(result => {
+        dispatch(setIsResourceEditor(true))
+        dispatch(getResourceManagers('price_book'))
+      })
+      .catch((err) => console.error(err))
     }
   }
 
@@ -660,6 +764,9 @@ import AroHttp from '../../common/aro-http'
     getPriceBookStrategy,
     createPriceBook,
     rebuildPricebookDefinitions,
+    definePriceBookForSelectedState,
+    getEquipmentTags,
+    saveAssignmentsToServer,
     createRateReachManager,
     deleteResourceManager,
     newManager,

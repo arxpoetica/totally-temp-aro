@@ -187,6 +187,12 @@ import Actions from '../../common/actions'
     }
   }
 
+  function setEquipmentTags (state, equipmentTags) {
+    return { ...state,
+      equipmentTags: equipmentTags
+    }
+  }
+
   function setCurrentPriceBook (state, currentPriceBook) {
     return { ...state,
       currentPriceBook: currentPriceBook
@@ -204,11 +210,12 @@ import Actions from '../../common/actions'
     }
   }
 
-  function setPriceBookDefinition (state, selectedDefinitionId, structuredPriceBookDefinitions) {
+  function setPriceBookDefinition (state, selectedDefinitionId, structuredPriceBookDefinitions, setOfSelectedEquipmentTags) {
     return { ...state,
       priceBookDefinition: {
         selectedDefinitionId: selectedDefinitionId,
-        structuredPriceBookDefinitions: structuredPriceBookDefinitions
+        structuredPriceBookDefinitions: structuredPriceBookDefinitions,
+        setOfSelectedEquipmentTags: setOfSelectedEquipmentTags
       }
     }
   }
@@ -265,6 +272,9 @@ import Actions from '../../common/actions'
 
       case Actions.RESOURCE_EDITOR_COMP_MAN_META:
         return setCompManMeta(state, action.payload) 
+
+      case Actions.RESOURCE_EDITOR_EQUIPMENT_TAGS:
+        return setEquipmentTags(state, action.payload)    
         
       case Actions.RESOURCE_EDITOR_CURRENT_PRICEBOOK:
         return setCurrentPriceBook(state, action.payload)  
@@ -273,7 +283,7 @@ import Actions from '../../common/actions'
         return setStatesStrategy(state, action.payload.statesForStrategy, action.payload.selectedStateForStrategy, action.payload.priceBookDefinitions,action.payload.pristineAssignments)          
 
       case Actions.RESOURCE_EDITOR_PRICEBOOK_DEFINITION:
-        return setPriceBookDefinition(state, action.payload.selectedDefinitionId, action.payload.structuredPriceBookDefinitions)          
+        return setPriceBookDefinition(state, action.payload.selectedDefinitionId, action.payload.structuredPriceBookDefinitions, action.payload.setOfSelectedEquipmentTags)          
       
       case Actions.RESOURCE_EDITOR_CONSTRUCTION_RATIOS:
         return setConstructionRatios(state, action.payload)      

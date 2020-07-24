@@ -8,24 +8,41 @@ export class PriceBookEditor extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      priceBookForState: '',
-      selectedpriceBookDefinition: 'equipmentItemList'
+      priceBookForState: '*',
+      selectedpriceBookDefinition: 'equipmentItemList',
+      isKeyExpanded: null,
+      selectedState: '',
+      structuredPriceBookDefinitions: ''
     }
 
     this.props.getPriceBookStrategy()
+    this.props.getEquipmentTags()
   }
 
   componentDidMount () {
     this.props.rebuildPricebookDefinitions(this.props.selectedResourceManagerId)
   }
 
+
+  componentWillReceiveProps(nextProps){
+    if(this.props != nextProps) {
+      if(nextProps.priceBookDefinition !== undefined) {
+        this.setState({structuredPriceBookDefinitions: nextProps.priceBookDefinition.structuredPriceBookDefinitions})
+      }
+    }
+  }
+  
+
   render () {
-    return this.props.priceBookStrategy === null || this.props.currentPriceBook === undefined || this.props.statesStrategy === undefined || this.props.priceBookDefinition === undefined || this.props.constructionRatios === undefined
+    return this.props.priceBookStrategy === null || this.props.currentPriceBook === undefined || this.props.statesStrategy === undefined || this.props.priceBookDefinition === undefined || this.props.constructionRatios === undefined || this.state.structuredPriceBookDefinitions === ''
       ? null
       : <div>{this.renderPriceBookEditor()}</div>
-  }  
+  }
 
   renderPriceBookEditor()  {
+
+    //console.log(this.state.priceBookForState)
+
     return (
       <div>
         <h4>{this.props.resourceManagerName}</h4>
@@ -61,28 +78,25 @@ export class PriceBookEditor extends Component {
 
         {/* Create tabs for each priceBookDefinition */}
         <ul className="nav nav-tabs" role="tablist">
-        {
-          this.props.priceBookDefinition.structuredPriceBookDefinitions.map((priceBookValue, pricebookIndex) => { 
-            return (
-              <li key={pricebookIndex} role="presentation" onClick={(e)=>this.handlepriceBookDefinition(priceBookValue.id)} className={`nav-item ${this.props.priceBookDefinition.selectedDefinitionId === priceBookValue.id ? 'active' : ''}`}>
-                <a href={`#${priceBookValue.id}`} className="nav-link" role="tab" data-toggle="tab">
-                  {priceBookValue.description}
-                </a>
-              </li>
-            )
-          })
-        }
+          {this.props.priceBookDefinition.structuredPriceBookDefinitions.map((priceBookValue, pricebookIndex) => { 
+              return (
+                <li key={pricebookIndex} role="presentation" onClick={(e)=>this.handlepriceBookDefinition(priceBookValue.id)} className={`nav-item ${this.props.priceBookDefinition.selectedDefinitionId === priceBookValue.id ? 'active' : ''}`}>
+                  <a href={`#${priceBookValue.id}`} className="nav-link" role="tab" data-toggle="tab">
+                    {priceBookValue.description}
+                  </a>
+                </li>
+              )
+            })
+          }
         </ul>
 
         {/* Create tab contents for each priceBookDefinition */}
         <div className="tab-content" style={{maxHeight: '500px', overflowY: 'auto'}}>
-
-        { 
-          this.props.priceBookDefinition.structuredPriceBookDefinitions.map((priceBookValue, pricebookIndex) => { 
+          {this.state.structuredPriceBookDefinitions.map((priceBookValue, pricebookIndex) => { 
             const priceBookFilter = [{"id":'01', "value": 'Direct Routing', "label": 'Direct Routing'},{"id":'02', "value": 'DSL', "label": 'DSL'},
                                     {"id":'03', "value": 'ODN', "label": 'ODN'},{"id":'04', "value": '5G', "label": '5G'}]; 
             return (
-              <div key={pricebookIndex} role="tabpanel" id={priceBookValue.id} className={`tab-pane ${this.props.priceBookDefinition.selectedDefinitionId === priceBookValue.id ? 'active' : ''}`} id="">
+              <div key={pricebookIndex} role="tabpanel" id={priceBookValue.id} className={`tab-pane ${this.state.selectedpriceBookDefinition === priceBookValue.id ? 'active' : ''}`} id="">
                 {/* Filter equipment items. Only for equipmentItemList */}
                 {this.state.selectedpriceBookDefinition === 'equipmentItemList' &&
                   <div className="row pt-3 pb-2 pl-2">
@@ -91,7 +105,7 @@ export class PriceBookEditor extends Component {
                       <Select
                         isMulti
                         closeMenuOnSelect={true}
-                        value=''
+                        value={this.state.selectedState}
                         options={priceBookFilter}
                         hideSelectedOptions={true}
                         backspaceRemovesValue={false}
@@ -99,7 +113,7 @@ export class PriceBookEditor extends Component {
                         isClearable=''
                         isDisabled=''
                         placeholder="Filter Equipment"
-                        onChange={(e)=>this.handleRegionsChange(e)}
+                        onChange={(e)=>this.handleStatesChange(e)}
                       />
                     </div>
                   </div>
@@ -120,41 +134,198 @@ export class PriceBookEditor extends Component {
                         {/* Common row for installed fiber total */}
                         <tr>
                           <td>Installed fiber (total)</td>
-                          <td>{this.getTotalFiberInstallCost(this.props.constructionRatios, this.props.priceBookDefinition.structuredPriceBookDefinitions, this.props.priceBookDefinition.selectedStateForStrategy)}</td>
+                          <td>{this.getTotalFiberInstallCost(this.props.constructionRatios, this.state.structuredPriceBookDefinitions, this.state.priceBookForState)}</td>
                           <td></td>
                           <td>
-                            <div className="alert alert-danger mb-0 p-1"><strong>Error:</strong> Total should be 100%</div>
+                            {this.shouldShowPercentageError(this.props.constructionRatios, this.state.structuredPriceBookDefinitions, this.state.priceBookForState) &&
+                              <div className="alert alert-danger mb-0 p-1"><strong>Error:</strong> Total should be 100%</div>
+                            }
                           </td>
                         </tr>
                         {/* Display all rows EXCEPT installed fiber, that is calculated above */}
-                        <tr>
-                          <td></td>
-                          <td>
-                            <input type="text" className="form-control form-control-sm"/>
-                          </td>
-                          <td></td>
-                          <td>
-                            <input className="form-control form-control-sm"/>
-                          </td>
-                        </tr>
+                         {priceBookValue.items.map((definitionItem, definitionKey) => { 
+                            if(definitionItem.costAssignment !== undefined && definitionItem.cableConstructionType !== undefined){
+                              if(definitionItem.name !== 'install_estimated'){
+                                return (
+                                  <tr key={definitionKey}>
+                                    <td>{definitionItem.description}</td>
+                                    <td>
+                                      <input type="text" onChange={(e)=>this.handleFiberLabourChange(e, pricebookIndex, definitionKey)} value={definitionItem.costAssignment.cost} className="form-control form-control-sm"/>
+                                    </td>
+                                    <td>{definitionItem.unitOfMeasure}</td>
+                                    <td>
+                                      <input className="form-control form-control-sm" value={this.props.constructionRatios[this.props.statesStrategy.selectedStateForStrategy].constructionRatios.cableConstructionRatios[definitionItem.cableConstructionType].ratio} percentage-input="true"/>
+                                    </td>
+                                  </tr>
+                                )
+                              }
+                            }
+                          })
+                        }
                       </tbody>
                     </table>
                   </div>
                 }
 
+                {/* Common markup for everything except fiberLaborList
+                The top-level table for this priceBookDefinition */}
+                {this.state.selectedpriceBookDefinition !== 'fiberLaborList' &&
+                  <table className="table table-striped">
+                    {/* Loop through each item in the priceBookDefinition */}
+                    {priceBookValue.items.filter((item) => this.equipmentTagFilter(item, this.props.priceBookDefinition.setOfSelectedEquipmentTags, this.props.priceBookDefinition.selectedDefinitionId))
+                      .map((definitionItem, definitionKey) => 
+                        <tr key={definitionKey}>
+                          {/* Description of this item */}
+                          <td className="p-2 pl-3">
+                            <div style={{fontWeight: '700', cursor: 'pointer'}} onClick={event => { this.toggleIsKeyExpanded(definitionItem.id) }}>
+                              {
+                                this.state.isKeyExpanded === definitionItem.id
+                                ? <i className="far fa-minus-square"></i>
+                                : <i className="far fa-plus-square"></i>
+                              }
+                              <span className="pl-2">{definitionItem.description}</span>
+                            </div>
 
+                            {this.state.isKeyExpanded === definitionItem.id &&
+                              <div>
+                              {/* IF a cost assignment is defined for this item, provide the ability to edit it */}
+                                {definitionItem.costAssignment &&
+                                  <div className="row" style={{width: '100%', margin: '0px'}}>
+                                    <table className="table table-bordered" style={{marginBottom: '0px'}}>
+                                      <tr>
+                                        <td style={{verticalAlign: 'middle'}}>Cost:</td>
+                                        <td style={{width: '100px', borderRight: 'none'}}>
+                                          <input type="text" value={definitionItem.costAssignment.cost} className="form-control form-control-sm"/>
+                                        </td>
+                                        <td style={{verticalAlign: 'middle', borderLeft: 'none', width: '10px'}}>{definitionItem.unitOfMeasure}</td>
+                                      </tr>
+                                    </table>
+                                </div>
+                                }        
 
+                                {/* Display details for sub-items if we have at least one sub-item */}
+                                {definitionItem.subItems && definitionItem.subItems.length > 0 &&
+                                  <div>
+                                    SubItems:
+                                  </div>
+                                }
 
+                                <div style={{paddingLeft: '20px', width: '100%'}}>
+                                  <table className="table table-bordered" style={{marginBottom: '0px'}}>
+                                    {/* Loop through all sub-items in this item */}
+                                    {definitionItem.subItems.map((subItem, subKey) => { 
+                                      return (
+                                        <tr key={subKey}>
+                                          {/* START TD block for sub-items with detailType === 'reference' */}
+                                          {subItem.detailType === 'reference' &&
+                                            <td style={{verticalAlign: 'middle'}}>{subItem.item.description}</td>
+                                          }
+                                          {subItem.detailType === 'reference' &&
+                                            <td style={{width: '100px', borderRight: 'none'}}>
+                                              <input type="text" value={subItem.detailAssignment.quantity} className="form-control form-control-sm"/>
+                                            </td>
+                                          }
+                                          {subItem.detailType === 'reference' &&
+                                            <td style={{verticalAlign: 'middle', borderLeft: 'none'}}>
+                                              {/* "UnitPerHour" becomes "Hours", etc. */}
+                                              {subItem.item.unitOfMeasure.replace('UnitPer', '') + 's'}
+                                            </td>
+                                          }
+                                          {/* END TD block for sub-items with detailType === 'reference' */}
+
+                                          {/* START TD block for sub-items with detailType === 'value' */}
+                                          {subItem.detailType === 'value' &&
+                                            <td style={{verticalAlign: 'middle'}}>{subItem.item.description}</td>
+                                          }
+                                          {subItem.detailType === 'value' &&
+                                            <td style={{width: '100px', borderRight: 'none'}}>
+                                              <input type="text" value={subItem.costAssignment.cost} className="form-control form-control-sm"/>
+                                            </td>
+                                          }
+                                          {subItem.detailType === 'value' &&
+                                            <td style={{verticalAlign: 'middle', borderLeft: 'none'}}>
+                                              {subItem.item.unitOfMeasure}
+                                            </td>
+                                          }
+                                          {/* END TD block for sub-items with detailType === 'value' */}
+                                        </tr>
+                                      )
+                                    })
+                                  }
+                                  </table>
+                                </div>
+                              </div>
+                            }
+                          </td>
+                        </tr>
+                      )
+                    }
+                     {/* Show a warning if we have selected any filters AND all rows are filtered out. */}
+                     {/* {subItem.detailType === 'value' &&
+                        <tr>
+                          <td colspan="4">
+                            <div class="alert alert-warning m-0">
+                              No items to show with the current filters.
+                            </div>
+                          </td>
+                        </tr>
+                    } */}
+                  </table>
+                }
               </div>            
             )
           })
         }
-
-
         </div>
-
+        <div style={{flex: '0 0 auto'}}>
+          <div style={{textAlign: 'right', paddingTop: '15px'}}>
+            <button className="btn btn-light mr-2" onClick={() => this.exitEditingMode()}>
+              <i className="fa fa-undo action-button-icon"></i>Discard changes
+            </button>
+            <button className="btn btn-primary" onClick={() => this.saveConfigurationToServer()}>
+              <i className="fa fa-save action-button-icon"></i>Save
+            </button>
+          </div>
+        </div>
       </div>
     )
+  }
+
+  handleFiberLabourChange(e, keyPriceBook, keyDefinition){
+
+    let structuredPriceBookDefinitions = this.state.structuredPriceBookDefinitions.map((priceBookValue, pricebookIndex) => {
+      let items = ''
+      if(keyPriceBook === pricebookIndex){
+        items = priceBookValue.items.map((definitionItem, definitionKey) => {
+          let cost = ''
+          if(definitionKey === keyDefinition){
+            cost = {...definitionItem.costAssignment, cost: e.target.value}
+          } else {
+            cost = {...definitionItem.costAssignment}
+          }
+          return { ...definitionItem, costAssignment:cost };
+        });
+        return { ...priceBookValue, items };
+      } else {
+        return { ...priceBookValue};
+      }
+    });
+   this.setState({ structuredPriceBookDefinitions: structuredPriceBookDefinitions })
+  }
+
+  exitEditingMode(){
+    this.props.setIsResourceEditor(true);
+  }
+
+  saveConfigurationToServer(){
+    this.props.saveAssignmentsToServer(this.props.statesStrategy.pristineAssignments, this.state.structuredPriceBookDefinitions, this.props.constructionRatios, this.props.selectedResourceManagerId)
+  }
+
+  toggleIsKeyExpanded (objIndex) {
+    if (this.state.isKeyExpanded === objIndex) {
+      objIndex = null
+    }
+    this.setState({ isKeyExpanded: objIndex })
   }
 
   getTotalFiberInstallCost (constructionRatios, structuredPriceBookDefinitions, selectedStateForStrategy) {
@@ -169,14 +340,39 @@ export class PriceBookEditor extends Component {
     return totalInstallCost
   }
 
+  shouldShowPercentageError (constructionRatios, structuredPriceBookDefinitions, selectedStateForStrategy) {
+    const fiberLaborList = structuredPriceBookDefinitions.filter(item => item.id === 'fiberLaborList')[0]
+    var totalInstallPercentage = 0
+    fiberLaborList.items.forEach(item => {
+      const ratioItem = constructionRatios[selectedStateForStrategy].constructionRatios.cableConstructionRatios[item.cableConstructionType]
+      const ratio = ratioItem ? (ratioItem.ratio || 0.0) : 0.0
+      totalInstallPercentage += ratio
+    })
+    return Math.abs(1.0 - totalInstallPercentage) > 0.001 // Total percentage should be 100%
+  }
+
+  equipmentTagFilter (item, setOfSelectedEquipmentTags, selectedDefinitionId) {
+    if (setOfSelectedEquipmentTags[selectedDefinitionId].size === 0) {
+      return true // No filters applied
+    } else {
+      const tags = item.tagMapping || [] // tagMapping can be null
+      const itemHasTag = tags.filter(tagId => this.setOfSelectedEquipmentTags[selectedDefinitionId].has(tagId)).length > 0
+      return itemHasTag
+    }
+  }
+
   handlepriceBookDefinition(priceBookDefinitionId){
     this.setState({selectedpriceBookDefinition: priceBookDefinitionId})
   }
 
+  handleStatesChange(selectedState){
+    this.setState({selectedState: selectedState})
+  }
+
   handlePriceBookForState(e){
     this.setState({ priceBookForState: e.target.value }); 
-    const {selectedStateForStrategy, priceBookDefinitions, pristineAssignments} = this.props.statesStrategy
-    this.props.definePriceBookForSelectedState(selectedStateForStrategy, priceBookDefinitions, pristineAssignments)
+    const {priceBookDefinitions, pristineAssignments} = this.props.statesStrategy
+    this.props.definePriceBookForSelectedState(e.target.value, priceBookDefinitions, pristineAssignments)
   }
 }
 
@@ -184,17 +380,20 @@ const mapStateToProps = (state) => ({
   resourceManagerName: state.resourceManager.editingManager && state.resourceManager.managers[state.resourceManager.editingManager.id].resourceManagerName,
   resourceManagerId: state.resourceManager.editingManager && state.resourceManager.managers[state.resourceManager.editingManager.id].resourceManagerId,
   priceBookStrategy: state.resourceEditor.priceBookStrategy,
+  equipmentTags: state.resourceEditor.equipmentTags,
   currentPriceBook: state.resourceEditor.currentPriceBook,
   statesStrategy: state.resourceEditor.statesStrategy,
   priceBookDefinition: state.resourceEditor.priceBookDefinition,
-  constructionRatios: state.resourceEditor.constructionRatios,
+  constructionRatios: state.resourceEditor.constructionRatios
 })   
 
 const mapDispatchToProps = (dispatch) => ({
   getPriceBookStrategy: () => dispatch(ResourceActions.getPriceBookStrategy()),
+  getEquipmentTags: () => dispatch(ResourceActions.getEquipmentTags()),
   rebuildPricebookDefinitions: (priceBookId) => dispatch(ResourceActions.rebuildPricebookDefinitions(priceBookId)),
-  definePriceBookForSelectedState: (selectedStateForStrategy, priceBookDefinitions, pristineAssignments) => dispatch(ResourceActions.rebuildPricebookDefinitions(selectedStateForStrategy, priceBookDefinitions, pristineAssignments)),
-
+  definePriceBookForSelectedState: (selectedStateForStrategy, priceBookDefinitions, pristineAssignments) => dispatch(ResourceActions.definePriceBookForSelectedState(selectedStateForStrategy, priceBookDefinitions, pristineAssignments)),
+  setIsResourceEditor: (status) => dispatch(ResourceActions.setIsResourceEditor(status)),
+  saveAssignmentsToServer: (pristineAssignments, structuredPriceBookDefinitions, constructionRatios, priceBookId) => dispatch(ResourceActions.saveAssignmentsToServer(pristineAssignments, structuredPriceBookDefinitions, constructionRatios, priceBookId))
 })
 
 const PriceBookEditorComponent = connect(mapStateToProps, mapDispatchToProps)(PriceBookEditor)
