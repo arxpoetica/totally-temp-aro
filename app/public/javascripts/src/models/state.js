@@ -1769,36 +1769,36 @@ class State {
       service.loadPlanRedux(service.plan.id)
     }
 
+    /*
     service.noteIdFileUpload = null
     service.handleETLStartEvent = msg => {
       console.log('--- ETL Start ---')
-      console.log(msg)
-      // service.noteIdFileUpload = service.postNotification('Uploading File')
-      // console.log(service.noteIdFileUpload)
+      var content = new TextDecoder('utf-8').decode(new Uint8Array(msg.content))
+      console.log({ msg, content })
     }
 
     service.handleETLUpdateEvent = msg => {
       console.log('--- ETL Update ---')
-      console.log(msg)
-      // service.updateNotification(service.noteIdFileUpload, 'File Update')
+      var content = new TextDecoder('utf-8').decode(new Uint8Array(msg.content))
+      console.log({ msg, content })
     }
 
     service.handleETLCloseEvent = msg => {
       console.log('--- ETL Close ---')
-      console.log(msg)
-      // service.noteIdFileUpload = service.removeNotification(service.noteIdFileUpload)
-      // console.log(service.noteIdFileUpload)
+      var content = new TextDecoder('utf-8').decode(new Uint8Array(msg.content))
+      console.log({ msg, content })
     }
+    */
 
     service.unsubscribePlanEvent = SocketManager.subscribe('COMMIT_TRANSACTION', service.handlePlanModifiedEvent.bind(service))
     service.unsubscribeLibraryEvent1 = SocketManager.subscribe('USER_TRANSACTION', service.handleLibraryModifiedEvent.bind(service))
     service.unsubscribeLibraryEvent1 = SocketManager.subscribe('ETL_ADD', service.handleLibraryModifiedEvent.bind(service))
     service.unsubscribePlanRefresh = SocketManager.subscribe('PLAN_REFRESH', service.handlePlanRefreshRequest.bind(service))
-    
+    /*
     service.unsubscribeETLStart = SocketManager.subscribe('ETL_START', service.handleETLStartEvent.bind(service))
     service.unsubscribeETLUpdate = SocketManager.subscribe('ETL_UPDATE', service.handleETLUpdateEvent.bind(service))
     service.unsubscribeETLClose = SocketManager.subscribe('ETL_CLOSE', service.handleETLCloseEvent.bind(service))
-
+    */
 
     service.mergeToTarget = (nextState, actions) => {
       const currentActivePlanId = service.plan && service.plan.id

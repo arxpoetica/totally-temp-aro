@@ -35,6 +35,7 @@ function manageLibrarySubscriptions (currentSelectedLibraryItems, newSelectedLib
 
 function loadPlanDataSelectionFromServer (planId) {
   return dispatch => {
+    // these should maybe be split up into seperate actions
     const promises = [
       AroHttp.get('/service/odata/datatypeentity'),
       AroHttp.get(`/service/v1/library-entry`),
@@ -189,6 +190,24 @@ function deleteLibraryEntry (dataSource) {
   }
 }
 
+function loadLibraryEntryById (libraryId) {
+  return (dispatch, getState) => {
+    const state = getState()
+    // technically we shouldn't be using state.user, perhaps make this a parameter
+    AroHttp.get(`/service/v1/library-entry/${libraryId}?user_id=${state.user.loggedInUser.id}`)
+      .then((result) => {
+        dispatch({
+          type: Actions.PLAN_APPEND_ALL_LIBRARY_ITEMS,
+          payload: {
+            dataItemKey: result.data.dataType,
+            allLibraryItems: [result.data]
+          }
+        })
+      })
+      .catch((err) => console.error(err))
+  }
+}
+
 export default {
   setActivePlan,
   setActivePlanState,
@@ -196,5 +215,6 @@ export default {
   selectDataItems,
   setAllLibraryItems,
   setHaveDataItemsChanged,
-  deleteLibraryEntry
+  deleteLibraryEntry,
+  loadLibraryEntryById
 }

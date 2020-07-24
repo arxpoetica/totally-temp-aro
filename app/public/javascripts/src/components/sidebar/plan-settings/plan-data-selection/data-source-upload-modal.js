@@ -264,15 +264,45 @@ class DataSourceUploadController {
     var file = $('#data_source_upload_modal input[type=file]').get(0).files[0]
     fd.append('file', file)
     var fileExtension = file.name.substr(file.name.lastIndexOf('.') + 1).toUpperCase()
-    var url = `/uploadservice/v1/library/${libraryId}?userId=${this.state.loggedInUser.id}&media=${fileExtension}`
-    // async-library not returning enough data
-    //var url = `/uploadservice/v1/async-library/${libraryId}?userId=${this.state.loggedInUser.id}&media=${fileExtension}`
+    // upon refactor perhaps make the rest of this function an action
+    var url = `/uploadservice/v1/async-library/${libraryId}?userId=${this.state.loggedInUser.id}&media=${fileExtension}`
     
+    // make this a utility to be used in many socket digest functions
+    const uploadNote = `Uploading file: ${file.name}`
+    const processNote = `Processing file: ${file.name}`
+    const noteId = this.postNotification(`${uploadNote} 0.00%`)
+
+    var uInt8ArrayToJSON = uIntArr => {
+      return JSON.parse(new TextDecoder('utf-8').decode(new Uint8Array(uIntArr)))
+    }
+
     SocketManager.joinRoom('library', libraryId)
+    var unsubscribeETLStart = SocketManager.subscribe('ETL_START', msg => {
+      if (msg.properties.headers.libraryId === libraryId) {
+        // var content = uInt8ArrayToJSON(msg.content)
+        this.updateNotification(noteId, `${processNote} 0.00% | 0 errors`)
+      }
+    })
+    var unsubscribeETLUpdate = SocketManager.subscribe('ETL_UPDATE', msg => {
+      if (msg.properties.headers.libraryId === libraryId) {
+        var content = uInt8ArrayToJSON(msg.content)
+        const pct = ((content.validCount / content.totalCount) * 100).toFixed(2)
+        const progressNote = `${pct}% | ${content.errorCount} errors`
+        this.updateNotification(noteId, `${processNote} ${progressNote}`)
+      }
+    })
+    var unsubscribeETLClose = SocketManager.subscribe('ETL_CLOSE', msg => {
+      if (msg.properties.headers.libraryId === libraryId) {
+        var content = uInt8ArrayToJSON(msg.content)
+        const pct = ((content.validCount / content.totalCount) * 100).toFixed(2)
+        const progressNote = `${pct}% | ${content.errorCount} errors`
+        this.updateNotification(noteId, `${processNote} ${progressNote}`)
+      }
+    })
+
     //var currentUploadSource = this.uploadSource
     //this.selectDataItems(currentUploadSource, libraryId)
-    const uploadNote = `Uploading file: ${file.name}`
-    const noteId = this.postNotification(`${uploadNote} 0.00%`)
+    
     this.$http.post(url, fd, {
       withCredentials: true,
       headers: { 'Content-Type': undefined },
@@ -289,19 +319,22 @@ class DataSourceUploadController {
         }
       }
     }).then((e) => {
-      // console.log(e)
-      // this.addDatasource(JSON.parse(e.data))
-      var data = JSON.parse(e.data)
-      this.setAllLibraryItems(data.dataType, this.dataItems[data.dataType].allLibraryItems.concat(data))
-      // note will be auto-removed in 4 seconds
-      this.updateNotification(noteId, `${uploadNote} COMPLETE!`)
+      // the note will be auto-removed in 4 seconds
+      this.updateNotification(noteId, `${file.name} COMPLETE!`)
       this.removeNotification(noteId, 4000)
       this.isUpLoad = false
-      // this.close()
+      unsubscribeETLStart()
+      unsubscribeETLUpdate()
+      unsubscribeETLClose()
+      // load new lib info from server
+      this.loadLibraryEntryById(libraryId)
     }).catch((e) => {
       console.error(e)
       this.removeNotification(noteId)
       this.isUpLoad = false
+      unsubscribeETLStart()
+      unsubscribeETLUpdate()
+      unsubscribeETLClose()
       swal('Error', e.statusText, 'error')
     })
     this.close()
@@ -454,6 +487,7 @@ class DataSourceUploadController {
       setAllLibraryItems: (dataItemKey, allLibraryItems) => dispatch(PlanActions.setAllLibraryItems(dataItemKey, allLibraryItems)),
       loadEtlTemplatesFromServer: (dataType) => dispatch(EtlTemplateActions.loadEtlTemplatesFromServer(dataType)),
       setConfigView: (flag) => dispatch(EtlTemplateActions.setConfigView(flag)),
+      loadLibraryEntryById: (libraryId) => dispatch(PlanActions.loadLibraryEntryById(libraryId)),
       postNotification: (notification, autoExpire) => NotificationInterface.postNotification(dispatch, notification, autoExpire), // you'll not this one looks a bit different, because we need a return val of the note ID we use an interface that wraps the action creator and the dispatch is done there
       updateNotification: (noteId, notification, autoExpire) => NotificationInterface.updateNotification(dispatch, noteId, notification, autoExpire),
       removeNotification: (noteId, autoExpire) => NotificationInterface.removeNotification(dispatch, noteId, autoExpire)

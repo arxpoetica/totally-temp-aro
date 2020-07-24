@@ -56,6 +56,17 @@ function setAllLibraryItems (state, dataItemKey, allLibraryItems) {
   }
 }
 
+function appendAllLibraryItems (state, dataItemKey, allLibraryItems) {
+  return { ...state,
+    dataItems: { ...state.dataItems,
+      [dataItemKey]: { ...state.dataItems[dataItemKey],
+        allLibraryItems: [ ...state.dataItems[dataItemKey].allLibraryItems, ...allLibraryItems ]
+      }
+    },
+    haveDataItemsChanged: true
+  }
+}
+
 function setHaveDataItemsChanged (state, haveDataItemsChanged) {
   return { ...state,
     haveDataItemsChanged
@@ -78,6 +89,9 @@ function planReducer (state = defaultState, action) {
 
     case Actions.PLAN_SET_ALL_LIBRARY_ITEMS:
       return setAllLibraryItems(state, action.payload.dataItemKey, action.payload.allLibraryItems)
+
+    case Actions.PLAN_APPEND_ALL_LIBRARY_ITEMS:
+      return appendAllLibraryItems(state, action.payload.dataItemKey, action.payload.allLibraryItems)
 
     case Actions.PLAN_SET_HAVE_DATA_ITEMS_CHANGED:
       return setHaveDataItemsChanged(state, action.payload)
