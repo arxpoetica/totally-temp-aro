@@ -754,6 +754,50 @@ import AroHttp from '../../common/aro-http'
     }
   }
 
+  // Roic Manager
+
+  function reloadRoicManagerConfiguration (roicManagerId) {
+    return dispatch => {
+      AroHttp.get(`/service/v1/roic-manager/${roicManagerId}`)
+        .then((result) => {
+          dispatch({
+            type: Actions.RESOURCE_EDITOR_ROIC_MANAGER,
+            payload: result.data
+          })
+        })
+
+      AroHttp.get(`/service/v1/roic-manager/${roicManagerId}/configuration`)
+      .then((result) => {
+        var roicModels = []
+        // Sort the roic models based on the locationTypeEntity
+        const locationEntityOrder = ['household', 'smallBusiness', 'mediumBusiness', 'largeBusiness', 'cellTower']
+        locationEntityOrder.forEach(locationEntity => {
+          const filteredModels = result.data.inputs
+            .filter(item => item.id.entityType === locationEntity)
+            .sort((a, b) => (a.id.speedCategory < b.id.speedCategory) ? -1 : 1)
+          roicModels = roicModels.concat(filteredModels)
+        })
+        let roicManagerConfiguration = { inputs: roicModels, roicSettingsConfiguration: result.data.roicSettingsConfiguration }
+        dispatch({
+          type: Actions.RESOURCE_EDITOR_ROIC_MANAGER_CONFIG,
+          payload: roicManagerConfiguration
+        })
+      })
+      .catch((err) => console.error(err))
+    }
+  }
+
+  function saveRoicConfigurationToServer (roicManagerId, roicManagerConfiguration) {
+    return dispatch => {
+      AroHttp.put(`/service/v1/roic-manager/${roicManagerId}/configuration`, roicManagerConfiguration)
+      .then(result => {
+        dispatch(setIsResourceEditor(true))
+        dispatch(getResourceManagers('roic_manager'))
+      })
+      .catch((err) => console.error(err))
+    }
+  }
+
   export default {
     getResourceTypes,
     getResourceManagers,
@@ -779,5 +823,7 @@ import AroHttp from '../../common/aro-http'
     setArpuRevenue,
     getRegions,
     loadCompManForStates,
-    saveCompManConfig
+    saveCompManConfig,
+    reloadRoicManagerConfiguration,
+    saveRoicConfigurationToServer
   }

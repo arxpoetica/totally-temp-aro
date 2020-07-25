@@ -226,6 +226,18 @@ import Actions from '../../common/actions'
     }
   }
 
+  function setRoicManager (state, roicManager) {
+    return { ...state,
+      roicManager: roicManager
+    }
+  }
+
+  function setRoicManagerConfiguration (state, roicManagerConfiguration) {
+    return { ...state,
+      roicManagerConfiguration: roicManagerConfiguration,
+    }
+  }
+
   function resourceReducer (state = defaultState, action) {
     switch (action.type) {
 			case Actions.RESOURCE_EDITOR_SET_RESOURCE_TYPES:
@@ -286,7 +298,13 @@ import Actions from '../../common/actions'
         return setPriceBookDefinition(state, action.payload.selectedDefinitionId, action.payload.structuredPriceBookDefinitions, action.payload.setOfSelectedEquipmentTags)          
       
       case Actions.RESOURCE_EDITOR_CONSTRUCTION_RATIOS:
-        return setConstructionRatios(state, action.payload)      
+        return setConstructionRatios(state, action.payload) 
+        
+      case Actions.RESOURCE_EDITOR_ROIC_MANAGER:
+        return setRoicManager(state, action.payload) 
+        
+      case Actions.RESOURCE_EDITOR_ROIC_MANAGER_CONFIG:
+        return setRoicManagerConfiguration(state, action.payload)                   
   
     default:
       return state

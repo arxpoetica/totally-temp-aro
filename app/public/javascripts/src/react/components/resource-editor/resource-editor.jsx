@@ -13,6 +13,8 @@ import FusionEditor from '../resource-manager/fusion-editor.jsx'
 import NetworkArchitectureEditor from '../resource-manager/network-architecture-editor.jsx'
 import PlanningConstraintsEditor from '../resource-manager/planning-constraints-editor.jsx'
 import ArpuEditor from '../resource-editor/arpu-editor.jsx'
+import RoicEditor from '../resource-editor/roic-editor.jsx'
+
 
 export class ResourceEditor extends Component {
   constructor (props) {
@@ -278,14 +280,18 @@ export class ResourceEditor extends Component {
 				{
 					clickedResourceForEdit === 'price_book' &&
 					<PriceBookEditor selectedResourceManagerId={this.state.selectedResourceId}/>
-				}					 
+				}	
+				{
+					clickedResource === 'roic_manager' &&
+					<RoicEditor selectedResourceManagerId={this.state.selectedResourceId}/>
+				}						 
 				{
 					(clickedResource === 'Rate Reach Manager'|| clickedResource === 'rate_reach_manager')  &&
 					<RateReachManager selectedResourceForClone={this.state.selectedResourceForClone}/>
 				}
 				{
 					clickedResource === 'competition_manager' &&
-						<CompetitorEditor/>
+					<CompetitorEditor/>
 				}					
 				{
 					clickedResource === 'fusion_manager' &&
@@ -387,12 +393,12 @@ export class ResourceEditor extends Component {
 
 	cloneSelectedManagerFromSource (selectedManager) {
 		let resourceType = selectedManager.resourceType
-		if(resourceType !== 'competition_manager' && resourceType !== 'planning_constraints_manager' && resourceType !== 'fusion_manager' && resourceType !== 'network_architecture_manager'){
+		if(resourceType !== 'competition_manager' && resourceType !== 'planning_constraints_manager' && resourceType !== 'fusion_manager' && resourceType !== 'network_architecture_manager' && resourceType !== 'roic_manager'){
 			this.props.setIsResourceEditor(false);
 		} else {
 			this.getNewResourceDetailsFromUser()
 		}
-		this.setState({clickedResource: selectedManager.resourceType,	selectedResourceForClone: selectedManager, filterText: selectedManager.resourceType})
+		this.setState({clickedResource: selectedManager.resourceType, selectedResourceId: selectedManager.id,	selectedResourceForClone: selectedManager, filterText: selectedManager.resourceType})
   }
 
 	askUserToConfirmManagerDelete (managerName) {
