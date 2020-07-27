@@ -8,6 +8,7 @@ import Constants from '../components/common/constants'
 import Actions from '../react/common/actions'
 import UiActions from '../react/components/configuration/ui/ui-actions'
 import UserActions from '../react/components/user/user-actions'
+import ConfigurationActions from '../react/components/configuration/configuration-actions'
 import PlanActions from '../react/components/plan/plan-actions'
 import MapActions from '../react/components/map/map-actions'
 import MapLayerActions from '../react/components/map-layers/map-layer-actions'
@@ -1584,6 +1585,8 @@ class State {
           service.setOptimizationInputs(service.configuration.optimizationOptions)
           // Fire a redux action to get configuration for the redux side. This will result in two calls to /configuration for the time being.
           service.getStyleValues()
+
+          service.setClientIdInRedux(service.configuration.ARO_CLIENT)
           return service.loadConfigurationFromServer()
         })
         .catch(err => console.error(err))
@@ -1805,6 +1808,7 @@ class State {
       loadAuthPermissionsRedux: () => dispatch(UserActions.loadAuthPermissions()),
       loadAuthRolesRedux: () => dispatch(UserActions.loadAuthRoles()),
       setLoggedInUserRedux: loggedInUser => dispatch(UserActions.setLoggedInUser(loggedInUser)),
+      setClientIdInRedux: clientId => dispatch(ConfigurationActions.setClientId(clientId)),
       loadSystemActorsRedux: () => dispatch(UserActions.loadSystemActors()),
       loadReportPagesForPlan: planId => dispatch(MapReportsActions.loadReportPagesForPlan(planId)),
       setMapReportMapObjectsVisibility: isVisible => dispatch(MapReportsActions.showMapObjects(isVisible)),

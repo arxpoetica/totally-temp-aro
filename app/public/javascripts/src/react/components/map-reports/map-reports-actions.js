@@ -3,7 +3,7 @@ import { saveAs } from 'file-saver'
 import AroHttp from '../../common/aro-http'
 import Actions from '../../common/actions'
 
-function downloadReport (planId, pageDefinitions) {
+function downloadReport (clientId, pageDefinitions) {
   return dispatch => {
     dispatch({ type: Actions.MAP_REPORTS_SET_IS_DOWNLOADING, payload: true })
     const reportUrl = `/map-reports/report`
