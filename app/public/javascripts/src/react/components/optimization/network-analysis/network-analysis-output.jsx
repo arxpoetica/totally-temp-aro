@@ -19,7 +19,9 @@ export class NetworkAnalysisOutput extends Component {
   }
 
   render () {
+    console.log('render')
     const hasChartData = Boolean(this.props.chartReportDefinition && this.props.chartReport && this.props.chartReport.length > 0)
+    console.log(hasChartData)
     if (hasChartData) {
       // Why setTimeout()? We need the chart to be rendered with the right display style, THEN we create the chart.
       this.updateChartDefinition()
@@ -70,6 +72,8 @@ export class NetworkAnalysisOutput extends Component {
       if (nextProps.activePlanState === PlanStates.START_STATE) {
         this.props.clearOutput()
       } else {
+        console.log('componentWillReceiveProps')
+        console.log(nextProps)
         this.props.loadReport(this.props.planId)
       }
     }

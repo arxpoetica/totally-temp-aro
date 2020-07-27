@@ -4,6 +4,7 @@ import AroHttp from '../../../common/aro-http'
 
 // ToDo: other than report, I'm not sure this is used
 function loadReport (planId) {
+  console.log('--- load report ---')
   return dispatch => {
     // First get reports metadata so we can find the id of the optimization_analysis report
     AroHttp.get('/service/v2/installed/report/meta-data')
