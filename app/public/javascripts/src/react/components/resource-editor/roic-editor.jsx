@@ -4,7 +4,6 @@ import ResourceActions from './resource-actions'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import reduxStore from '../../../redux-store'
 
-
 let tabs = [
   {
     label: 'Models',
@@ -58,7 +57,7 @@ export class RoicEditor extends Component {
   }
 
   componentDidMount () {
-    this.props.reloadRoicManagerConfiguration(this.props.selectedResourceManagerId)
+    this.props.reloadRoicManagerConfiguration(this.props.resourceManagerId)
   }
 
   componentWillReceiveProps(nextProps){
@@ -308,8 +307,6 @@ export class RoicEditor extends Component {
       pristineRoicModel.roicSettingsConfiguration.financialConstraints[name] = value
     }
 
-    console.log(pristineRoicModel)
-
     this.setState({roicManagerConfiguration : pristineRoicModel})
   }
 
@@ -358,7 +355,8 @@ export class RoicEditor extends Component {
     roicManager: state.resourceEditor.roicManager,
     roicManagerConfiguration: state.resourceEditor.roicManagerConfiguration,
     editingManager: state.resourceManager.editingManager,
-    resourceManagerName: state.resourceManager.editingManager && state.resourceManager.managers[state.resourceManager.editingManager.id].resourceManagerName,  
+    resourceManagerName: state.resourceManager.editingManager && state.resourceManager.managers[state.resourceManager.editingManager.id].resourceManagerName,
+    resourceManagerId: state.resourceManager.editingManager && state.resourceManager.managers[state.resourceManager.editingManager.id].resourceManagerId
   })   
 
   const mapDispatchToProps = (dispatch) => ({

@@ -133,6 +133,14 @@ import Actions from '../../common/actions'
     }
   }
 
+  // ARPU Manager
+
+  function setArpuManager (state, arpuManager) {
+    return { ...state,
+      arpuManager: arpuManager
+    }
+  }
+
   function setArpuManagerConfiguration (state, arpuManagerConfiguration) {
     return { ...state,
       arpuManagerConfiguration: arpuManagerConfiguration
@@ -142,18 +150,6 @@ import Actions from '../../common/actions'
   function setPristineArpuManagerConfiguration (state, pristineArpuManagerConfiguration) {
     return { ...state,
       pristineArpuManagerConfiguration: pristineArpuManagerConfiguration
-    }
-  }
-
-  function setArpuStrategy (state, ArpuStrategy) {
-    return { ...state,
-      ArpuStrategy: ArpuStrategy
-    }
-  }
-
-  function setArpuRevenue (state, ArpuRevenue) {
-    return { ...state,
-      ArpuRevenue: ArpuRevenue
     }
   }
 
@@ -260,18 +256,15 @@ import Actions from '../../common/actions'
 
 			case Actions.RESOURCE_EDITOR_GET_PRICEBOOK_STRATEGY:
         return setPriceBookStrategy(state, action.payload)
-        
+
+      case Actions.RESOURCE_EDITOR_ARPU_MANAGER:
+        return setArpuManager(state, action.payload)
+           
       case Actions.RESOURCE_EDITOR_SET_ARPU_MANAGER_CONFIGURATION:
         return setArpuManagerConfiguration(state, action.payload)
         
       case Actions.RESOURCE_EDITOR_SET_PRISTINE_ARPU_MANAGER_CONFIGURATION:
         return setPristineArpuManagerConfiguration(state, action.payload)        
-
-      case Actions.RESOURCE_EDITOR_SET_ARPU_STRATEGY:
-        return setArpuStrategy(state, action.payload)    
-        
-      case Actions.RESOURCE_EDITOR_SET_ARPU_REVENUE:
-        return setArpuRevenue(state, action.payload) 
         
       case Actions.RESOURCE_EDITOR_GET_REGIONS:
         return setRegions(state, action.payload) 

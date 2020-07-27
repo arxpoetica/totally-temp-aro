@@ -20,7 +20,7 @@ export class PriceBookEditor extends Component {
   }
 
   componentDidMount () {
-    this.props.rebuildPricebookDefinitions(this.props.selectedResourceManagerId)
+    this.props.rebuildPricebookDefinitions(this.props.resourceManagerId)
   }
 
 
@@ -32,7 +32,6 @@ export class PriceBookEditor extends Component {
     }
   }
   
-
   render () {
     return this.props.priceBookStrategy === null || this.props.currentPriceBook === undefined || this.props.statesStrategy === undefined || this.props.priceBookDefinition === undefined || this.props.constructionRatios === undefined || this.state.structuredPriceBookDefinitions === ''
       ? null

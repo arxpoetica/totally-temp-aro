@@ -6,8 +6,9 @@ export class ArpuEditor extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      selectedArpuModal : 0,
-      speedCategoryHelp : ''
+      selectedArpuModelIndex : 0,
+      speedCategoryHelp : '',
+      arpuManagerConfiguration: []
     }
 
     this.speedCategoryHelpObj = {
@@ -21,19 +22,30 @@ export class ArpuEditor extends Component {
   }
 
   componentDidMount () {
-    this.props.loadArpuManagerConfiguration(this.props.selectedResourceForEdit); 
+    this.props.loadArpuManagerConfiguration(this.props.resourceManagerId); 
+  }
+
+  componentWillReceiveProps(nextProps){
+    if(this.props != nextProps) {
+      if(nextProps.arpuManagerConfiguration !== undefined) {
+        this.setState({arpuManagerConfiguration: nextProps.arpuManagerConfiguration})
+      }
+    }
   }
 
   render () {
-    return this.props.arpuManagerConfiguration === null
+    return this.props.roicManager === null ||  this.props.arpuManagerConfiguration === null || this.state.arpuManagerConfiguration.arpuModels === undefined
       ? null
       : this.renderArpuEditor()
   }
 
   renderArpuEditor()  {
+
+    const {arpuManagerConfiguration, selectedArpuModelIndex, speedCategoryHelp} = this.state
+
     return (
       <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
-        <h4>{this.props.selectedResourceForEdit.name} </h4>
+        <h4>{this.props.resourceManagerName} </h4>
         <div style={{flex: '1 1 auto'}}>
           <div style={{maxHeight: '500px', overflowY : 'auto'}}>
             <div className="container">
@@ -42,10 +54,10 @@ export class ArpuEditor extends Component {
                 <div className="col-md-4">
                   <ul className="nav nav-pills flex-column" style={{maxHeight: '380px', overflowY : 'auto'}}>
                   {
-                  this.props.arpuManagerConfiguration.arpuModels.map((item, index) =>
+                  arpuManagerConfiguration.arpuModels.map((item, index) =>
                     <li role="presentation" className="nav-item" key={index} onClick={(e) => this.selectArpuModel(index)}>
                       {/* <!-- Show the entity type and speed category --> */}
-                      <div className={`nav-link pill-parent ${this.state.selectedArpuModal === index ? 'active' : 'true'}`} style={{cursor: 'pointer'}}>
+                      <div className={`nav-link pill-parent ${selectedArpuModelIndex === index ? 'active' : ''}`} style={{cursor: 'pointer'}}>
                         {item.id.locationEntityType} / {item.id.speedCategory}
                         <span className="badge badge-light float-right" onClick={(e) => this.showSpeedCategoryHelp(item.id.speedCategory)} style={{marginTop: '2px', cursor: 'pointer'}}>
                           <i className="fa fa-question"></i>
@@ -62,18 +74,18 @@ export class ArpuEditor extends Component {
                     <tbody>
                       <tr>
                         <td>ARPU Strategy</td>
-                        <td><input type="text" className="form-control" name="strategy" onChange={(e)=>this.props.setArpuStrategy(e.target.value)} value={this.props.ArpuStrategy}/></td>
+                        <td><input type="text" className="form-control" name="strategy" onChange={e => {this.handleArpuChange(e, selectedArpuModelIndex)}}  value={arpuManagerConfiguration.arpuModels[selectedArpuModelIndex].arpuStrategy}/></td>
                       </tr>
                       <tr>
                         <td>Revenue</td>
-                        <td><input type="text" className="form-control" name="revenue" onChange={(e)=>this.props.setArpuRevenue(e.target.value)} value={this.props.ArpuRevenue}/></td>
+                        <td><input type="text" className="form-control" name="revenue" onChange={e => {this.handleArpuChange(e, selectedArpuModelIndex)}} value={arpuManagerConfiguration.arpuModels[selectedArpuModelIndex].revenue}/></td>
                       </tr>
                     </tbody>
                   </table>
                   {
-                  this.state.speedCategoryHelp &&
+                  speedCategoryHelp &&
                   <div  className="alert alert-info alert-dismissible fade show" role="alert">
-                    {this.state.speedCategoryHelp}
+                    {speedCategoryHelp}
                     <button type="button" className="close" aria-label="Close" onClick={()=>this.hideSpeedCategoryHelp()}>
                       <span aria-hidden="true">&times;</span>
                     </button>
@@ -87,7 +99,7 @@ export class ArpuEditor extends Component {
 
         <div style={{flex: '0 0 auto'}}>
           <div style={{textAlign: 'right'}}>
-            <button className="btn btn-light mr-2" onClick={() => this.handleBack()}>
+            <button className="btn btn-light mr-2" onClick={() => this.exitEditingMode()}>
               <i className="fa fa-undo action-button-icon"></i>Discard changes
             </button>
             <button className="btn btn-primary" onClick={() => this.saveConfigurationToServer()}>
@@ -100,36 +112,26 @@ export class ArpuEditor extends Component {
   }
 
   selectArpuModel(index){
-    this.setState({selectedArpuModal : index})
-    this.props.setArpuStrategy(this.props.arpuManagerConfiguration.arpuModels[this.state.selectedArpuModal].arpuStrategy)
-    this.props.setArpuRevenue(this.props.arpuManagerConfiguration.arpuModels[this.state.selectedArpuModal].revenue)
+    this.setState({selectedArpuModelIndex : index})
   }
 
-  handleBack(){
-    this.props.getResourceTypes();
+  handleArpuChange (e, selectedArpuModelIndex) {  
+
+    let name = e.target.name;
+    let value = e.target.value;
+
+    var pristineArpuManager = this.state.arpuManagerConfiguration
+    pristineArpuManager.arpuModels[selectedArpuModelIndex][name] = value
+
+    this.setState({arpuManagerConfiguration : pristineArpuManager})
   }
 
-  handleChange (e) {  
-    console.log(e.target.value)
+  exitEditingMode(){
+    this.props.setIsResourceEditor(true);
   }
 
   saveConfigurationToServer(){
-    let arpuManagerConfiguration = this.props.arpuManagerConfiguration
-    let pristineArpuManagerConfiguration = this.props.pristineArpuManagerConfiguration
-
-    var changedModels = []
-    arpuManagerConfiguration.arpuModels.forEach((arpuModel) => {
-      var arpuKey = JSON.stringify(arpuModel.id)
-      var pristineModel = pristineArpuManagerConfiguration[arpuKey]
-      console.log(pristineModel)
-
-      if (pristineModel) {
-        // Check to see if the model has changed
-        if (JSON.stringify(pristineModel) !== angular.toJson(arpuModel)) {
-          changedModels.push(arpuModel)
-        }
-      }
-    })
+    this.props.saveArpuConfigurationToServer(this.props.arpuManager.id, this.props.pristineArpuManagerConfiguration, this.state.arpuManagerConfiguration)
   }
 
   showSpeedCategoryHelp (category) {
@@ -142,18 +144,18 @@ export class ArpuEditor extends Component {
 }
 
   const mapStateToProps = (state) => ({
+    arpuManager: state.resourceEditor.arpuManager,
     arpuManagerConfiguration: state.resourceEditor.arpuManagerConfiguration,
     pristineArpuManagerConfiguration : state.resourceEditor.pristineArpuManagerConfiguration,
-    ArpuStrategy : state.resourceEditor.ArpuStrategy,
-    ArpuRevenue : state.resourceEditor.ArpuRevenue
-
+    resourceManagerName: state.resourceManager.editingManager && state.resourceManager.managers[state.resourceManager.editingManager.id].resourceManagerName,  
+    resourceManagerId: state.resourceManager.editingManager && state.resourceManager.managers[state.resourceManager.editingManager.id].resourceManagerId,
   })   
 
   const mapDispatchToProps = (dispatch) => ({
     getResourceTypes: () => dispatch(ResourceActions.getResourceTypes()),
-    loadArpuManagerConfiguration: (selectedResourceForEdit) => dispatch(ResourceActions.loadArpuManagerConfiguration(selectedResourceForEdit)),
-    setArpuStrategy: (ArpuStrategy) => dispatch(ResourceActions.setArpuStrategy(ArpuStrategy)),
-    setArpuRevenue: (ArpuRevenue) => dispatch(ResourceActions.setArpuRevenue(ArpuRevenue))
+    loadArpuManagerConfiguration: (arpuManagerId) => dispatch(ResourceActions.loadArpuManagerConfiguration(arpuManagerId)),
+    setIsResourceEditor: (status) => dispatch(ResourceActions.setIsResourceEditor(status)),
+    saveArpuConfigurationToServer: (arpuManagerId, pristineArpuManager, arpuManager) => dispatch(ResourceActions.saveArpuConfigurationToServer(arpuManagerId, pristineArpuManager, arpuManager)),
   })
 
 const ArpuEditorComponent = connect(mapStateToProps, mapDispatchToProps)(ArpuEditor)

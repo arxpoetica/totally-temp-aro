@@ -152,6 +152,7 @@ import AroHttp from '../../common/aro-http'
               editingMode: editingMode
             }
           })
+          dispatch(setIsResourceEditor(false))
         })
         .catch(err => {
           console.error(err)
@@ -562,9 +563,18 @@ import AroHttp from '../../common/aro-http'
 
   // ARPU-Manager
 
-  function loadArpuManagerConfiguration (selectedResourceForEdit) {
+  function loadArpuManagerConfiguration (arpuManagerId) {
+
     return dispatch => {
-      AroHttp.get(`/service/v1/arpu-manager/${selectedResourceForEdit.id}/configuration`)
+      AroHttp.get(`/service/v1/arpu-manager/${arpuManagerId}`)
+      .then((result) => {
+        dispatch({
+          type: Actions.RESOURCE_EDITOR_ARPU_MANAGER,
+          payload: result.data
+        })
+      })
+
+      AroHttp.get(`/service/v1/arpu-manager/${arpuManagerId}/configuration`)
         .then((result) => {
           var arpuModels = []
           // Sort the arpu models based on the locationTypeEntity
@@ -596,25 +606,26 @@ import AroHttp from '../../common/aro-http'
       }
     }
 
-  function saveConfigurationToServer (arpuManagerId, changedModels) {
+  function saveArpuConfigurationToServer (arpuManagerId, pristineArpuManagerConfiguration, arpuManagerConfiguration) {
+
+    var changedModels = []
+    arpuManagerConfiguration.arpuModels.forEach((arpuModel) => {
+      var arpuKey = JSON.stringify(arpuModel.id)
+      var pristineModel = pristineArpuManagerConfiguration[arpuKey]
+      if (pristineModel) {
+        // Check to see if the model has changed
+        if (JSON.stringify(pristineModel) !== angular.toJson(arpuModel)) {
+          changedModels.push(arpuModel)
+        }
+      }
+    })
+
     return dispatch => {
       AroHttp.put(`/service/v1/arpu-manager/${arpuManagerId}/configuration`, changedModels)
-      .then((result) => {})
-      .catch((err) => console.error(err))
-    }
-  }
-
-  function setArpuStrategy (ArpuStrategy) {
-    return {
-      type: Actions.RESOURCE_EDITOR_SET_ARPU_STRATEGY,
-      payload: ArpuStrategy
-    }
-  }
-
-  function setArpuRevenue (ArpuRevenue) {
-    return {
-      type: Actions.RESOURCE_EDITOR_SET_ARPU_REVENUE,
-      payload: ArpuRevenue
+      .then(result => {
+        dispatch(setIsResourceEditor(true))
+        dispatch(getResourceManagers('arpu_manager'))
+      })
     }
   }
 
@@ -818,9 +829,7 @@ import AroHttp from '../../common/aro-http'
     startEditingResourceManager,
     loadArpuManagerConfiguration,
     loadCompManMeta,
-    saveConfigurationToServer,
-    setArpuStrategy,
-    setArpuRevenue,
+    saveArpuConfigurationToServer,
     getRegions,
     loadCompManForStates,
     saveCompManConfig,

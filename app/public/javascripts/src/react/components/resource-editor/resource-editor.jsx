@@ -28,12 +28,11 @@ export class ResourceEditor extends Component {
 			selectedPage:0,
 			searchText:'',
 			filterText:'',
-			selectedResourceName: '',
-			selectedResourceId: '',
 			openRowId: null,
-			clickedResource: '',
+			selectedResourceName: '',
 			selectedResourceForClone: '',
-			clickedResourceForEdit: '',
+			clickedResource: '',
+			clickedResourceForEditAndClone: '',
 		}
 		
 		this.actionsECD = [
@@ -268,47 +267,48 @@ export class ResourceEditor extends Component {
 	}
 
   renderResourceManager(){
+
 		let clickedResource = this.state.clickedResource;
-		let clickedResourceForEdit = this.state.clickedResourceForEdit;
+		let clickedResourceForEditAndClone = this.state.clickedResourceForEditAndClone;
 
     return (
 			<>
 				{
-					(clickedResource === 'Price Book' || clickedResource === 'price_book')  && 	clickedResourceForEdit !== 'price_book' &&
+					(clickedResource === 'Price Book' || clickedResource === 'price_book')  && 	clickedResourceForEditAndClone !== 'price_book' &&
 					<PriceBookCreator selectedResourceForClone={this.state.selectedResourceForClone}/>
 				} 
 				{
-					clickedResourceForEdit === 'price_book' &&
-					<PriceBookEditor selectedResourceManagerId={this.state.selectedResourceId}/>
+					clickedResourceForEditAndClone === 'price_book' &&
+					<PriceBookEditor/>
 				}	
 				{
-					clickedResource === 'roic_manager' &&
-					<RoicEditor selectedResourceManagerId={this.state.selectedResourceId}/>
+					clickedResourceForEditAndClone === 'roic_manager' &&
+					<RoicEditor/>
+				}	
+				{
+					clickedResourceForEditAndClone === 'arpu_manager' &&
+					<ArpuEditor/>
 				}						 
 				{
 					(clickedResource === 'Rate Reach Manager'|| clickedResource === 'rate_reach_manager')  &&
 					<RateReachManager selectedResourceForClone={this.state.selectedResourceForClone}/>
 				}
 				{
-					clickedResource === 'competition_manager' &&
+					clickedResourceForEditAndClone === 'competition_manager' &&
 					<CompetitorEditor/>
 				}					
 				{
-					clickedResource === 'fusion_manager' &&
+					clickedResourceForEditAndClone === 'fusion_manager' &&
 					<FusionEditor onDiscard={this.handleOnDiscard}/>
 				}
 				{
-					clickedResource === 'network_architecture_manager' &&
+					clickedResourceForEditAndClone === 'network_architecture_manager' &&
 					<NetworkArchitectureEditor onDiscard={this.handleOnDiscard}/>
 				}
 				{
-					clickedResource === 'planning_constraints_manager' &&
+					clickedResourceForEditAndClone === 'planning_constraints_manager' &&
 					<PlanningConstraintsEditor onDiscard={this.handleOnDiscard}/>
-				}
-				{
-					clickedResource === 'arpu_manager' &&
-					<ArpuEditor selectedResourceForEdit={this.state.clickedResourceForEdit}/>
-				}			
+				}		
 			</>
     )
 	}
@@ -326,9 +326,8 @@ export class ResourceEditor extends Component {
   }
 
 	editSelectedManager(selectedManager){
-		this.props.setIsResourceEditor(false);
 		this.props.startEditingResourceManager(selectedManager.id, selectedManager.resourceType, selectedManager.name, 'EDIT_RESOURCE_MANAGER')
-		this.setState({clickedResource: selectedManager.resourceType, clickedResourceForEdit: selectedManager.resourceType, selectedResourceId: selectedManager.id})
+		this.setState({clickedResourceForEditAndClone: selectedManager.resourceType, clickedResource: ''})
 	}
 
 	// Showing a SweetAlert from within a modal dialog does not work (The input box is not clickable).
@@ -373,7 +372,7 @@ export class ResourceEditor extends Component {
           resolve(resourceName)
         } else {
 					reject('Cancelled')
-					this.setState({clickedResource: ''})
+					this.setState({clickedResource: '', clickedResourceForEditAndClone: ''})
         }
       })
     })
@@ -383,9 +382,8 @@ export class ResourceEditor extends Component {
 		this.askNewResourceDetailsFromUser()
 		.then((resourceName) => {
 			if (resourceName) {
-				this.setState({clickedResource: this.state.filterText})
 				this.props.newManager(this.state.filterText, resourceName,this.props.loggedInUser, this.state.selectedResourceForClone.id)
-				this.props.setIsResourceEditor(false);
+				this.setState({clickedResourceForEditAndClone: this.state.filterText})
 			}
 		})
 		.catch((err) => console.error(err))
@@ -393,12 +391,12 @@ export class ResourceEditor extends Component {
 
 	cloneSelectedManagerFromSource (selectedManager) {
 		let resourceType = selectedManager.resourceType
-		if(resourceType !== 'competition_manager' && resourceType !== 'planning_constraints_manager' && resourceType !== 'fusion_manager' && resourceType !== 'network_architecture_manager' && resourceType !== 'roic_manager'){
+		if(resourceType === 'price_book' || resourceType === 'rate_reach_manager'){
 			this.props.setIsResourceEditor(false);
 		} else {
 			this.getNewResourceDetailsFromUser()
 		}
-		this.setState({clickedResource: selectedManager.resourceType, selectedResourceId: selectedManager.id,	selectedResourceForClone: selectedManager, filterText: selectedManager.resourceType})
+		this.setState({clickedResource: selectedManager.resourceType,	clickedResourceForEditAndClone: '', selectedResourceForClone: selectedManager, filterText: selectedManager.resourceType})
   }
 
 	askUserToConfirmManagerDelete (managerName) {
@@ -436,7 +434,7 @@ export class ResourceEditor extends Component {
 		if(clickedResource !== 'Competition System'){
 			this.props.setIsResourceEditor(false);
 		}
-		this.setState({clickedResource: clickedResource, selectedResourceForClone: ''})
+		this.setState({clickedResource: clickedResource, selectedResourceForClone: '', clickedResourceForEditAndClone: ''})
   }
 
   toggleRow (rowId) {
