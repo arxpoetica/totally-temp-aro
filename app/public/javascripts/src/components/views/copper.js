@@ -171,7 +171,6 @@ class CopperController {
       planId: reduxState.plan.activePlan && reduxState.plan.activePlan.id,
       networkEquipmentLayers: getNetworkEquipmentLayersList(reduxState),
       cablesArray: getCablesArray(reduxState),
-      conduitsArray: getConduitsArray(reduxState),
       dataItems: reduxState.plan.dataItems,
       mapRef: reduxState.map.googleMaps
     }

@@ -42,6 +42,7 @@ function loadConfiguration() {
   const configurationTypes = [
     'locationCategories',
     'networkEquipment',
+    'copperCategories',
     'constructionSiteCategories',
     'boundaryCategories',
     'units',

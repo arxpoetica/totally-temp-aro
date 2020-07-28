@@ -126,6 +126,13 @@ function setBoundaryLayers (boundaryLayers) {
   }
 }
 
+function setCopperLayers (copperLayers) {
+  return {
+    type: Actions.LAYERS_SET_COPPER,
+    payload: copperLayers
+  }
+}
+
 function setShowSiteBoundary (newVisibility) {
   return {
     type: Actions.LAYERS_SET_SITE_BOUNDARY,
@@ -203,6 +210,7 @@ export default {
   setNetworkEquipmentLayers,
   setConstructionSiteLayers,
   setBoundaryLayers,
+  setCopperLayers,
   setShowSiteBoundary,
   loadAnnotationsForUser,
   saveAnnotationsForUser,
