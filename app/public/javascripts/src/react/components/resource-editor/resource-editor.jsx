@@ -14,7 +14,9 @@ import NetworkArchitectureEditor from '../resource-manager/network-architecture-
 import PlanningConstraintsEditor from '../resource-manager/planning-constraints-editor.jsx'
 import ArpuEditor from '../resource-editor/arpu-editor.jsx'
 import RoicEditor from '../resource-editor/roic-editor.jsx'
-
+import ImpedanceEditor from '../resource-editor/impedance-editor.jsx'
+import TsmEditor from '../resource-editor/tsm-editor.jsx'
+import RateReachEditor from '../resource-editor/rate-reach-editor.jsx'
 
 export class ResourceEditor extends Component {
   constructor (props) {
@@ -282,16 +284,28 @@ export class ResourceEditor extends Component {
 					<PriceBookEditor/>
 				}	
 				{
+					clickedResourceForEditAndClone === 'tsm_manager' &&
+					<TsmEditor/>
+				}				
+				{
 					clickedResourceForEditAndClone === 'roic_manager' &&
 					<RoicEditor/>
 				}	
 				{
 					clickedResourceForEditAndClone === 'arpu_manager' &&
 					<ArpuEditor/>
-				}						 
+				}	
 				{
-					(clickedResource === 'Rate Reach Manager'|| clickedResource === 'rate_reach_manager')  &&
+					clickedResourceForEditAndClone === 'impedance_mapping_manager' &&
+					<ImpedanceEditor/>
+				}						 									 
+				{
+					(clickedResource === 'Rate Reach Manager'|| clickedResource === 'rate_reach_manager')  && clickedResourceForEditAndClone !== 'rate_reach_manager' &&
 					<RateReachManager selectedResourceForClone={this.state.selectedResourceForClone}/>
+				}
+				{
+					clickedResourceForEditAndClone === 'rate_reach_manager' &&
+					<RateReachEditor/>
 				}
 				{
 					clickedResourceForEditAndClone === 'competition_manager' &&
@@ -326,6 +340,9 @@ export class ResourceEditor extends Component {
   }
 
 	editSelectedManager(selectedManager){
+		// this.props.startEditingResourceManager('6', 'impedance_mapping_manager', 'Default Impedance Manager', 'EDIT_RESOURCE_MANAGER')
+		// this.setState({clickedResourceForEditAndClone: 'impedance_mapping_manager', clickedResource: ''})
+
 		this.props.startEditingResourceManager(selectedManager.id, selectedManager.resourceType, selectedManager.name, 'EDIT_RESOURCE_MANAGER')
 		this.setState({clickedResourceForEditAndClone: selectedManager.resourceType, clickedResource: ''})
 	}
@@ -382,6 +399,7 @@ export class ResourceEditor extends Component {
 		this.askNewResourceDetailsFromUser()
 		.then((resourceName) => {
 			if (resourceName) {
+				this.setState({clickedResource: ''})
 				this.props.newManager(this.state.filterText, resourceName,this.props.loggedInUser, this.state.selectedResourceForClone.id)
 				this.setState({clickedResourceForEditAndClone: this.state.filterText})
 			}
@@ -439,7 +457,7 @@ export class ResourceEditor extends Component {
 
   toggleRow (rowId) {
 		if (this.state.openRowId === rowId) {
-				rowId = null
+			rowId = null
 		}
 		this.setState({ ...this.state, 'openRowId': rowId })
   }
@@ -500,7 +518,6 @@ const mapDispatchToProps = (dispatch) => ({
 	deleteResourceManager: (selectedManager, filterText) => dispatch(ResourceActions.deleteResourceManager(selectedManager, filterText)),
 	startEditingResourceManager: (id, type, name, editingMode) => dispatch(ResourceActions.startEditingResourceManager(id, type, name, editingMode)),
 	newManager: (resourceType, resourceName, loggedInUser, sourceId) => dispatch(ResourceActions.newManager(resourceType, resourceName, loggedInUser, sourceId))
-
 })
 
 const ResourceEditorComponent = wrapComponentWithProvider(reduxStore, ResourceEditor, mapStateToProps, mapDispatchToProps)

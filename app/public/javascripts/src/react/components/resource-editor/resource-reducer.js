@@ -222,6 +222,9 @@ import Actions from '../../common/actions'
     }
   }
 
+  // Roic Editor
+
+
   function setRoicManager (state, roicManager) {
     return { ...state,
       roicManager: roicManager
@@ -231,6 +234,54 @@ import Actions from '../../common/actions'
   function setRoicManagerConfiguration (state, roicManagerConfiguration) {
     return { ...state,
       roicManagerConfiguration: roicManagerConfiguration,
+    }
+  }
+  
+  // Impedance Editor
+
+  function setImpedanceManager (state, impedanceManager) {
+    return { ...state,
+      impedanceManager: impedanceManager
+    }
+  }
+
+  function setImpedanceManagerConfiguration (state, impedanceManagerConfiguration, orderedImpedanceMapKeys) {
+    return { ...state,
+      impedanceManagerConfigurations: {
+        impedanceManagerConfiguration: impedanceManagerConfiguration,
+        orderedImpedanceMapKeys: orderedImpedanceMapKeys,
+      }
+    }
+  }
+
+  // Tsm Editor
+
+  function setTsmManager (state, tsmManager) {
+    return { ...state,
+      tsmManager: tsmManager
+    }
+  }
+
+  function setTsmManagerConfiguration (state, tsmManagerConfiguration, pristineTsmManagerConfiguration) {
+    return { ...state,
+      tsmManagerConfigurations: {
+        tsmManagerConfiguration: tsmManagerConfiguration,
+        pristineTsmManagerConfiguration: pristineTsmManagerConfiguration,
+      }
+    }
+  }
+
+  // Rate Reach Editor
+
+  function setRateReachManager (state, rateReachManager) {
+    return { ...state,
+      rateReachManager: rateReachManager
+    }
+  }
+
+  function setRateReachManagerConfiguration (state, rateReachManagerConfig) {
+    return { ...state,
+      rateReachManagerConfig: rateReachManagerConfig
     }
   }
 
@@ -297,7 +348,25 @@ import Actions from '../../common/actions'
         return setRoicManager(state, action.payload) 
         
       case Actions.RESOURCE_EDITOR_ROIC_MANAGER_CONFIG:
-        return setRoicManagerConfiguration(state, action.payload)                   
+        return setRoicManagerConfiguration(state, action.payload)  
+        
+      case Actions.RESOURCE_EDITOR_IMPEDANCE_MANAGER:
+        return setImpedanceManager(state, action.payload) 
+        
+      case Actions.RESOURCE_EDITOR_IMPEDANCE_MANAGER_CONFIG:
+        return setImpedanceManagerConfiguration(state, action.payload.impedanceManagerConfiguration, action.payload.orderedImpedanceMapKeys)           
+  
+      case Actions.RESOURCE_EDITOR_TSM_MANAGER:
+        return setTsmManager(state, action.payload) 
+        
+      case Actions.RESOURCE_EDITOR_TSM_MANAGER_CONFIG:
+        return setTsmManagerConfiguration(state, action.payload.tsmManagerConfiguration, action.payload.pristineTsmManagerConfiguration)           
+
+      case Actions.RESOURCE_EDITOR_RATE_REACH_MANAGER:
+        return setRateReachManager(state, action.payload)  
+        
+      case Actions.RESOURCE_EDITOR_RATE_REACH_MANAGER_CONFIG:
+        return setRateReachManagerConfiguration(state, action.payload)         
   
     default:
       return state

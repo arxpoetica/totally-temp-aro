@@ -267,7 +267,7 @@ import AroHttp from '../../common/aro-http'
           let selectedStateForStrategy = statesForStrategy[0]
           let priceBookDefinitions = results[1].data
           // Save a deep copy of the result, we can use this later if we save modifications to the server
-          let pristineAssignments = angular.copy(results[2].data)
+          let pristineAssignments = JSON.parse(JSON.stringify(results[2].data))
 
           dispatch({
             type: Actions.RESOURCE_EDITOR_STATES_STRATEGY,
@@ -314,7 +314,7 @@ import AroHttp from '../../common/aro-http'
       const hasConstructionRatiosForState = pristineAssignments.constructionRatios.filter(item => item.code === stateCode).length > 0
       if (!hasConstructionRatiosForState) {
         // Add default construction ratios for this state
-        var constructionRatio = angular.copy(defaultConstructionRatios)
+        var constructionRatio = JSON.parse(JSON.stringify(defaultConstructionRatios))
         constructionRatio.code = stateCode
         pristineAssignments.constructionRatios.push(constructionRatio)
       }
@@ -414,7 +414,7 @@ import AroHttp from '../../common/aro-http'
               }
             }
           })
-          var keyedRatio = angular.copy(ratio)
+          var keyedRatio = JSON.parse(JSON.stringify(ratio))
           keyedRatio.constructionRatios.cableConstructionRatios = ratioValues
           constructionRatios[keyedRatio.code] = keyedRatio
           dispatch({
@@ -469,7 +469,7 @@ import AroHttp from '../../common/aro-http'
       // Save cable construction ratios. Convert back from keyed to array
       assignments.constructionRatios = []
       Object.keys(constructionRatios).forEach(constructionRatioKey => {
-        var constructionRatio = angular.copy(constructionRatios[constructionRatioKey])
+        var constructionRatio = JSON.parse(JSON.stringify(constructionRatios[constructionRatioKey]))
         var cableConstructionRatios = []
         Object.keys(constructionRatio.constructionRatios.cableConstructionRatios).forEach(ratioKey => {
           // Only save non-zero ratios
@@ -614,7 +614,7 @@ import AroHttp from '../../common/aro-http'
       var pristineModel = pristineArpuManagerConfiguration[arpuKey]
       if (pristineModel) {
         // Check to see if the model has changed
-        if (JSON.stringify(pristineModel) !== angular.toJson(arpuModel)) {
+        if (JSON.stringify(pristineModel) !== JSON.stringify(arpuModel)) {
           changedModels.push(arpuModel)
         }
       }
@@ -666,10 +666,8 @@ import AroHttp from '../../common/aro-http'
       .then((carrierResult) => {
         var newCarriersById = {}
         var newStrengthsById = {}
-
-        let carrierResultDataArray = [{"carrierId":26,"alias":"NOEL COMMUNICATIONS","cbCount":195574.0,"coveredCbCount":58594.0,"fiberCoveredCbCount":52786.0,"fiberNetworkMiles":7091.0,"cbPercent":29.960015134936135},{"carrierId":21,"alias":"ZAYO","cbCount":195574.0,"coveredCbCount":45551.0,"fiberCoveredCbCount":92108.0,"fiberNetworkMiles":5913.0,"cbPercent":23.290928241995356},{"carrierId":37,"alias":"CENTURYLINK","cbCount":195574.0,"coveredCbCount":28365.0,"fiberCoveredCbCount":35479.0,"fiberNetworkMiles":4056.0,"cbPercent":14.503461605325862},{"carrierId":16,"alias":"NOANET","cbCount":195574.0,"coveredCbCount":21927.0,"fiberCoveredCbCount":12697.0,"fiberNetworkMiles":8709.0,"cbPercent":11.21161299559246},{"carrierId":15,"alias":"INTEGRA TELECOM","cbCount":195574.0,"coveredCbCount":20047.0,"fiberCoveredCbCount":14399.0,"fiberNetworkMiles":1963.0,"cbPercent":10.250340024747667},{"carrierId":13,"alias":"AT&T","cbCount":195574.0,"coveredCbCount":14483.0,"fiberCoveredCbCount":10757.0,"fiberNetworkMiles":805.0,"cbPercent":7.405381083375091},{"carrierId":48,"alias":"COMCAST","cbCount":195574.0,"coveredCbCount":14177.0,"fiberCoveredCbCount":11474.0,"fiberNetworkMiles":838.0,"cbPercent":7.2489185679078},{"carrierId":25,"alias":"SPECTRUM","cbCount":195574.0,"coveredCbCount":9799.0,"fiberCoveredCbCount":3238.0,"fiberNetworkMiles":848.0,"cbPercent":5.010379702823483},{"carrierId":17,"alias":"XO COMMUNICATIONS","cbCount":195574.0,"coveredCbCount":8911.0,"fiberCoveredCbCount":7568.0,"fiberNetworkMiles":1199.0,"cbPercent":4.556331618722325},{"carrierId":8,"alias":"SYRINGA NETWORKS","cbCount":195574.0,"coveredCbCount":7921.0,"fiberCoveredCbCount":3503.0,"fiberNetworkMiles":991.0,"cbPercent":4.050129362798736},{"carrierId":31,"alias":"BLACK ROCK CABLE","cbCount":195574.0,"coveredCbCount":7438.0,"fiberCoveredCbCount":16072.0,"fiberNetworkMiles":1237.0,"cbPercent":3.8031640197572276},{"carrierId":14,"alias":"COGENT COMMUNICATIONS","cbCount":195574.0,"coveredCbCount":6913.0,"fiberCoveredCbCount":3070.0,"fiberNetworkMiles":512.0,"cbPercent":3.5347234294947185},{"carrierId":46,"alias":"VERIZON","cbCount":195574.0,"coveredCbCount":5550.0,"fiberCoveredCbCount":8196.0,"fiberNetworkMiles":517.0,"cbPercent":2.8378005256322414},{"carrierId":28,"alias":"ORBITCOM","cbCount":195574.0,"coveredCbCount":4644.0,"fiberCoveredCbCount":4320.0,"fiberNetworkMiles":320.0,"cbPercent":2.3745487641506537},{"carrierId":30,"alias":"GRANT PUD","cbCount":195574.0,"coveredCbCount":3665.0,"fiberCoveredCbCount":8780.0,"fiberNetworkMiles":3182.0,"cbPercent":1.873970977737327},{"carrierId":3,"alias":"FATBEAM","cbCount":195574.0,"coveredCbCount":3131.0,"fiberCoveredCbCount":4506.0,"fiberNetworkMiles":351.0,"cbPercent":1.6009285487846032},{"carrierId":18,"alias":"STARTOUCH","cbCount":195574.0,"coveredCbCount":2644.0,"fiberCoveredCbCount":2372.0,"fiberNetworkMiles":372.0,"cbPercent":1.3519179441029994},{"carrierId":24,"alias":"RAIL AMERICA ROW","cbCount":195574.0,"coveredCbCount":2417.0,"fiberCoveredCbCount":1274.0,"fiberNetworkMiles":586.0,"cbPercent":1.2358493460275906},{"carrierId":41,"alias":"WINDSTREAM","cbCount":195574.0,"coveredCbCount":2112.0,"fiberCoveredCbCount":1340.0,"fiberNetworkMiles":85.0,"cbPercent":1.0798981459703234},{"carrierId":27,"alias":"CROWN CASTLE","cbCount":195574.0,"coveredCbCount":1724.0,"fiberCoveredCbCount":1946.0,"fiberNetworkMiles":94.0,"cbPercent":0.8815077668810782},{"carrierId":11,"alias":"BENTON PUD","cbCount":195574.0,"coveredCbCount":1585.0,"fiberCoveredCbCount":1330.0,"fiberNetworkMiles":220.0,"cbPercent":0.8104349248877661},{"carrierId":38,"alias":"CITY OF FRANKLIN PUD","cbCount":195574.0,"coveredCbCount":1333.0,"fiberCoveredCbCount":2380.0,"fiberNetworkMiles":222.0,"cbPercent":0.6815834415617619},{"carrierId":43,"alias":"PORT OF WHITMAN","cbCount":195574.0,"coveredCbCount":1245.0,"fiberCoveredCbCount":2032.0,"fiberNetworkMiles":357.0,"cbPercent":0.6365876854796649},{"carrierId":39,"alias":"BONNEVILLE POWER","cbCount":195574.0,"coveredCbCount":1236.0,"fiberCoveredCbCount":298.0,"fiberNetworkMiles":343.0,"cbPercent":0.6319858467894506},{"carrierId":4,"alias":"CITY OF BELLEVUE","cbCount":195574.0,"coveredCbCount":1068.0,"fiberCoveredCbCount":2628.0,"fiberNetworkMiles":143.0,"cbPercent":0.5460848579054476},{"carrierId":52,"alias":"CLICK! NETWORK","cbCount":195574.0,"coveredCbCount":867.0,"fiberCoveredCbCount":1280.0,"fiberNetworkMiles":98.0,"cbPercent":0.44331046049065825},{"carrierId":12,"alias":"STARCOM","cbCount":195574.0,"coveredCbCount":809.0,"fiberCoveredCbCount":610.0,"fiberNetworkMiles":72.0,"cbPercent":0.41365416670927624},{"carrierId":29,"alias":"UPN","cbCount":195574.0,"coveredCbCount":805.0,"fiberCoveredCbCount":827.0,"fiberNetworkMiles":76.0,"cbPercent":0.411608905069181},{"carrierId":34,"alias":"PACIFIC COUNTY PUD","cbCount":195574.0,"coveredCbCount":783.0,"fiberCoveredCbCount":734.0,"fiberNetworkMiles":114.0,"cbPercent":0.40035996604865676},{"carrierId":19,"alias":"TDS TELECOM","cbCount":195574.0,"coveredCbCount":627.0,"fiberCoveredCbCount":458.0,"fiberNetworkMiles":263.0,"cbPercent":0.32059476208493976},{"carrierId":33,"alias":"CITY OF REDMOND","cbCount":195574.0,"coveredCbCount":584.0,"fiberCoveredCbCount":1124.0,"fiberNetworkMiles":64.0,"cbPercent":0.29860819945391515},{"carrierId":35,"alias":"SKAGIT COUNTY","cbCount":195574.0,"coveredCbCount":581.0,"fiberCoveredCbCount":689.0,"fiberNetworkMiles":49.0,"cbPercent":0.2970742532238437},{"carrierId":6,"alias":"US CROSSINGS","cbCount":195574.0,"coveredCbCount":508.0,"fiberCoveredCbCount":550.0,"fiberNetworkMiles":26.0,"cbPercent":0.2597482282921043},{"carrierId":51,"alias":"OPALCO FIBER","cbCount":195574.0,"coveredCbCount":503.0,"fiberCoveredCbCount":848.0,"fiberNetworkMiles":161.0,"cbPercent":0.2571916512419851},{"carrierId":40,"alias":"COLUMBUS FIBERNET","cbCount":195574.0,"coveredCbCount":475.0,"fiberCoveredCbCount":670.0,"fiberNetworkMiles":31.0,"cbPercent":0.24287481976131797},{"carrierId":1,"alias":"GRAYS HARBOR PUD","cbCount":195574.0,"coveredCbCount":440.0,"fiberCoveredCbCount":209.0,"fiberNetworkMiles":19.0,"cbPercent":0.224978780410484},{"carrierId":36,"alias":"CITY OF KIRKLAND","cbCount":195574.0,"coveredCbCount":436.0,"fiberCoveredCbCount":570.0,"fiberNetworkMiles":30.0,"cbPercent":0.2229335187703887},{"carrierId":49,"alias":"VIACOM","cbCount":195574.0,"coveredCbCount":380.0,"fiberCoveredCbCount":652.0,"fiberNetworkMiles":33.0,"cbPercent":0.19429985580905437},{"carrierId":5,"alias":"CITY OF BELLINGHAM","cbCount":195574.0,"coveredCbCount":327.0,"fiberCoveredCbCount":180.0,"fiberNetworkMiles":16.0,"cbPercent":0.16720013907779152},{"carrierId":20,"alias":"CITY OF OLYMPIA","cbCount":195574.0,"coveredCbCount":306.0,"fiberCoveredCbCount":370.0,"fiberNetworkMiles":18.0,"cbPercent":0.15646251546729115},{"carrierId":23,"alias":"COAST COMMUNICATIONS","cbCount":195574.0,"coveredCbCount":257.0,"fiberCoveredCbCount":82.0,"fiberNetworkMiles":13.0,"cbPercent":0.13140806037612363},{"carrierId":50,"alias":"BROADSTRIPE","cbCount":195574.0,"coveredCbCount":160.0,"fiberCoveredCbCount":172.0,"fiberNetworkMiles":11.0,"cbPercent":0.08181046560381237},{"carrierId":7,"alias":"BELLEVUE SCHOOL DISTRICT","cbCount":195574.0,"coveredCbCount":121.0,"fiberCoveredCbCount":220.0,"fiberNetworkMiles":11.0,"cbPercent":0.061869164612883096},{"carrierId":44,"alias":"NETVERSANT","cbCount":195574.0,"coveredCbCount":94.0,"fiberCoveredCbCount":118.0,"fiberNetworkMiles":6.0,"cbPercent":0.04806364854223977},{"carrierId":47,"alias":"VIALITE","cbCount":195574.0,"coveredCbCount":67.0,"fiberCoveredCbCount":74.0,"fiberNetworkMiles":10.0,"cbPercent":0.03425813247159643},{"carrierId":2,"alias":"SAWNET","cbCount":195574.0,"coveredCbCount":53.0,"fiberCoveredCbCount":38.0,"fiberNetworkMiles":2.0,"cbPercent":0.02709971673126285},{"carrierId":53,"alias":"CITY OF ABERDEEN","cbCount":195574.0,"coveredCbCount":53.0,"fiberCoveredCbCount":8.0,"fiberNetworkMiles":2.0,"cbPercent":0.02709971673126285},{"carrierId":42,"alias":"RTI","cbCount":195574.0,"coveredCbCount":39.0,"fiberCoveredCbCount":86.0,"fiberNetworkMiles":22.0,"cbPercent":0.019941300990929264},{"carrierId":22,"alias":"BCE NEXXIA","cbCount":195574.0,"coveredCbCount":26.0,"fiberCoveredCbCount":9.0,"fiberNetworkMiles":0.0,"cbPercent":0.01329420066061951},{"carrierId":32,"alias":"PUGET SOUND ENERGY","cbCount":195574.0,"coveredCbCount":18.0,"fiberCoveredCbCount":16.0,"fiberNetworkMiles":1.0,"cbPercent":0.009203677380428892},{"carrierId":45,"alias":"FIRST STEP INTERNET","cbCount":195574.0,"coveredCbCount":9.0,"fiberCoveredCbCount":6.0,"fiberNetworkMiles":1.0,"cbPercent":0.004601838690214446},{"carrierId":9,"alias":"CITY OF LEWISTON","cbCount":195574.0,"coveredCbCount":4.0,"fiberCoveredCbCount":2.0,"fiberNetworkMiles":1.0,"cbPercent":0.0020452616400953093},{"carrierId":10,"alias":"BOEING","cbCount":195574.0,"coveredCbCount":1.0,"fiberCoveredCbCount":2.0,"fiberNetworkMiles":0.0,"cbPercent":5.113154100238273E-4},{"carrierId":0,"alias":null,"cbCount":77189.0,"coveredCbCount":0.0,"fiberCoveredCbCount":0.0,"fiberNetworkMiles":0.0,"cbPercent":0.0}]
         
-        carrierResultDataArray.forEach(ele => {
+        carrierResult.data.forEach(ele => {
           newCarriersById[ele.carrierId] = ele
           newStrengthsById[ele.carrierId] = getDefaultStrength(ele.carrierId)
         })
@@ -680,21 +678,19 @@ import AroHttp from '../../common/aro-http'
 
         dispatch({
           type: Actions.RESOURCE_EDITOR_CARRIERS_BY_PCT,
-          payload: carrierResultDataArray
+          payload: carrierResult.data
         })
 
         AroHttp.get(`/service/v1/competitor-manager/${competitorManagerId}/strengths?states=${regionsString}&user_id=${loggedInUser.id}`)
         .then((strengthsResult) => {
-
-          var strengthsResultArr = [{"providerTypeId":"retail","carrierId":26,"strength":1.0},{"providerTypeId":"wholesale","carrierId":26,"strength":1.0},{"providerTypeId":"tower","carrierId":26,"strength":1.0},{"providerTypeId":"wholesale","carrierId":21,"strength":1.0},{"providerTypeId":"tower","carrierId":21,"strength":1.0},{"providerTypeId":"retail","carrierId":21,"strength":1.0}]
           
           // ToDo: strength types should be dynamic, either get this list from the server OR have the server initilize strengths 
           var newStrengthColsDict = {wholesale: "wholesale", tower: "tower", retail: "retail"}
           
           var newStrengthCols = ["wholesale", "tower", "retail"]
           
-          strengthsResultArr.forEach(ele => {
-            
+          strengthsResult.data.forEach(ele => {
+
             if (!newStrengthColsDict.hasOwnProperty(ele.providerTypeId)){
               newStrengthColsDict[ele.providerTypeId] = ele.providerTypeId
               newStrengthCols.push(ele.providerTypeId)
@@ -736,7 +732,7 @@ import AroHttp from '../../common/aro-http'
       var changedModels = []
       for (var carrierId in strengthsById){
         for (var providerTypeId in strengthsById[carrierId]){
-          var strengthJSON = angular.toJson(strengthsById[carrierId][providerTypeId] )
+          var strengthJSON = JSON.stringify(strengthsById[carrierId][providerTypeId] )
           if (strengthJSON !== JSON.stringify(pristineStrengthsById[carrierId][providerTypeId])) {
             changedModels.push(JSON.parse(strengthJSON))
           }
@@ -809,6 +805,196 @@ import AroHttp from '../../common/aro-http'
     }
   }
 
+  // Impedance Editor
+
+  function reloadImpedanceManagerConfiguration (impedanceManagerId) {
+    return dispatch => {
+      AroHttp.get(`/service/v1/impedance-manager/${impedanceManagerId}`)
+        .then((result) => {
+          dispatch({
+            type: Actions.RESOURCE_EDITOR_IMPEDANCE_MANAGER,
+            payload: result.data
+          })
+        })
+        .catch(err => console.error(err))
+
+      AroHttp.get(`/service/v1/impedance-manager/${impedanceManagerId}/configuration`)
+        .then((result) => {
+          let impedanceManagerConfiguration = result.data
+          // The map is a set of key value pairs, we convert it to a sorted array
+          let orderedImpedanceMapKeys = Object.keys(impedanceManagerConfiguration.map)
+          orderedImpedanceMapKeys.sort((a, b) => (a < b) ? -1 : 1)
+          dispatch({
+            type: Actions.RESOURCE_EDITOR_IMPEDANCE_MANAGER_CONFIG,
+            payload: {
+              impedanceManagerConfiguration: impedanceManagerConfiguration,
+              orderedImpedanceMapKeys: orderedImpedanceMapKeys,
+            }
+          })
+        })
+        .catch((err) => console.error(err))
+    }
+  }
+
+  function saveImpedanceConfigurationToServer (impedanceManagerId, impedanceManagerConfiguration) {
+    return dispatch => {
+      AroHttp.put(`/service/v1/impedance-manager/${impedanceManagerId}/configuration`, impedanceManagerConfiguration)
+      .then(result => {
+        dispatch(setIsResourceEditor(true))
+        dispatch(getResourceManagers('impedance_mapping_manager'))
+      })
+      .catch((err) => console.error(err))
+    }
+  }
+
+  // TSM Manager
+
+  function reloadTsmManagerConfiguration (tsmManagerId) {
+    return dispatch => {
+      AroHttp.get(`/service/v1/tsm-manager/${tsmManagerId}`)
+      .then((result) => {
+        dispatch({
+          type: Actions.RESOURCE_EDITOR_TSM_MANAGER,
+          payload: result.data
+        })
+      })
+
+      AroHttp.get(`/service/v1/tsm-manager/${tsmManagerId}/strengths`)
+      .then((result) => {
+        let tsmManagerConfiguration = result.data
+        let pristineTsmManagerConfiguration = JSON.parse(JSON.stringify(result.data))
+
+        dispatch({
+          type: Actions.RESOURCE_EDITOR_TSM_MANAGER_CONFIG,
+          payload: {
+            tsmManagerConfiguration: tsmManagerConfiguration,
+            pristineTsmManagerConfiguration: pristineTsmManagerConfiguration,
+          }
+        })
+      })
+      .catch((err) => console.error(err))
+    }
+  }
+
+  function saveTsmConfigurationToServer (loggedInUser, tsmManagerId, tsmManagerConfiguration, pristineTsmManagerConfiguration) {
+
+    return dispatch => {
+      // Only save those configurations that have changed
+      var changedModels = []
+      tsmManagerConfiguration.forEach((tsmModel, index) => {
+        var pristineModel = pristineTsmManagerConfiguration[index]
+        if (pristineModel) {
+          // Check to see if the model has changed
+          if (JSON.stringify(pristineModel) !== JSON.stringify(tsmModel)) {
+            var tsmModelToSend = JSON.parse(JSON.stringify(tsmModel))
+            delete tsmModelToSend.dimensionName // Can't send this over to aro-service
+            changedModels.push(tsmModelToSend)
+          }
+        }
+      })
+
+      if (changedModels.length > 0) {
+        AroHttp.put(`/service/v1/tsm-manager/${tsmManagerId}/spends?refreshState=true&user_id=${loggedInUser.id}`, changedModels)
+        .then(result => {
+          dispatch(setIsResourceEditor(true))
+          dispatch(getResourceManagers('tsm_manager'))
+        })
+        .catch((err) => console.error(err))
+      } else {
+        console.log('TSM Editor: No models were changed. Nothing to save.')
+      }
+    }
+  }
+
+  // Rate Reach Manager
+
+  var matrixOrders = {}
+
+  function reloadRateReachManagerConfiguration (rateReachManagerId, loggedInUser) {
+
+    var rateReachConfig = []
+    return dispatch => {
+      AroHttp.get(`/service/rate-reach-matrix/resource/${rateReachManagerId}`)
+      .then((result) => {
+        dispatch({
+          type: Actions.RESOURCE_EDITOR_RATE_REACH_MANAGER,
+          payload: result.data
+        })
+      })
+      .catch(err => console.error(err))
+
+      AroHttp.get(`/service/rate-reach-matrix/resource/${rateReachManagerId}/config`)
+      .then(result => {
+        rateReachConfig = result.data
+        return loadAllTechnologyTypeDetails(loggedInUser, rateReachConfig)
+      })
+      .then(() => {
+        rateReachConfig = matrixMapsToOrderedArray(rateReachConfig)
+        dispatch({
+          type: Actions.RESOURCE_EDITOR_RATE_REACH_MANAGER_CONFIG,
+          payload: rateReachConfig
+        })      
+      })
+      .catch(err => console.error(err))
+    }
+  }
+
+    // Replaces matrix maps with ordered arrays and returns a new rate reach configuration. Used to show
+  // matrix maps in the correct order in the UI
+  function matrixMapsToOrderedArray (rateReachConfig) {
+    Object.keys(rateReachConfig.rateReachGroupMap).forEach(technologyType => {
+      var matrixMap = rateReachConfig.rateReachGroupMap[technologyType].matrixMap
+      var orderedMatrixMap = [] // Note, we are converting to an array
+      Object.keys(matrixMap).forEach(key => {
+        orderedMatrixMap.push({
+          id: key,
+          value: matrixMap[key]
+        })
+      })
+
+      // At the point the array is unordered. Order it!
+      orderedMatrixMap.sort((a, b) => {
+        // Slow check for indexOfs, but the array is small
+        const aIndex = matrixOrders[technologyType].findIndex(item => item.id === a.id)
+        const bIndex = matrixOrders[technologyType].findIndex(item => item.id === b.id)
+        return (aIndex < bIndex) ? -1 : 1
+      })
+      rateReachConfig.rateReachGroupMap[technologyType].matrixMap = orderedMatrixMap
+    })
+    return rateReachConfig
+  }
+
+  function loadAllTechnologyTypeDetails (loggedInUser, rateReachConfig) {
+    var ttPromises = []
+    Object.keys(rateReachConfig.rateReachGroupMap).forEach(technologyType => {
+      ttPromises.push(loadTechnologyTypeDetails(loggedInUser,technologyType))
+    })
+    return Promise.all(ttPromises)
+      .catch(err => console.error(err))
+  }
+
+  function loadTechnologyTypeDetails (loggedInUser, technologyType) {
+    var technologyTypeDetails = {}
+
+    return Promise.all([
+      AroHttp.get(`/service/rate-reach-matrix/network-structures?technology_type=${technologyType}&user_id=${loggedInUser.id}`),
+      AroHttp.get(`/service/rate-reach-matrix/technologies?technology_type=${technologyType}&user_id=${loggedInUser.id}`)
+    ])
+    .then(results => {
+      technologyTypeDetails[technologyType] = {
+        networkStructures: results[0].data,
+        technologies: {}
+      }
+      matrixOrders[technologyType] = results[1].data
+      results[1].data.forEach(technology => {
+        technologyTypeDetails[technologyType].technologies[technology.id] = technology
+      })
+      return Promise.resolve()
+    })
+    .catch(err => console.error(err))
+    
+  }
+
   export default {
     getResourceTypes,
     getResourceManagers,
@@ -834,5 +1020,10 @@ import AroHttp from '../../common/aro-http'
     loadCompManForStates,
     saveCompManConfig,
     reloadRoicManagerConfiguration,
-    saveRoicConfigurationToServer
+    saveRoicConfigurationToServer,
+    reloadImpedanceManagerConfiguration,
+    saveImpedanceConfigurationToServer,
+    reloadTsmManagerConfiguration,
+    saveTsmConfigurationToServer,
+    reloadRateReachManagerConfiguration
   }

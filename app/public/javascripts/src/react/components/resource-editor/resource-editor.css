@@ -72,4 +72,19 @@
 
 /* ---- Competition Manager End ----*/
 
+/* ---- TSM Manager Start ----*/
+
+#tblTsmModel td {
+  line-height: 33px; /* To vertically align text */
+}
+.sub-table-header {
+  background-color: darkgray;
+  color: black;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ---- TSM Manager End ----*/
+
+
 
