@@ -1742,6 +1742,7 @@ class State {
       // we commit a transaction.
       service.loadModifiedFeatures(service.plan.id)
         .then(() => service.requestMapLayerRefresh.next(null))
+        .then(() => service.loadNetworkAnalysisReport(service.plan.id))
         .catch(err => console.error(err))
     }
 
@@ -1826,6 +1827,7 @@ class State {
       setLocationFilters: locationFilters => dispatch(MapLayerActions.setLocationFilters(locationFilters)),
       setLocationFilterChecked: locationFilters => dispatch(MapLayerActions.setLocationFilterChecked(filterType, ruleKey, isChecked)),
       onFeatureSelectedRedux: features => dispatch(RingEditActions.onFeatureSelected(features)),
+      loadNetworkAnalysisReport: planId => dispatch(NetworkAnalysisActions.loadReport(planId)),
       setNetworkAnalysisConstraints: aroNetworkConstraints => dispatch(NetworkAnalysisActions.setNetworkAnalysisConstraints(aroNetworkConstraints)),
       setNetworkAnalysisConnectivityDefinition: (spatialEdgeType, networkConnectivityType) => dispatch(NetworkAnalysisActions.setNetworkAnalysisConnectivityDefinition(spatialEdgeType, networkConnectivityType)),
       setOptimizationInputs: inputs => dispatch(NetworkOptimizationActions.setOptimizationInputs(inputs)),

@@ -23,6 +23,7 @@ export class NetworkOptimizationButton extends ProgressButton {
     }
 
     this.unsubscriber = socketManager.subscribe('PROGRESS_MESSAGE_DATA', (progressData) => {
+      console.log(progressData)
       if (progressData.data.processType === 'optimization') {
         this.props.setActivePlanState(progressData.data.optimizationState)
         this.props.setAnalysisProgress(progressData.data.progress)

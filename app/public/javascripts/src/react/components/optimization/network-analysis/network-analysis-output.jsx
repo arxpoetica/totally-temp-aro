@@ -67,14 +67,19 @@ export class NetworkAnalysisOutput extends Component {
   }
 
   componentWillReceiveProps (nextProps) {
+    // this doesn't belong here
+    // on event action reloads reports
+    // this module just shows what ever reports are loaded into state
     // If the plan state changes (e.g. when optimization is finished), either clear the old report or load the new one
     if (this.props.activePlanState !== nextProps.activePlanState) {
       if (nextProps.activePlanState === PlanStates.START_STATE) {
         this.props.clearOutput()
       } else {
+        /*
         console.log('componentWillReceiveProps')
         console.log(nextProps)
         this.props.loadReport(this.props.planId)
+        */
       }
     }
   }
