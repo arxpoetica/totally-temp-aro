@@ -4,14 +4,14 @@ import MapLayerActions from '../../react/components/map-layers/map-layer-actions
 
 // We need a selector, else the .toJS() call will create an infinite digest loop
 // https://www.npmjs.com/package/reselect
-const getAllNetworkEquipmentLayers = reduxState => reduxState.mapLayers.networkEquipment
-const getNetworkEquipmentLayersList = createSelector([getAllNetworkEquipmentLayers], networkEquipmentLayers => networkEquipmentLayers)
-const getCablesArray = createSelector([getAllNetworkEquipmentLayers], networkEquipmentLayers => {
-  var cablesArray = []
-  if (networkEquipmentLayers.cables) {
-    Object.keys(networkEquipmentLayers.cables).forEach(key => cablesArray.push(networkEquipmentLayers.cables[key]))
+const getAllCopperLayers = reduxState => reduxState.mapLayers.copper
+const getCopperLayersList = createSelector([getAllCopperLayers], copperLayers => copperLayers)
+const getCopperArray = createSelector([getAllCopperLayers], copperLayers => {
+  var copperArray = []
+  if (copperLayers.categories) {
+    Object.keys(copperLayers.categories).forEach(key => copperArray.push(copperLayers.categories[key]))
   }
-  return cablesArray
+  return copperArray
 })
 
 class CopperController {
@@ -100,7 +100,7 @@ class CopperController {
       if (networkEquipment.equipmentType !== 'point' ||
         this.usePointAggregate ||
         this.mapRef.getZoom() > networkEquipment.aggregateZoomThreshold) {
-        if (this.state.cableLayerTypeVisibility.existing && networkEquipment.checked) {
+        if (networkEquipment.checked) {
           // We need to show the existing network equipment. Loop through all the selected library ids.
           this.dataItems && this.dataItems[networkEquipment.dataItemKey] &&
             this.dataItems[networkEquipment.dataItemKey].selectedLibraryItems.forEach((selectedLibraryItem) => {
@@ -108,13 +108,6 @@ class CopperController {
               mapLayers[mapLayerKey] = this.createSingleMapLayer(categoryItemKey, categoryType, networkEquipment, 'existing', selectedLibraryItem.identifier, null)
               createdMapLayerKeys.add(mapLayerKey)
             })
-        }
-
-        if (this.state.cableLayerTypeVisibility.planned && networkEquipment.checked && this.planId) {
-          // We need to show the planned network equipment for this plan.
-          var mapLayerKey = `${categoryItemKey}_planned`
-          mapLayers[mapLayerKey] = this.createSingleMapLayer(categoryItemKey, categoryType, networkEquipment, 'planned', null, this.planId)
-          createdMapLayerKeys.add(mapLayerKey)
         }
       }
 
@@ -124,7 +117,7 @@ class CopperController {
   }
 
   updateMapLayers () {
-    if (!this.networkEquipmentLayers) return
+    if (!this.copperLayers) return
     // Make a copy of the state mapLayers. We will update this
     var oldMapLayers = angular.copy(this.state.mapLayers.getValue())
 
@@ -135,18 +128,10 @@ class CopperController {
 
     // Create layers for network equipment nodes and cables
     this.createdMapLayerKeys.clear()
-    this.createMapLayersForCategory(this.networkEquipmentLayers.cables, 'cable', oldMapLayers, this.createdMapLayerKeys)
+    this.createMapLayersForCategory(this.copperLayers.cables, 'cable', oldMapLayers, this.createdMapLayerKeys)
 
     // "oldMapLayers" now contains the new layers. Set it in the state
     this.state.mapLayers.next(oldMapLayers)
-  }
-
-  // Change the visibility of a network equipment layer. layerObj should refer to an object
-  // in state.js --> networkEquipments[x].layers
-  changeLayerVisibility (layerObj, isVisible) {
-    // "visibilityType" allows us to distinguish between planned and existing layers
-    layerObj.checked = isVisible
-    this.updateMapLayers()
   }
 
   syncRulerOptions (layerKey, isLayerEnabled) {
@@ -169,8 +154,8 @@ class CopperController {
   mapStateToThis (reduxState) {
     return {
       planId: reduxState.plan.activePlan && reduxState.plan.activePlan.id,
-      networkEquipmentLayers: getNetworkEquipmentLayersList(reduxState),
-      cablesArray: getCablesArray(reduxState),
+      copperLayers: getCopperLayersList(reduxState),
+      copperArray: getCopperArray(reduxState),
       dataItems: reduxState.plan.dataItems,
       mapRef: reduxState.map.googleMaps
     }
@@ -178,20 +163,16 @@ class CopperController {
 
   mapDispatchToTarget (dispatch) {
     return {
-      setNetworkEquipmentLayers: (networkEquipmentLayers) => dispatch(MapLayerActions.setNetworkEquipmentLayers(networkEquipmentLayers)),
+      setcopperLayers: (copperLayers) => dispatch(MapLayerActions.setCopperLayers(copperLayers)),
       updateLayerVisibility: (layerType, layer, isVisible) => {
         // First set the visibility of the current layer
-        dispatch(MapLayerActions.setNetworkEquipmentLayerVisibility(layerType, layer, isVisible))
-      },
-      setCableConduitVisibility: (cableKey, conduitKey, isVisible) => dispatch(MapLayerActions.setCableConduitVisibility(cableKey, conduitKey, isVisible)),
-      updateType: (visibilityType, isVisible) => {
-        dispatch(MapLayerActions.setNetworkEquipmentLayerVisibilityType(visibilityType, isVisible))
+        dispatch(MapLayerActions.setCopperLayerVisibility(layerType, layer, isVisible))
       }
     }
   }
 
   mergeToTarget (nextState, actions) {
-    const currentNetworkEquipmentLayers = this.networkEquipmentLayers
+    const currentcopperLayers = this.copperLayers
     const currentSelectedLibrary = this.dataItems && this.dataItems.fiber && this.dataItems.fiber.selectedLibraryItems
 
     // merge state and actions onto controller
@@ -199,7 +180,7 @@ class CopperController {
     Object.assign(this, actions)
 
     const newSelectedLibrary = this.dataItems && this.dataItems.fiber && this.dataItems.fiber.selectedLibraryItems
-    if ((currentNetworkEquipmentLayers !== nextState.networkEquipmentLayers) ||
+    if ((currentcopperLayers !== nextState.copperLayers) ||
       (currentSelectedLibrary !== newSelectedLibrary)) {
       this.updateMapLayers()
     }

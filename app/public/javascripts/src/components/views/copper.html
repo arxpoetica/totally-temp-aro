@@ -52,14 +52,14 @@
           <div class="col-md-12">
             <table class="table table-sm">
               <tbody>
-                <tr ng-repeat="cableLayer in $ctrl.cablesArray | orderBy: 'listIndex'">
+                <tr ng-repeat="copperLayer in $ctrl.copperArray | orderBy: 'listIndex'">
                   <td>
                     <div>
-                      <div class="row-left" ng-click="$ctrl.toggleOpenRow(cableLayer.key)">
-                        <div class="box" ng-style="{ 'background-color': $ctrl.getBackgroundColor(cableLayer) }"></div>{{cableLayer.label}}
+                      <div class="row-left" ng-click="$ctrl.toggleOpenRow(copperLayer.key)">
+                        <div class="box" ng-style="{ 'background-color': $ctrl.getBackgroundColor(copperLayer) }"></div>{{copperLayer.label}}
                       </div>
                       <div class="row-right">
-                        <input type="checkbox" class="checkboxfill" ng-checked="cableLayer.checked" ng-click="$ctrl.updateLayerVisibility('copper', cableLayer, !cableLayer.checked)">
+                        <input type="checkbox" class="checkboxfill" ng-checked="copperLayer.checked" ng-click="$ctrl.updateLayerVisibility('copper', copperLayer, !copperLayer.checked)">
                       </div>
                     </div>
                   </td>
