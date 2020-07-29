@@ -60,6 +60,46 @@ function setLocationFilterChecked (state, filterType, ruleKey, isChecked) {
   }
 }
 
+function setCopperLayerVisibility (state, layerType, layer, subtype, visibility) {
+  var newState = { ...state }
+  // First determine which category/key (e.g. 'location' the layer belongs to)
+  var layerToChange = null
+  var layerKey = null
+  var anyVisibility = visibility
+  Object.keys(state['networkEquipment'][layerType]).forEach((key, index) => {
+    const stateLayer = state['networkEquipment'][layerType][key]
+    if (stateLayer.key === layer.key) {
+      layerToChange = stateLayer
+      layerKey = key
+    }
+  })
+  var subtypes = { ...layerToChange.subtypes }
+  subtypes[subtype] = visibility
+  if (!anyVisibility) {
+    Object.keys(subtypes).forEach(key => {
+      // if any of the subtypes are visible we need to get the whole layer 
+      // then tile renderer will filter by subtype
+      anyVisibility = anyVisibility || subtypes[key]
+    })
+  }
+  // Create a new layer with the checked flag set
+  const newLayer = { ...layerToChange, checked: anyVisibility, subtypes: subtypes }
+
+  // Replace this category in the state
+  newState = {
+    ...newState,
+    networkEquipment: {
+      ...newState.networkEquipment,
+      [layerType]: {
+        ...newState.networkEquipment[layerType],
+        [layerKey]: newLayer
+      }
+    }
+  }
+
+  return newState
+}
+
 function setNetworkEquipmentLayerVisibility (state, layerType, layer, subtype, visibility) {
   var newState = { ...state }
   // First determine which category/key (e.g. 'location' the layer belongs to)
@@ -229,7 +269,10 @@ function mapLayersReducer (state = defaultState, action) {
 
     case Actions.LAYERS_SET_COPPER:
       return setLayers(state, 'copper', action.payload)
-        
+    
+    case Actions.LAYERS_SET_COPPER_VISIBILITY:
+      return setCopperLayerVisibility(state, action.payload.layerType, action.payload.layer, action.payload.subtype, action.payload.visibility)
+      
     case Actions.LAYERS_SET_NETWORK_EQUIPMENT:
       return setLayers(state, 'networkEquipment', action.payload)
 

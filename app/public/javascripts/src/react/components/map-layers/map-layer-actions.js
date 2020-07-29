@@ -64,6 +64,18 @@ function setNetworkEquipmentLayerVisibility (layerType, layer, newVisibility) {
   }
 }
 
+function setCopperLayerVisibility (layerType, layer, newVisibility) {
+  return {
+    type: Actions.LAYERS_SET_COPPER_VISIBILITY,
+    payload: {
+      layerType: layerType,
+      layer: layer,
+      subtype: 0,
+      visibility: newVisibility
+    }
+  }
+}
+
 function setNetworkEquipmentSubtypeVisibility (layerType, layer, subtypeId, newVisibility) {
   return {
     type: Actions.LAYERS_SET_NETWORK_EQUIPMENT_VISIBILITY,
@@ -211,6 +223,7 @@ export default {
   setConstructionSiteLayers,
   setBoundaryLayers,
   setCopperLayers,
+  setCopperLayerVisibility,
   setShowSiteBoundary,
   loadAnnotationsForUser,
   saveAnnotationsForUser,
