@@ -19,9 +19,7 @@ export class NetworkAnalysisOutput extends Component {
   }
 
   render () {
-    console.log('render')
     const hasChartData = Boolean(this.props.chartReportDefinition && this.props.chartReport && this.props.chartReport.length > 0)
-    console.log(hasChartData)
     if (hasChartData) {
       // Why setTimeout()? We need the chart to be rendered with the right display style, THEN we create the chart.
       this.updateChartDefinition()
@@ -67,20 +65,10 @@ export class NetworkAnalysisOutput extends Component {
   }
 
   componentWillReceiveProps (nextProps) {
-    // this doesn't belong here
-    // on event action reloads reports
-    // this module just shows what ever reports are loaded into state
     // If the plan state changes (e.g. when optimization is finished), either clear the old report or load the new one
-    if (this.props.activePlanState !== nextProps.activePlanState) {
-      if (nextProps.activePlanState === PlanStates.START_STATE) {
-        this.props.clearOutput()
-      } else {
-        /*
-        console.log('componentWillReceiveProps')
-        console.log(nextProps)
-        this.props.loadReport(this.props.planId)
-        */
-      }
+    if (this.props.activePlanState !== nextProps.activePlanState &&
+        nextProps.activePlanState === PlanStates.START_STATE) {
+      this.props.clearOutput() // not sure this belongs here
     }
   }
 

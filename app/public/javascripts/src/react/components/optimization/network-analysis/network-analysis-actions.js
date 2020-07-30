@@ -5,7 +5,6 @@ import { batch } from 'react-redux'
 
 // ToDo: other than report, I'm not sure this is used
 function loadReport (planId) {
-  console.log('--- load report ---')
   return dispatch => {
     // First get reports metadata so we can find the id of the optimization_analysis report
     AroHttp.get('/service/v2/installed/report/meta-data')
@@ -21,7 +20,6 @@ function loadReport (planId) {
         // Get the report definition and actual report for this plan id
         const reportModuleId = optimizationReports[0].id
         return Promise.all([
-          // /service-download-file SOMETIMES comes back as [] if the report is large and we haven't waited long enough since the analysis has ended
           AroHttp.get(`/service-download-file/test.json/v2/report-extended/${reportModuleId}/${planId}.json`),
           AroHttp.get(`/service/v2/report-module/${reportModuleId}`)
         ])

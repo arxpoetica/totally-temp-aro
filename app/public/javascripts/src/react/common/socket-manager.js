@@ -88,7 +88,7 @@ class SocketManager {
   }
 
   routeMessage (message) {
-    console.log([message.properties.headers.eventType, message])
+    // console.log([message.properties.headers.eventType, message])
     const subscribers = this.router[message.properties.headers.eventType] || []
     subscribers.forEach(subscriber => subscriber(message))
   }
