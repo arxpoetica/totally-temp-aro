@@ -29,7 +29,11 @@ class RoadSegmentDetailController {
       } else if (this.isFeatureListEmpty(event)) {
         this.selectedEdgeInfo = null
         this.updateSelectedState()
-        this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO
+        // this check maybe needs to go at the top of this function (symptom of larger problem)
+        if (this.state.activeViewModePanel === this.state.viewModePanels.ROAD_SEGMENT_INFO) {
+          // ToDo: this doesn't belog here it's a symptom of a larger problem
+          this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO
+        }
         this.$timeout()
       }
     })

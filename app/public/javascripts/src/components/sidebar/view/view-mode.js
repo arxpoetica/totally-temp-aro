@@ -78,7 +78,8 @@ class ViewModeController {
     Object.assign(this, nextState)
     Object.assign(this, actions)
     if ((currentSelectedLocations !== nextState.selectedLocations) &&
-      (this.state.activeViewModePanel !== this.state.viewModePanels.EDIT_LOCATIONS)) {
+      (this.state.activeViewModePanel !== this.state.viewModePanels.EDIT_LOCATIONS) &&
+      (this.state.activeViewModePanel !== this.state.viewModePanels.EDIT_SERVICE_LAYER)) {
       const firstLocationId = nextState.selectedLocations.values().next().value
       this.updateSelectedState(firstLocationId)
       if (firstLocationId) {
