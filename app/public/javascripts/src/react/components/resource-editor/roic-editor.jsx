@@ -95,7 +95,7 @@ export class RoicEditor extends Component {
           }
         </ul>
 
-        <div className="container" style={{maxHeight: '520px', overflowY: 'auto', marginTop: '10px'}}>
+        <div className="container" style={{display: 'flex', flexDirection: 'column', height: '100%', marginTop: '10px'}}>
           {activeTab === 'roicSettingsConfiguration' &&
             <div className="row">
               

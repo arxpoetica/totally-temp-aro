@@ -909,6 +909,7 @@ import AroHttp from '../../common/aro-http'
   // Rate Reach Manager
 
   var matrixOrders = {}
+  var technologyTypeDetails = {}
 
   function reloadRateReachManagerConfiguration (rateReachManagerId, loggedInUser) {
 
@@ -932,7 +933,10 @@ import AroHttp from '../../common/aro-http'
         rateReachConfig = matrixMapsToOrderedArray(rateReachConfig)
         dispatch({
           type: Actions.RESOURCE_EDITOR_RATE_REACH_MANAGER_CONFIG,
-          payload: rateReachConfig
+          payload: {
+            rateReachConfig: rateReachConfig,
+            technologyTypeDetails: technologyTypeDetails,
+          }
         })      
       })
       .catch(err => console.error(err))
@@ -974,7 +978,6 @@ import AroHttp from '../../common/aro-http'
   }
 
   function loadTechnologyTypeDetails (loggedInUser, technologyType) {
-    var technologyTypeDetails = {}
 
     return Promise.all([
       AroHttp.get(`/service/rate-reach-matrix/network-structures?technology_type=${technologyType}&user_id=${loggedInUser.id}`),
@@ -992,7 +995,34 @@ import AroHttp from '../../common/aro-http'
       return Promise.resolve()
     })
     .catch(err => console.error(err))
-    
+  }
+
+  function saveRateReachConfig (rateReachManagerId, rateReachConfig) {
+
+    return dispatch => {
+      var configuration = JSON.parse(angular.toJson(rateReachConfig)) // Remove angularjs-specific properties from object
+      configuration = orderedArrayToMatrixMaps(configuration) // Transform object in aro-service format
+      AroHttp.put(`/service/rate-reach-matrix/resource/${rateReachManagerId}/config`, configuration)
+      .then(result => {
+        dispatch(setIsResourceEditor(true))
+        dispatch(getResourceManagers('rate_reach_manager'))
+      })
+      .catch((err) => console.error(err))
+    }
+  }
+
+  // Replaces ordered arrays with matrix maps and returns a new rate reach configuration. Used to convert
+  // from ui-specific arrays to something that aro-service can process.
+  function orderedArrayToMatrixMaps (rateReachConfig) {
+    Object.keys(rateReachConfig.rateReachGroupMap).forEach(technologyType => {
+      var matrixMapArray = rateReachConfig.rateReachGroupMap[technologyType].matrixMap
+      var matrixMap = {}
+      matrixMapArray.forEach(item => {
+        matrixMap[item.id] = item.value
+      })
+      rateReachConfig.rateReachGroupMap[technologyType].matrixMap = matrixMap
+    })
+    return rateReachConfig
   }
 
   export default {
@@ -1025,5 +1055,6 @@ import AroHttp from '../../common/aro-http'
     saveImpedanceConfigurationToServer,
     reloadTsmManagerConfiguration,
     saveTsmConfigurationToServer,
-    reloadRateReachManagerConfiguration
+    reloadRateReachManagerConfiguration,
+    saveRateReachConfig
   }

@@ -279,9 +279,12 @@ import Actions from '../../common/actions'
     }
   }
 
-  function setRateReachManagerConfiguration (state, rateReachManagerConfig) {
+  function setRateReachManagerConfiguration (state, rateReachConfig, technologyTypeDetails) {
     return { ...state,
-      rateReachManagerConfig: rateReachManagerConfig
+      rateReachManagerConfigs: {
+        rateReachConfig: rateReachConfig,
+        technologyTypeDetails: technologyTypeDetails,
+      }
     }
   }
 
@@ -366,7 +369,7 @@ import Actions from '../../common/actions'
         return setRateReachManager(state, action.payload)  
         
       case Actions.RESOURCE_EDITOR_RATE_REACH_MANAGER_CONFIG:
-        return setRateReachManagerConfiguration(state, action.payload)         
+        return setRateReachManagerConfiguration(state, action.payload.rateReachConfig, action.payload.technologyTypeDetails)         
   
     default:
       return state
