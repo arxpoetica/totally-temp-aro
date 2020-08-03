@@ -628,18 +628,22 @@ class MapTileRenderer {
             // check if show conduit is on for this fiber type and change color accordingly
             // ToDo: this needs to be generalized to work with all types,
             //    .conduits and .roads shouldn't be hardcoded, they are dynamic from service
+            // console.log([mapLayer, feature])
             if (feature.properties.spatial_edge_type &&
               mapLayer && mapLayer.tileDefinitions && 
               mapLayer.tileDefinitions.length > 0 && mapLayer.tileDefinitions[0].fiberType) {
               
               var edgeType = feature.properties.spatial_edge_type
               var fiberType = mapLayer.tileDefinitions[0].fiberType
+              // console.log([fiberType, edgeType])
               if (this.stateMapLayers.networkEquipment.cables[fiberType] &&
                 this.stateMapLayers.networkEquipment.cables[fiberType].conduitVisibility[edgeType]) {
                 
                 if (this.stateMapLayers.networkEquipment.conduits[edgeType]) {
+                  console.log('swap to conduits')
                   drawingStyles.strokeStyle = this.stateMapLayers.networkEquipment.conduits[edgeType].drawingOptions.strokeStyle
                 } else if (this.stateMapLayers.networkEquipment.roads[edgeType]) {
+                  console.log('swap to roads')
                   drawingStyles.strokeStyle = this.stateMapLayers.networkEquipment.roads[edgeType].drawingOptions.strokeStyle
                 }
                 
