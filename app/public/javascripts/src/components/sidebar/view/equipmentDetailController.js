@@ -61,7 +61,6 @@ class EquipmentDetailController {
         fiber.attributes = {}
         this.selectedFiber = fiber
         var fiberId = fiber.id || fiber.link_id
-        console.log(this.selectedFiber)
         this.$http.get(`/service/plan-feature/${plan.id}/fiber/${fiberId}?userId=${userId}`)
           .then(result => {
             fiber.attributes = result.data.attributes
