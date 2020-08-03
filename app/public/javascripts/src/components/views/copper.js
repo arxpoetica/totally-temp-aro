@@ -58,13 +58,8 @@ class CopperController {
 
   // Creates a single map layer by substituting tileDefinition parameters
   createSingleMapLayer (equipmentOrFiberKey, categoryType, networkEquipment, existingOrPlanned, libraryId, rootPlanId) {
-    var existingOrPlannedzIndex = this.state.configuration.networkEquipment.tileDefinitions[categoryType][existingOrPlanned].zIndex
-    var tileDefinition = angular.copy(this.state.configuration.networkEquipment.tileDefinitions[categoryType][existingOrPlanned])
-    delete tileDefinition.zIndex
-    this.objectKeyReplace(tileDefinition, '{networkNodeType}', equipmentOrFiberKey)
-    this.objectKeyReplace(tileDefinition, '{fiberType}', equipmentOrFiberKey)
+    var tileDefinition = angular.copy(this.state.configuration.copperCategories.categories.UNKNOWN.tileDefinitions[0])
     this.objectKeyReplace(tileDefinition, '{libraryId}', libraryId)
-    this.objectKeyReplace(tileDefinition, '{rootPlanId}', rootPlanId)
 
     if (networkEquipment.equipmentType === 'line') {
       var lineTransform = this.getLineTransformForLayer(+networkEquipment.aggregateZoomThreshold)
@@ -85,7 +80,7 @@ class CopperController {
       opacity: networkEquipment.drawingOptions.opacity || 0.5,
       drawingOptions: drawingOptions,
       selectable: true,
-      zIndex: networkEquipment.zIndex + (existingOrPlannedzIndex || 0),
+      zIndex: networkEquipment.zIndex,
       showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection && this.state.showDirectedCable, // Showing Direction
       highlightStyle: networkEquipment.highlightStyle
     }
@@ -112,7 +107,7 @@ class CopperController {
       }
 
       // Sync ruler option
-      networkEquipment.key === 'COPPER' && this.syncRulerOptions(networkEquipment.key, networkEquipment.checked)
+      networkEquipment.key === 'UNKNOWN' && this.syncRulerOptions(networkEquipment.key, networkEquipment.checked)
     })
   }
 
@@ -128,7 +123,7 @@ class CopperController {
 
     // Create layers for network equipment nodes and cables
     this.createdMapLayerKeys.clear()
-    this.createMapLayersForCategory(this.copperLayers.cables, 'cable', oldMapLayers, this.createdMapLayerKeys)
+    this.createMapLayersForCategory(this.copperLayers.categories, 'UNKNOWN', oldMapLayers, this.createdMapLayerKeys)
 
     // "oldMapLayers" now contains the new layers. Set it in the state
     this.state.mapLayers.next(oldMapLayers)

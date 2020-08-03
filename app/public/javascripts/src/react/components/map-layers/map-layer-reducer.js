@@ -65,35 +65,26 @@ function setCopperLayerVisibility (state, layerType, layer, subtype, visibility)
   // First determine which category/key (e.g. 'location' the layer belongs to)
   var layerToChange = null
   var layerKey = null
-  var anyVisibility = visibility
-  Object.keys(state['networkEquipment'][layerType]).forEach((key, index) => {
-    const stateLayer = state['networkEquipment'][layerType][key]
+  Object.keys(state['copper']['categories']).forEach((key, index) => {
+    const stateLayer = state['copper']['categories'][layerType]
     if (stateLayer.key === layer.key) {
       layerToChange = stateLayer
       layerKey = key
     }
   })
-  var subtypes = { ...layerToChange.subtypes }
-  subtypes[subtype] = visibility
-  if (!anyVisibility) {
-    Object.keys(subtypes).forEach(key => {
-      // if any of the subtypes are visible we need to get the whole layer 
-      // then tile renderer will filter by subtype
-      anyVisibility = anyVisibility || subtypes[key]
-    })
-  }
+
   // Create a new layer with the checked flag set
-  const newLayer = { ...layerToChange, checked: anyVisibility, subtypes: subtypes }
+  const newLayer = { ...layerToChange, checked: visibility, subtypes: subtype }
 
   // Replace this category in the state
   newState = {
     ...newState,
-    networkEquipment: {
-      ...newState.networkEquipment,
-      [layerType]: {
-        ...newState.networkEquipment[layerType],
-        [layerKey]: newLayer
-      }
+    copper: {
+      ...newState.copper,
+        categories: {
+          ...newState.copper.categories,
+          [layerType]: newLayer
+        }
     }
   }
 
