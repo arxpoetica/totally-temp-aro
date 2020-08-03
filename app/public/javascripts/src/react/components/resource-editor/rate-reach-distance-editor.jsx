@@ -9,7 +9,7 @@ export class RateReachDistanceEditor extends Component {
     this.state = {
       editableCategories: [],
       isCategoryInEditMode: false,
-      rateReachGroupMaps: ''
+      categories: ''
     }
 
     this.editableCategories = []
@@ -17,21 +17,53 @@ export class RateReachDistanceEditor extends Component {
   }  
 
   componentDidMount () {
-    this.setState({rateReachGroupMaps: this.props.rateReachGroupMap})  
+    // Use JQuery-UI Sortable to allow the table rows to be sorted using drag-and-drop
+    const sortableBody = jQuery('#rateReachDistanceEditorSortableBody')
+    sortableBody.sortable({
+      handle: '.row-draggable-handle',
+      stop: this.handleSortOrderChanged.bind(this)
+    })
+    sortableBody.disableSelection()
+  }
 
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if(prevState.categories === ''){
+      return {
+        categories: nextProps.categories,
+      };
+    } else {
+        return {
+          categories: nextProps.categories,
+        };
+    }
+  }
+
+  handleSortOrderChanged (event, ui) {
+    // The JQuery UI "sortable" widget has sorted the <tr> with the category, but our model has not updated.
+    // We will loop through the <tr>'s in the DOM and create a new model array with the new order, and then
+    // force angularjs to re-bind to our new model array.
+    const newCategories = []
+    const tableRows = jQuery('#rateReachDistanceEditorSortableBody tr')
+    for (var iRow = 0; iRow < tableRows.length; ++iRow) {
+      // The element ID contains the old index of the category
+      const rowId = tableRows[iRow].id
+      const oldIndex = +rowId.substring(rowId.lastIndexOf('_') + 1)
+      newCategories[iRow] = this.state.categories[oldIndex]
+    }
+    this.props.onRateReachEditChange(newCategories)
+    this.setState({categories: newCategories }) 
   }
 
   render () {
-    return this.renderRateReachDistanceEditor()
+    return this.state.categories === null
+    ? null
+    : this.renderRateReachDistanceEditor()
   }
 
   renderRateReachDistanceEditor()  {
 
-    const {categoryDescription, technologies, rateReachGroupMap, selectedTechnologyType, categories, categoryType} = this.props
-    const {editableCategories, rateReachGroupMaps} = this.state
-
-    // console.log(categories)
-    // console.log(editableCategories)
+    const {categoryDescription, technologies, rateReachGroupMap, selectedTechnologyType, categoryType} = this.props
+    const {editableCategories, categories} = this.state
 
     return (
       <>
@@ -39,7 +71,7 @@ export class RateReachDistanceEditor extends Component {
           <table id="tblrateReachConfig" className="table table-sm table-striped">
             <thead className="thead-dark">
               <tr>
-              <th>&nbsp;&nbsp;&nbsp;</th> {/*  <!-- This is for the draggable handle for each row --> */}
+              <th>&nbsp;&nbsp;&nbsp;</th> {/*<!-- This is for the draggable handle for each row --> */}
                 <th style={{minWidth: '200px'}}>{categoryDescription}</th>
                 {rateReachGroupMap[selectedTechnologyType].matrixMap.map((item, keyValue) => {
                   return (
@@ -101,33 +133,15 @@ export class RateReachDistanceEditor extends Component {
               }
             </tbody>
           </table>
-        </div><br/>
+        </div>
         <div style={{flex: '0 0 auto'}}>
+          <div style={{textAlign: 'left'}}>
             {/* If the user is allowed to edit categories, show a button to add categories */}
-            <div className="row">
-              <div className="col-lg-6">
-                <button className="btn btn-light" onClick={(e)=>this.addCategory()}>Add</button>
-              </div>
-              <div className="col-lg-6">
-                <button className="btn btn-light mr-2" onClick={() => this.exitEditingMode()}>
-                  <i className="fa fa-undo action-button-icon"></i>Discard changes
-                </button>
-                <button className="btn btn-primary" onClick={() => this.saveConfigurationToServer()}>
-                  <i className="fa fa-save action-button-icon"></i>Save
-                </button>
-              </div>
-            </div>
+            <button className="btn btn-light" onClick={(e)=>this.addCategory()}>Add</button>
+          </div>
         </div>
       </>
     )
-  }
-
-  exitEditingMode(){
-    this.props.onDiscard()
-  }
-
-  saveConfigurationToServer(){
-    this.props.onSave()
   }
 
   handleRateReachGroupMapChange(e, selectedTechnologyType, index, techIndex){
@@ -144,13 +158,13 @@ export class RateReachDistanceEditor extends Component {
 
   handleCategoryInEditMode(index){
     this.isCategoryInEditMode[index] = true 
-    this.editableCategories = []   
-    if (this.props.categories) {
-      this.props.categories.forEach(category => {
+    this.editableCategories = []
+    if (this.state.categories) {
+      this.state.categories.forEach(category => {
         this.editableCategories.push((this.props.categoryType === 'SPEED') ? SpeedCategory.fromServiceCategory(category) : category)
       })
     }
-    this.setState({editableCategories: this.editableCategories })  
+    this.setState({editableCategories: this.editableCategories })
   }
 
   addCategory () {
@@ -159,17 +173,18 @@ export class RateReachDistanceEditor extends Component {
     var newCategory = null
     if (this.props.categoryType === 'SPEED') {
       newCategory = new SpeedCategory(1, 'Mbps')
-      this.props.categories.push(newCategory.toServiceCategory())
+      this.state.categories.push(newCategory.toServiceCategory())
     } else {
       newCategory = {
         name: 'New category',
         description: 'New category'
       }
-      this.props.categories.push(newCategory)
+      this.state.categories.push(newCategory)
     }
     this.editableCategories.push(newCategory)
 
     this.setState({editableCategories: this.editableCategories})
+    this.props.onRateReachEditChange(this.state.categories)
 
     Object.keys(this.props.rateReachGroupMap).forEach(technology => {
       Object.keys(this.props.rateReachGroupMap[technology].matrixMap).forEach((technologyRef, index) => {
@@ -182,9 +197,10 @@ export class RateReachDistanceEditor extends Component {
   }
 
   removeCategory (categoryIndex) {
-    this.props.categories.splice(categoryIndex, 1)
+    this.state.categories.splice(categoryIndex, 1)
     this.isCategoryInEditMode.splice(categoryIndex, 1)
     this.setState({isCategoryInEditMode: this.isCategoryInEditMode})
+    this.props.onRateReachEditChange(this.state.categories)
     Object.keys(this.props.rateReachGroupMap).forEach(technology => {
       Object.keys(this.props.rateReachGroupMap[technology].matrixMap).forEach((technologyRef, index) => {
         this.props.rateReachGroupMap[technology].matrixMap[index].value.splice(categoryIndex, 1)
@@ -195,8 +211,8 @@ export class RateReachDistanceEditor extends Component {
   saveCategory (index) {
     // Copies over the "editable" category onto the service-formatted category
     if (this.props.categoryType === 'SPEED') {
-      this.props.categories[index] = this.editableCategories[index].toServiceCategory()
-      this.props.onRateReachEditChange(this.props.categories)
+      this.state.categories[index] = this.editableCategories[index].toServiceCategory()
+      this.props.onRateReachEditChange(this.state.categories)
       // We should also copy over the speeds to all the distance/speed maps
       const multiplier = this.editableCategories[index].units === 'Gbps' ? 1000 : 1
       const speedMbps = this.editableCategories[index].speed * multiplier
@@ -210,8 +226,8 @@ export class RateReachDistanceEditor extends Component {
         })
       })
     } else {
-      this.props.categories[index] = this.editableCategories[index]
-      this.props.onRateReachEditChange(this.props.categories)
+      this.state.categories[index] = this.editableCategories[index]
+      this.props.onRateReachEditChange(this.state.categories)
       this.setState({isCategoryInEditMode: false })
       // No need to copy over the speeds to the distance/speed maps
     }
@@ -264,7 +280,7 @@ class SpeedCategory {
     loggedInUser: state.user.loggedInUser,
     rateReachManager: state.resourceEditor.rateReachManager,
     rateReachManagerConfigs: state.resourceEditor.rateReachManagerConfigs,
-  })   
+  })
 
   const mapDispatchToProps = (dispatch) => ({
     setIsResourceEditor: (status) => dispatch(ResourceActions.setIsResourceEditor(status)),

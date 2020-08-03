@@ -30,8 +30,6 @@ export class RateReachEditor extends Component {
     }
     this.handleRateReachEditorChange = this.handleRateReachEditorChange.bind(this)
     this.handleRateReachMatrixChange = this.handleRateReachMatrixChange.bind(this)
-    this.exitEditingMode = this.exitEditingMode.bind(this)
-    this.saveConfigurationToServer = this.saveConfigurationToServer.bind(this)
   }  
 
   componentDidMount () {
@@ -127,8 +125,6 @@ export class RateReachEditor extends Component {
                   allowEditableCategories={rateReachManagerConfigs.rateReachConfig.categoryType === 'SPEED'}
                   onRateReachEditChange={this.handleRateReachEditorChange}
                   onRateReachMatrixChange={this.handleRateReachMatrixChange}
-                  onDiscard={this.exitEditingMode}
-                  onSave={this.saveConfigurationToServer}
                 >
                 </RateReachDistanceEditor>
               }  
@@ -148,18 +144,16 @@ export class RateReachEditor extends Component {
             </div>
           </div>
         </div>
-        {selectedEditingMode === this.editingModes.RATE_REACH_RATIOS &&
-          <div style={{flex: '0 0 auto'}}>
-            <div style={{textAlign: 'right'}}>
-              <button className="btn btn-light mr-2" onClick={() => this.exitEditingMode()}>
-                <i className="fa fa-undo action-button-icon"></i>Discard changes
-              </button>
-              <button className="btn btn-primary" onClick={() => this.saveConfigurationToServer()}>
-                <i className="fa fa-save action-button-icon"></i>Save
-              </button>
-            </div>
+        <div style={{flex: '0 0 auto'}}>
+          <div style={{textAlign: 'right'}}>
+            <button className="btn btn-light mr-2" onClick={() => this.exitEditingMode()}>
+              <i className="fa fa-undo action-button-icon"></i>Discard changes
+            </button>
+            <button className="btn btn-primary" onClick={() => this.saveConfigurationToServer()}>
+              <i className="fa fa-save action-button-icon"></i>Save
+            </button>
           </div>
-        }
+        </div>
       </div>
     )
   }
