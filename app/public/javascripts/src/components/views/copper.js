@@ -57,32 +57,32 @@ class CopperController {
   }
 
   // Creates a single map layer by substituting tileDefinition parameters
-  createSingleMapLayer (equipmentOrFiberKey, categoryType, networkEquipment, existingOrPlanned, libraryId, rootPlanId) {
+  createSingleMapLayer (copper, libraryId) {
     var tileDefinition = angular.copy(this.state.configuration.copperCategories.categories.UNKNOWN.tileDefinitions[0])
     this.objectKeyReplace(tileDefinition, '{libraryId}', libraryId)
 
-    if (networkEquipment.equipmentType === 'line') {
-      var lineTransform = this.getLineTransformForLayer(+networkEquipment.aggregateZoomThreshold)
+    if (copper.equipmentType === 'line') {
+      var lineTransform = this.getLineTransformForLayer(+copper.aggregateZoomThreshold)
       this.objectKeyReplace(tileDefinition, '{lineTransform}', lineTransform)
     }
 
     // For equipments, we are going to filter out features that are planned and deleted
-    var drawingOptions = angular.copy(networkEquipment.drawingOptions)
+    var drawingOptions = angular.copy(copper.drawingOptions)
     return {
       tileDefinitions: [tileDefinition],
-      iconUrl: networkEquipment.iconUrl,
-      greyOutIconUrl: networkEquipment.greyOutIconUrl,
+      iconUrl: copper.iconUrl,
+      greyOutIconUrl: copper.greyOutIconUrl,
       renderMode: 'PRIMITIVE_FEATURES', // Always render equipment nodes as primitives
       featureFilter: null,
-      strokeStyle: networkEquipment.drawingOptions.strokeStyle,
-      lineWidth: networkEquipment.drawingOptions.lineWidth || 2,
-      fillStyle: networkEquipment.drawingOptions.fillStyle,
-      opacity: networkEquipment.drawingOptions.opacity || 0.5,
+      strokeStyle: copper.drawingOptions.strokeStyle,
+      lineWidth: copper.drawingOptions.lineWidth || 2,
+      fillStyle: copper.drawingOptions.fillStyle,
+      opacity: copper.drawingOptions.opacity || 0.5,
       drawingOptions: drawingOptions,
       selectable: true,
-      zIndex: networkEquipment.zIndex,
-      showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection && this.state.showDirectedCable, // Showing Direction
-      highlightStyle: networkEquipment.highlightStyle
+      zIndex: copper.zIndex,
+      showPolylineDirection: copper.drawingOptions.showPolylineDirection && this.state.showDirectedCable, // Showing Direction
+      highlightStyle: copper.highlightStyle
     }
   }
 
@@ -90,24 +90,24 @@ class CopperController {
   createMapLayersForCategory (categoryItems, categoryType, mapLayers, createdMapLayerKeys) {
     // First loop through all the equipment types (e.g. central_office)
     categoryItems && Object.keys(categoryItems).forEach((categoryItemKey) => {
-      var networkEquipment = categoryItems[categoryItemKey]
+      var copper = categoryItems[categoryItemKey]
 
-      if (networkEquipment.equipmentType !== 'point' ||
+      if (copper.equipmentType !== 'point' ||
         this.usePointAggregate ||
-        this.mapRef.getZoom() > networkEquipment.aggregateZoomThreshold) {
-        if (networkEquipment.checked) {
-          // We need to show the existing network equipment. Loop through all the selected library ids.
-          this.dataItems && this.dataItems[networkEquipment.dataItemKey] &&
-            this.dataItems[networkEquipment.dataItemKey].selectedLibraryItems.forEach((selectedLibraryItem) => {
+        this.mapRef.getZoom() > copper.aggregateZoomThreshold) {
+        if (copper.checked) {
+          // We need to show the existing copper. Loop through all the selected library ids.
+          this.dataItems && this.dataItems[copper.dataItemKey] &&
+            this.dataItems[copper.dataItemKey].selectedLibraryItems.forEach((selectedLibraryItem) => {
               var mapLayerKey = `${categoryItemKey}_existing_${selectedLibraryItem.identifier}`
-              mapLayers[mapLayerKey] = this.createSingleMapLayer(categoryItemKey, categoryType, networkEquipment, 'existing', selectedLibraryItem.identifier, null)
+              mapLayers[mapLayerKey] = this.createSingleMapLayer(copper, selectedLibraryItem.identifier)
               createdMapLayerKeys.add(mapLayerKey)
             })
         }
       }
 
       // Sync ruler option
-      networkEquipment.key === 'UNKNOWN' && this.syncRulerOptions(networkEquipment.key, networkEquipment.checked)
+      copper.key === 'UNKNOWN' && this.syncRulerOptions(copper.key, copper.checked)
     })
   }
 
@@ -121,7 +121,7 @@ class CopperController {
       delete oldMapLayers[createdMapLayerKey]
     })
 
-    // Create layers for network equipment nodes and cables
+    // Create layers for copper
     this.createdMapLayerKeys.clear()
     this.createMapLayersForCategory(this.copperLayers.categories, 'UNKNOWN', oldMapLayers, this.createdMapLayerKeys)
 
