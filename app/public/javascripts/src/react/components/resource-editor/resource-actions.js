@@ -243,7 +243,7 @@ import AroHttp from '../../common/aro-http'
     let statesForStrategy = [DEFAULT_STATE_CODE]
 
     return dispatch => {
-            if (!priceBookId) {
+      if (!priceBookId) {
         return
       }
       AroHttp.get(`/service/v1/pricebook/${priceBookId}`)
@@ -389,6 +389,7 @@ import AroHttp from '../../common/aro-http'
         payload: {
           selectedDefinitionId: selectedDefinitionId,
           structuredPriceBookDefinitions: structuredPriceBookDefinitions,
+          selectedEquipmentTags: selectedEquipmentTags,
           setOfSelectedEquipmentTags: setOfSelectedEquipmentTags
         }
       })

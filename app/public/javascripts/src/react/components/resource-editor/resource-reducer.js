@@ -206,11 +206,12 @@ import Actions from '../../common/actions'
     }
   }
 
-  function setPriceBookDefinition (state, selectedDefinitionId, structuredPriceBookDefinitions, setOfSelectedEquipmentTags) {
+  function setPriceBookDefinition (state, selectedDefinitionId, structuredPriceBookDefinitions, selectedEquipmentTags, setOfSelectedEquipmentTags) {
     return { ...state,
       priceBookDefinition: {
         selectedDefinitionId: selectedDefinitionId,
         structuredPriceBookDefinitions: structuredPriceBookDefinitions,
+        selectedEquipmentTags: selectedEquipmentTags,
         setOfSelectedEquipmentTags: setOfSelectedEquipmentTags
       }
     }
@@ -342,7 +343,7 @@ import Actions from '../../common/actions'
         return setStatesStrategy(state, action.payload.statesForStrategy, action.payload.selectedStateForStrategy, action.payload.priceBookDefinitions,action.payload.pristineAssignments)          
 
       case Actions.RESOURCE_EDITOR_PRICEBOOK_DEFINITION:
-        return setPriceBookDefinition(state, action.payload.selectedDefinitionId, action.payload.structuredPriceBookDefinitions, action.payload.setOfSelectedEquipmentTags)          
+        return setPriceBookDefinition(state, action.payload.selectedDefinitionId, action.payload.structuredPriceBookDefinitions, action.payload.selectedEquipmentTags, action.payload.setOfSelectedEquipmentTags)          
       
       case Actions.RESOURCE_EDITOR_CONSTRUCTION_RATIOS:
         return setConstructionRatios(state, action.payload) 

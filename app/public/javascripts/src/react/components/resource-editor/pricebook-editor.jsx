@@ -3,7 +3,6 @@ import { connect } from 'react-redux'
 import ResourceActions from './resource-actions'
 import Select from "react-select";
 
-
 export class PriceBookEditor extends Component {
   constructor (props) {
     super(props)
@@ -11,8 +10,11 @@ export class PriceBookEditor extends Component {
       priceBookForState: '*',
       selectedpriceBookDefinition: 'equipmentItemList',
       isKeyExpanded: null,
-      selectedState: '',
-      structuredPriceBookDefinitions: ''
+      selectedFilter: [],
+      structuredPriceBookDefinitions: '',
+      constructionRatios: '',
+      setOfSelectedEquipmentTags: '',
+      selectedEquipmentTags: ''
     }
 
     this.props.getPriceBookStrategy()
@@ -23,11 +25,13 @@ export class PriceBookEditor extends Component {
     this.props.rebuildPricebookDefinitions(this.props.resourceManagerId)
   }
 
-
   componentWillReceiveProps(nextProps){
     if(this.props != nextProps) {
       if(nextProps.priceBookDefinition !== undefined) {
-        this.setState({structuredPriceBookDefinitions: nextProps.priceBookDefinition.structuredPriceBookDefinitions})
+        this.setState({structuredPriceBookDefinitions: nextProps.priceBookDefinition.structuredPriceBookDefinitions,
+          constructionRatios: nextProps.constructionRatios,
+          setOfSelectedEquipmentTags: nextProps.priceBookDefinition.setOfSelectedEquipmentTags,
+          selectedEquipmentTags: nextProps.priceBookDefinition.selectedEquipmentTags})
       }
     }
   }
@@ -39,8 +43,6 @@ export class PriceBookEditor extends Component {
   }
 
   renderPriceBookEditor()  {
-
-    //console.log(this.state.priceBookForState)
 
     return (
       <div>
@@ -92,8 +94,6 @@ export class PriceBookEditor extends Component {
         {/* Create tab contents for each priceBookDefinition */}
         <div className="tab-content" style={{maxHeight: '500px', overflowY: 'auto'}}>
           {this.state.structuredPriceBookDefinitions.map((priceBookValue, pricebookIndex) => { 
-            const priceBookFilter = [{"id":'01', "value": 'Direct Routing', "label": 'Direct Routing'},{"id":'02', "value": 'DSL', "label": 'DSL'},
-                                    {"id":'03', "value": 'ODN', "label": 'ODN'},{"id":'04', "value": '5G', "label": '5G'}]; 
             return (
               <div key={pricebookIndex} role="tabpanel" id={priceBookValue.id} className={`tab-pane ${this.state.selectedpriceBookDefinition === priceBookValue.id ? 'active' : ''}`} id="">
                 {/* Filter equipment items. Only for equipmentItemList */}
@@ -104,15 +104,15 @@ export class PriceBookEditor extends Component {
                       <Select
                         isMulti
                         closeMenuOnSelect={true}
-                        value={this.state.selectedState}
-                        options={priceBookFilter}
+                        value={this.state.selectedFilter}
+                        options=''
                         hideSelectedOptions={true}
                         backspaceRemovesValue={false}
                         isSearchable={true}
                         isClearable=''
                         isDisabled=''
                         placeholder="Filter Equipment"
-                        onChange={(e)=>this.handleStatesChange(e)}
+                        onChange={(e)=>this.updateSetOfSelectedEquipmentTags(e, this.props.priceBookDefinition.selectedDefinitionId)}
                       />
                     </div>
                   </div>
@@ -145,15 +145,18 @@ export class PriceBookEditor extends Component {
                          {priceBookValue.items.map((definitionItem, definitionKey) => { 
                             if(definitionItem.costAssignment !== undefined && definitionItem.cableConstructionType !== undefined){
                               if(definitionItem.name !== 'install_estimated'){
+                                var constructionRatios = this.state.constructionRatios[this.state.priceBookForState].constructionRatios.cableConstructionRatios[definitionItem.cableConstructionType].ratio
+                                var percentageCost = (+constructionRatios) * 100.0
+
                                 return (
                                   <tr key={definitionKey}>
                                     <td>{definitionItem.description}</td>
                                     <td>
-                                      <input type="text" onChange={(e)=>this.handleFiberLabourChange(e, pricebookIndex, definitionKey)} value={definitionItem.costAssignment.cost} className="form-control form-control-sm"/>
+                                      <input type="text" onChange={(e)=>this.handleFiberLabourChange(e, definitionKey, definitionItem.id)} value={definitionItem.costAssignment.cost} className="form-control form-control-sm"/>
                                     </td>
                                     <td>{definitionItem.unitOfMeasure}</td>
                                     <td>
-                                      <input className="form-control form-control-sm" value={this.props.constructionRatios[this.props.statesStrategy.selectedStateForStrategy].constructionRatios.cableConstructionRatios[definitionItem.cableConstructionType].ratio} percentage-input="true"/>
+                                      <input type="number" className="form-control form-control-sm" onChange={(e)=>this.handleFiberPercentageChange(e, definitionItem)} value={+percentageCost.toFixed(2)}/>
                                     </td>
                                   </tr>
                                 )
@@ -170,105 +173,107 @@ export class PriceBookEditor extends Component {
                 The top-level table for this priceBookDefinition */}
                 {this.state.selectedpriceBookDefinition !== 'fiberLaborList' &&
                   <table className="table table-striped">
-                    {/* Loop through each item in the priceBookDefinition */}
-                    {priceBookValue.items.filter((item) => this.equipmentTagFilter(item, this.props.priceBookDefinition.setOfSelectedEquipmentTags, this.props.priceBookDefinition.selectedDefinitionId))
-                      .map((definitionItem, definitionKey) => 
-                        <tr key={definitionKey}>
-                          {/* Description of this item */}
-                          <td className="p-2 pl-3">
-                            <div style={{fontWeight: '700', cursor: 'pointer'}} onClick={event => { this.toggleIsKeyExpanded(definitionItem.id) }}>
-                              {
-                                this.state.isKeyExpanded === definitionItem.id
-                                ? <i className="far fa-minus-square"></i>
-                                : <i className="far fa-plus-square"></i>
-                              }
-                              <span className="pl-2">{definitionItem.description}</span>
-                            </div>
-
-                            {this.state.isKeyExpanded === definitionItem.id &&
-                              <div>
-                              {/* IF a cost assignment is defined for this item, provide the ability to edit it */}
-                                {definitionItem.costAssignment &&
-                                  <div className="row" style={{width: '100%', margin: '0px'}}>
-                                    <table className="table table-bordered" style={{marginBottom: '0px'}}>
-                                      <tr>
-                                        <td style={{verticalAlign: 'middle'}}>Cost:</td>
-                                        <td style={{width: '100px', borderRight: 'none'}}>
-                                          <input type="text" value={definitionItem.costAssignment.cost} className="form-control form-control-sm"/>
-                                        </td>
-                                        <td style={{verticalAlign: 'middle', borderLeft: 'none', width: '10px'}}>{definitionItem.unitOfMeasure}</td>
-                                      </tr>
-                                    </table>
-                                </div>
-                                }        
-
-                                {/* Display details for sub-items if we have at least one sub-item */}
-                                {definitionItem.subItems && definitionItem.subItems.length > 0 &&
-                                  <div>
-                                    SubItems:
-                                  </div>
+                    <tbody>
+                      {/* Loop through each item in the priceBookDefinition */}
+                      {priceBookValue.items.filter((item) => this.equipmentTagFilter(item, this.state.setOfSelectedEquipmentTags, this.props.priceBookDefinition.selectedDefinitionId))
+                        .map((definitionItem, definitionKey) => 
+                          <tr key={definitionKey}>
+                            {/* Description of this item */}
+                            <td className="p-2 pl-3">
+                              <div style={{fontWeight: '700', cursor: 'pointer'}} onClick={event => { this.toggleIsKeyExpanded(definitionItem.id) }}>
+                                {
+                                  this.state.isKeyExpanded === definitionItem.id
+                                  ? <i className="far fa-minus-square"></i>
+                                  : <i className="far fa-plus-square"></i>
                                 }
-
-                                <div style={{paddingLeft: '20px', width: '100%'}}>
-                                  <table className="table table-bordered" style={{marginBottom: '0px'}}>
-                                    {/* Loop through all sub-items in this item */}
-                                    {definitionItem.subItems.map((subItem, subKey) => { 
-                                      return (
-                                        <tr key={subKey}>
-                                          {/* START TD block for sub-items with detailType === 'reference' */}
-                                          {subItem.detailType === 'reference' &&
-                                            <td style={{verticalAlign: 'middle'}}>{subItem.item.description}</td>
-                                          }
-                                          {subItem.detailType === 'reference' &&
-                                            <td style={{width: '100px', borderRight: 'none'}}>
-                                              <input type="text" value={subItem.detailAssignment.quantity} className="form-control form-control-sm"/>
-                                            </td>
-                                          }
-                                          {subItem.detailType === 'reference' &&
-                                            <td style={{verticalAlign: 'middle', borderLeft: 'none'}}>
-                                              {/* "UnitPerHour" becomes "Hours", etc. */}
-                                              {subItem.item.unitOfMeasure.replace('UnitPer', '') + 's'}
-                                            </td>
-                                          }
-                                          {/* END TD block for sub-items with detailType === 'reference' */}
-
-                                          {/* START TD block for sub-items with detailType === 'value' */}
-                                          {subItem.detailType === 'value' &&
-                                            <td style={{verticalAlign: 'middle'}}>{subItem.item.description}</td>
-                                          }
-                                          {subItem.detailType === 'value' &&
-                                            <td style={{width: '100px', borderRight: 'none'}}>
-                                              <input type="text" value={subItem.costAssignment.cost} className="form-control form-control-sm"/>
-                                            </td>
-                                          }
-                                          {subItem.detailType === 'value' &&
-                                            <td style={{verticalAlign: 'middle', borderLeft: 'none'}}>
-                                              {subItem.item.unitOfMeasure}
-                                            </td>
-                                          }
-                                          {/* END TD block for sub-items with detailType === 'value' */}
-                                        </tr>
-                                      )
-                                    })
-                                  }
-                                  </table>
-                                </div>
+                                <span className="pl-2">{definitionItem.description}</span>
                               </div>
-                            }
-                          </td>
-                        </tr>
-                      )
-                    }
-                     {/* Show a warning if we have selected any filters AND all rows are filtered out. */}
-                     {/* {subItem.detailType === 'value' &&
-                        <tr>
-                          <td colspan="4">
-                            <div class="alert alert-warning m-0">
-                              No items to show with the current filters.
-                            </div>
-                          </td>
-                        </tr>
-                    } */}
+
+                              {this.state.isKeyExpanded === definitionItem.id &&
+                                <div>
+                                {/* IF a cost assignment is defined for this item, provide the ability to edit it */}
+                                  {definitionItem.costAssignment &&
+                                    <div className="row" style={{width: '100%', margin: '0px'}}>
+                                      <table className="table table-bordered" style={{marginBottom: '0px'}}>
+                                        <tr>
+                                          <td style={{verticalAlign: 'middle'}}>Cost:</td>
+                                          <td style={{width: '100px', borderRight: 'none'}}>
+                                            <input type="text" onChange={(e)=>this.handleCostChange(e, definitionKey, definitionItem.id)} value={definitionItem.costAssignment.cost} className="form-control form-control-sm"/>
+                                          </td>
+                                          <td style={{verticalAlign: 'middle', borderLeft: 'none', width: '10px'}}>{definitionItem.unitOfMeasure}</td>
+                                        </tr>
+                                      </table>
+                                  </div>
+                                  }        
+
+                                  {/* Display details for sub-items if we have at least one sub-item */}
+                                  {definitionItem.subItems && definitionItem.subItems.length > 0 &&
+                                    <div>
+                                      SubItems:
+                                    </div>
+                                  }
+
+                                  <div style={{paddingLeft: '20px', width: '100%'}}>
+                                    <table className="table table-bordered" style={{marginBottom: '0px'}}>
+                                      {/* Loop through all sub-items in this item */}
+                                      {definitionItem.subItems.map((subItem, subKey) => { 
+                                        return (
+                                          <tr key={subKey}>
+                                            {/* START TD block for sub-items with detailType === 'reference' */}
+                                            {subItem.detailType === 'reference' &&
+                                              <td style={{verticalAlign: 'middle'}}>{subItem.item.description}</td>
+                                            }
+                                            {subItem.detailType === 'reference' &&
+                                              <td style={{width: '100px', borderRight: 'none'}}>
+                                                <input type="text" onChange={(e)=>this.handleDetailAssignmentChange(e, definitionKey)}  value={subItem.detailAssignment.quantity} className="form-control form-control-sm"/>
+                                              </td>
+                                            }
+                                            {subItem.detailType === 'reference' &&
+                                              <td style={{verticalAlign: 'middle', borderLeft: 'none'}}>
+                                                {/* "UnitPerHour" becomes "Hours", etc. */}
+                                                {subItem.item.unitOfMeasure.replace('UnitPer', '') + 's'}
+                                              </td>
+                                            }
+                                            {/* END TD block for sub-items with detailType === 'reference' */}
+
+                                            {/* START TD block for sub-items with detailType === 'value' */}
+                                            {subItem.detailType === 'value' &&
+                                              <td style={{verticalAlign: 'middle'}}>{subItem.item.description}</td>
+                                            }
+                                            {subItem.detailType === 'value' &&
+                                              <td style={{width: '100px', borderRight: 'none'}}>
+                                                <input type="text" onChange={(e)=>this.handleCostAssignmentChange(e, definitionKey, subItem.id)} value={subItem.costAssignment.cost} className="form-control form-control-sm"/>
+                                              </td>
+                                            }
+                                            {subItem.detailType === 'value' &&
+                                              <td style={{verticalAlign: 'middle', borderLeft: 'none'}}>
+                                                {subItem.item.unitOfMeasure}
+                                              </td>
+                                            }
+                                            {/* END TD block for sub-items with detailType === 'value' */}
+                                          </tr>
+                                        )
+                                      })
+                                    }
+                                    </table>
+                                  </div>
+                                </div>
+                              }
+                            </td>
+                          </tr>
+                        )
+                      }
+                      {/* Show a warning if we have selected any filters AND all rows are filtered out. */}
+                      {/* {subItem.detailType === 'value' &&
+                          <tr>
+                            <td colspan="4">
+                              <div class="alert alert-warning m-0">
+                                No items to show with the current filters.
+                              </div>
+                            </td>
+                          </tr>
+                      } */}
+                    </tbody>
                   </table>
                 }
               </div>            
@@ -290,26 +295,79 @@ export class PriceBookEditor extends Component {
     )
   }
 
-  handleFiberLabourChange(e, keyPriceBook, keyDefinition){
+  handleFiberPercentageChange(e, definitionItem){
+    let pristineConstructionRatios = this.state.constructionRatios
+    pristineConstructionRatios[this.state.priceBookForState].constructionRatios.cableConstructionRatios[definitionItem.cableConstructionType].ratio = (+e.target.value) / 100.0
 
-    let structuredPriceBookDefinitions = this.state.structuredPriceBookDefinitions.map((priceBookValue, pricebookIndex) => {
-      let items = ''
-      if(keyPriceBook === pricebookIndex){
-        items = priceBookValue.items.map((definitionItem, definitionKey) => {
-          let cost = ''
-          if(definitionKey === keyDefinition){
-            cost = {...definitionItem.costAssignment, cost: e.target.value}
-          } else {
-            cost = {...definitionItem.costAssignment}
+    this.setState({ constructionRatios: pristineConstructionRatios })
+  }
+
+
+  handleCostChange(e, parentDefinitionKey, parentCostId){
+
+    let pristineStructuredPriceBookDefinitions = this.state.structuredPriceBookDefinitions
+    pristineStructuredPriceBookDefinitions.map((priceBookValue, pricebookIndex) => {
+      priceBookValue.items.map((definitionItem, definitionKey) => {
+        if(parentDefinitionKey === definitionKey){
+          if(definitionItem.costAssignment){
+            if(parentCostId === definitionItem.id){
+              definitionItem.costAssignment.cost = e.target.value
           }
-          return { ...definitionItem, costAssignment:cost };
-        });
-        return { ...priceBookValue, items };
-      } else {
-        return { ...priceBookValue};
-      }
+          }
+        }
+      })
     });
-   this.setState({ structuredPriceBookDefinitions: structuredPriceBookDefinitions })
+    this.setState({ structuredPriceBookDefinitions: pristineStructuredPriceBookDefinitions })
+  }
+
+  handleDetailAssignmentChange(e, parentDefinitionKey){
+
+    let pristineStructuredPriceBookDefinitions = this.state.structuredPriceBookDefinitions
+    pristineStructuredPriceBookDefinitions.map((priceBookValue, pricebookIndex) => {
+      priceBookValue.items.map((definitionItem, definitionKey) => {
+        if(parentDefinitionKey === definitionKey){
+          definitionItem.subItems.map((subItem, subKey) => { 
+            if(subItem.detailType === 'reference'){
+              subItem.detailAssignment.quantity = e.target.value
+            }
+          })
+        }
+      })
+    });
+    this.setState({ structuredPriceBookDefinitions: pristineStructuredPriceBookDefinitions })
+  }
+
+  handleCostAssignmentChange(e, parentDefinitionKey, parentCostId){
+
+    let pristineStructuredPriceBookDefinitions = this.state.structuredPriceBookDefinitions
+    pristineStructuredPriceBookDefinitions.map((priceBookValue, pricebookIndex) => {
+      priceBookValue.items.map((definitionItem, definitionKey) => {
+        if(parentDefinitionKey === definitionKey){
+          definitionItem.subItems.map((subItem, subKey) => { 
+            if(subItem.detailType === 'value'){
+              if(parentCostId === subItem.id)
+                subItem.costAssignment.cost = e.target.value
+            }
+          })
+        }
+      })
+    });
+    this.setState({ structuredPriceBookDefinitions: pristineStructuredPriceBookDefinitions })
+  }
+
+  handleFiberLabourChange(e, parentDefinitionKey, parentCostId){
+
+    let pristineStructuredPriceBookDefinitions = this.state.structuredPriceBookDefinitions
+    pristineStructuredPriceBookDefinitions.map((priceBookValue, pricebookIndex) => {
+      priceBookValue.items.map((definitionItem, definitionKey) => {
+        if(parentDefinitionKey === definitionKey){
+          if(parentCostId === definitionItem.id){
+            definitionItem.costAssignment.cost = e.target.value
+          }
+        }
+      })
+    });
+    this.setState({ structuredPriceBookDefinitions: pristineStructuredPriceBookDefinitions })
   }
 
   exitEditingMode(){
@@ -317,7 +375,7 @@ export class PriceBookEditor extends Component {
   }
 
   saveConfigurationToServer(){
-    this.props.saveAssignmentsToServer(this.props.statesStrategy.pristineAssignments, this.state.structuredPriceBookDefinitions, this.props.constructionRatios, this.props.selectedResourceManagerId)
+    this.props.saveAssignmentsToServer(this.props.statesStrategy.pristineAssignments, this.state.structuredPriceBookDefinitions, this.props.constructionRatios, this.props.resourceManagerId)
   }
 
   toggleIsKeyExpanded (objIndex) {
@@ -355,7 +413,7 @@ export class PriceBookEditor extends Component {
       return true // No filters applied
     } else {
       const tags = item.tagMapping || [] // tagMapping can be null
-      const itemHasTag = tags.filter(tagId => this.setOfSelectedEquipmentTags[selectedDefinitionId].has(tagId)).length > 0
+      const itemHasTag = tags.filter(tagId => setOfSelectedEquipmentTags[selectedDefinitionId].has(tagId)).length > 0
       return itemHasTag
     }
   }
@@ -364,8 +422,18 @@ export class PriceBookEditor extends Component {
     this.setState({selectedpriceBookDefinition: priceBookDefinitionId})
   }
 
-  handleStatesChange(selectedState){
-    this.setState({selectedState: selectedState})
+  updateSetOfSelectedEquipmentTags(selectedFilter, definitionId){
+
+    var selectedEquipmentTags = this.state.selectedEquipmentTags
+    if(selectedFilter !== null){
+      selectedEquipmentTags[definitionId] = selectedFilter
+    } else {
+      selectedEquipmentTags[definitionId] = []
+    }
+
+    var setOfSelectedEquipmentTags = this.state.setOfSelectedEquipmentTags
+    setOfSelectedEquipmentTags[definitionId] = new Set(selectedEquipmentTags[definitionId].map(equipmentTag => equipmentTag.id))
+    this.setState({setOfSelectedEquipmentTags: setOfSelectedEquipmentTags, selectedFilter: selectedFilter})
   }
 
   handlePriceBookForState(e){
