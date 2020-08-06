@@ -66,12 +66,9 @@ export class NetworkAnalysisOutput extends Component {
 
   componentWillReceiveProps (nextProps) {
     // If the plan state changes (e.g. when optimization is finished), either clear the old report or load the new one
-    if (this.props.activePlanState !== nextProps.activePlanState) {
-      if (nextProps.activePlanState === PlanStates.START_STATE) {
-        this.props.clearOutput()
-      } else {
-        this.props.loadReport(this.props.planId)
-      }
+    if (this.props.activePlanState !== nextProps.activePlanState &&
+        nextProps.activePlanState === PlanStates.START_STATE) {
+      this.props.clearOutput() // not sure this belongs here
     }
   }
 

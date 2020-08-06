@@ -418,6 +418,7 @@ class PlanEditorController {
   }
 
   exitPlanEditMode () {
+    console.log('exitPlanEditMode')
     this.setNetworkEquipmentLayerVisibility(this.feederFiberLayer, this.isFiberVisiblePreTransaction)
 
     // You should no longer hide any of the object ids that have been committed or discarded

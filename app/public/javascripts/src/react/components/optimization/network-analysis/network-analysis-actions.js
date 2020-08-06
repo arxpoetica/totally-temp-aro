@@ -1,6 +1,7 @@
 /* globals */
 import Actions from '../../../common/actions'
 import AroHttp from '../../../common/aro-http'
+import { batch } from 'react-redux'
 
 // ToDo: other than report, I'm not sure this is used
 function loadReport (planId) {
@@ -24,16 +25,20 @@ function loadReport (planId) {
         ])
       })
       .then(results => {
-        dispatch({
-          type: Actions.NETWORK_ANALYSIS_SET_CHART_REPORT,
-          payload: results[0].data
-        })
         // uiDefinition comes in as a JSON string. We should parse it back out.
         var reportDefinition = results[1].data
         reportDefinition.uiDefinition = JSON.parse(reportDefinition.uiDefinition)
-        dispatch({
-          type: Actions.NETWORK_ANALYSIS_SET_CHART_REPORT_DEFINITION,
-          payload: reportDefinition
+        
+        batch(() => {
+          dispatch({
+            type: Actions.NETWORK_ANALYSIS_SET_CHART_REPORT,
+            payload: results[0].data
+          })
+          
+          dispatch({
+            type: Actions.NETWORK_ANALYSIS_SET_CHART_REPORT_DEFINITION,
+            payload: reportDefinition
+          })
         })
       })
       .catch(err => console.error(err))

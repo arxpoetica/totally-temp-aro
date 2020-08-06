@@ -150,9 +150,10 @@ module.exports = class User {
 
   // Find or create a user
   static findOrCreateUser(userDetails, email, password) {
-    return database.query(`SELECT * FROM auth.users WHERE email='${email}'`)
+    // Make the LDAP username/email to upper case
+    return database.query(`SELECT * FROM auth.users WHERE UPPER(email)=UPPER('${email}')`)
       .then((user) => {
-        return user.length > 0 ? Promise.resolve() : this.createUser(userDetails.firstName, userDetails.lastName, email, password, userDetails.ldapGroups)
+        return user.length > 0 ? Promise.resolve() : this.createUser(userDetails.firstName, userDetails.lastName, email.toUpperCase(), password, userDetails.ldapGroups)
       })
   }
 
@@ -192,7 +193,7 @@ module.exports = class User {
       })
       .then(() => {
         console.log('LDAP: Returned from findOrCreateUser()')
-        var sql = 'SELECT id, first_name, last_name, email, password, company_name FROM auth.users WHERE email=$1'
+        var sql = 'SELECT id, first_name, last_name, email, password, company_name FROM auth.users WHERE UPPER(email)=UPPER($1) ORDER BY id ASC'
         return database.findOne(sql, [username])
       })
       .then((user) => {

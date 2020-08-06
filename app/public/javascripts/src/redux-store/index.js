@@ -8,6 +8,7 @@ import createSocketMiddleware from './middleware/websockets'
 
 // Reducers
 import ui from '../react/components/configuration/ui/ui-reducer'
+import system from '../react/components/configuration/configuration-reducer'
 import report from '../react/components/configuration/report/report-reducer'
 import networkAnalysis from '../react/components/optimization/network-analysis/network-analysis-reducer'
 import networkOptimization from '../react/components/optimization/network-optimization/network-optimization-reducer'
@@ -41,7 +42,7 @@ const logger = createLogger({
 const socketMiddleware = createSocketMiddleware()
 
 let reducer = combineReducers({
-  configuration: combineReducers({ report, ui }),
+  configuration: combineReducers({ report, ui, system }),
   contextMenu,
   coverage,
   etlTemplates,

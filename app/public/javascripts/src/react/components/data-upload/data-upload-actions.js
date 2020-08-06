@@ -57,7 +57,7 @@ function saveDataSource (uploadDetails,loggedInUser) {
       return createLibraryId(uploadDetails,loggedInUser)
       .then((libraryItem) => {
         fileUpload(uploadDetails,libraryItem.identifier,loggedInUser) 
-        dispatch(setAllLibraryItems(uploadDetails.selectedDataSourceName,libraryItem))
+        dispatch(setAllLibraryItems(libraryItem.dataType, libraryItem))
       })
       .then((result) => {
         dispatch(setIsUploading(false))
@@ -72,7 +72,7 @@ function saveDataSource (uploadDetails,loggedInUser) {
         // Just create Datasource
         getLibraryId (uploadDetails)
         .then((library) => {
-          dispatch(setAllLibraryItems(uploadDetails.selectedDataSourceName,library.data))
+          dispatch(setAllLibraryItems(library.data.dataType,library.data))
         })
         .then((result) => {
           dispatch(setIsUploading(false))
@@ -99,7 +99,7 @@ function saveDataSource (uploadDetails,loggedInUser) {
           return setCableConstructionType(uploadDetails,loggedInUser)
           .then((libraryItem) => {
             fileUpload(uploadDetails, libraryItem.identifier, loggedInUser)
-            dispatch(setAllLibraryItems(uploadDetails.selectedDataSourceName, libraryItem))
+            dispatch(setAllLibraryItems(library.data.dataType, libraryItem))
           })
           .then((result) => {
             dispatch(setIsUploading(false))
@@ -118,7 +118,7 @@ function saveDataSource (uploadDetails,loggedInUser) {
                   fileUpload(uploadDetails,library.data.identifier,loggedInUser) 
                 }
               }
-              dispatch(setAllLibraryItems(uploadDetails.selectedDataSourceName,library.data))
+              dispatch(setAllLibraryItems(library.data.dataType, library.data))
             })
             .then((res) => {
               dispatch(setIsUploading(false))
