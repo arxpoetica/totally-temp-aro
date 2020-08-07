@@ -19,6 +19,7 @@ export class PriceBookEditor extends Component {
 
     this.props.getPriceBookStrategy()
     this.props.getEquipmentTags()
+    this.filteredItems = '';
   }
 
   componentDidMount () {
@@ -43,6 +44,10 @@ export class PriceBookEditor extends Component {
   }
 
   renderPriceBookEditor()  {
+
+    let filterTagList = this.props.equipmentTags.map(function(newkey, index) { 
+      return {"id":newkey.id, "name":newkey.name, "description":newkey.description, "colourHue":newkey.colourHue, "value": newkey.description, "label": newkey.description}; 
+    });
 
     return (
       <div>
@@ -81,8 +86,8 @@ export class PriceBookEditor extends Component {
         <ul className="nav nav-tabs" role="tablist">
           {this.props.priceBookDefinition.structuredPriceBookDefinitions.map((priceBookValue, pricebookIndex) => { 
               return (
-                <li key={pricebookIndex} role="presentation" onClick={(e)=>this.handlepriceBookDefinition(priceBookValue.id)} className={`nav-item ${this.props.priceBookDefinition.selectedDefinitionId === priceBookValue.id ? 'active' : ''}`}>
-                  <a href={`#${priceBookValue.id}`} className="nav-link" role="tab" data-toggle="tab">
+                <li key={pricebookIndex} role="presentation" onClick={(e)=>this.handlepriceBookDefinition(priceBookValue.id)} className="nav-item">
+                  <a href={`#${priceBookValue.id}`} className={`nav-link ${this.props.priceBookDefinition.selectedDefinitionId === priceBookValue.id ? 'active' : ''}`} role="tab" data-toggle="tab">
                     {priceBookValue.description}
                   </a>
                 </li>
@@ -105,7 +110,7 @@ export class PriceBookEditor extends Component {
                         isMulti
                         closeMenuOnSelect={true}
                         value={this.state.selectedFilter}
-                        options=''
+                        options={filterTagList}
                         hideSelectedOptions={true}
                         backspaceRemovesValue={false}
                         isSearchable={true}
@@ -142,7 +147,7 @@ export class PriceBookEditor extends Component {
                           </td>
                         </tr>
                         {/* Display all rows EXCEPT installed fiber, that is calculated above */}
-                         {priceBookValue.items.map((definitionItem, definitionKey) => { 
+                         {this.filteredItems = priceBookValue.items.map((definitionItem, definitionKey) => { 
                             if(definitionItem.costAssignment !== undefined && definitionItem.cableConstructionType !== undefined){
                               if(definitionItem.name !== 'install_estimated'){
                                 var constructionRatios = this.state.constructionRatios[this.state.priceBookForState].constructionRatios.cableConstructionRatios[definitionItem.cableConstructionType].ratio
@@ -264,15 +269,15 @@ export class PriceBookEditor extends Component {
                         )
                       }
                       {/* Show a warning if we have selected any filters AND all rows are filtered out. */}
-                      {/* {subItem.detailType === 'value' &&
-                          <tr>
-                            <td colspan="4">
-                              <div class="alert alert-warning m-0">
-                                No items to show with the current filters.
-                              </div>
-                            </td>
-                          </tr>
-                      } */}
+                      {(this.state.selectedEquipmentTags.length > 0) && (this.filteredItems.length === 0) &&
+                        <tr>
+                          <td colSpan="4">
+                            <div className="alert alert-warning m-0">
+                              No items to show with the current filters.
+                            </div>
+                          </td>
+                        </tr>
+                      }
                     </tbody>
                   </table>
                 }
