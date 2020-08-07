@@ -14,7 +14,8 @@ export class TsmEditor extends Component {
   }  
 
   componentDidMount () {
-    this.props.reloadTsmManagerConfiguration(this.props.resourceManagerId); 
+    this.props.reloadTsmManagerConfiguration(this.props.resourceManagerId);
+    this.props.setModalTitle(this.props.resourceManagerName); 
   }
 
   componentWillReceiveProps(nextProps){
@@ -37,7 +38,6 @@ export class TsmEditor extends Component {
     
     return (
       <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
-        <h4>{this.props.resourceManagerName} </h4>
         <div style={{flex: '1 1 auto'}}> 
           <table id="tblTsmModel" className="table table-sm table-striped" style={{marginBottom: '0px'}}>
             <thead className="thead-dark">
@@ -173,6 +173,7 @@ export class TsmEditor extends Component {
     setIsResourceEditor: (status) => dispatch(ResourceActions.setIsResourceEditor(status)),
     reloadTsmManagerConfiguration: (tsmManagerId) => dispatch(ResourceActions.reloadTsmManagerConfiguration(tsmManagerId)),
     saveTsmConfigurationToServer: (loggedInUser, tsmManagerId, tsmManagerConfiguration, pristineTsmManagerConfiguration) => dispatch(ResourceActions.saveTsmConfigurationToServer(loggedInUser, tsmManagerId, tsmManagerConfiguration, pristineTsmManagerConfiguration)),
+    setModalTitle: (title) => dispatch(ResourceActions.setModalTitle(title))
   })
 
 const TsmEditorComponent = connect(mapStateToProps, mapDispatchToProps)(TsmEditor)

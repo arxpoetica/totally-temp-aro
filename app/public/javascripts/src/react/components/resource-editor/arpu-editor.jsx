@@ -22,7 +22,8 @@ export class ArpuEditor extends Component {
   }
 
   componentDidMount () {
-    this.props.loadArpuManagerConfiguration(this.props.resourceManagerId); 
+    this.props.loadArpuManagerConfiguration(this.props.resourceManagerId);
+    this.props.setModalTitle(this.props.resourceManagerName);  
   }
 
   componentWillReceiveProps(nextProps){
@@ -45,7 +46,6 @@ export class ArpuEditor extends Component {
 
     return (
       <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
-        <h4>{this.props.resourceManagerName} </h4>
         <div style={{flex: '1 1 auto'}}>
           <div style={{maxHeight: '500px', overflowY : 'auto'}}>
             <div className="container">
@@ -156,6 +156,7 @@ export class ArpuEditor extends Component {
     loadArpuManagerConfiguration: (arpuManagerId) => dispatch(ResourceActions.loadArpuManagerConfiguration(arpuManagerId)),
     setIsResourceEditor: (status) => dispatch(ResourceActions.setIsResourceEditor(status)),
     saveArpuConfigurationToServer: (arpuManagerId, pristineArpuManager, arpuManager) => dispatch(ResourceActions.saveArpuConfigurationToServer(arpuManagerId, pristineArpuManager, arpuManager)),
+    setModalTitle: (title) => dispatch(ResourceActions.setModalTitle(title))
   })
 
 const ArpuEditorComponent = connect(mapStateToProps, mapDispatchToProps)(ArpuEditor)

@@ -19,10 +19,12 @@ export class PriceBookEditor extends Component {
 
     this.props.getPriceBookStrategy()
     this.props.getEquipmentTags()
+    this.filteredItems = '';
   }
 
   componentDidMount () {
     this.props.rebuildPricebookDefinitions(this.props.resourceManagerId)
+    this.props.setModalTitle(this.props.resourceManagerName)
   }
 
   componentWillReceiveProps(nextProps){
@@ -44,10 +46,12 @@ export class PriceBookEditor extends Component {
 
   renderPriceBookEditor()  {
 
+    let filterTagList = this.props.equipmentTags.map(function(newkey, index) { 
+      return {"id":newkey.id, "name":newkey.name, "description":newkey.description, "colourHue":newkey.colourHue, "value": newkey.description, "label": newkey.description}; 
+    });
+
     return (
       <div>
-        <h4>{this.props.resourceManagerName}</h4>
-
         <form className="form-horizontal">
           <div className="form-group">
             <div className="row">
@@ -81,8 +85,8 @@ export class PriceBookEditor extends Component {
         <ul className="nav nav-tabs" role="tablist">
           {this.props.priceBookDefinition.structuredPriceBookDefinitions.map((priceBookValue, pricebookIndex) => { 
               return (
-                <li key={pricebookIndex} role="presentation" onClick={(e)=>this.handlepriceBookDefinition(priceBookValue.id)} className={`nav-item ${this.props.priceBookDefinition.selectedDefinitionId === priceBookValue.id ? 'active' : ''}`}>
-                  <a href={`#${priceBookValue.id}`} className="nav-link" role="tab" data-toggle="tab">
+                <li key={pricebookIndex} role="presentation" onClick={(e)=>this.handlepriceBookDefinition(priceBookValue.id)} className="nav-item">
+                  <a href={`#${priceBookValue.id}`} className={`nav-link ${this.props.priceBookDefinition.selectedDefinitionId === priceBookValue.id ? 'active' : ''}`} role="tab" data-toggle="tab">
                     {priceBookValue.description}
                   </a>
                 </li>
@@ -105,12 +109,10 @@ export class PriceBookEditor extends Component {
                         isMulti
                         closeMenuOnSelect={true}
                         value={this.state.selectedFilter}
-                        options=''
+                        options={filterTagList}
                         hideSelectedOptions={true}
                         backspaceRemovesValue={false}
-                        isSearchable={true}
-                        isClearable=''
-                        isDisabled=''
+                        isSearchable={false}
                         placeholder="Filter Equipment"
                         onChange={(e)=>this.updateSetOfSelectedEquipmentTags(e, this.props.priceBookDefinition.selectedDefinitionId)}
                       />
@@ -175,7 +177,7 @@ export class PriceBookEditor extends Component {
                   <table className="table table-striped">
                     <tbody>
                       {/* Loop through each item in the priceBookDefinition */}
-                      {priceBookValue.items.filter((item) => this.equipmentTagFilter(item, this.state.setOfSelectedEquipmentTags, this.props.priceBookDefinition.selectedDefinitionId))
+                      {this.filteredItems = priceBookValue.items.filter((item) => this.equipmentTagFilter(item, this.state.setOfSelectedEquipmentTags, this.props.priceBookDefinition.selectedDefinitionId))
                         .map((definitionItem, definitionKey) => 
                           <tr key={definitionKey}>
                             {/* Description of this item */}
@@ -264,15 +266,15 @@ export class PriceBookEditor extends Component {
                         )
                       }
                       {/* Show a warning if we have selected any filters AND all rows are filtered out. */}
-                      {/* {subItem.detailType === 'value' &&
-                          <tr>
-                            <td colspan="4">
-                              <div class="alert alert-warning m-0">
-                                No items to show with the current filters.
-                              </div>
-                            </td>
-                          </tr>
-                      } */}
+                      {this.filteredItems.length === 0 &&
+                        <tr>
+                          <td colspan="4">
+                            <div class="alert alert-warning m-0">
+                              No items to show with the current filters.
+                            </div>
+                          </td>
+                        </tr>
+                      }
                     </tbody>
                   </table>
                 }
@@ -408,20 +410,6 @@ export class PriceBookEditor extends Component {
     return Math.abs(1.0 - totalInstallPercentage) > 0.001 // Total percentage should be 100%
   }
 
-  equipmentTagFilter (item, setOfSelectedEquipmentTags, selectedDefinitionId) {
-    if (setOfSelectedEquipmentTags[selectedDefinitionId].size === 0) {
-      return true // No filters applied
-    } else {
-      const tags = item.tagMapping || [] // tagMapping can be null
-      const itemHasTag = tags.filter(tagId => setOfSelectedEquipmentTags[selectedDefinitionId].has(tagId)).length > 0
-      return itemHasTag
-    }
-  }
-
-  handlepriceBookDefinition(priceBookDefinitionId){
-    this.setState({selectedpriceBookDefinition: priceBookDefinitionId})
-  }
-
   updateSetOfSelectedEquipmentTags(selectedFilter, definitionId){
 
     var selectedEquipmentTags = this.state.selectedEquipmentTags
@@ -434,6 +422,20 @@ export class PriceBookEditor extends Component {
     var setOfSelectedEquipmentTags = this.state.setOfSelectedEquipmentTags
     setOfSelectedEquipmentTags[definitionId] = new Set(selectedEquipmentTags[definitionId].map(equipmentTag => equipmentTag.id))
     this.setState({setOfSelectedEquipmentTags: setOfSelectedEquipmentTags, selectedFilter: selectedFilter})
+  }
+
+  equipmentTagFilter (item, setOfSelectedEquipmentTags, selectedDefinitionId) {
+    if (setOfSelectedEquipmentTags[selectedDefinitionId].size === 0) {
+      return true // No filters applied
+    } else {
+      const tags = item.tagMapping || [] // tagMapping can be null
+      const itemHasTag = tags.filter(tagId => setOfSelectedEquipmentTags[selectedDefinitionId].has(tagId)).length > 0
+      return itemHasTag
+    }
+  }
+
+  handlepriceBookDefinition(priceBookDefinitionId){
+    this.setState({selectedpriceBookDefinition: priceBookDefinitionId})
   }
 
   handlePriceBookForState(e){
@@ -460,7 +462,8 @@ const mapDispatchToProps = (dispatch) => ({
   rebuildPricebookDefinitions: (priceBookId) => dispatch(ResourceActions.rebuildPricebookDefinitions(priceBookId)),
   definePriceBookForSelectedState: (selectedStateForStrategy, priceBookDefinitions, pristineAssignments) => dispatch(ResourceActions.definePriceBookForSelectedState(selectedStateForStrategy, priceBookDefinitions, pristineAssignments)),
   setIsResourceEditor: (status) => dispatch(ResourceActions.setIsResourceEditor(status)),
-  saveAssignmentsToServer: (pristineAssignments, structuredPriceBookDefinitions, constructionRatios, priceBookId) => dispatch(ResourceActions.saveAssignmentsToServer(pristineAssignments, structuredPriceBookDefinitions, constructionRatios, priceBookId))
+  saveAssignmentsToServer: (pristineAssignments, structuredPriceBookDefinitions, constructionRatios, priceBookId) => dispatch(ResourceActions.saveAssignmentsToServer(pristineAssignments, structuredPriceBookDefinitions, constructionRatios, priceBookId)),
+  setModalTitle: (title) => dispatch(ResourceActions.setModalTitle(title)),
 })
 
 const PriceBookEditorComponent = connect(mapStateToProps, mapDispatchToProps)(PriceBookEditor)

@@ -58,6 +58,7 @@ export class RoicEditor extends Component {
 
   componentDidMount () {
     this.props.reloadRoicManagerConfiguration(this.props.resourceManagerId)
+    this.props.setModalTitle(this.props.resourceManagerName); 
   }
 
   componentWillReceiveProps(nextProps){
@@ -80,7 +81,6 @@ export class RoicEditor extends Component {
 
     return (
       <>
-        <h4>{this.props.resourceManagerName}</h4>
         {/* <!-- Create tabs --> */}
         <ul className="nav nav-tabs" role="tablist">
           {tabs.map((tabValue, tabKey) => { 
@@ -363,6 +363,7 @@ export class RoicEditor extends Component {
     reloadRoicManagerConfiguration: (roicManagerId) => dispatch(ResourceActions.reloadRoicManagerConfiguration(roicManagerId)),
     saveRoicConfigurationToServer: (roicManagerId, roicManagerConfiguration) => dispatch(ResourceActions.saveRoicConfigurationToServer(roicManagerId, roicManagerConfiguration)),
     setIsResourceEditor: (status) => dispatch(ResourceActions.setIsResourceEditor(status)),
+    setModalTitle: (title) => dispatch(ResourceActions.setModalTitle(title))
   })
 
 const RoicEditorComponent = wrapComponentWithProvider(reduxStore, RoicEditor, mapStateToProps, mapDispatchToProps)

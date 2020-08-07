@@ -39,6 +39,7 @@ export class CompetitorEditor extends Component {
   componentDidMount () {
     this.props.getRegions();
    // this.props.loadCompManMeta(this.props.editingManager.id)
+   this.props.setModalTitle(this.props.resourceManagerName)
   }
 
   componentWillReceiveProps(nextProps){
@@ -60,7 +61,6 @@ export class CompetitorEditor extends Component {
 
     return (
       <div>
-        <h4>{this.props.resourceManagerName}</h4>
         <strong>Regions</strong>
         <div className="comp_edit_flex_section">
           <div className="comp_edit_filter_row_left" id="comp_edit_region_select_list">
@@ -345,6 +345,7 @@ export class CompetitorEditor extends Component {
     saveCompManConfig: (competitorManagerId, pristineStrengths, newStrengths) => dispatch(ResourceActions.saveCompManConfig(competitorManagerId, pristineStrengths, newStrengths)),
     setIsResourceEditor: (status) => dispatch(ResourceActions.setIsResourceEditor(status)),
     loadCompManMeta: (competitorManagerId) => dispatch(ResourceActions.loadCompManMeta(competitorManagerId)),
+    setModalTitle: (title) => dispatch(ResourceActions.setModalTitle(title))
   })
 
 const CompetitorEditorComponent = connect(mapStateToProps, mapDispatchToProps)(CompetitorEditor)

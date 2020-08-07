@@ -65,6 +65,9 @@ import AroHttp from '../../common/aro-http'
         type: Actions.RESOURCE_EDITOR_IS_RESOURCE_EDITOR,
         payload: status
       })
+      if(status === true){
+        dispatch(setModalTitle('Resource Managers'))
+      }
     }
   }
 
@@ -1026,6 +1029,15 @@ import AroHttp from '../../common/aro-http'
     return rateReachConfig
   }
 
+  function setModalTitle (title){
+    return dispatch => {
+      dispatch({
+        type: Actions.RESOURCE_EDITOR_MODAL_TITLE,
+        payload: title
+      })
+    }
+  }
+
   export default {
     getResourceTypes,
     getResourceManagers,
@@ -1057,5 +1069,6 @@ import AroHttp from '../../common/aro-http'
     reloadTsmManagerConfiguration,
     saveTsmConfigurationToServer,
     reloadRateReachManagerConfiguration,
-    saveRateReachConfig
+    saveRateReachConfig,
+    setModalTitle
   }

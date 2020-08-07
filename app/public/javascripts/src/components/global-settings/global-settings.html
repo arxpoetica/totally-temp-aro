@@ -20,14 +20,20 @@
     color: white;
   }
 </style>
-<modal visible="$ctrl.state.showGlobalSettings"
+
+
+<r-global-settings ng-if="$ctrl.state.showGlobalSettings"></r-global-settings>
+
+
+
+   <!-- <modal visible="$ctrl.state.showGlobalSettings"
   modal-size="($ctrl.currentView === $ctrl.views.MANAGE_USERS || $ctrl.currentView === $ctrl.views.REPORTS_EDITOR || $ctrl.currentView === $ctrl.views.RESOURCE_EDITOR) ? 'modal-lg' : 'modal-md'"
   modal-size="($ctrl.currentView === $ctrl.views.DATA_UPLOAD || $ctrl.currentView === $ctrl.views.MANAGE_USERS || $ctrl.currentView === $ctrl.views.REPORTS_EDITOR) ? 'modal-lg' : 'modal-md'"
   backdrop="static" on-hide="$ctrl.modalHide()">
   <modal-header title="{{$ctrl.currentView}}"></modal-header>
   <modal-body style="height: 500px;overflow: auto;">
 
-    <div id="global-settings" ng-if="$ctrl.currentView === $ctrl.views.GLOBAL_SETTINGS">
+ <div id="global-settings" ng-if="$ctrl.currentView === $ctrl.views.GLOBAL_SETTINGS">
       <button class="btn btn-light settings-btn" ng-click="$ctrl.currentView = $ctrl.views.MY_ACCOUNT">
         <i class="fa fa-2x fa-user"></i>
         <br>My Account
@@ -62,7 +68,6 @@
       <button class="btn btn-light settings-btn notification" ng-click="$ctrl.currentView = $ctrl.views.RELEASE_NOTES">
         <i class="fa fa-2x fa-bell"></i>
         <br>Release Notes
-        <!-- <span class="badge">!</span> -->
       </button>
 
       <button class="btn btn-light settings-btn" ng-if="$ctrl.state.loggedInUser.isAdministrator" ng-click="$ctrl.currentView = $ctrl.views.CONFIGURATION_EDITOR">
@@ -115,15 +120,14 @@
     </r-report-module-list>
 
     <r-resource-editor ng-if="$ctrl.currentView === $ctrl.views.RESOURCE_EDITOR">
-    </r-resource-editor>
+    </r-resource-editor> 
     
   </modal-body>
 
   <modal-footer>
-    <!-- Close button - show when we are in "Global Settings" mode -->
     <button ng-if="$ctrl.currentView === $ctrl.views.GLOBAL_SETTINGS" class="btn btn-primary" ng-click="$ctrl.modalHide()">Close</button>
 
     <button ng-if="$ctrl.currentView !== $ctrl.views.GLOBAL_SETTINGS" class="btn btn-primary float-right" ng-click="$ctrl.goBack()">Back</button>
 
   </modal-footer>
-</modal>
+</modal>-->

@@ -2,6 +2,7 @@
 import { react2angular } from 'react2angular'
 import { ToastContainer } from 'react-toastify'
 
+import rGlobalSettings from '../react/components/global-settings/global-settings.jsx'
 import ResourceEditor from '../react/components/resource-editor/resource-editor.jsx'
 import DataUpload from '../react/components/data-upload/data-upload.jsx'
 import ManageUsers from '../react/components/user/manage-users.jsx'
@@ -248,6 +249,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('editorInterfacePrimitive', editorInterfacePrimitive)
   .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
 // ReactJS components
+  .component('rGlobalSettings', react2angular(rGlobalSettings))
   .component('rResourceEditor', react2angular(ResourceEditor))
   .component('rDataUpload', react2angular(DataUpload))
   .component('rManageUsers', react2angular(ManageUsers))

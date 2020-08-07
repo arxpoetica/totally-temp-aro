@@ -76,8 +76,8 @@ initSearchBox () {
 }
 
   componentDidMount () {
-    if(this.props.userId !== null ){
-      this.props.loadUserSettings(this.props.userId)
+    if(this.props.userIdForSettingsEdit !== null ){
+      this.props.loadUserSettings(this.props.userIdForSettingsEdit)
     }
   }
 

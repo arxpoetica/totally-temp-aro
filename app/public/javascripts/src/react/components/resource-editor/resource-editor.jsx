@@ -77,7 +77,8 @@ export class ResourceEditor extends Component {
   componentDidMount () {
     this.props.getResourceTypes();
     this.props.getResourceManagers('all');
-    this.props.canMakeNewFilter();
+		this.props.canMakeNewFilter();
+		this.props.setModalTitle('Resource Managers')
   }
 
   render () {
@@ -517,7 +518,8 @@ const mapDispatchToProps = (dispatch) => ({
 	setIsResourceEditor: (status) => dispatch(ResourceActions.setIsResourceEditor(status)),
 	deleteResourceManager: (selectedManager, filterText) => dispatch(ResourceActions.deleteResourceManager(selectedManager, filterText)),
 	startEditingResourceManager: (id, type, name, editingMode) => dispatch(ResourceActions.startEditingResourceManager(id, type, name, editingMode)),
-	newManager: (resourceType, resourceName, loggedInUser, sourceId) => dispatch(ResourceActions.newManager(resourceType, resourceName, loggedInUser, sourceId))
+	newManager: (resourceType, resourceName, loggedInUser, sourceId) => dispatch(ResourceActions.newManager(resourceType, resourceName, loggedInUser, sourceId)),
+	setModalTitle: (title) => dispatch(ResourceActions.setModalTitle(title)),
 })
 
 const ResourceEditorComponent = wrapComponentWithProvider(reduxStore, ResourceEditor, mapStateToProps, mapDispatchToProps)
