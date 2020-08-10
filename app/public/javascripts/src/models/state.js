@@ -457,6 +457,7 @@ class State {
     service.mapFeaturesClickedEvent = new Rx.BehaviorSubject({})
 
     service.mapFeaturesSelectedEvent.skip(1).subscribe((options) => {
+      console.log(options)
       // ToDo: this check may need to move into REACT
       if (service.selectedDisplayMode.getValue() == service.displayModes.EDIT_RINGS
         && service.activeEditRingsPanel == service.EditRingsPanels.EDIT_RINGS) {

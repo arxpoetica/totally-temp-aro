@@ -24,6 +24,7 @@ class RoadSegmentDetailController {
         state.selection = newSelection
         this.isSingleRoad = (event.roadSegments.size == 1)
         this.selectedEdgeInfo = this.generateRoadSegmentsInfo(event.roadSegments)
+        console.log(event.roadSegments)
         this.viewRoadSegmentInfo()
         this.$timeout()
       } else if (this.isFeatureListEmpty(event)) {
@@ -59,9 +60,10 @@ class RoadSegmentDetailController {
       roadSegmentsInfo.edge_length = [...roadSegments][0].edge_length.toFixed(2)
     } else {
       roadSegmentsInfo.totalLength = [...roadSegments].reduce((total, item) => { return total + item.edge_length }, 0).toFixed(2)
-      roadSegmentsInfo.count = roadSegments.length
+      roadSegmentsInfo.count = roadSegments.size // roadSegments.length
     }
 
+    /*
     // Temp values
     // Later we have to load it from response
     var constructionTypes = {
@@ -75,7 +77,7 @@ class RoadSegmentDetailController {
 
     roadSegmentsInfo.constructionTypes = constructionTypes
     roadSegmentsInfo.roadTypes = roadTypes
-
+    */
     return roadSegmentsInfo
   }
 
