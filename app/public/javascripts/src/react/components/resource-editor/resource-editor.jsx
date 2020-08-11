@@ -74,13 +74,28 @@ export class ResourceEditor extends Component {
 		]		
 	}
 
-  componentDidMount () {
-    this.props.getResourceTypes();
-    this.props.getResourceManagers('all');
-		this.props.canMakeNewFilter();
-		this.props.setModalTitle('Resource Managers')
+	static getDerivedStateFromProps(nextProps, prevState) {
+		
+		if(prevState.filterText !== undefined && nextProps.filterText !== undefined) {
+			if(prevState.filterText === ''){
+				return {
+					filterText: nextProps.filterText,
+				};
+			} else {
+				return {
+					filterText: prevState.filterText,
+				};
+			}
+		}
   }
 
+  componentDidMount () {
+    this.props.getResourceTypes();
+    this.props.getResourceManagers(this.state.filterText);
+		this.props.canMakeNewFilter();
+		this.props.setModalTitle('Resource Managers')
+	}
+	
   render () {
     return !this.props.resourceTypes
     ? null

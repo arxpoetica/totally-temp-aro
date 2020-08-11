@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
-import GlobalsettingsActions from '../global-settings/globalsettings-action'
+import PlanActions from '../plan/plan-actions'
 import './global-settings.css';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 
@@ -40,7 +40,7 @@ export class GlobalSettings extends Component {
 
     this.state = {
       modal: true,
-      currentView: this.views.GLOBAL_SETTINGS,
+      currentView: '',
       userIdForSettingsEdit: ''
     }    
 
@@ -48,12 +48,32 @@ export class GlobalSettings extends Component {
     this.openUserSettingsForUserId = this.openUserSettingsForUserId.bind(this);
   }
 
+  static getDerivedStateFromProps(nextProps, prevState) {
+
+    if(nextProps.currentViewProps !== undefined){
+      if(nextProps.currentViewProps === 'Resource Managers' && prevState.currentView === ''){
+        return {
+          currentView: nextProps.currentViewProps,
+        };
+      } else {
+        return {
+          currentView: prevState.currentView,
+        };
+      }
+    } else if(prevState.currentView === ''){
+      return {
+        currentView: 'Global Settings'
+      };
+    } else{
+      return {
+        currentView: prevState.currentView
+      };
+    }
+  }
+
   render () {
     const {loggedInUser} = this.props
     const {currentView, userIdForSettingsEdit} = this.state
-
-    // console.log(currentView)
-    // console.log(userIdForSettingsEdit)
 
     return(
       <div>
@@ -183,7 +203,7 @@ export class GlobalSettings extends Component {
               <DataUpload/>
             }
             {currentView === this.views.RESOURCE_EDITOR &&
-              <ResourceEditor/>
+              <ResourceEditor filterText={this.props.currentEditorProps}/>
             }    
             {currentView === this.views.BROADCAST &&
               <Broadcast/>
@@ -211,6 +231,7 @@ export class GlobalSettings extends Component {
   
   toggle() {
     this.setState({ modal: !this.state.modal});
+    this.props.setIsResourceSelection(false)
   }
 }
 
@@ -220,6 +241,7 @@ const mapStateToProps = (state) => ({
 })
 
 const mapDispatchToProps = (dispatch) => ({
+  setIsResourceSelection: (status) => dispatch(PlanActions.setIsResourceSelection(status))
 })
 
 const GlobalSettingsComponent = wrapComponentWithProvider(reduxStore, GlobalSettings, mapStateToProps, mapDispatchToProps)
