@@ -2,12 +2,12 @@ class RoadSegmentDetailController {
   constructor (state, $timeout) {
     this.state = state
     this.$timeout = $timeout
-    this.selectedEdgeInfo = null
-    this.isSingleRoad
+    this.selectedEdgeInfo = []
+    //this.isSingleRoad
 
     state.clearViewMode.subscribe((clear) => {
       if (clear) {
-        this.selectedEdgeInfo = null
+        this.selectedEdgeInfo = []
         this.updateSelectedState()
       }
     })
@@ -22,13 +22,12 @@ class RoadSegmentDetailController {
         var newSelection = state.cloneSelection()
         newSelection.details.roadSegments = event.roadSegments
         state.selection = newSelection
-        this.isSingleRoad = (event.roadSegments.size == 1)
+        //this.isSingleRoad = (event.roadSegments.size == 1)
         this.selectedEdgeInfo = this.generateRoadSegmentsInfo(event.roadSegments)
-        console.log(event.roadSegments)
         this.viewRoadSegmentInfo()
         this.$timeout()
       } else if (this.isFeatureListEmpty(event)) {
-        this.selectedEdgeInfo = null
+        this.selectedEdgeInfo = []
         this.updateSelectedState()
         // this check maybe needs to go at the top of this function (symptom of larger problem)
         if (this.state.activeViewModePanel === this.state.viewModePanels.ROAD_SEGMENT_INFO) {
@@ -52,32 +51,15 @@ class RoadSegmentDetailController {
   }
 
   generateRoadSegmentsInfo (roadSegments) {
-    var roadSegmentsInfo = {
-    }
+    var roadSegmentsInfo = []
+    var roadSegmentIds = {}
+    roadSegments.forEach(edge => {
+      if (!roadSegmentIds[edge.gid]) {
+        roadSegmentIds[edge.gid] = edge.gid
+        roadSegmentsInfo.push({ ...edge })
+      }
+    })
 
-    if (roadSegments.size == 1) {
-      roadSegmentsInfo.gid = [...roadSegments][0].gid
-      roadSegmentsInfo.edge_length = [...roadSegments][0].edge_length.toFixed(2)
-    } else {
-      roadSegmentsInfo.totalLength = [...roadSegments].reduce((total, item) => { return total + item.edge_length }, 0).toFixed(2)
-      roadSegmentsInfo.count = roadSegments.size // roadSegments.length
-    }
-
-    /*
-    // Temp values
-    // Later we have to load it from response
-    var constructionTypes = {
-      aerial: Math.floor(roadSegments.size / 2),
-      buried: Math.floor(roadSegments.size / 2)
-    }
-
-    var roadTypes = {
-      highWay: roadSegments.size
-    }
-
-    roadSegmentsInfo.constructionTypes = constructionTypes
-    roadSegmentsInfo.roadTypes = roadTypes
-    */
     return roadSegmentsInfo
   }
 
