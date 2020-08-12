@@ -2,6 +2,7 @@
 import { react2angular } from 'react2angular'
 import { ToastContainer } from 'react-toastify'
 
+import GlobalSettingsButton from '../react/components/global-settings/global-settings-button.jsx'
 import PlanSettings from '../react/components/plan-settings/plan-settings.jsx'
 import rGlobalSettings from '../react/components/global-settings/global-settings.jsx'
 import ResourceEditor from '../react/components/resource-editor/resource-editor.jsx'
@@ -250,6 +251,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('editorInterfacePrimitive', editorInterfacePrimitive)
   .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
 // ReactJS components PlanSettings
+  .component('rGlobalSettingsButton', react2angular(GlobalSettingsButton))
   .component('rPlanSettings', react2angular(PlanSettings))
   .component('rGlobalSettings', react2angular(rGlobalSettings))
   .component('rResourceEditor', react2angular(ResourceEditor))

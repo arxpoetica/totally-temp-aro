@@ -4,6 +4,7 @@ import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import PlanActions from '../plan/plan-actions'
 import './global-settings.css';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import GlobalsettingsActions from './globalsettings-action'
 
 import MyAccount from '../user/my-account.jsx'
 import MultiFactor from './multi-factor.jsx'
@@ -232,6 +233,7 @@ export class GlobalSettings extends Component {
   toggle() {
     this.setState({ modal: !this.state.modal});
     this.props.setIsResourceSelection(false)
+    this.props.setShowGlobalSettings(false)
   }
 }
 
@@ -241,7 +243,8 @@ const mapStateToProps = (state) => ({
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  setIsResourceSelection: (status) => dispatch(PlanActions.setIsResourceSelection(status))
+  setIsResourceSelection: (status) => dispatch(PlanActions.setIsResourceSelection(status)),
+  setShowGlobalSettings: (status) => dispatch(GlobalsettingsActions.setShowGlobalSettings(status))
 })
 
 const GlobalSettingsComponent = wrapComponentWithProvider(reduxStore, GlobalSettings, mapStateToProps, mapDispatchToProps)
