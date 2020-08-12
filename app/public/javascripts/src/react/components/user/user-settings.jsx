@@ -167,7 +167,7 @@ initSearchBox () {
   }
 
   saveSettings() {
-    this.props.saveUserSettings(this.props.userId,this.props.userConfiguration)
+    this.props.saveUserSettings(this.props.userIdForSettingsEdit,this.props.userConfiguration)
   }
 }
 

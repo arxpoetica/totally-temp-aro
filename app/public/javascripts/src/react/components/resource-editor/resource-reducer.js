@@ -2,7 +2,7 @@ import Actions from '../../common/actions'
 
 	const initialOffset = 0
 	const initialcurrentPage = 0
-	const perPage = 5
+	const perPage = 10
 	
 	const ResourceKey = {
 		price_book: true,
