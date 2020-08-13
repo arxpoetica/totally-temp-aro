@@ -2,7 +2,7 @@ import Actions from '../../common/actions'
 
 	const initialOffset = 0
 	const initialcurrentPage = 0
-	const perPage = 5
+	const perPage = 10
 	
 	const ResourceKey = {
 		price_book: true,
@@ -289,6 +289,12 @@ import Actions from '../../common/actions'
     }
   }
 
+  function setModalTitle (state, modalTitle) {
+    return { ...state,
+      modalTitle: modalTitle
+    }
+  }
+
   function resourceReducer (state = defaultState, action) {
     switch (action.type) {
 			case Actions.RESOURCE_EDITOR_SET_RESOURCE_TYPES:
@@ -371,6 +377,9 @@ import Actions from '../../common/actions'
         
       case Actions.RESOURCE_EDITOR_RATE_REACH_MANAGER_CONFIG:
         return setRateReachManagerConfiguration(state, action.payload.rateReachConfig, action.payload.technologyTypeDetails)         
+
+      case Actions.RESOURCE_EDITOR_MODAL_TITLE:
+        return setModalTitle(state, action.payload)         
   
     default:
       return state

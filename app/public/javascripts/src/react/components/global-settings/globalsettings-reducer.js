@@ -17,7 +17,8 @@ const defaultState = {
     show: false,
     type: '',
     text: ''
-  }
+  },
+  showGlobalSettings: false
 }
 
 function setReleaseNotes (state, releaseNotes) {
@@ -182,6 +183,13 @@ function setCreateOrUpdate (state, isCreateOrUpdate) {
     isCreateOrUpdate: true
   }
 }
+
+function setShowGlobalSettings (state, showGlobalSettings) {
+  return { ...state,
+    showGlobalSettings: showGlobalSettings
+  }
+}
+
 function globalSettingsReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.GLOBAL_SETTINGS_GET_RELEASE_NOTES:
@@ -234,6 +242,9 @@ function globalSettingsReducer (state = defaultState, action) {
 
     case Actions.GLOBAL_SETTINGS_TAG_FLAG:
       return setCreateOrUpdate(state, action.payload)
+
+    case Actions.GLOBAL_SETTINGS_SHOW_GLOBAL_SETTINGS:
+      return setShowGlobalSettings(state, action.payload)      
   
     default:
       return state

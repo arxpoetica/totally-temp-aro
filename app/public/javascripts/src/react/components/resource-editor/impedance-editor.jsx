@@ -23,6 +23,7 @@ export class ImpedanceEditor extends Component {
 
   componentDidMount () {
     this.props.reloadImpedanceManagerConfiguration(this.props.resourceManagerId); 
+    this.props.setModalTitle(this.props.resourceManagerName); 
   }
 
   componentWillReceiveProps(nextProps){
@@ -45,7 +46,6 @@ export class ImpedanceEditor extends Component {
 
     return (
       <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
-        <h4>{this.props.resourceManagerName} </h4>
           <div style={{flex: '1 1 auto'}}>
           <div style={{maxHeight: '500px', overflowY : 'auto', overflowX : 'hidden'}}>
             <form>
@@ -136,6 +136,7 @@ export class ImpedanceEditor extends Component {
     setIsResourceEditor: (status) => dispatch(ResourceActions.setIsResourceEditor(status)),
     reloadImpedanceManagerConfiguration: (impedanceManagerId) => dispatch(ResourceActions.reloadImpedanceManagerConfiguration(impedanceManagerId)),
     saveImpedanceConfigurationToServer: (impedanceManagerId, impedanceManagerConfiguration) => dispatch(ResourceActions.saveImpedanceConfigurationToServer(impedanceManagerId, impedanceManagerConfiguration)),
+    setModalTitle: (title) => dispatch(ResourceActions.setModalTitle(title))
   })
 
 const ImpedanceEditorComponent = connect(mapStateToProps, mapDispatchToProps)(ImpedanceEditor)

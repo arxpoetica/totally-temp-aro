@@ -7,13 +7,17 @@ import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import NetworkArchitecture from './network-architecture-form.jsx'
 import Constants from '../../common/constants'
 import ResourceManagerActions from './resource-manager-actions'
+import ResourceActions from '../resource-editor/resource-actions'
 const planningConstraintsSelector = getFormValues(Constants.NETWORK_ARCHITECTURE)
 
 export class NetworkArchitectureEditor extends Component {
+  componentDidMount () {
+    this.props.setModalTitle(this.props.resourceManagerName);  
+  }
+
   render () {
     return (
       <div>
-        <h5 className='modal-title ng-binding ng-scope'>{this.props.resourceManagerName}</h5>
         <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
           <div style={{flex: '1 1 auto'}}>
             <NetworkArchitecture initialValues={this.props.definition} enableReinitialize />
@@ -51,7 +55,8 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  saveResourceManagerDefinition: (resourceManagerId, managerType, definition) => dispatch(ResourceManagerActions.saveResourceManagerDefinition(resourceManagerId, managerType, definition))
+  saveResourceManagerDefinition: (resourceManagerId, managerType, definition) => dispatch(ResourceManagerActions.saveResourceManagerDefinition(resourceManagerId, managerType, definition)),
+  setModalTitle: (title) => dispatch(ResourceActions.setModalTitle(title)),
 })
 
 const NetworkArchitectureEditorComponent = wrapComponentWithProvider(reduxStore, NetworkArchitectureEditor, mapStateToProps, mapDispatchToProps)

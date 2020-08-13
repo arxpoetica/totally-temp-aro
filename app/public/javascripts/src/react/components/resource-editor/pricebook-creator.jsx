@@ -16,6 +16,7 @@ export class PriceBookCreator extends Component {
 
   componentDidMount () {
     this.props.getPriceBookStrategy();
+    this.props.setModalTitle('Create Price Book')
   }
 
   render () {
@@ -27,7 +28,6 @@ export class PriceBookCreator extends Component {
   renderPriceBookCreator()  {
     return (
        <>
-        <h4>Create Price Book </h4>
         <div style={{display: 'flex', flexDirection: 'column', height: '90%'}}>
           <div style={{flex: '1 1 auto'}}>
             <form className="form-horizontal">
@@ -116,6 +116,7 @@ export class PriceBookCreator extends Component {
     getPriceBookStrategy: () => dispatch(ResourceActions.getPriceBookStrategy()),
     createPriceBook: (priceBook, selectedResourceForClone) => dispatch(ResourceActions.createPriceBook(priceBook, selectedResourceForClone)),
     setIsResourceEditor: (status) => dispatch(ResourceActions.setIsResourceEditor(status)),
+    setModalTitle: (title) => dispatch(ResourceActions.setModalTitle(title)),
   })
 
 const PriceBookCreatorComponent = connect(mapStateToProps, mapDispatchToProps)(PriceBookCreator)

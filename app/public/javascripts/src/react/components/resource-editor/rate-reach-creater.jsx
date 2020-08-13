@@ -19,6 +19,10 @@ export class RateReachManager extends Component {
     ]
   }
 
+  componentDidMount () {
+    this.props.setModalTitle('Create Rate Reach Manager')
+  }
+
   render () {
     return this.categoryTypes === null
     ? null
@@ -28,7 +32,6 @@ export class RateReachManager extends Component {
   renderRateReachManager(){
     return(
       <>
-        <h4>Create Rate Reach Manager</h4>
         <div style={{display: 'flex', flexDirection: 'column', height: '90%'}}>
           <div style={{flex: '1 1 auto'}}>
             <form className="form-horizontal form-rr-creator">
@@ -115,6 +118,7 @@ export class RateReachManager extends Component {
 		searchManagers: (searchText) => dispatch(ResourceActions.searchManagers(searchText)),
     createRateReachManager: (rateReachManager, selectedResourceForClone, loggedInUser) => dispatch(ResourceActions.createRateReachManager(rateReachManager, selectedResourceForClone, loggedInUser)),
     setIsResourceEditor: (status) => dispatch(ResourceActions.setIsResourceEditor(status)),
+    setModalTitle: (title) => dispatch(ResourceActions.setModalTitle(title))
 	})
 
 const RateReachManagerCreatorComponent = connect(mapStateToProps, mapDispatchToProps)(RateReachManager)

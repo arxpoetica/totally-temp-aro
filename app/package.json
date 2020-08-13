@@ -98,6 +98,7 @@
     "react-toastify": "^5.0.1",
     "react-widgets": "^4.4.11",
     "react2angular": "^4.0.4",
+    "reactstrap": "^8.5.1",
     "redux": "^4.0.1",
     "redux-form": "8.2.6",
     "redux-logger": "^3.0.6",

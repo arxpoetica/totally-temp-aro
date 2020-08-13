@@ -52,11 +52,10 @@ export class RateReachEditor extends Component {
 
   renderRateReachEditor()  {
 
-    const {rateReachManagerConfigs, selectedTechnologyType, selectedEditingMode} = this.state
-    
+    const {rateReachManagerConfigs, selectedTechnologyType, selectedEditingMode} = this.state    
     return (
       <div className="container" style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
-        <h4>{this.props.resourceManagerName} [ {this.categoryDescription[rateReachManagerConfigs.rateReachConfig.categoryType]} ] </h4>
+        {this.props.setModalTitle(this.props.resourceManagerName +" ["+ this.categoryDescription[rateReachManagerConfigs.rateReachConfig.categoryType] +"]" )}
         <div className="row">
           <div className="col-md-12">
             <form>
@@ -215,7 +214,8 @@ export class RateReachEditor extends Component {
   const mapDispatchToProps = (dispatch) => ({
     setIsResourceEditor: (status) => dispatch(ResourceActions.setIsResourceEditor(status)),
     reloadRateReachManagerConfiguration: (rateReachManagerId, loggedInUser) => dispatch(ResourceActions.reloadRateReachManagerConfiguration(rateReachManagerId, loggedInUser)),
-    saveRateReachConfig:(rateReachManagerId, rateReachConfig) => dispatch(ResourceActions.saveRateReachConfig(rateReachManagerId, rateReachConfig))
+    saveRateReachConfig:(rateReachManagerId, rateReachConfig) => dispatch(ResourceActions.saveRateReachConfig(rateReachManagerId, rateReachConfig)),
+    setModalTitle: (title) => dispatch(ResourceActions.setModalTitle(title))
   })
 
 const RateReachEditorComponent = connect(mapStateToProps, mapDispatchToProps)(RateReachEditor)

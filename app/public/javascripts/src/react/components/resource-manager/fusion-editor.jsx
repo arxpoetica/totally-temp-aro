@@ -10,6 +10,7 @@ import FusionConstraints from './fusion-editor-form.jsx'
 import WormholeFuseDefinition from './wormhole-fuse-definition.jsx'
 import Constants from '../../common/constants'
 import ResourceManagerActions from './resource-manager-actions'
+import ResourceActions from '../resource-editor/resource-actions'
 const fusionSelector = getFormValues(Constants.FUSION_FORM)
 
 const getConduits = state => { return { ...state.mapLayers.networkEquipment.conduits, ...state.mapLayers.networkEquipment.roads } }
@@ -21,6 +22,11 @@ const getOrderedSpatialEdgeDefinitions = createSelector([getConduits], conduits 
 })
 
 export class FusionEditor extends Component {
+
+  componentDidMount () {
+    this.props.setModalTitle(this.props.resourceManagerName);  
+  }
+
   render () {
     if (!this.props.definition) return ''
 
@@ -95,7 +101,8 @@ const mapDispatchToProps = dispatch => ({
   saveResourceManagerDefinition: (resourceManagerId, managerType, definition) => dispatch(ResourceManagerActions.saveResourceManagerDefinition(resourceManagerId, managerType, definition)),
   setConnectivityDefinition: (id, spatialEdgeType, networkConnectivityType) => dispatch(ResourceManagerActions.setConnectivityDefinition(id, spatialEdgeType, networkConnectivityType)),
   setPrimarySpatialEdge: (id, primarySpatialEdge) => dispatch(ResourceManagerActions.setPrimarySpatialEdge(id, primarySpatialEdge)),
-  setWormholeFuseDefinition: (id, spatialEdgeType, wormholeFusionTypeId) => dispatch(ResourceManagerActions.setWormholeFuseDefinition(id, spatialEdgeType, wormholeFusionTypeId))
+  setWormholeFuseDefinition: (id, spatialEdgeType, wormholeFusionTypeId) => dispatch(ResourceManagerActions.setWormholeFuseDefinition(id, spatialEdgeType, wormholeFusionTypeId)),
+  setModalTitle: (title) => dispatch(ResourceActions.setModalTitle(title))
 })
 
 const FusionEditorComponent = wrapComponentWithProvider(reduxStore, FusionEditor, mapStateToProps, mapDispatchToProps)

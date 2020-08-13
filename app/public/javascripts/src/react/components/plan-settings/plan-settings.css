@@ -1,0 +1,78 @@
+.plan-settings-container {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding-top: 20px;
+}
+
+.plan-settings-error-contain {
+  padding-top: 5px;
+  padding-bottom: 10px;
+}
+
+.plan-settings-error-message {
+  display:inline-block;
+  padding: 8px;
+}
+
+.analysis-type {
+  flex: 0 0 auto;
+}
+.old-accordion-title {
+  flex: 0 0 auto;
+}
+.old-accordion-contents {
+  flex: 1 1 auto;
+  transition: flex-grow 100ms, flex-shrink 100ms, visibility 0ms 100ms;
+  overflow: hidden;
+  height: 450px;
+  max-height: 500px;
+  overflow: auto;
+}
+.old-accordion-contents.collapsed {
+  flex: 0 0 auto;
+  height: 0px;
+  visibility: hidden;
+}
+.old-accordion-title {
+  background-color: #333;
+  color: white;
+  font-weight: 700;
+  font-size: 18px;
+  border-radius: 0px;
+}
+.old-accordion-title:hover, .old-accordion-title:focus {
+  background-color: #333;
+  color: white;
+}
+
+/* React Card */
+
+.card-collapse {
+  margin-bottom: 1px;
+  border: none;
+}
+
+.card-header-dark {
+  background-color: #333;
+  color: white;
+  font-size: 18px;
+  border-radius: 0px;
+  text-align: center;
+  padding: 5px;
+}
+
+.collapse-show{
+  transition: flex-grow 100ms, flex-shrink 100ms, visibility 0ms 100ms;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.card-fixed{
+  position: fixed;
+  width: 310px;
+  z-index: 2;
+  height: 38px
+}

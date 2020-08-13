@@ -26,7 +26,8 @@ export class ManageUsers extends Component {constructor (props) {
     },
     selectedPage:0,
     searchText:'',
-    selectedNav: ''
+    selectedNav: '',
+    userIdForSettingsEdit: ''
   }
 }
 
@@ -126,7 +127,7 @@ export class ManageUsers extends Component {constructor (props) {
                           <span className="fa fa-envelope"></span>
                           </button>
                           
-                          <button onClick={() => this.setState({ selectedNav: 'UserSettings' })} className="btn btn-xs btn-primary" data-toggle="tooltip" data-placement="bottom" title="Open User Settings">
+                          <button onClick={() => this.setState({ selectedNav: 'UserSettings', userIdForSettingsEdit : user.id})} className="btn btn-xs btn-primary" data-toggle="tooltip" data-placement="bottom" title="Open User Settings">
                           <span className="fa fa-cog"></span>
                           </button>
                           
@@ -401,9 +402,10 @@ export class ManageUsers extends Component {constructor (props) {
 
   navSelection (){
     let val = this.state.selectedNav
+    let userIdForSettingsEdit = this.state.userIdForSettingsEdit
     if (val === 'UserSettings') {
       return (
-        <UserSettings id='userSettings' />
+        this.props.openUserSettingsForUserId(userIdForSettingsEdit, 'User Settings')
       )
     }
   }

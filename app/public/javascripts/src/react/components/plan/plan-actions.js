@@ -189,6 +189,94 @@ function deleteLibraryEntry (dataSource) {
   }
 }
 
+function loadPlanResourceSelectionFromServer (plan) {
+  return dispatch => {
+    if (!plan) {
+      return Promise.resolve()
+    }
+    var currentPlan = plan
+    return Promise.all([
+      AroHttp.get('/service/odata/resourcetypeentity'), // The types of resource managers
+      AroHttp.get('/service/v2/resource-manager'),
+      AroHttp.get(`/service/v1/plan/${currentPlan.id}/configuration`)
+    ])
+      .then((results) => {
+        var resourceManagerTypes = results[0].data
+        var allResourceManagers = results[1].data
+        var selectedResourceManagers = results[2].data.resourceConfigItems
+
+        var resourceManOrder = [
+          'price_book',
+          'arpu_manager',
+          'roic_manager',
+          'rate_reach_manager',
+          'impedance_mapping_manager',
+          'tsm_manager',
+          'competition_manager',
+          'fusion_manager',
+          'network_architecture_manager',
+          'planning_constraints_manager'
+        ]
+
+        // First set up the resource items so that we display all types in the UI
+        var newResourceItems = {}
+        resourceManagerTypes.forEach((resourceManager) => {
+          if (!resourceManOrder.includes(resourceManager.name)) resourceManOrder.push(resourceManager.name)
+
+          newResourceItems[resourceManager.name] = {
+            id: resourceManager.id,
+            description: resourceManager.description,
+            allManagers: [],
+            selectedManager: null,
+            order: resourceManOrder.indexOf(resourceManager.name)
+          }
+        })
+
+        // Then add all the managers in the system to the appropriate type
+        allResourceManagers.forEach((resourceManager) => {
+          // Once the backend supports the permission filtering on the odata API
+          // or durinng the react migration  managerType - resourceType maping can 
+          // be removed as managerType is used in many old Angular code
+          resourceManager['managerType'] = resourceManager['resourceType']
+          delete resourceManager['resourceType']
+          if (!resourceManager.deleted) {
+            newResourceItems[resourceManager.managerType].allManagers.push(resourceManager)
+          }
+          newResourceItems[resourceManager.managerType].allManagers.sort((a, b) => (a.name > b.name) ? 1 : -1)
+        })
+        
+        // Then select the appropriate manager for each type
+        selectedResourceManagers.forEach((selectedResourceManager) => {
+          var allManagers = newResourceItems[selectedResourceManager.aroResourceType].allManagers
+          var matchedManagers = allManagers.filter((item) => item.id === selectedResourceManager.resourceManagerId)
+          if (matchedManagers.length === 1) {
+            newResourceItems[selectedResourceManager.aroResourceType].selectedManager = matchedManagers[0]
+          }
+        })
+        var resourceItems = newResourceItems;
+        var pristineResourceItems = angular.copy(resourceItems)
+        dispatch({
+          type: Actions.PLAN_SET_RESOURCE_ITEMS,
+          payload: {
+            resourceItems: resourceItems,
+            pristineResourceItems: pristineResourceItems
+          }
+        })
+        return Promise.resolve()
+      })
+      .catch((err) => console.error(err))
+  }
+}
+
+function setIsResourceSelection (status){
+  return dispatch => {
+    dispatch({
+      type: Actions.PLAN_SET_IS_RESOURCE_SELECTION,
+      payload: status
+    })
+  }
+}
+
 export default {
   setActivePlan,
   setActivePlanState,
@@ -196,5 +284,7 @@ export default {
   selectDataItems,
   setAllLibraryItems,
   setHaveDataItemsChanged,
-  deleteLibraryEntry
+  deleteLibraryEntry,
+  loadPlanResourceSelectionFromServer,
+  setIsResourceSelection
 }
