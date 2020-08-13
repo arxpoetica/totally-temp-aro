@@ -144,7 +144,7 @@ export class PriceBookEditor extends Component {
                           </td>
                         </tr>
                         {/* Display all rows EXCEPT installed fiber, that is calculated above */}
-                         {priceBookValue.items.map((definitionItem, definitionKey) => { 
+                         {this.filteredItems = priceBookValue.items.map((definitionItem, definitionKey) => { 
                             if(definitionItem.costAssignment !== undefined && definitionItem.cableConstructionType !== undefined){
                               if(definitionItem.name !== 'install_estimated'){
                                 var constructionRatios = this.state.constructionRatios[this.state.priceBookForState].constructionRatios.cableConstructionRatios[definitionItem.cableConstructionType].ratio
@@ -266,10 +266,11 @@ export class PriceBookEditor extends Component {
                         )
                       }
                       {/* Show a warning if we have selected any filters AND all rows are filtered out. */}
-                      {this.filteredItems.length === 0 &&
+
+                      {(this.state.selectedEquipmentTags.length > 0) && (this.filteredItems.length === 0) &&
                         <tr>
-                          <td colspan="4">
-                            <div class="alert alert-warning m-0">
+                          <td colSpan="4">
+                            <div className="alert alert-warning m-0">
                               No items to show with the current filters.
                             </div>
                           </td>
