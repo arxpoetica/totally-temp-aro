@@ -607,8 +607,15 @@ class MapTileRenderer {
             if ((this.oldSelection.details.roadSegments.size > 0 && this.highlightPolyline(feature, this.oldSelection.details.roadSegments)) ||
               (this.oldSelection.details.fiberSegments.size > 0 && this.highlightPolyline(feature, this.oldSelection.details.fiberSegments))) {
               // Highlight the Selected Polyline
+              
+              // ToDo: lineWidth should always be of the same type!
+              var lineWidth = mapLayer.drawingOptions.lineWidth
+              if (typeof mapLayer.drawingOptions.lineWidth === 'function') {
+                lineWidth = mapLayer.drawingOptions.lineWidth(feature)
+              }
+
               drawingStyles = {
-                lineWidth: mapLayer.drawingOptions.lineWidth * 2,
+                'lineWidth': lineWidth * 2,
                 strokeStyle: mapLayer.drawingOptions.strokeStyle
               }
               if (mapLayer.highlightStyle) {
@@ -617,6 +624,7 @@ class MapTileRenderer {
                   strokeStyle: mapLayer.highlightStyle.strokeStyle
                 }
               }
+              
             } else if (this.state.showFiberSize && feature.properties._data_type === 'fiber' && this.state.viewSetting.selectedFiberOption.id !== 1) {
               var selectedFiberOption = this.state.viewSetting.selectedFiberOption
               var viewOption = selectedFiberOption.pixelWidth
@@ -642,7 +650,6 @@ class MapTileRenderer {
                 } else if (this.stateMapLayers.networkEquipment.roads[edgeType]) {
                   drawingStyles.strokeStyle = this.stateMapLayers.networkEquipment.roads[edgeType].drawingOptions.strokeStyle
                 }
-                
               }
             }
 

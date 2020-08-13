@@ -17,6 +17,7 @@ class PolylineFeatureRenderer {
     if (drawingStyleOverrides && drawingStyleOverrides.lineWidth) {
       lineWidth = drawingStyleOverrides.lineWidth
     } else {
+      // ToDo: lineWidth should always be of the same type!
       if (typeof mapLayer.drawingOptions.lineWidth === 'function') {
         lineWidth = mapLayer.drawingOptions.lineWidth(feature)
       } else {
