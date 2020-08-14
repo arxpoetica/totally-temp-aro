@@ -7,6 +7,7 @@ import MenuAction, { MenuActionTypes } from '../common/context-menu/menu-action'
 import MenuItem, { MenuItemTypes } from '../common/context-menu/menu-item'
 import uuidStore from '../../shared-utils/uuid-store'
 import SelectionActions from '../../react/components/selection/selection-actions'
+import DeleteMenu from '../../react/components/data-edit/maps-delete-menu.js'
 
 class MapObjectEditorController {
   constructor ($http, $element, $compile, $document, $timeout, $ngRedux, state, tileDataService, contextMenuService, Utils) {
@@ -49,6 +50,9 @@ class MapObjectEditorController {
       fillColor: '#FF1493',
       fillOpacity: 0.4
     }
+
+    this.deleteMenu = new DeleteMenu()
+
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }
 
@@ -883,6 +887,24 @@ class MapObjectEditorController {
       throw `createMapObject() not supported for geometry type ${feature.geometry.type}`
     }
 
+
+
+
+
+    // for test - once it works we'll fix the above
+    var mapObjectPath = mapObject.getPath()
+    google.maps.event.addListener(mapObject, 'rightclick', event => {
+      if (event.vertex === undefined) {
+        return
+      }
+      this.deleteMenu.open(this.mapRef, mapObjectPath, event.vertex)
+    })
+
+
+
+
+
+
     mapObject.addListener('rightclick', (event) => {
       if (typeof event === 'undefined') return
       // 'event' contains a MouseEvent which we use to get X,Y coordinates. The key of the MouseEvent object
@@ -1300,6 +1322,8 @@ class MapObjectEditorController {
   }
 
   $onDestroy () {
+    this.deleteMenu.close()
+
     if (this.overlayRightClickListener) {
       google.maps.event.removeListener(this.overlayRightClickListener)
       this.overlayRightClickListener = null
