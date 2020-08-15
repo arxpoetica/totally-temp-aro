@@ -32,7 +32,6 @@ export class FusionEditor extends Component {
 
     return (
       <div>
-        <h5 className='modal-title ng-binding ng-scope'>{this.props.resourceManagerName}</h5>
         <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
           <div style={{flex: '1 1 auto'}}>
             <FusionConstraints initialValues={this.props.definition.config} enableReinitialize />

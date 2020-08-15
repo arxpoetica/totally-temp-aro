@@ -172,7 +172,7 @@ export class ResourceEditor extends Component {
 							</div>
 						</div>
 					</div>
-					<div className="ei-table-contain" style={{flex: '1 1 auto', overflowY: 'auto'}}>
+					<div className="comp_edit_tbl_contain" style={{flex: '1 1 auto', overflowY: 'auto'}}>
 						<table className="table table-sm ei-table-foldout-striped" style={{borderBottom:"1px solid #dee2e6"}}>
 							<thead className="thead-dark">
 								<tr>
