@@ -812,8 +812,17 @@ class MapObjectEditorController {
       } else {
         return
       }
-    } else if (feature.geometry.type === 'Polygon') {
-      mapObject = this.createPolygonMapObject(feature)
+    } else if (feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon') {
+      if (feature.geometry.type === 'Polygon') {
+        mapObject = this.createPolygonMapObject(feature)
+        google.maps.event.addListener(mapObject, 'dragend', function () {
+          self.modifyObject(mapObject)
+        })
+      } else if (feature.geometry.type === 'MultiPolygon') {
+        mapObject = this.createMultiPolygonMapObject(feature)
+        console.log(feature.geometry)
+      }
+
       // Set up listeners on the map object
       mapObject.addListener('click', (event) => {
         // Select this map object
@@ -844,10 +853,23 @@ class MapObjectEditorController {
           }
         })
       })
+
+
+      var mapObjectPath = mapObject.getPath()
+      google.maps.event.addListener(mapObject, 'rightclick', event => {
+        if (event.vertex === undefined) {
+          return
+        }
+        this.deleteMenu.open(this.mapRef, mapObjectPath, event.vertex)
+      })
+
+      /*
       google.maps.event.addListener(mapObject, 'dragend', function () {
         // self.onModifyObject && self.onModifyObject({mapObject})
         self.modifyObject(mapObject)
       })
+      */
+     /*
     } else if (feature.geometry.type === 'MultiPolygon') {
       mapObject = this.createMultiPolygonMapObject(feature)
       // Set up listeners on the map object
@@ -883,6 +905,7 @@ class MapObjectEditorController {
       // google.maps.event.addListener(mapObject, 'dragend', function(){
       //   self.onModifyObject && self.onModifyObject({mapObject})
       // });
+    */
     } else {
       throw `createMapObject() not supported for geometry type ${feature.geometry.type}`
     }
@@ -890,7 +913,7 @@ class MapObjectEditorController {
 
 
 
-
+/*
     // for test - once it works we'll fix the above
     var mapObjectPath = mapObject.getPath()
     google.maps.event.addListener(mapObject, 'rightclick', event => {
@@ -899,7 +922,7 @@ class MapObjectEditorController {
       }
       this.deleteMenu.open(this.mapRef, mapObjectPath, event.vertex)
     })
-
+*/
 
 
 
