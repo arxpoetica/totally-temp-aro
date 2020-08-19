@@ -747,17 +747,21 @@ class MapObjectEditorController {
   createMultiPolygonMapObject (feature) {
     // Create a "polygon" map object
     this.tileDataService.addFeatureToExclude(feature.objectId)
-    var polygonPath = []
-    feature.geometry.coordinates[0][0].forEach((polygonVertex) => {
-      polygonPath.push({
-        lat: polygonVertex[1], // Note array index
-        lng: polygonVertex[0] // Note array index
+    var polygonPaths = []
+    feature.geometry.coordinates.forEach(path => {
+      var dPath = []
+      path[0].forEach(polygonVertex => {
+        dPath.push({
+          lat: polygonVertex[1], // Note array index
+          lng: polygonVertex[0] // Note array index
+        })
       })
+      polygonPaths.push(dPath)
     })
 
     var polygon = new google.maps.Polygon({
       objectId: feature.objectId, // Not used by Google Maps
-      paths: polygonPath,
+      paths: polygonPaths,
       clickable: true,
       draggable: false,
       map: this.mapRef
@@ -854,14 +858,17 @@ class MapObjectEditorController {
         })
       })
 
-
-      var mapObjectPath = mapObject.getPath()
+      
+      var mapObjectPaths = mapObject.getPaths()
       google.maps.event.addListener(mapObject, 'rightclick', event => {
         if (event.vertex === undefined) {
           return
         }
-        this.deleteMenu.open(this.mapRef, mapObjectPath, event.vertex)
+        this.deleteMenu.open(this.mapRef, mapObjectPaths, event.vertex)
       })
+      
+
+
 
       /*
       google.maps.event.addListener(mapObject, 'dragend', function () {
@@ -1044,6 +1051,7 @@ class MapObjectEditorController {
       featurePromise = this.state.StateViewMode.loadEntityList(this.$http, this.state, this.dataItems, 'ServiceAreaView', serviceArea.id, 'id,code,name,sourceId,geom', 'id')
         .then((result) => {
           // check for empty object, reject on true
+          console.log(result)
           if (!result[0] || !result[0].geom) {
             return Promise.reject(`object: ${serviceArea.object_id} may have been deleted`)
           }
@@ -1264,6 +1272,7 @@ class MapObjectEditorController {
         isExistingObject: false
       }
       event.overlay.getPaths().forEach((path) => {
+        console.log(path)
         var pathPoints = []
         path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
         pathPoints.push(pathPoints[0]) // Close the polygon
