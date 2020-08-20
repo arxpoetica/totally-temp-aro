@@ -861,10 +861,11 @@ class MapObjectEditorController {
       
       var mapObjectPaths = mapObject.getPaths()
       google.maps.event.addListener(mapObject, 'rightclick', event => {
+        console.log(mapObjectPaths.getAt(event.path))
         if (event.vertex === undefined) {
           return
         }
-        this.deleteMenu.open(this.mapRef, mapObjectPaths, event.vertex)
+        this.deleteMenu.open(this.mapRef, mapObjectPaths.getAt(event.path), event.vertex)
       })
       
 
