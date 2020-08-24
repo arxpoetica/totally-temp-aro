@@ -3,6 +3,7 @@ import React, { Component } from 'react'
 import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
 import NetworkOptimizationActions from './network-optimization-actions'
+import PlanEditorActions from '../../plan-editor/plan-editor-actions'
 import SelectionActions from '../../selection/selection-actions'
 import PlanTargetListComponent from '../../selection/plan-target-list.jsx'
 import { createSelector } from 'reselect'
@@ -22,7 +23,7 @@ export class NetworkOptimizationInput extends Component {
     return (
       <div style={{ paddingRight: '16px', paddingTop: '8px' }}>
         <NetworkOptimizationButton
-          onRun={() => this.onRunOptimization()}
+          onRun={() => this.requestRunOptimization()}
           onModify={() => this.props.onModify()}
           onCancel={() => this.onCancelOptimization()}
           isCanceling={this.props.isCanceling}
@@ -56,6 +57,37 @@ export class NetworkOptimizationInput extends Component {
         </div>
       </div>
     )
+  }
+
+  requestRunOptimization () {
+    if (this.props.transaction) {
+      // open a swal
+      swal({
+        title: 'Unsaved Changes',
+        text: 'Do you want to save your changes?',
+        type: 'warning',
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Save', // 'Yes',
+        showCancelButton: true,
+        cancelButtonText: 'Back', // 'No',
+        closeOnConfirm: true
+        
+      }, (result) => {
+        console.log(result)
+        if (result) {
+          // save transaction
+          this.props.commitTransaction(this.props.transaction.id)
+          .then(() => {
+            console.log('transaction commited!')
+            // this.onRunOptimization()
+          })
+          // then run optimization
+          //this.onRunOptimization()
+        }
+      })
+    } else {
+      this.onRunOptimization()
+    }
   }
 
   onRunOptimization () {
@@ -112,10 +144,12 @@ const mapStateToProps = (state) => ({
   optimizationInputs: state.optimization.networkOptimization.optimizationInputs,
   modifiedNetworkOptimizationInput: networkOptimizationInputSelector(state),
   allSelectionModes: getAllSelectionModes(state),
-  activeSelectionModeId: state.selection.activeSelectionMode.id
+  activeSelectionModeId: state.selection.activeSelectionMode.id,
+  transaction: state.planEditor.transaction
 })
 
 const mapDispatchToProps = dispatch => ({
+  commitTransaction: transactionId => dispatch(PlanEditorActions.commitTransaction(transactionId)),
   runOptimization: (inputs, userId) => dispatch(NetworkOptimizationActions.runOptimization(inputs, userId)),
   cancelOptimization: (planId, optimizationId) => dispatch(NetworkOptimizationActions.cancelOptimization(planId, optimizationId)),
   setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId))
