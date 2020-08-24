@@ -32,6 +32,7 @@ import locationInfo from '../react/components/location-info/location-info-reduce
 import acl from '../react/components/acl/acl-reducer'
 import resourceManager from '../react/components/resource-manager/resource-manager-reducer'
 import globalSettings from '../react/components/global-settings/globalsettings-reducer'
+import resourceEditor from '../react/components/resource-editor/resource-reducer'
 import dataUpload from '../react/components/data-upload/data-upload-reducer'
 
 const logger = createLogger({
@@ -62,6 +63,7 @@ let reducer = combineReducers({
   acl,
   resourceManager,
   globalSettings,
+  resourceEditor,
   dataUpload
 })
 

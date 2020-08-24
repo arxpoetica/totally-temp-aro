@@ -77,6 +77,19 @@ function setHaveDataItemsChanged (state, haveDataItemsChanged) {
   }
 }
 
+function setResourceItems (state, resourceItems, pristineResourceItems) {
+  return { ...state,
+    resourceItems: resourceItems,
+    pristineResourceItems: pristineResourceItems
+  }
+}
+
+function setIsResourceSelection (state, status) {
+  return { ...state,
+    isResourceSelection: status
+  }
+}
+
 function planReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.PLAN_SET_ACTIVE_PLAN:
@@ -99,6 +112,12 @@ function planReducer (state = defaultState, action) {
 
     case Actions.PLAN_SET_HAVE_DATA_ITEMS_CHANGED:
       return setHaveDataItemsChanged(state, action.payload)
+
+    case Actions.PLAN_SET_RESOURCE_ITEMS:
+      return setResourceItems(state, action.payload.resourceItems, action.payload.pristineResourceItems) 
+      
+    case Actions.PLAN_SET_IS_RESOURCE_SELECTION:
+      return setIsResourceSelection(state, action.payload)
 
     default:
       return state

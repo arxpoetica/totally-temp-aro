@@ -40,7 +40,7 @@ export class ManageGroups extends Component {constructor (props) {
 	}
 
 	addGroup () {
-			this.props.addGroup()
+		this.props.addGroup()
 	}
 
 	editGroup(editGroup){
