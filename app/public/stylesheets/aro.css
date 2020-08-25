@@ -169,8 +169,8 @@ footer nav {
   margin-top: 10px;
   margin-left: -5px;
   margin-bottom: 10px;
-  /*width: 500px;*/
-  height:100px;
+  width: 400px;
+  /*height:100px;*/
 }
 
 .outlineLegendIcon{
@@ -670,7 +670,7 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
     user-select: none;
     border: 1px solid #c0c0c0;
 }
-    
+
 .checkboxfill:checked {
     background:#4d99e5;
     border: #4d99e5;
@@ -687,7 +687,7 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
     position: relative;
     top: 1px;
     display: inline-block;
-    /* The following positions my tick in the center, 
+    /* The following positions my tick in the center,
      * but you could just overlay the entire box
      * with a full after element with a background if you want to */
     position: absolute;
@@ -728,7 +728,7 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
   user-select: none;
   border: 1px solid #c0c0c0;
 }
-  
+
 .radiofill:checked {
   background:#4d99e5;
   border: #4d99e5;
@@ -745,7 +745,7 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
   position: relative;
   top: 1px;
   display: inline-block;
-  /* The following positions my tick in the center, 
+  /* The following positions my tick in the center,
    * but you could just overlay the entire box
    * with a full after element with a background if you want to */
   position: absolute;
@@ -873,14 +873,14 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 
 .close {
   /* large close icon for modal window */
-  font-size: 30px; 
+  font-size: 30px;
 }
 
 .select2-no-results {
   color: black;
 }
 
-/* 
+/*
   After migrating to Bootstrap4, the <ui-select> component was not showing dropdown items. The following CSS fixes that (temporarily)
   until ui-select supports Bootstrap4. Workaround from https://stackoverflow.com/questions/48803798/angular-ui-select-component-broken-after-migrating-to-bootstrap-4
 */
@@ -998,7 +998,7 @@ ui-select-font {
 }
 
 .hue{
-  background: linear-gradient(to right, 
+  background: linear-gradient(to right,
   hsl(0,25%,50%) 0%,hsl(14.4,25%,50%) 4%,
   hsl(28.8,25%,50%) 8%,hsl(43.2,25%,50%) 12%,hsl(57.6,25%,50%) 16%,
   hsl(72,25%,50%) 20%,hsl(86.4,25%,50%) 24%,hsl(100.8,25%,50%) 28%,
