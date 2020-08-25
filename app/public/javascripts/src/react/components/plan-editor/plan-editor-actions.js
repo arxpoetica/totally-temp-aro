@@ -57,7 +57,7 @@ function clearTransaction () {
 function commitTransaction (transactionId) {
   return dispatch => {
     dispatch(setIsCommittingTransaction(true))
-    AroHttp.put(`/service/plan-transactions/${transactionId}`)
+    return AroHttp.put(`/service/plan-transactions/${transactionId}`)
       .then(() => dispatch(clearTransaction()))
       .catch(err => {
         console.error(err)

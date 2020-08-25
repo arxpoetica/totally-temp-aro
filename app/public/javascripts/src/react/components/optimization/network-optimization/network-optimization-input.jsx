@@ -67,22 +67,20 @@ export class NetworkOptimizationInput extends Component {
         text: 'Do you want to save your changes?',
         type: 'warning',
         confirmButtonColor: '#DD6B55',
-        confirmButtonText: 'Save', // 'Yes',
+        confirmButtonText: 'Save and Run', // 'Yes',
         showCancelButton: true,
         cancelButtonText: 'Back', // 'No',
         closeOnConfirm: true
-        
       }, (result) => {
-        console.log(result)
         if (result) {
           // save transaction
           this.props.commitTransaction(this.props.transaction.id)
-          .then(() => {
-            console.log('transaction commited!')
-            // this.onRunOptimization()
-          })
-          // then run optimization
-          //this.onRunOptimization()
+            .then(() => {
+              this.onRunOptimization()
+            })
+            .catch(err => {
+              console.error(err)
+            })
         }
       })
     } else {
@@ -149,7 +147,7 @@ const mapStateToProps = (state) => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  commitTransaction: transactionId => dispatch(PlanEditorActions.commitTransaction(transactionId)),
+  commitTransaction: transactionId => { return dispatch(PlanEditorActions.commitTransaction(transactionId)) },
   runOptimization: (inputs, userId) => dispatch(NetworkOptimizationActions.runOptimization(inputs, userId)),
   cancelOptimization: (planId, optimizationId) => dispatch(NetworkOptimizationActions.cancelOptimization(planId, optimizationId)),
   setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId))
