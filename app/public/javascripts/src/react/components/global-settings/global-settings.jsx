@@ -42,7 +42,10 @@ export class GlobalSettings extends Component {
     this.state = {
       modal: true,
       currentView: '',
-      userIdForSettingsEdit: ''
+      userIdForSettingsEdit: '',
+      resourceEditorProps: '',
+      dataUploadProps: '',
+      dataSelectionID: ''
     }    
 
     this.toggle = this.toggle.bind(this);
@@ -52,9 +55,12 @@ export class GlobalSettings extends Component {
   static getDerivedStateFromProps(nextProps, prevState) {
 
     if(nextProps.currentViewProps !== undefined){
-      if(nextProps.currentViewProps === 'Resource Managers' && prevState.currentView === ''){
+      if((nextProps.currentViewProps === 'Resource Managers' || nextProps.currentViewProps === 'Upload Data Resources') && prevState.currentView === ''){
         return {
           currentView: nextProps.currentViewProps,
+          resourceEditorProps: nextProps.resourceEditorProps,
+          dataUploadProps:  nextProps.dataUploadProps,
+          dataSelectionID: nextProps.dataSelectionID,
         };
       } else {
         return {
@@ -201,10 +207,10 @@ export class GlobalSettings extends Component {
               <ReportModuleList/>
             }
             {currentView === this.views.DATA_UPLOAD &&
-              <DataUpload/>
+              <DataUpload selectedDataSourceName={this.state.dataUploadProps} selectedDataTypeId={this.state.dataSelectionID}/>
             }
             {currentView === this.views.RESOURCE_EDITOR &&
-              <ResourceEditor filterText={this.props.currentEditorProps}/>
+              <ResourceEditor filterText={this.state.resourceEditorProps}/>
             }    
             {currentView === this.views.BROADCAST &&
               <Broadcast/>
@@ -227,12 +233,13 @@ export class GlobalSettings extends Component {
   }
 
   handleChangeView(currentView){
-    this.setState({ currentView: currentView });
+    this.setState({ currentView: currentView, resourceEditorProps: 'all', dataUploadProps : 'location', dataSelectionID: 1});
   }
   
   toggle() {
     this.setState({ modal: !this.state.modal});
     this.props.setIsResourceSelection(false)
+    this.props.setIsDataSelection(false)
     this.props.setShowGlobalSettings(false)
   }
 }
@@ -244,6 +251,7 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
   setIsResourceSelection: (status) => dispatch(PlanActions.setIsResourceSelection(status)),
+  setIsDataSelection: (status) => dispatch(PlanActions.setIsDataSelection(status)),
   setShowGlobalSettings: (status) => dispatch(GlobalsettingsActions.setShowGlobalSettings(status))
 })
 

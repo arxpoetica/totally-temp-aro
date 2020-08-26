@@ -2,8 +2,8 @@
 import { react2angular } from 'react2angular'
 import { ToastContainer } from 'react-toastify'
 
+import PlanSettings from '../react/components/plan/plan-settings.jsx'
 import GlobalSettingsButton from '../react/components/global-settings/global-settings-button.jsx'
-import PlanSettings from '../react/components/plan-settings/plan-settings.jsx'
 import rGlobalSettings from '../react/components/global-settings/global-settings.jsx'
 import ResourceEditor from '../react/components/resource-editor/resource-editor.jsx'
 import DataUpload from '../react/components/data-upload/data-upload.jsx'
