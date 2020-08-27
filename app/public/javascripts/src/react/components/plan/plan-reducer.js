@@ -10,7 +10,8 @@ const defaultState = {
     latitude: 47.6062, // Seattle, WA by default. For no particular reason.
     longitude: -122.3321, // Seattle, WA by default. For no particular reason.
     areaName: 'Seattle, WA' // Seattle, WA by default. For no particular reason.
-  }
+  },
+  selectedMode: 'HOME'
 }
 
 // Set the superuser flag for the currently logged in user
@@ -90,6 +91,43 @@ function setIsResourceSelection (state, status) {
   }
 }
 
+function setIsDataSelection (state, status) {
+  return { ...state,
+    isDataSelection: status
+  }
+}
+
+function setAllProject (state, allProjects, parentProjectForNewProject) {
+  return { ...state,
+    allProjects: allProjects,
+    parentProjectForNewProject: parentProjectForNewProject
+  }
+}
+
+function setselectedProjectId (state, selectedProjectId) {
+  return { ...state,
+    selectedProjectId: selectedProjectId
+  }
+}
+
+function setIsDeleting (state, status) {
+  return { ...state,
+    isDeleting: status
+  }
+}
+
+function setProjectMode (state, selectedMode) {
+  return { ...state,
+    selectedMode: selectedMode
+  }
+}
+
+function setIsDataSourceEditable (state, isDataSourceEditable) {
+  return { ...state,
+    isDataSourceEditable: isDataSourceEditable
+  }
+}
+
 function planReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.PLAN_SET_ACTIVE_PLAN:
@@ -118,6 +156,24 @@ function planReducer (state = defaultState, action) {
       
     case Actions.PLAN_SET_IS_RESOURCE_SELECTION:
       return setIsResourceSelection(state, action.payload)
+
+    case Actions.PLAN_SET_IS_DATA_SELECTION:
+      return setIsDataSelection(state, action.payload)
+
+    case Actions.PLAN_SET_ALL_PROJECT:
+      return setAllProject(state, action.payload.allProjects, action.payload.parentProjectForNewProject)
+
+    case Actions.PLAN_SET_SELECTED_PROJECT_ID:
+      return setselectedProjectId(state, action.payload)
+      
+    case Actions.PLAN_SET_IS_DELETING:
+      return setIsDeleting(state, action.payload)
+      
+    case Actions.PLAN_SET_PROJECT_MODE:
+      return setProjectMode(state, action.payload)
+      
+    case Actions.PLAN_SET_IS_DATASOURCE_EDITABLE:
+      return setIsDataSourceEditable(state, action.payload)      
 
     default:
       return state

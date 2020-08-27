@@ -62,17 +62,39 @@
   border-radius: 0px;
   text-align: center;
   padding: 5px;
+  cursor: pointer;
 }
 
 .collapse-show{
   transition: flex-grow 100ms, flex-shrink 100ms, visibility 0ms 100ms;
   overflow-x: hidden;
-  overflow-y: auto;
+  flex-grow: 1;
+}
+.collapse{
+  overflow: auto
 }
 
 .card-fixed{
-  position: fixed;
-  width: 310px;
+  position: sticky;
+  top: 0;
+  width: 100%;
   z-index: 2;
-  height: 38px
+}
+
+/* Plan Project Configuration */
+
+
+.indent {
+  margin: 5px;
+}
+.form-div-center,#tblProjectConfiguration td {
+  line-height: 33px;
+}
+.btn-project-configuration {
+  width: calc(49% - 20px);
+  margin: 10px;
+  height: 100px
+}
+.btn-delete-project {
+  padding: 3px 7px;
 }
