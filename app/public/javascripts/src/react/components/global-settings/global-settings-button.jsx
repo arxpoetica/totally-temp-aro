@@ -14,10 +14,8 @@ export class GlobalSettingsButton extends Component {
 
   render () {
    return(
-      <div>
+      <>
         <button className="btn"
-          data-toggle="tooltip"
-          data-placement="bottom"
           title="Global Settings..."
           onClick={(e) => this.showGlobalSettings()}>
           <i className="fa fa-th"></i>
@@ -25,7 +23,7 @@ export class GlobalSettingsButton extends Component {
         {this.props.showGlobalSettings &&
           <GlobalSettings/>
         }
-      </div>
+      </>
     )
   }
 
