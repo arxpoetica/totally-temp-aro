@@ -186,9 +186,7 @@ export class PlanDataSelection extends Component {
   }
 
   editDataSource (itemKey) { 
-    console.log(itemKey)
-    this.props.editDataSource(itemKey)
-    
+    this.props.editDataSource(itemKey)    
   } 
   
   editLocations () { 

@@ -326,8 +326,7 @@ class State {
       PLAN_SETTINGS: 'PLAN_SETTINGS',
       DEBUG: 'DEBUG'
     })
-    //service.selectedDisplayMode = new Rx.BehaviorSubject(service.displayModes.VIEW)
-    service.selectedDisplayMode = new Rx.BehaviorSubject(service.displayMode)
+    service.selectedDisplayMode = new Rx.BehaviorSubject(service.displayModes.VIEW)
 
     service.targetSelectionModes = Object.freeze({
       SINGLE_PLAN_TARGET: 0,
@@ -1781,7 +1780,6 @@ class State {
   }
 
   mapStateToThis (reduxState) {
-    console.log(reduxState)
     return {
       plan: reduxState.plan.activePlan,
       mapLayersRedux: reduxState.mapLayers,
@@ -1799,10 +1797,7 @@ class State {
       primarySpatialEdge: reduxState.optimization.networkAnalysis.primarySpatialEdge,
       wormholeFuseDefinitions: reduxState.optimization.networkAnalysis.wormholeFuseDefinitions,
       activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
-      optimizationInputs: reduxState.optimization.networkOptimization.optimizationInputs,
-      displayMode: reduxState.plan.plan.displayMode,
-      viewMode: reduxState.plan.plan.viewMode
-      
+      optimizationInputs: reduxState.optimization.networkOptimization.optimizationInputs
     }
   }
 

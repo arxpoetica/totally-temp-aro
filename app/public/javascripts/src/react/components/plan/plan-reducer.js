@@ -133,7 +133,6 @@ function setIsDataSourceEditable (state, isDataSourceEditable) {
 }
 
 function setViewMode (state, dataItemKey) {
-  console.log(dataItemKey);
   let viewMode;
   let displayMode;
   if(dataItemKey === 'location') {
