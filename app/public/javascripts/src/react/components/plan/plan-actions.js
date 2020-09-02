@@ -510,6 +510,16 @@ function planSettingsToProject (selectedProjectId, dataItems, resourceItems) {
     }
   }
 
+  function editDataSource (dataItemKey){
+    console.log(dataItemKey)
+    return dispatch => {
+      dispatch({
+        type: Actions.PLAN_SET_VIEW_MODE,
+        payload: dataItemKey
+      })
+    }
+  }
+
 export default {
   setActivePlan,
   setActivePlanState,
@@ -530,5 +540,6 @@ export default {
   setIsDeleting,
   setProjectMode,
   planSettingsToProject,
-  updateDataSourceEditableStatus
+  updateDataSourceEditableStatus,
+  editDataSource
 }
