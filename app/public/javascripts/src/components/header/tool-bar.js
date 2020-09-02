@@ -338,10 +338,13 @@ class ToolBarController {
 
   // Take the mapTileOptions defined and set it on the state
   toggleHeatMapOptions () {
+    /*
     var newMapTileOptions = angular.copy(this.mapTileOptions)
     // this.heatMapOption = !this.heatMapOption
     newMapTileOptions.selectedHeatmapOption = this.heatMapOption ? this.state.viewSetting.heatmapOptions[0] : this.state.viewSetting.heatmapOptions[2]
     this.state.mapTileOptions.next(newMapTileOptions)
+    */
+    this.state.setUseHeatMap(this.heatMapOption)
   }
 
   showEquipmentLabelsChanged () {

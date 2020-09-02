@@ -156,6 +156,7 @@ class State {
       service.selectedToolBarAction = null
     }
 
+    service.showLocationLabels = false
     service.showEquipmentLabels = false
     service.equipmentLayerTypeVisibility = {
       existing: false,
@@ -262,9 +263,17 @@ class State {
         powerExponent: 0.5,
         worldMaxValue: 500000
       },
-      selectedHeatmapOption: service.viewSetting.heatmapOptions[0]
+      selectedHeatmapOption: service.viewSetting.heatmapOptions[2] // 0, 2
     }
     service.mapTileOptions = new Rx.BehaviorSubject(heatmapOptions)
+
+    service.setUseHeatMap = (useHeatMap) => {
+      var newMapTileOptions = angular.copy(service.mapTileOptions.value)
+      // ToDo: don't hardcode these, but this whole thing needs to be restructured
+      newMapTileOptions.selectedHeatmapOption = useHeatMap ? service.viewSetting.heatmapOptions[0] : service.viewSetting.heatmapOptions[2] 
+      console.log(newMapTileOptions)
+      service.mapTileOptions.next(newMapTileOptions)
+    }
 
     service.defaultPlanCoordinates = {
       zoom: 14,
@@ -1430,6 +1439,7 @@ class State {
           service.initializeState()
           service.isReportMode = Boolean(initialState.reportPage || initialState.reportOverview)
           if (service.isReportMode) {
+            var reportOptions = initialState.reportPage || initialState.reportOverview
             return service.mapReadyPromise
               .then(() => {
                 google.maps.event.addListener(map, 'tilesloaded', function () {
@@ -1441,6 +1451,12 @@ class State {
                   streetViewControl: false,
                   mapTypeControl: false
                 })
+
+                // ToDo: should standardize initialState properties
+                if (reportOptions.showLocationLabels) {
+                  service.setUseHeatMap(reportOptions.showLocationLabels)
+                }
+
                 service.setPlanRedux(plan)
                 const mapCenter = (initialState.reportPage && initialState.reportPage.mapCenter) || (initialState.reportOverview && initialState.reportOverview.mapCenter)
                 const mapZoom = (initialState.reportPage && initialState.reportPage.mapZoom) || (initialState.reportOverview && initialState.reportOverview.mapZoom)
@@ -1534,6 +1550,7 @@ class State {
     service.suppressVectorTiles = true
     service.configuration = {}
     service.initializeApp = initialState => {
+      console.log(initialState)
       // Get application configuration from the server
       return $http.get('/configuration')
         .then(result => {

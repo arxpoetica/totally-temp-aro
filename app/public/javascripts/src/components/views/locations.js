@@ -234,17 +234,51 @@ class LocationsController {
               // For aggregated locations (all types - businesses, households, celltowers) we want to merge them into one layer
               mergedLayerDefinitions = mergedLayerDefinitions.concat(tileDefinitions)
             } else {
+              /*
+              var drawingOptions = angular.copy(networkEquipment.drawingOptions)
+              if (this.state.showEquipmentLabels) {
+                drawingOptions.labels = this.networkEquipmentLayers.labelDrawingOptions
+              }
+              */
+              // ToDo: move this
+              var drawingOptions = {
+                "strokeStyle":"#0000ff",
+                "labels":{
+                  "align":"bottom",
+                  "fontBold":false,
+                  "fontSize":16,
+                  "fillColor":"#4286f4",
+                  "fontFamily":"sans-serif",
+                  "properties":["location_id"],// name comes from service, it's not on the feature (change that)
+                  "borderColor":"#ffffff",
+                  "labelMargin":5,"labelPadding":3,"textFillColor":"#ffffff","textStrokeColor":null,"visibilityZoomThreshold":12
+                }
+              }
+
               // We want to create an individual layer
-              oldMapLayers[mapLayerKey] = {
+              var mapLayerProps = {
                 tileDefinitions: tileDefinitions,
                 iconUrl: `${baseUrl}${layerIconUrl}`,
                 mduIconUrl: locationType.mduIconUrl && `${baseUrl}${locationType.mduIconUrl}`,
                 renderMode: 'PRIMITIVE_FEATURES',
+                
+                strokeStyle: drawingOptions.strokeStyle,
+                lineWidth: drawingOptions.lineWidth || 2,
+                fillStyle: drawingOptions.fillStyle,
+                opacity: drawingOptions.opacity || 0.5,
+                
                 zIndex: locationType.zIndex,
                 selectable: true,
                 featureFilter: featureFilter,
                 v2Filters: v2Filters
               }
+              
+              console.log(this.state.showLocationLabels)
+              if (this.state.showLocationLabels) {
+                mapLayerProps.drawingOptions = drawingOptions
+              }
+
+              oldMapLayers[mapLayerKey] = mapLayerProps
               this.createdMapLayerKeys.add(mapLayerKey)
             }
           } else if (map && map.getZoom() < 10) {

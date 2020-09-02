@@ -87,6 +87,8 @@ export class MapReportsDownloader extends Component {
       if (this.props.manualWait) {
         pageDefinition.waitSecondsPerPage = this.props.waitSecondsPerPage // The user has asked to manually wait for each page
       }
+      // YOU LEFT OFF HERE - NEED TO MOVE showLocationLabels TO REDUX
+      // pageDefinition.showLocationLabels = this.state.showLocationLabels
       // From maplayers, get the layers that we want to display in the report. Also send the location filters.
       pageDefinition.locationFilters = this.props.mapLayers.locationFilters
       pageDefinition.visibleLayers = this.props.mapLayers.location.filter(layer => layer.checked).map(layer => layer.key).toJS();
