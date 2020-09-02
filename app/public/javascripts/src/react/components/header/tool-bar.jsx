@@ -5,6 +5,7 @@ import './tool-bar.css';
 import GlobalSettingsButton from '../global-settings/global-settings-button.jsx'
 import ToolBarActions from './tool-bar-actions'
 import uuidStore from '../../../shared-utils/uuid-store'
+import MapActions from '../map/map-actions'
 
 export class ToolBar extends Component {
   constructor (props) {
@@ -103,8 +104,6 @@ export class ToolBar extends Component {
     var ids = 0
     var searchSessionToken = ''
     var search = $('#global-search-toolbutton .select2')
-    console.log(search)
-    console.log(this.props.defaultPlanCoordinates)
     //var self = this
     search.select2({
       placeholder: 'Set an address, city, state or CLLI code',
@@ -144,7 +143,26 @@ export class ToolBar extends Component {
         cache: true
       }
     }).on('change', (e) => {
-     
+      var selectedLocation = e.added
+      if (selectedLocation) {
+        const ZOOM_FOR_LOCATION_SEARCH = 17
+        if (selectedLocation.type === 'placeId') {
+          // This is a google maps place_id. The actual latitude/longitude can be obtained by another call to the geocoder
+          var geocoder = new google.maps.Geocoder()
+          var self = this;
+          geocoder.geocode({ 'placeId': selectedLocation.value }, function (results, status) {
+            if (status !== 'OK') {
+              console.error('Geocoder failed: ' + status)
+              return
+            }
+            var mapObject = {
+              latitude: results[0].geometry.location.lat(),
+              longitude: results[0].geometry.location.lng()
+            }
+            self.props.requestSetMapCenter(mapObject)
+          })
+        }
+      }
     })
     //search.select2('val', location, true)
   }
@@ -159,7 +177,9 @@ const mapStateToProps = (state) => ({
 })  
 
 const mapDispatchToProps = (dispatch) => ({
-  setPlanInputsModal: (status) => dispatch(ToolBarActions.setPlanInputsModal(status))
+  setPlanInputsModal: (status) => dispatch(ToolBarActions.setPlanInputsModal(status)),
+  requestSetMapCenter: (mapRef) => dispatch(MapActions.requestSetMapCenter(mapRef)),
+
 })
 
 const ToolBarComponent = wrapComponentWithProvider(reduxStore, ToolBar, mapStateToProps, mapDispatchToProps)

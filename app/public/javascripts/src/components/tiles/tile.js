@@ -677,7 +677,9 @@ class TileComponentController {
       selection: reduxState.selection,
       stateMapLayers: reduxState.mapLayers,
       transactionFeatureIds: getTransactionFeatureIds(reduxState),
-      networkAnalysisType: reduxState.optimization.networkOptimization.optimizationInputs.analysis_type
+      networkAnalysisType: reduxState.optimization.networkOptimization.optimizationInputs.analysis_type,
+      zoom: reduxState.map.zoom,
+      mapCenter: reduxState.map.mapCenter
     }
   }
 

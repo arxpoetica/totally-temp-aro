@@ -24,7 +24,15 @@ function setSelectedMapFeatures (features) {
   }
 }
 
+function requestSetMapCenter (mapCenter) {
+  return {
+    type: Actions.MAP_SET_REQUEST_SET_MAP_CENTER,
+    payload: mapCenter
+  }
+}
+
 export default {
   setGoogleMapsReference,
-  setSelectedMapFeatures
+  setSelectedMapFeatures,
+  requestSetMapCenter
 }
