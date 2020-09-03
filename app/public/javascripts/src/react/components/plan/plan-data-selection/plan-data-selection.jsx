@@ -96,7 +96,7 @@ export class PlanDataSelection extends Component {
                         />
                         <div className="btn-group btn-group-sm" style={{flex: '0 0 auto'}}>
                           {this.props.isDataSourceEditable[objKey] &&
-                            <button className="btn btn-light">
+                            <button className="btn btn-light" onClick={(e)=>this.editDataSource(objKey)} >
                               <span className="fa fa-edit"></span>
                             </button>
                           }
@@ -185,6 +185,21 @@ export class PlanDataSelection extends Component {
     return areAllSelectionsValid
   }
 
+  editDataSource (itemKey) { 
+    this.props.editDataSource(itemKey)    
+  } 
+  
+  editLocations () { 
+    // Put the application in "Edit Location" mode 
+    this.state.selectedDisplayMode.next(this.state.displayModes.VIEW) 
+    this.state.activeViewModePanel = this.state.viewModePanels.EDIT_LOCATIONS 
+  } 
+  
+  editServiceLayer () { 
+    // Put the application in "Edit Service Layer" mode 
+    this.state.activeViewModePanel = this.state.viewModePanels.EDIT_SERVICE_LAYER 
+    this.state.selectedDisplayMode.next(this.state.displayModes.VIEW) 
+  }
 
   openDataSelection(srcId){
 
@@ -228,6 +243,7 @@ export class PlanDataSelection extends Component {
     setIsDataSelection: (status) => dispatch(PlanActions.setIsDataSelection(status)),
     updateDataSourceEditableStatus: (isDataSourceEditable,dataSourceKey,loggedInUser, authPermissions, dataItems) => dispatch(PlanActions.updateDataSourceEditableStatus(isDataSourceEditable,dataSourceKey,loggedInUser, authPermissions, dataItems)),
     selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems)),
+    editDataSource: (dataItemKey) => dispatch(PlanActions.editDataSource(dataItemKey))
   })
 
    const PlanDataSelectionComponent = wrapComponentWithProvider(reduxStore, PlanDataSelection, mapStateToProps, mapDispatchToProps)

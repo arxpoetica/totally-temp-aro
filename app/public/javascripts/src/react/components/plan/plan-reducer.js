@@ -11,7 +11,11 @@ const defaultState = {
     longitude: -122.3321, // Seattle, WA by default. For no particular reason.
     areaName: 'Seattle, WA' // Seattle, WA by default. For no particular reason.
   },
-  selectedMode: 'HOME'
+  selectedMode: 'HOME',
+  plan:{
+    displayMode:'VIEW',
+    viewMode:'LOCATION_INFO'
+  }
 }
 
 // Set the superuser flag for the currently logged in user
@@ -128,6 +132,31 @@ function setIsDataSourceEditable (state, isDataSourceEditable) {
   }
 }
 
+function setViewMode (state, dataItemKey) {
+  let viewMode;
+  let displayMode;
+  if(dataItemKey === 'location') {
+    viewMode = 'EDIT_LOCATIONS'
+    displayMode = "VIEW";
+  }
+  else if(dataItemKey === 'service_layer') {
+    viewMode = 'EDIT_SERVICE_LAYER'
+    displayMode = "VIEW";
+  }
+  else{
+    viewMode = 'LOCATION_INFO'
+    displayMode = "VIEW";
+  }
+
+  return { ...state,
+    plan:{
+      ...state.plan,
+      viewMode: viewMode,
+      displayMode: displayMode
+    }
+  }
+}
+
 function planReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.PLAN_SET_ACTIVE_PLAN:
@@ -173,7 +202,10 @@ function planReducer (state = defaultState, action) {
       return setProjectMode(state, action.payload)
       
     case Actions.PLAN_SET_IS_DATASOURCE_EDITABLE:
-      return setIsDataSourceEditable(state, action.payload)      
+      return setIsDataSourceEditable(state, action.payload) 
+    
+    case Actions.PLAN_SET_VIEW_MODE:
+      return setViewMode(state, action.payload) 
 
     default:
       return state

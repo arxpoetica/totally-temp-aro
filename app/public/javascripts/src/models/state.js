@@ -327,6 +327,7 @@ class State {
       DEBUG: 'DEBUG'
     })
     service.selectedDisplayMode = new Rx.BehaviorSubject(service.displayModes.VIEW)
+
     service.targetSelectionModes = Object.freeze({
       SINGLE_PLAN_TARGET: 0,
       POLYGON_PLAN_TARGET: 1,
