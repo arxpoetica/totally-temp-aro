@@ -102,9 +102,16 @@ export class ToolBar extends Component {
 
   initSearchBox () {
     var ids = 0
-    var searchSessionToken = ''
+    var searchSessionToken = uuidStore.getInsecureV4UUID()
+    var addBouncingMarker = (latitude, longitude) => {
+      var marker = new google.maps.Marker({
+        map: map,
+        animation: google.maps.Animation.BOUNCE,
+        position: { lat: latitude, lng: longitude }
+      })
+      setTimeout(() => { marker.setMap(null) }, 5000);
+    }
     var search = $('#global-search-toolbutton .select2')
-    //var self = this
     search.select2({
       placeholder: 'Set an address, city, state or CLLI code',
       ajax: {
@@ -113,7 +120,7 @@ export class ToolBar extends Component {
         quietMillis: 250, // *** In newer versions of select2, this is called 'delay'. Remember this when upgrading select2
         data: (term) => ({
           text: term,
-          sessionToken: uuidStore.getInsecureV4UUID(),
+          sessionToken: searchSessionToken,
           biasLatitude: this.props.defaultPlanCoordinates.latitude,
           biasLongitude: this.props.defaultPlanCoordinates.longitude
         }),
@@ -149,7 +156,6 @@ export class ToolBar extends Component {
         if (selectedLocation.type === 'placeId') {
           // This is a google maps place_id. The actual latitude/longitude can be obtained by another call to the geocoder
           var geocoder = new google.maps.Geocoder()
-          var self = this;
           geocoder.geocode({ 'placeId': selectedLocation.value }, function (results, status) {
             if (status !== 'OK') {
               console.error('Geocoder failed: ' + status)
@@ -157,14 +163,31 @@ export class ToolBar extends Component {
             }
             var mapObject = {
               latitude: results[0].geometry.location.lat(),
-              longitude: results[0].geometry.location.lng()
+              longitude: results[0].geometry.location.lng(),
+              zoom: ZOOM_FOR_LOCATION_SEARCH
             }
-            self.props.requestSetMapCenter(mapObject)
+            //Due to unable to subscribe requestSetMapCenter as of now used Custom Event Listener
+            // https://www.sitepoint.com/javascript-custom-events/
+            var event = new CustomEvent('mapChanged', { detail : mapObject});
+            window.dispatchEvent(event);
+            addBouncingMarker(results[0].geometry.location.lat(), results[0].geometry.location.lng())
           })
+        } else if (selectedLocation.type === 'latlng') {
+          // The user has searched for a latitude/longitude. Simply go to that position
+          var mapObject = {
+            latitude: +selectedLocation.value[0],
+            longitude: +selectedLocation.value[1],
+            zoom: ZOOM_FOR_LOCATION_SEARCH
+          }
+          var event = new CustomEvent('mapChanged', { detail : mapObject});
+          window.dispatchEvent(event);
+          addBouncingMarker(+selectedLocation.value[0], +selectedLocation.value[1])
+        } else if (selectedLocation.type === 'error') {
+          console.error('ERROR when searching for location')
+          console.error(selectedLocation)
         }
       }
     })
-    //search.select2('val', location, true)
   }
 
   savePlanAs(){

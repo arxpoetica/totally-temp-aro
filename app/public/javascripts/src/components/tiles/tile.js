@@ -45,7 +45,7 @@ class TileComponentController {
   // fillStyle: (Optional) For polygon features, this is the fill color
   // opacity: (Optional, default 1.0) This is the maximum opacity of anything drawn on the map layer. Aggregate layers will have features of varying opacity, but none exceeding this value
 
-  constructor ($window, $document, $timeout, $ngRedux, state, tileDataService, contextMenuService, Utils) {
+  constructor ($window, $document, $timeout, $ngRedux, state, tileDataService, contextMenuService, Utils, $scope) {
     this.layerIdToMapTilesIndex = {}
     this.mapRef = null // Will be set in $document.ready()
     this.$window = $window
@@ -119,6 +119,15 @@ class TileComponentController {
         this.mapRef.panTo({ lat: mapCenter.latitude, lng: mapCenter.longitude })
       }
     })
+    
+    //Due to unable to subscribe requestSetMapCenter as of now used Custom Event Listener
+    // https://www.sitepoint.com/javascript-custom-events/
+    window.addEventListener('mapChanged', (mapCenter) => { 
+      if (this.mapRef) {
+        this.mapRef.panTo({ lat: mapCenter.detail.latitude, lng: mapCenter.detail.longitude })
+        this.mapRef.setZoom(mapCenter.detail.zoom)
+      }
+    });
 
     tileDataService.addEntityImageForLayer('SELECTED_LOCATION', state.selectedLocationIcon)
 
@@ -773,7 +782,7 @@ class TileComponentController {
   
 }
 
-TileComponentController.$inject = ['$window', '$document', '$timeout', '$ngRedux', 'state', 'tileDataService', 'contextMenuService', 'Utils']
+TileComponentController.$inject = ['$window', '$document', '$timeout', '$ngRedux', 'state','tileDataService', 'contextMenuService', 'Utils', '$scope']
 
 let tile = {
   template: '',
