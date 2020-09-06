@@ -185,20 +185,21 @@ export class PlanDataSelection extends Component {
     return areAllSelectionsValid
   }
 
-  editDataSource (itemKey) { 
-    this.props.editDataSource(itemKey)    
-  } 
+  editDataSource (itemKey) {
+    itemKey === 'location' && this.editLocations()
+    itemKey === 'service_layer' && this.editServiceLayer()
+  }
   
   editLocations () { 
     // Put the application in "Edit Location" mode 
-    this.state.selectedDisplayMode.next(this.state.displayModes.VIEW) 
-    this.state.activeViewModePanel = this.state.viewModePanels.EDIT_LOCATIONS 
+    this.props.selectedDisplayMode("VIEW")
+    this.props.activeViewModePanel("EDIT_LOCATIONS")
   } 
   
   editServiceLayer () { 
     // Put the application in "Edit Service Layer" mode 
-    this.state.activeViewModePanel = this.state.viewModePanels.EDIT_SERVICE_LAYER 
-    this.state.selectedDisplayMode.next(this.state.displayModes.VIEW) 
+    this.props.selectedDisplayMode("VIEW")
+    this.props.activeViewModePanel("EDIT_SERVICE_LAYER")
   }
 
   openDataSelection(srcId){
@@ -243,7 +244,8 @@ export class PlanDataSelection extends Component {
     setIsDataSelection: (status) => dispatch(PlanActions.setIsDataSelection(status)),
     updateDataSourceEditableStatus: (isDataSourceEditable,dataSourceKey,loggedInUser, authPermissions, dataItems) => dispatch(PlanActions.updateDataSourceEditableStatus(isDataSourceEditable,dataSourceKey,loggedInUser, authPermissions, dataItems)),
     selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems)),
-    editDataSource: (dataItemKey) => dispatch(PlanActions.editDataSource(dataItemKey))
+    selectedDisplayMode: (value) => dispatch(PlanActions.selectedDisplayMode(value)),
+    activeViewModePanel: (value) => dispatch(PlanActions.activeViewModePanel(value))
   })
 
    const PlanDataSelectionComponent = wrapComponentWithProvider(reduxStore, PlanDataSelection, mapStateToProps, mapDispatchToProps)
