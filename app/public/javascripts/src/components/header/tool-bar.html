@@ -173,6 +173,14 @@
         <input type="range" ng-if="$ctrl.heatMapOption" min= {{$ctrl.min}} max= {{$ctrl.max}} ng-model="$ctrl.sliderValue"
           class="aro-slider" ng-change="$ctrl.changeHeatMapOptions()">
       </div>
+
+      <div>
+        <div class="dropdown-divider"></div>
+        <input type="checkbox" class="checkboxfill" ng-checked="$ctrl.showLocationLabels" ng-click="$ctrl.showEquipmentLabelsChanged()" name="ctype-name"
+          style="margin-left: 2px;">
+        <font>Location Labels</font>
+      </div>
+
       <div ng-if="$ctrl.state.configuration.toolbar.showSiteBoundaries">
         <div class="dropdown-divider"></div>
         <input type="checkbox" class="checkboxfill" ng-checked="$ctrl.state.showSiteBoundary" ng-click="$ctrl.state.toggleSiteBoundary()" name="ctype-name"
@@ -196,17 +204,6 @@
                style="margin-left: 2px;">
         <font>Directed Cable</font>
       </div>
-
-
-
-      <div>
-        <div class="dropdown-divider"></div>
-        <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showLocationLabels" ng-change="$ctrl.showEquipmentLabelsChanged()" name="ctype-name"
-          style="margin-left: 2px;">
-        <font>Location Labels</font>
-      </div>
-
-
 
       <div ng-if="$ctrl.state.configuration.perspective.viewSettings.showSiteLabels">
         <div class="dropdown-divider"></div>

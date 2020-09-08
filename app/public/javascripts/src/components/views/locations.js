@@ -272,9 +272,8 @@ class LocationsController {
                 featureFilter: featureFilter,
                 v2Filters: v2Filters
               }
-              
-              console.log(this.state.showLocationLabels)
-              if (this.state.showLocationLabels) {
+
+              if (this.showLocationLabels) {
                 mapLayerProps.drawingOptions = drawingOptions
               }
 
@@ -334,7 +333,8 @@ class LocationsController {
       locationLayers: getLocationLayersList(reduxState),
       locationFilters: reduxState.mapLayers.locationFilters || {},
       orderedLocationFilters: getOrderedLocationFilters(reduxState),
-      dataItems: reduxState.plan.dataItems
+      dataItems: reduxState.plan.dataItems,
+      showLocationLabels: reduxState.viewSettings.showLocationLabels
     }
   }
 

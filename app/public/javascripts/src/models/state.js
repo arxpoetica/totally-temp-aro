@@ -23,6 +23,7 @@ import ReactComponentConstants from '../react/common/constants'
 import AroNetworkConstraints from '../shared-utils/aro-network-constraints'
 import PuppeteerMessages from '../components/common/puppeteer-messages'
 import NetworkOptimizationActions from '../react/components/optimization/network-optimization/network-optimization-actions'
+import ViewSettingsActions from '../react/components/view-settings/view-settings-actions'
 import Tools from '../react/components/tool/tools'
 
 const networkAnalysisConstraintsSelector = formValueSelector(ReactComponentConstants.NETWORK_ANALYSIS_CONSTRAINTS)
@@ -156,7 +157,6 @@ class State {
       service.selectedToolBarAction = null
     }
 
-    service.showLocationLabels = false
     service.showEquipmentLabels = false
     service.equipmentLayerTypeVisibility = {
       existing: false,
@@ -263,7 +263,7 @@ class State {
         powerExponent: 0.5,
         worldMaxValue: 500000
       },
-      selectedHeatmapOption: service.viewSetting.heatmapOptions[2] // 0, 2
+      selectedHeatmapOption: service.viewSetting.heatmapOptions[0] // 0, 2
     }
     service.mapTileOptions = new Rx.BehaviorSubject(heatmapOptions)
 
@@ -271,7 +271,6 @@ class State {
       var newMapTileOptions = angular.copy(service.mapTileOptions.value)
       // ToDo: don't hardcode these, but this whole thing needs to be restructured
       newMapTileOptions.selectedHeatmapOption = useHeatMap ? service.viewSetting.heatmapOptions[0] : service.viewSetting.heatmapOptions[2] 
-      console.log(newMapTileOptions)
       service.mapTileOptions.next(newMapTileOptions)
     }
 
@@ -1453,8 +1452,9 @@ class State {
                 })
 
                 // ToDo: should standardize initialState properties
+                service.setShowLocationLabels(reportOptions.showLocationLabels)
                 if (reportOptions.showLocationLabels) {
-                  service.setUseHeatMap(reportOptions.showLocationLabels)
+                  service.setUseHeatMap(!reportOptions.showLocationLabels)
                 }
 
                 service.setPlanRedux(plan)
@@ -1550,7 +1550,6 @@ class State {
     service.suppressVectorTiles = true
     service.configuration = {}
     service.initializeApp = initialState => {
-      console.log(initialState)
       // Get application configuration from the server
       return $http.get('/configuration')
         .then(result => {
@@ -1850,7 +1849,8 @@ class State {
       setOptimizationInputs: inputs => dispatch(NetworkOptimizationActions.setOptimizationInputs(inputs)),
       setPrimarySpatialEdge: primarySpatialEdge => dispatch(NetworkAnalysisActions.setPrimarySpatialEdge(primarySpatialEdge)),
       clearWormholeFuseDefinitions: () => dispatch(NetworkAnalysisActions.clearWormholeFuseDefinitions()),
-      setWormholeFuseDefinition: (spatialEdgeType, wormholeFusionTypeId) => dispatch(NetworkAnalysisActions.setWormholeFuseDefinition(spatialEdgeType, wormholeFusionTypeId))
+      setWormholeFuseDefinition: (spatialEdgeType, wormholeFusionTypeId) => dispatch(NetworkAnalysisActions.setWormholeFuseDefinition(spatialEdgeType, wormholeFusionTypeId)),
+      setShowLocationLabels: showLocationLabels => dispatch(ViewSettingsActions.setShowLocationLabels(showLocationLabels))
     }
   }
 }

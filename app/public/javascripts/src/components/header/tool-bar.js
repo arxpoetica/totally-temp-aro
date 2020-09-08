@@ -4,6 +4,7 @@ import RfpActions from '../../react/components/optimization/rfp/rfp-actions'
 import MapReportsActions from '../../react/components/map-reports/map-reports-actions'
 import ToolActions from '../../react/components/tool/tool-actions'
 import Tools from '../../react/components/tool/tools'
+import ViewSettingsActions from '../../react/components/view-settings/view-settings-actions'
 
 class ToolBarController {
   constructor ($element, $timeout, $document, $http, $ngRedux, state, map_tools, $window) {
@@ -348,8 +349,9 @@ class ToolBarController {
   }
 
   showEquipmentLabelsChanged () {
-    this.state.viewSettingsChanged.next()
-    this.state.requestMapLayerRefresh.next(null)
+    this.setShowLocationLabels(!this.showLocationLabels)
+    //this.state.viewSettingsChanged.next()
+    //this.state.requestMapLayerRefresh.next(null)
   }
 
   changeHeatMapOptions () {
@@ -550,7 +552,8 @@ class ToolBarController {
     return {
       isAnnotationsListVisible: reduxState.tool.showToolBox && (reduxState.tool.activeTool === Tools.ANNOTATION.id),
       isMapReportsVisible: reduxState.tool.showToolBox && (reduxState.tool.activeTool === Tools.MAP_REPORTS.id),
-      showMapReportMapObjects: reduxState.mapReports.showMapObjects
+      showMapReportMapObjects: reduxState.mapReports.showMapObjects,
+      showLocationLabels: reduxState.viewSettings.showLocationLabels
     }
   }
 
@@ -568,7 +571,8 @@ class ToolBarController {
         dispatch(ToolActions.setActiveTool(isVisible ? Tools.MAP_REPORTS.id : null))
         dispatch(ToolActions.setToolboxVisibility(isVisible))
         dispatch(MapReportsActions.showMapObjects(isVisible))
-      }
+      },
+      setShowLocationLabels: showLocationLabels => dispatch(ViewSettingsActions.setShowLocationLabels(showLocationLabels))
     }
   }
 }
