@@ -234,29 +234,6 @@ class LocationsController {
               // For aggregated locations (all types - businesses, households, celltowers) we want to merge them into one layer
               mergedLayerDefinitions = mergedLayerDefinitions.concat(tileDefinitions)
             } else {
-              /*
-              var drawingOptions = angular.copy(networkEquipment.drawingOptions)
-              if (this.state.showEquipmentLabels) {
-                drawingOptions.labels = this.networkEquipmentLayers.labelDrawingOptions
-              }
-              */
-              // ToDo: move this
-              /*
-              var drawingOptions = {
-                "strokeStyle":"#0000ff",
-                "labels":{
-                  "align":"bottom",
-                  "fontBold":false,
-                  "fontSize":16,
-                  "fillColor":"#4286f4",
-                  "fontFamily":"sans-serif",
-                  "properties":["name"],// location_id, name comes from service, it's not on the feature (change that)
-                  "borderColor":"#ffffff",
-                  "labelMargin":5,"labelPadding":3,"textFillColor":"#ffffff","textStrokeColor":null,"visibilityZoomThreshold":12
-                }
-              }
-              */
-
               var drawingOptions = {
                 "strokeStyle":"#0000ff",
                 "labels":{ ...this.lableDrawingOptions, "properties":["name"]}
