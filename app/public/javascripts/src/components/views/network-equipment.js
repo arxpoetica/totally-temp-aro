@@ -134,7 +134,7 @@ class NetworkEquipmentController {
       // So we just turn on the "0" subtype for all boundary layers. The filter will take care of hiding based on boundary type.
       subtypes = { 0: true }
     }
-    console.log(drawingOptions)
+
     return { // ToDo: this needs to be a class and the same class as in the reducer
       tileDefinitions: [tileDefinition],
       iconUrl: networkEquipment.iconUrl,

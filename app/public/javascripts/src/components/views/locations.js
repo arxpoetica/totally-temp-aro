@@ -249,7 +249,7 @@ class LocationsController {
                   "fontSize":16,
                   "fillColor":"#4286f4",
                   "fontFamily":"sans-serif",
-                  "properties":["location_id"],// name comes from service, it's not on the feature (change that)
+                  "properties":["name"],// location_id, name comes from service, it's not on the feature (change that)
                   "borderColor":"#ffffff",
                   "labelMargin":5,"labelPadding":3,"textFillColor":"#ffffff","textStrokeColor":null,"visibilityZoomThreshold":12
                 }
@@ -273,7 +273,7 @@ class LocationsController {
                 v2Filters: v2Filters
               }
 
-              if (this.showLocationLabels) {
+              if (this.showLocationLabels) { // && map.getZoom() > this.networkEquipmentLayers.labelDrawingOptions.visibilityZoomThreshold
                 mapLayerProps.drawingOptions = drawingOptions
               }
 
