@@ -241,6 +241,7 @@ class LocationsController {
               }
               */
               // ToDo: move this
+              /*
               var drawingOptions = {
                 "strokeStyle":"#0000ff",
                 "labels":{
@@ -253,6 +254,12 @@ class LocationsController {
                   "borderColor":"#ffffff",
                   "labelMargin":5,"labelPadding":3,"textFillColor":"#ffffff","textStrokeColor":null,"visibilityZoomThreshold":12
                 }
+              }
+              */
+
+              var drawingOptions = {
+                "strokeStyle":"#0000ff",
+                "labels":{ ...this.lableDrawingOptions, "properties":["name"]}
               }
 
               // We want to create an individual layer
@@ -334,7 +341,8 @@ class LocationsController {
       locationFilters: reduxState.mapLayers.locationFilters || {},
       orderedLocationFilters: getOrderedLocationFilters(reduxState),
       dataItems: reduxState.plan.dataItems,
-      showLocationLabels: reduxState.viewSettings.showLocationLabels
+      showLocationLabels: reduxState.viewSettings.showLocationLabels,
+      lableDrawingOptions: reduxState.mapLayers.networkEquipment.labelDrawingOptions
     }
   }
 

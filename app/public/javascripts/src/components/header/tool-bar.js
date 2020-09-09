@@ -348,10 +348,13 @@ class ToolBarController {
     this.state.setUseHeatMap(this.heatMapOption)
   }
 
-  showEquipmentLabelsChanged () {
+  showLocationLabelsChanged () {
     this.setShowLocationLabels(!this.showLocationLabels)
-    //this.state.viewSettingsChanged.next()
-    //this.state.requestMapLayerRefresh.next(null)
+  }
+
+  showEquipmentLabelsChanged () {
+    this.state.viewSettingsChanged.next()
+    this.state.requestMapLayerRefresh.next(null)
   }
 
   changeHeatMapOptions () {
