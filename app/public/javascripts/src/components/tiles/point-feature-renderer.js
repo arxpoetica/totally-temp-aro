@@ -203,6 +203,7 @@ class PointFeatureRenderer {
       }
       labelCenterY += labelYOffset
       // Draw the box for the label
+      // console.log(feature)
       const fontSize = mapLayer.drawingOptions.labels.fontSize
       ctx.font = (mapLayer.drawingOptions.labels.fontBold ? 'bold ' : '') + `${fontSize}px ${mapLayer.drawingOptions.labels.fontFamily}`
       const labelText = feature.properties[labelProperty]

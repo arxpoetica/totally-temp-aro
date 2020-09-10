@@ -4,6 +4,7 @@ import RfpActions from '../../react/components/optimization/rfp/rfp-actions'
 import MapReportsActions from '../../react/components/map-reports/map-reports-actions'
 import ToolActions from '../../react/components/tool/tool-actions'
 import Tools from '../../react/components/tool/tools'
+import ViewSettingsActions from '../../react/components/view-settings/view-settings-actions'
 
 class ToolBarController {
   constructor ($element, $timeout, $document, $http, $ngRedux, state, map_tools, $window) {
@@ -338,10 +339,17 @@ class ToolBarController {
 
   // Take the mapTileOptions defined and set it on the state
   toggleHeatMapOptions () {
+    /*
     var newMapTileOptions = angular.copy(this.mapTileOptions)
     // this.heatMapOption = !this.heatMapOption
     newMapTileOptions.selectedHeatmapOption = this.heatMapOption ? this.state.viewSetting.heatmapOptions[0] : this.state.viewSetting.heatmapOptions[2]
     this.state.mapTileOptions.next(newMapTileOptions)
+    */
+    this.state.setUseHeatMap(this.heatMapOption)
+  }
+
+  showLocationLabelsChanged () {
+    this.setShowLocationLabels(!this.showLocationLabels)
   }
 
   showEquipmentLabelsChanged () {
@@ -548,7 +556,8 @@ class ToolBarController {
       isAnnotationsListVisible: reduxState.tool.showToolBox && (reduxState.tool.activeTool === Tools.ANNOTATION.id),
       isMapReportsVisible: reduxState.tool.showToolBox && (reduxState.tool.activeTool === Tools.MAP_REPORTS.id),
       showMapReportMapObjects: reduxState.mapReports.showMapObjects,
-      rSelectedDisplayMode: reduxState.plan.rSelectedDisplayMode
+      rSelectedDisplayMode: reduxState.plan.rSelectedDisplayMode,
+      showLocationLabels: reduxState.viewSettings.showLocationLabels
     }
   }
 
@@ -566,7 +575,8 @@ class ToolBarController {
         dispatch(ToolActions.setActiveTool(isVisible ? Tools.MAP_REPORTS.id : null))
         dispatch(ToolActions.setToolboxVisibility(isVisible))
         dispatch(MapReportsActions.showMapObjects(isVisible))
-      }
+      },
+      setShowLocationLabels: showLocationLabels => dispatch(ViewSettingsActions.setShowLocationLabels(showLocationLabels))
     }
   }
 }

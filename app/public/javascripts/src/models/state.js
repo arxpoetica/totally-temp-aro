@@ -23,6 +23,7 @@ import ReactComponentConstants from '../react/common/constants'
 import AroNetworkConstraints from '../shared-utils/aro-network-constraints'
 import PuppeteerMessages from '../components/common/puppeteer-messages'
 import NetworkOptimizationActions from '../react/components/optimization/network-optimization/network-optimization-actions'
+import ViewSettingsActions from '../react/components/view-settings/view-settings-actions'
 import Tools from '../react/components/tool/tools'
 
 const networkAnalysisConstraintsSelector = formValueSelector(ReactComponentConstants.NETWORK_ANALYSIS_CONSTRAINTS)
@@ -262,9 +263,16 @@ class State {
         powerExponent: 0.5,
         worldMaxValue: 500000
       },
-      selectedHeatmapOption: service.viewSetting.heatmapOptions[0]
+      selectedHeatmapOption: service.viewSetting.heatmapOptions[0] // 0, 2
     }
     service.mapTileOptions = new Rx.BehaviorSubject(heatmapOptions)
+
+    service.setUseHeatMap = (useHeatMap) => {
+      var newMapTileOptions = angular.copy(service.mapTileOptions.value)
+      // ToDo: don't hardcode these, but this whole thing needs to be restructured
+      newMapTileOptions.selectedHeatmapOption = useHeatMap ? service.viewSetting.heatmapOptions[0] : service.viewSetting.heatmapOptions[2] 
+      service.mapTileOptions.next(newMapTileOptions)
+    }
 
     service.defaultPlanCoordinates = {
       zoom: 14,
@@ -1431,6 +1439,7 @@ class State {
           service.initializeState()
           service.isReportMode = Boolean(initialState.reportPage || initialState.reportOverview)
           if (service.isReportMode) {
+            var reportOptions = initialState.reportPage || initialState.reportOverview
             return service.mapReadyPromise
               .then(() => {
                 google.maps.event.addListener(map, 'tilesloaded', function () {
@@ -1442,6 +1451,13 @@ class State {
                   streetViewControl: false,
                   mapTypeControl: false
                 })
+
+                // ToDo: should standardize initialState properties
+                service.setShowLocationLabels(reportOptions.showLocationLabels)
+                if (reportOptions.showLocationLabels) {
+                  service.setUseHeatMap(!reportOptions.showLocationLabels)
+                }
+
                 service.setPlanRedux(plan)
                 const mapCenter = (initialState.reportPage && initialState.reportPage.mapCenter) || (initialState.reportOverview && initialState.reportOverview.mapCenter)
                 const mapZoom = (initialState.reportPage && initialState.reportPage.mapZoom) || (initialState.reportOverview && initialState.reportOverview.mapZoom)
@@ -1834,7 +1850,8 @@ class State {
       setOptimizationInputs: inputs => dispatch(NetworkOptimizationActions.setOptimizationInputs(inputs)),
       setPrimarySpatialEdge: primarySpatialEdge => dispatch(NetworkAnalysisActions.setPrimarySpatialEdge(primarySpatialEdge)),
       clearWormholeFuseDefinitions: () => dispatch(NetworkAnalysisActions.clearWormholeFuseDefinitions()),
-      setWormholeFuseDefinition: (spatialEdgeType, wormholeFusionTypeId) => dispatch(NetworkAnalysisActions.setWormholeFuseDefinition(spatialEdgeType, wormholeFusionTypeId))
+      setWormholeFuseDefinition: (spatialEdgeType, wormholeFusionTypeId) => dispatch(NetworkAnalysisActions.setWormholeFuseDefinition(spatialEdgeType, wormholeFusionTypeId)),
+      setShowLocationLabels: showLocationLabels => dispatch(ViewSettingsActions.setShowLocationLabels(showLocationLabels))
     }
   }
 }
