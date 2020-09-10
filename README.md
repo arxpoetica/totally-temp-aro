@@ -39,9 +39,9 @@ Once installation is complete, edit the preferences/settings of the running appl
 
 Obtain credentials to the AIT Docker Registry. Then log into the registry with the following command:
 ```shell
-$ docker login -u aro -e aro@altvil.com https://ait-docker-registry.cloud.altvil.com
+$ docker login -usernane=dockerhubid
 ```
-This will prompt you for the password which will then be saved to your configuration and allow you to bypass entering the credentials in the future.  
+...where *dockerhubid* is replaced by your login name on hub.docker.com. This will prompt you for the password which will then be saved to your configuration and allow you to bypass entering the credentials in the future.  
 ***
 Unless you will not ever be modifying source data or any of the ETL in development (i.e., in very rare cases), you need to install git-lfs on your machine. The recommended method is installation via homebrew. Homebrew installation and documentation can be found [here](http://brew.sh/).
 

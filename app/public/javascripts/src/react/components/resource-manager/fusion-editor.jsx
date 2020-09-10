@@ -10,6 +10,7 @@ import FusionConstraints from './fusion-editor-form.jsx'
 import WormholeFuseDefinition from './wormhole-fuse-definition.jsx'
 import Constants from '../../common/constants'
 import ResourceManagerActions from './resource-manager-actions'
+import ResourceActions from '../resource-editor/resource-actions'
 const fusionSelector = getFormValues(Constants.FUSION_FORM)
 
 const getConduits = state => { return { ...state.mapLayers.networkEquipment.conduits, ...state.mapLayers.networkEquipment.roads } }
@@ -21,35 +22,42 @@ const getOrderedSpatialEdgeDefinitions = createSelector([getConduits], conduits 
 })
 
 export class FusionEditor extends Component {
+
+  componentDidMount () {
+    this.props.setModalTitle(this.props.resourceManagerName);  
+  }
+
   render () {
     if (!this.props.definition) return ''
 
     return (
       <div>
-        <div className='modal-header ng-isolate-scope' title={this.props.resourceManagerName}>
-          <h5 className='modal-title ng-binding ng-scope'>{this.props.resourceManagerName}</h5>
-          <button type='button' className='close ng-scope' data-dismiss='modal' aria-label='Close'>
-            <span aria-hidden='true'>×</span>
-          </button>
-        </div>
-        <div className='modal-body' style={{ maxHeight: 'calc(100vh - 12rem)', overflowY: 'scroll' }}>
-          <FusionConstraints initialValues={this.props.definition.config} enableReinitialize />
-          <ConduitConnectivityDefinition
-            connectivityDefinition={this.props.definition.config.connectivityDefinition}
-            setConnectivityDefinition={this.setConnectivityDefinitionWithId.bind(this)}
-            spatialEdgeDefinitions={this.props.spatialEdgeDefinitions}
-          />
-          <WormholeFuseDefinition
-            primarySpatialEdge={this.props.definition.config.primarySpatialEdge}
-            spatialEdgeDefinitions={this.props.spatialEdgeDefinitions}
-            wormholeFuseDefinitions={this.props.definition.config.wormholeFuseDefinitions}
-            setPrimarySpatialEdge={this.setPrimarySpatialEdgeWithId.bind(this)}
-            setWormholeFuseDefinition={this.setWormholeFuseDefinitionWithId.bind(this)}
-          />
-        </div>
-        <div className='modal-footer'>
-          <button className='btn btn-primary float-right' onClick={() => this.props.onDiscard()}>Discard changes</button>
-          <button className='btn btn-primary float-right' onClick={() => this.saveSettings()}>Save</button>
+        <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
+          <div style={{flex: '1 1 auto'}}>
+            <FusionConstraints initialValues={this.props.definition.config} enableReinitialize />
+            <ConduitConnectivityDefinition
+              connectivityDefinition={this.props.definition.config.connectivityDefinition}
+              setConnectivityDefinition={this.setConnectivityDefinitionWithId.bind(this)}
+              spatialEdgeDefinitions={this.props.spatialEdgeDefinitions}
+            />
+            <WormholeFuseDefinition
+              primarySpatialEdge={this.props.definition.config.primarySpatialEdge}
+              spatialEdgeDefinitions={this.props.spatialEdgeDefinitions}
+              wormholeFuseDefinitions={this.props.definition.config.wormholeFuseDefinitions}
+              setPrimarySpatialEdge={this.setPrimarySpatialEdgeWithId.bind(this)}
+              setWormholeFuseDefinition={this.setWormholeFuseDefinitionWithId.bind(this)}
+            />
+          </div>
+          <div style={{flex: '0 0 auto'}}>
+            <div style={{textAlign: 'right'}}>
+              <button className='btn btn-light mr-2' onClick={() => this.props.onDiscard()}>
+                <i className="fa fa-undo action-button-icon"></i>Discard changes
+              </button>
+              <button className='btn btn-primary' onClick={() => this.saveSettings()}>
+                <i className="fa fa-save action-button-icon"></i>Save
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     )
@@ -92,7 +100,8 @@ const mapDispatchToProps = dispatch => ({
   saveResourceManagerDefinition: (resourceManagerId, managerType, definition) => dispatch(ResourceManagerActions.saveResourceManagerDefinition(resourceManagerId, managerType, definition)),
   setConnectivityDefinition: (id, spatialEdgeType, networkConnectivityType) => dispatch(ResourceManagerActions.setConnectivityDefinition(id, spatialEdgeType, networkConnectivityType)),
   setPrimarySpatialEdge: (id, primarySpatialEdge) => dispatch(ResourceManagerActions.setPrimarySpatialEdge(id, primarySpatialEdge)),
-  setWormholeFuseDefinition: (id, spatialEdgeType, wormholeFusionTypeId) => dispatch(ResourceManagerActions.setWormholeFuseDefinition(id, spatialEdgeType, wormholeFusionTypeId))
+  setWormholeFuseDefinition: (id, spatialEdgeType, wormholeFusionTypeId) => dispatch(ResourceManagerActions.setWormholeFuseDefinition(id, spatialEdgeType, wormholeFusionTypeId)),
+  setModalTitle: (title) => dispatch(ResourceActions.setModalTitle(title))
 })
 
 const FusionEditorComponent = wrapComponentWithProvider(reduxStore, FusionEditor, mapStateToProps, mapDispatchToProps)

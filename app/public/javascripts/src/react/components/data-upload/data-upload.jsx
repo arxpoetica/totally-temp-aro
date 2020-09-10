@@ -12,8 +12,8 @@ export class DataUpload extends Component {
     super(props)
     this.state = {
       dataSourceName: '',
-      selectedDataSourceName: 'location',
-      selectedDataTypeId:1,
+      selectedDataSourceName: '',
+      selectedDataTypeId:'',
       selectedConduitSize: '',
       selectedSpatialEdgeType:'',
       selectedCreationType:'upload_file',
@@ -30,7 +30,24 @@ export class DataUpload extends Component {
   }
 
   componentDidMount(){
-    this.props.loadEtlTemplatesFromServer(1)
+    this.props.loadEtlTemplatesFromServer(this.state.selectedDataTypeId)
+  }
+
+  static getDerivedStateFromProps(nextProps, prevState) {
+		
+		if(prevState.selectedDataSourceName !== undefined && nextProps.selectedDataSourceName !== undefined) {
+			if(prevState.selectedDataSourceName === ''){
+				return {
+          selectedDataSourceName: nextProps.selectedDataSourceName,
+          selectedDataTypeId: nextProps.selectedDataTypeId
+				};
+			} else {
+				return {
+          selectedDataSourceName: prevState.selectedDataSourceName,
+          selectedDataTypeId: prevState.selectedDataTypeId
+				};
+			}
+		}
   }
   
   dataTypeChange(event) {

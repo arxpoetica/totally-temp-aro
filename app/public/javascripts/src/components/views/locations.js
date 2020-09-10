@@ -234,17 +234,34 @@ class LocationsController {
               // For aggregated locations (all types - businesses, households, celltowers) we want to merge them into one layer
               mergedLayerDefinitions = mergedLayerDefinitions.concat(tileDefinitions)
             } else {
+              var drawingOptions = {
+                "strokeStyle":"#0000ff",
+                "labels":{ ...this.lableDrawingOptions, "properties":["name"]}
+              }
+
               // We want to create an individual layer
-              oldMapLayers[mapLayerKey] = {
+              var mapLayerProps = {
                 tileDefinitions: tileDefinitions,
                 iconUrl: `${baseUrl}${layerIconUrl}`,
                 mduIconUrl: locationType.mduIconUrl && `${baseUrl}${locationType.mduIconUrl}`,
                 renderMode: 'PRIMITIVE_FEATURES',
+                
+                strokeStyle: drawingOptions.strokeStyle,
+                lineWidth: drawingOptions.lineWidth || 2,
+                fillStyle: drawingOptions.fillStyle,
+                opacity: drawingOptions.opacity || 0.5,
+                
                 zIndex: locationType.zIndex,
                 selectable: true,
                 featureFilter: featureFilter,
                 v2Filters: v2Filters
               }
+
+              if (this.showLocationLabels) { // && map.getZoom() > this.networkEquipmentLayers.labelDrawingOptions.visibilityZoomThreshold
+                mapLayerProps.drawingOptions = drawingOptions
+              }
+
+              oldMapLayers[mapLayerKey] = mapLayerProps
               this.createdMapLayerKeys.add(mapLayerKey)
             }
           } else if (map && map.getZoom() < 10) {
@@ -300,7 +317,9 @@ class LocationsController {
       locationLayers: getLocationLayersList(reduxState),
       locationFilters: reduxState.mapLayers.locationFilters || {},
       orderedLocationFilters: getOrderedLocationFilters(reduxState),
-      dataItems: reduxState.plan.dataItems
+      dataItems: reduxState.plan.dataItems,
+      showLocationLabels: reduxState.viewSettings.showLocationLabels,
+      lableDrawingOptions: reduxState.mapLayers.networkEquipment.labelDrawingOptions
     }
   }
 

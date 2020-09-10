@@ -7,24 +7,31 @@ import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import PlanningConstraints from './planning-constraints-form.jsx'
 import Constants from '../../common/constants'
 import ResourceManagerActions from './resource-manager-actions'
+import ResourceActions from '../resource-editor/resource-actions'
 const planningConstraintsSelector = getFormValues(Constants.PLANNING_CONSTRAINTS_FORM)
 
 export class PlanningConstraintsEditor extends Component {
+  componentDidMount () {
+    this.props.setModalTitle(this.props.resourceManagerName);  
+  }
+
   render () {
     return (
       <div>
-        <div className='modal-header ng-isolate-scope' title={this.props.resourceManagerName}>
-          <h5 className='modal-title ng-binding ng-scope'>{this.props.resourceManagerName}</h5>
-          <button type='button' className='close ng-scope' data-dismiss='modal' aria-label='Close'>
-            <span aria-hidden='true'>×</span>
-          </button>
-        </div>
-        <div className='modal-body' style={{ maxHeight: 'calc(100vh - 12rem)', overflowY: 'scroll' }}>
-          <PlanningConstraints initialValues={this.props.definition} enableReinitialize />
-        </div>
-        <div className='modal-footer'>
-          <button className='btn btn-primary float-right' onClick={() => this.props.onDiscard()}>Discard changes</button>
-          <button className='btn btn-primary float-right' onClick={() => this.saveSettings()}>Save</button>
+        <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
+          <div style={{flex: '1 1 auto'}}>
+            <PlanningConstraints initialValues={this.props.definition} enableReinitialize />
+          </div>
+          <div style={{flex: '0 0 auto'}}>
+            <div style={{textAlign: 'right'}}>
+              <button className='btn btn-light mr-2' onClick={() => this.props.onDiscard()}>
+                <i className="fa fa-undo action-button-icon"></i>Discard changes
+              </button>
+              <button className='btn btn-primary' onClick={() => this.saveSettings()}>
+                <i className="fa fa-save action-button-icon"></i>Save
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     )
@@ -47,7 +54,8 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  saveResourceManagerDefinition: (resourceManagerId, managerType, definition) => dispatch(ResourceManagerActions.saveResourceManagerDefinition(resourceManagerId, managerType, definition))
+  saveResourceManagerDefinition: (resourceManagerId, managerType, definition) => dispatch(ResourceManagerActions.saveResourceManagerDefinition(resourceManagerId, managerType, definition)),
+  setModalTitle: (title) => dispatch(ResourceActions.setModalTitle(title))
 })
 
 const PlanningConstraintsEditorComponent = wrapComponentWithProvider(reduxStore, PlanningConstraintsEditor, mapStateToProps, mapDispatchToProps)

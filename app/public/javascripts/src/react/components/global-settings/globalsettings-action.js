@@ -295,6 +295,15 @@ function setFlag () {
   }
 }
 
+function setShowGlobalSettings (status){
+  return dispatch => {
+    dispatch({
+      type: Actions.GLOBAL_SETTINGS_SHOW_GLOBAL_SETTINGS,
+      payload: status
+    })
+  }
+}
+
 export default {
   broadcastMessage,
   loadReleaseNotes,
@@ -312,5 +321,6 @@ export default {
   loadTags,
   setFlag,
   createTag,
-  updateTag
+  updateTag,
+  setShowGlobalSettings
 }

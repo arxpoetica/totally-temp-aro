@@ -76,6 +76,7 @@ workflows:
                 - planning_constraints_ray_tracing
                 - refactor-serialization-helper
                 - AERIAL
+                - location_labels
       - deploy:
           context: aro_qa_builds
           requires:

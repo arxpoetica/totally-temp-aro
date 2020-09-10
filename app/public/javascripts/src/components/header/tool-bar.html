@@ -91,14 +91,16 @@
 
   <div class="separator" class="no-collapse"></div>
 
-  <button class="btn"
+  <!-- <button class="btn"
           ng-click="$ctrl.openGlobalSettings()"
           ng-show="$ctrl.state.configuration.perspective.showToolbarButtons.globalSettings"
           data-toggle="tooltip"
           data-placement="bottom"
           title="Global Settings...">
     <i class="fa fa-th"></i>
-  </button>
+  </button> -->
+
+  <r-global-settings-button></r-global-settings-button>
 
   <div class="separator"></div>
 
@@ -171,6 +173,14 @@
         <input type="range" ng-if="$ctrl.heatMapOption" min= {{$ctrl.min}} max= {{$ctrl.max}} ng-model="$ctrl.sliderValue"
           class="aro-slider" ng-change="$ctrl.changeHeatMapOptions()">
       </div>
+
+      <div>
+        <div class="dropdown-divider"></div>
+        <input type="checkbox" class="checkboxfill" ng-checked="$ctrl.showLocationLabels" ng-click="$ctrl.showLocationLabelsChanged()" name="ctype-name"
+          style="margin-left: 2px;">
+        <font>Location Labels</font>
+      </div>
+
       <div ng-if="$ctrl.state.configuration.toolbar.showSiteBoundaries">
         <div class="dropdown-divider"></div>
         <input type="checkbox" class="checkboxfill" ng-checked="$ctrl.state.showSiteBoundary" ng-click="$ctrl.state.toggleSiteBoundary()" name="ctype-name"
