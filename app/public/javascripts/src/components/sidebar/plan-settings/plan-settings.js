@@ -237,7 +237,8 @@ class PlanSettingsController {
       dataItems: reduxState.plan.dataItems,
       haveDataItemsChanged: reduxState.plan.haveDataItemsChanged,
       plan: reduxState.plan.activePlan,
-      selectedServiceAreas: reduxState.selection.planTargets.serviceAreas
+      selectedServiceAreas: reduxState.selection.planTargets.serviceAreas,
+      showPanels: reduxState.configuration.ui.perspective.showViewModePanels
     }
   }
 

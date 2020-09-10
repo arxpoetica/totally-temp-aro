@@ -31,6 +31,7 @@ import ringEdit from '../react/components/ring-edit/ring-edit-reducer'
 import locationInfo from '../react/components/location-info/location-info-reducer'
 import acl from '../react/components/acl/acl-reducer'
 import resourceManager from '../react/components/resource-manager/resource-manager-reducer'
+import dataEdit from '../react/components/data-edit/data-edit-reducer'
 import globalSettings from '../react/components/global-settings/globalsettings-reducer'
 import resourceEditor from '../react/components/resource-editor/resource-reducer'
 import dataUpload from '../react/components/data-upload/data-upload-reducer'
@@ -63,6 +64,7 @@ let reducer = combineReducers({
   locationInfo,
   acl,
   resourceManager,
+  dataEdit,
   globalSettings,
   resourceEditor,
   dataUpload,
