@@ -67,7 +67,6 @@ workflows:
             branches:
               only:
                 - master
-                - location_labels
       - deploy:
           context: aro_qa_builds
           requires:

@@ -556,6 +556,7 @@ class ToolBarController {
       isAnnotationsListVisible: reduxState.tool.showToolBox && (reduxState.tool.activeTool === Tools.ANNOTATION.id),
       isMapReportsVisible: reduxState.tool.showToolBox && (reduxState.tool.activeTool === Tools.MAP_REPORTS.id),
       showMapReportMapObjects: reduxState.mapReports.showMapObjects,
+      rSelectedDisplayMode: reduxState.plan.rSelectedDisplayMode,
       showLocationLabels: reduxState.viewSettings.showLocationLabels
     }
   }

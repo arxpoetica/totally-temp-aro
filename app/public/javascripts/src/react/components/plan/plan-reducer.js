@@ -12,10 +12,8 @@ const defaultState = {
     areaName: 'Seattle, WA' // Seattle, WA by default. For no particular reason.
   },
   selectedMode: 'HOME',
-  plan:{
-    displayMode:'VIEW',
-    viewMode:'LOCATION_INFO'
-  }
+  rSelectedDisplayMode:'VIEW',
+  rActiveViewModePanel:'LOCATION_INFO'
 }
 
 // Set the superuser flag for the currently logged in user
@@ -132,28 +130,15 @@ function setIsDataSourceEditable (state, isDataSourceEditable) {
   }
 }
 
-function setViewMode (state, dataItemKey) {
-  let viewMode;
-  let displayMode;
-  if(dataItemKey === 'location') {
-    viewMode = 'EDIT_LOCATIONS'
-    displayMode = "VIEW";
-  }
-  else if(dataItemKey === 'service_layer') {
-    viewMode = 'EDIT_SERVICE_LAYER'
-    displayMode = "VIEW";
-  }
-  else{
-    viewMode = 'LOCATION_INFO'
-    displayMode = "VIEW";
-  }
-
+function setSelectedDisplayMode (state, displayMode) {
   return { ...state,
-    plan:{
-      ...state.plan,
-      viewMode: viewMode,
-      displayMode: displayMode
-    }
+    rSelectedDisplayMode: displayMode,
+  }
+}
+
+function setActiveViewModePanel (state, viewMode) {
+  return { ...state,
+    rActiveViewModePanel: viewMode
   }
 }
 
@@ -204,8 +189,11 @@ function planReducer (state = defaultState, action) {
     case Actions.PLAN_SET_IS_DATASOURCE_EDITABLE:
       return setIsDataSourceEditable(state, action.payload) 
     
-    case Actions.PLAN_SET_VIEW_MODE:
-      return setViewMode(state, action.payload) 
+    case Actions.PLAN_SET_SELECTED_DISPLAY_MODE:
+      return setSelectedDisplayMode(state, action.payload) 
+
+    case Actions.PLAN_SET_ACTIVE_VIEW_MODE_PANEL:
+      return setActiveViewModePanel(state, action.payload) 
 
     default:
       return state
