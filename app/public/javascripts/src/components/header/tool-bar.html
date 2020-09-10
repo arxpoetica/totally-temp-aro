@@ -229,7 +229,7 @@
   <div ng-show="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW" class="separator"></div>
 
   <button ng-show="($ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS
-                   || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW)
+                   || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW || $ctrl.rSelectedDisplayMode === $ctrl.state.displayModes.VIEW)
                    && $ctrl.state.activeViewModePanel !== $ctrl.state.viewModePanels.EDIT_LOCATIONS"
           ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.SINGLE_PLAN_TARGET }"
           ng-click="$ctrl.setSelectionSingle()"
@@ -240,7 +240,7 @@
   </button>
 
   <button ng-show="($ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS
-                   || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW)
+                   || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW || $ctrl.rSelectedDisplayMode === $ctrl.state.displayModes.VIEW)
                    && $ctrl.state.activeViewModePanel !== $ctrl.state.viewModePanels.EDIT_LOCATIONS
                    && $ctrl.state.configuration.perspective.showToolbarButtons.selectionPolygon"
           ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.POLYGON_PLAN_TARGET }"
@@ -276,7 +276,7 @@
 
   <div class="separator"></div>
 
-  <button ng-show="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW"
+  <button ng-show="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW || $ctrl.rSelectedDisplayMode === $ctrl.state.displayModes.VIEW"
           ng-if="$ctrl.state.configuration.perspective.showToolbarButtons.openCoverageBoundary"
           ng-class="{ 'btn': true,
                       'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.COVERAGE_BOUNDARY
@@ -289,7 +289,7 @@
     <i class="fa fa-crosshairs fa-rotate-180"></i>
   </button>
 
-  <button ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW &&
+  <button ng-if="($ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW || $ctrl.rSelectedDisplayMode === $ctrl.state.displayModes.VIEW) &&
                  $ctrl.state.configuration.perspective.showToolbarButtons.exportSelection &&
                  $ctrl.state.activeViewModePanel !== $ctrl.state.viewModePanels.EDIT_LOCATIONS"
     ng-click="$ctrl.setSelectionExport()"

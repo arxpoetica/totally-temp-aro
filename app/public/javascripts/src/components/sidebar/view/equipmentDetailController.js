@@ -222,7 +222,8 @@ class EquipmentDetailController {
 
   mapStateToThis (reduxState) {
     return {
-      dataItems: reduxState.plan.dataItems
+      dataItems: reduxState.plan.dataItems,
+      rActiveViewModePanel: reduxState.plan.rActiveViewModePanel
     }
   }
 
