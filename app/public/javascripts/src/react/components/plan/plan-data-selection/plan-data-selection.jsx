@@ -3,6 +3,7 @@ import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
 import GlobalSettings from '../../global-settings/global-settings.jsx'
 import PlanActions from '../plan-actions'
+import ToolBarActions from '../../header/tool-bar-actions'
 import Select, { components } from "react-select";
 import createClass from "create-react-class";
 
@@ -96,7 +97,7 @@ export class PlanDataSelection extends Component {
                         />
                         <div className="btn-group btn-group-sm" style={{flex: '0 0 auto'}}>
                           {this.props.isDataSourceEditable[objKey] &&
-                            <button className="btn btn-light">
+                            <button className="btn btn-light" onClick={(e)=>this.editDataSource(objKey)} >
                               <span className="fa fa-edit"></span>
                             </button>
                           }
@@ -185,6 +186,22 @@ export class PlanDataSelection extends Component {
     return areAllSelectionsValid
   }
 
+  editDataSource (itemKey) {
+    itemKey === 'location' && this.editLocations()
+    itemKey === 'service_layer' && this.editServiceLayer()
+  }
+  
+  editLocations () { 
+    // Put the application in "Edit Location" mode 
+    this.props.selectedDisplayMode("VIEW")
+    this.props.activeViewModePanel("EDIT_LOCATIONS")
+  } 
+  
+  editServiceLayer () { 
+    // Put the application in "Edit Service Layer" mode 
+    this.props.selectedDisplayMode("VIEW")
+    this.props.activeViewModePanel("EDIT_SERVICE_LAYER")
+  }
 
   openDataSelection(srcId){
 
@@ -228,6 +245,8 @@ export class PlanDataSelection extends Component {
     setIsDataSelection: (status) => dispatch(PlanActions.setIsDataSelection(status)),
     updateDataSourceEditableStatus: (isDataSourceEditable,dataSourceKey,loggedInUser, authPermissions, dataItems) => dispatch(PlanActions.updateDataSourceEditableStatus(isDataSourceEditable,dataSourceKey,loggedInUser, authPermissions, dataItems)),
     selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems)),
+    selectedDisplayMode: (value) => dispatch(ToolBarActions.selectedDisplayMode(value)),
+    activeViewModePanel: (value) => dispatch(ToolBarActions.activeViewModePanel(value))
   })
 
    const PlanDataSelectionComponent = wrapComponentWithProvider(reduxStore, PlanDataSelection, mapStateToProps, mapDispatchToProps)

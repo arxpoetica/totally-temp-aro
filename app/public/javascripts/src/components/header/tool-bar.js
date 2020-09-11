@@ -547,7 +547,8 @@ class ToolBarController {
     return {
       isAnnotationsListVisible: reduxState.tool.showToolBox && (reduxState.tool.activeTool === Tools.ANNOTATION.id),
       isMapReportsVisible: reduxState.tool.showToolBox && (reduxState.tool.activeTool === Tools.MAP_REPORTS.id),
-      showMapReportMapObjects: reduxState.mapReports.showMapObjects
+      showMapReportMapObjects: reduxState.mapReports.showMapObjects,
+      rSelectedDisplayMode: reduxState.toolbar.rSelectedDisplayMode
     }
   }
 
@@ -564,7 +565,9 @@ class ToolBarController {
       setMapReportsVisibility: isVisible => {
         dispatch(ToolActions.setActiveTool(isVisible ? Tools.MAP_REPORTS.id : null))
         dispatch(ToolActions.setToolboxVisibility(isVisible))
-        dispatch(MapReportsActions.showMapObjects(isVisible))
+        setTimeout(() => {
+          dispatch(MapReportsActions.showMapObjects(isVisible))
+        }, 0)
       }
     }
   }

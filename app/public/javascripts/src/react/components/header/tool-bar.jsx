@@ -3,9 +3,15 @@ import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import './tool-bar.css';
 import GlobalSettingsButton from '../global-settings/global-settings-button.jsx'
-import ToolBarActions from './tool-bar-actions'
+import Tools from '../tool/tools'
 import uuidStore from '../../../shared-utils/uuid-store'
 import MapActions from '../map/map-actions'
+import ToolBarActions from './tool-bar-actions'
+import MapReportsActions from '../map-reports/map-reports-actions'
+import ToolActions from '../tool/tool-actions'
+import MapReportsListMapObjects from '../map-reports/map-reports-list-map-objects.jsx'
+import FullScreenActions from '../full-screen/full-screen-actions'
+import RfpActions from '../optimization/rfp/rfp-actions'
 
 export class ToolBar extends Component {
   constructor (props) {
@@ -13,6 +19,35 @@ export class ToolBar extends Component {
 
     this.state = {
     }
+
+    this.viewModePanels = Object.freeze({
+      LOCATION_INFO: 'LOCATION_INFO',
+      EQUIPMENT_INFO: 'EQUIPMENT_INFO',
+      BOUNDARIES_INFO: 'BOUNDARIES_INFO',
+      ROAD_SEGMENT_INFO: 'ROAD_SEGMENT_INFO',
+      PLAN_SUMMARY_REPORTS: 'PLAN_SUMMARY_REPORTS',
+      COVERAGE_BOUNDARY: 'COVERAGE_BOUNDARY',
+      EDIT_LOCATIONS: 'EDIT_LOCATIONS',
+      EDIT_SERVICE_LAYER: 'EDIT_SERVICE_LAYER',
+      PLAN_INFO: 'PLAN_INFO'
+    })
+
+      // The display modes for the application
+    this.displayModes = Object.freeze({
+      VIEW: 'VIEW',
+      ANALYSIS: 'ANALYSIS',
+      EDIT_RINGS: 'EDIT_RINGS',
+      EDIT_PLAN: 'EDIT_PLAN',
+      PLAN_SETTINGS: 'PLAN_SETTINGS',
+      DEBUG: 'DEBUG'
+    })
+
+    this.targetSelectionModes = Object.freeze({
+      SINGLE_PLAN_TARGET: 0,
+      POLYGON_PLAN_TARGET: 1,
+      POLYGON_EXPORT_TARGET: 2,
+      COVERAGE_BOUNDARY: 5
+    })
   }
 
   componentDidMount(){
@@ -21,6 +56,14 @@ export class ToolBar extends Component {
 
   render() {
     this.initSearchBox();
+
+    const {selectedDisplayMode, activeViewModePanel, isAnnotationsListVisible,
+       isMapReportsVisible, showMapReportMapObjects, selectedTargetSelectionMode} = this.props
+
+    let selectedIndividualLocation = (selectedDisplayMode === this.displayModes.ANALYSIS || selectedDisplayMode === this.displayModes.VIEW) && activeViewModePanel !== this.viewModePanels.EDIT_LOCATIONS
+    let selectedMultipleLocation = (selectedDisplayMode === this.displayModes.ANALYSIS || selectedDisplayMode === this.displayModes.VIEW) && activeViewModePanel !== this.viewModePanels.EDIT_LOCATIONS
+    let calculateCoverageBoundry = selectedDisplayMode === this.displayModes.VIEW
+    let exportSelectedPolygon = selectedDisplayMode === this.displayModes.VIEW && activeViewModePanel !== this.viewModePanels.EDIT_LOCATIONS
     
     return(
       <div className="tool-bar" style={{margin: '10px'}}>
@@ -39,7 +82,7 @@ export class ToolBar extends Component {
 
         <div className="separator"></div>
 
-        <button className="btn"  title="Create a new plan">
+        <button className="btn" title="Create a new plan">
           <i className="fa fa-file"></i>
         </button>
 
@@ -47,57 +90,123 @@ export class ToolBar extends Component {
           <i className="far fa-save"></i>
         </button>
 
-        <button className="btn"  title="Open an existing plan...">
+        <button className="btn" title="Open an existing plan..." onClick={(e) => this.openViewModeExistingPlan()}>
           <i className="fa fa-folder-open"></i>
         </button>
 
         <div className="separator"></div>
 
-        <React.Fragment className="rulerDropdown">
+        <div className="rulerDropdown">
           <button className="btn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Ruler">
             <i className="fa fa-ruler"></i>
           </button>
-        </React.Fragment>
+        </div>
 
-        <React.Fragment className="myDropdown1">
+        <div className="myDropdown1">
           <button className="btn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Show view settings...">
             <i className="fa fa-eye"></i>
           </button>
-        </React.Fragment>
+        </div>
 
-        <button className="btn"  title="Select individual locations">
+        {selectedDisplayMode === this.displayModes.ANALYSIS || selectedDisplayMode === this.displayModes.VIEW &&
+          <div className="separator"></div>
+        }
+        
+        <button style={{ display: selectedIndividualLocation ? 'block' : 'none' }}
+          className={`btn ${selectedTargetSelectionMode === this.targetSelectionModes.SINGLE_PLAN_TARGET ? 'btn-selected' : ''} ${selectedIndividualLocation === true ? 'ng-hide-remove' : 'ng-hide-add'}`}
+          onClick={(e) => this.setSelectionSingle()}
+          title="Select individual locations">
           <i className="fa fa-mouse-pointer"></i>
         </button>
 
-        <button className="btn"  title="Select multiple locations">
+        <button style={{ display: selectedMultipleLocation ? 'block' : 'none' }} 
+          className={`btn ${selectedTargetSelectionMode === this.targetSelectionModes.POLYGON_PLAN_TARGET ? 'btn-selected' : ''} ${selectedMultipleLocation === true ? 'ng-hide-remove' : 'ng-hide-add'}`}
+          onClick={(e) => this.setSelectionPolygon()}
+          title="Select multiple locations">
           <i className="fa fa-draw-polygon"></i>
         </button>
 
-        <button className="btn"  title="Annotation">
+        <button className={`btn ${isAnnotationsListVisible ? 'btn-selected' : ''}`}
+          title="Annotation" onClick={(e) => this.openAnnotationListVisibility()}>
           <i className="fa fa-paint-brush"></i>
         </button>
 
-        <button className="btn"  title="PDF Reports">
+        <button className={`btn ${isMapReportsVisible ? 'btn-selected' : ''}`} 
+          title="PDF Reports" onClick={(e) => this.openMapReportsVisibility()}>
           <i className="fas fa-print"></i>
         </button>
 
+        {showMapReportMapObjects &&
+          <MapReportsListMapObjects/>
+        }
+
         <div className="separator"></div>
 
-        <button className="btn"  title="Calculate coverage boundary">
+        <button style={{ display: calculateCoverageBoundry ? 'block' : 'none' }} 
+          className={`btn ${selectedTargetSelectionMode === this.targetSelectionModes.COVERAGE_BOUNDARY ? 'btn-selected' : ''} ${calculateCoverageBoundry === true ? 'ng-hide-remove' : 'ng-hide-add'}`}
+          onClick={(e) => this.openViewModeCoverageBoundry()}
+          title="Calculate coverage boundary">
           <i className="fa fa-crosshairs fa-rotate-180"></i>
         </button>
-
-        <button className="btn"  title="Export selected polygon">
+        
+        <button style={{ display: exportSelectedPolygon ? 'block' : 'none' }}
+          className={`btn ${selectedTargetSelectionMode === this.targetSelectionModes.POLYGON_EXPORT_TARGET ? 'btn-selected' : ''} ${exportSelectedPolygon === true ? 'ng-hide-remove' : 'ng-hide-add'}`}
+          onClick={(e) => this.setSelectionExport()}
+          title="Export selected polygon">
           <i className="fa fa-cube"></i>
         </button>
 
-        <button className="btn"  title="Show RFP status">
+        <button className="btn" title="Show RFP status" 
+          onClick={(e) => this.showRfpWindow()}>
           <i className="fa fa-cloud"></i>
         </button>
 
       </div>
-
     )
+  }
+
+  setSelectionSingle () {
+    this.props.selectedToolBarAction(null)
+    this.props.activeViewModePanelActions(null)
+    this.setSelectionMode(this.targetSelectionModes.SINGLE_PLAN_TARGET)
+  }
+
+  setSelectionPolygon () {
+    this.props.selectedToolBarAction(null)
+    this.props.activeViewModePanelActions(null)
+    this.setSelectionMode(this.targetSelectionModes.POLYGON_PLAN_TARGET)
+  }
+
+  setSelectionExport () {
+    this.props.activeViewModePanelActions(null)
+    this.setSelectionMode(this.targetSelectionModes.POLYGON_EXPORT_TARGET)
+  }
+
+  setSelectionMode (selectionMode) {
+    this.props.selectedTargetSelectionModeAction(selectionMode)
+  }
+
+  showRfpWindow(){
+    this.props.showFullScreenContainer()
+  }
+
+  openMapReportsVisibility(){
+    this.props.setMapReportsVisibility(!this.props.isMapReportsVisible)
+  }
+
+  openAnnotationListVisibility(){
+    this.props.setAnnotationListVisibility(!this.props.isAnnotationsListVisible)
+  }
+
+  openViewModeExistingPlan(){
+    this.props.selectedDisplayModeActions(this.displayModes.VIEW)
+    this.props.activeViewModePanelActions(this.viewModePanels.PLAN_INFO)
+  }
+
+  openViewModeCoverageBoundry(){
+    this.props.selectedDisplayModeActions(this.displayModes.VIEW)
+    this.props.activeViewModePanelActions(this.viewModePanels.COVERAGE_BOUNDARY)
+    this.setSelectionMode(this.targetSelectionModes.COVERAGE_BOUNDARY)
   }
 
   initSearchBox () {
@@ -196,13 +305,36 @@ export class ToolBar extends Component {
 }
 
 const mapStateToProps = (state) => ({
-  defaultPlanCoordinates: state.plan.defaultPlanCoordinates
+  defaultPlanCoordinates: state.plan.defaultPlanCoordinates,
+  selectedDisplayMode: state.toolbar.rSelectedDisplayMode,
+  activeViewModePanel: state.toolbar.rActiveViewModePanel,
+  isAnnotationsListVisible: state.tool.showToolBox && (state.tool.activeTool === Tools.ANNOTATION.id),
+  isMapReportsVisible: state.tool.showToolBox && (state.tool.activeTool === Tools.MAP_REPORTS.id),
+  showMapReportMapObjects: state.mapReports.showMapObjects,
+  activeViewModePanel: state.toolbar.rActiveViewModePanel,
+  selectedTargetSelectionMode: state.toolbar.selectedTargetSelectionMode,
 })  
 
 const mapDispatchToProps = (dispatch) => ({
   setPlanInputsModal: (status) => dispatch(ToolBarActions.setPlanInputsModal(status)),
   requestSetMapCenter: (mapRef) => dispatch(MapActions.requestSetMapCenter(mapRef)),
-
+  selectedDisplayModeActions: (value) => dispatch(ToolBarActions.selectedDisplayMode(value)),
+  activeViewModePanelActions: (value) => dispatch(ToolBarActions.activeViewModePanel(value)),
+  setAnnotationListVisibility: isVisible => {
+    dispatch(ToolActions.setActiveTool(isVisible ? Tools.ANNOTATION.id : null))
+    dispatch(ToolActions.setToolboxVisibility(isVisible))
+  },
+  setMapReportsVisibility: isVisible => {
+    dispatch(ToolActions.setActiveTool(isVisible ? Tools.MAP_REPORTS.id : null))
+    dispatch(ToolActions.setToolboxVisibility(isVisible))
+    dispatch(MapReportsActions.showMapObjects(isVisible))
+  },
+  showFullScreenContainer: () => {
+    dispatch(FullScreenActions.showOrHideFullScreenContainer(true))
+    dispatch(RfpActions.showOrHideAllRfpStatus(true))
+  },
+  selectedToolBarAction: (value) => dispatch(ToolBarActions.selectedToolBarAction(value)),
+  selectedTargetSelectionModeAction: (value) => dispatch(ToolBarActions.selectedTargetSelectionMode(value))
 })
 
 const ToolBarComponent = wrapComponentWithProvider(reduxStore, ToolBar, mapStateToProps, mapDispatchToProps)
