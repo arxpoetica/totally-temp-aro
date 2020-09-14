@@ -17,9 +17,6 @@ export class ToolBar extends Component {
   constructor (props) {
     super(props)
 
-    this.state = {
-    }
-
     this.viewModePanels = Object.freeze({
       LOCATION_INFO: 'LOCATION_INFO',
       EQUIPMENT_INFO: 'EQUIPMENT_INFO',
@@ -48,10 +45,39 @@ export class ToolBar extends Component {
       POLYGON_EXPORT_TARGET: 2,
       COVERAGE_BOUNDARY: 5
     })
+
+    this.toolbarActions = Object.freeze({
+      SINGLE_SELECT: 1,
+      POLYGON_SELECT: 2,
+      POLYGON_EXPORT: 3
+    })
+
+    // ruler actions
+    this.allRulerActions = Object.freeze({
+      STRAIGHT_LINE: { id: 'STRAIGHT_LINE', label: 'Straight Line' },
+      ROAD_SEGMENT: { id: 'ROAD_SEGMENT', label: 'Road Segment' },
+      COPPER: { id: 'COPPER', label: 'Copper' }
+    })
+
+    this.rulerActions = [
+      this.allRulerActions.STRAIGHT_LINE,
+      this.allRulerActions.ROAD_SEGMENT
+    ]
+
+    this.state = {
+      currentRulerAction: this.allRulerActions.STRAIGHT_LINE
+    }
   }
 
   componentDidMount(){
     this.initSearchBox()
+
+    // toggle ruler dropdown
+    jQuery('.rulerDropdown').on('show.bs.dropdown', function (e) {
+      jQuery(this).find('.ruler-dropdown').toggle()
+      e.stopPropagation()
+      e.preventDefault()
+    })
   }
 
   render() {
@@ -59,6 +85,8 @@ export class ToolBar extends Component {
 
     const {selectedDisplayMode, activeViewModePanel, isAnnotationsListVisible,
        isMapReportsVisible, showMapReportMapObjects, selectedTargetSelectionMode} = this.props
+
+    const {currentRulerAction} = this.state
 
     let selectedIndividualLocation = (selectedDisplayMode === this.displayModes.ANALYSIS || selectedDisplayMode === this.displayModes.VIEW) && activeViewModePanel !== this.viewModePanels.EDIT_LOCATIONS
     let selectedMultipleLocation = (selectedDisplayMode === this.displayModes.ANALYSIS || selectedDisplayMode === this.displayModes.VIEW) && activeViewModePanel !== this.viewModePanels.EDIT_LOCATIONS
@@ -97,9 +125,19 @@ export class ToolBar extends Component {
         <div className="separator"></div>
 
         <div className="rulerDropdown">
-          <button className="btn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Ruler">
+          <button className="btn" type="button" onClick={(e) => this.rulerAction()}
+            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Ruler">
             <i className="fa fa-ruler"></i>
           </button>
+          <div className="dropdown-menu dropdown-menu-right ruler-dropdown">
+            <div className="ruler-container">
+              <select className="form-control" value={currentRulerAction} onChange={(e)=>this.onChangeRulerAction(e)}>
+                {this.rulerActions.map((item, index) =>
+                  <option key={index} value={item.label} label={item.label}></option>
+                )}
+              </select>              
+            </div>
+          </div>
         </div>
 
         <div className="myDropdown1">
@@ -143,7 +181,7 @@ export class ToolBar extends Component {
         <div className="separator"></div>
 
         <button style={{ display: calculateCoverageBoundry ? 'block' : 'none' }} 
-          className={`btn ${selectedTargetSelectionMode === this.targetSelectionModes.COVERAGE_BOUNDARY ? 'btn-selected' : ''} ${calculateCoverageBoundry === true ? 'ng-hide-remove' : 'ng-hide-add'}`}
+          className={`btn ${selectedTargetSelectionMode === this.targetSelectionModes.COVERAGE_BOUNDARY && activeViewModePanel === this.viewModePanels.COVERAGE_BOUNDARY  ? 'btn-selected' : ''} ${calculateCoverageBoundry === true ? 'ng-hide-remove' : 'ng-hide-add'}`}
           onClick={(e) => this.openViewModeCoverageBoundry()}
           title="Calculate coverage boundary">
           <i className="fa fa-crosshairs fa-rotate-180"></i>
@@ -165,20 +203,27 @@ export class ToolBar extends Component {
     )
   }
 
+  onChangeRulerAction (e) {
+    this.setState({currentRulerAction: e.target.value})
+  }
+
   setSelectionSingle () {
     this.props.selectedToolBarAction(null)
-    this.props.activeViewModePanelActions(null)
     this.setSelectionMode(this.targetSelectionModes.SINGLE_PLAN_TARGET)
   }
 
   setSelectionPolygon () {
     this.props.selectedToolBarAction(null)
-    this.props.activeViewModePanelActions(null)
     this.setSelectionMode(this.targetSelectionModes.POLYGON_PLAN_TARGET)
   }
 
   setSelectionExport () {
-    this.props.activeViewModePanelActions(null)
+    if (this.props.selectedDisplayMode != 'VIEW') return
+    if (this.props.selectedToolBarAction === this.toolbarActions.POLYGON_EXPORT) {
+      this.props.selectedToolBarAction(null)
+      return
+    }
+    this.props.selectedToolBarAction(this.toolbarActions.POLYGON_EXPORT)
     this.setSelectionMode(this.targetSelectionModes.POLYGON_EXPORT_TARGET)
   }
 

@@ -80,6 +80,7 @@ class MapSplitController {
         reduxState.planEditor.isEnteringTransaction,
       showToolBox: reduxState.tool.showToolBox,
       rSelectedDisplayMode: reduxState.toolbar.rSelectedDisplayMode,
+      rSelectedToolBarAction: reduxState.toolbar.selectedToolBarAction
     }
   }
 
@@ -194,7 +195,7 @@ let mapSplit = {
       </div>
       <!-- Plan target map selector should be active only if we are in analysis mode -->
       <map-selector-plan-target map-global-object-name="map"
-        ng-if="(!$ctrl.state.selectedToolBarAction || $ctrl.state.selectedToolBarAction === $ctrl.state.toolbarActions.POLYGON_SELECT)
+        ng-if="(!$ctrl.state.selectedToolBarAction || $ctrl.state.selectedToolBarAction === $ctrl.state.toolbarActions.POLYGON_SELECT || !$ctrl.rSelectedToolBarAction || $ctrl.rSelectedToolBarAction === $ctrl.state.toolbarActions.POLYGON_SELECT)
                && $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS
                && !$ctrl.state.isRulerEnabled">
       </map-selector-plan-target>

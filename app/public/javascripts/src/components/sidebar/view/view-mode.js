@@ -68,7 +68,8 @@ class ViewModeController {
       selectedLocations: reduxState.selection.locations,
       locationInfoDetails: reduxState.locationInfo.details,
       rActiveViewModePanel: reduxState.toolbar.rActiveViewModePanel,
-      activeViewModePanel: reduxState.toolbar.rActiveViewModePanel
+      activeViewModePanel: reduxState.toolbar.rActiveViewModePanel,
+      rSelectedTargetSelectionMode: reduxState.toolbar.selectedTargetSelectionMode,
     }
   }
 
