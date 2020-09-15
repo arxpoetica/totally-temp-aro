@@ -1790,6 +1790,15 @@ class State {
         // The active plan has changed. Note that we are comparing ids because a change in plan state also causes the plan object to update.
         service.onActivePlanChanged()
       }
+
+      // ToDo: replace all instances of service.selectedDisplayMode
+      //  with reduxState.plan.selectedDisplayMode
+      //  We are currently maintaining state in two places
+      if (nextState.rSelectedDisplayMode &&
+          service.rSelectedDisplayMode !== service.selectedDisplayMode.getValue()) {
+        // console.log(service.rSelectedDisplayMode)
+        service.selectedDisplayMode.next(service.rSelectedDisplayMode)
+      }
     }
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(service.mergeToTarget.bind(service))
 
@@ -1814,7 +1823,8 @@ class State {
       primarySpatialEdge: reduxState.optimization.networkAnalysis.primarySpatialEdge,
       wormholeFuseDefinitions: reduxState.optimization.networkAnalysis.wormholeFuseDefinitions,
       activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
-      optimizationInputs: reduxState.optimization.networkOptimization.optimizationInputs
+      optimizationInputs: reduxState.optimization.networkOptimization.optimizationInputs,
+      rSelectedDisplayMode: reduxState.plan.rSelectedDisplayMode
     }
   }
 
