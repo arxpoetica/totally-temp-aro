@@ -66,9 +66,8 @@ workflows:
           filters:
             branches:
               only:
-                - master
-                - charter
-                
+                  - master
+                  - charter
       - deploy:
           context: aro_qa_builds
           requires:
