@@ -5,7 +5,8 @@ const defaultState = {
   rSelectedDisplayMode:'VIEW',
   rActiveViewModePanel:'LOCATION_INFO',
   selectedToolBarAction: null,
-  selectedTargetSelectionMode: 0
+  selectedTargetSelectionMode: 0,
+  isRulerEnabled: false
 }
 
 function setPlanInputsModal (state, planInputsModal) {
@@ -38,6 +39,12 @@ function setSelectedTargetSelectionMode (state, selectedTargetSelectionMode) {
   }
 }
 
+function setIsRulerEnabled (state, isRulerEnabled) {
+  return { ...state,
+    isRulerEnabled: isRulerEnabled
+  }
+}
+
 function ToolBarReducer (state = defaultState, action) {
   switch (action.type) {
 
@@ -54,7 +61,10 @@ function ToolBarReducer (state = defaultState, action) {
       return setSelectedToolBarAction(state, action.payload) 
 
     case Actions.TOOL_BAR_SELECTED_TARGET_SELECTION_MODE:
-      return setSelectedTargetSelectionMode(state, action.payload)        
+      return setSelectedTargetSelectionMode(state, action.payload) 
+      
+    case Actions.TOOL_BAR_IS_RULER_ENABLED:
+      return setIsRulerEnabled(state, action.payload)      
   
     default:
       return state

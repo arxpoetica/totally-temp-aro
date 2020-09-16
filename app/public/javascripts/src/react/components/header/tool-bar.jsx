@@ -12,6 +12,8 @@ import ToolActions from '../tool/tool-actions'
 import MapReportsListMapObjects from '../map-reports/map-reports-list-map-objects.jsx'
 import FullScreenActions from '../full-screen/full-screen-actions'
 import RfpActions from '../optimization/rfp/rfp-actions'
+import AroHttp from '../../common/aro-http'
+import { createSelector } from 'reselect'
 
 export class ToolBar extends Component {
   constructor (props) {
@@ -65,8 +67,15 @@ export class ToolBar extends Component {
     ]
 
     this.state = {
-      currentRulerAction: this.allRulerActions.STRAIGHT_LINE
+      currentRulerAction: this.allRulerActions.STRAIGHT_LINE,
+      mapRef: {},
+      showRemoveRulerButton: false
     }
+
+    this.rulerSegments = []
+
+    this.SPATIAL_EDGE_ROAD ='road',
+    this.SPATIAL_EDGE_COPPER = 'copper'
   }
 
   componentDidMount(){
@@ -80,13 +89,20 @@ export class ToolBar extends Component {
     })
   }
 
+  static getDerivedStateFromProps(nextProps, prevState) {
+    return {
+      mapRef: nextProps.googleMaps,
+    };
+  }
+
   render() {
     this.initSearchBox();
 
     const {selectedDisplayMode, activeViewModePanel, isAnnotationsListVisible,
-       isMapReportsVisible, showMapReportMapObjects, selectedTargetSelectionMode} = this.props
+       isMapReportsVisible, showMapReportMapObjects, selectedTargetSelectionMode,
+       isRulerEnabled } = this.props
 
-    const {currentRulerAction} = this.state
+    const {currentRulerAction, showRemoveRulerButton} = this.state
 
     let selectedIndividualLocation = (selectedDisplayMode === this.displayModes.ANALYSIS || selectedDisplayMode === this.displayModes.VIEW) && activeViewModePanel !== this.viewModePanels.EDIT_LOCATIONS
     let selectedMultipleLocation = (selectedDisplayMode === this.displayModes.ANALYSIS || selectedDisplayMode === this.displayModes.VIEW) && activeViewModePanel !== this.viewModePanels.EDIT_LOCATIONS
@@ -125,17 +141,24 @@ export class ToolBar extends Component {
         <div className="separator"></div>
 
         <div className="rulerDropdown">
-          <button className="btn" type="button" onClick={(e) => this.rulerAction()}
-            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Ruler">
+          <button className={`btn ${isRulerEnabled ? 'btn-selected' : ''}`}
+            type="button" onClick={(e) => this.rulerAction(e)}
+            aria-haspopup="true" aria-expanded="false" title="Ruler">
             <i className="fa fa-ruler"></i>
           </button>
-          <div className="dropdown-menu dropdown-menu-right ruler-dropdown">
+          <div className="dropdown-menu dropdown-menu-right ruler-dropdown" style={{ display: isRulerEnabled ? 'block' : 'none' }}>
             <div className="ruler-container">
-              <select className="form-control" value={currentRulerAction} onChange={(e)=>this.onChangeRulerAction(e)}>
+              <select className="form-control" value={currentRulerAction.id} onChange={(e)=> {this.onChangeRulerDropdown(e);}}>
                 {this.rulerActions.map((item, index) =>
-                  <option key={index} value={item.label} label={item.label}></option>
+                  <option key={index} value={item.id} label={item.label}></option>
                 )}
-              </select>              
+              </select>
+              {showRemoveRulerButton &&
+                <button type="button" className="btn btn-primary ruler-undo-btn form-control"
+                  onClick={(e)=>this.removeLastRulerMarker(e)}>
+                  <i className="fa fa-minus"></i>
+                </button>    
+              }       
             </div>
           </div>
         </div>
@@ -203,9 +226,312 @@ export class ToolBar extends Component {
     )
   }
 
-  onChangeRulerAction (e) {
-    this.setState({currentRulerAction: e.target.value})
+  rulerAction (e) {
+
+    this.props.setIsRulerEnabled(!this.props.isRulerEnabled)
+    this.enableRulerAction()
+
+    !this.props.isRulerEnabled ? this.state.mapRef.setOptions({ draggableCursor: 'crosshair' }) : this.state.mapRef.setOptions({ draggableCursor: null })
   }
+
+  enableRulerAction () {
+    if (this.props.isRulerEnabled) {
+      // clear straight line ruler action
+       this.clearStraightLineAction()
+      // clear copper ruler action
+       this.clearRulerCopperAction()    
+    } else {
+      this.onChangeRulerAction()
+    }
+  }
+
+  onChangeRulerDropdown(e){
+    let prestineCurrentRulerAction = this.state.currentRulerAction
+    Object.entries(this.allRulerActions).map(([ objKey, objValue ], objIndex) => {
+      if(objKey === e.target.value){
+        prestineCurrentRulerAction = objValue
+      }
+    })
+    this.setState({currentRulerAction: prestineCurrentRulerAction}, function() {
+      this.onChangeRulerAction();
+    });
+  }
+
+  onChangeRulerAction () {
+
+    if (this.state.currentRulerAction.id === this.allRulerActions.STRAIGHT_LINE.id) {
+      this.toggleMeasuringStick()
+      // clear copper ruler action
+      this.clearRulerCopperAction()
+    }  else if (this.state.currentRulerAction.id === this.allRulerActions.COPPER.id ||
+      this.state.currentRulerAction.id === this.allRulerActions.ROAD_SEGMENT.id) {
+      // clear straight line ruler action
+      this.clearStraightLineAction()
+      this.clearRulerCopperAction()
+      this.rulerCopperAction() 
+      this.showRemoveRulerButton()
+    }
+  }
+
+  // **************** Stright Line Methods ***************************
+
+  toggleMeasuringStick () {
+    this.measuringStickEnabled = true
+    this.clearRulers()
+    if (this.measuringStickEnabled) {
+      this.clickListener = google.maps.event.addListener(this.state.mapRef, 'click', (point) => {
+        this.state.currentRulerAction.id === this.allRulerActions.STRAIGHT_LINE.id && this.addToRulerSegments(point.latLng)
+      })
+    } else {
+      google.maps.event.removeListener(this.clickListener)
+    }
+    this.props.selectedToolBarAction(null)
+  }
+
+  clearStraightLineAction () {
+    this.measuringStickEnabled = false
+    this.clearRulers()
+    this.clickListener && google.maps.event.removeListener(this.clickListener)
+  }
+
+  addToRulerSegments (latLng) {
+    var ruler
+
+    // add a marker
+    ruler = new google.maps.Marker({
+      position: latLng,
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 2
+      },
+      map: this.state.mapRef,
+      draggable: true,
+      zIndex: 100
+    })
+
+    this.rulerSegments.push(ruler)
+
+    // if this is the first marker, add a label and link it to the first marker
+    if (this.rulerSegments.length === 1) {
+      var event = new CustomEvent('measuredDistance', { detail : 0});
+      window.dispatchEvent(event);
+    } else {
+      this.rulerDrawEvent()
+    }
+
+    google.maps.event.addListener(ruler, 'drag', () => {
+      this.rulerDrawEvent()
+    })
+  }
+
+  clearRulerMarker (ruler) {
+    google.maps.event.clearListeners(ruler)
+    ruler.setMap(null)
+  }
+
+  rulerDrawEvent () {
+    this.drawRulerPolyline()
+    this.updateLengthLabel()
+  }
+
+  drawRulerPolyline () {
+    this.clearPolyLine()
+
+    this.rulerPolyLine = new google.maps.Polyline({
+      path: this.rulersToPositions(),
+      strokeColor: '#4d99e5',
+      strokeWeight: 3,
+      clickable: false,
+      map: this.state.mapRef
+    })
+  }
+
+  updateLengthLabel () {
+    var total
+
+    if (this.rulerSegments.length) {
+      total = _(this.rulerSegments).reduce((length, ruler, index) => {
+        var prev
+        // ignore the first ruler.... work from current ruler to the previous ruler
+        if (index) {
+          prev = this.rulerSegments[index - 1]
+          return length + google.maps.geometry.spherical.computeDistanceBetween(prev.getPosition(), ruler.getPosition())
+        } else {
+          return 0
+        }
+      }, 0)
+
+      var event = new CustomEvent('measuredDistance', { detail : total});
+      window.dispatchEvent(event);
+      // Unable to call in Render Method so called here
+      this.showRemoveRulerButton();
+    }
+  }
+
+  clearPolyLine () {
+    if (this.rulerPolyLine) {
+      this.rulerPolyLine.setMap(null)
+      this.rulerPolyLine = null
+    }
+  }
+
+  rulersToPositions () {
+    return _(this.rulerSegments).map(function (ruler) {
+      return ruler.position
+    })
+  }
+
+  clearRulers () {
+    this.clearPolyLine()
+
+    _(this.rulerSegments).each((ruler) => {
+      this.clearRulerMarker(ruler)
+    })
+
+    this.rulerSegments = null
+    this.rulerSegments = []
+
+    this.rulerDrawEvent()
+
+    this.measuredDistance = null
+    var event = new CustomEvent('measuredDistance', { detail : this.measuredDistance});
+    window.dispatchEvent(event);
+  }
+
+  removeLastRulerMarker () {
+    var last
+
+    if (this.rulerSegments.length) {
+      last = _(this.rulerSegments).last()
+      this.rulerSegments = _(this.rulerSegments).without(last)
+
+      this.clearRulerMarker(last)
+      this.rulerDrawEvent()
+    }
+  }
+
+// **************** Road Segment Methods ***************************
+
+  rulerCopperAction () {
+    this.getCopperPoints()
+  }
+
+  rulerCopperAction () {
+    this.getCopperPoints()
+  }
+
+  getCopperPoints () {
+    this.copperPoints = []
+    this.copperMarkers = []
+    this.listenForCopperMarkers()
+  }
+
+  listenForCopperMarkers () {
+    // Note we are using skip(1) to skip the initial value (that is fired immediately) from the RxJS stream.
+    this.copperClicklistener = google.maps.event.addListener(this.state.mapRef, 'click', (event) => {
+      if (!event || !event.latLng || this.state.currentRulerAction.id === this.allRulerActions.STRAIGHT_LINE.id) {
+        return
+      }
+
+      var copperMarker = new google.maps.Marker({
+        position: event.latLng,
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 2
+        },
+        map: this.state.mapRef,
+        draggable: false,
+        zIndex: 100
+      })
+
+      this.copperMarkers.push(copperMarker)
+      this.copperPoints.push(event)
+      if (this.copperPoints.length > 1) {
+        // clear copper ruler path if any
+        this.clearRulerCopperPath()
+        this.clearCopperMarkers()
+        this.drawCopperPath()
+      }
+    })
+  }
+
+  drawCopperPath () {
+    var maxDistance = 25 * config.length.length_units_to_meters
+    if (google.maps.geometry.spherical.computeDistanceBetween(this.copperPoints[0].latLng,
+      this.copperPoints[this.copperPoints.length - 1].latLng) > maxDistance) {
+      var errorText = 'Selected points are too far apart for ruler analysis. Please select points which are closer.'
+      swal({ title: 'Error!', text: errorText, type: 'error' })
+      this.copperPoints = []
+      this.clearCopperMarkers()
+      return
+    }
+
+    // Get the POST body for optimization based on the current application state
+    const {optimizationInputs, activeSelectionModeId, locationLayers, plan} = this.props
+    var optimizationBody = this.props.getOptimizationBody(optimizationInputs, activeSelectionModeId, locationLayers, plan)
+    // Replace analysis_type and add a point and radius
+    optimizationBody.analysis_type = 'POINT_TO_POINT'
+    optimizationBody.pointFrom = {
+      type: 'Point',
+      coordinates: [this.copperPoints[0].latLng.lng(), this.copperPoints[0].latLng.lat()]
+    }
+    let pointTo = this.copperPoints[this.copperPoints.length - 1]
+    optimizationBody.pointTo = {
+      type: 'Point',
+      coordinates: [pointTo.latLng.lng(), pointTo.latLng.lat()]
+    }
+    var spatialEdgeType = this.state.currentRulerAction.id === this.allRulerActions.COPPER.id ? this.SPATIAL_EDGE_COPPER : this.SPATIAL_EDGE_ROAD
+    optimizationBody.spatialEdgeType = spatialEdgeType
+    optimizationBody.directed = false
+    AroHttp.post('/service/v1/network-analysis/p2p', optimizationBody)
+      .then((result) => {
+        // get copper properties
+        var geoJson = {
+          'type': 'FeatureCollection',
+          'features': [{
+            'type': 'Feature',
+            'properties': {},
+            'geometry': {}
+          }]
+        }
+
+        geoJson.features[0].geometry = result.data.path
+        this.copperPath = this.state.mapRef.data.addGeoJson(geoJson)
+        this.state.mapRef.data.setStyle(function (feature) {
+          return {
+            strokeColor: '#000000',
+            strokeWeight: 4
+          }
+        })
+        var event = new CustomEvent('measuredDistance', { detail : result.data.length});
+        window.dispatchEvent(event);
+        this.copperPoints = []
+      })
+  }
+
+  clearRulerCopperAction () {
+    this.copperClicklistener && google.maps.event.removeListener(this.copperClicklistener)
+    this.clearRulerCopperPath()
+    this.clearCopperMarkers()
+  }
+
+  clearRulerCopperPath () {
+    if (this.copperPath != null) {
+      for (var i = 0; i < this.copperPath.length; i++) {
+        this.state.mapRef.data.remove(this.copperPath[i])
+      }
+    }
+  }
+
+  clearCopperMarkers () {
+    this.copperMarkers && this.copperMarkers.map((marker) => this.clearRulerMarker(marker))
+    this.copperMarkers = []
+  }
+
+  showRemoveRulerButton () {
+    this.setState({showRemoveRulerButton: this.rulerSegments && (this.rulerSegments.length > 1)})
+  }
+
 
   setSelectionSingle () {
     this.props.selectedToolBarAction(null)
@@ -349,6 +675,10 @@ export class ToolBar extends Component {
   }
 }
 
+// We need a selector, else the .toJS() call will create an infinite digest loop
+const getAllLocationLayers = state => state.mapLayers.location
+const getLocationLayersList = createSelector([getAllLocationLayers], (locationLayers) => locationLayers.toJS())
+
 const mapStateToProps = (state) => ({
   defaultPlanCoordinates: state.plan.defaultPlanCoordinates,
   selectedDisplayMode: state.toolbar.rSelectedDisplayMode,
@@ -358,6 +688,13 @@ const mapStateToProps = (state) => ({
   showMapReportMapObjects: state.mapReports.showMapObjects,
   activeViewModePanel: state.toolbar.rActiveViewModePanel,
   selectedTargetSelectionMode: state.toolbar.selectedTargetSelectionMode,
+  googleMaps: state.map.googleMaps,
+  isRulerEnabled: state.toolbar.isRulerEnabled,
+  optimizationInputs: state.optimization.networkOptimization.optimizationInputs,
+  activeSelectionModeId: state.selection.activeSelectionMode.id,
+  locationLayers: getLocationLayersList(state),
+  plan: state.plan.activePlan,
+  
 })  
 
 const mapDispatchToProps = (dispatch) => ({
@@ -379,7 +716,10 @@ const mapDispatchToProps = (dispatch) => ({
     dispatch(RfpActions.showOrHideAllRfpStatus(true))
   },
   selectedToolBarAction: (value) => dispatch(ToolBarActions.selectedToolBarAction(value)),
-  selectedTargetSelectionModeAction: (value) => dispatch(ToolBarActions.selectedTargetSelectionMode(value))
+  selectedTargetSelectionModeAction: (value) => dispatch(ToolBarActions.selectedTargetSelectionMode(value)),
+  setIsRulerEnabled: (value) => dispatch(ToolBarActions.setIsRulerEnabled(value)),
+  getOptimizationBody : (optimizationInputs, activeSelectionModeId, locationLayers, plan) => dispatch(ToolBarActions.getOptimizationBody(optimizationInputs, activeSelectionModeId, locationLayers, plan))
+
 })
 
 const ToolBarComponent = wrapComponentWithProvider(reduxStore, ToolBar, mapStateToProps, mapDispatchToProps)

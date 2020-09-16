@@ -46,10 +46,37 @@ function selectedTargetSelectionMode (value){
   }
 }
 
+function setIsRulerEnabled (value){
+  return dispatch => {
+    dispatch({
+      type: Actions.TOOL_BAR_IS_RULER_ENABLED,
+      payload: value
+    })
+  }
+}
+
+function getOptimizationBody(optimizationInputs, activeSelectionModeId, locationLayers, plan) {
+  return dispatch => {
+    var inputs = JSON.parse(JSON.stringify(optimizationInputs))
+    // inputs.analysis_type = service.networkAnalysisTypeId
+    // inputs.planId = service.planId
+    inputs.planId = plan.id
+    inputs.locationConstraints = {}
+    inputs.locationConstraints.analysisSelectionMode = activeSelectionModeId
+    inputs.locationConstraints.locationTypes = []
+    locationLayers.forEach(locationsLayer => {
+      if (locationsLayer.checked) inputs.locationConstraints.locationTypes.push(locationsLayer.plannerKey)
+    })
+    return inputs
+  }
+}
+
 export default {
   setPlanInputsModal,
   selectedDisplayMode,
   activeViewModePanel,
   selectedToolBarAction,
-  selectedTargetSelectionMode
+  selectedTargetSelectionMode,
+  setIsRulerEnabled,
+  getOptimizationBody
 }

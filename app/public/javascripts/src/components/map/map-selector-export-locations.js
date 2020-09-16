@@ -43,7 +43,7 @@ class MapSelectorExportLocationsController {
   }
 
   exportLocationsByPolygon (polygon) {
-    if (this.state.isRulerEnabled) return // disable any click action when ruler is enabled
+    if (this.state.isRulerEnabled || this.rIsRulerEnabled) return // disable any click action when ruler is enabled
 
     var area = google.maps.geometry.spherical.computeArea(polygon)
     if (area > this.state.MAX_EXPORTABLE_AREA) {
@@ -118,6 +118,7 @@ class MapSelectorExportLocationsController {
   mapStateToThis (reduxState) {
     return {
       rSelectedTargetSelectionMode: reduxState.toolbar.selectedTargetSelectionMode,
+      rIsRulerEnabled: reduxState.toolbar.isRulerEnabled
     }
   }
 }

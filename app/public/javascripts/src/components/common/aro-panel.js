@@ -11,6 +11,13 @@ class AroPanelController {
       this.measuredDistance = measuredDistance
       this.$timeout()
     })
+
+    window.addEventListener('measuredDistance', (measuredDistance) => { 
+      this.showPanel = !!measuredDistance.detail
+      this.panelInfo = 'Measured distance:'
+      this.measuredDistance = measuredDistance.detail
+      this.$timeout()
+    });
   }
 }
 
