@@ -34,11 +34,11 @@ export class NetworkOptimizationInput extends Component {
           networkAnalysisTypeId={this.props.networkAnalysisTypeId}
           displayOnly={!this.areControlsEnabled()} enableReinitialize />
 
-        <div className='ei-header ei-no-pointer' style={{ marginBottom: '0px' }}>Geography Selection</div>
+        <div className='ei-header ei-no-pointer' style={{ marginBottom: '0px' }}>Routing Selection</div>
         <div className='ei-gen-level ei-internal-level' style={{ paddingLeft: '11px' }}>
           <div className='ei-items-contain'>
             <div className='ei-property-item'>
-              <div className='ei-property-label'>Geography Type</div>
+              <div className='ei-property-label'>Selection Type</div>
               <div className='ei-property-value'>
                 <DropdownList
                   data={this.props.allSelectionModes}
@@ -50,7 +50,6 @@ export class NetworkOptimizationInput extends Component {
               </div>
             </div>
             <div className='ei-property-item'>
-              <div className='ei-property-label'>Selected Geographies</div>
               <div className='ei-property-value'><PlanTargetListComponent displayOnly={!this.areControlsEnabled()} /></div>
             </div>
           </div>
