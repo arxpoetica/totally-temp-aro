@@ -31,6 +31,7 @@ export class DataUpload extends Component {
 
   componentDidMount(){
     this.props.loadEtlTemplatesFromServer(this.state.selectedDataTypeId)
+    this.props.toggleView('FileUpload')
   }
 
   static getDerivedStateFromProps(nextProps, prevState) {

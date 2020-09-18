@@ -99,7 +99,7 @@ function saveDataSource (uploadDetails,loggedInUser) {
           return setCableConstructionType(uploadDetails,loggedInUser)
           .then((libraryItem) => {
             fileUpload(uploadDetails, libraryItem.identifier, loggedInUser)
-            dispatch(setAllLibraryItems(library.data.dataType, libraryItem))
+            dispatch(setAllLibraryItems(libraryItem.dataType, libraryItem))
           })
           .then((result) => {
             dispatch(setIsUploading(false))
