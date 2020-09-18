@@ -123,7 +123,7 @@ export class RateReachDistanceEditor extends Component {
                       </td>
                     }
                     {Object.entries(rateReachGroupMap[selectedTechnologyType].matrixMap).map(([techKey], techIndex) => (
-                      <td key={techIndex} style={{minWidth: '80px'}}>
+                      <td key={techIndex} style={{minWidth: '100px'}}>
                         <input className="form-control" onChange={(e)=>this.handleRateReachGroupMapChange(e, selectedTechnologyType, index, techIndex)} value={rateReachGroupMap[selectedTechnologyType].matrixMap[techIndex].value[index].distance} linearunitinput="true"/>
                       </td>
                     ))}

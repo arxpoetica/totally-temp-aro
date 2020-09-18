@@ -67,7 +67,8 @@ class ViewModeController {
       dataItems: reduxState.plan.dataItems,
       selectedLocations: reduxState.selection.locations,
       locationInfoDetails: reduxState.locationInfo.details,
-      rActiveViewModePanel: reduxState.plan.rActiveViewModePanel
+      rActiveViewModePanel: reduxState.plan.rActiveViewModePanel,
+      activeViewModePanel: reduxState.plan.rActiveViewModePanel,
     }
   }
 

@@ -28,7 +28,8 @@ import Actions from '../../common/actions'
     pristineArpuManagerConfiguration: null,
     ArpuStrategy: '',
     ArpuRevenue: '',
-    loadStrength: {}
+    loadStrength: {},
+    isRrmManager: false
 	}
 
   function setResourceTypes (state, resourceTypes) {
@@ -295,6 +296,12 @@ import Actions from '../../common/actions'
     }
   }
 
+  function setIsRrmManager (state, isRrmManager) {
+    return { ...state,
+      isRrmManager: isRrmManager
+    }
+  }
+
   function resourceReducer (state = defaultState, action) {
     switch (action.type) {
 			case Actions.RESOURCE_EDITOR_SET_RESOURCE_TYPES:
@@ -379,7 +386,10 @@ import Actions from '../../common/actions'
         return setRateReachManagerConfiguration(state, action.payload.rateReachConfig, action.payload.technologyTypeDetails)         
 
       case Actions.RESOURCE_EDITOR_MODAL_TITLE:
-        return setModalTitle(state, action.payload)         
+        return setModalTitle(state, action.payload)  
+        
+      case Actions.RESOURCE_EDITOR_IS_RRM_MANAGER:
+        return setIsRrmManager(state, action.payload)        
   
     default:
       return state
