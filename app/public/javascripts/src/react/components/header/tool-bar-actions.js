@@ -71,6 +71,24 @@ function getOptimizationBody(optimizationInputs, activeSelectionModeId, location
   }
 }
 
+function setIsViewSettingsEnabled (value){
+  return dispatch => {
+    dispatch({
+      type: Actions.TOOL_BAR_IS_VIEW_SETTINGS_ENABLED,
+      payload: value
+    })
+  }
+}
+
+function setShowDirectedCable (value){
+  return dispatch => {
+    dispatch({
+      type: Actions.TOOL_BAR_SHOW_DIRECTED_CABLE,
+      payload: value
+    })
+  }
+}
+
 export default {
   setPlanInputsModal,
   selectedDisplayMode,
@@ -78,5 +96,7 @@ export default {
   selectedToolBarAction,
   selectedTargetSelectionMode,
   setIsRulerEnabled,
-  getOptimizationBody
+  getOptimizationBody,
+  setIsViewSettingsEnabled,
+  setShowDirectedCable
 }

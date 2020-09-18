@@ -14,6 +14,7 @@ import FullScreenActions from '../full-screen/full-screen-actions'
 import RfpActions from '../optimization/rfp/rfp-actions'
 import AroHttp from '../../common/aro-http'
 import { createSelector } from 'reselect'
+import MapLayerActions from '../map-layers/map-layer-actions'
 
 export class ToolBar extends Component {
   constructor (props) {
@@ -66,20 +67,81 @@ export class ToolBar extends Component {
       this.allRulerActions.ROAD_SEGMENT
     ]
 
+    this.rulerSegments = []
+    this.rulerPolyLine = null
+
+    this.SPATIAL_EDGE_ROAD = 'road'
+    this.SPATIAL_EDGE_COPPER = 'copper'
+
+    // View Settings layer - define once
+    this.viewSetting = {
+    selectedFiberOption: null,
+    heatmapOptions: [
+      {
+        id: 'HEATMAP_ON',
+        label: 'Aggregate heatmap'
+      },
+      {
+        id: 'HEATMAP_DEBUG',
+        label: 'Aggregate points'
+      },
+      {
+        id: 'HEATMAP_OFF',
+        label: 'Raw Points'
+      }
+    ]
+  }
+
+    var heatmapOptions = {
+      showTileExtents: false,
+      heatMap: {
+        useAbsoluteMax: false,
+        maxValue: 100,
+        powerExponent: 0.5,
+        worldMaxValue: 500000
+      },
+      selectedHeatmapOption: this.viewSetting.heatmapOptions[0]
+    }
+    this.mapTileOptions = heatmapOptions
+
+    this.rangeValues = []
+    const initial = 1000
+    const final = 5000000
+    var incrementby = 1000
+    for (var i = initial; i <= final; i = i + incrementby) {
+      this.rangeValues.push(i)
+      if (i < 5000) incrementby = 1000
+      else if (i < 30000) incrementby = 5000
+      else if (i < 100000) incrementby = 10000
+      else if (i < 200000) incrementby = 25000
+      else if (i < 500000) incrementby = 50000
+      else if (i < 1000000) incrementby = 100000
+      else if (i < 2000000) incrementby = 250000
+      else incrementby = 500000
+    }
+    this.rangeValues.reverse()
+    this.max = this.rangeValues.length - 1
+
     this.state = {
       currentRulerAction: this.allRulerActions.STRAIGHT_LINE,
       mapRef: {},
-      showRemoveRulerButton: false
+      showRemoveRulerButton: false,
+      heatMapOption: this.mapTileOptions.selectedHeatmapOption.id === 'HEATMAP_ON',
+      sliderValue: this.rangeValues.indexOf(this.mapTileOptions.heatMap.worldMaxValue),
+      showSiteBoundary: '',
+      selectedBoundaryType: ''
     }
-
-    this.rulerSegments = []
-
-    this.SPATIAL_EDGE_ROAD ='road',
-    this.SPATIAL_EDGE_COPPER = 'copper'
   }
 
   componentDidMount(){
     this.initSearchBox()
+
+    // toggle view settings dropdown
+    jQuery('.myDropdown1').on('show.bs.dropdown', function (e) {
+      jQuery(this).find('.view-dropdown').toggle()
+      e.stopPropagation()
+      e.preventDefault()
+    })
 
     // toggle ruler dropdown
     jQuery('.rulerDropdown').on('show.bs.dropdown', function (e) {
@@ -89,20 +151,23 @@ export class ToolBar extends Component {
     })
   }
 
-  static getDerivedStateFromProps(nextProps, prevState) {
-    return {
-      mapRef: nextProps.googleMaps,
-    };
+  componentWillReceiveProps(nextProps){
+    if(this.props != nextProps) {
+      this.setState({mapRef: nextProps.googleMaps, showSiteBoundary: nextProps.showSiteBoundary,
+        selectedBoundaryType: nextProps.selectedBoundaryType})
+    }
   }
+
 
   render() {
     this.initSearchBox();
 
     const {selectedDisplayMode, activeViewModePanel, isAnnotationsListVisible,
        isMapReportsVisible, showMapReportMapObjects, selectedTargetSelectionMode,
-       isRulerEnabled } = this.props
+       isRulerEnabled, isViewSettingsEnabled, boundaryTypes, showDirectedCable } = this.props
 
-    const {currentRulerAction, showRemoveRulerButton} = this.state
+    const {currentRulerAction, showRemoveRulerButton, heatMapOption, sliderValue,
+      showSiteBoundary, selectedBoundaryType} = this.state
 
     let selectedIndividualLocation = (selectedDisplayMode === this.displayModes.ANALYSIS || selectedDisplayMode === this.displayModes.VIEW) && activeViewModePanel !== this.viewModePanels.EDIT_LOCATIONS
     let selectedMultipleLocation = (selectedDisplayMode === this.displayModes.ANALYSIS || selectedDisplayMode === this.displayModes.VIEW) && activeViewModePanel !== this.viewModePanels.EDIT_LOCATIONS
@@ -164,9 +229,50 @@ export class ToolBar extends Component {
         </div>
 
         <div className="myDropdown1">
-          <button className="btn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Show view settings...">
+          <button className={`btn ${isViewSettingsEnabled ? 'btn-selected' : ''}`}
+            type="button" onClick={(e) => this.viewSettingsAction(e)}
+            aria-haspopup="true" aria-expanded="false" title="Show view settings...">
             <i className="fa fa-eye"></i>
           </button>
+
+          <div className="dropdown-menu dropdown-menu-right view-dropdown" style={{ display: isViewSettingsEnabled ? 'block' : 'none' }}>
+            {/* Location Heat Map */}
+            <input type="checkbox" className="checkboxfill" checked={heatMapOption} name="ctype-name" style={{marginLeft: '2px'}}
+              onChange={(e)=> this.toggleHeatMapOptions(e)}/>
+            <font>Location Heatmap On</font>
+            {heatMapOption &&
+              <>
+                <div className="dropdown-divider"></div>
+                <font>Heatmap Intensity</font>
+                <div style={{padding: '0px 10px'}}>
+                  <input type="range" min={this.min} max={this.max} value={sliderValue} className="aro-slider"
+                    onChange={(e)=> this.changeHeatMapOptions(e)}/>
+                </div>
+              </>
+            }
+
+            {/* Site Boundaries */}
+            <div className="dropdown-divider"></div>
+            <input type="checkbox" className="checkboxfill" checked={showSiteBoundary} name="ctype-name" style={{marginLeft: '2px'}}
+              onChange={(e)=> this.toggleSiteBoundary(e)}/>
+            <font>Site Boundaries</font>
+            {showSiteBoundary &&
+              <select className="form-control" value={selectedBoundaryType.description}
+                onChange={(e)=> this.onChangeSiteBoundaries(e)}>
+                {boundaryTypes.map((item, index) =>
+                  <option key={index} value={item.description} label={item.description}></option>
+                )}
+              </select>
+            }
+
+            {/* Directed Cable */}
+              <div class="dropdown-divider"></div>
+              <input type="checkbox" class="checkboxfill" checked={showDirectedCable} name="ctype-name" style={{marginLeft: '2px'}}
+                onChange={(e)=> this.showCableDirection(e)}/>
+              <font>Directed Cable</font>
+
+
+          </div>
         </div>
 
         {selectedDisplayMode === this.displayModes.ANALYSIS || selectedDisplayMode === this.displayModes.VIEW &&
@@ -226,8 +332,51 @@ export class ToolBar extends Component {
     )
   }
 
-  rulerAction (e) {
+  showCableDirection () {
+    this.props.setShowDirectedCable(!this.props.showDirectedCable)
+    //this.state.viewSettingsChanged.next()
+  }
 
+  onChangeSiteBoundaries (e) {
+    let selectedBoundaryType = this.state.selectedBoundaryType
+    this.props.boundaryTypes.map((item, index) => {
+      if(index === e.target.selectedIndex){
+        selectedBoundaryType = item
+      }
+    })
+    this.setState({selectedBoundaryType: selectedBoundaryType})
+    this.props.setSelectedBoundaryType(this.props.boundaryTypes[e.target.selectedIndex])
+    this.props.setShowSiteBoundary(true)
+  }
+
+  toggleSiteBoundary (e) {
+    this.setState({showSiteBoundary: !this.state.showSiteBoundary})
+    //this.state.viewSettingsChanged.next() // This will also refresh the map layer
+  }
+
+  viewSettingsAction () {
+    !this.props.isViewSettingsEnabled && this.closeDropdowns()
+    this.props.setIsViewSettingsEnabled(!this.props.isViewSettingsEnabled)
+  }
+
+  toggleHeatMapOptions (e) {
+    this.setState({heatMapOption: !this.state.heatMapOption}, function() {
+      var newMapTileOptions = angular.copy(this.mapTileOptions)
+      newMapTileOptions.selectedHeatmapOption = this.state.heatMapOption ? this.viewSetting.heatmapOptions[0] : this.viewSetting.heatmapOptions[2]
+      //this.state.mapTileOptions.next(newMapTileOptions)
+    })
+  }
+
+  changeHeatMapOptions (e) {
+    this.setState({sliderValue: e.target.value}, function() {
+      var newMapTileOptions = angular.copy(this.mapTileOptions)
+      newMapTileOptions.heatMap.worldMaxValue = this.rangeValues[this.state.sliderValue]
+      //this.state.mapTileOptions.next(newMapTileOptions)
+    })
+  }
+
+  rulerAction (e) {
+    !this.props.isRulerEnabled && this.closeDropdowns()
     this.props.setIsRulerEnabled(!this.props.isRulerEnabled)
     this.enableRulerAction()
 
@@ -528,6 +677,17 @@ export class ToolBar extends Component {
     this.copperMarkers = []
   }
 
+  closeDropdowns () {
+    if (this.props.isViewSettingsEnabled) {
+      jQuery('.view-dropdown').toggle()
+      this.props.setIsViewSettingsEnabled(false)
+    }
+    if (this.props.isRulerEnabled) {
+      jQuery('.ruler-dropdown').toggle()
+      this.rulerAction()
+    }
+  }
+
   showRemoveRulerButton () {
     this.setState({showRemoveRulerButton: this.rulerSegments && (this.rulerSegments.length > 1)})
   }
@@ -679,6 +839,10 @@ export class ToolBar extends Component {
 const getAllLocationLayers = state => state.mapLayers.location
 const getLocationLayersList = createSelector([getAllLocationLayers], (locationLayers) => locationLayers.toJS())
 
+const getAllBoundaryTypesList = state => state.mapLayers.boundaryTypes
+const getBoundaryTypesList = createSelector([getAllBoundaryTypesList], (boundaryTypes) => boundaryTypes.toJS())
+
+
 const mapStateToProps = (state) => ({
   defaultPlanCoordinates: state.plan.defaultPlanCoordinates,
   selectedDisplayMode: state.toolbar.rSelectedDisplayMode,
@@ -694,7 +858,11 @@ const mapStateToProps = (state) => ({
   activeSelectionModeId: state.selection.activeSelectionMode.id,
   locationLayers: getLocationLayersList(state),
   plan: state.plan.activePlan,
-  
+  isViewSettingsEnabled: state.toolbar.isViewSettingsEnabled,
+  showSiteBoundary: state.mapLayers.showSiteBoundary,
+  boundaryTypes: getBoundaryTypesList(state),
+  selectedBoundaryType: state.mapLayers.selectedBoundaryType,
+  showDirectedCable: state.toolbar.showDirectedCable,
 })  
 
 const mapDispatchToProps = (dispatch) => ({
@@ -718,8 +886,11 @@ const mapDispatchToProps = (dispatch) => ({
   selectedToolBarAction: (value) => dispatch(ToolBarActions.selectedToolBarAction(value)),
   selectedTargetSelectionModeAction: (value) => dispatch(ToolBarActions.selectedTargetSelectionMode(value)),
   setIsRulerEnabled: (value) => dispatch(ToolBarActions.setIsRulerEnabled(value)),
-  getOptimizationBody : (optimizationInputs, activeSelectionModeId, locationLayers, plan) => dispatch(ToolBarActions.getOptimizationBody(optimizationInputs, activeSelectionModeId, locationLayers, plan))
-
+  getOptimizationBody : (optimizationInputs, activeSelectionModeId, locationLayers, plan) => dispatch(ToolBarActions.getOptimizationBody(optimizationInputs, activeSelectionModeId, locationLayers, plan)),
+  setIsViewSettingsEnabled: (value) => dispatch(ToolBarActions.setIsViewSettingsEnabled(value)),
+  setSelectedBoundaryType: (selectedBoundaryType) => dispatch(MapLayerActions.setSelectedBoundaryType(selectedBoundaryType)),
+  setShowSiteBoundary: (value) => dispatch(MapLayerActions.setShowSiteBoundary(value)),
+  setShowDirectedCable: (value) => dispatch(ToolBarActions.setShowDirectedCable(value))
 })
 
 const ToolBarComponent = wrapComponentWithProvider(reduxStore, ToolBar, mapStateToProps, mapDispatchToProps)

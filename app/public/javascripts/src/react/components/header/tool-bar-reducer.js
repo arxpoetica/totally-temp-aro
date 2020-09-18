@@ -6,7 +6,9 @@ const defaultState = {
   rActiveViewModePanel:'LOCATION_INFO',
   selectedToolBarAction: null,
   selectedTargetSelectionMode: 0,
-  isRulerEnabled: false
+  isRulerEnabled: false,
+  isViewSettingsEnabled: false,
+  showDirectedCable: false
 }
 
 function setPlanInputsModal (state, planInputsModal) {
@@ -45,6 +47,18 @@ function setIsRulerEnabled (state, isRulerEnabled) {
   }
 }
 
+function setIsViewSettingsEnabled (state, isViewSettingsEnabled) {
+  return { ...state,
+    isViewSettingsEnabled: isViewSettingsEnabled
+  }
+}
+
+function setShowDirectedCable (state, showDirectedCable) {
+  return { ...state,
+    showDirectedCable: showDirectedCable
+  }
+}
+
 function ToolBarReducer (state = defaultState, action) {
   switch (action.type) {
 
@@ -64,7 +78,13 @@ function ToolBarReducer (state = defaultState, action) {
       return setSelectedTargetSelectionMode(state, action.payload) 
       
     case Actions.TOOL_BAR_IS_RULER_ENABLED:
-      return setIsRulerEnabled(state, action.payload)      
+      return setIsRulerEnabled(state, action.payload)
+      
+    case Actions.TOOL_BAR_IS_VIEW_SETTINGS_ENABLED:
+      return setIsViewSettingsEnabled(state, action.payload)
+      
+    case Actions.TOOL_BAR_SHOW_DIRECTED_CABLE:
+      return setShowDirectedCable(state, action.payload)      
   
     default:
       return state

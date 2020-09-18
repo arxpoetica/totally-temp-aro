@@ -193,6 +193,13 @@ function clearOlderAnnotations (numberToClear) {
   }
 }
 
+function setSelectedBoundaryType (selectedBoundaryType) {
+  return {
+    type: Actions.LAYERS_SET_SELECTED_BOUNDARY_TYPE,
+    payload: selectedBoundaryType
+  }
+}
+
 export default {
   setLayerVisibility,
   setNetworkEquipmentLayerVisibility,
@@ -209,5 +216,6 @@ export default {
   addAnnotation,
   updateAnnotation,
   removeAnnotation,
-  clearOlderAnnotations
+  clearOlderAnnotations,
+  setSelectedBoundaryType
 }
