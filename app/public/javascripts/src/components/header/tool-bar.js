@@ -5,6 +5,7 @@ import MapReportsActions from '../../react/components/map-reports/map-reports-ac
 import ToolActions from '../../react/components/tool/tool-actions'
 import Tools from '../../react/components/tool/tools'
 import ViewSettingsActions from '../../react/components/view-settings/view-settings-actions'
+import PlanActions from '../../react/components/plan/plan-actions'
 
 class ToolBarController {
   constructor ($element, $timeout, $document, $http, $ngRedux, state, map_tools, $window) {
@@ -115,6 +116,8 @@ class ToolBarController {
 
   showPlanModal () {
     this.state.activeViewModePanel = this.state.viewModePanels.PLAN_INFO
+    this.rSelectedDisplayModeAction(this.state.displayModes.VIEW)
+    this.rActiveViewModePanelAction(this.state.viewModePanels.PLAN_INFO)
   }
 
   createEphemeralPlan () {
@@ -379,6 +382,7 @@ class ToolBarController {
     this.state.activeViewModePanel = this.state.viewModePanels.COVERAGE_BOUNDARY
     this.state.selectedDisplayMode.next(this.state.displayModes.VIEW) // Panel is visible only in VIEW mode
     this.state.selectedTargetSelectionMode = this.state.targetSelectionModes.COVERAGE_BOUNDARY
+    this.rActiveViewModePanelAction(this.state.viewModePanels.COVERAGE_BOUNDARY)
   }
 
   toggleSiteBoundary () {
@@ -576,7 +580,9 @@ class ToolBarController {
         dispatch(ToolActions.setToolboxVisibility(isVisible))
         dispatch(MapReportsActions.showMapObjects(isVisible))
       },
-      setShowLocationLabels: showLocationLabels => dispatch(ViewSettingsActions.setShowLocationLabels(showLocationLabels))
+      setShowLocationLabels: showLocationLabels => dispatch(ViewSettingsActions.setShowLocationLabels(showLocationLabels)),
+      rActiveViewModePanelAction: (value) => dispatch(PlanActions.activeViewModePanel(value)),
+      rSelectedDisplayModeAction: (value) => dispatch(PlanActions.selectedDisplayMode(value))
     }
   }
 }

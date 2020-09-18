@@ -61,7 +61,7 @@ export class RateReachEditor extends Component {
             <form>
               <div className="form-group row">
                 <label className="col-md-4 col-form-label text-right" style={{fontWeight: '700'}}>Technology Type</label>
-                <select id="cboTechnologyTypes" className="form-control col-md-6" onChange={e => {this.handleTechChange(e)}} value={selectedTechnologyType}>
+                <select id="cboTechnologyTypes" className="form-control col-md-4" onChange={e => {this.handleTechChange(e)}} value={selectedTechnologyType}>
                   {Object.entries(rateReachManagerConfigs.rateReachConfig.rateReachGroupMap).map(([techKey], techIndex) => (
                     <option key={techIndex} value={techKey}>{techKey}</option>
                   ))}
@@ -128,14 +128,16 @@ export class RateReachEditor extends Component {
                 </RateReachDistanceEditor>
               }  
               {selectedEditingMode === this.editingModes.RATE_REACH_RATIOS &&
-                <table id="tblRateReachRatios" className="table table-sm table-borderless">
-                    {Object.entries(rateReachManagerConfigs.rateReachConfig.marketAdjustmentFactorMap).map(([techKey], techIndex) => (
-                      <tr key={techIndex}>
-                        <td>{this.rateReachRatioDescription[techKey]}</td>
-                        <td><input className="form-control" onChange={e => {this.handleRateReachRatioChange(e, techKey)}} value={rateReachManagerConfigs.rateReachConfig.marketAdjustmentFactorMap[techKey]}/></td>
-                      </tr>
-                    ))}
-                </table>
+                <div className="container-fluid">
+                  <table id="tblRateReachRatios" className="table table-sm table-borderless">
+                      {Object.entries(rateReachManagerConfigs.rateReachConfig.marketAdjustmentFactorMap).map(([techKey], techIndex) => (
+                        <tr key={techIndex} className="d-flex">
+                          <td className="col-3">{this.rateReachRatioDescription[techKey]}</td>
+                          <td className="col-4"><input className="form-control" onChange={e => {this.handleRateReachRatioChange(e, techKey)}} value={rateReachManagerConfigs.rateReachConfig.marketAdjustmentFactorMap[techKey]}/></td>
+                        </tr>
+                      ))}
+                  </table>
+                </div>
               } 
               {!rateReachManagerConfigs.rateReachConfig.rateReachGroupMap[selectedTechnologyType].active &&
                 <div className="disable-sibling-controls"></div>
@@ -196,10 +198,12 @@ export class RateReachEditor extends Component {
 
   exitEditingMode(){
     this.props.setIsResourceEditor(true);
+    this.props.setIsRrmManager(false)
   }
 
   saveConfigurationToServer(){
     this.props.saveRateReachConfig(this.props.resourceManagerId, this.state.rateReachManagerConfigs.rateReachConfig)
+    this.props.setIsRrmManager(false)
   }
 }
 
@@ -215,7 +219,8 @@ export class RateReachEditor extends Component {
     setIsResourceEditor: (status) => dispatch(ResourceActions.setIsResourceEditor(status)),
     reloadRateReachManagerConfiguration: (rateReachManagerId, loggedInUser) => dispatch(ResourceActions.reloadRateReachManagerConfiguration(rateReachManagerId, loggedInUser)),
     saveRateReachConfig:(rateReachManagerId, rateReachConfig) => dispatch(ResourceActions.saveRateReachConfig(rateReachManagerId, rateReachConfig)),
-    setModalTitle: (title) => dispatch(ResourceActions.setModalTitle(title))
+    setModalTitle: (title) => dispatch(ResourceActions.setModalTitle(title)),
+    setIsRrmManager: (status) => dispatch(ResourceActions.setIsRrmManager(status)),
   })
 
 const RateReachEditorComponent = connect(mapStateToProps, mapDispatchToProps)(RateReachEditor)
