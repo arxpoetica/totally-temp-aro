@@ -56,7 +56,7 @@ export class PlanSettings extends Component {
 
         <Card className={`card-collapse ${collapseCards === 'DATA_SELECTION' ? 'collapse-show' :''}`}>
           <CardHeader className={`card-header-dark ${collapseCards === 'DATA_SELECTION' ? 'card-fixed' :''}`} onClick={(e)=>this.toggleCards(e)} data-event='DATA_SELECTION'>Data Selection</CardHeader>
-          <Collapse isOpen={collapseCards === 'DATA_SELECTION'}>
+          <Collapse style={{height:'100%'}} isOpen={collapseCards === 'DATA_SELECTION'}>
             <CardBody style={{padding:'0px'}}>
               <PlanDataSelection
                 onDataSelectionChange={this.onDataSelectionChange}
