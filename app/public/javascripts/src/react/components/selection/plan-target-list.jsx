@@ -26,6 +26,15 @@ export class PlanTargetList extends Component {
 
     if (geometries.size === 0) {
       return <div>(no items selected)</div>
+    } else if (geometries.size > this.props.maxRoutingSelectionDisplayCount) {
+      return  <div><span>{geometries.size} items selected (Too many items to display)</span>
+                <button className='btn btn-outline-danger btn-sm float-right'
+                  disabled={this.props.displayOnly}
+                  style={{ marginTop: '3px' }}
+                  onClick={() => this.onRemovePlanTargets({ [geometryKey]: this.props.planTargets[geometryKey] })}>
+                  <i className='far fa-trash-alt' />
+                </button>
+              </div>
     } else {
       return <div>
         <div style={{ 'backgroundColor': '#e0e0e0', 'paddingLeft': '10px', 'display': 'inline-block', 'width': '100%' }}>
@@ -83,7 +92,8 @@ const mapStateToProps = (state) => ({
   planId: state.plan.activePlan && state.plan.activePlan.id,
   activeSelectionModeId: state.selection.activeSelectionMode.id,
   planTargets: state.selection.planTargets,
-  planTargetDescriptions: state.selection.planTargetDescriptions
+  planTargetDescriptions: state.selection.planTargetDescriptions,
+  maxRoutingSelectionDisplayCount: state.configuration.ui.perspective.globalSettings.maxRoutingSelectionDisplayCount
 })
 
 const mapDispatchToProps = (dispatch, ownProps) => ({

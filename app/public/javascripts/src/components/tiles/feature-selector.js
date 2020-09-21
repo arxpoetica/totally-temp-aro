@@ -48,7 +48,11 @@ class FeatureSelector {
               for (var iFeature = 0; iFeature < filteredFeatures.length; ++iFeature) {
                 var feature = filteredFeatures[iFeature]
                 if (shouldFeatureBeSelected(feature, result.icon, result.deltaXPx, result.deltaYPx)) {
-                  hitFeatures.push(feature.properties)
+                  var featureProps = feature.properties
+                  // Note: we can send the feature geometry by:
+                  // featureProps.geometry = feature.loadGeometry()
+                  // keep in mind this will be SCREEN geometry not lat lng
+                  hitFeatures.push(featureProps)
                 }
               }
             })

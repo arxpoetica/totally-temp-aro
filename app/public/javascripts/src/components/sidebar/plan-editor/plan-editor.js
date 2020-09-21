@@ -1624,7 +1624,7 @@ class PlanEditorController {
           // this.discardTransaction(this.currentTransaction.id)
         }
         this.clearAllSubnetMapObjects()
-        this.clearTransaction()
+        // this.clearTransaction()
         this.unsubscribeRedux()
       })
     } else {

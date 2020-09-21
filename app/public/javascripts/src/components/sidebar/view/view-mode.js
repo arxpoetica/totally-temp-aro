@@ -1,4 +1,5 @@
 import SelectionActions from '../../../react/components/selection/selection-actions'
+import PlanActions from '../../../react/components/plan/plan-actions'
 
 class ViewModeController {
   constructor (state, $http, $ngRedux) {
@@ -16,6 +17,11 @@ class ViewModeController {
       }
     })
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
+  }
+
+  // To set reduxState to Local State
+  $onInit () {
+    this.activeViewModePanel = this.rActiveViewModePanel
   }
 
   onSearchResult (selectedLocation) {
@@ -60,14 +66,17 @@ class ViewModeController {
     return {
       dataItems: reduxState.plan.dataItems,
       selectedLocations: reduxState.selection.locations,
-      locationInfoDetails: reduxState.locationInfo.details
+      locationInfoDetails: reduxState.locationInfo.details,
+      rActiveViewModePanel: reduxState.plan.rActiveViewModePanel,
+      activeViewModePanel: reduxState.plan.rActiveViewModePanel,
     }
   }
 
   mapDispatchToTarget (dispatch) {
     return {
       setSelectedLocations: locationIds => dispatch(SelectionActions.setLocations(locationIds)),
-      clearSelectedLocations: () => dispatch(SelectionActions.setLocations([]))
+      clearSelectedLocations: () => dispatch(SelectionActions.setLocations([])),
+      rActiveViewModePanelAction: (value) => dispatch(PlanActions.activeViewModePanel(value))
     }
   }
 
@@ -78,7 +87,8 @@ class ViewModeController {
     Object.assign(this, nextState)
     Object.assign(this, actions)
     if ((currentSelectedLocations !== nextState.selectedLocations) &&
-      (this.state.activeViewModePanel !== this.state.viewModePanels.EDIT_LOCATIONS)) {
+      (this.state.activeViewModePanel !== this.state.viewModePanels.EDIT_LOCATIONS) &&
+      (this.state.activeViewModePanel !== this.state.viewModePanels.EDIT_SERVICE_LAYER)) {
       const firstLocationId = nextState.selectedLocations.values().next().value
       this.updateSelectedState(firstLocationId)
       if (firstLocationId) {

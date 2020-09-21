@@ -119,8 +119,8 @@ class DataSelectionController {
 
   editServiceLayer () {
     // Put the application in "Edit Service Layer" mode
-    this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
     this.state.activeViewModePanel = this.state.viewModePanels.EDIT_SERVICE_LAYER
+    this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
   }
 
   mapStateToThis (reduxState) {

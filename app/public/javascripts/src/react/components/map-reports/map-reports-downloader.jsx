@@ -82,10 +82,12 @@ export class MapReportsDownloader extends Component {
       const pageDefinition = JSON.parse(JSON.stringify(reportPage))
       pageDefinition.planId = this.props.planId
       pageDefinition.planName = this.props.planName
+      pageDefinition.clientId = this.props.clientId
       
       if (this.props.manualWait) {
         pageDefinition.waitSecondsPerPage = this.props.waitSecondsPerPage // The user has asked to manually wait for each page
       }
+      pageDefinition.showLocationLabels = this.props.showLocationLabels
       // From maplayers, get the layers that we want to display in the report. Also send the location filters.
       pageDefinition.locationFilters = this.props.mapLayers.locationFilters
       pageDefinition.visibleLayers = this.props.mapLayers.location.filter(layer => layer.checked).map(layer => layer.key).toJS();
@@ -123,25 +125,29 @@ export class MapReportsDownloader extends Component {
 MapReportsDownloader.propTypes = {
   planId: PropTypes.number,
   planName: PropTypes.string,
+  clientId: PropTypes.string,
   mapLayers: PropTypes.object,
   isCommunicating: PropTypes.bool,
   isDownloading: PropTypes.bool,
   reportPages: PropTypes.array,
   editingPageUuid: PropTypes.string,
   waitSecondsPerPage: PropTypes.number,
-  manualWait: PropTypes.bool
+  manualWait: PropTypes.bool,
+  showLocationLabels: PropTypes.bool
 }
 
 const mapStateToProps = state => ({
   planId: state.plan.activePlan.id,
   planName: state.plan.activePlan.name,
+  clientId: state.configuration.system.ARO_CLIENT,
   mapLayers: state.mapLayers,
   isCommunicating: state.mapReports.isCommunicating,
   isDownloading: state.mapReports.isDownloading,
   reportPages: state.mapReports.pages,
   editingPageUuid: state.mapReports.editingPageUuid,
   waitSecondsPerPage: state.mapReports.waitSecondsPerPage,
-  manualWait: state.mapReports.manualWait
+  manualWait: state.mapReports.manualWait,
+  showLocationLabels: state.viewSettings.showLocationLabels
 })
 
 const mapDispatchToProps = dispatch => ({

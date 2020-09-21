@@ -60,8 +60,8 @@ class EquipmentDetailController {
 
         fiber.attributes = {}
         this.selectedFiber = fiber
-
-        this.$http.get(`/service/plan-feature/${plan.id}/fiber/${fiber.id}?userId=${userId}`)
+        var fiberId = fiber.id || fiber.link_id
+        this.$http.get(`/service/plan-feature/${plan.id}/fiber/${fiberId}?userId=${userId}`)
           .then(result => {
             fiber.attributes = result.data.attributes
             this.$timeout()
@@ -222,7 +222,8 @@ class EquipmentDetailController {
 
   mapStateToThis (reduxState) {
     return {
-      dataItems: reduxState.plan.dataItems
+      dataItems: reduxState.plan.dataItems,
+      rActiveViewModePanel: reduxState.plan.rActiveViewModePanel
     }
   }
 

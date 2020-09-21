@@ -132,6 +132,9 @@
           },
           "physicallyLinked": {
             "type": "boolean"
+          },
+          "fiberCapacity": {
+            "type": "integer"
           }
         }
       },

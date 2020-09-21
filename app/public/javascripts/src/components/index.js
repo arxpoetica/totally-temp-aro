@@ -2,6 +2,11 @@
 import { react2angular } from 'react2angular'
 import { ToastContainer } from 'react-toastify'
 
+import PlanSettings from '../react/components/plan/plan-settings.jsx'
+import GlobalSettingsButton from '../react/components/global-settings/global-settings-button.jsx'
+import rGlobalSettings from '../react/components/global-settings/global-settings.jsx'
+import ResourceEditor from '../react/components/resource-editor/resource-editor.jsx'
+import DataUpload from '../react/components/data-upload/data-upload.jsx'
 import ManageUsers from '../react/components/user/manage-users.jsx'
 import UserSettings from '../react/components/user/user-settings.jsx'
 import MyAccount from '../react/components/user/my-account.jsx'
@@ -29,6 +34,7 @@ import RfpAnalyzer from '../react/components/optimization/rfp/rfp-analyzer.jsx'
 import RfpStatus from '../react/components/optimization/rfp/status/rfp-status.jsx'
 import RingEdit from '../react/components/ring-edit/ring-edit.jsx'
 import RingButton from '../react/components/ring-edit/ring-button.jsx'
+import DuctEdit from '../react/components/data-edit/duct-edit.jsx'
 import MapReportsListMapObjects from '../react/components/map-reports/map-reports-list-map-objects.jsx'
 import LocationInfo from '../react/components/location-info/location-info.jsx'
 import ResourcePermissions from '../react/components/acl/resource-permissions/resource-permissions.jsx'
@@ -247,7 +253,12 @@ app.component('boundaryDetail', boundaryDetail)
   .component('editorInterfaceValue', editorInterfaceValue)
   .component('editorInterfacePrimitive', editorInterfacePrimitive)
   .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
-// ReactJS components
+// ReactJS components PlanSettings
+  .component('rGlobalSettingsButton', react2angular(GlobalSettingsButton))
+  .component('rPlanSettings', react2angular(PlanSettings))
+  .component('rGlobalSettings', react2angular(rGlobalSettings))
+  .component('rResourceEditor', react2angular(ResourceEditor))
+  .component('rDataUpload', react2angular(DataUpload))
   .component('rManageUsers', react2angular(ManageUsers))
   .component('rTagManager', react2angular(TagManager))
   .component('rUserSettings', react2angular(UserSettings))
@@ -275,6 +286,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rRfpStatus', react2angular(RfpStatus))
   .component('rRingEdit', react2angular(RingEdit))
   .component('rRingButton', react2angular(RingButton, ['onModify']))
+  .component('rDuctEdit', react2angular(DuctEdit, ['displayOnly']))
   .component('rMapReportsListMapObjects', react2angular(MapReportsListMapObjects))
   .component('rToastContainer', react2angular(ToastContainer))
   .component('rLocationInfo', react2angular(LocationInfo))

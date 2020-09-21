@@ -697,7 +697,8 @@
       "hsiEnabled",
       "t1",
       "physicallyLinked",
-      "fiberAvailable"
+      "fiberAvailable",
+      "fiberCapacity"
     ],
     "displayProperties": [
       {
@@ -780,6 +781,18 @@
         "defaultValue": "true",
         "visible": true,
         "editable": true
+      },
+      {
+        "propertyName": "fiberCapacity",
+        "levelOfDetail": 2,
+        "format": "",
+        "displayName": "Fiber Capacity",
+        "enumEntityName": "",
+        "enumTypeURL": "",
+        "displayDataType": "integer",
+        "defaultValue": "0",
+        "editable": true,
+        "visible": true
       },
       {
         "propertyName": "t1",

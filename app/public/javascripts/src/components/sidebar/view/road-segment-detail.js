@@ -19,6 +19,7 @@ class RoadSegmentDetailController {
       if (this.state.activeViewModePanel === this.state.viewModePanels.EDIT_LOCATIONS) return
 
       if (event.roadSegments && event.roadSegments.size > 0) {
+        console.log(event)
         var newSelection = state.cloneSelection()
         newSelection.details.roadSegments = event.roadSegments
         state.selection = newSelection
@@ -29,7 +30,11 @@ class RoadSegmentDetailController {
       } else if (this.isFeatureListEmpty(event)) {
         this.selectedEdgeInfo = null
         this.updateSelectedState()
-        this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO
+        // this check maybe needs to go at the top of this function (symptom of larger problem)
+        if (this.state.activeViewModePanel === this.state.viewModePanels.ROAD_SEGMENT_INFO) {
+          // ToDo: this doesn't belog here it's a symptom of a larger problem
+          this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO
+        }
         this.$timeout()
       }
     })
@@ -47,6 +52,13 @@ class RoadSegmentDetailController {
   }
 
   generateRoadSegmentsInfo (roadSegments) {
+    var geometry = []
+    /*
+    roadSegments.forEach((roadSegment) => {
+      geometry.push(roadSegment.loadGeometry())
+    })
+    console.log(geometry)
+    */
     var roadSegmentsInfo = {
     }
 

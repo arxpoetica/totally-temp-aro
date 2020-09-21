@@ -26,7 +26,8 @@ export class ManageUsers extends Component {constructor (props) {
     },
     selectedPage:0,
     searchText:'',
-    selectedNav: ''
+    selectedNav: '',
+    userIdForSettingsEdit: ''
   }
 }
 
@@ -56,16 +57,19 @@ export class ManageUsers extends Component {constructor (props) {
 
     const users = this.props.pageableData.paginateData
 
-    let optionsList = this.props.allGroups.map(function(newkey) { 
+    let defaultIndex = 0;
+    let optionsList = this.props.allGroups.map(function(newkey, index) { 
+      if(newkey.name === 'Public'){
+        defaultIndex = index
+      }
       return {"id":newkey.id, "value": newkey.name, "label": newkey.name}; 
     });
 
     return (
-      <div>
+      <>
         {this.state.selectedNav !== 'UserSettings' &&
-        <div>
+        <>
           {!this.props.isOpenSendMail && !this.props.isOpenNewUser &&
-          <div>
             <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
               <div style={{flex: '0 0 auto'}}>
                 <div className="form-group row float-right">
@@ -100,7 +104,7 @@ export class ManageUsers extends Component {constructor (props) {
                       }); 
                     }
 
-                    return <React.Fragment key={user.id}> <tr key={index}>
+                    return <React.Fragment key={user.id}><tr key={index}>
                       <td style={{width: '20%'}}>{user.firstName} {user.lastName}</td>
                       <td style={{width: '20%'}}>{user.email}</td>
                       <td style={{width: '50%'}}>
@@ -123,7 +127,7 @@ export class ManageUsers extends Component {constructor (props) {
                           <span className="fa fa-envelope"></span>
                           </button>
                           
-                          <button onClick={() => this.setState({ selectedNav: 'UserSettings' })} className="btn btn-xs btn-primary" data-toggle="tooltip" data-placement="bottom" title="Open User Settings">
+                          <button onClick={() => this.setState({ selectedNav: 'UserSettings', userIdForSettingsEdit : user.id})} className="btn btn-xs btn-primary" data-toggle="tooltip" data-placement="bottom" title="Open User Settings">
                           <span className="fa fa-cog"></span>
                           </button>
                           
@@ -140,7 +144,7 @@ export class ManageUsers extends Component {constructor (props) {
               </table>
             </div>
 
-            <div style={{flex: '0 0 auto'}}>
+            <div style={{flex: '0 0 auto', paddingTop:'10px'}}>
               <div className="float-right"> 
                 <ReactPaginate 
                   previousLabel={'«'}
@@ -169,7 +173,7 @@ export class ManageUsers extends Component {constructor (props) {
               </div>
             </div>
           </div>
-          </div>}
+          }
           
           {this.props.isOpenSendMail && !this.props.isOpenNewUser &&
           <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
@@ -245,7 +249,7 @@ export class ManageUsers extends Component {constructor (props) {
                     backspaceRemovesValue={false}
                     onChange={(e)=>this.handleGroupChange(e)}
                     isSearchable={false} 
-                    defaultValue={[optionsList[2]]}
+                    defaultValue={[optionsList[defaultIndex]]}
                   />
                 </div>
               </div>
@@ -260,10 +264,10 @@ export class ManageUsers extends Component {constructor (props) {
             <button onClick={() => this.registerUser()} className="btn btn-primary float-right"><i className="fa fa-save"></i>&nbsp;&nbsp;Register user</button>
           </div>
           }
-        </div>
+        </>
         }
         {this.navSelection()}
-      </div>
+      </>
     )
   }
 
@@ -353,7 +357,11 @@ export class ManageUsers extends Component {constructor (props) {
   }
 
   openNewUser() {
-    this.setState({ newUser: {} });
+    if(this.props.defaultGroup !== null){
+      let newUser = this.state.newUser;
+      newUser['groups'] = this.props.defaultGroup;
+      this.setState({ newUser: newUser });
+    }
     this.props.openNewUser()
   }
 
@@ -362,28 +370,42 @@ export class ManageUsers extends Component {constructor (props) {
   }
 
   registerUser() {
-    if (this.state.newUser.email !== this.state.newUser.confirmEmail) {
+   if (this.state.newUser.email !== this.state.newUser.confirmEmail) {
       return swal({
         title: 'Error',
         text: 'Emails do not match',
         type: 'error'
       })
-    }else{
+    } else {
       this.props.registerUser(this.state.newUser)
     }
+    this.clearNewuser()
+  }
+
+  clearNewuser(){
+    let newUser = this.state.newUser;
+    newUser['firstName'] = ''; newUser['lastName'] = '';
+    newUser['email'] = ''; newUser['confirmEmail'] = '';
+    newUser['companyName'] = ''; newUser['isGlobalSuperUser'] = false;
+    newUser['groupIds'] = [];
+
+    if(this.props.defaultGroup !== null){
+      newUser['groups'] = this.props.defaultGroup;
+    }
+    this.setState({ newUser: newUser });
   }
 
   saveUsers() {
     this.props.saveUsers(this.props.userList)
-    this.props.loadGroups()
-    this.props.loadUsers()
+    this.setState({searchText:''})
   }
 
   navSelection (){
     let val = this.state.selectedNav
+    let userIdForSettingsEdit = this.state.userIdForSettingsEdit
     if (val === 'UserSettings') {
       return (
-        <UserSettings id='userSettings' />
+        this.props.openUserSettingsForUserId(userIdForSettingsEdit, 'User Settings')
       )
     }
   }
@@ -411,7 +433,8 @@ const mapStateToProps = (state) => ({
     allGroups: state.user.allGroups,
     isOpenSendMail: state.user.isOpenSendMail,
     isOpenNewUser: state.user.isOpenNewUser,
-    pageableData:  state.user.pageableData
+    pageableData:  state.user.pageableData,
+    defaultGroup : state.user.defaultGroup
 })
 
 const mapDispatchToProps = (dispatch) => ({
@@ -425,7 +448,7 @@ const mapDispatchToProps = (dispatch) => ({
   registerUser: (newUser) => dispatch(UserActions.registerUser(newUser)),
   handlePageClick: (selectedPage) => dispatch(UserActions.handlePageClick(selectedPage)),
   searchUsers: (searchText) => dispatch(UserActions.searchUsers(searchText)),
-  saveUsers: (userList) => UserActions.saveUsers(userList)
+  saveUsers: (userList) => dispatch(UserActions.saveUsers(userList))
 })
 
 const ManageUsersComponent = wrapComponentWithProvider(reduxStore, ManageUsers, mapStateToProps, mapDispatchToProps)

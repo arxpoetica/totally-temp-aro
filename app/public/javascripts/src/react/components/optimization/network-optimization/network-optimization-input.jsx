@@ -3,6 +3,7 @@ import React, { Component } from 'react'
 import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
 import NetworkOptimizationActions from './network-optimization-actions'
+import PlanEditorActions from '../../plan-editor/plan-editor-actions'
 import SelectionActions from '../../selection/selection-actions'
 import PlanTargetListComponent from '../../selection/plan-target-list.jsx'
 import { createSelector } from 'reselect'
@@ -22,7 +23,7 @@ export class NetworkOptimizationInput extends Component {
     return (
       <div style={{ paddingRight: '16px', paddingTop: '8px' }}>
         <NetworkOptimizationButton
-          onRun={() => this.onRunOptimization()}
+          onRun={() => this.requestRunOptimization()}
           onModify={() => this.props.onModify()}
           onCancel={() => this.onCancelOptimization()}
           isCanceling={this.props.isCanceling}
@@ -33,11 +34,11 @@ export class NetworkOptimizationInput extends Component {
           networkAnalysisTypeId={this.props.networkAnalysisTypeId}
           displayOnly={!this.areControlsEnabled()} enableReinitialize />
 
-        <div className='ei-header ei-no-pointer' style={{ marginBottom: '0px' }}>Geography Selection</div>
+        <div className='ei-header ei-no-pointer' style={{ marginBottom: '0px' }}>Routing Selection</div>
         <div className='ei-gen-level ei-internal-level' style={{ paddingLeft: '11px' }}>
           <div className='ei-items-contain'>
             <div className='ei-property-item'>
-              <div className='ei-property-label'>Geography Type</div>
+              <div className='ei-property-label'>Selection Type</div>
               <div className='ei-property-value'>
                 <DropdownList
                   data={this.props.allSelectionModes}
@@ -49,13 +50,41 @@ export class NetworkOptimizationInput extends Component {
               </div>
             </div>
             <div className='ei-property-item'>
-              <div className='ei-property-label'>Selected Geographies</div>
               <div className='ei-property-value'><PlanTargetListComponent displayOnly={!this.areControlsEnabled()} /></div>
             </div>
           </div>
         </div>
       </div>
     )
+  }
+
+  requestRunOptimization () {
+    if (this.props.transaction) {
+      // open a swal
+      swal({
+        title: 'Unsaved Changes',
+        text: 'Do you want to save your changes?',
+        type: 'warning',
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Save and Run', // 'Yes',
+        showCancelButton: true,
+        cancelButtonText: 'Back', // 'No',
+        closeOnConfirm: true
+      }, (result) => {
+        if (result) {
+          // save transaction
+          this.props.commitTransaction(this.props.transaction.id)
+            .then(() => {
+              this.onRunOptimization()
+            })
+            .catch(err => {
+              console.error(err)
+            })
+        }
+      })
+    } else {
+      this.onRunOptimization()
+    }
   }
 
   onRunOptimization () {
@@ -112,10 +141,12 @@ const mapStateToProps = (state) => ({
   optimizationInputs: state.optimization.networkOptimization.optimizationInputs,
   modifiedNetworkOptimizationInput: networkOptimizationInputSelector(state),
   allSelectionModes: getAllSelectionModes(state),
-  activeSelectionModeId: state.selection.activeSelectionMode.id
+  activeSelectionModeId: state.selection.activeSelectionMode.id,
+  transaction: state.planEditor.transaction
 })
 
 const mapDispatchToProps = dispatch => ({
+  commitTransaction: transactionId => { return dispatch(PlanEditorActions.commitTransaction(transactionId)) },
   runOptimization: (inputs, userId) => dispatch(NetworkOptimizationActions.runOptimization(inputs, userId)),
   cancelOptimization: (planId, optimizationId) => dispatch(NetworkOptimizationActions.cancelOptimization(planId, optimizationId)),
   setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId))

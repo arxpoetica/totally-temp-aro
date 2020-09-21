@@ -8,6 +8,7 @@ import createSocketMiddleware from './middleware/websockets'
 
 // Reducers
 import ui from '../react/components/configuration/ui/ui-reducer'
+import system from '../react/components/configuration/configuration-reducer'
 import report from '../react/components/configuration/report/report-reducer'
 import networkAnalysis from '../react/components/optimization/network-analysis/network-analysis-reducer'
 import networkOptimization from '../react/components/optimization/network-optimization/network-optimization-reducer'
@@ -30,7 +31,11 @@ import ringEdit from '../react/components/ring-edit/ring-edit-reducer'
 import locationInfo from '../react/components/location-info/location-info-reducer'
 import acl from '../react/components/acl/acl-reducer'
 import resourceManager from '../react/components/resource-manager/resource-manager-reducer'
+import dataEdit from '../react/components/data-edit/data-edit-reducer'
 import globalSettings from '../react/components/global-settings/globalsettings-reducer'
+import resourceEditor from '../react/components/resource-editor/resource-reducer'
+import dataUpload from '../react/components/data-upload/data-upload-reducer'
+import viewSettings from '../react/components/view-settings/view-settings-reducer'
 
 const logger = createLogger({
   level: 'info',
@@ -39,7 +44,7 @@ const logger = createLogger({
 const socketMiddleware = createSocketMiddleware()
 
 let reducer = combineReducers({
-  configuration: combineReducers({ report, ui }),
+  configuration: combineReducers({ report, ui, system }),
   contextMenu,
   coverage,
   etlTemplates,
@@ -59,7 +64,11 @@ let reducer = combineReducers({
   locationInfo,
   acl,
   resourceManager,
-  globalSettings
+  dataEdit,
+  globalSettings,
+  resourceEditor,
+  dataUpload,
+  viewSettings
 })
 
 // Add support for Redux devtools extension. Yes, even in production.

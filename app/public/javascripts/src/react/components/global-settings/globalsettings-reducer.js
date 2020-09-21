@@ -17,7 +17,8 @@ const defaultState = {
     show: false,
     type: '',
     text: ''
-  }
+  },
+  showGlobalSettings: false
 }
 
 function setReleaseNotes (state, releaseNotes) {
@@ -110,6 +111,8 @@ function reLoadGroups (state, groups) {
 
 function addGroup (state, group) {
   var groups = state.groups
+  groups.map((exGroup) => exGroup.isEditing = false);
+
   var group = group
   group.isEditing = true
   groups.push(group)
@@ -136,7 +139,10 @@ function saveGroup (state,group) {
 }
 
 function editGroup (state, id) {
-  const groups = state.groups.map(group => {
+  var groupsList = state.groups
+  groupsList.map((exGroup) => exGroup.isEditing = false);
+
+  const groups = groupsList.map(group => {
     if (group.id === id) {
       return { ...group,
         isEditing: true
@@ -177,6 +183,13 @@ function setCreateOrUpdate (state, isCreateOrUpdate) {
     isCreateOrUpdate: true
   }
 }
+
+function setShowGlobalSettings (state, showGlobalSettings) {
+  return { ...state,
+    showGlobalSettings: showGlobalSettings
+  }
+}
+
 function globalSettingsReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.GLOBAL_SETTINGS_GET_RELEASE_NOTES:
@@ -229,6 +242,9 @@ function globalSettingsReducer (state = defaultState, action) {
 
     case Actions.GLOBAL_SETTINGS_TAG_FLAG:
       return setCreateOrUpdate(state, action.payload)
+
+    case Actions.GLOBAL_SETTINGS_SHOW_GLOBAL_SETTINGS:
+      return setShowGlobalSettings(state, action.payload)      
   
     default:
       return state

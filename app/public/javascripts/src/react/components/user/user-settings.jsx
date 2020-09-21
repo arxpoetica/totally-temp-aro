@@ -17,7 +17,10 @@ export class UserSettings extends Component {constructor (props) {
 }
 
 initSearchBox () {
-  let location = this.props.userConfiguration.defaultLocation
+  let location = ''
+  if(this.props.userConfiguration !== null){
+    location = this.props.userConfiguration.defaultLocation
+  }
   var ids = 0
   var searchSessionToken = ''
   var search = $('#set-default-location .select2')
@@ -69,12 +72,12 @@ initSearchBox () {
       this.props.userConfiguration.defaultLocation = selected.text
     }
   })
-  search.select2('val', this.props.userConfiguration.defaultLocation, true)
+  search.select2('val', location, true)
 }
 
   componentDidMount () {
-    if(this.props.userId !== null ){
-      this.props.loadUserSettings(this.props.userId)
+    if(this.props.userIdForSettingsEdit !== null ){
+      this.props.loadUserSettings(this.props.userIdForSettingsEdit)
     }
   }
 
@@ -164,7 +167,7 @@ initSearchBox () {
   }
 
   saveSettings() {
-    this.props.saveUserSettings(this.props.userId,this.props.userConfiguration)
+    this.props.saveUserSettings(this.props.userIdForSettingsEdit,this.props.userConfiguration)
   }
 }
 
