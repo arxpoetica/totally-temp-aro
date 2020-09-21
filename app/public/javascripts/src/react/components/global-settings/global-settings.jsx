@@ -5,6 +5,7 @@ import PlanActions from '../plan/plan-actions'
 import './global-settings.css';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import GlobalsettingsActions from './globalsettings-action'
+import ResourceActions from '../resource-editor/resource-actions'
 
 import MyAccount from '../user/my-account.jsx'
 import MultiFactor from './multi-factor.jsx'
@@ -79,15 +80,19 @@ export class GlobalSettings extends Component {
   }
 
   render () {
-    const {loggedInUser} = this.props
+    const {loggedInUser, isRrmManager} = this.props
     const {currentView, userIdForSettingsEdit} = this.state
 
     return(
       <div>
         <Modal isOpen={this.state.modal} toggle={this.toggle} 
-        size={currentView === this.views.MANAGE_USERS || currentView === this.views.REPORTS_EDITOR ||
-              currentView === this.views.DATA_UPLOAD || currentView === this.views.RESOURCE_EDITOR
-              ? 'lg' : 'md'}
+        size={ currentView === this.views.RESOURCE_EDITOR && isRrmManager === true 
+                ? 'xl'
+                : currentView === this.views.MANAGE_USERS || currentView === this.views.REPORTS_EDITOR ||
+                  currentView === this.views.DATA_UPLOAD || currentView === this.views.RESOURCE_EDITOR
+                  ? 'lg'
+                  : 'md'
+              }
         >
         <ModalHeader toggle={this.toggle}>
           {currentView === this.views.RESOURCE_EDITOR
@@ -234,6 +239,7 @@ export class GlobalSettings extends Component {
 
   handleChangeView(currentView){
     this.setState({ currentView: currentView, resourceEditorProps: 'all', dataUploadProps : 'location', dataSelectionID: 1});
+    this.props.setIsRrmManager(false)
   }
   
   toggle() {
@@ -246,13 +252,15 @@ export class GlobalSettings extends Component {
 
 const mapStateToProps = (state) => ({
   loggedInUser: state.user.loggedInUser,
-  modalTitle: state.resourceEditor.modalTitle
+  modalTitle: state.resourceEditor.modalTitle,
+  isRrmManager: state.resourceEditor.isRrmManager,
 })
 
 const mapDispatchToProps = (dispatch) => ({
   setIsResourceSelection: (status) => dispatch(PlanActions.setIsResourceSelection(status)),
   setIsDataSelection: (status) => dispatch(PlanActions.setIsDataSelection(status)),
-  setShowGlobalSettings: (status) => dispatch(GlobalsettingsActions.setShowGlobalSettings(status))
+  setShowGlobalSettings: (status) => dispatch(GlobalsettingsActions.setShowGlobalSettings(status)),
+  setIsRrmManager: (status) => dispatch(ResourceActions.setIsRrmManager(status)),
 })
 
 const GlobalSettingsComponent = wrapComponentWithProvider(reduxStore, GlobalSettings, mapStateToProps, mapDispatchToProps)

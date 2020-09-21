@@ -156,6 +156,7 @@ import AroHttp from '../../common/aro-http'
             }
           })
           dispatch(setIsResourceEditor(false))
+          dispatch(setIsRrmManager(true))
         })
         .catch(err => {
           console.error(err)
@@ -1038,6 +1039,15 @@ import AroHttp from '../../common/aro-http'
     }
   }
 
+  function setIsRrmManager (value){
+    return dispatch => {
+      dispatch({
+        type: Actions.RESOURCE_EDITOR_IS_RRM_MANAGER,
+        payload: value
+      })
+    }
+  }
+
   export default {
     getResourceTypes,
     getResourceManagers,
@@ -1070,5 +1080,6 @@ import AroHttp from '../../common/aro-http'
     saveTsmConfigurationToServer,
     reloadRateReachManagerConfiguration,
     saveRateReachConfig,
-    setModalTitle
+    setModalTitle,
+    setIsRrmManager
   }

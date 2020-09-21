@@ -20,6 +20,7 @@ function selectedDisplayMode (value){
 }
 
 function activeViewModePanel (value){
+  console.log(value)
   return dispatch => {
     dispatch({
       type: Actions.TOOL_BAR_SET_ACTIVE_VIEW_MODE_PANEL,
@@ -89,6 +90,33 @@ function setShowDirectedCable (value){
   }
 }
 
+function setShowEquipmentLabelsChanged (value){
+  return dispatch => {
+    dispatch({
+      type: Actions.TOOL_BAR_SHOW_EQUIPMENT_LABELS,
+      payload: value
+    })
+  }
+}
+
+function setShowFiberSize (value){
+  return dispatch => {
+    dispatch({
+      type: Actions.TOOL_BAR_SHOW_FIBER_SIZE,
+      payload: value
+    })
+  }
+}
+
+function setAppConfiguration (appConfiguration){
+  return dispatch => {
+    dispatch({
+      type: Actions.TOOL_BAR_SET_APP_CONFIGURATION,
+      payload: appConfiguration
+    })
+  }
+}
+
 export default {
   setPlanInputsModal,
   selectedDisplayMode,
@@ -98,5 +126,8 @@ export default {
   setIsRulerEnabled,
   getOptimizationBody,
   setIsViewSettingsEnabled,
-  setShowDirectedCable
+  setShowDirectedCable,
+  setShowEquipmentLabelsChanged,
+  setShowFiberSize,
+  setAppConfiguration
 }

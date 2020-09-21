@@ -57,6 +57,11 @@ class ViewModeController {
     }
   }
 
+  toggleActiveViewModePanelAction (activeViewModePanel) {
+    this.rActiveViewModePanelAction(activeViewModePanel)
+    this.rSelectedTargetSelectionModeAction(this.state.targetSelectionModes.SINGLE_PLAN_TARGET)
+  }
+
   $onDestroy () {
     this.clearViewModeSubscription.unsubscribe()
     this.unsubscribeRedux()
@@ -77,7 +82,8 @@ class ViewModeController {
     return {
       setSelectedLocations: locationIds => dispatch(SelectionActions.setLocations(locationIds)),
       clearSelectedLocations: () => dispatch(SelectionActions.setLocations([])),
-      rActiveViewModePanelAction: (value) => dispatch(ToolBarActions.activeViewModePanel(value))
+      rActiveViewModePanelAction: (value) => dispatch(ToolBarActions.activeViewModePanel(value)),
+      rSelectedTargetSelectionModeAction: (value) => dispatch(ToolBarActions.selectedTargetSelectionMode(value))
     }
   }
 

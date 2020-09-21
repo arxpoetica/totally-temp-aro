@@ -23,7 +23,10 @@ import ReactComponentConstants from '../react/common/constants'
 import AroNetworkConstraints from '../shared-utils/aro-network-constraints'
 import PuppeteerMessages from '../components/common/puppeteer-messages'
 import NetworkOptimizationActions from '../react/components/optimization/network-optimization/network-optimization-actions'
+import ViewSettingsActions from '../react/components/view-settings/view-settings-actions'
 import Tools from '../react/components/tool/tools'
+import ToolBarActions from '../react/components/header/tool-bar-actions'
+
 
 const networkAnalysisConstraintsSelector = formValueSelector(ReactComponentConstants.NETWORK_ANALYSIS_CONSTRAINTS)
 
@@ -262,9 +265,16 @@ class State {
         powerExponent: 0.5,
         worldMaxValue: 500000
       },
-      selectedHeatmapOption: service.viewSetting.heatmapOptions[0]
+      selectedHeatmapOption: service.viewSetting.heatmapOptions[0] // 0, 2
     }
     service.mapTileOptions = new Rx.BehaviorSubject(heatmapOptions)
+
+    service.setUseHeatMap = (useHeatMap) => {
+      var newMapTileOptions = angular.copy(service.mapTileOptions.value)
+      // ToDo: don't hardcode these, but this whole thing needs to be restructured
+      newMapTileOptions.selectedHeatmapOption = useHeatMap ? service.viewSetting.heatmapOptions[0] : service.viewSetting.heatmapOptions[2] 
+      service.mapTileOptions.next(newMapTileOptions)
+    }
 
     service.defaultPlanCoordinates = {
       zoom: 14,
@@ -1430,6 +1440,7 @@ class State {
           service.initializeState()
           service.isReportMode = Boolean(initialState.reportPage || initialState.reportOverview)
           if (service.isReportMode) {
+            var reportOptions = initialState.reportPage || initialState.reportOverview
             return service.mapReadyPromise
               .then(() => {
                 google.maps.event.addListener(map, 'tilesloaded', function () {
@@ -1441,6 +1452,13 @@ class State {
                   streetViewControl: false,
                   mapTypeControl: false
                 })
+
+                // ToDo: should standardize initialState properties
+                service.setShowLocationLabels(reportOptions.showLocationLabels)
+                if (reportOptions.showLocationLabels) {
+                  service.setUseHeatMap(!reportOptions.showLocationLabels)
+                }
+
                 service.setPlanRedux(plan)
                 const mapCenter = (initialState.reportPage && initialState.reportPage.mapCenter) || (initialState.reportOverview && initialState.reportOverview.mapCenter)
                 const mapZoom = (initialState.reportPage && initialState.reportPage.mapZoom) || (initialState.reportOverview && initialState.reportOverview.mapZoom)
@@ -1554,6 +1572,7 @@ class State {
           config.appConfiguration.networkEquipment.conduits = filteredConduits
 
           service.configuration = config.appConfiguration
+          service.setAppConfiguration(service.configuration) // Require in tool-bar.jsx
           service.setLocationFilters(service.configuration.locationCategories.filters)
           service.googleMapsLicensing = config.googleMapsLicensing
           service.enumStrings = config.enumStrings
@@ -1748,6 +1767,7 @@ class State {
 
     service.handleLibraryModifiedEvent = msg => {
       // If the tileBox is null, use a tile box that covers the entire world
+      console.log(`----- handleLibraryModifiedEvent: ${msg} ----- `)
       const content = JSON.parse(new TextDecoder('utf-8').decode(new Uint8Array(msg.content)))
       const tileBox = content.tileBox || wholeWorldTileBox
       const layerNameRegexStrings = MapLayerHelper.getRegexForAllDataIds(service.mapLayersRedux, null, msg.properties.headers.libraryId)
@@ -1771,6 +1791,15 @@ class State {
       if ((currentActivePlanId !== newActivePlanId) && (nextState.plan)) {
         // The active plan has changed. Note that we are comparing ids because a change in plan state also causes the plan object to update.
         service.onActivePlanChanged()
+      }
+
+      // ToDo: replace all instances of service.selectedDisplayMode
+      //  with reduxState.plan.selectedDisplayMode
+      //  We are currently maintaining state in two places
+      if (nextState.rSelectedDisplayMode &&
+          service.rSelectedDisplayMode !== service.selectedDisplayMode.getValue()) {
+        // console.log(service.rSelectedDisplayMode)
+        service.selectedDisplayMode.next(service.rSelectedDisplayMode)
       }
     }
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(service.mergeToTarget.bind(service))
@@ -1796,7 +1825,8 @@ class State {
       primarySpatialEdge: reduxState.optimization.networkAnalysis.primarySpatialEdge,
       wormholeFuseDefinitions: reduxState.optimization.networkAnalysis.wormholeFuseDefinitions,
       activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
-      optimizationInputs: reduxState.optimization.networkOptimization.optimizationInputs
+      optimizationInputs: reduxState.optimization.networkOptimization.optimizationInputs,
+      rSelectedDisplayMode: reduxState.plan.rSelectedDisplayMode
     }
   }
 
@@ -1833,7 +1863,9 @@ class State {
       setOptimizationInputs: inputs => dispatch(NetworkOptimizationActions.setOptimizationInputs(inputs)),
       setPrimarySpatialEdge: primarySpatialEdge => dispatch(NetworkAnalysisActions.setPrimarySpatialEdge(primarySpatialEdge)),
       clearWormholeFuseDefinitions: () => dispatch(NetworkAnalysisActions.clearWormholeFuseDefinitions()),
-      setWormholeFuseDefinition: (spatialEdgeType, wormholeFusionTypeId) => dispatch(NetworkAnalysisActions.setWormholeFuseDefinition(spatialEdgeType, wormholeFusionTypeId))
+      setWormholeFuseDefinition: (spatialEdgeType, wormholeFusionTypeId) => dispatch(NetworkAnalysisActions.setWormholeFuseDefinition(spatialEdgeType, wormholeFusionTypeId)),
+      setShowLocationLabels: showLocationLabels => dispatch(ViewSettingsActions.setShowLocationLabels(showLocationLabels)),
+      setAppConfiguration: appConfiguration => dispatch(ToolBarActions.setAppConfiguration(appConfiguration)),
     }
   }
 }

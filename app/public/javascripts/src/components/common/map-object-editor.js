@@ -7,6 +7,7 @@ import MenuAction, { MenuActionTypes } from '../common/context-menu/menu-action'
 import MenuItem, { MenuItemTypes } from '../common/context-menu/menu-item'
 import uuidStore from '../../shared-utils/uuid-store'
 import SelectionActions from '../../react/components/selection/selection-actions'
+import DeleteMenu from '../../react/components/data-edit/maps-delete-menu.js'
 
 class MapObjectEditorController {
   constructor ($http, $element, $compile, $document, $timeout, $ngRedux, state, tileDataService, contextMenuService, Utils) {
@@ -49,6 +50,9 @@ class MapObjectEditorController {
       fillColor: '#FF1493',
       fillOpacity: 0.4
     }
+
+    this.deleteMenu = new DeleteMenu()
+
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }
 
@@ -743,17 +747,21 @@ class MapObjectEditorController {
   createMultiPolygonMapObject (feature) {
     // Create a "polygon" map object
     this.tileDataService.addFeatureToExclude(feature.objectId)
-    var polygonPath = []
-    feature.geometry.coordinates[0][0].forEach((polygonVertex) => {
-      polygonPath.push({
-        lat: polygonVertex[1], // Note array index
-        lng: polygonVertex[0] // Note array index
+    var polygonPaths = []
+    feature.geometry.coordinates.forEach(path => {
+      var dPath = []
+      path[0].forEach(polygonVertex => {
+        dPath.push({
+          lat: polygonVertex[1], // Note array index
+          lng: polygonVertex[0] // Note array index
+        })
       })
+      polygonPaths.push(dPath)
     })
 
     var polygon = new google.maps.Polygon({
       objectId: feature.objectId, // Not used by Google Maps
-      paths: polygonPath,
+      paths: polygonPaths,
       clickable: true,
       draggable: false,
       map: this.mapRef
@@ -808,8 +816,17 @@ class MapObjectEditorController {
       } else {
         return
       }
-    } else if (feature.geometry.type === 'Polygon') {
-      mapObject = this.createPolygonMapObject(feature)
+    } else if (feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon') {
+      if (feature.geometry.type === 'Polygon') {
+        mapObject = this.createPolygonMapObject(feature)
+        google.maps.event.addListener(mapObject, 'dragend', function () {
+          self.modifyObject(mapObject)
+        })
+      } else if (feature.geometry.type === 'MultiPolygon') {
+        mapObject = this.createMultiPolygonMapObject(feature)
+        console.log(feature.geometry)
+      }
+
       // Set up listeners on the map object
       mapObject.addListener('click', (event) => {
         // Select this map object
@@ -840,10 +857,27 @@ class MapObjectEditorController {
           }
         })
       })
+
+      
+      var mapObjectPaths = mapObject.getPaths()
+      google.maps.event.addListener(mapObject, 'rightclick', event => {
+        console.log(mapObjectPaths.getAt(event.path))
+        if (event.vertex === undefined) {
+          return
+        }
+        this.deleteMenu.open(this.mapRef, mapObjectPaths.getAt(event.path), event.vertex)
+      })
+      
+
+
+
+      /*
       google.maps.event.addListener(mapObject, 'dragend', function () {
         // self.onModifyObject && self.onModifyObject({mapObject})
         self.modifyObject(mapObject)
       })
+      */
+     /*
     } else if (feature.geometry.type === 'MultiPolygon') {
       mapObject = this.createMultiPolygonMapObject(feature)
       // Set up listeners on the map object
@@ -879,9 +913,28 @@ class MapObjectEditorController {
       // google.maps.event.addListener(mapObject, 'dragend', function(){
       //   self.onModifyObject && self.onModifyObject({mapObject})
       // });
+    */
     } else {
       throw `createMapObject() not supported for geometry type ${feature.geometry.type}`
     }
+
+
+
+
+/*
+    // for test - once it works we'll fix the above
+    var mapObjectPath = mapObject.getPath()
+    google.maps.event.addListener(mapObject, 'rightclick', event => {
+      if (event.vertex === undefined) {
+        return
+      }
+      this.deleteMenu.open(this.mapRef, mapObjectPath, event.vertex)
+    })
+*/
+
+
+
+
 
     mapObject.addListener('rightclick', (event) => {
       if (typeof event === 'undefined') return
@@ -999,6 +1052,7 @@ class MapObjectEditorController {
       featurePromise = this.state.StateViewMode.loadEntityList(this.$http, this.state, this.dataItems, 'ServiceAreaView', serviceArea.id, 'id,code,name,sourceId,geom', 'id')
         .then((result) => {
           // check for empty object, reject on true
+          console.log(result)
           if (!result[0] || !result[0].geom) {
             return Promise.reject(`object: ${serviceArea.object_id} may have been deleted`)
           }
@@ -1219,6 +1273,7 @@ class MapObjectEditorController {
         isExistingObject: false
       }
       event.overlay.getPaths().forEach((path) => {
+        console.log(path)
         var pathPoints = []
         path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
         pathPoints.push(pathPoints[0]) // Close the polygon
@@ -1300,6 +1355,8 @@ class MapObjectEditorController {
   }
 
   $onDestroy () {
+    this.deleteMenu.close()
+
     if (this.overlayRightClickListener) {
       google.maps.event.removeListener(this.overlayRightClickListener)
       this.overlayRightClickListener = null

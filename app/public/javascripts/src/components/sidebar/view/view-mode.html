@@ -14,7 +14,7 @@
 
   <div class="plan-settings-container">
     <!-- ng-click to hide EDIT_LOCATIONS or EDIT_SERVICE_LAYER on Clicking other accordion -->
-    <accordion ng-click="$ctrl.rActiveViewModePanelAction($ctrl.activeViewModePanel)"  style="position: relative; flex: 1 1 auto;" toggle-expanded-panel="$ctrl.activeViewModePanel">
+    <accordion ng-click="$ctrl.toggleActiveViewModePanelAction($ctrl.activeViewModePanel)"  style="position: relative; flex: 1 1 auto;" toggle-expanded-panel="$ctrl.activeViewModePanel">
       <accordion-panel-title title="'Location Info'" panel-id="$ctrl.state.viewModePanels.LOCATION_INFO"></accordion-panel-title>
       <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.LOCATION_INFO">
         <aro-search ng-if="($ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.LOCATION_INFO) || $ctrl.rActiveViewModePanel === $ctrl.state.viewModePanels.LOCATION_INFO" 

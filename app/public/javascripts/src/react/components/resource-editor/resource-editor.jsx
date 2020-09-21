@@ -356,9 +356,6 @@ export class ResourceEditor extends Component {
   }
 
 	editSelectedManager(selectedManager){
-		// this.props.startEditingResourceManager('6', 'impedance_mapping_manager', 'Default Impedance Manager', 'EDIT_RESOURCE_MANAGER')
-		// this.setState({clickedResourceForEditAndClone: 'impedance_mapping_manager', clickedResource: ''})
-
 		this.props.startEditingResourceManager(selectedManager.id, selectedManager.resourceType, selectedManager.name, 'EDIT_RESOURCE_MANAGER')
 		this.setState({clickedResourceForEditAndClone: selectedManager.resourceType, clickedResource: ''})
 	}

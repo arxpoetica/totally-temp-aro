@@ -8,7 +8,9 @@ const defaultState = {
   selectedTargetSelectionMode: 0,
   isRulerEnabled: false,
   isViewSettingsEnabled: false,
-  showDirectedCable: false
+  showDirectedCable: false,
+  showEquipmentLabels: false,
+  showFiberSize: false
 }
 
 function setPlanInputsModal (state, planInputsModal) {
@@ -59,6 +61,24 @@ function setShowDirectedCable (state, showDirectedCable) {
   }
 }
 
+function setShowEquipmentLabelsChanged (state, showEquipmentLabels) {
+  return { ...state,
+    showEquipmentLabels: showEquipmentLabels
+  }
+}
+
+function setShowFiberSize (state, showFiberSize) {
+  return { ...state,
+    showFiberSize: showFiberSize
+  }
+}
+
+function setAppConfiguration (state, appConfiguration) {
+  return { ...state,
+    appConfiguration: appConfiguration
+  }
+}
+
 function ToolBarReducer (state = defaultState, action) {
   switch (action.type) {
 
@@ -84,7 +104,16 @@ function ToolBarReducer (state = defaultState, action) {
       return setIsViewSettingsEnabled(state, action.payload)
       
     case Actions.TOOL_BAR_SHOW_DIRECTED_CABLE:
-      return setShowDirectedCable(state, action.payload)      
+      return setShowDirectedCable(state, action.payload)  
+      
+    case Actions.TOOL_BAR_SHOW_EQUIPMENT_LABELS:
+      return setShowEquipmentLabelsChanged(state, action.payload) 
+      
+    case Actions.TOOL_BAR_SHOW_FIBER_SIZE:
+      return setShowFiberSize(state, action.payload) 
+
+    case Actions.TOOL_BAR_SET_APP_CONFIGURATION:
+      return setAppConfiguration(state, action.payload)       
   
     default:
       return state

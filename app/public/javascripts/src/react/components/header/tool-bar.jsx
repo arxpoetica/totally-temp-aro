@@ -15,6 +15,7 @@ import RfpActions from '../optimization/rfp/rfp-actions'
 import AroHttp from '../../common/aro-http'
 import { createSelector } from 'reselect'
 import MapLayerActions from '../map-layers/map-layer-actions'
+import ViewSettingsActions from '../view-settings/view-settings-actions'
 
 export class ToolBar extends Component {
   constructor (props) {
@@ -100,7 +101,7 @@ export class ToolBar extends Component {
         powerExponent: 0.5,
         worldMaxValue: 500000
       },
-      selectedHeatmapOption: this.viewSetting.heatmapOptions[0]
+      selectedHeatmapOption: this.viewSetting.heatmapOptions[0],
     }
     this.mapTileOptions = heatmapOptions
 
@@ -122,6 +123,44 @@ export class ToolBar extends Component {
     this.rangeValues.reverse()
     this.max = this.rangeValues.length - 1
 
+    this.viewFiberOptions = [
+      {
+        id: 1,
+        name: 'Uniform width'
+      },
+      {
+        id: 2,
+        name: 'Fiber Strand Count',
+        field: 'fiber_strands',
+        multiplier: 2.1,
+        pixelWidth: {
+          min: 2,
+          max: 12,
+          divisor: 1 / 3
+        },
+        opacity: {
+          min: 0.66,
+          max: 1
+        }
+      },
+      {
+        id: 3,
+        name: 'Atomic Unit Demand',
+        field: 'atomic_units',
+        multiplier: 1,
+        pixelWidth: {
+          min: 2,
+          max: 12,
+          divisor: 1 / 3,
+          atomicDivisor: 50
+        },
+        opacity: {
+          min: 0.66,
+          max: 1
+        }
+      }
+    ]
+
     this.state = {
       currentRulerAction: this.allRulerActions.STRAIGHT_LINE,
       mapRef: {},
@@ -129,7 +168,8 @@ export class ToolBar extends Component {
       heatMapOption: this.mapTileOptions.selectedHeatmapOption.id === 'HEATMAP_ON',
       sliderValue: this.rangeValues.indexOf(this.mapTileOptions.heatMap.worldMaxValue),
       showSiteBoundary: '',
-      selectedBoundaryType: ''
+      selectedBoundaryType: '',
+      selectedFiberOption: this.viewSetting.selectedFiberOption
     }
   }
 
@@ -164,10 +204,11 @@ export class ToolBar extends Component {
 
     const {selectedDisplayMode, activeViewModePanel, isAnnotationsListVisible,
        isMapReportsVisible, showMapReportMapObjects, selectedTargetSelectionMode,
-       isRulerEnabled, isViewSettingsEnabled, boundaryTypes, showDirectedCable } = this.props
+       isRulerEnabled, isViewSettingsEnabled, boundaryTypes, showDirectedCable,
+       showEquipmentLabels, showLocationLabels, showFiberSize, configuration } = this.props
 
     const {currentRulerAction, showRemoveRulerButton, heatMapOption, sliderValue,
-      showSiteBoundary, selectedBoundaryType} = this.state
+      showSiteBoundary, selectedBoundaryType, selectedFiberOption} = this.state
 
     let selectedIndividualLocation = (selectedDisplayMode === this.displayModes.ANALYSIS || selectedDisplayMode === this.displayModes.VIEW) && activeViewModePanel !== this.viewModePanels.EDIT_LOCATIONS
     let selectedMultipleLocation = (selectedDisplayMode === this.displayModes.ANALYSIS || selectedDisplayMode === this.displayModes.VIEW) && activeViewModePanel !== this.viewModePanels.EDIT_LOCATIONS
@@ -251,25 +292,55 @@ export class ToolBar extends Component {
               </>
             }
 
-            {/* Site Boundaries */}
+            {/* Location Labels */}
             <div className="dropdown-divider"></div>
-            <input type="checkbox" className="checkboxfill" checked={showSiteBoundary} name="ctype-name" style={{marginLeft: '2px'}}
-              onChange={(e)=> this.toggleSiteBoundary(e)}/>
-            <font>Site Boundaries</font>
-            {showSiteBoundary &&
-              <select className="form-control" value={selectedBoundaryType.description}
-                onChange={(e)=> this.onChangeSiteBoundaries(e)}>
-                {boundaryTypes.map((item, index) =>
-                  <option key={index} value={item.description} label={item.description}></option>
-                )}
-              </select>
-            }
+            <input type="checkbox" className="checkboxfill" checked={showLocationLabels} name="ctype-name" style={{marginLeft: '2px'}}
+              onChange={(e)=> this.showLocationLabelsChanged(e)}/>
+            <font>Location Labels</font>
+
+            {/* Site Boundaries */}
+            {/* {configuration.toolbar.showSiteBoundaries && */}
+            <>
+              <div className="dropdown-divider"></div>
+              <input type="checkbox" className="checkboxfill" checked={showSiteBoundary} name="ctype-name" style={{marginLeft: '2px'}}
+                onChange={(e)=> this.toggleSiteBoundary(e)}/>
+              <font>Site Boundaries</font>
+              {showSiteBoundary &&
+                <select className="form-control" value={selectedBoundaryType.description}
+                  onChange={(e)=> this.onChangeSiteBoundaries(e)}>
+                  {boundaryTypes.map((item, index) =>
+                    <option key={index} value={item.description} label={item.description}></option>
+                  )}
+                </select>
+              }
+            </>
+            {/* } */}
 
             {/* Directed Cable */}
-              <div class="dropdown-divider"></div>
-              <input type="checkbox" class="checkboxfill" checked={showDirectedCable} name="ctype-name" style={{marginLeft: '2px'}}
+              <div className="dropdown-divider"></div>
+              <input type="checkbox" className="checkboxfill" checked={showDirectedCable} name="ctype-name" style={{marginLeft: '2px'}}
                 onChange={(e)=> this.showCableDirection(e)}/>
               <font>Directed Cable</font>
+
+              {/* Site Labels */}
+              <div className="dropdown-divider"></div>
+              <input type="checkbox" className="checkboxfill" checked={showEquipmentLabels} name="ctype-name" style={{marginLeft: '2px'}}
+                onChange={(e)=> this.showEquipmentLabelsChanged(e)}/>
+              <font>Site Labels</font>
+
+              {/* Fiber Size */}
+              <div className="dropdown-divider"></div>
+              <input type="checkbox" className="checkboxfill" checked={showFiberSize} name="ctype-name" style={{marginLeft: '2px'}}
+                onChange={(e)=> this.setShowFiberSize(e)}/>
+              <font>Fiber Size</font>
+              {showFiberSize &&
+                <select className="form-control" value={selectedFiberOption}
+                  onChange={(e)=> this.onChangeSelectedFiberOption(e)}>
+                  {this.viewFiberOptions.map((item, index) =>
+                    <option key={index} value={item.name} label={item.name}></option>
+                  )}
+                </select>
+              }
 
 
           </div>
@@ -330,6 +401,26 @@ export class ToolBar extends Component {
 
       </div>
     )
+  }
+
+  onChangeSelectedFiberOption (e) {
+    this.setState({selectedFiberOption: e.target.value})
+    // this.state.requestMapLayerRefresh.next(null)
+  }
+
+  setShowFiberSize () {
+    this.props.setShowFiberSize(!this.props.showFiberSize)
+    // this.state.requestMapLayerRefresh.next(null)
+  }
+
+  showLocationLabelsChanged () {
+    this.props.setShowLocationLabels(!this.props.showLocationLabels)
+  }
+
+  showEquipmentLabelsChanged () {
+    this.props.setShowEquipmentLabelsChanged(!this.props.showEquipmentLabels)
+    // this.state.viewSettingsChanged.next()
+    // this.state.requestMapLayerRefresh.next(null)
   }
 
   showCableDirection () {
@@ -863,6 +954,10 @@ const mapStateToProps = (state) => ({
   boundaryTypes: getBoundaryTypesList(state),
   selectedBoundaryType: state.mapLayers.selectedBoundaryType,
   showDirectedCable: state.toolbar.showDirectedCable,
+  showEquipmentLabels: state.toolbar.showEquipmentLabels,
+  showLocationLabels: state.viewSettings.showLocationLabels,
+  showFiberSize: state.toolbar.showFiberSize,
+  configuration: state.toolbar.appConfiguration
 })  
 
 const mapDispatchToProps = (dispatch) => ({
@@ -890,7 +985,10 @@ const mapDispatchToProps = (dispatch) => ({
   setIsViewSettingsEnabled: (value) => dispatch(ToolBarActions.setIsViewSettingsEnabled(value)),
   setSelectedBoundaryType: (selectedBoundaryType) => dispatch(MapLayerActions.setSelectedBoundaryType(selectedBoundaryType)),
   setShowSiteBoundary: (value) => dispatch(MapLayerActions.setShowSiteBoundary(value)),
-  setShowDirectedCable: (value) => dispatch(ToolBarActions.setShowDirectedCable(value))
+  setShowDirectedCable: (value) => dispatch(ToolBarActions.setShowDirectedCable(value)),
+  setShowEquipmentLabelsChanged: (value) => dispatch(ToolBarActions.setShowEquipmentLabelsChanged(value)),
+  setShowLocationLabels: showLocationLabels => dispatch(ViewSettingsActions.setShowLocationLabels(showLocationLabels)),
+  setShowFiberSize: (value) => dispatch(ToolBarActions.setShowFiberSize(value))
 })
 
 const ToolBarComponent = wrapComponentWithProvider(reduxStore, ToolBar, mapStateToProps, mapDispatchToProps)

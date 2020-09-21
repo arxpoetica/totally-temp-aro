@@ -31,20 +31,26 @@ export class DataUpload extends Component {
 
   componentDidMount(){
     this.props.loadEtlTemplatesFromServer(this.state.selectedDataTypeId)
+    this.props.toggleView('FileUpload')
   }
 
   static getDerivedStateFromProps(nextProps, prevState) {
-		
-		if(prevState.selectedDataSourceName !== undefined && nextProps.selectedDataSourceName !== undefined) {
+  
+    if(prevState.selectedDataSourceName !== undefined && nextProps.selectedDataSourceName !== undefined
+       && nextProps.spatialEdgeTypes.length > 0 && nextProps.conduitSizes !== null) {
 			if(prevState.selectedDataSourceName === ''){
 				return {
           selectedDataSourceName: nextProps.selectedDataSourceName,
-          selectedDataTypeId: nextProps.selectedDataTypeId
+          selectedDataTypeId: nextProps.selectedDataTypeId,
+          selectedSpatialEdgeType: nextProps.spatialEdgeTypes[0].name,
+          selectedConduitSize: nextProps.conduitSizes[0].id
 				};
 			} else {
 				return {
           selectedDataSourceName: prevState.selectedDataSourceName,
-          selectedDataTypeId: prevState.selectedDataTypeId
+          selectedDataTypeId: prevState.selectedDataTypeId,
+          selectedSpatialEdgeType: prevState.selectedSpatialEdgeType,
+          selectedConduitSize: prevState.selectedConduitSize
 				};
 			}
 		}
@@ -206,7 +212,7 @@ export class DataUpload extends Component {
               <div className="form-group row">
                 <label className="col-sm-4 col-form-label">Default Conduit Size</label>
                 <div className="col-sm-8">
-                  <select className="form-control" value={this.state.selectedCableType} onChange={event => this.conduitSizeChange(event)}>
+                  <select className="form-control" value={this.state.selectedConduitSize} onChange={event => this.conduitSizeChange(event)}>
                     {conduitOptions}
                   </select>
                 </div>

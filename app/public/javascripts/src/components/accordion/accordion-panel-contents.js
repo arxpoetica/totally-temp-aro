@@ -46,7 +46,7 @@ let accordionPanelContents = {
     </style>
     <!-- The position:absolute style is used so that the content has a max height of the root component element.
          Without this, if we have a lot of content, the height of the accordion panel would "jump" while expanding -->
-    <ng-transclude ng-class="{'hide-transcluded': $ctrl.parentAccordion.expandedAccordionId !== $ctrl.panelId }"
+    <ng-transclude ng-if="!$ctrl.destroyOnHide || $ctrl.parentAccordion.expandedAccordionId === $ctrl.panelId" ng-class="{'hide-transcluded': $ctrl.parentAccordion.expandedAccordionId !== $ctrl.panelId }"
                    style="position: absolute; height: 100%; width: 100%;"></ng-transclude>
   `,
   transclude: true,
@@ -54,7 +54,8 @@ let accordionPanelContents = {
     parentAccordion: '^accordion'
   },
   bindings: {
-    panelId: '<'
+    panelId: '<',
+    destroyOnHide: '<'
   },
   controller: AccordionPanelContentsController
 }

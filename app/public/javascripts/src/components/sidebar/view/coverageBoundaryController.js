@@ -141,7 +141,7 @@ class CoverageBoundaryController {
 
     // Target selection mode cannot be COVERAGE_BOUNDARY anymore
     this.state.selectedTargetSelectionMode = this.state.targetSelectionModes.SINGLE_PLAN_TARGET
-    this.rSelectedTargetSelectionModeAction(this.state.targetSelectionModes.SINGLE_PLAN_TARGET)
+    //this.rSelectedTargetSelectionModeAction(this.state.targetSelectionModes.SINGLE_PLAN_TARGET)
   }
 
   mapDispatchToTarget (dispatch) {
