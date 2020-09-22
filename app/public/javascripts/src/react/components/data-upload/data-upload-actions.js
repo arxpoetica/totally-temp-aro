@@ -1,5 +1,7 @@
 import Actions from '../../common/actions'
 import AroHttp from '../../common/aro-http'
+import PlanActions from '../plan/plan-actions'
+import GlobalSettingsActions from '../global-settings/globalsettings-action'
 
 function loadMetaData () {
 
@@ -72,7 +74,13 @@ function saveDataSource (uploadDetails,loggedInUser) {
         // Just create Datasource
         getLibraryId (uploadDetails)
         .then((library) => {
-          dispatch(setAllLibraryItems(library.data.dataType,library.data))
+          // Put the application in "Edit Service Layer" mode
+          dispatch(setAllLibraryItems(library.data.dataType, library.data))
+          dispatch(PlanActions.selectDataItems('service_layer', [library.data]))
+          dispatch(GlobalSettingsActions.setShowGlobalSettings(false))
+          dispatch(PlanActions.setIsDataSelection(false))
+          dispatch(PlanActions.selectedDisplayMode('VIEW'))
+          dispatch(PlanActions.activeViewModePanel('EDIT_SERVICE_LAYER'))
         })
         .then((result) => {
           dispatch(setIsUploading(false))
