@@ -113,14 +113,14 @@ class DataSelectionController {
 
   editLocations () {
     // Put the application in "Edit Location" mode
-    this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
     this.state.activeViewModePanel = this.state.viewModePanels.EDIT_LOCATIONS
+    this.setSelectedDisplayMode(this.state.displayModes.VIEW)
   }
 
   editServiceLayer () {
     // Put the application in "Edit Service Layer" mode
     this.state.activeViewModePanel = this.state.viewModePanels.EDIT_SERVICE_LAYER
-    this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
+    this.setSelectedDisplayMode(this.state.displayModes.VIEW)
   }
 
   mapStateToThis (reduxState) {
@@ -133,6 +133,7 @@ class DataSelectionController {
 
   mapDispatchToTarget (dispatch) {
     return {
+      setSelectedDisplayMode: displayMode => dispatch(PlanActions.setSelectedDisplayMode(displayMode)),
       selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems))
     }
   }

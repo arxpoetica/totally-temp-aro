@@ -391,9 +391,9 @@ class PlanEditorController {
         return this.state.configuration.planEditor.calculateSubnets ? this.rebuildAllTransactionSubnets() : Promise.resolve()
       })
       .catch((err) => {
-      // Log the error, then get out of "plan edit" mode.
-        this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
-        this.$timeout()
+        // Log the error, then get out of "plan edit" mode.
+        this.setSelectedDisplayMode(this.state.displayModes.VIEW)
+        this.$timeout() // I'm not sure if this is needed now that selectedDisplayMode is in react
         console.error(err)
       })
   }
@@ -437,7 +437,6 @@ class PlanEditorController {
 
     // this.currentTransaction = null
     this.state.loadModifiedFeatures(planId)
-    // this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
     this.setSelectedDisplayMode(this.state.displayModes.VIEW)
     this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO
     this.$timeout()

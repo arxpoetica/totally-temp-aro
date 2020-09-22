@@ -1,4 +1,5 @@
 import Constants from '../../common/constants'
+import PlanActions from '../../../react/components/plan/plan-actions'
 
 class ServiceLayerEditorController {
   constructor ($http, $timeout, $ngRedux, state, Utils, tileDataService) {
@@ -131,7 +132,7 @@ class ServiceLayerEditorController {
       })
       .catch((err) => {
         this.discardChanges = false
-        this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
+        this.setSelectedDisplayMode(this.state.displayModes.VIEW)
         this.$timeout()
         console.warn(err)
       })
@@ -227,7 +228,9 @@ class ServiceLayerEditorController {
   }
 
   mapDispatchToTarget (dispatch) {
-    return { }
+    return {
+      setSelectedDisplayMode: displayMode => dispatch(PlanActions.setSelectedDisplayMode(displayMode))
+    }
   }
 
   $onDestroy () {
