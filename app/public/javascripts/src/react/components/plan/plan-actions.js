@@ -510,7 +510,7 @@ function planSettingsToProject (selectedProjectId, dataItems, resourceItems) {
     }
   }
 
-  function selectedDisplayMode (value){
+  function setSelectedDisplayMode (value){
     return dispatch => {
       dispatch({
         type: Actions.PLAN_SET_SELECTED_DISPLAY_MODE,
@@ -549,6 +549,6 @@ export default {
   setProjectMode,
   planSettingsToProject,
   updateDataSourceEditableStatus,
-  selectedDisplayMode,
+  setSelectedDisplayMode,
   activeViewModePanel
 }

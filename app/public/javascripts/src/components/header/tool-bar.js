@@ -582,7 +582,7 @@ class ToolBarController {
       },
       setShowLocationLabels: showLocationLabels => dispatch(ViewSettingsActions.setShowLocationLabels(showLocationLabels)),
       rActiveViewModePanelAction: (value) => dispatch(PlanActions.activeViewModePanel(value)),
-      rSelectedDisplayModeAction: (value) => dispatch(PlanActions.selectedDisplayMode(value))
+      rSelectedDisplayModeAction: (value) => dispatch(PlanActions.setSelectedDisplayMode(value))
     }
   }
 }
