@@ -581,7 +581,7 @@ class ToolBarController {
         dispatch(MapReportsActions.showMapObjects(isVisible))
       },
       setShowLocationLabels: showLocationLabels => dispatch(ViewSettingsActions.setShowLocationLabels(showLocationLabels)),
-      rActiveViewModePanelAction: (value) => dispatch(PlanActions.activeViewModePanel(value)),
+      rActiveViewModePanelAction: (value) => dispatch(PlanActions.setActiveViewModePanel(value)),
       rSelectedDisplayModeAction: (value) => dispatch(PlanActions.setSelectedDisplayMode(value))
     }
   }

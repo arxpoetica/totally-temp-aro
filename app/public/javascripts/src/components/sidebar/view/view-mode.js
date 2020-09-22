@@ -76,7 +76,7 @@ class ViewModeController {
     return {
       setSelectedLocations: locationIds => dispatch(SelectionActions.setLocations(locationIds)),
       clearSelectedLocations: () => dispatch(SelectionActions.setLocations([])),
-      rActiveViewModePanelAction: (value) => dispatch(PlanActions.activeViewModePanel(value))
+      rActiveViewModePanelAction: (value) => dispatch(PlanActions.setActiveViewModePanel(value))
     }
   }
 
