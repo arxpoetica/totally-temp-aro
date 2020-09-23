@@ -1,4 +1,5 @@
 import Constants from '../../common/constants'
+import PlanActions from '../../../react/components/plan/plan-actions'
 
 class ServiceLayerEditorController {
   constructor ($http, $timeout, $ngRedux, state, Utils, tileDataService) {
@@ -70,9 +71,10 @@ class ServiceLayerEditorController {
 
   handleSelectedObjectChanged (mapObject) {
     if (this.currentTransaction == null) return
-    console.log(mapObject)
     if (mapObject != null) {
       this.updateSelectedState(mapObject)
+    } else {
+      this.rActiveViewModePanelAction(this.state.viewModePanels.LOCATION_INFO)
     }
     this.selectedMapObject = mapObject
     this.$timeout()
@@ -154,6 +156,7 @@ class ServiceLayerEditorController {
         this.currentTransaction = null
         this.state.recreateTilesAndCache()
         this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO // Close out this panel
+        this.rActiveViewModePanelAction(this.state.viewModePanels.LOCATION_INFO)
         this.$timeout()
         console.error(err)
       })
@@ -184,6 +187,7 @@ class ServiceLayerEditorController {
             this.discardChanges = true
             this.currentTransaction = null
             this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO // Close out this panel
+            this.rActiveViewModePanelAction(this.state.viewModePanels.LOCATION_INFO)
             this.$timeout()
             console.error(err)
           })
@@ -227,7 +231,9 @@ class ServiceLayerEditorController {
   }
 
   mapDispatchToTarget (dispatch) {
-    return { }
+    return {
+      rActiveViewModePanelAction: (value) => dispatch(PlanActions.activeViewModePanel(value))
+     }
   }
 
   $onDestroy () {
