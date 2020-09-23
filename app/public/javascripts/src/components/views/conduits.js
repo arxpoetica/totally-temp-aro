@@ -38,6 +38,10 @@ class ConduitsController {
       .skip(1)
       .subscribe((newValue) => this.updateMapLayers())
 
+    window.addEventListener('viewSettingsChanged', (newValue) => {
+      this.updateMapLayers()
+    });
+
     this.createdMapLayerKeys = new Set()
 
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
@@ -87,8 +91,8 @@ class ConduitsController {
       drawingOptions: drawingOptions,
       selectable: true,
       zIndex: networkEquipment.zIndex + (existingOrPlannedzIndex || 0),
-      showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection && this.state.showDirectedCable, // Showing Direction
-      highlightStyle: networkEquipment.highlightStyle
+      showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection && (this.state.showDirectedCable || this.rShowDirectedCable), // Showing Direction
+      highlightStyle: networkEquipment.highlightStyle,
     }
   }
 
@@ -151,7 +155,8 @@ class ConduitsController {
       conduitsArray: getConduitsArray(reduxState),
       roadsArray: getRoadsArray(reduxState),
       dataItems: reduxState.plan.dataItems,
-      mapRef: reduxState.map.googleMaps
+      mapRef: reduxState.map.googleMaps,
+      rShowDirectedCable: reduxState.toolbar.showDirectedCable
     }
   }
 

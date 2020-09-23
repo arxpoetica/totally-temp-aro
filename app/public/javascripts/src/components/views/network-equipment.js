@@ -34,6 +34,10 @@ class NetworkEquipmentController {
       .skip(1)
       .subscribe((newValue) => this.updateMapLayers())
 
+    window.addEventListener('viewSettingsChanged', (newValue) => {
+      this.updateMapLayers()
+    });
+
     this.createdMapLayerKeys = new Set()
 
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
@@ -120,7 +124,8 @@ class NetworkEquipmentController {
           (feature.properties.deployment_type === 1) ||
           (feature.properties.is_deleted !== 'true'))
       }
-      if (this.state.showEquipmentLabels && map.getZoom() > this.networkEquipmentLayers.labelDrawingOptions.visibilityZoomThreshold) {
+
+      if ((this.state.showEquipmentLabels || this.rShowEquipmentLabels) && map.getZoom() > this.networkEquipmentLayers.labelDrawingOptions.visibilityZoomThreshold) {
         drawingOptions.labels = this.networkEquipmentLayers.labelDrawingOptions
       }
       subtypes = { ...networkEquipment.subtypes }
@@ -261,7 +266,8 @@ class NetworkEquipmentController {
       equipmentsArray: getEquipmentsArray(reduxState),
       dataItems: reduxState.plan.dataItems,
       showSiteBoundary: reduxState.mapLayers.showSiteBoundary,
-      selectedBoundaryType: reduxState.mapLayers.selectedBoundaryType
+      selectedBoundaryType: reduxState.mapLayers.selectedBoundaryType,
+      rShowEquipmentLabels: reduxState.toolbar.showEquipmentLabels,
     }
   }
 

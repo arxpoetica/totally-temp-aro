@@ -9,7 +9,7 @@ import Rule from './rule'
 
 class MapTileRenderer {
   constructor (tileSize, tileDataService, mapTileOptions, censusCategories, selectedDisplayMode, selectionModes, analysisSelectionMode, stateMapLayers, displayModes,
-    viewModePanels, state, getPixelCoordinatesWithinTile, transactionFeatureIds, mapLayers = []) {
+    viewModePanels, state, getPixelCoordinatesWithinTile, transactionFeatureIds, rShowFiberSize, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
@@ -27,6 +27,7 @@ class MapTileRenderer {
     this.getPixelCoordinatesWithinTile = getPixelCoordinatesWithinTile
     this.latestTileUniqueId = 0
     this.transactionFeatureIds = transactionFeatureIds
+    this.rShowFiberSize = rShowFiberSize
 
     const MAX_CONCURRENT_VECTOR_TILE_RENDERS = 5
     this.tileRenderThrottle = new AsyncPriorityQueue((task, callback) => {
@@ -625,7 +626,7 @@ class MapTileRenderer {
                 }
               }
               
-            } else if (this.state.showFiberSize && feature.properties._data_type === 'fiber' && this.state.viewSetting.selectedFiberOption.id !== 1) {
+            } else if ((this.state.showFiberSize || this.rShowFiberSize) && feature.properties._data_type === 'fiber' && this.state.viewSetting.selectedFiberOption.id !== 1) {
               var selectedFiberOption = this.state.viewSetting.selectedFiberOption
               var viewOption = selectedFiberOption.pixelWidth
               drawingStyles = {

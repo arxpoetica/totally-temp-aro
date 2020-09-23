@@ -92,6 +92,11 @@ class TileComponentController {
       this.refreshMapTiles(tilesToRefresh)
     })
 
+    window.addEventListener('requestMapLayerRefresh', (tilesToRefresh) => { 
+      this.tileDataService.markHtmlCacheDirty(tilesToRefresh.detail)
+      this.refreshMapTiles(tilesToRefresh.detail)
+    });
+
     // If selected census category map changes or gets loaded, set that in the tile data road
     state.censusCategories.subscribe((censusCategories) => {
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
@@ -272,7 +277,8 @@ class TileComponentController {
       this.state.viewModePanels,
       this.state,
       MapUtilities.getPixelCoordinatesWithinTile.bind(this),
-      this.transactionFeatureIds
+      this.transactionFeatureIds,
+      this.rShowFiberSize
     ))
     this.OVERLAY_MAP_INDEX = this.mapRef.overlayMapTypes.getLength() - 1
     //this.state.isShiftPressed = false // make this per-overlay or move it somewhere more global
@@ -688,7 +694,8 @@ class TileComponentController {
       transactionFeatureIds: getTransactionFeatureIds(reduxState),
       networkAnalysisType: reduxState.optimization.networkOptimization.optimizationInputs.analysis_type,
       zoom: reduxState.map.zoom,
-      mapCenter: reduxState.map.mapCenter
+      mapCenter: reduxState.map.mapCenter,
+      rShowFiberSize: reduxState.toolbar.showFiberSize
     }
   }
 

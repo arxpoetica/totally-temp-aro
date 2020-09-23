@@ -198,8 +198,13 @@ export class ToolBar extends Component {
     }
   }
 
+  render () {
+    return this.props.configuration === undefined || this.props.configuration.perspective === undefined
+      ? null
+      : this.renderToolBar()
+  }
 
-  render() {
+  renderToolBar() {
     this.initSearchBox();
 
     const {selectedDisplayMode, activeViewModePanel, isAnnotationsListVisible,
@@ -211,42 +216,56 @@ export class ToolBar extends Component {
       showSiteBoundary, selectedBoundaryType, selectedFiberOption} = this.state
 
     let selectedIndividualLocation = (selectedDisplayMode === this.displayModes.ANALYSIS || selectedDisplayMode === this.displayModes.VIEW) && activeViewModePanel !== this.viewModePanels.EDIT_LOCATIONS
-    let selectedMultipleLocation = (selectedDisplayMode === this.displayModes.ANALYSIS || selectedDisplayMode === this.displayModes.VIEW) && activeViewModePanel !== this.viewModePanels.EDIT_LOCATIONS
+    let selectedMultipleLocation = (selectedDisplayMode === this.displayModes.ANALYSIS || selectedDisplayMode === this.displayModes.VIEW) && activeViewModePanel !== this.viewModePanels.EDIT_LOCATIONS && configuration.perspective.showToolbarButtons.selectionPolygon
     let calculateCoverageBoundry = selectedDisplayMode === this.displayModes.VIEW
-    let exportSelectedPolygon = selectedDisplayMode === this.displayModes.VIEW && activeViewModePanel !== this.viewModePanels.EDIT_LOCATIONS
-    
+    let exportSelectedPolygon = selectedDisplayMode === this.displayModes.VIEW && configuration.perspective.showToolbarButtons.exportSelection && activeViewModePanel !== this.viewModePanels.EDIT_LOCATIONS
+    let isEphemeralPlan = configuration.perspective.showToolbarButtons.ephemeralPlan
+    let isSavePlanAs = configuration.perspective.showToolbarButtons.savePlanAs
+    let isPlanModel = configuration.perspective.showToolbarButtons.planModel
+    let isMeasuringStick = configuration.perspective.showToolbarButtons.measuringStick
+    let isViewSettings = configuration.perspective.showToolbarButtons.viewSettings
+
     return(
       <div className="tool-bar" style={{margin: '10px'}}>
 
-        <img src="images/logos/aro/logo_navbar.png" className="no-collapse" style={{alignSelf: 'center', paddingLeft: '10px', paddingRight: '10px'}}/>
+        {configuration.ARO_CLIENT !== 'frontier' &&
+          <img src="images/logos/aro/logo_navbar.png" className="no-collapse" style={{alignSelf: 'center', paddingLeft: '10px', paddingRight: '10px'}}/>
+        }
+
+        {configuration.ARO_CLIENT === 'frontier' &&
+          <span style={{alignSelf: 'center', paddingLeft: '10px', paddingRight: '10px'}}><b>NPM BSA</b></span>
+        }
 
         <div className="no-collapse" id="global-search-toolbutton" style={{flex: '0 0 250px', margin: 'auto', width: '250px'}}>
           <input className="form-control select2" style={{padding:'0px', borderRadius: '0px'}} type="text" placeholder="Search an address, city, or state"/>
         </div>
-
         <div className="fa fa-search no-collapse" style={{paddingLeft: '10px', paddingRight: '10px', margin: 'auto', color: '#eee'}}></div>
 
         <div className="separator no-collapse"></div>
 
-        <GlobalSettingsButton/>
+        {configuration.perspective.showToolbarButtons.globalSettings &&
+          <GlobalSettingsButton/>
+        }
 
         <div className="separator"></div>
 
-        <button className="btn" title="Create a new plan">
+        <button className="btn" title="Create a new plan" style={{ display: isEphemeralPlan ? 'block' : 'none' }}>
           <i className="fa fa-file"></i>
         </button>
 
-        <button className="btn" onClick={(e) => this.savePlanAs()}  title="Save plan as...">
+        <button className="btn" title="Save plan as..." style={{ display: isSavePlanAs ? 'block' : 'none' }}
+          onClick={(e) => this.savePlanAs()}>
           <i className="far fa-save"></i>
         </button>
 
-        <button className="btn" title="Open an existing plan..." onClick={(e) => this.openViewModeExistingPlan()}>
+        <button className="btn" title="Open an existing plan..." style={{ display: isPlanModel ? 'block' : 'none' }}
+          onClick={(e) => this.openViewModeExistingPlan()}>
           <i className="fa fa-folder-open"></i>
         </button>
 
         <div className="separator"></div>
 
-        <div className="rulerDropdown">
+        <div className="rulerDropdown" style={{ display: isMeasuringStick ? 'block' : 'none' }}>
           <button className={`btn ${isRulerEnabled ? 'btn-selected' : ''}`}
             type="button" onClick={(e) => this.rulerAction(e)}
             aria-haspopup="true" aria-expanded="false" title="Ruler">
@@ -271,6 +290,7 @@ export class ToolBar extends Component {
 
         <div className="myDropdown1">
           <button className={`btn ${isViewSettingsEnabled ? 'btn-selected' : ''}`}
+            style={{ display: isViewSettings ? 'block' : 'none' }}
             type="button" onClick={(e) => this.viewSettingsAction(e)}
             aria-haspopup="true" aria-expanded="false" title="Show view settings...">
             <i className="fa fa-eye"></i>
@@ -299,7 +319,7 @@ export class ToolBar extends Component {
             <font>Location Labels</font>
 
             {/* Site Boundaries */}
-            {/* {configuration.toolbar.showSiteBoundaries && */}
+            {configuration.toolbar.showSiteBoundaries && configuration.toolbar !== undefined &&
             <>
               <div className="dropdown-divider"></div>
               <input type="checkbox" className="checkboxfill" checked={showSiteBoundary} name="ctype-name" style={{marginLeft: '2px'}}
@@ -314,21 +334,31 @@ export class ToolBar extends Component {
                 </select>
               }
             </>
-            {/* } */}
+            }
 
             {/* Directed Cable */}
+            {configuration.toolbar.showDirectedCables && configuration.toolbar !== undefined &&
+            <>
               <div className="dropdown-divider"></div>
               <input type="checkbox" className="checkboxfill" checked={showDirectedCable} name="ctype-name" style={{marginLeft: '2px'}}
                 onChange={(e)=> this.showCableDirection(e)}/>
               <font>Directed Cable</font>
+            </>
+            }
 
-              {/* Site Labels */}
+            {/* Site Labels */}
+            {configuration.perspective.viewSettings.showSiteLabels &&
+            <>
               <div className="dropdown-divider"></div>
               <input type="checkbox" className="checkboxfill" checked={showEquipmentLabels} name="ctype-name" style={{marginLeft: '2px'}}
                 onChange={(e)=> this.showEquipmentLabelsChanged(e)}/>
               <font>Site Labels</font>
+            </>
+            }
 
-              {/* Fiber Size */}
+            {/* Fiber Size */}
+            {configuration.perspective.viewSettings.showFiberSize &&
+            <>
               <div className="dropdown-divider"></div>
               <input type="checkbox" className="checkboxfill" checked={showFiberSize} name="ctype-name" style={{marginLeft: '2px'}}
                 onChange={(e)=> this.setShowFiberSize(e)}/>
@@ -341,8 +371,8 @@ export class ToolBar extends Component {
                   )}
                 </select>
               }
-
-
+            </>
+            }
           </div>
         </div>
 
@@ -380,19 +410,23 @@ export class ToolBar extends Component {
 
         <div className="separator"></div>
 
-        <button style={{ display: calculateCoverageBoundry ? 'block' : 'none' }} 
-          className={`btn ${selectedTargetSelectionMode === this.targetSelectionModes.COVERAGE_BOUNDARY && activeViewModePanel === this.viewModePanels.COVERAGE_BOUNDARY  ? 'btn-selected' : ''} ${calculateCoverageBoundry === true ? 'ng-hide-remove' : 'ng-hide-add'}`}
-          onClick={(e) => this.openViewModeCoverageBoundry()}
-          title="Calculate coverage boundary">
-          <i className="fa fa-crosshairs fa-rotate-180"></i>
-        </button>
+        {configuration.perspective.showToolbarButtons.openCoverageBoundary &&
+          <button style={{ display: calculateCoverageBoundry ? 'block' : 'none' }} 
+            className={`btn ${selectedTargetSelectionMode === this.targetSelectionModes.COVERAGE_BOUNDARY && activeViewModePanel === this.viewModePanels.COVERAGE_BOUNDARY  ? 'btn-selected' : ''} ${calculateCoverageBoundry === true ? 'ng-hide-remove' : 'ng-hide-add'}`}
+            onClick={(e) => this.openViewModeCoverageBoundry()}
+            title="Calculate coverage boundary">
+            <i className="fa fa-crosshairs fa-rotate-180"></i>
+          </button>
+        }
         
-        <button style={{ display: exportSelectedPolygon ? 'block' : 'none' }}
-          className={`btn ${selectedTargetSelectionMode === this.targetSelectionModes.POLYGON_EXPORT_TARGET ? 'btn-selected' : ''} ${exportSelectedPolygon === true ? 'ng-hide-remove' : 'ng-hide-add'}`}
-          onClick={(e) => this.setSelectionExport()}
-          title="Export selected polygon">
-          <i className="fa fa-cube"></i>
-        </button>
+        {exportSelectedPolygon &&
+          <button
+            className={`btn ${selectedTargetSelectionMode === this.targetSelectionModes.POLYGON_EXPORT_TARGET ? 'btn-selected' : ''} ${exportSelectedPolygon === true ? 'ng-hide-remove' : 'ng-hide-add'}`}
+            onClick={(e) => this.setSelectionExport()}
+            title="Export selected polygon">
+            <i className="fa fa-cube"></i>
+          </button>
+        }
 
         <button className="btn" title="Show RFP status" 
           onClick={(e) => this.showRfpWindow()}>
@@ -405,12 +439,14 @@ export class ToolBar extends Component {
 
   onChangeSelectedFiberOption (e) {
     this.setState({selectedFiberOption: e.target.value})
-    // this.state.requestMapLayerRefresh.next(null)
+    var event = new CustomEvent('requestMapLayerRefresh', { detail : null});
+    window.dispatchEvent(event);
   }
 
   setShowFiberSize () {
     this.props.setShowFiberSize(!this.props.showFiberSize)
-    // this.state.requestMapLayerRefresh.next(null)
+    var event = new CustomEvent('requestMapLayerRefresh', { detail : null});
+    window.dispatchEvent(event);
   }
 
   showLocationLabelsChanged () {
@@ -419,13 +455,17 @@ export class ToolBar extends Component {
 
   showEquipmentLabelsChanged () {
     this.props.setShowEquipmentLabelsChanged(!this.props.showEquipmentLabels)
-    // this.state.viewSettingsChanged.next()
-    // this.state.requestMapLayerRefresh.next(null)
+    var ViewEvent = new CustomEvent('viewSettingsChanged');
+    window.dispatchEvent(ViewEvent);
+
+    var event = new CustomEvent('requestMapLayerRefresh', { detail : null});
+    window.dispatchEvent(event);
   }
 
   showCableDirection () {
     this.props.setShowDirectedCable(!this.props.showDirectedCable)
-    //this.state.viewSettingsChanged.next()
+    var ViewEvent = new CustomEvent('viewSettingsChanged');
+    window.dispatchEvent(ViewEvent);
   }
 
   onChangeSiteBoundaries (e) {
@@ -442,7 +482,8 @@ export class ToolBar extends Component {
 
   toggleSiteBoundary (e) {
     this.setState({showSiteBoundary: !this.state.showSiteBoundary})
-    //this.state.viewSettingsChanged.next() // This will also refresh the map layer
+    var ViewEvent = new CustomEvent('viewSettingsChanged');
+    window.dispatchEvent(ViewEvent); // This will also refresh the map layer
   }
 
   viewSettingsAction () {
@@ -454,7 +495,8 @@ export class ToolBar extends Component {
     this.setState({heatMapOption: !this.state.heatMapOption}, function() {
       var newMapTileOptions = angular.copy(this.mapTileOptions)
       newMapTileOptions.selectedHeatmapOption = this.state.heatMapOption ? this.viewSetting.heatmapOptions[0] : this.viewSetting.heatmapOptions[2]
-      //this.state.mapTileOptions.next(newMapTileOptions)
+      var event = new CustomEvent('mapTileOptions', { detail : newMapTileOptions});
+      window.dispatchEvent(event);
     })
   }
 
@@ -462,7 +504,8 @@ export class ToolBar extends Component {
     this.setState({sliderValue: e.target.value}, function() {
       var newMapTileOptions = angular.copy(this.mapTileOptions)
       newMapTileOptions.heatMap.worldMaxValue = this.rangeValues[this.state.sliderValue]
-      //this.state.mapTileOptions.next(newMapTileOptions)
+      var event = new CustomEvent('mapTileOptions', { detail : newMapTileOptions});
+      window.dispatchEvent(event);
     })
   }
 

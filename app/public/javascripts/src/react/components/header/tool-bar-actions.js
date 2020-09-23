@@ -20,7 +20,6 @@ function selectedDisplayMode (value){
 }
 
 function activeViewModePanel (value){
-  console.log(value)
   return dispatch => {
     dispatch({
       type: Actions.TOOL_BAR_SET_ACTIVE_VIEW_MODE_PANEL,

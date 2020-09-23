@@ -11,6 +11,10 @@ class ViewSettingsController {
     // Map tile settings used for debugging
     this.state.mapTileOptions
       .subscribe((mapTileOptions) => this.mapTileOptions = angular.copy(mapTileOptions))
+
+    window.addEventListener('mapTileOptions', (mapTileOptions) => {
+      this.mapTileOptions = angular.copy(mapTileOptions.detail)
+    });
   }
 
   fiberOptionChanged () {
