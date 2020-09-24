@@ -45,7 +45,7 @@ class TileComponentController {
   // fillStyle: (Optional) For polygon features, this is the fill color
   // opacity: (Optional, default 1.0) This is the maximum opacity of anything drawn on the map layer. Aggregate layers will have features of varying opacity, but none exceeding this value
 
-  constructor ($window, $document, $timeout, $ngRedux, state, tileDataService, contextMenuService, Utils, $scope) {
+  constructor ($window, $document, $timeout, $ngRedux, state, tileDataService, contextMenuService, Utils, $scope, rState) {
     this.layerIdToMapTilesIndex = {}
     this.mapRef = null // Will be set in $document.ready()
     this.$window = $window
@@ -86,15 +86,22 @@ class TileComponentController {
       }
     })
 
+    // Subscribe to changes in the map tile options
+    rState.mapTileOptions.getMessage().subscribe((mapTileOptions) => {
+      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
+        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setMapTileOptions(mapTileOptions)
+      }
+    }) 
+
     // Redraw map tiles when requestd
     state.requestMapLayerRefresh.subscribe((tilesToRefresh) => {
       this.tileDataService.markHtmlCacheDirty(tilesToRefresh)
       this.refreshMapTiles(tilesToRefresh)
     })
 
-    window.addEventListener('requestMapLayerRefresh', (tilesToRefresh) => { 
-      this.tileDataService.markHtmlCacheDirty(tilesToRefresh.detail)
-      this.refreshMapTiles(tilesToRefresh.detail)
+    rState.requestMapLayerRefresh.getMessage().subscribe((tilesToRefresh) => {
+      this.tileDataService.markHtmlCacheDirty(tilesToRefresh)
+      this.refreshMapTiles(tilesToRefresh)
     });
 
     // If selected census category map changes or gets loaded, set that in the tile data road
@@ -789,7 +796,7 @@ class TileComponentController {
   
 }
 
-TileComponentController.$inject = ['$window', '$document', '$timeout', '$ngRedux', 'state','tileDataService', 'contextMenuService', 'Utils', '$scope']
+TileComponentController.$inject = ['$window', '$document', '$timeout', '$ngRedux', 'state','tileDataService', 'contextMenuService', 'Utils', '$scope', 'rState']
 
 let tile = {
   template: '',

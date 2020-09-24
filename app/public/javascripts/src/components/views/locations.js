@@ -18,7 +18,7 @@ const getOrderedLocationFilters = createSelector([getAllLocationFilters], locati
 
 
 class LocationsController {
-  constructor ($rootScope, $location, $timeout, $ngRedux, map_tools, state) {
+  constructor ($rootScope, $location, $timeout, $ngRedux, map_tools, state, rState) {
     this.$location = $location
     this.$timeout = $timeout
     this.map_tools = map_tools
@@ -54,6 +54,11 @@ class LocationsController {
     // Update map layers when the heatmap options change
     state.mapTileOptions
       .subscribe((newValue) => this.updateMapLayers())
+      
+    // Update map layers when the heatmap options change
+    rState.mapTileOptions.getMessage().subscribe((mapTileOptions) => {
+      this.updateMapLayers()
+    })       
 
     // Update map layers when the display mode button changes
     state.selectedDisplayMode.subscribe((newValue) => this.updateMapLayers())
@@ -63,6 +68,8 @@ class LocationsController {
       drawingMode: google.maps.drawing.OverlayType.POLYLINE,
       drawingControl: false
     })
+
+    console.log()
 
     this.drawingManager.addListener('overlaycomplete', (e) => {
       removeLatestOverlay()
@@ -257,6 +264,9 @@ class LocationsController {
                 v2Filters: v2Filters
               }
 
+              console.log(mapLayerProps)
+
+
               if (this.showLocationLabels) { // && map.getZoom() > this.networkEquipmentLayers.labelDrawingOptions.visibilityZoomThreshold
                 mapLayerProps.drawingOptions = drawingOptions
               }
@@ -351,7 +361,7 @@ class LocationsController {
   }
 }
 
-LocationsController.$inject = ['$rootScope', '$location', '$timeout', '$ngRedux', 'map_tools', 'state']
+LocationsController.$inject = ['$rootScope', '$location', '$timeout', '$ngRedux', 'map_tools', 'state', 'rState']
 
 let locations = {
   templateUrl: '/components/views/locations.html',

@@ -16,10 +16,13 @@ import AroHttp from '../../common/aro-http'
 import { createSelector } from 'reselect'
 import MapLayerActions from '../map-layers/map-layer-actions'
 import ViewSettingsActions from '../view-settings/view-settings-actions'
+import rState from '../../common/rState'
 
 export class ToolBar extends Component {
   constructor (props) {
     super(props)
+
+    this.rState = new rState();
 
     this.viewModePanels = Object.freeze({
       LOCATION_INFO: 'LOCATION_INFO',
@@ -122,6 +125,7 @@ export class ToolBar extends Component {
     }
     this.rangeValues.reverse()
     this.max = this.rangeValues.length - 1
+    this.min = 0
 
     this.viewFiberOptions = [
       {
@@ -206,6 +210,7 @@ export class ToolBar extends Component {
 
   renderToolBar() {
     this.initSearchBox();
+    this.refreshSlidertrack()
 
     const {selectedDisplayMode, activeViewModePanel, isAnnotationsListVisible,
        isMapReportsVisible, showMapReportMapObjects, selectedTargetSelectionMode,
@@ -307,7 +312,7 @@ export class ToolBar extends Component {
                 <font>Heatmap Intensity</font>
                 <div style={{padding: '0px 10px'}}>
                   <input type="range" min={this.min} max={this.max} value={sliderValue} className="aro-slider"
-                    onChange={(e)=> this.changeHeatMapOptions(e)}/>
+                    onChange={(e)=> {this.changeHeatMapOptions(e); this.refreshSlidertrack()}}/>
                 </div>
               </>
             }
@@ -439,14 +444,12 @@ export class ToolBar extends Component {
 
   onChangeSelectedFiberOption (e) {
     this.setState({selectedFiberOption: e.target.value})
-    var event = new CustomEvent('requestMapLayerRefresh', { detail : null});
-    window.dispatchEvent(event);
+    this.rState.requestMapLayerRefresh.sendMessage(null)
   }
 
   setShowFiberSize () {
     this.props.setShowFiberSize(!this.props.showFiberSize)
-    var event = new CustomEvent('requestMapLayerRefresh', { detail : null});
-    window.dispatchEvent(event);
+    this.rState.requestMapLayerRefresh.sendMessage(null)
   }
 
   showLocationLabelsChanged () {
@@ -455,17 +458,13 @@ export class ToolBar extends Component {
 
   showEquipmentLabelsChanged () {
     this.props.setShowEquipmentLabelsChanged(!this.props.showEquipmentLabels)
-    var ViewEvent = new CustomEvent('viewSettingsChanged');
-    window.dispatchEvent(ViewEvent);
-
-    var event = new CustomEvent('requestMapLayerRefresh', { detail : null});
-    window.dispatchEvent(event);
+    this.rState.viewSettingsChanged.sendMessage()
+    this.rState.requestMapLayerRefresh.sendMessage(null)
   }
 
   showCableDirection () {
     this.props.setShowDirectedCable(!this.props.showDirectedCable)
-    var ViewEvent = new CustomEvent('viewSettingsChanged');
-    window.dispatchEvent(ViewEvent);
+    this.rState.viewSettingsChanged.sendMessage()
   }
 
   onChangeSiteBoundaries (e) {
@@ -482,8 +481,7 @@ export class ToolBar extends Component {
 
   toggleSiteBoundary (e) {
     this.setState({showSiteBoundary: !this.state.showSiteBoundary})
-    var ViewEvent = new CustomEvent('viewSettingsChanged');
-    window.dispatchEvent(ViewEvent); // This will also refresh the map layer
+    this.rState.viewSettingsChanged.sendMessage() // This will also refresh the map layer
   }
 
   viewSettingsAction () {
@@ -495,8 +493,8 @@ export class ToolBar extends Component {
     this.setState({heatMapOption: !this.state.heatMapOption}, function() {
       var newMapTileOptions = angular.copy(this.mapTileOptions)
       newMapTileOptions.selectedHeatmapOption = this.state.heatMapOption ? this.viewSetting.heatmapOptions[0] : this.viewSetting.heatmapOptions[2]
-      var event = new CustomEvent('mapTileOptions', { detail : newMapTileOptions});
-      window.dispatchEvent(event);
+      this.rState.mapTileOptions.sendMessage(newMapTileOptions) // This will also refresh the map layer
+      this.refreshSlidertrack()
     })
   }
 
@@ -504,9 +502,18 @@ export class ToolBar extends Component {
     this.setState({sliderValue: e.target.value}, function() {
       var newMapTileOptions = angular.copy(this.mapTileOptions)
       newMapTileOptions.heatMap.worldMaxValue = this.rangeValues[this.state.sliderValue]
-      var event = new CustomEvent('mapTileOptions', { detail : newMapTileOptions});
-      window.dispatchEvent(event);
+      this.rState.mapTileOptions.sendMessage(newMapTileOptions) // This will also refresh the map layer
     })
+  }
+
+  refreshSlidertrack () {
+    var val = (this.state.sliderValue - this.min) / (this.max - this.min)
+    jQuery('.myDropdown1 input[type="range"]').css('background-image',
+      '-webkit-gradient(linear, left top, right top, ' +
+      'color-stop(' + val + ', #1f7de6), ' +
+      'color-stop(' + val + ', #C5C5C5)' +
+      ')'
+    )
   }
 
   rulerAction (e) {

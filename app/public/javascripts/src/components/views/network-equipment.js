@@ -14,7 +14,7 @@ const getEquipmentsArray = createSelector([getAllNetworkEquipmentLayers], networ
 })
 
 class NetworkEquipmentController {
-  constructor($rootScope, $http, $location, $ngRedux, map_tools, state) {
+  constructor($rootScope, $http, $location, $ngRedux, map_tools, state,rState) {
     this.map_tools = map_tools
     this.state = state
     this.currentUser = state.loggedInUser
@@ -34,9 +34,10 @@ class NetworkEquipmentController {
       .skip(1)
       .subscribe((newValue) => this.updateMapLayers())
 
-    window.addEventListener('viewSettingsChanged', (newValue) => {
+    // Update map layers when the dataItems property of state changes
+    rState.viewSettingsChanged.getMessage().skip(1).subscribe((data) => {
       this.updateMapLayers()
-    });
+    }) 
 
     this.createdMapLayerKeys = new Set()
 
@@ -310,7 +311,7 @@ class NetworkEquipmentController {
   }
 }
 
-NetworkEquipmentController.$inject = ['$rootScope', '$http', '$location', '$ngRedux', 'map_tools', 'state']
+NetworkEquipmentController.$inject = ['$rootScope', '$http', '$location', '$ngRedux', 'map_tools', 'state', 'rState']
 
 let networkEquipment = {
   templateUrl: '/components/views/network-equipment.html',

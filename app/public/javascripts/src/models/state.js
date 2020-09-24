@@ -1572,7 +1572,6 @@ class State {
           config.appConfiguration.networkEquipment.conduits = filteredConduits
 
           service.configuration = config.appConfiguration
-          service.setAppConfiguration(service.configuration) // Require in tool-bar.jsx
           service.setLocationFilters(service.configuration.locationCategories.filters)
           service.googleMapsLicensing = config.googleMapsLicensing
           service.enumStrings = config.enumStrings
@@ -1588,7 +1587,7 @@ class State {
           }
           service.configuration.loadPerspective(config.user.perspective)
           service.setNetworkEquipmentLayers(service.configuration.networkEquipment)
-
+          service.setAppConfiguration(service.configuration) // Require in tool-bar.jsx
           return service.setLoggedInUser(config.user, initialState)
         })
         .then(() => {

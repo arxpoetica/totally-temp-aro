@@ -1,5 +1,5 @@
 class ViewSettingsController {
-  constructor (state, tileDataService) {
+  constructor (state, tileDataService, rState) {
     this.state = state
     this.tileDataService = tileDataService
 
@@ -12,9 +12,10 @@ class ViewSettingsController {
     this.state.mapTileOptions
       .subscribe((mapTileOptions) => this.mapTileOptions = angular.copy(mapTileOptions))
 
-    window.addEventListener('mapTileOptions', (mapTileOptions) => {
-      this.mapTileOptions = angular.copy(mapTileOptions.detail)
-    });
+    // Map tile settings used for debugging
+    rState.mapTileOptions.getMessage().subscribe((mapTileOptions) => {
+      this.mapTileOptions = angular.copy(mapTileOptions)
+    }) 
   }
 
   fiberOptionChanged () {
@@ -40,7 +41,7 @@ class ViewSettingsController {
   }
 }
 
-ViewSettingsController.$inject = ['state', 'tileDataService']
+ViewSettingsController.$inject = ['state', 'tileDataService', 'rState']
 
 let viewSettings = {
   templateUrl: '/components/sidebar/debug/view-settings.html',
