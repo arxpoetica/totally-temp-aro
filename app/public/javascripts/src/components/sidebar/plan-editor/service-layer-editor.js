@@ -1,4 +1,5 @@
 import Constants from '../../common/constants'
+import ToolBarActions from '../../../react/components/header/tool-bar-actions'
 
 class ServiceLayerEditorController {
   constructor ($http, $timeout, $ngRedux, state, Utils, tileDataService) {
@@ -154,6 +155,7 @@ class ServiceLayerEditorController {
         this.currentTransaction = null
         this.state.recreateTilesAndCache()
         this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO // Close out this panel
+        this.rActiveViewModePanelAction(this.state.viewModePanels.LOCATION_INFO)
         this.$timeout()
         console.error(err)
       })
@@ -184,6 +186,7 @@ class ServiceLayerEditorController {
             this.discardChanges = true
             this.currentTransaction = null
             this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO // Close out this panel
+            this.rActiveViewModePanelAction(this.state.viewModePanels.LOCATION_INFO)
             this.$timeout()
             console.error(err)
           })
@@ -227,7 +230,9 @@ class ServiceLayerEditorController {
   }
 
   mapDispatchToTarget (dispatch) {
-    return { }
+    return {
+      rActiveViewModePanelAction: (value) => dispatch(ToolBarActions.activeViewModePanel(value))
+     }
   }
 
   $onDestroy () {

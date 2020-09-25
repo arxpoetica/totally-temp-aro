@@ -13,6 +13,8 @@ import SelectionModes from '../../react/components/selection/selection-modes'
 import MenuAction, { MenuActionTypes } from '../common/context-menu/menu-action'
 import MenuItem, { MenuItemTypes } from '../common/context-menu/menu-item'
 import FeatureSets from '../../react/common/featureSets'
+import ToolBarActions from '../../react/components/header/tool-bar-actions'
+
 
 const getTransactionFeatures = reduxState => reduxState.planEditor.features
 const getTransactionFeatureIds = createSelector([getTransactionFeatures], transactionFeatures => {
@@ -213,7 +215,7 @@ class TileComponentController {
           // ToDo: need to combine this with the overlayClickListener below
           var canSelectLoc = true
           var canSelectSA = true
-          if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.ANALYSIS) {
+          if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.ANALYSIS || this.rSelectedDisplayMode === this.state.displayModes.ANALYSIS) {
             if (this.activeSelectionModeId != SelectionModes.SELECTED_LOCATIONS) {
               canSelectLoc = false
             }
@@ -310,9 +312,9 @@ class TileComponentController {
       .then((hitFeatures) => {
         this.state.mapFeaturesRightClickedEvent.next(hitFeatures)
       })
-      
-      if (this.state.selectedDisplayMode.getValue() != this.state.displayModes.VIEW  ||
-          this.state.activeViewModePanel == this.state.viewModePanels.EDIT_SERVICE_LAYER
+
+      if ((this.state.selectedDisplayMode.getValue() != this.state.displayModes.VIEW && this.rSelectedDisplayMode != this.state.displayModes.VIEW)  ||
+          (this.state.activeViewModePanel == this.state.viewModePanels.EDIT_SERVICE_LAYER && this.rActiveViewModePanel == this.state.viewModePanels.EDIT_SERVICE_LAYER)
       ) return
 
       this.getFilteredFeaturesUnderLatLng(event.latLng)
@@ -491,6 +493,11 @@ class TileComponentController {
               fiberFeatures.add(result)
             }
           })
+          
+          // To open Location info in View-Mode While Edit-Service layers serviceAreas is Empty
+          if(serviceAreas.length === 0 ) {
+            this.rActiveViewModePanelAction(this.state.viewModePanels.LOCATION_INFO)
+          }
 
           // ToDo: formalize this
           // var hitFeatures = new FeatureSets() // need to import the class BUT it's over in React land, ask Parag
@@ -520,7 +527,7 @@ class TileComponentController {
           var canSelectLoc = false
           var canSelectSA = false
 
-          if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.ANALYSIS) {
+          if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.ANALYSIS || this.rSelectedDisplayMode === this.state.displayModes.ANALYSIS) {
             switch (this.activeSelectionModeId) {
               case SelectionModes.SELECTED_AREAS:
                 canSelectSA = !canSelectSA
@@ -532,19 +539,19 @@ class TileComponentController {
             if (this.networkAnalysisType === 'RFP') {
               canSelectLoc = canSelectSA = false // Do not allow any selection for RFP mode
             }
-          } else if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.VIEW) {
+          } else if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.VIEW || this.rSelectedDisplayMode === this.state.displayModes.VIEW) {
             canSelectSA = true
           }
           
           // filter the lists 
           if (!canSelectLoc &&
-            this.state.selectedDisplayMode.getValue() !== this.state.displayModes.VIEW) {
+            this.state.selectedDisplayMode.getValue() !== this.state.displayModes.VIEW || this.rSelectedDisplayMode === this.state.displayModes.VIEW) {
             hitFeatures.locations = []
           }
           if (!canSelectSA) {
             hitFeatures.serviceAreas = []
           }
-          if (this.state.selectedDisplayMode.getValue() !== this.state.displayModes.VIEW) {
+          if (this.state.selectedDisplayMode.getValue() !== this.state.displayModes.VIEW || this.rSelectedDisplayMode === this.state.displayModes.VIEW) {
             hitFeatures.censusFeatures = []
           }
           
@@ -702,12 +709,16 @@ class TileComponentController {
       networkAnalysisType: reduxState.optimization.networkOptimization.optimizationInputs.analysis_type,
       zoom: reduxState.map.zoom,
       mapCenter: reduxState.map.mapCenter,
-      rShowFiberSize: reduxState.toolbar.showFiberSize
+      rShowFiberSize: reduxState.toolbar.showFiberSize,
+      rSelectedDisplayMode: reduxState.toolbar.rSelectedDisplayMode,
+      rActiveViewModePanel: reduxState.toolbar.rActiveViewModePanel,
     }
   }
 
   mapDispatchToTarget (dispatch) {
-    return { }
+    return {
+      rActiveViewModePanelAction: (value) => dispatch(ToolBarActions.activeViewModePanel(value))
+     }
   }
 
   mergeToTarget (nextState, actions) {
