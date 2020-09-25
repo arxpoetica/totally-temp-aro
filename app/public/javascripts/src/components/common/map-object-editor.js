@@ -723,6 +723,15 @@ class MapObjectEditorController {
       })
     })
 
+    /*
+    console.log(polygonPath)
+    var lastI = polygonPath.length - 1
+    if (polygonPath[0].lat === polygonPath[lastI].lat && polygonPath[0].lng === polygonPath[lastI].lng) {
+      console.log('no need for a closed polygon')
+      polygonPath.pop()
+    }
+    */
+
     var polygon = new google.maps.Polygon({
       objectId: feature.objectId, // Not used by Google Maps
       paths: polygonPath,
@@ -756,6 +765,16 @@ class MapObjectEditorController {
           lng: polygonVertex[0] // Note array index
         })
       })
+
+      /*
+      console.log(dPath)
+      var lastI = dPath.length - 1
+      if (dPath[0].lat === dPath[lastI].lat && dPath[0].lng === dPath[lastI].lng) {
+        console.log('no need for a closed polygon')
+        dPath.pop()
+      }
+      */
+
       polygonPaths.push(dPath)
     })
 
@@ -824,7 +843,6 @@ class MapObjectEditorController {
         })
       } else if (feature.geometry.type === 'MultiPolygon') {
         mapObject = this.createMultiPolygonMapObject(feature)
-        console.log(feature.geometry)
       }
 
       // Set up listeners on the map object
@@ -861,80 +879,14 @@ class MapObjectEditorController {
       
       var mapObjectPaths = mapObject.getPaths()
       google.maps.event.addListener(mapObject, 'rightclick', event => {
-        console.log(mapObjectPaths.getAt(event.path))
         if (event.vertex === undefined) {
           return
         }
         this.deleteMenu.open(this.mapRef, mapObjectPaths.getAt(event.path), event.vertex)
       })
-      
-
-
-
-      /*
-      google.maps.event.addListener(mapObject, 'dragend', function () {
-        // self.onModifyObject && self.onModifyObject({mapObject})
-        self.modifyObject(mapObject)
-      })
-      */
-     /*
-    } else if (feature.geometry.type === 'MultiPolygon') {
-      mapObject = this.createMultiPolygonMapObject(feature)
-      // Set up listeners on the map object
-      mapObject.addListener('click', (event) => {
-        // Select this map object
-        this.selectMapObject(mapObject)
-      })
-      var self = this
-      mapObject.getPaths().forEach(function (path, index) {
-        google.maps.event.addListener(path, 'insert_at', function () {
-          self.modifyObject(mapObject)
-        })
-        google.maps.event.addListener(path, 'remove_at', function () {
-          self.modifyObject(mapObject)
-        })
-        google.maps.event.addListener(path, 'set_at', function () {
-          if (!self.isClosedPath(path)) {
-            // IMPORTANT to check if it is already a closed path, otherwise we will get into an infinite loop when trying to keep it closed
-            if (index === 0) {
-              // The first point has been moved, move the last point of the polygon (to keep it a valid, closed polygon)
-              path.setAt(0, path.getAt(path.length - 1))
-              self.modifyObject(mapObject)
-            } else if (index === path.length - 1) {
-              // The last point has been moved, move the first point of the polygon (to keep it a valid, closed polygon)
-              path.setAt(path.length - 1, path.getAt(0))
-              self.modifyObject(mapObject)
-            }
-          } else {
-            self.modifyObject(mapObject)
-          }
-        })
-      })
-      // google.maps.event.addListener(mapObject, 'dragend', function(){
-      //   self.onModifyObject && self.onModifyObject({mapObject})
-      // });
-    */
     } else {
       throw `createMapObject() not supported for geometry type ${feature.geometry.type}`
     }
-
-
-
-
-/*
-    // for test - once it works we'll fix the above
-    var mapObjectPath = mapObject.getPath()
-    google.maps.event.addListener(mapObject, 'rightclick', event => {
-      if (event.vertex === undefined) {
-        return
-      }
-      this.deleteMenu.open(this.mapRef, mapObjectPath, event.vertex)
-    })
-*/
-
-
-
-
 
     mapObject.addListener('rightclick', (event) => {
       if (typeof event === 'undefined') return
@@ -1052,7 +1004,6 @@ class MapObjectEditorController {
       featurePromise = this.state.StateViewMode.loadEntityList(this.$http, this.state, this.dataItems, 'ServiceAreaView', serviceArea.id, 'id,code,name,sourceId,geom', 'id')
         .then((result) => {
           // check for empty object, reject on true
-          console.log(result)
           if (!result[0] || !result[0].geom) {
             return Promise.reject(`object: ${serviceArea.object_id} may have been deleted`)
           }
@@ -1273,7 +1224,6 @@ class MapObjectEditorController {
         isExistingObject: false
       }
       event.overlay.getPaths().forEach((path) => {
-        console.log(path)
         var pathPoints = []
         path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
         pathPoints.push(pathPoints[0]) // Close the polygon
