@@ -203,8 +203,8 @@ class DataSourceUploadController {
           this.addDatasource(result)
           // Put the application in "Edit Service Layer" mode
           this.selectDataItems('service_layer', [result])
-          this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
           this.state.activeViewModePanel = this.state.viewModePanels.EDIT_SERVICE_LAYER
+          this.setSelectedDisplayMode(this.state.displayModes.VIEW)
           this.state.loadServiceLayers()
         })
       // Draw the layer by entering edit mode
@@ -425,6 +425,7 @@ class DataSourceUploadController {
 
   mapDispatchToTarget (dispatch) {
     return {
+      setSelectedDisplayMode: displayMode => dispatch(PlanActions.setSelectedDisplayMode(displayMode)),
       selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems)),
       setAllLibraryItems: (dataItemKey, allLibraryItems) => dispatch(PlanActions.setAllLibraryItems(dataItemKey, allLibraryItems)),
       loadEtlTemplatesFromServer: (dataType) => dispatch(EtlTemplateActions.loadEtlTemplatesFromServer(dataType)),

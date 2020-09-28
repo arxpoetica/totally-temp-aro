@@ -140,7 +140,7 @@ class ServiceLayerEditorController {
       })
       .catch((err) => {
         this.discardChanges = false
-        this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
+        this.setSelectedDisplayMode(this.state.displayModes.VIEW)
         this.$timeout()
         console.warn(err)
       })
@@ -239,8 +239,9 @@ class ServiceLayerEditorController {
 
   mapDispatchToTarget (dispatch) {
     return {
+      setSelectedDisplayMode: displayMode => dispatch(PlanActions.setSelectedDisplayMode(displayMode)),
       rActiveViewModePanelAction: (value) => dispatch(PlanActions.activeViewModePanel(value))
-     }
+    }
   }
 
   $onDestroy () {

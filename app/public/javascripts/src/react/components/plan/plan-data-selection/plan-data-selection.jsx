@@ -244,8 +244,8 @@ export class PlanDataSelection extends Component {
     setIsDataSelection: (status) => dispatch(PlanActions.setIsDataSelection(status)),
     updateDataSourceEditableStatus: (isDataSourceEditable,dataSourceKey,loggedInUser, authPermissions, dataItems) => dispatch(PlanActions.updateDataSourceEditableStatus(isDataSourceEditable,dataSourceKey,loggedInUser, authPermissions, dataItems)),
     selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems)),
-    selectedDisplayMode: (value) => dispatch(PlanActions.selectedDisplayMode(value)),
-    activeViewModePanel: (value) => dispatch(PlanActions.activeViewModePanel(value))
+    selectedDisplayMode: (value) => dispatch(PlanActions.setSelectedDisplayMode(value)),
+    activeViewModePanel: (value) => dispatch(PlanActions.setActiveViewModePanel(value))
   })
 
    const PlanDataSelectionComponent = wrapComponentWithProvider(reduxStore, PlanDataSelection, mapStateToProps, mapDispatchToProps)

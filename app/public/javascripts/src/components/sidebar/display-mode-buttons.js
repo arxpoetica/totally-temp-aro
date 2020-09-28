@@ -26,7 +26,7 @@ class DisplayModeButtonsController {
 
   mapDispatchToTarget (dispatch) {
     return {
-      rSelectedDisplayModeAction: (value) => dispatch(PlanActions.selectedDisplayMode(value)),
+      rSelectedDisplayModeAction: (value) => dispatch(PlanActions.setSelectedDisplayMode(value))
     }
   }
 }

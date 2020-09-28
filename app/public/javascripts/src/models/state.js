@@ -587,7 +587,8 @@ class State {
     // Initialize the state of the application (the parts that depend upon configuration being loaded from the server)
     service.initializeState = function () {
       service.reloadLocationTypes()
-      service.selectedDisplayMode.next(service.displayModes.VIEW)
+      // service.selectedDisplayMode.next(service.displayModes.VIEW)
+      service.setSelectedDisplayMode(service.displayModes.VIEW)
 
       // Upload Data Sources
       service.uploadDataSources = []
@@ -931,7 +932,8 @@ class State {
 
     service.loadPlan = (planId) => {
       tracker.trackEvent(tracker.CATEGORIES.LOAD_PLAN, tracker.ACTIONS.CLICK, 'PlanID', planId)
-      service.selectedDisplayMode.next(service.displayModes.VIEW)
+      // service.selectedDisplayMode.next(service.displayModes.VIEW)
+      service.setSelectedDisplayMode(service.displayModes.VIEW)
       var plan = null
       return $http.get(`/service/v1/plan/${planId}`)
         .then((result) => {
@@ -1793,6 +1795,7 @@ class State {
       // ToDo: replace all instances of service.selectedDisplayMode
       //  with reduxState.plan.selectedDisplayMode
       //  We are currently maintaining state in two places
+      //  BUT as of now are only setting it in redux
       if (nextState.rSelectedDisplayMode &&
           service.rSelectedDisplayMode !== service.selectedDisplayMode.getValue()) {
         // console.log(service.rSelectedDisplayMode)
@@ -1846,6 +1849,7 @@ class State {
       addPlanTargets: (planId, planTargets) => dispatch(SelectionActions.addPlanTargets(planId, planTargets)),
       removePlanTargets: (planId, planTargets) => dispatch(SelectionActions.removePlanTargets(planId, planTargets)),
       setSelectedLocations: locationIds => dispatch(SelectionActions.setLocations(locationIds)),
+      setSelectedDisplayMode: displayMode => dispatch(PlanActions.setSelectedDisplayMode(displayMode)),
       setActivePlanState: planState => dispatch(PlanActions.setActivePlanState(planState)),
       selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems)),
       setGoogleMapsReference: mapRef => dispatch(MapActions.setGoogleMapsReference(mapRef)),

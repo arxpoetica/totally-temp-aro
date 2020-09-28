@@ -67,6 +67,7 @@ workflows:
             branches:
               only:
                   - master
+                  - tab-change-on-action
                   - polygon-edit-fixes
       - deploy:
           context: aro_qa_builds
