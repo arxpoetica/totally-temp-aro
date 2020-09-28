@@ -67,7 +67,7 @@ workflows:
             branches:
               only:
                   - master
-                  - charter
+                  - tab-change-on-action
       - deploy:
           context: aro_qa_builds
           requires:
