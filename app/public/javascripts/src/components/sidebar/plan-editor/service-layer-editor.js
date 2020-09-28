@@ -31,11 +31,18 @@ class ServiceLayerEditorController {
     paths.forEach((path) => {
       var pathPoints = []
       path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
-      allPaths.push(pathPoints)
+      /*
+      var lastI = pathPoints.length - 1
+      if (pathPoints[0][0] !== pathPoints[lastI][0] || pathPoints[0][1] !== pathPoints[lastI][1]) {
+        // pathPoints.push([pathPoints[0][0], pathPoints[0][1]])
+        pathPoints.unshift([pathPoints[lastI][0], pathPoints[lastI][1]])
+      }
+      */
+      allPaths.push([pathPoints])
     })
     return {
       type: 'MultiPolygon',
-      coordinates: [allPaths]
+      coordinates: allPaths
     }
   }
 
