@@ -1767,7 +1767,6 @@ class State {
 
     service.handleLibraryModifiedEvent = msg => {
       // If the tileBox is null, use a tile box that covers the entire world
-      console.log(`----- handleLibraryModifiedEvent: ${msg} ----- `)
       const content = JSON.parse(new TextDecoder('utf-8').decode(new Uint8Array(msg.content)))
       const tileBox = content.tileBox || wholeWorldTileBox
       const layerNameRegexStrings = MapLayerHelper.getRegexForAllDataIds(service.mapLayersRedux, null, msg.properties.headers.libraryId)

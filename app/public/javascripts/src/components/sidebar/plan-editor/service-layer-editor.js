@@ -31,11 +31,18 @@ class ServiceLayerEditorController {
     paths.forEach((path) => {
       var pathPoints = []
       path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
-      allPaths.push(pathPoints)
+      /*
+      var lastI = pathPoints.length - 1
+      if (pathPoints[0][0] !== pathPoints[lastI][0] || pathPoints[0][1] !== pathPoints[lastI][1]) {
+        // pathPoints.push([pathPoints[0][0], pathPoints[0][1]])
+        pathPoints.unshift([pathPoints[lastI][0], pathPoints[lastI][1]])
+      }
+      */
+      allPaths.push([pathPoints])
     })
     return {
       type: 'MultiPolygon',
-      coordinates: [allPaths]
+      coordinates: allPaths
     }
   }
 
@@ -71,9 +78,10 @@ class ServiceLayerEditorController {
 
   handleSelectedObjectChanged (mapObject) {
     if (this.currentTransaction == null) return
-    console.log(mapObject)
     if (mapObject != null) {
       this.updateSelectedState(mapObject)
+    } else {
+      this.rActiveViewModePanelAction(this.state.viewModePanels.LOCATION_INFO)
     }
     this.selectedMapObject = mapObject
     this.$timeout()
@@ -155,6 +163,7 @@ class ServiceLayerEditorController {
         this.currentTransaction = null
         this.state.recreateTilesAndCache()
         this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO // Close out this panel
+        this.rActiveViewModePanelAction(this.state.viewModePanels.LOCATION_INFO)
         this.$timeout()
         console.error(err)
       })
@@ -185,6 +194,7 @@ class ServiceLayerEditorController {
             this.discardChanges = true
             this.currentTransaction = null
             this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO // Close out this panel
+            this.rActiveViewModePanelAction(this.state.viewModePanels.LOCATION_INFO)
             this.$timeout()
             console.error(err)
           })
@@ -229,7 +239,8 @@ class ServiceLayerEditorController {
 
   mapDispatchToTarget (dispatch) {
     return {
-      setSelectedDisplayMode: displayMode => dispatch(PlanActions.setSelectedDisplayMode(displayMode))
+      setSelectedDisplayMode: displayMode => dispatch(PlanActions.setSelectedDisplayMode(displayMode)),
+      rActiveViewModePanelAction: (value) => dispatch(PlanActions.activeViewModePanel(value))
     }
   }
 
