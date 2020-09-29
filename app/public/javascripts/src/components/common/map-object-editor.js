@@ -487,7 +487,7 @@ class MapObjectEditorController {
                 // editing the boundary without editing the equipment object itself
                 const mockEquipmentMapObject = {
                   objectId: feature.objectId,
-                  networkNodeType: feature._data_type.split('.')[1],  // Contract with aro-service
+                  networkNodeType: feature.networkNodeType || feature._data_type.split('.')[1],  // Contract with aro-service
                   icon: 'HACK to make this.isMarker() think this is a marker and not a polygon :('
                 }
                 this.startDrawingBoundaryFor(mockEquipmentMapObject)
