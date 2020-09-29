@@ -1801,6 +1801,10 @@ class State {
         // console.log(service.rSelectedDisplayMode)
         service.selectedDisplayMode.next(service.rSelectedDisplayMode)
       }
+      if (nextState.rActiveViewModePanel && 
+          service.rActiveViewModePanel !== service.activeViewModePanel) {
+        service.activeViewModePanel = service.rActiveViewModePanel
+      }
     }
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(service.mergeToTarget.bind(service))
 
@@ -1826,7 +1830,8 @@ class State {
       wormholeFuseDefinitions: reduxState.optimization.networkAnalysis.wormholeFuseDefinitions,
       activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
       optimizationInputs: reduxState.optimization.networkOptimization.optimizationInputs,
-      rSelectedDisplayMode: reduxState.plan.rSelectedDisplayMode
+      rSelectedDisplayMode: reduxState.plan.rSelectedDisplayMode,
+      rActiveViewModePanel: reduxState.plan.rActiveViewModePanel
     }
   }
 

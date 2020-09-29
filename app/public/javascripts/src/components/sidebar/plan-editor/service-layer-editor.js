@@ -240,7 +240,7 @@ class ServiceLayerEditorController {
   mapDispatchToTarget (dispatch) {
     return {
       setSelectedDisplayMode: displayMode => dispatch(PlanActions.setSelectedDisplayMode(displayMode)),
-      rActiveViewModePanelAction: (value) => dispatch(PlanActions.activeViewModePanel(value))
+      rActiveViewModePanelAction: (value) => dispatch(PlanActions.setActiveViewModePanel(value))
     }
   }
 
