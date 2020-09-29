@@ -26,30 +26,6 @@ class ServiceLayerEditorController {
     this.resumeOrCreateTransaction()
   }
 
-  // Convert the paths in a Google Maps object into a Polygon WKT
-  // duplicate in plan-editor
-  // ToDo: I think we should treat all polygons as multiPolygons
-  /*
-  polygonPathsToWKT (paths) {
-    var allPaths = []
-    paths.forEach((path) => {
-      var pathPoints = []
-      path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
-      
-      var lastI = pathPoints.length - 1
-      if (pathPoints[0][0] !== pathPoints[lastI][0] || pathPoints[0][1] !== pathPoints[lastI][1]) {
-        pathPoints.push([pathPoints[0][0], pathPoints[0][1]])
-      }
-      
-      allPaths.push([pathPoints])
-    })
-    return {
-      type: 'MultiPolygon',
-      coordinates: allPaths
-    }
-  }
-  */
-
   formatServiceLayerForService (mapObject) {
     // ToDo: this should use AroFeatureFactory
     var serviceFeature = {
