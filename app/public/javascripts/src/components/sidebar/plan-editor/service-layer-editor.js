@@ -1,5 +1,6 @@
 import Constants from '../../common/constants'
 import PlanActions from '../../../react/components/plan/plan-actions'
+import MapUtilities from '../../common/plan/map-utilities'
 
 class ServiceLayerEditorController {
   constructor ($http, $timeout, $ngRedux, state, Utils, tileDataService) {
@@ -26,18 +27,20 @@ class ServiceLayerEditorController {
   }
 
   // Convert the paths in a Google Maps object into a Polygon WKT
+  // duplicate in plan-editor
+  // ToDo: I think we should treat all polygons as multiPolygons
+  /*
   polygonPathsToWKT (paths) {
     var allPaths = []
     paths.forEach((path) => {
       var pathPoints = []
       path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
-      /*
+      
       var lastI = pathPoints.length - 1
       if (pathPoints[0][0] !== pathPoints[lastI][0] || pathPoints[0][1] !== pathPoints[lastI][1]) {
-        // pathPoints.push([pathPoints[0][0], pathPoints[0][1]])
-        pathPoints.unshift([pathPoints[lastI][0], pathPoints[lastI][1]])
+        pathPoints.push([pathPoints[0][0], pathPoints[0][1]])
       }
-      */
+      
       allPaths.push([pathPoints])
     })
     return {
@@ -45,13 +48,14 @@ class ServiceLayerEditorController {
       coordinates: allPaths
     }
   }
+  */
 
   formatServiceLayerForService (mapObject) {
     // ToDo: this should use AroFeatureFactory
     var serviceFeature = {
       objectId: mapObject.feature.objectId,
       dataType: 'service_layer',
-      geometry: this.polygonPathsToWKT(mapObject.getPaths()),
+      geometry: MapUtilities.multiPolygonPathsToWKT(mapObject.getPaths()),
       attributes: {
         name: mapObject.feature.name,
         code: mapObject.feature.code

@@ -97,6 +97,8 @@ function createFeature (featureType, transactionId, feature) {
 }
 
 function modifyFeature (featureType, transactionId, feature) {
+  // ToDo: this causes an error if you edit a new feature that has yet to be sent to service
+  //  everything still functions but it's bad form
   return dispatch => {
     // Do a PUT to send the equipment over to service
     return AroHttp.put(`/service/plan-transactions/${transactionId}/modified-features/${featureType}`, feature.feature)

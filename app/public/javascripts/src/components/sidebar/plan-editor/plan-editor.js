@@ -15,6 +15,7 @@ import uuidStore from '../../../shared-utils/uuid-store'
 import WktUtils from '../../../shared-utils/wkt-utils'
 import coverageActions from '../../../react/components/coverage/coverage-actions'
 import CoverageStatusTypes from '../../../react/components/coverage/constants'
+import MapUtilities from '../../common/plan/map-utilities'
 
 class PlanEditorController {
   constructor ($timeout, $http, $element, $filter, $ngRedux, state, Utils, tileDataService, tracker) {
@@ -426,7 +427,6 @@ class PlanEditorController {
   }
 
   exitPlanEditMode () {
-    console.log()
     this.setNetworkEquipmentLayerVisibility(this.feederFiberLayer, this.isFiberVisiblePreTransaction)
 
     // You should no longer hide any of the object ids that have been committed or discarded
@@ -604,11 +604,20 @@ class PlanEditorController {
   }
 
   // Convert the paths in a Google Maps object into a Polygon WKT
+  // duplicate in service-layer-editor
+  // ToDo: I think we should treat all polygons as multiPolygons
+  /*
   polygonPathsToWKT (paths) {
     var allPaths = []
     paths.forEach((path) => {
       var pathPoints = []
       path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
+      
+      var lastI = pathPoints.length - 1
+      if (pathPoints[0][0] !== pathPoints[lastI][0] || pathPoints[0][1] !== pathPoints[lastI][1]) {
+        pathPoints.push([pathPoints[0][0], pathPoints[0][1]])
+      }
+      
       allPaths.push(pathPoints)
     })
     return {
@@ -616,6 +625,7 @@ class PlanEditorController {
       coordinates: allPaths
     }
   }
+  */
 
   // Formats the boundary specified by the objectId so that it can be sent to aro-service for saving
   formatBoundaryForService (objectId, networkNodeType) {
@@ -645,7 +655,7 @@ class PlanEditorController {
       objectId: objectId,
       networkNodeType: siteNetworkNodeType,
       networkObjectId: this.boundaryIdToEquipmentId[objectId],
-      geometry: this.polygonPathsToWKT(boundaryMapObject.getPaths()),
+      geometry: MapUtilities.polygonPathsToWKT(boundaryMapObject.getPaths()),
       boundaryTypeId: boundaryProperties.selectedSiteBoundaryTypeId,
       attributes: attributes,
       dataType: 'equipment_boundary',
