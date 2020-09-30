@@ -1,5 +1,6 @@
 import AroHttp from '../../common/aro-http'
 import Actions from '../../common/actions'
+import PlanActions from '../plan/plan-actions'
 
 function setPlanInputsModal (status){
   return dispatch => {
@@ -116,6 +117,214 @@ function setAppConfiguration (appConfiguration){
   }
 }
 
+function createNewPlan (isEphemeral, planName, parentPlan, planType){
+  return (dispatch, getState) => {
+    const state = getState()
+    var loggedInUserId = state.user.loggedInUser.id
+    var defaultPlanCoordinates = state.plan.defaultPlanCoordinates
+
+    if (isEphemeral && parentPlan) {
+      return Promise.reject('ERROR: Ephemeral plans cannot have a parent plan')
+    }
+
+    // Use reverse geocoding to get the address at the current center of the map
+    var planOptions = {
+      areaName: '',
+      latitude: defaultPlanCoordinates.latitude,
+      longitude: defaultPlanCoordinates.longitude,
+      zoomIndex: defaultPlanCoordinates.zoom,
+      ephemeral: isEphemeral,
+      name: planName || 'Untitled', 
+      planType: planType || 'UNDEFINED'
+    }
+    return getAddressFor(planOptions.latitude, planOptions.longitude)
+    .then((address) => {
+      planOptions.areaName = address
+      // Get the configuration for this user - this will contain the default project template to use
+      return AroHttp.get(`/service/auth/users/${loggedInUserId}/configuration`)
+    })
+    .then((result) => {
+      var apiEndpoint = `/service/v1/plan?project_template_id=${result.data.projectTemplateId}`
+      if (!isEphemeral && parentPlan) {
+        // associate selected tags to child plan
+        planOptions.tagMapping = {
+          global: [],
+          linkTags: {
+            geographyTag: 'service_area',
+            serviceAreaIds: []
+          }
+        }
+
+        planOptions.tagMapping.global = service.currentPlanTags.map(tag => tag.id)
+        planOptions.tagMapping.linkTags.serviceAreaIds = service.currentPlanServiceAreaTags.map(tag => tag.id)
+        // A parent plan is specified - append it to the POST url
+        apiEndpoint += `&branch_plan=${parentPlan.id}`
+      }
+      return AroHttp.post(apiEndpoint, planOptions)
+    })
+    .catch((err) => console.error(err))
+  }
+}
+
+function loadPlan (planId) {
+  return dispatch => {
+    trackEvent('LOAD_PLAN', 'CLICK', 'PlanID', planId)
+    dispatch(selectedDisplayMode('VIEW'))
+    var plan = null
+    return AroHttp.get(`/service/v1/plan/${planId}`)
+      .then((result) => {
+        plan = result.data
+        return getAddressFor(plan.latitude, plan.longitude)
+      })
+      .then((address) => {
+        plan.areaName = address
+        var mapObject = {
+          latitude: plan.latitude,
+          longitude: plan.longitude,
+          zoom: plan.zoomIndex
+        }
+        //Due to unable to subscribe requestSetMapCenter as of now used Custom Event Listener
+        // https://www.sitepoint.com/javascript-custom-events/
+        var event = new CustomEvent('mapChanged', { detail : mapObject});
+        window.dispatchEvent(event);
+
+        return Promise.resolve()
+      })
+      .then(() => {
+        return dispatch(PlanActions.setActivePlan(plan)) // This will also create overlay, tiles, etc.
+      })
+  }
+}
+
+function trackEvent (category, action, label, value) {
+  try {
+    // 'gtag' is a global variable defined in index.html if an analytics key is provided
+    if (window.gtag) {
+      gtag('event', category, {
+        action: action,
+        label: label,
+        value: value
+      })
+    }
+  } catch (err) {
+    // Yes, we are swallowing the exception. But the tracker should never interfere with the functioning of the app. Being extra cautious.
+    console.error(err)
+  }
+}
+
+function getAddressFor (latitude, longitude) {
+  return new Promise((resolve, reject) => {
+    var geocoder = new google.maps.Geocoder()
+    var address = ''
+    geocoder.geocode({ 'location': new google.maps.LatLng(latitude, longitude) }, function (results, status) {
+      if (status === 'OK') {
+        if (results[1]) {
+          address = results[0].formatted_address
+        } else {
+          console.warn(`No address results for coordinates ${latitude}, ${longitude}`)
+        }
+      } else {
+        console.warn(`Unable to get address for coordinates ${latitude}, ${longitude}`)
+      }
+      resolve(address) // Always resolve, even if reverse geocoding failed
+    })
+  })
+}
+
+ // Plan search - tags
+ function loadListOfPlanTags () {
+  return dispatch => {
+    var promises = [
+      AroHttp.get(`/service/tag-mapping/global-tags`)
+    ]
+
+    return Promise.all(promises)
+      .then((results) => {
+        dispatch({
+          type: Actions.TOOL_BAR_LIST_OF_PLAN_TAGS,
+          payload: results[0].data
+        })
+      })
+  }
+}
+
+function setCurrentPlanTags (currentPlanTags){
+  return dispatch => {
+    dispatch({
+      type: Actions.TOOL_BAR_SET_CURRENT_PLAN_TAGS,
+      payload: currentPlanTags
+    })
+  }
+}
+
+
+function loadServiceLayers () {
+  var serviceLayers = []
+  var nameToServiceLayers = {}
+  return dispatch => {
+    AroHttp.get('/service/odata/ServiceLayer?$select=id,name,description')
+      .then((response) => {
+        if (response.status >= 200 && response.status <= 299) {
+          serviceLayers = response.data
+          serviceLayers.forEach((layer) => {
+            nameToServiceLayers[layer.name] = layer
+          })
+          dispatch({
+            type: Actions.TOOL_BAR_LOAD_SERVICE_LAYERS,
+            payload: nameToServiceLayers
+          })
+        }
+      })
+  }
+}
+
+function loadListOfSAPlanTags (dataItems, filterObj, ishardreload) {
+  return (dispatch, getState) => {
+
+    const state = getState()
+    var nameToServiceLayers = state.toolbar.nameToServiceLayers
+    var listOfServiceAreaTags = state.toolbar.listOfServiceAreaTags
+
+    const MAX_SERVICE_AREAS_FROM_ODATA = 10
+    // var filter = "layer/id eq 1"
+    var libraryItems = []
+    var filter = ''
+
+    var selectedServiceLayerLibraries = dataItems && dataItems.service_layer && dataItems.service_layer.selectedLibraryItems
+    // ToDo: Do not select service layers by name
+    // we need a change in service GET /v1/library-entry needs to send id, identifier is not the same thing
+    if (selectedServiceLayerLibraries) libraryItems = selectedServiceLayerLibraries.map(selectedLibraryItem => selectedLibraryItem.name)
+    if (libraryItems.length > 0) {
+      // Filter using selected serviceLayer id
+      var layerfilter = libraryItems.map(libraryName => `layer/id eq ${nameToServiceLayers[libraryName].id}`).join(' or ')
+      filter = filter ? filter.concat(` and (${layerfilter})`) : `${layerfilter}`
+    }
+
+    filter = filterObj ? filter.concat(` and (substringof(code,'${filterObj}') or substringof(name,'${filterObj}'))`) : filter
+    if (ishardreload) { 
+      dispatch({
+        type: Actions.TOOL_BAR_LIST_OF_SERVICE_AREA_TAGS,
+        payload: []
+      })
+    }
+    if (filterObj || listOfServiceAreaTags.length == 0) {
+      AroHttp.get(`/service/odata/ServiceAreaView?$select=id,code,name&$filter=${filter}&$orderby=id&$top=${MAX_SERVICE_AREAS_FROM_ODATA}`)
+        .then((results) => {
+          dispatch({
+            type: Actions.TOOL_BAR_LIST_OF_SERVICE_AREA_TAGS,
+            payload: removeDuplicates(listOfServiceAreaTags.concat(results.data), 'id')
+          })
+        })
+    }
+  }
+}
+
+function removeDuplicates (myArr, prop) {
+  return myArr.filter((obj, pos, arr) => {
+    return arr.map(mapObj => mapObj[prop]).indexOf(obj[prop]) === pos
+  })
+}
+
 export default {
   setPlanInputsModal,
   selectedDisplayMode,
@@ -128,5 +337,11 @@ export default {
   setShowDirectedCable,
   setShowEquipmentLabelsChanged,
   setShowFiberSize,
-  setAppConfiguration
+  setAppConfiguration,
+  createNewPlan,
+  loadPlan,
+  loadListOfPlanTags,
+  setCurrentPlanTags,
+  loadServiceLayers,
+  loadListOfSAPlanTags
 }

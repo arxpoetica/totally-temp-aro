@@ -17,6 +17,7 @@ import { createSelector } from 'reselect'
 import MapLayerActions from '../map-layers/map-layer-actions'
 import ViewSettingsActions from '../view-settings/view-settings-actions'
 import rState from '../../common/rState'
+import PlanInputsModal from './plan-inputs-modal.jsx'
 
 export class ToolBar extends Component {
   constructor (props) {
@@ -79,22 +80,22 @@ export class ToolBar extends Component {
 
     // View Settings layer - define once
     this.viewSetting = {
-    selectedFiberOption: null,
-    heatmapOptions: [
-      {
-        id: 'HEATMAP_ON',
-        label: 'Aggregate heatmap'
-      },
-      {
-        id: 'HEATMAP_DEBUG',
-        label: 'Aggregate points'
-      },
-      {
-        id: 'HEATMAP_OFF',
-        label: 'Raw Points'
-      }
-    ]
-  }
+      selectedFiberOption: null,
+      heatmapOptions: [
+        {
+          id: 'HEATMAP_ON',
+          label: 'Aggregate heatmap'
+        },
+        {
+          id: 'HEATMAP_DEBUG',
+          label: 'Aggregate points'
+        },
+        {
+          id: 'HEATMAP_OFF',
+          label: 'Raw Points'
+        }
+      ]
+    }
 
     var heatmapOptions = {
       showTileExtents: false,
@@ -175,6 +176,8 @@ export class ToolBar extends Component {
       selectedBoundaryType: '',
       selectedFiberOption: this.viewSetting.selectedFiberOption
     }
+
+    this.props.loadServiceLayers()
   }
 
   componentDidMount(){
@@ -254,7 +257,8 @@ export class ToolBar extends Component {
 
         <div className="separator"></div>
 
-        <button className="btn" title="Create a new plan" style={{ display: isEphemeralPlan ? 'block' : 'none' }}>
+        <button className="btn" title="Create a new plan" style={{ display: isEphemeralPlan ? 'block' : 'none' }}
+          onClick={(e) => this.createEphemeralPlan()}>
           <i className="fa fa-file"></i>
         </button>
 
@@ -437,9 +441,20 @@ export class ToolBar extends Component {
           onClick={(e) => this.showRfpWindow()}>
           <i className="fa fa-cloud"></i>
         </button>
-
+        <PlanInputsModal></PlanInputsModal>
       </div>
     )
+  }
+
+
+  savePlanAs(){
+    this.props.setPlanInputsModal(true)
+  }
+
+  createEphemeralPlan () {
+    this.props.createNewPlan(true)
+    .then((result) => this.props.loadPlan(result.data.id))
+    .catch((err) => console.error(err))
   }
 
   onChangeSelectedFiberOption (e) {
@@ -491,7 +506,7 @@ export class ToolBar extends Component {
 
   toggleHeatMapOptions (e) {
     this.setState({heatMapOption: !this.state.heatMapOption}, function() {
-      var newMapTileOptions = angular.copy(this.mapTileOptions)
+      var newMapTileOptions = JSON.parse(JSON.stringify(this.mapTileOptions))
       newMapTileOptions.selectedHeatmapOption = this.state.heatMapOption ? this.viewSetting.heatmapOptions[0] : this.viewSetting.heatmapOptions[2]
       this.rState.mapTileOptions.sendMessage(newMapTileOptions) // This will also refresh the map layer
       this.refreshSlidertrack()
@@ -500,7 +515,7 @@ export class ToolBar extends Component {
 
   changeHeatMapOptions (e) {
     this.setState({sliderValue: e.target.value}, function() {
-      var newMapTileOptions = angular.copy(this.mapTileOptions)
+      var newMapTileOptions = JSON.parse(JSON.stringify(this.mapTileOptions))
       newMapTileOptions.heatMap.worldMaxValue = this.rangeValues[this.state.sliderValue]
       this.rState.mapTileOptions.sendMessage(newMapTileOptions) // This will also refresh the map layer
     })
@@ -970,10 +985,6 @@ export class ToolBar extends Component {
       }
     })
   }
-
-  savePlanAs(){
-    this.props.setPlanInputsModal(true)
-  }
 }
 
 // We need a selector, else the .toJS() call will create an infinite digest loop
@@ -1038,7 +1049,10 @@ const mapDispatchToProps = (dispatch) => ({
   setShowDirectedCable: (value) => dispatch(ToolBarActions.setShowDirectedCable(value)),
   setShowEquipmentLabelsChanged: (value) => dispatch(ToolBarActions.setShowEquipmentLabelsChanged(value)),
   setShowLocationLabels: showLocationLabels => dispatch(ViewSettingsActions.setShowLocationLabels(showLocationLabels)),
-  setShowFiberSize: (value) => dispatch(ToolBarActions.setShowFiberSize(value))
+  setShowFiberSize: (value) => dispatch(ToolBarActions.setShowFiberSize(value)),
+  createNewPlan: (value) => dispatch(ToolBarActions.createNewPlan(value)),
+  loadPlan: (planId) => dispatch(ToolBarActions.loadPlan(planId)),
+  loadServiceLayers: () => dispatch(ToolBarActions.loadServiceLayers())
 })
 
 const ToolBarComponent = wrapComponentWithProvider(reduxStore, ToolBar, mapStateToProps, mapDispatchToProps)

@@ -10,7 +10,12 @@ const defaultState = {
   isViewSettingsEnabled: false,
   showDirectedCable: false,
   showEquipmentLabels: false,
-  showFiberSize: false
+  showFiberSize: false,
+  nameToServiceLayers: {},
+  listOfTags: [],
+  currentPlanTags: [],
+  listOfServiceAreaTags: [],
+  currentPlanServiceAreaTags: []
 }
 
 function setPlanInputsModal (state, planInputsModal) {
@@ -79,6 +84,30 @@ function setAppConfiguration (state, appConfiguration) {
   }
 }
 
+function setLoadListOfPlanTags (state, listOfTags) {
+  return { ...state,
+    listOfTags: listOfTags
+  }
+}
+
+function setCurrentPlanTags (state, currentPlanTags) {
+  return { ...state,
+    currentPlanTags: currentPlanTags
+  }
+}
+
+function setLoadServiceLayers (state, nameToServiceLayers) {
+  return { ...state,
+    nameToServiceLayers: nameToServiceLayers
+  }
+}
+
+function setLoadListOfSAPlanTags (state, listOfServiceAreaTags) {
+  return { ...state,
+    listOfServiceAreaTags: listOfServiceAreaTags
+  }
+}
+
 function ToolBarReducer (state = defaultState, action) {
   switch (action.type) {
 
@@ -113,8 +142,20 @@ function ToolBarReducer (state = defaultState, action) {
       return setShowFiberSize(state, action.payload) 
 
     case Actions.TOOL_BAR_SET_APP_CONFIGURATION:
-      return setAppConfiguration(state, action.payload)       
-  
+      return setAppConfiguration(state, action.payload) 
+      
+    case Actions.TOOL_BAR_LIST_OF_PLAN_TAGS:
+      return setLoadListOfPlanTags(state, action.payload) 
+      
+    case Actions.TOOL_BAR_SET_CURRENT_PLAN_TAGS:
+      return setCurrentPlanTags(state, action.payload)       
+
+    case Actions.TOOL_BAR_LOAD_SERVICE_LAYERS:
+      return setLoadServiceLayers(state, action.payload)  
+
+      case Actions.TOOL_BAR_LIST_OF_SERVICE_AREA_TAGS:
+        return setLoadListOfSAPlanTags(state, action.payload)      
+
     default:
       return state
   }
