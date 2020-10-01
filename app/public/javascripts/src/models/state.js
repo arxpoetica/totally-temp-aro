@@ -19,6 +19,7 @@ import SelectionModes from '../react/components/selection/selection-modes'
 import SocketManager from '../react/common/socket-manager'
 import RingEditActions from '../react/components/ring-edit/ring-edit-actions'
 import NetworkAnalysisActions from '../react/components/optimization/network-analysis/network-analysis-actions'
+import NotificationInterface from '../react/components/notification/notification-interface'
 import ReactComponentConstants from '../react/common/constants'
 import AroNetworkConstraints from '../shared-utils/aro-network-constraints'
 import PuppeteerMessages from '../components/common/puppeteer-messages'
@@ -314,7 +315,20 @@ class State {
     service.requestPolygonSelect = new Rx.BehaviorSubject({})
 
     service.areTilesRendering = false
+    service.noteIdTilesRendering = null
     service.setAreTilesRendering = newValue => {
+      // can't use the proper notification system because
+      //  this function is run at least once per second
+      //  for the life of the app. Fix this.
+      /*
+      if (!newValue && service.areTilesRendering) { // set to off and not off
+        console.log('---------------------------- OFF -------')
+        service.noteIdTilesRendering = service.removeNotification(service.noteIdTilesRendering)
+      } else if (newValue && !service.areTilesRendering) { // set to on and not already on
+        console.log('---------------------------- ON --------')
+        service.noteIdTilesRendering = service.postNotification('Rendering Tiles')
+      }
+      */
       service.areTilesRendering = newValue
       $timeout()
     }
@@ -1774,9 +1788,40 @@ class State {
       service.requestMapLayerRefresh.next(null)
     }
 
+    service.handlePlanRefreshRequest = msg => {
+      service.loadPlanRedux(service.plan.id)
+    }
+
+    /*
+    service.noteIdFileUpload = null
+    service.handleETLStartEvent = msg => {
+      console.log('--- ETL Start ---')
+      var content = new TextDecoder('utf-8').decode(new Uint8Array(msg.content))
+      console.log({ msg, content })
+    }
+
+    service.handleETLUpdateEvent = msg => {
+      console.log('--- ETL Update ---')
+      var content = new TextDecoder('utf-8').decode(new Uint8Array(msg.content))
+      console.log({ msg, content })
+    }
+
+    service.handleETLCloseEvent = msg => {
+      console.log('--- ETL Close ---')
+      var content = new TextDecoder('utf-8').decode(new Uint8Array(msg.content))
+      console.log({ msg, content })
+    }
+    */
+
     service.unsubscribePlanEvent = SocketManager.subscribe('COMMIT_TRANSACTION', service.handlePlanModifiedEvent.bind(service))
     service.unsubscribeLibraryEvent1 = SocketManager.subscribe('USER_TRANSACTION', service.handleLibraryModifiedEvent.bind(service))
     service.unsubscribeLibraryEvent1 = SocketManager.subscribe('ETL_ADD', service.handleLibraryModifiedEvent.bind(service))
+    service.unsubscribePlanRefresh = SocketManager.subscribe('PLAN_REFRESH', service.handlePlanRefreshRequest.bind(service))
+    /*
+    service.unsubscribeETLStart = SocketManager.subscribe('ETL_START', service.handleETLStartEvent.bind(service))
+    service.unsubscribeETLUpdate = SocketManager.subscribe('ETL_UPDATE', service.handleETLUpdateEvent.bind(service))
+    service.unsubscribeETLClose = SocketManager.subscribe('ETL_CLOSE', service.handleETLCloseEvent.bind(service))
+    */
 
     service.mergeToTarget = (nextState, actions) => {
       const currentActivePlanId = service.plan && service.plan.id
@@ -1850,6 +1895,7 @@ class State {
       setSelectedLocations: locationIds => dispatch(SelectionActions.setLocations(locationIds)),
       setActivePlanState: planState => dispatch(PlanActions.setActivePlanState(planState)),
       selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems)),
+      loadPlanRedux: planId => dispatch(PlanActions.loadPlan(planId)),
       setGoogleMapsReference: mapRef => dispatch(MapActions.setGoogleMapsReference(mapRef)),
       setNetworkEquipmentLayers: networkEquipmentLayers => dispatch(MapLayerActions.setNetworkEquipmentLayers(networkEquipmentLayers)),
       setCopperLayers: copperLayers => dispatch(MapLayerActions.setCopperLayers(copperLayers)),
@@ -1864,7 +1910,10 @@ class State {
       setPrimarySpatialEdge: primarySpatialEdge => dispatch(NetworkAnalysisActions.setPrimarySpatialEdge(primarySpatialEdge)),
       clearWormholeFuseDefinitions: () => dispatch(NetworkAnalysisActions.clearWormholeFuseDefinitions()),
       setWormholeFuseDefinition: (spatialEdgeType, wormholeFusionTypeId) => dispatch(NetworkAnalysisActions.setWormholeFuseDefinition(spatialEdgeType, wormholeFusionTypeId)),
-      setShowLocationLabels: showLocationLabels => dispatch(ViewSettingsActions.setShowLocationLabels(showLocationLabels))
+      setShowLocationLabels: showLocationLabels => dispatch(ViewSettingsActions.setShowLocationLabels(showLocationLabels)),
+      postNotification: (notification, autoExpire) => NotificationInterface.postNotification(dispatch, notification, autoExpire), // you'll not this one looks a bit different, because we need a return val of the note ID we use an interface that wraps the action creator and the dispatch is done there
+      updateNotification: (noteId, notification, autoExpire) => NotificationInterface.updateNotification(dispatch, noteId, notification, autoExpire),
+      removeNotification: (noteId, autoExpire) => NotificationInterface.removeNotification(dispatch, noteId, autoExpire)
     }
   }
 }

@@ -46,6 +46,7 @@ import PlanningConstraintsEditor from '../react/components/resource-manager/plan
 import FusionEditor from '../react/components/resource-manager/fusion-editor.jsx'
 import NetworkArchitectureEditor from '../react/components/resource-manager/network-architecture-editor.jsx'
 import ToolBox from '../react/components/tool/tool-box.jsx'
+import UINotifications from '../react/components/notification/ui-notifications.jsx'
 
 import boundaryDetail from './sidebar/view/boundary-detail'
 import equipmentDetail from './sidebar/view/equipment-detail'
@@ -119,7 +120,7 @@ import networkPlanModal from './header/network-plan-modal'
 import planInputsModal from './header/plan-inputs-modal'
 import networkPlanManage from './header/network-plan-manage'
 import networkPlan from './header/network-plan'
-import uiNotification from './footer/ui-notification'
+// import uiNotification from './footer/ui-notification'
 import fullScreenContainer from './full-screen/full-screen-container'
 import manageUsers from './global-settings/manage-users'
 import manageGroups from './global-settings/manage-groups'
@@ -225,7 +226,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('planInputsModal', planInputsModal)
   .component('networkPlanManage', networkPlanManage)
   .component('networkPlan', networkPlan)
-  .component('uiNotification', uiNotification)
+  // .component('uiNotification', uiNotification)
   .component('fullScreenContainer', fullScreenContainer)
   .component('manageUsers', manageUsers)
   .component('manageGroups', manageGroups)
@@ -299,6 +300,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rFusionEditor', react2angular(FusionEditor, ['onDiscard']))
   .component('rNetworkArchitectureEditor', react2angular(NetworkArchitectureEditor, ['onDiscard']))
   .component('rToolBox', react2angular(ToolBox))
+  .component('rUiNotifications', react2angular(UINotifications))
   .service('Utils', utils)
   .service('state', state)
   .service('tileDataService', tileDataService)

@@ -252,12 +252,13 @@ let mapSplit = {
       </div>
     </div>
   </div>
-  <div class="ui-note" ng-if="$ctrl.state.areTilesRendering" style="pointer-events: none; position: absolute; left: 0px; bottom: 25px;" >
+  <div class="ui-note" style="pointer-events: none; position: absolute; left: 0px; bottom: 25px;" >
     <!-- There used to be a "spinner" icon here, which has been removed. On profiling, we found that the
         spinning animation caused the tile rendering to be two times slower (e.g. 200ms with spinner vs 100 ms without)
         Do NOT add any kind of animated element in this control unless you suppress it when tiles are rendering -->
     <div class="ui-note-notes-contain">
-      <div class="ui-note-noteline">Rendering Tiles</div>
+      <div class="ui-note-noteline" ng-if="$ctrl.state.areTilesRendering">Rendering Tiles</div>
+      <r-ui-notifications></r-ui-notifications>
     </div>
   </div>
   <div ng-include="'javascripts/lib/components/footer/frontier_footer.html'" ng-if="$ctrl.state.configuration.ARO_CLIENT === 'frontier'"></div>

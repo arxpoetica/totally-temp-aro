@@ -137,4 +137,5 @@ docker/docker-compose.yml
 /app/.gitignore
 .vscode
 docker12
+docker12/
 docker12/*

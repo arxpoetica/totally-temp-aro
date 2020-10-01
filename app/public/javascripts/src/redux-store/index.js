@@ -36,6 +36,7 @@ import globalSettings from '../react/components/global-settings/globalsettings-r
 import resourceEditor from '../react/components/resource-editor/resource-reducer'
 import dataUpload from '../react/components/data-upload/data-upload-reducer'
 import viewSettings from '../react/components/view-settings/view-settings-reducer'
+import notification from '../react/components/notification/notification-reducer'
 
 const logger = createLogger({
   level: 'info',
@@ -68,7 +69,8 @@ let reducer = combineReducers({
   globalSettings,
   resourceEditor,
   dataUpload,
-  viewSettings
+  viewSettings,
+  notification
 })
 
 // Add support for Redux devtools extension. Yes, even in production.

@@ -536,6 +536,16 @@ class ToolBarController {
     this.copperMarkers = []
   }
 
+  refreshTiles () {
+    var refreshTileCmd = {
+      'dataTypes': [
+        'subnet'
+      ]
+    }
+    this.$http.post(`/service/v1/plan-command/refresh?user_id=${this.loggedInUser.id}&plan_id=${this.activePlan.id}`, refreshTileCmd)
+      .catch(err => console.error(err))
+  }
+
   closeDropdowns () {
     if (this.isViewSettingsEnabled) {
       this.$element.find('.view-dropdown').toggle()
@@ -561,7 +571,9 @@ class ToolBarController {
       isMapReportsVisible: reduxState.tool.showToolBox && (reduxState.tool.activeTool === Tools.MAP_REPORTS.id),
       showMapReportMapObjects: reduxState.mapReports.showMapObjects,
       rSelectedDisplayMode: reduxState.plan.rSelectedDisplayMode,
-      showLocationLabels: reduxState.viewSettings.showLocationLabels
+      showLocationLabels: reduxState.viewSettings.showLocationLabels,
+      activePlan: reduxState.plan.activePlan,
+      loggedInUser: reduxState.user.loggedInUser
     }
   }
 
