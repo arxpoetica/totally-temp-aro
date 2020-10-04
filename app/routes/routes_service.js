@@ -68,7 +68,7 @@ exports.configure = (api, middleware) => {
     // Chop off the prefix on this requests URL, and we get the URL to pass to aro-service
     var serviceUrl = request.url.substring('/uploadservice/'.length)
     var file = request.file && request.file.path
-
+    console.log(request.file)
     var req = {
       method: 'POST',
       url: `${config.aro_service_url}/${serviceUrl}`,

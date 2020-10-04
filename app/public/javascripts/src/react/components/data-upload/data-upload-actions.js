@@ -1,5 +1,8 @@
 import Actions from '../../common/actions'
 import AroHttp from '../../common/aro-http'
+import SocketManager from '../../common/socket-manager'
+import NotificationInterface from '../notification/notification-interface'
+import PlanActions from '../plan/plan-actions'
 
 function loadMetaData () {
 
@@ -47,7 +50,7 @@ function createLibraryId (uploadDetails, loggedInUser) {
 }
 
 function saveDataSource (uploadDetails,loggedInUser) {
-
+  console.log(uploadDetails)
   return dispatch => {
 
     dispatch(setIsUploading(true))
@@ -56,7 +59,7 @@ function saveDataSource (uploadDetails,loggedInUser) {
 
       return createLibraryId(uploadDetails,loggedInUser)
       .then((libraryItem) => {
-        fileUpload(uploadDetails,libraryItem.identifier,loggedInUser) 
+        fileUpload(dispatch, uploadDetails,libraryItem.identifier,loggedInUser) 
         dispatch(setAllLibraryItems(libraryItem.dataType, libraryItem))
       })
       .then((result) => {
@@ -91,7 +94,7 @@ function saveDataSource (uploadDetails,loggedInUser) {
               showCancelButton: true,
               closeOnConfirm: true
             }, 
-            fileUpload(uploadDetails,uploadDetails.dataSetId))
+            fileUpload(dispatch, uploadDetails,uploadDetails.dataSetId))
           }
         }
         // For uploading fiber no need to create library using getLibraryId()
@@ -99,7 +102,7 @@ function saveDataSource (uploadDetails,loggedInUser) {
           return setCableConstructionType(uploadDetails,loggedInUser)
           .then((libraryItem) => {
             dispatch(setAllLibraryItems(libraryItem.dataType, libraryItem)),
-            fileUpload(uploadDetails, libraryItem.identifier, loggedInUser)
+            fileUpload(dispatch, uploadDetails, libraryItem.identifier, loggedInUser)
           })
           .then((result) => {
             dispatch(setIsUploading(false))
@@ -107,6 +110,7 @@ function saveDataSource (uploadDetails,loggedInUser) {
           })
           .catch((err) => {
             dispatch(setIsUploading(false))
+            console.error(err)
           })
         } else {
           getLibraryId (uploadDetails)
@@ -115,7 +119,7 @@ function saveDataSource (uploadDetails,loggedInUser) {
                 layerBoundary(uploadDetails, library.data.identifier,loggedInUser) 
               } else {
                 if(uploadDetails.selectedDataSourceName !== 'edge'){
-                  fileUpload(uploadDetails,library.data.identifier,loggedInUser) 
+                  fileUpload(dispatch, uploadDetails,library.data.identifier,loggedInUser) 
                 }
               }
               dispatch(setAllLibraryItems(library.data.dataType, library.data))
@@ -177,19 +181,93 @@ function setCableConstructionType (uploadDetails,loggedInUser) {
     .catch((err) => console.error(err))
 }
 
-function fileUpload (uploadDetails,libraryId,loggedInUser) {
+function fileUpload (dispatch, uploadDetails,libraryId,loggedInUser) {
+  console.log(uploadDetails)
   var formData = new FormData()
   var file = uploadDetails.file
   formData.append('file', file)
-
+  console.log(formData.getAll('file'))
   var fileExtension = file.name.substr(file.name.lastIndexOf('.') + 1).toUpperCase()
-  var url = `/uploadservice/v1/library/${libraryId}?userId=${loggedInUser.id}&media=${fileExtension}`
+  // ---
   
-  AroHttp.postRaw(url, formData).then((e) => {
-    
+  // var url = `/uploadservice/v1/library/${libraryId}?userId=${loggedInUser.id}&media=${fileExtension}`
+  var url = `/uploadservice/v1/async-library/${libraryId}?userId=${loggedInUser.id}&media=${fileExtension}`
+  // make this a utility to be used in many socket digest functions
+  const uploadNote = `Uploading file: ${file.name}`
+  const processNote = `Processing file: ${file.name}`
+  const noteId = NotificationInterface.postNotification(dispatch, `${uploadNote} 0.00%`)
+  var uInt8ArrayToJSON = (uIntArr) => {
+    return JSON.parse(new TextDecoder('utf-8').decode(new Uint8Array(uIntArr)))
+  }
+  console.log('before join room')
+  SocketManager.joinRoom('library', libraryId)
+  var unsubscribeETLStart = SocketManager.subscribe('ETL_START', msg => {
+    console.log(msg)
+    if (msg.properties.headers.libraryId === libraryId) {
+      // var content = uInt8ArrayToJSON(msg.content)
+      NotificationInterface.updateNotification(dispatch, noteId, `${processNote} 0.00% | 0 errors`)
+    }
+  })
+  var unsubscribeETLUpdate = SocketManager.subscribe('ETL_UPDATE', msg => {
+    console.log(msg)
+    if (msg.properties.headers.libraryId === libraryId) {
+      var content = uInt8ArrayToJSON(msg.content)
+      const pct = ((content.validCount / content.totalCount) * 100).toFixed(2)
+      const progressNote = `${pct}% | ${content.errorCount} errors`
+      NotificationInterface.updateNotification(dispatch, noteId, `${processNote} ${progressNote}`)
+    }
+  })
+  var unsubscribeETLClose = SocketManager.subscribe('ETL_CLOSE', msg => {
+    console.log(msg)
+    if (msg.properties.headers.libraryId === libraryId) {
+      var content = uInt8ArrayToJSON(msg.content)
+      const pct = ((content.validCount / content.totalCount) * 100).toFixed(2)
+      const progressNote = `${pct}% | ${content.errorCount} errors`
+      NotificationInterface.updateNotification(dispatch, noteId, `${processNote} ${progressNote}`)
+    }
+  })
+
+  var options = {
+    method: 'POST',
+    withCredentials: true,
+    headers: { 'Content-Type': undefined },
+    // transformRequest: (x) => {return x},
+    body: formData,
+    uploadEventHandlers: {
+      progress: event => {
+        console.log(event)
+        var progressNote = 'unknown%'
+        if (event.lengthComputable) {
+          const pct = ((event.loaded / event.total) * 100).toFixed(2)
+          progressNote = `${pct}%`
+        }
+        NotificationInterface.updateNotification(dispatch, noteId, `${uploadNote} ${progressNote}`)
+      }
+    }
+  }
+
+  AroHttp._fetch(url, options).then((e) => {
+    // the note will be auto-removed in 4 seconds
+    NotificationInterface.updateNotification(dispatch, noteId, `${file.name} COMPLETE!`)
+    NotificationInterface.removeNotification(dispatch, noteId, 4000)
+    // this.isUpLoad = false
+    unsubscribeETLStart()
+    unsubscribeETLUpdate()
+    unsubscribeETLClose()
+    // load new lib info from server
+    PlanActions.loadLibraryEntryById(libraryId)
   }).catch((e) => {
+    console.error(e)
+    NotificationInterface.removeNotification(dispatch, noteId)
+    // this.isUpLoad = false
+    unsubscribeETLStart()
+    unsubscribeETLUpdate()
+    unsubscribeETLClose()
     swal('Error', e.statusText, 'error')
   })
+
+  // ---
+
 }
 
 function setIsUploading (status){

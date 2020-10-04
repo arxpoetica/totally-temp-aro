@@ -53,7 +53,9 @@ export class DataUpload extends Component {
           selectedConduitSize: prevState.selectedConduitSize
 				};
 			}
-		}
+		}else{
+      return null
+    }
   }
   
   dataTypeChange(event) {
@@ -128,6 +130,7 @@ export class DataUpload extends Component {
 
   save (){
     this.props.saveDataSource(this.state,this.props.loggedInUser)
+    // ToDo: close modal
   }
 
   render () {
@@ -192,7 +195,7 @@ export class DataUpload extends Component {
         <div>
           {this.state.selectedDataSourceName !== 'tile_system' &&
             <div className="form-group row">
-              <label className="col-sm-4 col-form-label">Data Source Name</label>
+              <label className="col-sm-4 col-form-label">Data Source Name REDUX</label>
               <div className="col-sm-8">
                 <input type="text" onChange={(e)=>this.handleDataSource(e)} value={this.state.dataSourceName} name="dataSourceName" className="form-control" placeholder="Data Source Name"/>
               </div>
