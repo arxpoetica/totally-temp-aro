@@ -9,6 +9,7 @@ import UserSettings from './user-settings.jsx'
 
 export class ManageUsers extends Component {constructor (props) {
   super(props)
+  this.emailLabel = 'Email'
   this.state = {
     newUser:{
       firstName:'',
@@ -48,9 +49,12 @@ export class ManageUsers extends Component {constructor (props) {
   }
 
   render () {
-      return this.props.userList===null
-      ? null
-      : <>{this.renderUserList()}</>
+    if (this.props.clientId.toLowerCase() === 'frontier') {
+      this.emailLabel = 'Corp ID'
+    }
+    return this.props.userList===null
+    ? null
+    : <>{this.renderUserList()}</>
   }
 
   renderUserList () {
@@ -86,7 +90,7 @@ export class ManageUsers extends Component {constructor (props) {
                 <thead>
                   <tr>
                     <th style={{width: '20%'}}>Name</th>
-                    <th style={{width: '20%'}}>Email</th>
+                    <th style={{width: '20%'}}>{this.emailLabel}</th>
                     <th style={{width: '50%'}}>Groups</th>
                     <th style={{width: '10%'}}>Actions</th>
                   </tr>
@@ -219,13 +223,13 @@ export class ManageUsers extends Component {constructor (props) {
                 </div>
               </div>
               <div className="form-group">
-                <label className="col-sm-4 control-label">Email</label>
+                <label className="col-sm-4 control-label">{this.emailLabel}</label>
                 <div className="col-sm-8">
                   <input name="email" onChange={(e)=>this.handleUserChange(e)} value={this.state.newUser.email} type="text" className="form-control"/>
                 </div>
               </div>
               <div className="form-group">
-                <label className="col-sm-4 control-label">Confirm email</label>
+                <label className="col-sm-4 control-label">Confirm {this.emailLabel}</label>
                 <div className="col-sm-8">
                   <input name="confirmEmail" onChange={(e)=>this.handleUserChange(e)} value={this.state.newUser.confirmEmail} type="text" className="form-control"/>
                 </div>
@@ -373,7 +377,7 @@ export class ManageUsers extends Component {constructor (props) {
    if (this.state.newUser.email !== this.state.newUser.confirmEmail) {
       return swal({
         title: 'Error',
-        text: 'Emails do not match',
+        text: `${this.emailLabel}s do not match`,
         type: 'error'
       })
     } else {
@@ -384,10 +388,13 @@ export class ManageUsers extends Component {constructor (props) {
 
   clearNewuser(){
     let newUser = this.state.newUser;
-    newUser['firstName'] = ''; newUser['lastName'] = '';
-    newUser['email'] = ''; newUser['confirmEmail'] = '';
-    newUser['companyName'] = ''; newUser['isGlobalSuperUser'] = false;
-    newUser['groupIds'] = [];
+    newUser['firstName'] = ''
+    newUser['lastName'] = ''
+    newUser['email'] = ''
+    newUser['confirmEmail'] = ''
+    newUser['companyName'] = ''
+    newUser['isGlobalSuperUser'] = false
+    newUser['groupIds'] = []
 
     if(this.props.defaultGroup !== null){
       newUser['groups'] = this.props.defaultGroup;
@@ -434,7 +441,8 @@ const mapStateToProps = (state) => ({
     isOpenSendMail: state.user.isOpenSendMail,
     isOpenNewUser: state.user.isOpenNewUser,
     pageableData:  state.user.pageableData,
-    defaultGroup : state.user.defaultGroup
+    defaultGroup : state.user.defaultGroup,
+    clientId: state.configuration.system.ARO_CLIENT
 })
 
 const mapDispatchToProps = (dispatch) => ({
