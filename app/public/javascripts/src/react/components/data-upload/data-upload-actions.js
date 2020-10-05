@@ -50,13 +50,9 @@ function createLibraryId (uploadDetails, loggedInUser) {
 }
 
 function saveDataSource (uploadDetails,loggedInUser) {
-  console.log(uploadDetails)
   return dispatch => {
-
     dispatch(setIsUploading(true))
-
-    if(uploadDetails.selectedDataSourceName === 'tile_system'){
-
+    if (uploadDetails.selectedDataSourceName === 'tile_system') {
       return createLibraryId(uploadDetails,loggedInUser)
       .then((libraryItem) => {
         fileUpload(dispatch, uploadDetails,libraryItem.identifier,loggedInUser) 
@@ -182,11 +178,9 @@ function setCableConstructionType (uploadDetails,loggedInUser) {
 }
 
 function fileUpload (dispatch, uploadDetails,libraryId,loggedInUser) {
-  console.log(uploadDetails)
   var formData = new FormData()
   var file = uploadDetails.file
   formData.append('file', file)
-  console.log(formData.getAll('file'))
   var fileExtension = file.name.substr(file.name.lastIndexOf('.') + 1).toUpperCase()
   // ---
   
@@ -199,17 +193,14 @@ function fileUpload (dispatch, uploadDetails,libraryId,loggedInUser) {
   var uInt8ArrayToJSON = (uIntArr) => {
     return JSON.parse(new TextDecoder('utf-8').decode(new Uint8Array(uIntArr)))
   }
-  console.log('before join room')
   SocketManager.joinRoom('library', libraryId)
   var unsubscribeETLStart = SocketManager.subscribe('ETL_START', msg => {
-    console.log(msg)
     if (msg.properties.headers.libraryId === libraryId) {
       // var content = uInt8ArrayToJSON(msg.content)
       NotificationInterface.updateNotification(dispatch, noteId, `${processNote} 0.00% | 0 errors`)
     }
   })
   var unsubscribeETLUpdate = SocketManager.subscribe('ETL_UPDATE', msg => {
-    console.log(msg)
     if (msg.properties.headers.libraryId === libraryId) {
       var content = uInt8ArrayToJSON(msg.content)
       const pct = ((content.validCount / content.totalCount) * 100).toFixed(2)
@@ -218,7 +209,6 @@ function fileUpload (dispatch, uploadDetails,libraryId,loggedInUser) {
     }
   })
   var unsubscribeETLClose = SocketManager.subscribe('ETL_CLOSE', msg => {
-    console.log(msg)
     if (msg.properties.headers.libraryId === libraryId) {
       var content = uInt8ArrayToJSON(msg.content)
       const pct = ((content.validCount / content.totalCount) * 100).toFixed(2)
@@ -230,12 +220,11 @@ function fileUpload (dispatch, uploadDetails,libraryId,loggedInUser) {
   var options = {
     method: 'POST',
     withCredentials: true,
-    headers: { 'Content-Type': undefined },
+    // headers: { 'Content-Type': undefined },
     // transformRequest: (x) => {return x},
     body: formData,
     uploadEventHandlers: {
       progress: event => {
-        console.log(event)
         var progressNote = 'unknown%'
         if (event.lengthComputable) {
           const pct = ((event.loaded / event.total) * 100).toFixed(2)

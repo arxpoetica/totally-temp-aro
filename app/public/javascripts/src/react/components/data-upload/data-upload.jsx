@@ -130,7 +130,7 @@ export class DataUpload extends Component {
 
   save (){
     this.props.saveDataSource(this.state,this.props.loggedInUser)
-    // ToDo: close modal
+    this.props.onSave()
   }
 
   render () {
