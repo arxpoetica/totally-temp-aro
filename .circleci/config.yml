@@ -68,7 +68,7 @@ workflows:
               only:
                   - master
                   - tab-change-on-action
-                  - polygon-edit-fixes
+                  - Corp-ID-label
       - deploy:
           context: aro_qa_builds
           requires:
