@@ -712,6 +712,7 @@ class MapObjectEditorController {
     return mapMarker
   }
 
+  // ToDo: I think we should treat all polygons as multiPolygons
   createPolygonMapObject (feature) {
     // Create a "polygon" map object
     this.tileDataService.addFeatureToExclude(feature.objectId)
@@ -723,15 +724,11 @@ class MapObjectEditorController {
       })
     })
 
-    /*
-    console.log(polygonPath)
     var lastI = polygonPath.length - 1
     if (polygonPath[0].lat === polygonPath[lastI].lat && polygonPath[0].lng === polygonPath[lastI].lng) {
-      console.log('no need for a closed polygon')
       polygonPath.pop()
     }
-    */
-
+    
     var polygon = new google.maps.Polygon({
       objectId: feature.objectId, // Not used by Google Maps
       paths: polygonPath,
@@ -753,6 +750,7 @@ class MapObjectEditorController {
     return polygon
   }
 
+  // ToDo: I think we should treat all polygons as multiPolygons
   createMultiPolygonMapObject (feature) {
     // Create a "polygon" map object
     this.tileDataService.addFeatureToExclude(feature.objectId)
@@ -766,18 +764,13 @@ class MapObjectEditorController {
         })
       })
 
-      /*
-      console.log(dPath)
       var lastI = dPath.length - 1
       if (dPath[0].lat === dPath[lastI].lat && dPath[0].lng === dPath[lastI].lng) {
-        console.log('no need for a closed polygon')
         dPath.pop()
       }
-      */
-
+      
       polygonPaths.push(dPath)
     })
-
     var polygon = new google.maps.Polygon({
       objectId: feature.objectId, // Not used by Google Maps
       paths: polygonPaths,
@@ -836,6 +829,7 @@ class MapObjectEditorController {
         return
       }
     } else if (feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon') {
+      // if closed path, prune
       if (feature.geometry.type === 'Polygon') {
         mapObject = this.createPolygonMapObject(feature)
         google.maps.event.addListener(mapObject, 'dragend', function () {
@@ -852,6 +846,8 @@ class MapObjectEditorController {
       })
       var self = this
       mapObject.getPaths().forEach(function (path, index) {
+        var isClosed = self.isClosedPath(path)
+        
         google.maps.event.addListener(path, 'insert_at', function () {
           self.modifyObject(mapObject)
         })
@@ -859,7 +855,8 @@ class MapObjectEditorController {
           self.modifyObject(mapObject)
         })
         google.maps.event.addListener(path, 'set_at', function () {
-          if (!self.isClosedPath(path)) {
+          // if (!self.isClosedPath(path)) {
+          if (isClosed) {
             // IMPORTANT to check if it is already a closed path, otherwise we will get into an infinite loop when trying to keep it closed
             if (index === 0) {
               // The first point has been moved, move the last point of the polygon (to keep it a valid, closed polygon)
@@ -876,7 +873,6 @@ class MapObjectEditorController {
         })
       })
 
-      
       var mapObjectPaths = mapObject.getPaths()
       google.maps.event.addListener(mapObject, 'rightclick', event => {
         if (event.vertex === undefined) {

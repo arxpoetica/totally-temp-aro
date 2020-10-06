@@ -15,6 +15,7 @@ import uuidStore from '../../../shared-utils/uuid-store'
 import WktUtils from '../../../shared-utils/wkt-utils'
 import coverageActions from '../../../react/components/coverage/coverage-actions'
 import CoverageStatusTypes from '../../../react/components/coverage/constants'
+import MapUtilities from '../../common/plan/map-utilities'
 
 class PlanEditorController {
   constructor ($timeout, $http, $element, $filter, $ngRedux, state, Utils, tileDataService, tracker) {
@@ -426,7 +427,6 @@ class PlanEditorController {
   }
 
   exitPlanEditMode () {
-    console.log()
     this.setNetworkEquipmentLayerVisibility(this.feederFiberLayer, this.isFiberVisiblePreTransaction)
 
     // You should no longer hide any of the object ids that have been committed or discarded
@@ -603,20 +603,6 @@ class PlanEditorController {
     return serviceFeature
   }
 
-  // Convert the paths in a Google Maps object into a Polygon WKT
-  polygonPathsToWKT (paths) {
-    var allPaths = []
-    paths.forEach((path) => {
-      var pathPoints = []
-      path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
-      allPaths.push(pathPoints)
-    })
-    return {
-      type: 'Polygon',
-      coordinates: allPaths
-    }
-  }
-
   // Formats the boundary specified by the objectId so that it can be sent to aro-service for saving
   formatBoundaryForService (objectId, networkNodeType) {
     // Format the object and send it over to aro-service
@@ -645,7 +631,7 @@ class PlanEditorController {
       objectId: objectId,
       networkNodeType: siteNetworkNodeType,
       networkObjectId: this.boundaryIdToEquipmentId[objectId],
-      geometry: this.polygonPathsToWKT(boundaryMapObject.getPaths()),
+      geometry: MapUtilities.polygonPathsToWKT(boundaryMapObject.getPaths()),
       boundaryTypeId: boundaryProperties.selectedSiteBoundaryTypeId,
       attributes: attributes,
       dataType: 'equipment_boundary',
