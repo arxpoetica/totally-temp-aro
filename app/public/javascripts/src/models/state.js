@@ -1801,10 +1801,10 @@ class State {
         // console.log(service.rSelectedDisplayMode)
         service.selectedDisplayMode.next(service.rSelectedDisplayMode)
       }
-      if (nextState.rActiveViewModePanel && 
-          service.rActiveViewModePanel !== service.activeViewModePanel) {
-        service.activeViewModePanel = service.rActiveViewModePanel
-      }
+      // if (nextState.rActiveViewModePanel && 
+      //     service.rActiveViewModePanel !== service.activeViewModePanel) {
+      //   service.activeViewModePanel = service.rActiveViewModePanel
+      // }
     }
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(service.mergeToTarget.bind(service))
 
