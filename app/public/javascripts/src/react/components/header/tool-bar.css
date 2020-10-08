@@ -75,3 +75,20 @@
   background-color: white;
   color: #1f7de6;
 }
+
+/* Plan-search */
+.with-margin {
+  margin-bottom: 5px;
+}
+
+.parent-plan-selector-body.ng-hide-remove {
+  animation: fadeIn 300ms;
+}
+.parent-plan-selector-body.ng-hide-add {
+  animation: fadeOut 300ms;
+}
+
+/* Plan-search Filter*/
+#dropdownMenu1 {
+  border-color:white;
+}

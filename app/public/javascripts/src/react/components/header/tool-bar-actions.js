@@ -119,9 +119,12 @@ function setAppConfiguration (appConfiguration){
 
 function createNewPlan (isEphemeral, planName, parentPlan, planType){
   return (dispatch, getState) => {
+
     const state = getState()
     var loggedInUserId = state.user.loggedInUser.id
     var defaultPlanCoordinates = state.plan.defaultPlanCoordinates
+    var currentPlanTags = state.toolbar.currentPlanTags
+    var currentPlanServiceAreaTags = state.toolbar.currentPlanServiceAreaTags
 
     if (isEphemeral && parentPlan) {
       return Promise.reject('ERROR: Ephemeral plans cannot have a parent plan')
@@ -155,8 +158,8 @@ function createNewPlan (isEphemeral, planName, parentPlan, planType){
           }
         }
 
-        planOptions.tagMapping.global = service.currentPlanTags.map(tag => tag.id)
-        planOptions.tagMapping.linkTags.serviceAreaIds = service.currentPlanServiceAreaTags.map(tag => tag.id)
+        planOptions.tagMapping.global = currentPlanTags.map(tag => tag.id)
+        planOptions.tagMapping.linkTags.serviceAreaIds = currentPlanServiceAreaTags.map(tag => tag.id)
         // A parent plan is specified - append it to the POST url
         apiEndpoint += `&branch_plan=${parentPlan.id}`
       }
@@ -192,6 +195,92 @@ function loadPlan (planId) {
       })
       .then(() => {
         return dispatch(PlanActions.setActivePlan(plan)) // This will also create overlay, tiles, etc.
+      })
+  }
+}
+
+function makeCurrentPlanNonEphemeral (planName, planType) {
+  return (dispatch, getState) => {
+    
+    const state = getState()
+    var plan = state.plan.activePlan
+    var defaultPlanCoordinates = state.plan.defaultPlanCoordinates
+    var currentPlanTags = state.toolbar.currentPlanTags
+    var currentPlanServiceAreaTags = state.toolbar.currentPlanServiceAreaTags
+
+    var newPlan = JSON.parse(JSON.stringify(plan))
+    newPlan.name = planName
+    newPlan.ephemeral = false
+    newPlan.latitude = defaultPlanCoordinates.latitude
+    newPlan.longitude = defaultPlanCoordinates.longitude
+    newPlan.planType = planType || 'UNDEFINED'
+    delete newPlan.optimizationId
+    newPlan.tagMapping = {
+      global: [],
+      linkTags: {
+        geographyTag: 'service_area',
+        serviceAreaIds: []
+      }
+    }
+
+    newPlan.tagMapping.global = currentPlanTags.map(tag => tag.id)
+    newPlan.tagMapping.linkTags.serviceAreaIds = currentPlanServiceAreaTags.map(tag => tag.id)
+    // newPlan.tagMapping = {"global":service.currentPlanTags.map(tag => tag.id)}
+    getAddressFor(newPlan.latitude, newPlan.longitude)
+      .then((address) => {
+        newPlan.areaName = address
+        return AroHttp.put(`/service/v1/plan`, newPlan)
+      })
+      .then((result) => {
+        if (result.status >= 200 && result.status <= 299) {
+          // Plan has been saved in the DB. Reload it
+          dispatch(PlanActions.setActivePlan(result.data))
+        } else {
+          console.error('Unable to make plan permanent')
+          console.error(result)
+        }
+      })
+  }
+}
+
+function copyCurrentPlanTo (planName, planType) {
+  return (dispatch, getState) => {
+
+    const state = getState()
+    var loggedInUser = state.user.loggedInUser
+    var plan = state.plan.activePlan
+
+    var newPlan = JSON.parse(JSON.stringify(plan))
+    newPlan.name = planName
+    newPlan.ephemeral = false
+
+    // Only keep the properties needed to create a plan
+    var validProperties = new Set(['projectId', 'areaName', 'latitude', 'longitude', 'ephemeral', 'name', 'zoomIndex', 'planType'])
+    var keysInPlan = Object.keys(newPlan)
+    keysInPlan.forEach((key) => {
+      if (!validProperties.has(key)) {
+        delete newPlan[key]
+      }
+    })
+    var userId = loggedInUser.id
+    var url = `/service/v1/plan-command/copy?source_plan_id=${plan.id}&is_ephemeral=${newPlan.ephemeral}&name=${newPlan.name}`
+
+    return AroHttp.post(url, {})
+      .then((result) => {
+        if (result.status >= 200 && result.status <= 299) {
+          var center = map.getCenter()
+          result.data.latitude = center.lat()
+          result.data.longitude = center.lng()
+          result.data.planType = planType || 'UNDEFINED'
+          return AroHttp.put(`/service/v1/plan`, result.data)
+        } else {
+          console.error('Unable to copy plan')
+          console.error(result)
+          return Promise.reject()
+        }
+      })
+      .then((result) => {
+        return dispatch(loadPlan(result.data.id))
       })
   }
 }
@@ -253,6 +342,15 @@ function setCurrentPlanTags (currentPlanTags){
     dispatch({
       type: Actions.TOOL_BAR_SET_CURRENT_PLAN_TAGS,
       payload: currentPlanTags
+    })
+  }
+}
+
+function setCurrentPlanServiceAreaTags (currentPlanServiceAreaTags){
+  return dispatch => {
+    dispatch({
+      type: Actions.TOOL_BAR_SET_CURRENT_PLAN_SA_TAGS,
+      payload: currentPlanServiceAreaTags
     })
   }
 }
@@ -319,10 +417,65 @@ function loadListOfSAPlanTags (dataItems, filterObj, ishardreload) {
   }
 }
 
+function loadListOfSAPlanTagsById (listOfServiceAreaTags, promises) {
+  return dispatch => {
+    if (promises) {
+      var listOfServiceAreaTagsValue
+      return Promise.all(promises)
+        .then((results) => {
+          results.forEach((result) => {
+            listOfServiceAreaTagsValue = removeDuplicates(listOfServiceAreaTags.concat(result.data), 'id')
+            dispatch({
+              type: Actions.TOOL_BAR_LIST_OF_SERVICE_AREA_TAGS,
+              payload: listOfServiceAreaTagsValue
+            })
+          })
+          return listOfServiceAreaTagsValue
+        })
+        .catch((err) => console.error(err))
+    }
+  }
+}
+
 function removeDuplicates (myArr, prop) {
   return myArr.filter((obj, pos, arr) => {
     return arr.map(mapObj => mapObj[prop]).indexOf(obj[prop]) === pos
   })
+}
+
+function getTagColour (tag) {
+  return dispatch => {
+    return hsvToRgb(tag.colourHue, 0.5, 0.5)
+  }
+}
+
+// Function to convert from hsv to rgb color values.
+// https://stackoverflow.com/questions/17242144/javascript-convert-hsb-hsv-color-to-rgb-accurately
+function hsvToRgb (h, s, v) {
+  var r, g, b, i, f, p, q, t
+  i = Math.floor(h * 6)
+  f = h * 6 - i
+  p = v * (1 - s)
+  q = v * (1 - f * s)
+  t = v * (1 - (1 - f) * s)
+  switch (i % 6) {
+    case 0: r = v, g = t, b = p; break
+    case 1: r = q, g = v, b = p; break
+    case 2: r = p, g = v, b = t; break
+    case 3: r = p, g = q, b = v; break
+    case 4: r = t, g = p, b = v; break
+    case 5: r = v, g = p, b = q; break
+  }
+  var rgb = [r, g, b]
+  var color = '#'
+  rgb.forEach((colorValue) => {
+    var colorValueHex = Math.round(colorValue * 255).toString(16)
+    if (colorValueHex.length === 1) {
+      colorValueHex = '0' + colorValueHex
+    }
+    color += colorValueHex
+  })
+  return color
 }
 
 export default {
@@ -342,6 +495,11 @@ export default {
   loadPlan,
   loadListOfPlanTags,
   setCurrentPlanTags,
+  setCurrentPlanServiceAreaTags,
   loadServiceLayers,
-  loadListOfSAPlanTags
+  loadListOfSAPlanTags,
+  loadListOfSAPlanTagsById,
+  getTagColour,
+  makeCurrentPlanNonEphemeral,
+  copyCurrentPlanTo
 }

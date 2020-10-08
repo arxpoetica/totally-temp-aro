@@ -23,6 +23,8 @@ export class ToolBar extends Component {
   constructor (props) {
     super(props)
 
+    this.myInput = React.createRef()
+
     this.rState = new rState();
 
     this.viewModePanels = Object.freeze({
@@ -174,7 +176,12 @@ export class ToolBar extends Component {
       sliderValue: this.rangeValues.indexOf(this.mapTileOptions.heatMap.worldMaxValue),
       showSiteBoundary: '',
       selectedBoundaryType: '',
-      selectedFiberOption: this.viewSetting.selectedFiberOption
+      selectedFiberOption: this.viewSetting.selectedFiberOption,
+      mapTileOptions: this.mapTileOptions,
+      showDropDown: false,
+      marginPixels: 10, // Margin between the container and the div containing the buttons
+      dropdownWidthPixels: 36, // The width of the dropdown button
+      numPreviousCollapsedButtons: 0
     }
 
     this.props.loadServiceLayers()
@@ -196,6 +203,13 @@ export class ToolBar extends Component {
       e.stopPropagation()
       e.preventDefault()
     })
+
+    // toggle toolbar dropdown
+    jQuery('.dropdown').on('show.bs.dropdown', function (e) {
+      jQuery('.tool-bar-dropdown').toggle()
+      e.stopPropagation()
+      e.preventDefault()
+    })
   }
 
   componentWillReceiveProps(nextProps){
@@ -203,6 +217,7 @@ export class ToolBar extends Component {
       this.setState({mapRef: nextProps.googleMaps, showSiteBoundary: nextProps.showSiteBoundary,
         selectedBoundaryType: nextProps.selectedBoundaryType})
     }
+    setTimeout(() => this.refreshToolbar(), 0)
   }
 
   render () {
@@ -213,7 +228,8 @@ export class ToolBar extends Component {
 
   renderToolBar() {
     this.initSearchBox();
-    this.refreshSlidertrack()
+    this.refreshSlidertrack();
+    //this.refreshToolbar();
 
     const {selectedDisplayMode, activeViewModePanel, isAnnotationsListVisible,
        isMapReportsVisible, showMapReportMapObjects, selectedTargetSelectionMode,
@@ -221,7 +237,8 @@ export class ToolBar extends Component {
        showEquipmentLabels, showLocationLabels, showFiberSize, configuration } = this.props
 
     const {currentRulerAction, showRemoveRulerButton, heatMapOption, sliderValue,
-      showSiteBoundary, selectedBoundaryType, selectedFiberOption} = this.state
+      showSiteBoundary, selectedBoundaryType, selectedFiberOption, showDropDown,
+      marginPixels, dropdownWidthPixels} = this.state
 
     let selectedIndividualLocation = (selectedDisplayMode === this.displayModes.ANALYSIS || selectedDisplayMode === this.displayModes.VIEW) && activeViewModePanel !== this.viewModePanels.EDIT_LOCATIONS
     let selectedMultipleLocation = (selectedDisplayMode === this.displayModes.ANALYSIS || selectedDisplayMode === this.displayModes.VIEW) && activeViewModePanel !== this.viewModePanels.EDIT_LOCATIONS && configuration.perspective.showToolbarButtons.selectionPolygon
@@ -234,7 +251,7 @@ export class ToolBar extends Component {
     let isViewSettings = configuration.perspective.showToolbarButtons.viewSettings
 
     return(
-      <div className="tool-bar" style={{margin: '10px'}}>
+      <div ref={this.myInput} className="tool-bar" style={{margin: '10px'}}>
 
         {configuration.ARO_CLIENT !== 'frontier' &&
           <img src="images/logos/aro/logo_navbar.png" className="no-collapse" style={{alignSelf: 'center', paddingLeft: '10px', paddingRight: '10px'}}/>
@@ -441,11 +458,101 @@ export class ToolBar extends Component {
           onClick={(e) => this.showRfpWindow()}>
           <i className="fa fa-cloud"></i>
         </button>
+
+        <div className="dropdown" 
+          style={{
+            display: showDropDown ? 'block' : 'none',
+            borderLeft: '#eee 1px dotted',
+            width: dropdownWidthPixels
+          }} 
+          >
+          <button className="btn btn-light" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+            <i className="fa fa-angle-double-down"></i>
+          </button>
+          {/* <!-- Override some styles on the dropdown-menu UL below to remove margins, padding, etc --> */}
+          <ul className="dropdown-menu tool-bar-dropdown" aria-labelledby="dropdownMenu1" style={{padding: '0px', minWidth: '0px'}}>
+          </ul> 
+        </div>   
         <PlanInputsModal></PlanInputsModal>
       </div>
     )
   }
 
+  refreshToolbar () {
+    var toolBarElement = jQuery(".tool-bar").get();
+    if (toolBarElement) {
+      var dropDownElement = jQuery(".tool-bar .dropdown").get();
+      var ulElement = jQuery(".tool-bar .dropdown ul").get();
+      var liElement = jQuery(".tool-bar .dropdown ul li").get();
+
+      var clientWidth = this.myInput.current.offsetWidth;
+      console.log(clientWidth)
+
+      // Some of the buttons may be in the dropdown menu because the toolbar is collapsed.
+      // Move them into the main toolbar before checking for button sizes.
+      var toolbarRoot = toolBarElement[0]
+      var dropdownRoot = dropDownElement[0]
+      // The width of the toolbar is the clientWidth minus the margins minus the width of the dropdown.
+      // We assume that the dropdown is shown while computing which buttons to collapse.
+      var toolbarWidth = clientWidth - this.state.marginPixels * 2.0 - this.state.dropdownWidthPixels
+      var dropdownUL = ulElement[0]
+      // Loop through all the <li> elements in the dropdown. These <li> elements contain the buttons.
+      var dropdownItems = liElement
+
+      for (var i = 0; i < dropdownItems.length; ++i) {
+        if (dropdownItems[i].childNodes.length > 0) {
+          toolbarRoot.insertBefore(dropdownItems[i].childNodes[0], dropdownRoot)
+        }
+      }
+
+      // Clear all <li> elements from the dropdown.
+      if (dropdownUL) {
+        while (dropdownUL.hasChildNodes()) {
+          dropdownUL.removeChild(dropdownUL.lastChild)
+        }
+      }
+
+      // All buttons are in the toolbar. Go through all of them and mark the ones to be collapsed (if any).
+      var cumulativeWidth = 0
+      var collapsedButtons = 0 // Counted from the right side.
+      var toolbarButtons = [] // A list of toolbar buttons
+      toolbarRoot.childNodes.forEach((toolbarButton) => {
+        // There may also be markup like newlines which show up as "text" elements that have a NaN scrollWidth.
+        // Ignore these elements (also ignore the dropdown button itself - this may be shown or hidden).
+        var isDropDown = toolbarButton.className && toolbarButton.className.indexOf('dropdown') >= 0
+        if (!isDropDown && !isNaN(toolbarButton.scrollWidth)) {
+          toolbarButtons.push(toolbarButton)
+          cumulativeWidth += toolbarButton.scrollWidth
+          if (cumulativeWidth > toolbarWidth && toolbarButton.className.indexOf('no-collapse') < 0) {
+            ++collapsedButtons
+          }
+        }
+      })
+      // Our toolbar width was calculated assuming that the dropdown button is visible. If we are going
+      // to collapse exactly one button, that is the dropdown. In this case don't collapse any buttons.
+      // This is done so that the "number of buttons to collapse" is computed correctly, including separators, etc.
+      if (collapsedButtons === 1) {
+        collapsedButtons = 0
+      }
+
+      this.setState({showDropDown: collapsedButtons > 0})
+
+      if (this.state.numPreviousCollapsedButtons !== collapsedButtons) {
+        //this.$timeout() // Trigger a digest cycle as the toolbar state has changed
+      }
+
+      this.setState({numPreviousCollapsedButtons: collapsedButtons})
+
+      // If we have any collapsed buttons, then move them into the dropdown
+      if (collapsedButtons > 0) {
+        for (var i = toolbarButtons.length - collapsedButtons; i < toolbarButtons.length; ++i) {
+          var li = document.createElement('li')
+          li.appendChild(toolbarButtons[i])
+          dropdownUL.appendChild(li)
+        }
+      }
+    }
+  }
 
   savePlanAs(){
     this.props.setPlanInputsModal(true)
@@ -506,7 +613,7 @@ export class ToolBar extends Component {
 
   toggleHeatMapOptions (e) {
     this.setState({heatMapOption: !this.state.heatMapOption}, function() {
-      var newMapTileOptions = JSON.parse(JSON.stringify(this.mapTileOptions))
+      var newMapTileOptions = JSON.parse(JSON.stringify(this.state.mapTileOptions))
       newMapTileOptions.selectedHeatmapOption = this.state.heatMapOption ? this.viewSetting.heatmapOptions[0] : this.viewSetting.heatmapOptions[2]
       this.rState.mapTileOptions.sendMessage(newMapTileOptions) // This will also refresh the map layer
       this.refreshSlidertrack()
@@ -515,11 +622,20 @@ export class ToolBar extends Component {
 
   changeHeatMapOptions (e) {
     this.setState({sliderValue: e.target.value}, function() {
-      var newMapTileOptions = JSON.parse(JSON.stringify(this.mapTileOptions))
+      var newMapTileOptions = JSON.parse(JSON.stringify(this.state.mapTileOptions))
       newMapTileOptions.heatMap.worldMaxValue = this.rangeValues[this.state.sliderValue]
-      this.rState.mapTileOptions.sendMessage(newMapTileOptions) // This will also refresh the map layer
+      this.setState({mapTileOptions: newMapTileOptions})
+      this.rState.mapTileOptions.sendMessage(newMapTileOptions) // This will also refresh the map layer  
     })
   }
+
+  // changeHeatMapOptions (e) {
+  //   this.setState({sliderValue: e.target.value}, function() {
+  //     var newMapTileOptions = JSON.parse(JSON.stringify(this.mapTileOptions))
+  //     newMapTileOptions.heatMap.worldMaxValue = this.rangeValues[this.state.sliderValue]
+  //     this.rState.mapTileOptions.sendMessage(newMapTileOptions) // This will also refresh the map layer
+  //   })
+  // }
 
   refreshSlidertrack () {
     var val = (this.state.sliderValue - this.min) / (this.max - this.min)

@@ -495,7 +495,7 @@ class TileComponentController {
           })
           
           // To open Location info in View-Mode While Edit-Service layers serviceAreas is Empty
-          if(serviceAreas.length === 0 ) {
+          if(serviceAreas.length === 0 && this.rActiveViewModePanel === this.state.viewModePanels.EDIT_SERVICE_LAYER) {
             this.rActiveViewModePanelAction(this.state.viewModePanels.LOCATION_INFO)
           }
 

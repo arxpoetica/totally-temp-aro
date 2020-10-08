@@ -4,12 +4,15 @@ import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import ToolBarActions from './tool-bar-actions'
 import EditPlanTag from './edit-plan-tag.jsx'
+import PlanSearch from './plan-search.jsx'
+import AroHttp from '../../common/aro-http'
 
 export class PlanInputsModal extends Component {
   constructor (props) {
     super(props)
 
     this.props.loadListOfPlanTags()
+    this.props.loadListOfSAPlanTags(this.props.dataItems)
 
     this.state = {
       planName: '',
@@ -40,13 +43,21 @@ export class PlanInputsModal extends Component {
         this.initModalData()
       }
     }
+
+    const currentActivePlanId = this.props.plan && this.props.plan.id
+    const newActivePlanId = nextProps.plan && nextProps.plan.id
+
+    if ((currentActivePlanId !== newActivePlanId) && (nextProps.plan)) {
+      // The active plan has changed. Note that we are comparing ids because a change in plan state also causes the plan object to update.
+      this.onActivePlanChanged(nextProps.plan)
+    }
   }
 
   render() {
 
     const {planInputsModal, listOfTags, currentPlanTags,
-          listOfServiceAreaTags, currentPlanServiceAreaTags, dataItems} = this.props
-    const {planName, planType, planTypes} = this.state
+          listOfServiceAreaTags, currentPlanServiceAreaTags, systemActors} = this.props
+    const {planName, planType, planTypes, parentPlanSelectorExpanded, parentPlan} = this.state
 
     return(
       <div>
@@ -81,8 +92,34 @@ export class PlanInputsModal extends Component {
               objectName="Service Area"
               searchList={listOfServiceAreaTags}
               selectedList={currentPlanServiceAreaTags}
-              refreshTagList={this.props.loadListOfSAPlanTags(dataItems)}
+              // refreshTagList={this.props.loadListOfSAPlanTags(dataItems)}
             />
+
+            {/* Parent plan selector - header */}
+            <div onClick={(e)=> this.toggleParentPlanSelectorExpanded(e)} style={{marginTop: '10px', cursor: 'pointer'}}>
+              Parent plan: {parentPlan ? parentPlan.name : '(undefined)'}&nbsp;
+              <button className="btn btn-thin btn-light" onClick={(e)=> this.clearParentPlan(e)}>Clear</button>
+              <div className="float-right">
+                <i className={`btn ${!parentPlanSelectorExpanded ? 'fa fa-plus' : 'fa fa-minus'}`}></i>
+              </div>
+            </div>
+
+            {/* Parent plan selector - expandable body */}
+            <div className="parent-plan-selector-body" style={{ display: parentPlanSelectorExpanded ? 'block' : 'none', 
+              marginLeft: '30px', maxHeight: '200px', overflowY: 'auto', width: '285px'
+             }}
+            >
+              {parentPlanSelectorExpanded &&
+                <PlanSearch
+                  showPlanDeleteButton={false}
+                  showRefreshPlansOnMapMove={false}
+                  systemActors={systemActors}
+                  onPlanSelected={this.onParentPlanSelected.bind(this)}
+                />
+              }
+           </div>
+
+
           </ModalBody>
           <ModalFooter>
             <button className="btn btn-primary" onClick={(e) => this.savePlanAs()}>Create Plan</button>
@@ -91,6 +128,24 @@ export class PlanInputsModal extends Component {
         </Modal>
       </div>
     )
+  }
+
+  onActivePlanChanged (plan) {
+    this.props.setCurrentPlanTags(this.props.listOfTags.filter(tag => _.contains(plan.tagMapping.global, tag.id)))
+    this.props.setCurrentPlanServiceAreaTags(this.props.listOfServiceAreaTags.filter(tag => _.contains(plan.tagMapping.linkTags.serviceAreaIds, tag.id)))
+  }
+
+  onParentPlanSelected (plan) {
+    this.setState({parentPlan: plan.plan, parentPlanSelectorExpanded: false})
+  }
+
+  toggleParentPlanSelectorExpanded () {
+    this.setState({parentPlanSelectorExpanded: !this.state.parentPlanSelectorExpanded})
+  }
+
+  clearParentPlan (e) {
+    e.stopPropagation()
+    this.setState({parentPlan: null})
   }
 
   onChangePlanName (e) {
@@ -102,12 +157,12 @@ export class PlanInputsModal extends Component {
   }
 
   initModalData () {
+    this.setState({planName: '', parentPlan: null, planType: 'UNDEFINED', parentPlanSelectorExpanded: false})
     const currentPlan = this.props.plan
     if (currentPlan && !currentPlan.ephemeral) {
       // IF the current plan is not an ephemeral plan, then set it as the parent plan.
       this.setState({parentPlan: currentPlan})
     }
-
     var allPlanTypes = []
     var allowedPlanTypes = []
     let planTypes = {}
@@ -130,7 +185,78 @@ export class PlanInputsModal extends Component {
   }
 
   savePlanAs () {
-    this.resetPlanInputs()
+    this.checkIfSATagExists()
+      .then((saTagExists) => {
+        if (saTagExists) return this.checkIfPlanNameExists()
+      })
+      .then((planNameExists) => {
+        if (!planNameExists) {
+          if (this.state.parentPlan) {
+            // A parent plan is specified. Ignore the currently open plan, and just create a new one using
+            // the selected plan name and parent plan
+            this.props.createNewPlan(false, this.state.planName, this.state.parentPlan, this.state.planType)
+            .then((result) => this.props.loadPlan(result.data.id))
+            .catch((err) => console.error(err))
+          } else {
+          // No parent plan specified
+            var currentPlan = this.props.plan
+            if (currentPlan.ephemeral) {
+              if (this.state.planName) {
+                this.props.makeCurrentPlanNonEphemeral(this.state.planName, this.state.planType)
+                this.resetPlanInputs()
+              }
+            } else {
+              if (this.state.planName) {
+                this.props.copyCurrentPlanTo(this.state.planName, this.state.planType)
+                this.resetPlanInputs()
+              }
+            }
+          }
+          this.close()
+        }
+      })
+  }
+
+  checkIfSATagExists () {
+    return new Promise((resolve, reject) => {
+      // For frontier client check for atleast one SA tag selected
+      if (this.props.configuration.ARO_CLIENT === 'frontier') {
+        if (this.props.currentPlanServiceAreaTags.length <= 0) {
+          swal({
+            title: 'Service Area Tag is Required',
+            text: 'Select Atleast One Service Area Tag',
+            type: 'error'
+          })
+        } else {
+          resolve(true)
+        }
+      } else {
+        resolve(true)
+      }
+    })
+  }
+
+  checkIfPlanNameExists () {
+    return new Promise((resolve, reject) => {
+      // For frontier client check for duplicate plan name
+      if (this.props.configuration.ARO_CLIENT === 'frontier') {
+        var filter = `(name eq '${this.state.planName.replace(/'/g, "''")}') and (ephemeral eq false)`
+        return AroHttp.get(`/service/odata/PlanSummaryEntity?$select=id,name&$filter=${encodeURIComponent(filter)}&$top=20`)
+          .then((result) => {
+            if (result.data.length > 0) {
+              swal({
+                title: 'Duplicate Plan Name',
+                text: 'Plan name already exists, please enter a unique plan name',
+                type: 'error'
+              })
+            } else {
+              resolve(false)
+            }
+          })
+      } else {
+        resolve(false)
+      }
+    })
   }
 
   resetPlanInputs () {
@@ -148,13 +274,19 @@ const mapStateToProps = (state) => ({
   dataItems: state.plan.dataItems,
   listOfServiceAreaTags: state.toolbar.listOfServiceAreaTags,
   currentPlanServiceAreaTags: state.toolbar.currentPlanServiceAreaTags,
-
+  systemActors: state.user.systemActors
 })  
 
 const mapDispatchToProps = (dispatch) => ({
   setPlanInputsModal: (status) => dispatch(ToolBarActions.setPlanInputsModal(status)),
   loadListOfPlanTags: () => dispatch(ToolBarActions.loadListOfPlanTags()),
-  loadListOfSAPlanTags: (dataItems) => dispatch(ToolBarActions.loadListOfSAPlanTags(dataItems))
+  loadListOfSAPlanTags: (dataItems) => dispatch(ToolBarActions.loadListOfSAPlanTags(dataItems)),
+  createNewPlan: (value, planName, parentPlan, planType) => dispatch(ToolBarActions.createNewPlan(value, planName, parentPlan, planType)),
+  loadPlan: (planId) => dispatch(ToolBarActions.loadPlan(planId)),
+  makeCurrentPlanNonEphemeral: (planName, planType) => dispatch(ToolBarActions.makeCurrentPlanNonEphemeral(planName, planType)),
+  copyCurrentPlanTo: (planName, planType) => dispatch(ToolBarActions.copyCurrentPlanTo(planName, planType)),
+  setCurrentPlanTags: (currentPlanTags) => dispatch(ToolBarActions.setCurrentPlanTags(currentPlanTags)),
+  setCurrentPlanServiceAreaTags: (currentPlanServiceAreaTags) => dispatch(ToolBarActions.setCurrentPlanServiceAreaTags(currentPlanServiceAreaTags))
 })
 
 const PlanInputsModalComponent = wrapComponentWithProvider(reduxStore, PlanInputsModal, mapStateToProps, mapDispatchToProps)

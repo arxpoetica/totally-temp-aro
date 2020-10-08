@@ -96,6 +96,12 @@ function setCurrentPlanTags (state, currentPlanTags) {
   }
 }
 
+function setCurrentPlanServiceAreaTags (state, currentPlanServiceAreaTags) {
+  return { ...state,
+    currentPlanServiceAreaTags: currentPlanServiceAreaTags
+  }
+}
+
 function setLoadServiceLayers (state, nameToServiceLayers) {
   return { ...state,
     nameToServiceLayers: nameToServiceLayers
@@ -148,7 +154,10 @@ function ToolBarReducer (state = defaultState, action) {
       return setLoadListOfPlanTags(state, action.payload) 
       
     case Actions.TOOL_BAR_SET_CURRENT_PLAN_TAGS:
-      return setCurrentPlanTags(state, action.payload)       
+      return setCurrentPlanTags(state, action.payload) 
+      
+    case Actions.TOOL_BAR_SET_CURRENT_PLAN_SA_TAGS:
+      return setCurrentPlanServiceAreaTags(state, action.payload)       
 
     case Actions.TOOL_BAR_LOAD_SERVICE_LAYERS:
       return setLoadServiceLayers(state, action.payload)  
