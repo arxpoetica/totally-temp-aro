@@ -23,9 +23,13 @@ export class ToolBar extends Component {
   constructor (props) {
     super(props)
 
-    this.myInput = React.createRef()
+    this.toolBarRef = React.createRef()
+    this.dropDownRef = React.createRef()
+    this.ulRef = React.createRef()
 
     this.rState = new rState();
+
+    this.refreshToolbar = this.refreshToolbar.bind(this)
 
     this.viewModePanels = Object.freeze({
       LOCATION_INFO: 'LOCATION_INFO',
@@ -185,6 +189,10 @@ export class ToolBar extends Component {
     }
 
     this.props.loadServiceLayers()
+
+    window.addEventListener('resizeChanged', (mapCenter) => { 
+      setTimeout(() => this.refreshToolbar(), 0)
+    });
   }
 
   componentDidMount(){
@@ -210,6 +218,10 @@ export class ToolBar extends Component {
       e.stopPropagation()
       e.preventDefault()
     })
+
+    //https://stackoverflow.com/questions/52037958/change-value-in-react-js-on-window-resize
+    //setTimeout(() => window.addEventListener("resize", this.refreshToolbar), 0)
+
   }
 
   componentWillReceiveProps(nextProps){
@@ -217,7 +229,12 @@ export class ToolBar extends Component {
       this.setState({mapRef: nextProps.googleMaps, showSiteBoundary: nextProps.showSiteBoundary,
         selectedBoundaryType: nextProps.selectedBoundaryType})
     }
-    setTimeout(() => this.refreshToolbar(), 0)
+    //setTimeout(() => this.refreshToolbar(), 0)
+  }
+
+  componentWillUnmount() {
+    //https://stackoverflow.com/questions/52037958/change-value-in-react-js-on-window-resize
+    //setTimeout(() => window.removeEventListener("resize", this.refreshToolbar), 0)
   }
 
   render () {
@@ -229,7 +246,6 @@ export class ToolBar extends Component {
   renderToolBar() {
     this.initSearchBox();
     this.refreshSlidertrack();
-    //this.refreshToolbar();
 
     const {selectedDisplayMode, activeViewModePanel, isAnnotationsListVisible,
        isMapReportsVisible, showMapReportMapObjects, selectedTargetSelectionMode,
@@ -251,7 +267,7 @@ export class ToolBar extends Component {
     let isViewSettings = configuration.perspective.showToolbarButtons.viewSettings
 
     return(
-      <div ref={this.myInput} className="tool-bar" style={{margin: '10px'}}>
+      <div ref={this.toolBarRef} className="tool-bar" style={{margin: marginPixels}}>
 
         {configuration.ARO_CLIENT !== 'frontier' &&
           <img src="images/logos/aro/logo_navbar.png" className="no-collapse" style={{alignSelf: 'center', paddingLeft: '10px', paddingRight: '10px'}}/>
@@ -283,6 +299,7 @@ export class ToolBar extends Component {
           onClick={(e) => this.savePlanAs()}>
           <i className="far fa-save"></i>
         </button>
+        <PlanInputsModal></PlanInputsModal>
 
         <button className="btn" title="Open an existing plan..." style={{ display: isPlanModel ? 'block' : 'none' }}
           onClick={(e) => this.openViewModeExistingPlan()}>
@@ -402,10 +419,8 @@ export class ToolBar extends Component {
           </div>
         </div>
 
-        {selectedDisplayMode === this.displayModes.ANALYSIS || selectedDisplayMode === this.displayModes.VIEW &&
-          <div className="separator"></div>
-        }
-        
+        <div style={{ display: selectedDisplayMode === this.displayModes.ANALYSIS || selectedDisplayMode === this.displayModes.VIEW ? 'block' : 'none' }} className="separator"></div>
+      
         <button style={{ display: selectedIndividualLocation ? 'block' : 'none' }}
           className={`btn ${selectedTargetSelectionMode === this.targetSelectionModes.SINGLE_PLAN_TARGET ? 'btn-selected' : ''} ${selectedIndividualLocation === true ? 'ng-hide-remove' : 'ng-hide-add'}`}
           onClick={(e) => this.setSelectionSingle()}
@@ -444,60 +459,52 @@ export class ToolBar extends Component {
             <i className="fa fa-crosshairs fa-rotate-180"></i>
           </button>
         }
-        
-        {exportSelectedPolygon &&
-          <button
-            className={`btn ${selectedTargetSelectionMode === this.targetSelectionModes.POLYGON_EXPORT_TARGET ? 'btn-selected' : ''} ${exportSelectedPolygon === true ? 'ng-hide-remove' : 'ng-hide-add'}`}
-            onClick={(e) => this.setSelectionExport()}
-            title="Export selected polygon">
-            <i className="fa fa-cube"></i>
-          </button>
-        }
 
+        <button
+          style={{ display: exportSelectedPolygon ? 'block' : 'none' }} 
+          className={`btn ${selectedTargetSelectionMode === this.targetSelectionModes.POLYGON_EXPORT_TARGET ? 'btn-selected' : ''} ${exportSelectedPolygon === true ? 'ng-hide-remove' : 'ng-hide-add'}`}
+          onClick={(e) => this.setSelectionExport()}
+          title="Export selected polygon">
+          <i className="fa fa-cube"></i>
+        </button>
+        
         <button className="btn" title="Show RFP status" 
           onClick={(e) => this.showRfpWindow()}>
           <i className="fa fa-cloud"></i>
         </button>
 
-        <div className="dropdown" 
-          style={{
-            display: showDropDown ? 'block' : 'none',
-            borderLeft: '#eee 1px dotted',
-            width: dropdownWidthPixels
-          }} 
-          >
+        <div className="dropdown" ref={this.dropDownRef}
+          style={{ display: !showDropDown ? 'none' : 'block', borderLeft: '#eee 1px dotted', width: dropdownWidthPixels}} 
+        >
           <button className="btn btn-light" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
             <i className="fa fa-angle-double-down"></i>
           </button>
           {/* <!-- Override some styles on the dropdown-menu UL below to remove margins, padding, etc --> */}
-          <ul className="dropdown-menu tool-bar-dropdown" aria-labelledby="dropdownMenu1" style={{padding: '0px', minWidth: '0px'}}>
+          <ul ref={this.ulRef} className="dropdown-menu tool-bar-dropdown" aria-labelledby="dropdownMenu1" style={{padding: '0px', minWidth: '0px'}}>
           </ul> 
-        </div>   
-        <PlanInputsModal></PlanInputsModal>
+        </div> 
       </div>
     )
   }
 
   refreshToolbar () {
-    var toolBarElement = jQuery(".tool-bar").get();
-    if (toolBarElement) {
+    var element = jQuery(".reactCompClass").get();
+    if (element) {
+
+      var toolBarElement = jQuery(".tool-bar").get();
       var dropDownElement = jQuery(".tool-bar .dropdown").get();
       var ulElement = jQuery(".tool-bar .dropdown ul").get();
-      var liElement = jQuery(".tool-bar .dropdown ul li").get();
-
-      var clientWidth = this.myInput.current.offsetWidth;
-      console.log(clientWidth)
 
       // Some of the buttons may be in the dropdown menu because the toolbar is collapsed.
       // Move them into the main toolbar before checking for button sizes.
-      var toolbarRoot = toolBarElement[0]
-      var dropdownRoot = dropDownElement[0]
+      var toolbarRoot = toolBarElement[0];
+      var dropdownRoot = dropDownElement[0];
       // The width of the toolbar is the clientWidth minus the margins minus the width of the dropdown.
       // We assume that the dropdown is shown while computing which buttons to collapse.
-      var toolbarWidth = clientWidth - this.state.marginPixels * 2.0 - this.state.dropdownWidthPixels
-      var dropdownUL = ulElement[0]
+      var toolbarWidth = element[0].clientWidth - this.state.marginPixels * 2.0 - this.state.dropdownWidthPixels
+      var dropdownUL = ulElement[0];
       // Loop through all the <li> elements in the dropdown. These <li> elements contain the buttons.
-      var dropdownItems = liElement
+      var dropdownItems = jQuery(".tool-bar .dropdown ul li").get();
 
       for (var i = 0; i < dropdownItems.length; ++i) {
         if (dropdownItems[i].childNodes.length > 0) {
@@ -536,12 +543,6 @@ export class ToolBar extends Component {
       }
 
       this.setState({showDropDown: collapsedButtons > 0})
-
-      if (this.state.numPreviousCollapsedButtons !== collapsedButtons) {
-        //this.$timeout() // Trigger a digest cycle as the toolbar state has changed
-      }
-
-      this.setState({numPreviousCollapsedButtons: collapsedButtons})
 
       // If we have any collapsed buttons, then move them into the dropdown
       if (collapsedButtons > 0) {
@@ -987,6 +988,8 @@ export class ToolBar extends Component {
 
   setSelectionMode (selectionMode) {
     this.props.selectedTargetSelectionModeAction(selectionMode)
+    // As we didnt
+    //this.$timeout() // Trigger a digest cycle as the toolbar state has changed
   }
 
   showRfpWindow(){

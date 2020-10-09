@@ -48,6 +48,9 @@ class MapSplitController {
       this.splitterObj.destroy()
       this.splitterObj = null
     }
+    // This event will we 
+    var event = new CustomEvent('resizeChanged', { detail : ''});
+    window.dispatchEvent(event);
   }
 
   toggleCollapseSideBar () {
@@ -190,7 +193,7 @@ let mapSplit = {
           causes the map to not show up -->
       <div id="header-bar-container" style="position: absolute; top: 0px; width: 100%; height: 55px; display: flex; flex-direction: row;">
         <div style="flex: 0 0 70px;"></div>
-        <r-tool-bar map-global-object-name="map" style="flex: 1 1 auto; position: relative;"></r-tool-bar>
+        <r-tool-bar map-global-object-name="map" class="reactCompClass" style="flex: 1 1 auto; position: relative;"></r-tool-bar>
         <network-plan style="flex: 0 0 auto; margin: auto;"></network-plan>
         <div id="spacerForIconOnSidebar" style="flex: 0 0 40px;"></div>
         <r-tool-box ng-if="$ctrl.showToolBox"></r-tool-box>
