@@ -15,7 +15,8 @@ const defaultState = {
   listOfTags: [],
   currentPlanTags: [],
   listOfServiceAreaTags: [],
-  currentPlanServiceAreaTags: []
+  currentPlanServiceAreaTags: [],
+  selectedHeatMapOption: 'HEATMAP_ON'
 }
 
 function setPlanInputsModal (state, planInputsModal) {
@@ -114,6 +115,12 @@ function setLoadListOfSAPlanTags (state, listOfServiceAreaTags) {
   }
 }
 
+function setSelectedHeatMapOption (state, selectedHeatMapOption) {
+  return { ...state,
+    selectedHeatMapOption: selectedHeatMapOption
+  }
+}
+
 function ToolBarReducer (state = defaultState, action) {
   switch (action.type) {
 
@@ -162,8 +169,11 @@ function ToolBarReducer (state = defaultState, action) {
     case Actions.TOOL_BAR_LOAD_SERVICE_LAYERS:
       return setLoadServiceLayers(state, action.payload)  
 
-      case Actions.TOOL_BAR_LIST_OF_SERVICE_AREA_TAGS:
-        return setLoadListOfSAPlanTags(state, action.payload)      
+    case Actions.TOOL_BAR_LIST_OF_SERVICE_AREA_TAGS:
+      return setLoadListOfSAPlanTags(state, action.payload)
+        
+    case Actions.TOOL_BAR_SET_HEAT_MAP_OPTION:
+      return setSelectedHeatMapOption(state, action.payload)        
 
     default:
       return state

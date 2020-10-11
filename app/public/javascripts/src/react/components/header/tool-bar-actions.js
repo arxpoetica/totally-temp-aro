@@ -478,6 +478,15 @@ function hsvToRgb (h, s, v) {
   return color
 }
 
+function setSelectedHeatMapOption (selectedHeatMapOption){
+  return dispatch => {
+    dispatch({
+      type: Actions.TOOL_BAR_SET_HEAT_MAP_OPTION,
+      payload: selectedHeatMapOption
+    })
+  }
+}
+
 export default {
   setPlanInputsModal,
   selectedDisplayMode,
@@ -501,5 +510,6 @@ export default {
   loadListOfSAPlanTagsById,
   getTagColour,
   makeCurrentPlanNonEphemeral,
-  copyCurrentPlanTo
+  copyCurrentPlanTo,
+  setSelectedHeatMapOption
 }

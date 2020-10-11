@@ -22,14 +22,8 @@ import PlanInputsModal from './plan-inputs-modal.jsx'
 export class ToolBar extends Component {
   constructor (props) {
     super(props)
-
-    this.toolBarRef = React.createRef()
-    this.dropDownRef = React.createRef()
-    this.ulRef = React.createRef()
-
-    this.rState = new rState();
-
-    this.refreshToolbar = this.refreshToolbar.bind(this)
+    
+    this.rState = new rState(); // For RxJs implementation in React
 
     this.viewModePanels = Object.freeze({
       LOCATION_INFO: 'LOCATION_INFO',
@@ -43,7 +37,7 @@ export class ToolBar extends Component {
       PLAN_INFO: 'PLAN_INFO'
     })
 
-      // The display modes for the application
+    // The display modes for the application
     this.displayModes = Object.freeze({
       VIEW: 'VIEW',
       ANALYSIS: 'ANALYSIS',
@@ -185,12 +179,14 @@ export class ToolBar extends Component {
       showDropDown: false,
       marginPixels: 10, // Margin between the container and the div containing the buttons
       dropdownWidthPixels: 36, // The width of the dropdown button
-      numPreviousCollapsedButtons: 0
     }
 
-    this.props.loadServiceLayers()
+    this.props.loadServiceLayers();
 
-    window.addEventListener('resizeChanged', (mapCenter) => { 
+    this.refreshToolbar = this.refreshToolbar.bind(this); // To bind a function
+
+    // To Trigger refreshToolbar() by Listening to the custom event from map-split.js do-check() method
+    window.addEventListener('toolBarResized', () => { 
       setTimeout(() => this.refreshToolbar(), 0)
     });
   }
@@ -218,10 +214,6 @@ export class ToolBar extends Component {
       e.stopPropagation()
       e.preventDefault()
     })
-
-    //https://stackoverflow.com/questions/52037958/change-value-in-react-js-on-window-resize
-    //setTimeout(() => window.addEventListener("resize", this.refreshToolbar), 0)
-
   }
 
   componentWillReceiveProps(nextProps){
@@ -229,12 +221,6 @@ export class ToolBar extends Component {
       this.setState({mapRef: nextProps.googleMaps, showSiteBoundary: nextProps.showSiteBoundary,
         selectedBoundaryType: nextProps.selectedBoundaryType})
     }
-    //setTimeout(() => this.refreshToolbar(), 0)
-  }
-
-  componentWillUnmount() {
-    //https://stackoverflow.com/questions/52037958/change-value-in-react-js-on-window-resize
-    //setTimeout(() => window.removeEventListener("resize", this.refreshToolbar), 0)
   }
 
   render () {
@@ -267,7 +253,7 @@ export class ToolBar extends Component {
     let isViewSettings = configuration.perspective.showToolbarButtons.viewSettings
 
     return(
-      <div ref={this.toolBarRef} className="tool-bar" style={{margin: marginPixels}}>
+      <div className="tool-bar" style={{margin: marginPixels}}>
 
         {configuration.ARO_CLIENT !== 'frontier' &&
           <img src="images/logos/aro/logo_navbar.png" className="no-collapse" style={{alignSelf: 'center', paddingLeft: '10px', paddingRight: '10px'}}/>
@@ -473,14 +459,14 @@ export class ToolBar extends Component {
           <i className="fa fa-cloud"></i>
         </button>
 
-        <div className="dropdown" ref={this.dropDownRef}
+        <div className="dropdown"
           style={{ display: !showDropDown ? 'none' : 'block', borderLeft: '#eee 1px dotted', width: dropdownWidthPixels}} 
         >
           <button className="btn btn-light" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
             <i className="fa fa-angle-double-down"></i>
           </button>
           {/* <!-- Override some styles on the dropdown-menu UL below to remove margins, padding, etc --> */}
-          <ul ref={this.ulRef} className="dropdown-menu tool-bar-dropdown" aria-labelledby="dropdownMenu1" style={{padding: '0px', minWidth: '0px'}}>
+          <ul className="dropdown-menu tool-bar-dropdown" aria-labelledby="dropdownMenu1" style={{padding: '0px', minWidth: '0px'}}>
           </ul> 
         </div> 
       </div>
@@ -488,7 +474,7 @@ export class ToolBar extends Component {
   }
 
   refreshToolbar () {
-    var element = jQuery(".reactCompClass").get();
+    var element = jQuery(".reactCompClass").get();  // To get the <r-tool-bar> component Elements
     if (element) {
 
       var toolBarElement = jQuery(".tool-bar").get();
@@ -523,18 +509,20 @@ export class ToolBar extends Component {
       var cumulativeWidth = 0
       var collapsedButtons = 0 // Counted from the right side.
       var toolbarButtons = [] // A list of toolbar buttons
-      toolbarRoot.childNodes.forEach((toolbarButton) => {
-        // There may also be markup like newlines which show up as "text" elements that have a NaN scrollWidth.
-        // Ignore these elements (also ignore the dropdown button itself - this may be shown or hidden).
-        var isDropDown = toolbarButton.className && toolbarButton.className.indexOf('dropdown') >= 0
-        if (!isDropDown && !isNaN(toolbarButton.scrollWidth)) {
-          toolbarButtons.push(toolbarButton)
-          cumulativeWidth += toolbarButton.scrollWidth
-          if (cumulativeWidth > toolbarWidth && toolbarButton.className.indexOf('no-collapse') < 0) {
-            ++collapsedButtons
+      if(toolbarRoot !== undefined) {
+        toolbarRoot.childNodes.forEach((toolbarButton) => {
+          // There may also be markup like newlines which show up as "text" elements that have a NaN scrollWidth.
+          // Ignore these elements (also ignore the dropdown button itself - this may be shown or hidden).
+          var isDropDown = toolbarButton.className && toolbarButton.className.indexOf('dropdown') >= 0
+          if (!isDropDown && !isNaN(toolbarButton.scrollWidth)) {
+            toolbarButtons.push(toolbarButton)
+            cumulativeWidth += toolbarButton.scrollWidth
+            if (cumulativeWidth > toolbarWidth && toolbarButton.className.indexOf('no-collapse') < 0) {
+              ++collapsedButtons
+            }
           }
-        }
-      })
+        })
+      }
       // Our toolbar width was calculated assuming that the dropdown button is visible. If we are going
       // to collapse exactly one button, that is the dropdown. In this case don't collapse any buttons.
       // This is done so that the "number of buttons to collapse" is computed correctly, including separators, etc.
@@ -543,6 +531,12 @@ export class ToolBar extends Component {
       }
 
       this.setState({showDropDown: collapsedButtons > 0})
+
+      // This Method is implemented in AngularJs to Trigger a digest cycle which not needed in React
+      // if (this.numPreviousCollapsedButtons !== collapsedButtons) {
+      //   this.$timeout() // Trigger a digest cycle as the toolbar state has changed
+      // }
+      // this.numPreviousCollapsedButtons = collapsedButtons
 
       // If we have any collapsed buttons, then move them into the dropdown
       if (collapsedButtons > 0) {
@@ -619,6 +613,8 @@ export class ToolBar extends Component {
       this.rState.mapTileOptions.sendMessage(newMapTileOptions) // This will also refresh the map layer
       this.refreshSlidertrack()
     })
+    // To set selectedHeatmapOption in redux state
+    this.props.setSelectedHeatMapOption(!this.state.heatMapOption ? this.viewSetting.heatmapOptions[0].id : this.viewSetting.heatmapOptions[2].id)
   }
 
   changeHeatMapOptions (e) {
@@ -629,14 +625,6 @@ export class ToolBar extends Component {
       this.rState.mapTileOptions.sendMessage(newMapTileOptions) // This will also refresh the map layer  
     })
   }
-
-  // changeHeatMapOptions (e) {
-  //   this.setState({sliderValue: e.target.value}, function() {
-  //     var newMapTileOptions = JSON.parse(JSON.stringify(this.mapTileOptions))
-  //     newMapTileOptions.heatMap.worldMaxValue = this.rangeValues[this.state.sliderValue]
-  //     this.rState.mapTileOptions.sendMessage(newMapTileOptions) // This will also refresh the map layer
-  //   })
-  // }
 
   refreshSlidertrack () {
     var val = (this.state.sliderValue - this.min) / (this.max - this.min)
@@ -988,7 +976,7 @@ export class ToolBar extends Component {
 
   setSelectionMode (selectionMode) {
     this.props.selectedTargetSelectionModeAction(selectionMode)
-    // As we didnt
+    // This Method is implemented in AngularJs to Trigger a digest cycle which not needed in React
     //this.$timeout() // Trigger a digest cycle as the toolbar state has changed
   }
 
@@ -1171,7 +1159,8 @@ const mapDispatchToProps = (dispatch) => ({
   setShowFiberSize: (value) => dispatch(ToolBarActions.setShowFiberSize(value)),
   createNewPlan: (value) => dispatch(ToolBarActions.createNewPlan(value)),
   loadPlan: (planId) => dispatch(ToolBarActions.loadPlan(planId)),
-  loadServiceLayers: () => dispatch(ToolBarActions.loadServiceLayers())
+  loadServiceLayers: () => dispatch(ToolBarActions.loadServiceLayers()),
+  setSelectedHeatMapOption: (selectedHeatMapOption) => dispatch(ToolBarActions.setSelectedHeatMapOption(selectedHeatMapOption))
 })
 
 const ToolBarComponent = wrapComponentWithProvider(reduxStore, ToolBar, mapStateToProps, mapDispatchToProps)

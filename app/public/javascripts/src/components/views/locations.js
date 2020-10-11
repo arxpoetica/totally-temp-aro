@@ -55,7 +55,7 @@ class LocationsController {
     state.mapTileOptions
       .subscribe((newValue) => this.updateMapLayers())
       
-    // Update map layers when the heatmap options change
+    // Update map layers when the heatmap options change using react rxjs
     rState.mapTileOptions.getMessage().subscribe((mapTileOptions) => {
       this.updateMapLayers()
     })       
@@ -144,7 +144,8 @@ class LocationsController {
     // Get the point transformation mode with the current zoom level
     const getPointTransformForLayer = zoomThreshold => {
       var transform = ''
-      if (this.state.mapTileOptions.getValue().selectedHeatmapOption.id === 'HEATMAP_OFF') {
+      // rSelectedHeatMapOption is a redux state which is set from too-bar-reducer.js
+      if (this.state.mapTileOptions.getValue().selectedHeatmapOption.id === 'HEATMAP_OFF' || this.rSelectedHeatMapOption === 'HEATMAP_OFF') {
         // The user has explicitly asked to display points, not aggregates
         transform = 'select'
       } else {
@@ -329,7 +330,8 @@ class LocationsController {
       orderedLocationFilters: getOrderedLocationFilters(reduxState),
       dataItems: reduxState.plan.dataItems,
       showLocationLabels: reduxState.viewSettings.showLocationLabels,
-      lableDrawingOptions: reduxState.mapLayers.networkEquipment.labelDrawingOptions
+      lableDrawingOptions: reduxState.mapLayers.networkEquipment.labelDrawingOptions,
+      rSelectedHeatMapOption: reduxState.toolbar.selectedHeatMapOption,
     }
   }
 
