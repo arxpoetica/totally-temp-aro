@@ -185,7 +185,8 @@ export class ToolBar extends Component {
 
     this.refreshToolbar = this.refreshToolbar.bind(this); // To bind a function
 
-    // To Trigger refreshToolbar() by Listening to the custom event from map-split.js do-check() method
+    // To Trigger refreshToolbar() by Listening to the custom event from map-split.js $document.ready() method
+    //https://stackoverflow.com/questions/52037958/change-value-in-react-js-on-window-resize
     window.addEventListener('toolBarResized', () => { 
       setTimeout(() => this.refreshToolbar(), 0)
     });
@@ -214,6 +215,10 @@ export class ToolBar extends Component {
       e.stopPropagation()
       e.preventDefault()
     })
+
+    // To Trigger refreshToolbar() when window resized
+    //https://stackoverflow.com/questions/52037958/change-value-in-react-js-on-window-resize
+    setTimeout(() => window.addEventListener("resize", this.refreshToolbar), 0)
   }
 
   componentWillReceiveProps(nextProps){
@@ -221,6 +226,8 @@ export class ToolBar extends Component {
       this.setState({mapRef: nextProps.googleMaps, showSiteBoundary: nextProps.showSiteBoundary,
         selectedBoundaryType: nextProps.selectedBoundaryType})
     }
+    // To Trigger refreshToolbar() when props changed
+    setTimeout(() => this.refreshToolbar(), 0)
   }
 
   render () {
@@ -268,7 +275,7 @@ export class ToolBar extends Component {
         </div>
         <div className="fa fa-search no-collapse" style={{paddingLeft: '10px', paddingRight: '10px', margin: 'auto', color: '#eee'}}></div>
 
-        <div className="separator no-collapse"></div>
+        <div className="separator"></div>
 
         {configuration.perspective.showToolbarButtons.globalSettings &&
           <GlobalSettingsButton/>
@@ -459,9 +466,7 @@ export class ToolBar extends Component {
           <i className="fa fa-cloud"></i>
         </button>
 
-        <div className="dropdown"
-          style={{ display: !showDropDown ? 'none' : 'block', borderLeft: '#eee 1px dotted', width: dropdownWidthPixels}} 
-        >
+        <div className="dropdown" style={{ display: !showDropDown ? 'none' : 'block', borderLeft: '#eee 1px dotted', width: dropdownWidthPixels}}>
           <button className="btn btn-light" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
             <i className="fa fa-angle-double-down"></i>
           </button>

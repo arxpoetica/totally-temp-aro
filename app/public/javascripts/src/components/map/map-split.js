@@ -27,6 +27,12 @@ class MapSplitController {
             }
             // After dragging, if the size is non-zero, it means we have expanded the sidebar
             if (this.splitterObj.getSizes()[1] > 0) {
+
+              // To Trigger refreshToolbar() in tool-bar.jsx by creating the custom event when sidebar resized
+              //https://stackoverflow.com/questions/52037958/change-value-in-react-js-on-window-resize
+              var event = new CustomEvent('toolBarResized');
+              window.dispatchEvent(event);
+
               this.isCollapsed = false
               this.sizesBeforeCollapse = null
               $scope.$apply()
@@ -48,10 +54,6 @@ class MapSplitController {
       this.splitterObj.destroy()
       this.splitterObj = null
     }
-
-    // To Trigger refreshToolbar() in tool-bar.jsx by creating to the custom event
-    var event = new CustomEvent('toolBarResized');
-    window.dispatchEvent(event);
   }
 
   toggleCollapseSideBar () {
@@ -59,10 +61,20 @@ class MapSplitController {
       // The sidebar is already collapsed. Un-collapse it by restoring the saved sizes
       this.splitterObj.setSizes(this.sizesBeforeCollapse)
       this.sizesBeforeCollapse = null
+
+      // To Trigger refreshToolbar() in tool-bar.jsx by creating the custom event when sidebar expand
+      //https://stackoverflow.com/questions/52037958/change-value-in-react-js-on-window-resize
+      var event = new CustomEvent('toolBarResized');
+      this.$timeout(() => window.dispatchEvent(event), this.transitionTimeMsec + 50)
     } else {
       // Save the current sizes and then collapse the sidebar
       this.sizesBeforeCollapse = this.splitterObj.getSizes()
       this.splitterObj.setSizes([99.5, 0.5])
+
+      // To Trigger refreshToolbar() in tool-bar.jsx by creating the custom event when sidebar collapse
+      //https://stackoverflow.com/questions/52037958/change-value-in-react-js-on-window-resize
+      var event = new CustomEvent('toolBarResized');
+      this.$timeout(() => window.dispatchEvent(event), this.transitionTimeMsec + 50)
     }
     this.isCollapsed = !this.isCollapsed
     // Trigger a resize so that any tiles that have been uncovered will be loaded

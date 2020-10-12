@@ -69,8 +69,6 @@ class LocationsController {
       drawingControl: false
     })
 
-    console.log()
-
     this.drawingManager.addListener('overlaycomplete', (e) => {
       removeLatestOverlay()
       latestOverlay = e.overlay
@@ -264,9 +262,6 @@ class LocationsController {
                 featureFilter: featureFilter,
                 v2Filters: v2Filters
               }
-
-              console.log(mapLayerProps)
-
 
               if (this.showLocationLabels) { // && map.getZoom() > this.networkEquipmentLayers.labelDrawingOptions.visibilityZoomThreshold
                 mapLayerProps.drawingOptions = drawingOptions
