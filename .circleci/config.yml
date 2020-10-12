@@ -68,7 +68,7 @@ workflows:
               only:
                   - master
                   - tab-change-on-action
-                  - Corp-ID-label
+                  - toolBarColor
       - deploy:
           context: aro_qa_builds
           requires:
