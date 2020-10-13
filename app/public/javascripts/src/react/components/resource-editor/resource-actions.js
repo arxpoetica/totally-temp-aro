@@ -156,6 +156,11 @@ import AroHttp from '../../common/aro-http'
             }
           })
           dispatch(setIsResourceEditor(false))
+
+          // To Resize Resoure Editor Popup to xl (Extra large) whille Edit rate_reach_manager
+          if(managerType === 'rate_reach_manager') {
+            dispatch(setIsRrmManager(true))
+          }
         })
         .catch(err => {
           console.error(err)
@@ -512,7 +517,7 @@ import AroHttp from '../../common/aro-http'
       })
       .then(result => {
         createdRateReachManager = result.data
-        return getDefaultConfiguration(loggedInUser)
+        return getDefaultConfiguration(loggedInUser, rateReachManager.category)
       })
       .then((defaultConfiguration) => AroHttp.put(`/service/rate-reach-matrix/resource/${createdRateReachManager.id}/config`, defaultConfiguration))
       .then(result => {
@@ -523,11 +528,11 @@ import AroHttp from '../../common/aro-http'
     }
   }
 
-  function getDefaultConfiguration (loggedInUser) {
+  function getDefaultConfiguration (loggedInUser, category) {
     const technologyTypes = ['Fiber', 'FiberProximity', 'Copper', 'CellTower']
     const configuration = {
       managerType: 'rate_reach_manager',
-      categoryType: 'SPEED',
+      categoryType: category,
       categories: [],
       rateReachGroupMap: {},
       marketAdjustmentFactorMap: {

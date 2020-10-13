@@ -13,7 +13,9 @@ const defaultState = {
   },
   selectedMode: 'HOME',
   rSelectedDisplayMode:'VIEW',
-  rActiveViewModePanel:'LOCATION_INFO'
+  rActiveViewModePanel:'LOCATION_INFO',
+  isDataSourceEditable: {},
+  isResourceSelection: false
 }
 
 // Set the superuser flag for the currently logged in user

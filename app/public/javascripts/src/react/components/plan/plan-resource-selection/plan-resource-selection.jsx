@@ -10,12 +10,12 @@ export class PlanResourceSelection extends Component {
     this.state = {
       openResourceSelection:false,
       currentEditor: '',
-      getResourceItemsArray: ''
+      getResourceItemsArray: '',
+      selectedResourceName: ''
     }
 
     this.props.loadPlanResourceSelectionFromServer(this.props.activePlan)
     this.handleChange = this.handleChange.bind(this);
-
   }
 
   render () {
@@ -24,13 +24,15 @@ export class PlanResourceSelection extends Component {
       : this.renderPlanResourceSelection()
   }
 
-  componentWillReceiveProps(nextProps){
-    if(this.props != nextProps) {
-      if(nextProps.resourceItems !== undefined) {
-        this.setState({getResourceItemsArray: Object.values(nextProps.resourceItems),
-          openResourceSelection: nextProps.isResourceSelection })
+  // To set Props values to State if props get modified
+  // https://reactjs.org/docs/react-component.html#static-getderivedstatefromprops
+  static getDerivedStateFromProps(nextProps, state) {
+    if(nextProps.resourceItems !== undefined) {
+      return {
+        getResourceItemsArray : Object.values(nextProps.resourceItems),
+        openResourceSelection: nextProps.isResourceSelection
       }
-    }
+    } else return null
   }
 
   render () {
@@ -55,7 +57,7 @@ export class PlanResourceSelection extends Component {
                       <option key={item.id} value={item.id} label={item.name}></option>
                     )}
                   </select>
-                  <button className="btn btn-light" style={{flex: '0 0 auto'}} onClick={(e)=>this.openResourceSelection(resourceItem.allManagers[0].managerType)}>
+                  <button className="btn btn-light" style={{flex: '0 0 auto'}} onClick={(e)=>this.openResourceSelection(resourceItem.allManagers[0].managerType, resourceItem.description)}>
                     <span className="fa fa-edit"></span>
                   </button>
                 </div>
@@ -65,7 +67,11 @@ export class PlanResourceSelection extends Component {
           </tbody>
         </table>
         {this.state.openResourceSelection &&
-          <GlobalSettings resourceEditorProps={this.state.currentEditor} currentViewProps='Resource Managers'/>
+          <GlobalSettings 
+            resourceEditorProps={this.state.currentEditor} 
+            currentViewProps='Resource Managers'
+            selectedResourceNameProps={this.state.selectedResourceName}
+          />
         }
       </div>
 
@@ -92,10 +98,9 @@ export class PlanResourceSelection extends Component {
     return Object.values(this.props.resourceItems)
   }
   
-  openResourceSelection(currentEditor){
-    this.setState({currentEditor:currentEditor});
+  openResourceSelection(currentEditor, selectedResourceName){
+    this.setState({currentEditor:currentEditor, selectedResourceName: selectedResourceName});
     this.props.setIsResourceSelection(true)
-
   }
 }
 
