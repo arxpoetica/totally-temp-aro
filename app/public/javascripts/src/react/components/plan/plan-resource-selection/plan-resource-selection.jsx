@@ -18,12 +18,6 @@ export class PlanResourceSelection extends Component {
     this.handleChange = this.handleChange.bind(this);
   }
 
-  render () {
-    return this.props.resourceItems === undefined
-      ? null
-      : this.renderPlanResourceSelection()
-  }
-
   // To set Props values to State if props get modified
   // https://reactjs.org/docs/react-component.html#static-getderivedstatefromprops
   static getDerivedStateFromProps(nextProps, state) {
@@ -74,7 +68,6 @@ export class PlanResourceSelection extends Component {
           />
         }
       </div>
-
     )
   }
 
@@ -113,7 +106,6 @@ export class PlanResourceSelection extends Component {
   const mapDispatchToProps = (dispatch) => ({
     loadPlanResourceSelectionFromServer: (plan) => dispatch(PlanActions.loadPlanResourceSelectionFromServer(plan)),
     setIsResourceSelection: (status) => dispatch(PlanActions.setIsResourceSelection(status))
-
   })
 
    const PlanResourceSelectionComponent = wrapComponentWithProvider(reduxStore, PlanResourceSelection, mapStateToProps, mapDispatchToProps)
