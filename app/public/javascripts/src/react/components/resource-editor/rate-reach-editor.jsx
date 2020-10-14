@@ -3,6 +3,9 @@ import { connect } from 'react-redux'
 import ResourceActions from './resource-actions'
 import RateReachDistanceEditor from './rate-reach-distance-editor.jsx'
 
+// import reduxStore from '../../../redux-store'
+// import wrapComponentWithProvider from '../../common/provider-wrapped-component'
+
 export class RateReachEditor extends Component {
   constructor (props) {
     super(props)
@@ -13,7 +16,7 @@ export class RateReachEditor extends Component {
     })
 
     this.state = {
-      rateReachManagerConfigs: '',
+      rateReachManagerConfigs: '', // ToDo: this is an object and should not default to a string
       selectedTechnologyType : 'Copper',
       selectedEditingMode: this.editingModes.SPEEDS
     }
@@ -33,15 +36,41 @@ export class RateReachEditor extends Component {
   }  
 
   componentDidMount () {
+    console.log('DID MOUNT')
     this.props.reloadRateReachManagerConfiguration(this.props.resourceManagerId, this.props.loggedInUser); 
+    this.updateModalTitle()
   }
-
+/*
   componentWillReceiveProps(nextProps){
+    console.log({props: this.props, nextProps})
     if(this.props != nextProps) {
       if(nextProps.rateReachManagerConfigs !== undefined) {
         this.setState({rateReachManagerConfigs: nextProps.rateReachManagerConfigs})
       }
     }
+  }
+*/
+  componentDidUpdate (prevProps) {
+    console.log({state: this.state, prevProps})
+    if (!_.isEqual(this.props.rateReachManagerConfigs, prevProps.rateReachManagerConfigs)) {
+      this.updateModalTitle()
+      this.setState({ rateReachManagerConfigs: this.props.rateReachManagerConfigs })
+    } else if (this.props.resourceManagerName && this.props.resourceManagerName !== prevProps.resourceManagerName) {
+      this.updateModalTitle()
+    }
+  }
+
+  // ToDo: this doesn't belong here
+  updateModalTitle () {
+    let name = this.props.resourceManagerName || ''
+    var cat = ''
+    if (this.props.rateReachManagerConfigs &&
+        this.props.rateReachManagerConfigs.rateReachConfig &&
+        this.props.rateReachManagerConfigs.rateReachConfig.categoryType) {
+      cat = this.categoryDescription[this.props.rateReachManagerConfigs.rateReachConfig.categoryType]
+      cat = ` [${cat}]`
+    }
+    this.props.setModalTitle(`${name}${cat}`)
   }
 
   render () {
@@ -51,11 +80,10 @@ export class RateReachEditor extends Component {
   }
 
   renderRateReachEditor()  {
-
+    console.log('actual render')
     const {rateReachManagerConfigs, selectedTechnologyType, selectedEditingMode} = this.state    
     return (
       <div className="container" style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
-        {this.props.setModalTitle(this.props.resourceManagerName +" ["+ this.categoryDescription[rateReachManagerConfigs.rateReachConfig.categoryType] +"]" )}
         <div className="row">
           <div className="col-md-12">
             <form>
@@ -113,7 +141,7 @@ export class RateReachEditor extends Component {
                 </li>
               </ul>
 
-              {selectedEditingMode === this.editingModes.SPEEDS &&
+              {/* selectedEditingMode === this.editingModes.SPEEDS &&
                 <RateReachDistanceEditor
                   categoryDescription={this.categoryDescription[rateReachManagerConfigs.rateReachConfig.categoryType]}
                   technologies={rateReachManagerConfigs.technologyTypeDetails[selectedTechnologyType].technologies}
@@ -126,14 +154,16 @@ export class RateReachEditor extends Component {
                   onRateReachMatrixChange={this.handleRateReachMatrixChange}
                 >
                 </RateReachDistanceEditor>
-              }  
+              */}  
               {selectedEditingMode === this.editingModes.RATE_REACH_RATIOS &&
                 <div className="container-fluid">
                   <table id="tblRateReachRatios" className="table table-sm table-borderless">
                       {Object.entries(rateReachManagerConfigs.rateReachConfig.marketAdjustmentFactorMap).map(([techKey], techIndex) => (
                         <tr key={techIndex} className="d-flex">
-                          <td className="col-3">{this.rateReachRatioDescription[techKey]}</td>
-                          <td className="col-4"><input className="form-control" onChange={e => {this.handleRateReachRatioChange(e, techKey)}} value={rateReachManagerConfigs.rateReachConfig.marketAdjustmentFactorMap[techKey]}/></td>
+                          <td className="col-3">{this.rateReachRatioDescription[techKey]}></td>
+                          <td className="col-4">
+                            <input className="form-control" onChange={e => {this.handleRateReachRatioChange(e, techKey)}} value={rateReachManagerConfigs.rateReachConfig.marketAdjustmentFactorMap[techKey]}/>
+                          </td>
                         </tr>
                       ))}
                   </table>
@@ -159,19 +189,24 @@ export class RateReachEditor extends Component {
     )
   }
 
+  // make utility?
+  clone (obj) {
+    return JSON.parse(JSON.stringify(obj))
+  }
+
   handleRateReachRatioChange(e, techKey){
-    let pristineRateReachManagerConfigs = this.state.rateReachManagerConfigs
+    let pristineRateReachManagerConfigs = this.clone(this.state.rateReachManagerConfigs)
     pristineRateReachManagerConfigs.rateReachConfig.marketAdjustmentFactorMap[techKey] = e.target.value
     this.setState({rateReachManagerConfigs: pristineRateReachManagerConfigs })
   }
 
   handleRateReachMatrixChange(rateReachGroupMap){
-    let pristineRateReachManagerConfigs = this.state.rateReachManagerConfigs
+    let pristineRateReachManagerConfigs = this.clone(this.state.rateReachManagerConfigs)
     pristineRateReachManagerConfigs.rateReachConfig.rateReachGroupMap = rateReachGroupMap
   }
 
   handleRateReachEditorChange(editableCategories){
-    let pristineRateReachManagerConfigs = this.state.rateReachManagerConfigs
+    let pristineRateReachManagerConfigs = this.clone(this.state.rateReachManagerConfigs)
     pristineRateReachManagerConfigs.rateReachConfig.categories = editableCategories
   }
 
@@ -181,13 +216,13 @@ export class RateReachEditor extends Component {
 
   handleEnableChange(e){
     let toggleEnabled = this.state.rateReachManagerConfigs.rateReachConfig.rateReachGroupMap[this.state.selectedTechnologyType].active
-    let pristineRateReachManagerConfigs = this.state.rateReachManagerConfigs
+    let pristineRateReachManagerConfigs = this.clone(this.state.rateReachManagerConfigs)
     pristineRateReachManagerConfigs.rateReachConfig.rateReachGroupMap[this.state.selectedTechnologyType].active = !toggleEnabled
     this.setState({rateReachManagerConfigs: pristineRateReachManagerConfigs})
   }
 
   handleNetWorkChange(e){
-    let pristineRateReachManagerConfigs = this.state.rateReachManagerConfigs
+    let pristineRateReachManagerConfigs = this.clone(this.state.rateReachManagerConfigs)
     pristineRateReachManagerConfigs.rateReachConfig.rateReachGroupMap[this.state.selectedTechnologyType].networkStructure = e.target.value
     this.setState({rateReachManagerConfigs: pristineRateReachManagerConfigs})
   }
@@ -224,4 +259,5 @@ export class RateReachEditor extends Component {
   })
 
 const RateReachEditorComponent = connect(mapStateToProps, mapDispatchToProps)(RateReachEditor)
+// const RateReachEditorComponent = wrapComponentWithProvider(reduxStore, RateReachEditor, mapStateToProps, mapDispatchToProps)
 export default RateReachEditorComponent
