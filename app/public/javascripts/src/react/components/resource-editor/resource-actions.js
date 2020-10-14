@@ -525,7 +525,7 @@ import { batch } from 'react-redux'
       })
       .then(result => {
         createdRateReachManager = result.data
-        return getDefaultConfiguration(loggedInUser)
+        return getDefaultConfiguration(loggedInUser, rateReachManager.category)
       })
       .then((defaultConfiguration) => AroHttp.put(`/service/rate-reach-matrix/resource/${createdRateReachManager.id}/config`, defaultConfiguration))
       .then(result => {
@@ -538,11 +538,11 @@ import { batch } from 'react-redux'
     }
   }
 
-  function getDefaultConfiguration (loggedInUser) {
+  function getDefaultConfiguration (loggedInUser, categoryType = 'SPEED') {
     const technologyTypes = ['Fiber', 'FiberProximity', 'Copper', 'CellTower']
     const configuration = {
       managerType: 'rate_reach_manager',
-      categoryType: 'SPEED',
+      categoryType: categoryType,
       categories: [],
       rateReachGroupMap: {},
       marketAdjustmentFactorMap: {

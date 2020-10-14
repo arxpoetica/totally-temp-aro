@@ -36,22 +36,11 @@ export class RateReachEditor extends Component {
   }  
 
   componentDidMount () {
-    console.log('DID MOUNT')
     this.props.reloadRateReachManagerConfiguration(this.props.resourceManagerId, this.props.loggedInUser); 
     this.updateModalTitle()
   }
-/*
-  componentWillReceiveProps(nextProps){
-    console.log({props: this.props, nextProps})
-    if(this.props != nextProps) {
-      if(nextProps.rateReachManagerConfigs !== undefined) {
-        this.setState({rateReachManagerConfigs: nextProps.rateReachManagerConfigs})
-      }
-    }
-  }
-*/
+
   componentDidUpdate (prevProps) {
-    console.log({state: this.state, prevProps})
     if (!_.isEqual(this.props.rateReachManagerConfigs, prevProps.rateReachManagerConfigs)) {
       this.updateModalTitle()
       this.setState({ rateReachManagerConfigs: this.props.rateReachManagerConfigs })
@@ -80,7 +69,6 @@ export class RateReachEditor extends Component {
   }
 
   renderRateReachEditor()  {
-    console.log('actual render')
     const {rateReachManagerConfigs, selectedTechnologyType, selectedEditingMode} = this.state    
     return (
       <div className="container" style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
@@ -140,8 +128,7 @@ export class RateReachEditor extends Component {
                   </a>
                 </li>
               </ul>
-
-              {/* selectedEditingMode === this.editingModes.SPEEDS &&
+              {selectedEditingMode === this.editingModes.SPEEDS &&
                 <RateReachDistanceEditor
                   categoryDescription={this.categoryDescription[rateReachManagerConfigs.rateReachConfig.categoryType]}
                   technologies={rateReachManagerConfigs.technologyTypeDetails[selectedTechnologyType].technologies}
@@ -154,13 +141,13 @@ export class RateReachEditor extends Component {
                   onRateReachMatrixChange={this.handleRateReachMatrixChange}
                 >
                 </RateReachDistanceEditor>
-              */}  
+              }  
               {selectedEditingMode === this.editingModes.RATE_REACH_RATIOS &&
                 <div className="container-fluid">
                   <table id="tblRateReachRatios" className="table table-sm table-borderless">
                       {Object.entries(rateReachManagerConfigs.rateReachConfig.marketAdjustmentFactorMap).map(([techKey], techIndex) => (
                         <tr key={techIndex} className="d-flex">
-                          <td className="col-3">{this.rateReachRatioDescription[techKey]}></td>
+                          <td className="col-3">{this.rateReachRatioDescription[techKey]}</td>
                           <td className="col-4">
                             <input className="form-control" onChange={e => {this.handleRateReachRatioChange(e, techKey)}} value={rateReachManagerConfigs.rateReachConfig.marketAdjustmentFactorMap[techKey]}/>
                           </td>
