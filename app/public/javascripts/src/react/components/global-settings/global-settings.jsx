@@ -247,6 +247,7 @@ export class GlobalSettings extends Component {
     this.props.setIsResourceSelection(false)
     this.props.setIsDataSelection(false)
     this.props.setShowGlobalSettings(false)
+    this.props.setIsRrmManager(false)
   }
 }
 
