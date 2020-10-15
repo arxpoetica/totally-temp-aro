@@ -145,6 +145,7 @@ export class RateReachEditor extends Component {
               {selectedEditingMode === this.editingModes.RATE_REACH_RATIOS &&
                 <div className="container-fluid">
                   <table id="tblRateReachRatios" className="table table-sm table-borderless">
+                    <tbody>  
                       {Object.entries(rateReachManagerConfigs.rateReachConfig.marketAdjustmentFactorMap).map(([techKey], techIndex) => (
                         <tr key={techIndex} className="d-flex">
                           <td className="col-3">{this.rateReachRatioDescription[techKey]}</td>
@@ -153,6 +154,7 @@ export class RateReachEditor extends Component {
                           </td>
                         </tr>
                       ))}
+                    </tbody>
                   </table>
                 </div>
               } 
