@@ -17,7 +17,7 @@ export class RateReachEditor extends Component {
 
     this.state = {
       rateReachManagerConfigs: '', // ToDo: this is an object and should not default to a string
-      selectedTechnologyType : 'Copper',
+      selectedTechnologyType : 'FiberProximity', // ToDo: this should not be hardcoded
       selectedEditingMode: this.editingModes.SPEEDS
     }
 
@@ -69,7 +69,7 @@ export class RateReachEditor extends Component {
   }
 
   renderRateReachEditor()  {
-    const {rateReachManagerConfigs, selectedTechnologyType, selectedEditingMode} = this.state    
+    const {rateReachManagerConfigs, selectedTechnologyType, selectedEditingMode} = this.state
     return (
       <div className="container" style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
         <div className="row">

@@ -539,7 +539,13 @@ import { batch } from 'react-redux'
   }
 
   function getDefaultConfiguration (loggedInUser, categoryType = 'SPEED') {
-    const technologyTypes = ['Fiber', 'FiberProximity', 'Copper', 'CellTower']
+    // ToDo: technologyTypes should be dynamic
+    var technologyTypes = []
+    if (categoryType === 'BAND') {
+      technologyTypes = ['FiberProximity']
+    } else {
+      technologyTypes = ['Fiber', 'FiberProximity', 'Copper', 'CellTower']
+    }
     const configuration = {
       managerType: 'rate_reach_manager',
       categoryType: categoryType,
