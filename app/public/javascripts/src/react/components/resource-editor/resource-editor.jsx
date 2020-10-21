@@ -356,6 +356,7 @@ export class ResourceEditor extends Component {
   }
 
 	editSelectedManager(selectedManager){
+		console.log(selectedManager)
 		this.props.startEditingResourceManager(selectedManager.id, selectedManager.resourceType, selectedManager.name, 'EDIT_RESOURCE_MANAGER')
 		this.setState({clickedResourceForEditAndClone: selectedManager.resourceType, clickedResource: ''})
 		this.props.setIsRrmManager(true)
@@ -422,6 +423,7 @@ export class ResourceEditor extends Component {
 	}
 
 	cloneSelectedManagerFromSource (selectedManager) {
+		console.log(selectedManager)
 		let resourceType = selectedManager.resourceType
 		if(resourceType === 'price_book' || resourceType === 'rate_reach_manager'){
 			this.props.setIsResourceEditor(false);
