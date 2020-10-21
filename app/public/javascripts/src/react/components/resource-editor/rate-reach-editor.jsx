@@ -16,7 +16,7 @@ export class RateReachEditor extends Component {
     })
 
     this.state = {
-      rateReachManagerConfigs: '', // ToDo: this is an object and should not default to a string
+      rateReachManagerConfigs: undefined, // ToDo: this is an object and should not default to a string
       selectedTechnologyType : 'FiberProximity', // ToDo: this should not be hardcoded
       selectedEditingMode: this.editingModes.SPEEDS
     }
@@ -38,6 +38,7 @@ export class RateReachEditor extends Component {
   componentDidMount () {
     this.props.reloadRateReachManagerConfiguration(this.props.resourceManagerId, this.props.loggedInUser); 
     this.updateModalTitle()
+    if (this.props !== undefined) this.setState({ rateReachManagerConfigs: this.props.rateReachManagerConfigs })
   }
 
   componentDidUpdate (prevProps) {
@@ -63,8 +64,8 @@ export class RateReachEditor extends Component {
   }
 
   render () {
-    return this.props.rateReachManager === null || this.props.rateReachManagerConfigs === undefined || this.state.rateReachManagerConfigs === ''
-    ? null
+    return (this.props.rateReachManager === null || this.props.rateReachManagerConfigs === undefined || this.state.rateReachManagerConfigs === undefined)
+    ? <div>NOPE</div>
     : this.renderRateReachEditor()
   }
 

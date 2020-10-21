@@ -356,7 +356,6 @@ export class ResourceEditor extends Component {
   }
 
 	editSelectedManager(selectedManager){
-		console.log(selectedManager)
 		this.props.startEditingResourceManager(selectedManager.id, selectedManager.resourceType, selectedManager.name, 'EDIT_RESOURCE_MANAGER')
 		this.setState({clickedResourceForEditAndClone: selectedManager.resourceType, clickedResource: ''})
 		this.props.setIsRrmManager(true)
