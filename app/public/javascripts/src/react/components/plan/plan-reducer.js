@@ -13,7 +13,11 @@ const defaultState = {
   },
   selectedMode: 'HOME',
   rSelectedDisplayMode:'VIEW',
-  rActiveViewModePanel:'LOCATION_INFO'
+  rActiveViewModePanel:'LOCATION_INFO',
+  isDataSourceEditable: {},
+  isResourceSelection: false,
+  parentProjectForNewProject: null,
+  selectedProjectId: ''
 }
 
 // Set the superuser flag for the currently logged in user
@@ -142,6 +146,12 @@ function setActiveViewModePanel (state, viewMode) {
   }
 }
 
+function setParentProjectForNewProject (state, parentProjectForNewProject) {
+  return { ...state,
+    parentProjectForNewProject: parentProjectForNewProject,
+  }
+}
+
 function planReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.PLAN_SET_ACTIVE_PLAN:
@@ -194,6 +204,9 @@ function planReducer (state = defaultState, action) {
 
     case Actions.PLAN_SET_ACTIVE_VIEW_MODE_PANEL:
       return setActiveViewModePanel(state, action.payload) 
+
+    case Actions.PLAN_SET_PARENT_PROJECT_FOR_NEW_PROJECT:
+      return setParentProjectForNewProject(state, action.payload)       
 
     default:
       return state
