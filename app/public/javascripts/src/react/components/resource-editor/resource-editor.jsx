@@ -423,7 +423,6 @@ export class ResourceEditor extends Component {
 	}
 
 	cloneSelectedManagerFromSource (selectedManager) {
-		console.log(selectedManager)
 		let resourceType = selectedManager.resourceType
 		if(resourceType === 'price_book' || resourceType === 'rate_reach_manager'){
 			this.props.setIsResourceEditor(false);
