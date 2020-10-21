@@ -588,7 +588,8 @@ class State {
     // Initialize the state of the application (the parts that depend upon configuration being loaded from the server)
     service.initializeState = function () {
       service.reloadLocationTypes()
-      service.selectedDisplayMode.next(service.displayModes.VIEW)
+      // service.selectedDisplayMode.next(service.displayModes.VIEW)
+      service.setSelectedDisplayMode(service.displayModes.VIEW)
 
       // Upload Data Sources
       service.uploadDataSources = []
@@ -932,7 +933,8 @@ class State {
 
     service.loadPlan = (planId) => {
       tracker.trackEvent(tracker.CATEGORIES.LOAD_PLAN, tracker.ACTIONS.CLICK, 'PlanID', planId)
-      service.selectedDisplayMode.next(service.displayModes.VIEW)
+      // service.selectedDisplayMode.next(service.displayModes.VIEW)
+      service.setSelectedDisplayMode(service.displayModes.VIEW)
       var plan = null
       return $http.get(`/service/v1/plan/${planId}`)
         .then((result) => {
@@ -1766,7 +1768,6 @@ class State {
 
     service.handleLibraryModifiedEvent = msg => {
       // If the tileBox is null, use a tile box that covers the entire world
-      console.log(`----- handleLibraryModifiedEvent: ${msg} ----- `)
       const content = JSON.parse(new TextDecoder('utf-8').decode(new Uint8Array(msg.content)))
       const tileBox = content.tileBox || wholeWorldTileBox
       const layerNameRegexStrings = MapLayerHelper.getRegexForAllDataIds(service.mapLayersRedux, null, msg.properties.headers.libraryId)
@@ -1795,10 +1796,15 @@ class State {
       // ToDo: replace all instances of service.selectedDisplayMode
       //  with reduxState.plan.selectedDisplayMode
       //  We are currently maintaining state in two places
+      //  BUT as of now are only setting it in redux
       if (nextState.rSelectedDisplayMode &&
           service.rSelectedDisplayMode !== service.selectedDisplayMode.getValue()) {
         // console.log(service.rSelectedDisplayMode)
         service.selectedDisplayMode.next(service.rSelectedDisplayMode)
+      }
+      if (nextState.rActiveViewModePanel && 
+          service.rActiveViewModePanel !== service.activeViewModePanel) {
+        service.activeViewModePanel = service.rActiveViewModePanel
       }
     }
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(service.mergeToTarget.bind(service))
@@ -1825,7 +1831,8 @@ class State {
       wormholeFuseDefinitions: reduxState.optimization.networkAnalysis.wormholeFuseDefinitions,
       activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
       optimizationInputs: reduxState.optimization.networkOptimization.optimizationInputs,
-      rSelectedDisplayMode: reduxState.plan.rSelectedDisplayMode
+      rSelectedDisplayMode: reduxState.plan.rSelectedDisplayMode,
+      rActiveViewModePanel: reduxState.plan.rActiveViewModePanel
     }
   }
 
@@ -1848,6 +1855,7 @@ class State {
       addPlanTargets: (planId, planTargets) => dispatch(SelectionActions.addPlanTargets(planId, planTargets)),
       removePlanTargets: (planId, planTargets) => dispatch(SelectionActions.removePlanTargets(planId, planTargets)),
       setSelectedLocations: locationIds => dispatch(SelectionActions.setLocations(locationIds)),
+      setSelectedDisplayMode: displayMode => dispatch(ToolBarActions.selectedDisplayMode(displayMode)),
       setActivePlanState: planState => dispatch(PlanActions.setActivePlanState(planState)),
       selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems)),
       setGoogleMapsReference: mapRef => dispatch(MapActions.setGoogleMapsReference(mapRef)),

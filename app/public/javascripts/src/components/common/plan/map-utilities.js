@@ -112,16 +112,42 @@ class MapUtilities {
     return selfIntersectingPoints.length === 0
   }
 
+  // ToDo: I think we should treat all polygons as multiPolygons
   // Convert the paths in a Google Maps object into a Polygon WKT
   static polygonPathsToWKT (paths) {
     var allPaths = []
     paths.forEach((path) => {
       var pathPoints = []
       path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
+
+      var lastI = pathPoints.length - 1
+      if (pathPoints[0][0] !== pathPoints[lastI][0] || pathPoints[0][1] !== pathPoints[lastI][1]) {
+        pathPoints.push([pathPoints[0][0], pathPoints[0][1]])
+      }
+
       allPaths.push(pathPoints)
     })
     return {
       type: 'Polygon',
+      coordinates: allPaths
+    }
+  }
+
+  static multiPolygonPathsToWKT (paths) {
+    var allPaths = []
+    paths.forEach((path) => {
+      var pathPoints = []
+      path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
+
+      var lastI = pathPoints.length - 1
+      if (pathPoints[0][0] !== pathPoints[lastI][0] || pathPoints[0][1] !== pathPoints[lastI][1]) {
+        pathPoints.push([pathPoints[0][0], pathPoints[0][1]])
+      }
+
+      allPaths.push([pathPoints])
+    })
+    return {
+      type: 'MultiPolygon',
       coordinates: allPaths
     }
   }

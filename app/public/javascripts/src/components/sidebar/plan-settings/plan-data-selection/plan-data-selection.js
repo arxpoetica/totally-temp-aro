@@ -1,5 +1,6 @@
 /* globals angular */
 import PlanActions from '../../../../react/components/plan/plan-actions'
+import ToolBarActions from '../../../../react/components/header/tool-bar-actions'
 import { createSelector } from 'reselect'
 
 // Make a copy of data items because the UI component will mutate them directly
@@ -113,14 +114,14 @@ class DataSelectionController {
 
   editLocations () {
     // Put the application in "Edit Location" mode
-    this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
     this.state.activeViewModePanel = this.state.viewModePanels.EDIT_LOCATIONS
+    this.setSelectedDisplayMode(this.state.displayModes.VIEW)
   }
 
   editServiceLayer () {
     // Put the application in "Edit Service Layer" mode
     this.state.activeViewModePanel = this.state.viewModePanels.EDIT_SERVICE_LAYER
-    this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
+    this.setSelectedDisplayMode(this.state.displayModes.VIEW)
   }
 
   mapStateToThis (reduxState) {
@@ -133,6 +134,7 @@ class DataSelectionController {
 
   mapDispatchToTarget (dispatch) {
     return {
+      setSelectedDisplayMode: displayMode => dispatch(ToolBarActions.selectedDisplayMode(displayMode)),
       selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems))
     }
   }

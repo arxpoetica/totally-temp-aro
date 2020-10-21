@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import './tool-bar.css';
-import GlobalSettingsButton from '../global-settings/global-settings-button.jsx'
 import Tools from '../tool/tools'
 import uuidStore from '../../../shared-utils/uuid-store'
 import MapActions from '../map/map-actions'
@@ -18,6 +17,8 @@ import MapLayerActions from '../map-layers/map-layer-actions'
 import ViewSettingsActions from '../view-settings/view-settings-actions'
 import rState from '../../common/rState'
 import PlanInputsModal from './plan-inputs-modal.jsx'
+import GlobalsettingsActions from '../global-settings/globalsettings-action'
+import GlobalSettings from '../global-settings/global-settings.jsx'
 
 export class ToolBar extends Component {
   constructor (props) {
@@ -240,10 +241,10 @@ export class ToolBar extends Component {
     this.initSearchBox();
     this.refreshSlidertrack();
 
-    const {selectedDisplayMode, activeViewModePanel, isAnnotationsListVisible,
-       isMapReportsVisible, showMapReportMapObjects, selectedTargetSelectionMode,
-       isRulerEnabled, isViewSettingsEnabled, boundaryTypes, showDirectedCable,
-       showEquipmentLabels, showLocationLabels, showFiberSize, configuration } = this.props
+    const {selectedDisplayMode, activeViewModePanel, isAnnotationsListVisible, isMapReportsVisible,
+       showMapReportMapObjects, selectedTargetSelectionMode, isRulerEnabled, isViewSettingsEnabled,
+       boundaryTypes, showDirectedCable, showEquipmentLabels, showLocationLabels,
+       showFiberSize, configuration, showGlobalSettings } = this.props
 
     const {currentRulerAction, showRemoveRulerButton, heatMapOption, sliderValue,
       showSiteBoundary, selectedBoundaryType, selectedFiberOption, showDropDown,
@@ -278,7 +279,14 @@ export class ToolBar extends Component {
         <div className="separator"></div>
 
         {configuration.perspective.showToolbarButtons.globalSettings &&
-          <GlobalSettingsButton/>
+          <button className="btn"
+            title="Global Settings..."
+            onClick={(e) => this.showGlobalSettings()}>
+            <i className="fa fa-th"></i>
+          </button>
+        }
+        {showGlobalSettings &&
+          <GlobalSettings/>
         }
 
         <div className="separator"></div>
@@ -476,6 +484,10 @@ export class ToolBar extends Component {
         </div> 
       </div>
     )
+  }
+
+  showGlobalSettings(){
+    this.props.setShowGlobalSettings(true)
   }
 
   refreshToolbar () {
@@ -1130,7 +1142,8 @@ const mapStateToProps = (state) => ({
   showEquipmentLabels: state.toolbar.showEquipmentLabels,
   showLocationLabels: state.viewSettings.showLocationLabels,
   showFiberSize: state.toolbar.showFiberSize,
-  configuration: state.toolbar.appConfiguration
+  configuration: state.toolbar.appConfiguration,
+  showGlobalSettings: state.globalSettings.showGlobalSettings
 })  
 
 const mapDispatchToProps = (dispatch) => ({
@@ -1165,7 +1178,8 @@ const mapDispatchToProps = (dispatch) => ({
   createNewPlan: (value) => dispatch(ToolBarActions.createNewPlan(value)),
   loadPlan: (planId) => dispatch(ToolBarActions.loadPlan(planId)),
   loadServiceLayers: () => dispatch(ToolBarActions.loadServiceLayers()),
-  setSelectedHeatMapOption: (selectedHeatMapOption) => dispatch(ToolBarActions.setSelectedHeatMapOption(selectedHeatMapOption))
+  setSelectedHeatMapOption: (selectedHeatMapOption) => dispatch(ToolBarActions.setSelectedHeatMapOption(selectedHeatMapOption)),
+  setShowGlobalSettings: (status) => dispatch(GlobalsettingsActions.setShowGlobalSettings(status))
 })
 
 const ToolBarComponent = wrapComponentWithProvider(reduxStore, ToolBar, mapStateToProps, mapDispatchToProps)

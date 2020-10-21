@@ -2,23 +2,61 @@ import React, { Component } from 'react'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import CreatableSelect from 'react-select/creatable';
+import { components } from 'react-select';
 import AroHttp from '../../common/aro-http'
 import ToolBarActions from './tool-bar-actions'
 import PlanSearchFilter from './plan-search-filter.jsx'
-
-const components = {
-  DropdownIndicator: null,
-};
+import uniqBy from 'lodash/uniqBy';
+import merge from 'lodash/merge';
 
 const createOption = (label) => ({
   label,
   value: label,
 });
 
+const groupStyles = {
+  padding: '0px 10px',
+  backgroundColor: '#eee',
+  color: 'black',
+  fontWeight: 'bold',
+  borderTop: '1px #aaa solid',
+  borderBottom: '1px #aaa solid',
+  lineHeight: '28px'
+};
+
+const groupBadgeStyles = {
+  backgroundColor: '#EBECF0',
+  display: 'inline-block',
+  fontSize: 12,
+  textTransform: 'lowercase'
+};
+
+const formatGroupLabel = data => (
+  <div style={groupStyles}>
+    <span style={groupBadgeStyles}>{data.label}</span>
+  </div>
+);
+
+const square = (color) => ({
+  alignItems: 'center',
+  display: 'flex',
+
+  ':before': {
+    backgroundColor: color,
+    content: '" "',
+    display: 'block',
+    margin: 5,
+    height: 10,
+    width: 10,
+  },
+});
+
 export class PlanSearch extends Component {
+
   constructor (props) {
     super(props)
 
+    this.creatableRef = React.createRef();
     this.searchCreatorsList()
 
     this.state = {
@@ -38,8 +76,17 @@ export class PlanSearch extends Component {
       plans: [],
       pages: [],
       currentPage: '',
-      idToServiceAreaCode: {}
+      idToServiceAreaCode: {},
+      optionSetText: [],
+      isDropDownOption: false,
+      isValueRemoved: false
     }
+
+    this.optionSetTextArray = [
+      {label: 'tag', options: []},
+      {label: 'svc', options: []},
+      {label: 'created_by', options: []}
+    ]
   }
 
   componentDidMount () {
@@ -48,9 +95,38 @@ export class PlanSearch extends Component {
 
   render() {
     const {showRefreshPlansOnMapMove, loggedInUser, listOfTags, listOfServiceAreaTags} = this.props
-    const { inputValue, searchText, plans, currentPage, pages,
-            idToServiceAreaCode, creatorsSearchList } = this.state;
+    const { searchText, plans, currentPage, pages, idToServiceAreaCode, creatorsSearchList,
+            optionSetText, isDropDownOption } = this.state;
 
+    // To customize MultiValuelabel in react-select
+    // https://codesandbox.io/s/znxjxj556l?file=/src/index.js:76-90
+    const MultiValue = props => {
+      return (
+      <components.MultiValue {...props}>
+        {props.data.type &&
+          <span className="tag">
+            {props.data.type}&nbsp;:&nbsp;
+            {props.data.type === 'tag' &&
+              <span className="badge badge-primary" style={{ backgroundColor: this.props.getTagColour(props.data) }}>{props.data.value}</span>
+            }
+            {props.data.type === 'svc' &&
+              <span className="badge badge-primary satags">{props.data.value}</span>
+            }
+            {props.data.type === 'created_by' &&
+              <span className="badge badge-primary satags">{props.data.value}</span>
+            }            
+          </span>
+        }
+        {!props.data.type &&
+          <span className="tag">
+            {props.data.label}
+          </span>
+        }
+      </components.MultiValue>
+      )
+    };
+
+    // To customize control, container, option in react-select
     const customStyles = {
       control: styles => ({ ...styles, backgroundColor: 'white' }),
       container: base => ({
@@ -58,15 +134,13 @@ export class PlanSearch extends Component {
         flex: 1,
         width: 150,
       }),
-      multiValueLabel: (styles, state) => {
-        return state.data.type === 'tag'
-          ? { ...styles, color: 'white', backgroundColor: this.props.getTagColour(state.data), fontWeight: 700 }
-          : state.data.type === 'svc' || state.data.type === 'created_by'
-            ? { ...styles, backgroundColor: 'white', borderColor: '#1f7de6', borderStyle: 'solid', 
-              borderRadius: '0.50em', borderWidth: '2px', fontSize: '10px', padding: '5px', color: '#1f7de6', fontWeight: 700, lineHeight: 1
-              }
-            : { ...styles }
-      },
+      option: (styles, state) => ({
+        ...styles,
+        padding: 3,
+        paddingLeft: 10,
+        fontSize: 12,
+        ...square(this.props.getTagColour(state.data)),
+      }),
     }
         
     var newSearchText = [];
@@ -91,17 +165,22 @@ export class PlanSearch extends Component {
         <div className="input-group">
           <CreatableSelect
             isMulti
+            options={optionSetText}
             value={newSearchText}
-            inputValue={inputValue}
             placeholder="Search for Plan Names"
             styles={customStyles}
-            components={components}
-            menuIsOpen={false}
+            components={{ MultiValue, DropdownIndicator: null }}
+            menuIsOpen={isDropDownOption}
+            closeMenuOnSelect={true}
             isClearable={false}
-            onKeyDown={(e)=>this.handleKeyDown(e)}
-            onChange={(e)=>this.handleChange(e)}
+            onChange={(e, action)=>this.handleChange(e, action)}
             onInputChange={(e, action)=>this.handleInputChange(e, action)}
-            getOptionLabel={value =>this.formatOptionLabel(value)}
+            formatGroupLabel={(e)=>formatGroupLabel(e)}
+            onBlur={(e)=>this.onBlur(e)}
+            onFocus={(e)=>this.onFocus(e)}
+            ref={ref => {
+              this.creatableRef = ref;
+            }}
           />
           <button className="btn btn-light input-group-append" onClick={(e)=>this.onClikCreateValue(e)} style={{cursor:'pointer'}}>
             <span className="fa fa-search"></span>
@@ -202,11 +281,23 @@ export class PlanSearch extends Component {
           </nav>
         </>
         }
-
-
       </div>
     )
   }
+
+  focusCreatable  () {
+    this.creatableRef.focus();
+  };
+
+  onFocus (e)  {
+    if(this.state.isValueRemoved){
+      this.setState({ isDropDownOption: true });
+    }
+  };
+
+  onBlur (e)  {
+    this.setState({ isDropDownOption: false });
+  };
 
   onClikCreateValue (e) {
     const { inputValue, searchText } = this.state;
@@ -222,25 +313,78 @@ export class PlanSearch extends Component {
     e.preventDefault();
   }
 
-  formatOptionLabel (value) {
-    if(value.hasOwnProperty('type')) {
-      return `${value.type}: ${value.label}`
-    } else {
-      return `${value.label}`
+  handleChange (searchText, { action }) {
+
+    // To perform action while 'remove-value' in react-select
+    switch (action) {
+      case 'remove-value':
+        var newSearchText = searchText;
+        if(newSearchText === null){
+          newSearchText = [];
+          this.setState({ isDropDownOption: true });
+        } else {
+          newSearchText = searchText;
+        }
+
+        // To Format searchText Array as per react-select options
+        var formatedObjArray = []
+        formatedObjArray = this.state.searchText.map((newkey, index) => {
+          if (newkey.hasOwnProperty('type')) {
+            if(newkey.type === 'tag') return {"id":newkey.id, "name": newkey.name, "value": newkey.name, "label": newkey.name, "type": newkey.type, "colourHue": newkey.colourHue}; 
+            if(newkey.type === 'svc') return {"id":newkey.id, "code": newkey.code, "value": newkey.code, "label": newkey.code, "type": newkey.type}; 
+            if(newkey.type === 'created_by') return {"id":newkey.fullName, "fullName": newkey.fullName, "value": newkey.fullName, "label": newkey.fullName, "type": newkey.type};  
+          } else { return newkey; }
+        })
+
+        // To compare 'newSearchText' and 'formatedObjArray' and get the removed values from reat-select serach bar
+        // https://stackoverflow.com/questions/21987909/how-to-get-the-difference-between-two-arrays-of-objects-in-javascript
+        var onlyInA = newSearchText.filter(this.arrayComparer(formatedObjArray));
+        var onlyInB = formatedObjArray.filter(this.arrayComparer(newSearchText));
+        var removedValueArray = onlyInA.concat(onlyInB);
+
+        // To Push formatedObjArray to reat-select required options structure
+        this.optionSetTextArray.map((newkey, index) => {
+          if (newkey.label === removedValueArray[0].type) {
+            this.optionSetTextArray[index].options.push(removedValueArray[0])
+          }
+        })
+
+        // To remove duplicate objects from array
+        var uniqueObjArray = this.optionSetTextArray
+        uniqueObjArray.map((subarray, index) =>  {
+          let filtered = uniqBy(subarray.options, item => item.value)
+          uniqueObjArray[index].options = [];
+          merge(uniqueObjArray[index].options, filtered)
+        })
+        
+        this.setState({ searchText: newSearchText, optionSetText: _.uniq(uniqueObjArray), isValueRemoved: true }, () => {
+          this.loadPlans()
+        });
+        return;
+      default:
+        var newSearchText = searchText;
+        if(newSearchText === null){
+          newSearchText = [];
+        } else {
+          newSearchText = searchText;
+          this.setState({ isDropDownOption: false });
+        }
+        this.setState({ searchText: newSearchText }, () => {
+          this.loadPlans()
+        });
+        return;
+    }
+  };
+
+  // To compare two array and find the difference value
+  // https://stackoverflow.com/questions/21987909/how-to-get-the-difference-between-two-arrays-of-objects-in-javascript
+  arrayComparer (otherArray) {
+    return function(current){
+      return otherArray.filter(function(other){
+        return other.value == current.value
+      }).length == 0;
     }
   }
-
-  handleChange (searchText) {
-    var newSearchText = searchText;
-    if(newSearchText === null){
-      newSearchText = [];
-    } else {
-      newSearchText = searchText;
-    }
-    this.setState({ searchText: newSearchText }, () => {
-      this.loadPlans()
-    });
-  };
 
   handleInputChange (inputValue, { action }) {
     switch (action) {
@@ -251,23 +395,6 @@ export class PlanSearch extends Component {
         return;
     }
   }
-
-  handleKeyDown (event) {
-    const { inputValue, searchText } = this.state;
-
-    if (!inputValue) return;
-    switch (event.key) {
-      case 'Enter':
-      case 'Tab':
-        this.setState({
-          inputValue: '',
-          searchText: [...searchText, createOption(inputValue)],
-        }, () => {
-          this.loadPlans()
-        });
-        event.preventDefault();
-    }
-  };
 
   onPlanClicked (plan) {
     this.props.onPlanSelected && this.props.onPlanSelected({ plan: plan })
@@ -462,6 +589,7 @@ export class PlanSearch extends Component {
       return item
     })
     this.applySearch(filters)
+    this.focusCreatable()
   }
 
   applySearch (filters) {

@@ -66,12 +66,12 @@ export class RateReachDistanceEditor extends Component {
     const {editableCategories, categories} = this.state
 
     return (
-      <>
+      <React.Fragment>
         <div id="verticalscroll" className="tableFixHead">
           <table id="tblrateReachConfig" className="table table-sm table-striped">
             <thead className="thead-dark">
               <tr>
-              <th>&nbsp;&nbsp;&nbsp;</th> {/*<!-- This is for the draggable handle for each row --> */}
+              <th>&nbsp;&nbsp;&nbsp;</th>{/*<!-- This is for the draggable handle for each row --> */}
                 <th style={{minWidth: '200px'}}>{categoryDescription}</th>
                 {rateReachGroupMap[selectedTechnologyType].matrixMap.map((item, keyValue) => {
                   return (
@@ -140,7 +140,7 @@ export class RateReachDistanceEditor extends Component {
             <button className="btn btn-light" onClick={(e)=>this.addCategory()}>Add</button>
           </div>
         </div>
-      </>
+      </React.Fragment>
     )
   }
 

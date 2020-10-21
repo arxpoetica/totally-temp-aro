@@ -25,26 +25,12 @@ class ServiceLayerEditorController {
     this.resumeOrCreateTransaction()
   }
 
-  // Convert the paths in a Google Maps object into a Polygon WKT
-  polygonPathsToWKT (paths) {
-    var allPaths = []
-    paths.forEach((path) => {
-      var pathPoints = []
-      path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
-      allPaths.push(pathPoints)
-    })
-    return {
-      type: 'MultiPolygon',
-      coordinates: [allPaths]
-    }
-  }
-
   formatServiceLayerForService (mapObject) {
     // ToDo: this should use AroFeatureFactory
     var serviceFeature = {
       objectId: mapObject.feature.objectId,
       dataType: 'service_layer',
-      geometry: this.polygonPathsToWKT(mapObject.getPaths()),
+      geometry: MapUtilities.multiPolygonPathsToWKT(mapObject.getPaths()),
       attributes: {
         name: mapObject.feature.name,
         code: mapObject.feature.code
@@ -132,7 +118,7 @@ class ServiceLayerEditorController {
       })
       .catch((err) => {
         this.discardChanges = false
-        this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
+        this.setSelectedDisplayMode(this.state.displayModes.VIEW)
         this.$timeout()
         console.warn(err)
       })
