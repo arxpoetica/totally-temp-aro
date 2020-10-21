@@ -58,7 +58,14 @@
   border-color: #1a79db
 }
 .tool-bar .btn {
-  background-color: #D9272D;
+  /*background-color: #D9272D;*/
+  flex: 0 0 30px;
+  border: none;
+  border-radius: 0px;
+  color: #eee;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  width: 36px;
 }
 
 .tool-bar .btn-selected {
@@ -66,7 +73,13 @@
 }
 
 .tool-bar {
-  background-color: #D9272D;
+  z-index: 3;
+  display: flex;
+  flex-direction: row;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  /*background-color: #D9272D;*/
 }
 
 .map_tool_label {
@@ -75,7 +88,7 @@
 }
 
 #global-search-toolbutton .select2-chosen {
-  background-color: #D9272D;
+  /*background-color: #D9272D;*/
   padding-left: 10px;
   margin-right: 0px;
   color: #eee;

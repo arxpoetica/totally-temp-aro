@@ -161,6 +161,10 @@ import { batch } from 'react-redux'
               }
             })
             dispatch(setIsResourceEditor(false))
+            // To Resize Resoure Editor Popup to xl (Extra large) whille Edit rate_reach_manager
+            if(managerType === 'rate_reach_manager') {
+              dispatch(setIsRrmManager(true))
+            }
           })
           dispatch(setIsResourceEditor(false))
           dispatch(setIsRrmManager(true))

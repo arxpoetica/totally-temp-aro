@@ -261,7 +261,7 @@ export class ToolBar extends Component {
     let isViewSettings = configuration.perspective.showToolbarButtons.viewSettings
 
     return(
-      <div className="tool-bar" style={{margin: marginPixels}}>
+      <div className="tool-bar" style={{margin: marginPixels, backgroundColor: configuration.toolbar.toolBarColor}}>
 
         {configuration.ARO_CLIENT !== 'frontier' &&
           <img src="images/logos/aro/logo_navbar.png" className="no-collapse" style={{alignSelf: 'center', paddingLeft: '10px', paddingRight: '10px'}}/>
@@ -475,11 +475,14 @@ export class ToolBar extends Component {
         </button>
 
         <div className="dropdown" style={{ display: !showDropDown ? 'none' : 'block', borderLeft: '#eee 1px dotted', width: dropdownWidthPixels}}>
-          <button className="btn btn-light" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+          <button style={{backgroundColor: configuration.toolbar.toolBarColor}} 
+            className="btn btn-light" type="button" id="dropdownMenu1" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="true">
             <i className="fa fa-angle-double-down"></i>
           </button>
           {/* <!-- Override some styles on the dropdown-menu UL below to remove margins, padding, etc --> */}
-          <ul className="dropdown-menu tool-bar-dropdown" aria-labelledby="dropdownMenu1" style={{padding: '0px', minWidth: '0px'}}>
+          <ul className="dropdown-menu tool-bar-dropdown" aria-labelledby="dropdownMenu1"
+            style={{padding: '0px', minWidth: '0px', backgroundColor: configuration.toolbar.toolBarColor}}>
           </ul> 
         </div> 
       </div>

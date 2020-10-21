@@ -7,7 +7,7 @@ export class RateReachManager extends Component {
     super(props)
     this.state = {
       rateReachManager: {
-        category:'',
+        category:'SPEED',
         name:'New Rate Reach Manager',
         description:'New Rate Reach Manager Description'
       }

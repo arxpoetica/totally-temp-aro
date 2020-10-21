@@ -21,7 +21,7 @@ export class PlanDataSelection extends Component {
     this.state = {
       openDataSelection: false,
       dataSelectionName: '',
-      dataItems: ''
+      dataItems: '',
     }
 
     this.isDataSourceEditable = {},
@@ -29,6 +29,8 @@ export class PlanDataSelection extends Component {
   }
 
   componentDidMount(){
+    // To validate DataSource in OnLoad
+    this.updateSelectionValidation()
     Object.keys(this.props.dataItems).forEach(dataSourceKey => {
       this.isDataSourceEditable[dataSourceKey] = false
       this.props.updateDataSourceEditableStatus(this.isDataSourceEditable,dataSourceKey,this.props.loggedInUser, this.props.authPermissions, this.props.dataItems)
@@ -37,23 +39,24 @@ export class PlanDataSelection extends Component {
     this.props.onDataSelectionChange({ childKey: 'dataSelection', isValid: isValid, isInit: true })
   }
 
-  componentWillReceiveProps(nextProps){
-    if(this.props != nextProps) {
-      if(nextProps.dataItems !== undefined) {
-        this.setState({openDataSelection: nextProps.isDataSelection,
-          dataItems: nextProps.dataItems})
+  // To set Props values to State if props get modified
+  // https://reactjs.org/docs/react-component.html#static-getderivedstatefromprops
+  static getDerivedStateFromProps(nextProps, state) {
+    if(nextProps.dataItems !== undefined) {
+      return {
+        openDataSelection : nextProps.isDataSelection,
+        dataItems: nextProps.dataItems
       }
     }
   }
 
   render () {
-    return this.props.dataItems === undefined || this.props.isDataSourceEditable === undefined
+    return this.props.dataItems === undefined
       ? null
       : this.renderPlanDataSelection()
   }
 
   renderPlanDataSelection() {
-
     return (
       <div style={{position: 'relative', height: '100%'}}>
         <table className="table table-sm table-striped">
@@ -151,11 +154,17 @@ export class PlanDataSelection extends Component {
       }
       })
     }
-    this.updateSelectionValidation(dataSource)
+    this.updateSelectionValidation()
+    this.props.selectDataItems(dataSource, this.state.dataItems[dataSource].selectedLibraryItems.map(item => JSON.parse(angular.toJson(item))))
+    this.props.updateDataSourceEditableStatus(this.isDataSourceEditable, dataSource, this.props.loggedInUser, this.props.authPermissions, this.state.dataItems)
+    var isValid = this.areAllSelectionsValid()
+    setTimeout(function() {
+      this.props.onDataSelectionChange({ childKey: 'dataSelection', isValid: isValid })
+    }.bind(this),0);
   }
 
   // Updates the 'valid' flags for all data items
-  updateSelectionValidation (dataSource) {
+  updateSelectionValidation () {
 
     var dataItem = []
     Object.keys(this.state.dataItems).forEach((dataItemKey) => {
@@ -166,13 +175,7 @@ export class PlanDataSelection extends Component {
       dataItem.isMinValueSelectionValid = dataItem.selectedLibraryItems.length >= dataItem.minValue
       dataItem.isMaxValueSelectionValid = dataItem.selectedLibraryItems.length <= dataItem.maxValue
     })
-
-    this.props.selectDataItems(dataSource, this.state.dataItems[dataSource].selectedLibraryItems.map(item => JSON.parse(angular.toJson(item))))
-    this.props.updateDataSourceEditableStatus(this.isDataSourceEditable, dataSource, this.props.loggedInUser, this.props.authPermissions, this.state.dataItems)
-    var isValid = this.areAllSelectionsValid()
-    setTimeout(function() {
-      this.props.onDataSelectionChange({ childKey: 'dataSelection', isValid: isValid })
-    }.bind(this),1000);
+    this.setState({dataItems: this.state.dataItems})
   }
 
   areAllSelectionsValid () {

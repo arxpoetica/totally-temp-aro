@@ -80,10 +80,12 @@ export class ResourceEditor extends Component {
 			if(prevState.filterText === ''){
 				return {
 					filterText: nextProps.filterText,
+					selectedResourceName: nextProps.selectedResourceName,
 				};
 			} else {
 				return {
 					filterText: prevState.filterText,
+					selectedResourceName: prevState.selectedResourceName,
 				};
 			}
 		}
@@ -92,7 +94,7 @@ export class ResourceEditor extends Component {
   componentDidMount () {
     this.props.getResourceTypes();
     this.props.getResourceManagers(this.state.filterText);
-		this.props.canMakeNewFilter();
+		this.props.canMakeNewFilter(this.state.filterText);
 		this.props.setModalTitle('Resource Managers')
 	}
 	

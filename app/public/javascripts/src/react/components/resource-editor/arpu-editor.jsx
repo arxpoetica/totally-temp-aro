@@ -74,7 +74,7 @@ export class ArpuEditor extends Component {
                     <tbody>
                       <tr>
                         <td>ARPU Strategy</td>
-                        <td><input type="text" className="form-control" name="strategy" onChange={e => {this.handleArpuChange(e, selectedArpuModelIndex)}}  value={arpuManagerConfiguration.arpuModels[selectedArpuModelIndex].arpuStrategy}/></td>
+                        <td><input type="text" className="form-control" name="arpuStrategy" onChange={e => {this.handleArpuChange(e, selectedArpuModelIndex)}}  value={arpuManagerConfiguration.arpuModels[selectedArpuModelIndex].arpuStrategy}/></td>
                       </tr>
                       <tr>
                         <td>Revenue</td>
