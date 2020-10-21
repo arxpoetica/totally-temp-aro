@@ -16,8 +16,8 @@ export class RateReachEditor extends Component {
     })
 
     this.state = {
-      rateReachManagerConfigs: '', // ToDo: this is an object and should not default to a string
-      selectedTechnologyType : 'Copper',
+      rateReachManagerConfigs: undefined, // ToDo: this is an object and should not default to a string
+      selectedTechnologyType : 'FiberProximity', // ToDo: this should not be hardcoded
       selectedEditingMode: this.editingModes.SPEEDS
     }
 
@@ -38,6 +38,7 @@ export class RateReachEditor extends Component {
   componentDidMount () {
     this.props.reloadRateReachManagerConfiguration(this.props.resourceManagerId, this.props.loggedInUser); 
     this.updateModalTitle()
+    if (this.props !== undefined) this.setState({ rateReachManagerConfigs: this.props.rateReachManagerConfigs })
   }
 
   componentDidUpdate (prevProps) {
@@ -63,13 +64,13 @@ export class RateReachEditor extends Component {
   }
 
   render () {
-    return this.props.rateReachManager === null || this.props.rateReachManagerConfigs === undefined || this.state.rateReachManagerConfigs === ''
-    ? null
+    return (this.props.rateReachManager === null || this.props.rateReachManagerConfigs === undefined || this.state.rateReachManagerConfigs === undefined)
+    ? <div>NOPE</div>
     : this.renderRateReachEditor()
   }
 
   renderRateReachEditor()  {
-    const {rateReachManagerConfigs, selectedTechnologyType, selectedEditingMode} = this.state    
+    const {rateReachManagerConfigs, selectedTechnologyType, selectedEditingMode} = this.state
     return (
       <div className="container" style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
         <div className="row">
@@ -145,6 +146,7 @@ export class RateReachEditor extends Component {
               {selectedEditingMode === this.editingModes.RATE_REACH_RATIOS &&
                 <div className="container-fluid">
                   <table id="tblRateReachRatios" className="table table-sm table-borderless">
+                    <tbody>  
                       {Object.entries(rateReachManagerConfigs.rateReachConfig.marketAdjustmentFactorMap).map(([techKey], techIndex) => (
                         <tr key={techIndex} className="d-flex">
                           <td className="col-3">{this.rateReachRatioDescription[techKey]}</td>
@@ -153,6 +155,7 @@ export class RateReachEditor extends Component {
                           </td>
                         </tr>
                       ))}
+                    </tbody>
                   </table>
                 </div>
               } 

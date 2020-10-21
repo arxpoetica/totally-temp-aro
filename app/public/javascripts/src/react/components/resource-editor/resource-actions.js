@@ -97,25 +97,25 @@ import { batch } from 'react-redux'
   }
   
   function newManager (resourceType, resourceName, loggedInUser, sourceId) {
-      return dispatch => {
-        if ('undefined' === typeof sourceId) sourceId = null // new one
-    
-        // TODO: once endpoint is ready use v2/resource-manager for pricebook and rate-reach-matrix as well
-        var managerId = resourceKeyToEndpointId[resourceType]
-        if (managerId === 'pricebook') {
-          // Have to put this switch in here because the API for pricebook cloning is different. Can remove once API is unified.
-          createByEditMode(createPriceBookMode, sourceId)
-        } else if (managerId === 'rate-reach-matrix') {
-          createByEditMode(createRateReachManagerMode, sourceId)
-        } else {
-          // Create a resource manager
-          var idParam = ''
-          if (null != sourceId) idParam = `resourceManagerId=${sourceId}&`
-          AroHttp.post(`/service/v2/resource-manager?${idParam}user_id=${loggedInUser.id}`,{
-            resourceType: resourceType,
-            name: resourceName,
-            description: resourceName
-          })
+    return dispatch => {
+      if ('undefined' === typeof sourceId) sourceId = null // new one
+  
+      // TODO: once endpoint is ready use v2/resource-manager for pricebook and rate-reach-matrix as well
+      var managerId = resourceKeyToEndpointId[resourceType]
+      if (managerId === 'pricebook') {
+        // Have to put this switch in here because the API for pricebook cloning is different. Can remove once API is unified.
+        createByEditMode(createPriceBookMode, sourceId)
+      } else if (managerId === 'rate-reach-matrix') {
+        createByEditMode(createRateReachManagerMode, sourceId)
+      } else {
+        // Create a resource manager
+        var idParam = ''
+        if (null != sourceId) idParam = `resourceManagerId=${sourceId}&`
+        AroHttp.post(`/service/v2/resource-manager?${idParam}user_id=${loggedInUser.id}`,{
+          resourceType: resourceType,
+          name: resourceName,
+          description: resourceName
+        })
         .then(result => {
           batch(() => {
             dispatch(getResourceManagers(resourceType))
@@ -539,7 +539,13 @@ import { batch } from 'react-redux'
   }
 
   function getDefaultConfiguration (loggedInUser, categoryType = 'SPEED') {
-    const technologyTypes = ['Fiber', 'FiberProximity', 'Copper', 'CellTower']
+    // ToDo: technologyTypes should be dynamic
+    var technologyTypes = []
+    if (categoryType === 'BAND') {
+      technologyTypes = ['FiberProximity']
+    } else {
+      technologyTypes = ['Fiber', 'FiberProximity', 'Copper', 'CellTower']
+    }
     const configuration = {
       managerType: 'rate_reach_manager',
       categoryType: categoryType,
@@ -1107,3 +1113,4 @@ import { batch } from 'react-redux'
     setModalTitle,
     setIsRrmManager
   }
+  
