@@ -21,7 +21,7 @@
   }
 </style>
 
-<div class="network-plan">
+<div class="network-plan" ng-style="{'background-color': $ctrl.state.configuration.toolbar.toolBarColor}">
   <!-- For ephemeral plans, the name has not been set by the user -->
   <div ng-if="($ctrl.state.plan && $ctrl.state.plan.ephemeral) && $ctrl.state.loggedInUser.perspective === 'admin'">
     <div id="selectedPlan" style="font-size: 25px; line-height: 40px;">Existing Network</div>

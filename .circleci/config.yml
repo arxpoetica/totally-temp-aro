@@ -68,6 +68,7 @@ workflows:
               only:
                   - master
                   - tab-change-on-action
+                  - toolBarColor
                   - coverage-initializer-typo
       - deploy:
           context: aro_qa_builds
