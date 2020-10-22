@@ -270,6 +270,22 @@ export class PlanningConstraints extends Component {
                     className='checkboxfill' component='input' type='checkbox' />
                 </td>
               </tr>
+
+              {/* TODO: This is hardcoded for now and needs get it from backend using 
+               /type-enum/hub_placement_strategy end point*/}
+              <tr>
+                <td>Hub Clustering Strategy</td>
+                <td>
+                  <Field name='hubClusterStrategyType'
+                    className='form-control form-control-sm' component='select' type='text'>
+                    <option value='DAG'>Directed Acyclic Graph</option>
+                    <option value='KMEANS_PP'>K Means</option>
+                    <option value='RROBIN'>Round Robin</option>
+                    <option value='GRAPH'>Graph</option>
+                    <option value='CLUSTER_ROADS'>Cluster Roads</option>
+                  </Field>
+                </td>
+              </tr>
             </tbody>
           </table>
         </form>
