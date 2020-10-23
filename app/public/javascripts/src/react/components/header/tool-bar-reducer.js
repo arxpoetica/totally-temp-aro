@@ -16,7 +16,8 @@ const defaultState = {
   currentPlanTags: [],
   listOfServiceAreaTags: [],
   currentPlanServiceAreaTags: [],
-  selectedHeatMapOption: 'HEATMAP_ON'
+  selectedHeatMapOption: 'HEATMAP_ON',
+  appConfiguration: {}
 }
 
 function setPlanInputsModal (state, planInputsModal) {

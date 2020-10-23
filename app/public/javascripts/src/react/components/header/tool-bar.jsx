@@ -169,12 +169,9 @@ export class ToolBar extends Component {
 
     this.state = {
       currentRulerAction: this.allRulerActions.STRAIGHT_LINE,
-      mapRef: {},
       showRemoveRulerButton: false,
       heatMapOption: this.mapTileOptions.selectedHeatmapOption.id === 'HEATMAP_ON',
       sliderValue: this.rangeValues.indexOf(this.mapTileOptions.heatMap.worldMaxValue),
-      showSiteBoundary: '',
-      selectedBoundaryType: '',
       selectedFiberOption: this.viewSetting.selectedFiberOption,
       mapTileOptions: this.mapTileOptions,
       showDropDown: false,
@@ -222,17 +219,16 @@ export class ToolBar extends Component {
     setTimeout(() => window.addEventListener("resize", this.refreshToolbar), 0)
   }
 
-  componentWillReceiveProps(nextProps){
-    if(this.props != nextProps) {
-      this.setState({mapRef: nextProps.googleMaps, showSiteBoundary: nextProps.showSiteBoundary,
-        selectedBoundaryType: nextProps.selectedBoundaryType})
+  // To Trigger refreshToolbar() when props changed
+  // https://reactjs.org/docs/react-component.html#componentdidupdate
+  componentDidUpdate(prevProps) {
+    if (this.props !== prevProps) {
+      setTimeout(() => this.refreshToolbar(), 0)
     }
-    // To Trigger refreshToolbar() when props changed
-    setTimeout(() => this.refreshToolbar(), 0)
   }
 
   render () {
-    return this.props.configuration === undefined || this.props.configuration.perspective === undefined
+    return Object.keys(this.props.configuration).length === 0
       ? null
       : this.renderToolBar()
   }
@@ -243,12 +239,11 @@ export class ToolBar extends Component {
 
     const {selectedDisplayMode, activeViewModePanel, isAnnotationsListVisible, isMapReportsVisible,
        showMapReportMapObjects, selectedTargetSelectionMode, isRulerEnabled, isViewSettingsEnabled,
-       boundaryTypes, showDirectedCable, showEquipmentLabels, showLocationLabels,
-       showFiberSize, configuration, showGlobalSettings } = this.props
+       boundaryTypes, showDirectedCable, showEquipmentLabels, showLocationLabels, showFiberSize,
+       configuration, showGlobalSettings, showSiteBoundary, selectedBoundaryType } = this.props
 
     const {currentRulerAction, showRemoveRulerButton, heatMapOption, sliderValue,
-      showSiteBoundary, selectedBoundaryType, selectedFiberOption, showDropDown,
-      marginPixels, dropdownWidthPixels} = this.state
+      selectedFiberOption, showDropDown, marginPixels, dropdownWidthPixels} = this.state
 
     let selectedIndividualLocation = (selectedDisplayMode === this.displayModes.ANALYSIS || selectedDisplayMode === this.displayModes.VIEW) && activeViewModePanel !== this.viewModePanels.EDIT_LOCATIONS
     let selectedMultipleLocation = (selectedDisplayMode === this.displayModes.ANALYSIS || selectedDisplayMode === this.displayModes.VIEW) && activeViewModePanel !== this.viewModePanels.EDIT_LOCATIONS && configuration.perspective.showToolbarButtons.selectionPolygon
@@ -605,19 +600,12 @@ export class ToolBar extends Component {
   }
 
   onChangeSiteBoundaries (e) {
-    let selectedBoundaryType = this.state.selectedBoundaryType
-    this.props.boundaryTypes.map((item, index) => {
-      if(index === e.target.selectedIndex){
-        selectedBoundaryType = item
-      }
-    })
-    this.setState({selectedBoundaryType: selectedBoundaryType})
     this.props.setSelectedBoundaryType(this.props.boundaryTypes[e.target.selectedIndex])
     this.props.setShowSiteBoundary(true)
   }
 
   toggleSiteBoundary (e) {
-    this.setState({showSiteBoundary: !this.state.showSiteBoundary})
+    this.props.setShowSiteBoundary(!this.props.showSiteBoundary)
     this.rState.viewSettingsChanged.sendMessage() // This will also refresh the map layer
   }
 
@@ -661,7 +649,7 @@ export class ToolBar extends Component {
     this.props.setIsRulerEnabled(!this.props.isRulerEnabled)
     this.enableRulerAction()
 
-    !this.props.isRulerEnabled ? this.state.mapRef.setOptions({ draggableCursor: 'crosshair' }) : this.state.mapRef.setOptions({ draggableCursor: null })
+    !this.props.isRulerEnabled ? this.props.mapRef.setOptions({ draggableCursor: 'crosshair' }) : this.props.mapRef.setOptions({ draggableCursor: null })
   }
 
   enableRulerAction () {
@@ -709,7 +697,7 @@ export class ToolBar extends Component {
     this.measuringStickEnabled = true
     this.clearRulers()
     if (this.measuringStickEnabled) {
-      this.clickListener = google.maps.event.addListener(this.state.mapRef, 'click', (point) => {
+      this.clickListener = google.maps.event.addListener(this.props.mapRef, 'click', (point) => {
         this.state.currentRulerAction.id === this.allRulerActions.STRAIGHT_LINE.id && this.addToRulerSegments(point.latLng)
       })
     } else {
@@ -734,7 +722,7 @@ export class ToolBar extends Component {
         path: google.maps.SymbolPath.CIRCLE,
         scale: 2
       },
-      map: this.state.mapRef,
+      map: this.props.mapRef,
       draggable: true,
       zIndex: 100
     })
@@ -772,7 +760,7 @@ export class ToolBar extends Component {
       strokeColor: '#4d99e5',
       strokeWeight: 3,
       clickable: false,
-      map: this.state.mapRef
+      map: this.props.mapRef
     })
   }
 
@@ -858,7 +846,7 @@ export class ToolBar extends Component {
 
   listenForCopperMarkers () {
     // Note we are using skip(1) to skip the initial value (that is fired immediately) from the RxJS stream.
-    this.copperClicklistener = google.maps.event.addListener(this.state.mapRef, 'click', (event) => {
+    this.copperClicklistener = google.maps.event.addListener(this.props.mapRef, 'click', (event) => {
       if (!event || !event.latLng || this.state.currentRulerAction.id === this.allRulerActions.STRAIGHT_LINE.id) {
         return
       }
@@ -869,7 +857,7 @@ export class ToolBar extends Component {
           path: google.maps.SymbolPath.CIRCLE,
           scale: 2
         },
-        map: this.state.mapRef,
+        map: this.props.mapRef,
         draggable: false,
         zIndex: 100
       })
@@ -926,8 +914,8 @@ export class ToolBar extends Component {
         }
 
         geoJson.features[0].geometry = result.data.path
-        this.copperPath = this.state.mapRef.data.addGeoJson(geoJson)
-        this.state.mapRef.data.setStyle(function (feature) {
+        this.copperPath = this.props.mapRef.data.addGeoJson(geoJson)
+        this.props.mapRef.data.setStyle(function (feature) {
           return {
             strokeColor: '#000000',
             strokeWeight: 4
@@ -948,7 +936,7 @@ export class ToolBar extends Component {
   clearRulerCopperPath () {
     if (this.copperPath != null) {
       for (var i = 0; i < this.copperPath.length; i++) {
-        this.state.mapRef.data.remove(this.copperPath[i])
+        this.props.mapRef.data.remove(this.copperPath[i])
       }
     }
   }
@@ -1131,7 +1119,7 @@ const mapStateToProps = (state) => ({
   showMapReportMapObjects: state.mapReports.showMapObjects,
   activeViewModePanel: state.toolbar.rActiveViewModePanel,
   selectedTargetSelectionMode: state.toolbar.selectedTargetSelectionMode,
-  googleMaps: state.map.googleMaps,
+  mapRef: state.map.googleMaps,
   isRulerEnabled: state.toolbar.isRulerEnabled,
   optimizationInputs: state.optimization.networkOptimization.optimizationInputs,
   activeSelectionModeId: state.selection.activeSelectionMode.id,
@@ -1146,7 +1134,8 @@ const mapStateToProps = (state) => ({
   showLocationLabels: state.viewSettings.showLocationLabels,
   showFiberSize: state.toolbar.showFiberSize,
   configuration: state.toolbar.appConfiguration,
-  showGlobalSettings: state.globalSettings.showGlobalSettings
+  showGlobalSettings: state.globalSettings.showGlobalSettings,
+  perspective: state.configuration.ui.perspective
 })  
 
 const mapDispatchToProps = (dispatch) => ({

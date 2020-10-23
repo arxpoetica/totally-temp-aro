@@ -34,22 +34,24 @@ export class PlanInputsModal extends Component {
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  // To trigger initModalData() when planInputsModal props change
+  // And if active plan has changed update the plan object
+  componentDidUpdate(prevProps) {
     // Trigger initModalData() when modal Show and Hide
-    if(this.props.planInputsModal != nextProps.planInputsModal) {
-      if(nextProps.planInputsModal === true) {
+    if(this.props.planInputsModal != prevProps.planInputsModal) {
+      if(this.props.planInputsModal === true) {
         this.initModalData()
       } else {
         this.initModalData()
       }
     }
 
-    const currentActivePlanId = this.props.plan && this.props.plan.id
-    const newActivePlanId = nextProps.plan && nextProps.plan.id
+    const currentActivePlanId = prevProps.plan && prevProps.plan.id
+    const newActivePlanId = this.props.plan && this.props.plan.id
 
-    if ((currentActivePlanId !== newActivePlanId) && (nextProps.plan)) {
+    if ((currentActivePlanId !== newActivePlanId) && (prevProps.plan)) {
       // The active plan has changed. Note that we are comparing ids because a change in plan state also causes the plan object to update.
-      this.onActivePlanChanged(nextProps.plan)
+      this.onActivePlanChanged(this.props.plan)
     }
   }
 
@@ -118,8 +120,6 @@ export class PlanInputsModal extends Component {
                 />
               }
            </div>
-
-
           </ModalBody>
           <ModalFooter>
             <button className="btn btn-primary" onClick={(e) => this.savePlanAs()}>Create Plan</button>

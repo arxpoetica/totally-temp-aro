@@ -166,8 +166,6 @@ import { batch } from 'react-redux'
               dispatch(setIsRrmManager(true))
             }
           })
-          dispatch(setIsResourceEditor(false))
-          dispatch(setIsRrmManager(true))
         })
         .catch(err => {
           console.error(err)

@@ -1831,8 +1831,8 @@ class State {
       wormholeFuseDefinitions: reduxState.optimization.networkAnalysis.wormholeFuseDefinitions,
       activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
       optimizationInputs: reduxState.optimization.networkOptimization.optimizationInputs,
-      rSelectedDisplayMode: reduxState.plan.rSelectedDisplayMode,
-      rActiveViewModePanel: reduxState.plan.rActiveViewModePanel
+      rSelectedDisplayMode: reduxState.toolbar.rSelectedDisplayMode,
+      rActiveViewModePanel: reduxState.toolbar.rActiveViewModePanel
     }
   }
 
