@@ -59,7 +59,11 @@ class ViewModeController {
 
   toggleActiveViewModePanelAction (activeViewModePanel) {
     this.rActiveViewModePanelAction(activeViewModePanel)
-    this.rSelectedTargetSelectionModeAction(this.state.targetSelectionModes.SINGLE_PLAN_TARGET)
+    
+    // To close COVERAGE_BOUNDARY panel while clicking on other panels
+    if(activeViewModePanel !== this.state.viewModePanels.COVERAGE_BOUNDARY) {
+      this.rSelectedTargetSelectionModeAction(this.state.targetSelectionModes.SINGLE_PLAN_TARGET)
+    }
   }
 
   $onDestroy () {

@@ -98,17 +98,10 @@ export class ToolBar extends Component {
       ]
     }
 
-    var heatmapOptions = {
-      showTileExtents: false,
-      heatMap: {
-        useAbsoluteMax: false,
-        maxValue: 100,
-        powerExponent: 0.5,
-        worldMaxValue: 500000
-      },
-      selectedHeatmapOption: this.viewSetting.heatmapOptions[0],
-    }
-    this.mapTileOptions = heatmapOptions
+    // Map tile settings used for debugging
+    this.rState.mapTileOptions.getMessage().subscribe((mapTileOptions) => {
+      this.mapTileOptions = JSON.parse(JSON.stringify(mapTileOptions))
+    }) 
 
     this.rangeValues = []
     const initial = 1000
@@ -173,13 +166,14 @@ export class ToolBar extends Component {
       heatMapOption: this.mapTileOptions.selectedHeatmapOption.id === 'HEATMAP_ON',
       sliderValue: this.rangeValues.indexOf(this.mapTileOptions.heatMap.worldMaxValue),
       selectedFiberOption: this.viewSetting.selectedFiberOption,
-      mapTileOptions: this.mapTileOptions,
       showDropDown: false,
       marginPixels: 10, // Margin between the container and the div containing the buttons
       dropdownWidthPixels: 36, // The width of the dropdown button
     }
 
-    this.props.loadServiceLayers();
+    this.searchLocation = 'Search an address, city, or state' // For IntialSelection of select2
+
+    this.props.loadServiceLayers(); // To load Service layer in advance 
 
     this.refreshToolbar = this.refreshToolbar.bind(this); // To bind a function
 
@@ -209,7 +203,7 @@ export class ToolBar extends Component {
 
     // toggle toolbar dropdown
     jQuery('.dropdown').on('show.bs.dropdown', function (e) {
-      jQuery('.tool-bar-dropdown').toggle()
+      jQuery(this).find('.tool-bar-dropdown').toggle()
       e.stopPropagation()
       e.preventDefault()
     })
@@ -219,23 +213,23 @@ export class ToolBar extends Component {
     setTimeout(() => window.addEventListener("resize", this.refreshToolbar), 0)
   }
 
-  // To Trigger refreshToolbar() when props changed
   // https://reactjs.org/docs/react-component.html#componentdidupdate
   componentDidUpdate(prevProps) {
     if (this.props !== prevProps) {
-      setTimeout(() => this.refreshToolbar(), 0)
+      setTimeout(() => this.refreshToolbar(), 0)   // To Trigger refreshToolbar() when props changed
+      this.initSearchBox(); // To re-render select2 searchbar
     }
   }
 
   render () {
+    // AppConfiguration takes some time to create a perspective object so this condition is required
     return Object.keys(this.props.configuration).length === 0
       ? null
       : this.renderToolBar()
   }
 
   renderToolBar() {
-    this.initSearchBox();
-    this.refreshSlidertrack();
+    this.refreshSlidertrack(); // To re-render Heatmap intensity slider
 
     const {selectedDisplayMode, activeViewModePanel, isAnnotationsListVisible, isMapReportsVisible,
        showMapReportMapObjects, selectedTargetSelectionMode, isRulerEnabled, isViewSettingsEnabled,
@@ -255,7 +249,7 @@ export class ToolBar extends Component {
     let isMeasuringStick = configuration.perspective.showToolbarButtons.measuringStick
     let isViewSettings = configuration.perspective.showToolbarButtons.viewSettings
 
-    return(
+    return (
       <div className="tool-bar" style={{margin: marginPixels, backgroundColor: configuration.toolbar.toolBarColor}}>
 
         {configuration.ARO_CLIENT !== 'frontier' &&
@@ -304,6 +298,7 @@ export class ToolBar extends Component {
 
         <div className="separator"></div>
 
+        {/* Ruler */}
         <div className="rulerDropdown" style={{ display: isMeasuringStick ? 'block' : 'none' }}>
           <button className={`btn ${isRulerEnabled ? 'btn-selected' : ''}`}
             type="button" onClick={(e) => this.rulerAction(e)}
@@ -327,6 +322,7 @@ export class ToolBar extends Component {
           </div>
         </div>
 
+        {/* Show View Settings */}
         <div className="myDropdown1">
           <button className={`btn ${isViewSettingsEnabled ? 'btn-selected' : ''}`}
             style={{ display: isViewSettings ? 'block' : 'none' }}
@@ -469,6 +465,7 @@ export class ToolBar extends Component {
           <i className="fa fa-cloud"></i>
         </button>
 
+        {/* Dynamic Dropdown for Toolbar icons */}
         <div className="dropdown" style={{ display: !showDropDown ? 'none' : 'block', borderLeft: '#eee 1px dotted', width: dropdownWidthPixels}}>
           <button style={{backgroundColor: configuration.toolbar.toolBarColor}} 
             className="btn btn-light" type="button" id="dropdownMenu1" data-toggle="dropdown"
@@ -616,7 +613,7 @@ export class ToolBar extends Component {
 
   toggleHeatMapOptions (e) {
     this.setState({heatMapOption: !this.state.heatMapOption}, function() {
-      var newMapTileOptions = JSON.parse(JSON.stringify(this.state.mapTileOptions))
+      var newMapTileOptions = JSON.parse(JSON.stringify(this.mapTileOptions))
       newMapTileOptions.selectedHeatmapOption = this.state.heatMapOption ? this.viewSetting.heatmapOptions[0] : this.viewSetting.heatmapOptions[2]
       this.rState.mapTileOptions.sendMessage(newMapTileOptions) // This will also refresh the map layer
       this.refreshSlidertrack()
@@ -627,9 +624,8 @@ export class ToolBar extends Component {
 
   changeHeatMapOptions (e) {
     this.setState({sliderValue: e.target.value}, function() {
-      var newMapTileOptions = JSON.parse(JSON.stringify(this.state.mapTileOptions))
+      var newMapTileOptions = JSON.parse(JSON.stringify(this.mapTileOptions))
       newMapTileOptions.heatMap.worldMaxValue = this.rangeValues[this.state.sliderValue]
-      this.setState({mapTileOptions: newMapTileOptions})
       this.rState.mapTileOptions.sendMessage(newMapTileOptions) // This will also refresh the map layer  
     })
   }
@@ -650,6 +646,7 @@ export class ToolBar extends Component {
     this.enableRulerAction()
 
     !this.props.isRulerEnabled ? this.props.mapRef.setOptions({ draggableCursor: 'crosshair' }) : this.props.mapRef.setOptions({ draggableCursor: null })
+    this.showRemoveRulerButton(); // To disable ruler (-) icon
   }
 
   enableRulerAction () {
@@ -687,7 +684,7 @@ export class ToolBar extends Component {
       this.clearStraightLineAction()
       this.clearRulerCopperAction()
       this.rulerCopperAction() 
-      this.showRemoveRulerButton()
+      this.showRemoveRulerButton() // To disable ruler (-) icon
     }
   }
 
@@ -782,7 +779,7 @@ export class ToolBar extends Component {
       var event = new CustomEvent('measuredDistance', { detail : total});
       window.dispatchEvent(event);
       // Unable to call in Render Method so called here
-      this.showRemoveRulerButton();
+      this.showRemoveRulerButton(); // To disable ruler (-) icon
     }
   }
 
@@ -1014,6 +1011,7 @@ export class ToolBar extends Component {
   initSearchBox () {
     var ids = 0
     var searchSessionToken = uuidStore.getInsecureV4UUID()
+    var searchLocation = this.searchLocation;
     var addBouncingMarker = (latitude, longitude) => {
       var marker = new google.maps.Marker({
         map: map,
@@ -1024,7 +1022,10 @@ export class ToolBar extends Component {
     }
     var search = $('#global-search-toolbutton .select2')
     search.select2({
-      placeholder: 'Set an address, city, state or CLLI code',
+      initSelection: function (select, callback) {
+        callback({ 'id': 0, 'text': searchLocation })
+      },
+      placeholder: 'Search an address, city, or state',
       ajax: {
         url: '/search/addresses',
         dataType: 'json',
@@ -1062,7 +1063,9 @@ export class ToolBar extends Component {
       }
     }).on('change', (e) => {
       var selectedLocation = e.added
-      if (selectedLocation) {
+      // Due to initSearchBox Render Multiple times, so condition check is used to render only one time on Change
+      if (selectedLocation && selectedLocation.text !== this.searchLocation) {
+        this.searchLocation = selectedLocation.text
         const ZOOM_FOR_LOCATION_SEARCH = 17
         if (selectedLocation.type === 'placeId') {
           // This is a google maps place_id. The actual latitude/longitude can be obtained by another call to the geocoder
@@ -1109,7 +1112,6 @@ const getLocationLayersList = createSelector([getAllLocationLayers], (locationLa
 const getAllBoundaryTypesList = state => state.mapLayers.boundaryTypes
 const getBoundaryTypesList = createSelector([getAllBoundaryTypesList], (boundaryTypes) => boundaryTypes.toJS())
 
-
 const mapStateToProps = (state) => ({
   defaultPlanCoordinates: state.plan.defaultPlanCoordinates,
   selectedDisplayMode: state.toolbar.rSelectedDisplayMode,
@@ -1134,8 +1136,7 @@ const mapStateToProps = (state) => ({
   showLocationLabels: state.viewSettings.showLocationLabels,
   showFiberSize: state.toolbar.showFiberSize,
   configuration: state.toolbar.appConfiguration,
-  showGlobalSettings: state.globalSettings.showGlobalSettings,
-  perspective: state.configuration.ui.perspective
+  showGlobalSettings: state.globalSettings.showGlobalSettings
 })  
 
 const mapDispatchToProps = (dispatch) => ({

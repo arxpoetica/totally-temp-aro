@@ -1,6 +1,7 @@
 class ViewSettingsController {
   constructor (state, tileDataService, rState) {
     this.state = state
+    this.rState = rState
     this.tileDataService = tileDataService
 
     this.state.viewSetting.selectedFiberOption = this.state.viewFiberOptions[0]
@@ -13,7 +14,7 @@ class ViewSettingsController {
       .subscribe((mapTileOptions) => this.mapTileOptions = angular.copy(mapTileOptions))
 
     // Map tile settings used for debugging
-    rState.mapTileOptions.getMessage().subscribe((mapTileOptions) => {
+    this.rState.mapTileOptions.getMessage().subscribe((mapTileOptions) => {
       this.mapTileOptions = angular.copy(mapTileOptions)
     }) 
   }
@@ -38,6 +39,7 @@ class ViewSettingsController {
   updateState () {
     var newMapTileOptions = angular.copy(this.mapTileOptions)
     this.state.mapTileOptions.next(newMapTileOptions)
+    this.rState.mapTileOptions.sendMessage(newMapTileOptions)
   }
 }
 
