@@ -68,7 +68,6 @@ workflows:
               only:
                   - master
                   - tab-change-on-action
-                  - typo_rate-reach
       - deploy:
           context: aro_qa_builds
           requires:

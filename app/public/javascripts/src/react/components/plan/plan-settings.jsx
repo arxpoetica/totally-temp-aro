@@ -12,6 +12,16 @@ import PlanActions from './plan-actions'
 export class PlanSettings extends Component {
   constructor (props) {
     super(props)
+
+    this.PLAN_STATE = Object.freeze({
+      INITIALIZED: 'INITIALIZED',
+      START_STATE: 'START_STATE',
+      STARTED: 'STARTED',
+      COMPLETED: 'COMPLETED',
+      FAILED: 'FAILED',
+      CANCELED: 'CANCELED'
+    }),
+
     this.state = {
       collapseCards: 'DATA_SELECTION',
       isSaveEnabled: false,
@@ -29,7 +39,6 @@ export class PlanSettings extends Component {
     this.updateUIState()
   }
   
-
   render () {
     return this.renderPlanSettings()
   }
@@ -61,6 +70,7 @@ export class PlanSettings extends Component {
               <PlanDataSelection
                 onDataSelectionChange={this.onDataSelectionChange}
               />
+              <div className="disable-sibling-controls" style={{display : this.areControlsEnabled() ? 'none' : 'block' }}> </div>
             </CardBody>
           </Collapse>
         </Card>
@@ -72,6 +82,7 @@ export class PlanSettings extends Component {
               <PlanResourceSelection
                onResourceSelectionChange={this.onResourceSelectionChange}
               />
+              <div className="disable-sibling-controls" style={{display : this.areControlsEnabled() ? 'none' : 'block' }}> </div>
             </CardBody>
           </Collapse>
         </Card>
@@ -86,6 +97,10 @@ export class PlanSettings extends Component {
         </Card>
       </div>
     )
+  }
+
+  areControlsEnabled () {
+    return this.props.activePlan && ((this.props.activePlan.planState === this.PLAN_STATE.START_STATE) || (this.props.activePlan.planState === this.PLAN_STATE.INITIALIZED))
   }
 
   toggleCards(e) {
@@ -207,47 +222,46 @@ export class PlanSettings extends Component {
   }
 
   componentWillUnmount() {
-       // If any selections have been changed, ask the user if they want to save them
 
-       var childData = this.getChangeList()
+    // If any selections have been changed, ask the user if they want to save them
+    var childData = this.getChangeList()
 
-       var changesList = childData.changesList
-       var invalidList = childData.invalidList
-   
-       if (changesList.length > 0) {
-         if (invalidList.length == 0) {
-           var saveText = this.childListToText(changesList)
-   
-           swal({
-             title: 'Save modified settings?',
-             text: 'Do you want to save your changes to ' + saveText + '?',
-             type: 'warning',
-             confirmButtonColor: '#DD6B55',
-             confirmButtonText: 'Save', // 'Yes',
-             showCancelButton: true,
-             cancelButtonText: 'Keep Unsaved', // 'No',
-             closeOnConfirm: true
-           }, (result) => {
-             if (result) {
-               this.saveChanges()
-             } else {
-               // this.discardChanges()
-             }
-           })
-         } else {
-           // All selections are not valid
-           var errorText = this.childListToText(invalidList)
-           swal({
-             title: 'Invalid selections',
-             text: 'The data selections are not valid for ' + errorText + '. Correct them before trying to save your changes.',
-             type: 'error',
-             showCancelButton: false,
-             confirmButtonColor: '#DD6B55'
-           })
-         }
-       }
+    var changesList = childData.changesList
+    var invalidList = childData.invalidList
+
+    if (changesList.length > 0) {
+      if (invalidList.length == 0) {
+        var saveText = this.childListToText(changesList)
+
+        swal({
+          title: 'Save modified settings?',
+          text: 'Do you want to save your changes to ' + saveText + '?',
+          type: 'warning',
+          confirmButtonColor: '#DD6B55',
+          confirmButtonText: 'Save', // 'Yes',
+          showCancelButton: true,
+          cancelButtonText: 'Keep Unsaved', // 'No',
+          closeOnConfirm: true
+        }, (result) => {
+          if (result) {
+            this.saveChanges()
+          } else {
+            // this.discardChanges()
+          }
+        })
+      } else {
+        // All selections are not valid
+        var errorText = this.childListToText(invalidList)
+        swal({
+          title: 'Invalid selections',
+          text: 'The data selections are not valid for ' + errorText + '. Correct them before trying to save your changes.',
+          type: 'error',
+          showCancelButton: false,
+          confirmButtonColor: '#DD6B55'
+        })
+      }
+    }
   }
-
 }
 
   const mapStateToProps = (state) => ({
@@ -257,7 +271,6 @@ export class PlanSettings extends Component {
     haveDataItemsChanged: state.plan.haveDataItemsChanged,
     activePlan: state.plan.activePlan,
     selectedServiceAreas: state.selection.planTargets.serviceAreas
-
   })   
 
   const mapDispatchToProps = (dispatch) => ({
@@ -265,8 +278,7 @@ export class PlanSettings extends Component {
     saveDataSelectionToServer: (plan, dataItems) => dispatch(PlanActions.saveDataSelectionToServer(plan, dataItems)),
     setHaveDataItemsChanged: haveDataItemsChanged => dispatch(PlanActions.setHaveDataItemsChanged(haveDataItemsChanged)),
     clearAllSelectedSA: (plan, dataItems, selectedServiceAreas) => dispatch(PlanActions.clearAllSelectedSA(plan, dataItems, selectedServiceAreas)),
-    savePlanResourceSelectionToServer: (plan, resourceItems) => dispatch(PlanActions.savePlanResourceSelectionToServer(plan, resourceItems)),
-
+    savePlanResourceSelectionToServer: (plan, resourceItems) => dispatch(PlanActions.savePlanResourceSelectionToServer(plan, resourceItems))
   })
 
   const PlanSettingsComponent = wrapComponentWithProvider(reduxStore, PlanSettings, mapStateToProps, mapDispatchToProps)

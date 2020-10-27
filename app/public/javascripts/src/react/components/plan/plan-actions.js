@@ -141,6 +141,8 @@ function setActivePlan (plan) {
     dispatch(NetworkOptimizationActions.loadOptimizationInputs(plan.id))
     // load rings
     dispatch(RingEditActions.loadRings(plan.id))
+    // load rings
+    dispatch(loadPlanResourceSelectionFromServer(plan))
   }
 }
 
@@ -528,6 +530,24 @@ function planSettingsToProject (selectedProjectId, dataItems, resourceItems) {
     }
   }
 
+  function setParentProjectForNewProject (parentProjectForNewProject){
+    return dispatch => {
+      dispatch({
+        type: Actions.PLAN_SET_PARENT_PROJECT_FOR_NEW_PROJECT,
+        payload: parentProjectForNewProject
+      })
+    }
+  }
+
+  function setSelectedProjectId (selectedProjectId){
+    return dispatch => {
+      dispatch({
+        type: Actions.PLAN_SET_SELECTED_PROJECT_ID,
+        payload: selectedProjectId
+      })
+    }
+  }
+
 export default {
   setActivePlan,
   setActivePlanState,
@@ -550,5 +570,7 @@ export default {
   planSettingsToProject,
   updateDataSourceEditableStatus,
   setSelectedDisplayMode,
-  setActiveViewModePanel
+  setActiveViewModePanel,
+  setParentProjectForNewProject,
+  setSelectedProjectId
 }

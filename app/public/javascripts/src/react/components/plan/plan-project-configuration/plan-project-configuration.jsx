@@ -24,28 +24,28 @@ export class PlanProjectConfig extends Component {
     this.state = {
       selectedMode: this.modes.HOME,
       newProjectName: 'New Project',
-      parentProjectForNewProject: '',
+      parentProjectForNewProject: null,
       selectedProjectId: '',
       showProjectSettingsModal: false
     }
 
     this.showProjectSettingsModal = this.showProjectSettingsModal.bind(this);
-
   }
 
   componentDidMount(){
     this.props.loadProjectConfig(this.props.loggedInUser.id, this.props.authPermissions)
   }
 
-  componentWillReceiveProps(nextProps){
-    if(this.props != nextProps) {
-      if(nextProps.parentProjectForNewProject !== undefined) {
-        this.setState({parentProjectForNewProject: nextProps.parentProjectForNewProject,
-                      selectedMode: nextProps.selectedMode,
-                      selectedProjectId: nextProps.selectedProjectId
-        })
+  // To set Props values to State if props get modified
+  // https://reactjs.org/docs/react-component.html#static-getderivedstatefromprops
+  static getDerivedStateFromProps(nextProps) {
+    if(nextProps.parentProjectForNewProject !== undefined) {
+      return {
+        parentProjectForNewProject: nextProps.parentProjectForNewProject,
+        selectedMode: nextProps.selectedMode,
+        selectedProjectId: nextProps.selectedProjectId
       }
-    }
+    } 
   }
 
   render () {
@@ -94,7 +94,7 @@ export class PlanProjectConfig extends Component {
             <div className="form-group row">
               <div className="col-sm-4 form-div-center">Parent</div>
               <div className="col-sm-8">
-                <select className="form-control" style={{flex: '1 1 auto'}} onChange={(e)=>this.handleParentProjectChange(e)} value={parentProjectForNewProject}>
+                <select className="form-control" style={{flex: '1 1 auto'}} onChange={(e)=>this.handleParentProjectChange(e)} value={parentProjectForNewProject.name}>
                   {allProjects.map((item, index) =>
                     <option key={index} value={item.name} label={item.name}></option>
                   )}
@@ -207,12 +207,12 @@ export class PlanProjectConfig extends Component {
   }
 
   handleTargetProjectChange(e){
-    this.setState({selectedProjectId: e.target.value});
+    this.props.setSelectedProjectId(e.target.value)
   }
 
   planSettingsToProject(){
     this.props.planSettingsToProject(this.state.selectedProjectId, this.props.dataItems, this.props.resourceItems )
-    this.setState({selectedMode: this.modes.HOME});
+    this.props.setProjectMode(this.modes.HOME)
   }
 
   deleteProject (project) {
@@ -251,7 +251,6 @@ export class PlanProjectConfig extends Component {
     e.preventDefault();
     this.props.createNewProject(newProjectName, parentProjectForNewProject, this.props.loggedInUser.id, this.props.authPermissions)
     this.setState({newProjectName: 'New Project'});
-
   }
 
   handleProjectNameChange(e){
@@ -259,17 +258,24 @@ export class PlanProjectConfig extends Component {
   }
 
   handleParentProjectChange(e){
-    var pristinePrject = this.state.parentProjectForNewProject
-    pristinePrject.name = e.target.value
-    this.setState({parentProjectForNewProject: pristinePrject});
+
+    let parentprojectname = e.target.value
+    var pristinePrject = {}
+    this.props.allProjects.map((project, index) => {
+        if (project.name === parentprojectname){
+          pristinePrject = project
+        }
+    })
+    this.props.setParentProjectForNewProject(pristinePrject)
   }
 
   setSelectedMode(mode){
-    this.setState({selectedMode: mode});
+    this.props.setProjectMode(mode)
   }
 
   cancelProjectCreation(){
-    this.setState({newProjectName: 'New Project', selectedMode: this.modes.HOME});
+    this.setState({newProjectName: 'New Project'});
+    this.props.setProjectMode(this.modes.HOME)
   }
 }
 
@@ -294,7 +300,9 @@ export class PlanProjectConfig extends Component {
     setProjectMode: (mode) => dispatch(PlanActions.setProjectMode(mode)),
     planSettingsToProject: (selectedProjectId, dataItems, resourceItems) => dispatch(PlanActions.planSettingsToProject(selectedProjectId, dataItems, resourceItems)),
     getAcl: (resourceId, doForceUpdate = false) => dispatch(aclActions.getAcl("PROJECT_TEMPLATE", resourceId, doForceUpdate)),
-    setCurrentProjectTemplateId: (selectedProjectTemplateId) => dispatch(ProjectTemplateActions.setCurrentProjectTemplateId(selectedProjectTemplateId))
+    setCurrentProjectTemplateId: (selectedProjectTemplateId) => dispatch(ProjectTemplateActions.setCurrentProjectTemplateId(selectedProjectTemplateId)),
+    setParentProjectForNewProject: (parentProjectForNewProject) => dispatch(PlanActions.setParentProjectForNewProject(parentProjectForNewProject)),
+    setSelectedProjectId: (selectedProjectId) => dispatch(PlanActions.setSelectedProjectId(selectedProjectId))
    })
 
   const PlanProjectConfigComponent = wrapComponentWithProvider(reduxStore, PlanProjectConfig, mapStateToProps, mapDispatchToProps)
