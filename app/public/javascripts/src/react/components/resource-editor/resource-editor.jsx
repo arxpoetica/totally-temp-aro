@@ -215,7 +215,7 @@ export class ResourceEditor extends Component {
 						<div style={{flex: '0 0 auto'}}>
 							<div className="form-group row justify-content-end"> 
 								<div className="col-sm-6">
-									<button onClick={(e)=>this.handleCanMakeNewFilter(e)} value={this.state.selectedResourceName} className="btn btn-light btn-block">
+									<button onClick={(e)=>this.handleCanMakeNewFilter(this.state.selectedResourceName, e)} value={this.state.selectedResourceName} className="btn btn-light btn-block">
 										<i className="fa fa-file action-button-icon"></i>
 										New {this.state.selectedResourceName}
 									</button> 
@@ -462,8 +462,7 @@ export class ResourceEditor extends Component {
 		.catch((err) => console.error(err))
 	}
 
-  handleCanMakeNewFilter (e) {      
-		let clickedResource = e.target.value;
+  handleCanMakeNewFilter (clickedResource) {      
 		if(clickedResource !== 'Competition System'){
 			this.props.setIsResourceEditor(false);
 		}

@@ -20,33 +20,36 @@ export class RateReachManager extends Component {
   }
 
   componentDidMount () {
+    this.props.reloadRateReachManagerConfiguration(this.props.selectedResourceForClone.id, this.props.loggedInUser)
     this.props.setModalTitle('Create Rate Reach Manager')
   }
 
   render () {
-    return this.categoryTypes === null
+    return (this.categoryTypes === null || 
+      this.props.rateReachManagerConfigs === undefined ||
+      this.props.rateReachManagerConfigs.rateReachConfig === undefined
+    )
     ? null
     : this.renderRateReachManager()
   }  
 
-  renderRateReachManager(){
-    return(
+  renderRateReachManager () {
+    return (
       <>
         <div style={{display: 'flex', flexDirection: 'column', height: '90%'}}>
           <div style={{flex: '1 1 auto'}}>
             <form className="form-horizontal form-rr-creator">
-               {/* The source rate reach manager used when cloning */}
-               {
-                this.props.selectedResourceForClone &&
-                  <div className="form-group row">
-                    <label className="col-sm-4 control-label">Rate Reach Manager to clone</label>
-                    <div className="col-sm-8">
-                      <input className="form-control" disabled value={this.props.selectedResourceForClone.name}/>
-                    </div>
+              {/* The source rate reach manager used when cloning */}
+              {this.props.selectedResourceForClone &&
+                <div className="form-group row">
+                  <label className="col-sm-4 control-label">Rate Reach Manager to clone</label>
+                  <div className="col-sm-8">
+                    <input className="form-control" disabled value={this.props.selectedResourceForClone.name}/>
                   </div>
-                }
+                </div>
+              }
 
-               {/* The name of the new rate reach manager  */}
+              {/* The name of the new rate reach manager  */}
               <div className="form-group row">
                 <label className="col-sm-4 control-label">Name</label>
                 <div className="col-sm-8">
@@ -68,7 +71,7 @@ export class RateReachManager extends Component {
               <div className="form-group row">
                 <label className="col-sm-4 control-label">Category Type</label>
                 <div className="col-sm-8">
-                  <select id="cboCategoryTypes" disabled={this.props.selectedResourceForClone}  className="form-control" name="category" onChange={(e)=>this.handleChange(e)} value={this.state.rateReachManager.category}> 
+                  <select id="cboCategoryTypes" disabled={this.props.selectedResourceForClone}  className="form-control" name="category" onChange={(e)=>this.handleChange(e)} value={this.props.rateReachManagerConfigs.rateReachConfig.categoryType}> 
                     {this.categoryTypes.map(item => <option value={item.id} key={item.id}>{item.description}</option>)}
                   </select>
                 </div>
@@ -102,7 +105,8 @@ export class RateReachManager extends Component {
   }
 
   handleCreateRateReachManager(){
-    let rateReachManager = this.state.rateReachManager;
+    var rateReachManager = { ...this.state.rateReachManager }
+    rateReachManager.category = this.props.rateReachManagerConfigs.rateReachConfig.categoryType
     let selectedResourceForClone = this.props.selectedResourceForClone;
     let loggedInUser = this.props.loggedInUser;
     this.props.createRateReachManager(rateReachManager, selectedResourceForClone, loggedInUser);
@@ -110,7 +114,8 @@ export class RateReachManager extends Component {
 }
 
 	const mapStateToProps = (state) => ({
-    loggedInUser: state.user.loggedInUser
+    loggedInUser: state.user.loggedInUser,
+    rateReachManagerConfigs: state.resourceEditor.rateReachManagerConfigs
 	})   
 
 	const mapDispatchToProps = (dispatch) => ({
@@ -118,7 +123,8 @@ export class RateReachManager extends Component {
 		searchManagers: (searchText) => dispatch(ResourceActions.searchManagers(searchText)),
     createRateReachManager: (rateReachManager, selectedResourceForClone, loggedInUser) => dispatch(ResourceActions.createRateReachManager(rateReachManager, selectedResourceForClone, loggedInUser)),
     setIsResourceEditor: (status) => dispatch(ResourceActions.setIsResourceEditor(status)),
-    setModalTitle: (title) => dispatch(ResourceActions.setModalTitle(title))
+    setModalTitle: (title) => dispatch(ResourceActions.setModalTitle(title)),
+    reloadRateReachManagerConfiguration: (rateReachManagerId, loggedInUser) => dispatch(ResourceActions.reloadRateReachManagerConfiguration(rateReachManagerId, loggedInUser))
 	})
 
 const RateReachManagerCreatorComponent = connect(mapStateToProps, mapDispatchToProps)(RateReachManager)
