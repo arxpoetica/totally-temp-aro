@@ -1,5 +1,6 @@
 /* globals angular */
 import PlanActions from '../../../../react/components/plan/plan-actions'
+import ToolBarActions from '../../../../react/components/header/tool-bar-actions'
 import { createSelector } from 'reselect'
 
 // Make a copy of data items because the UI component will mutate them directly
@@ -133,7 +134,7 @@ class DataSelectionController {
 
   mapDispatchToTarget (dispatch) {
     return {
-      setSelectedDisplayMode: displayMode => dispatch(PlanActions.setSelectedDisplayMode(displayMode)),
+      setSelectedDisplayMode: displayMode => dispatch(ToolBarActions.selectedDisplayMode(displayMode)),
       selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems))
     }
   }

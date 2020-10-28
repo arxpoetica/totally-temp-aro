@@ -3,6 +3,7 @@ import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
 import GlobalSettings from '../../global-settings/global-settings.jsx'
 import PlanActions from '../plan-actions'
+import ToolBarActions from '../../header/tool-bar-actions'
 import Select, { components } from "react-select";
 import createClass from "create-react-class";
 
@@ -247,8 +248,8 @@ export class PlanDataSelection extends Component {
     setIsDataSelection: (status) => dispatch(PlanActions.setIsDataSelection(status)),
     updateDataSourceEditableStatus: (isDataSourceEditable,dataSourceKey,loggedInUser, authPermissions, dataItems) => dispatch(PlanActions.updateDataSourceEditableStatus(isDataSourceEditable,dataSourceKey,loggedInUser, authPermissions, dataItems)),
     selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems)),
-    selectedDisplayMode: (value) => dispatch(PlanActions.setSelectedDisplayMode(value)),
-    activeViewModePanel: (value) => dispatch(PlanActions.setActiveViewModePanel(value))
+    selectedDisplayMode: (value) => dispatch(ToolBarActions.selectedDisplayMode(value)),
+    activeViewModePanel: (value) => dispatch(ToolBarActions.activeViewModePanel(value))
   })
 
    const PlanDataSelectionComponent = wrapComponentWithProvider(reduxStore, PlanDataSelection, mapStateToProps, mapDispatchToProps)

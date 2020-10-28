@@ -512,24 +512,6 @@ function planSettingsToProject (selectedProjectId, dataItems, resourceItems) {
     }
   }
 
-  function setSelectedDisplayMode (value){
-    return dispatch => {
-      dispatch({
-        type: Actions.PLAN_SET_SELECTED_DISPLAY_MODE,
-        payload: value
-      })
-    }
-  }
-
-  function setActiveViewModePanel (value){
-    return dispatch => {
-      dispatch({
-        type: Actions.PLAN_SET_ACTIVE_VIEW_MODE_PANEL,
-        payload: value
-      })
-    }
-  }
-
   function setParentProjectForNewProject (parentProjectForNewProject){
     return dispatch => {
       dispatch({
@@ -544,6 +526,24 @@ function planSettingsToProject (selectedProjectId, dataItems, resourceItems) {
       dispatch({
         type: Actions.PLAN_SET_SELECTED_PROJECT_ID,
         payload: selectedProjectId
+      })
+    }
+  }
+
+  function updateDefaultPlanCoordinates (coordinates){
+    return dispatch => {
+      coordinates.addListener('center_changed', () => {
+        var center = coordinates.getCenter()
+        dispatch({
+          type: Actions.PLAN_UPDATE_DEFAULT_PLAN_COORDINATES,
+          payload: {'center_changed' : center}
+        })
+      })
+      coordinates.addListener('zoom_changed', () => {
+        dispatch({
+          type: Actions.PLAN_UPDATE_DEFAULT_PLAN_COORDINATES,
+          payload: {'zoom_changed' : coordinates.getZoom()}
+        })
       })
     }
   }
@@ -569,8 +569,7 @@ export default {
   setProjectMode,
   planSettingsToProject,
   updateDataSourceEditableStatus,
-  setSelectedDisplayMode,
-  setActiveViewModePanel,
   setParentProjectForNewProject,
-  setSelectedProjectId
+  setSelectedProjectId,
+  updateDefaultPlanCoordinates
 }

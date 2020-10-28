@@ -25,6 +25,12 @@ function setZoom (state, zoom) {
   }
 }
 
+function setRequestSetMapCenter (state, mapCenter) {
+  return { ...state,
+    mapCenter: mapCenter
+  }
+}
+
 function configurationReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.MAP_SET_GOOGLE_MAPS_REFERENCE:
@@ -35,6 +41,9 @@ function configurationReducer (state = defaultState, action) {
 
     case Actions.MAP_SET_ZOOM:
       return setZoom(state, action.payload)
+
+    case Actions.MAP_SET_REQUEST_SET_MAP_CENTER:
+      return setRequestSetMapCenter(state, action.payload)      
 
     default:
       return state

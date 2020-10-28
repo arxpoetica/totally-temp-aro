@@ -1,5 +1,5 @@
 class MapSelectorExportLocationsController {
-  constructor ($document, $http, state, Utils) {
+  constructor ($document, $http, state, Utils, $ngRedux) {
     this.mapRef = null
     this.drawingManager = null
     this.document = $document
@@ -7,11 +7,13 @@ class MapSelectorExportLocationsController {
     this.state = state
     this.Utils = Utils
 
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
+
     // Hold display mode and selection mode variables from application state
     this.displayModes = state.displayModes
     state.selectedDisplayMode.subscribe((newValue) => {
       this.selectedDisplayMode = newValue
-      this.targetSelectionMode = this.state && this.state.selectedTargetSelectionMode
+      this.targetSelectionMode = this.state && (this.state.selectedTargetSelectionMode || this.rSelectedTargetSelectionMode)
       this.updateDrawingManagerState()
     })
   }
@@ -41,7 +43,7 @@ class MapSelectorExportLocationsController {
   }
 
   exportLocationsByPolygon (polygon) {
-    if (this.state.isRulerEnabled) return // disable any click action when ruler is enabled
+    if (this.state.isRulerEnabled || this.rIsRulerEnabled) return // disable any click action when ruler is enabled
 
     var area = google.maps.geometry.spherical.computeArea(polygon)
     if (area > this.state.MAX_EXPORTABLE_AREA) {
@@ -97,7 +99,7 @@ class MapSelectorExportLocationsController {
     })
 
     this.drawingManager.addListener('overlaycomplete', (e) => {
-      if (this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.POLYGON_EXPORT_TARGET) {
+      if (this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.POLYGON_EXPORT_TARGET || this.rSelectedTargetSelectionMode === this.state.targetSelectionModes.POLYGON_EXPORT_TARGET) {
         this.exportLocationsByPolygon(e.overlay.getPath().getArray())
       }
       setTimeout(() => e.overlay.setMap(null), 100)
@@ -107,14 +109,21 @@ class MapSelectorExportLocationsController {
   $doCheck () {
     // Do a manual check on selectedTargetSelectionMode, as it is no longer a BehaviorSubject
     var oldValue = this.targetSelectionMode
-    this.targetSelectionMode = this.state.selectedTargetSelectionMode
+    this.targetSelectionMode = this.state.selectedTargetSelectionMode || this.rSelectedTargetSelectionMode
     if (this.targetSelectionMode !== oldValue) {
       this.updateDrawingManagerState()
     }
   }
+
+  mapStateToThis (reduxState) {
+    return {
+      rSelectedTargetSelectionMode: reduxState.toolbar.selectedTargetSelectionMode,
+      rIsRulerEnabled: reduxState.toolbar.isRulerEnabled
+    }
+  }
 }
 
-MapSelectorExportLocationsController.$inject = ['$document', '$http', 'state', 'Utils']
+MapSelectorExportLocationsController.$inject = ['$document', '$http', 'state', 'Utils', '$ngRedux']
 
 let mapSelectorExportLocation = {
   template: '', // No markup for this component. It interacts with the map directly.

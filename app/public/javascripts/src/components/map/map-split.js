@@ -27,6 +27,12 @@ class MapSplitController {
             }
             // After dragging, if the size is non-zero, it means we have expanded the sidebar
             if (this.splitterObj.getSizes()[1] > 0) {
+
+              // To Trigger refreshToolbar() in tool-bar.jsx by creating the custom event when sidebar resized
+              //https://stackoverflow.com/questions/52037958/change-value-in-react-js-on-window-resize
+              var event = new CustomEvent('toolBarResized');
+              window.dispatchEvent(event);
+
               this.isCollapsed = false
               this.sizesBeforeCollapse = null
               $scope.$apply()
@@ -55,10 +61,20 @@ class MapSplitController {
       // The sidebar is already collapsed. Un-collapse it by restoring the saved sizes
       this.splitterObj.setSizes(this.sizesBeforeCollapse)
       this.sizesBeforeCollapse = null
+
+      // To Trigger refreshToolbar() in tool-bar.jsx by creating the custom event when sidebar expand
+      //https://stackoverflow.com/questions/52037958/change-value-in-react-js-on-window-resize
+      var event = new CustomEvent('toolBarResized');
+      this.$timeout(() => window.dispatchEvent(event), this.transitionTimeMsec + 50)
     } else {
       // Save the current sizes and then collapse the sidebar
       this.sizesBeforeCollapse = this.splitterObj.getSizes()
       this.splitterObj.setSizes([99.5, 0.5])
+
+      // To Trigger refreshToolbar() in tool-bar.jsx by creating the custom event when sidebar collapse
+      //https://stackoverflow.com/questions/52037958/change-value-in-react-js-on-window-resize
+      var event = new CustomEvent('toolBarResized');
+      this.$timeout(() => window.dispatchEvent(event), this.transitionTimeMsec + 50)
     }
     this.isCollapsed = !this.isCollapsed
     // Trigger a resize so that any tiles that have been uncovered will be loaded
@@ -79,7 +95,10 @@ class MapSplitController {
         reduxState.planEditor.isCommittingTransaction ||
         reduxState.planEditor.isEnteringTransaction,
       showToolBox: reduxState.tool.showToolBox,
-      rSelectedDisplayMode: reduxState.plan.rSelectedDisplayMode,
+      rSelectedDisplayMode: reduxState.toolbar.rSelectedDisplayMode,
+      rSelectedToolBarAction: reduxState.toolbar.selectedToolBarAction,
+      rIsRulerEnabled: reduxState.toolbar.isRulerEnabled,
+      rPlan: reduxState.plan.activePlan
     }
   }
 
@@ -187,16 +206,17 @@ let mapSplit = {
           causes the map to not show up -->
       <div id="header-bar-container" style="position: absolute; top: 0px; width: 100%; height: 55px; display: flex; flex-direction: row;">
         <div style="flex: 0 0 70px;"></div>
-        <tool-bar map-global-object-name="map" style="flex: 1 1 auto; position: relative;"></tool-bar>
+        <!-- Created a 'reactCompClass' to get the <r-too-bar> component elements in tool-bar.jsx -->
+        <r-tool-bar map-global-object-name="map" class="reactCompClass" style="flex: 1 1 auto; position: relative;"></r-tool-bar>
         <network-plan style="flex: 0 0 auto; margin: auto;"></network-plan>
         <div id="spacerForIconOnSidebar" style="flex: 0 0 40px;"></div>
         <r-tool-box ng-if="$ctrl.showToolBox"></r-tool-box>
       </div>
       <!-- Plan target map selector should be active only if we are in analysis mode -->
       <map-selector-plan-target map-global-object-name="map"
-        ng-if="(!$ctrl.state.selectedToolBarAction || $ctrl.state.selectedToolBarAction === $ctrl.state.toolbarActions.POLYGON_SELECT)
+        ng-if="(!$ctrl.state.selectedToolBarAction || $ctrl.state.selectedToolBarAction === $ctrl.state.toolbarActions.POLYGON_SELECT || !$ctrl.rSelectedToolBarAction || $ctrl.rSelectedToolBarAction === $ctrl.state.toolbarActions.POLYGON_SELECT)
                && $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS
-               && !$ctrl.state.isRulerEnabled">
+               && (!$ctrl.state.isRulerEnabled || !$ctrl.rIsRulerEnabled)">
       </map-selector-plan-target>
       <map-selector-export-locations map-global-object-name="map" ng-if="$ctrl.selectedDisplayMode === $ctrl.displayModes.VIEW
         "></map-selector-export-locations>
@@ -241,13 +261,13 @@ let mapSplit = {
         <div style="flex: 1 1 auto; position: relative;">
           <!-- ng-if is important here because the plan settings components implement $onDestroy() to show a messagebox
               when destroyed to ask if settings should be saved -->
-          <view-mode ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW"></view-mode>
-          <analysis-mode ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS && $ctrl.state.plan.planType != 'RING'"></analysis-mode>
-          <ring-editor ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.EDIT_RINGS"></ring-editor>
-          <plan-settings ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.PLAN_SETTINGS"></plan-settings>
-          <plan-editor-container ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.EDIT_PLAN">
+          <view-mode ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW || $ctrl.rSelectedDisplayMode === 'VIEW'"></view-mode>
+          <analysis-mode ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS && $ctrl.state.plan.planType != 'RING' && $ctrl.rSelectedDisplayMode !== 'VIEW'" && $ctrl.rPlan.planType != 'RING'></analysis-mode>
+          <ring-editor ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.EDIT_RINGS && $ctrl.rSelectedDisplayMode !== 'VIEW'"></ring-editor>
+          <r-plan-settings ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.PLAN_SETTINGS && $ctrl.rSelectedDisplayMode !== 'VIEW'"></r-plan-settings>
+          <plan-editor-container ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.EDIT_PLAN && $ctrl.rSelectedDisplayMode !== 'VIEW'">
           </plan-editor-container>
-          <aro-debug ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.DEBUG"></aro-debug>
+          <aro-debug ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.DEBUG && $ctrl.rSelectedDisplayMode !== 'VIEW'"></aro-debug>
         </div>
       </div>
     </div>

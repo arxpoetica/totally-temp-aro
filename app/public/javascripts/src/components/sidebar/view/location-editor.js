@@ -4,7 +4,7 @@ import WorkflowState from '../../../shared-utils/workflow-state'
 import Permissions from '../../../shared-utils/permissions'
 import MapLayerActions from '../../../react/components/map-layers/map-layer-actions'
 import SelectionActions from '../../../react/components/selection/selection-actions'
-import PlanActions from '../../../react/components/plan/plan-actions'
+import ToolBarActions from '../../../react/components/header/tool-bar-actions'
 
 // We need a selector, else the .toJS() call will create an infinite digest loop
 const getAllLocationLayers = state => state.mapLayers.location
@@ -474,7 +474,7 @@ class LocationEditorController {
         })
       },
       clearSelectedLocations: () => dispatch(SelectionActions.setLocations([])),
-      setSelectedDisplayMode: displayMode => dispatch(PlanActions.setSelectedDisplayMode(displayMode))
+      setSelectedDisplayMode: displayMode => dispatch(ToolBarActions.selectedDisplayMode(displayMode))
     }
   }
 }

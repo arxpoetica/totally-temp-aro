@@ -25,6 +25,8 @@ import PuppeteerMessages from '../components/common/puppeteer-messages'
 import NetworkOptimizationActions from '../react/components/optimization/network-optimization/network-optimization-actions'
 import ViewSettingsActions from '../react/components/view-settings/view-settings-actions'
 import Tools from '../react/components/tool/tools'
+import ToolBarActions from '../react/components/header/tool-bar-actions'
+
 
 const networkAnalysisConstraintsSelector = formValueSelector(ReactComponentConstants.NETWORK_ANALYSIS_CONSTRAINTS)
 
@@ -143,6 +145,7 @@ class State {
         // At this point we will have access to the global map variable
         map.ready(() => resolve())
         service.setGoogleMapsReference(map)
+        service.updateDefaultPlanCoordinates(map) // To set map Coordinates to plan-action redux
       })
     })
 
@@ -335,7 +338,6 @@ class State {
       DEBUG: 'DEBUG'
     })
     service.selectedDisplayMode = new Rx.BehaviorSubject(service.displayModes.VIEW)
-
     service.targetSelectionModes = Object.freeze({
       SINGLE_PLAN_TARGET: 0,
       POLYGON_PLAN_TARGET: 1,
@@ -1588,7 +1590,7 @@ class State {
           }
           service.configuration.loadPerspective(config.user.perspective)
           service.setNetworkEquipmentLayers(service.configuration.networkEquipment)
-
+          service.setAppConfiguration(service.configuration) // Require in tool-bar.jsx
           return service.setLoggedInUser(config.user, initialState)
         })
         .then(() => {
@@ -1600,6 +1602,8 @@ class State {
           }
           if (service.configuration.ARO_CLIENT === 'frontier' || service.configuration.ARO_CLIENT === 'sse') {
             heatmapOptions.selectedHeatmapOption = service.viewSetting.heatmapOptions.filter((option) => option.id === 'HEATMAP_OFF')[0]
+            // To set selectedHeatmapOption to redux tool-bar for frontier Client
+            service.setSelectedHeatMapOption(service.viewSetting.heatmapOptions.filter((option) => option.id === 'HEATMAP_OFF')[0].id)
           }
           service.setOptimizationInputs(service.configuration.optimizationOptions)
           // Fire a redux action to get configuration for the redux side. This will result in two calls to /configuration for the time being.
@@ -1830,8 +1834,8 @@ class State {
       wormholeFuseDefinitions: reduxState.optimization.networkAnalysis.wormholeFuseDefinitions,
       activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
       optimizationInputs: reduxState.optimization.networkOptimization.optimizationInputs,
-      rSelectedDisplayMode: reduxState.plan.rSelectedDisplayMode,
-      rActiveViewModePanel: reduxState.plan.rActiveViewModePanel
+      rSelectedDisplayMode: reduxState.toolbar.rSelectedDisplayMode,
+      rActiveViewModePanel: reduxState.toolbar.rActiveViewModePanel
     }
   }
 
@@ -1854,7 +1858,7 @@ class State {
       addPlanTargets: (planId, planTargets) => dispatch(SelectionActions.addPlanTargets(planId, planTargets)),
       removePlanTargets: (planId, planTargets) => dispatch(SelectionActions.removePlanTargets(planId, planTargets)),
       setSelectedLocations: locationIds => dispatch(SelectionActions.setLocations(locationIds)),
-      setSelectedDisplayMode: displayMode => dispatch(PlanActions.setSelectedDisplayMode(displayMode)),
+      setSelectedDisplayMode: displayMode => dispatch(ToolBarActions.selectedDisplayMode(displayMode)),
       setActivePlanState: planState => dispatch(PlanActions.setActivePlanState(planState)),
       selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems)),
       setGoogleMapsReference: mapRef => dispatch(MapActions.setGoogleMapsReference(mapRef)),
@@ -1870,7 +1874,10 @@ class State {
       setPrimarySpatialEdge: primarySpatialEdge => dispatch(NetworkAnalysisActions.setPrimarySpatialEdge(primarySpatialEdge)),
       clearWormholeFuseDefinitions: () => dispatch(NetworkAnalysisActions.clearWormholeFuseDefinitions()),
       setWormholeFuseDefinition: (spatialEdgeType, wormholeFusionTypeId) => dispatch(NetworkAnalysisActions.setWormholeFuseDefinition(spatialEdgeType, wormholeFusionTypeId)),
-      setShowLocationLabels: showLocationLabels => dispatch(ViewSettingsActions.setShowLocationLabels(showLocationLabels))
+      setShowLocationLabels: showLocationLabels => dispatch(ViewSettingsActions.setShowLocationLabels(showLocationLabels)),
+      setAppConfiguration: appConfiguration => dispatch(ToolBarActions.setAppConfiguration(appConfiguration)),
+      updateDefaultPlanCoordinates: coordinates => dispatch(PlanActions.updateDefaultPlanCoordinates(coordinates)),
+      setSelectedHeatMapOption: selectedHeatMapOption => dispatch(ToolBarActions.setSelectedHeatMapOption(selectedHeatMapOption)),
     }
   }
 }

@@ -1,6 +1,7 @@
 import Actions from '../../common/actions'
 import AroHttp from '../../common/aro-http'
 import PlanActions from '../plan/plan-actions'
+import ToolBarActions from '../header/tool-bar-actions'
 import GlobalSettingsActions from '../global-settings/globalsettings-action'
 
 function loadMetaData () {
@@ -79,8 +80,8 @@ function saveDataSource (uploadDetails,loggedInUser) {
           dispatch(PlanActions.selectDataItems('service_layer', [library.data]))
           dispatch(GlobalSettingsActions.setShowGlobalSettings(false))
           dispatch(PlanActions.setIsDataSelection(false))
-          dispatch(PlanActions.selectedDisplayMode('VIEW'))
-          dispatch(PlanActions.activeViewModePanel('EDIT_SERVICE_LAYER'))
+          dispatch(ToolBarActions.selectedDisplayMode('VIEW'))
+          dispatch(ToolBarActions.activeViewModePanel('EDIT_SERVICE_LAYER'))
         })
         .then((result) => {
           dispatch(setIsUploading(false))

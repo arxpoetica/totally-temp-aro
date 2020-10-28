@@ -14,7 +14,7 @@ const getEquipmentsArray = createSelector([getAllNetworkEquipmentLayers], networ
 })
 
 class NetworkEquipmentController {
-  constructor($rootScope, $http, $location, $ngRedux, map_tools, state) {
+  constructor($rootScope, $http, $location, $ngRedux, map_tools, state,rState) {
     this.map_tools = map_tools
     this.state = state
     this.currentUser = state.loggedInUser
@@ -33,6 +33,11 @@ class NetworkEquipmentController {
     state.viewSettingsChanged
       .skip(1)
       .subscribe((newValue) => this.updateMapLayers())
+
+    // Update map layers when the dataItems property of state changes
+    rState.viewSettingsChanged.getMessage().skip(1).subscribe((data) => {
+      this.updateMapLayers()
+    }) 
 
     this.createdMapLayerKeys = new Set()
 
@@ -120,7 +125,8 @@ class NetworkEquipmentController {
           (feature.properties.deployment_type === 1) ||
           (feature.properties.is_deleted !== 'true'))
       }
-      if (this.state.showEquipmentLabels && map.getZoom() > this.networkEquipmentLayers.labelDrawingOptions.visibilityZoomThreshold) {
+
+      if ((this.state.showEquipmentLabels || this.rShowEquipmentLabels) && map.getZoom() > this.networkEquipmentLayers.labelDrawingOptions.visibilityZoomThreshold) {
         drawingOptions.labels = this.networkEquipmentLayers.labelDrawingOptions
       }
       subtypes = { ...networkEquipment.subtypes }
@@ -261,7 +267,8 @@ class NetworkEquipmentController {
       equipmentsArray: getEquipmentsArray(reduxState),
       dataItems: reduxState.plan.dataItems,
       showSiteBoundary: reduxState.mapLayers.showSiteBoundary,
-      selectedBoundaryType: reduxState.mapLayers.selectedBoundaryType
+      selectedBoundaryType: reduxState.mapLayers.selectedBoundaryType,
+      rShowEquipmentLabels: reduxState.toolbar.showEquipmentLabels,
     }
   }
 
@@ -304,7 +311,7 @@ class NetworkEquipmentController {
   }
 }
 
-NetworkEquipmentController.$inject = ['$rootScope', '$http', '$location', '$ngRedux', 'map_tools', 'state']
+NetworkEquipmentController.$inject = ['$rootScope', '$http', '$location', '$ngRedux', 'map_tools', 'state', 'rState']
 
 let networkEquipment = {
   templateUrl: '/components/views/network-equipment.html',

@@ -5,7 +5,7 @@ import MapReportsActions from '../../react/components/map-reports/map-reports-ac
 import ToolActions from '../../react/components/tool/tool-actions'
 import Tools from '../../react/components/tool/tools'
 import ViewSettingsActions from '../../react/components/view-settings/view-settings-actions'
-import PlanActions from '../../react/components/plan/plan-actions'
+import ToolBarActions from '../../react/components/tool/tool-actions'
 
 class ToolBarController {
   constructor ($element, $timeout, $document, $http, $ngRedux, state, map_tools, $window) {
@@ -560,7 +560,7 @@ class ToolBarController {
       isAnnotationsListVisible: reduxState.tool.showToolBox && (reduxState.tool.activeTool === Tools.ANNOTATION.id),
       isMapReportsVisible: reduxState.tool.showToolBox && (reduxState.tool.activeTool === Tools.MAP_REPORTS.id),
       showMapReportMapObjects: reduxState.mapReports.showMapObjects,
-      rSelectedDisplayMode: reduxState.plan.rSelectedDisplayMode,
+      rSelectedDisplayMode: reduxState.toolbar.rSelectedDisplayMode,
       showLocationLabels: reduxState.viewSettings.showLocationLabels
     }
   }
@@ -581,8 +581,8 @@ class ToolBarController {
         dispatch(MapReportsActions.showMapObjects(isVisible))
       },
       setShowLocationLabels: showLocationLabels => dispatch(ViewSettingsActions.setShowLocationLabels(showLocationLabels)),
-      rActiveViewModePanelAction: (value) => dispatch(PlanActions.setActiveViewModePanel(value)),
-      rSelectedDisplayModeAction: (value) => dispatch(PlanActions.setSelectedDisplayMode(value))
+      rActiveViewModePanelAction: (value) => dispatch(ToolBarActions.activeViewModePanel(value)),
+      rSelectedDisplayModeAction: (value) => dispatch(ToolBarActions.selectedDisplayMode(value))
     }
   }
 }

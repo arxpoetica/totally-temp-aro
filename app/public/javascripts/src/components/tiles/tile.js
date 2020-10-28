@@ -13,6 +13,8 @@ import SelectionModes from '../../react/components/selection/selection-modes'
 import MenuAction, { MenuActionTypes } from '../common/context-menu/menu-action'
 import MenuItem, { MenuItemTypes } from '../common/context-menu/menu-item'
 import FeatureSets from '../../react/common/featureSets'
+import ToolBarActions from '../../react/components/header/tool-bar-actions'
+
 
 const getTransactionFeatures = reduxState => reduxState.planEditor.features
 const getTransactionFeatureIds = createSelector([getTransactionFeatures], transactionFeatures => {
@@ -45,7 +47,7 @@ class TileComponentController {
   // fillStyle: (Optional) For polygon features, this is the fill color
   // opacity: (Optional, default 1.0) This is the maximum opacity of anything drawn on the map layer. Aggregate layers will have features of varying opacity, but none exceeding this value
 
-  constructor ($window, $document, $timeout, $ngRedux, state, tileDataService, contextMenuService, Utils) {
+  constructor ($window, $document, $timeout, $ngRedux, state, tileDataService, contextMenuService, Utils, $scope, rState) {
     this.layerIdToMapTilesIndex = {}
     this.mapRef = null // Will be set in $document.ready()
     this.$window = $window
@@ -86,11 +88,23 @@ class TileComponentController {
       }
     })
 
+    // Subscribe to changes in the map tile options
+    rState.mapTileOptions.getMessage().subscribe((mapTileOptions) => {
+      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
+        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setMapTileOptions(mapTileOptions)
+      }
+    }) 
+
     // Redraw map tiles when requestd
     state.requestMapLayerRefresh.subscribe((tilesToRefresh) => {
       this.tileDataService.markHtmlCacheDirty(tilesToRefresh)
       this.refreshMapTiles(tilesToRefresh)
     })
+
+    rState.requestMapLayerRefresh.getMessage().subscribe((tilesToRefresh) => {
+      this.tileDataService.markHtmlCacheDirty(tilesToRefresh)
+      this.refreshMapTiles(tilesToRefresh)
+    });
 
     // If selected census category map changes or gets loaded, set that in the tile data road
     state.censusCategories.subscribe((censusCategories) => {
@@ -119,6 +133,15 @@ class TileComponentController {
         this.mapRef.panTo({ lat: mapCenter.latitude, lng: mapCenter.longitude })
       }
     })
+    
+    //Due to unable to subscribe requestSetMapCenter as of now used Custom Event Listener
+    // https://www.sitepoint.com/javascript-custom-events/
+    window.addEventListener('mapChanged', (mapCenter) => { 
+      if (this.mapRef) {
+        this.mapRef.panTo({ lat: mapCenter.detail.latitude, lng: mapCenter.detail.longitude })
+        this.mapRef.setZoom(mapCenter.detail.zoom)
+      }
+    });
 
     tileDataService.addEntityImageForLayer('SELECTED_LOCATION', state.selectedLocationIcon)
 
@@ -192,7 +215,7 @@ class TileComponentController {
           // ToDo: need to combine this with the overlayClickListener below
           var canSelectLoc = true
           var canSelectSA = true
-          if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.ANALYSIS) {
+          if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.ANALYSIS || this.rSelectedDisplayMode === this.state.displayModes.ANALYSIS) {
             if (this.activeSelectionModeId != SelectionModes.SELECTED_LOCATIONS) {
               canSelectLoc = false
             }
@@ -263,7 +286,8 @@ class TileComponentController {
       this.state.viewModePanels,
       this.state,
       MapUtilities.getPixelCoordinatesWithinTile.bind(this),
-      this.transactionFeatureIds
+      this.transactionFeatureIds,
+      this.rShowFiberSize
     ))
     this.OVERLAY_MAP_INDEX = this.mapRef.overlayMapTypes.getLength() - 1
     //this.state.isShiftPressed = false // make this per-overlay or move it somewhere more global
@@ -288,9 +312,9 @@ class TileComponentController {
       .then((hitFeatures) => {
         this.state.mapFeaturesRightClickedEvent.next(hitFeatures)
       })
-      
-      if (this.state.selectedDisplayMode.getValue() != this.state.displayModes.VIEW  ||
-          this.state.activeViewModePanel == this.state.viewModePanels.EDIT_SERVICE_LAYER
+
+      if ((this.state.selectedDisplayMode.getValue() != this.state.displayModes.VIEW && this.rSelectedDisplayMode != this.state.displayModes.VIEW)  ||
+          (this.state.activeViewModePanel == this.state.viewModePanels.EDIT_SERVICE_LAYER && this.rActiveViewModePanel == this.state.viewModePanels.EDIT_SERVICE_LAYER)
       ) return
 
       this.getFilteredFeaturesUnderLatLng(event.latLng)
@@ -469,6 +493,11 @@ class TileComponentController {
               fiberFeatures.add(result)
             }
           })
+          
+          // To open Location info in View-Mode While Edit-Service layers serviceAreas is Empty
+          if(serviceAreas.length === 0 && this.rActiveViewModePanel === this.state.viewModePanels.EDIT_SERVICE_LAYER) {
+            this.rActiveViewModePanelAction(this.state.viewModePanels.LOCATION_INFO)
+          }
 
           // ToDo: formalize this
           // var hitFeatures = new FeatureSets() // need to import the class BUT it's over in React land, ask Parag
@@ -498,7 +527,7 @@ class TileComponentController {
           var canSelectLoc = false
           var canSelectSA = false
 
-          if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.ANALYSIS) {
+          if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.ANALYSIS || this.rSelectedDisplayMode === this.state.displayModes.ANALYSIS) {
             switch (this.activeSelectionModeId) {
               case SelectionModes.SELECTED_AREAS:
                 canSelectSA = !canSelectSA
@@ -510,19 +539,19 @@ class TileComponentController {
             if (this.networkAnalysisType === 'RFP') {
               canSelectLoc = canSelectSA = false // Do not allow any selection for RFP mode
             }
-          } else if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.VIEW) {
+          } else if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.VIEW || this.rSelectedDisplayMode === this.state.displayModes.VIEW) {
             canSelectSA = true
           }
           
           // filter the lists 
           if (!canSelectLoc &&
-            this.state.selectedDisplayMode.getValue() !== this.state.displayModes.VIEW) {
+            this.state.selectedDisplayMode.getValue() !== this.state.displayModes.VIEW || this.rSelectedDisplayMode === this.state.displayModes.VIEW) {
             hitFeatures.locations = []
           }
           if (!canSelectSA) {
             hitFeatures.serviceAreas = []
           }
-          if (this.state.selectedDisplayMode.getValue() !== this.state.displayModes.VIEW) {
+          if (this.state.selectedDisplayMode.getValue() !== this.state.displayModes.VIEW || this.rSelectedDisplayMode === this.state.displayModes.VIEW) {
             hitFeatures.censusFeatures = []
           }
           
@@ -677,12 +706,19 @@ class TileComponentController {
       selection: reduxState.selection,
       stateMapLayers: reduxState.mapLayers,
       transactionFeatureIds: getTransactionFeatureIds(reduxState),
-      networkAnalysisType: reduxState.optimization.networkOptimization.optimizationInputs.analysis_type
+      networkAnalysisType: reduxState.optimization.networkOptimization.optimizationInputs.analysis_type,
+      zoom: reduxState.map.zoom,
+      mapCenter: reduxState.map.mapCenter,
+      rShowFiberSize: reduxState.toolbar.showFiberSize,
+      rSelectedDisplayMode: reduxState.toolbar.rSelectedDisplayMode,
+      rActiveViewModePanel: reduxState.toolbar.rActiveViewModePanel,
     }
   }
 
   mapDispatchToTarget (dispatch) {
-    return { }
+    return {
+      rActiveViewModePanelAction: (value) => dispatch(ToolBarActions.activeViewModePanel(value))
+     }
   }
 
   mergeToTarget (nextState, actions) {
@@ -771,7 +807,7 @@ class TileComponentController {
   
 }
 
-TileComponentController.$inject = ['$window', '$document', '$timeout', '$ngRedux', 'state', 'tileDataService', 'contextMenuService', 'Utils']
+TileComponentController.$inject = ['$window', '$document', '$timeout', '$ngRedux', 'state','tileDataService', 'contextMenuService', 'Utils', '$scope', 'rState']
 
 let tile = {
   template: '',
