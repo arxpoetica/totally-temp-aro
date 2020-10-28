@@ -145,6 +145,7 @@ class State {
         // At this point we will have access to the global map variable
         map.ready(() => resolve())
         service.setGoogleMapsReference(map)
+        service.updateDefaultPlanCoordinates(map) // To set map Coordinates to plan-action redux
       })
     })
 
@@ -1873,6 +1874,7 @@ class State {
       setWormholeFuseDefinition: (spatialEdgeType, wormholeFusionTypeId) => dispatch(NetworkAnalysisActions.setWormholeFuseDefinition(spatialEdgeType, wormholeFusionTypeId)),
       setShowLocationLabels: showLocationLabels => dispatch(ViewSettingsActions.setShowLocationLabels(showLocationLabels)),
       setAppConfiguration: appConfiguration => dispatch(ToolBarActions.setAppConfiguration(appConfiguration)),
+      updateDefaultPlanCoordinates: coordinates => dispatch(PlanActions.updateDefaultPlanCoordinates(coordinates)),
     }
   }
 }

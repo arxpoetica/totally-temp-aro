@@ -530,6 +530,24 @@ function planSettingsToProject (selectedProjectId, dataItems, resourceItems) {
     }
   }
 
+  function updateDefaultPlanCoordinates (coordinates){
+    return dispatch => {
+      coordinates.addListener('center_changed', () => {
+        var center = coordinates.getCenter()
+        dispatch({
+          type: Actions.PLAN_UPDATE_DEFAULT_PLAN_COORDINATES,
+          payload: {'center_changed' : center}
+        })
+      })
+      coordinates.addListener('zoom_changed', () => {
+        dispatch({
+          type: Actions.PLAN_UPDATE_DEFAULT_PLAN_COORDINATES,
+          payload: {'zoom_changed' : coordinates.getZoom()}
+        })
+      })
+    }
+  }
+
 export default {
   setActivePlan,
   setActivePlanState,
@@ -552,5 +570,6 @@ export default {
   planSettingsToProject,
   updateDataSourceEditableStatus,
   setParentProjectForNewProject,
-  setSelectedProjectId
+  setSelectedProjectId,
+  updateDefaultPlanCoordinates
 }

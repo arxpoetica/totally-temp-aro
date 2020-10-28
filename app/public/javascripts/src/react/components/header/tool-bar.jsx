@@ -249,6 +249,9 @@ export class ToolBar extends Component {
     let isMeasuringStick = configuration.perspective.showToolbarButtons.measuringStick
     let isViewSettings = configuration.perspective.showToolbarButtons.viewSettings
 
+    // To set Dynamic Background color for select2-results using jQuery
+    $(".select2-results").css("background-color", configuration.toolbar.toolBarColor);
+
     return (
       <div className="tool-bar" style={{margin: marginPixels, backgroundColor: configuration.toolbar.toolBarColor}}>
 

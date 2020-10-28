@@ -138,6 +138,24 @@ function setParentProjectForNewProject (state, parentProjectForNewProject) {
   }
 }
 
+function updateDefaultPlanCoordinates (state, coordinates) {
+  
+  let defaultPlanCoordinates = {}
+  if(coordinates.center_changed){
+    defaultPlanCoordinates['latitude'] = coordinates.center_changed.lat()
+    defaultPlanCoordinates['longitude'] = coordinates.center_changed.lng()
+    defaultPlanCoordinates['zoom'] = state.defaultPlanCoordinates.zoom
+  } else if(coordinates.zoom_changed) {
+    defaultPlanCoordinates['latitude'] = state.defaultPlanCoordinates.latitude
+    defaultPlanCoordinates['longitude'] = state.defaultPlanCoordinates.longitude
+    defaultPlanCoordinates['zoom'] = coordinates.zoom_changed
+  }
+
+  return { ...state,
+    defaultPlanCoordinates: defaultPlanCoordinates,
+  }
+}
+
 function planReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.PLAN_SET_ACTIVE_PLAN:
@@ -186,7 +204,10 @@ function planReducer (state = defaultState, action) {
       return setIsDataSourceEditable(state, action.payload)      
 
     case Actions.PLAN_SET_PARENT_PROJECT_FOR_NEW_PROJECT:
-      return setParentProjectForNewProject(state, action.payload)       
+      return setParentProjectForNewProject(state, action.payload) 
+
+    case Actions.PLAN_UPDATE_DEFAULT_PLAN_COORDINATES:
+      return updateDefaultPlanCoordinates(state, action.payload)       
 
     default:
       return state
