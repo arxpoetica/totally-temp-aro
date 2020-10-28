@@ -142,15 +142,28 @@ class LocationsController {
     // Get the point transformation mode with the current zoom level
     const getPointTransformForLayer = zoomThreshold => {
       var transform = ''
-      // rSelectedHeatMapOption is a redux state which is set from too-bar-reducer.js
-      if (this.state.mapTileOptions.getValue().selectedHeatmapOption.id === 'HEATMAP_OFF' || this.rSelectedHeatMapOption === 'HEATMAP_OFF') {
-        // The user has explicitly asked to display points, not aggregates
-        transform = 'select'
+      // For other Clients except frontier
+      if(this.state.configuration.ARO_CLIENT !== 'frontier') {
+        // rSelectedHeatMapOption is a redux state which is set from too-bar-reducer.js
+        if (this.state.mapTileOptions.getValue().selectedHeatmapOption.id === 'HEATMAP_OFF' || this.rSelectedHeatMapOption === 'HEATMAP_OFF') {
+          // The user has explicitly asked to display points, not aggregates
+          transform = 'select'
+        } else {
+          var mapZoom = map.getZoom()
+          // If we are zoomed in beyond a threshold, use 'select'. If we are zoomed out, use 'aggregate'
+          // (Google maps zoom starts at 0 for the entire world and increases as you zoom in)
+          transform = (mapZoom > zoomThreshold) ? 'select' : 'aggregate'
+        }
       } else {
-        var mapZoom = map.getZoom()
-        // If we are zoomed in beyond a threshold, use 'select'. If we are zoomed out, use 'aggregate'
-        // (Google maps zoom starts at 0 for the entire world and increases as you zoom in)
-        transform = (mapZoom > zoomThreshold) ? 'select' : 'aggregate'
+        if (this.rSelectedHeatMapOption === 'HEATMAP_OFF') {
+          // The user has explicitly asked to display points, not aggregates
+          transform = 'select'
+        } else {
+          var mapZoom = map.getZoom()
+          // If we are zoomed in beyond a threshold, use 'select'. If we are zoomed out, use 'aggregate'
+          // (Google maps zoom starts at 0 for the entire world and increases as you zoom in)
+          transform = (mapZoom > zoomThreshold) ? 'select' : 'aggregate'
+        }
       }
       return transform
     }
