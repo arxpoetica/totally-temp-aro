@@ -16,7 +16,12 @@ import { getFormValues } from 'redux-form'
 
 const networkOptimizationInputSelector = getFormValues(Constants.NETWORK_OPTIMIZATION_INPUT_FORM)
 const getSelectionModes = state => state.selection.selectionModes
-const getAllSelectionModes = createSelector([getSelectionModes], (selectionModes) => JSON.parse(JSON.stringify(selectionModes)).filter(mode => mode.id !== 'ALL_PLAN_AREAS'))
+const getAllSelectionModes = createSelector([getSelectionModes], (selectionModes) => {
+  // NOTE: filter prior used to remove legacy error lines from angular in
+  // `selection-reducer.js` and `selection-modes.js`
+  // THIS COMMENT CAN BE DELETED WHEN THOSE LINES ARE DELETED
+  return JSON.parse(JSON.stringify(selectionModes))
+})
 
 export class NetworkOptimizationInput extends Component {
   render () {
