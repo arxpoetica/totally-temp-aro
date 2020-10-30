@@ -1778,9 +1778,14 @@ class State {
       service.requestMapLayerRefresh.next(null)
     }
 
+    service.handlePlanRefreshRequest = msg => {
+      service.loadPlanRedux(service.plan.id)
+    }
+
     service.unsubscribePlanEvent = SocketManager.subscribe('COMMIT_TRANSACTION', service.handlePlanModifiedEvent.bind(service))
     service.unsubscribeLibraryEvent1 = SocketManager.subscribe('USER_TRANSACTION', service.handleLibraryModifiedEvent.bind(service))
     service.unsubscribeLibraryEvent1 = SocketManager.subscribe('ETL_ADD', service.handleLibraryModifiedEvent.bind(service))
+    service.unsubscribePlanRefresh = SocketManager.subscribe('PLAN_REFRESH', service.handlePlanRefreshRequest.bind(service))
 
     service.mergeToTarget = (nextState, actions) => {
       const currentActivePlanId = service.plan && service.plan.id
@@ -1861,6 +1866,7 @@ class State {
       setSelectedDisplayMode: displayMode => dispatch(ToolBarActions.selectedDisplayMode(displayMode)),
       setActivePlanState: planState => dispatch(PlanActions.setActivePlanState(planState)),
       selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems)),
+      loadPlanRedux: planId => dispatch(PlanActions.loadPlan(planId)),
       setGoogleMapsReference: mapRef => dispatch(MapActions.setGoogleMapsReference(mapRef)),
       setNetworkEquipmentLayers: networkEquipmentLayers => dispatch(MapLayerActions.setNetworkEquipmentLayers(networkEquipmentLayers)),
       updateShowSiteBoundary: isVisible => dispatch(MapLayerActions.setShowSiteBoundary(isVisible)),
