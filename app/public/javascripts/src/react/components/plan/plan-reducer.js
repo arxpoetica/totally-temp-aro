@@ -138,8 +138,8 @@ function setParentProjectForNewProject (state, parentProjectForNewProject) {
   }
 }
 
-function updateDefaultPlanCoordinates (state, coordinates) {
-  
+// ToDo: I think this the coords of current map view not defaultPlanCoordinates
+function updateDefaultPlanCoordinates (state, coordinates) {  
   let defaultPlanCoordinates = {}
   if(coordinates.center_changed){
     defaultPlanCoordinates['latitude'] = coordinates.center_changed.lat()
