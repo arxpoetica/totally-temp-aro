@@ -62,6 +62,7 @@ function loadPlanDataSelectionFromServer (planId) {
           if (dataTypeEntity.maxValue > 0) {
             newDataItems[dataTypeEntity.name] = {
               id: dataTypeEntity.id,
+              name: dataTypeEntity.name,
               description: dataTypeEntity.description,
               minValue: dataTypeEntity.minValue,
               maxValue: dataTypeEntity.maxValue,

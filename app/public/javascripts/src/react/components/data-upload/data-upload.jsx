@@ -146,9 +146,23 @@ export class DataUpload extends Component {
       dataTypesOptions.push(<option value={item.id} key={item.name} >{item.description}</option>)
     })
 
+    // TODO: Technical debt
+    // As of 2nd, Nov 2020 we do not have map between aro.edge_connectivity_type and aro_core.data_type
+    // For now the to get featuretype and subfeature type for datatype we have to use
+    // edeg connectivity endpoints. To make it work 
+    // we have to put in a briging login between those entities to fill the feature type
+    // edge = conduit
+    // copper_cable = copper
+    // fiber = cable
     let spatialEdgeOptions = []
-    this.props.spatialEdgeTypes.forEach((item) => {
+    let currentSubTypes = this.props.spatialEdgeTypes.filter(item => item.edgeConnectivityType == "conduit")
+    currentSubTypes.forEach((item) => {
       spatialEdgeOptions.push(<option value={item.name} key={item.name} >{item.description}</option>)
+    })
+    let cableOptions = []
+    let cableTypes = this.props.cableTypes.filter(item => item.edgeFeatureType.edgeConnectivityType == "cable")
+    cableTypes.forEach((item) => {
+      cableOptions.push(<option value={item.name} key={item.name} >{item.description}</option>)
     })
     
     let conduitOptions = []
@@ -156,10 +170,7 @@ export class DataUpload extends Component {
       conduitOptions.push(<option value={item.id} key={item.name} >{item.description}</option>)
     })
 
-    let cableOptions = []
-    this.props.cableTypes.forEach((item) => {
-      cableOptions.push(<option value={item.name} key={item.name} >{item.description}</option>)
-    })
+
 
     let creationTypeOptions = []
     this.props.saCreationTypes.forEach((item) => {
@@ -202,7 +213,7 @@ export class DataUpload extends Component {
             </div>
           }
 
-          { this.state.selectedDataSourceName === 'fiber' &&
+          { this.state.selectedDataSourceName === 'edge' &&
             <div>
               <div className="form-group row">
                 <label className="col-sm-4 col-form-label">Spatial Edge Type</label>
@@ -223,7 +234,7 @@ export class DataUpload extends Component {
             </div>
           }
 
-          { this.state.selectedDataSourceName === 'fiber' && this.state.selectedSpatialEdgeType === 'fiber' &&
+          { this.state.selectedDataSourceName === 'fiber' &&
             <div className="form-group row">
               <label className="col-sm-4 col-form-label">Cable Type</label>
               <div className="col-sm-8">
@@ -245,7 +256,7 @@ export class DataUpload extends Component {
             </div>
           }
 
-          {(this.state.selectedDataSourceName !== 'tile_system' && this.state.selectedDataSourceName !== 'edge') &&
+          { this.state.selectedDataSourceName !== 'tile_system' &&
             <>
               { (this.state.selectedDataSourceName !== 'service_layer' || this.state.selectedCreationType === 'upload_file') && 
                 <div className="form-group row">

@@ -7,14 +7,14 @@ import PlanActions from '../plan/plan-actions'
 function loadMetaData () {
 
   return dispatch => {
-    AroHttp.get(`/service/odata/SpatialEdgeTypeEntity`)
+    AroHttp.get(`/service/odata/EdgeFeatureTypeEntity`)
     .then(result => dispatch({
       type: Actions.DATA_UPLOAD_SET_EDGE_TYPE,
       payload: result.data
     }))
     .catch((err) => console.error(err))
 
-    AroHttp.get(`/service/odata/FiberTypeEntity`)
+    AroHttp.get(`/service/odata/EdgeFeatureSubTypeEntity`)
     .then(result => dispatch({
       type: Actions.DATA_UPLOAD_SET_CABLE_TYPE,
       payload: result.data
@@ -95,6 +95,7 @@ function saveDataSource (uploadDetails,loggedInUser) {
         }
         // For uploading fiber no need to create library using getLibraryId()
         if (uploadDetails.selectedDataSourceName === 'fiber') {
+          uploadDetails.selectedSpatialEdgeType = 'fiber_cable'
           return setCableConstructionType(uploadDetails,loggedInUser)
           .then((libraryItem) => {
             dispatch(setAllLibraryItems(libraryItem.dataType, libraryItem)),
@@ -168,9 +169,9 @@ function setCableConstructionType (uploadDetails,loggedInUser) {
     }
   }
 
-  if (uploadDetails.selectedSpatialEdgeType === 'fiber') {
+  if (uploadDetails.selectedSpatialEdgeType === 'fiber_cable') {
     // This is not a conduit, also send the fiber type
-    data.param.fiberType = uploadDetails.selectedCableType
+    data.param.edgeSubTypeReference = uploadDetails.selectedCableType
   }
   return AroHttp.post(`/service/v1/library_cable`,data)
     .then((result) => Promise.resolve(result.data.libraryItem))
