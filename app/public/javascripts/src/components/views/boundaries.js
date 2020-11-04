@@ -49,7 +49,7 @@ class BoundariesController {
             description: serviceLayer.description, // Service Areas
             type: 'wirecenter',
             key: 'wirecenter',
-            layerId: serviceLayer.id
+            analysisLayerId: serviceLayer.id,
           }
           newTileLayers.push(wirecenterLayer)
         })
@@ -64,7 +64,9 @@ class BoundariesController {
             uiLayerId: uiLayerId++,
             description: 'Census Blocks',
             type: 'census_blocks',
-            key: 'census_blocks'
+            key: 'census_blocks',
+            // NOTE: `-10` is hard coded on the back end as well, so this matches that
+            analysisLayerId: -10,
           })
         }
 

@@ -1231,7 +1231,7 @@ class State {
     }
     loadCensusCatData()
 
-    var loadBoundaryLayers = function () {
+    var loadBoundaryTypes = function () {
       return $http.get(`/service/boundary_type`)
         .then((result) => {
           var boundaryTypes = result.data
@@ -1244,7 +1244,7 @@ class State {
         })
     }
 
-    loadBoundaryLayers()
+    loadBoundaryTypes()
 
     service.setBoundaryTypes = function (boundaryTypes) {
       $ngRedux.dispatch({
