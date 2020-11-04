@@ -96,7 +96,7 @@ class BoundariesController {
       .catch((err) => console.error(err))
   }
 
-  onSelectCensusCat () {
+  onSelectCategory (category) {
     const id = this.selectedCensusCat && this.selectedCensusCat.id
     var newSelection = this.state.cloneSelection()
     newSelection.details.censusCategoryId = id
