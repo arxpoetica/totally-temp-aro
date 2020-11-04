@@ -268,12 +268,14 @@ class TileComponentController {
   }
 
   // Creates the map overlay that will be used to display vector tile information
+  // ToDo: stateMapLayers doesn't seem to get updated in MapTileRenderer when it changes in Redux
   createMapOverlay () {
     if (this.mapRef.overlayMapTypes.length > 0) {
       console.error('ERROR: Creating a map overlay, but we already have overlays defined')
       console.error(this.mapRef.overlayMapTypes)
       return
     }
+
     this.mapRef.overlayMapTypes.push(new MapTileRenderer(new google.maps.Size(Constants.TILE_SIZE, Constants.TILE_SIZE),
       this.tileDataService,
       this.state.mapTileOptions.getValue(),
@@ -787,6 +789,7 @@ class TileComponentController {
         !prevStateMapLayers.networkEquipment.cables ||
         !stateMapLayers.networkEquipment.cables ||
         JSON.stringify(prevStateMapLayers) === JSON.stringify(stateMapLayers)) {
+      console.log('doesConduitNeedUpdate: false, early return')
       return false
     }
     var needUpdate = false
@@ -795,13 +798,17 @@ class TileComponentController {
       if (!needUpdate) {
         const cable = stateMapLayers.networkEquipment.cables[cableType]
         const prevCable = prevStateMapLayers.networkEquipment.cables[cableType]
-        // is this layer visible? (if it was previously not visible this will be taken care of elsewhere 
-        //  (I know! We're depending on outside behaviour, this all needs to be redone))
-        if (cable.checked && prevCable.checked) {
-          if (JSON.stringify(cable.conduitVisibility) !== JSON.stringify(prevCable.conduitVisibility)) needUpdate = true
+        // this all needs to be redone
+        if (cable.checked) {
+          if (!prevCable.checked) {
+            needUpdate = true
+          } else if (JSON.stringify(cable.conduitVisibility) !== JSON.stringify(prevCable.conduitVisibility)) {
+            needUpdate = true
+          }
         }
       }
     })
+    console.log(`doesConduitNeedUpdate: ${needUpdate}`)
     return needUpdate
   }
   
