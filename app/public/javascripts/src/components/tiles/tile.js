@@ -789,7 +789,6 @@ class TileComponentController {
         !prevStateMapLayers.networkEquipment.cables ||
         !stateMapLayers.networkEquipment.cables ||
         JSON.stringify(prevStateMapLayers) === JSON.stringify(stateMapLayers)) {
-      console.log('doesConduitNeedUpdate: false, early return')
       return false
     }
     var needUpdate = false
@@ -808,7 +807,6 @@ class TileComponentController {
         }
       }
     })
-    console.log(`doesConduitNeedUpdate: ${needUpdate}`)
     return needUpdate
   }
   
