@@ -78,7 +78,8 @@ function saveDataSource (uploadDetails,loggedInUser) {
         })
         // Draw the layer by entering edit mode
       } else {
-        if (uploadDetails.selectedDataSourceName !== 'service_layer' || uploadDetails.selectedCreationType !== 'polygon_equipment') {
+        if (uploadDetails.selectedDataSourceName !== 'service_layer' 
+            || uploadDetails.selectedCreationType !== 'polygon_equipment') {
           var files = uploadDetails.file
           if (uploadDetails.dataSetId && files.length > 0) {
             return swal({
@@ -109,16 +110,12 @@ function saveDataSource (uploadDetails,loggedInUser) {
             dispatch(setIsUploading(false))
             console.error(err)
           })
-        } else {
+        }
+        if (uploadDetails.selectedDataSourceName === 'service_layer' 
+            && uploadDetails.selectedCreationType === 'polygon_equipment') { 
           getLibraryId (uploadDetails)
             .then((library) => {
-              if (uploadDetails.selectedDataSourceName === 'service_layer' && uploadDetails.selectedCreationType === 'polygon_equipment') { 
-                layerBoundary(uploadDetails, library.data.identifier,loggedInUser) 
-              } else {
-                if(uploadDetails.selectedDataSourceName !== 'edge'){
-                  fileUpload(dispatch, uploadDetails,library.data.identifier,loggedInUser) 
-                }
-              }
+              layerBoundary(uploadDetails, library.data.identifier,loggedInUser) 
               dispatch(setAllLibraryItems(library.data.dataType, library.data))
             })
             .then((res) => {
@@ -128,6 +125,35 @@ function saveDataSource (uploadDetails,loggedInUser) {
               dispatch(setIsUploading(false))
               console.error(err)
             })
+        }
+        if (uploadDetails.selectedDataSourceName === 'edge') { 
+          addConduit(uploadDetails)
+            .then((libraryItem) => {
+              dispatch(setAllLibraryItems(libraryItem.dataType, libraryItem)),
+              fileUpload(dispatch, uploadDetails, libraryItem.identifier, loggedInUser)
+          })
+          .then((result) => {
+            dispatch(setIsUploading(false))
+            return Promise.resolve(result)
+          })
+          .catch((err) => {
+            dispatch(setIsUploading(false))
+            console.error(err)
+          })
+        }
+        if (uploadDetails.selectedDataSourceName !== 'edge') { 
+          getLibraryId (uploadDetails)
+            .then((library) => {
+              dispatch(setAllLibraryItems(library.data.dataType, library.data))
+              fileUpload(dispatch, uploadDetails,library.data.identifier,loggedInUser) 
+          })
+          .then((res) => {
+            dispatch(setIsUploading(false))
+          })
+          .catch((err) => {
+            dispatch(setIsUploading(false))
+            console.error(err)
+          })
         }
       }
     }
@@ -165,15 +191,28 @@ function setCableConstructionType (uploadDetails,loggedInUser) {
     param: {
       defaultCableSize: uploadDetails.selectedConduitSize,
       param_type: 'cable_param',
+      spatialEdgeType: uploadDetails.selectedSpatialEdgeType,
+      edgeSubTypeReference: uploadDetails.selectedCableType
+    }
+  }
+  return AroHttp.post(`/service/v1/library_cable`,data)
+    .then((result) => Promise.resolve(result.data.libraryItem))
+    .catch((err) => console.error(err))
+}
+
+function addConduit(uploadDetails) {
+  var data = {
+    libraryItem: {
+      dataType: uploadDetails.selectedDataSourceName,
+      name: uploadDetails.dataSourceName
+    },
+    param: {
+      defaultCableSize: uploadDetails.selectedConduitSize,
+      param_type: 'cable_param',
       spatialEdgeType: uploadDetails.selectedSpatialEdgeType
     }
   }
-
-  if (uploadDetails.selectedSpatialEdgeType === 'fiber_cable') {
-    // This is not a conduit, also send the fiber type
-    data.param.edgeSubTypeReference = uploadDetails.selectedCableType
-  }
-  return AroHttp.post(`/service/v1/library_cable`,data)
+  return AroHttp.post(`/service/v1/library_conduit`,data)
     .then((result) => Promise.resolve(result.data.libraryItem))
     .catch((err) => console.error(err))
 }
