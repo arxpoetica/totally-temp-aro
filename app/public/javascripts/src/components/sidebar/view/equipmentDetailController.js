@@ -32,7 +32,7 @@ class EquipmentDetailController {
     this.mapFeatureSelectedSubscriber = state.mapFeaturesSelectedEvent.skip(1).subscribe((options) => {
       // most of this function is assuring the properties we need exist.
       // In ruler mode click should not perform any view action's
-      if (!this.state.StateViewMode.allowViewModeClickAction(this.state)) return
+      if (!this.state.StateViewMode.allowViewModeClickAction(this.state, this.rIsRulerEnabled)) return
       if (options.hasOwnProperty('roadSegments') && options.roadSegments.size > 0) return
 
       const plan = state.plan
@@ -223,7 +223,8 @@ class EquipmentDetailController {
   mapStateToThis (reduxState) {
     return {
       dataItems: reduxState.plan.dataItems,
-      rActiveViewModePanel: reduxState.plan.rActiveViewModePanel
+      rActiveViewModePanel: reduxState.toolbar.rActiveViewModePanel,
+      rIsRulerEnabled: reduxState.toolbar.isRulerEnabled
     }
   }
 

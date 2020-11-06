@@ -80,7 +80,7 @@ class MapObjectEditorController {
 
     // Note we are using skip(1) to skip the initial value (that is fired immediately) from the RxJS stream.
     this.mapFeaturesSelectedEventObserver = this.state.mapFeaturesSelectedEvent.skip(1).subscribe((event) => {
-      if (this.state.isRulerEnabled) return // disable any click action when ruler is enabled
+      if (this.state.isRulerEnabled || this.rIsRulerEnabled) return // disable any click action when ruler is enabled
       this.handleMapEntitySelected(event)
     })
 
@@ -1330,7 +1330,8 @@ class MapObjectEditorController {
   mapStateToThis (reduxState) {
     return {
       dataItems: reduxState.plan.dataItems,
-      transactionFeatures: reduxState.planEditor.features
+      transactionFeatures: reduxState.planEditor.features,
+      rIsRulerEnabled: reduxState.toolbar.isRulerEnabled
     }
   }
 

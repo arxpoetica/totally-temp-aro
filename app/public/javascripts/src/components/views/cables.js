@@ -24,7 +24,7 @@ const getConduitsArray = createSelector([getAllNetworkEquipmentLayers], networkE
 })
 
 class CablesController {
-  constructor ($rootScope, $ngRedux, map_tools, state) {
+  constructor ($rootScope, $ngRedux, map_tools, state, rState) {
     this.map_tools = map_tools
     this.state = state
     this.currentUser = state.loggedInUser
@@ -41,6 +41,11 @@ class CablesController {
     state.viewSettingsChanged
       .skip(1)
       .subscribe((newValue) => this.updateMapLayers())
+
+    // Update map layers when the view settings change
+    rState.viewSettingsChanged.getMessage().skip(1).subscribe((data) => {
+      this.updateMapLayers()
+    })     
 
     this.createdMapLayerKeys = new Set()
 
@@ -103,7 +108,7 @@ class CablesController {
       drawingOptions: drawingOptions,
       selectable: true,
       zIndex: networkEquipment.zIndex + (existingOrPlannedzIndex || 0),
-      showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection && this.state.showDirectedCable, // Showing Direction
+      showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection && (this.state.showDirectedCable || this.rShowDirectedCable), // Showing Direction
       highlightStyle: networkEquipment.highlightStyle
     }
   }
@@ -190,7 +195,8 @@ class CablesController {
       cablesArray: getCablesArray(reduxState),
       conduitsArray: getConduitsArray(reduxState),
       dataItems: reduxState.plan.dataItems,
-      mapRef: reduxState.map.googleMaps
+      mapRef: reduxState.map.googleMaps,
+      rShowDirectedCable: reduxState.toolbar.showDirectedCable
     }
   }
 
@@ -228,7 +234,7 @@ class CablesController {
   }
 }
 
-CablesController.$inject = ['$rootScope', '$ngRedux', 'map_tools', 'state']
+CablesController.$inject = ['$rootScope', '$ngRedux', 'map_tools', 'state', 'rState']
 
 let cables = {
   templateUrl: '/components/views/cables.html',

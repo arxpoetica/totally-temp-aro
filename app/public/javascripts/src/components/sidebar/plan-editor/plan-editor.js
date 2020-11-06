@@ -10,7 +10,7 @@ import EquipmentBoundaryFeature from '../../../service-typegen/dist/EquipmentBou
 import TileUtilities from '../../tiles/tile-utilities.js'
 import PlanEditorActions from '../../../react/components/plan-editor/plan-editor-actions'
 import MapLayerActions from '../../../react/components/map-layers/map-layer-actions'
-import PlanActions from '../../../react/components/plan/plan-actions'
+import ToolBarActions from '../../../react/components/header/tool-bar-actions'
 import uuidStore from '../../../shared-utils/uuid-store'
 import WktUtils from '../../../shared-utils/wkt-utils'
 import coverageActions from '../../../react/components/coverage/coverage-actions'
@@ -1669,7 +1669,7 @@ class PlanEditorController {
       viewBoundaryProperties: (planId, boundaryObjectId, transactionFeatures) => dispatch(PlanEditorActions.viewFeatureProperties('equipment_boundary', planId, boundaryObjectId, transactionFeatures)),
       clearCoverageForBoundary: objectId => dispatch(coverageActions.addBoundaryCoverage(objectId, null)),
       clearBoundaryCoverage: () => dispatch(coverageActions.clearBoundaryCoverage()),
-      setSelectedDisplayMode: displayMode => dispatch(PlanActions.setSelectedDisplayMode(displayMode))
+      setSelectedDisplayMode: displayMode => dispatch(ToolBarActions.selectedDisplayMode(displayMode))
     }
   }
 

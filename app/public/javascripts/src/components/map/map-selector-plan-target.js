@@ -5,16 +5,17 @@ class MapSelectorPlanTargetController {
     this.mapRef = null
     this.drawingManager = null
 
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
+
     // Hold display mode and selection mode variables from application state
     this.displayModes = state.displayModes
     state.selectedDisplayMode.subscribe((newValue) => {
       this.selectedDisplayMode = newValue
-      this.targetSelectionMode = this.state && this.state.selectedTargetSelectionMode
+      this.targetSelectionMode = this.state && (this.state.selectedTargetSelectionMode || this.rSelectedTargetSelectionMode)
       this.updateDrawingManagerState()
     })
     this.state = state
     this.document = $document
-    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
 
     // Handle selection events from state
     this.unsub = state.mapFeaturesSelectedEvent.skip(1).subscribe((event) => {
@@ -97,7 +98,7 @@ class MapSelectorPlanTargetController {
   $doCheck () {
     // Do a manual check on selectedTargetSelectionMode, as it is no longer a BehaviorSubject
     var oldValue = this.targetSelectionMode
-    this.targetSelectionMode = this.state.selectedTargetSelectionMode
+    this.targetSelectionMode = this.state.selectedTargetSelectionMode || this.rSelectedTargetSelectionMode
     if (this.targetSelectionMode !== oldValue) {
       this.updateDrawingManagerState()
     }
@@ -106,7 +107,8 @@ class MapSelectorPlanTargetController {
   mapStateToThis (reduxState) {
     return {
       activePlanId: reduxState.plan.activePlan && reduxState.plan.activePlan.id,
-      planTargets: reduxState.selection.planTargets
+      planTargets: reduxState.selection.planTargets,
+      rSelectedTargetSelectionMode: reduxState.toolbar.selectedTargetSelectionMode,
     }
   }
 

@@ -12,8 +12,6 @@ const defaultState = {
     areaName: 'Seattle, WA' // Seattle, WA by default. For no particular reason.
   },
   selectedMode: 'HOME',
-  rSelectedDisplayMode:'VIEW',
-  rActiveViewModePanel:'LOCATION_INFO',
   isDataSourceEditable: {},
   isResourceSelection: false,
   parentProjectForNewProject: null,
@@ -134,21 +132,27 @@ function setIsDataSourceEditable (state, isDataSourceEditable) {
   }
 }
 
-function setSelectedDisplayMode (state, displayMode) {
-  return { ...state,
-    rSelectedDisplayMode: displayMode,
-  }
-}
-
-function setActiveViewModePanel (state, viewMode) {
-  return { ...state,
-    rActiveViewModePanel: viewMode
-  }
-}
-
 function setParentProjectForNewProject (state, parentProjectForNewProject) {
   return { ...state,
     parentProjectForNewProject: parentProjectForNewProject,
+  }
+}
+
+// ToDo: I think this the coords of current map view not defaultPlanCoordinates
+function updateDefaultPlanCoordinates (state, coordinates) {  
+  let defaultPlanCoordinates = {}
+  if(coordinates.center_changed){
+    defaultPlanCoordinates['latitude'] = coordinates.center_changed.lat()
+    defaultPlanCoordinates['longitude'] = coordinates.center_changed.lng()
+    defaultPlanCoordinates['zoom'] = state.defaultPlanCoordinates.zoom
+  } else if(coordinates.zoom_changed) {
+    defaultPlanCoordinates['latitude'] = state.defaultPlanCoordinates.latitude
+    defaultPlanCoordinates['longitude'] = state.defaultPlanCoordinates.longitude
+    defaultPlanCoordinates['zoom'] = coordinates.zoom_changed
+  }
+
+  return { ...state,
+    defaultPlanCoordinates: defaultPlanCoordinates,
   }
 }
 
@@ -197,16 +201,13 @@ function planReducer (state = defaultState, action) {
       return setProjectMode(state, action.payload)
       
     case Actions.PLAN_SET_IS_DATASOURCE_EDITABLE:
-      return setIsDataSourceEditable(state, action.payload) 
-    
-    case Actions.PLAN_SET_SELECTED_DISPLAY_MODE:
-      return setSelectedDisplayMode(state, action.payload) 
-
-    case Actions.PLAN_SET_ACTIVE_VIEW_MODE_PANEL:
-      return setActiveViewModePanel(state, action.payload) 
+      return setIsDataSourceEditable(state, action.payload)      
 
     case Actions.PLAN_SET_PARENT_PROJECT_FOR_NEW_PROJECT:
-      return setParentProjectForNewProject(state, action.payload)       
+      return setParentProjectForNewProject(state, action.payload) 
+
+    case Actions.PLAN_UPDATE_DEFAULT_PLAN_COORDINATES:
+      return updateDefaultPlanCoordinates(state, action.payload)       
 
     default:
       return state

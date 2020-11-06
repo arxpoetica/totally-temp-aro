@@ -1,4 +1,5 @@
 import PlanActions from '../../../../react/components/plan/plan-actions'
+import ToolBarActions from '../../../../react/components/header/tool-bar-actions'
 import EtlTemplateActions from '../../../../react/components/etl-templates/etl-templates-actions'
 
 class DataSourceUploadController {
@@ -425,7 +426,7 @@ class DataSourceUploadController {
 
   mapDispatchToTarget (dispatch) {
     return {
-      setSelectedDisplayMode: displayMode => dispatch(PlanActions.setSelectedDisplayMode(displayMode)),
+      setSelectedDisplayMode: displayMode => dispatch(ToolBarActions.selectedDisplayMode(displayMode)),
       selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems)),
       setAllLibraryItems: (dataItemKey, allLibraryItems) => dispatch(PlanActions.setAllLibraryItems(dataItemKey, allLibraryItems)),
       loadEtlTemplatesFromServer: (dataType) => dispatch(EtlTemplateActions.loadEtlTemplatesFromServer(dataType)),

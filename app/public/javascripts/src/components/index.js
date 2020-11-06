@@ -2,6 +2,7 @@
 import { react2angular } from 'react2angular'
 import { ToastContainer } from 'react-toastify'
 
+import ToolBar from '../react/components/header/tool-bar.jsx'
 import PlanSettings from '../react/components/plan/plan-settings.jsx'
 import GlobalSettingsButton from '../react/components/global-settings/global-settings-button.jsx'
 import rGlobalSettings from '../react/components/global-settings/global-settings.jsx'
@@ -150,6 +151,8 @@ import editorInterfaceNullableNumber from './common/editor-interfaces/editor-int
 import utils from './common/utilities'
 
 import state from '../models/state'
+import rState from '../react/common/rState'
+
 import tileDataService from '../components/tiles/tile-data-service'
 
 import reduxConfig from '../redux-config'
@@ -252,6 +255,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('editorInterfacePrimitive', editorInterfacePrimitive)
   .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
 // ReactJS components PlanSettings
+  .component('rToolBar', react2angular(ToolBar))
   .component('rGlobalSettingsButton', react2angular(GlobalSettingsButton))
   .component('rPlanSettings', react2angular(PlanSettings))
   .component('rGlobalSettings', react2angular(rGlobalSettings))
@@ -299,5 +303,6 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rToolBox', react2angular(ToolBox))
   .service('Utils', utils)
   .service('state', state)
+  .service('rState', rState)
   .service('tileDataService', tileDataService)
   .config(reduxConfig)

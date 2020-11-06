@@ -98,9 +98,10 @@
   padding: 0px;
   background-color: #D9272D !important;
 }
-.select2-results {
+ /* Commented due to dynamic backgroud color change in tool-bar.jsx */
+/* .select2-results {
   background-color: #D9272D !important;
-}
+} */
 .select2-results .select2-highlighted {
   background-color: white;
   color: #1f7de6;

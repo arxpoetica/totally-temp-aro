@@ -1,4 +1,4 @@
-import PlanActions from '../../react/components/plan/plan-actions'
+import ToolBarActions from '../../react/components/header/tool-bar-actions'
 
 class DisplayModeButtonsController {
   constructor (state, $ngRedux) {
@@ -20,13 +20,13 @@ class DisplayModeButtonsController {
 
   mapStateToThis (reduxState) {
     return {
-      rSelectedDisplayMode: reduxState.plan.rSelectedDisplayMode,
+      rSelectedDisplayMode: reduxState.toolbar.rSelectedDisplayMode,
     }
   }
 
   mapDispatchToTarget (dispatch) {
     return {
-      rSelectedDisplayModeAction: (value) => dispatch(PlanActions.setSelectedDisplayMode(value))
+      rSelectedDisplayModeAction: (value) => dispatch(ToolBarActions.selectedDisplayMode(value)),
     }
   }
 }

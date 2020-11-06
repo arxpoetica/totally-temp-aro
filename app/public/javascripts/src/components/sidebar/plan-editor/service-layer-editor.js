@@ -1,6 +1,5 @@
 import Constants from '../../common/constants'
-import PlanActions from '../../../react/components/plan/plan-actions'
-import MapUtilities from '../../common/plan/map-utilities'
+import ToolBarActions from '../../../react/components/header/tool-bar-actions'
 
 class ServiceLayerEditorController {
   constructor ($http, $timeout, $ngRedux, state, Utils, tileDataService) {
@@ -58,10 +57,9 @@ class ServiceLayerEditorController {
 
   handleSelectedObjectChanged (mapObject) {
     if (this.currentTransaction == null) return
+    console.log(mapObject)
     if (mapObject != null) {
       this.updateSelectedState(mapObject)
-    } else {
-      this.rActiveViewModePanelAction(this.state.viewModePanels.LOCATION_INFO)
     }
     this.selectedMapObject = mapObject
     this.$timeout()
@@ -219,9 +217,8 @@ class ServiceLayerEditorController {
 
   mapDispatchToTarget (dispatch) {
     return {
-      setSelectedDisplayMode: displayMode => dispatch(PlanActions.setSelectedDisplayMode(displayMode)),
-      rActiveViewModePanelAction: (value) => dispatch(PlanActions.setActiveViewModePanel(value))
-    }
+      rActiveViewModePanelAction: (value) => dispatch(ToolBarActions.activeViewModePanel(value))
+     }
   }
 
   $onDestroy () {

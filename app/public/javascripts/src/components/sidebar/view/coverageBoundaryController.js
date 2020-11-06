@@ -1,5 +1,7 @@
+import ToolBarActions from '../../../react/components/header/tool-bar-actions'
+
 class CoverageBoundaryController {
-  constructor ($http, $timeout, state) {
+  constructor ($http, $timeout, state, $ngRedux) {
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
@@ -25,6 +27,7 @@ class CoverageBoundaryController {
     })
 
     this.coveragePolygon = null
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }
 
   $onInit () {
@@ -138,9 +141,16 @@ class CoverageBoundaryController {
 
     // Target selection mode cannot be COVERAGE_BOUNDARY anymore
     this.state.selectedTargetSelectionMode = this.state.targetSelectionModes.SINGLE_PLAN_TARGET
+    //this.rSelectedTargetSelectionModeAction(this.state.targetSelectionModes.SINGLE_PLAN_TARGET)
+  }
+
+  mapDispatchToTarget (dispatch) {
+    return {
+      rSelectedTargetSelectionModeAction: (value) => dispatch(ToolBarActions.selectedTargetSelectionMode(value))
+    }
   }
 }
 
-CoverageBoundaryController.$inject = ['$http', '$timeout', 'state']
+CoverageBoundaryController.$inject = ['$http', '$timeout', 'state', '$ngRedux']
 
 export default CoverageBoundaryController
