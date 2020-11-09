@@ -2,6 +2,7 @@
 import { react2angular } from 'react2angular'
 import { ToastContainer } from 'react-toastify'
 
+import AroDebug from '../react/components/sidebar/debug/aro-debug.jsx'
 import ToolBar from '../react/components/header/tool-bar.jsx'
 import PlanSettings from '../react/components/plan/plan-settings.jsx'
 import GlobalSettingsButton from '../react/components/global-settings/global-settings-button.jsx'
@@ -254,7 +255,8 @@ app.component('boundaryDetail', boundaryDetail)
   .component('editorInterfaceValue', editorInterfaceValue)
   .component('editorInterfacePrimitive', editorInterfacePrimitive)
   .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
-// ReactJS components PlanSettings
+// ReactJS components
+  .component('rAroDebug', react2angular(AroDebug))
   .component('rToolBar', react2angular(ToolBar))
   .component('rGlobalSettingsButton', react2angular(GlobalSettingsButton))
   .component('rPlanSettings', react2angular(PlanSettings))

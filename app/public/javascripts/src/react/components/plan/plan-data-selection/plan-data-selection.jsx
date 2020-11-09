@@ -39,6 +39,13 @@ export class PlanDataSelection extends Component {
     this.props.onDataSelectionChange({ childKey: 'dataSelection', isValid: isValid, isInit: true })
   }
 
+  componentDidUpdate(prevProps) {
+    // Trigger updateSelectionValidation() if props change
+    if(this.props.dataItems != prevProps.dataItems) {
+      this.updateSelectionValidation()
+    }
+  }
+
   // To set Props values to State if props get modified
   // https://reactjs.org/docs/react-component.html#static-getderivedstatefromprops
   static getDerivedStateFromProps(nextProps, state) {
