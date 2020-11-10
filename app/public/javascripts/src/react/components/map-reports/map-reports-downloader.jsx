@@ -91,16 +91,28 @@ export class MapReportsDownloader extends Component {
       // From maplayers, get the layers that we want to display in the report. Also send the location filters.
       pageDefinition.locationFilters = this.props.mapLayers.locationFilters
       pageDefinition.visibleLayers = this.props.mapLayers.location.filter(layer => layer.checked).map(layer => layer.key).toJS();
+      // this needs to be done differently
+      pageDefinition.visibleCableConduits = {};
+      // ToDo: this should NOT be hardcoded, related to state.js setLoggedInUser (very misnamed and bloated) near service.setNetworkEquipmentLayerVisiblity
       ['boundaries', 'cables', 'conduits', 'equipments', 'roads'].forEach(networkEquipmentCategory => {
         const category = this.props.mapLayers.networkEquipment[networkEquipmentCategory]
         if (category) {
           Object.keys(category).forEach(categoryKey => {
             if (category[categoryKey].checked) {
               pageDefinition.visibleLayers.push(category[categoryKey].key)
+              if (networkEquipmentCategory === 'cables') {
+                pageDefinition.visibleCableConduits[category[categoryKey].key] = []
+              }
             }
           })
         }
       })
+      Object.keys(pageDefinition.visibleCableConduits).forEach(cableType => {
+        pageDefinition.visibleCableConduits[cableType] = this.props.mapLayers.networkEquipment.cables[cableType].conduitVisibility
+      })
+      // need to send cable > conduit visibility from (for eg)
+      // mapLayers.networkEquipment.cables.FEEDER.conduitVisibility 
+      // still thinking about how to properly encode this
       return pageDefinition
     })
     this.props.downloadReport(this.props.planId, pageDefinitions)

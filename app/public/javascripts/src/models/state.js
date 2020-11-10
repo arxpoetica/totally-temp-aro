@@ -1525,10 +1525,20 @@ class State {
                 })
                 service.equipmentLayerTypeVisibility.planned = true;
                 service.cableLayerTypeVisibility.planned = true;
-                ['roads', 'cables', 'boundaries', 'equipments'].forEach(layerType => {
+                // ToDo: this should NOT be hardcoded, related to map-reports-downloader > doDownloadReport()
+                ['roads', 'cables', 'boundaries', 'equipments', 'conduits'].forEach(layerType => {
                   Object.keys(service.mapLayersRedux.networkEquipment[layerType]).forEach(layerKey => {
                     const isVisible = setOfVisibleLayers.has(layerKey)
                     service.setNetworkEquipmentLayerVisiblity(layerType, service.mapLayersRedux.networkEquipment[layerType][layerKey], isVisible)
+                  })
+                })
+
+                Object.keys(initialState.reportPage.visibleCableConduits).forEach(cableKey => {
+                  var conduitVisibility = initialState.reportPage.visibleCableConduits[cableKey]
+                  Object.keys(conduitVisibility).forEach(conduitKey => {
+                    if (conduitVisibility[conduitKey]) {
+                      service.setCableConduitVisibility(cableKey, conduitKey, true)
+                    }
                   })
                 })
               })
@@ -1847,6 +1857,7 @@ class State {
   mapDispatchToTarget (dispatch) {
     return {
       setNetworkEquipmentLayerVisiblity: (layerType, layer, newVisibility) => dispatch(MapLayerActions.setNetworkEquipmentLayerVisibility(layerType, layer, newVisibility)),
+      setCableConduitVisibility: (cableKey, conduitKey, newVisibility) => dispatch(MapLayerActions.setCableConduitVisibility(cableKey, conduitKey, newVisibility)),
       loadConfigurationFromServer: () => dispatch(UiActions.loadConfigurationFromServer()),
       setPerspective: perspective => dispatch(UiActions.setPerspective(perspective)),
       getStyleValues: () => dispatch(UiActions.getStyleValues()),
