@@ -3,21 +3,22 @@ import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
 import tileDataService from '../../../../components/tiles/tile-data-service'
 import ToolBarActions from '../../header/tool-bar-actions'
-import rState from '../../../common/rState'
+import rxState from '../../../common/rxState'
+import '../sidebar.css'
 
 export class ViewSettings extends Component {
   constructor (props) {
     super(props)
 
     this.tileDataService = new tileDataService();
-    this.rState = new rState(); // For RxJs implementation in React
+    this.rxState = new rxState(); // For RxJs implementation in react-js
 
     let newViewSetting = JSON.parse(JSON.stringify(this.props.viewSetting))
     newViewSetting.selectedFiberOption = this.props.viewFiberOptions[0];
     this.props.setViewSetting(newViewSetting)
 
     // Map tile settings used for debugging
-    this.rState.mapTileOptions.getMessage().subscribe((mapTileOptions) => {
+    this.rxState.mapTileOptions.getMessage().subscribe((mapTileOptions) => {
       this.mapTileOptions = JSON.parse(JSON.stringify(mapTileOptions))
     }) 
 
@@ -34,7 +35,7 @@ export class ViewSettings extends Component {
     const {mapTileOptions, tileDataService, equipmentPropertiesToRender} = this.state
 
     return(
-      <table className="table table-sm table-striped" style={viewSettings}>
+      <table className="table table-sm table-striped view-settings">
         <tbody>
           <tr>
             <td>Fiber Width</td>
@@ -158,7 +159,7 @@ export class ViewSettings extends Component {
     newViewSetting.selectedFiberOption = this.props.viewFiberOptions.filter(selectedFiberOption => selectedFiberOption.name === e.target.value)[0]
     this.props.setViewSetting(newViewSetting)
 
-    this.rState.requestMapLayerRefresh.sendMessage(null)
+    this.rxState.requestMapLayerRefresh.sendMessage(null)
   }
 
   fiberOptionInputMaxChanged(e){
@@ -167,7 +168,7 @@ export class ViewSettings extends Component {
     newViewSetting.selectedFiberOption[e.target.name].max = e.target.value
     this.props.setViewSetting(newViewSetting)
 
-    this.rState.requestMapLayerRefresh.sendMessage(null)
+    this.rxState.requestMapLayerRefresh.sendMessage(null)
   }
 
   fiberOptionInputMinChanged(e){
@@ -176,7 +177,7 @@ export class ViewSettings extends Component {
     newViewSetting.selectedFiberOption[e.target.name].min = e.target.value
     this.props.setViewSetting(newViewSetting)
 
-    this.rState.requestMapLayerRefresh.sendMessage(null)
+    this.rxState.requestMapLayerRefresh.sendMessage(null)
   }
 
   fiberOptionInputDivisorChanged(e){
@@ -185,7 +186,7 @@ export class ViewSettings extends Component {
     newViewSetting.selectedFiberOption.pixelWidth[[e.target.name]] = e.target.value
     this.props.setViewSetting(newViewSetting)
 
-    this.rState.requestMapLayerRefresh.sendMessage(null)
+    this.rxState.requestMapLayerRefresh.sendMessage(null)
   }
 
   updateState(){
@@ -194,7 +195,7 @@ export class ViewSettings extends Component {
     this.setState({ mapTileOptions: mapTileOptions });
 
     var newMapTileOptions = JSON.parse(JSON.stringify(this.state.mapTileOptions))
-    this.rState.mapTileOptions.sendMessage(newMapTileOptions)    
+    this.rxState.mapTileOptions.sendMessage(newMapTileOptions)    
   }
 
 
@@ -211,14 +212,14 @@ export class ViewSettings extends Component {
     this.setState({ tileDataService: tileDataService });
     // If the tile fetcher changes, delete the tile cache and re-render everything
     this.tileDataService.clearDataCache()
-    this.rState.requestMapLayerRefresh.sendMessage(null)
+    this.rxState.requestMapLayerRefresh.sendMessage(null)
   }
 
   equipmentPropertiesToRender(e){
     this.setState({equipmentPropertiesToRender: e.target.value})
 
     var newMapTileOptions = JSON.parse(JSON.stringify(this.state.mapTileOptions))
-    this.rState.mapTileOptions.sendMessage(newMapTileOptions)
+    this.rxState.mapTileOptions.sendMessage(newMapTileOptions)
   }
 
   updatePower(e){
@@ -227,18 +228,14 @@ export class ViewSettings extends Component {
     this.setState({mapTileOptions: mapTileOptions})
 
     var newMapTileOptions = JSON.parse(JSON.stringify(this.state.mapTileOptions))
-    this.rState.mapTileOptions.sendMessage(newMapTileOptions)   
+    this.rxState.mapTileOptions.sendMessage(newMapTileOptions)   
   }
 
   saveEquipmentPropertiesToRender () {
     this.props.configuration.networkEquipment.labelDrawingOptions.properties = JSON.parse(this.state.equipmentPropertiesToRender)
-    this.rState.viewSettingsChanged.sendMessage()
-    this.rState.requestMapLayerRefresh.sendMessage(null)
+    this.rxState.viewSettingsChanged.sendMessage()
+    this.rxState.requestMapLayerRefresh.sendMessage(null)
   }
-}
-
-const viewSettings = {
-  marginTop: '10px'
 }
 
 const mapStateToProps = (state) => ({

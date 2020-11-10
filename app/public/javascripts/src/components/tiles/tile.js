@@ -47,7 +47,7 @@ class TileComponentController {
   // fillStyle: (Optional) For polygon features, this is the fill color
   // opacity: (Optional, default 1.0) This is the maximum opacity of anything drawn on the map layer. Aggregate layers will have features of varying opacity, but none exceeding this value
 
-  constructor ($window, $document, $timeout, $ngRedux, state, tileDataService, contextMenuService, Utils, $scope, rState) {
+  constructor ($window, $document, $timeout, $ngRedux, state, tileDataService, contextMenuService, Utils, $scope, rxState) {
     this.layerIdToMapTilesIndex = {}
     this.mapRef = null // Will be set in $document.ready()
     this.$window = $window
@@ -89,7 +89,7 @@ class TileComponentController {
     })
 
     // Subscribe to changes in the map tile options
-    rState.mapTileOptions.getMessage().subscribe((mapTileOptions) => {
+    rxState.mapTileOptions.getMessage().subscribe((mapTileOptions) => {
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
         this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setMapTileOptions(mapTileOptions)
       }
@@ -101,7 +101,7 @@ class TileComponentController {
       this.refreshMapTiles(tilesToRefresh)
     })
 
-    rState.requestMapLayerRefresh.getMessage().subscribe((tilesToRefresh) => {
+    rxState.requestMapLayerRefresh.getMessage().subscribe((tilesToRefresh) => {
       this.tileDataService.markHtmlCacheDirty(tilesToRefresh)
       this.refreshMapTiles(tilesToRefresh)
     });
@@ -825,7 +825,7 @@ class TileComponentController {
   
 }
 
-TileComponentController.$inject = ['$window', '$document', '$timeout', '$ngRedux', 'state','tileDataService', 'contextMenuService', 'Utils', '$scope', 'rState']
+TileComponentController.$inject = ['$window', '$document', '$timeout', '$ngRedux', 'state','tileDataService', 'contextMenuService', 'Utils', '$scope', 'rxState']
 
 let tile = {
   template: '',

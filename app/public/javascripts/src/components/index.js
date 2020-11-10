@@ -152,7 +152,7 @@ import editorInterfaceNullableNumber from './common/editor-interfaces/editor-int
 import utils from './common/utilities'
 
 import state from '../models/state'
-import rState from '../react/common/rState'
+import rxState from '../react/common/rxState'
 
 import tileDataService from '../components/tiles/tile-data-service'
 
@@ -305,6 +305,6 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rToolBox', react2angular(ToolBox))
   .service('Utils', utils)
   .service('state', state)
-  .service('rState', rState)
+  .service('rxState', rxState)
   .service('tileDataService', tileDataService)
   .config(reduxConfig)

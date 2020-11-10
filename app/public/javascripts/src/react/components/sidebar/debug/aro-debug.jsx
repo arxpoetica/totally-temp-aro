@@ -4,6 +4,7 @@ import wrapComponentWithProvider from '../../../common/provider-wrapped-componen
 import ViewSettings from './view-settings.jsx'
 import MapUtilities from '../../../../components/common/plan/map-utilities'
 import AroHttp from '../../../common/aro-http'
+import '../sidebar.css'
 
 export class AroDebug extends Component {
   constructor (props) {
@@ -25,7 +26,7 @@ export class AroDebug extends Component {
     const {tileInfo, morphologyTileInfos} = this.state
 
     return (
-      <div style={aroDebugContainer}>
+      <div className="aro-debug-container ">
         {/* <!-- A button to get debugging info on all the selected service areas --> */}
         <button className="btn btn-block btn-light"
                 style={{flex: '0 0 auto'}}
@@ -129,15 +130,6 @@ export class AroDebug extends Component {
       this.setState({morphologyTileInfos: morphologyTileInfos})
     })
   }
-}
-
-const aroDebugContainer = {
-  position: 'absolute',
-  height: '100%',
-  width: '100%',
-  display: 'flex',
-  flexDirection: 'column',
-  paddingTop: '10px',
 }
 
 const mapStateToProps = (state) => ({

@@ -15,7 +15,7 @@ import AroHttp from '../../common/aro-http'
 import { createSelector } from 'reselect'
 import MapLayerActions from '../map-layers/map-layer-actions'
 import ViewSettingsActions from '../view-settings/view-settings-actions'
-import rState from '../../common/rState'
+import rxState from '../../common/rxState'
 import PlanInputsModal from './plan-inputs-modal.jsx'
 import GlobalsettingsActions from '../global-settings/globalsettings-action'
 import GlobalSettings from '../global-settings/global-settings.jsx'
@@ -24,7 +24,7 @@ export class ToolBar extends Component {
   constructor (props) {
     super(props)
     
-    this.rState = new rState(); // For RxJs implementation in React
+    this.rxState = new rxState(); // For RxJs implementation in reactjs
 
     this.viewModePanels = Object.freeze({
       LOCATION_INFO: 'LOCATION_INFO',
@@ -80,7 +80,7 @@ export class ToolBar extends Component {
     this.SPATIAL_EDGE_COPPER = 'copper'
 
     // Map tile settings used for debugging
-    this.rState.mapTileOptions.getMessage().subscribe((mapTileOptions) => {
+    this.rxState.mapTileOptions.getMessage().subscribe((mapTileOptions) => {
       this.mapTileOptions = JSON.parse(JSON.stringify(mapTileOptions))
     }) 
 
@@ -527,12 +527,12 @@ export class ToolBar extends Component {
     let newViewSetting = JSON.parse(JSON.stringify(this.props.viewSetting))
     newViewSetting.selectedFiberOption = this.props.viewFiberOptions.filter(selectedFiberOption => selectedFiberOption.name === e.target.value)[0]
     this.props.setViewSetting(newViewSetting)
-    this.rState.requestMapLayerRefresh.sendMessage(null)
+    this.rxState.requestMapLayerRefresh.sendMessage(null)
   }
 
   setShowFiberSize () {
     this.props.setShowFiberSize(!this.props.showFiberSize)
-    this.rState.requestMapLayerRefresh.sendMessage(null)
+    this.rxState.requestMapLayerRefresh.sendMessage(null)
   }
 
   showLocationLabelsChanged () {
@@ -541,13 +541,13 @@ export class ToolBar extends Component {
 
   showEquipmentLabelsChanged () {
     this.props.setShowEquipmentLabelsChanged(!this.props.showEquipmentLabels)
-    this.rState.viewSettingsChanged.sendMessage()
-    this.rState.requestMapLayerRefresh.sendMessage(null)
+    this.rxState.viewSettingsChanged.sendMessage()
+    this.rxState.requestMapLayerRefresh.sendMessage(null)
   }
 
   showCableDirection () {
     this.props.setShowDirectedCable(!this.props.showDirectedCable)
-    this.rState.viewSettingsChanged.sendMessage()
+    this.rxState.viewSettingsChanged.sendMessage()
   }
 
   onChangeSiteBoundaries (e) {
@@ -557,7 +557,7 @@ export class ToolBar extends Component {
 
   toggleSiteBoundary (e) {
     this.props.setShowSiteBoundary(!this.props.showSiteBoundary)
-    this.rState.viewSettingsChanged.sendMessage() // This will also refresh the map layer
+    this.rxState.viewSettingsChanged.sendMessage() // This will also refresh the map layer
   }
 
   viewSettingsAction () {
@@ -569,7 +569,7 @@ export class ToolBar extends Component {
     this.setState({heatMapOption: !this.state.heatMapOption}, function() {
       var newMapTileOptions = JSON.parse(JSON.stringify(this.mapTileOptions))
       newMapTileOptions.selectedHeatmapOption = this.state.heatMapOption ? this.props.viewSetting.heatmapOptions[0] : this.props.viewSetting.heatmapOptions[2]
-      this.rState.mapTileOptions.sendMessage(newMapTileOptions) // This will also refresh the map layer
+      this.rxState.mapTileOptions.sendMessage(newMapTileOptions) // This will also refresh the map layer
       this.refreshSlidertrack()
     })
     // To set selectedHeatmapOption in redux state
@@ -580,7 +580,7 @@ export class ToolBar extends Component {
     this.setState({sliderValue: e.target.value}, function() {
       var newMapTileOptions = JSON.parse(JSON.stringify(this.mapTileOptions))
       newMapTileOptions.heatMap.worldMaxValue = this.rangeValues[this.state.sliderValue]
-      this.rState.mapTileOptions.sendMessage(newMapTileOptions) // This will also refresh the map layer  
+      this.rxState.mapTileOptions.sendMessage(newMapTileOptions) // This will also refresh the map layer  
     })
   }
 

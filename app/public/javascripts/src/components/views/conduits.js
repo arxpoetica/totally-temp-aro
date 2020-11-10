@@ -21,7 +21,7 @@ const getRoadsArray = createSelector([getAllNetworkEquipmentLayers], networkEqui
 })
 
 class ConduitsController {
-  constructor ($rootScope, $ngRedux, map_tools, state, rState) {
+  constructor ($rootScope, $ngRedux, map_tools, state, rxState) {
     this.map_tools = map_tools
     this.state = state
     this.currentUser = state.loggedInUser
@@ -39,7 +39,7 @@ class ConduitsController {
       .subscribe((newValue) => this.updateMapLayers())
 
     // Update map layers when the view settings change
-    rState.viewSettingsChanged.getMessage().skip(1).subscribe((data) => {
+    rxState.viewSettingsChanged.getMessage().skip(1).subscribe((data) => {
       this.updateMapLayers()
     })
 
@@ -197,7 +197,7 @@ class ConduitsController {
   }
 }
 
-ConduitsController.$inject = ['$rootScope', '$ngRedux', 'map_tools', 'state', 'rState']
+ConduitsController.$inject = ['$rootScope', '$ngRedux', 'map_tools', 'state', 'rxState']
 
 let conduits = {
   templateUrl: '/components/views/conduits.html',
