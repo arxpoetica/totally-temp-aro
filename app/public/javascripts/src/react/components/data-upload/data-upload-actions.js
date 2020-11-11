@@ -2,6 +2,7 @@ import Actions from '../../common/actions'
 import AroHttp from '../../common/aro-http'
 import SocketManager from '../../common/socket-manager'
 import NotificationInterface from '../notification/notification-interface'
+import NotificationTypes from '../notification/notification-types'
 import PlanActions from '../plan/plan-actions'
 
 function loadMetaData () {
@@ -276,9 +277,10 @@ function fileUpload (dispatch, uploadDetails,libraryId,loggedInUser) {
   }
 
   AroHttp._fetch(url, options).then((e) => {
+    
+    NotificationInterface.updateNotification(dispatch, noteId, `${file.name} COMPLETE!`, false, NotificationTypes['USER_EXPIRE'])
     // the note will be auto-removed in 4 seconds
-    NotificationInterface.updateNotification(dispatch, noteId, `${file.name} COMPLETE!`)
-    NotificationInterface.removeNotification(dispatch, noteId, 4000)
+    // NotificationInterface.removeNotification(dispatch, noteId, 4000)
     // this.isUpLoad = false
     unsubscribeETLStart()
     unsubscribeETLUpdate()
@@ -287,7 +289,8 @@ function fileUpload (dispatch, uploadDetails,libraryId,loggedInUser) {
     PlanActions.loadLibraryEntryById(libraryId)
   }).catch((e) => {
     console.error(e)
-    NotificationInterface.removeNotification(dispatch, noteId)
+    // NotificationInterface.removeNotification(dispatch, noteId)
+    this.updateNotification(noteId, `${file.name} FAILED`, false, NotificationTypes['USER_EXPIRE'])
     // this.isUpLoad = false
     unsubscribeETLStart()
     unsubscribeETLUpdate()

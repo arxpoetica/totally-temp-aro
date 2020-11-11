@@ -1,6 +1,7 @@
 import PlanActions from '../../../../react/components/plan/plan-actions'
 import EtlTemplateActions from '../../../../react/components/etl-templates/etl-templates-actions'
 import NotificationInterface from '../../../../react/components/notification/notification-interface'
+import NotificationTypes from '../../../../react/components/notification/notification-types'
 
 // temporary
 import SocketManager from '../../../../react/common/socket-manager'
@@ -263,6 +264,8 @@ class DataSourceUploadController {
       })
   }
 
+  // ToDo: this is the EXACT same as DataUploadActions.fileUpload
+  // I don't know what happened
   submit (libraryId) {
     this.isUpLoad = true
     var fd = new FormData()
@@ -324,9 +327,9 @@ class DataSourceUploadController {
         }
       }
     }).then((e) => {
+      this.updateNotification(noteId, `${file.name} COMPLETE!`, false, NotificationTypes['USER_EXPIRE'])
       // the note will be auto-removed in 4 seconds
-      this.updateNotification(noteId, `${file.name} COMPLETE!`)
-      this.removeNotification(noteId, 4000)
+      // this.removeNotification(noteId, 4000)
       this.isUpLoad = false
       unsubscribeETLStart()
       unsubscribeETLUpdate()
@@ -335,7 +338,8 @@ class DataSourceUploadController {
       this.loadLibraryEntryById(libraryId)
     }).catch((e) => {
       console.error(e)
-      this.removeNotification(noteId)
+      // this.removeNotification(noteId)
+      this.updateNotification(noteId, `${file.name} FAILED`, false, NotificationTypes['USER_EXPIRE'])
       this.isUpLoad = false
       unsubscribeETLStart()
       unsubscribeETLUpdate()
@@ -494,8 +498,8 @@ class DataSourceUploadController {
       loadEtlTemplatesFromServer: (dataType) => dispatch(EtlTemplateActions.loadEtlTemplatesFromServer(dataType)),
       setConfigView: (flag) => dispatch(EtlTemplateActions.setConfigView(flag)),
       loadLibraryEntryById: (libraryId) => dispatch(PlanActions.loadLibraryEntryById(libraryId)),
-      postNotification: (notification, autoExpire) => NotificationInterface.postNotification(dispatch, notification, autoExpire), // you'll not this one looks a bit different, because we need a return val of the note ID we use an interface that wraps the action creator and the dispatch is done there
-      updateNotification: (noteId, notification, autoExpire) => NotificationInterface.updateNotification(dispatch, noteId, notification, autoExpire),
+      postNotification: (notification, autoExpire, type) => NotificationInterface.postNotification(dispatch, notification, autoExpire, type), // you'll not this one looks a bit different, because we need a return val of the note ID we use an interface that wraps the action creator and the dispatch is done there
+      updateNotification: (noteId, notification, autoExpire, type) => NotificationInterface.updateNotification(dispatch, noteId, notification, autoExpire, type),
       removeNotification: (noteId, autoExpire) => NotificationInterface.removeNotification(dispatch, noteId, autoExpire)
     }
   }

@@ -176,6 +176,20 @@ let mapSplit = {
     .ui-note-noteline{
       white-space: nowrap;
     }
+
+    .ui-note-persistent{
+      display: inline-block;
+      background: rgba(250, 250, 250, 0.7);
+      padding-left: 0.5em;
+      border: solid 1px #c0c0c0;
+    }
+
+    .ui-note-button{
+      pointer-events: all;
+      margin-left: 0.5em;
+      cursor: pointer;
+    }
+
   </style>
   <!-- First define the container for both the map and the sidebar. -->
   <div class="app_wrapper_container {{($ctrl.state.configuration.ARO_CLIENT === 'frontier') ? 'footer' : ''}}">

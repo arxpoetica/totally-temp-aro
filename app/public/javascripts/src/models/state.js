@@ -1911,8 +1911,8 @@ class State {
       clearWormholeFuseDefinitions: () => dispatch(NetworkAnalysisActions.clearWormholeFuseDefinitions()),
       setWormholeFuseDefinition: (spatialEdgeType, wormholeFusionTypeId) => dispatch(NetworkAnalysisActions.setWormholeFuseDefinition(spatialEdgeType, wormholeFusionTypeId)),
       setShowLocationLabels: showLocationLabels => dispatch(ViewSettingsActions.setShowLocationLabels(showLocationLabels)),
-      postNotification: (notification, autoExpire) => NotificationInterface.postNotification(dispatch, notification, autoExpire), // you'll not this one looks a bit different, because we need a return val of the note ID we use an interface that wraps the action creator and the dispatch is done there
-      updateNotification: (noteId, notification, autoExpire) => NotificationInterface.updateNotification(dispatch, noteId, notification, autoExpire),
+      postNotification: (notification, autoExpire, type) => NotificationInterface.postNotification(dispatch, notification, autoExpire, type), // you'll not this one looks a bit different, because we need a return val of the note ID we use an interface that wraps the action creator and the dispatch is done there
+      updateNotification: (noteId, notification, autoExpire, type) => NotificationInterface.updateNotification(dispatch, noteId, notification, autoExpire, type),
       removeNotification: (noteId, autoExpire) => NotificationInterface.removeNotification(dispatch, noteId, autoExpire)
     }
   }

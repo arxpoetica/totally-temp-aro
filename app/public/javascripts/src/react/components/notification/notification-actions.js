@@ -1,16 +1,16 @@
 import Actions from '../../common/actions'
 
-function postNotification (noteId, notification) {
+function postNotification (noteId, notification, type) {
   return {
     type: Actions.NOTIFICATION_POST,
-    payload: { noteId, notification }
+    payload: { noteId, notification, type }
   }
 }
 
-function updateNotification (noteId, notification) {
+function updateNotification (noteId, notification, type) {
   return {
     type: Actions.NOTIFICATION_UPDATE,
-    payload: { noteId, notification }
+    payload: { noteId, notification, type }
   }
 }
 
