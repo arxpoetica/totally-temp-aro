@@ -262,7 +262,7 @@ let mapSplit = {
           <!-- ng-if is important here because the plan settings components implement $onDestroy() to show a messagebox
               when destroyed to ask if settings should be saved -->
           <view-mode ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW || $ctrl.rSelectedDisplayMode === 'VIEW'"></view-mode>
-          <analysis-mode ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS && $ctrl.state.plan.planType != 'RING' && $ctrl.rSelectedDisplayMode !== 'VIEW'" && $ctrl.rPlan.planType != 'RING'></analysis-mode>
+          <r-analysis-mode ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS && $ctrl.state.plan.planType != 'RING' && $ctrl.rSelectedDisplayMode !== 'VIEW'" && $ctrl.rPlan.planType != 'RING'"></r-analysis-mode>
           <ring-editor ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.EDIT_RINGS && $ctrl.rSelectedDisplayMode !== 'VIEW'"></ring-editor>
           <r-plan-settings ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.PLAN_SETTINGS && $ctrl.rSelectedDisplayMode !== 'VIEW'"></r-plan-settings>
           <plan-editor-container ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.EDIT_PLAN && $ctrl.rSelectedDisplayMode !== 'VIEW'">

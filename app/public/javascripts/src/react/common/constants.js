@@ -9,5 +9,15 @@ export default Object.freeze({
   RING_OPTIONS_BASIC_FORM: 'ringOptionsBasic',
   RING_OPTIONS_CONNECTIVITY_DEFINITION: 'ringOptionsConnectivityDefinition',
   NETWORK_OPTIMIZATION_INPUT_FORM: 'NetworkOptimizationInputForm',
-  LAT_LONG_DISPLAY_PRECISION: 5 // Number of decimal places to show
+  LAT_LONG_DISPLAY_PRECISION: 5, // Number of decimal places to show
+
+  // Plan states
+  PLAN_STATE: Object.freeze({
+    INITIALIZED: 'INITIALIZED',
+    START_STATE: 'START_STATE',
+    STARTED: 'STARTED',
+    COMPLETED: 'COMPLETED',
+    FAILED: 'FAILED',
+    CANCELED: 'CANCELED'
+  })
 })
