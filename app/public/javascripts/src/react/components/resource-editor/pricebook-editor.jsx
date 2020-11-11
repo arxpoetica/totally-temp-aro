@@ -218,7 +218,7 @@ export class PriceBookEditor extends Component {
                                   <div style={{paddingLeft: '20px', width: '100%'}}>
                                     <table className="table table-bordered" style={{marginBottom: '0px'}}>
                                       {/* Loop through all sub-items in this item */}
-                                      {definitionItem.subItems && definitionItem.subItems.length > 0 && definitionItem.subItems.map((subItem, subKey) => { 
+                                      {definitionItem.subItems.map((subItem, subKey) => { 
                                         return (
                                           <tr key={subKey}>
                                             {/* START TD block for sub-items with detailType === 'reference' */}
