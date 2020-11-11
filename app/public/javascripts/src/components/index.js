@@ -86,7 +86,7 @@ import boundaryPropertiesEditor from './sidebar/plan-editor/boundary-properties-
 import planSummary from './sidebar/plan-editor/plan-summary'
 import serviceLayerEditor from './sidebar/plan-editor/service-layer-editor'
 import conicTileSystemUploader from './sidebar/plan-settings/plan-data-selection/conic-tile-system-uploader'
-import globalDataSourceUploadModal from './sidebar/plan-settings/plan-data-selection/data-source-upload-modal'
+//import globalDataSourceUploadModal from './sidebar/plan-settings/plan-data-selection/data-source-upload-modal'
 import projectSettingsModal from './sidebar/plan-settings/plan-project-configuration/project-settings-modal'
 import planDataSelection from './sidebar/plan-settings/plan-data-selection/plan-data-selection'
 import planProjectConfiguration from './sidebar/plan-settings/plan-project-configuration/plan-project-configuration'
@@ -120,7 +120,6 @@ import networkPlanModal from './header/network-plan-modal'
 import planInputsModal from './header/plan-inputs-modal'
 import networkPlanManage from './header/network-plan-manage'
 import networkPlan from './header/network-plan'
-// import uiNotification from './footer/ui-notification'
 import fullScreenContainer from './full-screen/full-screen-container'
 import manageUsers from './global-settings/manage-users'
 import manageGroups from './global-settings/manage-groups'
@@ -192,7 +191,6 @@ app.component('boundaryDetail', boundaryDetail)
   .component('serviceLayerEditor', serviceLayerEditor)
   .component('draggableButton', draggableButton)
   .component('conicTileSystemUploader', conicTileSystemUploader)
-  .component('globalDataSourceUploadModal', globalDataSourceUploadModal)
   .component('projectSettingsModal', projectSettingsModal)
   .component('planDataSelection', planDataSelection)
   .component('planProjectConfiguration', planProjectConfiguration)
