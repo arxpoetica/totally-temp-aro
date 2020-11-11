@@ -367,7 +367,7 @@ import AroHttp from '../../common/aro-http'
             subItems: [],
             tagMapping: definitionItem.tagMapping
           }
-          if(definitionItem.subItem) {
+          if(definitionItem.subItems) {
             definitionItem.subItems.forEach((subItem) => {
               var subItemToPush = {
                 id: subItem.id,
