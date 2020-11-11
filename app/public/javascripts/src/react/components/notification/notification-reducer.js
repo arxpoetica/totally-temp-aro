@@ -2,20 +2,7 @@ import Actions from '../../common/actions'
 import NotificationTypes from './notification-types'
 
 const defaultState = {
-  notifications: {
-    '1': {
-      noteId: '1',
-      notification: 'this is a test',
-      order: 0,
-      type: 'USER_EXPIRE'
-    },
-    '2': {
-      noteId: '2',
-      notification: 'this is a test2 with a longer text',
-      order: 1,
-      type: 'USER_EXPIRE'
-    }
-  },
+  notifications: {},
   lastIndex: 0
 }
 
