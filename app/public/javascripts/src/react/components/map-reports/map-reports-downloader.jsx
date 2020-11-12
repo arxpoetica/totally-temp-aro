@@ -88,6 +88,7 @@ export class MapReportsDownloader extends Component {
         pageDefinition.waitSecondsPerPage = this.props.waitSecondsPerPage // The user has asked to manually wait for each page
       }
       pageDefinition.showLocationLabels = this.props.showLocationLabels
+      pageDefinition.showEquipmentLabels = this.props.showEquipmentLabels
       // From maplayers, get the layers that we want to display in the report. Also send the location filters.
       pageDefinition.locationFilters = this.props.mapLayers.locationFilters
       pageDefinition.visibleLayers = this.props.mapLayers.location.filter(layer => layer.checked).map(layer => layer.key).toJS();
@@ -159,7 +160,8 @@ const mapStateToProps = state => ({
   editingPageUuid: state.mapReports.editingPageUuid,
   waitSecondsPerPage: state.mapReports.waitSecondsPerPage,
   manualWait: state.mapReports.manualWait,
-  showLocationLabels: state.viewSettings.showLocationLabels
+  showLocationLabels: state.viewSettings.showLocationLabels,
+  showEquipmentLabels: state.toolbar.showEquipmentLabels
 })
 
 const mapDispatchToProps = dispatch => ({
