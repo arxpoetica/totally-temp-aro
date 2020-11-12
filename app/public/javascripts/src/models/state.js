@@ -26,6 +26,7 @@ import NetworkOptimizationActions from '../react/components/optimization/network
 import ViewSettingsActions from '../react/components/view-settings/view-settings-actions'
 import Tools from '../react/components/tool/tools'
 import ToolBarActions from '../react/components/header/tool-bar-actions'
+import { hsvToRgb } from '../react/common/view-utils'
 
 
 const networkAnalysisConstraintsSelector = formValueSelector(ReactComponentConstants.NETWORK_ANALYSIS_CONSTRAINTS)
@@ -477,35 +478,6 @@ class State {
       }
     })
 
-    // Function to convert from hsv to rgb color values.
-    // https://stackoverflow.com/questions/17242144/javascript-convert-hsb-hsv-color-to-rgb-accurately
-    var hsvToRgb = (h, s, v) => {
-      var r, g, b, i, f, p, q, t
-      i = Math.floor(h * 6)
-      f = h * 6 - i
-      p = v * (1 - s)
-      q = v * (1 - f * s)
-      t = v * (1 - (1 - f) * s)
-      switch (i % 6) {
-        case 0: r = v, g = t, b = p; break
-        case 1: r = q, g = v, b = p; break
-        case 2: r = p, g = v, b = t; break
-        case 3: r = p, g = q, b = v; break
-        case 4: r = t, g = p, b = v; break
-        case 5: r = v, g = p, b = q; break
-      }
-      var rgb = [r, g, b]
-      var color = '#'
-      rgb.forEach((colorValue) => {
-        var colorValueHex = Math.round(colorValue * 255).toString(16)
-        if (colorValueHex.length === 1) {
-          colorValueHex = '0' + colorValueHex
-        }
-        color += colorValueHex
-      })
-      return color
-    }
-
     // We are going to use the golden ratio method from http://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
     // (Furthermore, it is a property of the golden ratio, Φ, that each subsequent hash value divides the interval into which it falls according to the golden ratio!)
     var golden_ratio_conjugate = 0.618033988749895
@@ -515,8 +487,8 @@ class State {
       hue %= 1
       // We are changing the hue while keeping saturation/value the same. Also the fill colors are lighter than stroke colors.
       return {
-        strokeStyle: service.StateViewMode.hsvToRgb(hue, 0.5, 0.5),
-        fillStyle: service.StateViewMode.hsvToRgb(hue, 0.8, 0.5)
+        strokeStyle: hsvToRgb(hue, 0.5, 0.5),
+        fillStyle: hsvToRgb(hue, 0.8, 0.5)
       }
     }
 

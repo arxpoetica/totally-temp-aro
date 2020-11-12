@@ -1,6 +1,7 @@
 import { List } from 'immutable'
 import Actions from '../../common/actions'
 import AroHttp from '../../common/aro-http'
+import { hsvToRgb } from '../../common/view-utils'
 
 // Sets the visibility for a specified layer
 // ToDo: LOCATIONS refactor callers of this to send layer Key instead of whole layer
@@ -134,7 +135,14 @@ function setBoundaryLayers (boundaryLayers) {
       results = results.filter(result => result.data.length).map(result => result.data)
       const newBoundaryLayers = layersClone.map(layer => {
         const categories = results.find(categories => categories[0].analysisLayerId === layer.analysisLayerId)
-        layer.categories = categories || []
+        layer.categories = (categories || []).map(category => {
+          category.mappedTags.tags = category.mappedTags.tags.map(tag => {
+            tag.colourHash = hsvToRgb(tag.colourHue, 1, 1)
+            return tag
+          })
+          return category
+        })
+        layer.selectedCategory = null
         return layer
       })
 

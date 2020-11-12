@@ -1,32 +1,6 @@
+import { hsvToRgb } from '../react/common/view-utils'
+
 class StateViewMode {
-  // Function to convert from hsv to rgb color values.
-  // https://stackoverflow.com/questions/17242144/javascript-convert-hsb-hsv-color-to-rgb-accurately
-  static hsvToRgb (h, s, v) {
-    var r, g, b, i, f, p, q, t
-    i = Math.floor(h * 6)
-    f = h * 6 - i
-    p = v * (1 - s)
-    q = v * (1 - f * s)
-    t = v * (1 - (1 - f) * s)
-    switch (i % 6) {
-      case 0: r = v, g = t, b = p; break
-      case 1: r = q, g = v, b = p; break
-      case 2: r = p, g = v, b = t; break
-      case 3: r = p, g = q, b = v; break
-      case 4: r = t, g = p, b = v; break
-      case 5: r = v, g = p, b = q; break
-    }
-    var rgb = [r, g, b]
-    var color = '#'
-    rgb.forEach((colorValue) => {
-      var colorValueHex = Math.round(colorValue * 255).toString(16)
-      if (colorValueHex.length === 1) {
-        colorValueHex = '0' + colorValueHex
-      }
-      color += colorValueHex
-    })
-    return color
-  }
 
   // view mode click action
   static allowViewModeClickAction (state, rIsRulerEnabled) {
@@ -95,7 +69,7 @@ class StateViewMode {
   }
 
   static getTagColour (tag) {
-    return StateViewMode.hsvToRgb(tag.colourHue, config.hsv_defaults.saturation, config.hsv_defaults.value)
+    return hsvToRgb(tag.colourHue, config.hsv_defaults.saturation, config.hsv_defaults.value)
   }
 
   // View mode search
