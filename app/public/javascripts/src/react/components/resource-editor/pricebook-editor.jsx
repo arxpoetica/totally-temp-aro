@@ -27,13 +27,27 @@ export class PriceBookEditor extends Component {
     this.props.setModalTitle(this.props.resourceManagerName)
   }
 
-  componentWillReceiveProps(nextProps){
-    if(this.props != nextProps) {
-      if(nextProps.priceBookDefinition !== undefined) {
-        this.setState({structuredPriceBookDefinitions: nextProps.priceBookDefinition.structuredPriceBookDefinitions,
-          constructionRatios: nextProps.constructionRatios,
-          setOfSelectedEquipmentTags: nextProps.priceBookDefinition.setOfSelectedEquipmentTags,
-          selectedEquipmentTags: nextProps.priceBookDefinition.selectedEquipmentTags})
+  // componentWillReceiveProps(nextProps){
+  //   if(this.props != nextProps) {
+  //     if(nextProps.priceBookDefinition !== undefined) {
+  //       this.setState({structuredPriceBookDefinitions: nextProps.priceBookDefinition.structuredPriceBookDefinitions,
+  //         constructionRatios: nextProps.constructionRatios,
+  //         setOfSelectedEquipmentTags: nextProps.priceBookDefinition.setOfSelectedEquipmentTags,
+  //         selectedEquipmentTags: nextProps.priceBookDefinition.selectedEquipmentTags})
+  //     }
+  //   }
+  // }
+
+
+  // To set Props values to State if props get modified
+  // https://reactjs.org/docs/react-component.html#static-getderivedstatefromprops
+  static getDerivedStateFromProps(nextProps, state) {
+    if(nextProps.priceBookDefinition !== undefined) {
+      return {
+        structuredPriceBookDefinitions: nextProps.priceBookDefinition.structuredPriceBookDefinitions,
+        constructionRatios: nextProps.constructionRatios,
+        setOfSelectedEquipmentTags: nextProps.priceBookDefinition.setOfSelectedEquipmentTags,
+        selectedEquipmentTags: nextProps.priceBookDefinition.selectedEquipmentTags
       }
     }
   }
@@ -144,25 +158,23 @@ export class PriceBookEditor extends Component {
                           </td>
                         </tr>
                         {/* Display all rows EXCEPT installed fiber, that is calculated above */}
-                         {this.filteredItems = priceBookValue.items.map((definitionItem, definitionKey) => { 
-                            if(definitionItem.costAssignment !== undefined && definitionItem.cableConstructionType !== undefined){
-                              if(definitionItem.name !== 'install_estimated'){
-                                var constructionRatios = this.state.constructionRatios[this.state.priceBookForState].constructionRatios.cableConstructionRatios[definitionItem.cableConstructionType].ratio
-                                var percentageCost = (+constructionRatios) * 100.0
+                         {priceBookValue.items.map((definitionItem, definitionKey) => { 
+                            if(definitionItem.name !== 'install_estimated'){
+                              var constructionRatios = definitionItem.cableConstructionType !== undefined ? this.state.constructionRatios[this.state.priceBookForState].constructionRatios.cableConstructionRatios[definitionItem.cableConstructionType].ratio : ''
+                              var percentageCost = (+constructionRatios) * 100.0
 
-                                return (
-                                  <tr key={definitionKey}>
-                                    <td>{definitionItem.description}</td>
-                                    <td>
-                                      <input type="text" onChange={(e)=>this.handleFiberLabourChange(e, definitionKey, definitionItem.id)} value={definitionItem.costAssignment.cost} className="form-control form-control-sm"/>
-                                    </td>
-                                    <td>{definitionItem.unitOfMeasure}</td>
-                                    <td>
-                                      <input type="number" className="form-control form-control-sm" onChange={(e)=>this.handleFiberPercentageChange(e, definitionItem)} value={+percentageCost.toFixed(2)}/>
-                                    </td>
-                                  </tr>
-                                )
-                              }
+                              return (
+                                <tr key={definitionKey}>
+                                  <td>{definitionItem.description}</td>
+                                  <td>
+                                    <input type="text" onChange={(e)=>this.handleFiberLabourChange(e, definitionKey, definitionItem.id)} value={definitionItem.costAssignment !== undefined ? definitionItem.costAssignment.cost: 0} className="form-control form-control-sm"/>
+                                  </td>
+                                  <td>{definitionItem.unitOfMeasure}</td>
+                                  <td>
+                                    <input type="number" className="form-control form-control-sm" onChange={(e)=>this.handleFiberPercentageChange(e, definitionItem)} value={+percentageCost.toFixed(2)}/>
+                                  </td>
+                                </tr>
+                              )
                             }
                           })
                         }
@@ -197,13 +209,15 @@ export class PriceBookEditor extends Component {
                                   {definitionItem.costAssignment &&
                                     <div className="row" style={{width: '100%', margin: '0px'}}>
                                       <table className="table table-bordered" style={{marginBottom: '0px'}}>
-                                        <tr>
-                                          <td style={{verticalAlign: 'middle'}}>Cost:</td>
-                                          <td style={{width: '100px', borderRight: 'none'}}>
-                                            <input type="text" onChange={(e)=>this.handleCostChange(e, definitionKey, definitionItem.id)} value={definitionItem.costAssignment.cost} className="form-control form-control-sm"/>
-                                          </td>
-                                          <td style={{verticalAlign: 'middle', borderLeft: 'none', width: '10px'}}>{definitionItem.unitOfMeasure}</td>
-                                        </tr>
+                                        <tbody>
+                                          <tr>
+                                            <td style={{verticalAlign: 'middle'}}>Cost:</td>
+                                            <td style={{width: '100px', borderRight: 'none'}}>
+                                              <input type="text" onChange={(e)=>this.handleCostChange(e, definitionKey, definitionItem.id)} value={definitionItem.costAssignment.cost} className="form-control form-control-sm"/>
+                                            </td>
+                                            <td style={{verticalAlign: 'middle', borderLeft: 'none', width: '10px'}}>{definitionItem.unitOfMeasure}</td>
+                                          </tr>
+                                        </tbody>
                                       </table>
                                   </div>
                                   }        
@@ -217,46 +231,48 @@ export class PriceBookEditor extends Component {
 
                                   <div style={{paddingLeft: '20px', width: '100%'}}>
                                     <table className="table table-bordered" style={{marginBottom: '0px'}}>
-                                      {/* Loop through all sub-items in this item */}
-                                      {definitionItem.subItems.map((subItem, subKey) => { 
-                                        return (
-                                          <tr key={subKey}>
-                                            {/* START TD block for sub-items with detailType === 'reference' */}
-                                            {subItem.detailType === 'reference' &&
-                                              <td style={{verticalAlign: 'middle'}}>{subItem.item.description}</td>
-                                            }
-                                            {subItem.detailType === 'reference' &&
-                                              <td style={{width: '100px', borderRight: 'none'}}>
-                                                <input type="text" onChange={(e)=>this.handleDetailAssignmentChange(e, definitionKey)}  value={subItem.detailAssignment.quantity} className="form-control form-control-sm"/>
-                                              </td>
-                                            }
-                                            {subItem.detailType === 'reference' &&
-                                              <td style={{verticalAlign: 'middle', borderLeft: 'none'}}>
-                                                {/* "UnitPerHour" becomes "Hours", etc. */}
-                                                {subItem.item.unitOfMeasure.replace('UnitPer', '') + 's'}
-                                              </td>
-                                            }
-                                            {/* END TD block for sub-items with detailType === 'reference' */}
+                                      <tbody>
+                                        {/* Loop through all sub-items in this item */}
+                                        {definitionItem.subItems.map((subItem, subKey) => { 
+                                          return (
+                                            <tr key={subKey}>
+                                              {/* START TD block for sub-items with detailType === 'reference' */}
+                                              {subItem.detailType === 'reference' &&
+                                                <td style={{verticalAlign: 'middle'}}>{subItem.item.description}</td>
+                                              }
+                                              {subItem.detailType === 'reference' &&
+                                                <td style={{width: '100px', borderRight: 'none'}}>
+                                                  <input type="text" onChange={(e)=>this.handleDetailAssignmentChange(e, definitionKey)}  value={subItem.detailAssignment !== undefined ? subItem.detailAssignment.quantity: 0} className="form-control form-control-sm"/>
+                                                </td>
+                                              }
+                                              {subItem.detailType === 'reference' &&
+                                                <td style={{verticalAlign: 'middle', borderLeft: 'none'}}>
+                                                  {/* "UnitPerHour" becomes "Hours", etc. */}
+                                                  {subItem.item.unitOfMeasure.replace('UnitPer', '') + 's'}
+                                                </td>
+                                              }
+                                              {/* END TD block for sub-items with detailType === 'reference' */}
 
-                                            {/* START TD block for sub-items with detailType === 'value' */}
-                                            {subItem.detailType === 'value' &&
-                                              <td style={{verticalAlign: 'middle'}}>{subItem.item.description}</td>
-                                            }
-                                            {subItem.detailType === 'value' &&
-                                              <td style={{width: '100px', borderRight: 'none'}}>
-                                                <input type="text" onChange={(e)=>this.handleCostAssignmentChange(e, definitionKey, subItem.id)} value={subItem.costAssignment.cost} className="form-control form-control-sm"/>
-                                              </td>
-                                            }
-                                            {subItem.detailType === 'value' &&
-                                              <td style={{verticalAlign: 'middle', borderLeft: 'none'}}>
-                                                {subItem.item.unitOfMeasure}
-                                              </td>
-                                            }
-                                            {/* END TD block for sub-items with detailType === 'value' */}
-                                          </tr>
-                                        )
-                                      })
-                                    }
+                                              {/* START TD block for sub-items with detailType === 'value' */}
+                                              {subItem.detailType === 'value' &&
+                                                <td style={{verticalAlign: 'middle'}}>{subItem.item.description}</td>
+                                              }
+                                              {subItem.detailType === 'value' &&
+                                                <td style={{width: '100px', borderRight: 'none'}}>
+                                                  <input type="text" onChange={(e)=>this.handleCostAssignmentChange(e, definitionKey, subItem.id)} value={subItem.costAssignment !== undefined ? subItem.costAssignment.cost : 0} className="form-control form-control-sm"/>
+                                                </td>
+                                              }
+                                              {subItem.detailType === 'value' &&
+                                                <td style={{verticalAlign: 'middle', borderLeft: 'none'}}>
+                                                  {subItem.item.unitOfMeasure}
+                                                </td>
+                                              }
+                                              {/* END TD block for sub-items with detailType === 'value' */}
+                                            </tr>
+                                          )
+                                        })
+                                      }
+                                      </tbody>
                                     </table>
                                   </div>
                                 </div>
@@ -394,7 +410,7 @@ export class PriceBookEditor extends Component {
     fiberLaborList.items.forEach(item => {
       const ratioItem = constructionRatios[selectedStateForStrategy].constructionRatios.cableConstructionRatios[item.cableConstructionType]
       const ratio = ratioItem ? (ratioItem.ratio || 0.0) : 0.0
-      const cost = item.costAssignment.cost || 0.0
+      const cost = item.costAssignment !== undefined ? item.costAssignment.cost : 0.0 || 0.0
       totalInstallCost += (cost * ratio)
     })
     return totalInstallCost
