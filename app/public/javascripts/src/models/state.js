@@ -323,10 +323,11 @@ class State {
       $timeout()
     }
 
+    // FIXME:
     service.censusCategories = new Rx.BehaviorSubject()
     service.reloadCensusCategories = (censusCategories) => {
       service.censusCategories.next(censusCategories)
-      service.requestMapLayerRefresh.next(null)
+      // service.requestMapLayerRefresh.next(null)
     }
 
     // The display modes for the application
@@ -1185,21 +1186,23 @@ class State {
 
     service.showDirectedCable = false
 
+    // FIXME:
     var loadCensusCatData = function () {
-      return $http.get(`/service/tag-mapping/meta-data/census_block/categories`)
-        .then((result) => {
-          let censusCats = {}
-          result.data.forEach((cat) => {
-            let tagsById = {}
-            cat.tags.forEach((tag) => {
-              tag.colourHash = service.StateViewMode.getTagColour(tag)
-              tagsById[tag.id + ''] = tag
-            })
-            cat.tags = tagsById
-            censusCats[cat.id + ''] = cat
-          })
-          service.reloadCensusCategories(censusCats)
-        })
+      // return $http.get(`/service/tag-mapping/meta-data/census_block/categories`)
+      //   .then((result) => {
+      //     let censusCats = {}
+      //     result.data.forEach((cat) => {
+      //       let tagsById = {}
+      //       cat.tags.forEach((tag) => {
+      //         tag.colourHash = service.StateViewMode.getTagColour(tag)
+      //         tagsById[tag.id + ''] = tag
+      //       })
+      //       cat.tags = tagsById
+      //       censusCats[cat.id + ''] = cat
+      //     })
+      //     service.reloadCensusCategories(censusCats)
+      //   })
+      service.reloadCensusCategories({})
     }
     loadCensusCatData()
 
@@ -1796,6 +1799,10 @@ class State {
       //     service.rActiveViewModePanel !== service.activeViewModePanel) {
       //   service.activeViewModePanel = service.rActiveViewModePanel
       // }
+      if (nextState.boundaries.map(boundary => boundary.categories).length) {
+        // FIXME: how to keep this from getting called multiple times on startup?
+        service.requestMapLayerRefresh.next(null)
+      }
     }
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(service.mergeToTarget.bind(service))
 
