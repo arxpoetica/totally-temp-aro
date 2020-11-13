@@ -57,7 +57,7 @@ aro_reportsrv_image_name = os.environ.get('ARO_REPORTSRV_IMAGE_NAME') or 'aro/ar
 
 aro_client = os.environ.get('ARO_CLIENT') or 'aro'
 env_slug = branch_name
-cloudformation_name_suffix = 'QA' if branch_name == 'master' else 'QA-' + branch_name
+cloudformation_name_suffix = 'QA' if branch_name == 'dev' else 'QA-' + branch_name
 
 db_user = os.environ.get('ARO_APP_DB_USER') or 'aro'
 db_pass = os.environ.get('ARO_APP_DB_PASS')
@@ -84,7 +84,7 @@ session = Session(region_name='us-east-1')
 
 cloudformation_stack_name = PROJECT_BASE_NAME + cloudformation_name_suffix
 
-if branch_name == 'master':
+if branch_name == 'dev':
     host_name = 'qa.aro.altvil.com'
 else:
     host_name = 'qa-' + branch_name + '.aro.altvil.com'
