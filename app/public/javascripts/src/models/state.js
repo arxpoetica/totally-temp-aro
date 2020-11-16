@@ -39,6 +39,7 @@ const getAllNetworkEquipmentLayers = reduxState => reduxState.mapLayers.networkE
 const getNetworkEquipmentLayersList = createSelector([getAllNetworkEquipmentLayers], (networkEquipmentLayers) => networkEquipmentLayers)
 
 const getAllBoundaryLayers = reduxState => reduxState.mapLayers.boundary
+// FIXME: change boundaries to an array so it doesn't change w/ each `.toJS()`
 const getBoundaryLayersList = createSelector([getAllBoundaryLayers], (boundaries) => boundaries.toJS())
 
 const getAllBoundaryTypesList = reduxState => reduxState.mapLayers.boundaryTypes
@@ -323,12 +324,10 @@ class State {
       $timeout()
     }
 
+    service.angBoundaries = new Rx.BehaviorSubject()
     // FIXME:
     service.censusCategories = new Rx.BehaviorSubject()
-    service.reloadCensusCategories = (censusCategories) => {
-      service.censusCategories.next(censusCategories)
-      // service.requestMapLayerRefresh.next(null)
-    }
+    service.censusCategories.next({})
 
     // The display modes for the application
     service.displayModes = Object.freeze({
@@ -1186,26 +1185,6 @@ class State {
 
     service.showDirectedCable = false
 
-    // FIXME:
-    var loadCensusCatData = function () {
-      // return $http.get(`/service/tag-mapping/meta-data/census_block/categories`)
-      //   .then((result) => {
-      //     let censusCats = {}
-      //     result.data.forEach((cat) => {
-      //       let tagsById = {}
-      //       cat.tags.forEach((tag) => {
-      //         tag.colourHash = service.StateViewMode.getTagColour(tag)
-      //         tagsById[tag.id + ''] = tag
-      //       })
-      //       cat.tags = tagsById
-      //       censusCats[cat.id + ''] = cat
-      //     })
-      //     service.reloadCensusCategories(censusCats)
-      //   })
-      service.reloadCensusCategories({})
-    }
-    loadCensusCatData()
-
     var loadBoundaryTypes = function () {
       return $http.get(`/service/boundary_type`)
         .then((result) => {
@@ -1218,7 +1197,6 @@ class State {
           service.setSelectedBoundaryType(selectedBoundaryType)
         })
     }
-
     loadBoundaryTypes()
 
     service.setBoundaryTypes = function (boundaryTypes) {
@@ -1772,16 +1750,20 @@ class State {
     service.unsubscribeLibraryEvent1 = SocketManager.subscribe('ETL_ADD', service.handleLibraryModifiedEvent.bind(service))
     service.unsubscribePlanRefresh = SocketManager.subscribe('PLAN_REFRESH', service.handlePlanRefreshRequest.bind(service))
 
-    service.mergeToTarget = (nextState, actions) => {
+    // let prior_boundaries = ''
+    let boundariesAreSet = false
+
+    // NOTE: this is willReceiveProps in Angular vernacular
+    service.mergeToTarget = (nextReduxState, actions) => {
       const currentActivePlanId = service.plan && service.plan.id
-      const newActivePlanId = nextState.plan && nextState.plan.id
+      const newActivePlanId = nextReduxState.plan && nextReduxState.plan.id
       const oldDataItems = service.dataItems
 
       // merge state and actions onto controller
-      Object.assign(service, nextState)
+      Object.assign(service, nextReduxState)
       Object.assign(service, actions)
 
-      if ((currentActivePlanId !== newActivePlanId) && (nextState.plan)) {
+      if ((currentActivePlanId !== newActivePlanId) && (nextReduxState.plan)) {
         // The active plan has changed. Note that we are comparing ids because a change in plan state also causes the plan object to update.
         service.onActivePlanChanged()
       }
@@ -1790,17 +1772,21 @@ class State {
       //  with reduxState.plan.selectedDisplayMode
       //  We are currently maintaining state in two places
       //  BUT as of now are only setting it in redux
-      if (nextState.rSelectedDisplayMode &&
+      if (nextReduxState.rSelectedDisplayMode &&
           service.rSelectedDisplayMode !== service.selectedDisplayMode.getValue()) {
         // console.log(service.rSelectedDisplayMode)
         service.selectedDisplayMode.next(service.rSelectedDisplayMode)
       }
-      // if (nextState.rActiveViewModePanel && 
+      // if (nextReduxState.rActiveViewModePanel && 
       //     service.rActiveViewModePanel !== service.activeViewModePanel) {
       //   service.activeViewModePanel = service.rActiveViewModePanel
       // }
-      if (nextState.boundaries.map(boundary => boundary.categories).length) {
-        // FIXME: how to keep this from getting called multiple times on startup?
+
+      if (
+        nextReduxState.boundaries
+        && JSON.stringify(nextReduxState.boundaries) !== JSON.stringify(service.angBoundaries.getValue())
+      ) {
+        service.angBoundaries.next(nextReduxState.boundaries)
         service.requestMapLayerRefresh.next(null)
       }
     }
@@ -1816,6 +1802,7 @@ class State {
       locationLayers: getLocationLayersList(reduxState),
       networkEquipmentLayers: getNetworkEquipmentLayersList(reduxState),
       boundaries: getBoundaryLayersList(reduxState),
+      boundariesTest: reduxState.mapLayers.boundary,
       mapRef: reduxState.map.googleMaps,
       reduxPlanTargets: reduxState.selection.planTargets,
       showSiteBoundary: reduxState.mapLayers.showSiteBoundary,
