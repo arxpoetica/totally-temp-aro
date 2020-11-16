@@ -314,7 +314,8 @@ class TileComponentController {
       .then((hitFeatures) => {
         this.state.mapFeaturesRightClickedEvent.next(hitFeatures)
       })
-
+      // Note: I just fixed a boolean logic typo having to do with rSelectedDisplayMode in getFilteredFeaturesUnderLatLng()
+      //  this also MAY be a typo, I think the "&&" may need to be "||"
       if ((this.state.selectedDisplayMode.getValue() != this.state.displayModes.VIEW && this.rSelectedDisplayMode != this.state.displayModes.VIEW)  ||
           (this.state.activeViewModePanel == this.state.viewModePanels.EDIT_SERVICE_LAYER && this.rActiveViewModePanel == this.state.viewModePanels.EDIT_SERVICE_LAYER)
       ) return
@@ -528,7 +529,6 @@ class TileComponentController {
         .then((hitFeatures) => {
           var canSelectLoc = false
           var canSelectSA = false
-
           if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.ANALYSIS || this.rSelectedDisplayMode === this.state.displayModes.ANALYSIS) {
             switch (this.activeSelectionModeId) {
               case SelectionModes.SELECTED_AREAS:
@@ -544,16 +544,15 @@ class TileComponentController {
           } else if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.VIEW || this.rSelectedDisplayMode === this.state.displayModes.VIEW) {
             canSelectSA = true
           }
-          
           // filter the lists 
           if (!canSelectLoc &&
-            this.state.selectedDisplayMode.getValue() !== this.state.displayModes.VIEW || this.rSelectedDisplayMode === this.state.displayModes.VIEW) {
+            (this.state.selectedDisplayMode.getValue() !== this.state.displayModes.VIEW || this.rSelectedDisplayMode !== this.state.displayModes.VIEW)) {
             hitFeatures.locations = []
           }
           if (!canSelectSA) {
             hitFeatures.serviceAreas = []
           }
-          if (this.state.selectedDisplayMode.getValue() !== this.state.displayModes.VIEW || this.rSelectedDisplayMode === this.state.displayModes.VIEW) {
+          if (this.state.selectedDisplayMode.getValue() !== this.state.displayModes.VIEW || this.rSelectedDisplayMode !== this.state.displayModes.VIEW) {
             hitFeatures.censusFeatures = []
           }
           
