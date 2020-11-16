@@ -1461,6 +1461,7 @@ class State {
                 if (reportOptions.showLocationLabels) {
                   service.setUseHeatMap(!reportOptions.showLocationLabels)
                 }
+                service.setShowEquipmentLabelsChanged(reportOptions.showEquipmentLabels)
 
                 service.setPlanRedux(plan)
                 const mapCenter = (initialState.reportPage && initialState.reportPage.mapCenter) || (initialState.reportOverview && initialState.reportOverview.mapCenter)
@@ -1892,6 +1893,7 @@ class State {
       clearWormholeFuseDefinitions: () => dispatch(NetworkAnalysisActions.clearWormholeFuseDefinitions()),
       setWormholeFuseDefinition: (spatialEdgeType, wormholeFusionTypeId) => dispatch(NetworkAnalysisActions.setWormholeFuseDefinition(spatialEdgeType, wormholeFusionTypeId)),
       setShowLocationLabels: showLocationLabels => dispatch(ViewSettingsActions.setShowLocationLabels(showLocationLabels)),
+      setShowEquipmentLabelsChanged: showEquipmentLabels => dispatch(ToolBarActions.setShowEquipmentLabelsChanged(showEquipmentLabels)),
       setAppConfiguration: appConfiguration => dispatch(ToolBarActions.setAppConfiguration(appConfiguration)),
       updateDefaultPlanCoordinates: coordinates => dispatch(PlanActions.updateDefaultPlanCoordinates(coordinates)),
       setSelectedHeatMapOption: selectedHeatMapOption => dispatch(ToolBarActions.setSelectedHeatMapOption(selectedHeatMapOption)),
