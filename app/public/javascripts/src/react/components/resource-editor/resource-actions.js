@@ -2,6 +2,9 @@
 import Actions from '../../common/actions'
 import AroHttp from '../../common/aro-http'
 import { batch } from 'react-redux'
+// ToDo: probably shouldn't be importing PlanActions into another action creator
+//  BUT resource managers are listed in two places, DRY this up!
+import PlanActions from '../plan/plan-actions'
 
   function getResourceTypes () {
     return dispatch => {
@@ -536,6 +539,8 @@ import { batch } from 'react-redux'
         batch(() => {
           dispatch(setIsResourceEditor(true))
           dispatch(getResourceManagers('rate_reach_manager'))
+          // ToDo: resource managers are listed in two places, DRY that up!
+          dispatch(PlanActions.loadPlanResourceSelectionFromServer())
         })
       })
       .catch((err) => console.error(err))

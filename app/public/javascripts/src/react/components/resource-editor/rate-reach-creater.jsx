@@ -20,7 +20,9 @@ export class RateReachManager extends Component {
   }
 
   componentDidMount () {
-    this.props.reloadRateReachManagerConfiguration(this.props.selectedResourceForClone.id, this.props.loggedInUser)
+    //if (this.props.selectedResourceForClone && this.props.selectedResourceForClone.id) {
+      this.props.reloadRateReachManagerConfiguration(this.props.selectedResourceForClone.id, this.props.loggedInUser)
+    //}
     this.props.setModalTitle('Create Rate Reach Manager')
   }
 
