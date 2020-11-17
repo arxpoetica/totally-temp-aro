@@ -27,18 +27,6 @@ export class PriceBookEditor extends Component {
     this.props.setModalTitle(this.props.resourceManagerName)
   }
 
-  // componentWillReceiveProps(nextProps){
-  //   if(this.props != nextProps) {
-  //     if(nextProps.priceBookDefinition !== undefined) {
-  //       this.setState({structuredPriceBookDefinitions: nextProps.priceBookDefinition.structuredPriceBookDefinitions,
-  //         constructionRatios: nextProps.constructionRatios,
-  //         setOfSelectedEquipmentTags: nextProps.priceBookDefinition.setOfSelectedEquipmentTags,
-  //         selectedEquipmentTags: nextProps.priceBookDefinition.selectedEquipmentTags})
-  //     }
-  //   }
-  // }
-
-
   // To set Props values to State if props get modified
   // https://reactjs.org/docs/react-component.html#static-getderivedstatefromprops
   static getDerivedStateFromProps(nextProps, state) {
@@ -49,7 +37,7 @@ export class PriceBookEditor extends Component {
         setOfSelectedEquipmentTags: nextProps.priceBookDefinition.setOfSelectedEquipmentTags,
         selectedEquipmentTags: nextProps.priceBookDefinition.selectedEquipmentTags
       }
-    }
+    } else { return null }
   }
   
   render () {
@@ -213,7 +201,7 @@ export class PriceBookEditor extends Component {
                                           <tr>
                                             <td style={{verticalAlign: 'middle'}}>Cost:</td>
                                             <td style={{width: '100px', borderRight: 'none'}}>
-                                              <input type="text" onChange={(e)=>this.handleCostChange(e, definitionKey, definitionItem.id)} value={definitionItem.costAssignment.cost} className="form-control form-control-sm"/>
+                                              <input type="text" onChange={(e)=>this.handleCostChange(e, definitionKey, definitionItem.id)} value={definitionItem.costAssignment !== undefined ? definitionItem.costAssignment.cost : 0} className="form-control form-control-sm"/>
                                             </td>
                                             <td style={{verticalAlign: 'middle', borderLeft: 'none', width: '10px'}}>{definitionItem.unitOfMeasure}</td>
                                           </tr>
