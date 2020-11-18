@@ -124,6 +124,7 @@ import PlanActions from '../plan/plan-actions'
             dispatch(getResourceManagers(resourceType))
             if (result.data && result.data.resourceType === null) result.data.resourceType = resourceType
             dispatch(editSelectedManager(result.data))
+            dispatch(PlanActions.loadPlanResourceSelectionFromServer())
           })
         })
         .catch((err) => console.error(err))
@@ -236,6 +237,7 @@ import PlanActions from '../plan/plan-actions'
         batch(() => {
           dispatch(setIsResourceEditor(true))
           dispatch(getResourceManagers('price_book'))
+          dispatch(PlanActions.loadPlanResourceSelectionFromServer())
         })
       })
       .catch((err) => console.error(err))
