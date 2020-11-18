@@ -530,11 +530,13 @@ import PlanActions from '../plan/plan-actions'
         name: rateReachManager.name,
         description: rateReachManager.description
       })
+      /*
       .then(result => {
         createdRateReachManager = result.data
         return getDefaultConfiguration(loggedInUser, rateReachManager.category)
       })
       .then((defaultConfiguration) => AroHttp.put(`/service/rate-reach-matrix/resource/${createdRateReachManager.id}/config`, defaultConfiguration))
+      */
       .then(result => {
         batch(() => {
           dispatch(setIsResourceEditor(true))
