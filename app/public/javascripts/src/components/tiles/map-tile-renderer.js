@@ -641,7 +641,7 @@ class MapTileRenderer {
               }
               
             } else if ((this.state.showFiberSize || this.rShowFiberSize) && feature.properties._data_type === 'fiber' && (this.state.viewSetting.selectedFiberOption.id !== 1 || this.rViewSetting.selectedFiberOption.id !== 1)) {
-              var selectedFiberOption = this.state.viewSetting.selectedFiberOption
+              var selectedFiberOption = this.rViewSetting.selectedFiberOption
               var viewOption = selectedFiberOption.pixelWidth
               drawingStyles = {
                 lineWidth: TileUtilities.getFiberStrandSize(selectedFiberOption.field, feature.properties.fiber_strands, viewOption.min, viewOption.max, viewOption.divisor, viewOption.atomicDivisor),
