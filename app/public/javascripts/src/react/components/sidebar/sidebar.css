@@ -1,0 +1,14 @@
+/* Aro-debug */
+.aro-debug-container {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding-top: 10px;
+}
+
+/* View Setting */
+.view-settings {
+  margin-top: 10px;
+}

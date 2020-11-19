@@ -1,4 +1,4 @@
-import { Subject, BehaviorSubject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 var viewSetting = {
   selectedFiberOption: null,
@@ -29,11 +29,11 @@ var heatmapOptions = {
   selectedHeatmapOption: viewSetting.heatmapOptions[0] // 0, 2
 }
 
-const viewSettingsChangedSubject = new BehaviorSubject();
-const requestMapLayerRefreshSubject = new BehaviorSubject();
-const mapTileOptionsSubject = new BehaviorSubject(heatmapOptions);
+let viewSettingsChangedSubject = new BehaviorSubject();
+let requestMapLayerRefreshSubject = new BehaviorSubject();
+let mapTileOptionsSubject = new BehaviorSubject(heatmapOptions);
 
-class rState {
+class rxState {
 
   constructor () {
     var service = {}
@@ -59,4 +59,4 @@ class rState {
 
 }
 
-export default rState;
+export default rxState;

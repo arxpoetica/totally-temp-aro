@@ -8,8 +8,10 @@
 .tool-bar .separator {
   border-left: #eee 1px dotted;
 }
+
+/* Need '!important' from tool-bar.jsx dropdown icon */
 .tool-bar .btn:hover {
-  background-color: #eee;
+  background-color: #eee !important; 
   color: #1f7de6;
 }
 .tool-bar .btn-selected {

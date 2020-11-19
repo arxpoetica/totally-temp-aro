@@ -18,7 +18,7 @@ const getOrderedLocationFilters = createSelector([getAllLocationFilters], locati
 
 
 class LocationsController {
-  constructor ($rootScope, $location, $timeout, $ngRedux, map_tools, state, rState) {
+  constructor ($rootScope, $location, $timeout, $ngRedux, map_tools, state, rxState) {
     this.$location = $location
     this.$timeout = $timeout
     this.map_tools = map_tools
@@ -56,7 +56,7 @@ class LocationsController {
       .subscribe((newValue) => this.updateMapLayers())
       
     // Update map layers when the heatmap options change using react rxjs
-    rState.mapTileOptions.getMessage().subscribe((mapTileOptions) => {
+    rxState.mapTileOptions.getMessage().subscribe((mapTileOptions) => {
       this.updateMapLayers()
     })       
 
@@ -371,7 +371,7 @@ class LocationsController {
   }
 }
 
-LocationsController.$inject = ['$rootScope', '$location', '$timeout', '$ngRedux', 'map_tools', 'state', 'rState']
+LocationsController.$inject = ['$rootScope', '$location', '$timeout', '$ngRedux', 'map_tools', 'state', 'rxState']
 
 let locations = {
   templateUrl: '/components/views/locations.html',

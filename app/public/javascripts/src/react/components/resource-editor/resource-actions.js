@@ -1092,6 +1092,31 @@ import PlanActions from '../plan/plan-actions'
     }
   }
 
+  function convertlengthUnitsToMeters (input) {
+    return (dispatch, getState) => {
+      // To get length_units_to_meters from redux state
+      const state = getState()
+      var lengthUnitsToMeters = state.toolbar.appConfiguration.units.length_units_to_meters
+      // Convert user-input value (in user units) to meters
+      input = input || '0'
+      return (+input) * lengthUnitsToMeters
+    }
+  }  
+
+  function convertMetersToLengthUnits (input) {
+    return (dispatch, getState) => {
+      // To get meters_to_length_units from redux state
+      const state = getState()
+      var metersToLengthUnits = state.toolbar.appConfiguration.units.meters_to_length_units
+      // Convert model value (always in meters) to user units before displaying it to the user
+      input = input || '0'
+      var inputTransformed = (+input) * metersToLengthUnits
+
+      // toFixed() converts it to a string, and + converts it back to a number before returning
+      return +inputTransformed.toFixed(2)
+    }
+  }
+
   export default {
     getResourceTypes,
     getResourceManagers,
@@ -1125,6 +1150,8 @@ import PlanActions from '../plan/plan-actions'
     reloadRateReachManagerConfiguration,
     saveRateReachConfig,
     setModalTitle,
-    setIsRrmManager
+    setIsRrmManager,
+    convertMetersToLengthUnits,
+    convertlengthUnitsToMeters
   }
   
