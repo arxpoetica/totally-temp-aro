@@ -197,13 +197,15 @@ export class PriceBookEditor extends Component {
                                   {definitionItem.costAssignment &&
                                     <div className="row" style={{width: '100%', margin: '0px'}}>
                                       <table className="table table-bordered" style={{marginBottom: '0px'}}>
-                                        <tr>
-                                          <td style={{verticalAlign: 'middle'}}>Cost:</td>
-                                          <td style={{width: '100px', borderRight: 'none'}}>
-                                            <input type="text" onChange={(e)=>this.handleCostChange(e, definitionKey, definitionItem.id)} value={definitionItem.costAssignment.cost} className="form-control form-control-sm"/>
-                                          </td>
-                                          <td style={{verticalAlign: 'middle', borderLeft: 'none', width: '10px'}}>{definitionItem.unitOfMeasure}</td>
-                                        </tr>
+                                        <tbody>
+                                          <tr>
+                                            <td style={{verticalAlign: 'middle'}}>Cost:</td>
+                                            <td style={{width: '100px', borderRight: 'none'}}>
+                                              <input type="text" onChange={(e)=>this.handleCostChange(e, definitionKey, definitionItem.id)} value={definitionItem.costAssignment.cost} className="form-control form-control-sm"/>
+                                            </td>
+                                            <td style={{verticalAlign: 'middle', borderLeft: 'none', width: '10px'}}>{definitionItem.unitOfMeasure}</td>
+                                          </tr>
+                                        </tbody>
                                       </table>
                                   </div>
                                   }        
@@ -217,6 +219,7 @@ export class PriceBookEditor extends Component {
 
                                   <div style={{paddingLeft: '20px', width: '100%'}}>
                                     <table className="table table-bordered" style={{marginBottom: '0px'}}>
+                                      <tbody>
                                       {/* Loop through all sub-items in this item */}
                                       {definitionItem.subItems.map((subItem, subKey) => { 
                                         return (
@@ -257,6 +260,7 @@ export class PriceBookEditor extends Component {
                                         )
                                       })
                                     }
+                                      </tbody>
                                     </table>
                                   </div>
                                 </div>
