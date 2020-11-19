@@ -532,13 +532,15 @@ import PlanActions from '../plan/plan-actions'
         name: rateReachManager.name,
         description: rateReachManager.description
       })
-      /*
       .then(result => {
-        createdRateReachManager = result.data
-        return getDefaultConfiguration(loggedInUser, rateReachManager.category)
+        if (sourceRateReachManagerId) {
+          return result
+        } else {
+          createdRateReachManager = result.data
+          return getDefaultConfiguration(loggedInUser, rateReachManager.category)
+          .then(defaultConfiguration => AroHttp.put(`/service/rate-reach-matrix/resource/${createdRateReachManager.id}/config`, defaultConfiguration))
+        }
       })
-      .then((defaultConfiguration) => AroHttp.put(`/service/rate-reach-matrix/resource/${createdRateReachManager.id}/config`, defaultConfiguration))
-      */
       .then(result => {
         batch(() => {
           dispatch(setIsResourceEditor(true))
@@ -672,7 +674,6 @@ import PlanActions from '../plan/plan-actions'
   // Competition System
 
   function getRegions () {
-    // ToDo: move this to state.js once we know the return won't change with plan selection 
     return dispatch => {
       AroHttp.get('/service/odata/stateEntity?$select=name,stusps,gid,statefp&$orderby=name')
       .then(result => dispatch({
