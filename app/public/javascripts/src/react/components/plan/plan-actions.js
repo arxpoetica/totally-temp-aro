@@ -233,9 +233,11 @@ function clearAllSelectedSA (plan, dataItems, selectedServiceAreas) {
 // Resource Selection
 
 function loadPlanResourceSelectionFromServer (plan) {
-  return dispatch => {
+  return (dispatch, getState) => {
+    const state = getState()
     if (!plan) {
-      return Promise.resolve()
+      plan = state.plan.activePlan
+      if (!plan.id) return Promise.resolve()
     }
     var currentPlan = plan
     return Promise.all([
