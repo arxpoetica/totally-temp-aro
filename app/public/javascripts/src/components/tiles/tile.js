@@ -47,7 +47,7 @@ class TileComponentController {
   // fillStyle: (Optional) For polygon features, this is the fill color
   // opacity: (Optional, default 1.0) This is the maximum opacity of anything drawn on the map layer. Aggregate layers will have features of varying opacity, but none exceeding this value
 
-  constructor ($window, $document, $timeout, $ngRedux, state, tileDataService, contextMenuService, Utils, $scope, rState) {
+  constructor ($window, $document, $timeout, $ngRedux, state, tileDataService, contextMenuService, Utils, $scope, rxState) {
     this.layerIdToMapTilesIndex = {}
     this.mapRef = null // Will be set in $document.ready()
     this.$window = $window
@@ -89,7 +89,7 @@ class TileComponentController {
     })
 
     // Subscribe to changes in the map tile options
-    rState.mapTileOptions.getMessage().subscribe((mapTileOptions) => {
+    rxState.mapTileOptions.getMessage().subscribe((mapTileOptions) => {
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
         this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setMapTileOptions(mapTileOptions)
       }
@@ -101,7 +101,7 @@ class TileComponentController {
       this.refreshMapTiles(tilesToRefresh)
     })
 
-    rState.requestMapLayerRefresh.getMessage().subscribe((tilesToRefresh) => {
+    rxState.requestMapLayerRefresh.getMessage().subscribe((tilesToRefresh) => {
       this.tileDataService.markHtmlCacheDirty(tilesToRefresh)
       this.refreshMapTiles(tilesToRefresh)
     });
@@ -289,7 +289,8 @@ class TileComponentController {
       this.state,
       MapUtilities.getPixelCoordinatesWithinTile.bind(this),
       this.transactionFeatureIds,
-      this.rShowFiberSize
+      this.rShowFiberSize,
+      this.rViewSetting
     ))
     this.OVERLAY_MAP_INDEX = this.mapRef.overlayMapTypes.getLength() - 1
     //this.state.isShiftPressed = false // make this per-overlay or move it somewhere more global
@@ -710,9 +711,10 @@ class TileComponentController {
       networkAnalysisType: reduxState.optimization.networkOptimization.optimizationInputs.analysis_type,
       zoom: reduxState.map.zoom,
       mapCenter: reduxState.map.mapCenter,
-      rShowFiberSize: reduxState.toolbar.showFiberSize,
+      rShowFiberSize: reduxState.toolbar.showFiberSize, // Set to map-tile-render.js from tool-bar.jsx
+      rViewSetting: reduxState.toolbar.viewSetting, // Set to map-tile-render.js from aro-debug.jsx
       rSelectedDisplayMode: reduxState.toolbar.rSelectedDisplayMode,
-      rActiveViewModePanel: reduxState.toolbar.rActiveViewModePanel,
+      rActiveViewModePanel: reduxState.toolbar.rActiveViewModePanel
     }
   }
 
@@ -727,6 +729,9 @@ class TileComponentController {
     const oldPlanTargets = this.selection && this.selection.planTargets
     const prevStateMapLayers = { ...this.stateMapLayers }
     const currentTransactionFeatureIds = this.transactionFeatureIds
+    const rShowFiberSize = this.rShowFiberSize
+    const rViewSetting = this.rViewSetting
+
     var needRefresh = false
     var doConduitUpdate = this.doesConduitNeedUpdate(prevStateMapLayers, nextState.stateMapLayers)
     needRefresh = doConduitUpdate
@@ -749,6 +754,19 @@ class TileComponentController {
 
     if (currentTransactionFeatureIds !== nextState.transactionFeatureIds) {
       this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setTransactionFeatureIds(nextState.transactionFeatureIds)
+      needRefresh = true
+    }
+
+    // Set the current state in rShowFiberSize
+    // If this is not set, the redux state does not change, it shows only the initial state, so current state is set in rShowFiberSize.
+    if (rShowFiberSize !== nextState.rShowFiberSize) {
+      this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setReactShowFiberSize(nextState.rShowFiberSize)
+      needRefresh = true
+    }
+
+    // Set the current state in rViewSetting
+    if (rViewSetting !== nextState.rViewSetting) {
+      this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setReactViewSetting(nextState.rViewSetting)
       needRefresh = true
     }
 
@@ -811,7 +829,7 @@ class TileComponentController {
   
 }
 
-TileComponentController.$inject = ['$window', '$document', '$timeout', '$ngRedux', 'state','tileDataService', 'contextMenuService', 'Utils', '$scope', 'rState']
+TileComponentController.$inject = ['$window', '$document', '$timeout', '$ngRedux', 'state','tileDataService', 'contextMenuService', 'Utils', '$scope', 'rxState']
 
 let tile = {
   template: '',

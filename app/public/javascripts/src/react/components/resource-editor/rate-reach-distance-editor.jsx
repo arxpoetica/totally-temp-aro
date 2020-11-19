@@ -122,11 +122,14 @@ export class RateReachDistanceEditor extends Component {
                         }
                       </td>
                     }
-                    {Object.entries(rateReachGroupMap[selectedTechnologyType].matrixMap).map(([techKey], techIndex) => (
-                      <td key={techIndex} style={{minWidth: '100px'}}>
-                        <input className="form-control" onChange={(e)=>this.handleRateReachGroupMapChange(e, selectedTechnologyType, index, techIndex)} value={rateReachGroupMap[selectedTechnologyType].matrixMap[techIndex].value[index].distance} linearunitinput="true"/>
-                      </td>
-                    ))}
+                    {Object.entries(rateReachGroupMap[selectedTechnologyType].matrixMap).map(([techKey], techIndex) => {
+                      let metersToLengthUnits = this.props.convertMetersToLengthUnits(rateReachGroupMap[selectedTechnologyType].matrixMap[techIndex].value[index].distance);
+                      return (
+                        <td key={techIndex} style={{minWidth: '100px'}}>
+                          <input className="form-control" onChange={(e)=>this.handleRateReachGroupMapChange(e, selectedTechnologyType, index, techIndex)} value={metersToLengthUnits}/>
+                        </td>
+                      )
+                    })}
                   </tr>
                 )
               })
@@ -145,7 +148,8 @@ export class RateReachDistanceEditor extends Component {
   }
 
   handleRateReachGroupMapChange(e, selectedTechnologyType, index, techIndex){
-    this.props.rateReachGroupMap[selectedTechnologyType].matrixMap[techIndex].value[index].distance = e.target.value
+    let lengthUnitsToMeters = this.props.convertlengthUnitsToMeters(e.target.value);
+    this.props.rateReachGroupMap[selectedTechnologyType].matrixMap[techIndex].value[index].distance = lengthUnitsToMeters
     this.setState({isCategoryInEditMode: false })
     this.props.onRateReachMatrixChange(this.props.rateReachGroupMap)
   }
@@ -234,11 +238,9 @@ export class RateReachDistanceEditor extends Component {
     this.isCategoryInEditMode[index] = false
     this.setState({isCategoryInEditMode: false })
   }
-
 }
 
-
-class SpeedCategory {
+ class SpeedCategory {
   constructor (speed, units) {
     this.speed = speed
     this.units = units
@@ -272,8 +274,6 @@ class SpeedCategory {
   }
 }
 
-
-
   const mapStateToProps = (state) => ({
     resourceManagerName: state.resourceManager.editingManager && state.resourceManager.managers[state.resourceManager.editingManager.id].resourceManagerName,  
     resourceManagerId: state.resourceManager.editingManager && state.resourceManager.managers[state.resourceManager.editingManager.id].resourceManagerId,
@@ -283,7 +283,8 @@ class SpeedCategory {
   })
 
   const mapDispatchToProps = (dispatch) => ({
-    setIsResourceEditor: (status) => dispatch(ResourceActions.setIsResourceEditor(status)),
+    convertMetersToLengthUnits: (input) => dispatch(ResourceActions.convertMetersToLengthUnits(input)),
+    convertlengthUnitsToMeters: (input) => dispatch(ResourceActions.convertlengthUnitsToMeters(input)),
   })
 
 const RateReachDistanceEditorComponent = connect(mapStateToProps, mapDispatchToProps)(RateReachDistanceEditor)

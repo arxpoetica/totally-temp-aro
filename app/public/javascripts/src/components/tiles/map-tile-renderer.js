@@ -9,7 +9,7 @@ import Rule from './rule'
 
 class MapTileRenderer {
   constructor (tileSize, tileDataService, mapTileOptions, censusCategories, selectedDisplayMode, selectionModes, analysisSelectionMode, stateMapLayers, displayModes,
-    viewModePanels, state, getPixelCoordinatesWithinTile, transactionFeatureIds, rShowFiberSize, mapLayers = []) {
+    viewModePanels, state, getPixelCoordinatesWithinTile, transactionFeatureIds, rShowFiberSize, rViewSetting, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
@@ -28,6 +28,7 @@ class MapTileRenderer {
     this.latestTileUniqueId = 0
     this.transactionFeatureIds = transactionFeatureIds
     this.rShowFiberSize = rShowFiberSize
+    this.rViewSetting = rViewSetting
 
     const MAX_CONCURRENT_VECTOR_TILE_RENDERS = 5
     this.tileRenderThrottle = new AsyncPriorityQueue((task, callback) => {
@@ -106,6 +107,18 @@ class MapTileRenderer {
 
   setTransactionFeatureIds (transactionFeatureIds) {
     this.transactionFeatureIds = transactionFeatureIds
+  }
+
+  // Sets the selected rshowFiberSize
+  setReactShowFiberSize (rShowFiberSize) {
+    this.rShowFiberSize = rShowFiberSize
+    this.tileDataService.markHtmlCacheDirty()
+  }
+
+  // Sets the selected rViewSetting
+  setReactViewSetting (rViewSetting) {
+    this.rViewSetting = rViewSetting
+    this.tileDataService.markHtmlCacheDirty()
   }
 
   // ToDo: move this to a place of utility functions
@@ -627,8 +640,8 @@ class MapTileRenderer {
                 }
               }
               
-            } else if ((this.state.showFiberSize || this.rShowFiberSize) && feature.properties._data_type === 'fiber' && this.state.viewSetting.selectedFiberOption.id !== 1) {
-              var selectedFiberOption = this.state.viewSetting.selectedFiberOption
+            } else if ((this.state.showFiberSize || this.rShowFiberSize) && feature.properties._data_type === 'fiber' && (this.state.viewSetting.selectedFiberOption.id !== 1 || this.rViewSetting.selectedFiberOption.id !== 1)) {
+              var selectedFiberOption = this.rViewSetting.selectedFiberOption
               var viewOption = selectedFiberOption.pixelWidth
               drawingStyles = {
                 lineWidth: TileUtilities.getFiberStrandSize(selectedFiberOption.field, feature.properties.fiber_strands, viewOption.min, viewOption.max, viewOption.divisor, viewOption.atomicDivisor),

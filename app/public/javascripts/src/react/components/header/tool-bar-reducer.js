@@ -17,7 +17,63 @@ const defaultState = {
   listOfServiceAreaTags: [],
   currentPlanServiceAreaTags: [],
   selectedHeatMapOption: 'HEATMAP_ON',
-  appConfiguration: {}
+  appConfiguration: {},
+  // View Settings layer - define once
+  viewSetting: {
+    selectedFiberOption: null,
+    heatmapOptions: [
+      {
+        id: 'HEATMAP_ON',
+        label: 'Aggregate heatmap'
+      },
+      {
+        id: 'HEATMAP_DEBUG',
+        label: 'Aggregate points'
+      },
+      {
+        id: 'HEATMAP_OFF',
+        label: 'Raw Points'
+      }
+    ]
+  },
+  // ViewFiberOptions Array
+  viewFiberOptions: [
+    {
+      id: 1,
+      name: 'Uniform width'
+    },
+    {
+      id: 2,
+      name: 'Fiber Strand Count',
+      field: 'fiber_strands',
+      multiplier: 2.1,
+      pixelWidth: {
+        min: 2,
+        max: 12,
+        divisor: 1 / 3
+      },
+      opacity: {
+        min: 0.66,
+        max: 1
+      }
+    },
+    {
+      id: 3,
+      name: 'Atomic Unit Demand',
+      field: 'atomic_units',
+      multiplier: 1,
+      pixelWidth: {
+        min: 2,
+        max: 12,
+        divisor: 1 / 3,
+        atomicDivisor: 50
+      },
+      opacity: {
+        min: 0.66,
+        max: 1
+      }
+    }
+  ]
 }
 
 function setPlanInputsModal (state, planInputsModal) {
@@ -122,6 +178,12 @@ function setSelectedHeatMapOption (state, selectedHeatMapOption) {
   }
 }
 
+function setViewSetting (state, viewSetting) {
+  return { ...state,
+    viewSetting: viewSetting
+  }
+}
+
 function ToolBarReducer (state = defaultState, action) {
   switch (action.type) {
 
@@ -174,7 +236,10 @@ function ToolBarReducer (state = defaultState, action) {
       return setLoadListOfSAPlanTags(state, action.payload)
         
     case Actions.TOOL_BAR_SET_HEAT_MAP_OPTION:
-      return setSelectedHeatMapOption(state, action.payload)        
+      return setSelectedHeatMapOption(state, action.payload)
+      
+    case Actions.TOOL_BAR_SET_VIEW_SETTING:
+      return setViewSetting(state, action.payload)       
 
     default:
       return state
