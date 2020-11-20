@@ -229,6 +229,34 @@ class NetworkEquipmentController {
     })
   }
 
+  // ---
+
+  // We will change this later,
+  //  currently we are just telling Redux that these values have changed
+  //  next: change over all components that read the state.js version to using Redux
+
+  onUpdateExistingEquipmentVisibility () {
+    // these shouldn't be hardcoded but this will all be migrated shortly
+    this.onUpdateTypeVisibility('equipment', 'existing', this.state.equipmentLayerTypeVisibility.existing)
+  }
+  onUpdatePlannedEquipmentVisibility () {
+    this.onUpdateTypeVisibility('equipment', 'planned', this.state.equipmentLayerTypeVisibility.planned)
+  }
+
+  onUpdateTypeVisibility (typeA, typeB, isVisible) {
+    // typeA: equipment / cable
+    // typeB: existing / planned
+    var typeVisibility = {}
+    typeVisibility[typeA] = {}
+    typeVisibility[typeA][typeB] = isVisible
+    this.setTypeVisibility(typeVisibility)
+    
+    this.updateMapLayers()
+  }
+
+  // ---
+
+  // ToDo: this does not belong here. Don't put the powerplant in the light switch.
   updateMapLayers() {
     if(!this.networkEquipmentLayers) return
     // Make a copy of the state mapLayers. We will update this
@@ -281,9 +309,7 @@ class NetworkEquipmentController {
       setNetworkEquipmentSubtypeVisibility: (layerType, layer, subtypeId, isVisible) => {
         dispatch(MapLayerActions.setNetworkEquipmentSubtypeVisibility(layerType, layer, subtypeId, isVisible))
       },
-      updateType: (visibilityType, isVisible) => {
-        dispatch(MapLayerActions.setNetworkEquipmentLayerVisibilityType(visibilityType, isVisible))
-      }
+      setTypeVisibility: (typeVisibility) => dispatch(MapLayerActions.setTypeVisibility(typeVisibility))
     }
   }
 

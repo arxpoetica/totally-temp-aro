@@ -15,6 +15,16 @@ const defaultState = {
     selectedIndex: 0,
     collections: [],
     maxGeometries: 200
+  },
+  typeVisibility: {
+    equipment: {
+      existing: false,
+      planned: false
+    },
+    cable: {
+      existing: false,
+      planned: false
+    }
   }
 }
 
@@ -215,6 +225,20 @@ function clearOlderGeometries (state, annotationIndex, numberOfGeometries) {
   }
 }
 
+// ToDo: this doesn't quite belong here, we'll fix this when we reorganize state
+//  should be in 'ui. ...'
+function setTypeVisibility (state, typeVisibilityMask) {
+  var newTypeVisibility = JSON.parse(JSON.stringify(state.typeVisibility))
+  Object.keys(typeVisibilityMask).forEach(keyA => {
+    Object.keys(typeVisibilityMask[keyA]).forEach(keyB => {
+      newTypeVisibility[keyA][keyB] = typeVisibilityMask[keyA][keyB]
+    })
+  })
+  return { ...state,
+    typeVisibility: newTypeVisibility
+  }
+}
+
 function mapLayersReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.LAYERS_SET_LOCATION:
@@ -276,6 +300,9 @@ function mapLayersReducer (state = defaultState, action) {
 
     case Actions.LAYERS_CLEAR_OLD_ANNOTATIONS:
       return clearOlderGeometries(state, 0, action.payload) // Always clear geometries from the 0th annotation collection
+
+    case Actions.LAYERS_SET_TYPE_VISIBILITY:
+      return setTypeVisibility(state, action.payload)
 
     default:
       return state
