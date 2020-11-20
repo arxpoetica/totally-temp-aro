@@ -487,7 +487,7 @@ class MapTileRenderer {
       if (feature.properties) {
         // Try object_id first, else try location_id
         var featureId = feature.properties.object_id || feature.properties.location_id
-
+        
 				if (this.transactionFeatureIds.has(featureId)) {
           // continue // Do not render any features that are part of a transaction
         }
@@ -508,6 +508,7 @@ class MapTileRenderer {
           // This feature is to be excluded. Do not render it. (edit: ONLY in edit mode)
           continue
         }
+        
         if (this.selectedDisplayMode == this.displayModes.VIEW &&
             (this.state.activeViewModePanel == this.viewModePanels.EDIT_LOCATIONS ||
               this.state.activeViewModePanel == this.viewModePanels.EDIT_SERVICE_LAYER) &&
@@ -640,7 +641,7 @@ class MapTileRenderer {
               }
               
             } else if ((this.state.showFiberSize || this.rShowFiberSize) && feature.properties._data_type === 'fiber' && (this.state.viewSetting.selectedFiberOption.id !== 1 || this.rViewSetting.selectedFiberOption.id !== 1)) {
-              var selectedFiberOption = this.state.viewSetting.selectedFiberOption
+              var selectedFiberOption = this.rViewSetting.selectedFiberOption
               var viewOption = selectedFiberOption.pixelWidth
               drawingStyles = {
                 lineWidth: TileUtilities.getFiberStrandSize(selectedFiberOption.field, feature.properties.fiber_strands, viewOption.min, viewOption.max, viewOption.divisor, viewOption.atomicDivisor),

@@ -2,6 +2,9 @@
 import Actions from '../../common/actions'
 import AroHttp from '../../common/aro-http'
 import { batch } from 'react-redux'
+// ToDo: probably shouldn't be importing PlanActions into another action creator
+//  BUT resource managers are listed in two places, DRY this up!
+import PlanActions from '../plan/plan-actions'
 
   function getResourceTypes () {
     return dispatch => {
@@ -121,6 +124,7 @@ import { batch } from 'react-redux'
             dispatch(getResourceManagers(resourceType))
             if (result.data && result.data.resourceType === null) result.data.resourceType = resourceType
             dispatch(editSelectedManager(result.data))
+            dispatch(PlanActions.loadPlanResourceSelectionFromServer())
           })
         })
         .catch((err) => console.error(err))
@@ -233,6 +237,7 @@ import { batch } from 'react-redux'
         batch(() => {
           dispatch(setIsResourceEditor(true))
           dispatch(getResourceManagers('price_book'))
+          dispatch(PlanActions.loadPlanResourceSelectionFromServer())
         })
       })
       .catch((err) => console.error(err))
@@ -528,14 +533,20 @@ import { batch } from 'react-redux'
         description: rateReachManager.description
       })
       .then(result => {
-        createdRateReachManager = result.data
-        return getDefaultConfiguration(loggedInUser, rateReachManager.category)
+        if (sourceRateReachManagerId) {
+          return result
+        } else {
+          createdRateReachManager = result.data
+          return getDefaultConfiguration(loggedInUser, rateReachManager.category)
+          .then(defaultConfiguration => AroHttp.put(`/service/rate-reach-matrix/resource/${createdRateReachManager.id}/config`, defaultConfiguration))
+        }
       })
-      .then((defaultConfiguration) => AroHttp.put(`/service/rate-reach-matrix/resource/${createdRateReachManager.id}/config`, defaultConfiguration))
       .then(result => {
         batch(() => {
           dispatch(setIsResourceEditor(true))
           dispatch(getResourceManagers('rate_reach_manager'))
+          // ToDo: resource managers are listed in two places, DRY that up!
+          dispatch(PlanActions.loadPlanResourceSelectionFromServer())
         })
       })
       .catch((err) => console.error(err))
@@ -663,7 +674,6 @@ import { batch } from 'react-redux'
   // Competition System
 
   function getRegions () {
-    // ToDo: move this to state.js once we know the return won't change with plan selection 
     return dispatch => {
       AroHttp.get('/service/odata/stateEntity?$select=name,stusps,gid,statefp&$orderby=name')
       .then(result => dispatch({
@@ -1082,6 +1092,31 @@ import { batch } from 'react-redux'
     }
   }
 
+  function convertlengthUnitsToMeters (input) {
+    return (dispatch, getState) => {
+      // To get length_units_to_meters from redux state
+      const state = getState()
+      var lengthUnitsToMeters = state.toolbar.appConfiguration.units.length_units_to_meters
+      // Convert user-input value (in user units) to meters
+      input = input || '0'
+      return (+input) * lengthUnitsToMeters
+    }
+  }  
+
+  function convertMetersToLengthUnits (input) {
+    return (dispatch, getState) => {
+      // To get meters_to_length_units from redux state
+      const state = getState()
+      var metersToLengthUnits = state.toolbar.appConfiguration.units.meters_to_length_units
+      // Convert model value (always in meters) to user units before displaying it to the user
+      input = input || '0'
+      var inputTransformed = (+input) * metersToLengthUnits
+
+      // toFixed() converts it to a string, and + converts it back to a number before returning
+      return +inputTransformed.toFixed(2)
+    }
+  }
+
   export default {
     getResourceTypes,
     getResourceManagers,
@@ -1115,6 +1150,8 @@ import { batch } from 'react-redux'
     reloadRateReachManagerConfiguration,
     saveRateReachConfig,
     setModalTitle,
-    setIsRrmManager
+    setIsRrmManager,
+    convertMetersToLengthUnits,
+    convertlengthUnitsToMeters
   }
   

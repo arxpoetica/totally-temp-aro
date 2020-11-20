@@ -445,8 +445,9 @@ class MapObjectEditorController {
     } else if (this.featureType === 'location' && this.isFeatureEditable(this.selectedMapObject.feature)) {
       var name = 'Location'
       var options = [ new MenuAction(MenuActionTypes.DELETE, () => {
-        this.deleteObjectWithId(this.selectedMapObject.objectId)
-        this.deleteCreatedMapObject(this.selectedMapObject.objectId)
+        var objectId = this.selectedMapObject.objectId
+        this.deleteObjectWithId(objectId)
+        this.deleteCreatedMapObject(objectId)
       }) ]
       var menuItems = []
 

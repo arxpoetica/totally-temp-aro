@@ -29,6 +29,13 @@ export class ViewSettings extends Component {
     }
   } 
 
+  componentDidMount () {
+    // Need to subscribe for setState the mapTileOptions
+    this.rxState.mapTileOptions.getMessage().subscribe((mapTileOptions) => {
+      this.setState({mapTileOptions: JSON.parse(JSON.stringify(mapTileOptions))})
+    })
+  }
+
   render () {
 
     const {viewSetting, viewFiberOptions } = this.props
