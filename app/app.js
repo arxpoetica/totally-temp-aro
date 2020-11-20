@@ -30,6 +30,12 @@ const loggerFunction = (tokens, req, res) => {
   }
 }
 
+app.use((req, res, next) => {
+  res.set('Cache-Control', 'no-store')
+  res.set('Pragma', 'no-cache');
+  next()
+})
+
 app.use(compression())
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json({ limit: '2mb' }))
