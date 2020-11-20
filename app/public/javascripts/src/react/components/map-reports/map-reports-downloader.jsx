@@ -91,6 +91,7 @@ export class MapReportsDownloader extends Component {
       pageDefinition.showEquipmentLabels = this.props.showEquipmentLabels
       // From maplayers, get the layers that we want to display in the report. Also send the location filters.
       pageDefinition.locationFilters = this.props.mapLayers.locationFilters
+      pageDefinition.layersTypeVisibility = JSON.parse(JSON.stringify(this.props.layersTypeVisibility))
       pageDefinition.visibleLayers = this.props.mapLayers.location.filter(layer => layer.checked).map(layer => layer.key).toJS();
       // this needs to be done differently
       pageDefinition.visibleCableConduits = {};
@@ -161,7 +162,8 @@ const mapStateToProps = state => ({
   waitSecondsPerPage: state.mapReports.waitSecondsPerPage,
   manualWait: state.mapReports.manualWait,
   showLocationLabels: state.viewSettings.showLocationLabels,
-  showEquipmentLabels: state.toolbar.showEquipmentLabels
+  showEquipmentLabels: state.toolbar.showEquipmentLabels,
+  layersTypeVisibility: state.mapLayers.typeVisibility
 })
 
 const mapDispatchToProps = dispatch => ({

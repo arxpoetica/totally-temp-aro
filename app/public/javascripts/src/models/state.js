@@ -1374,6 +1374,13 @@ class State {
 
       service.equipmentLayerTypeVisibility.existing = service.configuration.networkEquipment.visibility.defaultShowExistingEquipment
       service.equipmentLayerTypeVisibility.planned = service.configuration.networkEquipment.visibility.defaultShowPlannedEquipment
+      var reduxTypeVisibility = {
+        equipment: {
+          existing: service.equipmentLayerTypeVisibility.existing,
+          planned: service.equipmentLayerTypeVisibility.planned
+        }
+      }
+      service.setTypeVisibility(reduxTypeVisibility)
 
       // Set the logged in user, then call all the initialization functions that depend on having a logged in user.
       service.loggedInUser = user
@@ -1524,10 +1531,28 @@ class State {
                   const isVisible = setOfVisibleLayers.has(layer.key)
                   service.setLayerVisibility(layer, isVisible)
                 })
-                service.equipmentLayerTypeVisibility.planned = true;
-                service.cableLayerTypeVisibility.planned = true;
+
+                var layersTypeVisibility = {
+                  equipment: {
+                    existing: false,
+                    planned: true
+                  },
+                  cable: {
+                    existing: false,
+                    planned: true
+                  }
+                }
+
+                if (initialState.reportPage.layersTypeVisibility) layersTypeVisibility = initialState.reportPage.layersTypeVisibility
+                service.equipmentLayerTypeVisibility.existing = layersTypeVisibility.equipment.existing
+                service.equipmentLayerTypeVisibility.planned = layersTypeVisibility.equipment.planned
+                service.cableLayerTypeVisibility.existing = layersTypeVisibility.cable.existing
+                service.cableLayerTypeVisibility.planned = layersTypeVisibility.cable.planned
+                service.setTypeVisibility(layersTypeVisibility)
+
                 // ToDo: this should NOT be hardcoded, related to map-reports-downloader > doDownloadReport()
-                ['roads', 'cables', 'boundaries', 'equipments', 'conduits'].forEach(layerType => {
+                var layerTypes = ['roads', 'cables', 'boundaries', 'equipments', 'conduits']
+                layerTypes.forEach(layerType => {
                   Object.keys(service.mapLayersRedux.networkEquipment[layerType]).forEach(layerKey => {
                     const isVisible = setOfVisibleLayers.has(layerKey)
                     service.setNetworkEquipmentLayerVisiblity(layerType, service.mapLayersRedux.networkEquipment[layerType][layerKey], isVisible)
@@ -1821,10 +1846,10 @@ class State {
         // console.log(service.rSelectedDisplayMode)
         service.selectedDisplayMode.next(service.rSelectedDisplayMode)
       }
-      if (nextState.rActiveViewModePanel && 
-          service.rActiveViewModePanel !== service.activeViewModePanel) {
-        service.activeViewModePanel = service.rActiveViewModePanel
-      }
+      // if (nextState.rActiveViewModePanel && 
+      //     service.rActiveViewModePanel !== service.activeViewModePanel) {
+      //   service.activeViewModePanel = service.rActiveViewModePanel
+      // }
     }
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(service.mergeToTarget.bind(service))
 
@@ -1897,6 +1922,7 @@ class State {
       setAppConfiguration: appConfiguration => dispatch(ToolBarActions.setAppConfiguration(appConfiguration)),
       updateDefaultPlanCoordinates: coordinates => dispatch(PlanActions.updateDefaultPlanCoordinates(coordinates)),
       setSelectedHeatMapOption: selectedHeatMapOption => dispatch(ToolBarActions.setSelectedHeatMapOption(selectedHeatMapOption)),
+      setTypeVisibility: (typeVisibility) => dispatch(MapLayerActions.setTypeVisibility(typeVisibility)),
     }
   }
 }
