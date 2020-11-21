@@ -134,14 +134,28 @@ function setBoundaryLayers (boundaryLayers) {
 
       results = results.filter(result => result.data.length).map(result => result.data)
       const newBoundaryLayers = layersClone.map(layer => {
-        const categories = results.find(categories => categories[0].analysisLayerId === layer.analysisLayerId)
-        layer.categories = (categories || []).map(category => {
-          category.mappedTags.tags = category.mappedTags.tags.map(tag => {
+        const foundGroup = (results.find(group => group[0].analysisLayerId === layer.analysisLayerId) || [])
+
+        // only cloning here so what's mutated below doesn't also mutate this
+        layer.display = JSON.parse(JSON.stringify(foundGroup)).map(group => {
+          group.category.tags = group.category.tags.map(tag => {
             tag.colourHash = hsvToRgb(tag.colourHue, 1, 1)
             return tag
           })
-          return category
+          return group.category
         })
+
+        layer.categories = {}
+        for (const group of foundGroup) {
+          const tagsById = {}
+          for (const tag of group.category.tags) {
+            tag.colourHash = hsvToRgb(tag.colourHue, 1, 1)
+            tagsById[tag.id] = tag
+          }
+          group.category.tags = tagsById
+          layer.categories[group.id] = group.category
+        }
+
         layer.selectedCategory = null
         return layer
       })
@@ -151,7 +165,7 @@ function setBoundaryLayers (boundaryLayers) {
         // NOTE: trying to move away from the `immutability`
         // library, hence this reconstruction. In the future
         // won't need the `List` wrapper
-        payload: List(newBoundaryLayers)
+        payload: List(newBoundaryLayers),
       })
     })
     .catch(err => console.error(err))

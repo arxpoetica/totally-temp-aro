@@ -24,11 +24,6 @@ class BoundariesController {
     // Update map layers when the display mode button changes
     this.state.selectedDisplayMode.subscribe((newValue) => this.updateMapLayers())
 
-    this.censusCategories = this.state.censusCategories.getValue()
-    this.state.censusCategories.subscribe((newValue) => {
-      this.censusCategories = newValue
-    })
-
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
   }
 

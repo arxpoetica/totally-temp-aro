@@ -325,9 +325,7 @@ class State {
     }
 
     service.angBoundaries = new Rx.BehaviorSubject()
-    // FIXME:
     service.censusCategories = new Rx.BehaviorSubject()
-    service.censusCategories.next({})
 
     // The display modes for the application
     service.displayModes = Object.freeze({
@@ -1787,6 +1785,11 @@ class State {
         && JSON.stringify(nextReduxState.boundaries) !== JSON.stringify(service.angBoundaries.getValue())
       ) {
         service.angBoundaries.next(nextReduxState.boundaries)
+        let censusCategories = {}
+        for (const bounds of nextReduxState.boundaries) {
+          censusCategories = Object.assign({}, censusCategories, bounds.categories)
+        }
+        service.censusCategories.next(censusCategories)
         service.requestMapLayerRefresh.next(null)
       }
     }

@@ -79,7 +79,7 @@ class TileComponentController {
 
     // Subscribe to events for creating and destroying the map overlay layer
     this.createMapOverlaySubscription = state.requestCreateMapOverlay.skip(1).subscribe(() => this.createMapOverlay())
-    this.destroyMapOverlaySubscription = state.requestDestroyMapOverlay.skip(1).subscribe(() => this.destoryMapOverlay())
+    this.destroyMapOverlaySubscription = state.requestDestroyMapOverlay.skip(1).subscribe(() => this.destroyMapOverlay())
 
     // Subscribe to changes in the map tile options
     state.mapTileOptions.subscribe((mapTileOptions) => {
@@ -566,7 +566,7 @@ class TileComponentController {
   }
 
   // Removes the existing map overlay
-  destoryMapOverlay () {
+  destroyMapOverlay () {
     if (this.overlayClickListener) {
       google.maps.event.removeListener(this.overlayClickListener)
       this.overlayClickListener = null
