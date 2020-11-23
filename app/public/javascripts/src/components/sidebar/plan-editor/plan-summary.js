@@ -25,8 +25,8 @@ class PlanSummaryController {
     this.fiberOrder = []
     this.locTagCoverage = []
     this.planEditorChangedObserver = state.planEditorChanged.subscribe((isPlanEditorChanged) => isPlanEditorChanged && this.getPlanSummary())
-    this.censusTagCategories = this.state.censusCategories.getValue()
-    this.censusTagCategoriesObserver = this.state.censusCategories.subscribe((newValue) => {
+    this.censusTagCategories = this.state.layerCategories.getValue()
+    this.censusTagCategoriesObserver = this.state.layerCategories.subscribe((newValue) => {
       this.censusTagCategories = newValue
       this.censusTagTodescription = {}
       Object.keys(this.censusTagCategories).forEach((categoryId) => {

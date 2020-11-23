@@ -107,9 +107,9 @@ class TileComponentController {
     });
 
     // If selected census category map changes or gets loaded, set that in the tile data road
-    state.censusCategories.subscribe((censusCategories) => {
+    state.layerCategories.subscribe((layerCategories) => {
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
-        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setCensusCategories(censusCategories)
+        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setLayerCategories(layerCategories)
       }
     })
 
@@ -279,7 +279,7 @@ class TileComponentController {
     this.mapRef.overlayMapTypes.push(new MapTileRenderer(new google.maps.Size(Constants.TILE_SIZE, Constants.TILE_SIZE),
       this.tileDataService,
       this.state.mapTileOptions.getValue(),
-      this.state.censusCategories.getValue(),
+      this.state.layerCategories.getValue(),
       this.state.selectedDisplayMode.getValue(),
       SelectionModes,
       this.activeSelectionModeId,

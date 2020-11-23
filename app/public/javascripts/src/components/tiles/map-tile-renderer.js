@@ -8,7 +8,7 @@ import PuppeteerMessages from '../common/puppeteer-messages'
 import Rule from './rule'
 
 class MapTileRenderer {
-  constructor (tileSize, tileDataService, mapTileOptions, censusCategories, selectedDisplayMode, selectionModes, analysisSelectionMode, stateMapLayers, displayModes,
+  constructor (tileSize, tileDataService, mapTileOptions, layerCategories, selectedDisplayMode, selectionModes, analysisSelectionMode, stateMapLayers, displayModes,
     viewModePanels, state, getPixelCoordinatesWithinTile, transactionFeatureIds, rShowFiberSize, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
@@ -20,7 +20,7 @@ class MapTileRenderer {
     this.selectionModes = selectionModes
     this.analysisSelectionMode = analysisSelectionMode
     this.stateMapLayers = stateMapLayers
-    this.censusCategories = censusCategories
+    this.layerCategories = layerCategories
     this.displayModes = displayModes
     this.viewModePanels = viewModePanels
     this.state = state
@@ -83,8 +83,8 @@ class MapTileRenderer {
     this.oldSelection = oldSelection
   }
 
-  setCensusCategories (censusCategories) {
-    this.censusCategories = censusCategories
+  setLayerCategories (layerCategories) {
+    this.layerCategories = layerCategories
     this.tileDataService.markHtmlCacheDirty()
   }
 
@@ -586,7 +586,7 @@ class MapTileRenderer {
                 'geometryOffset': geometryOffset,
                 'ctx': ctx,
                 'mapLayer': mapLayer,
-                'censusCategories': this.censusCategories,
+                'layerCategories': this.layerCategories,
                 'tileDataService': this.tileDataService,
                 'styles': this.styles,
                 'tileSize': this.tileSize,
