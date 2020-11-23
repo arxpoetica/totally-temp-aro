@@ -1805,7 +1805,6 @@ class State {
       locationLayers: getLocationLayersList(reduxState),
       networkEquipmentLayers: getNetworkEquipmentLayersList(reduxState),
       boundaries: getBoundaryLayersList(reduxState),
-      boundariesTest: reduxState.mapLayers.boundary,
       mapRef: reduxState.map.googleMaps,
       reduxPlanTargets: reduxState.selection.planTargets,
       showSiteBoundary: reduxState.mapLayers.showSiteBoundary,
