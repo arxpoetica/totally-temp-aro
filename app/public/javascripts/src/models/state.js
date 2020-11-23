@@ -526,7 +526,7 @@ class State {
       details: {
         analysisAreaId: null,
         censusBlockId: null,
-        censusCategoryId: null,
+        layerCategoryId: null,
         roadSegments: new Set(),
         serviceAreaId: null,
         fiberSegments: new Set(),

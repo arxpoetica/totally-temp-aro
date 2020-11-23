@@ -16,7 +16,7 @@ class BoundariesController {
     // Creates map layers based on selection in the UI
     this.createdMapLayerKeys = new Set()
 
-    this.selectedCensusCat = null
+    this.selectedLayerCat = null
 
     // When the map zoom changes, map layers can change
     $rootScope.$on('map_zoom_changed', this.updateMapLayers.bind(this))
@@ -92,9 +92,9 @@ class BoundariesController {
   }
 
   onSelectCategory (category) {
-    const id = this.selectedCensusCat && this.selectedCensusCat.id
+    const id = this.selectedLayerCat && this.selectedLayerCat.id
     var newSelection = this.state.cloneSelection()
-    newSelection.details.censusCategoryId = id
+    newSelection.details.layerCategoryId = id
     this.state.selection = newSelection
   }
 

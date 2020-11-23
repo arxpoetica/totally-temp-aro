@@ -34,7 +34,7 @@ class BoundaryDetailController {
           for (var key in tags) {
             if (tags.hasOwnProperty(key)) {
               let tag = {}
-              tag.censusCatDescription = this.layerCategories[key].description
+              tag.layerCatDescription = this.layerCategories[key].description
               tag.tagInfo = this.layerCategories[key].tags[ tags[key] ]
               tagList.push(tag)
             }

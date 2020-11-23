@@ -25,14 +25,14 @@ class PlanSummaryController {
     this.fiberOrder = []
     this.locTagCoverage = []
     this.planEditorChangedObserver = state.planEditorChanged.subscribe((isPlanEditorChanged) => isPlanEditorChanged && this.getPlanSummary())
-    this.censusTagCategories = this.state.layerCategories.getValue()
-    this.censusTagCategoriesObserver = this.state.layerCategories.subscribe((newValue) => {
-      this.censusTagCategories = newValue
-      this.censusTagTodescription = {}
-      Object.keys(this.censusTagCategories).forEach((categoryId) => {
-        Object.keys(this.censusTagCategories[categoryId].tags).forEach((tagId) => {
-          var tag = this.censusTagCategories[categoryId].tags[tagId]
-          this.censusTagTodescription[tag.id] = tag.description
+    this.layerTagCategories = this.state.layerCategories.getValue()
+    this.layerTagCategoriesObserver = this.state.layerCategories.subscribe((newValue) => {
+      this.layerTagCategories = newValue
+      this.layerTagTodescription = {}
+      Object.keys(this.layerTagCategories).forEach((categoryId) => {
+        Object.keys(this.layerTagCategories[categoryId].tags).forEach((tagId) => {
+          var tag = this.layerTagCategories[categoryId].tags[tagId]
+          this.layerTagTodescription[tag.id] = tag.description
         })
       })
     })
@@ -197,7 +197,7 @@ class PlanSummaryController {
 
   $onDestroy () {
     this.planEditorChangedObserver.unsubscribe()
-    this.censusTagCategoriesObserver.unsubscribe()
+    this.layerTagCategoriesObserver.unsubscribe()
     this.locTagCoverage = []
     this.unsubscribeRedux()
   }

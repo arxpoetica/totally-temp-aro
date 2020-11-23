@@ -55,12 +55,12 @@ class PolygonFeatureRenderer {
       }
 
       // check for census filters
-      if (typeof oldSelection.details.censusCategoryId !== 'undefined' &&
-        feature.properties.tags.hasOwnProperty(oldSelection.details.censusCategoryId)) {
-        let tagId = feature.properties.tags[oldSelection.details.censusCategoryId]
+      if (typeof oldSelection.details.layerCategoryId !== 'undefined' &&
+        feature.properties.tags.hasOwnProperty(oldSelection.details.layerCategoryId)) {
+        let tagId = feature.properties.tags[oldSelection.details.layerCategoryId]
 
-        if (layerCategories[oldSelection.details.censusCategoryId].tags.hasOwnProperty(tagId)) {
-          let color = layerCategories[oldSelection.details.censusCategoryId].tags[tagId].colourHash
+        if (layerCategories[oldSelection.details.layerCategoryId].tags.hasOwnProperty(tagId)) {
+          let color = layerCategories[oldSelection.details.layerCategoryId].tags[tagId].colourHash
           drawingStyles.strokeStyle = color
           drawingStyles.fillStyle = color
         }
