@@ -15,40 +15,44 @@ export class NetWorkBuildOutput extends Component {
     }
   }
 
-  componentDidMount(){
+  componentDidMount () {
     this.setState({ reportTypes: this.state.reportTypes || ['GENERAL', 'PARAM_QUERY'] })
     this.setState({reportSize: 'small'})
   }
 
   render () {
-    return this.renderNetWorkBuildOutput()
-  }
 
-  renderNetWorkBuildOutput() {
-    return(
+    const {reportTypes, reportSize} = this.state;
+    const {planId, planState} = this.props;
+
+    return (
       <div>
         {/* <!-- The ROIC Reports component--> */}
         <div style={{position: 'relative', width: '100%'}}>
           <CommonRoicReports 
-            planId={this.props.planId}
-            rOptimizationState={this.props.rOptimizationState}
-            reportSize={this.state.reportSize}
+            planId={planId}
+            rOptimizationState={planState}
+            reportSize={reportSize}
           />
         </div>
+        
         <button className="btn btn-primary pull-left mr-1" onClick={(e)=>this.props.showReportModal()}>Reports</button>
         <button className="btn btn-primary pull-right" onClick={(e)=>this.props.showDetailedOutput()}>Expand Results</button>
-        <ReportsDownloadModal reportTypes={this.state.reportTypes} title='Reports'/>
+
+        {/* Render Reports Modal */}
+        <ReportsDownloadModal reportTypes={reportTypes} title='Reports'/>
       </div>
     )
   }
 
+  // To open Expand Results Modal
   showDetailedOutput () {
   }
 }
 
 const mapStateToProps = (state) => ({
   planId: state.plan.activePlan.id,
-  rOptimizationState: state.plan.activePlan.planState
+  planState: state.plan.activePlan.planState
 })  
 
 const mapDispatchToProps = (dispatch) => ({

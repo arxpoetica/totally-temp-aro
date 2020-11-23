@@ -24,8 +24,8 @@ import AroNetworkConstraints from '../shared-utils/aro-network-constraints'
 import PuppeteerMessages from '../components/common/puppeteer-messages'
 import NetworkOptimizationActions from '../react/components/optimization/network-optimization/network-optimization-actions'
 import ViewSettingsActions from '../react/components/view-settings/view-settings-actions'
-import Tools from '../react/components/tool/tools'
 import ToolBarActions from '../react/components/header/tool-bar-actions'
+import AnalysisActions from '../react/components/sidebar/analysis/analysis-actions'
 
 
 const networkAnalysisConstraintsSelector = formValueSelector(ReactComponentConstants.NETWORK_ANALYSIS_CONSTRAINTS)
@@ -1589,6 +1589,7 @@ class State {
           service.setLocationFilters(service.configuration.locationCategories.filters)
           service.googleMapsLicensing = config.googleMapsLicensing
           service.enumStrings = config.enumStrings
+          service.setEnumStrings(service.enumStrings) // Require in roic-reports-small.jsx
           if (!service.enumStrings) {
             throw new Error('No enumeration strings object found. Please check your server logs for errors in the UI schema.')
           }
@@ -1897,6 +1898,7 @@ class State {
       setAppConfiguration: appConfiguration => dispatch(ToolBarActions.setAppConfiguration(appConfiguration)),
       updateDefaultPlanCoordinates: coordinates => dispatch(PlanActions.updateDefaultPlanCoordinates(coordinates)),
       setSelectedHeatMapOption: selectedHeatMapOption => dispatch(ToolBarActions.setSelectedHeatMapOption(selectedHeatMapOption)),
+      setEnumStrings: enumStrings => dispatch(AnalysisActions.setEnumStrings(enumStrings))
     }
   }
 }

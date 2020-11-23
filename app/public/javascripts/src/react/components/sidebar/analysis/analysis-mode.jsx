@@ -6,7 +6,7 @@ import './analysis-mode.css'
 import ReportsActions from '../../optimization/reports/reports-actions'
 import NetworkOptimizationActions from '../../optimization/network-optimization/network-optimization-actions'
 import NetworkAnalysisTypes from '../..//optimization/network-optimization/network-analysis-types'
-import AngConstants from '../../../common/constants' // ToDo: merge constants, put in Redux?
+import ReactConstants from '../../../common/constants' // ToDo: merge constants, put in Redux?
 import CoverageButton from '../../coverage/coverage-button.jsx'
 import NetworkOptimizationInput from '../../optimization/network-optimization/network-optimization-input.jsx'
 import CoverageInitializer from '../../coverage/coverage-initializer.jsx'
@@ -17,8 +17,6 @@ import ReportsDownloadModal from '../../optimization/reports/reports-download-mo
 import NetWorkBuildOutput from './network-build/network-build-output.jsx'
 import AnalysisActions from './analysis-actions'
 import AnalysisExpertMode from './analysis-expert-mode.jsx'
-import reactState from '../../common/state'
-
 
 export class AnalysisMode extends Component {
   constructor (props) {
@@ -36,13 +34,10 @@ export class AnalysisMode extends Component {
     }
 
     this.reportTypes = ['RFP']
-
     this.handleModifyClicked = this.handleModifyClicked.bind(this)
-    this.reactState = new reactState();
-    this.props.getExpertModeTypes(this.reactState.expertModeTypes)
   }
 
-  componentDidMount(){
+  componentDidMount () {
     var initAnalysisType = this.state.NetworkAnalysisTypes[0]
     this.state.NetworkAnalysisTypes.forEach(analysisType => {
       if (analysisType.id === this.props.networkAnalysisType) initAnalysisType = analysisType
@@ -51,20 +46,20 @@ export class AnalysisMode extends Component {
   }
 
   render () {
-    return this.renderAnalysisMode()
-  }
-
-  renderAnalysisMode() {
 
     const {collapseCards, NetworkAnalysisTypes, localAnalysisType} = this.state;
-    const {networkAnalysisType} = this.props;
+    const {networkAnalysisType, coverageReport} = this.props;
 
-    return(
+    return (
       <div className="analysis-mode-container">
-        <h4 style={{textAlign: 'center', marginTop: '20px'}}>Analysis Type: {this.props.networkAnalysisType.label}</h4>
+        <h4 style={{textAlign: 'center', marginTop: '20px'}}>Analysis Type: {networkAnalysisType}</h4>
 
+        {/* INPUT Accordion */}
         <Card className={`card-collapse ${collapseCards === this.analysisModePanels.INPUT ? 'collapse-show' :''}`}>
-          <CardHeader data-event={this.analysisModePanels.INPUT} onClick={(e)=>this.toggleCards(e)} className={`card-header-dark ${collapseCards === this.analysisModePanels.INPUT ? 'card-fixed' :''}`}>Input</CardHeader>
+          <CardHeader data-event={this.analysisModePanels.INPUT} onClick={(e)=>this.toggleCards(e)} 
+            className={`card-header-dark ${collapseCards === this.analysisModePanels.INPUT ? 'card-fixed' :''}`}>
+            Input
+          </CardHeader>
           <Collapse isOpen={collapseCards === this.analysisModePanels.INPUT}>
             <CardBody style={{padding:'0px'}}>
 
@@ -82,7 +77,8 @@ export class AnalysisMode extends Component {
                 }
               </div>
 
-              <div>
+              {/* Will Render based on Switch case */}
+              <div> 
                 {this.renderNetworkAnalysisTypes(NetworkAnalysisTypes)}
               </div>
 
@@ -108,13 +104,16 @@ export class AnalysisMode extends Component {
                   </div>
                 }
               </div>
-
             </CardBody>
           </Collapse>
         </Card>
 
+        {/* OUTPUT Accordion */}
         <Card className={`card-collapse ${collapseCards === this.analysisModePanels.OUTPUT ? 'collapse-show' :''}`}>
-          <CardHeader data-event={this.analysisModePanels.OUTPUT} onClick={(e)=>this.toggleCards(e)} className={`card-header-dark ${collapseCards === this.analysisModePanels.OUTPUT ? 'card-fixed' :''}`}>Output</CardHeader>
+          <CardHeader data-event={this.analysisModePanels.OUTPUT} onClick={(e)=>this.toggleCards(e)} 
+            className={`card-header-dark ${collapseCards === this.analysisModePanels.OUTPUT ? 'card-fixed' :''}`}>
+            Output
+          </CardHeader>
           <Collapse isOpen={collapseCards === this.analysisModePanels.OUTPUT}>
             {collapseCards === this.analysisModePanels.OUTPUT &&
               <CardBody style={{padding:'0px'}}>
@@ -128,7 +127,7 @@ export class AnalysisMode extends Component {
                     <NetworkAnalysisOutput/>
                   </div>
                 }
-                {networkAnalysisType  === 'COVERAGE_ANALYSIS' && this.props.coverageReport &&
+                {networkAnalysisType  === 'COVERAGE_ANALYSIS' && coverageReport &&
                   <div style={{height: '100%'}}>
                     COVERAGE_ANALYSIS
                   </div>
@@ -144,12 +143,11 @@ export class AnalysisMode extends Component {
             }
           </Collapse>
         </Card>          
-
       </div>
     )
   }
 
-  renderNetworkAnalysisTypes(NetworkAnalysisTypes){
+  renderNetworkAnalysisTypes (NetworkAnalysisTypes) {
     switch (NetworkAnalysisTypes) {
       case 'COVERAGE_ANALYSIS':
         return <CoverageButton/>
@@ -164,24 +162,24 @@ export class AnalysisMode extends Component {
     }
   }
 
-  handleModifyClicked(){
+  handleModifyClicked () {
     this.props.handleModifyClicked(this.props.activePlan);
   }
 
-  onAnalysisTypeChange(e){
+  onAnalysisTypeChange (e) {
     var localAnalysisTypeId = e.target.value
     this.setState({localAnalysisType: localAnalysisTypeId});
     this.props.setNetworkAnalysisType(localAnalysisTypeId)
   }
 
-  toggleCards(e) {
+  toggleCards (e) {
     let event = e.target.dataset.event;
     this.setState({ collapseCards: this.state.collapseCards === event ? this.analysisModePanels.INPUT : event });
   }
 
   // ToDo: this is also in network-optimization-input.jsx
   areControlsEnabled () {
-    return (this.props.planState === AngConstants.PLAN_STATE.START_STATE) || (this.props.planState === AngConstants.PLAN_STATE.INITIALIZED)
+    return (this.props.planState === ReactConstants.PLAN_STATE.START_STATE) || (this.props.planState === ReactConstants.PLAN_STATE.INITIALIZED)
   }
 }
 
@@ -196,7 +194,6 @@ const mapDispatchToProps = (dispatch) => ({
   showReportModal: () => dispatch(ReportsActions.showOrHideReportModal(true)),
   setNetworkAnalysisType: (networkAnalysisType) => dispatch(NetworkOptimizationActions.setNetworkAnalysisType(networkAnalysisType)),
   handleModifyClicked: (activePlan) => dispatch(AnalysisActions.handleModifyClicked(activePlan)),
-  getExpertModeTypes: (expertModeTypes) => dispatch(AnalysisActions.getExpertModeTypes(expertModeTypes)),
 })
 
 const AnalysisModeComponent = wrapComponentWithProvider(reduxStore, AnalysisMode, mapStateToProps, mapDispatchToProps)

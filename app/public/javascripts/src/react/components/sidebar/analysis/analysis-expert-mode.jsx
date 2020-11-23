@@ -2,26 +2,25 @@ import React, { Component } from 'react'
 import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
 import AnalysisActions from './analysis-actions'
-import reactState from '../../common/state'
+import rxState from '../../../common/rxState'
 import { createSelector } from 'reselect'
+import ToolBarActions from '../../header/tool-bar-actions'
 
 export class AnalysisExpertMode extends Component {
   constructor (props) {
     super(props)
 
+    this.rxState = new rxState();
+    
     this.props.setSelectedExpertMode(this.props.expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].id)
-    this.reactState = new reactState();
-
-    this.state = {
-      selectedExpertMode: '',
-      expertMode: this.reactState.expertMode,
-    }
-
     this.props.getExpertModeScopeContext(this.props.plan)
 
+    this.state = {
+      expertMode: this.rxState.expertMode,
+    }
   }
 
-  componentDidMount(){
+  componentDidMount () {
     const {optimizationInputs, activeSelectionModeId, locationLayers, plan} = this.props
 
     let expertMode =  this.state.expertMode
@@ -29,26 +28,12 @@ export class AnalysisExpertMode extends Component {
     this.setState({expertMode : expertMode})
   }
 
-  componentWillReceiveProps(nextProps){
-    if(this.props != nextProps) {
-      if(nextProps.selectedExpertMode !== undefined) {
-        this.setState({selectedExpertMode: nextProps.selectedExpertMode})
-      }
-    }
-  }
-
-  render () {
-    return this.props.selectedExpertMode === undefined
-      ? null
-      : this.renderAnalysisExpertMode()
-  }
-
   render () {
 
-    const {expertModeTypes,scopeContextKeys} = this.props
-    const {selectedExpertMode, expertMode} = this.state
+    const {expertModeTypes, scopeContextKeys, selectedExpertMode} = this.props
+    const {expertMode} = this.state
 
-    return(
+    return (
       <div className="row" style={{height:'100%'}}>
         <div className="col-md-12" style={{height:'80%'}}>
           <select className="form-control" onChange={(e)=>this.handleExpertModeTypesChange(e)} value={selectedExpertMode}>
@@ -81,29 +66,29 @@ export class AnalysisExpertMode extends Component {
     )
   }
 
-  handleOptimizationSettings(e){
+  handleOptimizationSettings (e) {
     var expertMode =  this.state.expertMode;
     expertMode['OPTIMIZATION_SETTINGS'] = e.target.value
     this.setState({expertMode: expertMode})
   }
 
-  validateExpertModeQuery(e){
+  validateExpertModeQuery (e) {
     var expertMode =  this.state.expertMode;
-    var selectedExpertMode = this.state.selectedExpertMode
+    var selectedExpertMode = this.props.selectedExpertMode
     expertMode[selectedExpertMode]= e.target.value
     this.setState({expertMode: expertMode})
 
     var hasExcludeTerm = false
     var excludeTerms = ['delete', 'drop', 'update', 'alter', 'insert', 'call', 'commit', 'create']
     excludeTerms.forEach((term) => {
-      if (this.state.expertMode[this.state.selectedExpertMode].toLowerCase().indexOf(term) > -1) hasExcludeTerm = true
+      if (this.state.expertMode[this.props.selectedExpertMode].toLowerCase().indexOf(term) > -1) hasExcludeTerm = true
     })
-    this.props.expertModeTypes[this.state.selectedExpertMode].isQueryValid = this.state.expertMode[this.state.selectedExpertMode].toLowerCase().indexOf('select') > -1 &&
+    this.props.expertModeTypes[this.props.selectedExpertMode].isQueryValid = this.state.expertMode[this.state.selectedExpertMode].toLowerCase().indexOf('select') > -1 &&
         !hasExcludeTerm
   }
 
-  handleExpertModeTypesChange(e){
-    this.setState({selectedExpertMode: e.target.value})
+  handleExpertModeTypesChange (e) {
+    this.props.setSelectedExpertMode(e.target.value)
   }
 }
 
@@ -123,7 +108,7 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
   setSelectedExpertMode : (selectedExpertMode) => dispatch(AnalysisActions.setSelectedExpertMode(selectedExpertMode)),
-  getOptimizationBody : (optimizationInputs, activeSelectionModeId, locationLayers, plan) => dispatch(AnalysisActions.getOptimizationBody(optimizationInputs, activeSelectionModeId, locationLayers, plan)),
+  getOptimizationBody : (optimizationInputs, activeSelectionModeId, locationLayers, plan) => dispatch(ToolBarActions.getOptimizationBody(optimizationInputs, activeSelectionModeId, locationLayers, plan)),
   getExpertModeScopeContext : (plan) => dispatch(AnalysisActions.getExpertModeScopeContext(plan)),
 })
 

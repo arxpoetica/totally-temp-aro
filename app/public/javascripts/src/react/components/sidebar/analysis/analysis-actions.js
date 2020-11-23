@@ -1,33 +1,13 @@
 import AroHttp from '../../../common/aro-http'
 import Actions from '../../../common/actions'
 import PlanActions from '../../plan/plan-actions'
-import reactState from '../../common/state'
 
-function loadROICResultsForPlan (planId) {
+function setEnumStrings (enumStrings){
   return dispatch => {
-    AroHttp.get(`/service/report/plan/${planId}`)
-      .then(result => {
-        dispatch({
-          type: Actions.ANALYSIS_MODE_ROIC_RESULT_DATA,
-          payload: result.data
-        })
-      })
-      .catch(err => console.error(err))
-  }
-}
-
-function getEnumStrings () {
-  return dispatch => {
-    // Get application configuration from the server
-    AroHttp.get(`/configuration`)
-      .then(result => {
-        var config = result.data
-        dispatch({
-          type: Actions.ANALYSIS_MODE_ENUM_STRINGS,
-          payload: config.enumStrings
-        })
-      })
-      .catch(err => console.error(err))
+    dispatch({
+      type: Actions.ANALYSIS_MODE_ENUM_STRINGS,
+      payload: enumStrings
+    })
   }
 }
 
@@ -117,14 +97,6 @@ function loadNetworkNodeTypesEntity () {
     })
   }
 
-function getExpertModeTypes(expertModeTypes){
-  return dispatch => {
-    dispatch({
-      type: Actions.ANALYSIS_MODE_EXPERT_MODE_TYPES,
-      payload: expertModeTypes
-    })
-  }
-}
 
 function setSelectedExpertMode(selectedExpertMode){
   return dispatch => {
@@ -132,22 +104,6 @@ function setSelectedExpertMode(selectedExpertMode){
       type: Actions.ANALYSIS_MODE_SELECTED_EXPERT_MODE,
       payload: selectedExpertMode
     })
-  }
-}
-
-function getOptimizationBody(optimizationInputs, activeSelectionModeId, locationLayers, plan) {
-  return dispatch => {
-    var inputs = JSON.parse(JSON.stringify(optimizationInputs))
-    // inputs.analysis_type = service.networkAnalysisTypeId
-    // inputs.planId = service.planId
-    inputs.planId = plan.id
-    inputs.locationConstraints = {}
-    inputs.locationConstraints.analysisSelectionMode = activeSelectionModeId
-    inputs.locationConstraints.locationTypes = []
-    locationLayers.forEach(locationsLayer => {
-      if (locationsLayer.checked) inputs.locationConstraints.locationTypes.push(locationsLayer.plannerKey)
-    })
-    return inputs
   }
 }
 
@@ -186,12 +142,9 @@ function getAvailableScopeContextKeys (obj, parentKey) {
 }
 
 export default {
-  loadROICResultsForPlan,
-  getEnumStrings,
+  setEnumStrings,
   loadNetworkNodeTypesEntity,
   handleModifyClicked,
-  getExpertModeTypes,
   setSelectedExpertMode,
-  getOptimizationBody,
   getExpertModeScopeContext
 }

@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import reduxStore from '../../../../../redux-store'
 import wrapComponentWithProvider from '../../../../common/provider-wrapped-component'
-import config from '../analysisConfig.json'
 import AnalysisActions from '../analysis-actions'
 
 const currencyformatter = new Intl.NumberFormat('en-US', {
@@ -22,48 +21,38 @@ export class RoicReportsSmall extends Component {
   constructor (props) {
     super(props)
 
-    this.state = {
-      FIBER_STRINGS: '',
-      CABLE_CONSTRUCTION_STRINGS: '',
-      selectedEntityType: '',
-      selectedNetworkType: '',
-      selectedCategory: '',
-      selectedCalcType: ''
-    }
-  }
+    this.props.loadNetworkNodeTypesEntity() // Moved from state.js to redux
 
-  componentDidMount(){
-    this.props.getEnumStrings()
-    this.props.loadNetworkNodeTypesEntity()
-
-    this.setState({selectedEntityType: this.props.entityTypes.filter(item => item.id === 'network')[0], 
-                   selectedNetworkType: this.props.networkTypes.filter(item => item.id === 'planned_network')[0],
-                   selectedCategory: this.props.categories[1],
-                   selectedCalcType: this.props.categories[1].calcTypes[0]
-                  })
-  }
-
-  componentWillReceiveProps(nextProps){
-    if(this.props != nextProps) {
-      if(nextProps.enumStrings !== undefined) {
-        this.setState({FIBER_STRINGS: nextProps.enumStrings['com.altvil.aro.service.entity']['FiberType'],
-          CABLE_CONSTRUCTION_STRINGS:  nextProps.enumStrings['com.altvil.interfaces']['CableConstructionEnum']})
+    this.config = { 
+      "length": {
+        "length_units": "miles",
+        "length_units_to_meters": "1609.34",
+        "meters_to_length_units": "0.000621371"
       }
+    }
+
+    this.state = {
+      FIBER_STRINGS: this.props.enumStrings['com.altvil.aro.service.entity']['FiberType'],
+      CABLE_CONSTRUCTION_STRINGS: this.props.enumStrings['com.altvil.interfaces']['CableConstructionEnum'],
+      selectedEntityType: this.props.entityTypes.filter(item => item.id === 'network')[0],
+      selectedNetworkType: this.props.networkTypes.filter(item => item.id === 'planned_network')[0],
+      selectedCategory: this.props.categories[1],
+      selectedCalcType: this.props.categories[1].calcTypes[0]
     }
   }
 
   render () {
-    return this.props.roicResults === null || this.state.selectedCategory === ''
+    return this.props.roicResults === null
       ? null
       : this.renderRoicReportsSmall()
   }
 
-  renderRoicReportsSmall() {
+  renderRoicReportsSmall () {
 
     const {roicResults, networkEquipment, networkNodeTypesEntity, networkTypes, categories, entityTypes} = this.props
     const {FIBER_STRINGS, CABLE_CONSTRUCTION_STRINGS, selectedEntityType, selectedNetworkType, selectedCategory, selectedCalcType} = this.state
 
-    return(
+    return (
       <div style={{display: 'flex', flexDirection: 'column'}}>
         <div style={{flex: '0 0 auto'}}>
           <h3 className="mb-3 mt-3">Summary</h3>
@@ -120,8 +109,8 @@ export class RoicReportsSmall extends Component {
                       <td className="indent-1 text-capitalize">
                         {FIBER_STRINGS[fiberCost.fiberType]} - 
                         {CABLE_CONSTRUCTION_STRINGS[fiberCost.constructionType]}
-                        ({numberformatter_0.format(fiberCost.lengthMeters * $ctrl.config.length.meters_to_length_units)}
-                        {config.length.length_units})
+                        ({numberformatter_0.format(fiberCost.lengthMeters * this.config.length.meters_to_length_units)}
+                        {this.config.length.length_units})
                       </td>
                       <td>{currencyformatter.format(fiberCost.totalCost / 1000)+" K"}</td>
                     </tr>
@@ -229,47 +218,44 @@ export class RoicReportsSmall extends Component {
     )
   }
 
-  handleNetworkTypeChange(e){
+  handleNetworkTypeChange (e) {
     let selectedNetworkType = {}
     {this.props.networkTypes.map((item, index) => {
       if(item.id === e.target.value){
         selectedNetworkType = item
       }
-    })
-    }
+    })}
     this.setState({selectedNetworkType: selectedNetworkType})
   }
 
-  handleCategoriesChange(e){
+  handleCategoriesChange (e) {
     let selectedCategory = {}
     {this.props.categories.map((item, index) => {
       if(item.id === e.target.value){
         selectedCategory = item
       }
-    })
-    }
+    })}
     this.setState({selectedCategory: selectedCategory})
   }
 
-  handleCalcTypeChange(e){
+  handleCalcTypeChange (e) {
     let selectedCalcType = {}
-    {this.props.selectedCategory.calcTypes.map((item, index) => {
+    console.log(this.state.selectedCategory)
+    {this.state.selectedCategory.calcTypes.map((item, index) => {
       if(item.id === e.target.value){
         selectedCalcType = item
       }
-    })
-    }
+    })}
     this.setState({selectedCalcType: selectedCalcType})
   }
 
-  handleEntityTypeChange(e){
+  handleEntityTypeChange (e) {
     let selectedEntityType = {}
     {this.props.entityTypes.map((item, index) => {
       if(item.id === e.target.value){
         selectedEntityType = item
       }
-    })
-    }
+    })}
     this.setState({selectedEntityType: selectedEntityType})
   }
 }
@@ -281,7 +267,6 @@ const mapStateToProps = (state) => ({
 })  
 
 const mapDispatchToProps = (dispatch) => ({
-  getEnumStrings: () => dispatch(AnalysisActions.getEnumStrings()),
   loadNetworkNodeTypesEntity: () => dispatch(AnalysisActions.loadNetworkNodeTypesEntity())
 })
 

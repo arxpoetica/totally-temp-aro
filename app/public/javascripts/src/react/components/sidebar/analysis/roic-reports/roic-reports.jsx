@@ -8,7 +8,6 @@ export class RoicReports extends Component {
     super(props)
 
     this.datasetOverride = { fill: false }
-    this.roicResults = null
 
     this.calcTypes = [
       { id: 'opex_expenses', description: 'Operating Expenses', tickPrefix: '$ ', tickSuffix: '', multiplier: 1.0 },
@@ -96,9 +95,8 @@ export class RoicReports extends Component {
       { id: 'celltower', description: 'Cell Towers' }
     ]
   
-
     this.state = {
-  
+      roicResults: null
     }
 
   }
@@ -154,13 +152,14 @@ export class RoicReports extends Component {
     }
   }
 
-  componentWillReceiveProps (changesObj) {
-    if (changesObj.roicResultsData && this.props.roicResultsData) {
-      this.roicResults = JSON.parse(JSON.stringify(this.props.roicResultsData))
+  componentDidUpdate (prevProps) {
+    if(JSON.stringify(this.props) !== JSON.stringify(prevProps)) {
+      this.setState({roicResults: JSON.parse(JSON.stringify(this.props.roicResultsData))})
       //this.digestData()
     }
   }
 
+  // ToDo: Convert this.roicResults to his.state.roicResults
   digestData () {
     const currentYear = (new Date()).getFullYear()
     // number of years is number of vals in each curve, just grab the first one and get the length
@@ -187,25 +186,28 @@ export class RoicReports extends Component {
     })
   }
 
-  render() {
+  render () {
+
+    const {roicResults} = this.state;
+    const {reportSize} = this.props;
+
     return (
       <div>
-        {this.props.reportSize === 'small' &&
-        <RoicReportsSmall
-          categories={this.categories}
-          entityTypes={this.entityTypes}
-          networkTypes={this.networkTypes}
-          calcTypes={this.calcTypes}
-          roicResults={this.roicResults}
-          //timeLabels={this.xAxisLabels}
-          datasetOverride={this.datasetOverride}
-          graphOptions={this.graphOptions}
-        />
+        {reportSize === 'small' &&
+          <RoicReportsSmall
+            categories={this.categories}
+            entityTypes={this.entityTypes}
+            networkTypes={this.networkTypes}
+            calcTypes={this.calcTypes}
+            roicResults={roicResults}
+            //timeLabels={this.xAxisLabels}
+            datasetOverride={this.datasetOverride}
+            graphOptions={this.graphOptions}
+          />
         }
       </div>
     )
   }
-
 }
 
 const mapStateToProps = (state) => ({

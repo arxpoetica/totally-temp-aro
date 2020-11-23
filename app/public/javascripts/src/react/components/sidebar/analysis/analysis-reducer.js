@@ -1,11 +1,12 @@
 import Actions from '../../../common/actions'
 
 const defaultState = {
-}
-
-function setROICResultsForPlan (state, roicResultsData) {
-  return { ...state,
-    roicResultsData: roicResultsData
+  enumStrings: {},
+  networkNodeTypesEntity: [],
+  expertModeTypes: {
+    OPTIMIZATION_SETTINGS: { id: 'OPTIMIZATION_SETTINGS', label: 'Optimization Settings' },
+    MANUAL_PLAN_TARGET_ENTRY: { id: 'MANUAL_PLAN_TARGET_ENTRY', label: 'Manual plan Target Selection', isQueryValid: false },
+    MANUAL_PLAN_SA_ENTRY: { id: 'MANUAL_PLAN_SA_ENTRY', label: 'Manual Plan Service Area Selection', isQueryValid: false }
   }
 }
 
@@ -18,12 +19,6 @@ function setEnumStrings (state, enumStrings) {
 function setNetworkNodeTypesEntity (state, networkNodeTypesEntity) {
   return { ...state,
     networkNodeTypesEntity: networkNodeTypesEntity
-  }
-}
-
-function setExpertModeTypes (state, expertModeTypes) {
-  return { ...state,
-    expertModeTypes: expertModeTypes
   }
 }
 
@@ -48,17 +43,12 @@ function setAvailableScopeContextKeys (state, scopeContextKeys) {
 
 function AnalysisReducer (state = defaultState, action) {
   switch (action.type) {
-    case Actions.ANALYSIS_MODE_ROIC_RESULT_DATA:
-      return setROICResultsForPlan(state, action.payload)
 
     case Actions.ANALYSIS_MODE_ENUM_STRINGS:
       return setEnumStrings(state, action.payload)  
       
     case Actions.ANALYSIS_MODE_NETWORK_NODE_TYPE_ENTITY:
       return setNetworkNodeTypesEntity(state, action.payload) 
-      
-    case Actions.ANALYSIS_MODE_EXPERT_MODE_TYPES:
-      return setExpertModeTypes(state, action.payload)
       
     case Actions.ANALYSIS_MODE_SELECTED_EXPERT_MODE:
       return setSelectedExpertMode(state, action.payload) 
