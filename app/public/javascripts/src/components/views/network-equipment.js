@@ -14,7 +14,7 @@ const getEquipmentsArray = createSelector([getAllNetworkEquipmentLayers], networ
 })
 
 class NetworkEquipmentController {
-  constructor($rootScope, $http, $location, $ngRedux, map_tools, state,rState) {
+  constructor($rootScope, $http, $location, $ngRedux, map_tools, state,rxState) {
     this.map_tools = map_tools
     this.state = state
     this.currentUser = state.loggedInUser
@@ -35,7 +35,7 @@ class NetworkEquipmentController {
       .subscribe((newValue) => this.updateMapLayers())
 
     // Update map layers when the dataItems property of state changes
-    rState.viewSettingsChanged.getMessage().skip(1).subscribe((data) => {
+    rxState.viewSettingsChanged.getMessage().skip(1).subscribe((data) => {
       this.updateMapLayers()
     }) 
 
@@ -229,6 +229,34 @@ class NetworkEquipmentController {
     })
   }
 
+  // ---
+
+  // We will change this later,
+  //  currently we are just telling Redux that these values have changed
+  //  next: change over all components that read the state.js version to using Redux
+
+  onUpdateExistingEquipmentVisibility () {
+    // these shouldn't be hardcoded but this will all be migrated shortly
+    this.onUpdateTypeVisibility('equipment', 'existing', this.state.equipmentLayerTypeVisibility.existing)
+  }
+  onUpdatePlannedEquipmentVisibility () {
+    this.onUpdateTypeVisibility('equipment', 'planned', this.state.equipmentLayerTypeVisibility.planned)
+  }
+
+  onUpdateTypeVisibility (typeA, typeB, isVisible) {
+    // typeA: equipment / cable
+    // typeB: existing / planned
+    var typeVisibility = {}
+    typeVisibility[typeA] = {}
+    typeVisibility[typeA][typeB] = isVisible
+    this.setTypeVisibility(typeVisibility)
+    
+    this.updateMapLayers()
+  }
+
+  // ---
+
+  // ToDo: this does not belong here. Don't put the powerplant in the light switch.
   updateMapLayers() {
     if(!this.networkEquipmentLayers) return
     // Make a copy of the state mapLayers. We will update this
@@ -281,9 +309,7 @@ class NetworkEquipmentController {
       setNetworkEquipmentSubtypeVisibility: (layerType, layer, subtypeId, isVisible) => {
         dispatch(MapLayerActions.setNetworkEquipmentSubtypeVisibility(layerType, layer, subtypeId, isVisible))
       },
-      updateType: (visibilityType, isVisible) => {
-        dispatch(MapLayerActions.setNetworkEquipmentLayerVisibilityType(visibilityType, isVisible))
-      }
+      setTypeVisibility: (typeVisibility) => dispatch(MapLayerActions.setTypeVisibility(typeVisibility))
     }
   }
 
@@ -311,7 +337,7 @@ class NetworkEquipmentController {
   }
 }
 
-NetworkEquipmentController.$inject = ['$rootScope', '$http', '$location', '$ngRedux', 'map_tools', 'state', 'rState']
+NetworkEquipmentController.$inject = ['$rootScope', '$http', '$location', '$ngRedux', 'map_tools', 'state', 'rxState']
 
 let networkEquipment = {
   templateUrl: '/components/views/network-equipment.html',

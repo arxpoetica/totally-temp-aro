@@ -39,6 +39,13 @@ export class PlanDataSelection extends Component {
     this.props.onDataSelectionChange({ childKey: 'dataSelection', isValid: isValid, isInit: true })
   }
 
+  componentDidUpdate(prevProps) {
+    // Trigger updateSelectionValidation() if props change
+    if(this.props.dataItems != prevProps.dataItems) {
+      this.updateSelectionValidation()
+    }
+  }
+
   // To set Props values to State if props get modified
   // https://reactjs.org/docs/react-component.html#static-getderivedstatefromprops
   static getDerivedStateFromProps(nextProps, state) {
@@ -79,44 +86,48 @@ export class PlanDataSelection extends Component {
               return (
                 <React.Fragment key={objIndex}>
                 {!objValue.hidden &&
-                  <tr style={{verticalAlign: 'middle'}}>
-                    <td>{objValue.description}</td>
-                    <td>
-                      <div style={{display:'flex'}}>
-                        <Select
-                          defaultValue={defaultList}
-                          closeMenuOnSelect={false}
-                          isMulti
-                          components={{ Option }}
-                          options={optionsList}
-                          hideSelectedOptions={false}
-                          backspaceRemovesValue={false}
-                          isSearchable={false} 
-                          isClearable=''
-                          isDisabled=''
-                          placeholder="None Selected"
-                          onChange={(e,id)=>this.onSelectionChanged(e, objIndex, objKey)}
-                          styles={styles}
-                        />
-                        <div className="btn-group btn-group-sm" style={{flex: '0 0 auto'}}>
-                          {this.props.isDataSourceEditable[objKey] &&
-                            <button className="btn btn-light" onClick={(e)=>this.editDataSource(objKey)} >
-                              <span className="fa fa-edit"></span>
-                            </button>
+                  <> 
+                    {!objValue.hideDataItems && // To Show/hide data_Items
+                      <tr style={{verticalAlign: 'middle'}}>
+                        <td>{objValue.description}</td>
+                        <td>
+                          <div style={{display:'flex'}}>
+                            <Select
+                              defaultValue={defaultList}
+                              closeMenuOnSelect={false}
+                              isMulti
+                              components={{ Option }}
+                              options={optionsList}
+                              hideSelectedOptions={false}
+                              backspaceRemovesValue={false}
+                              isSearchable={false} 
+                              isClearable=''
+                              isDisabled=''
+                              placeholder="None Selected"
+                              onChange={(e,id)=>this.onSelectionChanged(e, objIndex, objKey)}
+                              styles={styles}
+                            />
+                            <div className="btn-group btn-group-sm" style={{flex: '0 0 auto'}}>
+                              {this.props.isDataSourceEditable[objKey] &&
+                                <button className="btn btn-light" onClick={(e)=>this.editDataSource(objKey)} >
+                                  <span className="fa fa-edit"></span>
+                                </button>
+                              }
+                              <button className="btn btn-light" disabled={!objValue.uploadSupported} onClick={(e)=>this.openDataSelection(objValue.id)}>
+                                <span className="fa fa-upload"></span>
+                              </button>
+                            </div>
+                          </div>
+                          {!objValue.isMinValueSelectionValid &&
+                            <span className="label label-danger alert-danger" style={{padding: '0px 10px'}}>Error: At least {objValue.minValue} items must be selected</span>
                           }
-                          <button className="btn btn-light" disabled={!objValue.uploadSupported} onClick={(e)=>this.openDataSelection(objValue.id)}>
-                            <span className="fa fa-upload"></span>
-                          </button>
-                        </div>
-                      </div>
-                      {!objValue.isMinValueSelectionValid &&
-                        <span className="label label-danger alert-danger" style={{padding: '0px 10px'}}>Error: At least {objValue.minValue} items must be selected</span>
-                      }
-                      {!objValue.isMaxValueSelectionValid &&
-                        <span className="label label-danger alert-danger" style={{padding: '0px 10px'}}>Error: A maximum of {objValue.maxValue} items can be selected</span>
-                      }
-                    </td>
-                  </tr>
+                          {!objValue.isMaxValueSelectionValid &&
+                            <span className="label label-danger alert-danger" style={{padding: '0px 10px'}}>Error: A maximum of {objValue.maxValue} items can be selected</span>
+                          }
+                        </td>
+                      </tr>
+                    }
+                  </>
                 }
                 </React.Fragment>
               )}
@@ -171,6 +182,15 @@ export class PlanDataSelection extends Component {
       if (this.props.loggedInUser.perspective === 'sales' && this.sales_role_remove.indexOf(dataItemKey) !== -1) {
         this.state.dataItems[dataItemKey].hidden = true
       }
+
+      // To check Whether showPlanDataSelection has the required dataItemKey
+      if(this.props.showPlanDataSelection.hasOwnProperty(dataItemKey)){
+        // Hide dataItems based on showPlanDataSelection object
+        if(this.props.showPlanDataSelection[dataItemKey] === false) {
+          this.state.dataItems[dataItemKey].hideDataItems = true
+        }
+      }
+
       dataItem = this.state.dataItems[dataItemKey]
       dataItem.isMinValueSelectionValid = dataItem.selectedLibraryItems.length >= dataItem.minValue
       dataItem.isMaxValueSelectionValid = dataItem.selectedLibraryItems.length <= dataItem.maxValue
@@ -241,7 +261,8 @@ export class PlanDataSelection extends Component {
     loggedInUser: state.user.loggedInUser,
     authPermissions: state.user.authPermissions,
     dataItems: state.plan.dataItems,
-    isDataSourceEditable: state.plan.isDataSourceEditable
+    isDataSourceEditable: state.plan.isDataSourceEditable,
+    showPlanDataSelection : state.toolbar.appConfiguration.showPlanDataSelection
   })   
 
   const mapDispatchToProps = (dispatch) => ({

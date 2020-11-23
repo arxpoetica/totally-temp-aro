@@ -20,17 +20,22 @@ export class RateReachManager extends Component {
   }
 
   componentDidMount () {
-    this.props.reloadRateReachManagerConfiguration(this.props.selectedResourceForClone.id, this.props.loggedInUser)
+    if (this.props.selectedResourceForClone && this.props.selectedResourceForClone.id) {
+      this.props.reloadRateReachManagerConfiguration(this.props.selectedResourceForClone.id, this.props.loggedInUser)
+    }
     this.props.setModalTitle('Create Rate Reach Manager')
   }
 
   render () {
+    /*
     return (this.categoryTypes === null || 
       this.props.rateReachManagerConfigs === undefined ||
       this.props.rateReachManagerConfigs.rateReachConfig === undefined
     )
     ? null
     : this.renderRateReachManager()
+    */
+    return this.renderRateReachManager()
   }  
 
   renderRateReachManager () {
@@ -71,7 +76,9 @@ export class RateReachManager extends Component {
               <div className="form-group row">
                 <label className="col-sm-4 control-label">Category Type</label>
                 <div className="col-sm-8">
-                  <select id="cboCategoryTypes" disabled={this.props.selectedResourceForClone}  className="form-control" name="category" onChange={(e)=>this.handleChange(e)} value={this.props.rateReachManagerConfigs.rateReachConfig.categoryType}> 
+                  <select id="cboCategoryTypes" disabled={this.props.selectedResourceForClone}  className="form-control" name="category" 
+                    onChange={(e)=>this.handleChange(e)} 
+                    value={this.props.rateReachManagerConfigs && this.props.rateReachManagerConfigs.rateReachConfig ? this.props.rateReachManagerConfigs.rateReachConfig.categoryType : undefined}> 
                     {this.categoryTypes.map(item => <option value={item.id} key={item.id}>{item.description}</option>)}
                   </select>
                 </div>
@@ -106,7 +113,7 @@ export class RateReachManager extends Component {
 
   handleCreateRateReachManager(){
     var rateReachManager = { ...this.state.rateReachManager }
-    rateReachManager.category = this.props.rateReachManagerConfigs.rateReachConfig.categoryType
+    // rateReachManager.category = this.props.rateReachManagerConfigs.rateReachConfig.categoryType
     let selectedResourceForClone = this.props.selectedResourceForClone;
     let loggedInUser = this.props.loggedInUser;
     this.props.createRateReachManager(rateReachManager, selectedResourceForClone, loggedInUser);

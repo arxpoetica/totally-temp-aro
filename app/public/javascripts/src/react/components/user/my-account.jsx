@@ -75,6 +75,7 @@ export class MyAccount extends Component {constructor (props) {
 
                 </form>
                 <div style={{ flex: '0 0 auto' }}>
+                    <button className={'btn btn-danger'} onClick={() => this.logoutApp()}>Logout</button>
                     <button className={'btn btn-primary float-right'} onClick={() => this.updateAccount()}><i className={'fa fa-save'} />&nbsp;&nbsp;Update Settings</button>
                 </div>
             </div>
@@ -90,6 +91,11 @@ export class MyAccount extends Component {constructor (props) {
     updateAccount () {
         this.props.updateUserAccount(this.state.accountDetails)
     }
+
+    logoutApp () {
+        window.location.href = '/logout';
+    }
+  
 }
 
 

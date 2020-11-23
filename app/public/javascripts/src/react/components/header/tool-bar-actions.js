@@ -459,6 +459,15 @@ function setSelectedHeatMapOption (selectedHeatMapOption){
   }
 }
 
+function setViewSetting (viewSetting) {
+  return dispatch => {
+    dispatch({
+      type: Actions.TOOL_BAR_SET_VIEW_SETTING,
+      payload: viewSetting
+    })
+  }
+}
+
 export default {
   setPlanInputsModal,
   selectedDisplayMode,
@@ -483,5 +492,6 @@ export default {
   getTagColour,
   makeCurrentPlanNonEphemeral,
   copyCurrentPlanTo,
-  setSelectedHeatMapOption
+  setSelectedHeatMapOption,
+  setViewSetting
 }

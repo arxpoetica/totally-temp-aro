@@ -50,9 +50,9 @@
     <li role="presentation" class="nav-item" ng-click="$ctrl.currentView = $ctrl.views.Search_plans">
       <a href="#" ng-class="{ 'nav-link': true, 'active': $ctrl.currentView === $ctrl.views.Search_plans }">Search Plans</a>
     </li>
-    <li role="presentation" class="nav-item" ng-click="$ctrl.currentView = $ctrl.views.Recent_plans">
+    <!-- <li role="presentation" class="nav-item" ng-click="$ctrl.currentView = $ctrl.views.Recent_plans">
       <a href="#" ng-class="{ 'nav-link': true, 'active': $ctrl.currentView === $ctrl.views.Recent_plans }">Recent Plans</a>
-    </li>
+    </li> -->
   </ul>
 
   <plan-info ng-if="$ctrl.currentView == $ctrl.views.Plan_Info"
@@ -61,7 +61,7 @@
     update-tag="$ctrl.updateTag(plan,removeTag)"
     delete-plan="$ctrl.deletePlan(plan)"></plan-info>
 
-  <plan-info-recent ng-if="$ctrl.currentView == $ctrl.views.Recent_plans"></plan-info-recent>
+  <!-- <plan-info-recent ng-if="$ctrl.currentView == $ctrl.views.Recent_plans"></plan-info-recent> -->
 
   <plan-search ng-if="$ctrl.currentView == $ctrl.views.Search_plans"
                system-actors="$ctrl.state.systemActors"

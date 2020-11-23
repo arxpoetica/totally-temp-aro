@@ -246,6 +246,13 @@ function setSelectedBoundaryType (selectedBoundaryType) {
   }
 }
 
+function setTypeVisibility (typeVisibility) {
+  return {
+    type: Actions.LAYERS_SET_TYPE_VISIBILITY,
+    payload: typeVisibility
+  }
+}
+
 export default {
   setLayerVisibility,
   setNetworkEquipmentLayerVisibility,
@@ -263,5 +270,6 @@ export default {
   updateAnnotation,
   removeAnnotation,
   clearOlderAnnotations,
-  setSelectedBoundaryType
+  setSelectedBoundaryType,
+  setTypeVisibility
 }
