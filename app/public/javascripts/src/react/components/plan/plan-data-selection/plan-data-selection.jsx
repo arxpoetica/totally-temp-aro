@@ -64,11 +64,26 @@ export class PlanDataSelection extends Component {
   }
 
   renderPlanDataSelection() {
+
+    // Dataitems Objects needed to be converted to Array for Sorting
+    let dataItemsArray = []
+    Object.entries(this.state.dataItems).map(([ key, value ], objIndex) => {
+      if(!value.hideDataItems) { // To Show/hide data_Items
+        value.dataItemsKey = key // To create a 'dataItemsKey' key for new array
+        dataItemsArray.push(value) // Need to push values to array
+      }
+    })
+
+    // sort dataItems based on rankIndex
+    let sorted_dataItems = dataItemsArray.sort((a, b) => parseFloat(b.rankIndex) - parseFloat(a.rankIndex))
+
     return (
       <div style={{position: 'relative', height: '100%'}}>
         <table className="table table-sm table-striped">
           <tbody>
-            {Object.entries(this.state.dataItems).map(([ objKey, objValue ], objIndex) => {
+            {sorted_dataItems.map((objValue, objIndex) => {
+
+              let objKey = objValue.dataItemsKey
 
               let optionsList = []; let defaultList=[];
               if(objValue.allLibraryItems.length > 0){
@@ -84,50 +99,46 @@ export class PlanDataSelection extends Component {
               }
 
               return (
-                <React.Fragment key={objIndex}>
+                <React.Fragment key={objValue.id}>
                 {!objValue.hidden &&
-                  <> 
-                    {!objValue.hideDataItems && // To Show/hide data_Items
-                      <tr style={{verticalAlign: 'middle'}}>
-                        <td>{objValue.description}</td>
-                        <td>
-                          <div style={{display:'flex'}}>
-                            <Select
-                              defaultValue={defaultList}
-                              closeMenuOnSelect={false}
-                              isMulti
-                              components={{ Option }}
-                              options={optionsList}
-                              hideSelectedOptions={false}
-                              backspaceRemovesValue={false}
-                              isSearchable={false} 
-                              isClearable=''
-                              isDisabled=''
-                              placeholder="None Selected"
-                              onChange={(e,id)=>this.onSelectionChanged(e, objIndex, objKey)}
-                              styles={styles}
-                            />
-                            <div className="btn-group btn-group-sm" style={{flex: '0 0 auto'}}>
-                              {this.props.isDataSourceEditable[objKey] &&
-                                <button className="btn btn-light" onClick={(e)=>this.editDataSource(objKey)} >
-                                  <span className="fa fa-edit"></span>
-                                </button>
-                              }
-                              <button className="btn btn-light" disabled={!objValue.uploadSupported} onClick={(e)=>this.openDataSelection(objValue.id)}>
-                                <span className="fa fa-upload"></span>
-                              </button>
-                            </div>
-                          </div>
-                          {!objValue.isMinValueSelectionValid &&
-                            <span className="label label-danger alert-danger" style={{padding: '0px 10px'}}>Error: At least {objValue.minValue} items must be selected</span>
+                  <tr style={{verticalAlign: 'middle'}}>
+                    <td>{objValue.description}</td>
+                    <td>
+                      <div style={{display:'flex'}}>
+                        <Select
+                          defaultValue={defaultList}
+                          closeMenuOnSelect={false}
+                          isMulti
+                          components={{ Option }}
+                          options={optionsList}
+                          hideSelectedOptions={false}
+                          backspaceRemovesValue={false}
+                          isSearchable={false} 
+                          isClearable=''
+                          isDisabled=''
+                          placeholder="None Selected"
+                          onChange={(e,id)=>this.onSelectionChanged(e, objValue.id, objKey)}
+                          styles={styles}
+                        />
+                        <div className="btn-group btn-group-sm" style={{flex: '0 0 auto'}}>
+                          {this.props.isDataSourceEditable[objKey] &&
+                            <button className="btn btn-light" onClick={(e)=>this.editDataSource(objKey)} >
+                              <span className="fa fa-edit"></span>
+                            </button>
                           }
-                          {!objValue.isMaxValueSelectionValid &&
-                            <span className="label label-danger alert-danger" style={{padding: '0px 10px'}}>Error: A maximum of {objValue.maxValue} items can be selected</span>
-                          }
-                        </td>
-                      </tr>
-                    }
-                  </>
+                          <button className="btn btn-light" disabled={!objValue.uploadSupported} onClick={(e)=>this.openDataSelection(objValue.id)}>
+                            <span className="fa fa-upload"></span>
+                          </button>
+                        </div>
+                      </div>
+                      {!objValue.isMinValueSelectionValid &&
+                        <span className="label label-danger alert-danger" style={{padding: '0px 10px'}}>Error: At least {objValue.minValue} items must be selected</span>
+                      }
+                      {!objValue.isMaxValueSelectionValid &&
+                        <span className="label label-danger alert-danger" style={{padding: '0px 10px'}}>Error: A maximum of {objValue.maxValue} items can be selected</span>
+                      }
+                    </td>
+                  </tr>
                 }
                 </React.Fragment>
               )}
@@ -145,11 +156,11 @@ export class PlanDataSelection extends Component {
     )
   }
 
-  onSelectionChanged(selectedLibraryItems, oldobjIndex, dataSource){
+  onSelectionChanged(selectedLibraryItems, objId, dataSource){
 
     var dataItems = this.state.dataItems
     {Object.entries(dataItems).map(([ objKey, objValue ], objIndex) => {
-      if(oldobjIndex === objIndex){
+      if(objId === objValue.id){
         objValue.selectedLibraryItems = [];
         objValue.allLibraryItems.map(function(allItemKey) {
           if(selectedLibraryItems !== null) {
@@ -186,14 +197,20 @@ export class PlanDataSelection extends Component {
       // To check Whether showPlanDataSelection has the required dataItemKey
       if(this.props.showPlanDataSelection.hasOwnProperty(dataItemKey)){
         // Hide dataItems based on showPlanDataSelection object
-        if(this.props.showPlanDataSelection[dataItemKey] === false) {
+        if(this.props.showPlanDataSelection[dataItemKey].visibility === false) {
           this.state.dataItems[dataItemKey].hideDataItems = true
         }
+
+        // To set rankIndex in dataItems object
+        this.state.dataItems[dataItemKey].rankIndex = this.props.showPlanDataSelection[dataItemKey].rankIndex
       }
 
       dataItem = this.state.dataItems[dataItemKey]
-      dataItem.isMinValueSelectionValid = dataItem.selectedLibraryItems.length >= dataItem.minValue
-      dataItem.isMaxValueSelectionValid = dataItem.selectedLibraryItems.length <= dataItem.maxValue
+      // To validate selection only for the non-hided items
+      if(!dataItem.hideDataItems) {
+        dataItem.isMinValueSelectionValid = dataItem.selectedLibraryItems.length >= dataItem.minValue
+        dataItem.isMaxValueSelectionValid = dataItem.selectedLibraryItems.length <= dataItem.maxValue
+      }
     })
     this.setState({dataItems: this.state.dataItems})
   }
