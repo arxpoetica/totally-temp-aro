@@ -3,11 +3,17 @@ import Actions from '../../../common/actions'
 const defaultState = {
   enumStrings: {},
   networkNodeTypesEntity: [],
+  expertMode: {
+    OPTIMIZATION_SETTINGS: '',
+    MANUAL_PLAN_TARGET_ENTRY: '',
+    MANUAL_PLAN_SA_ENTRY: ''
+  },
   expertModeTypes: {
     OPTIMIZATION_SETTINGS: { id: 'OPTIMIZATION_SETTINGS', label: 'Optimization Settings' },
     MANUAL_PLAN_TARGET_ENTRY: { id: 'MANUAL_PLAN_TARGET_ENTRY', label: 'Manual plan Target Selection', isQueryValid: false },
     MANUAL_PLAN_SA_ENTRY: { id: 'MANUAL_PLAN_SA_ENTRY', label: 'Manual Plan Service Area Selection', isQueryValid: false }
-  }
+  },
+  selectedExpertMode: 'MANUAL_PLAN_SA_ENTRY'
 }
 
 function setEnumStrings (state, enumStrings) {
@@ -40,6 +46,17 @@ function setAvailableScopeContextKeys (state, scopeContextKeys) {
   }
 }
 
+function setExpertMode (state, expertMode) {
+  return { ...state,
+    expertMode: expertMode
+  }
+}
+
+function setExpertModeTypes (state, expertModeTypes) {
+  return { ...state,
+    expertModeTypes: expertModeTypes
+  }
+}
 
 function AnalysisReducer (state = defaultState, action) {
   switch (action.type) {
@@ -58,6 +75,12 @@ function AnalysisReducer (state = defaultState, action) {
 
     case Actions.ANALYSIS_MODE_SUPER_CONTEXT_KEYS:
       return setAvailableScopeContextKeys(state, action.payload)
+
+    case Actions.ANALYSIS_MODE_EXPERT_MODE:
+      return setExpertMode(state, action.payload)
+      
+      case Actions.ANALYSIS_MODE_EXPERT_MODE_TYPES:
+        return setExpertModeTypes(state, action.payload)      
 
     default:
       return state

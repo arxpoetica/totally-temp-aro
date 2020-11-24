@@ -141,10 +141,30 @@ function getAvailableScopeContextKeys (obj, parentKey) {
   }
 }
 
+function setExpertMode(expertMode){
+  return dispatch => {
+    dispatch({
+      type: Actions.ANALYSIS_MODE_EXPERT_MODE,
+      payload: expertMode
+    })
+  }
+}
+
+function setExpertModeTypes(expertModeTypes){
+  return dispatch => {
+    dispatch({
+      type: Actions.ANALYSIS_MODE_EXPERT_MODE_TYPES,
+      payload: expertModeTypes
+    })
+  }
+}
+
 export default {
   setEnumStrings,
   loadNetworkNodeTypesEntity,
   handleModifyClicked,
   setSelectedExpertMode,
-  getExpertModeScopeContext
+  getExpertModeScopeContext,
+  setExpertMode,
+  setExpertModeTypes
 }

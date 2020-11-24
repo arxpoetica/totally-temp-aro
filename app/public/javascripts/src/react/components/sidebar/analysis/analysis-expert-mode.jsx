@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
 import AnalysisActions from './analysis-actions'
-import rxState from '../../../common/rxState'
 import { createSelector } from 'reselect'
 import ToolBarActions from '../../header/tool-bar-actions'
 
@@ -10,13 +9,10 @@ export class AnalysisExpertMode extends Component {
   constructor (props) {
     super(props)
 
-    this.rxState = new rxState();
-    
-    this.props.setSelectedExpertMode(this.props.expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].id)
     this.props.getExpertModeScopeContext(this.props.plan)
 
     this.state = {
-      expertMode: this.rxState.expertMode,
+      expertMode: this.props.expertMode,
     }
   }
 
@@ -70,21 +66,26 @@ export class AnalysisExpertMode extends Component {
     var expertMode =  this.state.expertMode;
     expertMode['OPTIMIZATION_SETTINGS'] = e.target.value
     this.setState({expertMode: expertMode})
+    this.props.setExpertMode(expertMode) // To set the changed 'OPTIMIZATION_SETTINGS' in redux
   }
 
   validateExpertModeQuery (e) {
     var expertMode =  this.state.expertMode;
     var selectedExpertMode = this.props.selectedExpertMode
+
     expertMode[selectedExpertMode]= e.target.value
     this.setState({expertMode: expertMode})
+    this.props.setExpertMode(expertMode)
 
     var hasExcludeTerm = false
     var excludeTerms = ['delete', 'drop', 'update', 'alter', 'insert', 'call', 'commit', 'create']
     excludeTerms.forEach((term) => {
-      if (this.state.expertMode[this.props.selectedExpertMode].toLowerCase().indexOf(term) > -1) hasExcludeTerm = true
+      if (this.state.expertMode[selectedExpertMode].toLowerCase().indexOf(term) > -1) hasExcludeTerm = true
     })
-    this.props.expertModeTypes[this.props.selectedExpertMode].isQueryValid = this.state.expertMode[this.state.selectedExpertMode].toLowerCase().indexOf('select') > -1 &&
-        !hasExcludeTerm
+
+    let expertModeTypes = this.props.expertModeTypes
+    expertModeTypes[selectedExpertMode].isQueryValid = this.state.expertMode[selectedExpertMode].toLowerCase().indexOf('select') > -1 && !hasExcludeTerm
+    this.props.setExpertModeTypes(expertModeTypes)
   }
 
   handleExpertModeTypesChange (e) {
@@ -103,13 +104,16 @@ const mapStateToProps = (state) => ({
   activeSelectionModeId: state.selection.activeSelectionMode.id,
   locationLayers: getLocationLayersList(state),
   plan: state.plan.activePlan,
-  scopeContextKeys: state.analysisMode.scopeContextKeys
+  scopeContextKeys: state.analysisMode.scopeContextKeys,
+  expertMode: state.analysisMode.expertMode,
 })  
 
 const mapDispatchToProps = (dispatch) => ({
   setSelectedExpertMode : (selectedExpertMode) => dispatch(AnalysisActions.setSelectedExpertMode(selectedExpertMode)),
   getOptimizationBody : (optimizationInputs, activeSelectionModeId, locationLayers, plan) => dispatch(ToolBarActions.getOptimizationBody(optimizationInputs, activeSelectionModeId, locationLayers, plan)),
   getExpertModeScopeContext : (plan) => dispatch(AnalysisActions.getExpertModeScopeContext(plan)),
+  setExpertMode : (expertMode) => dispatch(AnalysisActions.setExpertMode(expertMode)),
+  setExpertModeTypes : (expertModeTypes) => dispatch(AnalysisActions.setExpertModeTypes(expertModeTypes))
 })
 
 const AnalysisExpertModeComponent = wrapComponentWithProvider(reduxStore, AnalysisExpertMode, mapStateToProps, mapDispatchToProps)

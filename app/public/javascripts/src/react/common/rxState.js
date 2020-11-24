@@ -52,12 +52,6 @@ class rxState {
       sendMessage: message => mapTileOptionsSubject.next(message),
       getMessage: () => mapTileOptionsSubject.asObservable()
     }
-
-    service.expertMode = {
-      OPTIMIZATION_SETTINGS: '',
-      MANUAL_PLAN_TARGET_ENTRY: '',
-      MANUAL_PLAN_SA_ENTRY: ''
-    }
     
     return service
 

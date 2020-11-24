@@ -17,6 +17,7 @@ import ReportsDownloadModal from '../../optimization/reports/reports-download-mo
 import NetWorkBuildOutput from './network-build/network-build-output.jsx'
 import AnalysisActions from './analysis-actions'
 import AnalysisExpertMode from './analysis-expert-mode.jsx'
+import ExpertButton from './expert-button.jsx'
 
 export class AnalysisMode extends Component {
   constructor (props) {
@@ -79,7 +80,7 @@ export class AnalysisMode extends Component {
 
               {/* Will Render based on Switch case */}
               <div> 
-                {this.renderNetworkAnalysisTypes(NetworkAnalysisTypes)}
+                {this.renderNetworkAnalysisTypes(networkAnalysisType)}
               </div>
 
               <div>
@@ -156,7 +157,9 @@ export class AnalysisMode extends Component {
       case 'NETWORK_PLAN':
         return ''
       case 'NETWORK_ANALYSIS':
-        return ''               
+        return '' 
+      case 'EXPERT_MODE':
+        return <ExpertButton/>               
       default:
         return ''
     }
@@ -168,7 +171,9 @@ export class AnalysisMode extends Component {
 
   onAnalysisTypeChange (e) {
     var localAnalysisTypeId = e.target.value
-    this.setState({localAnalysisType: localAnalysisTypeId});
+    this.state.NetworkAnalysisTypes.forEach(analysisType => {
+      if (analysisType.id === localAnalysisTypeId) this.setState({localAnalysisType: analysisType});
+    })
     this.props.setNetworkAnalysisType(localAnalysisTypeId)
   }
 
