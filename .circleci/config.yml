@@ -76,6 +76,7 @@ workflows:
               only:
                   - master
                   - dev
+                  - bump
       - deploy:
           context: aro_qa_builds
           requires:
