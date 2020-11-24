@@ -16,18 +16,13 @@ class BoundariesController {
     // Creates map layers based on selection in the UI
     this.createdMapLayerKeys = new Set()
 
-    this.selectedCensusCat = null
+    this.selectedLayerCat = null
 
     // When the map zoom changes, map layers can change
     $rootScope.$on('map_zoom_changed', this.updateMapLayers.bind(this))
 
     // Update map layers when the display mode button changes
     this.state.selectedDisplayMode.subscribe((newValue) => this.updateMapLayers())
-
-    this.censusCategories = this.state.censusCategories.getValue()
-    this.state.censusCategories.subscribe((newValue) => {
-      this.censusCategories = newValue
-    })
 
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
   }
@@ -49,7 +44,7 @@ class BoundariesController {
             description: serviceLayer.description, // Service Areas
             type: 'wirecenter',
             key: 'wirecenter',
-            layerId: serviceLayer.id
+            analysisLayerId: serviceLayer.id,
           }
           newTileLayers.push(wirecenterLayer)
         })
@@ -64,7 +59,9 @@ class BoundariesController {
             uiLayerId: uiLayerId++,
             description: 'Census Blocks',
             type: 'census_blocks',
-            key: 'census_blocks'
+            key: 'census_blocks',
+            // NOTE: `-10` is hard coded on the back end as well, so this matches that
+            analysisLayerId: -10,
           })
         }
 
@@ -94,10 +91,10 @@ class BoundariesController {
       .catch((err) => console.error(err))
   }
 
-  onSelectCensusCat () {
-    const id = this.selectedCensusCat && this.selectedCensusCat.id
+  onSelectCategory (category) {
+    const id = this.selectedLayerCat && this.selectedLayerCat.id
     var newSelection = this.state.cloneSelection()
-    newSelection.details.censusCategoryId = id
+    newSelection.details.layerCategoryId = id
     this.state.selection = newSelection
   }
 

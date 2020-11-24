@@ -26,6 +26,7 @@ import NetworkOptimizationActions from '../react/components/optimization/network
 import ViewSettingsActions from '../react/components/view-settings/view-settings-actions'
 import Tools from '../react/components/tool/tools'
 import ToolBarActions from '../react/components/header/tool-bar-actions'
+import { hsvToRgb } from '../react/common/view-utils'
 
 
 const networkAnalysisConstraintsSelector = formValueSelector(ReactComponentConstants.NETWORK_ANALYSIS_CONSTRAINTS)
@@ -38,6 +39,7 @@ const getAllNetworkEquipmentLayers = reduxState => reduxState.mapLayers.networkE
 const getNetworkEquipmentLayersList = createSelector([getAllNetworkEquipmentLayers], (networkEquipmentLayers) => networkEquipmentLayers)
 
 const getAllBoundaryLayers = reduxState => reduxState.mapLayers.boundary
+// FIXME: change boundaries to an array so it doesn't change w/ each `.toJS()`
 const getBoundaryLayersList = createSelector([getAllBoundaryLayers], (boundaries) => boundaries.toJS())
 
 const getAllBoundaryTypesList = reduxState => reduxState.mapLayers.boundaryTypes
@@ -322,11 +324,8 @@ class State {
       $timeout()
     }
 
-    service.censusCategories = new Rx.BehaviorSubject()
-    service.reloadCensusCategories = (censusCategories) => {
-      service.censusCategories.next(censusCategories)
-      service.requestMapLayerRefresh.next(null)
-    }
+    service.angBoundaries = new Rx.BehaviorSubject()
+    service.layerCategories = new Rx.BehaviorSubject()
 
     // The display modes for the application
     service.displayModes = Object.freeze({
@@ -477,35 +476,6 @@ class State {
       }
     })
 
-    // Function to convert from hsv to rgb color values.
-    // https://stackoverflow.com/questions/17242144/javascript-convert-hsb-hsv-color-to-rgb-accurately
-    var hsvToRgb = (h, s, v) => {
-      var r, g, b, i, f, p, q, t
-      i = Math.floor(h * 6)
-      f = h * 6 - i
-      p = v * (1 - s)
-      q = v * (1 - f * s)
-      t = v * (1 - (1 - f) * s)
-      switch (i % 6) {
-        case 0: r = v, g = t, b = p; break
-        case 1: r = q, g = v, b = p; break
-        case 2: r = p, g = v, b = t; break
-        case 3: r = p, g = q, b = v; break
-        case 4: r = t, g = p, b = v; break
-        case 5: r = v, g = p, b = q; break
-      }
-      var rgb = [r, g, b]
-      var color = '#'
-      rgb.forEach((colorValue) => {
-        var colorValueHex = Math.round(colorValue * 255).toString(16)
-        if (colorValueHex.length === 1) {
-          colorValueHex = '0' + colorValueHex
-        }
-        color += colorValueHex
-      })
-      return color
-    }
-
     // We are going to use the golden ratio method from http://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
     // (Furthermore, it is a property of the golden ratio, Φ, that each subsequent hash value divides the interval into which it falls according to the golden ratio!)
     var golden_ratio_conjugate = 0.618033988749895
@@ -515,8 +485,8 @@ class State {
       hue %= 1
       // We are changing the hue while keeping saturation/value the same. Also the fill colors are lighter than stroke colors.
       return {
-        strokeStyle: service.StateViewMode.hsvToRgb(hue, 0.5, 0.5),
-        fillStyle: service.StateViewMode.hsvToRgb(hue, 0.8, 0.5)
+        strokeStyle: hsvToRgb(hue, 0.5, 0.5),
+        fillStyle: hsvToRgb(hue, 0.8, 0.5)
       }
     }
 
@@ -556,7 +526,7 @@ class State {
       details: {
         analysisAreaId: null,
         censusBlockId: null,
-        censusCategoryId: null,
+        layerCategoryId: null,
         roadSegments: new Set(),
         serviceAreaId: null,
         fiberSegments: new Set(),
@@ -1213,25 +1183,7 @@ class State {
 
     service.showDirectedCable = false
 
-    var loadCensusCatData = function () {
-      return $http.get(`/service/tag-mapping/meta-data/census_block/categories`)
-        .then((result) => {
-          let censusCats = {}
-          result.data.forEach((cat) => {
-            let tagsById = {}
-            cat.tags.forEach((tag) => {
-              tag.colourHash = service.StateViewMode.getTagColour(tag)
-              tagsById[tag.id + ''] = tag
-            })
-            cat.tags = tagsById
-            censusCats[cat.id + ''] = cat
-          })
-          service.reloadCensusCategories(censusCats)
-        })
-    }
-    loadCensusCatData()
-
-    var loadBoundaryLayers = function () {
+    var loadBoundaryTypes = function () {
       return $http.get(`/service/boundary_type`)
         .then((result) => {
           var boundaryTypes = result.data
@@ -1243,8 +1195,7 @@ class State {
           service.setSelectedBoundaryType(selectedBoundaryType)
         })
     }
-
-    loadBoundaryLayers()
+    loadBoundaryTypes()
 
     service.setBoundaryTypes = function (boundaryTypes) {
       $ngRedux.dispatch({
@@ -1823,16 +1774,20 @@ class State {
     service.unsubscribeLibraryEvent1 = SocketManager.subscribe('ETL_ADD', service.handleLibraryModifiedEvent.bind(service))
     service.unsubscribePlanRefresh = SocketManager.subscribe('PLAN_REFRESH', service.handlePlanRefreshRequest.bind(service))
 
-    service.mergeToTarget = (nextState, actions) => {
+    // let prior_boundaries = ''
+    let boundariesAreSet = false
+
+    // NOTE: this is willReceiveProps in Angular vernacular
+    service.mergeToTarget = (nextReduxState, actions) => {
       const currentActivePlanId = service.plan && service.plan.id
-      const newActivePlanId = nextState.plan && nextState.plan.id
+      const newActivePlanId = nextReduxState.plan && nextReduxState.plan.id
       const oldDataItems = service.dataItems
 
       // merge state and actions onto controller
-      Object.assign(service, nextState)
+      Object.assign(service, nextReduxState)
       Object.assign(service, actions)
 
-      if ((currentActivePlanId !== newActivePlanId) && (nextState.plan)) {
+      if ((currentActivePlanId !== newActivePlanId) && (nextReduxState.plan)) {
         // The active plan has changed. Note that we are comparing ids because a change in plan state also causes the plan object to update.
         service.onActivePlanChanged()
       }
@@ -1841,15 +1796,28 @@ class State {
       //  with reduxState.plan.selectedDisplayMode
       //  We are currently maintaining state in two places
       //  BUT as of now are only setting it in redux
-      if (nextState.rSelectedDisplayMode &&
+      if (nextReduxState.rSelectedDisplayMode &&
           service.rSelectedDisplayMode !== service.selectedDisplayMode.getValue()) {
         // console.log(service.rSelectedDisplayMode)
         service.selectedDisplayMode.next(service.rSelectedDisplayMode)
       }
-      // if (nextState.rActiveViewModePanel && 
+      // if (nextReduxState.rActiveViewModePanel && 
       //     service.rActiveViewModePanel !== service.activeViewModePanel) {
       //   service.activeViewModePanel = service.rActiveViewModePanel
       // }
+
+      if (
+        nextReduxState.boundaries
+        && JSON.stringify(nextReduxState.boundaries) !== JSON.stringify(service.angBoundaries.getValue())
+      ) {
+        service.angBoundaries.next(nextReduxState.boundaries)
+        let layerCategories = {}
+        for (const bounds of nextReduxState.boundaries) {
+          layerCategories = Object.assign({}, layerCategories, bounds.categories)
+        }
+        service.layerCategories.next(layerCategories)
+        service.requestMapLayerRefresh.next(null)
+      }
     }
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(service.mergeToTarget.bind(service))
 

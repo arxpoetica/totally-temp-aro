@@ -18,9 +18,9 @@ class BoundaryCoverageController {
     this.isChartInit = false
     this.coverageChart = null
 
-    this.censusCategories = this.state.censusCategories.getValue()
-    this.state.censusCategories.subscribe((newValue) => {
-      this.censusCategories = newValue
+    this.layerCategories = this.state.layerCategories.getValue()
+    this.state.layerCategories.subscribe((newValue) => {
+      this.layerCategories = newValue
     })
 
     this.chartSettings = {
@@ -120,19 +120,19 @@ class BoundaryCoverageController {
         var tags = this.formatCensusBlockData(location.censusBlockTagInfo)
 
         for (const catId in tags) {
-          if (this.censusCategories.hasOwnProperty(catId)) {
+          if (this.layerCategories.hasOwnProperty(catId)) {
             tags[catId].forEach((tagId) => {
-              if (this.censusCategories[catId].tags.hasOwnProperty(tagId)) {
+              if (this.layerCategories[catId].tags.hasOwnProperty(tagId)) {
                 if (!boundsCoverage.tagCounts.hasOwnProperty(catId)) {
                   boundsCoverage.tagCounts[catId] = {}
-                  boundsCoverage.tagCounts[catId].description = this.censusCategories[catId].description
+                  boundsCoverage.tagCounts[catId].description = this.layerCategories[catId].description
                   boundsCoverage.tagCounts[catId].tags = {}
                 }
 
                 if (!boundsCoverage.tagCounts[catId].tags.hasOwnProperty(tagId)) {
                   boundsCoverage.tagCounts[catId].tags[tagId] = {}
-                  boundsCoverage.tagCounts[catId].tags[tagId].description = this.censusCategories[catId].tags[tagId].description
-                  boundsCoverage.tagCounts[catId].tags[tagId].colourHash = this.censusCategories[catId].tags[tagId].colourHash
+                  boundsCoverage.tagCounts[catId].tags[tagId].description = this.layerCategories[catId].tags[tagId].description
+                  boundsCoverage.tagCounts[catId].tags[tagId].colourHash = this.layerCategories[catId].tags[tagId].colourHash
                   // clone baseCBCount
                   boundsCoverage.tagCounts[catId].tags[tagId].count = JSON.parse(JSON.stringify(baseCBCount))
                 }

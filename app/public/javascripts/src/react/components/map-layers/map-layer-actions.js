@@ -1,5 +1,7 @@
+import { List } from 'immutable'
 import Actions from '../../common/actions'
 import AroHttp from '../../common/aro-http'
+import { hsvToRgb } from '../../common/view-utils'
 
 // Sets the visibility for a specified layer
 // ToDo: LOCATIONS refactor callers of this to send layer Key instead of whole layer
@@ -120,9 +122,53 @@ function setConstructionSiteLayers (constructionSiteLayers) {
 }
 
 function setBoundaryLayers (boundaryLayers) {
-  return {
-    type: Actions.LAYERS_SET_BOUNDARY,
-    payload: boundaryLayers
+  return dispatch => {
+    // NOTE: trying to move away from the `immutability`
+    // library, hence this deconstruction for future removal
+    const layersClone = boundaryLayers.toJS()
+
+    const ids = [...new Set(layersClone.map(layer => layer.analysisLayerId))]
+    const promises = ids.map(id => AroHttp.get(`/service/category_assignments/${id}`))
+
+    return Promise.all(promises).then(results => {
+
+      results = results.filter(result => result.data.length).map(result => result.data)
+      const newBoundaryLayers = layersClone.map(layer => {
+        const foundGroup = (results.find(group => group[0].analysisLayerId === layer.analysisLayerId) || [])
+
+        // only cloning here so what's mutated below doesn't also mutate this
+        layer.display = JSON.parse(JSON.stringify(foundGroup)).map(group => {
+          group.category.tags = group.category.tags.map(tag => {
+            tag.colourHash = hsvToRgb(tag.colourHue, 1, 1)
+            return tag
+          })
+          return group.category
+        })
+
+        layer.categories = {}
+        for (const group of foundGroup) {
+          const tagsById = {}
+          for (const tag of group.category.tags) {
+            tag.colourHash = hsvToRgb(tag.colourHue, 1, 1)
+            tagsById[tag.id] = tag
+          }
+          group.category.tags = tagsById
+          layer.categories[group.id] = group.category
+        }
+
+        layer.selectedCategory = null
+        return layer
+      })
+
+      dispatch({
+        type: Actions.LAYERS_SET_BOUNDARY,
+        // NOTE: trying to move away from the `immutability`
+        // library, hence this reconstruction. In the future
+        // won't need the `List` wrapper
+        payload: List(newBoundaryLayers),
+      })
+    })
+    .catch(err => console.error(err))
   }
 }
 
