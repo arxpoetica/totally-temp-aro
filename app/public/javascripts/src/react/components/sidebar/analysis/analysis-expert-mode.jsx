@@ -66,7 +66,7 @@ export class AnalysisExpertMode extends Component {
     var expertMode =  this.state.expertMode;
     expertMode['OPTIMIZATION_SETTINGS'] = e.target.value
     this.setState({expertMode: expertMode})
-    this.props.setExpertMode(expertMode) // To set the changed 'OPTIMIZATION_SETTINGS' in redux
+    this.props.setExpertMode(JSON.parse(JSON.stringify(expertMode))) // To set the changed 'OPTIMIZATION_SETTINGS' in redux
   }
 
   validateExpertModeQuery (e) {
@@ -75,7 +75,7 @@ export class AnalysisExpertMode extends Component {
 
     expertMode[selectedExpertMode]= e.target.value
     this.setState({expertMode: expertMode})
-    this.props.setExpertMode(expertMode)
+    this.props.setExpertMode(JSON.parse(JSON.stringify(expertMode)))
 
     var hasExcludeTerm = false
     var excludeTerms = ['delete', 'drop', 'update', 'alter', 'insert', 'call', 'commit', 'create']
@@ -85,7 +85,7 @@ export class AnalysisExpertMode extends Component {
 
     let expertModeTypes = this.props.expertModeTypes
     expertModeTypes[selectedExpertMode].isQueryValid = this.state.expertMode[selectedExpertMode].toLowerCase().indexOf('select') > -1 && !hasExcludeTerm
-    this.props.setExpertModeTypes(expertModeTypes)
+    this.props.setExpertModeTypes(JSON.parse(JSON.stringify(expertModeTypes)))
   }
 
   handleExpertModeTypesChange (e) {
