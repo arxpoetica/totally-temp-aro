@@ -18,6 +18,7 @@ import NetWorkBuildOutput from './network-build/network-build-output.jsx'
 import AnalysisActions from './analysis-actions'
 import AnalysisExpertMode from './analysis-expert-mode.jsx'
 import ExpertButton from './expert-button.jsx'
+import CoverageReportDownloader from  './coverage/coverage-report-downloader.jsx'
 
 export class AnalysisMode extends Component {
   constructor (props) {
@@ -130,7 +131,7 @@ export class AnalysisMode extends Component {
                 }
                 {networkAnalysisType  === 'COVERAGE_ANALYSIS' && coverageReport &&
                   <div style={{height: '100%'}}>
-                    COVERAGE_ANALYSIS
+                    <CoverageReportDownloader/>
                   </div>
                 } 
 
