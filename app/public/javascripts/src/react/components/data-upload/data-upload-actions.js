@@ -4,6 +4,8 @@ import SocketManager from '../../common/socket-manager'
 import NotificationInterface from '../notification/notification-interface'
 import NotificationTypes from '../notification/notification-types'
 import PlanActions from '../plan/plan-actions'
+import ToolBarActions from '../header/tool-bar-actions'
+import GlobalSettingsActions from '../global-settings/globalsettings-action'
 
 function loadMetaData () {
 
@@ -72,7 +74,13 @@ function saveDataSource (uploadDetails,loggedInUser) {
         // Just create Datasource
         getLibraryId (uploadDetails)
         .then((library) => {
-          dispatch(setAllLibraryItems(library.data.dataType,library.data))
+          // Put the application in "Edit Service Layer" mode
+          dispatch(setAllLibraryItems(library.data.dataType, library.data))
+          dispatch(PlanActions.selectDataItems('service_layer', [library.data]))
+          dispatch(GlobalSettingsActions.setShowGlobalSettings(false))
+          dispatch(PlanActions.setIsDataSelection(false))
+          dispatch(ToolBarActions.selectedDisplayMode('VIEW'))
+          dispatch(ToolBarActions.activeViewModePanel('EDIT_SERVICE_LAYER'))
         })
         .then((result) => {
           dispatch(setIsUploading(false))

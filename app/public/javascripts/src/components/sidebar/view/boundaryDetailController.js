@@ -10,9 +10,9 @@ class BoundaryDetailController {
     this.selectedBoundary = null
     this.toggleOtherAttributes = false
 
-    this.censusCategories = this.state.censusCategories.getValue()
-    this.state.censusCategories.subscribe((newValue) => {
-      this.censusCategories = newValue
+    this.layerCategories = this.state.layerCategories.getValue()
+    this.state.layerCategories.subscribe((newValue) => {
+      this.layerCategories = newValue
     })
 
     this.mapFeaturesSelectedEventObserver = state.mapFeaturesSelectedEvent.skip(1).subscribe((event) => {
@@ -23,7 +23,7 @@ class BoundaryDetailController {
       if (event.hasOwnProperty('roadSegments') && event.roadSegments.size > 0) return
 
       // In ruler mode click should not enable boundary view action
-      if (this.state.StateViewMode.allowViewModeClickAction(this.state)) {
+      if (this.state.StateViewMode.allowViewModeClickAction(this.state, this.rIsRulerEnabled)) {
         this.selectedBoundary = null
         if (event.hasOwnProperty('censusFeatures') &&
             event.censusFeatures.length > 0 &&
@@ -34,8 +34,8 @@ class BoundaryDetailController {
           for (var key in tags) {
             if (tags.hasOwnProperty(key)) {
               let tag = {}
-              tag.censusCatDescription = this.censusCategories[key].description
-              tag.tagInfo = this.censusCategories[key].tags[ tags[key] ]
+              tag.layerCatDescription = this.layerCategories[key].description
+              tag.tagInfo = this.layerCategories[key].tags[ tags[key] ]
               tagList.push(tag)
             }
           }
@@ -187,7 +187,7 @@ class BoundaryDetailController {
   mapStateToThis (reduxState) {
     return {
       dataItems: reduxState.plan.dataItems,
-      rActiveViewModePanel: reduxState.plan.rActiveViewModePanel 
+      rIsRulerEnabled: reduxState.toolbar.isRulerEnabled
     }
   }
 

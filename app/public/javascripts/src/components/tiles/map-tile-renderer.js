@@ -8,8 +8,8 @@ import PuppeteerMessages from '../common/puppeteer-messages'
 import Rule from './rule'
 
 class MapTileRenderer {
-  constructor (tileSize, tileDataService, mapTileOptions, censusCategories, selectedDisplayMode, selectionModes, analysisSelectionMode, stateMapLayers, displayModes,
-    viewModePanels, state, getPixelCoordinatesWithinTile, transactionFeatureIds, mapLayers = []) {
+  constructor (tileSize, tileDataService, mapTileOptions, layerCategories, selectedDisplayMode, selectionModes, analysisSelectionMode, stateMapLayers, displayModes,
+    viewModePanels, state, getPixelCoordinatesWithinTile, transactionFeatureIds, rShowFiberSize, rViewSetting, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
@@ -20,13 +20,15 @@ class MapTileRenderer {
     this.selectionModes = selectionModes
     this.analysisSelectionMode = analysisSelectionMode
     this.stateMapLayers = stateMapLayers
-    this.censusCategories = censusCategories
+    this.layerCategories = layerCategories
     this.displayModes = displayModes
     this.viewModePanels = viewModePanels
     this.state = state
     this.getPixelCoordinatesWithinTile = getPixelCoordinatesWithinTile
     this.latestTileUniqueId = 0
     this.transactionFeatureIds = transactionFeatureIds
+    this.rShowFiberSize = rShowFiberSize
+    this.rViewSetting = rViewSetting
 
     const MAX_CONCURRENT_VECTOR_TILE_RENDERS = 5
     this.tileRenderThrottle = new AsyncPriorityQueue((task, callback) => {
@@ -82,8 +84,8 @@ class MapTileRenderer {
     this.oldSelection = oldSelection
   }
 
-  setCensusCategories (censusCategories) {
-    this.censusCategories = censusCategories
+  setLayerCategories (layerCategories) {
+    this.layerCategories = layerCategories
     this.tileDataService.markHtmlCacheDirty()
   }
 
@@ -105,6 +107,18 @@ class MapTileRenderer {
 
   setTransactionFeatureIds (transactionFeatureIds) {
     this.transactionFeatureIds = transactionFeatureIds
+  }
+
+  // Sets the selected rshowFiberSize
+  setReactShowFiberSize (rShowFiberSize) {
+    this.rShowFiberSize = rShowFiberSize
+    this.tileDataService.markHtmlCacheDirty()
+  }
+
+  // Sets the selected rViewSetting
+  setReactViewSetting (rViewSetting) {
+    this.rViewSetting = rViewSetting
+    this.tileDataService.markHtmlCacheDirty()
   }
 
   // ToDo: move this to a place of utility functions
@@ -473,7 +487,7 @@ class MapTileRenderer {
       if (feature.properties) {
         // Try object_id first, else try location_id
         var featureId = feature.properties.object_id || feature.properties.location_id
-
+        
 				if (this.transactionFeatureIds.has(featureId)) {
           // continue // Do not render any features that are part of a transaction
         }
@@ -494,6 +508,7 @@ class MapTileRenderer {
           // This feature is to be excluded. Do not render it. (edit: ONLY in edit mode)
           continue
         }
+        
         if (this.selectedDisplayMode == this.displayModes.VIEW &&
             (this.state.activeViewModePanel == this.viewModePanels.EDIT_LOCATIONS ||
               this.state.activeViewModePanel == this.viewModePanels.EDIT_SERVICE_LAYER) &&
@@ -585,7 +600,7 @@ class MapTileRenderer {
                 'geometryOffset': geometryOffset,
                 'ctx': ctx,
                 'mapLayer': mapLayer,
-                'censusCategories': this.censusCategories,
+                'layerCategories': this.layerCategories,
                 'tileDataService': this.tileDataService,
                 'styles': this.styles,
                 'tileSize': this.tileSize,
@@ -625,8 +640,8 @@ class MapTileRenderer {
                 }
               }
               
-            } else if (this.state.showFiberSize && feature.properties._data_type === 'fiber' && this.state.viewSetting.selectedFiberOption.id !== 1) {
-              var selectedFiberOption = this.state.viewSetting.selectedFiberOption
+            } else if ((this.state.showFiberSize || this.rShowFiberSize) && feature.properties._data_type === 'fiber' && (this.state.viewSetting.selectedFiberOption.id !== 1 || this.rViewSetting.selectedFiberOption.id !== 1)) {
+              var selectedFiberOption = this.rViewSetting.selectedFiberOption
               var viewOption = selectedFiberOption.pixelWidth
               drawingStyles = {
                 lineWidth: TileUtilities.getFiberStrandSize(selectedFiberOption.field, feature.properties.fiber_strands, viewOption.min, viewOption.max, viewOption.divisor, viewOption.atomicDivisor),

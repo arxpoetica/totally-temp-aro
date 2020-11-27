@@ -80,10 +80,12 @@ export class ResourceEditor extends Component {
 			if(prevState.filterText === ''){
 				return {
 					filterText: nextProps.filterText,
+					selectedResourceName: nextProps.selectedResourceName,
 				};
 			} else {
 				return {
 					filterText: prevState.filterText,
+					selectedResourceName: prevState.selectedResourceName,
 				};
 			}
 		}
@@ -92,7 +94,7 @@ export class ResourceEditor extends Component {
   componentDidMount () {
     this.props.getResourceTypes();
     this.props.getResourceManagers(this.state.filterText);
-		this.props.canMakeNewFilter();
+		this.props.canMakeNewFilter(this.state.filterText);
 		this.props.setModalTitle('Resource Managers')
 	}
 	
@@ -213,7 +215,7 @@ export class ResourceEditor extends Component {
 						<div style={{flex: '0 0 auto'}}>
 							<div className="form-group row justify-content-end"> 
 								<div className="col-sm-6">
-									<button onClick={(e)=>this.handleCanMakeNewFilter(e)} value={this.state.selectedResourceName} className="btn btn-light btn-block">
+									<button onClick={(e)=>this.handleCanMakeNewFilter(this.state.selectedResourceName, e)} value={this.state.selectedResourceName} className="btn btn-light btn-block">
 										<i className="fa fa-file action-button-icon"></i>
 										New {this.state.selectedResourceName}
 									</button> 
@@ -358,7 +360,6 @@ export class ResourceEditor extends Component {
 	editSelectedManager(selectedManager){
 		this.props.startEditingResourceManager(selectedManager.id, selectedManager.resourceType, selectedManager.name, 'EDIT_RESOURCE_MANAGER')
 		this.setState({clickedResourceForEditAndClone: selectedManager.resourceType, clickedResource: ''})
-		this.props.setIsRrmManager(true)
 	}
 
 	// Showing a SweetAlert from within a modal dialog does not work (The input box is not clickable).
@@ -461,8 +462,7 @@ export class ResourceEditor extends Component {
 		.catch((err) => console.error(err))
 	}
 
-  handleCanMakeNewFilter (e) {      
-		let clickedResource = e.target.value;
+  handleCanMakeNewFilter (clickedResource) {      
 		if(clickedResource !== 'Competition System'){
 			this.props.setIsResourceEditor(false);
 		}
@@ -533,7 +533,6 @@ const mapDispatchToProps = (dispatch) => ({
 	startEditingResourceManager: (id, type, name, editingMode) => dispatch(ResourceActions.startEditingResourceManager(id, type, name, editingMode)),
 	newManager: (resourceType, resourceName, loggedInUser, sourceId) => dispatch(ResourceActions.newManager(resourceType, resourceName, loggedInUser, sourceId)),
 	setModalTitle: (title) => dispatch(ResourceActions.setModalTitle(title)),
-	setIsRrmManager: (status) => dispatch(ResourceActions.setIsRrmManager(status))
 })
 
 const ResourceEditorComponent = wrapComponentWithProvider(reduxStore, ResourceEditor, mapStateToProps, mapDispatchToProps)

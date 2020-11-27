@@ -200,7 +200,12 @@ export class MapReportsListMapObjects extends Component {
   }
 
   componentWillUnmount () {
-    Object.keys(this.pageIdToMapObjects).forEach(reportPage => this.deleteMapObject(reportPage.uuid))
+    //Object.keys(this.pageIdToMapObjects).forEach(reportPage => this.deleteMapObject(reportPage.uuid))
+    this.props.reportPages.forEach(reportPage => {
+      if (this.pageIdToMapObjects[reportPage.uuid]) {
+        this.deleteMapObject(reportPage.uuid)
+      }
+    })
   }
 }
 

@@ -218,7 +218,7 @@ export class GlobalSettings extends Component {
                           />
             }
             {currentView === this.views.RESOURCE_EDITOR &&
-              <ResourceEditor filterText={this.state.resourceEditorProps}/>
+              <ResourceEditor filterText={this.state.resourceEditorProps} selectedResourceName={this.props.selectedResourceNameProps}/>
             }    
             {currentView === this.views.BROADCAST &&
               <Broadcast/>
@@ -250,6 +250,7 @@ export class GlobalSettings extends Component {
     this.props.setIsResourceSelection(false)
     this.props.setIsDataSelection(false)
     this.props.setShowGlobalSettings(false)
+    this.props.setIsRrmManager(false)
   }
 }
 

@@ -7,8 +7,8 @@
   <button type="button"
           ng-if="$ctrl.state.configuration.perspective.showDisplayModeButtons.VIEW"
           ng-class="{ 'btn display-mode-button': true,
-                      'btn-light': $ctrl.rSelectedDisplayMode !== $ctrl.displayModes.VIEW,
-                      'btn-primary': $ctrl.rSelectedDisplayMode === $ctrl.displayModes.VIEW }"
+                      'btn-light': $ctrl.selectedDisplayMode !== $ctrl.displayModes.VIEW,
+                      'btn-primary': $ctrl.selectedDisplayMode === $ctrl.displayModes.VIEW }"
           ng-click="$ctrl.setSelectedDisplayMode($ctrl.displayModes.VIEW)">
             <div class="fa fa-2x fa-eye"
                 data-toggle="tooltip"
@@ -19,8 +19,8 @@
           ng-if="$ctrl.state.configuration.perspective.showDisplayModeButtons.ANALYSIS
                   && $ctrl.state.plan.planType != 'RING'"
           ng-class="{ 'btn display-mode-button': true,
-                      'btn-light': $ctrl.selectedDisplayMode !== $ctrl.displayModes.ANALYSIS,
-                      'btn-primary': $ctrl.selectedDisplayMode === $ctrl.displayModes.ANALYSIS }"
+                      'btn-light': $ctrl.rSelectedDisplayMode !== $ctrl.displayModes.ANALYSIS,
+                      'btn-primary': $ctrl.rSelectedDisplayMode === $ctrl.displayModes.ANALYSIS }"
           ng-click="$ctrl.setSelectedDisplayMode($ctrl.displayModes.ANALYSIS)"
           ng-if="$ctrl.currentUser.perspective !== 'sales'">
             <div class="fa fa-2x fa-gavel"
@@ -31,8 +31,8 @@
   <button type="button"
           ng-if="$ctrl.state.plan.planType == 'RING'"
           ng-class="{ 'btn display-mode-button': true,
-                      'btn-light': $ctrl.selectedDisplayMode !== $ctrl.displayModes.EDIT_RINGS,
-                      'btn-primary': $ctrl.selectedDisplayMode === $ctrl.displayModes.EDIT_RINGS }"
+                      'btn-light': $ctrl.rSelectedDisplayMode !== $ctrl.displayModes.EDIT_RINGS,
+                      'btn-primary': $ctrl.rSelectedDisplayMode === $ctrl.displayModes.EDIT_RINGS }"
           ng-click="$ctrl.setSelectedDisplayMode($ctrl.displayModes.EDIT_RINGS)"
           ng-if="$ctrl.currentUser.perspective !== 'sales'">
             <div class="fa fa-2x fa-project-diagram"
@@ -43,8 +43,8 @@
   <button type="button"
           ng-if="$ctrl.state.configuration.perspective.showDisplayModeButtons.EDIT_PLAN"
           ng-class="{ 'btn display-mode-button': true,
-                      'btn-light': $ctrl.selectedDisplayMode !== $ctrl.displayModes.EDIT_PLAN,
-                      'btn-primary': $ctrl.selectedDisplayMode === $ctrl.displayModes.EDIT_PLAN }"
+                      'btn-light': $ctrl.rSelectedDisplayMode !== $ctrl.displayModes.EDIT_PLAN,
+                      'btn-primary': $ctrl.rSelectedDisplayMode === $ctrl.displayModes.EDIT_PLAN }"
           ng-click="$ctrl.setSelectedDisplayMode($ctrl.displayModes.EDIT_PLAN)"
           ng-if="$ctrl.currentUser.perspective !== 'sales'" 
           ng-disabled="!$ctrl.state.plan || $ctrl.state.plan.ephemeral">
@@ -58,8 +58,8 @@
   <button type="button"
           ng-if="$ctrl.state.configuration.perspective.showDisplayModeButtons.DEBUG && $ctrl.state.loggedInUser.isAdministrator"
           ng-class="{ 'btn display-mode-button': true,
-                      'btn-light': $ctrl.selectedDisplayMode !== $ctrl.displayModes.DEBUG,
-                      'btn-primary': $ctrl.selectedDisplayMode === $ctrl.displayModes.DEBUG }"
+                      'btn-light': $ctrl.rSelectedDisplayMode !== $ctrl.displayModes.DEBUG,
+                      'btn-primary': $ctrl.rSelectedDisplayMode === $ctrl.displayModes.DEBUG }"
           ng-click="$ctrl.setSelectedDisplayMode($ctrl.displayModes.DEBUG)">
             <div class="fa fa-2x fa-bug"
                   data-toggle="tooltip"
@@ -69,8 +69,8 @@
   <button type="button"
           ng-if="$ctrl.state.configuration.perspective.showDisplayModeButtons.PLAN_SETTINGS"
           ng-class="{ 'btn display-mode-button': true,
-                      'btn-light': $ctrl.rSelectedDisplayMode !== $ctrl.displayModes.PLAN_SETTINGS,
-                      'btn-primary': $ctrl.rSelectedDisplayMode === $ctrl.displayModes.PLAN_SETTINGS }"
+                      'btn-light': $ctrl.selectedDisplayMode !== $ctrl.displayModes.PLAN_SETTINGS,
+                      'btn-primary': $ctrl.selectedDisplayMode === $ctrl.displayModes.PLAN_SETTINGS }"
           ng-click="$ctrl.setSelectedDisplayMode($ctrl.displayModes.PLAN_SETTINGS)">
             <div class="fa fa-2x fa-cog"
                   data-toggle="tooltip"

@@ -34,7 +34,7 @@ export class DataUpload extends Component {
     this.props.toggleView('FileUpload')
   }
 
-  static getDerivedStateFromProps(nextProps, prevState) {
+  static getDerivedStateFromProps(nextProps, prevState) { // ToDo: replace this with selectors in mapStateToProps
   
     if(prevState.selectedDataSourceName !== undefined && nextProps.selectedDataSourceName !== undefined
        && nextProps.spatialEdgeTypes.length > 0 && nextProps.conduitSizes !== null) {
@@ -51,9 +51,9 @@ export class DataUpload extends Component {
           selectedDataTypeId: prevState.selectedDataTypeId,
           selectedSpatialEdgeType: prevState.selectedSpatialEdgeType,
           selectedConduitSize: prevState.selectedConduitSize
-				};
+				}
 			}
-		}else{
+		} else {
       return null
     }
   }

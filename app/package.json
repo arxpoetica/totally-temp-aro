@@ -22,6 +22,7 @@
     "webpack-development": "webpack --config webpack.dev.js --watch",
     "dev": "npm run build-vendor-bundle && npm run build-service-types && ./node_modules/.bin/concurrently \"npm run watch-client\" \"npm run watch-server\" \"npm run webpack-development\" \"npm run test-unit-watch\"",
     "local": "./node_modules/.bin/concurrently \"npm run watch-client\" \"npm run watch-server\" \"npm run webpack-development\"",
+    "dev-simple": "./node_modules/.bin/concurrently \"npm run watch-client\" \"npm run watch-server\" \"npm run webpack-development\"",
     "lint": "standard \"public/javascripts/src/react/**/*.js\" \"public/javascripts/src/react/**/*.jsx\"",
     "lint-fix": "standard \"public/javascripts/src/react/**/*.js\" \"public/javascripts/src/react/**/*.jsx\" --fix"
   },

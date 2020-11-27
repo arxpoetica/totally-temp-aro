@@ -143,6 +143,8 @@ function setActivePlan (plan) {
     dispatch(NetworkOptimizationActions.loadOptimizationInputs(plan.id))
     // load rings
     dispatch(RingEditActions.loadRings(plan.id))
+    // load rings
+    dispatch(loadPlanResourceSelectionFromServer(plan))
   }
 }
 
@@ -233,9 +235,11 @@ function clearAllSelectedSA (plan, dataItems, selectedServiceAreas) {
 // Resource Selection
 
 function loadPlanResourceSelectionFromServer (plan) {
-  return dispatch => {
+  return (dispatch, getState) => {
+    const state = getState()
     if (!plan) {
-      return Promise.resolve()
+      plan = state.plan.activePlan
+      if (!plan.id) return Promise.resolve()
     }
     var currentPlan = plan
     return Promise.all([
@@ -511,41 +515,43 @@ function updateDataSourceEditableStatus (isDataSourceEditable, dataSourceKey, lo
   }
 }
 
-function selectedDisplayMode (value) {
+function setParentProjectForNewProject (parentProjectForNewProject){
   return dispatch => {
     dispatch({
-      type: Actions.PLAN_SET_SELECTED_DISPLAY_MODE,
-      payload: value
+      type: Actions.PLAN_SET_PARENT_PROJECT_FOR_NEW_PROJECT,
+      payload: parentProjectForNewProject
     })
   }
 }
 
-function activeViewModePanel (value) {
+
+function setSelectedProjectId (selectedProjectId){
   return dispatch => {
     dispatch({
-      type: Actions.PLAN_SET_ACTIVE_VIEW_MODE_PANEL,
-      payload: value
+      type: Actions.PLAN_SET_SELECTED_PROJECT_ID,
+      payload: selectedProjectId
     })
   }
 }
 
-function loadLibraryEntryById (libraryId) {
-  return (dispatch, getState) => {
-    const state = getState()
-    // technically we shouldn't be using state.user, perhaps make this a parameter
-    AroHttp.get(`/service/v1/library-entry/${libraryId}?user_id=${state.user.loggedInUser.id}`)
-      .then((result) => {
-        dispatch({
-          type: Actions.PLAN_APPEND_ALL_LIBRARY_ITEMS,
-          payload: {
-            dataItemKey: result.data.dataType,
-            allLibraryItems: [result.data]
-          }
-        })
+function updateDefaultPlanCoordinates (coordinates){
+  return dispatch => {
+    coordinates.addListener('center_changed', () => {
+      var center = coordinates.getCenter()
+      dispatch({
+        type: Actions.PLAN_UPDATE_DEFAULT_PLAN_COORDINATES,
+        payload: {'center_changed' : center}
       })
-      .catch((err) => console.error(err))
+    })
+    coordinates.addListener('zoom_changed', () => {
+      dispatch({
+        type: Actions.PLAN_UPDATE_DEFAULT_PLAN_COORDINATES,
+        payload: {'zoom_changed' : coordinates.getZoom()}
+      })
+    })
   }
 }
+
 
 export default {
   setActivePlan,
@@ -568,7 +574,7 @@ export default {
   setProjectMode,
   planSettingsToProject,
   updateDataSourceEditableStatus,
-  selectedDisplayMode,
-  activeViewModePanel,
-  loadLibraryEntryById
+  setParentProjectForNewProject,
+  setSelectedProjectId,
+  updateDefaultPlanCoordinates
 }

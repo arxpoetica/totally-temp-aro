@@ -80,7 +80,7 @@ class MapObjectEditorController {
 
     // Note we are using skip(1) to skip the initial value (that is fired immediately) from the RxJS stream.
     this.mapFeaturesSelectedEventObserver = this.state.mapFeaturesSelectedEvent.skip(1).subscribe((event) => {
-      if (this.state.isRulerEnabled) return // disable any click action when ruler is enabled
+      if (this.state.isRulerEnabled || this.rIsRulerEnabled) return // disable any click action when ruler is enabled
       this.handleMapEntitySelected(event)
     })
 
@@ -445,8 +445,9 @@ class MapObjectEditorController {
     } else if (this.featureType === 'location' && this.isFeatureEditable(this.selectedMapObject.feature)) {
       var name = 'Location'
       var options = [ new MenuAction(MenuActionTypes.DELETE, () => {
-        this.deleteObjectWithId(this.selectedMapObject.objectId)
-        this.deleteCreatedMapObject(this.selectedMapObject.objectId)
+        var objectId = this.selectedMapObject.objectId
+        this.deleteObjectWithId(objectId)
+        this.deleteCreatedMapObject(objectId)
       }) ]
       var menuItems = []
 
@@ -487,7 +488,7 @@ class MapObjectEditorController {
                 // editing the boundary without editing the equipment object itself
                 const mockEquipmentMapObject = {
                   objectId: feature.objectId,
-                  networkNodeType: feature._data_type.split('.')[1],  // Contract with aro-service
+                  networkNodeType: feature.networkNodeType || feature._data_type.split('.')[1],  // Contract with aro-service
                   icon: 'HACK to make this.isMarker() think this is a marker and not a polygon :('
                 }
                 this.startDrawingBoundaryFor(mockEquipmentMapObject)
@@ -712,6 +713,7 @@ class MapObjectEditorController {
     return mapMarker
   }
 
+  // ToDo: I think we should treat all polygons as multiPolygons
   createPolygonMapObject (feature) {
     // Create a "polygon" map object
     this.tileDataService.addFeatureToExclude(feature.objectId)
@@ -723,6 +725,11 @@ class MapObjectEditorController {
       })
     })
 
+    var lastI = polygonPath.length - 1
+    if (polygonPath[0].lat === polygonPath[lastI].lat && polygonPath[0].lng === polygonPath[lastI].lng) {
+      polygonPath.pop()
+    }
+    
     var polygon = new google.maps.Polygon({
       objectId: feature.objectId, // Not used by Google Maps
       paths: polygonPath,
@@ -744,6 +751,7 @@ class MapObjectEditorController {
     return polygon
   }
 
+  // ToDo: I think we should treat all polygons as multiPolygons
   createMultiPolygonMapObject (feature) {
     // Create a "polygon" map object
     this.tileDataService.addFeatureToExclude(feature.objectId)
@@ -756,9 +764,14 @@ class MapObjectEditorController {
           lng: polygonVertex[0] // Note array index
         })
       })
+
+      var lastI = dPath.length - 1
+      if (dPath[0].lat === dPath[lastI].lat && dPath[0].lng === dPath[lastI].lng) {
+        dPath.pop()
+      }
+      
       polygonPaths.push(dPath)
     })
-
     var polygon = new google.maps.Polygon({
       objectId: feature.objectId, // Not used by Google Maps
       paths: polygonPaths,
@@ -817,6 +830,7 @@ class MapObjectEditorController {
         return
       }
     } else if (feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon') {
+      // if closed path, prune
       if (feature.geometry.type === 'Polygon') {
         mapObject = this.createPolygonMapObject(feature)
         google.maps.event.addListener(mapObject, 'dragend', function () {
@@ -824,7 +838,6 @@ class MapObjectEditorController {
         })
       } else if (feature.geometry.type === 'MultiPolygon') {
         mapObject = this.createMultiPolygonMapObject(feature)
-        console.log(feature.geometry)
       }
 
       // Set up listeners on the map object
@@ -834,6 +847,8 @@ class MapObjectEditorController {
       })
       var self = this
       mapObject.getPaths().forEach(function (path, index) {
+        var isClosed = self.isClosedPath(path)
+        
         google.maps.event.addListener(path, 'insert_at', function () {
           self.modifyObject(mapObject)
         })
@@ -841,7 +856,8 @@ class MapObjectEditorController {
           self.modifyObject(mapObject)
         })
         google.maps.event.addListener(path, 'set_at', function () {
-          if (!self.isClosedPath(path)) {
+          // if (!self.isClosedPath(path)) {
+          if (isClosed) {
             // IMPORTANT to check if it is already a closed path, otherwise we will get into an infinite loop when trying to keep it closed
             if (index === 0) {
               // The first point has been moved, move the last point of the polygon (to keep it a valid, closed polygon)
@@ -858,83 +874,16 @@ class MapObjectEditorController {
         })
       })
 
-      
       var mapObjectPaths = mapObject.getPaths()
       google.maps.event.addListener(mapObject, 'rightclick', event => {
-        console.log(mapObjectPaths.getAt(event.path))
         if (event.vertex === undefined) {
           return
         }
         this.deleteMenu.open(this.mapRef, mapObjectPaths.getAt(event.path), event.vertex)
       })
-      
-
-
-
-      /*
-      google.maps.event.addListener(mapObject, 'dragend', function () {
-        // self.onModifyObject && self.onModifyObject({mapObject})
-        self.modifyObject(mapObject)
-      })
-      */
-     /*
-    } else if (feature.geometry.type === 'MultiPolygon') {
-      mapObject = this.createMultiPolygonMapObject(feature)
-      // Set up listeners on the map object
-      mapObject.addListener('click', (event) => {
-        // Select this map object
-        this.selectMapObject(mapObject)
-      })
-      var self = this
-      mapObject.getPaths().forEach(function (path, index) {
-        google.maps.event.addListener(path, 'insert_at', function () {
-          self.modifyObject(mapObject)
-        })
-        google.maps.event.addListener(path, 'remove_at', function () {
-          self.modifyObject(mapObject)
-        })
-        google.maps.event.addListener(path, 'set_at', function () {
-          if (!self.isClosedPath(path)) {
-            // IMPORTANT to check if it is already a closed path, otherwise we will get into an infinite loop when trying to keep it closed
-            if (index === 0) {
-              // The first point has been moved, move the last point of the polygon (to keep it a valid, closed polygon)
-              path.setAt(0, path.getAt(path.length - 1))
-              self.modifyObject(mapObject)
-            } else if (index === path.length - 1) {
-              // The last point has been moved, move the first point of the polygon (to keep it a valid, closed polygon)
-              path.setAt(path.length - 1, path.getAt(0))
-              self.modifyObject(mapObject)
-            }
-          } else {
-            self.modifyObject(mapObject)
-          }
-        })
-      })
-      // google.maps.event.addListener(mapObject, 'dragend', function(){
-      //   self.onModifyObject && self.onModifyObject({mapObject})
-      // });
-    */
     } else {
       throw `createMapObject() not supported for geometry type ${feature.geometry.type}`
     }
-
-
-
-
-/*
-    // for test - once it works we'll fix the above
-    var mapObjectPath = mapObject.getPath()
-    google.maps.event.addListener(mapObject, 'rightclick', event => {
-      if (event.vertex === undefined) {
-        return
-      }
-      this.deleteMenu.open(this.mapRef, mapObjectPath, event.vertex)
-    })
-*/
-
-
-
-
 
     mapObject.addListener('rightclick', (event) => {
       if (typeof event === 'undefined') return
@@ -1052,7 +1001,6 @@ class MapObjectEditorController {
       featurePromise = this.state.StateViewMode.loadEntityList(this.$http, this.state, this.dataItems, 'ServiceAreaView', serviceArea.id, 'id,code,name,sourceId,geom', 'id')
         .then((result) => {
           // check for empty object, reject on true
-          console.log(result)
           if (!result[0] || !result[0].geom) {
             return Promise.reject(`object: ${serviceArea.object_id} may have been deleted`)
           }
@@ -1273,7 +1221,6 @@ class MapObjectEditorController {
         isExistingObject: false
       }
       event.overlay.getPaths().forEach((path) => {
-        console.log(path)
         var pathPoints = []
         path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
         pathPoints.push(pathPoints[0]) // Close the polygon
@@ -1384,7 +1331,8 @@ class MapObjectEditorController {
   mapStateToThis (reduxState) {
     return {
       dataItems: reduxState.plan.dataItems,
-      transactionFeatures: reduxState.planEditor.features
+      transactionFeatures: reduxState.planEditor.features,
+      rIsRulerEnabled: reduxState.toolbar.isRulerEnabled
     }
   }
 

@@ -10,10 +10,12 @@ import EquipmentBoundaryFeature from '../../../service-typegen/dist/EquipmentBou
 import TileUtilities from '../../tiles/tile-utilities.js'
 import PlanEditorActions from '../../../react/components/plan-editor/plan-editor-actions'
 import MapLayerActions from '../../../react/components/map-layers/map-layer-actions'
+import ToolBarActions from '../../../react/components/header/tool-bar-actions'
 import uuidStore from '../../../shared-utils/uuid-store'
 import WktUtils from '../../../shared-utils/wkt-utils'
 import coverageActions from '../../../react/components/coverage/coverage-actions'
 import CoverageStatusTypes from '../../../react/components/coverage/constants'
+import MapUtilities from '../../common/plan/map-utilities'
 
 class PlanEditorController {
   constructor ($timeout, $http, $element, $filter, $ngRedux, state, Utils, tileDataService, tracker) {
@@ -390,9 +392,9 @@ class PlanEditorController {
         return this.state.configuration.planEditor.calculateSubnets ? this.rebuildAllTransactionSubnets() : Promise.resolve()
       })
       .catch((err) => {
-      // Log the error, then get out of "plan edit" mode.
-        this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
-        this.$timeout()
+        // Log the error, then get out of "plan edit" mode.
+        this.setSelectedDisplayMode(this.state.displayModes.VIEW)
+        this.$timeout() // I'm not sure if this is needed now that selectedDisplayMode is in react
         console.error(err)
       })
   }
@@ -417,6 +419,13 @@ class PlanEditorController {
     return Object.keys(this.objectIdToProperties).length
   }
 
+  commitTransactionAndExit () {
+    this.commitTransaction(this.currentTransaction.id)
+    .then(() => {
+      this.exitPlanEditMode()
+    })
+  }
+
   exitPlanEditMode () {
     this.setNetworkEquipmentLayerVisibility(this.feederFiberLayer, this.isFiberVisiblePreTransaction)
 
@@ -428,7 +437,7 @@ class PlanEditorController {
 
     // this.currentTransaction = null
     this.state.loadModifiedFeatures(planId)
-    this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
+    this.setSelectedDisplayMode(this.state.displayModes.VIEW)
     this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO
     this.$timeout()
   }
@@ -594,20 +603,6 @@ class PlanEditorController {
     return serviceFeature
   }
 
-  // Convert the paths in a Google Maps object into a Polygon WKT
-  polygonPathsToWKT (paths) {
-    var allPaths = []
-    paths.forEach((path) => {
-      var pathPoints = []
-      path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
-      allPaths.push(pathPoints)
-    })
-    return {
-      type: 'Polygon',
-      coordinates: allPaths
-    }
-  }
-
   // Formats the boundary specified by the objectId so that it can be sent to aro-service for saving
   formatBoundaryForService (objectId, networkNodeType) {
     // Format the object and send it over to aro-service
@@ -636,7 +631,7 @@ class PlanEditorController {
       objectId: objectId,
       networkNodeType: siteNetworkNodeType,
       networkObjectId: this.boundaryIdToEquipmentId[objectId],
-      geometry: this.polygonPathsToWKT(boundaryMapObject.getPaths()),
+      geometry: MapUtilities.polygonPathsToWKT(boundaryMapObject.getPaths()),
       boundaryTypeId: boundaryProperties.selectedSiteBoundaryTypeId,
       attributes: attributes,
       dataType: 'equipment_boundary',
@@ -1658,7 +1653,7 @@ class PlanEditorController {
   mapDispatchToTarget (dispatch) {
     return {
       clearTransaction: () => dispatch(PlanEditorActions.clearTransaction()),
-      commitTransaction: transactionId => dispatch(PlanEditorActions.commitTransaction(transactionId)),
+      commitTransaction: transactionId => { return dispatch(PlanEditorActions.commitTransaction(transactionId)) },
       discardTransaction: transactionId => dispatch(PlanEditorActions.discardTransaction(transactionId)),
       resumeOrCreateTransaction: (planId, userId) => dispatch(PlanEditorActions.resumeOrCreateTransaction(planId, userId)),
       deleteTransactionFeature: (transactionId, featureType, transactionFeature) => dispatch(PlanEditorActions.deleteTransactionFeature(transactionId, featureType, transactionFeature)),
@@ -1673,7 +1668,8 @@ class PlanEditorController {
       viewEquipmentProperties: (planId, equipmentObjectId, transactionFeatures) => dispatch(PlanEditorActions.viewFeatureProperties('equipment', planId, equipmentObjectId, transactionFeatures)),
       viewBoundaryProperties: (planId, boundaryObjectId, transactionFeatures) => dispatch(PlanEditorActions.viewFeatureProperties('equipment_boundary', planId, boundaryObjectId, transactionFeatures)),
       clearCoverageForBoundary: objectId => dispatch(coverageActions.addBoundaryCoverage(objectId, null)),
-      clearBoundaryCoverage: () => dispatch(coverageActions.clearBoundaryCoverage())
+      clearBoundaryCoverage: () => dispatch(coverageActions.clearBoundaryCoverage()),
+      setSelectedDisplayMode: displayMode => dispatch(ToolBarActions.selectedDisplayMode(displayMode))
     }
   }
 

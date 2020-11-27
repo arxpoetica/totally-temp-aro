@@ -1,0 +1,106 @@
+.tool-bar .ng-hide-remove {
+  animation: fadeInDown 300ms;
+}
+
+.tool-bar .ng-hide-add {
+  animation: fadeOutUp 300ms;
+}
+.tool-bar .separator {
+  border-left: #eee 1px dotted;
+}
+
+/* Need '!important' from tool-bar.jsx dropdown icon */
+.tool-bar .btn:hover {
+  background-color: #eee !important; 
+  color: #1f7de6;
+}
+.tool-bar .btn-selected {
+  background-color: #eee;
+  color: #1f7de6;
+}
+.view-dropdown {
+  min-width: 170px
+}
+.dropdown-divider {
+  height: 1px;
+  margin: .5rem 0;
+  overflow: hidden;
+  background-color: #eceeef;
+}
+
+/* http://jsfiddle.net/JnrvG/1/ */
+.myDropdown1,.rulerDropdown {
+  position: relative;
+}
+
+.myDropdown1 font {
+  color: #1f7de6;
+  font-size: 14px;
+  margin-left: 4px;
+}
+
+.ruler-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.ruler-undo-btn {
+  border-radius: 5px!important;
+  margin-left: 2px!important;
+}
+
+
+#global-search-toolbutton .select2-container {
+  border-radius: 0px;
+}
+#global-search-toolbutton .select2-choice {
+  padding-left: 0px;
+  color: white;
+  border: none;
+}
+#global-search-toolbutton .select2-arrow {
+  display: none;  /* Hiding the arrow completely for now */
+}
+#global-search-toolbutton .select2-input {
+  background-color: #1f7de6;
+}
+.select2-search {
+  padding: 0px;
+  background-color: #1f7de6;
+}
+.select2-results {
+  /* background-color: #1f7de6; */
+  color: #eee;
+  margin: 0px;
+}
+.select2-results .select2-highlighted {
+  background-color: white;
+  color: #1f7de6;
+}
+
+/* Plan-search */
+.with-margin {
+  margin-bottom: 5px;
+}
+
+.parent-plan-selector-body.ng-hide-remove {
+  animation: fadeIn 300ms;
+}
+.parent-plan-selector-body.ng-hide-add {
+  animation: fadeOut 300ms;
+}
+
+/* Plan-search Filter*/
+#dropdownMenu1 {
+  border-color:white;
+}
+
+.css-18ng2q5-group {
+  padding-left: 0px !important;
+  padding-right: 0px !important;
+}
+
+.css-syji7d-Group {
+  padding-top: 0px !important;
+  padding-bottom: 0px !important;
+}

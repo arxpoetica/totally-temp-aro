@@ -1,6 +1,10 @@
 /* globals */
 import Actions from '../../common/actions'
 import AroHttp from '../../common/aro-http'
+import { batch } from 'react-redux'
+// ToDo: probably shouldn't be importing PlanActions into another action creator
+//  BUT resource managers are listed in two places, DRY this up!
+import PlanActions from '../plan/plan-actions'
 
   function getResourceTypes () {
     return dispatch => {
@@ -61,13 +65,15 @@ import AroHttp from '../../common/aro-http'
 
   function setIsResourceEditor (status){
     return dispatch => {
-      dispatch({
-        type: Actions.RESOURCE_EDITOR_IS_RESOURCE_EDITOR,
-        payload: status
+      batch(() => {
+        dispatch({
+          type: Actions.RESOURCE_EDITOR_IS_RESOURCE_EDITOR,
+          payload: status
+        })
+        if(status === true){
+          dispatch(setModalTitle('Resource Managers'))
+        }
       })
-      if(status === true){
-        dispatch(setModalTitle('Resource Managers'))
-      }
     }
   }
 
@@ -94,29 +100,32 @@ import AroHttp from '../../common/aro-http'
   }
   
   function newManager (resourceType, resourceName, loggedInUser, sourceId) {
-      return dispatch => {
-        if ('undefined' === typeof sourceId) sourceId = null // new one
-    
-        // TODO: once endpoint is ready use v2/resource-manager for pricebook and rate-reach-matrix as well
-        var managerId = resourceKeyToEndpointId[resourceType]
-        if (managerId === 'pricebook') {
-          // Have to put this switch in here because the API for pricebook cloning is different. Can remove once API is unified.
-          createByEditMode(createPriceBookMode, sourceId)
-        } else if (managerId === 'rate-reach-matrix') {
-          createByEditMode(createRateReachManagerMode, sourceId)
-        } else {
-          // Create a resource manager
-          var idParam = ''
-          if (null != sourceId) idParam = `resourceManagerId=${sourceId}&`
-          AroHttp.post(`/service/v2/resource-manager?${idParam}user_id=${loggedInUser.id}`,{
-            resourceType: resourceType,
-            name: resourceName,
-            description: resourceName
-          })
+    return dispatch => {
+      if ('undefined' === typeof sourceId) sourceId = null // new one
+  
+      // TODO: once endpoint is ready use v2/resource-manager for pricebook and rate-reach-matrix as well
+      var managerId = resourceKeyToEndpointId[resourceType]
+      if (managerId === 'pricebook') {
+        // Have to put this switch in here because the API for pricebook cloning is different. Can remove once API is unified.
+        createByEditMode(createPriceBookMode, sourceId)
+      } else if (managerId === 'rate-reach-matrix') {
+        createByEditMode(createRateReachManagerMode, sourceId)
+      } else {
+        // Create a resource manager
+        var idParam = ''
+        if (null != sourceId) idParam = `resourceManagerId=${sourceId}&`
+        AroHttp.post(`/service/v2/resource-manager?${idParam}user_id=${loggedInUser.id}`,{
+          resourceType: resourceType,
+          name: resourceName,
+          description: resourceName
+        })
         .then(result => {
-          dispatch(getResourceManagers(resourceType))
-          if (result.data && result.data.resourceType === null) result.data.resourceType = resourceType
-          dispatch(editSelectedManager(result.data))
+          batch(() => {
+            dispatch(getResourceManagers(resourceType))
+            if (result.data && result.data.resourceType === null) result.data.resourceType = resourceType
+            dispatch(editSelectedManager(result.data))
+            dispatch(PlanActions.loadPlanResourceSelectionFromServer())
+          })
         })
         .catch((err) => console.error(err))
       }
@@ -133,29 +142,34 @@ import AroHttp from '../../common/aro-http'
     return dispatch => {
       AroHttp.get(`/service/v2/resource-manager/${resourceManagerId}/${managerType}`)
         .then(result => {
-          // ToDo: use batch here (once merged with refactor branch)
-          dispatch({
-            type: Actions.RESOURCE_MANAGER_SET_MANAGER_DEFINITION,
-            payload: {
-              resourceManagerId: resourceManagerId,
-              resourceManagerName: resourceManagerName,
-              definition: result.data
+          batch(() => {
+            dispatch({
+              type: Actions.RESOURCE_MANAGER_SET_MANAGER_DEFINITION,
+              payload: {
+                resourceManagerId: resourceManagerId,
+                resourceManagerName: resourceManagerName,
+                definition: result.data
+              }
+            })
+            dispatch({
+              type: Actions.RESOURCE_MANAGER_SET_EDITING_MANAGER,
+              payload: {
+                id: resourceManagerId,
+                type: managerType
+              }
+            })
+            dispatch({
+              type: Actions.RESOURCE_MANAGER_SET_EDITING_MODE,
+              payload: {
+                editingMode: editingMode
+              }
+            })
+            dispatch(setIsResourceEditor(false))
+            // To Resize Resoure Editor Popup to xl (Extra large) whille Edit rate_reach_manager
+            if(managerType === 'rate_reach_manager') {
+              dispatch(setIsRrmManager(true))
             }
           })
-          dispatch({
-            type: Actions.RESOURCE_MANAGER_SET_EDITING_MANAGER,
-            payload: {
-              id: resourceManagerId,
-              type: managerType
-            }
-          })
-          dispatch({
-            type: Actions.RESOURCE_MANAGER_SET_EDITING_MODE,
-            payload: {
-              editingMode: editingMode
-            }
-          })
-          dispatch(setIsResourceEditor(false))
         })
         .catch(err => {
           console.error(err)
@@ -220,8 +234,11 @@ import AroHttp from '../../common/aro-http'
         return AroHttp.put(`/service/v1/pricebook/${createdManagerId}/assignment`, newManagerAssignments)
       })
       .then(result => {
-        dispatch(setIsResourceEditor(true))
-        dispatch(getResourceManagers('price_book'))
+        batch(() => {
+          dispatch(setIsResourceEditor(true))
+          dispatch(getResourceManagers('price_book'))
+          dispatch(PlanActions.loadPlanResourceSelectionFromServer())
+        })
       })
       .catch((err) => console.error(err))
     }
@@ -272,18 +289,19 @@ import AroHttp from '../../common/aro-http'
           // Save a deep copy of the result, we can use this later if we save modifications to the server
           let pristineAssignments = JSON.parse(JSON.stringify(results[2].data))
 
-          dispatch({
-            type: Actions.RESOURCE_EDITOR_STATES_STRATEGY,
-            payload: {
-              statesForStrategy: statesForStrategy,
-              selectedStateForStrategy: selectedStateForStrategy,
-              priceBookDefinitions: priceBookDefinitions,
-              pristineAssignments: pristineAssignments
-            }
+          batch(() => {
+            dispatch({
+              type: Actions.RESOURCE_EDITOR_STATES_STRATEGY,
+              payload: {
+                statesForStrategy: statesForStrategy,
+                selectedStateForStrategy: selectedStateForStrategy,
+                priceBookDefinitions: priceBookDefinitions,
+                pristineAssignments: pristineAssignments
+              }
+            })
+
+            dispatch(definePriceBookForSelectedState(selectedStateForStrategy, priceBookDefinitions, pristineAssignments))
           })
-
-          dispatch(definePriceBookForSelectedState(selectedStateForStrategy, priceBookDefinitions, pristineAssignments))
-
         })
         .catch((err) => console.log(err))
     }
@@ -389,17 +407,19 @@ import AroHttp from '../../common/aro-http'
         setOfSelectedEquipmentTags[definition.id] = new Set()
       })
       let selectedDefinitionId = structuredPriceBookDefinitions[0].id
-      dispatch({
-        type: Actions.RESOURCE_EDITOR_PRICEBOOK_DEFINITION,
-        payload: {
-          selectedDefinitionId: selectedDefinitionId,
-          structuredPriceBookDefinitions: structuredPriceBookDefinitions,
-          selectedEquipmentTags: selectedEquipmentTags,
-          setOfSelectedEquipmentTags: setOfSelectedEquipmentTags
-        }
+      batch(() => {
+        dispatch({
+          type: Actions.RESOURCE_EDITOR_PRICEBOOK_DEFINITION,
+          payload: {
+            selectedDefinitionId: selectedDefinitionId,
+            structuredPriceBookDefinitions: structuredPriceBookDefinitions,
+            selectedEquipmentTags: selectedEquipmentTags,
+            setOfSelectedEquipmentTags: setOfSelectedEquipmentTags
+          }
+        })
+        // Save construction ratios keyed by state
+        dispatch(defineConstructionRatiosForSelectedState(selectedStateForStrategy,priceBookDefinitions, pristineAssignments))
       })
-      // Save construction ratios keyed by state
-      dispatch(defineConstructionRatiosForSelectedState(selectedStateForStrategy,priceBookDefinitions, pristineAssignments))
     }
   }
 
@@ -490,8 +510,10 @@ import AroHttp from '../../common/aro-http'
       // Save assignments to the server
       AroHttp.put(`/service/v1/pricebook/${priceBookId}/assignment`, assignments)
       .then(result => {
-        dispatch(setIsResourceEditor(true))
-        dispatch(getResourceManagers('price_book'))
+        batch(() => {
+          dispatch(setIsResourceEditor(true))
+          dispatch(getResourceManagers('price_book'))
+        })
       })
       .catch((err) => console.error(err))
     }
@@ -513,23 +535,37 @@ import AroHttp from '../../common/aro-http'
         description: rateReachManager.description
       })
       .then(result => {
-        createdRateReachManager = result.data
-        return getDefaultConfiguration(loggedInUser)
+        if (sourceRateReachManagerId) {
+          return result
+        } else {
+          createdRateReachManager = result.data
+          return getDefaultConfiguration(loggedInUser, rateReachManager.category)
+          .then(defaultConfiguration => AroHttp.put(`/service/rate-reach-matrix/resource/${createdRateReachManager.id}/config`, defaultConfiguration))
+        }
       })
-      .then((defaultConfiguration) => AroHttp.put(`/service/rate-reach-matrix/resource/${createdRateReachManager.id}/config`, defaultConfiguration))
       .then(result => {
-        dispatch(setIsResourceEditor(true))
-        dispatch(getResourceManagers('rate_reach_manager'))
+        batch(() => {
+          dispatch(setIsResourceEditor(true))
+          dispatch(getResourceManagers('rate_reach_manager'))
+          // ToDo: resource managers are listed in two places, DRY that up!
+          dispatch(PlanActions.loadPlanResourceSelectionFromServer())
+        })
       })
       .catch((err) => console.error(err))
     }
   }
 
-  function getDefaultConfiguration (loggedInUser) {
-    const technologyTypes = ['Fiber', 'FiberProximity', 'Copper', 'CellTower']
+  function getDefaultConfiguration (loggedInUser, categoryType = 'SPEED') {
+    // ToDo: technologyTypes should be dynamic
+    var technologyTypes = []
+    if (categoryType === 'BAND') {
+      technologyTypes = ['FiberProximity']
+    } else {
+      technologyTypes = ['Fiber', 'FiberProximity', 'Copper', 'CellTower']
+    }
     const configuration = {
       managerType: 'rate_reach_manager',
-      categoryType: 'SPEED',
+      categoryType: categoryType,
       categories: [],
       rateReachGroupMap: {},
       marketAdjustmentFactorMap: {
@@ -629,8 +665,10 @@ import AroHttp from '../../common/aro-http'
     return dispatch => {
       AroHttp.put(`/service/v1/arpu-manager/${arpuManagerId}/configuration`, changedModels)
       .then(result => {
-        dispatch(setIsResourceEditor(true))
-        dispatch(getResourceManagers('arpu_manager'))
+        batch(() => {
+          dispatch(setIsResourceEditor(true))
+          dispatch(getResourceManagers('arpu_manager'))
+        })
       })
     }
   }
@@ -638,7 +676,6 @@ import AroHttp from '../../common/aro-http'
   // Competition System
 
   function getRegions () {
-    // ToDo: move this to state.js once we know the return won't change with plan selection 
     return dispatch => {
       AroHttp.get('/service/odata/stateEntity?$select=name,stusps,gid,statefp&$orderby=name')
       .then(result => dispatch({
@@ -804,8 +841,10 @@ import AroHttp from '../../common/aro-http'
     return dispatch => {
       AroHttp.put(`/service/v1/roic-manager/${roicManagerId}/configuration`, roicManagerConfiguration)
       .then(result => {
-        dispatch(setIsResourceEditor(true))
-        dispatch(getResourceManagers('roic_manager'))
+        batch(() => {
+          dispatch(setIsResourceEditor(true))
+          dispatch(getResourceManagers('roic_manager'))
+        })
       })
       .catch((err) => console.error(err))
     }
@@ -846,8 +885,10 @@ import AroHttp from '../../common/aro-http'
     return dispatch => {
       AroHttp.put(`/service/v1/impedance-manager/${impedanceManagerId}/configuration`, impedanceManagerConfiguration)
       .then(result => {
-        dispatch(setIsResourceEditor(true))
-        dispatch(getResourceManagers('impedance_mapping_manager'))
+        batch(() => {
+          dispatch(setIsResourceEditor(true))
+          dispatch(getResourceManagers('impedance_mapping_manager'))
+        })
       })
       .catch((err) => console.error(err))
     }
@@ -902,8 +943,10 @@ import AroHttp from '../../common/aro-http'
       if (changedModels.length > 0) {
         AroHttp.put(`/service/v1/tsm-manager/${tsmManagerId}/spends?refreshState=true&user_id=${loggedInUser.id}`, changedModels)
         .then(result => {
-          dispatch(setIsResourceEditor(true))
-          dispatch(getResourceManagers('tsm_manager'))
+          batch(() => {
+            dispatch(setIsResourceEditor(true))
+            dispatch(getResourceManagers('tsm_manager'))
+          })
         })
         .catch((err) => console.error(err))
       } else {
@@ -1010,8 +1053,10 @@ import AroHttp from '../../common/aro-http'
       configuration = orderedArrayToMatrixMaps(configuration) // Transform object in aro-service format
       AroHttp.put(`/service/rate-reach-matrix/resource/${rateReachManagerId}/config`, configuration)
       .then(result => {
-        dispatch(setIsResourceEditor(true))
-        dispatch(getResourceManagers('rate_reach_manager'))
+        batch(() => {
+          dispatch(setIsResourceEditor(true))
+          dispatch(getResourceManagers('rate_reach_manager'))
+        })
       })
       .catch((err) => console.error(err))
     }
@@ -1049,6 +1094,31 @@ import AroHttp from '../../common/aro-http'
     }
   }
 
+  function convertlengthUnitsToMeters (input) {
+    return (dispatch, getState) => {
+      // To get length_units_to_meters from redux state
+      const state = getState()
+      var lengthUnitsToMeters = state.toolbar.appConfiguration.units.length_units_to_meters
+      // Convert user-input value (in user units) to meters
+      input = input || '0'
+      return (+input) * lengthUnitsToMeters
+    }
+  }  
+
+  function convertMetersToLengthUnits (input) {
+    return (dispatch, getState) => {
+      // To get meters_to_length_units from redux state
+      const state = getState()
+      var metersToLengthUnits = state.toolbar.appConfiguration.units.meters_to_length_units
+      // Convert model value (always in meters) to user units before displaying it to the user
+      input = input || '0'
+      var inputTransformed = (+input) * metersToLengthUnits
+
+      // toFixed() converts it to a string, and + converts it back to a number before returning
+      return +inputTransformed.toFixed(2)
+    }
+  }
+
   export default {
     getResourceTypes,
     getResourceManagers,
@@ -1082,5 +1152,8 @@ import AroHttp from '../../common/aro-http'
     reloadRateReachManagerConfiguration,
     saveRateReachConfig,
     setModalTitle,
-    setIsRrmManager
+    setIsRrmManager,
+    convertMetersToLengthUnits,
+    convertlengthUnitsToMeters
   }
+  

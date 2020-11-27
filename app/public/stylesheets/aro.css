@@ -972,12 +972,12 @@ ui-select-font {
   position: absolute;
   top: 0px;
   left: 0px;
-  background-color: #1f7de6;
+  /* background-color: #1f7de6; */
 }
 
 .tool-bar .btn {
   flex: 0 0 30px;
-  background-color: #1f7de6;
+  /* background-color: #1f7de6; */
   border: none;
   border-radius: 0px;
   color: #eee;
@@ -987,7 +987,7 @@ ui-select-font {
 }
 
 #global-search-toolbutton .select2-chosen {
-  background-color: #1f7de6;
+  /* background-color: #1f7de6; */
   padding-left: 10px;
   margin-right: 0px;
   color: #eee;

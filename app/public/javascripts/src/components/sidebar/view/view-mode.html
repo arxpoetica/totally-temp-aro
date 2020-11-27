@@ -14,7 +14,7 @@
 
   <div class="plan-settings-container">
     <!-- ng-click to hide EDIT_LOCATIONS or EDIT_SERVICE_LAYER on Clicking other accordion -->
-    <accordion ng-click="$ctrl.rActiveViewModePanelAction($ctrl.activeViewModePanel)"  style="position: relative; flex: 1 1 auto;" toggle-expanded-panel="$ctrl.activeViewModePanel">
+    <accordion ng-click="$ctrl.toggleActiveViewModePanelAction($ctrl.activeViewModePanel)"  style="position: relative; flex: 1 1 auto;" toggle-expanded-panel="$ctrl.activeViewModePanel">
       <accordion-panel-title title="'Location Info'" panel-id="$ctrl.state.viewModePanels.LOCATION_INFO"></accordion-panel-title>
       <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.LOCATION_INFO">
         <aro-search ng-if="($ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.LOCATION_INFO) || $ctrl.rActiveViewModePanel === $ctrl.state.viewModePanels.LOCATION_INFO" 
@@ -64,14 +64,14 @@
       <!-- Planner coverage is a little different. Show it only if we are in COVERAGE_BOUNDARY mode. -->
       <accordion-panel-title title="'Coverage Boundary'"
                              panel-id="$ctrl.state.viewModePanels.COVERAGE_BOUNDARY"
-                             ng-if="($ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.COVERAGE_BOUNDARY
-                                    && $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.COVERAGE_BOUNDARY 
-                                    && $ctrl.state.configuration.perspective.showViewModePanels[$ctrl.state.viewModePanels.COVERAGE_BOUNDARY]) || $ctrl.rActiveViewModePanel === $ctrl.state.viewModePanels.COVERAGE_BOUNDARY">
+                             ng-if="($ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.COVERAGE_BOUNDARY || $ctrl.rActiveViewModePanel === $ctrl.state.viewModePanels.COVERAGE_BOUNDARY)
+                                    && ($ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.COVERAGE_BOUNDARY || $ctrl.rSelectedTargetSelectionMode === $ctrl.state.targetSelectionModes.COVERAGE_BOUNDARY)
+                                    && $ctrl.state.configuration.perspective.showViewModePanels[$ctrl.state.viewModePanels.COVERAGE_BOUNDARY]">
       </accordion-panel-title>
       <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.COVERAGE_BOUNDARY"
-                                ng-if="($ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.COVERAGE_BOUNDARY
-                                       && $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.COVERAGE_BOUNDARY
-                                       && $ctrl.state.configuration.perspective.viewModePanels[$ctrl.state.viewModePanels.COVERAGE_BOUNDARY].show) || $ctrl.rActiveViewModePanel === $ctrl.state.viewModePanels.COVERAGE_BOUNDARY">
+                                ng-if="($ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.COVERAGE_BOUNDARY || $ctrl.rActiveViewModePanel === $ctrl.state.viewModePanels.COVERAGE_BOUNDARY)
+                                       && ($ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.COVERAGE_BOUNDARY || $ctrl.rSelectedTargetSelectionMode === $ctrl.state.targetSelectionModes.COVERAGE_BOUNDARY)
+                                       && $ctrl.state.configuration.perspective.showViewModePanels[$ctrl.state.viewModePanels.COVERAGE_BOUNDARY]">
         <coverage-boundary map-global-object-name="map"></coverage-boundary>
       </accordion-panel-contents>
       <!-- Edit Locations is a little different. Show it only if we are in EDIT_LOCATION mode. -->

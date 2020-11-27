@@ -35,6 +35,7 @@ import dataEdit from '../react/components/data-edit/data-edit-reducer'
 import globalSettings from '../react/components/global-settings/globalsettings-reducer'
 import resourceEditor from '../react/components/resource-editor/resource-reducer'
 import dataUpload from '../react/components/data-upload/data-upload-reducer'
+import toolbar from '../react/components/header/tool-bar-reducer'
 import viewSettings from '../react/components/view-settings/view-settings-reducer'
 import notification from '../react/components/notification/notification-reducer'
 
@@ -69,8 +70,9 @@ let reducer = combineReducers({
   globalSettings,
   resourceEditor,
   dataUpload,
-  viewSettings,
-  notification
+  notification,
+  toolbar,
+  viewSettings
 })
 
 // Add support for Redux devtools extension. Yes, even in production.

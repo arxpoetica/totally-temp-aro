@@ -18,7 +18,7 @@ const getOrderedLocationFilters = createSelector([getAllLocationFilters], locati
 
 
 class LocationsController {
-  constructor ($rootScope, $location, $timeout, $ngRedux, map_tools, state) {
+  constructor ($rootScope, $location, $timeout, $ngRedux, map_tools, state, rxState) {
     this.$location = $location
     this.$timeout = $timeout
     this.map_tools = map_tools
@@ -54,6 +54,11 @@ class LocationsController {
     // Update map layers when the heatmap options change
     state.mapTileOptions
       .subscribe((newValue) => this.updateMapLayers())
+      
+    // Update map layers when the heatmap options change using react rxjs
+    rxState.mapTileOptions.getMessage().subscribe((mapTileOptions) => {
+      this.updateMapLayers()
+    })       
 
     // Update map layers when the display mode button changes
     state.selectedDisplayMode.subscribe((newValue) => this.updateMapLayers())
@@ -137,14 +142,28 @@ class LocationsController {
     // Get the point transformation mode with the current zoom level
     const getPointTransformForLayer = zoomThreshold => {
       var transform = ''
-      if (this.state.mapTileOptions.getValue().selectedHeatmapOption.id === 'HEATMAP_OFF') {
-        // The user has explicitly asked to display points, not aggregates
-        transform = 'select'
+      // For other Clients except frontier
+      if(this.state.configuration.ARO_CLIENT !== 'frontier') {
+        // rSelectedHeatMapOption is a redux state which is set from too-bar-reducer.js
+        if (this.state.mapTileOptions.getValue().selectedHeatmapOption.id === 'HEATMAP_OFF' || this.rSelectedHeatMapOption === 'HEATMAP_OFF') {
+          // The user has explicitly asked to display points, not aggregates
+          transform = 'select'
+        } else {
+          var mapZoom = map.getZoom()
+          // If we are zoomed in beyond a threshold, use 'select'. If we are zoomed out, use 'aggregate'
+          // (Google maps zoom starts at 0 for the entire world and increases as you zoom in)
+          transform = (mapZoom > zoomThreshold) ? 'select' : 'aggregate'
+        }
       } else {
-        var mapZoom = map.getZoom()
-        // If we are zoomed in beyond a threshold, use 'select'. If we are zoomed out, use 'aggregate'
-        // (Google maps zoom starts at 0 for the entire world and increases as you zoom in)
-        transform = (mapZoom > zoomThreshold) ? 'select' : 'aggregate'
+        if (this.rSelectedHeatMapOption === 'HEATMAP_OFF') {
+          // The user has explicitly asked to display points, not aggregates
+          transform = 'select'
+        } else {
+          var mapZoom = map.getZoom()
+          // If we are zoomed in beyond a threshold, use 'select'. If we are zoomed out, use 'aggregate'
+          // (Google maps zoom starts at 0 for the entire world and increases as you zoom in)
+          transform = (mapZoom > zoomThreshold) ? 'select' : 'aggregate'
+        }
       }
       return transform
     }
@@ -319,7 +338,8 @@ class LocationsController {
       orderedLocationFilters: getOrderedLocationFilters(reduxState),
       dataItems: reduxState.plan.dataItems,
       showLocationLabels: reduxState.viewSettings.showLocationLabels,
-      lableDrawingOptions: reduxState.mapLayers.networkEquipment.labelDrawingOptions
+      lableDrawingOptions: reduxState.mapLayers.networkEquipment.labelDrawingOptions,
+      rSelectedHeatMapOption: reduxState.toolbar.selectedHeatMapOption,
     }
   }
 
@@ -351,7 +371,7 @@ class LocationsController {
   }
 }
 
-LocationsController.$inject = ['$rootScope', '$location', '$timeout', '$ngRedux', 'map_tools', 'state']
+LocationsController.$inject = ['$rootScope', '$location', '$timeout', '$ngRedux', 'map_tools', 'state', 'rxState']
 
 let locations = {
   templateUrl: '/components/views/locations.html',

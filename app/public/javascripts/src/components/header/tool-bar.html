@@ -79,7 +79,7 @@
   }
 </style>
 
-<div class="tool-bar" ng-style="{ margin: $ctrl.marginPixels + 'px' }">
+<div class="tool-bar" ng-style="{ margin: $ctrl.marginPixels + 'px', 'background-color': $ctrl.state.configuration.toolbar.toolBarColor}">
 
   <img ng-if="$ctrl.state.configuration.ARO_CLIENT !== 'frontier'" src="images/logos/aro/logo_navbar.png" class="no-collapse" style="align-self: center; padding-left: 10px; padding-right: 10px">
   <span ng-if="$ctrl.state.configuration.ARO_CLIENT === 'frontier'" style="align-self: center; padding-left: 10px; padding-right: 10px"><b>NPM BSA</b></span>
@@ -308,11 +308,11 @@
   </button>
 
   <div class="dropdown" ng-hide="!$ctrl.showDropDown" ng-style="{ 'border-left': '#eee 1px dotted', width: $ctrl.dropdownWidthPixels }">
-    <button class="btn btn-light" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+    <button class="btn btn-light" ng-style="{'background-color': $ctrl.state.configuration.toolbar.toolBarColor}" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
       <i class="fa fa-angle-double-down"></i>
     </button>
     <!-- Override some styles on the dropdown-menu UL below to remove margins, padding, etc -->
-    <ul class="dropdown-menu tool-bar-dropdown" aria-labelledby="dropdownMenu1" style="padding: 0px; min-width: 0px;">
+    <ul class="dropdown-menu tool-bar-dropdown" ng-style="{'background-color': $ctrl.state.configuration.toolbar.toolBarColor}" aria-labelledby="dropdownMenu1" style="padding: 0px; min-width: 0px;">
     </ul>
   </div>
 

@@ -1,5 +1,10 @@
-docker/set_debug_env.sh
-docker/config.json
+/docker/set_debug_env.sh
+/docker/config.json
+/docker/docker-compose*
+!/docker/docker-compose-dev.yml
+!/docker/docker-compose-dev-private.yml
+docker12
+docker12/*
 
 #global file patterns
 
@@ -132,10 +137,10 @@ aro-service/
 
 bootstrap/etl.log
 
-docker/docker-compose.yml
 /node_modules/
 /app/.gitignore
 .vscode
 docker12
 docker12/
 docker12/*
+/_hidden

@@ -22,6 +22,7 @@ services:
         links:
             - db:arodb
             - zookeeper
+            - rabbitmq
         environment:
             _JAVA_OPTS: "-Xms512m -Xmx1g"
             PGUSER: aro
@@ -31,6 +32,7 @@ services:
             ARO_THREAD_COUNT: 5
             IGNITE_PROFILE: ignite_debug
             ZK_HOST: zookeeper
+            RABBITMQ_HOST: rabbitmq
     zookeeper:
         image: zookeeper
 

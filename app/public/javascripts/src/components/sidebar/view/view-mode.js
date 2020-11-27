@@ -1,5 +1,5 @@
 import SelectionActions from '../../../react/components/selection/selection-actions'
-import PlanActions from '../../../react/components/plan/plan-actions'
+import ToolBarActions from '../../../react/components/header/tool-bar-actions'
 
 class ViewModeController {
   constructor (state, $http, $ngRedux) {
@@ -57,6 +57,15 @@ class ViewModeController {
     }
   }
 
+  toggleActiveViewModePanelAction (activeViewModePanel) {
+    this.rActiveViewModePanelAction(activeViewModePanel)
+    
+    // To close COVERAGE_BOUNDARY panel while clicking on other panels
+    if(activeViewModePanel !== this.state.viewModePanels.COVERAGE_BOUNDARY) {
+      this.rSelectedTargetSelectionModeAction(this.state.targetSelectionModes.SINGLE_PLAN_TARGET)
+    }
+  }
+
   $onDestroy () {
     this.clearViewModeSubscription.unsubscribe()
     this.unsubscribeRedux()
@@ -67,8 +76,9 @@ class ViewModeController {
       dataItems: reduxState.plan.dataItems,
       selectedLocations: reduxState.selection.locations,
       locationInfoDetails: reduxState.locationInfo.details,
-      rActiveViewModePanel: reduxState.plan.rActiveViewModePanel,
-      activeViewModePanel: reduxState.plan.rActiveViewModePanel,
+      rActiveViewModePanel: reduxState.toolbar.rActiveViewModePanel,
+      activeViewModePanel: reduxState.toolbar.rActiveViewModePanel,
+      rSelectedTargetSelectionMode: reduxState.toolbar.selectedTargetSelectionMode,
     }
   }
 
@@ -76,7 +86,8 @@ class ViewModeController {
     return {
       setSelectedLocations: locationIds => dispatch(SelectionActions.setLocations(locationIds)),
       clearSelectedLocations: () => dispatch(SelectionActions.setLocations([])),
-      rActiveViewModePanelAction: (value) => dispatch(PlanActions.activeViewModePanel(value))
+      rActiveViewModePanelAction: (value) => dispatch(ToolBarActions.activeViewModePanel(value)),
+      rSelectedTargetSelectionModeAction: (value) => dispatch(ToolBarActions.selectedTargetSelectionMode(value))
     }
   }
 

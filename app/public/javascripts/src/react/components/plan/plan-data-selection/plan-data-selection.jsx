@@ -3,6 +3,7 @@ import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
 import GlobalSettings from '../../global-settings/global-settings.jsx'
 import PlanActions from '../plan-actions'
+import ToolBarActions from '../../header/tool-bar-actions'
 import Select, { components } from "react-select";
 import createClass from "create-react-class";
 
@@ -20,7 +21,7 @@ export class PlanDataSelection extends Component {
     this.state = {
       openDataSelection: false,
       dataSelectionName: '',
-      dataItems: ''
+      dataItems: '',
     }
 
     this.isDataSourceEditable = {},
@@ -28,6 +29,8 @@ export class PlanDataSelection extends Component {
   }
 
   componentDidMount(){
+    // To validate DataSource in OnLoad
+    this.updateSelectionValidation()
     Object.keys(this.props.dataItems).forEach(dataSourceKey => {
       this.isDataSourceEditable[dataSourceKey] = false
       this.props.updateDataSourceEditableStatus(this.isDataSourceEditable,dataSourceKey,this.props.loggedInUser, this.props.authPermissions, this.props.dataItems)
@@ -36,28 +39,51 @@ export class PlanDataSelection extends Component {
     this.props.onDataSelectionChange({ childKey: 'dataSelection', isValid: isValid, isInit: true })
   }
 
-  componentWillReceiveProps(nextProps){
-    if(this.props != nextProps) {
-      if(nextProps.dataItems !== undefined) {
-        this.setState({openDataSelection: nextProps.isDataSelection,
-          dataItems: nextProps.dataItems})
+  componentDidUpdate(prevProps) {
+    // Trigger updateSelectionValidation() if props change
+    if(this.props.dataItems != prevProps.dataItems) {
+      this.updateSelectionValidation()
+    }
+  }
+
+  // To set Props values to State if props get modified
+  // https://reactjs.org/docs/react-component.html#static-getderivedstatefromprops
+  static getDerivedStateFromProps(nextProps, state) {
+    if(nextProps.dataItems !== undefined) {
+      return {
+        openDataSelection : nextProps.isDataSelection,
+        dataItems: nextProps.dataItems
       }
     }
   }
 
   render () {
-    return this.props.dataItems === undefined || this.props.isDataSourceEditable === undefined
+    return this.props.dataItems === undefined
       ? null
       : this.renderPlanDataSelection()
   }
 
   renderPlanDataSelection() {
 
+    // Dataitems Objects needed to be converted to Array for Sorting
+    let dataItemsArray = []
+    Object.entries(this.state.dataItems).map(([ key, value ], objIndex) => {
+      if(!value.hideDataItems) { // To Show/hide data_Items
+        value.dataItemsKey = key // To create a 'dataItemsKey' key for new array
+        dataItemsArray.push(value) // Need to push values to array
+      }
+    })
+
+    // sort dataItems based on rankIndex
+    let sorted_dataItems = dataItemsArray.sort((a, b) => parseFloat(b.rankIndex) - parseFloat(a.rankIndex))
+
     return (
       <div style={{position: 'relative', height: '100%'}}>
         <table className="table table-sm table-striped">
           <tbody>
-            {Object.entries(this.state.dataItems).map(([ objKey, objValue ], objIndex) => {
+            {sorted_dataItems.map((objValue, objIndex) => {
+
+              let objKey = objValue.dataItemsKey
 
               let optionsList = []; let defaultList=[];
               if(objValue.allLibraryItems.length > 0){
@@ -73,7 +99,7 @@ export class PlanDataSelection extends Component {
               }
 
               return (
-                <React.Fragment key={objIndex}>
+                <React.Fragment key={objValue.id}>
                 {!objValue.hidden &&
                   <tr style={{verticalAlign: 'middle'}}>
                     <td>{objValue.description}</td>
@@ -91,7 +117,7 @@ export class PlanDataSelection extends Component {
                           isClearable=''
                           isDisabled=''
                           placeholder="None Selected"
-                          onChange={(e,id)=>this.onSelectionChanged(e, objIndex, objKey)}
+                          onChange={(e,id)=>this.onSelectionChanged(e, objValue.id, objKey)}
                           styles={styles}
                         />
                         <div className="btn-group btn-group-sm" style={{flex: '0 0 auto'}}>
@@ -130,11 +156,11 @@ export class PlanDataSelection extends Component {
     )
   }
 
-  onSelectionChanged(selectedLibraryItems, oldobjIndex, dataSource){
+  onSelectionChanged(selectedLibraryItems, objId, dataSource){
 
     var dataItems = this.state.dataItems
     {Object.entries(dataItems).map(([ objKey, objValue ], objIndex) => {
-      if(oldobjIndex === objIndex){
+      if(objId === objValue.id){
         objValue.selectedLibraryItems = [];
         objValue.allLibraryItems.map(function(allItemKey) {
           if(selectedLibraryItems !== null) {
@@ -150,28 +176,43 @@ export class PlanDataSelection extends Component {
       }
       })
     }
-    this.updateSelectionValidation(dataSource)
+    this.updateSelectionValidation()
+    this.props.selectDataItems(dataSource, this.state.dataItems[dataSource].selectedLibraryItems.map(item => JSON.parse(angular.toJson(item))))
+    this.props.updateDataSourceEditableStatus(this.isDataSourceEditable, dataSource, this.props.loggedInUser, this.props.authPermissions, this.state.dataItems)
+    var isValid = this.areAllSelectionsValid()
+    setTimeout(function() {
+      this.props.onDataSelectionChange({ childKey: 'dataSelection', isValid: isValid })
+    }.bind(this),0);
   }
 
   // Updates the 'valid' flags for all data items
-  updateSelectionValidation (dataSource) {
+  updateSelectionValidation () {
 
     var dataItem = []
     Object.keys(this.state.dataItems).forEach((dataItemKey) => {
       if (this.props.loggedInUser.perspective === 'sales' && this.sales_role_remove.indexOf(dataItemKey) !== -1) {
         this.state.dataItems[dataItemKey].hidden = true
       }
-      dataItem = this.state.dataItems[dataItemKey]
-      dataItem.isMinValueSelectionValid = dataItem.selectedLibraryItems.length >= dataItem.minValue
-      dataItem.isMaxValueSelectionValid = dataItem.selectedLibraryItems.length <= dataItem.maxValue
-    })
 
-    this.props.selectDataItems(dataSource, this.state.dataItems[dataSource].selectedLibraryItems.map(item => JSON.parse(angular.toJson(item))))
-    this.props.updateDataSourceEditableStatus(this.isDataSourceEditable, dataSource, this.props.loggedInUser, this.props.authPermissions, this.state.dataItems)
-    var isValid = this.areAllSelectionsValid()
-    setTimeout(function() {
-      this.props.onDataSelectionChange({ childKey: 'dataSelection', isValid: isValid })
-    }.bind(this),1000);
+      // To check Whether showPlanDataSelection has the required dataItemKey
+      if(this.props.showPlanDataSelection.hasOwnProperty(dataItemKey)){
+        // Hide dataItems based on showPlanDataSelection object
+        if(this.props.showPlanDataSelection[dataItemKey].visibility === false) {
+          this.state.dataItems[dataItemKey].hideDataItems = true
+        }
+
+        // To set rankIndex in dataItems object
+        this.state.dataItems[dataItemKey].rankIndex = this.props.showPlanDataSelection[dataItemKey].rankIndex
+      }
+
+      dataItem = this.state.dataItems[dataItemKey]
+      // To validate selection only for the non-hided items
+      if(!dataItem.hideDataItems) {
+        dataItem.isMinValueSelectionValid = dataItem.selectedLibraryItems.length >= dataItem.minValue
+        dataItem.isMaxValueSelectionValid = dataItem.selectedLibraryItems.length <= dataItem.maxValue
+      }
+    })
+    this.setState({dataItems: this.state.dataItems})
   }
 
   areAllSelectionsValid () {
@@ -237,15 +278,16 @@ export class PlanDataSelection extends Component {
     loggedInUser: state.user.loggedInUser,
     authPermissions: state.user.authPermissions,
     dataItems: state.plan.dataItems,
-    isDataSourceEditable: state.plan.isDataSourceEditable
+    isDataSourceEditable: state.plan.isDataSourceEditable,
+    showPlanDataSelection : state.toolbar.appConfiguration.showPlanDataSelection
   })   
 
   const mapDispatchToProps = (dispatch) => ({
     setIsDataSelection: (status) => dispatch(PlanActions.setIsDataSelection(status)),
     updateDataSourceEditableStatus: (isDataSourceEditable,dataSourceKey,loggedInUser, authPermissions, dataItems) => dispatch(PlanActions.updateDataSourceEditableStatus(isDataSourceEditable,dataSourceKey,loggedInUser, authPermissions, dataItems)),
     selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems)),
-    selectedDisplayMode: (value) => dispatch(PlanActions.selectedDisplayMode(value)),
-    activeViewModePanel: (value) => dispatch(PlanActions.activeViewModePanel(value))
+    selectedDisplayMode: (value) => dispatch(ToolBarActions.selectedDisplayMode(value)),
+    activeViewModePanel: (value) => dispatch(ToolBarActions.activeViewModePanel(value))
   })
 
    const PlanDataSelectionComponent = wrapComponentWithProvider(reduxStore, PlanDataSelection, mapStateToProps, mapDispatchToProps)

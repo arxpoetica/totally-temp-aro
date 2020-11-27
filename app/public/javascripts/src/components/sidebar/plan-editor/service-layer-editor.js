@@ -1,4 +1,5 @@
 import Constants from '../../common/constants'
+import ToolBarActions from '../../../react/components/header/tool-bar-actions'
 
 class ServiceLayerEditorController {
   constructor ($http, $timeout, $ngRedux, state, Utils, tileDataService) {
@@ -24,26 +25,12 @@ class ServiceLayerEditorController {
     this.resumeOrCreateTransaction()
   }
 
-  // Convert the paths in a Google Maps object into a Polygon WKT
-  polygonPathsToWKT (paths) {
-    var allPaths = []
-    paths.forEach((path) => {
-      var pathPoints = []
-      path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
-      allPaths.push(pathPoints)
-    })
-    return {
-      type: 'MultiPolygon',
-      coordinates: [allPaths]
-    }
-  }
-
   formatServiceLayerForService (mapObject) {
     // ToDo: this should use AroFeatureFactory
     var serviceFeature = {
       objectId: mapObject.feature.objectId,
       dataType: 'service_layer',
-      geometry: this.polygonPathsToWKT(mapObject.getPaths()),
+      geometry: MapUtilities.multiPolygonPathsToWKT(mapObject.getPaths()),
       attributes: {
         name: mapObject.feature.name,
         code: mapObject.feature.code
@@ -131,7 +118,7 @@ class ServiceLayerEditorController {
       })
       .catch((err) => {
         this.discardChanges = false
-        this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
+        this.setSelectedDisplayMode(this.state.displayModes.VIEW)
         this.$timeout()
         console.warn(err)
       })
@@ -154,6 +141,7 @@ class ServiceLayerEditorController {
         this.currentTransaction = null
         this.state.recreateTilesAndCache()
         this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO // Close out this panel
+        this.rActiveViewModePanelAction(this.state.viewModePanels.LOCATION_INFO)
         this.$timeout()
         console.error(err)
       })
@@ -184,6 +172,7 @@ class ServiceLayerEditorController {
             this.discardChanges = true
             this.currentTransaction = null
             this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO // Close out this panel
+            this.rActiveViewModePanelAction(this.state.viewModePanels.LOCATION_INFO)
             this.$timeout()
             console.error(err)
           })
@@ -227,7 +216,9 @@ class ServiceLayerEditorController {
   }
 
   mapDispatchToTarget (dispatch) {
-    return { }
+    return {
+      rActiveViewModePanelAction: (value) => dispatch(ToolBarActions.activeViewModePanel(value))
+     }
   }
 
   $onDestroy () {
