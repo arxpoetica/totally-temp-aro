@@ -1,3 +1,5 @@
+import ToolBarActions from '../../../react/components/header/tool-bar-actions'
+
 class BoundaryDetailController {
   constructor ($http, $timeout, $ngRedux, state) {
     this.$http = $http
@@ -149,6 +151,7 @@ class BoundaryDetailController {
 
   viewBoundaryInfo () {
     this.state.activeViewModePanel = this.state.viewModePanels.BOUNDARIES_INFO
+    this.rActiveViewModePanelAction(this.state.viewModePanels.BOUNDARIES_INFO)
   }
 
   clearBoundariesInfo () {
@@ -187,12 +190,14 @@ class BoundaryDetailController {
   mapStateToThis (reduxState) {
     return {
       dataItems: reduxState.plan.dataItems,
-      rIsRulerEnabled: reduxState.toolbar.isRulerEnabled
+      rIsRulerEnabled: reduxState.toolbar.isRulerEnabled,
+      rActiveViewModePanel: reduxState.toolbar.rActiveViewModePanel,
     }
   }
 
   mapDispatchToTarget (dispatch) {
     return {
+      rActiveViewModePanelAction: (value) => dispatch(ToolBarActions.activeViewModePanel(value))
     }
   }
 }
