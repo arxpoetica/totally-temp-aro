@@ -94,6 +94,10 @@ class BoundariesController {
       .catch((err) => console.error(err))
   }
 
+  objectHasLength (obj) {
+    return Object.keys(obj || {}).length
+  }
+
   onSelectCategory (category) {
     const id = category && category.id
     var newSelection = this.state.cloneSelection()

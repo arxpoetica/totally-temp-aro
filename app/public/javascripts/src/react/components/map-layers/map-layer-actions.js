@@ -148,15 +148,6 @@ function setBoundaryLayers (boundaryLayers) {
       const newBoundaryLayers = layersClone.map(layer => {
         const foundGroup = (results.find(group => group[0].analysisLayerId === layer.analysisLayerId) || [])
 
-        // only cloning here so what's mutated below doesn't also mutate this
-        layer.display = JSON.parse(JSON.stringify(foundGroup)).map(group => {
-          group.category.tags = group.category.tags.map(tag => {
-            tag.colourHash = hsvToRgb(tag.colourHue, 1, 1)
-            return tag
-          })
-          return group.category
-        })
-
         layer.categories = {}
         for (const group of foundGroup) {
           const tagsById = {}
@@ -165,6 +156,7 @@ function setBoundaryLayers (boundaryLayers) {
             tagsById[tag.id] = tag
           }
           group.category.tags = tagsById
+          group.category.id = group.id
           layer.categories[group.id] = group.category
         }
 
