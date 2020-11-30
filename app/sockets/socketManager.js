@@ -95,7 +95,6 @@ class SocketManager {
         // UI dependent on optimizationState at so many places TODO: need to remove optimizationstate
         msg.data = JSON.parse(msg.content.toString()) // Shove it in here for now. Its in too many places in the front end.
         msg.data.progress = (msg.data.jobsCompleted + 1) / (msg.data.totalJobs + 1)
-        msg.data.optimizationState = msg.data.progress !== 1 ? 'STARTED' : 'COMPLETED'
         self.sockets.emitToPlan(processId, msg)
       }
     }
