@@ -13,7 +13,9 @@ const defaultState = {
     MANUAL_PLAN_TARGET_ENTRY: { id: 'MANUAL_PLAN_TARGET_ENTRY', label: 'Manual plan Target Selection', isQueryValid: false },
     MANUAL_PLAN_SA_ENTRY: { id: 'MANUAL_PLAN_SA_ENTRY', label: 'Manual Plan Service Area Selection', isQueryValid: false }
   },
-  selectedExpertMode: 'MANUAL_PLAN_SA_ENTRY'
+  selectedExpertMode: 'MANUAL_PLAN_SA_ENTRY',
+  scopeContextKeys: [],
+  expertModeScopeContext: ''
 }
 
 function setEnumStrings (state, enumStrings) {
