@@ -1774,9 +1774,6 @@ class State {
     service.unsubscribeLibraryEvent1 = SocketManager.subscribe('ETL_ADD', service.handleLibraryModifiedEvent.bind(service))
     service.unsubscribePlanRefresh = SocketManager.subscribe('PLAN_REFRESH', service.handlePlanRefreshRequest.bind(service))
 
-    // let prior_boundaries = ''
-    let boundariesAreSet = false
-
     // NOTE: this is willReceiveProps in Angular vernacular
     service.mergeToTarget = (nextReduxState, actions) => {
       const currentActivePlanId = service.plan && service.plan.id
