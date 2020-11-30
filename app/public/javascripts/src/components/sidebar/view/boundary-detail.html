@@ -24,7 +24,7 @@
       </select>
     </div>
   </div>
-  <aro-search ng-if="$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.BOUNDARIES_INFO" object-name="Boundary Layer"
+  <aro-search ng-if="$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.BOUNDARIES_INFO || $ctrl.rActiveViewModePanel === $ctrl.state.viewModePanels.BOUNDARIES_INFO"  object-name="Boundary Layer"
     label-id="code" search-list="$ctrl.state.entityTypeBoundaryList" selected="$ctrl.selectedBoundary" refresh-tag-list="$ctrl.state.StateViewMode.loadBoundaryEntityList($ctrl.$http, $ctrl.state, $ctrl.dataItems, searchObj)"
     on-selection-changed="$ctrl.viewSelectedBoundary(selectedObj)">
   </aro-search>
