@@ -26,7 +26,7 @@ export class AroDebug extends Component {
     const {tileInfo, morphologyTileInfos} = this.state
 
     return (
-      <div className="aro-debug-container ">
+      <div className="aro-debug-container" style={{overflowY: 'auto'}}>
         {/* <!-- A button to get debugging info on all the selected service areas --> */}
         <button className="btn btn-block btn-light"
                 style={{flex: '0 0 auto'}}
@@ -67,7 +67,7 @@ export class AroDebug extends Component {
         }
 
         {/* <!-- A container to display all the debugging info on the selected service areas --> */}
-        <div style={{flex: '1 1 auto', overflowY: 'auto'}}>
+        <div style={morphologyTileInfos.length > 0 ? {flex: '0 0 25em', overflow: 'auto'} : {flex: '0 0 auto', overflow: 'auto'}}>
           {/* <!-- Display the array of debugging infos --> */}
           <div className="list-group">
           {morphologyTileInfos.map((morphologyTile, index) => {
@@ -113,7 +113,7 @@ export class AroDebug extends Component {
       var morphologyTileInfos = []
       results.forEach((result) => {
         morphologyTileInfos.push({
-          url: result.config.url,
+          url: result.url,
           info: JSON.stringify(result.data, null, 2)
         })
         this.setState({morphologyTileInfos: morphologyTileInfos})
