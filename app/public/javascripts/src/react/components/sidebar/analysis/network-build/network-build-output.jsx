@@ -16,8 +16,7 @@ export class NetWorkBuildOutput extends Component {
   }
 
   componentDidMount () {
-    this.setState({ reportTypes: this.state.reportTypes || ['GENERAL', 'PARAM_QUERY'] })
-    this.setState({reportSize: 'small'})
+    this.setState({ reportTypes: this.props.reportTypes || ['GENERAL', 'PARAM_QUERY'], reportSize: 'small' })
   }
 
   render () {

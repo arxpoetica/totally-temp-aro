@@ -159,13 +159,12 @@ export class RoicReports extends Component {
     }
   }
 
-  // ToDo: Convert this.roicResults to his.state.roicResults
   digestData () {
     const currentYear = (new Date()).getFullYear()
     // number of years is number of vals in each curve, just grab the first one and get the length
     // roicAnalysis.components['BAU'].['network.new_connections_cost'].values
-    const aComponentKey = Object.keys(this.roicResults.roicAnalysis.components)[0]
-    const component = this.roicResults.roicAnalysis.components[aComponentKey]
+    const aComponentKey = Object.keys(this.state.roicResults.roicAnalysis.components)[0]
+    const component = this.state.roicResults.roicAnalysis.components[aComponentKey]
     const aCurveKey = Object.keys(component)[0]
     const yearsCount = component[aCurveKey].values.length
 
@@ -175,8 +174,8 @@ export class RoicReports extends Component {
     }
 
     // Some of the values have to be scaled (e.g. penetration should be in %)
-    Object.keys(this.roicResults.roicAnalysis.components).forEach(componentKey => {
-      const component = this.roicResults.roicAnalysis.components[componentKey]
+    Object.keys(this.state.roicResults.roicAnalysis.components).forEach(componentKey => {
+      const component = this.state.roicResults.roicAnalysis.components[componentKey]
       Object.keys(component).forEach(curveKey => {
         const curve = component[curveKey]
         const calcType = this.calcTypes.filter(item => item.id === curve.calcType)[0]

@@ -3,11 +3,9 @@ import Actions from '../../../common/actions'
 import PlanActions from '../../plan/plan-actions'
 
 function setEnumStrings (enumStrings){
-  return dispatch => {
-    dispatch({
-      type: Actions.ANALYSIS_MODE_ENUM_STRINGS,
-      payload: enumStrings
-    })
+  return {
+    type: Actions.ANALYSIS_MODE_ENUM_STRINGS,
+    payload: enumStrings
   }
 }
 
@@ -99,11 +97,9 @@ function loadNetworkNodeTypesEntity () {
 
 
 function setSelectedExpertMode(selectedExpertMode){
-  return dispatch => {
-    dispatch({
-      type: Actions.ANALYSIS_MODE_SELECTED_EXPERT_MODE,
-      payload: selectedExpertMode
-    })
+  return {
+    type: Actions.ANALYSIS_MODE_SELECTED_EXPERT_MODE,
+    payload: selectedExpertMode
   }
 }
 
@@ -142,20 +138,16 @@ function getAvailableScopeContextKeys (obj, parentKey) {
 }
 
 function setExpertMode(expertMode){
-  return dispatch => {
-    dispatch({
-      type: Actions.ANALYSIS_MODE_EXPERT_MODE,
-      payload: expertMode
-    })
+  return {
+    type: Actions.ANALYSIS_MODE_EXPERT_MODE,
+    payload: expertMode
   }
 }
 
 function setExpertModeTypes(expertModeTypes){
-  return dispatch => {
-    dispatch({
-      type: Actions.ANALYSIS_MODE_EXPERT_MODE_TYPES,
-      payload: expertModeTypes
-    })
+  return {
+    type: Actions.ANALYSIS_MODE_EXPERT_MODE_TYPES,
+    payload: expertModeTypes
   }
 }
 

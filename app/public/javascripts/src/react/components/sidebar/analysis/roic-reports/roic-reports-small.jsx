@@ -3,6 +3,7 @@ import reduxStore from '../../../../../redux-store'
 import wrapComponentWithProvider from '../../../../common/provider-wrapped-component'
 import AnalysisActions from '../analysis-actions'
 
+// https://flaviocopes.com/how-to-format-number-as-currency-javascript/
 const currencyformatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
   currency: 'USD',
@@ -31,6 +32,8 @@ export class RoicReportsSmall extends Component {
       }
     }
 
+    this.series = ['Series A', 'Series B']
+
     this.state = {
       FIBER_STRINGS: this.props.enumStrings['com.altvil.aro.service.entity']['FiberType'],
       CABLE_CONSTRUCTION_STRINGS: this.props.enumStrings['com.altvil.interfaces']['CableConstructionEnum'],
@@ -42,15 +45,15 @@ export class RoicReportsSmall extends Component {
   }
 
   render () {
-    return this.props.roicResults === null
-      ? null
-      : this.renderRoicReportsSmall()
+    return this.props.roicResults === null ? null : this.renderRoicReportsSmall()
   }
 
   renderRoicReportsSmall () {
 
-    const {roicResults, networkEquipment, networkNodeTypesEntity, networkTypes, categories, entityTypes} = this.props
-    const {FIBER_STRINGS, CABLE_CONSTRUCTION_STRINGS, selectedEntityType, selectedNetworkType, selectedCategory, selectedCalcType} = this.state
+    const {roicResults, networkEquipment, networkNodeTypesEntity, networkTypes,
+           categories, entityTypes, datasetOverride, graphOptions} = this.props
+    const {FIBER_STRINGS, CABLE_CONSTRUCTION_STRINGS, selectedEntityType,
+          selectedNetworkType, selectedCategory, selectedCalcType} = this.state
 
     return (
       <div style={{display: 'flex', flexDirection: 'column'}}>
@@ -134,21 +137,25 @@ export class RoicReportsSmall extends Component {
                 )}
               )}
 
-              {/* {Object.entries(plannedNetworkDemand.locationDemand.entityDemands).map(([ key, value ], index)  => { 
-                return (
-                  <React.Fragment key={index}>
-                    <tr>
-                      {key === 'small' || key === 'medium' || key === 'large' &&
-                        <td className="indent-1 text-capitalize"> {key} Business </td>
-                      }
-                      {key === 'household' || key === 'celltower' &&
-                        <td className="indent-1 text-capitalize"> {key} </td>
-                      }
-                      <td> {numberformatter_0.format(value.rawCoverage)}</td>
-                    </tr> 
-                  </React.Fragment>
-                )}
-              )} */}
+              {/* plannedNetworkDemand does not assigned or received from any where of the app, so condition is implemented to avoid error while rendering */}
+              {this.props.plannedNetworkDemand !== undefined
+                 ? Object.entries(this.props.plannedNetworkDemand.locationDemand.entityDemands).map(([ key, value ], index)  => { 
+                    return (
+                      <React.Fragment key={index}>
+                        <tr>
+                          {key === 'small' || key === 'medium' || key === 'large' &&
+                            <td className="indent-1 text-capitalize"> {key} Business </td>
+                          }
+                          {key === 'household' || key === 'celltower' &&
+                            <td className="indent-1 text-capitalize"> {key} </td>
+                          }
+                          <td> {numberformatter_0.format(value.rawCoverage)}</td>
+                        </tr> 
+                      </React.Fragment>
+                    )
+                  })
+                : <tr></tr>
+              }
             </tbody>
           </table>
         </div>
@@ -206,13 +213,32 @@ export class RoicReportsSmall extends Component {
         </div>
 
         <div style={{flex: '1 1 auto'}}>
-        {/* <!-- If we do not have chart data, display a warning --> */}
-        {/* {!(roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' + selectedCalcType.id].values) &&
-          <div className="alert alert-warning" role="alert">
-            No data available for the selected combination of Network Type, Entity Type and Calculation Type.
-          </div>
-        } */}
+          {/* If we have chart data, show it */}
+          {/* roicResults.roicAnalysis.components does not has values, so condition is implemented to avoid error while rendering */}
+          {Object.keys(roicResults.roicAnalysis.components).length > 0
+            ? roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' + selectedCalcType.id].values &&
+              <canvas id="line"
+                  class="chart chart-line"
+                  chart-data={roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' + selectedCalcType.id].values}
+                  //chart-labels={timeLabels}
+                  chart-series={this.series}
+                  chart-options={graphOptions[selectedCalcType.id]}
+                  chart-dataset-override={datasetOverride}>
+              </canvas>
+            : ''
+          }
+        </div>
 
+        <div style={{flex: '1 1 auto'}}>
+          {/* <!-- If we do not have chart data, display a warning --> */}
+          {/* roicResults.roicAnalysis.components does not has values, so condition is implemented to avoid error while rendering */}
+          {Object.keys(roicResults.roicAnalysis.components).length > 0
+            ? !(roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' + selectedCalcType.id].values) &&
+                <div className="alert alert-warning" role="alert">
+                  No data available for the selected combination of Network Type, Entity Type and Calculation Type.
+                </div>
+            : ''
+          }
         </div>
       </div>
     )
