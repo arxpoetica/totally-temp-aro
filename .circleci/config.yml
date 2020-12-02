@@ -75,9 +75,7 @@ workflows:
             branches:
               only:
                 - master
-                - ring_bug
-                - plan_refresh_tiles
-                - refactor_edges
+                - refactor_edges_merge
       - deploy:
           context: aro_qa_builds
           requires:
