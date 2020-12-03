@@ -50,8 +50,8 @@ class AroHttp {
 
   // Internal fetch() implementation. Rejects all HTTP response codes other than 200-299
   static _fetch (url, options, returnRawResult) {
-    var status
-    var respUrl
+    let status
+    let respUrl
     return fetch(url, options)
       .then(response => {
         if (response.type === 'error') {
@@ -66,7 +66,7 @@ class AroHttp {
         }
       })
       .then(result => {
-        var resultToSend = returnRawResult
+        let resultToSend = returnRawResult
           ? result
           : {
             status: status,
