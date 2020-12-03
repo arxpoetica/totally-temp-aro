@@ -15,7 +15,9 @@ const defaultState = {
   },
   selectedExpertMode: 'MANUAL_PLAN_SA_ENTRY',
   scopeContextKeys: [],
-  expertModeScopeContext: ''
+  expertModeScopeContext: '',
+  showRoicReportsModal: false,
+  roicResults: null
 }
 
 function setEnumStrings (state, enumStrings) {
@@ -60,6 +62,18 @@ function setExpertModeTypes (state, expertModeTypes) {
   }
 }
 
+function setShowRoicReportsModal (state, showRoicReportsModal) {
+  return { ...state,
+    showRoicReportsModal: showRoicReportsModal
+  }
+}
+
+function setROICResultsForPlan (state, roicResults) {
+  return { ...state,
+    roicResults: roicResults
+  }
+}
+
 function AnalysisReducer (state = defaultState, action) {
   switch (action.type) {
 
@@ -82,7 +96,13 @@ function AnalysisReducer (state = defaultState, action) {
       return setExpertMode(state, action.payload)
       
       case Actions.ANALYSIS_MODE_EXPERT_MODE_TYPES:
-        return setExpertModeTypes(state, action.payload)      
+        return setExpertModeTypes(state, action.payload) 
+        
+      case Actions.ANALYSIS_MODE_SHOW_ROIC_REPORT_MODAL:
+        return setShowRoicReportsModal(state, action.payload) 
+        
+      case Actions.ANALYSIS_MODE_SET_ROIC_RESULTS_FOR_PLAN:
+        return setROICResultsForPlan(state, action.payload)         
 
     default:
       return state

@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import reduxStore from '../../../../../redux-store'
 import wrapComponentWithProvider from '../../../../common/provider-wrapped-component'
 import RoicReportsSmall from './roic-reports-small.jsx'
+import RoicReportsLarge from './roic-reports-large.jsx'
 
 export class RoicReports extends Component {
   constructor (props) {
@@ -96,9 +97,7 @@ export class RoicReports extends Component {
     ]
   
     this.state = {
-      roicResults: null
     }
-
   }
 
   getOptionsForCalcType (calcType) {
@@ -154,7 +153,6 @@ export class RoicReports extends Component {
 
   componentDidUpdate (prevProps) {
     if(JSON.stringify(this.props) !== JSON.stringify(prevProps)) {
-      this.setState({roicResults: JSON.parse(JSON.stringify(this.props.roicResultsData))})
       //this.digestData()
     }
   }
@@ -163,8 +161,8 @@ export class RoicReports extends Component {
     const currentYear = (new Date()).getFullYear()
     // number of years is number of vals in each curve, just grab the first one and get the length
     // roicAnalysis.components['BAU'].['network.new_connections_cost'].values
-    const aComponentKey = Object.keys(this.state.roicResults.roicAnalysis.components)[0]
-    const component = this.state.roicResults.roicAnalysis.components[aComponentKey]
+    const aComponentKey = Object.keys(this.props.roicResults.roicAnalysis.components)[0]
+    const component = this.props.roicResults.roicAnalysis.components[aComponentKey]
     const aCurveKey = Object.keys(component)[0]
     const yearsCount = component[aCurveKey].values.length
 
@@ -174,8 +172,8 @@ export class RoicReports extends Component {
     }
 
     // Some of the values have to be scaled (e.g. penetration should be in %)
-    Object.keys(this.state.roicResults.roicAnalysis.components).forEach(componentKey => {
-      const component = this.state.roicResults.roicAnalysis.components[componentKey]
+    Object.keys(this.props.roicResults.roicAnalysis.components).forEach(componentKey => {
+      const component = this.props.roicResults.roicAnalysis.components[componentKey]
       Object.keys(component).forEach(curveKey => {
         const curve = component[curveKey]
         const calcType = this.calcTypes.filter(item => item.id === curve.calcType)[0]
@@ -187,29 +185,40 @@ export class RoicReports extends Component {
 
   render () {
 
-    const {roicResults} = this.state;
     const {reportSize} = this.props;
 
     return (
-      <div>
+      <>
+        {reportSize === 'large' &&
+          <RoicReportsLarge
+            categories={this.categories}
+            entityTypes={this.entityTypes}
+            networkTypes={this.networkTypes}
+            calcTypes={this.calcTypes}
+            //timeLabels={this.xAxisLabels}
+            datasetOverride={this.datasetOverride}
+            graphOptions={this.graphOptions}
+          />
+        }
+
         {reportSize === 'small' &&
           <RoicReportsSmall
             categories={this.categories}
             entityTypes={this.entityTypes}
             networkTypes={this.networkTypes}
             calcTypes={this.calcTypes}
-            roicResults={roicResults}
             //timeLabels={this.xAxisLabels}
             datasetOverride={this.datasetOverride}
             graphOptions={this.graphOptions}
           />
         }
-      </div>
+      </>
     )
   }
 }
 
 const mapStateToProps = (state) => ({
+  roicResults: state.analysisMode.roicResults
 })  
 
 const mapDispatchToProps = (dispatch) => ({

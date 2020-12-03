@@ -4,6 +4,8 @@ import wrapComponentWithProvider from '../../../../common/provider-wrapped-compo
 import ReportsDownloadModal from '../../../optimization/reports/reports-download-modal.jsx'
 import ReportsActions from '../../../optimization/reports/reports-actions'
 import CommonRoicReports from '../roic-reports/common-roic-reports.jsx'
+import AnalysisActions from '../analysis-actions'
+import RoicReportsmodal from '../roic-reports/roic-reports-modal.jsx'
 
 export class NetWorkBuildOutput extends Component {
   constructor (props) {
@@ -36,16 +38,15 @@ export class NetWorkBuildOutput extends Component {
         </div>
         
         <button className="btn btn-primary pull-left mr-1" onClick={(e)=>this.props.showReportModal()}>Reports</button>
-        <button className="btn btn-primary pull-right" onClick={(e)=>this.props.showDetailedOutput()}>Expand Results</button>
+        <button className="btn btn-primary pull-right" onClick={(e)=>this.props.showRoicReportsModal()}>Expand Results</button>
 
         {/* Render Reports Modal */}
         <ReportsDownloadModal reportTypes={reportTypes} title='Reports'/>
+        
+        {/* To Render Expand Results Modal */}
+        <RoicReportsmodal/>
       </div>
     )
-  }
-
-  // To open Expand Results Modal
-  showDetailedOutput () {
   }
 }
 
@@ -55,7 +56,8 @@ const mapStateToProps = (state) => ({
 })  
 
 const mapDispatchToProps = (dispatch) => ({
-  showReportModal: () => dispatch(ReportsActions.showOrHideReportModal(true))
+  showReportModal: () => dispatch(ReportsActions.showOrHideReportModal(true)),
+  showRoicReportsModal: () => dispatch(AnalysisActions.setShowRoicReportsModal(true))
 })
 
 const NetWorkBuildOutputComponent = wrapComponentWithProvider(reduxStore, NetWorkBuildOutput, mapStateToProps, mapDispatchToProps)

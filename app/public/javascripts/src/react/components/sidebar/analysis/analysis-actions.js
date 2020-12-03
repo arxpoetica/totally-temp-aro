@@ -151,6 +151,26 @@ function setExpertModeTypes(expertModeTypes){
   }
 }
 
+function setShowRoicReportsModal (showRoicReportsModal) {
+  return {
+    type: Actions.ANALYSIS_MODE_SHOW_ROIC_REPORT_MODAL,
+    payload: showRoicReportsModal
+  }
+}
+
+function loadROICResultsForPlan(planId) {
+  return dispatch => {
+    AroHttp.get(`/service/report/plan/${planId}`)
+      .then(result => {
+        dispatch({
+          type: Actions.ANALYSIS_MODE_SET_ROIC_RESULTS_FOR_PLAN,
+          payload: result.data
+        })
+      })
+      .catch(err => console.error(err))
+  }
+}
+
 export default {
   setEnumStrings,
   loadNetworkNodeTypesEntity,
@@ -158,5 +178,7 @@ export default {
   setSelectedExpertMode,
   getExpertModeScopeContext,
   setExpertMode,
-  setExpertModeTypes
+  setExpertModeTypes,
+  setShowRoicReportsModal,
+  loadROICResultsForPlan
 }

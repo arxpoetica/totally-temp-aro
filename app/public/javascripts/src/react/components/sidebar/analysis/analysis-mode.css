@@ -60,3 +60,30 @@
 .option-indent {
   margin-left: 30px;
 }
+
+/* Roic Reports Large */
+
+.roic-report-label {
+  line-height: 33px;
+}
+.network-summary-card {
+  border: 1px solid darkgray;
+}
+.card-row-1 {
+  background-color: #e1ecff;
+}
+.card-row-2 {
+  background-color: #f1fff1;
+}
+.card-row-3 {
+  background-color: #ffecec;
+}
+.network-summary-card h5 {
+  font-size: x-large;
+}
+#tblRoicReportsLargeSummary td {
+  line-height: 33px; /* To vertically align text */
+}
+.indent-1 {
+  padding-left: 30px !important;
+}

@@ -86,7 +86,7 @@ export class RoicReportsSmall extends Component {
                   {networkStatistic.networkStatisticType === 'roic_irr' &&
                     <tr>
                       {networkStatistic.networkStatisticType === 'roic_irr' &&
-                        <td><strong>NPV</strong></td>
+                        <td><strong>IRR</strong></td>
                       }
                       {networkStatistic.networkStatisticType === 'roic_irr' &&
                         numberformatter_1.format(networkStatistic.value * 100)+" %" 
@@ -290,6 +290,7 @@ const mapStateToProps = (state) => ({
   enumStrings: state.analysisMode.enumStrings,
   networkEquipment: state.mapLayers.networkEquipment,
   networkNodeTypesEntity: state.analysisMode.networkNodeTypesEntity,
+  roicResults: state.analysisMode.roicResults
 })  
 
 const mapDispatchToProps = (dispatch) => ({

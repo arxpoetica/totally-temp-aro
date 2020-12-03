@@ -1,14 +1,13 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import RoicReports from './roic-reports.jsx'
-import AroHttp from '../../../../common/aro-http'
+import AnalysisActions from '../analysis-actions'
 
 export class CommonRoicReports extends Component {
   constructor (props) {
     super(props)
 
     this.state = {
-      roicResultsData: null
     }
   }
 
@@ -23,14 +22,10 @@ export class CommonRoicReports extends Component {
 
   render () {
 
-    const {roicResultsData} = this.state;
-    const {reportSize} = this.props;
-
     return (
-      // Render Component based on reportSize
+      // Render Components based on reportSize
       <RoicReports
-        reportSize={reportSize}
-        roicResultsData={roicResultsData}
+        reportSize={this.props.reportSize}
       />
     )
   }
@@ -40,23 +35,16 @@ export class CommonRoicReports extends Component {
       console.error('Plan ID not available')
       return
     }
-    this.loadROICResultsForPlan(this.props.planId)
+    // Insted of props Drilling, roicResults is moved to redux
+    this.props.loadROICResultsForPlan(this.props.planId)
   }
-
-  loadROICResultsForPlan (planId) {
-    AroHttp.get(`/service/report/plan/${planId}`)
-      .then(result => {
-        this.setState({roicResultsData: result.data})
-      })
-      .catch(err => console.error(err))
-  }
-
 }
 
 const mapStateToProps = (state) => ({
 })  
 
 const mapDispatchToProps = (dispatch) => ({
+  loadROICResultsForPlan: (planId) => dispatch(AnalysisActions.loadROICResultsForPlan(planId))
 })
 
 const CommonRoicReportsComponent = connect(mapStateToProps, mapDispatchToProps)(CommonRoicReports)
