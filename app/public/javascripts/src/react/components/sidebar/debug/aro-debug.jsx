@@ -112,8 +112,9 @@ export class AroDebug extends Component {
     .then((results) => {
       var morphologyTileInfos = []
       results.forEach((result) => {
+        var requestUrl = new URL(result.url);
         morphologyTileInfos.push({
-          url: result.url,
+          url: requestUrl.pathname,
           info: JSON.stringify(result.data, null, 2)
         })
         this.setState({morphologyTileInfos: morphologyTileInfos})
