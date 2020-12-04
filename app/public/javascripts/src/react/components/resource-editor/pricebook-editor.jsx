@@ -155,7 +155,7 @@ export class PriceBookEditor extends Component {
                                 <tr key={definitionKey}>
                                   <td>{definitionItem.description}</td>
                                   <td>
-                                    <input type="text" onChange={(e)=>this.handleFiberLabourChange(e, definitionKey, definitionItem.id)} value={definitionItem.costAssignment !== undefined ? definitionItem.costAssignment.cost: 0} className="form-control form-control-sm"/>
+                                    <input type="text" onChange={(e)=>this.handleFiberLabourChange(e, definitionKey, definitionItem.id)} value={definitionItem.costAssignment !== undefined ? definitionItem.costAssignment.cost : 0} className="form-control form-control-sm"/>
                                   </td>
                                   <td>{definitionItem.unitOfMeasure}</td>
                                   <td>
@@ -230,7 +230,7 @@ export class PriceBookEditor extends Component {
                                               }
                                               {subItem.detailType === 'reference' &&
                                                 <td style={{width: '100px', borderRight: 'none'}}>
-                                                  <input type="text" onChange={(e)=>this.handleDetailAssignmentChange(e, definitionKey)}  value={subItem.detailAssignment !== undefined ? subItem.detailAssignment.quantity: 0} className="form-control form-control-sm"/>
+                                                  <input type="text" onChange={(e)=>this.handleDetailAssignmentChange(e, definitionKey)}  value={subItem.detailAssignment !== undefined ? subItem.detailAssignment.quantity : 0} className="form-control form-control-sm"/>
                                                 </td>
                                               }
                                               {subItem.detailType === 'reference' &&

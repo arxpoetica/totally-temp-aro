@@ -1785,39 +1785,10 @@ class State {
       service.loadPlanRedux(service.plan.id)
     }
 
-    /*
-    service.noteIdFileUpload = null
-    service.handleETLStartEvent = msg => {
-      console.log('--- ETL Start ---')
-      var content = new TextDecoder('utf-8').decode(new Uint8Array(msg.content))
-      console.log({ msg, content })
-    }
-
-    service.handleETLUpdateEvent = msg => {
-      console.log('--- ETL Update ---')
-      var content = new TextDecoder('utf-8').decode(new Uint8Array(msg.content))
-      console.log({ msg, content })
-    }
-
-    service.handleETLCloseEvent = msg => {
-      console.log('--- ETL Close ---')
-      var content = new TextDecoder('utf-8').decode(new Uint8Array(msg.content))
-      console.log({ msg, content })
-    }
-    */
-
     service.unsubscribePlanEvent = SocketManager.subscribe('COMMIT_TRANSACTION', service.handlePlanModifiedEvent.bind(service))
     service.unsubscribeLibraryEvent1 = SocketManager.subscribe('USER_TRANSACTION', service.handleLibraryModifiedEvent.bind(service))
     service.unsubscribeLibraryEvent1 = SocketManager.subscribe('ETL_ADD', service.handleLibraryModifiedEvent.bind(service))
     service.unsubscribePlanRefresh = SocketManager.subscribe('PLAN_REFRESH', service.handlePlanRefreshRequest.bind(service))
-    /*
-    service.unsubscribeETLStart = SocketManager.subscribe('ETL_START', service.handleETLStartEvent.bind(service))
-    service.unsubscribeETLUpdate = SocketManager.subscribe('ETL_UPDATE', service.handleETLUpdateEvent.bind(service))
-    service.unsubscribeETLClose = SocketManager.subscribe('ETL_CLOSE', service.handleETLCloseEvent.bind(service))
-    */
-
-    // let prior_boundaries = ''
-    let boundariesAreSet = false
 
     // NOTE: this is willReceiveProps in Angular vernacular
     service.mergeToTarget = (nextReduxState, actions) => {
@@ -1929,9 +1900,6 @@ class State {
       clearWormholeFuseDefinitions: () => dispatch(NetworkAnalysisActions.clearWormholeFuseDefinitions()),
       setWormholeFuseDefinition: (spatialEdgeType, wormholeFusionTypeId) => dispatch(NetworkAnalysisActions.setWormholeFuseDefinition(spatialEdgeType, wormholeFusionTypeId)),
       setShowLocationLabels: showLocationLabels => dispatch(ViewSettingsActions.setShowLocationLabels(showLocationLabels)),
-      postNotification: (notification, autoExpire, type) => NotificationInterface.postNotification(dispatch, notification, autoExpire, type), // you'll not this one looks a bit different, because we need a return val of the note ID we use an interface that wraps the action creator and the dispatch is done there
-      updateNotification: (noteId, notification, autoExpire, type) => NotificationInterface.updateNotification(dispatch, noteId, notification, autoExpire, type),
-      removeNotification: (noteId, autoExpire) => NotificationInterface.removeNotification(dispatch, noteId, autoExpire),
       setShowEquipmentLabelsChanged: showEquipmentLabels => dispatch(ToolBarActions.setShowEquipmentLabelsChanged(showEquipmentLabels)),
       setAppConfiguration: appConfiguration => dispatch(ToolBarActions.setAppConfiguration(appConfiguration)),
       updateDefaultPlanCoordinates: coordinates => dispatch(PlanActions.updateDefaultPlanCoordinates(coordinates)),

@@ -118,7 +118,7 @@ export class ViewSettings extends Component {
           <tr>
             <td>Show tile information on map</td>
             <td>
-              <input type="checkbox" className="checkboxfill" value={mapTileOptions.showTileExtents} onChange={(e)=>this.updateState(e)}/>
+              <input type="checkbox" className="checkboxfill" checked={mapTileOptions.showTileExtents} onChange={(e)=>this.updateState(e)}/>
             </td>
           </tr>         
         

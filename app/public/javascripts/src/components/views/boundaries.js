@@ -16,13 +16,16 @@ class BoundariesController {
     // Creates map layers based on selection in the UI
     this.createdMapLayerKeys = new Set()
 
-    this.selectedLayerCat = null
-
     // When the map zoom changes, map layers can change
     $rootScope.$on('map_zoom_changed', this.updateMapLayers.bind(this))
 
     // Update map layers when the display mode button changes
     this.state.selectedDisplayMode.subscribe((newValue) => this.updateMapLayers())
+
+    this.layerCategories = this.state.layerCategories.getValue()
+    this.state.layerCategories.subscribe((newValue) => {
+      this.layerCategories = newValue
+    })
 
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
   }
@@ -92,7 +95,7 @@ class BoundariesController {
   }
 
   onSelectCategory (category) {
-    const id = this.selectedLayerCat && this.selectedLayerCat.id
+    const id = category && category.id
     var newSelection = this.state.cloneSelection()
     newSelection.details.layerCategoryId = id
     this.state.selection = newSelection

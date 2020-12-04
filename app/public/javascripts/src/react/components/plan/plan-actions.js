@@ -524,7 +524,6 @@ function setParentProjectForNewProject (parentProjectForNewProject){
   }
 }
 
-
 function setSelectedProjectId (selectedProjectId){
   return dispatch => {
     dispatch({
@@ -551,6 +550,7 @@ function updateDefaultPlanCoordinates (coordinates){
     })
   }
 }
+
 
 
 export default {

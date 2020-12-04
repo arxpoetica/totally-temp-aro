@@ -50,7 +50,8 @@ class AroHttp {
 
   // Internal fetch() implementation. Rejects all HTTP response codes other than 200-299
   static _fetch (url, options, returnRawResult) {
-    var status
+    let status
+    let respUrl
     return fetch(url, options)
       .then(response => {
         if (response.type === 'error') {
@@ -59,16 +60,18 @@ class AroHttp {
         } else {
           // We have a response.
           status = response.status
+          respUrl = response.url // We need url for Debug mode "Get tile info for all selected service areas"
           // We cannot do response.json() on an empty response (which is sometimes returned by service)
           return returnRawResult ? response.arrayBuffer() : response.text()
         }
       })
       .then(result => {
-        var resultToSend = returnRawResult
+        let resultToSend = returnRawResult
           ? result
           : {
             status: status,
-            data: JSON.parse(result || '{}')
+            data: JSON.parse(result || '{}'),
+            url: respUrl
           }
         if (status >= 200 && status <= 299) {
           return Promise.resolve(resultToSend)

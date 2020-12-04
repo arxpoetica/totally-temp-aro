@@ -68,9 +68,10 @@ export class PlanDataSelection extends Component {
     // Dataitems Objects needed to be converted to Array for Sorting
     let dataItemsArray = []
     Object.entries(this.state.dataItems).map(([ key, value ], objIndex) => {
-      if(!value.hideDataItems) { // To Show/hide data_Items
+      // To push only the visible values to dataItemsArray array
+      if(value.visibility === true) {
         value.dataItemsKey = key // To create a 'dataItemsKey' key for new array
-        dataItemsArray.push(value) // Need to push values to array
+        dataItemsArray.push(value)
       }
     })
 
@@ -194,25 +195,40 @@ export class PlanDataSelection extends Component {
         this.state.dataItems[dataItemKey].hidden = true
       }
 
-      // To check Whether showPlanDataSelection has the required dataItemKey
-      if(this.props.showPlanDataSelection.hasOwnProperty(dataItemKey)){
-        // Hide dataItems based on showPlanDataSelection object
-        if(this.props.showPlanDataSelection[dataItemKey].visibility === false) {
-          this.state.dataItems[dataItemKey].hideDataItems = true
+      if(this.props.showPlanDataSelection !== undefined) {
+        if(Object.entries(this.props.showPlanDataSelection).length > 0) {
+        // To check Whether showPlanDataSelection has the required dataItemKey
+          if(this.props.showPlanDataSelection.hasOwnProperty(dataItemKey)){
+            // Add visibility and rankIndex to dataItem
+            this.state.dataItems[dataItemKey].visibility = this.props.showPlanDataSelection[dataItemKey].visibility 
+            this.state.dataItems[dataItemKey].rankIndex = this.props.showPlanDataSelection[dataItemKey].rankIndex
+          } else {
+            this.state.dataItems[dataItemKey].visibility = false
+            this.state.dataItems[dataItemKey].rankIndex = 0
+          }
+        } else {
+          this.alertDataSlection()
         }
-
-        // To set rankIndex in dataItems object
-        this.state.dataItems[dataItemKey].rankIndex = this.props.showPlanDataSelection[dataItemKey].rankIndex
+      } else {
+        this.alertDataSlection()
       }
 
+      // To validate selection only for the visible items
       dataItem = this.state.dataItems[dataItemKey]
-      // To validate selection only for the non-hided items
-      if(!dataItem.hideDataItems) {
+      if(dataItem.visibility === true) {
         dataItem.isMinValueSelectionValid = dataItem.selectedLibraryItems.length >= dataItem.minValue
         dataItem.isMaxValueSelectionValid = dataItem.selectedLibraryItems.length <= dataItem.maxValue
       }
     })
     this.setState({dataItems: this.state.dataItems})
+  }
+
+  alertDataSlection () {
+    swal({
+      title: '',
+      text: 'Plan Data Selection "Settings" is Empty',
+      type: 'warning'
+    })
   }
 
   areAllSelectionsValid () {
