@@ -281,11 +281,11 @@ export class PlanningConstraints extends Component {
                   <Field name='hubClusterStrategyType'
                     className='form-control form-control-sm' component='select' type='text'>
                     <option value='DAG'>Directed Acyclic Graph</option>
-                    <option value='MST_DAG'>MST Directed Acyclic Graph</option>
-                    <option value='KMEANS_PP'>K Means</option>
-                    <option value='RROBIN'>Round Robin</option>
-                    <option value='GRAPH'>Graph</option>
-                    <option value='CLUSTER_ROADS'>Cluster Roads</option>
+                    <option value='KMEANS_PP'>K-Means Clustering</option>
+                    <option value='MST_DAG'>Minimum Spanning Tree</option>
+                    {/* <option value='RROBIN'>Round Robin</option> */}
+                    {/* <option value='GRAPH'>Graph</option> */}
+                    {/* <option value='CLUSTER_ROADS'>Cluster Roads</option> */}
                   </Field>
                 </td>
               </tr>
