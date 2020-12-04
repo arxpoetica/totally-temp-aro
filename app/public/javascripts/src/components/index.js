@@ -48,6 +48,7 @@ import PlanningConstraintsEditor from '../react/components/resource-manager/plan
 import FusionEditor from '../react/components/resource-manager/fusion-editor.jsx'
 import NetworkArchitectureEditor from '../react/components/resource-manager/network-architecture-editor.jsx'
 import ToolBox from '../react/components/tool/tool-box.jsx'
+import UINotifications from '../react/components/notification/ui-notifications.jsx'
 
 import boundaryDetail from './sidebar/view/boundary-detail'
 import equipmentDetail from './sidebar/view/equipment-detail'
@@ -87,7 +88,7 @@ import boundaryPropertiesEditor from './sidebar/plan-editor/boundary-properties-
 import planSummary from './sidebar/plan-editor/plan-summary'
 import serviceLayerEditor from './sidebar/plan-editor/service-layer-editor'
 import conicTileSystemUploader from './sidebar/plan-settings/plan-data-selection/conic-tile-system-uploader'
-import globalDataSourceUploadModal from './sidebar/plan-settings/plan-data-selection/data-source-upload-modal'
+//import globalDataSourceUploadModal from './sidebar/plan-settings/plan-data-selection/data-source-upload-modal'
 import projectSettingsModal from './sidebar/plan-settings/plan-project-configuration/project-settings-modal'
 import planDataSelection from './sidebar/plan-settings/plan-data-selection/plan-data-selection'
 import planProjectConfiguration from './sidebar/plan-settings/plan-project-configuration/plan-project-configuration'
@@ -109,6 +110,7 @@ import rateReachDistanceEditor from './sidebar/plan-settings/plan-resource-selec
 import boundaries from './views/boundaries'
 import locations from './views/locations'
 import networkEquipment from './views/network-equipment'
+import copper from './views/copper'
 import cables from './views/cables'
 import conduits from './views/conduits'
 import mapSplit from './map/map-split'
@@ -120,7 +122,6 @@ import networkPlanModal from './header/network-plan-modal'
 import planInputsModal from './header/plan-inputs-modal'
 import networkPlanManage from './header/network-plan-manage'
 import networkPlan from './header/network-plan'
-import uiNotification from './footer/ui-notification'
 import fullScreenContainer from './full-screen/full-screen-container'
 import manageUsers from './global-settings/manage-users'
 import manageGroups from './global-settings/manage-groups'
@@ -194,7 +195,6 @@ app.component('boundaryDetail', boundaryDetail)
   .component('serviceLayerEditor', serviceLayerEditor)
   .component('draggableButton', draggableButton)
   .component('conicTileSystemUploader', conicTileSystemUploader)
-  .component('globalDataSourceUploadModal', globalDataSourceUploadModal)
   .component('projectSettingsModal', projectSettingsModal)
   .component('planDataSelection', planDataSelection)
   .component('planProjectConfiguration', planProjectConfiguration)
@@ -217,6 +217,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('locations', locations)
   .component('networkEquipment', networkEquipment)
   .component('cables', cables)
+  .component('copper', copper)
   .component('conduits', conduits)
   .component('mapSplit', mapSplit)
   .component('mapSelectorPlanTarget', mapSelectorPlanTarget)
@@ -227,7 +228,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('planInputsModal', planInputsModal)
   .component('networkPlanManage', networkPlanManage)
   .component('networkPlan', networkPlan)
-  .component('uiNotification', uiNotification)
+  // .component('uiNotification', uiNotification)
   .component('fullScreenContainer', fullScreenContainer)
   .component('manageUsers', manageUsers)
   .component('manageGroups', manageGroups)
@@ -303,6 +304,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rFusionEditor', react2angular(FusionEditor, ['onDiscard']))
   .component('rNetworkArchitectureEditor', react2angular(NetworkArchitectureEditor, ['onDiscard']))
   .component('rToolBox', react2angular(ToolBox))
+  .component('rUiNotifications', react2angular(UINotifications))
   .service('Utils', utils)
   .service('state', state)
   .service('rxState', rxState)

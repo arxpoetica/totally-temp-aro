@@ -1,5 +1,8 @@
 import Actions from '../../common/actions'
 import AroHttp from '../../common/aro-http'
+import SocketManager from '../../common/socket-manager'
+import NotificationInterface from '../notification/notification-interface'
+import NotificationTypes from '../notification/notification-types'
 import PlanActions from '../plan/plan-actions'
 import ToolBarActions from '../header/tool-bar-actions'
 import GlobalSettingsActions from '../global-settings/globalsettings-action'
@@ -7,14 +10,14 @@ import GlobalSettingsActions from '../global-settings/globalsettings-action'
 function loadMetaData () {
 
   return dispatch => {
-    AroHttp.get(`/service/odata/SpatialEdgeTypeEntity`)
+    AroHttp.get(`/service/odata/EdgeFeatureTypeEntity`)
     .then(result => dispatch({
       type: Actions.DATA_UPLOAD_SET_EDGE_TYPE,
       payload: result.data
     }))
     .catch((err) => console.error(err))
 
-    AroHttp.get(`/service/odata/FiberTypeEntity`)
+    AroHttp.get(`/service/odata/EdgeFeatureSubTypeEntity`)
     .then(result => dispatch({
       type: Actions.DATA_UPLOAD_SET_CABLE_TYPE,
       payload: result.data
@@ -50,16 +53,12 @@ function createLibraryId (uploadDetails, loggedInUser) {
 }
 
 function saveDataSource (uploadDetails,loggedInUser) {
-
   return dispatch => {
-
     dispatch(setIsUploading(true))
-
-    if(uploadDetails.selectedDataSourceName === 'tile_system'){
-
+    if (uploadDetails.selectedDataSourceName === 'tile_system') {
       return createLibraryId(uploadDetails,loggedInUser)
       .then((libraryItem) => {
-        fileUpload(uploadDetails,libraryItem.identifier,loggedInUser) 
+        fileUpload(dispatch, uploadDetails,libraryItem.identifier,loggedInUser) 
         dispatch(setAllLibraryItems(libraryItem.dataType, libraryItem))
       })
       .then((result) => {
@@ -88,7 +87,8 @@ function saveDataSource (uploadDetails,loggedInUser) {
         })
         // Draw the layer by entering edit mode
       } else {
-        if (uploadDetails.selectedDataSourceName !== 'service_layer' || uploadDetails.selectedCreationType !== 'polygon_equipment') {
+        if (uploadDetails.selectedDataSourceName !== 'service_layer' 
+            || uploadDetails.selectedCreationType !== 'polygon_equipment') {
           var files = uploadDetails.file
           if (uploadDetails.dataSetId && files.length > 0) {
             return swal({
@@ -100,15 +100,16 @@ function saveDataSource (uploadDetails,loggedInUser) {
               showCancelButton: true,
               closeOnConfirm: true
             }, 
-            fileUpload(uploadDetails,uploadDetails.dataSetId))
+            fileUpload(dispatch, uploadDetails,uploadDetails.dataSetId))
           }
         }
         // For uploading fiber no need to create library using getLibraryId()
         if (uploadDetails.selectedDataSourceName === 'fiber') {
+          uploadDetails.selectedSpatialEdgeType = 'fiber_cable'
           return setCableConstructionType(uploadDetails,loggedInUser)
           .then((libraryItem) => {
             dispatch(setAllLibraryItems(libraryItem.dataType, libraryItem)),
-            fileUpload(uploadDetails, libraryItem.identifier, loggedInUser)
+            fileUpload(dispatch, uploadDetails, libraryItem.identifier, loggedInUser)
           })
           .then((result) => {
             dispatch(setIsUploading(false))
@@ -116,17 +117,14 @@ function saveDataSource (uploadDetails,loggedInUser) {
           })
           .catch((err) => {
             dispatch(setIsUploading(false))
+            console.error(err)
           })
-        } else {
+        }
+        if (uploadDetails.selectedDataSourceName === 'service_layer' 
+            && uploadDetails.selectedCreationType === 'polygon_equipment') { 
           getLibraryId (uploadDetails)
             .then((library) => {
-              if (uploadDetails.selectedDataSourceName === 'service_layer' && uploadDetails.selectedCreationType === 'polygon_equipment') { 
-                layerBoundary(uploadDetails, library.data.identifier,loggedInUser) 
-              } else {
-                if(uploadDetails.selectedDataSourceName !== 'edge'){
-                  fileUpload(uploadDetails,library.data.identifier,loggedInUser) 
-                }
-              }
+              layerBoundary(uploadDetails, library.data.identifier,loggedInUser) 
               dispatch(setAllLibraryItems(library.data.dataType, library.data))
             })
             .then((res) => {
@@ -136,6 +134,35 @@ function saveDataSource (uploadDetails,loggedInUser) {
               dispatch(setIsUploading(false))
               console.error(err)
             })
+        }
+        if (uploadDetails.selectedDataSourceName === 'edge') { 
+          addConduit(uploadDetails)
+            .then((libraryItem) => {
+              dispatch(setAllLibraryItems(libraryItem.dataType, libraryItem)),
+              fileUpload(dispatch, uploadDetails, libraryItem.identifier, loggedInUser)
+          })
+          .then((result) => {
+            dispatch(setIsUploading(false))
+            return Promise.resolve(result)
+          })
+          .catch((err) => {
+            dispatch(setIsUploading(false))
+            console.error(err)
+          })
+        }
+        if (uploadDetails.selectedDataSourceName !== 'edge') { 
+          getLibraryId (uploadDetails)
+            .then((library) => {
+              dispatch(setAllLibraryItems(library.data.dataType, library.data))
+              fileUpload(dispatch, uploadDetails,library.data.identifier,loggedInUser) 
+          })
+          .then((res) => {
+            dispatch(setIsUploading(false))
+          })
+          .catch((err) => {
+            dispatch(setIsUploading(false))
+            console.error(err)
+          })
         }
       }
     }
@@ -173,32 +200,114 @@ function setCableConstructionType (uploadDetails,loggedInUser) {
     param: {
       defaultCableSize: uploadDetails.selectedConduitSize,
       param_type: 'cable_param',
-      spatialEdgeType: uploadDetails.selectedSpatialEdgeType
+      spatialEdgeType: uploadDetails.selectedSpatialEdgeType,
+      edgeSubTypeReference: uploadDetails.selectedCableType
     }
-  }
-
-  if (uploadDetails.selectedSpatialEdgeType === 'fiber') {
-    // This is not a conduit, also send the fiber type
-    data.param.fiberType = uploadDetails.selectedCableType
   }
   return AroHttp.post(`/service/v1/library_cable`,data)
     .then((result) => Promise.resolve(result.data.libraryItem))
     .catch((err) => console.error(err))
 }
 
-function fileUpload (uploadDetails,libraryId,loggedInUser) {
+function addConduit(uploadDetails) {
+  var data = {
+    libraryItem: {
+      dataType: uploadDetails.selectedDataSourceName,
+      name: uploadDetails.dataSourceName
+    },
+    param: {
+      defaultCableSize: uploadDetails.selectedConduitSize,
+      param_type: 'cable_param',
+      spatialEdgeType: uploadDetails.selectedSpatialEdgeType
+    }
+  }
+  return AroHttp.post(`/service/v1/library_conduit`,data)
+    .then((result) => Promise.resolve(result.data.libraryItem))
+    .catch((err) => console.error(err))
+}
+
+function fileUpload (dispatch, uploadDetails,libraryId,loggedInUser) {
   var formData = new FormData()
   var file = uploadDetails.file
   formData.append('file', file)
-
   var fileExtension = file.name.substr(file.name.lastIndexOf('.') + 1).toUpperCase()
-  var url = `/uploadservice/v1/library/${libraryId}?userId=${loggedInUser.id}&media=${fileExtension}`
+  // ---
   
-  AroHttp.postRaw(url, formData).then((e) => {
+  // var url = `/uploadservice/v1/library/${libraryId}?userId=${loggedInUser.id}&media=${fileExtension}`
+  var url = `/uploadservice/v1/async-library/${libraryId}?userId=${loggedInUser.id}&media=${fileExtension}`
+  // make this a utility to be used in many socket digest functions
+  const uploadNote = `Uploading file: ${file.name}`
+  const processNote = `Processing file: ${file.name}`
+  const noteId = NotificationInterface.postNotification(dispatch, `${uploadNote} 0.00%`)
+  var uInt8ArrayToJSON = (uIntArr) => {
+    return JSON.parse(new TextDecoder('utf-8').decode(new Uint8Array(uIntArr)))
+  }
+  SocketManager.joinRoom('library', libraryId)
+  var unsubscribeETLStart = SocketManager.subscribe('ETL_START', msg => {
+    if (msg.properties.headers.libraryId === libraryId) {
+      // var content = uInt8ArrayToJSON(msg.content)
+      NotificationInterface.updateNotification(dispatch, noteId, `${processNote} 0.00% | 0 errors`)
+    }
+  })
+  var unsubscribeETLUpdate = SocketManager.subscribe('ETL_UPDATE', msg => {
+    if (msg.properties.headers.libraryId === libraryId) {
+      var content = uInt8ArrayToJSON(msg.content)
+      const pct = ((content.validCount / content.totalCount) * 100).toFixed(2)
+      const progressNote = `${pct}% | ${content.errorCount} errors`
+      NotificationInterface.updateNotification(dispatch, noteId, `${processNote} ${progressNote}`)
+    }
+  })
+  var unsubscribeETLClose = SocketManager.subscribe('ETL_CLOSE', msg => {
+    if (msg.properties.headers.libraryId === libraryId) {
+      var content = uInt8ArrayToJSON(msg.content)
+      const pct = ((content.validCount / content.totalCount) * 100).toFixed(2)
+      const progressNote = `${pct}% | ${content.errorCount} errors`
+      NotificationInterface.updateNotification(dispatch, noteId, `${processNote} ${progressNote}`)
+    }
+  })
+
+  var options = {
+    method: 'POST',
+    withCredentials: true,
+    // headers: { 'Content-Type': undefined },
+    // transformRequest: (x) => {return x},
+    body: formData,
+    uploadEventHandlers: {
+      progress: event => {
+        var progressNote = 'unknown%'
+        if (event.lengthComputable) {
+          const pct = ((event.loaded / event.total) * 100).toFixed(2)
+          progressNote = `${pct}%`
+        }
+        NotificationInterface.updateNotification(dispatch, noteId, `${uploadNote} ${progressNote}`)
+      }
+    }
+  }
+
+  AroHttp._fetch(url, options).then((e) => {
     
+    NotificationInterface.updateNotification(dispatch, noteId, `${file.name} COMPLETE!`, false, NotificationTypes['USER_EXPIRE'])
+    // the note will be auto-removed in 4 seconds
+    // NotificationInterface.removeNotification(dispatch, noteId, 4000)
+    // this.isUpLoad = false
+    unsubscribeETLStart()
+    unsubscribeETLUpdate()
+    unsubscribeETLClose()
+    // load new lib info from server
+    PlanActions.loadLibraryEntryById(libraryId)
   }).catch((e) => {
+    console.error(e)
+    // NotificationInterface.removeNotification(dispatch, noteId)
+    this.updateNotification(noteId, `${file.name} FAILED`, false, NotificationTypes['USER_EXPIRE'])
+    // this.isUpLoad = false
+    unsubscribeETLStart()
+    unsubscribeETLUpdate()
+    unsubscribeETLClose()
     swal('Error', e.statusText, 'error')
   })
+
+  // ---
+
 }
 
 function setIsUploading (status){

@@ -102,6 +102,7 @@ app.service('map_tools', ['$rootScope', 'tracker', 'state', '$document', ($rootS
   tools.TOOL_IDS = {
     LOCATIONS: 'locations',
     CABLES: 'cables',
+    COPPER: 'copper',
     CONDUITS: 'conduits',
     NETWORK_NODES: 'network_nodes',
     AREA_NETWORK_PLANNING: 'area_network_planning',
@@ -124,6 +125,11 @@ app.service('map_tools', ['$rootScope', 'tracker', 'state', '$document', ($rootS
       id: tools.TOOL_IDS.CABLES,
       name: 'Cables',
       icon: 'fab fa-usb fa-2x'
+    },
+    {
+      id: tools.TOOL_IDS.COPPER,
+      name: 'Copper',
+      icon: 'fa fa-draw-polygon fa-2x'
     },
     {
       id: tools.TOOL_IDS.CONDUITS,

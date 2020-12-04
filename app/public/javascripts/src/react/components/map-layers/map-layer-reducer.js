@@ -3,6 +3,7 @@ import { List, Map, remove } from 'immutable'
 
 const defaultState = {
   location: new List(),
+  copper: new List(),
   locationFilters: {},
   networkEquipment: new Map(),
   constructionSite: new List(),
@@ -67,6 +68,37 @@ function setLocationFilterChecked (state, filterType, ruleKey, isChecked) {
       }
     }
   }
+}
+
+function setCopperLayerVisibility (state, layerType, layer, subtype, visibility) {
+  var newState = { ...state }
+  // First determine which category/key (e.g. 'location' the layer belongs to)
+  var layerToChange = null
+  var layerKey = null
+  Object.keys(state['copper']['categories']).forEach((key, index) => {
+    const stateLayer = state['copper']['categories'][layerType]
+    if (stateLayer.key === layer.key) {
+      layerToChange = stateLayer
+      layerKey = key
+    }
+  })
+
+  // Create a new layer with the checked flag set
+  const newLayer = { ...layerToChange, checked: visibility, subtypes: subtype }
+
+  // Replace this category in the state
+  newState = {
+    ...newState,
+    copper: {
+      ...newState.copper,
+        categories: {
+          ...newState.copper.categories,
+          [layerType]: newLayer
+        }
+    }
+  }
+
+  return newState
 }
 
 function setNetworkEquipmentLayerVisibility (state, layerType, layer, subtype, visibility) {
@@ -243,13 +275,19 @@ function mapLayersReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.LAYERS_SET_LOCATION:
       return setLayers(state, 'location', action.payload)
-
+    
     case Actions.LAYERS_SET_LOCATION_FILTERS:
       return setLocationFilters(state, action.payload)
 
     case Actions.LAYERS_SET_LOCATION_FILTER_CHECKED:
       return setLocationFilterChecked(state, action.payload.filterType, action.payload.ruleKey, action.payload.isChecked)
 
+    case Actions.LAYERS_SET_COPPER:
+      return setLayers(state, 'copper', action.payload)
+    
+    case Actions.LAYERS_SET_COPPER_VISIBILITY:
+      return setCopperLayerVisibility(state, action.payload.layerType, action.payload.layer, action.payload.subtype, action.payload.visibility)
+      
     case Actions.LAYERS_SET_NETWORK_EQUIPMENT:
       return setLayers(state, 'networkEquipment', action.payload)
 
