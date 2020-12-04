@@ -1,13 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 
-// https://flaviocopes.com/how-to-format-number-as-currency-javascript/
-const currencyformatter = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
-  minimumFractionDigits: 1
-})
-
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat
 const numberformatter_1 = new Intl.NumberFormat('en-US', {
   minimumFractionDigits: 1
 })
@@ -20,13 +14,7 @@ export class RoicReportsLarge extends Component {
   constructor (props) {
     super(props)
 
-    this.config = { 
-      "length": {
-        "length_units": "miles",
-        "length_units_to_meters": "1609.34",
-        "meters_to_length_units": "0.000621371"
-      }
-    }
+    this.config = config // Ugh - A global from a time long ago!
 
     this.state = {
       selectedNetworkType: this.props.networkTypes.filter(item => item.id === 'planned_network')[0],
@@ -96,7 +84,7 @@ export class RoicReportsLarge extends Component {
                             <td><strong>NPV</strong></td>
                           }
                           {networkStatistic.networkStatisticType === 'roic_npv' &&
-                            currencyformatter.format(networkStatistic.value / 1000)+" K" 
+                            this.config.currency_symbol+numberformatter_1.format(networkStatistic.value / 1000)+" K" 
                           }
                         </tr>
                       }
@@ -123,7 +111,7 @@ export class RoicReportsLarge extends Component {
 
                   <tr>
                     <td><strong>Total Capex</strong></td>
-                    <td>{currencyformatter.format(roicResults.priceModel.totalCost / 1000)+" K"}</td>
+                    <td>{this.config.currency_symbol+numberformatter_1.format(roicResults.priceModel.totalCost / 1000)+" K"}</td>
                   </tr>
 
                   <tr>
@@ -139,7 +127,7 @@ export class RoicReportsLarge extends Component {
                             ({numberformatter_0.format(fiberCost.lengthMeters * this.config.length.meters_to_length_units)}
                             {this.config.length.length_units})
                           </td>
-                          <td>{currencyformatter.format(fiberCost.totalCost / 1000)+" K"}</td>
+                          <td>{this.config.currency_symbol+numberformatter_1.format(fiberCost.totalCost / 1000)+" K"}</td>
                         </tr>
                       </React.Fragment>
                     )}
@@ -155,7 +143,7 @@ export class RoicReportsLarge extends Component {
                           <td className="indent-1 text-capitalize">
                             {networkEquipment.equipments[equipmentCost.nodeType].label || networkNodeTypesEntity[equipmentCost.nodeType]} (x{numberformatter_0.format(equipmentCost.quantity)})
                           </td>
-                          <td>{currencyformatter.format(equipmentCost.total / 1000)+" K"}</td>
+                          <td>{this.config.currency_symbol+numberformatter_1.format(equipmentCost.total / 1000)+" K"}</td>
                         </tr>
                       </React.Fragment>
                     )}
