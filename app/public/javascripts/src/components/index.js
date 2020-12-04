@@ -86,26 +86,7 @@ import equipmentPropertiesEditor from './sidebar/plan-editor/equipment-propertie
 import boundaryPropertiesEditor from './sidebar/plan-editor/boundary-properties-editor'
 import planSummary from './sidebar/plan-editor/plan-summary'
 import serviceLayerEditor from './sidebar/plan-editor/service-layer-editor'
-import conicTileSystemUploader from './sidebar/plan-settings/plan-data-selection/conic-tile-system-uploader'
-import globalDataSourceUploadModal from './sidebar/plan-settings/plan-data-selection/data-source-upload-modal'
-import projectSettingsModal from './sidebar/plan-settings/plan-project-configuration/project-settings-modal'
-import planDataSelection from './sidebar/plan-settings/plan-data-selection/plan-data-selection'
-import planProjectConfiguration from './sidebar/plan-settings/plan-project-configuration/plan-project-configuration'
-import planSettings from './sidebar/plan-settings/plan-settings'
-import arpuEditor from './sidebar/plan-settings/plan-resource-selection/arpu-editor'
-import tsmEditor from './sidebar/plan-settings/plan-resource-selection/tsm-editor'
-import competitorEditor from './sidebar/plan-settings/plan-resource-selection/competitor-editor'
-import impedanceEditor from './sidebar/plan-settings/plan-resource-selection/impedance-editor'
-import planResourceEditorModal from './sidebar/plan-settings/plan-resource-selection/plan-resource-editor-modal'
-import planResourceSelection from './sidebar/plan-settings/plan-resource-selection/plan-resource-selection'
-import pricebookEditor from './sidebar/plan-settings/plan-resource-selection/pricebook-editor'
-import resourceManager from './sidebar/plan-settings/plan-resource-selection/resource-manager'
-import resourceManagerDetail from './sidebar/plan-settings/plan-resource-selection/resource-manager-detail'
-import pricebookCreator from './sidebar/plan-settings/plan-resource-selection/pricebook-creator'
-import roicEditor from './sidebar/plan-settings/plan-resource-selection/roic-editor'
-import rateReachEditor from './sidebar/plan-settings/plan-resource-selection/rate-reach-editor'
-import rateReachManagerCreator from './sidebar/plan-settings/plan-resource-selection/rate-reach-manager-creator'
-import rateReachDistanceEditor from './sidebar/plan-settings/plan-resource-selection/rate-reach-distance-editor'
+
 import boundaries from './views/boundaries'
 import locations from './views/locations'
 import networkEquipment from './views/network-equipment'
@@ -122,9 +103,6 @@ import networkPlanManage from './header/network-plan-manage'
 import networkPlan from './header/network-plan'
 import uiNotification from './footer/ui-notification'
 import fullScreenContainer from './full-screen/full-screen-container'
-import manageUsers from './global-settings/manage-users'
-import manageGroups from './global-settings/manage-groups'
-import globalSettings from './global-settings/global-settings'
 import aroPanel from './common/aro-panel'
 import aroMultiSelect from './common/aro-multiselect'
 import mapObjectEditor from './common/map-object-editor'
@@ -139,9 +117,6 @@ import accordion from './accordion/accordion'
 import accordionPanelContents from './accordion/accordion-panel-contents'
 import accordionPanelTitle from './accordion/accordion-panel-title'
 import tile from './tiles/tile'
-import userSettings from './global-settings/user-settings'
-import tagManager from './global-settings/tag-manager'
-import createUpdateTag from './global-settings/create-update-tag'
 
 import aroObjectEditor from './common/editor-interfaces/aro-object-editor'
 import editorInterfaceTree from './common/editor-interfaces/editor-interface-tree'
@@ -193,26 +168,6 @@ app.component('boundaryDetail', boundaryDetail)
   .component('planSummary', planSummary)
   .component('serviceLayerEditor', serviceLayerEditor)
   .component('draggableButton', draggableButton)
-  .component('conicTileSystemUploader', conicTileSystemUploader)
-  .component('globalDataSourceUploadModal', globalDataSourceUploadModal)
-  .component('projectSettingsModal', projectSettingsModal)
-  .component('planDataSelection', planDataSelection)
-  .component('planProjectConfiguration', planProjectConfiguration)
-  .component('planSettings', planSettings)
-  .component('arpuEditor', arpuEditor)
-  .component('tsmEditor', tsmEditor)
-  .component('competitorEditor', competitorEditor)
-  .component('impedanceEditor', impedanceEditor)
-  .component('planResourceEditorModal', planResourceEditorModal)
-  .component('planResourceSelection', planResourceSelection)
-  .component('pricebookEditor', pricebookEditor)
-  .component('resourceManager', resourceManager)
-  .component('resourceManagerDetail', resourceManagerDetail)
-  .component('pricebookCreator', pricebookCreator)
-  .component('roicEditor', roicEditor)
-  .component('rateReachEditor', rateReachEditor)
-  .component('rateReachManagerCreator', rateReachManagerCreator)
-  .component('rateReachDistanceEditor', rateReachDistanceEditor)
   .component('boundaries', boundaries)
   .component('locations', locations)
   .component('networkEquipment', networkEquipment)
@@ -229,10 +184,6 @@ app.component('boundaryDetail', boundaryDetail)
   .component('networkPlan', networkPlan)
   .component('uiNotification', uiNotification)
   .component('fullScreenContainer', fullScreenContainer)
-  .component('manageUsers', manageUsers)
-  .component('manageGroups', manageGroups)
-  .component('globalSettings', globalSettings)
-  .component('userSettings',userSettings)
   .component('aroPanel', aroPanel)
   .component('aroMultiSelect', aroMultiSelect)
   .component('mapObjectEditor', mapObjectEditor)
@@ -247,8 +198,6 @@ app.component('boundaryDetail', boundaryDetail)
   .component('accordionPanelContents', accordionPanelContents)
   .component('accordionPanelTitle', accordionPanelTitle)
   .component('tile', tile)
-  .component('tagManager', tagManager)
-  .component('createUpdateTag', createUpdateTag)
   .component('aroObjectEditor', aroObjectEditor)
   .component('editorInterfaceTree', editorInterfaceTree)
   .component('editorInterfaceTable', editorInterfaceTable)
