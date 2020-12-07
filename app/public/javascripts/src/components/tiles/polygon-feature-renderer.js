@@ -103,8 +103,13 @@ class PolygonFeatureRenderer {
       tags[parts[0]] = parts[1]
     }
 
-    const { layerCategoryId } = oldSelection.details
-    if (typeof layerCategoryId === 'number' && tags && tags.hasOwnProperty(layerCategoryId)) {
+    const { layerCategoryId, analysisLayerId, _data_type } = oldSelection.details
+    if (
+      typeof layerCategoryId === 'number'
+      && tags
+      && tags.hasOwnProperty(layerCategoryId)
+      && feature.properties._data_type === _data_type
+    ) {
       let tagId = tags[layerCategoryId]
       if (layerCategories[layerCategoryId].tags.hasOwnProperty(tagId)) {
         let color = layerCategories[layerCategoryId].tags[tagId].colourHash

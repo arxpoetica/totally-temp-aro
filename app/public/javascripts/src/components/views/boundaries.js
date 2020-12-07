@@ -99,9 +99,10 @@ class BoundariesController {
   }
 
   onSelectCategory (category) {
-    const id = category && category.id
     var newSelection = this.state.cloneSelection()
-    newSelection.details.layerCategoryId = id
+    newSelection.details.layerCategoryId = category && category.id
+    newSelection.details._data_type = category && category._data_type
+    newSelection.details.analysisLayerId = category && category.analysisLayerId
     this.state.selection = newSelection
   }
 
