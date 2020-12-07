@@ -101,8 +101,14 @@ class BoundariesController {
   onSelectCategory (category) {
     var newSelection = this.state.cloneSelection()
     newSelection.details.layerCategoryId = category && category.id
-    newSelection.details._data_type = category && category._data_type
-    newSelection.details.analysisLayerId = category && category.analysisLayerId
+    newSelection.details.categorySelections = this.boundaryLayers.map(layer => {
+      const { selectedCategory } = layer
+      if (!selectedCategory) { return false }
+      return {
+        layerCategoryId: selectedCategory.id,
+        _data_type: selectedCategory._data_type,
+      }
+    }).filter(Boolean)
     this.state.selection = newSelection
   }
 
