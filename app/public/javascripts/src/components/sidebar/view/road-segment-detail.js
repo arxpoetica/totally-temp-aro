@@ -1,5 +1,7 @@
+import ToolBarActions from '../../../react/components/header/tool-bar-actions'
+
 class RoadSegmentDetailController {
-  constructor (state, $timeout) {
+  constructor (state, $timeout, $ngRedux,) {
     this.state = state
     this.$timeout = $timeout
     this.selectedEdgeInfo = []
@@ -38,6 +40,8 @@ class RoadSegmentDetailController {
         this.$timeout()
       }
     })
+
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }
 
   isFeatureListEmpty (event) {
@@ -75,14 +79,26 @@ class RoadSegmentDetailController {
 
   viewRoadSegmentInfo () {
     this.state.activeViewModePanel = this.state.viewModePanels.ROAD_SEGMENT_INFO
+    this.rActiveViewModePanelAction(this.state.viewModePanels.ROAD_SEGMENT_INFO)
   }
 
   $onDestroy () {
     this.mapFeaturesSelectedEventObserver.unsubscribe()
   }
+
+  mapStateToThis (reduxState) {
+    return {
+    }
+  }
+
+  mapDispatchToTarget (dispatch) {
+    return {
+      rActiveViewModePanelAction: (value) => dispatch(ToolBarActions.activeViewModePanel(value))
+    }
+  }
 }
 
-RoadSegmentDetailController.$inject = ['state', '$timeout']
+RoadSegmentDetailController.$inject = ['state', '$timeout', '$ngRedux',]
 
 let roadSegmentDetail = {
   templateUrl: '/components/sidebar/view/road-segment-detail.html',

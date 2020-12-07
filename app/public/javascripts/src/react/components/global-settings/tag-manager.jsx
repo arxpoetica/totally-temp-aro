@@ -48,10 +48,14 @@ export class TagManager extends Component {
   }
 
   saveTag(){
-    if(this.state.tag.id !== '' && this.state.tag !== undefined){
-      this.props.updateTag(this.state.tag)
-    }else{
-      this.props.createTag(this.state.tag)
+    if(this.state.tag.name !== "") {
+      if(this.state.tag.id !== '' && this.state.tag !== undefined){
+        this.props.updateTag(this.state.tag)
+      }else{
+        this.props.createTag(this.state.tag)
+      }
+    } else {
+      this.props.customErrorHandle('Tag Name is empty', 'Please enter the valid Tag Name', 'warning')
     }
   }
 
@@ -150,7 +154,8 @@ const mapDispatchToProps = (dispatch) => ({
   loadTags: () => dispatch(globalsettingsActions.loadTags()),
   setFlag: () => dispatch(globalsettingsActions.setFlag()),
   createTag: (tag) => dispatch(globalsettingsActions.createTag(tag)),
-  updateTag: (tag) => dispatch(globalsettingsActions.updateTag(tag))
+  updateTag: (tag) => dispatch(globalsettingsActions.updateTag(tag)),
+  customErrorHandle: (title, text, type) => dispatch(globalsettingsActions.customErrorHandle(title, text, type))
 })
 
 const TagManagerComponent = wrapComponentWithProvider(reduxStore, TagManager, mapStateToProps, mapDispatchToProps)

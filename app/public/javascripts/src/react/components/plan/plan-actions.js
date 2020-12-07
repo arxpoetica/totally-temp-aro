@@ -315,7 +315,18 @@ function loadPlanResourceSelectionFromServer (plan) {
 
   // Save the plan resource selections to the server
   function savePlanResourceSelectionToServer (plan, resourceItems) {
-    return dispatch => {
+    return (dispatch, getState) => {
+
+      // to update pristineResourceItems
+      const state = getState()
+      dispatch({
+        type: Actions.PLAN_SET_RESOURCE_ITEMS,
+        payload: {
+          resourceItems: state.plan.resourceItems,
+          pristineResourceItems: state.plan.resourceItems
+        }
+      })
+
         var putBody = {
           configurationItems: [],
           resourceConfigItems: []

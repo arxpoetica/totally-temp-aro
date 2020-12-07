@@ -36,7 +36,11 @@ export class ReleaseNotes extends Component {
   renderReleaseNotes () {
     const releaseNote = this.props.releaseNotes
     return (
-      !this.state.showVersion?
+      releaseNote.length === 0
+      ? <div className="alert alert-info" role="alert">
+          There is no information avilable for Release Notes.
+        </div>
+      : !this.state.showVersion?
       <div>
         <table className="table table-sm table-striped">
           <tbody>

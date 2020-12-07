@@ -35,8 +35,14 @@ export class ManageGroups extends Component {constructor (props) {
 		}
 	}
 
-	deleteGroup(id){
-		this.props.deleteGroup(id)
+	deleteGroup(id, name){
+		this.props.askUserToConfirmBeforeDelete('Group', name)
+		.then((okToDelete) => {
+			if (okToDelete) {
+				this.props.deleteGroup(id)
+			}
+		})
+		.catch((err) => console.error(err))
 	}
 
 	addGroup () {
@@ -156,7 +162,7 @@ export class ManageGroups extends Component {constructor (props) {
 																				{group.isEditing &&
 																						<button className="btn btn-primary btn-sm" onClick={()=>this.saveGroup(group)}><i className="fa fa-save"></i></button>
 																				}
-																				<button className='btn btn-danger btn-sm' onClick={()=>this.deleteGroup(group.id)}><i className="fa fa-trash-alt"></i></button>
+																				<button className='btn btn-danger btn-sm' onClick={()=>this.deleteGroup(group.id, group.name)}><i className="fa fa-trash-alt"></i></button>
 																		</td>
 																</tr>
 														})
@@ -190,7 +196,8 @@ const mapDispatchToProps = (dispatch) => ({
 	addGroup: () => dispatch(GlobalsettingsActions.addGroup()),
 	deleteGroup: (id) => dispatch(GlobalsettingsActions.deleteGroup(id)),
 	editGroup: (id) => dispatch(GlobalsettingsActions.editGroup(id)),
-	saveGroup: (group) => dispatch(GlobalsettingsActions.saveGroup(group))
+	saveGroup: (group) => dispatch(GlobalsettingsActions.saveGroup(group)),
+	askUserToConfirmBeforeDelete: (title, text) => dispatch(GlobalsettingsActions.askUserToConfirmBeforeDelete(title, text))
 })
 
 const ManageGroupsComponent = wrapComponentWithProvider(reduxStore, ManageGroups, mapStateToProps, mapDispatchToProps)
