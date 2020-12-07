@@ -551,7 +551,23 @@ function updateDefaultPlanCoordinates (coordinates){
   }
 }
 
-
+function loadLibraryEntryById (libraryId) {
+  return (dispatch, getState) => {
+    const state = getState()
+    // technically we shouldn't be using state.user, perhaps make this a parameter
+    AroHttp.get(`/service/v1/library-entry/${libraryId}?user_id=${state.user.loggedInUser.id}`)
+      .then((result) => {
+        dispatch({
+          type: Actions.PLAN_APPEND_ALL_LIBRARY_ITEMS,
+          payload: {
+            dataItemKey: result.data.dataType,
+            allLibraryItems: [result.data]
+          }
+        })
+      })
+      .catch((err) => console.error(err))
+  }
+}
 
 export default {
   setActivePlan,
@@ -576,5 +592,6 @@ export default {
   updateDataSourceEditableStatus,
   setParentProjectForNewProject,
   setSelectedProjectId,
-  updateDefaultPlanCoordinates
+  updateDefaultPlanCoordinates,
+  loadLibraryEntryById
 }

@@ -298,7 +298,7 @@ function fileUpload (dispatch, uploadDetails,libraryId,loggedInUser) {
   }).catch((e) => {
     console.error(e)
     // NotificationInterface.removeNotification(dispatch, noteId)
-    this.updateNotification(noteId, `${file.name} FAILED`, false, NotificationTypes['USER_EXPIRE'])
+    NotificationInterface.updateNotification(dispatch, noteId, `${file.name} FAILED`, false, NotificationTypes['USER_EXPIRE'])
     // this.isUpLoad = false
     unsubscribeETLStart()
     unsubscribeETLUpdate()
