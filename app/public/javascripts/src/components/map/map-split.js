@@ -195,6 +195,20 @@ let mapSplit = {
     .ui-note-noteline{
       white-space: nowrap;
     }
+
+    .ui-note-persistent{
+      display: inline-block;
+      background: rgba(250, 250, 250, 0.7);
+      padding-left: 0.5em;
+      border: solid 1px #c0c0c0;
+    }
+
+    .ui-note-button{
+      pointer-events: all;
+      margin-left: 0.5em;
+      cursor: pointer;
+    }
+
   </style>
   <!-- First define the container for both the map and the sidebar. -->
   <div class="app_wrapper_container {{($ctrl.state.configuration.ARO_CLIENT === 'frontier') ? 'footer' : ''}}">
@@ -272,12 +286,13 @@ let mapSplit = {
       </div>
     </div>
   </div>
-  <div class="ui-note" ng-if="$ctrl.state.areTilesRendering" style="pointer-events: none; position: absolute; left: 0px; bottom: 25px;" >
+  <div class="ui-note" style="pointer-events: none; position: absolute; left: 0px; bottom: 25px;" >
     <!-- There used to be a "spinner" icon here, which has been removed. On profiling, we found that the
         spinning animation caused the tile rendering to be two times slower (e.g. 200ms with spinner vs 100 ms without)
         Do NOT add any kind of animated element in this control unless you suppress it when tiles are rendering -->
     <div class="ui-note-notes-contain">
-      <div class="ui-note-noteline">Rendering Tiles</div>
+      <div class="ui-note-noteline" ng-if="$ctrl.state.areTilesRendering">Rendering Tiles</div>
+      <r-ui-notifications></r-ui-notifications>
     </div>
   </div>
   <div ng-include="'javascripts/lib/components/footer/frontier_footer.html'" ng-if="$ctrl.state.configuration.ARO_CLIENT === 'frontier'"></div>

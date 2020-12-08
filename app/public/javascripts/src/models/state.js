@@ -19,6 +19,7 @@ import SelectionModes from '../react/components/selection/selection-modes'
 import SocketManager from '../react/common/socket-manager'
 import RingEditActions from '../react/components/ring-edit/ring-edit-actions'
 import NetworkAnalysisActions from '../react/components/optimization/network-analysis/network-analysis-actions'
+import NotificationInterface from '../react/components/notification/notification-interface'
 import ReactComponentConstants from '../react/common/constants'
 import AroNetworkConstraints from '../shared-utils/aro-network-constraints'
 import PuppeteerMessages from '../components/common/puppeteer-messages'
@@ -319,7 +320,20 @@ class State {
     service.requestPolygonSelect = new Rx.BehaviorSubject({})
 
     service.areTilesRendering = false
+    service.noteIdTilesRendering = null
     service.setAreTilesRendering = newValue => {
+      // can't use the proper notification system because
+      //  this function is run at least once per second
+      //  for the life of the app. Fix this.
+      /*
+      if (!newValue && service.areTilesRendering) { // set to off and not off
+        console.log('---------------------------- OFF -------')
+        service.noteIdTilesRendering = service.removeNotification(service.noteIdTilesRendering)
+      } else if (newValue && !service.areTilesRendering) { // set to on and not already on
+        console.log('---------------------------- ON --------')
+        service.noteIdTilesRendering = service.postNotification('Rendering Tiles')
+      }
+      */
       service.areTilesRendering = newValue
       $timeout()
     }
@@ -1529,7 +1543,7 @@ class State {
           PuppeteerMessages.suppressMessages = false
           service.recreateTilesAndCache()
           // Late night commit. The following line throws an error. Subtypes get rendered.
-          // service.requestSetMapZoom(map.getZoom() + 1)
+          service.requestSetMapZoom.next(map.getZoom() + 1)
           $timeout()
         })
         .catch((err) => {
@@ -1577,6 +1591,8 @@ class State {
           }
           service.configuration.loadPerspective(config.user.perspective)
           service.setNetworkEquipmentLayers(service.configuration.networkEquipment)
+          service.setCopperLayers(service.configuration.copperCategories)
+
           service.setAppConfiguration(service.configuration) // Require in tool-bar.jsx
           return service.setLoggedInUser(config.user, initialState)
         })
@@ -1871,6 +1887,7 @@ class State {
       loadPlanRedux: planId => dispatch(PlanActions.loadPlan(planId)),
       setGoogleMapsReference: mapRef => dispatch(MapActions.setGoogleMapsReference(mapRef)),
       setNetworkEquipmentLayers: networkEquipmentLayers => dispatch(MapLayerActions.setNetworkEquipmentLayers(networkEquipmentLayers)),
+      setCopperLayers: copperLayers => dispatch(MapLayerActions.setCopperLayers(copperLayers)),
       updateShowSiteBoundary: isVisible => dispatch(MapLayerActions.setShowSiteBoundary(isVisible)),
       setLocationFilters: locationFilters => dispatch(MapLayerActions.setLocationFilters(locationFilters)),
       setLocationFilterChecked: locationFilters => dispatch(MapLayerActions.setLocationFilterChecked(filterType, ruleKey, isChecked)),

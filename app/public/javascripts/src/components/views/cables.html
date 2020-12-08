@@ -44,11 +44,10 @@
         <span class="float-right aro-pointer" ng-show="!$ctrl.map_tools.is_expanded('cables')" ng-click="$ctrl.map_tools.expand('cables')">
           <span style="color:white" class="fa fa-chevron-down"></span>
         </span>
-        <h5 class="map-tool-title-text">Cables</h5>
+        <h5 class="map-tool-title-text">Fibers</h5>
       </div>
       <div class="card-body map-tools-card-body" ng-show="$ctrl.map_tools.is_expanded('cables')">
-  
-        <!-- New implementation of cable equipments -->
+          <!-- New implementation of cable equipments -->
         <div class="row" style="padding-bottom: 5px;">
             <div class="col-md-4">
               <strong style="padding-left: 5px;">Type</strong>
@@ -63,8 +62,8 @@
                 ng-change="$ctrl.onUpdatePlannedCableVisibility()">
               <span>&nbsp;Planned</span>
             </div>
-          </div>
-          <div class="row">
+        </div>
+        <div class="row">
           <div class="col-md-12">
             <table class="table table-sm">
               <tbody>
@@ -99,7 +98,7 @@
             </table>
           </div>
         </div>
-  
       </div>
+
     </div>
   </div>

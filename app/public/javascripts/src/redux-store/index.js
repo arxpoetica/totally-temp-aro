@@ -37,6 +37,7 @@ import resourceEditor from '../react/components/resource-editor/resource-reducer
 import dataUpload from '../react/components/data-upload/data-upload-reducer'
 import toolbar from '../react/components/header/tool-bar-reducer'
 import viewSettings from '../react/components/view-settings/view-settings-reducer'
+import notification from '../react/components/notification/notification-reducer'
 
 const logger = createLogger({
   level: 'info',
@@ -69,6 +70,7 @@ let reducer = combineReducers({
   globalSettings,
   resourceEditor,
   dataUpload,
+  notification,
   toolbar,
   viewSettings
 })

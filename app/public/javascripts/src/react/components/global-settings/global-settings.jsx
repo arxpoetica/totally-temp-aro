@@ -212,7 +212,10 @@ export class GlobalSettings extends Component {
               <ReportModuleList/>
             }
             {currentView === this.views.DATA_UPLOAD &&
-              <DataUpload selectedDataSourceName={this.state.dataUploadProps} selectedDataTypeId={this.state.dataSelectionID}/>
+              <DataUpload selectedDataSourceName={this.state.dataUploadProps}
+                          selectedDataTypeId={this.state.dataSelectionID}
+                          onSave={() => {this.toggle()}}
+                          />
             }
             {currentView === this.views.RESOURCE_EDITOR &&
               <ResourceEditor filterText={this.state.resourceEditorProps} selectedResourceName={this.props.selectedResourceNameProps}/>

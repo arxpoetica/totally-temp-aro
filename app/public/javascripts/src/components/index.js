@@ -48,6 +48,7 @@ import PlanningConstraintsEditor from '../react/components/resource-manager/plan
 import FusionEditor from '../react/components/resource-manager/fusion-editor.jsx'
 import NetworkArchitectureEditor from '../react/components/resource-manager/network-architecture-editor.jsx'
 import ToolBox from '../react/components/tool/tool-box.jsx'
+import UINotifications from '../react/components/notification/ui-notifications.jsx'
 
 import boundaryDetail from './sidebar/view/boundary-detail'
 import equipmentDetail from './sidebar/view/equipment-detail'
@@ -86,10 +87,10 @@ import equipmentPropertiesEditor from './sidebar/plan-editor/equipment-propertie
 import boundaryPropertiesEditor from './sidebar/plan-editor/boundary-properties-editor'
 import planSummary from './sidebar/plan-editor/plan-summary'
 import serviceLayerEditor from './sidebar/plan-editor/service-layer-editor'
-
 import boundaries from './views/boundaries'
 import locations from './views/locations'
 import networkEquipment from './views/network-equipment'
+import copper from './views/copper'
 import cables from './views/cables'
 import conduits from './views/conduits'
 import mapSplit from './map/map-split'
@@ -101,7 +102,6 @@ import networkPlanModal from './header/network-plan-modal'
 import planInputsModal from './header/plan-inputs-modal'
 import networkPlanManage from './header/network-plan-manage'
 import networkPlan from './header/network-plan'
-import uiNotification from './footer/ui-notification'
 import fullScreenContainer from './full-screen/full-screen-container'
 import aroPanel from './common/aro-panel'
 import aroMultiSelect from './common/aro-multiselect'
@@ -172,6 +172,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('locations', locations)
   .component('networkEquipment', networkEquipment)
   .component('cables', cables)
+  .component('copper', copper)
   .component('conduits', conduits)
   .component('mapSplit', mapSplit)
   .component('mapSelectorPlanTarget', mapSelectorPlanTarget)
@@ -182,7 +183,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('planInputsModal', planInputsModal)
   .component('networkPlanManage', networkPlanManage)
   .component('networkPlan', networkPlan)
-  .component('uiNotification', uiNotification)
+  // .component('uiNotification', uiNotification)
   .component('fullScreenContainer', fullScreenContainer)
   .component('aroPanel', aroPanel)
   .component('aroMultiSelect', aroMultiSelect)
@@ -252,6 +253,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rFusionEditor', react2angular(FusionEditor, ['onDiscard']))
   .component('rNetworkArchitectureEditor', react2angular(NetworkArchitectureEditor, ['onDiscard']))
   .component('rToolBox', react2angular(ToolBox))
+  .component('rUiNotifications', react2angular(UINotifications))
   .service('Utils', utils)
   .service('state', state)
   .service('rxState', rxState)

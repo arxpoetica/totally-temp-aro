@@ -37,7 +37,7 @@ export class PriceBookEditor extends Component {
         setOfSelectedEquipmentTags: nextProps.priceBookDefinition.setOfSelectedEquipmentTags,
         selectedEquipmentTags: nextProps.priceBookDefinition.selectedEquipmentTags
       }
-    } else { return null}
+    } else { return null }
   }
   
   render () {

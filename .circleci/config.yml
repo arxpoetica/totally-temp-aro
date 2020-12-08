@@ -74,9 +74,8 @@ workflows:
           filters:
             branches:
               only:
-                  - master
-                  - dev
-                  - bump
+                - master
+                - dev
       - deploy:
           context: aro_qa_builds
           requires:
