@@ -314,7 +314,7 @@ function askUserToConfirmBeforeDelete (title, text) {
   return dispatch => {
     return new Promise((resolve, reject) => {
       swal({
-        title: `Delete "${title}"?`,
+        title: `Delete ${title}?`,
         text: `Are you sure you want to delete "${text}"?`,
         type: 'warning',
         showCancelButton: true,
