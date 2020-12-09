@@ -156,14 +156,6 @@ function setBoundaryLayers (boundaryLayers) {
             tagsById[tag.id] = tag
           }
           group.category.tags = tagsById
-          // FIXME: this won't fly
-          // FIXME: this won't fly
-          // FIXME: this won't fly
-          // FIXME: this won't fly
-          // FIXME: this won't fly
-          group.category._data_type
-            = group.analysisLayerId === 3
-            ? 'analysis_area' : 'census_block'
           group.category.analysisLayerId = group.analysisLayerId
           layer.categories[group.category.id] = group.category
         }

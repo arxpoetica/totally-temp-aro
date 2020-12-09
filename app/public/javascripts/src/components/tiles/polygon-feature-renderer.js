@@ -103,18 +103,20 @@ class PolygonFeatureRenderer {
       tags[parts[0]] = parts[1]
     }
 
-    const { categorySelections = [] } = oldSelection.details
-    for (const { layerCategoryId, _data_type } of categorySelections) {
-      if (
-        typeof layerCategoryId === 'number'
-        && tags && tags.hasOwnProperty(layerCategoryId)
-        && feature.properties._data_type === _data_type
-      ) {
-        let tagId = tags[layerCategoryId]
-        if (layerCategories[layerCategoryId].tags.hasOwnProperty(tagId)) {
-          let color = layerCategories[layerCategoryId].tags[tagId].colourHash
-          drawingStyles.strokeStyle = color
-          drawingStyles.fillStyle = color
+    if (drawingStyles) {
+      const { categorySelections = [] } = oldSelection.details
+      for (const { layerCategoryId, analysisLayerId } of categorySelections) {
+        if (
+          typeof layerCategoryId === 'number'
+          && tags && tags.hasOwnProperty(layerCategoryId)
+          && feature.properties.layerId === analysisLayerId
+        ) {
+          let tagId = tags[layerCategoryId]
+          if (layerCategories[layerCategoryId].tags.hasOwnProperty(tagId)) {
+            let color = layerCategories[layerCategoryId].tags[tagId].colourHash
+            drawingStyles.strokeStyle = color
+            drawingStyles.fillStyle = color
+          }
         }
       }
     }

@@ -106,7 +106,7 @@ class BoundariesController {
       if (!selectedCategory) { return false }
       return {
         layerCategoryId: selectedCategory.id,
-        _data_type: selectedCategory._data_type,
+        analysisLayerId: selectedCategory.analysisLayerId,
       }
     }).filter(Boolean)
     this.state.selection = newSelection
