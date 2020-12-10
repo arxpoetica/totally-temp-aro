@@ -94,10 +94,21 @@ class BoundariesController {
       .catch((err) => console.error(err))
   }
 
+  objectHasLength (obj) {
+    return Object.keys(obj || {}).length
+  }
+
   onSelectCategory (category) {
-    const id = category && category.id
     var newSelection = this.state.cloneSelection()
-    newSelection.details.layerCategoryId = id
+    newSelection.details.layerCategoryId = category && category.id
+    newSelection.details.categorySelections = this.boundaryLayers.map(layer => {
+      const { selectedCategory } = layer
+      if (!selectedCategory) { return false }
+      return {
+        layerCategoryId: selectedCategory.id,
+        analysisLayerId: selectedCategory.analysisLayerId,
+      }
+    }).filter(Boolean)
     this.state.selection = newSelection
   }
 

@@ -42,28 +42,15 @@ class PolygonFeatureRenderer {
     // Get the drawing styles for rendering the polygon
     var drawingStyles = this.getDrawingStylesForPolygon(feature, mapLayer)
 
-    // ToDo: should this go into getDrawingStylesForPolygon?
-    // ToDo: use an object merge of mapLayer.highlightStyle instead having to know which attributes are implemented
-    // ToDo: need to ensure feature type
+    // TODO: should this go into getDrawingStylesForPolygon?
+    // TODO: use an object merge of mapLayer.highlightStyle instead having to know which attributes are implemented
+    // TODO: need to ensure feature type
     //    a non-selected service area could have the same id as the selected census block
-    if (feature.properties.hasOwnProperty('layerType') &&
-      feature.properties.layerType == 'census_block') {
+    if (feature.properties.hasOwnProperty('layerType') && feature.properties.layerType == 'census_block') {
       if (oldSelection.details.censusBlockId == feature.properties.id) {
         // Hilight selected census block
         drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
         drawingStyles.lineWidth = mapLayer.highlightStyle.lineWidth
-      }
-
-      // check for census filters
-      if (typeof oldSelection.details.layerCategoryId !== 'undefined' &&
-        feature.properties.tags.hasOwnProperty(oldSelection.details.layerCategoryId)) {
-        let tagId = feature.properties.tags[oldSelection.details.layerCategoryId]
-
-        if (layerCategories[oldSelection.details.layerCategoryId].tags.hasOwnProperty(tagId)) {
-          let color = layerCategories[oldSelection.details.layerCategoryId].tags[tagId].colourHash
-          drawingStyles.strokeStyle = color
-          drawingStyles.fillStyle = color
-        }
       }
     } else if (selection.planTargets.serviceAreas.has(feature.properties.id) &&
       selectedDisplayMode == displayModes.ANALYSIS &&
@@ -105,6 +92,35 @@ class PolygonFeatureRenderer {
       drawingStyles.lineOpacity = styles.modifiedBoundary.lineOpacity
     }
 
+    // FIXME: this is horrible but necessary conversion.
+    // Somewhere up the line we have inconsistent `feature.properties.tags` data
+    // sometimes sending as an object `{ "1": 2 }` and sometimes as a string `1:1`
+    // this conversion is only temporary to deal w/ that inconsistency. 👿
+    let { tags } = feature.properties
+    if (tags && tags.length) {
+      const parts = tags.split(':')
+      tags = {}
+      tags[parts[0]] = parts[1]
+    }
+
+    if (drawingStyles) {
+      const { categorySelections = [] } = oldSelection.details
+      for (const { layerCategoryId, analysisLayerId } of categorySelections) {
+        if (
+          typeof layerCategoryId === 'number'
+          && tags && tags.hasOwnProperty(layerCategoryId)
+          && feature.properties.layerId === analysisLayerId
+        ) {
+          let tagId = tags[layerCategoryId]
+          if (layerCategories[layerCategoryId].tags.hasOwnProperty(tagId)) {
+            let color = layerCategories[layerCategoryId].tags[tagId].colourHash
+            drawingStyles.strokeStyle = color
+            drawingStyles.fillStyle = color
+          }
+        }
+      }
+    }
+
     if (tileDataService.modifiedBoundaries.hasOwnProperty(feature.properties.object_id) &&
         mapLayer.tileDefinitions[0].vtlType == 'ExistingBoundaryPointLayer') {
       drawingStyles.strokeStyle = styles.modifiedBoundary.strokeStyle
@@ -129,6 +145,7 @@ class PolygonFeatureRenderer {
     // Make Line Border is highlighted
     ctx.globalAlpha = mapLayer.opacity || 0.7
 
+    // FIXME: this should absolutely be called within some limiter, such as `requestAnimationFrame`
     // Then draw a polyline except for the lines that are along the tile extents
     // Override the layers drawing styles by passing it through to the rendering function
     PolylineFeatureRenderer.renderFeature(feature, shape, geometryOffset, ctx, mapLayer, drawingStyles, true, tileSize)

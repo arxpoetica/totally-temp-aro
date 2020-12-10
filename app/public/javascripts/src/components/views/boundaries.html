@@ -28,7 +28,7 @@
           </div>
           <label>
             {{layer.description}}
-            <div ng-if="layer.display.length && layer.checked" style="padding-left: 0.5em;">
+            <div ng-if="$ctrl.objectHasLength(layer.categories) && layer.checked" style="padding-left: 0.5em;">
               <select class="form-control" style="margin-bottom: 0.5em;"
                 ng-model="layer.selectedCategory"
                 ng-options="item as item.description for item in layer.categories"
