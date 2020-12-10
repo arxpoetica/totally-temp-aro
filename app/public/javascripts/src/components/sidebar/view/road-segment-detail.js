@@ -3,7 +3,7 @@ class RoadSegmentDetailController {
     this.state = state
     this.$timeout = $timeout
     this.selectedEdgeInfo = []
-    //this.isSingleRoad
+    this.wrongZoomLevel = false
 
     state.clearViewMode.subscribe((clear) => {
       if (clear) {
@@ -23,7 +23,6 @@ class RoadSegmentDetailController {
         var newSelection = state.cloneSelection()
         newSelection.details.roadSegments = event.roadSegments
         state.selection = newSelection
-        //this.isSingleRoad = (event.roadSegments.size == 1)
         this.selectedEdgeInfo = this.generateRoadSegmentsInfo(event.roadSegments)
         this.viewRoadSegmentInfo()
         this.$timeout()
@@ -52,15 +51,16 @@ class RoadSegmentDetailController {
   }
 
   generateRoadSegmentsInfo (roadSegments) {
+    this.wrongZoomLevel = false
     var roadSegmentsInfo = []
-    var roadSegmentIds = {}
-    roadSegments.forEach(edge => {
-      if (!roadSegmentIds[edge.gid]) {
-        roadSegmentIds[edge.gid] = edge.gid
-        roadSegmentsInfo.push({ ...edge })
+    for (let rs of roadSegments) {
+      if (rs.feature_type_name && rs.edge_length) {
+        roadSegmentsInfo.push({ ...rs })
+      } else {
+        this.wrongZoomLevel = true;
+        break;
       }
-    })
-
+    }
     return roadSegmentsInfo
   }
 

@@ -1,16 +1,19 @@
 <div class="plan-settings-container" ng-if="$ctrl.selectedEdgeInfo">
   
-  <table class="table table-sm table-striped">
+  <table ng-if="!$ctrl.wrongZoomLevel" class="table table-sm table-striped">
     <thead>
       <tr>
-        <th>Road Segment Id</th>
+        <th>Conduit Type</th>
+        <th>ID</th>
         <th>Length</th>
       </tr>
     </thead>
     <tr ng-repeat="edgeInfo in $ctrl.selectedEdgeInfo">
+      <td>{{edgeInfo.feature_type_name}}</td>
       <td>{{edgeInfo.gid}}</td>
       <td>{{edgeInfo.edge_length.toFixed(2)}}m</td>
     </tr>
   </table>
-
+  <div ng-if="$ctrl.wrongZoomLevel">Zoom level too high to select conduit. Please zoom in and try to select the conduit again.</div>
+  
 </div>
