@@ -53,41 +53,56 @@ class PolygonFeatureRenderer {
           drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
           drawingStyles.lineWidth = mapLayer.highlightStyle.lineWidth
         }
-      } else if (selection.planTargets.serviceAreas.has(feature.properties.id) &&
-        selectedDisplayMode == displayModes.ANALYSIS &&
-        analysisSelectionMode == selectionModes.SELECTED_AREAS) {
+      } else if (
+        selection.planTargets.serviceAreas.has(feature.properties.id)
+        && selectedDisplayMode == displayModes.ANALYSIS
+        && analysisSelectionMode == selectionModes.SELECTED_AREAS
+      ) {
         // Highlight the selected SA
         // highlight if analysis mode -> selection type is service areas
         drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
         drawingStyles.fillStyle = mapLayer.highlightStyle.fillStyle
         drawingStyles.opacity = mapLayer.highlightStyle.opacity
         drawingStyles.lineOpacity = mapLayer.highlightStyle.lineOpacity
-      } else if (selection.planTargets.analysisAreas.has(feature.properties.id) &&
-                selectedDisplayMode == displayModes.ANALYSIS) {
+      } else if (
+        selection.planTargets.analysisAreas.has(feature.properties.id)
+        && selectedDisplayMode == displayModes.ANALYSIS
+      ) {
         // highlight if analysis mode -> selection type is service areas
         drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
         drawingStyles.fillStyle = mapLayer.highlightStyle.fillStyle
         drawingStyles.opacity = mapLayer.highlightStyle.opacity
         drawingStyles.lineOpacity = mapLayer.highlightStyle.lineOpacity
-      } else if (oldSelection.details.serviceAreaId && (oldSelection.details.serviceAreaId == feature.properties.id) &&
-        selectedDisplayMode == displayModes.VIEW) {
+      } else if (
+        oldSelection.details.serviceAreaId
+        && (oldSelection.details.serviceAreaId == feature.properties.id)
+        && selectedDisplayMode == displayModes.VIEW
+      ) {
         // Highlight the selected SA in view mode
         drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
         drawingStyles.lineOpacity = mapLayer.highlightStyle.lineOpacity
-      } else if (feature.properties.hasOwnProperty('_data_type') &&
-        feature.properties._data_type === 'analysis_area' &&
-        oldSelection.details.analysisAreaId == feature.properties.id &&
-        selectedDisplayMode == displayModes.VIEW) {
+      } else if (
+        feature.properties.hasOwnProperty('_data_type')
+        && feature.properties._data_type === 'analysis_area'
+        && oldSelection.details.analysisAreaId == feature.properties.id
+        && selectedDisplayMode == displayModes.VIEW
+      ) {
         // Highlight the selected SA in view mode
         drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
         drawingStyles.lineWidth = mapLayer.highlightStyle.lineWidth
-      } else if (oldSelection.details.siteBoundaryId && (oldSelection.details.siteBoundaryId == feature.properties.object_id) &&
-        feature.properties.hasOwnProperty('_data_type') &&
-        selectedDisplayMode == displayModes.EDIT_PLAN) {
+      } else if (
+        oldSelection.details.siteBoundaryId
+        && (oldSelection.details.siteBoundaryId == feature.properties.object_id)
+        && feature.properties.hasOwnProperty('_data_type')
+        && selectedDisplayMode == displayModes.EDIT_PLAN
+      ) {
         // Highlight the selected siteBoundary in Edit mode on selection
         drawingStyles.lineWidth = mapLayer.highlightStyle.lineWidth
-      } else if ((feature.properties._data_type) &&
-        feature.properties._data_type === 'equipment_boundary.select' && feature.properties.workflow_state_id === 2) {
+      } else if (
+        (feature.properties._data_type)
+        && feature.properties._data_type === 'equipment_boundary.select'
+        && feature.properties.workflow_state_id === 2
+      ) {
         drawingStyles.strokeStyle = '#0101F6'
         drawingStyles.fillStyle = mapLayer.highlightStyle.fillStyle
         drawingStyles.lineOpacity = styles.modifiedBoundary.lineOpacity
@@ -120,8 +135,10 @@ class PolygonFeatureRenderer {
         }
       }
 
-      if (tileDataService.modifiedBoundaries.hasOwnProperty(feature.properties.object_id) &&
-          mapLayer.tileDefinitions[0].vtlType == 'ExistingBoundaryPointLayer') {
+      if (
+        tileDataService.modifiedBoundaries.hasOwnProperty(feature.properties.object_id)
+        && mapLayer.tileDefinitions[0].vtlType == 'ExistingBoundaryPointLayer'
+      ) {
         drawingStyles.strokeStyle = styles.modifiedBoundary.strokeStyle
         drawingStyles.lineOpacity = styles.modifiedBoundary.lineOpacity
       }
