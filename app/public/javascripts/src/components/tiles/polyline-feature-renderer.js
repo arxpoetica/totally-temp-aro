@@ -9,7 +9,15 @@ class PolylineFeatureRenderer {
     if (drawingStyleOverrides && drawingStyleOverrides.strokeStyle) {
       ctx.strokeStyle = drawingStyleOverrides.strokeStyle
     } else {
-      ctx.strokeStyle = mapLayer.drawingOptions.strokeStyle
+      // TODO: there's an inconsistent schema somewhere in the code.
+      // This hotfix is normalizing for it, but `drawingOptions`
+      // really should be normalized at the source.
+      const strokeStyle = mapLayer.drawingOptions
+        ? mapLayer.drawingOptions.strokeStyle
+        : mapLayer.strokeStyle
+      if (strokeStyle) {
+        ctx.strokeStyle = strokeStyle
+      }
     }
     // ctx.strokeStyle = drawingStyleOverrides ? drawingStyleOverrides.strokeStyle : mapLayer.drawingOptions.strokeStyle
     
