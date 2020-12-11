@@ -86,7 +86,7 @@
           <tr ng-repeat="fiberCost in $ctrl.roicResults.priceModel.fiberCosts">
             <td class="indent-1 text-capitalize">
               {{$ctrl.FIBER_STRINGS[fiberCost.fiberType]}} - 
-              {{$ctrl.CABLE_CONSTRUCTION_STRINGS[fiberCost.constructionType]}}
+              {{$ctrl.CABLE_CONSTRUCTION_STRINGS[fiberCost.edgeFeatureType + "." + fiberCost.edgeConstructionType]}}
               ({{fiberCost.lengthMeters * $ctrl.config.length.meters_to_length_units | number : 0}}
               {{$ctrl.config.length.length_units}})
             </td>
