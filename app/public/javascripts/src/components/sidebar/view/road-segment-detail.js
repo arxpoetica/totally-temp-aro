@@ -3,7 +3,7 @@ class RoadSegmentDetailController {
     this.state = state
     this.$timeout = $timeout
     this.selectedEdgeInfo = []
-    this.wrongZoomLevel = false
+    this.correctZoomLevel = true
 
     state.clearViewMode.subscribe((clear) => {
       if (clear) {
@@ -51,13 +51,13 @@ class RoadSegmentDetailController {
   }
 
   generateRoadSegmentsInfo (roadSegments) {
-    this.wrongZoomLevel = false
+    this.correctZoomLevel = true
     var roadSegmentsInfo = []
     for (let rs of roadSegments) {
       if (rs.feature_type_name && rs.edge_length) {
         roadSegmentsInfo.push({ ...rs })
       } else {
-        this.wrongZoomLevel = true;
+        this.correctZoomLevel = false
         break;
       }
     }

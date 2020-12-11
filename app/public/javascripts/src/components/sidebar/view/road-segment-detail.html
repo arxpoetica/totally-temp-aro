@@ -1,6 +1,6 @@
 <div class="plan-settings-container" ng-if="$ctrl.selectedEdgeInfo">
   
-  <table ng-if="!$ctrl.wrongZoomLevel" class="table table-sm table-striped">
+  <table ng-if="$ctrl.correctZoomLevel" class="table table-sm table-striped">
     <thead>
       <tr>
         <th>Conduit Type</th>
@@ -14,6 +14,6 @@
       <td>{{edgeInfo.edge_length.toFixed(2)}}m</td>
     </tr>
   </table>
-  <div ng-if="$ctrl.wrongZoomLevel">Zoom level too high to select conduit. Please zoom in and try to select the conduit again.</div>
+  <div ng-if="!$ctrl.correctZoomLevel">Zoom level too high to select conduit. Please zoom in and try to select the conduit again.</div>
   
 </div>
