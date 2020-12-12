@@ -316,26 +316,26 @@ function loadPlanResourceSelectionFromServer (plan) {
 }
 
   // Save the plan resource selections to the server
-  function savePlanResourceSelectionToServer (plan, resourceItems) {
-    return (dispatch, getState) => {
+function savePlanResourceSelectionToServer (plan, resourceItems) {
+  return (dispatch, getState) => {
 
-      // to update pristineResourceItems
-      const state = getState()
-      dispatch({
-        type: Actions.PLAN_SET_RESOURCE_ITEMS,
-        payload: {
-          resourceItems: state.plan.resourceItems,
-          pristineResourceItems: state.plan.resourceItems
-        }
-      })
+    // to update pristineResourceItems
+    const state = getState()
+    dispatch({
+      type: Actions.PLAN_SET_RESOURCE_ITEMS,
+      payload: {
+        resourceItems: state.plan.resourceItems,
+        pristineResourceItems: state.plan.resourceItems
+      }
+    })
 
-        var putBody = {
-          configurationItems: [],
-          resourceConfigItems: []
-        }
+    let putBody = {
+      configurationItems: [],
+      resourceConfigItems: []
+    }
 
     Object.keys(resourceItems).forEach((resourceItemKey) => {
-      var selectedManager = resourceItems[resourceItemKey].selectedManager
+      let selectedManager = resourceItems[resourceItemKey].selectedManager
       if (selectedManager) {
         // We have a selected manager
         putBody.resourceConfigItems.push({
@@ -348,7 +348,7 @@ function loadPlanResourceSelectionFromServer (plan) {
     })
 
     // Save the configuration to the server
-    var currentPlan = plan
+    let currentPlan = plan
     AroHttp.put(`/service/v1/plan/${currentPlan.id}/configuration`, putBody)
   }
 }

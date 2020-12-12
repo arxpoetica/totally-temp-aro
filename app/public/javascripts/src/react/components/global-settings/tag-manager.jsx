@@ -48,7 +48,7 @@ export class TagManager extends Component {
   }
 
   saveTag(){
-    if(this.state.tag.name !== "") {
+    if(this.state.tag.name !== '') {
       if(this.state.tag.id !== '' && this.state.tag !== undefined){
         this.props.updateTag(this.state.tag)
       }else{
