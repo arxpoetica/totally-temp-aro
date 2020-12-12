@@ -3,10 +3,11 @@ import { hsvToRgb } from '../react/common/view-utils'
 class StateViewMode {
 
   // view mode click action
-  static allowViewModeClickAction (state, rIsRulerEnabled) {
+  static allowViewModeClickAction (state, rIsRulerEnabled, rActiveViewModePanel) {
     return (state.selectedDisplayMode.getValue() === state.displayModes.VIEW || state.selectedDisplayMode.getValue() === state.displayModes.EDIT_PLAN) &&
-      state.activeViewModePanel !== state.viewModePanels.EDIT_LOCATIONS && // location edit shouldn't perform other action
-      state.activeViewModePanel !== state.viewModePanels.EDIT_SERVICE_LAYER &&
+      (state.activeViewModePanel !== state.viewModePanels.EDIT_LOCATIONS && rActiveViewModePanel !== state.viewModePanels.EDIT_LOCATIONS) && // location edit shouldn't perform other action
+      (state.activeViewModePanel !== state.viewModePanels.EDIT_SERVICE_LAYER && rActiveViewModePanel !== state.viewModePanels.EDIT_SERVICE_LAYER) &&
+      rActiveViewModePanel !== state.viewModePanels.COVERAGE_BOUNDARY &&
       (!state.isRulerEnabled && !rIsRulerEnabled) // ruler mode click should not enable other  view action
   }
 

@@ -37,7 +37,7 @@ export class ReportModuleList extends Component {
                 <button id={`btnEditReport${reportMetaData.id}`} className='btn btn-primary' onClick={event => this.props.startEditingReport(reportMetaData.id)}>
                   <i className='fa fa-edit' /> Edit
                 </button>
-                <button id={`btnDeleteReport${reportMetaData.id}`} className='btn btn-danger' onClick={event => this.props.deleteReport(reportMetaData.id)}>
+                <button id={`btnDeleteReport${reportMetaData.id}`} className='btn btn-danger' onClick={event => this.props.deleteReport(reportMetaData.id, reportMetaData.displayName)}>
                   <i className='fa fa-trash-alt' /> Delete
                 </button>
               </td>
@@ -77,7 +77,7 @@ const mapDispatchToProps = dispatch => ({
   startEditingReport: reportId => dispatch(ReportActions.startEditingReport(reportId)),
   clearEditingReportDefinition: () => dispatch(ReportActions.clearEditingReportDefinition()),
   createReport: () => dispatch(ReportActions.createReport()),
-  deleteReport: reportId => dispatch(ReportActions.deleteReport(reportId))
+  deleteReport: (reportId, displayName) => dispatch(ReportActions.deleteReport(reportId, displayName))
 })
 
 const ReportModuleListComponent = wrapComponentWithProvider(reduxStore, ReportModuleList, mapStateToProps, mapDispatchToProps)

@@ -25,7 +25,7 @@ class BoundaryDetailController {
       if (event.hasOwnProperty('roadSegments') && event.roadSegments.size > 0) return
 
       // In ruler mode click should not enable boundary view action
-      if (this.state.StateViewMode.allowViewModeClickAction(this.state, this.rIsRulerEnabled)) {
+      if (this.state.StateViewMode.allowViewModeClickAction(this.state, this.rIsRulerEnabled, this.rActiveViewModePanel)) {
         this.selectedBoundary = null
         if (event.hasOwnProperty('censusFeatures') &&
             event.censusFeatures.length > 0 &&

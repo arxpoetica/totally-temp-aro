@@ -1,6 +1,7 @@
 /* globals */
 import Actions from '../../../common/actions'
 import AroHttp from '../../../common/aro-http'
+import GlobalSettingsActions from '../../global-settings/globalsettings-action'
 
 function getReportsMetadata () {
   return dispatch => {
@@ -129,11 +130,16 @@ function createReport () {
   }
 }
 
-function deleteReport (reportId) {
+function deleteReport (reportId, reportName) { 
   return dispatch => {
-    AroHttp.delete(`/service/v2/report-module/${reportId}`)
-      .then(() => dispatch(getReportsMetadata()))
-      .catch(err => console.error(err))
+    dispatch(GlobalSettingsActions.askUserToConfirmBeforeDelete('Report', reportName))
+    .then((okToDelete) => {
+			if (okToDelete) {
+        AroHttp.delete(`/service/v2/report-module/${reportId}`)
+          .then(() => dispatch(getReportsMetadata()))
+          .catch(err => console.error(err))
+      }
+    })
   }
 }
 

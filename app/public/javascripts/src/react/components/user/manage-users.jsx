@@ -5,7 +5,7 @@ import UserActions from './user-actions'
 import Select, { components } from "react-select";
 import createClass from "create-react-class";
 import ReactPaginate from 'react-paginate';
-import UserSettings from './user-settings.jsx'
+import GlobalsettingsActions from '../global-settings/globalsettings-action'
 
 export class ManageUsers extends Component {constructor (props) {
   super(props)
@@ -104,10 +104,9 @@ export class ManageUsers extends Component {constructor (props) {
                     var selectedOptions = null;
                     if(selectedGroups !== null && selectedGroups !== undefined && selectedGroups !== []){
                       selectedOptions = selectedGroups.map(function(newkey) { 
-                        return {"id":newkey.id, "value": newkey.name, "label": newkey.name}; 
+                        return {"id":newkey.id, "name": newkey.name, "value": newkey.name, "label": newkey.name}; 
                       }); 
                     }
-
                     return <React.Fragment key={user.id}><tr key={index}>
                       <td style={{width: '20%'}}>{user.firstName} {user.lastName}</td>
                       <td style={{width: '20%'}}>{user.email}</td>
@@ -374,16 +373,16 @@ export class ManageUsers extends Component {constructor (props) {
   }
 
   registerUser() {
-   if (this.state.newUser.email !== this.state.newUser.confirmEmail) {
-      return swal({
-        title: 'Error',
-        text: `${this.emailLabel}s do not match`,
-        type: 'error'
-      })
+    if(this.state.newUser.email !== '') {
+      if (this.state.newUser.email !== this.state.newUser.confirmEmail) {
+        this.props.customErrorHandle('Error', `${this.emailLabel}s do not match`, 'error')
+      } else {
+          this.props.registerUser(this.state.newUser)
+          this.clearNewuser()
+      }
     } else {
-      this.props.registerUser(this.state.newUser)
+      this.props.customErrorHandle('Error', `${this.emailLabel} can not be empty`, 'error')
     }
-    this.clearNewuser()
   }
 
   clearNewuser(){
@@ -456,7 +455,8 @@ const mapDispatchToProps = (dispatch) => ({
   registerUser: (newUser) => dispatch(UserActions.registerUser(newUser)),
   handlePageClick: (selectedPage) => dispatch(UserActions.handlePageClick(selectedPage)),
   searchUsers: (searchText) => dispatch(UserActions.searchUsers(searchText)),
-  saveUsers: (userList) => dispatch(UserActions.saveUsers(userList))
+  saveUsers: (userList) => dispatch(UserActions.saveUsers(userList)),
+  customErrorHandle: (title, text, type) => dispatch(GlobalsettingsActions.customErrorHandle(title, text, type))
 })
 
 const ManageUsersComponent = wrapComponentWithProvider(reduxStore, ManageUsers, mapStateToProps, mapDispatchToProps)
