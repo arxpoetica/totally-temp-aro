@@ -5,6 +5,7 @@ import { batch } from 'react-redux'
 // ToDo: probably shouldn't be importing PlanActions into another action creator
 //  BUT resource managers are listed in two places, DRY this up!
 import PlanActions from '../plan/plan-actions'
+import GlobalSettingsActions from '../global-settings/globalsettings-action'
 
   function getResourceTypes () {
     return dispatch => {
@@ -385,19 +386,21 @@ import PlanActions from '../plan/plan-actions'
             subItems: [],
             tagMapping: definitionItem.tagMapping
           }
-          definitionItem.subItems.forEach((subItem) => {
-            var subItemToPush = {
-              id: subItem.id,
-              item: subItem.item,
-              detailType: subItem.detailType
-            }
-            if (subItem.detailType === 'reference') {
-              subItemToPush.detailAssignment = itemDetailIdToDetailAssignment[subItem.id]
-            } else if (subItem.detailType === 'value') {
-              subItemToPush.costAssignment = itemIdToCostAssignment[subItem.item.id]
-            }
-            item.subItems.push(subItemToPush)
+          if(definitionItem.subItems) {
+            definitionItem.subItems.forEach((subItem) => {
+              var subItemToPush = {
+                id: subItem.id,
+                item: subItem.item,
+                detailType: subItem.detailType
+              }
+              if (subItem.detailType === 'reference') {
+                subItemToPush.detailAssignment = itemDetailIdToDetailAssignment[subItem.id]
+              } else if (subItem.detailType === 'value') {
+                subItemToPush.costAssignment = itemIdToCostAssignment[subItem.item.id]
+              }
+              item.subItems.push(subItemToPush)
           })
+        }
           definition.items.push(item)
         })
         structuredPriceBookDefinitions.push(definition)
@@ -667,6 +670,10 @@ import PlanActions from '../plan/plan-actions'
           dispatch(setIsResourceEditor(true))
           dispatch(getResourceManagers('arpu_manager'))
         })
+      })
+      .catch(err => {
+        console.error(err)
+        dispatch(GlobalSettingsActions.httpErrorhandle(err))
       })
     }
   }

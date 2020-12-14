@@ -9,19 +9,32 @@ class PolylineFeatureRenderer {
     if (drawingStyleOverrides && drawingStyleOverrides.strokeStyle) {
       ctx.strokeStyle = drawingStyleOverrides.strokeStyle
     } else {
-      ctx.strokeStyle = mapLayer.drawingOptions.strokeStyle
+      // TODO: there's an inconsistent schema somewhere in the code.
+      // This hotfix is normalizing for it, but `drawingOptions`
+      // really should be normalized at the source.
+      const strokeStyle = mapLayer.drawingOptions
+        ? mapLayer.drawingOptions.strokeStyle
+        : mapLayer.strokeStyle
+      if (strokeStyle) {
+        ctx.strokeStyle = strokeStyle
+      }
     }
     // ctx.strokeStyle = drawingStyleOverrides ? drawingStyleOverrides.strokeStyle : mapLayer.drawingOptions.strokeStyle
     
-    var lineWidth = null
+    let lineWidth = null
     if (drawingStyleOverrides && drawingStyleOverrides.lineWidth) {
       lineWidth = drawingStyleOverrides.lineWidth
     } else {
-      // ToDo: lineWidth should always be of the same type!
-      if (typeof mapLayer.drawingOptions.lineWidth === 'function') {
-        lineWidth = mapLayer.drawingOptions.lineWidth(feature)
+      // TODO: there's an inconsistent schema somewhere in the code.
+      // This hotfix is normalizing for it, but `drawingOptions`
+      // really should be normalized at the source.
+      const lineWidthValue = mapLayer.drawingOptions
+        ? mapLayer.drawingOptions.lineWidth
+        : mapLayer.lineWidth
+      if (typeof lineWidthValue === 'function') {
+        lineWidth = lineWidthValue(feature)
       } else {
-        lineWidth = mapLayer.drawingOptions.lineWidth
+        lineWidth = lineWidthValue
       }
     }
     ctx.lineWidth = lineWidth || 1

@@ -19,6 +19,7 @@ import SelectionModes from '../react/components/selection/selection-modes'
 import SocketManager from '../react/common/socket-manager'
 import RingEditActions from '../react/components/ring-edit/ring-edit-actions'
 import NetworkAnalysisActions from '../react/components/optimization/network-analysis/network-analysis-actions'
+import NotificationInterface from '../react/components/notification/notification-interface'
 import ReactComponentConstants from '../react/common/constants'
 import AroNetworkConstraints from '../shared-utils/aro-network-constraints'
 import PuppeteerMessages from '../components/common/puppeteer-messages'
@@ -26,6 +27,7 @@ import NetworkOptimizationActions from '../react/components/optimization/network
 import ViewSettingsActions from '../react/components/view-settings/view-settings-actions'
 import ToolBarActions from '../react/components/header/tool-bar-actions'
 import AnalysisActions from '../react/components/sidebar/analysis/analysis-actions'
+import { hsvToRgb } from '../react/common/view-utils'
 
 
 const networkAnalysisConstraintsSelector = formValueSelector(ReactComponentConstants.NETWORK_ANALYSIS_CONSTRAINTS)
@@ -38,6 +40,7 @@ const getAllNetworkEquipmentLayers = reduxState => reduxState.mapLayers.networkE
 const getNetworkEquipmentLayersList = createSelector([getAllNetworkEquipmentLayers], (networkEquipmentLayers) => networkEquipmentLayers)
 
 const getAllBoundaryLayers = reduxState => reduxState.mapLayers.boundary
+// FIXME: change boundaries to an array so it doesn't change w/ each `.toJS()`
 const getBoundaryLayersList = createSelector([getAllBoundaryLayers], (boundaries) => boundaries.toJS())
 
 const getAllBoundaryTypesList = reduxState => reduxState.mapLayers.boundaryTypes
@@ -317,16 +320,26 @@ class State {
     service.requestPolygonSelect = new Rx.BehaviorSubject({})
 
     service.areTilesRendering = false
+    service.noteIdTilesRendering = null
     service.setAreTilesRendering = newValue => {
+      // can't use the proper notification system because
+      //  this function is run at least once per second
+      //  for the life of the app. Fix this.
+      /*
+      if (!newValue && service.areTilesRendering) { // set to off and not off
+        console.log('---------------------------- OFF -------')
+        service.noteIdTilesRendering = service.removeNotification(service.noteIdTilesRendering)
+      } else if (newValue && !service.areTilesRendering) { // set to on and not already on
+        console.log('---------------------------- ON --------')
+        service.noteIdTilesRendering = service.postNotification('Rendering Tiles')
+      }
+      */
       service.areTilesRendering = newValue
       $timeout()
     }
 
-    service.censusCategories = new Rx.BehaviorSubject()
-    service.reloadCensusCategories = (censusCategories) => {
-      service.censusCategories.next(censusCategories)
-      service.requestMapLayerRefresh.next(null)
-    }
+    service.angBoundaries = new Rx.BehaviorSubject()
+    service.layerCategories = new Rx.BehaviorSubject()
 
     // The display modes for the application
     service.displayModes = Object.freeze({
@@ -477,35 +490,6 @@ class State {
       }
     })
 
-    // Function to convert from hsv to rgb color values.
-    // https://stackoverflow.com/questions/17242144/javascript-convert-hsb-hsv-color-to-rgb-accurately
-    var hsvToRgb = (h, s, v) => {
-      var r, g, b, i, f, p, q, t
-      i = Math.floor(h * 6)
-      f = h * 6 - i
-      p = v * (1 - s)
-      q = v * (1 - f * s)
-      t = v * (1 - (1 - f) * s)
-      switch (i % 6) {
-        case 0: r = v, g = t, b = p; break
-        case 1: r = q, g = v, b = p; break
-        case 2: r = p, g = v, b = t; break
-        case 3: r = p, g = q, b = v; break
-        case 4: r = t, g = p, b = v; break
-        case 5: r = v, g = p, b = q; break
-      }
-      var rgb = [r, g, b]
-      var color = '#'
-      rgb.forEach((colorValue) => {
-        var colorValueHex = Math.round(colorValue * 255).toString(16)
-        if (colorValueHex.length === 1) {
-          colorValueHex = '0' + colorValueHex
-        }
-        color += colorValueHex
-      })
-      return color
-    }
-
     // We are going to use the golden ratio method from http://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
     // (Furthermore, it is a property of the golden ratio, Φ, that each subsequent hash value divides the interval into which it falls according to the golden ratio!)
     var golden_ratio_conjugate = 0.618033988749895
@@ -515,8 +499,8 @@ class State {
       hue %= 1
       // We are changing the hue while keeping saturation/value the same. Also the fill colors are lighter than stroke colors.
       return {
-        strokeStyle: service.StateViewMode.hsvToRgb(hue, 0.5, 0.5),
-        fillStyle: service.StateViewMode.hsvToRgb(hue, 0.8, 0.5)
+        strokeStyle: hsvToRgb(hue, 0.5, 0.5),
+        fillStyle: hsvToRgb(hue, 0.8, 0.5)
       }
     }
 
@@ -556,7 +540,7 @@ class State {
       details: {
         analysisAreaId: null,
         censusBlockId: null,
-        censusCategoryId: null,
+        layerCategoryId: null,
         roadSegments: new Set(),
         serviceAreaId: null,
         fiberSegments: new Set(),
@@ -1213,25 +1197,7 @@ class State {
 
     service.showDirectedCable = false
 
-    var loadCensusCatData = function () {
-      return $http.get(`/service/tag-mapping/meta-data/census_block/categories`)
-        .then((result) => {
-          let censusCats = {}
-          result.data.forEach((cat) => {
-            let tagsById = {}
-            cat.tags.forEach((tag) => {
-              tag.colourHash = service.StateViewMode.getTagColour(tag)
-              tagsById[tag.id + ''] = tag
-            })
-            cat.tags = tagsById
-            censusCats[cat.id + ''] = cat
-          })
-          service.reloadCensusCategories(censusCats)
-        })
-    }
-    loadCensusCatData()
-
-    var loadBoundaryLayers = function () {
+    var loadBoundaryTypes = function () {
       return $http.get(`/service/boundary_type`)
         .then((result) => {
           var boundaryTypes = result.data
@@ -1243,8 +1209,7 @@ class State {
           service.setSelectedBoundaryType(selectedBoundaryType)
         })
     }
-
-    loadBoundaryLayers()
+    loadBoundaryTypes()
 
     service.setBoundaryTypes = function (boundaryTypes) {
       $ngRedux.dispatch({
@@ -1374,6 +1339,13 @@ class State {
 
       service.equipmentLayerTypeVisibility.existing = service.configuration.networkEquipment.visibility.defaultShowExistingEquipment
       service.equipmentLayerTypeVisibility.planned = service.configuration.networkEquipment.visibility.defaultShowPlannedEquipment
+      var reduxTypeVisibility = {
+        equipment: {
+          existing: service.equipmentLayerTypeVisibility.existing,
+          planned: service.equipmentLayerTypeVisibility.planned
+        }
+      }
+      service.setTypeVisibility(reduxTypeVisibility)
 
       // Set the logged in user, then call all the initialization functions that depend on having a logged in user.
       service.loggedInUser = user
@@ -1524,10 +1496,28 @@ class State {
                   const isVisible = setOfVisibleLayers.has(layer.key)
                   service.setLayerVisibility(layer, isVisible)
                 })
-                service.equipmentLayerTypeVisibility.planned = true;
-                service.cableLayerTypeVisibility.planned = true;
+
+                var layersTypeVisibility = {
+                  equipment: {
+                    existing: false,
+                    planned: true
+                  },
+                  cable: {
+                    existing: false,
+                    planned: true
+                  }
+                }
+
+                if (initialState.reportPage.layersTypeVisibility) layersTypeVisibility = initialState.reportPage.layersTypeVisibility
+                service.equipmentLayerTypeVisibility.existing = layersTypeVisibility.equipment.existing
+                service.equipmentLayerTypeVisibility.planned = layersTypeVisibility.equipment.planned
+                service.cableLayerTypeVisibility.existing = layersTypeVisibility.cable.existing
+                service.cableLayerTypeVisibility.planned = layersTypeVisibility.cable.planned
+                service.setTypeVisibility(layersTypeVisibility)
+
                 // ToDo: this should NOT be hardcoded, related to map-reports-downloader > doDownloadReport()
-                ['roads', 'cables', 'boundaries', 'equipments', 'conduits'].forEach(layerType => {
+                var layerTypes = ['roads', 'cables', 'boundaries', 'equipments', 'conduits']
+                layerTypes.forEach(layerType => {
                   Object.keys(service.mapLayersRedux.networkEquipment[layerType]).forEach(layerKey => {
                     const isVisible = setOfVisibleLayers.has(layerKey)
                     service.setNetworkEquipmentLayerVisiblity(layerType, service.mapLayersRedux.networkEquipment[layerType][layerKey], isVisible)
@@ -1553,7 +1543,7 @@ class State {
           PuppeteerMessages.suppressMessages = false
           service.recreateTilesAndCache()
           // Late night commit. The following line throws an error. Subtypes get rendered.
-          // service.requestSetMapZoom(map.getZoom() + 1)
+          service.requestSetMapZoom.next(map.getZoom() + 1)
           $timeout()
         })
         .catch((err) => {
@@ -1602,6 +1592,8 @@ class State {
           }
           service.configuration.loadPerspective(config.user.perspective)
           service.setNetworkEquipmentLayers(service.configuration.networkEquipment)
+          service.setCopperLayers(service.configuration.copperCategories)
+
           service.setAppConfiguration(service.configuration) // Require in tool-bar.jsx
           return service.setLoggedInUser(config.user, initialState)
         })
@@ -1799,16 +1791,17 @@ class State {
     service.unsubscribeLibraryEvent1 = SocketManager.subscribe('ETL_ADD', service.handleLibraryModifiedEvent.bind(service))
     service.unsubscribePlanRefresh = SocketManager.subscribe('PLAN_REFRESH', service.handlePlanRefreshRequest.bind(service))
 
-    service.mergeToTarget = (nextState, actions) => {
+    // NOTE: this is willReceiveProps in Angular vernacular
+    service.mergeToTarget = (nextReduxState, actions) => {
       const currentActivePlanId = service.plan && service.plan.id
-      const newActivePlanId = nextState.plan && nextState.plan.id
+      const newActivePlanId = nextReduxState.plan && nextReduxState.plan.id
       const oldDataItems = service.dataItems
 
       // merge state and actions onto controller
-      Object.assign(service, nextState)
+      Object.assign(service, nextReduxState)
       Object.assign(service, actions)
 
-      if ((currentActivePlanId !== newActivePlanId) && (nextState.plan)) {
+      if ((currentActivePlanId !== newActivePlanId) && (nextReduxState.plan)) {
         // The active plan has changed. Note that we are comparing ids because a change in plan state also causes the plan object to update.
         service.onActivePlanChanged()
       }
@@ -1817,14 +1810,27 @@ class State {
       //  with reduxState.plan.selectedDisplayMode
       //  We are currently maintaining state in two places
       //  BUT as of now are only setting it in redux
-      if (nextState.rSelectedDisplayMode &&
+      if (nextReduxState.rSelectedDisplayMode &&
           service.rSelectedDisplayMode !== service.selectedDisplayMode.getValue()) {
         // console.log(service.rSelectedDisplayMode)
         service.selectedDisplayMode.next(service.rSelectedDisplayMode)
       }
-      if (nextState.rActiveViewModePanel && 
-          service.rActiveViewModePanel !== service.activeViewModePanel) {
-        service.activeViewModePanel = service.rActiveViewModePanel
+      // if (nextReduxState.rActiveViewModePanel && 
+      //     service.rActiveViewModePanel !== service.activeViewModePanel) {
+      //   service.activeViewModePanel = service.rActiveViewModePanel
+      // }
+
+      if (
+        nextReduxState.boundaries
+        && JSON.stringify(nextReduxState.boundaries) !== JSON.stringify(service.angBoundaries.getValue())
+      ) {
+        service.angBoundaries.next(nextReduxState.boundaries)
+        let layerCategories = {}
+        for (const bounds of nextReduxState.boundaries) {
+          layerCategories = Object.assign({}, layerCategories, bounds.categories)
+        }
+        service.layerCategories.next(layerCategories)
+        service.requestMapLayerRefresh.next(null)
       }
     }
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(service.mergeToTarget.bind(service))
@@ -1882,6 +1888,7 @@ class State {
       loadPlanRedux: planId => dispatch(PlanActions.loadPlan(planId)),
       setGoogleMapsReference: mapRef => dispatch(MapActions.setGoogleMapsReference(mapRef)),
       setNetworkEquipmentLayers: networkEquipmentLayers => dispatch(MapLayerActions.setNetworkEquipmentLayers(networkEquipmentLayers)),
+      setCopperLayers: copperLayers => dispatch(MapLayerActions.setCopperLayers(copperLayers)),
       updateShowSiteBoundary: isVisible => dispatch(MapLayerActions.setShowSiteBoundary(isVisible)),
       setLocationFilters: locationFilters => dispatch(MapLayerActions.setLocationFilters(locationFilters)),
       setLocationFilterChecked: locationFilters => dispatch(MapLayerActions.setLocationFilterChecked(filterType, ruleKey, isChecked)),
@@ -1898,7 +1905,8 @@ class State {
       setAppConfiguration: appConfiguration => dispatch(ToolBarActions.setAppConfiguration(appConfiguration)),
       updateDefaultPlanCoordinates: coordinates => dispatch(PlanActions.updateDefaultPlanCoordinates(coordinates)),
       setSelectedHeatMapOption: selectedHeatMapOption => dispatch(ToolBarActions.setSelectedHeatMapOption(selectedHeatMapOption)),
-      setEnumStrings: enumStrings => dispatch(AnalysisActions.setEnumStrings(enumStrings))
+      setEnumStrings: enumStrings => dispatch(AnalysisActions.setEnumStrings(enumStrings)),
+      setTypeVisibility: (typeVisibility) => dispatch(MapLayerActions.setTypeVisibility(typeVisibility)),
     }
   }
 }

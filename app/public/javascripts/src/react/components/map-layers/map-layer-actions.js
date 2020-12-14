@@ -1,5 +1,7 @@
+import { List } from 'immutable'
 import Actions from '../../common/actions'
 import AroHttp from '../../common/aro-http'
+import { hsvToRgb } from '../../common/view-utils'
 
 // Sets the visibility for a specified layer
 // ToDo: LOCATIONS refactor callers of this to send layer Key instead of whole layer
@@ -55,6 +57,18 @@ function setLayerVisibility (layer, newVisibility) {
 function setNetworkEquipmentLayerVisibility (layerType, layer, newVisibility) {
   return {
     type: Actions.LAYERS_SET_NETWORK_EQUIPMENT_VISIBILITY,
+    payload: {
+      layerType: layerType,
+      layer: layer,
+      subtype: 0,
+      visibility: newVisibility
+    }
+  }
+}
+
+function setCopperLayerVisibility (layerType, layer, newVisibility) {
+  return {
+    type: Actions.LAYERS_SET_COPPER_VISIBILITY,
     payload: {
       layerType: layerType,
       layer: layer,
@@ -120,9 +134,52 @@ function setConstructionSiteLayers (constructionSiteLayers) {
 }
 
 function setBoundaryLayers (boundaryLayers) {
+  return dispatch => {
+    // NOTE: trying to move away from the `immutability`
+    // library, hence this deconstruction for future removal
+    const layersClone = boundaryLayers.toJS()
+
+    const ids = [...new Set(layersClone.map(layer => layer.analysisLayerId))]
+    const promises = ids.map(id => AroHttp.get(`/service/category_assignments/${id}`))
+
+    return Promise.all(promises).then(results => {
+
+      results = results.filter(result => result.data.length).map(result => result.data)
+      const newBoundaryLayers = layersClone.map(layer => {
+        const foundGroup = (results.find(group => group[0].analysisLayerId === layer.analysisLayerId) || [])
+
+        layer.categories = {}
+        for (const group of foundGroup) {
+          const tagsById = {}
+          for (const tag of group.category.tags) {
+            tag.colourHash = hsvToRgb(tag.colourHue, 1, 1)
+            tagsById[tag.id] = tag
+          }
+          group.category.tags = tagsById
+          group.category.analysisLayerId = group.analysisLayerId
+          layer.categories[group.category.id] = group.category
+        }
+
+        layer.selectedCategory = null
+        return layer
+      })
+
+      dispatch({
+        type: Actions.LAYERS_SET_BOUNDARY,
+        // NOTE: trying to move away from the `immutability`
+        // library, hence this reconstruction. In the future
+        // won't need the `List` wrapper
+        payload: List(newBoundaryLayers),
+      })
+    })
+    .catch(err => console.error(err))
+  }
+}
+
+function setCopperLayers (copperLayers) {
   return {
-    type: Actions.LAYERS_SET_BOUNDARY,
-    payload: boundaryLayers
+    type: Actions.LAYERS_SET_COPPER,
+    payload: copperLayers
   }
 }
 
@@ -200,6 +257,13 @@ function setSelectedBoundaryType (selectedBoundaryType) {
   }
 }
 
+function setTypeVisibility (typeVisibility) {
+  return {
+    type: Actions.LAYERS_SET_TYPE_VISIBILITY,
+    payload: typeVisibility
+  }
+}
+
 export default {
   setLayerVisibility,
   setNetworkEquipmentLayerVisibility,
@@ -210,6 +274,8 @@ export default {
   setNetworkEquipmentLayers,
   setConstructionSiteLayers,
   setBoundaryLayers,
+  setCopperLayers,
+  setCopperLayerVisibility,
   setShowSiteBoundary,
   loadAnnotationsForUser,
   saveAnnotationsForUser,
@@ -217,5 +283,6 @@ export default {
   updateAnnotation,
   removeAnnotation,
   clearOlderAnnotations,
-  setSelectedBoundaryType
+  setSelectedBoundaryType,
+  setTypeVisibility
 }

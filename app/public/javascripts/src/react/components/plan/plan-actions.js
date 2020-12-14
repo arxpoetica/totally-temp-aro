@@ -35,6 +35,7 @@ function manageLibrarySubscriptions (currentSelectedLibraryItems, newSelectedLib
 
 function loadPlanDataSelectionFromServer (planId) {
   return dispatch => {
+    // these should maybe be split up into seperate actions
     const promises = [
       AroHttp.get('/service/odata/datatypeentity'),
       AroHttp.get(`/service/v1/library-entry`),
@@ -61,6 +62,7 @@ function loadPlanDataSelectionFromServer (planId) {
           if (dataTypeEntity.maxValue > 0) {
             newDataItems[dataTypeEntity.name] = {
               id: dataTypeEntity.id,
+              name: dataTypeEntity.name,
               description: dataTypeEntity.description,
               minValue: dataTypeEntity.minValue,
               maxValue: dataTypeEntity.maxValue,
@@ -191,8 +193,8 @@ function deleteLibraryEntry (dataSource) {
   }
 }
 
- // Saves the plan Data Selection configuration to the server
- function saveDataSelectionToServer (plan, dataItems) {
+// Saves the plan Data Selection configuration to the server
+function saveDataSelectionToServer (plan, dataItems) {
   return dispatch => {
     var putBody = {
       configurationItems: [],
@@ -289,7 +291,7 @@ function loadPlanResourceSelectionFromServer (plan) {
           }
           newResourceItems[resourceManager.managerType].allManagers.sort((a, b) => (a.name > b.name) ? 1 : -1)
         })
-        
+
         // Then select the appropriate manager for each type
         selectedResourceManagers.forEach((selectedResourceManager) => {
           var allManagers = newResourceItems[selectedResourceManager.aroResourceType].allManagers
@@ -298,7 +300,7 @@ function loadPlanResourceSelectionFromServer (plan) {
             newResourceItems[selectedResourceManager.aroResourceType].selectedManager = matchedManagers[0]
           }
         })
-        var resourceItems = newResourceItems;
+        var resourceItems = newResourceItems
         var pristineResourceItems = JSON.parse(JSON.stringify(resourceItems))
         dispatch({
           type: Actions.PLAN_SET_RESOURCE_ITEMS,
@@ -314,34 +316,44 @@ function loadPlanResourceSelectionFromServer (plan) {
 }
 
   // Save the plan resource selections to the server
-  function savePlanResourceSelectionToServer (plan, resourceItems) {
-    return dispatch => {
-        var putBody = {
-          configurationItems: [],
-          resourceConfigItems: []
-        }
+function savePlanResourceSelectionToServer (plan, resourceItems) {
+  return (dispatch, getState) => {
 
-        Object.keys(resourceItems).forEach((resourceItemKey) => {
-          var selectedManager = resourceItems[resourceItemKey].selectedManager
-          if (selectedManager) {
-            // We have a selected manager
-            putBody.resourceConfigItems.push({
-              aroResourceType: resourceItemKey,
-              resourceManagerId: selectedManager.id,
-              name: selectedManager.name,
-              description: selectedManager.description
-            })
-          }
-        })
-
-        // Save the configuration to the server
-        var currentPlan = plan
-        AroHttp.put(`/service/v1/plan/${currentPlan.id}/configuration`, putBody)
+    // to update pristineResourceItems
+    const state = getState()
+    dispatch({
+      type: Actions.PLAN_SET_RESOURCE_ITEMS,
+      payload: {
+        resourceItems: state.plan.resourceItems,
+        pristineResourceItems: state.plan.resourceItems
       }
+    })
+
+    let putBody = {
+      configurationItems: [],
+      resourceConfigItems: []
     }
 
+    Object.keys(resourceItems).forEach((resourceItemKey) => {
+      let selectedManager = resourceItems[resourceItemKey].selectedManager
+      if (selectedManager) {
+        // We have a selected manager
+        putBody.resourceConfigItems.push({
+          aroResourceType: resourceItemKey,
+          resourceManagerId: selectedManager.id,
+          name: selectedManager.name,
+          description: selectedManager.description
+        })
+      }
+    })
 
-function setIsResourceSelection (status){
+    // Save the configuration to the server
+    let currentPlan = plan
+    AroHttp.put(`/service/v1/plan/${currentPlan.id}/configuration`, putBody)
+  }
+}
+
+function setIsResourceSelection (status) {
   return dispatch => {
     dispatch({
       type: Actions.PLAN_SET_IS_RESOURCE_SELECTION,
@@ -350,7 +362,7 @@ function setIsResourceSelection (status){
   }
 }
 
-function setIsDataSelection (status){
+function setIsDataSelection (status) {
   return dispatch => {
     dispatch({
       type: Actions.PLAN_SET_IS_DATA_SELECTION,
@@ -425,7 +437,7 @@ function deleteProjectConfig (project,userId, authPermissions) {
   }
 }
 
-function setIsDeleting (status){
+function setIsDeleting (status) {
   return dispatch => {
     dispatch({
       type: Actions.PLAN_SET_IS_DELETING,
@@ -434,7 +446,7 @@ function setIsDeleting (status){
   }
 }
 
-function setProjectMode (mode){
+function setProjectMode (mode) {
   return dispatch => {
     dispatch({
       type: Actions.PLAN_SET_PROJECT_MODE,
@@ -454,101 +466,119 @@ function planSettingsToProject (selectedProjectId, dataItems, resourceItems) {
   }
 }
 
-  // Saves the plan Data Selection and Resource Selection to the project
- function savePlanDataAndResourceSelectionToProject (selectedProjectId, dataItems, resourceItems) {
-    var putBody = {
-      configurationItems: [],
-      resourceConfigItems: []
-    }
+// Saves the plan Data Selection and Resource Selection to the project
+function savePlanDataAndResourceSelectionToProject (selectedProjectId, dataItems, resourceItems) {
+  var putBody = {
+    configurationItems: [],
+    resourceConfigItems: []
+  }
 
-    Object.keys(dataItems).forEach((dataItemKey) => {
-      // An example of dataItemKey is 'location'
-      if (dataItems[dataItemKey].selectedLibraryItems.length > 0) {
-        var configurationItem = {
-          dataType: dataItemKey,
-          libraryItems: dataItems[dataItemKey].selectedLibraryItems
-        }
-        putBody.configurationItems.push(configurationItem)
+  Object.keys(dataItems).forEach((dataItemKey) => {
+    // An example of dataItemKey is 'location'
+    if (dataItems[dataItemKey].selectedLibraryItems.length > 0) {
+      var configurationItem = {
+        dataType: dataItemKey,
+        libraryItems: dataItems[dataItemKey].selectedLibraryItems
       }
-    })
+      putBody.configurationItems.push(configurationItem)
+    }
+  })
 
-    Object.keys(resourceItems).forEach((resourceItemKey) => {
-      var selectedManager = resourceItems[resourceItemKey].selectedManager
-      if (selectedManager) {
-        // We have a selected manager
-        putBody.resourceConfigItems.push({
-          aroResourceType: resourceItemKey,
-          resourceManagerId: selectedManager.id,
-          name: selectedManager.name,
-          description: selectedManager.description
-        })
+  Object.keys(resourceItems).forEach((resourceItemKey) => {
+    var selectedManager = resourceItems[resourceItemKey].selectedManager
+    if (selectedManager) {
+      // We have a selected manager
+      putBody.resourceConfigItems.push({
+        aroResourceType: resourceItemKey,
+        resourceManagerId: selectedManager.id,
+        name: selectedManager.name,
+        description: selectedManager.description
+      })
+    }
+  })
+
+  // Save the configuration to the project
+  return AroHttp.put(`/service/v1/project-template/${selectedProjectId}/configuration`, putBody)
+}
+
+function updateDataSourceEditableStatus (isDataSourceEditable, dataSourceKey, loggedInUser, authPermissions, dataItems) {
+  return dispatch => {
+    isDataSourceEditable[dataSourceKey] = (dataSourceKey === 'location' || dataSourceKey === 'service_layer') && (dataItems[dataSourceKey].selectedLibraryItems.length === 1)
+    if (isDataSourceEditable[dataSourceKey]) {
+      // We still think this is editable, now check for ACL by making a call to service
+      const libraryId = dataItems[dataSourceKey].selectedLibraryItems[0].identifier  // Guaranteed to have 1 selection at this point
+      const dataSourceFilterString = `metaDataId eq ${libraryId}`
+      const filterString = `${dataSourceFilterString} and userId eq ${loggedInUser.id}`
+      AroHttp.get(`/service/odata/UserLibraryViewEntity?$select=dataSourceId,permissions&$filter=${filterString}&$top=1000`)
+        .then(result => {
+          const permissions = (result.data.length === 1) ? result.data[0].permissions : 0
+          const hasWrite = Boolean(permissions & authPermissions.RESOURCE_WRITE.permissionBits)
+          const hasAdmin = Boolean(permissions & authPermissions.RESOURCE_ADMIN.permissionBits)
+          const hasResourceWorkflow = Boolean(permissions & authPermissions.RESOURCE_WORKFLOW.permissionBits)
+          isDataSourceEditable[dataSourceKey] = hasWrite || hasAdmin || hasResourceWorkflow
+          dispatch({
+            type: Actions.PLAN_SET_IS_DATASOURCE_EDITABLE,
+            payload: isDataSourceEditable
+          })
+      })
+      .catch(err => console.error(err))
       }
+  }
+}
+
+function setParentProjectForNewProject (parentProjectForNewProject){
+  return dispatch => {
+    dispatch({
+      type: Actions.PLAN_SET_PARENT_PROJECT_FOR_NEW_PROJECT,
+      payload: parentProjectForNewProject
     })
-
-    // Save the configuration to the project
-    return AroHttp.put(`/service/v1/project-template/${selectedProjectId}/configuration`, putBody)
   }
+}
 
-  function updateDataSourceEditableStatus (isDataSourceEditable, dataSourceKey, loggedInUser, authPermissions, dataItems) {
-    return dispatch => {
-      isDataSourceEditable[dataSourceKey] = (dataSourceKey === 'location' || dataSourceKey === 'service_layer') && (dataItems[dataSourceKey].selectedLibraryItems.length === 1)
-        if (isDataSourceEditable[dataSourceKey]) {
-        // We still think this is editable, now check for ACL by making a call to service
-        const libraryId = dataItems[dataSourceKey].selectedLibraryItems[0].identifier  // Guaranteed to have 1 selection at this point
-        const dataSourceFilterString = `metaDataId eq ${libraryId}`
-        const filterString = `${dataSourceFilterString} and userId eq ${loggedInUser.id}`
-        AroHttp.get(`/service/odata/UserLibraryViewEntity?$select=dataSourceId,permissions&$filter=${filterString}&$top=1000`)
-          .then(result => {
-            const permissions = (result.data.length === 1) ? result.data[0].permissions : 0
-            const hasWrite = Boolean(permissions & authPermissions.RESOURCE_WRITE.permissionBits)
-            const hasAdmin = Boolean(permissions & authPermissions.RESOURCE_ADMIN.permissionBits)
-            const hasResourceWorkflow = Boolean(permissions & authPermissions.RESOURCE_WORKFLOW.permissionBits)
-            isDataSourceEditable[dataSourceKey] = hasWrite || hasAdmin || hasResourceWorkflow
-            dispatch({
-              type: Actions.PLAN_SET_IS_DATASOURCE_EDITABLE,
-              payload: isDataSourceEditable
-            })
-        })
-        .catch(err => console.error(err))
-        }
-    }
+function setSelectedProjectId (selectedProjectId){
+  return dispatch => {
+    dispatch({
+      type: Actions.PLAN_SET_SELECTED_PROJECT_ID,
+      payload: selectedProjectId
+    })
   }
+}
 
-  function setParentProjectForNewProject (parentProjectForNewProject){
-    return dispatch => {
+function updateDefaultPlanCoordinates (coordinates){
+  return dispatch => {
+    coordinates.addListener('center_changed', () => {
+      var center = coordinates.getCenter()
       dispatch({
-        type: Actions.PLAN_SET_PARENT_PROJECT_FOR_NEW_PROJECT,
-        payload: parentProjectForNewProject
+        type: Actions.PLAN_UPDATE_DEFAULT_PLAN_COORDINATES,
+        payload: {'center_changed' : center}
       })
-    }
-  }
-
-  function setSelectedProjectId (selectedProjectId){
-    return dispatch => {
+    })
+    coordinates.addListener('zoom_changed', () => {
       dispatch({
-        type: Actions.PLAN_SET_SELECTED_PROJECT_ID,
-        payload: selectedProjectId
+        type: Actions.PLAN_UPDATE_DEFAULT_PLAN_COORDINATES,
+        payload: {'zoom_changed' : coordinates.getZoom()}
       })
-    }
+    })
   }
+}
 
-  function updateDefaultPlanCoordinates (coordinates){
-    return dispatch => {
-      coordinates.addListener('center_changed', () => {
-        var center = coordinates.getCenter()
+function loadLibraryEntryById (libraryId) {
+  return (dispatch, getState) => {
+    const state = getState()
+    // technically we shouldn't be using state.user, perhaps make this a parameter
+    AroHttp.get(`/service/v1/library-entry/${libraryId}?user_id=${state.user.loggedInUser.id}`)
+      .then((result) => {
         dispatch({
-          type: Actions.PLAN_UPDATE_DEFAULT_PLAN_COORDINATES,
-          payload: {'center_changed' : center}
+          type: Actions.PLAN_APPEND_ALL_LIBRARY_ITEMS,
+          payload: {
+            dataItemKey: result.data.dataType,
+            allLibraryItems: [result.data]
+          }
         })
       })
-      coordinates.addListener('zoom_changed', () => {
-        dispatch({
-          type: Actions.PLAN_UPDATE_DEFAULT_PLAN_COORDINATES,
-          payload: {'zoom_changed' : coordinates.getZoom()}
-        })
-      })
-    }
+      .catch((err) => console.error(err))
   }
+}
 
 export default {
   setActivePlan,
@@ -573,5 +603,6 @@ export default {
   updateDataSourceEditableStatus,
   setParentProjectForNewProject,
   setSelectedProjectId,
-  updateDefaultPlanCoordinates
+  updateDefaultPlanCoordinates,
+  loadLibraryEntryById
 }

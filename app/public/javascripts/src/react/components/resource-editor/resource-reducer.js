@@ -29,7 +29,8 @@ import Actions from '../../common/actions'
     ArpuStrategy: '',
     ArpuRevenue: '',
     loadStrength: {},
-    isRrmManager: false
+    isRrmManager: false,
+    equipmentTags: []
 	}
 
   function setResourceTypes (state, resourceTypes) {

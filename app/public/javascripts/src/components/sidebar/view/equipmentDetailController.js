@@ -1,4 +1,5 @@
 import AroFeatureFactory from '../../../service-typegen/dist/AroFeatureFactory'
+import ToolBarActions from '../../../react/components/header/tool-bar-actions'
 
 class EquipmentDetailController {
   constructor ($http, $timeout, $ngRedux, state, tileDataService) {
@@ -32,7 +33,7 @@ class EquipmentDetailController {
     this.mapFeatureSelectedSubscriber = state.mapFeaturesSelectedEvent.skip(1).subscribe((options) => {
       // most of this function is assuring the properties we need exist.
       // In ruler mode click should not perform any view action's
-      if (!this.state.StateViewMode.allowViewModeClickAction(this.state, this.rIsRulerEnabled)) return
+      if (!this.state.StateViewMode.allowViewModeClickAction(this.state, this.rIsRulerEnabled, this.rActiveViewModePanel)) return
       if (options.hasOwnProperty('roadSegments') && options.roadSegments.size > 0) return
 
       const plan = state.plan
@@ -70,6 +71,7 @@ class EquipmentDetailController {
 
         this.currentEquipmentDetailView = this.EquipmentDetailView.Fiber
         this.state.activeViewModePanel = this.state.viewModePanels.EQUIPMENT_INFO
+        this.rActiveViewModePanelAction(this.state.viewModePanels.EQUIPMENT_INFO)
         this.$timeout()
       }
     })
@@ -130,6 +132,7 @@ class EquipmentDetailController {
           this.currentEquipmentDetailView = this.EquipmentDetailView.Detail
 
           this.state.activeViewModePanel = this.state.viewModePanels.EQUIPMENT_INFO
+          this.rActiveViewModePanelAction(this.state.viewModePanels.EQUIPMENT_INFO)
           this.$timeout()
         } else {
           this.clearSelection()
@@ -230,6 +233,7 @@ class EquipmentDetailController {
 
   mapDispatchToTarget (dispatch) {
     return {
+      rActiveViewModePanelAction: (value) => dispatch(ToolBarActions.activeViewModePanel(value))
     }
   }
 }

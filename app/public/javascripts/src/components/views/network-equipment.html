@@ -51,12 +51,12 @@
         </div>
         <div class="col-md-4" ng-if="$ctrl.state.configuration.perspective.networkEquipment.showExisting">
           <input type="checkbox" class="checkboxfill layer-type-checkboxes" ng-model="$ctrl.state.equipmentLayerTypeVisibility.existing"
-            ng-change="$ctrl.updateMapLayers()">
+            ng-change="$ctrl.onUpdateExistingEquipmentVisibility()">
           <span>&nbsp;Existing</span>
         </div>
         <div class="col-md-4" ng-if="$ctrl.state.configuration.perspective.networkEquipment.showPlanned">
           <input type="checkbox" class="checkboxfill layer-type-checkboxes" ng-model="$ctrl.state.equipmentLayerTypeVisibility.planned"
-            ng-change="$ctrl.updateMapLayers()">
+            ng-change="$ctrl.onUpdatePlannedEquipmentVisibility()">
           <span>&nbsp;Planned</span>
         </div>
       </div>

@@ -200,17 +200,17 @@ export class ToolBar extends Component {
     // To set Dynamic Background color for select2-results using jQuery
     $(".select2-results").css("background-color", configuration.toolbar.toolBarColor);
 
+    // ToDo: ARO_CLIENT should never be checked in views, these images should be in settings
+    var leftElement = <img src="images/logos/aro/logo_navbar.png" className="no-collapse" style={{alignSelf: 'center', paddingLeft: '10px', paddingRight: '10px'}}/>
+    if (configuration.ARO_CLIENT === 'frontier') {
+      leftElement = <span style={{alignSelf: 'center', paddingLeft: '10px', paddingRight: '10px'}}><b>NPM BSA</b></span>
+    } else if (configuration.ARO_CLIENT === 'ziply') {
+      leftElement = <img src="images/logos/ziply/ziply_navbar_logo.png" className="no-collapse" style={{alignSelf: 'center', paddingLeft: '3px', paddingRight: '10px'}}/>
+    }
+    
     return (
       <div className="tool-bar" style={{margin: marginPixels, backgroundColor: configuration.toolbar.toolBarColor}}>
-
-        {configuration.ARO_CLIENT !== 'frontier' &&
-          <img src="images/logos/aro/logo_navbar.png" className="no-collapse" style={{alignSelf: 'center', paddingLeft: '10px', paddingRight: '10px'}}/>
-        }
-
-        {configuration.ARO_CLIENT === 'frontier' &&
-          <span style={{alignSelf: 'center', paddingLeft: '10px', paddingRight: '10px'}}><b>NPM BSA</b></span>
-        }
-
+        { leftElement }
         <div className="no-collapse" id="global-search-toolbutton" style={{flex: '0 0 250px', margin: 'auto', width: '250px'}}>
           <input className="form-control select2" style={{padding:'0px', borderRadius: '0px'}} type="text" placeholder="Search an address, city, or state"/>
         </div>

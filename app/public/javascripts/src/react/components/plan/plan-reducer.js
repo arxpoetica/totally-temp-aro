@@ -5,7 +5,7 @@ const defaultState = {
   dataItems: {},
   haveDataItemsChanged: false,
   uploadDataSources: [],
-  defaultPlanCoordinates:{
+  defaultPlanCoordinates: {
     zoom: 14,
     latitude: 47.6062, // Seattle, WA by default. For no particular reason.
     longitude: -122.3321, // Seattle, WA by default. For no particular reason.
@@ -62,7 +62,6 @@ function setAllLibraryItems (state, dataItemKey, allLibraryItems) {
 }
 
 function setAllLibraryItemsAdd (state, dataItemKey, newLibraryItem) {
-
   let allLibraryItems = state.dataItems[dataItemKey].allLibraryItems
   allLibraryItems = allLibraryItems.concat(newLibraryItem)
 
@@ -70,6 +69,17 @@ function setAllLibraryItemsAdd (state, dataItemKey, newLibraryItem) {
     dataItems: { ...state.dataItems,
       [dataItemKey]: { ...state.dataItems[dataItemKey],
         allLibraryItems: allLibraryItems
+      }
+    },
+    haveDataItemsChanged: true
+  }
+}
+
+function appendAllLibraryItems (state, dataItemKey, allLibraryItems) {
+  return { ...state,
+    dataItems: { ...state.dataItems,
+      [dataItemKey]: { ...state.dataItems[dataItemKey],
+        allLibraryItems: [ ...state.dataItems[dataItemKey].allLibraryItems, ...allLibraryItems ]
       }
     },
     haveDataItemsChanged: true
@@ -176,12 +186,15 @@ function planReducer (state = defaultState, action) {
     case Actions.PLAN_SET_ALL_LIBRARY_ITEMS_ADD:
       return setAllLibraryItemsAdd(state, action.payload.dataItemKey, action.payload.allLibraryItems)  
 
+    case Actions.PLAN_APPEND_ALL_LIBRARY_ITEMS:
+      return appendAllLibraryItems(state, action.payload.dataItemKey, action.payload.allLibraryItems)
+
     case Actions.PLAN_SET_HAVE_DATA_ITEMS_CHANGED:
       return setHaveDataItemsChanged(state, action.payload)
 
     case Actions.PLAN_SET_RESOURCE_ITEMS:
       return setResourceItems(state, action.payload.resourceItems, action.payload.pristineResourceItems) 
-      
+
     case Actions.PLAN_SET_IS_RESOURCE_SELECTION:
       return setIsResourceSelection(state, action.payload)
 
@@ -193,13 +206,13 @@ function planReducer (state = defaultState, action) {
 
     case Actions.PLAN_SET_SELECTED_PROJECT_ID:
       return setselectedProjectId(state, action.payload)
-      
+
     case Actions.PLAN_SET_IS_DELETING:
       return setIsDeleting(state, action.payload)
-      
+
     case Actions.PLAN_SET_PROJECT_MODE:
       return setProjectMode(state, action.payload)
-      
+
     case Actions.PLAN_SET_IS_DATASOURCE_EDITABLE:
       return setIsDataSourceEditable(state, action.payload)      
 

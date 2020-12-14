@@ -269,7 +269,10 @@ function createTag (tag) {
       .then(result => dispatch(
         loadTags ()
       ))
-      .catch((err) => console.error(err))
+      .catch((err) => {
+        console.error(err)
+        dispatch(httpErrorhandle(err))
+      })
   }
 }
 
@@ -279,7 +282,10 @@ function updateTag(updatedTag) {
       .then(result => dispatch(
         loadTags ()
       ))
-      .catch((err) => console.error(err))
+      .catch((err) => {
+        console.error(err)
+        dispatch(httpErrorhandle(err))
+      })
   }
 }
 
@@ -304,6 +310,48 @@ function setShowGlobalSettings (status){
   }
 }
 
+function askUserToConfirmBeforeDelete (title, text) {
+  return dispatch => {
+    return new Promise((resolve, reject) => {
+      swal({
+        title: `Delete ${title}?`,
+        text: `Are you sure you want to delete "${text}"?`,
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No'
+      }, (result) => {
+        if (result) {
+          resolve(true)
+        } else {
+          resolve(false)
+        }
+      })
+    })
+  }
+}
+
+function httpErrorhandle (err) {
+  return dispatch => {
+    swal({
+      title: err.data.error,
+      text: `ARO-Service returned status code ${err.status}`,
+      type: 'error'
+    })
+  }
+}
+
+function customErrorHandle (title, text, type) {
+  return dispatch => {
+    swal({
+      title: title,
+      text:  text,
+      type:  type
+    })
+  }
+}
+
 export default {
   broadcastMessage,
   loadReleaseNotes,
@@ -322,5 +370,8 @@ export default {
   setFlag,
   createTag,
   updateTag,
-  setShowGlobalSettings
+  setShowGlobalSettings,
+  askUserToConfirmBeforeDelete,
+  httpErrorhandle,
+  customErrorHandle
 }

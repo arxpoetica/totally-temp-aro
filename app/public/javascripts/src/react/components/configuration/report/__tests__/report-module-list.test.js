@@ -55,7 +55,7 @@ test('Click delete report', () => {
   expect(component).toMatchSnapshot()
 
   component.find('#btnDeleteReport1').simulate('click')
-  expect(mockDeleteReport).toBeCalledWith(1)
+  expect(mockDeleteReport).toBeCalledWith(1, 'plan_report')
   expect(component).toMatchSnapshot()
 })
 

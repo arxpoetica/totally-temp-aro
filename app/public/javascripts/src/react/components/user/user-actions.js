@@ -1,5 +1,6 @@
 import AroHttp from '../../common/aro-http'
 import Actions from '../../common/actions'
+import GlobalsettingsActions from '../global-settings/globalsettings-action'
 
 function loadAuthPermissions () {
   // Get the permission bits from aro-service
@@ -230,15 +231,14 @@ function registerUser (newUser) {
       AroHttp.post('/admin/users/registerWithoutPassword', serviceUser)
       .then((response) => {
         if(response.status === 200){
-          swal({
-            title: 'Success',
-            text:  'User Registered Successfully',
-            type: 'success'
-          })
+          dispatch(GlobalsettingsActions.customErrorHandle('Success', 'User Registered Successfully', 'success'))
           resolve(); 
         }
       })
-      .catch((err) => console.error(err))
+      .catch((err) => {
+        console.error(err)
+        dispatch(GlobalsettingsActions.customErrorHandle('Failed to Register user', 'ARO-Service returned status code 500', 'error'))
+      })
     })
     promise
     .then(function () { 
