@@ -681,7 +681,13 @@ class MapTileRenderer {
 
   highlightPolyline (feature, polylines) {
     var ishighlight = [...polylines].filter(function (polyline) {
-      if (feature.properties && feature.properties._data_type && feature.properties._data_type == 'fiber') { return polyline.link_id === feature.properties.link_id } else if (feature.properties && feature.properties._data_type && feature.properties._data_type == 'existing_fiber.') { return polyline.id === feature.properties.id } else if (feature.properties && feature.properties._data_type && feature.properties._data_type == 'edge') { return polyline.gid === feature.properties.gid }
+      if (feature.properties && feature.properties._data_type && feature.properties._data_type == 'fiber') {
+        return polyline.link_id === feature.properties.link_id 
+      } else if (feature.properties && feature.properties._data_type && feature.properties._data_type == 'existing_fiber.') { 
+        return polyline.id === feature.properties.id 
+      } else if (feature.properties && feature.properties._data_type && feature.properties._data_type == 'edge.fat') { 
+        return polyline.gid === feature.properties.gid 
+      }
     }).length > 0
 
     return ishighlight
