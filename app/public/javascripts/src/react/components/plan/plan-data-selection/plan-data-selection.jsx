@@ -114,7 +114,7 @@ export class PlanDataSelection extends Component {
                           options={optionsList}
                           hideSelectedOptions={false}
                           backspaceRemovesValue={false}
-                          isSearchable={false} 
+                          isSearchable={true} 
                           isClearable=''
                           isDisabled=''
                           placeholder="None Selected"
