@@ -36,7 +36,12 @@ function updateUserAccount (user) {
         type: Actions.USER_UPDATE_USER,
         payload: user
       }))
-      .catch((err) => console.error(err))
+      .catch((err) =>  {
+        // TODO: we have to come up with a strategy of global error handler
+        // and success message toast rather then message boxes
+        swal({ title: err.data.error, type: 'error' })
+        console.log(err)
+      })
   }
 }
 
