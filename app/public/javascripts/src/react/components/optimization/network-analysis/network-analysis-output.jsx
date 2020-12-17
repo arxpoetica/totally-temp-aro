@@ -7,6 +7,7 @@ import ReportsDownloadModal from '../reports/reports-download-modal.jsx'
 import NetworkAnalysisActions from './network-analysis-actions'
 import ReportActions from '../reports/reports-actions'
 import PlanStates from '../../plan/plan-states'
+import { findMean, findStandardDeviation } from '../../../common/view-utils'
 
 export class NetworkAnalysisOutput extends Component {
   constructor (props) {
@@ -74,16 +75,20 @@ export class NetworkAnalysisOutput extends Component {
 
   updateChartDefinition () {
     if (!this.props.chartReportDefinition) {
-      return // This can happen when updateChart() is called from a setTimeout(), and the properties change in the meantime
+      // This can happen when updateChart() is called from a setTimeout(),
+      // and the properties change in the meantime
+      return
     }
     var selectedUiDefinition = null
     if (!this.state.selectedUiDefinition) {
       selectedUiDefinition = this.props.chartReportDefinition.uiDefinition[0]
     } else {
-      selectedUiDefinition = this.props.chartReportDefinition.uiDefinition.filter(item => item.chartDefinition.name === this.state.selectedUiDefinition)[0]
+      selectedUiDefinition = this.props.chartReportDefinition.uiDefinition.filter(item => {
+        return item.chartDefinition.name === this.state.selectedUiDefinition
+      })[0]
     }
-    const copyOfSelectedUiDefinition = JSON.parse(JSON.stringify(selectedUiDefinition))
-    this.chartDefinition = this.buildChartDefinition(copyOfSelectedUiDefinition.chartDefinition, copyOfSelectedUiDefinition.dataModifiers, this.props.chartReport)
+    const { chartDefinition, dataModifiers } = JSON.parse(JSON.stringify(selectedUiDefinition))
+    this.chartDefinition = this.buildChartDefinition(chartDefinition, dataModifiers, this.props.chartReport)
     this.chartDefinitionForTesting = JSON.parse(JSON.stringify(this.chartDefinition))
   }
 
@@ -101,11 +106,22 @@ export class NetworkAnalysisOutput extends Component {
   }
 
   buildChartDefinition (rawChartDefinition, dataModifiers, chartData) {
-    // First, sort the report data
-    const sortedData = chartData.sort((a, b) => {
-      const multiplier = (dataModifiers.sortOrder === 'ascending') ? 1.0 : -1.0
-      return (a[dataModifiers.sortBy] - b[dataModifiers.sortBy]) * multiplier
-    })
+    const { name } = rawChartDefinition
+    const valuesOnly = chartData.map(datum => datum[name])
+    const mean = findMean(valuesOnly)
+    const deviation = findStandardDeviation(valuesOnly)
+    const offset = 2
+
+    const sortedData = chartData
+      // first, sort the report data
+      .sort((a, b) => {
+        const multiplier = (dataModifiers.sortOrder === 'ascending') ? 1.0 : -1.0
+        return (a[dataModifiers.sortBy] - b[dataModifiers.sortBy]) * multiplier
+      })
+      // next, filter where difference from the mean is offset
+      // times the standard deviation, for non-flat-lined graphs
+      .filter(datum => (datum[name] - mean) < (offset * deviation))
+
     this.populateSeriesValues(sortedData, rawChartDefinition, dataModifiers)
     this.populateAxesOptions(sortedData, rawChartDefinition, dataModifiers)
     this.populateTooltipOptions(rawChartDefinition, dataModifiers)

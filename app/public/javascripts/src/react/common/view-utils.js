@@ -26,3 +26,14 @@ export const hsvToRgb = (h, s, v) => {
   })
   return color
 }
+
+export const findMean = array => {
+  return array.reduce((a, b) => a + b, 0) / array.length || 0
+}
+
+// https://stackoverflow.com/questions/7343890/standard-deviation-javascript
+export const findStandardDeviation = array => {
+  const len = array.length
+  const mean = findMean(array)
+  return Math.sqrt(array.map(x => Math.pow(x - mean, 2)).reduce((a, b) => a + b) / len)
+}
