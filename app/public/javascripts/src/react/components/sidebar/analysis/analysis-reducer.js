@@ -2,7 +2,7 @@ import Actions from '../../../common/actions'
 
 const defaultState = {
   enumStrings: {},
-  networkNodeTypesEntity: [],
+  networkNodeTypesEntity: {},
   expertMode: {
     OPTIMIZATION_SETTINGS: '',
     MANUAL_PLAN_TARGET_ENTRY: '',
@@ -17,7 +17,8 @@ const defaultState = {
   scopeContextKeys: [],
   expertModeScopeContext: '',
   showRoicReportsModal: false,
-  roicResults: null
+  roicResults: null,
+  xAxisLabels: []
 }
 
 function setEnumStrings (state, enumStrings) {
@@ -74,6 +75,12 @@ function setROICResultsForPlan (state, roicResults) {
   }
 }
 
+function setXaxisLabels (state, xAxisLabels) {
+  return { ...state,
+    xAxisLabels: xAxisLabels
+  }
+}
+
 function AnalysisReducer (state = defaultState, action) {
   switch (action.type) {
 
@@ -102,7 +109,10 @@ function AnalysisReducer (state = defaultState, action) {
         return setShowRoicReportsModal(state, action.payload) 
         
       case Actions.ANALYSIS_MODE_SET_ROIC_RESULTS_FOR_PLAN:
-        return setROICResultsForPlan(state, action.payload)         
+        return setROICResultsForPlan(state, action.payload)   
+        
+      case Actions.ANALYSIS_MODE_SET_XAXIS_LABELS:
+        return setXaxisLabels(state, action.payload)         
 
     default:
       return state

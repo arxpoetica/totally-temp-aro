@@ -54,7 +54,7 @@ export class AnalysisMode extends Component {
 
     return (
       <div className="analysis-mode-container">
-        <h4 style={{textAlign: 'center', marginTop: '20px'}}>Analysis Type: {networkAnalysisType}</h4>
+        <h4 style={{textAlign: 'center', marginTop: '20px'}}>Analysis Type: {localAnalysisType.label}</h4>
 
         {/* INPUT Accordion */}
         <Card className={`card-collapse ${collapseCards === this.analysisModePanels.INPUT ? 'collapse-show' :''}`}>

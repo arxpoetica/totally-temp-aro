@@ -3,6 +3,7 @@ import reduxStore from '../../../../../redux-store'
 import wrapComponentWithProvider from '../../../../common/provider-wrapped-component'
 import RoicReportsSmall from './roic-reports-small.jsx'
 import RoicReportsLarge from './roic-reports-large.jsx'
+import AnalysisActions from '../analysis-actions'
 
 export class RoicReports extends Component {
   constructor (props) {
@@ -110,6 +111,9 @@ export class RoicReports extends Component {
           label: (tooltipItem, data) => this.formatYAxisValue(+tooltipItem.yLabel, [+tooltipItem.yLabel], calcType, 3)
         }
       },
+      legend: {
+        display: false
+      },
       scales: {
         yAxes: [
           {
@@ -152,8 +156,9 @@ export class RoicReports extends Component {
   }
 
   componentDidUpdate (prevProps) {
-    if(JSON.stringify(this.props) !== JSON.stringify(prevProps)) {
-      //this.digestData()
+    if(JSON.stringify(this.props.roicResults) !== JSON.stringify(prevProps.roicResults)) {
+      if(Object.entries(this.props.roicResults.roicAnalysis.components).length > 0)
+      this.digestData()
     }
   }
 
@@ -166,11 +171,12 @@ export class RoicReports extends Component {
     const aCurveKey = Object.keys(component)[0]
     const yearsCount = component[aCurveKey].values.length
 
-    this.xAxisLabels = []
+    let xAxisLabels = []
     for (var i = 0; i < yearsCount; ++i) {
-      this.xAxisLabels.push(currentYear + i)
+      xAxisLabels.push(currentYear + i)
     }
 
+    this.props.setXaxisLabels(xAxisLabels)
     // Some of the values have to be scaled (e.g. penetration should be in %)
     Object.keys(this.props.roicResults.roicAnalysis.components).forEach(componentKey => {
       const component = this.props.roicResults.roicAnalysis.components[componentKey]
@@ -184,8 +190,12 @@ export class RoicReports extends Component {
   }
 
   render () {
+    return this.props.roicResults === null ? null : this.renderRoicReports()
+  }
 
-    const {reportSize} = this.props;
+  renderRoicReports () {
+
+    const {reportSize, xAxisLabels} = this.props;
 
     return (
       <>
@@ -195,7 +205,7 @@ export class RoicReports extends Component {
             entityTypes={this.entityTypes}
             networkTypes={this.networkTypes}
             calcTypes={this.calcTypes}
-            //timeLabels={this.xAxisLabels}
+            timeLabels={xAxisLabels}
             datasetOverride={this.datasetOverride}
             graphOptions={this.graphOptions}
           />
@@ -207,7 +217,7 @@ export class RoicReports extends Component {
             entityTypes={this.entityTypes}
             networkTypes={this.networkTypes}
             calcTypes={this.calcTypes}
-            //timeLabels={this.xAxisLabels}
+            timeLabels={xAxisLabels}
             datasetOverride={this.datasetOverride}
             graphOptions={this.graphOptions}
           />
@@ -218,10 +228,12 @@ export class RoicReports extends Component {
 }
 
 const mapStateToProps = (state) => ({
-  roicResults: state.analysisMode.roicResults
+  roicResults: state.analysisMode.roicResults,
+  xAxisLabels: state.analysisMode.xAxisLabels
 })  
 
 const mapDispatchToProps = (dispatch) => ({
+  setXaxisLabels: (xAxisLabels) => dispatch(AnalysisActions.setXaxisLabels(xAxisLabels))
 })
 
 const RoicReportsComponent = wrapComponentWithProvider(reduxStore, RoicReports, mapStateToProps, mapDispatchToProps)

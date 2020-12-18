@@ -1,7 +1,10 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
+import {Line} from 'react-chartjs-2';
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat
+const currencyFormatter = new Intl.NumberFormat('en-US')
+
 const numberformatter_1 = new Intl.NumberFormat('en-US', {
   minimumFractionDigits: 1
 })
@@ -17,9 +20,11 @@ export class RoicReportsLarge extends Component {
     this.config = config // Ugh - A global from a time long ago!
 
     this.state = {
+      FIBER_STRINGS: this.props.enumStrings['com.altvil.aro.service.entity']['FiberType'],
+      CABLE_CONSTRUCTION_STRINGS: this.props.enumStrings['com.altvil.interfaces']['CableConstructionEnum'],
       selectedNetworkType: this.props.networkTypes.filter(item => item.id === 'planned_network')[0],
-      selectedEntityType: this.props.entityTypes.filter(item => item.id === 'network')[0],
-      selectedCategory: {},
+      selectedEntityType: this.props.entityTypes.filter(item => item.id === 'medium')[0],
+      selectedCategory: this.props.categories[0],
       shouldRenderCharts: false
     }
   }
@@ -30,8 +35,13 @@ export class RoicReportsLarge extends Component {
 
   render () {
 
-    const {networkTypes, entityTypes, categories, roicResults} = this.props
-    const {selectedNetworkType, selectedEntityType, selectedCategory, shouldRenderCharts} = this.state
+    const {roicResults, networkEquipment, networkNodeTypesEntity, networkTypes,
+      categories, entityTypes, graphOptions} = this.props
+
+    const {FIBER_STRINGS, CABLE_CONSTRUCTION_STRINGS, selectedEntityType,
+      selectedNetworkType, selectedCategory, shouldRenderCharts} = this.state
+
+      //console.log('2', this.props.timeLabels)
 
     return (
       <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
@@ -77,41 +87,49 @@ export class RoicReportsLarge extends Component {
                 <tbody>
                   {roicResults.networkStatistics.map((networkStatistic, index) => { 
                     return (
-                      <React.Fragment key={index}>
-                      {networkStatistic.networkStatisticType === 'roic_npv' &&
-                        <tr>
-                          {networkStatistic.networkStatisticType === 'roic_npv' &&
-                            <td><strong>NPV</strong></td>
-                          }
-                          {networkStatistic.networkStatisticType === 'roic_npv' &&
-                            this.config.currency_symbol+numberformatter_1.format(networkStatistic.value / 1000)+" K" 
-                          }
-                        </tr>
-                      }
-                    </React.Fragment>
+                      <tr key={index}>
+                        {networkStatistic.networkStatisticType === 'roic_npv' &&
+                          <>
+                            <td>
+                              {networkStatistic.networkStatisticType === 'roic_npv' &&
+                                <strong>NPV</strong>
+                              }
+                            </td>
+                            <td>
+                              {networkStatistic.networkStatisticType === 'roic_npv' &&
+                                this.config.currency_symbol+currencyFormatter.format((networkStatistic.value / 1000).toFixed(1))+" K" 
+                              }
+                            </td>
+                          </>
+                        }
+                      </tr>
                     )}
                   )}
 
                   {roicResults.networkStatistics.map((networkStatistic, index) => { 
                     return (
-                      <React.Fragment key={index}>
-                      {networkStatistic.networkStatisticType === 'roic_irr' &&
-                        <tr>
-                          {networkStatistic.networkStatisticType === 'roic_irr' &&
-                            <td><strong>IRR</strong></td>
-                          }
-                          {networkStatistic.networkStatisticType === 'roic_irr' &&
-                            numberformatter_1.format(networkStatistic.value * 100)+" %" 
-                          }
-                        </tr>
-                      }
-                      </React.Fragment>
+                      <tr key={index}>
+                        {networkStatistic.networkStatisticType === 'roic_irr' &&
+                          <>
+                            <td>
+                              {networkStatistic.networkStatisticType === 'roic_irr' &&
+                                <strong>IRR</strong>
+                              }
+                              </td>
+                              <td>
+                              {networkStatistic.networkStatisticType === 'roic_irr' &&
+                                (networkStatistic.value * 100).toFixed(1)+" %" 
+                              }
+                            </td>
+                          </>
+                        }
+                      </tr>
                     )}
                   )}              
 
                   <tr>
                     <td><strong>Total Capex</strong></td>
-                    <td>{this.config.currency_symbol+numberformatter_1.format(roicResults.priceModel.totalCost / 1000)+" K"}</td>
+                    <td>{this.config.currency_symbol+currencyFormatter.format((roicResults.priceModel.totalCost / 1000).toFixed(1))+" K"}</td>
                   </tr>
 
                   <tr>
@@ -119,17 +137,15 @@ export class RoicReportsLarge extends Component {
                   </tr>
                   {roicResults.priceModel.fiberCosts.map((fiberCost, index) => { 
                     return (
-                      <React.Fragment key={index}>
-                        <tr>
-                          <td className="indent-1 text-capitalize">
-                            {FIBER_STRINGS[fiberCost.fiberType]} - 
-                            {CABLE_CONSTRUCTION_STRINGS[fiberCost.constructionType]}
-                            ({numberformatter_0.format(fiberCost.lengthMeters * this.config.length.meters_to_length_units)}
-                            {this.config.length.length_units})
-                          </td>
-                          <td>{this.config.currency_symbol+numberformatter_1.format(fiberCost.totalCost / 1000)+" K"}</td>
-                        </tr>
-                      </React.Fragment>
+                      <tr key={index}>
+                      <td className="indent-1 text-capitalize">
+                        {FIBER_STRINGS[fiberCost.fiberType]} -&nbsp;
+                        {CABLE_CONSTRUCTION_STRINGS[fiberCost.edgeFeatureType + "." + fiberCost.edgeConstructionType]}
+                        ({Math.round((fiberCost.lengthMeters * this.config.length.meters_to_length_units))}&nbsp;
+                        {this.config.length.length_units})
+                      </td>
+                      <td>{this.config.currency_symbol+currencyFormatter.format((fiberCost.totalCost / 1000).toFixed(1))+" K"}</td>
+                    </tr>
                     )}
                   )}  
 
@@ -138,14 +154,12 @@ export class RoicReportsLarge extends Component {
                   </tr>
                   {roicResults.priceModel.equipmentCosts.map((equipmentCost, index) => { 
                     return (
-                      <React.Fragment key={index}>
-                        <tr>
-                          <td className="indent-1 text-capitalize">
-                            {networkEquipment.equipments[equipmentCost.nodeType].label || networkNodeTypesEntity[equipmentCost.nodeType]} (x{numberformatter_0.format(equipmentCost.quantity)})
-                          </td>
-                          <td>{this.config.currency_symbol+numberformatter_1.format(equipmentCost.total / 1000)+" K"}</td>
-                        </tr>
-                      </React.Fragment>
+                      <tr key={index}>
+                        <td className="indent-1 text-capitalize">
+                          {networkNodeTypesEntity[equipmentCost.nodeType] || networkEquipment.equipments[equipmentCost.nodeType].label} (x{numberformatter_0.format(equipmentCost.quantity)})
+                        </td>
+                        <td>{this.config.currency_symbol+numberformatter_1.format((equipmentCost.total / 1000).toFixed(1))+" K"}</td>
+                      </tr>
                     )}
                   )}
 
@@ -153,17 +167,15 @@ export class RoicReportsLarge extends Component {
                   {this.props.plannedNetworkDemand !== undefined
                     ? Object.entries(this.props.plannedNetworkDemand.locationDemand.entityDemands).map(([ key, value ], index)  => { 
                         return (
-                          <React.Fragment key={index}>
-                            <tr>
-                              {key === 'small' || key === 'medium' || key === 'large' &&
-                                <td className="indent-1 text-capitalize"> {key} Business </td>
-                              }
-                              {key === 'household' || key === 'celltower' &&
-                                <td className="indent-1 text-capitalize"> {key} </td>
-                              }
-                              <td> {numberformatter_0.format(value.rawCoverage)}</td>
-                            </tr> 
-                          </React.Fragment>
+                          <tr key={index}>
+                            {key === 'small' || key === 'medium' || key === 'large' &&
+                              <td className="indent-1 text-capitalize"> {key} Business </td>
+                            }
+                            {key === 'household' || key === 'celltower' &&
+                              <td className="indent-1 text-capitalize"> {key} </td>
+                            }
+                            <td> {numberformatter_0.format(value.rawCoverage)}</td>
+                          </tr> 
                         )
                       })
                     : <tr></tr>
@@ -187,19 +199,15 @@ export class RoicReportsLarge extends Component {
                     <div key={index} style={{flex: '1 1 auto', width: '100%', position: 'relative'}}>
                       <div style={{display: 'flex', flexDirection: 'column', width: '100%', height: '100%', position: 'absolute'}}>
                         <div style={{flex: '1 1 auto'}}>
-                          {roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' + calcType.id].values && shouldRenderCharts &&
-                            <canvas 
-                              class="chart chart-line"
-                              style={{width: '100%', height: '90%'}}
-                              chart-data={roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' + calcType.id].values}
-                              //chart-labels={timeLabels}
-                              chart-series={this.series}
-                              chart-options={graphOptions[calcType.id]}
-                              chart-dataset-override={datasetOverride}>
-                            </canvas>
+                          {roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' + calcType.id] !== undefined && shouldRenderCharts &&
+                            <Line 
+                              display={'block'}
+                              data={this.updateDataSet(calcType)}
+                              options={graphOptions[calcType.id]} 
+                            />
                           }
                           {
-                            !(roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' + calcType.id].values) &&
+                            roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' + calcType.id] === undefined &&
                             <div className="alert bg-light border-info text-center" style={{margin: '0px 20%'}}>
                               No data
                             </div>
@@ -220,19 +228,15 @@ export class RoicReportsLarge extends Component {
                     <div key={index} style={{flex: '1 1 auto', width: '100%', position: 'relative'}}>
                       <div style={{display: 'flex', flexDirection: 'column', width: '100%', height: '100%', position: 'absolute'}}>
                         <div style={{flex: '1 1 auto'}}>
-                          {roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' + calcType.id].values && shouldRenderCharts &&
-                            <canvas 
-                              class="chart chart-line"
-                              style={{width: '100%', height: '90%'}}
-                              chart-data={roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' + calcType.id].values}
-                              //chart-labels={timeLabels}
-                              chart-series={this.series}
-                              chart-options={graphOptions[calcType.id]}
-                              chart-dataset-override={datasetOverride}>
-                            </canvas>
+                          {roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' + calcType.id] !== undefined && shouldRenderCharts &&
+                            <Line 
+                              display={'block'}
+                              data={this.updateDataSet(calcType)}
+                              options={graphOptions[calcType.id]} 
+                            />
                           }
                           {
-                            !(roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' + calcType.id].values) &&
+                            roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' + calcType.id] === undefined &&
                             <div className="alert bg-light border-info text-center" style={{margin: '0px 20%'}}>
                               No data
                             </div>
@@ -249,6 +253,24 @@ export class RoicReportsLarge extends Component {
         }         
       </div>
     )
+  }
+
+  updateDataSet (calcType) {
+
+    const {roicResults, datasetOverride, timeLabels} = this.props
+    const {selectedEntityType, selectedNetworkType} = this.state
+
+    return {
+      labels:timeLabels,
+      datasets: [
+        {
+          data: roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' + calcType.id].values,
+          fill: datasetOverride.fill,
+          pointBackgroundColor: '#97bbcd',
+          pointHoverBackgroundColor: '#000000'
+        }
+      ]
+    }
   }
 
   handleNetworkTypeChange (e) {
@@ -274,6 +296,9 @@ export class RoicReportsLarge extends Component {
 
 const mapStateToProps = (state) => ({
   roicResults: state.analysisMode.roicResults,
+  enumStrings: state.analysisMode.enumStrings,
+  networkEquipment: state.mapLayers.networkEquipment,
+  networkNodeTypesEntity: state.analysisMode.networkNodeTypesEntity
 })  
 
 const mapDispatchToProps = (dispatch) => ({

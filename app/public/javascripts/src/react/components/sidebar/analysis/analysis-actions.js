@@ -171,6 +171,13 @@ function loadROICResultsForPlan(planId) {
   }
 }
 
+function setXaxisLabels (xAxisLabels){
+  return {
+    type: Actions.ANALYSIS_MODE_SET_XAXIS_LABELS,
+    payload: xAxisLabels
+  }
+}
+
 export default {
   setEnumStrings,
   loadNetworkNodeTypesEntity,
@@ -180,5 +187,6 @@ export default {
   setExpertMode,
   setExpertModeTypes,
   setShowRoicReportsModal,
-  loadROICResultsForPlan
+  loadROICResultsForPlan,
+  setXaxisLabels
 }
