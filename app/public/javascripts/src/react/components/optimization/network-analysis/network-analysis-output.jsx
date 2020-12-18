@@ -7,7 +7,6 @@ import ReportsDownloadModal from '../reports/reports-download-modal.jsx'
 import NetworkAnalysisActions from './network-analysis-actions'
 import ReportActions from '../reports/reports-actions'
 import PlanStates from '../../plan/plan-states'
-import { findMean, findStandardDeviation } from '../../../common/view-utils'
 
 export class NetworkAnalysisOutput extends Component {
   constructor (props) {
@@ -107,20 +106,22 @@ export class NetworkAnalysisOutput extends Component {
 
   buildChartDefinition (rawChartDefinition, dataModifiers, chartData) {
     const { name } = rawChartDefinition
-    const valuesOnly = chartData.map(datum => datum[name])
-    const mean = findMean(valuesOnly)
-    const deviation = findStandardDeviation(valuesOnly)
-    const offset = 2
-
     const sortedData = chartData
-      // first, sort the report data
+      // BIG HONKIN' NOTE:
+      // This filter code was made at the behest of Sir Adam W. Musial of New York fame.
+      // Essentially upward outlier data above the 200% threshold is "not needed" for
+      // presentation. THIS CHANGE SHOULD ARGUABLY EXIST AT THE SERVICE LAYER.
+      // But since the user can still download ALL data changes, this is a
+      // "presentational bandaid" -- only for the sake of filtering out data that
+      // end users will need. If the request is ever made to fix this again, we
+      // should discuss it at a service level, and not a presentation level.
+      // Sincerely, Robert ⚔️ Excalibur ⚔️ Hall
+      .filter(datum => datum[name] < 2)
+      // next, sort the report data
       .sort((a, b) => {
         const multiplier = (dataModifiers.sortOrder === 'ascending') ? 1.0 : -1.0
         return (a[dataModifiers.sortBy] - b[dataModifiers.sortBy]) * multiplier
       })
-      // next, filter where difference from the mean is offset
-      // times the standard deviation, for non-flat-lined graphs
-      .filter(datum => (datum[name] - mean) < (offset * deviation))
 
     this.populateSeriesValues(sortedData, rawChartDefinition, dataModifiers)
     this.populateAxesOptions(sortedData, rawChartDefinition, dataModifiers)
