@@ -255,7 +255,17 @@ class LocationEditorController {
       var locationObject = this.formatLocationForService(selectedMapObject.objectId)
       this.$http.put(`/service/library/transaction/${this.currentTransaction.id}/features`, locationObject)
         .then((result) => {
+          if(result.status === 200){
+            swal({
+              title: 'Success',
+              text:  'Properties Saved Successfully',
+              type: 'success'
+            })
+          }
           this.objectIdToProperties[selectedMapObject.objectId].isDirty = false
+          // To set data from server and close modal
+          this.objectIdToMapObject[this.selectedMapObject.objectId].feature = result.data
+          this.modalHide()
           this.$timeout()
         })
         .catch((err) => console.error(err))
@@ -383,8 +393,15 @@ class LocationEditorController {
   }
 
   deleteLocationAttributes (index, key, val) {
-    var keypairToDelete = Object.keys(this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes)[index]
-    delete this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes[keypairToDelete]
+    this.askUserToConfirmBeforeDelete(key)
+		.then((okToDelete) => {
+			if (okToDelete) {
+        this.markSelectedLocationPropertiesDirty()
+        var keypairToDelete = Object.keys(this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes)[index]
+        delete this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes[keypairToDelete]
+        this.$timeout()
+      }
+    })
   }
 
   addLocationAttributes () {
@@ -454,6 +471,26 @@ class LocationEditorController {
       locationCategory = this.objectIdToProperties[this.selectedMapObject.objectId].locationCategory
     }
     return this.locationTypeToIconUrl[locationCategory]
+  }
+
+  askUserToConfirmBeforeDelete (key) {
+    return new Promise((resolve, reject) => {
+      swal({
+        title: `Delete Attribute?`,
+        text: `Are you sure you want to delete "${key}"?`,
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No'
+      }, (result) => {
+        if (result) {
+          resolve(true)
+        } else {
+          resolve(false)
+        }
+      })
+    })
   }
 
   mapStateToThis (reduxState) {
