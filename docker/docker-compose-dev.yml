@@ -17,6 +17,7 @@ services:
             - "15672:15672"
     service:
         image: avco/aro-service:latest
+        build: ../../aro-service/docker
         expose:
             - "8080"
         links:
