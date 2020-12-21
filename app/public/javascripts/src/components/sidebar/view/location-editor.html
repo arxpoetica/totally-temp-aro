@@ -152,7 +152,7 @@
       </button>
       <button class="btn btn-block btn-primary"
         ng-disabled="(($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId == $ctrl.WorkflowState.LOCKED.id) || ($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId == $ctrl.WorkflowState.INVALIDATED.id))"
-        ng-click="$ctrl.isExpandLocAttributes = true">
+        ng-click="$ctrl.isExpandLocAttributes = true; $ctrl.loadAttributesFromServer()">
         <i class="fa fa-pencil"></i>&nbsp;&nbsp;Expand
       </button>
     </div>

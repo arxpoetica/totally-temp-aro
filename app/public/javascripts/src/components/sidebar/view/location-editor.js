@@ -132,7 +132,9 @@ class LocationEditorController {
         // We now have objectIdToMapObject populated.
         features.forEach((feature) => {
           var locationProperties = new LocationProperties(WorkflowState[feature.workflowState].id)
-          locationProperties.numberOfHouseholds = feature.attributes.number_of_households
+          if(feature.attributes.number_of_households !== undefined) {
+            locationProperties.numberOfHouseholds = feature.attributes.number_of_households
+          }
           this.objectIdToProperties[feature.objectId] = locationProperties
         })
       })
@@ -263,8 +265,7 @@ class LocationEditorController {
             })
           }
           this.objectIdToProperties[selectedMapObject.objectId].isDirty = false
-          // To set data from server and close modal
-          this.objectIdToMapObject[this.selectedMapObject.objectId].feature = result.data
+          // To close modal after save
           this.modalHide()
           this.$timeout()
         })
@@ -491,6 +492,19 @@ class LocationEditorController {
         }
       })
     })
+  }
+
+  loadAttributesFromServer () {
+    if (this.selectedMapObject) {
+      this.$http.get(`/service/library/transaction/${this.currentTransaction.id}/features/${this.selectedMapObject.objectId}`)
+        .then((result) => {
+          this.objectIdToMapObject[this.selectedMapObject.objectId].feature = result.data
+          this.objectIdToProperties[this.selectedMapObject.objectId].isDirty = false
+          this.objectIdToProperties[this.selectedMapObject.objectId].numberOfHouseholds = result.data.attributes.number_of_households || 1
+          this.$timeout()
+        })
+        .catch((err) => console.error(err))
+    }
   }
 
   mapStateToThis (reduxState) {
