@@ -222,7 +222,7 @@ export class ResourceEditor extends Component {
 								</div>                   
 							</div>
 						</div>
-					}       
+					}
 					<>
 						{
 							this.state.clickedResource === 'Competition System' &&

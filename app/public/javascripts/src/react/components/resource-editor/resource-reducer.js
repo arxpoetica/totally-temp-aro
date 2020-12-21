@@ -5,10 +5,9 @@ import Actions from '../../common/actions'
 	const perPage = 10
 	
 	const ResourceKey = {
-		price_book: true,
 		rate_reach_manager: true,
 		competition_manager: true
-	};
+	}
 
 	const defaultState = {
 		resourceTypes: null,
@@ -116,10 +115,11 @@ import Actions from '../../common/actions'
     }
   }
 
-  function setcanMakeNewFilter (state,filterText) {
-    let isMakeNewFilter =  ResourceKey.hasOwnProperty(filterText)
-    return { ...state,
-      isMakeNewFilter: isMakeNewFilter
+  function setCanMakeNewFilter (state, filterText) {
+    const isMakeNewFilter =  ResourceKey.hasOwnProperty(filterText)
+    return {
+      ...state,
+      isMakeNewFilter: isMakeNewFilter,
     }
   }
 
@@ -318,7 +318,7 @@ import Actions from '../../common/actions'
 				return searchManagers(state, action.payload)
 
 			case Actions.RESOURCE_EDITOR_CAN_MAKE_NEW_FILTER:
-				return setcanMakeNewFilter(state, action.payload)  
+				return setCanMakeNewFilter(state, action.payload)  
 
 			case Actions.RESOURCE_EDITOR_IS_RESOURCE_EDITOR:
 				return setIsResourceEditor(state, action.payload)   
