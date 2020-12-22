@@ -395,14 +395,15 @@ class LocationEditorController {
 
   deleteLocationAttributes (index, key, val) {
     this.askUserToConfirmBeforeDelete(key)
-		.then((okToDelete) => {
-			if (okToDelete) {
-        this.markSelectedLocationPropertiesDirty()
-        var keypairToDelete = Object.keys(this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes)[index]
-        delete this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes[keypairToDelete]
-        this.$timeout()
-      }
-    })
+      .then((okToDelete) => {
+        if (okToDelete) {
+          this.markSelectedLocationPropertiesDirty()
+          const { attributes } = this.objectIdToMapObject[this.selectedMapObject.objectId].feature
+          const keypairToDelete = Object.keys(attributes)[index]
+          delete this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes[keypairToDelete]
+          this.$timeout()
+        }
+      })
   }
 
   addLocationAttributes () {
