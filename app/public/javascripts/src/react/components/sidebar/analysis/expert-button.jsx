@@ -41,7 +41,7 @@ export class expertButton extends Component {
 
    // expert mode refactor
    executeManualPlanTargetsQuery () {
-    var query = this.formatExpertModeQuery(this.props.expertMode[this.props.selectedExpertMode], this.props.expertModeScopeContext)
+    let query = this.formatExpertModeQuery(this.props.expertMode[this.props.selectedExpertMode], this.props.expertModeScopeContext)
 
     AroHttp.post('/locations/getLocationIds', { query: query })
       .then((result) => {
@@ -54,8 +54,8 @@ export class expertButton extends Component {
           this.props.setSelectionTypeById(SelectionModes.SELECTED_AREAS)
         }
 
-        var addPlanTargets = { locations: new Set(), serviceAreas: new Set() }
-        var removePlanTargets = { locations: new Set(), serviceAreas: new Set() }
+        let addPlanTargets = { locations: new Set(), serviceAreas: new Set() }
+        let removePlanTargets = { locations: new Set(), serviceAreas: new Set() }
         if (selectedExpertMode === expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].id) {
           result.data.forEach((location) => {
             if (reduxPlanTargets.locations.has(+location)) {
@@ -85,7 +85,7 @@ export class expertButton extends Component {
   }
 
   formatExpertModeQuery (string, replaceWithobject) {
-    var query
+    let query
     query = format(string, replaceWithobject)
     return query;
   }

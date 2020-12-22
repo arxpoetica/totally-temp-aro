@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
-import reduxStore from '../../../../../redux-store'
-import wrapComponentWithProvider from '../../../../common/provider-wrapped-component'
+import { connect } from 'react-redux'
 import ReportsDownloadModal from '../../../optimization/reports/reports-download-modal.jsx'
 import ReportsActions from '../../../optimization/reports/reports-actions'
 import CommonRoicReports from '../roic-reports/common-roic-reports.jsx'
@@ -60,5 +59,5 @@ const mapDispatchToProps = (dispatch) => ({
   showRoicReportsModal: () => dispatch(AnalysisActions.setShowRoicReportsModal(true))
 })
 
-const NetWorkBuildOutputComponent = wrapComponentWithProvider(reduxStore, NetWorkBuildOutput, mapStateToProps, mapDispatchToProps)
+const NetWorkBuildOutputComponent = connect(mapStateToProps, mapDispatchToProps)(NetWorkBuildOutput)
 export default NetWorkBuildOutputComponent

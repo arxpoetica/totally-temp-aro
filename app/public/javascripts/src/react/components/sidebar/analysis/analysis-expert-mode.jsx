@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
-import reduxStore from '../../../../redux-store'
-import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
+import { connect } from 'react-redux'
 import AnalysisActions from './analysis-actions'
 import { createSelector } from 'reselect'
 import ToolBarActions from '../../header/tool-bar-actions'
@@ -63,22 +62,22 @@ export class AnalysisExpertMode extends Component {
   }
 
   handleOptimizationSettings (e) {
-    var expertMode =  this.state.expertMode;
+    let expertMode =  this.state.expertMode;
     expertMode['OPTIMIZATION_SETTINGS'] = e.target.value
     this.setState({expertMode: expertMode})
     this.props.setExpertMode(JSON.parse(JSON.stringify(expertMode))) // To set the changed 'OPTIMIZATION_SETTINGS' in redux
   }
 
   validateExpertModeQuery (e) {
-    var expertMode =  this.state.expertMode;
-    var selectedExpertMode = this.props.selectedExpertMode
+    let expertMode =  this.state.expertMode;
+    let selectedExpertMode = this.props.selectedExpertMode
 
     expertMode[selectedExpertMode]= e.target.value
     this.setState({expertMode: expertMode})
     this.props.setExpertMode(JSON.parse(JSON.stringify(expertMode)))
 
-    var hasExcludeTerm = false
-    var excludeTerms = ['delete', 'drop', 'update', 'alter', 'insert', 'call', 'commit', 'create']
+    let hasExcludeTerm = false
+    let excludeTerms = ['delete', 'drop', 'update', 'alter', 'insert', 'call', 'commit', 'create']
     excludeTerms.forEach((term) => {
       if (this.state.expertMode[selectedExpertMode].toLowerCase().indexOf(term) > -1) hasExcludeTerm = true
     })
@@ -116,5 +115,5 @@ const mapDispatchToProps = (dispatch) => ({
   setExpertModeTypes : (expertModeTypes) => dispatch(AnalysisActions.setExpertModeTypes(expertModeTypes))
 })
 
-const AnalysisExpertModeComponent = wrapComponentWithProvider(reduxStore, AnalysisExpertMode, mapStateToProps, mapDispatchToProps)
+const AnalysisExpertModeComponent = connect(mapStateToProps, mapDispatchToProps)(AnalysisExpertMode)
 export default AnalysisExpertModeComponent

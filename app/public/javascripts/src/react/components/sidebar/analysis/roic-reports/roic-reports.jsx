@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
-import reduxStore from '../../../../../redux-store'
-import wrapComponentWithProvider from '../../../../common/provider-wrapped-component'
+import { connect } from 'react-redux'
 import RoicReportsSmall from './roic-reports-small.jsx'
 import RoicReportsLarge from './roic-reports-large.jsx'
 import AnalysisActions from '../analysis-actions'
@@ -172,7 +171,7 @@ export class RoicReports extends Component {
     const yearsCount = component[aCurveKey].values.length
 
     let xAxisLabels = []
-    for (var i = 0; i < yearsCount; ++i) {
+    for (let i = 0; i < yearsCount; ++i) {
       xAxisLabels.push(currentYear + i)
     }
 
@@ -236,5 +235,5 @@ const mapDispatchToProps = (dispatch) => ({
   setXaxisLabels: (xAxisLabels) => dispatch(AnalysisActions.setXaxisLabels(xAxisLabels))
 })
 
-const RoicReportsComponent = wrapComponentWithProvider(reduxStore, RoicReports, mapStateToProps, mapDispatchToProps)
+const RoicReportsComponent = connect(mapStateToProps, mapDispatchToProps)(RoicReports)
 export default RoicReportsComponent

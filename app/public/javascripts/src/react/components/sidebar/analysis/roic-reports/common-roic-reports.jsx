@@ -4,12 +4,6 @@ import RoicReports from './roic-reports.jsx'
 import AnalysisActions from '../analysis-actions'
 
 export class CommonRoicReports extends Component {
-  constructor (props) {
-    super(props)
-
-    this.state = {
-    }
-  }
 
   componentDidUpdate (prevProps){
     if(JSON.stringify(this.props) !== JSON.stringify(prevProps)){
@@ -21,12 +15,9 @@ export class CommonRoicReports extends Component {
   }
 
   render () {
-
     return (
       // Render Components based on reportSize
-      <RoicReports
-        reportSize={this.props.reportSize}
-      />
+      <RoicReports reportSize={this.props.reportSize} />
     )
   }
 

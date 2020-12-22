@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import { Modal, ModalBody, ModalFooter } from 'reactstrap';
 import AnalysisActions from '../analysis-actions'
 import CommonRoicReports from '../roic-reports/common-roic-reports.jsx'
 

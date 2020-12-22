@@ -6,7 +6,6 @@ import './analysis-mode.css'
 import ReportsActions from '../../optimization/reports/reports-actions'
 import NetworkOptimizationActions from '../../optimization/network-optimization/network-optimization-actions'
 import NetworkAnalysisTypes from '../..//optimization/network-optimization/network-analysis-types'
-import ReactConstants from '../../../common/constants' // ToDo: merge constants, put in Redux?
 import CoverageButton from '../../coverage/coverage-button.jsx'
 import NetworkOptimizationInput from '../../optimization/network-optimization/network-optimization-input.jsx'
 import CoverageInitializer from '../../coverage/coverage-initializer.jsx'
@@ -40,7 +39,7 @@ export class AnalysisMode extends Component {
   }
 
   componentDidMount () {
-    var initAnalysisType = this.state.NetworkAnalysisTypes[0]
+    let initAnalysisType = this.state.NetworkAnalysisTypes[0]
     this.state.NetworkAnalysisTypes.forEach(analysisType => {
       if (analysisType.id === this.props.networkAnalysisType) initAnalysisType = analysisType
     })
@@ -155,10 +154,6 @@ export class AnalysisMode extends Component {
         return <CoverageButton/>
       case 'RFP':
         return <RfpButton/>
-      case 'NETWORK_PLAN':
-        return ''
-      case 'NETWORK_ANALYSIS':
-        return '' 
       case 'EXPERT_MODE':
         return <ExpertButton/>               
       default:
@@ -171,7 +166,7 @@ export class AnalysisMode extends Component {
   }
 
   onAnalysisTypeChange (e) {
-    var localAnalysisTypeId = e.target.value
+    let localAnalysisTypeId = e.target.value
     this.state.NetworkAnalysisTypes.forEach(analysisType => {
       if (analysisType.id === localAnalysisTypeId) this.setState({localAnalysisType: analysisType});
     })
@@ -185,15 +180,16 @@ export class AnalysisMode extends Component {
 
   // ToDo: this is also in network-optimization-input.jsx
   areControlsEnabled () {
-    return (this.props.planState === ReactConstants.PLAN_STATE.START_STATE) || (this.props.planState === ReactConstants.PLAN_STATE.INITIALIZED)
+    return (this.props.currentPlanState === this.props.planStateCons.START_STATE) || (this.props.currentPlanState === this.props.planStateCons.INITIALIZED)
   }
 }
 
 const mapStateToProps = (state) => ({
   coverageReport: state.coverage.report,
   networkAnalysisType: state.optimization.networkOptimization.optimizationInputs.analysis_type,
-  planState: state.plan.activePlan.planState,
+  currentPlanState: state.plan.activePlan.planState,
   activePlan: state.plan.activePlan,
+  planStateCons: state.analysisMode.planStateCons
 }) 
 
 const mapDispatchToProps = (dispatch) => ({

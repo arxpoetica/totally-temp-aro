@@ -2,7 +2,7 @@ import AroHttp from '../../../common/aro-http'
 import Actions from '../../../common/actions'
 import PlanActions from '../../plan/plan-actions'
 
-function setEnumStrings (enumStrings){
+function setEnumStrings (enumStrings) {
   return {
     type: Actions.ANALYSIS_MODE_ENUM_STRINGS,
     payload: enumStrings
@@ -15,7 +15,7 @@ function loadNetworkNodeTypesEntity () {
       AroHttp.get('/service/odata/NetworkNodeTypesEntity')
         .then((response) => {
           if (response.status >= 200 && response.status <= 299) {
-            var networkNodeTypesEntity = {}
+            let networkNodeTypesEntity = {}
             response.data.forEach((entityType) => {
               networkNodeTypesEntity[entityType.name] = entityType.description
             })
@@ -33,7 +33,7 @@ function loadNetworkNodeTypesEntity () {
 }
 
   // optimization services
-  var modifyDialogResult = Object.freeze({
+  const modifyDialogResult = Object.freeze({
     CANCEL: 0,
     OVERWRITE: 1
   })
@@ -41,10 +41,10 @@ function loadNetworkNodeTypesEntity () {
   // also used by ring edit and r-network-optimization-input
   function handleModifyClicked(plan)  {
     return dispatch => {
-      var currentPlan = plan
+      let currentPlan = plan
       if (currentPlan.ephemeral) {
         // This is an ephemeral plan. Don't show any dialogs to the user, simply copy this plan over to a new ephemeral plan
-        var url = `/service/v1/plan-command/copy?source_plan_id=${currentPlan.id}&is_ephemeral=${currentPlan.ephemeral}`
+        let url = `/service/v1/plan-command/copy?source_plan_id=${currentPlan.id}&is_ephemeral=${currentPlan.ephemeral}`
         return AroHttp.post(url, {})
           .then((result) => {
             if (result.status >= 200 && result.status <= 299) {
@@ -64,7 +64,8 @@ function loadNetworkNodeTypesEntity () {
               return AroHttp.delete(`/service/v1/plan/${currentPlan.id}/optimization-state`)
                 .then(() => AroHttp.get(`/service/v1/plan/${currentPlan.id}/optimization-state`))
                 .then(result => {
-                  dispatch(PlanActions.setActivePlan(result.data))
+                  currentPlan.planState = result.data
+                  dispatch(PlanActions.setActivePlan(currentPlan))
                 })
                 .catch(err => console.error(err))
             }
@@ -77,7 +78,7 @@ function loadNetworkNodeTypesEntity () {
     }
   }
 
-  function showModifyQuestionDialog() {
+  function showModifyQuestionDialog () {
     return new Promise((resolve, reject) => {
       swal({
         title: '',
@@ -96,18 +97,18 @@ function loadNetworkNodeTypesEntity () {
   }
 
 
-function setSelectedExpertMode(selectedExpertMode){
+function setSelectedExpertMode (selectedExpertMode) {
   return {
     type: Actions.ANALYSIS_MODE_SELECTED_EXPERT_MODE,
     payload: selectedExpertMode
   }
 }
 
-function getExpertModeScopeContext(plan) {
+function getExpertModeScopeContext (plan) {
   return dispatch => {
     AroHttp.get(`/service/v1/plan/${plan.id}/scope-context`)
     .then((result) => {
-      var expertModeScopeContext = result.data
+      let expertModeScopeContext = result.data
       dispatch({
         type: Actions.ANALYSIS_MODE_EXPERT_MODE_SCOPE_CONTEXT,
         payload: expertModeScopeContext
@@ -117,12 +118,12 @@ function getExpertModeScopeContext(plan) {
   }
 }
 
-var scopeContextKeys = []
+let scopeContextKeys = []
 function getAvailableScopeContextKeys (obj, parentKey) {
   return dispatch => {
     Object.keys(obj).forEach((key) => {
       if (obj[key] instanceof Object) {
-        var superKey = parentKey == null ? key : parentKey + "." + key
+        let superKey = parentKey == null ? key : parentKey + "." + key
         dispatch(getAvailableScopeContextKeys(obj[key], superKey))
       } else {
         parentKey == null ? scopeContextKeys.push(key) : scopeContextKeys.push(parentKey + "." + key)
@@ -137,14 +138,14 @@ function getAvailableScopeContextKeys (obj, parentKey) {
   }
 }
 
-function setExpertMode(expertMode){
+function setExpertMode (expertMode) {
   return {
     type: Actions.ANALYSIS_MODE_EXPERT_MODE,
     payload: expertMode
   }
 }
 
-function setExpertModeTypes(expertModeTypes){
+function setExpertModeTypes (expertModeTypes) {
   return {
     type: Actions.ANALYSIS_MODE_EXPERT_MODE_TYPES,
     payload: expertModeTypes
@@ -158,7 +159,7 @@ function setShowRoicReportsModal (showRoicReportsModal) {
   }
 }
 
-function loadROICResultsForPlan(planId) {
+function loadROICResultsForPlan (planId) {
   return dispatch => {
     AroHttp.get(`/service/report/plan/${planId}`)
       .then(result => {
@@ -171,7 +172,7 @@ function loadROICResultsForPlan(planId) {
   }
 }
 
-function setXaxisLabels (xAxisLabels){
+function setXaxisLabels (xAxisLabels) {
   return {
     type: Actions.ANALYSIS_MODE_SET_XAXIS_LABELS,
     payload: xAxisLabels

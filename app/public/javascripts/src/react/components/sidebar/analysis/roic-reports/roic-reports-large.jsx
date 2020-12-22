@@ -3,14 +3,12 @@ import { connect } from 'react-redux'
 import {Line} from 'react-chartjs-2';
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat
-const currencyFormatter = new Intl.NumberFormat('en-US')
-
-const numberformatter_1 = new Intl.NumberFormat('en-US', {
+const intlNumberFormat = config.intl_number_format || 'en-US'
+const currencyCode = config.currency_code || 'USD'
+const currencyFormatter = new Intl.NumberFormat(intlNumberFormat, {
+  style: 'currency',
+  currency: currencyCode,
   minimumFractionDigits: 1
-})
-
-const numberformatter_0 = new Intl.NumberFormat('en-US', {
-  minimumFractionDigits: 0
 })
 
 export class RoicReportsLarge extends Component {
@@ -40,8 +38,6 @@ export class RoicReportsLarge extends Component {
 
     const {FIBER_STRINGS, CABLE_CONSTRUCTION_STRINGS, selectedEntityType,
       selectedNetworkType, selectedCategory, shouldRenderCharts} = this.state
-
-      //console.log('2', this.props.timeLabels)
 
     return (
       <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
@@ -97,7 +93,7 @@ export class RoicReportsLarge extends Component {
                             </td>
                             <td>
                               {networkStatistic.networkStatisticType === 'roic_npv' &&
-                                this.config.currency_symbol+currencyFormatter.format((networkStatistic.value / 1000).toFixed(1))+" K" 
+                                currencyFormatter.format((networkStatistic.value / 1000).toFixed(1))+" K" 
                               }
                             </td>
                           </>
@@ -129,7 +125,7 @@ export class RoicReportsLarge extends Component {
 
                   <tr>
                     <td><strong>Total Capex</strong></td>
-                    <td>{this.config.currency_symbol+currencyFormatter.format((roicResults.priceModel.totalCost / 1000).toFixed(1))+" K"}</td>
+                    <td>{currencyFormatter.format((roicResults.priceModel.totalCost / 1000).toFixed(1))+" K"}</td>
                   </tr>
 
                   <tr>
@@ -144,7 +140,7 @@ export class RoicReportsLarge extends Component {
                         ({Math.round((fiberCost.lengthMeters * this.config.length.meters_to_length_units))}&nbsp;
                         {this.config.length.length_units})
                       </td>
-                      <td>{this.config.currency_symbol+currencyFormatter.format((fiberCost.totalCost / 1000).toFixed(1))+" K"}</td>
+                      <td>{currencyFormatter.format((fiberCost.totalCost / 1000).toFixed(1))+" K"}</td>
                     </tr>
                     )}
                   )}  
@@ -156,9 +152,9 @@ export class RoicReportsLarge extends Component {
                     return (
                       <tr key={index}>
                         <td className="indent-1 text-capitalize">
-                          {networkNodeTypesEntity[equipmentCost.nodeType] || networkEquipment.equipments[equipmentCost.nodeType].label} (x{numberformatter_0.format(equipmentCost.quantity)})
+                          {networkNodeTypesEntity[equipmentCost.nodeType] || networkEquipment.equipments[equipmentCost.nodeType].label} (x{(equipmentCost.quantity).toFixed(0)})
                         </td>
-                        <td>{this.config.currency_symbol+numberformatter_1.format((equipmentCost.total / 1000).toFixed(1))+" K"}</td>
+                        <td>{currencyFormatter.format((equipmentCost.total / 1000).toFixed(1))+" K"}</td>
                       </tr>
                     )}
                   )}
@@ -174,7 +170,7 @@ export class RoicReportsLarge extends Component {
                             {key === 'household' || key === 'celltower' &&
                               <td className="indent-1 text-capitalize"> {key} </td>
                             }
-                            <td> {numberformatter_0.format(value.rawCoverage)}</td>
+                            <td>{(value.rawCoverage).toFixed(0)}</td>
                           </tr> 
                         )
                       })
