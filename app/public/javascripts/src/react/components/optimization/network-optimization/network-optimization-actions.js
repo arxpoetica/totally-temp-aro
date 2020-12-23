@@ -20,11 +20,11 @@ function runOptimization (inputs, userId) { // shouldn't be getting userId from 
 }
 
 function cancelOptimization (planId, optimizationId) {
-  // ToDo: check that optimizationId is not null
+  // TODO: check that optimizationId is not null
   return (dispatch, getState) => {
     dispatch({
       type: Actions.NETWORK_OPTIMIZATION_SET_IS_CANCELING,
-      payload: true
+      payload: true,
     })
 
     AroHttp.delete(`/service/optimization/processes/${optimizationId}`)
@@ -33,20 +33,18 @@ function cancelOptimization (planId, optimizationId) {
         return dispatch(PlanActions.loadPlan(planId))
       })
       .then((response) => {
-        // ToDo: the following shouldn't run until load plan returns, but loadplan doesn't return a promise
+        // TODO: the following shouldn't run until load plan returns, but loadplan doesn't return a promise
         // service.isCanceling = false
         dispatch({
           type: Actions.NETWORK_OPTIMIZATION_SET_IS_CANCELING,
-          payload: false
+          payload: false,
         })
-        
+
         //service.plan.planState = response.data.planState // Note that this should match with Constants.PLAN_STATE
-        
+
         // delete service.plan.optimizationId
-        dispatch({
-          type: Actions.NETWORK_OPTIMIZATION_CLEAR_OPTIMIZATION_ID
-        })
-        
+        dispatch({ type: Actions.NETWORK_OPTIMIZATION_CLEAR_OPTIMIZATION_ID })
+
         //tileDataService.markHtmlCacheDirty()
         //service.requestMapLayerRefresh.next(null)
       })
@@ -54,7 +52,7 @@ function cancelOptimization (planId, optimizationId) {
         console.error(err)
         dispatch({
           type: Actions.NETWORK_OPTIMIZATION_SET_IS_CANCELING,
-          payload: false
+          payload: false,
         })
       })
   }
