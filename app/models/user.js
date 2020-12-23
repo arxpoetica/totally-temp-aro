@@ -230,7 +230,7 @@ module.exports = class User {
   }
 
   static login (email, password) {
-    var sql = `SELECT	au.id, au.first_name, au.last_name, au.email, au.password, au.company_name
+    var sql = `SELECT au.id, au.first_name, au.last_name, au.email, au.password, au.company_name
               FROM auth.users au
               JOIN auth.system_actor sa ON sa.id = au.id
               WHERE NOT sa.is_deleted AND LOWER(email)=$1`
