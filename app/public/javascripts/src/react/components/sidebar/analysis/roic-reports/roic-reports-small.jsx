@@ -11,6 +11,7 @@ const currencyFormatter = new Intl.NumberFormat(intlNumberFormat, {
   currency: currencyCode,
   minimumFractionDigits: 1
 })
+const numberFormatter = new Intl.NumberFormat(intlNumberFormat)
 
 export class RoicReportsSmall extends Component {
   constructor (props) {
@@ -120,7 +121,10 @@ export class RoicReportsSmall extends Component {
                 return (
                   <tr key={index}>
                     <td className="indent-1 text-capitalize">
-                      {networkNodeTypesEntity[equipmentCost.nodeType] || networkEquipment.equipments[equipmentCost.nodeType].label} (x{(equipmentCost.quantity).toFixed(0)})
+                      {networkEquipment.equipments[equipmentCost.nodeType] !== undefined
+                        ? networkEquipment.equipments[equipmentCost.nodeType].label + ' (X' + numberFormatter.format((equipmentCost.quantity).toFixed(0)) + ')'
+                        : networkNodeTypesEntity[equipmentCost.nodeType] + ' (X' + numberFormatter.format((equipmentCost.quantity).toFixed(0)) + ')'
+                      }
                     </td>
                     <td>{currencyFormatter.format((equipmentCost.total / 1000).toFixed(1)) + ' K'}</td>
                   </tr>
@@ -218,13 +222,18 @@ export class RoicReportsSmall extends Component {
           {/* <!-- If we do not have chart data, display a warning --> */}
           {/* roicResults.roicAnalysis.components does not has values, so condition is implemented to avoid error while rendering */}
           {Object.keys(roicResults.roicAnalysis.components).length > 0
-            ? roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' + selectedCalcType.id] === undefined &&
-                <div className="alert alert-warning" role="alert">
-                  No data available for the selected combination of Network Type, Entity Type and Calculation Type.
-                </div>
-            : ''
+            ? roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' + selectedCalcType.id] === undefined && this.chartDataWarning()
+            : this.chartDataWarning()
           }
         </div>
+      </div>
+    )
+  }
+
+  chartDataWarning () {
+    return (
+      <div className="alert alert-warning" role="alert">
+        No data available for the selected combination of Network Type, Entity Type and Calculation Type.
       </div>
     )
   }

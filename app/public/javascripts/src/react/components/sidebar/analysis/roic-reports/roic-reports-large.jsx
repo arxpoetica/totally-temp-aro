@@ -10,6 +10,7 @@ const currencyFormatter = new Intl.NumberFormat(intlNumberFormat, {
   currency: currencyCode,
   minimumFractionDigits: 1
 })
+const numberFormatter = new Intl.NumberFormat(intlNumberFormat)
 
 export class RoicReportsLarge extends Component {
   constructor (props) {
@@ -152,7 +153,10 @@ export class RoicReportsLarge extends Component {
                     return (
                       <tr key={index}>
                         <td className="indent-1 text-capitalize">
-                          {networkNodeTypesEntity[equipmentCost.nodeType] || networkEquipment.equipments[equipmentCost.nodeType].label} (x{(equipmentCost.quantity).toFixed(0)})
+                          {networkEquipment.equipments[equipmentCost.nodeType] !== undefined
+                            ? networkEquipment.equipments[equipmentCost.nodeType].label + ' (X' + numberFormatter.format((equipmentCost.quantity).toFixed(0)) + ')'
+                            : networkNodeTypesEntity[equipmentCost.nodeType] + ' (X' + numberFormatter.format((equipmentCost.quantity).toFixed(0)) + ')'
+                          }                          
                         </td>
                         <td>{currencyFormatter.format((equipmentCost.total / 1000).toFixed(1)) + ' K'}</td>
                       </tr>
@@ -183,70 +187,75 @@ export class RoicReportsLarge extends Component {
         }
 
         {/* Show the graphs section only if we are not in "Summary" mode */}
-          {/* roicResults.roicAnalysis.components does not has values, so condition is implemented to avoid error while rendering (need to be removed) */}
-          {Object.keys(roicResults.roicAnalysis.components).length > 0
-            ? selectedCategory.id !== 'summary' &&
-            <div style={{flex: '1 1 auto', position: 'relative'}}>
-              {/* Even Index */}
-              <div style={{display: 'flex', flexDirection: 'column', position: 'absolute', width: '50%', height: '100%'}}>
-                {selectedCategory.calcTypes.map((calcType, index) => {
-                  if(index % 2 === 0) {
-                    return (
-                      <div key={index} style={{flex: '1 1 auto', width: '100%', position: 'relative'}}>
-                        <div style={{display: 'flex', flexDirection: 'column', width: '100%', height: '100%', position: 'absolute'}}>
-                          <div style={{flex: '1 1 auto'}}>
-                            {roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' + calcType.id] !== undefined && shouldRenderCharts &&
-                              <Line
-                                display={'block'}
-                                data={this.updateDataSet(calcType)}
-                                options={graphOptions[calcType.id]}
-                              />
-                            }
-                            {
-                              roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' + calcType.id] === undefined &&
-                              <div className="alert bg-light border-info text-center" style={{margin: '0px 20%'}}>
-                                No data
-                              </div>
-                            }
-                          </div>
+        {selectedCategory.id !== 'summary' &&
+          <div style={{flex: '1 1 auto', position: 'relative'}}>
+            {/* Even Index */}
+            <div style={{display: 'flex', flexDirection: 'column', position: 'absolute', width: '50%', height: '100%'}}>
+              {selectedCategory.calcTypes.map((calcType, index) => {
+                if(index % 2 === 0) {
+                  return (
+                    <div key={index} style={{flex: '1 1 auto', width: '100%', position: 'relative'}}>
+                      <div style={{display: 'flex', flexDirection: 'column', width: '100%', height: '100%', position: 'absolute'}}>
+                        <div style={{flex: '1 1 auto'}}>
+                        {Object.keys(roicResults.roicAnalysis.components).length > 0
+                          ? roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' + calcType.id] !== undefined && shouldRenderCharts &&
+                            <Line
+                              display={'block'}
+                              data={this.updateDataSet(calcType)}
+                              options={graphOptions[calcType.id]}
+                            />
+                          : ''
+                          }
+                          {Object.keys(roicResults.roicAnalysis.components).length > 0
+                            ? roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' + calcType.id] === undefined && this.chartDataWarning()
+                            : this.chartDataWarning()
+                          }
                         </div>
                       </div>
-                    )
-                  }}
-                )}
-              </div>
-
-              {/* Odd Index */}
-              <div style={{display: 'flex', flexDirection: 'column', position: 'absolute', left: '50%', width: '50%', height: '100%'}}>
-                {selectedCategory.calcTypes.map((calcType, index) => {
-                  if(index % 2 !== 0) {
-                    return (
-                      <div key={index} style={{flex: '1 1 auto', width: '100%', position: 'relative'}}>
-                        <div style={{display: 'flex', flexDirection: 'column', width: '100%', height: '100%', position: 'absolute'}}>
-                          <div style={{flex: '1 1 auto'}}>
-                            {roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' + calcType.id] !== undefined && shouldRenderCharts &&
-                              <Line
-                                display={'block'}
-                                data={this.updateDataSet(calcType)}
-                                options={graphOptions[calcType.id]}
-                              />
-                            }
-                            {
-                              roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' + calcType.id] === undefined &&
-                              <div className="alert bg-light border-info text-center" style={{margin: '0px 20%'}}>
-                                No data
-                              </div>
-                            }
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  }}
-                )}
-              </div>
+                    </div>
+                  )
+                }}
+              )}
             </div>
-          : ''
+
+            {/* Odd Index */}
+            <div style={{display: 'flex', flexDirection: 'column', position: 'absolute', left: '50%', width: '50%', height: '100%'}}>
+              {selectedCategory.calcTypes.map((calcType, index) => {
+                if(index % 2 !== 0) {
+                  return (
+                    <div key={index} style={{flex: '1 1 auto', width: '100%', position: 'relative'}}>
+                      <div style={{display: 'flex', flexDirection: 'column', width: '100%', height: '100%', position: 'absolute'}}>
+                        <div style={{flex: '1 1 auto'}}>
+                          {Object.keys(roicResults.roicAnalysis.components).length > 0
+                            ? roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' + calcType.id] !== undefined && shouldRenderCharts &&
+                              <Line
+                                display={'block'}
+                                data={this.updateDataSet(calcType)}
+                                options={graphOptions[calcType.id]}
+                              />
+                            : ''
+                          }
+                          {Object.keys(roicResults.roicAnalysis.components).length > 0
+                            ? roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' + calcType.id] === undefined && this.chartDataWarning()
+                            : this.chartDataWarning()
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  )
+                }}
+              )}
+            </div>
+          </div>
         }
+      </div>
+    )
+  }
+
+  chartDataWarning () {
+    return (
+      <div className="alert bg-light border-info text-center" style={{margin: '0px 20%'}}>
+        No data
       </div>
     )
   }
