@@ -74,16 +74,20 @@ export class NetworkAnalysisOutput extends Component {
 
   updateChartDefinition () {
     if (!this.props.chartReportDefinition) {
-      return // This can happen when updateChart() is called from a setTimeout(), and the properties change in the meantime
+      // This can happen when updateChart() is called from a setTimeout(),
+      // and the properties change in the meantime
+      return
     }
     var selectedUiDefinition = null
     if (!this.state.selectedUiDefinition) {
       selectedUiDefinition = this.props.chartReportDefinition.uiDefinition[0]
     } else {
-      selectedUiDefinition = this.props.chartReportDefinition.uiDefinition.filter(item => item.chartDefinition.name === this.state.selectedUiDefinition)[0]
+      selectedUiDefinition = this.props.chartReportDefinition.uiDefinition.filter(item => {
+        return item.chartDefinition.name === this.state.selectedUiDefinition
+      })[0]
     }
-    const copyOfSelectedUiDefinition = JSON.parse(JSON.stringify(selectedUiDefinition))
-    this.chartDefinition = this.buildChartDefinition(copyOfSelectedUiDefinition.chartDefinition, copyOfSelectedUiDefinition.dataModifiers, this.props.chartReport)
+    const { chartDefinition, dataModifiers } = JSON.parse(JSON.stringify(selectedUiDefinition))
+    this.chartDefinition = this.buildChartDefinition(chartDefinition, dataModifiers, this.props.chartReport)
     this.chartDefinitionForTesting = JSON.parse(JSON.stringify(this.chartDefinition))
   }
 
@@ -101,11 +105,27 @@ export class NetworkAnalysisOutput extends Component {
   }
 
   buildChartDefinition (rawChartDefinition, dataModifiers, chartData) {
-    // First, sort the report data
-    const sortedData = chartData.sort((a, b) => {
+    const { name } = rawChartDefinition
+
+    // BIG HONKIN' NOTE:
+    // This filter code was made at the behest of Sir Adam W. Musial of New York fame.
+    // Essentially upward outlier IIR(-only) data above the 200% threshold is "not needed"
+    // for presentation. THIS CHANGE SHOULD ARGUABLY EXIST AT THE SERVICE LAYER.
+    // But since the user can still download ALL data changes, this is a
+    // "presentational bandaid" -- only for the sake of filtering out data that
+    // end users will need. If the request is ever made to fix this again, we
+    // should discuss it at a service level, and not a presentation level.
+    // Sincerely, Robert ⚔️ Excalibur ⚔️ Hall
+    const filteredData = name === 'irr'
+      ? chartData.filter(datum => datum['irr'] < 2)
+      : chartData
+
+    // next, sort the report data
+    const sortedData = filteredData.sort((a, b) => {
       const multiplier = (dataModifiers.sortOrder === 'ascending') ? 1.0 : -1.0
       return (a[dataModifiers.sortBy] - b[dataModifiers.sortBy]) * multiplier
     })
+
     this.populateSeriesValues(sortedData, rawChartDefinition, dataModifiers)
     this.populateAxesOptions(sortedData, rawChartDefinition, dataModifiers)
     this.populateTooltipOptions(rawChartDefinition, dataModifiers)
