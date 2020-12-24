@@ -110,17 +110,17 @@ function AnalysisReducer (state = defaultState, action) {
     case Actions.ANALYSIS_MODE_EXPERT_MODE:
       return setExpertMode(state, action.payload)
       
-      case Actions.ANALYSIS_MODE_EXPERT_MODE_TYPES:
-        return setExpertModeTypes(state, action.payload)
-        
-      case Actions.ANALYSIS_MODE_SHOW_ROIC_REPORT_MODAL:
-        return setShowRoicReportsModal(state, action.payload) 
-        
-      case Actions.ANALYSIS_MODE_SET_ROIC_RESULTS_FOR_PLAN:
-        return setROICResultsForPlan(state, action.payload)
-        
-      case Actions.ANALYSIS_MODE_SET_XAXIS_LABELS:
-        return setXaxisLabels(state, action.payload)    
+    case Actions.ANALYSIS_MODE_EXPERT_MODE_TYPES:
+      return setExpertModeTypes(state, action.payload)
+      
+    case Actions.ANALYSIS_MODE_SHOW_ROIC_REPORT_MODAL:
+      return setShowRoicReportsModal(state, action.payload)
+      
+    case Actions.ANALYSIS_MODE_SET_ROIC_RESULTS_FOR_PLAN:
+      return setROICResultsForPlan(state, action.payload)
+      
+    case Actions.ANALYSIS_MODE_SET_XAXIS_LABELS:
+      return setXaxisLabels(state, action.payload)
 
     default:
       return state

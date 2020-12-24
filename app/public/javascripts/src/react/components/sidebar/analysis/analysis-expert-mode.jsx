@@ -16,45 +16,48 @@ export class AnalysisExpertMode extends Component {
   }
 
   componentDidMount () {
-    const {optimizationInputs, activeSelectionModeId, locationLayers, plan} = this.props
+    const { optimizationInputs, activeSelectionModeId, locationLayers, plan } = this.props
 
-    let expertMode =  this.state.expertMode
+    const expertMode = this.state.expertMode
     expertMode.OPTIMIZATION_SETTINGS = JSON.stringify(this.props.getOptimizationBody(optimizationInputs, activeSelectionModeId, locationLayers, plan), undefined, 4)
-    this.setState({expertMode : expertMode})
+    this.setState({ expertMode })
   }
 
   render () {
 
-    const {expertModeTypes, scopeContextKeys, selectedExpertMode} = this.props
-    const {expertMode} = this.state
+    const { expertModeTypes, scopeContextKeys, selectedExpertMode } = this.props
+    const { expertMode } = this.state
 
     return (
       <div className="row" style={{height:'100%'}}>
         <div className="col-md-12" style={{height:'80%'}}>
-          <select className="form-control" onChange={(e)=>this.handleExpertModeTypesChange(e)} value={selectedExpertMode}>
-            {Object.entries(expertModeTypes).map(([ key, item ], index) => { 
-              return (
-                <option key={index} value={item.id} label={item.label}></option>
-              )
+          <select className="form-control" onChange={(e) => this.handleExpertModeTypesChange(e)} value={selectedExpertMode}>
+            {Object.entries(expertModeTypes).map(([key, item], index) => {
+              return <option key={index} value={item.id} label={item.label}/>
             })
             }
           </select>
 
-          {selectedExpertMode !== expertModeTypes['OPTIMIZATION_SETTINGS'].id && 
-            <textarea rows="17" maxLength="75000"  style={{fontFamily: 'Courier', width:'100%', height:'100%'}} 
+          {selectedExpertMode !== expertModeTypes['OPTIMIZATION_SETTINGS'].id &&
+            <textarea 
+              rows="17"
+              maxLength="75000"
+              style={{fontFamily: 'Courier', width: '100%', height: '100%'}}
               value={expertMode[selectedExpertMode]}
               placeholder={`Available Keys: ${JSON.stringify(scopeContextKeys)}`}
-              onChange={(e)=>this.validateExpertModeQuery(e)}
-              spellCheck="false"> 
-            </textarea>
+              onChange={(e) => this.validateExpertModeQuery(e)}
+              spellCheck="false"
+            />
           }
 
-          {selectedExpertMode === expertModeTypes['OPTIMIZATION_SETTINGS'].id && 
-            <textarea rows="20" style={{fontFamily: 'Courier', width:'100%', height:'100%'}} 
+          {selectedExpertMode === expertModeTypes['OPTIMIZATION_SETTINGS'].id &&
+            <textarea 
+              rows="20"
+              style={{fontFamily: 'Courier', width: '100%', height: '100%'}}
               value={expertMode.OPTIMIZATION_SETTINGS}
-              onChange={(e)=>this.handleOptimizationSettings(e)}
-              spellCheck="false"> 
-            </textarea>
+              onChange={(e) => this.handleOptimizationSettings(e)}
+              spellCheck="false"
+            />
           }
         </div>
       </div>
@@ -62,27 +65,27 @@ export class AnalysisExpertMode extends Component {
   }
 
   handleOptimizationSettings (e) {
-    let expertMode =  this.state.expertMode;
+    const expertMode = this.state.expertMode;
     expertMode['OPTIMIZATION_SETTINGS'] = e.target.value
-    this.setState({expertMode: expertMode})
+    this.setState({ expertMode })
     this.props.setExpertMode(JSON.parse(JSON.stringify(expertMode))) // To set the changed 'OPTIMIZATION_SETTINGS' in redux
   }
 
   validateExpertModeQuery (e) {
-    let expertMode =  this.state.expertMode;
-    let selectedExpertMode = this.props.selectedExpertMode
+    const expertMode = this.state.expertMode;
+    const selectedExpertMode = this.props.selectedExpertMode
 
-    expertMode[selectedExpertMode]= e.target.value
-    this.setState({expertMode: expertMode})
+    expertMode[selectedExpertMode] = e.target.value
+    this.setState({ expertMode })
     this.props.setExpertMode(JSON.parse(JSON.stringify(expertMode)))
 
     let hasExcludeTerm = false
-    let excludeTerms = ['delete', 'drop', 'update', 'alter', 'insert', 'call', 'commit', 'create']
+    const excludeTerms = ['delete', 'drop', 'update', 'alter', 'insert', 'call', 'commit', 'create']
     excludeTerms.forEach((term) => {
       if (this.state.expertMode[selectedExpertMode].toLowerCase().indexOf(term) > -1) hasExcludeTerm = true
     })
 
-    let expertModeTypes = this.props.expertModeTypes
+    const expertModeTypes = this.props.expertModeTypes
     expertModeTypes[selectedExpertMode].isQueryValid = this.state.expertMode[selectedExpertMode].toLowerCase().indexOf('select') > -1 && !hasExcludeTerm
     this.props.setExpertModeTypes(JSON.parse(JSON.stringify(expertModeTypes)))
   }
@@ -104,15 +107,15 @@ const mapStateToProps = (state) => ({
   locationLayers: getLocationLayersList(state),
   plan: state.plan.activePlan,
   scopeContextKeys: state.analysisMode.scopeContextKeys,
-  expertMode: state.analysisMode.expertMode,
-})  
+  expertMode: state.analysisMode.expertMode
+})
 
 const mapDispatchToProps = (dispatch) => ({
-  setSelectedExpertMode : (selectedExpertMode) => dispatch(AnalysisActions.setSelectedExpertMode(selectedExpertMode)),
-  getOptimizationBody : (optimizationInputs, activeSelectionModeId, locationLayers, plan) => dispatch(ToolBarActions.getOptimizationBody(optimizationInputs, activeSelectionModeId, locationLayers, plan)),
-  getExpertModeScopeContext : (plan) => dispatch(AnalysisActions.getExpertModeScopeContext(plan)),
-  setExpertMode : (expertMode) => dispatch(AnalysisActions.setExpertMode(expertMode)),
-  setExpertModeTypes : (expertModeTypes) => dispatch(AnalysisActions.setExpertModeTypes(expertModeTypes))
+  setSelectedExpertMode: (selectedExpertMode) => dispatch(AnalysisActions.setSelectedExpertMode(selectedExpertMode)),
+  getOptimizationBody: (optimizationInputs, activeSelectionModeId, locationLayers, plan) => dispatch(ToolBarActions.getOptimizationBody(optimizationInputs, activeSelectionModeId, locationLayers, plan)),
+  getExpertModeScopeContext: (plan) => dispatch(AnalysisActions.getExpertModeScopeContext(plan)),
+  setExpertMode: (expertMode) => dispatch(AnalysisActions.setExpertMode(expertMode)),
+  setExpertModeTypes: (expertModeTypes) => dispatch(AnalysisActions.setExpertModeTypes(expertModeTypes))
 })
 
 const AnalysisExpertModeComponent = connect(mapStateToProps, mapDispatchToProps)(AnalysisExpertMode)

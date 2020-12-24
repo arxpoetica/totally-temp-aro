@@ -26,8 +26,8 @@ export class coverageReportDownloader extends Component {
 
   render () {
 
-    const {reports, reportTypes, selectedReportType, numReportsSelected,
-           reportFilename, reportDownloading} = this.state
+    const { reports, reportTypes, selectedReportType, numReportsSelected,
+    reportFilename, reportDownloading } = this.state
 
     return (
       <div className="container pt-3">
@@ -35,11 +35,11 @@ export class coverageReportDownloader extends Component {
         {/* Checkboxes to determine which report(s) to download */}
         <div className="row">
           <ul style={{padding: '0px', listStyleType: 'none'}}>
-            {reports.map((report, index) =>
+            {reports.map((report) =>
               <li className="pt-1 pb-1" key={report.id}>
                 <input type="checkbox" style={{marginRight: '5px'}} className="checkboxfill"
                   value={report.selectedForDownload}
-                  onChange={(e)=>this.updateDownloadFilenameAndMediaType(e, report.id)}
+                  onChange={(e) => this.updateDownloadFilenameAndMediaType(e, report.id)}
                 />
                 {report.displayName}
               </li>
@@ -52,7 +52,7 @@ export class coverageReportDownloader extends Component {
           <div className="col-md-3">Report type:</div>
           <div className="col-md-9" disabled={numReportsSelected === 0}>
             <select className="form-control" value={selectedReportType.description}
-              onChange={(e)=>this.reportTypeChange(e)} disabled={numReportsSelected === 0}>
+              onChange={(e) => this.reportTypeChange(e)} disabled={numReportsSelected === 0}>
               {reportTypes.map((item, index) =>
                 <option key={index} value={item.description} label={item.description}></option>
               )}
@@ -69,7 +69,7 @@ export class coverageReportDownloader extends Component {
                 aria-describedby="btnDownloadClubbedExcel" disabled={numReportsSelected === 0}/>
               <div className="input-group-append">
                 <button className="btn btn-primary btn-block" type="button" id="btnDownloadClubbedExcel"
-                  disabled={numReportsSelected === 0 || reportDownloading} onClick={(e)=>this.downloadReport(e)}>
+                  disabled={numReportsSelected === 0 || reportDownloading} onClick={(e) => this.downloadReport(e)}>
                   <span className="fa fa-download"></span>
                   {reportDownloading &&
                     <span className="fa fa-spinner fa-spin"></span>
@@ -77,7 +77,7 @@ export class coverageReportDownloader extends Component {
                 </button>
               </div>
             </div>
-          </div>  
+          </div>
         </div>
 
       </div>
@@ -100,52 +100,52 @@ export class coverageReportDownloader extends Component {
           reports[index].selectedForDownload = false
         })
         this.updateDownloadFilenameAndMediaType()
-        this.setState({reports: reports})
+        this.setState({ reports })
       })
       .catch(err => console.error(err))
   }
 
   reportTypeChange(e) {
-    let selectedReportType = this.reportTypes.find(item => item.description === e.target.value);
-    this.setState({selectedReportType: selectedReportType})
+    const selectedReportType = this.reportTypes.find(item => item.description === e.target.value);
+    this.setState({ selectedReportType })
   }
 
   updateDownloadFilenameAndMediaType (e, reportId) {
 
-    let reports = this.state.reports
-    reports.map((item, index) => item.id === reportId  ? item.selectedForDownload = !item.selectedForDownload : item.selectedForDownload)
+    const reports = this.state.reports
+    reports.map((item) => item.id === reportId ? item.selectedForDownload = !item.selectedForDownload : item.selectedForDownload)
 
     const now = new Date()
     const timeStamp = `${now.getMonth() + 1}_${now.getDate()}_${now.getFullYear()}_${now.getHours()}_${now.getMinutes()}`
-  
-    let numReportsSelected = reports.filter(item => item.selectedForDownload).length
+
+    const numReportsSelected = reports.filter(item => item.selectedForDownload).length
 
     if (numReportsSelected === 0) {
-      this.setState({reportFilename: '', numReportsSelected: numReportsSelected})
+      this.setState({ reportFilename: '', numReportsSelected })
     } else if (numReportsSelected === 1) {
       const selectedReport = reports.filter(item => item.selectedForDownload)[0]
-      let reportFilename = `${selectedReport.name}_${timeStamp}`
-      let reportTypes = [
+      const reportFilename = `${selectedReport.name}_${timeStamp}`
+      const reportTypes = [
         { mediaType: 'xls', description: 'Excel' },
         { mediaType: 'csv', description: 'CSV' }
       ]
-      let selectedReportType = reportTypes[0]
-      this.setState({reportFilename: reportFilename, selectedReportType: selectedReportType, 
-                     numReportsSelected: numReportsSelected, reportTypes: reportTypes})
-    }  else if (numReportsSelected > 1) {
+      const selectedReportType = reportTypes[0]
+      this.setState({ reportFilename: reportFilename, selectedReportType: selectedReportType,
+      numReportsSelected, reportTypes })
+    } else if (numReportsSelected > 1) {
       // If multiple reports are selected, then we can only have an Excel download
-      let reportFilename = `Consolidated_${timeStamp}`
-      let reportTypes = [
+      const reportFilename = `Consolidated_${timeStamp}`
+      const reportTypes = [
         { mediaType: 'xls', description: 'Excel' }
       ]
-      let selectedReportType = this.reportTypes[0]
-      this.setState({reportFilename: reportFilename, selectedReportType: selectedReportType,
-                     numReportsSelected: numReportsSelected, reportTypes: reportTypes})
+      const selectedReportType = this.reportTypes[0]
+      this.setState({ reportFilename: reportFilename, selectedReportType: selectedReportType,
+      numReportsSelected, reportTypes })
     }
   }
 
   downloadReport () {
-    this.setState({reportDownloading: true})
+    this.setState({ reportDownloading: true })
 
     const selectedReports = this.state.reports.filter(item => item.selectedForDownload)
     const fileName = `${this.state.reportFilename}.${this.state.selectedReportType.mediaType}`
@@ -155,7 +155,7 @@ export class coverageReportDownloader extends Component {
         { responseType: 'arraybuffer' })
         .then(result => {
           saveAs(new Blob([result]), fileName)
-          this.setState({reportDownloading: false})
+          this.setState({ reportDownloading: false })
         })
         .catch(err => console.error(err))
     } else {
@@ -167,7 +167,7 @@ export class coverageReportDownloader extends Component {
         { responseType: 'arraybuffer' })
         .then(result => {
           saveAs(new Blob([result]), fileName)
-          this.setState({reportDownloading: false})
+          this.setState({ reportDownloading: false })
         })
         .catch(err => console.error(err))
     }
@@ -177,7 +177,7 @@ export class coverageReportDownloader extends Component {
 const mapStateToProps = (state) => ({
   coverageReport: state.coverage.report,
   plan: state.plan.activePlan
-})  
+})
 
 const mapDispatchToProps = (dispatch) => ({
 })

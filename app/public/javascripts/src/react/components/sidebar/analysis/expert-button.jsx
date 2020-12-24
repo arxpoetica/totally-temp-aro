@@ -7,16 +7,17 @@ import SelectionModes from '../../selection/selection-modes'
 import SelectionActions from '../../selection/selection-actions'
 
 export class expertButton extends Component {
-  
+
   render () {
 
-    const {networkAnalysisType, selectedExpertMode, expertModeTypes} = this.props
+    const { networkAnalysisType, selectedExpertMode, expertModeTypes } = this.props
 
     return (
       <div>
         {networkAnalysisType === 'EXPERT_MODE' && selectedExpertMode === expertModeTypes['OPTIMIZATION_SETTINGS'].id &&
-          <button className="btn btn-block btn-primary" onClick={(e)=>this.saveExpertMode(e)} >
-            <i className="fa fa-save"></i> Save
+          <button className="btn btn-block btn-primary" onClick={(e) => this.saveExpertMode(e)}>
+            <i className="fa fa-save"></i>
+            &nbsp;Save
           </button>
         }
 
@@ -24,9 +25,10 @@ export class expertButton extends Component {
           <button
             className={`btn btn-block ${!expertModeTypes[selectedExpertMode].isQueryValid ? 'btn-default' : 'btn-primary'}`}
             disabled={!expertModeTypes[selectedExpertMode].isQueryValid}
-            onClick={(e)=>this.executeManualPlanTargetsQuery(e)}
+            onClick={(e) => this.executeManualPlanTargetsQuery(e)}
           >
-            <i className="fa fa-save"></i> Execute
+            <i className="fa fa-save"></i>
+            &nbsp;Execute
           </button>
         }
 
@@ -39,14 +41,14 @@ export class expertButton extends Component {
     this.props.setOptimizationInputs(JSON.parse(this.props.expertMode.OPTIMIZATION_SETTINGS))
   }
 
-   // expert mode refactor
-   executeManualPlanTargetsQuery () {
-    let query = this.formatExpertModeQuery(this.props.expertMode[this.props.selectedExpertMode], this.props.expertModeScopeContext)
+  // expert mode refactor
+  executeManualPlanTargetsQuery () {
+    const query = this.formatExpertModeQuery(this.props.expertMode[this.props.selectedExpertMode], this.props.expertModeScopeContext)
 
-    AroHttp.post('/locations/getLocationIds', { query: query })
+    AroHttp.post('/locations/getLocationIds', { query })
       .then((result) => {
 
-        const {plan, selectedExpertMode, expertModeTypes, reduxPlanTargets} = this.props
+        const { plan, selectedExpertMode, expertModeTypes, reduxPlanTargets } = this.props
 
         if (selectedExpertMode === expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].id) {
           this.props.setSelectionTypeById(SelectionModes.SELECTED_LOCATIONS)
@@ -85,8 +87,7 @@ export class expertButton extends Component {
   }
 
   formatExpertModeQuery (string, replaceWithobject) {
-    let query
-    query = format(string, replaceWithobject)
+    const query = format(string, replaceWithobject)
     return query;
   }
 }
@@ -96,10 +97,10 @@ const mapStateToProps = (state) => ({
   expertMode: state.analysisMode.expertMode,
   selectedExpertMode: state.analysisMode.selectedExpertMode,
   expertModeTypes: state.analysisMode.expertModeTypes,
-  expertModeScopeContext : state.analysisMode.expertModeScopeContext,
+  expertModeScopeContext: state.analysisMode.expertModeScopeContext,
   reduxPlanTargets: state.selection.planTargets,
   plan: state.plan.activePlan
-})  
+})
 
 const mapDispatchToProps = (dispatch) => ({
   setOptimizationInputs: inputs => dispatch(NetworkOptimizationActions.setOptimizationInputs(inputs)),

@@ -5,12 +5,6 @@ import AnalysisActions from '../analysis-actions'
 import CommonRoicReports from '../roic-reports/common-roic-reports.jsx'
 
 export class RoicReportsModal extends Component {
-  constructor (props) {
-    super(props)
-
-    this.state = {
-    }
-  }
 
   render () {
 

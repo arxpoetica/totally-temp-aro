@@ -7,10 +7,10 @@ export class CommonRoicReports extends Component {
 
   componentDidUpdate (prevProps){
     if(JSON.stringify(this.props) !== JSON.stringify(prevProps)){
-      if (prevProps.planId || 
+      if(prevProps.planId ||
          (prevProps.rOptimizationState && (prevProps.rOptimizationState === 'COMPLETED' || prevProps.rOptimizationState === 'FINISHED'))) {
           setTimeout(() => this.refreshData(), 0)
-      } 
+      }
     }
   }
 
@@ -32,7 +32,7 @@ export class CommonRoicReports extends Component {
 }
 
 const mapStateToProps = (state) => ({
-})  
+})
 
 const mapDispatchToProps = (dispatch) => ({
   loadROICResultsForPlan: (planId) => dispatch(AnalysisActions.loadROICResultsForPlan(planId))

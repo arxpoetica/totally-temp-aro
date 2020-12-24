@@ -8,7 +8,11 @@ export class RoicReports extends Component {
   constructor (props) {
     super(props)
 
-    this.datasetOverride = { fill: false }
+    this.dataSetProps = {
+      fill: false,
+      pointBackgroundColor: '#97bbcd',
+      pointHoverBackgroundColor: '#000000'
+    }
 
     this.calcTypes = [
       { id: 'opex_expenses', description: 'Operating Expenses', tickPrefix: '$ ', tickSuffix: '', multiplier: 1.0 },
@@ -194,7 +198,7 @@ export class RoicReports extends Component {
 
   renderRoicReports () {
 
-    const {reportSize, xAxisLabels} = this.props;
+    const { reportSize, xAxisLabels } = this.props;
 
     return (
       <>
@@ -205,7 +209,7 @@ export class RoicReports extends Component {
             networkTypes={this.networkTypes}
             calcTypes={this.calcTypes}
             timeLabels={xAxisLabels}
-            datasetOverride={this.datasetOverride}
+            dataSetProps={this.dataSetProps}
             graphOptions={this.graphOptions}
           />
         }
@@ -217,7 +221,7 @@ export class RoicReports extends Component {
             networkTypes={this.networkTypes}
             calcTypes={this.calcTypes}
             timeLabels={xAxisLabels}
-            datasetOverride={this.datasetOverride}
+            dataSetProps={this.dataSetProps}
             graphOptions={this.graphOptions}
           />
         }
@@ -229,7 +233,7 @@ export class RoicReports extends Component {
 const mapStateToProps = (state) => ({
   roicResults: state.analysisMode.roicResults,
   xAxisLabels: state.analysisMode.xAxisLabels
-})  
+})
 
 const mapDispatchToProps = (dispatch) => ({
   setXaxisLabels: (xAxisLabels) => dispatch(AnalysisActions.setXaxisLabels(xAxisLabels))

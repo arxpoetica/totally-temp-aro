@@ -15,7 +15,7 @@ function loadNetworkNodeTypesEntity () {
       AroHttp.get('/service/odata/NetworkNodeTypesEntity')
         .then((response) => {
           if (response.status >= 200 && response.status <= 299) {
-            let networkNodeTypesEntity = {}
+            const networkNodeTypesEntity = {}
             response.data.forEach((entityType) => {
               networkNodeTypesEntity[entityType.name] = entityType.description
             })
@@ -32,69 +32,69 @@ function loadNetworkNodeTypesEntity () {
   }
 }
 
-  // optimization services
-  const modifyDialogResult = Object.freeze({
-    CANCEL: 0,
-    OVERWRITE: 1
-  })
-  // expert mode refactor
-  // also used by ring edit and r-network-optimization-input
-  function handleModifyClicked(plan)  {
-    return dispatch => {
-      let currentPlan = plan
-      if (currentPlan.ephemeral) {
-        // This is an ephemeral plan. Don't show any dialogs to the user, simply copy this plan over to a new ephemeral plan
-        let url = `/service/v1/plan-command/copy?source_plan_id=${currentPlan.id}&is_ephemeral=${currentPlan.ephemeral}`
-        return AroHttp.post(url, {})
-          .then((result) => {
-            if (result.status >= 200 && result.status <= 299) {
-              dispatch(PlanActions.setActivePlan(result.data))
-              return Promise.resolve()
-            }
-          })
-          .catch((err) => {
-            console.log(err)
-            return Promise.reject(err)
-          })
-      } else {
-        // This is not an ephemeral plan. Show a dialog to the user asking whether to overwrite current plan or save as a new one.
-        return showModifyQuestionDialog()
-          .then((result) => {
-            if (result === modifyDialogResult.OVERWRITE) {
-              return AroHttp.delete(`/service/v1/plan/${currentPlan.id}/optimization-state`)
-                .then(() => AroHttp.get(`/service/v1/plan/${currentPlan.id}/optimization-state`))
-                .then(result => {
-                  currentPlan.planState = result.data
-                  dispatch(PlanActions.setActivePlan(currentPlan))
-                })
-                .catch(err => console.error(err))
-            }
-          })
-          .catch((err) => {
-            console.log(err)
-            return Promise.reject()
-          })
-      }
+// optimization services
+const modifyDialogResult = Object.freeze({
+  CANCEL: 0,
+  OVERWRITE: 1
+})
+// expert mode refactor
+// also used by ring edit and r-network-optimization-input
+function handleModifyClicked(plan)  {
+  return dispatch => {
+    const currentPlan = plan
+    if (currentPlan.ephemeral) {
+      // This is an ephemeral plan. Don't show any dialogs to the user, simply copy this plan over to a new ephemeral plan
+      const url = `/service/v1/plan-command/copy?source_plan_id=${currentPlan.id}&is_ephemeral=${currentPlan.ephemeral}`
+      return AroHttp.post(url, {})
+        .then((result) => {
+          if (result.status >= 200 && result.status <= 299) {
+            dispatch(PlanActions.setActivePlan(result.data))
+            return Promise.resolve()
+          }
+        })
+        .catch((err) => {
+          console.log(err)
+          return Promise.reject(err)
+        })
+    } else {
+      // This is not an ephemeral plan. Show a dialog to the user asking whether to overwrite current plan or save as a new one.
+      return showModifyQuestionDialog()
+        .then((resp) => {
+          if (resp === modifyDialogResult.OVERWRITE) {
+            return AroHttp.delete(`/service/v1/plan/${currentPlan.id}/optimization-state`)
+              .then(() => AroHttp.get(`/service/v1/plan/${currentPlan.id}/optimization-state`))
+              .then(result => {
+                currentPlan.planState = result.data
+                dispatch(PlanActions.setActivePlan(currentPlan))
+              })
+              .catch(err => console.error(err))
+          }
+        })
+        .catch((err) => {
+          console.log(err)
+          return Promise.reject()
+        })
     }
   }
+}
 
-  function showModifyQuestionDialog () {
-    return new Promise((resolve, reject) => {
-      swal({
-        title: '',
-        text: 'You are modifying a plan with a completed analysis. Do you wish to overwrite the existing plan?  Overwriting will clear all results which were previously run.',
-        type: 'info',
-        confirmButtonColor: '#b9b9b9',
-        confirmButtonText: 'Overwrite',
-        cancelButtonColor: '#DD6B55',
-        cancelButtonText: 'Cancel',
-        showCancelButton: true,
-        closeOnConfirm: true
-      }, (wasConfirmClicked) => {
-        resolve(wasConfirmClicked ? modifyDialogResult.OVERWRITE : modifyDialogResult.CANCEL)
-      })
+function showModifyQuestionDialog () {
+  return new Promise((resolve, reject) => {
+    swal({
+      title: '',
+      text: 'You are modifying a plan with a completed analysis. Do you wish to overwrite the existing plan?  Overwriting will clear all results which were previously run.',
+      type: 'info',
+      confirmButtonColor: '#b9b9b9',
+      confirmButtonText: 'Overwrite',
+      cancelButtonColor: '#DD6B55',
+      cancelButtonText: 'Cancel',
+      showCancelButton: true,
+      closeOnConfirm: true
+    }, (wasConfirmClicked) => {
+      resolve(wasConfirmClicked ? modifyDialogResult.OVERWRITE : modifyDialogResult.CANCEL)
     })
-  }
+  })
+}
 
 
 function setSelectedExpertMode (selectedExpertMode) {
@@ -108,7 +108,7 @@ function getExpertModeScopeContext (plan) {
   return dispatch => {
     AroHttp.get(`/service/v1/plan/${plan.id}/scope-context`)
     .then((result) => {
-      let expertModeScopeContext = result.data
+      const expertModeScopeContext = result.data
       dispatch({
         type: Actions.ANALYSIS_MODE_EXPERT_MODE_SCOPE_CONTEXT,
         payload: expertModeScopeContext
@@ -123,10 +123,10 @@ function getAvailableScopeContextKeys (obj, parentKey) {
   return dispatch => {
     Object.keys(obj).forEach((key) => {
       if (obj[key] instanceof Object) {
-        let superKey = parentKey == null ? key : parentKey + "." + key
+        const superKey = parentKey == null ? key : parentKey + '.' + key
         dispatch(getAvailableScopeContextKeys(obj[key], superKey))
       } else {
-        parentKey == null ? scopeContextKeys.push(key) : scopeContextKeys.push(parentKey + "." + key)
+        parentKey == null ? scopeContextKeys.push(key) : scopeContextKeys.push(parentKey + '.' + key)
       }
     })
     setTimeout(function(){ 

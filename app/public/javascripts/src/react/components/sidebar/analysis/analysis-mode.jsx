@@ -17,7 +17,7 @@ import NetWorkBuildOutput from './network-build/network-build-output.jsx'
 import AnalysisActions from './analysis-actions'
 import AnalysisExpertMode from './analysis-expert-mode.jsx'
 import ExpertButton from './expert-button.jsx'
-import CoverageReportDownloader from  './coverage/coverage-report-downloader.jsx'
+import CoverageReportDownloader from './coverage/coverage-report-downloader.jsx'
 
 export class AnalysisMode extends Component {
   constructor (props) {
@@ -30,7 +30,7 @@ export class AnalysisMode extends Component {
 
     this.state = {
       collapseCards: this.analysisModePanels.INPUT,
-      NetworkAnalysisTypes: NetworkAnalysisTypes,
+      networkAnalysisTypes: NetworkAnalysisTypes,
       localAnalysisType: ''
     }
 
@@ -39,26 +39,27 @@ export class AnalysisMode extends Component {
   }
 
   componentDidMount () {
-    let initAnalysisType = this.state.NetworkAnalysisTypes[0]
-    this.state.NetworkAnalysisTypes.forEach(analysisType => {
+    let initAnalysisType = this.state.networkAnalysisTypes[0]
+    this.state.networkAnalysisTypes.forEach(analysisType => {
       if (analysisType.id === this.props.networkAnalysisType) initAnalysisType = analysisType
     })
-    this.setState({localAnalysisType: initAnalysisType});
+    this.setState({ localAnalysisType: initAnalysisType });
   }
 
   render () {
 
-    const {collapseCards, NetworkAnalysisTypes, localAnalysisType} = this.state;
-    const {networkAnalysisType, coverageReport} = this.props;
+    const { collapseCards, networkAnalysisTypes, localAnalysisType } = this.state;
+    const { networkAnalysisType, coverageReport } = this.props;
 
     return (
       <div className="analysis-mode-container">
         <h4 style={{textAlign: 'center', marginTop: '20px'}}>Analysis Type: {localAnalysisType.label}</h4>
 
         {/* INPUT Accordion */}
-        <Card className={`card-collapse ${collapseCards === this.analysisModePanels.INPUT ? 'collapse-show' :''}`}>
-          <CardHeader data-event={this.analysisModePanels.INPUT} onClick={(e)=>this.toggleCards(e)} 
-            className={`card-header-dark ${collapseCards === this.analysisModePanels.INPUT ? 'card-fixed' :''}`}>
+        <Card className={`card-collapse ${collapseCards === this.analysisModePanels.INPUT ? 'collapse-show' : ''}`}>
+          <CardHeader data-event={this.analysisModePanels.INPUT} onClick={(e) => this.toggleCards(e)}
+            className={`card-header-dark ${collapseCards === this.analysisModePanels.INPUT ? 'card-fixed' : ''}`}
+          >
             Input
           </CardHeader>
           <Collapse isOpen={collapseCards === this.analysisModePanels.INPUT}>
@@ -67,8 +68,8 @@ export class AnalysisMode extends Component {
               <div className="col-xs-7" style={{left: '20', border: '10px solid white'}}>
                 {/* pull this out */}
                 {this.areControlsEnabled() &&
-                  <select className="form-control" onChange={(e)=>this.onAnalysisTypeChange(e)} value={localAnalysisType.id}>
-                    {NetworkAnalysisTypes.map((item, index) =>
+                  <select className="form-control" onChange={(e) => this.onAnalysisTypeChange(e)} value={localAnalysisType.id}>
+                    {networkAnalysisTypes.map((item, index) =>
                       <option key={index} value={item.id} label={item.label}></option>
                     )}
                   </select>
@@ -79,29 +80,29 @@ export class AnalysisMode extends Component {
               </div>
 
               {/* Will Render based on Switch case */}
-              <div> 
+              <div>
                 {this.renderNetworkAnalysisTypes(networkAnalysisType)}
               </div>
 
               <div>
-                {(networkAnalysisType  === 'NETWORK_PLAN' || networkAnalysisType === 'NETWORK_ANALYSIS') &&
+                {(networkAnalysisType === 'NETWORK_PLAN' || networkAnalysisType === 'NETWORK_ANALYSIS') &&
                   <div>
                     <NetworkOptimizationInput onModify={this.handleModifyClicked} networkAnalysisTypeId={networkAnalysisType} />
                   </div>
-                }               
-                {networkAnalysisType  === 'EXPERT_MODE' &&
+                }
+                {networkAnalysisType === 'EXPERT_MODE' &&
                   <div style={{height: '100%'}}>
-                    <AnalysisExpertMode/>
+                    <AnalysisExpertMode />
                   </div>
                 }
-                {networkAnalysisType  === 'COVERAGE_ANALYSIS' &&
+                {networkAnalysisType === 'COVERAGE_ANALYSIS' &&
                   <div style={{height: '100%'}}>
-                    <CoverageInitializer/>
+                    <CoverageInitializer />
                   </div>
                 }
-                {networkAnalysisType  === 'RFP' &&
+                {networkAnalysisType === 'RFP' &&
                   <div style={{height: '100%'}}>
-                    <RfpAnalyzer/>
+                    <RfpAnalyzer />
                   </div>
                 }
               </div>
@@ -110,52 +111,53 @@ export class AnalysisMode extends Component {
         </Card>
 
         {/* OUTPUT Accordion */}
-        <Card className={`card-collapse ${collapseCards === this.analysisModePanels.OUTPUT ? 'collapse-show' :''}`}>
-          <CardHeader data-event={this.analysisModePanels.OUTPUT} onClick={(e)=>this.toggleCards(e)} 
-            className={`card-header-dark ${collapseCards === this.analysisModePanels.OUTPUT ? 'card-fixed' :''}`}>
+        <Card className={`card-collapse ${collapseCards === this.analysisModePanels.OUTPUT ? 'collapse-show' : ''}`}>
+          <CardHeader data-event={this.analysisModePanels.OUTPUT} onClick={(e) => this.toggleCards(e)}
+            className={`card-header-dark ${collapseCards === this.analysisModePanels.OUTPUT ? 'card-fixed' : ''}`}
+          >
             Output
           </CardHeader>
           <Collapse isOpen={collapseCards === this.analysisModePanels.OUTPUT}>
             {collapseCards === this.analysisModePanels.OUTPUT &&
               <CardBody style={{padding:'0px'}}>
-                {networkAnalysisType  === 'NETWORK_PLAN' &&
+                {networkAnalysisType === 'NETWORK_PLAN' &&
                   <div style={{height: '100%'}}>
-                    <NetWorkBuildOutput/>
+                    <NetWorkBuildOutput />
                   </div>
                 }
-                {networkAnalysisType  === 'NETWORK_ANALYSIS' &&
+                {networkAnalysisType === 'NETWORK_ANALYSIS' &&
                   <div style={{height: '100%'}}>
-                    <NetworkAnalysisOutput/>
+                    <NetworkAnalysisOutput />
                   </div>
                 }
-                {networkAnalysisType  === 'COVERAGE_ANALYSIS' && coverageReport &&
+                {networkAnalysisType === 'COVERAGE_ANALYSIS' && coverageReport &&
                   <div style={{height: '100%'}}>
-                    <CoverageReportDownloader/>
+                    <CoverageReportDownloader />
                   </div>
-                } 
+                }
 
-                {networkAnalysisType  === 'RFP' &&
+                {networkAnalysisType === 'RFP' &&
                   <div style={{height: '100%'}}>
-                    <button className="btn btn-primary pull-left" onClick={(e)=>this.props.showReportModal(e)}>Reports</button>
-                    <ReportsDownloadModal reportTypes={this.reportTypes} title='RFP Reports'/>
+                    <button className="btn btn-primary pull-left" onClick={(e) => this.props.showReportModal(e)}>Reports</button>
+                    <ReportsDownloadModal reportTypes={this.reportTypes} title='RFP Reports' />
                   </div>
                 }
               </CardBody>
             }
           </Collapse>
-        </Card>          
+        </Card>
       </div>
     )
   }
 
-  renderNetworkAnalysisTypes (NetworkAnalysisTypes) {
-    switch (NetworkAnalysisTypes) {
+  renderNetworkAnalysisTypes (networkAnalysisType) {
+    switch (networkAnalysisType) {
       case 'COVERAGE_ANALYSIS':
-        return <CoverageButton/>
+        return <CoverageButton />
       case 'RFP':
-        return <RfpButton/>
+        return <RfpButton />
       case 'EXPERT_MODE':
-        return <ExpertButton/>               
+        return <ExpertButton />
       default:
         return ''
     }
@@ -166,21 +168,22 @@ export class AnalysisMode extends Component {
   }
 
   onAnalysisTypeChange (e) {
-    let localAnalysisTypeId = e.target.value
-    this.state.NetworkAnalysisTypes.forEach(analysisType => {
-      if (analysisType.id === localAnalysisTypeId) this.setState({localAnalysisType: analysisType});
+    const localAnalysisTypeId = e.target.value
+    this.state.networkAnalysisTypes.forEach(analysisType => {
+      if (analysisType.id === localAnalysisTypeId) this.setState({ localAnalysisType: analysisType });
     })
     this.props.setNetworkAnalysisType(localAnalysisTypeId)
   }
 
   toggleCards (e) {
-    let event = e.target.dataset.event;
+    const event = e.target.dataset.event;
     this.setState({ collapseCards: this.state.collapseCards === event ? this.analysisModePanels.INPUT : event });
   }
 
   // ToDo: this is also in network-optimization-input.jsx
   areControlsEnabled () {
-    return (this.props.currentPlanState === this.props.planStateCons.START_STATE) || (this.props.currentPlanState === this.props.planStateCons.INITIALIZED)
+    return (this.props.currentPlanState === this.props.planStateCons.START_STATE) ||
+           (this.props.currentPlanState === this.props.planStateCons.INITIALIZED)
   }
 }
 
@@ -190,12 +193,12 @@ const mapStateToProps = (state) => ({
   currentPlanState: state.plan.activePlan.planState,
   activePlan: state.plan.activePlan,
   planStateCons: state.analysisMode.planStateCons
-}) 
+})
 
 const mapDispatchToProps = (dispatch) => ({
   showReportModal: () => dispatch(ReportsActions.showOrHideReportModal(true)),
   setNetworkAnalysisType: (networkAnalysisType) => dispatch(NetworkOptimizationActions.setNetworkAnalysisType(networkAnalysisType)),
-  handleModifyClicked: (activePlan) => dispatch(AnalysisActions.handleModifyClicked(activePlan)),
+  handleModifyClicked: (activePlan) => dispatch(AnalysisActions.handleModifyClicked(activePlan))
 })
 
 const AnalysisModeComponent = wrapComponentWithProvider(reduxStore, AnalysisMode, mapStateToProps, mapDispatchToProps)
