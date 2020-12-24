@@ -105,7 +105,7 @@ export class LocationInfo extends Component {
 
         {this.renderLocationTypeTitle('Tower Count', locationDetails.number_of_towers, 5)}
         {this.renderLocationIdDetails('Tower IDs', locationDetails.locSourceIds.towerSourceIds.object_ids, 6)}
-
+        
         <tr>
           <td>Distance From Existing Network</td>
           <td>{locationDetails.distance_to_client_fiber}m</td>
