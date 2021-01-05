@@ -9,6 +9,11 @@ function runOptimization (inputs, userId) { // shouldn't be getting userId from 
     var apiUrl = `/service/v1/optimize/masterplan?userId=${userId}`
     if (inputs.analysis_type === 'NETWORK_ANALYSIS') apiUrl = `/service/v1/analyze/masterplan?userId=${userId}`
 
+    dispatch({
+      type: Actions.NETWORK_OPTIMIZATION_SET_IS_CANCELING,
+      payload: false,
+    })
+
     AroHttp.post(apiUrl, inputs)
       .then((response) => {
         dispatch({
@@ -33,18 +38,7 @@ function cancelOptimization (planId, optimizationId) {
         return dispatch(PlanActions.loadPlan(planId))
       })
       .then((response) => {
-        // TODO: the following shouldn't run until load plan returns, but loadplan doesn't return a promise
-        // service.isCanceling = false
-        dispatch({
-          type: Actions.NETWORK_OPTIMIZATION_SET_IS_CANCELING,
-          payload: false,
-        })
-
-        //service.plan.planState = response.data.planState // Note that this should match with Constants.PLAN_STATE
-
-        // delete service.plan.optimizationId
         dispatch({ type: Actions.NETWORK_OPTIMIZATION_CLEAR_OPTIMIZATION_ID })
-
         //tileDataService.markHtmlCacheDirty()
         //service.requestMapLayerRefresh.next(null)
       })
