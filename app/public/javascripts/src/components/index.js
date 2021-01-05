@@ -5,8 +5,7 @@ import { ToastContainer } from 'react-toastify'
 import AroDebug from '../react/components/sidebar/debug/aro-debug.jsx'
 import ToolBar from '../react/components/header/tool-bar.jsx'
 import PlanSettings from '../react/components/plan/plan-settings.jsx'
-import GlobalSettingsButton from '../react/components/global-settings/global-settings-button.jsx'
-import rGlobalSettings from '../react/components/global-settings/global-settings.jsx'
+import GlobalSettings from '../react/components/global-settings/global-settings.jsx'
 import ResourceEditor from '../react/components/resource-editor/resource-editor.jsx'
 import DataUpload from '../react/components/data-upload/data-upload.jsx'
 import ManageUsers from '../react/components/user/manage-users.jsx'
@@ -77,8 +76,6 @@ import roicReportsSmall from './sidebar/analysis/roic-reports/roic-reports-small
 import roicReportsModal from './sidebar/analysis/roic-reports/roic-reports-modal'
 import coverageReportDownloader from './sidebar/analysis/coverage/coverage-report-downloader'
 import networkBuildOutput from './sidebar/analysis/network-build/network-build-output'
-import aroDebug from './sidebar/debug/aro-debug'
-import viewSettings from './sidebar/debug/view-settings'
 import ringEditor from './sidebar/ring-editor'
 import draggableButton from './sidebar/plan-editor/draggable-button'
 import planEditor from './sidebar/plan-editor/plan-editor'
@@ -97,9 +94,7 @@ import mapSplit from './map/map-split'
 import mapSelectorPlanTarget from './map/map-selector-plan-target'
 import mapSelectorExportLocations from './map/map-selector-export-locations'
 import mapToggleComponent from './map/map-toggle'
-import toolBar from './header/tool-bar'
 import networkPlanModal from './header/network-plan-modal'
-import planInputsModal from './header/plan-inputs-modal'
 import networkPlanManage from './header/network-plan-manage'
 import networkPlan from './header/network-plan'
 import fullScreenContainer from './full-screen/full-screen-container'
@@ -158,8 +153,6 @@ app.component('boundaryDetail', boundaryDetail)
   .component('roicReportsModal', roicReportsModal)
   .component('coverageReportDownloader', coverageReportDownloader)
   .component('networkBuildOutput', networkBuildOutput)
-  .component('aroDebug', aroDebug)
-  .component('viewSettings', viewSettings)
   .component('ringEditor', ringEditor)
   .component('planEditor', planEditor)
   .component('planEditorContainer', planEditorContainer)
@@ -178,9 +171,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('mapSelectorPlanTarget', mapSelectorPlanTarget)
   .component('mapSelectorExportLocations', mapSelectorExportLocations)
   .component('mapToggleComponent', mapToggleComponent)
-  .component('toolBar', toolBar)
   .component('networkPlanModal', networkPlanModal)
-  .component('planInputsModal', planInputsModal)
   .component('networkPlanManage', networkPlanManage)
   .component('networkPlan', networkPlan)
   // .component('uiNotification', uiNotification)
@@ -208,9 +199,8 @@ app.component('boundaryDetail', boundaryDetail)
 // ReactJS components
   .component('rAroDebug', react2angular(AroDebug))
   .component('rToolBar', react2angular(ToolBar))
-  .component('rGlobalSettingsButton', react2angular(GlobalSettingsButton))
   .component('rPlanSettings', react2angular(PlanSettings))
-  .component('rGlobalSettings', react2angular(rGlobalSettings))
+  .component('rGlobalSettings', react2angular(GlobalSettings))
   .component('rResourceEditor', react2angular(ResourceEditor))
   .component('rDataUpload', react2angular(DataUpload))
   .component('rManageUsers', react2angular(ManageUsers))

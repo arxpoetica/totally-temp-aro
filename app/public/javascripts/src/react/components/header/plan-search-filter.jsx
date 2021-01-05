@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
-import reduxStore from '../../../redux-store'
-import wrapComponentWithProvider from '../../common/provider-wrapped-component'
-import Select from "react-select";
+import { connect } from 'react-redux'
+import Select from 'react-select';
 import ToolBarActions from './tool-bar-actions'
 
 const components = {
@@ -30,7 +29,7 @@ export class PlanSearchFilter extends Component {
       selectedItems: []
     }
 
-    var filterDropdown = jQuery('.filter-dropdown')
+    const filterDropdown = jQuery('.filter-dropdown')
 
     filterDropdown.on('click', (event) => {
       const isDropdownHidden = filterDropdown.is(':hidden')
@@ -42,7 +41,8 @@ export class PlanSearchFilter extends Component {
 
   render() {
 
-    const {objectName, searchList} = this.props
+    const { objectName, searchList } = this.props
+    const { selectedItems } = this.state;
 
     const customStyles = {
       control: styles => ({ ...styles, backgroundColor: 'white' }),
@@ -56,22 +56,20 @@ export class PlanSearchFilter extends Component {
       }),
     }
 
-    let optionsList = []; let defaultList=[];
-    if(objectName === 'Tag'){
-      optionsList = searchList.map(function(newkey, index) {
-        return {"id":newkey.id, "value": newkey.name, "label": newkey.name,"colourHue": newkey.colourHue}; 
+    let optionsList = [];
+    if (objectName === 'Tag'){
+      optionsList = searchList.map(function(newkey) {
+        return {"id": newkey.id, "value": newkey.name, "label": newkey.name, "colourHue": newkey.colourHue};
       });
     } else if (objectName === 'Service Area'){
-      optionsList = searchList.map(function(newkey, index) {
-        return {"id":newkey.id, "value": newkey.code, "label": newkey.code}; 
+      optionsList = searchList.map(function(newkey) {
+        return {"id": newkey.id, "value": newkey.code, "label": newkey.code};
       });
     } else if (objectName === 'Creator'){
-      optionsList = searchList.map(function(newkey, index) {
-        return {"id":newkey.fullName, "value": newkey.fullName, "label": newkey.fullName}; 
+      optionsList = searchList.map(function(newkey) {
+        return {"id": newkey.fullName, "value": newkey.fullName, "label": newkey.fullName};
       });
     }
-
-    const {selectedItems} = this.state;
 
     return (
       <div className="dropdown">
@@ -84,17 +82,17 @@ export class PlanSearchFilter extends Component {
             closeMenuOnSelect={true}
             hideSelectedOptions={true}
             backspaceRemovesValue={true}
-            isSearchable={true} 
+            isSearchable={true}
             isClearable={true}
             components={components}
             placeholder={`Select ${objectName}...`}
-            onChange={(e)=>this.onSelectedItemsChanged(e)}
+            onChange={(e) => this.onSelectedItemsChanged(e)}
             styles={customStyles}
           />
-          <div className="text-center" style={{marginTop:'2px'}}>
+          <div className="text-center" style={{marginTop: '2px'}}>
             <button id="apply-filter" disabled={(selectedItems.length < 0 ? 'disabled' : null)}
-              className={`btn btn-sm ${selectedItems.length > 0  ? 'btn-primary' : ''}`}
-              onClick={(e)=>this.props.applySearch({selectedFilters:selectedItems})}
+              className={`btn btn-sm ${selectedItems.length > 0 ? 'btn-primary' : ''}`}
+              onClick={() => this.props.applySearch({selectedFilters: selectedItems})}
             >Apply</button>
           </div>
         </div>
@@ -103,32 +101,28 @@ export class PlanSearchFilter extends Component {
   }
 
   onSelectedItemsChanged (event) {
-    var selectedItems = [];
-    if(event !== null) {
-      var objectName = this.props.objectName;
-      var searchlist = this.props.searchList;
-      if(objectName === 'Creator') {
-        searchlist.map(function(newkey, index) {
-          if(newkey.fullName === event.value) return selectedItems.push(newkey);
+    let selectedItems = [];
+    if (event !== null) {
+      const { objectName, searchList } = this.props
+      if (objectName === 'Creator') {
+        searchList.map(function(newkey) {
+          if (newkey.fullName === event.value) return selectedItems.push(newkey);
         });
       } else {
-        searchlist.map(function(newkey, index) {
-          if(newkey.id === event.id) return selectedItems.push(newkey);
+        searchList.map(function(newkey) {
+          if (newkey.id === event.id) return selectedItems.push(newkey);
         });
       }
     } else {
       selectedItems = []
     }
-    this.setState({ selectedItems: selectedItems});
+    this.setState({ selectedItems });
   }
 }
-
-const mapStateToProps = (state) => ({
-})  
 
 const mapDispatchToProps = (dispatch) => ({
   getTagColour: (tag) => dispatch(ToolBarActions.getTagColour(tag))
 })
 
-const PlanSearchFilterComponent = wrapComponentWithProvider(reduxStore, PlanSearchFilter, mapStateToProps, mapDispatchToProps)
+const PlanSearchFilterComponent = connect(null, mapDispatchToProps)(PlanSearchFilter)
 export default PlanSearchFilterComponent

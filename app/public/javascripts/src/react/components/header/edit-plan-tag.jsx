@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
-import reduxStore from '../../../redux-store'
-import wrapComponentWithProvider from '../../common/provider-wrapped-component'
-import Select from "react-select";
+import { connect } from 'react-redux'
+import Select from 'react-select';
 import ToolBarActions from './tool-bar-actions'
 
 const components = {
@@ -23,16 +22,10 @@ const square = (color) => ({
 });
 
 export class EditPlanTagMode extends Component {
-  constructor (props) {
-    super(props)
-
-    this.state = {
-    }
-  }
 
   render() {
-    const {searchList, selectedList, objectName} = this.props
-    
+    const { searchList, selectedList, objectName } = this.props
+
     const customStyles = {
       control: styles => ({ ...styles, backgroundColor: 'white' }),
       option: (styles, state) => ({
@@ -45,24 +38,24 @@ export class EditPlanTagMode extends Component {
       }),
     }
 
-    let optionsList = []; let defaultList=[];
-    if(objectName === 'Tag'){
-      optionsList = searchList.map(function(newkey, index) {
-        return {"id":newkey.id, "value": newkey.name, "label": newkey.name, "colourHue": newkey.colourHue}; 
+    let optionsList = []; let defaultList = [];
+    if (objectName === 'Tag'){
+      optionsList = searchList.map(function(newkey) {
+        return {"id": newkey.id, "value": newkey.name, "label": newkey.name, "colourHue": newkey.colourHue};
       });
-      defaultList = selectedList.map(function(newkey, index) {
-        return {"id":newkey.id, "value": newkey.name, "label": newkey.name,  "colourHue": newkey.colourHue}; 
+      defaultList = selectedList.map(function(newkey) {
+        return {"id": newkey.id, "value": newkey.name, "label": newkey.name, "colourHue": newkey.colourHue};
       });
     } else if (objectName === 'Service Area'){
-      optionsList = searchList.map(function(newkey, index) {
-        return {"id":newkey.id, "value": newkey.code, "label": newkey.code}; 
+      optionsList = searchList.map(function(newkey) {
+        return {"id": newkey.id, "value": newkey.code, "label": newkey.code};
       });
-      defaultList = selectedList.map(function(newkey, index) {
-        return {"id":newkey.id, "value": newkey.code, "label": newkey.code}; 
+      defaultList = selectedList.map(function(newkey) {
+        return {"id": newkey.id, "value": newkey.code, "label": newkey.code};
       });
     }
-    
-    return(
+
+    return (
       <Select
         isMulti
         options={optionsList}
@@ -70,49 +63,46 @@ export class EditPlanTagMode extends Component {
         closeMenuOnSelect={false}
         hideSelectedOptions={true}
         backspaceRemovesValue={true}
-        isSearchable={true} 
+        isSearchable={true}
         isClearable={false}
         components={components}
         placeholder={`Select ${objectName}...`}
-        onChange={(e,id)=>this.onSelectedItemsChanged(e)}
+        onChange={(e) => this.onSelectedItemsChanged(e)}
         styles={customStyles}
       />
     )
   }
 
   onSelectedItemsChanged (event) {
-    var selectedItems = [];
-    if(event !== null) {
-      var objectName = this.props.objectName;
-      var searchlist = this.props.searchList;
-
-      if(objectName === 'Tag') {
-        searchlist.filter(function (o1) {
+    const selectedItems = [];
+    if (event !== null) {
+      const { objectName, searchList } = this.props
+      if (objectName === 'Tag') {
+        searchList.filter(function (o1) {
           return event.some(function (o2) {
-            if(o1.id === o2.id) return selectedItems.push(o1);
+            if (o1.id === o2.id) return selectedItems.push(o1);
           });
         });
         this.props.setCurrentPlanTags(selectedItems)
-      } else if(objectName === 'Service Area') {
-        searchlist.filter(function (o1) {
+      } else if (objectName === 'Service Area') {
+        searchList.filter(function (o1) {
           return event.some(function (o2) {
-            if(o1.id === o2.id) return selectedItems.push(o1);
+            if (o1.id === o2.id) return selectedItems.push(o1);
           });
         });
         this.props.setCurrentPlanServiceAreaTags(selectedItems)
-      } 
+      }
     }
   }
 }
 
-const mapStateToProps = (state) => ({
-})  
-
 const mapDispatchToProps = (dispatch) => ({
   setCurrentPlanTags: (currentPlanTags) => dispatch(ToolBarActions.setCurrentPlanTags(currentPlanTags)),
-  setCurrentPlanServiceAreaTags: (currentPlanServiceAreaTags) => dispatch(ToolBarActions.setCurrentPlanServiceAreaTags(currentPlanServiceAreaTags)),
+  setCurrentPlanServiceAreaTags: (currentPlanServiceAreaTags) => dispatch(
+    ToolBarActions.setCurrentPlanServiceAreaTags(currentPlanServiceAreaTags)
+  ),
   getTagColour: (tag) => dispatch(ToolBarActions.getTagColour(tag))
 })
 
-const EditPlanTagModeComponent = wrapComponentWithProvider(reduxStore, EditPlanTagMode, mapStateToProps, mapDispatchToProps)
+const EditPlanTagModeComponent = connect(null, mapDispatchToProps)(EditPlanTagMode)
 export default EditPlanTagModeComponent
