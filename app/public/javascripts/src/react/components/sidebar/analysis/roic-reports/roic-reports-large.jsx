@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { Line } from 'react-chartjs-2';
+import { Line } from 'react-chartjs-2'
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat
 const intlNumberFormat = config.intl_number_format || 'en-US'
@@ -47,7 +47,9 @@ export class RoicReportsLarge extends Component {
             <div className="form-group row">
               <div className="col-sm-2">Network Type</div>
               <div className="col-sm-4">
-                <select className="form-control" onChange={(e) => this.handleNetworkTypeChange(e)} value={selectedNetworkType.id}>
+                <select className="form-control" onChange={(event) => this.handleNetworkTypeChange(event)}
+                  value={selectedNetworkType.id}
+                >
                   {networkTypes.map((item, index) =>
                     <option key={index} value={item.id} label={item.description}></option>
                   )}
@@ -55,7 +57,9 @@ export class RoicReportsLarge extends Component {
               </div>
               <div className="col-sm-2 roic-report-label">Entity Type</div>
               <div className="col-sm-4">
-                <select className="form-control" onChange={(e) => this.handleEntityTypeChange(e)} value={selectedEntityType.id}>
+                <select className="form-control" value={selectedEntityType.id}
+                  onChange={(event) => this.handleEntityTypeChange(event)}
+                >
                   {entityTypes.map((item, index) =>
                     <option key={index} value={item.id} label={item.description}></option>
                   )}
@@ -70,7 +74,7 @@ export class RoicReportsLarge extends Component {
             {categories.map((category, index) =>
               <li className="nav-item" key={index}>
                 <a className={`nav-link ${selectedCategory.id === category.id ? 'active' : ''}`}
-                    href="#" onClick={(e) => this.selectCategory(category)}>{category.description}</a>
+                  href="#" onClick={() => this.selectCategory(category)}>{category.description}</a>
               </li>
             )}
           </ul>
@@ -122,7 +126,7 @@ export class RoicReportsLarge extends Component {
                         }
                       </tr>
                     )}
-                  )}           
+                  )}
 
                   <tr>
                     <td><strong>Total Capex</strong></td>
@@ -135,14 +139,14 @@ export class RoicReportsLarge extends Component {
                   {roicResults.priceModel.fiberCosts.map((fiberCost, index) => {
                     return (
                       <tr key={index}>
-                      <td className="indent-1 text-capitalize">
-                        {FIBER_STRINGS[fiberCost.fiberType]} -&nbsp;
-                        {CABLE_CONSTRUCTION_STRINGS[fiberCost.edgeFeatureType + '.' + fiberCost.edgeConstructionType]}
-                        ({Math.round((fiberCost.lengthMeters * this.config.length.meters_to_length_units))}&nbsp;
-                        {this.config.length.length_units})
-                      </td>
-                      <td>{currencyFormatter.format((fiberCost.totalCost / 1000).toFixed(1)) + ' K'}</td>
-                    </tr>
+                        <td className="indent-1 text-capitalize">
+                          {FIBER_STRINGS[fiberCost.fiberType]} -&nbsp;
+                          {CABLE_CONSTRUCTION_STRINGS[fiberCost.edgeFeatureType + '.' + fiberCost.edgeConstructionType]}
+                          ({Math.round((fiberCost.lengthMeters * this.config.length.meters_to_length_units))}&nbsp;
+                          {this.config.length.length_units})
+                        </td>
+                        <td>{currencyFormatter.format((fiberCost.totalCost / 1000).toFixed(1)) + ' K'}</td>
+                      </tr>
                     )}
                   )}
 
@@ -154,18 +158,22 @@ export class RoicReportsLarge extends Component {
                       <tr key={index}>
                         <td className="indent-1 text-capitalize">
                           {networkEquipment.equipments[equipmentCost.nodeType] !== undefined
-                            ? networkEquipment.equipments[equipmentCost.nodeType].label + ' (X' + numberFormatter.format((equipmentCost.quantity).toFixed(0)) + ')'
-                            : networkNodeTypesEntity[equipmentCost.nodeType] + ' (X' + numberFormatter.format((equipmentCost.quantity).toFixed(0)) + ')'
-                          }                          
+                            ? networkEquipment.equipments[equipmentCost.nodeType].label +
+                              ' (X' + numberFormatter.format((equipmentCost.quantity).toFixed(0)) + ')'
+                            : networkNodeTypesEntity[equipmentCost.nodeType] + 
+                              ' (X' + numberFormatter.format((equipmentCost.quantity).toFixed(0)) + ')'
+                          }
                         </td>
                         <td>{currencyFormatter.format((equipmentCost.total / 1000).toFixed(1)) + ' K'}</td>
                       </tr>
                     )}
                   )}
 
-                  {/* plannedNetworkDemand does not assigned or received from any where of the app, so condition is implemented to avoid error while rendering */}
+                  {/* plannedNetworkDemand does not assigned or received from any where of the app,
+                  so condition is implemented to avoid error while rendering */}
                   {this.props.plannedNetworkDemand !== undefined
-                    ? Object.entries(this.props.plannedNetworkDemand.locationDemand.entityDemands).map(([key, value], index) => { 
+                    ? Object.entries(this.props.plannedNetworkDemand.locationDemand.entityDemands)
+                      .map(([key, value], index) => {
                         return (
                           <tr key={index}>
                             {key === 'small' || key === 'medium' || key === 'large' &&
@@ -192,22 +200,24 @@ export class RoicReportsLarge extends Component {
             {/* Even Index */}
             <div style={{display: 'flex', flexDirection: 'column', position: 'absolute', width: '50%', height: '100%'}}>
               {selectedCategory.calcTypes.map((calcType, index) => {
-                if(index % 2 === 0) {
+                if (index % 2 === 0) {
                   return (
                     <div key={index} style={{flex: '1 1 auto', width: '100%', position: 'relative'}}>
                       <div style={{display: 'flex', flexDirection: 'column', width: '100%', height: '100%', position: 'absolute'}}>
                         <div style={{flex: '1 1 auto'}}>
-                        {Object.keys(roicResults.roicAnalysis.components).length > 0
-                          ? roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' + calcType.id] !== undefined && shouldRenderCharts &&
-                            <Line
-                              display={'block'}
-                              data={this.updateDataSet(calcType)}
-                              options={graphOptions[calcType.id]}
-                            />
-                          : ''
+                          {Object.keys(roicResults.roicAnalysis.components).length > 0
+                            ? roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()]
+                              [selectedEntityType.id + '.' + calcType.id] !== undefined && shouldRenderCharts &&
+                              <Line
+                                display={'block'}
+                                data={this.updateDataSet(calcType)}
+                                options={graphOptions[calcType.id]}
+                              />
+                            : ''
                           }
                           {Object.keys(roicResults.roicAnalysis.components).length > 0
-                            ? roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' + calcType.id] === undefined && this.chartDataWarning()
+                            ? roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()]
+                              [selectedEntityType.id + '.' + calcType.id] === undefined && this.chartDataWarning()
                             : this.chartDataWarning()
                           }
                         </div>
@@ -219,15 +229,20 @@ export class RoicReportsLarge extends Component {
             </div>
 
             {/* Odd Index */}
-            <div style={{display: 'flex', flexDirection: 'column', position: 'absolute', left: '50%', width: '50%', height: '100%'}}>
+            <div style={{display: 'flex', flexDirection: 'column', position: 'absolute',
+              left: '50%', width: '50%', height: '100%'}}
+            >
               {selectedCategory.calcTypes.map((calcType, index) => {
-                if(index % 2 !== 0) {
+                if (index % 2 !== 0) {
                   return (
                     <div key={index} style={{flex: '1 1 auto', width: '100%', position: 'relative'}}>
-                      <div style={{display: 'flex', flexDirection: 'column', width: '100%', height: '100%', position: 'absolute'}}>
+                      <div style={{display: 'flex', flexDirection: 'column', width: '100%',
+                        height: '100%', position: 'absolute'}}
+                      >
                         <div style={{flex: '1 1 auto'}}>
                           {Object.keys(roicResults.roicAnalysis.components).length > 0
-                            ? roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' + calcType.id] !== undefined && shouldRenderCharts &&
+                            ? roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()]
+                              [selectedEntityType.id + '.' + calcType.id] !== undefined && shouldRenderCharts &&
                               <Line
                                 display={'block'}
                                 data={this.updateDataSet(calcType)}
@@ -236,7 +251,8 @@ export class RoicReportsLarge extends Component {
                             : ''
                           }
                           {Object.keys(roicResults.roicAnalysis.components).length > 0
-                            ? roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' + calcType.id] === undefined && this.chartDataWarning()
+                            ? roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()]
+                              [selectedEntityType.id + '.' + calcType.id] === undefined && this.chartDataWarning()
                             : this.chartDataWarning()
                           }
                         </div>
@@ -266,25 +282,26 @@ export class RoicReportsLarge extends Component {
     const { selectedEntityType, selectedNetworkType } = this.state
 
     return {
-      labels:timeLabels,
+      labels: timeLabels,
       datasets: [
         {
-          data: roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' + calcType.id].values,
+          data: roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' +
+          calcType.id].values,
           fill: dataSetProps.fill,
-          pointBackgroundColor:dataSetProps.pointBackgroundColor,
+          pointBackgroundColor: dataSetProps.pointBackgroundColor,
           pointHoverBackgroundColor: dataSetProps.pointHoverBackgroundColor
         }
       ]
     }
   }
 
-  handleNetworkTypeChange (e) {
-    const selectedNetworkType = this.props.networkTypes.find(item => item.id === e.target.value);
+  handleNetworkTypeChange (event) {
+    const selectedNetworkType = this.props.networkTypes.find(item => item.id === event.target.value)
     this.setState({ selectedNetworkType })
   }
 
-  handleEntityTypeChange (e) {
-    const selectedEntityType = this.props.entityTypes.find(item => item.id === e.target.value);
+  handleEntityTypeChange (event) {
+    const selectedEntityType = this.props.entityTypes.find(item => item.id === event.target.value)
     this.setState({ selectedEntityType })
   }
 
@@ -295,7 +312,7 @@ export class RoicReportsLarge extends Component {
     // overlapping one another. We are using a timeout so that the browser will finish laying out the divs,
     // and then initialize charts correctly. This is hacky, if there is a better solution feel free to implement it.
     const RENDER_TIMEOUT_CHARTS = 50 // milliseconds
-    setTimeout(function() { this.setState({ shouldRenderCharts: true }) }.bind(this), RENDER_TIMEOUT_CHARTS);
+    setTimeout(function() { this.setState({ shouldRenderCharts: true }) }.bind(this), RENDER_TIMEOUT_CHARTS)
   }
 }
 
@@ -303,11 +320,8 @@ const mapStateToProps = (state) => ({
   roicResults: state.analysisMode.roicResults,
   enumStrings: state.analysisMode.enumStrings,
   networkEquipment: state.mapLayers.networkEquipment,
-  networkNodeTypesEntity: state.analysisMode.networkNodeTypesEntity
+  networkNodeTypesEntity: state.analysisMode.networkNodeTypesEntity,
 })
 
-const mapDispatchToProps = (dispatch) => ({
-})
-
-const RoicReportsLargeComponent = connect(mapStateToProps, mapDispatchToProps)(RoicReportsLarge)
+const RoicReportsLargeComponent = connect(mapStateToProps, null)(RoicReportsLarge)
 export default RoicReportsLargeComponent

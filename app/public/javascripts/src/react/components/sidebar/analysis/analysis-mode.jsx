@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
-import { Collapse, Card, CardHeader, CardBody } from 'reactstrap';
+import { Collapse, Card, CardHeader, CardBody } from 'reactstrap'
 import './analysis-mode.css'
 import ReportsActions from '../../optimization/reports/reports-actions'
 import NetworkOptimizationActions from '../../optimization/network-optimization/network-optimization-actions'
@@ -43,13 +43,13 @@ export class AnalysisMode extends Component {
     this.state.networkAnalysisTypes.forEach(analysisType => {
       if (analysisType.id === this.props.networkAnalysisType) initAnalysisType = analysisType
     })
-    this.setState({ localAnalysisType: initAnalysisType });
+    this.setState({ localAnalysisType: initAnalysisType })
   }
 
   render () {
 
-    const { collapseCards, networkAnalysisTypes, localAnalysisType } = this.state;
-    const { networkAnalysisType, coverageReport } = this.props;
+    const { collapseCards, networkAnalysisTypes, localAnalysisType } = this.state
+    const { networkAnalysisType, coverageReport } = this.props
 
     return (
       <div className="analysis-mode-container">
@@ -57,7 +57,7 @@ export class AnalysisMode extends Component {
 
         {/* INPUT Accordion */}
         <Card className={`card-collapse ${collapseCards === this.analysisModePanels.INPUT ? 'collapse-show' : ''}`}>
-          <CardHeader data-event={this.analysisModePanels.INPUT} onClick={(e) => this.toggleCards(e)}
+          <CardHeader data-event={this.analysisModePanels.INPUT} onClick={(event) => this.toggleCards(event)}
             className={`card-header-dark ${collapseCards === this.analysisModePanels.INPUT ? 'card-fixed' : ''}`}
           >
             Input
@@ -68,7 +68,7 @@ export class AnalysisMode extends Component {
               <div className="col-xs-7" style={{left: '20', border: '10px solid white'}}>
                 {/* pull this out */}
                 {this.areControlsEnabled() &&
-                  <select className="form-control" onChange={(e) => this.onAnalysisTypeChange(e)} value={localAnalysisType.id}>
+                  <select className="form-control" onChange={(event) => this.onAnalysisTypeChange(event)} value={localAnalysisType.id}>
                     {networkAnalysisTypes.map((item, index) =>
                       <option key={index} value={item.id} label={item.label}></option>
                     )}
@@ -87,7 +87,10 @@ export class AnalysisMode extends Component {
               <div>
                 {(networkAnalysisType === 'NETWORK_PLAN' || networkAnalysisType === 'NETWORK_ANALYSIS') &&
                   <div>
-                    <NetworkOptimizationInput onModify={this.handleModifyClicked} networkAnalysisTypeId={networkAnalysisType} />
+                    <NetworkOptimizationInput
+                      onModify={this.handleModifyClicked}
+                      networkAnalysisTypeId={networkAnalysisType}
+                    />
                   </div>
                 }
                 {networkAnalysisType === 'EXPERT_MODE' &&
@@ -112,7 +115,7 @@ export class AnalysisMode extends Component {
 
         {/* OUTPUT Accordion */}
         <Card className={`card-collapse ${collapseCards === this.analysisModePanels.OUTPUT ? 'collapse-show' : ''}`}>
-          <CardHeader data-event={this.analysisModePanels.OUTPUT} onClick={(e) => this.toggleCards(e)}
+          <CardHeader data-event={this.analysisModePanels.OUTPUT} onClick={(event) => this.toggleCards(event)}
             className={`card-header-dark ${collapseCards === this.analysisModePanels.OUTPUT ? 'card-fixed' : ''}`}
           >
             Output
@@ -138,7 +141,7 @@ export class AnalysisMode extends Component {
 
                 {networkAnalysisType === 'RFP' &&
                   <div style={{height: '100%'}}>
-                    <button className="btn btn-primary pull-left" onClick={(e) => this.props.showReportModal(e)}>Reports</button>
+                    <button className="btn btn-primary pull-left" onClick={() => this.props.showReportModal()}>Reports</button>
                     <ReportsDownloadModal reportTypes={this.reportTypes} title='RFP Reports' />
                   </div>
                 }
@@ -164,20 +167,20 @@ export class AnalysisMode extends Component {
   }
 
   handleModifyClicked () {
-    this.props.handleModifyClicked(this.props.activePlan);
+    this.props.handleModifyClicked(this.props.activePlan)
   }
 
-  onAnalysisTypeChange (e) {
-    const localAnalysisTypeId = e.target.value
+  onAnalysisTypeChange (event) {
+    const localAnalysisTypeId = event.target.value
     this.state.networkAnalysisTypes.forEach(analysisType => {
-      if (analysisType.id === localAnalysisTypeId) this.setState({ localAnalysisType: analysisType });
+      if (analysisType.id === localAnalysisTypeId) this.setState({ localAnalysisType: analysisType })
     })
     this.props.setNetworkAnalysisType(localAnalysisTypeId)
   }
 
-  toggleCards (e) {
-    const event = e.target.dataset.event;
-    this.setState({ collapseCards: this.state.collapseCards === event ? this.analysisModePanels.INPUT : event });
+  toggleCards (eventArg) {
+    const event = eventArg.target.dataset.event
+    this.setState({ collapseCards: this.state.collapseCards === event ? this.analysisModePanels.INPUT : event })
   }
 
   // ToDo: this is also in network-optimization-input.jsx
@@ -192,13 +195,15 @@ const mapStateToProps = (state) => ({
   networkAnalysisType: state.optimization.networkOptimization.optimizationInputs.analysis_type,
   currentPlanState: state.plan.activePlan.planState,
   activePlan: state.plan.activePlan,
-  planStateCons: state.analysisMode.planStateCons
+  planStateCons: state.analysisMode.planStateCons,
 })
 
 const mapDispatchToProps = (dispatch) => ({
   showReportModal: () => dispatch(ReportsActions.showOrHideReportModal(true)),
-  setNetworkAnalysisType: (networkAnalysisType) => dispatch(NetworkOptimizationActions.setNetworkAnalysisType(networkAnalysisType)),
-  handleModifyClicked: (activePlan) => dispatch(AnalysisActions.handleModifyClicked(activePlan))
+  setNetworkAnalysisType: (networkAnalysisType) => dispatch(
+    NetworkOptimizationActions.setNetworkAnalysisType(networkAnalysisType)
+  ),
+  handleModifyClicked: (activePlan) => dispatch(AnalysisActions.handleModifyClicked(activePlan)),
 })
 
 const AnalysisModeComponent = wrapComponentWithProvider(reduxStore, AnalysisMode, mapStateToProps, mapDispatchToProps)

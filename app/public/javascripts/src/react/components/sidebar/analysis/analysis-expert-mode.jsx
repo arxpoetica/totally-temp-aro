@@ -17,9 +17,10 @@ export class AnalysisExpertMode extends Component {
 
   componentDidMount () {
     const { optimizationInputs, activeSelectionModeId, locationLayers, plan } = this.props
-
-    const expertMode = this.state.expertMode
-    expertMode.OPTIMIZATION_SETTINGS = JSON.stringify(this.props.getOptimizationBody(optimizationInputs, activeSelectionModeId, locationLayers, plan), undefined, 4)
+    const { expertMode } = this.state
+    expertMode.OPTIMIZATION_SETTINGS = JSON.stringify(this.props.getOptimizationBody(
+      optimizationInputs, activeSelectionModeId, locationLayers, plan), undefined, 4
+    )
     this.setState({ expertMode })
   }
 
@@ -29,33 +30,33 @@ export class AnalysisExpertMode extends Component {
     const { expertMode } = this.state
 
     return (
-      <div className="row" style={{height:'100%'}}>
-        <div className="col-md-12" style={{height:'80%'}}>
-          <select className="form-control" onChange={(e) => this.handleExpertModeTypesChange(e)} value={selectedExpertMode}>
-            {Object.entries(expertModeTypes).map(([key, item], index) => {
-              return <option key={index} value={item.id} label={item.label}/>
-            })
+      <div className="row" style={{height: '100%'}}>
+        <div className="col-md-12" style={{height: '80%'}}>
+          <select className="form-control" onChange={(event) => this.handleExpertModeTypesChange(event)} value={selectedExpertMode}>
+            { Object.entries(expertModeTypes).map(([key, item], index) => {
+                return <option key={index} value={item.id} label={item.label}/>
+              })
             }
           </select>
 
           {selectedExpertMode !== expertModeTypes['OPTIMIZATION_SETTINGS'].id &&
-            <textarea 
+            <textarea
               rows="17"
               maxLength="75000"
               style={{fontFamily: 'Courier', width: '100%', height: '100%'}}
               value={expertMode[selectedExpertMode]}
               placeholder={`Available Keys: ${JSON.stringify(scopeContextKeys)}`}
-              onChange={(e) => this.validateExpertModeQuery(e)}
+              onChange={(event) => this.validateExpertModeQuery(event)}
               spellCheck="false"
             />
           }
 
           {selectedExpertMode === expertModeTypes['OPTIMIZATION_SETTINGS'].id &&
-            <textarea 
+            <textarea
               rows="20"
               style={{fontFamily: 'Courier', width: '100%', height: '100%'}}
               value={expertMode.OPTIMIZATION_SETTINGS}
-              onChange={(e) => this.handleOptimizationSettings(e)}
+              onChange={(event) => this.handleOptimizationSettings(event)}
               spellCheck="false"
             />
           }
@@ -64,18 +65,19 @@ export class AnalysisExpertMode extends Component {
     )
   }
 
-  handleOptimizationSettings (e) {
+  handleOptimizationSettings (event) {
     const expertMode = this.state.expertMode;
-    expertMode['OPTIMIZATION_SETTINGS'] = e.target.value
+    expertMode['OPTIMIZATION_SETTINGS'] = event.target.value
     this.setState({ expertMode })
-    this.props.setExpertMode(JSON.parse(JSON.stringify(expertMode))) // To set the changed 'OPTIMIZATION_SETTINGS' in redux
+    // To set the changed 'OPTIMIZATION_SETTINGS' in redux
+    this.props.setExpertMode(JSON.parse(JSON.stringify(expertMode)))
   }
 
-  validateExpertModeQuery (e) {
+  validateExpertModeQuery (event) {
     const expertMode = this.state.expertMode;
     const selectedExpertMode = this.props.selectedExpertMode
 
-    expertMode[selectedExpertMode] = e.target.value
+    expertMode[selectedExpertMode] = event.target.value
     this.setState({ expertMode })
     this.props.setExpertMode(JSON.parse(JSON.stringify(expertMode)))
 
@@ -90,8 +92,8 @@ export class AnalysisExpertMode extends Component {
     this.props.setExpertModeTypes(JSON.parse(JSON.stringify(expertModeTypes)))
   }
 
-  handleExpertModeTypesChange (e) {
-    this.props.setSelectedExpertMode(e.target.value)
+  handleExpertModeTypesChange (event) {
+    this.props.setSelectedExpertMode(event.target.value)
   }
 }
 
@@ -107,15 +109,17 @@ const mapStateToProps = (state) => ({
   locationLayers: getLocationLayersList(state),
   plan: state.plan.activePlan,
   scopeContextKeys: state.analysisMode.scopeContextKeys,
-  expertMode: state.analysisMode.expertMode
+  expertMode: state.analysisMode.expertMode,
 })
 
 const mapDispatchToProps = (dispatch) => ({
   setSelectedExpertMode: (selectedExpertMode) => dispatch(AnalysisActions.setSelectedExpertMode(selectedExpertMode)),
-  getOptimizationBody: (optimizationInputs, activeSelectionModeId, locationLayers, plan) => dispatch(ToolBarActions.getOptimizationBody(optimizationInputs, activeSelectionModeId, locationLayers, plan)),
+  getOptimizationBody: (optimizationInputs, activeSelectionModeId, locationLayers, plan) => dispatch(
+    ToolBarActions.getOptimizationBody(optimizationInputs, activeSelectionModeId, locationLayers, plan)
+  ),
   getExpertModeScopeContext: (plan) => dispatch(AnalysisActions.getExpertModeScopeContext(plan)),
   setExpertMode: (expertMode) => dispatch(AnalysisActions.setExpertMode(expertMode)),
-  setExpertModeTypes: (expertModeTypes) => dispatch(AnalysisActions.setExpertModeTypes(expertModeTypes))
+  setExpertModeTypes: (expertModeTypes) => dispatch(AnalysisActions.setExpertModeTypes(expertModeTypes)),
 })
 
 const AnalysisExpertModeComponent = connect(mapStateToProps, mapDispatchToProps)(AnalysisExpertMode)

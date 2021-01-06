@@ -99,14 +99,16 @@ export class RoicReports extends Component {
       { id: 'household', description: 'Households' },
       { id: 'celltower', description: 'Cell Towers' }
     ]
-  
+
     this.state = {
     }
   }
 
   getOptionsForCalcType (calcType) {
     return {
-      id: Math.random(), // What is this? The chart binding is doing an "angular.equals()" comparison, so without a unique ID it will not recompute axes labels, etc.
+      // What is this? The chart binding is doing an "angular.equals()" comparison,
+      // so without a unique ID it will not recompute axes labels, etc.
+      id: Math.random(),
       maintainAspectRatio: false,
       aspectRatio: 0.7,
       tooltips: {
@@ -142,15 +144,17 @@ export class RoicReports extends Component {
     precision = precision || 1
     // This function will format the Y-axis tick values so that we show '100 K' instead of '100000'
     // (and will do the same for millions/billions). We can also specify a tick prefix like '$'
-    const maxValue = Math.max.apply(Math, allValues) // Inefficient to do this every time, but 'values' length will be small
+
+    // Inefficient to do this every time, but 'values' length will be small
+    const maxValue = Math.max.apply(Math, allValues)
     const thresholds = [
       { zeroes: 9, suffix: 'B' }, // Billions
       { zeroes: 6, suffix: 'M' }, // Millions
       { zeroes: 3, suffix: 'K' } // Thousands
     ]
     const threshold = thresholds.filter(item => maxValue >= Math.pow(10, item.zeroes))[0]
-    // Two spaces in front of the return value - For some reason values with yMax = 900,000 were getting chopped off on the graph
-    // without these two spaces.
+    // Two spaces in front of the return value - For some reason values with yMax = 900,000 were getting
+    // chopped off on the graph without these two spaces.
     if (threshold) {
       return `  ${calcType.tickPrefix}${(value / Math.pow(10, threshold.zeroes)).toFixed(precision)} ${threshold.suffix}${calcType.tickSuffix}`
     } else {
@@ -159,9 +163,9 @@ export class RoicReports extends Component {
   }
 
   componentDidUpdate (prevProps) {
-    if(JSON.stringify(this.props.roicResults) !== JSON.stringify(prevProps.roicResults)) {
-      if(Object.entries(this.props.roicResults.roicAnalysis.components).length > 0)
-      this.digestData()
+    if (JSON.stringify(this.props.roicResults) !== JSON.stringify(prevProps.roicResults)) {
+      if (Object.entries(this.props.roicResults.roicAnalysis.components).length > 0)
+        this.digestData()
     }
   }
 
@@ -174,7 +178,7 @@ export class RoicReports extends Component {
     const aCurveKey = Object.keys(component)[0]
     const yearsCount = component[aCurveKey].values.length
 
-    let xAxisLabels = []
+    const xAxisLabels = []
     for (let i = 0; i < yearsCount; ++i) {
       xAxisLabels.push(currentYear + i)
     }
@@ -198,7 +202,7 @@ export class RoicReports extends Component {
 
   renderRoicReports () {
 
-    const { reportSize, xAxisLabels } = this.props;
+    const { reportSize, xAxisLabels } = this.props
 
     return (
       <>
@@ -232,11 +236,11 @@ export class RoicReports extends Component {
 
 const mapStateToProps = (state) => ({
   roicResults: state.analysisMode.roicResults,
-  xAxisLabels: state.analysisMode.xAxisLabels
+  xAxisLabels: state.analysisMode.xAxisLabels,
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  setXaxisLabels: (xAxisLabels) => dispatch(AnalysisActions.setXaxisLabels(xAxisLabels))
+  setXaxisLabels: (xAxisLabels) => dispatch(AnalysisActions.setXaxisLabels(xAxisLabels)),
 })
 
 const RoicReportsComponent = connect(mapStateToProps, mapDispatchToProps)(RoicReports)

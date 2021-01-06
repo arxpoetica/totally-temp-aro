@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import AnalysisActions from '../analysis-actions'
-import { Line } from 'react-chartjs-2';
+import { Line } from 'react-chartjs-2'
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat
 const intlNumberFormat = config.intl_number_format || 'en-US'
@@ -90,7 +90,7 @@ export class RoicReportsSmall extends Component {
                     }
                   </tr>
                 )}
-              )}         
+              )}
 
               <tr>
                 <td><strong>Total Capex</strong></td>
@@ -122,8 +122,10 @@ export class RoicReportsSmall extends Component {
                   <tr key={index}>
                     <td className="indent-1 text-capitalize">
                       {networkEquipment.equipments[equipmentCost.nodeType] !== undefined
-                        ? networkEquipment.equipments[equipmentCost.nodeType].label + ' (X' + numberFormatter.format((equipmentCost.quantity).toFixed(0)) + ')'
-                        : networkNodeTypesEntity[equipmentCost.nodeType] + ' (X' + numberFormatter.format((equipmentCost.quantity).toFixed(0)) + ')'
+                        ? networkEquipment.equipments[equipmentCost.nodeType].label +
+                          ' (X' + numberFormatter.format((equipmentCost.quantity).toFixed(0)) + ')'
+                        : networkNodeTypesEntity[equipmentCost.nodeType] +
+                          ' (X' + numberFormatter.format((equipmentCost.quantity).toFixed(0)) + ')'
                       }
                     </td>
                     <td>{currencyFormatter.format((equipmentCost.total / 1000).toFixed(1)) + ' K'}</td>
@@ -131,9 +133,11 @@ export class RoicReportsSmall extends Component {
                 )}
               )}
 
-              {/* plannedNetworkDemand does not assigned or received from any where of the app, so condition is implemented to avoid error while rendering */}
+              {/* plannedNetworkDemand does not assigned or received from any where of the app,
+              so condition is implemented to avoid error while rendering */}
               {this.props.plannedNetworkDemand !== undefined
-                 ? Object.entries(this.props.plannedNetworkDemand.locationDemand.entityDemands).map(([key, value], index) => {
+                ? Object.entries(this.props.plannedNetworkDemand.locationDemand.entityDemands)
+                  .map(([key, value], index) => {
                     return (
                       <tr key={index}>
                         {key === 'small' || key === 'medium' || key === 'large' &&
@@ -160,7 +164,9 @@ export class RoicReportsSmall extends Component {
             <div className="form-group row">
               <div className="col-sm-4 roic-report-label">Network Type</div>
               <div className="col-sm-8">
-                <select className="form-control" onChange={(e) => this.handleNetworkTypeChange(e)} value={selectedNetworkType.id}>
+                <select className="form-control" value={selectedNetworkType.id}
+                  onChange={(event) => this.handleNetworkTypeChange(event)}
+                >
                   {networkTypes.map((item, index) =>
                     <option key={index} value={item.id} label={item.description}></option>
                   )}
@@ -171,19 +177,24 @@ export class RoicReportsSmall extends Component {
             <div className="form-group row">
               <div className="col-sm-4 roic-report-label">Group</div>
               <div className="col-sm-8">
-                <select className="form-control" onChange={(e) => this.handleCategoriesChange(e)} value={selectedCategory.id}>
-                {categories.filter((categorie) => categorie.id !== 'summary')
-                  .map((item, index) =>
-                    <option key={index} value={item.id} label={item.description}></option>
-                  )}
+                <select className="form-control" value={selectedCategory.id}
+                  onChange={(event) => this.handleCategoriesChange(event)}
+                >
+                  { categories.filter((categorie) => categorie.id !== 'summary')
+                    .map((item, index) =>
+                      <option key={index} value={item.id} label={item.description}></option>
+                    )
+                  }
                 </select>
               </div>
-            </div>  
+            </div>
 
             <div className="form-group row">
               <div className="col-sm-4 roic-report-label">Metric</div>
               <div className="col-sm-8">
-                <select className="form-control" onChange={(e) => this.handleCalcTypeChange(e)} value={selectedCalcType.id}>
+                <select className="form-control" value={selectedCalcType.id}
+                  onChange={(event) => this.handleCalcTypeChange(event)}
+                >
                   {selectedCategory.calcTypes.map((item, index) =>
                     <option key={index} value={item.id} label={item.description}></option>
                   )}
@@ -194,21 +205,25 @@ export class RoicReportsSmall extends Component {
             <div className="form-group row">
               <div className="col-sm-4 roic-report-label">Entity Type</div>
               <div className="col-sm-8">
-                <select className="form-control" onChange={(e) => this.handleEntityTypeChange(e)} value={selectedEntityType.id}>
+                <select className="form-control" value={selectedEntityType.id}
+                  onChange={(event) => this.handleEntityTypeChange(event)}
+                >
                   {entityTypes.map((item, index) =>
                     <option key={index} value={item.id} label={item.description}></option>
                   )}
                 </select>
               </div>
-            </div>            
+            </div>
           </form>
         </div>
 
         <div style={{flex: '1 1 auto'}}>
           {/* If we have chart data, show it */}
-          {/* roicResults.roicAnalysis.components does not has values, so condition is implemented to avoid error while rendering */}
+          {/* roicResults.roicAnalysis.components does not has values,
+          so condition is implemented to avoid error while rendering */}
           {Object.keys(roicResults.roicAnalysis.components).length > 0
-            ? roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' + selectedCalcType.id] !== undefined &&
+            ? roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' +
+              selectedCalcType.id] !== undefined &&
               <Line
                 display={'block'} width={250} height={533}
                 data={this.updateDataSet()}
@@ -220,9 +235,11 @@ export class RoicReportsSmall extends Component {
 
         <div style={{flex: '1 1 auto'}}>
           {/* <!-- If we do not have chart data, display a warning --> */}
-          {/* roicResults.roicAnalysis.components does not has values, so condition is implemented to avoid error while rendering */}
+          {/* roicResults.roicAnalysis.components does not has values,
+          so condition is implemented to avoid error while rendering */}
           {Object.keys(roicResults.roicAnalysis.components).length > 0
-            ? roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' + selectedCalcType.id] === undefined && this.chartDataWarning()
+            ? roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' +
+              selectedCalcType.id] === undefined && this.chartDataWarning()
             : this.chartDataWarning()
           }
         </div>
@@ -244,35 +261,35 @@ export class RoicReportsSmall extends Component {
     const { selectedEntityType, selectedNetworkType, selectedCalcType } = this.state
 
     return {
-      labels:timeLabels,
+      labels: timeLabels,
       datasets: [
         {
           data: roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' + selectedCalcType.id].values,
           fill: dataSetProps.fill,
-          pointBackgroundColor:dataSetProps.pointBackgroundColor,
+          pointBackgroundColor: dataSetProps.pointBackgroundColor,
           pointHoverBackgroundColor: dataSetProps.pointHoverBackgroundColor
         }
       ]
     }
   }
 
-  handleNetworkTypeChange (e) {
-    const selectedNetworkType = this.props.networkTypes.find(item => item.id === e.target.value);
+  handleNetworkTypeChange (event) {
+    const selectedNetworkType = this.props.networkTypes.find(item => item.id === event.target.value)
     this.setState({ selectedNetworkType })
   }
 
-  handleCategoriesChange (e) {
-    const selectedCategory = this.props.categories.find(item => item.id === e.target.value);
+  handleCategoriesChange (event) {
+    const selectedCategory = this.props.categories.find(item => item.id === event.target.value)
     this.setState({ selectedCategory, selectedCalcType: selectedCategory.calcTypes[0] })
   }
 
-  handleCalcTypeChange (e) {
-    const selectedCalcType = this.state.selectedCategory.calcTypes.find(item => item.id === e.target.value);
+  handleCalcTypeChange (event) {
+    const selectedCalcType = this.state.selectedCategory.calcTypes.find(item => item.id === event.target.value)
     this.setState({ selectedCalcType })
   }
 
-  handleEntityTypeChange (e) {
-    const selectedEntityType = this.props.entityTypes.find(item => item.id === e.target.value);
+  handleEntityTypeChange (event) {
+    const selectedEntityType = this.props.entityTypes.find(item => item.id === event.target.value)
     this.setState({ selectedEntityType })
   }
 }
@@ -281,11 +298,11 @@ const mapStateToProps = (state) => ({
   enumStrings: state.analysisMode.enumStrings,
   networkEquipment: state.mapLayers.networkEquipment,
   networkNodeTypesEntity: state.analysisMode.networkNodeTypesEntity,
-  roicResults: state.analysisMode.roicResults
+  roicResults: state.analysisMode.roicResults,
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  loadNetworkNodeTypesEntity: () => dispatch(AnalysisActions.loadNetworkNodeTypesEntity())
+  loadNetworkNodeTypesEntity: () => dispatch(AnalysisActions.loadNetworkNodeTypesEntity()),
 })
 
 const RoicReportsSmallComponent = connect(mapStateToProps, mapDispatchToProps)(RoicReportsSmall)

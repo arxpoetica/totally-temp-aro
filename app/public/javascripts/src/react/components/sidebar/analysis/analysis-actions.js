@@ -11,24 +11,17 @@ function setEnumStrings (enumStrings) {
 
 function loadNetworkNodeTypesEntity () {
   return dispatch => {
-    return new Promise((resolve, reject) => {
-      AroHttp.get('/service/odata/NetworkNodeTypesEntity')
-        .then((response) => {
-          if (response.status >= 200 && response.status <= 299) {
-            const networkNodeTypesEntity = {}
-            response.data.forEach((entityType) => {
-              networkNodeTypesEntity[entityType.name] = entityType.description
-            })
-            dispatch({
-              type: Actions.ANALYSIS_MODE_NETWORK_NODE_TYPE_ENTITY,
-              payload: networkNodeTypesEntity
-            })
-            resolve()
-          } else {
-            reject(response)
-          }
+    AroHttp.get('/service/odata/NetworkNodeTypesEntity')
+      .then((response) => {
+        const networkNodeTypesEntity = {}
+        response.data.forEach((entityType) => {
+          networkNodeTypesEntity[entityType.name] = entityType.description
         })
-    })
+        dispatch({
+          type: Actions.ANALYSIS_MODE_NETWORK_NODE_TYPE_ENTITY,
+          payload: networkNodeTypesEntity
+        })
+      })
   }
 }
 
@@ -43,7 +36,8 @@ function handleModifyClicked(plan)  {
   return dispatch => {
     const currentPlan = plan
     if (currentPlan.ephemeral) {
-      // This is an ephemeral plan. Don't show any dialogs to the user, simply copy this plan over to a new ephemeral plan
+      // This is an ephemeral plan. 
+      // Don't show any dialogs to the user, simply copy this plan over to a new ephemeral plan
       const url = `/service/v1/plan-command/copy?source_plan_id=${currentPlan.id}&is_ephemeral=${currentPlan.ephemeral}`
       return AroHttp.post(url, {})
         .then((result) => {
@@ -57,7 +51,8 @@ function handleModifyClicked(plan)  {
           return Promise.reject(err)
         })
     } else {
-      // This is not an ephemeral plan. Show a dialog to the user asking whether to overwrite current plan or save as a new one.
+      // This is not an ephemeral plan. 
+      // Show a dialog to the user asking whether to overwrite current plan or save as a new one.
       return showModifyQuestionDialog()
         .then((resp) => {
           if (resp === modifyDialogResult.OVERWRITE) {
@@ -79,7 +74,7 @@ function handleModifyClicked(plan)  {
 }
 
 function showModifyQuestionDialog () {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     swal({
       title: '',
       text: 'You are modifying a plan with a completed analysis. Do you wish to overwrite the existing plan?  Overwriting will clear all results which were previously run.',
@@ -107,14 +102,14 @@ function setSelectedExpertMode (selectedExpertMode) {
 function getExpertModeScopeContext (plan) {
   return dispatch => {
     AroHttp.get(`/service/v1/plan/${plan.id}/scope-context`)
-    .then((result) => {
-      const expertModeScopeContext = result.data
-      dispatch({
-        type: Actions.ANALYSIS_MODE_EXPERT_MODE_SCOPE_CONTEXT,
-        payload: expertModeScopeContext
+      .then((result) => {
+        const expertModeScopeContext = result.data
+        dispatch({
+          type: Actions.ANALYSIS_MODE_EXPERT_MODE_SCOPE_CONTEXT,
+          payload: expertModeScopeContext
+        })
+        dispatch(getAvailableScopeContextKeys(expertModeScopeContext))
       })
-      dispatch(getAvailableScopeContextKeys(expertModeScopeContext))
-    })
   }
 }
 
@@ -123,13 +118,13 @@ function getAvailableScopeContextKeys (obj, parentKey) {
   return dispatch => {
     Object.keys(obj).forEach((key) => {
       if (obj[key] instanceof Object) {
-        const superKey = parentKey == null ? key : parentKey + '.' + key
+        const superKey = parentKey === null ? key : parentKey + '.' + key
         dispatch(getAvailableScopeContextKeys(obj[key], superKey))
       } else {
-        parentKey == null ? scopeContextKeys.push(key) : scopeContextKeys.push(parentKey + '.' + key)
+        parentKey === null ? scopeContextKeys.push(key) : scopeContextKeys.push(parentKey + '.' + key)
       }
     })
-    setTimeout(function(){ 
+    setTimeout(function(){
       dispatch({
         type: Actions.ANALYSIS_MODE_SUPER_CONTEXT_KEYS,
         payload: scopeContextKeys

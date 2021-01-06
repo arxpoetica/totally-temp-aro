@@ -22,28 +22,40 @@ export class NetWorkBuildOutput extends Component {
 
   render () {
 
-    const {reportTypes, reportSize} = this.state;
-    const {planId, planState} = this.props;
+    const { reportTypes, reportSize } = this.state
+    const { planId, planState } = this.props
 
     return (
       <div>
         {/* <!-- The ROIC Reports component--> */}
         <div style={{position: 'relative', width: '100%'}}>
-          <CommonRoicReports 
+          <CommonRoicReports
             planId={planId}
             rOptimizationState={planState}
             reportSize={reportSize}
           />
         </div>
-        
-        <button className="btn btn-primary pull-left mr-1" onClick={(e)=>this.props.showReportModal()}>Reports</button>
-        <button className="btn btn-primary pull-right" onClick={(e)=>this.props.showRoicReportsModal()}>Expand Results</button>
+
+        <button
+          type="button"
+          className="btn btn-primary pull-left mr-1"
+          onClick={() => this.props.showReportModal()}
+        >
+          Reports
+        </button>
+        <button
+          type="button"
+          className="btn btn-primary pull-right"
+          onClick={() => this.props.showRoicReportsModal()}
+        >
+          Expand Results
+        </button>
 
         {/* Render Reports Modal */}
-        <ReportsDownloadModal reportTypes={reportTypes} title='Reports'/>
-        
+        <ReportsDownloadModal reportTypes={reportTypes} title="Reports" />
+
         {/* To Render Expand Results Modal */}
-        <RoicReportsmodal/>
+        <RoicReportsmodal />
       </div>
     )
   }
@@ -51,12 +63,12 @@ export class NetWorkBuildOutput extends Component {
 
 const mapStateToProps = (state) => ({
   planId: state.plan.activePlan.id,
-  planState: state.plan.activePlan.planState
-})  
+  planState: state.plan.activePlan.planState,
+})
 
 const mapDispatchToProps = (dispatch) => ({
   showReportModal: () => dispatch(ReportsActions.showOrHideReportModal(true)),
-  showRoicReportsModal: () => dispatch(AnalysisActions.setShowRoicReportsModal(true))
+  showRoicReportsModal: () => dispatch(AnalysisActions.setShowRoicReportsModal(true)),
 })
 
 const NetWorkBuildOutputComponent = connect(mapStateToProps, mapDispatchToProps)(NetWorkBuildOutput)

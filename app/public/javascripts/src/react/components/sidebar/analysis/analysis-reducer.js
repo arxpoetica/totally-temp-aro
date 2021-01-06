@@ -94,13 +94,13 @@ function AnalysisReducer (state = defaultState, action) {
 
     case Actions.ANALYSIS_MODE_ENUM_STRINGS:
       return setEnumStrings(state, action.payload)
-      
+
     case Actions.ANALYSIS_MODE_NETWORK_NODE_TYPE_ENTITY:
       return setNetworkNodeTypesEntity(state, action.payload)
-      
+
     case Actions.ANALYSIS_MODE_SELECTED_EXPERT_MODE:
       return setSelectedExpertMode(state, action.payload)
-      
+
     case Actions.ANALYSIS_MODE_EXPERT_MODE_SCOPE_CONTEXT:
       return setExpertModeScopeContext(state, action.payload)
 
@@ -109,16 +109,16 @@ function AnalysisReducer (state = defaultState, action) {
 
     case Actions.ANALYSIS_MODE_EXPERT_MODE:
       return setExpertMode(state, action.payload)
-      
+
     case Actions.ANALYSIS_MODE_EXPERT_MODE_TYPES:
       return setExpertModeTypes(state, action.payload)
-      
+
     case Actions.ANALYSIS_MODE_SHOW_ROIC_REPORT_MODAL:
       return setShowRoicReportsModal(state, action.payload)
-      
+
     case Actions.ANALYSIS_MODE_SET_ROIC_RESULTS_FOR_PLAN:
       return setROICResultsForPlan(state, action.payload)
-      
+
     case Actions.ANALYSIS_MODE_SET_XAXIS_LABELS:
       return setXaxisLabels(state, action.payload)
 
@@ -126,5 +126,5 @@ function AnalysisReducer (state = defaultState, action) {
       return state
   }
 }
-  
-  export default AnalysisReducer
+
+export default AnalysisReducer
