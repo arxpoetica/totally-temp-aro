@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import RoicReports from './roic-reports.jsx'
-import AnalysisActions from '../analysis-actions'
+import RoicReportsActions from './roic-reports-actions'
 
 export class CommonRoicReports extends Component {
 
@@ -35,7 +35,7 @@ export class CommonRoicReports extends Component {
 }
 
 const mapDispatchToProps = (dispatch) => ({
-  loadROICResultsForPlan: (planId) => dispatch(AnalysisActions.loadROICResultsForPlan(planId)),
+  loadROICResultsForPlan: (planId) => dispatch(RoicReportsActions.loadROICResultsForPlan(planId)),
 })
 
 const CommonRoicReportsComponent = connect(null, mapDispatchToProps)(CommonRoicReports)

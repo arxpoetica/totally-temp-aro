@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import AnalysisActions from './analysis-actions'
+import ExpertModeActions from './expert-mode-actions'
 import { createSelector } from 'reselect'
-import ToolBarActions from '../../header/tool-bar-actions'
+import ToolBarActions from '../../../header/tool-bar-actions'
 
 export class AnalysisExpertMode extends Component {
   constructor (props) {
@@ -102,24 +102,24 @@ const getAllLocationLayers = state => state.mapLayers.location
 const getLocationLayersList = createSelector([getAllLocationLayers], (locationLayers) => locationLayers.toJS())
 
 const mapStateToProps = (state) => ({
-  expertModeTypes: state.analysisMode.expertModeTypes,
-  selectedExpertMode: state.analysisMode.selectedExpertMode,
+  expertModeTypes: state.expertMode.expertModeTypes,
+  selectedExpertMode: state.expertMode.selectedExpertMode,
   optimizationInputs: state.optimization.networkOptimization.optimizationInputs,
   activeSelectionModeId: state.selection.activeSelectionMode.id,
   locationLayers: getLocationLayersList(state),
   plan: state.plan.activePlan,
-  scopeContextKeys: state.analysisMode.scopeContextKeys,
-  expertMode: state.analysisMode.expertMode,
+  scopeContextKeys: state.expertMode.scopeContextKeys,
+  expertMode: state.expertMode.expertMode,
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  setSelectedExpertMode: (selectedExpertMode) => dispatch(AnalysisActions.setSelectedExpertMode(selectedExpertMode)),
+  setSelectedExpertMode: (selectedExpertMode) => dispatch(ExpertModeActions.setSelectedExpertMode(selectedExpertMode)),
   getOptimizationBody: (optimizationInputs, activeSelectionModeId, locationLayers, plan) => dispatch(
     ToolBarActions.getOptimizationBody(optimizationInputs, activeSelectionModeId, locationLayers, plan)
   ),
-  getExpertModeScopeContext: (plan) => dispatch(AnalysisActions.getExpertModeScopeContext(plan)),
-  setExpertMode: (expertMode) => dispatch(AnalysisActions.setExpertMode(expertMode)),
-  setExpertModeTypes: (expertModeTypes) => dispatch(AnalysisActions.setExpertModeTypes(expertModeTypes)),
+  getExpertModeScopeContext: (plan) => dispatch(ExpertModeActions.getExpertModeScopeContext(plan)),
+  setExpertMode: (expertMode) => dispatch(ExpertModeActions.setExpertMode(expertMode)),
+  setExpertModeTypes: (expertModeTypes) => dispatch(ExpertModeActions.setExpertModeTypes(expertModeTypes)),
 })
 
 const AnalysisExpertModeComponent = connect(mapStateToProps, mapDispatchToProps)(AnalysisExpertMode)

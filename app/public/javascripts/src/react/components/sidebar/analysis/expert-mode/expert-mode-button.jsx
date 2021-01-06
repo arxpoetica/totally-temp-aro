@@ -1,10 +1,10 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import NetworkOptimizationActions from '../../optimization/network-optimization/network-optimization-actions'
-import format from '../../../../../src/models/string-template'
-import AroHttp from '../../../common/aro-http'
-import SelectionModes from '../../selection/selection-modes'
-import SelectionActions from '../../selection/selection-actions'
+import NetworkOptimizationActions from '../../../optimization/network-optimization/network-optimization-actions'
+import format from '../../../../../models/string-template'
+import AroHttp from '../../../../common/aro-http'
+import SelectionModes from '../../../selection/selection-modes'
+import SelectionActions from '../../../selection/selection-actions'
 
 export class expertButton extends Component {
 
@@ -97,10 +97,10 @@ export class expertButton extends Component {
 
 const mapStateToProps = (state) => ({
   networkAnalysisType: state.optimization.networkOptimization.optimizationInputs.analysis_type,
-  expertMode: state.analysisMode.expertMode,
-  selectedExpertMode: state.analysisMode.selectedExpertMode,
-  expertModeTypes: state.analysisMode.expertModeTypes,
-  expertModeScopeContext: state.analysisMode.expertModeScopeContext,
+  expertMode: state.expertMode.expertMode,
+  selectedExpertMode: state.expertMode.selectedExpertMode,
+  expertModeTypes: state.expertMode.expertModeTypes,
+  expertModeScopeContext: state.expertMode.expertModeScopeContext,
   reduxPlanTargets: state.selection.planTargets,
   plan: state.plan.activePlan,
 })

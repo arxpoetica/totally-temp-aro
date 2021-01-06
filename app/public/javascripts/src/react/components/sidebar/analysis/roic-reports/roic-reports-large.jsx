@@ -317,10 +317,10 @@ export class RoicReportsLarge extends Component {
 }
 
 const mapStateToProps = (state) => ({
-  roicResults: state.analysisMode.roicResults,
-  enumStrings: state.analysisMode.enumStrings,
+  roicResults: state.roicReports.roicResults,
+  enumStrings: state.roicReports.enumStrings,
   networkEquipment: state.mapLayers.networkEquipment,
-  networkNodeTypesEntity: state.analysisMode.networkNodeTypesEntity,
+  networkNodeTypesEntity: state.roicReports.networkNodeTypesEntity,
 })
 
 const RoicReportsLargeComponent = connect(mapStateToProps, null)(RoicReportsLarge)

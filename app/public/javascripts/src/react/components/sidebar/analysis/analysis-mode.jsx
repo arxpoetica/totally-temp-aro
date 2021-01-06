@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
 import { Collapse, Card, CardHeader, CardBody } from 'reactstrap'
-import './analysis-mode.css'
+import '../sidebar.css'
 import ReportsActions from '../../optimization/reports/reports-actions'
 import NetworkOptimizationActions from '../../optimization/network-optimization/network-optimization-actions'
 import NetworkAnalysisTypes from '../..//optimization/network-optimization/network-analysis-types'
@@ -14,9 +14,9 @@ import RfpButton from '../../optimization/rfp/rfp-button.jsx'
 import NetworkAnalysisOutput from '../../optimization/network-analysis/network-analysis-output.jsx'
 import ReportsDownloadModal from '../../optimization/reports/reports-download-modal.jsx'
 import NetWorkBuildOutput from './network-build/network-build-output.jsx'
-import AnalysisActions from './analysis-actions'
-import AnalysisExpertMode from './analysis-expert-mode.jsx'
-import ExpertButton from './expert-button.jsx'
+import RoicReportsActions from './roic-reports/roic-reports-actions'
+import ExpertMode from './expert-mode/expert-mode.jsx'
+import ExpertModeButton from './expert-mode/expert-mode-button.jsx'
 import CoverageReportDownloader from './coverage/coverage-report-downloader.jsx'
 
 export class AnalysisMode extends Component {
@@ -93,11 +93,6 @@ export class AnalysisMode extends Component {
                     />
                   </div>
                 }
-                {networkAnalysisType === 'EXPERT_MODE' &&
-                  <div style={{height: '100%'}}>
-                    <AnalysisExpertMode />
-                  </div>
-                }
                 {networkAnalysisType === 'COVERAGE_ANALYSIS' &&
                   <div style={{height: '100%'}}>
                     <CoverageInitializer />
@@ -106,6 +101,11 @@ export class AnalysisMode extends Component {
                 {networkAnalysisType === 'RFP' &&
                   <div style={{height: '100%'}}>
                     <RfpAnalyzer />
+                  </div>
+                }
+                {networkAnalysisType === 'EXPERT_MODE' &&
+                  <div style={{height: '100%'}}>
+                    <ExpertMode />
                   </div>
                 }
               </div>
@@ -138,7 +138,6 @@ export class AnalysisMode extends Component {
                     <CoverageReportDownloader />
                   </div>
                 }
-
                 {networkAnalysisType === 'RFP' &&
                   <div style={{height: '100%'}}>
                     <button className="btn btn-primary pull-left" onClick={() => this.props.showReportModal()}>Reports</button>
@@ -160,7 +159,7 @@ export class AnalysisMode extends Component {
       case 'RFP':
         return <RfpButton />
       case 'EXPERT_MODE':
-        return <ExpertButton />
+        return <ExpertModeButton />
       default:
         return ''
     }
@@ -195,7 +194,7 @@ const mapStateToProps = (state) => ({
   networkAnalysisType: state.optimization.networkOptimization.optimizationInputs.analysis_type,
   currentPlanState: state.plan.activePlan.planState,
   activePlan: state.plan.activePlan,
-  planStateCons: state.analysisMode.planStateCons,
+  planStateCons: state.roicReports.planStateCons,
 })
 
 const mapDispatchToProps = (dispatch) => ({
@@ -203,7 +202,7 @@ const mapDispatchToProps = (dispatch) => ({
   setNetworkAnalysisType: (networkAnalysisType) => dispatch(
     NetworkOptimizationActions.setNetworkAnalysisType(networkAnalysisType)
   ),
-  handleModifyClicked: (activePlan) => dispatch(AnalysisActions.handleModifyClicked(activePlan)),
+  handleModifyClicked: (activePlan) => dispatch(NetworkOptimizationActions.handleModifyClicked(activePlan)),
 })
 
 const AnalysisModeComponent = wrapComponentWithProvider(reduxStore, AnalysisMode, mapStateToProps, mapDispatchToProps)

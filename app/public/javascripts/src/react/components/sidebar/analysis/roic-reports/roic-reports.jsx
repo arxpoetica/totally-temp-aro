@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import RoicReportsSmall from './roic-reports-small.jsx'
 import RoicReportsLarge from './roic-reports-large.jsx'
-import AnalysisActions from '../analysis-actions'
+import RoicReportsActions from './roic-reports-actions'
 
 export class RoicReports extends Component {
   constructor (props) {
@@ -235,12 +235,12 @@ export class RoicReports extends Component {
 }
 
 const mapStateToProps = (state) => ({
-  roicResults: state.analysisMode.roicResults,
-  xAxisLabels: state.analysisMode.xAxisLabels,
+  roicResults: state.roicReports.roicResults,
+  xAxisLabels: state.roicReports.xAxisLabels,
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  setXaxisLabels: (xAxisLabels) => dispatch(AnalysisActions.setXaxisLabels(xAxisLabels)),
+  setXaxisLabels: (xAxisLabels) => dispatch(RoicReportsActions.setXaxisLabels(xAxisLabels)),
 })
 
 const RoicReportsComponent = connect(mapStateToProps, mapDispatchToProps)(RoicReports)

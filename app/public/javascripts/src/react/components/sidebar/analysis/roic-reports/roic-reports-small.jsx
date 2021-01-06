@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import AnalysisActions from '../analysis-actions'
+import RoicReportsActions from './roic-reports-actions'
 import { Line } from 'react-chartjs-2'
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat
@@ -295,14 +295,14 @@ export class RoicReportsSmall extends Component {
 }
 
 const mapStateToProps = (state) => ({
-  enumStrings: state.analysisMode.enumStrings,
+  enumStrings: state.roicReports.enumStrings,
   networkEquipment: state.mapLayers.networkEquipment,
-  networkNodeTypesEntity: state.analysisMode.networkNodeTypesEntity,
-  roicResults: state.analysisMode.roicResults,
+  networkNodeTypesEntity: state.roicReports.networkNodeTypesEntity,
+  roicResults: state.roicReports.roicResults,
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  loadNetworkNodeTypesEntity: () => dispatch(AnalysisActions.loadNetworkNodeTypesEntity()),
+  loadNetworkNodeTypesEntity: () => dispatch(RoicReportsActions.loadNetworkNodeTypesEntity()),
 })
 
 const RoicReportsSmallComponent = connect(mapStateToProps, mapDispatchToProps)(RoicReportsSmall)

@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { Modal, ModalBody, ModalFooter } from 'reactstrap'
-import AnalysisActions from '../analysis-actions'
+import RoicReportsActions from './roic-reports-actions'
 import CommonRoicReports from '../roic-reports/common-roic-reports.jsx'
 
 export class RoicReportsModal extends Component {
@@ -40,13 +40,13 @@ export class RoicReportsModal extends Component {
 }
 
 const mapStateToProps = (state) => ({
-  showRoicReportsModal: state.analysisMode.showRoicReportsModal,
+  showRoicReportsModal: state.roicReports.showRoicReportsModal,
   planId: state.plan.activePlan.id,
   planState: state.plan.activePlan.planState,
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  setShowRoicReportsModal: () => dispatch(AnalysisActions.setShowRoicReportsModal(false)),
+  setShowRoicReportsModal: () => dispatch(RoicReportsActions.setShowRoicReportsModal(false)),
 })
 
 const RoicReportsModalComponent = connect(mapStateToProps, mapDispatchToProps)(RoicReportsModal)

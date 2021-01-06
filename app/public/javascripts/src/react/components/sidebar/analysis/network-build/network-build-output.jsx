@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import ReportsDownloadModal from '../../../optimization/reports/reports-download-modal.jsx'
 import ReportsActions from '../../../optimization/reports/reports-actions'
 import CommonRoicReports from '../roic-reports/common-roic-reports.jsx'
-import AnalysisActions from '../analysis-actions'
+import RoicReportsActions from '../roic-reports/roic-reports-actions'
 import RoicReportsmodal from '../roic-reports/roic-reports-modal.jsx'
 
 export class NetWorkBuildOutput extends Component {
@@ -68,7 +68,7 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
   showReportModal: () => dispatch(ReportsActions.showOrHideReportModal(true)),
-  showRoicReportsModal: () => dispatch(AnalysisActions.setShowRoicReportsModal(true)),
+  showRoicReportsModal: () => dispatch(RoicReportsActions.setShowRoicReportsModal(true)),
 })
 
 const NetWorkBuildOutputComponent = connect(mapStateToProps, mapDispatchToProps)(NetWorkBuildOutput)
