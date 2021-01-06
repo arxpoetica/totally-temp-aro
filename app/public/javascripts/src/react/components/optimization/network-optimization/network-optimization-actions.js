@@ -39,6 +39,7 @@ function cancelOptimization (planId, optimizationId) {
       })
       .then((response) => {
         dispatch({ type: Actions.NETWORK_OPTIMIZATION_CLEAR_OPTIMIZATION_ID })
+        // TODO: uncertain if these lines of code are necessary.
         //tileDataService.markHtmlCacheDirty()
         //service.requestMapLayerRefresh.next(null)
       })

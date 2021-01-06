@@ -18,7 +18,7 @@ export class NetworkOptimizationButton extends ProgressButton {
 
     // override
     this.statusTypes = {
-      // FIXME: we need to consolidate state types
+      // TODO: we need to consolidate state types
       // to see what I mean, take a look in `plan-settings.jsx`
       UNINITIALIZED: AngConstants.PLAN_STATE.START_STATE,
       RUNNING: AngConstants.PLAN_STATE.STARTED,
