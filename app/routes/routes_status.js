@@ -10,16 +10,19 @@ exports.configure = (api, middleware) => {
     })
   })
 
-    api.all(`/aro-status/*`, expressProxy( config.aro_service_url, {
-	proxyReqPathResolver: req => req.url,
-	timeout: 2000,
-	filter: req => (req.method == 'GET'),
-	proxyErrorHandler: (err, res, next) => {
-	    switch (err && err.code) {
-	    case 'ECONNREFUSED': { return res.status(500).send("service connection refused"); }
-	    default:             { return res.status(500).send("Error"); }
-	    }
-	}  
-    }))
-   
+  api.get('/aro-status/*', expressProxy(config.aro_service_url, {
+    proxyReqPathResolver: req => req.url,
+    timeout: 2000,
+    proxyErrorHandler: (err, res, next) => {
+      switch (err && err.code) {
+        case 'ECONNREFUSED': {
+          return res.status(500).send('service connection refused')
+        }
+        default: {
+          return res.status(500).send('Error')
+        }
+      }
+    },
+  }))
+
 }
