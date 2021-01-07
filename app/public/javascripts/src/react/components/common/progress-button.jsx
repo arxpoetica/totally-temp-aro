@@ -10,7 +10,7 @@ export default class ProgressButton extends Component {
     this.statusTypes = {
       UNINITIALIZED: 'UNINITIALIZED',
       RUNNING: 'RUNNING',
-      FINISHED: 'FINISHED'
+      FINISHED: 'FINISHED',
     }
   }
 
@@ -26,6 +26,7 @@ export default class ProgressButton extends Component {
       case this.statusTypes.RUNNING:
         return this.renderProgressbar()
 
+      case this.statusTypes.CANCELED:
       case this.statusTypes.FINISHED:
         return this.renderFinishedButton()
 
