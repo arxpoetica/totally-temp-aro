@@ -122,6 +122,42 @@ const NetworkArchitectureFormMeta = Object.freeze({
             }
           }
         },
+        'equipmentDistanceMap': {
+          '_meta': {
+            'displayType': 'object',
+            'displayName': '',
+            'options': [
+
+            ]
+          },
+          'fiber_distribution_hub': {
+            '_meta': {
+              'displayType': 'number',
+              'displayName': '',
+              'options': [
+
+              ]
+            }
+          },
+          'multiple_dwelling_unit': {
+            '_meta': {
+              'displayType': 'number',
+              'displayName': '',
+              'options': [
+
+              ]
+            }
+          },
+          'olt': {
+            '_meta': {
+              'displayType': 'number',
+              'displayName': '',
+              'options': [
+
+              ]
+            }
+          }
+        },
         'inferCoWhenAbsent': {
           '_meta': {
             'displayType': 'checkbox',
@@ -866,6 +902,42 @@ const NetworkArchitectureFormMeta = Object.freeze({
             ]
           },
           'celltower': {
+            '_meta': {
+              'displayType': 'number',
+              'displayName': '',
+              'options': [
+
+              ]
+            }
+          }
+        },
+        'equipmentDistanceMap': {
+          '_meta': {
+            'displayType': 'object',
+            'displayName': '',
+            'options': [
+
+            ]
+          },
+          'fiber_distribution_hub': {
+            '_meta': {
+              'displayType': 'number',
+              'displayName': '',
+              'options': [
+
+              ]
+            }
+          },
+          'multiple_dwelling_unit': {
+            '_meta': {
+              'displayType': 'number',
+              'displayName': '',
+              'options': [
+
+              ]
+            }
+          },
+          'olt': {
             '_meta': {
               'displayType': 'number',
               'displayName': '',
@@ -1728,6 +1800,42 @@ const NetworkArchitectureFormMeta = Object.freeze({
             }
           }
         },
+        'equipmentDistanceMap': {
+          '_meta': {
+            'displayType': 'object',
+            'displayName': '',
+            'options': [
+
+            ]
+          },
+          'fiber_distribution_hub': {
+            '_meta': {
+              'displayType': 'number',
+              'displayName': '',
+              'options': [
+
+              ]
+            }
+          },
+          'multiple_dwelling_unit': {
+            '_meta': {
+              'displayType': 'number',
+              'displayName': '',
+              'options': [
+
+              ]
+            }
+          },
+          'olt': {
+            '_meta': {
+              'displayType': 'number',
+              'displayName': '',
+              'options': [
+
+              ]
+            }
+          }
+        },
         'inferCoWhenAbsent': {
           '_meta': {
             'displayType': 'checkbox',
@@ -2472,6 +2580,42 @@ const NetworkArchitectureFormMeta = Object.freeze({
             ]
           },
           'celltower': {
+            '_meta': {
+              'displayType': 'number',
+              'displayName': '',
+              'options': [
+
+              ]
+            }
+          }
+        },
+        'equipmentDistanceMap': {
+          '_meta': {
+            'displayType': 'object',
+            'displayName': '',
+            'options': [
+
+            ]
+          },
+          'fiber_distribution_hub': {
+            '_meta': {
+              'displayType': 'number',
+              'displayName': '',
+              'options': [
+
+              ]
+            }
+          },
+          'multiple_dwelling_unit': {
+            '_meta': {
+              'displayType': 'number',
+              'displayName': '',
+              'options': [
+
+              ]
+            }
+          },
+          'olt': {
             '_meta': {
               'displayType': 'number',
               'displayName': '',
