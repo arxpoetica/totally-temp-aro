@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap'
 import ToolBarActions from './tool-bar-actions'
 import EditPlanTag from './edit-plan-tag.jsx'
 import PlanSearch from './plan-search.jsx'
@@ -18,7 +18,7 @@ export class PlanInputsModal extends Component {
       parentPlan: null,
       planType: 'UNDEFINED',
       parentPlanSelectorExpanded: false,
-      planTypes: {}
+      planTypes: {},
     }
 
     this.allPlanTypes = {
@@ -28,7 +28,7 @@ export class PlanInputsModal extends Component {
       COVERAGE: 'Coverage Plan',
       MANUAL: 'Manual Plan',
       RFP: 'RFP',
-      RING: 'Ring Plan'
+      RING: 'Ring Plan',
     }
   }
 
@@ -56,26 +56,31 @@ export class PlanInputsModal extends Component {
 
   render() {
 
-    const { planInputsModal, listOfTags, currentPlanTags,
-      listOfServiceAreaTags, currentPlanServiceAreaTags, systemActors } = this.props
+    const { planInputsModal, listOfTags, currentPlanTags, listOfServiceAreaTags,
+      currentPlanServiceAreaTags, systemActors } = this.props
     const { planName, planType, planTypes, parentPlanSelectorExpanded, parentPlan } = this.state
 
     return (
       <div>
-        <Modal isOpen={planInputsModal} size='lg' style={{width: '350px'}}>
+        <Modal isOpen={planInputsModal} size="lg" style={{width: '350px'}}>
           <ModalHeader toggle={() => this.close()}>Plan Inputs</ModalHeader>
           <ModalBody>
             {/* Plan name */}
-            <input type="text" id="searchPlanName" className="form-control with-margin"
-              onChange={(e) => this.onChangePlanName(e)} value={planName} placeholder="Plan Name"/>
+            <input
+              type="text"
+              id="searchPlanName"
+              className="form-control with-margin"
+              onChange={(event) => this.onChangePlanName(event)}
+              value={planName} placeholder="Plan Name"
+            />
 
             {/* Plan type */}
             <select className="form-control with-margin" value={planType}
-              onChange={(e) => this.onChangePlanType(e)}>
+              onChange={(event) => this.onChangePlanType(event)}>
               {
                 Object.entries(planTypes).map(([objKey, objValue], objIndex) => {
                   return (
-                    <option key={objIndex} value={objKey} label={objValue}></option>
+                    <option key={objIndex} value={objKey} label={objValue} />
                   )
                 })
               }
@@ -96,16 +101,26 @@ export class PlanInputsModal extends Component {
             />
 
             {/* Parent plan selector - header */}
-            <div onClick={(e) => this.toggleParentPlanSelectorExpanded(e)} style={{marginTop: '10px', cursor: 'pointer'}}>
+            <div
+              onClick={() => this.toggleParentPlanSelectorExpanded()}
+              style={{marginTop: '10px', cursor: 'pointer'}}
+            >
               Parent plan: {parentPlan ? parentPlan.name : '(undefined)'}&nbsp;
-              <button className="btn btn-thin btn-light" onClick={(e) => this.clearParentPlan(e)}>Clear</button>
+              <button
+                className="btn btn-thin btn-light"
+                onClick={(event) => this.clearParentPlan(event)}
+              >
+                Clear
+              </button>
               <div className="float-right">
-                <i className={`btn ${!parentPlanSelectorExpanded ? 'fa fa-plus' : 'fa fa-minus'}`}></i>
+                <i className={`btn ${!parentPlanSelectorExpanded ? 'fa fa-plus' : 'fa fa-minus'}`} />
               </div>
             </div>
 
             {/* Parent plan selector - expandable body */}
-            <div className="parent-plan-selector-body" style={{ display: parentPlanSelectorExpanded ? 'block' : 'none',
+            <div
+              className="parent-plan-selector-body"
+              style={{ display: parentPlanSelectorExpanded ? 'block' : 'none',
               marginLeft: '30px', maxHeight: '200px', overflowY: 'auto', width: '285px'
              }}
             >
@@ -141,17 +156,17 @@ export class PlanInputsModal extends Component {
     this.setState({ parentPlanSelectorExpanded: !this.state.parentPlanSelectorExpanded })
   }
 
-  clearParentPlan (e) {
-    e.stopPropagation()
+  clearParentPlan (event) {
+    event.stopPropagation()
     this.setState({ parentPlan: null })
   }
 
-  onChangePlanName (e) {
-    this.setState({ planName: e.target.value })
+  onChangePlanName (event) {
+    this.setState({ planName: event.target.value })
   }
 
-  onChangePlanType (e) {
-    this.setState({ planType: e.target.value })
+  onChangePlanType (event) {
+    this.setState({ planType: event.target.value })
   }
 
   initModalData () {
@@ -271,7 +286,7 @@ const mapStateToProps = (state) => ({
   dataItems: state.plan.dataItems,
   listOfServiceAreaTags: state.toolbar.listOfServiceAreaTags,
   currentPlanServiceAreaTags: state.toolbar.currentPlanServiceAreaTags,
-  systemActors: state.user.systemActors
+  systemActors: state.user.systemActors,
 })
 
 const mapDispatchToProps = (dispatch) => ({
@@ -287,7 +302,7 @@ const mapDispatchToProps = (dispatch) => ({
   setCurrentPlanTags: (currentPlanTags) => dispatch(ToolBarActions.setCurrentPlanTags(currentPlanTags)),
   setCurrentPlanServiceAreaTags: (currentPlanServiceAreaTags) => dispatch(
     ToolBarActions.setCurrentPlanServiceAreaTags(currentPlanServiceAreaTags)
-  )
+  ),
 })
 
 const PlanInputsModalComponent = connect(mapStateToProps, mapDispatchToProps)(PlanInputsModal)

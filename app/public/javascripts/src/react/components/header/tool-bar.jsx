@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
-import './tool-bar.css';
+import './tool-bar.css'
 import Tools from '../tool/tools'
 import uuidStore from '../../../shared-utils/uuid-store'
 import MapActions from '../map/map-actions'
@@ -24,7 +24,7 @@ export class ToolBar extends Component {
   constructor (props) {
     super(props)
 
-    this.rxState = new RxState(); // For RxJs implementation in reactjs
+    this.rxState = new RxState() // For RxJs implementation in reactjs
 
     this.viewModePanels = Object.freeze({
       LOCATION_INFO: 'LOCATION_INFO',
@@ -115,19 +115,19 @@ export class ToolBar extends Component {
 
     this.searchLocation = 'Search an address, city, or state' // For IntialSelection of select2
 
-    this.props.loadServiceLayers(); // To load Service layer in advance
+    this.props.loadServiceLayers() // To load Service layer in advance
 
-    this.refreshToolbar = this.refreshToolbar.bind(this); // To bind a function
+    this.refreshToolbar = this.refreshToolbar.bind(this) // To bind a function
 
     // To Trigger refreshToolbar() by Listening to the custom event from map-split.js $document.ready() method
     // https://stackoverflow.com/questions/52037958/change-value-in-react-js-on-window-resize
     window.addEventListener('toolBarResized', () => {
       setTimeout(() => this.refreshToolbar(), 0)
-    });
+    })
 
     // To set selectedFiberOptionin in viewSetting redux state
     const newViewSetting = JSON.parse(JSON.stringify(this.props.viewSetting))
-    newViewSetting.selectedFiberOption = this.props.viewFiberOptions[0];
+    newViewSetting.selectedFiberOption = this.props.viewFiberOptions[0]
     this.props.setViewSetting(newViewSetting)
   }
 
@@ -135,24 +135,24 @@ export class ToolBar extends Component {
     this.initSearchBox()
 
     // toggle view settings dropdown
-    jQuery('.myDropdown1').on('show.bs.dropdown', function (e) {
+    jQuery('.myDropdown1').on('show.bs.dropdown', function (event) {
       jQuery(this).find('.view-dropdown').toggle()
-      e.stopPropagation()
-      e.preventDefault()
+      event.stopPropagation()
+      event.preventDefault()
     })
 
     // toggle ruler dropdown
-    jQuery('.rulerDropdown').on('show.bs.dropdown', function (e) {
+    jQuery('.rulerDropdown').on('show.bs.dropdown', function (event) {
       jQuery(this).find('.ruler-dropdown').toggle()
-      e.stopPropagation()
-      e.preventDefault()
+      event.stopPropagation()
+      event.preventDefault()
     })
 
     // toggle toolbar dropdown
-    jQuery('.dropdown').on('show.bs.dropdown', function (e) {
+    jQuery('.dropdown').on('show.bs.dropdown', function (event) {
       jQuery(this).find('.tool-bar-dropdown').toggle()
-      e.stopPropagation()
-      e.preventDefault()
+      event.stopPropagation()
+      event.preventDefault()
     })
 
     // To Trigger refreshToolbar() when window resized
@@ -164,7 +164,7 @@ export class ToolBar extends Component {
   componentDidUpdate(prevProps) {
     if (this.props !== prevProps) {
       setTimeout(() => this.refreshToolbar(), 0) // To Trigger refreshToolbar() when props changed
-      this.initSearchBox(); // To re-render select2 searchbar
+      this.initSearchBox() // To re-render select2 searchbar
     }
   }
 
@@ -176,7 +176,7 @@ export class ToolBar extends Component {
   }
 
   renderToolBar() {
-    this.refreshSlidertrack(); // To re-render Heatmap intensity slider
+    this.refreshSlidertrack() // To re-render Heatmap intensity slider
 
     const { selectedDisplayMode, activeViewModePanel, isAnnotationsListVisible, isMapReportsVisible,
       showMapReportMapObjects, selectedTargetSelectionMode, isRulerEnabled, isViewSettingsEnabled,
@@ -187,12 +187,16 @@ export class ToolBar extends Component {
     const { currentRulerAction, showRemoveRulerButton, heatMapOption, sliderValue,
       showDropDown, marginPixels, dropdownWidthPixels } = this.state
 
-    const selectedIndividualLocation = (selectedDisplayMode === this.displayModes.ANALYSIS || selectedDisplayMode === this.displayModes.VIEW) 
-      && activeViewModePanel !== this.viewModePanels.EDIT_LOCATIONS
-    const selectedMultipleLocation = (selectedDisplayMode === this.displayModes.ANALYSIS || selectedDisplayMode === this.displayModes.VIEW)
-      && activeViewModePanel !== this.viewModePanels.EDIT_LOCATIONS && configuration.perspective.showToolbarButtons.selectionPolygon
+    const selectedIndividualLocation = (
+      selectedDisplayMode === this.displayModes.ANALYSIS || selectedDisplayMode === this.displayModes.VIEW
+    ) && activeViewModePanel !== this.viewModePanels.EDIT_LOCATIONS
+    const selectedMultipleLocation = (
+      selectedDisplayMode === this.displayModes.ANALYSIS || selectedDisplayMode === this.displayModes.VIEW
+    ) && activeViewModePanel !== this.viewModePanels.EDIT_LOCATIONS
+    && configuration.perspective.showToolbarButtons.selectionPolygon
     const calculateCoverageBoundry = selectedDisplayMode === this.displayModes.VIEW
-    const exportSelectedPolygon = selectedDisplayMode === this.displayModes.VIEW && configuration.perspective.showToolbarButtons.exportSelection 
+    const exportSelectedPolygon = selectedDisplayMode === this.displayModes.VIEW
+      && configuration.perspective.showToolbarButtons.exportSelection
       && activeViewModePanel !== this.viewModePanels.EDIT_LOCATIONS
     const isEphemeralPlan = configuration.perspective.showToolbarButtons.ephemeralPlan
     const isSavePlanAs = configuration.perspective.showToolbarButtons.savePlanAs
@@ -201,23 +205,39 @@ export class ToolBar extends Component {
     const isViewSettings = configuration.perspective.showToolbarButtons.viewSettings
 
     // To set Dynamic Background color for select2-results using jQuery
-    $(".select2-results").css("background-color", configuration.toolbar.toolBarColor);
+    $(".select2-results").css("background-color", configuration.toolbar.toolBarColor)
 
     // ToDo: ARO_CLIENT should never be checked in views, these images should be in settings
-    let leftElement = <img src="images/logos/aro/logo_navbar.png" className="no-collapse" style={{alignSelf: 'center', paddingLeft: '10px', paddingRight: '10px'}} />
+    let leftElement = <img src="images/logos/aro/logo_navbar.png" className="no-collapse"
+      style={{alignSelf: 'center', paddingLeft: '10px', paddingRight: '10px'}}
+    />
     if (configuration.ARO_CLIENT === 'frontier') {
       leftElement = <span style={{alignSelf: 'center', paddingLeft: '10px', paddingRight: '10px'}}><b>NPM BSA</b></span>
     } else if (configuration.ARO_CLIENT === 'ziply') {
-      leftElement = <img src="images/logos/ziply/ziply_navbar_logo.png" className="no-collapse" style={{alignSelf: 'center', paddingLeft: '3px', paddingRight: '10px'}} />
+      leftElement = <img src="images/logos/ziply/ziply_navbar_logo.png" className="no-collapse"
+      style={{alignSelf: 'center', paddingLeft: '3px', paddingRight: '10px'}}
+    />
     }
 
     return (
       <div className="tool-bar" style={{margin: marginPixels, backgroundColor: configuration.toolbar.toolBarColor}}>
         { leftElement }
-        <div className="no-collapse" id="global-search-toolbutton" style={{flex: '0 0 250px', margin: 'auto', width: '250px'}}>
-          <input className="form-control select2" style={{padding: '0px', borderRadius: '0px'}} type="text" placeholder="Search an address, city, or state" />
+        <div
+          className="no-collapse"
+          id="global-search-toolbutton"
+          style={{flex: '0 0 250px', margin: 'auto', width: '250px'}}
+        >
+          <input
+            className="form-control select2"
+            style={{padding: '0px', borderRadius: '0px'}}
+            type="text"
+            placeholder="Search an address, city, or state"
+          />
         </div>
-        <div className="fa fa-search no-collapse" style={{paddingLeft: '10px', paddingRight: '10px', margin: 'auto', color: '#eee'}}></div>
+        <div
+          className="fa fa-search no-collapse"
+          style={{paddingLeft: '10px', paddingRight: '10px', margin: 'auto', color: '#eee'}} 
+        />
 
         <div className="separator"></div>
 
@@ -259,9 +279,16 @@ export class ToolBar extends Component {
             aria-haspopup="true" aria-expanded="false" title="Ruler">
             <i className="fa fa-ruler"></i>
           </button>
-          <div className="dropdown-menu dropdown-menu-right ruler-dropdown" style={{ display: isRulerEnabled ? 'block' : 'none' }}>
+          <div
+            className="dropdown-menu dropdown-menu-right ruler-dropdown"
+            style={{ display: isRulerEnabled ? 'block' : 'none' }}
+          >
             <div className="ruler-container">
-              <select className="form-control" value={currentRulerAction.id} onChange={(e) => {this.onChangeRulerDropdown(e);}}>
+              <select
+                className="form-control"
+                value={currentRulerAction.id}
+                onChange={(event) => {this.onChangeRulerDropdown(event)}}
+              >
                 {this.rulerActions.map((item, index) =>
                   <option key={index} value={item.id} label={item.label}></option>
                 )}
@@ -285,38 +312,64 @@ export class ToolBar extends Component {
             <i className="fa fa-eye"></i>
           </button>
 
-          <div className="dropdown-menu dropdown-menu-right view-dropdown" style={{ display: isViewSettingsEnabled ? 'block' : 'none' }}>
+          <div
+            className="dropdown-menu dropdown-menu-right view-dropdown"
+            style={{ display: isViewSettingsEnabled ? 'block' : 'none' }}
+          >
             {/* Location Heat Map */}
-            <input type="checkbox" className="checkboxfill" checked={heatMapOption} name="ctype-name" style={{marginLeft: '2px'}}
-              onChange={() => this.toggleHeatMapOptions()} />
+            <input
+              type="checkbox"
+              className="checkboxfill"
+              checked={heatMapOption}
+              name="ctype-name"
+              style={{marginLeft: '2px'}}
+              onChange={() => this.toggleHeatMapOptions()}
+            />
             <font>Location Heatmap On</font>
             {heatMapOption &&
               <>
                 <div className="dropdown-divider"></div>
                 <font>Heatmap Intensity</font>
                 <div style={{padding: '0px 10px'}}>
-                  <input type="range" min={this.min} max={this.max} value={sliderValue} className="aro-slider"
-                    onChange={(e) => {this.changeHeatMapOptions(e); this.refreshSlidertrack()}} />
+                  <input
+                    type="range"
+                    min={this.min}
+                    max={this.max}
+                    value={sliderValue}
+                    className="aro-slider"
+                    onChange={(event) => {this.changeHeatMapOptions(event); this.refreshSlidertrack()}}
+                  />
                 </div>
               </>
             }
 
             {/* Location Labels */}
             <div className="dropdown-divider"></div>
-            <input type="checkbox" className="checkboxfill" checked={showLocationLabels} name="ctype-name" style={{marginLeft: '2px'}}
-              onChange={() => this.showLocationLabelsChanged()} />
+            <input
+              type="checkbox"
+              className="checkboxfill"
+              checked={showLocationLabels}
+              name="ctype-name" style={{marginLeft: '2px'}}
+              onChange={() => this.showLocationLabelsChanged()}
+            />
             <font>Location Labels</font>
 
             {/* Site Boundaries */}
             {configuration.toolbar.showSiteBoundaries && configuration.toolbar !== undefined &&
             <>
               <div className="dropdown-divider"></div>
-              <input type="checkbox" className="checkboxfill" checked={showSiteBoundary} name="ctype-name" style={{marginLeft: '2px'}}
-                onChange={() => this.toggleSiteBoundary()} />
+              <input
+                type="checkbox"
+                className="checkboxfill"
+                checked={showSiteBoundary}
+                name="ctype-name"
+                style={{marginLeft: '2px'}}
+                onChange={() => this.toggleSiteBoundary()}
+              />
               <font>Site Boundaries</font>
               {showSiteBoundary &&
                 <select className="form-control" value={selectedBoundaryType.description}
-                  onChange={(e) => this.onChangeSiteBoundaries(e)}>
+                  onChange={(event) => this.onChangeSiteBoundaries(event)}>
                   {boundaryTypes.map((item, index) =>
                     <option key={index} value={item.description} label={item.description}></option>
                   )}
@@ -329,8 +382,14 @@ export class ToolBar extends Component {
             {configuration.toolbar.showDirectedCables && configuration.toolbar !== undefined &&
             <>
               <div className="dropdown-divider"></div>
-              <input type="checkbox" className="checkboxfill" checked={showDirectedCable} name="ctype-name" style={{marginLeft: '2px'}}
-                onChange={(e) => this.showCableDirection(e)} />
+              <input
+                type="checkbox"
+                className="checkboxfill"
+                checked={showDirectedCable}
+                name="ctype-name"
+                style={{marginLeft: '2px'}}
+                onChange={(event) => this.showCableDirection(event)}
+              />
               <font>Directed Cable</font>
             </>
             }
@@ -339,8 +398,14 @@ export class ToolBar extends Component {
             {configuration.perspective.viewSettings.showSiteLabels &&
             <>
               <div className="dropdown-divider"></div>
-              <input type="checkbox" className="checkboxfill" checked={showEquipmentLabels} name="ctype-name" style={{marginLeft: '2px'}}
-                onChange={(e) => this.showEquipmentLabelsChanged(e)} />
+              <input
+                type="checkbox"
+                className="checkboxfill"
+                checked={showEquipmentLabels}
+                name="ctype-name"
+                style={{marginLeft: '2px'}}
+                onChange={(event) => this.showEquipmentLabelsChanged(event)}
+              />
               <font>Site Labels</font>
             </>
             }
@@ -349,12 +414,18 @@ export class ToolBar extends Component {
             {configuration.perspective.viewSettings.showFiberSize &&
             <>
               <div className="dropdown-divider"></div>
-              <input type="checkbox" className="checkboxfill" checked={showFiberSize} name="ctype-name" style={{marginLeft: '2px'}}
-                onChange={(e) => this.setShowFiberSize(e)} />
+              <input
+                type="checkbox"
+                className="checkboxfill"
+                checked={showFiberSize}
+                name="ctype-name"
+                style={{marginLeft: '2px'}}
+                onChange={(event) => this.setShowFiberSize(event)}
+              />
               <font>Fiber Size</font>
               {showFiberSize &&
                 <select className="form-control" value={viewSetting.selectedFiberOption.name}
-                  onChange={(e) => this.onChangeSelectedFiberOption(e)}>
+                  onChange={(event) => this.onChangeSelectedFiberOption(event)}>
                   {viewFiberOptions.map((item, index) =>
                     <option key={index} value={item.name} label={item.name}></option>
                   )}
@@ -365,17 +436,27 @@ export class ToolBar extends Component {
           </div>
         </div>
 
-        <div style={{ display: selectedDisplayMode === this.displayModes.ANALYSIS || selectedDisplayMode === this.displayModes.VIEW ? 'block' : 'none' }} className="separator"></div>
+        <div
+          style={{ display: selectedDisplayMode === this.displayModes.ANALYSIS
+            || selectedDisplayMode === this.displayModes.VIEW? 'block' : 'none' }}
+          className="separator" 
+        />
 
         <button style={{ display: selectedIndividualLocation ? 'block' : 'none' }}
-          className={`btn ${selectedTargetSelectionMode === this.targetSelectionModes.SINGLE_PLAN_TARGET ? 'btn-selected' : ''} ${selectedIndividualLocation === true ? 'ng-hide-remove' : 'ng-hide-add'}`}
+          className={
+            `btn ${selectedTargetSelectionMode === this.targetSelectionModes.SINGLE_PLAN_TARGET ? 'btn-selected' : ''}
+            ${selectedIndividualLocation === true ? 'ng-hide-remove' : 'ng-hide-add'}`
+          }
           onClick={() => this.setSelectionSingle()}
           title="Select individual locations">
           <i className="fa fa-mouse-pointer"></i>
         </button>
 
         <button style={{ display: selectedMultipleLocation ? 'block' : 'none' }}
-          className={`btn ${selectedTargetSelectionMode === this.targetSelectionModes.POLYGON_PLAN_TARGET ? 'btn-selected' : ''} ${selectedMultipleLocation === true ? 'ng-hide-remove' : 'ng-hide-add'}`}
+          className={
+            `btn ${selectedTargetSelectionMode === this.targetSelectionModes.POLYGON_PLAN_TARGET ? 'btn-selected' : ''}
+            ${selectedMultipleLocation === true ? 'ng-hide-remove' : 'ng-hide-add'}`
+          }
           onClick={() => this.setSelectionPolygon()}
           title="Select multiple locations">
           <i className="fa fa-draw-polygon"></i>
@@ -399,7 +480,11 @@ export class ToolBar extends Component {
 
         {configuration.perspective.showToolbarButtons.openCoverageBoundary &&
           <button style={{ display: calculateCoverageBoundry ? 'block' : 'none' }}
-            className={`btn ${selectedTargetSelectionMode === this.targetSelectionModes.COVERAGE_BOUNDARY && activeViewModePanel === this.viewModePanels.COVERAGE_BOUNDARY ? 'btn-selected' : ''} ${calculateCoverageBoundry === true ? 'ng-hide-remove' : 'ng-hide-add'}`}
+            className={
+              `btn ${selectedTargetSelectionMode === this.targetSelectionModes.COVERAGE_BOUNDARY
+              && activeViewModePanel === this.viewModePanels.COVERAGE_BOUNDARY ? 'btn-selected' : ''}
+              ${calculateCoverageBoundry === true ? 'ng-hide-remove' : 'ng-hide-add'}`
+            }
             onClick={() => this.openViewModeCoverageBoundry()}
             title="Calculate coverage boundary">
             <i className="fa fa-crosshairs fa-rotate-180"></i>
@@ -408,7 +493,12 @@ export class ToolBar extends Component {
 
         <button
           style={{ display: exportSelectedPolygon ? 'block' : 'none' }}
-          className={`btn ${selectedTargetSelectionMode === this.targetSelectionModes.POLYGON_EXPORT_TARGET ? 'btn-selected' : ''} ${exportSelectedPolygon === true ? 'ng-hide-remove' : 'ng-hide-add'}`}
+          className={
+            `btn ${selectedTargetSelectionMode === this.targetSelectionModes.POLYGON_EXPORT_TARGET
+              ? 'btn-selected'
+              : ''
+            } ${exportSelectedPolygon === true ? 'ng-hide-remove' : 'ng-hide-add'}`
+          }
           onClick={() => this.setSelectionExport()}
           title="Export selected polygon">
           <i className="fa fa-cube"></i>
@@ -420,7 +510,11 @@ export class ToolBar extends Component {
         </button>
 
         {/* Dynamic Dropdown for Toolbar icons */}
-        <div className="dropdown" style={{ display: !showDropDown ? 'none' : 'block', borderLeft: '#eee 1px dotted', width: dropdownWidthPixels}}>
+        <div
+          className="dropdown"
+          style={{ display: !showDropDown ? 'none' : 'block',
+            borderLeft: '#eee 1px dotted', width: dropdownWidthPixels }}
+        >
           <button style={{backgroundColor: configuration.toolbar.toolBarColor}}
             className="btn btn-light" type="button" id="dropdownMenu1" data-toggle="dropdown"
             aria-haspopup="true" aria-expanded="true">
@@ -459,23 +553,23 @@ export class ToolBar extends Component {
   }
 
   refreshToolbar () {
-    const element = jQuery(".reactCompClass").get(); // To get the <r-tool-bar> component Elements
+    const element = jQuery(".reactCompClass").get() // To get the <r-tool-bar> component Elements
     if (element) {
 
-      const toolBarElement = jQuery(".tool-bar").get();
-      const dropDownElement = jQuery(".tool-bar .dropdown").get();
-      const ulElement = jQuery(".tool-bar .dropdown ul").get();
+      const toolBarElement = jQuery(".tool-bar").get()
+      const dropDownElement = jQuery(".tool-bar .dropdown").get()
+      const ulElement = jQuery(".tool-bar .dropdown ul").get()
 
       // Some of the buttons may be in the dropdown menu because the toolbar is collapsed.
       // Move them into the main toolbar before checking for button sizes.
-      const toolbarRoot = toolBarElement[0];
-      const dropdownRoot = dropDownElement[0];
+      const toolbarRoot = toolBarElement[0]
+      const dropdownRoot = dropDownElement[0]
       // The width of the toolbar is the clientWidth minus the margins minus the width of the dropdown.
       // We assume that the dropdown is shown while computing which buttons to collapse.
       const toolbarWidth = element[0].clientWidth - this.state.marginPixels * 2.0 - this.state.dropdownWidthPixels
-      const dropdownUL = ulElement[0];
+      const dropdownUL = ulElement[0]
       // Loop through all the <li> elements in the dropdown. These <li> elements contain the buttons.
-      const dropdownItems = jQuery(".tool-bar .dropdown ul li").get();
+      const dropdownItems = jQuery(".tool-bar .dropdown ul li").get()
 
       for (let i = 0; i < dropdownItems.length; ++i) {
         if (dropdownItems[i].childNodes.length > 0) {
@@ -544,10 +638,12 @@ export class ToolBar extends Component {
       .catch((err) => console.error(err))
   }
 
-  onChangeSelectedFiberOption (e) {
+  onChangeSelectedFiberOption (event) {
     // To set selectedFiberOptionin in viewSetting redux state
     const newViewSetting = JSON.parse(JSON.stringify(this.props.viewSetting))
-    newViewSetting.selectedFiberOption = this.props.viewFiberOptions.filter(selectedFiberOption => selectedFiberOption.name === e.target.value)[0]
+    newViewSetting.selectedFiberOption = this.props.viewFiberOptions.filter(
+      selectedFiberOption => selectedFiberOption.name === event.target.value
+    )[0]
     this.props.setViewSetting(newViewSetting)
     this.rxState.requestMapLayerRefresh.sendMessage(null)
   }
@@ -572,8 +668,8 @@ export class ToolBar extends Component {
     this.rxState.viewSettingsChanged.sendMessage()
   }
 
-  onChangeSiteBoundaries (e) {
-    this.props.setSelectedBoundaryType(this.props.boundaryTypes[e.target.selectedIndex])
+  onChangeSiteBoundaries (event) {
+    this.props.setSelectedBoundaryType(this.props.boundaryTypes[event.target.selectedIndex])
     this.props.setShowSiteBoundary(true)
   }
 
@@ -600,8 +696,8 @@ export class ToolBar extends Component {
       ? this.props.viewSetting.heatmapOptions[0].id : this.props.viewSetting.heatmapOptions[2].id)
   }
 
-  changeHeatMapOptions (e) {
-    this.setState({ sliderValue: e.target.value }, function() {
+  changeHeatMapOptions (event) {
+    this.setState({ sliderValue: event.target.value }, function() {
       const newMapTileOptions = JSON.parse(JSON.stringify(this.mapTileOptions))
       newMapTileOptions.heatMap.worldMaxValue = this.rangeValues[this.state.sliderValue]
       this.rxState.mapTileOptions.sendMessage(newMapTileOptions) // This will also refresh the map layer
@@ -623,8 +719,10 @@ export class ToolBar extends Component {
     this.props.setIsRulerEnabled(!this.props.isRulerEnabled)
     this.enableRulerAction()
 
-    !this.props.isRulerEnabled ? this.props.mapRef.setOptions({ draggableCursor: 'crosshair' }) : this.props.mapRef.setOptions({ draggableCursor: null })
-    this.showRemoveRulerButton(); // To disable ruler (-) icon
+    !this.props.isRulerEnabled
+      ? this.props.mapRef.setOptions({ draggableCursor: 'crosshair' })
+      : this.props.mapRef.setOptions({ draggableCursor: null })
+    this.showRemoveRulerButton() // To disable ruler (-) icon
   }
 
   enableRulerAction () {
@@ -638,16 +736,16 @@ export class ToolBar extends Component {
     }
   }
 
-  onChangeRulerDropdown(e){
+  onChangeRulerDropdown(event){
     let prestineCurrentRulerAction = this.state.currentRulerAction
     Object.entries(this.allRulerActions).map(([objKey, objValue]) => {
-      if (objKey === e.target.value){
+      if (objKey === event.target.value){
         prestineCurrentRulerAction = objValue
       }
     })
     this.setState({ currentRulerAction: prestineCurrentRulerAction }, function() {
-      this.onChangeRulerAction();
-    });
+      this.onChangeRulerAction()
+    })
   }
 
   onChangeRulerAction () {
@@ -673,7 +771,8 @@ export class ToolBar extends Component {
     this.clearRulers()
     if (this.measuringStickEnabled) {
       this.clickListener = google.maps.event.addListener(this.props.mapRef, 'click', (point) => {
-        this.state.currentRulerAction.id === this.allRulerActions.STRAIGHT_LINE.id && this.addToRulerSegments(point.latLng)
+        this.state.currentRulerAction.id === this.allRulerActions.STRAIGHT_LINE.id
+        && this.addToRulerSegments(point.latLng)
       })
     } else {
       google.maps.event.removeListener(this.clickListener)
@@ -704,8 +803,8 @@ export class ToolBar extends Component {
 
     // if this is the first marker, add a label and link it to the first marker
     if (this.rulerSegments.length === 1) {
-      const event = new CustomEvent('measuredDistance', { detail: 0});
-      window.dispatchEvent(event);
+      const event = new CustomEvent('measuredDistance', { detail: 0})
+      window.dispatchEvent(event)
     } else {
       this.rulerDrawEvent()
     }
@@ -743,16 +842,18 @@ export class ToolBar extends Component {
         // ignore the first ruler.... work from current ruler to the previous ruler
         if (index) {
           const prev = this.rulerSegments[index - 1]
-          return length + google.maps.geometry.spherical.computeDistanceBetween(prev.getPosition(), ruler.getPosition())
+          return length + google.maps.geometry.spherical.computeDistanceBetween(
+            prev.getPosition(), ruler.getPosition()
+          )
         } else {
           return 0
         }
       }, 0)
 
-      const event = new CustomEvent('measuredDistance', { detail: total});
-      window.dispatchEvent(event);
+      const event = new CustomEvent('measuredDistance', { detail: total})
+      window.dispatchEvent(event)
       // Unable to call in Render Method so called here
-      this.showRemoveRulerButton(); // To disable ruler (-) icon
+      this.showRemoveRulerButton() // To disable ruler (-) icon
     }
   }
 
@@ -782,8 +883,8 @@ export class ToolBar extends Component {
     this.rulerDrawEvent()
 
     this.measuredDistance = null
-    const event = new CustomEvent('measuredDistance', { detail: this.measuredDistance});
-    window.dispatchEvent(event);
+    const event = new CustomEvent('measuredDistance', { detail: this.measuredDistance})
+    window.dispatchEvent(event)
   }
 
   removeLastRulerMarker () {
@@ -811,7 +912,8 @@ export class ToolBar extends Component {
   listenForCopperMarkers () {
     // Note we are using skip(1) to skip the initial value (that is fired immediately) from the RxJS stream.
     this.copperClicklistener = google.maps.event.addListener(this.props.mapRef, 'click', (event) => {
-      if (!event || !event.latLng || this.state.currentRulerAction.id === this.allRulerActions.STRAIGHT_LINE.id) {
+      if (!event || !event.latLng
+        || this.state.currentRulerAction.id === this.allRulerActions.STRAIGHT_LINE.id) {
         return
       }
 
@@ -850,7 +952,9 @@ export class ToolBar extends Component {
 
     // Get the POST body for optimization based on the current application state
     const { optimizationInputs, activeSelectionModeId, locationLayers, plan } = this.props
-    const optimizationBody = this.props.getOptimizationBody(optimizationInputs, activeSelectionModeId, locationLayers, plan)
+    const optimizationBody = this.props.getOptimizationBody(
+      optimizationInputs, activeSelectionModeId, locationLayers, plan
+    )
     // Replace analysis_type and add a point and radius
     optimizationBody.analysis_type = 'POINT_TO_POINT'
     optimizationBody.pointFrom = {
@@ -862,7 +966,9 @@ export class ToolBar extends Component {
       type: 'Point',
       coordinates: [pointTo.latLng.lng(), pointTo.latLng.lat()]
     }
-    const spatialEdgeType = this.state.currentRulerAction.id === this.allRulerActions.COPPER.id ? this.SPATIAL_EDGE_COPPER : this.SPATIAL_EDGE_ROAD
+    const spatialEdgeType = this.state.currentRulerAction.id === this.allRulerActions.COPPER.id
+      ? this.SPATIAL_EDGE_COPPER
+      : this.SPATIAL_EDGE_ROAD
     optimizationBody.spatialEdgeType = spatialEdgeType
     optimizationBody.directed = false
     AroHttp.post('/service/v1/network-analysis/p2p', optimizationBody)
@@ -885,8 +991,8 @@ export class ToolBar extends Component {
             strokeWeight: 4
           }
         })
-        const event = new CustomEvent('measuredDistance', { detail: result.data.length});
-        window.dispatchEvent(event);
+        const event = new CustomEvent('measuredDistance', { detail: result.data.length})
+        window.dispatchEvent(event)
         this.copperPoints = []
       })
   }
@@ -978,14 +1084,14 @@ export class ToolBar extends Component {
   initSearchBox () {
     let ids = 0
     const searchSessionToken = uuidStore.getInsecureV4UUID()
-    const searchLocation = this.searchLocation;
+    const searchLocation = this.searchLocation
     const addBouncingMarker = (latitude, longitude) => {
       const marker = new google.maps.Marker({
         map: map,
         animation: google.maps.Animation.BOUNCE,
         position: { lat: latitude, lng: longitude }
       })
-      setTimeout(() => { marker.setMap(null) }, 5000);
+      setTimeout(() => { marker.setMap(null) }, 5000)
     }
     const search = $('#global-search-toolbutton .select2')
     search.select2({
@@ -996,7 +1102,8 @@ export class ToolBar extends Component {
       ajax: {
         url: '/search/addresses',
         dataType: 'json',
-        quietMillis: 250, // *** In newer versions of select2, this is called 'delay'. Remember this when upgrading select2
+         // *** In newer versions of select2, this is called 'delay'. Remember this when upgrading select2
+        quietMillis: 250,
         data: (term) => ({
           text: term,
           sessionToken: searchSessionToken,
@@ -1028,14 +1135,15 @@ export class ToolBar extends Component {
         },
         cache: true
       }
-    }).on('change', (e) => {
-      const selectedLocation = e.added
+    }).on('change', (evt) => {
+      const selectedLocation = evt.added
       // Due to initSearchBox Render Multiple times, so condition check is used to render only one time on Change
       if (selectedLocation && selectedLocation.text !== this.searchLocation) {
         this.searchLocation = selectedLocation.text
         const ZOOM_FOR_LOCATION_SEARCH = 17
         if (selectedLocation.type === 'placeId') {
-          // This is a google maps place_id. The actual latitude/longitude can be obtained by another call to the geocoder
+          // This is a google maps place_id.
+          // The actual latitude/longitude can be obtained by another call to the geocoder
           const geocoder = new google.maps.Geocoder()
           geocoder.geocode({ 'placeId': selectedLocation.value }, function (results, status) {
             if (status !== 'OK') {
@@ -1049,8 +1157,8 @@ export class ToolBar extends Component {
             }
             // Due to unable to subscribe requestSetMapCenter as of now used Custom Event Listener
             // https://www.sitepoint.com/javascript-custom-events/
-            const event = new CustomEvent('mapChanged', { detail: mapObject});
-            window.dispatchEvent(event);
+            const event = new CustomEvent('mapChanged', { detail: mapObject})
+            window.dispatchEvent(event)
             addBouncingMarker(results[0].geometry.location.lat(), results[0].geometry.location.lng())
           })
         } else if (selectedLocation.type === 'latlng') {
@@ -1060,8 +1168,8 @@ export class ToolBar extends Component {
             longitude: +selectedLocation.value[1],
             zoom: ZOOM_FOR_LOCATION_SEARCH
           }
-          const event = new CustomEvent('mapChanged', { detail: mapObject});
-          window.dispatchEvent(event);
+          const event = new CustomEvent('mapChanged', { detail: mapObject})
+          window.dispatchEvent(event)
           addBouncingMarker(+selectedLocation.value[0], +selectedLocation.value[1])
         } else if (selectedLocation.type === 'error') {
           console.error('ERROR when searching for location')
@@ -1105,7 +1213,7 @@ const mapStateToProps = (state) => ({
   showGlobalSettings: state.globalSettings.showGlobalSettings,
   viewSetting: state.toolbar.viewSetting,
   viewFiberOptions: state.toolbar.viewFiberOptions,
-  loggedInUser: state.user.loggedInUser
+  loggedInUser: state.user.loggedInUser,
 })
 
 const mapDispatchToProps = (dispatch) => ({
@@ -1129,9 +1237,13 @@ const mapDispatchToProps = (dispatch) => ({
   selectedToolBarAction: (value) => dispatch(ToolBarActions.selectedToolBarAction(value)),
   selectedTargetSelectionModeAction: (value) => dispatch(ToolBarActions.selectedTargetSelectionMode(value)),
   setIsRulerEnabled: (value) => dispatch(ToolBarActions.setIsRulerEnabled(value)),
-  getOptimizationBody: (optimizationInputs, activeSelectionModeId, locationLayers, plan) => dispatch(ToolBarActions.getOptimizationBody(optimizationInputs, activeSelectionModeId, locationLayers, plan)),
+  getOptimizationBody: (optimizationInputs, activeSelectionModeId, locationLayers, plan) => dispatch(
+    ToolBarActions.getOptimizationBody(optimizationInputs, activeSelectionModeId, locationLayers, plan)
+  ),
   setIsViewSettingsEnabled: (value) => dispatch(ToolBarActions.setIsViewSettingsEnabled(value)),
-  setSelectedBoundaryType: (selectedBoundaryType) => dispatch(MapLayerActions.setSelectedBoundaryType(selectedBoundaryType)),
+  setSelectedBoundaryType: (selectedBoundaryType) => dispatch(
+    MapLayerActions.setSelectedBoundaryType(selectedBoundaryType)
+  ),
   setShowSiteBoundary: (value) => dispatch(MapLayerActions.setShowSiteBoundary(value)),
   setShowDirectedCable: (value) => dispatch(ToolBarActions.setShowDirectedCable(value)),
   setShowEquipmentLabelsChanged: (value) => dispatch(ToolBarActions.setShowEquipmentLabelsChanged(value)),
@@ -1140,9 +1252,11 @@ const mapDispatchToProps = (dispatch) => ({
   createNewPlan: (value) => dispatch(ToolBarActions.createNewPlan(value)),
   loadPlan: (planId) => dispatch(ToolBarActions.loadPlan(planId)),
   loadServiceLayers: () => dispatch(ToolBarActions.loadServiceLayers()),
-  setSelectedHeatMapOption: (selectedHeatMapOption) => dispatch(ToolBarActions.setSelectedHeatMapOption(selectedHeatMapOption)),
+  setSelectedHeatMapOption: (selectedHeatMapOption) => dispatch(
+    ToolBarActions.setSelectedHeatMapOption(selectedHeatMapOption)
+  ),
   setShowGlobalSettings: (status) => dispatch(GlobalsettingsActions.setShowGlobalSettings(status)),
-  setViewSetting: (viewSetting) => dispatch(ToolBarActions.setViewSetting(viewSetting))
+  setViewSetting: (viewSetting) => dispatch(ToolBarActions.setViewSetting(viewSetting)),
 })
 
 const ToolBarComponent = wrapComponentWithProvider(reduxStore, ToolBar, mapStateToProps, mapDispatchToProps)

@@ -167,8 +167,8 @@ function loadPlan (planId) {
         }
         // Due to unable to subscribe requestSetMapCenter as of now used Custom Event Listener
         // https://www.sitepoint.com/javascript-custom-events/
-        const event = new CustomEvent('mapChanged', { detail: mapObject});
-        window.dispatchEvent(event);
+        const event = new CustomEvent('mapChanged', { detail: mapObject})
+        window.dispatchEvent(event)
 
         return Promise.resolve()
       })

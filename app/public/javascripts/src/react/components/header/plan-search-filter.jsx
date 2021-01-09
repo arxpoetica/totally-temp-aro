@@ -1,11 +1,11 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import Select from 'react-select';
+import Select from 'react-select'
 import ToolBarActions from './tool-bar-actions'
 
 const components = {
   DropdownIndicator: null,
-};
+}
 
 const square = (color) => ({
   alignItems: 'center',
@@ -19,14 +19,14 @@ const square = (color) => ({
     height: 10,
     width: 10,
   },
-});
+})
 
 export class PlanSearchFilter extends Component {
   constructor (props) {
     super(props)
 
     this.state = {
-      selectedItems: []
+      selectedItems: [],
     }
 
     const filterDropdown = jQuery('.filter-dropdown')
@@ -42,7 +42,7 @@ export class PlanSearchFilter extends Component {
   render() {
 
     const { objectName, searchList } = this.props
-    const { selectedItems } = this.state;
+    const { selectedItems } = this.state
 
     const customStyles = {
       control: styles => ({ ...styles, backgroundColor: 'white' }),
@@ -56,24 +56,30 @@ export class PlanSearchFilter extends Component {
       }),
     }
 
-    let optionsList = [];
+    let optionsList = []
     if (objectName === 'Tag'){
       optionsList = searchList.map(function(newkey) {
-        return {"id": newkey.id, "value": newkey.name, "label": newkey.name, "colourHue": newkey.colourHue};
-      });
+        return {"id": newkey.id, "value": newkey.name, "label": newkey.name, "colourHue": newkey.colourHue}
+      })
     } else if (objectName === 'Service Area'){
       optionsList = searchList.map(function(newkey) {
-        return {"id": newkey.id, "value": newkey.code, "label": newkey.code};
-      });
+        return {"id": newkey.id, "value": newkey.code, "label": newkey.code}
+      })
     } else if (objectName === 'Creator'){
       optionsList = searchList.map(function(newkey) {
-        return {"id": newkey.fullName, "value": newkey.fullName, "label": newkey.fullName};
-      });
+        return {"id": newkey.fullName, "value": newkey.fullName, "label": newkey.fullName}
+      })
     }
 
     return (
       <div className="dropdown">
-        <button className="btn btn-light dropdown-toggle filter-dropdown-menu" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+        <button
+          className="btn btn-light dropdown-toggle filter-dropdown-menu"
+          type="button" id="dropdownMenu1"
+          data-toggle="dropdown"
+          aria-haspopup="true"
+          aria-expanded="true"
+        >
           {objectName}
         </button>
         <div className="dropdown-menu filter-dropdown" aria-labelledby="dropdownMenu1">
@@ -86,14 +92,18 @@ export class PlanSearchFilter extends Component {
             isClearable={true}
             components={components}
             placeholder={`Select ${objectName}...`}
-            onChange={(e) => this.onSelectedItemsChanged(e)}
+            onChange={(event) => this.onSelectedItemsChanged(event)}
             styles={customStyles}
           />
           <div className="text-center" style={{marginTop: '2px'}}>
-            <button id="apply-filter" disabled={(selectedItems.length < 0 ? 'disabled' : null)}
+            <button
+              id="apply-filter"
+              disabled={(selectedItems.length < 0 ? 'disabled' : null)}
               className={`btn btn-sm ${selectedItems.length > 0 ? 'btn-primary' : ''}`}
               onClick={() => this.props.applySearch({selectedFilters: selectedItems})}
-            >Apply</button>
+            >
+              Apply
+            </button>
           </div>
         </div>
       </div>
@@ -101,27 +111,27 @@ export class PlanSearchFilter extends Component {
   }
 
   onSelectedItemsChanged (event) {
-    let selectedItems = [];
+    let selectedItems = []
     if (event !== null) {
       const { objectName, searchList } = this.props
       if (objectName === 'Creator') {
         searchList.map(function(newkey) {
-          if (newkey.fullName === event.value) return selectedItems.push(newkey);
-        });
+          if (newkey.fullName === event.value) return selectedItems.push(newkey)
+        })
       } else {
         searchList.map(function(newkey) {
-          if (newkey.id === event.id) return selectedItems.push(newkey);
-        });
+          if (newkey.id === event.id) return selectedItems.push(newkey)
+        })
       }
     } else {
       selectedItems = []
     }
-    this.setState({ selectedItems });
+    this.setState({ selectedItems })
   }
 }
 
 const mapDispatchToProps = (dispatch) => ({
-  getTagColour: (tag) => dispatch(ToolBarActions.getTagColour(tag))
+  getTagColour: (tag) => dispatch(ToolBarActions.getTagColour(tag)),
 })
 
 const PlanSearchFilterComponent = connect(null, mapDispatchToProps)(PlanSearchFilter)

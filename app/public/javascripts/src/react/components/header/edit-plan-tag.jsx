@@ -1,11 +1,11 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import Select from 'react-select';
+import Select from 'react-select'
 import ToolBarActions from './tool-bar-actions'
 
 const components = {
   DropdownIndicator: null,
-};
+}
 
 const square = (color) => ({
   alignItems: 'center',
@@ -19,7 +19,7 @@ const square = (color) => ({
     height: 10,
     width: 10,
   },
-});
+})
 
 export class EditPlanTagMode extends Component {
 
@@ -39,20 +39,20 @@ export class EditPlanTagMode extends Component {
     }
 
     let optionsList = []; let defaultList = [];
-    if (objectName === 'Tag'){
+    if (objectName === 'Tag') {
       optionsList = searchList.map(function(newkey) {
-        return {"id": newkey.id, "value": newkey.name, "label": newkey.name, "colourHue": newkey.colourHue};
-      });
+        return {"id": newkey.id, "value": newkey.name, "label": newkey.name, "colourHue": newkey.colourHue}
+      })
       defaultList = selectedList.map(function(newkey) {
-        return {"id": newkey.id, "value": newkey.name, "label": newkey.name, "colourHue": newkey.colourHue};
-      });
+        return {"id": newkey.id, "value": newkey.name, "label": newkey.name, "colourHue": newkey.colourHue}
+      })
     } else if (objectName === 'Service Area'){
       optionsList = searchList.map(function(newkey) {
-        return {"id": newkey.id, "value": newkey.code, "label": newkey.code};
-      });
+        return {"id": newkey.id, "value": newkey.code, "label": newkey.code}
+      })
       defaultList = selectedList.map(function(newkey) {
-        return {"id": newkey.id, "value": newkey.code, "label": newkey.code};
-      });
+        return {"id": newkey.id, "value": newkey.code, "label": newkey.code}
+      })
     }
 
     return (
@@ -67,29 +67,29 @@ export class EditPlanTagMode extends Component {
         isClearable={false}
         components={components}
         placeholder={`Select ${objectName}...`}
-        onChange={(e) => this.onSelectedItemsChanged(e)}
+        onChange={(event) => this.onSelectedItemsChanged(event)}
         styles={customStyles}
       />
     )
   }
 
   onSelectedItemsChanged (event) {
-    const selectedItems = [];
+    const selectedItems = []
     if (event !== null) {
       const { objectName, searchList } = this.props
       if (objectName === 'Tag') {
         searchList.filter(function (o1) {
           return event.some(function (o2) {
-            if (o1.id === o2.id) return selectedItems.push(o1);
-          });
-        });
+            if (o1.id === o2.id) return selectedItems.push(o1)
+          })
+        })
         this.props.setCurrentPlanTags(selectedItems)
       } else if (objectName === 'Service Area') {
         searchList.filter(function (o1) {
           return event.some(function (o2) {
-            if (o1.id === o2.id) return selectedItems.push(o1);
-          });
-        });
+            if (o1.id === o2.id) return selectedItems.push(o1)
+          })
+        })
         this.props.setCurrentPlanServiceAreaTags(selectedItems)
       }
     }
@@ -101,7 +101,7 @@ const mapDispatchToProps = (dispatch) => ({
   setCurrentPlanServiceAreaTags: (currentPlanServiceAreaTags) => dispatch(
     ToolBarActions.setCurrentPlanServiceAreaTags(currentPlanServiceAreaTags)
   ),
-  getTagColour: (tag) => dispatch(ToolBarActions.getTagColour(tag))
+  getTagColour: (tag) => dispatch(ToolBarActions.getTagColour(tag)),
 })
 
 const EditPlanTagModeComponent = connect(null, mapDispatchToProps)(EditPlanTagMode)
