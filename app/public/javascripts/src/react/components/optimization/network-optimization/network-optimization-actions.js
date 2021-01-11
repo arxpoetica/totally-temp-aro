@@ -164,7 +164,7 @@ const modifyDialogResult = Object.freeze({
   OVERWRITE: 1
 })
 
-function handleModifyClicked (plan)  {
+function modifyOptimization (plan)  {
   return dispatch => {
     const currentPlan = plan
     if (currentPlan.ephemeral) {
@@ -224,5 +224,5 @@ export default {
   runOptimization,
   cancelOptimization,
   setNetworkAnalysisType,
-  handleModifyClicked
+  modifyOptimization
 }

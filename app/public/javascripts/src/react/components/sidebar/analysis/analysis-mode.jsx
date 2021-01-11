@@ -14,7 +14,6 @@ import RfpButton from '../../optimization/rfp/rfp-button.jsx'
 import NetworkAnalysisOutput from '../../optimization/network-analysis/network-analysis-output.jsx'
 import ReportsDownloadModal from '../../optimization/reports/reports-download-modal.jsx'
 import NetWorkBuildOutput from './network-build/network-build-output.jsx'
-import RoicReportsActions from './roic-reports/roic-reports-actions'
 import ExpertMode from './expert-mode/expert-mode.jsx'
 import ExpertModeButton from './expert-mode/expert-mode-button.jsx'
 import CoverageReportDownloader from './coverage/coverage-report-downloader.jsx'
@@ -35,7 +34,6 @@ export class AnalysisMode extends Component {
     }
 
     this.reportTypes = ['RFP']
-    this.handleModifyClicked = this.handleModifyClicked.bind(this)
   }
 
   componentDidMount () {
@@ -88,7 +86,6 @@ export class AnalysisMode extends Component {
                 {(networkAnalysisType === 'NETWORK_PLAN' || networkAnalysisType === 'NETWORK_ANALYSIS') &&
                   <div>
                     <NetworkOptimizationInput
-                      onModify={this.handleModifyClicked}
                       networkAnalysisTypeId={networkAnalysisType}
                     />
                   </div>
@@ -165,10 +162,6 @@ export class AnalysisMode extends Component {
     }
   }
 
-  handleModifyClicked () {
-    this.props.handleModifyClicked(this.props.activePlan)
-  }
-
   onAnalysisTypeChange (event) {
     const localAnalysisTypeId = event.target.value
     this.state.networkAnalysisTypes.forEach(analysisType => {
@@ -193,7 +186,6 @@ const mapStateToProps = (state) => ({
   coverageReport: state.coverage.report,
   networkAnalysisType: state.optimization.networkOptimization.optimizationInputs.analysis_type,
   currentPlanState: state.plan.activePlan.planState,
-  activePlan: state.plan.activePlan,
   planStateCons: state.roicReports.planStateCons,
 })
 
@@ -202,7 +194,6 @@ const mapDispatchToProps = (dispatch) => ({
   setNetworkAnalysisType: (networkAnalysisType) => dispatch(
     NetworkOptimizationActions.setNetworkAnalysisType(networkAnalysisType)
   ),
-  handleModifyClicked: (activePlan) => dispatch(NetworkOptimizationActions.handleModifyClicked(activePlan)),
 })
 
 const AnalysisModeComponent = wrapComponentWithProvider(reduxStore, AnalysisMode, mapStateToProps, mapDispatchToProps)
