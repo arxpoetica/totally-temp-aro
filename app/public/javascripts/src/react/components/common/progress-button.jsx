@@ -21,6 +21,7 @@ export default class ProgressButton extends Component {
   render () {
     switch (this.props.status) {
       case this.statusTypes.UNINITIALIZED:
+      case this.statusTypes.FAILED:
         return this.renderUninitializedButton()
 
       case this.statusTypes.RUNNING:
@@ -31,16 +32,25 @@ export default class ProgressButton extends Component {
         return this.renderFinishedButton()
 
       default:
-        return <div>ERROR: Unknown coverage status - {this.props.status}</div>
+        return this.renderUninitializedButton()
     }
   }
 
   renderUninitializedButton () {
     return (
-      <button className={'btn btn-block btn-primary'} style={{ marginBottom: '10px' }}
-        onClick={() => this.onRun()}>
-        <i className='fa fa-bolt' /> Run
-      </button>
+      <>
+        {
+          this.props.status === this.statusTypes.FAILED
+          && <div className="">ERROR: Unknown coverage status - {this.props.status}</div>
+        }
+        <button
+          className="btn btn-block btn-primary"
+          style={{ marginBottom: '10px' }}
+          onClick={() => this.onRun()}
+        >
+          <i className='fa fa-bolt'/> Run
+        </button>
+      </>
     )
   }
 
