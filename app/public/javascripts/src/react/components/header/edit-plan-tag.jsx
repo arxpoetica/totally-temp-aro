@@ -123,7 +123,7 @@ const Option = createClass({
       <div>
         <components.Option {...this.props}>
           <label>{this.props.value}</label>&nbsp;
-          <small>{this.props.data.name}</small>
+          <small style={{marginBottom: '5px'}}>{this.props.data.name}</small>
         </components.Option>
       </div>
     );
