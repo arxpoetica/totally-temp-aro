@@ -76,7 +76,6 @@ workflows:
               only:
                 - master
                 - dev
-                - spatial-edge-type
       - deploy:
           context: aro_qa_builds
           requires:
