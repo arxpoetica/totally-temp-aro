@@ -21,7 +21,6 @@ export default class ProgressButton extends Component {
   render () {
     switch (this.props.status) {
       case this.statusTypes.UNINITIALIZED:
-      case this.statusTypes.FAILED:
         return this.renderUninitializedButton()
 
       case this.statusTypes.RUNNING:
@@ -29,6 +28,7 @@ export default class ProgressButton extends Component {
 
       case this.statusTypes.CANCELED:
       case this.statusTypes.FINISHED:
+      case this.statusTypes.FAILED:
         return this.renderFinishedButton()
 
       default:
@@ -38,19 +38,13 @@ export default class ProgressButton extends Component {
 
   renderUninitializedButton () {
     return (
-      <>
-        {
-          this.props.status === this.statusTypes.FAILED
-          && <div className="">ERROR: Unknown coverage status - {this.props.status}</div>
-        }
-        <button
-          className="btn btn-block btn-primary"
-          style={{ marginBottom: '10px' }}
-          onClick={() => this.onRun()}
-        >
-          <i className='fa fa-bolt'/> Run
-        </button>
-      </>
+      <button
+        className="btn btn-block btn-primary"
+        style={{ marginBottom: '10px' }}
+        onClick={() => this.onRun()}
+      >
+        <i className='fa fa-bolt'/> Run
+      </button>
     )
   }
 
@@ -89,10 +83,16 @@ export default class ProgressButton extends Component {
 
   renderFinishedButton () {
     return (
-      <button className={'btn btn-block modify-coverage-button'} style={{ marginBottom: '10px' }}
-        onClick={() => this.onModify()}>
-        <i className='fa fa-edit' /> Modify
-      </button>
+      <>
+        {
+          this.props.status === this.statusTypes.FAILED
+          && <div>ERROR: Unknown coverage status - {this.props.status}</div>
+        }
+        <button className={'btn btn-block modify-coverage-button'} style={{ marginBottom: '10px' }}
+          onClick={() => this.onModify()}>
+          <i className='fa fa-edit' /> Modify
+        </button>
+      </>
     )
   }
 }
