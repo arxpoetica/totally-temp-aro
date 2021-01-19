@@ -76,7 +76,7 @@ workflows:
               only:
                 - master
                 - dev
-                - feature-coloring
+                - spatial-edge-type
       - deploy:
           context: aro_qa_builds
           requires:

@@ -655,7 +655,7 @@ class MapTileRenderer {
               mapLayer && mapLayer.tileDefinitions && 
               mapLayer.tileDefinitions.length > 0 && mapLayer.tileDefinitions[0].fiberType) {
               
-              var edgeType = JSON.parse(feature.properties.spatial_edge_type).name
+              var edgeType = feature.properties.spatial_edge_type
               var fiberType = mapLayer.tileDefinitions[0].fiberType
               if (this.stateMapLayers.networkEquipment.cables[fiberType] &&
                 this.stateMapLayers.networkEquipment.cables[fiberType].conduitVisibility[edgeType]) {
