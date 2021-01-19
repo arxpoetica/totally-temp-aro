@@ -23,6 +23,7 @@ export class NetworkOptimizationButton extends ProgressButton {
       UNINITIALIZED: AngConstants.PLAN_STATE.START_STATE,
       RUNNING: AngConstants.PLAN_STATE.STARTED,
       CANCELED: AngConstants.PLAN_STATE.CANCELED,
+      FAILED: AngConstants.PLAN_STATE.FAILED,
       FINISHED: AngConstants.PLAN_STATE.COMPLETED,
     }
 
