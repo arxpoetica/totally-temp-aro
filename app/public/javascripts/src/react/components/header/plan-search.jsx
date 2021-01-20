@@ -200,6 +200,7 @@ export class PlanSearch extends Component {
             searchProperty="code"
             searchList={listOfServiceAreaTags}
             applySearch={this.applySearchFilter.bind(this, 'svc')}
+            refreshTagList={this.onRefreshTagList.bind(this)}
           />
           <PlanSearchFilter
             objectName="Creator"
@@ -283,6 +284,10 @@ export class PlanSearch extends Component {
         }
       </div>
     )
+  }
+
+  onRefreshTagList (dataItems, filterObj, isHardReload) {
+    this.props.loadListOfSAPlanTags(dataItems, filterObj, isHardReload)
   }
 
   focusCreatable  () {
@@ -608,7 +613,8 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
   loadListOfSAPlanTagsById: (listOfServiceAreaTags, promises) => dispatch(ToolBarActions.loadListOfSAPlanTagsById(listOfServiceAreaTags, promises)),
-  getTagColour: (tag) => dispatch(ToolBarActions.getTagColour(tag))
+  getTagColour: (tag) => dispatch(ToolBarActions.getTagColour(tag)),
+  loadListOfSAPlanTags: (dataItems, filterObj, ishardreload) => dispatch(ToolBarActions.loadListOfSAPlanTags(dataItems, filterObj, ishardreload)),
 })
 
 const PlanSearchComponent = wrapComponentWithProvider(reduxStore, PlanSearch, mapStateToProps, mapDispatchToProps)
