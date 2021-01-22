@@ -1,11 +1,8 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import Select from 'react-select'
+import Select, { components } from "react-select"
+import createClass from "create-react-class"
 import ToolBarActions from './tool-bar-actions'
-
-const components = {
-  DropdownIndicator: null,
-}
 
 const square = (color) => ({
   alignItems: 'center',
@@ -22,6 +19,14 @@ const square = (color) => ({
 })
 
 export class EditPlanTagMode extends Component {
+  constructor (props) {
+    super(props)
+
+    this.state = {
+    }
+
+    this.handleInputChange = _.debounce(this.handleInputChange.bind(this),250)
+  }
 
   render() {
     const { searchList, selectedList, objectName } = this.props
@@ -38,7 +43,7 @@ export class EditPlanTagMode extends Component {
       }),
     }
 
-    let optionsList = []; let defaultList = [];
+    let optionsList = []; let defaultList = []
     if (objectName === 'Tag') {
       optionsList = searchList.map(function(newkey) {
         return {"id": newkey.id, "value": newkey.name, "label": newkey.name, "colourHue": newkey.colourHue}
@@ -47,14 +52,14 @@ export class EditPlanTagMode extends Component {
         return {"id": newkey.id, "value": newkey.name, "label": newkey.name, "colourHue": newkey.colourHue}
       })
     } else if (objectName === 'Service Area'){
-      optionsList = searchList.map(function(newkey) {
-        return {"id": newkey.id, "value": newkey.code, "label": newkey.code}
+      optionsList = searchList.map(function(newkey, index) {
+        return {"id":newkey.id, "value": newkey.code, "label": newkey.code, "name": newkey.name}
       })
-      defaultList = selectedList.map(function(newkey) {
-        return {"id": newkey.id, "value": newkey.code, "label": newkey.code}
+      defaultList = selectedList.map(function(newkey, index) {
+        return {"id":newkey.id, "value": newkey.code, "label": newkey.code, "name": newkey.name}
       })
     }
-
+    
     return (
       <Select
         isMulti
@@ -65,12 +70,25 @@ export class EditPlanTagMode extends Component {
         backspaceRemovesValue={true}
         isSearchable={true}
         isClearable={false}
-        components={components}
+        components={this.props.objectName === 'Service Area' ? { Option } : ''}
         placeholder={`Select ${objectName}...`}
-        onChange={(event) => this.onSelectedItemsChanged(event)}
+        onChange={(e,id)=>this.onSelectedItemsChanged(e)}
+        onInputChange={(e, action) => this.handleInputChange(e, action)}
         styles={customStyles}
       />
     )
+  }
+
+  handleInputChange (searchText, { action }) {
+    switch (action) {
+      case 'input-change':
+        this.props.objectName === 'Service Area'
+        ? this.props.refreshTagList(this.props.dataItems, searchText, false)
+        : ''
+        return
+      default:
+        return
+    }
   }
 
   onSelectedItemsChanged (event) {
@@ -96,6 +114,23 @@ export class EditPlanTagMode extends Component {
   }
 }
 
+const Option = createClass({
+  render() {
+    return (
+      <div>
+        <components.Option {...this.props}>
+          <label>{this.props.value}</label>&nbsp;
+          <small style={{marginBottom: '5px'}}>{this.props.data.name}</small>
+        </components.Option>
+      </div>
+    )
+  }
+})
+
+const mapStateToProps = (state) => ({
+  dataItems: state.plan.dataItems,
+})  
+
 const mapDispatchToProps = (dispatch) => ({
   setCurrentPlanTags: (currentPlanTags) => dispatch(ToolBarActions.setCurrentPlanTags(currentPlanTags)),
   setCurrentPlanServiceAreaTags: (currentPlanServiceAreaTags) => dispatch(
@@ -104,5 +139,5 @@ const mapDispatchToProps = (dispatch) => ({
   getTagColour: (tag) => dispatch(ToolBarActions.getTagColour(tag)),
 })
 
-const EditPlanTagModeComponent = connect(null, mapDispatchToProps)(EditPlanTagMode)
+const EditPlanTagModeComponent = connect(mapStateToProps, mapDispatchToProps)(EditPlanTagMode)
 export default EditPlanTagModeComponent

@@ -146,7 +146,7 @@ export class PlanningConstraints extends Component {
                   </Field>
                 </td>
               </tr>
-              { /*
+              { 
               <tr>
                 <td>Minimum fiber splice capacity</td>
                 <td>
@@ -154,7 +154,7 @@ export class PlanningConstraints extends Component {
                     className='form-control form-control-sm' component='input' type='text' />
                 </td>
               </tr>
-              */ }
+              }
               <tr>
                 { /*
                 <td>Infer CO when missing</td>

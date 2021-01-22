@@ -2,6 +2,7 @@
 import { react2angular } from 'react2angular'
 import { ToastContainer } from 'react-toastify'
 
+import AnalysisMode from '../react/components/sidebar/analysis/analysis-mode.jsx'
 import AroDebug from '../react/components/sidebar/debug/aro-debug.jsx'
 import ToolBar from '../react/components/header/tool-bar.jsx'
 import PlanSettings from '../react/components/plan/plan-settings.jsx'
@@ -62,7 +63,6 @@ import editPlanTag from './sidebar/view/edit-plan-tag'
 import aroSearch from './sidebar/view/aro-search'
 import aroMultiselectSearch from './sidebar/view/aro-multiselect-search'
 import displayModeButtons from './sidebar/display-mode-buttons'
-import optimizeButton from './sidebar/optimize-button'
 import summaryReports from './sidebar/summary-reports'
 import analysisExpertMode from './sidebar/analysis/analysis-expert-mode'
 import analysisMode from './sidebar/analysis/analysis-mode'
@@ -95,6 +95,7 @@ import mapSelectorPlanTarget from './map/map-selector-plan-target'
 import mapSelectorExportLocations from './map/map-selector-export-locations'
 import mapToggleComponent from './map/map-toggle'
 import networkPlanModal from './header/network-plan-modal'
+import planInputsModal from './header/plan-inputs-modal'
 import networkPlanManage from './header/network-plan-manage'
 import networkPlan from './header/network-plan'
 import fullScreenContainer from './full-screen/full-screen-container'
@@ -141,7 +142,6 @@ app.component('boundaryDetail', boundaryDetail)
   .component('aroSearch', aroSearch)
   .component('aroMultiselectSearch', aroMultiselectSearch)
   .component('displayModeButtons', displayModeButtons)
-  .component('optimizeButton', optimizeButton)
   .component('summaryReports', summaryReports)
   .component('analysisExpertMode', analysisExpertMode)
   .component('analysisMode', analysisMode)
@@ -172,6 +172,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('mapSelectorExportLocations', mapSelectorExportLocations)
   .component('mapToggleComponent', mapToggleComponent)
   .component('networkPlanModal', networkPlanModal)
+  .component('planInputsModal', planInputsModal)
   .component('networkPlanManage', networkPlanManage)
   .component('networkPlan', networkPlan)
   // .component('uiNotification', uiNotification)
@@ -197,6 +198,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('editorInterfacePrimitive', editorInterfacePrimitive)
   .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
 // ReactJS components
+  .component('rAnalysisMode', react2angular(AnalysisMode))
   .component('rAroDebug', react2angular(AroDebug))
   .component('rToolBar', react2angular(ToolBar))
   .component('rPlanSettings', react2angular(PlanSettings))

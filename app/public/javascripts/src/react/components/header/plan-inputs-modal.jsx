@@ -98,6 +98,7 @@ export class PlanInputsModal extends Component {
               objectName="Service Area"
               searchList={listOfServiceAreaTags}
               selectedList={currentPlanServiceAreaTags}
+              refreshTagList={this.onRefreshTagList.bind(this)}
             />
 
             {/* Parent plan selector - header */}
@@ -141,6 +142,10 @@ export class PlanInputsModal extends Component {
         </Modal>
       </div>
     )
+  }
+
+  onRefreshTagList (dataItems, filterObj, isHardReload) {
+    this.props.loadListOfSAPlanTags(dataItems, filterObj, isHardReload)
   }
 
   onActivePlanChanged (plan) {
@@ -292,10 +297,8 @@ const mapStateToProps = (state) => ({
 const mapDispatchToProps = (dispatch) => ({
   setPlanInputsModal: (status) => dispatch(ToolBarActions.setPlanInputsModal(status)),
   loadListOfPlanTags: () => dispatch(ToolBarActions.loadListOfPlanTags()),
-  loadListOfSAPlanTags: (dataItems) => dispatch(ToolBarActions.loadListOfSAPlanTags(dataItems)),
-  createNewPlan: (value, planName, parentPlan, planType) => dispatch(
-    ToolBarActions.createNewPlan(value, planName, parentPlan, planType)
-  ),
+  loadListOfSAPlanTags: (dataItems, filterObj, isHardReload) => dispatch(ToolBarActions.loadListOfSAPlanTags(dataItems, filterObj, isHardReload)),
+  createNewPlan: (value, planName, parentPlan, planType) => dispatch(ToolBarActions.createNewPlan(value, planName, parentPlan, planType)),
   loadPlan: (planId) => dispatch(ToolBarActions.loadPlan(planId)),
   makeCurrentPlanNonEphemeral: (planName, planType) => dispatch(ToolBarActions.makeCurrentPlanNonEphemeral(planName, planType)),
   copyCurrentPlanTo: (planName, planType) => dispatch(ToolBarActions.copyCurrentPlanTo(planName, planType)),

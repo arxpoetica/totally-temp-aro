@@ -19,7 +19,7 @@ class NetworkEquipmentController {
     this.state = state
     this.currentUser = state.loggedInUser
     this.mapZoom = 0// map.getZoom()
-    this.equ_tdc_order = ['central_office', 'splice_point', 'fiber_distribution_hub', 'fiber_distribution_terminal', 'multiple_dwelling_unit', 'bulk_distribution_terminal', 'dslam', 'cell_5g', 'loop_extender', 'network_anchor']
+    this.equ_tdc_order = ['central_office', 'olt', 'splice_point', 'fiber_distribution_hub', 'fiber_distribution_terminal', 'multiple_dwelling_unit', 'bulk_distribution_terminal', 'dslam', 'cell_5g', 'loop_extender', 'network_anchor']
     this.usePointAggregate = false // aggregating multiple pieces of equipment under one marker causes problems with Equipment Selection
 
     // When the map zoom changes, map layers can change

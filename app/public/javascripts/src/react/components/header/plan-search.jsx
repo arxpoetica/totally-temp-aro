@@ -221,6 +221,7 @@ export class PlanSearch extends Component {
             searchProperty="code"
             searchList={listOfServiceAreaTags}
             applySearch={this.applySearchFilter.bind(this, 'svc')}
+            refreshTagList={this.onRefreshTagList.bind(this)}
           />
           <PlanSearchFilter
             objectName="Creator"
@@ -312,7 +313,11 @@ export class PlanSearch extends Component {
     )
   }
 
-  focusCreatable () {
+  onRefreshTagList (dataItems, filterObj, isHardReload) {
+    this.props.loadListOfSAPlanTags(dataItems, filterObj, isHardReload)
+  }
+
+  focusCreatable  () {
     this.creatableRef.focus()
   }
 
@@ -651,6 +656,9 @@ const mapDispatchToProps = (dispatch) => ({
     ToolBarActions.loadListOfSAPlanTagsById(listOfServiceAreaTags, promises)
   ),
   getTagColour: (tag) => dispatch(ToolBarActions.getTagColour(tag)),
+  loadListOfSAPlanTags: (dataItems, filterObj, ishardreload) => dispatch(
+    ToolBarActions.loadListOfSAPlanTags(dataItems, filterObj, ishardreload)
+  ),
 })
 
 const PlanSearchComponent = connect(mapStateToProps, mapDispatchToProps)(PlanSearch)

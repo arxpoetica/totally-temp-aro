@@ -350,7 +350,7 @@ function loadServiceLayers () {
   }
 }
 
-function loadListOfSAPlanTags (dataItems, filterObj, ishardreload) {
+function loadListOfSAPlanTags (dataItems, filterObj, isHardReload) {
   return (dispatch, getState) => {
 
     const state = getState()
@@ -373,7 +373,7 @@ function loadListOfSAPlanTags (dataItems, filterObj, ishardreload) {
     }
 
     filter = filterObj ? filter.concat(` and (substringof(code,'${filterObj}') or substringof(name,'${filterObj}'))`) : filter
-    if (ishardreload) {
+    if (isHardReload) { 
       dispatch({
         type: Actions.TOOL_BAR_LIST_OF_SERVICE_AREA_TAGS,
         payload: []

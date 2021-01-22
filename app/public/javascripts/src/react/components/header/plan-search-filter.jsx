@@ -37,6 +37,8 @@ export class PlanSearchFilter extends Component {
         event.stopPropagation()
       }
     })
+
+    this.handleInputChange = _.debounce(this.handleInputChange.bind(this),250)
   }
 
   render() {
@@ -94,6 +96,7 @@ export class PlanSearchFilter extends Component {
             placeholder={`Select ${objectName}...`}
             onChange={(event) => this.onSelectedItemsChanged(event)}
             styles={customStyles}
+            onInputChange={(e, action)=>this.handleInputChange(e, action)}
           />
           <div className="text-center" style={{marginTop: '2px'}}>
             <button
@@ -108,6 +111,18 @@ export class PlanSearchFilter extends Component {
         </div>
       </div>
     )
+  }
+
+  handleInputChange (searchText, { action }) {
+    switch (action) {
+      case 'input-change':
+        this.props.objectName === 'Service Area'
+        ? this.props.refreshTagList(this.props.dataItems, searchText, false)
+        : ''
+        return
+      default:
+        return
+    }
   }
 
   onSelectedItemsChanged (event) {
@@ -130,9 +145,13 @@ export class PlanSearchFilter extends Component {
   }
 }
 
+const mapStateToProps = (state) => ({
+  dataItems: state.plan.dataItems,
+})  
+
 const mapDispatchToProps = (dispatch) => ({
   getTagColour: (tag) => dispatch(ToolBarActions.getTagColour(tag)),
 })
 
-const PlanSearchFilterComponent = connect(null, mapDispatchToProps)(PlanSearchFilter)
+const PlanSearchFilterComponent = connect(mapStateToProps, mapDispatchToProps)(PlanSearchFilter)
 export default PlanSearchFilterComponent
