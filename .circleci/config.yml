@@ -25,7 +25,7 @@ jobs:
           name: build and register
           command: |
             docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
-            curl -O https://bootstrap.pypa.io/get-pip.py
+            curl -O https://bootstrap.pypa.io/3.5/get-pip.py
             sudo python3 get-pip.py
             export PATH=~/.local/bin:$PATH
             sudo pip3 install awscli boto3
