@@ -116,8 +116,8 @@ export class NetworkAnalysisOutput extends Component {
     // end users will need. If the request is ever made to fix this again, we
     // should discuss it at a service level, and not a presentation level.
     // Sincerely, Robert ⚔️ Excalibur ⚔️ Hall
-    const filteredData = name === 'irr'
-      ? chartData.filter(datum => datum['irr'] < 2)
+    const filteredData = name.match(/^irr/)
+      ? chartData.filter(datum => datum[name] < 2)
       : chartData
 
     // next, sort the report data
