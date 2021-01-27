@@ -4,8 +4,8 @@ import wrapComponentWithProvider from '../../../common/provider-wrapped-componen
 import GlobalSettings from '../../global-settings/global-settings.jsx'
 import PlanActions from '../plan-actions'
 import ToolBarActions from '../../header/tool-bar-actions'
-import Select, { components } from "react-select";
-import createClass from "create-react-class";
+import Select, { components } from "react-select"
+import createClass from "create-react-class"
 
 const styles = {
   container: base => ({
@@ -13,7 +13,7 @@ const styles = {
     flex: 1,
     width: 132,
   })
-};
+}
 
 export class PlanDataSelection extends Component {
   constructor (props) {
@@ -86,17 +86,17 @@ export class PlanDataSelection extends Component {
 
               let objKey = objValue.dataItemsKey
 
-              let optionsList = []; let defaultList=[];
+              let optionsList = []; let defaultList=[]
               if(objValue.allLibraryItems.length > 0){
                 optionsList = objValue.allLibraryItems.map(function(newkey, index) {
-                  return {"id":newkey.identifier, "value": newkey.name, "label": newkey.name}; 
-                });
+                  return {"id":newkey.identifier, "value": newkey.name, "label": newkey.name}
+                })
               }
 
               if(objValue.selectedLibraryItems.length > 0){
                 defaultList = objValue.selectedLibraryItems.map(function(newkey, index) { 
-                  return {"id":newkey.identifier, "value": newkey.name, "label": newkey.name}; 
-                });
+                  return {"id":newkey.identifier, "value": newkey.name, "label": newkey.name}
+                })
               }
 
               return (
@@ -162,18 +162,18 @@ export class PlanDataSelection extends Component {
     var dataItems = this.state.dataItems
     {Object.entries(dataItems).map(([ objKey, objValue ], objIndex) => {
       if(objId === objValue.id){
-        objValue.selectedLibraryItems = [];
+        objValue.selectedLibraryItems = []
         objValue.allLibraryItems.map(function(allItemKey) {
           if(selectedLibraryItems !== null) {
             selectedLibraryItems.map(function(selectedNewkey) {
               if(parseInt(selectedNewkey.id) === parseInt(allItemKey.identifier)){
                 objValue.selectedLibraryItems.push(allItemKey)
               }
-            });
+            })
           } else {
-            objValue.selectedLibraryItems = [];
+            objValue.selectedLibraryItems = []
           }
-        });
+        })
       }
       })
     }
@@ -183,7 +183,7 @@ export class PlanDataSelection extends Component {
     var isValid = this.areAllSelectionsValid()
     setTimeout(function() {
       this.props.onDataSelectionChange({ childKey: 'dataSelection', isValid: isValid })
-    }.bind(this),0);
+    }.bind(this),0)
   }
 
   // Updates the 'valid' flags for all data items
@@ -263,7 +263,7 @@ export class PlanDataSelection extends Component {
 
     this.props.uploadDataSources.forEach((value) => {
       if (value.id == srcId) {
-        this.setState({dataSelectionName:value.name, dataSelectionID:value.id});
+        this.setState({dataSelectionName:value.name, dataSelectionID:value.id})
       }
     })
     this.props.setIsDataSelection(true)
@@ -283,9 +283,9 @@ export class PlanDataSelection extends Component {
             <label>{this.props.value} </label>
           </components.Option>
         </div>
-      );
+      )
     }
-  });
+  })
 
   const mapStateToProps = (state) => ({
     dataItems: state.plan.dataItems,
@@ -300,7 +300,9 @@ export class PlanDataSelection extends Component {
 
   const mapDispatchToProps = (dispatch) => ({
     setIsDataSelection: (status) => dispatch(PlanActions.setIsDataSelection(status)),
-    updateDataSourceEditableStatus: (isDataSourceEditable,dataSourceKey,loggedInUser, authPermissions, dataItems) => dispatch(PlanActions.updateDataSourceEditableStatus(isDataSourceEditable,dataSourceKey,loggedInUser, authPermissions, dataItems)),
+    updateDataSourceEditableStatus: (isDataSourceEditable,dataSourceKey,loggedInUser, authPermissions, dataItems) => dispatch(
+      PlanActions.updateDataSourceEditableStatus(isDataSourceEditable,dataSourceKey,loggedInUser, authPermissions, dataItems)
+    ),
     selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems)),
     selectedDisplayMode: (value) => dispatch(ToolBarActions.selectedDisplayMode(value)),
     activeViewModePanel: (value) => dispatch(ToolBarActions.activeViewModePanel(value))
