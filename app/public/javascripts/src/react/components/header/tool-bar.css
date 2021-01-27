@@ -104,3 +104,20 @@
   padding-top: 0px !important;
   padding-bottom: 0px !important;
 }
+
+/* Account Settings */
+
+.accountDropdown {
+  position: relative;
+}
+
+.accountDropdown font {
+  color: #1f7de6;
+  font-size: 14px;
+  margin-left: 4px;
+  cursor: pointer;
+}
+
+.account-settings-dropdown {
+  min-width: 150px
+}

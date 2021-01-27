@@ -19,6 +19,7 @@ import RxState from '../../common/rxState'
 import PlanInputsModal from './plan-inputs-modal.jsx'
 import GlobalsettingsActions from '../global-settings/globalsettings-action'
 import GlobalSettings from '../global-settings/global-settings.jsx'
+import { logoutApp } from '../../common/view-utils'
 
 export class ToolBar extends Component {
   constructor (props) {
@@ -111,6 +112,8 @@ export class ToolBar extends Component {
       showDropDown: false,
       marginPixels: 10, // Margin between the container and the div containing the buttons
       dropdownWidthPixels: 36, // The width of the dropdown button
+      isAccountSettingsEnabled: false,
+      isOpenAccountSettings: false
     }
 
     this.searchLocation = 'Search an address, city, or state' // For IntialSelection of select2
@@ -118,6 +121,7 @@ export class ToolBar extends Component {
     this.props.loadServiceLayers() // To load Service layer in advance
 
     this.refreshToolbar = this.refreshToolbar.bind(this) // To bind a function
+    this.openAccountSettingsModal = this.openAccountSettingsModal.bind(this) // To bind a function
 
     // To Trigger refreshToolbar() by Listening to the custom event from map-split.js $document.ready() method
     // https://stackoverflow.com/questions/52037958/change-value-in-react-js-on-window-resize
@@ -155,6 +159,13 @@ export class ToolBar extends Component {
       event.preventDefault()
     })
 
+    // toggle accountSetting dropdown
+    jQuery('.accountDropdown').on('show.bs.dropdown', function (event) {
+      jQuery(this).find('.account-settings-dropdown').toggle()
+      event.stopPropagation()
+      event.preventDefault()
+    })
+
     // To Trigger refreshToolbar() when window resized
     // https://stackoverflow.com/questions/52037958/change-value-in-react-js-on-window-resize
     setTimeout(() => window.addEventListener("resize", this.refreshToolbar), 0)
@@ -185,7 +196,8 @@ export class ToolBar extends Component {
       viewSetting, viewFiberOptions } = this.props
 
     const { currentRulerAction, showRemoveRulerButton, heatMapOption, sliderValue,
-      showDropDown, marginPixels, dropdownWidthPixels } = this.state
+      showDropDown, marginPixels, dropdownWidthPixels, isAccountSettingsEnabled,
+      isOpenAccountSettings } = this.state
 
     const selectedIndividualLocation = (
       selectedDisplayMode === this.displayModes.ANALYSIS || selectedDisplayMode === this.displayModes.VIEW
@@ -534,10 +546,46 @@ export class ToolBar extends Component {
           title="Refresh tiles">
           <i className="fa fa-sync-alt"></i>
         </button>
+
+        <div className="separator"></div>
+
+         {/* Account Settings */}
+         <div className="accountDropdown" onMouseLeave={() => this.setState({ isAccountSettingsEnabled: false})}>
+          <button className={`btn ${this.state.isAccountSettingsEnabled ? 'btn-selected' : ''}`}
+            type="button"
+            onClick={() => this.openAccountSettingsDropDown()}
+            aria-haspopup="true" aria-expanded="false" title="Account Settings">
+            <i className="fa fa-user-cog" />
+          </button>
+
+          <div
+            className="dropdown-menu dropdown-menu-right account-settings-dropdown"
+            style={{ display: isAccountSettingsEnabled ? 'block' : 'none' }}
+          > 
+            <font onClick={() => this.openAccountSettingsModal(true)}>Account Settings</font>
+            <div className="dropdown-divider" />
+            <font onClick={() => logoutApp()}>Logout</font>
+          </div>
+        </div>
+        {isOpenAccountSettings &&
+          <GlobalSettings
+            currentViewProps='My Account'
+            openAccountSettingsModal={this.openAccountSettingsModal}
+          />
+        }
       </div>
     )
   }
 
+  openAccountSettingsDropDown () {
+    !this.state.isAccountSettingsEnabled && this.closeDropdowns()
+    this.setState({ isAccountSettingsEnabled: !this.state.isAccountSettingsEnabled})
+  }
+
+  openAccountSettingsModal (status) {
+    this.setState({ isOpenAccountSettings: status })
+  }
+  
   refreshTiles () {
     const refreshTileCmd = {
       'dataTypes': [
@@ -557,6 +605,7 @@ export class ToolBar extends Component {
     if (element) {
 
       const toolBarElement = jQuery(".tool-bar").get()
+      console.log(toolBarElement)
       const dropDownElement = jQuery(".tool-bar .dropdown").get()
       const ulElement = jQuery(".tool-bar .dropdown ul").get()
 
@@ -1024,6 +1073,10 @@ export class ToolBar extends Component {
     if (this.props.isRulerEnabled) {
       jQuery('.ruler-dropdown').toggle()
       this.rulerAction()
+    }
+    if (this.state.isAccountSettingsEnabled) {
+      jQuery('.account-settings-dropdown').toggle()
+      this.openAccountSettingsDropDown()
     }
   }
 
