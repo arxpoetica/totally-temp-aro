@@ -1,7 +1,7 @@
 {
   "name": "aro",
   "version": "0.0.0",
-  "description": "Network infrastructure planning application",
+  "description": "Network infrastructure planning application.",
   "main": "app.js",
   "private": true,
   "scripts": {
