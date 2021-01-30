@@ -282,7 +282,7 @@ export class GlobalSettings extends Component {
     this.props.setIsDataSelection(false)
     this.props.setShowGlobalSettings(false)
     this.props.setIsRrmManager(false)
-    if (this.props.currentViewProps === this.views.MY_ACCOUNT) this.props.openAccountSettingsModal(false)
+    if (this.props.currentViewProps === this.views.MY_ACCOUNT) { this.props.openAccountSettingsModal(false) }
   }
 }
 
