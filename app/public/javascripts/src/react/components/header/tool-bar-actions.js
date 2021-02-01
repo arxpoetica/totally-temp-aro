@@ -1,6 +1,7 @@
 import AroHttp from '../../common/aro-http'
 import Actions from '../../common/actions'
 import PlanActions from '../plan/plan-actions'
+import { hsvToRgb } from '../../common/view-utils'
 
 function setPlanInputsModal (status){
   return dispatch => {
@@ -376,7 +377,7 @@ function loadServiceLayers () {
   }
 }
 
-function loadListOfSAPlanTags (dataItems, filterObj, ishardreload) {
+function loadListOfSAPlanTags (dataItems, filterObj, isHardReload) {
   return (dispatch, getState) => {
 
     const state = getState()
@@ -399,7 +400,7 @@ function loadListOfSAPlanTags (dataItems, filterObj, ishardreload) {
     }
 
     filter = filterObj ? filter.concat(` and (substringof(code,'${filterObj}') or substringof(name,'${filterObj}'))`) : filter
-    if (ishardreload) { 
+    if (isHardReload) { 
       dispatch({
         type: Actions.TOOL_BAR_LIST_OF_SERVICE_AREA_TAGS,
         payload: []
@@ -449,40 +450,20 @@ function getTagColour (tag) {
   }
 }
 
-// Function to convert from hsv to rgb color values.
-// https://stackoverflow.com/questions/17242144/javascript-convert-hsb-hsv-color-to-rgb-accurately
-function hsvToRgb (h, s, v) {
-  var r, g, b, i, f, p, q, t
-  i = Math.floor(h * 6)
-  f = h * 6 - i
-  p = v * (1 - s)
-  q = v * (1 - f * s)
-  t = v * (1 - (1 - f) * s)
-  switch (i % 6) {
-    case 0: r = v, g = t, b = p; break
-    case 1: r = q, g = v, b = p; break
-    case 2: r = p, g = v, b = t; break
-    case 3: r = p, g = q, b = v; break
-    case 4: r = t, g = p, b = v; break
-    case 5: r = v, g = p, b = q; break
-  }
-  var rgb = [r, g, b]
-  var color = '#'
-  rgb.forEach((colorValue) => {
-    var colorValueHex = Math.round(colorValue * 255).toString(16)
-    if (colorValueHex.length === 1) {
-      colorValueHex = '0' + colorValueHex
-    }
-    color += colorValueHex
-  })
-  return color
-}
-
 function setSelectedHeatMapOption (selectedHeatMapOption){
   return dispatch => {
     dispatch({
       type: Actions.TOOL_BAR_SET_HEAT_MAP_OPTION,
       payload: selectedHeatMapOption
+    })
+  }
+}
+
+function setViewSetting (viewSetting) {
+  return dispatch => {
+    dispatch({
+      type: Actions.TOOL_BAR_SET_VIEW_SETTING,
+      payload: viewSetting
     })
   }
 }
@@ -511,5 +492,6 @@ export default {
   getTagColour,
   makeCurrentPlanNonEphemeral,
   copyCurrentPlanTo,
-  setSelectedHeatMapOption
+  setSelectedHeatMapOption,
+  setViewSetting
 }

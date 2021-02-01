@@ -47,7 +47,7 @@ class TileComponentController {
   // fillStyle: (Optional) For polygon features, this is the fill color
   // opacity: (Optional, default 1.0) This is the maximum opacity of anything drawn on the map layer. Aggregate layers will have features of varying opacity, but none exceeding this value
 
-  constructor ($window, $document, $timeout, $ngRedux, state, tileDataService, contextMenuService, Utils, $scope, rState) {
+  constructor ($window, $document, $timeout, $ngRedux, state, tileDataService, contextMenuService, Utils, $scope, rxState) {
     this.layerIdToMapTilesIndex = {}
     this.mapRef = null // Will be set in $document.ready()
     this.$window = $window
@@ -79,7 +79,7 @@ class TileComponentController {
 
     // Subscribe to events for creating and destroying the map overlay layer
     this.createMapOverlaySubscription = state.requestCreateMapOverlay.skip(1).subscribe(() => this.createMapOverlay())
-    this.destroyMapOverlaySubscription = state.requestDestroyMapOverlay.skip(1).subscribe(() => this.destoryMapOverlay())
+    this.destroyMapOverlaySubscription = state.requestDestroyMapOverlay.skip(1).subscribe(() => this.destroyMapOverlay())
 
     // Subscribe to changes in the map tile options
     state.mapTileOptions.subscribe((mapTileOptions) => {
@@ -89,7 +89,7 @@ class TileComponentController {
     })
 
     // Subscribe to changes in the map tile options
-    rState.mapTileOptions.getMessage().subscribe((mapTileOptions) => {
+    rxState.mapTileOptions.getMessage().subscribe((mapTileOptions) => {
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
         this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setMapTileOptions(mapTileOptions)
       }
@@ -101,15 +101,15 @@ class TileComponentController {
       this.refreshMapTiles(tilesToRefresh)
     })
 
-    rState.requestMapLayerRefresh.getMessage().subscribe((tilesToRefresh) => {
+    rxState.requestMapLayerRefresh.getMessage().subscribe((tilesToRefresh) => {
       this.tileDataService.markHtmlCacheDirty(tilesToRefresh)
       this.refreshMapTiles(tilesToRefresh)
     });
 
-    // If selected census category map changes or gets loaded, set that in the tile data road
-    state.censusCategories.subscribe((censusCategories) => {
+    // If selected layer category map changes or gets loaded, set that in the tile data road
+    state.layerCategories.subscribe((layerCategories) => {
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
-        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setCensusCategories(censusCategories)
+        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setLayerCategories(layerCategories)
       }
     })
 
@@ -279,7 +279,7 @@ class TileComponentController {
     this.mapRef.overlayMapTypes.push(new MapTileRenderer(new google.maps.Size(Constants.TILE_SIZE, Constants.TILE_SIZE),
       this.tileDataService,
       this.state.mapTileOptions.getValue(),
-      this.state.censusCategories.getValue(),
+      this.state.layerCategories.getValue(),
       this.state.selectedDisplayMode.getValue(),
       SelectionModes,
       this.activeSelectionModeId,
@@ -289,7 +289,8 @@ class TileComponentController {
       this.state,
       MapUtilities.getPixelCoordinatesWithinTile.bind(this),
       this.transactionFeatureIds,
-      this.rShowFiberSize
+      this.rShowFiberSize,
+      this.rViewSetting
     ))
     this.OVERLAY_MAP_INDEX = this.mapRef.overlayMapTypes.getLength() - 1
     //this.state.isShiftPressed = false // make this per-overlay or move it somewhere more global
@@ -314,7 +315,8 @@ class TileComponentController {
       .then((hitFeatures) => {
         this.state.mapFeaturesRightClickedEvent.next(hitFeatures)
       })
-
+      // Note: I just fixed a boolean logic typo having to do with rSelectedDisplayMode in getFilteredFeaturesUnderLatLng()
+      //  this also MAY be a typo, I think the "&&" may need to be "||"
       if ((this.state.selectedDisplayMode.getValue() != this.state.displayModes.VIEW && this.rSelectedDisplayMode != this.state.displayModes.VIEW)  ||
           (this.state.activeViewModePanel == this.state.viewModePanels.EDIT_SERVICE_LAYER && this.rActiveViewModePanel == this.state.viewModePanels.EDIT_SERVICE_LAYER)
       ) return
@@ -528,7 +530,6 @@ class TileComponentController {
         .then((hitFeatures) => {
           var canSelectLoc = false
           var canSelectSA = false
-
           if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.ANALYSIS || this.rSelectedDisplayMode === this.state.displayModes.ANALYSIS) {
             switch (this.activeSelectionModeId) {
               case SelectionModes.SELECTED_AREAS:
@@ -544,16 +545,15 @@ class TileComponentController {
           } else if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.VIEW || this.rSelectedDisplayMode === this.state.displayModes.VIEW) {
             canSelectSA = true
           }
-          
           // filter the lists 
           if (!canSelectLoc &&
-            this.state.selectedDisplayMode.getValue() !== this.state.displayModes.VIEW || this.rSelectedDisplayMode === this.state.displayModes.VIEW) {
+            (this.state.selectedDisplayMode.getValue() !== this.state.displayModes.VIEW || this.rSelectedDisplayMode !== this.state.displayModes.VIEW)) {
             hitFeatures.locations = []
           }
           if (!canSelectSA) {
             hitFeatures.serviceAreas = []
           }
-          if (this.state.selectedDisplayMode.getValue() !== this.state.displayModes.VIEW || this.rSelectedDisplayMode === this.state.displayModes.VIEW) {
+          if (this.state.selectedDisplayMode.getValue() !== this.state.displayModes.VIEW || this.rSelectedDisplayMode !== this.state.displayModes.VIEW) {
             hitFeatures.censusFeatures = []
           }
           
@@ -566,7 +566,7 @@ class TileComponentController {
   }
 
   // Removes the existing map overlay
-  destoryMapOverlay () {
+  destroyMapOverlay () {
     if (this.overlayClickListener) {
       google.maps.event.removeListener(this.overlayClickListener)
       this.overlayClickListener = null
@@ -711,9 +711,10 @@ class TileComponentController {
       networkAnalysisType: reduxState.optimization.networkOptimization.optimizationInputs.analysis_type,
       zoom: reduxState.map.zoom,
       mapCenter: reduxState.map.mapCenter,
-      rShowFiberSize: reduxState.toolbar.showFiberSize,
+      rShowFiberSize: reduxState.toolbar.showFiberSize, // Set to map-tile-render.js from tool-bar.jsx
+      rViewSetting: reduxState.toolbar.viewSetting, // Set to map-tile-render.js from aro-debug.jsx
       rSelectedDisplayMode: reduxState.toolbar.rSelectedDisplayMode,
-      rActiveViewModePanel: reduxState.toolbar.rActiveViewModePanel,
+      rActiveViewModePanel: reduxState.toolbar.rActiveViewModePanel
     }
   }
 
@@ -728,6 +729,9 @@ class TileComponentController {
     const oldPlanTargets = this.selection && this.selection.planTargets
     const prevStateMapLayers = { ...this.stateMapLayers }
     const currentTransactionFeatureIds = this.transactionFeatureIds
+    const rShowFiberSize = this.rShowFiberSize
+    const rViewSetting = this.rViewSetting
+
     var needRefresh = false
     var doConduitUpdate = this.doesConduitNeedUpdate(prevStateMapLayers, nextState.stateMapLayers)
     needRefresh = doConduitUpdate
@@ -750,6 +754,19 @@ class TileComponentController {
 
     if (currentTransactionFeatureIds !== nextState.transactionFeatureIds) {
       this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setTransactionFeatureIds(nextState.transactionFeatureIds)
+      needRefresh = true
+    }
+
+    // Set the current state in rShowFiberSize
+    // If this is not set, the redux state does not change, it shows only the initial state, so current state is set in rShowFiberSize.
+    if (rShowFiberSize !== nextState.rShowFiberSize) {
+      this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setReactShowFiberSize(nextState.rShowFiberSize)
+      needRefresh = true
+    }
+
+    // Set the current state in rViewSetting
+    if (rViewSetting !== nextState.rViewSetting) {
+      this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setReactViewSetting(nextState.rViewSetting)
       needRefresh = true
     }
 
@@ -812,7 +829,7 @@ class TileComponentController {
   
 }
 
-TileComponentController.$inject = ['$window', '$document', '$timeout', '$ngRedux', 'state','tileDataService', 'contextMenuService', 'Utils', '$scope', 'rState']
+TileComponentController.$inject = ['$window', '$document', '$timeout', '$ngRedux', 'state','tileDataService', 'contextMenuService', 'Utils', '$scope', 'rxState']
 
 let tile = {
   template: '',

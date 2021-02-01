@@ -15,7 +15,7 @@ import AroHttp from '../../common/aro-http'
 import { createSelector } from 'reselect'
 import MapLayerActions from '../map-layers/map-layer-actions'
 import ViewSettingsActions from '../view-settings/view-settings-actions'
-import rState from '../../common/rState'
+import rxState from '../../common/rxState'
 import PlanInputsModal from './plan-inputs-modal.jsx'
 import GlobalsettingsActions from '../global-settings/globalsettings-action'
 import GlobalSettings from '../global-settings/global-settings.jsx'
@@ -24,7 +24,7 @@ export class ToolBar extends Component {
   constructor (props) {
     super(props)
     
-    this.rState = new rState(); // For RxJs implementation in React
+    this.rxState = new rxState(); // For RxJs implementation in reactjs
 
     this.viewModePanels = Object.freeze({
       LOCATION_INFO: 'LOCATION_INFO',
@@ -79,27 +79,8 @@ export class ToolBar extends Component {
     this.SPATIAL_EDGE_ROAD = 'road'
     this.SPATIAL_EDGE_COPPER = 'copper'
 
-    // View Settings layer - define once
-    this.viewSetting = {
-      selectedFiberOption: null,
-      heatmapOptions: [
-        {
-          id: 'HEATMAP_ON',
-          label: 'Aggregate heatmap'
-        },
-        {
-          id: 'HEATMAP_DEBUG',
-          label: 'Aggregate points'
-        },
-        {
-          id: 'HEATMAP_OFF',
-          label: 'Raw Points'
-        }
-      ]
-    }
-
     // Map tile settings used for debugging
-    this.rState.mapTileOptions.getMessage().subscribe((mapTileOptions) => {
+    this.rxState.mapTileOptions.getMessage().subscribe((mapTileOptions) => {
       this.mapTileOptions = JSON.parse(JSON.stringify(mapTileOptions))
     }) 
 
@@ -122,50 +103,11 @@ export class ToolBar extends Component {
     this.max = this.rangeValues.length - 1
     this.min = 0
 
-    this.viewFiberOptions = [
-      {
-        id: 1,
-        name: 'Uniform width'
-      },
-      {
-        id: 2,
-        name: 'Fiber Strand Count',
-        field: 'fiber_strands',
-        multiplier: 2.1,
-        pixelWidth: {
-          min: 2,
-          max: 12,
-          divisor: 1 / 3
-        },
-        opacity: {
-          min: 0.66,
-          max: 1
-        }
-      },
-      {
-        id: 3,
-        name: 'Atomic Unit Demand',
-        field: 'atomic_units',
-        multiplier: 1,
-        pixelWidth: {
-          min: 2,
-          max: 12,
-          divisor: 1 / 3,
-          atomicDivisor: 50
-        },
-        opacity: {
-          min: 0.66,
-          max: 1
-        }
-      }
-    ]
-
     this.state = {
       currentRulerAction: this.allRulerActions.STRAIGHT_LINE,
       showRemoveRulerButton: false,
       heatMapOption: this.mapTileOptions.selectedHeatmapOption.id === 'HEATMAP_ON',
       sliderValue: this.rangeValues.indexOf(this.mapTileOptions.heatMap.worldMaxValue),
-      selectedFiberOption: this.viewSetting.selectedFiberOption,
       showDropDown: false,
       marginPixels: 10, // Margin between the container and the div containing the buttons
       dropdownWidthPixels: 36, // The width of the dropdown button
@@ -182,6 +124,11 @@ export class ToolBar extends Component {
     window.addEventListener('toolBarResized', () => { 
       setTimeout(() => this.refreshToolbar(), 0)
     });
+
+    // To set selectedFiberOptionin in viewSetting redux state
+    let newViewSetting = JSON.parse(JSON.stringify(this.props.viewSetting))
+    newViewSetting.selectedFiberOption = this.props.viewFiberOptions[0];
+    this.props.setViewSetting(newViewSetting)
   }
 
   componentDidMount(){
@@ -234,10 +181,11 @@ export class ToolBar extends Component {
     const {selectedDisplayMode, activeViewModePanel, isAnnotationsListVisible, isMapReportsVisible,
        showMapReportMapObjects, selectedTargetSelectionMode, isRulerEnabled, isViewSettingsEnabled,
        boundaryTypes, showDirectedCable, showEquipmentLabels, showLocationLabels, showFiberSize,
-       configuration, showGlobalSettings, showSiteBoundary, selectedBoundaryType } = this.props
+       configuration, showGlobalSettings, showSiteBoundary, selectedBoundaryType,
+       viewSetting, viewFiberOptions } = this.props
 
     const {currentRulerAction, showRemoveRulerButton, heatMapOption, sliderValue,
-      selectedFiberOption, showDropDown, marginPixels, dropdownWidthPixels} = this.state
+           showDropDown, marginPixels, dropdownWidthPixels} = this.state
 
     let selectedIndividualLocation = (selectedDisplayMode === this.displayModes.ANALYSIS || selectedDisplayMode === this.displayModes.VIEW) && activeViewModePanel !== this.viewModePanels.EDIT_LOCATIONS
     let selectedMultipleLocation = (selectedDisplayMode === this.displayModes.ANALYSIS || selectedDisplayMode === this.displayModes.VIEW) && activeViewModePanel !== this.viewModePanels.EDIT_LOCATIONS && configuration.perspective.showToolbarButtons.selectionPolygon
@@ -252,17 +200,17 @@ export class ToolBar extends Component {
     // To set Dynamic Background color for select2-results using jQuery
     $(".select2-results").css("background-color", configuration.toolbar.toolBarColor);
 
+    // ToDo: ARO_CLIENT should never be checked in views, these images should be in settings
+    var leftElement = <img src="images/logos/aro/logo_navbar.png" className="no-collapse" style={{alignSelf: 'center', paddingLeft: '10px', paddingRight: '10px'}}/>
+    if (configuration.ARO_CLIENT === 'frontier') {
+      leftElement = <span style={{alignSelf: 'center', paddingLeft: '10px', paddingRight: '10px'}}><b>NPM BSA</b></span>
+    } else if (configuration.ARO_CLIENT === 'ziply') {
+      leftElement = <img src="images/logos/ziply/ziply_navbar_logo.png" className="no-collapse" style={{alignSelf: 'center', paddingLeft: '3px', paddingRight: '10px'}}/>
+    }
+    
     return (
       <div className="tool-bar" style={{margin: marginPixels, backgroundColor: configuration.toolbar.toolBarColor}}>
-
-        {configuration.ARO_CLIENT !== 'frontier' &&
-          <img src="images/logos/aro/logo_navbar.png" className="no-collapse" style={{alignSelf: 'center', paddingLeft: '10px', paddingRight: '10px'}}/>
-        }
-
-        {configuration.ARO_CLIENT === 'frontier' &&
-          <span style={{alignSelf: 'center', paddingLeft: '10px', paddingRight: '10px'}}><b>NPM BSA</b></span>
-        }
-
+        { leftElement }
         <div className="no-collapse" id="global-search-toolbutton" style={{flex: '0 0 250px', margin: 'auto', width: '250px'}}>
           <input className="form-control select2" style={{padding:'0px', borderRadius: '0px'}} type="text" placeholder="Search an address, city, or state"/>
         </div>
@@ -402,9 +350,9 @@ export class ToolBar extends Component {
                 onChange={(e)=> this.setShowFiberSize(e)}/>
               <font>Fiber Size</font>
               {showFiberSize &&
-                <select className="form-control" value={selectedFiberOption}
+                <select className="form-control" value={viewSetting.selectedFiberOption.name}
                   onChange={(e)=> this.onChangeSelectedFiberOption(e)}>
-                  {this.viewFiberOptions.map((item, index) =>
+                  {viewFiberOptions.map((item, index) =>
                     <option key={index} value={item.name} label={item.name}></option>
                   )}
                 </select>
@@ -575,13 +523,16 @@ export class ToolBar extends Component {
   }
 
   onChangeSelectedFiberOption (e) {
-    this.setState({selectedFiberOption: e.target.value})
-    this.rState.requestMapLayerRefresh.sendMessage(null)
+    // To set selectedFiberOptionin in viewSetting redux state
+    let newViewSetting = JSON.parse(JSON.stringify(this.props.viewSetting))
+    newViewSetting.selectedFiberOption = this.props.viewFiberOptions.filter(selectedFiberOption => selectedFiberOption.name === e.target.value)[0]
+    this.props.setViewSetting(newViewSetting)
+    this.rxState.requestMapLayerRefresh.sendMessage(null)
   }
 
   setShowFiberSize () {
     this.props.setShowFiberSize(!this.props.showFiberSize)
-    this.rState.requestMapLayerRefresh.sendMessage(null)
+    this.rxState.requestMapLayerRefresh.sendMessage(null)
   }
 
   showLocationLabelsChanged () {
@@ -590,13 +541,13 @@ export class ToolBar extends Component {
 
   showEquipmentLabelsChanged () {
     this.props.setShowEquipmentLabelsChanged(!this.props.showEquipmentLabels)
-    this.rState.viewSettingsChanged.sendMessage()
-    this.rState.requestMapLayerRefresh.sendMessage(null)
+    this.rxState.viewSettingsChanged.sendMessage()
+    this.rxState.requestMapLayerRefresh.sendMessage(null)
   }
 
   showCableDirection () {
     this.props.setShowDirectedCable(!this.props.showDirectedCable)
-    this.rState.viewSettingsChanged.sendMessage()
+    this.rxState.viewSettingsChanged.sendMessage()
   }
 
   onChangeSiteBoundaries (e) {
@@ -606,7 +557,7 @@ export class ToolBar extends Component {
 
   toggleSiteBoundary (e) {
     this.props.setShowSiteBoundary(!this.props.showSiteBoundary)
-    this.rState.viewSettingsChanged.sendMessage() // This will also refresh the map layer
+    this.rxState.viewSettingsChanged.sendMessage() // This will also refresh the map layer
   }
 
   viewSettingsAction () {
@@ -617,19 +568,19 @@ export class ToolBar extends Component {
   toggleHeatMapOptions (e) {
     this.setState({heatMapOption: !this.state.heatMapOption}, function() {
       var newMapTileOptions = JSON.parse(JSON.stringify(this.mapTileOptions))
-      newMapTileOptions.selectedHeatmapOption = this.state.heatMapOption ? this.viewSetting.heatmapOptions[0] : this.viewSetting.heatmapOptions[2]
-      this.rState.mapTileOptions.sendMessage(newMapTileOptions) // This will also refresh the map layer
+      newMapTileOptions.selectedHeatmapOption = this.state.heatMapOption ? this.props.viewSetting.heatmapOptions[0] : this.props.viewSetting.heatmapOptions[2]
+      this.rxState.mapTileOptions.sendMessage(newMapTileOptions) // This will also refresh the map layer
       this.refreshSlidertrack()
     })
     // To set selectedHeatmapOption in redux state
-    this.props.setSelectedHeatMapOption(!this.state.heatMapOption ? this.viewSetting.heatmapOptions[0].id : this.viewSetting.heatmapOptions[2].id)
+    this.props.setSelectedHeatMapOption(!this.state.heatMapOption ? this.props.viewSetting.heatmapOptions[0].id : this.props.viewSetting.heatmapOptions[2].id)
   }
 
   changeHeatMapOptions (e) {
     this.setState({sliderValue: e.target.value}, function() {
       var newMapTileOptions = JSON.parse(JSON.stringify(this.mapTileOptions))
       newMapTileOptions.heatMap.worldMaxValue = this.rangeValues[this.state.sliderValue]
-      this.rState.mapTileOptions.sendMessage(newMapTileOptions) // This will also refresh the map layer  
+      this.rxState.mapTileOptions.sendMessage(newMapTileOptions) // This will also refresh the map layer  
     })
   }
 
@@ -1139,7 +1090,9 @@ const mapStateToProps = (state) => ({
   showLocationLabels: state.viewSettings.showLocationLabels,
   showFiberSize: state.toolbar.showFiberSize,
   configuration: state.toolbar.appConfiguration,
-  showGlobalSettings: state.globalSettings.showGlobalSettings
+  showGlobalSettings: state.globalSettings.showGlobalSettings,
+  viewSetting: state.toolbar.viewSetting,
+  viewFiberOptions: state.toolbar.viewFiberOptions
 })  
 
 const mapDispatchToProps = (dispatch) => ({
@@ -1175,7 +1128,8 @@ const mapDispatchToProps = (dispatch) => ({
   loadPlan: (planId) => dispatch(ToolBarActions.loadPlan(planId)),
   loadServiceLayers: () => dispatch(ToolBarActions.loadServiceLayers()),
   setSelectedHeatMapOption: (selectedHeatMapOption) => dispatch(ToolBarActions.setSelectedHeatMapOption(selectedHeatMapOption)),
-  setShowGlobalSettings: (status) => dispatch(GlobalsettingsActions.setShowGlobalSettings(status))
+  setShowGlobalSettings: (status) => dispatch(GlobalsettingsActions.setShowGlobalSettings(status)),
+  setViewSetting: (viewSetting) => dispatch(ToolBarActions.setViewSetting(viewSetting))
 })
 
 const ToolBarComponent = wrapComponentWithProvider(reduxStore, ToolBar, mapStateToProps, mapDispatchToProps)

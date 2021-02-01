@@ -39,6 +39,13 @@ export class PlanDataSelection extends Component {
     this.props.onDataSelectionChange({ childKey: 'dataSelection', isValid: isValid, isInit: true })
   }
 
+  componentDidUpdate(prevProps) {
+    // Trigger updateSelectionValidation() if props change
+    if(this.props.dataItems != prevProps.dataItems) {
+      this.updateSelectionValidation()
+    }
+  }
+
   // To set Props values to State if props get modified
   // https://reactjs.org/docs/react-component.html#static-getderivedstatefromprops
   static getDerivedStateFromProps(nextProps, state) {
@@ -57,11 +64,27 @@ export class PlanDataSelection extends Component {
   }
 
   renderPlanDataSelection() {
+
+    // Dataitems Objects needed to be converted to Array for Sorting
+    let dataItemsArray = []
+    Object.entries(this.state.dataItems).map(([ key, value ], objIndex) => {
+      // To push only the visible values to dataItemsArray array
+      if(value.visibility === true) {
+        value.dataItemsKey = key // To create a 'dataItemsKey' key for new array
+        dataItemsArray.push(value)
+      }
+    })
+
+    // sort dataItems based on rankIndex
+    let sorted_dataItems = dataItemsArray.sort((a, b) => parseFloat(b.rankIndex) - parseFloat(a.rankIndex))
+
     return (
       <div style={{position: 'relative', height: '100%'}}>
         <table className="table table-sm table-striped">
           <tbody>
-            {Object.entries(this.state.dataItems).map(([ objKey, objValue ], objIndex) => {
+            {sorted_dataItems.map((objValue, objIndex) => {
+
+              let objKey = objValue.dataItemsKey
 
               let optionsList = []; let defaultList=[];
               if(objValue.allLibraryItems.length > 0){
@@ -77,7 +100,7 @@ export class PlanDataSelection extends Component {
               }
 
               return (
-                <React.Fragment key={objIndex}>
+                <React.Fragment key={objValue.id}>
                 {!objValue.hidden &&
                   <tr style={{verticalAlign: 'middle'}}>
                     <td>{objValue.description}</td>
@@ -91,11 +114,11 @@ export class PlanDataSelection extends Component {
                           options={optionsList}
                           hideSelectedOptions={false}
                           backspaceRemovesValue={false}
-                          isSearchable={false} 
+                          isSearchable={true} 
                           isClearable=''
                           isDisabled=''
                           placeholder="None Selected"
-                          onChange={(e,id)=>this.onSelectionChanged(e, objIndex, objKey)}
+                          onChange={(e,id)=>this.onSelectionChanged(e, objValue.id, objKey)}
                           styles={styles}
                         />
                         <div className="btn-group btn-group-sm" style={{flex: '0 0 auto'}}>
@@ -134,11 +157,11 @@ export class PlanDataSelection extends Component {
     )
   }
 
-  onSelectionChanged(selectedLibraryItems, oldobjIndex, dataSource){
+  onSelectionChanged(selectedLibraryItems, objId, dataSource){
 
     var dataItems = this.state.dataItems
     {Object.entries(dataItems).map(([ objKey, objValue ], objIndex) => {
-      if(oldobjIndex === objIndex){
+      if(objId === objValue.id){
         objValue.selectedLibraryItems = [];
         objValue.allLibraryItems.map(function(allItemKey) {
           if(selectedLibraryItems !== null) {
@@ -171,11 +194,41 @@ export class PlanDataSelection extends Component {
       if (this.props.loggedInUser.perspective === 'sales' && this.sales_role_remove.indexOf(dataItemKey) !== -1) {
         this.state.dataItems[dataItemKey].hidden = true
       }
+
+      if(this.props.showPlanDataSelection !== undefined) {
+        if(Object.entries(this.props.showPlanDataSelection).length > 0) {
+        // To check Whether showPlanDataSelection has the required dataItemKey
+          if(this.props.showPlanDataSelection.hasOwnProperty(dataItemKey)){
+            // Add visibility and rankIndex to dataItem
+            this.state.dataItems[dataItemKey].visibility = this.props.showPlanDataSelection[dataItemKey].visibility 
+            this.state.dataItems[dataItemKey].rankIndex = this.props.showPlanDataSelection[dataItemKey].rankIndex
+          } else {
+            this.state.dataItems[dataItemKey].visibility = false
+            this.state.dataItems[dataItemKey].rankIndex = 0
+          }
+        } else {
+          this.alertDataSlection()
+        }
+      } else {
+        this.alertDataSlection()
+      }
+
+      // To validate selection only for the visible items
       dataItem = this.state.dataItems[dataItemKey]
-      dataItem.isMinValueSelectionValid = dataItem.selectedLibraryItems.length >= dataItem.minValue
-      dataItem.isMaxValueSelectionValid = dataItem.selectedLibraryItems.length <= dataItem.maxValue
+      if(dataItem.visibility === true) {
+        dataItem.isMinValueSelectionValid = dataItem.selectedLibraryItems.length >= dataItem.minValue
+        dataItem.isMaxValueSelectionValid = dataItem.selectedLibraryItems.length <= dataItem.maxValue
+      }
     })
     this.setState({dataItems: this.state.dataItems})
+  }
+
+  alertDataSlection () {
+    swal({
+      title: '',
+      text: 'Plan Data Selection "Settings" is Empty',
+      type: 'warning'
+    })
   }
 
   areAllSelectionsValid () {
@@ -241,7 +294,8 @@ export class PlanDataSelection extends Component {
     loggedInUser: state.user.loggedInUser,
     authPermissions: state.user.authPermissions,
     dataItems: state.plan.dataItems,
-    isDataSourceEditable: state.plan.isDataSourceEditable
+    isDataSourceEditable: state.plan.isDataSourceEditable,
+    showPlanDataSelection : state.toolbar.appConfiguration.showPlanDataSelection
   })   
 
   const mapDispatchToProps = (dispatch) => ({

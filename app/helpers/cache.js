@@ -42,6 +42,7 @@ function loadConfiguration() {
   const configurationTypes = [
     'locationCategories',
     'networkEquipment',
+    'copperCategories',
     'constructionSiteCategories',
     'boundaryCategories',
     'units',
@@ -52,7 +53,8 @@ function loadConfiguration() {
     'planEditor',
     'toolbar',
     'optimizationOptions',
-    'resourceEditors'
+    'resourceEditors',
+    'showPlanDataSelection'
   ]
 
   const configTypeToSubtype = {

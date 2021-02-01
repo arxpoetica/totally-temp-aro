@@ -15,11 +15,16 @@ const selector = formValueSelector(Constants.RING_OPTIONS_BASIC_FORM)
 export class NetworkOptimizationButton extends ProgressButton {
   constructor (props) {
     super(props)
+
     // override
     this.statusTypes = {
+      // TODO: we need to consolidate state types
+      // to see what I mean, take a look in `plan-settings.jsx`
       UNINITIALIZED: AngConstants.PLAN_STATE.START_STATE,
       RUNNING: AngConstants.PLAN_STATE.STARTED,
-      FINISHED: AngConstants.PLAN_STATE.COMPLETED
+      CANCELED: AngConstants.PLAN_STATE.CANCELED,
+      FAILED: AngConstants.PLAN_STATE.FAILED,
+      FINISHED: AngConstants.PLAN_STATE.COMPLETED,
     }
 
     this.unsubscriber = socketManager.subscribe('PROGRESS_MESSAGE_DATA', (progressData) => {

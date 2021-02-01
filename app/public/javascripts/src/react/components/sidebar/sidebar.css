@@ -1,0 +1,107 @@
+/* Aro-debug */
+.aro-debug-container {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding-top: 10px;
+}
+
+/* View Setting */
+.view-settings {
+  margin-top: 10px;
+}
+
+/* Analysis Mode */
+
+.analysis-mode-container {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.analysis-type {
+  flex: 0 0 auto;
+}
+
+/* React Card */
+
+.card-collapse {
+  margin-bottom: 1px;
+  border: none;
+}
+
+.card-header-dark {
+  background-color: #333;
+  color: white;
+  font-size: 18px;
+  border-radius: 0px;
+  text-align: center;
+  padding: 5px;
+}
+
+.collapse-show{
+  transition: flex-grow 100ms, flex-shrink 100ms, visibility 0ms 100ms;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.card-fixed{
+  position: sticky;
+  top: 0;
+  width: 100%;
+  z-index: 2;
+}
+
+/* Roic Reports Small */
+
+.roic-report-label {
+  line-height: 33px;
+}
+#tblNetworkBuildOutput td {
+  line-height: 33px; /* To vertically align text */
+}
+.indent-1 {
+  padding-left: 30px !important;
+}
+
+/* Coverage Report Downloader */
+
+#tblCoverageReportGenerator td, #tblDownloadReports td {
+  line-height: 28px;  /* To vertically align text */
+}
+.radio-text {
+  margin-top: 5px;
+}
+.option-indent {
+  margin-left: 30px;
+}
+
+/* Roic Reports Large */
+
+.roic-report-label {
+  line-height: 33px;
+}
+.network-summary-card {
+  border: 1px solid darkgray;
+}
+.card-row-1 {
+  background-color: #e1ecff;
+}
+.card-row-2 {
+  background-color: #f1fff1;
+}
+.card-row-3 {
+  background-color: #ffecec;
+}
+.network-summary-card h5 {
+  font-size: x-large;
+}
+#tblRoicReportsLargeSummary td {
+  line-height: 33px; /* To vertically align text */
+}
+.indent-1 {
+  padding-left: 30px !important;
+}

@@ -3,28 +3,32 @@ import AroHttp from '../../../common/aro-http'
 import PlanActions from '../../plan/plan-actions'
 import { batch } from 'react-redux'
 
-function runOptimization (inputs, userId) { // shouldn't be getting userId from caller
+function runOptimization(inputs, userId) { // shouldn't be getting userId from caller
   return (dispatch, getState) => {
-    // Make the API call that starts optimization calculations on aro-service
-    var apiUrl = `/service/v1/optimize/masterplan?userId=${userId}`
-    if (inputs.analysis_type === 'NETWORK_ANALYSIS') apiUrl = `/service/v1/analyze/masterplan?userId=${userId}`
 
-    AroHttp.post(apiUrl, inputs)
+    dispatch({
+      type: Actions.NETWORK_OPTIMIZATION_SET_IS_CANCELING,
+      payload: false,
+    })
+
+    const type = inputs.analysis_type === 'NETWORK_ANALYSIS' ? 'analyze' : 'optimize'
+    AroHttp.post(`/service/v1/${type}/masterplan?userId=${userId}`, inputs)
       .then((response) => {
         dispatch({
           type: Actions.NETWORK_OPTIMIZATION_SET_OPTIMIZATION_ID,
           payload: response.data.optimizationIdentifier
         })
       })
+      .catch(err => console.log(err))
   }
 }
 
 function cancelOptimization (planId, optimizationId) {
-  // ToDo: check that optimizationId is not null
+  // TODO: check that optimizationId is not null
   return (dispatch, getState) => {
     dispatch({
       type: Actions.NETWORK_OPTIMIZATION_SET_IS_CANCELING,
-      payload: true
+      payload: true,
     })
 
     AroHttp.delete(`/service/optimization/processes/${optimizationId}`)
@@ -33,28 +37,13 @@ function cancelOptimization (planId, optimizationId) {
         return dispatch(PlanActions.loadPlan(planId))
       })
       .then((response) => {
-        // ToDo: the following shouldn't run until load plan returns, but loadplan doesn't return a promise
-        // service.isCanceling = false
-        dispatch({
-          type: Actions.NETWORK_OPTIMIZATION_SET_IS_CANCELING,
-          payload: false
-        })
-        
-        //service.plan.planState = response.data.planState // Note that this should match with Constants.PLAN_STATE
-        
-        // delete service.plan.optimizationId
-        dispatch({
-          type: Actions.NETWORK_OPTIMIZATION_CLEAR_OPTIMIZATION_ID
-        })
-        
-        //tileDataService.markHtmlCacheDirty()
-        //service.requestMapLayerRefresh.next(null)
+        return dispatch({ type: Actions.NETWORK_OPTIMIZATION_CLEAR_OPTIMIZATION_ID })
       })
       .catch((err) => {
         console.error(err)
         dispatch({
           type: Actions.NETWORK_OPTIMIZATION_SET_IS_CANCELING,
-          payload: false
+          payload: false,
         })
       })
   }
@@ -158,10 +147,71 @@ function setNetworkAnalysisType (networkAnalysisType) {
   }
 }
 
+// optimization services
+const modifyDialogResult = Object.freeze({
+  CANCEL: 0,
+  OVERWRITE: 1
+})
+
+function modifyOptimization (plan)  {
+  return dispatch => {
+    const currentPlan = plan
+    if (currentPlan.ephemeral) {
+      // This is an ephemeral plan. 
+      // Don't show any dialogs to the user, simply copy this plan over to a new ephemeral plan
+      const url = `/service/v1/plan-command/copy?source_plan_id=${currentPlan.id}&is_ephemeral=${currentPlan.ephemeral}`
+      return AroHttp.post(url, {})
+        .then((result) => {
+          dispatch(PlanActions.setActivePlan(result.data))
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+    } else {
+      // This is not an ephemeral plan. 
+      // Show a dialog to the user asking whether to overwrite current plan or save as a new one.
+      return showModifyQuestionDialog()
+        .then((resp) => {
+          if (resp === modifyDialogResult.OVERWRITE) {
+            return AroHttp.delete(`/service/v1/plan/${currentPlan.id}/optimization-state`)
+              .then(() => AroHttp.get(`/service/v1/plan/${currentPlan.id}/optimization-state`))
+              .then(result => {
+                currentPlan.planState = result.data
+                dispatch(PlanActions.setActivePlan(currentPlan))
+              })
+              .catch(err => console.error(err))
+          }
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+    }
+  }
+}
+
+function showModifyQuestionDialog () {
+  return new Promise((resolve) => {
+    swal({
+      title: '',
+      text: 'You are modifying a plan with a completed analysis. Do you wish to overwrite the existing plan?  Overwriting will clear all results which were previously run.',
+      type: 'info',
+      confirmButtonColor: '#b9b9b9',
+      confirmButtonText: 'Overwrite',
+      cancelButtonColor: '#DD6B55',
+      cancelButtonText: 'Cancel',
+      showCancelButton: true,
+      closeOnConfirm: true
+    }, (wasConfirmClicked) => {
+      resolve(wasConfirmClicked ? modifyDialogResult.OVERWRITE : modifyDialogResult.CANCEL)
+    })
+  })
+}
+
 export default {
   loadOptimizationInputs,
   setOptimizationInputs,
   runOptimization,
   cancelOptimization,
-  setNetworkAnalysisType
+  setNetworkAnalysisType,
+  modifyOptimization
 }

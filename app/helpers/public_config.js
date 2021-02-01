@@ -5,6 +5,8 @@ var public_config = _.pick(config,
   'ui',
   'currency_symbol',
   'hsv_defaults',
-  'length')
+  'length',
+  'currency_code',
+  'intl_number_format')
 
 module.exports = public_config

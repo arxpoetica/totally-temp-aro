@@ -1,9 +1,11 @@
+import ToolBarActions from '../../../react/components/header/tool-bar-actions'
+
 class RoadSegmentDetailController {
-  constructor (state, $timeout) {
+  constructor (state, $timeout, $ngRedux,) {
     this.state = state
     this.$timeout = $timeout
     this.selectedEdgeInfo = []
-    //this.isSingleRoad
+    this.correctZoomLevel = true
 
     state.clearViewMode.subscribe((clear) => {
       if (clear) {
@@ -23,7 +25,6 @@ class RoadSegmentDetailController {
         var newSelection = state.cloneSelection()
         newSelection.details.roadSegments = event.roadSegments
         state.selection = newSelection
-        //this.isSingleRoad = (event.roadSegments.size == 1)
         this.selectedEdgeInfo = this.generateRoadSegmentsInfo(event.roadSegments)
         this.viewRoadSegmentInfo()
         this.$timeout()
@@ -38,6 +39,8 @@ class RoadSegmentDetailController {
         this.$timeout()
       }
     })
+
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }
 
   isFeatureListEmpty (event) {
@@ -52,15 +55,16 @@ class RoadSegmentDetailController {
   }
 
   generateRoadSegmentsInfo (roadSegments) {
+    this.correctZoomLevel = true
     var roadSegmentsInfo = []
-    var roadSegmentIds = {}
-    roadSegments.forEach(edge => {
-      if (!roadSegmentIds[edge.gid]) {
-        roadSegmentIds[edge.gid] = edge.gid
-        roadSegmentsInfo.push({ ...edge })
+    for (let rs of roadSegments) {
+      if (rs.feature_type_name && rs.edge_length) {
+        roadSegmentsInfo.push({ ...rs })
+      } else {
+        this.correctZoomLevel = false
+        break;
       }
-    })
-
+    }
     return roadSegmentsInfo
   }
 
@@ -75,14 +79,26 @@ class RoadSegmentDetailController {
 
   viewRoadSegmentInfo () {
     this.state.activeViewModePanel = this.state.viewModePanels.ROAD_SEGMENT_INFO
+    this.rActiveViewModePanelAction(this.state.viewModePanels.ROAD_SEGMENT_INFO)
   }
 
   $onDestroy () {
     this.mapFeaturesSelectedEventObserver.unsubscribe()
   }
+
+  mapStateToThis (reduxState) {
+    return {
+    }
+  }
+
+  mapDispatchToTarget (dispatch) {
+    return {
+      rActiveViewModePanelAction: (value) => dispatch(ToolBarActions.activeViewModePanel(value))
+    }
+  }
 }
 
-RoadSegmentDetailController.$inject = ['state', '$timeout']
+RoadSegmentDetailController.$inject = ['state', '$timeout', '$ngRedux',]
 
 let roadSegmentDetail = {
   templateUrl: '/components/sidebar/view/road-segment-detail.html',

@@ -1,5 +1,6 @@
 import Constants from '../../common/constants'
 import ToolBarActions from '../../../react/components/header/tool-bar-actions'
+import MapUtilities from '../../common/plan/map-utilities'
 
 class ServiceLayerEditorController {
   constructor ($http, $timeout, $ngRedux, state, Utils, tileDataService) {

@@ -375,6 +375,7 @@ module.exports = class Location {
         return Promise.all([businesses, households, towers])
       })
       .then(() => {
+        /*
         var sql = `
           SELECT address,zipcode,city, ST_AsGeojson(geog)::json AS geog,cb.tabblock_id, cb.name,
             (SELECT min(ST_Distance(ef_closest_fibers.geom::geography, locations.geog))
@@ -388,7 +389,21 @@ module.exports = class Location {
           FROM locations 
           JOIN aro.census_blocks cb ON ST_Contains(cb.geom,locations.geom)
           WHERE locations.id=$1
+        `*/
+        var sql = `
+          SELECT address,zipcode,city, ST_AsGeojson(geog)::json AS geog,cb.tabblock_id, cb.name
+          FROM locations 
+          JOIN aro.census_blocks cb ON ST_Contains(cb.geom,locations.geom)
+          WHERE locations.id=$1
         `
+        // new ?
+        /*
+        var sql = `
+          select e.* from aro_core.global_library gl
+          join aro.edge e
+          on gl.data_source_id =e.data_source_id
+          where gl.meta_data_id ={library_id}
+        `*/
         return database.findOne(sql, [location_id])
       })
       .then((_location) => {

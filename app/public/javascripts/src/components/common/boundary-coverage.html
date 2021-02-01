@@ -1,23 +1,23 @@
 <style>
-  .bounds-coverage-header{
+  .bounds-coverage-header {
     cursor: auto;
   }
   
-  .bounds-coverage-header-sub{
+  .bounds-coverage-header-sub {
     padding-left: 10px;
   }
   
-  .bounds-coverage-census-cat{
+  .bounds-coverage-layer-cat {
     margin-top: 10px;
     margin-bottom: 4px;
   }
   
-  .bounds-coverage-census-tag{
+  .bounds-coverage-layer-tag {
     padding-left: 20px;
     margin-bottom: 10px;
   }
   
-  .bounds-coverage-census-tag-count{
+  .bounds-coverage-layer-tag-count {
     margin-left: 20px;
     font-weight: bold;
   }
@@ -47,17 +47,17 @@
   <canvas ng-init="$ctrl.showCoverageChart()" class="plan-editor-bounds-dist-chart" width="300" height="300"></canvas>
   <div style="margin-bottom: 20px;">
     <div class="ei-header bounds-coverage-header">
-      Locations by Census Block Tag
+      Locations by Tag
     </div>
-    <div class="bounds-coverage-census-tag" ng-if="$ctrl.objKeys($ctrl.computedCoverage.tagCounts).length < 1">none</div>
+    <div class="bounds-coverage-layer-tag" ng-if="$ctrl.objKeys($ctrl.computedCoverage.tagCounts).length < 1">none</div>
     <div ng-repeat="cat in $ctrl.computedCoverage.tagCounts">
-      <div class="ei-property-item bounds-coverage-census-cat">
+      <div class="ei-property-item bounds-coverage-layer-cat">
         {{cat.description}}
       </div>
-      <div class="bounds-coverage-census-tag" ng-repeat="tag in cat.tags">
+      <div class="bounds-coverage-layer-tag" ng-repeat="tag in cat.tags">
         <div class="outlineLegendIcon" style="border-color: {{tag.colourHash}}; background-color: {{tag.colourHash}}33;"></div>
         {{tag.description}}: 
-        <div class="bounds-coverage-census-tag-count"
+        <div class="bounds-coverage-layer-tag-count"
              ng-repeat="(locationType, locationCount) in tag.count"
              ng-if="locationCount != 0"
              >{{locationType}}: {{locationCount}}</div>

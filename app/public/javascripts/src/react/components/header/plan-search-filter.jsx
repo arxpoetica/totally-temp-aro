@@ -38,6 +38,8 @@ export class PlanSearchFilter extends Component {
         event.stopPropagation()
       }
     })
+
+    this.handleInputChange = _.debounce(this.handleInputChange.bind(this),250)
   }
 
   render() {
@@ -90,6 +92,7 @@ export class PlanSearchFilter extends Component {
             placeholder={`Select ${objectName}...`}
             onChange={(e)=>this.onSelectedItemsChanged(e)}
             styles={customStyles}
+            onInputChange={(e, action)=>this.handleInputChange(e, action)}
           />
           <div className="text-center" style={{marginTop:'2px'}}>
             <button id="apply-filter" disabled={(selectedItems.length < 0 ? 'disabled' : null)}
@@ -100,6 +103,18 @@ export class PlanSearchFilter extends Component {
         </div>
       </div>
     )
+  }
+
+  handleInputChange (searchText, { action }) {
+    switch (action) {
+      case 'input-change':
+        this.props.objectName === 'Service Area'
+        ? setTimeout(function() { this.props.refreshTagList(this.props.dataItems, searchText, false) }.bind(this),250)
+        : ''
+        return
+      default:
+        return
+    }
   }
 
   onSelectedItemsChanged (event) {
@@ -124,6 +139,7 @@ export class PlanSearchFilter extends Component {
 }
 
 const mapStateToProps = (state) => ({
+  dataItems: state.plan.dataItems,
 })  
 
 const mapDispatchToProps = (dispatch) => ({

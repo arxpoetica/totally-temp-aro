@@ -24,7 +24,7 @@ const getConduitsArray = createSelector([getAllNetworkEquipmentLayers], networkE
 })
 
 class CablesController {
-  constructor ($rootScope, $ngRedux, map_tools, state, rState) {
+  constructor ($rootScope, $ngRedux, map_tools, state, rxState) {
     this.map_tools = map_tools
     this.state = state
     this.currentUser = state.loggedInUser
@@ -43,7 +43,7 @@ class CablesController {
       .subscribe((newValue) => this.updateMapLayers())
 
     // Update map layers when the view settings change
-    rState.viewSettingsChanged.getMessage().skip(1).subscribe((data) => {
+    rxState.viewSettingsChanged.getMessage().skip(1).subscribe((data) => {
       this.updateMapLayers()
     })     
 
@@ -145,6 +145,35 @@ class CablesController {
     })
   }
 
+  // ---
+
+  // We will change this later,
+  //  currently we are just telling Redux that these values have changed
+  //  next: change over all components that read the state.js version to using Redux
+
+  onUpdateExistingCableVisibility () {
+    // these shouldn't be hardcoded but this will all be migrated shortly
+    this.onUpdateTypeVisibility('cable', 'existing', this.state.cableLayerTypeVisibility.existing)
+  }
+  onUpdatePlannedCableVisibility () {
+    this.onUpdateTypeVisibility('cable', 'planned', this.state.cableLayerTypeVisibility.planned)
+  }
+
+  onUpdateTypeVisibility (typeA, typeB, isVisible) {
+    // typeA: equipment / cable
+    // typeB: existing / planned
+    var typeVisibility = {}
+    typeVisibility[typeA] = {}
+    typeVisibility[typeA][typeB] = isVisible
+    this.setTypeVisibility(typeVisibility)
+    
+    this.updateMapLayers()
+  }
+
+  // ---
+
+  // ToDo: this does not belong here. Don't put the powerplant in the light switch.
+  //  Also it's repeat code! network-equipment has one just like it
   updateMapLayers () {
     if (!this.networkEquipmentLayers) return
     // Make a copy of the state mapLayers. We will update this
@@ -208,9 +237,7 @@ class CablesController {
         dispatch(MapLayerActions.setNetworkEquipmentLayerVisibility(layerType, layer, isVisible))
       },
       setCableConduitVisibility: (cableKey, conduitKey, isVisible) => dispatch(MapLayerActions.setCableConduitVisibility(cableKey, conduitKey, isVisible)),
-      updateType: (visibilityType, isVisible) => {
-        dispatch(MapLayerActions.setNetworkEquipmentLayerVisibilityType(visibilityType, isVisible))
-      }
+      setTypeVisibility: (typeVisibility) => dispatch(MapLayerActions.setTypeVisibility(typeVisibility))
     }
   }
 
@@ -234,7 +261,7 @@ class CablesController {
   }
 }
 
-CablesController.$inject = ['$rootScope', '$ngRedux', 'map_tools', 'state', 'rState']
+CablesController.$inject = ['$rootScope', '$ngRedux', 'map_tools', 'state', 'rxState']
 
 let cables = {
   templateUrl: '/components/views/cables.html',

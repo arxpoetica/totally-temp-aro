@@ -24,7 +24,7 @@
       </select>
     </div>
   </div>
-  <aro-search ng-if="$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.BOUNDARIES_INFO" object-name="Boundary Layer"
+  <aro-search ng-if="($ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.BOUNDARIES_INFO) || $ctrl.rActiveViewModePanel === $ctrl.state.viewModePanels.BOUNDARIES_INFO" object-name="Boundary Layer"
     label-id="code" search-list="$ctrl.state.entityTypeBoundaryList" selected="$ctrl.selectedBoundary" refresh-tag-list="$ctrl.state.StateViewMode.loadBoundaryEntityList($ctrl.$http, $ctrl.state, $ctrl.dataItems, searchObj)"
     on-selection-changed="$ctrl.viewSelectedBoundary(selectedObj)">
   </aro-search>
@@ -37,7 +37,7 @@
   <div>Centroid Latitude: {{$ctrl.selectedBoundaryInfo.centroid.coordinates[1] | number:5}}</div>
   <div>Centroid Longitude: {{$ctrl.selectedBoundaryInfo.centroid.coordinates[0] | number:5}}</div>
   <div ng-repeat="tag in $ctrl.selectedBoundaryTags" ng-if="undefined != tag.tagInfo">
-    {{tag.censusCatDescription}} :
+    {{tag.layerCatDescription}} :
     <div class="outlineLegendIcon" style="border-color: {{tag.tagInfo.colourHash}}; background-color: {{tag.tagInfo.colourHash}}33;"></div> {{tag.tagInfo.description}}
   </div>
   <div ng-repeat="locationCountInfo in $ctrl.selectedBoundaryInfo.locationCount">

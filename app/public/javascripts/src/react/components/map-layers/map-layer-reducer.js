@@ -3,6 +3,7 @@ import { List, Map, remove } from 'immutable'
 
 const defaultState = {
   location: new List(),
+  copper: new List(),
   locationFilters: {},
   networkEquipment: new Map(),
   constructionSite: new List(),
@@ -15,6 +16,16 @@ const defaultState = {
     selectedIndex: 0,
     collections: [],
     maxGeometries: 200
+  },
+  typeVisibility: {
+    equipment: {
+      existing: false,
+      planned: false
+    },
+    cable: {
+      existing: false,
+      planned: false
+    }
   }
 }
 
@@ -57,6 +68,37 @@ function setLocationFilterChecked (state, filterType, ruleKey, isChecked) {
       }
     }
   }
+}
+
+function setCopperLayerVisibility (state, layerType, layer, subtype, visibility) {
+  var newState = { ...state }
+  // First determine which category/key (e.g. 'location' the layer belongs to)
+  var layerToChange = null
+  var layerKey = null
+  Object.keys(state['copper']['categories']).forEach((key, index) => {
+    const stateLayer = state['copper']['categories'][layerType]
+    if (stateLayer.key === layer.key) {
+      layerToChange = stateLayer
+      layerKey = key
+    }
+  })
+
+  // Create a new layer with the checked flag set
+  const newLayer = { ...layerToChange, checked: visibility, subtypes: subtype }
+
+  // Replace this category in the state
+  newState = {
+    ...newState,
+    copper: {
+      ...newState.copper,
+        categories: {
+          ...newState.copper.categories,
+          [layerType]: newLayer
+        }
+    }
+  }
+
+  return newState
 }
 
 function setNetworkEquipmentLayerVisibility (state, layerType, layer, subtype, visibility) {
@@ -215,17 +257,37 @@ function clearOlderGeometries (state, annotationIndex, numberOfGeometries) {
   }
 }
 
+// ToDo: this doesn't quite belong here, we'll fix this when we reorganize state
+//  should be in 'ui. ...'
+function setTypeVisibility (state, typeVisibilityMask) {
+  var newTypeVisibility = JSON.parse(JSON.stringify(state.typeVisibility))
+  Object.keys(typeVisibilityMask).forEach(keyA => {
+    Object.keys(typeVisibilityMask[keyA]).forEach(keyB => {
+      newTypeVisibility[keyA][keyB] = typeVisibilityMask[keyA][keyB]
+    })
+  })
+  return { ...state,
+    typeVisibility: newTypeVisibility
+  }
+}
+
 function mapLayersReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.LAYERS_SET_LOCATION:
       return setLayers(state, 'location', action.payload)
-
+    
     case Actions.LAYERS_SET_LOCATION_FILTERS:
       return setLocationFilters(state, action.payload)
 
     case Actions.LAYERS_SET_LOCATION_FILTER_CHECKED:
       return setLocationFilterChecked(state, action.payload.filterType, action.payload.ruleKey, action.payload.isChecked)
 
+    case Actions.LAYERS_SET_COPPER:
+      return setLayers(state, 'copper', action.payload)
+    
+    case Actions.LAYERS_SET_COPPER_VISIBILITY:
+      return setCopperLayerVisibility(state, action.payload.layerType, action.payload.layer, action.payload.subtype, action.payload.visibility)
+      
     case Actions.LAYERS_SET_NETWORK_EQUIPMENT:
       return setLayers(state, 'networkEquipment', action.payload)
 
@@ -276,6 +338,9 @@ function mapLayersReducer (state = defaultState, action) {
 
     case Actions.LAYERS_CLEAR_OLD_ANNOTATIONS:
       return clearOlderGeometries(state, 0, action.payload) // Always clear geometries from the 0th annotation collection
+
+    case Actions.LAYERS_SET_TYPE_VISIBILITY:
+      return setTypeVisibility(state, action.payload)
 
     default:
       return state

@@ -2,7 +2,7 @@ version: '2'
 
 services:
     db:
-        image: avco/aro-postgis:10
+        image: postgis/postgis:12-3.0
         volumes:
             - postgres-data:/var/lib/postgresql/data
         ports:
@@ -17,6 +17,7 @@ services:
             - "15672:15672"
     service:
         image: avco/aro-service:latest
+        build: ../../aro-service/docker
         expose:
             - "8080"
         links:

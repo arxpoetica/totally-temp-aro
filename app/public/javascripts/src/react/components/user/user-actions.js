@@ -1,5 +1,6 @@
 import AroHttp from '../../common/aro-http'
 import Actions from '../../common/actions'
+import GlobalsettingsActions from '../global-settings/globalsettings-action'
 
 function loadAuthPermissions () {
   // Get the permission bits from aro-service
@@ -35,7 +36,12 @@ function updateUserAccount (user) {
         type: Actions.USER_UPDATE_USER,
         payload: user
       }))
-      .catch((err) => console.error(err))
+      .catch((err) =>  {
+        // TODO: we have to come up with a strategy of global error handler
+        // and success message toast rather then message boxes
+        swal({ title: err.data.error, type: 'error' })
+        console.log(err)
+      })
   }
 }
 
@@ -230,15 +236,14 @@ function registerUser (newUser) {
       AroHttp.post('/admin/users/registerWithoutPassword', serviceUser)
       .then((response) => {
         if(response.status === 200){
-          swal({
-            title: 'Success',
-            text:  'User Registered Successfully',
-            type: 'success'
-          })
+          dispatch(GlobalsettingsActions.customErrorHandle('Success', 'User Registered Successfully', 'success'))
           resolve(); 
         }
       })
-      .catch((err) => console.error(err))
+      .catch((err) => {
+        console.error(err)
+        dispatch(GlobalsettingsActions.customErrorHandle('Failed to Register user', 'ARO-Service returned status code 500', 'error'))
+      })
     })
     promise
     .then(function () { 
