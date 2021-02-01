@@ -26,3 +26,7 @@ export const hsvToRgb = (h, s, v) => {
   })
   return color
 }
+// Logout function
+export const logoutApp = () => {
+  window.location.href = '/logout'
+}

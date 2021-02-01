@@ -19,6 +19,7 @@ import RxState from '../../common/rxState'
 import PlanInputsModal from './plan-inputs-modal.jsx'
 import GlobalsettingsActions from '../global-settings/globalsettings-action'
 import GlobalSettings from '../global-settings/global-settings.jsx'
+import { logoutApp } from '../../common/view-utils'
 
 export class ToolBar extends Component {
   constructor (props) {
@@ -111,6 +112,8 @@ export class ToolBar extends Component {
       showDropDown: false,
       marginPixels: 10, // Margin between the container and the div containing the buttons
       dropdownWidthPixels: 36, // The width of the dropdown button
+      isAccountSettingsEnabled: false,
+      isOpenAccountSettings: false
     }
 
     this.searchLocation = 'Search an address, city, or state' // For IntialSelection of select2
@@ -118,6 +121,7 @@ export class ToolBar extends Component {
     this.props.loadServiceLayers() // To load Service layer in advance
 
     this.refreshToolbar = this.refreshToolbar.bind(this) // To bind a function
+    this.openAccountSettingsModal = this.openAccountSettingsModal.bind(this) // To bind a function
 
     // To Trigger refreshToolbar() by Listening to the custom event from map-split.js $document.ready() method
     // https://stackoverflow.com/questions/52037958/change-value-in-react-js-on-window-resize
@@ -133,27 +137,6 @@ export class ToolBar extends Component {
 
   componentDidMount(){
     this.initSearchBox()
-
-    // toggle view settings dropdown
-    jQuery('.myDropdown1').on('show.bs.dropdown', function (event) {
-      jQuery(this).find('.view-dropdown').toggle()
-      event.stopPropagation()
-      event.preventDefault()
-    })
-
-    // toggle ruler dropdown
-    jQuery('.rulerDropdown').on('show.bs.dropdown', function (event) {
-      jQuery(this).find('.ruler-dropdown').toggle()
-      event.stopPropagation()
-      event.preventDefault()
-    })
-
-    // toggle toolbar dropdown
-    jQuery('.dropdown').on('show.bs.dropdown', function (event) {
-      jQuery(this).find('.tool-bar-dropdown').toggle()
-      event.stopPropagation()
-      event.preventDefault()
-    })
 
     // To Trigger refreshToolbar() when window resized
     // https://stackoverflow.com/questions/52037958/change-value-in-react-js-on-window-resize
@@ -185,7 +168,8 @@ export class ToolBar extends Component {
       viewSetting, viewFiberOptions } = this.props
 
     const { currentRulerAction, showRemoveRulerButton, heatMapOption, sliderValue,
-      showDropDown, marginPixels, dropdownWidthPixels } = this.state
+      showDropDown, marginPixels, dropdownWidthPixels, isAccountSettingsEnabled,
+      isOpenAccountSettings } = this.state
 
     const selectedIndividualLocation = (
       selectedDisplayMode === this.displayModes.ANALYSIS || selectedDisplayMode === this.displayModes.VIEW
@@ -325,11 +309,11 @@ export class ToolBar extends Component {
               style={{marginLeft: '2px'}}
               onChange={() => this.toggleHeatMapOptions()}
             />
-            <font>Location Heatmap On</font>
+            <span>Location Heatmap On</span>
             {heatMapOption &&
               <>
                 <div className="dropdown-divider"></div>
-                <font>Heatmap Intensity</font>
+                <span>Heatmap Intensity</span>
                 <div style={{padding: '0px 10px'}}>
                   <input
                     type="range"
@@ -352,7 +336,7 @@ export class ToolBar extends Component {
               name="ctype-name" style={{marginLeft: '2px'}}
               onChange={() => this.showLocationLabelsChanged()}
             />
-            <font>Location Labels</font>
+            <span>Location Labels</span>
 
             {/* Site Boundaries */}
             {configuration.toolbar.showSiteBoundaries && configuration.toolbar !== undefined &&
@@ -366,7 +350,7 @@ export class ToolBar extends Component {
                 style={{marginLeft: '2px'}}
                 onChange={() => this.toggleSiteBoundary()}
               />
-              <font>Site Boundaries</font>
+              <span>Site Boundaries</span>
               {showSiteBoundary &&
                 <select className="form-control" value={selectedBoundaryType.description}
                   onChange={(event) => this.onChangeSiteBoundaries(event)}>
@@ -390,7 +374,7 @@ export class ToolBar extends Component {
                 style={{marginLeft: '2px'}}
                 onChange={(event) => this.showCableDirection(event)}
               />
-              <font>Directed Cable</font>
+              <span>Directed Cable</span>
             </>
             }
 
@@ -406,7 +390,7 @@ export class ToolBar extends Component {
                 style={{marginLeft: '2px'}}
                 onChange={(event) => this.showEquipmentLabelsChanged(event)}
               />
-              <font>Site Labels</font>
+              <span>Site Labels</span>
             </>
             }
 
@@ -422,7 +406,7 @@ export class ToolBar extends Component {
                 style={{marginLeft: '2px'}}
                 onChange={(event) => this.setShowFiberSize(event)}
               />
-              <font>Fiber Size</font>
+              <span>Fiber Size</span>
               {showFiberSize &&
                 <select className="form-control" value={viewSetting.selectedFiberOption.name}
                   onChange={(event) => this.onChangeSelectedFiberOption(event)}>
@@ -534,10 +518,46 @@ export class ToolBar extends Component {
           title="Refresh tiles">
           <i className="fa fa-sync-alt"></i>
         </button>
+
+        <div className="separator"></div>
+
+         {/* Account Settings */}
+         <div className="accountDropdown" onMouseLeave={() => this.setState({ isAccountSettingsEnabled: false})}>
+          <button className={`btn ${this.state.isAccountSettingsEnabled ? 'btn-selected' : ''}`}
+            type="button"
+            onClick={() => this.openAccountSettingsDropDown()}
+            aria-haspopup="true" aria-expanded="false" title="Account Settings">
+            <i className="fa fa-user-cog" />
+          </button>
+
+          <div
+            className="dropdown-menu dropdown-menu-right account-settings-dropdown"
+            style={{ display: isAccountSettingsEnabled ? 'block' : 'none' }}
+          > 
+            <span onClick={() => this.openAccountSettingsModal(true)}>Account Settings</span>
+            <div className="dropdown-divider" />
+            <span onClick={() => logoutApp()}>Logout</span>
+          </div>
+        </div>
+        {isOpenAccountSettings &&
+          <GlobalSettings
+            currentViewProps='My Account'
+            openAccountSettingsModal={this.openAccountSettingsModal}
+          />
+        }
       </div>
     )
   }
 
+  openAccountSettingsDropDown () {
+    if (!this.state.isAccountSettingsEnabled) { this.closeDropdowns() }
+    this.setState({ isAccountSettingsEnabled: !this.state.isAccountSettingsEnabled})
+  }
+
+  openAccountSettingsModal (status) {
+    this.setState({ isOpenAccountSettings: status })
+  }
+  
   refreshTiles () {
     const refreshTileCmd = {
       'dataTypes': [
@@ -679,7 +699,7 @@ export class ToolBar extends Component {
   }
 
   viewSettingsAction () {
-    !this.props.isViewSettingsEtoggleHeatMapOptionsnabled && this.closeDropdowns()
+    if (!this.props.isViewSettingsEnabled) { this.closeDropdowns() }
     this.props.setIsViewSettingsEnabled(!this.props.isViewSettingsEnabled)
   }
 
@@ -715,7 +735,7 @@ export class ToolBar extends Component {
   }
 
   rulerAction () {
-    !this.props.isRulerEnabled && this.closeDropdowns()
+    if (!this.props.isRulerEnabled) { this.closeDropdowns() }
     this.props.setIsRulerEnabled(!this.props.isRulerEnabled)
     this.enableRulerAction()
 
@@ -1018,12 +1038,13 @@ export class ToolBar extends Component {
 
   closeDropdowns () {
     if (this.props.isViewSettingsEnabled) {
-      jQuery('.view-dropdown').toggle()
       this.props.setIsViewSettingsEnabled(false)
     }
     if (this.props.isRulerEnabled) {
-      jQuery('.ruler-dropdown').toggle()
       this.rulerAction()
+    }
+    if (this.state.isAccountSettingsEnabled) {
+      this.openAccountSettingsDropDown()
     }
   }
 
