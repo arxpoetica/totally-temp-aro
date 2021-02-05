@@ -1,27 +1,32 @@
+######################
+# Docker
+######################
+
 /docker/set_debug_env.sh
 /docker/config.json
 /docker/docker-compose*
 !/docker/docker-compose-dev.yml
 !/docker/docker-compose-dev-private.yml
 docker12
+docker12/
 docker12/*
 
-#global file patterns
+######################
+# Env Variables
+######################
+
+.env
+
+# ARO Root
 
 *.pyc
-
-#ARO Root
-
 .vagrant
-.DS_Store
 Vagrantfile
 npm-debug.log
-
 ops-legacy/
 
-#app ignores
-
 # All node_modules folders
+/node_modules/
 **/node_modules 
 app/coverage
 app/npm-debug*.*
@@ -34,6 +39,7 @@ app/public/javascripts/vendors/vendor-bundle.min.js
 conf/config_app.json
 app/jest_*/**
 app/v8-compile-cache*/**
+reportsrv/node_modules
 
 *.project
 *.settings
@@ -41,57 +47,41 @@ app/v8-compile-cache*/**
 *.component
 *.vscode
 
-# Report server ignores
-reportsrv/node_modules
-
-###############################
-
-
 # Directories #
 /build/
 /bin/
 target/
- 
-# OS Files #
-.DS_Store
- 
-*.class
- 
+
 # Package Files #
 *.jar
 *.war
 *.ear
 *.db
- 
+*.class
+
 ######################
 # Windows
 ######################
- 
+
 # Windows image file caches
 Thumbs.db 
- 
+
 # Folder config file
 Desktop.ini
- 
+
 ######################
 # OSX
 ######################
- 
+
 .DS_Store
-.svn
- 
-# Thumbnails
 ._*
- 
-# Files that might appear on external disk
 .Spotlight-V100
 .Trashes
- 
  
 ######################
 # Eclipse
 ######################
- 
+
 *.pydevproject
 .project
 .metadata
@@ -109,13 +99,10 @@ local.properties
 /src/main/resources/rebel.xml
 # External tool builders
 .externalToolBuilders/
- 
 # Locally stored "Eclipse launch configurations"
 *.launch
- 
 # CDT-specific
 .cproject
- 
 # PDT-specific
 .buildpath
 
@@ -125,22 +112,14 @@ local.properties
 etl/tiger_cousub/shapefiles
 etl/client/*.pyc
 etl/source_colt/data
-
 bin/
 
-
-
-#aro-service git ignores
-
+# aro-service git ignores
 aro-service
 aro-service/
 
 bootstrap/etl.log
 
-/node_modules/
 /app/.gitignore
 .vscode
-docker12
-docker12/
-docker12/*
 /_hidden
