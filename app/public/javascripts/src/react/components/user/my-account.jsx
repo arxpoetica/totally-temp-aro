@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import UserActions from './user-actions'
-import { logoutApp } from '../../common/view-utils'
 
 export class MyAccount extends Component {
   constructor(props) {
@@ -112,7 +111,6 @@ export class MyAccount extends Component {
 
         </form>
         <div style={{ flex: '0 0 auto' }}>
-          <button className="btn btn-danger" onClick={() => logoutApp()}>Logout</button>
           <button className="btn btn-primary float-right" onClick={() => this.updateAccount()}>
             <i className="fa fa-save" />
             &nbsp;&nbsp;Update Settings
