@@ -76,6 +76,7 @@ workflows:
               only:
                 - master
                 - dev
+                - robert/node-upgrade
       - deploy:
           context: aro_qa_builds
           requires:
