@@ -1,25 +1,25 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import ResourceActions from './resource-actions'
-import Select, { components } from "react-select";
+import Select from "react-select"
 
 const styles = {
   multiValue: (base, state) => {
-    return state.data.isFixed ? { ...base, backgroundColor: 'gray' } : base;
+    return state.data.isFixed ? { ...base, backgroundColor: 'gray' } : base
   },
   multiValueLabel: (base, state) => {
     return state.data.isFixed
       ? { ...base, fontWeight: 'bold', color: 'white', paddingRight: 6 }
-      : base;
+      : base
   },
   multiValueRemove: (base, state) => {
-    return state.data.isFixed ? { ...base, display: 'none' } : base;
+    return state.data.isFixed ? { ...base, display: 'none' } : base
   },
-};
+}
 
 const orderOptions = values => {
-  return values.filter(v => v.isFixed).concat(values.filter(v => !v.isFixed));
-};
+  return values.filter(v => v.isFixed).concat(values.filter(v => !v.isFixed))
+}
 
 export class CompetitorEditor extends Component {
   constructor (props) {
@@ -37,27 +37,22 @@ export class CompetitorEditor extends Component {
   }
 
   componentDidMount () {
-    this.props.getRegions();
-   // this.props.loadCompManMeta(this.props.editingManager.id)
-   this.props.setModalTitle(this.props.resourceManagerName)
+    this.props.getRegions()
+    this.props.setModalTitle(this.props.resourceManagerName)
   }
 
-  componentWillReceiveProps(nextProps){
-    if(this.props != nextProps) {
-      this.setState({strengthsById: nextProps.loadStrength.strengthsById})
-    }
+  static getDerivedStateFromProps(nextProps) {
+    if (nextProps.loadStrength.strengthsById !== undefined) {
+      return {
+        strengthsById: nextProps.loadStrength.strengthsById,
+      }
+    } else return null
   }
 
   render () {
-    return !this.props.regions
-    ? null
-    : this.renderCompetitorEditor()
-  }
-
-  renderCompetitorEditor () {
-    let regionsList = this.props.regions.map(function(regionValue) { 
-      return {"id":regionValue.gid, "value": regionValue.stusps, "label": regionValue.name}; 
-    });
+    const regionsList = this.props.regions && this.props.regions.map(function(regionValue) {
+      return {"id": regionValue.gid, "value": regionValue.stusps, "label": regionValue.name}
+    })
 
     return (
       <div>
@@ -76,25 +71,29 @@ export class CompetitorEditor extends Component {
               isClearable={this.state.isClearable}
               isDisabled={this.state.isDisabled}
               placeholder="Select data sources..."
-              onChange={(e)=>this.handleRegionsChange(e)}
+              onChange={(event) => this.handleRegionsChange(event)}
             />
             <div style={{marginTop: '4px'}}>
               {this.state.regionSelectEnabled &&
-                <button className="btn btn-primary nowrap_label" onClick={(e)=>this.handleSelectAllRegions(e)}>
+                <button className="btn btn-primary nowrap_label" onClick={(event) => this.handleSelectAllRegions(event)}>
                   <i className="fa fa-check action-button-icon"></i> Select All
                 </button>
               }
             </div>
           </div>
-          
+
           <div className="comp_edit_filter_row_right" id="comp_edit_region_btn">
             {!this.state.regionSelectEnabled &&
-              <button className="btn btn-light nowrap_label" onClick={(e)=>this.reselectRegion(e)}>
+              <button className="btn btn-light nowrap_label" onClick={(event) => this.reselectRegion(event)}>
                 <i className="fa fa-undo action-button-icon"></i> Reselect
               </button>
             }
             {this.state.regionSelectEnabled &&
-              <button className="btn btn-primary nowrap_label" onClick={(e)=>this.onRegionCommit(e)} disabled={this.state.selectedRegions.length < 1}>
+              <button
+                className="btn btn-primary nowrap_label"
+                onClick={(event) => this.onRegionCommit(event)}
+                disabled={this.state.selectedRegions.length < 1}
+              >
                 <i className="fa fa-save action-button-icon"></i> Select
               </button>
             }
@@ -112,7 +111,7 @@ export class CompetitorEditor extends Component {
                   max="100"
                   step="0.1"
                   value={this.state.prominenceThreshold}
-                  onChange={(e)=>this.handleRangeChange(e)}
+                  onChange={(event) => this.handleRangeChange(event)}
                   style={{marginTop: '10px', width:'100%'}}/>
               </div>
               <div className="comp_edit_filter_row_right">
@@ -121,7 +120,7 @@ export class CompetitorEditor extends Component {
                     <input id="coverageTargetValue"
                       type="number" step="0.1"
                       value={this.state.prominenceThreshold}
-                      onChange={(e)=>this.handleRangeChange(e)}
+                      onChange={(event) => this.handleRangeChange(event)}
                       className="form-control text-right"
                       />
                     <div className="input-group-addon">%</div>
@@ -137,12 +136,12 @@ export class CompetitorEditor extends Component {
             <ul className="nav nav-tabs">
               <li className="nav-item">
                 <a className={`nav-link ${this.state.openTab === 0 ? 'active' : ''}`}
-                  onClick={(e)=>this.handleOpenTab(0)} href="#"
+                  onClick={(event) => this.handleOpenTab(0)} href="#"
                 >Above Threshold</a>
               </li>
               <li className="nav-item">
               <a className={`nav-link ${this.state.openTab === 1 ? 'active' : ''}`}
-                  onClick={(e)=>this.handleOpenTab(1)} href="#"
+                  onClick={(event) => this.handleOpenTab(1)} href="#"
                 >Below Threshold</a>
               </li>
             </ul>
@@ -156,7 +155,8 @@ export class CompetitorEditor extends Component {
                         <th>Carrier</th>
                         <th>Coverage</th>
                         {
-                          this.props.loadStrength.strengthCols.map((providerType, providerKey) =>
+                          this.props.loadStrength.strengthCols
+                          && this.props.loadStrength.strengthCols.map((providerType, providerKey) =>
                             <th key={providerKey} className="comp_edit_center_label">{providerType}</th>
                           )
                         }
@@ -164,17 +164,26 @@ export class CompetitorEditor extends Component {
                     </thead>
                     <tbody>
                       {
-                       this.props.carriersByPct.filter((carrierValue) => carrierValue.cbPercent >= this.state.prominenceThreshold)
+                       this.props.carriersByPct.filter((carrierValue) =>
+                       carrierValue.cbPercent >= this.state.prominenceThreshold)
                        .map((carrierValue, carrierKey) =>
                         <tr key={carrierKey}>
                           <td>{carrierValue.alias}</td>
                           <td>{this.truncateNum(carrierValue.cbPercent, 1)}%</td>
                           {
-                            this.props.loadStrength.strengthCols.map((providerType, providerKey) =>
+                            this.props.loadStrength.strengthCols
+                            && this.props.loadStrength.strengthCols.map((providerType, providerKey) =>
                               <td key={providerKey}>
                                 {!!this.state.strengthsById[carrierValue.carrierId][providerType] &&
                                   <div className="comp_edit_input_set" >
-                                    <input type="text" className="form-control comp_edit_percent_item" value={this.state.strengthsById[carrierValue.carrierId][providerType].strength} onChange={(e)=>this.handleStrengthChange(e, this.state.strengthsById, carrierValue.carrierId, providerType)}/>
+                                    <input
+                                      type="text"
+                                      className="form-control comp_edit_percent_item"
+                                      value={this.state.strengthsById[carrierValue.carrierId][providerType].strength}
+                                      onChange={(event) => this.handleStrengthChange(
+                                        event, this.state.strengthsById, carrierValue.carrierId, providerType
+                                      )}
+                                    />
                                   </div>
                                 }
                               </td>
@@ -197,7 +206,8 @@ export class CompetitorEditor extends Component {
                         <th>Carrier</th>
                         <th>Coverage</th>
                         {
-                          this.props.loadStrength.strengthCols.map((providerType, providerKey) =>
+                          this.props.loadStrength.strengthCols
+                          && this.props.loadStrength.strengthCols.map((providerType, providerKey) =>
                             <th key={providerKey} className="comp_edit_center_label">{providerType}</th>
                           )
                         }
@@ -205,17 +215,26 @@ export class CompetitorEditor extends Component {
                     </thead>
                     <tbody>
                       {
-                       this.props.carriersByPct.filter((carrierValue) => carrierValue.cbPercent < this.state.prominenceThreshold)
+                       this.props.carriersByPct.filter((carrierValue) =>
+                       carrierValue.cbPercent < this.state.prominenceThreshold)
                        .map((carrierValue, carrierKey) =>
                         <tr key={carrierKey}>
                           <td>{carrierValue.alias}</td>
                           <td>{this.truncateNum(carrierValue.cbPercent, 1)}%</td>
                           {
-                            this.props.loadStrength.strengthCols.map((providerType, providerKey) =>
+                            this.props.loadStrength.strengthCols
+                            && this.props.loadStrength.strengthCols.map((providerType, providerKey) =>
                               <td key={providerKey}>
                                 {!!this.state.strengthsById[carrierValue.carrierId][providerType] &&
                                   <div className="comp_edit_input_set" >
-                                    <input type="text" className="form-control comp_edit_percent_item" value={this.state.strengthsById[carrierValue.carrierId][providerType].strength} onChange={(e)=>this.handleStrengthChange(e, this.state.strengthsById, carrierValue.carrierId, providerType)}/>
+                                    <input
+                                      type="text"
+                                      className="form-control comp_edit_percent_item"
+                                      value={this.state.strengthsById[carrierValue.carrierId][providerType].strength}
+                                      onChange={(event) => this.handleStrengthChange(
+                                        event, this.state.strengthsById, carrierValue.carrierId, providerType
+                                      )}
+                                    />
                                   </div>
                                 }
                               </td>
@@ -235,7 +254,10 @@ export class CompetitorEditor extends Component {
             <button className="btn btn-light mr-2" onClick={() => this.exitEditingMode()}>
               <i className="fa fa-undo action-button-icon"></i>Discard changes
             </button>
-            <button className="btn btn-primary" onClick={() => this.saveConfigurationToServer()} disabled={!this.state.hasChanged || this.state.regionSelectEnabled}>
+            <button
+              className="btn btn-primary"
+              onClick={() => this.saveConfigurationToServer()}
+              disabled={!this.state.hasChanged || this.state.regionSelectEnabled}>
               <i className="fa fa-save action-button-icon"></i>Save
             </button>
           </div>
@@ -245,33 +267,35 @@ export class CompetitorEditor extends Component {
   }
 
   exitEditingMode(){
-    this.props.setIsResourceEditor(true);
+    this.props.setIsResourceEditor(true)
   }
 
   saveConfigurationToServer(){
-    this.props.saveCompManConfig(this.props.editingManager.id, this.props.loadStrength.pristineStrengthsById, this.state.strengthsById)
+    this.props.saveCompManConfig(this.props.editingManager.id,
+      this.props.loadStrength.pristineStrengthsById, this.state.strengthsById
+    )
   }
 
   handleStrengthChange(e, strengthObj, carrierId, providerType){
     strengthObj[carrierId][providerType].strength = e.target.value
-    this.setState({strengthsById: strengthObj, hasChanged : true})
+    this.setState({ strengthsById: strengthObj, hasChanged : true })
   }
 
   truncateNum (num, digits) {
-    var scale = Math.pow(10, digits)
+    const scale = Math.pow(10, digits)
     return Math.round(num * scale) / scale
   }
 
   handleOpenTab(tabValue){
-    this.setState({openTab: tabValue})
+    this.setState({ openTab: tabValue })
   }
 
-  handleRangeChange(e){
-    this.setState({prominenceThreshold: e.target.value})
+  handleRangeChange(event){
+    this.setState({ prominenceThreshold: event.target.value })
   }
 
   reselectRegion(){
-    let enableOption = this.state.selectedRegions
+    const enableOption = this.state.selectedRegions
     enableOption.map((item) => item.isFixed = false)
 
     if (this.state.hasChanged === true) {
@@ -287,66 +311,69 @@ export class CompetitorEditor extends Component {
       }, (result) => {
         if (result) {
           this.saveConfigurationToServer()
-        } else {
-          // this.discardChanges()
         }
       })
     }
 
-    this.setState({regionSelectEnabled: true, isClearable: true,
-                   selectedRegions: enableOption, isDisabled: false, hasChanged: false})
+    this.setState({ regionSelectEnabled: true, isClearable: true,
+      selectedRegions: enableOption, isDisabled: false, hasChanged: false })
   }
 
   onRegionCommit(){
     this.props.loadCompManForStates(this.props.editingManager.id, this.state.selectedRegions, this.props.loggedInUser)
-    let disableOption = this.state.selectedRegions.map(function(regionValue) { 
-      var object = Object.assign({}, regionValue);
-      object.isFixed = true;
-      return object;
-    });
+    const disableOption = this.state.selectedRegions.map(function(regionValue) {
+      const object = Object.assign({}, regionValue)
+      object.isFixed = true
+      return object
+    })
     setTimeout(function () {
-      this.setState({regionSelectEnabled: false, isClearable: false,
-        selectedRegions: disableOption, isDisabled: true})
+      this.setState({ regionSelectEnabled: false, isClearable: false,
+        selectedRegions: disableOption, isDisabled: true })
     }.bind(this), 1000)
   }
 
   handleRegionsChange(regions) {
     let formattedRegionsList = []
-    if(regions){
-      formattedRegionsList = regions.map(function(regionValue) { 
-        return {"id":regionValue.id, "value": regionValue.value, "label": regionValue.value}; 
-      });
+    if (regions) {
+      formattedRegionsList = regions.map(function(regionValue) {
+        return {"id":regionValue.id, "value": regionValue.value, "label": regionValue.value}
+      })
     }
-    this.setState({selectedRegions: formattedRegionsList})
+    this.setState({ selectedRegions: formattedRegionsList })
   }
 
   handleSelectAllRegions(){
-    let regionsList = this.props.regions.map(function(regionValue) { 
-      return {"id":regionValue.gid, "value": regionValue.stusps, "label": regionValue.stusps}; 
-    });
-    let selectedRegions = JSON.parse(JSON.stringify(regionsList))
-    this.setState({selectedRegions: selectedRegions})
+    const regionsList = this.props.regions.map(function(regionValue) {
+      return {"id":regionValue.gid, "value": regionValue.stusps, "label": regionValue.stusps}
+    })
+    const selectedRegions = JSON.parse(JSON.stringify(regionsList))
+    this.setState({ selectedRegions })
   }
 }
 
-  const mapStateToProps = (state) => ({
-    regions: state.resourceEditor.regions,
-    carriersByPct: state.resourceEditor.carriersByPct,
-    loggedInUser: state.user.loggedInUser,
-    loadStrength: state.resourceEditor.loadStrength,
-    editingManager: state.resourceManager.editingManager,
-    compManMeta: state.resourceEditor.compManMeta,
-    resourceManagerName: state.resourceManager.editingManager && state.resourceManager.managers[state.resourceManager.editingManager.id].resourceManagerName,
-  })   
+const mapStateToProps = (state) => ({
+  regions: state.resourceEditor.regions,
+  carriersByPct: state.resourceEditor.carriersByPct,
+  loggedInUser: state.user.loggedInUser,
+  loadStrength: state.resourceEditor.loadStrength,
+  editingManager: state.resourceManager.editingManager,
+  compManMeta: state.resourceEditor.compManMeta,
+  resourceManagerName: state.resourceManager.editingManager
+    && state.resourceManager.managers[state.resourceManager.editingManager.id].resourceManagerName,
+})
 
-  const mapDispatchToProps = (dispatch) => ({
-    getRegions: () => dispatch(ResourceActions.getRegions()),
-    loadCompManForStates: (competitorManagerId, selectedRegions, loggedInUser) => dispatch(ResourceActions.loadCompManForStates(competitorManagerId, selectedRegions, loggedInUser)),
-    saveCompManConfig: (competitorManagerId, pristineStrengths, newStrengths) => dispatch(ResourceActions.saveCompManConfig(competitorManagerId, pristineStrengths, newStrengths)),
-    setIsResourceEditor: (status) => dispatch(ResourceActions.setIsResourceEditor(status)),
-    loadCompManMeta: (competitorManagerId) => dispatch(ResourceActions.loadCompManMeta(competitorManagerId)),
-    setModalTitle: (title) => dispatch(ResourceActions.setModalTitle(title))
-  })
+const mapDispatchToProps = (dispatch) => ({
+  getRegions: () => dispatch(ResourceActions.getRegions()),
+  loadCompManForStates: (competitorManagerId, selectedRegions, loggedInUser) => dispatch(
+    ResourceActions.loadCompManForStates(competitorManagerId, selectedRegions, loggedInUser)
+  ),
+  saveCompManConfig: (competitorManagerId, pristineStrengths, newStrengths) => dispatch(
+    ResourceActions.saveCompManConfig(competitorManagerId, pristineStrengths, newStrengths)
+  ),
+  setIsResourceEditor: (status) => dispatch(ResourceActions.setIsResourceEditor(status)),
+  loadCompManMeta: (competitorManagerId) => dispatch(ResourceActions.loadCompManMeta(competitorManagerId)),
+  setModalTitle: (title) => dispatch(ResourceActions.setModalTitle(title))
+})
 
 const CompetitorEditorComponent = connect(mapStateToProps, mapDispatchToProps)(CompetitorEditor)
 export default CompetitorEditorComponent

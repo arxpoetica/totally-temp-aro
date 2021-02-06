@@ -274,6 +274,7 @@ export class GlobalSettings extends Component {
     this.setState({ currentView, resourceEditorProps: 'all',
       dataUploadProps: 'location', dataSelectionID: 1})
     this.props.setIsRrmManager(false)
+    this.props.searchManagers('')
   }
 
   toggle() {
@@ -297,6 +298,7 @@ const mapDispatchToProps = (dispatch) => ({
   setIsDataSelection: (status) => dispatch(PlanActions.setIsDataSelection(status)),
   setShowGlobalSettings: (status) => dispatch(GlobalsettingsActions.setShowGlobalSettings(status)),
   setIsRrmManager: (status) => dispatch(ResourceActions.setIsRrmManager(status)),
+  searchManagers: (searchText) => dispatch(ResourceActions.searchManagers(searchText)),
 })
 
 const GlobalSettingsComponent = connect(mapStateToProps, mapDispatchToProps)(GlobalSettings)
