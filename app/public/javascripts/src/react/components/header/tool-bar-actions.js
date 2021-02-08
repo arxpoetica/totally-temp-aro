@@ -4,62 +4,50 @@ import PlanActions from '../plan/plan-actions'
 import { hsvToRgb } from '../../common/view-utils'
 
 function setPlanInputsModal (status){
-  return dispatch => {
-    dispatch({
-      type: Actions.TOOL_BAR_SET_SAVE_PLAN_AS,
-      payload: status
-    })
+  return {
+    type: Actions.TOOL_BAR_SET_SAVE_PLAN_AS,
+    payload: status
   }
 }
 
 function selectedDisplayMode (value){
-  return dispatch => {
-    dispatch({
-      type: Actions.TOOL_BAR_SET_SELECTED_DISPLAY_MODE,
-      payload: value
-    })
+  return {
+    type: Actions.TOOL_BAR_SET_SELECTED_DISPLAY_MODE,
+    payload: value
   }
 }
 
 function activeViewModePanel (value){
-  return dispatch => {
-    dispatch({
-      type: Actions.TOOL_BAR_SET_ACTIVE_VIEW_MODE_PANEL,
-      payload: value
-    })
+  return {
+    type: Actions.TOOL_BAR_SET_ACTIVE_VIEW_MODE_PANEL,
+    payload: value
   }
 }
 
 function selectedToolBarAction (value){
-  return dispatch => {
-    dispatch({
-      type: Actions.TOOL_BAR_SELECTED_TOOL_BAR_ACTION,
-      payload: value
-    })
+  return {
+    type: Actions.TOOL_BAR_SELECTED_TOOL_BAR_ACTION,
+    payload: value
   }
 }
 
 function selectedTargetSelectionMode (value){
-  return dispatch => {
-    dispatch({
-      type: Actions.TOOL_BAR_SELECTED_TARGET_SELECTION_MODE,
-      payload: value
-    })
+  return {
+    type: Actions.TOOL_BAR_SELECTED_TARGET_SELECTION_MODE,
+    payload: value
   }
 }
 
 function setIsRulerEnabled (value){
-  return dispatch => {
-    dispatch({
-      type: Actions.TOOL_BAR_IS_RULER_ENABLED,
-      payload: value
-    })
+  return {
+    type: Actions.TOOL_BAR_IS_RULER_ENABLED,
+    payload: value
   }
 }
 
 function getOptimizationBody(optimizationInputs, activeSelectionModeId, locationLayers, plan) {
-  return dispatch => {
-    var inputs = JSON.parse(JSON.stringify(optimizationInputs))
+  return () => {
+    const inputs = JSON.parse(JSON.stringify(optimizationInputs))
     // inputs.analysis_type = service.networkAnalysisTypeId
     // inputs.planId = service.planId
     inputs.planId = plan.id
@@ -74,47 +62,37 @@ function getOptimizationBody(optimizationInputs, activeSelectionModeId, location
 }
 
 function setIsViewSettingsEnabled (value){
-  return dispatch => {
-    dispatch({
-      type: Actions.TOOL_BAR_IS_VIEW_SETTINGS_ENABLED,
-      payload: value
-    })
+  return {
+    type: Actions.TOOL_BAR_IS_VIEW_SETTINGS_ENABLED,
+    payload: value
   }
 }
 
 function setShowDirectedCable (value){
-  return dispatch => {
-    dispatch({
-      type: Actions.TOOL_BAR_SHOW_DIRECTED_CABLE,
-      payload: value
-    })
+  return {
+    type: Actions.TOOL_BAR_SHOW_DIRECTED_CABLE,
+    payload: value
   }
 }
 
 function setShowEquipmentLabelsChanged (value){
-  return dispatch => {
-    dispatch({
-      type: Actions.TOOL_BAR_SHOW_EQUIPMENT_LABELS,
-      payload: value
-    })
+  return {
+    type: Actions.TOOL_BAR_SHOW_EQUIPMENT_LABELS,
+    payload: value
   }
 }
 
 function setShowFiberSize (value){
-  return dispatch => {
-    dispatch({
-      type: Actions.TOOL_BAR_SHOW_FIBER_SIZE,
-      payload: value
-    })
+  return {
+    type: Actions.TOOL_BAR_SHOW_FIBER_SIZE,
+    payload: value
   }
 }
 
 function setAppConfiguration (appConfiguration){
-  return dispatch => {
-    dispatch({
-      type: Actions.TOOL_BAR_SET_APP_CONFIGURATION,
-      payload: appConfiguration
-    })
+  return {
+    type: Actions.TOOL_BAR_SET_APP_CONFIGURATION,
+    payload: appConfiguration
   }
 }
 
@@ -122,51 +100,51 @@ function createNewPlan (isEphemeral, planName, parentPlan, planType){
   return (dispatch, getState) => {
 
     const state = getState()
-    var loggedInUserId = state.user.loggedInUser.id
-    var defaultPlanCoordinates = state.plan.defaultPlanCoordinates
-    var currentPlanTags = state.toolbar.currentPlanTags
-    var currentPlanServiceAreaTags = state.toolbar.currentPlanServiceAreaTags
+    const loggedInUserId = state.user.loggedInUser.id
+    const defaultPlanCoordinates = state.plan.defaultPlanCoordinates
+    const currentPlanTags = state.toolbar.currentPlanTags
+    const currentPlanServiceAreaTags = state.toolbar.currentPlanServiceAreaTags
 
     if (isEphemeral && parentPlan) {
       return Promise.reject('ERROR: Ephemeral plans cannot have a parent plan')
     }
 
     // Use reverse geocoding to get the address at the current center of the map
-    var planOptions = {
+    const planOptions = {
       areaName: '',
       latitude: defaultPlanCoordinates.latitude,
       longitude: defaultPlanCoordinates.longitude,
       zoomIndex: defaultPlanCoordinates.zoom,
       ephemeral: isEphemeral,
-      name: planName || 'Untitled', 
+      name: planName || 'Untitled',
       planType: planType || 'UNDEFINED'
     }
     return getAddressFor(planOptions.latitude, planOptions.longitude)
-    .then((address) => {
-      planOptions.areaName = address
-      // Get the configuration for this user - this will contain the default project template to use
-      return AroHttp.get(`/service/auth/users/${loggedInUserId}/configuration`)
-    })
-    .then((result) => {
-      var apiEndpoint = `/service/v1/plan?project_template_id=${result.data.projectTemplateId}`
-      if (!isEphemeral && parentPlan) {
-        // associate selected tags to child plan
-        planOptions.tagMapping = {
-          global: [],
-          linkTags: {
-            geographyTag: 'service_area',
-            serviceAreaIds: []
+      .then((address) => {
+        planOptions.areaName = address
+        // Get the configuration for this user - this will contain the default project template to use
+        return AroHttp.get(`/service/auth/users/${loggedInUserId}/configuration`)
+      })
+      .then((result) => {
+        let apiEndpoint = `/service/v1/plan?project_template_id=${result.data.projectTemplateId}`
+        if (!isEphemeral && parentPlan) {
+          // associate selected tags to child plan
+          planOptions.tagMapping = {
+            global: [],
+            linkTags: {
+              geographyTag: 'service_area',
+              serviceAreaIds: []
+            }
           }
-        }
 
-        planOptions.tagMapping.global = currentPlanTags.map(tag => tag.id)
-        planOptions.tagMapping.linkTags.serviceAreaIds = currentPlanServiceAreaTags.map(tag => tag.id)
-        // A parent plan is specified - append it to the POST url
-        apiEndpoint += `&branch_plan=${parentPlan.id}`
-      }
-      return AroHttp.post(apiEndpoint, planOptions)
-    })
-    .catch((err) => console.error(err))
+          planOptions.tagMapping.global = currentPlanTags.map(tag => tag.id)
+          planOptions.tagMapping.linkTags.serviceAreaIds = currentPlanServiceAreaTags.map(tag => tag.id)
+          // A parent plan is specified - append it to the POST url
+          apiEndpoint += `&branch_plan=${parentPlan.id}`
+        }
+        return AroHttp.post(apiEndpoint, planOptions)
+      })
+      .catch((err) => console.error(err))
   }
 }
 
@@ -174,7 +152,7 @@ function loadPlan (planId) {
   return dispatch => {
     trackEvent('LOAD_PLAN', 'CLICK', 'PlanID', planId)
     dispatch(selectedDisplayMode('VIEW'))
-    var plan = null
+    let plan = null
     return AroHttp.get(`/service/v1/plan/${planId}`)
       .then((result) => {
         plan = result.data
@@ -182,15 +160,15 @@ function loadPlan (planId) {
       })
       .then((address) => {
         plan.areaName = address
-        var mapObject = {
+        const mapObject = {
           latitude: plan.latitude,
           longitude: plan.longitude,
           zoom: plan.zoomIndex
         }
-        //Due to unable to subscribe requestSetMapCenter as of now used Custom Event Listener
+        // Due to unable to subscribe requestSetMapCenter as of now used Custom Event Listener
         // https://www.sitepoint.com/javascript-custom-events/
-        var event = new CustomEvent('mapChanged', { detail : mapObject});
-        window.dispatchEvent(event);
+        const event = new CustomEvent('mapChanged', { detail: mapObject})
+        window.dispatchEvent(event)
 
         return Promise.resolve()
       })
@@ -202,14 +180,14 @@ function loadPlan (planId) {
 
 function makeCurrentPlanNonEphemeral (planName, planType) {
   return (dispatch, getState) => {
-    
-    const state = getState()
-    var plan = state.plan.activePlan
-    var defaultPlanCoordinates = state.plan.defaultPlanCoordinates
-    var currentPlanTags = state.toolbar.currentPlanTags
-    var currentPlanServiceAreaTags = state.toolbar.currentPlanServiceAreaTags
 
-    var newPlan = JSON.parse(JSON.stringify(plan))
+    const state = getState()
+    const plan = state.plan.activePlan
+    const defaultPlanCoordinates = state.plan.defaultPlanCoordinates
+    const currentPlanTags = state.toolbar.currentPlanTags
+    const currentPlanServiceAreaTags = state.toolbar.currentPlanServiceAreaTags
+
+    const newPlan = JSON.parse(JSON.stringify(plan))
     newPlan.name = planName
     newPlan.ephemeral = false
     newPlan.latitude = defaultPlanCoordinates.latitude
@@ -248,28 +226,27 @@ function copyCurrentPlanTo (planName, planType) {
   return (dispatch, getState) => {
 
     const state = getState()
-    var loggedInUser = state.user.loggedInUser
-    var plan = state.plan.activePlan
+    const plan = state.plan.activePlan
 
-    var newPlan = JSON.parse(JSON.stringify(plan))
+    const newPlan = JSON.parse(JSON.stringify(plan))
     newPlan.name = planName
     newPlan.ephemeral = false
 
     // Only keep the properties needed to create a plan
-    var validProperties = new Set(['projectId', 'areaName', 'latitude', 'longitude', 'ephemeral', 'name', 'zoomIndex', 'planType'])
-    var keysInPlan = Object.keys(newPlan)
+    const validProperties = new Set(['projectId', 'areaName', 'latitude', 'longitude', 'ephemeral', 'name', 'zoomIndex', 'planType'])
+    const keysInPlan = Object.keys(newPlan)
     keysInPlan.forEach((key) => {
       if (!validProperties.has(key)) {
         delete newPlan[key]
       }
     })
-    var userId = loggedInUser.id
-    var url = `/service/v1/plan-command/copy?source_plan_id=${plan.id}&is_ephemeral=${newPlan.ephemeral}&name=${newPlan.name}`
+
+    const url = `/service/v1/plan-command/copy?source_plan_id=${plan.id}&is_ephemeral=${newPlan.ephemeral}&name=${newPlan.name}`
 
     return AroHttp.post(url, {})
       .then((result) => {
         if (result.status >= 200 && result.status <= 299) {
-          var center = map.getCenter()
+          const center = map.getCenter()
           result.data.latitude = center.lat()
           result.data.longitude = center.lng()
           result.data.planType = planType || 'UNDEFINED'
@@ -304,8 +281,8 @@ function trackEvent (category, action, label, value) {
 
 function getAddressFor (latitude, longitude) {
   return new Promise((resolve, reject) => {
-    var geocoder = new google.maps.Geocoder()
-    var address = ''
+    const geocoder = new google.maps.Geocoder()
+    let address = ''
     geocoder.geocode({ 'location': new google.maps.LatLng(latitude, longitude) }, function (results, status) {
       if (status === 'OK') {
         if (results[1]) {
@@ -321,10 +298,10 @@ function getAddressFor (latitude, longitude) {
   })
 }
 
- // Plan search - tags
- function loadListOfPlanTags () {
+// Plan search - tags
+function loadListOfPlanTags () {
   return dispatch => {
-    var promises = [
+    const promises = [
       AroHttp.get(`/service/tag-mapping/global-tags`)
     ]
 
@@ -339,27 +316,23 @@ function getAddressFor (latitude, longitude) {
 }
 
 function setCurrentPlanTags (currentPlanTags){
-  return dispatch => {
-    dispatch({
-      type: Actions.TOOL_BAR_SET_CURRENT_PLAN_TAGS,
-      payload: currentPlanTags
-    })
+  return {
+    type: Actions.TOOL_BAR_SET_CURRENT_PLAN_TAGS,
+    payload: currentPlanTags
   }
 }
 
 function setCurrentPlanServiceAreaTags (currentPlanServiceAreaTags){
-  return dispatch => {
-    dispatch({
-      type: Actions.TOOL_BAR_SET_CURRENT_PLAN_SA_TAGS,
-      payload: currentPlanServiceAreaTags
-    })
+  return {
+    type: Actions.TOOL_BAR_SET_CURRENT_PLAN_SA_TAGS,
+    payload: currentPlanServiceAreaTags
   }
 }
 
 
 function loadServiceLayers () {
-  var serviceLayers = []
-  var nameToServiceLayers = {}
+  let serviceLayers = []
+  let nameToServiceLayers = {}
   return dispatch => {
     AroHttp.get('/service/odata/ServiceLayer?$select=id,name,description')
       .then((response) => {
@@ -377,36 +350,36 @@ function loadServiceLayers () {
   }
 }
 
-function loadListOfSAPlanTags (dataItems, filterObj, ishardreload) {
+function loadListOfSAPlanTags (dataItems, filterObj, isHardReload) {
   return (dispatch, getState) => {
 
     const state = getState()
-    var nameToServiceLayers = state.toolbar.nameToServiceLayers
-    var listOfServiceAreaTags = state.toolbar.listOfServiceAreaTags
+    const nameToServiceLayers = state.toolbar.nameToServiceLayers
+    const listOfServiceAreaTags = state.toolbar.listOfServiceAreaTags
 
     const MAX_SERVICE_AREAS_FROM_ODATA = 10
-    // var filter = "layer/id eq 1"
-    var libraryItems = []
-    var filter = ''
+    // let filter = "layer/id eq 1"
+    let libraryItems = []
+    let filter = ''
 
-    var selectedServiceLayerLibraries = dataItems && dataItems.service_layer && dataItems.service_layer.selectedLibraryItems
+    const selectedServiceLayerLibraries = dataItems && dataItems.service_layer && dataItems.service_layer.selectedLibraryItems
     // ToDo: Do not select service layers by name
     // we need a change in service GET /v1/library-entry needs to send id, identifier is not the same thing
     if (selectedServiceLayerLibraries) libraryItems = selectedServiceLayerLibraries.map(selectedLibraryItem => selectedLibraryItem.name)
     if (libraryItems.length > 0) {
       // Filter using selected serviceLayer id
-      var layerfilter = libraryItems.map(libraryName => `layer/id eq ${nameToServiceLayers[libraryName].id}`).join(' or ')
+      const layerfilter = libraryItems.map(libraryName => `layer/id eq ${nameToServiceLayers[libraryName].id}`).join(' or ')
       filter = filter ? filter.concat(` and (${layerfilter})`) : `${layerfilter}`
     }
 
     filter = filterObj ? filter.concat(` and (substringof(code,'${filterObj}') or substringof(name,'${filterObj}'))`) : filter
-    if (ishardreload) { 
+    if (isHardReload) { 
       dispatch({
         type: Actions.TOOL_BAR_LIST_OF_SERVICE_AREA_TAGS,
         payload: []
       })
     }
-    if (filterObj || listOfServiceAreaTags.length == 0) {
+    if (filterObj || listOfServiceAreaTags.length === 0) {
       AroHttp.get(`/service/odata/ServiceAreaView?$select=id,code,name&$filter=${filter}&$orderby=id&$top=${MAX_SERVICE_AREAS_FROM_ODATA}`)
         .then((results) => {
           dispatch({
@@ -421,7 +394,7 @@ function loadListOfSAPlanTags (dataItems, filterObj, ishardreload) {
 function loadListOfSAPlanTagsById (listOfServiceAreaTags, promises) {
   return dispatch => {
     if (promises) {
-      var listOfServiceAreaTagsValue
+      let listOfServiceAreaTagsValue
       return Promise.all(promises)
         .then((results) => {
           results.forEach((result) => {
@@ -445,26 +418,22 @@ function removeDuplicates (myArr, prop) {
 }
 
 function getTagColour (tag) {
-  return dispatch => {
+  return () => {
     return hsvToRgb(tag.colourHue, 0.5, 0.5)
   }
 }
 
 function setSelectedHeatMapOption (selectedHeatMapOption){
-  return dispatch => {
-    dispatch({
-      type: Actions.TOOL_BAR_SET_HEAT_MAP_OPTION,
-      payload: selectedHeatMapOption
-    })
+  return {
+    type: Actions.TOOL_BAR_SET_HEAT_MAP_OPTION,
+    payload: selectedHeatMapOption
   }
 }
 
 function setViewSetting (viewSetting) {
-  return dispatch => {
-    dispatch({
-      type: Actions.TOOL_BAR_SET_VIEW_SETTING,
-      payload: viewSetting
-    })
+  return {
+    type: Actions.TOOL_BAR_SET_VIEW_SETTING,
+    payload: viewSetting
   }
 }
 

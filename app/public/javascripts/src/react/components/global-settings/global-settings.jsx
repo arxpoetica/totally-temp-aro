@@ -1,9 +1,8 @@
 import React, { Component } from 'react'
-import reduxStore from '../../../redux-store'
-import wrapComponentWithProvider from '../../common/provider-wrapped-component'
+import { connect } from 'react-redux'
 import PlanActions from '../plan/plan-actions'
-import './global-settings.css';
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import './global-settings.css'
+import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap'
 import GlobalsettingsActions from './globalsettings-action'
 import ResourceActions from '../resource-editor/resource-actions'
 
@@ -22,7 +21,7 @@ import Broadcast from './broadcast.jsx'
 
 export class GlobalSettings extends Component {
   constructor (props) {
-    super(props);
+    super(props)
 
     this.views = Object.freeze({
       GLOBAL_SETTINGS: 'Global Settings',
@@ -46,136 +45,163 @@ export class GlobalSettings extends Component {
       userIdForSettingsEdit: '',
       resourceEditorProps: '',
       dataUploadProps: '',
-      dataSelectionID: ''
-    }    
+      dataSelectionID: '',
+    }
 
-    this.toggle = this.toggle.bind(this);
-    this.openUserSettingsForUserId = this.openUserSettingsForUserId.bind(this);
+    this.toggle = this.toggle.bind(this)
+    this.openUserSettingsForUserId = this.openUserSettingsForUserId.bind(this)
   }
 
   static getDerivedStateFromProps(nextProps, prevState) {
 
-    if(nextProps.currentViewProps !== undefined){
-      if((nextProps.currentViewProps === 'Resource Managers' || nextProps.currentViewProps === 'Upload Data Resources') && prevState.currentView === ''){
+    if (nextProps.currentViewProps !== undefined){
+      if ((nextProps.currentViewProps === 'Resource Managers'
+        || nextProps.currentViewProps === 'Upload Data Resources'
+        || nextProps.currentViewProps === 'My Account') && prevState.currentView === '') {
         return {
           currentView: nextProps.currentViewProps,
           resourceEditorProps: nextProps.resourceEditorProps,
-          dataUploadProps:  nextProps.dataUploadProps,
+          dataUploadProps: nextProps.dataUploadProps,
           dataSelectionID: nextProps.dataSelectionID,
-        };
+        }
       } else {
         return {
           currentView: prevState.currentView,
-        };
+        }
       }
-    } else if(prevState.currentView === ''){
+    } else if (prevState.currentView === ''){
       return {
         currentView: 'Global Settings'
-      };
+      }
     } else{
       return {
         currentView: prevState.currentView
-      };
+      }
     }
   }
 
   render () {
-    const {loggedInUser, isRrmManager} = this.props
-    const {currentView, userIdForSettingsEdit} = this.state
+    const { loggedInUser, isRrmManager, selectedResourceNameProps } = this.props
+    const { currentView, userIdForSettingsEdit, modal, dataUploadProps, dataSelectionID,
+      resourceEditorProps } = this.state
 
     return(
-      <div>
-        <Modal isOpen={this.state.modal} toggle={this.toggle} 
-        size={ currentView === this.views.RESOURCE_EDITOR && isRrmManager === true 
-                ? 'xl'
-                : currentView === this.views.MANAGE_USERS || currentView === this.views.REPORTS_EDITOR ||
-                  currentView === this.views.DATA_UPLOAD || currentView === this.views.RESOURCE_EDITOR
-                  ? 'lg'
-                  : 'md'
-              }
-        >
-        <ModalHeader toggle={this.toggle}>
-          {currentView === this.views.RESOURCE_EDITOR
-            ? this.props.modalTitle
-            : currentView
+      <>
+        <Modal isOpen={modal} toggle={this.toggle}
+          size={ currentView === this.views.RESOURCE_EDITOR && isRrmManager === true
+            ? 'xl'
+            : currentView === this.views.MANAGE_USERS || currentView === this.views.REPORTS_EDITOR ||
+              currentView === this.views.DATA_UPLOAD || currentView === this.views.RESOURCE_EDITOR
+              ? 'lg'
+              : 'md'
           }
+        >
+          <ModalHeader toggle={this.toggle}>
+            {currentView === this.views.RESOURCE_EDITOR
+              ? this.props.modalTitle
+              : currentView
+            }
           </ModalHeader>
           <ModalBody style={{height: '500px',overflow: 'auto'}}>
 
             {currentView === this.views.GLOBAL_SETTINGS &&
               <div id="global-settings">
-                <button className="btn btn-light settings-btn" onClick={(e) => this.handleChangeView(this.views.MY_ACCOUNT)}>
-                  <i className="fa fa-2x fa-user"></i>
+                <button
+                  className="btn btn-light settings-btn"
+                  onClick={() => this.handleChangeView(this.views.MY_ACCOUNT)}>
+                  <i className="fa fa-2x fa-user" />
                   <br/>My Account
                 </button>
-                
-                <button className="btn btn-light settings-btn" onClick={(e) => this.handleChangeView(this.views.MULTIFACTOR_AUTHENTICATION)}>
-                  <i className="fa fa-2x fa-user-shield"></i>
+
+                <button
+                  className="btn btn-light settings-btn"
+                  onClick={() => this.handleChangeView(this.views.MULTIFACTOR_AUTHENTICATION)}>
+                  <i className="fa fa-2x fa-user-shield" />
                   <br/>Multi Factor Authentication
                 </button>
 
                 {loggedInUser.isAdministrator &&
-                  <button className="btn btn-light settings-btn" onClick={(e) => this.handleChangeView(this.views.MANAGE_USERS)}>
-                    <i className="fa fa-2x fa-users"></i>
+                  <button
+                    className="btn btn-light settings-btn"
+                    onClick={() => this.handleChangeView(this.views.MANAGE_USERS)}>
+                    <i className="fa fa-2x fa-users" />
                     <br/>Manage Users
                   </button>
                 }
 
                 {loggedInUser.isAdministrator &&
-                  <button className="btn btn-light settings-btn" onClick={(e) => this.handleChangeView(this.views.MANAGE_GROUPS)}>
-                    <i className="fa fa-2x fa-users"></i>
+                  <button
+                    className="btn btn-light settings-btn"
+                    onClick={() => this.handleChangeView(this.views.MANAGE_GROUPS)}>
+                    <i className="fa fa-2x fa-users" />
                     <br/>Manage Groups
                   </button>
                 }
 
-                <button className="btn btn-light settings-btn" onClick={(e) => this.openUserSettingsForUserId(loggedInUser.id, this.views.USER_SETTINGS)}>
-                  <i className="fa fa-2x fa-cogs"></i>
+                <button
+                  className="btn btn-light settings-btn"
+                  onClick={() => this.openUserSettingsForUserId(loggedInUser.id, this.views.USER_SETTINGS)}>
+                  <i className="fa fa-2x fa-cogs" />
                   <br/>User Settings
                 </button>
 
                 {loggedInUser.isAdministrator &&
-                  <button className="btn btn-light settings-btn" onClick={(e) => this.handleChangeView(this.views.TAG_MANAGER)}>
-                    <i className="fa fa-2x fa-tags"></i>
+                  <button
+                    className="btn btn-light settings-btn"
+                    onClick={() => this.handleChangeView(this.views.TAG_MANAGER)}>
+                    <i className="fa fa-2x fa-tags" />
                     <br/>Tag Manager
                   </button>
                 }
 
-                <button className="btn btn-light settings-btn notification" onClick={(e) => this.handleChangeView(this.views.RELEASE_NOTES)}>
-                  <i className="fa fa-2x fa-bell"></i>
+                <button
+                  className="btn btn-light settings-btn notification"
+                  onClick={() => this.handleChangeView(this.views.RELEASE_NOTES)}>
+                  <i className="fa fa-2x fa-bell" />
                   <br/>Release Notes
                 </button>
 
                 {loggedInUser.isAdministrator &&
-                  <button className="btn btn-light settings-btn" onClick={(e) => this.handleChangeView(this.views.CONFIGURATION_EDITOR)}>
-                    <i className="fa fa-2x fa-sliders-h"></i>
+                  <button
+                    className="btn btn-light settings-btn"
+                    onClick={() => this.handleChangeView(this.views.CONFIGURATION_EDITOR)}>
+                    <i className="fa fa-2x fa-sliders-h" />
                     <br/>Configuration Editor
                   </button>
                 }
 
                 {loggedInUser.isAdministrator &&
-                  <button className="btn btn-light settings-btn" onClick={(e) => this.handleChangeView(this.views.REPORTS_EDITOR)}>
-                    <i className="fas fa-2x fa-file-download"></i>
+                  <button
+                    className="btn btn-light settings-btn"
+                    onClick={() => this.handleChangeView(this.views.REPORTS_EDITOR)}>
+                    <i className="fas fa-2x fa-file-download" />
                     <br/>Reports Editor
                   </button>
                 }
 
                 {loggedInUser.isAdministrator &&
-                  <button className="btn btn-light settings-btn" onClick={(e) => this.handleChangeView(this.views.DATA_UPLOAD)}>
-                    <i className="fa fa-2x fa-upload"></i>
+                  <button
+                    className="btn btn-light settings-btn"
+                    onClick={() => this.handleChangeView(this.views.DATA_UPLOAD)}>
+                    <i className="fa fa-2x fa-upload" />
                     <br/>Data Upload
                   </button>
                 }
 
                 {loggedInUser.isAdministrator &&
-                  <button className="btn btn-light settings-btn" onClick={(e) => this.handleChangeView(this.views.RESOURCE_EDITOR)}>
-                    <i className="fa fa-2x fa-edit"></i>
+                  <button
+                    className="btn btn-light settings-btn"
+                    onClick={() => this.handleChangeView(this.views.RESOURCE_EDITOR)}>
+                    <i className="fa fa-2x fa-edit" />
                     <br/>Resource Editor
                   </button>
                 }
 
                 {loggedInUser.isAdministrator &&
-                  <button className="btn btn-light settings-btn" onClick={(e) => this.handleChangeView(this.views.BROADCAST)}>
-                    <i className="fa fa-2x fa-bullhorn"></i>
+                  <button
+                    className="btn btn-light settings-btn"
+                    onClick={() => this.handleChangeView(this.views.BROADCAST)}>
+                    <i className="fa fa-2x fa-bullhorn" />
                     <br/>BroadCast
                   </button>
                 }
@@ -212,14 +238,18 @@ export class GlobalSettings extends Component {
               <ReportModuleList/>
             }
             {currentView === this.views.DATA_UPLOAD &&
-              <DataUpload selectedDataSourceName={this.state.dataUploadProps}
-                          selectedDataTypeId={this.state.dataSelectionID}
-                          onSave={() => {this.toggle()}}
-                          />
+              <DataUpload
+                selectedDataSourceName={dataUploadProps}
+                selectedDataTypeId={dataSelectionID}
+                onSave={() => {this.toggle()}}
+              />
             }
             {currentView === this.views.RESOURCE_EDITOR &&
-              <ResourceEditor filterText={this.state.resourceEditorProps} selectedResourceName={this.props.selectedResourceNameProps}/>
-            }    
+              <ResourceEditor
+                filterText={resourceEditorProps}
+                selectedResourceName={selectedResourceNameProps}
+              />
+            }
             {currentView === this.views.BROADCAST &&
               <Broadcast/>
             }
@@ -228,29 +258,31 @@ export class GlobalSettings extends Component {
           <ModalFooter>
             {currentView === this.views.GLOBAL_SETTINGS
               ? <Button color="primary" onClick={this.toggle}>Close</Button>
-              : <Button color="primary" onClick={(e) => this.handleChangeView(this.views.GLOBAL_SETTINGS)}>Back</Button>
+              : <Button color="primary" onClick={() => this.handleChangeView(this.views.GLOBAL_SETTINGS)}>Back</Button>
             }
           </ModalFooter>
         </Modal>
-      </div>
+      </>
     )
   }
 
   openUserSettingsForUserId(userId, currentView){
-    this.setState({ userIdForSettingsEdit: userId, currentView: currentView });
+    this.setState({ userIdForSettingsEdit: userId, currentView })
   }
 
   handleChangeView(currentView){
-    this.setState({ currentView: currentView, resourceEditorProps: 'all', dataUploadProps : 'location', dataSelectionID: 1});
+    this.setState({ currentView, resourceEditorProps: 'all',
+      dataUploadProps: 'location', dataSelectionID: 1})
     this.props.setIsRrmManager(false)
   }
-  
+
   toggle() {
-    this.setState({ modal: !this.state.modal});
+    this.setState({ modal: !this.state.modal})
     this.props.setIsResourceSelection(false)
     this.props.setIsDataSelection(false)
     this.props.setShowGlobalSettings(false)
     this.props.setIsRrmManager(false)
+    if (this.props.currentViewProps === this.views.MY_ACCOUNT) { this.props.openAccountSettingsModal(false) }
   }
 }
 
@@ -267,5 +299,5 @@ const mapDispatchToProps = (dispatch) => ({
   setIsRrmManager: (status) => dispatch(ResourceActions.setIsRrmManager(status)),
 })
 
-const GlobalSettingsComponent = wrapComponentWithProvider(reduxStore, GlobalSettings, mapStateToProps, mapDispatchToProps)
+const GlobalSettingsComponent = connect(mapStateToProps, mapDispatchToProps)(GlobalSettings)
 export default GlobalSettingsComponent

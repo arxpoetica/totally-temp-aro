@@ -32,10 +32,15 @@ function loadAuthPermissions () {
 function updateUserAccount (user) {
   return dispatch => {
     AroHttp.post('/settings/update_settings', user)
-      .then(result => dispatch({
-        type: Actions.USER_UPDATE_USER,
-        payload: user
-      }))
+      .then(result => {
+        dispatch({
+          type: Actions.USER_UPDATE_USER,
+          payload: user
+        })
+        if (result.status === 200) {
+          dispatch(GlobalsettingsActions.customErrorHandle('Success', 'Updated Successfully', 'success'))
+        }
+      })
       .catch((err) =>  {
         // TODO: we have to come up with a strategy of global error handler
         // and success message toast rather then message boxes

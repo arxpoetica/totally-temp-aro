@@ -38,6 +38,8 @@ import dataUpload from '../react/components/data-upload/data-upload-reducer'
 import toolbar from '../react/components/header/tool-bar-reducer'
 import viewSettings from '../react/components/view-settings/view-settings-reducer'
 import notification from '../react/components/notification/notification-reducer'
+import expertMode from '../react/components/sidebar/analysis/expert-mode/expert-mode-reducer'
+import roicReports from '../react/components/sidebar/analysis/roic-reports/roic-reports-reducer'
 
 const logger = createLogger({
   level: 'info',
@@ -72,7 +74,9 @@ let reducer = combineReducers({
   dataUpload,
   notification,
   toolbar,
-  viewSettings
+  viewSettings,
+  expertMode,
+  roicReports,
 })
 
 // Add support for Redux devtools extension. Yes, even in production.

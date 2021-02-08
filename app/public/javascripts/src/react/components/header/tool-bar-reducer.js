@@ -2,8 +2,8 @@ import Actions from '../../common/actions'
 
 const defaultState = {
   planInputsModal: false,
-  rSelectedDisplayMode:'VIEW',
-  rActiveViewModePanel:'LOCATION_INFO',
+  rSelectedDisplayMode: 'VIEW',
+  rActiveViewModePanel: 'LOCATION_INFO',
   selectedToolBarAction: null,
   selectedTargetSelectionMode: 0,
   isRulerEnabled: false,
@@ -189,57 +189,57 @@ function ToolBarReducer (state = defaultState, action) {
 
     case Actions.TOOL_BAR_SET_SAVE_PLAN_AS:
       return setPlanInputsModal(state, action.payload)
-      
+
     case Actions.TOOL_BAR_SET_SELECTED_DISPLAY_MODE:
-      return setSelectedDisplayMode(state, action.payload) 
+      return setSelectedDisplayMode(state, action.payload)
 
     case Actions.TOOL_BAR_SET_ACTIVE_VIEW_MODE_PANEL:
-      return setActiveViewModePanel(state, action.payload)   
-      
+      return setActiveViewModePanel(state, action.payload)
+
     case Actions.TOOL_BAR_SELECTED_TOOL_BAR_ACTION:
-      return setSelectedToolBarAction(state, action.payload) 
+      return setSelectedToolBarAction(state, action.payload)
 
     case Actions.TOOL_BAR_SELECTED_TARGET_SELECTION_MODE:
-      return setSelectedTargetSelectionMode(state, action.payload) 
-      
+      return setSelectedTargetSelectionMode(state, action.payload)
+
     case Actions.TOOL_BAR_IS_RULER_ENABLED:
       return setIsRulerEnabled(state, action.payload)
-      
+
     case Actions.TOOL_BAR_IS_VIEW_SETTINGS_ENABLED:
       return setIsViewSettingsEnabled(state, action.payload)
-      
+
     case Actions.TOOL_BAR_SHOW_DIRECTED_CABLE:
-      return setShowDirectedCable(state, action.payload)  
-      
+      return setShowDirectedCable(state, action.payload)
+
     case Actions.TOOL_BAR_SHOW_EQUIPMENT_LABELS:
-      return setShowEquipmentLabelsChanged(state, action.payload) 
-      
+      return setShowEquipmentLabelsChanged(state, action.payload)
+
     case Actions.TOOL_BAR_SHOW_FIBER_SIZE:
-      return setShowFiberSize(state, action.payload) 
+      return setShowFiberSize(state, action.payload)
 
     case Actions.TOOL_BAR_SET_APP_CONFIGURATION:
-      return setAppConfiguration(state, action.payload) 
-      
+      return setAppConfiguration(state, action.payload)
+
     case Actions.TOOL_BAR_LIST_OF_PLAN_TAGS:
-      return setLoadListOfPlanTags(state, action.payload) 
-      
+      return setLoadListOfPlanTags(state, action.payload)
+
     case Actions.TOOL_BAR_SET_CURRENT_PLAN_TAGS:
-      return setCurrentPlanTags(state, action.payload) 
-      
+      return setCurrentPlanTags(state, action.payload)
+
     case Actions.TOOL_BAR_SET_CURRENT_PLAN_SA_TAGS:
-      return setCurrentPlanServiceAreaTags(state, action.payload)       
+      return setCurrentPlanServiceAreaTags(state, action.payload)
 
     case Actions.TOOL_BAR_LOAD_SERVICE_LAYERS:
-      return setLoadServiceLayers(state, action.payload)  
+      return setLoadServiceLayers(state, action.payload)
 
     case Actions.TOOL_BAR_LIST_OF_SERVICE_AREA_TAGS:
       return setLoadListOfSAPlanTags(state, action.payload)
-        
+
     case Actions.TOOL_BAR_SET_HEAT_MAP_OPTION:
       return setSelectedHeatMapOption(state, action.payload)
-      
+
     case Actions.TOOL_BAR_SET_VIEW_SETTING:
-      return setViewSetting(state, action.payload)       
+      return setViewSetting(state, action.payload)
 
     default:
       return state

@@ -29,7 +29,7 @@ export class NetworkOptimizationInput extends Component {
       <div style={{ paddingRight: '16px', paddingTop: '8px' }}>
         <NetworkOptimizationButton
           onRun={() => this.requestRunOptimization()}
-          onModify={() => this.props.onModify()}
+          onModify={() => this.onModifyOptimization()}
           onCancel={() => this.onCancelOptimization()}
           isCanceling={this.props.isCanceling}
         />
@@ -131,6 +131,10 @@ export class NetworkOptimizationInput extends Component {
   areControlsEnabled () {
     return (this.props.planState === AngConstants.PLAN_STATE.START_STATE) || (this.props.planState === AngConstants.PLAN_STATE.INITIALIZED)
   }
+
+  onModifyOptimization () {
+    this.props.modifyOptimization(this.props.activePlan)
+  }
 }
 
 // NetworkOptimizationInput.propTypes = {
@@ -147,14 +151,16 @@ const mapStateToProps = (state) => ({
   modifiedNetworkOptimizationInput: networkOptimizationInputSelector(state),
   allSelectionModes: getAllSelectionModes(state),
   activeSelectionModeId: state.selection.activeSelectionMode.id,
-  transaction: state.planEditor.transaction
+  transaction: state.planEditor.transaction,
+  activePlan: state.plan.activePlan,
 })
 
 const mapDispatchToProps = dispatch => ({
   commitTransaction: transactionId => { return dispatch(PlanEditorActions.commitTransaction(transactionId)) },
   runOptimization: (inputs, userId) => dispatch(NetworkOptimizationActions.runOptimization(inputs, userId)),
   cancelOptimization: (planId, optimizationId) => dispatch(NetworkOptimizationActions.cancelOptimization(planId, optimizationId)),
-  setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId))
+  setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId)),
+  modifyOptimization: (activePlan) => dispatch(NetworkOptimizationActions.modifyOptimization(activePlan)),
 })
 
 const NetworkOptimizationInputComponent = wrapComponentWithProvider(reduxStore, NetworkOptimizationInput, mapStateToProps, mapDispatchToProps)

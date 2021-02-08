@@ -1,3 +1,5 @@
+import ToolBarActions from '../../../react/components/header/tool-bar-actions'
+
 class PlanSearchController {
   constructor ($http, $timeout, $ngRedux, state) {
     this.$http = $http
@@ -66,7 +68,8 @@ class PlanSearchController {
 
       promises.push(this.$http.get(`/service/odata/servicearea?$select=id,code&$filter=${filter}&$orderby=id&$top=10000`))
     }
-
+    // To set ServiceArea based on Plan Tags in redux
+    this.loadListOfSAPlanTagsById(this.listOfServiceAreaTags, promises)
     return this.state.StateViewMode.loadListOfSAPlanTagsById(this.state, promises)
       .then((result) => {
         result.forEach((serviceArea) => this.idToServiceAreaCode[serviceArea.id] = serviceArea.code)
@@ -227,12 +230,15 @@ class PlanSearchController {
 
   mapStateToThis (reduxState) {
     return {
-      dataItems: reduxState.plan.dataItems
+      dataItems: reduxState.plan.dataItems,
+      listOfServiceAreaTags: reduxState.toolbar.listOfServiceAreaTags,
     }
   }
 
   mapDispatchToTarget (dispatch) {
-    return { }
+    return {
+      loadListOfSAPlanTagsById: (listOfServiceAreaTags, promises) => dispatch(ToolBarActions.loadListOfSAPlanTagsById(listOfServiceAreaTags, promises)),
+     }
   }
 
   $onDestroy () {
