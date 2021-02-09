@@ -298,15 +298,15 @@ export class ResourceEditor extends Component {
 								{
 									this.actionsECD.map(( listButton, buttonKey ) => {
 										return (
-										<React.Fragment key={buttonKey}>
-											<button
-												className="dropdown-item"
-												type="button"
-												onClick={() => listButton.callBack(listValue, rowKey)}
-											>
-												{listButton.buttonText}
-											</button>
-										</React.Fragment>
+											<React.Fragment key={buttonKey}>
+												<button
+													className="dropdown-item"
+													type="button"
+													onClick={() => listButton.callBack(listValue, rowKey)}
+												>
+													{listButton.buttonText}
+												</button>
+											</React.Fragment>
 										)
 									})
 								}

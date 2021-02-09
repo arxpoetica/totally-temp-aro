@@ -26,7 +26,9 @@ export class PlanResourceSelection extends Component {
         getResourceItemsArray : Object.values(nextProps.resourceItems),
         openResourceSelection: nextProps.isResourceSelection
       }
-    } else return null
+    } else {
+      return null
+    }
   }
 
   render () {
@@ -68,7 +70,7 @@ export class PlanResourceSelection extends Component {
                 </div>
               </td>
             </tr>
-          )}     
+          )}
           </tbody>
         </table>
         {this.state.openResourceSelection &&

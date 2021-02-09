@@ -28,18 +28,18 @@ function getResourceManagers (selectedResourceKey) {
       return
     }
 
-    let props = ''
+    let params = ''
     if (searchText.trim() !== '') {
-      props += `&name=${searchText}`
+      params += `&name=${searchText}`
     }
     if (selectedResourceKey && (selectedResourceKey !== 'all')) {
-      props += `&resourceType=${selectedResourceKey}`
+      params += `&resourceType=${selectedResourceKey}`
     }
-    if (props !== '') {
-      props = '?' + props
+    if (params !== '') {
+      params = '?' + params
     }
 
-    AroHttp.get(`service/v2/resource-manager${props}`)
+    AroHttp.get(`service/v2/resource-manager${params}`)
     .then(result => dispatch({
       type: Actions.RESOURCE_EDITOR_SET_RESOURCE_MANAGERS,
       payload: result.data

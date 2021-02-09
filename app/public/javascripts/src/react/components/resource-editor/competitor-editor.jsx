@@ -46,7 +46,9 @@ export class CompetitorEditor extends Component {
       return {
         strengthsById: nextProps.loadStrength.strengthsById,
       }
-    } else return null
+    } else {
+      return null
+    }
   }
 
   render () {
