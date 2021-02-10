@@ -50,6 +50,7 @@ services:
             - db:arodb
             - service:aro-service
         environment:
+            NODE_ENV: development
             PGHOST: arodb
             PGPASSWORD: aro
             PGUSER: aro
