@@ -233,7 +233,7 @@ export class ResourceEditor extends Component {
 							<div className="form-group row justify-content-end">
 								<div className="col-sm-6">
 									<button
-										onClick={(event) => this.handleCanMakeNewFilter(this.state.selectedResourceName, e)}
+										onClick={() => this.handleCanMakeNewFilter(this.state.selectedResourceName)}
 										value={this.state.selectedResourceName}
 										className="btn btn-light btn-block"
 									>
