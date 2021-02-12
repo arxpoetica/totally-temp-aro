@@ -1,11 +1,14 @@
-var path = require('path')
+const path = require('path')
+const dev = process.env.NODE_ENV === 'development'
 
 module.exports = {
   entry: path.resolve(__dirname, './public/javascripts/src/components/index.js'),
   output: {
     path: path.resolve(__dirname, 'public/javascripts/lib'),
-    filename: 'aro-bundle.js'
+    filename: 'aro-bundle.js',
   },
+  mode: dev ? 'development' : 'production',
+  devtool: 'source-map',
   module: {
     rules: [
       {
