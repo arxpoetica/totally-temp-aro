@@ -126,7 +126,13 @@ export class RateReachDistanceEditor extends Component {
                       let metersToLengthUnits = this.props.convertMetersToLengthUnits(rateReachGroupMap[selectedTechnologyType].matrixMap[techIndex].value[index].distance);
                       return (
                         <td key={techIndex} style={{minWidth: '100px'}}>
-                          <input className="form-control" onChange={(e)=>this.handleRateReachGroupMapChange(e, selectedTechnologyType, index, techIndex)} value={metersToLengthUnits}/>
+                          
+                          <div className="input-group mb-3">
+                            <input className="form-control border-right-0" onChange={(e)=>this.handleRateReachGroupMapChange(e, selectedTechnologyType, index, techIndex)} value={metersToLengthUnits}/>
+                            <div className="input-group-prepend">
+                              <span className="input-group-text text-muted border-left-0 bg-white">ft</span>
+                            </div>
+                          </div>
                         </td>
                       )
                     })}
