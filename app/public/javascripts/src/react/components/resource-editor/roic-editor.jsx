@@ -272,7 +272,7 @@ export class RoicEditor extends Component {
                           <div className="ei-items-contain">
                             <div className="ei-property-item">
                               <div className="ei-property-label">
-                                Terminal Value Strategy Type
+                                Plan Terminal Value Type
                               </div>
                               <div>
                                 <select
@@ -304,6 +304,46 @@ export class RoicEditor extends Component {
                                     .financialConstraints.terminalValueStrategy.value
                                   }
                                   onChange={(event) => {this.handleConfigChange(event)}}
+                                  className="form-control input-sm"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                          <div className="ei-items-contain">
+                            <div className="ei-property-item">
+                              <div className="ei-property-label">
+                                BAU Terminal Value Type
+                              </div>
+                              <div>
+                                <select
+                                  name="terminalValueStrategyType"
+                                  className="form-control"
+                                  onChange={(event) => {this.handleBAUChange(event)}}
+                                  value={
+                                    roicManagerConfiguration.roicSettingsConfiguration
+                                    .financialConstraints.bauTerminalValueStrategy.terminalValueStrategyType
+                                  }
+                                >
+                                  {Object.entries(this.terminalValueStrategyTypes).map(([itemKey, item]) => {
+                                    return (
+                                      <option key={item.id} value={item.id}>{item.label}</option>
+                                    )}
+                                  )}
+                                </select>
+                              </div>
+                            </div>
+                            <div className="ei-property-item">
+                              <div className="ei-property-label">
+                                Value
+                              </div>
+                              <div>
+                                <input
+                                  name="value"
+                                  value={
+                                    roicManagerConfiguration.roicSettingsConfiguration
+                                    .financialConstraints.bauTerminalValueStrategy.value
+                                  }
+                                  onChange={(event) => {this.handleBAUChange(event)}}
                                   className="form-control input-sm"
                                 />
                               </div>
@@ -409,6 +449,13 @@ export class RoicEditor extends Component {
         </div>
       </>
     )
+  }
+
+  handleBAUChange(event) {
+    const { name, value } = event.target
+    const { roicManagerConfiguration } = this.state
+    roicManagerConfiguration.roicSettingsConfiguration.financialConstraints.bauTerminalValueStrategy[name] = value
+    this.setState({ roicManagerConfiguration })
   }
 
   handleConfigChange(event) {
