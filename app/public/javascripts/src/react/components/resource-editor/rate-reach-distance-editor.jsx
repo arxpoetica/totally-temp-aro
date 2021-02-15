@@ -94,8 +94,10 @@ export class RateReachDistanceEditor extends Component {
                       <td className="category-description" style={{ minWidth: '200px' }}>
                         {category.description}
                         <div className="float-right">
-                          <button className="btn btn-sm btn-light category-hover-button" onClick={(event) => this.handleCategoryInEditMode(index)}><i className="fa fa-edit"></i></button>
-                          <button className="btn btn-sm btn-danger category-hover-button" onClick={(event) => this.removeCategory(index)}><i className="fa fa-trash-alt"></i></button>
+                          <button className="btn btn-sm btn-light category-hover-button" onClick={(event) =>
+                            this.handleCategoryInEditMode(index)}><i className="fa fa-edit"></i></button>
+                          <button className="btn btn-sm btn-danger category-hover-button" onClick={(event) =>
+                            this.removeCategory(index)}><i className="fa fa-trash-alt"></i></button>
                         </div>
                       </td>
                     }
@@ -104,31 +106,40 @@ export class RateReachDistanceEditor extends Component {
                         {categoryType === 'SPEED' &&
                           <div className="row ml-0 mr-0">
                             <input className="form-control col-sm-4 category-description" name="speed" onChange={(event) => this.handleEditableCategoriesChange(event, index)} value={editableCategories[index].speed} />
-                            <select className="form-control col-sm-6" name="units" onChange={(event) => this.handleEditableCategoriesChange(event, index)} value={editableCategories[index].units}>
+                            <select className="form-control col-sm-6" name="units" onChange={(event) =>
+                              this.handleEditableCategoriesChange(event, index)} value={editableCategories[index].units}>
                               <option>Mbps</option>
                               <option>Gbps</option>
                             </select>
-                            <button className="btn btn-light col-sm-2 p-0" onClick={(event) => this.saveCategory(index)}><i className="fa fa-save"></i></button>
+                            <button className="btn btn-light col-sm-2 p-0" onClick={(event) =>
+                              this.saveCategory(index)}><i className="fa fa-save"></i></button>
                           </div>
                         }
                         {categoryType === 'BAND' &&
                           <div>
                             <small>Name:</small>
-                            <input className="form-control form-control-sm category-description" name="name" onChange={(event) => this.handleEditableCategoriesChange(event, index)} value={editableCategories[index].name} />
+                            <input className="form-control form-control-sm category-description" name="name" onChange={(event) =>
+                              this.handleEditableCategoriesChange(event, index)} value={editableCategories[index].name} />
                             <small>Description:</small>
-                            <input className="form-control form-control-sm category-description" name="description" onChange={(event) => this.handleEditableCategoriesChange(event, index)} value={editableCategories[index].description} />
-                            <button className="btn btn-light" onClick={(event) => this.saveCategory(index)}><i className="fa fa-save"></i></button>
+                            <input className="form-control form-control-sm category-description" name="description"
+                              onChange={(event) => this.handleEditableCategoriesChange(event, index)}
+                              value={editableCategories[index].description} />
+                            <button className="btn btn-light" onClick={(event) => this.saveCategory(index)}>
+                              <i className="fa fa-save"></i></button>
                           </div>
                         }
                       </td>
                     }
                     {Object.entries(rateReachGroupMap[selectedTechnologyType].matrixMap).map(([techKey], techIndex) => {
-                      let metersToLengthUnits = this.props.convertMetersToLengthUnits(rateReachGroupMap[selectedTechnologyType].matrixMap[techIndex].value[index].distance);
+                      let metersToLengthUnits = this.props.convertMetersToLengthUnits(rateReachGroupMap[selectedTechnologyType]
+                        .matrixMap[techIndex].value[index].distance);
                       return (
                         <td key={techIndex} style={{ minWidth: '100px' }}>
 
                           <div className="input-group mb-3">
-                            <input className="form-control border-right-0" onChange={(event) => this.handleRateReachGroupMapChange(event, selectedTechnologyType, index, techIndex)} value={metersToLengthUnits} />
+                            <input className="form-control border-right-0" onChange={(event) =>
+                              this.handleRateReachGroupMapChange(event, selectedTechnologyType, index, techIndex)}
+                              value={metersToLengthUnits} />
                             <div className="input-group-prepend">
                               <span className="input-group-text text-muted border-left-0 bg-white">ft</span>
                             </div>
