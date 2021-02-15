@@ -105,7 +105,9 @@ export class RateReachDistanceEditor extends Component {
                       <td className="input-group">
                         {categoryType === 'SPEED' &&
                           <div className="row ml-0 mr-0">
-                            <input className="form-control col-sm-4 category-description" name="speed" onChange={(event) => this.handleEditableCategoriesChange(event, index)} value={editableCategories[index].speed} />
+                            <input className="form-control col-sm-4 category-description" name="speed"
+                              onChange={(event) => this.handleEditableCategoriesChange(event, index)}
+                              value={editableCategories[index].speed} />
                             <select className="form-control col-sm-6" name="units" onChange={(event) =>
                               this.handleEditableCategoriesChange(event, index)} value={editableCategories[index].units}>
                               <option>Mbps</option>
