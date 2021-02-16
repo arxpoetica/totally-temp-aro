@@ -522,6 +522,15 @@ const NetworkArchitectureFormMeta = Object.freeze({
 
             ]
           }
+        },
+        'optimizeSpans': {
+          '_meta': {
+            'displayType': 'checkbox',
+            'displayName': '',
+            'options': [
+
+            ]
+          }
         }
       },
       'fiberCapacityConfig': {
@@ -1411,6 +1420,15 @@ const NetworkArchitectureFormMeta = Object.freeze({
 
             ]
           }
+        },
+        'optimizeSpans': {
+          '_meta': {
+            'displayType': 'checkbox',
+            'displayName': '',
+            'options': [
+
+            ]
+          }
         }
       },
       'fiberCapacityConfig': {
@@ -2200,6 +2218,15 @@ const NetworkArchitectureFormMeta = Object.freeze({
 
             ]
           }
+        },
+        'optimizeSpans': {
+          '_meta': {
+            'displayType': 'checkbox',
+            'displayName': '',
+            'options': [
+
+            ]
+          }
         }
       },
       'fiberCapacityConfig': {
@@ -2984,6 +3011,15 @@ const NetworkArchitectureFormMeta = Object.freeze({
         'maxDistanceMeters': {
           '_meta': {
             'displayType': 'number',
+            'displayName': '',
+            'options': [
+
+            ]
+          }
+        },
+        'optimizeSpans': {
+          '_meta': {
+            'displayType': 'checkbox',
             'displayName': '',
             'options': [
 
