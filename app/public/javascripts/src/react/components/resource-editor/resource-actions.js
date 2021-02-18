@@ -622,47 +622,47 @@ function getDefaultConfiguration (loggedInUser, categoryType = 'SPEED') {
 // ARPU-Manager
 
 function loadArpuManagerConfiguration (arpuManagerId) {
-
   return dispatch => {
     AroHttp.get(`/service/v1/arpu-manager/${arpuManagerId}`)
-    .then((result) => {
-      dispatch({
-        type: Actions.RESOURCE_EDITOR_ARPU_MANAGER,
-        payload: result.data
+      .then((result) => {
+        dispatch({
+          type: Actions.RESOURCE_EDITOR_ARPU_MANAGER,
+          payload: result.data,
+        })
       })
-    })
 
     AroHttp.get(`/service/v1/arpu-manager/${arpuManagerId}/configuration`)
       .then((result) => {
         let arpuModels = []
         // Sort the arpu models based on the locationTypeEntity
         const locationEntityOrder = ['household', 'small', 'medium', 'large', 'celltower']
-        locationEntityOrder.forEach(locationEntity => {
-          const filteredModels = result.data.arpuModels
-            .filter(item => item.id.locationEntityType === locationEntity)
-            .sort((a, b) => (a.id.speedCategory < b.id.speedCategory) ? -1 : 1)
+        for (const locationEntity of locationEntityOrder) {
+          // NOTE: right now there's only the capture-all morphology `*` group
+          const filteredModels = result.data.morphologyGroups[0].arpuModels
+            .filter(item => item.arpuModelKey.locationEntityType === locationEntity)
+            .sort((one, two) => (one.arpuModelKey.speedCategory < two.arpuModelKey.speedCategory) ? -1 : 1)
           arpuModels = arpuModels.concat(filteredModels)
-        })
+        }
         dispatch({
           type: Actions.RESOURCE_EDITOR_SET_ARPU_MANAGER_CONFIGURATION,
-          payload:  { arpuModels: arpuModels }
+          payload: { arpuModels },
         })
-        const arpuManagerConfiguration = { arpuModels: arpuModels }
+
         const pristineArpuManagerConfiguration = {}
-        const copyOfModels = JSON.parse(JSON.stringify(arpuManagerConfiguration.arpuModels))
-        copyOfModels.forEach((arpuModel) => {
-        // Create a key from the "id" object
-          const arpuKey = JSON.stringify(arpuModel.id)
+        const copyOfModels = JSON.parse(JSON.stringify(arpuModels))
+        for (const arpuModel of copyOfModels) {
+          // Create a key from the `arpuModelKey` object
+          const arpuKey = JSON.stringify(arpuModel.arpuModelKey)
           pristineArpuManagerConfiguration[arpuKey] = arpuModel
-        })
+        }
         dispatch({
           type: Actions.RESOURCE_EDITOR_SET_PRISTINE_ARPU_MANAGER_CONFIGURATION,
-          payload:  pristineArpuManagerConfiguration
+          payload:  pristineArpuManagerConfiguration,
         })
       })
       .catch((err) => console.error(err))
-    }
   }
+}
 
 function saveArpuConfigurationToServer (arpuManagerId, pristineArpuManagerConfiguration, arpuManagerConfiguration) {
 

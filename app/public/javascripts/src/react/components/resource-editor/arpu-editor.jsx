@@ -8,22 +8,42 @@ export class ArpuEditor extends Component {
     this.state = {
       selectedArpuModelIndex : 0,
       speedCategoryHelp : '',
-      arpuManagerConfiguration: []
+      arpuManagerConfiguration: [],
     }
 
     this.speedCategoryHelpObj = {
-      "speedCategoryHelp": {
-        "default": "The speed category describes the maximum rated speed (e.g. 100 Mbps) for a fiber/cable type",
-        "cat3": "Category 3 cable, commonly known as Cat 3 or station wire, and less commonly known as VG or voice-grade (as, for example, in 100BaseVG), is an unshielded twisted pair (UTP) cable used in telephone wiring. It is part of a family of copper cabling standards defined jointly by the Electronic Industries Alliance (EIA) and the Telecommunications Industry Association (TIA) and published in TIA/EIA-568-B.",
-        "cat5": "Category 5 cable, commonly referred to as Cat 5, is a twisted pair cable for computer networks. The cable standard provides performance of up to 100 Mbps and is suitable for most varieties of Ethernet over twisted pair. Cat 5 is also used to carry other signals such as telephony and video.",
-        "cat7": "The Category 7 cable standard was ratified in 2002 to allow 10 Gigabit Ethernet over 100 m of copper cabling. The cable contains four twisted copper wire pairs, just like the earlier standards. Category 7 cable can be terminated either with 8P8C compatible GG45 electrical connectors which incorporate the 8P8C standard or with TERA connectors. When combined with GG-45 or TERA connectors, Category 7 cable is rated for transmission frequencies of up to 600 MHz."
+      speedCategoryHelp: {
+        default: 'The speed category describes the maximum rated speed (e.g. 100 Mbps) for a fiber/cable type',
+        cat3: [
+          'Category 3 cable, commonly known as Cat 3 or station wire, and less ',
+          'commonly known as VG or voice-grade (as, for example, in 100BaseVG), ',
+          'is an unshielded twisted pair (UTP) cable used in telephone wiring. It ',
+          'is part of a family of copper cabling standards defined jointly by the ',
+          'Electronic Industries Alliance (EIA) and the Telecommunications Industry ',
+          'Association (TIA) and published in TIA/EIA-568-B.',
+        ].join(''),
+        cat5: [
+          'Category 5 cable, commonly referred to as Cat 5, is a twisted pair cable ',
+          'for computer networks. The cable standard provides performance of up to ',
+          '100 Mbps and is suitable for most varieties of Ethernet over twisted pair. ',
+          'Cat 5 is also used to carry other signals such as telephony and video.',
+        ].join(''),
+        cat7: [
+          'The Category 7 cable standard was ratified in 2002 to allow 10 Gigabit ',
+          'Ethernet over 100 m of copper cabling. The cable contains four twisted ',
+          'copper wire pairs, just like the earlier standards. Category 7 cable can ',
+          'be terminated either with 8P8C compatible GG45 electrical connectors which ',
+          'incorporate the 8P8C standard or with TERA connectors. When combined with ',
+          'GG-45 or TERA connectors, Category 7 cable is rated for transmission ',
+          'frequencies of up to 600 MHz.',
+        ].join(''),
       }
     }
   }
 
   componentDidMount () {
-    this.props.loadArpuManagerConfiguration(this.props.resourceManagerId);
-    this.props.setModalTitle(this.props.resourceManagerName);  
+    this.props.loadArpuManagerConfiguration(this.props.resourceManagerId)
+    this.props.setModalTitle(this.props.resourceManagerName)
   }
 
   componentWillReceiveProps(nextProps){
@@ -35,14 +55,16 @@ export class ArpuEditor extends Component {
   }
 
   render () {
-    return this.props.roicManager === null ||  this.props.arpuManagerConfiguration === null || this.state.arpuManagerConfiguration.arpuModels === undefined
+    return this.props.roicManager === null
+      || this.props.arpuManagerConfiguration === null
+      || this.state.arpuManagerConfiguration.arpuModels === undefined
       ? null
       : this.renderArpuEditor()
   }
 
   renderArpuEditor()  {
 
-    const {arpuManagerConfiguration, selectedArpuModelIndex, speedCategoryHelp} = this.state
+    const { arpuManagerConfiguration, selectedArpuModelIndex, speedCategoryHelp } = this.state
 
     return (
       <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
@@ -58,8 +80,8 @@ export class ArpuEditor extends Component {
                     <li role="presentation" className="nav-item" key={index} onClick={(e) => this.selectArpuModel(index)}>
                       {/* <!-- Show the entity type and speed category --> */}
                       <div className={`nav-link pill-parent ${selectedArpuModelIndex === index ? 'active' : ''}`} style={{cursor: 'pointer'}}>
-                        {item.id.locationEntityType} / {item.id.speedCategory}
-                        <span className="badge badge-light float-right" onClick={(e) => this.showSpeedCategoryHelp(item.id.speedCategory)} style={{marginTop: '2px', cursor: 'pointer'}}>
+                        {item.arpuModelKey.locationEntityType} / {item.arpuModelKey.speedCategory}
+                        <span className="badge badge-light float-right" onClick={(e) => this.showSpeedCategoryHelp(item.arpuModelKey.speedCategory)} style={{marginTop: '2px', cursor: 'pointer'}}>
                           <i className="fa fa-question"></i>
                         </span>
                     </div>
@@ -74,11 +96,27 @@ export class ArpuEditor extends Component {
                     <tbody>
                       <tr>
                         <td>ARPU Strategy</td>
-                        <td><input type="text" className="form-control" name="arpuStrategy" onChange={e => {this.handleArpuChange(e, selectedArpuModelIndex)}}  value={arpuManagerConfiguration.arpuModels[selectedArpuModelIndex].arpuStrategy}/></td>
+                        <td>
+                          <input
+                            type="text"
+                            className="form-control"
+                            name="arpuStrategy"
+                            onChange={event => this.handleArpuChange(event, selectedArpuModelIndex)}
+                            value={arpuManagerConfiguration.arpuModels[selectedArpuModelIndex].arpuStrategy}
+                          />
+                        </td>
                       </tr>
                       <tr>
                         <td>Revenue</td>
-                        <td><input type="text" className="form-control" name="revenue" onChange={e => {this.handleArpuChange(e, selectedArpuModelIndex)}} value={arpuManagerConfiguration.arpuModels[selectedArpuModelIndex].revenue}/></td>
+                        <td>
+                          <input
+                            type="text"
+                            className="form-control"
+                            name="revenue"
+                            onChange={event => this.handleArpuChange(event, selectedArpuModelIndex)}
+                            value={arpuManagerConfiguration.arpuModels[selectedArpuModelIndex].revenue}
+                          />
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -86,7 +124,7 @@ export class ArpuEditor extends Component {
                   speedCategoryHelp &&
                   <div  className="alert alert-info alert-dismissible fade show" role="alert">
                     {speedCategoryHelp}
-                    <button type="button" className="close" aria-label="Close" onClick={()=>this.hideSpeedCategoryHelp()}>
+                    <button type="button" className="close" aria-label="Close" onClick={this.hideSpeedCategoryHelp}>
                       <span aria-hidden="true">&times;</span>
                     </button>
                   </div>
@@ -99,10 +137,10 @@ export class ArpuEditor extends Component {
 
         <div style={{flex: '0 0 auto'}}>
           <div style={{textAlign: 'right'}}>
-            <button className="btn btn-light mr-2" onClick={() => this.exitEditingMode()}>
+            <button className="btn btn-light mr-2" onClick={this.exitEditingMode}>
               <i className="fa fa-undo action-button-icon"></i>Discard changes
             </button>
-            <button className="btn btn-primary" onClick={() => this.saveConfigurationToServer()}>
+            <button className="btn btn-primary" onClick={this.saveConfigurationToServer}>
               <i className="fa fa-save action-button-icon"></i>Save
             </button>
           </div>
@@ -126,19 +164,19 @@ export class ArpuEditor extends Component {
     this.setState({arpuManagerConfiguration : pristineArpuManager})
   }
 
-  exitEditingMode(){
+  exitEditingMode() {
     this.props.setIsResourceEditor(true);
   }
 
-  saveConfigurationToServer(){
+  saveConfigurationToServer() {
     this.props.saveArpuConfigurationToServer(this.props.arpuManager.id, this.props.pristineArpuManagerConfiguration, this.state.arpuManagerConfiguration)
   }
 
-  showSpeedCategoryHelp (category) {
+  showSpeedCategoryHelp(category) {
     this.setState({speedCategoryHelp : this.speedCategoryHelpObj.speedCategoryHelp[category] || this.speedCategoryHelpObj.speedCategoryHelp.default})
   }
 
-  hideSpeedCategoryHelp (){
+  hideSpeedCategoryHelp() {
     this.setState({speedCategoryHelp : ''})
   }
 }
@@ -153,9 +191,13 @@ export class ArpuEditor extends Component {
 
   const mapDispatchToProps = (dispatch) => ({
     getResourceTypes: () => dispatch(ResourceActions.getResourceTypes()),
-    loadArpuManagerConfiguration: (arpuManagerId) => dispatch(ResourceActions.loadArpuManagerConfiguration(arpuManagerId)),
+    loadArpuManagerConfiguration: (arpuManagerId) => dispatch(
+      ResourceActions.loadArpuManagerConfiguration(arpuManagerId)
+    ),
     setIsResourceEditor: (status) => dispatch(ResourceActions.setIsResourceEditor(status)),
-    saveArpuConfigurationToServer: (arpuManagerId, pristineArpuManager, arpuManager) => dispatch(ResourceActions.saveArpuConfigurationToServer(arpuManagerId, pristineArpuManager, arpuManager)),
+    saveArpuConfigurationToServer: (arpuManagerId, pristineArpuManager, arpuManager) => dispatch(
+      ResourceActions.saveArpuConfigurationToServer(arpuManagerId, pristineArpuManager, arpuManager)
+    ),
     setModalTitle: (title) => dispatch(ResourceActions.setModalTitle(title))
   })
 
