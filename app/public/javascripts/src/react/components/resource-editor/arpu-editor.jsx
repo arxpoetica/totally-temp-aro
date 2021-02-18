@@ -1,43 +1,15 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import ResourceActions from './resource-actions'
+import './arpu-editor.css'
 
 export class ArpuEditor extends Component {
   constructor (props) {
     super(props)
-    this.state = {
-      selectedArpuModelIndex : 0,
-      speedCategoryHelp : '',
-      arpuManagerConfiguration: [],
-    }
 
-    this.speedCategoryHelpObj = {
-      speedCategoryHelp: {
-        default: 'The speed category describes the maximum rated speed (e.g. 100 Mbps) for a fiber/cable type',
-        cat3: [
-          'Category 3 cable, commonly known as Cat 3 or station wire, and less ',
-          'commonly known as VG or voice-grade (as, for example, in 100BaseVG), ',
-          'is an unshielded twisted pair (UTP) cable used in telephone wiring. It ',
-          'is part of a family of copper cabling standards defined jointly by the ',
-          'Electronic Industries Alliance (EIA) and the Telecommunications Industry ',
-          'Association (TIA) and published in TIA/EIA-568-B.',
-        ].join(''),
-        cat5: [
-          'Category 5 cable, commonly referred to as Cat 5, is a twisted pair cable ',
-          'for computer networks. The cable standard provides performance of up to ',
-          '100 Mbps and is suitable for most varieties of Ethernet over twisted pair. ',
-          'Cat 5 is also used to carry other signals such as telephony and video.',
-        ].join(''),
-        cat7: [
-          'The Category 7 cable standard was ratified in 2002 to allow 10 Gigabit ',
-          'Ethernet over 100 m of copper cabling. The cable contains four twisted ',
-          'copper wire pairs, just like the earlier standards. Category 7 cable can ',
-          'be terminated either with 8P8C compatible GG45 electrical connectors which ',
-          'incorporate the 8P8C standard or with TERA connectors. When combined with ',
-          'GG-45 or TERA connectors, Category 7 cable is rated for transmission ',
-          'frequencies of up to 600 MHz.',
-        ].join(''),
-      }
+    this.state = {
+      modelIndex : 0,
+      arpuManagerConfiguration: [],
     }
   }
 
@@ -62,78 +34,114 @@ export class ArpuEditor extends Component {
       : this.renderArpuEditor()
   }
 
-  renderArpuEditor()  {
-
-    const { arpuManagerConfiguration, selectedArpuModelIndex, speedCategoryHelp } = this.state
+  renderArpuEditor() {
+    const { arpuManagerConfiguration, modelIndex } = this.state
 
     return (
-      <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
-        <div style={{flex: '1 1 auto'}}>
-          <div style={{maxHeight: '500px', overflowY : 'auto'}}>
-            <div className="container">
-              <div className="row">
-                {/* <!-- On the left, show a list of ARPU models that the user can edit --> */}
-                <div className="col-md-4">
-                  <ul className="nav nav-pills flex-column" style={{maxHeight: '380px', overflowY : 'auto'}}>
-                  {
-                  arpuManagerConfiguration.arpuModels.map((item, index) =>
-                    <li role="presentation" className="nav-item" key={index} onClick={(e) => this.selectArpuModel(index)}>
-                      {/* <!-- Show the entity type and speed category --> */}
-                      <div className={`nav-link pill-parent ${selectedArpuModelIndex === index ? 'active' : ''}`} style={{cursor: 'pointer'}}>
-                        {item.arpuModelKey.locationEntityType} / {item.arpuModelKey.speedCategory}
-                        <span className="badge badge-light float-right" onClick={(e) => this.showSpeedCategoryHelp(item.arpuModelKey.speedCategory)} style={{marginTop: '2px', cursor: 'pointer'}}>
-                          <i className="fa fa-question"></i>
-                        </span>
-                    </div>
-                    </li>
-                  )}
-                  </ul>
-                </div>
-        
-                {/* <!-- On the right, show the details of the currently selected ARPU model --> */}
-                <div className="col-md-8">
-                  <table id="tblArpuModel" className="table table-sm table-striped">
-                    <tbody>
-                      <tr>
-                        <td>ARPU Strategy</td>
-                        <td>
-                          <input
-                            type="text"
-                            className="form-control"
-                            name="arpuStrategy"
-                            onChange={event => this.handleArpuChange(event, selectedArpuModelIndex)}
-                            value={arpuManagerConfiguration.arpuModels[selectedArpuModelIndex].arpuStrategy}
-                          />
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>Revenue</td>
-                        <td>
-                          <input
-                            type="text"
-                            className="form-control"
-                            name="revenue"
-                            onChange={event => this.handleArpuChange(event, selectedArpuModelIndex)}
-                            value={arpuManagerConfiguration.arpuModels[selectedArpuModelIndex].revenue}
-                          />
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                  {
-                  speedCategoryHelp &&
-                  <div  className="alert alert-info alert-dismissible fade show" role="alert">
-                    {speedCategoryHelp}
-                    <button type="button" className="close" aria-label="Close" onClick={this.hideSpeedCategoryHelp}>
-                      <span aria-hidden="true">&times;</span>
-                    </button>
-                  </div>
-                  }
-                </div>
-              </div>
-            </div>
-          </div>
+      <div className="arpu-manager">
+
+        <div className="header">
+          <h2>ARPU Manager:</h2>
+          {/* list of ARPU models that the user can edit */}
+          <select onChange={event => this.setState({ modelIndex: event.target.value })}>
+            {arpuManagerConfiguration.arpuModels.map((item, index) =>
+              <option key={index} value={index}>
+                {item.arpuModelKey.locationEntityType} / {item.arpuModelKey.speedCategory}
+              </option>
+            )}
+          </select>
         </div>
+
+        <div className="segmentation">
+
+          <div className="selectors">
+            <div className="s-row"></div>
+            {/* {this.state.segments.map((segment, index) => (
+              <div className="s-row">
+                <select>
+                  <option value="">[Add Segment]</option>
+                  <option value="Segment A">Segment A</option>
+                  <option value="Segment B">Segment B</option>
+                  <option value="Remove Segment">Remove Segment</option>
+                </select>
+              </div>
+            ))} */}
+          </div>
+
+          <div className="products">
+
+            <h2>{modelIndex}</h2>
+            <div>
+              {JSON.stringify(arpuManagerConfiguration.arpuModels[modelIndex])}
+            </div>
+
+            {/* {this.state.products.map((product, index) => (
+              <div className="s-col product">
+                <div className="s-row">
+                  <h3>{product.name}</h3>
+                  <div className="select-dropdown">
+                    <button className="toggle">
+                      20 | 20 | 20
+                    </button>
+                    <div className="dropdown">
+                      <ul>
+                        <li>
+                          <h4>ARPU</h4>
+                          <p>Avg. Revenue Per User</p>
+                          <input type="number"/>
+                        </li>
+                        <li>
+                          <h4>OPEX</h4>
+                          <p>Operating Expense</p>
+                          <input type="number"/>
+                        </li>
+                        <li>
+                          <h4>Cost</h4>
+                          <p>Acquisition <br/>Cost</p>
+                          <input type="number"/>
+                        </li>
+                      </ul>
+                      <button
+                        type="button"
+                        className="close"
+                        aria-label="Close"
+                      >
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {product.segments.map((segment, index) => (
+                  <div className="s-row">
+                    <input type="number" min="0" max="100" value="100" />
+                  </div>
+                ))}
+
+              </div>
+            ))} */}
+          </div>
+
+        </div>
+
+
+
+        {/* <h2>ARPU Strategy</h2>
+        <input
+          type="text"
+          className="form-control"
+          name="arpuStrategy"
+          onChange={event => this.handleArpuChange(event, modelIndex)}
+          value={arpuManagerConfiguration.arpuModels[modelIndex].arpuStrategy}
+        /> */}
+        {/* <h2>Revenue</h2>
+        <input
+          type="text"
+          className="form-control"
+          name="revenue"
+          onChange={event => this.handleArpuChange(event, modelIndex)}
+          value={arpuManagerConfiguration.arpuModels[modelIndex].revenue}
+        /> */}
 
         <div style={{flex: '0 0 auto'}}>
           <div style={{textAlign: 'right'}}>
@@ -145,21 +153,17 @@ export class ArpuEditor extends Component {
             </button>
           </div>
         </div>
-    </div>
+      </div>
     )
   }
 
-  selectArpuModel(index){
-    this.setState({selectedArpuModelIndex : index})
-  }
-
-  handleArpuChange (e, selectedArpuModelIndex) {  
+  handleArpuChange (e, modelIndex) {  
 
     let name = e.target.name;
     let value = e.target.value;
 
     var pristineArpuManager = this.state.arpuManagerConfiguration
-    pristineArpuManager.arpuModels[selectedArpuModelIndex][name] = value
+    pristineArpuManager.arpuModels[modelIndex][name] = value
 
     this.setState({arpuManagerConfiguration : pristineArpuManager})
   }
@@ -170,14 +174,6 @@ export class ArpuEditor extends Component {
 
   saveConfigurationToServer() {
     this.props.saveArpuConfigurationToServer(this.props.arpuManager.id, this.props.pristineArpuManagerConfiguration, this.state.arpuManagerConfiguration)
-  }
-
-  showSpeedCategoryHelp(category) {
-    this.setState({speedCategoryHelp : this.speedCategoryHelpObj.speedCategoryHelp[category] || this.speedCategoryHelpObj.speedCategoryHelp.default})
-  }
-
-  hideSpeedCategoryHelp() {
-    this.setState({speedCategoryHelp : ''})
   }
 }
 
