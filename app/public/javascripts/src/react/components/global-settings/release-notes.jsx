@@ -58,10 +58,10 @@ export class ReleaseNotes extends Component {
       :
       <div>
         <h1>Version {this.state.versionDetails.version}</h1>
-        <p dangerouslySetInnerHTML={{ 
+        <div dangerouslySetInnerHTML={{ 
             __html: this.state.versionDetails.description
           }}
-        ></p>
+        ></div>
       </div>
     )
   }
