@@ -177,7 +177,7 @@ function modifyOptimization (plan)  {
               .then(() => AroHttp.get(`/service/v1/plan/${currentPlan.id}/optimization-state`))
               .then(result => {
                 currentPlan.planState = result.data
-                dispatch(PlanActions.setActivePlan(currentPlan))
+                dispatch(PlanActions.setActivePlanState(result.data))
               })
               .catch(err => console.error(err))
           }
