@@ -277,7 +277,7 @@ let mapSplit = {
               when destroyed to ask if settings should be saved -->
           <view-mode ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW || $ctrl.rSelectedDisplayMode === 'VIEW'"></view-mode>
           <r-analysis-mode ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS && $ctrl.state.plan.planType != 'RING' && $ctrl.rSelectedDisplayMode !== 'VIEW'" && $ctrl.rPlan.planType != 'RING'"></r-analysis-mode>
-          <ring-editor ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.EDIT_RINGS && $ctrl.rSelectedDisplayMode !== 'VIEW'"></ring-editor>
+          <r-ring-editor ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.EDIT_RINGS && $ctrl.rSelectedDisplayMode !== 'VIEW'"></r-ring-editor>
           <r-plan-settings ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.PLAN_SETTINGS && $ctrl.rSelectedDisplayMode !== 'VIEW'"></r-plan-settings>
           <plan-editor-container ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.EDIT_PLAN && $ctrl.rSelectedDisplayMode !== 'VIEW'">
           </plan-editor-container>

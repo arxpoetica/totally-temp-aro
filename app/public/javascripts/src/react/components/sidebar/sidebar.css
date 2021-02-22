@@ -105,3 +105,13 @@
 .indent-1 {
   padding-left: 30px !important;
 }
+
+/* Edit Rings */
+
+.edit-ring-container {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
