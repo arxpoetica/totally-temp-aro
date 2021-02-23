@@ -61,9 +61,10 @@ export class ReportModuleEditor extends Component {
                       onClick={() => this.startEditingSubDefinition(index)}>
                       Subdefinition
                     </a>
-                    <button className='btn btn-sm btn-danger ml-1 subdefinition-delete-button'
+                    <button
+                      className='btn btn-sm ml-1 subdefinition-delete-button'
                       onClick={event => this.props.removeEditingReportSubDefinition(index)}>
-                      <i className='fas fa-trash-alt' />
+                      <i className='fas fa-trash-alt text-danger' />
                     </button>
                   </li>
                 ))

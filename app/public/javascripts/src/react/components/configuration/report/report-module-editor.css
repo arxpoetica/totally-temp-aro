@@ -14,7 +14,7 @@
 
 .subdefinition-delete-button {
   position: absolute;
-  right: 0;
+  right: 8px;
   top: 8px;
   display: none;
 }
