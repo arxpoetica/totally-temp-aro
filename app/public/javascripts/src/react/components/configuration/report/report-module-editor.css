@@ -9,12 +9,16 @@
 
 .definitions-list li {
   width: 100%;
+  position: relative;
 }
 
 .subdefinition-delete-button {
+  position: absolute;
+  right: 0;
+  top: 8px;
   display: none;
 }
 
-.subdefinition-link:hover .subdefinition-delete-button, .subdefinition-delete-button:hover {
+.outside-btn:hover .subdefinition-delete-button {
   display: inline-block;
 }

@@ -9,7 +9,7 @@ import './report-module-editor.css'
 const selector = formValueSelector(Constants.REPORT_DEFINITION_EDITOR_FORM)
 
 export class ReportModuleEditor extends Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.props.populateEditingReportDefinition(this.props.reportBeingEdited.id)
     this.props.populateReportTypes()
@@ -20,7 +20,7 @@ export class ReportModuleEditor extends Component {
     }
   }
 
-  getDefinitionBeingEdited () {
+  getDefinitionBeingEdited() {
     if (!this.props.reportBeingEdited.moduleDefinition) {
       return null
     } else {
@@ -30,11 +30,11 @@ export class ReportModuleEditor extends Component {
     }
   }
 
-  getEditingKey () {
+  getEditingKey() {
     return this.state.isEditingPrimary ? 'PRIMARY' : this.state.subDefinitionEditingIndex
   }
 
-  render () {
+  render() {
     return <div className='container report-module-editor' style={{ height: '100%' }}>
       <div className='row' style={{ height: '100%' }}>
         <div className='col-md-3'>
@@ -49,22 +49,22 @@ export class ReportModuleEditor extends Component {
               <a id='lnkEditPrimaryDefinition'
                 className={`nav-link ${this.state.isEditingPrimary ? 'active' : ''}`}
                 onClick={() => this.startEditingPrimaryDefinition()}>
-                  Primary Definition
+                Primary Definition
               </a>
             </li>
             {
               this.props.reportBeingEdited.moduleDefinition
                 ? this.props.reportBeingEdited.moduleDefinition.subDefinitions.map((subDefinition, index) => (
-                  <li className='nav-item' key={index}>
+                  <li className='nav-item outside-btn' key={index}>
                     <a id={`lnkEditSubDefinition${index}`}
                       className={`nav-link subdefinition-link ${this.state.subDefinitionEditingIndex === index ? 'active' : ''}`}
                       onClick={() => this.startEditingSubDefinition(index)}>
                       Subdefinition
-                      <button className='btn btn-sm btn-danger ml-1 subdefinition-delete-button'
-                        onClick={event => this.props.removeEditingReportSubDefinition(index)}>
-                        <i className='fas fa-trash-alt' />
-                      </button>
                     </a>
+                    <button className='btn btn-sm btn-danger ml-1 subdefinition-delete-button'
+                      onClick={event => this.props.removeEditingReportSubDefinition(index)}>
+                      <i className='fas fa-trash-alt' />
+                    </button>
                   </li>
                 ))
                 : null
@@ -76,14 +76,14 @@ export class ReportModuleEditor extends Component {
           </button>
         </div>
         <div className='col-md-9 d-flex flex-column' style={{ height: '100%' }}>
-          { this.getDefinitionBeingEdited()
+          {this.getDefinitionBeingEdited()
             ? <div className='flex-grow-1'>
               <ReportDefinitionEditor initialValues={this.getDefinitionBeingEdited()} enableReinitialize />
             </div>
             : null
           }
           {/* Show an alert if required */}
-          { this.renderValidationAlert() }
+          {this.renderValidationAlert()}
           <div className='form-row flex-grow-0' style={{ justifyContent: 'flex-end' }}>
             <button id='btnSaveCurrentDefinition' className='btn btn-light' onClick={event => {
               this.saveCurrentDefinition()
@@ -100,7 +100,7 @@ export class ReportModuleEditor extends Component {
     </div>
   }
 
-  renderValidationAlert () {
+  renderValidationAlert() {
     if (!this.props.reportValidation) {
       return null
     }
@@ -121,7 +121,7 @@ export class ReportModuleEditor extends Component {
     </div>
   }
 
-  saveCurrentDefinition () {
+  saveCurrentDefinition() {
     if (this.props.reportDefinitionEditorValues) {
       this.state.isEditingPrimary
         ? this.props.saveEditingReportPrimaryDefinition(this.props.reportDefinitionEditorValues)
@@ -129,7 +129,7 @@ export class ReportModuleEditor extends Component {
     }
   }
 
-  startEditingPrimaryDefinition () {
+  startEditingPrimaryDefinition() {
     if (this.props.formHasErrors) {
       // Form has errors, cannot change definitions
       return
@@ -141,7 +141,7 @@ export class ReportModuleEditor extends Component {
     })
   }
 
-  startEditingSubDefinition (index) {
+  startEditingSubDefinition(index) {
     if (this.props.formHasErrors) {
       // Form has errors, cannot change definitions
       return
@@ -153,7 +153,7 @@ export class ReportModuleEditor extends Component {
     })
   }
 
-  componentWillUnmount () {
+  componentWillUnmount() {
     this.props.clearEditingReportDefinition()
     this.props.clearReportTypes()
   }
