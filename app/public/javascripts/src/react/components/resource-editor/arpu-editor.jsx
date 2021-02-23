@@ -9,7 +9,7 @@ export class ArpuEditor extends Component {
 
     this.state = {
       modelIndex : 0,
-      arpuManagerConfiguration: [],
+      arpuModels: [],
     }
   }
 
@@ -20,22 +20,20 @@ export class ArpuEditor extends Component {
 
   componentWillReceiveProps(nextProps){
     if(this.props != nextProps) {
-      if(nextProps.arpuManagerConfiguration !== undefined) {
-        this.setState({arpuManagerConfiguration: nextProps.arpuManagerConfiguration})
+      if(nextProps.arpuModels !== undefined) {
+        this.setState({ arpuModels: nextProps.arpuModels })
       }
     }
   }
 
   render () {
-    return this.props.roicManager === null
-      || this.props.arpuManagerConfiguration === null
-      || this.state.arpuManagerConfiguration.arpuModels === undefined
+    return !this.props.arpuModels
       ? null
       : this.renderArpuEditor()
   }
 
   renderArpuEditor() {
-    const { arpuManagerConfiguration, modelIndex } = this.state
+    const { arpuModels, modelIndex } = this.state
 
     return (
       <div className="arpu-manager">
@@ -44,7 +42,7 @@ export class ArpuEditor extends Component {
           <h2>ARPU Manager:</h2>
           {/* list of ARPU models that the user can edit */}
           <select onChange={event => this.setState({ modelIndex: event.target.value })}>
-            {arpuManagerConfiguration.arpuModels.map((item, index) =>
+            {arpuModels.map((item, index) =>
               <option key={index} value={index}>
                 {item.arpuModelKey.locationEntityType} / {item.arpuModelKey.speedCategory}
               </option>
@@ -72,7 +70,7 @@ export class ArpuEditor extends Component {
 
             <h2>{modelIndex}</h2>
             <div>
-              {JSON.stringify(arpuManagerConfiguration.arpuModels[modelIndex])}
+              {JSON.stringify(arpuModels[modelIndex])}
             </div>
 
             {/* {this.state.products.map((product, index) => (
@@ -132,7 +130,7 @@ export class ArpuEditor extends Component {
           className="form-control"
           name="arpuStrategy"
           onChange={event => this.handleArpuChange(event, modelIndex)}
-          value={arpuManagerConfiguration.arpuModels[modelIndex].arpuStrategy}
+          value={arpuModels[modelIndex].arpuStrategy}
         /> */}
         {/* <h2>Revenue</h2>
         <input
@@ -140,7 +138,7 @@ export class ArpuEditor extends Component {
           className="form-control"
           name="revenue"
           onChange={event => this.handleArpuChange(event, modelIndex)}
-          value={arpuManagerConfiguration.arpuModels[modelIndex].revenue}
+          value={arpuModels[modelIndex].revenue}
         /> */}
 
         <div style={{flex: '0 0 auto'}}>
@@ -158,14 +156,13 @@ export class ArpuEditor extends Component {
   }
 
   handleArpuChange (e, modelIndex) {  
-
     let name = e.target.name;
     let value = e.target.value;
 
-    var pristineArpuManager = this.state.arpuManagerConfiguration
-    pristineArpuManager.arpuModels[modelIndex][name] = value
+    const { arpuModels } = this.state
+    arpuModels[modelIndex][name] = value
 
-    this.setState({arpuManagerConfiguration : pristineArpuManager})
+    this.setState({ arpuModels })
   }
 
   exitEditingMode() {
@@ -173,14 +170,14 @@ export class ArpuEditor extends Component {
   }
 
   saveConfigurationToServer() {
-    this.props.saveArpuConfigurationToServer(this.props.arpuManager.id, this.props.pristineArpuManagerConfiguration, this.state.arpuManagerConfiguration)
+    this.props.saveArpuConfigurationToServer(this.props.arpuManager.id, this.props.arpuModelsPristine, this.state.arpuModels)
   }
 }
 
   const mapStateToProps = (state) => ({
     arpuManager: state.resourceEditor.arpuManager,
-    arpuManagerConfiguration: state.resourceEditor.arpuManagerConfiguration,
-    pristineArpuManagerConfiguration : state.resourceEditor.pristineArpuManagerConfiguration,
+    arpuModels: state.resourceEditor.arpuModels,
+    arpuModelsPristine : state.resourceEditor.arpuModelsPristine,
     resourceManagerName: state.resourceManager.editingManager && state.resourceManager.managers[state.resourceManager.editingManager.id].resourceManagerName,  
     resourceManagerId: state.resourceManager.editingManager && state.resourceManager.managers[state.resourceManager.editingManager.id].resourceManagerId,
   })   
