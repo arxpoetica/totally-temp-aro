@@ -18,6 +18,21 @@ html, body {
   overflow: hidden;
 }
 
+.svg * {
+  color: currentColor;
+  fill: currentColor;
+}
+.svg svg {
+  flex: 1;
+  vertical-align: middle;
+  fill: currentColor;
+  height: 100%;
+  width: 100%;
+}
+.svg svg:not(:root) {
+  overflow: hidden;
+}
+
 .boundary-options a {
   padding: 0 4px;
 }

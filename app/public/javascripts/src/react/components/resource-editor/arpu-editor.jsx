@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import ResourceActions from './resource-actions'
+import { Dropdown } from './arpu-editor-dropdown.jsx'
 import './arpu-editor.css'
 
 export class ArpuEditor extends Component {
@@ -42,87 +43,18 @@ export class ArpuEditor extends Component {
           <h2>ARPU Manager:</h2>
           {/* list of ARPU models that the user can edit */}
           <select onChange={event => this.setState({ modelIndex: event.target.value })}>
-            {arpuModels.map((item, index) =>
-              <option key={index} value={index}>
-                {item.arpuModelKey.locationEntityType} / {item.arpuModelKey.speedCategory}
+            {/* <option value="">[Select a model]</option> */}
+            {arpuModels.map((model, index) =>
+              <option key={model.id} value={index}>
+                {model.arpuModelKey.locationEntityType} / {model.arpuModelKey.speedCategory}
               </option>
             )}
           </select>
         </div>
 
         <div className="segmentation">
-
-          <div className="selectors">
-            <div className="s-row"></div>
-            {/* {this.state.segments.map((segment, index) => (
-              <div className="s-row">
-                <select>
-                  <option value="">[Add Segment]</option>
-                  <option value="Segment A">Segment A</option>
-                  <option value="Segment B">Segment B</option>
-                  <option value="Remove Segment">Remove Segment</option>
-                </select>
-              </div>
-            ))} */}
-          </div>
-
-          <div className="products">
-
-            <h2>{modelIndex}</h2>
-            <div>
-              {JSON.stringify(arpuModels[modelIndex])}
-            </div>
-
-            {/* {this.state.products.map((product, index) => (
-              <div className="s-col product">
-                <div className="s-row">
-                  <h3>{product.name}</h3>
-                  <div className="select-dropdown">
-                    <button className="toggle">
-                      20 | 20 | 20
-                    </button>
-                    <div className="dropdown">
-                      <ul>
-                        <li>
-                          <h4>ARPU</h4>
-                          <p>Avg. Revenue Per User</p>
-                          <input type="number"/>
-                        </li>
-                        <li>
-                          <h4>OPEX</h4>
-                          <p>Operating Expense</p>
-                          <input type="number"/>
-                        </li>
-                        <li>
-                          <h4>Cost</h4>
-                          <p>Acquisition <br/>Cost</p>
-                          <input type="number"/>
-                        </li>
-                      </ul>
-                      <button
-                        type="button"
-                        className="close"
-                        aria-label="Close"
-                      >
-                        <span aria-hidden="true">&times;</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {product.segments.map((segment, index) => (
-                  <div className="s-row">
-                    <input type="number" min="0" max="100" value="100" />
-                  </div>
-                ))}
-
-              </div>
-            ))} */}
-          </div>
-
+          {arpuModels[modelIndex] ? this.renderSegmentation() : null}
         </div>
-
-
 
         {/* <h2>ARPU Strategy</h2>
         <input
@@ -151,7 +83,51 @@ export class ArpuEditor extends Component {
             </button>
           </div>
         </div>
+
       </div>
+    )
+  }
+
+  renderSegmentation() {
+
+    const model = this.state.arpuModels[this.state.modelIndex]
+    const { segments, products } = model
+
+    return (
+      <>
+
+
+
+        <div className="arpu-row products">
+          {products.map((product, index) =>
+            <div key={index} className="arpu-cell product">
+              <h3>{product.name}</h3>
+              <Dropdown product={product}/>
+            </div>
+          )}
+        </div>
+
+        {/* {#each [...segments, ''] as segment, index} */}
+        {[...segments, ''].map((segment, index) =>
+          <div key={index} className="arpu-row">
+            <div className="arpu-cell select">
+              {segment.name || ''}
+              {/* <Select
+                value={segment.segmentId}
+                options={segments}
+                handler={(value, prev_value) => handler(value, prev_value, index)}
+              /> */}
+            </div>
+            {segment ? segment.percents.map(percent =>
+              <div key={index} className="arpu-cell input">
+                {/* <input type="number" min="0" max={get_max(segment.percents)} bind:value={percent}> */}
+                <input type="number" min="0" max="100"/>
+              </div>
+            ) : null}
+          </div>
+        )}
+
+      </>
     )
   }
 
