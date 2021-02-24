@@ -1,47 +1,59 @@
-import React from 'react'
+import React, { useState } from 'react'
+import cx from 'clsx'
 
-export const Dropdown = ({ product }) =>
-  <div className="select-dropdown">
-    {/* <button className="toggle" on:click={() => open = !open}> */}
-    <button className="toggle">
-      ${product.arpu} | ${product.opex} | ${product.fixedCost}
-      {/* <span className="svg"><Caret/></span> */}
-    </button>
-    {/* <div className="dropdown" class:open> */}
-    <div className="dropdown">
-      <ul>
-        <li>
-          <h4>ARPU</h4>
-          <p>Avg. Revenue Per User</p>
-          <div className="input">
-            {/* <input type="number" bind:value={product.arpu}> */}
-            <input type="number"/>
-          </div>
-        </li>
-        <li>
-          <h4>OPEX</h4>
-          <p>Operating Expense</p>
-          <div className="input">
-            {/* <input type="number" bind:value={product.opex}> */}
-            <input type="number"/>
-          </div>
-        </li>
-        <li>
-          <h4>Cost</h4>
-          <p>Acquisition <br/>Cost</p>
-          <div className="input">
-            {/* <input type="number" bind:value={product.fixedCost}> */}
-            <input type="number"/>
-          </div>
-        </li>
-      </ul>
-      {/* <button
+export const Dropdown = ({ product, handler }) => {
+
+  const [open, setOpen] = useState(false)
+  const handleOpenState = () => setOpen(!open)
+
+  const metrics = [
+    { title: 'ARPU', text: 'Avg. Revenue Per User', property: 'arpu' },
+    { title: 'OPEX', text: 'Operating Expense', property: 'opex' },
+    { title: 'Cost', text: 'Acquisition Cost', property: 'fixedCost' },
+  ]
+
+  return (
+    <div className="select-dropdown">
+      <button
         type="button"
-        className="close"
-        aria-label="Close"
-        on:click={() => open = !open}
+        className="toggle"
+        aria-label={open ? 'Close' : 'Open'}
+        onClick={handleOpenState}
       >
-        <span aria-hidden="true">&times;</span>
-      </button> */}
+        ${product.arpu} | ${product.opex} | ${product.fixedCost}
+        <span className="svg">
+          <svg viewBox="0 0 7 4">
+            <path d="M.965 0h5.001a.4.4 0 01.283.683l-2.5
+              2.501a.4.4 0 01-.566 0L.683.683A.4.4 0 01.965 0z"></path>
+          </svg>
+        </span>
+      </button>
+      <div className={cx('dropdown', open && 'open')}>
+        <ul>
+          {metrics.map((metric, index) => 
+            <li key={index}>
+              <h4>{metric.title}</h4>
+              <p>{metric.text}</p>
+              <div className="input">
+                <input
+                  type="number"
+                  name={metric.property}
+                  value={product[metric.property]}
+                  onChange={event => handler(event)}
+                />
+              </div>
+            </li>
+          )}
+        </ul>
+        <button
+          type="button"
+          className="close"
+          aria-label="Close"
+          onClick={handleOpenState}
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
     </div>
-  </div>
+  )
+}

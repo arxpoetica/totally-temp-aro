@@ -56,23 +56,6 @@ export class ArpuEditor extends Component {
           {arpuModels[modelIndex] ? this.renderSegmentation() : null}
         </div>
 
-        {/* <h2>ARPU Strategy</h2>
-        <input
-          type="text"
-          className="form-control"
-          name="arpuStrategy"
-          onChange={event => this.handleArpuChange(event, modelIndex)}
-          value={arpuModels[modelIndex].arpuStrategy}
-        /> */}
-        {/* <h2>Revenue</h2>
-        <input
-          type="text"
-          className="form-control"
-          name="revenue"
-          onChange={event => this.handleArpuChange(event, modelIndex)}
-          value={arpuModels[modelIndex].revenue}
-        /> */}
-
         <div style={{flex: '0 0 auto'}}>
           <div style={{textAlign: 'right'}}>
             <button className="btn btn-light mr-2" onClick={this.exitEditingMode}>
@@ -90,54 +73,65 @@ export class ArpuEditor extends Component {
 
   renderSegmentation() {
 
-    const model = this.state.arpuModels[this.state.modelIndex]
+    const { arpuModels, modelIndex } = this.state
+    const model = arpuModels[modelIndex]
     const { segments, products } = model
 
     return (
       <>
-
-
-
         <div className="arpu-row products">
           {products.map((product, index) =>
             <div key={index} className="arpu-cell product">
               <h3>{product.name}</h3>
-              <Dropdown product={product}/>
+              <Dropdown
+                product={product}
+                handler={event => this.handleProductChange(event, index)}
+              />
             </div>
           )}
         </div>
 
         {/* {#each [...segments, ''] as segment, index} */}
-        {[...segments, ''].map((segment, index) =>
-          <div key={index} className="arpu-row">
+        {[...segments, ''].map((segment, segmentIndex) =>
+          <div key={segmentIndex} className="arpu-row">
             <div className="arpu-cell select">
               {segment.name || ''}
               {/* <Select
                 value={segment.segmentId}
                 options={segments}
-                handler={(value, prev_value) => handler(value, prev_value, index)}
+                handler={(value, prev_value) => handler(value, prev_value, segmentIndex)}
               /> */}
             </div>
-            {segment ? segment.percents.map(percent =>
-              <div key={index} className="arpu-cell input">
+            {segment ? segment.percents.map((percent, cellIndex) =>
+              <div key={cellIndex} className="arpu-cell input">
                 {/* <input type="number" min="0" max={get_max(segment.percents)} bind:value={percent}> */}
-                <input type="number" min="0" max="100"/>
+                {/* <input onChange={event => this.handleCellChange(event, modelIndex)} /> */}
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={percent}
+                  onChange={event => this.handleCellChange(event, segmentIndex, cellIndex)}
+                />
               </div>
             ) : null}
           </div>
         )}
-
       </>
     )
   }
 
-  handleArpuChange (e, modelIndex) {  
-    let name = e.target.name;
-    let value = e.target.value;
+  handleProductChange({ target }, productIndex) {
+    const { name, value } = target
+    const { arpuModels, modelIndex } = this.state
+    arpuModels[modelIndex].products[productIndex][name] = value
+    this.setState({ arpuModels })
+  }
 
-    const { arpuModels } = this.state
-    arpuModels[modelIndex][name] = value
-
+  handleCellChange({ target }, segmentIndex, cellIndex) {
+    const { value } = target
+    const { arpuModels, modelIndex } = this.state
+    arpuModels[modelIndex].segments[segmentIndex].percents[cellIndex] = value
     this.setState({ arpuModels })
   }
 
