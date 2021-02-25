@@ -3,21 +3,32 @@
   --primary: #4d99e5;
   --gray-light: #e9ecef;
   --gray-medium-light: #bcbcbc;
-  display: grid;
-  grid-template-rows: auto 1fr;
   position: absolute;
   top: 0;
   right: 0;
-  bottom: 0;
   left: 0;
+  height: 100%;
 }
 .arpu-manager .header {
   display: flex;
   align-items: center;
+  height: 60px;
   padding: 15px;
+}
+.arpu-manager .body {
+  height: calc(100% - 60px);
+  width: calc(100% - 1px);
 }
 .arpu-manager .segmentation {
   overflow: auto;
+  height: calc(100% - 70px);
+  border-top: 1px solid var(--gray-light);
+}
+.arpu-manager .buttons {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px;
+  height: 70px;
   border-top: 1px solid var(--gray-light);
 }
 .arpu-manager .arpu-row {

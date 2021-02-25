@@ -45,19 +45,18 @@ export class ArpuEditor extends Component {
           <select onChange={event => this.setState({ modelIndex: event.target.value })}>
             {/* <option value="">[Select a model]</option> */}
             {arpuModels.map((model, index) =>
-              <option key={model.id} value={index}>
+              <option key={index} value={index}>
                 {model.arpuModelKey.locationEntityType} / {model.arpuModelKey.speedCategory}
               </option>
             )}
           </select>
         </div>
 
-        <div className="segmentation">
-          {arpuModels[modelIndex] ? this.renderSegmentation() : null}
-        </div>
-
-        <div style={{flex: '0 0 auto'}}>
-          <div style={{textAlign: 'right'}}>
+        <div className="body">
+          <div className="segmentation">
+            {arpuModels[modelIndex] ? this.renderSegmentation() : null}
+          </div>
+          <div className="buttons">
             <button className="btn btn-light mr-2" onClick={this.exitEditingMode}>
               <i className="fa fa-undo action-button-icon"></i>Discard changes
             </button>
