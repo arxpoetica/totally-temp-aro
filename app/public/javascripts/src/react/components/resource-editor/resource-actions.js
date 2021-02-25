@@ -638,7 +638,7 @@ function loadArpuManagerConfiguration (arpuManagerId) {
     ]
 
     Promise.all(promises)
-      .then(([{ data: products }, { data: segments}, { data: config }]) => {
+      .then(([{ data: products }, { data: segments }, { data: config }]) => {
 
         // Sort the arpu models based on the `locationEntityType`
         // NOTE: the location order is hard typed here...
@@ -655,33 +655,34 @@ function loadArpuManagerConfiguration (arpuManagerId) {
         }
 
         arpuModels = arpuModels.map(model => {
-          model.id = JSON.stringify(model.arpuModelKey)
-          model.products = model.productAssignments
-            .sort((one, two) => one.productId - two.productId)
+          model.products = products
+            .sort((one, two) => one.id - two.id)
             .map(product => {
-              const found = products.find(prod => prod.id === product.productId)
-              product.name = found ? found.name : 'unnamed product'
-              return product
+              const found = model.productAssignments.find(prod => {
+                return prod.productId === product.id
+              })
+              return Object.assign({}, product, {
+                arpu: found ? found.arpu : 0,
+                opex: found ? found.opex : 0,
+                fixedCost: found ? found.fixedCost : 0,
+              })
             })
 
-          model.segments = model.segmentAssignments
-            .sort((one, two) => one.segmentId - two.segmentId)
-            .map((segment, index) => {
-              const found = segments.find(seg => seg.id === segment.segmentId)
-              segment.name = found ? found.name : 'unnamed segment'
+          model.segments = segments
+            .sort((one, two) => one.id - two.id)
+            .map(segment => {
               segment.percents = model.products.map(product => {
                 const found = model.cells.find(cell => {
-                  return cell.key.productId === product.productId
-                    && cell.key.segmentId === segment.segmentId
+                  return cell.key.productId === product.id
+                    && cell.key.segmentId === segment.id
                 })
                 return found ? found.arpuPercent : 0
               })
-              return segment
+              return Object.assign({}, segment)
             })
 
           delete model.productAssignments
           delete model.segmentAssignments
-          delete model.arpuStrategy
           delete model.cells
           return model
         })
