@@ -621,7 +621,7 @@ function getDefaultConfiguration (loggedInUser, categoryType = 'SPEED') {
 
 // ARPU-Manager
 
-function loadArpuManagerConfiguration (arpuManagerId) {
+function loadArpuManagerConfiguration(arpuManagerId) {
   return dispatch => {
     AroHttp.get(`/service/v1/arpu-manager/${arpuManagerId}`)
       .then((result) => {
@@ -709,34 +709,69 @@ function loadArpuManagerConfiguration (arpuManagerId) {
   }
 }
 
-function saveArpuConfigurationToServer (arpuManagerId, arpuModelsPristine, arpuModels) {
+function saveArpuModels(arpuManagerId, models) {
 
-  const changedModels = []
-  arpuModels.forEach((arpuModel) => {
-    const arpuKey = JSON.stringify(arpuModel.id)
-    const pristineModel = arpuModelsPristine[arpuKey]
-    if (pristineModel) {
-      // Check to see if the model has changed
-      if (JSON.stringify(pristineModel) !== JSON.stringify(arpuModel)) {
-        changedModels.push(arpuModel)
-      }
-    }
+  const arpuModels = JSON.parse(JSON.stringify(models)).map(model => {
+
+    model.productAssignments = model.products.map(product => {
+      product.productId = product.id
+      delete product.id
+      delete product.name
+      delete product.description
+      return product
+    })
+
+    model.cells = model.segments.reduce((cells, segment) => {
+      const productCells = model.products.map((product, index) => {
+        const arpuPercent = segment.percents[index]
+        if (arpuPercent) {
+          return {
+            key: {
+              productId: product.productId,
+              segmentId: segment.id,
+            },
+            arpuPercent: parseFloat(arpuPercent),
+          }
+        }
+        return false
+      }).filter(Boolean)
+      return [...cells, ...productCells]
+    }, [])
+
+    model.segmentAssignments = model.segments.map(segment => {
+      segment.segmentId = segment.id
+      delete segment.id
+      delete segment.name
+      delete segment.description
+      delete segment.percents
+      return segment
+    })
+
+    delete model.products
+    delete model.segments
+
+    return model
   })
 
   return (dispatch, getState) => {
-    if (changedModels.length > 0) {
+    if (arpuModels.length) {
       const state = getState()
-      AroHttp.put(`/service/v1/arpu-manager/${arpuManagerId}/configuration`, changedModels)
-      .then(result => {
-        batch(() => {
-          dispatch(setIsResourceEditor(true))
-          dispatch(getResourceManagers(state.resourceEditor.selectedResourceKey))
+      AroHttp.put(`/service/v1/arpu-manager/${arpuManagerId}/configuration`, {
+        morphologyGroups: [{
+          arpuModels,
+          morphology: 'string'
+        }]
+      })
+        .then(result => {
+          batch(() => {
+            dispatch(setIsResourceEditor(true))
+            dispatch(getResourceManagers(state.resourceEditor.selectedResourceKey))
+          })
         })
-      })
-      .catch(err => {
-        console.error(err)
-        dispatch(GlobalSettingsActions.httpErrorhandle(err))
-      })
+        .catch(err => {
+          console.error(err)
+          dispatch(GlobalSettingsActions.httpErrorhandle(err))
+        })
     } else {
       console.log('ARPU Editor: No models were changed. Nothing to save.')
     }
@@ -1213,7 +1248,7 @@ export default {
   startEditingResourceManager,
   loadArpuManagerConfiguration,
   loadCompManMeta,
-  saveArpuConfigurationToServer,
+  saveArpuModels,
   getRegions,
   loadCompManForStates,
   saveCompManConfig,

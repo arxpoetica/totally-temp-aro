@@ -58,10 +58,10 @@ export class ArpuEditor extends Component {
           </div>
           <div className="buttons">
             <button className="btn btn-light mr-2" onClick={this.exitEditingMode}>
-              <i className="fa fa-undo action-button-icon"></i>Discard changes
+              <i className="fa fa-undo action-button-icon"></i>&nbsp;Discard changes
             </button>
-            <button className="btn btn-primary" onClick={this.saveConfigurationToServer}>
-              <i className="fa fa-save action-button-icon"></i>Save
+            <button className="btn btn-primary" onClick={() => this.saveConfigurationToServer()}>
+              <i className="fa fa-save action-button-icon"></i>&nbsp;Save
             </button>
           </div>
         </div>
@@ -90,7 +90,6 @@ export class ArpuEditor extends Component {
           )}
         </div>
 
-        {/* {#each [...segments, ''] as segment, index} */}
         {[...segments, ''].map((segment, segmentIndex) =>
           <div key={segmentIndex} className="arpu-row">
             <div className="arpu-cell select">
@@ -135,33 +134,40 @@ export class ArpuEditor extends Component {
   }
 
   exitEditingMode() {
-    this.props.setIsResourceEditor(true);
+    this.props.setIsResourceEditor(true)
   }
 
   saveConfigurationToServer() {
-    this.props.saveArpuConfigurationToServer(this.props.arpuManager.id, this.props.arpuModelsPristine, this.state.arpuModels)
+    this.props.saveArpuModels(
+      this.props.arpuManager.id,
+      this.state.arpuModels,
+    )
   }
 }
 
-  const mapStateToProps = (state) => ({
-    arpuManager: state.resourceEditor.arpuManager,
-    arpuModels: state.resourceEditor.arpuModels,
-    arpuModelsPristine : state.resourceEditor.arpuModelsPristine,
-    resourceManagerName: state.resourceManager.editingManager && state.resourceManager.managers[state.resourceManager.editingManager.id].resourceManagerName,  
-    resourceManagerId: state.resourceManager.editingManager && state.resourceManager.managers[state.resourceManager.editingManager.id].resourceManagerId,
-  })   
+const mapStateToProps = (state) => ({
+  arpuManager: state.resourceEditor.arpuManager,
+  arpuModels: state.resourceEditor.arpuModels,
+  arpuModelsPristine : state.resourceEditor.arpuModelsPristine,
+  resourceManagerName:
+    state.resourceManager.editingManager
+    && state.resourceManager.managers[state.resourceManager.editingManager.id].resourceManagerName,
+  resourceManagerId:
+    state.resourceManager.editingManager
+    && state.resourceManager.managers[state.resourceManager.editingManager.id].resourceManagerId,
+})
 
-  const mapDispatchToProps = (dispatch) => ({
-    getResourceTypes: () => dispatch(ResourceActions.getResourceTypes()),
-    loadArpuManagerConfiguration: (arpuManagerId) => dispatch(
-      ResourceActions.loadArpuManagerConfiguration(arpuManagerId)
-    ),
-    setIsResourceEditor: (status) => dispatch(ResourceActions.setIsResourceEditor(status)),
-    saveArpuConfigurationToServer: (arpuManagerId, pristineArpuManager, arpuManager) => dispatch(
-      ResourceActions.saveArpuConfigurationToServer(arpuManagerId, pristineArpuManager, arpuManager)
-    ),
-    setModalTitle: (title) => dispatch(ResourceActions.setModalTitle(title))
-  })
+const mapDispatchToProps = (dispatch) => ({
+  getResourceTypes: () => dispatch(ResourceActions.getResourceTypes()),
+  loadArpuManagerConfiguration: (arpuManagerId) => dispatch(
+    ResourceActions.loadArpuManagerConfiguration(arpuManagerId)
+  ),
+  setIsResourceEditor: (status) => dispatch(ResourceActions.setIsResourceEditor(status)),
+  saveArpuModels: (arpuManagerId, arpuManager) => dispatch(
+    ResourceActions.saveArpuModels(arpuManagerId, arpuManager)
+  ),
+  setModalTitle: (title) => dispatch(ResourceActions.setModalTitle(title))
+})
 
 const ArpuEditorComponent = connect(mapStateToProps, mapDispatchToProps)(ArpuEditor)
 export default ArpuEditorComponent
