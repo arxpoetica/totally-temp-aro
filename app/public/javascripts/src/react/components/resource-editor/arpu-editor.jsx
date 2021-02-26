@@ -9,7 +9,7 @@ export class ArpuEditor extends Component {
     super(props)
 
     this.state = {
-      modelIndex : 0,
+      modelIndex: 0,
       arpuModels: [],
     }
   }
@@ -19,12 +19,11 @@ export class ArpuEditor extends Component {
     this.props.setModalTitle(this.props.resourceManagerName)
   }
 
-  componentWillReceiveProps(nextProps){
-    if(this.props != nextProps) {
-      if(nextProps.arpuModels !== undefined) {
-        this.setState({ arpuModels: nextProps.arpuModels })
-      }
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (nextProps.arpuModels && nextProps.arpuModels !== prevState.arpuModels) {
+      return { arpuModels: nextProps.arpuModels }
     }
+    else return null
   }
 
   render () {
@@ -94,16 +93,9 @@ export class ArpuEditor extends Component {
           <div key={segmentIndex} className="arpu-row">
             <div className="arpu-cell select">
               {segment.name || ''}
-              {/* <Select
-                value={segment.segmentId}
-                options={segments}
-                handler={(value, prev_value) => handler(value, prev_value, segmentIndex)}
-              /> */}
             </div>
             {segment ? segment.percents.map((percent, cellIndex) =>
               <div key={cellIndex} className="arpu-cell input">
-                {/* <input type="number" min="0" max={get_max(segment.percents)} bind:value={percent}> */}
-                {/* <input onChange={event => this.handleCellChange(event, modelIndex)} /> */}
                 <input
                   type="number"
                   min="0"
@@ -165,7 +157,7 @@ const mapDispatchToProps = (dispatch) => ({
   saveArpuModels: (arpuManagerId, arpuManager) => dispatch(
     ResourceActions.saveArpuModels(arpuManagerId, arpuManager)
   ),
-  setModalTitle: (title) => dispatch(ResourceActions.setModalTitle(title))
+  setModalTitle: (title) => dispatch(ResourceActions.setModalTitle(title)),
 })
 
 const ArpuEditorComponent = connect(mapStateToProps, mapDispatchToProps)(ArpuEditor)
