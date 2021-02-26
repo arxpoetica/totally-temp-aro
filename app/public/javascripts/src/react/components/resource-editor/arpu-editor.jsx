@@ -57,7 +57,7 @@ export class ArpuEditor extends Component {
             {arpuModels[modelIndex] ? this.renderSegmentation() : null}
           </div>
           <div className="buttons">
-            <button className="btn btn-light mr-2" onClick={this.exitEditingMode}>
+            <button className="btn btn-light mr-2" onClick={() => this.exitEditingMode()}>
               <i className="fa fa-undo action-button-icon"></i>&nbsp;Discard changes
             </button>
             <button className="btn btn-primary" onClick={() => this.saveConfigurationToServer()}>
@@ -148,7 +148,6 @@ export class ArpuEditor extends Component {
 const mapStateToProps = (state) => ({
   arpuManager: state.resourceEditor.arpuManager,
   arpuModels: state.resourceEditor.arpuModels,
-  arpuModelsPristine : state.resourceEditor.arpuModelsPristine,
   resourceManagerName:
     state.resourceManager.editingManager
     && state.resourceManager.managers[state.resourceManager.editingManager.id].resourceManagerName,

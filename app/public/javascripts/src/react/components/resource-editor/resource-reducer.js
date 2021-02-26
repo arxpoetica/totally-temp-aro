@@ -24,7 +24,6 @@ const defaultState = {
   isResourceEditor: true,
   priceBookStrategy: null,
   arpuModels: null,
-  arpuModelsPristine: null,
   ArpuStrategy: '',
   ArpuRevenue: '',
   loadStrength: {},
@@ -125,10 +124,6 @@ function setArpuManager (state, arpuManager) {
 
 function setArpuModels (state, arpuModels) {
   return { ...state, arpuModels }
-}
-
-function setArpuModelsPristine (state, arpuModelsPristine) {
-  return { ...state, arpuModelsPristine }
 }
 
 // Competition System
@@ -307,9 +302,6 @@ function resourceReducer (state = defaultState, action) {
 
     case Actions.RESOURCE_EDITOR_SET_ARPU_MODELS:
       return setArpuModels(state, action.payload)
-
-    case Actions.RESOURCE_EDITOR_SET_ARPU_MODELS_PRISTINE:
-      return setArpuModelsPristine(state, action.payload)
 
     case Actions.RESOURCE_EDITOR_GET_REGIONS:
       return setRegions(state, action.payload)

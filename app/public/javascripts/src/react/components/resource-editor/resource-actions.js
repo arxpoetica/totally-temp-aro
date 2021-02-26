@@ -691,19 +691,6 @@ function loadArpuManagerConfiguration(arpuManagerId) {
           type: Actions.RESOURCE_EDITOR_SET_ARPU_MODELS,
           payload: arpuModels,
         })
-
-        // FIXME: is there a better way???
-        const arpuModelsPristine = {}
-        const copyOfModels = JSON.parse(JSON.stringify(arpuModels))
-        for (const arpuModel of copyOfModels) {
-          // Create a key from the `arpuModelKey` object
-          const arpuKey = JSON.stringify(arpuModel.arpuModelKey)
-          arpuModelsPristine[arpuKey] = arpuModel
-        }
-        dispatch({
-          type: Actions.RESOURCE_EDITOR_SET_ARPU_MODELS_PRISTINE,
-          payload: arpuModelsPristine,
-        })
       })
       .catch((err) => console.error(err))
   }
