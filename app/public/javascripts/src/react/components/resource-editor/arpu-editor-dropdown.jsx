@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import cx from 'clsx'
+import { ClickOutside } from '../common/ClickOutside.jsx'
 
 export const Dropdown = ({ product, handler }) => {
 
@@ -28,32 +29,34 @@ export const Dropdown = ({ product, handler }) => {
           </svg>
         </span>
       </button>
-      <div className={cx('dropdown', open && 'open')}>
-        <ul>
-          {metrics.map((metric, index) => 
-            <li key={index}>
-              <h4>{metric.title}</h4>
-              <p>{metric.text}</p>
-              <div className="input">
-                <input
-                  type="number"
-                  name={metric.property}
-                  value={product[metric.property]}
-                  onChange={event => handler(event)}
-                />
-              </div>
-            </li>
-          )}
-        </ul>
-        <button
-          type="button"
-          className="close"
-          aria-label="Close"
-          onClick={handleOpenState}
-        >
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
+      <ClickOutside open={open} onClick={() => setOpen(!open)}>
+        <div className={cx('dropdown', open && 'open')}>
+          <ul>
+            {metrics.map((metric, index) =>
+              <li key={index}>
+                <h4>{metric.title}</h4>
+                <p>{metric.text}</p>
+                <div className="input">
+                  <input
+                    type="number"
+                    name={metric.property}
+                    value={product[metric.property]}
+                    onChange={event => handler(event)}
+                  />
+                </div>
+              </li>
+            )}
+          </ul>
+          <button
+            type="button"
+            className="close"
+            aria-label="Close"
+            onClick={handleOpenState}
+          >
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      </ClickOutside>
     </div>
   )
 }
