@@ -22,7 +22,13 @@ exports.configure = (api, middleware) => {
   }
   Object.keys(passThroughs).forEach(prefixUrl => {
     api.all(`${prefixUrl}/*`, expressProxy(`${passThroughs[prefixUrl]}`, {
-      proxyReqPathResolver: req => userIdInjector(req, prefixUrl, '', req.user.id)
+	proxyReqPathResolver: req => userIdInjector(req, prefixUrl, '', req.user.id),
+	proxyErrorHandler: function(err, res, next) {
+	    switch (err && err.code) {
+	    case 'ETIMEDOUT': { return res.status(504).send("'ETIMEDOUT' became 504'"); }
+	    default:          { next(err); }
+	    }
+	}
     }))
   })
 
