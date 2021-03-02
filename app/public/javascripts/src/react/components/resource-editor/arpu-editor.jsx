@@ -119,8 +119,16 @@ export class ArpuEditor extends Component {
   }
 
   handleCellChange({ target }, segmentIndex, cellIndex) {
-    const { value } = target
+    let value = parseFloat(target.value)
     const { arpuModels, modelIndex } = this.state
+
+    const { percents } = arpuModels[modelIndex].segments[segmentIndex]
+    const priorValue = percents[cellIndex]
+    const sum = percents.reduce((sum, value) => sum + value, 0) - priorValue
+    if (sum + value > 100) {
+      value = 100 - sum
+    }
+
     arpuModels[modelIndex].segments[segmentIndex].percents[cellIndex] = value
     this.setState({ arpuModels })
   }
