@@ -7,11 +7,11 @@ export const Dropdown = ({ product, handler }) => {
   const [open, setOpen] = useState(false)
   const handleOpenState = () => setOpen(!open)
 
-  const metrics = [
+  const METRICS = Object.freeze([
     { title: 'ARPU', text: 'Avg. Revenue Per User', property: 'arpu' },
     { title: 'OPEX', text: 'Operating Expense', property: 'opex' },
     { title: 'Cost', text: 'Acquisition Cost', property: 'fixedCost' },
-  ]
+  ])
 
   return (
     <div className="select-dropdown">
@@ -32,7 +32,7 @@ export const Dropdown = ({ product, handler }) => {
       <ClickOutside open={open} onClick={() => setOpen(!open)}>
         <div className={cx('dropdown', open && 'open')}>
           <ul>
-            {metrics.map((metric, index) =>
+            {METRICS.map((metric, index) =>
               <li key={index}>
                 <h4>{metric.title}</h4>
                 <p>{metric.text}</p>

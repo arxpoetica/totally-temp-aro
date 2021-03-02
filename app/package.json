@@ -2,8 +2,13 @@
   "name": "aro",
   "version": "0.0.0",
   "description": "Network infrastructure planning application.",
-  "main": "app.js",
+  "author": "Altman Vilandrie &Co. Advanced Analytics and Products Division",
+  "license": "BSD-2-Clause",
   "private": true,
+  "main": "app.js",
+  "volta": {
+    "node": "12.21.0"
+  },
   "scripts": {
     "test": "NODE_ENV=test mocha test/models/*.js test/helpers/*.js --timeout 50000 --delay",
     "test-cov": "NODE_ENV=test istanbul --preserve-comments cover _mocha -- test/models/*.js test/helpers/*.js -R spec --timeout 50000 --delay",
@@ -24,8 +29,6 @@
     "lint": "standard \"public/javascripts/src/react/**/*.js\" \"public/javascripts/src/react/**/*.jsx\"",
     "lint-fix": "standard \"public/javascripts/src/react/**/*.js\" \"public/javascripts/src/react/**/*.jsx\" --fix"
   },
-  "author": "Altman Vilandrie &Co. Advanced Analytics and Products Division",
-  "license": "BSD-2-Clause",
   "dependencies": {
     "@babel/cli": "^7.2.3",
     "@babel/core": "^7.2.2",

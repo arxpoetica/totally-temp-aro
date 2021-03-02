@@ -80,7 +80,7 @@ export class ArpuEditor extends Component {
         <div className="arpu-row products">
           {products.map((product, index) =>
             <div key={index} className="arpu-cell product">
-              <h3>{product.name}</h3>
+              <h3>{product.description || product.name}</h3>
               <Dropdown
                 product={product}
                 handler={event => this.handleProductChange(event, index)}
@@ -92,7 +92,7 @@ export class ArpuEditor extends Component {
         {[...segments, ''].map((segment, segmentIndex) =>
           <div key={segmentIndex} className="arpu-row">
             <div className="arpu-cell select">
-              {segment.name || ''}
+              {segment.description || segment.name}
             </div>
             {segment ? segment.percents.map((percent, cellIndex) =>
               <div key={cellIndex} className="arpu-cell input">
