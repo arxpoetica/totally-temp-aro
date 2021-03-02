@@ -7,7 +7,7 @@ jobs:
 
   build:
     docker:
-      - image: circleci/node:12
+      - image: cimg/python:3.9-node
     environment:
       IMAGE_NAME: avco/aro-app
       ECR_IMAGE_NAME: 976168524097.dkr.ecr.us-east-1.amazonaws.com/aro/aro-app
@@ -19,16 +19,13 @@ jobs:
           name: dependencies
           command: |
             # sudo apt-get install python-dev
-            sudo npm install -g mocha
+            # sudo npm install -g mocha
 
       - run:
           name: build and register
           command: |
             docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
-            curl -O https://bootstrap.pypa.io/3.5/get-pip.py
-            sudo python3 get-pip.py
-            export PATH=~/.local/bin:$PATH
-            sudo pip3 install awscli boto3
+            pip3 install awscli boto3
             eval $(aws ecr get-login --region us-east-1 --no-include-email --registry-ids 976168524097)
             export IMAGE_TAG=${IMAGE_NAME}:${CIRCLE_BUILD_NUM}
             export ECR_IMAGE_TAG=${ECR_IMAGE_NAME}:${CIRCLE_BUILD_NUM}
@@ -77,6 +74,7 @@ workflows:
                 - master
                 - dev
                 - uat
+                - terminalValueUI
       - deploy:
           context: aro_qa_builds
           requires:

@@ -1,11 +1,9 @@
 import React, { Component } from 'react'
-import { connect } from 'react-redux'
-import { PropTypes } from 'prop-types'
 import { Field, reduxForm } from 'redux-form'
 import Constants from '../../common/constants'
 
 export class PlanningConstraints extends Component {
-  render () {
+  render() {
     return (
       <div>
         <form className='d-flex flex-column rfp-options'
@@ -13,7 +11,6 @@ export class PlanningConstraints extends Component {
           onSubmit={event => event.preventDefault()}>
           <table className='table table-sm table-striped'>
             <tbody>
-
               <tr>
                 <td colSpan={2}>Cell Node Constraints</td>
               </tr>
@@ -110,32 +107,6 @@ export class PlanningConstraints extends Component {
                     className='form-control form-control-sm' component='input' type='text' />
                 </td>
               </tr>
-              { /*
-              <tr>
-                <td colSpan={2}>RFP Options</td>
-              </tr>
-              <tr>
-                <td className='pl-4'>RFP Max Points</td>
-                <td>
-                  <Field name='rfpMaxPoints'
-                    className='form-control form-control-sm' component='input' type='text' />
-                </td>
-              </tr>
-              <tr>
-                <td className='pl-4'>RFP Max Source Distance (m)</td>
-                <td>
-                  <Field name='rfpMaxSourceDistance'
-                    className='form-control form-control-sm' component='input' type='text' />
-                </td>
-              </tr>
-              <tr>
-                <td className='pl-4'>RFP Max Buffer Distance</td>
-                <td>
-                  <Field name='rfpMaxBufferDistance'
-                    className='form-control form-control-sm' component='input' type='text' />
-                </td>
-              </tr>
-              */ }
               <tr>
                 <td>Fiber routing mode</td>
                 <td>
@@ -146,7 +117,6 @@ export class PlanningConstraints extends Component {
                   </Field>
                 </td>
               </tr>
-              { 
               <tr>
                 <td>Minimum fiber splice capacity</td>
                 <td>
@@ -154,15 +124,7 @@ export class PlanningConstraints extends Component {
                     className='form-control form-control-sm' component='input' type='text' />
                 </td>
               </tr>
-              }
               <tr>
-                { /*
-                <td>Infer CO when missing</td>
-                <td>
-                  <Field name='inferCoWhenMissing'
-                    className='checkboxfill' component='input' type='checkbox' />
-                </td>
-                */ }
                 <td>Missing CO strategy</td>
                 <td>
                   <div>
@@ -272,9 +234,9 @@ export class PlanningConstraints extends Component {
                 </td>
               </tr>
 
-              {/* TODO: This is hardcoded for now and needs to get it from backend using. 
-              /type-enum/hub_placement_strategy end point
-              In order to do that this whole form has to be refactored*/}
+              {/* TODO: This is hardcoded for now and needs to get it from backend using.
+                /type-enum/hub_placement_strategy end point
+                In order to do that this whole form has to be refactored */}
               <tr>
                 <td>Hub Clustering Strategy</td>
                 <td>
@@ -283,9 +245,16 @@ export class PlanningConstraints extends Component {
                     <option value='DAG'>Directed Acyclic Graph</option>
                     <option value='KMEANS_PP'>K-Means Clustering</option>
                     <option value='MST_DAG'>Minimum Spanning Tree</option>
-                    {/* <option value='RROBIN'>Round Robin</option> */}
-                    {/* <option value='GRAPH'>Graph</option> */}
-                    {/* <option value='CLUSTER_ROADS'>Cluster Roads</option> */}
+                  </Field>
+                </td>
+              </tr>
+              <tr>
+                <td>Hub Location Strategy</td>
+                <td>
+                  <Field name='hubLocationStrategyType'
+                    className='form-control form-control-sm' component='select' type='text'>
+                    <option value='OPTIMIZED'>Optimized</option>
+                    <option value='CENTERED'>Centered</option>
                   </Field>
                 </td>
               </tr>
@@ -297,7 +266,7 @@ export class PlanningConstraints extends Component {
   }
 }
 
-let PlanningConstraintsForm = reduxForm({
+const PlanningConstraintsForm = reduxForm({
   form: Constants.PLANNING_CONSTRAINTS_FORM
 })(PlanningConstraints)
 

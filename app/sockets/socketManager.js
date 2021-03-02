@@ -101,7 +101,7 @@ class SocketManager {
           } else if (msg.data.jobsFailed) {
             msg.data.optimizationState = 'FAILED'
           } else {
-            msg.data.optimizationState = (msg.data.jobsCompleted < msg.data.totalJobs) ? 'STARTED' : 'COMPLETED'
+            msg.data.optimizationState = 'STARTED'
           }
         }
         self.sockets.emitToPlan(processId, msg)

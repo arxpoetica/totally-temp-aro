@@ -6,7 +6,7 @@ var path = require('path')
 var os = require('os')
 var fs = require('fs')
 var multer = require('multer')
-var upload = multer({ dest: os.tmpDir() })
+var upload = multer({ dest: os.tmpdir() })
 
 exports.configure = (api, middleware) => {
   var check_any_permission = middleware.check_any_permission
@@ -143,7 +143,7 @@ exports.configure = (api, middleware) => {
     var busboy = new Busboy({ headers: request.headers })
     var fullpath
     busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
-      fullpath = path.join(os.tmpDir(), String(Date.now()))
+      fullpath = path.join(os.tmpdir(), String(Date.now()))
       file.pipe(fs.createWriteStream(fullpath))
     })
     busboy.on('finish', () => {
@@ -159,7 +159,7 @@ exports.configure = (api, middleware) => {
     var busboy = new Busboy({ headers: request.headers })
     var fullpath
     busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
-      fullpath = path.join(os.tmpDir(), String(Date.now()))
+      fullpath = path.join(os.tmpdir(), String(Date.now()))
       file.pipe(fs.createWriteStream(fullpath))
     })
     busboy.on('finish', () => {

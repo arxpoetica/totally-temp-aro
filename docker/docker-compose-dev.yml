@@ -38,7 +38,7 @@ services:
         image: zookeeper
 
     app:
-        image: avco/aro-app-base:dev
+        image: avco/aro-app-base:node10-dev
         volumes:
             - ..:/srv/www/aro
             - ../../aro-etl:/srv/www/aro/db
@@ -50,6 +50,7 @@ services:
             - db:arodb
             - service:aro-service
         environment:
+            NODE_ENV: development
             PGHOST: arodb
             PGPASSWORD: aro
             PGUSER: aro
@@ -73,6 +74,3 @@ services:
 volumes:
     postgres-data:
         driver: local
-
-
-

@@ -85,7 +85,7 @@ export class RoicReportsSummary extends Component {
                 <tr key={index}>
                   <td className="indent-1 text-capitalize">
                     {FIBER_STRINGS[fiberCost.fiberType]} -&nbsp;
-                    {CABLE_CONSTRUCTION_STRINGS[fiberCost.edgeFeatureType + '.' + fiberCost.edgeConstructionType]}
+                    {`${CABLE_CONSTRUCTION_STRINGS[fiberCost.edgeFeatureType + '.' + fiberCost.edgeConstructionType]} `}
                     ({Math.round((fiberCost.lengthMeters * this.config.length.meters_to_length_units))}&nbsp;
                     {this.config.length.length_units})
                   </td>

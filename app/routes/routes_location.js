@@ -3,7 +3,7 @@ var config = helpers.config
 var models = require('../models')
 var multer = require('multer')
 var os = require('os')
-var upload = multer({ dest: os.tmpDir() })
+var upload = multer({ dest: os.tmpdir() })
 
 exports.configure = (api, middleware) => {
   var jsonSuccess = middleware.jsonSuccess
