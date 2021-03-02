@@ -34,7 +34,7 @@ function setShowRoicReportsModal (state, showRoicReportsModal) {
   }
 }
 
-function setROICResultsForPlan (state, roicResults) {
+function setROICResults (state, roicResults) {
   return { ...state,
     roicResults: roicResults
   }
@@ -59,10 +59,13 @@ function RoicReportsReducer (state = defaultState, action) {
       return setShowRoicReportsModal(state, action.payload)
 
     case Actions.ROIC_REPORTS_SET_ROIC_RESULTS_FOR_PLAN:
-      return setROICResultsForPlan(state, action.payload)
+      return setROICResults(state, action.payload)
 
     case Actions.ROIC_REPORTS_SET_XAXIS_LABELS:
       return setXaxisLabels(state, action.payload)
+
+    case Actions.ROIC_REPORTS_SET_ROIC_RESULTS_FOR_LOCATION:
+      return setROICResults(state, action.payload)
 
     default:
       return state

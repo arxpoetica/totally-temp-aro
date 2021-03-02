@@ -51,10 +51,24 @@ function setXaxisLabels (xAxisLabels) {
   }
 }
 
+function loadROICResultsForLocation (userId, roicPlanSettings) {
+  return dispatch => {
+    AroHttp.post(`/service/location-analysis/roic?userId=${userId}`, roicPlanSettings)
+      .then(result => {
+        dispatch({
+          type: Actions.ROIC_REPORTS_SET_ROIC_RESULTS_FOR_LOCATION,
+          payload: { roicAnalysis: result.data }
+        })
+      })
+      .catch(err => console.error(err))
+  }
+}
+
 export default {
   setEnumStrings,
   loadNetworkNodeTypesEntity,
   setShowRoicReportsModal,
   loadROICResultsForPlan,
-  setXaxisLabels
+  setXaxisLabels,
+  loadROICResultsForLocation,
 }
