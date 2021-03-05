@@ -48,7 +48,7 @@ const getBoundaryTypesList = createSelector([getAllBoundaryTypesList], (boundary
 
 /* global app localStorage map */
 class State {
-  constructor ($rootScope, $http, $document, $timeout, $sce, $ngRedux, $filter, tileDataService, Utils, tracker, Notification) {
+  constructor($rootScope, $http, $document, $timeout, $sce, $ngRedux, $filter, tileDataService, Utils, tracker, Notification) {
     // Important: RxJS must have been included using browserify before this point
     var Rx = require('rxjs')
 
@@ -199,7 +199,7 @@ class State {
       EDIT_RINGS: 'EDIT_RINGS'
     })
     service.activeEditPlanPanel = service.EditPlanPanels.EDIT_PLAN
-    
+
     service.EditRingsPanels = Object.freeze({
       EDIT_RINGS: 'EDIT_RINGS',
       OUTPUT: 'OUTPUT'
@@ -276,7 +276,7 @@ class State {
     service.setUseHeatMap = (useHeatMap) => {
       var newMapTileOptions = angular.copy(service.mapTileOptions.value)
       // ToDo: don't hardcode these, but this whole thing needs to be restructured
-      newMapTileOptions.selectedHeatmapOption = useHeatMap ? service.viewSetting.heatmapOptions[0] : service.viewSetting.heatmapOptions[2] 
+      newMapTileOptions.selectedHeatmapOption = useHeatMap ? service.viewSetting.heatmapOptions[0] : service.viewSetting.heatmapOptions[2]
       service.mapTileOptions.next(newMapTileOptions)
     }
 
@@ -470,7 +470,7 @@ class State {
       ],
       selectedRenderingOption: null
     }
-    
+
     // feature clicked on map
     service.hackRaiseEvent = (features) => {
       $rootScope.$broadcast('map_layer_clicked_feature', features, {})
@@ -626,7 +626,7 @@ class State {
       service.locationLayers.forEach(locationsLayer => {
         if (locationsLayer.checked) inputs.locationConstraints.locationTypes.push(locationsLayer.plannerKey)
       })
-      
+
       return inputs
     }
 
@@ -729,7 +729,7 @@ class State {
             }
             newResourceItems[resourceManager.managerType].allManagers.sort((a, b) => (a.name > b.name) ? 1 : -1)
           })
-          
+
           // Then select the appropriate manager for each type
           selectedResourceManagers.forEach((selectedResourceManager) => {
             var allManagers = newResourceItems[selectedResourceManager.aroResourceType].allManagers
@@ -798,7 +798,7 @@ class State {
         longitude: service.defaultPlanCoordinates.longitude,
         zoomIndex: service.defaultPlanCoordinates.zoom,
         ephemeral: isEphemeral,
-        name: planName || 'Untitled', 
+        name: planName || 'Untitled',
         planType: planType || 'UNDEFINED'
       }
       return service.getAddressFor(planOptions.latitude, planOptions.longitude)
@@ -831,8 +831,9 @@ class State {
 
     // Gets the last ephemeral plan in use, or creates a new one if no ephemeral plan exists.
     service.getOrCreateEphemeralPlan = () => {
-      return $http.get(`/service/v1/plan/ephemeral/latest`)
+      return $http.get(`/service/v1/plan?$top=1&user_id=${service.loggedInUser.id}`)
         .then((result) => {
+          result.data = result.data.pop();
           // We have a valid ephemeral plan if we get back an object with *some* properties
           var isValidEphemeralPlan = Object.getOwnPropertyNames(result.data).length > 0
           if (isValidEphemeralPlan) {
@@ -1320,7 +1321,7 @@ class State {
     service.reloadAuthPermissions()
 
     // service.systemActors
-    
+
     // The logged in user is currently set by using the AngularJS injector in index.html
     service.loggedInUser = null
     service.setLoggedInUser = (user, initialState) => {
@@ -1815,7 +1816,7 @@ class State {
       //  We are currently maintaining state in two places
       //  BUT as of now are only setting it in redux
       if (nextReduxState.rSelectedDisplayMode &&
-          service.rSelectedDisplayMode !== service.selectedDisplayMode.getValue()) {
+        service.rSelectedDisplayMode !== service.selectedDisplayMode.getValue()) {
         // console.log(service.rSelectedDisplayMode)
         service.selectedDisplayMode.next(service.rSelectedDisplayMode)
       }
@@ -1842,7 +1843,7 @@ class State {
     return service
   }
 
-  mapStateToThis (reduxState) {
+  mapStateToThis(reduxState) {
     return {
       plan: reduxState.plan.activePlan,
       mapLayersRedux: reduxState.mapLayers,
@@ -1866,7 +1867,7 @@ class State {
     }
   }
 
-  mapDispatchToTarget (dispatch) {
+  mapDispatchToTarget(dispatch) {
     return {
       setNetworkEquipmentLayerVisiblity: (layerType, layer, newVisibility) => dispatch(MapLayerActions.setNetworkEquipmentLayerVisibility(layerType, layer, newVisibility)),
       setCableConduitVisibility: (cableKey, conduitKey, newVisibility) => dispatch(MapLayerActions.setCableConduitVisibility(cableKey, conduitKey, newVisibility)),
