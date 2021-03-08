@@ -654,7 +654,23 @@ function loadArpuManagerConfiguration(arpuManagerId) {
           arpuModels = arpuModels.concat(filteredModels)
         }
 
+        const titles = {
+          'householdcat3': 'Residential (Legacy - Copper Cat3)',
+          'householdcat7': 'Residential (Planned)',
+          'smallcat3': 'Small Business (Legacy - Copper Cat3)',
+          'smallcat7': 'Small Business (Planned)',
+          'mediumcat3': 'Medium Business (Legacy - Copper Cat3)',
+          'mediumcat7': 'Medium Business (Planned)',
+          'largecat3': 'Large Business (Legacy - Copper Cat3)',
+          'largecat7': 'Large Business (Planned)',
+          'celltowercat3': 'Celltower (Legacy - Copper Cat3)',
+          'celltowercat7': 'Celltower (Planned)',
+        }
+
         arpuModels = arpuModels.map(model => {
+          const { locationEntityType, speedCategory } = model.arpuModelKey
+          model.title = titles[locationEntityType + speedCategory]
+
           model.products = products
             .sort((one, two) => one.id - two.id)
             .map(product => {

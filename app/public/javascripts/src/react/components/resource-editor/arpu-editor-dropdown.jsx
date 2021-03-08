@@ -14,7 +14,7 @@ export const Dropdown = ({ product, handler }) => {
   ])
 
   return (
-    <div className="select-dropdown">
+    <div className="arpu-dropdown">
       <button
         type="button"
         className="toggle"

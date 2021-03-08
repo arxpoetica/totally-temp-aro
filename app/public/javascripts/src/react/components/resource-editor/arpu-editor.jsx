@@ -8,10 +8,7 @@ export class ArpuEditor extends Component {
   constructor (props) {
     super(props)
 
-    this.state = {
-      modelIndex: 0,
-      arpuModels: [],
-    }
+    this.state = { arpuModels: [] }
   }
 
   componentDidMount () {
@@ -33,28 +30,56 @@ export class ArpuEditor extends Component {
   }
 
   renderArpuEditor() {
-    const { arpuModels, modelIndex } = this.state
+    const { arpuModels } = this.state
+    console.log(arpuModels)
 
     return (
       <div className="arpu-manager">
 
-        <div className="header">
-          <h2>ARPU Manager:</h2>
-          {/* list of ARPU models that the user can edit */}
-          <select onChange={event => this.setState({ modelIndex: event.target.value })}>
-            {/* <option value="">[Select a model]</option> */}
-            {arpuModels.map((model, index) =>
-              <option key={index} value={index}>
-                {model.arpuModelKey.locationEntityType} / {model.arpuModelKey.speedCategory}
-              </option>
-            )}
-          </select>
-        </div>
-
         <div className="body">
-          <div className="segmentation">
-            {arpuModels[modelIndex] ? this.renderSegmentation() : null}
-          </div>
+
+          <ul className="accordion">
+            {arpuModels.map((model, index) =>
+              <li className="accordion-row open" key={index}>
+
+                <div
+                  className="accordion-header"
+                  onClick={() => this.handleHeaderClick(index)}
+                >
+                  <h2 className="title">{model.title}</h2>
+                  <div className="selector">
+                    Strategy:
+                    {/* <select onChange={event => this.setState({ modelIndex: event.target.value })}>
+                      {arpuModels.map((model, index) =>
+                        <option key={index} value={index}>
+                          {model.arpuModelKey.locationEntityType} / {model.arpuModelKey.speedCategory}
+                        </option>
+                      )}
+                    </select> */}
+                    <select>
+                      <option>
+                        {model.arpuStrategy}
+                      </option>
+                      {/* {arpuModels.map((model, index) =>
+                        <option key={index} value={index}>
+                          {model.arpuModelKey.locationEntityType} / {model.arpuModelKey.speedCategory}
+                        </option>
+                      )} */}
+                    </select>
+                  </div>
+                </div>
+
+                <div className={`accordion-content ${arpuModels[index].open ? 'open' : 'shut'}`}>
+                  {/* {JSON.stringify(model)} */}
+                  <div className="segmentation">
+                    {this.renderSegmentation(index)}
+                  </div>
+                </div>
+
+              </li>
+            )}
+          </ul>
+
           <div className="buttons">
             <button className="btn btn-light mr-2" onClick={() => this.exitEditingMode()}>
               <i className="fa fa-undo action-button-icon"></i>&nbsp;Discard changes
@@ -69,9 +94,9 @@ export class ArpuEditor extends Component {
     )
   }
 
-  renderSegmentation() {
+  renderSegmentation(modelIndex) {
 
-    const { arpuModels, modelIndex } = this.state
+    const { arpuModels } = this.state
     const model = arpuModels[modelIndex]
     const { segments, products } = model
 
@@ -109,6 +134,12 @@ export class ArpuEditor extends Component {
         )}
       </>
     )
+  }
+
+  handleHeaderClick(index) {
+    const { arpuModels } = this.state
+    arpuModels[index].open = !arpuModels[index].open
+    this.setState({ arpuModels })
   }
 
   handleProductChange({ target }, productIndex) {
