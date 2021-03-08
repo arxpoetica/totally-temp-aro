@@ -831,8 +831,9 @@ class State {
 
     // Gets the last ephemeral plan in use, or creates a new one if no ephemeral plan exists.
     service.getOrCreateEphemeralPlan = () => {
-      return $http.get(`/service/v1/plan/ephemeral/latest`)
+      return $http.get(`/service/v1/plan?$top=1&user_id=${service.loggedInUser.id}`)
         .then((result) => {
+          result.data = result.data.pop();
           // We have a valid ephemeral plan if we get back an object with *some* properties
           var isValidEphemeralPlan = Object.getOwnPropertyNames(result.data).length > 0
           if (isValidEphemeralPlan) {
