@@ -3,6 +3,7 @@ import Actions from '../../../../common/actions'
 const defaultState = {
   enumStrings: {},
   networkNodeTypesEntity: {},
+  networkNodeTypes: {},
   showRoicReportsModal: false,
   roicResults: null,
   xAxisLabels: [],
@@ -25,6 +26,12 @@ function setEnumStrings (state, enumStrings) {
 function setNetworkNodeTypesEntity (state, networkNodeTypesEntity) {
   return { ...state,
     networkNodeTypesEntity: networkNodeTypesEntity
+  }
+}
+
+function setNetworkNodeTypes (state, networkNodeTypes) {
+  return { ...state,
+    networkNodeTypes: networkNodeTypes
   }
 }
 
@@ -54,6 +61,9 @@ function RoicReportsReducer (state = defaultState, action) {
 
     case Actions.ROIC_REPORTS_NETWORK_NODE_TYPE_ENTITY:
       return setNetworkNodeTypesEntity(state, action.payload)
+
+    case Actions.ROIC_REPORTS_NETWORK_NODE_TYPES:
+      return setNetworkNodeTypes(state, action.payload)
 
     case Actions.ROIC_REPORTS_SHOW_ROIC_REPORT_MODAL:
       return setShowRoicReportsModal(state, action.payload)

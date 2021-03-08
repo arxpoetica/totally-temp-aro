@@ -5,21 +5,20 @@ import RoicReports from './roic-reports.jsx'
 import RoicReportsActions from './roic-reports-actions'
 
 export class LocationRoicReports extends Component {
-
   constructor(props) {
     super(props)
-    this.state = {
-      roicPlanSettings: {}
+    this.getLocationInfo(this.props.planId)
+  }
+
+  componentDidUpdate(prevProps) {
+    const oldLocationId = prevProps.locationInfoDetails
+    const newLocationId = this.props.locationInfoDetails
+    if (newLocationId !== oldLocationId) {
+      this.getLocationInfo(this.props.planId)
     }
   }
 
-  componentDidUpdate (prevProps) {
-    if (prevProps.locationInfoDetails.location_id !== this.props.locationInfoDetails.location_id) {
-      this.getLocationInfo(this.props.planId)
-    } 
-  }
-
-  getLocationInfo (planId) {
+  getLocationInfo(planId) {
     const { locationInfoDetails } = this.props
     if (locationInfoDetails) {
       let locationIds = []
@@ -36,30 +35,27 @@ export class LocationRoicReports extends Component {
       }
 
       const roicPlanSettings = {
-        'analysis_type': 'LOCATION_ROIC',
-        'locationIds': locationIds,
-        'planId': planId,
-        'projectTemplateId': 1
+        analysis_type: 'LOCATION_ROIC',
+        locationIds,
+        planId,
+        projectTemplateId: 1,
       }
-      this.setState({ roicPlanSettings }, () => {
-        this.refreshData()
-      })
+      this.refreshData(roicPlanSettings)
     }
   }
 
-  refreshData() {
-    const { roicPlanSettings } = this.state
+  refreshData(roicPlanSettings) {
     if (!roicPlanSettings) {
       return
     }
     // Insted of props Drilling, roicResults is moved to redux
-    this.props.loadROICResultsForLocation(this.props.userId, roicPlanSettings)
+    this.props.loadROICResultsForLocation(roicPlanSettings)
   }
 
   render() {
     return (
       // Render Components based on reportSize
-      <RoicReports reportSize='small' />
+      <RoicReports reportSize="small" />
     )
   }
 }
@@ -67,12 +63,11 @@ export class LocationRoicReports extends Component {
 const mapStateToProps = (state) => ({
   planId: state.plan.activePlan && state.plan.activePlan.id,
   locationInfoDetails: state.locationInfo.details,
-  userId: state.user.loggedInUser.id,
-}) 
+})
 
 const mapDispatchToProps = (dispatch) => ({
-  loadROICResultsForLocation: (userId, roicPlanSettings) => dispatch(
-    RoicReportsActions.loadROICResultsForLocation(userId, roicPlanSettings)
+  loadROICResultsForLocation: (roicPlanSettings) => dispatch(
+    RoicReportsActions.loadROICResultsForLocation(roicPlanSettings)
   ),
 })
 
