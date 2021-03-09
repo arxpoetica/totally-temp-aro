@@ -13,12 +13,13 @@
 /* ----------- */
 
 .accordion {
+  overflow: auto;
+  height: calc(100% - 70px);
   margin: 0;
   padding: 0;
   list-style: none;
 }
-.accordion .accordion-row {
-}
+/* .accordion .accordion-row {} */
 .accordion .accordion-header {
   display: flex;
   justify-content: space-between;
@@ -29,9 +30,18 @@
   user-select: none;
 }
 .accordion .title {
+  display: flex;
+  align-items: center;
   margin: 0 12px 0 0;
   font: 18px var(--font);
   letter-spacing: -1px;
+}
+.accordion .svg {
+  width: 16px;
+  height: 16px;
+  margin: 0 10px 0 0;
+  color: var(--gray-medium-light);
+  line-height: 0;
 }
 /* .accordion .selector {} */
 .accordion .accordion-content {
@@ -49,14 +59,13 @@
   height: 60px;
   padding: 15px;
 } */
-.arpu-manager .body {
+/* .arpu-manager .body {
   height: calc(100% - 60px);
   width: calc(100% - 1px);
-}
+} */
 .arpu-manager .segmentation {
   overflow: auto;
   height: calc(100% - 70px);
-  border-top: 1px solid var(--gray-light);
 }
 .arpu-manager .buttons {
   display: flex;
@@ -71,12 +80,6 @@
   min-width: 100%;
   height: 50px;
   border-bottom: 1px solid var(--gray-light);
-}
-.arpu-manager .arpu-row:last-child {
-  border: none;
-}
-.arpu-manager .arpu-row:last-child .arpu-cell {
-  border: none;
 }
 .arpu-manager .products {
   height: 60px;

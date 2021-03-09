@@ -36,8 +36,6 @@ export class ArpuEditor extends Component {
     return (
       <div className="arpu-manager">
 
-        <div className="body">
-
           <ul className="accordion">
             {arpuModels.map((model, index) =>
               <li className="accordion-row open" key={index}>
@@ -46,7 +44,25 @@ export class ArpuEditor extends Component {
                   className="accordion-header"
                   onClick={() => this.handleHeaderClick(index)}
                 >
-                  <h2 className="title">{model.title}</h2>
+                  <h2 className="title">
+                    <div className="svg">
+                      <svg viewBox="0 0 16 16">
+                        {arpuModels[index].open
+                          ? <path d="M12 0a4 4 0 014 4v8a4 4 0 01-4 4H4a4 4 0
+                              01-4-4V4a4 4 0 014-4h8zm0 1H4a3 3 0 00-2.995
+                              2.824L1 4v8a3 3 0 002.824 2.995L4 15h8a3 3 0
+                              002.995-2.824L15 12V4a3 3 0 00-3-3zm0
+                              6v2H4V7h8z" fill="none" fillRule="evenodd"/>
+                          : <path d="M12 0a4 4 0 014 4v8a4 4 0 01-4 4H4a4 4 0
+                              01-4-4V4a4 4 0 014-4h8zm0 1H4a3 3 0 00-2.995
+                              2.824L1 4v8a3 3 0 002.824 2.995L4 15h8a3 3 0
+                              002.995-2.824L15 12V4a3 3 0 00-3-3zM9
+                              4v3h3v2H9v3H7V9H4V7h3V4h2z" fill="none" fillRule="evenodd"/>
+                        }
+                      </svg>
+                    </div>
+                    {model.title}
+                  </h2>
                   <div className="selector">
                     Strategy:
                     {/* <select onChange={event => this.setState({ modelIndex: event.target.value })}>
@@ -88,7 +104,6 @@ export class ArpuEditor extends Component {
               <i className="fa fa-save action-button-icon"></i>&nbsp;Save
             </button>
           </div>
-        </div>
 
       </div>
     )
@@ -114,12 +129,12 @@ export class ArpuEditor extends Component {
           )}
         </div>
 
-        {[...segments, ''].map((segment, segmentIndex) =>
+        {segments.map((segment, segmentIndex) =>
           <div key={segmentIndex} className="arpu-row">
             <div className="arpu-cell select">
               {segment.description || segment.name}
             </div>
-            {segment ? segment.percents.map((percent, cellIndex) =>
+            {segment.percents.map((percent, cellIndex) =>
               <div key={cellIndex} className="arpu-cell input">
                 <input
                   type="number"
@@ -129,7 +144,7 @@ export class ArpuEditor extends Component {
                   onChange={event => this.handleCellChange(event, segmentIndex, cellIndex)}
                 />
               </div>
-            ) : null}
+            )}
           </div>
         )}
       </>
