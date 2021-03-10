@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import ResourceActions from './resource-actions'
-import { Dropdown } from './arpu-editor-dropdown.jsx'
+import { Accordion, AccordionRow } from './../common/accordion/Accordion'
+import { Dropdown } from './arpu-editor-dropdown'
 import './arpu-editor.css'
 
 export class ArpuEditor extends Component {
@@ -33,77 +34,50 @@ export class ArpuEditor extends Component {
     const { arpuModels } = this.state
     console.log(arpuModels)
 
+    const selector = (model, index) =>
+      <div className="selector">
+        Strategy:
+        {/* <select onChange={event => this.setState({ modelIndex: event.target.value })}>
+          {arpuModels.map((model, index) =>
+            <option key={index} value={index}>
+              {model.arpuModelKey.locationEntityType} / {model.arpuModelKey.speedCategory}
+            </option>
+          )}
+        </select> */}
+        <select>
+          <option>
+            {model.arpuStrategy}
+          </option>
+          {/* {arpuModels.map((model, index) =>
+            <option key={index} value={index}>
+              {model.arpuModelKey.locationEntityType} / {model.arpuModelKey.speedCategory}
+            </option>
+          )} */}
+        </select>
+      </div>
+
     return (
       <div className="arpu-manager">
 
-          <ul className="accordion">
-            {arpuModels.map((model, index) =>
-              <li className="accordion-row open" key={index}>
+        <Accordion>
+          {arpuModels.map((model, index) =>
+            // NOTE: passing JSX content to the `header` prop
+            <AccordionRow key={index} title={model.title} header={selector(model, index)}>
+              <div className="segmentation">
+                {this.renderSegmentation(index)}
+              </div>
+            </AccordionRow>
+          )}
+        </Accordion>
 
-                <div
-                  className="accordion-header"
-                  onClick={() => this.handleHeaderClick(index)}
-                >
-                  <h2 className="title">
-                    <div className="svg">
-                      <svg viewBox="0 0 16 16">
-                        {arpuModels[index].open
-                          ? <path d="M12 0a4 4 0 014 4v8a4 4 0 01-4 4H4a4 4 0
-                              01-4-4V4a4 4 0 014-4h8zm0 1H4a3 3 0 00-2.995
-                              2.824L1 4v8a3 3 0 002.824 2.995L4 15h8a3 3 0
-                              002.995-2.824L15 12V4a3 3 0 00-3-3zm0
-                              6v2H4V7h8z" fill="none" fillRule="evenodd"/>
-                          : <path d="M12 0a4 4 0 014 4v8a4 4 0 01-4 4H4a4 4 0
-                              01-4-4V4a4 4 0 014-4h8zm0 1H4a3 3 0 00-2.995
-                              2.824L1 4v8a3 3 0 002.824 2.995L4 15h8a3 3 0
-                              002.995-2.824L15 12V4a3 3 0 00-3-3zM9
-                              4v3h3v2H9v3H7V9H4V7h3V4h2z" fill="none" fillRule="evenodd"/>
-                        }
-                      </svg>
-                    </div>
-                    {model.title}
-                  </h2>
-                  <div className="selector">
-                    Strategy:
-                    {/* <select onChange={event => this.setState({ modelIndex: event.target.value })}>
-                      {arpuModels.map((model, index) =>
-                        <option key={index} value={index}>
-                          {model.arpuModelKey.locationEntityType} / {model.arpuModelKey.speedCategory}
-                        </option>
-                      )}
-                    </select> */}
-                    <select>
-                      <option>
-                        {model.arpuStrategy}
-                      </option>
-                      {/* {arpuModels.map((model, index) =>
-                        <option key={index} value={index}>
-                          {model.arpuModelKey.locationEntityType} / {model.arpuModelKey.speedCategory}
-                        </option>
-                      )} */}
-                    </select>
-                  </div>
-                </div>
-
-                <div className={`accordion-content ${arpuModels[index].open ? 'open' : 'shut'}`}>
-                  {/* {JSON.stringify(model)} */}
-                  <div className="segmentation">
-                    {this.renderSegmentation(index)}
-                  </div>
-                </div>
-
-              </li>
-            )}
-          </ul>
-
-          <div className="buttons">
-            <button className="btn btn-light mr-2" onClick={() => this.exitEditingMode()}>
-              <i className="fa fa-undo action-button-icon"></i>&nbsp;Discard changes
-            </button>
-            <button className="btn btn-primary" onClick={() => this.saveConfigurationToServer()}>
-              <i className="fa fa-save action-button-icon"></i>&nbsp;Save
-            </button>
-          </div>
+        <div className="buttons">
+          <button className="btn btn-light mr-2" onClick={() => this.exitEditingMode()}>
+            <i className="fa fa-undo action-button-icon"></i>&nbsp;Discard changes
+          </button>
+          <button className="btn btn-primary" onClick={() => this.saveConfigurationToServer()}>
+            <i className="fa fa-save action-button-icon"></i>&nbsp;Save
+          </button>
+        </div>
 
       </div>
     )
@@ -149,12 +123,6 @@ export class ArpuEditor extends Component {
         )}
       </>
     )
-  }
-
-  handleHeaderClick(index) {
-    const { arpuModels } = this.state
-    arpuModels[index].open = !arpuModels[index].open
-    this.setState({ arpuModels })
   }
 
   handleProductChange({ target }, productIndex) {
