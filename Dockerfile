@@ -1,11 +1,13 @@
-FROM avco/aro-app-base:ubuntu1804-node12
+FROM node:10
 WORKDIR /target
 COPY app .
 RUN npm install --only=prod && npm run build
 
 
+FROM node:10
 
-FROM avco/aro-app-base:latest
+RUN npm install -g pm2
+
 WORKDIR /srv/www/aro/current
 COPY --from=0 /target ./app
 COPY bootstrap ./bootstrap

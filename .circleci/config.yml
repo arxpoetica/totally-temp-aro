@@ -75,6 +75,7 @@ workflows:
                 - dev
                 - uat
                 - terminalValueUI
+                - nv/restore-docker-sanity
       - deploy:
           context: aro_qa_builds
           requires:
