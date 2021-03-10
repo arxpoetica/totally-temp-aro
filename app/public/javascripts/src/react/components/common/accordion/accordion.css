@@ -24,6 +24,7 @@
   align-items: center;
   padding: 15px;
   border-bottom: 1px solid var(--gray-light);
+  font: 18px var(--font);
   cursor: pointer;
   user-select: none;
 }
@@ -32,7 +33,7 @@
   display: flex;
   align-items: center;
   margin: 0 12px 0 0;
-  font: 18px var(--font);
+  font: inherit;
   letter-spacing: -1px;
 }
 .accordion .accordion-tools .title {

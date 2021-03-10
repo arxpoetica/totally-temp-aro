@@ -10,6 +10,11 @@ export class ArpuEditor extends Component {
     super(props)
 
     this.state = { arpuModels: [] }
+    this.OPTIONS = Object.freeze({
+      global: 'Global',
+      segmentation: 'Segmentation',
+      tsm: 'Telecom Spend Matrix',
+    })
   }
 
   componentDidMount () {
@@ -32,28 +37,22 @@ export class ArpuEditor extends Component {
 
   renderArpuEditor() {
     const { arpuModels } = this.state
-    console.log(arpuModels)
 
     const selector = (model, index) =>
       <div className="selector">
         Strategy:
-        {/* <select onChange={event => this.setState({ modelIndex: event.target.value })}>
-          {arpuModels.map((model, index) =>
-            <option key={index} value={index}>
-              {model.arpuModelKey.locationEntityType} / {model.arpuModelKey.speedCategory}
-            </option>
-          )}
-        </select> */}
-        <select>
-          <option>
-            {model.arpuStrategy}
-          </option>
-          {/* {arpuModels.map((model, index) =>
-            <option key={index} value={index}>
-              {model.arpuModelKey.locationEntityType} / {model.arpuModelKey.speedCategory}
-            </option>
-          )} */}
-        </select>
+        {model.options
+          ? <select
+            value={model.strategy}
+            onClick={event => event.stopPropagation()}
+            onChange={event => this.handleStrategyChange(event, index)}
+          >
+            {model.options.map(option =>
+              <option key={option} value={option}>{this.OPTIONS[option]}</option>
+            )}
+          </select>
+          : ' Global'
+        }
       </div>
 
     return (
@@ -63,9 +62,26 @@ export class ArpuEditor extends Component {
           {arpuModels.map((model, index) =>
             // NOTE: passing JSX content to the `header` prop
             <AccordionRow key={index} title={model.title} header={selector(model, index)}>
-              <div className="segmentation">
-                {this.renderSegmentation(index)}
-              </div>
+              {/* {model.strategy === 'local' &&
+                <div className="arpu-content">
+                  <p>Average Revenue Per User will calculate per location.</p>
+                </div>
+              } */}
+              {model.strategy === 'global' &&
+                <div className="arpu-content">
+                  <input value="FILL IT IN HERE PLEASE." onChange={() => {}}/>
+                </div>
+              }
+              {model.strategy === 'tsm' &&
+                <div className="arpu-content">
+                  <p>Average Revenue per user will be calculated with the Telecom Spend Matrix.</p>
+                </div>
+              }
+              {model.strategy === 'segmentation' &&
+                <div className="segmentation">
+                  {this.renderSegmentation(index)}
+                </div>
+              }
             </AccordionRow>
           )}
         </Accordion>
@@ -125,8 +141,15 @@ export class ArpuEditor extends Component {
     )
   }
 
+  handleStrategyChange(event, modelIndex) {
+    const { arpuModels } = this.state
+    arpuModels[modelIndex].strategy = event.target.value
+    this.setState({ arpuModels })
+  }
+
   handleProductChange({ target }, productIndex) {
     const { name, value } = target
+    // FIXME: remove modelIndex
     const { arpuModels, modelIndex } = this.state
     arpuModels[modelIndex].products[productIndex][name] = value
     this.setState({ arpuModels })
@@ -134,6 +157,7 @@ export class ArpuEditor extends Component {
 
   handleCellChange({ target }, segmentIndex, cellIndex) {
     let value = parseFloat(target.value)
+    // FIXME: remove modelIndex
     const { arpuModels, modelIndex } = this.state
 
     const { percents } = arpuModels[modelIndex].segments[segmentIndex]

@@ -642,7 +642,8 @@ function loadArpuManagerConfiguration(arpuManagerId) {
 
         // Sort the arpu models based on the `locationEntityType`
         // NOTE: the location order is hard typed here...
-        const locationOrder = ['household', 'small', 'medium', 'large', 'celltower']
+        const businessOrder = ['small', 'medium', 'large']
+        const locationOrder = ['household', ...businessOrder, 'celltower']
         let arpuModels = []
         for (const type of locationOrder) {
           // NOTE: right now there's only the capture-all morphology `*` group hence `[0]`
@@ -671,6 +672,35 @@ function loadArpuManagerConfiguration(arpuManagerId) {
           const { locationEntityType, speedCategory } = model.arpuModelKey
           model.title = titles[locationEntityType + speedCategory]
 
+          // NOTE: we're rewiring the strategy for UI purposes.
+          // ON SAVE, THIS IS REVERSED BACK INTO THE CONFIG
+          // ===> strategy options
+          if (locationEntityType !== 'celltower') {
+            model.options = ['global']
+          }
+          if (businessOrder.includes(locationEntityType)) {
+            model.options.push('tsm')
+          } else if (locationEntityType === 'household') {
+            model.options.push('segmentation')
+          }
+          // ===> strategy value
+          if (model.arpuStrategy === 'arpu') {
+            if (model.cells.length === 1
+              && model.cells[0].key.productId === 1
+              && model.cells[0].key.segmentId === 1
+              || !model.cells.length
+            ) {
+              // ===> single cell, `arpu` means `global` here
+              model.strategy = 'global'
+            } else {
+              // ===> multiple cell, `arpu` means `segmentation` here
+              model.strategy = 'segmentation'
+            }
+          } else {
+            // ===> should only be `tsm` left over
+            model.strategy = model.arpuStrategy
+          }
+
           model.products = products
             .sort((one, two) => one.id - two.id)
             .map(product => {
@@ -697,6 +727,7 @@ function loadArpuManagerConfiguration(arpuManagerId) {
               return Object.assign({}, segment)
             })
 
+          delete model.arpuStrategy
           delete model.productAssignments
           delete model.segmentAssignments
           delete model.cells
