@@ -1124,28 +1124,27 @@ class State {
         service.plan.planState = PlanStates.START_STATE
         service.setActivePlanState(PlanStates.START_STATE)
       }
-      if (service.plan && service.plan.planState !== PlanStates.COMPLETED) {
+      if (service.plan) {
         // Unsubscribe from progress message handler (if any)
         if (service.unsubscribeProgressHandler) {
           service.unsubscribeProgressHandler()
         }
-        service.unsubscribeProgressHandler = SocketManager.subscribe('PROGRESS_MESSAGE_DATA', progressData => {
-          if (progressData.data.processType === 'optimization') {
-            newPlan.planState = progressData.data.optimizationState
-            service.plan.planState = progressData.data.optimizationState
+        service.unsubscribeProgressHandler = SocketManager.subscribe('PROGRESS_MESSAGE_DATA', msg => {
+          if (msg.data.processType === 'optimization') {
+            const state = msg.data.optimizationState
+            newPlan.planState = state
+            service.plan.planState = state
 
-            if (progressData.data.optimizationState === PlanStates.COMPLETED ||
-              progressData.data.optimizationState === PlanStates.CANCELED ||
-              progressData.data.optimizationState === PlanStates.FAILED) {
+            if (state === PlanStates.CANCELED || state === PlanStates.FAILED) {
               tileDataService.markHtmlCacheDirty()
               service.requestMapLayerRefresh.next(null)
               delete service.plan.optimizationId
               service.loadPlanInputs(newPlan.id)
-              service.setActivePlanState(progressData.data.optimizationState)
+              service.setActivePlanState(state)
               service.stopProgressMessagePolling()
             }
 
-            service.progressPercent = progressData.data.progress * 100
+            service.progressPercent = msg.data.progress * 100
             $timeout() // Trigger a digest cycle so that components can update
           }
         })
@@ -1757,6 +1756,11 @@ class State {
     }
 
     service.handlePlanModifiedEvent = msg => {
+
+      // set plan state to `COMPLETED` when `COMMIT_TRANSACTION` is sent from socket
+      service.plan.planState = PlanStates.COMPLETED
+      service.setActivePlanState(PlanStates.COMPLETED)
+
       // If the tileBox is null, use a tile box that covers the entire world
       const content = JSON.parse(new TextDecoder('utf-8').decode(new Uint8Array(msg.content)))
       const tileBox = (content.vectorTileUpdate && content.vectorTileUpdate.tileBox) || wholeWorldTileBox

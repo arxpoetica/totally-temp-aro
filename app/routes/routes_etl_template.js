@@ -1,7 +1,7 @@
 const models = require('../models')
 const multer = require('multer')
 const os = require('os')
-const upload = multer({ dest: os.tmpDir() })
+const upload = multer({ dest: os.tmpdir() })
 const fs = require('fs')
 
 exports.configure = (app, middleware) => {

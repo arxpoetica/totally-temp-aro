@@ -1,18 +1,17 @@
 import React, { Component } from 'react'
-import reduxStore from '../../../redux-store'
-import wrapComponentWithProvider from '../../common/provider-wrapped-component'
-import CreatableSelect from 'react-select/creatable';
-import { components } from 'react-select';
+import { connect } from 'react-redux'
+import CreatableSelect from 'react-select/creatable'
+import { components } from 'react-select'
 import AroHttp from '../../common/aro-http'
 import ToolBarActions from './tool-bar-actions'
 import PlanSearchFilter from './plan-search-filter.jsx'
-import uniqBy from 'lodash/uniqBy';
-import merge from 'lodash/merge';
+import uniqBy from 'lodash/uniqBy'
+import merge from 'lodash/merge'
 
 const createOption = (label) => ({
   label,
   value: label,
-});
+})
 
 const groupStyles = {
   padding: '0px 10px',
@@ -22,20 +21,20 @@ const groupStyles = {
   borderTop: '1px #aaa solid',
   borderBottom: '1px #aaa solid',
   lineHeight: '28px'
-};
+}
 
 const groupBadgeStyles = {
   backgroundColor: '#EBECF0',
   display: 'inline-block',
   fontSize: 12,
   textTransform: 'lowercase'
-};
+}
 
 const formatGroupLabel = data => (
   <div style={groupStyles}>
     <span style={groupBadgeStyles}>{data.label}</span>
   </div>
-);
+)
 
 const square = (color) => ({
   alignItems: 'center',
@@ -49,14 +48,14 @@ const square = (color) => ({
     height: 10,
     width: 10,
   },
-});
+})
 
 export class PlanSearch extends Component {
 
   constructor (props) {
     super(props)
 
-    this.creatableRef = React.createRef();
+    this.creatableRef = React.createRef()
     this.searchCreatorsList()
 
     this.state = {
@@ -65,7 +64,6 @@ export class PlanSearch extends Component {
       searchText: [],
       searchList: [],
       allPlans: false,
-      systemUsers: [],
       planOptions: {
         url: '/service/v1/plan',
         method: 'GET',
@@ -76,10 +74,9 @@ export class PlanSearch extends Component {
       plans: [],
       pages: [],
       currentPage: '',
-      idToServiceAreaCode: {},
       optionSetText: [],
       isDropDownOption: false,
-      isValueRemoved: false
+      isValueRemoved: false,
     }
 
     this.optionSetTextArray = [
@@ -94,9 +91,9 @@ export class PlanSearch extends Component {
   }
 
   render() {
-    const {showRefreshPlansOnMapMove, loggedInUser, listOfTags, listOfServiceAreaTags} = this.props
+    const { showRefreshPlansOnMapMove, loggedInUser, listOfTags, listOfServiceAreaTags } = this.props
     const { searchText, plans, currentPage, pages, idToServiceAreaCode, creatorsSearchList,
-            optionSetText, isDropDownOption } = this.state;
+      optionSetText, isDropDownOption } = this.state
 
     // To customize MultiValuelabel in react-select
     // https://codesandbox.io/s/znxjxj556l?file=/src/index.js:76-90
@@ -107,14 +104,19 @@ export class PlanSearch extends Component {
           <span className="tag">
             {props.data.type}&nbsp;:&nbsp;
             {props.data.type === 'tag' &&
-              <span className="badge badge-primary" style={{ backgroundColor: this.props.getTagColour(props.data) }}>{props.data.value}</span>
+              <span
+                className="badge badge-primary"
+                style={{ backgroundColor: this.props.getTagColour(props.data) }}
+              >
+                {props.data.value}
+              </span>
             }
             {props.data.type === 'svc' &&
               <span className="badge badge-primary satags">{props.data.value}</span>
             }
             {props.data.type === 'created_by' &&
               <span className="badge badge-primary satags">{props.data.value}</span>
-            }            
+            }
           </span>
         }
         {!props.data.type &&
@@ -124,7 +126,7 @@ export class PlanSearch extends Component {
         }
       </components.MultiValue>
       )
-    };
+    }
 
     // To customize control, container, option in react-select
     const customStyles = {
@@ -142,23 +144,38 @@ export class PlanSearch extends Component {
         ...square(this.props.getTagColour(state.data)),
       }),
     }
-        
-    var newSearchText = [];
-    if(searchText !== null) {
-      newSearchText = searchText.map((newkey, index) => {
-        if (newkey.hasOwnProperty('type')) {
-          if(newkey.type === 'tag') return {"id":newkey.id, "name": newkey.name, "value": newkey.name, "label": newkey.name, "type": newkey.type, "colourHue": newkey.colourHue}; 
-          if(newkey.type === 'svc') return {"id":newkey.id, "code": newkey.code, "value": newkey.code, "label": newkey.code, "type": newkey.type}; 
-          if(newkey.type === 'created_by') return {"id":newkey.fullName, "fullName": newkey.fullName, "value": newkey.fullName, "label": newkey.fullName, "type": newkey.type};  
-        } else { return newkey; }
-      })
-    } else {newSearchText = []; }
 
-    return(
+    let newSearchText = []
+    if (searchText !== null) {
+      newSearchText = searchText.map((newkey) => {
+        if (newkey.hasOwnProperty('type')) {
+          if (newkey.type === 'tag') {
+          return {"id": newkey.id, "name": newkey.name, "value": newkey.name,
+            "label": newkey.name, "type": newkey.type, "colourHue": newkey.colourHue}
+          }
+          if (newkey.type === 'svc') {
+            return {"id": newkey.id, "code": newkey.code, "value": newkey.code,
+              "label": newkey.code, "type": newkey.type}
+          }
+          if (newkey.type === 'created_by') {
+           return {"id": newkey.fullName, "fullName": newkey.fullName, "value": newkey.fullName,
+            "label": newkey.fullName, "type": newkey.type}
+          }
+        } else { return newkey }
+      })
+    } else { newSearchText = [] }
+
+    return (
       <div>
         {showRefreshPlansOnMapMove &&
         <div style={{lineHeight: '33px', padding: '5px 0px'}}>
-          <input type="checkbox" classame="checkboxfill" name="ctype-name" style={{marginTop: '0px'}} disabled/> Refresh Plans on map move
+          <input
+            type="checkbox"
+            classame="checkboxfill"
+            name="ctype-name"
+            style={{marginTop: '0px'}}
+            disabled
+          /> Refresh Plans on map move
         </div>
         }
 
@@ -173,16 +190,20 @@ export class PlanSearch extends Component {
             menuIsOpen={isDropDownOption}
             closeMenuOnSelect={true}
             isClearable={false}
-            onChange={(e, action)=>this.handleChange(e, action)}
-            onInputChange={(e, action)=>this.handleInputChange(e, action)}
-            formatGroupLabel={(e)=>formatGroupLabel(e)}
-            onBlur={(e)=>this.onBlur(e)}
-            onFocus={(e)=>this.onFocus(e)}
+            onChange={(event, action) => this.handleChange(event, action)}
+            onInputChange={(event, action) => this.handleInputChange(event, action)}
+            formatGroupLabel={(event) => formatGroupLabel(event)}
+            onBlur={(event) => this.onBlur(event)}
+            onFocus={() => this.onFocus()}
             ref={ref => {
-              this.creatableRef = ref;
+              this.creatableRef = ref
             }}
           />
-          <button className="btn btn-light input-group-append" onClick={(e)=>this.onClikCreateValue(e)} style={{cursor:'pointer'}}>
+          <button
+            className="btn btn-light input-group-append"
+            onClick={(event) => this.onClikCreateValue(event)}
+            style={{cursor: 'pointer'}}
+          >
             <span className="fa fa-search"></span>
           </button>
         </div>
@@ -221,22 +242,26 @@ export class PlanSearch extends Component {
               {plans.map((plan, index) =>
                 <tr key={index}>
                   <td>
-                    <b><span className="aro-faux-anchor" onClick={(e)=>this.onPlanClicked(plan)}>{plan.name}</span></b>
+                    <b>
+                      <span className="aro-faux-anchor" onClick={() => this.onPlanClicked(plan)}>{plan.name}</span>
+                    </b>
                     {plan.createdBy &&
                       <div>
                         <i>{this.getPlanCreatorName(plan.createdBy) || 'loading...'}</i>
                       </div>
                     }
                     <div className="tags"></div>
-                    {this.getTagCategories(plan.tagMapping.global).map((tag, index) => {
+                    {this.getTagCategories(plan.tagMapping.global).map((tag, ind) => {
                       return (
-                      <div key={index} className="badge badge-primary" 
+                      <div key={ind} className="badge badge-primary"
                         style={{ backgroundColor: this.props.getTagColour(tag) }}
                       >
                         <span> {tag.name} &nbsp;
                           {loggedInUser.isAdministrator &&
-                            <i className="fa fa-times pointer" onClick={(e)=>this.updateTag(plan, {type:'general',tag:tag})}></i>
-                          } 
+                            <i className="fa fa-times pointer"
+                              onClick={() => this.updateTag(plan, {type: 'general', tag: tag})}
+                            />
+                          }
                         </span>
                       </div>
                       )
@@ -247,8 +272,10 @@ export class PlanSearch extends Component {
                       <div key={index} className="badge satags">
                         <span> {idToServiceAreaCode[serviceAreaId] || 'loading...'} &nbsp;
                           {loggedInUser.isAdministrator &&
-                            <i className="fa fa-times pointer" onClick={(e)=>this.updateTag(plan, {type:'svc',serviceAreaId:serviceAreaId})}></i>
-                          } 
+                            <i className="fa fa-times pointer"
+                              onClick={() => this.updateTag(plan, {type: 'svc', serviceAreaId: serviceAreaId})}
+                            />
+                          }
                         </span>
                       </div>
                       )
@@ -260,25 +287,25 @@ export class PlanSearch extends Component {
           </table>
 
           <nav className="text-center" style={{maxHeight: '35px'}}>
-          <ul className="pagination" style={{margin: '0px'}}>
-            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-              <span className="page-link" aria-label="Previous" onClick={(e)=>this.loadPlans(currentPage - 1)}>
-                <span aria-hidden="true">&laquo;</span>
-              </span>
-            </li>
-            {pages.map((page, index) => {
-              return (
-                <li key={index} className={`page-item ${page ===  currentPage ? 'active' : ''}`}>
-                  <span className="page-link" onClick={(e)=>this.loadPlans(page)}>{ page }</span>
-                </li>
-              )
-            })}
-            <li className={`page-item ${currentPage === pages[pages.length - 1] ? 'disabled' : ''}`}>
-              <span className="page-link" aria-label="Next" onClick={(e)=>this.loadPlans(pages[pages.length - 1])}>
-                <span aria-hidden="true">&raquo;</span>
-              </span>
-            </li>
-          </ul>
+            <ul className="pagination" style={{margin: '0px'}}>
+              <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                <span className="page-link" aria-label="Previous" onClick={() => this.loadPlans(currentPage - 1)}>
+                  <span aria-hidden="true">&laquo;</span>
+                </span>
+              </li>
+              {pages.map((page, index) => {
+                return (
+                  <li key={index} className={`page-item ${page === currentPage ? 'active' : ''}`}>
+                    <span className="page-link" onClick={() => this.loadPlans(page)}>{ page }</span>
+                  </li>
+                )
+              })}
+              <li className={`page-item ${currentPage === pages[pages.length - 1] ? 'disabled' : ''}`}>
+                <span className="page-link" aria-label="Next" onClick={() => this.loadPlans(pages[pages.length - 1])}>
+                  <span aria-hidden="true">&raquo;</span>
+                </span>
+              </li>
+            </ul>
           </nav>
         </>
         }
@@ -291,61 +318,70 @@ export class PlanSearch extends Component {
   }
 
   focusCreatable  () {
-    this.creatableRef.focus();
-  };
+    this.creatableRef.focus()
+  }
 
-  onFocus (e)  {
-    if(this.state.isValueRemoved){
-      this.setState({ isDropDownOption: true });
+  onFocus () {
+    if (this.state.isValueRemoved){
+      this.setState({ isDropDownOption: true })
     }
-  };
+  }
 
-  onBlur (e)  {
-    this.setState({ isDropDownOption: false });
-  };
+  onBlur () {
+    this.setState({ isDropDownOption: false })
+  }
 
-  onClikCreateValue (e) {
-    const { inputValue, searchText } = this.state;
+  onClikCreateValue (event) {
+    const { inputValue, searchText } = this.state
 
-    if (!inputValue) return;
+    if (!inputValue) return
     this.setState({
       inputValue: '',
       searchText: [...searchText, createOption(inputValue)],
-    }, () =>{
+    }, () => {
       this.loadPlans()
     })
-    e.stopPropagation();
-    e.preventDefault();
+    event.stopPropagation()
+    event.preventDefault()
   }
 
   handleChange (searchText, { action }) {
 
+    let newSearchText = searchText
     // To perform action while 'remove-value' in react-select
     switch (action) {
       case 'remove-value':
-        var newSearchText = searchText;
-        if(newSearchText === null){
-          newSearchText = [];
-          this.setState({ isDropDownOption: true });
+        if (newSearchText === null){
+          newSearchText = []
+          this.setState({ isDropDownOption: true })
         } else {
-          newSearchText = searchText;
+          newSearchText = searchText
         }
 
         // To Format searchText Array as per react-select options
-        var formatedObjArray = []
+        let formatedObjArray = []
         formatedObjArray = this.state.searchText.map((newkey, index) => {
           if (newkey.hasOwnProperty('type')) {
-            if(newkey.type === 'tag') return {"id":newkey.id, "name": newkey.name, "value": newkey.name, "label": newkey.name, "type": newkey.type, "colourHue": newkey.colourHue}; 
-            if(newkey.type === 'svc') return {"id":newkey.id, "code": newkey.code, "value": newkey.code, "label": newkey.code, "type": newkey.type}; 
-            if(newkey.type === 'created_by') return {"id":newkey.fullName, "fullName": newkey.fullName, "value": newkey.fullName, "label": newkey.fullName, "type": newkey.type};  
-          } else { return newkey; }
+            if (newkey.type === 'tag') {
+              return {"id": newkey.id, "name": newkey.name, "value": newkey.name,
+                "label": newkey.name, "type": newkey.type, "colourHue": newkey.colourHue}
+            }
+            if (newkey.type === 'svc') {
+              return {"id": newkey.id, "code": newkey.code, "value": newkey.code,
+                "label": newkey.code, "type": newkey.type}
+            }
+            if (newkey.type === 'created_by') {
+              return {"id": newkey.fullName, "fullName": newkey.fullName,
+                "value": newkey.fullName, "label": newkey.fullName, "type": newkey.type}
+            }
+          } else { return newkey }
         })
 
         // To compare 'newSearchText' and 'formatedObjArray' and get the removed values from reat-select serach bar
         // https://stackoverflow.com/questions/21987909/how-to-get-the-difference-between-two-arrays-of-objects-in-javascript
-        var onlyInA = newSearchText.filter(this.arrayComparer(formatedObjArray));
-        var onlyInB = formatedObjArray.filter(this.arrayComparer(newSearchText));
-        var removedValueArray = onlyInA.concat(onlyInB);
+        const onlyInA = newSearchText.filter(this.arrayComparer(formatedObjArray))
+        const onlyInB = formatedObjArray.filter(this.arrayComparer(newSearchText))
+        const removedValueArray = onlyInA.concat(onlyInB)
 
         // To Push formatedObjArray to reat-select required options structure
         this.optionSetTextArray.map((newkey, index) => {
@@ -355,49 +391,49 @@ export class PlanSearch extends Component {
         })
 
         // To remove duplicate objects from array
-        var uniqueObjArray = this.optionSetTextArray
-        uniqueObjArray.map((subarray, index) =>  {
-          let filtered = uniqBy(subarray.options, item => item.value)
-          uniqueObjArray[index].options = [];
+        const uniqueObjArray = this.optionSetTextArray
+        uniqueObjArray.map((subarray, index) => {
+          const filtered = uniqBy(subarray.options, item => item.value)
+          uniqueObjArray[index].options = []
           merge(uniqueObjArray[index].options, filtered)
         })
-        
-        this.setState({ searchText: newSearchText, optionSetText: _.uniq(uniqueObjArray), isValueRemoved: true }, () => {
+
+        this.setState({ searchText: newSearchText,
+          optionSetText: _.uniq(uniqueObjArray), isValueRemoved: true }, () => {
           this.loadPlans()
-        });
-        return;
+        })
+        return
       default:
-        var newSearchText = searchText;
-        if(newSearchText === null){
-          newSearchText = [];
+        if (newSearchText === null){
+          newSearchText = []
         } else {
-          newSearchText = searchText;
-          this.setState({ isDropDownOption: false });
+          newSearchText = searchText
+          this.setState({ isDropDownOption: false })
         }
         this.setState({ searchText: newSearchText }, () => {
           this.loadPlans()
-        });
-        return;
+        })
+        return
     }
-  };
+  }
 
   // To compare two array and find the difference value
   // https://stackoverflow.com/questions/21987909/how-to-get-the-difference-between-two-arrays-of-objects-in-javascript
   arrayComparer (otherArray) {
     return function(current){
       return otherArray.filter(function(other){
-        return other.value == current.value
-      }).length == 0;
+        return other.value === current.value
+      }).length === 0
     }
   }
 
   handleInputChange (inputValue, { action }) {
     switch (action) {
       case 'input-change':
-        this.setState({ inputValue });
-        return;
+        this.setState({ inputValue })
+        return
       default:
-        return;
+        return
     }
   }
 
@@ -408,7 +444,7 @@ export class PlanSearch extends Component {
   loadServiceAreaInfo (plans) {
     // Load service area ids for all service areas referenced by the plans
     // First determine which ids to fetch. We might already have a some or all of them
-    var serviceAreaIdsToFetch = new Set()
+    const serviceAreaIdsToFetch = new Set()
     plans.forEach((plan) => {
       plan.tagMapping.linkTags.serviceAreaIds.forEach((serviceAreaId) => {
         if (!this.state.idToServiceAreaCode.hasOwnProperty(serviceAreaId)) {
@@ -421,10 +457,10 @@ export class PlanSearch extends Component {
     }
 
     // Get the ids from aro-service
-    let serviceAreaIds = [...serviceAreaIdsToFetch]
-    var promises = []
+    const serviceAreaIds = [...serviceAreaIdsToFetch]
+    const promises = []
     while (serviceAreaIds.length) {
-      var filter = ''
+      let filter = ''
       serviceAreaIds.splice(0, 100).forEach((serviceAreaId, index) => {
         if (index > 0) {
           filter += ' or '
@@ -437,11 +473,11 @@ export class PlanSearch extends Component {
 
     return this.props.loadListOfSAPlanTagsById(this.props.listOfServiceAreaTags, promises)
       .then((result) => {
-        var idToServiceAreaCode = this.state.idToServiceAreaCode
+        const idToServiceAreaCode = this.state.idToServiceAreaCode
         result.forEach((serviceArea) => {
           idToServiceAreaCode[serviceArea.id] = serviceArea.code
         })
-        this.setState({ idToServiceAreaCode: idToServiceAreaCode })
+        this.setState({ idToServiceAreaCode })
       })
       .catch((err) => console.error(err))
   }
@@ -451,41 +487,41 @@ export class PlanSearch extends Component {
     this.setState({ currentPage: page || 1 })
     this.maxResults = 10
     if (page > 1) {
-      var start = this.maxResults * (page - 1)
-      var end = start + this.maxResults
+      const start = this.maxResults * (page - 1)
+      const end = start + this.maxResults
       this.setState({ plans: this.state.allPlans.slice(start, end) })
       this.loadServiceAreaInfo(this.state.plans)
       return
     }
 
-    var load = (callback) => {
-      var planOptions = this.state.planOptions
+    const load = (callback) => {
+      const planOptions = this.state.planOptions
       planOptions.params.user_id = this.props.loggedInUser.id
       planOptions.params.search = this.state.search_text
       planOptions.params.project_template_id = this.props.loggedInUser.projectId
 
-      var esc = encodeURIComponent;
-      var queryParams = Object.keys(planOptions.params)
+      const esc = encodeURIComponent
+      const queryParams = Object.keys(planOptions.params)
           .map(k => esc(k) + '=' + esc(planOptions.params[k]))
-          .join('&');
+          .join('&')
 
-      var queryString = planOptions.url+'?'+queryParams
+      const queryString = planOptions.url +'?'+ queryParams
 
       AroHttp.get(queryString)
         .then((response) => {
-          var planOptions = this.state.planOptions
+          const planOptions = this.state.planOptions
           planOptions.params = {}
-          this.setState({ planOptions: planOptions })
+          this.setState({ planOptions })
 
           AroHttp.get('/optimization/processes').then((running) => {
             this.totalData = []
             this.totalData = response.data.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase()) ? 1 : -1)
             this.totalData.forEach((plan) => {
-              var info = running.data.find((status) => status.planId === +plan.id)
+              const info = running.data.find((status) => status.planId === +plan.id)
               if (info) {
-                var diff = (Date.now() - new Date(info.startDate).getTime()) / 1000
-                var min = Math.floor(diff / 60)
-                var sec = Math.ceil(diff % 60)
+                const diff = (Date.now() - new Date(info.startDate).getTime()) / 1000
+                const min = Math.floor(diff / 60)
+                const sec = Math.ceil(diff % 60)
                 plan.progressString = `${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec} Runtime`
                 plan.progress = info.progress
                 plan.startDate = info.startDate
@@ -493,13 +529,15 @@ export class PlanSearch extends Component {
               }
             })
 
-            let allPlans = response.data
-            this.setState({ allPlans: allPlans, plans: allPlans.slice(0, this.maxResults) }, () => {
+            const allPlans = response.data
+            this.setState({ allPlans, plans: allPlans.slice(0, this.maxResults) }, () => {
               this.loadServiceAreaInfo(this.state.plans)
             })
             this.pages = []
-            var pageSize = Math.floor(response.data.length / this.maxResults) + (response.data.length % this.maxResults > 0 ? 1 : 0)
-            for (var i = 1; i <= pageSize; i++) {
+            const pageSize = Math.floor(
+              response.data.length / this.maxResults) + (response.data.length % this.maxResults > 0 ? 1 : 0
+            )
+            for (let i = 1; i <= pageSize; i++) {
               this.pages.push(i)
             }
             this.setState({ pages: this.pages })
@@ -511,14 +549,16 @@ export class PlanSearch extends Component {
     setTimeout(
       function() {
         load(callback)
-      }.bind(this),500
-    );
+      }.bind(this), 500
+    )
   }
 
   updateTag (plan, removeTag) {
-    var updatePlan = plan
-    if (removeTag.type == 'svc') {
-      updatePlan.tagMapping.linkTags.serviceAreaIds = _.without(updatePlan.tagMapping.linkTags.serviceAreaIds, removeTag.serviceAreaId)
+    const updatePlan = plan
+    if (removeTag.type === 'svc') {
+      updatePlan.tagMapping.linkTags.serviceAreaIds = _.without(
+        updatePlan.tagMapping.linkTags.serviceAreaIds, removeTag.serviceAreaId
+      )
     } else {
       updatePlan.tagMapping.global = _.without(updatePlan.tagMapping.global, removeTag.tag.id)
     }
@@ -530,29 +570,29 @@ export class PlanSearch extends Component {
   }
 
   getPlanCreatorName (createdBy) {
-    var creator = this.props.systemActors[createdBy]
+    const creator = this.props.systemActors[createdBy]
     return creator && ((creator.type === 'group') ? creator.name : `${creator.firstName} ${creator.lastName}`)
   }
 
   constructSearch () {
     this.setState({ search_text: '' })
 
-    var newConstructSearch = [];
-    let oldConstructSearch = this.state.searchText;
+    let newConstructSearch = []
+    const oldConstructSearch = this.state.searchText
 
-    if(oldConstructSearch !== null) {
+    if (oldConstructSearch !== null) {
       newConstructSearch = oldConstructSearch.map((item, index) => {
         if (item.hasOwnProperty('type')) {
-          return item;
+          return item
         } else {
-          return item.value;
+          return item.value
         }
       })
     } else {
-      newConstructSearch = [];
+      newConstructSearch = []
     }
 
-    var selectedFilterPlans = _.filter(newConstructSearch, (plan) => {
+    const selectedFilterPlans = _.filter(newConstructSearch, (plan) => {
       if (_.isString(plan)) return plan
     })
 
@@ -562,7 +602,7 @@ export class PlanSearch extends Component {
       created_by: 'fullName'
     }
 
-    var selectedFilters = newConstructSearch
+    let selectedFilters = newConstructSearch
       .filter((item) => typeof item !== 'string')
       .map((item) => `${item.type}:\"${item[typeToProperty[item.type]]}\"`)
 
@@ -575,9 +615,9 @@ export class PlanSearch extends Component {
   }
 
   searchCreatorsList (filter) {
-    let MAX_CREATORS_FROM_ODATA = 10
-    var url = `/service/odata/UserEntity?$select=firstName,lastName,fullName`
-    if(filter) {
+    const MAX_CREATORS_FROM_ODATA = 10
+    let url = `/service/odata/UserEntity?$select=firstName,lastName,fullName`
+    if (filter) {
       url = url + `&$filter=substringof(fullName,'${filter}')`
     }
     url = url + `&$top=${MAX_CREATORS_FROM_ODATA}`
@@ -600,8 +640,8 @@ export class PlanSearch extends Component {
   applySearch (filters) {
     this.setState({ searchText: _.uniq(this.state.searchText.concat(filters)),
       searchList: _.uniq(this.state.searchList.concat(filters)) }, () => {
-        this.loadPlans()
-      })
+      this.loadPlans()
+    })
   }
 }
 
@@ -609,13 +649,17 @@ const mapStateToProps = (state) => ({
   loggedInUser: state.user.loggedInUser,
   listOfTags: state.toolbar.listOfTags,
   listOfServiceAreaTags: state.toolbar.listOfServiceAreaTags,
-})  
-
-const mapDispatchToProps = (dispatch) => ({
-  loadListOfSAPlanTagsById: (listOfServiceAreaTags, promises) => dispatch(ToolBarActions.loadListOfSAPlanTagsById(listOfServiceAreaTags, promises)),
-  getTagColour: (tag) => dispatch(ToolBarActions.getTagColour(tag)),
-  loadListOfSAPlanTags: (dataItems, filterObj, ishardreload) => dispatch(ToolBarActions.loadListOfSAPlanTags(dataItems, filterObj, ishardreload)),
 })
 
-const PlanSearchComponent = wrapComponentWithProvider(reduxStore, PlanSearch, mapStateToProps, mapDispatchToProps)
+const mapDispatchToProps = (dispatch) => ({
+  loadListOfSAPlanTagsById: (listOfServiceAreaTags, promises) => dispatch(
+    ToolBarActions.loadListOfSAPlanTagsById(listOfServiceAreaTags, promises)
+  ),
+  getTagColour: (tag) => dispatch(ToolBarActions.getTagColour(tag)),
+  loadListOfSAPlanTags: (dataItems, filterObj, ishardreload) => dispatch(
+    ToolBarActions.loadListOfSAPlanTags(dataItems, filterObj, ishardreload)
+  ),
+})
+
+const PlanSearchComponent = connect(mapStateToProps, mapDispatchToProps)(PlanSearch)
 export default PlanSearchComponent

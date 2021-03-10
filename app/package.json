@@ -1,7 +1,7 @@
 {
   "name": "aro",
   "version": "0.0.0",
-  "description": "Network infrastructure planning application",
+  "description": "Network infrastructure planning application.",
   "main": "app.js",
   "private": true,
   "scripts": {
@@ -15,14 +15,12 @@
     "build-service-types": "cd ./public/javascripts/src/service-typegen/src && node class-generator.js",
     "build-vendor-bundle": "chmod +x ./node_modules/uglify-js/bin/* && ./node_modules/browserify/bin/cmd.js -r rxjs -r ng-redux -p licensify | ./node_modules/uglify-js/bin/uglifyjs --comments > ./public/javascripts/vendors/vendor-bundle.min.js",
     "build-angularjs": "./node_modules/.bin/babel public/javascripts/src -d public/javascripts/lib --presets=@babel/preset-env --ignore public/javascripts/src/service-typegen/,public/javascripts/src/react/ && cd ./public/javascripts/src/components && find . -name \\*.html -exec cp --parents {} ../../lib/components/ \\;",
-    "build": "npm run build-service-types && npm run build-vendor-bundle && npm run build-angularjs && npm run webpack-production",
-    "watch-client": "./node_modules/.bin/babel public/javascripts/src -d public/javascripts/lib --presets=@babel/preset-env --ignore public/javascripts/src/service-typegen/,public/javascripts/src/react/ --watch --copy-files --source-maps",
-    "watch-server": "./node_modules/.bin/nodemon --inspect=0.0.0.0:9229 ./app.js",
-    "webpack-production": "webpack --config webpack.prod.js",
-    "webpack-development": "webpack --config webpack.dev.js --watch",
-    "dev": "npm run build-vendor-bundle && npm run build-service-types && ./node_modules/.bin/concurrently \"npm run watch-client\" \"npm run watch-server\" \"npm run webpack-development\" \"npm run test-unit-watch\"",
-    "local": "./node_modules/.bin/concurrently \"npm run watch-client\" \"npm run watch-server\" \"npm run webpack-development\"",
-    "dev-simple": "./node_modules/.bin/concurrently \"npm run watch-client\" \"npm run watch-server\" \"npm run webpack-development\"",
+    "build": "npm run build-service-types && npm run build-vendor-bundle && npm run build-angularjs && webpack",
+    "watch-server": "nodemon --inspect=0.0.0.0:9229 ./app.js",
+    "watch-client": "babel public/javascripts/src -d public/javascripts/lib --ignore public/javascripts/src/service-typegen/,public/javascripts/src/react/ --watch --copy-files --source-maps",
+    "watch-webpack": "NODE_ENV=development webpack --watch",
+    "dev": "npm run build-vendor-bundle && npm run build-service-types && concurrently \"npm run watch-client\" \"npm run watch-server\" \"npm run watch-webpack\" \"npm run test-unit-watch\"",
+    "local": "concurrently \"npm run watch-client\" \"npm run watch-server\" \"npm run watch-webpack\"",
     "lint": "standard \"public/javascripts/src/react/**/*.js\" \"public/javascripts/src/react/**/*.jsx\"",
     "lint-fix": "standard \"public/javascripts/src/react/**/*.js\" \"public/javascripts/src/react/**/*.jsx\" --fix"
   },
@@ -124,7 +122,6 @@
     "vector-tile": "^1.3.0",
     "webpack": "^4.29.0",
     "webpack-cli": "^3.2.1",
-    "webpack-merge": "^4.2.1",
     "yargs": "^3.24.0"
   },
   "devDependencies": {
