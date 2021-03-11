@@ -675,9 +675,7 @@ function loadArpuManagerConfiguration(arpuManagerId) {
           // NOTE: we're rewiring the strategy for UI purposes.
           // ON SAVE, THIS IS REVERSED BACK INTO THE CONFIG
           // ===> strategy options
-          if (locationEntityType !== 'celltower') {
-            model.options = ['global']
-          }
+          model.options = ['global']
           if (businessOrder.includes(locationEntityType)) {
             model.options.push('tsm')
           } else if (locationEntityType === 'household') {
@@ -685,9 +683,12 @@ function loadArpuManagerConfiguration(arpuManagerId) {
           }
           // ===> strategy value
           if (model.arpuStrategy === 'arpu') {
-            if (model.cells.length === 1
-              && model.cells[0].key.productId === 1
-              && model.cells[0].key.segmentId === 1
+            if (locationEntityType === 'celltower'
+              || (
+                model.cells.length === 1
+                && model.cells[0].key.productId === 1
+                && model.cells[0].key.segmentId === 1
+              )
               || !model.cells.length
             ) {
               // ===> single cell, `arpu` means `global` here
@@ -758,22 +759,34 @@ function saveArpuModels(arpuManagerId, models) {
       return product
     })
 
-    model.cells = model.segments.reduce((cells, segment) => {
-      const productCells = model.products.map((product, index) => {
-        const arpuPercent = segment.percents[index]
-        if (arpuPercent) {
-          return {
-            key: {
-              productId: product.productId,
-              segmentId: segment.id,
-            },
-            arpuPercent: parseFloat(arpuPercent),
+    if (model.strategy === 'global') {
+      // ===> global
+      model.arpuStrategy = 'arpu'
+      model.cells = [{ key: { productId: 1, segmentId: 1 }, arpuPercent: model.global }]
+    } else if (model.strategy === 'tsm') {
+      // ===> tsm
+      model.arpuStrategy = 'tsm'
+      model.cells = [] // TODO: is this right???
+    } else { // model.strategy === 'segmentation'
+      // ===> segmentation
+      model.arpuStrategy = 'arpu'
+      model.cells = model.segments.reduce((cells, segment) => {
+        const productCells = model.products.map((product, index) => {
+          const arpuPercent = segment.percents[index]
+          if (arpuPercent) {
+            return {
+              key: {
+                productId: product.productId,
+                segmentId: segment.id,
+              },
+              arpuPercent: parseFloat(arpuPercent),
+            }
           }
-        }
-        return false
-      }).filter(Boolean)
-      return [...cells, ...productCells]
-    }, [])
+          return false
+        }).filter(Boolean)
+        return [...cells, ...productCells]
+      }, [])
+    }
 
     model.segmentAssignments = model.segments.map(segment => {
       segment.segmentId = segment.id
@@ -784,6 +797,10 @@ function saveArpuModels(arpuManagerId, models) {
       return segment
     })
 
+    delete model.title
+    delete model.options
+    delete model.strategy
+    delete model.global
     delete model.products
     delete model.segments
 
