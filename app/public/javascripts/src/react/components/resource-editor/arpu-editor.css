@@ -41,10 +41,10 @@
   height: 50px;
   border-bottom: 1px solid var(--gray-light);
 }
-.arpu-manager .arpu-row:last-child,
+/* .arpu-manager .arpu-row:last-child,
 .arpu-manager .arpu-row:last-child .arpu-cell.select {
   border-bottom: none;
-}
+} */
 .arpu-manager .products {
   height: 60px;
 }

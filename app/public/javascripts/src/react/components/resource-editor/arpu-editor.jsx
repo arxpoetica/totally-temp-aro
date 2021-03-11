@@ -113,7 +113,7 @@ export class ArpuEditor extends Component {
               <h3>{product.description || product.name}</h3>
               <Dropdown
                 product={product}
-                handler={event => this.handleProductChange(event, index)}
+                handler={event => this.handleProductChange(event, modelIndex, index)}
               />
             </div>
           )}
@@ -131,7 +131,7 @@ export class ArpuEditor extends Component {
                   min="0"
                   max="100"
                   value={percent}
-                  onChange={event => this.handleCellChange(event, segmentIndex, cellIndex)}
+                  onChange={event => this.handleCellChange(event, modelIndex, segmentIndex, cellIndex)}
                 />
               </div>
             )}
@@ -147,18 +147,16 @@ export class ArpuEditor extends Component {
     this.setState({ arpuModels })
   }
 
-  handleProductChange({ target }, productIndex) {
+  handleProductChange({ target }, modelIndex, productIndex) {
     const { name, value } = target
-    // FIXME: remove modelIndex
-    const { arpuModels, modelIndex } = this.state
+    const { arpuModels } = this.state
     arpuModels[modelIndex].products[productIndex][name] = value
     this.setState({ arpuModels })
   }
 
-  handleCellChange({ target }, segmentIndex, cellIndex) {
+  handleCellChange({ target }, modelIndex, segmentIndex, cellIndex) {
     let value = parseFloat(target.value)
-    // FIXME: remove modelIndex
-    const { arpuModels, modelIndex } = this.state
+    const { arpuModels } = this.state
 
     const { percents } = arpuModels[modelIndex].segments[segmentIndex]
     const priorValue = percents[cellIndex]
