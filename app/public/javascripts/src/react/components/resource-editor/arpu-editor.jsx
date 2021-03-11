@@ -41,7 +41,7 @@ export class ArpuEditor extends Component {
     const selector = (model, index) =>
       <div className="selector">
         Strategy:
-        {model.options
+        {model.options.length > 1
           ? <select
             value={model.strategy}
             onClick={event => event.stopPropagation()}
@@ -59,9 +59,9 @@ export class ArpuEditor extends Component {
       <div className="arpu-manager">
 
         <Accordion>
-          {arpuModels.map((model, index) =>
+          {arpuModels.map((model, modelIndex) =>
             // NOTE: passing JSX content to the `header` prop
-            <AccordionRow key={index} title={model.title} header={selector(model, index)}>
+            <AccordionRow key={modelIndex} title={model.title} header={selector(model, modelIndex)}>
               {/* {model.strategy === 'local' &&
                 <div className="arpu-content">
                   <p>Average Revenue Per User will calculate per location.</p>
@@ -69,7 +69,18 @@ export class ArpuEditor extends Component {
               } */}
               {model.strategy === 'global' &&
                 <div className="arpu-content">
-                  <input value="FILL IT IN HERE PLEASE." onChange={() => {}}/>
+                  {/* TODO: update this, temporary... */}
+                  {/* table borrowed from old ARPU for convenience */}
+                  <div className="arpu-global">
+                        <h3>Revenue</h3>
+                        <input
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={model.global}
+                          onChange={event => this.handleGlobalChange(event, modelIndex)}
+                        />
+                  </div>
                 </div>
               }
               {model.strategy === 'tsm' &&
@@ -79,7 +90,7 @@ export class ArpuEditor extends Component {
               }
               {model.strategy === 'segmentation' &&
                 <div className="segmentation">
-                  {this.renderSegmentation(index)}
+                  {this.renderSegmentation(modelIndex)}
                 </div>
               }
             </AccordionRow>
@@ -141,6 +152,14 @@ export class ArpuEditor extends Component {
     )
   }
 
+  handleGlobalChange({ target }, modelIndex) {
+    let value = parseFloat(target.value) || 0
+    value = value > 100 ? 100 : (value < 0 ? 0 : value)
+    const { arpuModels } = this.state
+    arpuModels[modelIndex].global = value
+    this.setState({ arpuModels })
+  }
+
   handleStrategyChange(event, modelIndex) {
     const { arpuModels } = this.state
     arpuModels[modelIndex].strategy = event.target.value
@@ -155,7 +174,7 @@ export class ArpuEditor extends Component {
   }
 
   handleCellChange({ target }, modelIndex, segmentIndex, cellIndex) {
-    let value = parseFloat(target.value)
+    let value = parseFloat(target.value) || 0
     const { arpuModels } = this.state
 
     const { percents } = arpuModels[modelIndex].segments[segmentIndex]
@@ -163,10 +182,17 @@ export class ArpuEditor extends Component {
     const sum = percents.reduce((sum, value) => sum + value, 0) - priorValue
     if (sum + value > 100) {
       value = 100 - sum
+    } else if (value < 0) {
+      value = 0
     }
 
     arpuModels[modelIndex].segments[segmentIndex].percents[cellIndex] = value
     this.setState({ arpuModels })
+
+    // // make sure global matches
+    // if (segmentIndex === 0 && cellIndex === 0) {
+    //   this.handleGlobalChange({ target: { value } }, modelIndex)
+    // }
   }
 
   exitEditingMode() {

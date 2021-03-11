@@ -26,6 +26,33 @@
 }
 .arpu-manager .arpu-content { padding: 15px; }
 .arpu-manager .arpu-content p { margin: 0; }
+.arpu-manager .arpu-global {
+  display: flex;
+  align-items: center;
+}
+/* FIXME: make this a component */
+.arpu-manager .arpu-global input {
+  display: block;
+  width: 100px;
+  height: 40px;
+  margin-left: 10px;
+  border: 1px solid var(--gray-light);
+  color: var(--primary);
+  font: 24px/40px var(--font);
+  letter-spacing: -1.4px;
+  text-align: center;
+}
+.arpu-manager .arpu-global input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.arpu-manager .arpu-global input[type=number] {
+  -moz-appearance: textfield;
+}
+.arpu-manager .arpu-global input:focus {
+  outline: none;
+  box-shadow: inset 0 0 0 3px rgba(77, 153, 229, 0.6);
+}
 .arpu-manager .buttons {
   display: flex;
   justify-content: flex-end;

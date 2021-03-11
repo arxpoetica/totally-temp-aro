@@ -727,6 +727,9 @@ function loadArpuManagerConfiguration(arpuManagerId) {
               return Object.assign({}, segment)
             })
 
+          // global value treated separately for convenience in the UI
+          model.global = model.segments[0].percents[0]
+
           delete model.arpuStrategy
           delete model.productAssignments
           delete model.segmentAssignments
