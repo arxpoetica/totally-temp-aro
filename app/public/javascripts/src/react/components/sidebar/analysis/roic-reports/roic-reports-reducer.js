@@ -24,8 +24,12 @@ function setEnumStrings (state, enumStrings) {
 }
 
 function setNetworkNodeTypesEntity (state, networkNodeTypesEntity) {
+  const networkNodeTypesEntityList = {}
+  networkNodeTypesEntity.forEach((entityType) => {
+    networkNodeTypesEntityList[entityType.name] = entityType.description
+  })
   return { ...state,
-    networkNodeTypesEntity: networkNodeTypesEntity
+    networkNodeTypesEntity: networkNodeTypesEntityList
   }
 }
 

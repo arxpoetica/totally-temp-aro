@@ -107,13 +107,13 @@ function loadEntityList (entityType, filterObj, select, searchColumn, configurat
         entityTypeList[entityType] = results.data
         batch(() => {
           dispatch({
-            type: Actions.STATE_VIEW_MODE_ENTITY_TYPE_LIST,
+            type: Actions.STATE_VIEW_MODE_GET_ENTITY_TYPE_LIST,
             payload: entityTypeList
           })
           if (entityType === 'ServiceAreaView' || entityType === 'CensusBlocksEntity' ||
           entityType === 'AnalysisArea') {
             dispatch({
-              type: Actions.STATE_VIEW_MODE_ENTITY_TYPE_BOUNDRY_LIST,
+              type: Actions.STATE_VIEW_MODE_GET_ENTITY_TYPE_BOUNDRY_LIST,
               payload: entityTypeList[entityType]
             })
           }

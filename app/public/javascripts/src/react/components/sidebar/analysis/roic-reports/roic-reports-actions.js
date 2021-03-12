@@ -13,10 +13,6 @@ function loadNetworkNodeTypesEntity () {
   return dispatch => {
     AroHttp.get('/service/odata/NetworkNodeTypesEntity')
       .then((response) => {
-        const networkNodeTypesEntity = {}
-        response.data.forEach((entityType) => {
-          networkNodeTypesEntity[entityType.name] = entityType.description
-        })
         batch(() => {
           dispatch({
             type: Actions.ROIC_REPORTS_NETWORK_NODE_TYPES,
@@ -24,7 +20,7 @@ function loadNetworkNodeTypesEntity () {
           })
           dispatch({
             type: Actions.ROIC_REPORTS_NETWORK_NODE_TYPE_ENTITY,
-            payload: networkNodeTypesEntity
+            payload: response.data
           })
         })
       })

@@ -26,10 +26,10 @@ function setEntityTypeBoundaryList (state, entityTypeBoundaryList) {
 
 function configurationReducer (state = defaultState, action) {
   switch (action.type) {
-    case Actions.STATE_VIEW_MODE_ENTITY_TYPE_LIST:
+    case Actions.STATE_VIEW_MODE_GET_ENTITY_TYPE_LIST:
       return setEntityTypeList(state, action.payload)
 
-    case Actions.STATE_VIEW_MODE_ENTITY_TYPE_BOUNDRY_LIST:
+    case Actions.STATE_VIEW_MODE_GET_ENTITY_TYPE_BOUNDRY_LIST:
       return setEntityTypeBoundaryList(state, action.payload)  
 
     default:
