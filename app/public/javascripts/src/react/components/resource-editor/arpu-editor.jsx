@@ -72,14 +72,14 @@ export class ArpuEditor extends Component {
                   {/* TODO: update this, temporary... */}
                   {/* table borrowed from old ARPU for convenience */}
                   <div className="arpu-global">
-                        <h3>Revenue</h3>
-                        <input
-                          type="number"
-                          min="0"
-                          max="100"
-                          value={model.global}
-                          onChange={event => this.handleGlobalChange(event, modelIndex)}
-                        />
+                    <h3>Revenue</h3>
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={model.global}
+                      onChange={event => this.handleGlobalChange(event, modelIndex)}
+                    />
                   </div>
                 </div>
               }

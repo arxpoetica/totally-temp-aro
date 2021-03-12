@@ -1,6 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import cx from 'clsx'
 import './accordion.css'
+
+const AccordionContext = React.createContext()
 
 // = = = = = = = = = = = = = = = = = = = = >>>
 // = = = = = = = = = = = = = = = = = = = = >>> ACCORDION
@@ -8,24 +10,26 @@ import './accordion.css'
 
 export const Accordion = ({ children }) => {
 
-  const [open, setOpen] = useState(false)
+  const [accordionOpen, setAccordionOpen] = useState(false)
   const handleOpenState = () => {
-    // TODO: open all others too...
-    setOpen(!open)
+    // TODO: accordionOpen all others too...
+    setAccordionOpen(!accordionOpen)
   }
 
   return (
-    <div className="accordion">
-      <div className="accordion-tools" onClick={handleOpenState}>
-        <h2 className="title">
-          {open ? <ToggleMinus/> : <TogglePlus/>}
-          {open ? 'close' : 'expand'} all
-        </h2>
+    <AccordionContext.Provider value={{ accordionOpen, setAccordionOpen }}>
+      <div className="accordion">
+        <div className="accordion-tools" onClick={handleOpenState}>
+          <h2 className="title">
+            {accordionOpen ? <ToggleMinus/> : <TogglePlus/>}
+            {accordionOpen ? 'close' : 'expand'} all
+          </h2>
+        </div>
+        <ul className="accordion-list">
+          {children}
+        </ul>
       </div>
-      <ul className="accordion-list">
-        {children}
-      </ul>
-    </div>
+    </AccordionContext.Provider>
   )
 }
 
@@ -33,10 +37,17 @@ export const Accordion = ({ children }) => {
 // = = = = = = = = = = = = = = = = = = = = >>> ROW
 // = = = = = = = = = = = = = = = = = = = = >>>
 
-export const AccordionRow = ({ children, title, header, handler }) => {
+export const AccordionRow = ({ children, title, header }) => {
+
+  const { accordionOpen, setAccordionOpen } = useContext(AccordionContext)
 
   const [open, setOpen] = useState(false)
   const handleOpenState = () => setOpen(!open)
+
+  // if (accordionOpen !== open) {
+  //   console.log('oh hey:', accordionOpen)
+  //   setOpen(accordionOpen)
+  // }
 
   return (
     <li className={cx('accordion-row', open && 'open')}>
