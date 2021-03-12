@@ -38,7 +38,7 @@ services:
         image: zookeeper
 
     app:
-        image: avco/aro-app-base:node10-dev
+        image: avco/aro-app-base:latest
         volumes:
             - ..:/srv/www/aro
             - ../../aro-etl:/srv/www/aro/db
