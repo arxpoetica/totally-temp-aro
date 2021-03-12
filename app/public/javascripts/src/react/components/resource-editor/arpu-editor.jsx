@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import ResourceActions from './resource-actions'
-import { Accordion, AccordionRow } from './../common/accordion/Accordion'
-import { Dropdown } from './arpu-editor-dropdown'
+import { Accordion, AccordionRow } from '../common/accordion/Accordion.jsx'
+import { Dropdown } from './arpu-editor-dropdown.jsx'
 import './arpu-editor.css'
 
 export class ArpuEditor extends Component {
