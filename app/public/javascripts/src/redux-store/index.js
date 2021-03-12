@@ -40,6 +40,7 @@ import viewSettings from '../react/components/view-settings/view-settings-reduce
 import notification from '../react/components/notification/notification-reducer'
 import expertMode from '../react/components/sidebar/analysis/expert-mode/expert-mode-reducer'
 import roicReports from '../react/components/sidebar/analysis/roic-reports/roic-reports-reducer'
+import stateViewMode from '../react/components/state-view-mode/state-view-mode-reducer'
 
 const logger = createLogger({
   level: 'info',
@@ -77,6 +78,7 @@ let reducer = combineReducers({
   viewSettings,
   expertMode,
   roicReports,
+  stateViewMode,
 })
 
 // Add support for Redux devtools extension. Yes, even in production.

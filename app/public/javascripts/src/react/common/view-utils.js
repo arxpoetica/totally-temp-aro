@@ -30,3 +30,7 @@ export const hsvToRgb = (h, s, v) => {
 export const logoutApp = () => {
   window.location.href = '/logout'
 }
+
+export const flattenDeep = (arr) => {
+  return arr.reduce((acc, val) => Array.isArray(val) ? acc.concat(flattenDeep(val)) : acc.concat(val), [])
+}

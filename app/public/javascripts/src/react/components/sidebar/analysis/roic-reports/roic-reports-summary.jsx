@@ -36,7 +36,7 @@ export class RoicReportsSummary extends Component {
       <div>
         <table id="tblNetworkBuildOutput" className="table table-sm table-striped">
           <tbody>
-            {roicResults.networkStatistics.map((networkStatistic, index) => {
+            {roicResults.networkStatistics && roicResults.networkStatistics.map((networkStatistic, index) => {
               return (
                 networkStatistic.networkStatisticType === 'roic_npv' &&
                 <tr key={index}>
@@ -54,7 +54,7 @@ export class RoicReportsSummary extends Component {
               )}
             )}
 
-            {roicResults.networkStatistics.map((networkStatistic, index) => {
+            {roicResults.networkStatistics && roicResults.networkStatistics.map((networkStatistic, index) => {
               return (
                 networkStatistic.networkStatisticType === 'roic_irr' &&
                 <tr key={index}>
@@ -74,13 +74,13 @@ export class RoicReportsSummary extends Component {
 
             <tr>
               <td><strong>Total Capex</strong></td>
-              <td>{currencyFormatter.format((roicResults.priceModel.totalCost / 1000).toFixed(1)) + ' K'}</td>
+              <td>{roicResults.priceModel && currencyFormatter.format((roicResults.priceModel.totalCost / 1000).toFixed(1)) + ' K'}</td>
             </tr>
 
             <tr>
               <td colSpan="2"><strong>Fiber Capex</strong></td>
             </tr>
-            {roicResults.priceModel.fiberCosts.map((fiberCost, index) => {
+            {roicResults.priceModel && roicResults.priceModel.fiberCosts.map((fiberCost, index) => {
               return (
                 <tr key={index}>
                   <td className="indent-1 text-capitalize">
@@ -97,7 +97,7 @@ export class RoicReportsSummary extends Component {
             <tr>
               <td colSpan="2"><strong>Equipment Capex</strong></td>
             </tr>
-            {roicResults.priceModel.equipmentCosts.map((equipmentCost, index) => {
+            {roicResults.priceModel && roicResults.priceModel.equipmentCosts.map((equipmentCost, index) => {
               return (
                 <tr key={index}>
                   <td className="indent-1 text-capitalize">
