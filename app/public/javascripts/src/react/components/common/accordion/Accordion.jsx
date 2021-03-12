@@ -8,21 +8,20 @@ const AccordionContext = React.createContext()
 // = = = = = = = = = = = = = = = = = = = = >>> ACCORDION
 // = = = = = = = = = = = = = = = = = = = = >>>
 
-export const Accordion = ({ children }) => {
+export const Accordion = ({ children, items }) => {
 
-  const [accordionOpen, setAccordionOpen] = useState(false)
-  const handleOpenState = () => {
-    // TODO: accordionOpen all others too...
-    setAccordionOpen(!accordionOpen)
-  }
+  const [rowsOpen, setRowsOpen] = useState(items.map(() => false))
+  // this confusing double negative just checks to see if ANY row is open
+  const anyRowIsOpen = !rowsOpen.every(open => !open)
+  const handleOpenState = () => setRowsOpen(items.map(() => !anyRowIsOpen))
 
   return (
-    <AccordionContext.Provider value={{ accordionOpen, setAccordionOpen }}>
+    <AccordionContext.Provider value={{ rowsOpen, setRowsOpen }}>
       <div className="accordion">
         <div className="accordion-tools" onClick={handleOpenState}>
           <h2 className="title">
-            {accordionOpen ? <ToggleMinus/> : <TogglePlus/>}
-            {accordionOpen ? 'close' : 'expand'} all
+            {anyRowIsOpen ? <ToggleMinus/> : <TogglePlus/>}
+            {anyRowIsOpen ? 'close' : 'expand'} all
           </h2>
         </div>
         <ul className="accordion-list">
@@ -34,20 +33,24 @@ export const Accordion = ({ children }) => {
 }
 
 // = = = = = = = = = = = = = = = = = = = = >>>
+// = = = = = = = = = = = = = = = = = = = = >>> TOGGLE
+// = = = = = = = = = = = = = = = = = = = = >>>
+
+// export const AccordionToggle = ({ children, items }) => {
+// }
+
+// = = = = = = = = = = = = = = = = = = = = >>>
 // = = = = = = = = = = = = = = = = = = = = >>> ROW
 // = = = = = = = = = = = = = = = = = = = = >>>
 
-export const AccordionRow = ({ children, title, header }) => {
+export const AccordionRow = ({ children, index, title, header }) => {
 
-  const { accordionOpen, setAccordionOpen } = useContext(AccordionContext)
+  const { rowsOpen, setRowsOpen } = useContext(AccordionContext)
 
-  const [open, setOpen] = useState(false)
-  const handleOpenState = () => setOpen(!open)
-
-  // if (accordionOpen !== open) {
-  //   console.log('oh hey:', accordionOpen)
-  //   setOpen(accordionOpen)
-  // }
+  const open = rowsOpen[index]
+  const handleOpenState = () => setRowsOpen(
+    rowsOpen.map((open, oIndex) => oIndex === index ? !open : open)
+  )
 
   return (
     <li className={cx('accordion-row', open && 'open')}>

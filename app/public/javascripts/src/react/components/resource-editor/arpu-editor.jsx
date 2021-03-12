@@ -58,10 +58,15 @@ export class ArpuEditor extends Component {
     return (
       <div className="arpu-manager">
 
-        <Accordion>
+        <Accordion items={arpuModels}>
           {arpuModels.map((model, modelIndex) =>
             // NOTE: passing JSX content to the `header` prop
-            <AccordionRow key={modelIndex} title={model.title} header={selector(model, modelIndex)}>
+            <AccordionRow
+              key={modelIndex}
+              index={modelIndex}
+              title={model.title}
+              header={selector(model, modelIndex)}
+            >
               {/* {model.strategy === 'local' &&
                 <div className="arpu-content">
                   <p>Average Revenue Per User will calculate per location.</p>
