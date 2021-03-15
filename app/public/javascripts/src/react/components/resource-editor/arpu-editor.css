@@ -68,10 +68,15 @@
   height: 50px;
   border-bottom: 1px solid var(--gray-light);
 }
-/* .arpu-manager .arpu-row:last-child,
-.arpu-manager .arpu-row:last-child .arpu-cell.select {
-  border-bottom: none;
-} */
+.arpu-manager .strategy {
+  display: flex;
+  align-items: center;
+  position: relative;
+  z-index: 4;
+}
+.arpu-manager .strategy .select {
+  margin: 0 0 0 6px;
+}
 .arpu-manager .products {
   height: 60px;
 }

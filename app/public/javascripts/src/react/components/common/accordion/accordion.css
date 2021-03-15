@@ -44,8 +44,8 @@
 .accordion .accordion-tools .title {
   font-size: 14px;
 }
-.accordion .accordion-tools .svg,
-.accordion .accordion-header .svg {
+.accordion .accordion-tools .title .svg,
+.accordion .accordion-header .title .svg {
   width: 16px;
   height: 16px;
   margin: 0 10px 0 0;

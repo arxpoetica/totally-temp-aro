@@ -675,11 +675,11 @@ function loadArpuManagerConfiguration(arpuManagerId) {
           // NOTE: we're rewiring the strategy for UI purposes.
           // ON SAVE, THIS IS REVERSED BACK INTO THE CONFIG
           // ===> strategy options
-          model.options = ['global']
+          model.options = [{ value: 'global', label: 'Global' }]
           if (businessOrder.includes(locationEntityType)) {
-            model.options.push('tsm')
+            model.options.push({ value: 'tsm', label: 'Telecom Spend Matrix' })
           } else if (locationEntityType === 'household') {
-            model.options.push('segmentation')
+            model.options.push({ value: 'segmentation', label: 'Segmentation' })
           }
           // ===> strategy value
           if (model.arpuStrategy === 'arpu') {

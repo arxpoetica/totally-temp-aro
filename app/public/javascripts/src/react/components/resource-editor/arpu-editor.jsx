@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import ResourceActions from './resource-actions'
 import { Accordion, AccordionRow } from '../common/accordion/Accordion.jsx'
+import { Select } from './../common/forms/Select'
 import { Dropdown } from './arpu-editor-dropdown.jsx'
 import './arpu-editor.css'
 
@@ -39,18 +40,15 @@ export class ArpuEditor extends Component {
     const { arpuModels } = this.state
 
     const selector = (model, index) =>
-      <div className="selector">
+      <div className="strategy">
         Strategy:
-        {model.options.length > 1
-          ? <select
+        {model.options.length > 1 ?
+          <Select
             value={model.strategy}
+            options={model.options}
             onClick={event => event.stopPropagation()}
             onChange={event => this.handleStrategyChange(event, index)}
-          >
-            {model.options.map(option =>
-              <option key={option} value={option}>{this.OPTIONS[option]}</option>
-            )}
-          </select>
+          />
           : ' Global'
         }
       </div>
