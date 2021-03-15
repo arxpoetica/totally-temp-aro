@@ -33,13 +33,6 @@ export const Accordion = ({ children, items }) => {
 }
 
 // = = = = = = = = = = = = = = = = = = = = >>>
-// = = = = = = = = = = = = = = = = = = = = >>> TOGGLE
-// = = = = = = = = = = = = = = = = = = = = >>>
-
-// export const AccordionToggle = ({ children, items }) => {
-// }
-
-// = = = = = = = = = = = = = = = = = = = = >>>
 // = = = = = = = = = = = = = = = = = = = = >>> ROW
 // = = = = = = = = = = = = = = = = = = = = >>>
 
@@ -58,7 +51,6 @@ export const AccordionRow = ({ children, index, title, header }) => {
       {/* = = = = = = = = = = = = = = = = = = = = >>> HEADER */}
 
       <div className="accordion-header" onClick={handleOpenState}>
-        
         <h2 className="title">
           <div className="svg">
             {open ? <ToggleMinus/> : <TogglePlus/>}

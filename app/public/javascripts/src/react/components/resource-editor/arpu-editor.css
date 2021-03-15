@@ -13,12 +13,6 @@
 
 /* ----------- */
 
-/* .arpu-manager .header {
-  display: flex;
-  align-items: center;
-  height: 60px;
-  padding: 15px;
-} */
 .arpu-manager .accordion { height: calc(100% - 70px); }
 .arpu-manager .segmentation {
   overflow-x: auto;
@@ -147,12 +141,6 @@
   outline: none;
   box-shadow: inset 0 0 0 3px rgba(77, 153, 229, 0.6);
 }
-
-/* ----------- */
-
-/* .arpu-manager .s-row select {
-  width: calc(100% - 24px);
-} */
 
 /* ----------- */
 

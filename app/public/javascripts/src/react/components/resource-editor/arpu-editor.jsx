@@ -65,15 +65,16 @@ export class ArpuEditor extends Component {
               title={model.title}
               header={selector(model, modelIndex)}
             >
-              {/* {model.strategy === 'local' &&
+              {/*
+              NOTE: this might not be necessary, but keeping around in case we
+              decide to explicitly make `local` an option...
+              {model.strategy === 'local' &&
                 <div className="arpu-content">
                   <p>Average Revenue Per User will calculate per location.</p>
                 </div>
               } */}
               {model.strategy === 'global' &&
                 <div className="arpu-content">
-                  {/* TODO: update this, temporary... */}
-                  {/* table borrowed from old ARPU for convenience */}
                   <div className="arpu-global">
                     <h3>Revenue</h3>
                     <input
@@ -191,11 +192,6 @@ export class ArpuEditor extends Component {
 
     arpuModels[modelIndex].segments[segmentIndex].percents[cellIndex] = value
     this.setState({ arpuModels })
-
-    // // make sure global matches
-    // if (segmentIndex === 0 && cellIndex === 0) {
-    //   this.handleGlobalChange({ target: { value } }, modelIndex)
-    // }
   }
 
   exitEditingMode() {
