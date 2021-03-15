@@ -19,7 +19,7 @@
 	
 	.equipment-list {
 		position: relative;
-		height: 100%;
+		/*height: 100%;*/
 		overflow-y: auto;
 	}
 	
@@ -34,6 +34,7 @@
 </style>
 
 <div class="ei-panel">
+	<!--
 	<div class="mb-2 mt-2">
 		<aro-search
 			ng-if="($ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.EQUIPMENT_INFO) || $ctrl.rActiveViewModePanel === $ctrl.state.viewModePanels.EQUIPMENT_INFO"
@@ -67,7 +68,7 @@
 			</tbody>
 		</table>
 	</div>
-
+-->
 	<div class="ei-panel-header clearfix"
 		ng-if="$ctrl.currentEquipmentDetailView === $ctrl.EquipmentDetailView.Detail">
 
@@ -81,30 +82,32 @@
 			<div class="sidebar-header-subinfo-item">long: {{$ctrl.selectedEquipmentGeog[0] | number:6}}</div>
 		</div>
 	</div>
-	<div class="equipment-detail ei-panel-content"
-		ng-if="$ctrl.currentEquipmentDetailView === $ctrl.EquipmentDetailView.Detail">
+	<div class="equipment-detail ei-panel-content">
+		<div ng-if="$ctrl.currentEquipmentDetailView === $ctrl.EquipmentDetailView.Detail">
+			<editor-interface-tree object-to-view="$ctrl.equipmentFeature"
+				root-meta-data="{'networkNodeType':$ctrl.networkNodeType}"
+				is-edit="false"> </editor-interface-tree>
 
-		<editor-interface-tree object-to-view="$ctrl.equipmentFeature"
-			root-meta-data="{'networkNodeType':$ctrl.networkNodeType}"
-			is-edit="false"> </editor-interface-tree>
+			<div class="equipment-detail-bounds"
+				ng-if="$ctrl.boundsObjectId && $ctrl.state.showSiteBoundary">
+				<hr class="equipment-detail-hr">
+				<button class="btn btn-primary btn-sm"
+					ng-click="$ctrl.onRequestCalculateCoverage()">calculate coverage</button>
 
-		<div class="equipment-detail-bounds"
-			ng-if="$ctrl.boundsObjectId && $ctrl.state.showSiteBoundary">
-			<hr class="equipment-detail-hr">
-			<button class="btn btn-primary btn-sm"
-				ng-click="$ctrl.onRequestCalculateCoverage()">calculate coverage</button>
+				<boundary-coverage ng-if="$ctrl.showCoverageOutput" selected-boundary-coverage="$ctrl.coverageOutput">
+				</boundary-coverage>
+			</div>
+		</div>
 
-			<boundary-coverage ng-if="$ctrl.showCoverageOutput" selected-boundary-coverage="$ctrl.coverageOutput">
-			</boundary-coverage>
+		<br />
+		<div class="ei-panel-header-title">Equipment List</div>
+		<div class="equipment-list"
+			ng-if="($ctrl.currentEquipmentDetailView === $ctrl.EquipmentDetailView.List &&
+				$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.EQUIPMENT_INFO) || $ctrl.rActiveViewModePanel === $ctrl.state.viewModePanels.EQUIPMENT_INFO">
+			<equipment-detail-list map-global-object-name="map"
+				on-click-object="$ctrl.viewSelectedEquipment(selectedEquipment,isZoom)">
+			</equipment-detail-list>
 		</div>
 	</div>
-
-	<span class="equipment-list"
-		ng-if="($ctrl.currentEquipmentDetailView === $ctrl.EquipmentDetailView.List &&
-			$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.EQUIPMENT_INFO) || $ctrl.rActiveViewModePanel === $ctrl.state.viewModePanels.EQUIPMENT_INFO">
-		<equipment-detail-list map-global-object-name="map"
-			on-click-object="$ctrl.viewSelectedEquipment(selectedEquipment,isZoom)">
-		</equipment-detail-list>
-	</span>
 
 </div>
