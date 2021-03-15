@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import ResourceActions from './resource-actions'
 import { Accordion, AccordionRow } from '../common/accordion/Accordion.jsx'
-import { Select } from './../common/forms/Select'
+import { Select } from './../common/forms/Select.jsx'
 import { Dropdown } from './arpu-editor-dropdown.jsx'
 import './arpu-editor.css'
 
