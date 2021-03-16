@@ -681,7 +681,7 @@ function loadArpuManagerConfiguration(arpuManagerId) {
           } else if (locationEntityType === 'household') {
             model.options.push({ value: 'segmentation', label: 'Segmentation' })
           }
-          model.options.push({ value: 'local', label: 'Local' })
+          model.options.push({ value: 'override', label: 'Location Layer' })
           // ===> strategy value
           if (model.arpuStrategy === 'arpu') {
             if (locationEntityType === 'celltower'
@@ -699,7 +699,7 @@ function loadArpuManagerConfiguration(arpuManagerId) {
               model.strategy = 'segmentation'
             }
           } else {
-            // ===> should only be `tsm` or `local` left over
+            // ===> should only be `tsm` or `override` left over
             model.strategy = model.arpuStrategy
           }
 
@@ -760,8 +760,8 @@ function saveArpuModels(arpuManagerId, models) {
       return product
     })
 
-    if (model.strategy === 'local' || model.strategy === 'tsm') {
-      // ===> tsm or local
+    if (model.strategy === 'override' || model.strategy === 'tsm') {
+      // ===> tsm or override
       model.arpuStrategy = model.strategy
       model.cells = []
     } else if (model.strategy === 'global') {

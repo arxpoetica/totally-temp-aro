@@ -65,9 +65,9 @@ export class ArpuEditor extends Component {
               title={model.title}
               header={selector(model, modelIndex)}
             >
-              {model.strategy === 'local' &&
+              {model.strategy === 'override' &&
                 <div className="arpu-content">
-                  <p>Average Revenue Per User will calculate per location.</p>
+                  <p>Average Revenue Per User is set by individual locations.</p>
                 </div>
               }
               {model.strategy === 'global' &&
@@ -86,7 +86,7 @@ export class ArpuEditor extends Component {
               }
               {model.strategy === 'tsm' &&
                 <div className="arpu-content">
-                  <p>Average Revenue per user will be calculated with the Telecom Spend Matrix.</p>
+                  <p>Average Revenue Per User is set by the Telecom Spend Matrix.</p>
                 </div>
               }
               {model.strategy === 'segmentation' &&
