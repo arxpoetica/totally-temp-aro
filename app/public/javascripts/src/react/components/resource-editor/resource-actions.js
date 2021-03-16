@@ -681,6 +681,7 @@ function loadArpuManagerConfiguration(arpuManagerId) {
           } else if (locationEntityType === 'household') {
             model.options.push({ value: 'segmentation', label: 'Segmentation' })
           }
+          model.options.push({ value: 'local', label: 'Local' })
           // ===> strategy value
           if (model.arpuStrategy === 'arpu') {
             if (locationEntityType === 'celltower'
@@ -698,7 +699,7 @@ function loadArpuManagerConfiguration(arpuManagerId) {
               model.strategy = 'segmentation'
             }
           } else {
-            // ===> should only be `tsm` left over
+            // ===> should only be `tsm` or `local` left over
             model.strategy = model.arpuStrategy
           }
 
@@ -759,14 +760,14 @@ function saveArpuModels(arpuManagerId, models) {
       return product
     })
 
-    if (model.strategy === 'global') {
+    if (model.strategy === 'local' || model.strategy === 'tsm') {
+      // ===> tsm or local
+      model.arpuStrategy = model.strategy
+      model.cells = []
+    } else if (model.strategy === 'global') {
       // ===> global
       model.arpuStrategy = 'arpu'
       model.cells = [{ key: { productId: 1, segmentId: 1 }, arpuPercent: model.global }]
-    } else if (model.strategy === 'tsm') {
-      // ===> tsm
-      model.arpuStrategy = 'tsm'
-      model.cells = [] // TODO: is this right???
     } else { // model.strategy === 'segmentation'
       // ===> segmentation
       model.arpuStrategy = 'arpu'

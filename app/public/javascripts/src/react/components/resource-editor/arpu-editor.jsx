@@ -65,14 +65,11 @@ export class ArpuEditor extends Component {
               title={model.title}
               header={selector(model, modelIndex)}
             >
-              {/*
-              NOTE: this might not be necessary, but keeping around in case we
-              decide to explicitly make `local` an option...
               {model.strategy === 'local' &&
                 <div className="arpu-content">
                   <p>Average Revenue Per User will calculate per location.</p>
                 </div>
-              } */}
+              }
               {model.strategy === 'global' &&
                 <div className="arpu-content">
                   <div className="arpu-global">
