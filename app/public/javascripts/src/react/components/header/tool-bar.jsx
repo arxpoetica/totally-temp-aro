@@ -305,7 +305,6 @@ export class ToolBar extends Component {
               type="checkbox"
               className="checkboxfill"
               checked={heatMapOption}
-              name="ctype-name"
               style={{marginLeft: '2px'}}
               onChange={() => this.toggleHeatMapOptions()}
             />
@@ -333,7 +332,7 @@ export class ToolBar extends Component {
               type="checkbox"
               className="checkboxfill"
               checked={showLocationLabels}
-              name="ctype-name" style={{marginLeft: '2px'}}
+              style={{marginLeft: '2px'}}
               onChange={() => this.showLocationLabelsChanged()}
             />
             <span>Location Labels</span>
@@ -346,7 +345,6 @@ export class ToolBar extends Component {
                 type="checkbox"
                 className="checkboxfill"
                 checked={showSiteBoundary}
-                name="ctype-name"
                 style={{marginLeft: '2px'}}
                 onChange={() => this.toggleSiteBoundary()}
               />
@@ -370,7 +368,6 @@ export class ToolBar extends Component {
                 type="checkbox"
                 className="checkboxfill"
                 checked={showDirectedCable}
-                name="ctype-name"
                 style={{marginLeft: '2px'}}
                 onChange={(event) => this.showCableDirection(event)}
               />
@@ -386,7 +383,6 @@ export class ToolBar extends Component {
                 type="checkbox"
                 className="checkboxfill"
                 checked={showEquipmentLabels}
-                name="ctype-name"
                 style={{marginLeft: '2px'}}
                 onChange={(event) => this.showEquipmentLabelsChanged(event)}
               />
@@ -402,7 +398,6 @@ export class ToolBar extends Component {
                 type="checkbox"
                 className="checkboxfill"
                 checked={showFiberSize}
-                name="ctype-name"
                 style={{marginLeft: '2px'}}
                 onChange={(event) => this.setShowFiberSize(event)}
               />
