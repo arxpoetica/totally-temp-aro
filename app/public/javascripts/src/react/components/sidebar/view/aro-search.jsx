@@ -17,7 +17,8 @@ export class AroSearch extends Component {
   }
 
   handleOptionsList(entityType) {
-    return [{id: entityType[0].id, value: entityType[0].objectId, label: entityType[0].objectId}]
+    const { configuration } = this.props
+    return [{id: entityType[0].id, value: entityType[0][configuration], label: entityType[0][configuration]}]
   }
 
   onKeyDown(event) {
@@ -31,29 +32,35 @@ export class AroSearch extends Component {
   }
 
   onFocus () {
-    const { entityType } = this.props
-    if (this.props.entityTypeList[entityType].length > 0) {
-      this.setState({ isDropDownEnable: true, searchText: null })
+    const { entityType, entityTypeList } = this.props
+    if (entityType) {
+      if (entityTypeList[entityType].length > 0) {
+        this.setState({ isDropDownEnable: true, searchText: null })
+      }
     }
   }
 
   handleChange (searchText) {
     this.setState({ searchText })
-    const { entityType } = this.props
-    this.onSearchResult(this.props.entityTypeList[entityType][0])
+    const { entityType, entityTypeList } = this.props
+    entityType === 'LocationObjectEntity'
+      ? this.onSearchResult(entityTypeList[entityType][0])
+      : this.props.onSelectedBoundary(entityTypeList[entityType][0])
   }
 
   handleInputChange (searchText, { action }) {
     switch (action) {
       case 'input-change':
         this.setState({ searchText })
-        const { entityType } = this.props
-        this.props.loadEntityList(entityType, searchText, 'id,objectId', 'objectId')
-        setTimeout(function() {
-          if (JSON.parse(JSON.stringify(this.props.entityTypeList[entityType].length > 0))) {
-            this.setState({ isDropDownEnable: true })
-          }
-        }.bind(this), 1000)
+        const { entityType, searchColumn, configuration } = this.props
+        if (entityType) {
+          this.props.loadEntityList(entityType, searchText, searchColumn, configuration)
+          setTimeout(function() {
+            if (JSON.parse(JSON.stringify(this.props.entityTypeList[entityType].length > 0))) {
+              this.setState({ isDropDownEnable: true })
+            }
+          }.bind(this), 1000)
+        }
         return
       default:
         return
@@ -98,7 +105,7 @@ export class AroSearch extends Component {
         blurInputOnSelect
         onFocus={() => this.onFocus()}
         options={
-          entityTypeList.LocationObjectEntity.length > 0
+          entityTypeList[entityType] && entityTypeList[entityType].length > 0
             ? this.handleOptionsList(entityTypeList[entityType])
             : []
         }
