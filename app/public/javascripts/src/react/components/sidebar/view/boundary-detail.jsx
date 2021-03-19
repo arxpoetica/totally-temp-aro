@@ -22,6 +22,8 @@ export const BoundaryDetail = ({ boundaries, activeViewModePanel, plan, loadEnti
   const [selectedBoundaryInfo, setSelectedBoundaryInfo] = useState(null)
   const [selectedSAInfo, setSelectedSAInfo] = useState(null)
   const [selectedAnalysisAreaInfo, setSelectedAnalysisAreaInfo] = useState(null)
+  const [selectedBoundaryTags, setSelectedBoundaryTags] = useState([])
+  const [toggleOtherAttributes, setToggleOtherAttributes] = useState(false)
 
   const onChangeBoundaryType = (event) => {
     const { value } = event.target
@@ -95,6 +97,10 @@ export const BoundaryDetail = ({ boundaries, activeViewModePanel, plan, loadEnti
     return AroHttp.get('/census_blocks/' + cbId + '/details')
       .then((response) => {
         censusBlockInfo = response.data
+        setSelectedSAInfo(null)
+        setSelectedAnalysisAreaInfo(null)
+        setSelectedBoundaryInfo(censusBlockInfo)
+        viewBoundaryInfo()
         return AroHttp.get(`/service/plan-query/${plan.id}/censusBlockCounts?census-block-ids=${censusBlockInfo.id}`)
       })
       .then((response) => {
@@ -105,12 +111,6 @@ export const BoundaryDetail = ({ boundaries, activeViewModePanel, plan, loadEnti
 
   const viewCensusBlockInfo = (censusBlockId) => {
     return getCensusBlockInfo(censusBlockId)
-    // .then((cbInfo) => {
-    //   setSelectedSAInfo(null)
-    //   setSelectedAnalysisAreaInfo(null)
-    //   setSelectedBoundaryInfo(cbInfo)
-    //   viewBoundaryInfo()
-    // })
   }
 
   const viewSelectedBoundary = (selectedBoundary) => {
@@ -131,6 +131,10 @@ export const BoundaryDetail = ({ boundaries, activeViewModePanel, plan, loadEnti
 
   const viewBoundaryInfo = () => {
     activeViewModePanelAction('BOUNDARIES_INFO')
+  }
+
+  const onClickToggleOtherAttributes = () => {
+    setToggleOtherAttributes(!toggleOtherAttributes)
   }
 
   return (
@@ -172,11 +176,68 @@ export const BoundaryDetail = ({ boundaries, activeViewModePanel, plan, loadEnti
         selectedBoundaryInfo !== null &&
         <div className="boundary-detail">
           <div>Census Block Code: {selectedBoundaryInfo.tabblock_id}</div>
-          <div>Area(sq. miles): {numberFormatter.format((selectedBoundaryInfo.area_meters / (1609.34 * 1609.34).toFixed(2)))}</div>
-          <div>Area(acres): {numberFormatter.format((selectedBoundaryInfo.area_meters / 4046.86).toFixed(2))}</div>
+          <div>Area(sq. miles): {(selectedBoundaryInfo.area_meters / (1609.34 * 1609.34)).toFixed(2)}</div>
+          <div>Area(acres): {(selectedBoundaryInfo.area_meters / 4046.86).toFixed(2)}</div>
           <div>Area(sq. meters): {numberFormatter.format((selectedBoundaryInfo.area_meters).toFixed(2))}</div>
-          <div>Centroid Latitude: {numberFormatter.format((selectedBoundaryInfo.centroid.coordinates[1]).toFixed(5))}</div>
-          <div>Centroid Longitude: {numberFormatter.format((selectedBoundaryInfo.centroid.coordinates[0]).toFixed(5))}</div>
+          <div>Centroid Latitude: {(selectedBoundaryInfo.centroid.coordinates[1]).toFixed(5)}</div>
+          <div>Centroid Longitude: {(selectedBoundaryInfo.centroid.coordinates[0]).toFixed(5)}</div>
+          {
+            selectedBoundaryTags && selectedBoundaryTags.map((tag, index) => {
+              return (
+                undefined !== tag.tagInfo &&
+                <>
+                  {tag.layerCatDescription} :
+                  <div 
+                    classname="outlineLegendIcon" 
+                    style={{borderColor: `${tag.tagInfo.colourHash}`, backgroundColor: `${tag.tagInfo.colourHash}33`}}
+                  />
+                    {tag.tagInfo.description}
+                </>
+              )
+            })
+          }
+          {
+            selectedBoundaryInfo.locationCount && selectedBoundaryInfo.locationCount.map((locationCountInfo, index) => {
+              return (
+                <>
+                  <span className="capitalize">{locationCountInfo.locationCategory}</span>: {locationCountInfo.houseHoldCount}
+                </>
+              )
+            })
+          }
+
+          {/* other Attributes */}
+          <div style={{width: '100%', marginTop: '2px', marginBottom: '6px'}}>
+            <div className="ei-header" style={{paddingTop: '0px',}} onClick={onClickToggleOtherAttributes}>
+              {
+                !toggleOtherAttributes 
+                ? <i className="far fa-plus-square ei-foldout-icon"></i>
+                : <i className="far fa-minus-square ei-foldout-icon"></i>
+              }
+              Other Attributes
+            </div>
+            {
+              toggleOtherAttributes && activeViewModePanel === 'BOUNDARIES_INFO' &&
+              <span>
+                <div className="table-wrapper-scroll-y">
+                  <table className="table table-sm table-striped">
+                    <tbody>
+                      {
+                        selectedBoundaryInfo.attributes && Object.entries(selectedBoundaryInfo.attributes).map(([key, value]) => {
+                          return (
+                            <tr>
+                              <td>{ key }</td>
+                              <td>{ value }</td>
+                            </tr>
+                          )
+                        })
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </span>
+            }
+          </div>
         </div>
       }
 

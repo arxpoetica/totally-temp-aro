@@ -130,6 +130,13 @@ function setLocations (locationIds) {
   }
 }
 
+function setServiceAreas (serviceAreasIds) {
+  return {
+    type: Actions.SELECTION_SET_SERVICE_AREA,
+    payload: serviceAreasIds
+  }
+}
+
 function setPlanEditorFeatures (planEditorFeatures) {
   return {
     type: Actions.SELECTION_SET_PLAN_EDITOR_FEATURES,
@@ -144,5 +151,6 @@ export default {
   addPlanTargets,
   removePlanTargets,
   setLocations,
-  setPlanEditorFeatures
+  setPlanEditorFeatures,
+  setServiceAreas
 }

@@ -22,6 +22,7 @@ const defaultState = {
     analysisAreas: {}
   },
   locations: new Set(),
+  serviceAreas: new Set(),
   planEditorFeatures: []
 }
 
@@ -112,6 +113,12 @@ function addLocations (state, locationIds) {
   }
 }
 
+function addServiceAreas (state, serviceAreasIds) {
+  return { ...state,
+    serviceAreas: new Set(serviceAreasIds)
+  }
+}
+
 function setPlanEditorSelectedFeatures (state, planEditorFeatures) {
   return { ...state,
     planEditorFeatures: planEditorFeatures
@@ -137,6 +144,9 @@ function selectionReducer (state = defaultState, action) {
 
     case Actions.SELECTION_SET_LOCATIONS:
       return addLocations(state, action.payload)
+
+    case Actions.SELECTION_SET_SERVICE_AREA:
+      return addServiceAreas(state, action.payload)
 
     case Actions.SELECTION_SET_PLAN_EDITOR_FEATURES:
       return setPlanEditorSelectedFeatures(state, action.payload)

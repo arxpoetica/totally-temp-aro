@@ -100,7 +100,6 @@ export class AroSearch extends Component {
         isSearchable={true}
         menuIsOpen={isDropDownEnable}
         placeholder={`Select or search a ${objectName} in the list...`}
-        components={{ DropdownIndicator: null }}
         onChange={(event, action) => this.handleChange(event, action)}
         onInputChange={(event, action) => this.handleInputChange(event, action)}
         onKeyDown={(event) => this.onKeyDown(event)}
@@ -112,7 +111,7 @@ export class AroSearch extends Component {
             ? this.handleOptionsList(entityTypeList[entityType])
             : []
         }
-        components={{ Option }}
+        components={{ Option, DropdownIndicator: null }}
       />
     )
   }

@@ -485,8 +485,10 @@ class State {
       if (service.selectedDisplayMode.getValue() == service.displayModes.EDIT_RINGS
         && service.activeEditRingsPanel == service.EditRingsPanels.EDIT_RINGS) {
         service.onFeatureSelectedRedux(options)
-      } else if (options.locations) {
+      } else if (options.locations.length > 0) {
         service.setSelectedLocations(options.locations.map(location => location.location_id))
+      } else if (options.serviceAreas.length > 0) {
+        service.setSelectedServiceAreas(options.serviceAreas.map(serviceArea => serviceArea.id))
       }
     })
 
@@ -1886,6 +1888,7 @@ class State {
       addPlanTargets: (planId, planTargets) => dispatch(SelectionActions.addPlanTargets(planId, planTargets)),
       removePlanTargets: (planId, planTargets) => dispatch(SelectionActions.removePlanTargets(planId, planTargets)),
       setSelectedLocations: locationIds => dispatch(SelectionActions.setLocations(locationIds)),
+      setSelectedServiceAreas: serviceAreasIds => dispatch(SelectionActions.setServiceAreas(serviceAreasIds)),
       setSelectedDisplayMode: displayMode => dispatch(ToolBarActions.selectedDisplayMode(displayMode)),
       setActivePlanState: planState => dispatch(PlanActions.setActivePlanState(planState)),
       selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems)),
