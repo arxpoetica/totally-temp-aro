@@ -1,10 +1,11 @@
 import React, { Component } from 'react'
 import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
-import Select from 'react-select'
+import Select, { components } from 'react-select'
 import StateViewModeActions from '../../state-view-mode/state-view-mode-actions'
 import SelectionActions from '../../selection/selection-actions'
 import AroHttp from '../../../common/aro-http'
+import createClass from "create-react-class"
 
 export class AroSearch extends Component {
   constructor(props) {
@@ -18,7 +19,9 @@ export class AroSearch extends Component {
 
   handleOptionsList(entityType) {
     const { configuration } = this.props
-    return [{id: entityType[0].id, value: entityType[0][configuration], label: entityType[0][configuration]}]
+    return entityType.map((type, index) => {
+      return ( {id: type.id, value: type[configuration], label: type[configuration], name:type.name} )
+    })
   }
 
   onKeyDown(event) {
@@ -109,10 +112,23 @@ export class AroSearch extends Component {
             ? this.handleOptionsList(entityTypeList[entityType])
             : []
         }
+        components={{ Option }}
       />
     )
   }
 }
+
+const Option = createClass({
+  render() {
+    return (
+      <div>
+        <components.Option {...this.props}>
+          <label>{this.props.value} {(this.props.value !== null && this.props.data.name !== null) ? this.props.data.name: ''}</label>
+        </components.Option>
+      </div>
+    )
+  }
+})
 
 const mapStateToProps = (state) => ({
   entityTypeList: state.stateViewMode.entityTypeList,

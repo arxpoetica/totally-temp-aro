@@ -25,7 +25,8 @@ export const BoundaryDetail = ({ boundaries, activeViewModePanel, plan, loadEnti
 
   const onChangeBoundaryType = (event) => {
     const { value } = event.target
-    setSelectedBoundaryType(value)
+    const filteredBoundry = boundaries.filter(item => item.type === value)[0]
+    setSelectedBoundaryType(filteredBoundry)
     setBoundryType(value)
     clearBoundariesDetails()
   }
@@ -103,25 +104,26 @@ export const BoundaryDetail = ({ boundaries, activeViewModePanel, plan, loadEnti
   }
 
   const viewCensusBlockInfo = (censusBlockId) => {
-    return getCensusBlockInfo(censusBlockId).then((cbInfo) => {
-      setSelectedSAInfo(null)
-      setSelectedAnalysisAreaInfo(null)
-      setSelectedBoundaryInfo(cbInfo)
-      viewBoundaryInfo()
-    })
+    return getCensusBlockInfo(censusBlockId)
+    // .then((cbInfo) => {
+    //   setSelectedSAInfo(null)
+    //   setSelectedAnalysisAreaInfo(null)
+    //   setSelectedBoundaryInfo(cbInfo)
+    //   viewBoundaryInfo()
+    // })
   }
 
   const viewSelectedBoundary = (selectedBoundary) => {
     var visibleBoundaryLayer = selectedBoundaryType
-    if (visibleBoundaryLayer === 'census_blocks') {
+    if (visibleBoundaryLayer && visibleBoundaryLayer.type === 'census_blocks') {
       viewCensusBlockInfo(selectedBoundary.id)
         .then((response) => {
           map.setCenter({ lat: response.centroid.coordinates[1], lng: response.centroid.coordinates[0] })
         })
-    } else if (visibleBoundaryLayer === 'wirecenter') {
+    } else if (visibleBoundaryLayer && visibleBoundaryLayer.type === 'wirecenter') {
       map.setCenter({ lat: selectedBoundary.centroid.coordinates[1], lng: selectedBoundary.centroid.coordinates[0] })
       viewServiceAreaInfo(selectedBoundary)
-    } else if (visibleBoundaryLayer === 'analysis_layer') {
+    } else if (visibleBoundaryLayer && visibleBoundaryLayer.type === 'analysis_layer') {
       map.setCenter({ lat: selectedBoundary.centroid.coordinates[1], lng: selectedBoundary.centroid.coordinates[0] })
       viewAnalysisAreaInfo(selectedBoundary)
     }
@@ -140,7 +142,7 @@ export const BoundaryDetail = ({ boundaries, activeViewModePanel, plan, loadEnti
         </div>
         <div className="col" style={{ display: 'table-cell', verticalAlign: 'middle' }}>
           <select
-            value={selectedBoundaryType}
+            value={selectedBoundaryType.type}
             className="form-control-sm"
             onChange={(event) => onChangeBoundaryType(event)}
           >
