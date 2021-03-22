@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { createSelector } from 'reselect'
 import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
@@ -6,6 +6,8 @@ import AroSearch from '../view/aro-search.jsx'
 import AroHttp from '../../../common/aro-http'
 import StateViewModeActions from '../../state-view-mode/state-view-mode-actions'
 import ToolBarActions from '../../header/tool-bar-actions'
+import SelectionActions from '../../selection/selection-actions'
+import { viewModePanels, entityTypeCons, boundryTypeCons, mapHitFeatures } from '../constants'
 
 const getAllBoundaryLayers = state => state.mapLayers.boundary
 const getBoundaryLayersList = createSelector([getAllBoundaryLayers], (boundaries) => boundaries.toJS())
@@ -13,7 +15,10 @@ const getBoundaryLayersList = createSelector([getAllBoundaryLayers], (boundaries
 const intlNumberFormat = config.intl_number_format || 'en-US'
 const numberFormatter = new Intl.NumberFormat(intlNumberFormat)
 
-export const BoundaryDetail = ({ boundaries, activeViewModePanel, plan, loadEntityList, activeViewModePanelAction }) => {
+export const BoundaryDetail = (props) => {
+
+  const { boundaries, activeViewModePanel, plan, loadEntityList, activeViewModePanelAction,
+    selectedMapFeatures, allowViewModeClickAction, cloneSelection, setMapSelection, layerCategories } = props
 
   const [selectedBoundaryType, setSelectedBoundaryType] = useState('')
   const [entityType, setEntityType] = useState('')
@@ -24,6 +29,73 @@ export const BoundaryDetail = ({ boundaries, activeViewModePanel, plan, loadEnti
   const [selectedAnalysisAreaInfo, setSelectedAnalysisAreaInfo] = useState(null)
   const [selectedBoundaryTags, setSelectedBoundaryTags] = useState([])
   const [toggleOtherAttributes, setToggleOtherAttributes] = useState(false)
+
+  // https://stackoverflow.com/questions/53446020/how-to-compare-oldvalues-and-newvalues-on-react-hooks-useeffect
+  function usePrevious(value) {
+    const ref = useRef()
+    useEffect(() => {
+      ref.current = value
+    })
+    return ref.current
+  }
+
+  const prevMapFeatures = usePrevious(selectedMapFeatures)
+
+  useEffect(() => {
+    if (!_.isEqual(prevMapFeatures, selectedMapFeatures)) {
+      // 160712271: On click of equipment or location dont show boundary details
+      if (selectedMapFeatures.hasOwnProperty(mapHitFeatures.EQUIPMENT_FEATURES)
+        && selectedMapFeatures.equipmentFeatures.length > 0) return
+      if (selectedMapFeatures.hasOwnProperty(mapHitFeatures.LOCATIONS)
+        && selectedMapFeatures.locations.length > 0) return
+      if (selectedMapFeatures.hasOwnProperty(mapHitFeatures.FIBER_FEATURES)
+        && selectedMapFeatures.fiberFeatures.size > 0) return
+      if (selectedMapFeatures.hasOwnProperty(mapHitFeatures.ROAD_SEGMENTS)
+        && selectedMapFeatures.roadSegments.size > 0) return
+
+      // In ruler mode click should not enable boundary view action
+      if (allowViewModeClickAction()) {
+        if (selectedMapFeatures.hasOwnProperty(mapHitFeatures.CENSUS_FEATURES)
+          && selectedMapFeatures.censusFeatures.length > 0
+          && selectedMapFeatures.censusFeatures[0].hasOwnProperty('id')) {
+          const tagList = []
+          const tags = selectedMapFeatures.censusFeatures[0].tags
+          for (const key in tags) {
+            if (tags.hasOwnProperty(key)) {
+              const tag = {}
+              tag.layerCatDescription = layerCategories[key].description
+              tag.tagInfo = layerCategories[key].tags[tags[key]]
+              tagList.push(tag)
+            }
+          }
+          setSelectedBoundaryTags(tagList)
+          const censusBlockId = selectedMapFeatures.censusFeatures[0].id
+          const newSelection = cloneSelection()
+          newSelection.details.censusBlockId = censusBlockId
+          setMapSelection(newSelection)
+          viewCensusBlockInfo(censusBlockId)
+          setBoundryType(boundryTypeCons.CENSUS_BLOCKS)
+        } else if (selectedMapFeatures.hasOwnProperty(mapHitFeatures.SERVICE_AREAS)
+            && selectedMapFeatures.serviceAreas.length > 0
+            && selectedMapFeatures.serviceAreas[0].hasOwnProperty('code')) {
+          viewServiceAreaInfo(selectedMapFeatures.serviceAreas[0])
+          const newSelection = cloneSelection()
+          newSelection.details.serviceAreaId = selectedMapFeatures.serviceAreas[0].id
+          setMapSelection(newSelection)
+          setBoundryType(boundryTypeCons.WIRECENTER)
+        } else if (selectedMapFeatures.hasOwnProperty(mapHitFeatures.ANALYSIS_AREAS)
+            && selectedMapFeatures.analysisAreas.length > 0
+            && selectedMapFeatures.analysisAreas[0].hasOwnProperty('code')
+            && selectedMapFeatures.analysisAreas[0].hasOwnProperty('_data_type')) {
+          viewAnalysisAreaInfo(selectedMapFeatures.analysisAreas[0])
+          const newSelection = cloneSelection()
+          newSelection.details.analysisAreaId = selectedMapFeatures.analysisAreas[0].id
+          setMapSelection(newSelection)
+          setBoundryType(boundryTypeCons.ANALYSIS_LAYER)
+        }
+      }
+    }
+  }, [selectedMapFeatures])
 
   const onChangeBoundaryType = (event) => {
     const { value } = event.target
@@ -45,18 +117,18 @@ export const BoundaryDetail = ({ boundaries, activeViewModePanel, plan, loadEnti
 
   const setBoundryType = (boundaryLayerType) => {
     if (boundaryLayerType) {
-      if (boundaryLayerType === 'census_blocks') {
-        setEntityType('CensusBlocksEntity')
+      if (boundaryLayerType === boundryTypeCons.CENSUS_BLOCKS) {
+        setEntityType(entityTypeCons.CENSUS_BLOCKS_ENTITY)
         setSearchColumn('id,tabblockId')
         setConfiguration('tabblockId')
       }
-      if (boundaryLayerType === 'wirecenter') {
-        setEntityType('ServiceAreaView')
+      if (boundaryLayerType === boundryTypeCons.WIRECENTER) {
+        setEntityType(entityTypeCons.SERVICE_AREA_VIEW)
         setSearchColumn('id,code,name,centroid')
         setConfiguration('code')
       }
-      if (boundaryLayerType === 'analysis_layer') {
-        setEntityType('AnalysisArea')
+      if (boundaryLayerType === boundryTypeCons.ANALYSIS_LAYER) {
+        setEntityType(entityTypeCons.ANALYSIS_AREA)
         setSearchColumn('id,code,centroid')
         setConfiguration('code')
       }
@@ -66,7 +138,7 @@ export const BoundaryDetail = ({ boundaries, activeViewModePanel, plan, loadEnti
   const viewServiceAreaInfo = (serviceArea) => {
     setSelectedBoundaryInfo(null)
     setSelectedAnalysisAreaInfo(null)
-    loadEntityList('ServiceAreaView', serviceArea.id, 'id,code,name', 'id')
+    loadEntityList(entityTypeCons.SERVICE_AREA_VIEW, serviceArea.id, 'id,code,name', 'id')
       .then((serviceAreaInfos) => {
         setSelectedSAInfo(serviceAreaInfos[0])
       })
@@ -86,25 +158,25 @@ export const BoundaryDetail = ({ boundaries, activeViewModePanel, plan, loadEnti
   }
 
   const getAnalysisAreaInfo = (analysisAreaId) => {
-    return loadEntityList('AnalysisArea', analysisAreaId, 'id,code', 'id')
+    return loadEntityList(entityTypeCons.ANALYSIS_AREA, analysisAreaId, 'id,code', 'id')
       .then((analysisAreaInfo) => {
         return analysisAreaInfo[0]
       })
   }
 
   const getCensusBlockInfo = (cbId) => {
-    var censusBlockInfo = null
+    let censusBlockInfo = null
     return AroHttp.get('/census_blocks/' + cbId + '/details')
       .then((response) => {
         censusBlockInfo = response.data
         setSelectedSAInfo(null)
         setSelectedAnalysisAreaInfo(null)
-        setSelectedBoundaryInfo(censusBlockInfo)
         viewBoundaryInfo()
         return AroHttp.get(`/service/plan-query/${plan.id}/censusBlockCounts?census-block-ids=${censusBlockInfo.id}`)
       })
       .then((response) => {
         censusBlockInfo.locationCount = response.data
+        setSelectedBoundaryInfo(censusBlockInfo)
         return censusBlockInfo
       })
   }
@@ -114,23 +186,40 @@ export const BoundaryDetail = ({ boundaries, activeViewModePanel, plan, loadEnti
   }
 
   const viewSelectedBoundary = (selectedBoundary) => {
-    var visibleBoundaryLayer = selectedBoundaryType
-    if (visibleBoundaryLayer && visibleBoundaryLayer.type === 'census_blocks') {
+    const visibleBoundaryLayer = selectedBoundaryType
+    if (visibleBoundaryLayer && visibleBoundaryLayer.type === boundryTypeCons.CENSUS_BLOCKS) {
+      const newSelection = cloneSelection()
+      newSelection.details.censusBlockId = selectedBoundary.id
+      setMapSelection(newSelection)
       viewCensusBlockInfo(selectedBoundary.id)
         .then((response) => {
           map.setCenter({ lat: response.centroid.coordinates[1], lng: response.centroid.coordinates[0] })
+          const ZOOM_FOR_LOCATION_SEARCH = 14
+          const mapObject = {
+            latitude: response.centroid.coordinates[1],
+            longitude: response.centroid.coordinates[0],
+            zoom: ZOOM_FOR_LOCATION_SEARCH,
+          }
+          const event = new CustomEvent('mapChanged', { detail: mapObject})
+          window.dispatchEvent(event)
         })
-    } else if (visibleBoundaryLayer && visibleBoundaryLayer.type === 'wirecenter') {
-      map.setCenter({ lat: selectedBoundary.centroid.coordinates[1], lng: selectedBoundary.centroid.coordinates[0] })
+    } else if (visibleBoundaryLayer && visibleBoundaryLayer.type === boundryTypeCons.WIRECENTER) {
+      selectedBoundary.centroid && map.setCenter({ lat: selectedBoundary.centroid.coordinates[1], lng: selectedBoundary.centroid.coordinates[0] })
+      const newSelection = cloneSelection()
+      newSelection.details.serviceAreaId = selectedBoundary.id
+      setMapSelection(newSelection)
       viewServiceAreaInfo(selectedBoundary)
-    } else if (visibleBoundaryLayer && visibleBoundaryLayer.type === 'analysis_layer') {
-      map.setCenter({ lat: selectedBoundary.centroid.coordinates[1], lng: selectedBoundary.centroid.coordinates[0] })
+    } else if (visibleBoundaryLayer && visibleBoundaryLayer.type === boundryTypeCons.ANALYSIS_LAYER) {
+      selectedBoundary.centroid && map.setCenter({ lat: selectedBoundary.centroid.coordinates[1], lng: selectedBoundary.centroid.coordinates[0] })
+      const newSelection = cloneSelection()
+      newSelection.details.analysisAreaId = selectedBoundary.id
+      setMapSelection(newSelection)
       viewAnalysisAreaInfo(selectedBoundary)
     }
   }
 
   const viewBoundaryInfo = () => {
-    activeViewModePanelAction('BOUNDARIES_INFO')
+    activeViewModePanelAction(viewModePanels.BOUNDARIES_INFO)
   }
 
   const onClickToggleOtherAttributes = () => {
@@ -139,39 +228,43 @@ export const BoundaryDetail = ({ boundaries, activeViewModePanel, plan, loadEnti
 
   return (
     <>
-    <div className="mb-2 mt-2">
-      <div className="form-group" style={{ display:'table', width:'100%' }}>
-        <div className="col" style={{ display: 'table-cell', verticalAlign: 'bottom'}}>
-          <label>Boundary Search:</label>
+      <div className="mb-2 mt-2">
+        {/* Boundary Search */}
+        <div className="form-group" style={{ display: 'table', width: '100%' }}>
+          <div className="col" style={{ display: 'table-cell', verticalAlign: 'bottom'}}>
+            <label>Boundary Search:</label>
+          </div>
+          <div className="col" style={{ display: 'table-cell', verticalAlign: 'middle' }}>
+            <select
+              value={selectedBoundaryType.type}
+              className="form-control-sm"
+              onChange={(event) => onChangeBoundaryType(event)}
+            >
+              <option value="" hidden>Select a boundary type for search</option>
+              {
+                boundaries.filter((item) => item.checked === true).map((item, index) =>
+                  <option key={index} value={item.type} label={item.description} />
+                )
+              }
+            </select>
+          </div>
         </div>
-        <div className="col" style={{ display: 'table-cell', verticalAlign: 'middle' }}>
-          <select
-            value={selectedBoundaryType.type}
-            className="form-control-sm"
-            onChange={(event) => onChangeBoundaryType(event)}
-          >
-            <option value="" hidden>Select a boundary type for search</option>
-            {
-              boundaries.filter((item) => item.checked === true).map((item, index) =>
-                <option key={index} value={item.type} label={item.description} />
-              )
-            }
-          </select>
-        </div>
-      </div>
-      {
-        activeViewModePanel === 'BOUNDARIES_INFO' &&
-        <AroSearch
-          objectName="Boundary Layer"
-          labelId="code"
-          entityType={entityType}
-          searchColumn={searchColumn}
-          configuration={configuration}
-          onSelectedBoundary={viewSelectedBoundary}
-        />
-      }
-    </div>
 
+        {/* Aro Search */}
+        {
+          activeViewModePanel === viewModePanels.BOUNDARIES_INFO &&
+          <AroSearch
+            objectName="Boundary Layer"
+            labelId="code"
+            entityType={entityType}
+            searchColumn={searchColumn}
+            configuration={configuration}
+            onSelectedBoundary={viewSelectedBoundary}
+          />
+        }
+      </div>
+
+      {/* Census Block info */}
       {
         selectedBoundaryInfo !== null &&
         <div className="boundary-detail">
@@ -185,45 +278,48 @@ export const BoundaryDetail = ({ boundaries, activeViewModePanel, plan, loadEnti
             selectedBoundaryTags && selectedBoundaryTags.map((tag, index) => {
               return (
                 undefined !== tag.tagInfo &&
-                <>
+                <div key={index}>
                   {tag.layerCatDescription} :
-                  <div 
-                    classname="outlineLegendIcon" 
+                  <div
+                    classname="outlineLegendIcon"
                     style={{borderColor: `${tag.tagInfo.colourHash}`, backgroundColor: `${tag.tagInfo.colourHash}33`}}
                   />
                     {tag.tagInfo.description}
-                </>
+                </div>
               )
             })
           }
           {
-            selectedBoundaryInfo.locationCount && selectedBoundaryInfo.locationCount.map((locationCountInfo, index) => {
-              return (
-                <>
-                  <span className="capitalize">{locationCountInfo.locationCategory}</span>: {locationCountInfo.houseHoldCount}
-                </>
-              )
-            })
+            selectedBoundaryInfo.locationCount && selectedBoundaryInfo.locationCount.length > 0
+              && selectedBoundaryInfo.locationCount.map((locationCountInfo, index) => {
+                return (
+                  <div key={index}>
+                    <span className="capitalize">
+                      {locationCountInfo.locationCategory}</span>: {locationCountInfo.houseHoldCount}
+                  </div>
+                )
+              })
           }
 
           {/* other Attributes */}
           <div style={{width: '100%', marginTop: '2px', marginBottom: '6px'}}>
             <div className="ei-header" style={{paddingTop: '0px',}} onClick={onClickToggleOtherAttributes}>
               {
-                !toggleOtherAttributes 
-                ? <i className="far fa-plus-square ei-foldout-icon"></i>
-                : <i className="far fa-minus-square ei-foldout-icon"></i>
+                !toggleOtherAttributes
+                  ? <i className="far fa-plus-square ei-foldout-icon"></i>
+                  : <i className="far fa-minus-square ei-foldout-icon"></i>
               }
               Other Attributes
             </div>
             {
-              toggleOtherAttributes && activeViewModePanel === 'BOUNDARIES_INFO' &&
+              toggleOtherAttributes && activeViewModePanel === viewModePanels.BOUNDARIES_INFO &&
               <span>
                 <div className="table-wrapper-scroll-y">
                   <table className="table table-sm table-striped">
                     <tbody>
                       {
-                        selectedBoundaryInfo.attributes && Object.entries(selectedBoundaryInfo.attributes).map(([key, value]) => {
+                        selectedBoundaryInfo.attributes
+                        && Object.entries(selectedBoundaryInfo.attributes).map(([key, value]) => {
                           return (
                             <tr>
                               <td>{ key }</td>
@@ -241,6 +337,7 @@ export const BoundaryDetail = ({ boundaries, activeViewModePanel, plan, loadEnti
         </div>
       }
 
+      {/* Service Area info */}
       {
         selectedSAInfo !== null &&
         <div className="boundary-detail">
@@ -249,6 +346,7 @@ export const BoundaryDetail = ({ boundaries, activeViewModePanel, plan, loadEnti
         </div>
       }
 
+      {/* Analysis Area info */}
       {
         selectedAnalysisAreaInfo !== null &&
         <div className="boundary-detail">
@@ -264,6 +362,8 @@ const mapStateToProps = (state) => ({
   boundaries: getBoundaryLayersList(state),
   activeViewModePanel: state.toolbar.rActiveViewModePanel,
   plan: state.plan.activePlan,
+  selectedMapFeatures: state.selection.mapFeatures,
+  layerCategories: state.stateViewMode.layerCategories,
 })
 
 const mapDispatchToProps = (dispatch) => ({
@@ -271,6 +371,9 @@ const mapDispatchToProps = (dispatch) => ({
     StateViewModeActions.loadEntityList(entityType, filterObj, select, searchColumn, configuration)
   ),
   activeViewModePanelAction: (value) => dispatch(ToolBarActions.activeViewModePanel(value)),
+  allowViewModeClickAction: () => dispatch(StateViewModeActions.allowViewModeClickAction()),
+  cloneSelection: () => dispatch(SelectionActions.cloneSelection()),
+  setMapSelection: (mapSelection) => dispatch(SelectionActions.setMapSelection(mapSelection)),
 })
 
 const BoundaryDetailComponent = wrapComponentWithProvider(

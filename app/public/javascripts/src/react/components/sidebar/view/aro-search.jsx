@@ -5,7 +5,7 @@ import Select, { components } from 'react-select'
 import StateViewModeActions from '../../state-view-mode/state-view-mode-actions'
 import SelectionActions from '../../selection/selection-actions'
 import AroHttp from '../../../common/aro-http'
-import createClass from "create-react-class"
+import createClass from 'create-react-class'
 
 export class AroSearch extends Component {
   constructor(props) {
@@ -17,10 +17,19 @@ export class AroSearch extends Component {
     }
   }
 
+  componentDidUpdate(prevProps) {
+    const { entityType: oldEntityType, selectedMapFeatures: oldSelectedMapFeatures } = prevProps
+    const { entityType: newEntityType, selectedMapFeatures: newSelectedMapFeatures } = this.props
+
+    if (oldEntityType !== newEntityType || !_.isEqual(oldSelectedMapFeatures, newSelectedMapFeatures)) {
+      this.setState({ searchText: null })
+    }
+  }
+
   handleOptionsList(entityType) {
     const { configuration } = this.props
     return entityType.map((type, index) => {
-      return ( {id: type.id, value: type[configuration], label: type[configuration], name:type.name} )
+      return ( {id: type.id, value: type[configuration], label: type[configuration], name: type.name} )
     })
   }
 
@@ -83,7 +92,7 @@ export class AroSearch extends Component {
           zoom: ZOOM_FOR_LOCATION_SEARCH,
         }
         // https://www.sitepoint.com/javascript-custom-events/
-        const event = new CustomEvent('mapChanged', { detail: mapObject})
+        const event = new CustomEvent('mapChanged', { detail: mapObject })
         window.dispatchEvent(event)
       })
       .catch(err => console.error(err))
@@ -122,7 +131,13 @@ const Option = createClass({
     return (
       <div>
         <components.Option {...this.props}>
-          <label>{this.props.value} {(this.props.value !== null && this.props.data.name !== null) ? this.props.data.name: ''}</label>
+          <label>
+            {this.props.value} {
+              (this.props.value !== null
+                && this.props.data.name !== null)
+                ? this.props.data.name : ''
+            }
+          </label>
         </components.Option>
       </div>
     )
@@ -131,6 +146,7 @@ const Option = createClass({
 
 const mapStateToProps = (state) => ({
   entityTypeList: state.stateViewMode.entityTypeList,
+  selectedMapFeatures: state.selection.mapFeatures,
 })
 
 const mapDispatchToProps = (dispatch) => ({

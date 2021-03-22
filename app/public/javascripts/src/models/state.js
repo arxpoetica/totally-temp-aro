@@ -28,7 +28,7 @@ import ViewSettingsActions from '../react/components/view-settings/view-settings
 import ToolBarActions from '../react/components/header/tool-bar-actions'
 import RoicReportsActions from '../react/components/sidebar/analysis/roic-reports/roic-reports-actions'
 import { hsvToRgb } from '../react/common/view-utils'
-
+import StateViewModeActions from '../react/components/state-view-mode/state-view-mode-actions'
 
 const networkAnalysisConstraintsSelector = formValueSelector(ReactComponentConstants.NETWORK_ANALYSIS_CONSTRAINTS)
 
@@ -481,14 +481,18 @@ class State {
     service.mapFeaturesClickedEvent = new Rx.BehaviorSubject({})
 
     service.mapFeaturesSelectedEvent.skip(1).subscribe((options) => {
+
+      // set all mapFeatures in redux
+      if (service.selectedDisplayMode.getValue() == service.displayModes.VIEW) {
+        service.setMapFeatures(options)
+      }
+
       // ToDo: this check may need to move into REACT
       if (service.selectedDisplayMode.getValue() == service.displayModes.EDIT_RINGS
         && service.activeEditRingsPanel == service.EditRingsPanels.EDIT_RINGS) {
         service.onFeatureSelectedRedux(options)
-      } else if (options.locations.length > 0) {
+      } else if (options.locations) {
         service.setSelectedLocations(options.locations.map(location => location.location_id))
-      } else if (options.serviceAreas.length > 0) {
-        service.setSelectedServiceAreas(options.serviceAreas.map(serviceArea => serviceArea.id))
       }
     })
 
@@ -1836,6 +1840,7 @@ class State {
           layerCategories = Object.assign({}, layerCategories, bounds.categories)
         }
         service.layerCategories.next(layerCategories)
+        service.setLayerCategories(layerCategories)
         service.requestMapLayerRefresh.next(null)
       }
     }
@@ -1888,7 +1893,7 @@ class State {
       addPlanTargets: (planId, planTargets) => dispatch(SelectionActions.addPlanTargets(planId, planTargets)),
       removePlanTargets: (planId, planTargets) => dispatch(SelectionActions.removePlanTargets(planId, planTargets)),
       setSelectedLocations: locationIds => dispatch(SelectionActions.setLocations(locationIds)),
-      setSelectedServiceAreas: serviceAreasIds => dispatch(SelectionActions.setServiceAreas(serviceAreasIds)),
+      setMapFeatures: mapFeatures => dispatch(SelectionActions.setMapFeatures(mapFeatures)),
       setSelectedDisplayMode: displayMode => dispatch(ToolBarActions.selectedDisplayMode(displayMode)),
       setActivePlanState: planState => dispatch(PlanActions.setActivePlanState(planState)),
       selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems)),
@@ -1914,6 +1919,7 @@ class State {
       setSelectedHeatMapOption: selectedHeatMapOption => dispatch(ToolBarActions.setSelectedHeatMapOption(selectedHeatMapOption)),
       setEnumStrings: enumStrings => dispatch(RoicReportsActions.setEnumStrings(enumStrings)),
       setTypeVisibility: (typeVisibility) => dispatch(MapLayerActions.setTypeVisibility(typeVisibility)),
+      setLayerCategories: (layerCategories) => dispatch(StateViewModeActions.setLayerCategories(layerCategories)),
     }
   }
 }

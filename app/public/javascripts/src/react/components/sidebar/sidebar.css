@@ -115,3 +115,18 @@
   display: flex;
   flex-direction: column;
 }
+
+/* View-Mode Boundry-info */
+
+.boundary-detail {
+  position: relative;
+  /* This will require the parent to have position: relative or absolute */
+}
+
+.boundary-detail>div {
+  margin-top: 10px;
+}
+
+.capitalize {
+ text-transform: capitalize;
+}

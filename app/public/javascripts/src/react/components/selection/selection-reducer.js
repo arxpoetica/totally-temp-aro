@@ -22,8 +22,24 @@ const defaultState = {
     analysisAreas: {}
   },
   locations: new Set(),
-  serviceAreas: new Set(),
-  planEditorFeatures: []
+  planEditorFeatures: [],
+  mapFeatures: {},
+  selection: {
+    details: {
+      analysisAreaId: null,
+      censusBlockId: null,
+      layerCategoryId: null,
+      roadSegments: new Set(),
+      serviceAreaId: null,
+      fiberSegments: new Set(),
+      siteBoundaryId: null
+    },
+    editable: {
+      equipment: {},
+      location: {},
+      serviceArea: {}
+    }
+  }
 }
 
 function setActiveSelectionModeById (state, newSelectionModeId) {
@@ -113,15 +129,21 @@ function addLocations (state, locationIds) {
   }
 }
 
-function addServiceAreas (state, serviceAreasIds) {
+function setMapFeatures (state, mapFeatures) {
   return { ...state,
-    serviceAreas: new Set(serviceAreasIds)
+    mapFeatures: mapFeatures
   }
 }
 
 function setPlanEditorSelectedFeatures (state, planEditorFeatures) {
   return { ...state,
     planEditorFeatures: planEditorFeatures
+  }
+}
+
+function setMapSelection (state, mapSelection) {
+  return { ...state,
+    selection: mapSelection
   }
 }
 
@@ -145,11 +167,14 @@ function selectionReducer (state = defaultState, action) {
     case Actions.SELECTION_SET_LOCATIONS:
       return addLocations(state, action.payload)
 
-    case Actions.SELECTION_SET_SERVICE_AREA:
-      return addServiceAreas(state, action.payload)
+    case Actions.SELECTION_SET_MAP_FEATURES:
+      return setMapFeatures(state, action.payload)
 
     case Actions.SELECTION_SET_PLAN_EDITOR_FEATURES:
       return setPlanEditorSelectedFeatures(state, action.payload)
+
+    case Actions.SELECTION_SET_MAP_SELECTION:
+    return setMapSelection(state, action.payload)
 
     default:
       return state
