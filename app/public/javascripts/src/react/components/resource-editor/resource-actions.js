@@ -814,7 +814,7 @@ function saveArpuModels(arpuManagerId, models) {
       AroHttp.put(`/service/v1/arpu-manager/${arpuManagerId}/configuration`, {
         morphologyGroups: [{
           arpuModels,
-          morphology: 'string'
+          morphology: '*',
         }]
       })
         .then(result => {
