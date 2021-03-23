@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import ResourceActions from './resource-actions'
 import { Accordion, AccordionRow } from '../common/accordion/Accordion.jsx'
+import { Input } from './../common/forms/Input.jsx'
 import { Select } from './../common/forms/Select.jsx'
 import { Dropdown } from './arpu-editor-dropdown.jsx'
 import './arpu-editor.css'
@@ -73,10 +74,11 @@ export class ArpuEditor extends Component {
               {model.strategy === 'global' &&
                 <div className="arpu-content">
                   <div className="arpu-global">
-                    <h3>Revenue</h3>
-                    <input
+                    <h3>ARPU</h3>
+                    <Input
                       type="number"
-                      min="0"
+                      classes="currency"
+                      min={0}
                       value={model.global}
                       onChange={event => this.handleGlobalChange(event, modelIndex)}
                     />

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 // import cx from 'clsx'
-import './select.css'
+import './Select.css'
 
 export const Select = ({ options, value, onClick=()=>{}, onChange=()=>{} }) => {
 

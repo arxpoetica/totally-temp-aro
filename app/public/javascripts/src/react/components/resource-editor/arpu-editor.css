@@ -1,9 +1,4 @@
 .arpu-manager {
-  /* FIXME: move this into a root section */
-  --font: Helvetica, Arial, sans-serif;
-  --primary: #4d99e5;
-  --gray-light: #e9ecef;
-  --gray-medium-light: #bcbcbc;
   position: absolute;
   top: 0;
   right: 0;
@@ -24,28 +19,11 @@
   display: flex;
   align-items: center;
 }
-/* FIXME: make this a component */
-.arpu-manager .arpu-global input {
-  display: block;
-  width: 100px;
-  height: 40px;
-  margin-left: 10px;
-  border: 1px solid var(--gray-light);
-  color: var(--primary);
-  font: 24px/40px var(--font);
-  letter-spacing: -1.4px;
-  text-align: center;
+.arpu-manager .arpu-global h3 {
+  margin-right: 8px;
 }
-.arpu-manager .arpu-global input[type=number]::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-.arpu-manager .arpu-global input[type=number] {
-  -moz-appearance: textfield;
-}
-.arpu-manager .arpu-global input:focus {
-  outline: none;
-  box-shadow: inset 0 0 0 3px rgba(77, 153, 229, 0.6);
+.arpu-manager .arpu-global .aro-input {
+  width: 200px;
 }
 .arpu-manager .buttons {
   display: flex;
@@ -101,6 +79,11 @@
   border-bottom: 1px solid var(--gray-light);
   z-index: 3;
 }
+.arpu-manager h3 {
+  margin: 0;
+  font: 14px/30px var(--font);
+  text-align: center;
+}
 .arpu-manager .arpu-cell.input {
   flex-direction: row;
   font-size: 15px;
@@ -115,12 +98,7 @@
   line-height: 50px;
   pointer-events: none;
 }
-.arpu-manager h3 {
-  margin: 0;
-  font: 14px/30px var(--font);
-  text-align: center;
-}
-.arpu-manager .arpu-cell input {
+.arpu-manager .arpu-cell.input input {
   display: block;
   width: 100%;
   height: 100%;
@@ -130,14 +108,14 @@
   letter-spacing: -1.4px;
   text-align: center;
 }
-.arpu-manager .arpu-cell input[type=number]::-webkit-inner-spin-button {
+.arpu-manager .arpu-cell.input input[type=number]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
-.arpu-manager .arpu-cell input[type=number] {
+.arpu-manager .arpu-cell.input input[type=number] {
   -moz-appearance: textfield;
 }
-.arpu-manager .arpu-cell input:focus {
+.arpu-manager .arpu-cell.input input:focus {
   outline: none;
   box-shadow: inset 0 0 0 3px rgba(77, 153, 229, 0.6);
 }
@@ -203,6 +181,7 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  width: 100px;
 }
 .arpu-dropdown li:not(:first-child) {
   margin: 0 0 0 21px;
@@ -225,43 +204,6 @@
   font: 10px var(--font);
   letter-spacing: -0.6px;
   padding: 0 5px;
-}
-.arpu-dropdown .dropdown .input {
-  font-family: Exo2-Medium;
-  font-size: 12px;
-  color: var(--gray-medium-light);
-}
-.arpu-dropdown .dropdown .input::before {
-  content: '$';
-  display: block;
-  position: absolute;
-  left: 8px;
-  height: 45px;
-  line-height: 45px;
-  pointer-events: none;
-}
-.arpu-dropdown .dropdown input {
-  display: block;
-  width: 70px;
-  height: 45px;
-  margin: 0;
-  padding: 0;
-  border: 1px solid var(--gray-light);
-  border-radius: 8px;
-  font: 24px var(--font);
-  letter-spacing: -1.4px;
-  text-align: center;
-}
-.arpu-dropdown .dropdown input[type=number]::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-.arpu-dropdown .dropdown input[type=number] {
-  -moz-appearance: textfield;
-}
-.arpu-dropdown input:focus {
-  outline: none;
-  box-shadow: inset 0 0 0 3px rgba(77, 153, 229, 0.6);
 }
 .arpu-dropdown .close {
   position: absolute;
