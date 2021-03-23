@@ -753,6 +753,14 @@ function saveArpuModels(arpuManagerId, models) {
   const arpuModels = JSON.parse(JSON.stringify(models)).map(model => {
 
     model.productAssignments = model.products.map(product => {
+      // if it's global, need to set it
+      if (model.strategy === 'global') {
+        let arpu = 0
+        if (product.id === 1) {
+          arpu = model.global
+        }
+        product = Object.assign({}, product, { arpu, opex: 0, fixedCost: 0 })
+      }
       product.productId = product.id
       delete product.id
       delete product.name
@@ -767,7 +775,8 @@ function saveArpuModels(arpuManagerId, models) {
     } else if (model.strategy === 'global') {
       // ===> global
       model.arpuStrategy = 'arpu'
-      model.cells = [{ key: { productId: 1, segmentId: 1 }, arpuPercent: model.global }]
+      // since global, just set to 100%
+      model.cells = [{ key: { productId: 1, segmentId: 1 }, arpuPercent: 100 }]
     } else { // model.strategy === 'segmentation'
       // ===> segmentation
       model.arpuStrategy = 'arpu'

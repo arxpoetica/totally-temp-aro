@@ -77,7 +77,6 @@ export class ArpuEditor extends Component {
                     <input
                       type="number"
                       min="0"
-                      max="100"
                       value={model.global}
                       onChange={event => this.handleGlobalChange(event, modelIndex)}
                     />
@@ -155,7 +154,7 @@ export class ArpuEditor extends Component {
 
   handleGlobalChange({ target }, modelIndex) {
     let value = parseFloat(target.value) || 0
-    value = value > 100 ? 100 : (value < 0 ? 0 : value)
+    value = value < 0 ? 0 : value
     const { arpuModels } = this.state
     arpuModels[modelIndex].global = value
     this.setState({ arpuModels })
