@@ -682,6 +682,14 @@ function loadArpuManagerConfiguration(arpuManagerId) {
             model.options.push({ value: 'segmentation', label: 'Segmentation' })
           }
           model.options.push({ value: 'override', label: 'Location Layer' })
+
+          // first make sure things are in order
+          model.cells.sort((one, two) => {
+            return one.key.segmentId === two.key.segmentId
+              ? one.key.productId - two.key.productId
+              : one.key.segmentId - two.key.segmentId
+          })
+
           // ===> strategy value
           if (model.arpuStrategy === 'arpu') {
             if (locationEntityType === 'celltower'
@@ -689,10 +697,12 @@ function loadArpuManagerConfiguration(arpuManagerId) {
                 model.cells.length === 1
                 && model.cells[0].key.productId === 1
                 && model.cells[0].key.segmentId === 1
+                && model.cells[0].key.segmentId === 1
+                && model.cells[0].arpuPercent === 1
               )
               || !model.cells.length
             ) {
-              // ===> single cell, `arpu` means `global` here
+              // ===> single cell, arpuPercent === 1, `arpu` means `global` here
               model.strategy = 'global'
             } else {
               // ===> multiple cell, `arpu` means `segmentation` here
@@ -724,13 +734,15 @@ function loadArpuManagerConfiguration(arpuManagerId) {
                   return cell.key.productId === product.id
                     && cell.key.segmentId === segment.id
                 })
-                return found ? found.arpuPercent : 0
+                // NOTE: multiplying by 100 because percents are
+                // stored in decimal but must be displayed in 100s
+                return (found ? found.arpuPercent : 0) * 100
               })
               return Object.assign({}, segment)
             })
 
           // global value treated separately for convenience in the UI
-          model.global = model.segments[0].percents[0]
+          model.global = model.products[0].arpu
 
           delete model.arpuStrategy
           delete model.productAssignments
@@ -775,8 +787,8 @@ function saveArpuModels(arpuManagerId, models) {
     } else if (model.strategy === 'global') {
       // ===> global
       model.arpuStrategy = 'arpu'
-      // since global, just set to 100%
-      model.cells = [{ key: { productId: 1, segmentId: 1 }, arpuPercent: 100 }]
+      // since global, just set to 1 (which is the decimal of 100%)
+      model.cells = [{ key: { productId: 1, segmentId: 1 }, arpuPercent: 1 }]
     } else { // model.strategy === 'segmentation'
       // ===> segmentation
       model.arpuStrategy = 'arpu'
@@ -789,7 +801,9 @@ function saveArpuModels(arpuManagerId, models) {
                 productId: product.productId,
                 segmentId: segment.id,
               },
-              arpuPercent: parseFloat(arpuPercent),
+              // NOTE: dividing by 100 because percents are
+              // displayed in 100s but must be stored in decimal
+              arpuPercent: parseFloat(arpuPercent) / 100,
             }
           }
           return false
