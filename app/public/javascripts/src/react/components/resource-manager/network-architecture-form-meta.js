@@ -25,6 +25,11 @@ const FiberCapacityTypes = [
   'DropCoil'
 ]
 
+const DistanceConstraintTypes = [
+  'HONOR_DISTANCE',
+  'ALWAYS_CONNECT'
+]
+
 const NetworkArchitectureFormMeta = Object.freeze({
   '_meta': {
     'displayType': 'object',
@@ -531,7 +536,14 @@ const NetworkArchitectureFormMeta = Object.freeze({
 
             ]
           }
-        }
+        },
+        'distanceConstraintStrategy': {
+          '_meta': {
+            'displayType': 'dropdownList',
+            'displayName': 'Distance Constraint Strategy',
+            'options': DistanceConstraintTypes,
+          },
+        },
       },
       'fiberCapacityConfig': {
         '_meta': {
@@ -1429,7 +1441,14 @@ const NetworkArchitectureFormMeta = Object.freeze({
 
             ]
           }
-        }
+        },
+        'distanceConstraintStrategy': {
+          '_meta': {
+            'displayType': 'dropdownList',
+            'displayName': 'Distance Constraint Strategy',
+            'options': DistanceConstraintTypes,
+          },
+        },
       },
       'fiberCapacityConfig': {
         '_meta': {
@@ -2227,7 +2246,14 @@ const NetworkArchitectureFormMeta = Object.freeze({
 
             ]
           }
-        }
+        },
+        'distanceConstraintStrategy': {
+          '_meta': {
+            'displayType': 'dropdownList',
+            'displayName': 'Distance Constraint Strategy',
+            'options': DistanceConstraintTypes,
+          },
+        },
       },
       'fiberCapacityConfig': {
         '_meta': {
@@ -3025,7 +3051,14 @@ const NetworkArchitectureFormMeta = Object.freeze({
 
             ]
           }
-        }
+        },
+        'distanceConstraintStrategy': {
+          '_meta': {
+            'displayType': 'dropdownList',
+            'displayName': 'Distance Constraint Strategy',
+            'options': DistanceConstraintTypes,
+          },
+        },
       },
       'fiberCapacityConfig': {
         '_meta': {
