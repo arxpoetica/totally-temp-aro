@@ -192,7 +192,7 @@ export class ToolBar extends Component {
     $(".select2-results").css("background-color", configuration.toolbar.toolBarColor)
 
     // TODO: ARO_CLIENT should never be checked in views, these images should be in settings
-    const { ARO_CLIENT } = configuration.ARO_CLIENT
+    const { ARO_CLIENT } = configuration
     const isFrontier = ARO_CLIENT === 'frontier'
     const isZiply = ARO_CLIENT === 'ziply'
     let leftElement = <img src="images/logos/aro/logo_navbar.png" className="no-collapse"
