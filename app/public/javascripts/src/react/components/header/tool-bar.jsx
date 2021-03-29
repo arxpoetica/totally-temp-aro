@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import './tool-bar.css'
+import ToolBarSearch from './tool-bar-search'
 import Tools from '../tool/tools'
 import uuidStore from '../../../shared-utils/uuid-store'
 import MapActions from '../map/map-actions'
@@ -209,18 +210,7 @@ export class ToolBar extends Component {
     return (
       <div className="tool-bar" style={{margin: marginPixels, backgroundColor: configuration.toolbar.toolBarColor}}>
         { leftElement }
-        <div
-          className="no-collapse"
-          id="global-search-toolbutton"
-          style={{flex: '0 0 250px', margin: 'auto', width: '250px'}}
-        >
-          <input
-            className="form-control select2"
-            style={{padding: '0px', borderRadius: '0px'}}
-            type="text"
-            placeholder="Search an address, city, or state"
-          />
-        </div>
+        <ToolBarSearch/>
         <div
           className="fa fa-search no-collapse"
           style={{paddingLeft: '10px', paddingRight: '10px', margin: 'auto', color: '#eee'}} 
