@@ -78,9 +78,6 @@ function RoicReportsReducer (state = defaultState, action) {
     case Actions.ROIC_REPORTS_SET_XAXIS_LABELS:
       return setXaxisLabels(state, action.payload)
 
-    case Actions.ROIC_REPORTS_SET_ROIC_RESULTS_FOR_LOCATION:
-      return setROICResults(state, action.payload)
-
     default:
       return state
   }
