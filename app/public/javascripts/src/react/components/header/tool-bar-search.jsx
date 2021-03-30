@@ -6,7 +6,7 @@ import AroHttp from '../../common/aro-http'
 import uuidStore from '../../../shared-utils/uuid-store'
 // import cx from 'clsx'
 
-const ToolBarSearch = ({ defaultPlanCoordinates }) => {
+const ToolBarSearch = ({ defaultPlanCoordinates, mapRef }) => {
 
   const [options, setOptions] = useState([])
 
@@ -30,8 +30,42 @@ const ToolBarSearch = ({ defaultPlanCoordinates }) => {
     }
   }
 
-  const handleChange = changes => {
-    console.log(changes)
+  const handleChange = change => {
+    console.log(change)
+
+    if (change.type === 'error') {
+      console.error('ERROR when searching for location')
+      console.error(change)
+      return
+    }
+
+    if (change.type === 'placeId') {
+      // This is a google maps place_id.
+      // The actual latitude/longitude can be obtained by another call to the geocoder
+      const geocoder = new google.maps.Geocoder()
+      geocoder.geocode({ 'placeId': change.value }, (results, status) => {
+        if (status !== 'OK') {
+          console.error('Geocoder failed: ' + status)
+          return
+        }
+        const { lat, lng } = results[0].geometry.location
+        setMarker(lat(), lng())
+      })
+    } else if (change.type === 'latlng') {
+      setMarker(+change.value[0], +change.value[1])
+    }
+  }
+
+  function setMarker(latitude, longitude) {
+    const mapObject = { latitude, longitude, zoom: 17 }
+    const event = new CustomEvent('mapChanged', { detail: mapObject })
+    window.dispatchEvent(event)
+    const marker = new google.maps.Marker({
+      map: mapRef,
+      animation: google.maps.Animation.BOUNCE,
+      position: { lat: latitude, lng: longitude }
+    })
+    setTimeout(() => { marker.setMap(null) }, 5000)
   }
 
   return (
@@ -42,15 +76,16 @@ const ToolBarSearch = ({ defaultPlanCoordinates }) => {
         filterOption={() => true}
         onInputChange={handleInputChange}
         onChange={handleChange}
+        onFocus={() => setOptions([])}
+        onBlur={() => setOptions([])}
       />
-        {/* cacheOptions */}
-        {/* defaultOptions */}
     </div>
   )
 }
 
 const mapStateToProps = (state) => ({
   defaultPlanCoordinates: state.plan.defaultPlanCoordinates,
+  mapRef: state.map.googleMaps,
 })
 
 const mapDispatchToProps = (dispatch) => ({})
