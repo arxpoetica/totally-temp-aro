@@ -39,7 +39,7 @@ const defaultState = {
       location: {},
       serviceArea: {}
     }
-  }
+  },
 }
 
 function setActiveSelectionModeById (state, newSelectionModeId) {

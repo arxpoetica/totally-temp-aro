@@ -6,6 +6,7 @@ import StateViewModeActions from '../../state-view-mode/state-view-mode-actions'
 import SelectionActions from '../../selection/selection-actions'
 import AroHttp from '../../../common/aro-http'
 import createClass from 'create-react-class'
+import RxState from '../../../common/rxState'
 
 export class AroSearch extends Component {
   constructor(props) {
@@ -15,6 +16,8 @@ export class AroSearch extends Component {
       isDropDownEnable: false,
       searchText: null,
     }
+
+    this.rxState = new RxState()
   }
 
   componentDidUpdate(prevProps) {
@@ -46,7 +49,7 @@ export class AroSearch extends Component {
   onFocus () {
     const { entityType, entityTypeList } = this.props
     if (entityType) {
-      if (entityTypeList[entityType].length > 0) {
+      if (entityTypeList[entityType].length) {
         this.setState({ isDropDownEnable: true, searchText: null })
       }
     }
@@ -68,7 +71,7 @@ export class AroSearch extends Component {
         if (entityType) {
           this.props.loadEntityList(entityType, searchText, searchColumn, configuration)
           setTimeout(function() {
-            if (JSON.parse(JSON.stringify(this.props.entityTypeList[entityType].length > 0))) {
+            if (JSON.parse(JSON.stringify(this.props.entityTypeList[entityType].length))) {
               this.setState({ isDropDownEnable: true })
             }
           }.bind(this), 1000)
@@ -85,15 +88,12 @@ export class AroSearch extends Component {
       .then(result => {
         const location = result.data[0]
         const ZOOM_FOR_LOCATION_SEARCH = 17
-
         const mapObject = {
           latitude: location.geom.coordinates[1],
           longitude: location.geom.coordinates[0],
           zoom: ZOOM_FOR_LOCATION_SEARCH,
         }
-        // https://www.sitepoint.com/javascript-custom-events/
-        const event = new CustomEvent('mapChanged', { detail: mapObject })
-        window.dispatchEvent(event)
+        rxState.requestSetMapCenter.sendMessage(mapObject)
       })
       .catch(err => console.error(err))
   }
@@ -116,7 +116,7 @@ export class AroSearch extends Component {
         blurInputOnSelect
         onFocus={() => this.onFocus()}
         options={
-          entityTypeList[entityType] && entityTypeList[entityType].length > 0
+          entityTypeList[entityType] && entityTypeList[entityType].length
             ? this.handleOptionsList(entityTypeList[entityType])
             : []
         }
@@ -129,17 +129,19 @@ export class AroSearch extends Component {
 const Option = createClass({
   render() {
     return (
-      <div>
+      <>
         <components.Option {...this.props}>
           <label>
-            {this.props.value} {
-              (this.props.value !== null
-                && this.props.data.name !== null)
-                ? this.props.data.name : ''
+            {this.props.value}
+            &nbsp;
+            {
+              this.props.value && this.props.data.name !== null
+                ? this.props.data.name
+                : ''
             }
           </label>
         </components.Option>
-      </div>
+      </>
     )
   }
 })

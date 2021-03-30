@@ -127,8 +127,22 @@ class TileComponentController {
       }
     })
 
+    // Set the map zoom level
+    rxState.requestSetMapZoom.getMessage().subscribe((zoom) => {
+      if (this.mapRef) {
+        this.mapRef.setZoom(zoom)
+      }
+    })
+
     // To change the center of the map to given LatLng
     state.requestSetMapCenter.subscribe((mapCenter) => {
+      if (this.mapRef) {
+        this.mapRef.panTo({ lat: mapCenter.latitude, lng: mapCenter.longitude })
+      }
+    })
+
+    // To change the center of the map to given LatLng
+    rxState.requestSetMapCenter.getMessage().subscribe((mapCenter) => {
       if (this.mapRef) {
         this.mapRef.panTo({ lat: mapCenter.latitude, lng: mapCenter.longitude })
       }

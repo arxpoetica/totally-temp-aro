@@ -172,5 +172,5 @@ export default {
   setPlanEditorFeatures,
   setMapFeatures,
   cloneSelection,
-  setMapSelection
+  setMapSelection,
 }

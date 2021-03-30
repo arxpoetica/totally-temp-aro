@@ -8,7 +8,7 @@ function allowViewModeClickAction() {
   return (dispatch, getState) => {
     const state = getState()
     const { rSelectedDisplayMode, isRulerEnabled } = state.toolbar
-    return (rSelectedDisplayMode === displayModes.VIEW && !isRulerEnabled )
+    return rSelectedDisplayMode === displayModes.VIEW && !isRulerEnabled
   }
 }
 

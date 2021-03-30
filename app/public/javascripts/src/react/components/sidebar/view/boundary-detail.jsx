@@ -8,6 +8,7 @@ import StateViewModeActions from '../../state-view-mode/state-view-mode-actions'
 import ToolBarActions from '../../header/tool-bar-actions'
 import SelectionActions from '../../selection/selection-actions'
 import { viewModePanels, entityTypeCons, boundryTypeCons, mapHitFeatures } from '../constants'
+import RxState from '../../../common/rxState'
 
 const getAllBoundaryLayers = state => state.mapLayers.boundary
 const getBoundaryLayersList = createSelector([getAllBoundaryLayers], (boundaries) => boundaries.toJS())
@@ -17,25 +18,31 @@ const numberFormatter = new Intl.NumberFormat(intlNumberFormat)
 
 export const BoundaryDetail = (props) => {
 
+  const rxState = new RxState()
+
   const { boundaries, activeViewModePanel, plan, loadEntityList, activeViewModePanelAction,
     selectedMapFeatures, allowViewModeClickAction, cloneSelection, setMapSelection, layerCategories } = props
 
-  const [selectedBoundaryType, setSelectedBoundaryType] = useState('')
-  const [entityType, setEntityType] = useState('')
-  const [searchColumn, setSearchColumn] = useState('')
-  const [configuration, setConfiguration] = useState('')
-  const [selectedBoundaryInfo, setSelectedBoundaryInfo] = useState(null)
-  const [selectedSAInfo, setSelectedSAInfo] = useState(null)
-  const [selectedAnalysisAreaInfo, setSelectedAnalysisAreaInfo] = useState(null)
-  const [selectedBoundaryTags, setSelectedBoundaryTags] = useState([])
-  const [toggleOtherAttributes, setToggleOtherAttributes] = useState(false)
+  const [state, setState] = useState({
+    selectedBoundaryType: '',
+    entityType: '',
+    searchColumn: '',
+    configuration: '',
+    selectedBoundaryInfo: null,
+    selectedSAInfo: null,
+    selectedAnalysisAreaInfo: null,
+    selectedBoundaryTags: [],
+    toggleOtherAttributes: false,
+  })
 
-  // https://stackoverflow.com/questions/53446020/how-to-compare-oldvalues-and-newvalues-on-react-hooks-useeffect
+  const  { selectedBoundaryType, entityType, searchColumn, configuration, selectedBoundaryInfo,
+    selectedSAInfo, selectedAnalysisAreaInfo, selectedBoundaryTags, toggleOtherAttributes } = state
+
+  // To get the previous props or state, currently we can do it manually with a usePrevious() custom Hook. 
+  // https://reactjs.org/docs/hooks-faq.html#how-to-get-the-previous-props-or-state
   function usePrevious(value) {
     const ref = useRef()
-    useEffect(() => {
-      ref.current = value
-    })
+    useEffect(() => {ref.current = value})
     return ref.current
   }
 
@@ -45,9 +52,9 @@ export const BoundaryDetail = (props) => {
     if (!_.isEqual(prevMapFeatures, selectedMapFeatures)) {
       // 160712271: On click of equipment or location dont show boundary details
       if (selectedMapFeatures.hasOwnProperty(mapHitFeatures.EQUIPMENT_FEATURES)
-        && selectedMapFeatures.equipmentFeatures.length > 0) return
+        && selectedMapFeatures.equipmentFeatures.length) return
       if (selectedMapFeatures.hasOwnProperty(mapHitFeatures.LOCATIONS)
-        && selectedMapFeatures.locations.length > 0) return
+        && selectedMapFeatures.locations.length) return
       if (selectedMapFeatures.hasOwnProperty(mapHitFeatures.FIBER_FEATURES)
         && selectedMapFeatures.fiberFeatures.size > 0) return
       if (selectedMapFeatures.hasOwnProperty(mapHitFeatures.ROAD_SEGMENTS)
@@ -56,8 +63,9 @@ export const BoundaryDetail = (props) => {
       // In ruler mode click should not enable boundary view action
       if (allowViewModeClickAction()) {
         if (selectedMapFeatures.hasOwnProperty(mapHitFeatures.CENSUS_FEATURES)
-          && selectedMapFeatures.censusFeatures.length > 0
-          && selectedMapFeatures.censusFeatures[0].hasOwnProperty('id')) {
+          && selectedMapFeatures.censusFeatures.length
+          && selectedMapFeatures.censusFeatures[0].hasOwnProperty('id')
+        ) {
           const tagList = []
           const tags = selectedMapFeatures.censusFeatures[0].tags
           for (const key in tags) {
@@ -68,7 +76,7 @@ export const BoundaryDetail = (props) => {
               tagList.push(tag)
             }
           }
-          setSelectedBoundaryTags(tagList)
+          setState((state) => ({ ...state, selectedBoundaryTags: tagList }))
           const censusBlockId = selectedMapFeatures.censusFeatures[0].id
           const newSelection = cloneSelection()
           newSelection.details.censusBlockId = censusBlockId
@@ -76,17 +84,19 @@ export const BoundaryDetail = (props) => {
           viewCensusBlockInfo(censusBlockId)
           setBoundryType(boundryTypeCons.CENSUS_BLOCKS)
         } else if (selectedMapFeatures.hasOwnProperty(mapHitFeatures.SERVICE_AREAS)
-            && selectedMapFeatures.serviceAreas.length > 0
-            && selectedMapFeatures.serviceAreas[0].hasOwnProperty('code')) {
+            && selectedMapFeatures.serviceAreas.length
+            && selectedMapFeatures.serviceAreas[0].hasOwnProperty('code')
+        ) {
           viewServiceAreaInfo(selectedMapFeatures.serviceAreas[0])
           const newSelection = cloneSelection()
           newSelection.details.serviceAreaId = selectedMapFeatures.serviceAreas[0].id
           setMapSelection(newSelection)
           setBoundryType(boundryTypeCons.WIRECENTER)
         } else if (selectedMapFeatures.hasOwnProperty(mapHitFeatures.ANALYSIS_AREAS)
-            && selectedMapFeatures.analysisAreas.length > 0
+            && selectedMapFeatures.analysisAreas.length
             && selectedMapFeatures.analysisAreas[0].hasOwnProperty('code')
-            && selectedMapFeatures.analysisAreas[0].hasOwnProperty('_data_type')) {
+            && selectedMapFeatures.analysisAreas[0].hasOwnProperty('_data_type')
+        ) {
           viewAnalysisAreaInfo(selectedMapFeatures.analysisAreas[0])
           const newSelection = cloneSelection()
           newSelection.details.analysisAreaId = selectedMapFeatures.analysisAreas[0].id
@@ -99,8 +109,8 @@ export const BoundaryDetail = (props) => {
 
   const onChangeBoundaryType = (event) => {
     const { value } = event.target
-    const filteredBoundry = boundaries.filter(item => item.type === value)[0]
-    setSelectedBoundaryType(filteredBoundry)
+    const filteredBoundry = boundaries.find(item => item.type === value)
+    setState((state) => ({ ...state, selectedBoundaryType: filteredBoundry }))
     setBoundryType(value)
     clearBoundariesDetails()
   }
@@ -110,37 +120,49 @@ export const BoundaryDetail = (props) => {
   }
 
   const clearBoundariesInfo = () => {
-    setSelectedBoundaryInfo(null)
-    setSelectedSAInfo(null)
-    setSelectedAnalysisAreaInfo(null)
+    setState((state) => ({ ...state,
+      selectedBoundaryInfo: null,
+      selectedSAInfo: null,
+      selectedAnalysisAreaInfo: null,
+    }))
   }
 
   const setBoundryType = (boundaryLayerType) => {
     if (boundaryLayerType) {
       if (boundaryLayerType === boundryTypeCons.CENSUS_BLOCKS) {
-        setEntityType(entityTypeCons.CENSUS_BLOCKS_ENTITY)
-        setSearchColumn('id,tabblockId')
-        setConfiguration('tabblockId')
+        setState((state) => ({ ...state,
+          entityType: entityTypeCons.CENSUS_BLOCKS_ENTITY,
+          searchColumn: 'id,tabblockId',
+          configuration: 'tabblockId',
+        }))
       }
       if (boundaryLayerType === boundryTypeCons.WIRECENTER) {
-        setEntityType(entityTypeCons.SERVICE_AREA_VIEW)
-        setSearchColumn('id,code,name,centroid')
-        setConfiguration('code')
+        setState((state) => ({ ...state,
+          entityType: entityTypeCons.SERVICE_AREA_VIEW,
+          searchColumn: 'id,code,name,centroid',
+          configuration: 'code',
+        }))
       }
       if (boundaryLayerType === boundryTypeCons.ANALYSIS_LAYER) {
-        setEntityType(entityTypeCons.ANALYSIS_AREA)
-        setSearchColumn('id,code,centroid')
-        setConfiguration('code')
+        setState((state) => ({ ...state,
+          entityType: entityTypeCons.ANALYSIS_AREA,
+          searchColumn: 'id,code,centroid',
+          configuration: 'code',
+        }))
       }
     }
   }
 
   const viewServiceAreaInfo = (serviceArea) => {
-    setSelectedBoundaryInfo(null)
-    setSelectedAnalysisAreaInfo(null)
+    setState((state) => ({ ...state,
+      selectedBoundaryInfo: null,
+      selectedAnalysisAreaInfo: null,
+    }))
     loadEntityList(entityTypeCons.SERVICE_AREA_VIEW, serviceArea.id, 'id,code,name', 'id')
       .then((serviceAreaInfos) => {
-        setSelectedSAInfo(serviceAreaInfos[0])
+        setState((state) => ({ ...state,
+          selectedSAInfo: serviceAreaInfos[0],
+        }))
       })
       .catch(err => console.error(err))
     viewBoundaryInfo()
@@ -148,20 +170,22 @@ export const BoundaryDetail = (props) => {
 
 
   const viewAnalysisAreaInfo = (analysisArea) => {
-    setSelectedBoundaryInfo(null)
-    setSelectedSAInfo(null)
+    setState((state) => ({ ...state,
+      selectedBoundaryInfo: null,
+      serviceAreaInfos: null,
+    }))
     getAnalysisAreaInfo(analysisArea.id)
       .then((analysisAreaInfo) => {
-        setSelectedAnalysisAreaInfo(analysisAreaInfo)
+        setState((state) => ({ ...state,
+          selectedAnalysisAreaInfo: analysisAreaInfo,
+        }))
       })
     viewBoundaryInfo()
   }
 
   const getAnalysisAreaInfo = (analysisAreaId) => {
     return loadEntityList(entityTypeCons.ANALYSIS_AREA, analysisAreaId, 'id,code', 'id')
-      .then((analysisAreaInfo) => {
-        return analysisAreaInfo[0]
-      })
+      .then((analysisAreaInfo) => analysisAreaInfo[0])
   }
 
   const getCensusBlockInfo = (cbId) => {
@@ -169,14 +193,18 @@ export const BoundaryDetail = (props) => {
     return AroHttp.get('/census_blocks/' + cbId + '/details')
       .then((response) => {
         censusBlockInfo = response.data
-        setSelectedSAInfo(null)
-        setSelectedAnalysisAreaInfo(null)
+        setState((state) => ({ ...state,
+          selectedSAInfo: null,
+          selectedAnalysisAreaInfo: null
+        }))
         viewBoundaryInfo()
         return AroHttp.get(`/service/plan-query/${plan.id}/censusBlockCounts?census-block-ids=${censusBlockInfo.id}`)
       })
       .then((response) => {
         censusBlockInfo.locationCount = response.data
-        setSelectedBoundaryInfo(censusBlockInfo)
+        setState((state) => ({ ...state,
+          selectedBoundaryInfo: censusBlockInfo,
+        }))
         return censusBlockInfo
       })
   }
@@ -194,14 +222,8 @@ export const BoundaryDetail = (props) => {
       viewCensusBlockInfo(selectedBoundary.id)
         .then((response) => {
           map.setCenter({ lat: response.centroid.coordinates[1], lng: response.centroid.coordinates[0] })
-          const ZOOM_FOR_LOCATION_SEARCH = 14
-          const mapObject = {
-            latitude: response.centroid.coordinates[1],
-            longitude: response.centroid.coordinates[0],
-            zoom: ZOOM_FOR_LOCATION_SEARCH,
-          }
-          const event = new CustomEvent('mapChanged', { detail: mapObject})
-          window.dispatchEvent(event)
+          const ZOOM_FOR_CB_SEARCH = 14
+          rxState.requestSetMapZoom.sendMessage(ZOOM_FOR_CB_SEARCH)
         })
     } else if (visibleBoundaryLayer && visibleBoundaryLayer.type === boundryTypeCons.WIRECENTER) {
       selectedBoundary.centroid && map.setCenter({ lat: selectedBoundary.centroid.coordinates[1], lng: selectedBoundary.centroid.coordinates[0] })
@@ -223,7 +245,7 @@ export const BoundaryDetail = (props) => {
   }
 
   const onClickToggleOtherAttributes = () => {
-    setToggleOtherAttributes(!toggleOtherAttributes)
+    setState((state) => ({ ...state, toggleOtherAttributes: !toggleOtherAttributes }))
   }
 
   return (
@@ -267,7 +289,7 @@ export const BoundaryDetail = (props) => {
       {/* Census Block info */}
       {
         selectedBoundaryInfo !== null &&
-        <div className="boundary-detail">
+        <div className="aro-boundary-detail">
           <div>Census Block Code: {selectedBoundaryInfo.tabblock_id}</div>
           <div>Area(sq. miles): {(selectedBoundaryInfo.area_meters / (1609.34 * 1609.34)).toFixed(2)}</div>
           <div>Area(acres): {(selectedBoundaryInfo.area_meters / 4046.86).toFixed(2)}</div>
@@ -290,8 +312,8 @@ export const BoundaryDetail = (props) => {
             })
           }
           {
-            selectedBoundaryInfo.locationCount && selectedBoundaryInfo.locationCount.length > 0
-              && selectedBoundaryInfo.locationCount.map((locationCountInfo, index) => {
+            selectedBoundaryInfo.locationCount && selectedBoundaryInfo.locationCount.length
+              ? selectedBoundaryInfo.locationCount.map((locationCountInfo, index) => {
                 return (
                   <div key={index}>
                     <span className="capitalize">
@@ -299,6 +321,7 @@ export const BoundaryDetail = (props) => {
                   </div>
                 )
               })
+              : ''
           }
 
           {/* other Attributes */}
@@ -340,7 +363,7 @@ export const BoundaryDetail = (props) => {
       {/* Service Area info */}
       {
         selectedSAInfo !== null &&
-        <div className="boundary-detail">
+        <div className="aro-boundary-detail">
           <div>Code: {selectedSAInfo.code}</div>
           <div>Name: {selectedSAInfo.name}</div>
         </div>
@@ -349,7 +372,7 @@ export const BoundaryDetail = (props) => {
       {/* Analysis Area info */}
       {
         selectedAnalysisAreaInfo !== null &&
-        <div className="boundary-detail">
+        <div className="aro-boundary-detail">
           <div>Name: {selectedAnalysisAreaInfo.code}</div>
         </div>
       }
