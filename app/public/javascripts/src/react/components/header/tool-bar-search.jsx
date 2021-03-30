@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import reduxStore from '../../../redux-store'
+import { connect } from 'react-redux'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import Select from 'react-select'
 import AroHttp from '../../common/aro-http'
@@ -85,7 +85,5 @@ const mapStateToProps = (state) => ({
   defaultPlanCoordinates: state.plan.defaultPlanCoordinates,
   mapRef: state.map.googleMaps,
 })
-
-const mapDispatchToProps = (dispatch) => ({})
-
-export default wrapComponentWithProvider(reduxStore, ToolBarSearch, mapStateToProps, mapDispatchToProps)
+const mapDispatchToProps = dispatch => ({})
+export default connect(mapStateToProps, mapDispatchToProps)(ToolBarSearch)
