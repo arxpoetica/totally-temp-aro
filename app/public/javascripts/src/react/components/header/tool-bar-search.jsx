@@ -31,8 +31,6 @@ const ToolBarSearch = ({ defaultPlanCoordinates, mapRef }) => {
   }
 
   const handleChange = change => {
-    console.log(change)
-
     if (change.type === 'error') {
       console.error('ERROR when searching for location')
       console.error(change)
