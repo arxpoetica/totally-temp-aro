@@ -14,20 +14,18 @@ const ToolBarSearch = ({ defaultPlanCoordinates, mapRef }) => {
   const handleInputChange = (searchTerm, { action }) => {
     if (action === 'input-change') {
       clearTimeout(timer)
-      timer = setTimeout(() => {
+      timer = setTimeout(async() => {
         const params = new URLSearchParams({
           text: searchTerm,
           sessionToken: uuidStore.getInsecureV4UUID(),
           biasLatitude: defaultPlanCoordinates.latitude,
           biasLongitude: defaultPlanCoordinates.longitude,
         })
-        AroHttp.get(`/search/addresses?${params.toString()}`)
-          .then(({ data }) => {
-            setOptions(data.map(option => {
-              option.label = option.displayText
-              return option
-            }))
-          })
+        const { data } = await AroHttp.get(`/search/addresses?${params.toString()}`)
+        setOptions(data.map(option => {
+          option.label = option.displayText
+          return option
+        }))
       }, 250)
     }
   }
