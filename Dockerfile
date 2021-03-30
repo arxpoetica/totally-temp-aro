@@ -5,7 +5,7 @@ RUN npm install --only=prod && npm run build
 
 
 
-FROM avco/aro-app-base:olddev
+FROM avco/aro-app-base:oldbase
 WORKDIR /srv/www/aro/current
 COPY --from=0 /target ./app
 COPY bootstrap ./bootstrap
