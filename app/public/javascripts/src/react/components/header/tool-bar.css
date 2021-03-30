@@ -50,20 +50,6 @@
 }
 
 
-#global-search-toolbutton .select2-container {
-  border-radius: 0px;
-}
-#global-search-toolbutton .select2-choice {
-  padding-left: 0px;
-  color: white;
-  border: none;
-}
-#global-search-toolbutton .select2-arrow {
-  display: none;  /* Hiding the arrow completely for now */
-}
-#global-search-toolbutton .select2-input {
-  background-color: #1f7de6;
-}
 .select2-search {
   padding: 0px;
   background-color: #1f7de6;
