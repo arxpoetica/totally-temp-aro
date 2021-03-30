@@ -87,13 +87,6 @@
   background-color: #1f7de6;
 }
 
-#global-search-toolbutton .select2-chosen {
-  /*background-color: #D9272D;*/
-  padding-left: 10px;
-  margin-right: 0px;
-  color: #eee;
-}
-
 .select2-search {
   padding: 0px;
   background-color: #D9272D !important;
