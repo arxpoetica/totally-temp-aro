@@ -2,8 +2,8 @@ import React, { Component } from 'react'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import './tool-bar.css'
+import ToolBarSearch from './tool-bar-search.jsx'
 import Tools from '../tool/tools'
-import uuidStore from '../../../shared-utils/uuid-store'
 import MapActions from '../map/map-actions'
 import ToolBarActions from './tool-bar-actions'
 import MapReportsActions from '../map-reports/map-reports-actions'
@@ -116,10 +116,6 @@ export class ToolBar extends Component {
       isOpenAccountSettings: false
     }
 
-    this.searchLocation = 'Search an address, city, or state' // For IntialSelection of select2
-    this.latitude = null
-    this.longitude = null
-
     this.props.loadServiceLayers() // To load Service layer in advance
 
     this.refreshToolbar = this.refreshToolbar.bind(this) // To bind a function
@@ -138,18 +134,15 @@ export class ToolBar extends Component {
   }
 
   componentDidMount(){
-    this.initSearchBox()
-
     // To Trigger refreshToolbar() when window resized
     // https://stackoverflow.com/questions/52037958/change-value-in-react-js-on-window-resize
-    setTimeout(() => window.addEventListener("resize", this.refreshToolbar), 0)
+    setTimeout(() => window.addEventListener('resize', this.refreshToolbar), 0)
   }
 
   // https://reactjs.org/docs/react-component.html#componentdidupdate
   componentDidUpdate(prevProps) {
     if (this.props !== prevProps) {
       setTimeout(() => this.refreshToolbar(), 0) // To Trigger refreshToolbar() when props changed
-      this.initSearchBox() // To re-render select2 searchbar
     }
   }
 
@@ -211,23 +204,7 @@ export class ToolBar extends Component {
     return (
       <div className="tool-bar" style={{margin: marginPixels, backgroundColor: configuration.toolbar.toolBarColor}}>
         { leftElement }
-        <div
-          className="no-collapse"
-          id="global-search-toolbutton"
-          style={{flex: '0 0 250px', margin: 'auto', width: '250px'}}
-        >
-          <input
-            className="form-control select2"
-            style={{padding: '0px', borderRadius: '0px'}}
-            type="text"
-            placeholder="Search an address, city, or state"
-          />
-        </div>
-        <div
-          className="fa fa-search no-collapse"
-          style={{paddingLeft: '10px', paddingRight: '10px', margin: 'auto', color: '#eee'}} 
-        />
-
+        <ToolBarSearch/>
         <div className="separator"></div>
 
         {configuration.perspective.showToolbarButtons.globalSettings &&
@@ -1103,115 +1080,6 @@ export class ToolBar extends Component {
     this.props.activeViewModePanelActions(this.viewModePanels.COVERAGE_BOUNDARY)
     this.setSelectionMode(this.targetSelectionModes.COVERAGE_BOUNDARY)
   }
-
-  initSearchBox () {
-    let ids = 0
-    const searchSessionToken = uuidStore.getInsecureV4UUID()
-    const searchLocation = this.searchLocation
-    const addBouncingMarker = (latitude, longitude) => {
-      const marker = new google.maps.Marker({
-        map: map,
-        animation: google.maps.Animation.BOUNCE,
-        position: { lat: latitude, lng: longitude }
-      })
-      setTimeout(() => { marker.setMap(null) }, 5000)
-    }
-    const search = $('#global-search-toolbutton .select2')
-    search.select2({
-      initSelection: function (select, callback) {
-        callback({ 'id': 0, 'text': searchLocation })
-      },
-      placeholder: 'Search an address, city, or state',
-      ajax: {
-        url: '/search/addresses',
-        dataType: 'json',
-         // *** In newer versions of select2, this is called 'delay'. Remember this when upgrading select2
-        quietMillis: 250,
-        data: (term) => ({
-          text: term,
-          sessionToken: searchSessionToken,
-          biasLatitude: this.props.defaultPlanCoordinates.latitude,
-          biasLongitude: this.props.defaultPlanCoordinates.longitude
-        }),
-        results: (data) => {
-          const items = data.map((location) => {
-            return {
-              id: 'id-' + (++ids),
-              text: location.displayText,
-              type: location.type,
-              value: location.value
-            }
-          })
-          if (items.length === 0) {
-            items.push({
-              id: 'id-' + (++ids),
-              text: 'Search an address, city, or state',
-              type: 'placeholder'
-            })
-          }
-          return {
-            results: items,
-            pagination: {
-              more: false
-            }
-          }
-        },
-        cache: true
-      }
-    }).on('change', (evt) => {
-      const selectedLocation = evt.added
-      if (selectedLocation) {
-
-        if (selectedLocation.type === 'error') {
-          console.error('ERROR when searching for location')
-          console.error(selectedLocation)
-          return
-        }
-
-        const { lat, lng } = this.props.mapRef.getCenter()
-        const latitude = lat()
-        const longitude = lng()
-
-        if (latitude !== this.latitude || longitude !== this.longitude) {
-          this.latitude = latitude
-          this.longitude = longitude
-          this.searchLocation = selectedLocation.text
-          const ZOOM_FOR_LOCATION_SEARCH = 17
-          if (selectedLocation.type === 'placeId') {
-            // This is a google maps place_id.
-            // The actual latitude/longitude can be obtained by another call to the geocoder
-            const geocoder = new google.maps.Geocoder()
-            geocoder.geocode({ 'placeId': selectedLocation.value }, function (results, status) {
-              if (status !== 'OK') {
-                console.error('Geocoder failed: ' + status)
-                return
-              }
-              const mapObject = {
-                latitude: results[0].geometry.location.lat(),
-                longitude: results[0].geometry.location.lng(),
-                zoom: ZOOM_FOR_LOCATION_SEARCH
-              }
-              // Due to unable to subscribe requestSetMapCenter as of now used Custom Event Listener
-              // https://www.sitepoint.com/javascript-custom-events/
-              const event = new CustomEvent('mapChanged', { detail: mapObject})
-              window.dispatchEvent(event)
-              addBouncingMarker(results[0].geometry.location.lat(), results[0].geometry.location.lng())
-            })
-          } else if (selectedLocation.type === 'latlng') {
-            // The user has searched for a latitude/longitude. Simply go to that position
-            const mapObject = {
-              latitude: +selectedLocation.value[0],
-              longitude: +selectedLocation.value[1],
-              zoom: ZOOM_FOR_LOCATION_SEARCH
-            }
-            const event = new CustomEvent('mapChanged', { detail: mapObject})
-            window.dispatchEvent(event)
-            addBouncingMarker(+selectedLocation.value[0], +selectedLocation.value[1])
-          }
-        }
-      }
-    })
-  }
 }
 
 // We need a selector, else the .toJS() call will create an infinite digest loop
@@ -1222,7 +1090,6 @@ const getAllBoundaryTypesList = state => state.mapLayers.boundaryTypes
 const getBoundaryTypesList = createSelector([getAllBoundaryTypesList], (boundaryTypes) => boundaryTypes.toJS())
 
 const mapStateToProps = (state) => ({
-  defaultPlanCoordinates: state.plan.defaultPlanCoordinates,
   selectedDisplayMode: state.toolbar.rSelectedDisplayMode,
   activeViewModePanel: state.toolbar.rActiveViewModePanel,
   isAnnotationsListVisible: state.tool.showToolBox && (state.tool.activeTool === Tools.ANNOTATION.id),

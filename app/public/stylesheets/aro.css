@@ -1008,13 +1008,6 @@ ui-select-font {
   width: 36px;
 }
 
-#global-search-toolbutton .select2-chosen {
-  /* background-color: #1f7de6; */
-  padding-left: 10px;
-  margin-right: 0px;
-  color: #eee;
-}
-
 .footer-clr {
   background:-webkit-linear-gradient(left,#a60c0d, #c1151b, #d9272d, #d9272d, #d9272d, #c1151b, #a60c0d);
 }
