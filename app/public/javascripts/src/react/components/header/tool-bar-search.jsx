@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { connect } from 'react-redux'
-import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import Select from 'react-select'
 import AroHttp from '../../common/aro-http'
 import uuidStore from '../../../shared-utils/uuid-store'
@@ -76,6 +75,24 @@ const ToolBarSearch = ({ defaultPlanCoordinates, mapRef }) => {
         onChange={handleChange}
         onFocus={() => setOptions([])}
         onBlur={() => setOptions([])}
+        styles={{
+          placeholder: provided => ({
+            ...provided,
+            pointerEvents: 'none',
+            userSelect: 'none',
+          }),
+          singleValue: provided => ({
+            ...provided,
+            pointerEvents: 'none',
+            userSelect: 'none',
+          }),
+          input: provided => ({
+            ...provided,
+            flex: '1 1 auto',
+            '> div': { width: '100%' },
+            input: { width: '100% !important', textAlign: 'left' },
+          }),
+        }}
       />
     </div>
   )
