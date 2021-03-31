@@ -9,6 +9,7 @@ import ToolBarActions from '../../header/tool-bar-actions'
 import SelectionActions from '../../selection/selection-actions'
 import { viewModePanels, entityTypeCons, boundryTypeCons, mapHitFeatures } from '../constants'
 import RxState from '../../../common/rxState'
+import { dequal } from 'dequal'
 
 const getAllBoundaryLayers = state => state.mapLayers.boundary
 const getBoundaryLayersList = createSelector([getAllBoundaryLayers], (boundaries) => boundaries.toJS())
@@ -35,21 +36,21 @@ export const BoundaryDetail = (props) => {
     toggleOtherAttributes: false,
   })
 
-  const  { selectedBoundaryType, entityType, searchColumn, configuration, selectedBoundaryInfo,
+  const { selectedBoundaryType, entityType, searchColumn, configuration, selectedBoundaryInfo,
     selectedSAInfo, selectedAnalysisAreaInfo, selectedBoundaryTags, toggleOtherAttributes } = state
 
-  // To get the previous props or state, currently we can do it manually with a usePrevious() custom Hook. 
+  // To get the previous props or state, currently we can do it manually with a usePrevious() custom Hook.
   // https://reactjs.org/docs/hooks-faq.html#how-to-get-the-previous-props-or-state
   function usePrevious(value) {
     const ref = useRef()
-    useEffect(() => {ref.current = value})
+    useEffect(() => { ref.current = value })
     return ref.current
   }
 
   const prevMapFeatures = usePrevious(selectedMapFeatures)
 
   useEffect(() => {
-    if (!_.isEqual(prevMapFeatures, selectedMapFeatures)) {
+    if (!dequal(prevMapFeatures, selectedMapFeatures)) {
       // 160712271: On click of equipment or location dont show boundary details
       if (selectedMapFeatures.hasOwnProperty(mapHitFeatures.EQUIPMENT_FEATURES)
         && selectedMapFeatures.equipmentFeatures.length) return
@@ -226,13 +227,19 @@ export const BoundaryDetail = (props) => {
           rxState.requestSetMapZoom.sendMessage(ZOOM_FOR_CB_SEARCH)
         })
     } else if (visibleBoundaryLayer && visibleBoundaryLayer.type === boundryTypeCons.WIRECENTER) {
-      selectedBoundary.centroid && map.setCenter({ lat: selectedBoundary.centroid.coordinates[1], lng: selectedBoundary.centroid.coordinates[0] })
+      selectedBoundary.centroid && map.setCenter({
+        lat: selectedBoundary.centroid.coordinates[1],
+        lng: selectedBoundary.centroid.coordinates[0]
+      })
       const newSelection = cloneSelection()
       newSelection.details.serviceAreaId = selectedBoundary.id
       setMapSelection(newSelection)
       viewServiceAreaInfo(selectedBoundary)
     } else if (visibleBoundaryLayer && visibleBoundaryLayer.type === boundryTypeCons.ANALYSIS_LAYER) {
-      selectedBoundary.centroid && map.setCenter({ lat: selectedBoundary.centroid.coordinates[1], lng: selectedBoundary.centroid.coordinates[0] })
+      selectedBoundary.centroid && map.setCenter({
+        lat: selectedBoundary.centroid.coordinates[1],
+        lng: selectedBoundary.centroid.coordinates[0]
+      })
       const newSelection = cloneSelection()
       newSelection.details.analysisAreaId = selectedBoundary.id
       setMapSelection(newSelection)
@@ -253,7 +260,7 @@ export const BoundaryDetail = (props) => {
       <div className="mb-2 mt-2">
         {/* Boundary Search */}
         <div className="form-group" style={{ display: 'table', width: '100%' }}>
-          <div className="col" style={{ display: 'table-cell', verticalAlign: 'bottom'}}>
+          <div className="col" style={{ display: 'table-cell', verticalAlign: 'bottom' }}>
             <label>Boundary Search:</label>
           </div>
           <div className="col" style={{ display: 'table-cell', verticalAlign: 'middle' }}>
@@ -304,7 +311,7 @@ export const BoundaryDetail = (props) => {
                   {tag.layerCatDescription} :
                   <div
                     classname="outlineLegendIcon"
-                    style={{borderColor: `${tag.tagInfo.colourHash}`, backgroundColor: `${tag.tagInfo.colourHash}33`}}
+                    style={{ borderColor: `${tag.tagInfo.colourHash}`, backgroundColor: `${tag.tagInfo.colourHash}33` }}
                   />
                     {tag.tagInfo.description}
                 </div>
@@ -325,8 +332,8 @@ export const BoundaryDetail = (props) => {
           }
 
           {/* other Attributes */}
-          <div style={{width: '100%', marginTop: '2px', marginBottom: '6px'}}>
-            <div className="ei-header" style={{paddingTop: '0px',}} onClick={onClickToggleOtherAttributes}>
+          <div style={{ width: '100%', marginTop: '2px', marginBottom: '6px' }}>
+            <div className="ei-header" style={{ paddingTop: '0px' }} onClick={onClickToggleOtherAttributes}>
               {
                 !toggleOtherAttributes
                   ? <i className="far fa-plus-square ei-foldout-icon"></i>
@@ -376,7 +383,6 @@ export const BoundaryDetail = (props) => {
           <div>Name: {selectedAnalysisAreaInfo.code}</div>
         </div>
       }
-
     </>
   )
 }

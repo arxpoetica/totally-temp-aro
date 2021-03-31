@@ -7,6 +7,7 @@ import SelectionActions from '../../selection/selection-actions'
 import AroHttp from '../../../common/aro-http'
 import createClass from 'create-react-class'
 import RxState from '../../../common/rxState'
+import { dequal } from 'dequal'
 
 export class AroSearch extends Component {
   constructor(props) {
@@ -24,15 +25,15 @@ export class AroSearch extends Component {
     const { entityType: oldEntityType, selectedMapFeatures: oldSelectedMapFeatures } = prevProps
     const { entityType: newEntityType, selectedMapFeatures: newSelectedMapFeatures } = this.props
 
-    if (oldEntityType !== newEntityType || !_.isEqual(oldSelectedMapFeatures, newSelectedMapFeatures)) {
+    if (oldEntityType !== newEntityType || !dequal(oldSelectedMapFeatures, newSelectedMapFeatures)) {
       this.setState({ searchText: null })
     }
   }
 
   handleOptionsList(entityType) {
     const { configuration } = this.props
-    return entityType.map((type, index) => {
-      return ( {id: type.id, value: type[configuration], label: type[configuration], name: type.name} )
+    return entityType.map((type) => {
+      return { id: type.id, value: type[configuration], label: type[configuration], name: type.name }
     })
   }
 
@@ -46,7 +47,7 @@ export class AroSearch extends Component {
     this.setState({ isDropDownEnable: false })
   }
 
-  onFocus () {
+  onFocus() {
     const { entityType, entityTypeList } = this.props
     if (entityType) {
       if (entityTypeList[entityType].length) {
@@ -55,7 +56,7 @@ export class AroSearch extends Component {
     }
   }
 
-  handleChange (searchText) {
+  handleChange(searchText) {
     this.setState({ searchText })
     const { entityType, entityTypeList } = this.props
     entityType === 'LocationObjectEntity'
@@ -63,7 +64,7 @@ export class AroSearch extends Component {
       : this.props.onSelectedBoundary(entityTypeList[entityType][0])
   }
 
-  handleInputChange (searchText, { action }) {
+  handleInputChange(searchText, { action }) {
     switch (action) {
       case 'input-change':
         this.setState({ searchText })
@@ -91,9 +92,9 @@ export class AroSearch extends Component {
         const mapObject = {
           latitude: location.geom.coordinates[1],
           longitude: location.geom.coordinates[0],
-          zoom: ZOOM_FOR_LOCATION_SEARCH,
         }
-        rxState.requestSetMapCenter.sendMessage(mapObject)
+        this.rxState.requestSetMapCenter.sendMessage(mapObject)
+        this.rxState.requestSetMapZoom.sendMessage(ZOOM_FOR_LOCATION_SEARCH)
       })
       .catch(err => console.error(err))
   }
