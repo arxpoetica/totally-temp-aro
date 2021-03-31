@@ -1,4 +1,4 @@
-FROM node:10-buster-slim
+FROM node:10-buster
 WORKDIR /target
 COPY app .
 RUN npm install --only=prod && npm run build
