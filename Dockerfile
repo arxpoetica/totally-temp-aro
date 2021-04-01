@@ -1,10 +1,10 @@
-FROM node:10
+FROM node:10-buster
 WORKDIR /target
 COPY app .
 RUN npm install --only=prod && npm run build
 
 
-FROM node:10
+FROM node:10-buster-slim
 
 RUN npm install -g pm2
 
@@ -19,4 +19,3 @@ CMD /usr/local/bin/pm2 start /srv/www/aro/current/aro.json --no-daemon
 VOLUME /srv/www/aro/current/app/public/images
 VOLUME /srv/www/aro/current/app/public/stylesheets
 VOLUME /srv/www/aro/current/app/public/fonts
-
