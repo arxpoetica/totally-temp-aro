@@ -3,11 +3,8 @@ WORKDIR /target
 COPY app .
 RUN npm install --only=prod && npm run build
 
-
 FROM node:10-buster-slim
-
 RUN npm install -g pm2
-
 WORKDIR /srv/www/aro/current
 COPY --from=0 /target ./app
 COPY bootstrap ./bootstrap
