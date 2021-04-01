@@ -35,7 +35,7 @@ function loadEntityList (entityType, filterObj, select, searchColumn, configurat
     const networkNodeTypes = state.roicReports.networkNodeTypes
     const entityTypeList = state.stateViewMode.entityTypeList
 
-    if (filterObj === '') return
+    if (filterObj === '') return Promise.resolve()
     let entityListUrl = `/service/odata/${entityType}?$select=${select}`
     if (entityType !== entityTypeCons.ANALYSIS_LAYER) {
       entityListUrl = entityListUrl + '&$top=20'
@@ -48,7 +48,7 @@ function loadEntityList (entityType, filterObj, select, searchColumn, configurat
       if (pattern.test(filterObj)) {
         filter = filterObj ? `${searchColumn} eq guid'${filterObj}'` : filter
       } else {
-        return // 157501341: Location search should not reach out to endpoint without supplying a valid object id
+        return Promise.resolve() // 157501341: Location search should not reach out to endpoint without supplying a valid object id
       }
     } else {
       if (filterObj) {
@@ -87,7 +87,7 @@ function loadEntityList (entityType, filterObj, select, searchColumn, configurat
         flattenDeep, networkNodeTypes, configuration
       ).map(id => `networkNodeType eq ${id}`).join(' or ')
       // Search for equipments that are selected in NetworkEquipment modal
-      if (selectedEquipments === '') return
+      if (selectedEquipments === '') return Promise.resolve()
       filter = selectedEquipments ? filter.concat(` and (${selectedEquipments})`) : filter
       filter = filter.concat(` and (isDeleted eq false)`) // filter deleted equipment
     }

@@ -110,9 +110,9 @@ export const BoundaryDetail = (props) => {
 
   const onChangeBoundaryType = (event) => {
     const { value } = event.target
-    const filteredBoundry = boundaries.find(item => item.type === value)
+    const filteredBoundry = boundaries.find(item => item.uiLayerId === parseInt(value))
     setState((state) => ({ ...state, selectedBoundaryType: filteredBoundry }))
-    setBoundryType(value)
+    setBoundryType(filteredBoundry.type)
     clearBoundariesDetails()
   }
 
@@ -141,7 +141,7 @@ export const BoundaryDetail = (props) => {
         setState((state) => ({ ...state,
           entityType: entityTypeCons.SERVICE_AREA_VIEW,
           searchColumn: 'id,code,name,centroid',
-          configuration: 'code',
+          configuration: 'code,name',
         }))
       }
       if (boundaryLayerType === boundryTypeCons.ANALYSIS_LAYER) {
@@ -265,14 +265,14 @@ export const BoundaryDetail = (props) => {
           </div>
           <div className="col" style={{ display: 'table-cell', verticalAlign: 'middle' }}>
             <select
-              value={selectedBoundaryType.type}
+              value={selectedBoundaryType.uiLayerId}
               className="form-control-sm"
               onChange={(event) => onChangeBoundaryType(event)}
             >
               <option value="" hidden>Select a boundary type for search</option>
               {
                 boundaries.filter((item) => item.checked === true).map((item, index) =>
-                  <option key={index} value={item.type} label={item.description} />
+                  <option key={index} value={item.uiLayerId} label={item.description} />
                 )
               }
             </select>

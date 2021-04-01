@@ -8,6 +8,7 @@ import AroHttp from '../../../common/aro-http'
 import createClass from 'create-react-class'
 import RxState from '../../../common/rxState'
 import { dequal } from 'dequal'
+import { entityTypeCons } from '../constants'
 
 export class AroSearch extends Component {
   constructor(props) {
@@ -30,10 +31,11 @@ export class AroSearch extends Component {
     }
   }
 
-  handleOptionsList(entityType) {
-    const { configuration } = this.props
-    return entityType.map((type) => {
-      return { id: type.id, value: type[configuration], label: type[configuration], name: type.name }
+  handleOptionsList(entityTypeArg) {
+    const { entityType, configuration } = this.props
+    const configurationKey = entityType === entityTypeCons.SERVICE_AREA_VIEW ? 'code' : configuration
+    return entityTypeArg.map((type) => {
+      return { id: type.id, value: type[configurationKey], label: type[configurationKey], name: type.name }
     })
   }
 
@@ -71,11 +73,11 @@ export class AroSearch extends Component {
         const { entityType, searchColumn, configuration } = this.props
         if (entityType) {
           this.props.loadEntityList(entityType, searchText, searchColumn, configuration)
-          setTimeout(function() {
-            if (JSON.parse(JSON.stringify(this.props.entityTypeList[entityType].length))) {
-              this.setState({ isDropDownEnable: true })
-            }
-          }.bind(this), 1000)
+            .then(result => {
+              if (JSON.parse(JSON.stringify(this.props.entityTypeList[entityType].length))) {
+                this.setState({ isDropDownEnable: true })
+              }
+            })
         }
         return
       default:
