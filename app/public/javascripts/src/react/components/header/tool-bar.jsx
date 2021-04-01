@@ -186,13 +186,16 @@ export class ToolBar extends Component {
     // To set Dynamic Background color for select2-results using jQuery
     $(".select2-results").css("background-color", configuration.toolbar.toolBarColor)
 
-    // ToDo: ARO_CLIENT should never be checked in views, these images should be in settings
+    // TODO: ARO_CLIENT should never be checked in views, these images should be in settings
+    const { ARO_CLIENT } = configuration
+    const isFrontier = ARO_CLIENT === 'frontier'
+    const isZiply = ARO_CLIENT === 'ziply'
     let leftElement = <img src="images/logos/aro/logo_navbar.png" className="no-collapse"
       style={{alignSelf: 'center', paddingLeft: '10px', paddingRight: '10px'}}
     />
-    if (configuration.ARO_CLIENT === 'frontier') {
+    if (isFrontier) {
       leftElement = <span style={{alignSelf: 'center', paddingLeft: '10px', paddingRight: '10px'}}><b>NPM BSA</b></span>
-    } else if (configuration.ARO_CLIENT === 'ziply') {
+    } else if (isZiply) {
       leftElement = <img src="images/logos/ziply/ziply_navbar_logo.png" className="no-collapse"
       style={{alignSelf: 'center', paddingLeft: '3px', paddingRight: '10px'}}
     />
@@ -284,7 +287,6 @@ export class ToolBar extends Component {
               type="checkbox"
               className="checkboxfill"
               checked={heatMapOption}
-              name="ctype-name"
               style={{marginLeft: '2px'}}
               onChange={() => this.toggleHeatMapOptions()}
             />
@@ -312,12 +314,12 @@ export class ToolBar extends Component {
               type="checkbox"
               className="checkboxfill"
               checked={showLocationLabels}
-              name="ctype-name" style={{marginLeft: '2px'}}
+              style={{marginLeft: '2px'}}
               onChange={() => this.showLocationLabelsChanged()}
             />
             <span>Location Labels</span>
 
-            {/* Site Boundaries */}
+            {/* Equipment Boundaries */}
             {configuration.toolbar.showSiteBoundaries && configuration.toolbar !== undefined &&
             <>
               <div className="dropdown-divider"></div>
@@ -325,11 +327,11 @@ export class ToolBar extends Component {
                 type="checkbox"
                 className="checkboxfill"
                 checked={showSiteBoundary}
-                name="ctype-name"
                 style={{marginLeft: '2px'}}
                 onChange={() => this.toggleSiteBoundary()}
               />
-              <span>Site Boundaries</span>
+              {/* TODO: See https://www.pivotaltracker.com/n/projects/2468285/stories/177344788 */}
+              <span>{isFrontier ? 'Site' : 'Equipment'} Boundaries</span>
               {showSiteBoundary &&
                 <select className="form-control" value={selectedBoundaryType.description}
                   onChange={(event) => this.onChangeSiteBoundaries(event)}>
@@ -349,7 +351,6 @@ export class ToolBar extends Component {
                 type="checkbox"
                 className="checkboxfill"
                 checked={showDirectedCable}
-                name="ctype-name"
                 style={{marginLeft: '2px'}}
                 onChange={(event) => this.showCableDirection(event)}
               />
@@ -357,7 +358,7 @@ export class ToolBar extends Component {
             </>
             }
 
-            {/* Site Labels */}
+            {/* Equipment Labels */}
             {configuration.perspective.viewSettings.showSiteLabels &&
             <>
               <div className="dropdown-divider"></div>
@@ -365,11 +366,11 @@ export class ToolBar extends Component {
                 type="checkbox"
                 className="checkboxfill"
                 checked={showEquipmentLabels}
-                name="ctype-name"
                 style={{marginLeft: '2px'}}
                 onChange={(event) => this.showEquipmentLabelsChanged(event)}
               />
-              <span>Site Labels</span>
+              {/* TODO: See https://www.pivotaltracker.com/n/projects/2468285/stories/177344788 */}
+              <span>{isFrontier ? 'Site' : 'Equipment'} Labels</span>
             </>
             }
 
@@ -381,7 +382,6 @@ export class ToolBar extends Component {
                 type="checkbox"
                 className="checkboxfill"
                 checked={showFiberSize}
-                name="ctype-name"
                 style={{marginLeft: '2px'}}
                 onChange={(event) => this.setShowFiberSize(event)}
               />

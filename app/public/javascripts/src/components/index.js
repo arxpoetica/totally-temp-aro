@@ -2,6 +2,7 @@
 import { react2angular } from 'react2angular'
 import { ToastContainer } from 'react-toastify'
 
+import AroSearch from '../react/components/sidebar/view/aro-search.jsx'
 import RingEditor from '../react/components/sidebar/ring-editor.jsx'
 import AnalysisMode from '../react/components/sidebar/analysis/analysis-mode.jsx'
 import AroDebug from '../react/components/sidebar/debug/aro-debug.jsx'
@@ -199,6 +200,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('editorInterfacePrimitive', editorInterfacePrimitive)
   .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
 // ReactJS components
+  .component('rAroSearch', react2angular(AroSearch, ['objectName', 'labelId', 'entityType']))
   .component('rRingEditor', react2angular(RingEditor))
   .component('rAnalysisMode', react2angular(AnalysisMode))
   .component('rAroDebug', react2angular(AroDebug))

@@ -176,7 +176,7 @@ export class RoicReports extends Component {
     const aComponentKey = Object.keys(this.props.roicResults.roicAnalysis.components)[0]
     const component = this.props.roicResults.roicAnalysis.components[aComponentKey]
     const aCurveKey = Object.keys(component)[0]
-    const yearsCount = component[aCurveKey].values.length
+    const yearsCount = aCurveKey !== undefined ? component[aCurveKey].values.length : 0
 
     const xAxisLabels = []
     for (let i = 0; i < yearsCount; ++i) {

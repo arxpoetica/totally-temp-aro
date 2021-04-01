@@ -1,5 +1,6 @@
 import AroHttp from '../../../../common/aro-http'
 import Actions from '../../../../common/actions'
+import { batch } from 'react-redux'
 
 function setEnumStrings (enumStrings) {
   return {
@@ -12,13 +13,15 @@ function loadNetworkNodeTypesEntity () {
   return dispatch => {
     AroHttp.get('/service/odata/NetworkNodeTypesEntity')
       .then((response) => {
-        const networkNodeTypesEntity = {}
-        response.data.forEach((entityType) => {
-          networkNodeTypesEntity[entityType.name] = entityType.description
-        })
-        dispatch({
-          type: Actions.ROIC_REPORTS_NETWORK_NODE_TYPE_ENTITY,
-          payload: networkNodeTypesEntity
+        batch(() => {
+          dispatch({
+            type: Actions.ROIC_REPORTS_NETWORK_NODE_TYPES,
+            payload: response.data
+          })
+          dispatch({
+            type: Actions.ROIC_REPORTS_NETWORK_NODE_TYPE_ENTITY,
+            payload: response.data
+          })
         })
       })
   }
@@ -56,5 +59,5 @@ export default {
   loadNetworkNodeTypesEntity,
   setShowRoicReportsModal,
   loadROICResultsForPlan,
-  setXaxisLabels
+  setXaxisLabels,
 }
