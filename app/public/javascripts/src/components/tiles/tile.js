@@ -403,9 +403,6 @@ class TileComponentController {
                 this.contextMenuService.menuOn()
                 this.$timeout()
               })
-          } else {
-            this.contextMenuService.menuOff()
-            this.$timeout()
           }
         })
     })
