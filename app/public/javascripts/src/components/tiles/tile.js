@@ -668,7 +668,6 @@ class TileComponentController {
       // Map not initialized yet
       return
     }
-    console.log(newMapLayers)
     this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setMapLayers(newMapLayers)
     this.refreshMapTiles()
   }

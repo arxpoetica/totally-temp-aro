@@ -192,7 +192,6 @@ class NetworkEquipmentController {
 
   createMapLayersForBoundaryCategory(categoryItems, categoryType, mapLayers, createdMapLayerKeys) {
     // First loop through all the equipment types
-    console.log(categoryItems)
     this.mapZoom = map.getZoom()
     // Boundary selection depends on showSiteBoundary checkbox and the selected boundary type in the dropdown
     categoryItems && Object.keys(categoryItems).forEach((categoryItemKey) => {
@@ -259,8 +258,6 @@ class NetworkEquipmentController {
 
   // ToDo: this does not belong here. Don't put the powerplant in the light switch.
   updateMapLayers() {
-    console.log(this.state.showSiteBoundary)
-    console.log(this.networkEquipmentLayers)
     if(!this.networkEquipmentLayers) return
     // Make a copy of the state mapLayers. We will update this
     var oldMapLayers = angular.copy(this.state.mapLayers.getValue())

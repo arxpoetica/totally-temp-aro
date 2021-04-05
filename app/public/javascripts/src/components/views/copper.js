@@ -81,7 +81,7 @@ class CopperController {
       drawingOptions: drawingOptions,
       selectable: true,
       zIndex: copper.zIndex,
-      showPolylineDirection: copper.drawingOptions.showPolylineDirection && this.state.showDirectedCable, // Showing Direction
+      showPolylineDirection: copper.drawingOptions.showPolylineDirection && (this.state.showDirectedCable || this.rShowDirectedCable), // Showing Direction
       highlightStyle: copper.highlightStyle
     }
   }
@@ -152,7 +152,8 @@ class CopperController {
       copperLayers: getCopperLayersList(reduxState),
       copperArray: getCopperArray(reduxState),
       dataItems: reduxState.plan.dataItems,
-      mapRef: reduxState.map.googleMaps
+      mapRef: reduxState.map.googleMaps,
+      rShowDirectedCable: reduxState.toolbar.showDirectedCable
     }
   }
 
