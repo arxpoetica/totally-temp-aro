@@ -127,8 +127,22 @@ class TileComponentController {
       }
     })
 
+    // Set the map zoom level
+    rxState.requestSetMapZoom.getMessage().subscribe((zoom) => {
+      if (this.mapRef) {
+        this.mapRef.setZoom(zoom)
+      }
+    })
+
     // To change the center of the map to given LatLng
     state.requestSetMapCenter.subscribe((mapCenter) => {
+      if (this.mapRef) {
+        this.mapRef.panTo({ lat: mapCenter.latitude, lng: mapCenter.longitude })
+      }
+    })
+
+    // To change the center of the map to given LatLng
+    rxState.requestSetMapCenter.getMessage().subscribe((mapCenter) => {
       if (this.mapRef) {
         this.mapRef.panTo({ lat: mapCenter.latitude, lng: mapCenter.longitude })
       }
@@ -692,6 +706,18 @@ class TileComponentController {
         this.cachedOldSelection = this.state.selection
       }
     }
+
+    // For React boundries-info
+    if (this.rCachedOldSelection !== this.rSelection) {
+      // Update the selection in the renderer
+      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
+        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setOldSelection(this.rSelection)
+        // If the selection has changed, redraw the tiles
+        this.tileDataService.markHtmlCacheDirty()
+        this.refreshMapTiles()
+        this.rCachedOldSelection = this.rSelection
+      }
+    }
   }
 
   $onDestroy () {
@@ -706,6 +732,7 @@ class TileComponentController {
       activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
       selectionModes: reduxState.selection.selectionModes,
       selection: reduxState.selection,
+      rSelection: reduxState.selection.selection,
       stateMapLayers: reduxState.mapLayers,
       transactionFeatureIds: getTransactionFeatureIds(reduxState),
       networkAnalysisType: reduxState.optimization.networkOptimization.optimizationInputs.analysis_type,

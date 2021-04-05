@@ -10,6 +10,7 @@ const defaultState = {
     AnalysisLayer: []
   },
   entityTypeBoundaryList: [], // list of matched boundary list (ServiceAreaView/CensusBlocksEntity/AnalysisArea)
+  layerCategories: {},
 }
 
 function setEntityTypeList (state, entityTypeList) {
@@ -24,13 +25,22 @@ function setEntityTypeBoundaryList (state, entityTypeBoundaryList) {
   }
 }
 
+function setLayerCategories (state, layerCategories) {
+  return { ...state,
+    layerCategories: layerCategories
+  }
+}
+
 function configurationReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.STATE_VIEW_MODE_GET_ENTITY_TYPE_LIST:
       return setEntityTypeList(state, action.payload)
 
     case Actions.STATE_VIEW_MODE_GET_ENTITY_TYPE_BOUNDRY_LIST:
-      return setEntityTypeBoundaryList(state, action.payload)  
+      return setEntityTypeBoundaryList(state, action.payload)
+
+    case Actions.STATE_VIEW_MODE_SET_LAYER_CATEGORIES:
+      return setLayerCategories(state, action.payload)
 
     default:
       return state
