@@ -21,6 +21,7 @@
     "watch-webpack": "NODE_ENV=development webpack --watch",
     "dev": "npm run build-vendor-bundle && npm run build-service-types && concurrently \"npm run watch-client\" \"npm run watch-server\" \"npm run watch-webpack\" \"npm run test-unit-watch\"",
     "local": "concurrently \"npm run watch-client\" \"npm run watch-server\" \"npm run watch-webpack\"",
+    "watch-esbuild": "esbuild public/javascripts/src/components/index.js --outfile=public/javascripts/lib/aro-bundle.js --bundle --define:process.env.NODE_ENV=\\\"development\\\" --external:/svg/* --watch --sourcemap=external",
     "lint": "standard \"public/javascripts/src/react/**/*.js\" \"public/javascripts/src/react/**/*.jsx\"",
     "lint-fix": "standard \"public/javascripts/src/react/**/*.js\" \"public/javascripts/src/react/**/*.jsx\" --fix"
   },
@@ -55,6 +56,7 @@
     "dequal": "^2.0.2",
     "ejs": "^2.3.3",
     "enzyme-to-json": "^3.3.5",
+    "esbuild": "0.9.0",
     "express": "^4.13.1",
     "express-flash": "0.0.2",
     "express-http-proxy": "^1.5.1",
