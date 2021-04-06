@@ -248,7 +248,10 @@ export const BoundaryDetail = (props) => {
   }
 
   const viewBoundaryInfo = () => {
-    activeViewModePanelAction(viewModePanels.BOUNDARIES_INFO)
+    // when editing the service layer, don't flip open the boundaries info panel
+    if (activeViewModePanel !== viewModePanels.EDIT_SERVICE_LAYER) {
+      activeViewModePanelAction(viewModePanels.BOUNDARIES_INFO)
+    }
   }
 
   const onClickToggleOtherAttributes = () => {
