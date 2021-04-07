@@ -403,9 +403,6 @@ class TileComponentController {
                 this.contextMenuService.menuOn()
                 this.$timeout()
               })
-          } else {
-            this.contextMenuService.menuOff()
-            this.$timeout()
           }
         })
     })
@@ -511,11 +508,6 @@ class TileComponentController {
               fiberFeatures.add(result)
             }
           })
-          
-          // To open Location info in View-Mode While Edit-Service layers serviceAreas is Empty
-          if(serviceAreas.length === 0 && this.rActiveViewModePanel === this.state.viewModePanels.EDIT_SERVICE_LAYER) {
-            this.rActiveViewModePanelAction(this.state.viewModePanels.LOCATION_INFO)
-          }
 
           // ToDo: formalize this
           // var hitFeatures = new FeatureSets() // need to import the class BUT it's over in React land, ask Parag
