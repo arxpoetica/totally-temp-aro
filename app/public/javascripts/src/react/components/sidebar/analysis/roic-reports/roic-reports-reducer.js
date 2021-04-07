@@ -3,6 +3,7 @@ import Actions from '../../../../common/actions'
 const defaultState = {
   enumStrings: {},
   networkNodeTypesEntity: {},
+  networkNodeTypes: {},
   showRoicReportsModal: false,
   roicResults: null,
   xAxisLabels: [],
@@ -23,8 +24,18 @@ function setEnumStrings (state, enumStrings) {
 }
 
 function setNetworkNodeTypesEntity (state, networkNodeTypesEntity) {
+  const networkNodeTypesEntityList = {}
+  networkNodeTypesEntity.forEach((entityType) => {
+    networkNodeTypesEntityList[entityType.name] = entityType.description
+  })
   return { ...state,
-    networkNodeTypesEntity: networkNodeTypesEntity
+    networkNodeTypesEntity: networkNodeTypesEntityList
+  }
+}
+
+function setNetworkNodeTypes (state, networkNodeTypes) {
+  return { ...state,
+    networkNodeTypes: networkNodeTypes
   }
 }
 
@@ -34,7 +45,7 @@ function setShowRoicReportsModal (state, showRoicReportsModal) {
   }
 }
 
-function setROICResultsForPlan (state, roicResults) {
+function setROICResults (state, roicResults) {
   return { ...state,
     roicResults: roicResults
   }
@@ -55,11 +66,14 @@ function RoicReportsReducer (state = defaultState, action) {
     case Actions.ROIC_REPORTS_NETWORK_NODE_TYPE_ENTITY:
       return setNetworkNodeTypesEntity(state, action.payload)
 
+    case Actions.ROIC_REPORTS_NETWORK_NODE_TYPES:
+      return setNetworkNodeTypes(state, action.payload)
+
     case Actions.ROIC_REPORTS_SHOW_ROIC_REPORT_MODAL:
       return setShowRoicReportsModal(state, action.payload)
 
     case Actions.ROIC_REPORTS_SET_ROIC_RESULTS_FOR_PLAN:
-      return setROICResultsForPlan(state, action.payload)
+      return setROICResults(state, action.payload)
 
     case Actions.ROIC_REPORTS_SET_XAXIS_LABELS:
       return setXaxisLabels(state, action.payload)
