@@ -45,9 +45,8 @@ export const RoadSegmentDetail = (props) => {
       } else if (isFeatureListEmpty(selectedMapFeatures)) {
         setState((state) => ({ ...state, selectedEdgeInfo: [] }))
         updateSelectedState()
-        // this check maybe needs to go at the top of this function (symptom of larger problem)
+        // If user clicked on map then load LOCATION_INFO
         if (activeViewModePanel === viewModePanels.ROAD_SEGMENT_INFO) {
-          // ToDo: this doesn't belog here it's a symptom of a larger problem
           activeViewModePanelAction(viewModePanels.LOCATION_INFO)
         }
       }
@@ -78,7 +77,7 @@ export const RoadSegmentDetail = (props) => {
         roadSegmentsInfo.push({ ...rs })
       } else {
         setState((state) => ({ ...state, correctZoomLevel: false }))
-        break;
+        break
       }
     }
     return roadSegmentsInfo
