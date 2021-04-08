@@ -4,6 +4,7 @@ import { flattenDeep } from '../../common/view-utils'
 import { batch } from 'react-redux'
 import { displayModes, entityTypeCons, viewModePanels } from '../sidebar/constants'
 
+// In ruler and for some active view-mode panels click should not be enabled for boundary view.
 function allowViewModeClickAction() {
   return (dispatch, getState) => {
     const state = getState()
