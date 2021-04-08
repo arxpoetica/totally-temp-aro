@@ -2,13 +2,20 @@ import Actions from '../../common/actions'
 import AroHttp from '../../common/aro-http'
 import { flattenDeep } from '../../common/view-utils'
 import { batch } from 'react-redux'
-import { displayModes, entityTypeCons } from '../sidebar/constants'
+import { displayModes, entityTypeCons, viewModePanels } from '../sidebar/constants'
 
+// In ruler and for some active view-mode panels click should not be enabled for boundary view.
 function allowViewModeClickAction() {
   return (dispatch, getState) => {
     const state = getState()
-    const { rSelectedDisplayMode, isRulerEnabled } = state.toolbar
-    return rSelectedDisplayMode === displayModes.VIEW && !isRulerEnabled
+    const { rSelectedDisplayMode, rActiveViewModePanel, isRulerEnabled } = state.toolbar
+    return (
+      (rSelectedDisplayMode === displayModes.VIEW || rSelectedDisplayMode === displayModes.EDIT_PLAN)
+      && rActiveViewModePanel !== viewModePanels.EDIT_LOCATIONS
+      && rActiveViewModePanel !== viewModePanels.EDIT_SERVICE_LAYER
+      && rActiveViewModePanel !== viewModePanels.COVERAGE_BOUNDARY
+      && !isRulerEnabled
+    )
   }
 }
 
@@ -139,9 +146,17 @@ function setLayerCategories (layerCategories) {
   }
 }
 
+function clearViewMode (isClearViewMode) {
+  return {
+    type: Actions.STATE_VIEW_MODE_CLEAR_VIEW_MODE,
+    payload: isClearViewMode
+  }
+}
+
 export default {
   getSelectedEquipmentIds,
   loadEntityList,
   allowViewModeClickAction,
   setLayerCategories,
+  clearViewMode,
 }
