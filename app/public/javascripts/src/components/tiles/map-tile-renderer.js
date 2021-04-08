@@ -9,7 +9,7 @@ import Rule from './rule'
 
 class MapTileRenderer {
   constructor (tileSize, tileDataService, mapTileOptions, layerCategories, selectedDisplayMode, selectionModes, analysisSelectionMode, stateMapLayers, displayModes,
-    viewModePanels, state, getPixelCoordinatesWithinTile, transactionFeatureIds, rShowFiberSize, rViewSetting, mapLayers = []) {
+    viewModePanels, state, getPixelCoordinatesWithinTile, selectionIds, rShowFiberSize, rViewSetting, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
@@ -26,7 +26,7 @@ class MapTileRenderer {
     this.state = state
     this.getPixelCoordinatesWithinTile = getPixelCoordinatesWithinTile
     this.latestTileUniqueId = 0
-    this.transactionFeatureIds = transactionFeatureIds
+    this.selectionIds = selectionIds
     this.rShowFiberSize = rShowFiberSize
     this.rViewSetting = rViewSetting
 
@@ -105,8 +105,8 @@ class MapTileRenderer {
     this.stateMapLayers = stateMapLayers
   }
 
-  setTransactionFeatureIds (transactionFeatureIds) {
-    this.transactionFeatureIds = transactionFeatureIds
+  setSelectionIds (selectionIds) {
+    this.selectionIds = selectionIds
   }
 
   // Sets the selected rshowFiberSize
@@ -488,8 +488,8 @@ class MapTileRenderer {
         // Try object_id first, else try location_id
         var featureId = feature.properties.object_id || feature.properties.location_id
 
-        if (this.transactionFeatureIds.has(featureId)) {
-          // continue // Do not render any features that are part of a transaction
+        if (this.selectionIds.includes(featureId)) {
+          continue // Do not render any features that are part of a transaction
         }
 
         if (mapLayer.subtypes) {
@@ -610,8 +610,6 @@ class MapTileRenderer {
                 'selectionModes': this.selectionModes }
               closedPolygonFeatureLayersList.push(featureObj)
               ctx.globalAlpha = 1.0
-            } else {
-
             }
           } else {
             // This is not a closed polygon. Render lines only
