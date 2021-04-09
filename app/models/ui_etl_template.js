@@ -48,8 +48,8 @@ module.exports = class UiEtlTemplate {
     })
   }
 
-  static getClientId() {
-    let clientName = process.env.ARO_CLIENT
+  static getClientId(clientNameOverride) {
+    let clientName = clientNameOverride ? clientNameOverride : process.env.ARO_CLIENT
     // 'aro' client is stored as 'default client' in client.cleint table
     if( clientName === 'aro')
       clientName = 'default client';
@@ -57,7 +57,11 @@ module.exports = class UiEtlTemplate {
     const clientSql = 'SELECT id FROM client.client WHERE name=$1'
     return database.query(clientSql, [clientName])
     .then(results => {
-      return parseInt(results[0].id)
+      if (results && results.length > 0) {
+        return parseInt(results[0].id)
+      } else {
+        return this.getClientId('aro')
+      }
     })
   }
 
