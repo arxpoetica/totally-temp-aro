@@ -886,7 +886,7 @@ class MapObjectEditorController {
     }
 
     mapObject.addListener('rightclick', (event) => {
-      if (typeof event === 'undefined' || event.vertex) {
+      if (typeof event === 'undefined' || event.vertex === 'undefined') {
         return
       }
       // 'event' contains a MouseEvent which we use to get X,Y coordinates. The key of the MouseEvent object
