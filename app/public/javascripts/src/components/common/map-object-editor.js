@@ -886,7 +886,9 @@ class MapObjectEditorController {
     }
 
     mapObject.addListener('rightclick', (event) => {
-      if (typeof event === 'undefined') return
+      if (typeof event === 'undefined' || event.vertex) {
+        return
+      }
       // 'event' contains a MouseEvent which we use to get X,Y coordinates. The key of the MouseEvent object
       // changes with google maps implementations. So iterate over the keys to find the right object.
 
