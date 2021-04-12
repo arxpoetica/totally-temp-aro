@@ -3,6 +3,7 @@ import AroHttp from '../../common/aro-http'
 import { flattenDeep } from '../../common/view-utils'
 import { batch } from 'react-redux'
 import { displayModes, entityTypeCons, viewModePanels } from '../sidebar/constants'
+import { createSelector } from 'reselect'
 
 function allowViewModeClickAction() {
   return (dispatch, getState) => {
@@ -152,10 +153,38 @@ function clearViewMode (isClearViewMode) {
   }
 }
 
+// We need a selector, else the .toJS() call will create an infinite digest loop
+const getAllLocationLayers = state => state.mapLayers.location
+const getLocationLayersList = createSelector([getAllLocationLayers], (locationLayers) => locationLayers.toJS())
+
+// ToDo: This does not belong here. this is already present in tool-bar-actions.js, but in that function all the state
+// are passed as arguments, so that it feel hard to handle and repeats the code, so it is modified using getState()
+// here, once all the changes are done in dependent files this will be removed here.
+function getOptimizationBody() {
+  return (dispatch, getState) => {
+    const state = getState()
+    const { optimizationInputs } = state.optimization.networkOptimization
+    const { id: activeSelectionModeId } = state.selection.activeSelectionMode
+    const locationLayers = getLocationLayersList(state)
+    const { activePlan: plan } = state.plan
+
+    const inputs = JSON.parse(JSON.stringify(optimizationInputs))
+    inputs.planId = plan.id
+    inputs.locationConstraints = {}
+    inputs.locationConstraints.analysisSelectionMode = activeSelectionModeId
+    inputs.locationConstraints.locationTypes = []
+    locationLayers.forEach(locationsLayer => {
+      if (locationsLayer.checked) inputs.locationConstraints.locationTypes.push(locationsLayer.plannerKey)
+    })
+    return inputs
+  }
+}
+
 export default {
   getSelectedEquipmentIds,
   loadEntityList,
   allowViewModeClickAction,
   setLayerCategories,
   clearViewMode,
+  getOptimizationBody,
 }

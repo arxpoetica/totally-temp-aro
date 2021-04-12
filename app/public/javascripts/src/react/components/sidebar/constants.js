@@ -47,11 +47,25 @@ const mapHitFeatures = Object.freeze({
   FIBER_FEATURES: 'fiberFeatures'
 })
 
+const controlStates = Object.freeze({
+  NO_TARGET_SELECTED: 'NO_TARGET_SELECTED',
+  COMPUTING: 'COMPUTING',
+  COMPUTED: 'COMPUTED',
+})
+
+const targetSelectionModes = Object.freeze({
+  SINGLE_PLAN_TARGET: 0,
+  POLYGON_PLAN_TARGET: 1,
+  POLYGON_EXPORT_TARGET: 2,
+  COVERAGE_BOUNDARY: 5,
+})
 
 export {
   viewModePanels,
   displayModes,
   entityTypeCons,
   boundryTypeCons,
-  mapHitFeatures
+  mapHitFeatures,
+  controlStates,
+  targetSelectionModes,
 }

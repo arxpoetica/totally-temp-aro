@@ -130,3 +130,19 @@
 .capitalize {
  text-transform: capitalize;
 }
+
+/* View-Mode Coverage Boundary */
+
+.view-mode-container {
+  position: relative; /* This will require the parent to have position: relative or absolute */
+  height: 100%;
+  padding: 0px 10px 10px 10px;
+}
+
+#tblCoverageBoundaryOptions td {
+  line-height: 33px;  /* To vertically align text */
+}
+
+#coverageBoundarySpinner div {
+  margin-left: 3px;
+}
