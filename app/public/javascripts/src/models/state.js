@@ -1241,7 +1241,8 @@ class State {
     service.clearToolbarActions = new Rx.BehaviorSubject(false)
     $rootScope.$on('map_tool_esc_clear_view_mode', () => {
       service.clearViewMode.next(true)
-      service.clearViewModeAction(true)
+      // To clear the values for view mode React components using Redux.
+      service.rClearViewMode(true)
       service.clearEditingMode.next(true)
       service.clearToolbarActions.next(true)
     })
@@ -1921,7 +1922,7 @@ class State {
       setEnumStrings: enumStrings => dispatch(RoicReportsActions.setEnumStrings(enumStrings)),
       setTypeVisibility: (typeVisibility) => dispatch(MapLayerActions.setTypeVisibility(typeVisibility)),
       setLayerCategories: (layerCategories) => dispatch(StateViewModeActions.setLayerCategories(layerCategories)),
-      clearViewModeAction: (value) => dispatch(StateViewModeActions.clearViewMode(value)),
+      rClearViewMode: (value) => dispatch(StateViewModeActions.clearViewMode(value)),
     }
   }
 }

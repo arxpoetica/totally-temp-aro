@@ -58,7 +58,6 @@ class ServiceLayerEditorController {
 
   handleSelectedObjectChanged (mapObject) {
     if (this.currentTransaction == null) return
-    console.log(mapObject)
     if (mapObject != null) {
       this.updateSelectedState(mapObject)
     }

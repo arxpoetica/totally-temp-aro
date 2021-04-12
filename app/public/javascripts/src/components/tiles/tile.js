@@ -14,12 +14,7 @@ import MenuAction, { MenuActionTypes } from '../common/context-menu/menu-action'
 import MenuItem, { MenuItemTypes } from '../common/context-menu/menu-item'
 import FeatureSets from '../../react/common/featureSets'
 import ToolBarActions from '../../react/components/header/tool-bar-actions'
-
-
-const getTransactionFeatures = reduxState => reduxState.planEditor.features
-const getTransactionFeatureIds = createSelector([getTransactionFeatures], transactionFeatures => {
-  return new Set(Object.keys(transactionFeatures))
-})
+import { dequal } from 'dequal'
 
 class TileComponentController {
   // MapLayer objects contain the following information
@@ -302,7 +297,7 @@ class TileComponentController {
       this.state.viewModePanels,
       this.state,
       MapUtilities.getPixelCoordinatesWithinTile.bind(this),
-      this.transactionFeatureIds,
+      this.selectionIds,
       this.rShowFiberSize,
       this.rViewSetting
     ))
@@ -403,9 +398,6 @@ class TileComponentController {
                 this.contextMenuService.menuOn()
                 this.$timeout()
               })
-          } else {
-            this.contextMenuService.menuOff()
-            this.$timeout()
           }
         })
     })
@@ -511,11 +503,6 @@ class TileComponentController {
               fiberFeatures.add(result)
             }
           })
-          
-          // To open Location info in View-Mode While Edit-Service layers serviceAreas is Empty
-          if(serviceAreas.length === 0 && this.rActiveViewModePanel === this.state.viewModePanels.EDIT_SERVICE_LAYER) {
-            this.rActiveViewModePanelAction(this.state.viewModePanels.LOCATION_INFO)
-          }
 
           // ToDo: formalize this
           // var hitFeatures = new FeatureSets() // need to import the class BUT it's over in React land, ask Parag
@@ -731,9 +718,9 @@ class TileComponentController {
       activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
       selectionModes: reduxState.selection.selectionModes,
       selection: reduxState.selection,
+      selectionIds: reduxState.selection.planEditorFeatures,
       rSelection: reduxState.selection.selection,
       stateMapLayers: reduxState.mapLayers,
-      transactionFeatureIds: getTransactionFeatureIds(reduxState),
       networkAnalysisType: reduxState.optimization.networkOptimization.optimizationInputs.analysis_type,
       zoom: reduxState.map.zoom,
       mapCenter: reduxState.map.mapCenter,
@@ -754,7 +741,7 @@ class TileComponentController {
     const currentSelectionModeId = this.activeSelectionModeId
     const oldPlanTargets = this.selection && this.selection.planTargets
     const prevStateMapLayers = { ...this.stateMapLayers }
-    const currentTransactionFeatureIds = this.transactionFeatureIds
+    const currentSelectionIds = this.selectionIds
     const rShowFiberSize = this.rShowFiberSize
     const rViewSetting = this.rViewSetting
 
@@ -778,8 +765,8 @@ class TileComponentController {
       }
     }
 
-    if (currentTransactionFeatureIds !== nextState.transactionFeatureIds) {
-      this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setTransactionFeatureIds(nextState.transactionFeatureIds)
+    if (!dequal(currentSelectionIds, nextState.selectionIds)) {
+      this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setSelectionIds(nextState.selectionIds)
       needRefresh = true
     }
 

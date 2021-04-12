@@ -16,33 +16,38 @@ export const RoadSegmentDetail = (props) => {
 
   const { selectedEdgeInfo, correctZoomLevel } = state
 
-  const { selectedMapFeatures, activeViewModePanel, cloneSelection, setMapSelection,
-    activeViewModePanelAction, isClearViewMode, clearViewModeAction } = props
+  const { mapFeatures, activeViewModePanel, cloneSelection, setMapSelection,
+    activeViewModePanelAction, isClearViewMode, clearViewMode } = props
 
+  // We need to get the previous mapFeatures prop, so that we can run an effect only on mapFeatures updates,
+  // we can do it manually with a usePrevious() custom Hook.
+  // https://reactjs.org/docs/hooks-faq.html#how-to-get-the-previous-props-or-state
   function usePrevious(value) {
     const ref = useRef()
     useEffect(() => { ref.current = value })
     return ref.current
   }
 
-  const prevMapFeatures = usePrevious(selectedMapFeatures)
+  const prevMapFeatures = usePrevious(mapFeatures)
 
   useEffect(() => {
-    if (prevMapFeatures && !dequal(prevMapFeatures, selectedMapFeatures)) {
-      if (selectedMapFeatures.hasOwnProperty(mapHitFeatures.EQUIPMENT_FEATURES)
-        && selectedMapFeatures.equipmentFeatures.length > 0) return
-      if (selectedMapFeatures.hasOwnProperty(mapHitFeatures.LOCATIONS)
-        && selectedMapFeatures.locations.length > 0) return
+    // We need to run an effect only on mapFeatures updates, so 'prevMapFeatures' & 'mapFeatures' is compared.
+    if (prevMapFeatures && !dequal(prevMapFeatures, mapFeatures)) {
+      // On click of equipment or location dont show road segment details
+      if (mapFeatures.hasOwnProperty(mapHitFeatures.EQUIPMENT_FEATURES)
+        && mapFeatures.equipmentFeatures.length > 0) return
+      if (mapFeatures.hasOwnProperty(mapHitFeatures.LOCATIONS)
+        && mapFeatures.locations.length > 0) return
       if (activeViewModePanel === viewModePanels.EDIT_LOCATIONS) return
 
-      if (selectedMapFeatures.roadSegments && selectedMapFeatures.roadSegments.size > 0) {
+      if (mapFeatures.roadSegments && mapFeatures.roadSegments.size > 0) {
         const newSelection = cloneSelection()
-        newSelection.details.roadSegments = selectedMapFeatures.roadSegments
+        newSelection.details.roadSegments = mapFeatures.roadSegments
         setMapSelection(newSelection)
-        const roadSegmentsInfo = generateRoadSegmentsInfo(selectedMapFeatures.roadSegments)
+        const roadSegmentsInfo = generateRoadSegmentsInfo(mapFeatures.roadSegments)
         setState((state) => ({ ...state, selectedEdgeInfo: roadSegmentsInfo }))
         viewRoadSegmentInfo()
-      } else if (isFeatureListEmpty(selectedMapFeatures)) {
+      } else if (isFeatureListEmpty(mapFeatures)) {
         setState((state) => ({ ...state, selectedEdgeInfo: [] }))
         updateSelectedState()
         // If user clicked on map then load LOCATION_INFO
@@ -55,9 +60,9 @@ export const RoadSegmentDetail = (props) => {
     if (isClearViewMode) {
       setState((state) => ({ ...state, selectedEdgeInfo: [] }))
       updateSelectedState()
-      clearViewModeAction(false)
+      clearViewMode(false)
     }
-  }, [selectedMapFeatures, isClearViewMode])
+  }, [mapFeatures, isClearViewMode])
 
   const isFeatureListEmpty = (mapFeatures) => {
     let isObjectEmpty = true
@@ -110,15 +115,16 @@ export const RoadSegmentDetail = (props) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {selectedEdgeInfo.map((edgeInfo) => {
-                    return (
-                      <tr key={edgeInfo.id}>
-                        <td>{edgeInfo.feature_type_name}</td>
-                        <td>{edgeInfo.gid}</td>
-                        <td>{(edgeInfo.edge_length).toFixed(2)}m</td>
-                      </tr>
-                    )
-                  })
+                  {
+                    selectedEdgeInfo.map((edgeInfo) => {
+                      return (
+                        <tr key={edgeInfo.id}>
+                          <td>{edgeInfo.feature_type_name}</td>
+                          <td>{edgeInfo.gid}</td>
+                          <td>{(edgeInfo.edge_length).toFixed(2)}m</td>
+                        </tr>
+                      )
+                    })
                   }
                 </tbody>
               </table>
@@ -134,7 +140,7 @@ export const RoadSegmentDetail = (props) => {
 
 const mapStateToProps = (state) => ({
   activeViewModePanel: state.toolbar.rActiveViewModePanel,
-  selectedMapFeatures: state.selection.mapFeatures,
+  mapFeatures: state.selection.mapFeatures,
   isClearViewMode: state.stateViewMode.isClearViewMode,
 })
 
@@ -142,7 +148,7 @@ const mapDispatchToProps = (dispatch) => ({
   activeViewModePanelAction: (value) => dispatch(ToolBarActions.activeViewModePanel(value)),
   cloneSelection: () => dispatch(SelectionActions.cloneSelection()),
   setMapSelection: (mapSelection) => dispatch(SelectionActions.setMapSelection(mapSelection)),
-  clearViewModeAction: (value) => dispatch(StateViewModeActions.clearViewMode(value)),
+  clearViewMode: (value) => dispatch(StateViewModeActions.clearViewMode(value)),
 })
 
 export default wrapComponentWithProvider(reduxStore, RoadSegmentDetail, mapStateToProps, mapDispatchToProps)
