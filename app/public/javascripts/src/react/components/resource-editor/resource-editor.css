@@ -1,20 +1,3 @@
-/* ---- ARPU Manager Start ----*/
-
-.action-button-icon {
-  padding-right: 10px;
-}
-/* Display the span within the pill-parent only when it is hovered */
-.pill-parent span {
-  display: none;
-}
-.pill-parent:hover span {
-  display: block;
-}
-#tblArpuModel td {
-  line-height: 33px; /* To vertically align text */
-}
-/* ---- ARPU Manager End ----*/
-
 /* ---- Competition Manager Start ----*/
 
 #tblCompetitorModel td {
