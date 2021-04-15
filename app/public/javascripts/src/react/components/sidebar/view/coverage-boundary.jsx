@@ -163,7 +163,7 @@ export const CoverageBoundary = (props) => {
         controlState === controlStates.COMPUTING &&
         <div style={{ margin: '30px', textAlign: 'center' }}>
           <p>Calculating coverage area...</p>
-          <div className="spinner" id="coverageBoundarySpinner">
+          <div className="spinner aro-coverageBoundarySpinner">
             <div className="rect1" />
             <div className="rect2" />
             <div className="rect3" />
@@ -179,7 +179,7 @@ export const CoverageBoundary = (props) => {
           Click on the map to calculate a coverage boundary
         </div>
       }
-      <table id="tblCoverageBoundaryOptions" className="table table-striped table-sm">
+      <table className="table table-striped table-sm aro-tblCoverageBoundaryOptions">
         <tbody>
           <tr>
             <td>Coverage Radius</td>

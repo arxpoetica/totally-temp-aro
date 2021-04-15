@@ -139,10 +139,10 @@
   padding: 0px 10px 10px 10px;
 }
 
-#tblCoverageBoundaryOptions td {
+.aro-tblCoverageBoundaryOptions td {
   line-height: 33px;  /* To vertically align text */
 }
 
-#coverageBoundarySpinner div {
+.aro-coverageBoundarySpinner div {
   margin-left: 3px;
 }
