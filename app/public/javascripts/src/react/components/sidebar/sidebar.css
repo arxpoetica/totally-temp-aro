@@ -146,3 +146,9 @@
 .aro-coverageBoundarySpinner div {
   margin-left: 3px;
 }
+
+/* Summary Reports */
+
+.aro-summary-button-export {
+  margin-bottom: 10px;
+}
