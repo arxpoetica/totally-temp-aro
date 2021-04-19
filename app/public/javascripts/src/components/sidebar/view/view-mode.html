@@ -22,9 +22,9 @@
           label-id="'objectId'"
           entity-type="'LocationObjectEntity'"
           search-list="$ctrl.state.entityTypeList.LocationObjectEntity" 
-          selected="$ctrl.selectedLocation" 
-          refresh-tag-list="$ctrl.state.StateViewMode.loadEntityList($ctrl.$http, $ctrl.state, $ctrl.dataItems, 'LocationObjectEntity',searchObj,'id,objectId','objectId')"
-          on-selection-changed="$ctrl.onSearchResult(selectedObj)">
+          selected="$ctrl.selectedLocation"
+          search-column="'id,objectId'"
+          configuration="'objectId'">
         </r-aro-search>
         <r-location-info>
         </r-location-info>
@@ -42,12 +42,12 @@
 
       <accordion-panel-title title="'Boundaries Info'" panel-id="$ctrl.state.viewModePanels.BOUNDARIES_INFO" ng-if="$ctrl.state.configuration.perspective.showViewModePanels[$ctrl.state.viewModePanels.BOUNDARIES_INFO]"></accordion-panel-title>
       <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.BOUNDARIES_INFO" ng-if="$ctrl.state.configuration.perspective.showViewModePanels[$ctrl.state.viewModePanels.BOUNDARIES_INFO]">
-        <boundary-detail></boundary-detail>
+        <r-boundary-detail></r-boundary-detail>
       </accordion-panel-contents>
 
       <accordion-panel-title title="'Conduit Info'" panel-id="$ctrl.state.viewModePanels.ROAD_SEGMENT_INFO" ng-if="$ctrl.state.configuration.perspective.showViewModePanels[$ctrl.state.viewModePanels.ROAD_SEGMENT_INFO]"></accordion-panel-title>
       <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.ROAD_SEGMENT_INFO" ng-if="$ctrl.state.configuration.perspective.showViewModePanels[$ctrl.state.viewModePanels.ROAD_SEGMENT_INFO]">
-        <road-segment-detail selection="$ctrl.state.selection"></road-segment-detail>
+        <r-road-segment-detail></r-road-segment-detail>
       </accordion-panel-contents>
 
       <accordion-panel-title title="'Plan Info'" panel-id="$ctrl.state.viewModePanels.PLAN_INFO" ng-if="$ctrl.state.configuration.perspective.showViewModePanels[$ctrl.state.viewModePanels.PLAN_INFO]"></accordion-panel-title>
@@ -69,7 +69,7 @@
                                 ng-if="($ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.COVERAGE_BOUNDARY || $ctrl.rActiveViewModePanel === $ctrl.state.viewModePanels.COVERAGE_BOUNDARY)
                                        && ($ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.COVERAGE_BOUNDARY || $ctrl.rSelectedTargetSelectionMode === $ctrl.state.targetSelectionModes.COVERAGE_BOUNDARY)
                                        && $ctrl.state.configuration.perspective.showViewModePanels[$ctrl.state.viewModePanels.COVERAGE_BOUNDARY]">
-        <coverage-boundary map-global-object-name="map"></coverage-boundary>
+        <r-coverage-boundary map-global-object-name="'map'" />
       </accordion-panel-contents>
       <!-- Edit Locations is a little different. Show it only if we are in EDIT_LOCATION mode. -->
       <accordion-panel-title title="'Edit Locations'"

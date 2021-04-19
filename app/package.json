@@ -1,9 +1,14 @@
 {
   "name": "aro",
-  "version": "0.0.0",
+  "version": "2.2.0",
   "description": "Network infrastructure planning application.",
-  "main": "app.js",
+  "author": "Altman Vilandrie &Co. Advanced Analytics and Products Division",
+  "license": "BSD-2-Clause",
   "private": true,
+  "main": "app.js",
+  "volta": {
+    "node": "12.21.0"
+  },
   "scripts": {
     "test": "NODE_ENV=test mocha test/models/*.js test/helpers/*.js --timeout 50000 --delay",
     "test-cov": "NODE_ENV=test istanbul --preserve-comments cover _mocha -- test/models/*.js test/helpers/*.js -R spec --timeout 50000 --delay",
@@ -21,11 +26,10 @@
     "watch-webpack": "NODE_ENV=development webpack --watch",
     "dev": "npm run build-vendor-bundle && npm run build-service-types && concurrently \"npm run watch-client\" \"npm run watch-server\" \"npm run watch-webpack\" \"npm run test-unit-watch\"",
     "local": "concurrently \"npm run watch-client\" \"npm run watch-server\" \"npm run watch-webpack\"",
+    "watch-esbuild": "esbuild public/javascripts/src/components/index.js --outfile=public/javascripts/lib/aro-bundle.js --bundle --define:process.env.NODE_ENV=\\\"development\\\" --external:/svg/* --watch --sourcemap=external",
     "lint": "standard \"public/javascripts/src/react/**/*.js\" \"public/javascripts/src/react/**/*.jsx\"",
     "lint-fix": "standard \"public/javascripts/src/react/**/*.js\" \"public/javascripts/src/react/**/*.jsx\" --fix"
   },
-  "author": "Altman Vilandrie &Co. Advanced Analytics and Products Division",
-  "license": "BSD-2-Clause",
   "dependencies": {
     "@babel/cli": "^7.2.3",
     "@babel/core": "^7.2.2",
@@ -43,6 +47,7 @@
     "chai": "~3.0.0",
     "chai-string": "^1.1.6",
     "chart.js": "^2.9.4",
+    "clsx": "^1.1.1",
     "compression": "~1.5.0",
     "cookie-session": "^1.2.0",
     "create-react-class": "^15.6.3",
@@ -52,8 +57,10 @@
     "csv-stringify": "0.0.8",
     "dedent": "^0.6.0",
     "deepmerge": "^3.2.0",
+    "dequal": "^2.0.2",
     "ejs": "^2.3.3",
     "enzyme-to-json": "^3.3.5",
+    "esbuild": "0.9.0",
     "express": "^4.13.1",
     "express-flash": "0.0.2",
     "express-http-proxy": "^1.5.1",

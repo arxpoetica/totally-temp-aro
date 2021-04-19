@@ -621,77 +621,235 @@ function getDefaultConfiguration (loggedInUser, categoryType = 'SPEED') {
 
 // ARPU-Manager
 
-function loadArpuManagerConfiguration (arpuManagerId) {
-
+function loadArpuManagerConfiguration(arpuManagerId) {
   return dispatch => {
     AroHttp.get(`/service/v1/arpu-manager/${arpuManagerId}`)
-    .then((result) => {
-      dispatch({
-        type: Actions.RESOURCE_EDITOR_ARPU_MANAGER,
-        payload: result.data
-      })
-    })
-
-    AroHttp.get(`/service/v1/arpu-manager/${arpuManagerId}/configuration`)
       .then((result) => {
+        dispatch({
+          type: Actions.RESOURCE_EDITOR_ARPU_MANAGER,
+          payload: result.data,
+        })
+      })
+
+    const promises = [
+      AroHttp.get(`/service/v1/arpu-products`),
+      AroHttp.get(`/service/v1/arpu-segments`),
+      AroHttp.get(`/service/v1/arpu-manager/${arpuManagerId}/configuration`),
+    ]
+
+    Promise.all(promises)
+      .then(([{ data: products }, { data: segments }, { data: config }]) => {
+
+        // Sort the arpu models based on the `locationEntityType`
+        // NOTE: the location order is hard typed here...
+        const businessOrder = ['small', 'medium', 'large']
+        const locationOrder = ['household', ...businessOrder, 'celltower']
         let arpuModels = []
-        // Sort the arpu models based on the locationTypeEntity
-        const locationEntityOrder = ['household', 'small', 'medium', 'large', 'celltower']
-        locationEntityOrder.forEach(locationEntity => {
-          const filteredModels = result.data.arpuModels
-            .filter(item => item.id.locationEntityType === locationEntity)
-            .sort((a, b) => (a.id.speedCategory < b.id.speedCategory) ? -1 : 1)
+        for (const type of locationOrder) {
+          // NOTE: right now there's only the capture-all morphology `*` group hence `[0]`
+          const filteredModels = config.morphologyGroups[0].arpuModels
+            .filter(item => item.arpuModelKey.locationEntityType === type)
+            .sort((one, two) => one.arpuModelKey.speedCategory
+              .localeCompare(two.arpuModelKey.speedCategory)
+            )
           arpuModels = arpuModels.concat(filteredModels)
+        }
+
+        const titles = {
+          'householdcat3': 'Residential (Legacy - Copper Cat3)',
+          'householdcat7': 'Residential (Planned)',
+          'smallcat3': 'Small Business (Legacy - Copper Cat3)',
+          'smallcat7': 'Small Business (Planned)',
+          'mediumcat3': 'Medium Business (Legacy - Copper Cat3)',
+          'mediumcat7': 'Medium Business (Planned)',
+          'largecat3': 'Large Business (Legacy - Copper Cat3)',
+          'largecat7': 'Large Business (Planned)',
+          'celltowercat3': 'Celltower (Legacy - Copper Cat3)',
+          'celltowercat7': 'Celltower (Planned)',
+        }
+
+        arpuModels = arpuModels.map(model => {
+          const { locationEntityType, speedCategory } = model.arpuModelKey
+          model.title = titles[locationEntityType + speedCategory]
+
+          // NOTE: we're rewiring the strategy for UI purposes.
+          // ON SAVE, THIS IS REVERSED BACK INTO THE CONFIG
+          // ===> strategy options
+          model.options = [{ value: 'global', label: 'Global' }]
+          if (businessOrder.includes(locationEntityType)) {
+            model.options.push({ value: 'tsm', label: 'Telecom Spend Matrix' })
+          } else if (locationEntityType === 'household') {
+            model.options.push({ value: 'segmentation', label: 'Segmentation' })
+          }
+          model.options.push({ value: 'override', label: 'Location Layer' })
+
+          // first make sure things are in order
+          model.cells.sort((one, two) => {
+            return one.key.segmentId === two.key.segmentId
+              ? one.key.productId - two.key.productId
+              : one.key.segmentId - two.key.segmentId
+          })
+
+          // ===> strategy value
+          if (model.arpuStrategy === 'arpu') {
+            if (locationEntityType === 'celltower'
+              || (
+                model.cells.length === 1
+                && model.cells[0].key.productId === 1
+                && model.cells[0].key.segmentId === 1
+                && model.cells[0].key.segmentId === 1
+                && model.cells[0].arpuPercent === 1
+              )
+              || !model.cells.length
+            ) {
+              // ===> single cell, arpuPercent === 1, `arpu` means `global` here
+              model.strategy = 'global'
+            } else {
+              // ===> multiple cell, `arpu` means `segmentation` here
+              model.strategy = 'segmentation'
+            }
+          } else {
+            // ===> should only be `tsm` or `override` left over
+            model.strategy = model.arpuStrategy
+          }
+
+          model.products = products
+            .sort((one, two) => one.id - two.id)
+            .map(product => {
+              const found = model.productAssignments.find(prod => {
+                return prod.productId === product.id
+              })
+              return Object.assign({}, product, {
+                arpu: found ? found.arpu : 0,
+                opex: found ? found.opex : 0,
+                fixedCost: found ? found.fixedCost : 0,
+              })
+            })
+
+          model.segments = segments
+            .sort((one, two) => one.id - two.id)
+            .map(segment => {
+              segment.percents = model.products.map(product => {
+                const found = model.cells.find(cell => {
+                  return cell.key.productId === product.id
+                    && cell.key.segmentId === segment.id
+                })
+                // NOTE: multiplying by 100 because percents are
+                // stored in decimal but must be displayed in 100s
+                return (found ? found.arpuPercent : 0) * 100
+              })
+              return Object.assign({}, segment)
+            })
+
+          // global value treated separately for convenience in the UI
+          model.global = model.products[0].arpu
+
+          delete model.arpuStrategy
+          delete model.productAssignments
+          delete model.segmentAssignments
+          delete model.cells
+          return model
         })
+
         dispatch({
-          type: Actions.RESOURCE_EDITOR_SET_ARPU_MANAGER_CONFIGURATION,
-          payload:  { arpuModels: arpuModels }
-        })
-        const arpuManagerConfiguration = { arpuModels: arpuModels }
-        const pristineArpuManagerConfiguration = {}
-        const copyOfModels = JSON.parse(JSON.stringify(arpuManagerConfiguration.arpuModels))
-        copyOfModels.forEach((arpuModel) => {
-        // Create a key from the "id" object
-          const arpuKey = JSON.stringify(arpuModel.id)
-          pristineArpuManagerConfiguration[arpuKey] = arpuModel
-        })
-        dispatch({
-          type: Actions.RESOURCE_EDITOR_SET_PRISTINE_ARPU_MANAGER_CONFIGURATION,
-          payload:  pristineArpuManagerConfiguration
+          type: Actions.RESOURCE_EDITOR_SET_ARPU_MODELS,
+          payload: arpuModels,
         })
       })
       .catch((err) => console.error(err))
-    }
   }
+}
 
-function saveArpuConfigurationToServer (arpuManagerId, pristineArpuManagerConfiguration, arpuManagerConfiguration) {
+function saveArpuModels(arpuManagerId, models) {
 
-  const changedModels = []
-  arpuManagerConfiguration.arpuModels.forEach((arpuModel) => {
-    const arpuKey = JSON.stringify(arpuModel.id)
-    const pristineModel = pristineArpuManagerConfiguration[arpuKey]
-    if (pristineModel) {
-      // Check to see if the model has changed
-      if (JSON.stringify(pristineModel) !== JSON.stringify(arpuModel)) {
-        changedModels.push(arpuModel)
+  const arpuModels = JSON.parse(JSON.stringify(models)).map(model => {
+
+    model.productAssignments = model.products.map(product => {
+      // if it's global, need to set it
+      if (model.strategy === 'global') {
+        let arpu = 0
+        if (product.id === 1) {
+          arpu = model.global
+        }
+        product = Object.assign({}, product, { arpu, opex: 0, fixedCost: 0 })
       }
+      product.productId = product.id
+      delete product.id
+      delete product.name
+      delete product.description
+      return product
+    })
+
+    if (model.strategy === 'override' || model.strategy === 'tsm') {
+      // ===> tsm or override
+      model.arpuStrategy = model.strategy
+      model.cells = []
+    } else if (model.strategy === 'global') {
+      // ===> global
+      model.arpuStrategy = 'arpu'
+      // since global, just set to 1 (which is the decimal of 100%)
+      model.cells = [{ key: { productId: 1, segmentId: 1 }, arpuPercent: 1 }]
+    } else { // model.strategy === 'segmentation'
+      // ===> segmentation
+      model.arpuStrategy = 'arpu'
+      model.cells = model.segments.reduce((cells, segment) => {
+        const productCells = model.products.map((product, index) => {
+          const arpuPercent = segment.percents[index]
+          if (arpuPercent) {
+            return {
+              key: {
+                productId: product.productId,
+                segmentId: segment.id,
+              },
+              // NOTE: dividing by 100 because percents are
+              // displayed in 100s but must be stored in decimal
+              arpuPercent: parseFloat(arpuPercent) / 100,
+            }
+          }
+          return false
+        }).filter(Boolean)
+        return [...cells, ...productCells]
+      }, [])
     }
+
+    model.segmentAssignments = model.segments.map(segment => {
+      segment.segmentId = segment.id
+      delete segment.id
+      delete segment.name
+      delete segment.description
+      delete segment.percents
+      return segment
+    })
+
+    delete model.title
+    delete model.options
+    delete model.strategy
+    delete model.global
+    delete model.products
+    delete model.segments
+
+    return model
   })
 
   return (dispatch, getState) => {
-    if (changedModels.length > 0) {
+    if (arpuModels.length) {
       const state = getState()
-      AroHttp.put(`/service/v1/arpu-manager/${arpuManagerId}/configuration`, changedModels)
-      .then(result => {
-        batch(() => {
-          dispatch(setIsResourceEditor(true))
-          dispatch(getResourceManagers(state.resourceEditor.selectedResourceKey))
+      AroHttp.put(`/service/v1/arpu-manager/${arpuManagerId}/configuration`, {
+        morphologyGroups: [{
+          arpuModels,
+          morphology: '*',
+        }]
+      })
+        .then(result => {
+          batch(() => {
+            dispatch(setIsResourceEditor(true))
+            dispatch(getResourceManagers(state.resourceEditor.selectedResourceKey))
+          })
         })
-      })
-      .catch(err => {
-        console.error(err)
-        dispatch(GlobalSettingsActions.httpErrorhandle(err))
-      })
+        .catch(err => {
+          console.error(err)
+          dispatch(GlobalSettingsActions.httpErrorhandle(err))
+        })
     } else {
       console.log('ARPU Editor: No models were changed. Nothing to save.')
     }
@@ -1168,7 +1326,7 @@ export default {
   startEditingResourceManager,
   loadArpuManagerConfiguration,
   loadCompManMeta,
-  saveArpuConfigurationToServer,
+  saveArpuModels,
   getRegions,
   loadCompManForStates,
   saveCompManConfig,
