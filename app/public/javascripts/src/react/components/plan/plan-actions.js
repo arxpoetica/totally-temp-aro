@@ -193,29 +193,6 @@ function deleteLibraryEntry (dataSource) {
   }
 }
 
-// Saves the plan Data Selection configuration to the server
-function saveDataSelectionToServer (plan, dataItems) {
-  return dispatch => {
-    var putBody = {
-      configurationItems: [],
-      resourceConfigItems: []
-    }
-    Object.keys(dataItems).forEach(dataItemKey => {
-      // An example of dataItemKey is 'location'
-      if (dataItems[dataItemKey].selectedLibraryItems.length > 0) {
-        var configurationItem = {
-          dataType: dataItemKey,
-          libraryItems: dataItems[dataItemKey].selectedLibraryItems
-        }
-        putBody.configurationItems.push(configurationItem)
-      }
-    })
-
-    // Save the configuration to the server
-    AroHttp.put(`/service/v1/plan/${plan.id}/configuration`, putBody)
-  }
-}
-
 function clearAllSelectedSA (plan, dataItems, selectedServiceAreas) {
   return dispatch => {
     // Get a list of selected service areas that are valid, given the (possibly) changed service area library selection
@@ -315,8 +292,8 @@ function loadPlanResourceSelectionFromServer (plan) {
   }
 }
 
-  // Save the plan resource selections to the server
-function savePlanResourceSelectionToServer (plan, resourceItems) {
+// Save the plan configuration selections to the server
+function savePlanConfiguration(plan, dataItems, resourceItems) {
   return (dispatch, getState) => {
 
     // to update pristineResourceItems
@@ -334,6 +311,17 @@ function savePlanResourceSelectionToServer (plan, resourceItems) {
       resourceConfigItems: []
     }
 
+    Object.keys(dataItems).forEach(dataItemKey => {
+      // An example of dataItemKey is 'location'
+      if (dataItems[dataItemKey].selectedLibraryItems.length > 0) {
+        var configurationItem = {
+          dataType: dataItemKey,
+          libraryItems: dataItems[dataItemKey].selectedLibraryItems
+        }
+        putBody.configurationItems.push(configurationItem)
+      }
+    })
+
     Object.keys(resourceItems).forEach((resourceItemKey) => {
       let selectedManager = resourceItems[resourceItemKey].selectedManager
       if (selectedManager) {
@@ -348,8 +336,7 @@ function savePlanResourceSelectionToServer (plan, resourceItems) {
     })
 
     // Save the configuration to the server
-    let currentPlan = plan
-    AroHttp.put(`/service/v1/plan/${currentPlan.id}/configuration`, putBody)
+    AroHttp.put(`/service/v1/plan/${plan.id}/configuration`, putBody)
   }
 }
 
@@ -588,10 +575,9 @@ export default {
   setAllLibraryItems,
   setHaveDataItemsChanged,
   deleteLibraryEntry,
-  saveDataSelectionToServer,
   clearAllSelectedSA,
   loadPlanResourceSelectionFromServer,
-  savePlanResourceSelectionToServer,
+  savePlanConfiguration,
   setIsResourceSelection,
   setIsDataSelection,
   loadProjectConfig,
