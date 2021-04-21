@@ -163,19 +163,24 @@ export class PlanSettings extends Component {
     }
   }
 
-  saveChanges () {
-    if (!this.state.isSaveEnabled) return
-    this.setState({isSaveEnabled: false});
-    // for each child save and on success rest the object
-    if (this.props.haveDataItemsChanged && this.isDataSelectionValid) {
-      this.props.saveDataSelectionToServer(this.props.activePlan, this.props.dataItems)
-      this.props.setHaveDataItemsChanged(false)
-      this.props.clearAllSelectedSA(this.props.activePlan, this.props.dataItems, this.props.selectedServiceAreas)
-    }
+  saveChanges() {
+    if (!this.state.isSaveEnabled) { return }
+    this.setState({ isSaveEnabled: false })
 
-    if (this.childSettingsPanels.resourceSelection.isChanged && this.childSettingsPanels.resourceSelection.isValid) {
-      this.props.savePlanResourceSelectionToServer(this.props.activePlan, this.props.resourceItems)
-      this.resetChildSettingsPanels('resourceSelection')
+    // for each child save and on success rest the object
+    const { resourceSelection } = this.childSettingsPanels
+    const hasDataChanges = this.props.haveDataItemsChanged && this.isDataSelectionValid
+    const hadResourcesChanges = resourceSelection.isChanged && resourceSelection.isValid
+
+    if (hasDataChanges || hadResourcesChanges) {
+      this.props.savePlanConfiguration(this.props.activePlan, this.props.dataItems, this.props.resourceItems)
+      if (hasDataChanges) {
+        this.props.setHaveDataItemsChanged(false)
+        this.props.clearAllSelectedSA(this.props.activePlan, this.props.dataItems, this.props.selectedServiceAreas)
+      }
+      if (hadResourcesChanges) {
+        this.resetChildSettingsPanels('resourceSelection')
+      }
     }
   }
 
@@ -275,10 +280,9 @@ export class PlanSettings extends Component {
 
   const mapDispatchToProps = (dispatch) => ({
     loadPlanResourceSelectionFromServer: (plan) => dispatch(PlanActions.loadPlanResourceSelectionFromServer(plan)),
-    saveDataSelectionToServer: (plan, dataItems) => dispatch(PlanActions.saveDataSelectionToServer(plan, dataItems)),
     setHaveDataItemsChanged: haveDataItemsChanged => dispatch(PlanActions.setHaveDataItemsChanged(haveDataItemsChanged)),
     clearAllSelectedSA: (plan, dataItems, selectedServiceAreas) => dispatch(PlanActions.clearAllSelectedSA(plan, dataItems, selectedServiceAreas)),
-    savePlanResourceSelectionToServer: (plan, resourceItems) => dispatch(PlanActions.savePlanResourceSelectionToServer(plan, resourceItems))
+    savePlanConfiguration: (plan, dataItems, resourceItems) => dispatch(PlanActions.savePlanConfiguration(plan, dataItems, resourceItems))
   })
 
   const PlanSettingsComponent = wrapComponentWithProvider(reduxStore, PlanSettings, mapStateToProps, mapDispatchToProps)
