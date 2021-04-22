@@ -27,7 +27,12 @@ class SocketManager {
       this.sockets[socketNamespace] = io(`/${socketNamespace}`)
     })
     Object.keys(this.sockets).forEach(namespaceKey => {
-      this.sockets[namespaceKey].on('message', message => this.routeMessage(message))
+      // broadcast has a different object structure, so it should be handled seperately
+      if(namespaceKey !== 'broadcast') {
+        this.sockets[namespaceKey].on('message', message => this.routeMessage(message))
+      } else {
+        this.sockets[namespaceKey].on('message', message => this.routeBrodcastMessage(message))
+      }
     })
   }
 
@@ -90,6 +95,12 @@ class SocketManager {
   routeMessage (message) {
     // console.log([message.properties.headers.eventType, message])
     const subscribers = this.router[message.properties.headers.eventType] || []
+    subscribers.forEach(subscriber => subscriber(message))
+  }
+
+  // Route the Brodcast Message
+  routeBrodcastMessage (message) {
+    const subscribers = this.router[message.type] || []
     subscribers.forEach(subscriber => subscriber(message))
   }
 }

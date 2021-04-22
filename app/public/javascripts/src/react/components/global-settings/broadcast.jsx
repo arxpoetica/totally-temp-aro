@@ -24,7 +24,7 @@ export class Broadcast extends Component {
             <label>
               <input type='checkbox'
                 checked={this.state.isChecked}
-                onChange={this.toggleChange} />
+                onChange={this.toggleChange} />&nbsp;
               Disappear after 15 Seconds
             </label>
           </div>
