@@ -64,7 +64,8 @@ class Sockets {
 
   // Emit a message to EVERYONE connected via websockets. Use sparingly, if used at all.
   emitToAll (payload) {
-    this.sockets.client.to(`broadcast`).emit('message', payload)
+    // it should be 'this.sockets.broadcast' for broadcast.
+    this.sockets.broadcast.to(`broadcast`).emit('message', payload)
     console.log(`SOCKET EMIT broadcast, payload: ${this.formatPayloadForLogging(payload)}`)
   }
 
