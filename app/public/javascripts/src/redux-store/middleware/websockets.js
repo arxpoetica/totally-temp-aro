@@ -1,6 +1,4 @@
-import io from 'socket.io-client'
 import { toast } from 'react-toastify'
-import Actions from '../../react/common/actions'
 import socketManager from '../../react/common/socket-manager'
 
 const createSocketMiddleware = () => {

@@ -28,7 +28,7 @@ class SocketManager {
     })
     Object.keys(this.sockets).forEach(namespaceKey => {
       // broadcast has a different object structure, so it should be handled seperately
-      if(namespaceKey !== 'broadcast') {
+      if (namespaceKey !== 'broadcast') {
         this.sockets[namespaceKey].on('message', message => this.routeMessage(message))
       } else {
         this.sockets[namespaceKey].on('message', message => this.routeBrodcastMessage(message))
@@ -84,7 +84,7 @@ class SocketManager {
 
   unsubscribe (fn) {
     Object.keys(this.router).forEach(messageType => {
-      var subscriberIndex = this.router[messageType].findIndex(item => item === fn)
+      let subscriberIndex = this.router[messageType].findIndex(item => item === fn)
       while (subscriberIndex >= 0) {
         this.router[messageType].splice(subscriberIndex)
         subscriberIndex = this.router[messageType].findIndex(item => item === fn)
@@ -93,7 +93,6 @@ class SocketManager {
   }
 
   routeMessage (message) {
-    // console.log([message.properties.headers.eventType, message])
     const subscribers = this.router[message.properties.headers.eventType] || []
     subscribers.forEach(subscriber => subscriber(message))
   }
