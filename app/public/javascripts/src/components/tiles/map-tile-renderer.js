@@ -9,7 +9,7 @@ import Rule from './rule'
 
 class MapTileRenderer {
   constructor (tileSize, tileDataService, mapTileOptions, layerCategories, selectedDisplayMode, selectionModes, analysisSelectionMode, stateMapLayers, displayModes,
-    viewModePanels, state, getPixelCoordinatesWithinTile, transactionFeatureIds, rShowFiberSize, rViewSetting, mapLayers = []) {
+    viewModePanels, state, getPixelCoordinatesWithinTile, selectionIds, rShowFiberSize, rViewSetting, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
@@ -26,7 +26,7 @@ class MapTileRenderer {
     this.state = state
     this.getPixelCoordinatesWithinTile = getPixelCoordinatesWithinTile
     this.latestTileUniqueId = 0
-    this.transactionFeatureIds = transactionFeatureIds
+    this.selectionIds = selectionIds
     this.rShowFiberSize = rShowFiberSize
     this.rViewSetting = rViewSetting
 
@@ -105,8 +105,8 @@ class MapTileRenderer {
     this.stateMapLayers = stateMapLayers
   }
 
-  setTransactionFeatureIds (transactionFeatureIds) {
-    this.transactionFeatureIds = transactionFeatureIds
+  setSelectionIds (selectionIds) {
+    this.selectionIds = selectionIds
   }
 
   // Sets the selected rshowFiberSize
@@ -126,11 +126,11 @@ class MapTileRenderer {
   getOrderedKeys (obj, orderPram, defaultVal) {
     let orderedArr = Object.keys(obj)
     orderedArr.sort(function (a, b) {
-	  let aObj = obj[a]
-	  let bObj = obj[b]
+    let aObj = obj[a]
+    let bObj = obj[b]
 
-	  if (!aObj.hasOwnProperty(orderPram) || isNaN(aObj[orderPram])) { aObj[orderPram] = defaultVal }
-	  if (!bObj.hasOwnProperty(orderPram) || isNaN(bObj[orderPram])) { bObj[orderPram] = defaultVal }
+    if (!aObj.hasOwnProperty(orderPram) || isNaN(aObj[orderPram])) { aObj[orderPram] = defaultVal }
+    if (!bObj.hasOwnProperty(orderPram) || isNaN(bObj[orderPram])) { bObj[orderPram] = defaultVal }
 
       return aObj[orderPram] - bObj[orderPram]
     })
@@ -487,9 +487,9 @@ class MapTileRenderer {
       if (feature.properties) {
         // Try object_id first, else try location_id
         var featureId = feature.properties.object_id || feature.properties.location_id
-        
-				if (this.transactionFeatureIds.has(featureId)) {
-          // continue // Do not render any features that are part of a transaction
+
+        if (this.selectionIds.includes(featureId)) {
+          continue // Do not render any features that are part of a transaction
         }
 
         if (mapLayer.subtypes) {
@@ -508,7 +508,7 @@ class MapTileRenderer {
           // This feature is to be excluded. Do not render it. (edit: ONLY in edit mode)
           continue
         }
-        
+
         if (this.selectedDisplayMode == this.displayModes.VIEW &&
             (this.state.activeViewModePanel == this.viewModePanels.EDIT_LOCATIONS ||
               this.state.activeViewModePanel == this.viewModePanels.EDIT_SERVICE_LAYER) &&
@@ -549,13 +549,13 @@ class MapTileRenderer {
       geometry.forEach((rawShape) => {
         const shape = TileUtilities.pixelCoordinatesFromScaledTileCoordinates(rawShape)
         if (shape.length == 1) {
-  	      // This is a point
-  	      var x = shape[0].x + geometryOffset.x - imageWidthBy2
-  	      var y = shape[0].y + geometryOffset.y - (imageHeightBy2 * 2)
+          // This is a point
+          var x = shape[0].x + geometryOffset.x - imageWidthBy2
+          var y = shape[0].y + geometryOffset.y - (imageHeightBy2 * 2)
 
-  	      // Draw the location icons with its original color
-  	      ctx.globalCompositeOperation = 'source-over'
-  	      if (heatmapID === 'HEATMAP_OFF' || heatmapID === 'HEATMAP_DEBUG' || mapLayer.renderMode === 'PRIMITIVE_FEATURES') {
+          // Draw the location icons with its original color
+          ctx.globalCompositeOperation = 'source-over'
+          if (heatmapID === 'HEATMAP_OFF' || heatmapID === 'HEATMAP_DEBUG' || mapLayer.renderMode === 'PRIMITIVE_FEATURES') {
             var featureObj = {
               'ctx': ctx,
               'shape': shape,
@@ -577,14 +577,14 @@ class MapTileRenderer {
               'equipmentLayerTypeVisibility': this.state.equipmentLayerTypeVisibility
             }
             pointFeatureRendererList.push(featureObj)
-  	      } else {
-  	        // Display heatmap
-  	        var aggregationProperty = feature.properties.entity_count || feature.properties.weight
-  	        if (aggregationProperty) {
-  	          var adjustedWeight = Math.pow(+aggregationProperty, this.mapTileOptions.heatMap.powerExponent)
-  	          heatMapData.push([x, y, adjustedWeight])
-  	        }
-  	      }
+          } else {
+            // Display heatmap
+            var aggregationProperty = feature.properties.entity_count || feature.properties.weight
+            if (aggregationProperty) {
+              var adjustedWeight = Math.pow(+aggregationProperty, this.mapTileOptions.heatMap.powerExponent)
+              heatMapData.push([x, y, adjustedWeight])
+            }
+          }
         } else {
           // Check if this is a closed polygon
           var firstPoint = shape[0]
@@ -610,19 +610,17 @@ class MapTileRenderer {
                 'selectionModes': this.selectionModes }
               closedPolygonFeatureLayersList.push(featureObj)
               ctx.globalAlpha = 1.0
-            } else {
-
             }
           } else {
             // This is not a closed polygon. Render lines only
             ctx.globalAlpha = 1.0
-            
+
             var drawingStyles = {}
 
             if ((this.oldSelection.details.roadSegments.size > 0 && this.highlightPolyline(feature, this.oldSelection.details.roadSegments)) ||
               (this.oldSelection.details.fiberSegments.size > 0 && this.highlightPolyline(feature, this.oldSelection.details.fiberSegments))) {
               // Highlight the Selected Polyline
-              
+
               // ToDo: lineWidth should always be of the same type!
               var lineWidth = mapLayer.drawingOptions.lineWidth
               if (typeof mapLayer.drawingOptions.lineWidth === 'function') {
@@ -639,7 +637,7 @@ class MapTileRenderer {
                   strokeStyle: mapLayer.highlightStyle.strokeStyle
                 }
               }
-              
+
             } else if ((this.state.showFiberSize || this.rShowFiberSize) && feature.properties._data_type === 'fiber' && (this.state.viewSetting.selectedFiberOption.id !== 1 || this.rViewSetting.selectedFiberOption.id !== 1)) {
               var selectedFiberOption = this.rViewSetting.selectedFiberOption
               var viewOption = selectedFiberOption.pixelWidth
@@ -654,12 +652,12 @@ class MapTileRenderer {
             if (feature.properties.spatial_edge_type &&
               mapLayer && mapLayer.tileDefinitions && 
               mapLayer.tileDefinitions.length > 0 && mapLayer.tileDefinitions[0].fiberType) {
-              
+
               var edgeType = feature.properties.spatial_edge_type
               var fiberType = mapLayer.tileDefinitions[0].fiberType
               if (this.stateMapLayers.networkEquipment.cables[fiberType] &&
                 this.stateMapLayers.networkEquipment.cables[fiberType].conduitVisibility[edgeType]) {
-                
+
                 if (this.stateMapLayers.networkEquipment.conduits[edgeType]) {
                   drawingStyles.strokeStyle = this.stateMapLayers.networkEquipment.conduits[edgeType].drawingOptions.strokeStyle
                 } else if (this.stateMapLayers.networkEquipment.roads[edgeType]) {

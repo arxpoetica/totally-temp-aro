@@ -23,8 +23,7 @@ const defaultState = {
   isMakeNewFilter: false,
   isResourceEditor: true,
   priceBookStrategy: null,
-  arpuManagerConfiguration: null,
-  pristineArpuManagerConfiguration: null,
+  arpuModels: null,
   ArpuStrategy: '',
   ArpuRevenue: '',
   loadStrength: {},
@@ -123,16 +122,8 @@ function setArpuManager (state, arpuManager) {
   }
 }
 
-function setArpuManagerConfiguration (state, arpuManagerConfiguration) {
-  return { ...state,
-    arpuManagerConfiguration: arpuManagerConfiguration
-  }
-}
-
-function setPristineArpuManagerConfiguration (state, pristineArpuManagerConfiguration) {
-  return { ...state,
-    pristineArpuManagerConfiguration: pristineArpuManagerConfiguration
-  }
+function setArpuModels (state, arpuModels) {
+  return { ...state, arpuModels }
 }
 
 // Competition System
@@ -309,11 +300,8 @@ function resourceReducer (state = defaultState, action) {
     case Actions.RESOURCE_EDITOR_ARPU_MANAGER:
       return setArpuManager(state, action.payload)
 
-    case Actions.RESOURCE_EDITOR_SET_ARPU_MANAGER_CONFIGURATION:
-      return setArpuManagerConfiguration(state, action.payload)
-
-    case Actions.RESOURCE_EDITOR_SET_PRISTINE_ARPU_MANAGER_CONFIGURATION:
-      return setPristineArpuManagerConfiguration(state, action.payload)
+    case Actions.RESOURCE_EDITOR_SET_ARPU_MODELS:
+      return setArpuModels(state, action.payload)
 
     case Actions.RESOURCE_EDITOR_GET_REGIONS:
       return setRegions(state, action.payload)

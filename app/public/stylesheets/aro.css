@@ -11,10 +11,32 @@ body {
 
 /* -- */
 
+:root {
+  --font: Helvetica, Arial, sans-serif;
+  --primary: #4d99e5;
+  --gray-light: #e9ecef;
+  --gray-medium-light: #bcbcbc;
+}
+
 html, body {
   height: 100%;
   margin: 0;
   padding: 0;
+  overflow: hidden;
+}
+
+.svg * {
+  color: currentColor;
+  fill: currentColor;
+}
+.svg svg {
+  flex: 1;
+  vertical-align: middle;
+  fill: currentColor;
+  height: 100%;
+  width: 100%;
+}
+.svg svg:not(:root) {
   overflow: hidden;
 }
 
