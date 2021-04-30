@@ -1,16 +1,13 @@
 import { toast } from 'react-toastify'
 import socketManager from '../../react/common/socket-manager'
+import GlobalsettingsActions from '../../react/components/global-settings/globalsettings-action'
 
 const createSocketMiddleware = () => {
   return storeAPI => {
-    // Join room for this broadcast
-    socketManager.joinRoom('broadcast', 'broadcast')
     socketManager.subscribe('NOTIFICATION_SHOW', (command) => {
-      toast.error(command.payload.subject + ': ' + command.payload.body, {
-        position: toast.POSITION.BOTTOM_LEFT,
-        className: 'map-canvas',
-        autoClose: command.payload.isChecked
-      })
+      const { dispatch } = storeAPI
+      // Dispatch an action to notify the broadcast message
+      dispatch(GlobalsettingsActions.notifyBroadcast(command.payload))
     })
 
     // next is the following action to be run after this middleware

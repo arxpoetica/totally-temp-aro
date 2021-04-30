@@ -1,10 +1,42 @@
 import AroHttp from '../../common/aro-http'
 import Actions from '../../common/actions'
+import moment from 'moment'
 
 function broadcastMessage (message) {
-  return dispatch => {
+  return (dispatch, getState) => {
+    const state = getState()
+    const loggedInUserID = state.user.loggedInUser.id
+    message.loggedInUserID = loggedInUserID
     AroHttp.post('/socket/broadcast', message)
       .catch((err) => console.error(err))
+  }
+}
+
+function validateBroadcast (broadcast) {
+  return dispatch => {
+    const { startDate, endDate} = broadcast
+    if ((startDate !== undefined && endDate !== undefined)) {
+      const dataFormat = 'YYYY-MM-DD'
+      const currentDate = moment().format(dataFormat)
+      const formatStartDate = moment(startDate).format(dataFormat)
+      const formatEndDate = moment(endDate).format(dataFormat)
+      // Check startDate & endDate and if it is valid daterange broadcast the message.
+      const isTimeValid = moment(currentDate).isBetween(formatStartDate, formatEndDate, null, '[]')
+      if (isTimeValid) {
+        dispatch(broadcastMessage(broadcast))
+      } else {
+        console.log('Date range not valid to broadcast')
+      }
+    }
+  }
+}
+
+function notifyBroadcast (notifyBroadcast) {
+  return dispatch => {
+    dispatch({
+      type: Actions.GLOBAL_SETTINGS_NOTIFY_BROADCAST,
+      payload: notifyBroadcast
+    })
   }
 }
 
@@ -352,6 +384,15 @@ function customErrorHandle (title, text, type) {
   }
 }
 
+function setGlobalSettingsView (isGlobalSettingsView) {
+  return dispatch => {
+    dispatch({
+      type: Actions.GLOBAL_SETTINGS_SET_CURRENT_VIEW,
+      payload: isGlobalSettingsView
+    })
+  }
+}
+
 export default {
   broadcastMessage,
   loadReleaseNotes,
@@ -373,5 +414,8 @@ export default {
   setShowGlobalSettings,
   askUserToConfirmBeforeDelete,
   httpErrorhandle,
-  customErrorHandle
+  customErrorHandle,
+  validateBroadcast,
+  notifyBroadcast,
+  setGlobalSettingsView
 }

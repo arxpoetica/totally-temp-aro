@@ -2,6 +2,7 @@
 import { react2angular } from 'react2angular'
 import { ToastContainer } from 'react-toastify'
 
+import NotifyBroadcast from '../react/components/global-settings/notify-broadcast.jsx'
 import SummaryReports from '../react/components/sidebar/view/summary-reports.jsx'
 import CoverageBoundary from '../react/components/sidebar/view/coverage-boundary.jsx'
 import RoadSegmentDetail from '../react/components/sidebar/view/road-segment-detail.jsx'
@@ -204,6 +205,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('editorInterfacePrimitive', editorInterfacePrimitive)
   .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
 // ReactJS components
+  .component('rNotifyBroadcast', react2angular(NotifyBroadcast))
   .component('rSummaryReports', react2angular(SummaryReports))
   .component('rCoverageBoundary', react2angular(CoverageBoundary, ['mapGlobalObjectName']))  
   .component('rRoadSegmentDetail', react2angular(RoadSegmentDetail))

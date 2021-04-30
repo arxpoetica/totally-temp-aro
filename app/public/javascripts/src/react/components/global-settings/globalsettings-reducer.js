@@ -18,7 +18,9 @@ const defaultState = {
     type: '',
     text: ''
   },
-  showGlobalSettings: false
+  showGlobalSettings: false,
+  notifyBroadcast: {},
+  isGlobalSettingsView: false,
 }
 
 function setReleaseNotes (state, releaseNotes) {
@@ -190,6 +192,19 @@ function setShowGlobalSettings (state, showGlobalSettings) {
   }
 }
 
+function setNotifyBroadcast (state, notifyBroadcast) {
+  notifyBroadcast.isEnableBroadcastModal = true
+  return { ...state,
+    notifyBroadcast: notifyBroadcast
+  }
+}
+
+function setGlobalSettingsView (state, isGlobalSettingsView) {
+  return { ...state,
+    isGlobalSettingsView: isGlobalSettingsView
+  }
+}
+
 function globalSettingsReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.GLOBAL_SETTINGS_GET_RELEASE_NOTES:
@@ -245,6 +260,12 @@ function globalSettingsReducer (state = defaultState, action) {
 
     case Actions.GLOBAL_SETTINGS_SHOW_GLOBAL_SETTINGS:
       return setShowGlobalSettings(state, action.payload)      
+  
+    case Actions.GLOBAL_SETTINGS_NOTIFY_BROADCAST:
+      return setNotifyBroadcast(state, action.payload)
+
+    case Actions.GLOBAL_SETTINGS_SET_CURRENT_VIEW:
+      return setGlobalSettingsView(state, action.payload)
   
     default:
       return state
