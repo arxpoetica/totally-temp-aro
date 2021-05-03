@@ -75,6 +75,7 @@ workflows:
                 - dev
                 - uat
                 - 175119846-robert-new-arpu-manager
+                - 176042046-locations-import-fix
       - deploy:
           context: aro_qa_builds
           requires:
