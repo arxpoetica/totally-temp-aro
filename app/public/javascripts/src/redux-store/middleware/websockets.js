@@ -1,4 +1,3 @@
-import { toast } from 'react-toastify'
 import socketManager from '../../react/common/socket-manager'
 import GlobalsettingsActions from '../../react/components/global-settings/globalsettings-action'
 

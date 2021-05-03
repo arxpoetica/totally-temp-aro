@@ -3,7 +3,7 @@ import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap'
 
-export const NotifyBroadcast = (props) => {
+export const NotifyBroadcastModal = (props) => {
 
   const [state, setState] = useState({
     isBroadcastModalOpen: false,
@@ -50,4 +50,4 @@ const mapStateToProps = (state) => ({
   notifyBroadcast: state.globalSettings.notifyBroadcast,
 })
 
-export default wrapComponentWithProvider(reduxStore, NotifyBroadcast, mapStateToProps, null)
+export default wrapComponentWithProvider(reduxStore, NotifyBroadcastModal, mapStateToProps, null)
