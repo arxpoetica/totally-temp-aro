@@ -758,6 +758,33 @@ class State {
         .catch((err) => console.error(err))
     }
 
+    // Save the plan resource selections to the server
+    service.savePlanResourceSelectionToServer = () => {
+      service.pristineResourceItems = angular.copy(service.resourceItems)
+
+      var putBody = {
+        configurationItems: [],
+        resourceConfigItems: []
+      }
+
+      Object.keys(service.resourceItems).forEach((resourceItemKey) => {
+        var selectedManager = service.resourceItems[resourceItemKey].selectedManager
+        if (selectedManager) {
+          // We have a selected manager
+          putBody.resourceConfigItems.push({
+            aroResourceType: resourceItemKey,
+            resourceManagerId: selectedManager.id,
+            name: selectedManager.name,
+            description: selectedManager.description
+          })
+        }
+      })
+
+      // Save the configuration to the server
+      var currentPlan = service.plan
+      $http.put(`/service/v1/plan/${currentPlan.id}/configuration`, putBody)
+    }
+
     // Get the default project template id for a given user
     service.getDefaultProjectTemplate = (userId) => {
       return $http.get(`/service/auth/users/${service.loggedInUser.id}/configuration`)
@@ -1540,7 +1567,7 @@ class State {
       return $http.get('/configuration')
         .then(result => {
           var config = result.data
-          console.log(config)
+
           // filter out conduits that are not to be shown
           // this code may belong in cache.js instead
           var conduits = config.appConfiguration.networkEquipment.conduits || {}
