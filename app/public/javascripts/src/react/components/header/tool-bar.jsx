@@ -190,7 +190,7 @@ export class ToolBar extends Component {
     const { ARO_CLIENT } = configuration
     const isFrontier = ARO_CLIENT === 'frontier'
     const isZiply = ARO_CLIENT === 'ziply'
-    let leftElement = <img src="images/logos/aro/logo_navbar.png" className="no-collapse"
+    let leftElement = <img src={`images/logos/${ARO_CLIENT}/logo_navbar.png`} className="no-collapse"
       style={{alignSelf: 'center', paddingLeft: '10px', paddingRight: '10px'}}
     />
     if (isFrontier) {

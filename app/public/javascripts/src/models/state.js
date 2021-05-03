@@ -1540,7 +1540,7 @@ class State {
       return $http.get('/configuration')
         .then(result => {
           var config = result.data
-
+          console.log(config)
           // filter out conduits that are not to be shown
           // this code may belong in cache.js instead
           var conduits = config.appConfiguration.networkEquipment.conduits || {}
