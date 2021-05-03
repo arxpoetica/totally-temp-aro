@@ -93,7 +93,7 @@ module.exports = class UIConfiguration {
             enumStrings[clientDef.package][clientDef.class][clientDef.key]) {
             enumStrings[clientDef.package][clientDef.class][clientDef.key] = clientDef.description
           } else {
-            //throw new Error('A client string definition was encountered, but there is no corresponding base definition. Always define the base definition')
+            throw new Error('A client string definition was encountered, but there is no corresponding base definition. Always define the base definition')
           }
         })
         console.log('Enum Strings loaded from database')
