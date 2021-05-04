@@ -259,14 +259,25 @@ class State {
 
     // Map layers data - define once. Details on map layer objects are available in the TileComponentController class in tile-component.js
     service.mapLayers = new Rx.BehaviorSubject({})
-    
+    /*
     service.setUseHeatMap = (useHeatMap) => {
-      var newMapTileOptions = angular.copy(service.mapTileOptions.value)
       // ToDo: don't hardcode these, but this whole thing needs to be restructured
+      //   below is duplicate of object in rxState.js
+      var newMapTileOptions = {
+        showTileExtents: false,
+        heatMap: {
+          useAbsoluteMax: false,
+          maxValue: 100,
+          powerExponent: 0.5,
+          worldMaxValue: 500000
+        },
+        selectedHeatmapOption: viewSetting.heatmapOptions[0]
+      }
+      
       newMapTileOptions.selectedHeatmapOption = useHeatMap ? service.viewSetting.heatmapOptions[0] : service.viewSetting.heatmapOptions[2] 
       rxState.mapTileOptions.sendMessage(newMapTileOptions)
     }
-
+    */
     service.defaultPlanCoordinates = {
       zoom: 14,
       latitude: 47.6062, // Seattle, WA by default. For no particular reason.
@@ -1397,9 +1408,11 @@ class State {
 
                 // ToDo: should standardize initialState properties
                 service.setShowLocationLabels(reportOptions.showLocationLabels)
+                /*
                 if (reportOptions.showLocationLabels) {
                   service.setUseHeatMap(!reportOptions.showLocationLabels)
                 }
+                */
                 service.setShowEquipmentLabelsChanged(reportOptions.showEquipmentLabels)
 
                 service.setPlanRedux(plan)
