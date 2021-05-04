@@ -28,7 +28,9 @@ export const NotifyBroadcastModal = (props) => {
     <Modal isOpen={isBroadcastModalOpen} size="md" toggle={toggleBroadcastModal} backdrop={false}>
       <ModalHeader toggle={toggleBroadcastModal}>BROADCAST</ModalHeader>
       <ModalBody>
-        <b>{notifyBroadcast.subject}:</b>
+        <span className="font-weight-bold">
+          {notifyBroadcast.subject}:
+        </span>
         <div style={{ marginTop: '15px' }}>
           {notifyBroadcast.message}
         </div>

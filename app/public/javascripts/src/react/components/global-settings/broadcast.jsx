@@ -20,7 +20,7 @@ export class Broadcast extends Component {
       <div className="no-collapse" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         <div style={{ flex: '1 1 auto' }}>
           <div className="form-group">
-            <label><b>Subject</b></label>
+            <label className="font-weight-bold">Subject</label>
             <input
               name="subject"
               type="text"
@@ -30,7 +30,7 @@ export class Broadcast extends Component {
             />
           </div>
           <div className="form-group">
-            <label><b>Message</b></label>
+            <label className="font-weight-bold">Message</label>
             <textarea
               name="message"
               className="form-control"
@@ -40,7 +40,7 @@ export class Broadcast extends Component {
             />
           </div>
           <div className="form-group">
-            <label><b>When should the messages broadcast?</b></label>
+            <label className="font-weight-bold">When should the messages broadcast?</label>
             <div className="row">
               <div className="col-md-5">
                 <input
