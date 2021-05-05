@@ -69,6 +69,12 @@ class Sockets {
     console.log(`SOCKET EMIT broadcast, payload: ${this.formatPayloadForLogging(payload)}`)
   }
 
+  // Emit a message to loggedInUser connected via websockets.
+  emitToLoggedInUser (loggedInUserID, payload) {
+    this.sockets.broadcast.to(`${loggedInUserID}`).emit('message', payload)
+    console.log(`SOCKET EMIT broadcast:${loggedInUserID}, payload: ${this.formatPayloadForLogging(payload)}`)
+  }
+
   // Formats a payload for logging. Show only a subset of the content
   formatPayloadForLogging (payload) {
     return JSON.stringify(payload, (key, value) => {

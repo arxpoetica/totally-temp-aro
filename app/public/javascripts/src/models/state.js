@@ -29,6 +29,7 @@ import ToolBarActions from '../react/components/header/tool-bar-actions'
 import RoicReportsActions from '../react/components/sidebar/analysis/roic-reports/roic-reports-actions'
 import { hsvToRgb } from '../react/common/view-utils'
 import StateViewModeActions from '../react/components/state-view-mode/state-view-mode-actions'
+import GlobalsettingsActions from '../react/components/global-settings/globalsettings-action'
 
 const networkAnalysisConstraintsSelector = formValueSelector(ReactComponentConstants.NETWORK_ANALYSIS_CONSTRAINTS)
 
@@ -1316,6 +1317,8 @@ class State {
       service.setLoggedInUserRedux(user)
       service.loadSystemActorsRedux()
       SocketManager.joinRoom('user', user.id)
+      // Join room for this broadcast
+      SocketManager.joinRoom('broadcast', user.id)
 
       service.equipmentLayerTypeVisibility.existing = service.configuration.networkEquipment.visibility.defaultShowExistingEquipment
       service.equipmentLayerTypeVisibility.planned = service.configuration.networkEquipment.visibility.defaultShowPlannedEquipment
@@ -1594,6 +1597,10 @@ class State {
           service.getStyleValues()
 
           service.setClientIdInRedux(service.configuration.ARO_CLIENT)
+          // Validate Broadcast if it exists in the configuration
+          if(service.configuration.broadcast) {
+            service.validateBroadcast(service.configuration.broadcast)
+          }
           return service.loadConfigurationFromServer()
         })
         .catch(err => console.error(err))
@@ -1896,6 +1903,7 @@ class State {
       setTypeVisibility: (typeVisibility) => dispatch(MapLayerActions.setTypeVisibility(typeVisibility)),
       setLayerCategories: (layerCategories) => dispatch(StateViewModeActions.setLayerCategories(layerCategories)),
       rClearViewMode: (value) => dispatch(StateViewModeActions.clearViewMode(value)),
+      validateBroadcast: (message) => dispatch(GlobalsettingsActions.validateBroadcast(message)),
     }
   }
 }

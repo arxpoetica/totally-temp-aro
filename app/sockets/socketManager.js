@@ -127,8 +127,8 @@ class SocketManager {
   }
 
   broadcastMessage (msg) {
-    // Sending to all clients in namespace 'broadcast', including sender
-    this.sockets.emitToAll({
+    // Sending to loggedInUser in namespace 'broadcast'
+    this.sockets.emitToLoggedInUser(msg.loggedInUserID, {
       type: 'NOTIFICATION_SHOW',
       payload: msg
     })
