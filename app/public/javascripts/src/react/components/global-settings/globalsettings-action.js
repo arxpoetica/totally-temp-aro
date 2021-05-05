@@ -11,21 +11,25 @@ function broadcastMessage (message) {
   }
 }
 
+const toDateFromIsoDay = isoDayString => new Date(`${isoDayString}T00:00:00.000`)
+const toUTCDate = date => new Date(Date.UTC(
+  date.getUTCFullYear(),
+  date.getUTCMonth(),
+  date.getUTCDate(),
+))
+
 function validateBroadcast (broadcast) {
   return dispatch => {
-    const { startDate, endDate} = broadcast
+    const { startDate, endDate } = broadcast
     if ((startDate !== undefined && endDate !== undefined)) {
-      // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat
-      const dataFormat = { year: 'numeric', month: '2-digit', day: '2-digit'}
-      const currentDate = new Intl.DateTimeFormat(dataFormat).format(new Date())
-      const formatStartDate = new Intl.DateTimeFormat(dataFormat).format(new Date(startDate))
-      const formatEndDate = new Intl.DateTimeFormat(dataFormat).format(new Date(endDate))
-      // Check startDate & endDate and if it is valid daterange broadcast the message.
-      // https://www.geeksforgeeks.org/how-to-check-if-one-date-is-between-two-dates-in-javascript/
-      // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/parse
-      const isDateValid = Date.parse(currentDate) >= Date.parse(formatStartDate)
-        && Date.parse(currentDate) <= Date.parse(formatEndDate)
-      if (isDateValid) {
+      // see: https://stackoverflow.com/a/38050824/209803
+      // and: https://zachholman.com/talk/utc-is-enough-for-everyone-right
+      const now = new Date()
+      const nowTime = toUTCDate(now).getTime()
+      const compareStart = toDateFromIsoDay(startDate)
+      const compareEnd = toDateFromIsoDay(endDate)
+      const isValidDate = nowTime >= compareStart.getTime() && nowTime <= compareEnd.getTime()
+      if (isValidDate) {
         dispatch(broadcastMessage(broadcast))
       } else {
         console.log('Date range not valid to broadcast')
