@@ -34,7 +34,7 @@ export class Broadcast extends Component {
             <textarea
               name="message"
               className="form-control"
-              rows="12"
+              rows="9"
               value={message}
               onChange={(event) => this.handleOnChange(event)}
             />
