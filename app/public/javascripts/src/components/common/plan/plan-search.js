@@ -228,6 +228,16 @@ class PlanSearchController {
       })
   }
 
+  convertTimeStampToDate (timestamp) {
+    // https://usefulangle.com/post/258/javascript-timestamp-to-date-time
+    const date = new Date(timestamp)
+    const year = date.getFullYear()
+    const month = ("0" + (date.getMonth() + 1)).slice(-2)
+    const day = ("0" + date.getDate()).slice(-2)
+    const formatDate = day + "/" + month + "/" + year
+    return formatDate
+  }
+
   mapStateToThis (reduxState) {
     return {
       dataItems: reduxState.plan.dataItems,
