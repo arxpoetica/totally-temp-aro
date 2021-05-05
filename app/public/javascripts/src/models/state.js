@@ -49,7 +49,7 @@ const getBoundaryTypesList = createSelector([getAllBoundaryTypesList], (boundary
 
 /* global app localStorage map */
 class State {
-  constructor ($rootScope, $http, $document, $timeout, $sce, $ngRedux, $filter, tileDataService, Utils, tracker, Notification) {
+  constructor ($rootScope, $http, $document, $timeout, $sce, $ngRedux, $filter, tileDataService, Utils, tracker, Notification, rxState) {
     // Important: RxJS must have been included using browserify before this point
     var Rx = require('rxjs')
 
@@ -258,29 +258,27 @@ class State {
 
     service.activeboundaryLayerMode = service.boundaryLayerMode.SEARCH
 
-    // The panels in the view mode
-
     // Map layers data - define once. Details on map layer objects are available in the TileComponentController class in tile-component.js
     service.mapLayers = new Rx.BehaviorSubject({})
-    var heatmapOptions = {
-      showTileExtents: false,
-      heatMap: {
-        useAbsoluteMax: false,
-        maxValue: 100,
-        powerExponent: 0.5,
-        worldMaxValue: 500000
-      },
-      selectedHeatmapOption: service.viewSetting.heatmapOptions[0] // 0, 2
-    }
-    service.mapTileOptions = new Rx.BehaviorSubject(heatmapOptions)
-
+    /*
     service.setUseHeatMap = (useHeatMap) => {
-      var newMapTileOptions = angular.copy(service.mapTileOptions.value)
       // ToDo: don't hardcode these, but this whole thing needs to be restructured
+      //   below is duplicate of object in rxState.js
+      var newMapTileOptions = {
+        showTileExtents: false,
+        heatMap: {
+          useAbsoluteMax: false,
+          maxValue: 100,
+          powerExponent: 0.5,
+          worldMaxValue: 500000
+        },
+        selectedHeatmapOption: viewSetting.heatmapOptions[0]
+      }
+      
       newMapTileOptions.selectedHeatmapOption = useHeatMap ? service.viewSetting.heatmapOptions[0] : service.viewSetting.heatmapOptions[2] 
-      service.mapTileOptions.next(newMapTileOptions)
+      rxState.mapTileOptions.sendMessage(newMapTileOptions)
     }
-
+    */
     service.defaultPlanCoordinates = {
       zoom: 14,
       latitude: 47.6062, // Seattle, WA by default. For no particular reason.
@@ -1413,9 +1411,11 @@ class State {
 
                 // ToDo: should standardize initialState properties
                 service.setShowLocationLabels(reportOptions.showLocationLabels)
+                /*
                 if (reportOptions.showLocationLabels) {
                   service.setUseHeatMap(!reportOptions.showLocationLabels)
                 }
+                */
                 service.setShowEquipmentLabelsChanged(reportOptions.showEquipmentLabels)
 
                 service.setPlanRedux(plan)
@@ -1908,6 +1908,6 @@ class State {
   }
 }
 
-State.$inject = ['$rootScope', '$http', '$document', '$timeout', '$sce', '$ngRedux', '$filter', 'tileDataService', 'Utils', 'tracker', 'Notification']
+State.$inject = ['$rootScope', '$http', '$document', '$timeout', '$sce', '$ngRedux', '$filter', 'tileDataService', 'Utils', 'tracker', 'Notification', 'rxState']
 
 export default State
