@@ -1,4 +1,5 @@
 import ToolBarActions from '../../../react/components/header/tool-bar-actions'
+import { toUTCDate } from '../../../react/common/view-utils.js'
 
 class PlanSearchController {
   constructor ($http, $timeout, $ngRedux, state) {
@@ -229,13 +230,8 @@ class PlanSearchController {
   }
 
   convertTimeStampToDate (timestamp) {
-    // https://usefulangle.com/post/258/javascript-timestamp-to-date-time
-    const date = new Date(timestamp)
-    const year = date.getFullYear()
-    const month = ("0" + (date.getMonth() + 1)).slice(-2)
-    const day = ("0" + date.getDate()).slice(-2)
-    const formatDate = day + "/" + month + "/" + year
-    return formatDate
+    const utcDate = toUTCDate(new Date(timestamp))
+    return new Intl.DateTimeFormat('en-US').format(utcDate)
   }
 
   mapStateToThis (reduxState) {

@@ -1,5 +1,6 @@
 import AroHttp from '../../common/aro-http'
 import Actions from '../../common/actions'
+import { toDateFromIsoDay, toUTCDate } from '../../common/view-utils.js'
 
 function broadcastMessage (message) {
   return (dispatch, getState) => {
@@ -11,19 +12,10 @@ function broadcastMessage (message) {
   }
 }
 
-const toDateFromIsoDay = isoDayString => new Date(`${isoDayString}T00:00:00.000`)
-const toUTCDate = date => new Date(Date.UTC(
-  date.getUTCFullYear(),
-  date.getUTCMonth(),
-  date.getUTCDate(),
-))
-
 function validateBroadcast (broadcast) {
   return dispatch => {
     const { startDate, endDate } = broadcast
     if ((startDate !== undefined && endDate !== undefined)) {
-      // see: https://stackoverflow.com/a/38050824/209803
-      // and: https://zachholman.com/talk/utc-is-enough-for-everyone-right
       const now = new Date()
       const nowTime = toUTCDate(now).getTime()
       const compareStart = toDateFromIsoDay(startDate)
