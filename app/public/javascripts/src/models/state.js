@@ -1565,6 +1565,10 @@ class State {
           service.setEnumStrings(service.enumStrings) // Require in roic-reports-small.jsx
           if (!service.enumStrings) {
             throw new Error('No enumeration strings object found. Please check your server logs for errors in the UI schema.')
+            // note: if this is happening 
+            //   check if the error from /aro-platform/app/helpers/ui_configuration.js is being thrown 
+            //   'A client string definition was encountered, but there is no corresponding base definition. Always define the base definition'
+            //   then check the ui.enum_string table
           }
           service.configuration.loadPerspective = (perspective) => {
             // If a perspective is not found, go to the default
