@@ -51,9 +51,6 @@ class LocationsController {
     state.mapReadyPromise.then(() => {
       this.updateMapLayers()
     })
-    // Update map layers when the heatmap options change
-    state.mapTileOptions
-      .subscribe((newValue) => this.updateMapLayers())
       
     // Update map layers when the heatmap options change using react rxjs
     rxState.mapTileOptions.getMessage().subscribe((mapTileOptions) => {
@@ -145,7 +142,7 @@ class LocationsController {
       // For other Clients except frontier
       if(this.state.configuration.ARO_CLIENT !== 'frontier') {
         // rSelectedHeatMapOption is a redux state which is set from too-bar-reducer.js
-        if (this.state.mapTileOptions.getValue().selectedHeatmapOption.id === 'HEATMAP_OFF' || this.rSelectedHeatMapOption === 'HEATMAP_OFF') {
+        if (this.rSelectedHeatMapOption === 'HEATMAP_OFF') {
           // The user has explicitly asked to display points, not aggregates
           transform = 'select'
         } else {

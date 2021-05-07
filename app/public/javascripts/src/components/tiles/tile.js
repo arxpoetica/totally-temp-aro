@@ -52,6 +52,7 @@ class TileComponentController {
     this.tileDataService = tileDataService
     this.contextMenuService = contextMenuService
     this.utils = Utils
+    this.rxState = rxState
 
     // Subscribe to changes in the mapLayers subject
     state.mapLayers
@@ -77,14 +78,8 @@ class TileComponentController {
     this.destroyMapOverlaySubscription = state.requestDestroyMapOverlay.skip(1).subscribe(() => this.destroyMapOverlay())
 
     // Subscribe to changes in the map tile options
-    state.mapTileOptions.subscribe((mapTileOptions) => {
-      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
-        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setMapTileOptions(mapTileOptions)
-      }
-    })
-
-    // Subscribe to changes in the map tile options
     rxState.mapTileOptions.getMessage().subscribe((mapTileOptions) => {
+      this.mapTileOptions = JSON.parse(JSON.stringify(mapTileOptions))
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
         this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setMapTileOptions(mapTileOptions)
       }
@@ -287,7 +282,7 @@ class TileComponentController {
 
     this.mapRef.overlayMapTypes.push(new MapTileRenderer(new google.maps.Size(Constants.TILE_SIZE, Constants.TILE_SIZE),
       this.tileDataService,
-      this.state.mapTileOptions.getValue(),
+      this.mapTileOptions,
       this.state.layerCategories.getValue(),
       this.state.selectedDisplayMode.getValue(),
       SelectionModes,
