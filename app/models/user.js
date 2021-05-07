@@ -278,7 +278,7 @@ module.exports = class User {
   }
 
   static findByEmail (email) {
-    return database.findOne('SELECT id, first_name, last_name, email FROM auth.users WHERE email=$1', [email.toLowerCase()])
+    return database.findOne('SELECT id, first_name, last_name, email FROM auth.users WHERE lower(email)=$1', [email.toLowerCase()])
   }
 
   static find () {
@@ -440,7 +440,7 @@ module.exports = class User {
 
     return Promise.resolve()
       .then(() => (
-        database.findOne('SELECT id, email FROM auth.users WHERE email=$1', [email])
+        database.findOne('SELECT id, email FROM auth.users WHERE lower(email)=$1', [email])
       ))
       .then((user) => {
         if (!user) return Promise.reject(errors.notFound('No user found with email `%s`', email))
