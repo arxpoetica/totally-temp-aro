@@ -1565,6 +1565,10 @@ class State {
           service.setEnumStrings(service.enumStrings) // Require in roic-reports-small.jsx
           if (!service.enumStrings) {
             throw new Error('No enumeration strings object found. Please check your server logs for errors in the UI schema.')
+            // note: if this is happening 
+            //   check if the error from /aro-platform/app/helpers/ui_configuration.js is being thrown 
+            //   'A client string definition was encountered, but there is no corresponding base definition. Always define the base definition'
+            //   then check the ui.enum_string table
           }
           service.configuration.loadPerspective = (perspective) => {
             // If a perspective is not found, go to the default
@@ -1588,7 +1592,7 @@ class State {
             service.getReleaseVersions()
           }
           if (service.configuration.ARO_CLIENT === 'frontier' || service.configuration.ARO_CLIENT === 'sse') {
-            heatmapOptions.selectedHeatmapOption = service.viewSetting.heatmapOptions.filter((option) => option.id === 'HEATMAP_OFF')[0]
+            // heatmapOptions.selectedHeatmapOption = service.viewSetting.heatmapOptions.filter((option) => option.id === 'HEATMAP_OFF')[0]
             // To set selectedHeatmapOption to redux tool-bar for frontier Client
             service.setSelectedHeatMapOption(service.viewSetting.heatmapOptions.filter((option) => option.id === 'HEATMAP_OFF')[0].id)
           }
