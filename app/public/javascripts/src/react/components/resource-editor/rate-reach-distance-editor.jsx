@@ -139,8 +139,8 @@ export class RateReachDistanceEditor extends Component {
                         <td key={techIndex} style={{ minWidth: '100px' }}>
 
                           <div className="input-group mb-3">
-                            <input className="form-control border-right-0" onChange={(event) =>
-                              this.handleRateReachGroupMapChange(event, selectedTechnologyType, index, techIndex)}
+                            <input className="form-control border-right-0" style={{ minWidth: '6em' }}
+                              onChange={(event) => this.handleRateReachGroupMapChange(event, selectedTechnologyType, index, techIndex)}
                               value={metersToLengthUnits} />
                             <div className="input-group-prepend">
                               <span className="input-group-text text-muted border-left-0 bg-white">ft</span>
