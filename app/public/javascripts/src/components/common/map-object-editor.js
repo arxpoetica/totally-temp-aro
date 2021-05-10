@@ -1063,9 +1063,9 @@ class MapObjectEditorController {
     // can be null if we are de-selecting everything
     if (mapObject) {
       this.highlightMapObject(mapObject)
-      this.selectObjectRedux(Object.keys(this.createdMapObjects))
+      this.setPlanEditorFeatures(Object.keys(this.createdMapObjects))
     } else {
-      this.selectObjectRedux([])
+      this.setPlanEditorFeatures([])
     }
 
     if (!isMult) this.selectedMapObject = mapObject
@@ -1341,7 +1341,7 @@ class MapObjectEditorController {
 
   mapDispatchToTarget (dispatch) {
     return {
-      selectObjectRedux: objectIds => dispatch(SelectionActions.setPlanEditorFeatures(objectIds))
+      setPlanEditorFeatures: objectIds => dispatch(SelectionActions.setPlanEditorFeatures(objectIds))
     }
   }
 }
