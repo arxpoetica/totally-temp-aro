@@ -1059,10 +1059,11 @@ class MapObjectEditorController {
       this.dehighlightMapObject(this.selectedMapObject)
     }
 
-    // Then select the map object
-    if (mapObject) { // Can be null if we are de-selecting everything
+    // then select the map object
+    // can be null if we are de-selecting everything
+    if (mapObject) {
       this.highlightMapObject(mapObject)
-      this.selectObjectRedux([mapObject.objectId])
+      this.selectObjectRedux(Object.keys(this.createdMapObjects))
     } else {
       this.selectObjectRedux([])
     }
