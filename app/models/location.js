@@ -436,7 +436,6 @@ module.exports = class Location {
 
         locationInfo.locSourceIds = locationSources
         return Object.assign(info, locationInfo)
-      })
   }
 
   static createLocation (values) {
