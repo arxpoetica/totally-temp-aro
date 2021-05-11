@@ -207,11 +207,9 @@ module.exports = class Location {
   }
 
   // Get summary information for a given location
-  static showInformation (plan_id, location_id) {
-    var info,locationInfo,locationSources
-    return Promise.resolve()
-      .then(() => {
-        var sql = `
+  static async showInformation (plan_id, location_id) {
+
+        const info_sql = `
           select
             location_id,
             sum(entry_fee)::integer as entry_fee,
@@ -283,37 +281,16 @@ module.exports = class Location {
 
           ) t group by location_id;
         `
-        return database.findOne(sql, [location_id], {})
-      })
-      .then((_info) => {
-        info = _info
+        const info = await database.findOne(info_sql, [location_id], {})
         info.customer_profile = {}
         info.customer_profile_totals = {}
-        var sql
 
-        var add = (type, values) => {
+        const add = (type, values) => {
           info.customer_profile[type] = values
           info.customer_profile_totals[type] = values.reduce((total, item) => total + item.total, 0)
         }
 
-        var condition1 = ''
-        var condition2 = ''	
-        if (config.ui.locations_modal && config.ui.locations_modal.businesses && config.ui.locations_modal.businesses.floor) {
-        	condition1 = `
-        		bs.size_name || ' (' || bs.min_value || ' - ' || bs.max_value || ' floors)'
-        	`
-        	condition2 = `
-        		bs.size_name || ' (' || bs.min_value || '+ floors)'
-        	`
-        } else {
-        condition1 = `
-    		bs.size_name || ' (' || bs.min_value || ' - ' || bs.max_value || ' employees)'
-    	`
-    	condition2 = `
-    		bs.size_name || ' (' || bs.min_value || '+ employees)'
-    	`
-        }
-        sql = `
+        const businesses_values = await database.query(`
           SELECT
             CASE WHEN bs.max_value < 9999999 THEN
             (initcap(bs.name) || ' (' || bs.min_value || ' - ' || bs.max_value || ' employees)')
@@ -327,11 +304,10 @@ module.exports = class Location {
             AND b.location_id=$1
           GROUP BY bs.name,bs.max_value,bs.min_value
           ORDER BY bs.min_value ASC
-        `
-        var businesses = database.query(sql, [location_id])
-          .then((values) => add('businesses', values))
+        `, [location_id])
+        add('businesses', businesses_values)
 
-        sql = `
+        const households_values = await database.query(`
           SELECT
             ct.name, COUNT(*)::double precision AS total
           FROM households h
@@ -341,11 +317,10 @@ module.exports = class Location {
             ON ct.id = hct.customer_type_id
           WHERE h.location_id=$1
           GROUP BY ct.id
-        `
-        var households = database.query(sql, [location_id])
-          .then((values) => add('households', values))
+        `, [location_id])
+        add('households', households_values)
 
-        sql = `
+        const sql = `
           SELECT
             ct.name, COUNT(*)::integer AS total
           FROM towers t
@@ -356,7 +331,7 @@ module.exports = class Location {
           WHERE t.location_id=$1
           GROUP BY ct.id
         `
-        sql = `
+        const towers_values = await database.query(`
           SELECT 'Macro - Existing' as name, 0 as total
           UNION ALL
           SELECT 'Macro - Planned' as name, 0 as total
@@ -368,13 +343,9 @@ module.exports = class Location {
           SELECT 'Undefined' as name, (
             SELECT COUNT(*)::integer FROM towers t WHERE t.location_id=$1
           ) as total
-        `
-        var towers = database.query(sql, [location_id])
-          .then((values) => add('towers', values))
+        `, [location_id])
+        add('towers', towers_values)
 
-        return Promise.all([businesses, households, towers])
-      })
-      .then(() => {
         /*
         var sql = `
           SELECT address,zipcode,city, ST_AsGeojson(geog)::json AS geog,cb.tabblock_id, cb.name,
@@ -390,12 +361,6 @@ module.exports = class Location {
           JOIN aro.census_blocks cb ON ST_Contains(cb.geom,locations.geom)
           WHERE locations.id=$1
         `*/
-        var sql = `
-          SELECT address,zipcode,city, ST_AsGeojson(geog)::json AS geog,cb.tabblock_id, cb.name
-          FROM locations 
-          JOIN aro.census_blocks cb ON ST_Contains(cb.geom,locations.geom)
-          WHERE locations.id=$1
-        `
         // new ?
         /*
         var sql = `
@@ -404,59 +369,43 @@ module.exports = class Location {
           on gl.data_source_id =e.data_source_id
           where gl.meta_data_id ={library_id}
         `*/
-        return database.findOne(sql, [location_id])
-      })
-      .then((_location) => {
-        locationInfo = _location
-        locationSources = {} 
-        var hhSources = `
+        const locationInfo = await database.findOne(`
+          SELECT address,zipcode,city, ST_AsGeojson(geog)::json AS geog,cb.tabblock_id, cb.name
+          FROM locations 
+          JOIN aro.census_blocks cb ON ST_Contains(cb.geom, locations.geom)
+          WHERE locations.id=$1
+        `, [location_id])
+
+        const locationSources = {}
+
+        locationSources.hhSourceIds = await database.findOne(`
             SELECT array_agg(object_id) as object_ids FROM households
             WHERE location_id=$1
-        `
-        var hhSourceIds = database.findOne(hhSources, [location_id])
-          .then((values) => {
-            locationSources.hhSourceIds = values
-          })
+        `, [location_id])
 
-        var bizSources = `
+        locationSources.bizSourceIds = await database.findOne(`
           SELECT array_remove(array_agg(object_id), null) as object_ids FROM businesses
           WHERE location_id=$1
-        `
-        var bizSourceIds = database.findOne(bizSources, [location_id])
-          .then((values) => {
-            locationSources.bizSourceIds = values
-          })
+        `, [location_id])
 
-        var towerSources = `
+        locationSources.towerSourceIds = await database.findOne(`
           SELECT array_agg(object_id) as object_ids FROM towers
           WHERE location_id=$1
-        `
-        var towerSourceIds = database.findOne(towerSources, [location_id])
-          .then((values) => {
-            locationSources.towerSourceIds = values
-          })
+        `, [location_id])
 
-        return Promise.all([hhSourceIds, bizSourceIds, towerSourceIds])
-      })
-      .then(()=> {
-
-        var attributeQuery = `
+        const result = await database.findOne(`
           SELECT name,attributes FROM location_entity
           WHERE id=$1
-        `
-        return database.findOne(attributeQuery, [location_id])
-      })
-      .then((result)=>{
-        locationInfo.name = result.name ? result.name : ''      
+        `, [location_id])
+        locationInfo.name = result.name ? result.name : ''
         if (!result || !result.attributes) {
           locationInfo.attributes = []
-          return Promise.resolve() // There are no attributes for households, celltowers
+          await Promise.resolve() // There are no attributes for households, celltowers
         } else {
           locationInfo.attributes = []
           let order_property_string = 'business_attribute_order_' + process.env.ARO_CLIENT.toString().toLowerCase()
           let order_property_query = `select spf.name, sp.string_value from client.system_property sp join client.system_rule sr on sp.system_rule_id = sr.id join client.system_property_field spf on sp.property_field_id = spf.id where spf.name = \'${order_property_string}\'`
-          return database.findOne(order_property_query)
-            .then((order)=>{
+          const order = await database.findOne(order_property_query)
               hstore.parse(result.attributes, function (result) {
                 if (order) {
                   let order_array = JSON.parse(order.string_value)
@@ -483,10 +432,8 @@ module.exports = class Location {
                   }
                 }
               })
-            })
         }
-      })
-      .then(() => {
+
         locationInfo.locSourceIds = locationSources
         return Object.assign(info, locationInfo)
       })
