@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
+import { RoadSegmentTagging } from './road-segment-tagging.jsx'
 import SelectionActions from '../../selection/selection-actions'
 import ToolBarActions from '../../header/tool-bar-actions'
 import StateViewModeActions from '../../state-view-mode/state-view-mode-actions'
@@ -173,6 +174,9 @@ export const RoadSegmentDetail = (props) => {
       </style>
       {selectedEdgeInfo &&
         <div className="plan-settings-container">
+
+          <RoadSegmentTagging/>
+
           {correctZoomLevel
             ? <table className="table table-sm">
                 <thead>
