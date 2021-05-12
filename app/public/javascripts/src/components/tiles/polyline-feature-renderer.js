@@ -39,6 +39,38 @@ class PolylineFeatureRenderer {
     }
     ctx.lineWidth = lineWidth || 1
 
+
+
+
+
+    // --- test ---
+    // - dashed - 
+    
+    //ctx.setLineDash([6, 2, 2, 2])
+    //ctx.setLineDash([])
+    //ctx.lineWidth = 4
+    // - multiple - 
+    /*
+    var pattern = (function () {
+      const patternCanvas = document.createElement('canvas');
+      const patternContext = patternCanvas.getContext('2d');
+      patternCanvas.width = 4;
+      patternCanvas.height = 4;
+      patternContext.fillStyle = '#003399';
+      patternContext.fillRect(0, 0, 2, 2);
+      patternContext.fillRect(2, 2, 4, 4)
+      return ctx.createPattern(patternCanvas, 'repeat')
+    })();
+
+    ctx.strokeStyle = pattern
+    //*/
+
+
+
+
+
+
+
     var xPrev = shape[0].x + geometryOffset.x
     var yPrev = shape[0].y + geometryOffset.y
     ctx.beginPath()
@@ -66,6 +98,22 @@ class PolylineFeatureRenderer {
       ctx.moveTo(xPrev, yPrev)
     }
     ctx.stroke()
+
+
+
+
+    
+    //ctx.setLineDash([6, 2, 2, 2])
+    //ctx.lineDashOffset = 4
+    //ctx.restore()
+    //ctx.lineWidth = 2
+    //ctx.setLineDash([])
+    //ctx.strokeStyle = '#ffffff'
+    //ctx.stroke()
+
+
+
+
 
     // Draw the polyline direction if the map options specify it
     if (mapLayer.showPolylineDirection) {
