@@ -140,27 +140,17 @@ export const RoadSegmentDetail = (props) => {
     .catch((err) => console.error(err))
   }
 
-  const renderAttributesComponent = (attributes) => {
-    let attributeComponents = []
-    Object.keys(attributes).forEach(key => {
-      attributeComponents.push(
-        <tr key={key}>
-          <td>
-            {key}
-          </td>
-          <td>
-            {attributes[key]}
-          </td>
-        </tr>
-      )
-    })
-    return (
-      <table className="table table-sm" style={{'backgroundColor': 'inherit'}}>
-        <tbody>
-          {attributeComponents}
-        </tbody>
-      </table>
-    )
+  const renderAttributesComponent = attributes => {
+    return <table className="table table-sm" style={{ 'backgroundColor': 'inherit' }}>
+      <tbody>
+        {Object.keys(attributes).map(key =>
+          <tr key={key}>
+            <td>{key}</td>
+            <td>{attributes[key]}</td>
+          </tr>
+        )}
+      </tbody>
+    </table>
   }
 
   return (
@@ -175,9 +165,6 @@ export const RoadSegmentDetail = (props) => {
           }
           .roadSegDetailAttributeRow {
             padding-left: 20px !important;
-          }
-          .roadSegEvenRow {
-
           }
           .roadSegOddRow {
             background-color: rgba(0,0,0,.05);
