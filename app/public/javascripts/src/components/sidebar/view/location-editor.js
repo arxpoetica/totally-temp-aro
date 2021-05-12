@@ -137,6 +137,7 @@ class LocationEditorController {
           }
           this.objectIdToProperties[feature.objectId] = locationProperties
         })
+        this.setPlanEditorFeatures(Object.keys(this.objectIdToProperties))
       })
       .catch((err) => {
         this.setSelectedDisplayMode(this.state.displayModes.VIEW)
@@ -525,6 +526,7 @@ class LocationEditorController {
           dispatch(MapLayerActions.setLayerVisibility(layer, true))
         })
       },
+      setPlanEditorFeatures: objectIds => dispatch(SelectionActions.setPlanEditorFeatures(objectIds)),
       clearSelectedLocations: () => dispatch(SelectionActions.setLocations([])),
       setSelectedDisplayMode: displayMode => dispatch(ToolBarActions.selectedDisplayMode(displayMode))
     }
