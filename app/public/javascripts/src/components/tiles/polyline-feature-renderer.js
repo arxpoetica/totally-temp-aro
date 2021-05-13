@@ -109,6 +109,7 @@ class PolylineFeatureRenderer {
     //ctx.lineWidth = 2
     //ctx.setLineDash([])
     //ctx.strokeStyle = '#ffffff'
+    //ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)'
     //ctx.stroke()
 
 
