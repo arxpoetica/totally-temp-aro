@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
-import reduxStore from '../../../../redux-store'
-import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
+//import reduxStore from '../../../../redux-store'
+//import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
+import { connect } from 'react-redux'
 import cx from 'clsx'
 import './road-segment-tagging.css'
 
@@ -63,4 +64,5 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
 })
 
-export default wrapComponentWithProvider(reduxStore, RoadSegmentTagging, mapStateToProps, mapDispatchToProps)
+//export default wrapComponentWithProvider(reduxStore, RoadSegmentTagging, mapStateToProps, mapDispatchToProps)
+export default connect(mapStateToProps, mapDispatchToProps)(RoadSegmentTagging)
