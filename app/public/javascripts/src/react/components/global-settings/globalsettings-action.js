@@ -1,6 +1,6 @@
 import AroHttp from '../../common/aro-http'
 import Actions from '../../common/actions'
-import { toDateFromIsoDay, toUTCDate } from '../../common/view-utils.js'
+import { formatDate } from '../../common/view-utils.js'
 
 function broadcastMessage (message) {
   return (dispatch, getState) => {
@@ -17,10 +17,12 @@ function validateBroadcast (broadcast) {
     const { startDate, endDate } = broadcast
     if ((startDate !== undefined && endDate !== undefined)) {
       const now = new Date()
-      const nowTime = toUTCDate(now).getTime()
-      const compareStart = toDateFromIsoDay(startDate)
-      const compareEnd = toDateFromIsoDay(endDate)
-      const isValidDate = nowTime >= compareStart.getTime() && nowTime <= compareEnd.getTime()
+      // UTC removed, the reason is when we add a time +5:30 hrs added. 
+      // This cause the issue when start date and end date is same, broadcast message is not showing
+      // Right now timestamp is not required as per design, will add later if timestamp is mandatory.
+      const currentDate = formatDate(now)
+      const isValidDate = Date.parse(currentDate) >= Date.parse(startDate)
+        && Date.parse(currentDate) <= Date.parse(endDate)
       if (isValidDate) {
         dispatch(broadcastMessage(broadcast))
       } else {
