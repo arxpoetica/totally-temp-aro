@@ -189,16 +189,11 @@ export class ToolBar extends Component {
     // TODO: ARO_CLIENT should never be checked in views, these images should be in settings
     const { ARO_CLIENT } = configuration
     const isFrontier = ARO_CLIENT === 'frontier'
-    const isZiply = ARO_CLIENT === 'ziply'
-    let leftElement = <img src="images/logos/aro/logo_navbar.png" className="no-collapse"
+    let leftElement = <img src={`images/logos/${ARO_CLIENT}/logo_navbar.png`} className="no-collapse"
       style={{alignSelf: 'center', paddingLeft: '10px', paddingRight: '10px'}}
     />
     if (isFrontier) {
       leftElement = <span style={{alignSelf: 'center', paddingLeft: '10px', paddingRight: '10px'}}><b>NPM BSA</b></span>
-    } else if (isZiply) {
-      leftElement = <img src="images/logos/ziply/ziply_navbar_logo.png" className="no-collapse"
-      style={{alignSelf: 'center', paddingLeft: '3px', paddingRight: '10px'}}
-    />
     }
 
     return (

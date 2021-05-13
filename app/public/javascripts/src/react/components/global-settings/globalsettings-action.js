@@ -1,10 +1,41 @@
 import AroHttp from '../../common/aro-http'
 import Actions from '../../common/actions'
+import { toDateFromIsoDay, toUTCDate } from '../../common/view-utils.js'
 
 function broadcastMessage (message) {
-  return dispatch => {
+  return (dispatch, getState) => {
+    const state = getState()
+    const loggedInUserID = state.user.loggedInUser.id
+    message.loggedInUserID = loggedInUserID
     AroHttp.post('/socket/broadcast', message)
       .catch((err) => console.error(err))
+  }
+}
+
+function validateBroadcast (broadcast) {
+  return dispatch => {
+    const { startDate, endDate } = broadcast
+    if ((startDate !== undefined && endDate !== undefined)) {
+      const now = new Date()
+      const nowTime = toUTCDate(now).getTime()
+      const compareStart = toDateFromIsoDay(startDate)
+      const compareEnd = toDateFromIsoDay(endDate)
+      const isValidDate = nowTime >= compareStart.getTime() && nowTime <= compareEnd.getTime()
+      if (isValidDate) {
+        dispatch(broadcastMessage(broadcast))
+      } else {
+        console.log('Date range not valid to broadcast')
+      }
+    }
+  }
+}
+
+function notifyBroadcast (notifyBroadcast) {
+  return dispatch => {
+    dispatch({
+      type: Actions.GLOBAL_SETTINGS_NOTIFY_BROADCAST,
+      payload: notifyBroadcast
+    })
   }
 }
 
@@ -352,6 +383,15 @@ function customErrorHandle (title, text, type) {
   }
 }
 
+function setGlobalSettingsView (isGlobalSettingsView) {
+  return dispatch => {
+    dispatch({
+      type: Actions.GLOBAL_SETTINGS_SET_CURRENT_VIEW,
+      payload: isGlobalSettingsView
+    })
+  }
+}
+
 export default {
   broadcastMessage,
   loadReleaseNotes,
@@ -373,5 +413,8 @@ export default {
   setShowGlobalSettings,
   askUserToConfirmBeforeDelete,
   httpErrorhandle,
-  customErrorHandle
+  customErrorHandle,
+  validateBroadcast,
+  notifyBroadcast,
+  setGlobalSettingsView
 }
