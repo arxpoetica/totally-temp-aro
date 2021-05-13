@@ -1,0 +1,42 @@
+.segments-tagging .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 5px 5px;
+  border-bottom: 1px solid #888888;
+  font-weight: bold;
+}
+.segments-tagging h3 {
+  margin: 0;
+  font-size: inherit;
+  font-weight: bold;
+}
+.segments-tagging .tag-rows {
+  padding: 8px 0;
+  display: none;
+}
+.segments-tagging .tag-rows.show {
+  display: block;
+}
+.segments-tagging label {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 5px;
+}
+.segments-tagging h4 {
+  flex-basis: calc(50% - 15px);
+  margin: 0;
+  font-size: inherit;
+}
+.segments-tagging .display {
+  flex-basis: calc(50% - 15px);
+  background-color: royalblue;
+  height: 4px;
+}
+.segments-tagging .checkbox {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-basis: 30px;
+}
