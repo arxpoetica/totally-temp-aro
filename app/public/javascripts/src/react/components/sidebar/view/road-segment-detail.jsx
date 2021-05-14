@@ -175,47 +175,48 @@ export const RoadSegmentDetail = (props) => {
       {selectedEdgeInfo &&
         <div className="plan-settings-container">
 
-          <RoadSegmentTagging/>
-
           {correctZoomLevel
-            ? <table className="table table-sm">
-                <thead>
-                  <tr>
-                    <th>Conduit Type</th>
-                    <th>ID</th>
-                    <th>Length</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {
-                    selectedEdgeInfo.map((edgeInfo, index) => {
-                      let rowClass = 'roadSegOddRow'
-                      if (index % 2 === 0) rowClass = 'roadSegEvenRow'
-                      let rows = []
-                      rows.push(
-                        <tr key={edgeInfo.id} className={`roadSegDetailRow ${rowClass}`}
-                          onClick={() => onEdgeExpand(edgeInfo)} >
-                          <td>{edgeInfo.feature_type_name}</td>
-                          <td>{edgeInfo.gid}</td>
-                          <td>{(edgeInfo.edge_length).toFixed(2)}m</td>
-                        </tr>
-                      )
-                      if (edgeInfo.id === selectedDetail) {
-                        let attributes = 'loading'
-                        if (detailsById[edgeInfo.id]) {
-                          attributes = renderAttributesComponent(detailsById[edgeInfo.id])
-                        }
+            ? <>
+                <RoadSegmentTagging/>
+                <table className="table table-sm">
+                  <thead>
+                    <tr>
+                      <th>Conduit Type</th>
+                      <th>ID</th>
+                      <th>Length</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {
+                      selectedEdgeInfo.map((edgeInfo, index) => {
+                        let rowClass = 'roadSegOddRow'
+                        if (index % 2 === 0) rowClass = 'roadSegEvenRow'
+                        let rows = []
                         rows.push(
-                          <tr className={`${rowClass}`} key={`${edgeInfo.id}_detail`}>
-                            <td className='roadSegDetailAttributeRow' colSpan="3">{attributes}</td>
+                          <tr key={edgeInfo.id} className={`roadSegDetailRow ${rowClass}`}
+                            onClick={() => onEdgeExpand(edgeInfo)} >
+                            <td>{edgeInfo.feature_type_name}</td>
+                            <td>{edgeInfo.gid}</td>
+                            <td>{(edgeInfo.edge_length).toFixed(2)}m</td>
                           </tr>
                         )
-                      }
-                      return rows
-                    })
-                  }
-                </tbody>
-              </table>
+                        if (edgeInfo.id === selectedDetail) {
+                          let attributes = 'loading'
+                          if (detailsById[edgeInfo.id]) {
+                            attributes = renderAttributesComponent(detailsById[edgeInfo.id])
+                          }
+                          rows.push(
+                            <tr className={`${rowClass}`} key={`${edgeInfo.id}_detail`}>
+                              <td className='roadSegDetailAttributeRow' colSpan="3">{attributes}</td>
+                            </tr>
+                          )
+                        }
+                        return rows
+                      })
+                    }
+                  </tbody>
+                </table>
+              </>
             : <>
                 Zoom level too high to select conduit. Please zoom in and try to select the conduit again.
               </>
