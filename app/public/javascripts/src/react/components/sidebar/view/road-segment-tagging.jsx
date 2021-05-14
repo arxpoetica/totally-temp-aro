@@ -28,7 +28,7 @@ export const RoadSegmentTagging = props => {
   return (
     <div className="segments-tagging">
       {/* <style></style> */}
-      <div className="header">
+      <label className="header">
         <h3>Show Segments by Tag</h3>
         <input
           className="checkboxfill"
@@ -36,7 +36,7 @@ export const RoadSegmentTagging = props => {
           checked={showSegments}
           onChange={() => setShowSegments(!showSegments)}
         />
-      </div>
+      </label>
       <div className={cx('tag-rows', showSegments && 'show')}>
         {rows.map((row, index) =>
           <label key={index}>
