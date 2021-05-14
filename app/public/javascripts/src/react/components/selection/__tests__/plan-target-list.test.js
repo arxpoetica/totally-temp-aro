@@ -12,6 +12,7 @@ test('Render when all plan targets are empty', () => {
       activeSelectionModeId={SelectionModes.SELECTED_LOCATIONS}
       planTargets={{ locations: new Set(), serviceAreas: new Set(), analysisAreas: new Set() }}
       planTargetDescriptions={{}}
+      maxRoutingSelectionDisplayCount={2000}
     />
   )
   let tree = component.toJSON()
@@ -40,6 +41,7 @@ test('Render when location targets are being shown', () => {
       activeSelectionModeId={SelectionModes.SELECTED_LOCATIONS}
       planTargets={planTargets}
       planTargetDescriptions={planTargetDescriptions}
+      maxRoutingSelectionDisplayCount={2000}
     />
   )
   let tree = component.toJSON()
@@ -68,6 +70,7 @@ test('Render when service area targets are being shown', () => {
       activeSelectionModeId={SelectionModes.SELECTED_AREAS}
       planTargets={planTargets}
       planTargetDescriptions={planTargetDescriptions}
+      maxRoutingSelectionDisplayCount={2000}
     />
   )
   let tree = component.toJSON()
@@ -96,6 +99,7 @@ test('Render when analysis area targets are being shown', () => {
       activeSelectionModeId={SelectionModes.SELECTED_ANALYSIS_AREAS}
       planTargets={planTargets}
       planTargetDescriptions={planTargetDescriptions}
+      maxRoutingSelectionDisplayCount={2000}
     />
   )
   let tree = component.toJSON()
@@ -126,6 +130,7 @@ const testRemovingPlanTarget = (targetKey, selectionMode) => {
       planTargets={planTargets}
       planTargetDescriptions={planTargetDescriptions}
       removePlanTargets={mockRemovePlanTargets}
+      maxRoutingSelectionDisplayCount={2000}
     />
   )
   component.find('div > ul > li > button').at(0).simulate('click')
@@ -141,6 +146,7 @@ const testRemovingPlanTarget = (targetKey, selectionMode) => {
       planTargets={planTargets}
       planTargetDescriptions={planTargetDescriptions}
       removePlanTargets={mockRemovePlanTargets}
+      maxRoutingSelectionDisplayCount={2000}
     />
   )
   component.find('div > div > button').simulate('click')
