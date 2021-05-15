@@ -1,5 +1,7 @@
 import { useRef, useEffect } from 'react'
 
+// ========================= >>>>> style utils
+
 // Function to convert from hsv to rgb color values.
 // https://stackoverflow.com/questions/17242144/javascript-convert-hsb-hsv-color-to-rgb-accurately
 export const hsvToRgb = (h, s, v) => {
@@ -48,7 +50,10 @@ export const selectStyles = {
   }),
 }
 
-// Logout function
+
+// ========================= >>>>> misc utils
+
+// logout function
 export const logoutApp = () => {
   window.location.href = '/logout'
 }
@@ -56,6 +61,8 @@ export const logoutApp = () => {
 export const flattenDeep = (arr) => {
   return arr.reduce((acc, val) => Array.isArray(val) ? acc.concat(flattenDeep(val)) : acc.concat(val), [])
 }
+
+// ========================= >>>>> date utils
 
 // date transormations
 // see: https://stackoverflow.com/a/38050824/209803
@@ -67,7 +74,7 @@ export const toUTCDate = date => new Date(Date.UTC(
   date.getUTCDate(),
 ))
 
-// hooks
+// ========================= >>>>> react hooks
 
 // see: https://reactjs.org/docs/hooks-faq.html#how-to-get-the-previous-props-or-state
 export const usePrevious = value => {
