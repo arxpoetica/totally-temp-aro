@@ -166,9 +166,7 @@ exports[`Default render 1`] = `
             >
               Analysis Areas
             </option>
-            <option
-              value="ALL_SERVICE_AREAS"
-            >
+            <option>
               All Service Areas
             </option>
           </select>
@@ -359,9 +357,7 @@ exports[`When we do not have an existing report 1`] = `
             >
               Analysis Areas
             </option>
-            <option
-              value="ALL_SERVICE_AREAS"
-            >
+            <option>
               All Service Areas
             </option>
           </select>
@@ -552,9 +548,7 @@ exports[`When we have an existing report 1`] = `
             >
               Analysis Areas
             </option>
-            <option
-              value="ALL_SERVICE_AREAS"
-            >
+            <option>
               All Service Areas
             </option>
           </select>
@@ -751,9 +745,7 @@ exports[`When we have supplied all parameters 1`] = `
             >
               Analysis Areas
             </option>
-            <option
-              value="ALL_SERVICE_AREAS"
-            >
+            <option>
               All Service Areas
             </option>
           </select>
