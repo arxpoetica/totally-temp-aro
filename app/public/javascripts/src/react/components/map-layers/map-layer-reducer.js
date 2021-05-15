@@ -26,8 +26,9 @@ const defaultState = {
       existing: false,
       planned: false
     }
-  }
-}  
+  },
+  showSegmentsByTag: false,
+}
 
 /*
   roadConstructionTypes: {
@@ -371,6 +372,9 @@ function mapLayersReducer (state = defaultState, action) {
 
     case Actions.LAYERS_SET_TYPE_VISIBILITY:
       return setTypeVisibility(state, action.payload)
+
+    case Actions.LAYERS_SET_SHOW_SEGMENTS_BY_TAG:
+      return { ...state, showSegmentsByTag: action.payload }
 
     default:
       return state

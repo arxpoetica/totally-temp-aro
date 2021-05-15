@@ -91,7 +91,7 @@ export class RateReachEditor extends Component {
         <div style={{flex: '1 1 auto'}}> 
           <div className="row">
             {/* <!-- On the left, show dropdowns with the options that the user can edit --> */}
-            <div className="col-md-3" style={{overflowY: 'auto'}}>
+            <div className="col-lg-3" style={{overflowY: 'auto'}}>
               <form id="rateReachSettings">
                 <span className="ctype-checkbox" style={{marginRight: '5px'}}>
                   <input type="checkbox" className="checkboxfill"
@@ -116,7 +116,7 @@ export class RateReachEditor extends Component {
               </form>
             </div>
             {/* <!-- On the right, show the details of the currently selected combination of category type, technology type, etc. --> */}
-            <div className="col-md-9"  style={{overflowY: 'auto'}}>
+            <div className="col-lg-9"  style={{overflowY: 'auto'}}>
               <ul className="nav nav-tabs">
                 <li className="nav-item">
                   <a href="#" className={`nav-link ${selectedEditingMode === this.editingModes.SPEEDS ? 'active' : ''}`} onClick={e => {this.handleEditMode(this.editingModes.SPEEDS)}}>
