@@ -1,13 +1,13 @@
-import React, { useState, useRef, useEffect } from 'react'
-//import reduxStore from '../../../../redux-store'
-//import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
+import React, { useState } from 'react'
 import { connect } from 'react-redux'
+import MapLayerActions from '../../map-layers/map-layer-actions'
+
 import cx from 'clsx'
-import './road-segment-tagging.css'
 
-export const RoadSegmentTagging = props => {
+const RoadSegmentTagPanel = props => {
 
-  const [showSegments, setShowSegments] = useState(false)
+  const { mapFeatures, showSegmentsByTag, setShowSegmentsByTag } = props
+
   const [rows, setRows] = useState([
     { label: 'Aerial', display: '', checked: false },
     { label: 'Buried', display: '', checked: false },
@@ -26,18 +26,17 @@ export const RoadSegmentTagging = props => {
   }
 
   return (
-    <div className="segments-tagging">
-      {/* <style></style> */}
+    <div className="segments-tag-panel">
       <label className="header">
         <h3>Show Segments by Tag</h3>
         <input
           className="checkboxfill"
           type="checkbox"
-          checked={showSegments}
-          onChange={() => setShowSegments(!showSegments)}
+          checked={showSegmentsByTag}
+          onChange={() => setShowSegmentsByTag(!showSegmentsByTag)}
         />
       </label>
-      <div className={cx('tag-rows', showSegments && 'show')}>
+      <div className={cx('tag-rows', showSegmentsByTag && 'show')}>
         {rows.map((row, index) =>
           <label key={index}>
             <h4>{row.label}</h4>
@@ -57,12 +56,13 @@ export const RoadSegmentTagging = props => {
   )
 }
 
-
 const mapStateToProps = state => ({
+  mapFeatures: state.selection.mapFeatures,
+  showSegmentsByTag: state.mapLayers.showSegmentsByTag,
 })
 
 const mapDispatchToProps = dispatch => ({
+  setShowSegmentsByTag: value => dispatch(MapLayerActions.setShowSegmentsByTag(value)),
 })
 
-//export default wrapComponentWithProvider(reduxStore, RoadSegmentTagging, mapStateToProps, mapDispatchToProps)
-export default connect(mapStateToProps, mapDispatchToProps)(RoadSegmentTagging)
+export default connect(mapStateToProps, mapDispatchToProps)(RoadSegmentTagPanel)

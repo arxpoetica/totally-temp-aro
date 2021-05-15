@@ -1,3 +1,7 @@
+import { useRef, useEffect } from 'react'
+
+// ========================= >>>>> style utils
+
 // Function to convert from hsv to rgb color values.
 // https://stackoverflow.com/questions/17242144/javascript-convert-hsb-hsv-color-to-rgb-accurately
 export const hsvToRgb = (h, s, v) => {
@@ -26,7 +30,30 @@ export const hsvToRgb = (h, s, v) => {
   })
   return color
 }
-// Logout function
+
+export const selectStyles = {
+  placeholder: provided => ({
+    ...provided,
+    pointerEvents: 'none',
+    userSelect: 'none',
+  }),
+  singleValue: provided => ({
+    ...provided,
+    pointerEvents: 'none',
+    userSelect: 'none',
+  }),
+  input: provided => ({
+    ...provided,
+    flex: '1 1 auto',
+    '> div': { width: '100%' },
+    input: { width: '100% !important', textAlign: 'left' },
+  }),
+}
+
+
+// ========================= >>>>> misc utils
+
+// logout function
 export const logoutApp = () => {
   window.location.href = '/logout'
 }
@@ -34,6 +61,8 @@ export const logoutApp = () => {
 export const flattenDeep = (arr) => {
   return arr.reduce((acc, val) => Array.isArray(val) ? acc.concat(flattenDeep(val)) : acc.concat(val), [])
 }
+
+// ========================= >>>>> date utils
 
 // date transormations
 // see: https://stackoverflow.com/a/38050824/209803
@@ -44,3 +73,12 @@ export const toUTCDate = date => new Date(Date.UTC(
   date.getUTCMonth(),
   date.getUTCDate(),
 ))
+
+// ========================= >>>>> react hooks
+
+// see: https://reactjs.org/docs/hooks-faq.html#how-to-get-the-previous-props-or-state
+export const usePrevious = value => {
+  const ref = useRef()
+  useEffect(() => { ref.current = value })
+  return ref.current
+}

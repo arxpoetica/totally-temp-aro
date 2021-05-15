@@ -264,6 +264,13 @@ function setTypeVisibility (typeVisibility) {
   }
 }
 
+function setShowSegmentsByTag(showSegmentsByTag) {
+  return {
+    type: Actions.LAYERS_SET_SHOW_SEGMENTS_BY_TAG,
+    payload: showSegmentsByTag,
+  }
+}
+
 export default {
   setLayerVisibility,
   setNetworkEquipmentLayerVisibility,
@@ -284,5 +291,6 @@ export default {
   removeAnnotation,
   clearOlderAnnotations,
   setSelectedBoundaryType,
-  setTypeVisibility
+  setTypeVisibility,
+  setShowSegmentsByTag,
 }
