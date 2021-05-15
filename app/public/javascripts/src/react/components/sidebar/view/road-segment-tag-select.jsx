@@ -1,31 +1,49 @@
 import React, { useState } from 'react'
 import { connect } from 'react-redux'
-import MapLayerActions from '../../map-layers/map-layer-actions'
+import Select from 'react-select'
+import { selectStyles } from '../../../common/view-utils.js'
+// import MapLayerActions from '../../map-layers/map-layer-actions'
 
 const RoadSegmentTagSelect = props => {
 
   const { showSegmentsByTag, roadSegment } = props
 
   const [options, setOptions] = useState([
-    'Aerial',
-    'Buried',
-    'Untagged',
-    'Special Type',
+    { label: 'Aerial', value: 0 },
+    { label: 'Buried', value: 1 },
+    { label: 'Untagged', value: 2 },
+    { label: 'Special Type', value: 3 },
   ])
 
+  const handleInputChange = (searchTerm, { action }) => {
+    console.group('handleInputChange')
+    console.log('searchTerm:', searchTerm)
+    console.log('action:', action)
+    console.groupEnd()
+  }
+
+  const handleChange = change => {
+    console.group('handleChange')
+    console.log('change:', change)
+    console.groupEnd()
+  }
 
   return showSegmentsByTag && roadSegment ?
+    <>
     <div className="segments-tag-select">
       <h3>Tagged as:</h3>
-      <select name="foo" id="bar">
-        {options.map(option =>
-          <option key={option} value={option}>
-            {option}
-          </option>
-        )}
-      </select>
-      <pre>{JSON.stringify(roadSegment, null, '  ')}</pre>
+      <div className="select">
+        <Select
+          options={options}
+          placeholder="Select a tag..."
+          onInputChange={handleInputChange}
+          onChange={handleChange}
+          styles={selectStyles}
+        />
+      </div>
     </div>
+    <pre>{JSON.stringify(roadSegment, null, '  ')}</pre>
+    </>
     : null
 }
 

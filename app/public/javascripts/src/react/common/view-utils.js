@@ -29,6 +29,25 @@ export const hsvToRgb = (h, s, v) => {
   return color
 }
 
+export const selectStyles = {
+  placeholder: provided => ({
+    ...provided,
+    pointerEvents: 'none',
+    userSelect: 'none',
+  }),
+  singleValue: provided => ({
+    ...provided,
+    pointerEvents: 'none',
+    userSelect: 'none',
+  }),
+  input: provided => ({
+    ...provided,
+    flex: '1 1 auto',
+    '> div': { width: '100%' },
+    input: { width: '100% !important', textAlign: 'left' },
+  }),
+}
+
 // Logout function
 export const logoutApp = () => {
   window.location.href = '/logout'

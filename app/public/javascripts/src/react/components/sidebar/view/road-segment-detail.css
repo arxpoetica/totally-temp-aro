@@ -58,3 +58,19 @@
 }
 
 /* segments-tag-select */
+
+.segments-tag-select {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 5px 0;
+  border-top: 1px solid #888888;
+}
+.segments-tag-select h3 {
+  margin: 0 12px 0 0;
+  font-size: inherit;
+  font-weight: bold;
+}
+.segments-tag-select .select {
+  flex: 1;
+}

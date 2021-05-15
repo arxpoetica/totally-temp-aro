@@ -138,7 +138,7 @@ export const RoadSegmentDetail = (props) => {
   }
 
   const renderAttributesComponent = attributes => {
-    return <table className="table table-sm" style={{ 'backgroundColor': 'inherit' }}>
+    return <table className="table table-sm mb-1" style={{ 'backgroundColor': 'inherit' }}>
       <tbody>
         {Object.keys(attributes).map(key =>
           <tr key={key}>
@@ -156,7 +156,7 @@ export const RoadSegmentDetail = (props) => {
       {correctZoomLevel
         ? <>
             <RoadSegmentTagPanel/>
-            <table className="table table-sm">
+            <table className="table table-sm mb-1">
               <thead>
                 <tr>
                   <th>Conduit Type</th>
