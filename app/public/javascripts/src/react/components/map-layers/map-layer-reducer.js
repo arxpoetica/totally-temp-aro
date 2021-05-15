@@ -27,7 +27,37 @@ const defaultState = {
       planned: false
     }
   }
-}
+}  
+
+/*
+  roadConstructionTypes: {
+    'AERIAL': {
+      id: 'AERIAL',
+      displayName: 'Aerial',
+      isVisible: false,
+      lineType: 'AERIAL_LINE'
+    },
+    'BURIED': {
+      id: 'BURIED',
+      displayName: 'Buried',
+      isVisible: false,
+      lineType: 'BURIED_LINE'
+    },
+    'SPECIAL': {
+      id: 'SPECIAL',
+      displayName: 'Special Type',
+      isVisible: false,
+      lineType: 'SPECIAL_LINE'
+    },
+    'UNTAGGED': {
+      id: 'UNTAGGED',
+      displayName: 'Untagged',
+      isVisible: false,
+      lineType: 'DEFAULT'
+    }
+  }
+
+*/
 
 // ToDo: reafctor "checked" to be a collection of subtypes
 function setLayers (state, layerKey, layers) {
