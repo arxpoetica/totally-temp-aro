@@ -271,6 +271,13 @@ function setShowSegmentsByTag(showSegmentsByTag) {
   }
 }
 
+function setEdgeConstructionTypeVisibility(constructionType, isVisible) {
+  return {
+    type: Actions.LAYERS_SET_EDGE_CONSTRUCTION_TYPE_VISIBILITY,
+    payload: {constructionType, isVisible},
+  }
+}
+
 export default {
   setLayerVisibility,
   setNetworkEquipmentLayerVisibility,
@@ -293,4 +300,5 @@ export default {
   setSelectedBoundaryType,
   setTypeVisibility,
   setShowSegmentsByTag,
+  setEdgeConstructionTypeVisibility,
 }
