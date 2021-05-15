@@ -3,6 +3,7 @@ import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
 import { usePrevious } from '../../../common/view-utils.js'
 import RoadSegmentTagPanel from './road-segment-tag-panel.jsx'
+import RoadSegmentTagSelect from './road-segment-tag-select.jsx'
 import SelectionActions from '../../selection/selection-actions'
 import ToolBarActions from '../../header/tool-bar-actions'
 import StateViewModeActions from '../../state-view-mode/state-view-mode-actions'
@@ -193,6 +194,7 @@ export const RoadSegmentDetail = (props) => {
                 }
               </tbody>
             </table>
+            <RoadSegmentTagSelect/>
           </>
         : <>
             Zoom level too high to select conduit. Please zoom in and try to select the conduit again.
