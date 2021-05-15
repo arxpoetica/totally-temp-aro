@@ -1,3 +1,5 @@
+import { useRef, useEffect } from 'react'
+
 // Function to convert from hsv to rgb color values.
 // https://stackoverflow.com/questions/17242144/javascript-convert-hsb-hsv-color-to-rgb-accurately
 export const hsvToRgb = (h, s, v) => {
@@ -26,6 +28,7 @@ export const hsvToRgb = (h, s, v) => {
   })
   return color
 }
+
 // Logout function
 export const logoutApp = () => {
   window.location.href = '/logout'
@@ -44,3 +47,12 @@ export const toUTCDate = date => new Date(Date.UTC(
   date.getUTCMonth(),
   date.getUTCDate(),
 ))
+
+// hooks
+
+// see: https://reactjs.org/docs/hooks-faq.html#how-to-get-the-previous-props-or-state
+export const usePrevious = value => {
+  const ref = useRef()
+  useEffect(() => { ref.current = value })
+  return ref.current
+}

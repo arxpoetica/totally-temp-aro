@@ -1,11 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react'
-//import reduxStore from '../../../../redux-store'
-//import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
+import React, { useState } from 'react'
 import { connect } from 'react-redux'
 import cx from 'clsx'
-import './road-segment-tagging.css'
 
-export const RoadSegmentTagging = props => {
+const RoadSegmentTagPanel = props => {
+
+  const { mapFeatures } = props
 
   const [showSegments, setShowSegments] = useState(false)
   const [rows, setRows] = useState([
@@ -26,7 +25,7 @@ export const RoadSegmentTagging = props => {
   }
 
   return (
-    <div className="segments-tagging">
+    <div className="segments-tag-panel">
       {/* <style></style> */}
       <label className="header">
         <h3>Show Segments by Tag</h3>
@@ -57,12 +56,11 @@ export const RoadSegmentTagging = props => {
   )
 }
 
-
 const mapStateToProps = state => ({
+  mapFeatures: state.selection.mapFeatures,
 })
 
 const mapDispatchToProps = dispatch => ({
 })
 
-//export default wrapComponentWithProvider(reduxStore, RoadSegmentTagging, mapStateToProps, mapDispatchToProps)
-export default connect(mapStateToProps, mapDispatchToProps)(RoadSegmentTagging)
+export default connect(mapStateToProps, mapDispatchToProps)(RoadSegmentTagPanel)
