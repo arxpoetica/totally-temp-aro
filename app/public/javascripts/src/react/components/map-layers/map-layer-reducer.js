@@ -1,5 +1,6 @@
 import Actions from '../../common/actions'
 import { List, Map, remove } from 'immutable'
+import actions from 'redux-form/lib/actions'
 
 const defaultState = {
   location: new List(),
@@ -27,7 +28,33 @@ const defaultState = {
       planned: false
     }
   },
-  showSegmentsByTag: false,
+  showSegmentsByTag: false, // I want to rename this 
+  edgeConstructionTypes: {
+    'AERIAL': {
+      id: 'AERIAL',
+      displayName: 'Aerial',
+      isVisible: false,
+      lineType: 'AERIAL_LINE'
+    },
+    'BURIED': {
+      id: 'BURIED',
+      displayName: 'Buried',
+      isVisible: false,
+      lineType: 'BURIED_LINE'
+    },
+    'SPECIAL': {
+      id: 'SPECIAL',
+      displayName: 'Special Type',
+      isVisible: false,
+      lineType: 'SPECIAL_LINE'
+    },
+    'UNTAGGED': {
+      id: 'UNTAGGED',
+      displayName: 'Untagged',
+      isVisible: false,
+      lineType: 'DEFAULT'
+    }
+  }
 }
 
 // ToDo: reafctor "checked" to be a collection of subtypes
@@ -272,6 +299,16 @@ function setTypeVisibility (state, typeVisibilityMask) {
   }
 }
 
+function setEdgeConstructionTypeVisibility (state, constructionType, isVisible) {
+  return { ...state,
+    edgeConstructionTypes: { ...state.edgeConstructionTypes,
+      [constructionType]: { ...state.edgeConstructionTypes[constructionType],
+        'isVisible': isVisible
+      }
+    }
+  }
+}
+
 function mapLayersReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.LAYERS_SET_LOCATION:
@@ -345,6 +382,9 @@ function mapLayersReducer (state = defaultState, action) {
 
     case Actions.LAYERS_SET_SHOW_SEGMENTS_BY_TAG:
       return { ...state, showSegmentsByTag: action.payload }
+
+    case Actions.LAYERS_SET_EDGE_CONSTRUCTION_TYPE_VISIBILITY:
+      return setEdgeConstructionTypeVisibility(state, action.payload.constructionType, action.payload.isVisible)
 
     default:
       return state

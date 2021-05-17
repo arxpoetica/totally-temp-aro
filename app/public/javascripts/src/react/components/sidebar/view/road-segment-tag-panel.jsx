@@ -6,23 +6,13 @@ import cx from 'clsx'
 
 const RoadSegmentTagPanel = props => {
 
-  const { mapFeatures, showSegmentsByTag, setShowSegmentsByTag } = props
+  const { 
+    mapFeatures, showSegmentsByTag, edgeConstructionTypes, 
+    setShowSegmentsByTag, setEdgeConstructionTypeVisibility } = props
 
-  const [rows, setRows] = useState([
-    { label: 'Aerial', display: '', checked: false },
-    { label: 'Buried', display: '', checked: false },
-    { label: 'Untagged', display: '', checked: false },
-    { label: 'Special Type', display: '', checked: false },
-  ])
-
-  function handleCheckbox(index) {
-    const updatedRows = rows.map((row, mapIndex) => {
-      if (mapIndex === index) {
-        row.checked = !row.checked
-      }
-      return row
-    })
-    setRows(updatedRows)
+  function handleCheckbox(constructionType) {
+    let isVisible = !edgeConstructionTypes[constructionType].isVisible
+    setEdgeConstructionTypeVisibility(constructionType, isVisible)
   }
 
   return (
@@ -37,20 +27,23 @@ const RoadSegmentTagPanel = props => {
         />
       </label>
       <div className={cx('tag-rows', showSegmentsByTag && 'show')}>
-        {rows.map((row, index) =>
-          <label key={index}>
-            <h4>{row.label}</h4>
-            <div className="display"></div>
-            <div className="checkbox">
-              <input
-                className="checkboxfill"
-                type="checkbox"
-                checked={row.checked}
-                onChange={() => handleCheckbox(index)}
-              />
-            </div>
-          </label>
-        )}
+        {Object.keys(edgeConstructionTypes).map((k) => {
+          let constructionType = edgeConstructionTypes[k]
+          return (
+            <label key={k}>
+              <h4>{constructionType.displayName}</h4>
+              <div className="display"></div>
+              <div className="checkbox">
+                <input
+                  className="checkboxfill"
+                  type="checkbox"
+                  checked={constructionType.isVisible}
+                  onChange={() => handleCheckbox(k)}
+                />
+              </div>
+            </label>
+          )
+        })}
       </div>
     </div>
   )
@@ -59,10 +52,12 @@ const RoadSegmentTagPanel = props => {
 const mapStateToProps = state => ({
   mapFeatures: state.selection.mapFeatures,
   showSegmentsByTag: state.mapLayers.showSegmentsByTag,
+  edgeConstructionTypes: state.mapLayers.edgeConstructionTypes
 })
 
 const mapDispatchToProps = dispatch => ({
   setShowSegmentsByTag: value => dispatch(MapLayerActions.setShowSegmentsByTag(value)),
+  setEdgeConstructionTypeVisibility: (constructionType, isVisible) => dispatch(MapLayerActions.setEdgeConstructionTypeVisibility(constructionType, isVisible))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(RoadSegmentTagPanel)
