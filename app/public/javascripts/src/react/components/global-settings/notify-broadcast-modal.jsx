@@ -4,7 +4,6 @@ import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import UiActions from '../configuration/ui/ui-actions'
 import GlobalsettingsActions from '../global-settings/globalsettings-action'
 import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap'
-import { setBroadcastExpiry, checkBroadcastExpiry, removeLocalStorage } from '../../common/view-utils.js'
 import Constants from '../../common/constants.js'
 import { dequal } from 'dequal'
 
@@ -34,7 +33,7 @@ export const NotifyBroadcastModal = (props) => {
 
   // https://reactjs.org/docs/hooks-faq.html#how-to-get-the-previous-props-or-state
   function usePrevious(value) {
-    if (value) delete value.loggedInUserID
+    if (value) { delete value.loggedInUserID }
     const ref = useRef()
     useEffect(() => { ref.current = value })
     return ref.current
@@ -49,7 +48,7 @@ export const NotifyBroadcastModal = (props) => {
       // the localStorage and broadcast the message.
       if (!checkBroadcastExpiry(Constants.BROADCAST_LOCAL_STORAGE)) {
         setState((state) => ({ ...state, broadcastChecked: false }))
-        removeLocalStorage(Constants.BROADCAST_LOCAL_STORAGE)
+        localStorage.removeItem(Constants.BROADCAST_LOCAL_STORAGE)
         validateBroadcast(broadcastData)
       } else {
         validateBroadcast(broadcastData)
@@ -67,8 +66,39 @@ export const NotifyBroadcastModal = (props) => {
   const toggleMessageShow = () => {
     !broadcastChecked
       ? setBroadcastExpiry(Constants.BROADCAST_LOCAL_STORAGE, false)
-      : removeLocalStorage(Constants.BROADCAST_LOCAL_STORAGE)
+      : localStorage.removeItem(Constants.BROADCAST_LOCAL_STORAGE)
     setState((state) => ({ ...state, broadcastChecked: !broadcastChecked }))
+  }
+
+  const setBroadcastExpiry = (key, value) => {
+    const now = new Date()
+    const broadcastObj = {
+      value,
+      expiry: now.getTime() + Constants.BROADCAST_EXPIRY_TIME
+    }
+    // set the value and expiryTime in localStorage
+    localStorage.setItem(key, JSON.stringify(broadcastObj))
+  }
+
+  const checkBroadcastExpiry = (key) => {
+    // get the item 'showBroadcast' from localStorage
+    const broadcastExpiry = localStorage.getItem(key)
+    if (!broadcastExpiry) { return true }
+    let broadcastObj = null
+    try {
+      broadcastObj = JSON.parse(broadcastExpiry)
+      const now = new Date()
+      // compares the expiry time with the current time
+      if (now.getTime() > broadcastObj.expiry) {
+        // if the time is expired, remove it from localStorage
+        localStorage.removeItem(key)
+        return true
+      }
+    } catch {
+      localStorage.removeItem(key)
+      return true
+    }
+    return broadcastObj.value
   }
 
   return (

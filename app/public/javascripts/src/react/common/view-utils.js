@@ -31,7 +31,7 @@ export const hsvToRgb = (h, s, v) => {
 // Logout function
 export const logoutApp = () => {
   window.location.href = '/logout'
-  removeLocalStorage(Constants.BROADCAST_LOCAL_STORAGE)
+  localStorage.removeItem(Constants.BROADCAST_LOCAL_STORAGE)
 }
 
 export const flattenDeep = (arr) => {
@@ -41,53 +41,10 @@ export const flattenDeep = (arr) => {
 // date transormations
 // see: https://stackoverflow.com/a/38050824/209803
 // and: https://zachholman.com/talk/utc-is-enough-for-everyone-right
-export const toDateFromIsoDay = isoDayString => new Date(`${isoDayString}T00:00:00.000`)
+export const toIsoStartDate = isoDayString => new Date(`${isoDayString}T00:00:00.000`)
+export const toIsoEndDate = isoDayString => new Date(`${isoDayString}T23:59:59.000`)
 export const toUTCDate = date => new Date(Date.UTC(
   date.getUTCFullYear(),
   date.getUTCMonth(),
   date.getUTCDate(),
 ))
-
-export const formatDate = date => {
-  const year = date.getFullYear()
-  const month = ("0" + (date.getMonth() + 1)).slice(-2)
-  const day = ("0" + date.getDate()).slice(-2)
-  const formatDate = year + "-" + month + "-" + day
-  return formatDate
-}
-
-export function setBroadcastExpiry (key, value) {
-  const now = new Date()
-  const broadcastObj = {
-    value,
-    expiry: now.getTime() + Constants.BROADCAST_EXPIRY_TIME
-  }
-  // set the value and expiryTime in localStorage
-  localStorage.setItem(key, JSON.stringify(broadcastObj))
-}
-
-export function checkBroadcastExpiry (key) {
-  // get the item 'showBroadcast' from localStorage
-  const broadcastExpiry = localStorage.getItem(key)
-  if (!broadcastExpiry) return true
-  let broadcastObj = null
-  try {
-    broadcastObj = JSON.parse(broadcastExpiry)
-    const now = new Date()
-    // compares the expiry time with the current time
-    if (now.getTime() > broadcastObj.expiry) {
-    // if the time is expired, remove it from localStorage
-      removeLocalStorage(key)
-      return true
-    }
-  } catch {
-    removeLocalStorage(key)
-    return true
-  }
-  return broadcastObj.value
-}
-
-export function removeLocalStorage (key) {
-  // removes the required key from localStorage
-  localStorage.removeItem(key)
-}
