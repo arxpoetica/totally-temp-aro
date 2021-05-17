@@ -19,5 +19,10 @@ export default Object.freeze({
     COMPLETED: 'COMPLETED',
     FAILED: 'FAILED',
     CANCELED: 'CANCELED'
-  })
+  }),
+
+  // Broadcast constants
+  BROADCAST_LOCAL_STORAGE: 'showBroadcast',
+  BROADCAST_EXPIRY_TIME: 259200000, // in milliseconds (72 hrs)
+  BROADCAST_INTERVAL_TIME: 14400000, // in milliseconds (4 hrs)
 })
