@@ -69,10 +69,12 @@ function saveDataSource (uploadDetails,loggedInUser) {
         dispatch(setIsUploading(false))
         console.error(err)
       })
-    } else {
-      if (uploadDetails.selectedDataSourceName === 'service_layer' && uploadDetails.selectedCreationType === 'draw_polygon') {
-        // Just create Datasource
-        getLibraryId (uploadDetails)
+    } else if (
+      uploadDetails.selectedDataSourceName === 'service_layer'
+      && uploadDetails.selectedCreationType === 'draw_polygon'
+    ) {
+      // Just create Datasource
+      getLibraryId(uploadDetails)
         .then((library) => {
           // Put the application in "Edit Service Layer" mode
           dispatch(setAllLibraryItems(library.data.dataType, library.data))
@@ -86,75 +88,51 @@ function saveDataSource (uploadDetails,loggedInUser) {
           dispatch(setIsUploading(false))
         })
         // Draw the layer by entering edit mode
-      } else {
-        if (uploadDetails.selectedDataSourceName !== 'service_layer' 
-            || uploadDetails.selectedCreationType !== 'polygon_equipment') {
-          var files = uploadDetails.file
-          if (uploadDetails.dataSetId && files.length > 0) {
-            return swal({
-              title: 'Are you sure?',
-              text: 'Are you sure you want to overwrite the data which is currently in this boundary layer?',
-              type: 'warning',
-              confirmButtonColor: '#DD6B55',
-              confirmButtonText: 'Yes',
-              showCancelButton: true,
-              closeOnConfirm: true
-            }, 
-            fileUpload(dispatch, uploadDetails,uploadDetails.dataSetId))
-          }
+    } else {
+
+      if (uploadDetails.selectedDataSourceName !== 'service_layer' 
+          || uploadDetails.selectedCreationType !== 'polygon_equipment') {
+        var files = uploadDetails.file
+        if (uploadDetails.dataSetId && files.length > 0) {
+          return swal({
+            title: 'Are you sure?',
+            text: 'Are you sure you want to overwrite the data which is currently in this boundary layer?',
+            type: 'warning',
+            confirmButtonColor: '#DD6B55',
+            confirmButtonText: 'Yes',
+            showCancelButton: true,
+            closeOnConfirm: true
+          }, 
+          fileUpload(dispatch, uploadDetails,uploadDetails.dataSetId))
         }
-        // For uploading fiber no need to create library using getLibraryId()
-        if (uploadDetails.selectedDataSourceName === 'fiber') {
-          uploadDetails.selectedSpatialEdgeType = 'fiber_cable'
-          return setCableConstructionType(uploadDetails,loggedInUser)
-          .then((libraryItem) => {
-            dispatch(setAllLibraryItems(libraryItem.dataType, libraryItem)),
-            fileUpload(dispatch, uploadDetails, libraryItem.identifier, loggedInUser)
-          })
-          .then((result) => {
-            dispatch(setIsUploading(false))
-            return Promise.resolve(result)
-          })
-          .catch((err) => {
-            dispatch(setIsUploading(false))
-            console.error(err)
-          })
-        }
-        if (uploadDetails.selectedDataSourceName === 'service_layer' 
-            && uploadDetails.selectedCreationType === 'polygon_equipment') { 
-          getLibraryId (uploadDetails)
-            .then((library) => {
-              layerBoundary(uploadDetails, library.data.identifier,loggedInUser) 
-              dispatch(setAllLibraryItems(library.data.dataType, library.data))
-            })
-            .then((res) => {
-              dispatch(setIsUploading(false))
-            })
-            .catch((err) => {
-              dispatch(setIsUploading(false))
-              console.error(err)
-            })
-        }
-        if (uploadDetails.selectedDataSourceName === 'edge') { 
-          addConduit(uploadDetails)
-            .then((libraryItem) => {
-              dispatch(setAllLibraryItems(libraryItem.dataType, libraryItem)),
-              fileUpload(dispatch, uploadDetails, libraryItem.identifier, loggedInUser)
-          })
-          .then((result) => {
-            dispatch(setIsUploading(false))
-            return Promise.resolve(result)
-          })
-          .catch((err) => {
-            dispatch(setIsUploading(false))
-            console.error(err)
-          })
-        }
-        if (uploadDetails.selectedDataSourceName !== 'edge') { 
-          getLibraryId (uploadDetails)
-            .then((library) => {
-              dispatch(setAllLibraryItems(library.data.dataType, library.data))
-              fileUpload(dispatch, uploadDetails,library.data.identifier,loggedInUser) 
+      }
+
+      // For uploading fiber no need to create library using getLibraryId()
+      if (uploadDetails.selectedDataSourceName === 'fiber') {
+        uploadDetails.selectedSpatialEdgeType = 'fiber_cable'
+        return setCableConstructionType(uploadDetails,loggedInUser)
+        .then((libraryItem) => {
+          dispatch(setAllLibraryItems(libraryItem.dataType, libraryItem)),
+          fileUpload(dispatch, uploadDetails, libraryItem.identifier, loggedInUser)
+        })
+        .then((result) => {
+          dispatch(setIsUploading(false))
+          return Promise.resolve(result)
+        })
+        .catch((err) => {
+          dispatch(setIsUploading(false))
+          console.error(err)
+        })
+      }
+
+      if (
+        uploadDetails.selectedDataSourceName === 'service_layer' 
+        && uploadDetails.selectedCreationType === 'polygon_equipment'
+      ) { 
+        return getLibraryId(uploadDetails)
+          .then((library) => {
+            layerBoundary(uploadDetails, library.data.identifier,loggedInUser) 
+            dispatch(setAllLibraryItems(library.data.dataType, library.data))
           })
           .then((res) => {
             dispatch(setIsUploading(false))
@@ -163,13 +141,42 @@ function saveDataSource (uploadDetails,loggedInUser) {
             dispatch(setIsUploading(false))
             console.error(err)
           })
-        }
       }
+
+      if (uploadDetails.selectedDataSourceName === 'edge') { 
+        addConduit(uploadDetails)
+          .then((libraryItem) => {
+            dispatch(setAllLibraryItems(libraryItem.dataType, libraryItem)),
+            fileUpload(dispatch, uploadDetails, libraryItem.identifier, loggedInUser)
+        })
+        .then((result) => {
+          dispatch(setIsUploading(false))
+          return Promise.resolve(result)
+        })
+        .catch((err) => {
+          dispatch(setIsUploading(false))
+          console.error(err)
+        })
+      } else {
+        getLibraryId(uploadDetails)
+          .then((library) => {
+            dispatch(setAllLibraryItems(library.data.dataType, library.data))
+            fileUpload(dispatch, uploadDetails,library.data.identifier,loggedInUser) 
+        })
+        .then((res) => {
+          dispatch(setIsUploading(false))
+        })
+        .catch((err) => {
+          dispatch(setIsUploading(false))
+          console.error(err)
+        })
+      }
+
     }
   }
 }
 
-function getLibraryId (uploadDetails) {
+function getLibraryId(uploadDetails) {
   return AroHttp.post('/service/v1/library-entry', { dataType: uploadDetails.selectedDataSourceName, name: uploadDetails.dataSourceName})
   .then((response) => {
     return Promise.resolve(response)
