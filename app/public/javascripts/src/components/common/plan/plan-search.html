@@ -69,7 +69,7 @@
               <i>
                 {{$ctrl.getPlanCreatorName(plan.createdBy) || 'loading...'}}
                 | created {{$ctrl.convertTimeStampToDate(plan.createdDate)}}
-                | last opened {{$ctrl.convertTimeStampToDate(plan.updatedDate)}}
+                | last modified {{$ctrl.convertTimeStampToDate(plan.updatedDate)}}
               </i>
             </div>
             <div class="tags">
