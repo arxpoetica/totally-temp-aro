@@ -278,6 +278,17 @@ function setEdgeConstructionTypeVisibility(constructionType, isVisible) {
   }
 }
 
+function loadEdgeConstructionTypeIds() {
+  return dispatch => {
+    AroHttp.get('/service/odata/EdgeConstructionTypeEntity')
+      .then(result => dispatch({
+        type: Actions.LAYERS_SET_EDGE_CONSTRUCTION_TYPE_IDS,
+        payload: result.data
+      }))
+      .catch(err => console.error(err))
+  }
+}
+
 export default {
   setLayerVisibility,
   setNetworkEquipmentLayerVisibility,
@@ -301,4 +312,5 @@ export default {
   setTypeVisibility,
   setShowSegmentsByTag,
   setEdgeConstructionTypeVisibility,
+  loadEdgeConstructionTypeIds,
 }

@@ -8,12 +8,11 @@ const RoadSegmentTagSelect = props => {
 
   const { showSegmentsByTag, roadSegment } = props
 
-  const [options, setOptions] = useState([
-    { label: 'Aerial', value: 0 },
-    { label: 'Buried', value: 1 },
-    { label: 'Untagged', value: 2 },
-    { label: 'Special Type', value: 3 },
-  ])
+  const tagOptions = Object.values(props.edgeConstructionTypes).map(type => {
+    return {'label': type.displayName, 'value': type.id}
+  })
+  
+  //const [options, setOptions] = useState(tagOpts)
 
   const handleInputChange = (searchTerm, { action }) => {
     console.group('handleInputChange')
@@ -34,7 +33,7 @@ const RoadSegmentTagSelect = props => {
       <h3>Tagged as:</h3>
       <div className="select">
         <Select
-          options={options}
+          options={tagOptions}
           placeholder="Select a tag..."
           onInputChange={handleInputChange}
           onChange={handleChange}
@@ -50,6 +49,7 @@ const RoadSegmentTagSelect = props => {
 const mapStateToProps = state => ({
   showSegmentsByTag: state.mapLayers.showSegmentsByTag,
   roadSegment: [...(state.selection.mapFeatures.roadSegments || [undefined])][0],
+  edgeConstructionTypes: state.mapLayers.edgeConstructionTypes,
 })
 
 const mapDispatchToProps = dispatch => ({})

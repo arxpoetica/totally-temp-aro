@@ -30,29 +30,19 @@ const defaultState = {
   },
   showSegmentsByTag: false, // I want to rename this 
   edgeConstructionTypes: {
-    'AERIAL': {
-      id: 'AERIAL',
+    'aerial': {
+      id: null,
+      name: 'aerial',
       displayName: 'Aerial',
       isVisible: false,
-      lineType: 'AERIAL_LINE'
+      strokeType: 'AERIAL_LINE'
     },
-    'BURIED': {
-      id: 'BURIED',
+    'buried': {
+      id: null,
+      name: 'buried',
       displayName: 'Buried',
       isVisible: false,
-      lineType: 'BURIED_LINE'
-    },
-    'SPECIAL': {
-      id: 'SPECIAL',
-      displayName: 'Special Type',
-      isVisible: false,
-      lineType: 'SPECIAL_LINE'
-    },
-    'UNTAGGED': {
-      id: 'UNTAGGED',
-      displayName: 'Untagged',
-      isVisible: false,
-      lineType: 'DEFAULT'
+      strokeType: 'BURIED_LINE'
     }
   }
 }
@@ -309,6 +299,16 @@ function setEdgeConstructionTypeVisibility (state, constructionType, isVisible) 
   }
 }
 
+function setEdgeConstructionTypeIds (state, apiTypes) {
+  var newEdgeConstructionTypes = JSON.parse(JSON.stringify(state.edgeConstructionTypes))
+  apiTypes.forEach(apiType => {
+    if (newEdgeConstructionTypes.hasOwnProperty(apiType.name)) {
+      newEdgeConstructionTypes[apiType.name].id = apiType.id
+    }
+  })
+  return { ...state, edgeConstructionTypes: newEdgeConstructionTypes}
+}
+
 function mapLayersReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.LAYERS_SET_LOCATION:
@@ -385,6 +385,9 @@ function mapLayersReducer (state = defaultState, action) {
 
     case Actions.LAYERS_SET_EDGE_CONSTRUCTION_TYPE_VISIBILITY:
       return setEdgeConstructionTypeVisibility(state, action.payload.constructionType, action.payload.isVisible)
+
+    case Actions.LAYERS_SET_EDGE_CONSTRUCTION_TYPE_IDS:
+      return setEdgeConstructionTypeIds(state, action.payload)
 
     default:
       return state

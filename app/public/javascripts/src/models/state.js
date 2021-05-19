@@ -1582,6 +1582,7 @@ class State {
           service.setCopperLayers(service.configuration.copperCategories)
 
           service.setAppConfiguration(service.configuration) // Require in tool-bar.jsx
+          service.loadEdgeConstructionTypeIds()
           return service.setLoggedInUser(config.user, initialState)
         })
         .then(() => {
@@ -1908,6 +1909,7 @@ class State {
       setLayerCategories: (layerCategories) => dispatch(StateViewModeActions.setLayerCategories(layerCategories)),
       rClearViewMode: (value) => dispatch(StateViewModeActions.clearViewMode(value)),
       validateBroadcast: (message) => dispatch(GlobalsettingsActions.validateBroadcast(message)),
+      loadEdgeConstructionTypeIds: () => dispatch(MapLayerActions.loadEdgeConstructionTypeIds()),
     }
   }
 }
