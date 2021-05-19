@@ -1,18 +1,12 @@
-import io from 'socket.io-client'
-import { toast } from 'react-toastify'
-import Actions from '../../react/common/actions'
 import socketManager from '../../react/common/socket-manager'
+import GlobalsettingsActions from '../../react/components/global-settings/globalsettings-action'
 
 const createSocketMiddleware = () => {
   return storeAPI => {
-    // If we get a raw Redux command, dispatch it
     socketManager.subscribe('NOTIFICATION_SHOW', (command) => {
-      toast.error(command.payload.subject + ': ' + command.payload.body, {
-        position: toast.POSITION.BOTTOM_LEFT,
-        className: 'map-canvas',
-        autoClose: command.payload.isChecked
-      })
-      // storeAPI.dispatch(command)
+      const { dispatch } = storeAPI
+      // Dispatch an action to notify the broadcast message
+      dispatch(GlobalsettingsActions.notifyBroadcast(command.payload))
     })
 
     // next is the following action to be run after this middleware

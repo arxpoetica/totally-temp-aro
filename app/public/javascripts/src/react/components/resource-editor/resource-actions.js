@@ -556,7 +556,7 @@ function createRateReachManager (rateReachManager, selectedResourceForClone, log
       } else {
         createdRateReachManager = result.data
         return getDefaultConfiguration(loggedInUser, rateReachManager.category)
-        .then(defaultConfiguration => AroHttp.put(`/service/rate-reach-matrix/resource/${createdRateReachManager.id}/config`, defaultConfiguration))
+        .then(defaultConfiguration => AroHttp.put(`/service/rate-reach-matrix/resource/${createdRateReachManager.id}/config?user_id=${loggedInUser.id}`, defaultConfiguration))
       }
     })
     .then(result => {

@@ -65,7 +65,13 @@
         <tr ng-repeat="plan in $ctrl.plans | orderBy:$ctrl.sortField:$ctrl.descending">
           <td>
             <b><span class="aro-faux-anchor" ng-click="$ctrl.onPlanClicked(plan)">{{plan.name}}</span></b>
-            <div ng-if="plan.createdBy"><i>{{$ctrl.getPlanCreatorName(plan.createdBy) || 'loading...'}}</i></div>
+            <div ng-if="plan.createdBy">
+              <i>
+                {{$ctrl.getPlanCreatorName(plan.createdBy) || 'loading...'}}
+                | created {{$ctrl.convertTimeStampToDate(plan.createdDate)}}
+                | last opened {{$ctrl.convertTimeStampToDate(plan.updatedDate)}}
+              </i>
+            </div>
             <div class="tags">
               <div ng-repeat="tag in $ctrl.getTagCategories(plan.tagMapping.global) track by tag.id" 
                 class="badge badge-primary" ng-style="{'background-color': $ctrl.state.StateViewMode.getTagColour(tag)}">

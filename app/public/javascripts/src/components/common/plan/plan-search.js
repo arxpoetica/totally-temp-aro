@@ -1,4 +1,5 @@
 import ToolBarActions from '../../../react/components/header/tool-bar-actions'
+import { toUTCDate } from '../../../react/common/view-utils.js'
 
 class PlanSearchController {
   constructor ($http, $timeout, $ngRedux, state) {
@@ -226,6 +227,11 @@ class PlanSearchController {
       .then((response) => {
         this.creatorsSearchList = response.data
       })
+  }
+
+  convertTimeStampToDate (timestamp) {
+    const utcDate = toUTCDate(new Date(timestamp))
+    return new Intl.DateTimeFormat('en-US').format(utcDate)
   }
 
   mapStateToThis (reduxState) {

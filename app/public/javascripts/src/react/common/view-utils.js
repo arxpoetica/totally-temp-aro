@@ -34,3 +34,13 @@ export const logoutApp = () => {
 export const flattenDeep = (arr) => {
   return arr.reduce((acc, val) => Array.isArray(val) ? acc.concat(flattenDeep(val)) : acc.concat(val), [])
 }
+
+// date transormations
+// see: https://stackoverflow.com/a/38050824/209803
+// and: https://zachholman.com/talk/utc-is-enough-for-everyone-right
+export const toDateFromIsoDay = isoDayString => new Date(`${isoDayString}T00:00:00.000`)
+export const toUTCDate = date => new Date(Date.UTC(
+  date.getUTCFullYear(),
+  date.getUTCMonth(),
+  date.getUTCDate(),
+))
