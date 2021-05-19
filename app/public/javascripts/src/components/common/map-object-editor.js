@@ -885,8 +885,8 @@ class MapObjectEditorController {
       throw `createMapObject() not supported for geometry type ${feature.geometry.type}`
     }
 
-    mapObject.addListener('rightclick', (event) => {
-      if (typeof event === 'undefined' || event.vertex !== 'undefined') {
+    mapObject.addListener('rightclick', event => {
+      if (typeof event === 'undefined' || typeof event.vertex !== 'undefined') {
         return
       }
       // 'event' contains a MouseEvent which we use to get X,Y coordinates. The key of the MouseEvent object
@@ -896,7 +896,9 @@ class MapObjectEditorController {
         this.selectMapObject(mapObject)
       }
       var eventXY = this.getXYFromEvent(event)
-      if (!eventXY) return
+      if (!eventXY) {
+        return
+      }
       this.updateContextMenu(event.latLng, eventXY.x, eventXY.y, mapObject)
     })
 
