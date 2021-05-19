@@ -811,7 +811,8 @@ class State {
       return $http.get(`/service/v1/plan/ephemeral/latest`)
         .then((result) => {
           // We have a valid ephemeral plan if we get back an object with *some* properties
-          var isValidEphemeralPlan = Object.getOwnPropertyNames(result.data).length > 0
+          // When there is no plan API return empty string instead of empty object, Hence this method Object.getOwnPropertyNames(result.data).length always return 1
+          var isValidEphemeralPlan = result.data ? true : false
           if (isValidEphemeralPlan) {
             // We have a valid ephemeral plan. Return it.
             return Promise.resolve(result)
