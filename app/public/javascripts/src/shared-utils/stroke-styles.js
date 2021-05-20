@@ -1,28 +1,21 @@
 
-function aerialStroke(ctx, isHighlight){
+function aerialStroke(ctx){
+  // ToDo: we won't get is highlighted 
+  // let's take it off of line width
   var oLineWidth = ctx.lineWidth
   var oStrokeStyle = ctx.strokeStyle
-  if (isHighlight) {
-    ctx.lineWidth = 6
-  } else {
-    ctx.lineWidth = 3
-  }
+  ctx.lineWidth = 3 * oLineWidth
   ctx.stroke()
-  if (isHighlight) {
-    ctx.lineWidth = 2
-  } else {
-    ctx.lineWidth = 1
-  }
+  ctx.lineWidth = oLineWidth
   ctx.strokeStyle = '#ffffff'
   ctx.stroke()
   // restore
-  ctx.lineWidth = oLineWidth
   ctx.strokeStyle = oStrokeStyle
 }
 
-function buriedStroke(ctx, isHighlight){
+function buriedStroke(ctx){
   var oLineDash = ctx.getLineDash()
-  ctx.setLineDash([5, 3])
+  ctx.setLineDash([6, 2])
   ctx.stroke()
   // restore
   ctx.setLineDash(oLineDash)
@@ -56,7 +49,7 @@ function generatePreviewImgs(){
     ctx0.clearRect(0, 0, w, h)
     ctx0.moveTo(0, y)
     ctx0.lineTo(w, y)
-    style.styledStroke(ctx0, false)
+    style.styledStroke(ctx0)
     style.previewImg = cnv0.toDataURL("image/png")
     //style.previewImg = cnv0.toDataURL("image/png").replace("image/png", "image/octet-stream")
   })

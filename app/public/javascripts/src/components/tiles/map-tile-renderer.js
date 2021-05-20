@@ -666,6 +666,24 @@ class MapTileRenderer {
               }
             }
 
+            
+            // road segments by tag
+            if (feature.properties.feature_type_name = "road" && this.stateMapLayers.showSegmentsByTag) {
+              console.log('lets check')
+              let selectedEdgeConstructionType = null
+              if (feature.properties.hasOwnProperty('edge_construction_type')) {
+                // todo change the indecies if edgeConstructionTypes to the ID 
+                selectedEdgeConstructionType = Object.values(this.stateMapLayers.edgeConstructionTypes).find(cType => {
+                  return cType.isVisible && cType.id === feature.properties.edge_construction_type
+                })
+              }
+              if (selectedEdgeConstructionType) {
+                drawingStyles.styledStroke = selectedEdgeConstructionType.styledStroke
+              } else {
+                drawingStyles.lineOpacity = 0.6 // ToDo: don't hard code this
+              }
+            }
+
             PolylineFeatureRenderer.renderFeature(feature, shape, geometryOffset, ctx, mapLayer, drawingStyles, false, this.tileSize)
           }
         }
