@@ -42,13 +42,17 @@ class PolylineFeatureRenderer {
 
 
 
-
+    if (feature.properties.hasOwnProperty('edge_construction_type')) {
+      //console.log(feature.properties)
+    } else {
+      //console.log('nope')
+    }
     // --- test ---
     // - dashed - 
     
     //ctx.setLineDash([6, 2, 2, 2])
     //ctx.setLineDash([])
-    //ctx.lineWidth = 4
+    ctx.lineWidth = 4
     // - multiple - 
     /*
     var pattern = (function () {
@@ -103,14 +107,14 @@ class PolylineFeatureRenderer {
 
 
     
-    //ctx.setLineDash([6, 2, 2, 2])
+    ctx.setLineDash([6, 2, 2, 2])
     //ctx.lineDashOffset = 4
     //ctx.restore()
-    //ctx.lineWidth = 2
+    ctx.lineWidth = 2
     //ctx.setLineDash([])
-    //ctx.strokeStyle = '#ffffff'
+    ctx.strokeStyle = '#ffffff'
     //ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)'
-    //ctx.stroke()
+    ctx.stroke()
 
 
 
