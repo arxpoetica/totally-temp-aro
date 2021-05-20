@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import MapLayerActions from '../../map-layers/map-layer-actions'
 
 import cx from 'clsx'
+import StrokeStyle from '../../../../shared-utils/stroke-styles'
 
 const RoadSegmentTagPanel = props => {
 
@@ -32,7 +33,8 @@ const RoadSegmentTagPanel = props => {
           return (
             <label key={k}>
               <h4>{constructionType.displayName}</h4>
-              <div className="display"></div>
+              <div className="stroke-preview"
+                style={{'backgroundImage': `url(${StrokeStyle[constructionType.strokeType].previewImg})`}}></div>
               <div className="checkbox">
                 <input
                   className="checkboxfill"
