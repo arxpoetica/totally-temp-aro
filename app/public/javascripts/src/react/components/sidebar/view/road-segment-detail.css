@@ -45,10 +45,10 @@
   margin: 0;
   font-size: inherit;
 }
-.segments-tag-panel .display {
+.segments-tag-panel .stroke-preview {
   flex-basis: calc(50% - 15px);
-  background-color: royalblue;
-  height: 4px;
+  height: 8px;
+  background-repeat: repeat;
 }
 .segments-tag-panel .checkbox {
   display: flex;
