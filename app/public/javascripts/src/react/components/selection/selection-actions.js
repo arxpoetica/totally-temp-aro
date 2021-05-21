@@ -137,6 +137,13 @@ function setMapFeatures (mapFeatures) {
   }
 }
 
+function setRoadSegments(roadSegments) {
+  return {
+    type: Actions.SELECTION_SET_ROAD_SEGMENTS,
+    payload: roadSegments,
+  }
+}
+
 function setPlanEditorFeatures (planEditorFeatures) {
   return {
     type: Actions.SELECTION_SET_PLAN_EDITOR_FEATURES,
@@ -171,6 +178,7 @@ export default {
   setLocations,
   setPlanEditorFeatures,
   setMapFeatures,
+  setRoadSegments,
   cloneSelection,
   setMapSelection,
 }
