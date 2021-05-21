@@ -4,12 +4,13 @@ function aerialStroke(ctx){
   // let's take it off of line width
   var oLineWidth = ctx.lineWidth
   var oStrokeStyle = ctx.strokeStyle
-  ctx.lineWidth = 3 * oLineWidth
+  ctx.lineWidth = 1.5 * oLineWidth
   ctx.stroke()
-  ctx.lineWidth = oLineWidth
+  ctx.lineWidth = 0.5 * oLineWidth
   ctx.strokeStyle = '#ffffff'
   ctx.stroke()
   // restore
+  ctx.lineWidth = oLineWidth
   ctx.strokeStyle = oStrokeStyle
 }
 

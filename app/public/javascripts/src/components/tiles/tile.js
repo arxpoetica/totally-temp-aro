@@ -805,6 +805,8 @@ class TileComponentController {
   }
   
   doesConduitNeedUpdate (prevStateMapLayers, stateMapLayers) {
+    if (prevStateMapLayers.showSegmentsByTag !== stateMapLayers.showSegmentsByTag) return true
+    if (JSON.stringify(prevStateMapLayers.edgeConstructionTypes) !== JSON.stringify(stateMapLayers.edgeConstructionTypes)) return true
     // ToDo: this is so wrong! 
     //    find what triggers an update on setNetworkEquipmentLayerVisibility
     //    and have it also trigger an update on setCableConduitVisibility when parent is visible
