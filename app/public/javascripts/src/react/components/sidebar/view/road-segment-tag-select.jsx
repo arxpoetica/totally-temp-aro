@@ -6,17 +6,17 @@ import SelectionActions from '../../selection/selection-actions'
 import AroHttp from '../../../common/aro-http'
 
 function setSelectedOption(tagOptions, roadSegments) {
-    const constructionType = roadSegments[0].edge_construction_type
-    return tagOptions.find(option => option.value === constructionType)
+  const constructionType = roadSegments[0].edge_construction_type
+  return tagOptions.find(option => option.value === constructionType)
 }
 
 const RoadSegmentTagSelect = props => {
 
   const {
-  	showSegmentsByTag,
-  	roadSegments,
-  	edgeConstructionTypes,
-  	setRoadSegments,
+    showSegmentsByTag,
+    roadSegments,
+    edgeConstructionTypes,
+    setRoadSegments,
     selectedLibraryItems,
   } = props
 

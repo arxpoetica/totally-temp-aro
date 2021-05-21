@@ -137,11 +137,11 @@ function setMapFeatures (state, mapFeatures) {
 
 function setRoadSegments(state, roadSegments) {
   return {
-  	...state,
-  	mapFeatures: {
-  		...state.mapFeatures,
-  		roadSegments,
-  	},
+    ...state,
+    mapFeatures: {
+      ...state.mapFeatures,
+      roadSegments,
+    },
   }
 }
 
