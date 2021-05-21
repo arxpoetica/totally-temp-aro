@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import Select from 'react-select'
 import { selectStyles } from '../../../common/view-utils'
 import SelectionActions from '../../selection/selection-actions'
-// import AroHttp from '../../../common/aro-http'
+import AroHttp from '../../../common/aro-http'
 
 function setSelectedOption(tagOptions, roadSegments) {
     const constructionType = roadSegments[0].edge_construction_type
@@ -12,10 +12,16 @@ function setSelectedOption(tagOptions, roadSegments) {
 
 const RoadSegmentTagSelect = props => {
 
-  const { showSegmentsByTag, roadSegments, edgeConstructionTypes, setRoadSegments } = props
+  const {
+  	showSegmentsByTag,
+  	roadSegments,
+  	edgeConstructionTypes,
+  	setRoadSegments,
+    selectedLibraryItems,
+  } = props
 
   const tagOptions = Object.values(edgeConstructionTypes).map(type => {
-    return { label: type.displayName, value: type.id }
+    return { label: type.displayName, value: type.id, name: type.name }
   })
   // FIXME: need untagged
   tagOptions.unshift({ label: 'Untagged', value: 1 })
@@ -36,20 +42,23 @@ const RoadSegmentTagSelect = props => {
 
   const handleChange = async(change) => {
     try {
-      console.log('TODO: finish the actual POST of the body...')
-      console.log('change:', change)
-      // const body = {
-      //   edgeSelection: {
-      //     selectedObjectIds: {},
-      //   },
-      //   modifications: {
-      //     attributes: {},
-      //     constructionType: 'string',
-      //     subType: 'string',
-      //   },
-      // }
-      // const result = await AroHttp.post('/edges/cmd/tag', body)
-      // console.log(result)
+      const body = {
+        // FIXME: this should NOT just assume the first edges library
+        // FIXME: it will likely break if mutliple conduit libraries are in place
+        // FIXME: the alternatives are to somehow include the aro.edge `datasource`
+        //          column on the tile or have the service auto figure out which
+        //          associated libraryId goes w/ which selected object ids
+        libraryId: selectedLibraryItems[0].identifier,
+        edgeSelection: {
+          selectedObjectIds: roadSegments.map(segment => segment.object_id),
+        },
+        modifications: {
+          // attributes: {},
+          constructionType: change.name,
+          // subType: '',
+        },
+      }
+      const result = await AroHttp.post('/service/edges/cmd/tag', body)
 
       const updatedRoadSegments = roadSegments.map(segment => {
         segment.edge_construction_type = change.value
@@ -86,6 +95,7 @@ const mapStateToProps = state => ({
   // destructuring because `roadSegments` is a `Set()`
   roadSegments: [...(state.selection.mapFeatures.roadSegments || [])],
   edgeConstructionTypes: state.mapLayers.edgeConstructionTypes,
+  selectedLibraryItems: state.plan.dataItems?.edge?.selectedLibraryItems,
 })
 
 const mapDispatchToProps = dispatch => ({
