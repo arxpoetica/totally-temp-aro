@@ -95,7 +95,10 @@ const mapStateToProps = state => ({
   // destructuring because `roadSegments` is a `Set()`
   roadSegments: [...(state.selection.mapFeatures.roadSegments || [])],
   edgeConstructionTypes: state.mapLayers.edgeConstructionTypes,
-  selectedLibraryItems: state.plan.dataItems?.edge?.selectedLibraryItems,
+  // selectedLibraryItems: state.plan.dataItems?.edge?.selectedLibraryItems,
+  selectedLibraryItems: state.plan.dataItems.edge
+    ? state.plan.dataItems.edge.selectedLibraryItems
+    : undefined,
 })
 
 const mapDispatchToProps = dispatch => ({
