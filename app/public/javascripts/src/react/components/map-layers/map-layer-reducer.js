@@ -29,7 +29,7 @@ const defaultState = {
     }
   },
   showSegmentsByTag: false, // I want to rename this 
-  edgeConstructionTypes: {
+  edgeConstructionTypes: { // todo change the indecies if edgeConstructionTypes to the ID 
     'aerial': {
       id: null,
       name: 'aerial',
