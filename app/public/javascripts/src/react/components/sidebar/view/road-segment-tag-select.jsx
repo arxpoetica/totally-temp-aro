@@ -5,6 +5,11 @@ import { selectStyles } from '../../../common/view-utils'
 import SelectionActions from '../../selection/selection-actions'
 // import AroHttp from '../../../common/aro-http'
 
+function setSelectedOption(tagOptions, roadSegments) {
+    const constructionType = roadSegments[0].edge_construction_type
+    return tagOptions.find(option => option.value === constructionType)
+}
+
 const RoadSegmentTagSelect = props => {
 
   const { showSegmentsByTag, roadSegments, edgeConstructionTypes, setRoadSegments } = props
@@ -12,23 +17,24 @@ const RoadSegmentTagSelect = props => {
   const tagOptions = Object.values(edgeConstructionTypes).map(type => {
     return { label: type.displayName, value: type.id }
   })
+  // FIXME: need untagged
+  tagOptions.unshift({ label: 'Untagged', value: 1 })
 
   let selectedOption
   if (roadSegments.length === 1) {
-    // FIXME: need untagged
-    tagOptions.unshift({ label: 'Untagged', value: 1 })
-
-    const constructionType = roadSegments[0].edge_construction_type
-    selectedOption = tagOptions.find(option => {
-      return option.value === constructionType
-    })
+    selectedOption = setSelectedOption(tagOptions, roadSegments)
   } else if (roadSegments.length > 1) {
-    selectedOption = { label: 'multiple selected', value: 'multiple' }
-    tagOptions.unshift(selectedOption)
+    const types = roadSegments.map(segment => segment.edge_construction_type)
+    const uniqueTypesLength = [...new Set(types)].length
+    if (uniqueTypesLength === 1) {
+      selectedOption = setSelectedOption(tagOptions, roadSegments)
+    } else {
+      selectedOption = { label: 'multiple selected', value: 'multiple' }
+      tagOptions.unshift(selectedOption)
+    }
   }
 
   const handleChange = async(change) => {
-    console.group('handleChange')
     try {
       console.log('TODO: finish the actual POST of the body...')
       console.log('change:', change)
@@ -54,7 +60,6 @@ const RoadSegmentTagSelect = props => {
     } catch (error) {
       console.error(error)
     }
-    console.groupEnd()
   }
 
   return showSegmentsByTag && roadSegments.length ?
