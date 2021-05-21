@@ -668,7 +668,7 @@ class MapTileRenderer {
 
             
             // road segments by tag
-            if (feature.properties.feature_type_name = "road" && this.stateMapLayers.showSegmentsByTag) {
+            if (feature.properties.feature_type_name === "road" && this.stateMapLayers.showSegmentsByTag) {
               console.log('lets check')
               let selectedEdgeConstructionType = null
               if (feature.properties.hasOwnProperty('edge_construction_type')) {
