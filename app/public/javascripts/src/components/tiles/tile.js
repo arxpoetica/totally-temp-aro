@@ -417,42 +417,54 @@ class TileComponentController {
       }
     })
 
-    this.overlayClickListener = this.mapRef.addListener('click', (event) => {
-      var wasShiftPressed = this.state.isShiftPressed
-      
+    this.overlayClickListener = this.mapRef.addListener('click', async(event) => {
+      const { isShiftPressed } = this.state
+
       if (this.contextMenuService.isMenuVisible.getValue()) {
         this.contextMenuService.menuOff()
         this.$timeout()
         return
       }
-      
-      // ToDo: depricate getFilteredFeaturesUnderLatLng switch to this
-      this.getFeaturesUnderLatLng(event.latLng)
-        .then((hitFeatures) => {
-          if (wasShiftPressed) {
-            this.state.mapFeaturesKeyClickedEvent.next(hitFeatures)
-          } else {
-            this.state.mapFeaturesClickedEvent.next(hitFeatures)
-          }
-        })
-        .catch(err => console.error(err))
-        
-      if (wasShiftPressed) return
-      
-      this.getFilteredFeaturesUnderLatLng(event.latLng)
-        .then((hitFeatures) => {
-          if (hitFeatures) {
-            if (hitFeatures.locations.length > 0) {
-              this.state.hackRaiseEvent(hitFeatures.locations)
-            }
 
-            // Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
-            // ToDo: now that we have types these categories should to be dynamic
-            this.state.mapFeaturesSelectedEvent.next(hitFeatures)
+      try {
+        // ToDo: depricate getFilteredFeaturesUnderLatLng switch to this
+        const hitFeatures = await this.getFeaturesUnderLatLng(event.latLng)
+        if (isShiftPressed) {
+          this.state.mapFeaturesKeyClickedEvent.next(hitFeatures)
+        } else {
+          this.state.mapFeaturesClickedEvent.next(hitFeatures)
+        }
+      } catch (error) {
+        console.error(err)
+      }
+
+      try {
+        const hitFeatures = await this.getFilteredFeaturesUnderLatLng(event.latLng)
+
+        const hasRoadSegments = [...hitFeatures.roadSegments || []].length > 0
+        if (isShiftPressed && !hasRoadSegments) {
+          return
+        }
+
+        if (hitFeatures) {
+          if (hitFeatures.locations.length > 0) {
+            this.state.hackRaiseEvent(hitFeatures.locations)
           }
-        })
+
+          if (isShiftPressed && hasRoadSegments) {
+            const mapFeatures = this.state.mapFeaturesSelectedEvent.getValue()
+            const priorRoadSegments = [...mapFeatures.roadSegments || []]
+            hitFeatures.roadSegments = new Set([...priorRoadSegments, ...hitFeatures.roadSegments])
+          }
+          // Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
+          // ToDo: now that we have types these categories should to be dynamic
+          this.state.mapFeaturesSelectedEvent.next(hitFeatures)
+        }
+      } catch (error) {
+        console.error(err)
+      }
     })
-    
+
     this.getFeaturesUnderLatLng = function (latLng) {
       // Get latitiude and longitude
       var lat = latLng.lat()
