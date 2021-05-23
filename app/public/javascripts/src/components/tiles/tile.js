@@ -789,22 +789,24 @@ class TileComponentController {
       return true
     }
     // A hacky way to perform change detection, because of the way our tile.js and map-tile-renderer.js are set up.
-    const strOldSelection = JSON.stringify({
+    const strOldSelection = {
       locations: [...oldSelection.locations],
       serviceAreas: [...oldSelection.serviceAreas],
       analysisAreas: [...oldSelection.analysisAreas]
-    })
+    }
 
-    const strNewSelection = JSON.stringify({
+    const strNewSelection = {
       locations: [...newSelection.locations],
       serviceAreas: [...newSelection.serviceAreas],
       analysisAreas: [...newSelection.analysisAreas]
-    })
+    }
 
-    return strOldSelection !== strNewSelection
+    return !dequal(strOldSelection, strNewSelection)
   }
   
   doesConduitNeedUpdate (prevStateMapLayers, stateMapLayers) {
+    if (prevStateMapLayers.showSegmentsByTag !== stateMapLayers.showSegmentsByTag) return true
+    if (!dequal(prevStateMapLayers.edgeConstructionTypes, stateMapLayers.edgeConstructionTypes)) return true
     // ToDo: this is so wrong! 
     //    find what triggers an update on setNetworkEquipmentLayerVisibility
     //    and have it also trigger an update on setCableConduitVisibility when parent is visible
@@ -813,7 +815,7 @@ class TileComponentController {
         !stateMapLayers.networkEquipment ||
         !prevStateMapLayers.networkEquipment.cables ||
         !stateMapLayers.networkEquipment.cables ||
-        JSON.stringify(prevStateMapLayers) === JSON.stringify(stateMapLayers)) {
+        dequal(prevStateMapLayers, stateMapLayers)) {
       return false
     }
     var needUpdate = false
@@ -826,7 +828,7 @@ class TileComponentController {
         if (cable.checked) {
           if (!prevCable.checked) {
             needUpdate = true
-          } else if (JSON.stringify(cable.conduitVisibility) !== JSON.stringify(prevCable.conduitVisibility)) {
+          } else if (!dequal(cable.conduitVisibility, prevCable.conduitVisibility)) {
             needUpdate = true
           }
         }
