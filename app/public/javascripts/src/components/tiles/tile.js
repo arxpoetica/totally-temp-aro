@@ -440,7 +440,14 @@ class TileComponentController {
 
       try {
         const hitFeatures = await this.getFilteredFeaturesUnderLatLng(event.latLng)
-        const hitRoadSegments = [...hitFeatures.roadSegments || []]
+        const hittableSegmentsIds = Object
+          .values(this.stateMapLayers.edgeConstructionTypes)
+          .filter(type => type.isVisible)
+          .map(type => type.id)
+        const hitRoadSegments = [...hitFeatures.roadSegments || []].filter(segment => {
+          return hittableSegmentsIds.includes(segment.edge_construction_type)
+        })
+
         const hasRoadSegments = hitRoadSegments.length > 0
         if (isShiftPressed && !hasRoadSegments) {
           return
@@ -464,6 +471,8 @@ class TileComponentController {
             })
 
             hitFeatures.roadSegments = new Set([...onlyInPrior, ...onlyInHit])
+          } else {
+            hitFeatures.roadSegments = new Set([...hitRoadSegments])
           }
           // Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
           // ToDo: now that we have types these categories should to be dynamic
