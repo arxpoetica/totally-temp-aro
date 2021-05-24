@@ -7,8 +7,8 @@ import StrokeStyle from '../../../../shared-utils/stroke-styles'
 
 const RoadSegmentTagPanel = props => {
 
-  const { 
-    mapFeatures, showSegmentsByTag, edgeConstructionTypes, 
+  const {
+    showSegmentsByTag, edgeConstructionTypes,
     setShowSegmentsByTag, setEdgeConstructionTypeVisibility } = props
 
   function handleCheckbox(constructionType) {
@@ -52,7 +52,6 @@ const RoadSegmentTagPanel = props => {
 }
 
 const mapStateToProps = state => ({
-  mapFeatures: state.selection.mapFeatures,
   showSegmentsByTag: state.mapLayers.showSegmentsByTag,
   edgeConstructionTypes: state.mapLayers.edgeConstructionTypes
 })
