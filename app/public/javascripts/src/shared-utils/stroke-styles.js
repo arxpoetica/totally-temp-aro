@@ -24,16 +24,12 @@ function aerialStroke (ctx) {
 function buriedStroke (ctx) {
   var oLineCap = ctx.lineCap
   var oLineDash = ctx.getLineDash()
-  //var oLineWidth = ctx.lineWidth
   ctx.lineCap = 'butt'
-  ctx.setLineDash([6, 2])
 
-  //ctx.lineWidth = 4 * oLineWidth
-  //ctx.setLineDash([1, 7])
+  ctx.setLineDash([6, 2])
   ctx.stroke()
   // restore
   ctx.setLineDash(oLineDash)
-  //ctx.lineWidth = oLineWidth
   ctx.lineCap = oLineCap
 }
 
@@ -53,7 +49,7 @@ var StrokeStyle = {
 }
 
 function generatePreviewImgs () {
-  var w = 16
+  var w = 16 // NOTE: w should be divisible by any/all setLineDash array totals
   var h = 8
   var y = 4.5
   var cnv0 = document.createElement('canvas')
@@ -70,7 +66,6 @@ function generatePreviewImgs () {
     ctx0.lineTo(w, y)
     style.styledStroke(ctx0)
     style.previewImg = cnv0.toDataURL("image/png")
-    //style.previewImg = cnv0.toDataURL("image/png").replace("image/png", "image/octet-stream")
   })
 }
 
