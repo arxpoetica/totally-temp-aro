@@ -26,9 +26,7 @@ const RoadSegmentTagSelect = props => {
   const tagOptions = Object.values(edgeConstructionTypes).map(type => {
     return { label: type.displayName, value: type.id, name: type.name }
   })
-  // FIXME: need untagged
-  tagOptions.unshift({ label: 'Untagged', value: 1 })
-
+  
   let selectedOption
   if (roadSegments.length === 1) {
     selectedOption = setSelectedOption(tagOptions, roadSegments)

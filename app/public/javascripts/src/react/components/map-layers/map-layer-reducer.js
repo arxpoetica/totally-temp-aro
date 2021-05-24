@@ -30,6 +30,13 @@ const defaultState = {
   },
   showSegmentsByTag: false, // I want to rename this 
   edgeConstructionTypes: { // todo change the indecies if edgeConstructionTypes to the ID 
+    'estimated': {
+      id: null,
+      name: 'estimated',
+      displayName: 'Untagged',
+      isVisible: false,
+      strokeType: 'DEFAULT_LINE'
+    },
     'aerial': {
       id: null,
       name: 'aerial',
