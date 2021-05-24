@@ -440,8 +440,8 @@ class TileComponentController {
 
       try {
         const hitFeatures = await this.getFilteredFeaturesUnderLatLng(event.latLng)
-
-        const hasRoadSegments = [...hitFeatures.roadSegments || []].length > 0
+        const hitRoadSegments = [...hitFeatures.roadSegments || []]
+        const hasRoadSegments = hitRoadSegments.length > 0
         if (isShiftPressed && !hasRoadSegments) {
           return
         }
@@ -454,7 +454,16 @@ class TileComponentController {
           if (isShiftPressed && hasRoadSegments) {
             const mapFeatures = this.state.mapFeaturesSelectedEvent.getValue()
             const priorRoadSegments = [...mapFeatures.roadSegments || []]
-            hitFeatures.roadSegments = new Set([...priorRoadSegments, ...hitFeatures.roadSegments])
+
+            // capturing difference because shift + click should also remove
+            const onlyInPrior = priorRoadSegments.filter(segment => {
+              return !hitRoadSegments.find(found => found.id === segment.id)
+            })
+            const onlyInHit = hitRoadSegments.filter(segment => {
+              return !priorRoadSegments.find(found => found.id === segment.id)
+            })
+
+            hitFeatures.roadSegments = new Set([...onlyInPrior, ...onlyInHit])
           }
           // Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
           // ToDo: now that we have types these categories should to be dynamic
