@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { connect } from 'react-redux'
 import Select from 'react-select'
+import Loader from '../../common/Loader.jsx'
 import { selectStyles } from '../../../common/view-utils'
 import SelectionActions from '../../selection/selection-actions'
 import AroHttp from '../../../common/aro-http'
@@ -11,6 +12,8 @@ function setSelectedOption(tagOptions, roadSegments) {
 }
 
 const RoadSegmentTagSelect = props => {
+
+  const [loading, setLoading] = useState(false)
 
   const {
     showSegmentsByTag,
@@ -58,6 +61,7 @@ const RoadSegmentTagSelect = props => {
           // subType: '',
         },
       }
+      setLoading(true)
       const result = await AroHttp.post('/service/edges/cmd/tag', body)
 
       const updatedRoadSegments = roadSegments.map(segment => {
@@ -65,7 +69,7 @@ const RoadSegmentTagSelect = props => {
         return segment
       })
       setRoadSegments(new Set(updatedRoadSegments))
-
+      setLoading(false)
     } catch (error) {
       console.error(error)
     }
@@ -84,6 +88,7 @@ const RoadSegmentTagSelect = props => {
           styles={selectStyles}
         />
       </div>
+      <Loader loading={loading} title="saving tags..."/>
     </div>
     {/* <pre>{JSON.stringify(roadSegments, null, '  ')}</pre> */}
     </>

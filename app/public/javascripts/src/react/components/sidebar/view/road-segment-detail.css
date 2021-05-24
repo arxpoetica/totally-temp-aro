@@ -63,7 +63,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 5px 0;
+  position: relative;
+  padding: 12px 5px;
   border-top: 1px solid #888888;
 }
 .segments-tag-select h3 {
