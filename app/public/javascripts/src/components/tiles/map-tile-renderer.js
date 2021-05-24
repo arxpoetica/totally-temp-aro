@@ -103,7 +103,6 @@ class MapTileRenderer {
   }
 
   setStateMapLayers (stateMapLayers) {
-    console.log(stateMapLayers)
     this.stateMapLayers = stateMapLayers
   }
 

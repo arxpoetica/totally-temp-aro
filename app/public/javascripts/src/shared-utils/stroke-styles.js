@@ -1,25 +1,35 @@
 
 function aerialStroke(ctx){
-  // ToDo: we won't get is highlighted 
-  // let's take it off of line width
+  var oLineCap = ctx.lineCap
   var oLineWidth = ctx.lineWidth
   var oStrokeStyle = ctx.strokeStyle
+  ctx.lineCap = 'butt'
+
   ctx.lineWidth = 1.5 * oLineWidth
   ctx.stroke()
   ctx.lineWidth = 0.5 * oLineWidth
   ctx.strokeStyle = '#ffffff'
   ctx.stroke()
   // restore
-  ctx.lineWidth = oLineWidth
   ctx.strokeStyle = oStrokeStyle
+  ctx.lineWidth = oLineWidth
+  ctx.lineCap = oLineCap
 }
 
 function buriedStroke(ctx){
+  var oLineCap = ctx.lineCap
   var oLineDash = ctx.getLineDash()
+  //var oLineWidth = ctx.lineWidth
+  ctx.lineCap = 'butt'
   ctx.setLineDash([6, 2])
+
+  //ctx.lineWidth = 4 * oLineWidth
+  //ctx.setLineDash([1, 7])
   ctx.stroke()
   // restore
   ctx.setLineDash(oLineDash)
+  //ctx.lineWidth = oLineWidth
+  ctx.lineCap = oLineCap
 }
 
 var StrokeStyle = {
@@ -34,7 +44,6 @@ var StrokeStyle = {
 }
 
 function generatePreviewImgs(){
-  console.log('render preview images')
   var w = 16
   var h = 8
   var y = 4.5
