@@ -680,7 +680,7 @@ class MapTileRenderer {
               if (selectedEdgeConstructionType) {
                 drawingStyles.styledStroke = StrokeStyle[selectedEdgeConstructionType.strokeType].styledStroke
               } else {
-                drawingStyles.lineOpacity = 0.6 // ToDo: don't hard code this
+                drawingStyles.lineOpacity = 0.5 // ToDo: don't hard code this
               }
             }
 

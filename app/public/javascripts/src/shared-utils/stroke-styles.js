@@ -1,5 +1,10 @@
 
-function aerialStroke(ctx){
+function defaultStroke (ctx) {
+  // no change to the line style
+  ctx.stroke()
+}
+
+function aerialStroke (ctx) {
   var oLineCap = ctx.lineCap
   var oLineWidth = ctx.lineWidth
   var oStrokeStyle = ctx.strokeStyle
@@ -16,7 +21,7 @@ function aerialStroke(ctx){
   ctx.lineCap = oLineCap
 }
 
-function buriedStroke(ctx){
+function buriedStroke (ctx) {
   var oLineCap = ctx.lineCap
   var oLineDash = ctx.getLineDash()
   //var oLineWidth = ctx.lineWidth
@@ -33,6 +38,10 @@ function buriedStroke(ctx){
 }
 
 var StrokeStyle = {
+  'DEFAULT_LINE': {
+    'previewImg': null,
+    'styledStroke': defaultStroke
+  },
   'AERIAL_LINE': {
     'previewImg': null,
     'styledStroke': aerialStroke
@@ -43,7 +52,7 @@ var StrokeStyle = {
   },
 }
 
-function generatePreviewImgs(){
+function generatePreviewImgs () {
   var w = 16
   var h = 8
   var y = 4.5
