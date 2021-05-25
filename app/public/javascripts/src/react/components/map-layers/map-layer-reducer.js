@@ -50,6 +50,13 @@ const defaultState = {
       displayName: 'Buried',
       isVisible: true,
       strokeType: 'BURIED_LINE'
+    },
+    'underground': {
+      id: null,
+      name: 'underground',
+      displayName: 'Underground',
+      isVisible: true,
+      strokeType: 'UNDERGROUND_LINE'
     }
   }
 }

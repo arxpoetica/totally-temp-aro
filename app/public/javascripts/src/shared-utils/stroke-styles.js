@@ -33,6 +33,18 @@ function buriedStroke (ctx) {
   ctx.lineCap = oLineCap
 }
 
+function undergroundStroke (ctx) {
+  var oLineCap = ctx.lineCap
+  var oLineDash = ctx.getLineDash()
+  ctx.lineCap = 'butt'
+
+  ctx.setLineDash([10, 2, 2, 2])
+  ctx.stroke()
+  // restore
+  ctx.setLineDash(oLineDash)
+  ctx.lineCap = oLineCap
+}
+
 var StrokeStyle = {
   'DEFAULT_LINE': {
     'previewImg': null,
@@ -45,6 +57,10 @@ var StrokeStyle = {
   'BURIED_LINE': {
     'previewImg': null,
     'styledStroke': buriedStroke
+  },
+  'UNDERGROUND_LINE': {
+    'previewImg': null,
+    'styledStroke': undergroundStroke
   },
 }
 
