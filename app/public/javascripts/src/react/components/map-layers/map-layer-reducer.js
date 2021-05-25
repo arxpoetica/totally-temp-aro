@@ -34,21 +34,21 @@ const defaultState = {
       id: null,
       name: 'estimated',
       displayName: 'Untagged',
-      isVisible: false,
+      isVisible: true,
       strokeType: 'DEFAULT_LINE'
     },
     'aerial': {
       id: null,
       name: 'aerial',
       displayName: 'Aerial',
-      isVisible: false,
+      isVisible: true,
       strokeType: 'AERIAL_LINE'
     },
     'buried': {
       id: null,
       name: 'buried',
       displayName: 'Buried',
-      isVisible: false,
+      isVisible: true,
       strokeType: 'BURIED_LINE'
     }
   }
