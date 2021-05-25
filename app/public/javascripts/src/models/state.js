@@ -29,7 +29,6 @@ import ToolBarActions from '../react/components/header/tool-bar-actions'
 import RoicReportsActions from '../react/components/sidebar/analysis/roic-reports/roic-reports-actions'
 import { hsvToRgb } from '../react/common/view-utils'
 import StateViewModeActions from '../react/components/state-view-mode/state-view-mode-actions'
-import GlobalsettingsActions from '../react/components/global-settings/globalsettings-action'
 
 const networkAnalysisConstraintsSelector = formValueSelector(ReactComponentConstants.NETWORK_ANALYSIS_CONSTRAINTS)
 
@@ -812,7 +811,8 @@ class State {
       return $http.get(`/service/v1/plan/ephemeral/latest`)
         .then((result) => {
           // We have a valid ephemeral plan if we get back an object with *some* properties
-          var isValidEphemeralPlan = Object.getOwnPropertyNames(result.data).length > 0
+          // When there is no plan API return empty string instead of empty object, Hence this method Object.getOwnPropertyNames(result.data).length always return 1
+          var isValidEphemeralPlan = result.data ? true : false
           if (isValidEphemeralPlan) {
             // We have a valid ephemeral plan. Return it.
             return Promise.resolve(result)
@@ -1602,10 +1602,6 @@ class State {
           service.getStyleValues()
 
           service.setClientIdInRedux(service.configuration.ARO_CLIENT)
-          // Validate Broadcast if it exists in the configuration
-          if(service.configuration.broadcast) {
-            service.validateBroadcast(service.configuration.broadcast)
-          }
           return service.loadConfigurationFromServer()
         })
         .catch(err => console.error(err))
@@ -1908,7 +1904,6 @@ class State {
       setTypeVisibility: (typeVisibility) => dispatch(MapLayerActions.setTypeVisibility(typeVisibility)),
       setLayerCategories: (layerCategories) => dispatch(StateViewModeActions.setLayerCategories(layerCategories)),
       rClearViewMode: (value) => dispatch(StateViewModeActions.clearViewMode(value)),
-      validateBroadcast: (message) => dispatch(GlobalsettingsActions.validateBroadcast(message)),
       loadEdgeConstructionTypeIds: () => dispatch(MapLayerActions.loadEdgeConstructionTypeIds()),
     }
   }

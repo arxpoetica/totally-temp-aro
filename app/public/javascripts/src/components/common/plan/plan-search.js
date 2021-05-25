@@ -101,7 +101,7 @@ class PlanSearchController {
           this.planOptions.params = {}
           this.$http.get('/optimization/processes').then((running) => {
             this.totalData = []
-            this.totalData = response.data.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase()) ? 1 : -1)
+            this.totalData = response.data.sort((a, b) => (a.createdDate < b.createdDate) ? 1 : -1)
             this.totalData.forEach((plan) => {
               var info = running.data.find((status) => status.planId === +plan.id)
               if (info) {

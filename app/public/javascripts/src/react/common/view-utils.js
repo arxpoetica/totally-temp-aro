@@ -1,4 +1,5 @@
 import { useRef, useEffect } from 'react'
+import Constants from './constants.js'
 
 // ========================= >>>>> style utils
 
@@ -56,6 +57,7 @@ export const selectStyles = {
 // logout function
 export const logoutApp = () => {
   window.location.href = '/logout'
+  localStorage.removeItem(Constants.BROADCAST_LOCAL_STORAGE)
 }
 
 export const flattenDeep = (arr) => {
@@ -67,7 +69,8 @@ export const flattenDeep = (arr) => {
 // date transormations
 // see: https://stackoverflow.com/a/38050824/209803
 // and: https://zachholman.com/talk/utc-is-enough-for-everyone-right
-export const toDateFromIsoDay = isoDayString => new Date(`${isoDayString}T00:00:00.000`)
+export const toIsoStartDate = isoDayString => new Date(`${isoDayString}T00:00:00.000`)
+export const toIsoEndDate = isoDayString => new Date(`${isoDayString}T23:59:59.000`)
 export const toUTCDate = date => new Date(Date.UTC(
   date.getUTCFullYear(),
   date.getUTCMonth(),
