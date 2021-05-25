@@ -39,6 +39,7 @@ class PolylineFeatureRenderer {
     }
     ctx.lineWidth = lineWidth || 1
 
+
     var xPrev = shape[0].x + geometryOffset.x
     var yPrev = shape[0].y + geometryOffset.y
     ctx.beginPath()
@@ -65,7 +66,11 @@ class PolylineFeatureRenderer {
       yPrev = yNext
       ctx.moveTo(xPrev, yPrev)
     }
-    ctx.stroke()
+    if (drawingStyleOverrides.hasOwnProperty('styledStroke')) {
+      drawingStyleOverrides.styledStroke(ctx)
+    } else {
+      ctx.stroke()
+    }
 
     // Draw the polyline direction if the map options specify it
     if (mapLayer.showPolylineDirection) {

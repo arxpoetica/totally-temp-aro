@@ -417,42 +417,72 @@ class TileComponentController {
       }
     })
 
-    this.overlayClickListener = this.mapRef.addListener('click', (event) => {
-      var wasShiftPressed = this.state.isShiftPressed
-      
+    this.overlayClickListener = this.mapRef.addListener('click', async(event) => {
+      const { isShiftPressed } = this.state
+
       if (this.contextMenuService.isMenuVisible.getValue()) {
         this.contextMenuService.menuOff()
         this.$timeout()
         return
       }
-      
-      // ToDo: depricate getFilteredFeaturesUnderLatLng switch to this
-      this.getFeaturesUnderLatLng(event.latLng)
-        .then((hitFeatures) => {
-          if (wasShiftPressed) {
-            this.state.mapFeaturesKeyClickedEvent.next(hitFeatures)
-          } else {
-            this.state.mapFeaturesClickedEvent.next(hitFeatures)
-          }
-        })
-        .catch(err => console.error(err))
-        
-      if (wasShiftPressed) return
-      
-      this.getFilteredFeaturesUnderLatLng(event.latLng)
-        .then((hitFeatures) => {
-          if (hitFeatures) {
-            if (hitFeatures.locations.length > 0) {
-              this.state.hackRaiseEvent(hitFeatures.locations)
-            }
 
-            // Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
-            // ToDo: now that we have types these categories should to be dynamic
-            this.state.mapFeaturesSelectedEvent.next(hitFeatures)
-          }
+      try {
+        // ToDo: depricate getFilteredFeaturesUnderLatLng switch to this
+        const hitFeatures = await this.getFeaturesUnderLatLng(event.latLng)
+        if (isShiftPressed) {
+          this.state.mapFeaturesKeyClickedEvent.next(hitFeatures)
+        } else {
+          this.state.mapFeaturesClickedEvent.next(hitFeatures)
+        }
+      } catch (error) {
+        console.error(err)
+      }
+
+      try {
+        const hitFeatures = await this.getFilteredFeaturesUnderLatLng(event.latLng)
+        const hittableSegmentsIds = Object
+          .values(this.stateMapLayers.edgeConstructionTypes)
+          .filter(type => type.isVisible)
+          .map(type => type.id)
+        const hitRoadSegments = [...hitFeatures.roadSegments || []].filter(segment => {
+          return hittableSegmentsIds.includes(segment.edge_construction_type)
         })
+
+        const hasRoadSegments = hitRoadSegments.length > 0
+        if (isShiftPressed && !hasRoadSegments) {
+          return
+        }
+
+        if (hitFeatures) {
+          if (hitFeatures.locations.length > 0) {
+            this.state.hackRaiseEvent(hitFeatures.locations)
+          }
+
+          if (isShiftPressed && hasRoadSegments) {
+            const mapFeatures = this.state.mapFeaturesSelectedEvent.getValue()
+            const priorRoadSegments = [...mapFeatures.roadSegments || []]
+
+            // capturing difference because shift + click should also remove
+            const onlyInPrior = priorRoadSegments.filter(segment => {
+              return !hitRoadSegments.find(found => found.id === segment.id)
+            })
+            const onlyInHit = hitRoadSegments.filter(segment => {
+              return !priorRoadSegments.find(found => found.id === segment.id)
+            })
+
+            hitFeatures.roadSegments = new Set([...onlyInPrior, ...onlyInHit])
+          } else {
+            hitFeatures.roadSegments = new Set([...hitRoadSegments])
+          }
+          // Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
+          // ToDo: now that we have types these categories should to be dynamic
+          this.state.mapFeaturesSelectedEvent.next(hitFeatures)
+        }
+      } catch (error) {
+        console.error(err)
+      }
     })
-    
+
     this.getFeaturesUnderLatLng = function (latLng) {
       // Get latitiude and longitude
       var lat = latLng.lat()
@@ -789,22 +819,24 @@ class TileComponentController {
       return true
     }
     // A hacky way to perform change detection, because of the way our tile.js and map-tile-renderer.js are set up.
-    const strOldSelection = JSON.stringify({
+    const strOldSelection = {
       locations: [...oldSelection.locations],
       serviceAreas: [...oldSelection.serviceAreas],
       analysisAreas: [...oldSelection.analysisAreas]
-    })
+    }
 
-    const strNewSelection = JSON.stringify({
+    const strNewSelection = {
       locations: [...newSelection.locations],
       serviceAreas: [...newSelection.serviceAreas],
       analysisAreas: [...newSelection.analysisAreas]
-    })
+    }
 
-    return strOldSelection !== strNewSelection
+    return !dequal(strOldSelection, strNewSelection)
   }
   
   doesConduitNeedUpdate (prevStateMapLayers, stateMapLayers) {
+    if (prevStateMapLayers.showSegmentsByTag !== stateMapLayers.showSegmentsByTag) return true
+    if (!dequal(prevStateMapLayers.edgeConstructionTypes, stateMapLayers.edgeConstructionTypes)) return true
     // ToDo: this is so wrong! 
     //    find what triggers an update on setNetworkEquipmentLayerVisibility
     //    and have it also trigger an update on setCableConduitVisibility when parent is visible
@@ -813,7 +845,7 @@ class TileComponentController {
         !stateMapLayers.networkEquipment ||
         !prevStateMapLayers.networkEquipment.cables ||
         !stateMapLayers.networkEquipment.cables ||
-        JSON.stringify(prevStateMapLayers) === JSON.stringify(stateMapLayers)) {
+        dequal(prevStateMapLayers, stateMapLayers)) {
       return false
     }
     var needUpdate = false
@@ -826,7 +858,7 @@ class TileComponentController {
         if (cable.checked) {
           if (!prevCable.checked) {
             needUpdate = true
-          } else if (JSON.stringify(cable.conduitVisibility) !== JSON.stringify(prevCable.conduitVisibility)) {
+          } else if (!dequal(cable.conduitVisibility, prevCable.conduitVisibility)) {
             needUpdate = true
           }
         }

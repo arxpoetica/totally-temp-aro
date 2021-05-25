@@ -6,6 +6,7 @@ import AsyncPriorityQueue from 'async/priorityQueue'
 import Constants from '../common/constants'
 import PuppeteerMessages from '../common/puppeteer-messages'
 import Rule from './rule'
+import StrokeStyle from '../../shared-utils/stroke-styles'
 
 class MapTileRenderer {
   constructor (tileSize, tileDataService, mapTileOptions, layerCategories, selectedDisplayMode, selectionModes, analysisSelectionMode, stateMapLayers, displayModes,
@@ -663,6 +664,23 @@ class MapTileRenderer {
                 } else if (this.stateMapLayers.networkEquipment.roads[edgeType]) {
                   drawingStyles.strokeStyle = this.stateMapLayers.networkEquipment.roads[edgeType].drawingOptions.strokeStyle
                 }
+              }
+            }
+
+            
+            // road segments by tag
+            if (feature.properties.feature_type_name === "road" && this.stateMapLayers.showSegmentsByTag) {
+              let selectedEdgeConstructionType = null
+              if (feature.properties.hasOwnProperty('edge_construction_type')) {
+                // todo change the indecies if edgeConstructionTypes to the ID 
+                selectedEdgeConstructionType = Object.values(this.stateMapLayers.edgeConstructionTypes).find(cType => {
+                  return cType.isVisible && cType.id === feature.properties.edge_construction_type
+                })
+              }
+              if (selectedEdgeConstructionType) {
+                drawingStyles.styledStroke = StrokeStyle[selectedEdgeConstructionType.strokeType].styledStroke
+              } else {
+                drawingStyles.lineOpacity = 0.5 // ToDo: don't hard code this
               }
             }
 
