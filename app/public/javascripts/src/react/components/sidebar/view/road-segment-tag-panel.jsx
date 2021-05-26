@@ -1,19 +1,42 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { connect } from 'react-redux'
 import MapLayerActions from '../../map-layers/map-layer-actions'
-
+import SelectionActions from '../../selection/selection-actions'
 import cx from 'clsx'
 import StrokeStyle from '../../../../shared-utils/stroke-styles'
 
 const RoadSegmentTagPanel = props => {
 
   const {
-    showSegmentsByTag, edgeConstructionTypes,
-    setShowSegmentsByTag, setEdgeConstructionTypeVisibility } = props
+    showSegmentsByTag,
+    edgeConstructionTypes,
+    mapFeatures,
+    setShowSegmentsByTag,
+    setEdgeConstructionTypeVisibility,
+    setRoadSegments,
+    cloneSelection,
+    setMapSelection,
+  } = props
 
   function handleCheckbox(constructionType) {
-    let isVisible = !edgeConstructionTypes[constructionType].isVisible
-    setEdgeConstructionTypeVisibility(constructionType, isVisible)
+    const checkedType = edgeConstructionTypes[constructionType]
+    const { isVisible } = checkedType
+
+    setEdgeConstructionTypeVisibility(constructionType, !isVisible)
+
+    // unselect any road segments of any given unchecked type
+    // note: for some reason this only works if we set both selection and road segments
+    if (isVisible && mapFeatures.hasOwnProperty('roadSegments')) {
+      const filteredSegments = [...mapFeatures.roadSegments].filter(segment => {
+        return segment.edge_construction_type !== checkedType.id
+      })
+      const newRoadSegments = new Set([...filteredSegments])
+      setRoadSegments(newRoadSegments)
+
+      const newSelection = cloneSelection()
+      newSelection.details.roadSegments = newRoadSegments
+      setMapSelection(newSelection)
+    }
   }
 
   return (
@@ -53,12 +76,18 @@ const RoadSegmentTagPanel = props => {
 
 const mapStateToProps = state => ({
   showSegmentsByTag: state.mapLayers.showSegmentsByTag,
-  edgeConstructionTypes: state.mapLayers.edgeConstructionTypes
+  edgeConstructionTypes: state.mapLayers.edgeConstructionTypes,
+  mapFeatures: state.selection.mapFeatures,
 })
 
 const mapDispatchToProps = dispatch => ({
   setShowSegmentsByTag: value => dispatch(MapLayerActions.setShowSegmentsByTag(value)),
-  setEdgeConstructionTypeVisibility: (constructionType, isVisible) => dispatch(MapLayerActions.setEdgeConstructionTypeVisibility(constructionType, isVisible))
+  setEdgeConstructionTypeVisibility: (constructionType, isVisible) => {
+    return dispatch(MapLayerActions.setEdgeConstructionTypeVisibility(constructionType, isVisible))
+  },
+  setRoadSegments: roadSegments => dispatch(SelectionActions.setRoadSegments(roadSegments)),
+  cloneSelection: () => dispatch(SelectionActions.cloneSelection()),
+  setMapSelection: mapSelection => dispatch(SelectionActions.setMapSelection(mapSelection)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(RoadSegmentTagPanel)
