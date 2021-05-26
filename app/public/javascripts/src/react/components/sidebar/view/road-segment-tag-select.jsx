@@ -4,6 +4,7 @@ import Select from 'react-select'
 import Loader from '../../common/Loader.jsx'
 import { selectStyles } from '../../../common/view-utils'
 import SelectionActions from '../../selection/selection-actions'
+import AclActions from '../../acl/acl-actions'
 import AroHttp from '../../../common/aro-http'
 
 function setSelectedOption(tagOptions, roadSegments) {
@@ -19,9 +20,42 @@ const RoadSegmentTagSelect = props => {
     showSegmentsByTag,
     roadSegments,
     edgeConstructionTypes,
-    setRoadSegments,
     selectedLibraryItems,
+    acl,
+    authRoles,
+    writeBit,
+    loggedInUser,
+    setRoadSegments,
+    getAcl,
   } = props
+
+  let resourceType = 'LIBRARY'
+  let canEdit = false
+
+  const getCanEdit = (resourceId) => {
+    let permissions = false
+    let groupIds = loggedInUser.groupIds.concat([loggedInUser.id])
+    if (acl.aclByType.hasOwnProperty(resourceType) 
+      && acl.aclByType[resourceType].hasOwnProperty(resourceId)
+    ){
+      permissions = 'undefined' !== typeof (
+        acl.aclByType[resourceType][resourceId].find(
+          ele => groupIds.includes(ele.systemActorId) 
+          && writeBit === writeBit & ele.rolePermissions
+        )
+      )
+    }
+    return permissions
+  }
+
+  // be sure we have permissions info
+  if (selectedLibraryItems.length > 0 && writeBit) {
+    // FIXME: this should NOT just assume the first edges library
+    //          see related below fixme too...
+    let resourceId = selectedLibraryItems[0].identifier
+    getAcl(resourceType, resourceId)
+    canEdit = getCanEdit(resourceId)
+  }
 
   const tagOptions = Object.values(edgeConstructionTypes).map(type => {
     return { label: type.displayName, value: type.id, name: type.name }
@@ -73,7 +107,7 @@ const RoadSegmentTagSelect = props => {
     }
   }
 
-  return showSegmentsByTag && roadSegments.length ?
+  return showSegmentsByTag && roadSegments.length && canEdit ?
     <>
     <div className="segments-tag-select">
       <h3>Tagged as:</h3>
@@ -101,11 +135,18 @@ const mapStateToProps = state => ({
   // selectedLibraryItems: state.plan.dataItems?.edge?.selectedLibraryItems,
   selectedLibraryItems: state.plan.dataItems.edge
     ? state.plan.dataItems.edge.selectedLibraryItems
-    : undefined,
+    : [],
+  acl: state.acl,
+  authRoles: state.user.authRoles,
+  loggedInUser: state.user.loggedInUser,
+  writeBit: state.user.authPermissions.RESOURCE_WRITE 
+    ? state.user.authPermissions.RESOURCE_WRITE.permissionBits 
+    : null,
 })
 
 const mapDispatchToProps = dispatch => ({
   setRoadSegments: roadSegments => dispatch(SelectionActions.setRoadSegments(roadSegments)),
+  getAcl: (resourceType, resourceId, doForceUpdate = false) => dispatch(AclActions.getAcl(resourceType, resourceId, doForceUpdate)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(RoadSegmentTagSelect)
