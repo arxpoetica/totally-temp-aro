@@ -50,6 +50,8 @@ const RoadSegmentTagSelect = props => {
 
   // be sure we have permissions info
   if (selectedLibraryItems.length > 0 && writeBit) {
+    // FIXME: this should NOT just assume the first edges library
+    //          see related below fixme too...
     let resourceId = selectedLibraryItems[0].identifier
     getAcl(resourceType, resourceId)
     canEdit = getCanEdit(resourceId)
