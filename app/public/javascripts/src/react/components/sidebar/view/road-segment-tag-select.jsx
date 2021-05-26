@@ -22,7 +22,6 @@ const RoadSegmentTagSelect = props => {
     edgeConstructionTypes,
     selectedLibraryItems,
     acl,
-    authRoles,
     writeBit,
     loggedInUser,
     setRoadSegments,
@@ -107,37 +106,48 @@ const RoadSegmentTagSelect = props => {
     }
   }
 
-  return showSegmentsByTag && roadSegments.length && canEdit ?
-    <>
-    <div className="segments-tag-select">
-      <h3>Tagged as:</h3>
-      <div className="select">
-        <Select
-          value={selectedOption}
-          options={tagOptions}
-          placeholder="Select a tag..."
-          onChange={handleChange}
-          styles={selectStyles}
-        />
-      </div>
-      <Loader loading={loading} title="saving tags..."/>
-    </div>
-    {/* <pre>{JSON.stringify(roadSegments, null, '  ')}</pre> */}
-    </>
-    : null
+  if (showSegmentsByTag && roadSegments.length > 0) {
+    if (canEdit) {
+      // showSegmentsByTag && roadSegments.length && canEdit
+      return (
+        <>
+          <div className="segments-tag-select">
+            <h3>Tagged as:</h3>
+            <div className="select">
+              <Select
+                value={selectedOption}
+                options={tagOptions}
+                placeholder="Select a tag..."
+                onChange={handleChange}
+                styles={selectStyles}
+              />
+            </div>
+            <Loader loading={loading} title="saving tags..."/>
+          </div>
+          {/* <pre>{JSON.stringify(roadSegments, null, '  ')}</pre> */}
+        </>
+      )
+    } else if (selectedLibraryItems.length) {
+      // showSegmentsByTag && roadSegments.length && !canEdit
+      return <div style={{'marginLeft': 'auto', 'marginRight': 'auto'}}>You do not have permission to edit: {selectedLibraryItems[0].name}</div>
+    }
+  }
+
+  return null
 }
 
 const mapStateToProps = state => ({
   showSegmentsByTag: state.mapLayers.showSegmentsByTag,
   // destructuring because `roadSegments` is a `Set()`
-  roadSegments: [...(state.selection.mapFeatures.roadSegments || [])],
+  roadSegments: state.selection.mapFeatures.roadSegments 
+    ? [...(state.selection.mapFeatures.roadSegments)]
+    : [],
   edgeConstructionTypes: state.mapLayers.edgeConstructionTypes,
   // selectedLibraryItems: state.plan.dataItems?.edge?.selectedLibraryItems,
   selectedLibraryItems: state.plan.dataItems.edge
     ? state.plan.dataItems.edge.selectedLibraryItems
     : [],
   acl: state.acl,
-  authRoles: state.user.authRoles,
   loggedInUser: state.user.loggedInUser,
   writeBit: state.user.authPermissions.RESOURCE_WRITE 
     ? state.user.authPermissions.RESOURCE_WRITE.permissionBits 
