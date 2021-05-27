@@ -11,9 +11,6 @@
   },
   "scripts": {
     "test": "NODE_ENV=test mocha test/models/*.js test/helpers/*.js --timeout 50000 --delay",
-    "test-integration": "NODE_ENV=test protractor test/integration/conf.js",
-    "test-all": "npm test && npm run test-integration",
-    "test-wdio": "USER=dileep@metronconsulting.com PSWD=welcome01 ./node_modules/.bin/wdio wdio.conf.js",
     "test-unit-watch": "sleep 20 && ./node_modules/.bin/jest --watch",
     "build-service-types": "cd ./public/javascripts/src/service-typegen/src && node class-generator.js",
     "build-vendor-bundle": "chmod +x ./node_modules/uglify-js/bin/* && ./node_modules/browserify/bin/cmd.js -r rxjs -r ng-redux -p licensify | ./node_modules/uglify-js/bin/uglifyjs --comments > ./public/javascripts/vendors/vendor-bundle.min.js",
@@ -22,11 +19,9 @@
     "watch-server": "nodemon --inspect=0.0.0.0:9229 ./app.js",
     "watch-client": "babel public/javascripts/src -d public/javascripts/lib --ignore public/javascripts/src/service-typegen/,public/javascripts/src/react/ --watch --copy-files --source-maps",
     "watch-webpack": "NODE_ENV=development webpack --watch",
-    "dev": "npm run build-vendor-bundle && npm run build-service-types && concurrently \"npm run watch-client\" \"npm run watch-server\" \"npm run watch-webpack\" \"npm run test-unit-watch\"",
-    "local": "concurrently \"npm run watch-client\" \"npm run watch-server\" \"npm run watch-webpack\"",
     "watch-esbuild": "esbuild public/javascripts/src/components/index.js --outfile=public/javascripts/lib/aro-bundle.js --bundle --define:process.env.NODE_ENV=\\\"development\\\" --external:/svg/* --watch --sourcemap=external",
-    "lint": "standard \"public/javascripts/src/react/**/*.js\" \"public/javascripts/src/react/**/*.jsx\"",
-    "lint-fix": "standard \"public/javascripts/src/react/**/*.js\" \"public/javascripts/src/react/**/*.jsx\" --fix"
+    "dev": "npm run build-vendor-bundle && npm run build-service-types && concurrently \"npm run watch-client\" \"npm run watch-server\" \"npm run watch-webpack\" \"npm run test-unit-watch\"",
+    "local": "concurrently \"npm run watch-client\" \"npm run watch-server\" \"npm run watch-webpack\""
   },
   "dependencies": {
     "@babel/cli": "^7.2.3",
@@ -143,7 +138,6 @@
     "nodemon": "^2.0.7",
     "react-redux": "^7.2.0",
     "react-test-renderer": "^16.7.0",
-    "standard": "^12.0.1",
     "xml2js": "^0.4.10"
   }
 }
