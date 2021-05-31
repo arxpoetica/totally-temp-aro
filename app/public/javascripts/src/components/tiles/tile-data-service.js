@@ -22,6 +22,7 @@ class TileDataService {
       { description: 'Websockets', fetcher: new SocketTileFetcher() }
     ]
     this.activeTileFetcher = this.tileFetchers[1]
+    this.noDataTileTypes = []
 
     // For Chrome, Firefox 3+, Safari 5+, the browser throttles all http 1 requests to 6 maximum concurrent requests.
     // If we have a large number of vector tile requests, then any other calls to aro-service get queued after these,
@@ -129,8 +130,20 @@ class TileDataService {
           }
         })
       })
+
+      // Exclude all the tile definition without data before download.
+      let excludeNoDataTileDefinitions = []
+      if (this.noDataTileTypes.length) {
+        excludeNoDataTileDefinitions = tileDefinitionsToDownload.filter((item) => {
+          return !this.noDataTileTypes.includes(item.fiberType)
+        })
+      }
+
+      // Check whether tile without data is present, if not download all the tileDefinitions.
+      const tileDefinitions = this.noDataTileTypes.length ? excludeNoDataTileDefinitions : tileDefinitionsToDownload
+
       // Wrap a promise that will make the request
-      var dataPromise = this.getMapData(tileDefinitionsToDownload, zoom, tileX, tileY)
+      var dataPromise = this.getMapData(tileDefinitions, zoom, tileX, tileY)
         .catch((err) => {
           console.error(err)
           // There was a server error when getting the data. Delete this promise from the tileProviderCache
@@ -163,12 +176,22 @@ class TileDataService {
       // We don't have any data for this tile. Get it from the server.
       return this.getTileDataProviderCache(tileDefinition, zoom, tileX, tileY)
         .then((result) => {
-          // Save the results of just this tile definition. The server may return other definitions, they will
-          // be saved by the corresponding calls for those definitions.
-          var layerResult = {}
-          layerResult[tileDefinition.dataId] = result[tileDefinition.dataId]
-          thisTileDataCache[tileDefinition.dataId] = Promise.resolve(layerResult)
-          return thisTileDataCache[tileDefinition.dataId]
+          if(result) {
+            // Save the results of just this tile definition. The server may return other definitions, they will
+            // be saved by the corresponding calls for those definitions.
+            var layerResult = {}
+            layerResult[tileDefinition.dataId] = result[tileDefinition.dataId]
+            thisTileDataCache[tileDefinition.dataId] = Promise.resolve(layerResult)
+            return thisTileDataCache[tileDefinition.dataId]
+          } else {
+            // If the tile has no data from service, remove it from the future requests.
+            if (tileDefinition.hasOwnProperty('fiberType')) {
+              if (this.noDataTileTypes.indexOf(tileDefinition.fiberType) === -1) {
+                this.noDataTileTypes.push(tileDefinition.fiberType)
+              }
+            }
+            return thisTileDataCache[tileDefinition.dataId] = []
+          }
         })
         .catch((err) => console.error(err))
     }
@@ -234,7 +257,10 @@ class TileDataService {
           var result = results.splice(0, 1)[0]
           var layerToFeatures = result
           Object.keys(layerToFeatures).forEach((layerKey) => {
-            allFeatures = allFeatures.concat(layerToFeatures[layerKey])
+            // There can be no data for tiles, so ignore it.
+            if (layerToFeatures[layerKey]) {
+              allFeatures = allFeatures.concat(layerToFeatures[layerKey])
+            }
           })
         }
         var tileData = {
