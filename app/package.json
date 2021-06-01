@@ -7,7 +7,7 @@
   "private": true,
   "main": "app.js",
   "volta": {
-    "node": "12.21.0"
+    "node": "10.23.2"
   },
   "scripts": {
     "test": "NODE_ENV=test mocha test/models/*.js test/helpers/*.js --timeout 50000 --delay",
