@@ -293,7 +293,6 @@ export class PlanDataSelection extends Component {
     isDataSelection: state.plan.isDataSelection,
     loggedInUser: state.user.loggedInUser,
     authPermissions: state.user.authPermissions,
-    dataItems: state.plan.dataItems,
     isDataSourceEditable: state.plan.isDataSourceEditable,
     showPlanDataSelection : state.toolbar.appConfiguration.showPlanDataSelection
   })   

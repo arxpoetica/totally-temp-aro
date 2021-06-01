@@ -33,8 +33,7 @@ function setOtpStatus (state, multiFactor) {
   return { ...state,
     multiFactor: multiFactor,
     secretDetails: null,
-    verifyDetails:null,
-    secretDetails:null,
+    verifyDetails: null,
     totpEmailSent: false,
     errorFlag: false
   }
@@ -44,7 +43,7 @@ function setSecretDetails (state, secret) {
   return { ...state,
     secretDetails: secret,
     totpEmailSent: false,
-    multiFactor:null
+    multiFactor: null
   }
 }
 
@@ -77,8 +76,7 @@ function clearDetails(state, secret){
   return { ...state,
     multiFactor: null,
     secretDetails: null,
-    verifyDetails:null,
-    secretDetails:null
+    verifyDetails: null,
   }
 }
 

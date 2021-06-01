@@ -288,7 +288,6 @@ export class PlanProjectConfig extends Component {
     parentProjectForNewProject: state.plan.parentProjectForNewProject,
     isDeleting: state.plan.isDeleting,
     selectedMode: state.plan.selectedMode,
-    dataItems: state.plan.dataItems,
     resourceItems: state.plan.resourceItems
   })   
 
