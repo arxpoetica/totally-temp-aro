@@ -1005,15 +1005,15 @@ const NetworkArchitectureFormMeta = Object.freeze({
             ]
           }
         },
-        'maxLocationToEdgeDistance': {
-          '_meta': {
-            'displayType': 'number',
-            'displayName': '',
-            'options': [
+        // 'maxLocationToEdgeDistance': {
+        //   '_meta': {
+        //     'displayType': 'number',
+        //     'displayName': '',
+        //     'options': [
 
-            ]
-          }
-        },
+        //     ]
+        //   }
+        // },
         'entityDistanceMap': {
           '_meta': {
             'displayType': 'object',
