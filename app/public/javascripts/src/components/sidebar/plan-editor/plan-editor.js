@@ -800,7 +800,7 @@ class PlanEditorController {
   }
 
   displayViewObject (feature, iconUrl) {
-    // First deselect all equipment and boundary features
+    // First unselect all equipment and boundary features
     this.viewEventFeature = null
     this.setIsEditingFeatureProperties(false)
     this.viewSiteBoundaryEventFeature = null

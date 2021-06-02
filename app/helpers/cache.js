@@ -54,7 +54,8 @@ function loadConfiguration() {
     'toolbar',
     'optimizationOptions',
     'resourceEditors',
-    'showPlanDataSelection'
+    'showPlanDataSelection',
+    'broadcast'
   ]
 
   const configTypeToSubtype = {

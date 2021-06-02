@@ -72,7 +72,7 @@ exports[`Click primary and subdefinitions to edit 1`] = `
           </a>
         </li>
         <li
-          className="nav-item"
+          className="nav-item outside-btn"
           key="0"
         >
           <a
@@ -81,18 +81,18 @@ exports[`Click primary and subdefinitions to edit 1`] = `
             onClick={[Function]}
           >
             Subdefinition
-            <button
-              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
-              onClick={[Function]}
-            >
-              <i
-                className="fas fa-trash-alt"
-              />
-            </button>
           </a>
+          <button
+            className="btn btn-sm ml-1 subdefinition-delete-button"
+            onClick={[Function]}
+          >
+            <i
+              className="fas fa-trash-alt text-danger"
+            />
+          </button>
         </li>
         <li
-          className="nav-item"
+          className="nav-item outside-btn"
           key="1"
         >
           <a
@@ -101,15 +101,15 @@ exports[`Click primary and subdefinitions to edit 1`] = `
             onClick={[Function]}
           >
             Subdefinition
-            <button
-              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
-              onClick={[Function]}
-            >
-              <i
-                className="fas fa-trash-alt"
-              />
-            </button>
           </a>
+          <button
+            className="btn btn-sm ml-1 subdefinition-delete-button"
+            onClick={[Function]}
+          >
+            <i
+              className="fas fa-trash-alt text-danger"
+            />
+          </button>
         </li>
       </ul>
       <button
@@ -437,7 +437,7 @@ exports[`Click primary and subdefinitions to edit 2`] = `
           </a>
         </li>
         <li
-          className="nav-item"
+          className="nav-item outside-btn"
           key="0"
         >
           <a
@@ -446,18 +446,18 @@ exports[`Click primary and subdefinitions to edit 2`] = `
             onClick={[Function]}
           >
             Subdefinition
-            <button
-              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
-              onClick={[Function]}
-            >
-              <i
-                className="fas fa-trash-alt"
-              />
-            </button>
           </a>
+          <button
+            className="btn btn-sm ml-1 subdefinition-delete-button"
+            onClick={[Function]}
+          >
+            <i
+              className="fas fa-trash-alt text-danger"
+            />
+          </button>
         </li>
         <li
-          className="nav-item"
+          className="nav-item outside-btn"
           key="1"
         >
           <a
@@ -466,15 +466,15 @@ exports[`Click primary and subdefinitions to edit 2`] = `
             onClick={[Function]}
           >
             Subdefinition
-            <button
-              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
-              onClick={[Function]}
-            >
-              <i
-                className="fas fa-trash-alt"
-              />
-            </button>
           </a>
+          <button
+            className="btn btn-sm ml-1 subdefinition-delete-button"
+            onClick={[Function]}
+          >
+            <i
+              className="fas fa-trash-alt text-danger"
+            />
+          </button>
         </li>
       </ul>
       <button
@@ -645,7 +645,7 @@ exports[`Click primary and subdefinitions to edit 3`] = `
           </a>
         </li>
         <li
-          className="nav-item"
+          className="nav-item outside-btn"
           key="0"
         >
           <a
@@ -654,18 +654,18 @@ exports[`Click primary and subdefinitions to edit 3`] = `
             onClick={[Function]}
           >
             Subdefinition
-            <button
-              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
-              onClick={[Function]}
-            >
-              <i
-                className="fas fa-trash-alt"
-              />
-            </button>
           </a>
+          <button
+            className="btn btn-sm ml-1 subdefinition-delete-button"
+            onClick={[Function]}
+          >
+            <i
+              className="fas fa-trash-alt text-danger"
+            />
+          </button>
         </li>
         <li
-          className="nav-item"
+          className="nav-item outside-btn"
           key="1"
         >
           <a
@@ -674,15 +674,15 @@ exports[`Click primary and subdefinitions to edit 3`] = `
             onClick={[Function]}
           >
             Subdefinition
-            <button
-              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
-              onClick={[Function]}
-            >
-              <i
-                className="fas fa-trash-alt"
-              />
-            </button>
           </a>
+          <button
+            className="btn btn-sm ml-1 subdefinition-delete-button"
+            onClick={[Function]}
+          >
+            <i
+              className="fas fa-trash-alt text-danger"
+            />
+          </button>
         </li>
       </ul>
       <button
@@ -845,7 +845,7 @@ exports[`Click primary and subdefinitions to edit 4`] = `
           </a>
         </li>
         <li
-          className="nav-item"
+          className="nav-item outside-btn"
           key="0"
         >
           <a
@@ -854,18 +854,18 @@ exports[`Click primary and subdefinitions to edit 4`] = `
             onClick={[Function]}
           >
             Subdefinition
-            <button
-              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
-              onClick={[Function]}
-            >
-              <i
-                className="fas fa-trash-alt"
-              />
-            </button>
           </a>
+          <button
+            className="btn btn-sm ml-1 subdefinition-delete-button"
+            onClick={[Function]}
+          >
+            <i
+              className="fas fa-trash-alt text-danger"
+            />
+          </button>
         </li>
         <li
-          className="nav-item"
+          className="nav-item outside-btn"
           key="1"
         >
           <a
@@ -874,15 +874,15 @@ exports[`Click primary and subdefinitions to edit 4`] = `
             onClick={[Function]}
           >
             Subdefinition
-            <button
-              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
-              onClick={[Function]}
-            >
-              <i
-                className="fas fa-trash-alt"
-              />
-            </button>
           </a>
+          <button
+            className="btn btn-sm ml-1 subdefinition-delete-button"
+            onClick={[Function]}
+          >
+            <i
+              className="fas fa-trash-alt text-danger"
+            />
+          </button>
         </li>
       </ul>
       <button
@@ -1327,7 +1327,7 @@ exports[`With populated report 1`] = `
           </a>
         </li>
         <li
-          className="nav-item"
+          className="nav-item outside-btn"
           key="0"
         >
           <a
@@ -1336,18 +1336,18 @@ exports[`With populated report 1`] = `
             onClick={[Function]}
           >
             Subdefinition
-            <button
-              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
-              onClick={[Function]}
-            >
-              <i
-                className="fas fa-trash-alt"
-              />
-            </button>
           </a>
+          <button
+            className="btn btn-sm ml-1 subdefinition-delete-button"
+            onClick={[Function]}
+          >
+            <i
+              className="fas fa-trash-alt text-danger"
+            />
+          </button>
         </li>
         <li
-          className="nav-item"
+          className="nav-item outside-btn"
           key="1"
         >
           <a
@@ -1356,15 +1356,15 @@ exports[`With populated report 1`] = `
             onClick={[Function]}
           >
             Subdefinition
-            <button
-              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
-              onClick={[Function]}
-            >
-              <i
-                className="fas fa-trash-alt"
-              />
-            </button>
           </a>
+          <button
+            className="btn btn-sm ml-1 subdefinition-delete-button"
+            onClick={[Function]}
+          >
+            <i
+              className="fas fa-trash-alt text-danger"
+            />
+          </button>
         </li>
       </ul>
       <button
@@ -1692,7 +1692,7 @@ exports[`With validation error message 1`] = `
           </a>
         </li>
         <li
-          className="nav-item"
+          className="nav-item outside-btn"
           key="0"
         >
           <a
@@ -1701,18 +1701,18 @@ exports[`With validation error message 1`] = `
             onClick={[Function]}
           >
             Subdefinition
-            <button
-              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
-              onClick={[Function]}
-            >
-              <i
-                className="fas fa-trash-alt"
-              />
-            </button>
           </a>
+          <button
+            className="btn btn-sm ml-1 subdefinition-delete-button"
+            onClick={[Function]}
+          >
+            <i
+              className="fas fa-trash-alt text-danger"
+            />
+          </button>
         </li>
         <li
-          className="nav-item"
+          className="nav-item outside-btn"
           key="1"
         >
           <a
@@ -1721,15 +1721,15 @@ exports[`With validation error message 1`] = `
             onClick={[Function]}
           >
             Subdefinition
-            <button
-              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
-              onClick={[Function]}
-            >
-              <i
-                className="fas fa-trash-alt"
-              />
-            </button>
           </a>
+          <button
+            className="btn btn-sm ml-1 subdefinition-delete-button"
+            onClick={[Function]}
+          >
+            <i
+              className="fas fa-trash-alt text-danger"
+            />
+          </button>
         </li>
       </ul>
       <button
@@ -2081,7 +2081,7 @@ exports[`With validation success message 1`] = `
           </a>
         </li>
         <li
-          className="nav-item"
+          className="nav-item outside-btn"
           key="0"
         >
           <a
@@ -2090,18 +2090,18 @@ exports[`With validation success message 1`] = `
             onClick={[Function]}
           >
             Subdefinition
-            <button
-              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
-              onClick={[Function]}
-            >
-              <i
-                className="fas fa-trash-alt"
-              />
-            </button>
           </a>
+          <button
+            className="btn btn-sm ml-1 subdefinition-delete-button"
+            onClick={[Function]}
+          >
+            <i
+              className="fas fa-trash-alt text-danger"
+            />
+          </button>
         </li>
         <li
-          className="nav-item"
+          className="nav-item outside-btn"
           key="1"
         >
           <a
@@ -2110,15 +2110,15 @@ exports[`With validation success message 1`] = `
             onClick={[Function]}
           >
             Subdefinition
-            <button
-              className="btn btn-sm btn-danger ml-1 subdefinition-delete-button"
-              onClick={[Function]}
-            >
-              <i
-                className="fas fa-trash-alt"
-              />
-            </button>
           </a>
+          <button
+            className="btn btn-sm ml-1 subdefinition-delete-button"
+            onClick={[Function]}
+          >
+            <i
+              className="fas fa-trash-alt text-danger"
+            />
+          </button>
         </li>
       </ul>
       <button

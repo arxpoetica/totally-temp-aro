@@ -88,10 +88,16 @@ export default class ProgressButton extends Component {
           this.props.status === this.statusTypes.FAILED
           && <div>ERROR: Unknown coverage status - {this.props.status}</div>
         }
-        <button className={'btn btn-block modify-coverage-button'} style={{ marginBottom: '10px' }}
-          onClick={() => this.onModify()}>
-          <i className='fa fa-edit' /> Modify
-        </button>
+        {this.props.isEphemeral
+          ? <button className={'btn btn-block modify-coverage-button'} style={{ marginBottom: '10px' }}
+              onClick={() => this.props.setPlanInputsModal(true)}>
+              <i className="far fa-save"/> Save plan as...
+            </button>
+          : <button className={'btn btn-block modify-coverage-button'} style={{ marginBottom: '10px' }}
+              onClick={() => this.onModify()}>
+              <i className="fa fa-edit"/> Modify
+            </button>
+        }
       </>
     )
   }

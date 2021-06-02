@@ -38,7 +38,7 @@ app.use((req, res, next) => {
 
 app.use(compression())
 app.use(bodyParser.urlencoded({ extended: false }))
-app.use(bodyParser.json({ limit: '2mb' }))
+app.use(bodyParser.json({ limit: '1000mb' }))
 
 // Print requests out twice - once when we receive them, once when it completes.
 app.use(morgan((tokens, req, res) => 'ARO-PRE-REQUEST ' + loggerFunction(tokens, req, res), { immediate: true }))

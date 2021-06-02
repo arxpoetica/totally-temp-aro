@@ -1,83 +1,119 @@
 import React, { Component } from 'react'
-import reduxStore from '../../../redux-store'
-import wrapComponentWithProvider from '../../common/provider-wrapped-component'
-import globalsettingsActions from '../global-settings/globalsettings-action'
+import { connect } from 'react-redux'
+import UiActions from '../configuration/ui/ui-actions'
+import { toIsoStartDate, toIsoEndDate } from '../../common/view-utils.js'
 
 export class Broadcast extends Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
-    this.state = { subject: '', body: '', isChecked: true }
-
-    this.handleSubjectChange = this.handleSubjectChange.bind(this)
-    this.handleBodyChange = this.handleBodyChange.bind(this)
-    this.confirmBroadcast = this.confirmBroadcast.bind(this)
-    this.toggleChange = this.toggleChange.bind(this)
+    const { subject, message, startDate, endDate } = { ...this.props.broadcast }
+    this.state = {
+      subject: subject || '',
+      message: message || '',
+      startDate: startDate || '',
+      endDate: endDate || '',
+    }
   }
 
-  render () {
-    var divStyle = { display: 'flex', 'flexDirection': 'column', height: '100%' }
-
+  render() {
+    const { subject, message, startDate, endDate } = this.state
     return (
-      <div className={'no-collapse'} style={divStyle}>
+      <div className="no-collapse" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         <div style={{ flex: '1 1 auto' }}>
-          <div className={'form-group'}>
-            <label>
-              <input type='checkbox'
-                checked={this.state.isChecked}
-                onChange={this.toggleChange} />
-              Disappear after 15 Seconds
-            </label>
+          <div className="form-group">
+            <label className="font-weight-bold">Subject</label>
+            <input
+              name="subject"
+              type="text"
+              className="form-control"
+              value={subject}
+              onChange={(event) => this.handleOnChange(event)}
+            />
           </div>
-          <div className={'form-group'}>
-            <label>Subject</label>
-            <input type='text' className={'form-control'} value={this.state.subject} onChange={this.handleSubjectChange} />
+          <div className="form-group">
+            <label className="font-weight-bold">Message</label>
+            <textarea
+              name="message"
+              className="form-control"
+              rows="9"
+              value={message}
+              onChange={(event) => this.handleOnChange(event)}
+            />
           </div>
-          <div className={'form-group'}>
-            <label>Text</label>
-            <textarea className={'form-control'} rows='12' value={this.state.text} onChange={this.handleBodyChange} />
+          <div className="form-group">
+            <label className="font-weight-bold">When should the messages broadcast?</label>
+            <div className="row">
+              <div className="col-md-5">
+                <input
+                  type="date"
+                  name="startDate"
+                  className="form-control"
+                  value={startDate}
+                  onChange={(event) => this.handleOnChange(event)}
+                />
+              </div>
+              <div className="col-md-1 pt-2 text-center">
+                to
+              </div>
+              <div className="col-md-5">
+                <input
+                  type="date"
+                  name="endDate"
+                  className="form-control"
+                  value={endDate}
+                  onChange={(event) => this.handleOnChange(event)}
+                />
+              </div>
+            </div>
           </div>
         </div>
         <div style={{ flex: '0 0 auto' }}>
-          <button className={'btn btn-primary float-right'} onClick={() => this.confirmBroadcast()}><i className={'fa fa-save'} />&nbsp;&nbsp;Send</button>
+          <button
+            type="button"
+            disabled={!this.enableSave()}
+            className="btn btn-primary float-right"
+            onClick={() => this.saveBroadcast()}
+          >
+            <i className="fa fa-save" />
+            &nbsp;&nbsp;Save
+          </button>
         </div>
       </div>
     )
   }
 
-  handleSubjectChange (event) {
-    this.setState({ subject: event.target.value })
+  enableSave() {
+    const { subject, message, startDate, endDate } = this.state
+    return subject && message && startDate && endDate
   }
 
-  handleBodyChange (event) {
-    this.setState({ body: event.target.value })
+  handleOnChange(event) {
+    const { name, value } = event.target
+    this.setState({ [name]: value })
   }
 
-  toggleChange () {
-    this.setState({ isChecked: !this.state.isChecked })
-  }
-
-  confirmBroadcast () {
-    swal({ // eslint-disable-line
-      title: 'Are you sure?',
-      text: 'This message will be broadcast to all users. Are you sure you wish to proceed?',
-      type: 'warning',
-      confirmButtonColor: '#DD6B55',
-      confirmButtonText: 'Yes, Broadcast!',
-      showCancelButton: true,
-      closeOnConfirm: true
-    }, (confirmed) => {
-      confirmed && this.props.broadcastMessage(this.state)
-    })
+  saveBroadcast() {
+    const { startDate, endDate } = this.state
+    const compareStart = toIsoStartDate(startDate)
+    const compareEnd = toIsoEndDate(endDate)
+    compareStart.getTime() <= compareEnd.getTime()
+      ? this.props.saveConfigurationToServerAndReload('broadcast', this.state) // To update config in ui.settings and reload it.
+      : swal({
+        title: 'Invalid date range',
+        text: 'Please select a valid date range for broadcast',
+        type: 'warning'
+      })
   }
 }
 
-const mapStateToProps = (state) => {
-  return {}
-}
-
-const mapDispatchToProps = (dispatch, ownProps) => ({
-  broadcastMessage: (message) => dispatch(globalsettingsActions.broadcastMessage(message))
+const mapStateToProps = (state) => ({
+  broadcast: state.configuration.ui.items.broadcast,
 })
 
-const BroadcastComponent = wrapComponentWithProvider(reduxStore, Broadcast, mapStateToProps, mapDispatchToProps)
-export default BroadcastComponent
+const mapDispatchToProps = (dispatch) => ({
+  saveConfigurationToServerAndReload: (type, configuration) => dispatch(
+    UiActions.saveConfigurationToServerAndReload(type, configuration)
+  ),
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(Broadcast)

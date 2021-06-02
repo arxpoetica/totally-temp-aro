@@ -1,4 +1,5 @@
 import ToolBarActions from '../../../react/components/header/tool-bar-actions'
+import { toUTCDate } from '../../../react/common/view-utils.js'
 
 class PlanSearchController {
   constructor ($http, $timeout, $ngRedux, state) {
@@ -100,7 +101,7 @@ class PlanSearchController {
           this.planOptions.params = {}
           this.$http.get('/optimization/processes').then((running) => {
             this.totalData = []
-            this.totalData = response.data.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase()) ? 1 : -1)
+            this.totalData = response.data.sort((a, b) => (a.createdDate < b.createdDate) ? 1 : -1)
             this.totalData.forEach((plan) => {
               var info = running.data.find((status) => status.planId === +plan.id)
               if (info) {
@@ -226,6 +227,11 @@ class PlanSearchController {
       .then((response) => {
         this.creatorsSearchList = response.data
       })
+  }
+
+  convertTimeStampToDate (timestamp) {
+    const utcDate = toUTCDate(new Date(timestamp))
+    return new Intl.DateTimeFormat('en-US').format(utcDate)
   }
 
   mapStateToThis (reduxState) {

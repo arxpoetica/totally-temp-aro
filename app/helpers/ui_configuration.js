@@ -51,7 +51,7 @@ module.exports = class UIConfiguration {
     ])
       .then(results => {
         // We should always have a baseConfig for all configSets
-        const baseConfig = results[0][0].settings
+        const baseConfig = (results[0][0] && results[0][0].settings) || {}
         // We may not have a client config for all clients
         const clientConfig = (results[1][0] && results[1][0].settings) || {}
         UIConfiguration.basicDeepObjMerge(baseConfig, clientConfig)
@@ -93,7 +93,7 @@ module.exports = class UIConfiguration {
             enumStrings[clientDef.package][clientDef.class][clientDef.key]) {
             enumStrings[clientDef.package][clientDef.class][clientDef.key] = clientDef.description
           } else {
-            throw new Error('A client string definition was encountered, but there is no corresponding base definition. Always define the base definition')
+            //throw new Error('A client string definition was encountered, but there is no corresponding base definition. Always define the base definition')
           }
         })
         console.log('Enum Strings loaded from database')
@@ -105,7 +105,7 @@ module.exports = class UIConfiguration {
   getConfigurationSet (configSet) {
     if (!this.configurations[configSet]) {
       // This configuration set has not been loaded yet. Load it.
-      const dbConfigSets = ['boundaryCategories', 'locationCategories', 'copperCategories', 'networkEquipment', 'plan', 'perspectives', 'toolbar', 'showPlanDataSelection']
+      const dbConfigSets = ['boundaryCategories', 'locationCategories', 'copperCategories', 'networkEquipment', 'plan', 'perspectives', 'toolbar', 'showPlanDataSelection', 'broadcast']
       if (dbConfigSets.indexOf(configSet) >= 0) {
         // These configuration settings are stored in the database
         this.configurations[configSet] = this.getConfigurationSetFromDatabase(configSet)

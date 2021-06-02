@@ -18,7 +18,9 @@ const defaultState = {
     type: '',
     text: ''
   },
-  showGlobalSettings: false
+  showGlobalSettings: false,
+  notifyBroadcast: {},
+  isGlobalSettingsView: false,
 }
 
 function setReleaseNotes (state, releaseNotes) {
@@ -31,8 +33,7 @@ function setOtpStatus (state, multiFactor) {
   return { ...state,
     multiFactor: multiFactor,
     secretDetails: null,
-    verifyDetails:null,
-    secretDetails:null,
+    verifyDetails: null,
     totpEmailSent: false,
     errorFlag: false
   }
@@ -42,7 +43,7 @@ function setSecretDetails (state, secret) {
   return { ...state,
     secretDetails: secret,
     totpEmailSent: false,
-    multiFactor:null
+    multiFactor: null
   }
 }
 
@@ -75,8 +76,7 @@ function clearDetails(state, secret){
   return { ...state,
     multiFactor: null,
     secretDetails: null,
-    verifyDetails:null,
-    secretDetails:null
+    verifyDetails: null,
   }
 }
 
@@ -190,6 +190,19 @@ function setShowGlobalSettings (state, showGlobalSettings) {
   }
 }
 
+function setNotifyBroadcast (state, notifyBroadcast) {
+  notifyBroadcast.isEnableBroadcastModal = true
+  return { ...state,
+    notifyBroadcast: notifyBroadcast
+  }
+}
+
+function setGlobalSettingsView (state, isGlobalSettingsView) {
+  return { ...state,
+    isGlobalSettingsView: isGlobalSettingsView
+  }
+}
+
 function globalSettingsReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.GLOBAL_SETTINGS_GET_RELEASE_NOTES:
@@ -245,6 +258,12 @@ function globalSettingsReducer (state = defaultState, action) {
 
     case Actions.GLOBAL_SETTINGS_SHOW_GLOBAL_SETTINGS:
       return setShowGlobalSettings(state, action.payload)      
+  
+    case Actions.GLOBAL_SETTINGS_NOTIFY_BROADCAST:
+      return setNotifyBroadcast(state, action.payload)
+
+    case Actions.GLOBAL_SETTINGS_SET_CURRENT_VIEW:
+      return setGlobalSettingsView(state, action.payload)
   
     default:
       return state

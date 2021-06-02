@@ -54,7 +54,11 @@ export class GlobalSettings extends Component {
 
   static getDerivedStateFromProps(nextProps, prevState) {
 
-    if (nextProps.currentViewProps !== undefined){
+    if (nextProps.isGlobalSettingsView) {
+      return { currentView: 'Global Settings' }
+    }
+
+    if (nextProps.currentViewProps !== undefined) {
       if ((nextProps.currentViewProps === 'Resource Managers'
         || nextProps.currentViewProps === 'Upload Data Resources'
         || nextProps.currentViewProps === 'My Account') && prevState.currentView === '') {
@@ -69,11 +73,11 @@ export class GlobalSettings extends Component {
           currentView: prevState.currentView,
         }
       }
-    } else if (prevState.currentView === ''){
+    } else if (prevState.currentView === '') {
       return {
         currentView: 'Global Settings'
       }
-    } else{
+    } else {
       return {
         currentView: prevState.currentView
       }
@@ -266,15 +270,16 @@ export class GlobalSettings extends Component {
     )
   }
 
-  openUserSettingsForUserId(userId, currentView){
+  openUserSettingsForUserId(userId, currentView) {
     this.setState({ userIdForSettingsEdit: userId, currentView })
   }
 
-  handleChangeView(currentView){
+  handleChangeView(currentView) {
     this.setState({ currentView, resourceEditorProps: 'all',
       dataUploadProps: 'location', dataSelectionID: 1})
     this.props.setIsRrmManager(false)
     this.props.searchManagers('')
+    this.props.setGlobalSettingsView(false)
   }
 
   toggle() {
@@ -283,6 +288,7 @@ export class GlobalSettings extends Component {
     this.props.setIsDataSelection(false)
     this.props.setShowGlobalSettings(false)
     this.props.setIsRrmManager(false)
+    this.props.setGlobalSettingsView(false)
     if (this.props.currentViewProps === this.views.MY_ACCOUNT) { this.props.openAccountSettingsModal(false) }
   }
 }
@@ -291,6 +297,7 @@ const mapStateToProps = (state) => ({
   loggedInUser: state.user.loggedInUser,
   modalTitle: state.resourceEditor.modalTitle,
   isRrmManager: state.resourceEditor.isRrmManager,
+  isGlobalSettingsView: state.globalSettings.isGlobalSettingsView,
 })
 
 const mapDispatchToProps = (dispatch) => ({
@@ -299,6 +306,7 @@ const mapDispatchToProps = (dispatch) => ({
   setShowGlobalSettings: (status) => dispatch(GlobalsettingsActions.setShowGlobalSettings(status)),
   setIsRrmManager: (status) => dispatch(ResourceActions.setIsRrmManager(status)),
   searchManagers: (searchText) => dispatch(ResourceActions.searchManagers(searchText)),
+  setGlobalSettingsView: (status) => dispatch(GlobalsettingsActions.setGlobalSettingsView(status)),
 })
 
 const GlobalSettingsComponent = connect(mapStateToProps, mapDispatchToProps)(GlobalSettings)

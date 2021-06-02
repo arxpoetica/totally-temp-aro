@@ -1,5 +1,6 @@
 import Actions from '../../common/actions'
 import { List, Map, remove } from 'immutable'
+import actions from 'redux-form/lib/actions'
 
 const defaultState = {
   location: new List(),
@@ -25,6 +26,37 @@ const defaultState = {
     cable: {
       existing: false,
       planned: false
+    }
+  },
+  showSegmentsByTag: false, // I want to rename this 
+  edgeConstructionTypes: { // todo change the indecies if edgeConstructionTypes to the ID 
+    'estimated': {
+      id: null,
+      name: 'estimated',
+      displayName: 'Untagged',
+      isVisible: true,
+      strokeType: 'DEFAULT_LINE'
+    },
+    'aerial': {
+      id: null,
+      name: 'aerial',
+      displayName: 'Aerial',
+      isVisible: true,
+      strokeType: 'AERIAL_LINE'
+    },
+    'buried': {
+      id: null,
+      name: 'buried',
+      displayName: 'Buried',
+      isVisible: true,
+      strokeType: 'BURIED_LINE'
+    },
+    'underground': {
+      id: null,
+      name: 'underground',
+      displayName: 'Underground',
+      isVisible: true,
+      strokeType: 'UNDERGROUND_LINE'
     }
   }
 }
@@ -271,6 +303,26 @@ function setTypeVisibility (state, typeVisibilityMask) {
   }
 }
 
+function setEdgeConstructionTypeVisibility (state, constructionType, isVisible) {
+  return { ...state,
+    edgeConstructionTypes: { ...state.edgeConstructionTypes,
+      [constructionType]: { ...state.edgeConstructionTypes[constructionType],
+        'isVisible': isVisible
+      }
+    }
+  }
+}
+
+function setEdgeConstructionTypeIds (state, apiTypes) {
+  var newEdgeConstructionTypes = JSON.parse(JSON.stringify(state.edgeConstructionTypes))
+  apiTypes.forEach(apiType => {
+    if (newEdgeConstructionTypes.hasOwnProperty(apiType.name)) {
+      newEdgeConstructionTypes[apiType.name].id = apiType.id
+    }
+  })
+  return { ...state, edgeConstructionTypes: newEdgeConstructionTypes}
+}
+
 function mapLayersReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.LAYERS_SET_LOCATION:
@@ -341,6 +393,15 @@ function mapLayersReducer (state = defaultState, action) {
 
     case Actions.LAYERS_SET_TYPE_VISIBILITY:
       return setTypeVisibility(state, action.payload)
+
+    case Actions.LAYERS_SET_SHOW_SEGMENTS_BY_TAG:
+      return { ...state, showSegmentsByTag: action.payload }
+
+    case Actions.LAYERS_SET_EDGE_CONSTRUCTION_TYPE_VISIBILITY:
+      return setEdgeConstructionTypeVisibility(state, action.payload.constructionType, action.payload.isVisible)
+
+    case Actions.LAYERS_SET_EDGE_CONSTRUCTION_TYPE_IDS:
+      return setEdgeConstructionTypeIds(state, action.payload)
 
     default:
       return state

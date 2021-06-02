@@ -1,6 +1,7 @@
 /* globals FormData */
 import Actions from '../../../common/actions'
 import AroHttp from '../../../common/aro-http'
+import GlobalSettingsActions from '../../global-settings/globalsettings-action'
 
 function loadConfigurationFromServer () {
   return dispatch => {
@@ -36,7 +37,19 @@ function setPerspective (perspective) {
 function saveConfigurationToServerAndReload (type, configuration) {
   return dispatch => {
     AroHttp.post(`/ui_settings/save/${type}`, { configuration: configuration })
-      .then(result => dispatch(loadConfigurationFromServer))
+      .then(result => {
+        dispatch(loadConfigurationFromServer())
+        // Show success message if data is save to DB for broadcast
+        if (type === 'broadcast') {
+          swal({
+            title: 'Success',
+            text:  'Broadcast saved successfully.',
+            type: 'success'
+          }, () => {
+            dispatch(GlobalSettingsActions.setGlobalSettingsView(true))
+        })
+        }
+      })
       .catch(err => console.error(err))
   }
 }

@@ -64,8 +64,15 @@ class Sockets {
 
   // Emit a message to EVERYONE connected via websockets. Use sparingly, if used at all.
   emitToAll (payload) {
-    this.sockets.client.to(`broadcast`).emit('message', payload)
+    // it should be 'this.sockets.broadcast' for broadcast.
+    this.sockets.broadcast.to(`broadcast`).emit('message', payload)
     console.log(`SOCKET EMIT broadcast, payload: ${this.formatPayloadForLogging(payload)}`)
+  }
+
+  // Emit a message to loggedInUser connected via websockets.
+  emitToLoggedInUser (loggedInUserID, payload) {
+    this.sockets.broadcast.to(`${loggedInUserID}`).emit('message', payload)
+    console.log(`SOCKET EMIT broadcast:${loggedInUserID}, payload: ${this.formatPayloadForLogging(payload)}`)
   }
 
   // Formats a payload for logging. Show only a subset of the content

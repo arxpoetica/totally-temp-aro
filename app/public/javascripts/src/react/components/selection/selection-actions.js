@@ -130,10 +130,42 @@ function setLocations (locationIds) {
   }
 }
 
+function setMapFeatures (mapFeatures) {
+  return {
+    type: Actions.SELECTION_SET_MAP_FEATURES,
+    payload: mapFeatures
+  }
+}
+
+function setRoadSegments(roadSegments) {
+  return {
+    type: Actions.SELECTION_SET_ROAD_SEGMENTS,
+    payload: roadSegments,
+  }
+}
+
 function setPlanEditorFeatures (planEditorFeatures) {
   return {
     type: Actions.SELECTION_SET_PLAN_EDITOR_FEATURES,
     payload: planEditorFeatures
+  }
+}
+
+function cloneSelection() {
+  return (dispatch, getState) => {
+    const state = getState()
+    const { selection } = state.selection
+    return {
+      details: selection.details,
+      editable: selection.editable
+    }
+  }
+}
+
+function setMapSelection (mapSelection) {
+  return {
+    type: Actions.SELECTION_SET_MAP_SELECTION,
+    payload: mapSelection
   }
 }
 
@@ -144,5 +176,9 @@ export default {
   addPlanTargets,
   removePlanTargets,
   setLocations,
-  setPlanEditorFeatures
+  setPlanEditorFeatures,
+  setMapFeatures,
+  setRoadSegments,
+  cloneSelection,
+  setMapSelection,
 }

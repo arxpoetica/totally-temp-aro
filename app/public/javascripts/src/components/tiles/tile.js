@@ -14,12 +14,7 @@ import MenuAction, { MenuActionTypes } from '../common/context-menu/menu-action'
 import MenuItem, { MenuItemTypes } from '../common/context-menu/menu-item'
 import FeatureSets from '../../react/common/featureSets'
 import ToolBarActions from '../../react/components/header/tool-bar-actions'
-
-
-const getTransactionFeatures = reduxState => reduxState.planEditor.features
-const getTransactionFeatureIds = createSelector([getTransactionFeatures], transactionFeatures => {
-  return new Set(Object.keys(transactionFeatures))
-})
+import { dequal } from 'dequal'
 
 class TileComponentController {
   // MapLayer objects contain the following information
@@ -57,6 +52,7 @@ class TileComponentController {
     this.tileDataService = tileDataService
     this.contextMenuService = contextMenuService
     this.utils = Utils
+    this.rxState = rxState
 
     // Subscribe to changes in the mapLayers subject
     state.mapLayers
@@ -82,14 +78,8 @@ class TileComponentController {
     this.destroyMapOverlaySubscription = state.requestDestroyMapOverlay.skip(1).subscribe(() => this.destroyMapOverlay())
 
     // Subscribe to changes in the map tile options
-    state.mapTileOptions.subscribe((mapTileOptions) => {
-      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
-        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setMapTileOptions(mapTileOptions)
-      }
-    })
-
-    // Subscribe to changes in the map tile options
     rxState.mapTileOptions.getMessage().subscribe((mapTileOptions) => {
+      this.mapTileOptions = JSON.parse(JSON.stringify(mapTileOptions))
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
         this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setMapTileOptions(mapTileOptions)
       }
@@ -127,8 +117,22 @@ class TileComponentController {
       }
     })
 
+    // Set the map zoom level
+    rxState.requestSetMapZoom.getMessage().subscribe((zoom) => {
+      if (this.mapRef) {
+        this.mapRef.setZoom(zoom)
+      }
+    })
+
     // To change the center of the map to given LatLng
     state.requestSetMapCenter.subscribe((mapCenter) => {
+      if (this.mapRef) {
+        this.mapRef.panTo({ lat: mapCenter.latitude, lng: mapCenter.longitude })
+      }
+    })
+
+    // To change the center of the map to given LatLng
+    rxState.requestSetMapCenter.getMessage().subscribe((mapCenter) => {
       if (this.mapRef) {
         this.mapRef.panTo({ lat: mapCenter.latitude, lng: mapCenter.longitude })
       }
@@ -278,7 +282,7 @@ class TileComponentController {
 
     this.mapRef.overlayMapTypes.push(new MapTileRenderer(new google.maps.Size(Constants.TILE_SIZE, Constants.TILE_SIZE),
       this.tileDataService,
-      this.state.mapTileOptions.getValue(),
+      this.mapTileOptions,
       this.state.layerCategories.getValue(),
       this.state.selectedDisplayMode.getValue(),
       SelectionModes,
@@ -288,7 +292,7 @@ class TileComponentController {
       this.state.viewModePanels,
       this.state,
       MapUtilities.getPixelCoordinatesWithinTile.bind(this),
-      this.transactionFeatureIds,
+      this.selectionIds,
       this.rShowFiberSize,
       this.rViewSetting
     ))
@@ -389,9 +393,6 @@ class TileComponentController {
                 this.contextMenuService.menuOn()
                 this.$timeout()
               })
-          } else {
-            this.contextMenuService.menuOff()
-            this.$timeout()
           }
         })
     })
@@ -416,42 +417,72 @@ class TileComponentController {
       }
     })
 
-    this.overlayClickListener = this.mapRef.addListener('click', (event) => {
-      var wasShiftPressed = this.state.isShiftPressed
-      
+    this.overlayClickListener = this.mapRef.addListener('click', async(event) => {
+      const { isShiftPressed } = this.state
+
       if (this.contextMenuService.isMenuVisible.getValue()) {
         this.contextMenuService.menuOff()
         this.$timeout()
         return
       }
-      
-      // ToDo: depricate getFilteredFeaturesUnderLatLng switch to this
-      this.getFeaturesUnderLatLng(event.latLng)
-        .then((hitFeatures) => {
-          if (wasShiftPressed) {
-            this.state.mapFeaturesKeyClickedEvent.next(hitFeatures)
-          } else {
-            this.state.mapFeaturesClickedEvent.next(hitFeatures)
-          }
-        })
-        .catch(err => console.error(err))
-        
-      if (wasShiftPressed) return
-      
-      this.getFilteredFeaturesUnderLatLng(event.latLng)
-        .then((hitFeatures) => {
-          if (hitFeatures) {
-            if (hitFeatures.locations.length > 0) {
-              this.state.hackRaiseEvent(hitFeatures.locations)
-            }
 
-            // Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
-            // ToDo: now that we have types these categories should to be dynamic
-            this.state.mapFeaturesSelectedEvent.next(hitFeatures)
-          }
+      try {
+        // ToDo: depricate getFilteredFeaturesUnderLatLng switch to this
+        const hitFeatures = await this.getFeaturesUnderLatLng(event.latLng)
+        if (isShiftPressed) {
+          this.state.mapFeaturesKeyClickedEvent.next(hitFeatures)
+        } else {
+          this.state.mapFeaturesClickedEvent.next(hitFeatures)
+        }
+      } catch (error) {
+        console.error(err)
+      }
+
+      try {
+        const hitFeatures = await this.getFilteredFeaturesUnderLatLng(event.latLng)
+        const hittableSegmentsIds = Object
+          .values(this.stateMapLayers.edgeConstructionTypes)
+          .filter(type => type.isVisible)
+          .map(type => type.id)
+        const hitRoadSegments = [...hitFeatures.roadSegments || []].filter(segment => {
+          return hittableSegmentsIds.includes(segment.edge_construction_type)
         })
+
+        const hasRoadSegments = hitRoadSegments.length > 0
+        if (isShiftPressed && !hasRoadSegments) {
+          return
+        }
+
+        if (hitFeatures) {
+          if (hitFeatures.locations.length > 0) {
+            this.state.hackRaiseEvent(hitFeatures.locations)
+          }
+
+          if (isShiftPressed && hasRoadSegments) {
+            const mapFeatures = this.state.mapFeaturesSelectedEvent.getValue()
+            const priorRoadSegments = [...mapFeatures.roadSegments || []]
+
+            // capturing difference because shift + click should also remove
+            const onlyInPrior = priorRoadSegments.filter(segment => {
+              return !hitRoadSegments.find(found => found.id === segment.id)
+            })
+            const onlyInHit = hitRoadSegments.filter(segment => {
+              return !priorRoadSegments.find(found => found.id === segment.id)
+            })
+
+            hitFeatures.roadSegments = new Set([...onlyInPrior, ...onlyInHit])
+          } else {
+            hitFeatures.roadSegments = new Set([...hitRoadSegments])
+          }
+          // Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
+          // ToDo: now that we have types these categories should to be dynamic
+          this.state.mapFeaturesSelectedEvent.next(hitFeatures)
+        }
+      } catch (error) {
+        console.error(err)
+      }
     })
-    
+
     this.getFeaturesUnderLatLng = function (latLng) {
       // Get latitiude and longitude
       var lat = latLng.lat()
@@ -497,11 +528,6 @@ class TileComponentController {
               fiberFeatures.add(result)
             }
           })
-          
-          // To open Location info in View-Mode While Edit-Service layers serviceAreas is Empty
-          if(serviceAreas.length === 0 && this.rActiveViewModePanel === this.state.viewModePanels.EDIT_SERVICE_LAYER) {
-            this.rActiveViewModePanelAction(this.state.viewModePanels.LOCATION_INFO)
-          }
 
           // ToDo: formalize this
           // var hitFeatures = new FeatureSets() // need to import the class BUT it's over in React land, ask Parag
@@ -654,7 +680,6 @@ class TileComponentController {
       // Map not initialized yet
       return
     }
-
     this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setMapLayers(newMapLayers)
     this.refreshMapTiles()
   }
@@ -692,6 +717,18 @@ class TileComponentController {
         this.cachedOldSelection = this.state.selection
       }
     }
+
+    // For React boundries-info
+    if (this.rCachedOldSelection !== this.rSelection) {
+      // Update the selection in the renderer
+      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
+        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setOldSelection(this.rSelection)
+        // If the selection has changed, redraw the tiles
+        this.tileDataService.markHtmlCacheDirty()
+        this.refreshMapTiles()
+        this.rCachedOldSelection = this.rSelection
+      }
+    }
   }
 
   $onDestroy () {
@@ -706,8 +743,9 @@ class TileComponentController {
       activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
       selectionModes: reduxState.selection.selectionModes,
       selection: reduxState.selection,
+      selectionIds: reduxState.selection.planEditorFeatures,
+      rSelection: reduxState.selection.selection,
       stateMapLayers: reduxState.mapLayers,
-      transactionFeatureIds: getTransactionFeatureIds(reduxState),
       networkAnalysisType: reduxState.optimization.networkOptimization.optimizationInputs.analysis_type,
       zoom: reduxState.map.zoom,
       mapCenter: reduxState.map.mapCenter,
@@ -728,7 +766,7 @@ class TileComponentController {
     const currentSelectionModeId = this.activeSelectionModeId
     const oldPlanTargets = this.selection && this.selection.planTargets
     const prevStateMapLayers = { ...this.stateMapLayers }
-    const currentTransactionFeatureIds = this.transactionFeatureIds
+    const currentSelectionIds = this.selectionIds
     const rShowFiberSize = this.rShowFiberSize
     const rViewSetting = this.rViewSetting
 
@@ -752,8 +790,8 @@ class TileComponentController {
       }
     }
 
-    if (currentTransactionFeatureIds !== nextState.transactionFeatureIds) {
-      this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setTransactionFeatureIds(nextState.transactionFeatureIds)
+    if (!dequal(currentSelectionIds, nextState.selectionIds)) {
+      this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setSelectionIds(nextState.selectionIds)
       needRefresh = true
     }
 
@@ -781,22 +819,24 @@ class TileComponentController {
       return true
     }
     // A hacky way to perform change detection, because of the way our tile.js and map-tile-renderer.js are set up.
-    const strOldSelection = JSON.stringify({
+    const strOldSelection = {
       locations: [...oldSelection.locations],
       serviceAreas: [...oldSelection.serviceAreas],
       analysisAreas: [...oldSelection.analysisAreas]
-    })
+    }
 
-    const strNewSelection = JSON.stringify({
+    const strNewSelection = {
       locations: [...newSelection.locations],
       serviceAreas: [...newSelection.serviceAreas],
       analysisAreas: [...newSelection.analysisAreas]
-    })
+    }
 
-    return strOldSelection !== strNewSelection
+    return !dequal(strOldSelection, strNewSelection)
   }
   
   doesConduitNeedUpdate (prevStateMapLayers, stateMapLayers) {
+    if (prevStateMapLayers.showSegmentsByTag !== stateMapLayers.showSegmentsByTag) return true
+    if (!dequal(prevStateMapLayers.edgeConstructionTypes, stateMapLayers.edgeConstructionTypes)) return true
     // ToDo: this is so wrong! 
     //    find what triggers an update on setNetworkEquipmentLayerVisibility
     //    and have it also trigger an update on setCableConduitVisibility when parent is visible
@@ -805,7 +845,7 @@ class TileComponentController {
         !stateMapLayers.networkEquipment ||
         !prevStateMapLayers.networkEquipment.cables ||
         !stateMapLayers.networkEquipment.cables ||
-        JSON.stringify(prevStateMapLayers) === JSON.stringify(stateMapLayers)) {
+        dequal(prevStateMapLayers, stateMapLayers)) {
       return false
     }
     var needUpdate = false
@@ -818,7 +858,7 @@ class TileComponentController {
         if (cable.checked) {
           if (!prevCable.checked) {
             needUpdate = true
-          } else if (JSON.stringify(cable.conduitVisibility) !== JSON.stringify(prevCable.conduitVisibility)) {
+          } else if (!dequal(cable.conduitVisibility, prevCable.conduitVisibility)) {
             needUpdate = true
           }
         }

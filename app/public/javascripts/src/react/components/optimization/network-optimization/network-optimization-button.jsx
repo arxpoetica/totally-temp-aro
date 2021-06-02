@@ -1,6 +1,7 @@
 import { PropTypes } from 'prop-types'
 import { formValueSelector } from 'redux-form'
 import reduxStore from '../../../../redux-store'
+import ToolBarActions from '../../header/tool-bar-actions'
 import RingActions from '../../ring-edit/ring-edit-actions'
 import PlanActions from '../../plan/plan-actions'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
@@ -76,13 +77,15 @@ const mapStateToProps = state => {
     planId: state.plan.activePlan && state.plan.activePlan.id,
     projectId: state.user.loggedInUser.projectId,
     rings: state.ringEdit.rings,
-    mapLayers: state.mapLayers
+    mapLayers: state.mapLayers,
+    isEphemeral: state.plan.activePlan && state.plan.activePlan.ephemeral,
   }
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  setActivePlanState: (status) => dispatch(PlanActions.setActivePlanState(status)),
-  setAnalysisProgress: (progress) => dispatch(RingActions.setAnalysisProgress(progress))
+  setPlanInputsModal: status => dispatch(ToolBarActions.setPlanInputsModal(status)),
+  setActivePlanState: status => dispatch(PlanActions.setActivePlanState(status)),
+  setAnalysisProgress: progress => dispatch(RingActions.setAnalysisProgress(progress))
 })
 
 const NetworkOptimizationButtonComponent = wrapComponentWithProvider(reduxStore, NetworkOptimizationButton, mapStateToProps, mapDispatchToProps)

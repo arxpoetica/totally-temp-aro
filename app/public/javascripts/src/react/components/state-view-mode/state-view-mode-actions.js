@@ -2,6 +2,23 @@ import Actions from '../../common/actions'
 import AroHttp from '../../common/aro-http'
 import { flattenDeep } from '../../common/view-utils'
 import { batch } from 'react-redux'
+import { displayModes, entityTypeCons, viewModePanels } from '../sidebar/constants'
+import { createSelector } from 'reselect'
+
+// In ruler and for some active view-mode panels click should not be enabled for boundary view.
+function allowViewModeClickAction() {
+  return (dispatch, getState) => {
+    const state = getState()
+    const { rSelectedDisplayMode, rActiveViewModePanel, isRulerEnabled } = state.toolbar
+    return (
+      (rSelectedDisplayMode === displayModes.VIEW || rSelectedDisplayMode === displayModes.EDIT_PLAN)
+      && rActiveViewModePanel !== viewModePanels.EDIT_LOCATIONS
+      && rActiveViewModePanel !== viewModePanels.EDIT_SERVICE_LAYER
+      && rActiveViewModePanel !== viewModePanels.COVERAGE_BOUNDARY
+      && !isRulerEnabled
+    )
+  }
+}
 
 function getSelectedEquipmentIds (flattenDeep, networkNodeTypes, configuration) {
   const selectedEquipmentIds = []
@@ -26,20 +43,20 @@ function loadEntityList (entityType, filterObj, select, searchColumn, configurat
     const networkNodeTypes = state.roicReports.networkNodeTypes
     const entityTypeList = state.stateViewMode.entityTypeList
 
-    if (filterObj === '') return
+    if (filterObj === '') return Promise.resolve()
     let entityListUrl = `/service/odata/${entityType}?$select=${select}`
-    if (entityType !== 'AnalysisLayer') {
+    if (entityType !== entityTypeCons.ANALYSIS_LAYER) {
       entityListUrl = entityListUrl + '&$top=20'
     }
 
     let filter = ''
-    if (entityType === 'LocationObjectEntity') {
+    if (entityType === entityTypeCons.LOCATION_OBJECT_ENTITY) {
       // for UUID odata doesn't support substring
       const pattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/
       if (pattern.test(filterObj)) {
         filter = filterObj ? `${searchColumn} eq guid'${filterObj}'` : filter
       } else {
-        return // 157501341: Location search should not reach out to endpoint without supplying a valid object id
+        return Promise.resolve() // 157501341: Location search should not reach out to endpoint without supplying a valid object id
       }
     } else {
       if (filterObj) {
@@ -60,7 +77,7 @@ function loadEntityList (entityType, filterObj, select, searchColumn, configurat
     }
 
     let libraryItems = []
-    if (entityType === 'LocationObjectEntity') {
+    if (entityType === entityTypeCons.LOCATION_OBJECT_ENTITY) {
       const selectedLocationLibraries = dataItems && dataItems.location && dataItems.location.selectedLibraryItems
       if (selectedLocationLibraries) libraryItems = selectedLocationLibraries.map(
         selectedLibraryItem => selectedLibraryItem.identifier
@@ -71,19 +88,19 @@ function loadEntityList (entityType, filterObj, select, searchColumn, configurat
       }
     }
 
-    if (entityType === 'NetworkEquipmentEntity') {
+    if (entityType === entityTypeCons.NETWORK_EQUIPMENT_ENTITY) {
       // Filtering NetworkEquipmentEntity by planId so as to fetch latest equipment info
       filter = filter ? filter.concat(` and (planId eq ${planId})`) : filter
       const selectedEquipments = StateViewMode.getSelectedEquipmentIds(
         flattenDeep, networkNodeTypes, configuration
       ).map(id => `networkNodeType eq ${id}`).join(' or ')
       // Search for equipments that are selected in NetworkEquipment modal
-      if (selectedEquipments === '') return
+      if (selectedEquipments === '') return Promise.resolve()
       filter = selectedEquipments ? filter.concat(` and (${selectedEquipments})`) : filter
       filter = filter.concat(` and (isDeleted eq false)`) // filter deleted equipment
     }
 
-    if (entityType === 'ServiceAreaView') {
+    if (entityType === entityTypeCons.SERVICE_AREA_VIEW) {
       // filter = filter ? filter.concat(' and layer/id eq 1') : filter
       const selectedServiceLayerLibraries = dataItems && dataItems.service_layer 
         && dataItems.service_layer.selectedLibraryItems
@@ -110,8 +127,8 @@ function loadEntityList (entityType, filterObj, select, searchColumn, configurat
             type: Actions.STATE_VIEW_MODE_GET_ENTITY_TYPE_LIST,
             payload: entityTypeList
           })
-          if (entityType === 'ServiceAreaView' || entityType === 'CensusBlocksEntity' ||
-          entityType === 'AnalysisArea') {
+          if (entityType === entityTypeCons.SERVICE_AREA_VIEW || entityType === entityTypeCons.CENSUS_BLOCKS_ENTITY ||
+          entityType === entityTypeCons.ANALYSIS_AREA) {
             dispatch({
               type: Actions.STATE_VIEW_MODE_GET_ENTITY_TYPE_BOUNDRY_LIST,
               payload: entityTypeList[entityType]
@@ -123,7 +140,52 @@ function loadEntityList (entityType, filterObj, select, searchColumn, configurat
   }
 }
 
+function setLayerCategories (layerCategories) {
+  return {
+    type: Actions.STATE_VIEW_MODE_SET_LAYER_CATEGORIES,
+    payload: layerCategories
+  }
+}
+
+function clearViewMode (isClearViewMode) {
+  return {
+    type: Actions.STATE_VIEW_MODE_CLEAR_VIEW_MODE,
+    payload: isClearViewMode
+  }
+}
+
+// We need a selector, else the .toJS() call will create an infinite digest loop
+const getAllLocationLayers = state => state.mapLayers.location
+const getLocationLayersList = createSelector([getAllLocationLayers], (locationLayers) => locationLayers.toJS())
+
+// ToDo: This does not belong here. this is already present in tool-bar-actions.js, but in that function all the state
+// are passed as arguments, so that it feel hard to handle and repeats the code, so it is modified using getState()
+// here, once all the changes are done in dependent files this will be removed here.
+function getOptimizationBody() {
+  return (dispatch, getState) => {
+    const state = getState()
+    const { optimizationInputs } = state.optimization.networkOptimization
+    const { id: activeSelectionModeId } = state.selection.activeSelectionMode
+    const locationLayers = getLocationLayersList(state)
+    const { activePlan: plan } = state.plan
+
+    const inputs = JSON.parse(JSON.stringify(optimizationInputs))
+    inputs.planId = plan.id
+    inputs.locationConstraints = {}
+    inputs.locationConstraints.analysisSelectionMode = activeSelectionModeId
+    inputs.locationConstraints.locationTypes = []
+    locationLayers.forEach(locationsLayer => {
+      if (locationsLayer.checked) inputs.locationConstraints.locationTypes.push(locationsLayer.plannerKey)
+    })
+    return inputs
+  }
+}
+
 export default {
   getSelectedEquipmentIds,
-  loadEntityList
+  loadEntityList,
+  allowViewModeClickAction,
+  setLayerCategories,
+  clearViewMode,
+  getOptimizationBody,
 }
