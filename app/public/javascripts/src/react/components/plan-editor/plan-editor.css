@@ -1,0 +1,33 @@
+.aro-plan-editor {
+  padding: 20px 0;
+}
+
+
+/* ========================= >>>>> recalculate plan >>>>> */
+
+.plan-editor-recalculate .actions {
+  display: grid;
+  grid-auto-flow: column;
+  grid-gap: 10px;
+  justify-content: center;
+  align-items: center;
+  margin: 0 0 15px;
+}
+.plan-editor-recalculate h2 {
+  margin: 0;
+  font-size: inherit;
+  font-weight: bold;
+}
+.plan-editor-recalculate .checkboxes {
+  display: grid;
+  grid-auto-flow: column;
+  grid-gap: 20px;
+  justify-content: center;
+  align-items: center;
+}
+.plan-editor-recalculate label {
+  margin: 0;
+}
+.plan-editor-recalculate .checkboxfill {
+  margin: 0 10px 0 0;
+}
