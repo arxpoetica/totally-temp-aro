@@ -1,4 +1,20 @@
 
+function parseColor(input) {
+  if (input.substr(0,1) === '#') {
+    var cols = (input.length-1)/3
+    var vals = [
+      input.substr(1,cols),
+      input.substr(1+cols,cols),
+      input.substr(1+2*cols,cols),
+    ]
+    if (cols === 1) vals = vals.map(val => val+''+val)
+    vals = vals.map( val => Number(`0x${val}`) )
+    return vals
+  }
+  
+  return input.split("(")[1].split(")")[0].split(",").map(x=>+x)
+}
+
 function defaultStroke (ctx) {
   // no change to the line style
   ctx.stroke()
@@ -10,10 +26,22 @@ function aerialStroke (ctx) {
   var oStrokeStyle = ctx.strokeStyle
   ctx.lineCap = 'butt'
 
+  var negativeColor = '#ffffff'
+  if ('string' === typeof oStrokeStyle) {
+    let color = parseColor(oStrokeStyle)
+    // quick and dirty saturation / lightness conversion, enough for our purposes 
+    // average and second derivation 
+    // derv2 0 => 340
+    let avg = (color[0]+color[1]+color[2])/3
+    let derv2 = Math.abs(color[0]-avg) + Math.abs(color[0]-avg) + Math.abs(color[0]-avg)
+    // if saturation is under 50% and lightness is grerater than 75%, use a black line instead of a white one
+    if (derv2 <= 170 && avg >= 185) negativeColor = '#000000'
+  }
+
   ctx.lineWidth = 1.5 * oLineWidth
   ctx.stroke()
   ctx.lineWidth = 0.5 * oLineWidth
-  ctx.strokeStyle = '#ffffff'
+  ctx.strokeStyle = negativeColor
   ctx.stroke()
   // restore
   ctx.strokeStyle = oStrokeStyle
