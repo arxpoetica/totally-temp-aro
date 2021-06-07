@@ -42,7 +42,7 @@ const RoadSegmentTagSelect = props => {
       permissions = 'undefined' !== typeof (
         acl.aclByType[resourceType][resourceId].find(
           ele => groupIds.includes(ele.systemActorId) 
-          && writeBit === writeBit & ele.rolePermissions
+          && writeBit === (writeBit & ele.rolePermissions)
         )
       )
     }
