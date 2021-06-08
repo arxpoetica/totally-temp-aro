@@ -27,6 +27,8 @@ export class ToolBar extends Component {
 
     this.rxState = new RxState() // For RxJs implementation in reactjs
 
+    // ToDo: these constants need to be global
+    
     this.viewModePanels = Object.freeze({
       LOCATION_INFO: 'LOCATION_INFO',
       EQUIPMENT_INFO: 'EQUIPMENT_INFO',

@@ -5,6 +5,7 @@ import Loader from '../../common/Loader.jsx'
 import { selectStyles } from '../../../common/view-utils'
 import SelectionActions from '../../selection/selection-actions'
 import AclActions from '../../acl/acl-actions'
+import ToolBarActions from '../../header/tool-bar-actions'
 import AroHttp from '../../../common/aro-http'
 
 function setSelectedOption(tagOptions, roadSegments) {
@@ -26,6 +27,7 @@ const RoadSegmentTagSelect = props => {
     loggedInUser,
     setRoadSegments,
     getAcl,
+    selectedDisplayMode,
   } = props
 
   let resourceType = 'LIBRARY'
@@ -40,7 +42,7 @@ const RoadSegmentTagSelect = props => {
       permissions = 'undefined' !== typeof (
         acl.aclByType[resourceType][resourceId].find(
           ele => groupIds.includes(ele.systemActorId) 
-          && writeBit === writeBit & ele.rolePermissions
+          && writeBit === (writeBit & ele.rolePermissions)
         )
       )
     }
@@ -107,6 +109,21 @@ const RoadSegmentTagSelect = props => {
   }
 
   if (showSegmentsByTag && roadSegments.length > 0) {
+    if (selectedLibraryItems.length > 1) {
+      return (
+        <>
+          <div style={{'marginLeft': 'auto', 'marginRight': 'auto'}}>
+            To edit a conduit library please select only one, {selectedLibraryItems.length} currently selected. 
+            <br /><br />
+            <button className="btn btn-primary" title="Plan Settings"
+              onClick={() => selectedDisplayMode('PLAN_SETTINGS')}>
+              <i className="fa fa-cog"></i> Plan Settings
+            </button>
+          </div>
+        </>
+      )
+    }
+
     if (canEdit) {
       // showSegmentsByTag && roadSegments.length && canEdit
       return (
@@ -157,6 +174,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
   setRoadSegments: roadSegments => dispatch(SelectionActions.setRoadSegments(roadSegments)),
   getAcl: (resourceType, resourceId, doForceUpdate = false) => dispatch(AclActions.getAcl(resourceType, resourceId, doForceUpdate)),
+  selectedDisplayMode: (value) => dispatch(ToolBarActions.selectedDisplayMode(value)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(RoadSegmentTagSelect)
