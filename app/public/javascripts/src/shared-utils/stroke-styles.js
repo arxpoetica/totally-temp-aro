@@ -1,5 +1,11 @@
 
 function parseColor(input) {
+  // takes strings like 
+  // #FF9900
+  // #f90
+  // rgb(255, 153, 0)
+  // and returns an array of numbers 
+  // [255, 153, 0]
   if (input.substr(0,1) === '#') {
     var cols = (input.length-1)/3
     var vals = [
@@ -32,8 +38,8 @@ function aerialStroke (ctx) {
     // quick and dirty saturation / lightness conversion, enough for our purposes 
     // average and second derivation 
     // derv2 0 => 340
-    let avg = (color[0]+color[1]+color[2])/3
-    let derv2 = Math.abs(color[0]-avg) + Math.abs(color[0]-avg) + Math.abs(color[0]-avg)
+    let avg = color.reduce((ttl, val) => ttl + val, 0) / color.length
+    let derv2 = color.reduce((ttl, val) => ttl + Math.abs(val-avg), 0)
     // if saturation is under 50% and lightness is grerater than 75%, use a black line instead of a white one
     if (derv2 <= 170 && avg >= 185) negativeColor = '#000000'
   }
