@@ -1,11 +1,14 @@
 import { List, Map } from 'immutable'
 import { createSelector } from 'reselect'
 import { formValueSelector } from 'redux-form'
+import { ToastContainer, toast } from 'react-toastify';
+import React from 'react'
 import format from './string-template'
 import StateViewMode from './state-view-mode'
 import MapLayerHelper from './map-layer-helper'
 import Constants from '../components/common/constants'
 import Actions from '../react/common/actions'
+import GlobalSettingsActions from '../react/components/global-settings/globalsettings-action'
 import UiActions from '../react/components/configuration/ui/ui-actions'
 import UserActions from '../react/components/user/user-actions'
 import ConfigurationActions from '../react/components/configuration/configuration-actions'
@@ -1697,18 +1700,24 @@ class State {
 
           if (!localStorage.getItem(service.loggedInUser.id) ||
             _.difference(service.listOfAppVersions, JSON.parse(currentuserAppVersions)).length > 0) {
-            Notification.primary({
-              message: `<a href="#" onClick="openReleaseNotes()">Latest Updates and Platform Improvements</a>`
-            })
+              service.showReleaseNotesToast()
           }
-
           localStorage.setItem(service.loggedInUser.id, JSON.stringify(service.listOfAppVersions))
         })
-
-      service.openReleaseNotes = () => {
-        service.showGlobalSettings = true
-        service.openGlobalSettingsView.next('RELEASE_NOTES')
-        $timeout()
+      service.showReleaseNotesToast = () => {
+        toast('Latest Updates and Platform Improvements', {
+          position: "bottom-left",
+          hideProgressBar: true,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          onClick: () => {
+            service.setShowGlobalSettings()
+            service.setCurrentViewToReleaseNotes("Release Notes")
+          }
+        });
+        <ToastContainer/>
       }
     }
 
@@ -1905,6 +1914,8 @@ class State {
       setLayerCategories: (layerCategories) => dispatch(StateViewModeActions.setLayerCategories(layerCategories)),
       rClearViewMode: (value) => dispatch(StateViewModeActions.clearViewMode(value)),
       loadEdgeConstructionTypeIds: () => dispatch(MapLayerActions.loadEdgeConstructionTypeIds()),
+      setShowGlobalSettings: () => dispatch(GlobalSettingsActions.setShowGlobalSettings(true)),
+      setCurrentViewToReleaseNotes: (viewString) => dispatch(GlobalSettingsActions.setCurrentViewToReleaseNotes(viewString))
     }
   }
 }

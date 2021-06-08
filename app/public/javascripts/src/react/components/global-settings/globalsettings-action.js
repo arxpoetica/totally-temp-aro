@@ -392,6 +392,15 @@ function setGlobalSettingsView (isGlobalSettingsView) {
   }
 }
 
+function setCurrentViewToReleaseNotes (currentViewString) {
+  return dispatch => {
+    dispatch({
+      type: Actions.GLOBAL_SETTINGS_SET_NEW_USER_CURRENT_VIEW,
+      payload: currentViewString
+    })
+  }
+} 
+
 export default {
   broadcastMessage,
   loadReleaseNotes,
@@ -416,5 +425,6 @@ export default {
   customErrorHandle,
   validateBroadcast,
   notifyBroadcast,
-  setGlobalSettingsView
+  setGlobalSettingsView,
+  setCurrentViewToReleaseNotes
 }
