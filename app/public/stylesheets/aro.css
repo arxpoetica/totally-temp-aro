@@ -207,10 +207,13 @@ footer nav {
 }
 
 .login-page-bg {
-  position: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   height: 100%;
   width: 100%;
-  padding-top: 100px;
+  padding: 100px;
+  overflow-y: scroll;
   top: 0;
   left: 0;
   z-index: 4;
