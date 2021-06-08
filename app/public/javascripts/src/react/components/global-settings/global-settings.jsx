@@ -74,7 +74,7 @@ export class GlobalSettings extends Component {
         }
       }
     } else if (prevState.currentView === '') {
-        if (nextProps.currentUserView === "Release Notes" && nextProps.showGlobalSettings) return { currentView: nextProps.currentUserView }
+        if (nextProps.currentUserView === 'Release Notes' && nextProps.showGlobalSettings) return { currentView: nextProps.currentUserView }
         return {
           currentView: 'Global Settings'
         }
@@ -299,7 +299,7 @@ const mapStateToProps = (state) => ({
   isRrmManager: state.resourceEditor.isRrmManager,
   isGlobalSettingsView: state.globalSettings.isGlobalSettingsView,
   currentUserView: state.globalSettings.currentView,
-  showGlobalSettings: state.globalSettings.showGlobalSettings
+  showGlobalSettings: state.globalSettings.showGlobalSettings,
 })
 
 const mapDispatchToProps = (dispatch) => ({

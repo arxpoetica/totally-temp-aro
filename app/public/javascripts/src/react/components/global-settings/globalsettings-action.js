@@ -426,5 +426,5 @@ export default {
   validateBroadcast,
   notifyBroadcast,
   setGlobalSettingsView,
-  setCurrentViewToReleaseNotes
+  setCurrentViewToReleaseNotes,
 }

@@ -19,7 +19,7 @@ const defaultState = {
     text: ''
   },
   showGlobalSettings: false,
-  currentView: "",
+  currentView: '',
   notifyBroadcast: {},
   isGlobalSettingsView: false,
 }

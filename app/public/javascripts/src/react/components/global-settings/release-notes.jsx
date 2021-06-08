@@ -18,8 +18,8 @@ export class ReleaseNotes extends Component {
     this.props.loadReleaseNotes()
   }
 
-  componentWillUnmount(){
-    this.props.setCurrentViewToReleaseNotes("")
+  componentWillUnmount () {
+    this.props.setCurrentViewToReleaseNotes('')
   }
 
   onClickVersion(id){
@@ -78,7 +78,7 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
   loadReleaseNotes: () => dispatch(globalsettingsActions.loadReleaseNotes()),
-  setCurrentViewToReleaseNotes: (viewString) => dispatch(globalsettingsActions.setCurrentViewToReleaseNotes(viewString))
+  setCurrentViewToReleaseNotes: (viewString) => dispatch(globalsettingsActions.setCurrentViewToReleaseNotes(viewString)),
 })
 
 const ReleaseNotesComponent = wrapComponentWithProvider(reduxStore, ReleaseNotes, mapStateToProps, mapDispatchToProps)

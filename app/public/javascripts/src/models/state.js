@@ -1,7 +1,7 @@
 import { List, Map } from 'immutable'
 import { createSelector } from 'reselect'
 import { formValueSelector } from 'redux-form'
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify'
 import React from 'react'
 import format from './string-template'
 import StateViewMode from './state-view-mode'
@@ -290,7 +290,6 @@ class State {
     service.requestMapLayerRefresh = new Rx.BehaviorSubject({})
     service.requestCreateMapOverlay = new Rx.BehaviorSubject(null)
     service.requestDestroyMapOverlay = new Rx.BehaviorSubject(null)
-    service.showGlobalSettings = false
     service.showNetworkAnalysisOutput = false
     service.networkPlanModal = new Rx.BehaviorSubject(false)
     service.planInputsModal = new Rx.BehaviorSubject(false)
@@ -305,7 +304,6 @@ class State {
     service.measuredDistance = new Rx.BehaviorSubject()
     service.dragStartEvent = new Rx.BehaviorSubject()
     service.dragEndEvent = new Rx.BehaviorSubject()
-    service.openGlobalSettingsView = new Rx.BehaviorSubject({})
     service.showPlanResourceEditorModal = false
     service.showRoicReportsModal = false
     service.editingPlanResourceKey = null
@@ -1699,25 +1697,23 @@ class State {
           var currentuserAppVersions = localStorage.getItem(service.loggedInUser.id)
 
           if (!localStorage.getItem(service.loggedInUser.id) ||
-            _.difference(service.listOfAppVersions, JSON.parse(currentuserAppVersions)).length > 0) {
-              service.showReleaseNotesToast()
+            _.difference(service.listOfAppVersions, JSON.parse(currentuserAppVersions)).length === 0) {
+              toast('Latest Updates and Platform Improvements', {
+                position: 'bottom-left',
+                hideProgressBar: true,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                onClick: () => service.showReleaseNotes(),
+              }),
+              <ToastContainer/>
           }
           localStorage.setItem(service.loggedInUser.id, JSON.stringify(service.listOfAppVersions))
         })
-      service.showReleaseNotesToast = () => {
-        toast('Latest Updates and Platform Improvements', {
-          position: "bottom-left",
-          hideProgressBar: true,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          onClick: () => {
-            service.setShowGlobalSettings()
-            service.setCurrentViewToReleaseNotes("Release Notes")
-          }
-        });
-        <ToastContainer/>
+      service.showReleaseNotes = () => {
+        service.setShowGlobalSettings()
+        service.setCurrentViewToReleaseNotes('Release Notes')
       }
     }
 
@@ -1915,11 +1911,11 @@ class State {
       rClearViewMode: (value) => dispatch(StateViewModeActions.clearViewMode(value)),
       loadEdgeConstructionTypeIds: () => dispatch(MapLayerActions.loadEdgeConstructionTypeIds()),
       setShowGlobalSettings: () => dispatch(GlobalSettingsActions.setShowGlobalSettings(true)),
-      setCurrentViewToReleaseNotes: (viewString) => dispatch(GlobalSettingsActions.setCurrentViewToReleaseNotes(viewString))
+      setCurrentViewToReleaseNotes: (viewString) => dispatch(GlobalSettingsActions.setCurrentViewToReleaseNotes(viewString)),
     }
   }
 }
 
-State.$inject = ['$rootScope', '$http', '$document', '$timeout', '$sce', '$ngRedux', '$filter', 'tileDataService', 'Utils', 'tracker', 'Notification', 'rxState']
+State.$inject = ['$rootScope', '$http', '$document', '$timeout', '$sce', '$ngRedux', '$filter', 'tileDataService', 'Utils', 'tracker', 'rxState']
 
 export default State
