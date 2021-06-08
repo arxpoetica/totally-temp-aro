@@ -5,6 +5,10 @@
 
 /* ========================= >>>>> recalculate plan >>>>> */
 
+.plan-editor-header {}
+
+/* ========================= >>>>> recalculate plan >>>>> */
+
 .plan-editor-recalculate .actions {
   display: grid;
   grid-auto-flow: column;
