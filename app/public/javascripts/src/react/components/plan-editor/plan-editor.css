@@ -2,20 +2,18 @@
   padding: 20px 0;
 }
 
-
 /* ========================= >>>>> recalculate plan >>>>> */
 
-.plan-editor-header {}
-
-/* ========================= >>>>> recalculate plan >>>>> */
-
+.plan-editor-recalculate {
+  margin: 0 0 10px;
+}
 .plan-editor-recalculate .actions {
   display: grid;
   grid-auto-flow: column;
   grid-gap: 10px;
   justify-content: center;
   align-items: center;
-  margin: 0 0 15px;
+  margin: 0 0 10px;
 }
 .plan-editor-recalculate h2 {
   margin: 0;
@@ -34,4 +32,42 @@
 }
 .plan-editor-recalculate .checkboxfill {
   margin: 0 10px 0 0;
+}
+
+/* ========================= >>>>> plan editor header >>>>> */
+
+.plan-editor-header {
+  margin: 0 0 10px;
+  padding: 10px;
+  font-weight: 700;
+  background-color: #eee;
+  border: solid 1px #ccc;
+}
+.plan-editor-header .subinfo {
+	font-weight: normal;
+	margin-top: 10px;
+}
+.plan-editor-header .item {
+	display: inline-block;
+	margin-right: 10px;
+}
+
+
+/* ========================= >>>>> plan editor actions >>>>> */
+
+/* .plan-editor-buttons {} */
+.plan-editor-buttons .group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 10px;
+  align-items: center;
+  margin: 0 0 10px;
+}
+.plan-editor-buttons .group .group {
+  margin: 0;
+}
+.plan-editor-buttons h2 {
+  margin: 0;
+  font-size: inherit;
+  font-weight: bold;
 }

@@ -4,6 +4,7 @@ import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import PlanEditorActions from './plan-editor-actions'
 import PlanEditorHeader from './plan-editor-header.jsx'
+import PlanEditorButtons from './plan-editor-buttons.jsx'
 import PlanEditorRecalculate from './plan-editor-recalculate.jsx'
 import EquipmentDragger from './equipment-dragger.jsx'
 import EquipmentMapObjects from './equipment-map-objects.jsx'
@@ -66,6 +67,7 @@ export const PlanEditor = props => {
 
       <PlanEditorRecalculate/>
       <PlanEditorHeader/>
+      <PlanEditorButtons/>
     </div>
   )
 

@@ -10,18 +10,18 @@ const PlanEditorHeader = props => {
   const ARO_CLIENT = 'aro'
 
   return (
-    <div className="plan-editor-header sidebar-table-header">
+    <div className="plan-editor-header">
       {/* above was ng-if $ctrl.getSelectedNetworkConfig() */}
 
       {/* was: $ctrl.getSelectedNetworkConfig().iconUrl */}
-      <img src={`images/map_icons/${ARO_CLIENT}/fiber_distribution_terminal.png`} style="vertical-align: middle; padding-right: 10px;"/>
+      {/* <img src={`/images/map_icons/${ARO_CLIENT}/fiber_distribution_terminal.png`} style="vertical-align: middle; padding-right: 10px;"/> */}
       {/* was $ctrl.getSelectedNetworkConfig().label */}
       <span>Fiber Distribution Terminal (FDT)</span>
-      <div className="sidebar-header-subinfo">
+      <div className="subinfo">
         {/* was $ctrl.selectedMapObjectLat */}
-        <div className="sidebar-header-subinfo-item">lat: 47.48186436198969</div>
+        <div className="item">lat: 47.48186436198969</div>
         {/* was $ctrl.selectedMapObjectLng */}
-        <div className="sidebar-header-subinfo-item">long: -118.25462573755699</div>
+        <div className="item">long: -118.25462573755699</div>
       </div>
     </div>
   )
