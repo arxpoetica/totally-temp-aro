@@ -1526,7 +1526,7 @@ class State {
           PuppeteerMessages.suppressMessages = false
           service.recreateTilesAndCache()
           // Late night commit. The following line throws an error. Subtypes get rendered.
-          service.requestSetMapZoom.next(map.getZoom() + 1)
+          //service.requestSetMapZoom.next(map.getZoom() + 1)
           $timeout()
         })
         .catch((err) => {
