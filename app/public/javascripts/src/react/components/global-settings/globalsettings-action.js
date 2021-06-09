@@ -393,11 +393,9 @@ function setGlobalSettingsView (isGlobalSettingsView) {
 }
 
 function setCurrentViewToReleaseNotes (currentViewString) {
-  return dispatch => {
-    dispatch({
-      type: Actions.GLOBAL_SETTINGS_SET_NEW_USER_CURRENT_VIEW,
-      payload: currentViewString
-    })
+  return {
+    type: Actions.GLOBAL_SETTINGS_SET_NEW_USER_CURRENT_VIEW,
+    payload: currentViewString
   }
 } 
 
