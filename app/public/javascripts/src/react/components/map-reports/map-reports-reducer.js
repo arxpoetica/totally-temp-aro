@@ -9,7 +9,8 @@ const defaultState = {
   isCommunicating: false,
   isDownloading: false,
   manualWait: false,
-  waitSecondsPerPage: 20
+  waitSecondsPerPage: 20,
+  isReportMode: false,
 }
 
 function clearMapReports () {
@@ -70,6 +71,12 @@ function setManualWait (state, manualWait) {
   }
 }
 
+function setIsReportMode (state, isReportMode) {
+  return { ...state,
+    isReportMode
+  }
+}
+
 function mapReportsReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.MAP_REPORTS_SET_PAGES:
@@ -101,6 +108,9 @@ function mapReportsReducer (state = defaultState, action) {
 
     case Actions.MAP_REPORTS_SET_MANUAL_WAIT:
       return setManualWait(state, action.payload)
+
+    case Actions.MAP_REPORTS_SET_IS_REPORT_MODE:
+      return setIsReportMode(state, action.payload)      
 
     default:
       return state
