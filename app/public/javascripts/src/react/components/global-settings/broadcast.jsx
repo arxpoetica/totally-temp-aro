@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import UiActions from '../configuration/ui/ui-actions'
+import { toIsoStartDate, toIsoEndDate } from '../../common/view-utils.js'
 
 export class Broadcast extends Component {
   constructor(props) {
@@ -92,8 +93,16 @@ export class Broadcast extends Component {
   }
 
   saveBroadcast() {
-    // To update config in ui.settings and reload it.
-    this.props.saveConfigurationToServerAndReload('broadcast', this.state)
+    const { startDate, endDate } = this.state
+    const compareStart = toIsoStartDate(startDate)
+    const compareEnd = toIsoEndDate(endDate)
+    compareStart.getTime() <= compareEnd.getTime()
+      ? this.props.saveConfigurationToServerAndReload('broadcast', this.state) // To update config in ui.settings and reload it.
+      : swal({
+        title: 'Invalid date range',
+        text: 'Please select a valid date range for broadcast',
+        type: 'warning'
+      })
   }
 }
 
