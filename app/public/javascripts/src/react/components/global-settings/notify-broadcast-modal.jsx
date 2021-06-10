@@ -16,12 +16,12 @@ export const NotifyBroadcastModal = (props) => {
 
   const { isBroadcastModalOpen, broadcastChecked } = state
 
-  const { notifyBroadcast, loadConfigurationFromServer, broadcastData, validateBroadcast } = props
+  const { notifyBroadcast, loadConfigurationFromServer, broadcastData, validateBroadcast, isReportMode } = props
 
   useEffect(() => {
     // Enable modal when broadcast is active.
     if (notifyBroadcast && notifyBroadcast.isEnableBroadcastModal
-      && checkBroadcastExpiry(Constants.BROADCAST_LOCAL_STORAGE)) {
+      && checkBroadcastExpiry(Constants.BROADCAST_LOCAL_STORAGE) && !isReportMode) {
       setState((state) => ({ ...state, isBroadcastModalOpen: true }))
     }
   }, [notifyBroadcast])
@@ -103,34 +103,29 @@ export const NotifyBroadcastModal = (props) => {
 
   return (
     <Modal isOpen={isBroadcastModalOpen} size="md" toggle={toggleBroadcastModal} backdrop={false}>
-      {/* Broadcast modal interfers while downloading PDF reports, so 'broadcastModal' & 'btnCloseBroadcast'
-         id's are created to handle in aro-reportsrv  */}
-      <div id="broadcastModal">
-        <ModalHeader toggle={toggleBroadcastModal}>BROADCAST</ModalHeader>
-        <ModalBody>
-          <span className="font-weight-bold">
-            {notifyBroadcast.subject}:
-          </span>
-          <div style={{ marginTop: '15px' }}>
-            {notifyBroadcast.message}
-          </div>
-        </ModalBody>
-        <ModalFooter>
-          <label>
-            <input type="checkbox" checked={broadcastChecked} onChange={() => toggleMessageShow()} />
-            &nbsp;Don&apos;t show this message again
-          </label>
-          &nbsp;
-          <button
-            id="btnCloseBroadcast"
-            type="button"
-            className="btn btn-primary"
-            onClick={() => toggleBroadcastModal()}
-          >
-            Okay
-          </button>
-        </ModalFooter>
-      </div>
+      <ModalHeader toggle={toggleBroadcastModal}>BROADCAST</ModalHeader>
+      <ModalBody>
+        <span className="font-weight-bold">
+          {notifyBroadcast.subject}:
+        </span>
+        <div style={{ marginTop: '15px' }}>
+          {notifyBroadcast.message}
+        </div>
+      </ModalBody>
+      <ModalFooter>
+        <label>
+          <input type="checkbox" checked={broadcastChecked} onChange={() => toggleMessageShow()} />
+          &nbsp;Don&apos;t show this message again
+        </label>
+        &nbsp;
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={() => toggleBroadcastModal()}
+        >
+          Okay
+        </button>
+      </ModalFooter>
     </Modal>
   )
 }
@@ -138,6 +133,7 @@ export const NotifyBroadcastModal = (props) => {
 const mapStateToProps = (state) => ({
   notifyBroadcast: state.globalSettings.notifyBroadcast,
   broadcastData: state.configuration.ui.items.broadcast,
+  isReportMode: state.mapReports.isReportMode,
 })
 
 const mapDispatchToProps = (dispatch) => ({

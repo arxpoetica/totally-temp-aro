@@ -1396,6 +1396,9 @@ class State {
           service.initializeState()
           service.isReportMode = Boolean(initialState.reportPage || initialState.reportOverview)
           if (service.isReportMode) {
+            // Broadcast modal interfers while downloading PDF reports with puppeteer, So 'isReportMode' is set in redux
+            // to hide Broadcast modal (notify-broadcast-modal.jsx) from PDF reports.
+            service.setIsReportMode(true)
             var reportOptions = initialState.reportPage || initialState.reportOverview
             return service.mapReadyPromise
               .then(() => {
@@ -1909,6 +1912,7 @@ class State {
       setLayerCategories: (layerCategories) => dispatch(StateViewModeActions.setLayerCategories(layerCategories)),
       rClearViewMode: (value) => dispatch(StateViewModeActions.clearViewMode(value)),
       loadEdgeConstructionTypeIds: () => dispatch(MapLayerActions.loadEdgeConstructionTypeIds()),
+      setIsReportMode: reportMode => dispatch(MapReportsActions.setIsReportMode(reportMode)),
       setShowGlobalSettings: () => dispatch(GlobalSettingsActions.setShowGlobalSettings(true)),
       setCurrentViewToReleaseNotes: (viewString) => dispatch(GlobalSettingsActions.setCurrentViewToReleaseNotes(viewString)),
     }
