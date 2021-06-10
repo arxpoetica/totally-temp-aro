@@ -19,6 +19,7 @@ const defaultState = {
     text: ''
   },
   showGlobalSettings: false,
+  currentView: '',
   notifyBroadcast: {},
   isGlobalSettingsView: false,
 }
@@ -203,6 +204,12 @@ function setGlobalSettingsView (state, isGlobalSettingsView) {
   }
 }
 
+function setCurrentView(state, currentViewOption) {
+  return {...state,
+    currentView: currentViewOption
+  }
+}
+
 function globalSettingsReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.GLOBAL_SETTINGS_GET_RELEASE_NOTES:
@@ -264,6 +271,9 @@ function globalSettingsReducer (state = defaultState, action) {
 
     case Actions.GLOBAL_SETTINGS_SET_CURRENT_VIEW:
       return setGlobalSettingsView(state, action.payload)
+
+    case Actions.GLOBAL_SETTINGS_SET_NEW_USER_CURRENT_VIEW:
+      return setCurrentView(state, action.payload)
   
     default:
       return state

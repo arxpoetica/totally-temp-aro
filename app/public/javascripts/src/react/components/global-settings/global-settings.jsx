@@ -74,9 +74,10 @@ export class GlobalSettings extends Component {
         }
       }
     } else if (prevState.currentView === '') {
-      return {
-        currentView: 'Global Settings'
-      }
+        if (nextProps.currentUserView === 'Release Notes' && nextProps.showGlobalSettings) return { currentView: nextProps.currentUserView }
+        return {
+          currentView: 'Global Settings'
+        }
     } else {
       return {
         currentView: prevState.currentView
@@ -88,7 +89,6 @@ export class GlobalSettings extends Component {
     const { loggedInUser, isRrmManager, selectedResourceNameProps } = this.props
     const { currentView, userIdForSettingsEdit, modal, dataUploadProps, dataSelectionID,
       resourceEditorProps } = this.state
-
     return(
       <>
         <Modal isOpen={modal} toggle={this.toggle}
@@ -298,6 +298,8 @@ const mapStateToProps = (state) => ({
   modalTitle: state.resourceEditor.modalTitle,
   isRrmManager: state.resourceEditor.isRrmManager,
   isGlobalSettingsView: state.globalSettings.isGlobalSettingsView,
+  currentUserView: state.globalSettings.currentView,
+  showGlobalSettings: state.globalSettings.showGlobalSettings,
 })
 
 const mapDispatchToProps = (dispatch) => ({
