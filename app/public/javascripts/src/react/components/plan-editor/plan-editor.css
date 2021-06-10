@@ -1,0 +1,75 @@
+.aro-plan-editor {
+  padding: 20px 0;
+}
+.aro-plan-editor h2 {
+  margin: 0;
+  font-size: inherit;
+  font-weight: bold;
+}
+
+/* ========================= >>>>> recalculate plan >>>>> */
+
+.plan-editor-recalculate {
+  margin: 0 0 10px;
+}
+.plan-editor-recalculate .actions {
+  display: grid;
+  grid-auto-flow: column;
+  grid-gap: 10px;
+  justify-content: center;
+  align-items: center;
+  margin: 0 0 10px;
+}
+.plan-editor-recalculate .checkboxes {
+  display: grid;
+  grid-auto-flow: column;
+  grid-gap: 20px;
+  align-items: center;
+}
+.plan-editor-recalculate label {
+  margin: 0;
+}
+.plan-editor-recalculate .checkboxfill {
+  margin: 0 10px 0 0;
+}
+
+/* ========================= >>>>> plan editor header >>>>> */
+
+.plan-editor-header {
+  margin: 0 0 10px;
+  padding: 10px;
+  background-color: #eee;
+  border: solid 1px #ccc;
+}
+.plan-editor-header h2 {
+	margin: 0 0 10px;
+}
+.plan-editor-header .subinfo {
+  display: grid;
+  grid-auto-flow: column;
+  grid-gap: 10px;
+  align-items: center;
+}
+.plan-editor-header .item {
+  display: flex;
+  align-items: center;
+  margin: 0;
+}
+.plan-editor-header input {
+  margin-left: 5px;
+}
+
+
+/* ========================= >>>>> plan editor actions >>>>> */
+
+/* .plan-editor-buttons {} */
+.plan-editor-buttons .group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 10px;
+  align-items: center;
+  margin: 0 0 10px;
+}
+.plan-editor-buttons .group .group {
+  margin: 0;
+}

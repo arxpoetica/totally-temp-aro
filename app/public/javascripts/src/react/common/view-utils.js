@@ -51,6 +51,39 @@ export const selectStyles = {
   }),
 }
 
+export const selectStylesBlue = {
+  control: provided => ({
+    ...provided,
+    backgroundColor: '#4d99e5',
+    borderWidth: '0px',
+  }),
+  placeholder: provided => ({
+    ...provided,
+    color: '#ffffff',
+    pointerEvents: 'none',
+    userSelect: 'none',
+  }),
+  singleValue: provided => ({
+    ...provided,
+    color: '#ffffff !important',
+    pointerEvents: 'none',
+    userSelect: 'none',
+  }),
+  input: provided => ({
+    ...provided,
+    flex: '1 1 auto',
+    '> div': { width: '100%' },
+    input: {
+      width: '100% !important',
+      color: '#ffffff !important',
+      textAlign: 'left',
+    },
+  }),
+  dropdownIndicator: provided => ({
+    ...provided,
+    color: '#ffffff !important',
+  }),
+}
 
 // ========================= >>>>> misc utils
 
