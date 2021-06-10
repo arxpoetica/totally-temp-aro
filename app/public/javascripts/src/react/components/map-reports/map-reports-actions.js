@@ -123,6 +123,13 @@ function setManualWait (manualWait) {
   }
 }
 
+function setIsReportMode (isReportMode) {
+  return {
+    type: Actions.MAP_REPORTS_SET_IS_REPORT_MODE,
+    payload: isReportMode
+  }
+}
+
 export default {
   downloadReport,
   setLayers,
@@ -135,5 +142,6 @@ export default {
   setActivePageUuid,
   setEditingPageUuid,
   setWaitTimePerPage,
-  setManualWait
+  setManualWait,
+  setIsReportMode,
 }
