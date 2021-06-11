@@ -1,6 +1,6 @@
 import AroHttp from '../../common/aro-http'
 import Actions from '../../common/actions'
-import { toDateFromIsoDay, toUTCDate } from '../../common/view-utils.js'
+import { toUTCDate, toIsoStartDate, toIsoEndDate } from '../../common/view-utils.js'
 
 function broadcastMessage (message) {
   return (dispatch, getState) => {
@@ -18,8 +18,8 @@ function validateBroadcast (broadcast) {
     if ((startDate !== undefined && endDate !== undefined)) {
       const now = new Date()
       const nowTime = toUTCDate(now).getTime()
-      const compareStart = toDateFromIsoDay(startDate)
-      const compareEnd = toDateFromIsoDay(endDate)
+      const compareStart = toIsoStartDate(startDate)
+      const compareEnd = toIsoEndDate(endDate)
       const isValidDate = nowTime >= compareStart.getTime() && nowTime <= compareEnd.getTime()
       if (isValidDate) {
         dispatch(broadcastMessage(broadcast))
@@ -392,6 +392,13 @@ function setGlobalSettingsView (isGlobalSettingsView) {
   }
 }
 
+function setCurrentViewToReleaseNotes (currentViewString) {
+  return {
+    type: Actions.GLOBAL_SETTINGS_SET_NEW_USER_CURRENT_VIEW,
+    payload: currentViewString
+  }
+} 
+
 export default {
   broadcastMessage,
   loadReleaseNotes,
@@ -416,5 +423,6 @@ export default {
   customErrorHandle,
   validateBroadcast,
   notifyBroadcast,
-  setGlobalSettingsView
+  setGlobalSettingsView,
+  setCurrentViewToReleaseNotes,
 }

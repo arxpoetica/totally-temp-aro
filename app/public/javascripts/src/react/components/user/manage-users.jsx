@@ -102,7 +102,7 @@ export class ManageUsers extends Component {constructor (props) {
                     // To map groups with user
                     var selectedGroups = user.userGroups
                     var selectedOptions = null;
-                    if(selectedGroups !== null && selectedGroups !== undefined && selectedGroups !== []){
+                    if (selectedGroups && selectedGroups.length) {
                       selectedOptions = selectedGroups.map(function(newkey) { 
                         return {"id":newkey.id, "name": newkey.name, "value": newkey.name, "label": newkey.name}; 
                       }); 

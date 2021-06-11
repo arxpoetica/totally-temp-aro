@@ -103,8 +103,9 @@ export class AroObjectEditor extends Component {
     return (typeof obj === 'number') || (typeof obj === 'string') || (typeof obj === 'boolean') || Array.isArray(obj)
   }
 
+  // check that has at least one property
   isExpandable (obj) {
-    return (typeof obj === 'object' && {} !== obj)// && object isn't empty, ToDo: check that at least one child it showable
+    return !!obj && obj.constructor === Object && Object.keys(obj).length
   }
 
   toggleIsKeyExpanded (objIndex) {

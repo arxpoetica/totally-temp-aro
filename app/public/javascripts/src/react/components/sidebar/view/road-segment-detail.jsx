@@ -1,12 +1,16 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
+import { usePrevious } from '../../../common/view-utils.js'
+import RoadSegmentTagPanel from './road-segment-tag-panel.jsx'
+import RoadSegmentTagSelect from './road-segment-tag-select.jsx'
 import SelectionActions from '../../selection/selection-actions'
 import ToolBarActions from '../../header/tool-bar-actions'
 import StateViewModeActions from '../../state-view-mode/state-view-mode-actions'
 import { viewModePanels, mapHitFeatures } from '../constants'
 import AroHttp from '../../../common/aro-http'
 import { dequal } from 'dequal'
+import './road-segment-detail.css'
 
 export const RoadSegmentDetail = (props) => {
 
@@ -24,13 +28,6 @@ export const RoadSegmentDetail = (props) => {
 
   // We need to get the previous mapFeatures prop, so that we can run an effect only on mapFeatures updates,
   // we can do it manually with a usePrevious() custom Hook.
-  // https://reactjs.org/docs/hooks-faq.html#how-to-get-the-previous-props-or-state
-  function usePrevious(value) {
-    const ref = useRef()
-    useEffect(() => { ref.current = value })
-    return ref.current
-  }
-
   const prevMapFeatures = usePrevious(mapFeatures)
 
   useEffect(() => {
@@ -140,99 +137,71 @@ export const RoadSegmentDetail = (props) => {
     .catch((err) => console.error(err))
   }
 
-  const renderAttributesComponent = (attributes) => {
-    let attributeComponents = []
-    Object.keys(attributes).forEach(key => {
-      attributeComponents.push(
-        <tr key={key}>
-          <td>
-            {key}
-          </td>
-          <td>
-            {attributes[key]}
-          </td>
-        </tr>
-      )
-    })
-    return (
-      <table className="table table-sm" style={{'backgroundColor': 'inherit'}}>
-        <tbody>
-          {attributeComponents}
-        </tbody>
-      </table>
-    )
+  const renderAttributesComponent = attributes => {
+    return <table className="table table-sm mb-1" style={{ 'backgroundColor': 'inherit' }}>
+      <tbody>
+        {Object.keys(attributes).map(key =>
+          <tr key={key}>
+            <td>{key}</td>
+            <td>{attributes[key]}</td>
+          </tr>
+        )}
+      </tbody>
+    </table>
   }
 
-  return (
-    <>
-      <style>
-        {`
-          .roadSegDetailRow {
-            cursor: pointer;
-          }
-          .roadSegDetailRow:hover {
-            outline: 1px solid #007bff;
-          }
-          .roadSegDetailAttributeRow {
-            padding-left: 20px !important;
-          }
-          .roadSegEvenRow {
+  return selectedEdgeInfo
+    ? <div className="plan-settings-container">
 
-          }
-          .roadSegOddRow {
-            background-color: rgba(0,0,0,.05);
-          }
-        `}
-      </style>
-      {selectedEdgeInfo &&
-        <div className="plan-settings-container">
-          {correctZoomLevel
-            ? <table className="table table-sm">
-                <thead>
-                  <tr>
-                    <th>Conduit Type</th>
-                    <th>ID</th>
-                    <th>Length</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {
-                    selectedEdgeInfo.map((edgeInfo, index) => {
-                      let rowClass = 'roadSegOddRow'
-                      if (index % 2 === 0) rowClass = 'roadSegEvenRow'
-                      let rows = []
+      {correctZoomLevel
+        ? <>
+            <RoadSegmentTagPanel/>
+            <table className="table table-sm mb-1">
+              <thead>
+                <tr>
+                  <th>Conduit Type</th>
+                  <th>ID</th>
+                  <th>Length</th>
+                </tr>
+              </thead>
+              <tbody>
+                {
+                  selectedEdgeInfo.map((edgeInfo, index) => {
+                    let rowClass = 'roadSegOddRow'
+                    if (index % 2 === 0) rowClass = 'roadSegEvenRow'
+                    let rows = []
+                    rows.push(
+                      <tr key={edgeInfo.id} className={`roadSegDetailRow ${rowClass}`}
+                        onClick={() => onEdgeExpand(edgeInfo)} >
+                        <td>{edgeInfo.feature_type_name}</td>
+                        <td>{edgeInfo.gid}</td>
+                        <td>{(edgeInfo.edge_length).toFixed(2)}m</td>
+                      </tr>
+                    )
+                    if (edgeInfo.id === selectedDetail) {
+                      let attributes = 'loading'
+                      if (detailsById[edgeInfo.id]) {
+                        attributes = renderAttributesComponent(detailsById[edgeInfo.id])
+                      }
                       rows.push(
-                        <tr key={edgeInfo.id} className={`roadSegDetailRow ${rowClass}`}
-                          onClick={() => onEdgeExpand(edgeInfo)} >
-                          <td>{edgeInfo.feature_type_name}</td>
-                          <td>{edgeInfo.gid}</td>
-                          <td>{(edgeInfo.edge_length).toFixed(2)}m</td>
+                        <tr className={`${rowClass}`} key={`${edgeInfo.id}_detail`}>
+                          <td className='roadSegDetailAttributeRow' colSpan="3">{attributes}</td>
                         </tr>
                       )
-                      if (edgeInfo.id === selectedDetail) {
-                        let attributes = 'loading'
-                        if (detailsById[edgeInfo.id]) {
-                          attributes = renderAttributesComponent(detailsById[edgeInfo.id])
-                        }
-                        rows.push(
-                          <tr className={`${rowClass}`} key={`${edgeInfo.id}_detail`}>
-                            <td className='roadSegDetailAttributeRow' colSpan="3">{attributes}</td>
-                          </tr>
-                        )
-                      }
-                      return rows
-                    })
-                  }
-                </tbody>
-              </table>
-            : <>
-                Zoom level too high to select conduit. Please zoom in and try to select the conduit again.
-              </>
-          }
-        </div>
+                    }
+                    return rows
+                  })
+                }
+              </tbody>
+            </table>
+            <RoadSegmentTagSelect/>
+          </>
+        : <>
+            Zoom level too high to select conduit. Please zoom in and try to select the conduit again.
+          </>
       }
-    </>
-  )
+    </div>
+    : null
 }
 
 const mapStateToProps = (state) => ({

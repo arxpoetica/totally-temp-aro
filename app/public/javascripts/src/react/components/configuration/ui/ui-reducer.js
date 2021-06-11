@@ -1,7 +1,14 @@
 import Actions from '../../../common/actions'
 
 const defaultState = {
-  perspective: null,
+  perspective: {
+    globalSettings: { // default 
+      "showManageUsers": true,
+      "showRegisterUser": true,
+      "showMultiFactorAuthentication": true,
+      "maxRoutingSelectionDisplayCount": 2000
+    }
+  },
   items: [],
   assetKeys: [],
   styleValues: ''

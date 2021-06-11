@@ -248,8 +248,11 @@ export const BoundaryDetail = (props) => {
   }
 
   const viewBoundaryInfo = () => {
-    // when editing the service layer, don't flip open the boundaries info panel
-    if (activeViewModePanel !== viewModePanels.EDIT_SERVICE_LAYER) {
+    // when editing the service or conduit layer, don't flip open the boundaries info panel
+    if (
+      activeViewModePanel !== viewModePanels.EDIT_SERVICE_LAYER
+      && activeViewModePanel !== viewModePanels.ROAD_SEGMENT_INFO
+    ) {
       activeViewModePanelAction(viewModePanels.BOUNDARIES_INFO)
     }
   }
