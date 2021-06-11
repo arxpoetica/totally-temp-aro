@@ -1699,7 +1699,7 @@ class State {
           var currentuserAppVersions = localStorage.getItem(service.loggedInUser.id)
 
           if (!localStorage.getItem(service.loggedInUser.id) ||
-            _.difference(service.listOfAppVersions, JSON.parse(currentuserAppVersions)).length === 0) {
+            _.difference(service.listOfAppVersions, JSON.parse(currentuserAppVersions)).length > 0) {
               toast('Latest Updates and Platform Improvements', {
                 position: 'bottom-left',
                 hideProgressBar: true,
