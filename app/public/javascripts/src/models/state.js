@@ -1,7 +1,7 @@
 import { List, Map } from 'immutable'
 import { createSelector } from 'reselect'
 import { formValueSelector } from 'redux-form'
-import { ToastContainer, toast } from 'react-toastify'
+import { toast } from 'react-toastify'
 import format from './string-template'
 import StateViewMode from './state-view-mode'
 import MapLayerHelper from './map-layer-helper'
@@ -1708,8 +1708,7 @@ class State {
                 draggable: true,
                 progress: undefined,
                 onClick: () => service.showReleaseNotes(),
-              }),
-              <ToastContainer/>
+              })
           }
           localStorage.setItem(service.loggedInUser.id, JSON.stringify(service.listOfAppVersions))
         })
