@@ -116,16 +116,16 @@ export const RoadSegmentDetail = (props) => {
 
     setState((state) => ({ ...state, selectedDetail: newSelectedDetail }))
     if (!detailsById[edgeInfo.id]) {
-      getEdgeAttributes(edgeInfo.id)
+      getEdgeAttributes(edgeInfo.id, edgeInfo._base_data_type)
     }
   }
 
-  const getEdgeAttributes = (edgeId) => {
-    AroHttp.get(`/service/plan-feature/${plan.id}/edge/${edgeId}?user_id=${user.id}`)
+  const getEdgeAttributes = (edgeId, path) => {
+    AroHttp.get(`/service/plan-feature/${plan.id}/${path}/${edgeId}?user_id=${user.id}`)
     .then((result) => {
       if (result.data && result.data.exportedAttributes) {
         const newDetailsById = { ...state.detailsById }
-        newDetailsById[edgeId] = result.data.exportedAttributes
+        newDetailsById[edgeId] = result.data.attributes
         setState(state => ({ ...state, detailsById: newDetailsById }))
       }
     })
