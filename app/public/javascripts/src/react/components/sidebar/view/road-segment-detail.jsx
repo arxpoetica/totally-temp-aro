@@ -114,7 +114,7 @@ export const RoadSegmentDetail = (props) => {
       newSelectedDetail = edgeInfo.id
     }
 
-    setState((state) => ({ ...state, 'selectedDetail': newSelectedDetail }))
+    setState((state) => ({ ...state, selectedDetail: newSelectedDetail }))
     if (!detailsById[edgeInfo.id]) {
       getEdgeAttributes(edgeInfo.id)
     }
@@ -123,16 +123,11 @@ export const RoadSegmentDetail = (props) => {
   const getEdgeAttributes = (edgeId) => {
     AroHttp.get(`/service/plan-feature/${plan.id}/edge/${edgeId}?user_id=${user.id}`)
     .then((result) => {
-      let attributes = null
       if (result.data && result.data.exportedAttributes) {
-        attributes = result.data.exportedAttributes
+        const newDetailsById = { ...state.detailsById }
+        newDetailsById[edgeId] = result.data.exportedAttributes
+        setState(state => ({ ...state, detailsById: newDetailsById }))
       }
-      let newDetailsById = { ...state.detailsById }
-      newDetailsById[edgeId] = attributes
-      setState((state) => ({ ...state, 
-        'detailsById': newDetailsById
-      }))
-
     })
     .catch((err) => console.error(err))
   }
@@ -178,11 +173,8 @@ export const RoadSegmentDetail = (props) => {
                         <td>{(edgeInfo.edge_length).toFixed(2)}m</td>
                       </tr>
                     )
-                    if (edgeInfo.id === selectedDetail) {
-                      let attributes = 'loading'
-                      if (detailsById[edgeInfo.id]) {
-                        attributes = renderAttributesComponent(detailsById[edgeInfo.id])
-                      }
+                    if (edgeInfo.id === selectedDetail && detailsById[edgeInfo.id]) {
+                      const attributes = renderAttributesComponent(detailsById[edgeInfo.id])
                       rows.push(
                         <tr className={`${rowClass}`} key={`${edgeInfo.id}_detail`}>
                           <td className='roadSegDetailAttributeRow' colSpan="3">{attributes}</td>
