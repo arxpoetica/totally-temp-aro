@@ -1,7 +1,7 @@
 import { List, Map } from 'immutable'
 import { createSelector } from 'reselect'
 import { formValueSelector } from 'redux-form'
-import { ToastContainer, toast } from 'react-toastify'
+import { toast } from 'react-toastify'
 import format from './string-template'
 import StateViewMode from './state-view-mode'
 import MapLayerHelper from './map-layer-helper'
@@ -1699,7 +1699,7 @@ class State {
           var currentuserAppVersions = localStorage.getItem(service.loggedInUser.id)
 
           if (!localStorage.getItem(service.loggedInUser.id) ||
-            _.difference(service.listOfAppVersions, JSON.parse(currentuserAppVersions)).length === 0) {
+            _.difference(service.listOfAppVersions, JSON.parse(currentuserAppVersions)).length > 0) {
               toast('Latest Updates and Platform Improvements', {
                 position: 'bottom-left',
                 hideProgressBar: true,
@@ -1708,8 +1708,7 @@ class State {
                 draggable: true,
                 progress: undefined,
                 onClick: () => service.showReleaseNotes(),
-              }),
-              <ToastContainer/>
+              })
           }
           localStorage.setItem(service.loggedInUser.id, JSON.stringify(service.listOfAppVersions))
         })
