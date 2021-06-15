@@ -132,6 +132,14 @@ class PlanSearchController {
   }
 
   constructSearch () {
+    const searchTextObject = {}
+    this.searchText.forEach(planObj => {
+      if (planObj.type === 'svc') searchTextObject.svc = planObj
+      if (planObj.type === 'tag') searchTextObject.tag = planObj
+      if (planObj.type === 'created_by') searchTextObject.created_by = planObj
+    })
+    this.searchText = Object.values(searchTextObject)
+    
     this.search_text = ''
     var selectedFilterPlans = _.filter(this.searchText, (plan) => {
       if (_.isString(plan)) return plan
