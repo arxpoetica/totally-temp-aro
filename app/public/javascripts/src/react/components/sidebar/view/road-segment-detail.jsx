@@ -113,7 +113,7 @@ export const RoadSegmentDetail = (props) => {
   const onEdgeExpand = (edgeInfo) => {
     setState((state) => ({ ...state, selectedDetail: edgeInfo.id }))
     if (!detailsById[edgeInfo.id]) {
-      getEdgeAttributes(edgeInfo.id, edgeInfo._base_data_type)
+      getEdgeAttributes(edgeInfo.id, edgeInfo._data_type.split('.')[0])
     }
   }
 
