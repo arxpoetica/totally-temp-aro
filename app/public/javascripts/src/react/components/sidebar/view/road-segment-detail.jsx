@@ -46,7 +46,9 @@ export const RoadSegmentDetail = (props) => {
         setMapSelection(newSelection)
         const roadSegmentsInfo = generateRoadSegmentsInfo(mapFeatures.roadSegments)
         setState((state) => ({ ...state, selectedEdgeInfo: roadSegmentsInfo }))
-        if (roadSegmentsInfo.length === 1) onEdgeExpand(roadSegmentsInfo[0])
+        if (roadSegmentsInfo.length === 1) {
+          onEdgeExpand(roadSegmentsInfo[0])
+        }
         viewRoadSegmentInfo()
       } else if (isFeatureListEmpty(mapFeatures)) {
         setState((state) => ({ ...state, selectedEdgeInfo: [] }))
@@ -109,30 +111,20 @@ export const RoadSegmentDetail = (props) => {
   }
 
   const onEdgeExpand = (edgeInfo) => {
-    let newSelectedDetail = null
-    if (edgeInfo.id !== selectedDetail) {
-      newSelectedDetail = edgeInfo.id
-    }
-
-    setState((state) => ({ ...state, 'selectedDetail': newSelectedDetail }))
+    setState((state) => ({ ...state, selectedDetail: edgeInfo.id }))
     if (!detailsById[edgeInfo.id]) {
-      getEdgeAttributes(edgeInfo.id)
+      getEdgeAttributes(edgeInfo.id, edgeInfo._data_type.split('.')[0])
     }
   }
 
-  const getEdgeAttributes = (edgeId) => {
-    AroHttp.get(`/service/plan-feature/${plan.id}/edge/${edgeId}?user_id=${user.id}`)
+  const getEdgeAttributes = (edgeId, path) => {
+    AroHttp.get(`/service/plan-feature/${plan.id}/${path}/${edgeId}?user_id=${user.id}`)
     .then((result) => {
-      let attributes = null
-      if (result.data && result.data.exportedAttributes) {
-        attributes = result.data.exportedAttributes
+      if (result.data && result.data.attributes) {
+        const newDetailsById = { ...state.detailsById }
+        newDetailsById[edgeId] = result.data.attributes
+        setState(state => ({ ...state, detailsById: newDetailsById }))
       }
-      let newDetailsById = { ...state.detailsById }
-      newDetailsById[edgeId] = attributes
-      setState((state) => ({ ...state, 
-        'detailsById': newDetailsById
-      }))
-
     })
     .catch((err) => console.error(err))
   }
@@ -171,18 +163,18 @@ export const RoadSegmentDetail = (props) => {
                     if (index % 2 === 0) rowClass = 'roadSegEvenRow'
                     let rows = []
                     rows.push(
-                      <tr key={edgeInfo.id} className={`roadSegDetailRow ${rowClass}`}
-                        onClick={() => onEdgeExpand(edgeInfo)} >
+                      <tr
+                        key={edgeInfo.id}
+                        className={`roadSegDetailRow ${rowClass}`}
+                        onClick={() => onEdgeExpand(edgeInfo)}
+                      >
                         <td>{edgeInfo.feature_type_name}</td>
                         <td>{edgeInfo.gid}</td>
                         <td>{(edgeInfo.edge_length).toFixed(2)}m</td>
                       </tr>
                     )
-                    if (edgeInfo.id === selectedDetail) {
-                      let attributes = 'loading'
-                      if (detailsById[edgeInfo.id]) {
-                        attributes = renderAttributesComponent(detailsById[edgeInfo.id])
-                      }
+                    if (edgeInfo.id === selectedDetail && detailsById[edgeInfo.id]) {
+                      const attributes = renderAttributesComponent(detailsById[edgeInfo.id])
                       rows.push(
                         <tr className={`${rowClass}`} key={`${edgeInfo.id}_detail`}>
                           <td className='roadSegDetailAttributeRow' colSpan="3">{attributes}</td>
