@@ -55,6 +55,15 @@
       refresh-tag-list="$ctrl.searchCreatorsList(searchObj)"></plan-search-filter>
   </div>
 
+  <div class="plan-info" style="display: flex; padding-top: 5px;">
+    <span style="flex: 0 0 auto; line-height: 33px; padding: 0px 12px;">Sort by:</span>
+    <select class="form-control-sm" style="background: #f8f9fa; border: 0px; outline: 0px;"
+      ng-model="$ctrl.selectedPlanSortType"
+      ng-options="item as item.description for item in $ctrl.planSortingOptions"
+      ng-change="$ctrl.onChangeSortingType()">
+    </select>
+  </div>
+
   <p ng-show="$ctrl.plans.length < 1" class="text-center">
     No plans found
   </p>
