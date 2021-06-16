@@ -23,6 +23,7 @@ export const PlanEditor = props => {
   	commitTransaction,
   	discardTransaction,
     isDrawingBoundaryFor,
+    selectedFeatureIds,
   } = props
 
   useEffect(() => {
@@ -68,24 +69,34 @@ export const PlanEditor = props => {
       <PlanEditorRecalculate/>
       <PlanEditorHeader/>
       <PlanEditorButtons/>
+      {/* below will be replaced by generic object editor */}
+      Selected:
+      {
+        selectedFeatureIds.map(id => {
+          return (<div key={id}>{id}</div>)
+        })
+      }
     </div>
   )
 
 }
-
+/*
 PlanEditor.propTypes = {
   planId: PropTypes.number,
   userId: PropTypes.number,
   transactionId: PropTypes.number,
   isDrawingBoundaryFor: PropTypes.string
 }
-
+*/
 const mapStateToProps = state => ({
   planId: state.plan.activePlan.id,
   userId: state.user.loggedInUser.id,
   transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
   isCommittingTransaction: state.planEditor.isCommittingTransaction,
   isDrawingBoundaryFor: state.planEditor.isDrawingBoundaryFor,
+  features: state.planEditor.features,
+  //selectedFeatureIds: state.planEditor.selectedFeatureIds,
+  selectedFeatureIds: state.selection.planEditorFeatures,
 })
 
 const mapDispatchToProps = dispatch => ({

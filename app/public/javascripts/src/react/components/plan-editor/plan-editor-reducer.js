@@ -4,6 +4,7 @@ const defaultState = {
   isPlanEditorActive: false,
   transaction: null,
   features: {},
+  selectedFeatureIds: [],
   isDrawingBoundaryFor: null,
   isCalculatingSubnets: false,
   isCreatingObject: false,
@@ -107,6 +108,12 @@ function setIsEnteringTransaction (state, isEnteringTransaction) {
   }
 }
 
+function setSelectedFeatures (state, selectedFeatureIds) {
+  return { ...state,
+    selectedFeatureIds: selectedFeatureIds
+  }
+}
+
 function planEditorReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.PLAN_EDITOR_CLEAR_TRANSACTION:
@@ -147,6 +154,9 @@ function planEditorReducer (state = defaultState, action) {
 
     case Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION:
       return setIsEnteringTransaction(state, action.payload)
+
+    case Actions.PLAN_EDITOR_SET_SELECTED_FEATURES:
+      return setSelectedFeatures(state, action.payload)
 
     default:
       return state

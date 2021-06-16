@@ -488,7 +488,7 @@ class State {
       }
 
       if (service.selectedDisplayMode.getValue() == service.displayModes.EDIT_PLAN) {
-        service.addPlanEditFeatures(options.equipmentFeatures)
+        service.selectPlanEditFeatures(options.equipmentFeatures)
       }
 
       // ToDo: this check may need to move into REACT
@@ -1920,7 +1920,7 @@ class State {
       setIsReportMode: reportMode => dispatch(MapReportsActions.setIsReportMode(reportMode)),
       setShowGlobalSettings: () => dispatch(GlobalSettingsActions.setShowGlobalSettings(true)),
       setCurrentViewToReleaseNotes: (viewString) => dispatch(GlobalSettingsActions.setCurrentViewToReleaseNotes(viewString)),
-      addPlanEditFeatures: (features) => dispatch(PlanEditorActions.addFeatures(features)),
+      selectPlanEditFeatures: (features) => dispatch(PlanEditorActions.selectFeatures(features)),
     }
   }
 }

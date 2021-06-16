@@ -479,7 +479,7 @@ class TileComponentController {
           // ToDo: now that we have types these categories should to be dynamic
           this.state.mapFeaturesSelectedEvent.next(hitFeatures)
         }
-      } catch (error) {
+      } catch (err) {
         console.error(err)
       }
     })
