@@ -47,7 +47,7 @@ export class CoverageInitializer extends Component {
                 disabled={displayOnly}
                 value={this.props.coverageType}
                 onChange={(event) => this.props.setCoverageType(event.target.value)}>
-                {this.state.coverageTypes.map(item => <option value={item.id} key={item.id}>{item.name}</option>)}
+                {this.state.coverageTypes.map(item => <option value={item.id} key={`selectCoverageType_${item.id}`}>{item.name}</option>)}
               </select>
             </td>
           </tr>
@@ -61,7 +61,7 @@ export class CoverageInitializer extends Component {
                 disabled={displayOnly}
                 value={this.props.groupKeyType}
                 onChange={(event) => this.props.setGroupKeyType(event.target.value)}>
-                {this.state.groupKeyTypes.map(item => <option value={item.id} key={item.id}>{item.name}</option>)}
+                {this.state.groupKeyTypes.map(item => <option value={item.id} key={`selectGroupKeyType_${item.id}`}>{item.name}</option>)}
               </select>
             </td>
           </tr>
@@ -126,7 +126,7 @@ export class CoverageInitializer extends Component {
                 disabled={displayOnly}
                 value={this.state.selectedSiteAssignment}
                 onChange={event => this.setState({ selectedSiteAssignment: event.target.value })}>
-                {this.state.siteAssignments.map(item => <option value={item} key={item}>{item}</option>)}
+                {this.state.siteAssignments.map(item => <option value={item} key={`selectSiteAssignment_${item}`}>{item}</option>)}
               </select>
             </td>
           </tr>
@@ -140,7 +140,7 @@ export class CoverageInitializer extends Component {
                 disabled={displayOnly}
                 value={this.props.activeSelectionModeId}
                 onChange={event => this.props.setSelectionTypeById(event.target.value)}>
-                {this.props.selectionModes.map(item => <option value={item.id} key={item.id}>{item.description}</option>)}
+                {this.props.selectionModes.map(item => <option value={item.id} key={`selectCoverageInitializerSelectionType_${item.id}`}>{item.description}</option>)}
               </select>
             </td>
           </tr>

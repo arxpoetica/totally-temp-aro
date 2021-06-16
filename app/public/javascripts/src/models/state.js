@@ -1,11 +1,13 @@
 import { List, Map } from 'immutable'
 import { createSelector } from 'reselect'
 import { formValueSelector } from 'redux-form'
+import { toast } from 'react-toastify'
 import format from './string-template'
 import StateViewMode from './state-view-mode'
 import MapLayerHelper from './map-layer-helper'
 import Constants from '../components/common/constants'
 import Actions from '../react/common/actions'
+import GlobalSettingsActions from '../react/components/global-settings/globalsettings-action'
 import UiActions from '../react/components/configuration/ui/ui-actions'
 import UserActions from '../react/components/user/user-actions'
 import ConfigurationActions from '../react/components/configuration/configuration-actions'
@@ -29,7 +31,6 @@ import ToolBarActions from '../react/components/header/tool-bar-actions'
 import RoicReportsActions from '../react/components/sidebar/analysis/roic-reports/roic-reports-actions'
 import { hsvToRgb } from '../react/common/view-utils'
 import StateViewModeActions from '../react/components/state-view-mode/state-view-mode-actions'
-import GlobalsettingsActions from '../react/components/global-settings/globalsettings-action'
 
 const networkAnalysisConstraintsSelector = formValueSelector(ReactComponentConstants.NETWORK_ANALYSIS_CONSTRAINTS)
 
@@ -288,7 +289,6 @@ class State {
     service.requestMapLayerRefresh = new Rx.BehaviorSubject({})
     service.requestCreateMapOverlay = new Rx.BehaviorSubject(null)
     service.requestDestroyMapOverlay = new Rx.BehaviorSubject(null)
-    service.showGlobalSettings = false
     service.showNetworkAnalysisOutput = false
     service.networkPlanModal = new Rx.BehaviorSubject(false)
     service.planInputsModal = new Rx.BehaviorSubject(false)
@@ -303,7 +303,6 @@ class State {
     service.measuredDistance = new Rx.BehaviorSubject()
     service.dragStartEvent = new Rx.BehaviorSubject()
     service.dragEndEvent = new Rx.BehaviorSubject()
-    service.openGlobalSettingsView = new Rx.BehaviorSubject({})
     service.showPlanResourceEditorModal = false
     service.showRoicReportsModal = false
     service.editingPlanResourceKey = null
@@ -812,7 +811,8 @@ class State {
       return $http.get(`/service/v1/plan/ephemeral/latest`)
         .then((result) => {
           // We have a valid ephemeral plan if we get back an object with *some* properties
-          var isValidEphemeralPlan = Object.getOwnPropertyNames(result.data).length > 0
+          // When there is no plan API return empty string instead of empty object, Hence this method Object.getOwnPropertyNames(result.data).length always return 1
+          var isValidEphemeralPlan = result.data ? true : false
           if (isValidEphemeralPlan) {
             // We have a valid ephemeral plan. Return it.
             return Promise.resolve(result)
@@ -1396,6 +1396,9 @@ class State {
           service.initializeState()
           service.isReportMode = Boolean(initialState.reportPage || initialState.reportOverview)
           if (service.isReportMode) {
+            // Broadcast modal interfers while downloading PDF reports with puppeteer, So 'isReportMode' is set in redux
+            // to hide Broadcast modal (notify-broadcast-modal.jsx) from PDF reports.
+            service.setIsReportMode(true)
             var reportOptions = initialState.reportPage || initialState.reportOverview
             return service.mapReadyPromise
               .then(() => {
@@ -1526,7 +1529,7 @@ class State {
           PuppeteerMessages.suppressMessages = false
           service.recreateTilesAndCache()
           // Late night commit. The following line throws an error. Subtypes get rendered.
-          service.requestSetMapZoom.next(map.getZoom() + 1)
+          //service.requestSetMapZoom.next(map.getZoom() + 1)
           $timeout()
         })
         .catch((err) => {
@@ -1582,6 +1585,7 @@ class State {
           service.setCopperLayers(service.configuration.copperCategories)
 
           service.setAppConfiguration(service.configuration) // Require in tool-bar.jsx
+          service.loadEdgeConstructionTypeIds()
           return service.setLoggedInUser(config.user, initialState)
         })
         .then(() => {
@@ -1601,10 +1605,6 @@ class State {
           service.getStyleValues()
 
           service.setClientIdInRedux(service.configuration.ARO_CLIENT)
-          // Validate Broadcast if it exists in the configuration
-          if(service.configuration.broadcast) {
-            service.validateBroadcast(service.configuration.broadcast)
-          }
           return service.loadConfigurationFromServer()
         })
         .catch(err => console.error(err))
@@ -1700,18 +1700,21 @@ class State {
 
           if (!localStorage.getItem(service.loggedInUser.id) ||
             _.difference(service.listOfAppVersions, JSON.parse(currentuserAppVersions)).length > 0) {
-            Notification.primary({
-              message: `<a href="#" onClick="openReleaseNotes()">Latest Updates and Platform Improvements</a>`
-            })
+              toast('Latest Updates and Platform Improvements', {
+                position: 'bottom-left',
+                hideProgressBar: true,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                onClick: () => service.showReleaseNotes(),
+              })
           }
-
           localStorage.setItem(service.loggedInUser.id, JSON.stringify(service.listOfAppVersions))
         })
-
-      service.openReleaseNotes = () => {
-        service.showGlobalSettings = true
-        service.openGlobalSettingsView.next('RELEASE_NOTES')
-        $timeout()
+      service.showReleaseNotes = () => {
+        service.setShowGlobalSettings()
+        service.setCurrentViewToReleaseNotes('Release Notes')
       }
     }
 
@@ -1907,11 +1910,14 @@ class State {
       setTypeVisibility: (typeVisibility) => dispatch(MapLayerActions.setTypeVisibility(typeVisibility)),
       setLayerCategories: (layerCategories) => dispatch(StateViewModeActions.setLayerCategories(layerCategories)),
       rClearViewMode: (value) => dispatch(StateViewModeActions.clearViewMode(value)),
-      validateBroadcast: (message) => dispatch(GlobalsettingsActions.validateBroadcast(message)),
+      loadEdgeConstructionTypeIds: () => dispatch(MapLayerActions.loadEdgeConstructionTypeIds()),
+      setIsReportMode: reportMode => dispatch(MapReportsActions.setIsReportMode(reportMode)),
+      setShowGlobalSettings: () => dispatch(GlobalSettingsActions.setShowGlobalSettings(true)),
+      setCurrentViewToReleaseNotes: (viewString) => dispatch(GlobalSettingsActions.setCurrentViewToReleaseNotes(viewString)),
     }
   }
 }
 
-State.$inject = ['$rootScope', '$http', '$document', '$timeout', '$sce', '$ngRedux', '$filter', 'tileDataService', 'Utils', 'tracker', 'Notification', 'rxState']
+State.$inject = ['$rootScope', '$http', '$document', '$timeout', '$sce', '$ngRedux', '$filter', 'tileDataService', 'Utils', 'tracker', 'rxState']
 
 export default State

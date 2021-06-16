@@ -135,6 +135,16 @@ function setMapFeatures (state, mapFeatures) {
   }
 }
 
+function setRoadSegments(state, roadSegments) {
+  return {
+    ...state,
+    mapFeatures: {
+      ...state.mapFeatures,
+      roadSegments,
+    },
+  }
+}
+
 function setPlanEditorSelectedFeatures (state, planEditorFeatures) {
   return { ...state,
     planEditorFeatures: planEditorFeatures
@@ -169,6 +179,9 @@ function selectionReducer (state = defaultState, action) {
 
     case Actions.SELECTION_SET_MAP_FEATURES:
       return setMapFeatures(state, action.payload)
+
+    case Actions.SELECTION_SET_ROAD_SEGMENTS:
+      return setRoadSegments(state, action.payload)
 
     case Actions.SELECTION_SET_PLAN_EDITOR_FEATURES:
       return setPlanEditorSelectedFeatures(state, action.payload)

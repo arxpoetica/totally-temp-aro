@@ -19,6 +19,7 @@ const defaultState = {
     text: ''
   },
   showGlobalSettings: false,
+  currentView: '',
   notifyBroadcast: {},
   isGlobalSettingsView: false,
 }
@@ -33,8 +34,7 @@ function setOtpStatus (state, multiFactor) {
   return { ...state,
     multiFactor: multiFactor,
     secretDetails: null,
-    verifyDetails:null,
-    secretDetails:null,
+    verifyDetails: null,
     totpEmailSent: false,
     errorFlag: false
   }
@@ -44,7 +44,7 @@ function setSecretDetails (state, secret) {
   return { ...state,
     secretDetails: secret,
     totpEmailSent: false,
-    multiFactor:null
+    multiFactor: null
   }
 }
 
@@ -77,8 +77,7 @@ function clearDetails(state, secret){
   return { ...state,
     multiFactor: null,
     secretDetails: null,
-    verifyDetails:null,
-    secretDetails:null
+    verifyDetails: null,
   }
 }
 
@@ -205,6 +204,12 @@ function setGlobalSettingsView (state, isGlobalSettingsView) {
   }
 }
 
+function setCurrentView(state, currentViewOption) {
+  return {...state,
+    currentView: currentViewOption
+  }
+}
+
 function globalSettingsReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.GLOBAL_SETTINGS_GET_RELEASE_NOTES:
@@ -266,6 +271,9 @@ function globalSettingsReducer (state = defaultState, action) {
 
     case Actions.GLOBAL_SETTINGS_SET_CURRENT_VIEW:
       return setGlobalSettingsView(state, action.payload)
+
+    case Actions.GLOBAL_SETTINGS_SET_NEW_USER_CURRENT_VIEW:
+      return setCurrentView(state, action.payload)
   
     default:
       return state

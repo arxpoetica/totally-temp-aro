@@ -164,7 +164,7 @@ export class PlanningConstraints extends Component {
                 </td>
               </tr>
               <tr>
-                <td>Max distance - eqipment to edge (m)</td>
+                <td>Max distance - equipment to edge (m)</td>
                 <td>
                   <Field name='maxEquipmentDistanceToEdge'
                     className='form-control form-control-sm' component='input' type='text' />

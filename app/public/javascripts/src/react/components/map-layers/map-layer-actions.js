@@ -264,6 +264,31 @@ function setTypeVisibility (typeVisibility) {
   }
 }
 
+function setShowSegmentsByTag(showSegmentsByTag) {
+  return {
+    type: Actions.LAYERS_SET_SHOW_SEGMENTS_BY_TAG,
+    payload: showSegmentsByTag,
+  }
+}
+
+function setEdgeConstructionTypeVisibility(constructionType, isVisible) {
+  return {
+    type: Actions.LAYERS_SET_EDGE_CONSTRUCTION_TYPE_VISIBILITY,
+    payload: {constructionType, isVisible},
+  }
+}
+
+function loadEdgeConstructionTypeIds() {
+  return dispatch => {
+    AroHttp.get('/service/odata/EdgeConstructionTypeEntity')
+      .then(result => dispatch({
+        type: Actions.LAYERS_SET_EDGE_CONSTRUCTION_TYPE_IDS,
+        payload: result.data
+      }))
+      .catch(err => console.error(err))
+  }
+}
+
 export default {
   setLayerVisibility,
   setNetworkEquipmentLayerVisibility,
@@ -284,5 +309,8 @@ export default {
   removeAnnotation,
   clearOlderAnnotations,
   setSelectedBoundaryType,
-  setTypeVisibility
+  setTypeVisibility,
+  setShowSegmentsByTag,
+  setEdgeConstructionTypeVisibility,
+  loadEdgeConstructionTypeIds,
 }

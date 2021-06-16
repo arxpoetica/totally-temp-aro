@@ -21,23 +21,14 @@ exports[`Default component render 1`] = `
     <div
       className="form-group"
     >
-      <label>
-        <input
-          checked={true}
-          onChange={[Function]}
-          type="checkbox"
-        />
-        Disappear after 15 Seconds
-      </label>
-    </div>
-    <div
-      className="form-group"
-    >
-      <label>
+      <label
+        className="font-weight-bold"
+      >
         Subject
       </label>
       <input
         className="form-control"
+        name="subject"
         onChange={[Function]}
         type="text"
         value=""
@@ -46,14 +37,58 @@ exports[`Default component render 1`] = `
     <div
       className="form-group"
     >
-      <label>
-        Text
+      <label
+        className="font-weight-bold"
+      >
+        Message
       </label>
       <textarea
         className="form-control"
+        name="message"
         onChange={[Function]}
-        rows="12"
+        rows="9"
+        value=""
       />
+    </div>
+    <div
+      className="form-group"
+    >
+      <label
+        className="font-weight-bold"
+      >
+        When should the messages broadcast?
+      </label>
+      <div
+        className="row"
+      >
+        <div
+          className="col-md-5"
+        >
+          <input
+            className="form-control"
+            name="startDate"
+            onChange={[Function]}
+            type="date"
+            value=""
+          />
+        </div>
+        <div
+          className="col-md-1 pt-2 text-center"
+        >
+          to
+        </div>
+        <div
+          className="col-md-5"
+        >
+          <input
+            className="form-control"
+            name="endDate"
+            onChange={[Function]}
+            type="date"
+            value=""
+          />
+        </div>
+      </div>
     </div>
   </div>
   <div
@@ -65,12 +100,14 @@ exports[`Default component render 1`] = `
   >
     <button
       className="btn btn-primary float-right"
+      disabled={true}
       onClick={[Function]}
+      type="button"
     >
       <i
         className="fa fa-save"
       />
-        Send
+        Save
     </button>
   </div>
 </div>
