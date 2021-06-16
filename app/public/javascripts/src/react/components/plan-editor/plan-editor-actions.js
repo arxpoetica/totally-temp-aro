@@ -256,6 +256,41 @@ function setIsEnteringTransaction (isEnteringTransaction) {
   }
 }
 
+// --- experimental --- //
+
+function addFeatures (features) {
+  return (dispatch, getState) => {
+    const state = getState()
+    let featuresToGet = []
+    features.forEach(feature => {
+      // should action creators be aware of state schema?
+      if (!state.planEditor.features[feature.object_id]) {
+        featuresToGet.push(feature)
+      }
+    })
+
+    featuresToGet.forEach(feature => {
+      AroHttp.get(`/service/plan-feature/${state.plan.activePlan.id}/${feature._base_data_type}/${feature.object_id}`)
+      .then(result => {
+        // Decorate the equipment with some default values. Technically this is not yet "created" equipment
+        // but will have to do for now.
+        const createdEquipment = {
+          feature: result.data,
+          meta: {
+            mapId: null,
+            isVisible: true,
+            //hasChanged: false,
+          }
+        }
+        return dispatch(addTransactionFeatures([createdEquipment]))
+      })
+      .catch(err => console.error(err))
+    })
+  }
+}
+
+// --- //
+
 export default {
   commitTransaction,
   clearTransaction,
@@ -276,5 +311,6 @@ export default {
   setIsDraggingFeatureForDrop,
   setIsEditingFeatureProperties,
   setIsCommittingTransaction,
-  setIsEnteringTransaction
+  setIsEnteringTransaction,
+  addFeatures,
 }

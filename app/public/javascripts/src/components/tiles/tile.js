@@ -418,6 +418,7 @@ class TileComponentController {
     })
 
     this.overlayClickListener = this.mapRef.addListener('click', async(event) => {
+      console.log(event)
       const { isShiftPressed } = this.state
 
       if (this.contextMenuService.isMenuVisible.getValue()) {
