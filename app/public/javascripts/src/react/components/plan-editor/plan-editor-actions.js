@@ -259,8 +259,6 @@ function setIsEnteringTransaction (isEnteringTransaction) {
 // --- experimental --- //
 
 function addFeatures (features) {
-  if (features.length === 0) return Promise.resolve([])
-
   return (dispatch, getState) => {
     const state = getState()
     let featuresToGet = []
