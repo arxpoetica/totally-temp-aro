@@ -39,27 +39,24 @@ export const PlanEditor = props => {
 
   return (
     <div className="aro-plan-editor">
-      <div className='text-center'>
-        <div className='btn-group '>
-          {/* A button to commit the transaction */}
+      <div className="text-center mb-2">
+        <div className="btn-group">
           <button
-            className='btn btn-light'
+            className="btn btn-light"
             onClick={() => checkAndCommitTransaction()}
             disabled={isCommittingTransaction}
           >
-            <i className='fa fa-check-circle' />&nbsp;&nbsp;Commit
+            <i className="fa fa-check-circle" />&nbsp;&nbsp;Commit
           </button>
-
-          {/* A button to discard the transaction */}
           <button
-            className='btn btn-light'
+            className="btn btn-light"
             onClick={() => discardTransaction(transactionId)}
           >
-            <i className='fa fa-times-circle' />&nbsp;&nbsp;Discard
+            <i className="fa fa-times-circle" />&nbsp;&nbsp;Discard
           </button>
         </div>
-        <EquipmentDragger />
       </div>
+      <EquipmentDragger />
       <EquipmentMapObjects />
       <EquipmentBoundaryMapObjects />
       { /* If we are in "draw boundary mode" for any equipment, render the drawing component */ }
