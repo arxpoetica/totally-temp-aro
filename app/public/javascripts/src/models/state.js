@@ -481,7 +481,6 @@ class State {
 
     service.mapFeaturesSelectedEvent.skip(1).subscribe((options) => {
       // ToDo: selection mechanism needs to be cerntalised 
-      console.log(options)
       // set all mapFeatures in redux
       if (service.selectedDisplayMode.getValue() == service.displayModes.VIEW) {
         service.setMapFeatures(options)
@@ -1816,7 +1815,8 @@ class State {
       //  We are currently maintaining state in two places
       //  BUT as of now are only setting it in redux
       if (nextReduxState.rSelectedDisplayMode &&
-          service.rSelectedDisplayMode !== service.selectedDisplayMode.getValue()) {
+          service.rSelectedDisplayMode !== service.selectedDisplayMode.getValue()) 
+      {
         // console.log(service.rSelectedDisplayMode)
         service.selectedDisplayMode.next(service.rSelectedDisplayMode)
       }

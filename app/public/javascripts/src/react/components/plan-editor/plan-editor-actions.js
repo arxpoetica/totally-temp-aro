@@ -304,10 +304,8 @@ function selectFeatures (features) {
   return (dispatch, getState) => {
     dispatch(addFeatures(features))
       .then(retrievedIds => {
-        console.log(retrievedIds)
         // we should have all of our features in state at this point (all valid features that is)
         let state = getState()
-        console.log(state.planEditor.features)
         let validFeatures = []
         features.forEach(feature => {
           if (state.planEditor.features[feature.object_id]) validFeatures.push(feature.object_id)
