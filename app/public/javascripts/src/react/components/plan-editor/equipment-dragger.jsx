@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import { PropTypes } from 'prop-types'
-import DraggableButton from './draggable-button.jsx'
+import DraggableNode from './draggable-node.jsx'
 import Constants from './constants'
 
 // TODO: centralize these somewhere...should probably not be hardcoded
@@ -42,15 +42,13 @@ export const EquipmentDragger = props => {
 
       <div className="nodes">
         {editableEquipmentTypes.map(type =>
-          <div key={type} className="node" title={equipmentDefinitions[type].label}>
-            <DraggableButton
-              key={type}
-              icon={equipmentDefinitions[type].iconUrl}
-              entityType={Constants.DRAG_DROP_NETWORK_EQUIPMENT}
-              entityDetails={equipmentDefinitions[type].networkNodeType}
-              isBoundary={false}
-            />
-          </div>
+          <DraggableNode
+            key={type}
+            icon={equipmentDefinitions[type].iconUrl}
+            entityType={Constants.DRAG_DROP_NETWORK_EQUIPMENT}
+            entityDetails={equipmentDefinitions[type].networkNodeType}
+            label={equipmentDefinitions[type].label}
+          />
         )}
       </div>
 
