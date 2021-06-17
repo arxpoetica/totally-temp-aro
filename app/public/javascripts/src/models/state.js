@@ -31,6 +31,7 @@ import ToolBarActions from '../react/components/header/tool-bar-actions'
 import RoicReportsActions from '../react/components/sidebar/analysis/roic-reports/roic-reports-actions'
 import { hsvToRgb } from '../react/common/view-utils'
 import StateViewModeActions from '../react/components/state-view-mode/state-view-mode-actions'
+import PlanEditorActions from '../react/components/plan-editor/plan-editor-actions'
 
 const networkAnalysisConstraintsSelector = formValueSelector(ReactComponentConstants.NETWORK_ANALYSIS_CONSTRAINTS)
 
@@ -479,10 +480,14 @@ class State {
     service.mapFeaturesClickedEvent = new Rx.BehaviorSubject({})
 
     service.mapFeaturesSelectedEvent.skip(1).subscribe((options) => {
-
+      // ToDo: selection mechanism needs to be cerntalised 
       // set all mapFeatures in redux
       if (service.selectedDisplayMode.getValue() == service.displayModes.VIEW) {
         service.setMapFeatures(options)
+      }
+
+      if (service.selectedDisplayMode.getValue() == service.displayModes.EDIT_PLAN) {
+        service.selectPlanEditFeatures(options.equipmentFeatures)
       }
 
       // ToDo: this check may need to move into REACT
@@ -1810,7 +1815,8 @@ class State {
       //  We are currently maintaining state in two places
       //  BUT as of now are only setting it in redux
       if (nextReduxState.rSelectedDisplayMode &&
-          service.rSelectedDisplayMode !== service.selectedDisplayMode.getValue()) {
+          service.rSelectedDisplayMode !== service.selectedDisplayMode.getValue()) 
+      {
         // console.log(service.rSelectedDisplayMode)
         service.selectedDisplayMode.next(service.rSelectedDisplayMode)
       }
@@ -1914,6 +1920,7 @@ class State {
       setIsReportMode: reportMode => dispatch(MapReportsActions.setIsReportMode(reportMode)),
       setShowGlobalSettings: () => dispatch(GlobalSettingsActions.setShowGlobalSettings(true)),
       setCurrentViewToReleaseNotes: (viewString) => dispatch(GlobalSettingsActions.setCurrentViewToReleaseNotes(viewString)),
+      selectPlanEditFeatures: (features) => dispatch(PlanEditorActions.selectFeatures(features)),
     }
   }
 }

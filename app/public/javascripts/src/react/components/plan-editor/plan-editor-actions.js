@@ -118,12 +118,12 @@ function modifyFeature (featureType, transactionId, feature) {
   }
 }
 
-function deleteTransactionFeature (transactionId, featureType, transactionFeature) {
+function deleteTransactionFeature (transactionId, featureType, transactionFeatureId) {
   return dispatch => {
-    return AroHttp.delete(`/service/plan-transactions/${transactionId}/modified-features/${featureType}/${transactionFeature.feature.objectId}`)
+    return AroHttp.delete(`/service/plan-transactions/${transactionId}/modified-features/${featureType}/${transactionFeatureId}`)
       .then(result => dispatch({
         type: Actions.PLAN_EDITOR_DELETE_TRANSACTION_FEATURE,
-        payload: transactionFeature.feature.objectId
+        payload: transactionFeatureId
       }))
       .catch(err => console.error(err))
   }
@@ -256,6 +256,71 @@ function setIsEnteringTransaction (isEnteringTransaction) {
   }
 }
 
+// --- experimental --- //
+
+function addFeatures (features) {
+  return (dispatch, getState) => {
+    const state = getState()
+    let featuresToGet = []
+    features.forEach(feature => {
+      // should action creators be aware of state schema?
+      if (!state.planEditor.features[feature.object_id]) {
+        featuresToGet.push(feature)
+      }
+    })
+    let retrievedIds = []
+    let promises = [Promise.resolve()]
+    featuresToGet.forEach(feature => {
+      let baseDataType = feature._base_data_type || 'equipment'
+      promises.push(
+        AroHttp.get(`/service/plan-feature/${state.plan.activePlan.id}/${baseDataType}/${feature.object_id}`)
+          .then(result => {
+            if (result.data) {
+              // Decorate the equipment with some default values. Technically this is not yet "created" equipment
+              // but will have to do for now.
+              retrievedIds.push(feature.object_id)
+              const createdEquipment = {
+                feature: result.data,
+                meta: {
+                  mapId: null,
+                  isVisible: true,
+                  //hasChanged: false,
+                }
+              }
+              return dispatch(addTransactionFeatures([createdEquipment]))
+            }
+          })
+          .catch(err => console.error(err))
+      )
+    })
+    return Promise.all(promises)
+      .then(() => Promise.resolve(retrievedIds))
+  }
+}
+
+function selectFeatures (features) {
+  return (dispatch, getState) => {
+    dispatch(addFeatures(features))
+      .then(retrievedIds => {
+        // we should have all of our features in state at this point (all valid features that is)
+        let state = getState()
+        let validFeatures = []
+        features.forEach(feature => {
+          if (state.planEditor.features[feature.object_id]) validFeatures.push(feature.object_id)
+        })
+        /*
+        dispatch({
+          type: Actions.PLAN_EDITOR_SET_SELECTED_FEATURES, 
+          payload: validFeatures,
+        })
+        */
+        dispatch(SelectionActions.setPlanEditorFeatures(validFeatures))
+      })
+  }
+}
+
+// --- //
+
 export default {
   commitTransaction,
   clearTransaction,
@@ -276,5 +341,7 @@ export default {
   setIsDraggingFeatureForDrop,
   setIsEditingFeatureProperties,
   setIsCommittingTransaction,
-  setIsEnteringTransaction
+  setIsEnteringTransaction,
+  addFeatures,
+  selectFeatures,
 }

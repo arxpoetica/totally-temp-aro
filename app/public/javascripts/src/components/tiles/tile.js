@@ -478,7 +478,7 @@ class TileComponentController {
           // ToDo: now that we have types these categories should to be dynamic
           this.state.mapFeaturesSelectedEvent.next(hitFeatures)
         }
-      } catch (error) {
+      } catch (err) {
         console.error(err)
       }
     })
@@ -743,7 +743,8 @@ class TileComponentController {
       activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
       selectionModes: reduxState.selection.selectionModes,
       selection: reduxState.selection,
-      selectionIds: reduxState.selection.planEditorFeatures,
+      //selectionIds: reduxState.selection.planEditorFeatures,
+      selectionIds: Object.keys(reduxState.planEditor.features),
       rSelection: reduxState.selection.selection,
       stateMapLayers: reduxState.mapLayers,
       networkAnalysisType: reduxState.optimization.networkOptimization.optimizationInputs.analysis_type,

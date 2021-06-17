@@ -31,7 +31,11 @@ class PointFeatureRenderer {
 
   static renderFeature (ctx, shape, feature, featureData, geometryOffset, mapLayer, mapLayers, tileDataService,
     selection, oldSelection, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage,
-    selectedDisplayMode, displayModes, analysisSelectionMode, selectionModes, equipmentLayerTypeVisibility, ARO_CLIENT) {
+    selectedDisplayMode, displayModes, analysisSelectionMode, selectionModes, equipmentLayerTypeVisibility, ARO_CLIENT) 
+  {
+    // this is a bit simple for what we actually need
+    if (selectedDisplayMode === displayModes.EDIT_PLAN) ctx.globalAlpha = 0.333
+
     const entityImage = this.getEntityImageForFeature(feature, featureData, ARO_CLIENT, mapLayer)
     var selectedListType = null
     var selectedListId = null
@@ -71,7 +75,8 @@ class PointFeatureRenderer {
         selectedDisplayMode == displayModes.ANALYSIS && analysisSelectionMode == selectionModes.SELECTED_LOCATIONS) {
       // Draw selected icon
       ctx.drawImage(selectedLocationImage[0], x, y)
-    } else if ((selectedDisplayMode == displayModes.VIEW || selectedDisplayMode == displayModes.EDIT_PLAN) && // for edit mode view of existing
+  //} else if ((selectedDisplayMode == displayModes.VIEW || selectedDisplayMode == displayModes.EDIT_PLAN) && // for edit mode view of existing
+    } else if (selectedDisplayMode === displayModes.VIEW && // for edit mode view of existing
                selectedListId != null &&
                selectedListType != null &&
                oldSelection.editable.hasOwnProperty(selectedListType) &&
