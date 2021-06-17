@@ -21,7 +21,7 @@ class PlanSearchController {
     this.creatorsSearchList = []
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
     this.planSortingOptions = [
-      { sortType: 'updatedDate', description: 'Date Updated' },
+      { sortType: 'updatedDate', description: 'Date Modified' },
       { sortType: 'createdDate', description: 'Date Created' },
     ]
     this.selectedPlanSortType = this.planSortingOptions[0]
