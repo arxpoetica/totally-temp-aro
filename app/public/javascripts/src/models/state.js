@@ -1705,8 +1705,6 @@ class State {
                 hideProgressBar: true,
                 closeOnClick: false,
                 pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
                 onClick: () => service.showReleaseNotes(),
               })
           }
