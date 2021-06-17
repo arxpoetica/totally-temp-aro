@@ -5,7 +5,7 @@ import DraggableButton from './draggable-button.jsx'
 import Constants from './constants'
 
 // TODO: centralize these somewhere...should probably not be hardcoded
-const editableNetworkNodeTypes = [
+const networkNodeTypes = [
   'dslam',
   'central_office',
   'fiber_distribution_hub',
@@ -24,46 +24,36 @@ export const EquipmentDragger = props => {
 
   const { visibleEquipmentTypes, equipmentDefinitions } = props
 
-  const [selectedEquipmentType, setSelectedEquipmentType] = useState(null)
   const [editableEquipmentTypes, setEditableEquipmentTypes] = useState([])
 
   useEffect(() => {
-    const editableEquipmentTypes = visibleEquipmentTypes.filter(type => editableNetworkNodeTypes.includes(type))
+    const editableEquipmentTypes = visibleEquipmentTypes.filter(type => {
+      return networkNodeTypes.includes(type)
+    })
     setEditableEquipmentTypes(editableEquipmentTypes)
-    setSelectedEquipmentType(editableEquipmentTypes[0])
   }, [])
 
-  return equipmentDefinitions && equipmentDefinitions[selectedEquipmentType] && (
-    <div className='d-flex flex-row' style={{ alignItems: 'center' }}>
-      {/* The button that will be dragged onto the map */}
-      <DraggableButton
-        className='flex-grow-0 m-3'
-        key={selectedEquipmentType}
-        icon={equipmentDefinitions[selectedEquipmentType].iconUrl}
-        entityType={Constants.DRAG_DROP_NETWORK_EQUIPMENT}
-        entityDetails={equipmentDefinitions[selectedEquipmentType].networkNodeType}
-        isBoundary={false}
-      />
+  return equipmentDefinitions && (
+    <div className="equipment-dragger">
 
-      {/* A dropdown to select the equipment type to drag */}
-      <select
-        className='flex-grow-1 m-2 form-control'
-        value={selectedEquipmentType}
-        onChange={event => setSelectedEquipmentType(event.target.value)}
-      >
-        {
-          editableEquipmentTypes.map(type => {
-            <option key={type} value={type}>
-              {equipmentDefinitions[type].label}
-            </option>
-          })
-        }
-      </select>
-
-      {/* Help text */}
-      <div className='flex-shrink-0 m-3'>
+      <div className="info">
         (drag icon onto map)
       </div>
+
+      <div className="nodes">
+        {editableEquipmentTypes.map(type =>
+          <div key={type} className="node" title={equipmentDefinitions[type].label}>
+            <DraggableButton
+              key={type}
+              icon={equipmentDefinitions[type].iconUrl}
+              entityType={Constants.DRAG_DROP_NETWORK_EQUIPMENT}
+              entityDetails={equipmentDefinitions[type].networkNodeType}
+              isBoundary={false}
+            />
+          </div>
+        )}
+      </div>
+
     </div>
   ) || null
 

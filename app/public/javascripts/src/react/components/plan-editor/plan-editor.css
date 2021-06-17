@@ -73,3 +73,21 @@
 .plan-editor-buttons .group .group {
   margin: 0;
 }
+
+/* ========================= >>>>> plan editor actions >>>>> */
+
+.equipment-dragger {}
+.equipment-dragger .info {
+  text-align: center;
+}
+.equipment-dragger .nodes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+.equipment-dragger .node {
+  flex-basis: 50px;
+  width: 50px;
+  height: 50px;
+}
