@@ -73,3 +73,32 @@
 .plan-editor-buttons .group .group {
   margin: 0;
 }
+
+/* ========================= >>>>> plan editor actions >>>>> */
+
+.equipment-dragger {
+  margin: 0 0 20px;
+}
+.equipment-dragger .info {
+  text-align: center;
+  margin: 0 0 12px;
+}
+.equipment-dragger .nodes {
+  display: grid;
+  grid-gap: 5px;
+  grid-template-columns: repeat(auto-fill, 44px);
+}
+.equipment-dragger .node {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 44px;
+  background-color: #f3f3f3;
+  border: 1px solid transparent;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+.equipment-dragger .node:hover {
+  background-color: #e1e1e1;
+  border-color: #cccccc;
+}
