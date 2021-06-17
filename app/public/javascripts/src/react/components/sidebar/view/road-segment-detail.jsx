@@ -113,12 +113,12 @@ export const RoadSegmentDetail = (props) => {
   const onEdgeExpand = (edgeInfo) => {
     setState((state) => ({ ...state, selectedDetail: edgeInfo.id }))
     if (!detailsById[edgeInfo.id]) {
-      getEdgeAttributes(edgeInfo.id, edgeInfo._base_data_type)
+      getEdgeAttributes(edgeInfo.id, edgeInfo._data_type.split('.')[0])
     }
   }
 
   const getEdgeAttributes = (edgeId, path) => {
-    AroHttp.get(`/service/plan-feature/${plan.id}/${path || 'fiber'}/${edgeId}?user_id=${user.id}`)
+    AroHttp.get(`/service/plan-feature/${plan.id}/${path}/${edgeId}?user_id=${user.id}`)
     .then((result) => {
       if (result.data && result.data.attributes) {
         const newDetailsById = { ...state.detailsById }

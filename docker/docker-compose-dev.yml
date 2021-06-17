@@ -10,14 +10,24 @@ services:
         environment:
             POSTGRES_PASSWORD: aro
             POSTGRES_USER: aro
+        command: postgres -c 'max_connections=200'
+        # command: postgres -c log_statement=all
+        networks:
+            - main
+
     rabbitmq:
         image: rabbitmq:management
         ports:
             - "5672:5672"
             - "15672:15672"
+        networks:
+            - main
+
     service:
         image: avco/aro-service:latest
         build: ../../aro-service/docker
+        ports:
+            - "8888:8080"
         expose:
             - "8080"
         links:
@@ -34,11 +44,19 @@ services:
             IGNITE_PROFILE: ignite_debug
             ZK_HOST: zookeeper
             RABBITMQ_HOST: rabbitmq
+        networks:
+            - main
+
     zookeeper:
         image: zookeeper
+        ports:
+            - "2181:2181"
+        networks:
+            - main
 
     app:
         image: avco/aro-app-base:node10-dev
+        container_name: docker_app_1
         volumes:
             - ..:/srv/www/aro
             - ../../aro-etl:/srv/www/aro/db
@@ -59,18 +77,39 @@ services:
             DATABASE_URL: postgres://aro:aro@arodb/aro
             ARO_CLIENT: aro
             RAILS_ENV: development
+            # ARO_SERVICE_URL: http://docker.for.mac.localhost:8080
         working_dir: /srv/www/aro
         command: bash -c "/usr/sbin/sshd -D"
+        networks:
+            - main
 
-    # Uncomment the container below if you want to run the PG Admin server
+    # reportsrv:
+    #     image: avco/aro-reportsrv
+    #     container_name: docker_reportsrv_1
+    #     command: bash -c "cd /app && npm install && ./node_modules/.bin/nodemon --inspect=0.0.0.0:9230"
+    #     ports:
+    #         - "7000:7000"
+    #         - "9230:9230"
+    #     # environment:
+    #     #     APP_BASE_URL: http://localhost:8000
+    #     volumes:
+    #         - ../../aro-reportsrv:/app
+    #     networks:
+    #         - main
+
+    # # Uncomment the container below if you want to run the PG Admin server
     # pgadmin:
     #     image: dpage/pgadmin4
     #     ports:
     #       - "8082:80"
     #     environment:
-    #         PGADMIN_DEFAULT_EMAIL: parag@metronconsulting.com
-    #         PGADMIN_DEFAULT_PASSWORD: changeMePlease
+    #         PGADMIN_DEFAULT_EMAIL: [your.name]@altmansolon.com
+    #         PGADMIN_DEFAULT_PASSWORD: password
 
 volumes:
     postgres-data:
         driver: local
+
+networks:
+    main:
+        name: main
