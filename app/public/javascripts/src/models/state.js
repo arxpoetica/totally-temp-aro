@@ -483,6 +483,8 @@ class State {
       // set all mapFeatures in redux
       if (service.selectedDisplayMode.getValue() == service.displayModes.VIEW) {
         service.setMapFeatures(options)
+        // For tracking when map clicked by the user.
+        service.setIsMapClicked(true)
       }
 
       // ToDo: this check may need to move into REACT
@@ -1914,6 +1916,7 @@ class State {
       setIsReportMode: reportMode => dispatch(MapReportsActions.setIsReportMode(reportMode)),
       setShowGlobalSettings: () => dispatch(GlobalSettingsActions.setShowGlobalSettings(true)),
       setCurrentViewToReleaseNotes: (viewString) => dispatch(GlobalSettingsActions.setCurrentViewToReleaseNotes(viewString)),
+      setIsMapClicked: mapFeatures => dispatch(SelectionActions.setIsMapClicked(mapFeatures)),
     }
   }
 }

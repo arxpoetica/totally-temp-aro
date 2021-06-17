@@ -24,7 +24,8 @@ export const RoadSegmentDetail = (props) => {
   const { selectedEdgeInfo, correctZoomLevel, detailsById, selectedDetail } = state
 
   const { mapFeatures, activeViewModePanel, cloneSelection, setMapSelection,
-    activeViewModePanelAction, isClearViewMode, clearViewMode, plan, user } = props
+    activeViewModePanelAction, isClearViewMode, clearViewMode, plan, user,
+    isMapClicked } = props
 
   // We need to get the previous mapFeatures prop, so that we can run an effect only on mapFeatures updates,
   // we can do it manually with a usePrevious() custom Hook.
@@ -72,7 +73,7 @@ export const RoadSegmentDetail = (props) => {
     const features = Object.keys(mapFeatures)
     for (let i = 0; i < features.length; i++) {
       if (features[i] === 'latLng' || features[i] === 'roadSegments') continue
-      if (mapFeatures[features[i]].length > 0 || [...mapFeatures[features[i]]].length > 0) isObjectEmpty = false
+      if ((mapFeatures[features[i]].length > 0 || [...mapFeatures[features[i]]].length > 0) || !isMapClicked) isObjectEmpty = false
     }
     return isObjectEmpty
   }
@@ -202,6 +203,7 @@ const mapStateToProps = (state) => ({
   isClearViewMode: state.stateViewMode.isClearViewMode,
   plan: state.plan.activePlan,
   user: state.user.loggedInUser,
+  isMapClicked: state.selection.isMapClicked,
 })
 
 const mapDispatchToProps = (dispatch) => ({
