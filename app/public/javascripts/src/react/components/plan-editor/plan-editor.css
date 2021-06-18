@@ -44,6 +44,13 @@
 .plan-editor-header h2 {
 	margin: 0 0 10px;
 }
+.plan-editor-header .info {
+  display: flex;
+  align-items: center;
+  margin: 0 0 12px;
+}
+.plan-editor-header img { margin: 0 12px 0 0; }
+.plan-editor-header h2 { margin: 0; }
 .plan-editor-header .subinfo {
   display: grid;
   grid-auto-flow: column;

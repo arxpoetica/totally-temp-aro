@@ -63,14 +63,18 @@ export const PlanEditor = props => {
       { /* If we are in "draw boundary mode" for any equipment, render the drawing component */ }
       { isDrawingBoundaryFor ? <BoundaryDrawCreator /> : null }
 
-      <PlanEditorRecalculate/>
-      <PlanEditorHeader/>
-      <PlanEditorButtons/>
-      {/* below will be replaced by generic object editor */}
-      Selected:
+      <PlanEditorRecalculate />
+      <PlanEditorButtons />
       {
         selectedFeatureIds.map(id => {
-          return (<div key={id}>{id}</div>)
+          return (
+            <div key={id}>
+              <PlanEditorHeader selectedFeatureId={id} />
+
+              {/* below will be replaced by generic object editor */}
+              <p>Selected: {id}</p>
+            </div>
+          )
         })
       }
     </div>
