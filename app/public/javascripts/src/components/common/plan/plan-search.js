@@ -281,7 +281,6 @@ let planSearch = {
   templateUrl: '/components/common/plan/plan-search.html',
   bindings: {
     showPlanDeleteButton: '<',
-    showRefreshPlansOnMapMove: '<',
     systemActors: '<',
     onPlanSelected: '&',
     onPlanDeleteRequested: '&'
