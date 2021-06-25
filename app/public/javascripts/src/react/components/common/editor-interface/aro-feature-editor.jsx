@@ -12,12 +12,13 @@ export class AroFeatureEditor extends Component {
 
     if (!'isCollapsible' in props) props.isCollapsible = true
     if (!'isEditable' in props) props.isEditable = true
+    if (!'visible' in props.meta) props.meta.visible = true
   }
 
   // left off here
 
   render () {
-    
+    console.log(this.props)
     if (!this.props.meta.visible) return []
     
     if (this.props.meta.displayDataType.startsWith('object')) {
@@ -31,14 +32,16 @@ export class AroFeatureEditor extends Component {
 
   renderList () {
     // ToDo: the meta data should be an entirely seperate object, not a property of the value 
-    let subMeta = this.props.value.getDisplayProperties()
+    //let subMeta = this.props.value.getDisplayProperties()
+    //console.log(subMeta)
     var jsx = []
     let isEditable = this.props.isEditable && subMeta.editable
     this.props.value.forEach((item, index) => {
       let objPath = `${this.props.objPath}[${index}]`
       //let displayName = `${this.props.meta.displayName} ${index+1}`
       //let meta = { ...subMeta, displayName}
-      let meta = { ...subMeta}
+      //let meta = subMeta
+      let meta = item.getDisplayProperties()
       jsx.push(<AroFeatureEditor objPath={objPath} key={objPath} isEditable={isEditable} value={item} meta={meta} onChange={this.props.onChange} />)
     })
     // ToDo: repeat code below
@@ -60,17 +63,21 @@ export class AroFeatureEditor extends Component {
   renderCollection () {
     // ToDo: the meta data should be an entirely seperate object, not a property of the value 
     let subMeta = this.props.value.getDisplayProperties()
+    console.log(subMeta)
     var jsx = []
     //let keysByOrder = Object.entries(subMeta).sort((a,b) => a[1].displayOrder - b[1].displayOrder)
-    let keysByOrder = Object.entries(subMeta)
-    for (const [key, meta] of keysByOrder) {
+    //let keysByOrder = Object.entries(subMeta)
+    //for (const [arKey, meta] of subMeta) {
+    subMeta.forEach((meta, index) => {
+      let key = meta.propertyName
       if (key in this.props.value && meta.visible) {
         let value = this.props.value[key]
         let isEditable = this.props.isEditable && meta.editable
         let objPath = `${this.props.objPath}.${key}`
         jsx.push(<AroFeatureEditor objPath={objPath} key={objPath} isEditable={isEditable} value={value} meta={meta} onChange={this.props.onChange} />)
       }
-    }
+    })
+    console.log(jsx)
     if (this.props.omitRootContain) {
       return (
         <>
@@ -123,9 +130,23 @@ export class AroFeatureEditor extends Component {
 
 
   renderItem () {
+    // JUST TO TEST 
+    return (
+      <div className='ei-property-item' key={this.props.objPath}>
+        <div className='ei-property-label'>
+          {this.props.meta.displayName}
+        </div>
+        <div className='ei-property-value'>
+          {this.props.value}
+        </div>
+      </div>
+    )
+
+    // ----
+
     let isEditable = this.props.isEditable && this.props.meta.editable
     var field = ''
-
+    console.log(this.props.meta)
     let options = []
     // ToDo: this should be more abstract, not aware of AroFeatureFactory
     /*
