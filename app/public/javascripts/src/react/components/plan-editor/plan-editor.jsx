@@ -10,6 +10,8 @@ import EquipmentDragger from './equipment-dragger.jsx'
 import EquipmentMapObjects from './equipment-map-objects.jsx'
 import EquipmentBoundaryMapObjects from './equipment-boundary-map-objects.jsx'
 import BoundaryDrawCreator from './boundary-draw-creator.jsx'
+import AroFeatureFactory from '../../../service-typegen/dist/AroFeatureFactory'
+import AroFeatureEditor from '../common/editor-interface/aro-feature-editor.jsx'
 import './plan-editor.css'
 
 export const PlanEditor = props => {
@@ -23,6 +25,7 @@ export const PlanEditor = props => {
   	commitTransaction,
   	discardTransaction,
     isDrawingBoundaryFor,
+    features,
     selectedFeatureIds,
   } = props
 
@@ -36,6 +39,25 @@ export const PlanEditor = props => {
       return
     }
     commitTransaction(transactionId)
+  }
+
+  function onFormChange (event, val, path) {
+    console.log({event, val, path})
+    /*
+    var pathAr = path.split('.')
+    pathAr.shift()
+    var leafKey = pathAr.pop()
+    var objRef = pathAr.reduce((ref, key) => (ref || {})[key], this.initFormVal)
+    objRef[leafKey] = val
+    //if ('newGame.gameType' === path) {
+      // set game specfic form
+    //}
+    if (!this.state.isFormValid) this.validateForm(this.initFormVal)
+    this.setState({
+      'formVal': this.initFormVal,
+      //'formMeta': this.newGameMeta,
+    })
+    */
   }
 
   return (
@@ -68,9 +90,31 @@ export const PlanEditor = props => {
       <PlanEditorButtons/>
       {/* below will be replaced by generic object editor */}
       Selected:
+      {/*
+        selectedFeatureIds.map(id => {
+          let aroFeature = AroFeatureFactory.createObject(features[id].feature)
+          return (
+            <div key={id}>
+              <pre>{JSON.stringify(aroFeature, null, 2)}</pre>
+              <div> ======= </div>
+              <pre>{JSON.stringify(aroFeature.networkNodeEquipment.getDisplayProperties(), null, 2)}</pre>
+            </div>
+          )
+        })
+      */}
       {
         selectedFeatureIds.map(id => {
-          return (<div key={id}>{id}</div>)
+          let aroFeature = AroFeatureFactory.createObject(features[id].feature).networkNodeEquipment
+          let meta = aroFeature.getDisplayProperties()
+          return (
+            <AroFeatureEditor key={id}
+              objPath='' 
+              isEditable={false} 
+              value={aroFeature} 
+              meta={meta} 
+              onChange={onFormChange}
+            ></AroFeatureEditor>
+          )
         })
       }
     </div>
