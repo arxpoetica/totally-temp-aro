@@ -16,6 +16,7 @@ const defaultState = {
   currentPlanTags: [],
   listOfServiceAreaTags: [],
   currentPlanServiceAreaTags: [],
+  deletedUncommitedMapObjects: [],
   selectedHeatMapOption: 'HEATMAP_ON',
   appConfiguration: {},
   // View Settings layer - define once
@@ -184,6 +185,13 @@ function setViewSetting (state, viewSetting) {
   }
 }
 
+function setDeletedMapObjects (state, deletedMapObjectsList) {
+  const deletedObjectsList = Array.isArray(deletedMapObjectsList) ? [] : [...state.deletedUncommitedMapObjects, deletedMapObjectsList]
+  return { ...state,
+    deletedUncommitedMapObjects: deletedObjectsList
+  }
+}
+
 function ToolBarReducer (state = defaultState, action) {
   switch (action.type) {
 
@@ -240,6 +248,9 @@ function ToolBarReducer (state = defaultState, action) {
 
     case Actions.TOOL_BAR_SET_VIEW_SETTING:
       return setViewSetting(state, action.payload)
+
+    case Actions.TOOL_BAR_SET_DELETED_UNCOMMITED_MAP_OBJECTS:
+      return setDeletedMapObjects(state, action.payload)
 
     default:
       return state

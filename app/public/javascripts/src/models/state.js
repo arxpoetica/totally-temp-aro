@@ -1858,7 +1858,8 @@ class State {
       activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
       optimizationInputs: reduxState.optimization.networkOptimization.optimizationInputs,
       rSelectedDisplayMode: reduxState.toolbar.rSelectedDisplayMode,
-      rActiveViewModePanel: reduxState.toolbar.rActiveViewModePanel
+      rActiveViewModePanel: reduxState.toolbar.rActiveViewModePanel,
+      deletedUncommitedMapObjects: reduxState.toolbar.deletedUncommitedMapObjects
     }
   }
 

@@ -78,7 +78,9 @@ class ServiceLayerEditorController {
   }
 
   handleObjectDeleted (mapObject) {
+    this.setDeletedMapObjects(mapObject)
     this.$http.delete(`/service/library/transaction/${this.currentTransaction.id}/features/${mapObject.objectId}`)
+    this.state.recreateTilesAndCache()
   }
 
   updateSelectedState (selectedFeature) {
@@ -130,6 +132,7 @@ class ServiceLayerEditorController {
       // Transaction has been committed, start a new one
         this.discardChanges = true
         this.currentTransaction = null
+        this.setDeletedMapObjects([])
         // Do not recreate tiles and/or data cache. That will be handled by the tile invalidation messages from aro-service
         Object.keys(this.objectIdToMapObject).forEach(objectId => this.tileDataService.removeFeatureToExclude(objectId))
         return this.state.loadModifiedFeatures(this.state.plan.id)
@@ -139,6 +142,7 @@ class ServiceLayerEditorController {
       .catch((err) => {
         this.discardChanges = true
         this.currentTransaction = null
+        this.setDeletedMapObjects([])
         this.state.recreateTilesAndCache()
         this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO // Close out this panel
         this.rActiveViewModePanelAction(this.state.viewModePanels.LOCATION_INFO)
@@ -165,12 +169,14 @@ class ServiceLayerEditorController {
             // Transaction has been discarded, start a new one
             this.discardChanges = true
             this.currentTransaction = null
+            this.setDeletedMapObjects([])
             this.state.recreateTilesAndCache()
             return this.resumeOrCreateTransaction()
           })
           .catch((err) => {
             this.discardChanges = true
             this.currentTransaction = null
+            this.setDeletedMapObjects([])
             this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO // Close out this panel
             this.rActiveViewModePanelAction(this.state.viewModePanels.LOCATION_INFO)
             this.$timeout()
@@ -211,13 +217,15 @@ class ServiceLayerEditorController {
 
   mapStateToThis (reduxState) {
     return {
-      dataItems: reduxState.plan.dataItems
+      dataItems: reduxState.plan.dataItems,
+      deletedUncommitedMapObjects: reduxState.toolbar.deletedUncommitedMapObjects
     }
   }
 
   mapDispatchToTarget (dispatch) {
     return {
-      rActiveViewModePanelAction: (value) => dispatch(ToolBarActions.activeViewModePanel(value))
+      rActiveViewModePanelAction: (value) => dispatch(ToolBarActions.activeViewModePanel(value)),
+      setDeletedMapObjects: (mapObject) => dispatch(ToolBarActions.setDeletedMapObjects(mapObject)),
      }
   }
 
