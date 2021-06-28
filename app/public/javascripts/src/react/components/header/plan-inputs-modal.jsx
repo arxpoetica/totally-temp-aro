@@ -128,7 +128,6 @@ export class PlanInputsModal extends Component {
               {parentPlanSelectorExpanded &&
                 <PlanSearch
                   showPlanDeleteButton={false}
-                  showRefreshPlansOnMapMove={false}
                   systemActors={systemActors}
                   onPlanSelected={this.onParentPlanSelected.bind(this)}
                 />

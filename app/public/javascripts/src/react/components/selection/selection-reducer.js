@@ -40,6 +40,7 @@ const defaultState = {
       serviceArea: {}
     }
   },
+  isMapClicked: false,
 }
 
 function setActiveSelectionModeById (state, newSelectionModeId) {
@@ -157,6 +158,12 @@ function setMapSelection (state, mapSelection) {
   }
 }
 
+function setIsMapClicked (state, isMapClicked) {
+  return { ...state,
+    isMapClicked: isMapClicked
+  }
+}
+
 function selectionReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.SELECTION_SET_ACTIVE_MODE:
@@ -188,6 +195,9 @@ function selectionReducer (state = defaultState, action) {
 
     case Actions.SELECTION_SET_MAP_SELECTION:
     return setMapSelection(state, action.payload)
+
+    case Actions.SELECTION_SET_IS_MAP_CLICKED:
+    return setIsMapClicked(state, action.payload)
 
     default:
       return state

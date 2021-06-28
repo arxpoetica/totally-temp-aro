@@ -484,6 +484,8 @@ class State {
       // set all mapFeatures in redux
       if (service.selectedDisplayMode.getValue() == service.displayModes.VIEW) {
         service.setMapFeatures(options)
+        // For tracking when map clicked by the user.
+        service.setIsMapClicked(true)
       }
 
       if (service.selectedDisplayMode.getValue() == service.displayModes.EDIT_PLAN) {
@@ -1710,8 +1712,6 @@ class State {
                 hideProgressBar: true,
                 closeOnClick: false,
                 pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
                 onClick: () => service.showReleaseNotes(),
               })
           }
@@ -1920,6 +1920,7 @@ class State {
       setIsReportMode: reportMode => dispatch(MapReportsActions.setIsReportMode(reportMode)),
       setShowGlobalSettings: () => dispatch(GlobalSettingsActions.setShowGlobalSettings(true)),
       setCurrentViewToReleaseNotes: (viewString) => dispatch(GlobalSettingsActions.setCurrentViewToReleaseNotes(viewString)),
+      setIsMapClicked: mapFeatures => dispatch(SelectionActions.setIsMapClicked(mapFeatures)),
       selectPlanEditFeatures: (features) => dispatch(PlanEditorActions.selectFeatures(features)),
     }
   }

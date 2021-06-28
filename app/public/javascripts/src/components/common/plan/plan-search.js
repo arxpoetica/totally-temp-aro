@@ -21,7 +21,7 @@ class PlanSearchController {
     this.creatorsSearchList = []
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
     this.planSortingOptions = [
-      { sortType: 'updatedDate', description: 'Date Updated' },
+      { sortType: 'updatedDate', description: 'Date Modified' },
       { sortType: 'createdDate', description: 'Date Created' },
     ]
     this.selectedPlanSortType = this.planSortingOptions[0]
@@ -138,6 +138,18 @@ class PlanSearchController {
   }
 
   constructSearch () {
+    const searchTextObject = {}
+    this.searchText.forEach(searchInput => {
+      if (typeof searchInput !== 'string'){
+        if (searchInput.type === 'svc') searchTextObject.svc = searchInput
+        if (searchInput.type === 'tag') searchTextObject.tag = searchInput
+        if (searchInput.type === 'created_by') searchTextObject.created_by = searchInput
+      } else {
+        searchTextObject.searchString = searchInput
+      }
+    })
+    this.searchText = Object.values(searchTextObject)
+    
     this.search_text = ''
     var selectedFilterPlans = _.filter(this.searchText, (plan) => {
       if (_.isString(plan)) return plan
@@ -269,7 +281,6 @@ let planSearch = {
   templateUrl: '/components/common/plan/plan-search.html',
   bindings: {
     showPlanDeleteButton: '<',
-    showRefreshPlansOnMapMove: '<',
     systemActors: '<',
     onPlanSelected: '&',
     onPlanDeleteRequested: '&'
