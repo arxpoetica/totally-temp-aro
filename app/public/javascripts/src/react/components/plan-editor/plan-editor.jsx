@@ -23,6 +23,7 @@ export const PlanEditor = props => {
   	commitTransaction,
   	discardTransaction,
     isDrawingBoundaryFor,
+    features,
     selectedFeatureIds,
     setSubnets,
   } = props
@@ -78,6 +79,24 @@ export const PlanEditor = props => {
           )
         })
       }
+      <div className="temporary" style={{ margin: '0 0 25px' }}>
+        <h2>Plan Information</h2>
+        <p>userId: {userId}</p>
+        <p>planId: {planId}</p>
+        <p>transactionId: {transactionId}</p>
+        {/* <pre>features {JSON.stringify(features, null, '  ')}</pre> */}
+        <pre>selectedFeatureIds {JSON.stringify(selectedFeatureIds, null, '  ')}</pre>
+        {Object.entries(features).map(([subnetId, { feature }]) =>
+          <button key={subnetId} onClick={() => setSubnets([{ transactionId, subnetId }])}>
+            [DEMO] set {feature.networkNodeType} subnet<br />({subnetId})
+          </button>
+        )}
+        {selectedFeatureIds.length > 1 &&
+          <button onClick={() => setSubnets(selectedFeatureIds.map(subnetId => ({ transactionId, subnetId })))}>
+            [DEMO] set all subnets
+          </button>
+        }
+      </div>
     </div>
   )
 
