@@ -63,7 +63,10 @@ export class EquipmentMapObjects extends Component {
       const eventXY = WktUtils.getXYFromEvent(event)
       this.props.showContextMenuForEquipment(this.props.planId, this.props.transactionId, this.props.selectedBoundaryTypeId, mapObject.objectId, eventXY.x, eventXY.y)
     })
-    mapObject.addListener('click', () => this.props.selectEquipment(objectId))
+    mapObject.addListener('click', () => {
+      this.props.selectEquipment(objectId)
+      this.props.addSubnets([objectId])
+    })
     this.objectIdToMapObject[objectId] = mapObject
   }
 
@@ -136,7 +139,8 @@ const mapDispatchToProps = dispatch => ({
   showContextMenuForEquipment: (planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y) => {
     dispatch(PlanEditorActions.showContextMenuForEquipment(planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y))
   },
-  selectEquipment: objectId => dispatch(SelectionActions.setPlanEditorFeatures([objectId]))
+  selectEquipment: objectId => dispatch(SelectionActions.setPlanEditorFeatures([objectId])),
+  addSubnets: subnetIds => dispatch(PlanEditorActions.addSubnets(subnetIds)),
 })
 
 const EquipmentMapObjectsComponent = connect(mapStateToProps, mapDispatchToProps)(EquipmentMapObjects)

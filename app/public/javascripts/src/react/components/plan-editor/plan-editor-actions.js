@@ -43,28 +43,6 @@ function resumeOrCreateTransaction (planId, userId) {
   }
 }
 
-function setSubnets (subnets) {
-  return dispatch => {
-    const subnetApiPromises = subnets.map(({ transactionId, subnetId }) => {
-      return AroHttp.get(`/service/plan-transaction/${transactionId}/subnet/${subnetId}`)
-    })
-    Promise.all(subnetApiPromises)
-      .then(subnetResults => {
-        dispatch({
-          type: Actions.PLAN_EDITOR_SET_SUBNETS,
-          payload: subnetResults.map(result => result.data),
-        })
-      })
-      .catch(err => {
-        console.error(err)
-        dispatch({
-          type: Actions.PLAN_EDITOR_SET_SUBNETS,
-          payload: [],
-        })
-      })
-  }
-}
-
 function clearTransaction () {
   return dispatch => {
     dispatch({ type: Actions.PLAN_EDITOR_CLEAR_TRANSACTION })
@@ -328,8 +306,11 @@ function selectFeatures (features) {
         let state = getState()
         let validFeatures = []
         features.forEach(feature => {
-          if (state.planEditor.features[feature.object_id]) validFeatures.push(feature.object_id)
+          if (state.planEditor.features[feature.object_id]) { validFeatures.push(feature.object_id) }
         })
+
+        dispatch(addSubnets(validFeatures))
+
         /*
         dispatch({
           type: Actions.PLAN_EDITOR_SET_SELECTED_FEATURES, 
@@ -341,10 +322,34 @@ function selectFeatures (features) {
   }
 }
 
+function addSubnets (subnetIds) {
+  return (dispatch, getState) => {
+
+    const { transaction, subnets: cachedSubnets } = getState().planEditor
+
+    // this little dance only fetches uncached subnets
+    const cachedSubnetIds = Object.keys(cachedSubnets)
+    const uncachedSubnetIds = subnetIds.filter(id => !cachedSubnetIds.includes(id))
+
+    const subnetApiPromises = uncachedSubnetIds.map(subnetId => {
+      return AroHttp.get(`/service/plan-transaction/${transaction.id}/subnet/${subnetId}`)
+    })
+    Promise.all(subnetApiPromises)
+      .then(subnetResults => {
+        if (subnetResults.length) {
+          dispatch({
+            type: Actions.PLAN_EDITOR_ADD_SUBNETS,
+            payload: subnetResults.map(result => result.data),
+          })
+        }
+      })
+      .catch(err => console.error(err))
+  }
+}
+
 // --- //
 
 export default {
-  setSubnets,
   commitTransaction,
   clearTransaction,
   discardTransaction,
@@ -367,4 +372,5 @@ export default {
   setIsEnteringTransaction,
   addFeatures,
   selectFeatures,
+  addSubnets,
 }
