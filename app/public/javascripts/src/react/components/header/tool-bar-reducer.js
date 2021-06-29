@@ -1,5 +1,23 @@
 import Actions from '../../common/actions'
 
+const viewSetting = {
+  selectedFiberOption: null,
+  heatmapOptions: [
+    {
+      id: 'HEATMAP_ON',
+      label: 'Aggregate heatmap'
+    },
+    {
+      id: 'HEATMAP_DEBUG',
+      label: 'Aggregate points'
+    },
+    {
+      id: 'HEATMAP_OFF',
+      label: 'Raw Points'
+    }
+  ]
+}
+
 const defaultState = {
   planInputsModal: false,
   rSelectedDisplayMode: 'VIEW',
@@ -19,23 +37,7 @@ const defaultState = {
   selectedHeatMapOption: 'HEATMAP_ON',
   appConfiguration: {},
   // View Settings layer - define once
-  viewSetting: {
-    selectedFiberOption: null,
-    heatmapOptions: [
-      {
-        id: 'HEATMAP_ON',
-        label: 'Aggregate heatmap'
-      },
-      {
-        id: 'HEATMAP_DEBUG',
-        label: 'Aggregate points'
-      },
-      {
-        id: 'HEATMAP_OFF',
-        label: 'Raw Points'
-      }
-    ]
-  },
+  viewSetting: { ...viewSetting },
   // ViewFiberOptions Array
   viewFiberOptions: [
     {
@@ -73,7 +75,17 @@ const defaultState = {
         max: 1
       }
     }
-  ]
+  ],
+  heatmapOptions: {
+    showTileExtents: false,
+    heatMap: {
+      useAbsoluteMax: false,
+      maxValue: 100,
+      powerExponent: 0.5,
+      worldMaxValue: 500000
+    },
+    selectedHeatmapOption: viewSetting.heatmapOptions[0] // 0, 2
+  }
 }
 
 function setPlanInputsModal (state, planInputsModal) {
