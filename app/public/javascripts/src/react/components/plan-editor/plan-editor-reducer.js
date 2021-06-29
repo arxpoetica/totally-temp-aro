@@ -4,6 +4,8 @@ const defaultState = {
   isPlanEditorActive: false,
   transaction: null,
   features: {},
+  subnets: {},
+  selectedSubnets: [], // currently unused
   //selectedFeatureIds: [],
   isDrawingBoundaryFor: null,
   isCalculatingSubnets: false,
@@ -13,6 +15,14 @@ const defaultState = {
   isEditingFeatureProperties: false,
   isEnteringTransaction: false,
   isCommittingTransaction: false
+}
+
+function setSubnets (state, subnets) {
+  const newSubnets = {}
+  for (const subnet of subnets) {
+    newSubnets[subnet.subnetId.id] = subnet
+  }
+  return { ...state, subnets: newSubnets }
 }
 
 function setTransaction (state, transaction) {
@@ -117,6 +127,9 @@ function setSelectedFeatures (state, selectedFeatureIds) {
 
 function planEditorReducer (state = defaultState, action) {
   switch (action.type) {
+    case Actions.PLAN_EDITOR_SET_SUBNETS:
+      return setSubnets(state, action.payload)
+
     case Actions.PLAN_EDITOR_CLEAR_TRANSACTION:
       return clearTransaction()
 

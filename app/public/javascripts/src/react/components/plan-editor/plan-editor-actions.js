@@ -43,6 +43,28 @@ function resumeOrCreateTransaction (planId, userId) {
   }
 }
 
+function setSubnets (subnets) {
+  return dispatch => {
+    const subnetApiPromises = subnets.map(({ transactionId, subnetId }) => {
+      return AroHttp.get(`/service/plan-transaction/${transactionId}/subnet/${subnetId}`)
+    })
+    Promise.all(subnetApiPromises)
+      .then(subnetResults => {
+        dispatch({
+          type: Actions.PLAN_EDITOR_SET_SUBNETS,
+          payload: subnetResults.map(result => result.data),
+        })
+      })
+      .catch(err => {
+        console.error(err)
+        dispatch({
+          type: Actions.PLAN_EDITOR_SET_SUBNETS,
+          payload: [],
+        })
+      })
+  }
+}
+
 function clearTransaction () {
   return dispatch => {
     dispatch({ type: Actions.PLAN_EDITOR_CLEAR_TRANSACTION })
@@ -322,6 +344,7 @@ function selectFeatures (features) {
 // --- //
 
 export default {
+  setSubnets,
   commitTransaction,
   clearTransaction,
   discardTransaction,

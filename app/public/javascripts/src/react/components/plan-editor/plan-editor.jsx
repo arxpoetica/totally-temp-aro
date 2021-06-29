@@ -24,6 +24,7 @@ export const PlanEditor = props => {
   	discardTransaction,
     isDrawingBoundaryFor,
     selectedFeatureIds,
+    setSubnets,
   } = props
 
   useEffect(() => {
@@ -104,6 +105,7 @@ const mapDispatchToProps = dispatch => ({
   resumeOrCreateTransaction: (planId, userId) => dispatch(PlanEditorActions.resumeOrCreateTransaction(planId, userId)),
   commitTransaction: transactionId => dispatch(PlanEditorActions.commitTransaction(transactionId)),
   discardTransaction: transactionId => dispatch(PlanEditorActions.discardTransaction(transactionId)),
+  setSubnets: subnets => dispatch(PlanEditorActions.setSubnets(subnets)),
 })
 
 const PlanEditorComponent = wrapComponentWithProvider(reduxStore, PlanEditor, mapStateToProps, mapDispatchToProps)
