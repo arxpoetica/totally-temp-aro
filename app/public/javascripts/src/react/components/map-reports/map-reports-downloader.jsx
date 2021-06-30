@@ -93,6 +93,7 @@ export class MapReportsDownloader extends Component {
       pageDefinition.locationFilters = this.props.mapLayers.locationFilters
       pageDefinition.layersTypeVisibility = JSON.parse(JSON.stringify(this.props.layersTypeVisibility))
       pageDefinition.visibleLayers = this.props.mapLayers.location.filter(layer => layer.checked).map(layer => layer.key).toJS();
+      pageDefinition.selectedHeatMapOption = this.props.selectedHeatMapOption
       // this needs to be done differently
       pageDefinition.visibleCableConduits = {};
       // ToDo: this should NOT be hardcoded, related to state.js setLoggedInUser (very misnamed and bloated) near service.setNetworkEquipmentLayerVisiblity
@@ -163,7 +164,8 @@ const mapStateToProps = state => ({
   manualWait: state.mapReports.manualWait,
   showLocationLabels: state.viewSettings.showLocationLabels,
   showEquipmentLabels: state.toolbar.showEquipmentLabels,
-  layersTypeVisibility: state.mapLayers.typeVisibility
+  layersTypeVisibility: state.mapLayers.typeVisibility,
+  selectedHeatMapOption: state.toolbar.selectedHeatMapOption,
 })
 
 const mapDispatchToProps = dispatch => ({
