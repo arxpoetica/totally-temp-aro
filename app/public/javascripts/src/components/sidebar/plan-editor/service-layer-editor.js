@@ -80,7 +80,6 @@ class ServiceLayerEditorController {
   handleObjectDeleted (mapObject) {
     this.setDeletedMapObjects(mapObject)
     this.$http.delete(`/service/library/transaction/${this.currentTransaction.id}/features/${mapObject.objectId}`)
-    this.state.recreateTilesAndCache()
   }
 
   updateSelectedState (selectedFeature) {
