@@ -51,24 +51,8 @@ export const PlanEditor = props => {
     commitTransaction(transactionId)
   }
 
-  function onFormChange (event, path) {
-    let val = event.target.value
-    console.log({event, val, path})
-    /*
-    var pathAr = path.split('.')
-    pathAr.shift()
-    var leafKey = pathAr.pop()
-    var objRef = pathAr.reduce((ref, key) => (ref || {})[key], this.initFormVal)
-    objRef[leafKey] = val
-    //if ('newGame.gameType' === path) {
-      // set game specfic form
-    //}
-    if (!this.state.isFormValid) this.validateForm(this.initFormVal)
-    this.setState({
-      'formVal': this.initFormVal,
-      //'formMeta': this.newGameMeta,
-    })
-    */
+  function onFormChange (newValObj, propVal, path, event) {
+    console.log({propVal, path, newValObj, event})
   }
 
   return (
@@ -122,7 +106,6 @@ export const PlanEditor = props => {
           console.log({meta, aroFeature})
           return (
             <AroFeatureEditor key={id}
-              objPath='' 
               isEditable={true} 
               value={aroFeature} 
               meta={meta} 
