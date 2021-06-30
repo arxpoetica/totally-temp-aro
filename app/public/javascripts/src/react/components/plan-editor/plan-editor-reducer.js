@@ -137,7 +137,7 @@ function clearSubnets (state) {
   return { ...state, subnets: {} }
 }
 
-function setSelectedSubnet (state, selectedSubnetId) {
+function setSelectedSubnetId (state, selectedSubnetId) {
   return { ...state, selectedSubnetId }
 }
 
@@ -194,8 +194,8 @@ function planEditorReducer (state = defaultState, action) {
     case Actions.PLAN_EDITOR_CLEAR_SUBNETS:
       return clearSubnets()
 
-    case Actions.PLAN_EDITOR_SET_SELECTED_SUBNET:
-      return setSelectedSubnet(state, action.payload)
+    case Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID:
+      return setSelectedSubnetId(state, action.payload)
 
     default:
       return state

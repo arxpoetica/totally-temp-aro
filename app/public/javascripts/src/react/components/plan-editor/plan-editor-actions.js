@@ -310,6 +310,8 @@ function selectFeatures (features) {
         })
 
         dispatch(addSubnets(validFeatures))
+        // FIXME: we need to decide which feature to represent as the root of the (turtles) subnets tree
+        dispatch(setSelectedSubnetId(validFeatures[0]))
 
         /*
         dispatch({
@@ -347,6 +349,13 @@ function addSubnets (subnetIds) {
   }
 }
 
+function setSelectedSubnetId (selectedSubnetId) {
+  return {
+    type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
+    payload: selectedSubnetId,
+  }
+}
+
 // --- //
 
 export default {
@@ -373,4 +382,5 @@ export default {
   addFeatures,
   selectFeatures,
   addSubnets,
+  setSelectedSubnetId,
 }

@@ -66,6 +66,7 @@ export class EquipmentMapObjects extends Component {
     mapObject.addListener('click', () => {
       this.props.selectEquipment(objectId)
       this.props.addSubnets([objectId])
+      this.props.setSelectedSubnetId(objectId)
     })
     this.objectIdToMapObject[objectId] = mapObject
   }
@@ -141,6 +142,7 @@ const mapDispatchToProps = dispatch => ({
   },
   selectEquipment: objectId => dispatch(SelectionActions.setPlanEditorFeatures([objectId])),
   addSubnets: subnetIds => dispatch(PlanEditorActions.addSubnets(subnetIds)),
+  setSelectedSubnetId: subnetId => dispatch(PlanEditorActions.setSelectedSubnetId(subnetId)),
 })
 
 const EquipmentMapObjectsComponent = connect(mapStateToProps, mapDispatchToProps)(EquipmentMapObjects)
