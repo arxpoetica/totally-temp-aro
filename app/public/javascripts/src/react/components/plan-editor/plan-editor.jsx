@@ -29,10 +29,20 @@ export const PlanEditor = props => {
     selectedFeatureIds,
   } = props
 
+  //state = 
+
   useEffect(() => {
     resumeOrCreateTransaction(planId, userId)
   }, [])
 
+  /*
+  function componentDidUpdate(prevProps) {
+    // Typical usage (don't forget to compare props):
+    if (this.props.userID !== prevProps.userID) {
+      this.fetchData(this.props.userID);
+    }
+  }
+  */
 
   function checkAndCommitTransaction() {
     if (isCommittingTransaction) {
@@ -41,7 +51,8 @@ export const PlanEditor = props => {
     commitTransaction(transactionId)
   }
 
-  function onFormChange (event, val, path) {
+  function onFormChange (event, path) {
+    let val = event.target.value
     console.log({event, val, path})
     /*
     var pathAr = path.split('.')
@@ -112,7 +123,7 @@ export const PlanEditor = props => {
           return (
             <AroFeatureEditor key={id}
               objPath='' 
-              isEditable={false} 
+              isEditable={true} 
               value={aroFeature} 
               meta={meta} 
               onChange={onFormChange}

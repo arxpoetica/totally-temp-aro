@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Field, reduxForm } from 'redux-form'
+//import { Field, reduxForm } from 'redux-form'
 import Foldout from '../foldout.jsx'
 import AroFeatureFactory from '../../../../service-typegen/dist/AroFeatureFactory'
 import Multiselect from 'react-widgets/lib/Multiselect'
@@ -35,13 +35,13 @@ export class AroFeatureEditor extends Component {
     //let subMeta = this.props.value.getDisplayProperties()
     //console.log(subMeta)
     var jsx = []
-    let isEditable = this.props.isEditable && subMeta.editable
     this.props.value.forEach((item, index) => {
       let objPath = `${this.props.objPath}[${index}]`
       //let displayName = `${this.props.meta.displayName} ${index+1}`
       //let meta = { ...subMeta, displayName}
       //let meta = subMeta
       let meta = item.getDisplayProperties()
+      let isEditable = this.props.isEditable && meta.editable
       jsx.push(<AroFeatureEditor objPath={objPath} key={objPath} isEditable={isEditable} value={item} meta={meta} onChange={this.props.onChange} />)
     })
     // ToDo: repeat code below
@@ -131,22 +131,23 @@ export class AroFeatureEditor extends Component {
 
   renderItem () {
     // JUST TO TEST 
+    /*
     return (
       <div className='ei-property-item' key={this.props.objPath}>
         <div className='ei-property-label'>
           {this.props.meta.displayName}
         </div>
         <div className='ei-property-value'>
-          {this.props.value}
+          {String(this.props.value)}
         </div>
       </div>
     )
-
+    */
     // ----
 
     let isEditable = this.props.isEditable && this.props.meta.editable
     var field = ''
-    console.log(this.props.meta)
+    
     let options = []
     // ToDo: this should be more abstract, not aware of AroFeatureFactory
     /*
@@ -159,73 +160,54 @@ export class AroFeatureEditor extends Component {
     }
     */
 
-    if (!isEditable) {
+    // multiple meta.displayDataType may resolve to the same form element
+    //  find this one
+    let formEleType = null
+    for (const displayTypeName in AroFeatureEditor.displayTypes) {
+      if (AroFeatureEditor.displayTypes[displayTypeName].includes(this.props.meta.displayDataType)) {
+        formEleType = displayTypeName
+      }
+    }
+    
+    if (!isEditable || !formEleType) {
       field = (
-        <Field
-          name={this.props.objPath}
-          component={FieldComponents.renderDisplayOnly}
-          value={this.props.value}
-        />
+        <div style={{ display: 'inline-block' }}>{String(this.props.value)}</div>
       )
     } else {
-      switch (this.props.meta.displayDataType) {
-        case ObjectEditor.displayTypes.CHECKBOX:
+      let eleProps = {
+        'name': this.props.objPath,
+        'onChange': ((event, value) => this.props.onChange(event, this.props.objPath)),
+        'type': formEleType,
+        'value': this.props.value,
+      }
+      switch (formEleType) {
+        case 'checkbox':
           field = (
-            <Field name={this.props.objPath}
-              onChange={((event, value) => this.props.onChange(event, value, this.props.objPath))} 
-              className='checkboxfill' 
-              component='input' 
-              type={this.props.meta.displayDataType} 
-              value={this.props.value} 
-            />
+            <input {...eleProps} checked={this.props.value === true ? 'checked' : null} className='checkboxfill layer-type-checkboxes'></input>
           )
           break
-        case ObjectEditor.displayTypes.MULTI_SELECT:
+        case 'multiSelect':
           field = (
-            <Field
-              onChange={((event, value) => this.props.onChange(event, value, this.props.objPath))} 
-              name={this.props.objPath}
-              component={FieldComponents.renderMultiselect}
-              data={options}
-              value={this.props.value}
-            />
+            <Multiselect {...eleProps} />
           )
           break
-        case ObjectEditor.displayTypes.DROPDOWN_LIST:
+        case 'dropdownList':
           // when we get fancier with the options we can include on the <Field> tag:
           // valueField="value"
           // textField="displayName"
           // for options that look like: {displayName: 'Feeder Fiber', value: 'FEEDER'}
           field = (
-            <Field
-              onChange={((event, value) => this.props.onChange(event, value, this.props.objPath))} 
-              name={this.props.objPath}
-              component={FieldComponents.renderDropdownList}
-              data={options}
-              value={this.props.value}
-            />
+            <DropdownList {...eleProps} />
           )
           break
-        case ObjectEditor.displayTypes.SELECT_LIST:
+        case 'selectList':
           field = (
-            <Field
-              onChange={((event, value) => this.props.onChange(event, value, this.props.objPath))} 
-              name={this.props.objPath}
-              component={FieldComponents.renderSelectList}
-              data={options}
-              value={this.props.value}
-            />
+            <SelectList {...eleProps} />
           )
           break
         default:
           field = (
-            <Field name={this.props.objPath}
-              onChange={((event, value) => this.props.onChange(event, value, this.props.objPath))} 
-              className='form-control form-control-sm' 
-              component='input' 
-              type={this.props.meta.displayDataType} 
-              value={this.props.value}
-            />
+            <input {...eleProps} className='form-control form-control-sm'></input>
           )
       }
     }
@@ -242,10 +224,21 @@ export class AroFeatureEditor extends Component {
     )
   }
 
-
-
-
 }
+
+AroFeatureEditor.displayTypes = {
+  //OBJECT: ['object'],
+  'string': ['string'],
+  'text': ['text'],
+  'number': ['number', 'integer'],
+  'checkbox': ['checkbox', 'boolean'],
+  'multiSelect': ['multiSelect'],
+  'dropdownList': ['dropdownList', 'enum'],
+  'selectList': ['selectList'],
+  'date': ['date'],
+  'datetime-local': ['datetime'],
+}
+Object.freeze(AroFeatureEditor.displayTypes)
 
 // --- react-widgets wrappers, now for export! --- //
 export class FieldComponents {
