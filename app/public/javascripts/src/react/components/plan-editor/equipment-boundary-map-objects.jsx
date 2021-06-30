@@ -9,7 +9,7 @@ import WktUtils from '../../../shared-utils/wkt-utils'
 export class EquipmentBoundaryMapObjects extends Component {
   constructor (props) {
     super(props)
-    this.objectIdToMapObject = {}
+    this.mapObject = undefined
     this.polygonOptions = {
       strokeColor: '#1f7de6',
       // strokeOpacity: 1,
@@ -35,9 +35,12 @@ export class EquipmentBoundaryMapObjects extends Component {
   componentDidUpdate (prevProps, prevState) {
     const { selectedSubnetId, subnets } = this.props
     if (selectedSubnetId && subnets && subnets[selectedSubnetId] !== prevProps.subnets[selectedSubnetId]) {
+      if (prevProps.selectedSubnetId) {
+        this.deleteMapObject()
+      }
       this.createMapObject(selectedSubnetId)
 
-      // const createdIds = new Set(Object.keys(this.objectIdToMapObject))
+      // const createdIds = new Set(Object.keys(this.mapObjects))
       // const allEquipmentIds = new Set(
       //   Object.keys(this.props.transactionFeatures)
       //     .filter(objectId => this.props.transactionFeatures[objectId].feature.dataType === 'equipment_boundary')
@@ -58,37 +61,38 @@ export class EquipmentBoundaryMapObjects extends Component {
     const { subnets } = this.props
     const geometry = subnets[selectedSubnetId].subnetBoundary.polygon
 
-    const mapObject = new google.maps.Polygon({
-      // objectId: equipmentBoundary.objectId, // Not used by Google Maps
+    this.mapObject = new google.maps.Polygon({
+      // selectedSubnetId, // Not used by Google Maps
       paths: WktUtils.getGoogleMapPathsFromWKTMultiPolygon(geometry),
-      clickable: true,
+      clickable: false,
       draggable: false,
       editable: true,
       map: this.props.googleMaps,
     })
-    mapObject.setOptions(this.polygonOptions)
-    this.setupListenersForMapObject(mapObject)
+    this.mapObject.setOptions(this.polygonOptions)
+    this.setupListenersForMapObject(this.mapObject)
 
-    mapObject.addListener('rightclick', event => {
+    this.mapObject.addListener('rightclick', event => {
       console.log('yay, you right clicked!')
       // const eventXY = WktUtils.getXYFromEvent(event)
-      // this.props.showContextMenuForEquipmentBoundary(this.props.transactionId, mapObject.objectId, eventXY.x, eventXY.y)
+      // this.props.showContextMenuForEquipmentBoundary(this.props.transactionId, this.mapObject.objectId, eventXY.x, eventXY.y)
     })
-    mapObject.addListener('click', () => {
+    this.mapObject.addListener('click', () => {
       console.log('yay! you clicked!')
       // this.props.selectBoundary(objectId)
     })
-    // this.objectIdToMapObject[objectId] = mapObject
   }
 
-  deleteMapObject (objectId) {
-    // this.objectIdToMapObject[objectId].setMap(null)
-    // delete this.objectIdToMapObject[objectId]
+  deleteMapObject () {
+    if (this.mapObject) {
+      this.mapObject.setMap(null)
+      delete this.mapObject
+    }
   }
 
   updateBoundaryShapeFromStore (objectId) {
     // const geometry = this.props.transactionFeatures[objectId].feature.geometry
-    // const mapObject = this.objectIdToMapObject[objectId]
+    // const mapObject = this.mapObjects[objectId]
     // mapObject.setPath(WktUtils.getGoogleMapPathsFromWKTMultiPolygon(geometry))
     // this.setupListenersForMapObject(mapObject)
   }
@@ -128,21 +132,21 @@ export class EquipmentBoundaryMapObjects extends Component {
   }
 
   highlightSelectedBoundaries () {
-    // Object.keys(this.objectIdToMapObject).forEach(objectId => {
+    // Object.keys(this.mapObjects).forEach(objectId => {
     //   if (this.props.selectedFeatures.indexOf(objectId) >= 0) {
     //     // This boundary is selected.
-    //     this.objectIdToMapObject[objectId].setOptions(this.selectedPolygonOptions)
-    //     this.objectIdToMapObject[objectId].setEditable(true)
+    //     this.mapObjects[objectId].setOptions(this.selectedPolygonOptions)
+    //     this.mapObjects[objectId].setEditable(true)
     //   } else {
     //     // This boundary is not selected.
-    //     this.objectIdToMapObject[objectId].setOptions(this.polygonOptions)
-    //     this.objectIdToMapObject[objectId].setEditable(false)
+    //     this.mapObjects[objectId].setOptions(this.polygonOptions)
+    //     this.mapObjects[objectId].setEditable(false)
     //   }
     // })
   }
 
   componentWillUnmount () {
-    // Object.keys(this.objectIdToMapObject).forEach(objectId => this.deleteMapObject(objectId))
+    this.deleteMapObject()
   }
 }
 
