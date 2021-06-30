@@ -11,19 +11,20 @@ export class EquipmentBoundaryMapObjects extends Component {
     super(props)
     this.objectIdToMapObject = {}
     this.polygonOptions = {
-      strokeColor: '#FF1493',
-      strokeOpacity: 0.8,
-      strokeWeight: 2,
-      fillColor: '#FF1493',
-      fillOpacity: 0.4,
-    }
-    this.selectedPolygonOptions = {
-      strokeColor: '#000000',
-      strokeOpacity: 0.8,
+      strokeColor: '#1f7de6',
+      // strokeOpacity: 1,
       strokeWeight: 3,
-      fillColor: '#FF1493',
-      fillOpacity: 0.4,
+      fillColor: '#1f7de6',
+      fillOpacity: 0.05,
     }
+    // TODO: I don't know if we need a selected state anymore ???
+    // this.selectedPolygonOptions = {
+    //   strokeColor: '#000000',
+    //   strokeOpacity: 0.8,
+    //   strokeWeight: 3,
+    //   fillColor: '#1f7de6',
+    //   fillOpacity: 0.05,
+    // }
   }
 
   render () {
