@@ -23,7 +23,11 @@ export const PlanEditor = props => {
   	commitTransaction,
   	discardTransaction,
     isDrawingBoundaryFor,
+    features,
     selectedFeatureIds,
+    subnets,
+    selectedSubnetId,
+    addSubnets,
   } = props
 
   useEffect(() => {
@@ -77,6 +81,26 @@ export const PlanEditor = props => {
           )
         })
       }
+      <div className="temporary" style={{ margin: '0 0 25px' }}>
+        <h2>Plan Information</h2>
+        <p>userId: {userId}</p>
+        <p>planId: {planId}</p>
+        <p>transactionId: {transactionId}</p>
+        <p>selectedSubnetId: {selectedSubnetId}</p>
+        <p>subnets: {JSON.stringify(Object.keys(subnets), null, '  ')}</p>
+        {/* <pre>features: {JSON.stringify(features, null, '  ')}</pre> */}
+        <pre>selectedFeatureIds: {JSON.stringify(selectedFeatureIds, null, '  ')}</pre>
+        {Object.entries(features).map(([subnetId, { feature }]) =>
+          <button key={subnetId} onClick={() => addSubnets([subnetId])}>
+            [DEMO] set {feature.networkNodeType} subnet<br />({subnetId})
+          </button>
+        )}
+        {selectedFeatureIds.length > 1 &&
+          <button onClick={() => addSubnets(selectedFeatureIds)}>
+            [DEMO] set all subnets
+          </button>
+        }
+      </div>
     </div>
   )
 
@@ -98,12 +122,15 @@ const mapStateToProps = state => ({
   features: state.planEditor.features,
   //selectedFeatureIds: state.planEditor.selectedFeatureIds,
   selectedFeatureIds: state.selection.planEditorFeatures,
+  subnets: state.planEditor.subnets,
+  selectedSubnetId: state.planEditor.selectedSubnetId,
 })
 
 const mapDispatchToProps = dispatch => ({
   resumeOrCreateTransaction: (planId, userId) => dispatch(PlanEditorActions.resumeOrCreateTransaction(planId, userId)),
   commitTransaction: transactionId => dispatch(PlanEditorActions.commitTransaction(transactionId)),
   discardTransaction: transactionId => dispatch(PlanEditorActions.discardTransaction(transactionId)),
+  addSubnets: subnetIds => dispatch(PlanEditorActions.addSubnets(subnetIds)),
 })
 
 const PlanEditorComponent = wrapComponentWithProvider(reduxStore, PlanEditor, mapStateToProps, mapDispatchToProps)

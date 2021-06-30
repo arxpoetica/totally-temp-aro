@@ -306,8 +306,13 @@ function selectFeatures (features) {
         let state = getState()
         let validFeatures = []
         features.forEach(feature => {
-          if (state.planEditor.features[feature.object_id]) validFeatures.push(feature.object_id)
+          if (state.planEditor.features[feature.object_id]) { validFeatures.push(feature.object_id) }
         })
+
+        dispatch(addSubnets(validFeatures))
+        // FIXME: we need to decide which feature to represent as the root of the (turtles) subnets tree
+        dispatch(setSelectedSubnetId(validFeatures[0]))
+
         /*
         dispatch({
           type: Actions.PLAN_EDITOR_SET_SELECTED_FEATURES, 
@@ -316,6 +321,38 @@ function selectFeatures (features) {
         */
         dispatch(SelectionActions.setPlanEditorFeatures(validFeatures))
       })
+  }
+}
+
+function addSubnets (subnetIds) {
+  return (dispatch, getState) => {
+
+    const { transaction, subnets: cachedSubnets } = getState().planEditor
+
+    // this little dance only fetches uncached subnets
+    const cachedSubnetIds = Object.keys(cachedSubnets)
+    const uncachedSubnetIds = subnetIds.filter(id => !cachedSubnetIds.includes(id))
+
+    const subnetApiPromises = uncachedSubnetIds.map(subnetId => {
+      return AroHttp.get(`/service/plan-transaction/${transaction.id}/subnet/${subnetId}`)
+    })
+    Promise.all(subnetApiPromises)
+      .then(subnetResults => {
+        if (subnetResults.length) {
+          dispatch({
+            type: Actions.PLAN_EDITOR_ADD_SUBNETS,
+            payload: subnetResults.map(result => result.data),
+          })
+        }
+      })
+      .catch(err => console.error(err))
+  }
+}
+
+function setSelectedSubnetId (selectedSubnetId) {
+  return {
+    type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
+    payload: selectedSubnetId,
   }
 }
 
@@ -344,4 +381,6 @@ export default {
   setIsEnteringTransaction,
   addFeatures,
   selectFeatures,
+  addSubnets,
+  setSelectedSubnetId,
 }
