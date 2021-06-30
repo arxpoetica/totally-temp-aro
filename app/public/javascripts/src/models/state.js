@@ -1854,6 +1854,7 @@ class State {
       optimizationInputs: reduxState.optimization.networkOptimization.optimizationInputs,
       rSelectedDisplayMode: reduxState.toolbar.rSelectedDisplayMode,
       rActiveViewModePanel: reduxState.toolbar.rActiveViewModePanel,
+      deletedUncommitedMapObjects: reduxState.toolbar.deletedUncommitedMapObjects,
       rHeatmapOptions: reduxState.toolbar.heatmapOptions,
     }
   }
