@@ -48,8 +48,13 @@ export const RoadSegmentDetail = (props) => {
         setMapSelection(newSelection)
         const roadSegmentsInfo = generateRoadSegmentsInfo(mapFeatures.roadSegments)
 
-        // sets selectedEdgeInfo, also checks if all selected items are road segments so we only display the tag select on road segments
-        setState((state) => ({ ...state, selectedEdgeInfo: roadSegmentsInfo, showTagSelection: !roadSegmentsInfo.some(segment => segment.feature_type_name !== "road") }))
+        // sets selectedEdgeInfo, also checks if all selected items are road segments,
+        // so we only display the tag select on road segments
+        setState((state) => ({
+          ...state,
+          selectedEdgeInfo: roadSegmentsInfo, 
+          showTagSelection: !roadSegmentsInfo.some(segment => segment.feature_type_name !== "road") 
+        }))
         if (roadSegmentsInfo.length === 1) {
           onEdgeExpand(roadSegmentsInfo[0])
         }
