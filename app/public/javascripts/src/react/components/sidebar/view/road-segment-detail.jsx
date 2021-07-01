@@ -53,7 +53,7 @@ export const RoadSegmentDetail = (props) => {
         setState((state) => ({
           ...state,
           selectedEdgeInfo: roadSegmentsInfo, 
-          showTagSelection: !roadSegmentsInfo.some(segment => segment.feature_type_name !== "road") 
+          showTagSelection: !roadSegmentsInfo.some(segment => segment.feature_type_name !== 'road'), 
         }))
         if (roadSegmentsInfo.length === 1) {
           onEdgeExpand(roadSegmentsInfo[0])
