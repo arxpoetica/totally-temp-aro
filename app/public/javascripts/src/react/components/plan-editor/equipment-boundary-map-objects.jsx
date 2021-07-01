@@ -9,21 +9,22 @@ import WktUtils from '../../../shared-utils/wkt-utils'
 export class EquipmentBoundaryMapObjects extends Component {
   constructor (props) {
     super(props)
-    this.objectIdToMapObject = {}
+    this.mapObject = undefined
     this.polygonOptions = {
-      strokeColor: '#FF1493',
-      strokeOpacity: 0.8,
-      strokeWeight: 2,
-      fillColor: '#FF1493',
-      fillOpacity: 0.4
-    }
-    this.selectedPolygonOptions = {
-      strokeColor: '#000000',
-      strokeOpacity: 0.8,
+      strokeColor: '#1f7de6',
+      // strokeOpacity: 1,
       strokeWeight: 3,
-      fillColor: '#FF1493',
-      fillOpacity: 0.4
+      fillColor: '#1f7de6',
+      fillOpacity: 0.05,
     }
+    // TODO: I don't know if we need a selected state anymore ???
+    // this.selectedPolygonOptions = {
+    //   strokeColor: '#000000',
+    //   strokeOpacity: 0.8,
+    //   strokeWeight: 3,
+    //   fillColor: '#1f7de6',
+    //   fillOpacity: 0.05,
+    // }
   }
 
   render () {
@@ -31,114 +32,133 @@ export class EquipmentBoundaryMapObjects extends Component {
     return null
   }
 
-  componentDidUpdate () {
-    const createdIds = new Set(Object.keys(this.objectIdToMapObject))
-    const allEquipmentIds = new Set(
-      Object.keys(this.props.transactionFeatures)
-        .filter(objectId => this.props.transactionFeatures[objectId].feature.dataType === 'equipment_boundary')
-    )
-    const idsToCreate = [...allEquipmentIds].filter(objectId => !createdIds.has(objectId))
-    const idsToDelete = [...createdIds].filter(objectId => !allEquipmentIds.has(objectId))
-    const idsToUpdate = [...allEquipmentIds].filter(objectId => createdIds.has(objectId))
-    idsToCreate.forEach(objectId => this.createMapObject(objectId))
-    idsToDelete.forEach(objectId => this.deleteMapObject(objectId))
-    idsToUpdate.forEach(objectId => this.updateBoundaryShapeFromStore(objectId))
-    this.highlightSelectedBoundaries()
+  componentDidUpdate (prevProps, prevState) {
+    const { selectedSubnetId, subnets } = this.props
+    if (selectedSubnetId && subnets && subnets[selectedSubnetId] !== prevProps.subnets[selectedSubnetId]) {
+      if (prevProps.selectedSubnetId) {
+        this.deleteMapObject()
+      }
+      this.createMapObject(selectedSubnetId)
+
+      // const createdIds = new Set(Object.keys(this.mapObjects))
+      // const allEquipmentIds = new Set(
+      //   Object.keys(this.props.transactionFeatures)
+      //     .filter(objectId => this.props.transactionFeatures[objectId].feature.dataType === 'equipment_boundary')
+      // )
+      // const idsToCreate = [...allEquipmentIds].filter(objectId => !createdIds.has(objectId))
+      // const idsToDelete = [...createdIds].filter(objectId => !allEquipmentIds.has(objectId))
+      // const idsToUpdate = [...allEquipmentIds].filter(objectId => createdIds.has(objectId))
+      // idsToCreate.forEach(objectId => this.createMapObject(objectId))
+      // idsToDelete.forEach(objectId => this.deleteMapObject(objectId))
+      // idsToUpdate.forEach(objectId => this.updateBoundaryShapeFromStore(objectId))
+      // this.highlightSelectedBoundaries()
+    }
   }
 
-  createMapObject (objectId) {
-    const equipmentBoundary = this.props.transactionFeatures[objectId].feature
-    const mapObject = new google.maps.Polygon({
-      objectId: equipmentBoundary.objectId, // Not used by Google Maps
-      paths: WktUtils.getGoogleMapPathsFromWKTMultiPolygon(equipmentBoundary.geometry),
-      clickable: true,
+  createMapObject (selectedSubnetId) {
+    // const equipmentBoundary = this.props.transactionFeatures[objectId].feature
+
+    const { subnets } = this.props
+    const geometry = subnets[selectedSubnetId].subnetBoundary.polygon
+
+    this.mapObject = new google.maps.Polygon({
+      // selectedSubnetId, // Not used by Google Maps
+      paths: WktUtils.getGoogleMapPathsFromWKTMultiPolygon(geometry),
+      clickable: false,
       draggable: false,
       editable: true,
-      map: this.props.googleMaps
+      map: this.props.googleMaps,
     })
-    mapObject.setOptions(this.polygonOptions)
-    this.setupListenersForMapObject(mapObject)
+    this.mapObject.setOptions(this.polygonOptions)
+    this.setupListenersForMapObject(this.mapObject)
 
-    mapObject.addListener('rightclick', event => {
-      const eventXY = WktUtils.getXYFromEvent(event)
-      this.props.showContextMenuForEquipmentBoundary(this.props.transactionId, mapObject.objectId, eventXY.x, eventXY.y)
+    this.mapObject.addListener('rightclick', event => {
+      console.log('yay, you right clicked!')
+      // const eventXY = WktUtils.getXYFromEvent(event)
+      // this.props.showContextMenuForEquipmentBoundary(this.props.transactionId, this.mapObject.objectId, eventXY.x, eventXY.y)
     })
-    mapObject.addListener('click', () => this.props.selectBoundary(objectId))
-    this.objectIdToMapObject[objectId] = mapObject
+    this.mapObject.addListener('click', () => {
+      console.log('yay! you clicked!')
+      // this.props.selectBoundary(objectId)
+    })
   }
 
-  deleteMapObject (objectId) {
-    this.objectIdToMapObject[objectId].setMap(null)
-    delete this.objectIdToMapObject[objectId]
+  deleteMapObject () {
+    if (this.mapObject) {
+      this.mapObject.setMap(null)
+      delete this.mapObject
+    }
   }
 
   updateBoundaryShapeFromStore (objectId) {
-    const geometry = this.props.transactionFeatures[objectId].feature.geometry
-    const mapObject = this.objectIdToMapObject[objectId]
-    mapObject.setPath(WktUtils.getGoogleMapPathsFromWKTMultiPolygon(geometry))
-    this.setupListenersForMapObject(mapObject)
+    // const geometry = this.props.transactionFeatures[objectId].feature.geometry
+    // const mapObject = this.mapObjects[objectId]
+    // mapObject.setPath(WktUtils.getGoogleMapPathsFromWKTMultiPolygon(geometry))
+    // this.setupListenersForMapObject(mapObject)
   }
 
   modifyBoundaryShape (mapObject) {
-    var newEquipment = JSON.parse(JSON.stringify(this.props.transactionFeatures[mapObject.objectId]))
-    newEquipment.feature.geometry = WktUtils.getWKTMultiPolygonFromGoogleMapPaths(mapObject.getPaths())
-    this.props.modifyFeature(this.props.transactionId, newEquipment)
+    // var newEquipment = JSON.parse(JSON.stringify(this.props.transactionFeatures[mapObject.objectId]))
+    // newEquipment.feature.geometry = WktUtils.getWKTMultiPolygonFromGoogleMapPaths(mapObject.getPaths())
+    // this.props.modifyFeature(this.props.transactionId, newEquipment)
   }
 
   setupListenersForMapObject (mapObject) {
-    const self = this
-    mapObject.getPaths().forEach(function (path, index) {
-      google.maps.event.addListener(path, 'insert_at', function () {
-        self.modifyBoundaryShape(mapObject)
-      })
-      google.maps.event.addListener(path, 'remove_at', function () {
-        self.modifyBoundaryShape(mapObject)
-      })
-      google.maps.event.addListener(path, 'set_at', function () {
-        if (!WktUtils.isClosedPath(path)) {
-          // IMPORTANT to check if it is already a closed path, otherwise we will get into an infinite loop when trying to keep it closed
-          if (index === 0) {
-            // The first point has been moved, move the last point of the polygon (to keep it a valid, closed polygon)
-            path.setAt(0, path.getAt(path.length - 1))
-            self.modifyBoundaryShape(mapObject)
-          } else if (index === path.length - 1) {
-            // The last point has been moved, move the first point of the polygon (to keep it a valid, closed polygon)
-            path.setAt(path.length - 1, path.getAt(0))
-            self.modifyBoundaryShape(mapObject)
-          }
-        } else {
-          self.modifyBoundaryShape(mapObject)
-        }
-      })
-    })
+    // const self = this
+    // mapObject.getPaths().forEach(function (path, index) {
+    //   google.maps.event.addListener(path, 'insert_at', function () {
+    //     self.modifyBoundaryShape(mapObject)
+    //   })
+    //   google.maps.event.addListener(path, 'remove_at', function () {
+    //     self.modifyBoundaryShape(mapObject)
+    //   })
+    //   google.maps.event.addListener(path, 'set_at', function () {
+    //     if (!WktUtils.isClosedPath(path)) {
+    //       // IMPORTANT to check if it is already a closed path, otherwise we will get into an infinite loop when trying to keep it closed
+    //       if (index === 0) {
+    //         // The first point has been moved, move the last point of the polygon (to keep it a valid, closed polygon)
+    //         path.setAt(0, path.getAt(path.length - 1))
+    //         self.modifyBoundaryShape(mapObject)
+    //       } else if (index === path.length - 1) {
+    //         // The last point has been moved, move the first point of the polygon (to keep it a valid, closed polygon)
+    //         path.setAt(path.length - 1, path.getAt(0))
+    //         self.modifyBoundaryShape(mapObject)
+    //       }
+    //     } else {
+    //       self.modifyBoundaryShape(mapObject)
+    //     }
+    //   })
+    // })
   }
 
   highlightSelectedBoundaries () {
-    Object.keys(this.objectIdToMapObject).forEach(objectId => {
-      if (this.props.selectedFeatures.indexOf(objectId) >= 0) {
-        // This boundary is selected.
-        this.objectIdToMapObject[objectId].setOptions(this.selectedPolygonOptions)
-        this.objectIdToMapObject[objectId].setEditable(true)
-      } else {
-        // This boundary is not selected.
-        this.objectIdToMapObject[objectId].setOptions(this.polygonOptions)
-        this.objectIdToMapObject[objectId].setEditable(false)
-      }
-    })
+    // Object.keys(this.mapObjects).forEach(objectId => {
+    //   if (this.props.selectedFeatures.indexOf(objectId) >= 0) {
+    //     // This boundary is selected.
+    //     this.mapObjects[objectId].setOptions(this.selectedPolygonOptions)
+    //     this.mapObjects[objectId].setEditable(true)
+    //   } else {
+    //     // This boundary is not selected.
+    //     this.mapObjects[objectId].setOptions(this.polygonOptions)
+    //     this.mapObjects[objectId].setEditable(false)
+    //   }
+    // })
   }
 
   componentWillUnmount () {
-    Object.keys(this.objectIdToMapObject).forEach(objectId => this.deleteMapObject(objectId))
+    this.deleteMapObject()
   }
 }
 
+/* 
 EquipmentBoundaryMapObjects.propTypes = {
   transactionId: PropTypes.number,
   transactionFeatures: PropTypes.object,
-  selectedBoundaryTypeId: PropTypes.number,
-  selectedFeatures: PropTypes.arrayOf(PropTypes.string),
-  googleMaps: PropTypes.object
+  googleMaps: PropTypes.object,
+  subnets: PropTypes.object,
+  selectedSubnetId: PropTypes.string,
 }
+*/
 
 const mapStateToProps = state => ({
   planId: state.plan.activePlan.id,
@@ -146,7 +166,9 @@ const mapStateToProps = state => ({
   transactionFeatures: state.planEditor.features,
   selectedBoundaryTypeId: state.mapLayers.selectedBoundaryType.id,
   selectedFeatures: state.selection.planEditorFeatures,
-  googleMaps: state.map.googleMaps
+  googleMaps: state.map.googleMaps,
+  subnets: state.planEditor.subnets,
+  selectedSubnetId: state.planEditor.selectedSubnetId,
 })
 
 const mapDispatchToProps = dispatch => ({
