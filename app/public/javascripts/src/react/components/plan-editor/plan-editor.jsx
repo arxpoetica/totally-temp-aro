@@ -120,8 +120,8 @@ const mapStateToProps = state => ({
   isCommittingTransaction: state.planEditor.isCommittingTransaction,
   isDrawingBoundaryFor: state.planEditor.isDrawingBoundaryFor,
   features: state.planEditor.features,
-  //selectedFeatureIds: state.planEditor.selectedFeatureIds,
-  selectedFeatureIds: state.selection.planEditorFeatures,
+  selectedFeatureIds: state.planEditor.selectedFeatureIds,
+  //selectedFeatureIds: state.selection.planEditorFeatures,
   subnets: state.planEditor.subnets,
   selectedSubnetId: state.planEditor.selectedSubnetId,
 })

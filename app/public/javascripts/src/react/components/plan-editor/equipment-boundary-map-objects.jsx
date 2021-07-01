@@ -165,7 +165,7 @@ const mapStateToProps = state => ({
   transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
   transactionFeatures: state.planEditor.features,
   selectedBoundaryTypeId: state.mapLayers.selectedBoundaryType.id,
-  selectedFeatures: state.selection.planEditorFeatures,
+  //selectedFeatures: state.selection.planEditorFeatures,
   googleMaps: state.map.googleMaps,
   subnets: state.planEditor.subnets,
   selectedSubnetId: state.planEditor.selectedSubnetId,

@@ -4,7 +4,7 @@ const defaultState = {
   isPlanEditorActive: false,
   transaction: null,
   features: {},
-  // selectedFeatureIds: [],
+  selectedFeatureIds: [],
   isDrawingBoundaryFor: null,
   isCalculatingSubnets: false,
   isCreatingObject: false,
@@ -28,7 +28,7 @@ function clearTransaction () {
   return JSON.parse(JSON.stringify(defaultState))
 }
 
-function addTransactionFeature (state, equipments) {
+function addTransactionFeatures (state, equipments) {
   var newFeatures = { ...state.features }
   equipments.forEach(equipment => {
     newFeatures[equipment.feature.objectId] = equipment
@@ -109,13 +109,12 @@ function setIsEnteringTransaction (state, isEnteringTransaction) {
     isEnteringTransaction: isEnteringTransaction
   }
 }
-/*
+
 function setSelectedFeatures (state, selectedFeatureIds) {
   return { ...state,
     selectedFeatureIds: selectedFeatureIds
   }
 }
-*/
 
 function addSubnets (state, subnets) {
   const updatedSubnets = { ...state.subnets }
@@ -150,7 +149,7 @@ function planEditorReducer (state = defaultState, action) {
       return setTransaction(state, action.payload)
 
     case Actions.PLAN_EDITOR_ADD_FEATURES:
-      return addTransactionFeature(state, action.payload)
+      return addTransactionFeatures(state, action.payload)
 
     case Actions.PLAN_EDITOR_DELETE_TRANSACTION_FEATURE:
       return deleteTransactionFeature(state, action.payload)
@@ -182,8 +181,8 @@ function planEditorReducer (state = defaultState, action) {
     case Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION:
       return setIsEnteringTransaction(state, action.payload)
 
-    //case Actions.PLAN_EDITOR_SET_SELECTED_FEATURES:
-    //  return setSelectedFeatures(state, action.payload)
+    case Actions.PLAN_EDITOR_SET_SELECTED_FEATURES:
+      return setSelectedFeatures(state, action.payload)
 
     case Actions.PLAN_EDITOR_ADD_SUBNETS:
       return addSubnets(state, action.payload)

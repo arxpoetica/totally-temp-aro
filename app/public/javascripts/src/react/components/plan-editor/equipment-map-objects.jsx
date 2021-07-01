@@ -64,9 +64,9 @@ export class EquipmentMapObjects extends Component {
       this.props.showContextMenuForEquipment(this.props.planId, this.props.transactionId, this.props.selectedBoundaryTypeId, mapObject.objectId, eventXY.x, eventXY.y)
     })
     mapObject.addListener('click', () => {
-      this.props.selectEquipment(objectId)
-      this.props.addSubnets([objectId])
-      this.props.setSelectedSubnetId(objectId)
+      this.props.selectFeatureById(objectId)
+      //this.props.addSubnets([objectId])
+      //this.props.setSelectedSubnetId(objectId)
     })
     this.objectIdToMapObject[objectId] = mapObject
   }
@@ -131,7 +131,8 @@ const mapStateToProps = state => ({
   transactionFeatures: state.planEditor.features,
   equipmentDefinitions: state.mapLayers.networkEquipment.equipments,
   selectedBoundaryTypeId: state.mapLayers.selectedBoundaryType.id,
-  selectedFeatures: state.selection.planEditorFeatures,
+  //selectedFeatures: state.selection.planEditorFeatures,
+  selectedFeatures: state.planEditor.selectedFeatureIds,
   googleMaps: state.map.googleMaps
 })
 
@@ -140,7 +141,8 @@ const mapDispatchToProps = dispatch => ({
   showContextMenuForEquipment: (planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y) => {
     dispatch(PlanEditorActions.showContextMenuForEquipment(planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y))
   },
-  selectEquipment: objectId => dispatch(SelectionActions.setPlanEditorFeatures([objectId])),
+  //selectFeatureById: objectId => dispatch(SelectionActions.setPlanEditorFeatures([objectId])),
+  selectFeatureById: objectId => dispatch(PlanEditorActions.selectFeaturesById([objectId])),
   addSubnets: subnetIds => dispatch(PlanEditorActions.addSubnets(subnetIds)),
   setSelectedSubnetId: subnetId => dispatch(PlanEditorActions.setSelectedSubnetId(subnetId)),
 })
