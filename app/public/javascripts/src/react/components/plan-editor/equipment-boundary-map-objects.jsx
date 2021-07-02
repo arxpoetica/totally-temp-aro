@@ -33,8 +33,8 @@ export class EquipmentBoundaryMapObjects extends Component {
   }
 
   componentDidUpdate (prevProps, prevState) {
-    const { selectedSubnetId, subnets } = this.props
-    if (selectedSubnetId && subnets && subnets[selectedSubnetId] !== prevProps.subnets[selectedSubnetId]) {
+    const {selectedSubnetId} = this.props
+    if (selectedSubnetId !== prevProps.selectedSubnetId) {
       if (prevProps.selectedSubnetId) {
         this.deleteMapObject()
       }
@@ -57,9 +57,8 @@ export class EquipmentBoundaryMapObjects extends Component {
 
   createMapObject (selectedSubnetId) {
     // const equipmentBoundary = this.props.transactionFeatures[objectId].feature
-
-    const { subnets } = this.props
-    const geometry = subnets[selectedSubnetId].subnetBoundary.polygon
+    if (!this.props.subnets[selectedSubnetId]) return
+    const geometry = this.props.subnets[selectedSubnetId].subnetBoundary.polygon
 
     this.mapObject = new google.maps.Polygon({
       // selectedSubnetId, // Not used by Google Maps

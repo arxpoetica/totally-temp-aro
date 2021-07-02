@@ -87,7 +87,7 @@ export class EquipmentMapObjects extends Component {
 
   highlightSelectedMarkers () {
     Object.keys(this.objectIdToMapObject).forEach(objectId => {
-      if (this.props.selectedFeatures.indexOf(objectId) >= 0) {
+      if (this.props.selectedFeatureIds.indexOf(objectId) >= 0) {
         // This marker is selected. Create a selection overlay if it does not exist.
         if (!this.objectIdToSelectionOverlay[objectId]) {
           this.objectIdToSelectionOverlay[objectId] = new google.maps.Marker({
@@ -121,7 +121,7 @@ EquipmentMapObjects.propTypes = {
   transactionFeatures: PropTypes.object,
   equipmentDefinitions: PropTypes.object,
   selectedBoundaryTypeId: PropTypes.number,
-  selectedFeatures: PropTypes.arrayOf(PropTypes.string),
+  selectedFeatureIds: PropTypes.arrayOf(PropTypes.string),
   googleMaps: PropTypes.object
 }
 
@@ -131,8 +131,8 @@ const mapStateToProps = state => ({
   transactionFeatures: state.planEditor.features,
   equipmentDefinitions: state.mapLayers.networkEquipment.equipments,
   selectedBoundaryTypeId: state.mapLayers.selectedBoundaryType.id,
-  //selectedFeatures: state.selection.planEditorFeatures,
-  selectedFeatures: state.planEditor.selectedFeatureIds,
+  //selectedFeatureIds: state.selection.planEditorFeatures,
+  selectedFeatureIds: state.planEditor.selectedFeatureIds,
   googleMaps: state.map.googleMaps
 })
 

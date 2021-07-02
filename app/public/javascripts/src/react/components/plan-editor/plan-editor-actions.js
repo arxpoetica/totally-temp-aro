@@ -22,6 +22,7 @@ function resumeOrCreateTransaction (planId, userId) {
         const transactionId = result.data.id
         return Promise.all([
           AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/equipment`),
+          // depricated? 
           AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/equipment_boundary`)
         ])
       })
@@ -50,6 +51,7 @@ function clearTransaction () {
       type: Actions.SELECTION_SET_PLAN_EDITOR_FEATURES, // DEPRICATED
       payload: []
     })
+    // ToDo: clear features list and subnets list 
     dispatch(setIsCommittingTransaction(false))
   }
 }

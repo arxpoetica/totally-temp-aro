@@ -54,6 +54,8 @@ function modifyTransactionFeatures (state, newEquipments) {
     if (newFeatures[equipment.feature.objectId]) {
       newFeatures[equipment.feature.objectId] = equipment
     } else {
+      // not really sure why this check is needed
+      //  I think we can combine the add and modify actions 
       throw new Error(`Trying to modify equipment with objectId ${equipment.feature.objectId}, but it is not in the existing list of equipments`)
     }
   })
