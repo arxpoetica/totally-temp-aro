@@ -269,6 +269,7 @@ class State {
       const { heatmapOptions } = service.viewSetting
       newMapTileOptions.selectedHeatmapOption = useHeatMap ? heatmapOptions[0] : heatmapOptions[2] 
       service.rxState.mapTileOptions.sendMessage(newMapTileOptions)
+      service.setSelectedHeatMapOption(newMapTileOptions.selectedHeatmapOption.id)
     }
 
     service.defaultPlanCoordinates = {
