@@ -88,42 +88,35 @@ export const PlanEditor = props => {
 
       <PlanEditorRecalculate />
       <PlanEditorButtons />
-      {
-        selectedFeatureIds.map(id => {
-          return (
-            <div key={id}>
-              <PlanEditorHeader selectedFeatureId={id} 
-                onClick={ (event, objectId) => onSelectedClick(event, objectId)}
-                onClose={ (event, objectId) => onSelectedClose(event, objectId)}
-                isSelected={id === selectedSubnetId}
-              />
+      {selectedFeatureIds.map(id => <PlanEditorHeader selectedFeatureId={id}
+          onClick={ (event, objectId) => onSelectedClick(event, objectId)}
+          onClose={ (event, objectId) => onSelectedClose(event, objectId)}
+          isSelected={id === selectedSubnetId}
+        />
+      )}
 
-              {/* below will be replaced by generic object editor */}
-              <p>Selected: {id}</p>
-            </div>
-          )
-        })
+      {false &&
+        <div className="temporary" style={{ margin: '0 0 25px' }}>
+          <h2>Plan Information</h2>
+          <p>userId: {userId}</p>
+          <p>planId: {planId}</p>
+          <p>transactionId: {transactionId}</p>
+          <p>selectedSubnetId: {selectedSubnetId}</p>
+          <p>subnets: {JSON.stringify(Object.keys(subnets), null, '  ')}</p>
+          {/* <pre>features: {JSON.stringify(features, null, '  ')}</pre> */}
+          <pre>selectedFeatureIds: {JSON.stringify(selectedFeatureIds, null, '  ')}</pre>
+          {Object.entries(features).map(([subnetId, { feature }]) =>
+            <button key={subnetId} onClick={() => addSubnets([subnetId])}>
+              [DEMO] set {feature.networkNodeType} subnet<br />({subnetId})
+            </button>
+          )}
+          {selectedFeatureIds.length > 1 &&
+            <button onClick={() => addSubnets(selectedFeatureIds)}>
+              [DEMO] set all subnets
+            </button>
+          }
+        </div>
       }
-      <div className="temporary" style={{ margin: '0 0 25px' }}>
-        <h2>Plan Information</h2>
-        <p>userId: {userId}</p>
-        <p>planId: {planId}</p>
-        <p>transactionId: {transactionId}</p>
-        <p>selectedSubnetId: {selectedSubnetId}</p>
-        <p>subnets: {JSON.stringify(Object.keys(subnets), null, '  ')}</p>
-        {/* <pre>features: {JSON.stringify(features, null, '  ')}</pre> */}
-        <pre>selectedFeatureIds: {JSON.stringify(selectedFeatureIds, null, '  ')}</pre>
-        {Object.entries(features).map(([subnetId, { feature }]) =>
-          <button key={subnetId} onClick={() => addSubnets([subnetId])}>
-            [DEMO] set {feature.networkNodeType} subnet<br />({subnetId})
-          </button>
-        )}
-        {selectedFeatureIds.length > 1 &&
-          <button onClick={() => addSubnets(selectedFeatureIds)}>
-            [DEMO] set all subnets
-          </button>
-        }
-      </div>
     </div>
   )
 

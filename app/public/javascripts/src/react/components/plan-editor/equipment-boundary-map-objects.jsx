@@ -17,14 +17,6 @@ export class EquipmentBoundaryMapObjects extends Component {
       fillColor: '#1f7de6',
       fillOpacity: 0.05,
     }
-    // TODO: I don't know if we need a selected state anymore ???
-    // this.selectedPolygonOptions = {
-    //   strokeColor: '#000000',
-    //   strokeOpacity: 0.8,
-    //   strokeWeight: 3,
-    //   fillColor: '#1f7de6',
-    //   fillOpacity: 0.05,
-    // }
   }
 
   render () {
@@ -51,7 +43,6 @@ export class EquipmentBoundaryMapObjects extends Component {
       // idsToCreate.forEach(objectId => this.createMapObject(objectId))
       // idsToDelete.forEach(objectId => this.deleteMapObject(objectId))
       // idsToUpdate.forEach(objectId => this.updateBoundaryShapeFromStore(objectId))
-      // this.highlightSelectedBoundaries()
     }
   }
 
@@ -127,20 +118,6 @@ export class EquipmentBoundaryMapObjects extends Component {
     //       self.modifyBoundaryShape(mapObject)
     //     }
     //   })
-    // })
-  }
-
-  highlightSelectedBoundaries () {
-    // Object.keys(this.mapObjects).forEach(objectId => {
-    //   if (this.props.selectedFeatures.indexOf(objectId) >= 0) {
-    //     // This boundary is selected.
-    //     this.mapObjects[objectId].setOptions(this.selectedPolygonOptions)
-    //     this.mapObjects[objectId].setEditable(true)
-    //   } else {
-    //     // This boundary is not selected.
-    //     this.mapObjects[objectId].setOptions(this.polygonOptions)
-    //     this.mapObjects[objectId].setEditable(false)
-    //   }
     // })
   }
 

@@ -6,23 +6,6 @@
     display: flex;
     flex-direction: column;
   }
-  .temporary-divider {
-    margin: 20px 0;
-    border-top: 1px solid lightgray;
-    border-bottom: 1px solid lightgray;
-    color: lightgray;
-  }
-  .temporary-divider::before,
-  .temporary-divider::after {
-    display: block;
-    text-align: center;
-  }
-  .temporary-divider::before {
-    content: '⌃⌃⌃ NEW ⌃⌃⌃';
-  }
-  .temporary-divider::after {
-    content: '⌄⌄⌄ OLD ⌄⌄⌄';
-  }
 </style>
 
 <div class="edit-plan-container">
@@ -31,7 +14,6 @@
     <accordion-panel-contents panel-id="$ctrl.state.EditPlanPanels.EDIT_PLAN">
       <div>
         <r-plan-editor></r-plan-editor>
-        <div class="temporary-divider"></div>
         <!--
         <plan-editor map-global-object-name="map"></plan-editor>
         -->
