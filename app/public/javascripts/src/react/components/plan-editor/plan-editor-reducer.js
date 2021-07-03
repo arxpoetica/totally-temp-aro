@@ -156,6 +156,10 @@ function setSelectedSubnetId (state, selectedSubnetId) {
   return { ...state, selectedSubnetId }
 }
 
+function recalculateSubnet (state, to_be_determined) {
+  return { ...state, to_be_determined }
+}
+
 function planEditorReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.PLAN_EDITOR_CLEAR_TRANSACTION:
@@ -217,6 +221,9 @@ function planEditorReducer (state = defaultState, action) {
 
     case Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID:
       return setSelectedSubnetId(state, action.payload)
+
+    case Actions.PLAN_EDITOR_RECALCULATE_SUBNET:
+      return recalculateSubnet(state, action.payload)
 
     default:
       return state

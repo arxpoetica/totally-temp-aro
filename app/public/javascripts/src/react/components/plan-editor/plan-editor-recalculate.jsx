@@ -1,13 +1,17 @@
 import React, { useState } from 'react'
 import { connect } from 'react-redux'
+import PlanEditorActions from './plan-editor-actions'
 import Select from 'react-select'
 import { selectStylesBlue } from '../../common/view-utils'
 import AroHttp from '../../common/aro-http'
 
 const PlanEditorRecalculate = props => {
 
-  const { transaction } = props
-  
+  const {
+    transaction,
+    recalculateSubnet,
+  } = props
+
   const [options, setOptions] = useState([
     { label: 'Auto assign to a boundary', value: 0 },
     { label: 'Delete this hub', value: 1 },
@@ -45,7 +49,13 @@ const PlanEditorRecalculate = props => {
           <h2>Recalculate Plan:</h2>
           <div className="group">
             <button type="button" className="btn btn-outline-secondary">Cancel</button>
-            <button type="button" className="btn btn-primary">Save</button>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => recalculateSubnet(transaction.id)}
+            >
+              Save
+            </button>
           </div>
         </div>
 
@@ -75,8 +85,8 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  discardTransaction: transactionId => dispatch(PlanEditorActions.discardTransaction(transactionId)),
-  addSubnets: subnetIds => dispatch(PlanEditorActions.addSubnets(subnetIds)),
+  // discardTransaction: transactionId => dispatch(PlanEditorActions.discardTransaction(transactionId)),
+  recalculateSubnet: transactionId => dispatch(PlanEditorActions.recalculateSubnet(transactionId)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(PlanEditorRecalculate)
