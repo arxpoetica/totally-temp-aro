@@ -9,7 +9,8 @@ const PlanEditorRecalculate = props => {
 
   const {
     transaction,
-    recalculateSubnet,
+    selectedSubnetId,
+    recalculateSubnets,
   } = props
 
   const [options, setOptions] = useState([
@@ -45,19 +46,25 @@ const PlanEditorRecalculate = props => {
 
       <div className="plan-editor-buttons">
 
-        <div className="group">
-          <h2>Recalculate Plan:</h2>
+        {/* FIXME: only show this group when subnets have actually changed */}
+        {selectedSubnetId &&
           <div className="group">
-            <button type="button" className="btn btn-outline-secondary">Cancel</button>
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={() => recalculateSubnet(transaction.id)}
-            >
-              Save
-            </button>
+            <h2>Recalculate Plan:</h2>
+            <div className="group">
+              <button type="button" className="btn btn-outline-secondary">Cancel</button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => recalculateSubnets({
+                  transactionId: transaction.id,
+                  subnetIds: [selectedSubnetId],
+                })}
+              >
+                Save
+              </button>
+            </div>
           </div>
-        </div>
+        }
 
         {/* TODO: the following will come back when ready */}
         {/* <div className="group">
@@ -86,7 +93,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
   // discardTransaction: transactionId => dispatch(PlanEditorActions.discardTransaction(transactionId)),
-  recalculateSubnet: transactionId => dispatch(PlanEditorActions.recalculateSubnet(transactionId)),
+  recalculateSubnets: vars => dispatch(PlanEditorActions.recalculateSubnets(vars)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(PlanEditorRecalculate)

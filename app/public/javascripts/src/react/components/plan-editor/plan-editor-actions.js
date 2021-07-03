@@ -448,12 +448,13 @@ function setSelectedSubnetId (selectedSubnetId) {
   }
 }
 
-function recalculateSubnet (transactionId) {
+function recalculateSubnets ({ transactionId, subnetIds }) {
   return dispatch => {
-    return AroHttp.post(`/plan-transaction/${transactionId}/subnet-cmd/recalc`)
+    const body = { command: { subnetIds } }
+    return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet-cmd/recalc`, body)
       .then(res => {
         // dispatch({
-        //   type: Actions.PLAN_EDITOR_RECALCULATE_SUBNET,
+        //   type: Actions.PLAN_EDITOR_RECALCULATE_SUBNETS,
         //   payload: subnetResults.map(result => result.data),
         // })
       })
@@ -489,5 +490,5 @@ export default {
   deselectFeatureById,
   addSubnets,
   setSelectedSubnetId,
-  recalculateSubnet,
+  recalculateSubnets,
 }
