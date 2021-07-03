@@ -160,10 +160,10 @@ EquipmentBoundaryMapObjects.propTypes = {
 */
 
 const mapStateToProps = state => ({
-  planId: state.plan.activePlan.id,
-  transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
+  //planId: state.plan.activePlan.id,
+  //transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
   transactionFeatures: state.planEditor.features,
-  selectedBoundaryTypeId: state.mapLayers.selectedBoundaryType.id,
+  //selectedBoundaryTypeId: state.mapLayers.selectedBoundaryType.id,
   //selectedFeatures: state.selection.planEditorFeatures,
   googleMaps: state.map.googleMaps,
   subnets: state.planEditor.subnets,
@@ -171,10 +171,10 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  modifyFeature: (transactionId, equipmentBoundary) => dispatch(PlanEditorActions.modifyFeature('equipment_boundary', transactionId, equipmentBoundary)),
-  showContextMenuForEquipmentBoundary: (planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y) => {
-    dispatch(PlanEditorActions.showContextMenuForEquipmentBoundary(planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y))
-  },
+  modifyFeature: (equipmentBoundary) => dispatch(PlanEditorActions.modifyFeature('equipment_boundary', equipmentBoundary)),
+  //showContextMenuForEquipmentBoundary: (planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y) => {
+  //  dispatch(PlanEditorActions.showContextMenuForEquipmentBoundary(planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y))
+  //},
   selectBoundary: objectId => dispatch(SelectionActions.setPlanEditorFeatures([objectId]))
 })
 

@@ -56,6 +56,7 @@ function clearTransaction () {
   }
 }
 
+// ToDo: there's only one transaction don't require the ID
 function commitTransaction (transactionId) {
   return dispatch => {
     dispatch(setIsCommittingTransaction(true))
@@ -68,6 +69,7 @@ function commitTransaction (transactionId) {
   }
 }
 
+// ToDo: there's only one transaction don't require the ID
 function discardTransaction (transactionId) {
   return dispatch => {
     dispatch(setIsCommittingTransaction(true))
@@ -80,8 +82,10 @@ function discardTransaction (transactionId) {
   }
 }
 
-function createFeature (featureType, transactionId, feature) {
-  return dispatch => {
+function createFeature (featureType, feature) {
+  return (dispatch, getState) => {
+    const state = getState()
+    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
     // Do a POST to send the equipment over to service
     AroHttp.post(`/service/plan-transactions/${transactionId}/modified-features/${featureType}`, feature)
       .then(result => {
@@ -98,14 +102,16 @@ function createFeature (featureType, transactionId, feature) {
   }
 }
 
-function modifyFeature (featureType, transactionId, feature) {
+function modifyFeature (featureType, feature) {
   // ToDo: this causes an error if you edit a new feature that has yet to be sent to service
   //  everything still functions but it's bad form
   // ToDo: figure out POST / PUT perhaps one function 
   //  that determines weather to add (the potentially "modified") feature
   //  or modifiy the feature if it's already been added to the transaction
   //  basically we need service to overwrite or if not present, make 
-  return dispatch => {
+  return (dispatch, getState) => {
+    const state = getState()
+    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
     // Do a PUT to send the equipment over to service
     return AroHttp.put(`/service/plan-transactions/${transactionId}/modified-features/${featureType}`, feature.feature)
       .then(result => {
@@ -124,6 +130,7 @@ function modifyFeature (featureType, transactionId, feature) {
   }
 }
 
+// ToDo: there's only one transaction don't require the ID
 function deleteTransactionFeature (transactionId, featureType, transactionFeatureId) {
   return dispatch => {
     return AroHttp.delete(`/service/plan-transactions/${transactionId}/modified-features/${featureType}/${transactionFeatureId}`)
@@ -142,8 +149,13 @@ function addTransactionFeatures (features) {
   }
 }
 
-function showContextMenuForEquipment (planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y) {
-  return dispatch => {
+function showContextMenuForEquipment (equipmentObjectId, x, y) {
+  return (dispatch, getState) => {
+    const state = getState()
+    const planId = state.plan.activePlan.id
+    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+    const selectedBoundaryTypeId = state.mapLayers.selectedBoundaryType.id
+
     // Get details on the boundary (if any) for this equipment
     AroHttp.get(`/boundary/for_network_node/${planId}/${equipmentObjectId}/${selectedBoundaryTypeId}`)
       .then(result => {
@@ -162,8 +174,11 @@ function showContextMenuForEquipment (planId, transactionId, selectedBoundaryTyp
   }
 }
 
-function showContextMenuForEquipmentBoundary (transactionId, equipmentObjectId, x, y) {
-  return dispatch => {
+function showContextMenuForEquipmentBoundary (equipmentObjectId, x, y) {
+  return (dispatch, getState) => {
+    const state = getState()
+    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+    
     var menuActions = []
     menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteTransactionFeature', transactionId, 'equipment_boundary', equipmentObjectId))
     const menuItemFeature = new MenuItemFeature('BOUNDARY', 'Equipment Boundary', menuActions)
@@ -353,6 +368,11 @@ function addSubnets (subnetIds) {
     const subnetApiPromises = uncachedSubnetIds.map(subnetId => {
       return AroHttp.get(`/service/plan-transaction/${transaction.id}/subnet/${subnetId}`)
     })
+    // ToDo: need to refactor subnet props
+    //  planEditor.subnets[###].children[#].point to
+    //  planEditor.subnets[###].children[#].geometry
+    //  planEditor.subnets[###].children[#].id to
+    //  planEditor.subnets[###].children[#].objectId
     return Promise.all(subnetApiPromises)
       .then(subnetResults => {
         if (subnetResults.length) {

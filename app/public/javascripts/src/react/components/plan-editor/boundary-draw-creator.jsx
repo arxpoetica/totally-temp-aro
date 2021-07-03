@@ -23,7 +23,7 @@ export class BoundaryDrawCreator extends Component {
       polygonOptions: boundaryPolygonOptions
     })
     this.drawingManager.setMap(this.props.googleMaps)
-    const self = this
+    const self = this // for context binding ... I think
     google.maps.event.addListener(this.drawingManager, 'overlaycomplete', event => {
       // Create a boundary object.
       var boundaryFeature = {
@@ -39,7 +39,7 @@ export class BoundaryDrawCreator extends Component {
       self.props.stopDrawingBoundary()
       var isValidPolygon = true // TODO: FIX MapUtilities.isPolygonValid({ type: 'Feature', geometry: boundaryFeature.geometry })
       if (isValidPolygon) {
-        self.props.createFeature(self.props.transactionId, boundaryFeature)
+        self.props.createFeature(boundaryFeature)
       } else {
         console.error('Invalid polygon. Boundary will not be created.')
       }
@@ -61,19 +61,17 @@ export class BoundaryDrawCreator extends Component {
 }
 
 BoundaryDrawCreator.propTypes = {
-  transactionId: PropTypes.number,
   isDrawingBoundaryFor: PropTypes.string,
   googleMaps: PropTypes.object
 }
 
 const mapStateToProps = (state) => ({
-  transactionId: state.planEditor.transaction.id,
   isDrawingBoundaryFor: state.planEditor.isDrawingBoundaryFor,
   googleMaps: state.map.googleMaps
 })
 
 const mapDispatchToProps = dispatch => ({
-  createFeature: (transactionId, feature) => dispatch(PlanEditorActions.createFeature('equipment_boundary', transactionId, feature)),
+  createFeature: (feature) => dispatch(PlanEditorActions.createFeature('equipment_boundary', feature)),
   stopDrawingBoundary: () => dispatch(PlanEditorActions.stopDrawingBoundary())
 })
 
