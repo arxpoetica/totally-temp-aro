@@ -64,6 +64,10 @@ function modifyTransactionFeatures (state, newEquipments) {
   }
 }
 
+function clearTransactionFeatures (state) {
+  return { ...state, features: {}, selectedFeatureIds: [] }
+}
+
 function setIsDrawingBoundaryFor (state, isDrawingBoundaryFor) {
   return { ...state,
     isDrawingBoundaryFor: isDrawingBoundaryFor
@@ -135,7 +139,7 @@ function removeSubnets (state, subnets) {
 }
 
 function clearSubnets (state) {
-  return { ...state, subnets: {} }
+  return { ...state, subnets: {}, selectedSubnetId: '' }
 }
 
 function setSelectedSubnetId (state, selectedSubnetId) {
@@ -158,6 +162,9 @@ function planEditorReducer (state = defaultState, action) {
 
     case Actions.PLAN_EDITOR_MODIFY_FEATURES:
       return modifyTransactionFeatures(state, action.payload)
+
+    case Actions.PLAN_EDITOR_CLEAR_FEATURES:
+      return clearTransactionFeatures(state)
 
     case Actions.PLAN_EDITOR_SET_IS_CALCULATING_SUBNETS:
       return setIsCalculatingSubnets(state, action.payload)
@@ -193,7 +200,7 @@ function planEditorReducer (state = defaultState, action) {
       return removeSubnets(state, action.payload)
 
     case Actions.PLAN_EDITOR_CLEAR_SUBNETS:
-      return clearSubnets()
+      return clearSubnets(state)
 
     case Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID:
       return setSelectedSubnetId(state, action.payload)

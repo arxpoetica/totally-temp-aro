@@ -5,7 +5,8 @@ import AroHttp from '../../common/aro-http'
 import MenuItemFeature from '../context-menu/menu-item-feature'
 import MenuItemAction from '../context-menu/menu-item-action'
 import ContextMenuActions from '../context-menu/actions'
-import SelectionActions from '../selection/selection-actions'
+//import SelectionActions from '../selection/selection-actions'
+import { batch } from 'react-redux'
 
 function resumeOrCreateTransaction (planId, userId) {
   return dispatch => {
@@ -51,8 +52,19 @@ function clearTransaction () {
       type: Actions.SELECTION_SET_PLAN_EDITOR_FEATURES, // DEPRICATED
       payload: []
     })
-    // ToDo: clear features list and subnets list 
-    dispatch(setIsCommittingTransaction(false))
+    batch(() => {
+      dispatch(setIsCommittingTransaction(false))
+      dispatch({
+        type: Actions.PLAN_EDITOR_CLEAR_SUBNETS,
+      })
+      dispatch({
+        type: Actions.PLAN_EDITOR_CLEAR_FEATURES,
+      })
+      dispatch({
+        type: Actions.TOOL_BAR_SET_SELECTED_DISPLAY_MODE,
+        payload: 'VIEW', // ToDo: globalize the constants in tool-bar including displayModes
+      })
+    })
   }
 }
 
