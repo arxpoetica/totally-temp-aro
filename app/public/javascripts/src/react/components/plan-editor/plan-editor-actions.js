@@ -357,13 +357,14 @@ function selectFeaturesById (featureIds) {
             }
           }
         })
-        dispatch({
-          type: Actions.PLAN_EDITOR_SET_SELECTED_FEATURES, 
-          payload: validFeatures,
+        batch(() => {
+          dispatch({
+            type: Actions.PLAN_EDITOR_SET_SELECTED_FEATURES, 
+            payload: validFeatures,
+          })
+          // later we may highlight more than one subnet
+          dispatch(setSelectedSubnetId(subnetFeatures[0]))
         })
-        // later we may highlight more than one subnet
-        console.log(subnetFeatures)
-        dispatch(setSelectedSubnetId(subnetFeatures[0]))
       })
   }
 }
@@ -406,13 +407,15 @@ function setSelectedSubnetId (selectedSubnetId) {
         payload: '',
       })
     } else {
-      dispatch(addSubnets([selectedSubnetId]))
-        .then( () => {
-          dispatch({
-            type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
-            payload: selectedSubnetId,
+      batch(() => {
+        dispatch(addSubnets([selectedSubnetId]))
+          .then( () => {
+            dispatch({
+              type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
+              payload: selectedSubnetId,
+            })
           })
-        })
+      })
     }
   }
 }

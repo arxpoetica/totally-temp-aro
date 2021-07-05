@@ -23,45 +23,40 @@ export class EquipmentMapObjects extends Component {
   }
 
   componentDidUpdate () {
-    /*
-    const createdIds = new Set(Object.keys(this.objectIdToMapObject))
-    const allEquipmentIds = new Set(
-      Object.keys(this.props.transactionFeatures)
-        .filter(objectId => this.props.transactionFeatures[objectId].feature.dataType === 'equipment')
-    )
-    const idsToCreate = [...allEquipmentIds].filter(objectId => !createdIds.has(objectId))
-    const idsToDelete = [...createdIds].filter(objectId => !allEquipmentIds.has(objectId))
-    const idsToUpdate = [...allEquipmentIds].filter(objectId => createdIds.has(objectId))
-    idsToCreate.forEach(objectId => this.createMapObject(objectId))
-    idsToDelete.forEach(objectId => this.deleteMapObject(objectId))
-    idsToUpdate.forEach(objectId => this.updateMapObject(objectId))
-    this.highlightSelectedMarkers()
-    */
-    
     const createdIds = Object.keys(this.objectIdToMapObject)
     let idsToDelete = Object.keys(this.objectIdToMapObject)
     let featuresToCreate = []
     let idsToUpdate = []
-    //let subnetFeaturesById = {}
-    if (this.props.selectedSubnet) {
-      this.props.selectedSubnet.children.forEach(feature => {
-        const objectId = feature.id || feature.objectId
-        //subnetFeaturesById[objectId] = feature
-        var index = createdIds.indexOf(objectId)
-        if (index >= 0) {
-          // we already have this one
-          idsToUpdate.push(objectId)
-          idsToDelete.splice(index, 1)
-        } else {
-          featuresToCreate.push(feature)
-        }
-      })
+    
+    let subnetFeatures = {}
+    let allFeatureIds = []
+    if (this.props.selectedSubnet) { 
+      //allFeatureIds = this.props.selectedSubnet.children
+      subnetFeatures = this.props.selectedSubnet.children.reduce((dict, feature) => {
+        allFeatureIds.push(feature.id)
+        dict[feature.id] = feature
+        return dict
+      }, {})
     }
+    // concatinate the two arrays using the spread op, 
+    //  make sure all elements are unique by making it a Set,
+    //  turn it back into an array using the spread op
+    allFeatureIds = [...new Set([...allFeatureIds, ...this.props.selectedFeatureIds])]
+    allFeatureIds.forEach(objectId => {
+      var index = createdIds.indexOf(objectId)
+      if (index >= 0) {
+        // we already have this one
+        idsToUpdate.push(objectId)
+        idsToDelete.splice(index, 1)
+      } else {
+        let feature = this.props.transactionFeatures[objectId] ? this.props.transactionFeatures[objectId].feature : subnetFeatures[objectId]
+        if (feature) featuresToCreate.push(feature)
+      }
+    })
     idsToDelete.forEach(objectId => this.deleteMapObject(objectId))
     featuresToCreate.forEach(feature => this.createMapObject(feature))
     //idsToUpdate.forEach(objectId => this.updateMapObject(objectId))
     this.highlightSelectedMarkers()
-
   }
 
   createMapObject (feature) {
