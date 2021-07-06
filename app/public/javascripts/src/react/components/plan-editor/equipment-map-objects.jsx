@@ -180,7 +180,7 @@ const mapStateToProps = state => ({
   selectedFeatureIds: state.planEditor.selectedFeatureIds,
   googleMaps: state.map.googleMaps,
   selectedSubnetId: state.planEditor.selectedSubnetId,
-  subnets: state.planEditor.subnets,
+  //subnets: state.planEditor.subnets,
   //allFeatureIds, subnetFeatures
   ...PlanEditorSelectors.getSelectedIdsAndSubnetFeatures(state),
 })
