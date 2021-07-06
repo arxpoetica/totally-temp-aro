@@ -9,7 +9,7 @@ export class RoicReportsLarge extends Component {
 
     this.state = {
       selectedNetworkType: this.props.networkTypes.filter(item => item.id === 'planned_network')[0],
-      selectedEntityType: this.props.entityTypes.filter(item => item.id === 'medium')[0],
+      selectedEntityType: this.props.entityTypes.filter(item => item.id === 'network')[0],
       selectedCategory: this.props.categories[0],
       shouldRenderCharts: false
     }
