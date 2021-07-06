@@ -59,6 +59,9 @@ export class EquipmentBoundaryMapObjects extends Component {
       editable: true,
       map: this.props.googleMaps,
     })
+    // hardcore FIXME: need to actually attach map objects / boundaries to state
+    // this was 1,000,000% just to get it working quickly
+    window.TEMPORARY_MAP_BOUNDARY = this.mapObject
     this.mapObject.setOptions(this.polygonOptions)
     this.setupListenersForMapObject(this.mapObject)
 
