@@ -6,6 +6,7 @@ import WorkflowState from '../../../shared-utils/workflow-state'
 import PlanEditorActions from './plan-editor-actions'
 import SelectionActions from '../selection/selection-actions'
 import WktUtils from '../../../shared-utils/wkt-utils'
+import PlanEditorSelectors from './plan-editor-selectors.js'
 
 const SELECTION_Z_INDEX = 1
 const MAP_OBJECT_Z_INDEX = SELECTION_Z_INDEX + 1
@@ -23,11 +24,11 @@ export class EquipmentMapObjects extends Component {
   }
 
   componentDidUpdate () {
-    const createdIds = Object.keys(this.objectIdToMapObject)
+    //const createdIds = Object.keys(this.objectIdToMapObject)
     let idsToDelete = Object.keys(this.objectIdToMapObject)
     let featuresToCreate = []
     let idsToUpdate = []
-    
+    /*
     let subnetFeatures = {}
     let allFeatureIds = []
     if (this.props.selectedSubnet) { 
@@ -42,14 +43,16 @@ export class EquipmentMapObjects extends Component {
     //  make sure all elements are unique by making it a Set,
     //  turn it back into an array using the spread op
     allFeatureIds = [...new Set([...allFeatureIds, ...this.props.selectedFeatureIds])]
-    allFeatureIds.forEach(objectId => {
-      var index = createdIds.indexOf(objectId)
+    */
+    
+    this.props.allFeatureIds.forEach(objectId => {
+      var index = idsToDelete.indexOf(objectId)
       if (index >= 0) {
         // we already have this one
         idsToUpdate.push(objectId)
         idsToDelete.splice(index, 1)
       } else {
-        let feature = this.props.transactionFeatures[objectId] ? this.props.transactionFeatures[objectId].feature : subnetFeatures[objectId]
+        let feature = this.props.transactionFeatures[objectId] ? this.props.transactionFeatures[objectId].feature : this.props.subnetFeatures[objectId]
         if (feature) featuresToCreate.push(feature)
       }
     })
@@ -82,11 +85,6 @@ export class EquipmentMapObjects extends Component {
     })
     // When the marker is dragged, modify its position in the redux store
     mapObject.addListener('dragend', event => {
-      console.log([event.latLng.lng(), event.latLng.lat()])
-      // I need to figure out where this goes
-      //var newEquipment = JSON.parse(JSON.stringify(this.props.transactionFeatures[mapObject.objectId]))
-      //newEquipment.feature.geometry.coordinates = [event.latLng.lng(), event.latLng.lat()]
-      //this.props.modifyFeature(newEquipment)
       let coordinates = [event.latLng.lng(), event.latLng.lat()]
       this.props.moveFeature(mapObject.objectId, coordinates)
     })
@@ -118,25 +116,31 @@ export class EquipmentMapObjects extends Component {
   }
 
   highlightSelectedMarkers () {
-    // ToDo: this function shouldn't be aware of props, 
-    //  it should just accept an array of objectIds 
     Object.keys(this.objectIdToMapObject).forEach(objectId => {
       if (this.props.selectedFeatureIds.indexOf(objectId) >= 0) {
         // This marker is selected. Create a selection overlay if it does not exist.
-        if (!this.objectIdToSelectionOverlay[objectId]) {
-          this.objectIdToSelectionOverlay[objectId] = new google.maps.Marker({
-            icon: {
-              url: '/images/map_icons/aro/icon-selection-background.svg',
-              size: new google.maps.Size(64, 64),
-              scaledSize: new google.maps.Size(48, 48),
-              anchor: new google.maps.Point(24, 48)
-            },
-            clickable: false,
-            zIndex: SELECTION_Z_INDEX,
-            opacity: 0.7
-          })
-          this.objectIdToSelectionOverlay[objectId].bindTo('position', this.objectIdToMapObject[objectId], 'position')
+        let icon = '/images/map_icons/aro/icon-selection-background.svg'
+        if (objectId === this.props.selectedSubnetId) icon = '/images/map_icons/aro/icon-selection-background_B.svg'
+        
+        if (this.objectIdToSelectionOverlay[objectId]) {
+          // ToDo: just change the icon instead of deleteing and remaking
+          this.objectIdToSelectionOverlay[objectId].setMap(null)
+          delete this.objectIdToSelectionOverlay[objectId]
         }
+        
+        this.objectIdToSelectionOverlay[objectId] = new google.maps.Marker({
+          icon: {
+            url: icon,
+            size: new google.maps.Size(64, 64),
+            scaledSize: new google.maps.Size(48, 48),
+            anchor: new google.maps.Point(24, 48)
+          },
+          clickable: false,
+          zIndex: SELECTION_Z_INDEX,
+          opacity: 0.7
+        })
+        this.objectIdToSelectionOverlay[objectId].bindTo('position', this.objectIdToMapObject[objectId], 'position')
+        
         this.objectIdToSelectionOverlay[objectId].setMap(this.props.googleMaps)
       } else {
         // This marker is not selected. Turn off selection overlay if it exists
@@ -168,7 +172,9 @@ const mapStateToProps = state => ({
   //selectedFeatureIds: state.selection.planEditorFeatures,
   selectedFeatureIds: state.planEditor.selectedFeatureIds,
   googleMaps: state.map.googleMaps,
-  selectedSubnet: state.planEditor.subnets[state.planEditor.selectedSubnetId],
+  selectedSubnetId: state.planEditor.selectedSubnetId,
+  //allFeatureIds, subnetFeatures
+  ...PlanEditorSelectors.getSelectedIdsAndSubnetFeatures(state),
 })
 
 const mapDispatchToProps = dispatch => ({

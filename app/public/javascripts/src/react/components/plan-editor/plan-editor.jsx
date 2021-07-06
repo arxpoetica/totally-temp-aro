@@ -46,6 +46,13 @@ export const PlanEditor = props => {
 
   function onSelectedClick(event, objectId) {
     if (objectId === selectedSubnetId) objectId = '' // deselect
+    // ToDo: this check does not belong here
+    //  the action should try to request the subnet and if fail, set sub net to null
+    if (!features[objectId] 
+      || (
+        features[objectId].feature.networkNodeType !== 'central_office'
+        && features[objectId].feature.networkNodeType !== 'fiber_distribution_hub'
+    )) objectId = '' // deselect
     setSelectedSubnetId(objectId)
   }
 

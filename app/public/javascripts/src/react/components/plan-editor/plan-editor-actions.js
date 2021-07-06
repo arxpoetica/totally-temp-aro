@@ -435,7 +435,14 @@ function setSelectedSubnetId (selectedSubnetId) {
               type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
               payload: selectedSubnetId,
             })
+          }).catch(err => {
+            console.error(err)
+            dispatch({
+              type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
+              payload: '',
+            })
           })
+
       })
     }
   }
