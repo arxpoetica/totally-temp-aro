@@ -10,6 +10,7 @@ const PlanEditorRecalculate = props => {
   const {
     transaction,
     selectedSubnetId,
+    recalculateBoundary,
     recalculateSubnets,
   } = props
 
@@ -25,6 +26,7 @@ const PlanEditorRecalculate = props => {
   const [selectedOption, setSelectedOption] = useState()
 
   const handleSelectChange = change => {
+    console.log(change)
     setSelectedOption(change)
   }
 
@@ -32,37 +34,49 @@ const PlanEditorRecalculate = props => {
     <div className="plan-editor-recalculate">
 
       {/* TODO: the following will come back when ready */}
-      {/* <div className="actions">
-        <h2>Recalculate Plan:</h2>
-        <Select
-          className="select"
-          value={selectedOption}
-          options={options}
-          placeholder="Select Calculation Type"
-          onChange={handleSelectChange}
-          styles={selectStylesBlue}
-        />
-      </div> */}
+      {/* FIXME: only show this group when subnets have actually changed */}
+      {/* {selectedSubnetId &&
+        <div className="actions">
+          <h2>Recalculate Plan:</h2>
+          <Select
+            className="select"
+            value={selectedOption}
+            options={options}
+            placeholder="Select Calculation Type"
+            onChange={handleSelectChange}
+            styles={selectStylesBlue}
+          />
+        </div>
+      } */}
 
       <div className="plan-editor-buttons">
 
         {/* FIXME: only show this group when subnets have actually changed */}
         {selectedSubnetId &&
           <div className="group">
-            <h2>Recalculate Plan:</h2>
-            <div className="group">
-              <button type="button" className="btn btn-outline-secondary">Cancel</button>
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={() => recalculateSubnets({
-                  transactionId: transaction.id,
-                  subnetIds: [selectedSubnetId],
-                })}
-              >
-                Save
-              </button>
-            </div>
+
+            <button
+              type="button"
+              className="btn btn-outline-success"
+              onClick={() => recalculateBoundary({
+                transactionId: transaction.id,
+                subnetId: selectedSubnetId,
+              })}
+            >
+              Recalculate Boundary
+            </button>
+
+            <button
+              type="button"
+              className="btn btn-outline-success"
+              onClick={() => recalculateSubnets({
+                transactionId: transaction.id,
+                subnetIds: [selectedSubnetId],
+              })}
+            >
+              Recalculate Hubs & Terminals
+            </button>
+
           </div>
         }
 
@@ -93,6 +107,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
   // discardTransaction: transactionId => dispatch(PlanEditorActions.discardTransaction(transactionId)),
+  recalculateBoundary: vars => dispatch(PlanEditorActions.recalculateBoundary(vars)),
   recalculateSubnets: vars => dispatch(PlanEditorActions.recalculateSubnets(vars)),
 })
 

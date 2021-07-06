@@ -293,8 +293,6 @@ function setIsEnteringTransaction (isEnteringTransaction) {
   }
 }
 
-// --- experimental --- //
-
 function moveFeature (featureId, coordinates) {
   return (dispatch, getState) => {
     const state = getState()
@@ -449,10 +447,11 @@ function setSelectedSubnetId (selectedSubnetId) {
   }
 }
 
-function recalculateSubnets ({ transactionId, subnetIds }) {
+function recalculateBoundary ({ transactionId, subnetId }) {
   return dispatch => {
 
-    // hardcore FIXME: need to actually attach map objects / boundaries to state
+    // FIXME: FIXME: FIXME: FIXME: FIXME: FIXME: FIXME: FIXME: FIXME: FIXME: FIXME: 
+    // hardcore fixme: need to actually attach map objects / boundaries to state
     // this was 1,000,000% just to get it working quickly
     const newPolygon = WktUtils.getWKTMultiPolygonFromGoogleMapPaths(window.TEMPORARY_MAP_BOUNDARY.getPaths())
     const boundaryBody = {
@@ -460,15 +459,26 @@ function recalculateSubnets ({ transactionId, subnetIds }) {
       polygon: newPolygon,
     }
 
-    return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet/${subnetIds[0]}/boundary`, boundaryBody)
-      .then(res => {
-        const recalcBody = { subnetIds }
-        console.log(recalcBody)
-        return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet-cmd/recalc`, recalcBody)
-      })
+    return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet/${subnetId}/boundary`, boundaryBody)
       .then(res => {
         console.log(res)
         // debugger
+        // dispatch({
+        //   type: Actions.PLAN_EDITOR_RECALCULATE_BOUNDARY,
+        //   payload: subnetResults.map(result => result.data),
+        // })
+      })
+      .catch(err => console.error(err))
+  }
+}
+
+function recalculateSubnets ({ transactionId, subnetIds }) {
+  return dispatch => {
+    const recalcBody = { subnetIds }
+    console.log(recalcBody)
+    return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet-cmd/recalc`, recalcBody)
+      .then(res => {
+        console.log(res)
         // dispatch({
         //   type: Actions.PLAN_EDITOR_RECALCULATE_SUBNETS,
         //   payload: subnetResults.map(result => result.data),
@@ -506,5 +516,6 @@ export default {
   deselectFeatureById,
   addSubnets,
   setSelectedSubnetId,
+  recalculateBoundary,
   recalculateSubnets,
 }
