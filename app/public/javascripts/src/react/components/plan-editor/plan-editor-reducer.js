@@ -122,6 +122,16 @@ function setSelectedFeatures (state, selectedFeatureIds) {
   }
 }
 
+function deselectFeature (state, objectId) {
+  let newSelectedFeatureIds = [...state.selectedFeatureIds]
+  let i = newSelectedFeatureIds.indexOf(objectId)
+  if (i < 0) return state
+  newSelectedFeatureIds.splice(i, 1)
+  return { ...state,
+    selectedFeatureIds: newSelectedFeatureIds
+  }
+}
+
 function addSubnets (state, subnets) {
   const updatedSubnets = { ...state.subnets }
   for (const subnet of subnets) {
@@ -192,6 +202,9 @@ function planEditorReducer (state = defaultState, action) {
 
     case Actions.PLAN_EDITOR_SET_SELECTED_FEATURES:
       return setSelectedFeatures(state, action.payload)
+
+    case Actions.PLAN_EDITOR_SET_DESELECT_FEATURE:
+      return deselectFeature(state, action.payload)
 
     case Actions.PLAN_EDITOR_ADD_SUBNETS:
       return addSubnets(state, action.payload)

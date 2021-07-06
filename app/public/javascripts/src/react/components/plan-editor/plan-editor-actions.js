@@ -303,7 +303,6 @@ function readFeatures (featureIds) {
     })
     let retrievedIds = []
     let promises = [Promise.resolve()]
-    console.log(featuresToGet)
     let retrievedFeatures = []
     featuresToGet.forEach(featureId => {
       promises.push(
@@ -343,12 +342,9 @@ function selectFeaturesById (featureIds) {
         let state = getState()
         let validFeatures = []
         let subnetFeatures = []
-        console.log(featureIds)
         featureIds.forEach(featureId => {
           if (state.planEditor.features[featureId]) { 
             validFeatures.push(featureId) 
-            
-            console.log(state.planEditor.features[featureId])
             let networkNodeType = state.planEditor.features[featureId].feature.networkNodeType
             if (networkNodeType === "central_office"
               || networkNodeType === "fiber_distribution_hub"
@@ -366,6 +362,13 @@ function selectFeaturesById (featureIds) {
           dispatch(setSelectedSubnetId(subnetFeatures[0]))
         })
       })
+  }
+}
+
+function deselectFeatureById (objectId) {
+  return {
+    type: Actions.PLAN_EDITOR_SET_DESELECT_FEATURE,
+    payload: objectId,
   }
 }
 
@@ -444,6 +447,7 @@ export default {
   setIsEnteringTransaction,
   readFeatures,
   selectFeaturesById,
+  deselectFeatureById,
   addSubnets,
   setSelectedSubnetId,
 }
