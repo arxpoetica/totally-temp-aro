@@ -293,7 +293,7 @@ function setIsEnteringTransaction (isEnteringTransaction) {
   }
 }
 
-function moveFeature (featureId, coordinates) {
+function moveFeature (featureId, subnetId, coordinates) {
   return (dispatch, getState) => {
     const state = getState()
     dispatch(readFeatures([featureId]))
@@ -304,6 +304,34 @@ function moveFeature (featureId, coordinates) {
         feature.feature.geometry.coordinates = coordinates
         let dataType = feature.feature.dataType || "equipment"
         dispatch(modifyFeature(dataType, feature))
+
+
+/*
+        const body = {
+          commands: [{
+            // `childId` is one of the children nodes of the subnets
+            childId: {
+              dropLinks: [{}],
+              id: 'string',
+              locked: true,
+              networkNodeType: 'undefined',
+              point: getWKTPointFromGoogleMapLatLng()
+            },
+            subnetId: 'xxxxx-xxxxx-xxxxx-xxxxx', // parent subnet id, don't add when `type: 'add'`
+            type: 'update', // `add`, `update`, or `delete`
+          }]
+        }
+        // Do a PUT to send the equipment over to service
+        return AroHttp.put(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, feature.feature)
+          .then(result => {
+
+          })
+          .catch(err => console.error(err))
+
+*/
+
+
+
       })
   }
 }

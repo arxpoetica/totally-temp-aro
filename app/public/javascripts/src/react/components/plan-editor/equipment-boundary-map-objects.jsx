@@ -50,13 +50,14 @@ export class EquipmentBoundaryMapObjects extends Component {
     // const equipmentBoundary = this.props.transactionFeatures[objectId].feature
     if (!this.props.subnets[selectedSubnetId]) return
     const geometry = this.props.subnets[selectedSubnetId].subnetBoundary.polygon
+    const isLocked = this.props.subnets[selectedSubnetId].subnetBoundary.locked
 
     this.mapObject = new google.maps.Polygon({
       // selectedSubnetId, // Not used by Google Maps
       paths: WktUtils.getGoogleMapPathsFromWKTMultiPolygon(geometry),
       clickable: false,
       draggable: false,
-      editable: true,
+      editable: !isLocked,
       map: this.props.googleMaps,
     })
     // hardcore FIXME: need to actually attach map objects / boundaries to state
