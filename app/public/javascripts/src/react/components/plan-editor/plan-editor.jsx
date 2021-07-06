@@ -87,7 +87,9 @@ export const PlanEditor = props => {
 
       <PlanEditorRecalculate />
 
-      {selectedFeatureIds.map(id => <PlanEditorHeader selectedFeatureId={id}
+      {selectedFeatureIds.map(id => <PlanEditorHeader
+          key={id}
+          selectedFeatureId={id}
           onClick={ (event, objectId) => onSelectedClick(event, objectId)}
           onClose={ (event, objectId) => onSelectedClose(event, objectId)}
           isSelected={id === selectedSubnetId}
