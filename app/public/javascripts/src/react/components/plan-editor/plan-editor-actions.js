@@ -128,8 +128,11 @@ function modifyFeature (featureType, feature) {
     return AroHttp.put(`/service/plan-transactions/${transactionId}/modified-features/${featureType}`, feature.feature)
       .then(result => {
         // Decorate the created feature with some default values
+        let crudAction = feature.crudAction || 'read'
+        if (crudAction === 'read') crudAction = 'update'
         const newFeature = {
           ...feature,
+          crudAction: crudAction,
           feature: result.data
         }
         dispatch({
@@ -291,6 +294,21 @@ function setIsEnteringTransaction (isEnteringTransaction) {
 
 // --- experimental --- //
 
+function moveFeature (featureId, coordinates) {
+  return (dispatch, getState) => {
+    const state = getState()
+    dispatch(readFeatures([featureId]))
+      .then(retrievedIds => {
+        const state = getState()
+        let feature = state.planEditor.features[featureId]
+        feature = JSON.parse(JSON.stringify(feature))
+        feature.feature.geometry.coordinates = coordinates
+        let dataType = feature.feature.dataType || "equipment"
+        dispatch(modifyFeature(dataType, feature))
+      })
+  }
+}
+
 function readFeatures (featureIds) {
   return (dispatch, getState) => {
     const state = getState()
@@ -432,6 +450,7 @@ export default {
   resumeOrCreateTransaction,
   createFeature,
   modifyFeature,
+  moveFeature,
   deleteTransactionFeature,
   addTransactionFeatures,
   showContextMenuForEquipment,

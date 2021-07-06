@@ -87,6 +87,8 @@ export class EquipmentMapObjects extends Component {
       //var newEquipment = JSON.parse(JSON.stringify(this.props.transactionFeatures[mapObject.objectId]))
       //newEquipment.feature.geometry.coordinates = [event.latLng.lng(), event.latLng.lat()]
       //this.props.modifyFeature(newEquipment)
+      let coordinates = [event.latLng.lng(), event.latLng.lat()]
+      this.props.moveFeature(mapObject.objectId, coordinates)
     })
     mapObject.addListener('rightclick', event => {
       const eventXY = WktUtils.getXYFromEvent(event)
@@ -171,6 +173,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
   modifyFeature: (feature) => dispatch(PlanEditorActions.modifyFeature('equipment', feature)),
+  moveFeature: (featureId, coordinates) => dispatch(PlanEditorActions.moveFeature(featureId, coordinates)),
   showContextMenuForEquipment: (equipmentObjectId, x, y) => {
     dispatch(PlanEditorActions.showContextMenuForEquipment(equipmentObjectId, x, y))
   },
