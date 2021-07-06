@@ -7,6 +7,7 @@ import MenuItemAction from '../context-menu/menu-item-action'
 import ContextMenuActions from '../context-menu/actions'
 //import SelectionActions from '../selection/selection-actions'
 import { batch } from 'react-redux'
+import WktUtils from '../../../shared-utils/wkt-utils'
 
 function resumeOrCreateTransaction (planId, userId) {
   return dispatch => {
@@ -292,8 +293,6 @@ function setIsEnteringTransaction (isEnteringTransaction) {
   }
 }
 
-// --- experimental --- //
-
 function moveFeature (featureId, coordinates) {
   return (dispatch, getState) => {
     const state = getState()
@@ -448,6 +447,47 @@ function setSelectedSubnetId (selectedSubnetId) {
   }
 }
 
+function recalculateBoundary ({ transactionId, subnetId }) {
+  return dispatch => {
+
+    // FIXME: FIXME: FIXME: FIXME: FIXME: FIXME: FIXME: FIXME: FIXME: FIXME: FIXME: 
+    // hardcore fixme: need to actually attach map objects / boundaries to state
+    // this was 1,000,000% just to get it working quickly
+    const newPolygon = WktUtils.getWKTMultiPolygonFromGoogleMapPaths(window.TEMPORARY_MAP_BOUNDARY.getPaths())
+    const boundaryBody = {
+      locked: true,
+      polygon: newPolygon,
+    }
+
+    return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet/${subnetId}/boundary`, boundaryBody)
+      .then(res => {
+        console.log(res)
+        // debugger
+        // dispatch({
+        //   type: Actions.PLAN_EDITOR_RECALCULATE_BOUNDARY,
+        //   payload: subnetResults.map(result => result.data),
+        // })
+      })
+      .catch(err => console.error(err))
+  }
+}
+
+function recalculateSubnets ({ transactionId, subnetIds }) {
+  return dispatch => {
+    const recalcBody = { subnetIds }
+    console.log(recalcBody)
+    return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet-cmd/recalc`, recalcBody)
+      .then(res => {
+        console.log(res)
+        // dispatch({
+        //   type: Actions.PLAN_EDITOR_RECALCULATE_SUBNETS,
+        //   payload: subnetResults.map(result => result.data),
+        // })
+      })
+      .catch(err => console.error(err))
+  }
+}
+
 // --- //
 
 export default {
@@ -476,4 +516,6 @@ export default {
   deselectFeatureById,
   addSubnets,
   setSelectedSubnetId,
+  recalculateBoundary,
+  recalculateSubnets,
 }
