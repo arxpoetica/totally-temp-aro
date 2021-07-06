@@ -162,7 +162,7 @@ export const BoundaryDetail = (props) => {
     loadEntityList(entityTypeCons.SERVICE_AREA_VIEW, serviceArea.id, 'id,code,name', 'id')
       .then((serviceAreaInfos) => {
         setState((state) => ({ ...state,
-          selectedSAInfo: serviceAreaInfos.length > 0 ? serviceAreaInfos[0] : null,
+          selectedSAInfo: serviceAreaInfos.length ? serviceAreaInfos[0] : null,
         }))
       })
       .catch(err => console.error(err))
