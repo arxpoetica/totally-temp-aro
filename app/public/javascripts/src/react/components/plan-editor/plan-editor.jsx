@@ -28,6 +28,8 @@ export const PlanEditor = props => {
     subnets,
     selectedSubnetId,
     addSubnets,
+    setSelectedSubnetId,
+    deselectFeatureById,
   } = props
 
   useEffect(() => {
@@ -42,8 +44,25 @@ export const PlanEditor = props => {
     commitTransaction(transactionId)
   }
 
+  function onSelectedClick(event, objectId) {
+    if (objectId === selectedSubnetId) objectId = '' // deselect
+    // ToDo: this check does not belong here
+    //  the action should try to request the subnet and if fail, set sub net to null
+    if (!features[objectId] 
+      || (
+        features[objectId].feature.networkNodeType !== 'central_office'
+        && features[objectId].feature.networkNodeType !== 'fiber_distribution_hub'
+    )) objectId = '' // deselect
+    setSelectedSubnetId(objectId)
+  }
+
+  function onSelectedClose(event, objectId) {
+    if (objectId === selectedSubnetId) setSelectedSubnetId('')
+    deselectFeatureById(objectId)
+  }
+
   return (
-    <div className="aro-plan-editor">
+    <div className="aro-plan-editor" style={{paddingRight: '10px'}}>
       <div className="text-center mb-2">
         <div className="btn-group">
           <button
@@ -73,7 +92,11 @@ export const PlanEditor = props => {
         selectedFeatureIds.map(id => {
           return (
             <div key={id}>
-              <PlanEditorHeader selectedFeatureId={id} />
+              <PlanEditorHeader selectedFeatureId={id} 
+                onClick={ (event, objectId) => onSelectedClick(event, objectId)}
+                onClose={ (event, objectId) => onSelectedClose(event, objectId)}
+                isSelected={id === selectedSubnetId}
+              />
 
               {/* below will be replaced by generic object editor */}
               <p>Selected: {id}</p>
@@ -120,8 +143,8 @@ const mapStateToProps = state => ({
   isCommittingTransaction: state.planEditor.isCommittingTransaction,
   isDrawingBoundaryFor: state.planEditor.isDrawingBoundaryFor,
   features: state.planEditor.features,
-  //selectedFeatureIds: state.planEditor.selectedFeatureIds,
-  selectedFeatureIds: state.selection.planEditorFeatures,
+  selectedFeatureIds: state.planEditor.selectedFeatureIds,
+  //selectedFeatureIds: state.selection.planEditorFeatures,
   subnets: state.planEditor.subnets,
   selectedSubnetId: state.planEditor.selectedSubnetId,
 })
@@ -131,6 +154,8 @@ const mapDispatchToProps = dispatch => ({
   commitTransaction: transactionId => dispatch(PlanEditorActions.commitTransaction(transactionId)),
   discardTransaction: transactionId => dispatch(PlanEditorActions.discardTransaction(transactionId)),
   addSubnets: subnetIds => dispatch(PlanEditorActions.addSubnets(subnetIds)),
+  setSelectedSubnetId: subnetId => dispatch(PlanEditorActions.setSelectedSubnetId(subnetId)),
+  deselectFeatureById: objectId => dispatch(PlanEditorActions.deselectFeatureById(objectId)),
 })
 
 const PlanEditorComponent = wrapComponentWithProvider(reduxStore, PlanEditor, mapStateToProps, mapDispatchToProps)

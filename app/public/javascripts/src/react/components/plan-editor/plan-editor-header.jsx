@@ -9,12 +9,30 @@ const PlanEditorHeader = props => {
     features,
   } = props
 
+  const isSelected = props.isSelected || false
+
   const { feature } = features[selectedFeatureId]
   const equipment = equipments[feature.networkNodeType]
   const { coordinates } = feature.geometry
 
   // const [..., ...] = useState()
   // const handleChange = change => {}
+
+  function onClick (event) {
+    //event.preventDefault()
+    event.stopPropagation()
+    if (props.onClick) {
+      props.onClick(event, selectedFeatureId)
+    }
+  }
+
+  function onClose (event) {
+    //event.preventDefault()
+    event.stopPropagation()
+    if (props.onClose) {
+      props.onClose(event, selectedFeatureId)
+    }
+  }
 
   return (
     <>
@@ -25,7 +43,12 @@ const PlanEditorHeader = props => {
         )}
       </div> */}
 
-      <div className="plan-editor-header">
+      <div className={`plan-editor-header 
+          ${isSelected ? "plan-editor-header-selected" : ""}
+          ${props.onClick ? "plan-editor-use-pointer" : ""}
+        `}
+        onClick={event => onClick(event)}
+      >
         <div className="info">
           <img src={equipment.iconUrl} alt={equipment.label}/>
           <h2>{equipment.label}</h2>
@@ -34,6 +57,14 @@ const PlanEditorHeader = props => {
           <div className="item">lat: {coordinates[1]}</div>
           <div className="item">long: {coordinates[0]}</div>
         </div>
+        {props.onClose 
+          ? <button type="button" 
+              className="btn btn-sm plan-editor-header-close" 
+              aria-label="Close"
+              onClick={event => onClose(event)}
+            ><i className="fa fa-times"></i></button>
+          : null
+        }
       </div>
 
       {/* see equipment properties editor for former logic / binding / events */}

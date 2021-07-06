@@ -144,6 +144,7 @@ function setRoadSegments(roadSegments) {
   }
 }
 
+// DEPRICATED
 function setPlanEditorFeatures (planEditorFeatures) {
   return {
     type: Actions.SELECTION_SET_PLAN_EDITOR_FEATURES,

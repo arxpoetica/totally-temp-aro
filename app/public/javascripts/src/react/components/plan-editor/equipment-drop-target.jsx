@@ -82,25 +82,23 @@ export class EquipmentDropTarget extends Component {
         },
         deploymentType: 'PLANNED'
       }
-      this.props.createFeature(this.props.transactionId, featureToCreate)
+      this.props.createFeature(featureToCreate)
     }
   }
 }
 
 EquipmentDropTarget.propTypes = {
-  transactionId: PropTypes.number,
   isDraggingFeatureForDrop: PropTypes.bool,
   googleMaps: PropTypes.object
 }
 
 const mapStateToProps = state => ({
-  transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
   isDraggingFeatureForDrop: state.planEditor.isDraggingFeatureForDrop,
   googleMaps: state.map.googleMaps
 })
 
 const mapDispatchToProps = dispatch => ({
-  createFeature: (transactionId, equipment) => dispatch(PlanEditorActions.createFeature('equipment', transactionId, equipment))
+  createFeature: (equipment) => dispatch(PlanEditorActions.createFeature('equipment', equipment))
 })
 
 const EquipmentDropTargetComponent = wrapComponentWithProvider(reduxStore, EquipmentDropTarget, mapStateToProps, mapDispatchToProps)

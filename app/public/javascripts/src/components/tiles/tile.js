@@ -14,6 +14,7 @@ import MenuAction, { MenuActionTypes } from '../common/context-menu/menu-action'
 import MenuItem, { MenuItemTypes } from '../common/context-menu/menu-item'
 import FeatureSets from '../../react/common/featureSets'
 import ToolBarActions from '../../react/components/header/tool-bar-actions'
+import PlanEditorSelectors from '../../react/components/plan-editor/plan-editor-selectors.js'
 import { dequal } from 'dequal'
 
 class TileComponentController {
@@ -739,12 +740,14 @@ class TileComponentController {
 
   // Map global state to component properties
   mapStateToThis (reduxState) {
+    const {allFeatureIds, subnetFeatures} = PlanEditorSelectors.getSelectedIdsAndSubnetFeatures(reduxState)
     return {
       activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
       selectionModes: reduxState.selection.selectionModes,
       selection: reduxState.selection,
       //selectionIds: reduxState.selection.planEditorFeatures,
-      selectionIds: Object.keys(reduxState.planEditor.features),
+      //selectionIds: Object.keys(reduxState.planEditor.features),
+      selectionIds: allFeatureIds,
       rSelection: reduxState.selection.selection,
       stateMapLayers: reduxState.mapLayers,
       networkAnalysisType: reduxState.optimization.networkOptimization.optimizationInputs.analysis_type,
@@ -753,7 +756,9 @@ class TileComponentController {
       rShowFiberSize: reduxState.toolbar.showFiberSize, // Set to map-tile-render.js from tool-bar.jsx
       rViewSetting: reduxState.toolbar.viewSetting, // Set to map-tile-render.js from aro-debug.jsx
       rSelectedDisplayMode: reduxState.toolbar.rSelectedDisplayMode,
-      rActiveViewModePanel: reduxState.toolbar.rActiveViewModePanel
+      rActiveViewModePanel: reduxState.toolbar.rActiveViewModePanel,
+      //allFeatureIds, 
+      subnetFeatures: subnetFeatures,
     }
   }
 

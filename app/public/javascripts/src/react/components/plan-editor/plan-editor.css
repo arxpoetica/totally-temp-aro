@@ -6,6 +6,9 @@
   font-size: inherit;
   font-weight: bold;
 }
+.plan-editor-use-pointer {
+  cursor: pointer;
+}
 
 /* ========================= >>>>> recalculate plan >>>>> */
 
@@ -40,6 +43,10 @@
   padding: 10px;
   background-color: #eee;
   border: solid 1px #ccc;
+  position: relative;
+}
+.plan-editor-header.plan-editor-header-selected{
+  border-color: #1f7de6;
 }
 .plan-editor-header h2 {
 	margin: 0 0 10px;
@@ -48,6 +55,7 @@
   display: flex;
   align-items: center;
   margin: 0 0 12px;
+  padding-right: 20px; /* for the close button */
 }
 .plan-editor-header img { margin: 0 12px 0 0; }
 .plan-editor-header h2 { margin: 0; }
@@ -64,6 +72,11 @@
 }
 .plan-editor-header input {
   margin-left: 5px;
+}
+.plan-editor-header-close {
+  position:absolute;
+  top: 0px;
+  right: 0px;
 }
 
 /* ========================= >>>>> plan editor actions >>>>> */

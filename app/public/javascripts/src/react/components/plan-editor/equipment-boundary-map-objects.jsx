@@ -33,8 +33,8 @@ export class EquipmentBoundaryMapObjects extends Component {
   }
 
   componentDidUpdate (prevProps, prevState) {
-    const { selectedSubnetId, subnets } = this.props
-    if (selectedSubnetId && subnets && subnets[selectedSubnetId] !== prevProps.subnets[selectedSubnetId]) {
+    const {selectedSubnetId} = this.props
+    if (selectedSubnetId !== prevProps.selectedSubnetId) {
       if (prevProps.selectedSubnetId) {
         this.deleteMapObject()
       }
@@ -57,9 +57,8 @@ export class EquipmentBoundaryMapObjects extends Component {
 
   createMapObject (selectedSubnetId) {
     // const equipmentBoundary = this.props.transactionFeatures[objectId].feature
-
-    const { subnets } = this.props
-    const geometry = subnets[selectedSubnetId].subnetBoundary.polygon
+    if (!this.props.subnets[selectedSubnetId]) return
+    const geometry = this.props.subnets[selectedSubnetId].subnetBoundary.polygon
 
     this.mapObject = new google.maps.Polygon({
       // selectedSubnetId, // Not used by Google Maps
@@ -161,21 +160,21 @@ EquipmentBoundaryMapObjects.propTypes = {
 */
 
 const mapStateToProps = state => ({
-  planId: state.plan.activePlan.id,
-  transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
+  //planId: state.plan.activePlan.id,
+  //transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
   transactionFeatures: state.planEditor.features,
-  selectedBoundaryTypeId: state.mapLayers.selectedBoundaryType.id,
-  selectedFeatures: state.selection.planEditorFeatures,
+  //selectedBoundaryTypeId: state.mapLayers.selectedBoundaryType.id,
+  //selectedFeatures: state.selection.planEditorFeatures,
   googleMaps: state.map.googleMaps,
   subnets: state.planEditor.subnets,
   selectedSubnetId: state.planEditor.selectedSubnetId,
 })
 
 const mapDispatchToProps = dispatch => ({
-  modifyFeature: (transactionId, equipmentBoundary) => dispatch(PlanEditorActions.modifyFeature('equipment_boundary', transactionId, equipmentBoundary)),
-  showContextMenuForEquipmentBoundary: (planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y) => {
-    dispatch(PlanEditorActions.showContextMenuForEquipmentBoundary(planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y))
-  },
+  modifyFeature: (equipmentBoundary) => dispatch(PlanEditorActions.modifyFeature('equipment_boundary', equipmentBoundary)),
+  //showContextMenuForEquipmentBoundary: (planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y) => {
+  //  dispatch(PlanEditorActions.showContextMenuForEquipmentBoundary(planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y))
+  //},
   selectBoundary: objectId => dispatch(SelectionActions.setPlanEditorFeatures([objectId]))
 })
 

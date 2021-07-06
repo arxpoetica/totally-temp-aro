@@ -489,7 +489,11 @@ class State {
       }
 
       if (service.selectedDisplayMode.getValue() == service.displayModes.EDIT_PLAN) {
-        service.selectPlanEditFeatures(options.equipmentFeatures)
+        let featuresIds = []
+        options.equipmentFeatures.forEach(feature => {
+          featuresIds.push(feature.object_id)
+        })
+        service.selectPlanEditFeaturesById(featuresIds)
       }
 
       // ToDo: this check may need to move into REACT
@@ -1921,7 +1925,7 @@ class State {
       setShowGlobalSettings: () => dispatch(GlobalSettingsActions.setShowGlobalSettings(true)),
       setCurrentViewToReleaseNotes: (viewString) => dispatch(GlobalSettingsActions.setCurrentViewToReleaseNotes(viewString)),
       setIsMapClicked: mapFeatures => dispatch(SelectionActions.setIsMapClicked(mapFeatures)),
-      selectPlanEditFeatures: (features) => dispatch(PlanEditorActions.selectFeatures(features)),
+      selectPlanEditFeaturesById: (features) => dispatch(PlanEditorActions.selectFeaturesById(features)),
     }
   }
 }

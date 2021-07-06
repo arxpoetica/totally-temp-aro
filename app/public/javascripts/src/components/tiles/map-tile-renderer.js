@@ -489,8 +489,9 @@ class MapTileRenderer {
         // Try object_id first, else try location_id
         var featureId = feature.properties.object_id || feature.properties.location_id
 
-        if (this.selectionIds.includes(featureId)) {
-          continue // Do not render any features that are part of a transaction
+        if (this.selectedDisplayMode == this.displayModes.EDIT_PLAN 
+          && this.selectionIds.includes(featureId)) {
+          continue // Do not render any features that are part of a transaction while in plan edit
         }
 
         if (mapLayer.subtypes) {
@@ -541,8 +542,18 @@ class MapTileRenderer {
           selectedListId = feature.properties.id
         }
       }
-
+      
+      // ToDo: we need a single source of the lat long while in edit mode
+      /*
+      if (this.selectedDisplayMode == this.displayModes.EDIT_PLAN 
+        && reduxState.planEditor.features[featureId]
+        && reduxState.planEditor.features[featureId].crudAction !== 'read') {
+        use all the data in 
+        reduxState.planEditor.features[featureId].feature
+      }
+      */
       var geometry = feature.loadGeometry()
+      
       // Geometry is an array of shapes
       var imageWidthBy2 = entityImage ? entityImage.width / 2 : 0
       var imageHeightBy2 = entityImage ? entityImage.height / 2 : 0
