@@ -20,6 +20,12 @@ class PlanSearchController {
     this.idToServiceAreaCode = {}
     this.creatorsSearchList = []
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
+    this.planSortingOptions = [
+      { sortType: 'updatedDate', description: 'Date Modified' },
+      { sortType: 'createdDate', description: 'Date Created' },
+    ]
+    this.selectedPlanSortType = this.planSortingOptions[0]
+    this.sortByField = this.planSortingOptions[0].sortType
   }
 
   $onInit () {
@@ -101,7 +107,7 @@ class PlanSearchController {
           this.planOptions.params = {}
           this.$http.get('/optimization/processes').then((running) => {
             this.totalData = []
-            this.totalData = response.data.sort((a, b) => (a.createdDate < b.createdDate) ? 1 : -1)
+            this.totalData = response.data.sort((a, b) => (a[this.sortByField] < b[this.sortByField]) ? 1 : -1)
             this.totalData.forEach((plan) => {
               var info = running.data.find((status) => status.planId === +plan.id)
               if (info) {
@@ -132,6 +138,18 @@ class PlanSearchController {
   }
 
   constructSearch () {
+    const searchTextObject = {}
+    this.searchText.forEach(searchInput => {
+      if (typeof searchInput !== 'string'){
+        if (searchInput.type === 'svc') searchTextObject.svc = searchInput
+        if (searchInput.type === 'tag') searchTextObject.tag = searchInput
+        if (searchInput.type === 'created_by') searchTextObject.created_by = searchInput
+      } else {
+        searchTextObject.searchString = searchInput
+      }
+    })
+    this.searchText = Object.values(searchTextObject)
+    
     this.search_text = ''
     var selectedFilterPlans = _.filter(this.searchText, (plan) => {
       if (_.isString(plan)) return plan
@@ -184,6 +202,11 @@ class PlanSearchController {
   applySearch (filters) {
     this.searchText = _.uniq(this.searchText.concat(filters))
     this.searchList = _.uniq(this.searchList.concat(filters))
+    this.loadPlans()
+  }
+
+  onChangeSortingType () {
+    this.sortByField = this.selectedPlanSortType.sortType
     this.loadPlans()
   }
 
@@ -258,7 +281,6 @@ let planSearch = {
   templateUrl: '/components/common/plan/plan-search.html',
   bindings: {
     showPlanDeleteButton: '<',
-    showRefreshPlansOnMapMove: '<',
     systemActors: '<',
     onPlanSelected: '&',
     onPlanDeleteRequested: '&'

@@ -1,8 +1,4 @@
 <div>
-  <div ng-if="$ctrl.showRefreshPlansOnMapMove" style="line-height: 33px; padding: 5px 0px;">
-    <input type="checkbox" class="checkboxfill" name="ctype-name" style="margin-top: 0px;" disabled> Refresh Plans on map move
-  </div>
-
   <div class="input-group">
     <!-- (tagging) paste not working if tagging-label="false" and tagging-tokens are set -->
     <!-- http://plnkr.co/edit/kauNS7YjckRfi616k4PT?p=preview -->
@@ -53,6 +49,15 @@
       search-list="$ctrl.creatorsSearchList"
       apply-search="$ctrl.applySearchFilter(selectedFilters, 'created_by')"
       refresh-tag-list="$ctrl.searchCreatorsList(searchObj)"></plan-search-filter>
+  </div>
+
+  <div class="plan-info" style="display: flex; padding-top: 5px;">
+    <span style="flex: 0 0 auto; line-height: 33px; padding: 0px 12px;">Sort by:</span>
+    <select class="form-control-sm" style="background: #f8f9fa; border: 0px; outline: 0px;"
+      ng-model="$ctrl.selectedPlanSortType"
+      ng-options="item as item.description for item in $ctrl.planSortingOptions"
+      ng-change="$ctrl.onChangeSortingType()">
+    </select>
   </div>
 
   <p ng-show="$ctrl.plans.length < 1" class="text-center">

@@ -91,7 +91,7 @@ export class PlanSearch extends Component {
   }
 
   render() {
-    const { showRefreshPlansOnMapMove, loggedInUser, listOfTags, listOfServiceAreaTags } = this.props
+    const { loggedInUser, listOfTags, listOfServiceAreaTags } = this.props
     const { searchText, plans, currentPage, pages, idToServiceAreaCode, creatorsSearchList,
       optionSetText, isDropDownOption } = this.state
 
@@ -167,18 +167,6 @@ export class PlanSearch extends Component {
 
     return (
       <div>
-        {showRefreshPlansOnMapMove &&
-        <div style={{lineHeight: '33px', padding: '5px 0px'}}>
-          <input
-            type="checkbox"
-            classame="checkboxfill"
-            name="ctype-name"
-            style={{marginTop: '0px'}}
-            disabled
-          /> Refresh Plans on map move
-        </div>
-        }
-
         <div className="input-group">
           <CreatableSelect
             isMulti
