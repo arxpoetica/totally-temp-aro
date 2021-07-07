@@ -302,8 +302,50 @@ function moveFeature (featureId, coordinates) {
         let feature = state.planEditor.features[featureId]
         feature = JSON.parse(JSON.stringify(feature))
         feature.feature.geometry.coordinates = coordinates
-        let dataType = feature.feature.dataType || "equipment"
-        dispatch(modifyFeature(dataType, feature))
+        //let dataType = feature.feature.dataType || "equipment"
+        //dispatch(modifyFeature(dataType, feature))
+
+        // change the featurein the feature list 
+        let crudAction = feature.crudAction || 'read'
+        if (crudAction === 'read') crudAction = 'update'
+        const newFeature = {
+          ...feature,
+          crudAction: crudAction,
+        }
+        dispatch({
+          type: Actions.PLAN_EDITOR_MODIFY_FEATURES,
+          payload: [newFeature]
+        })
+
+
+        if (state.planEditor.subnetFeatures[featureId]) {
+          let subnetFeature = state.planEditor.subnetFeatures[featureId].feature
+          let subnetId = state.planEditor.subnetFeatures[featureId].subnetId
+          let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+          subnetFeature = JSON.parse(JSON.stringify(subnetFeature))
+          subnetFeature.point.coordinates = coordinates
+          const body = {
+            commands: [{
+              // `childId` is one of the children nodes of the subnets
+              childId: subnetFeature,
+              subnetId: subnetId, // parent subnet id, don't add when `type: 'add'`
+              type: 'update', // `add`, `update`, or `delete`
+            }]
+          }
+          // Do a PUT to send the equipment over to service
+          return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
+            .then(result => {
+              console.log(result)
+              
+              dispatch({
+                type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
+                payload: [subnetFeature]
+              })
+            })
+            .catch(err => console.error(err))
+
+        }
+
       })
   }
 }

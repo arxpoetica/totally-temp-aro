@@ -67,8 +67,15 @@ export class EquipmentMapObjects extends Component {
     // The marker is editable if the state is not LOCKED or INVALIDATED
     //const isEditable = !((feature.workflow_state_id & WorkflowState.LOCKED.id) ||
     //                      (feature.workflow_state_id & WorkflowState.INVALIDATED.id))
-    const isEditable = true
+    
     let objectId = feature.objectId || feature.id
+    
+    // ToDo: this could use some refactoring
+    let isLocked = false
+    //if (this.props.subnets[objectId]) isLocked = this.props.subnets[objectId].subnetId.locked
+    // ToDo: unhack this 
+    if (feature.networkNodeType === "central_office") isLocked = true
+
     const mapObject = new google.maps.Marker({
       objectId: objectId, // Not used by Google Maps
       // note: service needs to change 
@@ -78,8 +85,8 @@ export class EquipmentMapObjects extends Component {
       icon: {
         url: this.props.equipmentDefinitions[feature.networkNodeType].iconUrl
       },
-      draggable: isEditable, // Allow dragging only if feature is not locked
-      clickable: isEditable,
+      draggable: !isLocked, // Allow dragging only if feature is not locked
+      clickable: true,
       map: this.props.googleMaps,
       zIndex: MAP_OBJECT_Z_INDEX
     })
@@ -173,6 +180,7 @@ const mapStateToProps = state => ({
   selectedFeatureIds: state.planEditor.selectedFeatureIds,
   googleMaps: state.map.googleMaps,
   selectedSubnetId: state.planEditor.selectedSubnetId,
+  //subnets: state.planEditor.subnets,
   //allFeatureIds, subnetFeatures
   ...PlanEditorSelectors.getSelectedIdsAndSubnetFeatures(state),
 })

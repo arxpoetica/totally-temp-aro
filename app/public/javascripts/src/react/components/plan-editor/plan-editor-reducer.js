@@ -14,6 +14,7 @@ const defaultState = {
   isEnteringTransaction: false,
   isCommittingTransaction: false,
   subnets: {},
+  subnetFeatures: {},
   selectedSubnetId: '',
 }
 
@@ -133,23 +134,44 @@ function deselectFeature (state, objectId) {
 }
 
 function addSubnets (state, subnets) {
-  const updatedSubnets = { ...state.subnets }
+  let updatedSubnets = { ...state.subnets }
+  let subnetFeatures = { ...state.subnetFeatures }
   for (const subnet of subnets) {
-    updatedSubnets[subnet.subnetId.id] = subnet
+    let subnetId = subnet.subnetId.id
+    updatedSubnets[subnetId] = subnet
+    subnet.children.forEach(feature => {
+      subnetFeatures[feature.id] = {
+        feature: feature,
+        subnetId: subnetId,
+      }
+    })
   }
-  return { ...state, subnets: updatedSubnets }
+  return { ...state, subnets: updatedSubnets, subnetFeatures: subnetFeatures }
+}
+
+function updateSubnetFeatures (state, subnetFeatureList) {
+  let subnetFeatures = { ...state.subnetFeatures }
+  
+  subnetFeatureList.forEach(feature => {
+    if (subnetFeatures[feature.id]){
+      subnetFeatures[feature.id].feature = feature
+    }
+  })
+  
+  return { ...state, subnetFeatures: subnetFeatures }
 }
 
 function removeSubnets (state, subnets) {
   const updatedSubnets = { ...state.subnets }
   for (const subnet of subnets) {
     delete updatedSubnets[subnet.subnetId.id]
+    // ToDo: remove children from subnetFeatures
   }
   return { ...state, subnets: updatedSubnets }
 }
 
 function clearSubnets (state) {
-  return { ...state, subnets: {}, selectedSubnetId: '' }
+  return { ...state, subnets: {}, selectedSubnetId: '', subnetFeatures: {} }
 }
 
 function setSelectedSubnetId (state, selectedSubnetId) {
@@ -216,6 +238,9 @@ function planEditorReducer (state = defaultState, action) {
 
     case Actions.PLAN_EDITOR_ADD_SUBNETS:
       return addSubnets(state, action.payload)
+
+    case Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES:
+      return updateSubnetFeatures(state, action.payload)
 
     case Actions.PLAN_EDITOR_REMOVE_SUBNETS:
       return removeSubnets(state, action.payload)
