@@ -66,6 +66,22 @@ export class EquipmentBoundaryMapObjects extends Component {
     this.mapObject.setOptions(this.polygonOptions)
     this.setupListenersForMapObject(this.mapObject)
 
+    this.mapObject.getPath().addListener("set_at", event => {
+      console.log("set")
+      this.props.recalculateBoundary({
+        transactionId: this.props.transactionId,
+        subnetId: this.props.selectedSubnetId,
+      })
+    })
+
+    this.mapObject.getPath().addListener("insert_at", event => {
+      console.log("insert")
+      this.props.recalculateBoundary({
+        transactionId: this.props.transactionId,
+        subnetId: this.props.selectedSubnetId,
+      })
+    })
+
     this.mapObject.addListener('rightclick', event => {
       console.log('yay, you right clicked!')
       // const eventXY = WktUtils.getXYFromEvent(event)
@@ -73,7 +89,7 @@ export class EquipmentBoundaryMapObjects extends Component {
     })
     this.mapObject.addListener('click', () => {
       console.log('yay! you clicked!')
-      // this.props.selectBoundary(objectId)
+      // this.props.selectBoundary(objectId)  
     })
   }
 
@@ -142,7 +158,7 @@ EquipmentBoundaryMapObjects.propTypes = {
 
 const mapStateToProps = state => ({
   //planId: state.plan.activePlan.id,
-  //transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
+  transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
   transactionFeatures: state.planEditor.features,
   //selectedBoundaryTypeId: state.mapLayers.selectedBoundaryType.id,
   //selectedFeatures: state.selection.planEditorFeatures,
@@ -156,6 +172,7 @@ const mapDispatchToProps = dispatch => ({
   //showContextMenuForEquipmentBoundary: (planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y) => {
   //  dispatch(PlanEditorActions.showContextMenuForEquipmentBoundary(planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y))
   //},
+  recalculateBoundary: vars => dispatch(PlanEditorActions.recalculateBoundary(vars)),
   selectBoundary: objectId => dispatch(SelectionActions.setPlanEditorFeatures([objectId]))
 })
 
