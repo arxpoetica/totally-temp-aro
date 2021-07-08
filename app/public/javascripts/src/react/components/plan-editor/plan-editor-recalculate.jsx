@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { connect } from 'react-redux'
 import PlanEditorActions from './plan-editor-actions'
 import Select from 'react-select'
+import Loader from '../common/Loader.jsx'
 import { selectStylesBlue } from '../../common/view-utils'
 import AroHttp from '../../common/aro-http'
 
@@ -9,6 +10,7 @@ const PlanEditorRecalculate = props => {
 
   const {
     transaction,
+    isCalculatingSubnets,
     selectedSubnetId,
     recalculateBoundary,
     recalculateSubnets,
@@ -54,18 +56,6 @@ const PlanEditorRecalculate = props => {
         {/* FIXME: only show this group when subnets have actually changed */}
         {selectedSubnetId &&
           <div className="group">
-
-            <button
-              type="button"
-              className="btn btn-outline-success"
-              onClick={() => recalculateBoundary({
-                transactionId: transaction.id,
-                subnetId: selectedSubnetId,
-              })}
-            >
-              Recalculate Boundary
-            </button>
-
             <button
               type="button"
               className="btn btn-outline-success"
@@ -76,7 +66,7 @@ const PlanEditorRecalculate = props => {
             >
               Recalculate Hubs & Terminals
             </button>
-
+            <Loader loading={isCalculatingSubnets} title="recalculating..."/>
           </div>
         }
 
@@ -103,11 +93,11 @@ const mapStateToProps = state => ({
   transaction: state.planEditor.transaction,
   subnets: state.planEditor.subnets,
   selectedSubnetId: state.planEditor.selectedSubnetId,
+  isCalculatingSubnets: state.planEditor.isCalculatingSubnets,
 })
 
 const mapDispatchToProps = dispatch => ({
   // discardTransaction: transactionId => dispatch(PlanEditorActions.discardTransaction(transactionId)),
-  recalculateBoundary: vars => dispatch(PlanEditorActions.recalculateBoundary(vars)),
   recalculateSubnets: vars => dispatch(PlanEditorActions.recalculateSubnets(vars)),
 })
 
