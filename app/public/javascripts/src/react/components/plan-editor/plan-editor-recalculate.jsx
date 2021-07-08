@@ -58,17 +58,6 @@ const PlanEditorRecalculate = props => {
             <button
               type="button"
               className="btn btn-outline-success"
-              onClick={() => recalculateBoundary({
-                transactionId: transaction.id,
-                subnetId: selectedSubnetId,
-              })}
-            >
-              Recalculate Boundary
-            </button>
-
-            <button
-              type="button"
-              className="btn btn-outline-success"
               onClick={() => recalculateSubnets({
                 transactionId: transaction.id,
                 subnetIds: [selectedSubnetId],
@@ -76,7 +65,7 @@ const PlanEditorRecalculate = props => {
             >
               Recalculate Hubs & Terminals
             </button>
-
+            
           </div>
         }
 
@@ -107,7 +96,6 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
   // discardTransaction: transactionId => dispatch(PlanEditorActions.discardTransaction(transactionId)),
-  recalculateBoundary: vars => dispatch(PlanEditorActions.recalculateBoundary(vars)),
   recalculateSubnets: vars => dispatch(PlanEditorActions.recalculateSubnets(vars)),
 })
 
