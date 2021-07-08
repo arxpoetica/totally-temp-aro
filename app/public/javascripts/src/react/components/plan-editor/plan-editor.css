@@ -38,8 +38,9 @@
 
 /* .plan-editor-buttons {} */
 .plan-editor-buttons .group {
+  position: relative;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* grid-template-columns: 1fr 1fr; */
   grid-gap: 10px;
   align-items: center;
   margin: 0 0 10px;
