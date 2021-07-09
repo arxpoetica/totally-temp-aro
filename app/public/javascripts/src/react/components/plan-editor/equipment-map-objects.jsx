@@ -28,22 +28,6 @@ export class EquipmentMapObjects extends Component {
     let idsToDelete = Object.keys(this.objectIdToMapObject)
     let featuresToCreate = []
     let idsToUpdate = []
-    /*
-    let subnetFeatures = {}
-    let allFeatureIds = []
-    if (this.props.selectedSubnet) { 
-      //allFeatureIds = this.props.selectedSubnet.children
-      subnetFeatures = this.props.selectedSubnet.children.reduce((dict, feature) => {
-        allFeatureIds.push(feature.id)
-        dict[feature.id] = feature
-        return dict
-      }, {})
-    }
-    // concatinate the two arrays using the spread op, 
-    //  make sure all elements are unique by making it a Set,
-    //  turn it back into an array using the spread op
-    allFeatureIds = [...new Set([...allFeatureIds, ...this.props.selectedFeatureIds])]
-    */
     
     this.props.allFeatureIds.forEach(objectId => {
       var index = idsToDelete.indexOf(objectId)
@@ -52,8 +36,7 @@ export class EquipmentMapObjects extends Component {
         idsToUpdate.push(objectId)
         idsToDelete.splice(index, 1)
       } else {
-        let feature = this.props.transactionFeatures[objectId] ? this.props.transactionFeatures[objectId].feature : this.props.subnetFeatures[objectId]
-        if (feature) featuresToCreate.push(feature)
+        if (this.props.subnetFeatures[objectId]) featuresToCreate.push(this.props.subnetFeatures[objectId].feature)
       }
     })
     idsToDelete.forEach(objectId => this.deleteMapObject(objectId))
@@ -68,24 +51,19 @@ export class EquipmentMapObjects extends Component {
     //const isEditable = !((feature.workflow_state_id & WorkflowState.LOCKED.id) ||
     //                      (feature.workflow_state_id & WorkflowState.INVALIDATED.id))
     
-    let objectId = feature.objectId || feature.id
+    let objectId = feature.objectId
     
-    // ToDo: this could use some refactoring
-    let isLocked = false
-    //if (this.props.subnets[objectId]) isLocked = this.props.subnets[objectId].subnetId.locked
     // ToDo: unhack this 
-    if (feature.networkNodeType === "central_office") isLocked = true
+    //let isLocked = false
+    //if (feature.networkNodeType === "central_office") isLocked = true
 
     const mapObject = new google.maps.Marker({
       objectId: objectId, // Not used by Google Maps
-      // note: service needs to change 
-      //  planEditor.subnets[###].children[#].point
-      //  planEditor.subnets[###].children[#].geometry
-      position: WktUtils.getGoogleMapLatLngFromWKTPoint(feature.geometry || feature.point), 
+      position: WktUtils.getGoogleMapLatLngFromWKTPoint(feature.geometry), 
       icon: {
         url: this.props.equipmentDefinitions[feature.networkNodeType].iconUrl
       },
-      draggable: !isLocked, // Allow dragging only if feature is not locked
+      draggable: !feature.isLocked, // Allow dragging only if feature is not locked
       clickable: true,
       map: this.props.googleMaps,
       zIndex: MAP_OBJECT_Z_INDEX
@@ -100,7 +78,7 @@ export class EquipmentMapObjects extends Component {
       this.props.showContextMenuForEquipment(mapObject.objectId, eventXY.x, eventXY.y)
     })
     mapObject.addListener('click', () => {
-      this.props.selectFeatureById(objectId)
+      this.props.selectEditFeatureById(objectId)
       //this.props.addSubnets([objectId])
       //this.props.setSelectedSubnetId(objectId)
     })
@@ -124,7 +102,7 @@ export class EquipmentMapObjects extends Component {
 
   highlightSelectedMarkers () {
     Object.keys(this.objectIdToMapObject).forEach(objectId => {
-      if (this.props.selectedFeatureIds.indexOf(objectId) >= 0) {
+      if (this.props.selectedEditFeatureIds.indexOf(objectId) >= 0) {
         // This marker is selected. Create a selection overlay if it does not exist.
         let icon = '/images/map_icons/aro/icon-selection-background.svg'
         if (objectId === this.props.selectedSubnetId) icon = '/images/map_icons/aro/icon-selection-background_B.svg'
@@ -160,29 +138,14 @@ export class EquipmentMapObjects extends Component {
     Object.keys(this.objectIdToMapObject).forEach(objectId => this.deleteMapObject(objectId))
   }
 }
-/*
-EquipmentMapObjects.propTypes = {
-  transactionId: PropTypes.number,
-  transactionFeatures: PropTypes.object,
-  equipmentDefinitions: PropTypes.object,
-  selectedBoundaryTypeId: PropTypes.number,
-  selectedFeatureIds: PropTypes.arrayOf(PropTypes.string),
-  googleMaps: PropTypes.object
-}
-*/
+
 const mapStateToProps = state => ({
-  //planId: state.plan.activePlan.id,
-  //transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
-  transactionFeatures: state.planEditor.features,
   equipmentDefinitions: state.mapLayers.networkEquipment.equipments,
-  //selectedBoundaryTypeId: state.mapLayers.selectedBoundaryType.id,
-  //selectedFeatureIds: state.selection.planEditorFeatures,
-  selectedFeatureIds: state.planEditor.selectedFeatureIds,
+  selectedEditFeatureIds: state.planEditor.selectedEditFeatureIds,
   googleMaps: state.map.googleMaps,
   selectedSubnetId: state.planEditor.selectedSubnetId,
-  //subnets: state.planEditor.subnets,
-  //allFeatureIds, subnetFeatures
-  ...PlanEditorSelectors.getSelectedIdsAndSubnetFeatures(state),
+  subnetFeatures: state.planEditor.subnetFeatures,
+  allFeatureIds: PlanEditorSelectors.getSelectedIds(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -191,8 +154,7 @@ const mapDispatchToProps = dispatch => ({
   showContextMenuForEquipment: (equipmentObjectId, x, y) => {
     dispatch(PlanEditorActions.showContextMenuForEquipment(equipmentObjectId, x, y))
   },
-  //selectFeatureById: objectId => dispatch(SelectionActions.setPlanEditorFeatures([objectId])),
-  selectFeatureById: objectId => dispatch(PlanEditorActions.selectFeaturesById([objectId])),
+  selectEditFeatureById: objectId => dispatch(PlanEditorActions.selectEditFeaturesById([objectId])),
   addSubnets: subnetIds => dispatch(PlanEditorActions.addSubnets(subnetIds)),
   setSelectedSubnetId: subnetId => dispatch(PlanEditorActions.setSelectedSubnetId(subnetId)),
 })
