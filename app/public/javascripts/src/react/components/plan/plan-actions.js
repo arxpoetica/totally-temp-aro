@@ -64,7 +64,7 @@ function loadPlanDataSelectionFromServer (planId) {
               id: dataTypeEntity.id,
               name: dataTypeEntity.name,
               description: dataTypeEntity.description,
-              minValue: dataTypeEntity.minValue,
+              minValue: dataTypeEntity.name === "equipment" ? 1 : dataTypeEntity.minValue,
               maxValue: dataTypeEntity.maxValue,
               uploadSupported: dataTypeEntity.uploadSupported,
               isMinValueSelectionValid: true,
