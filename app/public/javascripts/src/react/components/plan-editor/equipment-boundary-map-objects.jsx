@@ -65,13 +65,13 @@ export class EquipmentBoundaryMapObjects extends Component {
     this.setupListenersForMapObject(this.mapObject)
 
     this.mapObject.addListener('rightclick', event => {
-      console.log('yay, you right clicked!')
+      // console.log('yay, you right clicked!')
       // const eventXY = WktUtils.getXYFromEvent(event)
       // this.props.showContextMenuForEquipmentBoundary(this.props.transactionId, this.mapObject.objectId, eventXY.x, eventXY.y)
     })
     this.mapObject.addListener('click', () => {
-      console.log('yay! you clicked!')
-      // this.props.selectBoundary(objectId)
+      // console.log('yay! you clicked!')
+      // this.props.selectBoundary(objectId)  
     })
   }
 
@@ -96,6 +96,7 @@ export class EquipmentBoundaryMapObjects extends Component {
 
   setupListenersForMapObject (mapObject) {
     const self = this // to keep reference 
+    // TODO: check to make sure all boundaries are legit and concave/non-crossing
     mapObject.getPaths().forEach(function (path, index) {
       google.maps.event.addListener(path, 'insert_at', function () {
         self.modifyBoundaryShape(mapObject)
@@ -103,6 +104,7 @@ export class EquipmentBoundaryMapObjects extends Component {
       google.maps.event.addListener(path, 'remove_at', function () {
         self.modifyBoundaryShape(mapObject)
       })
+      // FIXME: make deleting vertices work
       google.maps.event.addListener(path, 'set_at', function () {
         if (!WktUtils.isClosedPath(path)) {
           // IMPORTANT to check if it is already a closed path, otherwise we will get into an infinite loop when trying to keep it closed
@@ -139,7 +141,7 @@ EquipmentBoundaryMapObjects.propTypes = {
 
 const mapStateToProps = state => ({
   //planId: state.plan.activePlan.id,
-  //transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
+  transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
   transactionFeatures: state.planEditor.features,
   //selectedBoundaryTypeId: state.mapLayers.selectedBoundaryType.id,
   //selectedFeatures: state.selection.planEditorFeatures,

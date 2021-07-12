@@ -489,10 +489,13 @@ function boundaryChange (subnetId, geometry) {
 
 function recalculateSubnets ({ transactionId, subnetIds }) {
   return dispatch => {
+    dispatch(setIsCalculatingSubnets(true))
     const recalcBody = { subnetIds }
     console.log(recalcBody)
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet-cmd/recalc`, recalcBody)
       .then(res => {
+        // TODO: handle errors
+        dispatch(setIsCalculatingSubnets(false))
         console.log(res)
         // dispatch({
         //   type: Actions.PLAN_EDITOR_RECALCULATE_SUBNETS,
