@@ -296,17 +296,17 @@ function setIsEnteringTransaction (isEnteringTransaction) {
 function moveFeature (featureId, coordinates) {
   return (dispatch, getState) => {
     const state = getState()
-    let subnetFeature = state.planEditor.subnetFeatures[featureId].feature
+    let subnetFeature = state.planEditor.subnetFeatures[featureId]
     subnetFeature = JSON.parse(JSON.stringify(subnetFeature))
-    let subnetId = state.planEditor.subnetFeatures[featureId].subnetId
+    let subnetId = subnetFeature.subnetId
     let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
     
-    subnetFeature.geometry.coordinates = coordinates
+    subnetFeature.feature.geometry.coordinates = coordinates
     const body = {
       commands: [{
         // `childId` is one of the children nodes of the subnets
         // service need to chagen this to "childNode"
-        childId: unparseSubnetFeature(subnetFeature),
+        childId: unparseSubnetFeature(subnetFeature.feature),
         subnetId: subnetId, // parent subnet id, don't add when `type: 'add'`
         type: 'update', // `add`, `update`, or `delete`
       }]
@@ -314,11 +314,11 @@ function moveFeature (featureId, coordinates) {
     // Do a PUT to send the equipment over to service
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
       .then(result => {
-        console.log(result)
+        //console.log(result)
         
         dispatch({
           type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
-          payload: [subnetFeature]
+          payload: {featureId: subnetFeature}
         })
       })
       .catch(err => console.error(err))

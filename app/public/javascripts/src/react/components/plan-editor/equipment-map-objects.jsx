@@ -63,7 +63,7 @@ export class EquipmentMapObjects extends Component {
       icon: {
         url: this.props.equipmentDefinitions[feature.networkNodeType].iconUrl
       },
-      draggable: !feature.isLocked, // Allow dragging only if feature is not locked
+      draggable: !feature.locked, // Allow dragging only if feature is not locked
       clickable: true,
       map: this.props.googleMaps,
       zIndex: MAP_OBJECT_Z_INDEX

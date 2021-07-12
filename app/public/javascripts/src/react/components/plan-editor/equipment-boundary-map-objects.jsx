@@ -105,6 +105,9 @@ export class EquipmentBoundaryMapObjects extends Component {
         self.modifyBoundaryShape(mapObject)
       })
       // FIXME: make deleting vertices work
+      // ToDo: avoid redundant first=last polygons
+      //  clear these when parsing from service 
+      //  and if needed, replace them when unparsing to send back to service
       google.maps.event.addListener(path, 'set_at', function () {
         if (!WktUtils.isClosedPath(path)) {
           // IMPORTANT to check if it is already a closed path, otherwise we will get into an infinite loop when trying to keep it closed
