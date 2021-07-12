@@ -1,0 +1,18 @@
+[
+  {
+    "dataType": "location",
+    "schemaReference": "urn:jsonschema:com:altvil:aro:service:feature:model:LocationFeature"
+  },
+  {
+    "dataType": "equipment",
+    "schemaReference": "urn:jsonschema:com:altvil:aro:service:feature:model:EquipmentFeature"
+  },
+  {
+    "dataType": "service_layer",
+    "schemaReference": "urn:jsonschema:com:altvil:aro:service:feature:model:ServiceAreaFeature"
+  },
+  {
+    "dataType": "equipment_boundary",
+    "schemaReference": "urn:jsonschema:com:altvil:aro:service:feature:model:EquipmentBoundaryFeature"
+  }
+]
