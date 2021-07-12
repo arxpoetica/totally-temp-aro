@@ -176,12 +176,14 @@ class StateViewMode {
             })
         }
 
-        if (libraryItems.every(libraryName => state.nameToServiceLayers[libraryName])){
-          var layerfilter = libraryItems.map(libraryName => `layer/id eq ${state.nameToServiceLayers[libraryName].id}`).join(' or ')
+        if (libraryItems.every(libraryName => state.nameToServiceLayers[libraryName])) {
+          const layerfilter = libraryItems.map(libraryName => `layer/id eq ${state.nameToServiceLayers[libraryName].id}`)
+          .join(' or ')
           filter = filter ? filter.concat(` and (${layerfilter})`) : `${layerfilter}`
         } else {
           getServiceLayersData()
-          .then(serviceLayersObject => libraryItems.map(libraryName => `layer/id eq ${serviceLayersObject[libraryName].id}`).join(' or '))
+          .then(serviceLayersObject => libraryItems.map(libraryName => `layer/id eq ${serviceLayersObject[libraryName].id}`)
+            .join(' or '))
           .then(layerText => {
             filter = filter ? filter.concat(` and (${layerText})`) : `${layerText}`
           })
