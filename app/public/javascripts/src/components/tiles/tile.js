@@ -435,7 +435,7 @@ class TileComponentController {
           this.state.mapFeaturesClickedEvent.next(hitFeatures)
         }
       } catch (error) {
-        console.error(err)
+        console.error(error)
       }
 
       try {
@@ -479,7 +479,7 @@ class TileComponentController {
           this.state.mapFeaturesSelectedEvent.next(hitFeatures)
         }
       } catch (error) {
-        console.error(err)
+        console.error(error)
       }
     })
 
