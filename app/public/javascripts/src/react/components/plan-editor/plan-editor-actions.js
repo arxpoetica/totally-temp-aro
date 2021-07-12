@@ -456,12 +456,11 @@ function setSelectedSubnetId (selectedSubnetId) {
 }
 
 function recalculateBoundary ({ transactionId, subnetId }) {
-  return dispatch => {
-
-    // FIXME: FIXME: FIXME: FIXME: FIXME: FIXME: FIXME: FIXME: FIXME: FIXME: FIXME: 
-    // hardcore fixme: need to actually attach map objects / boundaries to state
-    // this was 1,000,000% just to get it working quickly
-    const newPolygon = WktUtils.getWKTMultiPolygonFromGoogleMapPaths(window.TEMPORARY_MAP_BOUNDARY.getPaths())
+  return (dispatch, getState) => {
+    const state = getState()
+    //const transactionId = state.planEditor.transaction.id
+    if (!state.planEditor.subnets[subnetId]) return null // null? meh
+    const newPolygon = state.planEditor.subnets[subnetId].subnetBoundary.polygon
     const boundaryBody = {
       locked: true,
       polygon: newPolygon,
@@ -477,6 +476,14 @@ function recalculateBoundary ({ transactionId, subnetId }) {
         // })
       })
       .catch(err => console.error(err))
+  }
+}
+
+function boundaryChange (subnetId, geometry) {
+  // put debounce here
+  return {
+    type: Actions.PLAN_EDITOR_UPDATE_SUBNET_BOUNDARY,
+    payload: {subnetId, geometry},
   }
 }
 
@@ -638,5 +645,6 @@ export default {
   addSubnets,
   setSelectedSubnetId,
   recalculateBoundary,
+  boundaryChange,
   recalculateSubnets,
 }

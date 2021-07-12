@@ -25,7 +25,10 @@ class WktUtils {
     paths.forEach((path) => {
       var pathPoints = []
       path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
-      pathPoints.push(pathPoints[0]) // Close the polygon
+      if (JSON.stringify(pathPoints[0]) !== JSON.stringify(pathPoints[pathPoints.length-1])) {
+        console.log("not closed")
+        pathPoints.push(pathPoints[0]) // Close the polygon
+      }
       geometry.coordinates[0].push(pathPoints)
     })
     return geometry

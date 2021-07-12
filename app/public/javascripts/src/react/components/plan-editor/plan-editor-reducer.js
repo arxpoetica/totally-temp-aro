@@ -137,6 +137,24 @@ function addSubnets (state, updatedSubnets) {
   return { ...state, subnets: { ...state.subnets, ...updatedSubnets} }
 }
 
+function updateSubnetBoundary (state, subnetId, geometry) {
+  if (!state.subnets[subnetId]) return state
+  
+  return {
+    ...state, 
+    subnets: {
+      ...state.subnets, 
+      [subnetId]: {
+        ...state.subnets[subnetId],
+        subnetBoundary: {
+          ...state.subnets[subnetId].subnetBoundary,
+          polygon: geometry,
+        }
+      }
+    }
+  }
+}
+
 function updateSubnetFeatures (state, updatedSubnetFeatures) {
   return { ...state, subnetFeatures: { ...state.subnetFeatures, ...updatedSubnetFeatures } }
 }
@@ -218,6 +236,9 @@ function planEditorReducer (state = defaultState, action) {
 
     case Actions.PLAN_EDITOR_ADD_SUBNETS:
       return addSubnets(state, action.payload)
+
+    case Actions.PLAN_EDITOR_UPDATE_SUBNET_BOUNDARY:
+      return updateSubnetBoundary(state, action.payload.subnetId, action.payload.geometry)
 
     case Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES:
       return updateSubnetFeatures(state, action.payload)
