@@ -162,7 +162,7 @@ class StateViewMode {
       if (selectedServiceLayerLibraries) libraryItems = selectedServiceLayerLibraries.map(selectedLibraryItem => selectedLibraryItem.name)
       if (libraryItems.length > 0) {
         // Filter using selected serviceLayer id
-        function getServiceLayersData(){
+        function getServiceLayersData() {
           return $http.get('/service/odata/ServiceLayer?$select=id,name,description')
             .then((response) => {
               let nameToServiceLayers = {}
@@ -177,13 +177,15 @@ class StateViewMode {
         }
 
         if (libraryItems.every(libraryName => state.nameToServiceLayers[libraryName])) {
-          const layerfilter = libraryItems.map(libraryName => `layer/id eq ${state.nameToServiceLayers[libraryName].id}`)
-          .join(' or ')
+          const layerfilter = libraryItems.map(libraryName => {
+            return `layer/id eq ${state.nameToServiceLayers[libraryName].id}`
+          }).join(' or ')
           filter = filter ? filter.concat(` and (${layerfilter})`) : `${layerfilter}`
         } else {
           getServiceLayersData()
-          .then(serviceLayersObject => libraryItems.map(libraryName => `layer/id eq ${serviceLayersObject[libraryName].id}`)
-            .join(' or '))
+          .then(serviceLayersObject => libraryItems.map(libraryName => {
+            return `layer/id eq ${serviceLayersObject[libraryName].id}`
+          }).join(' or '))
           .then(layerText => {
             filter = filter ? filter.concat(` and (${layerText})`) : `${layerText}`
           })
