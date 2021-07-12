@@ -2,41 +2,12 @@ var fs = require('fs')
 var path = require('path')
 var rimraf = require('rimraf')
 var Handlebars = require('handlebars')
-const fetch = require('cross-fetch')
-var config = require('../../../../../helpers/config')
 
 class ClassGenerator {
-  constructor () {
-  }
-
-  static apiGet (apiUrl) {
-    return (
-      fetch(`${config.aro_service_url}${apiUrl}`, {})
-      .then(response => {
-        if (response.status >= 200 && response.status <= 299) {
-          return response.json()
-        } else {
-          return Promise.reject(new Error(`${response.status} from ${response.url}`))
-        }
-      })
-    )
-  }
-
-  static dynamicallyGenerateSourceCode () {
-    this.apiGet(`/v1/schema/display-properties`)
-    .then(classMetas => {
-      this.apiGet(`/v1/schema/json`)
-      .then(typeDefinitions => {
-        this.apiGet(`/v1/schema/type-mapping`)
-        .then(dataTypeToUrnList => {
-          this.generateSourceCode(classMetas, typeDefinitions, dataTypeToUrnList)
-        })
-      })
-    })
-  }
+  constructor () {}
 
   // The main function that generates the source code for our class definitions
-  static generateSourceCode (classMetas, typeDefinitions, dataTypeToUrnList) {
+  static generateSourceCode () {
     // Register Handlebars helpers - used to compile class definition into source code
     this.registerHandlebarsHelpers(Handlebars)
     // Hold a list of class names to compiled strings
@@ -44,12 +15,16 @@ class ClassGenerator {
     var typeToSourceCode = {}
     var handlebarsCompiler = Handlebars.compile(templateSource)
     // Create a map of type URN to its display properties
+    // TODO: use GET '/v1/schema/attributes' endpoint in the app, not in build
+    var classMetas = require('./typesmeta.json')
     var typeToDisplayProperties = {}
     var typeToOrderedPropertyNames = {}
     classMetas.forEach((classMeta) => {
       typeToDisplayProperties[classMeta.schemaReference] = classMeta.displayProperties.properties || []
       typeToOrderedPropertyNames[classMeta.schemaReference] = classMeta.orderedPropertyNames || []
     })
+    // TODO: use GET '/v1/schema/json' endpoint in the app, not in build
+    var typeDefinitions = require('./types.json')
     typeDefinitions.forEach((typeDefinition) => this.buildTypeSourceCode(typeDefinition, handlebarsCompiler, typeToSourceCode, typeToDisplayProperties, typeToOrderedPropertyNames))
 
     var referencedTypes = new Set()
@@ -67,6 +42,8 @@ class ClassGenerator {
 
         // Build the AroFeatureFactory
         var templateFactory = Handlebars.compile(fs.readFileSync('./aro-feature-factory.hbs').toString())
+        // TODO: use GET '/v1/schema/type-mapping' endpoint in the app, not in build
+        var dataTypeToUrnList = require('./dataTypeToUrn.json')
         const fileName = path.join(__dirname, `../dist/AroFeatureFactory.js`)
         fs.writeFileSync(fileName, templateFactory(dataTypeToUrnList))
       })
@@ -336,5 +313,4 @@ class ClassGenerator {
   }
 }
 
-//ClassGenerator.generateSourceCode()
-ClassGenerator.dynamicallyGenerateSourceCode()
+ClassGenerator.generateSourceCode()

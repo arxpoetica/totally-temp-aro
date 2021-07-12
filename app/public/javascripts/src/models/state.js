@@ -484,10 +484,16 @@ class State {
       // set all mapFeatures in redux
       if (service.selectedDisplayMode.getValue() == service.displayModes.VIEW) {
         service.setMapFeatures(options)
+        // For tracking when map clicked by the user.
+        service.setIsMapClicked(true)
       }
 
       if (service.selectedDisplayMode.getValue() == service.displayModes.EDIT_PLAN) {
-        service.selectPlanEditFeatures(options.equipmentFeatures)
+        let featuresIds = []
+        options.equipmentFeatures.forEach(feature => {
+          featuresIds.push(feature.object_id)
+        })
+        service.selectPlanEditFeaturesById(featuresIds)
       }
 
       // ToDo: this check may need to move into REACT
@@ -1710,8 +1716,6 @@ class State {
                 hideProgressBar: true,
                 closeOnClick: false,
                 pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
                 onClick: () => service.showReleaseNotes(),
               })
           }
@@ -1920,7 +1924,8 @@ class State {
       setIsReportMode: reportMode => dispatch(MapReportsActions.setIsReportMode(reportMode)),
       setShowGlobalSettings: () => dispatch(GlobalSettingsActions.setShowGlobalSettings(true)),
       setCurrentViewToReleaseNotes: (viewString) => dispatch(GlobalSettingsActions.setCurrentViewToReleaseNotes(viewString)),
-      selectPlanEditFeatures: (features) => dispatch(PlanEditorActions.selectFeatures(features)),
+      setIsMapClicked: mapFeatures => dispatch(SelectionActions.setIsMapClicked(mapFeatures)),
+      selectPlanEditFeaturesById: (features) => dispatch(PlanEditorActions.selectFeaturesById(features)),
     }
   }
 }

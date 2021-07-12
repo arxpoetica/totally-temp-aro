@@ -144,6 +144,7 @@ function setRoadSegments(roadSegments) {
   }
 }
 
+// DEPRICATED
 function setPlanEditorFeatures (planEditorFeatures) {
   return {
     type: Actions.SELECTION_SET_PLAN_EDITOR_FEATURES,
@@ -169,6 +170,13 @@ function setMapSelection (mapSelection) {
   }
 }
 
+function setIsMapClicked (isMapClicked) {
+  return {
+    type: Actions.SELECTION_SET_IS_MAP_CLICKED,
+    payload: isMapClicked
+  }
+}
+
 export default {
   setActiveSelectionMode,
   clearAllPlanTargets,
@@ -181,4 +189,5 @@ export default {
   setRoadSegments,
   cloneSelection,
   setMapSelection,
+  setIsMapClicked,
 }

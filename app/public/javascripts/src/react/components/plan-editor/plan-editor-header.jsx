@@ -3,32 +3,73 @@ import { connect } from 'react-redux'
 
 const PlanEditorHeader = props => {
 
+  const {
+    selectedFeatureId,
+    equipments,
+    features,
+  } = props
+
+  const isSelected = props.isSelected || false
+
+  const { feature } = features[selectedFeatureId]
+  const equipment = equipments[feature.networkNodeType]
+  const { coordinates } = feature.geometry
+
   // const [..., ...] = useState()
   // const handleChange = change => {}
 
-  // FIXME: const { ARO_CLIENT } = configuration
-  const ARO_CLIENT = 'aro'
+  function onClick (event) {
+    //event.preventDefault()
+    event.stopPropagation()
+    if (props.onClick) {
+      props.onClick(event, selectedFeatureId)
+    }
+  }
+
+  function onClose (event) {
+    //event.preventDefault()
+    event.stopPropagation()
+    if (props.onClose) {
+      props.onClose(event, selectedFeatureId)
+    }
+  }
 
   return (
     <>
-      <div className="plan-editor-header">
-        {/* above was ng-if $ctrl.getSelectedNetworkConfig() */}
 
-        {/* was: $ctrl.getSelectedNetworkConfig().iconUrl */}
-        {/* <img src={`/images/map_icons/${ARO_CLIENT}/fiber_distribution_terminal.png`} style="vertical-align: middle; padding-right: 10px;"/> */}
-        {/* was $ctrl.getSelectedNetworkConfig().label */}
-        <h2>Fiber Distribution Terminal (FDT)</h2>
-        <div className="subinfo">
-          {/* was $ctrl.selectedMapObjectLat */}
-          <div className="item">lat: 47.48186436198969</div>
-          {/* was $ctrl.selectedMapObjectLng */}
-          <div className="item">long: -118.25462573755699</div>
+      {/* <div className="image-sample">
+        {equipments && Object.entries(equipments).map(([key, definition]) => 
+          <img key={key} src={definition.iconUrl} alt={definition.label} />
+        )}
+      </div> */}
+
+      <div className={`plan-editor-header 
+          ${isSelected ? "plan-editor-header-selected" : ""}
+          ${props.onClick ? "plan-editor-use-pointer" : ""}
+        `}
+        onClick={event => onClick(event)}
+      >
+        <div className="info">
+          <img src={equipment.iconUrl} alt={equipment.label}/>
+          <h2>{equipment.label}</h2>
         </div>
+        <div className="subinfo">
+          <div className="item">lat: {coordinates[1]}</div>
+          <div className="item">long: {coordinates[0]}</div>
+        </div>
+        {props.onClose 
+          ? <button type="button" 
+              className="btn btn-sm plan-editor-header-close" 
+              aria-label="Close"
+              onClick={event => onClose(event)}
+            ><i className="fa fa-times"></i></button>
+          : null
+        }
       </div>
 
       {/* see equipment properties editor for former logic / binding / events */}
-      <div className="plan-editor-header">
-        {/* <img src={} style="vertical-align:middle; padding-right: 10px"/> */}
+      {/* <div className="plan-editor-header">
+        <img src={} style="vertical-align:middle; padding-right: 10px"/>
         <h2>Fiber Distribution Terminal (FDT)</h2>
         <div className="subinfo">
           <label className="item">
@@ -40,11 +81,14 @@ const PlanEditorHeader = props => {
             <input type="number" defaultValue="-118.25462573755699" className="form-control form-control-sm" step="0.000001"/>
           </label>
         </div>
-      </div>
+      </div> */}
     </>
   )
 }
 
-const mapStateToProps = state => ({})
+const mapStateToProps = state => ({
+  equipments: state.mapLayers.networkEquipment.equipments,
+  features: state.planEditor.features,
+})
 const mapDispatchToProps = dispatch => ({})
 export default connect(mapStateToProps, mapDispatchToProps)(PlanEditorHeader)

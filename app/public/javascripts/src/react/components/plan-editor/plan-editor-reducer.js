@@ -4,7 +4,7 @@ const defaultState = {
   isPlanEditorActive: false,
   transaction: null,
   features: {},
-  //selectedFeatureIds: [],
+  selectedFeatureIds: [],
   isDrawingBoundaryFor: null,
   isCalculatingSubnets: false,
   isCreatingObject: false,
@@ -12,7 +12,10 @@ const defaultState = {
   isDraggingFeatureForDrop: false,
   isEditingFeatureProperties: false,
   isEnteringTransaction: false,
-  isCommittingTransaction: false
+  isCommittingTransaction: false,
+  subnets: {},
+  subnetFeatures: {},
+  selectedSubnetId: '',
 }
 
 function setTransaction (state, transaction) {
@@ -26,7 +29,7 @@ function clearTransaction () {
   return JSON.parse(JSON.stringify(defaultState))
 }
 
-function addTransactionFeature (state, equipments) {
+function addTransactionFeatures (state, equipments) {
   var newFeatures = { ...state.features }
   equipments.forEach(equipment => {
     newFeatures[equipment.feature.objectId] = equipment
@@ -52,12 +55,18 @@ function modifyTransactionFeatures (state, newEquipments) {
     if (newFeatures[equipment.feature.objectId]) {
       newFeatures[equipment.feature.objectId] = equipment
     } else {
+      // not really sure why this check is needed
+      //  I think we can combine the add and modify actions 
       throw new Error(`Trying to modify equipment with objectId ${equipment.feature.objectId}, but it is not in the existing list of equipments`)
     }
   })
   return { ...state,
     features: newFeatures
   }
+}
+
+function clearTransactionFeatures (state) {
+  return { ...state, features: {}, selectedFeatureIds: [] }
 }
 
 function setIsDrawingBoundaryFor (state, isDrawingBoundaryFor) {
@@ -107,13 +116,76 @@ function setIsEnteringTransaction (state, isEnteringTransaction) {
     isEnteringTransaction: isEnteringTransaction
   }
 }
-/*
+
 function setSelectedFeatures (state, selectedFeatureIds) {
   return { ...state,
     selectedFeatureIds: selectedFeatureIds
   }
 }
-*/
+
+function deselectFeature (state, objectId) {
+  let newSelectedFeatureIds = [...state.selectedFeatureIds]
+  let i = newSelectedFeatureIds.indexOf(objectId)
+  if (i < 0) return state
+  newSelectedFeatureIds.splice(i, 1)
+  return { ...state,
+    selectedFeatureIds: newSelectedFeatureIds
+  }
+}
+
+function addSubnets (state, subnets) {
+  let updatedSubnets = { ...state.subnets }
+  let subnetFeatures = { ...state.subnetFeatures }
+  for (const subnet of subnets) {
+    let subnetId = subnet.subnetId.id
+    updatedSubnets[subnetId] = subnet
+    subnet.children.forEach(feature => {
+      subnetFeatures[feature.id] = {
+        feature: feature,
+        subnetId: subnetId,
+      }
+    })
+  }
+  return { ...state, subnets: updatedSubnets, subnetFeatures: subnetFeatures }
+}
+
+function updateSubnetFeatures (state, subnetFeatureList) {
+  let subnetFeatures = { ...state.subnetFeatures }
+  
+  subnetFeatureList.forEach(feature => {
+    if (subnetFeatures[feature.id]){
+      subnetFeatures[feature.id].feature = feature
+    }
+  })
+  
+  return { ...state, subnetFeatures: subnetFeatures }
+}
+
+function removeSubnets (state, subnets) {
+  const updatedSubnets = { ...state.subnets }
+  for (const subnet of subnets) {
+    delete updatedSubnets[subnet.subnetId.id]
+    // ToDo: remove children from subnetFeatures
+  }
+  return { ...state, subnets: updatedSubnets }
+}
+
+function clearSubnets (state) {
+  return { ...state, subnets: {}, selectedSubnetId: '', subnetFeatures: {} }
+}
+
+function setSelectedSubnetId (state, selectedSubnetId) {
+  return { ...state, selectedSubnetId }
+}
+
+// TODO: this needs to be done
+function recalculateBoundary (state, to_be_determined) {
+  return { ...state, to_be_determined }
+}
+
+function recalculateSubnets (state, to_be_determined) {
+  return { ...state, to_be_determined }
+}
 
 function planEditorReducer (state = defaultState, action) {
   switch (action.type) {
@@ -124,13 +196,16 @@ function planEditorReducer (state = defaultState, action) {
       return setTransaction(state, action.payload)
 
     case Actions.PLAN_EDITOR_ADD_FEATURES:
-      return addTransactionFeature(state, action.payload)
+      return addTransactionFeatures(state, action.payload)
 
     case Actions.PLAN_EDITOR_DELETE_TRANSACTION_FEATURE:
       return deleteTransactionFeature(state, action.payload)
 
     case Actions.PLAN_EDITOR_MODIFY_FEATURES:
       return modifyTransactionFeatures(state, action.payload)
+
+    case Actions.PLAN_EDITOR_CLEAR_FEATURES:
+      return clearTransactionFeatures(state)
 
     case Actions.PLAN_EDITOR_SET_IS_CALCULATING_SUBNETS:
       return setIsCalculatingSubnets(state, action.payload)
@@ -156,8 +231,32 @@ function planEditorReducer (state = defaultState, action) {
     case Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION:
       return setIsEnteringTransaction(state, action.payload)
 
-    //case Actions.PLAN_EDITOR_SET_SELECTED_FEATURES:
-    //  return setSelectedFeatures(state, action.payload)
+    case Actions.PLAN_EDITOR_SET_SELECTED_FEATURES:
+      return setSelectedFeatures(state, action.payload)
+
+    case Actions.PLAN_EDITOR_SET_DESELECT_FEATURE:
+      return deselectFeature(state, action.payload)
+
+    case Actions.PLAN_EDITOR_ADD_SUBNETS:
+      return addSubnets(state, action.payload)
+
+    case Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES:
+      return updateSubnetFeatures(state, action.payload)
+
+    case Actions.PLAN_EDITOR_REMOVE_SUBNETS:
+      return removeSubnets(state, action.payload)
+
+    case Actions.PLAN_EDITOR_CLEAR_SUBNETS:
+      return clearSubnets(state)
+
+    case Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID:
+      return setSelectedSubnetId(state, action.payload)
+
+    case Actions.PLAN_EDITOR_RECALCULATE_BOUNDARY:
+      return recalculateBoundary(state, action.payload)
+
+    case Actions.PLAN_EDITOR_RECALCULATE_SUBNETS:
+      return recalculateSubnets(state, action.payload)
 
     default:
       return state

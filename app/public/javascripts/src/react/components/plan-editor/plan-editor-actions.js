@@ -5,7 +5,9 @@ import AroHttp from '../../common/aro-http'
 import MenuItemFeature from '../context-menu/menu-item-feature'
 import MenuItemAction from '../context-menu/menu-item-action'
 import ContextMenuActions from '../context-menu/actions'
-import SelectionActions from '../selection/selection-actions'
+//import SelectionActions from '../selection/selection-actions'
+import { batch } from 'react-redux'
+import WktUtils from '../../../shared-utils/wkt-utils'
 
 function resumeOrCreateTransaction (planId, userId) {
   return dispatch => {
@@ -22,6 +24,7 @@ function resumeOrCreateTransaction (planId, userId) {
         const transactionId = result.data.id
         return Promise.all([
           AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/equipment`),
+          // depricated? 
           AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/equipment_boundary`)
         ])
       })
@@ -47,13 +50,26 @@ function clearTransaction () {
   return dispatch => {
     dispatch({ type: Actions.PLAN_EDITOR_CLEAR_TRANSACTION })
     dispatch({
-      type: Actions.SELECTION_SET_PLAN_EDITOR_FEATURES,
+      type: Actions.SELECTION_SET_PLAN_EDITOR_FEATURES, // DEPRICATED
       payload: []
     })
-    dispatch(setIsCommittingTransaction(false))
+    batch(() => {
+      dispatch(setIsCommittingTransaction(false))
+      dispatch({
+        type: Actions.PLAN_EDITOR_CLEAR_SUBNETS,
+      })
+      dispatch({
+        type: Actions.PLAN_EDITOR_CLEAR_FEATURES,
+      })
+      dispatch({
+        type: Actions.TOOL_BAR_SET_SELECTED_DISPLAY_MODE,
+        payload: 'VIEW', // ToDo: globalize the constants in tool-bar including displayModes
+      })
+    })
   }
 }
 
+// ToDo: there's only one transaction don't require the ID
 function commitTransaction (transactionId) {
   return dispatch => {
     dispatch(setIsCommittingTransaction(true))
@@ -66,6 +82,7 @@ function commitTransaction (transactionId) {
   }
 }
 
+// ToDo: there's only one transaction don't require the ID
 function discardTransaction (transactionId) {
   return dispatch => {
     dispatch(setIsCommittingTransaction(true))
@@ -78,8 +95,10 @@ function discardTransaction (transactionId) {
   }
 }
 
-function createFeature (featureType, transactionId, feature) {
-  return dispatch => {
+function createFeature (featureType, feature) {
+  return (dispatch, getState) => {
+    const state = getState()
+    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
     // Do a POST to send the equipment over to service
     AroHttp.post(`/service/plan-transactions/${transactionId}/modified-features/${featureType}`, feature)
       .then(result => {
@@ -96,16 +115,25 @@ function createFeature (featureType, transactionId, feature) {
   }
 }
 
-function modifyFeature (featureType, transactionId, feature) {
+function modifyFeature (featureType, feature) {
   // ToDo: this causes an error if you edit a new feature that has yet to be sent to service
   //  everything still functions but it's bad form
-  return dispatch => {
+  // ToDo: figure out POST / PUT perhaps one function 
+  //  that determines weather to add (the potentially "modified") feature
+  //  or modifiy the feature if it's already been added to the transaction
+  //  basically we need service to overwrite or if not present, make 
+  return (dispatch, getState) => {
+    const state = getState()
+    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
     // Do a PUT to send the equipment over to service
     return AroHttp.put(`/service/plan-transactions/${transactionId}/modified-features/${featureType}`, feature.feature)
       .then(result => {
         // Decorate the created feature with some default values
+        let crudAction = feature.crudAction || 'read'
+        if (crudAction === 'read') crudAction = 'update'
         const newFeature = {
           ...feature,
+          crudAction: crudAction,
           feature: result.data
         }
         dispatch({
@@ -118,6 +146,7 @@ function modifyFeature (featureType, transactionId, feature) {
   }
 }
 
+// ToDo: there's only one transaction don't require the ID
 function deleteTransactionFeature (transactionId, featureType, transactionFeatureId) {
   return dispatch => {
     return AroHttp.delete(`/service/plan-transactions/${transactionId}/modified-features/${featureType}/${transactionFeatureId}`)
@@ -136,8 +165,13 @@ function addTransactionFeatures (features) {
   }
 }
 
-function showContextMenuForEquipment (planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y) {
-  return dispatch => {
+function showContextMenuForEquipment (equipmentObjectId, x, y) {
+  return (dispatch, getState) => {
+    const state = getState()
+    const planId = state.plan.activePlan.id
+    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+    const selectedBoundaryTypeId = state.mapLayers.selectedBoundaryType.id
+
     // Get details on the boundary (if any) for this equipment
     AroHttp.get(`/boundary/for_network_node/${planId}/${equipmentObjectId}/${selectedBoundaryTypeId}`)
       .then(result => {
@@ -156,8 +190,11 @@ function showContextMenuForEquipment (planId, transactionId, selectedBoundaryTyp
   }
 }
 
-function showContextMenuForEquipmentBoundary (transactionId, equipmentObjectId, x, y) {
-  return dispatch => {
+function showContextMenuForEquipmentBoundary (equipmentObjectId, x, y) {
+  return (dispatch, getState) => {
+    const state = getState()
+    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+    
     var menuActions = []
     menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteTransactionFeature', transactionId, 'equipment_boundary', equipmentObjectId))
     const menuItemFeature = new MenuItemFeature('BOUNDARY', 'Equipment Boundary', menuActions)
@@ -166,7 +203,7 @@ function showContextMenuForEquipmentBoundary (transactionId, equipmentObjectId, 
     dispatch(ContextMenuActions.showContextMenu(x, y))
   }
 }
-
+/*
 function viewFeatureProperties (featureType, planId, objectId, transactionFeatures) {
   return dispatch => {
     var equipmentPromise = null
@@ -178,7 +215,7 @@ function viewFeatureProperties (featureType, planId, objectId, transactionFeatur
           // Decorate the equipment with some default values. Technically this is not yet "created" equipment
           // but will have to do for now.
           const createdEquipment = {
-            crudAction: 'create',
+            crudAction: 'read',
             deleted: false,
             valid: true,
             feature: result.data
@@ -192,7 +229,7 @@ function viewFeatureProperties (featureType, planId, objectId, transactionFeatur
       .catch(err => console.error(err))
   }
 }
-
+*/
 function startDrawingBoundaryFor (equipmentObjectId) {
   return {
     type: Actions.PLAN_EDITOR_SET_IS_DRAWING_BOUNDARY_FOR,
@@ -256,66 +293,243 @@ function setIsEnteringTransaction (isEnteringTransaction) {
   }
 }
 
-// --- experimental --- //
+function moveFeature (featureId, coordinates) {
+  return (dispatch, getState) => {
+    const state = getState()
+    dispatch(readFeatures([featureId]))
+      .then(retrievedIds => {
+        const state = getState()
+        let feature = state.planEditor.features[featureId]
+        feature = JSON.parse(JSON.stringify(feature))
+        feature.feature.geometry.coordinates = coordinates
+        //let dataType = feature.feature.dataType || "equipment"
+        //dispatch(modifyFeature(dataType, feature))
 
-function addFeatures (features) {
+        // change the featurein the feature list 
+        let crudAction = feature.crudAction || 'read'
+        if (crudAction === 'read') crudAction = 'update'
+        const newFeature = {
+          ...feature,
+          crudAction: crudAction,
+        }
+        dispatch({
+          type: Actions.PLAN_EDITOR_MODIFY_FEATURES,
+          payload: [newFeature]
+        })
+
+
+        if (state.planEditor.subnetFeatures[featureId]) {
+          let subnetFeature = state.planEditor.subnetFeatures[featureId].feature
+          let subnetId = state.planEditor.subnetFeatures[featureId].subnetId
+          let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+          subnetFeature = JSON.parse(JSON.stringify(subnetFeature))
+          subnetFeature.point.coordinates = coordinates
+          const body = {
+            commands: [{
+              // `childId` is one of the children nodes of the subnets
+              childId: subnetFeature,
+              subnetId: subnetId, // parent subnet id, don't add when `type: 'add'`
+              type: 'update', // `add`, `update`, or `delete`
+            }]
+          }
+          // Do a PUT to send the equipment over to service
+          return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
+            .then(result => {
+              console.log(result)
+              
+              dispatch({
+                type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
+                payload: [subnetFeature]
+              })
+            })
+            .catch(err => console.error(err))
+
+        }
+
+      })
+  }
+}
+
+function readFeatures (featureIds) {
   return (dispatch, getState) => {
     const state = getState()
     let featuresToGet = []
-    features.forEach(feature => {
+    featureIds.forEach(featureId => {
       // should action creators be aware of state schema?
-      if (!state.planEditor.features[feature.object_id]) {
-        featuresToGet.push(feature)
+      if (!state.planEditor.features[featureId]) {
+        featuresToGet.push(featureId)
       }
     })
     let retrievedIds = []
     let promises = [Promise.resolve()]
-    featuresToGet.forEach(feature => {
-      let baseDataType = feature._base_data_type || 'equipment'
+    let retrievedFeatures = []
+    featuresToGet.forEach(featureId => {
       promises.push(
-        AroHttp.get(`/service/plan-feature/${state.plan.activePlan.id}/${baseDataType}/${feature.object_id}`)
+        AroHttp.get(`/service/plan-feature/${state.plan.activePlan.id}/equipment/${featureId}`)
           .then(result => {
             if (result.data) {
               // Decorate the equipment with some default values. Technically this is not yet "created" equipment
               // but will have to do for now.
-              retrievedIds.push(feature.object_id)
-              const createdEquipment = {
-                feature: result.data,
-                meta: {
-                  mapId: null,
-                  isVisible: true,
-                  //hasChanged: false,
-                }
-              }
-              return dispatch(addTransactionFeatures([createdEquipment]))
+              retrievedIds.push(featureId)
+              retrievedFeatures.push({
+                crudAction: 'read',
+                deleted: false,
+                valid: true,
+                feature: result.data
+              })
+              //return dispatch(addTransactionFeatures([createdEquipment]))
             }
           })
           .catch(err => console.error(err))
       )
     })
     return Promise.all(promises)
-      .then(() => Promise.resolve(retrievedIds))
+      .then(() => {
+        return dispatch(addTransactionFeatures(retrievedFeatures))
+      })
+      .then(() => {
+        Promise.resolve(retrievedIds)
+      })
   }
 }
 
-function selectFeatures (features) {
+function selectFeaturesById (featureIds) {
   return (dispatch, getState) => {
-    dispatch(addFeatures(features))
+    dispatch(readFeatures(featureIds))
       .then(retrievedIds => {
         // we should have all of our features in state at this point (all valid features that is)
         let state = getState()
         let validFeatures = []
-        features.forEach(feature => {
-          if (state.planEditor.features[feature.object_id]) validFeatures.push(feature.object_id)
+        let subnetFeatures = []
+        featureIds.forEach(featureId => {
+          if (state.planEditor.features[featureId]) { 
+            validFeatures.push(featureId) 
+            let networkNodeType = state.planEditor.features[featureId].feature.networkNodeType
+            if (networkNodeType === "central_office"
+              || networkNodeType === "fiber_distribution_hub"
+            ) {
+              subnetFeatures.push(featureId)
+            }
+          }
         })
-        /*
-        dispatch({
-          type: Actions.PLAN_EDITOR_SET_SELECTED_FEATURES, 
-          payload: validFeatures,
+        batch(() => {
+          dispatch({
+            type: Actions.PLAN_EDITOR_SET_SELECTED_FEATURES, 
+            payload: validFeatures,
+          })
+          // later we may highlight more than one subnet
+          dispatch(setSelectedSubnetId(subnetFeatures[0]))
         })
-        */
-        dispatch(SelectionActions.setPlanEditorFeatures(validFeatures))
       })
+  }
+}
+
+function deselectFeatureById (objectId) {
+  return {
+    type: Actions.PLAN_EDITOR_SET_DESELECT_FEATURE,
+    payload: objectId,
+  }
+}
+
+function addSubnets (subnetIds) {
+  return (dispatch, getState) => {
+
+    const { transaction, subnets: cachedSubnets } = getState().planEditor
+
+    // this little dance only fetches uncached subnets
+    const cachedSubnetIds = Object.keys(cachedSubnets)
+    const uncachedSubnetIds = subnetIds.filter(id => !cachedSubnetIds.includes(id))
+
+    const subnetApiPromises = uncachedSubnetIds.map(subnetId => {
+      return AroHttp.get(`/service/plan-transaction/${transaction.id}/subnet/${subnetId}`)
+    })
+    // ToDo: need to refactor subnet props
+    //  planEditor.subnets[###].children[#].point to
+    //  planEditor.subnets[###].children[#].geometry
+    //  planEditor.subnets[###].children[#].id to
+    //  planEditor.subnets[###].children[#].objectId
+    return Promise.all(subnetApiPromises)
+      .then(subnetResults => {
+        if (subnetResults.length) {
+          dispatch({
+            type: Actions.PLAN_EDITOR_ADD_SUBNETS,
+            payload: subnetResults.map(result => result.data),
+          })
+        }
+      })
+      .catch(err => console.error(err))
+  }
+}
+
+function setSelectedSubnetId (selectedSubnetId) {
+  return (dispatch) => {
+    if (!selectedSubnetId) {
+      dispatch({
+        type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
+        payload: '',
+      })
+    } else {
+      batch(() => {
+        dispatch(addSubnets([selectedSubnetId]))
+          .then( () => {
+            dispatch({
+              type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
+              payload: selectedSubnetId,
+            })
+          }).catch(err => {
+            console.error(err)
+            dispatch({
+              type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
+              payload: '',
+            })
+          })
+
+      })
+    }
+  }
+}
+
+function recalculateBoundary ({ transactionId, subnetId }) {
+  return dispatch => {
+
+    // FIXME: FIXME: FIXME: FIXME: FIXME: FIXME: FIXME: FIXME: FIXME: FIXME: FIXME: 
+    // hardcore fixme: need to actually attach map objects / boundaries to state
+    // this was 1,000,000% just to get it working quickly
+    const newPolygon = WktUtils.getWKTMultiPolygonFromGoogleMapPaths(window.TEMPORARY_MAP_BOUNDARY.getPaths())
+    const boundaryBody = {
+      locked: true,
+      polygon: newPolygon,
+    }
+
+    return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet/${subnetId}/boundary`, boundaryBody)
+      .then(res => {
+        console.log(res)
+        // debugger
+        // dispatch({
+        //   type: Actions.PLAN_EDITOR_RECALCULATE_BOUNDARY,
+        //   payload: subnetResults.map(result => result.data),
+        // })
+      })
+      .catch(err => console.error(err))
+  }
+}
+
+function recalculateSubnets ({ transactionId, subnetIds }) {
+  return dispatch => {
+    dispatch(setIsCalculatingSubnets(true))
+    const recalcBody = { subnetIds }
+    console.log(recalcBody)
+    return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet-cmd/recalc`, recalcBody)
+      .then(res => {
+        // TODO: handle errors
+        dispatch(setIsCalculatingSubnets(false))
+        console.log(res)
+        // dispatch({
+        //   type: Actions.PLAN_EDITOR_RECALCULATE_SUBNETS,
+        //   payload: subnetResults.map(result => result.data),
+        // })
+      })
+      .catch(err => console.error(err))
   }
 }
 
@@ -328,11 +542,11 @@ export default {
   resumeOrCreateTransaction,
   createFeature,
   modifyFeature,
+  moveFeature,
   deleteTransactionFeature,
   addTransactionFeatures,
   showContextMenuForEquipment,
   showContextMenuForEquipmentBoundary,
-  viewFeatureProperties,
   startDrawingBoundaryFor,
   stopDrawingBoundary,
   setIsCalculatingSubnets,
@@ -342,6 +556,11 @@ export default {
   setIsEditingFeatureProperties,
   setIsCommittingTransaction,
   setIsEnteringTransaction,
-  addFeatures,
-  selectFeatures,
+  readFeatures,
+  selectFeaturesById,
+  deselectFeatureById,
+  addSubnets,
+  setSelectedSubnetId,
+  recalculateBoundary,
+  recalculateSubnets,
 }
