@@ -32,7 +32,7 @@ class WktUtils {
       coordinates: [[]]
     }
     paths.forEach((path) => {
-      geometry.coordinates[0].push( pathToCoordinates(path) )
+      geometry.coordinates[0].push( WktUtils.pathToCoordinates(path) )
     })
     return geometry
   }
@@ -43,7 +43,7 @@ class WktUtils {
       type: 'Polygon',
       coordinates: []
     }
-    geometry.coordinates.push( pathToCoordinates(path) )
+    geometry.coordinates.push( WktUtils.pathToCoordinates(path) )
     return geometry
   }
 
