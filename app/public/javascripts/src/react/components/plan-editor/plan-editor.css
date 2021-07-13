@@ -67,7 +67,7 @@
 .plan-editor-header .info {
   display: flex;
   align-items: center;
-  margin: 0 0 12px;
+  margin: 0 0 8px;
   padding-right: 20px; /* for the close button */
 }
 .plan-editor-header img { margin: 0 12px 0 0; }
@@ -79,7 +79,6 @@
   align-items: center;
 }
 .plan-editor-header .item {
-  display: flex;
   align-items: center;
   margin: 0;
 }
