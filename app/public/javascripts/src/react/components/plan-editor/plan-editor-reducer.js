@@ -4,7 +4,7 @@ const defaultState = {
   isPlanEditorActive: false,
   transaction: null,
   features: {},
-  selectedFeatureIds: [],
+  selectedEditFeatureIds: [],
   isDrawingBoundaryFor: null,
   isCalculatingSubnets: false,
   isCreatingObject: false,
@@ -66,7 +66,7 @@ function modifyTransactionFeatures (state, newEquipments) {
 }
 
 function clearTransactionFeatures (state) {
-  return { ...state, features: {}, selectedFeatureIds: [] }
+  return { ...state, features: {}, selectedEditFeatureIds: [] }
 }
 
 function setIsDrawingBoundaryFor (state, isDrawingBoundaryFor) {
@@ -117,48 +117,46 @@ function setIsEnteringTransaction (state, isEnteringTransaction) {
   }
 }
 
-function setSelectedFeatures (state, selectedFeatureIds) {
+function setSelectedEditFeatureIds (state, selectedEditFeatureIds) {
   return { ...state,
-    selectedFeatureIds: selectedFeatureIds
+    selectedEditFeatureIds: selectedEditFeatureIds
   }
 }
 
 function deselectFeature (state, objectId) {
-  let newSelectedFeatureIds = [...state.selectedFeatureIds]
+  let newSelectedFeatureIds = [...state.selectedEditFeatureIds]
   let i = newSelectedFeatureIds.indexOf(objectId)
   if (i < 0) return state
   newSelectedFeatureIds.splice(i, 1)
   return { ...state,
-    selectedFeatureIds: newSelectedFeatureIds
+    selectedEditFeatureIds: newSelectedFeatureIds
   }
 }
 
-function addSubnets (state, subnets) {
-  let updatedSubnets = { ...state.subnets }
-  let subnetFeatures = { ...state.subnetFeatures }
-  for (const subnet of subnets) {
-    let subnetId = subnet.subnetId.id
-    updatedSubnets[subnetId] = subnet
-    subnet.children.forEach(feature => {
-      subnetFeatures[feature.id] = {
-        feature: feature,
-        subnetId: subnetId,
+function addSubnets (state, updatedSubnets) {
+  return { ...state, subnets: { ...state.subnets, ...updatedSubnets} }
+}
+
+function updateSubnetBoundary (state, subnetId, geometry) {
+  if (!state.subnets[subnetId]) return state
+  
+  return {
+    ...state, 
+    subnets: {
+      ...state.subnets, 
+      [subnetId]: {
+        ...state.subnets[subnetId],
+        subnetBoundary: {
+          ...state.subnets[subnetId].subnetBoundary,
+          polygon: geometry,
+        }
       }
-    })
+    }
   }
-  return { ...state, subnets: updatedSubnets, subnetFeatures: subnetFeatures }
 }
 
-function updateSubnetFeatures (state, subnetFeatureList) {
-  let subnetFeatures = { ...state.subnetFeatures }
-  
-  subnetFeatureList.forEach(feature => {
-    if (subnetFeatures[feature.id]){
-      subnetFeatures[feature.id].feature = feature
-    }
-  })
-  
-  return { ...state, subnetFeatures: subnetFeatures }
+function updateSubnetFeatures (state, updatedSubnetFeatures) {
+  return { ...state, subnetFeatures: { ...state.subnetFeatures, ...updatedSubnetFeatures } }
 }
 
 function removeSubnets (state, subnets) {
@@ -231,14 +229,17 @@ function planEditorReducer (state = defaultState, action) {
     case Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION:
       return setIsEnteringTransaction(state, action.payload)
 
-    case Actions.PLAN_EDITOR_SET_SELECTED_FEATURES:
-      return setSelectedFeatures(state, action.payload)
+    case Actions.PLAN_EDITOR_SET_SELECTED_EDIT_FEATURE_IDS:
+      return setSelectedEditFeatureIds(state, action.payload)
 
-    case Actions.PLAN_EDITOR_SET_DESELECT_FEATURE:
+    case Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURE:
       return deselectFeature(state, action.payload)
 
     case Actions.PLAN_EDITOR_ADD_SUBNETS:
       return addSubnets(state, action.payload)
+
+    case Actions.PLAN_EDITOR_UPDATE_SUBNET_BOUNDARY:
+      return updateSubnetBoundary(state, action.payload.subnetId, action.payload.geometry)
 
     case Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES:
       return updateSubnetFeatures(state, action.payload)
