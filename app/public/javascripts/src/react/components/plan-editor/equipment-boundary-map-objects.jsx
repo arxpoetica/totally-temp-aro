@@ -53,16 +53,14 @@ export class EquipmentBoundaryMapObjects extends Component {
     const isLocked = this.props.subnets[selectedSubnetId].subnetBoundary.locked
 
     this.mapObject = new google.maps.Polygon({
-      // selectedSubnetId, // Not used by Google Maps
+      subnetId: selectedSubnetId, // Not used by Google Maps
       paths: WktUtils.getGoogleMapPathsFromWKTMultiPolygon(geometry),
       clickable: false,
       draggable: false,
       editable: !isLocked,
       map: this.props.googleMaps,
     })
-    // hardcore FIXME: need to actually attach map objects / boundaries to state
-    // this was 1,000,000% just to get it working quickly
-    window.TEMPORARY_MAP_BOUNDARY = this.mapObject
+    
     this.mapObject.setOptions(this.polygonOptions)
     this.setupListenersForMapObject(this.mapObject)
 
@@ -91,36 +89,42 @@ export class EquipmentBoundaryMapObjects extends Component {
     // this.setupListenersForMapObject(mapObject)
   }
 
+  modifyBoundaryShape (mapObject) {
+    let geometry = WktUtils.getWKTMultiPolygonFromGoogleMapPaths(mapObject.getPaths())
+    this.props.boundaryChange(mapObject.subnetId, geometry)
+  }
+
   setupListenersForMapObject (mapObject) {
-
-    const { recalculateBoundary } = this.props
-
+    const self = this // to keep reference 
     // TODO: check to make sure all boundaries are legit and concave/non-crossing
-    this.mapObject.getPath().addListener('set_at', event => {
-      // console.log('set')
-      recalculateBoundary({
-        transactionId: this.props.transactionId,
-        subnetId: this.props.selectedSubnetId,
+    mapObject.getPaths().forEach(function (path, index) {
+      google.maps.event.addListener(path, 'insert_at', function () {
+        self.modifyBoundaryShape(mapObject)
+      })
+      google.maps.event.addListener(path, 'remove_at', function () {
+        self.modifyBoundaryShape(mapObject)
+      })
+      // FIXME: make deleting vertices work
+      // ToDo: avoid redundant first=last polygons
+      //  clear these when parsing from service 
+      //  and if needed, replace them when unparsing to send back to service
+      google.maps.event.addListener(path, 'set_at', function () {
+        if (!WktUtils.isClosedPath(path)) {
+          // IMPORTANT to check if it is already a closed path, otherwise we will get into an infinite loop when trying to keep it closed
+          if (index === 0) {
+            // The first point has been moved, move the last point of the polygon (to keep it a valid, closed polygon)
+            path.setAt(0, path.getAt(path.length - 1))
+            self.modifyBoundaryShape(mapObject)
+          } else if (index === path.length - 1) {
+            // The last point has been moved, move the first point of the polygon (to keep it a valid, closed polygon)
+            path.setAt(path.length - 1, path.getAt(0))
+            self.modifyBoundaryShape(mapObject)
+          }
+        } else {
+          self.modifyBoundaryShape(mapObject)
+        }
       })
     })
-
-    this.mapObject.getPath().addListener('insert_at', event => {
-      // console.log('insert')
-      recalculateBoundary({
-        transactionId: this.props.transactionId,
-        subnetId: this.props.selectedSubnetId,
-      })
-    })
-
-    // FIXME: make deleting vertices work
-    this.mapObject.getPath().addListener('remove_at', event => {
-      // console.log('remove')
-      recalculateBoundary({
-        transactionId: this.props.transactionId,
-        subnetId: this.props.selectedSubnetId,
-      })
-    })
-
   }
 
   componentWillUnmount () {
@@ -154,8 +158,8 @@ const mapDispatchToProps = dispatch => ({
   //showContextMenuForEquipmentBoundary: (planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y) => {
   //  dispatch(PlanEditorActions.showContextMenuForEquipmentBoundary(planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y))
   //},
-  recalculateBoundary: vars => dispatch(PlanEditorActions.recalculateBoundary(vars)),
-  selectBoundary: objectId => dispatch(SelectionActions.setPlanEditorFeatures([objectId]))
+  boundaryChange: (subnetId, geometry) => dispatch(PlanEditorActions.boundaryChange(subnetId, geometry)),
+  selectBoundary: objectId => dispatch(SelectionActions.setPlanEditorFeatures([objectId])),
 })
 
 const EquipmentBoundaryMapObjectsComponent = connect(mapStateToProps, mapDispatchToProps)(EquipmentBoundaryMapObjects)

@@ -1925,7 +1925,7 @@ class State {
       setShowGlobalSettings: () => dispatch(GlobalSettingsActions.setShowGlobalSettings(true)),
       setCurrentViewToReleaseNotes: (viewString) => dispatch(GlobalSettingsActions.setCurrentViewToReleaseNotes(viewString)),
       setIsMapClicked: mapFeatures => dispatch(SelectionActions.setIsMapClicked(mapFeatures)),
-      selectPlanEditFeaturesById: (features) => dispatch(PlanEditorActions.selectFeaturesById(features)),
+      selectPlanEditFeaturesById: (features) => dispatch(PlanEditorActions.selectEditFeaturesById(features)),
     }
   }
 }

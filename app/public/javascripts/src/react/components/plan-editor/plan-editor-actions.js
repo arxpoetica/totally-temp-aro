@@ -296,57 +296,32 @@ function setIsEnteringTransaction (isEnteringTransaction) {
 function moveFeature (featureId, coordinates) {
   return (dispatch, getState) => {
     const state = getState()
-    dispatch(readFeatures([featureId]))
-      .then(retrievedIds => {
-        const state = getState()
-        let feature = state.planEditor.features[featureId]
-        feature = JSON.parse(JSON.stringify(feature))
-        feature.feature.geometry.coordinates = coordinates
-        //let dataType = feature.feature.dataType || "equipment"
-        //dispatch(modifyFeature(dataType, feature))
-
-        // change the featurein the feature list 
-        let crudAction = feature.crudAction || 'read'
-        if (crudAction === 'read') crudAction = 'update'
-        const newFeature = {
-          ...feature,
-          crudAction: crudAction,
-        }
+    let subnetFeature = state.planEditor.subnetFeatures[featureId]
+    subnetFeature = JSON.parse(JSON.stringify(subnetFeature))
+    let subnetId = subnetFeature.subnetId
+    let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+    
+    subnetFeature.feature.geometry.coordinates = coordinates
+    const body = {
+      commands: [{
+        // `childId` is one of the children nodes of the subnets
+        // service need to chagen this to "childNode"
+        childId: unparseSubnetFeature(subnetFeature.feature),
+        subnetId: subnetId, // parent subnet id, don't add when `type: 'add'`
+        type: 'update', // `add`, `update`, or `delete`
+      }]
+    }
+    // Do a PUT to send the equipment over to service
+    return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
+      .then(result => {
+        //console.log(result)
+        
         dispatch({
-          type: Actions.PLAN_EDITOR_MODIFY_FEATURES,
-          payload: [newFeature]
+          type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
+          payload: {featureId: subnetFeature}
         })
-
-
-        if (state.planEditor.subnetFeatures[featureId]) {
-          let subnetFeature = state.planEditor.subnetFeatures[featureId].feature
-          let subnetId = state.planEditor.subnetFeatures[featureId].subnetId
-          let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
-          subnetFeature = JSON.parse(JSON.stringify(subnetFeature))
-          subnetFeature.point.coordinates = coordinates
-          const body = {
-            commands: [{
-              // `childId` is one of the children nodes of the subnets
-              childId: subnetFeature,
-              subnetId: subnetId, // parent subnet id, don't add when `type: 'add'`
-              type: 'update', // `add`, `update`, or `delete`
-            }]
-          }
-          // Do a PUT to send the equipment over to service
-          return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
-            .then(result => {
-              console.log(result)
-              
-              dispatch({
-                type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
-                payload: [subnetFeature]
-              })
-            })
-            .catch(err => console.error(err))
-
-        }
-
       })
+      .catch(err => console.error(err))
   }
 }
 
@@ -355,7 +330,6 @@ function readFeatures (featureIds) {
     const state = getState()
     let featuresToGet = []
     featureIds.forEach(featureId => {
-      // should action creators be aware of state schema?
       if (!state.planEditor.features[featureId]) {
         featuresToGet.push(featureId)
       }
@@ -393,7 +367,7 @@ function readFeatures (featureIds) {
   }
 }
 
-function selectFeaturesById (featureIds) {
+function selectEditFeaturesById (featureIds) {
   return (dispatch, getState) => {
     dispatch(readFeatures(featureIds))
       .then(retrievedIds => {
@@ -414,7 +388,7 @@ function selectFeaturesById (featureIds) {
         })
         batch(() => {
           dispatch({
-            type: Actions.PLAN_EDITOR_SET_SELECTED_FEATURES, 
+            type: Actions.PLAN_EDITOR_SET_SELECTED_EDIT_FEATURE_IDS, 
             payload: validFeatures,
           })
           // later we may highlight more than one subnet
@@ -424,9 +398,9 @@ function selectFeaturesById (featureIds) {
   }
 }
 
-function deselectFeatureById (objectId) {
+function deselectEditFeatureById (objectId) {
   return {
-    type: Actions.PLAN_EDITOR_SET_DESELECT_FEATURE,
+    type: Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURE,
     payload: objectId,
   }
 }
@@ -443,19 +417,11 @@ function addSubnets (subnetIds) {
     const subnetApiPromises = uncachedSubnetIds.map(subnetId => {
       return AroHttp.get(`/service/plan-transaction/${transaction.id}/subnet/${subnetId}`)
     })
-    // ToDo: need to refactor subnet props
-    //  planEditor.subnets[###].children[#].point to
-    //  planEditor.subnets[###].children[#].geometry
-    //  planEditor.subnets[###].children[#].id to
-    //  planEditor.subnets[###].children[#].objectId
+    
     return Promise.all(subnetApiPromises)
       .then(subnetResults => {
-        if (subnetResults.length) {
-          dispatch({
-            type: Actions.PLAN_EDITOR_ADD_SUBNETS,
-            payload: subnetResults.map(result => result.data),
-          })
-        }
+        let apiSubnets = subnetResults.map(result => result.data)
+        dispatch(parseAddApiSubnets(apiSubnets))
       })
       .catch(err => console.error(err))
   }
@@ -490,12 +456,11 @@ function setSelectedSubnetId (selectedSubnetId) {
 }
 
 function recalculateBoundary ({ transactionId, subnetId }) {
-  return dispatch => {
-
-    // FIXME: FIXME: FIXME: FIXME: FIXME: FIXME: FIXME: FIXME: FIXME: FIXME: FIXME: 
-    // hardcore fixme: need to actually attach map objects / boundaries to state
-    // this was 1,000,000% just to get it working quickly
-    const newPolygon = WktUtils.getWKTMultiPolygonFromGoogleMapPaths(window.TEMPORARY_MAP_BOUNDARY.getPaths())
+  return (dispatch, getState) => {
+    const state = getState()
+    //const transactionId = state.planEditor.transaction.id
+    if (!state.planEditor.subnets[subnetId]) return null // null? meh
+    const newPolygon = state.planEditor.subnets[subnetId].subnetBoundary.polygon
     const boundaryBody = {
       locked: true,
       polygon: newPolygon,
@@ -511,6 +476,14 @@ function recalculateBoundary ({ transactionId, subnetId }) {
         // })
       })
       .catch(err => console.error(err))
+  }
+}
+
+function boundaryChange (subnetId, geometry) {
+  // put debounce here
+  return {
+    type: Actions.PLAN_EDITOR_UPDATE_SUBNET_BOUNDARY,
+    payload: {subnetId, geometry},
   }
 }
 
@@ -531,6 +504,119 @@ function recalculateSubnets ({ transactionId, subnetIds }) {
       })
       .catch(err => console.error(err))
   }
+}
+
+// --- //
+
+// helper
+function parseAddApiSubnets (apiSubnets) {
+  return (dispatch) => {
+    if (apiSubnets.length) {
+      let subnets = {}
+      let allFeatures = {}
+      // parse 
+      apiSubnets.forEach(apiSubnet => {
+        let {subnet, subnetFeatures} = parseSubnet(apiSubnet)
+        const subnetId = subnet.subnetNode
+        subnets[subnetId] = subnet
+        allFeatures = {...allFeatures, ...subnetFeatures}
+      })
+      // dispatch add subnets and add subnetFeatures
+      batch(() => {
+        dispatch({
+          type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
+          payload: allFeatures,
+        })
+        dispatch({
+          type: Actions.PLAN_EDITOR_ADD_SUBNETS,
+          payload: subnets,
+        })
+      })
+    }
+  }
+}
+
+// helper function 
+function parseSubnet (subnet) {
+  // --- fix service typos - eventually this won't be needed --- //
+  subnet.subnetNode = parseSubnetFeature(subnet.subnetId)
+  delete subnet.subnetId
+  subnet.children = subnet.children.map(feature => parseSubnetFeature(feature))
+  // --- end typo section --- //
+
+  // build the subnet feature list
+  const subnetId = subnet.subnetNode.objectId
+  let subnetFeatures = {}
+  // root node
+  subnetFeatures[subnetId] = {
+    'feature': subnet.subnetNode,
+    'subnetId': subnet.parentSubnetId,
+  }
+  // child nodes
+  subnet.children.forEach(feature => {
+    subnetFeatures[feature.objectId] = {
+      'feature': feature,
+      'subnetId': subnetId,
+    }
+  })
+
+  // subnet child list is a list of IDs, not full features, features are stored in subnetFeatures
+  subnet.children = subnet.children.map(feature => feature.objectId)
+  subnet.subnetNode = subnet.subnetNode.objectId
+
+  return {subnet, subnetFeatures}
+}
+
+// helper function
+function parseSubnetFeature (feature) {
+  // --- fix service typos - eventually this won't be needed --- //
+  feature.objectId = feature.id
+  delete feature.id
+
+  feature.geometry = feature.point
+  delete feature.point
+  // --- end typo section --- //
+
+  return feature
+}
+
+// helper function
+function composeSubnet (subnet, state) {
+  // to bring in child refrences 
+  //  used to unparse subnets to send back to the server 
+  //  BUT ALSO may be used internally which why we don't unfix the typos here
+  subnet = JSON.parse(JSON.stringify(subnet))
+  subnet.children = subnet.children.map(objectId => {
+    return JSON.parse(JSON.stringify(state.planEditor.subnetFeatures[objectId].feature))
+  })
+  subnet.subnetNode = JSON.parse(JSON.stringify(state.planEditor.subnetFeatures[subnet.subnetNode].feature))
+
+  return subnet
+}
+
+// helper function 
+function unparseSubnet (subnet, state) {
+  subnet = composeSubnet(subnet, state)
+  subnet.children = subnet.children.map(feature => unparseSubnetFeature(feature))
+
+  subnet.subnetId = unparseSubnetFeature(subnet.subnetNode)
+  delete subnet.subnetNode
+
+  return subnet
+}
+
+// helper function
+function unparseSubnetFeature (feature) {
+  feature = JSON.parse(JSON.stringify(feature))
+  // --- unfix service typos - eventually this won't be needed --- //
+  feature.id = feature.objectId
+  delete feature.objectId
+
+  feature.point = feature.geometry
+  delete feature.geometry
+  // --- end typo section --- //
+
+  return feature
 }
 
 // --- //
@@ -557,10 +643,11 @@ export default {
   setIsCommittingTransaction,
   setIsEnteringTransaction,
   readFeatures,
-  selectFeaturesById,
-  deselectFeatureById,
+  selectEditFeaturesById,
+  deselectEditFeatureById,
   addSubnets,
   setSelectedSubnetId,
   recalculateBoundary,
+  boundaryChange,
   recalculateSubnets,
 }

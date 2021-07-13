@@ -740,14 +740,11 @@ class TileComponentController {
 
   // Map global state to component properties
   mapStateToThis (reduxState) {
-    const {allFeatureIds, subnetFeatures} = PlanEditorSelectors.getSelectedIdsAndSubnetFeatures(reduxState)
     return {
       activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
       selectionModes: reduxState.selection.selectionModes,
       selection: reduxState.selection,
-      //selectionIds: reduxState.selection.planEditorFeatures,
-      //selectionIds: Object.keys(reduxState.planEditor.features),
-      selectionIds: allFeatureIds,
+      selectionIds: PlanEditorSelectors.getSelectedIds(reduxState),
       rSelection: reduxState.selection.selection,
       stateMapLayers: reduxState.mapLayers,
       networkAnalysisType: reduxState.optimization.networkOptimization.optimizationInputs.analysis_type,
@@ -757,8 +754,7 @@ class TileComponentController {
       rViewSetting: reduxState.toolbar.viewSetting, // Set to map-tile-render.js from aro-debug.jsx
       rSelectedDisplayMode: reduxState.toolbar.rSelectedDisplayMode,
       rActiveViewModePanel: reduxState.toolbar.rActiveViewModePanel,
-      //allFeatureIds, 
-      subnetFeatures: subnetFeatures,
+      subnetFeatures: reduxState.planEditor.subnetFeatures,
     }
   }
 
