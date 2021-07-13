@@ -437,6 +437,13 @@ function setViewSetting (viewSetting) {
   }
 }
 
+function setDeletedMapObjects (mapObject) {
+  return {
+    type: Actions.TOOL_BAR_SET_DELETED_UNCOMMITED_MAP_OBJECTS,
+    payload: mapObject
+  }
+}
+
 export default {
   setPlanInputsModal,
   selectedDisplayMode,
@@ -462,5 +469,6 @@ export default {
   makeCurrentPlanNonEphemeral,
   copyCurrentPlanTo,
   setSelectedHeatMapOption,
-  setViewSetting
+  setViewSetting,
+  setDeletedMapObjects,
 }

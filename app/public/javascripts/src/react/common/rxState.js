@@ -1,46 +1,13 @@
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs'
+import reduxStore from '../../redux-store'
 
-const viewSetting = {
-  selectedFiberOption: null,
-  heatmapOptions: [
-    {
-      id: 'HEATMAP_ON',
-      label: 'Aggregate heatmap'
-    },
-    {
-      id: 'HEATMAP_DEBUG',
-      label: 'Aggregate points'
-    },
-    {
-      id: 'HEATMAP_OFF',
-      label: 'Raw Points'
-    }
-  ]
-}
+const state = reduxStore.getState()
 
-const heatmapOptions = {
-  showTileExtents: false,
-  heatMap: {
-    useAbsoluteMax: false,
-    maxValue: 100,
-    powerExponent: 0.5,
-    worldMaxValue: 500000
-  },
-  selectedHeatmapOption: viewSetting.heatmapOptions[0] // 0, 2
-}
-
-const defaultPlanCoordinates = {
-  zoom: 14,
-  latitude: 47.6062, // Seattle, WA by default. For no particular reason.
-  longitude: -122.3321, // Seattle, WA by default. For no particular reason.
-  areaName: 'Seattle, WA' // Seattle, WA by default. For no particular reason.
-}
-
-const viewSettingsChangedSubject = new BehaviorSubject();
-const requestMapLayerRefreshSubject = new BehaviorSubject();
-const mapTileOptionsSubject = new BehaviorSubject(heatmapOptions);
-const requestSetMapCenterSubject = new BehaviorSubject(defaultPlanCoordinates);
-const requestSetMapZoomSubject = new BehaviorSubject(defaultPlanCoordinates.zoom);
+const viewSettingsChangedSubject = new BehaviorSubject()
+const requestMapLayerRefreshSubject = new BehaviorSubject()
+const mapTileOptionsSubject = new BehaviorSubject(state.toolbar.heatmapOptions)
+const requestSetMapCenterSubject = new BehaviorSubject(state.plan.defaultPlanCoordinates)
+const requestSetMapZoomSubject = new BehaviorSubject(state.plan.defaultPlanCoordinates.zoom)
 
 class rxState {
   constructor () {
@@ -70,9 +37,9 @@ class rxState {
       sendMessage: (message) => requestSetMapZoomSubject.next(message),
       getMessage: () => requestSetMapZoomSubject.asObservable()
     }
-    
+
     return service
   }
 }
 
-export default rxState;
+export default rxState
