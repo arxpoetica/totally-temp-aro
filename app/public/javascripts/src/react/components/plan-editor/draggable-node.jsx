@@ -46,7 +46,9 @@ export const DraggableNode = props => {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <img src={icon} onLoad={onImageLoad} />
+      <div className="node-wrap">
+        <img src={icon} onLoad={onImageLoad} />
+      </div>
     </div>
   )
 
