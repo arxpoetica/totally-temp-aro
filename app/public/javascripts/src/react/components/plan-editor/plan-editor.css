@@ -10,6 +10,46 @@
   cursor: pointer;
 }
 
+/* ========================= >>>>> exceptions panel >>>>> */
+
+.exceptions-panel {
+  margin: 0 0 10px;
+}
+.exceptions-panel .header {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-top: 1px solid var(--gray-medium-light);
+  border-bottom: 1px solid var(--gray-medium-light);
+  font: 18px var(--font);
+  cursor: pointer;
+  user-select: none;
+}
+.exceptions-panel h2 {
+  margin: 0;
+  font: bold 16px/1 var(--font);
+}
+.exceptions-panel small {
+  font: 13px/1 var(--font);
+}
+.exceptions-panel .plus-minus {
+  width: 16px;
+  height: 16px;
+  margin: 0 10px 0 0;
+  background: url('/svg/toggle-plus.svg') no-repeat center transparent;
+}
+.exceptions-panel.open .plus-minus {
+  background-image: url('/svg/toggle-minus.svg');
+}
+.exceptions-panel .content {
+  display: none;
+  padding: 10px;
+  border-bottom: 1px solid var(--gray-medium-light);
+}
+.exceptions-panel.open .content {
+  display: block;
+}
+
 /* ========================= >>>>> recalculate plan >>>>> */
 
 /* .plan-editor-recalculate {} */
