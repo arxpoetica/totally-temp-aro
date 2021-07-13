@@ -12,7 +12,6 @@ const PlanEditorRecalculate = props => {
     transaction,
     isCalculatingSubnets,
     selectedSubnetId,
-    recalculateBoundary,
     recalculateSubnets,
   } = props
 

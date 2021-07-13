@@ -103,17 +103,25 @@
 .equipment-dragger .nodes {
   display: grid;
   grid-gap: 5px;
-  grid-template-columns: repeat(auto-fill, 44px);
+  grid-template-columns: repeat(auto-fit, minmax(44px, 1fr));
 }
 .equipment-dragger .node {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 44px;
+  position: relative;
+  padding: 0 0 100%;
   background-color: #f3f3f3;
   border: 1px solid transparent;
   transition: all 0.2s ease-in-out;
   cursor: pointer;
+}
+.equipment-dragger .node-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
 }
 .equipment-dragger .node:hover {
   background-color: #e1e1e1;
