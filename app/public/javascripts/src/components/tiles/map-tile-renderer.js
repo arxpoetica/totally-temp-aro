@@ -700,6 +700,18 @@ class MapTileRenderer {
         }
       })
     }
+    
+    if (this.state.deletedUncommitedMapObjects.length > 0) {
+      const deletedObjectIds = this.state.deletedUncommitedMapObjects.map(mapObject => mapObject.objectId)
+      
+      closedPolygonFeatureLayersList = closedPolygonFeatureLayersList
+      .filter(fatureLayerObject => !deletedObjectIds
+        .includes(fatureLayerObject.feature.properties.object_id))
+
+      featureData.layerToFeatures.FEATURES_FLATTENED = featureData.layerToFeatures.FEATURES_FLATTENED
+      .filter(tileObject => !deletedObjectIds
+        .includes(tileObject.properties.object_id))
+    }
     // render point feature
     PointFeatureRenderer.renderFeatures(pointFeatureRendererList, this.state.configuration.ARO_CLIENT)
     // render polygon feature

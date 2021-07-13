@@ -32,6 +32,7 @@ import RoicReportsActions from '../react/components/sidebar/analysis/roic-report
 import { hsvToRgb } from '../react/common/view-utils'
 import StateViewModeActions from '../react/components/state-view-mode/state-view-mode-actions'
 import PlanEditorActions from '../react/components/plan-editor/plan-editor-actions'
+import RxState from '../react/common/rxState'
 
 const networkAnalysisConstraintsSelector = formValueSelector(ReactComponentConstants.NETWORK_ANALYSIS_CONSTRAINTS)
 
@@ -59,6 +60,7 @@ class State {
     service.INVALID_PLAN_ID = -1
     service.MAX_EXPORTABLE_AREA = 11000000000 // 25000000
 
+    service.rxState = new RxState() // For RxJs in react components
     service.StateViewMode = StateViewMode
 
     service.OPTIMIZATION_TYPES = {
@@ -262,25 +264,15 @@ class State {
 
     // Map layers data - define once. Details on map layer objects are available in the TileComponentController class in tile-component.js
     service.mapLayers = new Rx.BehaviorSubject({})
-    /*
+    
     service.setUseHeatMap = (useHeatMap) => {
-      // ToDo: don't hardcode these, but this whole thing needs to be restructured
-      //   below is duplicate of object in rxState.js
-      var newMapTileOptions = {
-        showTileExtents: false,
-        heatMap: {
-          useAbsoluteMax: false,
-          maxValue: 100,
-          powerExponent: 0.5,
-          worldMaxValue: 500000
-        },
-        selectedHeatmapOption: viewSetting.heatmapOptions[0]
-      }
-      
-      newMapTileOptions.selectedHeatmapOption = useHeatMap ? service.viewSetting.heatmapOptions[0] : service.viewSetting.heatmapOptions[2] 
-      rxState.mapTileOptions.sendMessage(newMapTileOptions)
+      const newMapTileOptions = JSON.parse(JSON.stringify(service.rHeatmapOptions))
+      const { heatmapOptions } = service.viewSetting
+      newMapTileOptions.selectedHeatmapOption = useHeatMap ? heatmapOptions[0] : heatmapOptions[2] 
+      service.rxState.mapTileOptions.sendMessage(newMapTileOptions)
+      service.setSelectedHeatMapOption(newMapTileOptions.selectedHeatmapOption.id)
     }
-    */
+
     service.defaultPlanCoordinates = {
       zoom: 14,
       latitude: 47.6062, // Seattle, WA by default. For no particular reason.
@@ -1446,6 +1438,10 @@ class State {
                   service.setMapReportMapObjectsVisibility(true)
                   service.setMapReportPageNumbersVisibility(true)
                 }
+                
+                // To set heatMap (or) locations based on the User selection while downloading PDF reports.
+                service.setUseHeatMap(reportOptions.selectedHeatMapOption === service.viewSetting.heatmapOptions[0].id)
+              
                 return Promise.resolve()
               })
               .catch(err => console.error(err))
@@ -1868,7 +1864,9 @@ class State {
       activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
       optimizationInputs: reduxState.optimization.networkOptimization.optimizationInputs,
       rSelectedDisplayMode: reduxState.toolbar.rSelectedDisplayMode,
-      rActiveViewModePanel: reduxState.toolbar.rActiveViewModePanel
+      rActiveViewModePanel: reduxState.toolbar.rActiveViewModePanel,
+      deletedUncommitedMapObjects: reduxState.toolbar.deletedUncommitedMapObjects,
+      rHeatmapOptions: reduxState.toolbar.heatmapOptions,
     }
   }
 
