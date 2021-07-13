@@ -20,7 +20,8 @@ class ClassGenerator {
     var typeToDisplayProperties = {}
     var typeToOrderedPropertyNames = {}
     classMetas.forEach((classMeta) => {
-      typeToDisplayProperties[classMeta.schemaReference] = classMeta.displayProperties.properties || []
+      //typeToDisplayProperties[classMeta.schemaReference] = classMeta.displayProperties.properties || []
+      typeToDisplayProperties[classMeta.schemaReference] = classMeta.displayProperties || []
       typeToOrderedPropertyNames[classMeta.schemaReference] = classMeta.orderedPropertyNames || []
     })
     // TODO: use GET '/v1/schema/json' endpoint in the app, not in build

@@ -8,6 +8,7 @@ export class AroFeatureEditor extends Component {
 
     if (!'isCollapsible' in props) props.isCollapsible = true
     if (!'isEditable' in props) props.isEditable = true
+    console.log(props.meta)
     if (!'visible' in props.meta) props.meta.visible = true
 
     this.state = {

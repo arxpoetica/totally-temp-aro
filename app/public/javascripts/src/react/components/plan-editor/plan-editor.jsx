@@ -114,9 +114,10 @@ export const PlanEditor = props => {
 
 
       {
-        selectedFeatureIds.map(id => {
+        selectedEditFeatureIds.map(id => {
           let aroFeature = AroFeatureFactory.createObject(features[id].feature)
           let meta = aroFeature.getDisplayProperties()
+          console.log(meta)
           meta = meta.find(ele => ele.displayName === "Network Node Equipment") // ToDo: this needs fixing
           aroFeature = aroFeature.networkNodeEquipment
           console.log({meta, aroFeature})
