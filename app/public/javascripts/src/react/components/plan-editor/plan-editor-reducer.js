@@ -279,7 +279,7 @@ function planEditorReducer (state = defaultState, action) {
       return setBoundaryDebounce(state, action.payload.subnetId, action.payload.timeoutId)
 
     case Actions.PLAN_EDITOR_CLEAR_BOUNDARY_DEBOUNCE:
-      return clearBoundaryDebounce(state, action.payload.subnetId)
+      return clearBoundaryDebounce(state, action.payload)
 
     default:
       return state
