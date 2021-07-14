@@ -480,10 +480,12 @@ function recalculateBoundary (subnetId) {
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet/${subnetId}/boundary`, boundaryBody)
       .then(res => {
         console.log(res)
-        // debugger
         dispatch(setIsCalculatingBoundary(false)) // may need to extend this for multiple boundaries? (make it and int incriment, decriment)
       })
-      .catch(err => console.error(err))
+      .catch(err => {
+        console.error(err)
+        dispatch(setIsCalculatingBoundary(false))
+      })
   }
 }
 
@@ -537,15 +539,13 @@ function recalculateSubnets ({ transactionId, subnetIds }) {
     console.log(recalcBody)
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet-cmd/recalc`, recalcBody)
       .then(res => {
-        // TODO: handle errors
         dispatch(setIsCalculatingSubnets(false))
         console.log(res)
-        // dispatch({
-        //   type: Actions.PLAN_EDITOR_RECALCULATE_SUBNETS,
-        //   payload: subnetResults.map(result => result.data),
-        // })
       })
-      .catch(err => console.error(err))
+      .catch(err => {
+        console.error(err)
+        dispatch(setIsCalculatingSubnets(false))
+      })
   }
 }
 
