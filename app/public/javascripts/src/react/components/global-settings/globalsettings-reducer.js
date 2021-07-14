@@ -22,6 +22,7 @@ const defaultState = {
   currentView: '',
   notifyBroadcast: {},
   isGlobalSettingsView: false,
+  userGroupsMsg: {},
 }
 
 function setReleaseNotes (state, releaseNotes) {
@@ -210,6 +211,12 @@ function setCurrentView(state, currentViewOption) {
   }
 }
 
+function setUserGroupsMsg(state, userGroupsMsg) {
+  return {...state,
+    userGroupsMsg: userGroupsMsg
+  }
+}
+
 function globalSettingsReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.GLOBAL_SETTINGS_GET_RELEASE_NOTES:
@@ -274,6 +281,9 @@ function globalSettingsReducer (state = defaultState, action) {
 
     case Actions.GLOBAL_SETTINGS_SET_NEW_USER_CURRENT_VIEW:
       return setCurrentView(state, action.payload)
+
+    case Actions.GLOBAL_SETTINGS_SET_USER_GROUPS_MSG:
+      return setUserGroupsMsg(state, action.payload)
   
     default:
       return state

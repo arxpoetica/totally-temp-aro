@@ -1355,7 +1355,14 @@ class State {
           return $http.get(`/service/auth/users/${service.loggedInUser.id}`)
         })
         .then((result) => {
-          service.loggedInUser.groupIds = result.data.groupIds
+          const groupIds = result.data.groupIds
+          // For the 'Frontier' client show warning to the user who does not assigned to any of the groups.
+          if (service.configuration.ARO_CLIENT === 'frontier' && !groupIds.length) {
+            const userGroupsWarning =  service.configuration.userGroupsWarning
+            const userGroupsMsg = userGroupsWarning && Object.keys(userGroupsWarning).length ? userGroupsWarning : {}
+            $timeout(() => { service.setUserGroupsMsg(userGroupsMsg) })
+          }
+          service.loggedInUser.groupIds = groupIds
 
           var userGroupIsAdministrator = false
           result.data.groupIds.forEach((groupId) => {
@@ -1913,6 +1920,7 @@ class State {
       setShowGlobalSettings: () => dispatch(GlobalSettingsActions.setShowGlobalSettings(true)),
       setCurrentViewToReleaseNotes: (viewString) => dispatch(GlobalSettingsActions.setCurrentViewToReleaseNotes(viewString)),
       setIsMapClicked: mapFeatures => dispatch(SelectionActions.setIsMapClicked(mapFeatures)),
+      setUserGroupsMsg: (userGroupsMsg) => dispatch(GlobalSettingsActions.setUserGroupsMsg(userGroupsMsg)),
     }
   }
 }
