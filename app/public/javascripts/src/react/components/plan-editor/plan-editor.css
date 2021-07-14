@@ -32,14 +32,24 @@
 .exceptions-panel small {
   font: 13px/1 var(--font);
 }
+.exceptions-panel .svg {
+  width: 39px;
+  margin: 0 10px 0 0;
+  background: none no-repeat center transparent;
+  background-size: contain;
+}
 .exceptions-panel .plus-minus {
   width: 16px;
   height: 16px;
-  margin: 0 10px 0 0;
-  background: url('/svg/toggle-plus.svg') no-repeat center transparent;
+  background-image: url('/svg/toggle-plus.svg');
 }
 .exceptions-panel.open .plus-minus {
   background-image: url('/svg/toggle-minus.svg');
+}
+.exceptions-panel .warning {
+  width: 24px;
+  height: 24px;
+  background-image: url('/svg/exception-panel-warning.svg');
 }
 .exceptions-panel .content {
   display: none;
@@ -48,6 +58,25 @@
 }
 .exceptions-panel.open .content {
   display: block;
+  margin: 0;
+  padding: 0;
+}
+.exceptions-panel li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--gray-medium-light);
+}
+.exceptions-panel .text {
+  display: flex;
+  align-items: center;
+}
+.exceptions-panel .location {
+  width: 35px;
+  height: 42px;
+  position: relative;
+  background-image: url('/svg/exception-panel-location.svg');
 }
 
 /* ========================= >>>>> recalculate plan >>>>> */

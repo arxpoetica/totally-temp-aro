@@ -36,24 +36,31 @@ const DefectsPanel = props => {
     <div className={cx('exceptions-panel', open && 'open')}>
 
       <div className="header" onClick={handleOpenState}>
-        <span className="plus-minus"></span>
+        <span className="svg plus-minus"></span>
+        <span className="svg warning"></span>
         <h2>Plan Defects <small>{exceptions.length} item{exceptions.length ? 's' : ''}</small></h2>
       </div>
 
-      <div className={cx('content', open && 'open')}>
+      <ul className={cx('content', open && 'open')}>
 
         {exceptions.map((exception, index) =>
-          <label key={exception.id}>
-            <input
+          <li key={exception.id}>
+            {/* <input
               type="checkbox"
               checked={exception.checked}
               onChange={() => toggleChecked(index)}
-            />
-            <h2>{exception.id}</h2>
-          </label>
+            /> */}
+            <div className="text">
+              <div className="svg location"></div>
+              Drop Cable Length Exceeded
+            </div>
+            <div className="dropdown">
+              {/* Ignore this Exception */}
+            </div>
+          </li>
         )}
 
-      </div>
+      </ul>
 
     </div>
   ) : null
