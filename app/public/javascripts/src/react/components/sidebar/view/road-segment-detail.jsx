@@ -16,15 +16,17 @@ export const RoadSegmentDetail = (props) => {
 
   const [state, setState] = useState({
     selectedEdgeInfo: [],
+    showTagSelection: false,
     correctZoomLevel: true,
     detailsById: {},
     selectedDetail: null,
   })
 
-  const { selectedEdgeInfo, correctZoomLevel, detailsById, selectedDetail } = state
+  const { selectedEdgeInfo, correctZoomLevel, detailsById, selectedDetail, showTagSelection } = state
 
   const { mapFeatures, activeViewModePanel, cloneSelection, setMapSelection,
-    activeViewModePanelAction, isClearViewMode, clearViewMode, plan, user } = props
+    activeViewModePanelAction, isClearViewMode, clearViewMode, plan, user,
+    isMapClicked } = props
 
   // We need to get the previous mapFeatures prop, so that we can run an effect only on mapFeatures updates,
   // we can do it manually with a usePrevious() custom Hook.
@@ -45,7 +47,14 @@ export const RoadSegmentDetail = (props) => {
         newSelection.details.roadSegments = mapFeatures.roadSegments
         setMapSelection(newSelection)
         const roadSegmentsInfo = generateRoadSegmentsInfo(mapFeatures.roadSegments)
-        setState((state) => ({ ...state, selectedEdgeInfo: roadSegmentsInfo }))
+
+        // sets selectedEdgeInfo, also checks if all selected items are road segments,
+        // so we only display the tag select on road segments
+        setState((state) => ({
+          ...state,
+          selectedEdgeInfo: roadSegmentsInfo, 
+          showTagSelection: !roadSegmentsInfo.some(segment => segment.feature_type_name !== 'road'), 
+        }))
         if (roadSegmentsInfo.length === 1) {
           onEdgeExpand(roadSegmentsInfo[0])
         }
@@ -72,7 +81,7 @@ export const RoadSegmentDetail = (props) => {
     const features = Object.keys(mapFeatures)
     for (let i = 0; i < features.length; i++) {
       if (features[i] === 'latLng' || features[i] === 'roadSegments') continue
-      if (mapFeatures[features[i]].length > 0 || [...mapFeatures[features[i]]].length > 0) isObjectEmpty = false
+      if ((mapFeatures[features[i]].length > 0 || [...mapFeatures[features[i]]].length > 0) || !isMapClicked) isObjectEmpty = false
     }
     return isObjectEmpty
   }
@@ -186,7 +195,9 @@ export const RoadSegmentDetail = (props) => {
                 }
               </tbody>
             </table>
-            <RoadSegmentTagSelect/>
+            {/* Checking the type of selection so tag select only shows on road segments */}
+            {showTagSelection && <RoadSegmentTagSelect/>}
+
           </>
         : <>
             Zoom level too high to select conduit. Please zoom in and try to select the conduit again.
@@ -202,6 +213,7 @@ const mapStateToProps = (state) => ({
   isClearViewMode: state.stateViewMode.isClearViewMode,
   plan: state.plan.activePlan,
   user: state.user.loggedInUser,
+  isMapClicked: state.selection.isMapClicked,
 })
 
 const mapDispatchToProps = (dispatch) => ({

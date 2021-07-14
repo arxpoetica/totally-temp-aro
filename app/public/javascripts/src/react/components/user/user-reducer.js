@@ -22,6 +22,7 @@ const defaultState = {
     paginateData: []
   },
   defaultGroup : null,
+  searchText:'',
   filteredUsers : null
 }
 
@@ -74,10 +75,11 @@ function setProjectTemplates (state, projectTemplates) {
 }
 
 function setUserList (state, users) {
-
+  
   let mapIdToGroup = {}
   state.allGroups.forEach((group) => mapIdToGroup[group.id] = group)
 
+  let filteredUsers = []
   let allUsers = users
   // For a user we will get the IDs of the groups that the user belongs to. Our control uses objects to bind to the model.
   // Remove the group ids property and replace it with group objects
@@ -89,9 +91,21 @@ function setUserList (state, users) {
     delete allUsers[index].groupIds
   })
 
+  // if there is searchtext, we filter the userlist
+  if (state.searchText === '') {
+    filteredUsers = allUsers
+  } else {
+    // For now do search in a crude way. Will get this from the ODATA endpoint later
+    allUsers.forEach((user) => {
+      if ((JSON.stringify(user).toLowerCase()).indexOf(state.searchText.toLowerCase()) >= 0) {
+        filteredUsers.push(user)
+      }
+    })
+  }
+
   // Set Pagination Data
-  let pageCount = Math.ceil(allUsers.length / perPage)
-  let paginateData = allUsers.slice(initialOffset, initialOffset + perPage) 
+  let pageCount = Math.ceil(filteredUsers.length / perPage)
+  let paginateData = filteredUsers.slice(initialOffset, initialOffset + perPage) 
 
   let pageableData = {}
   pageableData['pageCount'] = pageCount
@@ -105,7 +119,7 @@ function setUserList (state, users) {
     isOpenSendMail: false,
     isOpenNewUser: false,
     pageableData: pageableData,
-    filteredUsers : null
+    filteredUsers : filteredUsers
   }
 }
 
@@ -159,7 +173,8 @@ function searchUsers (state,searchText) {
     isOpenSendMail: false,
     isOpenNewUser: false,
     pageableData: pageableData,
-    filteredUsers : filteredUsers
+    filteredUsers : filteredUsers,
+    searchText: searchText
   }
   
 }

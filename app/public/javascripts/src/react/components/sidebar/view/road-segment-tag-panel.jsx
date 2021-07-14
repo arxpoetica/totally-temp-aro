@@ -16,6 +16,7 @@ const RoadSegmentTagPanel = props => {
     setRoadSegments,
     cloneSelection,
     setMapSelection,
+    setIsMapClicked,
   } = props
 
   function handleCheckbox(constructionType) {
@@ -36,6 +37,7 @@ const RoadSegmentTagPanel = props => {
       const newSelection = cloneSelection()
       newSelection.details.roadSegments = newRoadSegments
       setMapSelection(newSelection)
+      setIsMapClicked(false)
     }
   }
 
@@ -88,6 +90,7 @@ const mapDispatchToProps = dispatch => ({
   setRoadSegments: roadSegments => dispatch(SelectionActions.setRoadSegments(roadSegments)),
   cloneSelection: () => dispatch(SelectionActions.cloneSelection()),
   setMapSelection: mapSelection => dispatch(SelectionActions.setMapSelection(mapSelection)),
+  setIsMapClicked: mapFeatures => dispatch(SelectionActions.setIsMapClicked(mapFeatures)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(RoadSegmentTagPanel)
