@@ -5,8 +5,6 @@ const getBoundaryLayersList = createSelector([getAllBoundaryLayers], (boundaries
 
 const getSelectedSubnet = state => state.planEditor.subnets[state.planEditor.selectedSubnetId]
 const getSelectedEditFeatureIds = state => state.planEditor.selectedEditFeatureIds
-
-// ToDo: this should be reworked a bit, should happen when we centralize plan edit features and subnet features
 const getSelectedIds = createSelector([getSelectedSubnet, getSelectedEditFeatureIds], (selectedSubnet, selectedEditFeatureIds) => {
   let selectedIds = []
   if (selectedSubnet) { 
@@ -20,8 +18,20 @@ const getSelectedIds = createSelector([getSelectedSubnet, getSelectedEditFeature
   return selectedIds
 })
 
+const getIsCalculatingSubnets = state => state.planEditor.isCalculatingSubnets
+const getIsCalculatingBoundary = state => state.planEditor.isCalculatingBoundary
+const getBoundaryDebounceBySubnetId = state => state.planEditor.boundaryDebounceBySubnetId
+const getIsRecalcSettled = createSelector(
+  [getIsCalculatingSubnets, getIsCalculatingBoundary, getBoundaryDebounceBySubnetId], 
+  (isCalculatingSubnets, isCalculatingBoundary, boundaryDebounceBySubnetId) => {
+    return (!isCalculatingSubnets && !isCalculatingBoundary && (0 === Object.keys(boundaryDebounceBySubnetId).length))
+  }
+)
+
 const PlanEditorSelectors = Object.freeze({
+  getBoundaryLayersList,
   getSelectedIds,
+  getIsRecalcSettled,
 })
 
 export default PlanEditorSelectors

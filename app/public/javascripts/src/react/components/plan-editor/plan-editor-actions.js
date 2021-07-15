@@ -244,10 +244,19 @@ function stopDrawingBoundary () {
   }
 }
 
+// does this need to be it's own function? it's only used in the recalc subnets function
 function setIsCalculatingSubnets (isCalculatingSubnets) {
   return {
     type: Actions.PLAN_EDITOR_SET_IS_CALCULATING_SUBNETS,
     payload: isCalculatingSubnets
+  }
+}
+
+// does this need to be it's own function? it's only used in the recalc boundary function
+function setIsCalculatingBoundary (isCalculatingBoundary) {
+  return {
+    type: Actions.PLAN_EDITOR_SET_IS_CALCULATING_BOUNDARY,
+    payload: isCalculatingBoundary
   }
 }
 
@@ -455,11 +464,13 @@ function setSelectedSubnetId (selectedSubnetId) {
   }
 }
 
-function recalculateBoundary ({ transactionId, subnetId }) {
+function recalculateBoundary (subnetId) {
   return (dispatch, getState) => {
+    dispatch(setIsCalculatingBoundary(true))
     const state = getState()
     //const transactionId = state.planEditor.transaction.id
-    if (!state.planEditor.subnets[subnetId]) return null // null? meh
+    if (!state.planEditor.subnets[subnetId] || !state.planEditor.transaction) return null // null? meh
+    const transactionId = state.planEditor.transaction.id
     const newPolygon = state.planEditor.subnets[subnetId].subnetBoundary.polygon
     const boundaryBody = {
       locked: true,
@@ -469,21 +480,55 @@ function recalculateBoundary ({ transactionId, subnetId }) {
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet/${subnetId}/boundary`, boundaryBody)
       .then(res => {
         console.log(res)
-        // debugger
-        // dispatch({
-        //   type: Actions.PLAN_EDITOR_RECALCULATE_BOUNDARY,
-        //   payload: subnetResults.map(result => result.data),
-        // })
+        dispatch(setIsCalculatingBoundary(false)) // may need to extend this for multiple boundaries? (make it and int incriment, decriment)
       })
-      .catch(err => console.error(err))
+      .catch(err => {
+        console.error(err)
+        dispatch(setIsCalculatingBoundary(false))
+      })
   }
 }
 
 function boundaryChange (subnetId, geometry) {
-  // put debounce here
-  return {
-    type: Actions.PLAN_EDITOR_UPDATE_SUBNET_BOUNDARY,
-    payload: {subnetId, geometry},
+  /**
+   * makes a delay function that will call recalculateBoundary with the subnetId
+   * gets the timeoutId and adds that to state by subnetId 
+   * (we may be changeing multiple subnets durring the debounce time)
+   * when new change comes in we check if there is already a timeoutId for that subnetId
+   * if so we cancel it and make a fresh one set to the full time
+   * 
+   * the delayed Fn with call recalculateBoundary and pull out it's entry in the delay list
+   * the recalculate button will (through a selector) check if there are any delay function waiting
+   * if so it will be disabled
+   */
+  return (dispatch, getState) => {
+    const timeoutDuration = 3000 // milliseconds
+    const state = getState()
+    
+    if (state.planEditor.boundaryDebounceBySubnetId[subnetId]) {
+      clearTimeout( state.planEditor.boundaryDebounceBySubnetId[subnetId] )
+    }
+    
+    const timeoutId = setTimeout(() => {
+      batch(() => {
+        dispatch(recalculateBoundary(subnetId))
+        dispatch({
+          type: Actions.PLAN_EDITOR_CLEAR_BOUNDARY_DEBOUNCE,
+          payload: subnetId,
+        })
+      })
+    }, timeoutDuration)
+
+    batch(() => {
+      dispatch({
+        type: Actions.PLAN_EDITOR_SET_BOUNDARY_DEBOUNCE,
+        payload: {subnetId, timeoutId},
+      })
+      dispatch({
+        type: Actions.PLAN_EDITOR_UPDATE_SUBNET_BOUNDARY,
+        payload: {subnetId, geometry},
+      })
+    })
   }
 }
 
@@ -494,15 +539,13 @@ function recalculateSubnets ({ transactionId, subnetIds }) {
     console.log(recalcBody)
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet-cmd/recalc`, recalcBody)
       .then(res => {
-        // TODO: handle errors
         dispatch(setIsCalculatingSubnets(false))
         console.log(res)
-        // dispatch({
-        //   type: Actions.PLAN_EDITOR_RECALCULATE_SUBNETS,
-        //   payload: subnetResults.map(result => result.data),
-        // })
       })
-      .catch(err => console.error(err))
+      .catch(err => {
+        console.error(err)
+        dispatch(setIsCalculatingSubnets(false))
+      })
   }
 }
 
@@ -636,6 +679,7 @@ export default {
   startDrawingBoundaryFor,
   stopDrawingBoundary,
   setIsCalculatingSubnets,
+  setIsCalculatingBoundary,
   setIsCreatingObject,
   setIsModifyingObject,
   setIsDraggingFeatureForDrop,

@@ -7,6 +7,7 @@ const defaultState = {
   selectedEditFeatureIds: [],
   isDrawingBoundaryFor: null,
   isCalculatingSubnets: false,
+  isCalculatingBoundary: false,
   isCreatingObject: false,
   isModifyingObject: false,
   isDraggingFeatureForDrop: false,
@@ -16,6 +17,8 @@ const defaultState = {
   subnets: {},
   subnetFeatures: {},
   selectedSubnetId: '',
+  boundaryDebounceBySubnetId: {},
+
 }
 
 function setTransaction (state, transaction) {
@@ -78,6 +81,12 @@ function setIsDrawingBoundaryFor (state, isDrawingBoundaryFor) {
 function setIsCalculatingSubnets (state, isCalculatingSubnets) {
   return { ...state,
     isCalculatingSubnets: isCalculatingSubnets
+  }
+}
+
+function setIsCalculatingBoundary (state, isCalculatingBoundary) {
+  return { ...state,
+    isCalculatingBoundary: isCalculatingBoundary
   }
 }
 
@@ -176,13 +185,23 @@ function setSelectedSubnetId (state, selectedSubnetId) {
   return { ...state, selectedSubnetId }
 }
 
-// TODO: this needs to be done
-function recalculateBoundary (state, to_be_determined) {
-  return { ...state, to_be_determined }
+function setBoundaryDebounce (state, subnetId, timeoutId) {
+  return {
+    ...state, 
+    boundaryDebounceBySubnetId: {
+      ...state.boundaryDebounceBySubnetId, 
+      [subnetId]: timeoutId,
+    }
+  }
 }
 
-function recalculateSubnets (state, to_be_determined) {
-  return { ...state, to_be_determined }
+function clearBoundaryDebounce (state, subnetId) {
+  let newBoundaryDebounceBySubnetId = JSON.parse(JSON.stringify(state.boundaryDebounceBySubnetId))
+  delete newBoundaryDebounceBySubnetId[subnetId]
+  return {
+    ...state, 
+    boundaryDebounceBySubnetId: newBoundaryDebounceBySubnetId
+  }
 }
 
 function planEditorReducer (state = defaultState, action) {
@@ -207,6 +226,9 @@ function planEditorReducer (state = defaultState, action) {
 
     case Actions.PLAN_EDITOR_SET_IS_CALCULATING_SUBNETS:
       return setIsCalculatingSubnets(state, action.payload)
+
+    case Actions.PLAN_EDITOR_SET_IS_CALCULATING_BOUNDARY:
+      return setIsCalculatingBoundary(state, action.payload)
 
     case Actions.PLAN_EDITOR_SET_IS_CREATING_OBJECT:
       return setIsCreatingObject(state, action.payload)
@@ -253,11 +275,11 @@ function planEditorReducer (state = defaultState, action) {
     case Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID:
       return setSelectedSubnetId(state, action.payload)
 
-    case Actions.PLAN_EDITOR_RECALCULATE_BOUNDARY:
-      return recalculateBoundary(state, action.payload)
+    case Actions.PLAN_EDITOR_SET_BOUNDARY_DEBOUNCE:
+      return setBoundaryDebounce(state, action.payload.subnetId, action.payload.timeoutId)
 
-    case Actions.PLAN_EDITOR_RECALCULATE_SUBNETS:
-      return recalculateSubnets(state, action.payload)
+    case Actions.PLAN_EDITOR_CLEAR_BOUNDARY_DEBOUNCE:
+      return clearBoundaryDebounce(state, action.payload)
 
     default:
       return state
