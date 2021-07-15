@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import cx from 'clsx'
+import PlanEditorSelectors from './plan-editor-selectors.js'
 
 const DefectsPanel = props => {
+  console.log(PlanEditorSelectors.ExceptionTypes)
 
-  const { subnetFeatures } = props
+  const { subnetFeatures, locationExceptions } = props
 
   const [exceptions, setExceptions] = useState([])
   const [open, setOpen] = useState(false)
@@ -76,6 +78,7 @@ const DefectsPanel = props => {
 
 const mapStateToProps = state => ({
   subnetFeatures: state.planEditor.subnetFeatures,
+  locationExceptions: PlanEditorSelectors.getExceptionsForSelectedSubnet(reduxState),
 })
 
 const mapDispatchToProps = dispatch => ({
