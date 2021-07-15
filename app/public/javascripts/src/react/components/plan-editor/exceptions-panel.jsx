@@ -54,9 +54,16 @@ const DefectsPanel = props => {
               <div className="svg location"></div>
               Drop Cable Length Exceeded
             </div>
+
+
+
             <div className="dropdown">
-              {/* Ignore this Exception */}
+              <div className="svg caret"></div>
+              <ul className="list">
+                <li>Ignore this Error</li>
+              </ul>
             </div>
+
           </li>
         )}
 
