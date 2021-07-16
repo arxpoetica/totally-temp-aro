@@ -29,12 +29,12 @@ const getIsRecalcSettled = createSelector(
 )
 
 const ExceptionTypes = {
-  'MAX_DROPLENGTH_EXCEEDED': {
-    key: 'MAX_DROPLENGTH_EXCEEDED', 
+  MAX_DROP_LENGTH_EXCEEDED: {
+    key: 'MAX_DROP_LENGTH_EXCEEDED', 
     displayName: 'Drop Cable Length Exceeded',
     iconUrl: '/svg/exception-panel-location.svg',
   },
-  'ABANDONED_LOCATION': {
+  ABANDONED_LOCATION: {
     key: 'ABANDONED_LOCATION', 
     displayName: 'Abandoned Location',
     iconUrl: '/svg/exception-panel-location.svg',
@@ -48,7 +48,7 @@ const getSubnetFeatures = state => state.planEditor.subnetFeatures
 const getExceptionsForSelectedSubnet = createSelector(
   [getSelectedSubnet, getSubnetFeatures],
   (selectedSubnet, subnetFeatures) => {
-    const maxDropcableLength = 500 //400 for test // FIX ME!!! ToDo: get the real value from ??? 
+    const maxDropcableLength = 280 //400 for test // FIX ME!!! ToDo: get the real value from ??? 
     let exceptions = {}
     // maybe we can spruce this up a bit some filter functions?
     if (selectedSubnet && selectedSubnet.subnetLocations && selectedSubnet.subnetLocations.length > 0) {
@@ -68,12 +68,12 @@ const getExceptionsForSelectedSubnet = createSelector(
               if (dropLink.dropCableLength > maxDropcableLength) {
                 if (!exceptions[locationId]) {
                   exceptions[locationId] = {
-                    'locationId': locationId,
-                    'subnetId': selectedSubnet.subnetNode,
-			              'exceptions': [],
+                    locationId: locationId,
+                    subnetId: selectedSubnet.subnetNode,
+                    exceptions: [],
                   }
                 }
-                exceptions[locationId].exceptions.push(ExceptionTypes['MAX_DROPLENGTH_EXCEEDED'].key)
+                exceptions[locationId].exceptions.push(ExceptionTypes['MAX_DROP_LENGTH_EXCEEDED'].key)
               }
             })
           })

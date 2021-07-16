@@ -662,7 +662,7 @@ function parseSubnet (subnet) {
   subnet.subnetNode = subnet.subnetNode.objectId
 
   // subnetLocations needs to be a dictionary
-  //  may have to fix this later for single-point-of-truth concerns
+  // TODO: may have to fix this later for single-point-of-truth concerns
   subnet.subnetLocationsById = {}
   subnet.subnetLocations.forEach(location => {
     location.objectIds.forEach(objectId => {

@@ -108,16 +108,6 @@ export const PlanEditor = props => {
           <p>subnets: {JSON.stringify(Object.keys(subnets), null, '  ')}</p>
           {/* <pre>features: {JSON.stringify(features, null, '  ')}</pre> */}
           <pre>selectedEditFeatureIds: {JSON.stringify(selectedEditFeatureIds, null, '  ')}</pre>
-          {Object.entries(features).map(([subnetId, { feature }]) =>
-            <button key={subnetId} onClick={() => addSubnets([subnetId])}>
-              [DEMO] set {feature.networkNodeType} subnet<br />({subnetId})
-            </button>
-          )}
-          {selectedEditFeatureIds.length > 1 &&
-            <button onClick={() => addSubnets(selectedEditFeatureIds)}>
-              [DEMO] set all subnets
-            </button>
-          }
         </div>
       }
     </div>
