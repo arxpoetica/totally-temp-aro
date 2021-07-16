@@ -1,7 +1,8 @@
 import WorkflowState from '../../shared-utils/workflow-state'
 
 class PointFeatureRenderer {
-  static renderFeatures (pointFeatureRendererList, ARO_CLIENT) {
+  // I can not wait to rewrite this whole system!!!
+  static renderFeatures (pointFeatureRendererList, ARO_CLIENT, selectedSubnetLocations = {}, locationExceptions = {}) {
     var deletedPointFeatureRendererList = pointFeatureRendererList.filter((featureObj) => {
       if (this.getModificationTypeForFeature(featureObj.feature, featureObj.mapLayer, featureObj.tileDataService) === PointFeatureRenderer.modificationTypes.DELETED) {
         return featureObj
@@ -18,20 +19,21 @@ class PointFeatureRenderer {
       PointFeatureRenderer.renderFeature(Obj.ctx, Obj.shape, Obj.feature, Obj.featureData, Obj.geometryOffset, Obj.mapLayer, Obj.mapLayers, Obj.tileDataService,
         Obj.selection, Obj.oldSelection, Obj.selectedLocationImage, Obj.lockOverlayImage, Obj.invalidatedOverlayImage,
         Obj.selectedDisplayMode, Obj.displayModes, Obj.analysisSelectionMode, Obj.selectionModes, Obj.equipmentLayerTypeVisibility,
-        ARO_CLIENT)
+        ARO_CLIENT, selectedSubnetLocations, locationExceptions)
     })
 
     unDeletedPointFeatureRendererList.forEach((Obj) => {
       PointFeatureRenderer.renderFeature(Obj.ctx, Obj.shape, Obj.feature, Obj.featureData, Obj.geometryOffset, Obj.mapLayer, Obj.mapLayers, Obj.tileDataService,
         Obj.selection, Obj.oldSelection, Obj.selectedLocationImage, Obj.lockOverlayImage, Obj.invalidatedOverlayImage,
         Obj.selectedDisplayMode, Obj.displayModes, Obj.analysisSelectionMode, Obj.selectionModes, Obj.equipmentLayerTypeVisibility,
-        ARO_CLIENT)
+        ARO_CLIENT, selectedSubnetLocations, locationExceptions)
     })
   }
 
   static renderFeature (ctx, shape, feature, featureData, geometryOffset, mapLayer, mapLayers, tileDataService,
     selection, oldSelection, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage,
-    selectedDisplayMode, displayModes, analysisSelectionMode, selectionModes, equipmentLayerTypeVisibility, ARO_CLIENT) 
+    selectedDisplayMode, displayModes, analysisSelectionMode, selectionModes, equipmentLayerTypeVisibility, 
+    ARO_CLIENT, selectedSubnetLocations, locationExceptions) 
   {
 
     const entityImage = this.getEntityImageForFeature(feature, featureData, ARO_CLIENT, mapLayer)
@@ -51,10 +53,25 @@ class PointFeatureRenderer {
 
     // this is a bit simple for what we actually need
     if (selectedDisplayMode === displayModes.EDIT_PLAN) {
+      let newGlobalAlpha = 0.333 // equipment
+      // selectedSubnetLocations = {}, locationExceptions
       // locations 
       // selectedListId
       // equipment 
-      ctx.globalAlpha = 0.333
+      //console.log(feature)
+      // not sure if this is reliable 
+      if (feature.properties._data_type && feature.properties._data_type === 'location') {
+        newGlobalAlpha = 0.4
+        //console.log(feature.properties.object_id)
+        //console.log(selectedSubnetLocations)
+        if (selectedSubnetLocations[feature.properties.object_id]) newGlobalAlpha = 1.0
+        if (locationExceptions[feature.properties.object_id]) {
+          console.log(feature.properties.object_id)
+          // mark with "!"
+        }
+      }
+
+      ctx.globalAlpha = newGlobalAlpha
     }
 
     var imageWidthBy2 = entityImage ? entityImage.width / 2 : 0
