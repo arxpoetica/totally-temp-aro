@@ -26,6 +26,8 @@ export class ArpuEditor extends Component {
 
   static getDerivedStateFromProps(nextProps, prevState) {
     if (nextProps.arpuModels && nextProps.arpuModels !== prevState.arpuModels) {
+      nextProps.arpuModels.forEach(arpuModelObject => arpuModelObject.hasInvalidValuesSelected = false)
+
       return { arpuModels: nextProps.arpuModels }
     }
     else return null
@@ -41,18 +43,27 @@ export class ArpuEditor extends Component {
     const { arpuModels } = this.state
 
     const selector = (model, index) =>
-      <div className="strategy">
-        Strategy:
-        {model.options.length > 1 ?
-          <Select
-            value={model.strategy}
-            options={model.options}
-            onClick={event => event.stopPropagation()}
-            onChange={event => this.handleStrategyChange(event, index)}
-          />
-          : ' Global'
+      <>
+        <div className="strategy">
+          Strategy:
+          {model.options.length > 1 ?
+            <Select
+              value={model.strategy}
+              options={model.options}
+              onClick={event => event.stopPropagation()}
+              onChange={event => this.handleStrategyChange(event, index)}
+            />
+            : ' Global'
+          }
+        </div>
+        {model.hasInvalidValuesSelected
+          && (
+            <div className="label label-danger alert-danger">
+              Segmentation Strategy cannot be saved while Default Segment is allocated 100% of Default Product.
+            </div>
+          )
         }
-      </div>
+      </>
 
     return (
       <div className="arpu-manager">
@@ -164,8 +175,14 @@ export class ArpuEditor extends Component {
 
   handleStrategyChange(event, modelIndex) {
     const { arpuModels } = this.state
-    arpuModels[modelIndex].strategy = event.target.value
-    this.setState({ arpuModels })
+    const model = arpuModels[modelIndex]
+    model.strategy = event.target.value
+
+    model.hasInvalidValuesSelected = model.strategy === 'segmentation'
+    && model.arpuModelKey.locationEntityType === 'household'
+    && model.segments[0].percents[0] === 100
+
+    this.setState({ arpuModels });
   }
 
   handleProductChange({ target }, modelIndex, productIndex) {
@@ -188,8 +205,11 @@ export class ArpuEditor extends Component {
       value = 0
     }
 
+    arpuModels[modelIndex].hasInvalidValuesSelected = !(((segmentIndex || cellIndex) && value)
+    || value !== 100)
+
     arpuModels[modelIndex].segments[segmentIndex].percents[cellIndex] = value
-    this.setState({ arpuModels })
+    this.setState({ arpuModels });
   }
 
   exitEditingMode() {
