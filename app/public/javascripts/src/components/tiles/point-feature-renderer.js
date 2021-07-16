@@ -33,8 +33,6 @@ class PointFeatureRenderer {
     selection, oldSelection, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage,
     selectedDisplayMode, displayModes, analysisSelectionMode, selectionModes, equipmentLayerTypeVisibility, ARO_CLIENT) 
   {
-    // this is a bit simple for what we actually need
-    if (selectedDisplayMode === displayModes.EDIT_PLAN) ctx.globalAlpha = 0.333
 
     const entityImage = this.getEntityImageForFeature(feature, featureData, ARO_CLIENT, mapLayer)
     var selectedListType = null
@@ -49,6 +47,14 @@ class PointFeatureRenderer {
       } else if (feature.properties.hasOwnProperty('id')) {
         selectedListId = feature.properties.id
       }
+    }
+
+    // this is a bit simple for what we actually need
+    if (selectedDisplayMode === displayModes.EDIT_PLAN) {
+      // locations 
+      // selectedListId
+      // equipment 
+      ctx.globalAlpha = 0.333
     }
 
     var imageWidthBy2 = entityImage ? entityImage.width / 2 : 0

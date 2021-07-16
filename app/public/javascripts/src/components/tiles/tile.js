@@ -755,6 +755,7 @@ class TileComponentController {
       rSelectedDisplayMode: reduxState.toolbar.rSelectedDisplayMode,
       rActiveViewModePanel: reduxState.toolbar.rActiveViewModePanel,
       subnetFeatures: reduxState.planEditor.subnetFeatures,
+      locationExceptions: PlanEditorSelectors.getExceptionsForSelectedSubnet(reduxState),
     }
   }
 
@@ -765,6 +766,7 @@ class TileComponentController {
   }
 
   mergeToTarget (nextState, actions) {
+    //console.log(this.locationExceptions)
     const currentSelectionModeId = this.activeSelectionModeId
     const oldPlanTargets = this.selection && this.selection.planTargets
     const prevStateMapLayers = { ...this.stateMapLayers }
