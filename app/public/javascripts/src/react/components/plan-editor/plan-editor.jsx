@@ -100,7 +100,7 @@ export const PlanEditor = props => {
         />
       )}
 
-      {true &&
+      {false &&
         <div className="temporary" style={{ margin: '0 0 25px' }}>
           <h2>Plan Information</h2>
           <p>userId: {userId}</p>
