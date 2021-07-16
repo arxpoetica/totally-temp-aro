@@ -16,7 +16,7 @@ const defaultState = {
   isCommittingTransaction: false,
   subnets: {},
   subnetFeatures: {},
-  selectedSubnetId: '',
+  selectedSubnetId: '', // unselected this should be null not ''
   boundaryDebounceBySubnetId: {},
 
 }

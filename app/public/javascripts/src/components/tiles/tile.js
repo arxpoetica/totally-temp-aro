@@ -294,6 +294,8 @@ class TileComponentController {
       this.state,
       MapUtilities.getPixelCoordinatesWithinTile.bind(this),
       this.selectionIds,
+      this.selectedSubnetLocations,
+      this.locationExceptions,
       this.rShowFiberSize,
       this.rViewSetting
     ))
@@ -740,6 +742,10 @@ class TileComponentController {
 
   // Map global state to component properties
   mapStateToThis (reduxState) {
+    let selectedSubnetLocations = {}
+    if ( reduxState.planEditor.subnets[reduxState.planEditor.selectedSubnetId] ) {
+      selectedSubnetLocations = reduxState.planEditor.subnets[reduxState.planEditor.selectedSubnetId].subnetLocationsById
+    }
     return {
       activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
       selectionModes: reduxState.selection.selectionModes,
@@ -756,6 +762,7 @@ class TileComponentController {
       rActiveViewModePanel: reduxState.toolbar.rActiveViewModePanel,
       subnetFeatures: reduxState.planEditor.subnetFeatures,
       locationExceptions: PlanEditorSelectors.getExceptionsForSelectedSubnet(reduxState),
+      selectedSubnetLocations: selectedSubnetLocations,
     }
   }
 
@@ -766,13 +773,15 @@ class TileComponentController {
   }
 
   mergeToTarget (nextState, actions) {
-    //console.log(this.locationExceptions)
+    // store the previous values before Object.assign
     const currentSelectionModeId = this.activeSelectionModeId
     const oldPlanTargets = this.selection && this.selection.planTargets
     const prevStateMapLayers = { ...this.stateMapLayers }
     const currentSelectionIds = this.selectionIds
     const rShowFiberSize = this.rShowFiberSize
     const rViewSetting = this.rViewSetting
+    const selectedSubnetLocations = this.selectedSubnetLocations
+    const locationExceptions = this.locationExceptions
 
     var needRefresh = false
     var doConduitUpdate = this.doesConduitNeedUpdate(prevStateMapLayers, nextState.stateMapLayers)
@@ -781,34 +790,46 @@ class TileComponentController {
     Object.assign(this, nextState)
     Object.assign(this, actions)
 
+    let overlayMap = this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX)
+    
     if (doConduitUpdate) {
-      this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setStateMapLayers(nextState.stateMapLayers)
+      overlayMap.setStateMapLayers(nextState.stateMapLayers)
     }
 
     if (currentSelectionModeId !== nextState.activeSelectionModeId ||
         this.hasPlanTargetSelectionChanged(oldPlanTargets, nextState.selection && nextState.selection.planTargets)) {
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
-        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setAnalysisSelectionMode(nextState.activeSelectionModeId)
-        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setSelection(nextState.selection)
+        overlayMap.setAnalysisSelectionMode(nextState.activeSelectionModeId)
+        overlayMap.setSelection(nextState.selection)
         needRefresh = true
       }
     }
 
+    // - plan edit - //
     if (!dequal(currentSelectionIds, nextState.selectionIds)) {
-      this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setSelectionIds(nextState.selectionIds)
+      overlayMap.setSelectionIds(nextState.selectionIds)
       needRefresh = true
     }
+    if (!dequal(selectedSubnetLocations, nextState.selectedSubnetLocations)) {
+      overlayMap.setSelectedSubnetLocations(nextState.selectedSubnetLocations)
+      needRefresh = true
+    }
+    if (!dequal(locationExceptions, nextState.locationExceptions)) {
+      overlayMap.setLocationExceptions(nextState.locationExceptions)
+      needRefresh = true
+    }
+    // - //
 
     // Set the current state in rShowFiberSize
     // If this is not set, the redux state does not change, it shows only the initial state, so current state is set in rShowFiberSize.
     if (rShowFiberSize !== nextState.rShowFiberSize) {
-      this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setReactShowFiberSize(nextState.rShowFiberSize)
+      overlayMap.setReactShowFiberSize(nextState.rShowFiberSize)
       needRefresh = true
     }
 
     // Set the current state in rViewSetting
     if (rViewSetting !== nextState.rViewSetting) {
-      this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setReactViewSetting(nextState.rViewSetting)
+      overlayMap.setReactViewSetting(nextState.rViewSetting)
       needRefresh = true
     }
 

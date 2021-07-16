@@ -541,6 +541,8 @@ function recalculateSubnets ({ transactionId, subnetIds }) {
       .then(res => {
         dispatch(setIsCalculatingSubnets(false))
         console.log(res)
+        // parse changes
+        dispatch(parseRecalcEvents(res.data))
       })
       .catch(err => {
         console.error(err)
@@ -550,6 +552,58 @@ function recalculateSubnets ({ transactionId, subnetIds }) {
 }
 
 // --- //
+
+// helper
+function parseRecalcEvents (recalcData) {
+  // this needs to be redone and I think we should make a sealed subnet manager
+  // that will manage the subnetFeatures list with changes to a subnet (deleting children etc)
+  return (dispatch, getState) => {
+    const state = getState()
+    let newSubnetFeatures = JSON.parse(JSON.stringify(state.planEditor.subnetFeatures))
+    let updatedSubnets = {}
+    recalcData.subnets.forEach(subnetRecalc => {
+      let subnetId = subnetRecalc.feature.objectId
+      let newSubnet = JSON.parse(JSON.stringify(state.planEditor.subnets[subnetId]))
+      subnetRecalc.recalcNodeEvents.forEach(recalcNodeEvent => {
+        let objectId = recalcNodeEvent.subnetNode.id
+        switch (recalcNodeEvent.eventType) {
+          case 'DELETE':
+            // need to cover the case of deleteing a hub where we need to pull the whole thing
+            delete newSubnetFeatures[objectId]
+            let index = newSubnet.children.indexOf(objectId);
+            if (index !== -1) {
+              newSubnet.children.splice(index, 1);
+            }
+            break
+          case 'ADD':
+            // add only
+            newSubnet.children.push(objectId)
+            // do not break
+          case 'MODIFY':
+            // add || modify
+            // TODO: this is repeat code from below
+            let parsedNode = {
+              'feature': parseSubnetFeature(recalcNodeEvent.subnetNode),
+              'subnetId': subnetId,
+            }
+            newSubnetFeatures[objectId] = parsedNode
+            break
+        }
+      })
+      updatedSubnets[subnetId] = newSubnet
+    })
+    batch(() => {
+      dispatch({
+        type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
+        payload: newSubnetFeatures,
+      })
+      dispatch({
+        type: Actions.PLAN_EDITOR_ADD_SUBNETS,
+        payload: updatedSubnets,
+      })
+    })
+  }
+}
 
 // helper
 function parseAddApiSubnets (apiSubnets) {
