@@ -1,4 +1,6 @@
 import WorkflowState from '../../shared-utils/workflow-state'
+// temporary 
+import PlanEditorSelectors from '../../react/components/plan-editor/plan-editor-selectors.js'
 
 class PointFeatureRenderer {
   // I can not wait to rewrite this whole system!!!
@@ -36,7 +38,7 @@ class PointFeatureRenderer {
     ARO_CLIENT, selectedSubnetLocations, locationExceptions) 
   {
 
-    const entityImage = this.getEntityImageForFeature(feature, featureData, ARO_CLIENT, mapLayer)
+    var entityImage = this.getEntityImageForFeature(feature, featureData, ARO_CLIENT, mapLayer)
     var selectedListType = null
     var selectedListId = null
     if (feature.properties.hasOwnProperty('_data_type') && feature.properties._data_type != '') {
@@ -51,26 +53,17 @@ class PointFeatureRenderer {
       }
     }
 
-    // this is a bit simple for what we actually need
+    // this may not be in the right place but this whole system is a mess so ...
     if (selectedDisplayMode === displayModes.EDIT_PLAN) {
       let newGlobalAlpha = 0.333 // equipment
-      // selectedSubnetLocations = {}, locationExceptions
-      // locations 
-      // selectedListId
-      // equipment 
-      //console.log(feature)
       // not sure if this is reliable 
       if (feature.properties._data_type && feature.properties._data_type === 'location') {
         newGlobalAlpha = 0.4
-        //console.log(feature.properties.object_id)
-        //console.log(selectedSubnetLocations)
         if (selectedSubnetLocations[feature.properties.object_id]) newGlobalAlpha = 1.0
         if (locationExceptions[feature.properties.object_id]) {
-          console.log(feature.properties.object_id)
-          // mark with "!"
+          entityImage = PlanEditorSelectors.locationWarnImg
         }
       }
-
       ctx.globalAlpha = newGlobalAlpha
     }
 

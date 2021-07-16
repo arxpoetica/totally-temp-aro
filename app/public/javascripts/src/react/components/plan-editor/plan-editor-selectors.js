@@ -32,14 +32,17 @@ const ExceptionTypes = {
   'MAX_DROPLENGTH_EXCEEDED': {
     key: 'MAX_DROPLENGTH_EXCEEDED', 
     displayName: 'Drop Cable Length Exceeded',
-    iconUrl: '/svg/exception-panel-warning.svg',
+    iconUrl: '/svg/exception-panel-location.svg',
   },
   'ABANDONED_LOCATION': {
     key: 'ABANDONED_LOCATION', 
     displayName: 'Abandoned Location',
-    iconUrl: '/svg/exception-panel-warning.svg',
+    iconUrl: '/svg/exception-panel-location.svg',
   },
 }
+// temporary
+const locationWarnImg = new Image(18, 22)
+locationWarnImg.src = '/svg/exception-panel-location.png'
 //const getSubnets = state => state.planEditor.subnets
 const getSubnetFeatures = state => state.planEditor.subnetFeatures
 const getExceptionsForSelectedSubnet = createSelector(
@@ -70,7 +73,6 @@ const getExceptionsForSelectedSubnet = createSelector(
         }
       })
     } 
-    
     return exceptions
   }
 )
@@ -81,6 +83,7 @@ const PlanEditorSelectors = Object.freeze({
   getIsRecalcSettled,
   ExceptionTypes,
   getExceptionsForSelectedSubnet,
+  locationWarnImg,
 })
 
 export default PlanEditorSelectors
