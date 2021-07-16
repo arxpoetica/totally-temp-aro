@@ -11,7 +11,7 @@ export class ArpuEditor extends Component {
   constructor (props) {
     super(props)
 
-    this.state = { arpuModels: [] }
+    this.state = { arpuModels: [], isSelectionInvalid: false }
     this.OPTIONS = Object.freeze({
       global: 'Global',
       segmentation: 'Segmentation',
@@ -60,6 +60,7 @@ export class ArpuEditor extends Component {
         <Accordion items={arpuModels}>
           {arpuModels.map((model, modelIndex) =>
             // NOTE: passing JSX content to the `header` prop
+            <>
             <AccordionRow
               key={modelIndex}
               index={modelIndex}
@@ -96,6 +97,19 @@ export class ArpuEditor extends Component {
                 </div>
               }
             </AccordionRow>
+            {this.state.isSelectionInvalid &&
+              model.arpuModelKey.locationEntityType === "household" &&
+              modelIndex === 1 && (
+                <span
+                  className="label label-danger alert-danger"
+                  style={{ padding: "0px 10px" }}
+                >
+                  Unable to Edit: Cannot save Segmentation strategy while ARPU is 100%
+                </span>
+              )
+            }
+            </>
+
           )}
         </Accordion>
 
@@ -165,7 +179,12 @@ export class ArpuEditor extends Component {
   handleStrategyChange(event, modelIndex) {
     const { arpuModels } = this.state
     arpuModels[modelIndex].strategy = event.target.value
-    this.setState({ arpuModels })
+    this.setState({
+      arpuModels,
+      isSelectionInvalid:
+        event.target.value === "segmentation" &&
+        arpuModels[modelIndex].segments[0].percents[0] === 100
+    });
   }
 
   handleProductChange({ target }, modelIndex, productIndex) {
@@ -189,7 +208,10 @@ export class ArpuEditor extends Component {
     }
 
     arpuModels[modelIndex].segments[segmentIndex].percents[cellIndex] = value
-    this.setState({ arpuModels })
+    this.setState({
+      arpuModels,
+      isSelectionInvalid: !(((segmentIndex || cellIndex) && value) || value !== 100)
+    });
   }
 
   exitEditingMode() {
