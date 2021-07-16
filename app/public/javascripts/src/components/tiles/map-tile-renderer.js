@@ -707,6 +707,11 @@ class MapTileRenderer {
               }
             }
 
+            // lower opacity of fiber in plan edit mode
+            if (this.selectedDisplayMode == this.displayModes.EDIT_PLAN && feature.properties._data_type === 'fiber'){
+              drawingStyles.lineOpacity = 0.2
+              drawingStyles.lineCap = 'butt'
+            }
             PolylineFeatureRenderer.renderFeature(feature, shape, geometryOffset, ctx, mapLayer, drawingStyles, false, this.tileSize)
           }
         }
