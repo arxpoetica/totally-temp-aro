@@ -50,15 +50,22 @@ const getExceptionsForSelectedSubnet = createSelector(
   (selectedSubnet, subnetFeatures) => {
     const maxDropcableLength = 500 //400 for test // FIX ME!!! ToDo: get the real value from ??? 
     let exceptions = {}
-    // maybe we can sp[ruce this up a bit some filter functions?
+    // maybe we can spruce this up a bit some filter functions?
     if (selectedSubnet && selectedSubnet.subnetLocations && selectedSubnet.subnetLocations.length > 0) {
+      let abandonedLocations = {}
+      Object.keys(selectedSubnet.subnetLocationsById).forEach(locationId => {
+        abandonedLocations[locationId] = true
+      }) 
       selectedSubnet.children.forEach(featureId => {
         const featureEntry = subnetFeatures[featureId]
         if (featureEntry) {
           featureEntry.feature.dropLinks.forEach(dropLink => {
-            if (dropLink.dropCableLength > maxDropcableLength) {
-              dropLink.locationLinks.forEach(locationLink => {
-                const locationId = locationLink.locationId
+            dropLink.locationLinks.forEach(locationLink => {
+              const locationId = locationLink.locationId
+              // remove abandoned entry
+              delete abandonedLocations[locationId]
+              // dropcable exception?
+              if (dropLink.dropCableLength > maxDropcableLength) {
                 if (!exceptions[locationId]) {
                   exceptions[locationId] = {
                     'locationId': locationId,
@@ -67,12 +74,23 @@ const getExceptionsForSelectedSubnet = createSelector(
                   }
                 }
                 exceptions[locationId].exceptions.push(ExceptionTypes['MAX_DROPLENGTH_EXCEEDED'].key)
-              })
-            }
+              }
+            })
           })
         }
       })
+      Object.keys(abandonedLocations).forEach(locationId => {
+        if (!exceptions[locationId]) {
+          exceptions[locationId] = {
+            'locationId': locationId,
+            'subnetId': selectedSubnet.subnetNode,
+            'exceptions': [],
+          }
+        }
+        exceptions[locationId].exceptions.push(ExceptionTypes['ABANDONED_LOCATION'].key)
+      }) 
     } 
+    console.log(exceptions)
     return exceptions
   }
 )
