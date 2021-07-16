@@ -426,10 +426,24 @@ function addSubnets (subnetIds) {
     const subnetApiPromises = uncachedSubnetIds.map(subnetId => {
       return AroHttp.get(`/service/plan-transaction/${transaction.id}/subnet/${subnetId}`)
     })
-    
-    return Promise.all(subnetApiPromises)
-      .then(subnetResults => {
-        let apiSubnets = subnetResults.map(result => result.data)
+    const fiberApiPromises = uncachedSubnetIds.map(subnetId => {
+      return AroHttp.get(`/service/plan-transaction/${transaction.id}/subnetfeature/${subnetId}`)
+    })
+
+    //messy solution where we combine the promises and then parse the two responses since fiber is a seperate call
+    return Promise.all([...subnetApiPromises, ...fiberApiPromises])
+      .then(allResults => {
+        // splitting the results into subnet and fiber
+        const halfLength = allResults.length / 2
+        const subnetResults = allResults.slice(0, halfLength)
+        const fiberResults = allResults.slice(halfLength, allResults.length)
+        
+        //attaching fiber into the subnet
+        let apiSubnets = subnetResults.map((result, index) => {
+          result.data.fiber = fiberResults[index].data
+          return result.data
+        })
+        console.log(apiSubnets)
         dispatch(parseAddApiSubnets(apiSubnets))
       })
       .catch(err => console.error(err))
