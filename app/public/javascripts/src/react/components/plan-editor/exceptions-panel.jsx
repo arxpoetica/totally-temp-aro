@@ -78,7 +78,7 @@ const DefectsPanel = props => {
 
 const mapStateToProps = state => ({
   subnetFeatures: state.planEditor.subnetFeatures,
-  locationExceptions: PlanEditorSelectors.getExceptionsForSelectedSubnet(reduxState),
+  locationExceptions: PlanEditorSelectors.getExceptionsForSelectedSubnet(state),
 })
 
 const mapDispatchToProps = dispatch => ({

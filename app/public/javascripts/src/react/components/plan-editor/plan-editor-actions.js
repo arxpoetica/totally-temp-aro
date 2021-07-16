@@ -607,6 +607,15 @@ function parseSubnet (subnet) {
   subnet.children = subnet.children.map(feature => feature.objectId)
   subnet.subnetNode = subnet.subnetNode.objectId
 
+  // subnetLocations needs to be a dictionary
+  //  may have to fix this later for single-point-of-truth concerns
+  subnet.subnetLocationsById = {}
+  subnet.subnetLocations.forEach(location => {
+    location.objectIds.forEach(objectId => {
+      subnet.subnetLocationsById[objectId] = location
+    })
+  })
+
   return {subnet, subnetFeatures}
 }
 
