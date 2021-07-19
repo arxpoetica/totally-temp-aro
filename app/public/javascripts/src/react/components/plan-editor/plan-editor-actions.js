@@ -147,6 +147,7 @@ function modifyFeature (featureType, feature) {
 }
 
 // ToDo: there's only one transaction don't require the ID
+// TODO: cleanup?
 function deleteTransactionFeature (transactionId, featureType, transactionFeatureId) {
   return dispatch => {
     return AroHttp.delete(`/service/plan-transactions/${transactionId}/modified-features/${featureType}/${transactionFeatureId}`)
@@ -569,12 +570,12 @@ function boundaryChange (subnetId, geometry) {
 function recalculateSubnets ({ transactionId, subnetIds }) {
   return dispatch => {
     dispatch(setIsCalculatingSubnets(true))
-    console.log(recalcBody)
     const recalcBody = { subnetIds: [] }
+    // console.log(recalcBody)
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet-cmd/recalc`, recalcBody)
       .then(res => {
         dispatch(setIsCalculatingSubnets(false))
-        console.log(res)
+        // console.log(res)
         // parse changes
         dispatch(parseRecalcEvents(res.data))
       })
