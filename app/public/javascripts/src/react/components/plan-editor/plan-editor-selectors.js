@@ -48,7 +48,7 @@ const getSubnetFeatures = state => state.planEditor.subnetFeatures
 const getExceptionsForSelectedSubnet = createSelector(
   [getSelectedSubnet, getSubnetFeatures],
   (selectedSubnet, subnetFeatures) => {
-    const maxDropcableLength = 280 //400 for test // FIX ME!!! ToDo: get the real value from ??? 
+    const maxDropcableLength = 500 //400 for test // FIX ME!!! ToDo: get the real value from ??? 
     let exceptions = {}
     // maybe we can spruce this up a bit some filter functions?
     if (selectedSubnet && selectedSubnet.subnetLocations && selectedSubnet.subnetLocations.length > 0) {
@@ -90,7 +90,7 @@ const getExceptionsForSelectedSubnet = createSelector(
         exceptions[locationId].exceptions.push(ExceptionTypes['ABANDONED_LOCATION'].key)
       }) 
     } 
-    // console.log(exceptions)
+    console.log(exceptions)
     return exceptions
   }
 )

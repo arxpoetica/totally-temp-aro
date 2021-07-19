@@ -346,10 +346,23 @@ function deleteFeature (featureId) {
       .then(result => {
         console.log(result)
         // FIXME: what should this be?
+        /*
         dispatch({
           type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
           payload: {featureId: subnetFeature}
         })
+        */
+        //dispatch(parseRecalcEvents(result.data))
+        // --- //
+        /**
+         * - delete state.planEditor.subnetFeatures[featureId]
+         * - if featureId in state.planEditor.subnets
+         *    delete parentSubnet.children
+         *    delete each subnet.children from state.planEditor.subnetFeatures
+         *    delete state.planEditor.subnets[featureId]
+         * 
+         * ? does the above belong in an action or in the reducer? 
+         */
       })
       .catch(err => console.error(err))
   }
@@ -575,7 +588,7 @@ function recalculateSubnets ({ transactionId, subnetIds }) {
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet-cmd/recalc`, recalcBody)
       .then(res => {
         dispatch(setIsCalculatingSubnets(false))
-        // console.log(res)
+        console.log(res)
         // parse changes
         dispatch(parseRecalcEvents(res.data))
       })
@@ -590,12 +603,15 @@ function recalculateSubnets ({ transactionId, subnetIds }) {
 
 // helper
 function parseRecalcEvents (recalcData) {
+  //copnsole.log(recalcData)
   // this needs to be redone and I think we should make a sealed subnet manager
   // that will manage the subnetFeatures list with changes to a subnet (deleting children etc)
   return (dispatch, getState) => {
     const state = getState()
     let newSubnetFeatures = JSON.parse(JSON.stringify(state.planEditor.subnetFeatures))
     let updatedSubnets = {}
+    // TODO: some edits may affect subnets that we don't have in state
+      //  we need to add these .then do the following
     recalcData.subnets.forEach(subnetRecalc => {
       let subnetId = subnetRecalc.feature.objectId
       let newSubnet = JSON.parse(JSON.stringify(state.planEditor.subnets[subnetId]))
