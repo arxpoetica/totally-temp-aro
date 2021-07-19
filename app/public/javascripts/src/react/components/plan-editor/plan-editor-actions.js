@@ -443,7 +443,7 @@ function addSubnets (subnetIds) {
           result.data.fiber = fiberResults[index].data
           return result.data
         })
-        console.log(apiSubnets)
+        // console.log(apiSubnets)
         dispatch(parseAddApiSubnets(apiSubnets))
       })
       .catch(err => console.error(err))

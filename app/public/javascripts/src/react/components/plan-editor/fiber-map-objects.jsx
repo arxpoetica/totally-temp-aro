@@ -19,36 +19,43 @@ export class FiberMapObjects extends Component {
   }
 
   componentDidUpdate () {
-    const {selectedSubnetId, subnets} = this.props
+    const { selectedSubnetId, subnets } = this.props
     if (this.mapobjects.length) {
       this.deleteMapObject()
     }
 
     if (subnets[selectedSubnetId]){
-      const {geometry, fiberType} = subnets[selectedSubnetId].fiber
-      const fiberToCreate = WktUtils.getGoogleMapPathsFromWKTMultiLineString(geometry)
+      const { subnetLinks, fiberType } = subnets[selectedSubnetId].fiber
 
-      fiberToCreate.forEach(path => this.createMapObject(path, fiberType))
+      for (const subnetLink of subnetLinks) {
+        const { geometry } = subnetLink
+        if (geometry.type === 'LineString') {
+          const path = WktUtils.getGoogleMapPathsFromWKTLineString(geometry)
+          this.createMapObject(path, fiberType)
+        } else if (geometry.type === 'MultiLineString') {
+          const path = WktUtils.getGoogleMapPathsFromWKTMultiLineString(geometry)
+          this.createMapObject(path, fiberType)
+        }
+        // TODO: is there an else / alternative?
+      }
     }
   }
 
   createMapObject (path, fiberType) {
-
     const mapObject = new google.maps.Polyline({
-      path: path, 
+      path,
       clickable: false,
       map: this.props.googleMaps,
       zIndex: MAP_OBJECT_Z_INDEX,
-      strokeColor: (fiberType === 'DISTRIBUTION' ? '#FF0000' : '#1700ff'),
+      strokeColor: fiberType === 'DISTRIBUTION' ? '#FF0000' : '#1700ff',
       strokeOpacity: 1.0,
-      strokeWeight: (fiberType === 'DISTRIBUTION' ? 2 : 4)
+      strokeWeight: fiberType === 'DISTRIBUTION' ? 2 : 4,
     })
     this.mapobjects.push(mapObject)
   }
 
   deleteMapObject () {
-    if(this.mapobjects.length){
-      console.log(this.mapobjects)
+    if (this.mapobjects.length) {
       this.mapobjects.forEach(mapObject => mapObject.setMap(null))
       this.mapobjects = []
     }
