@@ -28,7 +28,13 @@ var Constants = Object.freeze({
   DRAG_DROP_GRAB_OFFSET_X: 'grabOffsetX',
   DRAG_DROP_GRAB_OFFSET_Y: 'grabOffsetY',
   DRAG_DROP_GRAB_ICON_W: 'grabIconW',
-  DRAG_DROP_GRAB_ICON_H: 'grabIconH'
+  DRAG_DROP_GRAB_ICON_H: 'grabIconH',
+
+  // Client List
+  ARO_CLIENT: {
+    ARO: 'aro',
+    FRONTIER: 'frontier',
+  },
 })
 
 export default Constants

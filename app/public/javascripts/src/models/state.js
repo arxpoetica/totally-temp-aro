@@ -1357,7 +1357,7 @@ class State {
         .then((result) => {
           const groupIds = result.data.groupIds
           // For the 'Frontier' client show warning to the user who does not assigned to any of the groups.
-          if (service.configuration.ARO_CLIENT === 'frontier' && !groupIds.length) {
+          if (service.configuration.ARO_CLIENT === Constants.ARO_CLIENT.FRONTIER && !groupIds.length) {
             const userGroupsWarning =  service.configuration.userGroupsWarning
             const userGroupsMsg = userGroupsWarning && Object.keys(userGroupsWarning).length ? userGroupsWarning : {}
             $timeout(() => { service.setUserGroupsMsg(userGroupsMsg) })
