@@ -217,6 +217,9 @@ export class ArpuEditor extends Component {
   }
 
   saveConfigurationToServer() {
+    this.state.arpuModels.forEach(arpuModelObject => 
+      delete arpuModelObject.hasInvalidValuesSelected)
+      
     this.props.saveArpuModels(
       this.props.arpuManager.id,
       this.state.arpuModels,
