@@ -165,28 +165,15 @@ function addTransactionFeatures (features) {
   }
 }
 
-function showContextMenuForEquipment (equipmentObjectId, x, y) {
-  return (dispatch, getState) => {
-    const state = getState()
-    const planId = state.plan.activePlan.id
-    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
-    const selectedBoundaryTypeId = state.mapLayers.selectedBoundaryType.id
-
-    // Get details on the boundary (if any) for this equipment
-    AroHttp.get(`/boundary/for_network_node/${planId}/${equipmentObjectId}/${selectedBoundaryTypeId}`)
-      .then(result => {
-        var menuActions = []
-        var isAddBoundaryAllowed = (result.data.length === 0) // No results for this combination of planid, object_id, selectedBoundaryTypeId. Allow users to add boundary
-        if (isAddBoundaryAllowed) {
-          menuActions.push(new MenuItemAction('ADD_BOUNDARY', 'Add boundary', 'PlanEditorActions', 'startDrawingBoundaryFor', equipmentObjectId))
-        }
-        menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteTransactionFeature', transactionId, 'equipment', equipmentObjectId))
-        const menuItemFeature = new MenuItemFeature('EQUIPMENT', 'Equipment', menuActions)
-        // Show context menu
-        dispatch(ContextMenuActions.setContextMenuItems([menuItemFeature]))
-        dispatch(ContextMenuActions.showContextMenu(x, y))
-      })
-      .catch(err => console.error(err))
+function showContextMenuForEquipment (featureId, x, y) {
+  return (dispatch) => {
+    // debugger
+    var menuActions = []
+    menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteFeature', featureId))
+    const menuItemFeature = new MenuItemFeature('EQUIPMENT', 'Equipment', menuActions)
+    // Show context menu
+    dispatch(ContextMenuActions.setContextMenuItems([menuItemFeature]))
+    dispatch(ContextMenuActions.showContextMenu(x, y))
   }
 }
 
@@ -314,7 +301,7 @@ function moveFeature (featureId, coordinates) {
     const body = {
       commands: [{
         // `childId` is one of the children nodes of the subnets
-        // service need to chagen this to "childNode"
+        // service need to change this to "childNode"
         childId: unparseSubnetFeature(subnetFeature.feature),
         subnetId: subnetId, // parent subnet id, don't add when `type: 'add'`
         type: 'update', // `add`, `update`, or `delete`
@@ -325,6 +312,39 @@ function moveFeature (featureId, coordinates) {
       .then(result => {
         //console.log(result)
         
+        dispatch({
+          type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
+          payload: {featureId: subnetFeature}
+        })
+      })
+      .catch(err => console.error(err))
+  }
+}
+
+function deleteFeature (featureId) {
+  return (dispatch, getState) => {
+    const state = getState()
+
+    let subnetFeature = state.planEditor.subnetFeatures[featureId]
+    subnetFeature = JSON.parse(JSON.stringify(subnetFeature))
+    let subnetId = subnetFeature.subnetId
+    let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+
+    const body = {
+      commands: [{
+        childId: unparseSubnetFeature(subnetFeature.feature),
+        subnetId, // parent subnet id, don't add when `type: 'add'`
+        type: 'delete',
+      }]
+    }
+
+    console.log(body)
+
+    // Do a PUT to send the equipment over to service
+    return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
+      .then(result => {
+        console.log(result)
+        // FIXME: what should this be?
         dispatch({
           type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
           payload: {featureId: subnetFeature}
@@ -549,8 +569,8 @@ function boundaryChange (subnetId, geometry) {
 function recalculateSubnets ({ transactionId, subnetIds }) {
   return dispatch => {
     dispatch(setIsCalculatingSubnets(true))
-    const recalcBody = { subnetIds }
     console.log(recalcBody)
+    const recalcBody = { subnetIds: [] }
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet-cmd/recalc`, recalcBody)
       .then(res => {
         dispatch(setIsCalculatingSubnets(false))
@@ -749,6 +769,7 @@ export default {
   createFeature,
   modifyFeature,
   moveFeature,
+  deleteFeature,
   deleteTransactionFeature,
   addTransactionFeatures,
   showContextMenuForEquipment,
