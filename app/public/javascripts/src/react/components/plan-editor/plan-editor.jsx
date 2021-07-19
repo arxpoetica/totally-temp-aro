@@ -8,6 +8,7 @@ import PlanEditorRecalculate from './plan-editor-recalculate.jsx'
 import EquipmentDragger from './equipment-dragger.jsx'
 import EquipmentMapObjects from './equipment-map-objects.jsx'
 import EquipmentBoundaryMapObjects from './equipment-boundary-map-objects.jsx'
+import FiberMapObjects  from './fiber-map-objects.jsx'
 import ExceptionsPanel from './exceptions-panel.jsx'
 import BoundaryDrawCreator from './boundary-draw-creator.jsx'
 import './plan-editor.css'
@@ -83,6 +84,7 @@ export const PlanEditor = props => {
       <EquipmentDragger />
       <EquipmentMapObjects />
       <EquipmentBoundaryMapObjects />
+      <FiberMapObjects />
       { /* If we are in "draw boundary mode" for any equipment, render the drawing component */ }
       { isDrawingBoundaryFor ? <BoundaryDrawCreator /> : null }
 
