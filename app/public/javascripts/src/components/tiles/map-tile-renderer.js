@@ -10,7 +10,7 @@ import StrokeStyle from '../../shared-utils/stroke-styles'
 
 class MapTileRenderer {
   constructor (tileSize, tileDataService, mapTileOptions, layerCategories, selectedDisplayMode, selectionModes, analysisSelectionMode, stateMapLayers, displayModes,
-    viewModePanels, state, getPixelCoordinatesWithinTile, selectionIds, rShowFiberSize, rViewSetting, mapLayers = []) {
+    viewModePanels, state, getPixelCoordinatesWithinTile, selectionIds, selectedSubnetLocations, locationExceptions, rShowFiberSize, rViewSetting, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
@@ -27,7 +27,11 @@ class MapTileRenderer {
     this.state = state
     this.getPixelCoordinatesWithinTile = getPixelCoordinatesWithinTile
     this.latestTileUniqueId = 0
+    
     this.selectionIds = selectionIds
+    this.selectedSubnetLocations = selectedSubnetLocations
+    this.locationExceptions = locationExceptions
+
     this.rShowFiberSize = rShowFiberSize
     this.rViewSetting = rViewSetting
 
@@ -106,9 +110,17 @@ class MapTileRenderer {
     this.stateMapLayers = stateMapLayers
   }
 
+  // - plan edit - //
   setSelectionIds (selectionIds) {
     this.selectionIds = selectionIds
   }
+  setSelectedSubnetLocations (selectedSubnetLocations) {
+    this.selectedSubnetLocations = selectedSubnetLocations
+  }
+  setLocationExceptions (locationExceptions) {
+    this.locationExceptions = locationExceptions
+  }
+  // - //
 
   // Sets the selected rshowFiberSize
   setReactShowFiberSize (rShowFiberSize) {
@@ -695,6 +707,11 @@ class MapTileRenderer {
               }
             }
 
+            // lower opacity of fiber in plan edit mode
+            if (this.selectedDisplayMode == this.displayModes.EDIT_PLAN && feature.properties._data_type === 'fiber'){
+              drawingStyles.lineOpacity = 0.2
+              drawingStyles.lineCap = 'butt'
+            }
             PolylineFeatureRenderer.renderFeature(feature, shape, geometryOffset, ctx, mapLayer, drawingStyles, false, this.tileSize)
           }
         }
@@ -713,7 +730,7 @@ class MapTileRenderer {
         .includes(tileObject.properties.object_id))
     }
     // render point feature
-    PointFeatureRenderer.renderFeatures(pointFeatureRendererList, this.state.configuration.ARO_CLIENT)
+    PointFeatureRenderer.renderFeatures(pointFeatureRendererList, this.state.configuration.ARO_CLIENT, this.selectedSubnetLocations, this.locationExceptions)
     // render polygon feature
     PolygonFeatureRenderer.renderFeatures(closedPolygonFeatureLayersList, featureData, this.selection, this.oldSelection)
   }

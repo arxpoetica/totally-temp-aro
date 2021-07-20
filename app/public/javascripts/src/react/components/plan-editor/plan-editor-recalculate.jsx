@@ -5,6 +5,7 @@ import Select from 'react-select'
 import Loader from '../common/Loader.jsx'
 import { selectStylesBlue } from '../../common/view-utils'
 import AroHttp from '../../common/aro-http'
+import PlanEditorSelectors from './plan-editor-selectors.js'
 
 const PlanEditorRecalculate = props => {
 
@@ -13,6 +14,7 @@ const PlanEditorRecalculate = props => {
     isCalculatingSubnets,
     selectedSubnetId,
     recalculateSubnets,
+    isRecalcSettled,
   } = props
 
   const [options, setOptions] = useState([
@@ -62,6 +64,7 @@ const PlanEditorRecalculate = props => {
                 transactionId: transaction.id,
                 subnetIds: [selectedSubnetId],
               })}
+              disabled={!isRecalcSettled}
             >
               Recalculate Hubs & Terminals
             </button>
@@ -93,6 +96,7 @@ const mapStateToProps = state => ({
   subnets: state.planEditor.subnets,
   selectedSubnetId: state.planEditor.selectedSubnetId,
   isCalculatingSubnets: state.planEditor.isCalculatingSubnets,
+  isRecalcSettled: PlanEditorSelectors.getIsRecalcSettled(state),
 })
 
 const mapDispatchToProps = dispatch => ({
