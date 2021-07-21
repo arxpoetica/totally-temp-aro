@@ -1357,10 +1357,11 @@ class State {
         .then((result) => {
           const groupIds = result.data.groupIds
           // Show warning to the user who does not assigned to any of the groups.
-          if (!groupIds.length) {
-            const userGroupsCheck =  service.configuration.userGroupsCheck
-            const userGroupsMsg = userGroupsCheck && Object.keys(userGroupsCheck).length ? userGroupsCheck : {}
-            $timeout(() => { service.setUserGroupsMsg(userGroupsMsg) })
+          const userGroupsConfig = service.configuration.userGroups
+          if (userGroupsConfig && !groupIds.length) {
+            const { hasGroupsCheck, groupsMessage } = userGroupsConfig
+            const userGroupMsg = hasGroupsCheck ? groupsMessage : {}
+            $timeout(() => { service.setUserGroupsMsg(userGroupMsg) })
           }
           service.loggedInUser.groupIds = groupIds
 
