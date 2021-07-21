@@ -168,6 +168,31 @@ function updateSubnetFeatures (state, updatedSubnetFeatures) {
   return { ...state, subnetFeatures: { ...state.subnetFeatures, ...updatedSubnetFeatures } }
 }
 
+function removeSubnetFeature (state, featureId) {
+
+  //remove from subnetFeatures
+  const subnetId = state.subnetFeatures[featureId].subnetId
+  let updatedSubnets = JSON.parse(JSON.stringify(state.subnets))
+  const updatedSubnetFeatures = { ...state.subnetFeatures }
+ 
+  // this checks if the ID is a subnet, not sure if this should happen here or in actions
+  // TODO: I feel like there is a better way to check this
+  if (state.subnets[featureId]) {
+    // removes each of the children from subnet features
+    // TODO: Should these be sent to service to remove there as well?
+    for (const child of state.subnets[featureId].children) {
+      delete updatedSubnetFeatures[child]
+    }
+    // removes the feature itself from subnet features
+    delete updatedSubnetFeatures[featureId]
+  } else {
+    // if it is not a parent itself then it just removes from subFeatures and from it's parent in subnets
+    delete updatedSubnetFeatures[featureId]
+    updatedSubnets[subnetId].children = updatedSubnets[subnetId].children.filter(childId => childId !== featureId)
+  }
+  return { ...state, subnetFeatures: updatedSubnetFeatures, subnets: updatedSubnets }
+}
+
 function removeSubnets (state, subnets) {
   const updatedSubnets = { ...state.subnets }
   for (const subnet of subnets) {
@@ -265,6 +290,9 @@ function planEditorReducer (state = defaultState, action) {
 
     case Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES:
       return updateSubnetFeatures(state, action.payload)
+
+    case Actions.PLAN_EDITOR_REMOVE_SUBNET_FEATURE:
+      return removeSubnetFeature(state, action.payload.featureId)
 
     case Actions.PLAN_EDITOR_REMOVE_SUBNETS:
       return removeSubnets(state, action.payload)

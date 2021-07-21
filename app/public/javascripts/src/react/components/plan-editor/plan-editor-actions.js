@@ -346,18 +346,21 @@ function deleteFeature (featureId) {
       .then(result => {
         console.log(result)
         // FIXME: what should this be?
-        /*
-        dispatch({
-          type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
-          payload: {featureId: subnetFeature}
-        })
-        */
+        // deletes feature from subnetFeatures and subnets.children
+        // right now is also checking if it is in subnets and removing those children as well
+        // TODO: do those children need to be collected and sent to service to be fully removed?
+          dispatch({
+            type: Actions.PLAN_EDITOR_REMOVE_SUBNET_FEATURE,
+            payload: {featureId: featureId}
+          })
+        
+        
         //dispatch(parseRecalcEvents(result.data))
         // --- //
-        /**
-         * - delete state.planEditor.subnetFeatures[featureId]
+         /**
+         * - delete state.planEditor.subnetFeatures[featureId] done
          * - if featureId in state.planEditor.subnets
-         *    delete parentSubnet.children
+         *    delete parentSubnet.children[featureId]
          *    delete each subnet.children from state.planEditor.subnetFeatures
          *    delete state.planEditor.subnets[featureId]
          * 
