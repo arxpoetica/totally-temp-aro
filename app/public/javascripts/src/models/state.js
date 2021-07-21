@@ -1355,7 +1355,15 @@ class State {
           return $http.get(`/service/auth/users/${service.loggedInUser.id}`)
         })
         .then((result) => {
-          service.loggedInUser.groupIds = result.data.groupIds
+          const groupIds = result.data.groupIds
+          // Show warning to the user who does not assigned to any of the groups.
+          const userGroupsConfig = service.configuration.userGroups
+          if (userGroupsConfig && !groupIds.length) {
+            const { hasGroupsCheck, groupsMessage } = userGroupsConfig
+            const userGroupMsg = hasGroupsCheck ? groupsMessage : {}
+            $timeout(() => { service.setUserGroupsMsg(userGroupMsg) })
+          }
+          service.loggedInUser.groupIds = groupIds
 
           var userGroupIsAdministrator = false
           result.data.groupIds.forEach((groupId) => {
@@ -1913,6 +1921,7 @@ class State {
       setShowGlobalSettings: () => dispatch(GlobalSettingsActions.setShowGlobalSettings(true)),
       setCurrentViewToReleaseNotes: (viewString) => dispatch(GlobalSettingsActions.setCurrentViewToReleaseNotes(viewString)),
       setIsMapClicked: mapFeatures => dispatch(SelectionActions.setIsMapClicked(mapFeatures)),
+      setUserGroupsMsg: (userGroupsMsg) => dispatch(GlobalSettingsActions.setUserGroupsMsg(userGroupsMsg)),
     }
   }
 }
