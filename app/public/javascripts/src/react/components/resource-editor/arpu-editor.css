@@ -40,6 +40,11 @@
   height: 50px;
   border-bottom: 1px solid var(--gray-light);
 }
+.arpu-manager .header-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
 .arpu-manager .strategy {
   display: flex;
   align-items: center;
@@ -48,6 +53,11 @@
 }
 .arpu-manager .strategy .select {
   margin: 0 0 0 6px;
+}
+.arpu-manager .header-content .label {
+  margin: 4px 0 0;
+  padding: 4px;
+  font-size: 12px;
 }
 .arpu-manager .products {
   height: 60px;
