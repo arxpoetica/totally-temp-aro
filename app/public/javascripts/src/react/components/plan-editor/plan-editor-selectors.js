@@ -45,17 +45,31 @@ const locationWarnImg = new Image(18, 22)
 locationWarnImg.src = '/svg/exception-panel-location.png'
 //const getSubnets = state => state.planEditor.subnets
 const getSubnetFeatures = state => state.planEditor.subnetFeatures
+const getDropCableLength = state => {
+  const { network_architecture_manager } = state.plan.resourceItems
+  if (!network_architecture_manager) { return }
+  const { id } = network_architecture_manager.selectedManager
+  const manager = state.resourceManager.managers && state.resourceManager.managers[id]
+  if (!manager) { return }
+  const { maxDistanceMeters } = manager.definition
+    .networkConfigurations.ODN_1.terminalConfiguration
+  return maxDistanceMeters
+}
 const getExceptionsForSelectedSubnet = createSelector(
-  [getSelectedSubnet, getSubnetFeatures],
-  (selectedSubnet, subnetFeatures) => {
-    const maxDropcableLength = 280 //400 for test // FIX ME!!! ToDo: get the real value from ??? 
+  [getSelectedSubnet, getSubnetFeatures, getDropCableLength],
+  (selectedSubnet, subnetFeatures, maxDropCableLength) => {
     let exceptions = {}
     // maybe we can spruce this up a bit some filter functions?
-    if (selectedSubnet && selectedSubnet.subnetLocations && selectedSubnet.subnetLocations.length > 0) {
+    if (
+      selectedSubnet
+      && selectedSubnet.subnetLocations
+      && selectedSubnet.subnetLocations.length > 0
+      && typeof getDropCableLength !== 'undefined'
+    ) {
       let abandonedLocations = {}
       Object.keys(selectedSubnet.subnetLocationsById).forEach(locationId => {
         abandonedLocations[locationId] = true
-      }) 
+      })
       selectedSubnet.children.forEach(featureId => {
         const featureEntry = subnetFeatures[featureId]
         if (featureEntry) {
@@ -65,7 +79,7 @@ const getExceptionsForSelectedSubnet = createSelector(
               // remove abandoned entry
               delete abandonedLocations[locationId]
               // dropcable exception?
-              if (dropLink.dropCableLength > maxDropcableLength) {
+              if (dropLink.dropCableLength > maxDropCableLength) {
                 if (!exceptions[locationId]) {
                   exceptions[locationId] = {
                     locationId: locationId,
