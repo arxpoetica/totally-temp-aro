@@ -179,14 +179,14 @@ function removeSubnetFeature (state, featureId) {
   // TODO: I feel like there is a better way to check this
   if (state.subnets[featureId]) {
     // removes each of the children from subnet features
-    // TODO: Should these be sent to service to remove there as well?
-    for (const child of state.subnets[featureId].children) {
+    updatedSubnets[featureId].children.forEach(child => {
       delete updatedSubnetFeatures[child]
-    }
-    // removes the feature itself from subnet features
+    })
+    // removes from subvnets and subnet features
+    delete updatedSubnets[featureId]
     delete updatedSubnetFeatures[featureId]
   } else {
-    // if it is not a parent itself then it just removes from subFeatures and from it's parent in subnets
+    // if it is not a parent itself then it just removes from subFeatures and from its parent in subnets
     delete updatedSubnetFeatures[featureId]
     updatedSubnets[subnetId].children = updatedSubnets[subnetId].children.filter(childId => childId !== featureId)
   }

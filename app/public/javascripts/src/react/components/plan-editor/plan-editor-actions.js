@@ -353,7 +353,11 @@ function deleteFeature (featureId) {
             type: Actions.PLAN_EDITOR_REMOVE_SUBNET_FEATURE,
             payload: {featureId: featureId}
           })
-        
+
+          dispatch({
+            type: Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURE,
+            payload: featureId,
+          })
         
         //dispatch(parseRecalcEvents(result.data))
         // --- //
