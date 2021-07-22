@@ -18,7 +18,7 @@ const defaultState = {
   subnetFeatures: {},
   selectedSubnetId: '', // unselected this should be null not ''
   boundaryDebounceBySubnetId: {},
-
+  hiddenFeatures: [],
 }
 
 function setTransaction (state, transaction) {
@@ -170,19 +170,19 @@ function updateSubnetFeatures (state, updatedSubnetFeatures) {
 
 function removeSubnetFeature (state, featureId) {
 
-  //remove from subnetFeatures
   const subnetId = state.subnetFeatures[featureId].subnetId
   let updatedSubnets = JSON.parse(JSON.stringify(state.subnets))
   const updatedSubnetFeatures = { ...state.subnetFeatures }
  
   // this checks if the ID is a subnet, not sure if this should happen here or in actions
   // TODO: I feel like there is a better way to check this
-  if (state.subnets[featureId]) {
+  if (state.subnetFeatures[featureId].feature.networkNodeType === "central_office" ||
+  state.subnetFeatures[featureId].feature.networkNodeType === "fiber_distribution_hub") {
     // removes each of the children from subnet features
     updatedSubnets[featureId].children.forEach(child => {
       delete updatedSubnetFeatures[child]
     })
-    // removes from subvnets and subnet features
+    // removes from subnets and subnet features
     delete updatedSubnets[featureId]
     delete updatedSubnetFeatures[featureId]
   } else {
@@ -227,6 +227,10 @@ function clearBoundaryDebounce (state, subnetId) {
     ...state, 
     boundaryDebounceBySubnetId: newBoundaryDebounceBySubnetId
   }
+}
+
+function setHiddenFeatures (state, hiddenFeatures) {
+  return { ...state, hiddenFeatures }
 }
 
 function planEditorReducer (state = defaultState, action) {
@@ -292,7 +296,7 @@ function planEditorReducer (state = defaultState, action) {
       return updateSubnetFeatures(state, action.payload)
 
     case Actions.PLAN_EDITOR_REMOVE_SUBNET_FEATURE:
-      return removeSubnetFeature(state, action.payload.featureId)
+      return removeSubnetFeature(state, action.payload)
 
     case Actions.PLAN_EDITOR_REMOVE_SUBNETS:
       return removeSubnets(state, action.payload)
@@ -308,6 +312,9 @@ function planEditorReducer (state = defaultState, action) {
 
     case Actions.PLAN_EDITOR_CLEAR_BOUNDARY_DEBOUNCE:
       return clearBoundaryDebounce(state, action.payload)
+
+    case Actions.PLAN_EDITOR_SET_HIDDEN_FEATURES:
+      return setHiddenFeatures(state, action.payload)
 
     default:
       return state

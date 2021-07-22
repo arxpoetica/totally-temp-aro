@@ -345,31 +345,31 @@ function deleteFeature (featureId) {
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
       .then(result => {
         console.log(result)
-        // FIXME: what should this be?
-        // deletes feature from subnetFeatures and subnets.children
-        // right now is also checking if it is in subnets and removing those children as well
-        // TODO: do those children need to be collected and sent to service to be fully removed?
-          dispatch({
-            type: Actions.PLAN_EDITOR_REMOVE_SUBNET_FEATURE,
-            payload: {featureId: featureId}
-          })
 
+        // TODO: do those children need to be collected and sent to service to be fully removed?
+        if (subnetFeature.feature.networkNodeType === "central_office" ||
+         subnetFeature.feature.networkNodeType === "fiber_distribution_hub") {
+           const hiddenFeatures = []
+           hiddenFeatures.push(featureId)
+          // pull ids of children to add them to hidden feaures in state
+          state.planEditor.subnets[featureId].children.forEach(childId => {
+            hiddenFeatures.push(childId)
+          })
+          dispatch({
+            type: Actions.PLAN_EDITOR_SET_HIDDEN_FEATURES,
+            payload: hiddenFeatures
+          })
+        }
+        batch(() => {
+          dispatch({
+          type: Actions.PLAN_EDITOR_REMOVE_SUBNET_FEATURE,
+            payload: featureId
+          })
           dispatch({
             type: Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURE,
             payload: featureId,
           })
-        
-        //dispatch(parseRecalcEvents(result.data))
-        // --- //
-         /**
-         * - delete state.planEditor.subnetFeatures[featureId] done
-         * - if featureId in state.planEditor.subnets
-         *    delete parentSubnet.children[featureId]
-         *    delete each subnet.children from state.planEditor.subnetFeatures
-         *    delete state.planEditor.subnets[featureId]
-         * 
-         * ? does the above belong in an action or in the reducer? 
-         */
+        })
       })
       .catch(err => console.error(err))
   }
