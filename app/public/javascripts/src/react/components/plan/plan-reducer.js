@@ -15,7 +15,8 @@ const defaultState = {
   isDataSourceEditable: {},
   isResourceSelection: false,
   parentProjectForNewProject: null,
-  selectedProjectId: ''
+  selectedProjectId: '',
+  resourceItems: {},
 }
 
 // Set the superuser flag for the currently logged in user
