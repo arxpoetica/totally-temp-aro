@@ -11,6 +11,13 @@ export class AroFeatureEditor extends Component {
     console.log(props.meta)
     if (!'visible' in props.meta) props.meta.visible = true
 
+    // TODO: get serializable value as prop and NO meta
+    //  then THIS COMPONENT does the AroFeatureFactory.createObject(this.props.value)
+    //  AND makes the meta from the return
+    //  with the added benifits of:
+    //    - we can parse the meta into any schema we want
+    //    - we have a serializable object for form value to allow cloning
+    //    - when we refactor AroFeatureFactory it's contained here and decoupled from the reast of the codebase
     this.state = {
       'value': this.props.value, // may need to update this on props change
     }
@@ -66,6 +73,9 @@ export class AroFeatureEditor extends Component {
     //console.log(newValObj)
     //console.log(pathClone.getDisplayProperties())
     
+    //TODO: given that this component will make the AROFeature it can keep a serilizable 
+    //  version of the value object and clone it so we don't have to change state in place 
+
     this.setState({
       'value': this.state.value,
     })

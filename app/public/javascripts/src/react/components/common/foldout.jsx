@@ -3,10 +3,12 @@ import React, { Component } from "react";
 class Foldout extends Component {
   constructor (props) {
     super(props)
-
+    let isCollapsible = props.isCollapsible || true
+    let isOpen = props.isOpen || false
+    if (!isCollapsible) isOpen = true
     this.state = {
-      isOpen: props.isOpen || false,
-      isCollapsible: props.isCollapsible || true,
+      isOpen: isOpen,
+      isCollapsible: isCollapsible,
     }
   }
 

@@ -13,6 +13,13 @@ export class AroFeatureEditorNode extends Component {
     if (!'isCollapsible' in props) props.isCollapsible = true
     if (!'isEditable' in props) props.isEditable = true
     if (!'visible' in props.meta) props.meta.visible = true
+
+    this.value = this.props.value
+    if ('undefined' === typeof this.value) {
+      console.log(' ------- undefined ---')
+      console.log(this.props.meta.defaultValue)
+      this.value = this.props.meta.defaultValue
+    }
   }
 
   render () {
@@ -29,19 +36,34 @@ export class AroFeatureEditorNode extends Component {
 
   renderList () {
     // ToDo: the meta data should be an entirely seperate object, not a property of the value 
-    //let subMeta = this.props.value.getDisplayProperties()
+    //let subMeta = this.value.getDisplayProperties()
     //console.log(subMeta)
     var jsx = []
-    this.props.value.forEach((item, index) => {
+    var itemMeta = JSON.parse(JSON.stringify(this.props.meta))
+    // get the object type out of the array type
+    let len = itemMeta.displayDataType.length
+    if ('array[' === itemMeta.displayDataType.substring(0, 6)
+      && ']' === itemMeta.displayDataType.charAt(len-1)) {
+        itemMeta.displayDataType = itemMeta.displayDataType.substring(6, len-1)
+    }
+    
+    this.value.forEach((item, index) => {
       let objPath = `${this.props.objPath}[${index}]`
       //let displayName = `${this.props.meta.displayName} ${index+1}`
       //let meta = { ...subMeta, displayName}
       //let meta = subMeta
-      let meta = item.getDisplayProperties()
-      let isEditable = this.props.isEditable && meta.editable
-      jsx.push(<AroFeatureEditorNode objPath={objPath} key={objPath} isEditable={isEditable} value={item} meta={meta} onChange={this.props.onChange} />)
+      //let metaArray = item.getDisplayProperties()
+      //let meta = Object.assign({}, ...metaArray.map((prop) => ({[prop.propertyName]: prop})))
+      let isEditable = this.props.isEditable && this.props.meta.editable
+      itemMeta.displayName = `${index}`
+      console.log({item, itemMeta})
+      //console.log(this.props.meta)
+      jsx.push(<AroFeatureEditorNode objPath={objPath} key={objPath} isEditable={isEditable} value={item} meta={itemMeta} onChange={this.props.onChange} />)
     })
     // ToDo: repeat code below
+    console.log('list')
+    console.log(jsx)
+    
     if (this.props.omitRootContain) {
       return (
         <>
@@ -49,8 +71,9 @@ export class AroFeatureEditorNode extends Component {
         </>
       )
     } else {
+      console.log(jsx)
       return (
-        <Foldout displayName={this.props.meta.displayName}>
+        <Foldout displayName={`${this.props.meta.displayName} ${this.value.length}`}>
           {jsx}
         </Foldout>
       )
@@ -59,21 +82,23 @@ export class AroFeatureEditorNode extends Component {
 
   renderCollection () {
     // ToDo: the meta data should be an entirely seperate object, not a property of the value 
-    let subMeta = this.props.value.getDisplayProperties()
+    console.log(this.props)
+    let subMeta = this.value.getDisplayProperties()
     var jsx = []
     //let keysByOrder = Object.entries(subMeta).sort((a,b) => a[1].displayOrder - b[1].displayOrder)
     //let keysByOrder = Object.entries(subMeta)
     //for (const [arKey, meta] of subMeta) {
     subMeta.forEach((meta, index) => {
       let key = meta.propertyName
-      if (key in this.props.value && meta.visible) {
-        let value = this.props.value[key]
+      if (key in this.value && meta.visible) {
+        let value = this.value[key]
         let isEditable = this.props.isEditable && meta.editable
         let objPath = `${this.props.objPath}.${key}`
         jsx.push(<AroFeatureEditorNode objPath={objPath} key={objPath} isEditable={isEditable} value={value} meta={meta} onChange={this.props.onChange} />)
       }
     })
-    
+    console.log('collection')
+    console.log(jsx)
     if (this.props.omitRootContain) {
       return (
         <>
@@ -114,7 +139,7 @@ export class AroFeatureEditorNode extends Component {
   //       {this.props.meta.displayName}: 
   //       <DisplayElement objPath={this.props.objPath} 
   //         isEditable={isEditable} 
-  //         value={this.props.value} 
+  //         value={this.value} 
   //         meta={this.props.meta} 
   //         onChange={this.props.onChange} 
   //       />
@@ -134,7 +159,7 @@ export class AroFeatureEditorNode extends Component {
           {this.props.meta.displayName}
         </div>
         <div className='ei-property-value'>
-          {String(this.props.value)}
+          {String(this.value)}
         </div>
       </div>
     )
@@ -167,20 +192,20 @@ export class AroFeatureEditorNode extends Component {
     
     if (!isEditable || !formEleType) {
       field = (
-        <div style={{ display: 'inline-block' }}>{String(this.props.value)}</div>
+        <div style={{ display: 'inline-block' }}>{String(this.value)}</div>
       )
     } else {
       let eleProps = {
         'name': this.props.objPath,
         'onChange': ((event) => this.props.onChange(event, event.target.value, this.props.objPath)),
         'type': formEleType,
-        'value': this.props.value,
+        'value': this.value,
       }
       switch (formEleType) {
         case 'checkbox':
-          eleProps.onChange = ((event) => this.props.onChange(event, !this.props.value, this.props.objPath))
+          eleProps.onChange = ((event) => this.props.onChange(event, !this.value, this.props.objPath))
           field = (
-            <input {...eleProps} checked={this.props.value === true ? 'checked' : null} className='checkboxfill layer-type-checkboxes'></input>
+            <input {...eleProps} checked={this.value === true ? 'checked' : null} className='checkboxfill layer-type-checkboxes'></input>
           )
           break
         case 'multiSelect':
