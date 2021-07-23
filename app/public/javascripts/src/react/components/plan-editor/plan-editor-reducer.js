@@ -230,7 +230,11 @@ function clearBoundaryDebounce (state, subnetId) {
 }
 
 function setHiddenFeatures (state, hiddenFeatures) {
-  return { ...state, hiddenFeatures }
+  return { ...state, hiddenFeatures: [...state.hiddenFeatures, ...hiddenFeatures] }
+}
+
+function clearHiddenFeatures (state) {
+  return { ...state, hiddenFeatures: [] }
 }
 
 function planEditorReducer (state = defaultState, action) {
@@ -315,6 +319,9 @@ function planEditorReducer (state = defaultState, action) {
 
     case Actions.PLAN_EDITOR_SET_HIDDEN_FEATURES:
       return setHiddenFeatures(state, action.payload)
+
+    case Actions.PLAN_EDITOR_CLEAR_HIDDEN_FEATURES:
+      return clearHiddenFeatures(state)
 
     default:
       return state
