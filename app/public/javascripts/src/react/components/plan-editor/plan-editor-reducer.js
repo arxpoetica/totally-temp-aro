@@ -142,8 +142,8 @@ function deselectFeature (state, objectId) {
   }
 }
 
-function addSubnets (state, updatedSubnets) {
-  return { ...state, subnets: { ...state.subnets, ...updatedSubnets} }
+function addSubnets (state, newSubnets) {
+  return { ...state, subnets: { ...state.subnets, ...newSubnets } }
 }
 
 function updateSubnetBoundary (state, subnetId, geometry) {
