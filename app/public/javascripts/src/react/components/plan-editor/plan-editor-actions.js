@@ -614,15 +614,16 @@ function parseRecalcEvents (recalcData) {
   // this needs to be redone and I think we should make a sealed subnet manager
   // that will manage the subnetFeatures list with changes to a subnet (deleting children etc)
   return (dispatch, getState) => {
-    const state = getState()
-
-    let newSubnetFeatures = JSON.parse(JSON.stringify(state.planEditor.subnetFeatures))
+    const { subnetFeatures } = getState().planEditor
+    let newSubnetFeatures = JSON.parse(JSON.stringify(subnetFeatures))
     let updatedSubnets = {}
 
     dispatch(addSubnets(
       [...new Set(recalcData.subnets.map(subnet => subnet.feature.objectId))]
     ))
       .then(() => {
+        // need to recapture state because we've altered it w/ `addSubnets`
+        const state = getState()
         recalcData.subnets.forEach(subnetRecalc => {
           let subnetId = subnetRecalc.feature.objectId
           let newSubnet = JSON.parse(JSON.stringify(state.planEditor.subnets[subnetId]))
@@ -682,7 +683,7 @@ function parseAddApiSubnets (apiSubnets) {
         allFeatures = {...allFeatures, ...subnetFeatures}
       })
       // dispatch add subnets and add subnetFeatures
-      batch(() => {
+      return batch(() => {
         dispatch({
           type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
           payload: allFeatures,
