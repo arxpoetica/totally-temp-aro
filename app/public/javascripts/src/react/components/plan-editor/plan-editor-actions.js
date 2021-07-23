@@ -485,7 +485,7 @@ function addSubnets (subnetIds) {
           return result.data
         })
         // console.log(apiSubnets)
-        dispatch(parseAddApiSubnets(apiSubnets))
+        return dispatch(parseAddApiSubnets(apiSubnets))
       })
       .catch(err => console.error(err))
   }
@@ -615,40 +615,45 @@ function parseRecalcEvents (recalcData) {
   // that will manage the subnetFeatures list with changes to a subnet (deleting children etc)
   return (dispatch, getState) => {
     const state = getState()
+
     let newSubnetFeatures = JSON.parse(JSON.stringify(state.planEditor.subnetFeatures))
     let updatedSubnets = {}
-    // TODO: some edits may affect subnets that we don't have in state
-      //  we need to add these .then do the following
-    recalcData.subnets.forEach(subnetRecalc => {
-      let subnetId = subnetRecalc.feature.objectId
-      let newSubnet = JSON.parse(JSON.stringify(state.planEditor.subnets[subnetId]))
-      subnetRecalc.recalcNodeEvents.forEach(recalcNodeEvent => {
-        let objectId = recalcNodeEvent.subnetNode.id
-        switch (recalcNodeEvent.eventType) {
-          case 'DELETE':
-            // need to cover the case of deleteing a hub where we need to pull the whole thing
-            delete newSubnetFeatures[objectId]
-            let index = newSubnet.children.indexOf(objectId);
-            if (index !== -1) {
-              newSubnet.children.splice(index, 1);
+
+    dispatch(addSubnets(
+      [...new Set(recalcData.subnets.map(subnet => subnet.feature.objectId))]
+    ))
+      .then(() => {
+        recalcData.subnets.forEach(subnetRecalc => {
+          let subnetId = subnetRecalc.feature.objectId
+          let newSubnet = JSON.parse(JSON.stringify(state.planEditor.subnets[subnetId]))
+          subnetRecalc.recalcNodeEvents.forEach(recalcNodeEvent => {
+            let objectId = recalcNodeEvent.subnetNode.id
+            switch (recalcNodeEvent.eventType) {
+              case 'DELETE':
+                // need to cover the case of deleteing a hub where we need to pull the whole thing
+                delete newSubnetFeatures[objectId]
+                let index = newSubnet.children.indexOf(objectId);
+                if (index !== -1) {
+                  newSubnet.children.splice(index, 1);
+                }
+                break
+              case 'ADD':
+                // add only
+                newSubnet.children.push(objectId)
+                // do not break
+              case 'MODIFY':
+                // add || modify
+                // TODO: this is repeat code from below
+                let parsedNode = {
+                  'feature': parseSubnetFeature(recalcNodeEvent.subnetNode),
+                  'subnetId': subnetId,
+                }
+                newSubnetFeatures[objectId] = parsedNode
+                break
             }
-            break
-          case 'ADD':
-            // add only
-            newSubnet.children.push(objectId)
-            // do not break
-          case 'MODIFY':
-            // add || modify
-            // TODO: this is repeat code from below
-            let parsedNode = {
-              'feature': parseSubnetFeature(recalcNodeEvent.subnetNode),
-              'subnetId': subnetId,
-            }
-            newSubnetFeatures[objectId] = parsedNode
-            break
-        }
+          })
+          updatedSubnets[subnetId] = newSubnet
       })
-      updatedSubnets[subnetId] = newSubnet
     })
     batch(() => {
       dispatch({
