@@ -10,7 +10,7 @@ import StrokeStyle from '../../shared-utils/stroke-styles'
 
 class MapTileRenderer {
   constructor (tileSize, tileDataService, mapTileOptions, layerCategories, selectedDisplayMode, selectionModes, analysisSelectionMode, stateMapLayers, displayModes,
-    viewModePanels, state, getPixelCoordinatesWithinTile, selectionIds, hiddenFeatures, selectedSubnetLocations, locationExceptions, rShowFiberSize, rViewSetting, mapLayers = []) {
+    viewModePanels, state, getPixelCoordinatesWithinTile, selectionIds, hiddenFeatures, selectedSubnetLocations, locationAlerts, rShowFiberSize, rViewSetting, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
@@ -30,7 +30,7 @@ class MapTileRenderer {
     
     this.selectionIds = selectionIds
     this.selectedSubnetLocations = selectedSubnetLocations
-    this.locationExceptions = locationExceptions
+    this.locationAlerts = locationAlerts
     this.hiddenFeatures = hiddenFeatures
 
     this.rShowFiberSize = rShowFiberSize
@@ -118,8 +118,8 @@ class MapTileRenderer {
   setSelectedSubnetLocations (selectedSubnetLocations) {
     this.selectedSubnetLocations = selectedSubnetLocations
   }
-  setLocationExceptions (locationExceptions) {
-    this.locationExceptions = locationExceptions
+  setLocationAlerts (locationAlerts) {
+    this.locationAlerts = locationAlerts
   }
   setHiddenFeatures (hiddenFeatures) {
     this.hiddenFeatures = hiddenFeatures
@@ -734,7 +734,7 @@ class MapTileRenderer {
         .includes(tileObject.properties.object_id))
     }
     // render point feature
-    PointFeatureRenderer.renderFeatures(pointFeatureRendererList, this.state.configuration.ARO_CLIENT, this.selectedSubnetLocations, this.locationExceptions)
+    PointFeatureRenderer.renderFeatures(pointFeatureRendererList, this.state.configuration.ARO_CLIENT, this.selectedSubnetLocations, this.locationAlerts)
     // render polygon feature
     PolygonFeatureRenderer.renderFeatures(closedPolygonFeatureLayersList, featureData, this.selection, this.oldSelection)
   }
