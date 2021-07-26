@@ -7,7 +7,6 @@ import NetworkOptimizationActions from './network-optimization-actions'
 // import NetworkOptimizationInputFormMeta from './network-optimization-input-form-meta'
 import { FieldComponents } from '../../common/editor-interface/object-editor.jsx'
 import DropdownList from 'react-widgets/lib/DropdownList'
-import set from 'lodash/set'
 
 export class NetworkOptimizationInputFormProto extends Component {
   constructor (props) {
@@ -404,9 +403,19 @@ export class NetworkOptimizationInputFormProto extends Component {
     }
   }
 
+  set (obj, path, value) {
+    const pathArray = Array.isArray(path) ? path : path.match(/([^[.\]])+/g)
+  
+    pathArray.reduce((acc, key, i) => {
+      if (acc[key] === undefined) acc[key] = {}
+      if (i === pathArray.length - 1) acc[key] = value
+      return acc[key]
+    }, obj)
+  }
+
   handleChange (newVal, prevVal, propChain) {
     const newObj = this.props.values
-    set(newObj, propChain, newVal)
+    this.set(newObj, propChain, newVal)
     this.props.setOptimizationInputs(newObj)
   }
 
