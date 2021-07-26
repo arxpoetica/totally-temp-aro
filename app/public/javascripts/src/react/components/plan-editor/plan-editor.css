@@ -86,7 +86,7 @@
 
 /* ========================= >>>>> exceptions dropdown >>>>> */
 
-.exceptions-panel .dropdown {
+/* .exceptions-panel .dropdown {
   position: relative;
 }
 .exceptions-panel .caret {
@@ -128,7 +128,7 @@
 }
 .exceptions-panel .list li:hover {
   background-color: var(--gray-light);
-}
+} */
 
 /* ========================= >>>>> recalculate plan >>>>> */
 

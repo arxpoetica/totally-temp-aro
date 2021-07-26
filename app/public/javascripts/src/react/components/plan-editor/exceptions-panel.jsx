@@ -32,12 +32,12 @@ const DefectsPanel = props => {
                 ></div>
                 {exceptionTypes[exception].displayName}
               </div>
-              <div className="dropdown">
+              {/* <div className="dropdown">
                 <div className="svg caret"></div>
                 <ul className="list">
                   <li>Ignore this Error</li>
                 </ul>
-              </div>
+              </div> */}
             </li>
           )
         ))}
