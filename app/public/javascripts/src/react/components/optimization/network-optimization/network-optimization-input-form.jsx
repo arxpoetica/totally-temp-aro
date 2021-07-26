@@ -3,10 +3,11 @@ import { connect } from 'react-redux'
 // import { PropTypes } from 'prop-types'
 import { Field, reduxForm, getFormValues, change } from 'redux-form'
 import Constants from '../../../common/constants'
+import NetworkOptimizationActions from './network-optimization-actions'
 // import NetworkOptimizationInputFormMeta from './network-optimization-input-form-meta'
 import { FieldComponents } from '../../common/editor-interface/object-editor.jsx'
 import DropdownList from 'react-widgets/lib/DropdownList'
-
+import { set } from '../../../../shared-utils/utilities'
 export class NetworkOptimizationInputFormProto extends Component {
   constructor (props) {
     super(props)
@@ -279,6 +280,7 @@ export class NetworkOptimizationInputFormProto extends Component {
                             max='1.0'
                             step='0.01'
                             name={'optimization.preIrrThreshold'}
+                            onChange={(val, newVal, prevVal, propChain) => this.handleChange(newVal, prevVal, propChain)}
                             style={{ marginTop: '10px', width: '100%' }}
                             component={this.filterComponent('input')}
                             type='range'
@@ -318,6 +320,7 @@ export class NetworkOptimizationInputFormProto extends Component {
                             max='1'
                             step='0.01'
                             name={'optimization.threshold'}
+                            onChange={(val, newVal, prevVal, propChain) => this.handleChange(newVal, prevVal, propChain)}
                             style={{ marginTop: '10px', width: '100%' }}
                             component={this.filterComponent('input')}
                             type='range'
@@ -379,7 +382,9 @@ export class NetworkOptimizationInputFormProto extends Component {
       if (networkType === 'FiveG') networkTypes = this.removeByVal(networkTypes, 'Copper')
       if (networkType === 'Copper') networkTypes = this.removeByVal(networkTypes, 'FiveG')
     }
+    this.props.values.networkTypes = networkTypes
     this.props.dispatch(change(Constants.NETWORK_OPTIMIZATION_INPUT_FORM, 'networkTypes', networkTypes))
+    this.props.setOptimizationInputs(this.props.values)
   }
 
   removeByVal (arr, val) {
@@ -399,7 +404,9 @@ export class NetworkOptimizationInputFormProto extends Component {
   }
 
   handleChange (newVal, prevVal, propChain) {
-    this.props.handleChange(newVal, prevVal, propChain)
+    const newObj = this.props.values
+    set(newObj, propChain, newVal)
+    this.props.setOptimizationInputs(newObj)
   }
 
   getAlgorithmComposite (vals) {
@@ -425,7 +432,9 @@ export class NetworkOptimizationInputFormProto extends Component {
 
   onAlgorithmChange (newVal, event) {
     this.setState({ algorithmComposite: newVal })
+    this.props.values.optimization.algorithm = newVal.id
     this.props.dispatch(change(Constants.NETWORK_OPTIMIZATION_INPUT_FORM, 'optimization.algorithm', newVal.algorithm))
+    this.props.setOptimizationInputs(this.props.values)
 
     newVal.excludedFields.forEach(fieldName => {
       this.props.dispatch(change(Constants.NETWORK_OPTIMIZATION_INPUT_FORM, fieldName, null))
@@ -460,10 +469,13 @@ const mapStateToProps = (state) => ({
   values: getFormValues(Constants.NETWORK_OPTIMIZATION_INPUT_FORM)(state)
 })
 
+const mapDispatchToProps = dispatch => ({
+  setOptimizationInputs: networkTypeInput => dispatch(NetworkOptimizationActions.setOptimizationInputs(networkTypeInput))
+})
 let NetworkOptimizationInputForm = reduxForm({
   form: Constants.NETWORK_OPTIMIZATION_INPUT_FORM
 })(
-  connect(mapStateToProps)(NetworkOptimizationInputFormProto)
+  connect(mapStateToProps, mapDispatchToProps)(NetworkOptimizationInputFormProto)
 )
 
 export default NetworkOptimizationInputForm
