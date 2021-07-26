@@ -104,7 +104,7 @@ const getExceptionsForSelectedSubnet = createSelector(
         exceptions[locationId].exceptions.push(ExceptionTypes['ABANDONED_LOCATION'].key)
       }) 
     } 
-    // console.log(exceptions)
+    console.log(exceptions)
     return exceptions
   }
 )

@@ -10,7 +10,7 @@ import StrokeStyle from '../../shared-utils/stroke-styles'
 
 class MapTileRenderer {
   constructor (tileSize, tileDataService, mapTileOptions, layerCategories, selectedDisplayMode, selectionModes, analysisSelectionMode, stateMapLayers, displayModes,
-    viewModePanels, state, getPixelCoordinatesWithinTile, selectionIds, selectedSubnetLocations, locationExceptions, rShowFiberSize, rViewSetting, mapLayers = []) {
+    viewModePanels, state, getPixelCoordinatesWithinTile, selectionIds, hiddenFeatures, selectedSubnetLocations, locationExceptions, rShowFiberSize, rViewSetting, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
@@ -31,6 +31,7 @@ class MapTileRenderer {
     this.selectionIds = selectionIds
     this.selectedSubnetLocations = selectedSubnetLocations
     this.locationExceptions = locationExceptions
+    this.hiddenFeatures = hiddenFeatures
 
     this.rShowFiberSize = rShowFiberSize
     this.rViewSetting = rViewSetting
@@ -119,6 +120,9 @@ class MapTileRenderer {
   }
   setLocationExceptions (locationExceptions) {
     this.locationExceptions = locationExceptions
+  }
+  setHiddenFeatures (hiddenFeatures) {
+    this.hiddenFeatures = hiddenFeatures
   }
   // - //
 
@@ -502,7 +506,7 @@ class MapTileRenderer {
         var featureId = feature.properties.object_id || feature.properties.location_id
 
         if (this.selectedDisplayMode == this.displayModes.EDIT_PLAN 
-          && this.selectionIds.includes(featureId)) {
+          && this.selectionIds.includes(featureId) || this.hiddenFeatures.includes(featureId)) {
           continue // Do not render any features that are part of a transaction while in plan edit
         }
 

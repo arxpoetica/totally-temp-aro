@@ -154,6 +154,7 @@ function modifyFeature (featureType, feature) {
 }
 
 // ToDo: there's only one transaction don't require the ID
+// TODO: cleanup?
 function deleteTransactionFeature (transactionId, featureType, transactionFeatureId) {
   return dispatch => {
     return AroHttp.delete(`/service/plan-transactions/${transactionId}/modified-features/${featureType}/${transactionFeatureId}`)
@@ -172,28 +173,15 @@ function addTransactionFeatures (features) {
   }
 }
 
-function showContextMenuForEquipment (equipmentObjectId, x, y) {
-  return (dispatch, getState) => {
-    const state = getState()
-    const planId = state.plan.activePlan.id
-    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
-    const selectedBoundaryTypeId = state.mapLayers.selectedBoundaryType.id
-
-    // Get details on the boundary (if any) for this equipment
-    AroHttp.get(`/boundary/for_network_node/${planId}/${equipmentObjectId}/${selectedBoundaryTypeId}`)
-      .then(result => {
-        var menuActions = []
-        var isAddBoundaryAllowed = (result.data.length === 0) // No results for this combination of planid, object_id, selectedBoundaryTypeId. Allow users to add boundary
-        if (isAddBoundaryAllowed) {
-          menuActions.push(new MenuItemAction('ADD_BOUNDARY', 'Add boundary', 'PlanEditorActions', 'startDrawingBoundaryFor', equipmentObjectId))
-        }
-        menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteTransactionFeature', transactionId, 'equipment', equipmentObjectId))
-        const menuItemFeature = new MenuItemFeature('EQUIPMENT', 'Equipment', menuActions)
-        // Show context menu
-        dispatch(ContextMenuActions.setContextMenuItems([menuItemFeature]))
-        dispatch(ContextMenuActions.showContextMenu(x, y))
-      })
-      .catch(err => console.error(err))
+function showContextMenuForEquipment (featureId, x, y) {
+  return (dispatch) => {
+    // debugger
+    var menuActions = []
+    menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteFeature', featureId))
+    const menuItemFeature = new MenuItemFeature('EQUIPMENT', 'Equipment', menuActions)
+    // Show context menu
+    dispatch(ContextMenuActions.setContextMenuItems([menuItemFeature]))
+    dispatch(ContextMenuActions.showContextMenu(x, y))
   }
 }
 
@@ -321,7 +309,7 @@ function moveFeature (featureId, coordinates) {
     const body = {
       commands: [{
         // `childId` is one of the children nodes of the subnets
-        // service need to chagen this to "childNode"
+        // service need to change this to "childNode"
         childId: unparseSubnetFeature(subnetFeature.feature),
         subnetId: subnetId, // parent subnet id, don't add when `type: 'add'`
         type: 'update', // `add`, `update`, or `delete`
@@ -335,6 +323,61 @@ function moveFeature (featureId, coordinates) {
         dispatch({
           type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
           payload: {featureId: subnetFeature}
+        })
+      })
+      .catch(err => console.error(err))
+  }
+}
+
+function deleteFeature (featureId) {
+  return (dispatch, getState) => {
+    const state = getState()
+
+    let subnetFeature = state.planEditor.subnetFeatures[featureId]
+    subnetFeature = JSON.parse(JSON.stringify(subnetFeature))
+    let subnetId = subnetFeature.subnetId
+    let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+
+    const body = {
+      commands: [{
+        childId: unparseSubnetFeature(subnetFeature.feature),
+        subnetId, // parent subnet id, don't add when `type: 'add'`
+        type: 'delete',
+      }]
+    }
+
+    console.log(body)
+
+    // Do a PUT to send the equipment over to service
+    return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
+      .then(result => {
+        console.log(result)
+        const hiddenFeatures = []
+        hiddenFeatures.push(featureId)
+
+        // TODO: do those children need to be collected and sent to service to be fully removed?
+        if (subnetFeature.feature.networkNodeType === "central_office" ||
+         subnetFeature.feature.networkNodeType === "fiber_distribution_hub") {
+
+          // pull ids of children to add them to hidden feaures in state
+          state.planEditor.subnets[featureId].children.forEach(childId => {
+            hiddenFeatures.push(childId)
+          })
+          
+        }
+        batch(() => {
+          dispatch({
+          type: Actions.PLAN_EDITOR_REMOVE_SUBNET_FEATURE,
+            payload: featureId
+          })
+          dispatch({
+            type: Actions.PLAN_EDITOR_SET_HIDDEN_FEATURES,
+            payload: hiddenFeatures
+          })
+          dispatch({
+            type: Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURE,
+            payload: featureId,
+          })
         })
       })
       .catch(err => console.error(err))
@@ -451,7 +494,7 @@ function addSubnets (subnetIds) {
           return result.data
         })
         // console.log(apiSubnets)
-        dispatch(parseAddApiSubnets(apiSubnets))
+        return dispatch(parseAddApiSubnets(apiSubnets))
       })
       .catch(err => console.error(err))
   }
@@ -556,8 +599,8 @@ function boundaryChange (subnetId, geometry) {
 function recalculateSubnets ({ transactionId, subnetIds }) {
   return dispatch => {
     dispatch(setIsCalculatingSubnets(true))
-    const recalcBody = { subnetIds }
-    console.log(recalcBody)
+    const recalcBody = { subnetIds: [] }
+    // console.log(recalcBody)
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet-cmd/recalc`, recalcBody)
       .then(res => {
         dispatch(setIsCalculatingSubnets(false))
@@ -576,42 +619,51 @@ function recalculateSubnets ({ transactionId, subnetIds }) {
 
 // helper
 function parseRecalcEvents (recalcData) {
+  //copnsole.log(recalcData)
   // this needs to be redone and I think we should make a sealed subnet manager
   // that will manage the subnetFeatures list with changes to a subnet (deleting children etc)
   return (dispatch, getState) => {
-    const state = getState()
-    let newSubnetFeatures = JSON.parse(JSON.stringify(state.planEditor.subnetFeatures))
+    const { subnetFeatures } = getState().planEditor
+    let newSubnetFeatures = JSON.parse(JSON.stringify(subnetFeatures))
     let updatedSubnets = {}
-    recalcData.subnets.forEach(subnetRecalc => {
-      let subnetId = subnetRecalc.feature.objectId
-      let newSubnet = JSON.parse(JSON.stringify(state.planEditor.subnets[subnetId]))
-      subnetRecalc.recalcNodeEvents.forEach(recalcNodeEvent => {
-        let objectId = recalcNodeEvent.subnetNode.id
-        switch (recalcNodeEvent.eventType) {
-          case 'DELETE':
-            // need to cover the case of deleteing a hub where we need to pull the whole thing
-            delete newSubnetFeatures[objectId]
-            let index = newSubnet.children.indexOf(objectId);
-            if (index !== -1) {
-              newSubnet.children.splice(index, 1);
+
+    dispatch(addSubnets(
+      [...new Set(recalcData.subnets.map(subnet => subnet.feature.objectId))]
+    ))
+      .then(() => {
+        // need to recapture state because we've altered it w/ `addSubnets`
+        const state = getState()
+        recalcData.subnets.forEach(subnetRecalc => {
+          let subnetId = subnetRecalc.feature.objectId
+          let newSubnet = JSON.parse(JSON.stringify(state.planEditor.subnets[subnetId]))
+          subnetRecalc.recalcNodeEvents.forEach(recalcNodeEvent => {
+            let objectId = recalcNodeEvent.subnetNode.id
+            switch (recalcNodeEvent.eventType) {
+              case 'DELETE':
+                // need to cover the case of deleteing a hub where we need to pull the whole thing
+                delete newSubnetFeatures[objectId]
+                let index = newSubnet.children.indexOf(objectId);
+                if (index !== -1) {
+                  newSubnet.children.splice(index, 1);
+                }
+                break
+              case 'ADD':
+                // add only
+                newSubnet.children.push(objectId)
+                // do not break
+              case 'MODIFY':
+                // add || modify
+                // TODO: this is repeat code from below
+                let parsedNode = {
+                  'feature': parseSubnetFeature(recalcNodeEvent.subnetNode),
+                  'subnetId': subnetId,
+                }
+                newSubnetFeatures[objectId] = parsedNode
+                break
             }
-            break
-          case 'ADD':
-            // add only
-            newSubnet.children.push(objectId)
-            // do not break
-          case 'MODIFY':
-            // add || modify
-            // TODO: this is repeat code from below
-            let parsedNode = {
-              'feature': parseSubnetFeature(recalcNodeEvent.subnetNode),
-              'subnetId': subnetId,
-            }
-            newSubnetFeatures[objectId] = parsedNode
-            break
-        }
+          })
+          updatedSubnets[subnetId] = newSubnet
       })
-      updatedSubnets[subnetId] = newSubnet
     })
     batch(() => {
       dispatch({
@@ -640,7 +692,7 @@ function parseAddApiSubnets (apiSubnets) {
         allFeatures = {...allFeatures, ...subnetFeatures}
       })
       // dispatch add subnets and add subnetFeatures
-      batch(() => {
+      return batch(() => {
         dispatch({
           type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
           payload: allFeatures,
@@ -756,6 +808,7 @@ export default {
   createFeature,
   modifyFeature,
   moveFeature,
+  deleteFeature,
   deleteTransactionFeature,
   addTransactionFeatures,
   showContextMenuForEquipment,
