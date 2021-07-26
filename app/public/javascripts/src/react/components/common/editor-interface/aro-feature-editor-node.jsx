@@ -19,6 +19,11 @@ export class AroFeatureEditorNode extends Component {
       console.log(' ------- undefined ---')
       console.log(this.props.meta.defaultValue)
       this.value = this.props.meta.defaultValue
+      // eh something is wrong
+      if ('${' === this.props.meta.defaultValue.substring(0, 2)) {
+        this.props.meta.visible = false
+      }
+      
     }
   }
 

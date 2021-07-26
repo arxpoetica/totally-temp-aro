@@ -119,17 +119,10 @@ export const PlanEditor = props => {
 
       {
         selectedEditFeatureIds.map(id => {
-          let aroFeature = AroFeatureFactory.createObject(features[id].feature)
-          let meta = aroFeature.getDisplayProperties()
-          console.log(meta)
-          meta = meta.find(ele => ele.displayName === "Network Node Equipment") // ToDo: this needs fixing
-          aroFeature = aroFeature.networkNodeEquipment
-          console.log({meta, aroFeature})
           return (
             <AroFeatureEditor key={id}
               isEditable={true} 
-              value={aroFeature} 
-              meta={meta} 
+              feature={features[id].feature} 
               onChange={onFormChange}
             ></AroFeatureEditor>
           )
