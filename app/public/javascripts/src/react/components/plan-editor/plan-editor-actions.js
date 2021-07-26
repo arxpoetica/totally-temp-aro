@@ -5,12 +5,14 @@ import AroHttp from '../../common/aro-http'
 import MenuItemFeature from '../context-menu/menu-item-feature'
 import MenuItemAction from '../context-menu/menu-item-action'
 import ContextMenuActions from '../context-menu/actions'
+import ResourceActions from '../resource-editor/resource-actions'
 //import SelectionActions from '../selection/selection-actions'
 import { batch } from 'react-redux'
 import WktUtils from '../../../shared-utils/wkt-utils'
 
 function resumeOrCreateTransaction (planId, userId) {
-  return dispatch => {
+  return (dispatch, getState) => {
+    const state = getState()
     dispatch({
       type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION,
       payload: true
@@ -22,10 +24,15 @@ function resumeOrCreateTransaction (planId, userId) {
           payload: Transaction.fromServiceObject(result.data)
         })
         const transactionId = result.data.id
+        const resource = 'network_architecture_manager'
+        const { id, name } = state.plan.resourceItems[resource].selectedManager
         return Promise.all([
           AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/equipment`),
           // depricated? 
-          AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/equipment_boundary`)
+          AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/equipment_boundary`),
+          // NOTE: need to load resource manager so drop cable
+          // length is available for plan-editor-selectors
+          dispatch(ResourceActions.loadResourceManager(id, resource, name))
         ])
       })
       .then(results => {
