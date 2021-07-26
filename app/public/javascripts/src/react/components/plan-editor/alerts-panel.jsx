@@ -5,32 +5,32 @@ import cx from 'clsx'
 
 const DefectsPanel = props => {
 
-  const { locationExceptions, exceptionTypes } = props
-  const exceptions = Object.entries(locationExceptions)
+  const { locationAlerts, alertTypes } = props
+  const alerts = Object.entries(locationAlerts)
 
   const [open, setOpen] = useState(false)
   const handleOpenState = () => setOpen(!open)
 
-  return exceptions.length ? (
-    <div className={cx('exceptions-panel', open && 'open')}>
+  return alerts.length ? (
+    <div className={cx('alerts-panel', open && 'open')}>
 
       <div className="header" onClick={handleOpenState}>
         <span className="svg plus-minus"></span>
         <span className="svg warning"></span>
-        <h2>Plan Defects <small>{exceptions.length} item{exceptions.length ? 's' : ''}</small></h2>
+        <h2>Plan Defects <small>{alerts.length} item{alerts.length ? 's' : ''}</small></h2>
       </div>
 
       <ul className={cx('content', open && 'open')}>
 
-        {exceptions.map(([id, location]) => (
-          location.exceptions.map((exception, index) =>
+        {alerts.map(([id, location]) => (
+          location.alerts.map((alert, index) =>
             <li key={index}>
               <div className="text">
                 <div
                   className="svg location"
-                  style={ { backgroundImage: `url('${exceptionTypes[exception].iconUrl}')` } }
+                  style={ { backgroundImage: `url('${alertTypes[alert].iconUrl}')` } }
                 ></div>
-                {exceptionTypes[exception].displayName}
+                {alertTypes[alert].displayName}
               </div>
               {/* <div className="dropdown">
                 <div className="svg caret"></div>
@@ -50,8 +50,8 @@ const DefectsPanel = props => {
 }
 
 const mapStateToProps = state => ({
-  locationExceptions: PlanEditorSelectors.getExceptionsForSelectedSubnet(state),
-  exceptionTypes: PlanEditorSelectors.ExceptionTypes,
+  locationAlerts: PlanEditorSelectors.getAlertsForSelectedSubnet(state),
+  alertTypes: PlanEditorSelectors.AlertTypes,
 })
 
 const mapDispatchToProps = dispatch => ({

@@ -28,21 +28,21 @@ const getIsRecalcSettled = createSelector(
   }
 )
 
-const ExceptionTypes = {
+const AlertTypes = {
   MAX_DROP_LENGTH_EXCEEDED: {
     key: 'MAX_DROP_LENGTH_EXCEEDED', 
     displayName: 'Drop Cable Length Exceeded',
-    iconUrl: '/svg/exception-panel-location.svg',
+    iconUrl: '/svg/alert-panel-location.svg',
   },
   ABANDONED_LOCATION: {
     key: 'ABANDONED_LOCATION', 
     displayName: 'Abandoned Location',
-    iconUrl: '/svg/exception-panel-location.svg',
+    iconUrl: '/svg/alert-panel-location.svg',
   },
 }
 // temporary
 const locationWarnImg = new Image(18, 22)
-locationWarnImg.src = '/svg/exception-panel-location.png'
+locationWarnImg.src = '/svg/alert-panel-location.png'
 //const getSubnets = state => state.planEditor.subnets
 const getSubnetFeatures = state => state.planEditor.subnetFeatures
 const getDropCableLength = state => {
@@ -55,10 +55,10 @@ const getDropCableLength = state => {
     .networkConfigurations.ODN_1.terminalConfiguration
   return maxDistanceMeters
 }
-const getExceptionsForSelectedSubnet = createSelector(
+const getAlertsForSelectedSubnet = createSelector(
   [getSelectedSubnet, getSubnetFeatures, getDropCableLength],
   (selectedSubnet, subnetFeatures, maxDropCableLength) => {
-    let exceptions = {}
+    let alerts = {}
     // maybe we can spruce this up a bit some filter functions?
     if (
       selectedSubnet
@@ -78,34 +78,34 @@ const getExceptionsForSelectedSubnet = createSelector(
               const locationId = locationLink.locationId
               // remove abandoned entry
               delete abandonedLocations[locationId]
-              // dropcable exception?
+              // dropcable alert?
               if (dropLink.dropCableLength > maxDropCableLength) {
-                if (!exceptions[locationId]) {
-                  exceptions[locationId] = {
+                if (!alerts[locationId]) {
+                  alerts[locationId] = {
                     locationId: locationId,
                     subnetId: selectedSubnet.subnetNode,
-                    exceptions: [],
+                    alerts: [],
                   }
                 }
-                exceptions[locationId].exceptions.push(ExceptionTypes['MAX_DROP_LENGTH_EXCEEDED'].key)
+                alerts[locationId].alerts.push(AlertTypes['MAX_DROP_LENGTH_EXCEEDED'].key)
               }
             })
           })
         }
       })
       Object.keys(abandonedLocations).forEach(locationId => {
-        if (!exceptions[locationId]) {
-          exceptions[locationId] = {
-            'locationId': locationId,
-            'subnetId': selectedSubnet.subnetNode,
-            'exceptions': [],
+        if (!alerts[locationId]) {
+          alerts[locationId] = {
+            locationId: locationId,
+            subnetId: selectedSubnet.subnetNode,
+            alerts: [],
           }
         }
-        exceptions[locationId].exceptions.push(ExceptionTypes['ABANDONED_LOCATION'].key)
+        alerts[locationId].alerts.push(AlertTypes['ABANDONED_LOCATION'].key)
       }) 
     } 
-    console.log(exceptions)
-    return exceptions
+    // console.log(alerts)
+    return alerts
   }
 )
 
@@ -113,8 +113,8 @@ const PlanEditorSelectors = Object.freeze({
   getBoundaryLayersList,
   getSelectedIds,
   getIsRecalcSettled,
-  ExceptionTypes,
-  getExceptionsForSelectedSubnet,
+  AlertTypes,
+  getAlertsForSelectedSubnet,
   locationWarnImg,
 })
 

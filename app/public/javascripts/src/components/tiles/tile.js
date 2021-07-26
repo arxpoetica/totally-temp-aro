@@ -296,7 +296,7 @@ class TileComponentController {
       this.selectionIds,
       this.hiddenFeatures,
       this.selectedSubnetLocations,
-      this.locationExceptions,
+      this.locationAlerts,
       this.rShowFiberSize,
       this.rViewSetting
     ))
@@ -762,7 +762,7 @@ class TileComponentController {
       rSelectedDisplayMode: reduxState.toolbar.rSelectedDisplayMode,
       rActiveViewModePanel: reduxState.toolbar.rActiveViewModePanel,
       subnetFeatures: reduxState.planEditor.subnetFeatures,
-      locationExceptions: PlanEditorSelectors.getExceptionsForSelectedSubnet(reduxState),
+      locationAlerts: PlanEditorSelectors.getAlertsForSelectedSubnet(reduxState),
       selectedSubnetLocations: selectedSubnetLocations,
       hiddenFeatures: reduxState.planEditor.hiddenFeatures,
     }
@@ -783,7 +783,7 @@ class TileComponentController {
     const rShowFiberSize = this.rShowFiberSize
     const rViewSetting = this.rViewSetting
     const selectedSubnetLocations = this.selectedSubnetLocations
-    const locationExceptions = this.locationExceptions
+    const locationAlerts = this.locationAlerts
     const currentHiddenFeatures = this.hiddenFeatures
 
     var needRefresh = false
@@ -817,8 +817,8 @@ class TileComponentController {
       overlayMap.setSelectedSubnetLocations(nextState.selectedSubnetLocations)
       needRefresh = true
     }
-    if (!dequal(locationExceptions, nextState.locationExceptions)) {
-      overlayMap.setLocationExceptions(nextState.locationExceptions)
+    if (!dequal(locationAlerts, nextState.locationAlerts)) {
+      overlayMap.setLocationAlerts(nextState.locationAlerts)
       needRefresh = true
     }
     if (!dequal(currentHiddenFeatures, nextState.hiddenFeatures)) {
