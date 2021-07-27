@@ -102,22 +102,24 @@
         </tr>
       </tbody>
     </table>
-    <nav class="text-center" style="max-height: 35px">
+    <div style="padding: 8px" ng-if="$ctrl.rowsPerPage < $ctrl.allPlans.length">
       <ul class="pagination" style="margin: 0px">
-        <li ng-class="{ 'page-item': true, disabled: $ctrl.currentPage === 1 }">
-          <span class="page-link" aria-label="Previous" ng-click="$ctrl.loadPlans($ctrl.currentPage - 1)">
+        <li ng-class="{ 'page-item': true, disabled: $ctrl.pageOffset === 0 }">
+          <span class="page-link" aria-label="Previous" ng-click="$ctrl.changePage($ctrl.pageOffset - 1)">
             <span aria-hidden="true">&laquo;</span>
           </span>
         </li>
-        <li ng-repeat="page in $ctrl.pages" ng-class="{ 'page-item': true, active: page === $ctrl.currentPage }">
-          <span class="page-link" ng-click="$ctrl.loadPlans(page)">{{ page }}</span>
+        <li ng-repeat="page in $ctrl.pages track by $index" ng-class="{ 'page-item': true, active: $ctrl.pageOffset === page }">
+          <span ng-class="{ 'page-link': -1 !== page, 'break': -1 === page}" ng-click="$ctrl.loadPlans(page+1); $ctrl.setPage(page)">
+            {{-1 === page ? "…" : page+1}}
+          </span>
         </li>
-        <li ng-class="{ 'page-item': true, disabled: $ctrl.currentPage === $ctrl.pages[$ctrl.pages.length - 1] }">
-          <span class="page-link" aria-label="Next" ng-click="$ctrl.loadPlans($ctrl.pages[$ctrl.pages.length - 1])">
+        <li ng-class="{ 'page-item': true, disabled: $ctrl.pageOffset === $ctrl.pages[$ctrl.pages.length - 1] }">
+          <span class="page-link" aria-label="Next" ng-click="$ctrl.changePage($ctrl.pageOffset + 1)">
             <span aria-hidden="true">&raquo;</span>
           </span>
         </li>
       </ul>
-    </nav>
+    </div>
   </div>
 </div>
