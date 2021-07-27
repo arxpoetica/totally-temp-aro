@@ -636,6 +636,13 @@ function parseRecalcEvents (recalcData) {
         recalcData.subnets.forEach(subnetRecalc => {
           let subnetId = subnetRecalc.feature.objectId
           let newSubnet = JSON.parse(JSON.stringify(state.planEditor.subnets[subnetId]))
+
+          // update fiber
+          // TODO: create parser for this???
+          // ...also use it above in `addSubnets`, where fiber is added
+          newSubnet.fiber = subnetRecalc.feature
+
+          // update equipment
           subnetRecalc.recalcNodeEvents.forEach(recalcNodeEvent => {
             let objectId = recalcNodeEvent.subnetNode.id
             switch (recalcNodeEvent.eventType) {
@@ -655,8 +662,8 @@ function parseRecalcEvents (recalcData) {
                 // add || modify
                 // TODO: this is repeat code from below
                 let parsedNode = {
-                  'feature': parseSubnetFeature(recalcNodeEvent.subnetNode),
-                  'subnetId': subnetId,
+                  feature: parseSubnetFeature(recalcNodeEvent.subnetNode),
+                  subnetId: subnetId,
                 }
                 newSubnetFeatures[objectId] = parsedNode
                 break
@@ -664,16 +671,18 @@ function parseRecalcEvents (recalcData) {
           })
           updatedSubnets[subnetId] = newSubnet
       })
-    })
-    batch(() => {
-      dispatch({
-        type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
-        payload: newSubnetFeatures,
+
+      batch(() => {
+        dispatch({
+          type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
+          payload: newSubnetFeatures,
+        })
+        dispatch({
+          type: Actions.PLAN_EDITOR_ADD_SUBNETS,
+          payload: updatedSubnets,
+        })
       })
-      dispatch({
-        type: Actions.PLAN_EDITOR_ADD_SUBNETS,
-        payload: updatedSubnets,
-      })
+
     })
   }
 }
