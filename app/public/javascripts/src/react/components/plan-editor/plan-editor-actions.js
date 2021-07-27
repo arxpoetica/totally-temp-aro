@@ -10,7 +10,7 @@ import ResourceActions from '../resource-editor/resource-actions'
 import { batch } from 'react-redux'
 import WktUtils from '../../../shared-utils/wkt-utils'
 
-function resumeOrCreateTransaction (planId, userId) {
+function resumeOrCreateTransaction(planId, userId) {
   return (dispatch, getState) => {
     const state = getState()
     dispatch({
@@ -53,31 +53,27 @@ function resumeOrCreateTransaction (planId, userId) {
   }
 }
 
-function clearTransaction () {
-  return dispatch => {
-    dispatch({ type: Actions.PLAN_EDITOR_CLEAR_TRANSACTION })
-    dispatch({
+function clearTransaction() {
+  return async(dispatch, getState) => {
+    await dispatch({ type: Actions.PLAN_EDITOR_CLEAR_TRANSACTION })
+    await dispatch({
       type: Actions.SELECTION_SET_PLAN_EDITOR_FEATURES, // DEPRICATED
       payload: []
     })
-    batch(() => {
-      dispatch(setIsCommittingTransaction(false))
-      dispatch({
-        type: Actions.PLAN_EDITOR_CLEAR_SUBNETS,
-      })
-      dispatch({
-        type: Actions.PLAN_EDITOR_CLEAR_FEATURES,
-      })
-      dispatch({
-        type: Actions.TOOL_BAR_SET_SELECTED_DISPLAY_MODE,
-        payload: 'VIEW', // ToDo: globalize the constants in tool-bar including displayModes
-      })
+    await batch(async() => {
+      await dispatch(setIsCommittingTransaction(false))
+      await dispatch({ type: Actions.PLAN_EDITOR_CLEAR_SUBNETS })
+      await dispatch({ type: Actions.PLAN_EDITOR_CLEAR_FEATURES })
     })
+    const state = getState()
+    const planId = state.plan.activePlan.id
+    const userId = state.user.loggedInUser.id
+    await dispatch(resumeOrCreateTransaction(planId, userId))
   }
 }
 
 // ToDo: there's only one transaction don't require the ID
-function commitTransaction (transactionId) {
+function commitTransaction(transactionId) {
   return dispatch => {
     dispatch(setIsCommittingTransaction(true))
     return AroHttp.put(`/service/plan-transactions/${transactionId}`)
