@@ -27,7 +27,8 @@ export class AroFeatureEditor extends Component {
     //    - when we refactor AroFeatureFactory it's contained here and decoupled from the reast of the codebase
     this.state = {
       //'value': this.props.feature, // may need to update this on props change
-      value: JSON.parse(JSON.stringify(this.aroFeature))
+      //value: JSON.parse(JSON.stringify(this.aroFeature))
+      value: this.aroFeature,
     }
   }
 
@@ -39,7 +40,7 @@ export class AroFeatureEditor extends Component {
         objPath='' 
         isCollapsible={this.props.isCollapsible}
         isEditable={this.props.isEditable} 
-        value={this.aroFeature} // this.state.value 
+        value={this.state.value} // this.state.value 
         meta={this.meta} 
         onChange={(event, propVal, path) => this._onChange(event, propVal, path)}
       ></AroFeatureEditorNode>
@@ -52,7 +53,7 @@ export class AroFeatureEditor extends Component {
     pathAr.shift()
     let leafKey = pathAr.pop()
     // will omit functions
-    let pathClone = {...this.state.value}
+    //let pathClone = {...this.state.value}
     // So .reduce steps through an array calling a function and keeping a running tally (collector, value) 
     //  we step through the object path using the collector to keep the object reference.
     //  We provide valClone as the initial value for ref, then step down through that object
@@ -76,7 +77,10 @@ export class AroFeatureEditor extends Component {
     // can do validate here and chnge meta with validation message 
     
     // ToDo: we are probably going to need to fix this <-----------------------------------------<<<
+    console.log(this.state.value)
     let stateRef = pathAr.reduce((ref, key) => (ref || {})[key], this.state.value)
+    console.log(stateRef)
+    console.log(leafKey)
     stateRef[leafKey] = propVal
     console.log(this.state.value)
     

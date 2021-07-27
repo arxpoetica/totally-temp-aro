@@ -3,6 +3,7 @@ import React, { Component } from "react";
 class Foldout extends Component {
   constructor (props) {
     super(props)
+    this.leftIndent = this.props.leftIndent || 12
     let isCollapsible = props.isCollapsible || true
     let isOpen = props.isOpen || false
     if (!isCollapsible) isOpen = true
@@ -31,7 +32,7 @@ class Foldout extends Component {
           }
           {this.props.displayName}
         </div>
-        <div className='ei-gen-level ei-internal-level' style={{ paddingLeft: this.props.leftIndent + 'px' }}>
+        <div className='ei-gen-level ei-internal-level' style={{ paddingLeft: this.leftIndent + 'px' }}>
           <div className='ei-items-contain'>
             {isOpen
               ? this.props.children

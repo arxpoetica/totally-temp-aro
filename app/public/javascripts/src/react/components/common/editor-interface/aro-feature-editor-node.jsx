@@ -14,16 +14,18 @@ export class AroFeatureEditorNode extends Component {
     if (!'isEditable' in props) props.isEditable = true
     if (!'visible' in props.meta) props.meta.visible = true
 
-    this.value = this.props.value
-    if ('undefined' === typeof this.value) {
-      console.log(' ------- undefined ---')
-      console.log(this.props.meta.defaultValue)
-      this.value = this.props.meta.defaultValue
+    //this.value = this.props.value
+    //console.log({key: this.props.objPath, val: this.value, iVal: this.props.value})
+    if ('undefined' === typeof this.props.value) {
       // eh something is wrong
+      this.props.meta.visible = false
       if ('${' === this.props.meta.defaultValue.substring(0, 2)) {
         this.props.meta.visible = false
+      } else {
+        console.log(` --- undefined --- ${this.props.objPath}`)
+        console.log(this.props.meta.defaultValue)
+        //this.props.value = this.props.meta.defaultValue
       }
-      
     }
   }
 
@@ -41,7 +43,7 @@ export class AroFeatureEditorNode extends Component {
 
   renderList () {
     // ToDo: the meta data should be an entirely seperate object, not a property of the value 
-    //let subMeta = this.value.getDisplayProperties()
+    //let subMeta = this.props.value.getDisplayProperties()
     //console.log(subMeta)
     var jsx = []
     var itemMeta = JSON.parse(JSON.stringify(this.props.meta))
@@ -52,7 +54,7 @@ export class AroFeatureEditorNode extends Component {
         itemMeta.displayDataType = itemMeta.displayDataType.substring(6, len-1)
     }
     
-    this.value.forEach((item, index) => {
+    this.props.value.forEach((item, index) => {
       let objPath = `${this.props.objPath}[${index}]`
       //let displayName = `${this.props.meta.displayName} ${index+1}`
       //let meta = { ...subMeta, displayName}
@@ -78,7 +80,7 @@ export class AroFeatureEditorNode extends Component {
     } else {
       console.log(jsx)
       return (
-        <Foldout displayName={`${this.props.meta.displayName} ${this.value.length}`}>
+        <Foldout displayName={`${this.props.meta.displayName} ${this.props.value.length}`}>
           {jsx}
         </Foldout>
       )
@@ -88,17 +90,18 @@ export class AroFeatureEditorNode extends Component {
   renderCollection () {
     // ToDo: the meta data should be an entirely seperate object, not a property of the value 
     console.log(this.props)
-    let subMeta = this.value.getDisplayProperties()
+    let subMeta = this.props.value.getDisplayProperties()
     var jsx = []
     //let keysByOrder = Object.entries(subMeta).sort((a,b) => a[1].displayOrder - b[1].displayOrder)
     //let keysByOrder = Object.entries(subMeta)
     //for (const [arKey, meta] of subMeta) {
     subMeta.forEach((meta, index) => {
       let key = meta.propertyName
-      if (key in this.value && meta.visible) {
-        let value = this.value[key]
+      if (key in this.props.value && meta.visible) {
+        let value = this.props.value[key]
         let isEditable = this.props.isEditable && meta.editable
         let objPath = `${this.props.objPath}.${key}`
+        console.log({cKey: objPath, cVal: value})
         jsx.push(<AroFeatureEditorNode objPath={objPath} key={objPath} isEditable={isEditable} value={value} meta={meta} onChange={this.props.onChange} />)
       }
     })
@@ -144,7 +147,7 @@ export class AroFeatureEditorNode extends Component {
   //       {this.props.meta.displayName}: 
   //       <DisplayElement objPath={this.props.objPath} 
   //         isEditable={isEditable} 
-  //         value={this.value} 
+  //         value={this.props.value} 
   //         meta={this.props.meta} 
   //         onChange={this.props.onChange} 
   //       />
@@ -156,6 +159,7 @@ export class AroFeatureEditorNode extends Component {
 
 
   renderItem () {
+    console.log({key: this.props.objPath, val: this.props.value})
     // JUST TO TEST 
     /*
     return (
@@ -164,7 +168,7 @@ export class AroFeatureEditorNode extends Component {
           {this.props.meta.displayName}
         </div>
         <div className='ei-property-value'>
-          {String(this.value)}
+          {String(this.props.value)}
         </div>
       </div>
     )
@@ -197,20 +201,21 @@ export class AroFeatureEditorNode extends Component {
     
     if (!isEditable || !formEleType) {
       field = (
-        <div style={{ display: 'inline-block' }}>{String(this.value)}</div>
+        <div style={{ display: 'inline-block' }}>{String(this.props.value)}</div>
       )
     } else {
       let eleProps = {
         'name': this.props.objPath,
         'onChange': ((event) => this.props.onChange(event, event.target.value, this.props.objPath)),
         'type': formEleType,
-        'value': this.value,
+        'value': this.props.value,
+        //'ref': this.props.value,
       }
       switch (formEleType) {
         case 'checkbox':
-          eleProps.onChange = ((event) => this.props.onChange(event, !this.value, this.props.objPath))
+          eleProps.onChange = ((event) => this.props.onChange(event, !this.props.value, this.props.objPath))
           field = (
-            <input {...eleProps} checked={this.value === true ? 'checked' : null} className='checkboxfill layer-type-checkboxes'></input>
+            <input {...eleProps} checked={this.props.value === true ? 'checked' : null} className='checkboxfill layer-type-checkboxes'></input>
           )
           break
         case 'multiSelect':
