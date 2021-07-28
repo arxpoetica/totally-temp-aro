@@ -28,6 +28,7 @@ class {{classNameExtractor this.classDef}} {
   {{!-- A static function that will take a POJO object and return an object with the current classes type --}}
   // Returns a {{classNameExtractor this.classDef}} object from it's JSON representation
   static fromJSONObject(jsonObject) {
+    //var fullDisplayProps = this.getFullDisplayProperties()
     var newObj = new {{classNameExtractor this.classDef}}()
 
     if (!jsonObject) {
@@ -43,7 +44,7 @@ class {{classNameExtractor this.classDef}} {
       jsonObject['{{@key}}'].forEach((item) => newObj['{{@key}}'].push({{classNameExtractor this.items}}.fromJSONObject(item)))
     }
     {{else if (isPrimitive this.type)}}
-    newObj.{{@key}} = jsonObject['{{@key}}']
+    newObj.{{@key}} = jsonObject['{{@key}}'] //|| fullDisplayProps['{{@key}}'].defaultValue
     {{else if (isMapObject this)}}
     newObj.{{@key}} = jsonObject['{{@key}}']
     {{else if (isAnyObject this)}}
@@ -68,6 +69,25 @@ class {{classNameExtractor this.classDef}} {
     }
     return {{classNameExtractor this.classDef}}.displayProperties
   }
+
+  static buildFullDisplayProperties() {
+    //displayOrder
+    //properties = {} // used only for displayType: COLLECTION
+    //itemSchema = null // used only for displayType: LIST
+    this.fullDisplayProperties = {{{toJSONByOrder display propOrder}}}
+  }
+
+  static getFullDisplayProperties() {
+    if (!this.fullDisplayProperties) {
+      this.buildFullDisplayProperties()
+    }
+    return this.fullDisplayProperties
+  }
+
+  getFullDisplayProperties() {
+    return {{classNameExtractor this.classDef}}.getFullDisplayProperties()
+  }
+
 }
 
 AroFeatureFactory.registerAroFeature('{{classUrnExtractor this.classDef}}', {{classNameExtractor this.classDef}})

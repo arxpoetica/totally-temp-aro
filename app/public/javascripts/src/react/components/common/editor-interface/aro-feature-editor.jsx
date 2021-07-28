@@ -8,12 +8,16 @@ export class AroFeatureEditor extends Component {
 
     this.aroFeature = AroFeatureFactory.createObject(this.props.feature)
     this.meta = this.aroFeature.getDisplayProperties()
-    console.log({meta: this.meta, aroFeature: this.aroFeature})
+
+    let fullMeta = this.getFullMeta(this.aroFeature)
+
+
+    //console.log({meta: this.meta, aroFeature: this.aroFeature})
     this.meta = this.meta.find(ele => ele.displayName === "Network Node Equipment") // ToDo: this needs fixing
     this.aroFeature = this.aroFeature.networkNodeEquipment
-    console.log(this.aroFeature.plannedEquipment[0].getDisplayProperties())
-    console.log({meta: this.meta, aroFeature: this.aroFeature})
-    console.log(this.props.feature)
+    //console.log(this.aroFeature.plannedEquipment[0].getDisplayProperties())
+    //console.log({meta: this.meta, aroFeature: this.aroFeature})
+    //console.log(this.props.feature)
     if (!'isCollapsible' in props) props.isCollapsible = true
     if (!'isEditable' in props) props.isEditable = true
     if (!'visible' in this.meta) this.meta.visible = true
@@ -31,6 +35,37 @@ export class AroFeatureEditor extends Component {
       value: this.aroFeature,
     }
   }
+
+
+
+  getFullMeta (aroFeature) {
+    let metaList = aroFeature.getDisplayProperties()
+    console.log(metaList)
+    // make it a dictionary and add special props for objects and arrays
+    //  that will contain the meta for object properties and list elements
+    //  note that list elements should have the same type and thus the same meta (hopefully)
+    //properties = {} // used only for displayType: COLLECTION
+    //itemSchema = null // used only for displayType: LIST
+    let meta = {}
+    metaList.forEach(metaItem => {
+      let propName = metaItem.propertyName
+      meta[propName] = metaItem
+      // for standardisation 
+      meta[propName].properties = {} // used only for displayType: COLLECTION
+      meta[propName].itemSchema = null // used only for displayType: LIST
+      if (metaItem.displayDataType.startsWith('object')) {
+        meta[metaItem.propertyName].properties = this.getFullMeta( aroFeature[propName] )
+      } else if (metaItem.displayDataType.startsWith('array')) {
+        //meta[propName].itemSchema = // how do we get this?
+        //EquipmentComponent.getDisplayProperties
+      }
+    })
+
+    return meta
+  }
+
+
+
 
   render () {
     //return ([])
@@ -50,6 +85,7 @@ export class AroFeatureEditor extends Component {
 
   _onChange (event, propVal, path) {
     let parsedPath = path
+    // normalize notation for array indices
     parsedPath = parsedPath.replace('].', '.')
     parsedPath = parsedPath.replace('[', '.')
     parsedPath = parsedPath.replace(']', '')

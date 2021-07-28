@@ -63,13 +63,13 @@ export class AroFeatureEditorNode extends Component {
       //let meta = Object.assign({}, ...metaArray.map((prop) => ({[prop.propertyName]: prop})))
       let isEditable = this.props.isEditable && this.props.meta.editable
       itemMeta.displayName = `${index}`
-      console.log({item, itemMeta})
+      //console.log({item, itemMeta})
       //console.log(this.props.meta)
       jsx.push(<AroFeatureEditorNode objPath={objPath} key={objPath} isEditable={isEditable} value={item} meta={itemMeta} onChange={this.props.onChange} />)
     })
     // ToDo: repeat code below
-    console.log('list')
-    console.log(jsx)
+    //console.log('list')
+    //console.log(jsx)
     
     if (this.props.omitRootContain) {
       return (
@@ -89,7 +89,7 @@ export class AroFeatureEditorNode extends Component {
 
   renderCollection () {
     // ToDo: the meta data should be an entirely seperate object, not a property of the value 
-    console.log(this.props)
+    //console.log(this.props)
     let subMeta = this.props.value.getDisplayProperties()
     var jsx = []
     //let keysByOrder = Object.entries(subMeta).sort((a,b) => a[1].displayOrder - b[1].displayOrder)
@@ -101,12 +101,12 @@ export class AroFeatureEditorNode extends Component {
         let value = this.props.value[key]
         let isEditable = this.props.isEditable && meta.editable
         let objPath = `${this.props.objPath}.${key}`
-        console.log({cKey: objPath, cVal: value})
+        //console.log({cKey: objPath, cVal: value})
         jsx.push(<AroFeatureEditorNode objPath={objPath} key={objPath} isEditable={isEditable} value={value} meta={meta} onChange={this.props.onChange} />)
       }
     })
-    console.log('collection')
-    console.log(jsx)
+    //console.log('collection')
+    //console.log(jsx)
     if (this.props.omitRootContain) {
       return (
         <>
@@ -159,7 +159,7 @@ export class AroFeatureEditorNode extends Component {
 
 
   renderItem () {
-    console.log({key: this.props.objPath, val: this.props.value})
+    //console.log({key: this.props.objPath, val: this.props.value})
     // JUST TO TEST 
     /*
     return (
