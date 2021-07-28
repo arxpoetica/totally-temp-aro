@@ -28,6 +28,7 @@ const defaultState = {
   isLoadingRfpPlans: false,
   planListOffset: 0,
   planListLimit: 10,
+  progress: 0,
   reportsBeingDownloaded: new Set() // A set of URLs that are being downloaded (the server can take time to generate reports)
 }
 
@@ -154,6 +155,12 @@ function endDownloadingRfpReport (state, reportUrl) {
   }
 }
 
+function setOptimizationProgressPercent (state, percent) {
+  return { ...state,
+    progress: percent
+  }
+}
+
 function rfpReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.RFP_CLEAR_STATE:
@@ -209,6 +216,9 @@ function rfpReducer (state = defaultState, action) {
 
     case Actions.RFP_END_DOWNLOADING_REPORT:
       return endDownloadingRfpReport(state, action.payload)
+    
+    case Actions.RFP_SET_OPTIMIZATION_PROGRESS_PERCENT:
+      return setOptimizationProgressPercent(state, action.payload)
 
     default:
       return state
