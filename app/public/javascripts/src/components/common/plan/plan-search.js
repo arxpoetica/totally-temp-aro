@@ -51,6 +51,10 @@ class PlanSearchController {
     }
   }
 
+  $doCheck () {
+    this.setPage()
+  }
+
   loadServiceAreaInfo (plans) {
     // Load service area ids for all service areas referenced by the plans
     // First determine which ids to fetch. We might already have a some or all of them
@@ -281,16 +285,33 @@ class PlanSearchController {
 
     let newPages = []
     // -1 indicates "..."
-    if (this.lastPage < 7) {
-      newPages = [...Array(this.lastPage + 1).keys()]
-    } else if (page < 2 || page + 2 > this.lastPage) {
-      newPages = [0, 1, 2, -1, this.lastPage - 2, this.lastPage - 1, this.lastPage]
-    } else if (page === 2) {
-      newPages = [0, 1, 2, 3, -1, this.lastPage - 1, this.lastPage]
-    } else if (this.lastPage - 2 === page) {
-      newPages = [0, 1, -1, this.lastPage - 3, this.lastPage - 2, this.lastPage - 1, this.lastPage]
+    // Change the newPages size based on sidebarWidth
+    if (this.state.sidebarWidth < 30) {
+      if (this.lastPage < 8) {
+        newPages = [...Array(this.lastPage + 1).keys()]
+      } else if (page < 2 || page + 2 > this.lastPage) {
+        newPages = [0, 1, 2, 3, -1, this.lastPage - 2, this.lastPage - 1, this.lastPage]
+      } else if (page === 2) {
+        newPages = [0, 1, 2, 3, 4, -1, this.lastPage - 1, this.lastPage]
+      } else if (this.lastPage - 2 === page) {
+        newPages = [0, 1, 2, -1, this.lastPage - 3, this.lastPage - 2, this.lastPage - 1, this.lastPage]
+      } else {
+        newPages = [0, -1, page - 1, page, page + 1, -1, this.lastPage - 1, this.lastPage]
+      }
     } else {
-      newPages = [0, -1, page - 1, page, page + 1, -1, this.lastPage]
+      if (this.lastPage < 10) {
+        newPages = [...Array(this.lastPage + 1).keys()]
+      } else if (page < 4 || page + 2 > this.lastPage) {
+        newPages = [0, 1, 2, 3, 4, -1, this.lastPage - 3, this.lastPage - 2, this.lastPage - 1, this.lastPage]
+      } else if (page === 4) {
+        newPages = [0, 1, 2, 3, 4, 5, -1, this.lastPage - 2, this.lastPage - 1, this.lastPage]
+      } else if (this.lastPage - 3 === page) {
+        newPages = [0, 1, 2, 3, -1, this.lastPage - 4, this.lastPage - 3, this.lastPage - 2, this.lastPage - 1, this.lastPage]
+      } else if (this.lastPage - 2 === page) {
+          newPages = [0, 1, 2, -3, -1, page - 2, page - 1, page, this.lastPage - 1, this.lastPage]
+      } else {
+        newPages = [0, 1, 2, -1, page - 1, page, page + 1, page + 2, -1, this.lastPage]
+      }
     }
 
     this.pages = newPages
