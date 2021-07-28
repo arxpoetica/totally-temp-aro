@@ -86,7 +86,7 @@ const getAlertsForSelectedSubnet = createSelector(
       const maxTerminalHomes = networkConfig.terminalConfiguration.outputConfig.max
       const maxHubHomes = networkConfig.hubConfiguration.outputConfig.max
       const maxHubDistance = networkConfig.hubConfiguration.maxDistanceMeters
-      
+
       let totalHomes = 0
 
       let abandonedLocations = {}
@@ -171,7 +171,6 @@ const getAlertsForSelectedSubnet = createSelector(
         alerts[locationId].alerts.push(AlertTypes['ABANDONED_LOCATION'].key)
       }) 
     } 
-    console.log(alerts)
     return alerts
   }
 )
