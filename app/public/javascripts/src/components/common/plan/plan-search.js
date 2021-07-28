@@ -26,10 +26,15 @@ class PlanSearchController {
     ]
     this.selectedPlanSortType = this.planSortingOptions[0]
     this.sortByField = this.planSortingOptions[0].sortType
+    this.pageOffset = 0
+    this.lastPage = 0
+    this.pages = []
+    this.rowsPerPage = 10
   }
 
   $onInit () {
     this.loadPlans(1)
+    this.setPage()
   }
 
   $onChanges (changesObj) {
@@ -44,6 +49,10 @@ class PlanSearchController {
           return user
         })
     }
+  }
+
+  $doCheck () {
+    this.setPage()
   }
 
   loadServiceAreaInfo (plans) {
@@ -88,7 +97,7 @@ class PlanSearchController {
   loadPlans (page, callback) {
     this.constructSearch()
     this.currentPage = page || 1
-    this.maxResults = 10
+    this.maxResults = this.rowsPerPage
     if (page > 1) {
       var start = this.maxResults * (page - 1)
       var end = start + this.maxResults
@@ -124,12 +133,7 @@ class PlanSearchController {
             this.allPlans = response.data
             this.plans = this.allPlans.slice(0, this.maxResults)
             this.loadServiceAreaInfo(this.plans)
-            this.pages = []
-            var pageSize = Math.floor(response.data.length / this.maxResults) + (response.data.length % this.maxResults > 0 ? 1 : 0)
-            for (var i = 1; i <= pageSize; i++) {
-              this.pages.push(i)
-            }
-
+            this.setPage ()
             callback && callback()
           })
         })
@@ -255,6 +259,63 @@ class PlanSearchController {
   convertTimeStampToDate (timestamp) {
     const utcDate = toUTCDate(new Date(timestamp))
     return new Intl.DateTimeFormat('en-US').format(utcDate)
+  }
+
+  changePage (page) {
+    this.loadPlans(page)
+    this.setPage(page)
+  }
+
+  // Pagination
+  setPage (page) {
+    if (typeof page === 'undefined') {
+      page = this.pageOffset
+    }
+
+    page === Math.floor(page)
+
+    this.lastPage = Math.floor((this.allPlans.length - 1) / this.rowsPerPage)
+    if (this.lastPage < 0) this.lastPage = 0
+
+    if (page > this.lastPage) {
+      page = this.lastPage
+    }
+
+    if (page < 0) page = 0
+
+    let newPages = []
+    // -1 indicates "..."
+    // Change the newPages size based on sidebarWidth
+    if (this.state.sidebarWidth < 30) {
+      if (this.lastPage < 8) {
+        newPages = [...Array(this.lastPage + 1).keys()]
+      } else if (page < 2 || page + 2 > this.lastPage) {
+        newPages = [0, 1, 2, 3, -1, this.lastPage - 2, this.lastPage - 1, this.lastPage]
+      } else if (page === 2) {
+        newPages = [0, 1, 2, 3, 4, -1, this.lastPage - 1, this.lastPage]
+      } else if (this.lastPage - 2 === page) {
+        newPages = [0, 1, 2, -1, this.lastPage - 3, this.lastPage - 2, this.lastPage - 1, this.lastPage]
+      } else {
+        newPages = [0, -1, page - 1, page, page + 1, -1, this.lastPage - 1, this.lastPage]
+      }
+    } else {
+      if (this.lastPage < 10) {
+        newPages = [...Array(this.lastPage + 1).keys()]
+      } else if (page < 4 || page + 2 > this.lastPage) {
+        newPages = [0, 1, 2, 3, 4, -1, this.lastPage - 3, this.lastPage - 2, this.lastPage - 1, this.lastPage]
+      } else if (page === 4) {
+        newPages = [0, 1, 2, 3, 4, 5, -1, this.lastPage - 2, this.lastPage - 1, this.lastPage]
+      } else if (this.lastPage - 3 === page) {
+        newPages = [0, 1, 2, 3, -1, this.lastPage - 4, this.lastPage - 3, this.lastPage - 2, this.lastPage - 1, this.lastPage]
+      } else if (this.lastPage - 2 === page) {
+          newPages = [0, 1, 2, -3, -1, page - 2, page - 1, page, this.lastPage - 1, this.lastPage]
+      } else {
+        newPages = [0, 1, 2, -1, page - 1, page, page + 1, page + 2, -1, this.lastPage]
+      }
+    }
+
+    this.pages = newPages
+    this.pageOffset = page
   }
 
   mapStateToThis (reduxState) {

@@ -62,6 +62,8 @@ class State {
     service.rxState = new RxState() // For RxJs in react components
     service.StateViewMode = StateViewMode
 
+    service.sidebarWidth = window.GLOBAL_SIDEBAR_INITIAL_WIDTH || 25
+
     service.OPTIMIZATION_TYPES = {
       UNCONSTRAINED: { id: 'UNCONSTRAINED', algorithm: 'UNCONSTRAINED', label: 'Full Coverage' },
       MAX_IRR: { id: 'MAX_IRR', algorithm: 'IRR', label: 'Maximum IRR' },
