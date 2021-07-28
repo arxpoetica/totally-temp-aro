@@ -59,7 +59,7 @@ function initializeRfpReport (planId, userId, projectId, rfpId, fiberRoutingMode
         AroHttp.get(`/service/v1/plan?search=type:"RFP"&user_id=${userId}`)
           .then(rfpPlans => {
             if (rfpPlans) {
-              rfpPlans.data.sort((a, b) => a.id > b.id ? -1 : 1)
+              rfpPlans.data.sort((a, b) => b.id - a.id)
               const activePlan = rfpPlans.data.find(plan => plan.id === result.data.planId)
               dispatch(PlanActions.setActivePlan(activePlan))
             }
@@ -177,5 +177,5 @@ export default {
   setSelectedTarget,
   setClickMapToAddTarget,
   showOrHideAllRfpStatus,
-  setOptimizationProgress
+  setOptimizationProgress,
 }

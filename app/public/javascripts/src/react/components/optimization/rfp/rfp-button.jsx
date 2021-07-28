@@ -50,7 +50,7 @@ RfpButton.propTypes = {
   progress: PropTypes.number,
   userId: PropTypes.number,
   planId: PropTypes.number,
-  fiberRoutingMode: PropTypes.string
+  fiberRoutingMode: PropTypes.string,
 }
 
 const mapStateToProps = (state) => {
@@ -61,14 +61,14 @@ const mapStateToProps = (state) => {
     progress: state.optimization.rfp.progress,
     userId: state.user.loggedInUser.id,
     planId: state.plan.activePlan.id,
-    fiberRoutingMode: selector(state, 'fiberRoutingMode.value')
+    fiberRoutingMode: selector(state, 'fiberRoutingMode.value'),
   }
 }
 
 const mapDispatchToProps = dispatch => ({
   modifyRfpReport: () => dispatch(RfpActions.modifyRfpReport()),
   initializeRfpReport: (planId, userId, projectId, rfpId, fiberRoutingMode, targets) => dispatch(RfpActions.initializeRfpReport(planId, userId, projectId, rfpId, fiberRoutingMode, targets)),
-  setOptimizationProgress: (progress) => dispatch(RfpActions.setOptimizationProgress(progress))
+  setOptimizationProgress: (progress) => dispatch(RfpActions.setOptimizationProgress(progress)),
 })
 
 const CoverageButtonComponent = wrapComponentWithProvider(reduxStore, RfpButton, mapStateToProps, mapDispatchToProps)
