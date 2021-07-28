@@ -49,7 +49,12 @@ export class AroFeatureEditor extends Component {
   }
 
   _onChange (event, propVal, path) {
-    let pathAr = path.split('.')
+    let parsedPath = path
+    parsedPath = parsedPath.replace('].', '.')
+    parsedPath = parsedPath.replace('[', '.')
+    parsedPath = parsedPath.replace(']', '')
+    let pathAr = parsedPath.split('.')
+    console.log({path:pathAr, val:this.state.value})
     pathAr.shift()
     let leafKey = pathAr.pop()
     // will omit functions
@@ -77,12 +82,12 @@ export class AroFeatureEditor extends Component {
     // can do validate here and chnge meta with validation message 
     
     // ToDo: we are probably going to need to fix this <-----------------------------------------<<<
-    console.log(this.state.value)
+    
     let stateRef = pathAr.reduce((ref, key) => (ref || {})[key], this.state.value)
-    console.log(stateRef)
-    console.log(leafKey)
+    //console.log(stateRef)
+    //console.log(leafKey)
     stateRef[leafKey] = propVal
-    console.log(this.state.value)
+    //console.log(this.state.value)
     
     //let newValObj = {...this.state.value, ...pathClone}
     //console.log(newValObj)
