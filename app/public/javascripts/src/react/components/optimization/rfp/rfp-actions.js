@@ -2,6 +2,7 @@
 import Actions from '../../../common/actions'
 import AroHttp from '../../../common/aro-http'
 import RfpStatusTypes from './constants'
+import PlanActions from '../../plan/plan-actions'
 
 function addTargets (targets) {
   return {
@@ -53,8 +54,18 @@ function initializeRfpReport (planId, userId, projectId, rfpId, fiberRoutingMode
       payload: RfpStatusTypes.RUNNING
     })
     AroHttp.delete(`/service/v1/plan/${planId}/optimization-state`)
-      .then(() => AroHttp.post(`/service/rfp/process?plan_id=${planId}`, requestBody))
+      .then(() => AroHttp.post(`/service/rfp/process?user_id=${userId}`, requestBody))
       .then(result => {
+        AroHttp.get(`/service/v1/plan?search=type:"RFP"&user_id=${userId}`)
+          .then(rfpPlans => {
+            if (rfpPlans) {
+              rfpPlans.data.sort((a, b) => a.id > b.id ? -1 : 1)
+              const activePlan = rfpPlans.data.find(plan => plan.id === result.data.planId)
+              dispatch(PlanActions.setActivePlan(activePlan))
+            }
+          })
+      })
+      .then(() => {
         dispatch({
           type: Actions.RFP_SET_STATUS,
           payload: RfpStatusTypes.FINISHED
@@ -97,9 +108,14 @@ function loadRfpPlans (userId, searchTerm = '') {
       .then(results => {
         const rfpPlans = results[0].data
         rfpPlans.sort((a, b) => a.id > b.id ? -1 : 1) // Sort plans in descending order by ID (so newest plans appear first)
-        const rfpReportDefinitions = results[1].data.filter(reportDefinition =>
-          (reportDefinition.reportData.reportType === 'COVERAGE' || reportDefinition.reportData.reportType === 'RFP')
+
+        const rfpReportDefinitions = results[1].data.length 
+        ? results[1].data.filter(reportDefinition =>
+          (reportDefinition.reportData.reportType === 'COVERAGE'
+          || reportDefinition.reportData.reportType === 'RFP')
         )
+        : []
+
         dispatch({
           type: Actions.RFP_SET_PLANS,
           payload: {
@@ -142,6 +158,13 @@ function showOrHideAllRfpStatus (show) {
   }
 }
 
+function setOptimizationProgress (percent) {
+  return {
+    type: Actions.RFP_SET_OPTIMIZATION_PROGRESS_PERCENT,
+    payload: percent
+  }
+}
+
 export default {
   addTargets,
   clearRfpState,
@@ -153,5 +176,6 @@ export default {
   replaceTarget,
   setSelectedTarget,
   setClickMapToAddTarget,
-  showOrHideAllRfpStatus
+  showOrHideAllRfpStatus,
+  setOptimizationProgress
 }
