@@ -17,15 +17,9 @@ export class AroFeatureEditorNode extends Component {
     //this.value = this.props.value
     //console.log({key: this.props.objPath, val: this.value, iVal: this.props.value})
     if ('undefined' === typeof this.props.value) {
+      console.log(` --- undefined --- ${this.props.objPath}`)
       // eh something is wrong
       this.props.meta.visible = false
-      if ('${' === this.props.meta.defaultValue.substring(0, 2)) {
-        this.props.meta.visible = false
-      } else {
-        console.log(` --- undefined --- ${this.props.objPath}`)
-        console.log(this.props.meta.defaultValue)
-        //this.props.value = this.props.meta.defaultValue
-      }
     }
   }
 
@@ -42,9 +36,6 @@ export class AroFeatureEditorNode extends Component {
   }
 
   renderList () {
-    // ToDo: the meta data should be an entirely seperate object, not a property of the value 
-    //let subMeta = this.props.value.getDisplayProperties()
-    //console.log(subMeta)
     var jsx = []
     var itemMeta = JSON.parse(JSON.stringify(this.props.meta))
     // get the object type out of the array type
@@ -56,21 +47,11 @@ export class AroFeatureEditorNode extends Component {
     
     this.props.value.forEach((item, index) => {
       let objPath = `${this.props.objPath}[${index}]`
-      //let displayName = `${this.props.meta.displayName} ${index+1}`
-      //let meta = { ...subMeta, displayName}
-      //let meta = subMeta
-      //let metaArray = item.getDisplayProperties()
-      //let meta = Object.assign({}, ...metaArray.map((prop) => ({[prop.propertyName]: prop})))
       let isEditable = this.props.isEditable && this.props.meta.editable
       itemMeta.displayName = `${index}`
-      //console.log({item, itemMeta})
-      //console.log(this.props.meta)
       jsx.push(<AroFeatureEditorNode objPath={objPath} key={objPath} isEditable={isEditable} value={item} meta={itemMeta} onChange={this.props.onChange} />)
     })
     // ToDo: repeat code below
-    //console.log('list')
-    //console.log(jsx)
-    
     if (this.props.omitRootContain) {
       return (
         <>
@@ -78,7 +59,6 @@ export class AroFeatureEditorNode extends Component {
         </>
       )
     } else {
-      //console.log(jsx)
       return (
         <Foldout displayName={`${this.props.meta.displayName} ${this.props.value.length}`}>
           {jsx}
@@ -88,14 +68,8 @@ export class AroFeatureEditorNode extends Component {
   }
 
   renderCollection () {
-    // ToDo: the meta data should be an entirely seperate object, not a property of the value 
-    //console.log(this.props)
-    //let subMeta = this.props.value.getDisplayProperties()
     let subMeta = this.props.meta.properties
     var jsx = []
-    //let keysByOrder = Object.entries(subMeta).sort((a,b) => a[1].displayOrder - b[1].displayOrder)
-    //let keysByOrder = Object.entries(subMeta)
-    //for (const [arKey, meta] of subMeta) {
     let propsList = Object.values(subMeta)
     propsList.sort((a, b) => {
       let isSwap = a.displayOrder - b.displayOrder
@@ -108,12 +82,10 @@ export class AroFeatureEditorNode extends Component {
         let value = this.props.value[key]
         let isEditable = this.props.isEditable && meta.editable
         let objPath = `${this.props.objPath}.${key}`
-        //console.log({cKey: objPath, cVal: value})
         jsx.push(<AroFeatureEditorNode objPath={objPath} key={objPath} isEditable={isEditable} value={value} meta={meta} onChange={this.props.onChange} />)
       }
     })
-    //console.log('collection')
-    //console.log(jsx)
+    
     if (this.props.omitRootContain) {
       return (
         <>
@@ -129,74 +101,11 @@ export class AroFeatureEditorNode extends Component {
     }
   }
 
-  /*
-  _onChange (event, value, objPath) {
-    this.props.onChange(event, value, objPath)
-  }
-  */
-
-  
-  // renderItem () {
-  //   // to get the meta use property.getDisplayProperties()
-
-  //   let isEditable = this.props.isEditable && this.props.meta.editable
-  //   // make the input item dynamic
-  //   var DisplayElement = DisplayTypes[this.props.meta.displayType].element
-  //   /*
-  //   let invalidMessEle = null
-  //   if (this.props.meta.invalidMessage && this.props.meta.invalidMessage != '') {
-  //     invalidMessEle = (<div className='dsInvalidMessage'>{this.props.meta.invalidMessage}</div>)
-  //   }
-  //   */
-  //   return (
-  //     <div className='spacerEle'>
-  //       {/*invalidMessEle*/}
-  //       {this.props.meta.displayName}: 
-  //       <DisplayElement objPath={this.props.objPath} 
-  //         isEditable={isEditable} 
-  //         value={this.props.value} 
-  //         meta={this.props.meta} 
-  //         onChange={this.props.onChange} 
-  //       />
-  //     </div>
-  //   )
-  // }
-
-
-
-
   renderItem () {
-    //console.log({key: this.props.objPath, val: this.props.value})
-    // JUST TO TEST 
-    /*
-    return (
-      <div className='ei-property-item' key={this.props.objPath}>
-        <div className='ei-property-label'>
-          {this.props.meta.displayName}
-        </div>
-        <div className='ei-property-value'>
-          {String(this.props.value)}
-        </div>
-      </div>
-    )
-    */
-    // ----
-
     let isEditable = this.props.isEditable && this.props.meta.editable
     var field = ''
     
     let options = []
-    // ToDo: this should be more abstract, not aware of AroFeatureFactory
-    /*
-    if (this.props.meta.enumTypeURL) {
-      AroFeatureFactory.getEnumSet(this.rootMetaData, this.parentObj, '/service/type-enum/' + this.displayProps.enumTypeURL)
-        .then(digestEnum, (errorText) => {
-          console.log(errorText)
-          this.displayProps.enumSet = []
-        })
-    }
-    */
-
     // multiple meta.displayDataType may resolve to the same form element
     //  find this one
     let formEleType = null
