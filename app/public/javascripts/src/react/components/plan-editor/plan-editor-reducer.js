@@ -18,7 +18,7 @@ const defaultState = {
   subnetFeatures: {},
   selectedSubnetId: '', // unselected this should be null not ''
   boundaryDebounceBySubnetId: {},
-
+  hiddenFeatures: [],
 }
 
 function setTransaction (state, transaction) {
@@ -142,8 +142,8 @@ function deselectFeature (state, objectId) {
   }
 }
 
-function addSubnets (state, updatedSubnets) {
-  return { ...state, subnets: { ...state.subnets, ...updatedSubnets} }
+function addSubnets (state, newSubnets) {
+  return { ...state, subnets: { ...state.subnets, ...newSubnets } }
 }
 
 function updateSubnetBoundary (state, subnetId, geometry) {
@@ -166,6 +166,31 @@ function updateSubnetBoundary (state, subnetId, geometry) {
 
 function updateSubnetFeatures (state, updatedSubnetFeatures) {
   return { ...state, subnetFeatures: { ...state.subnetFeatures, ...updatedSubnetFeatures } }
+}
+
+function removeSubnetFeature (state, featureId) {
+
+  const subnetId = state.subnetFeatures[featureId].subnetId
+  let updatedSubnets = JSON.parse(JSON.stringify(state.subnets))
+  const updatedSubnetFeatures = { ...state.subnetFeatures }
+ 
+  // this checks if the ID is a subnet, not sure if this should happen here or in actions
+  // TODO: I feel like there is a better way to check this
+  if (state.subnetFeatures[featureId].feature.networkNodeType === "central_office" ||
+  state.subnetFeatures[featureId].feature.networkNodeType === "fiber_distribution_hub") {
+    // removes each of the children from subnet features
+    updatedSubnets[featureId].children.forEach(child => {
+      delete updatedSubnetFeatures[child]
+    })
+    // removes from subnets and subnet features
+    delete updatedSubnets[featureId]
+    delete updatedSubnetFeatures[featureId]
+  } else {
+    // if it is not a parent itself then it just removes from subFeatures and from its parent in subnets
+    delete updatedSubnetFeatures[featureId]
+    updatedSubnets[subnetId].children = updatedSubnets[subnetId].children.filter(childId => childId !== featureId)
+  }
+  return { ...state, subnetFeatures: updatedSubnetFeatures, subnets: updatedSubnets }
 }
 
 function removeSubnets (state, subnets) {
@@ -202,6 +227,14 @@ function clearBoundaryDebounce (state, subnetId) {
     ...state, 
     boundaryDebounceBySubnetId: newBoundaryDebounceBySubnetId
   }
+}
+
+function setHiddenFeatures (state, hiddenFeatures) {
+  return { ...state, hiddenFeatures: [...state.hiddenFeatures, ...hiddenFeatures] }
+}
+
+function clearHiddenFeatures (state) {
+  return { ...state, hiddenFeatures: [] }
 }
 
 function planEditorReducer (state = defaultState, action) {
@@ -266,6 +299,9 @@ function planEditorReducer (state = defaultState, action) {
     case Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES:
       return updateSubnetFeatures(state, action.payload)
 
+    case Actions.PLAN_EDITOR_REMOVE_SUBNET_FEATURE:
+      return removeSubnetFeature(state, action.payload)
+
     case Actions.PLAN_EDITOR_REMOVE_SUBNETS:
       return removeSubnets(state, action.payload)
 
@@ -280,6 +316,12 @@ function planEditorReducer (state = defaultState, action) {
 
     case Actions.PLAN_EDITOR_CLEAR_BOUNDARY_DEBOUNCE:
       return clearBoundaryDebounce(state, action.payload)
+
+    case Actions.PLAN_EDITOR_SET_HIDDEN_FEATURES:
+      return setHiddenFeatures(state, action.payload)
+
+    case Actions.PLAN_EDITOR_CLEAR_HIDDEN_FEATURES:
+      return clearHiddenFeatures(state)
 
     default:
       return state

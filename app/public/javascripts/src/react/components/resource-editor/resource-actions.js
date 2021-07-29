@@ -48,6 +48,20 @@ function getResourceManagers (selectedResourceKey) {
   }
 }
 
+function loadResourceManager (resourceManagerId, managerType, resourceManagerName) {
+  return async dispatch => {
+    const result = await AroHttp.get(`/service/v2/resource-manager/${resourceManagerId}/${managerType}`)
+    dispatch({
+      type: Actions.RESOURCE_MANAGER_SET_MANAGER_DEFINITION,
+      payload: {
+        resourceManagerId: resourceManagerId,
+        resourceManagerName: resourceManagerName,
+        definition: result.data,
+      },
+    })
+  }
+}
+
 function nextOrPrevPageClick (selectedPage) {
   return dispatch => {
     dispatch({
@@ -155,6 +169,7 @@ function editSelectedManager(selectedManager){
 
 function startEditingResourceManager (resourceManagerId, managerType, resourceManagerName, editingMode) {
   return dispatch => {
+    // TODO: dispatch to `loadResourceManager` above, since it performs the same action
     AroHttp.get(`/service/v2/resource-manager/${resourceManagerId}/${managerType}`)
       .then(result => {
         batch(() => {
@@ -1309,6 +1324,7 @@ function convertMetersToLengthUnits (input) {
 export default {
   getResourceTypes,
   getResourceManagers,
+  loadResourceManager,
   nextOrPrevPageClick,
   searchManagers,
   canMakeNewFilter,

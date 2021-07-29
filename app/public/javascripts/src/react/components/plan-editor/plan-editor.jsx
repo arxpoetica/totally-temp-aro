@@ -9,7 +9,7 @@ import EquipmentDragger from './equipment-dragger.jsx'
 import EquipmentMapObjects from './equipment-map-objects.jsx'
 import EquipmentBoundaryMapObjects from './equipment-boundary-map-objects.jsx'
 import FiberMapObjects  from './fiber-map-objects.jsx'
-import ExceptionsPanel from './exceptions-panel.jsx'
+import AlertsPanel from './alerts-panel.jsx'
 import BoundaryDrawCreator from './boundary-draw-creator.jsx'
 import AroFeatureFactory from '../../../service-typegen/dist/AroFeatureFactory'
 import AroFeatureEditor from '../common/editor-interface/aro-feature-editor.jsx'
@@ -104,7 +104,7 @@ export const PlanEditor = props => {
       { /* If we are in "draw boundary mode" for any equipment, render the drawing component */ }
       { isDrawingBoundaryFor ? <BoundaryDrawCreator /> : null }
 
-      <ExceptionsPanel />
+      <AlertsPanel />
       <PlanEditorRecalculate />
 
       {selectedEditFeatureIds.map(id => <PlanEditorHeader

@@ -4,7 +4,7 @@ import PlanEditorSelectors from '../../react/components/plan-editor/plan-editor-
 
 class PointFeatureRenderer {
   // I can not wait to rewrite this whole system!!!
-  static renderFeatures (pointFeatureRendererList, ARO_CLIENT, selectedSubnetLocations = {}, locationExceptions = {}) {
+  static renderFeatures (pointFeatureRendererList, ARO_CLIENT, selectedSubnetLocations = {}, locationAlerts = {}) {
     var deletedPointFeatureRendererList = pointFeatureRendererList.filter((featureObj) => {
       if (this.getModificationTypeForFeature(featureObj.feature, featureObj.mapLayer, featureObj.tileDataService) === PointFeatureRenderer.modificationTypes.DELETED) {
         return featureObj
@@ -21,21 +21,21 @@ class PointFeatureRenderer {
       PointFeatureRenderer.renderFeature(Obj.ctx, Obj.shape, Obj.feature, Obj.featureData, Obj.geometryOffset, Obj.mapLayer, Obj.mapLayers, Obj.tileDataService,
         Obj.selection, Obj.oldSelection, Obj.selectedLocationImage, Obj.lockOverlayImage, Obj.invalidatedOverlayImage,
         Obj.selectedDisplayMode, Obj.displayModes, Obj.analysisSelectionMode, Obj.selectionModes, Obj.equipmentLayerTypeVisibility,
-        ARO_CLIENT, selectedSubnetLocations, locationExceptions)
+        ARO_CLIENT, selectedSubnetLocations, locationAlerts)
     })
 
     unDeletedPointFeatureRendererList.forEach((Obj) => {
       PointFeatureRenderer.renderFeature(Obj.ctx, Obj.shape, Obj.feature, Obj.featureData, Obj.geometryOffset, Obj.mapLayer, Obj.mapLayers, Obj.tileDataService,
         Obj.selection, Obj.oldSelection, Obj.selectedLocationImage, Obj.lockOverlayImage, Obj.invalidatedOverlayImage,
         Obj.selectedDisplayMode, Obj.displayModes, Obj.analysisSelectionMode, Obj.selectionModes, Obj.equipmentLayerTypeVisibility,
-        ARO_CLIENT, selectedSubnetLocations, locationExceptions)
+        ARO_CLIENT, selectedSubnetLocations, locationAlerts)
     })
   }
 
   static renderFeature (ctx, shape, feature, featureData, geometryOffset, mapLayer, mapLayers, tileDataService,
     selection, oldSelection, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage,
     selectedDisplayMode, displayModes, analysisSelectionMode, selectionModes, equipmentLayerTypeVisibility, 
-    ARO_CLIENT, selectedSubnetLocations, locationExceptions) 
+    ARO_CLIENT, selectedSubnetLocations, locationAlerts) 
   {
 
     var entityImage = this.getEntityImageForFeature(feature, featureData, ARO_CLIENT, mapLayer)
@@ -60,7 +60,7 @@ class PointFeatureRenderer {
       if (feature.properties._data_type && feature.properties._data_type === 'location') {
         newGlobalAlpha = 0.4
         if (selectedSubnetLocations[feature.properties.object_id]) newGlobalAlpha = 1.0
-        if (locationExceptions[feature.properties.object_id]) {
+        if (locationAlerts[feature.properties.object_id]) {
           entityImage = PlanEditorSelectors.locationWarnImg
         }
       }
