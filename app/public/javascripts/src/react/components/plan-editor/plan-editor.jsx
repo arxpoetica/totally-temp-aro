@@ -33,6 +33,8 @@ export const PlanEditor = props => {
     addSubnets,
     setSelectedSubnetId,
     deselectEditFeatureById,
+    equipments,
+    updateFeatureProperties,
   } = props
 
   //state = 
@@ -57,10 +59,21 @@ export const PlanEditor = props => {
     commitTransaction(transactionId)
   }
 
-  function onFormChange (newValObj, propVal, path, event) {
-    console.log({propVal, path, newValObj, event})
+  function onFeatureFormChange (newValObj, propVal, path, event) {
+    //console.log({propVal, path, newValObj, event})
   }
   
+  function onFeatureFormSave (newValObj, objectId) {
+    console.log(`SAVE ${objectId}`)
+    console.log(newValObj)
+    let feature = features[objectId].feature
+    let updatedFeature = { ...feature, 
+      networkNodeEquipment: newValObj,
+    }
+    console.log(updatedFeature)
+    updateFeatureProperties(updatedFeature)
+  }
+
   function onSelectedClick(event, objectId) {
     if (objectId === selectedSubnetId) objectId = '' // deselect
     // ToDo: this check does not belong here
@@ -121,9 +134,11 @@ export const PlanEditor = props => {
         selectedEditFeatureIds.map(id => {
           return (
             <AroFeatureEditor key={id}
-              isEditable={true} 
+              altTitle={equipments[features[id].feature.networkNodeType].label}
+              isEditable={true}
               feature={features[id].feature} 
-              onChange={onFormChange}
+              onChange={onFeatureFormChange}
+              onSave={newValObj => onFeatureFormSave(newValObj, id)}
             ></AroFeatureEditor>
           )
         })
@@ -164,6 +179,7 @@ const mapStateToProps = state => ({
   selectedEditFeatureIds: state.planEditor.selectedEditFeatureIds,
   subnets: state.planEditor.subnets,
   selectedSubnetId: state.planEditor.selectedSubnetId,
+  equipments: state.mapLayers.networkEquipment.equipments,
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -173,6 +189,7 @@ const mapDispatchToProps = dispatch => ({
   addSubnets: subnetIds => dispatch(PlanEditorActions.addSubnets(subnetIds)),
   setSelectedSubnetId: subnetId => dispatch(PlanEditorActions.setSelectedSubnetId(subnetId)),
   deselectEditFeatureById: objectId => dispatch(PlanEditorActions.deselectEditFeatureById(objectId)),
+  updateFeatureProperties: feature => dispatch(PlanEditorActions.updateFeatureProperties(feature)),
 })
 
 const PlanEditorComponent = wrapComponentWithProvider(reduxStore, PlanEditor, mapStateToProps, mapDispatchToProps)
