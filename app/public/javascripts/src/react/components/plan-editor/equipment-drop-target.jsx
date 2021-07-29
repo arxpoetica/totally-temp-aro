@@ -54,33 +54,9 @@ export class EquipmentDropTarget extends Component {
       const networkNodeType = event.dataTransfer.getData(Constants.DRAG_DROP_ENTITY_DETAILS_KEY)
 
       const featureToCreate = {
-        objectId: uuidStore.getUUID(),
-        geometry: WktUtils.getWKTPointFromGoogleMapLatLng(dropLatLng),
+        id: uuidStore.getUUID(),
+        point: WktUtils.getWKTPointFromGoogleMapLatLng(dropLatLng),
         networkNodeType: networkNodeType,
-        dataType: 'equipment',
-        target_type: 'sewer',
-        attributes: {
-          siteName: '',
-          siteIdentifier: '',
-          selectedEquipmentType: 'Generic ADSL'
-        },
-        networkNodeEquipment: {
-          siteInfo: {
-            siteClli: '',
-            siteName: '',
-            address: '',
-            dpiEnvironment: '',
-            hsiOfficeCode: '',
-            hsiEnabled: true,
-            t1: false,
-            fiberAvailable: false,
-            physicallyLinked: false
-          },
-          existingEquipment: [],
-          plannedEquipment: [],
-          notes: ''
-        },
-        deploymentType: 'PLANNED'
       }
       this.props.createFeature(featureToCreate)
     }
@@ -98,7 +74,7 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  createFeature: (equipment) => dispatch(PlanEditorActions.createFeature('equipment', equipment))
+  createFeature: (equipment) => dispatch(PlanEditorActions.createFeature(equipment))
 })
 
 const EquipmentDropTargetComponent = wrapComponentWithProvider(reduxStore, EquipmentDropTarget, mapStateToProps, mapDispatchToProps)
