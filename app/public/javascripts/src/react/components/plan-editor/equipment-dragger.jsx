@@ -42,13 +42,13 @@ export const EquipmentDragger = props => {
 
       <div className="nodes">
         {editableEquipmentTypes.map(type =>
-          <DraggableNode
+          (equipmentDefinitions[type] && <DraggableNode
             key={type}
             icon={equipmentDefinitions[type].iconUrl}
             entityType={Constants.DRAG_DROP_NETWORK_EQUIPMENT}
             entityDetails={equipmentDefinitions[type].networkNodeType}
             label={equipmentDefinitions[type].label}
-          />
+          />)
         )}
       </div>
 
