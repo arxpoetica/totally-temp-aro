@@ -11,6 +11,8 @@ import EquipmentBoundaryMapObjects from './equipment-boundary-map-objects.jsx'
 import FiberMapObjects  from './fiber-map-objects.jsx'
 import AlertsPanel from './alerts-panel.jsx'
 import BoundaryDrawCreator from './boundary-draw-creator.jsx'
+import AroFeatureFactory from '../../../service-typegen/dist/AroFeatureFactory'
+import AroFeatureEditor from '../common/editor-interface/aro-feature-editor.jsx'
 import './plan-editor.css'
 
 export const PlanEditor = props => {
@@ -31,18 +33,45 @@ export const PlanEditor = props => {
     addSubnets,
     setSelectedSubnetId,
     deselectEditFeatureById,
+    equipments,
+    updateFeatureProperties,
   } = props
+
+  //state = 
 
   useEffect(() => {
     resumeOrCreateTransaction(planId, userId)
   }, [])
 
+  /*
+  function componentDidUpdate(prevProps) {
+    // Typical usage (don't forget to compare props):
+    if (this.props.userID !== prevProps.userID) {
+      this.fetchData(this.props.userID);
+    }
+  }
+  */
 
   function checkAndCommitTransaction() {
     if (isCommittingTransaction) {
       return
     }
     commitTransaction(transactionId)
+  }
+
+  function onFeatureFormChange (newValObj, propVal, path, event) {
+    //console.log({propVal, path, newValObj, event})
+  }
+  
+  function onFeatureFormSave (newValObj, objectId) {
+    console.log(`SAVE ${objectId}`)
+    console.log(newValObj)
+    let feature = features[objectId].feature
+    let updatedFeature = { ...feature, 
+      networkNodeEquipment: newValObj,
+    }
+    console.log(updatedFeature)
+    updateFeatureProperties(updatedFeature)
   }
 
   function onSelectedClick(event, objectId) {
@@ -100,6 +129,22 @@ export const PlanEditor = props => {
         />
       )}
 
+
+      {
+        selectedEditFeatureIds.map(id => {
+          return (
+            <AroFeatureEditor key={id}
+              altTitle={equipments[features[id].feature.networkNodeType].label}
+              isEditable={true}
+              feature={features[id].feature} 
+              onChange={onFeatureFormChange}
+              onSave={newValObj => onFeatureFormSave(newValObj, id)}
+            ></AroFeatureEditor>
+          )
+        })
+      }
+
+
       {false &&
         <div className="temporary" style={{ margin: '0 0 25px' }}>
           <h2>Plan Information</h2>
@@ -134,6 +179,7 @@ const mapStateToProps = state => ({
   selectedEditFeatureIds: state.planEditor.selectedEditFeatureIds,
   subnets: state.planEditor.subnets,
   selectedSubnetId: state.planEditor.selectedSubnetId,
+  equipments: state.mapLayers.networkEquipment.equipments,
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -143,6 +189,7 @@ const mapDispatchToProps = dispatch => ({
   addSubnets: subnetIds => dispatch(PlanEditorActions.addSubnets(subnetIds)),
   setSelectedSubnetId: subnetId => dispatch(PlanEditorActions.setSelectedSubnetId(subnetId)),
   deselectEditFeatureById: objectId => dispatch(PlanEditorActions.deselectEditFeatureById(objectId)),
+  updateFeatureProperties: feature => dispatch(PlanEditorActions.updateFeatureProperties(feature)),
 })
 
 const PlanEditorComponent = wrapComponentWithProvider(reduxStore, PlanEditor, mapStateToProps, mapDispatchToProps)

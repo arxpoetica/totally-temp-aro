@@ -122,6 +122,7 @@ function createFeature (featureType, feature) {
   }
 }
 
+//TODO: depricate
 function modifyFeature (featureType, feature) {
   // ToDo: this causes an error if you edit a new feature that has yet to be sent to service
   //  everything still functions but it's bad form
@@ -146,6 +147,32 @@ function modifyFeature (featureType, feature) {
         dispatch({
           type: Actions.PLAN_EDITOR_MODIFY_FEATURES,
           payload: [newFeature]
+        })
+        return Promise.resolve()
+      })
+      .catch(err => console.error(err))
+  }
+}
+
+function updateFeatureProperties (feature) {
+  return (dispatch, getState) => {
+    const state = getState()
+    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+    let featureEntry = state.planEditor.features[feature.objectId]
+    // Do a PUT to send the equipment over to service
+    return AroHttp.put(`/service/plan-transaction/${transactionId}/subnet-equipment`, feature)
+      .then(result => {
+        // Decorate the created feature with some default values
+        let crudAction = featureEntry.crudAction || 'read'
+        if (crudAction === 'read') crudAction = 'update'
+        const newFeatureEntry = {
+          ...featureEntry,
+          crudAction: crudAction,
+          feature: result.data,//feature,
+        }
+        dispatch({
+          type: Actions.PLAN_EDITOR_MODIFY_FEATURES,
+          payload: [newFeatureEntry]
         })
         return Promise.resolve()
       })
@@ -816,6 +843,7 @@ export default {
   resumeOrCreateTransaction,
   createFeature,
   modifyFeature,
+  updateFeatureProperties,
   moveFeature,
   deleteFeature,
   deleteTransactionFeature,
