@@ -5,6 +5,8 @@
 // control. Details on how to auto-generate these classes is given in README.md
 // *****************************************************************************
 
+// TODO: this whole AroFeatureFactory system needs to be replaced
+
 {{!-- Import dependent classes that are required by the current class --}}
 {{importDependentClasses classDef.properties}}
 {{#each classDef.properties}}
@@ -28,7 +30,6 @@ class {{classNameExtractor this.classDef}} {
   {{!-- A static function that will take a POJO object and return an object with the current classes type --}}
   // Returns a {{classNameExtractor this.classDef}} object from it's JSON representation
   static fromJSONObject(jsonObject) {
-    //var fullDisplayProps = this.getFullDisplayProperties()
     var newObj = new {{classNameExtractor this.classDef}}()
 
     if (!jsonObject) {
@@ -41,16 +42,16 @@ class {{classNameExtractor this.classDef}} {
     {{#if (isArray this)}}
     newObj['{{@key}}'] = []
     if (jsonObject['{{@key}}']) {
-      jsonObject['{{@key}}'].forEach((item) => newObj['{{@key}}'].push({{classNameExtractor this.items}}.fromJSONObject(item)))
+      jsonObject['{{@key}}'].forEach((item) => newObj['{{@key}}'].push({{classNameExtractor this.items}}.fromJSONObject(item))) // array
     }
     {{else if (isPrimitive this.type)}}
-    newObj.{{@key}} = jsonObject['{{@key}}'] //|| fullDisplayProps['{{@key}}'].defaultValue
+    if (jsonObject['{{@key}}']) newObj.{{@key}} = jsonObject['{{@key}}'] //primitive
     {{else if (isMapObject this)}}
-    newObj.{{@key}} = jsonObject['{{@key}}']
+    if (jsonObject['{{@key}}']) newObj.{{@key}} = jsonObject['{{@key}}'] //map
     {{else if (isAnyObject this)}}
-    newObj.{{@key}} = jsonObject['{{@key}}']
+    if (jsonObject['{{@key}}']) newObj.{{@key}} = jsonObject['{{@key}}'] //any
     {{else}}
-    newObj.{{@key}} = {{classNameExtractor this}}.fromJSONObject(jsonObject['{{@key}}'])
+    newObj.{{@key}} = {{classNameExtractor this}}.fromJSONObject(jsonObject['{{@key}}']) // else
     {{/if}}
     {{/each}}
 
@@ -74,7 +75,9 @@ class {{classNameExtractor this.classDef}} {
     //displayOrder
     //properties = {} // used only for displayType: COLLECTION
     //itemSchema = null // used only for displayType: LIST
-    this.fullDisplayProperties = {{{toJSONByOrder display propOrder}}}
+    this.fullDisplayProperties = {{{buildFullDisplayProperties display propOrder}}}
+
+    
   }
 
   static getFullDisplayProperties() {

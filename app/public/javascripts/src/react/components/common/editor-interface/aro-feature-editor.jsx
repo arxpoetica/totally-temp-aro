@@ -9,7 +9,8 @@ export class AroFeatureEditor extends Component {
     this.aroFeature = AroFeatureFactory.createObject(this.props.feature)
     this.meta = this.aroFeature.getDisplayProperties()
 
-    let fullMeta = this.getFullMeta(this.aroFeature)
+    let fullMeta = this.aroFeature.getFullDisplayProperties()
+    console.log(fullMeta)
 
 
     //console.log({meta: this.meta, aroFeature: this.aroFeature})
@@ -37,7 +38,7 @@ export class AroFeatureEditor extends Component {
   }
 
 
-
+/*
   getFullMeta (aroFeature) {
     let metaList = aroFeature.getDisplayProperties()
     console.log(metaList)
@@ -63,6 +64,7 @@ export class AroFeatureEditor extends Component {
 
     return meta
   }
+*/
 
 
 
