@@ -78,7 +78,7 @@ export class AroFeatureEditorNode extends Component {
         </>
       )
     } else {
-      console.log(jsx)
+      //console.log(jsx)
       return (
         <Foldout displayName={`${this.props.meta.displayName} ${this.props.value.length}`}>
           {jsx}
@@ -90,12 +90,19 @@ export class AroFeatureEditorNode extends Component {
   renderCollection () {
     // ToDo: the meta data should be an entirely seperate object, not a property of the value 
     //console.log(this.props)
-    let subMeta = this.props.value.getDisplayProperties()
+    //let subMeta = this.props.value.getDisplayProperties()
+    let subMeta = this.props.meta.properties
     var jsx = []
     //let keysByOrder = Object.entries(subMeta).sort((a,b) => a[1].displayOrder - b[1].displayOrder)
     //let keysByOrder = Object.entries(subMeta)
     //for (const [arKey, meta] of subMeta) {
-    subMeta.forEach((meta, index) => {
+    let propsList = Object.values(subMeta)
+    propsList.sort((a, b) => {
+      let isSwap = a.displayOrder - b.displayOrder
+      if (a.displayOrder === -1 && b.displayOrder !== -1) isSwap = -isSwap
+      return isSwap
+    })
+    propsList.forEach((meta, index) => {
       let key = meta.propertyName
       if (key in this.props.value && meta.visible) {
         let value = this.props.value[key]

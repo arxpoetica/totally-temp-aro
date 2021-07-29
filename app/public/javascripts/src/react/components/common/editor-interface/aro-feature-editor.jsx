@@ -6,22 +6,17 @@ export class AroFeatureEditor extends Component {
   constructor (props) {
     super(props)
 
-    this.aroFeature = AroFeatureFactory.createObject(this.props.feature)
-    this.meta = this.aroFeature.getDisplayProperties()
-
-    let fullMeta = this.aroFeature.getFullDisplayProperties()
-    console.log(fullMeta)
-
-
-    //console.log({meta: this.meta, aroFeature: this.aroFeature})
-    this.meta = this.meta.find(ele => ele.displayName === "Network Node Equipment") // ToDo: this needs fixing
-    this.aroFeature = this.aroFeature.networkNodeEquipment
+    let aroFeature = AroFeatureFactory.createObject(this.props.feature)
+    let meta = aroFeature.getFullDisplayProperties()
+    
+    aroFeature = aroFeature.networkNodeEquipment
+    meta = meta.networkNodeEquipment
     //console.log(this.aroFeature.plannedEquipment[0].getDisplayProperties())
     //console.log({meta: this.meta, aroFeature: this.aroFeature})
     //console.log(this.props.feature)
     if (!'isCollapsible' in props) props.isCollapsible = true
     if (!'isEditable' in props) props.isEditable = true
-    if (!'visible' in this.meta) this.meta.visible = true
+    //if (!'visible' in this.meta) this.meta.visible = true
 
     // TODO: get serializable value as prop and NO meta
     //  then THIS COMPONENT does the AroFeatureFactory.createObject(this.props.value)
@@ -32,8 +27,8 @@ export class AroFeatureEditor extends Component {
     //    - when we refactor AroFeatureFactory it's contained here and decoupled from the reast of the codebase
     this.state = {
       //'value': this.props.feature, // may need to update this on props change
-      //value: JSON.parse(JSON.stringify(this.aroFeature))
-      value: this.aroFeature,
+      value: JSON.parse(JSON.stringify(aroFeature)),
+      meta: meta,
     }
   }
 
@@ -78,7 +73,7 @@ export class AroFeatureEditor extends Component {
         isCollapsible={this.props.isCollapsible}
         isEditable={this.props.isEditable} 
         value={this.state.value} // this.state.value 
-        meta={this.meta} 
+        meta={this.state.meta} 
         onChange={(event, propVal, path) => this._onChange(event, propVal, path)}
       ></AroFeatureEditorNode>
     )
@@ -92,7 +87,7 @@ export class AroFeatureEditor extends Component {
     parsedPath = parsedPath.replace('[', '.')
     parsedPath = parsedPath.replace(']', '')
     let pathAr = parsedPath.split('.')
-    console.log({path:pathAr, val:this.state.value})
+    //console.log({path:pathAr, val:this.state.value})
     pathAr.shift()
     let leafKey = pathAr.pop()
     // will omit functions
@@ -120,8 +115,8 @@ export class AroFeatureEditor extends Component {
     // can do validate here and chnge meta with validation message 
     
     // ToDo: we are probably going to need to fix this <-----------------------------------------<<<
-    
-    let stateRef = pathAr.reduce((ref, key) => (ref || {})[key], this.state.value)
+    let valueClone = JSON.parse(JSON.stringify(this.state.value))
+    let stateRef = pathAr.reduce((ref, key) => (ref || {})[key], valueClone)
     //console.log(stateRef)
     //console.log(leafKey)
     stateRef[leafKey] = propVal
@@ -133,9 +128,9 @@ export class AroFeatureEditor extends Component {
     
     //TODO: given that this component will make the AROFeature it can keep a serilizable 
     //  version of the value object and clone it so we don't have to change state in place 
-
+    console.log(valueClone)
     this.setState({
-      'value': this.state.value,
+      'value': valueClone,
     })
 
     //this.props.onChange(newValObj, propVal, path, event)
