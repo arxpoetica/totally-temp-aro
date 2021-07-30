@@ -466,6 +466,7 @@ function selectEditFeaturesById (featureIds) {
           if (state.planEditor.features[featureId]) { 
             validFeatures.push(featureId) 
             let networkNodeType = state.planEditor.features[featureId].feature.networkNodeType
+            // TODO: do other networkNodeTypes have subnets?
             if (networkNodeType === "central_office"
               || networkNodeType === "fiber_distribution_hub"
             ) {
@@ -521,8 +522,42 @@ function addSubnets (subnetIds) {
           result.data.fiber = fiberResults[index].data
           return result.data
         })
-        // console.log(apiSubnets)
-        return dispatch(parseAddApiSubnets(apiSubnets))
+
+
+
+        // left off here - need to fix
+        console.log(apiSubnets)
+        
+        // need to add all parent and child subnets - recurcisive 
+        // merge your cachedSubnetIds and uncachedSubnetIds
+        let newCachedSubnetIds = cachedSubnetIds.concat(uncachedSubnetIds)
+        let subnetsToGet = []
+        apiSubnets.forEach(apiSubnet => {
+          let parentSubnetId = apiSubnet.parentSubnetId
+          if (parentSubnetId && !newCachedSubnetIds.includes(parentSubnetId)) {
+            subnetsToGet.push(parentSubnetId)
+          }
+          apiSubnet.children.forEach(node => {
+            // TODO: will other feature types have subnets?
+            if ("fiber_distribution_hub" === node.networkNodeType 
+              && !newCachedSubnetIds.includes(node.id)) 
+            {
+              subnetsToGet.push(node.id)
+            }
+          })
+        })
+
+        // TODO: this is kind of ugly
+        if (subnetsToGet.length) {
+          dispatch(addSubnets(subnetsToGet))
+            .then(() => {
+              return dispatch(parseAddApiSubnets( JSON.parse(JSON.stringify(apiSubnets)) ))
+            })
+        } else {
+          return dispatch(parseAddApiSubnets( JSON.parse(JSON.stringify(apiSubnets)) ))
+        }
+
+        //return dispatch(parseAddApiSubnets( JSON.parse(JSON.stringify(apiSubnets)) ))
       })
       .catch(err => console.error(err))
   }
