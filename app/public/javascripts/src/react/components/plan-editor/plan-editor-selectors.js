@@ -39,40 +39,94 @@ const AlertTypes = {
     displayName: 'Abandoned Location',
     iconUrl: '/svg/alert-panel-location.svg',
   },
+  MAX_TERMINAL_HOMES_EXCEEDED: {
+    key: 'MAX_TERMINAL_HOMES_EXCEEDED',
+    displayName: 'Maximum Terminal Homes Exceeded',
+    iconUrl: '/svg/alert-panel-location.svg',
+  },
+  MAX_HUB_HOMES_EXCEEDED: {
+    key: 'MAX_HUB_HOMES_EXCEEDED',
+    displayName: 'Maximum Hub Homes Exceeded',
+    iconUrl: '/svg/alert-panel-location.svg',
+  },
+  MAX_HUB_DISTANCE_EXCEEDED: {
+    key: 'MAX_HUB_DISTANCE_EXCEEDED',
+    displayName: 'Maximum Hub Distance Exceeded',
+    iconUrl: '/svg/alert-panel-location.svg',
+  },
 }
 // temporary
 const locationWarnImg = new Image(18, 22)
 locationWarnImg.src = '/svg/alert-panel-location.png'
 //const getSubnets = state => state.planEditor.subnets
 const getSubnetFeatures = state => state.planEditor.subnetFeatures
-const getDropCableLength = state => {
+const getNetworkConfig = state => {
   const { network_architecture_manager } = state.plan.resourceItems
   if (!network_architecture_manager) { return }
   const { id } = network_architecture_manager.selectedManager
   const manager = state.resourceManager.managers && state.resourceManager.managers[id]
   if (!manager) { return }
-  const { maxDistanceMeters } = manager.definition
-    .networkConfigurations.ODN_1.terminalConfiguration
-  return maxDistanceMeters
+  const networkConfig = manager.definition
+    .networkConfigurations.ODN_1
+  return networkConfig
 }
+
 const getAlertsForSelectedSubnet = createSelector(
-  [getSelectedSubnet, getSubnetFeatures, getDropCableLength],
-  (selectedSubnet, subnetFeatures, maxDropCableLength) => {
+  [getSelectedSubnet, getSubnetFeatures, getNetworkConfig],
+  (selectedSubnet, subnetFeatures, networkConfig) => {
     let alerts = {}
     // maybe we can spruce this up a bit some filter functions?
     if (
       selectedSubnet
       && selectedSubnet.subnetLocations
       && selectedSubnet.subnetLocations.length > 0
-      && typeof getDropCableLength !== 'undefined'
+      && typeof getNetworkConfig !== 'undefined'
     ) {
+      const maxDropCableLength = networkConfig.terminalConfiguration.maxDistanceMeters
+      const maxTerminalHomes = networkConfig.terminalConfiguration.outputConfig.max
+      const maxHubHomes = networkConfig.hubConfiguration.outputConfig.max
+      const maxHubDistance = networkConfig.hubConfiguration.maxDistanceMeters
+
+      let totalHomes = 0
+
       let abandonedLocations = {}
       Object.keys(selectedSubnet.subnetLocationsById).forEach(locationId => {
         abandonedLocations[locationId] = true
       })
+
       selectedSubnet.children.forEach(featureId => {
+        // checks for max distance between hub and Central Office
+        // right now equipmentCoDistance is only on central office, otherwise will be null
+        if (selectedSubnet.fiber.equipmentCoDistances !== null) {
+            const distance = selectedSubnet.fiber.equipmentCoDistances[featureId]
+            if (distance > maxHubDistance) {
+              if (!alerts[featureId]) {
+                alerts[featureId] = {
+                  locationId: featureId,
+                  subnetId: selectedSubnet.subnetNode,
+                  alerts: [],
+                }
+              }
+              alerts[featureId].alerts.push(AlertTypes['MAX_HUB_DISTANCE_EXCEEDED'].key)
+            }
+        }
+
         const featureEntry = subnetFeatures[featureId]
         if (featureEntry) {
+          // add droplinks to totalHomes to check if it exceeds maxHubHomes
+          totalHomes += featureEntry.feature.dropLinks.length
+
+          //checks for max homes in terminal
+          if (featureEntry.feature.dropLinks.length > maxTerminalHomes) {
+            if (!alerts[featureId]) {
+              alerts[featureId] = {
+                locationId: featureId,
+                subnetId: selectedSubnet.subnetNode,
+                alerts: [],
+              }
+            }
+            alerts[featureId].alerts.push(AlertTypes['MAX_TERMINAL_HOMES_EXCEEDED'].key)
+          }
           featureEntry.feature.dropLinks.forEach(dropLink => {
             dropLink.locationLinks.forEach(locationLink => {
               const locationId = locationLink.locationId
@@ -93,6 +147,19 @@ const getAlertsForSelectedSubnet = createSelector(
           })
         }
       })
+
+      // after the forEach check if totalhomes exceeds maxHubHomes
+      if (totalHomes > maxHubHomes) {
+        if (!alerts[selectedSubnet.subnetNode]) {
+          alerts[selectedSubnet.subnetNode] = {
+            locationId: selectedSubnet.subnetNode,
+            subnetId: selectedSubnet.subnetNode,
+            alerts: [],
+          }
+        }
+        alerts[selectedSubnet.subnetNode].alerts.push(AlertTypes['MAX_HUB_HOMES_EXCEEDED'].key)
+      }
+      
       Object.keys(abandonedLocations).forEach(locationId => {
         if (!alerts[locationId]) {
           alerts[locationId] = {
@@ -104,7 +171,6 @@ const getAlertsForSelectedSubnet = createSelector(
         alerts[locationId].alerts.push(AlertTypes['ABANDONED_LOCATION'].key)
       }) 
     } 
-    // console.log(alerts)
     return alerts
   }
 )
