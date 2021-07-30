@@ -7,7 +7,7 @@ export class RfpReportDownloadCell extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      selectedReportTypeId: this.props.reportDefinitions[0].reportData.id
+      selectedReportTypeId: this.props.reportDefinitions.length ? this.props.reportDefinitions[0].reportData.id : 0
     }
   }
 
@@ -30,7 +30,7 @@ export class RfpReportDownloadCell extends Component {
       </select>
       <div className='btn btn-group p-0'>
         {
-          selectedReport.reportData.media_types.map(mediaType => {
+          selectedReport ? selectedReport.reportData.media_types.map(mediaType => {
             // "(new Date()).toISOString().split('T')[0]" will give "YYYY-MM-DD"
             // Note that we are doing (new Date(Date.now())) so that we can have deterministic tests (by replacing the Date.now() function when testing)
             const downloadFileName = `${(new Date(Date.now())).toISOString().split('T')[0]}_${selectedReport.reportData.name}.${mediaType}`
@@ -51,7 +51,7 @@ export class RfpReportDownloadCell extends Component {
                   : this.renderDownloadButtonContent(mediaType)
               }
             </button>
-          })
+          }) : ""
         }
       </div>
     </div>
