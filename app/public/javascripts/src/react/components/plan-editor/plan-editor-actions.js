@@ -119,21 +119,56 @@ function discardTransaction (transactionId) {
   }
 }
 
-function createFeature (featureType, feature) {
+function createFeature (feature) {
   return (dispatch, getState) => {
     const state = getState()
     const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
-    // Do a POST to send the equipment over to service
-    AroHttp.post(`/service/plan-transactions/${transactionId}/modified-features/${featureType}`, feature)
+    
+    const body = {
+      commands: [{
+        childId: feature,
+        type: 'add', 
+      }]
+    }
+
+    console.log(body)
+    AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
       .then(result => {
-        // Decorate the created feature with some default values
-        const createdFeature = {
-          crudAction: 'create',
-          deleted: false,
-          valid: true,
-          feature: result.data
-        }
-        dispatch(addTransactionFeatures([createdFeature]))
+        console.log(result)
+        let updatedSubnets = JSON.parse(JSON.stringify(state.planEditor.subnets))
+        const newFeatures = {}
+        // the subnet and equipment updates are not connected, right now we get back two arrays
+        // For now I am assuming the relevent subnet is the one with type 'modified'
+        // TODO: handle there being multiple updated subnets
+
+        if (result.data.subnetUpdates.length === 1 || result.data.subnetUpdates.length === 2 && result.data.equipmentUpdates) {
+          const modifiedSubnet = result.data.subnetUpdates.find(subnet => subnet.type === 'modified')
+          const subnetId = modifiedSubnet.subnet.id
+          
+          result.data.equipmentUpdates.forEach(equipment => {
+            const feature = parseSubnetFeature(equipment.subnetNode)
+
+            newFeatures[feature.objectId] = {
+              feature: feature,
+              subnetId: subnetId,
+            }
+
+            if (updatedSubnets[subnetId]) {
+              updatedSubnets[subnetId].children.push(feature.objectId)
+            }
+          })
+
+          batch(() => {
+            dispatch({
+              type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
+              payload: newFeatures,
+            }),
+            dispatch({
+              type: Actions.PLAN_EDITOR_ADD_SUBNETS,
+              payload: updatedSubnets,
+            })
+          })
+      }
       })
       .catch(err => console.error(err))
   }
