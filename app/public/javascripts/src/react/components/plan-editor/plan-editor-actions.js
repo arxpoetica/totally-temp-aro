@@ -24,23 +24,40 @@ function resumeOrCreateTransaction (planId, userId) {
           payload: Transaction.fromServiceObject(result.data)
         })
         const transactionId = result.data.id
-        const resource = 'network_architecture_manager'
-        const { id, name } = state.plan.resourceItems[resource].selectedManager
         return Promise.all([
           AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/equipment`),
           // depricated? 
           AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/equipment_boundary`),
-          // NOTE: need to load resource manager so drop cable
-          // length is available for plan-editor-selectors
-          dispatch(ResourceActions.loadResourceManager(id, resource, name))
+          // need to get ALL the subnets upfront 
+          AroHttp.get(`/service/plan-transaction/${transactionId}/subnet-refs`),
         ])
       })
       .then(results => {
-        dispatch(addTransactionFeatures(results[0].data))
-        dispatch(addTransactionFeatures(results[1].data))
-        dispatch({
-          type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION,
-          payload: false
+        let equipmentList = results[0].data
+        let boundaryList = results[1].data
+        let subnetRefList = results[2].data
+
+        const resource = 'network_architecture_manager'
+        const { id, name } = state.plan.resourceItems[resource].selectedManager
+
+        let subnetIds = []
+        subnetRefList.forEach(subnetRef => {
+          subnetIds.push(subnetRef.node.id)
+        })
+
+        batch(() => {
+          // NOTE: need to load resource manager so drop cable
+          // length is available for plan-editor-selectors
+          dispatch(ResourceActions.loadResourceManager(id, resource, name))
+          dispatch(addTransactionFeatures(equipmentList))
+          dispatch(addTransactionFeatures(boundaryList))
+
+          dispatch(addSubnets(subnetIds))
+
+          dispatch({
+            type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION,
+            payload: false
+          })
         })
       })
       .catch(err => {
@@ -496,11 +513,16 @@ function deselectEditFeatureById (objectId) {
 function addSubnets (subnetIds) {
   return (dispatch, getState) => {
 
-    const { transaction, subnets: cachedSubnets } = getState().planEditor
+    const { transaction, subnets: cachedSubnets, requestedSubnetIds } = getState().planEditor
 
     // this little dance only fetches uncached subnets
-    const cachedSubnetIds = Object.keys(cachedSubnets)
+    const cachedSubnetIds = Object.keys(cachedSubnets).concat(requestedSubnetIds)
     const uncachedSubnetIds = subnetIds.filter(id => !cachedSubnetIds.includes(id))
+
+    dispatch({
+      type: Actions.PLAN_EDITOR_ADD_REQUESTED_SUBNET_IDS,
+      payload: uncachedSubnetIds,
+    })
 
     const subnetApiPromises = uncachedSubnetIds.map(subnetId => {
       return AroHttp.get(`/service/plan-transaction/${transaction.id}/subnet/${subnetId}`)
@@ -523,43 +545,21 @@ function addSubnets (subnetIds) {
           return result.data
         })
 
-
-
-        // left off here - need to fix
-        console.log(apiSubnets)
-        
-        // need to add all parent and child subnets - recurcisive 
-        // merge your cachedSubnetIds and uncachedSubnetIds
-        let newCachedSubnetIds = cachedSubnetIds.concat(uncachedSubnetIds)
-        let subnetsToGet = []
-        apiSubnets.forEach(apiSubnet => {
-          let parentSubnetId = apiSubnet.parentSubnetId
-          if (parentSubnetId && !newCachedSubnetIds.includes(parentSubnetId)) {
-            subnetsToGet.push(parentSubnetId)
-          }
-          apiSubnet.children.forEach(node => {
-            // TODO: will other feature types have subnets?
-            if ("fiber_distribution_hub" === node.networkNodeType 
-              && !newCachedSubnetIds.includes(node.id)) 
-            {
-              subnetsToGet.push(node.id)
-            }
-          })
+        dispatch({
+          type: Actions.PLAN_EDITOR_REMOVE_REQUESTED_SUBNET_IDS,
+          payload: uncachedSubnetIds,
         })
-
-        // TODO: this is kind of ugly
-        if (subnetsToGet.length) {
-          dispatch(addSubnets(subnetsToGet))
-            .then(() => {
-              return dispatch(parseAddApiSubnets( JSON.parse(JSON.stringify(apiSubnets)) ))
-            })
-        } else {
-          return dispatch(parseAddApiSubnets( JSON.parse(JSON.stringify(apiSubnets)) ))
-        }
-
-        //return dispatch(parseAddApiSubnets( JSON.parse(JSON.stringify(apiSubnets)) ))
+        
+        return dispatch(parseAddApiSubnets(apiSubnets))
       })
-      .catch(err => console.error(err))
+      .catch(err => {
+        console.error(err)
+        dispatch({
+          type: Actions.PLAN_EDITOR_REMOVE_REQUESTED_SUBNET_IDS,
+          payload: uncachedSubnetIds,
+        })
+        return Promise.resolve()
+      })
   }
 }
 
