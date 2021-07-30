@@ -743,10 +743,6 @@ class TileComponentController {
 
   // Map global state to component properties
   mapStateToThis (reduxState) {
-    let selectedSubnetLocations = {}
-    if ( reduxState.planEditor.subnets[reduxState.planEditor.selectedSubnetId] ) {
-      selectedSubnetLocations = reduxState.planEditor.subnets[reduxState.planEditor.selectedSubnetId].subnetLocationsById
-    }
     return {
       activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
       selectionModes: reduxState.selection.selectionModes,
@@ -763,7 +759,7 @@ class TileComponentController {
       rActiveViewModePanel: reduxState.toolbar.rActiveViewModePanel,
       subnetFeatures: reduxState.planEditor.subnetFeatures,
       locationAlerts: PlanEditorSelectors.getAlertsForSelectedSubnet(reduxState),
-      selectedSubnetLocations: selectedSubnetLocations,
+      selectedSubnetLocations: PlanEditorSelectors.getSelectedSubnetLocations(reduxState),
       hiddenFeatures: reduxState.planEditor.hiddenFeatures,
     }
   }

@@ -3,6 +3,9 @@ import { createSelector } from 'reselect'
 const getAllBoundaryLayers = state => state.mapLayers.boundary
 const getBoundaryLayersList = createSelector([getAllBoundaryLayers], (boundaries) => boundaries.toJS())
 
+const getSelectedSubnetId = state => state.planEditor.selectedSubnetId
+const getSubnets = state => state.planEditor.subnets
+
 const getSelectedSubnet = state => state.planEditor.subnets[state.planEditor.selectedSubnetId]
 const getSelectedEditFeatureIds = state => state.planEditor.selectedEditFeatureIds
 const getSelectedIds = createSelector([getSelectedSubnet, getSelectedEditFeatureIds], (selectedSubnet, selectedEditFeatureIds) => {
@@ -27,6 +30,18 @@ const getIsRecalcSettled = createSelector(
     return (!isCalculatingSubnets && !isCalculatingBoundary && (0 === Object.keys(boundaryDebounceBySubnetId).length))
   }
 )
+
+const getSubnetFeatures = state => state.planEditor.subnetFeatures
+const getNetworkConfig = state => {
+  const { network_architecture_manager } = state.plan.resourceItems
+  if (!network_architecture_manager) { return }
+  const { id } = network_architecture_manager.selectedManager
+  const manager = state.resourceManager.managers && state.resourceManager.managers[id]
+  if (!manager) { return }
+  const networkConfig = manager.definition
+    .networkConfigurations.ODN_1
+  return networkConfig
+}
 
 const AlertTypes = {
   MAX_DROP_LENGTH_EXCEEDED: {
@@ -58,18 +73,28 @@ const AlertTypes = {
 // temporary
 const locationWarnImg = new Image(18, 22)
 locationWarnImg.src = '/svg/alert-panel-location.png'
-//const getSubnets = state => state.planEditor.subnets
-const getSubnetFeatures = state => state.planEditor.subnetFeatures
-const getNetworkConfig = state => {
-  const { network_architecture_manager } = state.plan.resourceItems
-  if (!network_architecture_manager) { return }
-  const { id } = network_architecture_manager.selectedManager
-  const manager = state.resourceManager.managers && state.resourceManager.managers[id]
-  if (!manager) { return }
-  const networkConfig = manager.definition
-    .networkConfigurations.ODN_1
-  return networkConfig
-}
+
+const getSelectedSubnetLocations = createSelector(
+  [getSelectedSubnetId, getSelectedSubnet, getSubnetFeatures, getSubnets],
+  (selectedSubnetId, selectedSubnet, subnetFeatures, subnets) => {
+    let selectedSubnetLocations = {}
+    if (selectedSubnet) {
+      selectedSubnetLocations = selectedSubnet.subnetLocationsById
+    } else if (subnetFeatures[selectedSubnetId]
+      && subnetFeatures[selectedSubnetId].subnetId
+      && subnetFeatures[selectedSubnetId].feature.dropLinks
+    ) {
+      let parentSubnetId = subnetFeatures[selectedSubnetId].subnetId
+      subnetFeatures[selectedSubnetId].feature.dropLinks.forEach(dropLink => {
+        dropLink.locationLinks.forEach(locationLink => {
+          let locationId = locationLink.locationId
+          selectedSubnetLocations[locationId] = subnets[parentSubnetId].subnetLocationsById[locationId]
+        })
+      })
+    }
+    return selectedSubnetLocations
+  }
+)
 
 const getAlertsForSelectedSubnet = createSelector(
   [getSelectedSubnet, getSubnetFeatures, getNetworkConfig],
@@ -182,6 +207,7 @@ const PlanEditorSelectors = Object.freeze({
   AlertTypes,
   getAlertsForSelectedSubnet,
   locationWarnImg,
+  getSelectedSubnetLocations,
 })
 
 export default PlanEditorSelectors

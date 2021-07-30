@@ -17,7 +17,7 @@ const defaultState = {
   requestedSubnetIds: [],
   subnets: {},
   subnetFeatures: {},
-  selectedSubnetId: '', // unselected this should be null not ''
+  selectedSubnetId: '', // need to rename this now that a terminal can be selected, lets do "activeFeature" // unselected this should be null not ''
   boundaryDebounceBySubnetId: {},
   hiddenFeatures: [],
 }

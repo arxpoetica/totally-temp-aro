@@ -17,6 +17,13 @@ export class EquipmentBoundaryMapObjects extends Component {
       fillColor: '#1f7de6',
       fillOpacity: 0.05,
     }
+    this.neighborPolygonOptions = {
+      strokeColor: '#1f7de6',
+      strokeOpacity: 0.5,
+      strokeWeight: 1,
+      fillColor: '#1f7de6',
+      fillOpacity: 0.02,
+    }
   }
 
   render () {

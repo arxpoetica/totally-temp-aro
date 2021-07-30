@@ -517,6 +517,7 @@ function selectEditFeaturesById (featureIds) {
         featureIds.forEach(featureId => {
           if (state.planEditor.features[featureId]) { 
             validFeatures.push(featureId) 
+            /*
             let networkNodeType = state.planEditor.features[featureId].feature.networkNodeType
             // TODO: do other networkNodeTypes have subnets?
             if (networkNodeType === "central_office"
@@ -524,6 +525,7 @@ function selectEditFeaturesById (featureIds) {
             ) {
               subnetFeatures.push(featureId)
             }
+            */
           }
         })
         batch(() => {
@@ -532,7 +534,8 @@ function selectEditFeaturesById (featureIds) {
             payload: validFeatures,
           })
           // later we may highlight more than one subnet
-          dispatch(setSelectedSubnetId(subnetFeatures[0]))
+          //dispatch(setSelectedSubnetId(subnetFeatures[0]))
+          dispatch(setSelectedSubnetId(validFeatures[0]))
         })
       })
   }
@@ -546,13 +549,29 @@ function deselectEditFeatureById (objectId) {
 }
 
 function addSubnets (subnetIds) {
+  // TODO: now that we get all subnets on get transaction 
+  //  we can probably change this whole structure
   return (dispatch, getState) => {
 
-    const { transaction, subnets: cachedSubnets, requestedSubnetIds } = getState().planEditor
+    const { transaction, subnets: cachedSubnets, requestedSubnetIds, features} = getState().planEditor
 
     // this little dance only fetches uncached subnets
     const cachedSubnetIds = Object.keys(cachedSubnets).concat(requestedSubnetIds)
-    const uncachedSubnetIds = subnetIds.filter(id => !cachedSubnetIds.includes(id))
+    let uncachedSubnetIds = subnetIds.filter(id => !cachedSubnetIds.includes(id))
+    
+    // pull out any ids that are not subnets
+    uncachedSubnetIds = uncachedSubnetIds.filter(id => {
+      if (!features[id]) return true // unknown so we'll try it
+      let networkNodeType = features[id].feature.networkNodeType
+      // TODO: do other networkNodeTypes have subnets?
+      //  how would we know? solve that
+      if (networkNodeType === "central_office"
+        || networkNodeType === "fiber_distribution_hub"
+      ) {
+        return true
+      }
+      return false // nothing else was true so ...
+    })
 
     dispatch({
       type: Actions.PLAN_EDITOR_ADD_REQUESTED_SUBNET_IDS,
