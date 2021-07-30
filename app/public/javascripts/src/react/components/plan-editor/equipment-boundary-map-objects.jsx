@@ -10,12 +10,20 @@ export class EquipmentBoundaryMapObjects extends Component {
   constructor (props) {
     super(props)
     this.mapObject = undefined
+    this.neighborObjectsById = {}
     this.polygonOptions = {
       strokeColor: '#1f7de6',
       // strokeOpacity: 1,
       strokeWeight: 3,
       fillColor: '#1f7de6',
       fillOpacity: 0.05,
+    }
+    this.neighborPolygonOptions = {
+      strokeColor: '#1f7de6',
+      //strokeOpacity: 0.5,
+      strokeWeight: 1.5,
+      fillColor: '#1f7de6',
+      fillOpacity: 0.02,
     }
   }
 
@@ -25,25 +33,52 @@ export class EquipmentBoundaryMapObjects extends Component {
   }
 
   componentDidUpdate (prevProps, prevState) {
-    const {selectedSubnetId} = this.props
-    if (selectedSubnetId !== prevProps.selectedSubnetId) {
-      if (prevProps.selectedSubnetId) {
-        this.deleteMapObject()
+    // any changes to state props should cause a rerender
+    const {subnets, subnetFeatures} = this.props
+    let selectedSubnetId = this.props.selectedSubnetId
+    let activeFeature = subnetFeatures[selectedSubnetId]
+    if (!activeFeature) {
+      this.clearAll()
+    } else {
+      // step up through the subnets until you get to a subnet with no parent (the CO)
+      let rootSubnetId = selectedSubnetId
+      let parentSubnetId = activeFeature.subnetId
+      while (parentSubnetId) {
+        rootSubnetId = parentSubnetId
+        parentSubnetId = subnetFeatures[rootSubnetId].subnetId
       }
-      this.createMapObject(selectedSubnetId)
+      let newNeighborIds = subnets[rootSubnetId].children.concat([rootSubnetId])
+      // may need to ensure newNeighborIds are all unique 
+      let index = newNeighborIds.indexOf(selectedSubnetId)
+      if (index >= 0) {
+        // pull from array 
+        newNeighborIds.splice(index, 1)
+      } else {
+        // selected feature is not a subnet so only show neighbors
+        selectedSubnetId = null
+      }
 
-      // const createdIds = new Set(Object.keys(this.mapObjects))
-      // const allEquipmentIds = new Set(
-      //   Object.keys(this.props.transactionFeatures)
-      //     .filter(objectId => this.props.transactionFeatures[objectId].feature.dataType === 'equipment_boundary')
-      // )
-      // const idsToCreate = [...allEquipmentIds].filter(objectId => !createdIds.has(objectId))
-      // const idsToDelete = [...createdIds].filter(objectId => !allEquipmentIds.has(objectId))
-      // const idsToUpdate = [...allEquipmentIds].filter(objectId => createdIds.has(objectId))
-      // idsToCreate.forEach(objectId => this.createMapObject(objectId))
-      // idsToDelete.forEach(objectId => this.deleteMapObject(objectId))
-      // idsToUpdate.forEach(objectId => this.updateBoundaryShapeFromStore(objectId))
-    }
+      if (selectedSubnetId !== prevProps.selectedSubnetId) {
+        this.deleteMapObject()
+        this.createMapObject(selectedSubnetId)
+      }
+
+      let idsToCreate = []
+      let idsToDelete = Object.keys(this.neighborObjectsById)
+      newNeighborIds.forEach(id => {
+        let delIndex = idsToDelete.indexOf(id)
+        if (delIndex >= 0) {
+          // already exists, just don't delete it
+          idsToDelete.splice(delIndex, 1)
+        } else {
+          // doesn't exist need to create it
+          idsToCreate.push(id)
+        }
+      })
+
+      this.deleteNeighbors(idsToDelete)
+      this.createNeighbors(idsToCreate)
+     }
   }
 
   createMapObject (selectedSubnetId) {
@@ -51,6 +86,8 @@ export class EquipmentBoundaryMapObjects extends Component {
     if (!this.props.subnets[selectedSubnetId]) return
     const geometry = this.props.subnets[selectedSubnetId].subnetBoundary.polygon
     const isLocked = this.props.subnets[selectedSubnetId].subnetBoundary.locked
+
+    if (this.mapObject) this.deleteMapObject()
 
     this.mapObject = new google.maps.Polygon({
       subnetId: selectedSubnetId, // Not used by Google Maps
@@ -63,7 +100,7 @@ export class EquipmentBoundaryMapObjects extends Component {
     
     this.mapObject.setOptions(this.polygonOptions)
     this.setupListenersForMapObject(this.mapObject)
-
+    /*
     this.mapObject.addListener('rightclick', event => {
       // console.log('yay, you right clicked!')
       // const eventXY = WktUtils.getXYFromEvent(event)
@@ -73,6 +110,29 @@ export class EquipmentBoundaryMapObjects extends Component {
       // console.log('yay! you clicked!')
       // this.props.selectBoundary(objectId)  
     })
+    */
+  }
+
+  createNeighborMapObject (subnetId) {
+    // TODO: DRY the two create functions a bit
+    if (!this.props.subnets[subnetId]) return
+    const geometry = this.props.subnets[subnetId].subnetBoundary.polygon
+
+    if (this.neighborObjectsById[subnetId]) {
+      this.deleteNeighbors([subnetId])
+    }
+
+    let neighborObject = new google.maps.Polygon({
+      subnetId: subnetId, // Not used by Google Maps
+      paths: WktUtils.getGoogleMapPathsFromWKTMultiPolygon(geometry),
+      clickable: false,
+      draggable: false,
+      editable: false,
+      map: this.props.googleMaps,
+    })
+
+    neighborObject.setOptions(this.neighborPolygonOptions)
+    this.neighborObjectsById[subnetId] = neighborObject
   }
 
   deleteMapObject () {
@@ -80,6 +140,21 @@ export class EquipmentBoundaryMapObjects extends Component {
       this.mapObject.setMap(null)
       delete this.mapObject
     }
+  }
+
+  deleteNeighbors (idsToDelete) {
+    idsToDelete.forEach(id => {
+      if (this.neighborObjectsById[id]) {
+        this.neighborObjectsById[id].setMap(null)
+        delete this.neighborObjectsById[id]
+      }
+    })
+  }
+  
+  createNeighbors (idsToCreate) {
+    idsToCreate.forEach(id => {
+      this.createNeighborMapObject(id)
+    })
   }
 
   updateBoundaryShapeFromStore (objectId) {
@@ -127,8 +202,14 @@ export class EquipmentBoundaryMapObjects extends Component {
     })
   }
 
-  componentWillUnmount () {
+  clearAll () {
     this.deleteMapObject()
+    // delete all neighbors
+    this.deleteNeighbors(Object.keys(this.neighborObjectsById))
+  }
+
+  componentWillUnmount () {
+    this.clearAll()
   }
 }
 
@@ -151,6 +232,7 @@ const mapStateToProps = state => ({
   googleMaps: state.map.googleMaps,
   subnets: state.planEditor.subnets,
   selectedSubnetId: state.planEditor.selectedSubnetId,
+  subnetFeatures: state.planEditor.subnetFeatures,
 })
 
 const mapDispatchToProps = dispatch => ({

@@ -14,9 +14,10 @@ const defaultState = {
   isEditingFeatureProperties: false,
   isEnteringTransaction: false,
   isCommittingTransaction: false,
+  requestedSubnetIds: [],
   subnets: {},
   subnetFeatures: {},
-  selectedSubnetId: '', // unselected this should be null not ''
+  selectedSubnetId: '', // need to rename this now that a terminal can be selected, lets do "activeFeature" // unselected this should be null not ''
   boundaryDebounceBySubnetId: {},
   hiddenFeatures: [],
 }
@@ -139,6 +140,20 @@ function deselectFeature (state, objectId) {
   newSelectedFeatureIds.splice(i, 1)
   return { ...state,
     selectedEditFeatureIds: newSelectedFeatureIds
+  }
+}
+
+function addRequestedSubnetIds (state, subnetIds) {
+  let updatedRequestedSubnetIds = [ ...new Set(state.requestedSubnetIds.concat(subnetIds))]
+  return { ...state,
+    requestedSubnetIds: updatedRequestedSubnetIds,
+  }
+}
+
+function removeRequestedSubnetIds (state, subnetIds) {
+  let updatedRequestedSubnetIds = state.requestedSubnetIds.filter(subnetId => !subnetIds.includes(subnetId))
+  return { ...state,
+    requestedSubnetIds: updatedRequestedSubnetIds,
   }
 }
 
@@ -289,6 +304,12 @@ function planEditorReducer (state = defaultState, action) {
 
     case Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURE:
       return deselectFeature(state, action.payload)
+
+    case Actions.PLAN_EDITOR_ADD_REQUESTED_SUBNET_IDS:
+      return addRequestedSubnetIds(state, action.payload)
+
+    case Actions.PLAN_EDITOR_REMOVE_REQUESTED_SUBNET_IDS:
+      return removeRequestedSubnetIds(state, action.payload)
 
     case Actions.PLAN_EDITOR_ADD_SUBNETS:
       return addSubnets(state, action.payload)
