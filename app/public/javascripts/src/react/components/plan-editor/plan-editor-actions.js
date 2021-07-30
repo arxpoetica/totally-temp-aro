@@ -405,6 +405,7 @@ function deleteFeature (featureId) {
             type: Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURE,
             payload: featureId,
           })
+          dispatch(recalculateSubnets({transactionId: transactionId}))
         })
       })
       .catch(err => console.error(err))
