@@ -79,27 +79,6 @@ export class EquipmentBoundaryMapObjects extends Component {
       this.deleteNeighbors(idsToDelete)
       this.createNeighbors(idsToCreate)
      }
-
-    /*
-    if (selectedSubnetId !== prevProps.selectedSubnetId) {
-      if (prevProps.selectedSubnetId) {
-        this.deleteMapObject()
-      }
-      this.createMapObject(selectedSubnetId)
-
-      // const createdIds = new Set(Object.keys(this.mapObjects))
-      // const allEquipmentIds = new Set(
-      //   Object.keys(this.props.transactionFeatures)
-      //     .filter(objectId => this.props.transactionFeatures[objectId].feature.dataType === 'equipment_boundary')
-      // )
-      // const idsToCreate = [...allEquipmentIds].filter(objectId => !createdIds.has(objectId))
-      // const idsToDelete = [...createdIds].filter(objectId => !allEquipmentIds.has(objectId))
-      // const idsToUpdate = [...allEquipmentIds].filter(objectId => createdIds.has(objectId))
-      // idsToCreate.forEach(objectId => this.createMapObject(objectId))
-      // idsToDelete.forEach(objectId => this.deleteMapObject(objectId))
-      // idsToUpdate.forEach(objectId => this.updateBoundaryShapeFromStore(objectId))
-    }
-    */
   }
 
   createMapObject (selectedSubnetId) {
