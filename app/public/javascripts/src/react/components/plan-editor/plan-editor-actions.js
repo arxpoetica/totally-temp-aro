@@ -9,6 +9,7 @@ import ResourceActions from '../resource-editor/resource-actions'
 //import SelectionActions from '../selection/selection-actions'
 import { batch } from 'react-redux'
 import WktUtils from '../../../shared-utils/wkt-utils'
+import PlanEditorSelectors from './plan-editor-selectors.js'
 
 function resumeOrCreateTransaction (planId, userId) {
   return (dispatch, getState) => {
@@ -262,6 +263,92 @@ function showContextMenuForEquipment (featureId, x, y) {
     dispatch(ContextMenuActions.setContextMenuItems([menuItemFeature]))
     dispatch(ContextMenuActions.showContextMenu(x, y))
   }
+}
+
+function showContextMenuForLocations (featureIds, event) {
+  return (dispatch, getState) => {
+    const state = getState()
+    const selectedSubnetId = state.planEditor.selectedSubnetId
+    if (featureIds.length > 0
+      && state.planEditor.subnetFeatures[selectedSubnetId] 
+      && state.planEditor.subnetFeatures[selectedSubnetId].feature.dropLinks
+    ) {
+      // we have locations AND the active feature has drop links
+      const selectedSubnetLocations = PlanEditorSelectors.getSelectedSubnetLocations(state)
+      const coords = WktUtils.getXYFromEvent(event)
+      console.log(selectedSubnetLocations)
+      var menuItemFeatures = []
+      featureIds.forEach(location => {
+        let id = location.object_id
+        var menuActions = []
+        console.log(id)
+        if (selectedSubnetLocations[id]) {
+          // this location is a part of the selected FDT
+          menuActions.push(new MenuItemAction('REMOVE', 'Unassign from terminal', 'PlanEditorActions', 'unassignLocation', id, selectedSubnetId))
+        } else {
+          menuActions.push(new MenuItemAction('ADD', 'Assign to terminal', 'PlanEditorActions', 'assignLocation', id, selectedSubnetId))
+        }
+        menuItemFeatures.push(new MenuItemFeature('LOCATION', 'Location', menuActions))
+      })
+
+      // Show context menu
+      dispatch(ContextMenuActions.setContextMenuItems(menuItemFeatures))
+      dispatch(ContextMenuActions.showContextMenu(coords.x, coords.y))
+
+    } else {
+      return null
+    }
+  }
+}
+
+function unassignLocation (locationId, terminalId) {
+  console.log('unassignLocation')
+  console.log({locationId, terminalId})
+  return (dispatch, getState) => {
+    const state = getState()
+    let subnetFeature = state.planEditor.subnetFeatures[terminalId]
+    subnetFeature = JSON.parse(JSON.stringify(subnetFeature))
+    let subnetId = subnetFeature.subnetId
+    let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+    
+    let index = subnetFeature.feature.dropLinks.findIndex(dropLink => {
+      //planEditor.subnetFeatures["0c9e9415-e5e2-4146-9594-bb3057ca54dc"].feature.dropLinks[0].locationLinks[0].locationId
+      return (0 <= dropLink.locationLinks.findIndex(locationLink => {
+        return (locationId === locationLink.locationId)
+      }))
+    })
+    console.log(index)
+
+    subnetFeature.feature.dropLinks.splice(index, 1)
+    
+    const body = {
+      commands: [{
+        // `childId` is one of the children nodes of the subnets
+        // service need to change this to "childNode"
+        childId: unparseSubnetFeature(subnetFeature.feature),
+        subnetId: subnetId, // parent subnet id, don't add when `type: 'add'`
+        type: 'update', // `add`, `update`, or `delete`
+      }]
+    }
+    // Do a PUT to send the equipment over to service
+    return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
+      .then(result => {
+        console.log(result)
+        
+        dispatch({
+          type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
+          payload: {featureId: subnetFeature}
+        })
+      })
+      .catch(err => console.error(err))
+    
+  }
+}
+
+function assignLocation (locationId, terminalId) {
+  console.log('assignLocation')
+  console.log({locationId, terminalId})
+  return null
 }
 
 function showContextMenuForEquipmentBoundary (equipmentObjectId, x, y) {
@@ -939,6 +1026,9 @@ export default {
   deleteTransactionFeature,
   addTransactionFeatures,
   showContextMenuForEquipment,
+  showContextMenuForLocations,
+  unassignLocation,
+  assignLocation,
   showContextMenuForEquipmentBoundary,
   startDrawingBoundaryFor,
   stopDrawingBoundary,
