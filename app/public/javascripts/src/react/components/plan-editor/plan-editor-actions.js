@@ -273,6 +273,7 @@ function showContextMenuForLocations (featureIds, event) {
       && state.planEditor.subnetFeatures[selectedSubnetId] 
       && state.planEditor.subnetFeatures[selectedSubnetId].feature.dropLinks
     ) {
+      let subnetId = state.planEditor.subnetFeatures[selectedSubnetId].subnetId
       // we have locations AND the active feature has drop links
       const selectedSubnetLocations = PlanEditorSelectors.getSelectedSubnetLocations(state)
       const coords = WktUtils.getXYFromEvent(event)
@@ -286,15 +287,25 @@ function showContextMenuForLocations (featureIds, event) {
           // this location is a part of the selected FDT
           menuActions.push(new MenuItemAction('REMOVE', 'Unassign from terminal', 'PlanEditorActions', 'unassignLocation', id, selectedSubnetId))
         } else {
-          menuActions.push(new MenuItemAction('ADD', 'Assign to terminal', 'PlanEditorActions', 'assignLocation', id, selectedSubnetId))
+          // check that the location is part of the same subnet as the FDT
+          if (state.planEditor.subnets[subnetId].subnetLocationsById
+            && state.planEditor.subnets[subnetId].subnetLocationsById[id])
+          {
+            menuActions.push(new MenuItemAction('ADD', 'Assign to terminal', 'PlanEditorActions', 'assignLocation', id, selectedSubnetId))
+          }
         }
-        menuItemFeatures.push(new MenuItemFeature('LOCATION', 'Location', menuActions))
+        if (menuActions.length > 0) {
+          menuItemFeatures.push(new MenuItemFeature('LOCATION', 'Location', menuActions))
+        }
       })
 
       // Show context menu
-      dispatch(ContextMenuActions.setContextMenuItems(menuItemFeatures))
-      dispatch(ContextMenuActions.showContextMenu(coords.x, coords.y))
-
+      if (menuItemFeatures.length > 0) {
+        dispatch(ContextMenuActions.setContextMenuItems(menuItemFeatures))
+        dispatch(ContextMenuActions.showContextMenu(coords.x, coords.y))
+      } else {
+        return null
+      }
     } else {
       return null
     }
