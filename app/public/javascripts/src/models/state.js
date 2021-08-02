@@ -497,6 +497,14 @@ class State {
       }
     })
 
+    service.mapFeaturesRightClickedEvent.skip(1).subscribe(options => {
+      // plan edit rightclick action from tile.js
+      if (service.selectedDisplayMode.getValue() == service.displayModes.EDIT_PLAN) {
+        console.log(options)
+        service.showContextMenuForLocations (options.locations, options.event)
+      }
+    })
+
     // We are going to use the golden ratio method from http://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
     // (Furthermore, it is a property of the golden ratio, Φ, that each subsequent hash value divides the interval into which it falls according to the golden ratio!)
     var golden_ratio_conjugate = 0.618033988749895
@@ -1924,6 +1932,7 @@ class State {
       setCurrentViewToReleaseNotes: (viewString) => dispatch(GlobalSettingsActions.setCurrentViewToReleaseNotes(viewString)),
       setIsMapClicked: mapFeatures => dispatch(SelectionActions.setIsMapClicked(mapFeatures)),
       selectPlanEditFeaturesById: (features) => dispatch(PlanEditorActions.selectEditFeaturesById(features)),
+      showContextMenuForLocations: (featureIds, event) => dispatch(PlanEditorActions.showContextMenuForLocations(featureIds, event)),
     }
   }
 }

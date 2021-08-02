@@ -9,6 +9,7 @@ import ResourceActions from '../resource-editor/resource-actions'
 //import SelectionActions from '../selection/selection-actions'
 import { batch } from 'react-redux'
 import WktUtils from '../../../shared-utils/wkt-utils'
+import PlanEditorSelectors from './plan-editor-selectors.js'
 
 function resumeOrCreateTransaction (planId, userId) {
   return (dispatch, getState) => {
@@ -29,22 +30,22 @@ function resumeOrCreateTransaction (planId, userId) {
           // depricated? 
           AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/equipment_boundary`),
           // need to get ALL the subnets upfront 
-          AroHttp.get(`/service/plan-transaction/${transactionId}/subnet-refs`),
+          //AroHttp.get(`/service/plan-transaction/${transactionId}/subnet-refs`),
         ])
       })
       .then(results => {
         let equipmentList = results[0].data
         let boundaryList = results[1].data
-        let subnetRefList = results[2].data
+        //let subnetRefList = results[2].data
 
         const resource = 'network_architecture_manager'
         const { id, name } = state.plan.resourceItems[resource].selectedManager
-
+        /*
         let subnetIds = []
         subnetRefList.forEach(subnetRef => {
           subnetIds.push(subnetRef.node.id)
         })
-
+        */
         batch(() => {
           // NOTE: need to load resource manager so drop cable
           // length is available for plan-editor-selectors
@@ -52,7 +53,7 @@ function resumeOrCreateTransaction (planId, userId) {
           dispatch(addTransactionFeatures(equipmentList))
           dispatch(addTransactionFeatures(boundaryList))
 
-          dispatch(addSubnets(subnetIds))
+          //dispatch(addSubnets(subnetIds))
 
           dispatch({
             type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION,
@@ -264,6 +265,152 @@ function showContextMenuForEquipment (featureId, x, y) {
   }
 }
 
+function showContextMenuForLocations (featureIds, event) {
+  return (dispatch, getState) => {
+    const state = getState()
+    const selectedSubnetId = state.planEditor.selectedSubnetId
+    if (featureIds.length > 0
+      && state.planEditor.subnetFeatures[selectedSubnetId] 
+      && state.planEditor.subnetFeatures[selectedSubnetId].feature.dropLinks
+    ) {
+      // we have locations AND the active feature has drop links
+      const selectedSubnetLocations = PlanEditorSelectors.getSelectedSubnetLocations(state)
+      const coords = WktUtils.getXYFromEvent(event)
+      console.log(selectedSubnetLocations)
+      var menuItemFeatures = []
+      featureIds.forEach(location => {
+        let id = location.object_id
+        var menuActions = []
+        console.log(id)
+        if (selectedSubnetLocations[id]) {
+          // this location is a part of the selected FDT
+          menuActions.push(new MenuItemAction('REMOVE', 'Unassign from terminal', 'PlanEditorActions', 'unassignLocation', id, selectedSubnetId))
+        } else {
+          menuActions.push(new MenuItemAction('ADD', 'Assign to terminal', 'PlanEditorActions', 'assignLocation', id, selectedSubnetId))
+        }
+        menuItemFeatures.push(new MenuItemFeature('LOCATION', 'Location', menuActions))
+      })
+
+      // Show context menu
+      dispatch(ContextMenuActions.setContextMenuItems(menuItemFeatures))
+      dispatch(ContextMenuActions.showContextMenu(coords.x, coords.y))
+
+    } else {
+      return null
+    }
+  }
+}
+
+function unassignLocation (locationId, terminalId) {
+  console.log('unassignLocation')
+  console.log({locationId, terminalId})
+  return (dispatch, getState) => {
+    const state = getState()
+    let subnetFeature = state.planEditor.subnetFeatures[terminalId]
+    subnetFeature = JSON.parse(JSON.stringify(subnetFeature))
+    let subnetId = subnetFeature.subnetId
+    let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+    
+    let index = subnetFeature.feature.dropLinks.findIndex(dropLink => {
+      //planEditor.subnetFeatures["0c9e9415-e5e2-4146-9594-bb3057ca54dc"].feature.dropLinks[0].locationLinks[0].locationId
+      return (0 <= dropLink.locationLinks.findIndex(locationLink => {
+        return (locationId === locationLink.locationId)
+      }))
+    })
+    console.log(index)
+
+    subnetFeature.feature.dropLinks.splice(index, 1)
+    
+    const body = {
+      commands: [{
+        // `childId` is one of the children nodes of the subnets
+        // service need to change this to "childNode"
+        childId: unparseSubnetFeature(subnetFeature.feature),
+        subnetId: subnetId, // parent subnet id, don't add when `type: 'add'`
+        type: 'update', // `add`, `update`, or `delete`
+      }]
+    }
+    console.log(body)
+    // Do a PUT to send the equipment over to service
+    
+    return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
+      .then(result => {
+        console.log(result)
+        
+        dispatch({
+          type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
+          payload: {[terminalId]: subnetFeature}
+        })
+      })
+      .catch(err => console.error(err))
+    
+    /*
+    dispatch({
+      type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
+      payload: {[terminalId]: subnetFeature}
+    })
+    */
+  }
+}
+
+function assignLocation (locationId, terminalId) {
+  // TODO: unassignLocation from it's current FDT
+  console.log('assignLocation')
+  console.log({locationId, terminalId})
+  return (dispatch, getState) => {
+    const state = getState()
+    let subnetFeature = state.planEditor.subnetFeatures[terminalId]
+    subnetFeature = JSON.parse(JSON.stringify(subnetFeature))
+    let subnetId = subnetFeature.subnetId
+    let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+
+    let defaultDropLink = {
+      dropCableLength: 0, // ?
+      locationLinks: [
+        {
+          locationId: locationId,
+          atomicUnits: 1, // ?
+          arpu: 50, // ?
+          penetration: 1, // ?
+        }
+      ]
+    }
+
+    subnetFeature.feature.dropLinks.push(defaultDropLink)
+    
+    const body = {
+      commands: [{
+        // `childId` is one of the children nodes of the subnets
+        // service need to change this to "childNode"
+        childId: unparseSubnetFeature(subnetFeature.feature),
+        subnetId: subnetId, // parent subnet id, don't add when `type: 'add'`
+        type: 'update', // `add`, `update`, or `delete`
+      }]
+    }
+    console.log(body)
+    // Do a PUT to send the equipment over to service
+    
+    return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
+      .then(result => {
+        console.log(result)
+        
+        dispatch({
+          type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
+          payload: {[terminalId]: subnetFeature}
+        })
+        
+      })
+      .catch(err => console.error(err))
+    
+    /*
+    dispatch({
+      type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
+      payload: {[terminalId]: subnetFeature},
+    })
+    */
+  }
+}
+
 function showContextMenuForEquipmentBoundary (equipmentObjectId, x, y) {
   return (dispatch, getState) => {
     const state = getState()
@@ -401,7 +548,7 @@ function moveFeature (featureId, coordinates) {
         
         dispatch({
           type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
-          payload: {featureId: subnetFeature}
+          payload: {[featureId]: subnetFeature}
         })
       })
       .catch(err => console.error(err))
@@ -549,8 +696,9 @@ function deselectEditFeatureById (objectId) {
 }
 
 function addSubnets (subnetIds) {
-  // TODO: now that we get all subnets on get transaction 
-  //  we can probably change this whole structure
+  // TODO: I (BRIAN) needs to refactor this, it works for the moment but does a lot of extranious things
+  //  ALSO there is a "bug" where if we select an FDT before selecting the CO or one of the hubs, we get no info
+  //  to fix this we need to find out what subnet the FDT is a part of and run that through here
   return (dispatch, getState) => {
 
     const { transaction, subnets: cachedSubnets, requestedSubnetIds, features} = getState().planEditor
@@ -573,46 +721,55 @@ function addSubnets (subnetIds) {
       return false // nothing else was true so ...
     })
 
+    if (uncachedSubnetIds.length <= 0) return Promise.resolve()
+
+    /*
     dispatch({
       type: Actions.PLAN_EDITOR_ADD_REQUESTED_SUBNET_IDS,
       payload: uncachedSubnetIds,
     })
+    */
+    
+    let command = {
+      cmdType: 'QUERY_SUBNET_TREE', //"QUERY_SELECTED_SUBNETS",
+      subnetIds: uncachedSubnetIds,
+    }
 
-    const subnetApiPromises = uncachedSubnetIds.map(subnetId => {
-      return AroHttp.get(`/service/plan-transaction/${transaction.id}/subnet/${subnetId}`)
-    })
-    const fiberApiPromises = uncachedSubnetIds.map(subnetId => {
-      return AroHttp.get(`/service/plan-transaction/${transaction.id}/subnetfeature/${subnetId}`)
-    })
-
-    //messy solution where we combine the promises and then parse the two responses since fiber is a seperate call
-    return Promise.all([...subnetApiPromises, ...fiberApiPromises])
-      .then(allResults => {
-        // splitting the results into subnet and fiber
-        const halfLength = allResults.length / 2
-        const subnetResults = allResults.slice(0, halfLength)
-        const fiberResults = allResults.slice(halfLength, allResults.length)
-        
-        //attaching fiber into the subnet
-        let apiSubnets = subnetResults.map((result, index) => {
-          result.data.fiber = fiberResults[index].data
-          return result.data
+    return AroHttp.post(`/service/plan-transaction/${transaction.id}/subnet_cmd/query-subnets`, command)
+      .then(result => {
+        let apiSubnets = result.data
+        let fiberApiPromises = []
+        apiSubnets.forEach(subnet => {
+          const subnetId = subnet.subnetId.id
+          fiberApiPromises.push(AroHttp.get(`/service/plan-transaction/${transaction.id}/subnetfeature/${subnetId}`)
+            .then(fiberResult => {
+              subnet.fiber = fiberResult.data
+            })
+          )
         })
-
-        dispatch({
-          type: Actions.PLAN_EDITOR_REMOVE_REQUESTED_SUBNET_IDS,
-          payload: uncachedSubnetIds,
-        })
-        
-        return dispatch(parseAddApiSubnets(apiSubnets))
-      })
-      .catch(err => {
-        console.error(err)
-        dispatch({
-          type: Actions.PLAN_EDITOR_REMOVE_REQUESTED_SUBNET_IDS,
-          payload: uncachedSubnetIds,
-        })
-        return Promise.resolve()
+    
+        return Promise.all(fiberApiPromises)
+          .then(() => {
+            
+            /*
+            dispatch({
+              type: Actions.PLAN_EDITOR_REMOVE_REQUESTED_SUBNET_IDS,
+              payload: uncachedSubnetIds,
+            })
+            */
+            return dispatch(parseAddApiSubnets(apiSubnets))
+            
+          })
+          .catch(err => {
+            console.error(err)
+            /*
+            dispatch({
+              type: Actions.PLAN_EDITOR_REMOVE_REQUESTED_SUBNET_IDS,
+              payload: uncachedSubnetIds,
+            })
+            */
+            return Promise.resolve()
+          })
       })
   }
 }
@@ -939,6 +1096,9 @@ export default {
   deleteTransactionFeature,
   addTransactionFeatures,
   showContextMenuForEquipment,
+  showContextMenuForLocations,
+  unassignLocation,
+  assignLocation,
   showContextMenuForEquipmentBoundary,
   startDrawingBoundaryFor,
   stopDrawingBoundary,

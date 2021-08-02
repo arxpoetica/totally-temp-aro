@@ -321,6 +321,7 @@ class TileComponentController {
     this.overlayRightclickListener = this.mapRef.addListener('rightclick', (event) => {
       this.getFeaturesUnderLatLng(event.latLng)
       .then((hitFeatures) => {
+        hitFeatures.event = event
         this.state.mapFeaturesRightClickedEvent.next(hitFeatures)
       })
       // Note: I just fixed a boolean logic typo having to do with rSelectedDisplayMode in getFilteredFeaturesUnderLatLng()
