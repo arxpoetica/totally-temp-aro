@@ -330,25 +330,84 @@ function unassignLocation (locationId, terminalId) {
         type: 'update', // `add`, `update`, or `delete`
       }]
     }
+    console.log(body)
     // Do a PUT to send the equipment over to service
+    /*
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
       .then(result => {
         console.log(result)
         
         dispatch({
           type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
-          payload: {featureId: subnetFeature}
+          payload: {[featureId]: subnetFeature}
         })
       })
       .catch(err => console.error(err))
+    */
+    
+    dispatch({
+      type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
+      payload: {[terminalId]: subnetFeature}
+    })
     
   }
 }
 
 function assignLocation (locationId, terminalId) {
+  // TODO: unassignLocation from it's current FDT
   console.log('assignLocation')
   console.log({locationId, terminalId})
-  return null
+  return (dispatch, getState) => {
+    const state = getState()
+    let subnetFeature = state.planEditor.subnetFeatures[terminalId]
+    subnetFeature = JSON.parse(JSON.stringify(subnetFeature))
+    let subnetId = subnetFeature.subnetId
+    let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+
+    let defaultDropLink = {
+      dropCableLength: 0, // ?
+      locationLinks: [
+        {
+          locationId: locationId,
+          //atomicUnits: 1, // ?
+          //arpu: 50, // ?
+          //penetration: 1, // ?
+        }
+      ]
+    }
+
+    subnetFeature.feature.dropLinks.push(defaultDropLink)
+    
+    const body = {
+      commands: [{
+        // `childId` is one of the children nodes of the subnets
+        // service need to change this to "childNode"
+        childId: unparseSubnetFeature(subnetFeature.feature),
+        subnetId: subnetId, // parent subnet id, don't add when `type: 'add'`
+        type: 'update', // `add`, `update`, or `delete`
+      }]
+    }
+    console.log(body)
+    // Do a PUT to send the equipment over to service
+    /*
+    return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
+      .then(result => {
+        console.log(result)
+        
+        dispatch({
+          type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
+          payload: {[featureId]: subnetFeature}
+        })
+      })
+      .catch(err => console.error(err))
+    */
+    
+    dispatch({
+      type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
+      payload: {[terminalId]: subnetFeature},
+    })
+    
+  }
 }
 
 function showContextMenuForEquipmentBoundary (equipmentObjectId, x, y) {
@@ -488,7 +547,7 @@ function moveFeature (featureId, coordinates) {
         
         dispatch({
           type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
-          payload: {featureId: subnetFeature}
+          payload: {[featureId]: subnetFeature}
         })
       })
       .catch(err => console.error(err))
