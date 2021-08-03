@@ -60,10 +60,10 @@ const PlanEditorRecalculate = props => {
             <button
               type="button"
               className="btn btn-outline-success"
-              onClick={() => recalculateSubnets({
-                transactionId: transaction.id,
-                subnetIds: [selectedSubnetId],
-              })}
+              onClick={() => recalculateSubnets(
+                transaction.id,
+                [selectedSubnetId]
+              )}
               disabled={!isRecalcSettled}
             >
               Recalculate Hubs & Terminals
@@ -101,7 +101,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
   // discardTransaction: transactionId => dispatch(PlanEditorActions.discardTransaction(transactionId)),
-  recalculateSubnets: vars => dispatch(PlanEditorActions.recalculateSubnets(vars)),
+  recalculateSubnets: (transactionId, subnetIds) => dispatch(PlanEditorActions.recalculateSubnets(transactionId, subnetIds)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(PlanEditorRecalculate)
