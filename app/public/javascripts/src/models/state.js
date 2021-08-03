@@ -487,6 +487,7 @@ class State {
         service.onFeatureSelectedRedux(options)
       } else if (options.locations) {
         service.setSelectedLocations(options.locations.map(location => location.location_id))
+        service.setActiveViewModePanel(service.viewModePanels.LOCATION_INFO)
       }
     })
 
@@ -1892,6 +1893,7 @@ class State {
       setSelectedLocations: locationIds => dispatch(SelectionActions.setLocations(locationIds)),
       setMapFeatures: mapFeatures => dispatch(SelectionActions.setMapFeatures(mapFeatures)),
       setSelectedDisplayMode: displayMode => dispatch(ToolBarActions.selectedDisplayMode(displayMode)),
+      setActiveViewModePanel: displayPanel => dispatch(ToolBarActions.activeViewModePanel(displayPanel)),
       setActivePlanState: planState => dispatch(PlanActions.setActivePlanState(planState)),
       selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems)),
       loadPlanRedux: planId => dispatch(PlanActions.loadPlan(planId)),
