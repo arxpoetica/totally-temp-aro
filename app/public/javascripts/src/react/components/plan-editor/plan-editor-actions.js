@@ -132,10 +132,8 @@ function createFeature (feature) {
       }]
     }
 
-    console.log(body)
     AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
       .then(result => {
-        console.log(result)
         let updatedSubnets = JSON.parse(JSON.stringify(state.planEditor.subnets))
         const newFeatures = {}
         // the subnet and equipment updates are not connected, right now we get back two arrays
@@ -277,18 +275,16 @@ function showContextMenuForLocations (featureIds, event) {
       // we have locations AND the active feature has drop links
       const selectedSubnetLocations = PlanEditorSelectors.getSelectedSubnetLocations(state)
       const coords = WktUtils.getXYFromEvent(event)
-      console.log(selectedSubnetLocations)
       var menuItemFeatures = []
       featureIds.forEach(location => {
         let id = location.object_id
         var menuActions = []
-        console.log(id)
         if (selectedSubnetLocations[id]) {
           // this location is a part of the selected FDT
           menuActions.push(new MenuItemAction('REMOVE', 'Unassign from terminal', 'PlanEditorActions', 'unassignLocation', id, selectedSubnetId))
         } else {
           // check that the location is part of the same subnet as the FDT
-          if (state.planEditor.subnets[subnetId].subnetLocationsById
+          if (state.planEditor.subnets[subnetId]
             && state.planEditor.subnets[subnetId].subnetLocationsById[id])
           {
             menuActions.push(new MenuItemAction('ADD', 'Assign to terminal', 'PlanEditorActions', 'assignLocation', id, selectedSubnetId))
@@ -312,69 +308,92 @@ function showContextMenuForLocations (featureIds, event) {
   }
 }
 
-function unassignLocation (locationId, terminalId) {
-  console.log('unassignLocation')
-  console.log({locationId, terminalId})
+// helper
+function _updateSubnetFeatures (subnetFeatures) {
   return (dispatch, getState) => {
     const state = getState()
-    let subnetFeature = state.planEditor.subnetFeatures[terminalId]
-    subnetFeature = JSON.parse(JSON.stringify(subnetFeature))
-    let subnetId = subnetFeature.subnetId
     let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
-    
-    let index = subnetFeature.feature.dropLinks.findIndex(dropLink => {
-      //planEditor.subnetFeatures["0c9e9415-e5e2-4146-9594-bb3057ca54dc"].feature.dropLinks[0].locationLinks[0].locationId
-      return (0 <= dropLink.locationLinks.findIndex(locationLink => {
-        return (locationId === locationLink.locationId)
-      }))
+    let commands = []
+    let subnetFeaturesById = {}
+    let subnetIds = []
+    subnetFeatures.forEach(subnetFeature => {
+      subnetFeaturesById[subnetFeature.feature.objectId] = subnetFeature
+      let subnetId = subnetFeature.subnetId
+      subnetIds.push(subnetId)
+      commands.push(
+        {
+          childId: unparseSubnetFeature(subnetFeature.feature),
+          subnetId: subnetId, // parent subnet id, don't add when `type: 'add'`
+          type: 'update', // `add`, `update`, or `delete`
+        }
+      )
     })
-    console.log(index)
+    
+    if (!transactionId || commands.length <= 0) return null
 
-    subnetFeature.feature.dropLinks.splice(index, 1)
-    
-    const body = {
-      commands: [{
-        // `childId` is one of the children nodes of the subnets
-        // service need to change this to "childNode"
-        childId: unparseSubnetFeature(subnetFeature.feature),
-        subnetId: subnetId, // parent subnet id, don't add when `type: 'add'`
-        type: 'update', // `add`, `update`, or `delete`
-      }]
-    }
-    console.log(body)
-    // Do a PUT to send the equipment over to service
-    
+    const body = {commands}
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
       .then(result => {
-        console.log(result)
+        //console.log(result) // we do NOT get the child feature back in the result
         
         dispatch({
           type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
-          payload: {[terminalId]: subnetFeature}
+          payload: subnetFeaturesById,
         })
+        dispatch(recalculateSubnets(transactionId, subnetIds))
+        
       })
       .catch(err => console.error(err))
-    
-    /*
-    dispatch({
-      type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
-      payload: {[terminalId]: subnetFeature}
-    })
-    */
+  }
+}
+
+// helper
+function _spliceLocationFromTerminal (state, locationId, terminalId) {
+  let subnetFeature = state.planEditor.subnetFeatures[terminalId]
+  subnetFeature = JSON.parse(JSON.stringify(subnetFeature))
+  
+  let index = subnetFeature.feature.dropLinks.findIndex(dropLink => {
+    //planEditor.subnetFeatures["0c9e9415-e5e2-4146-9594-bb3057ca54dc"].feature.dropLinks[0].locationLinks[0].locationId
+    return (0 <= dropLink.locationLinks.findIndex(locationLink => {
+      return (locationId === locationLink.locationId)
+    }))
+  })
+  
+  if (index !== -1) {
+    subnetFeature.feature.dropLinks.splice(index, 1)
+    return subnetFeature
+  } else {
+    return null
+  }
+}
+
+function unassignLocation (locationId, terminalId) {
+  return (dispatch, getState) => {
+    const state = getState()
+    let subnetFeature = _spliceLocationFromTerminal(state, locationId, terminalId)
+    if (subnetFeature) {
+      return dispatch(_updateSubnetFeatures([subnetFeature]))
+    } else {
+      return null
+    }
   }
 }
 
 function assignLocation (locationId, terminalId) {
-  // TODO: unassignLocation from it's current FDT
-  console.log('assignLocation')
-  console.log({locationId, terminalId})
   return (dispatch, getState) => {
     const state = getState()
-    let subnetFeature = state.planEditor.subnetFeatures[terminalId]
-    subnetFeature = JSON.parse(JSON.stringify(subnetFeature))
-    let subnetId = subnetFeature.subnetId
-    let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+    let features = []
 
+    let toFeature = state.planEditor.subnetFeatures[terminalId]
+    toFeature = JSON.parse(JSON.stringify(toFeature))
+    let subnetId = toFeature.subnetId
+
+    // unassign location
+    let fromTerminalId = state.planEditor.subnets[subnetId].subnetLocationsById[locationId].parentEquipmentId
+    let fromFeature = _spliceLocationFromTerminal(state, locationId, fromTerminalId)
+    if (fromFeature) features.push(fromFeature)
+
+    // assign location
     let defaultDropLink = {
       dropCableLength: 0, // ?
       locationLinks: [
@@ -387,38 +406,10 @@ function assignLocation (locationId, terminalId) {
       ]
     }
 
-    subnetFeature.feature.dropLinks.push(defaultDropLink)
-    
-    const body = {
-      commands: [{
-        // `childId` is one of the children nodes of the subnets
-        // service need to change this to "childNode"
-        childId: unparseSubnetFeature(subnetFeature.feature),
-        subnetId: subnetId, // parent subnet id, don't add when `type: 'add'`
-        type: 'update', // `add`, `update`, or `delete`
-      }]
-    }
-    console.log(body)
-    // Do a PUT to send the equipment over to service
-    
-    return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
-      .then(result => {
-        console.log(result)
-        
-        dispatch({
-          type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
-          payload: {[terminalId]: subnetFeature}
-        })
-        
-      })
-      .catch(err => console.error(err))
-    
-    /*
-    dispatch({
-      type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
-      payload: {[terminalId]: subnetFeature},
-    })
-    */
+    toFeature.feature.dropLinks.push(defaultDropLink)
+    features.push(toFeature)
+
+    return dispatch(_updateSubnetFeatures(features))
   }
 }
 
@@ -555,7 +546,6 @@ function moveFeature (featureId, coordinates) {
     // Do a PUT to send the equipment over to service
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
       .then(result => {
-        //console.log(result)
         
         dispatch({
           type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
@@ -583,12 +573,9 @@ function deleteFeature (featureId) {
       }]
     }
 
-    console.log(body)
-
     // Do a PUT to send the equipment over to service
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
       .then(result => {
-        console.log(result)
         const hiddenFeatures = []
         hiddenFeatures.push(featureId)
 
@@ -615,7 +602,7 @@ function deleteFeature (featureId) {
             type: Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURE,
             payload: featureId,
           })
-          dispatch(recalculateSubnets({transactionId: transactionId}))
+          dispatch(recalculateSubnets(transactionId))
         })
       })
       .catch(err => console.error(err))
@@ -718,6 +705,9 @@ function addSubnets (subnetIds) {
     const cachedSubnetIds = Object.keys(cachedSubnets).concat(requestedSubnetIds)
     let uncachedSubnetIds = subnetIds.filter(id => !cachedSubnetIds.includes(id))
     
+    // we have everything, no need to query service
+    if (uncachedSubnetIds.length <= 0) return Promise.resolve(subnetIds)
+
     // pull out any ids that are not subnets
     uncachedSubnetIds = uncachedSubnetIds.filter(id => {
       if (!features[id]) return true // unknown so we'll try it
@@ -732,6 +722,8 @@ function addSubnets (subnetIds) {
       return false // nothing else was true so ...
     })
 
+    // the selected ID isn't a subnet persay so don't query for it
+    // TODO: we need to fix this selection discrepancy
     if (uncachedSubnetIds.length <= 0) return Promise.resolve()
 
     /*
@@ -768,8 +760,13 @@ function addSubnets (subnetIds) {
               payload: uncachedSubnetIds,
             })
             */
-            return dispatch(parseAddApiSubnets(apiSubnets))
+            //return dispatch(parseAddApiSubnets(apiSubnets))
+            //  .then(() => Promise.resolve(apiSubnets))
             
+            return new Promise((resolve, reject) => {
+              dispatch(parseAddApiSubnets(apiSubnets))
+              resolve(subnetIds)
+            })
           })
           .catch(err => {
             console.error(err)
@@ -779,7 +776,7 @@ function addSubnets (subnetIds) {
               payload: uncachedSubnetIds,
             })
             */
-            return Promise.resolve()
+            return Promise.reject()
           })
       })
   }
@@ -795,7 +792,11 @@ function setSelectedSubnetId (selectedSubnetId) {
     } else {
       batch(() => {
         dispatch(addSubnets([selectedSubnetId]))
-          .then( () => {
+          .then( (result) => {
+            // TODO: we need to figure out the proper subnet select workflow
+            // FDTs aren't subnets but can be selcted as such
+            // that is where the following discrepancy comes from 
+            if (!result) selectedSubnetId = ''
             dispatch({
               type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
               payload: selectedSubnetId,
@@ -828,7 +829,6 @@ function recalculateBoundary (subnetId) {
 
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet/${subnetId}/boundary`, boundaryBody)
       .then(res => {
-        console.log(res)
         dispatch(setIsCalculatingBoundary(false)) // may need to extend this for multiple boundaries? (make it and int incriment, decriment)
       })
       .catch(err => {
@@ -881,15 +881,14 @@ function boundaryChange (subnetId, geometry) {
   }
 }
 
-function recalculateSubnets ({ transactionId, subnetIds }) {
+function recalculateSubnets (transactionId, subnetIds = []) {
   return dispatch => {
     dispatch(setIsCalculatingSubnets(true))
-    const recalcBody = { subnetIds: [] }
-    // console.log(recalcBody)
+    const recalcBody = { subnetIds }
+    
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet-cmd/recalc`, recalcBody)
       .then(res => {
         dispatch(setIsCalculatingSubnets(false))
-        console.log(res)
         // parse changes
         dispatch(parseRecalcEvents(res.data))
       })
@@ -1008,6 +1007,16 @@ function parseSubnet (subnet) {
   subnet.children = subnet.children.map(feature => parseSubnetFeature(feature))
   // --- end typo section --- //
 
+  // subnetLocations needs to be a dictionary
+  subnet.subnetLocationsById = {}
+  subnet.subnetLocations.forEach(location => {
+    location.objectIds.forEach(objectId => {
+      // if subnet.subnetLocationsById[objectId] doesn't exist something has fallen out of sync
+      subnet.subnetLocationsById[objectId] = { ...location, parentEquipmentId: null}
+    })
+  })
+  delete subnet.subnetLocations
+
   // build the subnet feature list
   const subnetId = subnet.subnetNode.objectId
   let subnetFeatures = {}
@@ -1022,20 +1031,24 @@ function parseSubnet (subnet) {
       'feature': feature,
       'subnetId': subnetId,
     }
+    // if the feature has attached locations we need to note that in the locations list
+    //  technically we are duplicating data so we need to be sure the reducer machinery keeps these in sync
+    if (feature.dropLinks) {
+      feature.dropLinks.forEach(dropLink => {
+        dropLink.locationLinks.forEach(locationLink => {
+          if (!subnet.subnetLocationsById[locationLink.locationId]) {
+            console.warn(`location ${locationLink.locationId} of feature ${feature.objectId} is not in the location list of subnet ${subnetId}`)
+          } else {
+            subnet.subnetLocationsById[locationLink.locationId].parentEquipmentId = feature.objectId
+          }
+        })
+      })
+    }
   })
 
   // subnet child list is a list of IDs, not full features, features are stored in subnetFeatures
   subnet.children = subnet.children.map(feature => feature.objectId)
   subnet.subnetNode = subnet.subnetNode.objectId
-
-  // subnetLocations needs to be a dictionary
-  // TODO: may have to fix this later for single-point-of-truth concerns
-  subnet.subnetLocationsById = {}
-  subnet.subnetLocations.forEach(location => {
-    location.objectIds.forEach(objectId => {
-      subnet.subnetLocationsById[objectId] = location
-    })
-  })
 
   return {subnet, subnetFeatures}
 }

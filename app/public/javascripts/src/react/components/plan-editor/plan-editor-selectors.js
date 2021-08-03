@@ -17,7 +17,7 @@ const getSelectedIds = createSelector([getSelectedSubnet, getSelectedEditFeature
   //  make sure all elements are unique by making it a Set,
   //  turn it back into an array using the spread op
   selectedIds = [...new Set([...selectedIds, ...selectedEditFeatureIds])]
-
+  
   return selectedIds
 })
 
@@ -101,10 +101,11 @@ const getAlertsForSelectedSubnet = createSelector(
   (selectedSubnet, subnetFeatures, networkConfig) => {
     let alerts = {}
     // maybe we can spruce this up a bit some filter functions?
+    let subnetLocationsIds = []
+    if (selectedSubnet) subnetLocationsIds = Object.keys(selectedSubnet.subnetLocationsById)
     if (
       selectedSubnet
-      && selectedSubnet.subnetLocations
-      && selectedSubnet.subnetLocations.length > 0
+      && subnetLocationsIds.length > 0
       && typeof getNetworkConfig !== 'undefined'
     ) {
       const maxDropCableLength = networkConfig.terminalConfiguration.maxDistanceMeters
@@ -115,7 +116,7 @@ const getAlertsForSelectedSubnet = createSelector(
       let totalHomes = 0
 
       let abandonedLocations = {}
-      Object.keys(selectedSubnet.subnetLocationsById).forEach(locationId => {
+      subnetLocationsIds.forEach(locationId => {
         abandonedLocations[locationId] = true
       })
 
