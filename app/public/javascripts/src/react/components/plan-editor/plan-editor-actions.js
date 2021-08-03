@@ -699,7 +699,7 @@ function addSubnets (subnetIds) {
   //  to fix this we need to find out what subnet the FDT is a part of and run that through here
   return (dispatch, getState) => {
 
-    const { transaction, subnets: cachedSubnets, requestedSubnetIds, features} = getState().planEditor
+    const { transaction, subnets: cachedSubnets, requestedSubnetIds, features, subnetFeatures} = getState().planEditor
 
     // this little dance only fetches uncached subnets
     const cachedSubnetIds = Object.keys(cachedSubnets).concat(requestedSubnetIds)
@@ -709,6 +709,7 @@ function addSubnets (subnetIds) {
     if (uncachedSubnetIds.length <= 0) return Promise.resolve(subnetIds)
 
     // pull out any ids that are not subnets
+    let validPsudoSubnets = []
     uncachedSubnetIds = uncachedSubnetIds.filter(id => {
       if (!features[id]) return true // unknown so we'll try it
       let networkNodeType = features[id].feature.networkNodeType
@@ -718,13 +719,23 @@ function addSubnets (subnetIds) {
         || networkNodeType === "fiber_distribution_hub"
       ) {
         return true
+      } else {
+        if (subnetFeatures[id]) validPsudoSubnets.push(id)
+        return false
       }
-      return false // nothing else was true so ...
     })
 
     // the selected ID isn't a subnet persay so don't query for it
     // TODO: we need to fix this selection discrepancy
-    if (uncachedSubnetIds.length <= 0) return Promise.resolve()
+    if (uncachedSubnetIds.length <= 0) {
+      // is the FDT in state? If so we can select it
+      if (validPsudoSubnets.length > 0) {
+        return Promise.resolve(validPsudoSubnets)
+      } else {
+        // if not we can't
+        return Promise.resolve()
+      }
+    }
 
     /*
     dispatch({
@@ -796,6 +807,7 @@ function setSelectedSubnetId (selectedSubnetId) {
             // TODO: we need to figure out the proper subnet select workflow
             // FDTs aren't subnets but can be selcted as such
             // that is where the following discrepancy comes from 
+            //console.log(result)
             if (!result) selectedSubnetId = ''
             dispatch({
               type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,

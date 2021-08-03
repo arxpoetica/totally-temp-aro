@@ -92,6 +92,7 @@ const getSelectedSubnetLocations = createSelector(
         })
       })
     }
+    
     return selectedSubnetLocations
   }
 )
