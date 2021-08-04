@@ -75,3 +75,12 @@
 .segments-tag-select .select {
   flex: 1;
 }
+
+/* aro-search */
+.search-bar__input {
+  width: 100% !important;
+}
+
+.search-bar__input > input {
+  width: 100% !important;
+}
