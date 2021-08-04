@@ -37,6 +37,13 @@ export class ManageUsers extends Component {constructor (props) {
     this.props.loadUsers()
   }
 
+  // When user move the screen back and forth without saving the added roles it leads to the UI issue,
+  // so the usersList is loaded again to set back the data.
+  // See: https://www.pivotaltracker.com/n/projects/2468285/stories/177604213
+  componentWillUnmount() {
+    this.props.loadUsers()
+  }
+
   handlePageClick (data) { 
     this.props.handlePageClick(data.selected)
     this.setState({selectedPage: data.selected})
