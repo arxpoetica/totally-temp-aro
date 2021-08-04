@@ -9,6 +9,7 @@ import createClass from 'create-react-class'
 import RxState from '../../../common/rxState'
 import { dequal } from 'dequal'
 import { entityTypeCons } from '../constants'
+import './road-segment-detail.css'
 
 export class AroSearch extends Component {
   constructor(props) {
@@ -61,7 +62,13 @@ export class AroSearch extends Component {
   handleChange(searchText) {
     this.setState({ searchText })
     const { entityType, entityTypeList } = this.props
-    const selectedBoundary = entityTypeList[entityType].find(boundary => boundary.code === searchText.label)
+    const selectedBoundary = entityTypeList[entityType].find(boundary => {
+      return (
+        boundary.objectId
+        || boundary.code
+        || boundary.tabblockId
+      ) === searchText.label
+    })
     entityType === 'LocationObjectEntity'
       ? this.onSearchResult(selectedBoundary)
       : this.props.onSelectedBoundary(selectedBoundary)
@@ -117,6 +124,10 @@ export class AroSearch extends Component {
         onInputChange={(event, action) => this.handleInputChange(event, action)}
         onKeyDown={(event) => this.onKeyDown(event)}
         onBlur={(event) => this.onBlur(event)}
+        styles={{
+          placeholder: (style) => ({ ...style, pointerEvents: "none" }),
+          input: (style) => ({ ...style, width: "100%" }),
+        }}
         blurInputOnSelect
         onFocus={() => this.onFocus()}
         options={
@@ -125,6 +136,7 @@ export class AroSearch extends Component {
             : []
         }
         components={{ Option, DropdownIndicator: null }}
+        classNamePrefix="search-bar"
       />
     )
   }
