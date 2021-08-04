@@ -894,9 +894,20 @@ function boundaryChange (subnetId, geometry) {
 }
 
 function recalculateSubnets (transactionId, subnetIds = []) {
-  return dispatch => {
+  return (dispatch, getState) => {
+    const state = getState()
+    let activeSubnets = []
+    subnetIds.forEach(subnetId => {
+      if (state.planEditor.subnets[subnetId]) {
+        activeSubnets.push(subnetId)
+      } else if (state.planEditor.subnetFeatures[subnetId]
+        && state.planEditor.subnetFeatures[subnetId].subnetId
+      ) {
+        activeSubnets.push(state.planEditor.subnetFeatures[subnetId].subnetId)
+      }
+    })
     dispatch(setIsCalculatingSubnets(true))
-    const recalcBody = { subnetIds }
+    const recalcBody = { subnetIds: activeSubnets }
     
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet-cmd/recalc`, recalcBody)
       .then(res => {

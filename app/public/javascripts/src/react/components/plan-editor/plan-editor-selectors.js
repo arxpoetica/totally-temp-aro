@@ -139,7 +139,7 @@ const getAlertsForSelectedSubnet = createSelector(
         }
 
         const featureEntry = subnetFeatures[featureId]
-        if (featureEntry) {
+        if (featureEntry && featureEntry.feature.dropLinks) {
           // add droplinks to totalHomes to check if it exceeds maxHubHomes
           totalHomes += featureEntry.feature.dropLinks.length
 
