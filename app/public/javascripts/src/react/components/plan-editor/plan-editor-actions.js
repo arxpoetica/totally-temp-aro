@@ -748,7 +748,8 @@ function addSubnets (subnetIds) {
       cmdType: 'QUERY_SUBNET_TREE', //"QUERY_SELECTED_SUBNETS",
       subnetIds: uncachedSubnetIds,
     }
-
+    // should we rename that now that we are using it for retreiving subnets as well?
+    dispatch(setIsCalculatingSubnets(true))
     return AroHttp.post(`/service/plan-transaction/${transaction.id}/subnet_cmd/query-subnets`, command)
       .then(result => {
         let apiSubnets = result.data
@@ -773,7 +774,7 @@ function addSubnets (subnetIds) {
             */
             //return dispatch(parseAddApiSubnets(apiSubnets))
             //  .then(() => Promise.resolve(apiSubnets))
-            
+            dispatch(setIsCalculatingSubnets(false))
             return new Promise((resolve, reject) => {
               dispatch(parseAddApiSubnets(apiSubnets))
               resolve(subnetIds)
@@ -787,6 +788,7 @@ function addSubnets (subnetIds) {
               payload: uncachedSubnetIds,
             })
             */
+            dispatch(setIsCalculatingSubnets(false))
             return Promise.reject()
           })
       })
