@@ -5,6 +5,7 @@ import wrapComponentWithProvider from '../../../common/provider-wrapped-componen
 import NetworkOptimizationActions from './network-optimization-actions'
 import PlanEditorActions from '../../plan-editor/plan-editor-actions'
 import SelectionActions from '../../selection/selection-actions'
+import { EditorInterface, EditorInterfaceItem } from './editor-interface.jsx'
 import PlanTargetListComponent from '../../selection/plan-target-list.jsx'
 import { createSelector } from 'reselect'
 import NetworkOptimizationInputForm from './network-optimization-input-form.jsx'
@@ -39,26 +40,21 @@ export class NetworkOptimizationInput extends Component {
           networkAnalysisTypeId={this.props.networkAnalysisTypeId}
           displayOnly={!this.areControlsEnabled()} enableReinitialize />
 
-        <div className='ei-header ei-no-pointer' style={{ marginBottom: '0px' }}>Routing Selection</div>
-        <div className='ei-gen-level ei-internal-level' style={{ paddingLeft: '11px' }}>
-          <div className='ei-items-contain'>
-            <div className='ei-property-item'>
-              <div className='ei-property-label'>Selection Type</div>
-              <div className='ei-property-value'>
-                <DropdownList
-                  data={this.props.allSelectionModes}
-                  valueField='id'
-                  textField='description'
-                  value={this.props.activeSelectionModeId}
-                  readOnly={!this.areControlsEnabled()}
-                  onChange={(val, event) => this.onSelectionModeChange(val, event)} />
-              </div>
-            </div>
-            <div className='ei-property-item'>
-              <div className='ei-property-value'><PlanTargetListComponent displayOnly={!this.areControlsEnabled()} /></div>
-            </div>
-          </div>
-        </div>
+        <EditorInterface title="Routing Selection">
+          <EditorInterfaceItem subtitle="Selection Type">
+            <DropdownList
+              data={this.props.allSelectionModes}
+              valueField='id'
+              textField='description'
+              value={this.props.activeSelectionModeId}
+              readOnly={!this.areControlsEnabled()}
+              onChange={(val, event) => this.onSelectionModeChange(val, event)} />
+          </EditorInterfaceItem>
+          <EditorInterfaceItem>
+            <PlanTargetListComponent displayOnly={!this.areControlsEnabled()} />
+          </EditorInterfaceItem>
+        </EditorInterface>
+
       </div>
     )
   }

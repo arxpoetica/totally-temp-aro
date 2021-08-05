@@ -4,6 +4,7 @@ import { connect } from 'react-redux'
 import { Field, reduxForm, getFormValues, change } from 'redux-form'
 import Constants from '../../../common/constants'
 import NetworkOptimizationActions from './network-optimization-actions'
+import { EditorInterface, EditorInterfaceItem } from './editor-interface.jsx'
 // import NetworkOptimizationInputFormMeta from './network-optimization-input-form-meta'
 import { FieldComponents } from '../../common/editor-interface/object-editor.jsx'
 import DropdownList from 'react-widgets/lib/DropdownList'
@@ -148,81 +149,49 @@ export class NetworkOptimizationInputFormProto extends Component {
     if (this.props.values && this.props.values.networkTypes) networkTypes = this.props.values.networkTypes
 
     return (
-      <div className='ei-items-contain object-editor'>
-        <div className='ei-header ei-no-pointer'>Settings</div>
-        <div className='ei-gen-level ei-internal-level' style={{ paddingLeft: '11px' }}>
-          <div className='ei-items-contain'>
-            {/*
-            <div className='ei-property-item'>
-              <div className='ei-property-label'>Analysis Type</div>
-              <div className='ei-property-value'>
-                {
-                <Field
-                  onChange={(val, newVal, prevVal, propChain) => this.handleChange(newVal, prevVal, propChain)}
-                  name={'analysis_type'}
-                  component={this.filterComponent(FieldComponents.renderDropdownList)}
-                  valueField='value'
-                  textField='label'
-                  data={this.AnalysisTypes}
-                />
-                }
-                {this.props.networkAnalysisTypeId}
-              </div>
-            </div>
-            */}
-            <div className='ei-property-item'>
-              <div className='ei-property-label'>Endpoint Technology</div>
-              <div className='ei-property-value' style={{ flex: 'inherit' }}>
+      <EditorInterface
+        title="Settings"
+        footer={this.renderOptimizationOptions()}
+      >
+        <EditorInterfaceItem subtitle="Endpoint Technology">
+          <button className={'btn btn-sm ' + (networkTypes.includes('Fiber') ? 'btn-primary' : 'btn-light')}
+            onClick={() => this.toggleNetworkType('Fiber')}
+            disabled={this.props.displayOnly}>
+            Fiber
+          </button>
 
-                <button className={'btn btn-sm ' + (networkTypes.includes('Fiber') ? 'btn-primary' : 'btn-light')}
-                  onClick={() => this.toggleNetworkType('Fiber')}
-                  disabled={this.props.displayOnly}>
-                  Fiber
-                </button>
+          <div className='btn-group btn-group-sm' style={{ marginLeft: '5px' }}>
+            <button className={'btn btn-sm ' + (networkTypes.includes('FiveG') ? 'btn-primary' : 'btn-light')}
+              onClick={() => this.toggleNetworkType('FiveG')}
+              disabled={this.props.displayOnly}>
+              5G
+            </button>
 
-                <div className='btn-group btn-group-sm' style={{ marginLeft: '5px' }}>
-                  <button className={'btn btn-sm ' + (networkTypes.includes('FiveG') ? 'btn-primary' : 'btn-light')}
-                    onClick={() => this.toggleNetworkType('FiveG')}
-                    disabled={this.props.displayOnly}>
-                    5G
-                  </button>
-
-                  <button className={'btn btn-sm ' + (networkTypes.includes('Copper') ? 'btn-primary' : 'btn-light')}
-                    onClick={() => this.toggleNetworkType('Copper')}
-                    disabled={this.props.displayOnly}>
-                    DSL
-                  </button>
-                </div>
-
-              </div>
-            </div>
-
-            <div className='ei-property-item'>
-              <div className='ei-property-label'>Network Construction</div>
-              <div className='ei-property-value'>
-                <Field
-                  onChange={(val, newVal, prevVal, propChain) => this.handleChange(newVal, prevVal, propChain)}
-                  name={'routingMode'}
-                  component={this.filterComponent(FieldComponents.renderDropdownList)}
-                  valueField='value'
-                  textField='label'
-                  data={this.RoutingModes}
-                />
-              </div>
-            </div>
+            <button className={'btn btn-sm ' + (networkTypes.includes('Copper') ? 'btn-primary' : 'btn-light')}
+              onClick={() => this.toggleNetworkType('Copper')}
+              disabled={this.props.displayOnly}>
+              DSL
+            </button>
           </div>
-        </div>
-        {// ToDo: props.networkAnalysisTypeId should come from redux NOT parent
-          this.props.networkAnalysisTypeId === 'NETWORK_PLAN' ? this.renderOptimizationOptions() : ''
-        }
-      </div>
+        </EditorInterfaceItem>
+        <EditorInterfaceItem subtitle="Network Construction">
+          <Field
+            onChange={(val, newVal, prevVal, propChain) => this.handleChange(newVal, prevVal, propChain)}
+            name={'routingMode'}
+            component={this.filterComponent(FieldComponents.renderDropdownList)}
+            valueField='value'
+            textField='label'
+            data={this.RoutingModes}
+          />
+        </EditorInterfaceItem>
+      </EditorInterface>
     )
   }
 
   renderOptimizationOptions () {
     // possibly make this its own component
-    return (
-      <div>
+    return this.props.networkAnalysisTypeId === 'NETWORK_PLAN' ? (
+      <>
         <div className='ei-header ei-no-pointer'>Optimization</div>
         <div className='ei-gen-level ei-internal-level' style={{ paddingLeft: '11px' }}>
           <div className='ei-items-contain'>
@@ -367,8 +336,8 @@ export class NetworkOptimizationInputFormProto extends Component {
 
           </div>
         </div>
-      </div>
-    )
+      </>
+    ) : null
   }
 
   toggleNetworkType (networkType) {
