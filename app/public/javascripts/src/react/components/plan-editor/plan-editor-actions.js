@@ -97,12 +97,15 @@ function clearTransaction () {
 // ToDo: there's only one transaction don't require the ID
 function commitTransaction (transactionId) {
   return dispatch => {
-    dispatch(setIsCommittingTransaction(true))
-    return AroHttp.put(`/service/plan-transactions/${transactionId}`)
-      .then(() => dispatch(clearTransaction()))
-      .catch(err => {
-        console.error(err)
-        dispatch(clearTransaction())
+    return dispatch(recalculateSubnets(transactionId))
+      .then(() => {
+        dispatch(setIsCommittingTransaction(true))
+        return AroHttp.put(`/service/plan-transactions/${transactionId}`)
+          .then(() => dispatch(clearTransaction()))
+          .catch(err => {
+            console.error(err)
+            dispatch(clearTransaction())
+          })
       })
   }
 }
@@ -552,8 +555,6 @@ function moveFeature (featureId, coordinates) {
           type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
           payload: {[featureId]: subnetFeature}
         })
-        dispatch(recalculateSubnets(transactionId, [subnetId]))
-
       })
       .catch(err => console.error(err))
   }
