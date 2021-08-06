@@ -149,7 +149,7 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  modifyFeature: (feature) => dispatch(PlanEditorActions.modifyFeature('equipment', feature)),
+  //modifyFeature: (feature) => dispatch(PlanEditorActions.modifyFeature('equipment', feature)),
   moveFeature: (featureId, coordinates) => dispatch(PlanEditorActions.moveFeature(featureId, coordinates)),
   showContextMenuForEquipment: (equipmentObjectId, x, y) => {
     dispatch(PlanEditorActions.showContextMenuForEquipment(equipmentObjectId, x, y))

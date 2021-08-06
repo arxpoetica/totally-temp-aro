@@ -175,6 +175,7 @@ function createFeature (feature) {
 
 //TODO: depricate
 function modifyFeature (featureType, feature) {
+  console.log('modifyFeature should be depricated')
   // ToDo: this causes an error if you edit a new feature that has yet to be sent to service
   //  everything still functions but it's bad form
   // ToDo: figure out POST / PUT perhaps one function 
@@ -543,7 +544,7 @@ function moveFeature (featureId, coordinates) {
         type: 'update', // `add`, `update`, or `delete`
       }]
     }
-    // Do a PUT to send the equipment over to service
+    // TODO: this is VERY similar to code above, use _updateSubnetFeatures?
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
       .then(result => {
         
@@ -551,6 +552,8 @@ function moveFeature (featureId, coordinates) {
           type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
           payload: {[featureId]: subnetFeature}
         })
+        dispatch(recalculateSubnets(transactionId, [subnetId]))
+
       })
       .catch(err => console.error(err))
   }
