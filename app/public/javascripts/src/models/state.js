@@ -62,6 +62,8 @@ class State {
     service.rxState = new RxState() // For RxJs in react components
     service.StateViewMode = StateViewMode
 
+    service.sidebarWidth = window.GLOBAL_SIDEBAR_INITIAL_WIDTH || 25
+
     service.OPTIMIZATION_TYPES = {
       UNCONSTRAINED: { id: 'UNCONSTRAINED', algorithm: 'UNCONSTRAINED', label: 'Full Coverage' },
       MAX_IRR: { id: 'MAX_IRR', algorithm: 'IRR', label: 'Maximum IRR' },
@@ -483,8 +485,9 @@ class State {
       if (service.selectedDisplayMode.getValue() == service.displayModes.EDIT_RINGS
         && service.activeEditRingsPanel == service.EditRingsPanels.EDIT_RINGS) {
         service.onFeatureSelectedRedux(options)
-      } else if (options.locations) {
+      } else if (options.locations && options.locations.length) {
         service.setSelectedLocations(options.locations.map(location => location.location_id))
+        service.setActiveViewModePanel(service.viewModePanels.LOCATION_INFO)
       }
     })
 
@@ -1355,7 +1358,15 @@ class State {
           return $http.get(`/service/auth/users/${service.loggedInUser.id}`)
         })
         .then((result) => {
-          service.loggedInUser.groupIds = result.data.groupIds
+          const groupIds = result.data.groupIds
+          // Show warning to the user who does not assigned to any of the groups.
+          const userGroupsConfig = service.configuration.userGroups
+          if (userGroupsConfig && !groupIds.length) {
+            const { hasGroupsCheck, groupsMessage } = userGroupsConfig
+            const userGroupMsg = hasGroupsCheck ? groupsMessage : {}
+            $timeout(() => { service.setUserGroupsMsg(userGroupMsg) })
+          }
+          service.loggedInUser.groupIds = groupIds
 
           var userGroupIsAdministrator = false
           result.data.groupIds.forEach((groupId) => {
@@ -1882,6 +1893,7 @@ class State {
       setSelectedLocations: locationIds => dispatch(SelectionActions.setLocations(locationIds)),
       setMapFeatures: mapFeatures => dispatch(SelectionActions.setMapFeatures(mapFeatures)),
       setSelectedDisplayMode: displayMode => dispatch(ToolBarActions.selectedDisplayMode(displayMode)),
+      setActiveViewModePanel: displayPanel => dispatch(ToolBarActions.activeViewModePanel(displayPanel)),
       setActivePlanState: planState => dispatch(PlanActions.setActivePlanState(planState)),
       selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems)),
       loadPlanRedux: planId => dispatch(PlanActions.loadPlan(planId)),
@@ -1913,6 +1925,7 @@ class State {
       setShowGlobalSettings: () => dispatch(GlobalSettingsActions.setShowGlobalSettings(true)),
       setCurrentViewToReleaseNotes: (viewString) => dispatch(GlobalSettingsActions.setCurrentViewToReleaseNotes(viewString)),
       setIsMapClicked: mapFeatures => dispatch(SelectionActions.setIsMapClicked(mapFeatures)),
+      setUserGroupsMsg: (userGroupsMsg) => dispatch(GlobalSettingsActions.setUserGroupsMsg(userGroupsMsg)),
     }
   }
 }

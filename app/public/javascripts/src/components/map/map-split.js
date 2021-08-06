@@ -25,6 +25,7 @@ class MapSplitController {
             if (map.getStreetView().getVisible()) {
               google.maps.event.trigger(panorama, 'resize')
             }
+            this.state.sidebarWidth = this.splitterObj.getSizes()[1]
             // After dragging, if the size is non-zero, it means we have expanded the sidebar
             if (this.splitterObj.getSizes()[1] > 0) {
 

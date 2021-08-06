@@ -399,6 +399,13 @@ function setCurrentViewToReleaseNotes (currentViewString) {
   }
 } 
 
+function setUserGroupsMsg (userGroupsMsg) {
+  return {
+    type: Actions.GLOBAL_SETTINGS_SET_USER_GROUPS_MSG,
+    payload: userGroupsMsg
+  }
+}
+
 export default {
   broadcastMessage,
   loadReleaseNotes,
@@ -425,4 +432,5 @@ export default {
   notifyBroadcast,
   setGlobalSettingsView,
   setCurrentViewToReleaseNotes,
+  setUserGroupsMsg,
 }
