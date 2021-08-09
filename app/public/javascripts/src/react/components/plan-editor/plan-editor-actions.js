@@ -756,9 +756,10 @@ function addSubnets (subnetIds) {
     dispatch(setIsCalculatingSubnets(true))
     return AroHttp.post(`/service/plan-transaction/${transaction.id}/subnet_cmd/query-subnets`, command)
       .then(result => {
-        let apiSubnets = result.data
+        let apiSubnets = result.data.filter(x => x)
         let fiberApiPromises = []
         apiSubnets.forEach(subnet => {
+          // subnet could be null (don't ask me)
           const subnetId = subnet.subnetId.id
           fiberApiPromises.push(AroHttp.get(`/service/plan-transaction/${transaction.id}/subnetfeature/${subnetId}`)
             .then(fiberResult => {
@@ -795,6 +796,10 @@ function addSubnets (subnetIds) {
             dispatch(setIsCalculatingSubnets(false))
             return Promise.reject()
           })
+      }).catch(err => {
+        console.error(err)
+        dispatch(setIsCalculatingSubnets(false))
+        return Promise.reject()
       })
   }
 }
@@ -948,41 +953,44 @@ function parseRecalcEvents (recalcData) {
         const state = getState()
         recalcData.subnets.forEach(subnetRecalc => {
           let subnetId = subnetRecalc.feature.objectId
-          let newSubnet = JSON.parse(JSON.stringify(state.planEditor.subnets[subnetId]))
+          // TODO: looks like this needs to be rewritten 
+          if (state.planEditor.subnets[subnetId]) {
+            let newSubnet = JSON.parse(JSON.stringify(state.planEditor.subnets[subnetId]))
 
-          // update fiber
-          // TODO: create parser for this???
-          // ...also use it above in `addSubnets`, where fiber is added
-          newSubnet.fiber = subnetRecalc.feature
+            // update fiber
+            // TODO: create parser for this???
+            // ...also use it above in `addSubnets`, where fiber is added
+            newSubnet.fiber = subnetRecalc.feature
 
-          // update equipment
-          subnetRecalc.recalcNodeEvents.forEach(recalcNodeEvent => {
-            let objectId = recalcNodeEvent.subnetNode.id
-            switch (recalcNodeEvent.eventType) {
-              case 'DELETE':
-                // need to cover the case of deleteing a hub where we need to pull the whole thing
-                delete newSubnetFeatures[objectId]
-                let index = newSubnet.children.indexOf(objectId);
-                if (index !== -1) {
-                  newSubnet.children.splice(index, 1);
-                }
-                break
-              case 'ADD':
-                // add only
-                newSubnet.children.push(objectId)
-                // do not break
-              case 'MODIFY':
-                // add || modify
-                // TODO: this is repeat code from below
-                let parsedNode = {
-                  feature: parseSubnetFeature(recalcNodeEvent.subnetNode),
-                  subnetId: subnetId,
-                }
-                newSubnetFeatures[objectId] = parsedNode
-                break
-            }
-          })
-          updatedSubnets[subnetId] = newSubnet
+            // update equipment
+            subnetRecalc.recalcNodeEvents.forEach(recalcNodeEvent => {
+              let objectId = recalcNodeEvent.subnetNode.id
+              switch (recalcNodeEvent.eventType) {
+                case 'DELETE':
+                  // need to cover the case of deleteing a hub where we need to pull the whole thing
+                  delete newSubnetFeatures[objectId]
+                  let index = newSubnet.children.indexOf(objectId);
+                  if (index !== -1) {
+                    newSubnet.children.splice(index, 1);
+                  }
+                  break
+                case 'ADD':
+                  // add only
+                  newSubnet.children.push(objectId)
+                  // do not break
+                case 'MODIFY':
+                  // add || modify
+                  // TODO: this is repeat code from below
+                  let parsedNode = {
+                    feature: parseSubnetFeature(recalcNodeEvent.subnetNode),
+                    subnetId: subnetId,
+                  }
+                  newSubnetFeatures[objectId] = parsedNode
+                  break
+              }
+            })
+            updatedSubnets[subnetId] = newSubnet
+          }
       })
 
       batch(() => {
