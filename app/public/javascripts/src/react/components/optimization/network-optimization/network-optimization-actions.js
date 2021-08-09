@@ -207,11 +207,29 @@ function showModifyQuestionDialog () {
   })
 }
 
+function loadFilters () {
+  return (dispatch, getState) => {
+    const state = getState()
+    const client = state.configuration.system.ARO_CLIENT
+    const dataType = 'location'
+
+    AroHttp.get(`service/meta-data/${dataType}/properties?client=${client}`)
+      .then((res) => {
+        console.log(res)
+        dispatch({
+          type: Actions.NETWORK_OPTIMIZATION_SET_FILTERS,
+          payload: res.data,
+        })
+      })
+  }
+}
+
 export default {
   loadOptimizationInputs,
   setOptimizationInputs,
   runOptimization,
   cancelOptimization,
   setNetworkAnalysisType,
-  modifyOptimization
+  modifyOptimization,
+  loadFilters
 }
