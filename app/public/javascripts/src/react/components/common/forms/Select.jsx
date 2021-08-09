@@ -1,16 +1,18 @@
 import React, { useState } from 'react'
-// import cx from 'clsx'
+import cx from 'clsx'
 import './Select.css'
 
-export const Select = ({ options, value, onClick=()=>{}, onChange=()=>{} }) => {
+export const Select = ({ options, value, placeholder, classes, onClick=()=>{}, onChange=()=>{} }) => {
 
   return (
-    <div className="select">
+    <div className={cx('select', classes && classes)}>
       <select
         value={value}
         onClick={event => onClick(event)}
         onChange={event => onChange(event)}
+        
       >
+        {placeholder && <option value="" disabled hidden>{placeholder}</option>}
         {options.map(({ label, value }) => 
           <option key={value} value={value}>{label}</option>
         )}
