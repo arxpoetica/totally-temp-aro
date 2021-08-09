@@ -224,6 +224,15 @@ function loadFilters () {
   }
 }
 
+function setActiveFilters (filters) {
+  return (dispatch) => {
+    dispatch({
+      type: Actions.NETWORK_OPTIMIZATION_SET_ACTIVE_FILTERS,
+      payload: filters
+    })
+  }
+}
+
 export default {
   loadOptimizationInputs,
   setOptimizationInputs,
@@ -231,5 +240,6 @@ export default {
   cancelOptimization,
   setNetworkAnalysisType,
   modifyOptimization,
-  loadFilters
+  loadFilters,
+  setActiveFilters,
 }

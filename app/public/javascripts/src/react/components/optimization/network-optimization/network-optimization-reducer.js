@@ -6,6 +6,7 @@ const defaultState = {
   isCanceling: false,
   optimizationId: null,
   filters: [],
+  activeFilters: [],
 }
 
 function setLocationType (state, locationType, isIncluded) {
@@ -67,6 +68,10 @@ function setFilters (state, filters) {
   return {...state, filters: filters}
 }
 
+function setActiveFilters (state, filters) {
+  return {...state, activeFilters: filters}
+}
+
 function optimizationReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.NETWORK_OPTIMIZATION_SET_OPTIMIZATION_INPUTS:
@@ -83,6 +88,8 @@ function optimizationReducer (state = defaultState, action) {
       return clearOptimizationId(state)
     case Actions.NETWORK_OPTIMIZATION_SET_FILTERS:
       return setFilters(state, action.payload)
+    case Actions.NETWORK_OPTIMIZATION_SET_ACTIVE_FILTERS:
+      return setActiveFilters(state, action.payload)
     default:
       return state
   }
