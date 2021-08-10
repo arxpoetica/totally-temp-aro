@@ -5,23 +5,27 @@ import wrapComponentWithProvider from '../../../common/provider-wrapped-componen
 import { EditorInterface, EditorInterfaceItem } from './editor-interface.jsx'
 import NetworkOptimizationActions from './network-optimization-actions'
 import { Select } from '../../common/forms/Select.jsx'
+import { Input } from '../../common/forms/Input.jsx'
 // import './editor-interfaces.css'
 
+
+const boolOptions = [{value: 'True', label: 'Yes'}, {value: 'False', label: 'No'}]
+
+const numberOptions = [
+  {value: 'EQ', label: 'Equal'}, 
+  {value: 'NEQ', label: 'Not Equal'},
+  {value: 'GT', label: 'Greater Than'},
+  {value: 'GTE', label: 'Greater Than or Equal'},
+  {value: 'LT', label: 'Less Than'},
+  {value: 'LTE', label: 'Less Than or Equal'},
+]
+
 export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilters, filters}) => {
-  const [filterOptions, setFilterOptions] = useState([])
+  const [textValues, setTextValues] = useState({})
 
   useEffect(() => {
     loadFilters()
   }, [])
-
-  useEffect(() => {
-    const newFilterOptions = filters.map(filter => {
-      filter.label = filter.displayName
-      filter.value = filter.name
-      return filter
-    })
-    setFilterOptions(newFilterOptions)
-  }, [filters])
 
   const newFilter = {
     displayName: null,
@@ -33,6 +37,7 @@ export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilt
     propertyType: null,
     value: '',
     label: '',
+    operator: '',
   }
 
   const addNewFilter = () => {
@@ -43,7 +48,6 @@ export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilt
     const selectedFilter = filters.find(filter => filter.name === event.target.value)
     const newActiveFilters = activeFilters
     newActiveFilters[index] = selectedFilter
-    console.log(newActiveFilters)
 
     setActiveFilters([...newActiveFilters])
   }
@@ -54,6 +58,43 @@ export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilt
     setActiveFilters([...newActiveFilters])
   }
 
+  const selectOperator = (event, filter, index) => {
+    const newActiveFilters = activeFilters
+    newActiveFilters[index] = {...filter, operator: event.target.value}
+
+    setActiveFilters([...newActiveFilters])
+  }
+  
+  const FilterEditorItem = ({ filter, index }) => {
+    // generate the forms based on type right now just number or boolean
+    // possible formats: STRING, NUMBER, INTEGER, BOOLEAN
+    // possible operations: EQ, NEQ, GT, GTE, LT, LTE, IN, RANGE
+    const MainSelect = (filter.format === 'BOOLEAN' ? (
+      <Select
+        value={filter.operator}
+        placeholder="Select"
+        options={boolOptions}
+        onChange={event => selectOperator(event, filter, index)}
+        />
+    ): (
+      <div className='ei-filter-input-container'>
+        <Select
+          value={filter.operator}
+          placeholder="Select"
+          options={numberOptions}
+          onChange={event => selectOperator(event, filter, index)}
+          />
+        <Input 
+          type="number"
+          value={}
+          // onChange={event => setTextValues()}
+        />
+      </div>
+    ))
+  
+    return MainSelect
+  }
+
   const FilterSelect = (index) => {
     return (
         <>
@@ -61,10 +102,9 @@ export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilt
           <Select 
           value={activeFilters[index].value}
           placeholder="Select"
-          options={filterOptions}
+          options={filters}
           // onClick={event => event.stopPropagation()}
           onChange={(event) => selectFilterType(event, index)}
-          classes="ei-select"
           />
       </>
     )
@@ -75,7 +115,7 @@ export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilt
       {activeFilters.map((activeFilter, index) => (
         (activeFilter.displayName ? (
           <EditorInterfaceItem subtitle={FilterSelect(index)} key={index}>
-            <FilterEditorItem filter={activeFilter}/>
+            <FilterEditorItem filter={activeFilter} index={index}/>
           </EditorInterfaceItem>
           ) : (
           <EditorInterfaceItem subtitle={FilterSelect(index)} key={index} />
@@ -86,38 +126,7 @@ export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilt
   )
 }
 
-const FilterEditorItem = ({ filter }) => {
-  console.log(filter)
-  const boolOptions = [{value: 'True', label: 'Yes'}, {value: 'False', label: 'No'}]
-  const numberOptions = [
-    {value: 'EQ', label: 'Equal'}, 
-    {value: 'NEQ', label: 'Not Equal'},
-    {value: 'GT', label: 'Greater Than'},
-    {value: 'GTE', label: 'Greater Than or Equal'},
-    {value: 'LT', label: 'Less Than'},
-    {value: 'LTE', label: 'Less Than or Equal'},]
-  // I will generate the forms based on type right now just number or boolean
-  //possible formats: STRING, NUMBER, INTEGER, BOOLEAN
-  //possible operations: EQ, NEQ, GT, GTE, LT, LTE, IN, RANGE
-  const MainSelect = (filter.format === 'BOOLEAN' ? (
-    <Select
-      value='yes'
-      options={boolOptions}
-      // onChange=?
-      />
-  ): (
-    <Select
-      value=""
-      placeholder="Select"
-      options={numberOptions}
-      />
-  ))
 
-
-  return (
-    <>{MainSelect}</>
-  )
-}
 
 const mapStateToProps = (state) => ({
   filters: state.optimization.networkOptimization.filters,

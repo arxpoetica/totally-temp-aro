@@ -105,6 +105,11 @@
   margin-right: 5px;
 }
 
+.ei-filter-input-container{
+  display: flex;
+  align-items: center;
+}
+
 .ei-foldout-icon{
   padding-left: 0px;
   padding-right: 4px;

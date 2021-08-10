@@ -215,10 +215,17 @@ function loadFilters () {
 
     AroHttp.get(`service/meta-data/${dataType}/properties?client=${client}`)
       .then((res) => {
-        console.log(res)
+        // adding extra info for selecting later on
+        const newFilters = res.data.map((filter) => {
+          filter.value = filter.name
+          filter.label = filter.displayName
+          filter.operator = ''
+          return filter
+        })
+
         dispatch({
           type: Actions.NETWORK_OPTIMIZATION_SET_FILTERS,
-          payload: res.data,
+          payload: newFilters,
         })
       })
   }
