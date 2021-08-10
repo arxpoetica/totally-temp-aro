@@ -96,6 +96,9 @@
   width: 15px;
   background-size: 15px 15px;
 }
+.ei-header-icon.plus-sign:hover {
+  background-color: #e2e6ea;
+}
 
 .ei-property-icon.trashcan {
   background: url('/svg/trash.svg');
@@ -105,9 +108,34 @@
   margin-right: 5px;
 }
 
-.ei-filter-input-container{
+.ei-property-icon.trashcan:hover {
+  background-color: #e2e6ea;
+}
+
+.ei-property-item:nth-child(odd) .ei-property-label .select select {
+  background-color: #f9f9f9;
+}
+
+.ei-filter-select-container select {
+  border: none;
+}
+
+.ei-filter-input-container {
   display: flex;
   align-items: center;
+}
+.ei-filter-input {
+  width: 75px;
+  margin: 0 5px 0 5px;
+}
+.ei-filter-input input {
+  color: black;
+  font: 14px var(--font);
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  height: 34px;
+  border: 1px solid var(--gray-medium-light);
+  width: 75px;
 }
 
 .ei-foldout-icon{
