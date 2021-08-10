@@ -18,10 +18,11 @@ const numberOptions = [
   {value: 'GTE', label: 'Greater Than or Equal'},
   {value: 'LT', label: 'Less Than'},
   {value: 'LTE', label: 'Less Than or Equal'},
+  {value: 'RANGE', label: 'Range'},
 ]
 
 export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilters, filters}) => {
-  const [textValues, setTextValues] = useState({})
+  const [textValues, setTextValues] = useState([])
 
   useEffect(() => {
     loadFilters()
@@ -41,6 +42,7 @@ export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilt
   }
 
   const addNewFilter = () => {
+    setTextValues([...textValues, {value1: '', value2: ''}])
     setActiveFilters([...activeFilters, newFilter])
   }
 
@@ -64,8 +66,18 @@ export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilt
 
     setActiveFilters([...newActiveFilters])
   }
+
+  const textChange = (event, index) => {
+    const newTextValues = textValues
+    if (event.target.name === 'value1') {
+      newTextValues[index].value1 = event.target.value
+    } else if (event.target.name === 'value2') {
+      newTextValues[index].value2 = event.target.value
+    }
+    setTextValues([...newTextValues])
+  }
   
-  const FilterEditorItem = ({ filter, index }) => {
+  const FilterEditorItem = (filter, index ) => {
     // generate the forms based on type right now just number or boolean
     // possible formats: STRING, NUMBER, INTEGER, BOOLEAN
     // possible operations: EQ, NEQ, GT, GTE, LT, LTE, IN, RANGE
@@ -86,9 +98,16 @@ export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilt
           />
         <Input 
           type="number"
-          value={}
-          // onChange={event => setTextValues()}
+          name="value1"
+          value={textValues[index].value1}
+          onChange={event => textChange(event, index)}
         />
+        {filter.operator === 'RANGE' && (<Input 
+          type="number"
+          name="value2"
+          value={textValues[index].value2}
+          onChange={event => textChange(event, index)}
+        />)}
       </div>
     ))
   
@@ -103,7 +122,7 @@ export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilt
           value={activeFilters[index].value}
           placeholder="Select"
           options={filters}
-          // onClick={event => event.stopPropagation()}
+          onClick={event => event.stopPropagation()}
           onChange={(event) => selectFilterType(event, index)}
           />
       </>
@@ -115,7 +134,7 @@ export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilt
       {activeFilters.map((activeFilter, index) => (
         (activeFilter.displayName ? (
           <EditorInterfaceItem subtitle={FilterSelect(index)} key={index}>
-            <FilterEditorItem filter={activeFilter} index={index}/>
+            {FilterEditorItem(activeFilter, index)}
           </EditorInterfaceItem>
           ) : (
           <EditorInterfaceItem subtitle={FilterSelect(index)} key={index} />
