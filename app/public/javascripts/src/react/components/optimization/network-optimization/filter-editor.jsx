@@ -22,7 +22,6 @@ const numberOptions = [
 ]
 
 export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilters, filters}) => {
-  const [textValues, setTextValues] = useState([])
 
   useEffect(() => {
     loadFilters()
@@ -39,10 +38,11 @@ export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilt
     value: '',
     label: '',
     operator: '',
+    value1: '',
+    value2: '',
   }
 
   const addNewFilter = () => {
-    setTextValues([...textValues, {value1: '', value2: ''}])
     setActiveFilters([...activeFilters, newFilter])
   }
 
@@ -58,7 +58,6 @@ export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilt
     const newActiveFilters = activeFilters.filter((activeFilter, i) => i !== index)
     const newTextValues = textValues.filter((textValue, i) => i !== index)
     setActiveFilters([...newActiveFilters])
-    setTextValues([...newTextValues])
   }
 
   const selectOperator = (event, filter, index) => {
@@ -69,13 +68,14 @@ export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilt
   }
 
   const textChange = (event, index) => {
-    const newTextValues = textValues
+    const newActiveFilters = activeFilters
     if (event.target.name === 'value1') {
-      newTextValues[index].value1 = event.target.value
+      newActiveFilters[index].value1 = event.target.value
     } else if (event.target.name === 'value2') {
-      newTextValues[index].value2 = event.target.value
+      newActiveFilters[index].value2 = event.target.value
     }
-    setTextValues([...newTextValues])
+
+    setActiveFilters([...newActiveFilters])
   }
   
   const FilterEditorItem = (filter, index ) => {
@@ -100,7 +100,7 @@ export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilt
         <Input 
           type="number"
           name="value1"
-          value={textValues[index].value1}
+          value={activeFilters[index].value1}
           onChange={event => textChange(event, index)}
         />
         
@@ -110,7 +110,7 @@ export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilt
             <Input 
               type="number"
               name="value2"
-              value={textValues[index].value2}
+              value={activeFilters[index].value2}
               onChange={event => textChange(event, index)}
             />
           </>)}
