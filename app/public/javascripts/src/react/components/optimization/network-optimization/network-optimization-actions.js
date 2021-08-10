@@ -220,6 +220,8 @@ function loadFilters () {
           filter.value = filter.name
           filter.label = filter.displayName
           filter.operator = ''
+          filter.value1 = ''
+          filter.value2 = ''
           return filter
         })
 

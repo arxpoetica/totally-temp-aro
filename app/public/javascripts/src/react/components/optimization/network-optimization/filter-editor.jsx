@@ -56,7 +56,7 @@ export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilt
 
   const removeActiveFilter = (index) => {
     const newActiveFilters = activeFilters.filter((activeFilter, i) => i !== index)
-    const newTextValues = textValues.filter((textValue, i) => i !== index)
+
     setActiveFilters([...newActiveFilters])
   }
 
@@ -97,13 +97,15 @@ export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilt
           options={numberOptions}
           onChange={event => selectOperator(event, filter, index)}
           />
-        <Input 
+        {filter.operator &&
+          <Input 
           type="number"
           name="value1"
           value={activeFilters[index].value1}
           onChange={event => textChange(event, index)}
+          classes="ei-filter-input"
         />
-        
+        }
         {filter.operator === 'RANGE' && (
           <>
             and
@@ -112,6 +114,7 @@ export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilt
               name="value2"
               value={activeFilters[index].value2}
               onChange={event => textChange(event, index)}
+              classes="ei-filter-input"
             />
           </>)}
       </div>
