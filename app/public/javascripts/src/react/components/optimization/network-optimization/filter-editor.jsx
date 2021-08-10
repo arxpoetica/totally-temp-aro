@@ -56,8 +56,9 @@ export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilt
 
   const removeActiveFilter = (index) => {
     const newActiveFilters = activeFilters.filter((activeFilter, i) => i !== index)
-
+    const newTextValues = textValues.filter((textValue, i) => i !== index)
     setActiveFilters([...newActiveFilters])
+    setTextValues([...newTextValues])
   }
 
   const selectOperator = (event, filter, index) => {
