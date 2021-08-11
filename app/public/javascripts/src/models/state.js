@@ -483,11 +483,14 @@ class State {
       }
 
       if (service.selectedDisplayMode.getValue() == service.displayModes.EDIT_PLAN) {
-        let featuresIds = []
+        let featureIds = []
+        //console.log(options)
+        //console.log({lat: options.latLng.lat(), lng: options.latLng.lng()})
         options.equipmentFeatures.forEach(feature => {
-          featuresIds.push(feature.object_id)
+          featureIds.push(feature.object_id)
         })
-        service.selectPlanEditFeaturesById(featuresIds)
+        //service.selectPlanEditFeaturesById(featureIds)
+        service.planEditorOnMapClick(featureIds, options.latLng)
       }
 
       // ToDo: this check may need to move into REACT
@@ -1943,7 +1946,8 @@ class State {
       setShowGlobalSettings: () => dispatch(GlobalSettingsActions.setShowGlobalSettings(true)),
       setCurrentViewToReleaseNotes: (viewString) => dispatch(GlobalSettingsActions.setCurrentViewToReleaseNotes(viewString)),
       setIsMapClicked: mapFeatures => dispatch(SelectionActions.setIsMapClicked(mapFeatures)),
-      selectPlanEditFeaturesById: (features) => dispatch(PlanEditorActions.selectEditFeaturesById(features)),
+      //selectPlanEditFeaturesById: (features) => dispatch(PlanEditorActions.selectEditFeaturesById(features)),
+      planEditorOnMapClick: (featureIds, latLng) => dispatch(PlanEditorActions.onMapClick(featureIds, latLng)),
       showContextMenuForLocations: (featureIds, event) => dispatch(PlanEditorActions.showContextMenuForLocations(featureIds, event)),
       setUserGroupsMsg: (userGroupsMsg) => dispatch(GlobalSettingsActions.setUserGroupsMsg(userGroupsMsg)),
     }

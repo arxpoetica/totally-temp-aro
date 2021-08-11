@@ -804,6 +804,48 @@ function addSubnets (subnetIds) {
   }
 }
 
+function addSubnetTreeByLatLng (latLng) {
+  return (dispatch, getState) => {
+    const state = getState()
+    let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+    // TODO: we should make a call on standardization
+    //  do we pass around the latLng object or the actual values 
+    let command = {
+      cmdType: "QUERY_CO_SUBNET",
+      point:{
+        type: "Point",
+        coordinates: [latLng.lng(), latLng.lat()],
+      }
+    }
+    dispatch(setIsCalculatingSubnets(true))
+    return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/query-subnets`, command)
+      .then(result => {
+        let rootId = null
+        if (result.data 
+          && result.data[0] 
+          && result.data[0].subnetId 
+          && result.data[0].subnetId.id
+        ){ 
+          rootId = result.data[0].subnetId.id
+        }
+        if (rootId) {
+          // TODO: the addSubnets function needs to be broken up
+          return dispatch(addSubnets([rootId]))
+            .then(subnetRes => {
+              return Promise.resolve(subnetRes)
+            })
+        } else {
+          dispatch(setIsCalculatingSubnets(false))
+          return Promise.resolve([])
+        }
+      }).catch(err => {
+        console.error(err)
+        dispatch(setIsCalculatingSubnets(false))
+        return Promise.reject()
+      })
+  }
+}
+
 function setSelectedSubnetId (selectedSubnetId) {
   return (dispatch) => {
     if (!selectedSubnetId) {
@@ -833,6 +875,24 @@ function setSelectedSubnetId (selectedSubnetId) {
           })
 
       })
+    }
+  }
+}
+
+function onMapClick (featureIds, latLng) {
+  // TODO: this is a bit of a shim for the moment to handle selecting a terminal that isn't yet loaded
+  //  next we'll be selecting subnets by bounds using addSubnetTreeByLatLng 
+  // TODO: this file is has become a two course meal of spaghetti and return dispatch soup
+  //  Corr, fix yer mess!
+  return (dispatch, getState) => {
+    const state = getState()
+    if (state.planEditor.subnetFeatures[featureIds[0]]) { 
+      dispatch(selectEditFeaturesById(featureIds))
+    } else {
+      dispatch(addSubnetTreeByLatLng(latLng))
+        .then(result => {
+          dispatch(selectEditFeaturesById(featureIds))
+        }) 
     }
   }
 }
@@ -1176,6 +1236,7 @@ export default {
   deselectEditFeatureById,
   addSubnets,
   setSelectedSubnetId,
+  onMapClick,
   recalculateBoundary,
   boundaryChange,
   recalculateSubnets,
