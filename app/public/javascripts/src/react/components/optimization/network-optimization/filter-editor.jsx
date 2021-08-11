@@ -6,6 +6,7 @@ import { EditorInterface, EditorInterfaceItem } from './editor-interface.jsx'
 import NetworkOptimizationActions from './network-optimization-actions'
 import { Select } from '../../common/forms/Select.jsx'
 import { Input } from '../../common/forms/Input.jsx'
+import cx from 'clsx'
 // import './editor-interfaces.css'
 
 
@@ -102,8 +103,12 @@ export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilt
           type="number"
           name="value1"
           value={activeFilters[index].value1}
+          min={filter.minValue}
+          max={filter.maxvalue}
           onChange={event => textChange(event, index)}
-          classes="ei-filter-input"
+          classes={cx('ei-filter-input', 
+            filter.format === 'DOLLAR' && 'dollar', 
+            filter.format === 'PERCENT' && 'percent')}
         />
         }
         {filter.operator === 'RANGE' && (
@@ -113,8 +118,12 @@ export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilt
               type="number"
               name="value2"
               value={activeFilters[index].value2}
+              min={filter.minValue}
+              max={filter.maxvalue}
               onChange={event => textChange(event, index)}
-              classes="ei-filter-input"
+              classes={cx('ei-filter-input',
+                filter.format === 'DOLLAR' && 'dollar',
+                filter.format === 'PERCENT' && 'percent')}
             />
           </>)}
       </div>

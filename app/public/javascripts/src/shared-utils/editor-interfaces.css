@@ -120,6 +120,10 @@
   border: none;
 }
 
+.ei-filter-select-container select option {
+  background-color: #888888;
+}
+
 .ei-filter-input-container {
   display: flex;
   align-items: center;
@@ -127,6 +131,7 @@
 .ei-filter-input {
   width: 75px;
   margin: 0 5px 0 5px;
+  
 }
 .ei-filter-input input {
   color: black;
@@ -136,6 +141,22 @@
   height: 34px;
   border: 1px solid var(--gray-medium-light);
   width: 75px;
+  padding-left:18px;
+}
+
+.ei-filter-input:before {
+  top: 8px;
+  left: 5px;
+  font: 14px var(--font);
+  position: absolute;
+}
+
+.ei-filter-input.dollar:before {
+  content: "$";
+}
+
+.ei-filter-input.percent:before {
+  content: "%";
 }
 
 .ei-foldout-icon{
