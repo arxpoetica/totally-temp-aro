@@ -886,7 +886,7 @@ function onMapClick (featureIds, latLng) {
   //  Corr, fix yer mess!
   return (dispatch, getState) => {
     const state = getState()
-    if (state.planEditor.subnetFeatures[featureIds[0]]) { 
+    if (!featureIds.length || state.planEditor.subnetFeatures[featureIds[0]]) { 
       dispatch(selectEditFeaturesById(featureIds))
     } else {
       dispatch(addSubnetTreeByLatLng(latLng))
