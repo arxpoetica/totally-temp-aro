@@ -19,7 +19,8 @@ const numberOptions = [
   {value: 'GTE', label: 'Greater Than or Equal'},
   {value: 'LT', label: 'Less Than'},
   {value: 'LTE', label: 'Less Than or Equal'},
-  {value: 'RANGE', label: 'Range'},
+  {value: 'RANGE', label: 'Between'},
+  {value: 'IN', label: 'In'},
 ]
 
 export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilters, filters}) => {
@@ -79,16 +80,19 @@ export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilt
     setActiveFilters([...newActiveFilters])
   }
   
-  const FilterEditorItem = (filter, index ) => {
+  const ActiveFilterForm = (filter, index ) => {
     // generate the forms based on type right now just number or boolean
     // possible formats: STRING, NUMBER, INTEGER, BOOLEAN
     // possible operations: EQ, NEQ, GT, GTE, LT, LTE, IN, RANGE
+
+    // this first select gets rendered only if the type is BOOLEAN
     const MainSelect = (filter.format === 'BOOLEAN' ? (
       <Select
         value={filter.operator}
         placeholder="Select"
         options={boolOptions}
         onChange={event => selectOperator(event, filter, index)}
+        classes="ei-filter-select-operator"
         />
     ): (
       <div className='ei-filter-input-container'>
@@ -97,6 +101,7 @@ export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilt
           placeholder="Select"
           options={numberOptions}
           onChange={event => selectOperator(event, filter, index)}
+          classes="ei-filter-select-operator"
           />
         {filter.operator &&
           <Input 
@@ -111,6 +116,7 @@ export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilt
             filter.format === 'PERCENT' && 'percent')}
         />
         }
+        {/* This second field only gets rendered if type is range, adding second inoput */}
         {filter.operator === 'RANGE' && (
           <>
             and
@@ -131,7 +137,7 @@ export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilt
   
     return MainSelect
   }
-
+  //this is the initial select of the filter type
   const FilterSelect = (index) => {
     return (
         <>
@@ -153,7 +159,7 @@ export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilt
       {activeFilters.map((activeFilter, index) => (
         (activeFilter.displayName ? (
           <EditorInterfaceItem subtitle={FilterSelect(index)} key={index}>
-            {FilterEditorItem(activeFilter, index)}
+            {ActiveFilterForm(activeFilter, index)}
           </EditorInterfaceItem>
           ) : (
           <EditorInterfaceItem subtitle={FilterSelect(index)} key={index} />

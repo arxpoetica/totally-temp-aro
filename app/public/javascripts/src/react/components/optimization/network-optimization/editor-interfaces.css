@@ -33,6 +33,10 @@
 
 .ei-filter-select-container select {
   border: none;
+  border-radius: 3px;
+}
+.ei-filter-select-operator select {
+  border-radius: 3px;
 }
 
 .ei-filter-select-container select option {
@@ -57,6 +61,7 @@
   border: 1px solid var(--gray-medium-light);
   width: 75px;
   padding-left:18px;
+  border-radius: 3px;
 }
 
 .ei-filter-input:before {
