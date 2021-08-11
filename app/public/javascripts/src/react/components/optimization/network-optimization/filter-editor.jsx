@@ -7,7 +7,7 @@ import NetworkOptimizationActions from './network-optimization-actions'
 import { Select } from '../../common/forms/Select.jsx'
 import { Input } from '../../common/forms/Input.jsx'
 import cx from 'clsx'
-// import './editor-interfaces.css'
+import './editor-interfaces.css'
 
 
 const boolOptions = [{value: 'True', label: 'Yes'}, {value: 'False', label: 'No'}]
