@@ -106,18 +106,22 @@ export class NetworkOptimizationInput extends Component {
     inputs.locationConstraints = JSON.parse(JSON.stringify(this.props.optimizationInputs.locationConstraints))
     inputs.locationConstraints.analysisSelectionMode = this.props.activeSelectionModeId
 
-    const propertyConstraints = this.props.activeFilters.reduce((result, filter) =>{
-      if (filter.value1) {
-        result.push({
-          op: filter.operator,
-          propertyName: filter.name,
-          value: filter.value1,
-          value2: filter.value2,
-        })
+    const validatedFilters = this.props.activeFilters.reduce((result, filter) =>{
+      if (filter.value1 && filter.value2 || filter.value1 && filter.operator !== 'RANGE') {
+        result.push(filter)
       }
       return result;
     }, []);
+    this.props.setActiveFilters(validatedFilters)
 
+    const propertyConstraints = validatedFilters.map((filter) => {
+      return ({
+        op: filter.operator,
+        propertyName: filter.name,
+        value: filter.value1,
+        value2: filter.value2,
+      })
+    })
     const objectFilter = {
       clientName: this.props.clientName,
       propertyConstraints: propertyConstraints,
@@ -177,6 +181,7 @@ const mapDispatchToProps = dispatch => ({
   cancelOptimization: (planId, optimizationId) => dispatch(NetworkOptimizationActions.cancelOptimization(planId, optimizationId)),
   setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId)),
   modifyOptimization: (activePlan) => dispatch(NetworkOptimizationActions.modifyOptimization(activePlan)),
+  setActiveFilters: (filters) => dispatch(NetworkOptimizationActions.setActiveFilters(filters)),
 })
 
 const NetworkOptimizationInputComponent = wrapComponentWithProvider(reduxStore, NetworkOptimizationInput, mapStateToProps, mapDispatchToProps)
