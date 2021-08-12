@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
-import { connect } from 'react-redux'
+import reduxStore from '../../../redux-store'
+import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import CreatableSelect from 'react-select/creatable'
 import { components } from 'react-select'
 import AroHttp from '../../common/aro-http'
@@ -7,6 +8,8 @@ import ToolBarActions from './tool-bar-actions'
 import PlanSearchFilter from './plan-search-filter.jsx'
 import uniqBy from 'lodash/uniqBy'
 import merge from 'lodash/merge'
+import { toUTCDate } from '../../common/view-utils.js'
+import PlanActions from '../plan/plan-actions.js'
 
 const createOption = (label) => ({
   label,
@@ -58,6 +61,19 @@ export class PlanSearch extends Component {
     this.creatableRef = React.createRef()
     this.searchCreatorsList()
 
+    this.planSortingOptions = [
+      { sortType: 'updatedDate', description: 'Date Updated' },
+      { sortType: 'createdDate', description: 'Date Created' },
+    ]
+
+    this.currentView = {
+      SAVE_PLAN_SEARCH: 'savePlanSearch',
+      VIEW_MODE_PLAN_SEARCH:'viewModePlanSearch'
+    }
+
+    this.lastPage = 0
+    this.rowsPerPage = 10
+
     this.state = {
       inputValue: '',
       search_text: '',
@@ -77,6 +93,8 @@ export class PlanSearch extends Component {
       optionSetText: [],
       isDropDownOption: false,
       isValueRemoved: false,
+      sortByField: this.planSortingOptions[0].sortType,
+      pageOffset: 0
     }
 
     this.optionSetTextArray = [
@@ -88,12 +106,19 @@ export class PlanSearch extends Component {
 
   componentDidMount () {
     this.loadPlans(1)
+    this.setPage()
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props.sidebarWidth !== prevProps.sidebarWidth) {
+      this.setPage()
+    }
   }
 
   render() {
-    const { loggedInUser, listOfTags, listOfServiceAreaTags } = this.props
+    const { loggedInUser, listOfTags, listOfServiceAreaTags, showPlanDeleteButton } = this.props
     const { searchText, plans, currentPage, pages, idToServiceAreaCode, creatorsSearchList,
-      optionSetText, isDropDownOption } = this.state
+      optionSetText, isDropDownOption, sortByField, allPlans, pageOffset } = this.state
 
     // To customize MultiValuelabel in react-select
     // https://codesandbox.io/s/znxjxj556l?file=/src/index.js:76-90
@@ -219,6 +244,19 @@ export class PlanSearch extends Component {
           />
         </div>
 
+        <div className="plan-info" style={{display: 'flex', paddingTop: '5px'}}>
+          <span style={{flex: '0 0 auto', lineHeight: '33px', padding: '0px 12px'}}>Sort by:</span>
+          <select
+            className="form-control-sm"
+            style={{background: '#f8f9fa', border: '0px', outline: '0px'}}
+            value={sortByField}
+            onChange={(event) => this.onChangeSortingType(event)}>
+            {this.planSortingOptions.map((item, index) =>
+              <option key={index} value={item.sortType} label={item.description}></option>
+            )}
+          </select>
+        </div>
+
         {plans.length < 1 &&
           <p className="text-center">No plans found</p>
         }
@@ -235,7 +273,11 @@ export class PlanSearch extends Component {
                     </b>
                     {plan.createdBy &&
                       <div>
-                        <i>{this.getPlanCreatorName(plan.createdBy) || 'loading...'}</i>
+                        <i>
+                          {this.getPlanCreatorName(plan.createdBy) || 'loading...'}
+                          &nbsp;| created {this.convertTimeStampToDate(plan.createdDate)}
+                          &nbsp;| last modified {this.convertTimeStampToDate(plan.updatedDate)}
+                        </i>
                       </div>
                     }
                     <div className="tags"></div>
@@ -269,32 +311,51 @@ export class PlanSearch extends Component {
                       )
                     })}
                   </td>
+                  <td>
+                    {plan.progress &&
+                      <a className="btn btn-success" onClick={() => this.stopOptimization(plan)}>
+                        <span className="fa fa-stop"></span>
+                      </a>
+                    }
+                    {!plan.progress && showPlanDeleteButton &&
+                      <a className="btn btn-danger" onClick={() => this.onPlanDeleteClicked(plan)}>
+                        <span className="fa fa-trash-alt text-white"></span>
+                      </a>
+                    }
+                  </td>
                 </tr>
               )}
             </tbody>
           </table>
 
-          <nav className="text-center" style={{maxHeight: '35px'}}>
-            <ul className="pagination" style={{margin: '0px'}}>
-              <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                <span className="page-link" aria-label="Previous" onClick={() => this.loadPlans(currentPage - 1)}>
-                  <span aria-hidden="true">&laquo;</span>
-                </span>
-              </li>
-              {pages.map((page, index) => {
-                return (
-                  <li key={index} className={`page-item ${page === currentPage ? 'active' : ''}`}>
-                    <span className="page-link" onClick={() => this.loadPlans(page)}>{ page }</span>
-                  </li>
-                )
-              })}
-              <li className={`page-item ${currentPage === pages[pages.length - 1] ? 'disabled' : ''}`}>
-                <span className="page-link" aria-label="Next" onClick={() => this.loadPlans(pages[pages.length - 1])}>
-                  <span aria-hidden="true">&raquo;</span>
-                </span>
-              </li>
-            </ul>
-          </nav>
+          {this.rowsPerPage < allPlans.length &&
+            <div style={{padding: '8px'}}>
+              <ul className="pagination" style={{margin: '0px'}}>
+                <li className={`page-item ${pageOffset === 0 ? 'disabled' : ''}`}>
+                  <span className="page-link" aria-label="Previous" onClick={() => this.changePage(pageOffset - 1)}>
+                    <span aria-hidden="true">&laquo;</span>
+                  </span>
+                </li>
+                {pages.map((page, index) => {
+                  return (
+                    <li key={index} className={`page-item ${pageOffset === page ? 'active' : ''}`}>
+                      <span className={`${-1 !== page ? 'page-link' : ''} ${-1 === page ? 'break' : ''}`}
+                        onClick={() => {this.loadPlans(page + 1); this.setPage(page)}}>
+                        {-1 === page ? "…" : page+1}
+                      </span>
+                    </li>
+                  )
+                  })
+                }
+                <li className={`page-item ${pageOffset === pages[pages.length - 1] ? 'disabled' : ''}`}>
+                  <span className="page-link" aria-label="Next"
+                    onClick={() => this.changePage(pageOffset + 1)}>
+                    <span aria-hidden="true">&raquo;</span>
+                  </span>
+                </li>
+              </ul>
+            </div>
+          }
         </>
         }
       </div>
@@ -426,7 +487,11 @@ export class PlanSearch extends Component {
   }
 
   onPlanClicked (plan) {
-    this.props.onPlanSelected && this.props.onPlanSelected({ plan: plan })
+    if (this.props.currentView === this.currentView.SAVE_PLAN_SEARCH) {
+      this.props.onPlanSelected && this.props.onPlanSelected({ plan: plan })
+    } else if (this.props.currentView === this.currentView.VIEW_MODE_PLAN_SEARCH) {
+      this.props.loadPlan(plan.id)
+    }
   }
 
   loadServiceAreaInfo (plans) {
@@ -473,7 +538,7 @@ export class PlanSearch extends Component {
   loadPlans (page, callback) {
     this.constructSearch()
     this.setState({ currentPage: page || 1 })
-    this.maxResults = 10
+    this.maxResults = this.rowsPerPage
     if (page > 1) {
       const start = this.maxResults * (page - 1)
       const end = start + this.maxResults
@@ -503,7 +568,7 @@ export class PlanSearch extends Component {
 
           AroHttp.get('/optimization/processes').then((running) => {
             this.totalData = []
-            this.totalData = response.data.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase()) ? 1 : -1)
+            this.totalData = response.data.sort((a, b) => (a[this.state.sortByField] < b[this.state.sortByField]) ? 1 : -1)
             this.totalData.forEach((plan) => {
               const info = running.data.find((status) => status.planId === +plan.id)
               if (info) {
@@ -521,15 +586,7 @@ export class PlanSearch extends Component {
             this.setState({ allPlans, plans: allPlans.slice(0, this.maxResults) }, () => {
               this.loadServiceAreaInfo(this.state.plans)
             })
-            this.pages = []
-            const pageSize = Math.floor(
-              response.data.length / this.maxResults) + (response.data.length % this.maxResults > 0 ? 1 : 0
-            )
-            for (let i = 1; i <= pageSize; i++) {
-              this.pages.push(i)
-            }
-            this.setState({ pages: this.pages })
-
+            this.setPage()
             callback && callback()
           })
         })
@@ -631,12 +688,95 @@ export class PlanSearch extends Component {
       this.loadPlans()
     })
   }
+
+  onChangeSortingType(event) {
+    this.setState({ sortByField: event.target.value })
+    this.loadPlans()
+  }
+
+  convertTimeStampToDate (timestamp) {
+    const utcDate = toUTCDate(new Date(timestamp))
+    return new Intl.DateTimeFormat('en-US').format(utcDate)
+  }
+
+  changePage (page) {
+    this.loadPlans(page)
+    this.setPage(page)
+  }
+
+  // Pagination
+  setPage (page) {
+    if (typeof page === 'undefined') {
+      page = this.state.pageOffset
+    }
+
+    page === Math.floor(page)
+
+    this.lastPage = Math.floor((this.state.allPlans.length - 1) / this.rowsPerPage)
+    if (this.lastPage < 0) this.lastPage = 0
+
+    if (page > this.lastPage) {
+      page = this.lastPage
+    }
+
+    if (page < 0) page = 0
+
+    let newPages = []
+    // -1 indicates "..."
+    // Change the newPages size based on sidebarWidth
+    if (this.props.sidebarWidth < 30) {
+      if (this.lastPage < 8) {
+        newPages = [...Array(this.lastPage + 1).keys()]
+      } else if (page < 2 || page + 2 > this.lastPage) {
+        newPages = [0, 1, 2, 3, -1, this.lastPage - 2, this.lastPage - 1, this.lastPage]
+      } else if (page === 2) {
+        newPages = [0, 1, 2, 3, 4, -1, this.lastPage - 1, this.lastPage]
+      } else if (this.lastPage - 2 === page) {
+        newPages = [0, 1, 2, -1, this.lastPage - 3, this.lastPage - 2, this.lastPage - 1, this.lastPage]
+      } else {
+        newPages = [0, -1, page - 1, page, page + 1, -1, this.lastPage - 1, this.lastPage]
+      }
+    } else {
+      if (this.lastPage < 10) {
+        newPages = [...Array(this.lastPage + 1).keys()]
+      } else if (page < 4 || page + 2 > this.lastPage) {
+        newPages = [0, 1, 2, 3, 4, -1, this.lastPage - 3, this.lastPage - 2, this.lastPage - 1, this.lastPage]
+      } else if (page === 4) {
+        newPages = [0, 1, 2, 3, 4, 5, -1, this.lastPage - 2, this.lastPage - 1, this.lastPage]
+      } else if (this.lastPage - 3 === page) {
+        newPages = [0, 1, 2, 3, -1, this.lastPage - 4, this.lastPage - 3, this.lastPage - 2, this.lastPage - 1, this.lastPage]
+      } else if (this.lastPage - 2 === page) {
+          newPages = [0, 1, 2, -3, -1, page - 2, page - 1, page, this.lastPage - 1, this.lastPage]
+      } else {
+        newPages = [0, 1, 2, -1, page - 1, page, page + 1, page + 2, -1, this.lastPage]
+      }
+    }
+
+    this.setState({ pages: newPages, pageOffset: page })
+  }
+
+  onPlanDeleteClicked (plan) {
+    this.onPlanDeleteRequested(plan)
+      .then(() => {
+        this.loadPlans()
+      })
+      .catch((err) => {
+        console.error(err)
+        this.loadPlans()
+      })
+  }
+
+  onPlanDeleteRequested(plan) {
+    return this.props.deletePlan(plan)
+  }
+  
 }
 
 const mapStateToProps = (state) => ({
   loggedInUser: state.user.loggedInUser,
   listOfTags: state.toolbar.listOfTags,
   listOfServiceAreaTags: state.toolbar.listOfServiceAreaTags,
+  sidebarWidth: state.toolbar.sidebarWidth,
 })
 
 const mapDispatchToProps = (dispatch) => ({
@@ -647,7 +787,9 @@ const mapDispatchToProps = (dispatch) => ({
   loadListOfSAPlanTags: (dataItems, filterObj, ishardreload) => dispatch(
     ToolBarActions.loadListOfSAPlanTags(dataItems, filterObj, ishardreload)
   ),
+  loadPlan: (planId) => dispatch(ToolBarActions.loadPlan(planId)),
+  deletePlan: (plan) => dispatch(PlanActions.deletePlan(plan)),
+
 })
 
-const PlanSearchComponent = connect(mapStateToProps, mapDispatchToProps)(PlanSearch)
-export default PlanSearchComponent
+export default wrapComponentWithProvider(reduxStore, PlanSearch, mapStateToProps, mapDispatchToProps)

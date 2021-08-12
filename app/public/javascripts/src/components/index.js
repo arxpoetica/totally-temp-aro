@@ -2,6 +2,7 @@
 import { react2angular } from 'react2angular'
 import { ToastContainer } from 'react-toastify'
 
+import PlanSearch from '../react/components/header/plan-search.jsx'
 import UserGroupsModal from '../react/components/global-settings/user-groups-modal.jsx'
 import NotifyBroadcastModal from '../react/components/global-settings/notify-broadcast-modal.jsx'
 import SummaryReports from '../react/components/sidebar/view/summary-reports.jsx'
@@ -206,6 +207,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('editorInterfacePrimitive', editorInterfacePrimitive)
   .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
 // ReactJS components
+  .component('rPlanSearch', react2angular(PlanSearch, ['systemActors', 'showPlanDeleteButton', 'currentView']))
   .component('userGroupsModal', react2angular(UserGroupsModal))
   .component('notifyBroadcastModal', react2angular(NotifyBroadcastModal))
   .component('rSummaryReports', react2angular(SummaryReports))

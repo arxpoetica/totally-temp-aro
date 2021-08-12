@@ -130,6 +130,7 @@ export class PlanInputsModal extends Component {
                   showPlanDeleteButton={false}
                   systemActors={systemActors}
                   onPlanSelected={this.onParentPlanSelected.bind(this)}
+                  currentView="savePlanSearch"
                 />
               }
             </div>
