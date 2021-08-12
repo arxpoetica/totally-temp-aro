@@ -105,8 +105,25 @@ export class NetworkOptimizationInput extends Component {
 
     inputs.locationConstraints = JSON.parse(JSON.stringify(this.props.optimizationInputs.locationConstraints))
     inputs.locationConstraints.analysisSelectionMode = this.props.activeSelectionModeId
+
+    const propertyConstraints = this.props.activeFilters.reduce((result, filter) =>{
+      if (filter.value1) {
+        result.push({
+          op: filter.operator,
+          propertyName: filter.name,
+          value: filter.value1,
+          value2: filter.value2,
+        })
+      }
+      return result;
+    }, []);
+
+    const objectFilter = {
+      clientName: this.props.clientName,
+      propertyConstraints: propertyConstraints,
+    }
+    inputs.locationConstraints.objectFilter = objectFilter
     // inputs.locationConstraints.analysisLayerId
-    
     return inputs
   }
 
@@ -149,6 +166,9 @@ const mapStateToProps = (state) => ({
   activeSelectionModeId: state.selection.activeSelectionMode.id,
   transaction: state.planEditor.transaction,
   activePlan: state.plan.activePlan,
+  networkAnalysisType: state.optimization.networkOptimization.optimizationInputs.analysis_type,
+  activeFilters: state.optimization.networkOptimization.activeFilters,
+  clientName: state.configuration.system.ARO_CLIENT,
 })
 
 const mapDispatchToProps = dispatch => ({
