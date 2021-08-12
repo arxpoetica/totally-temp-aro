@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import cx from 'clsx'
 import './Select.css'
 
-export const Select = ({ options, value, placeholder, classes, onClick=()=>{}, onChange=()=>{} }) => {
+export const Select = ({ options, value, placeholder, disabled, classes, onClick=()=>{}, onChange=()=>{} }) => {
 
   return (
     <div className={cx('select', classes && classes)}>
@@ -10,7 +10,7 @@ export const Select = ({ options, value, placeholder, classes, onClick=()=>{}, o
         value={value}
         onClick={event => onClick(event)}
         onChange={event => onChange(event)}
-        
+        disabled={disabled}
       >
         {placeholder && <option value="" disabled hidden>{placeholder}</option>}
         {options.map(({ label, value }) => 

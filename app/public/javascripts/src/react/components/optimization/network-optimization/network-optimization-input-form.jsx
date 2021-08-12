@@ -187,7 +187,7 @@ export class NetworkOptimizationInputFormProto extends Component {
             />
           </EditorInterfaceItem>
         </EditorInterface>
-        <FilterEditor />
+        <FilterEditor displayOnly={this.props.displayOnly} />
       </>
     )
   }

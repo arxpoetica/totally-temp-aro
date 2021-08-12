@@ -23,7 +23,7 @@ const numberOptions = [
   {value: 'IN', label: 'In'},
 ]
 
-export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilters, filters}) => {
+export const FilterEditorComponent = ({displayOnly, loadFilters, setActiveFilters, activeFilters, filters}) => {
 
   useEffect(() => {
     loadFilters()
@@ -45,7 +45,7 @@ export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilt
   }
 
   const addNewFilter = () => {
-    setActiveFilters([...activeFilters, newFilter])
+      setActiveFilters([...activeFilters, newFilter])
   }
 
   const selectFilterType = (event, index) => {
@@ -57,14 +57,21 @@ export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilt
   }
 
   const removeActiveFilter = (index) => {
-    const newActiveFilters = activeFilters.filter((activeFilter, i) => i !== index)
+      const newActiveFilters = activeFilters.filter((activeFilter, i) => i !== index)
 
-    setActiveFilters([...newActiveFilters])
+      setActiveFilters([...newActiveFilters])
   }
 
   const selectOperator = (event, filter, index) => {
     const newActiveFilters = activeFilters
     newActiveFilters[index] = {...filter, operator: event.target.value}
+
+    setActiveFilters([...newActiveFilters])
+  }
+
+  const selectBool = (event, filter, index) => {
+    const newActiveFilters = activeFilters
+    newActiveFilters[index] = {...filter, operator: "EQ", value1: event.target.value}
 
     setActiveFilters([...newActiveFilters])
   }
@@ -88,11 +95,12 @@ export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilt
     // this first select gets rendered only if the type is BOOLEAN
     const MainSelect = (filter.format === 'BOOLEAN' ? (
       <Select
-        value={filter.operator}
+        value={filter.value1}
         placeholder="Select"
         options={boolOptions}
-        onChange={event => selectOperator(event, filter, index)}
+        onChange={event => selectBool(event, filter, index)}
         classes="ei-filter-select-operator"
+        disabled={displayOnly}
         />
     ): (
       <div className='ei-filter-input-container'>
@@ -102,6 +110,7 @@ export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilt
           options={numberOptions}
           onChange={event => selectOperator(event, filter, index)}
           classes="ei-filter-select-operator"
+          disabled={displayOnly}
           />
         {filter.operator &&
           <Input 
@@ -114,6 +123,7 @@ export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilt
           classes={cx('ei-filter-input', 
             filter.format === 'DOLLAR' && 'dollar', 
             filter.format === 'PERCENT' && 'percent')}
+          disabled={displayOnly}
         />
         }
         {/* This second field only gets rendered if type is range, adding second inoput */}
@@ -130,6 +140,7 @@ export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilt
               classes={cx('ei-filter-input',
                 filter.format === 'DOLLAR' && 'dollar',
                 filter.format === 'PERCENT' && 'percent')}
+              disabled={displayOnly}
             />
           </>)}
       </div>
@@ -141,7 +152,7 @@ export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilt
   const FilterSelect = (index) => {
     return (
         <>
-          <i className="ei-property-icon trashcan svg" onClick={() => removeActiveFilter(index)} />
+          {!displayOnly && <i className="ei-property-icon trashcan svg" onClick={() => removeActiveFilter(index)} />}
           <Select 
           value={activeFilters[index].value}
           placeholder="Select"
@@ -149,13 +160,14 @@ export const FilterEditorComponent = ({loadFilters, setActiveFilters, activeFilt
           onClick={event => event.stopPropagation()}
           onChange={(event) => selectFilterType(event, index)}
           classes="ei-filter-select-container"
+          disabled={displayOnly}
           />
       </>
     )
   }
 
   return (
-    <EditorInterface title="Filters" action={addNewFilter}>
+    <EditorInterface title="Filters" action={!displayOnly && addNewFilter}>
       {activeFilters.map((activeFilter, index) => (
         (activeFilter.displayName ? (
           <EditorInterfaceItem subtitle={FilterSelect(index)} key={index}>
