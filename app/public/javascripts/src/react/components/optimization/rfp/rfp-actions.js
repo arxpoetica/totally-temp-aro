@@ -35,7 +35,7 @@ function setSelectedTarget (selectedTarget) {
   }
 }
 
-function initializeRfpReport (planId, userId, projectId, rfpId, fiberRoutingMode, targets) {
+function initializeRfpReport (planId, userId, projectId, rfpId, fiberRoutingMode, targets, dataItems, resourceItems) {
   return dispatch => {
     const requestBody = {
       projectId: projectId,
@@ -61,10 +61,11 @@ function initializeRfpReport (planId, userId, projectId, rfpId, fiberRoutingMode
             if (rfpPlans) {
               rfpPlans.data.sort((a, b) => b.id - a.id)
               const activePlan = rfpPlans.data.find(plan => plan.id === result.data.planId)
-              dispatch(PlanActions.setActivePlan(activePlan))
+              dispatch(PlanActions.savePlanConfiguration(activePlan, dataItems, resourceItems))
             }
           })
       })
+      .then(() => dispatch(loadRfpPlans(userId, '', true)))
       .then(() => {
         dispatch({
           type: Actions.RFP_SET_STATUS,
@@ -94,19 +95,20 @@ function setClickMapToAddTarget (clickMapToAddTarget) {
   }
 }
 
-function loadRfpPlans (userId, searchTerm = '') {
+function loadRfpPlans (userId, searchTerm = '', runRfpPlan) {
   return dispatch => {
     dispatch({
       type: Actions.RFP_SET_IS_LOADING_RFP_PLANS,
       payload: true
     })
     const searchTermWithQuotes = searchTerm ? ` "${searchTerm}"` : ''
+    let rfpPlans = []
     Promise.all([
       AroHttp.get(`/service/v1/plan?search=type:"RFP"${searchTermWithQuotes}&user_id=${userId}`),
       AroHttp.get(`/service/rfp/report-definition`)
     ])
       .then(results => {
-        const rfpPlans = results[0].data
+        rfpPlans = results[0].data
         rfpPlans.sort((a, b) => a.id > b.id ? -1 : 1) // Sort plans in descending order by ID (so newest plans appear first)
 
         const rfpReportDefinitions = results[1].data.length 
@@ -124,6 +126,9 @@ function loadRfpPlans (userId, searchTerm = '') {
             isLoadingRfpPlans: false
           }
         })
+      })
+      .then(() => {
+        if (runRfpPlan && rfpPlans.length) dispatch(PlanActions.loadPlan(rfpPlans[0].id))
       })
       .catch(err => {
         console.error(err)

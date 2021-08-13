@@ -30,7 +30,16 @@ export class RfpButton extends ProgressButton {
 
   // override
   onRun () {
-    this.props.initializeRfpReport(this.props.planId, this.props.userId, this.props.projectId, uuidv4(), this.props.fiberRoutingMode, this.props.targets)
+    this.props.initializeRfpReport(
+      this.props.planId,
+      this.props.userId,
+      this.props.projectId,
+      uuidv4(),
+      this.props.fiberRoutingMode,
+      this.props.targets,
+      this.props.dataItems,
+      this.props.resourceItems,
+    )
   }
 
   // override
@@ -51,6 +60,8 @@ RfpButton.propTypes = {
   userId: PropTypes.number,
   planId: PropTypes.number,
   fiberRoutingMode: PropTypes.string,
+  dataItems: PropTypes.object,
+  resourceItems: PropTypes.object,
 }
 
 const mapStateToProps = (state) => {
@@ -62,6 +73,8 @@ const mapStateToProps = (state) => {
     userId: state.user.loggedInUser.id,
     planId: state.plan.activePlan.id,
     fiberRoutingMode: selector(state, 'fiberRoutingMode.value'),
+    dataItems: state.plan.dataItems,
+    resourceItems: state.plan.resourceItems,
   }
 }
 
