@@ -60,7 +60,6 @@
   height: 34px;
   border: 1px solid var(--gray-medium-light);
   width: 75px;
-  padding-left:18px;
   border-radius: 3px;
 }
 
@@ -69,6 +68,9 @@
   left: 5px;
   font: 14px var(--font);
   position: absolute;
+}
+.ei-filter-input.dollar input, .ei-filter-input.percent input {
+  padding-left:18px;
 }
 
 .ei-filter-input.dollar:before {
