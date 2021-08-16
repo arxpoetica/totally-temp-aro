@@ -201,7 +201,7 @@ export class ToolBar extends Component {
     return (
       <div className="tool-bar" style={{margin: marginPixels, backgroundColor: configuration.toolbar.toolBarColor}}>
         { leftElement }
-        <ToolBarSearch/>
+        <ToolBarSearch currentView='toolBarSearch'/>
         <div className="separator"></div>
 
         {configuration.perspective.showToolbarButtons.globalSettings &&

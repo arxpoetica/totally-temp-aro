@@ -619,6 +619,13 @@ function getOrCreateEphemeralPlan () {
   }
 }
 
+function editActivePlan (plan) {
+  return {
+    type: Actions.PLAN_EDIT_ACTIVE_PLAN,
+    payload: plan
+  }
+}
+
 export default {
   setActivePlan,
   setActivePlanState,
@@ -645,4 +652,5 @@ export default {
   loadLibraryEntryById,
   deletePlan,
   getOrCreateEphemeralPlan,
+  editActivePlan,
 }

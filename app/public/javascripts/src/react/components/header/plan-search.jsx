@@ -62,7 +62,7 @@ export class PlanSearch extends Component {
     this.searchCreatorsList()
 
     this.planSortingOptions = [
-      { sortType: 'updatedDate', description: 'Date Updated' },
+      { sortType: 'updatedDate', description: 'Date Modified' },
       { sortType: 'createdDate', description: 'Date Created' },
     ]
 
@@ -215,7 +215,7 @@ export class PlanSearch extends Component {
           <button
             className="btn btn-light input-group-append"
             onClick={(event) => this.onClikCreateValue(event)}
-            style={{cursor: 'pointer'}}
+            style={{cursor: 'pointer', alignItems: 'center'}}
           >
             <span className="fa fa-search"></span>
           </button>
@@ -777,6 +777,7 @@ const mapStateToProps = (state) => ({
   listOfTags: state.toolbar.listOfTags,
   listOfServiceAreaTags: state.toolbar.listOfServiceAreaTags,
   sidebarWidth: state.toolbar.sidebarWidth,
+  systemActors: state.user.systemActors,
 })
 
 const mapDispatchToProps = (dispatch) => ({

@@ -152,3 +152,28 @@
 .aro-summary-button-export {
   margin-bottom: 10px;
 }
+
+/* Plan info */
+
+.aro-plan-details-container {
+  position: relative;
+}
+.aro-plan-actions {
+  display: flex;
+  flex-direction: row;
+}
+.aro-plan-actions button {
+  margin-left: 1px;
+  margin-right: 1px;
+  flex: 1 1 auto;
+}
+#tblPlanInfo td {
+  line-height: 33px;
+}
+#tblPlanInfo > tbody > tr:first-child > td {
+  border: none;
+}
+.aro-plan-info-container {
+  height: 100%;
+  padding-top: 10px;
+}
