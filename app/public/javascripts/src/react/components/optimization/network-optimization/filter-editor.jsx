@@ -20,7 +20,7 @@ const numberOptions = [
   {value: 'LT', label: 'Less Than'},
   {value: 'LTE', label: 'Less Than or Equal'},
   {value: 'RANGE', label: 'Between'},
-  {value: 'IN', label: 'In'},
+  // {value: 'IN', label: 'In'},
 ]
 
 export const FilterEditorComponent = ({displayOnly, loadFilters, setActiveFilters, activeFilters, filters}) => {
@@ -93,7 +93,7 @@ export const FilterEditorComponent = ({displayOnly, loadFilters, setActiveFilter
     // possible operations: EQ, NEQ, GT, GTE, LT, LTE, IN, RANGE
 
     // this first select gets rendered only if the type is BOOLEAN
-    const MainSelect = (filter.format === 'BOOLEAN' ? (
+    const MainSelect = (filter.propertyType === 'BOOLEAN' ? (
       <Select
         value={filter.value1}
         placeholder="Select"
@@ -118,7 +118,7 @@ export const FilterEditorComponent = ({displayOnly, loadFilters, setActiveFilter
           name="value1"
           value={activeFilters[index].value1}
           min={filter.minValue}
-          max={filter.maxvalue}
+          max={filter.maxValue}
           onChange={event => textChange(event, index)}
           classes={cx('ei-filter-input', 
             filter.format === 'DOLLAR' && 'dollar', 
@@ -135,7 +135,7 @@ export const FilterEditorComponent = ({displayOnly, loadFilters, setActiveFilter
               name="value2"
               value={activeFilters[index].value2}
               min={filter.minValue}
-              max={filter.maxvalue}
+              max={filter.maxValue}
               onChange={event => textChange(event, index)}
               classes={cx('ei-filter-input',
                 filter.format === 'DOLLAR' && 'dollar',
