@@ -2,6 +2,7 @@ import Actions from '../../common/actions'
 import CoverageActions from '../coverage/coverage-actions'
 import SelectionActions from '../selection/selection-actions'
 import RfpActions from '../optimization/rfp/rfp-actions'
+import RfpStatusTypes from '../optimization/rfp/constants'
 import SocketManager from '../../../react/common/socket-manager'
 import RingEditActions from '../ring-edit/ring-edit-actions'
 import NetworkOptimizationActions from '../optimization/network-optimization/network-optimization-actions'
@@ -146,6 +147,13 @@ function setActivePlan (plan) {
     dispatch(RingEditActions.loadRings(plan.id))
     // load rings
     dispatch(loadPlanResourceSelectionFromServer(plan))
+    
+    if (plan.planType === 'RFP') {
+      dispatch({
+        type: Actions.RFP_SET_STATUS,
+        payload: RfpStatusTypes.FINISHED
+      })
+    }
   }
 }
 
@@ -307,6 +315,8 @@ function savePlanConfiguration(plan, dataItems, resourceItems) {
       }
     })
 
+    if (!dataItems) dataItems = state.plan.dataItems
+    if (!resourceItems) resourceItems = state.plan.resourceItems
     let putBody = {
       configurationItems: [],
       resourceConfigItems: []
