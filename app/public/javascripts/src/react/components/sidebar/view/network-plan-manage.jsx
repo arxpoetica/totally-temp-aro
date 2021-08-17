@@ -5,7 +5,6 @@ import PlanInfo from './plan-info.jsx'
 import PlanSearch from '../../header/plan-search.jsx'
 
 export const NetworkPlanManage = () => {
-
   const views = Object.freeze({
     Plan_Info: 0,
     Search_plans: 1,

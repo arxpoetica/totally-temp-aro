@@ -5,11 +5,11 @@ import { selectStyles } from '../../common/view-utils.js'
 import AroHttp from '../../common/aro-http'
 import uuidStore from '../../../shared-utils/uuid-store'
 import PlanActions from '../plan/plan-actions.js'
-// import cx from 'clsx'
 
-const ToolBarSearch = ({ defaultPlanCoordinates, mapRef, currentView, plan }) => {
+const ToolBarSearch = (props) => {
 
   const [options, setOptions] = useState([])
+  const { defaultPlanCoordinates, mapRef, currentView, plan } = props
 
   let timer
   const handleInputChange = (searchTerm, { action }) => {
@@ -83,6 +83,7 @@ const ToolBarSearch = ({ defaultPlanCoordinates, mapRef, currentView, plan }) =>
     return option
   }
 
+  // To check in view-mode plan-info
   const excuteInPlanInfo = (excute) => {
     if (excute) {
       return currentView && currentView === 'viewModePlanInfo'

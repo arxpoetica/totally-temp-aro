@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react'
 import reduxStore from '../../../../redux-store'
 import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
-import ToolBarSearch from '../../header/tool-bar-search.jsx'
+import LocationSearch from '../../header/location-search.jsx'
 import EditPlanTag from '../../header/edit-plan-tag.jsx'
 import ToolBarActions from '../../header/tool-bar-actions.js'
 import PermissionsTable from '../../acl/resource-permissions/permissions-table.jsx'
 import PlanActions from '../../plan/plan-actions'
 import AroHttp from '../../../common/aro-http'
+import { getPlanCreatorName, getTagCategories, getSATagCategories } from './plan-info-common.js'
+import { without } from '../../../common/view-utils.js'
 
 export const PlanInfo = (props) => {
 
@@ -29,7 +31,7 @@ export const PlanInfo = (props) => {
   const { isEditMode, currentUserCanEdit, addGeneralTags, addSATags, generalPlanTags, saPlanTags } = state
   const { plan, systemActors, listOfServiceAreaTags, currentPlanServiceAreaTags, listOfTags, currentPlanTags,
     dataItems, getTagColour, loggedInUser, authRoles, editActivePlan, loadPlan, setCurrentPlanTags,
-    setCurrentPlanServiceAreaTags, deletePlan } = props
+    setCurrentPlanServiceAreaTags, deletePlan, loadListOfSAPlanTags } = props
 
   useEffect(() => {
     updateEditableStatus()
@@ -43,15 +45,10 @@ export const PlanInfo = (props) => {
 
   const editCurrentPlan = () => {
     setState((state) => ({ ...state, isEditMode: true }))
-    const saPlanTags = getSATagCategories(plan.tagMapping.linkTags.serviceAreaIds)
+    const saPlanTags = getSATagCategories(plan.tagMapping.linkTags.serviceAreaIds, listOfServiceAreaTags)
     setCurrentPlanServiceAreaTags(saPlanTags)
-    const generalPlanTags = getTagCategories(plan.tagMapping.global)
+    const generalPlanTags = getTagCategories(plan.tagMapping.global, listOfTags)
     setCurrentPlanTags(generalPlanTags)
-  }
-
-  const getPlanCreatorName = (createdBy) => {
-    const creator = systemActors[createdBy]
-    return creator && ((creator.type === 'group') ? creator.name : `${creator.firstName} ${creator.lastName}`)
   }
 
   const handleAddGeneralTags = () => {
@@ -76,18 +73,10 @@ export const PlanInfo = (props) => {
     setState((state) => ({ ...state, isEditMode: false, addGeneralTags: false, addSATags: false }))
   }
 
-  const getTagCategories = (currentPlanTags) => {
-    return listOfTags.filter(tag => _.contains(currentPlanTags, tag.id))
-  }
-
-  const getSATagCategories = (currentPlanTags) => {
-    return listOfServiceAreaTags.filter(tag => _.contains(currentPlanTags, tag.id))
-  }
-
-  const planResource = { identifier: plan.id, dataType: "", name: plan.name, permissions: 63, id: plan.id }
+  const planResource = { identifier: plan.id, dataType: '', name: plan.name, permissions: 63, id: plan.id }
 
   const removeTagFn = (type, tag) => {
-    updateTag(plan, {type: type, tag: tag})
+    updateTag(plan, { type, tag })
       .then(() => {
         loadPlan(plan.id)
       })
@@ -96,18 +85,18 @@ export const PlanInfo = (props) => {
   const updateTag = (plan, removeTag) => {
     const updatePlan = plan
     if (removeTag.type === 'svc') {
-      updatePlan.tagMapping.linkTags.serviceAreaIds = _.without(
+      updatePlan.tagMapping.linkTags.serviceAreaIds = without(
         updatePlan.tagMapping.linkTags.serviceAreaIds, removeTag.tag.id
       )
-      const saPlanTags = getSATagCategories(updatePlan.tagMapping.linkTags.serviceAreaIds)
+      const saPlanTags = getSATagCategories(updatePlan.tagMapping.linkTags.serviceAreaIds, listOfServiceAreaTags)
       setCurrentPlanServiceAreaTags(saPlanTags)
     } else {
-      updatePlan.tagMapping.global = _.without(updatePlan.tagMapping.global, removeTag.tag.id)
-      const generalPlanTags = getTagCategories(updatePlan.tagMapping.global)
+      updatePlan.tagMapping.global = without(updatePlan.tagMapping.global, removeTag.tag.id)
+      const generalPlanTags = getTagCategories(updatePlan.tagMapping.global, listOfTags)
       setCurrentPlanTags(generalPlanTags)
     }
 
-    return AroHttp.put(`/service/v1/plan`, updatePlan)
+    return AroHttp.put('/service/v1/plan', updatePlan)
   }
 
   const updateEditableStatus = async () => {
@@ -126,16 +115,19 @@ export const PlanInfo = (props) => {
         ])
       })
       .then((results) => {
-        const planPermissions = results[0].data; const systemPermissions = results[1].data
+        const planPermissions = results[0].data
+        const systemPermissions = results[1].data
         // First, check if the user or usergroups have write permissions
-        var currentUserCanWrite = false; var currentUserIsAdmin = false; var isUserCanEdit = false
+        let currentUserCanWrite = false
+        let currentUserIsAdmin = false
+        let isUserCanEdit = false
         planPermissions.resourcePermissions.forEach((access) => {
           // We are checking if the logged in user or any of the users groups have permission to write.
           if ((loggedInUser.id === access.systemActorId) ||
               (loggedInUser.groupIds.indexOf(access.systemActorId) >= 0)) {
             const permission = access.rolePermissions
-            currentUserCanWrite = ((permission & accessTypes.RESOURCE_WRITE.permissionBits) != 0)
-            currentUserIsAdmin = ((permission & accessTypes.RESOURCE_ADMIN.permissionBits) != 0)
+            currentUserCanWrite = ((permission & accessTypes.RESOURCE_WRITE.permissionBits) !== 0)
+            currentUserIsAdmin = ((permission & accessTypes.RESOURCE_ADMIN.permissionBits) !== 0)
             isUserCanEdit = currentUserCanEdit || currentUserCanWrite || currentUserIsAdmin
           }
         })
@@ -162,16 +154,16 @@ export const PlanInfo = (props) => {
   }
 
   const getPlanTagDetails = () => {
-    const generalPlanTags = getTagCategories(plan.tagMapping.global)
+    const generalPlanTags = getTagCategories(plan.tagMapping.global, listOfTags)
     setState((state) => ({ ...state, generalPlanTags }))
-    const saPlanTags = getSATagCategories(plan.tagMapping.linkTags.serviceAreaIds)
+    const saPlanTags = getSATagCategories(plan.tagMapping.linkTags.serviceAreaIds, listOfServiceAreaTags)
     setState((state) => ({ ...state, saPlanTags }))
   }
 
   const updatePlanTags = () => {
-    plan.tagMapping.global = _.map(currentPlanTags, (tag) => tag.id)
-    plan.tagMapping.linkTags.serviceAreaIds = _.map(currentPlanServiceAreaTags, (tag) => tag.id)
-    AroHttp.put(`/service/v1/plan`, plan)
+    plan.tagMapping.global = currentPlanTags.map(tag => tag.id)
+    plan.tagMapping.linkTags.serviceAreaIds = currentPlanServiceAreaTags.map(tag => tag.id)
+    AroHttp.put('/service/v1/plan', plan)
   }
 
   return (
@@ -204,14 +196,14 @@ export const PlanInfo = (props) => {
                     <span>{plan.areaName}</span>
                   }
                   {isEditMode &&
-                    <ToolBarSearch currentView='viewModePlanInfo'/>
+                    <LocationSearch currentView='viewModePlanInfo'/>
                   }
                 </td>
               </tr>
               {plan.createdBy &&
                 <tr ng-if="$ctrl.state.plan.createdBy">
                   <td>Created By</td>
-                  <td>{ getPlanCreatorName(plan.createdBy) }</td>
+                  <td>{ getPlanCreatorName(plan.createdBy, systemActors) }</td>
                 </tr>
               }
               <tr>
@@ -226,7 +218,7 @@ export const PlanInfo = (props) => {
                             <span>
                               {tag.name} &nbsp;
                               {isEditMode &&
-                                <i 
+                                <i
                                   className="fa fa-times pointer"
                                   onClick={() => removeTagFn('general', tag)}
                                 />
@@ -246,7 +238,7 @@ export const PlanInfo = (props) => {
                   } &nbsp;
                   <span>
                     {(isEditMode && !addGeneralTags) &&
-                      <i className="fa fa-plus pointer" onClick={() => handleAddGeneralTags()}></i>
+                      <i className="fa fa-plus pointer" onClick={() => handleAddGeneralTags()} />
                     }
                   </span>
                 </td>
@@ -272,30 +264,30 @@ export const PlanInfo = (props) => {
                       })
                     }
                   </span>
-                    {addSATags &&
-                      <EditPlanTag
-                        objectName="Service Area"
-                        searchList={listOfServiceAreaTags}
-                        selectedList={saPlanTags}
-                        refreshTagList={onRefreshTagList}
-                      />
-                    } &nbsp;
-                    <span>
-                      {(isEditMode && !addSATags) &&
-                        <i className="fa fa-plus pointer" onClick={() => handleAddSATags()}></i>
-                      }
-                    </span>
-                  </td>
-                </tr>
-                <tr>
-                  <td colSpan="2">
-                    <PermissionsTable resource={planResource} resourceType='PLAN' isOwner={isEditMode} />
-                  </td>
-                </tr>
+                  {addSATags &&
+                    <EditPlanTag
+                      objectName="Service Area"
+                      searchList={listOfServiceAreaTags}
+                      selectedList={saPlanTags}
+                      refreshTagList={onRefreshTagList}
+                    />
+                  } &nbsp;
+                  <span>
+                    {(isEditMode && !addSATags) &&
+                      <i className="fa fa-plus pointer" onClick={() => handleAddSATags()} />
+                    }
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td colSpan="2">
+                  <PermissionsTable resource={planResource} resourceType='PLAN' isOwner={isEditMode} />
+                </td>
+              </tr>
             </tbody>
           </table>
           {/* Add a div that will overlay all the controls above. The div will be visible when the controls need to be disabled. */}
-          <div className="disable-sibling-controls" style={{display : isEditMode ? 'none' : 'block' }} />
+          <div className="disable-sibling-controls" style={{ display: isEditMode ? 'none' : 'block' }} />
         </div>
 
         <div className="aro-plan-actions">
@@ -305,16 +297,17 @@ export const PlanInfo = (props) => {
               disabled={!currentUserCanEdit}
               onClick={() => editCurrentPlan()}
             >
-              <i className="fa fa-pencil"></i>&nbsp;&nbsp;Edit Plan Details
+              <i className="fa fa-pencil" />&nbsp;&nbsp;Edit Plan Details
             </button>
           }
           {isEditMode &&
             <button
+              type="button"
               className="btn btn-primary"
               disabled={!currentUserCanEdit}
               onClick={() => commitUpdatestoPlan(false)}
             >
-              <i className="fa fa-save"></i>&nbsp;&nbsp;Save Changes
+              <i className="fa fa-save" />&nbsp;&nbsp;Save Changes
             </button>
           }
           <button
@@ -322,7 +315,7 @@ export const PlanInfo = (props) => {
             disabled={!currentUserCanEdit}
             onClick={() => deletePlan(plan)}
           >
-            <i className="far fa-trash-alt"></i>&nbsp;&nbsp;Delete Plan
+            <i className="far fa-trash-alt" />&nbsp;&nbsp;Delete Plan
           </button>
         </div>
       </div>

@@ -211,7 +211,7 @@ app.component('boundaryDetail', boundaryDetail)
 // ReactJS components
   .component('rNetworkPlanManage', react2angular(NetworkPlanManage))
   .component('rPlanInfo', react2angular(PlanInfo))
-  .component('rPlanSearch', react2angular(PlanSearch, ['systemActors', 'showPlanDeleteButton', 'currentView']))
+  .component('rPlanSearch', react2angular(PlanSearch))
   .component('userGroupsModal', react2angular(UserGroupsModal))
   .component('notifyBroadcastModal', react2angular(NotifyBroadcastModal))
   .component('rSummaryReports', react2angular(SummaryReports))
