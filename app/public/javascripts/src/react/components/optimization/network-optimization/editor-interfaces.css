@@ -63,6 +63,10 @@
   border-radius: 3px;
 }
 
+.ei-filter-input input:disabled {
+  color: var(--gray-medium-light);
+}
+
 .ei-filter-input:before {
   top: 8px;
   left: 5px;
