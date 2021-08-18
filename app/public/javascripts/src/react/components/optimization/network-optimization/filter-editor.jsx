@@ -114,7 +114,7 @@ export const FilterEditorComponent = ({displayOnly, loadFilters, setActiveFilter
           />
         {filter.operator &&
           <Input 
-          type="number"
+            type={filter.propertyType === 'NUMBER' || 'INTEGER' ? 'number' : 'text'}
           name="value1"
           value={activeFilters[index].value1}
           min={filter.minValue}
@@ -131,7 +131,7 @@ export const FilterEditorComponent = ({displayOnly, loadFilters, setActiveFilter
           <>
             and
             <Input 
-              type="number"
+              type={filter.propertyType === 'NUMBER' || 'INTEGER' ? 'number' : 'text'}
               name="value2"
               value={activeFilters[index].value2}
               min={filter.minValue}
