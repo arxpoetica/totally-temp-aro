@@ -9,6 +9,7 @@ export const Input = ({
   min,
   max,
   classes,
+  disabled,
   onChange = () => {},
 }) => {
   return (
@@ -19,6 +20,7 @@ export const Input = ({
         value={value}
         min={min}
         max={max}
+        disabled={disabled}
         onChange={event => onChange(event)}
       />
     </div>

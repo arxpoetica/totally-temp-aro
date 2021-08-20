@@ -5,6 +5,7 @@ import { Field, reduxForm, getFormValues, change } from 'redux-form'
 import Constants from '../../../common/constants'
 import NetworkOptimizationActions from './network-optimization-actions'
 import { EditorInterface, EditorInterfaceItem } from './editor-interface.jsx'
+import FilterEditor from './filter-editor.jsx'
 // import NetworkOptimizationInputFormMeta from './network-optimization-input-form-meta'
 import { FieldComponents } from '../../common/editor-interface/object-editor.jsx'
 import DropdownList from 'react-widgets/lib/DropdownList'
@@ -149,42 +150,45 @@ export class NetworkOptimizationInputFormProto extends Component {
     if (this.props.values && this.props.values.networkTypes) networkTypes = this.props.values.networkTypes
 
     return (
-      <EditorInterface
-        title="Settings"
-        footer={this.renderOptimizationOptions()}
-      >
-        <EditorInterfaceItem subtitle="Endpoint Technology">
-          <button className={'btn btn-sm ' + (networkTypes.includes('Fiber') ? 'btn-primary' : 'btn-light')}
-            onClick={() => this.toggleNetworkType('Fiber')}
-            disabled={this.props.displayOnly}>
-            Fiber
-          </button>
-
-          <div className='btn-group btn-group-sm' style={{ marginLeft: '5px' }}>
-            <button className={'btn btn-sm ' + (networkTypes.includes('FiveG') ? 'btn-primary' : 'btn-light')}
-              onClick={() => this.toggleNetworkType('FiveG')}
+      <>
+        <EditorInterface
+          title="Settings"
+          footer={this.renderOptimizationOptions()}
+        >
+          <EditorInterfaceItem subtitle="Endpoint Technology">
+            <button className={'btn btn-sm ' + (networkTypes.includes('Fiber') ? 'btn-primary' : 'btn-light')}
+              onClick={() => this.toggleNetworkType('Fiber')}
               disabled={this.props.displayOnly}>
-              5G
+              Fiber
             </button>
 
-            <button className={'btn btn-sm ' + (networkTypes.includes('Copper') ? 'btn-primary' : 'btn-light')}
-              onClick={() => this.toggleNetworkType('Copper')}
-              disabled={this.props.displayOnly}>
-              DSL
-            </button>
-          </div>
-        </EditorInterfaceItem>
-        <EditorInterfaceItem subtitle="Network Construction">
-          <Field
-            onChange={(val, newVal, prevVal, propChain) => this.handleChange(newVal, prevVal, propChain)}
-            name={'routingMode'}
-            component={this.filterComponent(FieldComponents.renderDropdownList)}
-            valueField='value'
-            textField='label'
-            data={this.RoutingModes}
-          />
-        </EditorInterfaceItem>
-      </EditorInterface>
+            <div className='btn-group btn-group-sm' style={{ marginLeft: '5px' }}>
+              <button className={'btn btn-sm ' + (networkTypes.includes('FiveG') ? 'btn-primary' : 'btn-light')}
+                onClick={() => this.toggleNetworkType('FiveG')}
+                disabled={this.props.displayOnly}>
+                5G
+              </button>
+
+              <button className={'btn btn-sm ' + (networkTypes.includes('Copper') ? 'btn-primary' : 'btn-light')}
+                onClick={() => this.toggleNetworkType('Copper')}
+                disabled={this.props.displayOnly}>
+                DSL
+              </button>
+            </div>
+          </EditorInterfaceItem>
+          <EditorInterfaceItem subtitle="Network Construction">
+            <Field
+              onChange={(val, newVal, prevVal, propChain) => this.handleChange(newVal, prevVal, propChain)}
+              name={'routingMode'}
+              component={this.filterComponent(FieldComponents.renderDropdownList)}
+              valueField='value'
+              textField='label'
+              data={this.RoutingModes}
+            />
+          </EditorInterfaceItem>
+        </EditorInterface>
+        <FilterEditor displayOnly={this.props.displayOnly} />
+      </>
     )
   }
 

@@ -105,8 +105,26 @@ export class NetworkOptimizationInput extends Component {
 
     inputs.locationConstraints = JSON.parse(JSON.stringify(this.props.optimizationInputs.locationConstraints))
     inputs.locationConstraints.analysisSelectionMode = this.props.activeSelectionModeId
+
+    const validatedFilters = this.props.activeFilters.filter((filter) =>{
+      return filter.value1 && filter.value2 || filter.value1 && filter.operator !== 'RANGE'
+    });
+    this.props.setActiveFilters(validatedFilters)
+
+    const propertyConstraints = validatedFilters.map((filter) => {
+      return ({
+        op: filter.operator,
+        propertyName: filter.name,
+        value: filter.value1,
+        value2: filter.value2,
+      })
+    })
+    const objectFilter = {
+      clientName: this.props.clientName,
+      propertyConstraints: propertyConstraints,
+    }
+    inputs.locationConstraints.objectFilter = objectFilter
     // inputs.locationConstraints.analysisLayerId
-    
     return inputs
   }
 
@@ -149,6 +167,9 @@ const mapStateToProps = (state) => ({
   activeSelectionModeId: state.selection.activeSelectionMode.id,
   transaction: state.planEditor.transaction,
   activePlan: state.plan.activePlan,
+  networkAnalysisType: state.optimization.networkOptimization.optimizationInputs.analysis_type,
+  activeFilters: state.optimization.networkOptimization.activeFilters,
+  clientName: state.configuration.system.ARO_CLIENT,
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -157,6 +178,7 @@ const mapDispatchToProps = dispatch => ({
   cancelOptimization: (planId, optimizationId) => dispatch(NetworkOptimizationActions.cancelOptimization(planId, optimizationId)),
   setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId)),
   modifyOptimization: (activePlan) => dispatch(NetworkOptimizationActions.modifyOptimization(activePlan)),
+  setActiveFilters: (filters) => dispatch(NetworkOptimizationActions.setActiveFilters(filters)),
 })
 
 const NetworkOptimizationInputComponent = wrapComponentWithProvider(reduxStore, NetworkOptimizationInput, mapStateToProps, mapDispatchToProps)
