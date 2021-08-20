@@ -1,7 +1,5 @@
-import React, {useEffect, useState} from 'react'
-import { propTypes } from 'react-widgets/lib/SelectList'
-import reduxStore from '../../../../redux-store'
-import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
+import React, { useEffect } from 'react'
+import { connect } from 'react-redux'
 import { EditorInterface, EditorInterfaceItem } from './editor-interface.jsx'
 import NetworkOptimizationActions from './network-optimization-actions'
 import { Select } from '../../common/forms/Select.jsx'
@@ -23,11 +21,9 @@ const numberOptions = [
   // {value: 'IN', label: 'In'},
 ]
 
-export const FilterEditorComponent = ({displayOnly, loadFilters, setActiveFilters, activeFilters, filters}) => {
+export const FilterEditor = ({displayOnly, loadFilters, setActiveFilters, activeFilters, filters}) => {
 
-  useEffect(() => {
-    loadFilters()
-  }, [])
+  useEffect(() => loadFilters(), [])
 
   const newFilter = {
     displayName: null,
@@ -44,47 +40,41 @@ export const FilterEditorComponent = ({displayOnly, loadFilters, setActiveFilter
     value2: '',
   }
 
-  const addNewFilter = () => {
-      setActiveFilters([...activeFilters, newFilter])
-  }
+  const addNewFilter = () => setActiveFilters([...activeFilters, newFilter])
 
   const selectFilterType = (event, index) => {
     const selectedFilter = filters.find(filter => filter.name === event.target.value)
-    const newActiveFilters = activeFilters
-    newActiveFilters[index] = selectedFilter
+    activeFilters[index] = selectedFilter
 
-    setActiveFilters([...newActiveFilters])
+    setActiveFilters([...activeFilters])
   }
 
   const removeActiveFilter = (index) => {
-      const newActiveFilters = activeFilters.filter((activeFilter, i) => i !== index)
+      activeFilters = activeFilters.filter((activeFilter, i) => i !== index)
 
-      setActiveFilters([...newActiveFilters])
+      setActiveFilters([...activeFilters])
   }
 
   const selectOperator = (event, filter, index) => {
-    const newActiveFilters = activeFilters
-    newActiveFilters[index] = {...filter, operator: event.target.value}
+    activeFilters[index] = {...filter, operator: event.target.value}
 
-    setActiveFilters([...newActiveFilters])
+    setActiveFilters([...activeFilters])
   }
 
   const selectBool = (event, filter, index) => {
-    const newActiveFilters = activeFilters
-    newActiveFilters[index] = {...filter, operator: "EQ", value1: event.target.value}
+    activeFilters[index] = {...filter, operator: "EQ", value1: event.target.value}
 
-    setActiveFilters([...newActiveFilters])
+    setActiveFilters([...activeFilters])
   }
 
   const textChange = (event, index) => {
-    const newActiveFilters = activeFilters
     if (event.target.name === 'value1') {
-      newActiveFilters[index].value1 = event.target.value
+      activeFilters[index].value1 = event.target.value
     } else if (event.target.name === 'value2') {
-      newActiveFilters[index].value2 = event.target.value
+      activeFilters[index].value2 = event.target.value
     }
 
-    setActiveFilters([...newActiveFilters])
+    setActiveFilters([...activeFilters])
   }
   
   const ActiveFilterForm = (filter, index ) => {
@@ -93,8 +83,8 @@ export const FilterEditorComponent = ({displayOnly, loadFilters, setActiveFilter
     // possible operations: EQ, NEQ, GT, GTE, LT, LTE, IN, RANGE
 
     // this first select gets rendered only if the type is BOOLEAN
-    const MainSelect = (filter.propertyType === 'BOOLEAN' ? (
-      <Select
+    const MainSelect = (filter.propertyType === 'BOOLEAN' 
+      ? <Select
         value={filter.value1}
         placeholder="Select"
         options={boolOptions}
@@ -102,49 +92,48 @@ export const FilterEditorComponent = ({displayOnly, loadFilters, setActiveFilter
         classes="ei-filter-select-operator"
         disabled={displayOnly}
         />
-    ): (
-      <div className='ei-filter-input-container'>
-        <Select
-          value={filter.operator}
-          placeholder="Select"
-          options={numberOptions}
-          onChange={event => selectOperator(event, filter, index)}
-          classes="ei-filter-select-operator"
-          disabled={displayOnly}
+      : <div className='ei-filter-input-container'>
+          <Select
+            value={filter.operator}
+            placeholder="Select"
+            options={numberOptions}
+            onChange={event => selectOperator(event, filter, index)}
+            classes="ei-filter-select-operator"
+            disabled={displayOnly}
           />
-        {filter.operator &&
-          <Input 
-            type={filter.propertyType === 'NUMBER' || 'INTEGER' ? 'number' : 'text'}
-          name="value1"
-          value={activeFilters[index].value1}
-          min={filter.minValue}
-          max={filter.maxValue}
-          onChange={event => textChange(event, index)}
-          classes={cx('ei-filter-input', 
-            filter.format === 'DOLLAR' && 'dollar', 
-            filter.format === 'PERCENT' && 'percent')}
-          disabled={displayOnly}
-        />
-        }
-        {/* This second field only gets rendered if type is range, adding second inoput */}
-        {filter.operator === 'RANGE' && (
-          <>
-            and
+          {filter.operator &&
             <Input 
               type={filter.propertyType === 'NUMBER' || 'INTEGER' ? 'number' : 'text'}
-              name="value2"
-              value={activeFilters[index].value2}
+              name="value1"
+              value={activeFilters[index].value1}
               min={filter.minValue}
               max={filter.maxValue}
               onChange={event => textChange(event, index)}
-              classes={cx('ei-filter-input',
-                filter.format === 'DOLLAR' && 'dollar',
+              classes={cx('ei-filter-input', 
+                filter.format === 'DOLLAR' && 'dollar', 
                 filter.format === 'PERCENT' && 'percent')}
               disabled={displayOnly}
-            />
-          </>)}
+          />}
+
+          {/* This second field only gets rendered if type is range, adding second inoput */}
+          {filter.operator === 'RANGE' && (
+            <>
+              and
+              <Input 
+                type={filter.propertyType === 'NUMBER' || 'INTEGER' ? 'number' : 'text'}
+                name="value2"
+                value={activeFilters[index].value2}
+                min={filter.minValue}
+                max={filter.maxValue}
+                onChange={event => textChange(event, index)}
+                classes={cx('ei-filter-input',
+                  filter.format === 'DOLLAR' && 'dollar',
+                  filter.format === 'PERCENT' && 'percent')}
+                disabled={displayOnly}
+              />
+            </>)}
       </div>
-    ))
+    )
   
     return MainSelect
   }
@@ -154,13 +143,13 @@ export const FilterEditorComponent = ({displayOnly, loadFilters, setActiveFilter
         <>
           {!displayOnly && <i className="ei-property-icon trashcan svg" onClick={() => removeActiveFilter(index)} />}
           <Select 
-          value={activeFilters[index].value}
-          placeholder="Select"
-          options={filters}
-          onClick={event => event.stopPropagation()}
-          onChange={(event) => selectFilterType(event, index)}
-          classes="ei-filter-select-container"
-          disabled={displayOnly}
+            value={activeFilters[index].value}
+            placeholder="Select"
+            options={filters}
+            onClick={event => event.stopPropagation()}
+            onChange={(event) => selectFilterType(event, index)}
+            classes="ei-filter-select-container"
+            disabled={displayOnly}
           />
       </>
     )
@@ -169,14 +158,12 @@ export const FilterEditorComponent = ({displayOnly, loadFilters, setActiveFilter
   return (
     <EditorInterface title="Filters" action={!displayOnly && addNewFilter}>
       {activeFilters.map((activeFilter, index) => (
-        (activeFilter.displayName ? (
-          <EditorInterfaceItem subtitle={FilterSelect(index)} key={index}>
-            {ActiveFilterForm(activeFilter, index)}
-          </EditorInterfaceItem>
-          ) : (
-          <EditorInterfaceItem subtitle={FilterSelect(index)} key={index} />
-          )
-        )   
+        (activeFilter.displayName 
+          ? <EditorInterfaceItem subtitle={FilterSelect(index)} key={index}>
+              {ActiveFilterForm(activeFilter, index)}
+            </EditorInterfaceItem>
+          : <EditorInterfaceItem subtitle={FilterSelect(index)} key={index} />
+        )
       ))}
     </EditorInterface>
   )
@@ -194,5 +181,4 @@ const mapDispatchToProps = dispatch => ({
   setActiveFilters: (filters) => dispatch(NetworkOptimizationActions.setActiveFilters(filters)),
 })
 
-const FilterEditor = wrapComponentWithProvider(reduxStore, FilterEditorComponent, mapStateToProps, mapDispatchToProps)
-export default FilterEditor
+export default connect(mapStateToProps, mapDispatchToProps)(FilterEditor)

@@ -6,20 +6,20 @@
 }
 
 .ei-header-icon.plus-sign{
-  background: url('/svg/plus.svg');
+  background: url('/svg/plus.svg') no-repeat center transparent;
   height: 15px;
   width: 15px;
-  background-size: 15px 15px;
+  background-size: contain;
 }
 .ei-header-icon.plus-sign:hover {
   background-color: #e2e6ea;
 }
 
 .ei-property-icon.trashcan {
-  background: url('/svg/trash.svg');
+  background: url('/svg/trash.svg') no-repeat center transparent;
   height: 20px;
   width: 20px;
-  background-size: 20px 20px;
+  background-size: contain;
   margin-right: 5px;
 }
 

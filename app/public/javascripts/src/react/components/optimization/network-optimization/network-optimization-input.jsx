@@ -106,12 +106,9 @@ export class NetworkOptimizationInput extends Component {
     inputs.locationConstraints = JSON.parse(JSON.stringify(this.props.optimizationInputs.locationConstraints))
     inputs.locationConstraints.analysisSelectionMode = this.props.activeSelectionModeId
 
-    const validatedFilters = this.props.activeFilters.reduce((result, filter) =>{
-      if (filter.value1 && filter.value2 || filter.value1 && filter.operator !== 'RANGE') {
-        result.push(filter)
-      }
-      return result;
-    }, []);
+    const validatedFilters = this.props.activeFilters.filter((filter) =>{
+      return filter.value1 && filter.value2 || filter.value1 && filter.operator !== 'RANGE'
+    });
     this.props.setActiveFilters(validatedFilters)
 
     const propertyConstraints = validatedFilters.map((filter) => {
