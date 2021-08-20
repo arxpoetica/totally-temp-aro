@@ -21,9 +21,31 @@ const numberOptions = [
   // {value: 'IN', label: 'In'},
 ]
 
-export const FilterEditor = ({displayOnly, loadFilters, setActiveFilters, activeFilters, filters}) => {
+export const FilterEditor = ({
+  displayOnly,
+  loadFilters,
+  setActiveFilters,
+  activeFilters,
+  filters,
+  loadedPropertyConstraints
+  }) => {
 
-  useEffect(() => loadFilters(), [])
+  useEffect(() => loadFilters() ,[])
+
+  useEffect(() => {
+      const validatedConstraints = loadedPropertyConstraints.filter((constraint) =>{
+        return filters.some(filter => filter.name === constraint.propertyName)
+      })
+
+      const loadedFilters = validatedConstraints.map((constraint) => {
+        const newActiveFilter = filters.find(filter => filter.name === constraint.propertyName)
+        newActiveFilter.operator = constraint.op
+        newActiveFilter.value1 = constraint.value
+        newActiveFilter.value2 = constraint.value2
+        return newActiveFilter
+      })
+      setActiveFilters(loadedFilters)   
+  } ,[loadedPropertyConstraints, filters])
 
   const newFilter = {
     displayName: null,
@@ -174,6 +196,8 @@ export const FilterEditor = ({displayOnly, loadFilters, setActiveFilters, active
 const mapStateToProps = (state) => ({
   filters: state.optimization.networkOptimization.filters,
   activeFilters: state.optimization.networkOptimization.activeFilters,
+  loadedPropertyConstraints: state.optimization.networkOptimization.optimizationInputs.locationConstraints
+    && state.optimization.networkOptimization.optimizationInputs.locationConstraints.objectFilter.propertyConstraints
 })
 
 const mapDispatchToProps = dispatch => ({
