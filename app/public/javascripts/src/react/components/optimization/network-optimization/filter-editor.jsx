@@ -85,12 +85,12 @@ export const FilterEditor = ({displayOnly, loadFilters, setActiveFilters, active
     // this first select gets rendered only if the type is BOOLEAN
     const MainSelect = (filter.propertyType === 'BOOLEAN' 
       ? <Select
-        value={filter.value1}
-        placeholder="Select"
-        options={boolOptions}
-        onChange={event => selectBool(event, filter, index)}
-        classes="ei-filter-select-operator"
-        disabled={displayOnly}
+          value={filter.value1}
+          placeholder="Select"
+          options={boolOptions}
+          onChange={event => selectBool(event, filter, index)}
+          classes="ei-filter-select-operator"
+          disabled={displayOnly}
         />
       : <div className='ei-filter-input-container'>
           <Select
