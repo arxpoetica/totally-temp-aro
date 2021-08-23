@@ -229,7 +229,7 @@ function planReducer (state = defaultState, action) {
       return updateDefaultPlanCoordinates(state, action.payload)
       
     case Actions.PLAN_EDIT_ACTIVE_PLAN:
-    return editActivePlan(state, action.payload)
+      return editActivePlan(state, action.payload)
 
     default:
       return state

@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
-import reduxStore from '../../../redux-store'
-import wrapComponentWithProvider from '../../common/provider-wrapped-component'
+import { connect } from 'react-redux'
 import CreatableSelect from 'react-select/creatable'
 import { components } from 'react-select'
 import AroHttp from '../../common/aro-http'
@@ -9,7 +8,8 @@ import PlanSearchFilter from './plan-search-filter.jsx'
 import { toUTCDate } from '../../common/view-utils.js'
 import PlanActions from '../plan/plan-actions.js'
 import { getPlanCreatorName, getTagCategories } from '../sidebar/view/plan-info-common.js'
-import { without, isString, uniqBy, arrayComparer } from '../../common/view-utils.js'
+import { uniqBy, arrayComparer } from '../../common/view-utils.js'
+import ReactPaginate from 'react-paginate'
 
 const createOption = (label) => ({
   label,
@@ -68,11 +68,8 @@ export class PlanSearch extends Component {
 
     this.currentView = {
       SAVE_PLAN_SEARCH: 'savePlanSearch',
-      VIEW_MODE_PLAN_SEARCH: 'viewModePlanSearch'
+      VIEW_MODE_PLAN_SEARCH: 'viewModePlanSearch',
     }
-
-    this.lastPage = 0
-    this.rowsPerPage = 10
 
     this.state = {
       inputValue: '',
@@ -88,12 +85,17 @@ export class PlanSearch extends Component {
       idToServiceAreaCode: {},
       creatorsSearchList: [],
       plans: [],
-      pages: [],
       optionSetText: [],
       isDropDownOption: false,
       isValueRemoved: false,
       sortByField: this.planSortingOptions[0].sortType,
-      pageOffset: 0
+      pageableData: {
+        pageOffset: 0,
+        rowsPerPage: 10,
+        currentPage: 0,
+        pageCount: 0,
+        marginPagesDisplayed: 2,
+      },
     }
 
     this.optionSetTextArray = [
@@ -116,8 +118,8 @@ export class PlanSearch extends Component {
 
   render() {
     const { loggedInUser, listOfTags, listOfServiceAreaTags, showPlanDeleteButton, systemActors} = this.props
-    const { searchText, plans, pages, idToServiceAreaCode, creatorsSearchList,
-      optionSetText, isDropDownOption, sortByField, allPlans, pageOffset } = this.state
+    const { searchText, plans, idToServiceAreaCode, creatorsSearchList,
+      optionSetText, isDropDownOption, sortByField, allPlans, pageableData } = this.state
 
     // To customize MultiValuelabel in react-select
     // https://codesandbox.io/s/znxjxj556l?file=/src/index.js:76-90
@@ -126,7 +128,7 @@ export class PlanSearch extends Component {
         <components.MultiValue {...props}>
           {props.data.type &&
             <span className="tag">
-              {props.data.type}&nbsp;:&nbsp;
+              {props.data.type}<span className="aro-plan-blank-space" />:<span className="aro-plan-blank-space" />
               {props.data.type === 'tag' &&
                 <span
                   className="badge badge-primary"
@@ -212,16 +214,15 @@ export class PlanSearch extends Component {
             }}
           />
           <button
-            className="btn btn-light input-group-append"
+            className="btn btn-light input-group-append aro-plan-search-button"
             onClick={(event) => this.onClikCreateValue(event)}
-            style={{ cursor: 'pointer', alignItems: 'center' }}
           >
             <span className="fa fa-search" />
           </button>
         </div>
 
-        <div className="plan-info" style={{ display: 'flex' }}>
-          <span style={{ flex: '0 0 auto', lineHeight: '33px', padding: '0px 12px' }}>Filter by:</span>
+        <div className="aro-plan-info">
+          <span className="aro-plan-search-filter">Filter by:</span>
           <PlanSearchFilter
             objectName="Tag"
             searchProperty="name"
@@ -243,11 +244,10 @@ export class PlanSearch extends Component {
           />
         </div>
 
-        <div className="plan-info" style={{ display: 'flex', paddingTop: '5px' }}>
-          <span style={{ flex: '0 0 auto', lineHeight: '33px', padding: '0px 12px' }}>Sort by:</span>
+        <div className="aro-plan-info">
+          <span className="aro-plan-search-filter">Sort by:</span>
           <select
-            className="form-control-sm"
-            style={{ background: '#f8f9fa', border: '0px', outline: '0px' }}
+            className="form-control-sm aro-plan-sorting"
             value={sortByField}
             onChange={(event) => this.onChangeSortingType(event)}>
             {this.planSortingOptions.map((item, index) =>
@@ -273,19 +273,19 @@ export class PlanSearch extends Component {
                     {plan.createdBy &&
                       <div>
                         <i>
-                          {getPlanCreatorName(plan.createdBy, systemActors) || 'loading...'}
-                          &nbsp;| created {this.convertTimeStampToDate(plan.createdDate)}
-                          &nbsp;| last modified {this.convertTimeStampToDate(plan.updatedDate)}
+                          {getPlanCreatorName(plan.createdBy, systemActors) || 'loading...' }
+                          <span className="aro-plan-blank-space">| created {this.convertTimeStampToDate(plan.createdDate)}</span>
+                          <span className="aro-plan-blank-space">| last modified {this.convertTimeStampToDate(plan.updatedDate)}</span>
                         </i>
                       </div>
                     }
-                    <div className="tags"></div>
+                    <div className="aro-plan-tags"></div>
                     {getTagCategories(plan.tagMapping.global, listOfTags).map((tag, ind) => {
                       return (
                         <div key={ind} className="badge badge-primary"
                           style={{ backgroundColor: this.props.getTagColour(tag) }}
                         >
-                          <span> {tag.name} &nbsp;
+                          <span> {tag.name} <span className="aro-plan-blank-space" />
                             {loggedInUser.isAdministrator &&
                               <i className="fa fa-times pointer"
                                 onClick={() => this.updateTag(plan, { type: 'general', tag })}
@@ -295,11 +295,11 @@ export class PlanSearch extends Component {
                         </div>
                       )
                     })}
-                    <div className="tags"></div>
+                    <div className="aro-plan-tags"></div>
                     {plan.tagMapping.linkTags.serviceAreaIds.map((serviceAreaId, index) => {
                       return (
                         <div key={index} className="badge satags">
-                          <span> {idToServiceAreaCode[serviceAreaId] || 'loading...'} &nbsp;
+                          <span> {idToServiceAreaCode[serviceAreaId] || 'loading...'} <span className="aro-plan-blank-space" />
                             {loggedInUser.isAdministrator &&
                               <i className="fa fa-times pointer"
                                 onClick={() => this.updateTag(plan, { type: 'svc', serviceAreaId })}
@@ -327,32 +327,24 @@ export class PlanSearch extends Component {
             </tbody>
           </table>
 
-          {this.rowsPerPage < allPlans.length &&
-            <div style={{ padding: '8px' }}>
-              <ul className="pagination" style={{ margin: '0px' }}>
-                <li className={`page-item ${pageOffset === 0 ? 'disabled' : ''}`}>
-                  <span className="page-link" aria-label="Previous" onClick={() => this.changePage(pageOffset - 1)}>
-                    <span aria-hidden="true">&laquo;</span>
-                  </span>
-                </li>
-                {pages.map((page, index) => {
-                  return (
-                    <li key={index} className={`page-item ${pageOffset === page ? 'active' : ''}`}>
-                      <span className={`${-1 !== page ? 'page-link' : ''} ${-1 === page ? 'break' : ''}`}
-                        onClick={() => {this.loadPlans(page + 1); this.setPage(page)}}>
-                        {-1 === page ? '…' : page+1}
-                      </span>
-                    </li>
-                  )
-                })
-                }
-                <li className={`page-item ${pageOffset === pages[pages.length - 1] ? 'disabled' : ''}`}>
-                  <span className="page-link" aria-label="Next"
-                    onClick={() => this.changePage(pageOffset + 1)}>
-                    <span aria-hidden="true">&raquo;</span>
-                  </span>
-                </li>
-              </ul>
+          {pageableData.rowsPerPage < allPlans.length &&
+            <div className="aro-plan-pagination">
+              <ReactPaginate
+                previousLabel='«'
+                nextLabel='»'
+                breakLabel={<span className="gap">…</span>}
+                marginPagesDisplayed={pageableData.marginPagesDisplayed}
+                pageCount={pageableData.pageCount}
+                forcePage={pageableData.currentPage}
+                onPageChange={(event) => this.handlePageClick(event)}
+                activeClassName='active'
+                containerClassName='pagination'
+                pageClassName='page-item'
+                pageLinkClassName='page-link'
+                previousLinkClassName='page-link'
+                nextLinkClassName='page-link'
+                disabledClassName='page-item disabled'
+              />
             </div>
           }
         </>
@@ -426,7 +418,6 @@ export class PlanSearch extends Component {
         })
 
         // To compare 'newSearchText' and 'formatedObjArray' and get the removed values from reat-select serach bar
-        // https://stackoverflow.com/questions/21987909/how-to-get-the-difference-between-two-arrays-of-objects-in-javascript
         const onlyInA = newSearchText.filter(arrayComparer(formatedObjArray))
         const onlyInB = formatedObjArray.filter(arrayComparer(newSearchText))
         const removedValueArray = onlyInA.concat(onlyInB)
@@ -520,7 +511,7 @@ export class PlanSearch extends Component {
 
   loadPlans(page, callback) {
     this.constructSearch()
-    this.maxResults = this.rowsPerPage
+    this.maxResults = this.state.pageableData.rowsPerPage
     if (page > 1) {
       const start = this.maxResults * (page - 1)
       const end = start + this.maxResults
@@ -583,13 +574,12 @@ export class PlanSearch extends Component {
   updateTag(plan, removeTag) {
     const updatePlan = plan
     if (removeTag.type === 'svc') {
-      updatePlan.tagMapping.linkTags.serviceAreaIds = without(
-        updatePlan.tagMapping.linkTags.serviceAreaIds, removeTag.serviceAreaId
-      )
+      updatePlan.tagMapping.linkTags.serviceAreaIds = updatePlan.tagMapping.linkTags.serviceAreaIds
+        .filter(item => removeTag.serviceAreaId !== item)
     } else {
-      updatePlan.tagMapping.global = without(updatePlan.tagMapping.global, removeTag.tag.id)
+      updatePlan.tagMapping.global = updatePlan.tagMapping.global.filter(item => removeTag.tag.id !== item)
     }
-
+    this.props.editActivePlan(JSON.parse(JSON.stringify(updatePlan)))
     return AroHttp.put('/service/v1/plan', updatePlan)
       .then((response) => {
         this.loadPlans()
@@ -614,7 +604,7 @@ export class PlanSearch extends Component {
       newConstructSearch = []
     }
 
-    const selectedFilterPlans = newConstructSearch.filter(plan => { if (isString(plan)) return plan })
+    const selectedFilterPlans = newConstructSearch.filter(plan => { if (typeof plan === 'string') return plan })
 
     const typeToProperty = {
       svc: 'code',
@@ -623,7 +613,7 @@ export class PlanSearch extends Component {
     }
 
     let selectedFilters = newConstructSearch
-      .filter((item) => !isString(item))
+      .filter((item) => typeof item !== 'string')
       .map((item) => `${item.type}:\"${item[typeToProperty[item.type]]}\"`)
 
     if (selectedFilterPlans.length > 0) selectedFilters = selectedFilters.concat(`"${selectedFilterPlans.join(' ')}"`)
@@ -670,68 +660,42 @@ export class PlanSearch extends Component {
     return new Intl.DateTimeFormat('en-US').format(utcDate)
   }
 
-  changePage(page) {
-    this.loadPlans(page)
-    this.setPage(page)
+  handlePageClick(event) {
+    const currentpage = event.selected
+    this.setPage(currentpage)
+    this.loadPlans(currentpage + 1)
   }
 
   // Pagination
   setPage(page) {
+    const { allPlans, pageableData } = this.state
+    const { pageOffset, rowsPerPage } = pageableData
+    const { sidebarWidth } = this.props
+
     if (typeof page === 'undefined') {
-      page = this.state.pageOffset
+      page = pageOffset
     }
 
     page === Math.floor(page)
 
-    this.lastPage = Math.floor((this.state.allPlans.length - 1) / this.rowsPerPage)
-    if (this.lastPage < 0) this.lastPage = 0
-    if (isNaN(this.lastPage)) this.lastPage = 0
-
-    if (page > this.lastPage) {
-      page = this.lastPage
-    }
-
-    if (page < 0) page = 0
-
-    let newPages = []
-    // -1 indicates "..."
-    // Change the newPages size based on sidebarWidth
-    if (this.props.sidebarWidth < 30) {
-      if (this.lastPage < 8) {
-        newPages = [...Array(this.lastPage + 1).keys()]
-      } else if (page < 2 || page + 2 > this.lastPage) {
-        newPages = [0, 1, 2, 3, -1, this.lastPage - 2, this.lastPage - 1, this.lastPage]
-      } else if (page === 2) {
-        newPages = [0, 1, 2, 3, 4, -1, this.lastPage - 1, this.lastPage]
-      } else if (this.lastPage - 2 === page) {
-        newPages = [0, 1, 2, -1, this.lastPage - 3, this.lastPage - 2, this.lastPage - 1, this.lastPage]
-      } else {
-        newPages = [0, -1, page - 1, page, page + 1, -1, this.lastPage - 1, this.lastPage]
-      }
+    let marginPagesDisplayed
+    if (sidebarWidth < 30) {
+      marginPagesDisplayed = 2
     } else {
-      if (this.lastPage < 10) {
-        newPages = [...Array(this.lastPage + 1).keys()]
-      } else if (page < 4 || page + 2 > this.lastPage) {
-        newPages = [0, 1, 2, 3, 4, -1, this.lastPage - 3, this.lastPage - 2, this.lastPage - 1, this.lastPage]
-      } else if (page === 4) {
-        newPages = [0, 1, 2, 3, 4, 5, -1, this.lastPage - 2, this.lastPage - 1, this.lastPage]
-      } else if (this.lastPage - 3 === page) {
-        newPages = [0, 1, 2, 3, -1, this.lastPage - 4, this.lastPage - 3, this.lastPage - 2, this.lastPage - 1, this.lastPage]
-      } else if (this.lastPage - 2 === page) {
-        newPages = [0, 1, 2, -3, -1, page - 2, page - 1, page, this.lastPage - 1, this.lastPage]
-      } else {
-        newPages = [0, 1, 2, -1, page - 1, page, page + 1, page + 2, -1, this.lastPage]
-      }
+      marginPagesDisplayed = 5
     }
 
-    this.setState({ pages: newPages, pageOffset: page })
+    pageableData.pageCount = Math.ceil(allPlans.length / rowsPerPage)
+    pageableData.currentPage = page
+    pageableData.marginPagesDisplayed = marginPagesDisplayed
+
+    this.setState({ pageableData })
   }
 
   onPlanDeleteClicked(plan) {
     this.onPlanDeleteRequested(plan)
       .then(() => {
         this.loadPlans()
-        this.setPage(0)
       })
       .catch((err) => {
         console.error(err)
@@ -762,7 +726,7 @@ const mapDispatchToProps = (dispatch) => ({
   ),
   loadPlan: (planId) => dispatch(ToolBarActions.loadPlan(planId)),
   deletePlan: (plan) => dispatch(PlanActions.deletePlan(plan)),
-
+  editActivePlan: (plan) => dispatch(PlanActions.editActivePlan(plan)),
 })
 
-export default wrapComponentWithProvider(reduxStore, PlanSearch, mapStateToProps, mapDispatchToProps)
+export default connect(mapStateToProps, mapDispatchToProps)(PlanSearch)

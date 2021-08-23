@@ -177,11 +177,38 @@
   height: 100%;
   padding-top: 10px;
 }
-.tags {
+.aro-plan-tags {
   margin-bottom: 5px;
  } 
-.tags .tag {
+.aro-plan-tags .tag {
   display: inline-block;
   margin: 1px;
   font-size: 12px;
+}
+.aro-plan-info-position {
+  position: relative
+}
+.aro-plan-search-button {
+  cursor: pointer;
+  align-items: center;
+}
+.aro-plan-search-filter {
+  flex: 0 0 auto;
+  line-height: 33px;
+  padding: 0px 12px;
+}
+.aro-plan-info {
+  display: flex;
+  padding-top: 5px;
+}
+.aro-plan-sorting {
+  background: #f8f9fa;
+  border: 0px;
+  outline: 0px;
+}
+.aro-plan-pagination {
+  padding: 8px
+}
+.aro-plan-blank-space {
+  margin-left: 4px;
 }

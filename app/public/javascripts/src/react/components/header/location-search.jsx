@@ -50,18 +50,20 @@ const ToolBarSearch = (props) => {
           return
         }
 
-        if (excuteInPlanInfo(true)) {
+        // While Editing the existing plan, if user modified the location details then update the plan,
+        // When location change from top tool-bar search box, update the 'lat', 'lag' to change the marker values.
+        if (currentView && currentView === 'viewModePlanInfo') {
           plan.areaName = change.displayText
           plan.latitude = results[0].geometry.location.lat()
           plan.longitude = results[0].geometry.location.lng()
           AroHttp.put(`/service/v1/plan`, plan)
+        } else if (currentView && currentView !== 'viewModePlanInfo') { 
+          const { lat, lng } = results[0].geometry.location
+          setMarker(lat(), lng()) 
         }
-        
-        const { lat, lng } = results[0].geometry.location
-        if (excuteInPlanInfo(false)) { setMarker(lat(), lng()) }
       })
     } else if (change.type === 'latlng') {
-      if (excuteInPlanInfo(false)) { setMarker(+change.value[0], +change.value[1]) }
+      if (currentView && currentView !== 'viewModePlanInfo') { setMarker(+change.value[0], +change.value[1]) }
     }
   }
 
@@ -77,24 +79,9 @@ const ToolBarSearch = (props) => {
     setTimeout(() => { marker.setMap(null) }, 5000)
   }
 
-  const loadPlanLocation = (plan) => {
-    const option = {}
-    option.label = plan.areaName
-    return option
-  }
-
-  // To check in view-mode plan-info
-  const excuteInPlanInfo = (excute) => {
-    if (excute) {
-      return currentView && currentView === 'viewModePlanInfo'
-    } else {
-      return currentView && currentView !== 'viewModePlanInfo'
-    }
-  }
-
   const setDefaultLocation = () => {
-    if (excuteInPlanInfo(true)) {
-      return plan && loadPlanLocation(plan)
+    if (currentView && currentView === 'viewModePlanInfo') {
+      return plan && { label: plan.areaName }
     } else {
       return []
     }

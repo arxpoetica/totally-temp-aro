@@ -10,15 +10,11 @@ export const NetworkPlanManage = () => {
     Search_plans: 1,
   })
 
-  const [state, setState] = useState({
-    currentView: views.Search_plans,
-  })
+  const [state, setState] = useState({ currentView: views.Search_plans })
 
   const { currentView } = state
 
-  const setCurrentView = (currentView) => {
-    setState((state) => ({ ...state, currentView }))
-  }
+  const setCurrentView = (currentView) => setState((state) => ({ ...state, currentView }))
 
   return (
     <div className="aro-plan-info-container">
@@ -37,7 +33,7 @@ export const NetworkPlanManage = () => {
 
       {currentView === views.Search_plans &&
         <PlanSearch
-          currentView='viewModePlanSearch'
+          currentView="viewModePlanSearch"
           showPlanDeleteButton={true}
         />
       }

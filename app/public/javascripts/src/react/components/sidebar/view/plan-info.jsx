@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import reduxStore from '../../../../redux-store'
-import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
+import { connect } from 'react-redux'
 import LocationSearch from '../../header/location-search.jsx'
 import EditPlanTag from '../../header/edit-plan-tag.jsx'
 import ToolBarActions from '../../header/tool-bar-actions.js'
@@ -8,7 +7,6 @@ import PermissionsTable from '../../acl/resource-permissions/permissions-table.j
 import PlanActions from '../../plan/plan-actions'
 import AroHttp from '../../../common/aro-http'
 import { getPlanCreatorName, getTagCategories, getSATagCategories } from './plan-info-common.js'
-import { without } from '../../../common/view-utils.js'
 
 export const PlanInfo = (props) => {
 
@@ -51,9 +49,7 @@ export const PlanInfo = (props) => {
     setCurrentPlanTags(generalPlanTags)
   }
 
-  const handleAddGeneralTags = () => {
-    setState((state) => ({ ...state, addGeneralTags: true }))
-  }
+  const handleAddGeneralTags = () => setState((state) => ({ ...state, addGeneralTags: true }))
 
   const onRefreshTagList = () => {
     loadListOfSAPlanTags(dataItems)
@@ -75,23 +71,20 @@ export const PlanInfo = (props) => {
 
   const planResource = { identifier: plan.id, dataType: '', name: plan.name, permissions: 63, id: plan.id }
 
-  const removeTagFn = (type, tag) => {
-    updateTag(plan, { type, tag })
-      .then(() => {
-        loadPlan(plan.id)
-      })
+  const removeTagFn = async(type, tag) => {
+    await updateTag(plan, { type, tag })
+    loadPlan(plan.id)
   }
 
   const updateTag = (plan, removeTag) => {
     const updatePlan = plan
     if (removeTag.type === 'svc') {
-      updatePlan.tagMapping.linkTags.serviceAreaIds = without(
-        updatePlan.tagMapping.linkTags.serviceAreaIds, removeTag.tag.id
-      )
+      updatePlan.tagMapping.linkTags.serviceAreaIds = updatePlan.tagMapping.linkTags.serviceAreaIds
+        .filter(item => removeTag.tag.id !== item)
       const saPlanTags = getSATagCategories(updatePlan.tagMapping.linkTags.serviceAreaIds, listOfServiceAreaTags)
       setCurrentPlanServiceAreaTags(saPlanTags)
     } else {
-      updatePlan.tagMapping.global = without(updatePlan.tagMapping.global, removeTag.tag.id)
+      updatePlan.tagMapping.global = updatePlan.tagMapping.global.filter(item => removeTag.tag.id !== item)
       const generalPlanTags = getTagCategories(updatePlan.tagMapping.global, listOfTags)
       setCurrentPlanTags(generalPlanTags)
     }
@@ -99,7 +92,7 @@ export const PlanInfo = (props) => {
     return AroHttp.put('/service/v1/plan', updatePlan)
   }
 
-  const updateEditableStatus = async () => {
+  const updateEditableStatus = () => {
     setState((state) => ({ ...state, currentUserCanEdit: false }))
     AroHttp.get('/service/auth/permissions')
       .then((result) => {
@@ -169,7 +162,7 @@ export const PlanInfo = (props) => {
   return (
     !plan.ephemeral ?
       <div className="aro-plan-details-container">
-        <div style={{ position: 'relative' }}>
+        <div className="aro-plan-info-position">
           <table id="tblPlanInfo" className="table table-sm table-striped">
             <tbody>
               <tr>
@@ -209,14 +202,15 @@ export const PlanInfo = (props) => {
               <tr>
                 <td>General tags</td>
                 <td>
-                  <span className="tags">
+                  <span className="aro-plan-tags">
                     {!addGeneralTags &&
                       generalPlanTags.map((tag, index) => {
                         return (
                           <div className="badge badge-primary" key={index}
                             style={{ backgroundColor: getTagColour(tag) }}>
                             <span>
-                              {tag.name} &nbsp;
+                              {tag.name}
+                              <span className="aro-plan-blank-space" />
                               {isEditMode &&
                                 <i
                                   className="fa fa-times pointer"
@@ -235,7 +229,8 @@ export const PlanInfo = (props) => {
                       searchList={listOfTags}
                       selectedList={generalPlanTags}
                     />
-                  } &nbsp;
+                  }
+                  <span className="aro-plan-blank-space" />
                   <span>
                     {(isEditMode && !addGeneralTags) &&
                       <i className="fa fa-plus pointer" onClick={() => handleAddGeneralTags()} />
@@ -246,12 +241,14 @@ export const PlanInfo = (props) => {
               <tr>
                 <td>Service area tags</td>
                 <td>
-                  <span className="tags">
+                  <span className="aro-plan-tags">
                     {!addSATags &&
                       saPlanTags.map((tag, index) => {
                         return (
                           <div className="badge satags" key={index}>
-                            <span> {tag.code} &nbsp;
+                            <span>
+                              {tag.code}
+                              <span className="aro-plan-blank-space" />
                               {isEditMode &&
                                 <i
                                   className="fa fa-times pointer"
@@ -271,7 +268,8 @@ export const PlanInfo = (props) => {
                       selectedList={saPlanTags}
                       refreshTagList={onRefreshTagList}
                     />
-                  } &nbsp;
+                  }
+                  <span className="aro-plan-blank-space" />
                   <span>
                     {(isEditMode && !addSATags) &&
                       <i className="fa fa-plus pointer" onClick={() => handleAddSATags()} />
@@ -297,7 +295,8 @@ export const PlanInfo = (props) => {
               disabled={!currentUserCanEdit}
               onClick={() => editCurrentPlan()}
             >
-              <i className="fa fa-pencil" />&nbsp;&nbsp;Edit Plan Details
+              <i className="fas fa-pencil-alt" />
+              <span className="aro-plan-blank-space">Edit Plan Details</span>
             </button>
           }
           {isEditMode &&
@@ -307,7 +306,8 @@ export const PlanInfo = (props) => {
               disabled={!currentUserCanEdit}
               onClick={() => commitUpdatestoPlan(false)}
             >
-              <i className="fa fa-save" />&nbsp;&nbsp;Save Changes
+              <i className="fa fa-save" />
+              <span className="aro-plan-blank-space">Save Changes</span>
             </button>
           }
           <button
@@ -315,7 +315,8 @@ export const PlanInfo = (props) => {
             disabled={!currentUserCanEdit}
             onClick={() => deletePlan(plan)}
           >
-            <i className="far fa-trash-alt" />&nbsp;&nbsp;Delete Plan
+            <i className="far fa-trash-alt" />
+            <span className="aro-plan-blank-space">Delete Plan</span>
           </button>
         </div>
       </div>
@@ -349,4 +350,4 @@ const mapDispatchToProps = (dispatch) => ({
   deletePlan: (plan) => dispatch(PlanActions.deletePlan(plan)),
 })
 
-export default wrapComponentWithProvider(reduxStore, PlanInfo, mapStateToProps, mapDispatchToProps)
+export default connect(mapStateToProps, mapDispatchToProps)(PlanInfo)

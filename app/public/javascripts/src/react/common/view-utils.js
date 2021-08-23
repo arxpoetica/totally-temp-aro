@@ -86,10 +86,6 @@ export const usePrevious = value => {
   return ref.current
 }
 
-// https://youmightnotneed.com/lodash/
-export const without = (arr, ...args) => arr.filter(item => !args.includes(item))
-export const isString = a => typeof a === 'string'
-
 // https://newbedev.com/converting-lodash-uniqby-to-native-javascript
 export const uniqBy = (arr, predicate) => {
   const cb = typeof predicate === 'function' ? predicate : (o) => o[predicate]
