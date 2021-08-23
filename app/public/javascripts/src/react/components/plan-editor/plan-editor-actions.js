@@ -756,7 +756,7 @@ function addSubnets (subnetIds) {
     dispatch(setIsCalculatingSubnets(true))
     return AroHttp.post(`/service/plan-transaction/${transaction.id}/subnet_cmd/query-subnets`, command)
       .then(result => {
-        let apiSubnets = result.data.filter(x => x)
+        let apiSubnets = result.data.filter(Boolean)
         let fiberApiPromises = []
         apiSubnets.forEach(subnet => {
           // subnet could be null (don't ask me)

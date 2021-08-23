@@ -104,9 +104,11 @@ export class EquipmentMapObjects extends Component {
     Object.keys(this.objectIdToMapObject).forEach(objectId => {
       if (this.props.selectedEditFeatureIds.indexOf(objectId) >= 0) {
         // This marker is selected. Create a selection overlay if it does not exist.
-        let icon = '/images/map_icons/aro/icon-selection-background.svg'
-        if (objectId === this.props.selectedSubnetId) icon = '/images/map_icons/aro/icon-selection-background_B.svg'
-        
+        let icon = '/svg/map-icons/selection-1.svg'
+        if (objectId === this.props.selectedSubnetId) {
+          icon = '/svg/map-icons/selection-2.svg'
+        }
+
         if (this.objectIdToSelectionOverlay[objectId]) {
           // ToDo: just change the icon instead of deleteing and remaking
           this.objectIdToSelectionOverlay[objectId].setMap(null)
