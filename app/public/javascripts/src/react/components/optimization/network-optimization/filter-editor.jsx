@@ -107,10 +107,24 @@ export const FilterEditor = ({
   }
 
   const textChange = (event, index) => {
+    let min = parseFloat(event.target.min) || null
+    let max = parseFloat(event.target.max) || null
+    let value = parseFloat(event.target.value) || 0
+
     if (event.target.name === 'value1') {
-      activeFilters[index].value1 = event.target.value
+      if (max && value > max) {
+        value = max
+      } else if (min && value < min) {
+        value = min
+      }
+      activeFilters[index].value1 = value
     } else if (event.target.name === 'value2') {
-      activeFilters[index].value2 = event.target.value
+      if (max && filter.value2 > max) {
+        value = max
+      } else if (min && filter.value2 < min) {
+        value = min
+      }
+      activeFilters[index].value2 = value
     }
 
     setActiveFilters([...activeFilters])
