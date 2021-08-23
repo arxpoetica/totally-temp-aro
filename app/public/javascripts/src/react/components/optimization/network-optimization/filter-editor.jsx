@@ -53,7 +53,7 @@ export const FilterEditor = ({
 
         // adds extra information from the metadta, that is needed for display
         const loadedFilters = validatedConstraints.map((constraint) => {
-          const newActiveFilter = filters.find(filter => filter.name === constraint.propertyName)
+          const newActiveFilter = JSON.parse(JSON.stringify(filters.find((filter) => filter.name === constraint.propertyName)))
           newActiveFilter.operator = constraint.op
           newActiveFilter.value1 = constraint.value
           newActiveFilter.value2 = constraint.value2
