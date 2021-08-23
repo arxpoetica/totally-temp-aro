@@ -1031,11 +1031,13 @@ export class ToolBar extends Component {
 
   setSelectionSingle () {
     this.props.selectedToolBarAction(null)
+    this.props.mapRef.setOptions({ draggableCursor: null })
     this.setSelectionMode(this.targetSelectionModes.SINGLE_PLAN_TARGET)
   }
 
   setSelectionPolygon () {
     this.props.selectedToolBarAction(null)
+    this.props.mapRef.setOptions({ draggableCursor: 'crosshair' })
     this.setSelectionMode(this.targetSelectionModes.POLYGON_PLAN_TARGET)
   }
 
