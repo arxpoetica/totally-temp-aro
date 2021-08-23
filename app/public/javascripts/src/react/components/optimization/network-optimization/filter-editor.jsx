@@ -27,7 +27,7 @@ export const FilterEditor = ({
   setActiveFilters,
   activeFilters,
   filters,
-  OptimizationInputs,
+  optimizationInputs,
   planId,
   }) => {
 
@@ -43,8 +43,8 @@ export const FilterEditor = ({
     // this useEffect is for setting previously added filters from state
     // We have to check if the inputs match the plan
     // inputs don't change when switching to an incomplete plan
-    if (OptimizationInputs.planId === planId){
-      const { objectFilter } = OptimizationInputs.locationConstraints
+    if (optimizationInputs.planId === planId){
+      const { objectFilter } = optimizationInputs.locationConstraints
       if ( objectFilter && objectFilter.propertyConstraints) {
         // removes filters that don't match metadata
         const validatedConstraints = objectFilter.propertyConstraints.filter((constraint) =>{
@@ -62,7 +62,7 @@ export const FilterEditor = ({
         setActiveFilters(loadedFilters)
       }
     }
-  } ,[OptimizationInputs, filters])
+  } ,[optimizationInputs, filters])
 
   const newFilter = {
     displayName: null,
@@ -213,7 +213,7 @@ export const FilterEditor = ({
 const mapStateToProps = (state) => ({
   filters: state.optimization.networkOptimization.filters,
   activeFilters: state.optimization.networkOptimization.activeFilters,
-  OptimizationInputs: state.optimization.networkOptimization.optimizationInputs,
+  optimizationInputs: state.optimization.networkOptimization.optimizationInputs,
   planId: state.plan.activePlan.id,
 })
 
