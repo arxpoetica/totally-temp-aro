@@ -27,25 +27,39 @@ export const FilterEditor = ({
   setActiveFilters,
   activeFilters,
   filters,
-  loadedPropertyConstraints
+  OptimizationInputs,
+  planId,
   }) => {
 
-  useEffect(() => loadFilters() ,[])
+  useEffect(() => {
+    loadFilters()
+
+    return () => {
+      setActiveFilters([])
+    }
+  } ,[])
 
   useEffect(() => {
-      const validatedConstraints = loadedPropertyConstraints.filter((constraint) =>{
-        return filters.some(filter => filter.name === constraint.propertyName)
-      })
+    // We have to check if the inputs match the plan
+    // inputs don't change when switching to an incomplete plan
+    if (OptimizationInputs.planId === planId){
+      const { objectFilter } = OptimizationInputs.locationConstraints
+      if ( objectFilter && objectFilter.propertyConstraints) {
+        const validatedConstraints = objectFilter.propertyConstraints.filter((constraint) =>{
+          return filters.some(filter => filter.name === constraint.propertyName)
+        })
 
-      const loadedFilters = validatedConstraints.map((constraint) => {
-        const newActiveFilter = filters.find(filter => filter.name === constraint.propertyName)
-        newActiveFilter.operator = constraint.op
-        newActiveFilter.value1 = constraint.value
-        newActiveFilter.value2 = constraint.value2
-        return newActiveFilter
-      })
-      setActiveFilters(loadedFilters)   
-  } ,[loadedPropertyConstraints, filters])
+        const loadedFilters = validatedConstraints.map((constraint) => {
+          const newActiveFilter = filters.find(filter => filter.name === constraint.propertyName)
+          newActiveFilter.operator = constraint.op
+          newActiveFilter.value1 = constraint.value
+          newActiveFilter.value2 = constraint.value2
+          return newActiveFilter
+        })
+        setActiveFilters(loadedFilters)
+      }
+    }
+  } ,[OptimizationInputs, filters])
 
   const newFilter = {
     displayName: null,
@@ -196,8 +210,8 @@ export const FilterEditor = ({
 const mapStateToProps = (state) => ({
   filters: state.optimization.networkOptimization.filters,
   activeFilters: state.optimization.networkOptimization.activeFilters,
-  loadedPropertyConstraints: state.optimization.networkOptimization.optimizationInputs.locationConstraints
-    && state.optimization.networkOptimization.optimizationInputs.locationConstraints.objectFilter.propertyConstraints
+  OptimizationInputs: state.optimization.networkOptimization.optimizationInputs,
+  planId: state.plan.activePlan.id,
 })
 
 const mapDispatchToProps = dispatch => ({
