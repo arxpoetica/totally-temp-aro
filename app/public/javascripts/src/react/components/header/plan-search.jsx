@@ -192,7 +192,7 @@ export class PlanSearch extends Component {
     } else { newSearchText = [] }
 
     return (
-      <div classname="aro-plan">
+      <div className="aro-plan">
         <div className="input-group">
           <CreatableSelect
             isMulti
