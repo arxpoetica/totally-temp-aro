@@ -77,10 +77,10 @@
   padding-left:18px;
 }
 
-.ei-filter-input.dollar:before {
+.ei-filter-input.dollar::before {
   content: "$";
 }
 
-.ei-filter-input.percent:before {
+.ei-filter-input.percent::before {
   content: "%";
 }
