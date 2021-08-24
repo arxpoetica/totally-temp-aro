@@ -17,7 +17,7 @@ export const NetworkPlanManage = () => {
   const setCurrentView = (currentView) => setState((state) => ({ ...state, currentView }))
 
   return (
-    <div className="aro-plan-info-container">
+    <div className="aro-plan info-container">
       <ul className="nav nav-tabs">
         <li role="presentation" className="nav-item" onClick={() => setCurrentView(views.Plan_Info)}>
           <a href="#" className={`nav-link ${currentView === views.Plan_Info ? 'active' : ''}`}>Plan Info</a>

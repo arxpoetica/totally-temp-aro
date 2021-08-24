@@ -128,7 +128,7 @@ export class PlanSearch extends Component {
         <components.MultiValue {...props}>
           {props.data.type &&
             <span className="tag">
-              {props.data.type}<span className="aro-plan-blank-space" />:<span className="aro-plan-blank-space" />
+              {props.data.type}<span className="blank-space" />:<span className="blank-space" />
               {props.data.type === 'tag' &&
                 <span
                   className="badge badge-primary"
@@ -192,7 +192,7 @@ export class PlanSearch extends Component {
     } else { newSearchText = [] }
 
     return (
-      <div>
+      <div classname="aro-plan">
         <div className="input-group">
           <CreatableSelect
             isMulti
@@ -214,15 +214,15 @@ export class PlanSearch extends Component {
             }}
           />
           <button
-            className="btn btn-light input-group-append aro-plan-search-button"
+            className="btn btn-light input-group-append search-button"
             onClick={(event) => this.onClikCreateValue(event)}
           >
             <span className="fa fa-search" />
           </button>
         </div>
 
-        <div className="aro-plan-info">
-          <span className="aro-plan-search-filter">Filter by:</span>
+        <div className="info">
+          <span className="filter">Filter by:</span>
           <PlanSearchFilter
             objectName="Tag"
             searchProperty="name"
@@ -244,10 +244,10 @@ export class PlanSearch extends Component {
           />
         </div>
 
-        <div className="aro-plan-info">
-          <span className="aro-plan-search-filter">Sort by:</span>
+        <div className="info">
+          <span className="filter">Sort by:</span>
           <select
-            className="form-control-sm aro-plan-sorting"
+            className="form-control-sm sorting"
             value={sortByField}
             onChange={(event) => this.onChangeSortingType(event)}>
             {this.planSortingOptions.map((item, index) =>
@@ -274,18 +274,18 @@ export class PlanSearch extends Component {
                       <div>
                         <i>
                           {getPlanCreatorName(plan.createdBy, systemActors) || 'loading...' }
-                          <span className="aro-plan-blank-space">| created {this.convertTimeStampToDate(plan.createdDate)}</span>
-                          <span className="aro-plan-blank-space">| last modified {this.convertTimeStampToDate(plan.updatedDate)}</span>
+                          <span className="blank-space">| created {this.convertTimeStampToDate(plan.createdDate)}</span>
+                          <span className="blank-space">| last modified {this.convertTimeStampToDate(plan.updatedDate)}</span>
                         </i>
                       </div>
                     }
-                    <div className="aro-plan-tags"></div>
+                    <div className="tags"></div>
                     {getTagCategories(plan.tagMapping.global, listOfTags).map((tag, ind) => {
                       return (
                         <div key={ind} className="badge badge-primary"
                           style={{ backgroundColor: this.props.getTagColour(tag) }}
                         >
-                          <span> {tag.name} <span className="aro-plan-blank-space" />
+                          <span> {tag.name} <span className="blank-space" />
                             {loggedInUser.isAdministrator &&
                               <i className="fa fa-times pointer"
                                 onClick={() => this.updateTag(plan, { type: 'general', tag })}
@@ -295,11 +295,11 @@ export class PlanSearch extends Component {
                         </div>
                       )
                     })}
-                    <div className="aro-plan-tags"></div>
+                    <div className="tags"></div>
                     {plan.tagMapping.linkTags.serviceAreaIds.map((serviceAreaId, index) => {
                       return (
                         <div key={index} className="badge satags">
-                          <span> {idToServiceAreaCode[serviceAreaId] || 'loading...'} <span className="aro-plan-blank-space" />
+                          <span> {idToServiceAreaCode[serviceAreaId] || 'loading...'} <span className="blank-space" />
                             {loggedInUser.isAdministrator &&
                               <i className="fa fa-times pointer"
                                 onClick={() => this.updateTag(plan, { type: 'svc', serviceAreaId })}
@@ -328,7 +328,7 @@ export class PlanSearch extends Component {
           </table>
 
           {pageableData.rowsPerPage < allPlans.length &&
-            <div className="aro-plan-pagination">
+            <div className="pagination">
               <ReactPaginate
                 previousLabel='«'
                 nextLabel='»'

@@ -161,8 +161,8 @@ export const PlanInfo = (props) => {
 
   return (
     !plan.ephemeral ?
-      <div className="aro-plan-details-container">
-        <div className="aro-plan-info-position">
+      <div className="aro-plan details-container">
+        <div className="details-container">
           <table id="tblPlanInfo" className="table table-sm table-striped">
             <tbody>
               <tr>
@@ -194,15 +194,15 @@ export const PlanInfo = (props) => {
                 </td>
               </tr>
               {plan.createdBy &&
-                <tr ng-if="$ctrl.state.plan.createdBy">
+                <tr>
                   <td>Created By</td>
                   <td>{ getPlanCreatorName(plan.createdBy, systemActors) }</td>
                 </tr>
               }
               <tr>
                 <td>General tags</td>
-                <td>
-                  <span className="aro-plan-tags">
+                <td className={`${isEditMode && addGeneralTags ? 'tags-height' : ''}`}>
+                  <span className="tags">
                     {!addGeneralTags &&
                       generalPlanTags.map((tag, index) => {
                         return (
@@ -210,7 +210,7 @@ export const PlanInfo = (props) => {
                             style={{ backgroundColor: getTagColour(tag) }}>
                             <span>
                               {tag.name}
-                              <span className="aro-plan-blank-space" />
+                              <span className="blank-space" />
                               {isEditMode &&
                                 <i
                                   className="fa fa-times pointer"
@@ -230,7 +230,7 @@ export const PlanInfo = (props) => {
                       selectedList={generalPlanTags}
                     />
                   }
-                  <span className="aro-plan-blank-space" />
+                  <span className="blank-space" />
                   <span>
                     {(isEditMode && !addGeneralTags) &&
                       <i className="fa fa-plus pointer" onClick={() => handleAddGeneralTags()} />
@@ -240,15 +240,15 @@ export const PlanInfo = (props) => {
               </tr>
               <tr>
                 <td>Service area tags</td>
-                <td>
-                  <span className="aro-plan-tags">
+                <td className={`${isEditMode && addSATags ? 'tags-height' : ''}`}>
+                  <span className="tags">
                     {!addSATags &&
                       saPlanTags.map((tag, index) => {
                         return (
                           <div className="badge satags" key={index}>
                             <span>
                               {tag.code}
-                              <span className="aro-plan-blank-space" />
+                              <span className="blank-space" />
                               {isEditMode &&
                                 <i
                                   className="fa fa-times pointer"
@@ -269,7 +269,7 @@ export const PlanInfo = (props) => {
                       refreshTagList={onRefreshTagList}
                     />
                   }
-                  <span className="aro-plan-blank-space" />
+                  <span className="blank-space" />
                   <span>
                     {(isEditMode && !addSATags) &&
                       <i className="fa fa-plus pointer" onClick={() => handleAddSATags()} />
@@ -288,7 +288,7 @@ export const PlanInfo = (props) => {
           <div className="disable-sibling-controls" style={{ display: isEditMode ? 'none' : 'block' }} />
         </div>
 
-        <div className="aro-plan-actions">
+        <div className="actions">
           {!isEditMode &&
             <button
               className="btn btn-primary"
@@ -296,7 +296,7 @@ export const PlanInfo = (props) => {
               onClick={() => editCurrentPlan()}
             >
               <i className="fas fa-pencil-alt" />
-              <span className="aro-plan-blank-space">Edit Plan Details</span>
+              <span className="blank-space">Edit Plan Details</span>
             </button>
           }
           {isEditMode &&
@@ -307,7 +307,7 @@ export const PlanInfo = (props) => {
               onClick={() => commitUpdatestoPlan(false)}
             >
               <i className="fa fa-save" />
-              <span className="aro-plan-blank-space">Save Changes</span>
+              <span className="blank-space">Save Changes</span>
             </button>
           }
           <button
@@ -316,7 +316,7 @@ export const PlanInfo = (props) => {
             onClick={() => deletePlan(plan)}
           >
             <i className="far fa-trash-alt" />
-            <span className="aro-plan-blank-space">Delete Plan</span>
+            <span className="blank-space">Delete Plan</span>
           </button>
         </div>
       </div>
