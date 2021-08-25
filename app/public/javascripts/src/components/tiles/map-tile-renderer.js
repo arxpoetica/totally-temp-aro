@@ -641,9 +641,13 @@ class MapTileRenderer {
 
             } else if (
               (this.state.showFiberSize || this.rShowFiberSize)
-            && feature.properties._data_type === 'fiber'
-            && ((this.state.viewSetting.selectedFiberOption && this.state.viewSetting.selectedFiberOption.id !== 1)
-              || this.rViewSetting.selectedFiberOption.id !== 1)) {
+              && feature.properties._data_type === 'fiber'
+              && (
+                this.state.viewSetting.selectedFiberOption
+                && this.state.viewSetting.selectedFiberOption.id !== 1
+                || this.rViewSetting.selectedFiberOption.id !== 1
+              )
+            ) {
 
               var selectedFiberOption = this.rViewSetting.selectedFiberOption
               var viewOption = selectedFiberOption.pixelWidth
