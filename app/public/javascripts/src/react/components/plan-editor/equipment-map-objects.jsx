@@ -151,7 +151,7 @@ export class EquipmentMapObjects extends Component {
               // TODO: enhance when droplink lengths are exceeded???
               this.objectIdToDroplink[id] = new google.maps.Polyline({
                 path: [{ lat, lng }, { lat: latitude, lng: longitude }],
-                strokeColor: '#008000',
+                strokeColor: '#84d496',
                 strokeWeight: 1.5,
               })
               this.objectIdToDroplink[id].setMap(googleMaps)
