@@ -142,13 +142,17 @@ export class EquipmentMapObjects extends Component {
         if (feature.networkNodeType === 'fiber_distribution_terminal') {
           const [lng, lat] = feature.geometry.coordinates
           for (const [id, location] of Object.entries(selectedLocations)) {
-            const { latitude, longitude } = location.point
-            this.objectIdToDroplink[id] = new google.maps.Polyline({
-              path: [{ lat, lng }, { lat: latitude, lng: longitude }],
-              strokeColor: '#888888',
-              strokeWeight: 1.5,
-            })
-            this.objectIdToDroplink[id].setMap(googleMaps)
+            // oddly, sometimes `location` is `undefined`
+            if (location) {
+              const { latitude, longitude } = location.point
+              // TODO: enhance when droplink lengths are exceeded???
+              this.objectIdToDroplink[id] = new google.maps.Polyline({
+                path: [{ lat, lng }, { lat: latitude, lng: longitude }],
+                strokeColor: '#008000',
+                strokeWeight: 1.5,
+              })
+              this.objectIdToDroplink[id].setMap(googleMaps)
+            }
           }
         }
 
