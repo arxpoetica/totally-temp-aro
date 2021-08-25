@@ -179,6 +179,12 @@ export class EquipmentBoundaryMapObjects extends Component {
       google.maps.event.addListener(path, 'remove_at', function () {
         self.modifyBoundaryShape(mapObject)
       })
+      mapObject.addListener('contextmenu', event => {
+        const eventXY = WktUtils.getXYFromEvent(event)
+        console.log(event)
+        console.log(event.vertex)
+        self.props.showContextMenuForEquipmentBoundary(mapObject, eventXY.x, eventXY.y, event.vertex)
+      })
       // FIXME: make deleting vertices work
       // ToDo: avoid redundant first=last polygons
       //  clear these when parsing from service 
@@ -237,9 +243,9 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
   modifyFeature: (equipmentBoundary) => dispatch(PlanEditorActions.modifyFeature('equipment_boundary', equipmentBoundary)),
-  //showContextMenuForEquipmentBoundary: (planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y) => {
-  //  dispatch(PlanEditorActions.showContextMenuForEquipmentBoundary(planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y))
-  //},
+  showContextMenuForEquipmentBoundary: (mapObject, x, y, vertex) => {
+   dispatch(PlanEditorActions.showContextMenuForEquipmentBoundary(mapObject, x, y, vertex))
+  },
   boundaryChange: (subnetId, geometry) => dispatch(PlanEditorActions.boundaryChange(subnetId, geometry)),
   selectBoundary: objectId => dispatch(SelectionActions.setPlanEditorFeatures([objectId])),
 })

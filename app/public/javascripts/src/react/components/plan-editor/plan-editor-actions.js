@@ -255,6 +255,12 @@ function addTransactionFeatures (features) {
   }
 }
 
+function deleteBoundaryVertex (mapObject, vertex) {
+  return dispatch => {
+    mapObject.getPath().removeAt(vertex)
+  }
+}
+
 function showContextMenuForEquipment (featureId, x, y) {
   return (dispatch) => {
     // debugger
@@ -266,6 +272,7 @@ function showContextMenuForEquipment (featureId, x, y) {
     dispatch(ContextMenuActions.showContextMenu(x, y))
   }
 }
+
 
 function showContextMenuForLocations (featureIds, event) {
   return (dispatch, getState) => {
@@ -417,13 +424,12 @@ function assignLocation (locationId, terminalId) {
   }
 }
 
-function showContextMenuForEquipmentBoundary (equipmentObjectId, x, y) {
+function showContextMenuForEquipmentBoundary (mapObject, x, y, vertex) {
   return (dispatch, getState) => {
     const state = getState()
-    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
     
-    var menuActions = []
-    menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteTransactionFeature', transactionId, 'equipment_boundary', equipmentObjectId))
+    const menuActions = []
+    menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteBoundaryVertex', mapObject, vertex))
     const menuItemFeature = new MenuItemFeature('BOUNDARY', 'Equipment Boundary', menuActions)
     // Show context menu
     dispatch(ContextMenuActions.setContextMenuItems([menuItemFeature]))
@@ -1215,6 +1221,7 @@ export default {
   moveFeature,
   deleteFeature,
   deleteTransactionFeature,
+  deleteBoundaryVertex,
   addTransactionFeatures,
   showContextMenuForEquipment,
   showContextMenuForLocations,
