@@ -179,12 +179,6 @@ export class EquipmentBoundaryMapObjects extends Component {
       google.maps.event.addListener(path, 'remove_at', function () {
         self.modifyBoundaryShape(mapObject)
       })
-      mapObject.addListener('contextmenu', event => {
-        const eventXY = WktUtils.getXYFromEvent(event)
-        console.log(event)
-        console.log(event.vertex)
-        self.props.showContextMenuForEquipmentBoundary(mapObject, eventXY.x, eventXY.y, event.vertex)
-      })
       // FIXME: make deleting vertices work
       // ToDo: avoid redundant first=last polygons
       //  clear these when parsing from service 
@@ -205,6 +199,10 @@ export class EquipmentBoundaryMapObjects extends Component {
           self.modifyBoundaryShape(mapObject)
         }
       })
+    })
+    mapObject.addListener('contextmenu', event => {
+      const eventXY = WktUtils.getXYFromEvent(event)
+      self.props.showContextMenuForEquipmentBoundary(mapObject, eventXY.x, eventXY.y, event.vertex)
     })
   }
 

@@ -273,7 +273,6 @@ function showContextMenuForEquipment (featureId, x, y) {
   }
 }
 
-
 function showContextMenuForLocations (featureIds, event) {
   return (dispatch, getState) => {
     const state = getState()
@@ -425,12 +424,11 @@ function assignLocation (locationId, terminalId) {
 }
 
 function showContextMenuForEquipmentBoundary (mapObject, x, y, vertex) {
-  return (dispatch, getState) => {
-    const state = getState()
-    
+  return (dispatch) => {
     const menuActions = []
     menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteBoundaryVertex', mapObject, vertex))
     const menuItemFeature = new MenuItemFeature('BOUNDARY', 'Equipment Boundary', menuActions)
+
     // Show context menu
     dispatch(ContextMenuActions.setContextMenuItems([menuItemFeature]))
     dispatch(ContextMenuActions.showContextMenu(x, y))
