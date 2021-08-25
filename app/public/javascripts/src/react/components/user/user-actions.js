@@ -317,6 +317,13 @@ function saveUsers (allUsers) {
   }
 }
 
+  function clearUserList () {
+    return {
+      type: Actions.USER_SET_USERLIST,
+      payload: []
+    }
+  }
+
 export default {
   loadAuthPermissions,
   loadAuthRoles,
@@ -335,5 +342,6 @@ export default {
   registerUser,
   handlePageClick,
   searchUsers,
-  saveUsers
+  saveUsers,
+  clearUserList,
 }

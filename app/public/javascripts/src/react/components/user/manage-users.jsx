@@ -38,10 +38,10 @@ export class ManageUsers extends Component {
   }
 
   // When user move the screen back and forth without saving the added roles it leads to the UI issue,
-  // so the usersList is loaded again to set back the data.
+  // so the modified usersList is cleared and loaded again to set back the data.
   // See: https://www.pivotaltracker.com/n/projects/2468285/stories/177604213
   componentWillUnmount() {
-    this.props.loadUsers()
+    this.props.clearUserList()
   }
 
   handlePageClick(data) {
@@ -73,7 +73,7 @@ export class ManageUsers extends Component {
       if (newkey.name === 'Public') {
         defaultIndex = index
       }
-      return { id: newkey.id, value: newkey.name, label: newkey.name }
+      return { id: newkey.id, name: newkey.name, value: newkey.name, label: newkey.name }
     })
 
     return (
@@ -117,7 +117,9 @@ export class ManageUsers extends Component {
                       let selectedOptions = null
                       if (selectedGroups && selectedGroups.length) {
                         selectedOptions = selectedGroups.map(function(newkey) {
-                          return { id: newkey.id, name: newkey.name, value: newkey.name, label: newkey.name }
+                          if (newkey.name) {
+                            return { id: newkey.id, name: newkey.name, value: newkey.name, label: newkey.name }
+                          }
                         })
                       }
                       return <React.Fragment key={user.id}><tr key={index}>
@@ -548,6 +550,7 @@ const mapDispatchToProps = (dispatch) => ({
   searchUsers: (searchText) => dispatch(UserActions.searchUsers(searchText)),
   saveUsers: (userList) => dispatch(UserActions.saveUsers(userList)),
   customErrorHandle: (title, text, type) => dispatch(GlobalsettingsActions.customErrorHandle(title, text, type)),
+  clearUserList: () => dispatch(UserActions.clearUserList()),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(ManageUsers)

@@ -51,7 +51,7 @@ class MapSelectorPlanTargetController {
     if ((this.selectedDisplayMode === this.displayModes.ANALYSIS || this.selectedDisplayMode === this.displayModes.VIEW) &&
         this.targetSelectionMode === this.state.targetSelectionModes.POLYGON_PLAN_TARGET) {
       this.drawingManager.setDrawingMode('polygon')
-      this.drawingManager.setMap(this.mapRef)
+      this.drawingManager.setMap(null)
     } else {
       this.drawingManager.setDrawingMode('marker')
       this.drawingManager.setMap(null)
