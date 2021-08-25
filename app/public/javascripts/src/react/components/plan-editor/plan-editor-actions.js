@@ -257,7 +257,10 @@ function addTransactionFeatures (features) {
 
 function deleteBoundaryVertex (mapObject, vertex) {
   return dispatch => {
-    mapObject.getPath().removeAt(vertex)
+    // checks it is a valid vertex and that there are at least 3 other vertices left
+    if (vertex && mapObject.getPath().getLength() > 3) {
+      mapObject.getPath().removeAt(vertex)
+    }
   }
 }
 
