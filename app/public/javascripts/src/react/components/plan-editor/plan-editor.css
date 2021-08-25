@@ -6,9 +6,6 @@
   font-size: inherit;
   font-weight: bold;
 }
-.plan-editor-use-pointer {
-  cursor: pointer;
-}
 
 /* ========================= >>>>> alerts panel >>>>> */
 
@@ -172,18 +169,15 @@
 /* ========================= >>>>> plan editor header >>>>> */
 
 .plan-editor-header {
+  position: relative;
   margin: 0 0 10px;
   padding: 10px;
   background-color: #eee;
   border: solid 1px #ccc;
-  position: relative;
+  cursor: pointer;
 }
-.plan-editor-header.plan-editor-header-selected{
-  border-color: #1f7de6;
-}
-.plan-editor-header h2 {
-	margin: 0 0 10px;
-}
+.plan-editor-header.selected { border-color: #1f7de6; }
+.plan-editor-header h2 { margin: 0 0 10px; }
 .plan-editor-header .info {
   display: flex;
   align-items: center;

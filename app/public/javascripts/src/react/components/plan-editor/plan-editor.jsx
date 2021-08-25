@@ -3,7 +3,7 @@ import { PropTypes } from 'prop-types'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import PlanEditorActions from './plan-editor-actions'
-import PlanEditorHeader from './plan-editor-header.jsx'
+import PlanEditorThumbs from './plan-editor-thumbssss.jsx'
 import PlanEditorRecalculate from './plan-editor-recalculate.jsx'
 import EquipmentDragger from './equipment-dragger.jsx'
 import EquipmentMapObjects from './equipment-map-objects.jsx'
@@ -30,9 +30,6 @@ export const PlanEditor = props => {
     selectedEditFeatureIds,
     subnets,
     selectedSubnetId,
-    addSubnets,
-    setSelectedSubnetId,
-    deselectEditFeatureById,
     equipments,
     updateFeatureProperties,
   } = props
@@ -74,26 +71,6 @@ export const PlanEditor = props => {
     updateFeatureProperties(updatedFeature)
   }
 
-  function onSelectedClick(event, objectId) {
-    if (objectId === selectedSubnetId) objectId = '' // deselect
-    // ToDo: this check does not belong here
-    //  the action should try to request the subnet and if fail, set sub net to null
-    /*
-    if (!features[objectId] 
-      || (
-        features[objectId].feature.networkNodeType !== 'central_office'
-        && features[objectId].feature.networkNodeType !== 'fiber_distribution_hub'
-    )) objectId = '' // deselect
-    */
-    if (!features[objectId]) objectId = '' // deselect
-    setSelectedSubnetId(objectId)
-  }
-
-  function onSelectedClose(event, objectId) {
-    if (objectId === selectedSubnetId) setSelectedSubnetId('')
-    deselectEditFeatureById(objectId)
-  }
-
   return (
     <div className="aro-plan-editor" style={{paddingRight: '10px'}}>
       <div className="text-center mb-2">
@@ -122,16 +99,7 @@ export const PlanEditor = props => {
 
       <AlertsPanel />
       <PlanEditorRecalculate />
-
-      {selectedEditFeatureIds.map(id => <PlanEditorHeader
-          key={id}
-          selectedFeatureId={id}
-          onClick={ (event, objectId) => onSelectedClick(event, objectId)}
-          onClose={ (event, objectId) => onSelectedClose(event, objectId)}
-          isSelected={id === selectedSubnetId}
-        />
-      )}
-
+      <PlanEditorThumbs />
 
       {
         selectedEditFeatureIds.map(id => {
@@ -189,9 +157,6 @@ const mapDispatchToProps = dispatch => ({
   resumeOrCreateTransaction: (planId, userId) => dispatch(PlanEditorActions.resumeOrCreateTransaction(planId, userId)),
   commitTransaction: transactionId => dispatch(PlanEditorActions.commitTransaction(transactionId)),
   discardTransaction: transactionId => dispatch(PlanEditorActions.discardTransaction(transactionId)),
-  addSubnets: subnetIds => dispatch(PlanEditorActions.addSubnets(subnetIds)),
-  setSelectedSubnetId: subnetId => dispatch(PlanEditorActions.setSelectedSubnetId(subnetId)),
-  deselectEditFeatureById: objectId => dispatch(PlanEditorActions.deselectEditFeatureById(objectId)),
   updateFeatureProperties: feature => dispatch(PlanEditorActions.updateFeatureProperties(feature)),
 })
 
