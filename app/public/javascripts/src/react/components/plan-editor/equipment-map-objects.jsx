@@ -139,7 +139,10 @@ export class EquipmentMapObjects extends Component {
         this.objectIdToSelectionOverlay[objectId].setMap(googleMaps)
 
         const { feature } = subnetFeatures[objectId]
-        if (feature.networkNodeType === 'fiber_distribution_terminal') {
+        if (
+          objectId === selectedSubnetId
+          && feature.networkNodeType === 'fiber_distribution_terminal'
+        ) {
           const [lng, lat] = feature.geometry.coordinates
           for (const [id, location] of Object.entries(selectedLocations)) {
             // oddly, sometimes `location` is `undefined`
