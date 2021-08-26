@@ -68,9 +68,7 @@ import roadSegmentDetail from './sidebar/view/road-segment-detail'
 import coverageBoundary from './sidebar/view/coverage-boundary'
 import locationEditor from './sidebar/view/location-editor'
 import viewMode from './sidebar/view/view-mode'
-import planInfo from './sidebar/view/plan-info'
 import planInfoRecent from './sidebar/view/plan-info-recent'
-import editPlanTag from './sidebar/view/edit-plan-tag'
 import aroSearch from './sidebar/view/aro-search'
 import aroMultiselectSearch from './sidebar/view/aro-multiselect-search'
 import displayModeButtons from './sidebar/display-mode-buttons'
@@ -106,8 +104,6 @@ import mapSelectorPlanTarget from './map/map-selector-plan-target'
 import mapSelectorExportLocations from './map/map-selector-export-locations'
 import mapToggleComponent from './map/map-toggle'
 import networkPlanModal from './header/network-plan-modal'
-import planInputsModal from './header/plan-inputs-modal'
-import networkPlanManage from './header/network-plan-manage'
 import networkPlan from './header/network-plan'
 import fullScreenContainer from './full-screen/full-screen-container'
 import aroPanel from './common/aro-panel'
@@ -116,8 +112,6 @@ import mapObjectEditor from './common/map-object-editor'
 import contextMenu from './common/context-menu/context-menu'
 import boundaryCoverage from './common/boundary-coverage'
 import dropTarget from './common/drop-target'
-import planSearch from './common/plan/plan-search'
-import planSearchFilter from './common/plan/plan-search-filter'
 import resourcePermissionsEditor from './common/resource-permissions-editor'
 import aroDrawingManager from './common/aro-drawing-manager'
 import accordion from './accordion/accordion'
@@ -147,9 +141,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('coverageBoundary', coverageBoundary)
   .component('locationEditor', locationEditor)
   .component('viewMode', viewMode)
-  .component('planInfo', planInfo)
   .component('planInfoRecent', planInfoRecent)
-  .component('editPlanTag', editPlanTag)
   .component('aroSearch', aroSearch)
   .component('aroMultiselectSearch', aroMultiselectSearch)
   .component('displayModeButtons', displayModeButtons)
@@ -183,8 +175,6 @@ app.component('boundaryDetail', boundaryDetail)
   .component('mapSelectorExportLocations', mapSelectorExportLocations)
   .component('mapToggleComponent', mapToggleComponent)
   .component('networkPlanModal', networkPlanModal)
-  .component('planInputsModal', planInputsModal)
-  .component('networkPlanManage', networkPlanManage)
   .component('networkPlan', networkPlan)
   // .component('uiNotification', uiNotification)
   .component('fullScreenContainer', fullScreenContainer)
@@ -194,8 +184,6 @@ app.component('boundaryDetail', boundaryDetail)
   .component('contextMenu', contextMenu)
   .component('boundaryCoverage', boundaryCoverage)
   .component('dropTarget', dropTarget)
-  .component('planSearch', planSearch)
-  .component('planSearchFilter', planSearchFilter)
   .component('resourcePermissionsEditor', resourcePermissionsEditor)
   .component('aroDrawingManager', aroDrawingManager)
   .component('accordion', accordion)
