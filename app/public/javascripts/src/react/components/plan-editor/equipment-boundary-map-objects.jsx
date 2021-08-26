@@ -200,6 +200,10 @@ export class EquipmentBoundaryMapObjects extends Component {
         }
       })
     })
+    mapObject.addListener('contextmenu', event => {
+      const eventXY = WktUtils.getXYFromEvent(event)
+      self.props.showContextMenuForEquipmentBoundary(mapObject, eventXY.x, eventXY.y, event.vertex)
+    })
   }
 
   clearAll () {
@@ -237,9 +241,9 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
   modifyFeature: (equipmentBoundary) => dispatch(PlanEditorActions.modifyFeature('equipment_boundary', equipmentBoundary)),
-  //showContextMenuForEquipmentBoundary: (planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y) => {
-  //  dispatch(PlanEditorActions.showContextMenuForEquipmentBoundary(planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y))
-  //},
+  showContextMenuForEquipmentBoundary: (mapObject, x, y, vertex) => {
+    dispatch(PlanEditorActions.showContextMenuForEquipmentBoundary(mapObject, x, y, vertex))
+  },
   boundaryChange: (subnetId, geometry) => dispatch(PlanEditorActions.boundaryChange(subnetId, geometry)),
   selectBoundary: objectId => dispatch(SelectionActions.setPlanEditorFeatures([objectId])),
 })

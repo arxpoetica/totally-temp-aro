@@ -255,6 +255,15 @@ function addTransactionFeatures (features) {
   }
 }
 
+function deleteBoundaryVertex (mapObject, vertex) {
+  return dispatch => {
+    // checks it is a valid vertex and that there are at least 3 other vertices left
+    if (vertex && mapObject.getPath().getLength() > 3) {
+      mapObject.getPath().removeAt(vertex)
+    }
+  }
+}
+
 function showContextMenuForEquipment (featureId, x, y) {
   return (dispatch) => {
     // debugger
@@ -417,14 +426,12 @@ function assignLocation (locationId, terminalId) {
   }
 }
 
-function showContextMenuForEquipmentBoundary (equipmentObjectId, x, y) {
-  return (dispatch, getState) => {
-    const state = getState()
-    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
-    
-    var menuActions = []
-    menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteTransactionFeature', transactionId, 'equipment_boundary', equipmentObjectId))
+function showContextMenuForEquipmentBoundary (mapObject, x, y, vertex) {
+  return (dispatch) => {
+    const menuActions = []
+    menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteBoundaryVertex', mapObject, vertex))
     const menuItemFeature = new MenuItemFeature('BOUNDARY', 'Equipment Boundary', menuActions)
+
     // Show context menu
     dispatch(ContextMenuActions.setContextMenuItems([menuItemFeature]))
     dispatch(ContextMenuActions.showContextMenu(x, y))
@@ -1215,6 +1222,7 @@ export default {
   moveFeature,
   deleteFeature,
   deleteTransactionFeature,
+  deleteBoundaryVertex,
   addTransactionFeatures,
   showContextMenuForEquipment,
   showContextMenuForLocations,
