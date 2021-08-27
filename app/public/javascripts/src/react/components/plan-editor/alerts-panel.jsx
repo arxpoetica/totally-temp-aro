@@ -50,7 +50,7 @@ const DefectsPanel = props => {
 }
 
 const mapStateToProps = state => ({
-  locationAlerts: PlanEditorSelectors.getAlertsForSelectedSubnet(state),
+  locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(state),
   alertTypes: PlanEditorSelectors.AlertTypes,
 })
 

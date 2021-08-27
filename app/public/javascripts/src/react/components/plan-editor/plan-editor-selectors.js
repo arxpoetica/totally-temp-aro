@@ -10,10 +10,10 @@ const getSelectedSubnet = state => state.planEditor.subnets[state.planEditor.sel
 const getSelectedEditFeatureIds = state => state.planEditor.selectedEditFeatureIds
 const getSelectedIds = createSelector([getSelectedSubnet, getSelectedEditFeatureIds], (selectedSubnet, selectedEditFeatureIds) => {
   let selectedIds = []
-  if (selectedSubnet) { 
+  if (selectedSubnet) {
     selectedIds = selectedSubnet.children
   }
-  // concatinate the two arrays using the spread op, 
+  // concatinate the two arrays using the spread op,
   //  make sure all elements are unique by making it a Set,
   //  turn it back into an array using the spread op
   selectedIds = [...new Set([...selectedIds, ...selectedEditFeatureIds])]
@@ -25,7 +25,7 @@ const getIsCalculatingSubnets = state => state.planEditor.isCalculatingSubnets
 const getIsCalculatingBoundary = state => state.planEditor.isCalculatingBoundary
 const getBoundaryDebounceBySubnetId = state => state.planEditor.boundaryDebounceBySubnetId
 const getIsRecalcSettled = createSelector(
-  [getIsCalculatingSubnets, getIsCalculatingBoundary, getBoundaryDebounceBySubnetId], 
+  [getIsCalculatingSubnets, getIsCalculatingBoundary, getBoundaryDebounceBySubnetId],
   (isCalculatingSubnets, isCalculatingBoundary, boundaryDebounceBySubnetId) => {
     return (!isCalculatingSubnets && !isCalculatingBoundary && (0 === Object.keys(boundaryDebounceBySubnetId).length))
   }
@@ -45,12 +45,12 @@ const getNetworkConfig = state => {
 
 const AlertTypes = {
   MAX_DROP_LENGTH_EXCEEDED: {
-    key: 'MAX_DROP_LENGTH_EXCEEDED', 
+    key: 'MAX_DROP_LENGTH_EXCEEDED',
     displayName: 'Drop Cable Length Exceeded',
     iconUrl: '/svg/alert-panel-location.svg',
   },
   ABANDONED_LOCATION: {
-    key: 'ABANDONED_LOCATION', 
+    key: 'ABANDONED_LOCATION',
     displayName: 'Abandoned Location',
     iconUrl: '/svg/alert-panel-location.svg',
   },
@@ -97,18 +97,47 @@ const getSelectedSubnetLocations = createSelector(
   }
 )
 
-const getAlertsForSelectedSubnet = createSelector(
-  [getSelectedSubnet, getSubnetFeatures, getNetworkConfig],
-  (selectedSubnet, subnetFeatures, networkConfig) => {
+const getAlertsForSubnetTree = createSelector(
+  [getSelectedSubnetId, getSubnetFeatures, getNetworkConfig, getSubnets],
+  (selectedFeatureId, subnetFeatures, networkConfig, subnets) => {
+
     let alerts = {}
-    // maybe we can spruce this up a bit some filter functions?
-    let subnetLocationsIds = []
-    if (selectedSubnet) subnetLocationsIds = Object.keys(selectedSubnet.subnetLocationsById)
-    if (
-      selectedSubnet
-      && subnetLocationsIds.length > 0
-      && typeof getNetworkConfig !== 'undefined'
-    ) {
+    let currentFeature = subnetFeatures[selectedFeatureId]
+    if (currentFeature) {
+
+      let subnetTree = []
+
+      // get the root subnet
+      let rootSubnet
+      while(!rootSubnet) {
+        if (currentFeature.subnetId === null) {
+          rootSubnet = subnets[currentFeature.feature.objectId]
+        } else {
+          currentFeature = subnetFeatures[currentFeature.subnetId]
+        }
+      }
+
+      // get all children hub subnets
+      const childrenHubSubnets = rootSubnet.children
+        .filter(id => subnets[id])
+        .map(id => subnets[id])
+
+      subnetTree = [rootSubnet, ...childrenHubSubnets]
+      for (const subnet of subnetTree) {
+        alerts = { ...alerts, ...getAlertsFromSubnet(subnet, subnetFeatures, networkConfig) }
+      }
+    }
+    return alerts
+  }
+)
+
+const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
+  let alerts = {}
+  // maybe we can spruce this up a bit some filter functions?
+  if (subnet) {
+    const subnetLocationsIds = Object.keys(subnet.subnetLocationsById)
+
+    if (subnetLocationsIds.length > 0 && typeof getNetworkConfig !== 'undefined') {
       const maxDropCableLength = networkConfig.terminalConfiguration.maxDistanceMeters
       const maxTerminalHomes = networkConfig.terminalConfiguration.outputConfig.max
       const maxHubHomes = networkConfig.hubConfiguration.outputConfig.max
@@ -116,21 +145,22 @@ const getAlertsForSelectedSubnet = createSelector(
 
       let totalHomes = 0
 
-      let abandonedLocations = {}
-      subnetLocationsIds.forEach(locationId => {
-        abandonedLocations[locationId] = true
-      })
+      const abandonedLocations = {}
+      subnetLocationsIds.forEach(locationId => abandonedLocations[locationId] = true)
 
-      selectedSubnet.children.forEach(featureId => {
+      const subnetId = subnet.subnetNode
+      subnet.children.forEach(featureId => {
+
+
         // checks for max distance between hub and Central Office
         // right now equipmentCoDistance is only on central office, otherwise will be null
-        if (selectedSubnet.fiber.equipmentCoDistances !== null) {
-            const distance = selectedSubnet.fiber.equipmentCoDistances[featureId]
+        if (subnet.fiber.equipmentCoDistances !== null) {
+            const distance = subnet.fiber.equipmentCoDistances[featureId]
             if (distance > maxHubDistance) {
               if (!alerts[featureId]) {
                 alerts[featureId] = {
                   locationId: featureId,
-                  subnetId: selectedSubnet.subnetNode,
+                  subnetId,
                   alerts: [],
                 }
               }
@@ -148,7 +178,7 @@ const getAlertsForSelectedSubnet = createSelector(
             if (!alerts[featureId]) {
               alerts[featureId] = {
                 locationId: featureId,
-                subnetId: selectedSubnet.subnetNode,
+                subnetId,
                 alerts: [],
               }
             }
@@ -164,7 +194,7 @@ const getAlertsForSelectedSubnet = createSelector(
                 if (!alerts[locationId]) {
                   alerts[locationId] = {
                     locationId: locationId,
-                    subnetId: selectedSubnet.subnetNode,
+                    subnetId,
                     alerts: [],
                   }
                 }
@@ -177,37 +207,37 @@ const getAlertsForSelectedSubnet = createSelector(
 
       // after the forEach check if totalhomes exceeds maxHubHomes
       if (totalHomes > maxHubHomes) {
-        if (!alerts[selectedSubnet.subnetNode]) {
-          alerts[selectedSubnet.subnetNode] = {
-            locationId: selectedSubnet.subnetNode,
-            subnetId: selectedSubnet.subnetNode,
+        if (!alerts[subnetId]) {
+          alerts[subnetId] = {
+            locationId: subnetId,
+            subnetId,
             alerts: [],
           }
         }
-        alerts[selectedSubnet.subnetNode].alerts.push(AlertTypes['MAX_HUB_HOMES_EXCEEDED'].key)
+        alerts[subnetId].alerts.push(AlertTypes['MAX_HUB_HOMES_EXCEEDED'].key)
       }
       
       Object.keys(abandonedLocations).forEach(locationId => {
         if (!alerts[locationId]) {
           alerts[locationId] = {
             locationId: locationId,
-            subnetId: selectedSubnet.subnetNode,
+            subnetId,
             alerts: [],
           }
         }
         alerts[locationId].alerts.push(AlertTypes['ABANDONED_LOCATION'].key)
-      }) 
-    } 
-    return alerts
+      })
+    }
   }
-)
+  return alerts
+}
 
 const PlanEditorSelectors = Object.freeze({
   getBoundaryLayersList,
   getSelectedIds,
   getIsRecalcSettled,
   AlertTypes,
-  getAlertsForSelectedSubnet,
+  getAlertsForSubnetTree,
   locationWarnImg,
   getSelectedSubnetLocations,
 })
