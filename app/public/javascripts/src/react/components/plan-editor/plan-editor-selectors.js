@@ -97,10 +97,36 @@ const getSelectedSubnetLocations = createSelector(
   }
 )
 
-const getAlertsForSelectedSubnet = createSelector(
-  [getSelectedSubnet, getSubnetFeatures, getNetworkConfig],
-  (selectedSubnet, subnetFeatures, networkConfig) => {
-    const alerts = getAlertsFromSubnet(selectedSubnet, subnetFeatures, networkConfig)
+const getAlertsForSubnetTree = createSelector(
+  [getSelectedSubnetId, getSubnetFeatures, getNetworkConfig, getSubnets],
+  (selectedFeatureId, subnetFeatures, networkConfig, subnets) => {
+
+    let alerts = {}
+    let currentFeature = subnetFeatures[selectedFeatureId]
+    if (currentFeature) {
+
+      let subnetTree = []
+
+      // get the root subnet
+      let rootSubnet
+      while(!rootSubnet) {
+        if (currentFeature.subnetId === null) {
+          rootSubnet = subnets[currentFeature.feature.objectId]
+        } else {
+          currentFeature = subnetFeatures[currentFeature.subnetId]
+        }
+      }
+
+      // get all children hub subnets
+      const childrenHubSubnets = rootSubnet.children
+        .filter(id => subnets[id])
+        .map(id => subnets[id])
+
+      subnetTree = [rootSubnet, ...childrenHubSubnets]
+      for (const subnet of subnetTree) {
+        alerts = { ...alerts, ...getAlertsFromSubnet(subnet, subnetFeatures, networkConfig) }
+      }
+    }
     return alerts
   }
 )
@@ -211,7 +237,7 @@ const PlanEditorSelectors = Object.freeze({
   getSelectedIds,
   getIsRecalcSettled,
   AlertTypes,
-  getAlertsForSelectedSubnet,
+  getAlertsForSubnetTree,
   locationWarnImg,
   getSelectedSubnetLocations,
 })
