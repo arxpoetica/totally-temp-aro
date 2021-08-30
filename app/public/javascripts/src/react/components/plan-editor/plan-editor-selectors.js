@@ -32,6 +32,7 @@ const getIsRecalcSettled = createSelector(
 )
 
 const getSubnetFeatures = state => state.planEditor.subnetFeatures
+const getSubnetFeatureIds = createSelector([getSubnetFeatures], features => Object.keys(features))
 const getNetworkConfig = state => {
   const { network_architecture_manager } = state.plan.resourceItems
   if (!network_architecture_manager) { return }
@@ -235,6 +236,7 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
 const PlanEditorSelectors = Object.freeze({
   getBoundaryLayersList,
   getSelectedIds,
+  getSubnetFeatureIds,
   getIsRecalcSettled,
   AlertTypes,
   getAlertsForSubnetTree,

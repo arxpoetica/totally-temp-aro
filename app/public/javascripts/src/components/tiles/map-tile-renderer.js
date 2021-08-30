@@ -10,7 +10,7 @@ import StrokeStyle from '../../shared-utils/stroke-styles'
 
 class MapTileRenderer {
   constructor (tileSize, tileDataService, mapTileOptions, layerCategories, selectedDisplayMode, selectionModes, analysisSelectionMode, stateMapLayers, displayModes,
-    viewModePanels, state, getPixelCoordinatesWithinTile, selectionIds, hiddenFeatures, selectedSubnetLocations, locationAlerts, rShowFiberSize, rViewSetting, mapLayers = []) {
+    viewModePanels, state, getPixelCoordinatesWithinTile, subnetFeatureIds, hiddenFeatures, selectedSubnetLocations, locationAlerts, rShowFiberSize, rViewSetting, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
@@ -28,7 +28,7 @@ class MapTileRenderer {
     this.getPixelCoordinatesWithinTile = getPixelCoordinatesWithinTile
     this.latestTileUniqueId = 0
     
-    this.selectionIds = selectionIds
+    this.subnetFeatureIds = subnetFeatureIds
     this.selectedSubnetLocations = selectedSubnetLocations
     this.locationAlerts = locationAlerts
     this.hiddenFeatures = hiddenFeatures
@@ -112,8 +112,8 @@ class MapTileRenderer {
   }
 
   // - plan edit - //
-  setSelectionIds (selectionIds) {
-    this.selectionIds = selectionIds
+  setSubnetFeatureIds (subnetFeatureIds) {
+    this.subnetFeatureIds = subnetFeatureIds
   }
   setSelectedSubnetLocations (selectedSubnetLocations) {
     this.selectedSubnetLocations = selectedSubnetLocations
@@ -505,9 +505,28 @@ class MapTileRenderer {
         // Try object_id first, else try location_id
         var featureId = feature.properties.object_id || feature.properties.location_id
 
-        if (this.selectedDisplayMode == this.displayModes.EDIT_PLAN 
-          && this.selectionIds.includes(featureId) || this.hiddenFeatures.includes(featureId)) {
-          continue // Do not render any features that are part of a transaction while in plan edit
+        // do not render any features that are part of a transaction while in `EDIT_PLAN` mode
+        if (this.selectedDisplayMode == this.displayModes.EDIT_PLAN) {
+
+          // don't render any featureIds in plan edit
+          // serviceLayerSelectionIds
+          const { _data_type } = feature.properties
+          if (
+            this.subnetFeatureIds.includes(featureId)
+            && (_data_type === 'equipment' || _data_type === 'fiber')
+          ) {
+            continue
+          }
+
+          // This feature is to be excluded. Do not render it.
+          // TODO: is this necessary? What is `tileDataService.featuresToExclude`
+          // investigate at some point in the future
+          if (
+            this.tileDataService.featuresToExclude.has(featureId)
+            && !(feature.properties._data_type && feature.properties._data_type === 'location')
+          ) {
+            continue
+          }
         }
 
         if (mapLayer.subtypes) {
@@ -518,13 +537,6 @@ class MapTileRenderer {
             // check that the root layer is on
             if (!mapLayer.subtypes.hasOwnProperty('0') || !mapLayer.subtypes[0]) continue
           }
-        }
-
-        if (this.selectedDisplayMode == this.displayModes.EDIT_PLAN &&
-            this.tileDataService.featuresToExclude.has(featureId) &&
-            !(feature.properties._data_type && feature.properties._data_type == 'location')) {
-          // This feature is to be excluded. Do not render it. (edit: ONLY in edit mode)
-          continue
         }
 
         if (this.selectedDisplayMode == this.displayModes.VIEW &&
@@ -558,16 +570,7 @@ class MapTileRenderer {
           selectedListId = feature.properties.id
         }
       }
-      
-      // ToDo: we need a single source of the lat long while in edit mode
-      /*
-      if (this.selectedDisplayMode == this.displayModes.EDIT_PLAN 
-        && reduxState.planEditor.features[featureId]
-        && reduxState.planEditor.features[featureId].crudAction !== 'read') {
-        use all the data in 
-        reduxState.planEditor.features[featureId].feature
-      }
-      */
+
       var geometry = feature.loadGeometry()
       
       // Geometry is an array of shapes
