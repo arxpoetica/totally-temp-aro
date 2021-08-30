@@ -8,18 +8,15 @@ const getSubnets = state => state.planEditor.subnets
 
 const getSelectedSubnet = state => state.planEditor.subnets[state.planEditor.selectedSubnetId]
 const getSelectedEditFeatureIds = state => state.planEditor.selectedEditFeatureIds
-const getSelectedIds = createSelector([getSelectedSubnet, getSelectedEditFeatureIds], (selectedSubnet, selectedEditFeatureIds) => {
-  let selectedIds = []
-  if (selectedSubnet) {
-    selectedIds = selectedSubnet.children
+const getSelectedIds = createSelector(
+  [getSelectedSubnet, getSelectedEditFeatureIds],
+  (selectedSubnet, selectedEditFeatureIds) => {
+    // concatinate the two arrays using the spread op,
+    //  make sure all elements are unique by making it a Set,
+    //  turn it back into an array using the spread op
+    return [...new Set([...(selectedSubnet.children || []), ...selectedEditFeatureIds])]
   }
-  // concatinate the two arrays using the spread op,
-  //  make sure all elements are unique by making it a Set,
-  //  turn it back into an array using the spread op
-  selectedIds = [...new Set([...selectedIds, ...selectedEditFeatureIds])]
-  
-  return selectedIds
-})
+)
 
 const getIsCalculatingSubnets = state => state.planEditor.isCalculatingSubnets
 const getIsCalculatingBoundary = state => state.planEditor.isCalculatingBoundary

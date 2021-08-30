@@ -25,25 +25,25 @@ export class EquipmentMapObjects extends Component {
   }
 
   componentDidUpdate() {
-    //const createdIds = Object.keys(this.objectIdToMapObject)
     let idsToDelete = Object.keys(this.objectIdToMapObject)
     let featuresToCreate = []
-    let idsToUpdate = []
+    // TODO: either remove or use
+    // let idsToUpdate = []
     
-    this.props.allFeatureIds.forEach(objectId => {
+    this.props.selectedIds.forEach(objectId => {
       var index = idsToDelete.indexOf(objectId)
       if (index >= 0) {
         // we already have this one
-        idsToUpdate.push(objectId)
+        // idsToUpdate.push(objectId)
         idsToDelete.splice(index, 1)
-      } else {
-        if (this.props.subnetFeatures[objectId]) featuresToCreate.push(this.props.subnetFeatures[objectId].feature)
+      } else if (this.props.subnetFeatures[objectId]) {
+        featuresToCreate.push(this.props.subnetFeatures[objectId].feature)
       }
     })
     this.deleteDroplinks()
     idsToDelete.forEach(objectId => this.deleteMapObject(objectId))
     featuresToCreate.forEach(feature => this.createMapObject(feature))
-    //idsToUpdate.forEach(objectId => this.updateMapObject(objectId))
+    // idsToUpdate.forEach(objectId => this.updateMapObject(objectId))
     this.highlightSelectedMarkers()
   }
 
@@ -178,7 +178,7 @@ const mapStateToProps = state => ({
   googleMaps: state.map.googleMaps,
   selectedSubnetId: state.planEditor.selectedSubnetId,
   subnetFeatures: state.planEditor.subnetFeatures,
-  allFeatureIds: PlanEditorSelectors.getSelectedIds(state),
+  selectedIds: PlanEditorSelectors.getSelectedIds(state),
   selectedLocations: PlanEditorSelectors.getSelectedSubnetLocations(state),
 })
 
