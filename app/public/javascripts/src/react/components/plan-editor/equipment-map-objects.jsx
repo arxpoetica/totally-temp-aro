@@ -25,29 +25,33 @@ export class EquipmentMapObjects extends Component {
   }
 
   componentDidUpdate() {
-    let idsToDelete = Object.keys(this.objectIdToMapObject)
-    let featuresToCreate = []
-    // TODO: either remove or use
-    // let idsToUpdate = []
-    
-    this.props.selectedIds.forEach(objectId => {
-      var index = idsToDelete.indexOf(objectId)
-      if (index >= 0) {
-        // we already have this one
-        // idsToUpdate.push(objectId)
-        idsToDelete.splice(index, 1)
-      } else if (this.props.subnetFeatures[objectId]) {
+    // FIXME: how to cache this layer better so we don't have to delete every lifecycle
+    Object.keys(this.objectIdToMapObject).forEach(id => this.deleteMapObject(id))
+
+    const idleFeaturesToCreate = []
+    const featuresToCreate = []
+
+    const { selectedIds, idleFeatureIds } = this.props
+
+    for (const objectId of idleFeatureIds) {
+      if (this.props.subnetFeatures[objectId]) {
+        idleFeaturesToCreate.push(this.props.subnetFeatures[objectId].feature)
+      }
+    }
+
+    for (const objectId of selectedIds) {
+      if (this.props.subnetFeatures[objectId]) {
         featuresToCreate.push(this.props.subnetFeatures[objectId].feature)
       }
-    })
+    }
+
     this.deleteDroplinks()
-    idsToDelete.forEach(objectId => this.deleteMapObject(objectId))
+    idleFeaturesToCreate.forEach(feature => this.createMapObject(feature, true))
     featuresToCreate.forEach(feature => this.createMapObject(feature))
-    // idsToUpdate.forEach(objectId => this.updateMapObject(objectId))
     this.highlightSelectedMarkers()
   }
 
-  createMapObject(feature) {
+  createMapObject(feature, idle) {
     //const feature = this.props.transactionFeatures[objectId].feature
     // The marker is editable if the state is not LOCKED or INVALIDATED
     //const isEditable = !((feature.workflow_state_id & WorkflowState.LOCKED.id) ||
@@ -66,11 +70,12 @@ export class EquipmentMapObjects extends Component {
         url: this.props.equipmentDefinitions[feature.networkNodeType].iconUrl
       },
       draggable: !feature.locked, // Allow dragging only if feature is not locked
-      clickable: true,
+      clickable: !idle,
+      opacity: idle ? 0.4 : 1.0,
       map: this.props.googleMaps,
       zIndex: MAP_OBJECT_Z_INDEX
     })
-    // When the marker is dragged, modify its position in the redux store
+
     mapObject.addListener('dragend', event => {
       let coordinates = [event.latLng.lng(), event.latLng.lat()]
       this.props.moveFeature(mapObject.objectId, coordinates)
@@ -84,13 +89,8 @@ export class EquipmentMapObjects extends Component {
       //this.props.addSubnets([objectId])
       //this.props.setSelectedSubnetId(objectId)
     })
-    this.objectIdToMapObject[objectId] = mapObject
-  }
 
-  updateMapObject(objectId) {
-    // will we ever get position changes from elsewhere? 
-    // const geometry = this.props.transactionFeatures[objectId].feature.geometry
-    // this.objectIdToMapObject[objectId].setPosition(WktUtils.getGoogleMapLatLngFromWKTPoint(geometry))
+    this.objectIdToMapObject[objectId] = mapObject
   }
 
   deleteMapObject(objectId) {
@@ -176,6 +176,7 @@ const mapStateToProps = state => ({
   equipmentDefinitions: state.mapLayers.networkEquipment.equipments,
   selectedEditFeatureIds: state.planEditor.selectedEditFeatureIds,
   googleMaps: state.map.googleMaps,
+  idleFeatureIds: PlanEditorSelectors.getIdleFeaturesIds(state),
   selectedSubnetId: state.planEditor.selectedSubnetId,
   subnetFeatures: state.planEditor.subnetFeatures,
   selectedIds: PlanEditorSelectors.getSelectedIds(state),

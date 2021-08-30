@@ -14,7 +14,7 @@ const getSelectedIds = createSelector(
     // concatinate the two arrays using the spread op,
     //  make sure all elements are unique by making it a Set,
     //  turn it back into an array using the spread op
-    return [...new Set([...(selectedSubnet.children || []), ...selectedEditFeatureIds])]
+    return [...new Set([...(selectedSubnet && selectedSubnet.children || []), ...selectedEditFeatureIds])]
   }
 )
 
@@ -30,6 +30,13 @@ const getIsRecalcSettled = createSelector(
 
 const getSubnetFeatures = state => state.planEditor.subnetFeatures
 const getSubnetFeatureIds = createSelector([getSubnetFeatures], features => Object.keys(features))
+const getIdleFeaturesIds = createSelector(
+  [getSelectedIds, getSubnetFeatureIds],
+  (selectedIds, subnetFeaturesIds) => {
+    return subnetFeaturesIds.filter(id => !selectedIds.includes(id))
+  }
+)
+
 const getNetworkConfig = state => {
   const { network_architecture_manager } = state.plan.resourceItems
   if (!network_architecture_manager) { return }
@@ -234,6 +241,7 @@ const PlanEditorSelectors = Object.freeze({
   getBoundaryLayersList,
   getSelectedIds,
   getSubnetFeatureIds,
+  getIdleFeaturesIds,
   getIsRecalcSettled,
   AlertTypes,
   getAlertsForSubnetTree,
