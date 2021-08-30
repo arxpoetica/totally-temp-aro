@@ -293,7 +293,6 @@ class TileComponentController {
       this.state.viewModePanels,
       this.state,
       MapUtilities.getPixelCoordinatesWithinTile.bind(this),
-      this.subnetFeatureIds,
       this.hiddenFeatures,
       this.selectedSubnetLocations,
       this.locationAlerts,
@@ -748,7 +747,6 @@ class TileComponentController {
       activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
       selectionModes: reduxState.selection.selectionModes,
       selection: reduxState.selection,
-      subnetFeatureIds: PlanEditorSelectors.getSubnetFeatureIds(reduxState),
       rSelection: reduxState.selection.selection,
       stateMapLayers: reduxState.mapLayers,
       networkAnalysisType: reduxState.optimization.networkOptimization.optimizationInputs.analysis_type,
@@ -776,7 +774,6 @@ class TileComponentController {
     const currentSelectionModeId = this.activeSelectionModeId
     const oldPlanTargets = this.selection && this.selection.planTargets
     const prevStateMapLayers = { ...this.stateMapLayers }
-    const currentSubnetFeatureIds = this.subnetFeatureIds
     const rShowFiberSize = this.rShowFiberSize
     const rViewSetting = this.rViewSetting
     const selectedSubnetLocations = this.selectedSubnetLocations
@@ -806,10 +803,6 @@ class TileComponentController {
     }
 
     // - plan edit - //
-    if (!dequal(currentSubnetFeatureIds, nextState.subnetFeatureIds)) {
-      overlayMap.setSubnetFeatureIds(nextState.subnetFeatureIds)
-      needRefresh = true
-    }
     if (!dequal(selectedSubnetLocations, nextState.selectedSubnetLocations)) {
       overlayMap.setSelectedSubnetLocations(nextState.selectedSubnetLocations)
       needRefresh = true

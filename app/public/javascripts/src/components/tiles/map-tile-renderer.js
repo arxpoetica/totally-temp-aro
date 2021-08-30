@@ -10,7 +10,7 @@ import StrokeStyle from '../../shared-utils/stroke-styles'
 
 class MapTileRenderer {
   constructor (tileSize, tileDataService, mapTileOptions, layerCategories, selectedDisplayMode, selectionModes, analysisSelectionMode, stateMapLayers, displayModes,
-    viewModePanels, state, getPixelCoordinatesWithinTile, subnetFeatureIds, hiddenFeatures, selectedSubnetLocations, locationAlerts, rShowFiberSize, rViewSetting, mapLayers = []) {
+    viewModePanels, state, getPixelCoordinatesWithinTile, hiddenFeatures, selectedSubnetLocations, locationAlerts, rShowFiberSize, rViewSetting, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
@@ -27,12 +27,9 @@ class MapTileRenderer {
     this.state = state
     this.getPixelCoordinatesWithinTile = getPixelCoordinatesWithinTile
     this.latestTileUniqueId = 0
-    
-    this.subnetFeatureIds = subnetFeatureIds
     this.selectedSubnetLocations = selectedSubnetLocations
     this.locationAlerts = locationAlerts
     this.hiddenFeatures = hiddenFeatures
-
     this.rShowFiberSize = rShowFiberSize
     this.rViewSetting = rViewSetting
 
@@ -112,9 +109,6 @@ class MapTileRenderer {
   }
 
   // - plan edit - //
-  setSubnetFeatureIds (subnetFeatureIds) {
-    this.subnetFeatureIds = subnetFeatureIds
-  }
   setSelectedSubnetLocations (selectedSubnetLocations) {
     this.selectedSubnetLocations = selectedSubnetLocations
   }
@@ -509,12 +503,9 @@ class MapTileRenderer {
         if (this.selectedDisplayMode == this.displayModes.EDIT_PLAN) {
 
           // don't render any featureIds in plan edit
-          // serviceLayerSelectionIds
+          // TODO: if we need to broaden this logic to service layers, may need to think through
           const { _data_type } = feature.properties
-          if (
-            this.subnetFeatureIds.includes(featureId)
-            && (_data_type === 'equipment' || _data_type === 'fiber')
-          ) {
+          if (_data_type === 'equipment' || _data_type === 'fiber') {
             continue
           }
 
