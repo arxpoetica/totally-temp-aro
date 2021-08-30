@@ -107,14 +107,10 @@ export const FilterEditor = ({
   }
 
   const textChange = (event, index) => {
-    let min = parseFloat(event.target.min) || null
-    let max = parseFloat(event.target.max) || null
-    let value = parseFloat(event.target.value) || 0
-
     if (event.target.name === 'value1') {
-      activeFilters[index].value1 = value
+      activeFilters[index].value1 = event.target.value
     } else if (event.target.name === 'value2') {
-      activeFilters[index].value2 = value
+      activeFilters[index].value2 = event.target.value
     }
 
     setActiveFilters([...activeFilters])
@@ -152,6 +148,7 @@ export const FilterEditor = ({
               min={filter.minValue}
               max={filter.maxValue}
               onChange={event => textChange(event, index)}
+              onBlur={event => textChange(event, index)}
               classes={cx('ei-filter-input', 
                 filter.format === 'DOLLAR' && 'dollar', 
                 filter.format === 'PERCENT' && 'percent')}
@@ -169,6 +166,7 @@ export const FilterEditor = ({
                 min={filter.minValue}
                 max={filter.maxValue}
                 onChange={event => textChange(event, index)}
+                onBlur={event => textChange(event, index)}
                 classes={cx('ei-filter-input',
                   filter.format === 'DOLLAR' && 'dollar',
                   filter.format === 'PERCENT' && 'percent')}
