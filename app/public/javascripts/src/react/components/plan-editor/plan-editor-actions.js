@@ -256,6 +256,13 @@ function setIsEnteringTransaction (isEnteringTransaction) {
   }
 }
 
+function setIsPlanEditorChanged (isPlanEditorChanged) {
+  return {
+    type: Actions.PLAN_EDITOR_SET_IS_PLAN_EDITOR_CHANGED,
+    payload: isPlanEditorChanged
+  }
+}
+
 export default {
   commitTransaction,
   clearTransaction,
@@ -276,5 +283,6 @@ export default {
   setIsDraggingFeatureForDrop,
   setIsEditingFeatureProperties,
   setIsCommittingTransaction,
-  setIsEnteringTransaction
+  setIsEnteringTransaction,
+  setIsPlanEditorChanged,
 }

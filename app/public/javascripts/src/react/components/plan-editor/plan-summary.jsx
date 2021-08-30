@@ -4,6 +4,7 @@ import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import SummaryReports from '../sidebar/view/summary-reports.jsx'
 import AroHttp from '../../common/aro-http'
 import RoicReportsActions from '../sidebar/analysis/roic-reports/roic-reports-actions'
+import { usePrevious, groupBy } from '../../common/view-utils.js'
 
 export const PlanSummary = (props) => {
   const summaryInstallationTypes = Object.freeze({
@@ -16,12 +17,11 @@ export const PlanSummary = (props) => {
     Fiber: { summaryData: {}, totalSummary: {}, groupBy: 'fiberType', aggregateBy: 'lengthMeters' },
     Coverage: { summaryData: {}, totalSummary: {}, groupBy: 'locationEntityType', aggregateBy: 'count' }
   }
-  const intlNumberFormat = config.intl_number_format || 'en-US'
-  const numberFormatter = new Intl.NumberFormat(intlNumberFormat)
   const metersToLength = config.length.meters_to_length_units
 
   const [state, setState] = useState({
     summaryCategoryTypes: summaryCategoryTypesObj,
+    cachedRawSummary: null,
     isKeyExpanded: {
       Equipment: false,
       Fiber: false,
@@ -31,13 +31,14 @@ export const PlanSummary = (props) => {
     locTagCoverage: [],
     coverageOrder: [],
     isLocKeyExpanded: false,
+    layerTagTodescription: {},
   })
 
   const { summaryCategoryTypes, isKeyExpanded, equipmentOrder, coverageOrder, isLocKeyExpanded,
-    locTagCoverage } = state
+    locTagCoverage, cachedRawSummary } = state
 
   const { selectedBoundaryType, currentTransaction, loadNetworkNodeTypesEntity, networkNodeTypesEntity,
-    locationCategories, networkEquipment } = props
+    locationCategories, networkEquipment, layerCategories, isPlanEditorChanged } = props
 
   useEffect(() => {
     // fetching equipment order from networkEquipment.json
@@ -52,16 +53,22 @@ export const PlanSummary = (props) => {
       result[item] = false
       return result
     }, {})
-    setState((state) => ({ ...state, equipmentOrder, coverageOrder, isLocKeyExpanded }))
 
-    getPlanSummary()
+    setState((state) => ({ ...state, equipmentOrder, coverageOrder, isLocKeyExpanded }))
     loadNetworkNodeTypesEntity()
   }, [])
+
+  const oldTransaction = usePrevious(currentTransaction)
+  useEffect(() => {
+    if (oldTransaction && oldTransaction !== currentTransaction) {
+      // Current transaction has changed. Recalculate plan summary.
+      getPlanSummary()
+    }
+  }, [currentTransaction])
 
   const orderSummaryByCategory = (obj, key) => {
     var categoryOrder = []
 
-    // for (const [objKey, objValue] of Object.entries(obj)) {
     Object.keys(obj).forEach(objKey => {
       categoryOrder.push(obj[objKey][key])
     })
@@ -70,240 +77,58 @@ export const PlanSummary = (props) => {
   }
 
   const getPlanSummary = () => {
-    let cachedRawSummary = null
+    setState((state) => ({ ...state, cachedRawSummary: null }))
     if (currentTransaction) {
-      AroHttp.get(`/service/plan-library-feature-mods/76/equipment?userId=4`)
+      AroHttp.get(`/service/plan-transaction/${currentTransaction.id}/plan_summary/`)
         .then((response) => {
-          cachedRawSummary = {
-            "priceModel": {
-              "totalCost": 0,
-              "equipmentCosts": [],
-              "fiberCosts": []
-            },
-            "demandSummary": {
-              "summaries": []
-            },
-            "networkStatistics": [],
-            "equipmentSummary": [
-              {
-                "deploymentType": "PLANNED",
-                "networkNodeType": "location_connector",
-                "modified": false,
-                "equipmentCode": null,
-                "count": 0
-              },
-              {
-                "deploymentType": "PLANNED",
-                "networkNodeType": "junction_splitter",
-                "modified": false,
-                "equipmentCode": null,
-                "count": 0
-              },
-              {
-                "deploymentType": "PLANNED",
-                "networkNodeType": "bulk_distribution_terminal",
-                "modified": false,
-                "equipmentCode": null,
-                "count": 0
-              },
-              {
-                "deploymentType": "INSTALLED",
-                "networkNodeType": "fiber_distribution_hub",
-                "modified": false,
-                "equipmentCode": null,
-                "count": 0
-              },
-              {
-                "deploymentType": "PLANNED",
-                "networkNodeType": "fiber_distribution_terminal",
-                "modified": false,
-                "equipmentCode": null,
-                "count": 0
-              },
-              {
-                "deploymentType": "INSTALLED",
-                "networkNodeType": "splice_point",
-                "modified": false,
-                "equipmentCode": null,
-                "count": 0
-              },
-              {
-                "deploymentType": "INSTALLED",
-                "networkNodeType": "subnet_node",
-                "modified": false,
-                "equipmentCode": null,
-                "count": 0
-              },
-              {
-                "deploymentType": "INSTALLED",
-                "networkNodeType": "junction_splitter",
-                "modified": false,
-                "equipmentCode": null,
-                "count": 0
-              },
-              {
-                "deploymentType": "INSTALLED",
-                "networkNodeType": "fiber_distribution_terminal",
-                "modified": false,
-                "equipmentCode": null,
-                "count": 0
-              },
-              {
-                "deploymentType": "INSTALLED",
-                "networkNodeType": "network_connector",
-                "modified": false,
-                "equipmentCode": null,
-                "count": 0
-              },
-              {
-                "deploymentType": "PLANNED",
-                "networkNodeType": "network_anchor",
-                "modified": false,
-                "equipmentCode": null,
-                "count": 0
-              },
-              {
-                "deploymentType": "INSTALLED",
-                "networkNodeType": "multiple_dwelling_unit",
-                "modified": false,
-                "equipmentCode": null,
-                "count": 0
-              },
-              {
-                "deploymentType": "PLANNED",
-                "networkNodeType": "loop_extender",
-                "modified": false,
-                "equipmentCode": null,
-                "count": 0
-              },
-              {
-                "deploymentType": "INSTALLED",
-                "networkNodeType": "central_office",
-                "modified": false,
-                "equipmentCode": null,
-                "count": 0
-              },
-              {
-                "deploymentType": "PLANNED",
-                "networkNodeType": "network_connector",
-                "modified": false,
-                "equipmentCode": null,
-                "count": 0
-              },
-              {
-                "deploymentType": "PLANNED",
-                "networkNodeType": "dslam",
-                "modified": true,
-                "equipmentCode": null,
-                "count": 2
-              },
-              {
-                "deploymentType": "PLANNED",
-                "networkNodeType": "cell_5g",
-                "modified": false,
-                "equipmentCode": null,
-                "count": 0
-              },
-              {
-                "deploymentType": "INSTALLED",
-                "networkNodeType": "cell_5g",
-                "modified": false,
-                "equipmentCode": null,
-                "count": 0
-              },
-              {
-                "deploymentType": "INSTALLED",
-                "networkNodeType": "loop_extender",
-                "modified": false,
-                "equipmentCode": null,
-                "count": 0
-              },
-              {
-                "deploymentType": "PLANNED",
-                "networkNodeType": "central_office",
-                "modified": false,
-                "equipmentCode": null,
-                "count": 0
-              },
-              {
-                "deploymentType": "INSTALLED",
-                "networkNodeType": "location_connector",
-                "modified": false,
-                "equipmentCode": null,
-                "count": 0
-              },
-              {
-                "deploymentType": "PLANNED",
-                "networkNodeType": "fiber_distribution_hub",
-                "modified": false,
-                "equipmentCode": null,
-                "count": 0
-              },
-              {
-                "deploymentType": "PLANNED",
-                "networkNodeType": "subnet_node",
-                "modified": false,
-                "equipmentCode": null,
-                "count": 0
-              },
-              {
-                "deploymentType": "INSTALLED",
-                "networkNodeType": "bulk_distribution_terminal",
-                "modified": false,
-                "equipmentCode": null,
-                "count": 0
-              },
-              {
-                "deploymentType": "INSTALLED",
-                "networkNodeType": "dslam",
-                "modified": false,
-                "equipmentCode": null,
-                "count": 0
-              },
-              {
-                "deploymentType": "INSTALLED",
-                "networkNodeType": "network_anchor",
-                "modified": false,
-                "equipmentCode": null,
-                "count": 0
-              },
-              {
-                "deploymentType": "PLANNED",
-                "networkNodeType": "multiple_dwelling_unit",
-                "modified": false,
-                "equipmentCode": null,
-                "count": 0
-              },
-              {
-                "deploymentType": "PLANNED",
-                "networkNodeType": "splice_point",
-                "modified": false,
-                "equipmentCode": null,
-                "count": 0
-              }
-            ],
-            "fiberSummary": [],
-            "equipmentCoverageSummary": [],
-            "roicAnalysis": {
-              "periods": 0,
-              "components": {}
-            }
-          }
+          const cachedRawSummary = response.data
           formatSummary(cachedRawSummary)
+          setState((state) => ({ ...state, cachedRawSummary }))
         })
     }
   }
 
+  const prevSelectedBoundaryType = usePrevious(selectedBoundaryType)
+  useEffect(() => {
+    if (prevSelectedBoundaryType && prevSelectedBoundaryType.id !== selectedBoundaryType.id) {
+      // Selected boundary type has changed
+      cachedRawSummary && formatSummary(cachedRawSummary)
+    }
+  }, [selectedBoundaryType])
+
+  useEffect(() => {
+    getPlanSummary()
+  }, [equipmentOrder])
+
+  useEffect(() => {
+    let layerTagCategories = {}
+    Object.keys(layerCategories).forEach((categoryId) => {
+      Object.keys(layerCategories[categoryId].tags).forEach((tagId) => {
+        var tag = layerCategories[categoryId].tags[tagId]
+        layerTagCategories[tag.id] = tag.description
+      })
+    })
+    setState((state) => ({ ...state, layerTagTodescription: layerTagCategories }))
+  }, [layerCategories])
+
+  useEffect(() => {
+    isPlanEditorChanged && getPlanSummary()
+  }, [isPlanEditorChanged])
+
   const formatSummary = (planSummary) => {
     // Order Equipment Summary
-    var OrderedEquipmentSummary = _.sortBy(planSummary.equipmentSummary, (obj) => _.indexOf(equipmentOrder, obj.networkNodeType))
+    var OrderedEquipmentSummary = planSummary.equipmentSummary.sort((a, b) => {  
+      return equipmentOrder.indexOf(a.networkNodeType) - equipmentOrder.indexOf(b.networkNodeType)
+    })
     var equipmentSummary = OrderedEquipmentSummary
 
     var fiberSummary = planSummary.fiberSummary
 
     // Preprocessing Coverage Summary (rolling up tagSetCounts to count) and order
     var rawCoverageSummary = planSummary.equipmentCoverageSummary
-    var orderedRawCoverageSummary = _.sortBy(rawCoverageSummary, (obj) => _.indexOf(coverageOrder, obj.locationEntityType))
+    var orderedRawCoverageSummary = rawCoverageSummary.sort((a, b) => {  
+      return coverageOrder.indexOf(a.locationEntityType) - coverageOrder.indexOf(b.locationEntityType)
+    })
     var processedCoverageSummary = processCoverageSummary(orderedRawCoverageSummary)
 
     let summaryCategoryTypes = summaryCategoryTypesObj
@@ -342,15 +167,15 @@ export const PlanSummary = (props) => {
   }
 
   const transformSummary = (summary, groupByCategoryType, aggregateBy) => {
-    var groupByNodeType = _.groupBy(summary, groupByCategoryType)
+    var groupByNodeType = groupBy(summary, groupByCategoryType)
+
     var transformedSummary = {}
 
     Object.keys(groupByNodeType).forEach(nodeType => {
-      transformedSummary[nodeType] = _.groupBy(groupByNodeType[nodeType], 'deploymentType')
+      transformedSummary[nodeType] = groupBy(groupByNodeType[nodeType], 'deploymentType')
 
       // Calculating total for planned and existing of a particular node type
-      // transformedSummary[nodeType].Total = [{'count':_.reduce(_.map(groupByNodeType[nodeType],(obj) => 'lengthMeters' in obj ? obj.lengthMeters : obj.count), (memo, num) => memo + num, 0)}]
-      transformedSummary[nodeType].Total = [{ [aggregateBy]: _.reduce(_.map(groupByNodeType[nodeType], (obj) => obj[aggregateBy]), (memo, num) => memo + num, 0) }]
+      transformedSummary[nodeType].Total = [{ [aggregateBy]: groupByNodeType[nodeType].map((obj) => obj[aggregateBy]).reduce((memo, num) => memo + num, 0) }]
     })
 
     return transformedSummary
@@ -375,7 +200,6 @@ export const PlanSummary = (props) => {
   const togglelocationTagCoverage = (selectedCoverageLoc) => {
     isLocKeyExpanded[selectedCoverageLoc] = !isLocKeyExpanded[selectedCoverageLoc]
     // creating dummy install data
-    // this.summaryCategoryTypes['Coverage']['summaryData'][selectedCoverageLoc]['INSTALLED'] = [{"deploymentType":"INSTALLED","nodeType":"dslam","locationEntityType":"small","boundaryTypeId":1,"tagSetCounts":[{"tagSet":[16],"count":1},{"tagSet":[13],"count":1}],"count":2}]
 
     var installedId = summaryInstallationTypes['INSTALLED'].id
     var plannedId = summaryInstallationTypes['PLANNED'].id
@@ -395,12 +219,12 @@ export const PlanSummary = (props) => {
     existing && existing.map((arr) => tempTagSetCountsData.push(arr))
     planned && planned.map((arr) => tempTagSetCountsData.push(arr))
 
-    var groupByTag = _.groupBy(tempTagSetCountsData, 'tagSet')
+    var groupByTag = groupBy(tempTagSetCountsData, 'tagSet')
 
     var groupByTagDeploymentType = {}
     Object.keys(groupByTag).forEach((tag) => {
-      groupByTagDeploymentType[tag] = _.groupBy(groupByTag[tag], 'deploymentType')
-      groupByTagDeploymentType[tag][totalId] = [{ 'count': _.reduce(_.map(groupByTag[tag], (obj) => obj['count']), (memo, num) => memo + num, 0) }]
+      groupByTagDeploymentType[tag] = groupBy(groupByTag[tag], 'deploymentType')
+      groupByTagDeploymentType[tag][totalId] = [{ 'count': groupByTag[tag].map((obj) => obj['count']).reduce((memo, num) => memo + num, 0) }]
     })
 
     locTagCoverage[selectedCoverageLoc] = groupByTagDeploymentType
@@ -408,25 +232,25 @@ export const PlanSummary = (props) => {
   }
 
   return (
-    <div>
+    <>
       <table id="tblPlanSummary" className="table table-sm table-striped">
         <thead>
           <tr>
             <th></th>
             {
-              Object.entries(summaryInstallationTypes).map(([installationType, info]) => (
-                <td key={info.id}>{info.Label}</td>
+              Object.entries(summaryInstallationTypes).map(([installationType, info], index) => (
+                <td key={index}>{info.Label}</td>
               ))
             }
           </tr>
         </thead>
         {/* Display plan summary */}
         {
-          Object.entries(summaryCategoryTypes).map(([categoryType, categoryinfo]) => {
+          Object.entries(summaryCategoryTypes).map(([categoryType, categoryinfo], summaryIndex) => {
             return (
               categoryType !== 'Coverage'
               ? (
-                <tbody>
+                <tbody key={summaryIndex}>
                   {/* Display total summary of a category */}
                   <tr>
                     <th id="pointer" onClick={() => toggleIsKeyExpanded(categoryType)}>
@@ -440,27 +264,24 @@ export const PlanSummary = (props) => {
 
                     {/* Display installation types */}
                     {
-                      categoryinfo['aggregateBy'] === 'count' &&
-                      (
-                        Object.entries(summaryInstallationTypes).map(([installationType, info]) => (
-                          <th>
-                            { 
+                      categoryinfo['aggregateBy'] === 'count'
+                      ? (
+                          Object.entries(summaryInstallationTypes).map(([installationType, info], index) => (
+                            <th key={index}>
+                              { 
+                                Object.keys(categoryinfo['totalSummary']).length &&
+                                categoryinfo['totalSummary'][installationType][0][categoryinfo['aggregateBy']]
+                              }
+                            </th>
+                          ))
+                        )
+                      : (
+                        Object.entries(summaryInstallationTypes).map(([installationType, info], index) => (
+                           // Display with two decimal points
+                          <th key={index}>
+                            {
                               Object.keys(categoryinfo['totalSummary']).length &&
-                              categoryinfo['totalSummary'][installationType][0][categoryinfo['aggregateBy']]
-                            }
-                          </th>
-                        ))
-                      )
-                    }
-                    {/* Display with two decimal points */}
-                    {
-                      categoryinfo['aggregateBy'] !== 'count' &&
-                      (
-                        Object.entries(summaryInstallationTypes).map(([installationType, info]) => (
-                          <th>
-                            { 
-                              Object.keys(categoryinfo['totalSummary']).length &&
-                              numberFormatter.format((categoryinfo['totalSummary'][installationType][0][categoryinfo['aggregateBy']] * metersToLength).toFixed(1))
+                              (categoryinfo['totalSummary'][installationType][0][categoryinfo['aggregateBy']] || 0 * metersToLength).toFixed(1)
                             }
                           </th>
                         ))
@@ -480,8 +301,8 @@ export const PlanSummary = (props) => {
                   {
                     isKeyExpanded[categoryType] &&
                     (
-                      Object.entries(categoryinfo['summaryData']).map(([name, installationType]) => (
-                        <tr>
+                      Object.entries(categoryinfo['summaryData']).map(([name, installationType], categoryIndex) => (
+                        <tr key={categoryIndex}>
                           {/* For category type 'Equipment' display nicer names */}
                           {
                             categoryType === 'Equipment'
@@ -490,10 +311,10 @@ export const PlanSummary = (props) => {
                           }
                           {/* Display installation types */}
                           {
-                            categoryinfo['aggregateBy'] !== 'count'
+                            categoryinfo['aggregateBy'] === 'count'
                             ? (
-                                Object.entries(summaryInstallationTypes).map(([type, info]) => (
-                                  <td>
+                                Object.entries(summaryInstallationTypes).map(([type, info], index) => (
+                                  <td key={index}>
                                     {
                                       Object.keys(categoryinfo['totalSummary']).length &&
                                       installationType[type][0][categoryinfo['aggregateBy']] || 0
@@ -502,11 +323,12 @@ export const PlanSummary = (props) => {
                                 ))
                               )
                             : (
-                                Object.entries(summaryInstallationTypes).map(([type, info]) => (
-                                  <td>
+                                Object.entries(summaryInstallationTypes).map(([type, info], index) => (
+                                  // converting to client specific units
+                                  <td key={index}>
                                     {
                                       Object.keys(categoryinfo['totalSummary']).length &&
-                                      numberFormatter.format((categoryinfo['totalSummary'][type][0][categoryinfo['aggregateBy']] || 0 * metersToLength).toFixed(1))
+                                      (installationType[type][0][categoryinfo['aggregateBy']] || 0 * metersToLength).toFixed(1)
                                     }
                                   </td>
                                 ))
@@ -520,7 +342,7 @@ export const PlanSummary = (props) => {
               )
             : (
                 // Display Coverage summary
-                <tbody>
+                <tbody key={summaryIndex}>
                   {/* coverage total summary */}
                   <tr>
                     <th id="pointer" onClick={() => toggleIsKeyExpanded('Coverage')}>
@@ -532,14 +354,15 @@ export const PlanSummary = (props) => {
                       Coverage
                     </th>
                     {
-                      Object.keys(summaryCategoryTypes['Coverage']['totalSummary']).length &&
-                      (
-                        <>
-                          <td>{ summaryCategoryTypes['Coverage']['totalSummary'][summaryInstallationTypes['INSTALLED'].id][0].count }</td>
-                          <td>{ summaryCategoryTypes['Coverage']['totalSummary'][summaryInstallationTypes['PLANNED'].id][0].count }</td>
-                          <td>{ summaryCategoryTypes['Coverage']['totalSummary'][summaryInstallationTypes['Total'].id][0].count }</td>
-                        </>
-                      )
+                      Object.keys(summaryCategoryTypes['Coverage']['totalSummary']).length
+                      ?  (
+                          <>
+                            <td>{ summaryCategoryTypes['Coverage']['totalSummary'][summaryInstallationTypes['INSTALLED'].id][0].count }</td>
+                            <td>{ summaryCategoryTypes['Coverage']['totalSummary'][summaryInstallationTypes['PLANNED'].id][0].count }</td>
+                            <td>{ summaryCategoryTypes['Coverage']['totalSummary'][summaryInstallationTypes['Total'].id][0].count }</td>
+                          </>
+                        )
+                      : <td colSpan="3"></td>
                     }
                   </tr>
                   {
@@ -558,8 +381,8 @@ export const PlanSummary = (props) => {
         {
           isKeyExpanded['Coverage'] &&
           (
-            Object.entries(summaryCategoryTypes['Coverage']['summaryData']).map(([locationEntityType, coverageinfo]) => (
-              <tbody>
+            Object.entries(summaryCategoryTypes['Coverage']['summaryData']).map(([locationEntityType, coverageinfo], categoryIndex) => (
+              <tbody key={categoryIndex}>
                 <tr>
                   <td id="pointer" onClick={() => togglelocationTagCoverage(locationEntityType)}>
                     {
@@ -576,9 +399,9 @@ export const PlanSummary = (props) => {
                 {
                   isLocKeyExpanded[locationEntityType] &&
                   (
-                    Object.entries(locTagCoverage[locationEntityType]).map(([tag, taginfo]) => (
-                      <tr>
-                        <td class="indent-2"> { layerTagTodescription[tag] }</td>
+                    Object.entries(locTagCoverage[locationEntityType]).map(([tag, taginfo], index) => (
+                      <tr key={index}>
+                        <td class="indent-2">{ layerTagTodescription[tag] }</td>
                         <td>{ taginfo[summaryInstallationTypes['INSTALLED'].id][0].count || 0 }</td>
                         <td>{ taginfo[summaryInstallationTypes['PLANNED'].id][0].count || 0 }</td>
                         <td>{ taginfo[summaryInstallationTypes['Total'].id][0].count || 0 }</td>
@@ -596,17 +419,19 @@ export const PlanSummary = (props) => {
       <SummaryReports />
 
       {/* Add a div that will overlay all the controls above. The div will be visible when the controls need to be disabled. */}
-      {/* { currentTransaction && <div className="disable-sibling-controls" /> } */}
-    </div>
+      { currentTransaction && <div className="disable-sibling-controls" /> }
+    </>
   )
 }
 
 const mapStateToProps = (state) => ({
   selectedBoundaryType: state.mapLayers.selectedBoundaryType,
-  currentTransaction: state.planEditor.transaction || 10,
+  currentTransaction: state.planEditor.transaction,
   networkEquipment: state.toolbar.appConfiguration.networkEquipment,
   locationCategories: state.toolbar.appConfiguration.locationCategories,
   networkNodeTypesEntity: state.roicReports.networkNodeTypesEntity,
+  layerCategories: state.stateViewMode.layerCategories,
+  isPlanEditorChanged: state.planEditor.isPlanEditorChanged,
 })
 
 const mapDispatchToProps = (dispatch) => ({

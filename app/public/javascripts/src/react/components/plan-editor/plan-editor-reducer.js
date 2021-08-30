@@ -11,7 +11,8 @@ const defaultState = {
   isDraggingFeatureForDrop: false,
   isEditingFeatureProperties: false,
   isEnteringTransaction: false,
-  isCommittingTransaction: false
+  isCommittingTransaction: false,
+  isPlanEditorChanged: false,
 }
 
 function setTransaction (state, transaction) {
@@ -107,6 +108,12 @@ function setIsEnteringTransaction (state, isEnteringTransaction) {
   }
 }
 
+function setIsPlanEditorChanged (state, isPlanEditorChanged) {
+  return { ...state,
+    isPlanEditorChanged: isPlanEditorChanged
+  }
+}
+
 function planEditorReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.PLAN_EDITOR_CLEAR_TRANSACTION:
@@ -147,6 +154,9 @@ function planEditorReducer (state = defaultState, action) {
 
     case Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION:
       return setIsEnteringTransaction(state, action.payload)
+
+    case Actions.PLAN_EDITOR_SET_IS_PLAN_EDITOR_CHANGED:
+      return setIsPlanEditorChanged(state, action.payload)
 
     default:
       return state
