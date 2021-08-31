@@ -83,7 +83,7 @@ export class RoicReportsSummary extends Component {
               No. of premises varies according to selected Network type and Entity type
               that's why Capex Per Premises is fixed with their default values */}
               {/* Note to self: singular of premises is premises, not premise */}
-              <td><strong>Capex Per Premises</strong></td>
+              <td className='roic-report-field-title'>Capex Per Premises</td>
               <td>{roicResults.priceModel
               && 'PLANNED_NETWORK' in roicResults.roicAnalysis.components
               && roicResults.roicAnalysis.components['PLANNED_NETWORK']['network.premises']

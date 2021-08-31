@@ -67,6 +67,12 @@
   padding-left: 30px !important;
 }
 
+/* Roic Reports Summary */
+
+.roic-report-field-title {
+  font-weight: bolder;
+}
+
 /* Coverage Report Downloader */
 
 #tblCoverageReportGenerator td, #tblDownloadReports td {
