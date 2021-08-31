@@ -421,13 +421,19 @@ class TileComponentController {
     })
 
     this.overlayClickListener = this.mapRef.addListener('click', async(event) => {
-      const { isShiftPressed } = this.state
 
       if (this.contextMenuService.isMenuVisible.getValue()) {
         this.contextMenuService.menuOff()
         this.$timeout()
         return
       }
+
+      // let plan edit do its thing
+      if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.EDIT_PLAN) {
+        return
+      }
+
+      const { isShiftPressed } = this.state
 
       try {
         // ToDo: depricate getFilteredFeaturesUnderLatLng switch to this
