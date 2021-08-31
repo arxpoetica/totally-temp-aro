@@ -10,12 +10,12 @@ export const PlanSummary = (props) => {
   const summaryInstallationTypes = Object.freeze({
     INSTALLED: { id: 'INSTALLED', Label: 'Existing' },
     PLANNED: { id: 'PLANNED', Label: 'Planned' },
-    Total: { id: 'Total', Label: 'Total' }
+    Total: { id: 'Total', Label: 'Total' },
   })
   const summaryCategoryTypesObj = {
     Equipment: { summaryData: {}, totalSummary: {}, groupBy: 'networkNodeType', aggregateBy: 'count' },
     Fiber: { summaryData: {}, totalSummary: {}, groupBy: 'fiberType', aggregateBy: 'lengthMeters' },
-    Coverage: { summaryData: {}, totalSummary: {}, groupBy: 'locationEntityType', aggregateBy: 'count' }
+    Coverage: { summaryData: {}, totalSummary: {}, groupBy: 'locationEntityType', aggregateBy: 'count' },
   }
   const metersToLength = config.length.meters_to_length_units
 
@@ -38,18 +38,18 @@ export const PlanSummary = (props) => {
     locTagCoverage, cachedRawSummary } = state
 
   const { selectedBoundaryType, currentTransaction, loadNetworkNodeTypesEntity, networkNodeTypesEntity,
-    locationCategories, networkEquipment, layerCategories, isPlanEditorChanged } = props
+    locationCategories, networkEquipment, layerCategories, isPlanEditorChanged, layerTagTodescription } = props
 
   useEffect(() => {
     // fetching equipment order from networkEquipment.json
-    var equipmentOrderKey = summaryCategoryTypes['Equipment']['groupBy']
+    const equipmentOrderKey = summaryCategoryTypes['Equipment']['groupBy']
     const equipmentOrder = orderSummaryByCategory(networkEquipment.equipments, equipmentOrderKey)
     equipmentOrder.push('junction_splitter')
 
     // fetching location order from locationCategories.json
-    var coverageOrderKey = 'plannerKey'
+    const coverageOrderKey = 'plannerKey'
     const coverageOrder = orderSummaryByCategory(locationCategories.categories, coverageOrderKey)
-    const isLocKeyExpanded = coverageOrder.reduce(function (result, item, index, array) {
+    const isLocKeyExpanded = coverageOrder.reduce(function (result, item) {
       result[item] = false
       return result
     }, {})
@@ -67,13 +67,7 @@ export const PlanSummary = (props) => {
   }, [currentTransaction])
 
   const orderSummaryByCategory = (obj, key) => {
-    var categoryOrder = []
-
-    Object.keys(obj).forEach(objKey => {
-      categoryOrder.push(obj[objKey][key])
-    })
-
-    return categoryOrder
+    return Object.keys(obj).map(objKey => obj[objKey][key])
   }
 
   const getPlanSummary = () => {
@@ -101,10 +95,10 @@ export const PlanSummary = (props) => {
   }, [equipmentOrder])
 
   useEffect(() => {
-    let layerTagCategories = {}
+    const layerTagCategories = {}
     Object.keys(layerCategories).forEach((categoryId) => {
       Object.keys(layerCategories[categoryId].tags).forEach((tagId) => {
-        var tag = layerCategories[categoryId].tags[tagId]
+        const tag = layerCategories[categoryId].tags[tagId]
         layerTagCategories[tag.id] = tag.description
       })
     })
@@ -117,47 +111,66 @@ export const PlanSummary = (props) => {
 
   const formatSummary = (planSummary) => {
     // Order Equipment Summary
-    var OrderedEquipmentSummary = planSummary.equipmentSummary.sort((a, b) => {  
+    const OrderedEquipmentSummary = planSummary.equipmentSummary.sort((a, b) => {
       return equipmentOrder.indexOf(a.networkNodeType) - equipmentOrder.indexOf(b.networkNodeType)
     })
-    var equipmentSummary = OrderedEquipmentSummary
+    const equipmentSummary = OrderedEquipmentSummary
 
-    var fiberSummary = planSummary.fiberSummary
+    const { fiberSummary } = planSummary
 
     // Preprocessing Coverage Summary (rolling up tagSetCounts to count) and order
-    var rawCoverageSummary = planSummary.equipmentCoverageSummary
-    var orderedRawCoverageSummary = rawCoverageSummary.sort((a, b) => {  
+    const rawCoverageSummary = planSummary.equipmentCoverageSummary
+    const orderedRawCoverageSummary = rawCoverageSummary.sort((a, b) => {
       return coverageOrder.indexOf(a.locationEntityType) - coverageOrder.indexOf(b.locationEntityType)
     })
-    var processedCoverageSummary = processCoverageSummary(orderedRawCoverageSummary)
+    const processedCoverageSummary = processCoverageSummary(orderedRawCoverageSummary)
 
-    let summaryCategoryTypes = summaryCategoryTypesObj
+    const summaryCategoryTypes = summaryCategoryTypesObj
 
-    summaryCategoryTypes['Equipment']['summaryData'] = transformSummary(equipmentSummary, summaryCategoryTypes['Equipment']['groupBy'], summaryCategoryTypes['Equipment']['aggregateBy'])
-    summaryCategoryTypes['Fiber']['summaryData'] = transformSummary(fiberSummary, summaryCategoryTypes['Fiber']['groupBy'], summaryCategoryTypes['Fiber']['aggregateBy'])
-    summaryCategoryTypes['Coverage']['summaryData'] = transformSummary(processedCoverageSummary, summaryCategoryTypes['Coverage']['groupBy'], summaryCategoryTypes['Coverage']['aggregateBy'])
+    summaryCategoryTypes['Equipment']['summaryData'] = transformSummary(
+      equipmentSummary, summaryCategoryTypes['Equipment']['groupBy'], summaryCategoryTypes['Equipment']['aggregateBy']
+    )
+    summaryCategoryTypes['Fiber']['summaryData'] = transformSummary(
+      fiberSummary, summaryCategoryTypes['Fiber']['groupBy'], summaryCategoryTypes['Fiber']['aggregateBy']
+    )
+    summaryCategoryTypes['Coverage']['summaryData'] = transformSummary(
+      processedCoverageSummary, summaryCategoryTypes['Coverage']['groupBy'],
+      summaryCategoryTypes['Coverage']['aggregateBy']
+    )
 
     // Calculating Total Equipment Summary
-    summaryCategoryTypes['Equipment']['totalSummary'] = calculateTotalByInstallationType(equipmentSummary, summaryCategoryTypes['Equipment']['aggregateBy'])
+    summaryCategoryTypes['Equipment']['totalSummary'] = calculateTotalByInstallationType(
+      equipmentSummary, summaryCategoryTypes['Equipment']['aggregateBy']
+    )
     // Calculating Total Fiber Summary
-    summaryCategoryTypes['Fiber']['totalSummary'] = calculateTotalByInstallationType(fiberSummary, summaryCategoryTypes['Fiber']['aggregateBy'])
+    summaryCategoryTypes['Fiber']['totalSummary'] = calculateTotalByInstallationType(
+      fiberSummary, summaryCategoryTypes['Fiber']['aggregateBy']
+    )
     // Calculating Total Coverage Summary
-    summaryCategoryTypes['Coverage']['totalSummary'] = calculateTotalByInstallationType(processedCoverageSummary, summaryCategoryTypes['Coverage']['aggregateBy'])
+    summaryCategoryTypes['Coverage']['totalSummary'] = calculateTotalByInstallationType(
+      processedCoverageSummary, summaryCategoryTypes['Coverage']['aggregateBy']
+    )
 
     setState((state) => ({ ...state, summaryCategoryTypes }))
   }
 
   const calculateTotalByInstallationType = (equipmentSummary, aggregateBy) => {
-    var totalEquipmentSummary = {}
-    var existingEquip = equipmentSummary.filter(equipment => equipment.deploymentType === summaryInstallationTypes['INSTALLED'].id)
-    var plannedEquip = equipmentSummary.filter(equipment => equipment.deploymentType === summaryInstallationTypes['PLANNED'].id)
+    const totalEquipmentSummary = {}
+    const existingEquip = equipmentSummary.filter(
+      equipment => equipment.deploymentType === summaryInstallationTypes['INSTALLED'].id
+    )
+    const plannedEquip = equipmentSummary.filter(
+      equipment => equipment.deploymentType === summaryInstallationTypes['PLANNED'].id
+    )
 
-    var existingEquipCountArray = existingEquip.map(exitingEqu => exitingEqu[aggregateBy])
-    var plannedEquipCountArray = plannedEquip.map(plannedEqu => plannedEqu[aggregateBy])
+    const existingEquipCountArray = existingEquip.map(exitingEqu => exitingEqu[aggregateBy])
+    const plannedEquipCountArray = plannedEquip.map(plannedEqu => plannedEqu[aggregateBy])
 
-    var existingEquipCount = existingEquipCountArray.length && existingEquipCountArray.reduce((accumulator, currentValue) => accumulator + currentValue)
-    var plannedEquipCount = plannedEquipCountArray.length && plannedEquipCountArray.reduce((accumulator, currentValue) => accumulator + currentValue)
-    var totalEuipCount = existingEquipCount + plannedEquipCount
+    const existingEquipCount = existingEquipCountArray.length
+      && existingEquipCountArray.reduce((accumulator, currentValue) => accumulator + currentValue)
+    const plannedEquipCount = plannedEquipCountArray.length
+      && plannedEquipCountArray.reduce((accumulator, currentValue) => accumulator + currentValue)
+    const totalEuipCount = existingEquipCount + plannedEquipCount
 
     totalEquipmentSummary[summaryInstallationTypes['INSTALLED'].id] = [{ [aggregateBy]: existingEquipCount }]
     totalEquipmentSummary[summaryInstallationTypes['PLANNED'].id] = [{ [aggregateBy]: plannedEquipCount }]
@@ -167,26 +180,29 @@ export const PlanSummary = (props) => {
   }
 
   const transformSummary = (summary, groupByCategoryType, aggregateBy) => {
-    var groupByNodeType = groupBy(summary, groupByCategoryType)
+    const groupByNodeType = groupBy(summary, groupByCategoryType)
 
-    var transformedSummary = {}
+    const transformedSummary = {}
 
     Object.keys(groupByNodeType).forEach(nodeType => {
       transformedSummary[nodeType] = groupBy(groupByNodeType[nodeType], 'deploymentType')
 
       // Calculating total for planned and existing of a particular node type
-      transformedSummary[nodeType].Total = [{ [aggregateBy]: groupByNodeType[nodeType].map((obj) => obj[aggregateBy]).reduce((memo, num) => memo + num, 0) }]
+      transformedSummary[nodeType].Total = [{
+        [aggregateBy]: groupByNodeType[nodeType].map((obj) => obj[aggregateBy]).reduce((memo, num) => memo + num, 0)
+      }]
     })
 
     return transformedSummary
   }
 
   const processCoverageSummary = (summary) => {
-    var selectedBoundaryCoverageSummary = summary.filter(row => row.boundaryTypeId === selectedBoundaryType.id)
+    const selectedBoundaryCoverageSummary = summary.filter(row => row.boundaryTypeId === selectedBoundaryType.id)
     selectedBoundaryCoverageSummary.forEach((row) => {
       // calculate count by aggregating 'count' in 'tagSetCounts' array of objects
-      var tagSetCountsArray = row['tagSetCounts'].map(tagset => tagset['count'])
-      row['count'] = tagSetCountsArray.length && tagSetCountsArray.reduce((accumulator, currentValue) => accumulator + currentValue)
+      const tagSetCountsArray = row['tagSetCounts'].map(tagset => tagset['count'])
+      row['count'] = tagSetCountsArray.length
+        && tagSetCountsArray.reduce((accumulator, currentValue) => accumulator + currentValue)
     })
 
     return selectedBoundaryCoverageSummary
@@ -201,30 +217,32 @@ export const PlanSummary = (props) => {
     isLocKeyExpanded[selectedCoverageLoc] = !isLocKeyExpanded[selectedCoverageLoc]
     // creating dummy install data
 
-    var installedId = summaryInstallationTypes['INSTALLED'].id
-    var plannedId = summaryInstallationTypes['PLANNED'].id
-    var totalId = summaryInstallationTypes['Total'].id
+    const installedId = summaryInstallationTypes['INSTALLED'].id
+    const plannedId = summaryInstallationTypes['PLANNED'].id
+    const totalId = summaryInstallationTypes['Total'].id
 
     // get a location specific tagSetCounts per deploymentType
-    var existing = summaryCategoryTypes['Coverage']['summaryData'][selectedCoverageLoc][installedId] &&
+    const existing = summaryCategoryTypes['Coverage']['summaryData'][selectedCoverageLoc][installedId] &&
       summaryCategoryTypes['Coverage']['summaryData'][selectedCoverageLoc][installedId][0].tagSetCounts
     // differentiate tagSetCounts based on deploymentType which is used to display
     existing && existing.map(tag => tag.deploymentType = installedId)
 
-    var planned = summaryCategoryTypes['Coverage']['summaryData'][selectedCoverageLoc][plannedId] &&
+    const planned = summaryCategoryTypes['Coverage']['summaryData'][selectedCoverageLoc][plannedId] &&
       summaryCategoryTypes['Coverage']['summaryData'][selectedCoverageLoc][plannedId][0].tagSetCounts
     planned && planned.map(tag => tag.deploymentType = plannedId)
 
-    var tempTagSetCountsData = []
+    const tempTagSetCountsData = []
     existing && existing.map((arr) => tempTagSetCountsData.push(arr))
     planned && planned.map((arr) => tempTagSetCountsData.push(arr))
 
-    var groupByTag = groupBy(tempTagSetCountsData, 'tagSet')
+    const groupByTag = groupBy(tempTagSetCountsData, 'tagSet')
 
-    var groupByTagDeploymentType = {}
+    const groupByTagDeploymentType = {}
     Object.keys(groupByTag).forEach((tag) => {
       groupByTagDeploymentType[tag] = groupBy(groupByTag[tag], 'deploymentType')
-      groupByTagDeploymentType[tag][totalId] = [{ 'count': groupByTag[tag].map((obj) => obj['count']).reduce((memo, num) => memo + num, 0) }]
+      groupByTagDeploymentType[tag][totalId] = [{
+        count: groupByTag[tag].map((obj) => obj['count']).reduce((memo, num) => memo + num, 0)
+      }]
     })
 
     locTagCoverage[selectedCoverageLoc] = groupByTagDeploymentType
@@ -258,7 +276,7 @@ export const PlanSummary = (props) => {
                         !isKeyExpanded[categoryType]
                           ? <i className="far fa-plus-square ei-foldout-icon" />
                           : <i className="far fa-minus-square ei-foldout-icon" />
-                      }                      
+                      }
                       { categoryType }
                     </th>
 
@@ -266,9 +284,9 @@ export const PlanSummary = (props) => {
                     {
                       categoryinfo['aggregateBy'] === 'count'
                       ? (
-                          Object.entries(summaryInstallationTypes).map(([installationType, info], index) => (
+                          Object.entries(summaryInstallationTypes).map(([installationType], index) => (
                             <th key={index}>
-                              { 
+                              {
                                 Object.keys(categoryinfo['totalSummary']).length &&
                                 categoryinfo['totalSummary'][installationType][0][categoryinfo['aggregateBy']]
                               }
@@ -276,16 +294,17 @@ export const PlanSummary = (props) => {
                           ))
                         )
                       : (
-                        Object.entries(summaryInstallationTypes).map(([installationType, info], index) => (
-                           // Display with two decimal points
-                          <th key={index}>
-                            {
-                              Object.keys(categoryinfo['totalSummary']).length &&
-                              (categoryinfo['totalSummary'][installationType][0][categoryinfo['aggregateBy']] || 0 * metersToLength).toFixed(1)
-                            }
-                          </th>
-                        ))
-                      )
+                          Object.entries(summaryInstallationTypes).map(([installationType], index) => (
+                            // Display with two decimal points
+                            <th key={index}>
+                              {
+                                Object.keys(categoryinfo['totalSummary']).length &&
+                                (categoryinfo['totalSummary'][installationType][0][categoryinfo['aggregateBy']]
+                                  || 0 * metersToLength).toFixed(1)
+                              }
+                            </th>
+                          ))
+                        )
                     }
                   </tr>
                   {
@@ -306,14 +325,14 @@ export const PlanSummary = (props) => {
                           {/* For category type 'Equipment' display nicer names */}
                           {
                             categoryType === 'Equipment'
-                            ? <td className="indent-1">{ networkNodeTypesEntity && networkNodeTypesEntity[name] }</td>
-                            : <td className="indent-1 text-capitalize">{ name }</td>
+                              ? <td className="indent-1">{ networkNodeTypesEntity && networkNodeTypesEntity[name] }</td>
+                              : <td className="indent-1 text-capitalize">{ name }</td>
                           }
                           {/* Display installation types */}
                           {
                             categoryinfo['aggregateBy'] === 'count'
                             ? (
-                                Object.entries(summaryInstallationTypes).map(([type, info], index) => (
+                                Object.entries(summaryInstallationTypes).map(([type], index) => (
                                   <td key={index}>
                                     {
                                       Object.keys(categoryinfo['totalSummary']).length &&
@@ -323,12 +342,13 @@ export const PlanSummary = (props) => {
                                 ))
                               )
                             : (
-                                Object.entries(summaryInstallationTypes).map(([type, info], index) => (
+                                Object.entries(summaryInstallationTypes).map(([type], index) => (
                                   // converting to client specific units
                                   <td key={index}>
                                     {
                                       Object.keys(categoryinfo['totalSummary']).length &&
-                                      (installationType[type][0][categoryinfo['aggregateBy']] || 0 * metersToLength).toFixed(1)
+                                      (installationType[type][0][categoryinfo['aggregateBy']]
+                                        || 0 * metersToLength).toFixed(1)
                                     }
                                   </td>
                                 ))
@@ -350,12 +370,12 @@ export const PlanSummary = (props) => {
                         !isKeyExpanded['Coverage']
                           ? <i className="far fa-plus-square ei-foldout-icon" />
                           : <i className="far fa-minus-square ei-foldout-icon" />
-                      }                      
+                      }
                       Coverage
                     </th>
                     {
                       Object.keys(summaryCategoryTypes['Coverage']['totalSummary']).length
-                      ?  (
+                      ? (
                           <>
                             <td>{ summaryCategoryTypes['Coverage']['totalSummary'][summaryInstallationTypes['INSTALLED'].id][0].count }</td>
                             <td>{ summaryCategoryTypes['Coverage']['totalSummary'][summaryInstallationTypes['PLANNED'].id][0].count }</td>
@@ -373,7 +393,7 @@ export const PlanSummary = (props) => {
                       </td>
                     </tr>
                   }
-                </tbody>  
+                </tbody>
               )
             )
           })
@@ -381,7 +401,8 @@ export const PlanSummary = (props) => {
         {
           isKeyExpanded['Coverage'] &&
           (
-            Object.entries(summaryCategoryTypes['Coverage']['summaryData']).map(([locationEntityType, coverageinfo], categoryIndex) => (
+            Object.entries(summaryCategoryTypes['Coverage']['summaryData']).map(
+              ([locationEntityType, coverageinfo], categoryIndex) => (
               <tbody key={categoryIndex}>
                 <tr>
                   <td id="pointer" onClick={() => togglelocationTagCoverage(locationEntityType)}>
@@ -389,7 +410,7 @@ export const PlanSummary = (props) => {
                       !isLocKeyExpanded[locationEntityType]
                         ? <i className="far fa-plus-square ei-foldout-icon" />
                         : <i className="far fa-minus-square ei-foldout-icon" />
-                    }                      
+                    }
                     { locationEntityType }
                   </td>
                   <td>{ coverageinfo[summaryInstallationTypes['INSTALLED'].id][0].count || 0 }</td>
@@ -401,7 +422,7 @@ export const PlanSummary = (props) => {
                   (
                     Object.entries(locTagCoverage[locationEntityType]).map(([tag, taginfo], index) => (
                       <tr key={index}>
-                        <td class="indent-2">{ layerTagTodescription[tag] }</td>
+                        <td className="indent-2">{ layerTagTodescription[tag] }</td>
                         <td>{ taginfo[summaryInstallationTypes['INSTALLED'].id][0].count || 0 }</td>
                         <td>{ taginfo[summaryInstallationTypes['PLANNED'].id][0].count || 0 }</td>
                         <td>{ taginfo[summaryInstallationTypes['Total'].id][0].count || 0 }</td>
@@ -418,7 +439,8 @@ export const PlanSummary = (props) => {
       {/* Show buttons for downloading plan summary reports */}
       <SummaryReports />
 
-      {/* Add a div that will overlay all the controls above. The div will be visible when the controls need to be disabled. */}
+      {/* Add a div that will overlay all the controls above.
+        The div will be visible when the controls need to be disabled. */}
       { currentTransaction && <div className="disable-sibling-controls" /> }
     </>
   )

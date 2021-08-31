@@ -88,20 +88,20 @@ export const usePrevious = value => {
 
 // https://codereview.stackexchange.com/questions/66733/groupby-implementation-in-nodejs/66752#66752
 export const groupBy = (array, keyOrIterator) => {
-  var iterator, key;
+  let iterator, key
 
   // use the function passed in, or create one
   if(typeof key !== 'function') {
-    key = String(keyOrIterator);
-    iterator = function (item) { return item[key]; };
+    key = String(keyOrIterator)
+    iterator = function (item) { return item[key] }
   } else {
-    iterator = keyOrIterator;
+    iterator = keyOrIterator
   }
 
   return array.reduce(function (memo, item) {
-    var key = iterator(item);
-    memo[key] = memo[key] || [];
-    memo[key].push(item);
-    return memo;
-  }, {});
+    const key = iterator(item)
+    memo[key] = memo[key] || []
+    memo[key].push(item)
+    return memo
+  }, {})
 }
