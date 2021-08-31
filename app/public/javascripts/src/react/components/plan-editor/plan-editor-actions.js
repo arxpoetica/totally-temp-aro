@@ -591,11 +591,6 @@ function deleteFeature (featureId) {
     // Do a PUT to send the equipment over to service
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
       .then(result => {
-        // TODO: do those children need to be collected and sent to service to be fully removed?
-        if (subnetFeature.feature.networkNodeType === "central_office" ||
-         subnetFeature.feature.networkNodeType === "fiber_distribution_hub") {
-          
-        }
         batch(() => {
           dispatch({
           type: Actions.PLAN_EDITOR_REMOVE_SUBNET_FEATURE,
