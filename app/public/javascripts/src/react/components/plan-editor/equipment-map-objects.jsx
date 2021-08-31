@@ -84,10 +84,25 @@ export class EquipmentMapObjects extends Component {
       const eventXY = WktUtils.getXYFromEvent(event)
       this.props.showContextMenuForEquipment(mapObject.objectId, eventXY.x, eventXY.y)
     })
-    mapObject.addListener('click', () => {
+    mapObject.addListener('click', (event) => {
       this.props.selectEditFeatureById(objectId)
       // this.props.addSubnets([objectId])
       // this.props.setSelectedSubnetId(objectId)
+
+
+      const selectionCircle = new google.maps.Circle({
+        map: this.props.googleMaps,
+        center: event.latLng,
+        radius: 25,
+        visible: false,
+      });
+
+      const selectedEquipment = Object.values(this.mapObjects)
+        .filter((object) => selectionCircle.getBounds().contains(object.getPosition()))
+        .map(filteredMapObjects => filteredMapObjects.objectId)
+
+      selectionCircle.setMap(null)
+      this.props.selectEditFeaturesById(selectedEquipment)
     })
 
     this.mapObjects[objectId] = mapObject
@@ -192,6 +207,7 @@ const mapDispatchToProps = dispatch => ({
   selectEditFeatureById: id => dispatch(PlanEditorActions.selectEditFeaturesById([id])),
   // addSubnets: ids => dispatch(PlanEditorActions.addSubnets(ids)),
   setSelectedSubnetId: id => dispatch(PlanEditorActions.setSelectedSubnetId(id)),
+  selectEditFeaturesById: featureIds => dispatch(PlanEditorActions.selectEditFeaturesById(featureIds)),
 })
 
 const EquipmentMapObjectsComponent = connect(mapStateToProps, mapDispatchToProps)(EquipmentMapObjects)
