@@ -293,7 +293,6 @@ class TileComponentController {
       this.state.viewModePanels,
       this.state,
       MapUtilities.getPixelCoordinatesWithinTile.bind(this),
-      this.hiddenFeatures,
       this.selectedSubnetLocations,
       this.locationAlerts,
       this.rShowFiberSize,
@@ -759,7 +758,6 @@ class TileComponentController {
       subnetFeatures: reduxState.planEditor.subnetFeatures,
       locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(reduxState),
       selectedSubnetLocations: PlanEditorSelectors.getSelectedSubnetLocations(reduxState),
-      hiddenFeatures: reduxState.planEditor.hiddenFeatures,
     }
   }
 
@@ -778,7 +776,6 @@ class TileComponentController {
     const rViewSetting = this.rViewSetting
     const selectedSubnetLocations = this.selectedSubnetLocations
     const locationAlerts = this.locationAlerts
-    const currentHiddenFeatures = this.hiddenFeatures
 
     var needRefresh = false
     var doConduitUpdate = this.doesConduitNeedUpdate(prevStateMapLayers, nextState.stateMapLayers)
@@ -809,10 +806,6 @@ class TileComponentController {
     }
     if (!dequal(locationAlerts, nextState.locationAlerts)) {
       overlayMap.setLocationAlerts(nextState.locationAlerts)
-      needRefresh = true
-    }
-    if (!dequal(currentHiddenFeatures, nextState.hiddenFeatures)) {
-      overlayMap.setHiddenFeatures(nextState.hiddenFeatures)
       needRefresh = true
     }
     // - //

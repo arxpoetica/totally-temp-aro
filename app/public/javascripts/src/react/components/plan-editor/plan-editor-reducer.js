@@ -19,7 +19,6 @@ const defaultState = {
   subnetFeatures: {},
   selectedSubnetId: '', // need to rename this now that a terminal can be selected, lets do "activeFeature" // unselected this should be null not ''
   boundaryDebounceBySubnetId: {},
-  hiddenFeatures: [],
 }
 
 function setTransaction (state, transaction) {
@@ -244,14 +243,6 @@ function clearBoundaryDebounce (state, subnetId) {
   }
 }
 
-function setHiddenFeatures (state, hiddenFeatures) {
-  return { ...state, hiddenFeatures: [...state.hiddenFeatures, ...hiddenFeatures] }
-}
-
-function clearHiddenFeatures (state) {
-  return { ...state, hiddenFeatures: [] }
-}
-
 function planEditorReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.PLAN_EDITOR_CLEAR_TRANSACTION:
@@ -337,12 +328,6 @@ function planEditorReducer (state = defaultState, action) {
 
     case Actions.PLAN_EDITOR_CLEAR_BOUNDARY_DEBOUNCE:
       return clearBoundaryDebounce(state, action.payload)
-
-    case Actions.PLAN_EDITOR_SET_HIDDEN_FEATURES:
-      return setHiddenFeatures(state, action.payload)
-
-    case Actions.PLAN_EDITOR_CLEAR_HIDDEN_FEATURES:
-      return clearHiddenFeatures(state)
 
     default:
       return state

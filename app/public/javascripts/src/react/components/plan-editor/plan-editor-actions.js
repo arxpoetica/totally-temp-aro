@@ -591,27 +591,15 @@ function deleteFeature (featureId) {
     // Do a PUT to send the equipment over to service
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
       .then(result => {
-        const hiddenFeatures = []
-        hiddenFeatures.push(featureId)
-
         // TODO: do those children need to be collected and sent to service to be fully removed?
         if (subnetFeature.feature.networkNodeType === "central_office" ||
          subnetFeature.feature.networkNodeType === "fiber_distribution_hub") {
-
-          // pull ids of children to add them to hidden feaures in state
-          state.planEditor.subnets[featureId].children.forEach(childId => {
-            hiddenFeatures.push(childId)
-          })
           
         }
         batch(() => {
           dispatch({
           type: Actions.PLAN_EDITOR_REMOVE_SUBNET_FEATURE,
             payload: featureId
-          })
-          dispatch({
-            type: Actions.PLAN_EDITOR_SET_HIDDEN_FEATURES,
-            payload: hiddenFeatures
           })
           dispatch({
             type: Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURE,

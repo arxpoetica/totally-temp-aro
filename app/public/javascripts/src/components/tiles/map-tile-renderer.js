@@ -10,7 +10,7 @@ import StrokeStyle from '../../shared-utils/stroke-styles'
 
 class MapTileRenderer {
   constructor (tileSize, tileDataService, mapTileOptions, layerCategories, selectedDisplayMode, selectionModes, analysisSelectionMode, stateMapLayers, displayModes,
-    viewModePanels, state, getPixelCoordinatesWithinTile, hiddenFeatures, selectedSubnetLocations, locationAlerts, rShowFiberSize, rViewSetting, mapLayers = []) {
+    viewModePanels, state, getPixelCoordinatesWithinTile, selectedSubnetLocations, locationAlerts, rShowFiberSize, rViewSetting, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
@@ -29,7 +29,6 @@ class MapTileRenderer {
     this.latestTileUniqueId = 0
     this.selectedSubnetLocations = selectedSubnetLocations
     this.locationAlerts = locationAlerts
-    this.hiddenFeatures = hiddenFeatures
     this.rShowFiberSize = rShowFiberSize
     this.rViewSetting = rViewSetting
 
@@ -114,9 +113,6 @@ class MapTileRenderer {
   }
   setLocationAlerts (locationAlerts) {
     this.locationAlerts = locationAlerts
-  }
-  setHiddenFeatures (hiddenFeatures) {
-    this.hiddenFeatures = hiddenFeatures
   }
   // - //
 
