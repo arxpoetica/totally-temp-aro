@@ -85,24 +85,24 @@ export class EquipmentMapObjects extends Component {
       this.props.showContextMenuForEquipment(mapObject.objectId, eventXY.x, eventXY.y)
     })
     mapObject.addListener('click', (event) => {
-      this.props.selectEditFeatureById(objectId)
-      // this.props.addSubnets([objectId])
-      // this.props.setSelectedSubnetId(objectId)
-
-
+      // NOTE: this is a workaround to make sure we're selecting
+      // equipment that might be piled on top of one another
       const selectionCircle = new google.maps.Circle({
         map: this.props.googleMaps,
         center: event.latLng,
+        // FIXME: this radius is only useful at certain zoom levels.
+        // How can we set this correctly based on zoom?
         radius: 25,
         visible: false,
-      });
+      })
 
-      const selectedEquipment = Object.values(this.mapObjects)
-        .filter((object) => selectionCircle.getBounds().contains(object.getPosition()))
+      const selectedEquipmentIds = Object.values(this.mapObjects)
+        .filter(object => selectionCircle.getBounds().contains(object.getPosition()))
         .map(filteredMapObjects => filteredMapObjects.objectId)
 
       selectionCircle.setMap(null)
-      this.props.selectEditFeaturesById(selectedEquipment)
+      this.props.selectEditFeaturesById(selectedEquipmentIds)
+      // this.props.selectEditFeatureById(objectId)
     })
 
     this.mapObjects[objectId] = mapObject
