@@ -293,8 +293,6 @@ class TileComponentController {
       this.state.viewModePanels,
       this.state,
       MapUtilities.getPixelCoordinatesWithinTile.bind(this),
-      this.selectionIds,
-      this.hiddenFeatures,
       this.selectedSubnetLocations,
       this.locationAlerts,
       this.rShowFiberSize,
@@ -423,13 +421,19 @@ class TileComponentController {
     })
 
     this.overlayClickListener = this.mapRef.addListener('click', async(event) => {
-      const { isShiftPressed } = this.state
 
       if (this.contextMenuService.isMenuVisible.getValue()) {
         this.contextMenuService.menuOff()
         this.$timeout()
         return
       }
+
+      // let plan edit do its thing
+      if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.EDIT_PLAN) {
+        return
+      }
+
+      const { isShiftPressed } = this.state
 
       try {
         // ToDo: depricate getFilteredFeaturesUnderLatLng switch to this
@@ -748,7 +752,6 @@ class TileComponentController {
       activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
       selectionModes: reduxState.selection.selectionModes,
       selection: reduxState.selection,
-      selectionIds: PlanEditorSelectors.getSelectedIds(reduxState),
       rSelection: reduxState.selection.selection,
       stateMapLayers: reduxState.mapLayers,
       networkAnalysisType: reduxState.optimization.networkOptimization.optimizationInputs.analysis_type,
@@ -761,7 +764,6 @@ class TileComponentController {
       subnetFeatures: reduxState.planEditor.subnetFeatures,
       locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(reduxState),
       selectedSubnetLocations: PlanEditorSelectors.getSelectedSubnetLocations(reduxState),
-      hiddenFeatures: reduxState.planEditor.hiddenFeatures,
     }
   }
 
@@ -776,12 +778,10 @@ class TileComponentController {
     const currentSelectionModeId = this.activeSelectionModeId
     const oldPlanTargets = this.selection && this.selection.planTargets
     const prevStateMapLayers = { ...this.stateMapLayers }
-    const currentSelectionIds = this.selectionIds
     const rShowFiberSize = this.rShowFiberSize
     const rViewSetting = this.rViewSetting
     const selectedSubnetLocations = this.selectedSubnetLocations
     const locationAlerts = this.locationAlerts
-    const currentHiddenFeatures = this.hiddenFeatures
 
     var needRefresh = false
     var doConduitUpdate = this.doesConduitNeedUpdate(prevStateMapLayers, nextState.stateMapLayers)
@@ -806,20 +806,12 @@ class TileComponentController {
     }
 
     // - plan edit - //
-    if (!dequal(currentSelectionIds, nextState.selectionIds)) {
-      overlayMap.setSelectionIds(nextState.selectionIds)
-      needRefresh = true
-    }
     if (!dequal(selectedSubnetLocations, nextState.selectedSubnetLocations)) {
       overlayMap.setSelectedSubnetLocations(nextState.selectedSubnetLocations)
       needRefresh = true
     }
     if (!dequal(locationAlerts, nextState.locationAlerts)) {
       overlayMap.setLocationAlerts(nextState.locationAlerts)
-      needRefresh = true
-    }
-    if (!dequal(currentHiddenFeatures, nextState.hiddenFeatures)) {
-      overlayMap.setHiddenFeatures(nextState.hiddenFeatures)
       needRefresh = true
     }
     // - //

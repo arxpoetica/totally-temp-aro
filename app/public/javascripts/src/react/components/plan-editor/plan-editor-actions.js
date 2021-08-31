@@ -25,6 +25,9 @@ function resumeOrCreateTransaction (planId, userId) {
           payload: Transaction.fromServiceObject(result.data)
         })
         const transactionId = result.data.id
+        // TODO: how much of this is legacy??????
+        // it might need a lot of cleanup
+        // i.e., we might not need to load from these end points. unclear.
         return Promise.all([
           AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/equipment`),
           // depricated? 
@@ -47,6 +50,7 @@ function resumeOrCreateTransaction (planId, userId) {
         })
         */
         batch(() => {
+          dispatch(addSubnetTree())
           // NOTE: need to load resource manager so drop cable
           // length is available for plan-editor-selectors
           dispatch(ResourceActions.loadResourceManager(id, resource, name))
@@ -587,27 +591,10 @@ function deleteFeature (featureId) {
     // Do a PUT to send the equipment over to service
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
       .then(result => {
-        const hiddenFeatures = []
-        hiddenFeatures.push(featureId)
-
-        // TODO: do those children need to be collected and sent to service to be fully removed?
-        if (subnetFeature.feature.networkNodeType === "central_office" ||
-         subnetFeature.feature.networkNodeType === "fiber_distribution_hub") {
-
-          // pull ids of children to add them to hidden feaures in state
-          state.planEditor.subnets[featureId].children.forEach(childId => {
-            hiddenFeatures.push(childId)
-          })
-          
-        }
         batch(() => {
           dispatch({
           type: Actions.PLAN_EDITOR_REMOVE_SUBNET_FEATURE,
             payload: featureId
-          })
-          dispatch({
-            type: Actions.PLAN_EDITOR_SET_HIDDEN_FEATURES,
-            payload: hiddenFeatures
           })
           dispatch({
             type: Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURE,
@@ -705,7 +692,7 @@ function deselectEditFeatureById (objectId) {
 }
 
 function addSubnets (subnetIds) {
-  // TODO: I (BRIAN) needs to refactor this, it works for the moment but does a lot of extranious things
+  // FIXME: I (BRIAN) needs to refactor this, it works for the moment but does a lot of extranious things
   //  ALSO there is a "bug" where if we select an FDT before selecting the CO or one of the hubs, we get no info
   //  to fix this we need to find out what subnet the FDT is a part of and run that through here
   return (dispatch, getState) => {
@@ -803,6 +790,34 @@ function addSubnets (subnetIds) {
             dispatch(setIsCalculatingSubnets(false))
             return Promise.reject()
           })
+      }).catch(err => {
+        console.error(err)
+        dispatch(setIsCalculatingSubnets(false))
+        return Promise.reject()
+      })
+  }
+}
+
+// FIXME: this should be called `addSubnetTreeBy...Something` because
+// we need to enhance the UI to allow selecting by service areas.
+function addSubnetTree() {
+  return (dispatch, getState) => {
+    const state = getState()
+    let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+
+    dispatch(setIsCalculatingSubnets(true))
+    return AroHttp.get(`/service/plan-transaction/${transactionId}/subnet-root-refs`)
+      .then(result => {
+        const { data } = result
+        if (data && data[0] && data[0].node && data[0].node.id) {
+          const rootId = result.data[0].node.id
+          // TODO: the addSubnets function needs to be broken up
+          return dispatch(addSubnets([rootId]))
+            .then(subnetRes => Promise.resolve(subnetRes))
+        } else {
+          dispatch(setIsCalculatingSubnets(false))
+          return Promise.resolve([])
+        }
       }).catch(err => {
         console.error(err)
         dispatch(setIsCalculatingSubnets(false))
