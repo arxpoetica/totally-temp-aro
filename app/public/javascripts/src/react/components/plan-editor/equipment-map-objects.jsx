@@ -86,8 +86,8 @@ export class EquipmentMapObjects extends Component {
     })
     mapObject.addListener('click', () => {
       this.props.selectEditFeatureById(objectId)
-      //this.props.addSubnets([objectId])
-      //this.props.setSelectedSubnetId(objectId)
+      // this.props.addSubnets([objectId])
+      // this.props.setSelectedSubnetId(objectId)
     })
 
     this.objectIdToMapObject[objectId] = mapObject
@@ -190,7 +190,7 @@ const mapDispatchToProps = dispatch => ({
     dispatch(PlanEditorActions.showContextMenuForEquipment(equipmentObjectId, x, y))
   },
   selectEditFeatureById: objectId => dispatch(PlanEditorActions.selectEditFeaturesById([objectId])),
-  addSubnets: subnetIds => dispatch(PlanEditorActions.addSubnets(subnetIds)),
+  // addSubnets: subnetIds => dispatch(PlanEditorActions.addSubnets(subnetIds)),
   setSelectedSubnetId: subnetId => dispatch(PlanEditorActions.setSelectedSubnetId(subnetId)),
 })
 
