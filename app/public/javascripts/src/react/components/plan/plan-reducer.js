@@ -167,6 +167,12 @@ function updateDefaultPlanCoordinates (state, coordinates) {
   }
 }
 
+function editActivePlan (state, plan) {
+  return { ...state,
+    activePlan: plan
+  }
+}
+
 function planReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.PLAN_SET_ACTIVE_PLAN:
@@ -221,7 +227,10 @@ function planReducer (state = defaultState, action) {
       return setParentProjectForNewProject(state, action.payload) 
 
     case Actions.PLAN_UPDATE_DEFAULT_PLAN_COORDINATES:
-      return updateDefaultPlanCoordinates(state, action.payload)       
+      return updateDefaultPlanCoordinates(state, action.payload)
+      
+    case Actions.PLAN_EDIT_ACTIVE_PLAN:
+      return editActivePlan(state, action.payload)
 
     default:
       return state

@@ -1,4 +1,5 @@
 import PuppeteerMessages from '../common/puppeteer-messages'
+import ToolBarActions from '../../react/components/header/tool-bar-actions'
 
 class MapSplitController {
   constructor ($document, $timeout, $scope, state, $compile, $ngRedux) {
@@ -25,7 +26,9 @@ class MapSplitController {
             if (map.getStreetView().getVisible()) {
               google.maps.event.trigger(panorama, 'resize')
             }
-            this.state.sidebarWidth = this.splitterObj.getSizes()[1]
+            const getSidebarWidth = this.splitterObj.getSizes()[1]
+            this.state.sidebarWidth = getSidebarWidth
+            this.setSidebarWidth(getSidebarWidth)
             // After dragging, if the size is non-zero, it means we have expanded the sidebar
             if (this.splitterObj.getSizes()[1] > 0) {
 
@@ -105,6 +108,7 @@ class MapSplitController {
 
   mapDispatchToTarget (dispatch) {
     return {
+      setSidebarWidth: sidebarWidth => dispatch(ToolBarActions.setSidebarWidth(sidebarWidth)),
     }
   }
 }
