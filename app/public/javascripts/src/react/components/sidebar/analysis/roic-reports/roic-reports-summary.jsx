@@ -103,7 +103,7 @@ export class RoicReportsSummary extends Component {
                   <td className="indent-1 text-capitalize">
                     {FIBER_STRINGS[fiberCost.fiberType]} -&nbsp;
                     {`${CABLE_CONSTRUCTION_STRINGS[fiberCost.edgeFeatureType + '.' + fiberCost.edgeConstructionType]} `}
-                    ({Math.round((fiberCost.lengthMeters * this.config.length.meters_to_length_units))}&nbsp;
+                    ({(fiberCost.lengthMeters * this.config.length.meters_to_length_units).toFixed(2)}&nbsp;
                     {this.config.length.length_units})
                   </td>
                   <td>{currencyFormatter.format((fiberCost.totalCost / 1000).toFixed(1)) + ' K'}</td>
