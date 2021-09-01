@@ -42,14 +42,14 @@ export const PlanSummary = (props) => {
 
   useEffect(() => {
     // fetching equipment order from networkEquipment.json
-    const equipmentOrderKey = summaryCategoryTypes['Equipment']['groupBy']
+    const equipmentOrderKey = summaryCategoryTypes.Equipment.groupBy
     const equipmentOrder = orderSummaryByCategory(networkEquipment.equipments, equipmentOrderKey)
     equipmentOrder.push('junction_splitter')
 
     // fetching location order from locationCategories.json
     const coverageOrderKey = 'plannerKey'
     const coverageOrder = orderSummaryByCategory(locationCategories.categories, coverageOrderKey)
-    const isLocKeyExpanded = coverageOrder.reduce(function (result, item) {
+    const isLocKeyExpanded = coverageOrder.reduce((result, item) => {
       result[item] = false
       return result
     }, {})
@@ -127,28 +127,28 @@ export const PlanSummary = (props) => {
 
     const summaryCategoryTypes = summaryCategoryTypesObj
 
-    summaryCategoryTypes['Equipment']['summaryData'] = transformSummary(
-      equipmentSummary, summaryCategoryTypes['Equipment']['groupBy'], summaryCategoryTypes['Equipment']['aggregateBy']
+    summaryCategoryTypes.Equipment.summaryData = transformSummary(
+      equipmentSummary, summaryCategoryTypes.Equipment.groupBy, summaryCategoryTypes.Equipment.aggregateBy
     )
-    summaryCategoryTypes['Fiber']['summaryData'] = transformSummary(
-      fiberSummary, summaryCategoryTypes['Fiber']['groupBy'], summaryCategoryTypes['Fiber']['aggregateBy']
+    summaryCategoryTypes.Fiber.summaryData = transformSummary(
+      fiberSummary, summaryCategoryTypes.Fiber.groupBy, summaryCategoryTypes.Fiber.aggregateBy
     )
-    summaryCategoryTypes['Coverage']['summaryData'] = transformSummary(
-      processedCoverageSummary, summaryCategoryTypes['Coverage']['groupBy'],
-      summaryCategoryTypes['Coverage']['aggregateBy']
+    summaryCategoryTypes.Coverage.summaryData = transformSummary(
+      processedCoverageSummary, summaryCategoryTypes.Coverage.groupBy,
+      summaryCategoryTypes.Coverage.aggregateBy
     )
 
     // Calculating Total Equipment Summary
-    summaryCategoryTypes['Equipment']['totalSummary'] = calculateTotalByInstallationType(
-      equipmentSummary, summaryCategoryTypes['Equipment']['aggregateBy']
+    summaryCategoryTypes.Equipment.totalSummary = calculateTotalByInstallationType(
+      equipmentSummary, summaryCategoryTypes.Equipment.aggregateBy
     )
     // Calculating Total Fiber Summary
-    summaryCategoryTypes['Fiber']['totalSummary'] = calculateTotalByInstallationType(
-      fiberSummary, summaryCategoryTypes['Fiber']['aggregateBy']
+    summaryCategoryTypes.Fiber.totalSummary = calculateTotalByInstallationType(
+      fiberSummary, summaryCategoryTypes.Fiber.aggregateBy
     )
     // Calculating Total Coverage Summary
-    summaryCategoryTypes['Coverage']['totalSummary'] = calculateTotalByInstallationType(
-      processedCoverageSummary, summaryCategoryTypes['Coverage']['aggregateBy']
+    summaryCategoryTypes.Coverage.totalSummary = calculateTotalByInstallationType(
+      processedCoverageSummary, summaryCategoryTypes.Coverage.aggregateBy
     )
 
     setState((state) => ({ ...state, summaryCategoryTypes }))
@@ -157,10 +157,10 @@ export const PlanSummary = (props) => {
   const calculateTotalByInstallationType = (equipmentSummary, aggregateBy) => {
     const totalEquipmentSummary = {}
     const existingEquip = equipmentSummary.filter(
-      equipment => equipment.deploymentType === summaryInstallationTypes['INSTALLED'].id
+      equipment => equipment.deploymentType === summaryInstallationTypes.INSTALLED.id
     )
     const plannedEquip = equipmentSummary.filter(
-      equipment => equipment.deploymentType === summaryInstallationTypes['PLANNED'].id
+      equipment => equipment.deploymentType === summaryInstallationTypes.PLANNED.id
     )
 
     const existingEquipCountArray = existingEquip.map(exitingEqu => exitingEqu[aggregateBy])
@@ -172,9 +172,9 @@ export const PlanSummary = (props) => {
       && plannedEquipCountArray.reduce((accumulator, currentValue) => accumulator + currentValue)
     const totalEuipCount = existingEquipCount + plannedEquipCount
 
-    totalEquipmentSummary[summaryInstallationTypes['INSTALLED'].id] = [{ [aggregateBy]: existingEquipCount }]
-    totalEquipmentSummary[summaryInstallationTypes['PLANNED'].id] = [{ [aggregateBy]: plannedEquipCount }]
-    totalEquipmentSummary[summaryInstallationTypes['Total'].id] = [{ [aggregateBy]: totalEuipCount }]
+    totalEquipmentSummary[summaryInstallationTypes.INSTALLED.id] = [{ [aggregateBy]: existingEquipCount }]
+    totalEquipmentSummary[summaryInstallationTypes.PLANNED.id] = [{ [aggregateBy]: plannedEquipCount }]
+    totalEquipmentSummary[summaryInstallationTypes.Total.id] = [{ [aggregateBy]: totalEuipCount }]
 
     return totalEquipmentSummary
   }
@@ -200,8 +200,8 @@ export const PlanSummary = (props) => {
     const selectedBoundaryCoverageSummary = summary.filter(row => row.boundaryTypeId === selectedBoundaryType.id)
     selectedBoundaryCoverageSummary.forEach((row) => {
       // calculate count by aggregating 'count' in 'tagSetCounts' array of objects
-      const tagSetCountsArray = row['tagSetCounts'].map(tagset => tagset['count'])
-      row['count'] = tagSetCountsArray.length
+      const tagSetCountsArray = row.tagSetCounts.map(tagset => tagset.count)
+      row.count = tagSetCountsArray.length
         && tagSetCountsArray.reduce((accumulator, currentValue) => accumulator + currentValue)
     })
 
@@ -217,18 +217,18 @@ export const PlanSummary = (props) => {
     isLocKeyExpanded[selectedCoverageLoc] = !isLocKeyExpanded[selectedCoverageLoc]
     // creating dummy install data
 
-    const installedId = summaryInstallationTypes['INSTALLED'].id
-    const plannedId = summaryInstallationTypes['PLANNED'].id
-    const totalId = summaryInstallationTypes['Total'].id
+    const installedId = summaryInstallationTypes.INSTALLED.id
+    const plannedId = summaryInstallationTypes.PLANNED.id
+    const totalId = summaryInstallationTypes.Total.id
 
     // get a location specific tagSetCounts per deploymentType
-    const existing = summaryCategoryTypes['Coverage']['summaryData'][selectedCoverageLoc][installedId] &&
-      summaryCategoryTypes['Coverage']['summaryData'][selectedCoverageLoc][installedId][0].tagSetCounts
+    const existing = summaryCategoryTypes.Coverage.summaryData[selectedCoverageLoc][installedId] &&
+      summaryCategoryTypes.Coverage.summaryData[selectedCoverageLoc][installedId][0].tagSetCounts
     // differentiate tagSetCounts based on deploymentType which is used to display
     existing && existing.map(tag => tag.deploymentType = installedId)
 
-    const planned = summaryCategoryTypes['Coverage']['summaryData'][selectedCoverageLoc][plannedId] &&
-      summaryCategoryTypes['Coverage']['summaryData'][selectedCoverageLoc][plannedId][0].tagSetCounts
+    const planned = summaryCategoryTypes.Coverage.summaryData[selectedCoverageLoc][plannedId] &&
+      summaryCategoryTypes.Coverage.summaryData[selectedCoverageLoc][plannedId][0].tagSetCounts
     planned && planned.map(tag => tag.deploymentType = plannedId)
 
     const tempTagSetCountsData = []
@@ -241,7 +241,7 @@ export const PlanSummary = (props) => {
     Object.keys(groupByTag).forEach((tag) => {
       groupByTagDeploymentType[tag] = groupBy(groupByTag[tag], 'deploymentType')
       groupByTagDeploymentType[tag][totalId] = [{
-        count: groupByTag[tag].map((obj) => obj['count']).reduce((memo, num) => memo + num, 0)
+        count: groupByTag[tag].map((obj) => obj.count).reduce((memo, num) => memo + num, 0)
       }]
     })
 
@@ -267,171 +267,171 @@ export const PlanSummary = (props) => {
           Object.entries(summaryCategoryTypes).map(([categoryType, categoryinfo], summaryIndex) => {
             return (
               categoryType !== 'Coverage'
-              ? (
-                <tbody key={summaryIndex}>
-                  {/* Display total summary of a category */}
-                  <tr>
-                    <th id="pointer" onClick={() => toggleIsKeyExpanded(categoryType)}>
+                ? (
+                  <tbody key={summaryIndex}>
+                    {/* Display total summary of a category */}
+                    <tr>
+                      <th id="pointer" onClick={() => toggleIsKeyExpanded(categoryType)}>
+                        {
+                          !isKeyExpanded[categoryType]
+                            ? <i className="far fa-plus-square ei-foldout-icon" />
+                            : <i className="far fa-minus-square ei-foldout-icon" />
+                        }
+                        { categoryType }
+                      </th>
+
+                      {/* Display installation types */}
                       {
-                        !isKeyExpanded[categoryType]
+                        categoryinfo.aggregateBy === 'count'
+                          ? (
+                            Object.entries(summaryInstallationTypes).map(([installationType], index) => (
+                              <th key={index}>
+                                {
+                                  Object.keys(categoryinfo.totalSummary).length &&
+                                  categoryinfo.totalSummary[installationType][0][categoryinfo.aggregateBy]
+                                }
+                              </th>
+                            ))
+                          )
+                          : (
+                            Object.entries(summaryInstallationTypes).map(([installationType], index) => (
+                              // Display with two decimal points
+                              <th key={index}>
+                                {
+                                  Object.keys(categoryinfo.totalSummary).length &&
+                                  (categoryinfo.totalSummary[installationType][0][categoryinfo.aggregateBy]
+                                    || 0 * metersToLength).toFixed(1)
+                                }
+                              </th>
+                            ))
+                          )
+                      }
+                    </tr>
+                    {
+                      isKeyExpanded[categoryType] && categoryType === 'Coverage' &&
+                      <tr>
+                        <td colSpan="4" className="indent-1">
+                          { selectedBoundaryType.description }
+                        </td>
+                      </tr>
+                    }
+
+                    {/* Display each element summary in category */}
+                    {
+                      isKeyExpanded[categoryType] &&
+                      (
+                        Object.entries(categoryinfo.summaryData).map(([name, installationType], categoryIndex) => (
+                          <tr key={categoryIndex}>
+                            {/* For category type 'Equipment' display nicer names */}
+                            {
+                              categoryType === 'Equipment'
+                                ? <td className="indent-1">{ networkNodeTypesEntity && networkNodeTypesEntity[name] }</td>
+                                : <td className="indent-1 text-capitalize">{ name }</td>
+                            }
+                            {/* Display installation types */}
+                            {
+                              categoryinfo.aggregateBy === 'count'
+                                ? (
+                                  Object.entries(summaryInstallationTypes).map(([type], index) => (
+                                    <td key={index}>
+                                      {
+                                        Object.keys(categoryinfo.totalSummary).length &&
+                                        installationType[type][0][categoryinfo.aggregateBy] || 0
+                                      }
+                                    </td>
+                                  ))
+                                )
+                                : (
+                                  Object.entries(summaryInstallationTypes).map(([type], index) => (
+                                    // converting to client specific units
+                                    <td key={index}>
+                                      {
+                                        Object.keys(categoryinfo.totalSummary).length &&
+                                        (installationType[type][0][categoryinfo.aggregateBy]
+                                          || 0 * metersToLength).toFixed(1)
+                                      }
+                                    </td>
+                                  ))
+                                )
+                            }
+                          </tr>
+                        ))
+                      )
+                    }
+                  </tbody>
+                )
+                : (
+                  // Display Coverage summary
+                  <tbody key={summaryIndex}>
+                    {/* coverage total summary */}
+                    <tr>
+                      <th id="pointer" onClick={() => toggleIsKeyExpanded('Coverage')}>
+                        {
+                          !isKeyExpanded.Coverage
+                            ? <i className="far fa-plus-square ei-foldout-icon" />
+                            : <i className="far fa-minus-square ei-foldout-icon" />
+                        }
+                        Coverage
+                      </th>
+                      {
+                        Object.keys(summaryCategoryTypes.Coverage.totalSummary).length
+                          ? (
+                            <>
+                              <td>{ summaryCategoryTypes.Coverage.totalSummary[summaryInstallationTypes.INSTALLED.id][0].count }</td>
+                              <td>{ summaryCategoryTypes.Coverage.totalSummary[summaryInstallationTypes.PLANNED.id][0].count }</td>
+                              <td>{ summaryCategoryTypes.Coverage.totalSummary[summaryInstallationTypes.Total.id][0].count }</td>
+                            </>
+                          )
+                          : <td colSpan="3"></td>
+                      }
+                    </tr>
+                    {
+                      isKeyExpanded.Coverage &&
+                      <tr>
+                        <td colSpan="4" className="indent-1">
+                          { selectedBoundaryType.description }
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                )
+            )
+          })
+        }
+        {
+          isKeyExpanded.Coverage &&
+          (
+            Object.entries(summaryCategoryTypes.Coverage.summaryData).map(
+              ([locationEntityType, coverageinfo], categoryIndex) => (
+                <tbody key={categoryIndex}>
+                  <tr>
+                    <td id="pointer" onClick={() => togglelocationTagCoverage(locationEntityType)}>
+                      {
+                        !isLocKeyExpanded[locationEntityType]
                           ? <i className="far fa-plus-square ei-foldout-icon" />
                           : <i className="far fa-minus-square ei-foldout-icon" />
                       }
-                      { categoryType }
-                    </th>
-
-                    {/* Display installation types */}
-                    {
-                      categoryinfo['aggregateBy'] === 'count'
-                      ? (
-                          Object.entries(summaryInstallationTypes).map(([installationType], index) => (
-                            <th key={index}>
-                              {
-                                Object.keys(categoryinfo['totalSummary']).length &&
-                                categoryinfo['totalSummary'][installationType][0][categoryinfo['aggregateBy']]
-                              }
-                            </th>
-                          ))
-                        )
-                      : (
-                          Object.entries(summaryInstallationTypes).map(([installationType], index) => (
-                            // Display with two decimal points
-                            <th key={index}>
-                              {
-                                Object.keys(categoryinfo['totalSummary']).length &&
-                                (categoryinfo['totalSummary'][installationType][0][categoryinfo['aggregateBy']]
-                                  || 0 * metersToLength).toFixed(1)
-                              }
-                            </th>
-                          ))
-                        )
-                    }
+                      { locationEntityType }
+                    </td>
+                    <td>{ coverageinfo[summaryInstallationTypes.INSTALLED.id][0].count || 0 }</td>
+                    <td>{ coverageinfo[summaryInstallationTypes.PLANNED.id][0].count || 0 }</td>
+                    <td>{ coverageinfo[summaryInstallationTypes.Total.id][0].count || 0 }</td>
                   </tr>
                   {
-                    isKeyExpanded[categoryType] && categoryType === 'Coverage' &&
-                    <tr>
-                      <td colSpan="4" className="indent-1">
-                        { selectedBoundaryType.description }
-                      </td>
-                    </tr>
-                  }
-
-                  {/* Display each element summary in category */}
-                  {
-                    isKeyExpanded[categoryType] &&
+                    isLocKeyExpanded[locationEntityType] &&
                     (
-                      Object.entries(categoryinfo['summaryData']).map(([name, installationType], categoryIndex) => (
-                        <tr key={categoryIndex}>
-                          {/* For category type 'Equipment' display nicer names */}
-                          {
-                            categoryType === 'Equipment'
-                              ? <td className="indent-1">{ networkNodeTypesEntity && networkNodeTypesEntity[name] }</td>
-                              : <td className="indent-1 text-capitalize">{ name }</td>
-                          }
-                          {/* Display installation types */}
-                          {
-                            categoryinfo['aggregateBy'] === 'count'
-                            ? (
-                                Object.entries(summaryInstallationTypes).map(([type], index) => (
-                                  <td key={index}>
-                                    {
-                                      Object.keys(categoryinfo['totalSummary']).length &&
-                                      installationType[type][0][categoryinfo['aggregateBy']] || 0
-                                    }
-                                  </td>
-                                ))
-                              )
-                            : (
-                                Object.entries(summaryInstallationTypes).map(([type], index) => (
-                                  // converting to client specific units
-                                  <td key={index}>
-                                    {
-                                      Object.keys(categoryinfo['totalSummary']).length &&
-                                      (installationType[type][0][categoryinfo['aggregateBy']]
-                                        || 0 * metersToLength).toFixed(1)
-                                    }
-                                  </td>
-                                ))
-                              )
-                          }
+                      Object.entries(locTagCoverage[locationEntityType]).map(([tag, taginfo], index) => (
+                        <tr key={index}>
+                          <td className="indent-2">{ layerTagTodescription[tag] }</td>
+                          <td>{ taginfo[summaryInstallationTypes.INSTALLED.id][0].count || 0 }</td>
+                          <td>{ taginfo[summaryInstallationTypes.PLANNED.id][0].count || 0 }</td>
+                          <td>{ taginfo[summaryInstallationTypes.Total.id][0].count || 0 }</td>
                         </tr>
                       ))
                     )
                   }
                 </tbody>
-              )
-            : (
-                // Display Coverage summary
-                <tbody key={summaryIndex}>
-                  {/* coverage total summary */}
-                  <tr>
-                    <th id="pointer" onClick={() => toggleIsKeyExpanded('Coverage')}>
-                      {
-                        !isKeyExpanded['Coverage']
-                          ? <i className="far fa-plus-square ei-foldout-icon" />
-                          : <i className="far fa-minus-square ei-foldout-icon" />
-                      }
-                      Coverage
-                    </th>
-                    {
-                      Object.keys(summaryCategoryTypes['Coverage']['totalSummary']).length
-                      ? (
-                          <>
-                            <td>{ summaryCategoryTypes['Coverage']['totalSummary'][summaryInstallationTypes['INSTALLED'].id][0].count }</td>
-                            <td>{ summaryCategoryTypes['Coverage']['totalSummary'][summaryInstallationTypes['PLANNED'].id][0].count }</td>
-                            <td>{ summaryCategoryTypes['Coverage']['totalSummary'][summaryInstallationTypes['Total'].id][0].count }</td>
-                          </>
-                        )
-                      : <td colSpan="3"></td>
-                    }
-                  </tr>
-                  {
-                    isKeyExpanded['Coverage'] &&
-                    <tr>
-                      <td colSpan="4" className="indent-1">
-                        { selectedBoundaryType.description }
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              )
-            )
-          })
-        }
-        {
-          isKeyExpanded['Coverage'] &&
-          (
-            Object.entries(summaryCategoryTypes['Coverage']['summaryData']).map(
-              ([locationEntityType, coverageinfo], categoryIndex) => (
-              <tbody key={categoryIndex}>
-                <tr>
-                  <td id="pointer" onClick={() => togglelocationTagCoverage(locationEntityType)}>
-                    {
-                      !isLocKeyExpanded[locationEntityType]
-                        ? <i className="far fa-plus-square ei-foldout-icon" />
-                        : <i className="far fa-minus-square ei-foldout-icon" />
-                    }
-                    { locationEntityType }
-                  </td>
-                  <td>{ coverageinfo[summaryInstallationTypes['INSTALLED'].id][0].count || 0 }</td>
-                  <td>{ coverageinfo[summaryInstallationTypes['PLANNED'].id][0].count || 0 }</td>
-                  <td>{ coverageinfo[summaryInstallationTypes['Total'].id][0].count || 0 }</td>
-                </tr>
-                {
-                  isLocKeyExpanded[locationEntityType] &&
-                  (
-                    Object.entries(locTagCoverage[locationEntityType]).map(([tag, taginfo], index) => (
-                      <tr key={index}>
-                        <td className="indent-2">{ layerTagTodescription[tag] }</td>
-                        <td>{ taginfo[summaryInstallationTypes['INSTALLED'].id][0].count || 0 }</td>
-                        <td>{ taginfo[summaryInstallationTypes['PLANNED'].id][0].count || 0 }</td>
-                        <td>{ taginfo[summaryInstallationTypes['Total'].id][0].count || 0 }</td>
-                      </tr>
-                    ))
-                  )
-                }
-              </tbody>
-            ))
+              ))
           )
         }
       </table>
