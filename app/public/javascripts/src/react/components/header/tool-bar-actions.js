@@ -444,6 +444,13 @@ function setDeletedMapObjects (mapObject) {
   }
 }
 
+function setSidebarWidth (sidebarWidth) {
+  return {
+    type: Actions.TOOL_BAR_SET_SIDEBAR_WIDTH,
+    payload: sidebarWidth
+  }
+}
+
 export default {
   setPlanInputsModal,
   selectedDisplayMode,
@@ -471,4 +478,5 @@ export default {
   setSelectedHeatMapOption,
   setViewSetting,
   setDeletedMapObjects,
+  setSidebarWidth,
 }

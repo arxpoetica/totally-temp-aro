@@ -86,7 +86,8 @@ const defaultState = {
       worldMaxValue: 500000
     },
     selectedHeatmapOption: viewSetting.heatmapOptions[0] // 0, 2
-  }
+  },
+  sidebarWidth: 25
 }
 
 function setPlanInputsModal (state, planInputsModal) {
@@ -204,6 +205,12 @@ function setDeletedMapObjects (state, deletedMapObjectsList) {
   }
 }
 
+function setSidebarWidth (state, sidebarWidth) {
+  return { ...state,
+    sidebarWidth: sidebarWidth
+  }
+}
+
 function ToolBarReducer (state = defaultState, action) {
   switch (action.type) {
 
@@ -263,6 +270,9 @@ function ToolBarReducer (state = defaultState, action) {
 
     case Actions.TOOL_BAR_SET_DELETED_UNCOMMITED_MAP_OBJECTS:
       return setDeletedMapObjects(state, action.payload)
+
+    case Actions.TOOL_BAR_SET_SIDEBAR_WIDTH:
+      return setSidebarWidth(state, action.payload)
 
     default:
       return state
