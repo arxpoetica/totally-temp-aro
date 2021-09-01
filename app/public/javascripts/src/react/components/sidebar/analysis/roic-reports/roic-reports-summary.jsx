@@ -91,7 +91,7 @@ export class RoicReportsSummary extends Component {
               && currencyFormatter.format(
                 (roicResults.priceModel.totalCost
                 / roicResults.roicAnalysis.components['PLANNED_NETWORK']['network.premises'].values[0]) // no. of premises in year 0
-                .toFixed(1)) + ' K'}</td>
+                .toFixed(1))}</td>
             </tr>
 
             <tr>
