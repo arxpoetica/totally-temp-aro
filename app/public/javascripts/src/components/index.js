@@ -91,7 +91,6 @@ import planEditor from './sidebar/plan-editor/plan-editor'
 import planEditorContainer from './sidebar/plan-editor/plan-editor-container'
 import equipmentPropertiesEditor from './sidebar/plan-editor/equipment-properties-editor'
 import boundaryPropertiesEditor from './sidebar/plan-editor/boundary-properties-editor'
-import planSummary from './sidebar/plan-editor/plan-summary'
 import serviceLayerEditor from './sidebar/plan-editor/service-layer-editor'
 import boundaries from './views/boundaries'
 import locations from './views/locations'
@@ -167,7 +166,6 @@ app.component('boundaryDetail', boundaryDetail)
   .component('planEditorContainer', planEditorContainer)
   .component('equipmentPropertiesEditor', equipmentPropertiesEditor)
   .component('boundaryPropertiesEditor', boundaryPropertiesEditor)
-  .component('planSummary', planSummary)
   .component('serviceLayerEditor', serviceLayerEditor)
   .component('draggableButton', draggableButton)
   .component('boundaries', boundaries)
