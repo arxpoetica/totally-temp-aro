@@ -24,7 +24,15 @@ export class EquipmentMapObjects extends Component {
     return null
   }
 
+  componentDidMount() {
+    this.pickFeaturesToCreate()
+  }
+
   componentDidUpdate() {
+    this.pickFeaturesToCreate()
+  }
+
+  pickFeaturesToCreate() {
     // FIXME: how to cache this layer better so we don't have to delete every lifecycle
     Object.keys(this.mapObjects).forEach(id => this.deleteMapObject(id))
 
@@ -58,7 +66,6 @@ export class EquipmentMapObjects extends Component {
     //                      (feature.workflow_state_id & WorkflowState.INVALIDATED.id))
     
     const { objectId } = feature
-    
     // ToDo: unhack this 
     //let isLocked = false
     //if (feature.networkNodeType === "central_office") isLocked = true
@@ -70,7 +77,6 @@ export class EquipmentMapObjects extends Component {
         url: this.props.equipmentDefinitions[feature.networkNodeType].iconUrl
       },
       draggable: !feature.locked, // Allow dragging only if feature is not locked
-      clickable: !idle,
       opacity: idle ? 0.4 : 1.0,
       map: this.props.googleMaps,
       zIndex: MAP_OBJECT_Z_INDEX

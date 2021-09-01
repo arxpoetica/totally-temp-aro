@@ -704,8 +704,10 @@ function addSubnets (subnetIds) {
     let uncachedSubnetIds = subnetIds.filter(id => !cachedSubnetIds.includes(id))
     
     // we have everything, no need to query service
-    if (uncachedSubnetIds.length <= 0) return Promise.resolve(subnetIds)
-
+    if (uncachedSubnetIds.length <= 0) {
+      dispatch(setIsCalculatingSubnets(false))
+      return Promise.resolve(subnetIds)
+    }
     // pull out any ids that are not subnets
     let validPsudoSubnets = []
     uncachedSubnetIds = uncachedSubnetIds.filter(id => {
@@ -1027,9 +1029,8 @@ function parseRecalcEvents (recalcData) {
     let newSubnetFeatures = JSON.parse(JSON.stringify(subnetFeatures))
     let updatedSubnets = {}
 
-    dispatch(addSubnets(
-      [...new Set(recalcData.subnets.map(subnet => subnet.feature.objectId))]
-    ))
+    const subnets = [...new Set(recalcData.subnets.map(subnet => subnet.feature.objectId))]
+    dispatch(addSubnets(subnets))
       .then(() => {
         // need to recapture state because we've altered it w/ `addSubnets`
         const state = getState()
@@ -1037,12 +1038,12 @@ function parseRecalcEvents (recalcData) {
           let subnetId = subnetRecalc.feature.objectId
           // TODO: looks like this needs to be rewritten 
           if (state.planEditor.subnets[subnetId]) {
-            let newSubnet = JSON.parse(JSON.stringify(state.planEditor.subnets[subnetId]))
+            const subnetCopy = JSON.parse(JSON.stringify(state.planEditor.subnets[subnetId]))
 
             // update fiber
             // TODO: create parser for this???
             // ...also use it above in `addSubnets`, where fiber is added
-            newSubnet.fiber = subnetRecalc.feature
+            subnetCopy.fiber = subnetRecalc.feature
 
             // update equipment
             subnetRecalc.recalcNodeEvents.forEach(recalcNodeEvent => {
@@ -1051,14 +1052,14 @@ function parseRecalcEvents (recalcData) {
                 case 'DELETE':
                   // need to cover the case of deleteing a hub where we need to pull the whole thing
                   delete newSubnetFeatures[objectId]
-                  let index = newSubnet.children.indexOf(objectId);
-                  if (index !== -1) {
-                    newSubnet.children.splice(index, 1);
+                  let index = subnetCopy.children.indexOf(objectId);
+                  if (index > -1) {
+                    subnetCopy.children.splice(index, 1);
                   }
                   break
                 case 'ADD':
                   // add only
-                  newSubnet.children.push(objectId)
+                  subnetCopy.children.push(objectId)
                   // do not break
                 case 'MODIFY':
                   // add || modify
@@ -1071,22 +1072,22 @@ function parseRecalcEvents (recalcData) {
                   break
               }
             })
-            updatedSubnets[subnetId] = newSubnet
+            updatedSubnets[subnetId] = subnetCopy
           }
-      })
-
-      batch(() => {
-        dispatch({
-          type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
-          payload: newSubnetFeatures,
         })
-        dispatch({
-          type: Actions.PLAN_EDITOR_ADD_SUBNETS,
-          payload: updatedSubnets,
-        })
-      })
 
-    })
+        batch(() => {
+          dispatch({
+            type: Actions.PLAN_EDITOR_SET_SUBNET_FEATURES,
+            payload: newSubnetFeatures,
+          })
+          dispatch({
+            type: Actions.PLAN_EDITOR_ADD_SUBNETS,
+            payload: updatedSubnets,
+          })
+        })
+
+      })
   }
 }
 
