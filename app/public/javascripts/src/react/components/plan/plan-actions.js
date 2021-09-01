@@ -2,9 +2,11 @@ import Actions from '../../common/actions'
 import CoverageActions from '../coverage/coverage-actions'
 import SelectionActions from '../selection/selection-actions'
 import RfpActions from '../optimization/rfp/rfp-actions'
+import RfpStatusTypes from '../optimization/rfp/constants'
 import SocketManager from '../../../react/common/socket-manager'
 import RingEditActions from '../ring-edit/ring-edit-actions'
 import NetworkOptimizationActions from '../optimization/network-optimization/network-optimization-actions'
+import ToolBarActions from '../header/tool-bar-actions.js'
 import AroHttp from '../../common/aro-http'
 
 function setActivePlanState (planState) {
@@ -145,6 +147,13 @@ function setActivePlan (plan) {
     dispatch(RingEditActions.loadRings(plan.id))
     // load rings
     dispatch(loadPlanResourceSelectionFromServer(plan))
+    
+    if (plan.planType === 'RFP') {
+      dispatch({
+        type: Actions.RFP_SET_STATUS,
+        payload: RfpStatusTypes.FINISHED
+      })
+    }
   }
 }
 
@@ -306,6 +315,8 @@ function savePlanConfiguration(plan, dataItems, resourceItems) {
       }
     })
 
+    if (!dataItems) dataItems = state.plan.dataItems
+    if (!resourceItems) resourceItems = state.plan.resourceItems
     let putBody = {
       configurationItems: [],
       resourceConfigItems: []
@@ -567,6 +578,64 @@ function loadLibraryEntryById (libraryId) {
   }
 }
 
+function deletePlan (plan) {
+  return (dispatch) => {
+    if (!plan) {
+      return Promise.resolve()
+    }
+
+    return new Promise((resolve, reject) => {
+      swal({
+        title: 'Are you sure?',
+        text: 'You will not be able to recover the deleted plan!',
+        type: 'warning',
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Yes, delete it!',
+        showCancelButton: true,
+        closeOnConfirm: true
+      }, (deletePlan) => {
+        if (deletePlan) {
+          AroHttp.delete(`/service/v1/plan/${plan.id}`)
+            .then((response) => {
+              resolve()
+              return dispatch(getOrCreateEphemeralPlan())
+            })
+            .then((ephemeralPlan) => dispatch(setActivePlan(ephemeralPlan.data)))
+            .catch((err) => reject(err))
+        } else {
+          resolve()
+        }
+      })
+    })
+  }
+}
+
+ // Gets the last ephemeral plan in use, or creates a new one if no ephemeral plan exists.
+function getOrCreateEphemeralPlan () {
+  return (dispatch, getState) => {
+    return AroHttp.get(`/service/v1/plan/ephemeral/latest`)
+      .then((result) => {
+        // We have a valid ephemeral plan if we get back an object with *some* properties
+        // When there is no plan API return empty string instead of empty object, Hence this method Object.getOwnPropertyNames(result.data).length always return 1
+        var isValidEphemeralPlan = result.data ? true : false
+        if (isValidEphemeralPlan) {
+          // We have a valid ephemeral plan. Return it.
+          return Promise.resolve(result)
+        } else {
+          // We dont have an ephemeral plan. Create one and send it back
+          return dispatch(ToolBarActions.createNewPlan(true))
+        }
+      })
+  }
+}
+
+function editActivePlan (plan) {
+  return {
+    type: Actions.PLAN_EDIT_ACTIVE_PLAN,
+    payload: plan
+  }
+}
+
 export default {
   setActivePlan,
   setActivePlanState,
@@ -590,5 +659,8 @@ export default {
   setParentProjectForNewProject,
   setSelectedProjectId,
   updateDefaultPlanCoordinates,
-  loadLibraryEntryById
+  loadLibraryEntryById,
+  deletePlan,
+  getOrCreateEphemeralPlan,
+  editActivePlan,
 }

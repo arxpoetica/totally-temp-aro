@@ -285,7 +285,6 @@ class State {
     service.requestDestroyMapOverlay = new Rx.BehaviorSubject(null)
     service.showNetworkAnalysisOutput = false
     service.networkPlanModal = new Rx.BehaviorSubject(false)
-    service.planInputsModal = new Rx.BehaviorSubject(false)
     service.requestSetMapCenter = new Rx.BehaviorSubject({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
     service.requestSetMapZoom = new Rx.BehaviorSubject(service.defaultPlanCoordinates.zoom)
     service.showDetailedLocationInfo = new Rx.BehaviorSubject()
@@ -487,7 +486,7 @@ class State {
         service.onFeatureSelectedRedux(options)
       } else if (options.locations && options.locations.length) {
         service.setSelectedLocations(options.locations.map(location => location.location_id))
-        service.setActiveViewModePanel(service.viewModePanels.LOCATION_INFO)
+        // service.setActiveViewModePanel(service.viewModePanels.LOCATION_INFO)
       }
     })
 
