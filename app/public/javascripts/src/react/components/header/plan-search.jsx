@@ -587,24 +587,20 @@ export class PlanSearch extends Component {
   }
 
   constructSearch() {
-    this.setState({ search_text: '' })
+    const searchTextObject = []
+    this.state.searchText.forEach(searchInput => {
+      if (typeof searchInput !== 'string'){
+        if (searchInput.type === 'svc') searchTextObject.svc = searchInput
+        if (searchInput.type === 'tag') searchTextObject.tag = searchInput
+        if (searchInput.type === 'created_by') searchTextObject.created_by = searchInput
+      } else {
+        searchTextObject.searchString = searchInput
+      }
+    })
+    const searchText = Object.values(searchTextObject)
+    this.setState({ search_text: '', searchText })
 
-    let newConstructSearch = []
-    const oldConstructSearch = this.state.searchText
-
-    if (oldConstructSearch !== null) {
-      newConstructSearch = oldConstructSearch.map((item, index) => {
-        if (item.hasOwnProperty('type')) {
-          return item
-        } else {
-          return item.value
-        }
-      })
-    } else {
-      newConstructSearch = []
-    }
-
-    const selectedFilterPlans = newConstructSearch.filter(plan => { if (typeof plan === 'string') return plan })
+    const selectedFilterPlans = searchText.filter(plan => { if (typeof plan === 'string') return plan })
 
     const typeToProperty = {
       svc: 'code',
@@ -612,7 +608,7 @@ export class PlanSearch extends Component {
       created_by: 'fullName'
     }
 
-    let selectedFilters = newConstructSearch
+    let selectedFilters = searchText
       .filter((item) => typeof item !== 'string')
       .map((item) => `${item.type}:\"${item[typeToProperty[item.type]]}\"`)
 
