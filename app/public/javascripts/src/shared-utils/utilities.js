@@ -17,10 +17,12 @@ export function updateDrawingManagerState (drawingManager, selectedDisplayMode, 
     }
 
     if (selectedDisplayMode === displayModes.VIEW 
-      && targetSelectionMode === state.targetSelectionModes.POLYGON_EXPORT_TARGET
-      || (
-        (selectedDisplayMode === displayModes.ANALYSIS || selectedDisplayMode === displayModes.VIEW) 
-        && targetSelectionMode === state.targetSelectionModes.POLYGON_PLAN_TARGET)
+        && targetSelectionMode === state.targetSelectionModes.POLYGON_EXPORT_TARGET
+        || (
+            selectedDisplayMode === displayModes.ANALYSIS
+            || selectedDisplayMode === displayModes.VIEW
+            && targetSelectionMode === state.targetSelectionModes.POLYGON_PLAN_TARGET
+          )
       ) {
       drawingManager.setDrawingMode('polygon')
       drawingManager.setMap(mapRef)
