@@ -24,7 +24,15 @@ export class EquipmentMapObjects extends Component {
     return null
   }
 
+  componentDidMount() {
+    this.pickFeaturesToCreate()
+  }
+
   componentDidUpdate() {
+    this.pickFeaturesToCreate()
+  }
+
+  pickFeaturesToCreate() {
     // FIXME: how to cache this layer better so we don't have to delete every lifecycle
     Object.keys(this.mapObjects).forEach(id => this.deleteMapObject(id))
 

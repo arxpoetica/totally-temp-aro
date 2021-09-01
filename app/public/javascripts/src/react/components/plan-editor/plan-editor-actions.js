@@ -704,8 +704,10 @@ function addSubnets (subnetIds) {
     let uncachedSubnetIds = subnetIds.filter(id => !cachedSubnetIds.includes(id))
     
     // we have everything, no need to query service
-    if (uncachedSubnetIds.length <= 0) return Promise.resolve(subnetIds)
-
+    if (uncachedSubnetIds.length <= 0) {
+      dispatch(setIsCalculatingSubnets(false))
+      return Promise.resolve(subnetIds)
+    }
     // pull out any ids that are not subnets
     let validPsudoSubnets = []
     uncachedSubnetIds = uncachedSubnetIds.filter(id => {
