@@ -453,7 +453,7 @@ export class PlanSearch extends Component {
   handleInputChange(inputValue, { action }) {
     switch (action) {
       case 'input-change':
-        this.setState({ inputValue })
+        this.setState({ inputValue, isDropDownOption: true })
         return
       default:
         return
@@ -579,7 +579,6 @@ export class PlanSearch extends Component {
     } else {
       updatePlan.tagMapping.global = updatePlan.tagMapping.global.filter(item => removeTag.tag.id !== item)
     }
-    this.props.editActivePlan(JSON.parse(JSON.stringify(updatePlan)))
     return AroHttp.put('/service/v1/plan', updatePlan)
       .then((response) => {
         this.loadPlans()
@@ -589,7 +588,7 @@ export class PlanSearch extends Component {
   constructSearch() {
     const searchTextObject = []
     this.state.searchText.forEach(searchInput => {
-      if (typeof searchInput !== 'string'){
+      if (searchInput.hasOwnProperty('type')) {
         if (searchInput.type === 'svc') searchTextObject.svc = searchInput
         if (searchInput.type === 'tag') searchTextObject.tag = searchInput
         if (searchInput.type === 'created_by') searchTextObject.created_by = searchInput
@@ -610,8 +609,13 @@ export class PlanSearch extends Component {
 
     let selectedFilters = searchText
       .filter((item) => typeof item !== 'string')
-      .map((item) => `${item.type}:\"${item[typeToProperty[item.type]]}\"`)
-
+      .map((item) => {
+        if (item.hasOwnProperty('type')) {
+          return `${item.type}:\"${item[typeToProperty[item.type]]}\"`
+        } else {
+          return `\"${item.value}\"`
+        }
+      })
     if (selectedFilterPlans.length > 0) selectedFilters = selectedFilters.concat(`"${selectedFilterPlans.join(' ')}"`)
     this.setState({ search_text: selectedFilters.join(' ') })
   }
@@ -722,7 +726,6 @@ const mapDispatchToProps = (dispatch) => ({
   ),
   loadPlan: (planId) => dispatch(ToolBarActions.loadPlan(planId)),
   deletePlan: (plan) => dispatch(PlanActions.deletePlan(plan)),
-  editActivePlan: (plan) => dispatch(PlanActions.editActivePlan(plan)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(PlanSearch)
