@@ -3,6 +3,7 @@ import { PropTypes } from 'prop-types'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import LocationInfoActions from './location-info-actions'
+import ToolBarActions from '../header/tool-bar-actions'
 import AuditLog from './audit-log.jsx'
 import '../../../../../javascripts/src/shared-utils/editor-interfaces.css'
 
@@ -25,6 +26,7 @@ export class LocationInfo extends Component {
     } else if (newLocationId !== oldLocationId) {
       // We have exactly one location selected. Get the location details
       this.props.getLocationInfo(this.props.planId, newLocationId)
+      this.props.setActiveViewModePanel('LOCATION_INFO')
     }
   }
 
@@ -145,6 +147,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = (dispatch) => ({
   getLocationInfo: (planId, selectedLocations) => dispatch(LocationInfoActions.getLocationInfo(planId, selectedLocations)),
+  setActiveViewModePanel: displayPanel => dispatch(ToolBarActions.activeViewModePanel(displayPanel)),
   clearLocationInfo: () => dispatch(LocationInfoActions.clearLocationInfo())
 })
 
