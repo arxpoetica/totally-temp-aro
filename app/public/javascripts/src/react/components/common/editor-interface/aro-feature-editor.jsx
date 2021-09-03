@@ -16,13 +16,10 @@ export class AroFeatureEditor extends Component {
     let aroFeature = AroFeatureFactory.createObject(this.props.feature)
     let meta = aroFeature.getFullDisplayProperties()
     // TODO: get enums in the meta
-    
+
     aroFeature = aroFeature.networkNodeEquipment
     meta = meta.networkNodeEquipment
-    
-    if (!'isCollapsible' in props) props.isCollapsible = true
-    if (!'isEditable' in props) props.isEditable = true
-    
+
     this.state = {
       value: JSON.parse(JSON.stringify(aroFeature)),
       meta: meta,
@@ -37,13 +34,13 @@ export class AroFeatureEditor extends Component {
         <AroFeatureEditorNode 
           objPath='' 
           omitRootContain={true}
-          isCollapsible={this.props.isCollapsible}
-          isEditable={this.props.isEditable} 
-          value={this.state.value} // this.state.value 
-          meta={this.state.meta} 
+          isCollapsible={this.props.isCollapsible || true}
+          isEditable={this.props.isEditable || true}
+          value={this.state.value} // this.state.value
+          meta={this.state.meta}
           onChange={(event, propVal, path) => this._onChange(event, propVal, path)}
         ></AroFeatureEditorNode>
-        <button className="btn btn-light" 
+        <button className="btn btn-light"
           style={{margin: '30px 12px 12px 0px'}}
           onClick={event => this._onSave(event)}
           disabled={!this.state.canSave}
