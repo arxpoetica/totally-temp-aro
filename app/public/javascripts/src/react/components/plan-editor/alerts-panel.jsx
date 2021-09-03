@@ -6,15 +6,14 @@ import { constants } from './constants'
 
 const DefectsPanel = props => {
 
-  const { locationAlerts, alertTypes, map, locations } = props
+  const { locationAlerts, alertTypes, map } = props
   const alerts = Object.entries(locationAlerts)
 
   const [open, setOpen] = useState(false)
   const [bounceMarker, setBounceMarker] = useState(null)
   const handleOpenState = () => setOpen(!open)
 
-  const handleMouseEnter = ({ locationId }) => {
-    const { latitude, longitude } = locations[locationId].point
+  const handleMouseEnter = ({ latitude, longitude }) => {
     const marker = new google.maps.Marker({
       map,
       icon: {
@@ -28,13 +27,12 @@ const DefectsPanel = props => {
     setBounceMarker(marker)
   }
 
-  const handleMouseLeave = ({ locationId }) => {
+  const handleMouseLeave = () => {
     bounceMarker.setMap(null)
     setBounceMarker(null)
   }
 
-  const handleClick = ({ locationId }) => {
-    const { latitude, longitude } = locations[locationId].point
+  const handleClick = ({ latitude, longitude }) => {
     map.setCenter({ lat: latitude, lng: longitude })
   }
 
@@ -52,9 +50,9 @@ const DefectsPanel = props => {
           location.alerts.map((alert, index) =>
             <li
               key={index}
-              onMouseEnter={() => handleMouseEnter(location)}
-              onMouseLeave={() => handleMouseLeave(location)}
-              onClick={() => handleClick(location)}
+              onMouseEnter={() => handleMouseEnter(location.point)}
+              onMouseLeave={() => handleMouseLeave()}
+              onClick={() => handleClick(location.point)}
             >
               <div className="text">
                 <div
@@ -78,7 +76,6 @@ const mapStateToProps = state => ({
   alertTypes: PlanEditorSelectors.AlertTypes,
   // TODO: why is this named `googleMaps`? Is it ever plural? Isn't it a single map?
   map: state.map.googleMaps,
-  locations: PlanEditorSelectors.getSelectedSubnetLocations(state),
 })
 
 const mapDispatchToProps = dispatch => ({

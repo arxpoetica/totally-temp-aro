@@ -168,6 +168,7 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
                   locationId: featureId,
                   subnetId,
                   alerts: [],
+                  point: subnet.subnetLocationsById[featureId].point,
                 }
               }
               alerts[featureId].alerts.push(AlertTypes['MAX_HUB_DISTANCE_EXCEEDED'].key)
@@ -186,6 +187,7 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
                 locationId: featureId,
                 subnetId,
                 alerts: [],
+                point: subnet.subnetLocationsById[featureId].point,
               }
             }
             alerts[featureId].alerts.push(AlertTypes['MAX_TERMINAL_HOMES_EXCEEDED'].key)
@@ -199,9 +201,10 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
               if (dropLink.dropCableLength > maxDropCableLength) {
                 if (!alerts[locationId]) {
                   alerts[locationId] = {
-                    locationId: locationId,
+                    locationId,
                     subnetId,
                     alerts: [],
+                    point: subnet.subnetLocationsById[locationId].point,
                   }
                 }
                 alerts[locationId].alerts.push(AlertTypes['MAX_DROP_LENGTH_EXCEEDED'].key)
@@ -218,6 +221,7 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
             locationId: subnetId,
             subnetId,
             alerts: [],
+            point: subnet.subnetLocationsById[subnetId].point,
           }
         }
         alerts[subnetId].alerts.push(AlertTypes['MAX_HUB_HOMES_EXCEEDED'].key)
@@ -226,9 +230,10 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
       Object.keys(abandonedLocations).forEach(locationId => {
         if (!alerts[locationId]) {
           alerts[locationId] = {
-            locationId: locationId,
+            locationId,
             subnetId,
             alerts: [],
+            point: subnet.subnetLocationsById[locationId].point,
           }
         }
         alerts[locationId].alerts.push(AlertTypes['ABANDONED_LOCATION'].key)
