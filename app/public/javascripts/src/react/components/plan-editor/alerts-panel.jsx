@@ -9,14 +9,31 @@ const DefectsPanel = props => {
   const alerts = Object.entries(locationAlerts)
 
   const [open, setOpen] = useState(false)
+  const [bounceMarker, setBounceMarker] = useState(null)
   const handleOpenState = () => setOpen(!open)
 
+  const handleMouseEnter = ({ locationId }) => {
+    const { latitude, longitude } = locations[locationId].point
+    const marker = new google.maps.Marker({
+      map,
+      icon: {
+        url: '/svg/map-icons/pin.svg',
+        size: new google.maps.Size(19, 30),
+      },
+      animation: google.maps.Animation.BOUNCE,
+      position: { lat: latitude, lng: longitude },
+    })
+    setBounceMarker(marker)
+  }
+
+  const handleMouseLeave = ({ locationId }) => {
+    bounceMarker.setMap(null)
+    setBounceMarker(null)
+  }
+
   const handleClick = ({ locationId }) => {
-    const location = locations[locationId]
-    if (location) {
-      const { latitude, longitude } = location.point
-      map.setCenter({ lat: latitude, lng: longitude })
-    }
+    const { latitude, longitude } = locations[locationId].point
+    map.setCenter({ lat: latitude, lng: longitude })
   }
 
   return alerts.length ? (
@@ -31,7 +48,12 @@ const DefectsPanel = props => {
       <ul className={cx('content', open && 'open')}>
         {alerts.map(([id, location]) => (
           location.alerts.map((alert, index) =>
-            <li key={index} onClick={() => handleClick(location)}>
+            <li
+              key={index}
+              onMouseEnter={() => handleMouseEnter(location)}
+              onMouseLeave={() => handleMouseLeave(location)}
+              onClick={() => handleClick(location)}
+            >
               <div className="text">
                 <div
                   className="svg location"
