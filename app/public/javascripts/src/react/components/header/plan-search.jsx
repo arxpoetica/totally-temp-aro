@@ -589,9 +589,7 @@ export class PlanSearch extends Component {
     const searchTextObject = []
     this.state.searchText.forEach(searchInput => {
       if (searchInput.hasOwnProperty('type')) {
-        if (searchInput.type === 'svc') searchTextObject.svc = searchInput
-        if (searchInput.type === 'tag') searchTextObject.tag = searchInput
-        if (searchInput.type === 'created_by') searchTextObject.created_by = searchInput
+        searchTextObject[searchInput.type] = searchInput
       } else {
         searchTextObject.searchString = searchInput
       }
@@ -611,10 +609,8 @@ export class PlanSearch extends Component {
       .filter((item) => typeof item !== 'string')
       .map((item) => {
         if (item.hasOwnProperty('type')) {
-          return `${item.type}:\"${item[typeToProperty[item.type]]}\"`
-        } else {
-          return `\"${item.value}\"`
-        }
+          return `${item.type}:"${item[typeToProperty[item.type]]}"`
+        } return `"${item.value}"`
       })
     if (selectedFilterPlans.length > 0) selectedFilters = selectedFilters.concat(`"${selectedFilterPlans.join(' ')}"`)
     this.setState({ search_text: selectedFilters.join(' ') })
