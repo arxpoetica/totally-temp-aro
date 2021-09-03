@@ -2,10 +2,7 @@
 import { Component } from 'react'
 import { connect } from 'react-redux'
 import WktUtils from '../../../shared-utils/wkt-utils'
-
-//not sure about z-index I just took this from equipment
-const SELECTION_Z_INDEX = 1
-const MAP_OBJECT_Z_INDEX = SELECTION_Z_INDEX + 1
+import { constants } from './constants'
 
 export class FiberMapObjects extends Component {
   constructor (props) {
@@ -46,7 +43,7 @@ export class FiberMapObjects extends Component {
       path,
       clickable: false,
       map: this.props.googleMaps,
-      zIndex: MAP_OBJECT_Z_INDEX,
+      zIndex: constants.Z_INDEX_MAP_OBJECT,
       strokeColor: fiberType === 'DISTRIBUTION' ? '#FF0000' : '#1700ff',
       strokeOpacity: 1.0,
       strokeWeight: fiberType === 'DISTRIBUTION' ? 2 : 4,

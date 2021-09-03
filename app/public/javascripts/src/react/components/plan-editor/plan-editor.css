@@ -49,7 +49,9 @@
   background-image: url('/svg/alert-panel-warning.svg');
 }
 .alerts-panel .content {
+  overflow: auto;
   display: none;
+  max-height: 400px;
   padding: 10px;
   border-bottom: 1px solid var(--gray-medium-light);
 }

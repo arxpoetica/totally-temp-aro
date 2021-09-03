@@ -79,6 +79,20 @@ const AlertTypes = {
 const locationWarnImg = new Image(18, 22)
 locationWarnImg.src = '/svg/alert-panel-location.png'
 
+const getRootSubnet = createSelector(
+  [getSelectedSubnetId, getSubnetFeatures, getSubnets],
+  (selectedFeatureId, subnetFeatures, subnets) => {
+    let rootSubnet = subnetFeatures[selectedFeatureId]
+    if (rootSubnet) {
+      while(rootSubnet.subnetId !== null) {
+        rootSubnet = subnetFeatures[rootSubnet.subnetId]
+      }
+      rootSubnet = subnets[rootSubnet.feature.objectId]
+    }
+    return rootSubnet
+  }
+)
+
 const getSelectedSubnetLocations = createSelector(
   [getSelectedSubnetId, getSelectedSubnet, getSubnetFeatures, getSubnets],
   (selectedSubnetId, selectedSubnet, subnetFeatures, subnets) => {
@@ -103,24 +117,11 @@ const getSelectedSubnetLocations = createSelector(
 )
 
 const getAlertsForSubnetTree = createSelector(
-  [getSelectedSubnetId, getSubnetFeatures, getNetworkConfig, getSubnets],
-  (selectedFeatureId, subnetFeatures, networkConfig, subnets) => {
-
+  [getRootSubnet, getSubnets, getSubnetFeatures, getNetworkConfig],
+  (rootSubnet, subnets, subnetFeatures, networkConfig) => {
     let alerts = {}
-    let currentFeature = subnetFeatures[selectedFeatureId]
-    if (currentFeature) {
-
+    if (rootSubnet) {
       let subnetTree = []
-
-      // get the root subnet
-      let rootSubnet
-      while(!rootSubnet) {
-        if (currentFeature.subnetId === null) {
-          rootSubnet = subnets[currentFeature.feature.objectId]
-        } else {
-          currentFeature = subnetFeatures[currentFeature.subnetId]
-        }
-      }
 
       // get all children hub subnets
       const childrenHubSubnets = rootSubnet.children
@@ -167,6 +168,7 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
                   locationId: featureId,
                   subnetId,
                   alerts: [],
+                  point: subnet.subnetLocationsById[featureId].point,
                 }
               }
               alerts[featureId].alerts.push(AlertTypes['MAX_HUB_DISTANCE_EXCEEDED'].key)
@@ -185,6 +187,7 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
                 locationId: featureId,
                 subnetId,
                 alerts: [],
+                point: subnet.subnetLocationsById[featureId].point,
               }
             }
             alerts[featureId].alerts.push(AlertTypes['MAX_TERMINAL_HOMES_EXCEEDED'].key)
@@ -198,9 +201,10 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
               if (dropLink.dropCableLength > maxDropCableLength) {
                 if (!alerts[locationId]) {
                   alerts[locationId] = {
-                    locationId: locationId,
+                    locationId,
                     subnetId,
                     alerts: [],
+                    point: subnet.subnetLocationsById[locationId].point,
                   }
                 }
                 alerts[locationId].alerts.push(AlertTypes['MAX_DROP_LENGTH_EXCEEDED'].key)
@@ -217,6 +221,7 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
             locationId: subnetId,
             subnetId,
             alerts: [],
+            point: subnet.subnetLocationsById[subnetId].point,
           }
         }
         alerts[subnetId].alerts.push(AlertTypes['MAX_HUB_HOMES_EXCEEDED'].key)
@@ -225,9 +230,10 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
       Object.keys(abandonedLocations).forEach(locationId => {
         if (!alerts[locationId]) {
           alerts[locationId] = {
-            locationId: locationId,
+            locationId,
             subnetId,
             alerts: [],
+            point: subnet.subnetLocationsById[locationId].point,
           }
         }
         alerts[locationId].alerts.push(AlertTypes['ABANDONED_LOCATION'].key)
