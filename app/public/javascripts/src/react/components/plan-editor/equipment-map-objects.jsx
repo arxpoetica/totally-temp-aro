@@ -7,9 +7,7 @@ import PlanEditorActions from './plan-editor-actions'
 import SelectionActions from '../selection/selection-actions'
 import WktUtils from '../../../shared-utils/wkt-utils'
 import PlanEditorSelectors from './plan-editor-selectors.js'
-
-const SELECTION_Z_INDEX = 1
-const MAP_OBJECT_Z_INDEX = SELECTION_Z_INDEX + 1
+import { constants } from './constants'
 
 export class EquipmentMapObjects extends Component {
   constructor(props) {
@@ -79,7 +77,7 @@ export class EquipmentMapObjects extends Component {
       draggable: !feature.locked, // Allow dragging only if feature is not locked
       opacity: idle ? 0.4 : 1.0,
       map: this.props.googleMaps,
-      zIndex: MAP_OBJECT_Z_INDEX
+      zIndex: constants.Z_INDEX_MAP_OBJECT,
     })
 
     mapObject.addListener('dragend', event => {
@@ -153,7 +151,7 @@ export class EquipmentMapObjects extends Component {
             anchor: new google.maps.Point(24, 48)
           },
           clickable: false,
-          zIndex: SELECTION_Z_INDEX,
+          zIndex: constants.Z_INDEX_SELECTION,
           opacity: 0.7,
         })
         this.selectionOverlays[id].bindTo('position', this.mapObjects[id], 'position')

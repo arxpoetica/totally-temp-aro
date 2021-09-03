@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { PropTypes } from 'prop-types'
 import { connect } from 'react-redux'
-import Constants from './constants'
+import { constants } from './constants'
 import PlanEditorActions from './plan-editor-actions'
 
 export const DraggableNode = props => {
@@ -19,12 +19,12 @@ export const DraggableNode = props => {
 
   function handleDragStart(dragEvent) {
     startDragging()
-    dragEvent.dataTransfer.setData(Constants.DRAG_DROP_ENTITY_KEY, entityType)
-    dragEvent.dataTransfer.setData(Constants.DRAG_DROP_ENTITY_DETAILS_KEY, entityDetails)
-    dragEvent.dataTransfer.setData(Constants.DRAG_DROP_GRAB_OFFSET_X, dragEvent.nativeEvent.offsetX)
-    dragEvent.dataTransfer.setData(Constants.DRAG_DROP_GRAB_OFFSET_Y, dragEvent.nativeEvent.offsetY)
-    dragEvent.dataTransfer.setData(Constants.DRAG_DROP_GRAB_ICON_W, aspect.width)
-    dragEvent.dataTransfer.setData(Constants.DRAG_DROP_GRAB_ICON_H, aspect.height)
+    dragEvent.dataTransfer.setData(constants.DRAG_DROP_ENTITY_KEY, entityType)
+    dragEvent.dataTransfer.setData(constants.DRAG_DROP_ENTITY_DETAILS_KEY, entityDetails)
+    dragEvent.dataTransfer.setData(constants.DRAG_DROP_GRAB_OFFSET_X, dragEvent.nativeEvent.offsetX)
+    dragEvent.dataTransfer.setData(constants.DRAG_DROP_GRAB_OFFSET_Y, dragEvent.nativeEvent.offsetY)
+    dragEvent.dataTransfer.setData(constants.DRAG_DROP_GRAB_ICON_W, aspect.width)
+    dragEvent.dataTransfer.setData(constants.DRAG_DROP_GRAB_ICON_H, aspect.height)
     return true
   }
 

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
-import PlanEditorSelectors from './plan-editor-selectors.js'
 import cx from 'clsx'
+import PlanEditorSelectors from './plan-editor-selectors.js'
+import { constants } from './constants'
 
 const DefectsPanel = props => {
 
@@ -22,6 +23,7 @@ const DefectsPanel = props => {
       },
       animation: google.maps.Animation.BOUNCE,
       position: { lat: latitude, lng: longitude },
+      zIndex: constants.Z_INDEX_PIN,
     })
     setBounceMarker(marker)
   }
