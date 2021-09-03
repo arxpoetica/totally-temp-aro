@@ -19,43 +19,42 @@ export class EquipmentMapObjects extends Component {
     this.droplinks = {}
   }
 
-  render() {
-    // No UI for this component. It deals with map objects only.
-    return null
-  }
+  // No UI for this component. It deals with map objects only.
+  render() { return null }
+  componentDidMount() { this.renderObjects() }
+  componentDidUpdate() { this.renderObjects() }
 
-  componentDidMount() {
-    this.pickFeaturesToCreate()
-  }
-
-  componentDidUpdate() {
-    this.pickFeaturesToCreate()
-  }
-
-  pickFeaturesToCreate() {
-    // FIXME: how to cache this layer better so we don't have to delete every lifecycle
-    Object.keys(this.mapObjects).forEach(id => this.deleteMapObject(id))
-
-    const idleFeaturesToCreate = []
-    const featuresToCreate = []
-
-    const { selectedIds, idleFeatureIds } = this.props
-
-    for (const objectId of idleFeatureIds) {
-      if (this.props.subnetFeatures[objectId]) {
-        idleFeaturesToCreate.push(this.props.subnetFeatures[objectId].feature)
-      }
-    }
-
-    for (const objectId of selectedIds) {
-      if (this.props.subnetFeatures[objectId]) {
-        featuresToCreate.push(this.props.subnetFeatures[objectId].feature)
-      }
-    }
-
+  renderObjects() {
     this.deleteDroplinks()
-    idleFeaturesToCreate.forEach(feature => this.createMapObject(feature, true))
-    featuresToCreate.forEach(feature => this.createMapObject(feature))
+
+    const { subnetFeatures, selectedIds, idleFeatureIds } = this.props
+
+    // just making it easy to loop through them all
+    const features = [
+      ...selectedIds.map(id => ({ id, idle: false })),
+      ...idleFeatureIds.map(id => ({ id, idle: true })),
+    ]
+
+    // delete any not present
+    for (const id of Object.keys(this.mapObjects)) {
+      if (!features.find(feature => feature.id === id)) {
+        this.deleteMapObject(id)
+      }
+    }
+
+    // either add or update existing features
+    for (const { id, idle } of features) {
+      const mapObject = this.mapObjects[id]
+      if (mapObject) {
+        mapObject.setOpacity(idle ? 0.4 : 1.0)
+      } else {
+        const feature = subnetFeatures[id]
+        if (feature) {
+          this.createMapObject(feature.feature, idle)
+        }
+      }
+    }
+
     this.highlightSelectedMarkers()
   }
 
