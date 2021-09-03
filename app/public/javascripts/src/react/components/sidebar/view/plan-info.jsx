@@ -34,6 +34,7 @@ export const PlanInfo = (props) => {
   useEffect(() => {
     updateEditableStatus()
     getPlanTagDetails()
+    loadPlan(plan.id)
   }, [])
 
   useEffect(() => {
