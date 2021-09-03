@@ -610,7 +610,8 @@ export class PlanSearch extends Component {
       .map((item) => {
         if (item.hasOwnProperty('type')) {
           return `${item.type}:"${item[typeToProperty[item.type]]}"`
-        } return `"${item.value}"`
+        }
+        return `"${item.value}"`
       })
     if (selectedFilterPlans.length > 0) selectedFilters = selectedFilters.concat(`"${selectedFilterPlans.join(' ')}"`)
     this.setState({ search_text: selectedFilters.join(' ') })
