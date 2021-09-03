@@ -5,11 +5,19 @@ import cx from 'clsx'
 
 const DefectsPanel = props => {
 
-  const { locationAlerts, alertTypes } = props
+  const { locationAlerts, alertTypes, map, locations } = props
   const alerts = Object.entries(locationAlerts)
 
   const [open, setOpen] = useState(false)
   const handleOpenState = () => setOpen(!open)
+
+  const handleClick = ({ locationId }) => {
+    const location = locations[locationId]
+    if (location) {
+      const { latitude, longitude } = location.point
+      map.setCenter({ lat: latitude, lng: longitude })
+    }
+  }
 
   return alerts.length ? (
     <div className={cx('alerts-panel', open && 'open')}>
@@ -21,10 +29,9 @@ const DefectsPanel = props => {
       </div>
 
       <ul className={cx('content', open && 'open')}>
-
         {alerts.map(([id, location]) => (
           location.alerts.map((alert, index) =>
-            <li key={index}>
+            <li key={index} onClick={() => handleClick(location)}>
               <div className="text">
                 <div
                   className="svg location"
@@ -32,16 +39,9 @@ const DefectsPanel = props => {
                 ></div>
                 {alertTypes[alert].displayName}
               </div>
-              {/* <div className="dropdown">
-                <div className="svg caret"></div>
-                <ul className="list">
-                  <li>Ignore this Error</li>
-                </ul>
-              </div> */}
             </li>
           )
         ))}
-
       </ul>
 
     </div>
@@ -52,6 +52,9 @@ const DefectsPanel = props => {
 const mapStateToProps = state => ({
   locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(state),
   alertTypes: PlanEditorSelectors.AlertTypes,
+  // TODO: why is this named `googleMaps`? Is it ever plural? Isn't it a single map?
+  map: state.map.googleMaps,
+  locations: PlanEditorSelectors.getSelectedSubnetLocations(state),
 })
 
 const mapDispatchToProps = dispatch => ({
