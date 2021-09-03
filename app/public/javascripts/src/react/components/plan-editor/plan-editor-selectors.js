@@ -79,6 +79,20 @@ const AlertTypes = {
 const locationWarnImg = new Image(18, 22)
 locationWarnImg.src = '/svg/alert-panel-location.png'
 
+const getRootSubnet = createSelector(
+  [getSelectedSubnetId, getSubnetFeatures, getSubnets],
+  (selectedFeatureId, subnetFeatures, subnets) => {
+    let rootSubnet = subnetFeatures[selectedFeatureId]
+    if (rootSubnet) {
+      while(rootSubnet.subnetId !== null) {
+        rootSubnet = subnetFeatures[rootSubnet.subnetId]
+      }
+      rootSubnet = subnets[rootSubnet.feature.objectId]
+    }
+    return rootSubnet
+  }
+)
+
 const getSelectedSubnetLocations = createSelector(
   [getSelectedSubnetId, getSelectedSubnet, getSubnetFeatures, getSubnets],
   (selectedSubnetId, selectedSubnet, subnetFeatures, subnets) => {
@@ -103,24 +117,11 @@ const getSelectedSubnetLocations = createSelector(
 )
 
 const getAlertsForSubnetTree = createSelector(
-  [getSelectedSubnetId, getSubnetFeatures, getNetworkConfig, getSubnets],
-  (selectedFeatureId, subnetFeatures, networkConfig, subnets) => {
-
+  [getRootSubnet, getSubnets, getSubnetFeatures, getNetworkConfig],
+  (rootSubnet, subnets, subnetFeatures, networkConfig) => {
     let alerts = {}
-    let currentFeature = subnetFeatures[selectedFeatureId]
-    if (currentFeature) {
-
+    if (rootSubnet) {
       let subnetTree = []
-
-      // get the root subnet
-      let rootSubnet
-      while(!rootSubnet) {
-        if (currentFeature.subnetId === null) {
-          rootSubnet = subnets[currentFeature.feature.objectId]
-        } else {
-          currentFeature = subnetFeatures[currentFeature.subnetId]
-        }
-      }
 
       // get all children hub subnets
       const childrenHubSubnets = rootSubnet.children
