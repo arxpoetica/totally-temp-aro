@@ -3,6 +3,7 @@ import { PropTypes } from 'prop-types'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import LocationInfoActions from './location-info-actions'
+import ToolBarActions from '../header/tool-bar-actions'
 import AuditLog from './audit-log.jsx'
 import '../../../../../javascripts/src/shared-utils/editor-interfaces.css'
 
@@ -13,6 +14,10 @@ export class LocationInfo extends Component {
       areAttributesExpanded: false
     }
     this.toggleAreAttributesExpanded = this.toggleAreAttributesExpanded.bind(this)
+    this.viewModePanelsToIgnoreLocationClick = {
+      LOCATION_INFO: 'LOCATION_INFO',
+      EDIT_LOCATIONS: 'EDIT_LOCATIONS'
+    }
   }
 
   componentDidUpdate (prevProps) {
@@ -25,6 +30,10 @@ export class LocationInfo extends Component {
     } else if (newLocationId !== oldLocationId) {
       // We have exactly one location selected. Get the location details
       this.props.getLocationInfo(this.props.planId, newLocationId)
+
+      !(this.props.activeViewModePanel in this.viewModePanelsToIgnoreLocationClick)
+      ? this.props.setActiveViewModePanel('LOCATION_INFO')
+      : null
     }
   }
 
@@ -140,11 +149,13 @@ LocationInfo.propTypes = {
 const mapStateToProps = state => ({
   planId: state.plan.activePlan && state.plan.activePlan.id,
   selectedLocations: state.selection.locations,
-  locationInfoDetails: state.locationInfo.details
+  locationInfoDetails: state.locationInfo.details,
+  activeViewModePanel: state.toolbar.rActiveViewModePanel,
 })
 
 const mapDispatchToProps = (dispatch) => ({
   getLocationInfo: (planId, selectedLocations) => dispatch(LocationInfoActions.getLocationInfo(planId, selectedLocations)),
+  setActiveViewModePanel: displayPanel => dispatch(ToolBarActions.activeViewModePanel(displayPanel)),
   clearLocationInfo: () => dispatch(LocationInfoActions.clearLocationInfo())
 })
 
