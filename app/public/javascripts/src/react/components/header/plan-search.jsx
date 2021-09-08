@@ -241,6 +241,7 @@ export class PlanSearch extends Component {
             searchProperty="fullName"
             searchList={creatorsSearchList}
             applySearch={this.applySearchFilter.bind(this, 'created_by')}
+            refreshTagList={this.searchCreatorsList.bind(this)}
           />
         </div>
 
