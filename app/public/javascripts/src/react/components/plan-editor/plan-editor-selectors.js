@@ -226,7 +226,7 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
         }
         alerts[subnetId].alerts.push(AlertTypes['MAX_HUB_HOMES_EXCEEDED'].key)
       }
-      
+
       Object.keys(abandonedLocations).forEach(locationId => {
         if (!alerts[locationId]) {
           alerts[locationId] = {

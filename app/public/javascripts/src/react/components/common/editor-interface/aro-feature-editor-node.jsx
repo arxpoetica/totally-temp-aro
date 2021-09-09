@@ -25,7 +25,7 @@ export class AroFeatureEditorNode extends Component {
 
   render () {
     if (!this.props.meta.visible) return []
-    
+
     if (this.props.meta.displayDataType.startsWith('object')) {
       return this.renderCollection()
     } else if (this.props.meta.displayDataType.startsWith('array')) {

@@ -697,7 +697,13 @@ function addSubnets (subnetIds) {
   //  to fix this we need to find out what subnet the FDT is a part of and run that through here
   return (dispatch, getState) => {
 
-    const { transaction, subnets: cachedSubnets, requestedSubnetIds, features, subnetFeatures} = getState().planEditor
+    const {
+      transaction,
+      subnets: cachedSubnets,
+      requestedSubnetIds,
+      features,
+      subnetFeatures,
+    } = getState().planEditor
 
     // this little dance only fetches uncached subnets
     const cachedSubnetIds = Object.keys(cachedSubnets).concat(requestedSubnetIds)
@@ -709,32 +715,28 @@ function addSubnets (subnetIds) {
       return Promise.resolve(subnetIds)
     }
     // pull out any ids that are not subnets
-    let validPsudoSubnets = []
+    let validPseudoSubnets = []
     uncachedSubnetIds = uncachedSubnetIds.filter(id => {
       if (!features[id]) return true // unknown so we'll try it
       let networkNodeType = features[id].feature.networkNodeType
       // TODO: do other networkNodeTypes have subnets?
       //  how would we know? solve that
-      if (networkNodeType === "central_office"
-        || networkNodeType === "fiber_distribution_hub"
-      ) {
+      if (networkNodeType === 'central_office' || networkNodeType === 'fiber_distribution_hub') {
         return true
-      } else {
-        if (subnetFeatures[id]) validPsudoSubnets.push(id)
-        return false
       }
+      if (subnetFeatures[id]) validPseudoSubnets.push(id)
+      return false
     })
 
     // the selected ID isn't a subnet persay so don't query for it
     // TODO: we need to fix this selection discrepancy
     if (uncachedSubnetIds.length <= 0) {
       // is the FDT in state? If so we can select it
-      if (validPsudoSubnets.length > 0) {
-        return Promise.resolve(validPsudoSubnets)
-      } else {
-        // if not we can't
-        return Promise.resolve()
+      if (validPseudoSubnets.length > 0) {
+        return Promise.resolve(validPseudoSubnets)
       }
+      // if not we can't
+      return Promise.resolve()
     }
 
     /*
@@ -757,24 +759,14 @@ function addSubnets (subnetIds) {
         apiSubnets.forEach(subnet => {
           // subnet could be null (don't ask me)
           const subnetId = subnet.subnetId.id
-          fiberApiPromises.push(AroHttp.get(`/service/plan-transaction/${transaction.id}/subnetfeature/${subnetId}`)
-            .then(fiberResult => {
-              subnet.fiber = fiberResult.data
-            })
+          fiberApiPromises.push(
+            AroHttp.get(`/service/plan-transaction/${transaction.id}/subnetfeature/${subnetId}`)
+              .then(fiberResult => subnet.fiber = fiberResult.data)
           )
         })
-    
+
         return Promise.all(fiberApiPromises)
           .then(() => {
-            
-            /*
-            dispatch({
-              type: Actions.PLAN_EDITOR_REMOVE_REQUESTED_SUBNET_IDS,
-              payload: uncachedSubnetIds,
-            })
-            */
-            //return dispatch(parseAddApiSubnets(apiSubnets))
-            //  .then(() => Promise.resolve(apiSubnets))
             dispatch(setIsCalculatingSubnets(false))
             return new Promise((resolve, reject) => {
               dispatch(parseAddApiSubnets(apiSubnets))
@@ -783,12 +775,6 @@ function addSubnets (subnetIds) {
           })
           .catch(err => {
             console.error(err)
-            /*
-            dispatch({
-              type: Actions.PLAN_EDITOR_REMOVE_REQUESTED_SUBNET_IDS,
-              payload: uncachedSubnetIds,
-            })
-            */
             dispatch(setIsCalculatingSubnets(false))
             return Promise.reject()
           })
@@ -1097,12 +1083,12 @@ function parseAddApiSubnets (apiSubnets) {
     if (apiSubnets.length) {
       let subnets = {}
       let allFeatures = {}
-      // parse 
+      // parse
       apiSubnets.forEach(apiSubnet => {
-        let {subnet, subnetFeatures} = parseSubnet(apiSubnet)
+        let { subnet, subnetFeatures } = parseSubnet(apiSubnet)
         const subnetId = subnet.subnetNode
         subnets[subnetId] = subnet
-        allFeatures = {...allFeatures, ...subnetFeatures}
+        allFeatures = { ...allFeatures, ...subnetFeatures }
       })
       // dispatch add subnets and add subnetFeatures
       return batch(() => {
@@ -1142,15 +1128,12 @@ function parseSubnet (subnet) {
   let subnetFeatures = {}
   // root node
   subnetFeatures[subnetId] = {
-    'feature': subnet.subnetNode,
-    'subnetId': subnet.parentSubnetId,
+    feature: subnet.subnetNode,
+    subnetId: subnet.parentSubnetId,
   }
   // child nodes
   subnet.children.forEach(feature => {
-    subnetFeatures[feature.objectId] = {
-      'feature': feature,
-      'subnetId': subnetId,
-    }
+    subnetFeatures[feature.objectId] = { feature, subnetId }
     // if the feature has attached locations we need to note that in the locations list
     //  technically we are duplicating data so we need to be sure the reducer machinery keeps these in sync
     if (feature.dropLinks) {
@@ -1170,7 +1153,7 @@ function parseSubnet (subnet) {
   subnet.children = subnet.children.map(feature => feature.objectId)
   subnet.subnetNode = subnet.subnetNode.objectId
 
-  return {subnet, subnetFeatures}
+  return { subnet, subnetFeatures }
 }
 
 // helper function
