@@ -183,11 +183,16 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
           //checks for max homes in terminal
           if (featureEntry.feature.dropLinks.length > maxTerminalHomes) {
             if (!alerts[featureId]) {
+              // getting location of terminal for alert display
+              // then converting to lat long format used on locations
+              const terminalPoint = {}
+              terminalPoint.longitude = featureEntry.feature.geometry.coordinates[0]
+              terminalPoint.latitude = featureEntry.feature.geometry.coordinates[1]
               alerts[featureId] = {
                 locationId: featureId,
                 subnetId,
                 alerts: [],
-                point: subnet.subnetLocationsById[featureId].point,
+                point: terminalPoint,
               }
             }
             alerts[featureId].alerts.push(AlertTypes['MAX_TERMINAL_HOMES_EXCEEDED'].key)
