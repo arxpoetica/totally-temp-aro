@@ -248,15 +248,13 @@ const getLocationCounts = createSelector(
   (subnets, subnetFeatures, selectedEditFeatureIds) => {
     let locationCountsById = {}
     for (const id of selectedEditFeatureIds) {
-      let count
       if (subnetFeatures[id].feature.networkNodeType === 'fiber_distribution_hub') {
         // TODO: is this accurate ?
-        count = Object.keys(subnets[id].subnetLocationsById).length
+        locationCountsById[id] = Object.keys(subnets[id].subnetLocationsById).length
       } else {
         const locationDistanceMap = subnets[id] && subnets[id].fiber && subnets[id].fiber.locationDistanceMap
-        count = locationDistanceMap && Object.keys(locationDistanceMap).length
+        locationCountsById[id] = locationDistanceMap ? Object.keys(locationDistanceMap).length : 0
       }
-      if (count) locationCountsById[id] = count
     }
     return locationCountsById
   }
