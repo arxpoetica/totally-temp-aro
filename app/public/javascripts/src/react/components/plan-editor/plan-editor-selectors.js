@@ -243,6 +243,23 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
   return alerts
 }
 
+const getLocationCounts = createSelector(
+  [getSubnets, getSubnetFeatures, getSelectedEditFeatureIds],
+  (subnets, subnetFeatures, selectedEditFeatureIds) => {
+    let locationCountsById = {}
+    for (const id of selectedEditFeatureIds) {
+      if (subnetFeatures[id].feature.networkNodeType === 'fiber_distribution_hub') {
+        // TODO: is this accurate ?
+        locationCountsById[id] = Object.keys(subnets[id].subnetLocationsById).length
+      } else {
+        const locationDistanceMap = subnets[id] && subnets[id].fiber && subnets[id].fiber.locationDistanceMap
+        locationCountsById[id] = locationDistanceMap ? Object.keys(locationDistanceMap).length : 0
+      }
+    }
+    return locationCountsById
+  }
+)
+
 const PlanEditorSelectors = Object.freeze({
   getBoundaryLayersList,
   getSelectedIds,
@@ -253,6 +270,7 @@ const PlanEditorSelectors = Object.freeze({
   getAlertsForSubnetTree,
   locationWarnImg,
   getSelectedSubnetLocations,
+  getLocationCounts,
 })
 
 export default PlanEditorSelectors
