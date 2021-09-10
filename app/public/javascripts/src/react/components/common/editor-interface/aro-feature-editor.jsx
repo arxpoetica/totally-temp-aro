@@ -31,8 +31,8 @@ export class AroFeatureEditor extends Component {
     let displayName = this.props.altTitle || this.state.meta.displayName
     return (
       <Foldout displayName={displayName}>
-        <AroFeatureEditorNode 
-          objPath='' 
+        <AroFeatureEditorNode
+          objPath=""
           omitRootContain={true}
           isCollapsible={this.props.isCollapsible || true}
           isEditable={this.props.isEditable || true}

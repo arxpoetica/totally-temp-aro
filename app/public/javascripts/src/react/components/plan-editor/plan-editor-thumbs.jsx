@@ -9,6 +9,7 @@ const PlanEditorHeader = props => {
     equipments,
     features,
     selectedEditFeatureIds,
+    subnets,
     selectedSubnetId,
     setSelectedSubnetId,
     deselectEditFeatureById,
@@ -33,6 +34,9 @@ const PlanEditorHeader = props => {
     const { iconUrl, label } = equipments[feature.networkNodeType]
     const { coordinates } = feature.geometry
 
+    const locationDistanceMap = subnets[id] && subnets[id].fiber && subnets[id].fiber.locationDistanceMap
+    const locationCount = locationDistanceMap ? Object.keys(locationDistanceMap).length : 0
+
     return (
     <div
       key={id}
@@ -46,6 +50,7 @@ const PlanEditorHeader = props => {
         <img src={iconUrl} alt={label}/>
         <h2>{label}</h2>
       </div>
+      {locationCount > 0 && <p>Household connections: {locationCount}</p>}
       <div className="subinfo">
         <div className="item">
           <div className="badge badge-dark">LATITUDE</div>
@@ -71,6 +76,7 @@ const mapStateToProps = state => ({
   equipments: state.mapLayers.networkEquipment.equipments,
   features: state.planEditor.features,
   selectedEditFeatureIds: state.planEditor.selectedEditFeatureIds,
+  subnets: state.planEditor.subnets,
   selectedSubnetId: state.planEditor.selectedSubnetId,
 })
 

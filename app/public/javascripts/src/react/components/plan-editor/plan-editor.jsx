@@ -11,7 +11,6 @@ import EquipmentBoundaryMapObjects from './equipment-boundary-map-objects.jsx'
 import FiberMapObjects  from './fiber-map-objects.jsx'
 import AlertsPanel from './alerts-panel.jsx'
 import BoundaryDrawCreator from './boundary-draw-creator.jsx'
-import AroFeatureFactory from '../../../service-typegen/dist/AroFeatureFactory'
 import AroFeatureEditor from '../common/editor-interface/aro-feature-editor.jsx'
 import './plan-editor.css'
 
@@ -101,20 +100,15 @@ export const PlanEditor = props => {
       <PlanEditorRecalculate />
       <PlanEditorThumbs />
 
-      {
-        selectedEditFeatureIds.map(id => {
-          return (
-            <AroFeatureEditor key={id}
-              altTitle={equipments[features[id].feature.networkNodeType].label}
-              isEditable={true}
-              feature={features[id].feature} 
-              onChange={onFeatureFormChange}
-              onSave={newValObj => onFeatureFormSave(newValObj, id)}
-            ></AroFeatureEditor>
-          )
-        })
-      }
-
+      {selectedEditFeatureIds.map(id =>
+        <AroFeatureEditor key={id}
+          altTitle={equipments[features[id].feature.networkNodeType].label}
+          isEditable={true}
+          feature={features[id].feature}
+          onChange={onFeatureFormChange}
+          onSave={newValObj => onFeatureFormSave(newValObj, id)}
+        ></AroFeatureEditor>
+      )}
 
       {false &&
         <div className="temporary" style={{ margin: '0 0 25px' }}>
@@ -123,8 +117,13 @@ export const PlanEditor = props => {
           <p>planId: {planId}</p>
           <p>transactionId: {transactionId}</p>
           <p>selectedSubnetId: {selectedSubnetId}</p>
-          <p>subnets: {JSON.stringify(Object.keys(subnets), null, '  ')}</p>
-          {/* <pre>features: {JSON.stringify(features, null, '  ')}</pre> */}
+          {Object.keys(subnets).length && <>
+            <br/>
+            <h2>Subnet Information</h2>
+            {Object.keys(subnets).map(id => <p key={id}>subnet id: {id}</p>)}
+          </>}
+          <br/>
+          <h2>Features Information</h2>
           <pre>selectedEditFeatureIds: {JSON.stringify(selectedEditFeatureIds, null, '  ')}</pre>
         </div>
       }
