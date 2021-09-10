@@ -244,12 +244,19 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
 }
 
 const getLocationCounts = createSelector(
-  [getSubnets, getSelectedEditFeatureIds],
-  (subnets, selectedEditFeatureIds) => {
+  [getSubnets, getSubnetFeatures, getSelectedEditFeatureIds],
+  (subnets, subnetFeatures, selectedEditFeatureIds) => {
     let locationCountsById = {}
     for (const id of selectedEditFeatureIds) {
-      const locationDistanceMap = subnets[id] && subnets[id].fiber && subnets[id].fiber.locationDistanceMap
-      locationCountsById[id] = locationDistanceMap ? Object.keys(locationDistanceMap).length : 0
+      let count
+      if (subnetFeatures[id].feature.networkNodeType === 'fiber_distribution_hub') {
+        // TODO: is this accurate ?
+        count = Object.keys(subnets[id].subnetLocationsById).length
+      } else {
+        const locationDistanceMap = subnets[id] && subnets[id].fiber && subnets[id].fiber.locationDistanceMap
+        count = locationDistanceMap && Object.keys(locationDistanceMap).length
+      }
+      if (count) locationCountsById[id] = count
     }
     return locationCountsById
   }
