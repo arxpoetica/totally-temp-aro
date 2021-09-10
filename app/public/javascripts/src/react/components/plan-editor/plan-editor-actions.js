@@ -405,10 +405,13 @@ function assignLocation (locationId, terminalId) {
     toFeature = JSON.parse(JSON.stringify(toFeature))
     let subnetId = toFeature.subnetId
 
-    // unassign location
     let fromTerminalId = state.planEditor.subnets[subnetId].subnetLocationsById[locationId].parentEquipmentId
-    let fromFeature = _spliceLocationFromTerminal(state, locationId, fromTerminalId)
-    if (fromFeature) features.push(fromFeature)
+
+    // unassign location if location is assigned
+    if (fromTerminalId){
+      let fromFeature = _spliceLocationFromTerminal(state, locationId, fromTerminalId)
+      if (fromFeature) features.push(fromFeature)
+    }
 
     // assign location
     let defaultDropLink = {
