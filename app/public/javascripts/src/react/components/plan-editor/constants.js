@@ -1,5 +1,10 @@
-export default Object.freeze({
+export const constants = Object.freeze({
+  Z_INDEX_SELECTION: 1,
+  Z_INDEX_MAP_OBJECT: 2,
+  Z_INDEX_PIN: 3,
+
   // Drag-and-drop editing on map
+  // TODO: go through and figure out what is used and what is not
   DRAG_DROP_ENTITY_KEY: 'entity_type',
   DRAG_DROP_ENTITY_DETAILS_KEY: 'entity_details',
   DRAG_DROP_NETWORK_EQUIPMENT: 'networkEquipment',

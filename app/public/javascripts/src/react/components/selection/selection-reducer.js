@@ -22,7 +22,7 @@ const defaultState = {
     analysisAreas: {}
   },
   locations: new Set(),
-  planEditorFeatures: [],
+  planEditorFeatures: [],// DEPRICATED
   mapFeatures: {},
   selection: {
     details: {
@@ -146,6 +146,7 @@ function setRoadSegments(state, roadSegments) {
   }
 }
 
+// DEPRICATED
 function setPlanEditorSelectedFeatures (state, planEditorFeatures) {
   return { ...state,
     planEditorFeatures: planEditorFeatures

@@ -1,0 +1,86 @@
+
+.ei-header.ei-header-with-icon{
+  display: flex;
+  justify-content: space-between;
+
+}
+
+.ei-header-icon.plus-sign{
+  background: url('/svg/plus.svg') no-repeat center transparent;
+  height: 15px;
+  width: 15px;
+  background-size: contain;
+}
+.ei-header-icon.plus-sign:hover {
+  background-color: #e2e6ea;
+}
+
+.ei-property-icon.trashcan {
+  background: url('/svg/trash.svg') no-repeat center transparent;
+  height: 20px;
+  width: 20px;
+  background-size: contain;
+  margin-right: 5px;
+}
+
+.ei-property-icon.trashcan:hover {
+  background-color: #e2e6ea;
+}
+
+.ei-property-item:nth-child(odd) .ei-property-label .select select {
+  background-color: #f9f9f9;
+}
+
+.ei-filter-select-container select {
+  border: none;
+  border-radius: 3px;
+}
+.ei-filter-select-operator select {
+  border-radius: 3px;
+}
+
+.ei-filter-select-container select option {
+  background-color: #888888;
+}
+
+.ei-filter-input-container {
+  display: flex;
+  align-items: center;
+}
+.ei-filter-input {
+  width: 75px;
+  margin: 0 5px 0 5px;
+
+}
+.ei-filter-input input {
+  color: black;
+  font: 14px var(--font);
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  height: 34px;
+  border: 1px solid var(--gray-medium-light);
+  width: 75px;
+  border-radius: 3px;
+}
+
+.ei-filter-input input:disabled {
+  color: var(--gray-medium-light);
+}
+
+.ei-filter-input:before {
+  top: 8px;
+  left: 5px;
+  font: 14px var(--font);
+  position: absolute;
+}
+.ei-filter-input.dollar input, .ei-filter-input.percent input {
+  padding-left:18px;
+}
+
+.ei-filter-input.dollar::before {
+  content: "$";
+}
+
+.ei-filter-input.percent::before {
+  content: "%";
+}

@@ -207,11 +207,48 @@ function showModifyQuestionDialog () {
   })
 }
 
+function loadFilters () {
+  return (dispatch, getState) => {
+    const state = getState()
+    const client = state.configuration.system.ARO_CLIENT
+    const dataType = 'location'
+
+    AroHttp.get(`service/meta-data/${dataType}/properties?client=${client}`)
+      .then((res) => {
+        // adding extra info for selecting later on
+        const newFilters = res.data.map((filter) => {
+          filter.value = filter.name
+          filter.label = filter.displayName
+          filter.operator = ''
+          filter.value1 = ''
+          filter.value2 = ''
+          return filter
+        })
+
+        dispatch({
+          type: Actions.NETWORK_OPTIMIZATION_SET_FILTERS,
+          payload: newFilters,
+        })
+      })
+  }
+}
+
+function setActiveFilters (filters) {
+  return (dispatch) => {
+    dispatch({
+      type: Actions.NETWORK_OPTIMIZATION_SET_ACTIVE_FILTERS,
+      payload: filters
+    })
+  }
+}
+
 export default {
   loadOptimizationInputs,
   setOptimizationInputs,
   runOptimization,
   cancelOptimization,
   setNetworkAnalysisType,
-  modifyOptimization
+  modifyOptimization,
+  loadFilters,
+  setActiveFilters,
 }

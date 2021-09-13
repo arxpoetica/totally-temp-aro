@@ -6,137 +6,211 @@ import WorkflowState from '../../../shared-utils/workflow-state'
 import PlanEditorActions from './plan-editor-actions'
 import SelectionActions from '../selection/selection-actions'
 import WktUtils from '../../../shared-utils/wkt-utils'
-
-const SELECTION_Z_INDEX = 1
-const MAP_OBJECT_Z_INDEX = SELECTION_Z_INDEX + 1
+import PlanEditorSelectors from './plan-editor-selectors.js'
+import { constants } from './constants'
 
 export class EquipmentMapObjects extends Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
-    this.objectIdToMapObject = {}
-    this.objectIdToSelectionOverlay = {}
+    this.mapObjects = {}
+    this.selectionOverlays = {}
+    this.droplinks = {}
   }
 
-  render () {
-    // No UI for this component. It deals with map objects only.
-    return null
-  }
+  // No UI for this component. It deals with map objects only.
+  render() { return null }
+  componentDidMount() { this.renderObjects() }
+  componentDidUpdate() { this.renderObjects() }
 
-  componentDidUpdate () {
-    const createdIds = new Set(Object.keys(this.objectIdToMapObject))
-    const allEquipmentIds = new Set(
-      Object.keys(this.props.transactionFeatures)
-        .filter(objectId => this.props.transactionFeatures[objectId].feature.dataType === 'equipment')
-    )
-    const idsToCreate = [...allEquipmentIds].filter(objectId => !createdIds.has(objectId))
-    const idsToDelete = [...createdIds].filter(objectId => !allEquipmentIds.has(objectId))
-    const idsToUpdate = [...allEquipmentIds].filter(objectId => createdIds.has(objectId))
-    idsToCreate.forEach(objectId => this.createMapObject(objectId))
-    idsToDelete.forEach(objectId => this.deleteMapObject(objectId))
-    idsToUpdate.forEach(objectId => this.updateMapObject(objectId))
+  renderObjects() {
+    this.deleteDroplinks()
+
+    const { subnetFeatures, selectedIds, idleFeatureIds } = this.props
+
+    // just making it easy to loop through them all
+    const features = [
+      ...selectedIds.map(id => ({ id, idle: false })),
+      ...idleFeatureIds.map(id => ({ id, idle: true })),
+    ]
+
+    // delete any not present
+    for (const id of Object.keys(this.mapObjects)) {
+      if (!features.find(feature => feature.id === id)) {
+        this.deleteMapObject(id)
+      }
+    }
+
+    // either add or update existing features
+    for (const { id, idle } of features) {
+      const mapObject = this.mapObjects[id]
+      if (mapObject) {
+        mapObject.setOpacity(idle ? 0.4 : 1.0)
+      } else {
+        const feature = subnetFeatures[id]
+        if (feature) {
+          this.createMapObject(feature.feature, idle)
+        }
+      }
+    }
+
     this.highlightSelectedMarkers()
   }
 
-  createMapObject (objectId) {
-    const equipment = this.props.transactionFeatures[objectId].feature
+  createMapObject(feature, idle) {
+    //const feature = this.props.transactionFeatures[objectId].feature
     // The marker is editable if the state is not LOCKED or INVALIDATED
-    const isEditable = !((equipment.workflow_state_id & WorkflowState.LOCKED.id) ||
-                          (equipment.workflow_state_id & WorkflowState.INVALIDATED.id))
+    //const isEditable = !((feature.workflow_state_id & WorkflowState.LOCKED.id) ||
+    //                      (feature.workflow_state_id & WorkflowState.INVALIDATED.id))
+    
+    const { objectId } = feature
+    // ToDo: unhack this 
+    //let isLocked = false
+    //if (feature.networkNodeType === "central_office") isLocked = true
+
     const mapObject = new google.maps.Marker({
-      objectId: equipment.objectId, // Not used by Google Maps
-      position: WktUtils.getGoogleMapLatLngFromWKTPoint(equipment.geometry),
+      objectId, // Not used by Google Maps
+      position: WktUtils.getGoogleMapLatLngFromWKTPoint(feature.geometry), 
       icon: {
-        url: this.props.equipmentDefinitions[equipment.networkNodeType].iconUrl
+        url: this.props.equipmentDefinitions[feature.networkNodeType].iconUrl
       },
-      draggable: isEditable, // Allow dragging only if feature is not locked
-      clickable: isEditable,
+      draggable: !feature.locked, // Allow dragging only if feature is not locked
+      opacity: idle ? 0.4 : 1.0,
       map: this.props.googleMaps,
-      zIndex: MAP_OBJECT_Z_INDEX
+      zIndex: constants.Z_INDEX_MAP_OBJECT,
     })
-    // When the marker is dragged, modify its position in the redux store
+
     mapObject.addListener('dragend', event => {
-      var newEquipment = JSON.parse(JSON.stringify(this.props.transactionFeatures[mapObject.objectId]))
-      newEquipment.feature.geometry.coordinates = [event.latLng.lng(), event.latLng.lat()]
-      this.props.modifyFeature(this.props.transactionId, newEquipment)
+      let coordinates = [event.latLng.lng(), event.latLng.lat()]
+      this.props.moveFeature(mapObject.objectId, coordinates)
     })
     mapObject.addListener('rightclick', event => {
       const eventXY = WktUtils.getXYFromEvent(event)
-      this.props.showContextMenuForEquipment(this.props.planId, this.props.transactionId, this.props.selectedBoundaryTypeId, mapObject.objectId, eventXY.x, eventXY.y)
+      this.props.showContextMenuForEquipment(mapObject.objectId, eventXY.x, eventXY.y)
     })
-    mapObject.addListener('click', () => this.props.selectEquipment(objectId))
-    this.objectIdToMapObject[objectId] = mapObject
+    mapObject.addListener('click', (event) => {
+      // NOTE: this is a workaround to make sure we're selecting
+      // equipment that might be piled on top of one another
+      const selectionCircle = new google.maps.Circle({
+        map: this.props.googleMaps,
+        center: event.latLng,
+        // FIXME: this radius is only useful at certain zoom levels.
+        // How can we set this correctly based on zoom?
+        radius: 25,
+        visible: false,
+      })
+
+      const selectedEquipmentIds = Object.values(this.mapObjects)
+        .filter(object => selectionCircle.getBounds().contains(object.getPosition()))
+        .map(filteredMapObjects => filteredMapObjects.objectId)
+
+      selectionCircle.setMap(null)
+      this.props.selectEditFeaturesById(selectedEquipmentIds)
+      // this.props.selectEditFeatureById(objectId)
+    })
+
+    this.mapObjects[objectId] = mapObject
   }
 
-  updateMapObject (objectId) {
-    const geometry = this.props.transactionFeatures[objectId].feature.geometry
-    this.objectIdToMapObject[objectId].setPosition(WktUtils.getGoogleMapLatLngFromWKTPoint(geometry))
-  }
-
-  deleteMapObject (objectId) {
-    this.objectIdToMapObject[objectId].setMap(null)
-    delete this.objectIdToMapObject[objectId]
-    if (this.objectIdToSelectionOverlay[objectId]) {
-      this.objectIdToSelectionOverlay[objectId].setMap(null)
-      delete this.objectIdToSelectionOverlay[objectId]
+  deleteMapObject(id) {
+    this.mapObjects[id].setMap(null)
+    delete this.mapObjects[id]
+    if (this.selectionOverlays[id]) {
+      this.selectionOverlays[id].setMap(null)
+      delete this.selectionOverlays[id]
     }
   }
 
-  highlightSelectedMarkers () {
-    Object.keys(this.objectIdToMapObject).forEach(objectId => {
-      if (this.props.selectedFeatures.indexOf(objectId) >= 0) {
+  deleteDroplinks() {
+    Object.values(this.droplinks).forEach(polyline => polyline.setMap(null))
+    this.droplinks = {}
+  }
+
+  highlightSelectedMarkers() {
+    Object.keys(this.mapObjects).forEach(id => {
+      if (this.props.selectedEditFeatureIds.indexOf(id) >= 0) {
+        const { subnetFeatures, selectedSubnetId, googleMaps, selectedLocations } = this.props
+
         // This marker is selected. Create a selection overlay if it does not exist.
-        if (!this.objectIdToSelectionOverlay[objectId]) {
-          this.objectIdToSelectionOverlay[objectId] = new google.maps.Marker({
-            icon: {
-              url: '/images/map_icons/aro/icon-selection-background.svg',
-              size: new google.maps.Size(64, 64),
-              scaledSize: new google.maps.Size(48, 48),
-              anchor: new google.maps.Point(24, 48)
-            },
-            clickable: false,
-            zIndex: SELECTION_Z_INDEX,
-            opacity: 0.7
-          })
-          this.objectIdToSelectionOverlay[objectId].bindTo('position', this.objectIdToMapObject[objectId], 'position')
+        let icon = '/svg/map-icons/selection-1.svg'
+        if (id === selectedSubnetId) {
+          icon = '/svg/map-icons/selection-2.svg'
         }
-        this.objectIdToSelectionOverlay[objectId].setMap(this.props.googleMaps)
+
+        if (this.selectionOverlays[id]) {
+          // TODO: just change the icon instead of deleteing and remaking
+          this.selectionOverlays[id].setMap(null)
+          delete this.selectionOverlays[id]
+        }
+
+        this.selectionOverlays[id] = new google.maps.Marker({
+          icon: {
+            url: icon,
+            size: new google.maps.Size(64, 64),
+            scaledSize: new google.maps.Size(48, 48),
+            anchor: new google.maps.Point(24, 48)
+          },
+          clickable: false,
+          zIndex: constants.Z_INDEX_SELECTION,
+          opacity: 0.7,
+        })
+        this.selectionOverlays[id].bindTo('position', this.mapObjects[id], 'position')
+        this.selectionOverlays[id].setMap(googleMaps)
+
+        const { feature } = subnetFeatures[id]
+        if (
+          id === selectedSubnetId
+          && feature.networkNodeType === 'fiber_distribution_terminal'
+        ) {
+          const [lng, lat] = feature.geometry.coordinates
+          for (const [droplinkId, location] of Object.entries(selectedLocations)) {
+            // oddly, sometimes `location` is `undefined`
+            if (location) {
+              const { latitude, longitude } = location.point
+              // TODO: enhance when droplink lengths are exceeded???
+              this.droplinks[droplinkId] = new google.maps.Polyline({
+                path: [{ lat, lng }, { lat: latitude, lng: longitude }],
+                strokeColor: '#84d496',
+                strokeWeight: 1.5,
+              })
+              this.droplinks[droplinkId].setMap(googleMaps)
+            }
+          }
+        }
+
       } else {
         // This marker is not selected. Turn off selection overlay if it exists
-        this.objectIdToSelectionOverlay[objectId] && this.objectIdToSelectionOverlay[objectId].setMap(null)
+        this.selectionOverlays[id] && this.selectionOverlays[id].setMap(null)
       }
     })
   }
 
-  componentWillUnmount () {
-    Object.keys(this.objectIdToMapObject).forEach(objectId => this.deleteMapObject(objectId))
+  componentWillUnmount() {
+    this.deleteDroplinks()
+    Object.keys(this.mapObjects).forEach(id => this.deleteMapObject(id))
   }
 }
 
-EquipmentMapObjects.propTypes = {
-  transactionId: PropTypes.number,
-  transactionFeatures: PropTypes.object,
-  equipmentDefinitions: PropTypes.object,
-  selectedBoundaryTypeId: PropTypes.number,
-  selectedFeatures: PropTypes.arrayOf(PropTypes.string),
-  googleMaps: PropTypes.object
-}
-
 const mapStateToProps = state => ({
-  planId: state.plan.activePlan.id,
-  transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
-  transactionFeatures: state.planEditor.features,
   equipmentDefinitions: state.mapLayers.networkEquipment.equipments,
-  selectedBoundaryTypeId: state.mapLayers.selectedBoundaryType.id,
-  selectedFeatures: state.selection.planEditorFeatures,
-  googleMaps: state.map.googleMaps
+  selectedEditFeatureIds: state.planEditor.selectedEditFeatureIds,
+  googleMaps: state.map.googleMaps,
+  idleFeatureIds: PlanEditorSelectors.getIdleFeaturesIds(state),
+  selectedSubnetId: state.planEditor.selectedSubnetId,
+  subnetFeatures: state.planEditor.subnetFeatures,
+  selectedIds: PlanEditorSelectors.getSelectedIds(state),
+  selectedLocations: PlanEditorSelectors.getSelectedSubnetLocations(state),
 })
 
 const mapDispatchToProps = dispatch => ({
-  modifyFeature: (transactionId, equipment) => dispatch(PlanEditorActions.modifyFeature('equipment', transactionId, equipment)),
-  showContextMenuForEquipment: (planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y) => {
-    dispatch(PlanEditorActions.showContextMenuForEquipment(planId, transactionId, selectedBoundaryTypeId, equipmentObjectId, x, y))
+  //modifyFeature: (feature) => dispatch(PlanEditorActions.modifyFeature('equipment', feature)),
+  moveFeature: (id, coordinates) => dispatch(PlanEditorActions.moveFeature(id, coordinates)),
+  showContextMenuForEquipment: (equipmentObjectId, x, y) => {
+    dispatch(PlanEditorActions.showContextMenuForEquipment(equipmentObjectId, x, y))
   },
-  selectEquipment: objectId => dispatch(SelectionActions.setPlanEditorFeatures([objectId]))
+  selectEditFeatureById: id => dispatch(PlanEditorActions.selectEditFeaturesById([id])),
+  // addSubnets: ids => dispatch(PlanEditorActions.addSubnets(ids)),
+  setSelectedSubnetId: id => dispatch(PlanEditorActions.setSelectedSubnetId(id)),
+  selectEditFeaturesById: featureIds => dispatch(PlanEditorActions.selectEditFeaturesById(featureIds)),
 })
 
 const EquipmentMapObjectsComponent = connect(mapStateToProps, mapDispatchToProps)(EquipmentMapObjects)

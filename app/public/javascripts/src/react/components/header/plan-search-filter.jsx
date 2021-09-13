@@ -114,11 +114,17 @@ export class PlanSearchFilter extends Component {
   }
 
   handleInputChange (searchText, { action }) {
+    const { objectName, dataItems, refreshTagList } = this.props
     switch (action) {
       case 'input-change':
-        this.props.objectName === 'Service Area'
-        ? this.props.refreshTagList(this.props.dataItems, searchText, false)
-        : ''
+        if (objectName === 'Service Area') {
+          refreshTagList(dataItems, searchText, false)
+        } else if (objectName === 'Creator') {
+          refreshTagList(searchText)
+        }
+        return
+      case 'menu-close':
+        if (objectName === 'Creator') { refreshTagList(searchText) }
         return
       default:
         return

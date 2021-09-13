@@ -9,8 +9,21 @@ export const Input = ({
   min,
   max,
   classes,
+  disabled,
   onChange = () => {},
+  onBlur = () => {},
 }) => {
+
+  const handleBlur = event => {
+    const valueFloat = parseFloat(event.target.value)
+    if (max && valueFloat > max ) {
+      event.target.value = max
+    } else if (min && valueFloat < min) {
+      event.target.value = min
+    }
+    onBlur(event)
+  }
+
   return (
     <div className={cx('aro-input', classes && classes)}>
       <input
@@ -19,7 +32,9 @@ export const Input = ({
         value={value}
         min={min}
         max={max}
+        disabled={disabled}
         onChange={event => onChange(event)}
+        onBlur={event => handleBlur(event)}
       />
     </div>
   )

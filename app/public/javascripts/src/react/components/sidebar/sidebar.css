@@ -172,3 +172,60 @@
 #tblPlanSummary > tbody > tr > #pointer {
   cursor: pointer;
 }
+
+/* Plan info */
+
+#tblPlanInfo td {
+  line-height: 33px;
+}
+#tblPlanInfo > tbody > tr:first-child > td {
+  border: none;
+}
+.aro-plan .details-container {
+  position: relative;
+}
+.aro-plan .tags-height {
+  line-height: 20px !important;
+}
+.aro-plan .tags {
+  margin-bottom: 5px;
+ }
+.aro-plan .tags .tag {
+  display: inline-block;
+  margin: 1px;
+  font-size: 12px;
+}
+.aro-plan .blank-space {
+  margin-left: 4px;
+}
+.aro-plan .actions {
+  display: flex;
+  flex-direction: row;
+}
+.aro-plan .actions button {
+  margin-left: 1px;
+  margin-right: 1px;
+  flex: 1 1 auto;
+}
+.aro-plan .search-button {
+  cursor: pointer;
+  align-items: center;
+}
+.aro-plan .info {
+  display: flex;
+  padding-top: 5px;
+}
+.aro-plan .info .filter {
+  flex: 0 0 auto;
+  line-height: 33px;
+  padding: 0px 12px;
+}
+.aro-plan .info .sorting {
+  background: #f8f9fa;
+  border: 0px;
+  outline: 0px;
+}
+.aro-plan .info-container {
+  height: 100%;
+  padding-top: 10px;
+}

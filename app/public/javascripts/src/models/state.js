@@ -31,6 +31,7 @@ import ToolBarActions from '../react/components/header/tool-bar-actions'
 import RoicReportsActions from '../react/components/sidebar/analysis/roic-reports/roic-reports-actions'
 import { hsvToRgb } from '../react/common/view-utils'
 import StateViewModeActions from '../react/components/state-view-mode/state-view-mode-actions'
+import PlanEditorActions from '../react/components/plan-editor/plan-editor-actions'
 import RxState from '../react/common/rxState'
 
 const networkAnalysisConstraintsSelector = formValueSelector(ReactComponentConstants.NETWORK_ANALYSIS_CONSTRAINTS)
@@ -285,7 +286,6 @@ class State {
     service.requestDestroyMapOverlay = new Rx.BehaviorSubject(null)
     service.showNetworkAnalysisOutput = false
     service.networkPlanModal = new Rx.BehaviorSubject(false)
-    service.planInputsModal = new Rx.BehaviorSubject(false)
     service.requestSetMapCenter = new Rx.BehaviorSubject({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
     service.requestSetMapZoom = new Rx.BehaviorSubject(service.defaultPlanCoordinates.zoom)
     service.showDetailedLocationInfo = new Rx.BehaviorSubject()
@@ -473,7 +473,7 @@ class State {
     service.mapFeaturesClickedEvent = new Rx.BehaviorSubject({})
 
     service.mapFeaturesSelectedEvent.skip(1).subscribe((options) => {
-
+      // ToDo: selection mechanism needs to be cerntalised 
       // set all mapFeatures in redux
       if (service.selectedDisplayMode.getValue() == service.displayModes.VIEW) {
         service.setMapFeatures(options)
@@ -481,13 +481,31 @@ class State {
         service.setIsMapClicked(true)
       }
 
+      if (service.selectedDisplayMode.getValue() == service.displayModes.EDIT_PLAN) {
+        let featureIds = []
+        //console.log(options)
+        //console.log({lat: options.latLng.lat(), lng: options.latLng.lng()})
+        options.equipmentFeatures.forEach(feature => {
+          featureIds.push(feature.object_id)
+        })
+        //service.selectPlanEditFeaturesById(featureIds)
+        service.planEditorOnMapClick(featureIds, options.latLng)
+      }
+
       // ToDo: this check may need to move into REACT
       if (service.selectedDisplayMode.getValue() == service.displayModes.EDIT_RINGS
         && service.activeEditRingsPanel == service.EditRingsPanels.EDIT_RINGS) {
         service.onFeatureSelectedRedux(options)
-      } else if (options.locations && options.locations.length) {
+      } else if (options.locations) {
         service.setSelectedLocations(options.locations.map(location => location.location_id))
-        service.setActiveViewModePanel(service.viewModePanels.LOCATION_INFO)
+      }
+    })
+
+    service.mapFeaturesRightClickedEvent.skip(1).subscribe(options => {
+      // plan edit rightclick action from tile.js
+      if (service.selectedDisplayMode.getValue() == service.displayModes.EDIT_PLAN) {
+        console.log(options)
+        service.showContextMenuForLocations (options.locations, options.event)
       }
     })
 
@@ -1538,7 +1556,7 @@ class State {
           PuppeteerMessages.suppressMessages = false
           service.recreateTilesAndCache()
           // Late night commit. The following line throws an error. Subtypes get rendered.
-          //service.requestSetMapZoom.next(map.getZoom() + 1)
+          // service.requestSetMapZoom.next(map.getZoom() + 1)
           $timeout()
         })
         .catch((err) => {
@@ -1817,7 +1835,8 @@ class State {
       //  We are currently maintaining state in two places
       //  BUT as of now are only setting it in redux
       if (nextReduxState.rSelectedDisplayMode &&
-          service.rSelectedDisplayMode !== service.selectedDisplayMode.getValue()) {
+          service.rSelectedDisplayMode !== service.selectedDisplayMode.getValue()) 
+      {
         // console.log(service.rSelectedDisplayMode)
         service.selectedDisplayMode.next(service.rSelectedDisplayMode)
       }
@@ -1893,7 +1912,6 @@ class State {
       setSelectedLocations: locationIds => dispatch(SelectionActions.setLocations(locationIds)),
       setMapFeatures: mapFeatures => dispatch(SelectionActions.setMapFeatures(mapFeatures)),
       setSelectedDisplayMode: displayMode => dispatch(ToolBarActions.selectedDisplayMode(displayMode)),
-      setActiveViewModePanel: displayPanel => dispatch(ToolBarActions.activeViewModePanel(displayPanel)),
       setActivePlanState: planState => dispatch(PlanActions.setActivePlanState(planState)),
       selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems)),
       loadPlanRedux: planId => dispatch(PlanActions.loadPlan(planId)),
@@ -1925,6 +1943,8 @@ class State {
       setShowGlobalSettings: () => dispatch(GlobalSettingsActions.setShowGlobalSettings(true)),
       setCurrentViewToReleaseNotes: (viewString) => dispatch(GlobalSettingsActions.setCurrentViewToReleaseNotes(viewString)),
       setIsMapClicked: mapFeatures => dispatch(SelectionActions.setIsMapClicked(mapFeatures)),
+      planEditorOnMapClick: (featureIds, latLng) => dispatch(PlanEditorActions.onMapClick(featureIds, latLng)),
+      showContextMenuForLocations: (featureIds, event) => dispatch(PlanEditorActions.showContextMenuForLocations(featureIds, event)),
       setUserGroupsMsg: (userGroupsMsg) => dispatch(GlobalSettingsActions.setUserGroupsMsg(userGroupsMsg)),
     }
   }

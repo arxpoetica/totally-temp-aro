@@ -4,7 +4,9 @@ import Actions from '../../../common/actions'
 const defaultState = {
   optimizationInputs: {}, // will hydrate from config settings
   isCanceling: false,
-  optimizationId: null
+  optimizationId: null,
+  filters: [],
+  activeFilters: [],
 }
 
 function setLocationType (state, locationType, isIncluded) {
@@ -62,6 +64,14 @@ function clearOptimizationId (state) {
   return setOptimizationId(state, null)
 }
 
+function setFilters (state, filters) {
+  return {...state, filters: filters}
+}
+
+function setActiveFilters (state, filters) {
+  return {...state, activeFilters: filters}
+}
+
 function optimizationReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.NETWORK_OPTIMIZATION_SET_OPTIMIZATION_INPUTS:
@@ -76,6 +86,10 @@ function optimizationReducer (state = defaultState, action) {
       return setOptimizationId(state, action.payload)
     case Actions.NETWORK_OPTIMIZATION_CLEAR_OPTIMIZATION_ID:
       return clearOptimizationId(state)
+    case Actions.NETWORK_OPTIMIZATION_SET_FILTERS:
+      return setFilters(state, action.payload)
+    case Actions.NETWORK_OPTIMIZATION_SET_ACTIVE_FILTERS:
+      return setActiveFilters(state, action.payload)
     default:
       return state
   }

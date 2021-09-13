@@ -135,8 +135,10 @@ export class RoicReportsSmall extends Component {
 
   updateDataSet () {
 
-    const { roicResults, dataSetProps, timeLabels } = this.props
+    const { roicResults, dataSetProps, timeLabels, planId, loadROICResultsForPlan } = this.props
     const { selectedEntityType, selectedNetworkType, selectedCalcType } = this.state
+
+    loadROICResultsForPlan(planId)
 
     return {
       labels: timeLabels,
@@ -178,6 +180,7 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
   loadNetworkNodeTypesEntity: () => dispatch(RoicReportsActions.loadNetworkNodeTypesEntity()),
+  loadROICResultsForPlan: (planId) => dispatch(RoicReportsActions.loadROICResultsForPlan(planId)),
 })
 
 const RoicReportsSmallComponent = connect(mapStateToProps, mapDispatchToProps)(RoicReportsSmall)

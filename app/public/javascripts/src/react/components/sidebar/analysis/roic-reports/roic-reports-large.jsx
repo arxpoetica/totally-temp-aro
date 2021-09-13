@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { Line } from 'react-chartjs-2'
 import RoicReportsSummary from './roic-reports-summary.jsx'
+import RoicReportsActions from './roic-reports-actions'
 
 export class RoicReportsLarge extends Component {
   constructor (props) {
@@ -159,8 +160,9 @@ export class RoicReportsLarge extends Component {
 
   updateDataSet (calcType) {
 
-    const { roicResults, dataSetProps, timeLabels } = this.props
+    const { roicResults, dataSetProps, timeLabels, planId, loadROICResultsForPlan } = this.props
     const { selectedEntityType, selectedNetworkType } = this.state
+    loadROICResultsForPlan(planId)
 
     return {
       labels: timeLabels,
@@ -201,5 +203,9 @@ const mapStateToProps = (state) => ({
   roicResults: state.roicReports.roicResults,
 })
 
-const RoicReportsLargeComponent = connect(mapStateToProps, null)(RoicReportsLarge)
+const mapDispatchToProps = (dispatch) => ({
+  loadROICResultsForPlan: (planId) => dispatch(RoicReportsActions.loadROICResultsForPlan(planId)),
+})
+
+const RoicReportsLargeComponent = connect(mapStateToProps, mapDispatchToProps)(RoicReportsLarge)
 export default RoicReportsLargeComponent

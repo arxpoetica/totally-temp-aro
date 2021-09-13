@@ -51,6 +51,39 @@ export const selectStyles = {
   }),
 }
 
+export const selectStylesBlue = {
+  control: provided => ({
+    ...provided,
+    backgroundColor: '#4d99e5',
+    borderWidth: '0px',
+  }),
+  placeholder: provided => ({
+    ...provided,
+    color: '#ffffff',
+    pointerEvents: 'none',
+    userSelect: 'none',
+  }),
+  singleValue: provided => ({
+    ...provided,
+    color: '#ffffff !important',
+    pointerEvents: 'none',
+    userSelect: 'none',
+  }),
+  input: provided => ({
+    ...provided,
+    flex: '1 1 auto',
+    '> div': { width: '100%' },
+    input: {
+      width: '100% !important',
+      color: '#ffffff !important',
+      textAlign: 'left',
+    },
+  }),
+  dropdownIndicator: provided => ({
+    ...provided,
+    color: '#ffffff !important',
+  }),
+}
 
 // ========================= >>>>> misc utils
 
@@ -104,4 +137,28 @@ export const groupBy = (array, keyOrIterator) => {
     memo[key].push(item)
     return memo
   }, {})
+}
+
+// https://newbedev.com/converting-lodash-uniqby-to-native-javascript
+export const uniqBy = (arr, predicate) => {
+  const cb = typeof predicate === 'function' ? predicate : (o) => o[predicate]
+  
+  return [...arr.reduce((map, item) => {
+    const key = (item === null || item === undefined) ? 
+      item : cb(item)
+    
+    map.has(key) || map.set(key, item)
+    
+    return map
+  }, new Map()).values()]
+}
+
+// To compare two array and find the difference value
+// https://stackoverflow.com/questions/21987909/how-to-get-the-difference-between-two-arrays-of-objects-in-javascript
+export const arrayComparer = (otherArray) => {
+  return function(current) {
+    return otherArray.filter(function(other) {
+      return other.value === current.value
+    }).length === 0
+  }
 }
