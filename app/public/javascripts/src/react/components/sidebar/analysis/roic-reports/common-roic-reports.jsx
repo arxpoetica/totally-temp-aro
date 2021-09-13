@@ -20,7 +20,7 @@ export class CommonRoicReports extends Component {
   render () {
     return (
       // Render Components based on reportSize
-      <RoicReports reportSize={this.props.reportSize} />
+      <RoicReports reportSize={this.props.reportSize} planId={this.props.planId} />
     )
   }
 

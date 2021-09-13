@@ -215,6 +215,7 @@ export class RoicReports extends Component {
             timeLabels={xAxisLabels}
             dataSetProps={this.dataSetProps}
             graphOptions={this.graphOptions}
+            planId={this.props.planId}
           />
         }
 
@@ -227,6 +228,7 @@ export class RoicReports extends Component {
             timeLabels={xAxisLabels}
             dataSetProps={this.dataSetProps}
             graphOptions={this.graphOptions}
+            planId={this.props.planId}
           />
         }
       </>
