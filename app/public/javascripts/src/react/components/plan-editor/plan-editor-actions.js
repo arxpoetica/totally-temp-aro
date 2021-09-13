@@ -408,7 +408,7 @@ function assignLocation (locationId, terminalId) {
     let fromTerminalId = state.planEditor.subnets[subnetId].subnetLocationsById[locationId].parentEquipmentId
 
     // unassign location if location is assigned
-    if (fromTerminalId){
+    if (fromTerminalId && state.planEditor.subnetFeatures[fromTerminalId]){
       let fromFeature = _spliceLocationFromTerminal(state, locationId, fromTerminalId)
       if (fromFeature) features.push(fromFeature)
     }
