@@ -222,11 +222,14 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
       // after the forEach check if totalhomes exceeds maxHubHomes
       if (totalHomes > maxHubHomes) {
         if (!alerts[subnetId]) {
+          const hubPoint = {}
+          hubPoint.longitude = subnetFeatures[subnetId].feature.geometry.coordinates[0]
+          hubPoint.latitude = subnetFeatures[subnetId].feature.geometry.coordinates[1]
           alerts[subnetId] = {
             locationId: subnetId,
             subnetId,
             alerts: [],
-            point: subnet.subnetLocationsById[subnetId].point,
+            point: hubPoint,
           }
         }
         alerts[subnetId].alerts.push(AlertTypes['MAX_HUB_HOMES_EXCEEDED'].key)
