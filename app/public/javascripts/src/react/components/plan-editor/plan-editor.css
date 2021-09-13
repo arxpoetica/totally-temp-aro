@@ -178,7 +178,7 @@
   border: solid 1px #ccc;
   cursor: pointer;
 }
-.plan-editor-header.selected { border-color: #1f7de6; }
+.plan-editor-header.selected { border-color: #4aa34b; }
 .plan-editor-header h2 { margin: 0 0 10px; }
 .plan-editor-header .info {
   display: flex;

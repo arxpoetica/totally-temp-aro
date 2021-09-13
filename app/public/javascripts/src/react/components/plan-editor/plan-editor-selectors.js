@@ -164,11 +164,14 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
             const distance = subnet.fiber.equipmentCoDistances[featureId]
             if (distance > maxHubDistance) {
               if (!alerts[featureId]) {
+                const hubPoint = {}
+                hubPoint.longitude = subnetFeatures[subnetId].feature.geometry.coordinates[0]
+                hubPoint.latitude = subnetFeatures[subnetId].feature.geometry.coordinates[1]
                 alerts[featureId] = {
                   locationId: featureId,
                   subnetId,
                   alerts: [],
-                  point: subnet.subnetLocationsById[featureId].point,
+                  point: hubPoint,
                 }
               }
               alerts[featureId].alerts.push(AlertTypes['MAX_HUB_DISTANCE_EXCEEDED'].key)
