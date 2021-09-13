@@ -74,6 +74,11 @@ const AlertTypes = {
     displayName: 'Maximum Hub Distance Exceeded',
     iconUrl: '/svg/alert-panel-location.svg',
   },
+  MAX_TERMINAL_DISTANCE_EXCEEDED: {
+    key: 'MAX_TERMINAL_DISTANCE_EXCEEDED',
+    displayName: 'Maximum Terminal Distance Exceeded',
+    iconUrl: '/svg/alert-panel-location.svg',
+  },
 }
 // temporary
 const locationWarnImg = new Image(18, 22)
@@ -144,10 +149,12 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
     const subnetLocationsIds = Object.keys(subnet.subnetLocationsById)
 
     if (subnetLocationsIds.length > 0 && typeof getNetworkConfig !== 'undefined') {
+      // FIXME: Check these are the right sources of information
       const maxDropCableLength = networkConfig.terminalConfiguration.maxDistanceMeters
       const maxTerminalHomes = networkConfig.terminalConfiguration.outputConfig.max
       const maxHubHomes = networkConfig.hubConfiguration.outputConfig.max
       const maxHubDistance = networkConfig.hubConfiguration.maxDistanceMeters
+      const maxTerminalDistance = networkConfig.hubConfiguration.maxDistanceMeters
 
       let totalHomes = 0
 
@@ -159,23 +166,38 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
 
 
         // checks for max distance between hub and Central Office
-        // right now equipmentCoDistance is only on central office, otherwise will be null
-        if (subnet.fiber.equipmentCoDistances !== null) {
-            const distance = subnet.fiber.equipmentCoDistances[featureId]
-            if (distance > maxHubDistance) {
-              if (!alerts[featureId]) {
-                const hubPoint = {}
-                hubPoint.longitude = subnetFeatures[subnetId].feature.geometry.coordinates[0]
-                hubPoint.latitude = subnetFeatures[subnetId].feature.geometry.coordinates[1]
-                alerts[featureId] = {
-                  locationId: featureId,
-                  subnetId,
-                  alerts: [],
-                  point: hubPoint,
-                }
+        // right now equipmentCoDistance is on both hubs and COs
+        if (subnet.fiber.equipmentCoDistances !== null && subnetFeatures[featureId]) {
+
+          const distance = subnet.fiber.equipmentCoDistances[featureId]
+          const { networkNodeType } = subnetFeatures[featureId].feature
+
+          // transforming feature latlong into location latlong
+          const featurePoint = {}
+          featurePoint.longitude = subnetFeatures[featureId].feature.geometry.coordinates[0]
+          featurePoint.latitude = subnetFeatures[featureId].feature.geometry.coordinates[1]
+
+          if (distance > maxHubDistance && networkNodeType === 'fiber_distribution_hub') {
+            if (!alerts[featureId]) {
+              alerts[featureId] = {
+                locationId: featureId,
+                subnetId,
+                alerts: [],
+                point: featurePoint,
               }
-              alerts[featureId].alerts.push(AlertTypes['MAX_HUB_DISTANCE_EXCEEDED'].key)
             }
+            alerts[featureId].alerts.push(AlertTypes['MAX_HUB_DISTANCE_EXCEEDED'].key)
+          } else if (distance > maxTerminalDistance && networkNodeType === 'fiber_distribution_terminal'){
+            if (!alerts[featureId]) {
+              alerts[featureId] = {
+                locationId: featureId,
+                subnetId,
+                alerts: [],
+                point: featurePoint,
+              }
+            }
+            alerts[featureId].alerts.push(AlertTypes['MAX_TERMINAL_DISTANCE_EXCEEDED'].key)
+          }
         }
 
         const featureEntry = subnetFeatures[featureId]
@@ -225,6 +247,7 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
       // after the forEach check if totalhomes exceeds maxHubHomes
       if (totalHomes > maxHubHomes) {
         if (!alerts[subnetId]) {
+          // transforming feature latlong into location latlong
           const hubPoint = {}
           hubPoint.longitude = subnetFeatures[subnetId].feature.geometry.coordinates[0]
           hubPoint.latitude = subnetFeatures[subnetId].feature.geometry.coordinates[1]
