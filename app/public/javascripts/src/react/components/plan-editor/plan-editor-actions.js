@@ -1010,73 +1010,72 @@ function recalculateSubnets (transactionId, subnetIds = []) {
 
 // helper
 function parseRecalcEvents (recalcData) {
-  //copnsole.log(recalcData)
   // this needs to be redone and I think we should make a sealed subnet manager
   // that will manage the subnetFeatures list with changes to a subnet (deleting children etc)
-  return (dispatch, getState) => {
+  return async(dispatch, getState) => {
     const { subnetFeatures } = getState().planEditor
     let newSubnetFeatures = JSON.parse(JSON.stringify(subnetFeatures))
     let updatedSubnets = {}
 
-    const subnets = [...new Set(recalcData.subnets.map(subnet => subnet.feature.objectId))]
-    dispatch(addSubnets(subnets))
-      .then(() => {
-        // need to recapture state because we've altered it w/ `addSubnets`
-        const state = getState()
-        recalcData.subnets.forEach(subnetRecalc => {
-          let subnetId = subnetRecalc.feature.objectId
-          // TODO: looks like this needs to be rewritten 
-          if (state.planEditor.subnets[subnetId]) {
-            const subnetCopy = JSON.parse(JSON.stringify(state.planEditor.subnets[subnetId]))
+    const recalcedSubnets = [...new Set(recalcData.subnets.map(subnet => subnet.feature.objectId))]
+    await dispatch(addSubnets(recalcedSubnets))
 
-            // update fiber
-            // TODO: create parser for this???
-            // ...also use it above in `addSubnets`, where fiber is added
-            subnetCopy.fiber = subnetRecalc.feature
+    // need to recapture state because we've altered it w/ `addSubnets`
+    const { planEditor: { subnets } } = getState()
+    recalcData.subnets.forEach(subnetRecalc => {
+      let subnetId = subnetRecalc.feature.objectId
+      // TODO: looks like this needs to be rewritten 
+      if (subnets[subnetId]) {
+        const subnetCopy = JSON.parse(JSON.stringify(subnets[subnetId]))
 
-            // update equipment
-            subnetRecalc.recalcNodeEvents.forEach(recalcNodeEvent => {
-              let objectId = recalcNodeEvent.subnetNode.id
-              switch (recalcNodeEvent.eventType) {
-                case 'DELETE':
-                  // need to cover the case of deleteing a hub where we need to pull the whole thing
-                  delete newSubnetFeatures[objectId]
-                  let index = subnetCopy.children.indexOf(objectId);
-                  if (index > -1) {
-                    subnetCopy.children.splice(index, 1);
-                  }
-                  break
-                case 'ADD':
-                  // add only
-                  subnetCopy.children.push(objectId)
-                  // do not break
-                case 'MODIFY':
-                  // add || modify
-                  // TODO: this is repeat code from below
-                  let parsedNode = {
-                    feature: parseSubnetFeature(recalcNodeEvent.subnetNode),
-                    subnetId: subnetId,
-                  }
-                  newSubnetFeatures[objectId] = parsedNode
-                  break
+        // update fiber
+        // TODO: create parser for this???
+        // ...also use it above in `addSubnets`, where fiber is added
+        subnetCopy.fiber = subnetRecalc.feature
+
+        // update equipment
+        subnetRecalc.recalcNodeEvents.forEach(recalcNodeEvent => {
+          let objectId = recalcNodeEvent.subnetNode.id
+          switch (recalcNodeEvent.eventType) {
+            case 'DELETE':
+              // need to cover the case of deleteing a hub where we need to pull the whole thing
+              delete newSubnetFeatures[objectId]
+              let index = subnetCopy.children.indexOf(objectId);
+              if (index > -1) {
+                subnetCopy.children.splice(index, 1);
               }
-            })
-            updatedSubnets[subnetId] = subnetCopy
+              break
+            case 'ADD':
+              // add only
+              subnetCopy.children.push(objectId)
+              // do not break
+            case 'MODIFY':
+              // add || modify
+              // TODO: this is repeat code from below
+              let parsedNode = {
+                feature: parseSubnetFeature(recalcNodeEvent.subnetNode),
+                subnetId: subnetId,
+              }
+              newSubnetFeatures[objectId] = parsedNode
+              break
           }
         })
+        updatedSubnets[subnetId] = subnetCopy
+      }
+    })
 
-        batch(() => {
-          dispatch({
-            type: Actions.PLAN_EDITOR_SET_SUBNET_FEATURES,
-            payload: newSubnetFeatures,
-          })
-          dispatch({
-            type: Actions.PLAN_EDITOR_ADD_SUBNETS,
-            payload: updatedSubnets,
-          })
-        })
-
+    batch(() => {
+      dispatch({
+        type: Actions.PLAN_EDITOR_SET_SUBNET_FEATURES,
+        payload: newSubnetFeatures,
       })
+      dispatch({
+        type: Actions.PLAN_EDITOR_ADD_SUBNETS,
+        payload: updatedSubnets,
+      })
+    })
+
+
   }
 }
 
