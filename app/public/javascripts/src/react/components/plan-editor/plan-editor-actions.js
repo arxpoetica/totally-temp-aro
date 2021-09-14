@@ -1114,6 +1114,7 @@ function parseSubnet (subnet) {
   subnet.subnetNode = parseSubnetFeature(subnet.subnetId)
   delete subnet.subnetId
   subnet.children = subnet.children.map(feature => parseSubnetFeature(feature))
+  subnet.coEquipments = subnet.coEquipments.map(feature => parseSubnetFeature(feature))
   // --- end typo section --- //
 
   // subnetLocations needs to be a dictionary
@@ -1134,8 +1135,8 @@ function parseSubnet (subnet) {
     feature: subnet.subnetNode,
     subnetId: subnet.parentSubnetId,
   }
-  // child nodes
-  subnet.children.forEach(feature => {
+  // child and coEquipment nodes
+  subnet.children.concat(subnet.coEquipments).forEach(feature => {
     subnetFeatures[feature.objectId] = { feature, subnetId }
     // if the feature has attached locations we need to note that in the locations list
     //  technically we are duplicating data so we need to be sure the reducer machinery keeps these in sync
@@ -1154,6 +1155,7 @@ function parseSubnet (subnet) {
 
   // subnet child list is a list of IDs, not full features, features are stored in subnetFeatures
   subnet.children = subnet.children.map(feature => feature.objectId)
+  subnet.coEquipments = subnet.coEquipments.map(feature => feature.objectId)
   subnet.subnetNode = subnet.subnetNode.objectId
 
   return { subnet, subnetFeatures }
@@ -1164,9 +1166,14 @@ function parseSubnetFeature (feature) {
   // --- fix service typos - eventually this won't be needed --- //
   feature.objectId = feature.id
   delete feature.id
-
-  feature.geometry = feature.point
-  delete feature.point
+  if (feature.point) {
+    feature.geometry = feature.point
+    delete feature.point
+    // coEquipment calls it geom not point
+  } else if (feature.geom) {
+    feature.geometry = feature.geom
+    delete feature.geom
+  }
   // --- end typo section --- //
 
   return feature
