@@ -6,17 +6,18 @@ import AroHttp from '../../common/aro-http'
 import RoicReportsActions from '../sidebar/analysis/roic-reports/roic-reports-actions'
 import { usePrevious, groupBy } from '../../common/view-utils.js'
 
+const summaryInstallationTypes = Object.freeze({
+  INSTALLED: { id: 'INSTALLED', Label: 'Existing' },
+  PLANNED: { id: 'PLANNED', Label: 'Planned' },
+  Total: { id: 'Total', Label: 'Total' },
+})
+const summaryCategoryTypesObj = {
+  Equipment: { summaryData: {}, totalSummary: {}, groupBy: 'networkNodeType', aggregateBy: 'count' },
+  Fiber: { summaryData: {}, totalSummary: {}, groupBy: 'fiberType', aggregateBy: 'lengthMeters' },
+  Coverage: { summaryData: {}, totalSummary: {}, groupBy: 'locationEntityType', aggregateBy: 'count' },
+}
+
 export const PlanSummary = (props) => {
-  const summaryInstallationTypes = Object.freeze({
-    INSTALLED: { id: 'INSTALLED', Label: 'Existing' },
-    PLANNED: { id: 'PLANNED', Label: 'Planned' },
-    Total: { id: 'Total', Label: 'Total' },
-  })
-  const summaryCategoryTypesObj = {
-    Equipment: { summaryData: {}, totalSummary: {}, groupBy: 'networkNodeType', aggregateBy: 'count' },
-    Fiber: { summaryData: {}, totalSummary: {}, groupBy: 'fiberType', aggregateBy: 'lengthMeters' },
-    Coverage: { summaryData: {}, totalSummary: {}, groupBy: 'locationEntityType', aggregateBy: 'count' },
-  }
   const metersToLength = config.length.meters_to_length_units
 
   const [state, setState] = useState({
@@ -90,9 +91,7 @@ export const PlanSummary = (props) => {
     }
   }, [selectedBoundaryType])
 
-  useEffect(() => {
-    getPlanSummary()
-  }, [equipmentOrder])
+  useEffect(() => getPlanSummary(), [equipmentOrder])
 
   useEffect(() => {
     const layerTagCategories = {}
@@ -105,9 +104,7 @@ export const PlanSummary = (props) => {
     setState((state) => ({ ...state, layerTagTodescription: layerTagCategories }))
   }, [layerCategories])
 
-  useEffect(() => {
-    isPlanEditorChanged && getPlanSummary()
-  }, [isPlanEditorChanged])
+  useEffect(() => isPlanEditorChanged && getPlanSummary(), [isPlanEditorChanged])
 
   const formatSummary = (planSummary) => {
     // Order Equipment Summary
