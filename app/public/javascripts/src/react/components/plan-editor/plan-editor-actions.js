@@ -694,7 +694,7 @@ function deselectEditFeatureById (objectId) {
   }
 }
 
-function addSubnets (subnetIds) {
+function addSubnets (subnetIds, forceReload = false) {
   // FIXME: I (BRIAN) needs to refactor this, it works for the moment but does a lot of extranious things
   //  ALSO there is a "bug" where if we select an FDT before selecting the CO or one of the hubs, we get no info
   //  to fix this we need to find out what subnet the FDT is a part of and run that through here
@@ -708,10 +708,13 @@ function addSubnets (subnetIds) {
       subnetFeatures,
     } = getState().planEditor
 
-    // this little dance only fetches uncached subnets
-    const cachedSubnetIds = Object.keys(cachedSubnets).concat(requestedSubnetIds)
-    let uncachedSubnetIds = subnetIds.filter(id => !cachedSubnetIds.includes(id))
-    
+    // this little dance only fetches uncached (or forced to reload) subnets
+    const cachedSubnetIds = [...Object.keys(cachedSubnets), ...requestedSubnetIds]
+    let uncachedSubnetIds = subnetIds.filter(id => {
+      let isNotCached = !cachedSubnetIds.includes(id)
+      return forceReload || isNotCached // gotta love that double negative...
+    })
+
     // we have everything, no need to query service
     if (uncachedSubnetIds.length <= 0) {
       dispatch(setIsCalculatingSubnets(false))
@@ -1010,73 +1013,77 @@ function recalculateSubnets (transactionId, subnetIds = []) {
 
 // helper
 function parseRecalcEvents (recalcData) {
-  //copnsole.log(recalcData)
   // this needs to be redone and I think we should make a sealed subnet manager
   // that will manage the subnetFeatures list with changes to a subnet (deleting children etc)
-  return (dispatch, getState) => {
+  return async(dispatch, getState) => {
     const { subnetFeatures } = getState().planEditor
     let newSubnetFeatures = JSON.parse(JSON.stringify(subnetFeatures))
     let updatedSubnets = {}
 
-    const subnets = [...new Set(recalcData.subnets.map(subnet => subnet.feature.objectId))]
-    dispatch(addSubnets(subnets))
-      .then(() => {
-        // need to recapture state because we've altered it w/ `addSubnets`
-        const state = getState()
-        recalcData.subnets.forEach(subnetRecalc => {
-          let subnetId = subnetRecalc.feature.objectId
-          // TODO: looks like this needs to be rewritten 
-          if (state.planEditor.subnets[subnetId]) {
-            const subnetCopy = JSON.parse(JSON.stringify(state.planEditor.subnets[subnetId]))
+    const recalcedSubnets = [...new Set(recalcData.subnets.map(subnet => subnet.feature.objectId))]
+    // TODO: ??? --->
+    // this may have some redundancy in it-- we're only telling the cache to
+    // (sadly) clear because we need to reload locations that are in or our of a modified
+    // subnet boundary. Another way we could handle this it to pass `subnetLocations`
+    // back down with the recalced subnets...
+    await dispatch(addSubnets(recalcedSubnets, true))
 
-            // update fiber
-            // TODO: create parser for this???
-            // ...also use it above in `addSubnets`, where fiber is added
-            subnetCopy.fiber = subnetRecalc.feature
+    // need to recapture state because we've altered it w/ `addSubnets`
+    const { planEditor: { subnets } } = getState()
+    recalcData.subnets.forEach(subnetRecalc => {
+      let subnetId = subnetRecalc.feature.objectId
+      // TODO: looks like this needs to be rewritten 
+      if (subnets[subnetId]) {
+        const subnetCopy = JSON.parse(JSON.stringify(subnets[subnetId]))
 
-            // update equipment
-            subnetRecalc.recalcNodeEvents.forEach(recalcNodeEvent => {
-              let objectId = recalcNodeEvent.subnetNode.id
-              switch (recalcNodeEvent.eventType) {
-                case 'DELETE':
-                  // need to cover the case of deleteing a hub where we need to pull the whole thing
-                  delete newSubnetFeatures[objectId]
-                  let index = subnetCopy.children.indexOf(objectId);
-                  if (index > -1) {
-                    subnetCopy.children.splice(index, 1);
-                  }
-                  break
-                case 'ADD':
-                  // add only
-                  subnetCopy.children.push(objectId)
-                  // do not break
-                case 'MODIFY':
-                  // add || modify
-                  // TODO: this is repeat code from below
-                  let parsedNode = {
-                    feature: parseSubnetFeature(recalcNodeEvent.subnetNode),
-                    subnetId: subnetId,
-                  }
-                  newSubnetFeatures[objectId] = parsedNode
-                  break
+        // update fiber
+        // TODO: create parser for this???
+        // ...also use it above in `addSubnets`, where fiber is added
+        subnetCopy.fiber = subnetRecalc.feature
+
+        // update equipment
+        subnetRecalc.recalcNodeEvents.forEach(recalcNodeEvent => {
+          let objectId = recalcNodeEvent.subnetNode.id
+          switch (recalcNodeEvent.eventType) {
+            case 'DELETE':
+              // need to cover the case of deleteing a hub where we need to pull the whole thing
+              delete newSubnetFeatures[objectId]
+              let index = subnetCopy.children.indexOf(objectId);
+              if (index > -1) {
+                subnetCopy.children.splice(index, 1);
               }
-            })
-            updatedSubnets[subnetId] = subnetCopy
+              break
+            case 'ADD':
+              // add only
+              subnetCopy.children.push(objectId)
+              // do not break
+            case 'MODIFY':
+              // add || modify
+              // TODO: this is repeat code from below
+              let parsedNode = {
+                feature: parseSubnetFeature(recalcNodeEvent.subnetNode),
+                subnetId: subnetId,
+              }
+              newSubnetFeatures[objectId] = parsedNode
+              break
           }
         })
+        updatedSubnets[subnetId] = subnetCopy
+      }
+    })
 
-        batch(() => {
-          dispatch({
-            type: Actions.PLAN_EDITOR_SET_SUBNET_FEATURES,
-            payload: newSubnetFeatures,
-          })
-          dispatch({
-            type: Actions.PLAN_EDITOR_ADD_SUBNETS,
-            payload: updatedSubnets,
-          })
-        })
-
+    batch(() => {
+      dispatch({
+        type: Actions.PLAN_EDITOR_SET_SUBNET_FEATURES,
+        payload: newSubnetFeatures,
       })
+      dispatch({
+        type: Actions.PLAN_EDITOR_ADD_SUBNETS,
+        payload: updatedSubnets,
+      })
+    })
+
+
   }
 }
 

@@ -205,13 +205,11 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  //modifyFeature: (feature) => dispatch(PlanEditorActions.modifyFeature('equipment', feature)),
   moveFeature: (id, coordinates) => dispatch(PlanEditorActions.moveFeature(id, coordinates)),
   showContextMenuForEquipment: (equipmentObjectId, x, y) => {
     dispatch(PlanEditorActions.showContextMenuForEquipment(equipmentObjectId, x, y))
   },
   selectEditFeatureById: id => dispatch(PlanEditorActions.selectEditFeaturesById([id])),
-  // addSubnets: ids => dispatch(PlanEditorActions.addSubnets(ids)),
   setSelectedSubnetId: id => dispatch(PlanEditorActions.setSelectedSubnetId(id)),
   selectEditFeaturesById: featureIds => dispatch(PlanEditorActions.selectEditFeaturesById(featureIds)),
 })
