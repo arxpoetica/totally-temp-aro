@@ -135,10 +135,9 @@ export class RoicReportsSmall extends Component {
 
   updateDataSet () {
 
-    const { roicResults, dataSetProps, timeLabels, planId, loadROICResultsForPlan } = this.props
+    const { roicResults, dataSetProps, timeLabels } = this.props
     const { selectedEntityType, selectedNetworkType, selectedCalcType } = this.state
 
-    loadROICResultsForPlan(planId)
 
     return {
       labels: timeLabels,
@@ -156,6 +155,7 @@ export class RoicReportsSmall extends Component {
   handleNetworkTypeChange (event) {
     const selectedNetworkType = this.props.networkTypes.find(item => item.id === event.target.value)
     this.setState({ selectedNetworkType })
+    this.props.loadROICResultsForPlan(this.props.planId)
   }
 
   handleCategoriesChange (event) {
@@ -171,6 +171,7 @@ export class RoicReportsSmall extends Component {
   handleEntityTypeChange (event) {
     const selectedEntityType = this.props.entityTypes.find(item => item.id === event.target.value)
     this.setState({ selectedEntityType })
+    this.props.loadROICResultsForPlan(this.props.planId)
   }
 }
 
