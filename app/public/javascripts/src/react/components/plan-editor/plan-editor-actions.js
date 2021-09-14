@@ -694,7 +694,7 @@ function deselectEditFeatureById (objectId) {
   }
 }
 
-function addSubnets (subnetIds) {
+function addSubnets (subnetIds, forceReload = false) {
   // FIXME: I (BRIAN) needs to refactor this, it works for the moment but does a lot of extranious things
   //  ALSO there is a "bug" where if we select an FDT before selecting the CO or one of the hubs, we get no info
   //  to fix this we need to find out what subnet the FDT is a part of and run that through here
@@ -708,10 +708,13 @@ function addSubnets (subnetIds) {
       subnetFeatures,
     } = getState().planEditor
 
-    // this little dance only fetches uncached subnets
-    const cachedSubnetIds = Object.keys(cachedSubnets).concat(requestedSubnetIds)
-    let uncachedSubnetIds = subnetIds.filter(id => !cachedSubnetIds.includes(id))
-    
+    // this little dance only fetches uncached (or forced to reload) subnets
+    const cachedSubnetIds = [...Object.keys(cachedSubnets), ...requestedSubnetIds]
+    let uncachedSubnetIds = subnetIds.filter(id => {
+      let isNotCached = !cachedSubnetIds.includes(id)
+      return forceReload || isNotCached // gotta love that double negative...
+    })
+
     // we have everything, no need to query service
     if (uncachedSubnetIds.length <= 0) {
       dispatch(setIsCalculatingSubnets(false))
@@ -1018,7 +1021,12 @@ function parseRecalcEvents (recalcData) {
     let updatedSubnets = {}
 
     const recalcedSubnets = [...new Set(recalcData.subnets.map(subnet => subnet.feature.objectId))]
-    await dispatch(addSubnets(recalcedSubnets))
+    // TODO: ??? --->
+    // this may have some redundancy in it-- we're only telling the cache to
+    // (sadly) clear because we need to reload locations that are in or our of a modified
+    // subnet boundary. Another way we could handle this it to pass `subnetLocations`
+    // back down with the recalced subnets...
+    await dispatch(addSubnets(recalcedSubnets, true))
 
     // need to recapture state because we've altered it w/ `addSubnets`
     const { planEditor: { subnets } } = getState()
