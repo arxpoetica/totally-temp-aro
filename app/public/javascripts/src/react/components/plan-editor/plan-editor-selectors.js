@@ -282,7 +282,7 @@ const getLocationCounts = createSelector(
   (subnets, subnetFeatures, selectedEditFeatureIds) => {
     let locationCountsById = {}
     for (const id of selectedEditFeatureIds) {
-      if (subnetFeatures[id].feature.networkNodeType === 'fiber_distribution_hub') {
+      if (subnetFeatures[id] && subnetFeatures[id].feature.networkNodeType === 'fiber_distribution_hub') {
         // TODO: is this accurate ?
         locationCountsById[id] = Object.keys(subnets[id].subnetLocationsById).length
       } else {
