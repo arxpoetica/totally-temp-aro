@@ -12,6 +12,10 @@
   background-color: white;
 }
 
+.button-group {
+  position: relative;
+}
+
 .ei-header-icon.plus-sign{
   background: url('/svg/plus.svg') no-repeat center transparent;
   height: 15px;
@@ -92,3 +96,4 @@
 .ei-filter-input.percent::before {
   content: "%";
 }
+

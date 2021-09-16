@@ -4,6 +4,7 @@ import { EditorInterface, EditorInterfaceItem } from './editor-interface.jsx'
 import NetworkOptimizationActions from './network-optimization-actions'
 import { Select } from '../../common/forms/Select.jsx'
 import { Input } from '../../common/forms/Input.jsx'
+import Loader from '../../common/Loader.jsx'
 import cx from 'clsx'
 import './editor-interfaces.css'
 
@@ -199,7 +200,10 @@ export const FilterEditor = ({
   return (
     <EditorInterface title="Filters" 
       middleSection={!displayOnly && 
-        <button type="button" className="ei-header-filter-preview">Preview On Map</button>
+        <div className="button-group">
+          <button type="button" className="ei-header-filter-preview">Preview On Map</button>
+          <Loader loading={false} title="Calculating..."/>
+        </div>
       }
       rightSection={!displayOnly && 
         <i onClick={() => addNewFilter()} className="ei-header-icon plus-sign svg" />
