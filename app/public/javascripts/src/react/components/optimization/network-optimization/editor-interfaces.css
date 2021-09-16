@@ -2,7 +2,14 @@
 .ei-header.ei-header-with-icon{
   display: flex;
   justify-content: space-between;
+  align-items: center;
+}
 
+.ei-header-filter-preview {
+  color: var(--primary);
+  font-size: .7rem;
+  border: none;
+  background-color: white;
 }
 
 .ei-header-icon.plus-sign{
@@ -11,6 +18,7 @@
   width: 15px;
   background-size: contain;
 }
+
 .ei-header-icon.plus-sign:hover {
   background-color: #e2e6ea;
 }

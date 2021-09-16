@@ -197,7 +197,13 @@ export const FilterEditor = ({
   }
 
   return (
-    <EditorInterface title="Filters" action={!displayOnly && addNewFilter}>
+    <EditorInterface title="Filters" 
+      middleSection={!displayOnly && 
+        <button type="button" className="ei-header-filter-preview">Preview On Map</button>
+      }
+      rightSection={!displayOnly && 
+        <i onClick={() => addNewFilter()} className="ei-header-icon plus-sign svg" />
+      }>
       {activeFilters.map((activeFilter, index) => (
         (activeFilter.displayName 
           ? <EditorInterfaceItem subtitle={FilterSelect(index)} key={index}>
