@@ -156,23 +156,26 @@ export class EquipmentMapObjects extends Component {
         this.selectionOverlays[id].bindTo('position', this.mapObjects[id], 'position')
         this.selectionOverlays[id].setMap(googleMaps)
 
-        const { feature } = subnetFeatures[id]
-        if (
-          id === selectedSubnetId
-          && feature.networkNodeType === 'fiber_distribution_terminal'
-        ) {
-          const [lng, lat] = feature.geometry.coordinates
-          for (const [droplinkId, location] of Object.entries(selectedLocations)) {
-            // oddly, sometimes `location` is `undefined`
-            if (location) {
-              const { latitude, longitude } = location.point
-              // TODO: enhance when droplink lengths are exceeded???
-              this.droplinks[droplinkId] = new google.maps.Polyline({
-                path: [{ lat, lng }, { lat: latitude, lng: longitude }],
-                strokeColor: '#84d496',
-                strokeWeight: 1.5,
-              })
-              this.droplinks[droplinkId].setMap(googleMaps)
+        if (subnetFeatures[id]){
+          const { feature } = subnetFeatures[id]
+        
+          if (
+            id === selectedSubnetId
+            && feature.networkNodeType === 'fiber_distribution_terminal'
+          ) {
+            const [lng, lat] = feature.geometry.coordinates
+            for (const [droplinkId, location] of Object.entries(selectedLocations)) {
+              // oddly, sometimes `location` is `undefined`
+              if (location) {
+                const { latitude, longitude } = location.point
+                // TODO: enhance when droplink lengths are exceeded???
+                this.droplinks[droplinkId] = new google.maps.Polyline({
+                  path: [{ lat, lng }, { lat: latitude, lng: longitude }],
+                  strokeColor: '#84d496',
+                  strokeWeight: 1.5,
+                })
+                this.droplinks[droplinkId].setMap(googleMaps)
+              }
             }
           }
         }
@@ -202,13 +205,11 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  //modifyFeature: (feature) => dispatch(PlanEditorActions.modifyFeature('equipment', feature)),
   moveFeature: (id, coordinates) => dispatch(PlanEditorActions.moveFeature(id, coordinates)),
   showContextMenuForEquipment: (equipmentObjectId, x, y) => {
     dispatch(PlanEditorActions.showContextMenuForEquipment(equipmentObjectId, x, y))
   },
   selectEditFeatureById: id => dispatch(PlanEditorActions.selectEditFeaturesById([id])),
-  // addSubnets: ids => dispatch(PlanEditorActions.addSubnets(ids)),
   setSelectedSubnetId: id => dispatch(PlanEditorActions.setSelectedSubnetId(id)),
   selectEditFeaturesById: featureIds => dispatch(PlanEditorActions.selectEditFeaturesById(featureIds)),
 })
