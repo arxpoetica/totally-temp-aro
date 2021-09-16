@@ -31,6 +31,10 @@
   background-color: #f9f9f9;
 }
 
+.ei-property-item {
+  flex-wrap: wrap;
+}
+
 .ei-filter-select-container select {
   border: none;
   border-radius: 3px;
@@ -48,7 +52,6 @@
   align-items: center;
 }
 .ei-filter-input {
-  width: 75px;
   margin: 0 5px 0 5px;
 
 }
@@ -61,6 +64,14 @@
   border: 1px solid var(--gray-medium-light);
   width: 75px;
   border-radius: 3px;
+}
+
+.ei-filter-input input[type=datetime-local] {
+  width: 170px;
+}
+
+.ei-filter-input input[type=date] {
+  width: 135px;
 }
 
 .ei-filter-input input:disabled {

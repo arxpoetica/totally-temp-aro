@@ -112,6 +112,12 @@ export class NetworkOptimizationInput extends Component {
     this.props.setActiveFilters(validatedFilters)
 
     const propertyConstraints = validatedFilters.map((filter) => {
+      if (filter.propertyType === 'DATETIME' || 'DATE'){
+        filter.value1 = new Date(filter.value1).getTime()
+        if (filter.value2) {
+          filter.value2 = new Date(filter.value2).getTime()
+        }
+      }
       return ({
         op: filter.operator,
         propertyName: filter.name,
