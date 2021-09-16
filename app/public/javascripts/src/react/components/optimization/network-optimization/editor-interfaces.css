@@ -53,7 +53,8 @@
 }
 .ei-filter-input {
   margin: 0 5px 0 5px;
-
+  display: flex;
+  justify-content: flex-end;
 }
 .ei-filter-input input {
   color: black;
@@ -64,10 +65,11 @@
   border: 1px solid var(--gray-medium-light);
   width: 75px;
   border-radius: 3px;
+  margin: 0;
 }
 
 .ei-filter-input input[type=datetime-local] {
-  width: 170px;
+  width: 180px;
 }
 
 .ei-filter-input input[type=date] {
