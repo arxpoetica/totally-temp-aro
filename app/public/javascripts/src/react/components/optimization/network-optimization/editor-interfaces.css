@@ -2,7 +2,18 @@
 .ei-header.ei-header-with-icon{
   display: flex;
   justify-content: space-between;
+  align-items: center;
+}
 
+.ei-header-filter-preview {
+  color: var(--primary);
+  font-size: .7rem;
+  border: none;
+  background-color: white;
+}
+
+.button-group {
+  position: relative;
 }
 
 .ei-header-icon.plus-sign{
@@ -11,6 +22,7 @@
   width: 15px;
   background-size: contain;
 }
+
 .ei-header-icon.plus-sign:hover {
   background-color: #e2e6ea;
 }
@@ -84,3 +96,4 @@
 .ei-filter-input.percent::before {
   content: "%";
 }
+

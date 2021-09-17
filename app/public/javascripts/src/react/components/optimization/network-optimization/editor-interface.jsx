@@ -1,12 +1,13 @@
 import React from 'react'
 // import './editor-interfaces.css'
 
-export const EditorInterface = ({ children, title, footer, action }) => {
+export const EditorInterface = ({ children, title, footer, middleSection, rightSection }) => {
   return (
     <div className="ei-items-contain object-editor">
       <div className="ei-header ei-no-pointer ei-header-with-icon">
-        {title} 
-        {action && <i onClick={() => action()} className="ei-header-icon plus-sign svg" />}
+        {title}
+        {middleSection && middleSection}
+        {rightSection && rightSection}
       </div>
       <div className="ei-gen-level ei-internal-level">
         <div className="ei-items-contain">

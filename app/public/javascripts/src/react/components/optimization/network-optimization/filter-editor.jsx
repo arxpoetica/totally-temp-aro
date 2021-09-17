@@ -2,8 +2,10 @@ import React, { useEffect } from 'react'
 import { connect } from 'react-redux'
 import { EditorInterface, EditorInterfaceItem } from './editor-interface.jsx'
 import NetworkOptimizationActions from './network-optimization-actions'
+import NetworkOptimizationSelectors from './network-optimization-selectors.js'
 import { Select } from '../../common/forms/Select.jsx'
 import { Input } from '../../common/forms/Input.jsx'
+import Loader from '../../common/Loader.jsx'
 import cx from 'clsx'
 import './editor-interfaces.css'
 
@@ -29,7 +31,9 @@ export const FilterEditor = ({
   filters,
   optimizationInputs,
   planId,
-  }) => {
+  updatedLocationConstraints,
+  loadSelectionFromObjectFilter,
+}) => {
 
   useEffect(() => {
     loadFilters()
@@ -115,6 +119,17 @@ export const FilterEditor = ({
 
     setActiveFilters([...activeFilters])
   }
+
+  const handlePreview = () => {
+
+    loadSelectionFromObjectFilter(planId, updatedLocationConstraints)
+
+    // swal({
+    //   title: 'Error',
+    //   text: 'Data set too large',
+    //   type: 'error'
+    // })
+  }
   
   const ActiveFilterForm = (filter, index ) => {
     // generate the forms based on type right now just number or boolean
@@ -197,7 +212,16 @@ export const FilterEditor = ({
   }
 
   return (
-    <EditorInterface title="Filters" action={!displayOnly && addNewFilter}>
+    <EditorInterface title="Filters" 
+      middleSection={!displayOnly && 
+        <div className="button-group">
+          <button type="button" className="ei-header-filter-preview" onClick={() => handlePreview()}>Preview On Map</button>
+          <Loader loading={false} title="Calculating..."/>
+        </div>
+      }
+      rightSection={!displayOnly && 
+        <i onClick={() => addNewFilter()} className="ei-header-icon plus-sign svg" />
+      }>
       {activeFilters.map((activeFilter, index) => (
         (activeFilter.displayName 
           ? <EditorInterfaceItem subtitle={FilterSelect(index)} key={index}>
@@ -217,11 +241,14 @@ const mapStateToProps = (state) => ({
   activeFilters: state.optimization.networkOptimization.activeFilters,
   optimizationInputs: state.optimization.networkOptimization.optimizationInputs,
   planId: state.plan.activePlan.id,
+  updatedLocationConstraints: NetworkOptimizationSelectors.getUpdatedLocationConstraints(state),
 })
 
 const mapDispatchToProps = dispatch => ({
   loadFilters: () => dispatch(NetworkOptimizationActions.loadFilters()),
   setActiveFilters: (filters) => dispatch(NetworkOptimizationActions.setActiveFilters(filters)),
+  loadSelectionFromObjectFilter: (planId, constraints) =>
+    dispatch(NetworkOptimizationActions.getLocationPreview(planId, constraints)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(FilterEditor)
