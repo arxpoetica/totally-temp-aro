@@ -23,7 +23,7 @@ function runOptimization(inputs, userId) { // shouldn't be getting userId from c
   }
 }
 
-function cancelOptimization (planId, optimizationId) {
+function cancelOptimization(planId, optimizationId) {
   // TODO: check that optimizationId is not null
   return (dispatch, getState) => {
     dispatch({
@@ -49,7 +49,7 @@ function cancelOptimization (planId, optimizationId) {
   }
 }
 
-function loadOptimizationInputs (planId) {
+function loadOptimizationInputs(planId) {
   // if (typeof planId === 'undefined') return {} ToDo: figure this out
   return (dispatch, getState) => {
     const state = getState()
@@ -66,7 +66,7 @@ function loadOptimizationInputs (planId) {
   }
 }
 
-function setOptimizationInputs (inputs) {
+function setOptimizationInputs(inputs) {
   return (dispatch) => {
     var layerKeys = []
     if (inputs.locationConstraints && inputs.locationConstraints.locationTypes) {
@@ -140,7 +140,7 @@ function setOptimizationInputs (inputs) {
   }
 }
 
-function setNetworkAnalysisType (networkAnalysisType) {
+function setNetworkAnalysisType(networkAnalysisType) {
   return {
     type: Actions.NETWORK_OPTIMIZATION_SET_ANALYSIS_TYPE,
     payload: networkAnalysisType
@@ -153,7 +153,7 @@ const modifyDialogResult = Object.freeze({
   OVERWRITE: 1
 })
 
-function modifyOptimization (plan)  {
+function modifyOptimization(plan)  {
   return dispatch => {
     const currentPlan = plan
     if (currentPlan.ephemeral) {
@@ -189,7 +189,7 @@ function modifyOptimization (plan)  {
   }
 }
 
-function showModifyQuestionDialog () {
+function showModifyQuestionDialog() {
   return new Promise((resolve) => {
     swal({
       title: '',
@@ -207,7 +207,7 @@ function showModifyQuestionDialog () {
   })
 }
 
-function loadFilters () {
+function loadFilters() {
   return (dispatch, getState) => {
     const state = getState()
     const client = state.configuration.system.ARO_CLIENT
@@ -233,12 +233,30 @@ function loadFilters () {
   }
 }
 
-function setActiveFilters (filters) {
+function setActiveFilters(filters) {
   return (dispatch) => {
     dispatch({
       type: Actions.NETWORK_OPTIMIZATION_SET_ACTIVE_FILTERS,
       payload: filters
     })
+  }
+}
+
+function getLocationPreview(planId, updatedLocationConstraints) {
+  return async(dispatch, getState) => {
+    try {
+      const body = {
+        planId,
+        locationConstraints: updatedLocationConstraints,
+      }
+      const res = await AroHttp.post('service/v1/optimize/location-preview', body)
+      console.log(res)
+
+      // selection dispatch here
+
+    } catch (error) {
+      console.log(error)
+    }
   }
 }
 
@@ -251,4 +269,5 @@ export default {
   modifyOptimization,
   loadFilters,
   setActiveFilters,
+  getLocationPreview,
 }

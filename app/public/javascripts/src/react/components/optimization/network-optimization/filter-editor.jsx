@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import { connect } from 'react-redux'
 import { EditorInterface, EditorInterfaceItem } from './editor-interface.jsx'
 import NetworkOptimizationActions from './network-optimization-actions'
+import NetworkOptimizationSelectors from './network-optimization-selectors.js'
 import { Select } from '../../common/forms/Select.jsx'
 import { Input } from '../../common/forms/Input.jsx'
 import Loader from '../../common/Loader.jsx'
@@ -30,7 +31,9 @@ export const FilterEditor = ({
   filters,
   optimizationInputs,
   planId,
-  }) => {
+  updatedLocationConstraints,
+  loadSelectionFromObjectFilter,
+}) => {
 
   useEffect(() => {
     loadFilters()
@@ -118,11 +121,14 @@ export const FilterEditor = ({
   }
 
   const handlePreview = () => {
-    swal({
-      title: 'Error',
-      text: 'Data set too large',
-      type: 'error'
-    })
+
+    loadSelectionFromObjectFilter(planId, updatedLocationConstraints)
+
+    // swal({
+    //   title: 'Error',
+    //   text: 'Data set too large',
+    //   type: 'error'
+    // })
   }
   
   const ActiveFilterForm = (filter, index ) => {
@@ -235,11 +241,14 @@ const mapStateToProps = (state) => ({
   activeFilters: state.optimization.networkOptimization.activeFilters,
   optimizationInputs: state.optimization.networkOptimization.optimizationInputs,
   planId: state.plan.activePlan.id,
+  updatedLocationConstraints: NetworkOptimizationSelectors.getUpdatedLocationConstraints(state),
 })
 
 const mapDispatchToProps = dispatch => ({
   loadFilters: () => dispatch(NetworkOptimizationActions.loadFilters()),
   setActiveFilters: (filters) => dispatch(NetworkOptimizationActions.setActiveFilters(filters)),
+  loadSelectionFromObjectFilter: (planId, constraints) =>
+    dispatch(NetworkOptimizationActions.getLocationPreview(planId, constraints)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(FilterEditor)

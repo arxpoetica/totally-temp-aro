@@ -1,12 +1,14 @@
 import { createSelector } from 'reselect'
 import { getFormValues } from 'redux-form'
 import Constants from '../../../common/constants'
+import SelectionModes from '../../selection/selection-modes'
 
 const getModifiedNetworkOptimizationInputs = getFormValues(Constants.NETWORK_OPTIMIZATION_INPUT_FORM)
 
 const getPlanId = (state) => state.plan.activePlan.id
 const getNetworkAnalysisType = (state) => state.optimization.networkOptimization.optimizationInputs.analysis_type
 const getOptimizationInputs = (state) => state.optimization.networkOptimization.optimizationInputs
+const getLocationTypes = (state) => state.optimization.networkOptimization.optimizationInputs.locationTypes
 const getActiveSelectionModeId = (state) => state.selection.activeSelectionMode.id
 const getActivefilters = (state) => state.optimization.networkOptimization.activeFilters
 const getSelectionModes = state => state.selection.selectionModes
@@ -44,10 +46,24 @@ const getObjectFilter = createSelector([getValidatedFilters, getClientName], (va
 })
 
 const getAdditionalOptimizationInputs = createSelector(
-  [getModifiedNetworkOptimizationInputs, getNetworkAnalysisType, getPlanId, getOptimizationInputs, getActiveSelectionModeId, getObjectFilter], (modifiedOptimizationInputs, networkAnalysisTypeId, planId, optimizationInputs, activeSelectionModeId, objectFilter) => {
+  [
+    getModifiedNetworkOptimizationInputs,
+    getNetworkAnalysisType,
+    getPlanId,
+    getOptimizationInputs,
+    getActiveSelectionModeId,
+    getObjectFilter,
+  ], (
+    modifiedOptimizationInputs,
+    networkAnalysisTypeId,
+    planId,
+    optimizationInputs,
+    activeSelectionModeId,
+    objectFilter,
+  ) => {
 
   // plan.selection.planTargets are sent seperately to the server
-  if(modifiedOptimizationInputs){
+  if (modifiedOptimizationInputs) {
     const inputs = JSON.parse(JSON.stringify(modifiedOptimizationInputs))
     // ToDo: this should come from redux NOT parent
     inputs.analysis_type = networkAnalysisTypeId
@@ -59,14 +75,29 @@ const getAdditionalOptimizationInputs = createSelector(
     inputs.locationConstraints.objectFilter = objectFilter
     // inputs.locationConstraints.analysisLayerId
     return inputs
-  } else return undefined
+  }
+  return undefined
 })
+
+const getUpdatedLocationConstraints = createSelector(
+  [getActiveSelectionModeId, getLocationTypes, getObjectFilter], (analysisSelectionMode, locationTypes, objectFilter) => {
+    console.log({ analysisSelectionMode })
+    return {
+      // // NOTE: See the AnalysisSelectionMode.java file
+      // // for a full list of possible enumerations
+      // analysisSelectionMode,
+      locationTypes,
+      objectFilter,
+    }
+  }
+)
 
 const NetworkOptimizationSelectors = Object.freeze({
   getValidatedFilters,
   getObjectFilter,
   getAdditionalOptimizationInputs,
   getAllSelectionModes,
+  getUpdatedLocationConstraints,
 })
 
 export default NetworkOptimizationSelectors
