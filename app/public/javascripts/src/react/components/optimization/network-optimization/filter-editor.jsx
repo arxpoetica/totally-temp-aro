@@ -116,6 +116,14 @@ export const FilterEditor = ({
 
     setActiveFilters([...activeFilters])
   }
+
+  const handlePreview = () => {
+    swal({
+      title: 'Error',
+      text: 'Data set too large',
+      type: 'error'
+    })
+  }
   
   const ActiveFilterForm = (filter, index ) => {
     // generate the forms based on type right now just number or boolean
@@ -201,7 +209,7 @@ export const FilterEditor = ({
     <EditorInterface title="Filters" 
       middleSection={!displayOnly && 
         <div className="button-group">
-          <button type="button" className="ei-header-filter-preview">Preview On Map</button>
+          <button type="button" className="ei-header-filter-preview" onClick={() => handlePreview()}>Preview On Map</button>
           <Loader loading={false} title="Calculating..."/>
         </div>
       }
