@@ -8,7 +8,6 @@ const getModifiedNetworkOptimizationInputs = getFormValues(Constants.NETWORK_OPT
 const getPlanId = (state) => state.plan.activePlan.id
 const getNetworkAnalysisType = (state) => state.optimization.networkOptimization.optimizationInputs.analysis_type
 const getOptimizationInputs = (state) => state.optimization.networkOptimization.optimizationInputs
-const getLocationTypes = (state) => state.optimization.networkOptimization.optimizationInputs.locationTypes
 const getActiveSelectionModeId = (state) => state.selection.activeSelectionMode.id
 const getActivefilters = (state) => state.optimization.networkOptimization.activeFilters
 const getSelectionModes = state => state.selection.selectionModes

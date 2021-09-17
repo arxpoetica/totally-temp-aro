@@ -28,7 +28,8 @@ class MapSelectorPlanTargetController {
 
   addOrRemoveSelection (entities, planTargetKey, entityIdKey) {
     // Get a list of ids to add and remove
-    var idsToAdd = new Set(); var idsToRemove = new Set()
+    var idsToAdd = new Set()
+    var idsToRemove = new Set()
     entities.forEach((entity) => {
       if (this.planTargets[planTargetKey].has(+entity[entityIdKey])) {
         idsToRemove.add(+entity[entityIdKey])
