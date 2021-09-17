@@ -79,20 +79,7 @@ const getAdditionalOptimizationInputs = createSelector(
   return undefined
 })
 
-// const getUpdatedLocationConstraints = createSelector(
-//   [getActiveSelectionModeId, getLocationTypes, getObjectFilter], (analysisSelectionMode, locationTypes, objectFilter) => {
-//     console.log({ analysisSelectionMode, locationTypes })
-//     return {
-//       // // NOTE: See the AnalysisSelectionMode.java file
-//       // // for a full list of possible enumerations
-//       // analysisSelectionMode,
-//       locationTypes: ['household'],
-//       objectFilter,
-//     }
-//   }
-// )
-
-const getCurrentLocationConstraints = createSelector(
+const getUpdatedLocationConstraints = createSelector(
   [getAdditionalOptimizationInputs], (optimizationInputs) => {
     return optimizationInputs.locationConstraints
   }
@@ -103,7 +90,7 @@ const NetworkOptimizationSelectors = Object.freeze({
   getObjectFilter,
   getAdditionalOptimizationInputs,
   getAllSelectionModes,
-  getCurrentLocationConstraints,
+  getUpdatedLocationConstraints,
 })
 
 export default NetworkOptimizationSelectors

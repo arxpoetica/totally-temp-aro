@@ -241,7 +241,7 @@ const mapStateToProps = (state) => ({
   activeFilters: state.optimization.networkOptimization.activeFilters,
   optimizationInputs: state.optimization.networkOptimization.optimizationInputs,
   planId: state.plan.activePlan.id,
-  updatedLocationConstraints: NetworkOptimizationSelectors.getCurrentLocationConstraints(state),
+  updatedLocationConstraints: NetworkOptimizationSelectors.getUpdatedLocationConstraints(state),
 })
 
 const mapDispatchToProps = dispatch => ({
