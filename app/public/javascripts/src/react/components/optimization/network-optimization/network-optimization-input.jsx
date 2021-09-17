@@ -124,7 +124,6 @@ const mapStateToProps = (state) => ({
   networkAnalysisType: state.optimization.networkOptimization.optimizationInputs.analysis_type,
   activeFilters: state.optimization.networkOptimization.activeFilters,
   clientName: state.configuration.system.ARO_CLIENT,
-  objectFilter: NetworkOptimizationSelectors.getObjectFilter(state),
   validatedFilters: NetworkOptimizationSelectors.getValidatedFilters(state),
   additionalOptimizationInputs: NetworkOptimizationSelectors.getAdditionalOptimizationInputs(state)
 })
