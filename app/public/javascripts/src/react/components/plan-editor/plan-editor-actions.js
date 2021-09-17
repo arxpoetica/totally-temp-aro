@@ -936,6 +936,7 @@ function recalculateBoundary (subnetId) {
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet/${subnetId}/boundary`, boundaryBody)
       .then(res => {
         dispatch(setIsCalculatingBoundary(false)) // may need to extend this for multiple boundaries? (make it and int incriment, decriment)
+        dispatch(setIsPlanEditorChanged(true)) // recaluculate plansummary
       })
       .catch(err => {
         console.error(err)
@@ -1006,6 +1007,7 @@ function recalculateSubnets (transactionId, subnetIds = []) {
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet-cmd/recalc`, recalcBody)
       .then(res => {
         dispatch(setIsCalculatingSubnets(false))
+        dispatch(setIsPlanEditorChanged(true)) // recaluculate plansummary
         // parse changes
         dispatch(parseRecalcEvents(res.data))
       })

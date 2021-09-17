@@ -527,7 +527,6 @@ class PlanEditorController {
 
         this.isWorkingOnCoverage = false
         this.state.planEditorChanged.next(true) // recaluculate plansummary
-        this.setIsPlanEditorChanged(true)
       })
       .catch((err) => {
         console.error(err)
@@ -1283,7 +1282,6 @@ class PlanEditorController {
         .then(() => {
           this.refreshViewObjectSBTypes(mapObject.objectId) // refresh network node SB type
           this.state.planEditorChanged.next(true) // recaluculate plansummary
-          this.setIsPlanEditorChanged(true)
         })
     }
   }
@@ -1319,7 +1317,6 @@ class PlanEditorController {
           this.deleteBoundary(boundaryObjectId) // boundary is in edit mode
         }
         this.state.planEditorChanged.next(true) // recaluculate plansummary
-        this.setIsPlanEditorChanged(true)
       })
       .catch((err) => console.error(err))
   }
@@ -1346,7 +1343,6 @@ class PlanEditorController {
         this.state.requestMapLayerRefresh.next(null)
         this.refreshViewObjectSBTypes(boundaryId) // refresh network node SB type
         this.state.planEditorChanged.next(true) // recaluculate plansummary
-        this.setIsPlanEditorChanged(true)
       })
   }
 
@@ -1463,7 +1459,6 @@ class PlanEditorController {
     return this.$http.post(`/service/plan-transaction/${this.currentTransaction.id}/subnets-recalc?saveFeature=true`, recalcBody)
       .then(subnetResult => {
         this.state.planEditorChanged.next(true)
-        this.setIsPlanEditorChanged(true)
         subnetResult.data.forEach(subnet => {
           this.subnetMapObjects[subnet.feature.objectId] = []
           subnet.feature.subnetLinks.forEach(subnetLink => {
@@ -1675,7 +1670,6 @@ class PlanEditorController {
       clearCoverageForBoundary: objectId => dispatch(coverageActions.addBoundaryCoverage(objectId, null)),
       clearBoundaryCoverage: () => dispatch(coverageActions.clearBoundaryCoverage()),
       setSelectedDisplayMode: displayMode => dispatch(ToolBarActions.selectedDisplayMode(displayMode)),
-      setIsPlanEditorChanged: isPlanEditorChanged => dispatch(PlanEditorActions.setIsPlanEditorChanged(isPlanEditorChanged)),
     }
   }
 
