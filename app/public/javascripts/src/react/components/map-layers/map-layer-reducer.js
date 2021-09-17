@@ -58,7 +58,8 @@ const defaultState = {
       isVisible: true,
       strokeType: 'UNDERGROUND_LINE'
     }
-  }
+  },
+  activeMapLayers: {},
 }
 
 // ToDo: reafctor "checked" to be a collection of subtypes
@@ -323,6 +324,10 @@ function setEdgeConstructionTypeIds (state, apiTypes) {
   return { ...state, edgeConstructionTypes: newEdgeConstructionTypes}
 }
 
+  function setActiveMapLayers (state, activeMapLayers) {
+    return { ...state, activeMapLayers }
+  }
+
 function mapLayersReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.LAYERS_SET_LOCATION:
@@ -402,6 +407,9 @@ function mapLayersReducer (state = defaultState, action) {
 
     case Actions.LAYERS_SET_EDGE_CONSTRUCTION_TYPE_IDS:
       return setEdgeConstructionTypeIds(state, action.payload)
+
+    case Actions.LAYERS_SET_ACTIVE_MAP_LAYERS:
+      return setActiveMapLayers(state, action.payload)
 
     default:
       return state

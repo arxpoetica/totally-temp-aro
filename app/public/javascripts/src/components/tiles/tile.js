@@ -15,6 +15,7 @@ import MenuItem, { MenuItemTypes } from '../common/context-menu/menu-item'
 import FeatureSets from '../../react/common/featureSets'
 import ToolBarActions from '../../react/components/header/tool-bar-actions'
 import PlanEditorSelectors from '../../react/components/plan-editor/plan-editor-selectors.js'
+import MapLayerActions from '../../react/components/map-layers/map-layer-actions'
 import { dequal } from 'dequal'
 
 class TileComponentController {
@@ -689,6 +690,7 @@ class TileComponentController {
       // Map not initialized yet
       return
     }
+    this.setActiveMapLayers(newMapLayers)
     this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setMapLayers(newMapLayers)
     this.refreshMapTiles()
   }
@@ -769,7 +771,8 @@ class TileComponentController {
 
   mapDispatchToTarget (dispatch) {
     return {
-      rActiveViewModePanelAction: (value) => dispatch(ToolBarActions.activeViewModePanel(value))
+      rActiveViewModePanelAction: (value) => dispatch(ToolBarActions.activeViewModePanel(value)),
+      setActiveMapLayers: (value) => dispatch(MapLayerActions.setActiveMapLayers(value)),
      }
   }
 
