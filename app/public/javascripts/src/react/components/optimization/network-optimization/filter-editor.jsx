@@ -5,6 +5,7 @@ import NetworkOptimizationActions from './network-optimization-actions'
 import { Select } from '../../common/forms/Select.jsx'
 import { Input } from '../../common/forms/Input.jsx'
 import cx from 'clsx'
+import moment from 'moment'
 import './editor-interfaces.css'
 
 
@@ -65,9 +66,13 @@ export const FilterEditor = ({
         // adds extra information from the metadta, that is needed for display
         const loadedFilters = validatedConstraints.map((constraint) => {
           const newActiveFilter = JSON.parse(JSON.stringify(filters.find((filter) => filter.name === constraint.propertyName)))
+
           newActiveFilter.operator = constraint.op
           newActiveFilter.value1 = constraint.value
           newActiveFilter.value2 = constraint.value2
+          if (newActiveFilter.propertyType === 'DATE' || 'DATETIME') {
+            newActiveFilter.value1 = moment(parseInt(newActiveFilter.value1)).format('YYYY-MM-DDThh:mm:ss.SSS')
+          }
           return newActiveFilter
         })
         setActiveFilters(loadedFilters)
