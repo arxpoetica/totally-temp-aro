@@ -78,6 +78,23 @@ export class RoicReportsSummary extends Component {
             </tr>
 
             <tr>
+              {/* Capex per premises is being calculated as Total Capex in $s
+              divided by number of premises in year 0.
+              No. of premises varies according to selected Network type and Entity type
+              that's why Capex Per Premises is fixed with their default values */}
+              {/* Note to self: singular of premises is premises, not premise */}
+              <td className='roic-report-field-title'>Capex Per Premises</td>
+              <td>{roicResults.priceModel
+              && 'PLANNED_NETWORK' in roicResults.roicAnalysis.components
+              && roicResults.roicAnalysis.components['PLANNED_NETWORK']['network.premises']
+              && roicResults.roicAnalysis.components['PLANNED_NETWORK']['network.premises'].values.length
+              && currencyFormatter.format(
+                (roicResults.priceModel.totalCost
+                / roicResults.roicAnalysis.components['PLANNED_NETWORK']['network.premises'].values[0]) // no. of premises in year 0
+                .toFixed(2))}</td>
+            </tr>
+
+            <tr>
               <td colSpan="2"><strong>Fiber Capex</strong></td>
             </tr>
             {roicResults.priceModel && roicResults.priceModel.fiberCosts.map((fiberCost, index) => {
@@ -86,7 +103,7 @@ export class RoicReportsSummary extends Component {
                   <td className="indent-1 text-capitalize">
                     {FIBER_STRINGS[fiberCost.fiberType]} -&nbsp;
                     {`${CABLE_CONSTRUCTION_STRINGS[fiberCost.edgeFeatureType + '.' + fiberCost.edgeConstructionType]} `}
-                    ({Math.round((fiberCost.lengthMeters * this.config.length.meters_to_length_units))}&nbsp;
+                    ({(fiberCost.lengthMeters * this.config.length.meters_to_length_units).toFixed(2)}&nbsp;
                     {this.config.length.length_units})
                   </td>
                   <td>{currencyFormatter.format((fiberCost.totalCost / 1000).toFixed(1)) + ' K'}</td>

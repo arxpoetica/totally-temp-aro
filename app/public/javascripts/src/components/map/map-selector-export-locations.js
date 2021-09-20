@@ -1,3 +1,4 @@
+import { updateDrawingManagerState } from '../../shared-utils/utilities'
 class MapSelectorExportLocationsController {
   constructor ($document, $http, state, Utils, $ngRedux) {
     this.mapRef = null
@@ -14,7 +15,7 @@ class MapSelectorExportLocationsController {
     state.selectedDisplayMode.subscribe((newValue) => {
       this.selectedDisplayMode = newValue
       this.targetSelectionMode = this.state && (this.state.selectedTargetSelectionMode || this.rSelectedTargetSelectionMode)
-      this.updateDrawingManagerState()
+      updateDrawingManagerState(this.drawingManager, this.selectedDisplayMode, this.targetSelectionMode, this.state, this.displayModes, this.mapRef)
     })
   }
 
@@ -22,21 +23,6 @@ class MapSelectorExportLocationsController {
     if (this.unsub) { this.unsub.unsubscribe() }
 
     if (this.drawingManager) {
-      this.drawingManager.setDrawingMode('marker')
-      this.drawingManager.setMap(null)
-    }
-  }
-
-  updateDrawingManagerState () {
-    if (!this.drawingManager) {
-      return
-    }
-
-    if (this.selectedDisplayMode === this.displayModes.VIEW &&
-        this.targetSelectionMode === this.state.targetSelectionModes.POLYGON_EXPORT_TARGET) {
-      this.drawingManager.setDrawingMode('polygon')
-      this.drawingManager.setMap(this.mapRef)
-    } else {
       this.drawingManager.setDrawingMode('marker')
       this.drawingManager.setMap(null)
     }
@@ -111,7 +97,7 @@ class MapSelectorExportLocationsController {
     var oldValue = this.targetSelectionMode
     this.targetSelectionMode = this.state.selectedTargetSelectionMode || this.rSelectedTargetSelectionMode
     if (this.targetSelectionMode !== oldValue) {
-      this.updateDrawingManagerState()
+      updateDrawingManagerState(this.drawingManager, this.selectedDisplayMode, this.targetSelectionMode, this.state, this.displayModes, this.mapRef)
     }
   }
 

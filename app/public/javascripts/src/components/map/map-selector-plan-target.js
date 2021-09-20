@@ -1,4 +1,5 @@
 import SelectionActions from '../../react/components/selection/selection-actions'
+import { updateDrawingManagerState } from '../../shared-utils/utilities'
 
 class MapSelectorPlanTargetController {
   constructor ($document, $ngRedux, state) {
@@ -12,7 +13,7 @@ class MapSelectorPlanTargetController {
     state.selectedDisplayMode.subscribe((newValue) => {
       this.selectedDisplayMode = newValue
       this.targetSelectionMode = this.state && (this.state.selectedTargetSelectionMode || this.rSelectedTargetSelectionMode)
-      this.updateDrawingManagerState()
+      updateDrawingManagerState(this.drawingManager, this.selectedDisplayMode, this.targetSelectionMode, this.state, this.displayModes, this.mapRef)
     })
     this.state = state
     this.document = $document
@@ -40,21 +41,6 @@ class MapSelectorPlanTargetController {
     }
     if (idsToRemove.size > 0) {
       this.removePlanTargets(this.activePlanId, { [planTargetKey]: idsToRemove })
-    }
-  }
-
-  updateDrawingManagerState () {
-    if (!this.drawingManager) {
-      return
-    }
-
-    if ((this.selectedDisplayMode === this.displayModes.ANALYSIS || this.selectedDisplayMode === this.displayModes.VIEW) &&
-        this.targetSelectionMode === this.state.targetSelectionModes.POLYGON_PLAN_TARGET) {
-      this.drawingManager.setDrawingMode('polygon')
-      this.drawingManager.setMap(this.mapRef)
-    } else {
-      this.drawingManager.setDrawingMode('marker')
-      this.drawingManager.setMap(null)
     }
   }
 
@@ -100,7 +86,7 @@ class MapSelectorPlanTargetController {
     var oldValue = this.targetSelectionMode
     this.targetSelectionMode = this.state.selectedTargetSelectionMode || this.rSelectedTargetSelectionMode
     if (this.targetSelectionMode !== oldValue) {
-      this.updateDrawingManagerState()
+      updateDrawingManagerState(this.drawingManager, this.selectedDisplayMode, this.targetSelectionMode, this.state, this.displayModes, this.mapRef)
     }
   }
 

@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import './tool-bar.css'
-import ToolBarSearch from './tool-bar-search.jsx'
+import LocationSearch from './location-search.jsx'
 import Tools from '../tool/tools'
 import MapActions from '../map/map-actions'
 import ToolBarActions from './tool-bar-actions'
@@ -201,7 +201,7 @@ export class ToolBar extends Component {
     return (
       <div className="tool-bar" style={{margin: marginPixels, backgroundColor: configuration.toolbar.toolBarColor}}>
         { leftElement }
-        <ToolBarSearch/>
+        <LocationSearch currentView='toolBarSearch'/>
         <div className="separator"></div>
 
         {configuration.perspective.showToolbarButtons.globalSettings &&
@@ -1031,11 +1031,13 @@ export class ToolBar extends Component {
 
   setSelectionSingle () {
     this.props.selectedToolBarAction(null)
+    this.props.mapRef.setOptions({ draggableCursor: null })
     this.setSelectionMode(this.targetSelectionModes.SINGLE_PLAN_TARGET)
   }
 
   setSelectionPolygon () {
     this.props.selectedToolBarAction(null)
+    this.props.mapRef.setOptions({ draggableCursor: 'crosshair' })
     this.setSelectionMode(this.targetSelectionModes.POLYGON_PLAN_TARGET)
   }
 

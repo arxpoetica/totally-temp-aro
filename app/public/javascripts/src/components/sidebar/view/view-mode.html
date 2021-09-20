@@ -52,7 +52,7 @@
 
       <accordion-panel-title title="'Plan Info'" panel-id="$ctrl.state.viewModePanels.PLAN_INFO" ng-if="$ctrl.state.configuration.perspective.showViewModePanels[$ctrl.state.viewModePanels.PLAN_INFO]"></accordion-panel-title>
       <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.PLAN_INFO" ng-if="$ctrl.state.configuration.perspective.showViewModePanels[$ctrl.state.viewModePanels.PLAN_INFO]">
-        <network-plan-manage ng-if="($ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.PLAN_INFO) || $ctrl.rActiveViewModePanel === $ctrl.state.viewModePanels.PLAN_INFO"></network-plan-manage>
+        <r-network-plan-manage ng-if="($ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.PLAN_INFO) || $ctrl.rActiveViewModePanel === $ctrl.state.viewModePanels.PLAN_INFO"></r-network-plan-manage>
       </accordion-panel-contents>
       <accordion-panel-title title="'Plan Summary'" panel-id="$ctrl.state.viewModePanels.PLAN_SUMMARY_REPORTS" ng-if="$ctrl.state.configuration.perspective.showViewModePanels[$ctrl.state.viewModePanels.PLAN_SUMMARY_REPORTS]"></accordion-panel-title>
       <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.PLAN_SUMMARY_REPORTS" ng-if="$ctrl.state.configuration.perspective.showViewModePanels[$ctrl.state.viewModePanels.PLAN_SUMMARY_REPORTS]">

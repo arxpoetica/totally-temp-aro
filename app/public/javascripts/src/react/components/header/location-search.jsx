@@ -4,11 +4,12 @@ import Select from 'react-select'
 import { selectStyles } from '../../common/view-utils.js'
 import AroHttp from '../../common/aro-http'
 import uuidStore from '../../../shared-utils/uuid-store'
-// import cx from 'clsx'
+import PlanActions from '../plan/plan-actions.js'
 
-const ToolBarSearch = ({ defaultPlanCoordinates, mapRef }) => {
+const ToolBarSearch = (props) => {
 
   const [options, setOptions] = useState([])
+  const { defaultPlanCoordinates, mapRef, currentView, plan } = props
 
   let timer
   const handleInputChange = (searchTerm, { action }) => {
@@ -48,11 +49,21 @@ const ToolBarSearch = ({ defaultPlanCoordinates, mapRef }) => {
           console.error('Geocoder failed: ' + status)
           return
         }
-        const { lat, lng } = results[0].geometry.location
-        setMarker(lat(), lng())
+
+        // While Editing the existing plan, if user modified the location details then update the plan,
+        // When location change from top tool-bar search box, update the 'lat', 'lag' to change the marker values.
+        if (currentView && currentView === 'viewModePlanInfo') {
+          plan.areaName = change.displayText
+          plan.latitude = results[0].geometry.location.lat()
+          plan.longitude = results[0].geometry.location.lng()
+          AroHttp.put(`/service/v1/plan`, plan)
+        } else if (currentView && currentView !== 'viewModePlanInfo') { 
+          const { lat, lng } = results[0].geometry.location
+          setMarker(lat(), lng()) 
+        }
       })
     } else if (change.type === 'latlng') {
-      setMarker(+change.value[0], +change.value[1])
+      if (currentView && currentView !== 'viewModePlanInfo') { setMarker(+change.value[0], +change.value[1]) }
     }
   }
 
@@ -68,6 +79,14 @@ const ToolBarSearch = ({ defaultPlanCoordinates, mapRef }) => {
     setTimeout(() => { marker.setMap(null) }, 5000)
   }
 
+  const setDefaultLocation = () => {
+    if (currentView && currentView === 'viewModePlanInfo') {
+      return plan && { label: plan.areaName }
+    } else {
+      return []
+    }
+  }  
+  
   return (
     <div className="aro-toolbar-search" style={{ flex: '0 0 250px', margin: 'auto', width: '250px' }}>
       <Select
@@ -79,6 +98,7 @@ const ToolBarSearch = ({ defaultPlanCoordinates, mapRef }) => {
         onFocus={() => setOptions([])}
         onBlur={() => setOptions([])}
         styles={selectStyles}
+        defaultValue={setDefaultLocation()}
       />
     </div>
   )
@@ -87,6 +107,9 @@ const ToolBarSearch = ({ defaultPlanCoordinates, mapRef }) => {
 const mapStateToProps = (state) => ({
   defaultPlanCoordinates: state.plan.defaultPlanCoordinates,
   mapRef: state.map.googleMaps,
+  plan: state.plan.activePlan,
 })
-const mapDispatchToProps = dispatch => ({})
+const mapDispatchToProps = dispatch => ({
+  editActivePlan: (plan) => dispatch(PlanActions.editActivePlan(plan)),
+})
 export default connect(mapStateToProps, mapDispatchToProps)(ToolBarSearch)
