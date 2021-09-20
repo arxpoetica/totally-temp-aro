@@ -255,3 +255,28 @@
 .equipment-list {
   position: relative;
 }
+
+/* Boundary Coverage */
+
+.bounds-coverage-header {
+  cursor: auto;
+}
+
+.bounds-coverage-header-sub {
+  padding-left: 10px;
+}
+
+.bounds-coverage-layer-cat {
+  margin-top: 10px;
+  margin-bottom: 4px;
+}
+
+.bounds-coverage-layer-tag {
+  padding-left: 20px;
+  margin-bottom: 10px;
+}
+
+.bounds-coverage-layer-tag-count {
+  margin-left: 20px;
+  font-weight: bold;
+}

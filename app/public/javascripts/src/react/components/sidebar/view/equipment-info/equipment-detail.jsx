@@ -2,9 +2,11 @@ import React, { useState } from 'react'
 import reduxStore from '../../../../../redux-store'
 import wrapComponentWithProvider from '../../../../common/provider-wrapped-component'
 import { viewModePanels } from '../../constants'
+import BoundaryCoverage from './boundary-coverage.jsx'
 import EquipmentDetailList from './equipment-detail-list.jsx'
 import SelectionActions from '../../../selection/selection-actions'
 import ToolBarActions from '../../../header/tool-bar-actions'
+import StateViewModeActions from '../../../state-view-mode/state-view-mode-actions'
 import  AroHttp from '../../../../common/aro-http'
 import RxState from '../../../../common/rxState'
 
@@ -22,29 +24,20 @@ export const equipmentDetail = (props) => {
     currentEquipmentDetailView: EquipmentDetailView.List,
     selectedEquipmentGeog: [],
     headerIcon: '',
-    networkNodeLabel: ''
+    networkNodeLabel: '',
+    boundsObjectId: null,
+    showCoverageOutput: false,
+    coverageOutput: null,
+    equipmentData: null,
+    boundsData: null,
+    isWorkingOnCoverage: false,
+    isComponentDestroyed: false,
   })
 
-  const { currentEquipmentDetailView, selectedEquipmentGeog, headerIcon, networkNodeLabel } = state
+  const { currentEquipmentDetailView, selectedEquipmentGeog, headerIcon, networkNodeLabel, boundsObjectId,
+    showCoverageOutput, coverageOutput, equipmentData, boundsData, isComponentDestroyed } = state
   const { activeViewModePanel, plan, cloneSelection, setMapSelection, loggedInUser, networkEquipment,
-    activeViewModePanelAction } = props
-
-  const viewSelectedEquipment = (selectedEquipment, isZoom) => {
-    var objectId = selectedEquipment.objectId || selectedEquipment.object_id
-    updateSelectedState(selectedEquipment)
-    displayEquipment(plan.id, objectId).then((equipmentInfo) => {
-      if (typeof equipmentInfo !== 'undefined') {
-        const mapObject = {
-          latitude: selectedEquipmentGeog[1] || 20.5937,
-          longitude: selectedEquipmentGeog[0] || 78.9629,
-        }
-        const ZOOM_FOR_EQUIPMENT_SEARCH = 14
-        rxState.requestSetMapCenter.sendMessage(mapObject)
-        isZoom && rxState.requestSetMapZoom.sendMessage(ZOOM_FOR_EQUIPMENT_SEARCH)
-      }
-      // this.checkForBounds(objectId)
-    })
-  }
+    activeViewModePanelAction, showSiteBoundary, getOptimizationBody } = props
 
   const updateSelectedState = (selectedFeature) => {
     const newSelection = cloneSelection()
@@ -58,11 +51,10 @@ export const equipmentDetail = (props) => {
   }
 
   const displayEquipment = (planId, objectId) => {
-    // this.coverageOutput = null
-    // this.showCoverageOutput = false
+    setState((state) => ({ ...state, coverageOutput: null, showCoverageOutput: false }))
 	  return AroHttp.get(`/service/plan-feature/${planId}/equipment/${objectId}?userId=${loggedInUser.id}`)
       .then((result) => {
-        const equipmentInfo = {"dataType":"equipment","objectId":"568c42b3-0189-4c73-84e4-c36b06b02885","geometry":{"type":"Point","coordinates":[-122.350346,47.587277999999976]},"attributes":{},"networkNodeType":"bulk_distribution_terminal","subtypeId":null,"networkNodeEquipment":{"existingEquipment":[],"plannedEquipment":[{"equipmentTypeCategoryId":6,"equipmentItemId":24,"quantity":1.0,"constructionCost":0.0,"installCost":0.0,"rank":1,"equipmentName":"drop_coil","subComponents":[],"oneTimeCost":false}]},"subnetId":null,"deploymentType":"PLANNED","exportedAttributes":{}}
+        const equipmentInfo = result.data
         if (equipmentInfo.hasOwnProperty('dataType') && equipmentInfo.hasOwnProperty('objectId')) {
           if (networkEquipment.equipments.hasOwnProperty(equipmentInfo.networkNodeType)) {
             setState((state) => ({ ...state,
@@ -72,18 +64,18 @@ export const equipmentDetail = (props) => {
           } else {
             // no icon
             setState((state) => ({ ...state,
-              headerIcon: '', networkNodeLabel: equipmentInfo.networkNodeType
+              headerIcon: '',networkNodeLabel: equipmentInfo.networkNodeType
             }))
           }
 
-          // this.equipmentData = equipmentInfo
-
           // this.networkNodeType = equipmentInfo.networkNodeType
-
           // this.equipmentFeature = AroFeatureFactory.createObject(equipmentInfo).networkNodeEquipment
           // this.currentEquipmentDetailView = this.EquipmentDetailView.Detail
 
-          setState((state) => ({ ...state, selectedEquipmentGeog: equipmentInfo.geometry.coordinates }))
+          setState((state) => ({ ...state,
+            equipmentData: equipmentInfo, 
+            selectedEquipmentGeog: equipmentInfo.geometry.coordinates
+          }))
           activeViewModePanelAction(viewModePanels.EQUIPMENT_INFO)
         } else {
           // this.clearSelection()
@@ -94,14 +86,86 @@ export const equipmentDetail = (props) => {
       })
   }
 
+  const viewSelectedEquipment = (selectedEquipment, isZoom) => {
+    var objectId = selectedEquipment.objectId || selectedEquipment.object_id
+    updateSelectedState(selectedEquipment)
+    displayEquipment(plan.id, objectId).then((equipmentInfo) => {
+      if (typeof equipmentInfo !== 'undefined') {
+        const mapObject = {
+          latitude: selectedEquipmentGeog[1],
+          longitude: selectedEquipmentGeog[0],
+        }
+        const ZOOM_FOR_EQUIPMENT_SEARCH = 14
+        rxState.requestSetMapCenter.sendMessage(mapObject)
+        isZoom && rxState.requestSetMapZoom.sendMessage(ZOOM_FOR_EQUIPMENT_SEARCH)
+      }
+      checkForBounds(equipmentInfo)
+    })
+  }
+
+  const checkForBounds = (equipmentInfo) => {
+    if (!equipmentInfo.hasOwnProperty('objectId')) {
+      setState((state) => ({ ...state, boundsData: null }))
+      return
+    }
+    var equipmentId = equipmentInfo.objectId
+    var filter = `rootPlanId eq ${plan.id} and networkNodeObjectId eq guid'${equipmentId}'`
+    AroHttp.get(`/service/odata/NetworkBoundaryEntity?$filter=${filter}`)
+      .then((result) => {
+        if (result.data.length < 1) {
+          setState((state) => ({ ...state, boundsObjectId: null, boundsData: null }))
+        } else {
+          setState((state) => ({ ...state, boundsObjectId: result.data.objectId, boundsData: result.data }))
+        }
+      })
+  }
+
+  const onRequestCalculateCoverage = () => {
+    if (equipmentData && boundsData) {
+      calculateCoverage(boundsData, equipmentData.geometry)
+    }
+  }
+
+   // ToDo: very similar function to the one in plan-editor.js combine those
+   const calculateCoverage = (boundsData, equipmentPoint, directed) => {
+    if (typeof directed === 'undefined') directed = false
+    // Get the POST body for optimization based on the current application state
+    var optimizationBody = getOptimizationBody()
+    // Replace analysis_type and add a point and radius
+    optimizationBody.boundaryCalculationType = 'FIXED_POLYGON'
+    optimizationBody.analysis_type = 'COVERAGE'
+    optimizationBody.point = equipmentPoint
+    optimizationBody.polygon = boundsData.geom
+    optimizationBody.directed = directed // directed analysis if thats what the user wants
+    setState((state) => ({ ...state, isWorkingOnCoverage: true }))
+
+    //AroHttp.post('/service/v1/network-analysis/boundary', optimizationBody)
+    AroHttp.get('/service/auth/users')
+      .then(result => {
+        // // The user may have destroyed the component before we get here. In that case, just return
+        if (isComponentDestroyed) {
+          return Promise.reject(new Error('Plan editor was closed while a boundary was being calculated'))
+        }
+        setState((state) => ({ ...state,
+          coverageOutput: result.data, 
+          showCoverageOutput: true,
+          isWorkingOnCoverage: false,
+        }))
+      })
+      .catch((err) => {
+        console.error(err)
+        setState((state) => ({ ...state, isWorkingOnCoverage: false }))
+      })
+  }
+
   return (
     <div className="ei-panel">
       {
-        currentEquipmentDetailView === EquipmentDetailView.List &&
+        currentEquipmentDetailView === EquipmentDetailView.Detail &&
           <div className="ei-panel-header clearfix">
           {
             headerIcon != ''  &&
-            <img className="ei-panel-header-icon" src={headerIcon} alt="Equipment Icon"/>
+            <img className="ei-panel-header-icon" src={headerIcon} alt="Equipment Icon" />
           }
           <div className="ei-panel-header-title">{networkNodeLabel}</div>
           <div className="sidebar-header-subinfo">
@@ -111,13 +175,32 @@ export const equipmentDetail = (props) => {
         </div>
       }
       <div className="equipment-detail ei-panel-content">
-        <div className="ei-panel-header-title">Equipment List</div>
+      {
+        currentEquipmentDetailView === EquipmentDetailView.Detail &&
+        <>
         {
-          currentEquipmentDetailView === EquipmentDetailView.List && activeViewModePanel === viewModePanels.EQUIPMENT_INFO &&
-          <div className="equipment-list">
-            <EquipmentDetailList onClickObject={viewSelectedEquipment}/>
+          boundsObjectId && showSiteBoundary &&
+          <div className="equipment-detail-bounds">
+            <hr className="equipment-detail-hr" />
+            <button className="btn btn-primary btn-sm" onClick={() => onRequestCalculateCoverage()}>
+              calculate coverage
+            </button>
+            {
+              showCoverageOutput &&
+              <BoundaryCoverage selectedBoundaryCoverage={coverageOutput} />
+            }
           </div>
         }
+        </>
+      }
+      <br />
+      <div className="ei-panel-header-title">Equipment List</div>
+      {
+        currentEquipmentDetailView === EquipmentDetailView.List && activeViewModePanel === viewModePanels.EQUIPMENT_INFO &&
+        <div className="equipment-list">
+          <EquipmentDetailList onClickObject={viewSelectedEquipment}/>
+        </div>
+      }
       </div>
     </div>
   )
@@ -128,12 +211,14 @@ const mapStateToProps = (state) => ({
   plan: state.plan.activePlan,
   networkEquipment: state.mapLayers.networkEquipment,
   loggedInUser: state.user.loggedInUser,
+  showSiteBoundary: state.mapLayers.showSiteBoundary,
 })
 
 const mapDispatchToProps = (dispatch) => ({
   cloneSelection: () => dispatch(SelectionActions.cloneSelection()),
   activeViewModePanelAction: (value) => dispatch(ToolBarActions.activeViewModePanel(value)),
   setMapSelection: (mapSelection) => dispatch(SelectionActions.setMapSelection(mapSelection)),
+  getOptimizationBody: () => dispatch(StateViewModeActions.getOptimizationBody()),
 })
 
 export default wrapComponentWithProvider(reduxStore, equipmentDetail, mapStateToProps, mapDispatchToProps)
