@@ -170,7 +170,7 @@
 
 /* ========================= >>>>> plan editor header >>>>> */
 
-.plan-editor-header {
+.plan-editor-thumb {
   position: relative;
   margin: 0 0 10px;
   padding: 10px;
@@ -178,31 +178,34 @@
   border: solid 1px #ccc;
   cursor: pointer;
 }
-.plan-editor-header.selected { border-color: #4aa34b; }
-.plan-editor-header h2 { margin: 0 0 10px; }
-.plan-editor-header .info {
+.plan-editor-thumb.selected {
+  padding: 8px;
+  border: 2px solid #49a24a;
+}
+.plan-editor-thumb h2 { margin: 0 0 10px; }
+.plan-editor-thumb .info {
   display: flex;
   align-items: center;
   margin: 0 0 8px;
   padding-right: 20px; /* for the close button */
 }
-.plan-editor-header img { margin: 0 12px 0 0; }
-.plan-editor-header h2 { margin: 0; }
-.plan-editor-header p { margin: 0; }
-.plan-editor-header .subinfo {
+.plan-editor-thumb img { margin: 0 12px 0 0; }
+.plan-editor-thumb h2 { margin: 0; }
+.plan-editor-thumb p { margin: 0; }
+.plan-editor-thumb .subinfo {
   display: grid;
   grid-auto-flow: column;
   grid-gap: 10px;
   align-items: center;
 }
-.plan-editor-header .item {
+.plan-editor-thumb .item {
   align-items: center;
   margin: 0;
 }
-.plan-editor-header input {
+.plan-editor-thumb input {
   margin-left: 5px;
 }
-.plan-editor-header-close {
+.plan-editor-thumb-close {
   position:absolute;
   top: 0px;
   right: 0px;

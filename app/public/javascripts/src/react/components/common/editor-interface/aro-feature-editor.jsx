@@ -6,6 +6,12 @@ import AroFeatureEditorNode from './aro-feature-editor-node.jsx'
 export class AroFeatureEditor extends Component {
   constructor (props) {
     super(props)
+
+    this.isCollapsible = true
+    this.isEditable = true
+    if ('isCollapsible' in props) this.isCollapsible = this.props.isCollapsible
+    if ('isEditable' in props) this.isEditable = this.props.isEditable
+
     //  this gets a serializable value as prop and NO meta
     //  then THIS COMPONENT does the AroFeatureFactory.createObject(this.props.value)
     //  AND makes the meta from the return
@@ -34,8 +40,8 @@ export class AroFeatureEditor extends Component {
         <AroFeatureEditorNode
           objPath=""
           omitRootContain={true}
-          isCollapsible={this.props.isCollapsible || true}
-          isEditable={this.props.isEditable || true}
+          isCollapsible={this.isCollapsible}
+          isEditable={this.isEditable}
           value={this.state.value} // this.state.value
           meta={this.state.meta}
           onChange={(event, propVal, path) => this._onChange(event, propVal, path)}

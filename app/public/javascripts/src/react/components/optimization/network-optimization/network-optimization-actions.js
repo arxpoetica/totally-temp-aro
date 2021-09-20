@@ -1,6 +1,7 @@
 import Actions from '../../../common/actions'
 import AroHttp from '../../../common/aro-http'
 import PlanActions from '../../plan/plan-actions'
+import SelectionActions from '../../selection/selection-actions'
 import { batch } from 'react-redux'
 
 function runOptimization(inputs, userId) { // shouldn't be getting userId from caller
@@ -23,7 +24,7 @@ function runOptimization(inputs, userId) { // shouldn't be getting userId from c
   }
 }
 
-function cancelOptimization (planId, optimizationId) {
+function cancelOptimization(planId, optimizationId) {
   // TODO: check that optimizationId is not null
   return (dispatch, getState) => {
     dispatch({
@@ -49,7 +50,7 @@ function cancelOptimization (planId, optimizationId) {
   }
 }
 
-function loadOptimizationInputs (planId) {
+function loadOptimizationInputs(planId) {
   // if (typeof planId === 'undefined') return {} ToDo: figure this out
   return (dispatch, getState) => {
     const state = getState()
@@ -66,7 +67,7 @@ function loadOptimizationInputs (planId) {
   }
 }
 
-function setOptimizationInputs (inputs) {
+function setOptimizationInputs(inputs) {
   return (dispatch) => {
     var layerKeys = []
     if (inputs.locationConstraints && inputs.locationConstraints.locationTypes) {
@@ -140,7 +141,7 @@ function setOptimizationInputs (inputs) {
   }
 }
 
-function setNetworkAnalysisType (networkAnalysisType) {
+function setNetworkAnalysisType(networkAnalysisType) {
   return {
     type: Actions.NETWORK_OPTIMIZATION_SET_ANALYSIS_TYPE,
     payload: networkAnalysisType
@@ -153,7 +154,7 @@ const modifyDialogResult = Object.freeze({
   OVERWRITE: 1
 })
 
-function modifyOptimization (plan)  {
+function modifyOptimization(plan)  {
   return dispatch => {
     const currentPlan = plan
     if (currentPlan.ephemeral) {
@@ -189,7 +190,7 @@ function modifyOptimization (plan)  {
   }
 }
 
-function showModifyQuestionDialog () {
+function showModifyQuestionDialog() {
   return new Promise((resolve) => {
     swal({
       title: '',
@@ -207,7 +208,7 @@ function showModifyQuestionDialog () {
   })
 }
 
-function loadFilters () {
+function loadFilters() {
   return (dispatch, getState) => {
     const state = getState()
     const client = state.configuration.system.ARO_CLIENT
@@ -233,12 +234,51 @@ function loadFilters () {
   }
 }
 
-function setActiveFilters (filters) {
+function setActiveFilters(filters) {
   return (dispatch) => {
     dispatch({
       type: Actions.NETWORK_OPTIMIZATION_SET_ACTIVE_FILTERS,
       payload: filters
     })
+  }
+}
+
+function getLocationPreview(planId, updatedLocationConstraints) {
+  return async(dispatch, getState) => {
+    try {
+      const body = {
+        planId,
+        locationConstraints: updatedLocationConstraints,
+      }
+
+      dispatch({
+        type: Actions.SELECTION_SET_ACTIVE_MODE,
+        payload: 'SELECTED_LOCATIONS',
+      })
+
+      const { data } = await AroHttp.post('service/v1/optimize/location-preview', body)
+
+      // FIXME: harry made a concession to give us `location_id` as `id` here.
+      // FIXME: we need to stop using `location_id`
+      // FIXME: however the rest of the tile layer system uses it all over the place,
+      // FIXME: including the Node.js location routes and models which also need to
+      // FIXME: be converted to GUIDs and to service API endpoints
+      const locations = new Set()
+      for (const item of data) {
+        for (const ids of item.ids) {
+          locations.add(ids.id)
+        }
+      }
+      dispatch(SelectionActions.addPlanTargets(planId, {
+        locations: [...locations],
+        serviceAreas: [],
+        analysisAreas: [],
+        allServiceAreas: []
+      }))
+
+    } catch (error) {
+      console.log(error)
+    }
   }
 }
 
@@ -251,4 +291,5 @@ export default {
   modifyOptimization,
   loadFilters,
   setActiveFilters,
+  getLocationPreview,
 }

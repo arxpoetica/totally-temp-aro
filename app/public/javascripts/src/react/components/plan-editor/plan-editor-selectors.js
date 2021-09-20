@@ -148,8 +148,8 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
   if (subnet) {
     const subnetLocationsIds = Object.keys(subnet.subnetLocationsById)
 
-    if (subnetLocationsIds.length > 0 && typeof getNetworkConfig !== 'undefined') {
-      // FIXME: Check these are the right sources of information
+    if (subnetLocationsIds.length > 0 && typeof networkConfig !== 'undefined') {
+      // TODO: Check these are the right sources of information
       const maxDropCableLength = networkConfig.terminalConfiguration.maxDistanceMeters
       const maxTerminalHomes = networkConfig.terminalConfiguration.outputConfig.max
       const maxHubHomes = networkConfig.hubConfiguration.outputConfig.max
@@ -282,7 +282,7 @@ const getLocationCounts = createSelector(
   (subnets, subnetFeatures, selectedEditFeatureIds) => {
     let locationCountsById = {}
     for (const id of selectedEditFeatureIds) {
-      if (subnetFeatures[id].feature.networkNodeType === 'fiber_distribution_hub') {
+      if (subnetFeatures[id] && subnetFeatures[id].feature.networkNodeType === 'fiber_distribution_hub') {
         // TODO: is this accurate ?
         locationCountsById[id] = Object.keys(subnets[id].subnetLocationsById).length
       } else {

@@ -39,7 +39,7 @@ const PlanEditorHeader = props => {
     <div
       key={id}
       className={cx(
-        'plan-editor-header',
+        'plan-editor-thumb',
         id === selectedSubnetId && 'selected',
       )}
       onClick={event => onClick(event, id)}
@@ -60,7 +60,7 @@ const PlanEditorHeader = props => {
         </div>
       </div>
       <button type="button" 
-        className="btn btn-sm plan-editor-header-close" 
+        className="btn btn-sm plan-editor-thumb-close" 
         aria-label="Close"
         onClick={event => onClose(event, id)}
       ><i className="fa fa-times"></i></button>
