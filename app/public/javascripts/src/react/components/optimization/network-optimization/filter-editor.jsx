@@ -245,7 +245,7 @@ export const FilterEditor = ({
           {activeFilter && activeFilter.propertyType && activeFilter.propertyType !== 'BOOLEAN' && <Select
             value={activeFilter.operator}
             placeholder="Select"
-            options={activeFilter.propertyType === 'DATETIME' || 'DATE' ? dateOptions : numberOptions}
+            options={activeFilter.propertyType === ('DATETIME' || 'DATE') ? dateOptions : numberOptions}
             onChange={event => selectOperator(event, activeFilter, index)}
             classes="ei-filter-select-operator"
             disabled={displayOnly}
