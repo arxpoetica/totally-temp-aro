@@ -45,6 +45,7 @@ export const FilterEditor = ({
   planId,
   updatedLocationConstraints,
   loadSelectionFromObjectFilter,
+  planTargets,
 }) => {
 
   useEffect(() => {
@@ -163,14 +164,19 @@ export const FilterEditor = ({
   }
 
   const handlePreview = () => {
+    const { serviceAreas } = planTargets
 
-    loadSelectionFromObjectFilter(planId, updatedLocationConstraints)
+    if (serviceAreas.size < 2){
+      loadSelectionFromObjectFilter(planId, updatedLocationConstraints)
+    } else {
+      swal({
+        title: 'Error',
+        text: 'Too many service areas selected',
+        type: 'error'
+      })
+    }
 
-    // swal({
-    //   title: 'Error',
-    //   text: 'Data set too large',
-    //   type: 'error'
-    // })
+
   }
   
   const ActiveFilterForm = (filter, index ) => {
@@ -285,6 +291,7 @@ const mapStateToProps = (state) => ({
   optimizationInputs: state.optimization.networkOptimization.optimizationInputs,
   planId: state.plan.activePlan.id,
   updatedLocationConstraints: NetworkOptimizationSelectors.getUpdatedLocationConstraints(state),
+  planTargets: state.selection.planTargets,
 })
 
 const mapDispatchToProps = dispatch => ({
