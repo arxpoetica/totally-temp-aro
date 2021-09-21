@@ -33,8 +33,8 @@ export class AroSearch extends Component {
   }
 
   handleOptionsList(entityTypeArg) {
-    const { entityType, configuration } = this.props
-    const configurationKey = entityType === entityTypeCons.SERVICE_AREA_VIEW ? 'code' : configuration
+    const { entityType, searchColumn } = this.props
+    const configurationKey = entityType === entityTypeCons.SERVICE_AREA_VIEW ? 'code' : searchColumn
     return entityTypeArg.map((type) => {
       return { id: type.id, value: type[configurationKey], label: type[configurationKey], name: type.name }
     })
@@ -62,25 +62,32 @@ export class AroSearch extends Component {
   handleChange(searchText) {
     this.setState({ searchText })
     const { entityType, entityTypeList } = this.props
-    const selectedBoundary = entityTypeList[entityType].find(boundary => {
+    const searchObj = entityTypeList[entityType].find(boundary => {
       return (
         boundary.objectId
         || boundary.code
         || boundary.tabblockId
+        || boundary.clli
       ) === searchText.label
     })
-    entityType === 'LocationObjectEntity'
-      ? this.onSearchResult(selectedBoundary)
-      : this.props.onSelectedBoundary(selectedBoundary)
+    if (entityType === entityTypeCons.LOCATION_OBJECT_ENTITY) {
+      this.onSearchResult(searchObj)
+    } else if (entityType === entityTypeCons.CENSUS_BLOCKS_ENTITY
+        || entityType === entityTypeCons.SERVICE_AREA_VIEW 
+        || entityType === entityTypeCons.ANALYSIS_AREA) {
+      this.props.onSelectedBoundary(searchObj)
+    } else if (entityType === entityTypeCons.NETWORK_EQUIPMENT_ENTITY) {
+      this.props.onSelectionChanged(searchObj, true)
+    }
   }
 
   handleInputChange(searchText, { action }) {
     switch (action) {
       case 'input-change':
         this.setState({ searchText })
-        const { entityType, searchColumn, configuration } = this.props
+        const { entityType, select, searchColumn, configuration } = this.props
         if (entityType) {
-          this.props.loadEntityList(entityType, searchText, searchColumn, configuration)
+          this.props.loadEntityList(entityType, searchText, select, searchColumn, configuration)
             .then(result => {
               if (JSON.parse(JSON.stringify(this.props.entityTypeList[entityType].length))) {
                 this.setState({ isDropDownEnable: true })

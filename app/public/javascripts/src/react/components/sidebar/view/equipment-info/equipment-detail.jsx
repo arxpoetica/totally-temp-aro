@@ -9,6 +9,7 @@ import ToolBarActions from '../../../header/tool-bar-actions'
 import StateViewModeActions from '../../../state-view-mode/state-view-mode-actions'
 import  AroHttp from '../../../../common/aro-http'
 import RxState from '../../../../common/rxState'
+import AroSearch from '../../view/aro-search.jsx'
 
 const EquipmentDetailView = Object.freeze({
   List: 0,
@@ -37,7 +38,7 @@ export const equipmentDetail = (props) => {
   const { currentEquipmentDetailView, selectedEquipmentGeog, headerIcon, networkNodeLabel, boundsObjectId,
     showCoverageOutput, coverageOutput, equipmentData, boundsData, isComponentDestroyed } = state
   const { activeViewModePanel, plan, cloneSelection, setMapSelection, loggedInUser, networkEquipment,
-    activeViewModePanelAction, showSiteBoundary, getOptimizationBody } = props
+    activeViewModePanelAction, showSiteBoundary, getOptimizationBody, configuration } = props
 
   const updateSelectedState = (selectedFeature) => {
     const newSelection = cloneSelection()
@@ -139,8 +140,7 @@ export const equipmentDetail = (props) => {
     optimizationBody.directed = directed // directed analysis if thats what the user wants
     setState((state) => ({ ...state, isWorkingOnCoverage: true }))
 
-    //AroHttp.post('/service/v1/network-analysis/boundary', optimizationBody)
-    AroHttp.get('/service/auth/users')
+    AroHttp.post('/service/v1/network-analysis/boundary', optimizationBody)
       .then(result => {
         // // The user may have destroyed the component before we get here. In that case, just return
         if (isComponentDestroyed) {
@@ -160,6 +160,20 @@ export const equipmentDetail = (props) => {
 
   return (
     <div className="ei-panel">
+      <div className="mb-2 mt-2">
+        {
+          activeViewModePanel === viewModePanels.EQUIPMENT_INFO &&
+          <AroSearch
+            objectName="Equipment"
+            labelId="clli"
+            entityType="NetworkEquipmentEntity"
+            select="id,clli,objectId"
+            searchColumn="clli"
+            configuration={configuration}
+            onSelectionChanged={viewSelectedEquipment}
+          />
+        }
+      </div>
       {
         currentEquipmentDetailView === EquipmentDetailView.Detail &&
           <div className="ei-panel-header clearfix">
@@ -212,6 +226,7 @@ const mapStateToProps = (state) => ({
   networkEquipment: state.mapLayers.networkEquipment,
   loggedInUser: state.user.loggedInUser,
   showSiteBoundary: state.mapLayers.showSiteBoundary,
+  configuration: state.toolbar.appConfiguration,
 })
 
 const mapDispatchToProps = (dispatch) => ({

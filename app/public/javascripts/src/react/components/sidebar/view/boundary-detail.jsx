@@ -27,8 +27,8 @@ export const BoundaryDetail = (props) => {
   const [state, setState] = useState({
     selectedBoundaryType: '',
     entityType: '',
-    searchColumn: '',
-    configuration: '',
+    select: '',
+    searchcolumn: '',
     selectedBoundaryInfo: null,
     selectedSAInfo: null,
     selectedAnalysisAreaInfo: null,
@@ -36,7 +36,7 @@ export const BoundaryDetail = (props) => {
     toggleOtherAttributes: false,
   })
 
-  const { selectedBoundaryType, entityType, searchColumn, configuration, selectedBoundaryInfo,
+  const { selectedBoundaryType, entityType, select, searchcolumn, selectedBoundaryInfo,
     selectedSAInfo, selectedAnalysisAreaInfo, selectedBoundaryTags, toggleOtherAttributes } = state
 
   // To get the previous props or state, currently we can do it manually with a usePrevious() custom Hook.
@@ -133,22 +133,22 @@ export const BoundaryDetail = (props) => {
       if (boundaryLayerType === boundryTypeCons.CENSUS_BLOCKS) {
         setState((state) => ({ ...state,
           entityType: entityTypeCons.CENSUS_BLOCKS_ENTITY,
-          searchColumn: 'id,tabblockId',
-          configuration: 'tabblockId',
+          select: 'id,tabblockId',
+          searchcolumn: 'tabblockId',
         }))
       }
       if (boundaryLayerType === boundryTypeCons.WIRECENTER) {
         setState((state) => ({ ...state,
           entityType: entityTypeCons.SERVICE_AREA_VIEW,
-          searchColumn: 'id,code,name,centroid',
-          configuration: 'code,name',
+          select: 'id,code,name,centroid',
+          searchcolumn: 'code,name',
         }))
       }
       if (boundaryLayerType === boundryTypeCons.ANALYSIS_LAYER) {
         setState((state) => ({ ...state,
           entityType: entityTypeCons.ANALYSIS_AREA,
-          searchColumn: 'id,code,centroid',
-          configuration: 'code',
+          select: 'id,code,centroid',
+          searchcolumn: 'code',
         }))
       }
     }
@@ -292,8 +292,8 @@ export const BoundaryDetail = (props) => {
             objectName="Boundary Layer"
             labelId="code"
             entityType={entityType}
-            searchColumn={searchColumn}
-            configuration={configuration}
+            select={select}
+            searchColumn={searchcolumn}
             onSelectedBoundary={viewSelectedBoundary}
           />
         }

@@ -91,7 +91,7 @@ function loadEntityList (entityType, filterObj, select, searchColumn, configurat
     if (entityType === entityTypeCons.NETWORK_EQUIPMENT_ENTITY) {
       // Filtering NetworkEquipmentEntity by planId so as to fetch latest equipment info
       filter = filter ? filter.concat(` and (planId eq ${planId})`) : filter
-      const selectedEquipments = StateViewMode.getSelectedEquipmentIds(
+      const selectedEquipments = getSelectedEquipmentIds(
         flattenDeep, networkNodeTypes, configuration
       ).map(id => `networkNodeType eq ${id}`).join(' or ')
       // Search for equipments that are selected in NetworkEquipment modal
