@@ -262,7 +262,7 @@ export const FilterEditor = ({
 
   return (
     <EditorInterface title="Filters" 
-      middleSection={!displayOnly && 
+      middleSection={!displayOnly && activeFilters.length > 0 && 
         <div className="button-group">
           <button type="button" className="ei-header-filter-preview" onClick={() => handlePreview()}>Preview On Map</button>
           <Loader loading={false} title="Calculating..."/>
