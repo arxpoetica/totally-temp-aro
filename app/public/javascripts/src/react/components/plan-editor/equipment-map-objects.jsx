@@ -1,10 +1,6 @@
-/* globals google */
 import { Component } from 'react'
-import { PropTypes } from 'prop-types'
 import { connect } from 'react-redux'
-import WorkflowState from '../../../shared-utils/workflow-state'
 import PlanEditorActions from './plan-editor-actions'
-import SelectionActions from '../selection/selection-actions'
 import WktUtils from '../../../shared-utils/wkt-utils'
 import PlanEditorSelectors from './plan-editor-selectors.js'
 import { constants } from './constants'
@@ -57,15 +53,7 @@ export class EquipmentMapObjects extends Component {
   }
 
   createMapObject(feature, idle) {
-    //const feature = this.props.transactionFeatures[objectId].feature
-    // The marker is editable if the state is not LOCKED or INVALIDATED
-    //const isEditable = !((feature.workflow_state_id & WorkflowState.LOCKED.id) ||
-    //                      (feature.workflow_state_id & WorkflowState.INVALIDATED.id))
-    
     const { objectId } = feature
-    // ToDo: unhack this 
-    //let isLocked = false
-    //if (feature.networkNodeType === "central_office") isLocked = true
 
     const mapObject = new google.maps.Marker({
       objectId, // Not used by Google Maps
