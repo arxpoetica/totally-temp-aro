@@ -110,6 +110,10 @@ export const toUTCDate = date => new Date(Date.UTC(
   date.getUTCDate(),
 ))
 
+// These two are for formatting for datetime-local and date input elements
+export const getDateString = (date) => date.toISOString().substring(0, 10)
+export const getDateTimeString = (date) => date.toISOString().substring(0, 16)
+
 // ========================= >>>>> react hooks
 
 // see: https://reactjs.org/docs/hooks-faq.html#how-to-get-the-previous-props-or-state
