@@ -1669,7 +1669,7 @@ class PlanEditorController {
       viewBoundaryProperties: (planId, boundaryObjectId, transactionFeatures) => dispatch(PlanEditorActions.viewFeatureProperties('equipment_boundary', planId, boundaryObjectId, transactionFeatures)),
       clearCoverageForBoundary: objectId => dispatch(coverageActions.addBoundaryCoverage(objectId, null)),
       clearBoundaryCoverage: () => dispatch(coverageActions.clearBoundaryCoverage()),
-      setSelectedDisplayMode: displayMode => dispatch(ToolBarActions.selectedDisplayMode(displayMode))
+      setSelectedDisplayMode: displayMode => dispatch(ToolBarActions.selectedDisplayMode(displayMode)),
     }
   }
 

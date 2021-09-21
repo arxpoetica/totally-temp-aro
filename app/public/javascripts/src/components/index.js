@@ -2,6 +2,7 @@
 import { react2angular } from 'react2angular'
 import { ToastContainer } from 'react-toastify'
 
+import PlanSummary from '../react/components/plan-editor/plan-summary.jsx'
 import NetworkPlanManage from '../react/components/sidebar/view/network-plan-manage.jsx'
 import PlanInfo from '../react/components/sidebar/view/plan-info.jsx'
 import PlanSearch from '../react/components/header/plan-search.jsx'
@@ -91,7 +92,6 @@ import planEditor from './sidebar/plan-editor/plan-editor'
 import planEditorContainer from './sidebar/plan-editor/plan-editor-container'
 import equipmentPropertiesEditor from './sidebar/plan-editor/equipment-properties-editor'
 import boundaryPropertiesEditor from './sidebar/plan-editor/boundary-properties-editor'
-import planSummary from './sidebar/plan-editor/plan-summary'
 import serviceLayerEditor from './sidebar/plan-editor/service-layer-editor'
 import boundaries from './views/boundaries'
 import locations from './views/locations'
@@ -161,7 +161,6 @@ app.component('boundaryDetail', boundaryDetail)
   .component('planEditorContainer', planEditorContainer)
   .component('equipmentPropertiesEditor', equipmentPropertiesEditor)
   .component('boundaryPropertiesEditor', boundaryPropertiesEditor)
-  .component('planSummary', planSummary)
   .component('serviceLayerEditor', serviceLayerEditor)
   .component('draggableButton', draggableButton)
   .component('boundaries', boundaries)
@@ -197,6 +196,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('editorInterfacePrimitive', editorInterfacePrimitive)
   .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
 // ReactJS components
+  .component('rPlanSummary', react2angular(PlanSummary))
   .component('rNetworkPlanManage', react2angular(NetworkPlanManage))
   .component('rPlanInfo', react2angular(PlanInfo))
   .component('rPlanSearch', react2angular(PlanSearch))

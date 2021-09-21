@@ -119,6 +119,26 @@ export const usePrevious = value => {
   return ref.current
 }
 
+// https://codereview.stackexchange.com/questions/66733/groupby-implementation-in-nodejs/66752#66752
+export const groupBy = (array, keyOrIterator) => {
+  let iterator, key
+
+  // use the function passed in, or create one
+  if(typeof key !== 'function') {
+    key = String(keyOrIterator)
+    iterator = function (item) { return item[key] }
+  } else {
+    iterator = keyOrIterator
+  }
+
+  return array.reduce(function (memo, item) {
+    const key = iterator(item)
+    memo[key] = memo[key] || []
+    memo[key].push(item)
+    return memo
+  }, {})
+}
+
 // https://newbedev.com/converting-lodash-uniqby-to-native-javascript
 export const uniqBy = (arr, predicate) => {
   const cb = typeof predicate === 'function' ? predicate : (o) => o[predicate]
