@@ -29,11 +29,21 @@ const getValidatedFilters = createSelector([getActivefilters], (activeFilters) =
 
 const getObjectFilter = createSelector([getValidatedFilters, getClientName], (validatedFilters, clientName) => {
   const propertyConstraints = validatedFilters.map((filter) => {
+    let value = filter.value1
+    let value2 = filter.value2
+    // convert dates to milliseconds since epoch for service
+    if (filter.propertyType === 'DATE' || 'DATETIME') {
+      value = new Date(filter.value1).getTime()
+      if (filter.value2) {
+        value2 = new Date(filter.value2).getTime()
+      }
+    }
+  
     return ({
       op: filter.operator,
       propertyName: filter.name,
-      value: filter.value1,
-      value2: filter.value2,
+      value,
+      value2,
     })
   })
   const objectFilter = {

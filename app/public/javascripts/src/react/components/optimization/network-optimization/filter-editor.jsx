@@ -6,6 +6,7 @@ import NetworkOptimizationSelectors from './network-optimization-selectors.js'
 import { Select } from '../../common/forms/Select.jsx'
 import { Input } from '../../common/forms/Input.jsx'
 import Loader from '../../common/Loader.jsx'
+import { getDateString, getDateTimeString } from '../../../common/view-utils.js'
 import cx from 'clsx'
 import './editor-interfaces.css'
 
@@ -19,6 +20,17 @@ const numberOptions = [
   {value: 'GTE', label: 'Greater Than or Equal'},
   {value: 'LT', label: 'Less Than'},
   {value: 'LTE', label: 'Less Than or Equal'},
+  {value: 'RANGE', label: 'Between'},
+  // {value: 'IN', label: 'In'},
+]
+
+const dateOptions = [
+  {value: 'EQ', label: 'Equal'}, 
+  {value: 'NEQ', label: 'Not Equal'},
+  {value: 'GT', label: 'After'},
+  {value: 'GTE', label: 'After or On'},
+  {value: 'LT', label: 'Before'},
+  {value: 'LTE', label: 'Before or On'},
   {value: 'RANGE', label: 'Between'},
   // {value: 'IN', label: 'In'},
 ]
@@ -58,9 +70,23 @@ export const FilterEditor = ({
         // adds extra information from the metadta, that is needed for display
         const loadedFilters = validatedConstraints.map((constraint) => {
           const newActiveFilter = JSON.parse(JSON.stringify(filters.find((filter) => filter.name === constraint.propertyName)))
+          
           newActiveFilter.operator = constraint.op
           newActiveFilter.value1 = constraint.value
           newActiveFilter.value2 = constraint.value2
+          // convert date from millseonds since epoch to format for datetime-local input
+          if (newActiveFilter.propertyType === 'DATETIME') {
+            newActiveFilter.value1 = getDateTimeString(new Date(parseInt(newActiveFilter.value1)))
+            if (newActiveFilter.value2) {
+              newActiveFilter.value2 = getDateTimeString(new Date(parseInt(newActiveFilter.value2)))
+            }
+          }
+          if (newActiveFilter.propertyType === 'DATE') {
+            newActiveFilter.value1 = getDateString(new Date(parseInt(newActiveFilter.value1)))
+            if (newActiveFilter.value2) {
+              newActiveFilter.value2 = getDateString(new Date(parseInt(newActiveFilter.value2)))
+            }
+          }
           return newActiveFilter
         })
         setActiveFilters(loadedFilters)
@@ -120,6 +146,22 @@ export const FilterEditor = ({
     setActiveFilters([...activeFilters])
   }
 
+  const getInputType = (propertyType) => {
+    switch (propertyType) {
+      case 'NUMBER':
+      case 'INTEGER':
+        return 'number'
+      case 'STRING':
+        return 'text'
+      case 'DATETIME':
+        return 'datetime-local'
+      case 'DATE':
+        return 'date'
+      default:
+        return 'text'
+    }
+  }
+
   const handlePreview = () => {
 
     loadSelectionFromObjectFilter(planId, updatedLocationConstraints)
@@ -147,17 +189,9 @@ export const FilterEditor = ({
           disabled={displayOnly}
         />
       : <div className='ei-filter-input-container'>
-          <Select
-            value={filter.operator}
-            placeholder="Select"
-            options={numberOptions}
-            onChange={event => selectOperator(event, filter, index)}
-            classes="ei-filter-select-operator"
-            disabled={displayOnly}
-          />
           {filter.operator &&
             <Input 
-              type={filter.propertyType === 'NUMBER' || 'INTEGER' ? 'number' : 'text'}
+              type={getInputType(filter.propertyType)}
               name="value1"
               value={activeFilters[index].value1}
               min={filter.minValue}
@@ -175,7 +209,7 @@ export const FilterEditor = ({
             <>
               and
               <Input 
-                type={filter.propertyType === 'NUMBER' || 'INTEGER' ? 'number' : 'text'}
+                type={getInputType(filter.propertyType)}
                 name="value2"
                 value={activeFilters[index].value2}
                 min={filter.minValue}
@@ -188,13 +222,13 @@ export const FilterEditor = ({
                 disabled={displayOnly}
               />
             </>)}
-      </div>
+        </div>
     )
   
     return MainSelect
   }
   //this is the initial select of the filter type
-  const FilterSelect = (index) => {
+  const FilterSelect = (index, activeFilter) => {
     return (
         <>
           {!displayOnly && <i className="ei-property-icon trashcan svg" onClick={() => removeActiveFilter(index)} />}
@@ -207,6 +241,15 @@ export const FilterEditor = ({
             classes="ei-filter-select-container"
             disabled={displayOnly}
           />
+          {/* This renders once a filter has been selected */}
+          {activeFilter && activeFilter.propertyType && activeFilter.propertyType !== 'BOOLEAN' && <Select
+            value={activeFilter.operator}
+            placeholder="Select"
+            options={activeFilter.propertyType === 'DATETIME' || 'DATE' ? dateOptions : numberOptions}
+            onChange={event => selectOperator(event, activeFilter, index)}
+            classes="ei-filter-select-operator"
+            disabled={displayOnly}
+          />}
       </>
     )
   }
@@ -224,10 +267,10 @@ export const FilterEditor = ({
       }>
       {activeFilters.map((activeFilter, index) => (
         (activeFilter.displayName 
-          ? <EditorInterfaceItem subtitle={FilterSelect(index)} key={index}>
+          ? <EditorInterfaceItem subtitle={FilterSelect(index, activeFilter)} key={index}>
               {ActiveFilterForm(activeFilter, index)}
             </EditorInterfaceItem>
-          : <EditorInterfaceItem subtitle={FilterSelect(index)} key={index} />
+          : <EditorInterfaceItem subtitle={FilterSelect(index, activeFilter)} key={index} />
         )
       ))}
     </EditorInterface>
