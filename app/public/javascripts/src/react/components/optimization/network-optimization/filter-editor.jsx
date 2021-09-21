@@ -74,8 +74,18 @@ export const FilterEditor = ({
           newActiveFilter.operator = constraint.op
           newActiveFilter.value1 = constraint.value
           newActiveFilter.value2 = constraint.value2
-          if (newActiveFilter.propertyType === 'DATE' || 'DATETIME') {
+          // convert date from millseonds since epoch to format for datetime-local input
+          if (newActiveFilter.propertyType === 'DATETIME') {
             newActiveFilter.value1 = moment(parseInt(newActiveFilter.value1)).format('YYYY-MM-DDThh:mm:ss.SSS')
+            if (newActiveFilter.value2) {
+              newActiveFilter.value2 = moment(parseInt(newActiveFilter.value2)).format('YYYY-MM-DDThh:mm:ss.SSS')
+            }
+          }
+          if (newActiveFilter.propertyType === 'DATE') {
+            newActiveFilter.value1 = moment(parseInt(newActiveFilter.value1)).format('YYYY-MM-DD')
+            if (newActiveFilter.value2) {
+              newActiveFilter.value2 = moment(parseInt(newActiveFilter.value2)).format('YYYY-MM-DD')
+            }
           }
           return newActiveFilter
         })
@@ -151,7 +161,7 @@ export const FilterEditor = ({
         return 'text'
     }
   }
-  
+
   const handlePreview = () => {
 
     loadSelectionFromObjectFilter(planId, updatedLocationConstraints)
