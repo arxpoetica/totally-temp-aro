@@ -21,29 +21,45 @@ export class EquipmentMapObjects extends Component {
   renderObjects() {
     this.deleteDroplinks()
 
-    const { subnetFeatures, selectedIds, idleFeatureIds } = this.props
+    const { subnetFeatures, selectedIds, idleFeatureIds, selectedSubnet } = this.props
 
     // just making it easy to loop through them all
-    const features = [
+    // NOTE: both of these lists are unique, so no need to dedupe
+    const featuresInfo = [
       ...selectedIds.map(id => ({ id, idle: false })),
       ...idleFeatureIds.map(id => ({ id, idle: true })),
     ]
 
     // delete any not present
     for (const id of Object.keys(this.mapObjects)) {
-      if (!features.find(feature => feature.id === id)) {
+      const info = featuresInfo.find(feature => feature.id === id)
+      if (info) {
+        const { feature } = subnetFeatures[info.id]
+        // only delete idle terminals when found
+        if (info.idle && feature.networkNodeType.includes('terminal')) {
+          this.deleteMapObject(id)
+        }
+      } else {
+        // if not found, just delete straight across
         this.deleteMapObject(id)
       }
     }
 
     // either add or update existing features
-    for (const { id, idle } of features) {
+    for (const { id, idle } of featuresInfo) {
       const mapObject = this.mapObjects[id]
       if (mapObject) {
         mapObject.setOpacity(idle ? 0.4 : 1.0)
       } else {
         const feature = subnetFeatures[id]
-        if (feature) {
+        // if (feature) {}
+        if (idle) {
+          // if idle show everything but the terminals for performance reasons
+          if (!feature.feature.networkNodeType.includes('terminal')) {
+            this.createMapObject(feature.feature, idle)
+          }
+        } else {
+          // if selected (not idle) just show everything in the subnet
           this.createMapObject(feature.feature, idle)
         }
       }
@@ -190,6 +206,7 @@ const mapStateToProps = state => ({
   subnetFeatures: state.planEditor.subnetFeatures,
   selectedIds: PlanEditorSelectors.getSelectedIds(state),
   selectedLocations: PlanEditorSelectors.getSelectedSubnetLocations(state),
+  selectedSubnet: PlanEditorSelectors.getSelectedSubnet(state),
 })
 
 const mapDispatchToProps = dispatch => ({

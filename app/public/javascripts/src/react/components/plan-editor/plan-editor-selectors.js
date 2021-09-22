@@ -295,6 +295,7 @@ const getLocationCounts = createSelector(
 )
 
 const PlanEditorSelectors = Object.freeze({
+  getSelectedSubnet,
   getBoundaryLayersList,
   getSelectedIds,
   getSubnetFeatureIds,
