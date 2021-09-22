@@ -45,7 +45,7 @@ export const FilterEditor = ({
   planId,
   updatedLocationConstraints,
   loadSelectionFromObjectFilter,
-  planTargets,
+  serviceAreas,
 }) => {
 
   useEffect(() => {
@@ -164,8 +164,6 @@ export const FilterEditor = ({
   }
 
   const handlePreview = () => {
-    const { serviceAreas } = planTargets
-
     if (serviceAreas.size > 1){
       swal({
         title: 'Error',
@@ -291,7 +289,7 @@ const mapStateToProps = (state) => ({
   optimizationInputs: state.optimization.networkOptimization.optimizationInputs,
   planId: state.plan.activePlan.id,
   updatedLocationConstraints: NetworkOptimizationSelectors.getUpdatedLocationConstraints(state),
-  planTargets: state.selection.planTargets,
+  serviceAreas: state.selection.planTargets.serviceAreas
 })
 
 const mapDispatchToProps = dispatch => ({
