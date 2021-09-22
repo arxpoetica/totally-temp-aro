@@ -17,8 +17,8 @@ export default class RfpPointImporterUtils {
         // Split by lines
         var lines = contents.split(/\r?\n/) // NOTE: Has to accept both Windows and Linux line endings
         const firstLine = lines.splice(0, 1)[0] // The first line is assumed to be a column header, ignore it
-        if (firstLine !== 'id,latitude,longitude') {
-          throw new Error('In RfpFileImporter: The csv file format is incorrect. The first line should be "id,latitude,longitude"')
+        if (!firstLine.includes('id,latitude,longitude')) {
+          throw new Error('In RfpFileImporter: The csv file format is incorrect. The first line must have atleast "id,latitude,longitude"')
         }
         var targets = lines
           .filter(line => line) // Ignore null or empty strings
