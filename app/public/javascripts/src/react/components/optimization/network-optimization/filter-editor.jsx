@@ -50,10 +50,6 @@ export const FilterEditor = ({
 
   useEffect(() => {
     loadFilters()
-
-    return () => {
-      setActiveFilters([])
-    }
   } ,[])
 
   useEffect(() => {
