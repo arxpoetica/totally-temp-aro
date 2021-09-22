@@ -166,14 +166,14 @@ export const FilterEditor = ({
   const handlePreview = () => {
     const { serviceAreas } = planTargets
 
-    if (serviceAreas.size < 2){
-      loadSelectionFromObjectFilter(planId, updatedLocationConstraints)
-    } else {
+    if (serviceAreas.size > 1){
       swal({
         title: 'Error',
         text: 'Too many service areas selected',
         type: 'error'
       })
+    } else {
+      loadSelectionFromObjectFilter(planId, updatedLocationConstraints)
     }
 
 
