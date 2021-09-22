@@ -45,6 +45,7 @@ export const FilterEditor = ({
   planId,
   updatedLocationConstraints,
   loadSelectionFromObjectFilter,
+  serviceAreas,
 }) => {
 
   useEffect(() => {
@@ -163,14 +164,17 @@ export const FilterEditor = ({
   }
 
   const handlePreview = () => {
+    if (serviceAreas.size > 1){
+      swal({
+        title: 'Error',
+        text: 'Too many service areas selected',
+        type: 'error'
+      })
+    } else {
+      loadSelectionFromObjectFilter(planId, updatedLocationConstraints)
+    }
 
-    loadSelectionFromObjectFilter(planId, updatedLocationConstraints)
 
-    // swal({
-    //   title: 'Error',
-    //   text: 'Data set too large',
-    //   type: 'error'
-    // })
   }
   
   const ActiveFilterForm = (filter, index ) => {
@@ -245,7 +249,7 @@ export const FilterEditor = ({
           {activeFilter && activeFilter.propertyType && activeFilter.propertyType !== 'BOOLEAN' && <Select
             value={activeFilter.operator}
             placeholder="Select"
-            options={activeFilter.propertyType === 'DATETIME' || 'DATE' ? dateOptions : numberOptions}
+            options={activeFilter.propertyType === ('DATETIME' || 'DATE') ? dateOptions : numberOptions}
             onChange={event => selectOperator(event, activeFilter, index)}
             classes="ei-filter-select-operator"
             disabled={displayOnly}
@@ -256,7 +260,7 @@ export const FilterEditor = ({
 
   return (
     <EditorInterface title="Filters" 
-      middleSection={!displayOnly && 
+      middleSection={!displayOnly && activeFilters.length > 0 && 
         <div className="button-group">
           <button type="button" className="ei-header-filter-preview" onClick={() => handlePreview()}>Preview On Map</button>
           <Loader loading={false} title="Calculating..."/>
@@ -285,6 +289,7 @@ const mapStateToProps = (state) => ({
   optimizationInputs: state.optimization.networkOptimization.optimizationInputs,
   planId: state.plan.activePlan.id,
   updatedLocationConstraints: NetworkOptimizationSelectors.getUpdatedLocationConstraints(state),
+  serviceAreas: state.selection.planTargets.serviceAreas
 })
 
 const mapDispatchToProps = dispatch => ({
