@@ -23,15 +23,16 @@ export class FiberMapObjects extends Component {
 
     if (subnets[selectedSubnetId]){
       const { subnetLinks, fiberType } = subnets[selectedSubnetId].fiber
-
-      for (const subnetLink of subnetLinks) {
-        const { geometry } = subnetLink
-        if (geometry.type === 'LineString') {
-          const path = WktUtils.getGoogleMapPathsFromWKTLineString(geometry)
-          this.createMapObject(path, fiberType)
-        } else if (geometry.type === 'MultiLineString') {
-          const path = WktUtils.getGoogleMapPathsFromWKTMultiLineString(geometry)
-          this.createMapObject(path, fiberType)
+      if (subnetLinks) {
+        for (const subnetLink of subnetLinks) {
+          const { geometry } = subnetLink
+          if (geometry.type === 'LineString') {
+            const path = WktUtils.getGoogleMapPathsFromWKTLineString(geometry)
+            this.createMapObject(path, fiberType)
+          } else if (geometry.type === 'MultiLineString') {
+            const path = WktUtils.getGoogleMapPathsFromWKTMultiLineString(geometry)
+            this.createMapObject(path, fiberType)
+          }
         }
         // TODO: is there an else / alternative?
       }
