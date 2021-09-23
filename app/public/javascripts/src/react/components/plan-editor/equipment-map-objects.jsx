@@ -103,7 +103,6 @@ export class EquipmentMapObjects extends Component {
 
       selectionCircle.setMap(null)
       this.props.selectEditFeaturesById(selectedEquipmentIds)
-      // this.props.selectEditFeatureById(objectId)
     })
 
     this.mapObjects[objectId] = mapObject
@@ -206,7 +205,6 @@ const mapDispatchToProps = dispatch => ({
   showContextMenuForEquipment: (equipmentObjectId, x, y) => {
     dispatch(PlanEditorActions.showContextMenuForEquipment(equipmentObjectId, x, y))
   },
-  selectEditFeatureById: id => dispatch(PlanEditorActions.selectEditFeaturesById([id])),
   setSelectedSubnetId: id => dispatch(PlanEditorActions.setSelectedSubnetId(id)),
   selectEditFeaturesById: featureIds => dispatch(PlanEditorActions.selectEditFeaturesById(featureIds)),
 })
