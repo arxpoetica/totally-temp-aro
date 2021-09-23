@@ -438,7 +438,7 @@ export const PlanSummary = (props) => {
 
       {/* Add a div that will overlay all the controls above.
         The div will be visible when the controls need to be disabled. */}
-      { currentTransaction && <div className="disable-sibling-controls" /> }
+      { !currentTransaction && <div className="disable-sibling-controls" /> }
     </>
   )
 }
