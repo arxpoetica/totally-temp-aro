@@ -21,18 +21,11 @@ export class EquipmentMapObjects extends Component {
   renderObjects() {
     this.deleteDroplinks()
 
-    const { subnetFeatures, selectedIds, idleFeatureIds, selectedSubnet } = this.props
-
-    // just making it easy to loop through them all
-    // NOTE: both of these lists are unique, so no need to dedupe
-    const featuresInfo = [
-      ...selectedIds.map(id => ({ id, idle: false })),
-      ...idleFeatureIds.map(id => ({ id, idle: true })),
-    ]
+    const { subnetFeatures, featuresRenderInfo } = this.props
 
     // delete any not present
     for (const id of Object.keys(this.mapObjects)) {
-      const info = featuresInfo.find(feature => feature.id === id)
+      const info = featuresRenderInfo.find(feature => feature.id === id)
       if (info) {
         const { feature } = subnetFeatures[info.id]
         // only delete idle terminals when found
@@ -46,21 +39,22 @@ export class EquipmentMapObjects extends Component {
     }
 
     // either add or update existing features
-    for (const { id, idle } of featuresInfo) {
+    for (const { id, idle } of featuresRenderInfo) {
       const mapObject = this.mapObjects[id]
       if (mapObject) {
         mapObject.setOpacity(idle ? 0.4 : 1.0)
       } else {
-        const feature = subnetFeatures[id]
-        // if (feature) {}
-        if (idle) {
-          // if idle show everything but the terminals for performance reasons
-          if (!feature.feature.networkNodeType.includes('terminal')) {
-            this.createMapObject(feature.feature, idle)
+        const feature = subnetFeatures[id] && subnetFeatures[id].feature
+        if (feature) {
+          if (idle) {
+            // if idle show everything but the terminals for performance reasons
+            if (!feature.networkNodeType.includes('terminal')) {
+              this.createMapObject(feature, idle)
+            }
+          } else {
+            // if selected (not idle) just show everything in the subnet
+            this.createMapObject(feature, idle)
           }
-        } else {
-          // if selected (not idle) just show everything in the subnet
-          this.createMapObject(feature.feature, idle)
         }
       }
     }
@@ -201,12 +195,10 @@ const mapStateToProps = state => ({
   equipmentDefinitions: state.mapLayers.networkEquipment.equipments,
   selectedEditFeatureIds: state.planEditor.selectedEditFeatureIds,
   googleMaps: state.map.googleMaps,
-  idleFeatureIds: PlanEditorSelectors.getIdleFeaturesIds(state),
+  featuresRenderInfo: PlanEditorSelectors.getFeaturesRenderInfo(state),
   selectedSubnetId: state.planEditor.selectedSubnetId,
   subnetFeatures: state.planEditor.subnetFeatures,
-  selectedIds: PlanEditorSelectors.getSelectedIds(state),
   selectedLocations: PlanEditorSelectors.getSelectedSubnetLocations(state),
-  selectedSubnet: PlanEditorSelectors.getSelectedSubnet(state),
 })
 
 const mapDispatchToProps = dispatch => ({
