@@ -27,9 +27,9 @@ export class EquipmentMapObjects extends Component {
     for (const id of Object.keys(this.mapObjects)) {
       const info = featuresRenderInfo.find(feature => feature.id === id)
       if (info) {
-        const { feature } = subnetFeatures[info.id]
+        const feature = subnetFeatures[info.id] && subnetFeatures[info.id].feature
         // only delete idle terminals when found
-        if (info.idle && feature.networkNodeType.includes('terminal')) {
+        if (feature && info.idle && feature.networkNodeType.includes('terminal')) {
           this.deleteMapObject(id)
         }
       } else {
