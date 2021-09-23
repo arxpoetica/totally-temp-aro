@@ -112,7 +112,6 @@ function saveDataSource (uploadDetails,loggedInUser) {
         uploadDetails.selectedSpatialEdgeType = 'fiber_cable'
         return setCableConstructionType(uploadDetails,loggedInUser)
         .then((libraryItem) => {
-          dispatch(setAllLibraryItems(libraryItem.dataType, libraryItem)),
           fileUpload(dispatch, uploadDetails, libraryItem.identifier, loggedInUser)
         })
         .then((result) => {
