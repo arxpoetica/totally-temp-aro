@@ -33,20 +33,9 @@ export const PlanEditor = props => {
     updateFeatureProperties,
   } = props
 
-  //state = 
-
   useEffect(() => {
     resumeOrCreateTransaction(planId, userId)
   }, [])
-
-  /*
-  function componentDidUpdate(prevProps) {
-    // Typical usage (don't forget to compare props):
-    if (this.props.userID !== prevProps.userID) {
-      this.fetchData(this.props.userID);
-    }
-  }
-  */
 
   function checkAndCommitTransaction() {
     if (isCommittingTransaction) {
@@ -131,14 +120,7 @@ export const PlanEditor = props => {
   )
 
 }
-/*
-PlanEditor.propTypes = {
-  planId: PropTypes.number,
-  userId: PropTypes.number,
-  transactionId: PropTypes.number,
-  isDrawingBoundaryFor: PropTypes.string
-}
-*/
+
 const mapStateToProps = state => ({
   planId: state.plan.activePlan.id,
   userId: state.user.loggedInUser.id,

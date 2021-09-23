@@ -5,22 +5,14 @@ const getBoundaryLayersList = createSelector([getAllBoundaryLayers], (boundaries
 
 const getSelectedSubnetId = state => state.planEditor.selectedSubnetId
 const getSubnets = state => state.planEditor.subnets
-
+const getSubnetFeatures = state => state.planEditor.subnetFeatures
 const getSelectedSubnet = state => state.planEditor.subnets[state.planEditor.selectedSubnetId]
 const getSelectedEditFeatureIds = state => state.planEditor.selectedEditFeatureIds
-const getSelectedIds = createSelector(
-  [getSelectedSubnet, getSelectedEditFeatureIds],
-  (selectedSubnet, selectedEditFeatureIds) => {
-    // concatinate the two arrays using the spread op,
-    //  make sure all elements are unique by making it a Set,
-    //  turn it back into an array using the spread op
-    return [...new Set([...(selectedSubnet && selectedSubnet.children || []), ...selectedEditFeatureIds])]
-  }
-)
 
 const getIsCalculatingSubnets = state => state.planEditor.isCalculatingSubnets
 const getIsCalculatingBoundary = state => state.planEditor.isCalculatingBoundary
 const getBoundaryDebounceBySubnetId = state => state.planEditor.boundaryDebounceBySubnetId
+
 const getIsRecalcSettled = createSelector(
   [getIsCalculatingSubnets, getIsCalculatingBoundary, getBoundaryDebounceBySubnetId],
   (isCalculatingSubnets, isCalculatingBoundary, boundaryDebounceBySubnetId) => {
@@ -28,12 +20,30 @@ const getIsRecalcSettled = createSelector(
   }
 )
 
-const getSubnetFeatures = state => state.planEditor.subnetFeatures
-const getSubnetFeatureIds = createSelector([getSubnetFeatures], features => Object.keys(features))
-const getIdleFeaturesIds = createSelector(
-  [getSelectedIds, getSubnetFeatureIds],
-  (selectedIds, subnetFeaturesIds) => {
-    return subnetFeaturesIds.filter(id => !selectedIds.includes(id))
+const getFeaturesRenderInfo = createSelector(
+  [getSelectedSubnetId, getSubnetFeatures, getSubnets, getSelectedSubnet, getSelectedEditFeatureIds],
+  (selectedSubnetId, subnetFeatures, subnets, selectedSubnet, selectedEditFeatureIds) => {
+    if (!selectedSubnet) {
+      const subnetId = subnetFeatures[selectedSubnetId] && subnetFeatures[selectedSubnetId].subnetId
+      selectedSubnet = subnetId ? subnets[subnetId] : { children: [] }
+    }
+
+    // highlighted ids within the subnet
+    const highlightedFeatureIds = [
+      ...new Set([
+        selectedSubnet.subnetNode,
+        ...selectedSubnet.children,
+        ...selectedEditFeatureIds,
+      ])
+    ]
+    // everything else outside the context of anything highlighted
+    const idleFeatureIds = Object.keys(subnetFeatures)
+      .filter(id => !highlightedFeatureIds.includes(id))
+
+    return [
+      ...highlightedFeatureIds.map(id => ({ id, idle: false })),
+      ...idleFeatureIds.map(id => ({ id, idle: true })),
+    ]
   }
 )
 
@@ -295,10 +305,9 @@ const getLocationCounts = createSelector(
 )
 
 const PlanEditorSelectors = Object.freeze({
+  getSelectedSubnet,
   getBoundaryLayersList,
-  getSelectedIds,
-  getSubnetFeatureIds,
-  getIdleFeaturesIds,
+  getFeaturesRenderInfo,
   getIsRecalcSettled,
   AlertTypes,
   getAlertsForSubnetTree,
