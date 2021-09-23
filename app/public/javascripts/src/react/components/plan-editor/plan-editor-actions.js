@@ -141,7 +141,6 @@ function createFeature (feature) {
 
     AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
       .then(result => {
-        console.log({result})
         let updatedSubnets = JSON.parse(JSON.stringify(state.planEditor.subnets))
         const { subnetUpdates, equipmentUpdates } = result.data
         const newFeatures = {}
