@@ -621,6 +621,7 @@ function readFeatures (featureIds) {
   return (dispatch, getState) => {
     const state = getState()
     let featuresToGet = []
+    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
     featureIds.forEach(featureId => {
       if (!state.planEditor.features[featureId]) {
         featuresToGet.push(featureId)
@@ -631,7 +632,7 @@ function readFeatures (featureIds) {
     let retrievedFeatures = []
     featuresToGet.forEach(featureId => {
       promises.push(
-        AroHttp.get(`/service/plan-feature/${state.plan.activePlan.id}/equipment/${featureId}`)
+        AroHttp.get(`/service/plan-transaction/${transactionId}/subnet-equipment/${featureId}`)
           .then(result => {
             if (result.data) {
               // Decorate the equipment with some default values. Technically this is not yet "created" equipment
