@@ -131,9 +131,11 @@ export class EquipmentMapObjects extends Component {
         let icon = '/svg/map-icons/selection-1.svg'
         if (id === selectedSubnetId) {
           icon = '/svg/map-icons/selection-2.svg'
-          // re-render the main selection so it appears on top
-          this.deleteMapObject(id)
-          this.createMapObject(subnetFeatures[id].feature, false)
+          // re-render the main selection so it appears on top if there are multiple equipmente
+          if (this.props.selectedEditFeatureIds.length > 1){
+            this.deleteMapObject(id)
+            this.createMapObject(subnetFeatures[id].feature, false)
+          }
         }
 
         if (this.selectionOverlays[id]) {
