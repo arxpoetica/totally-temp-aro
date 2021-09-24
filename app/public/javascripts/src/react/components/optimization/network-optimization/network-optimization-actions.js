@@ -250,10 +250,15 @@ function getLocationPreview(planId, updatedLocationConstraints) {
         planId,
         locationConstraints: updatedLocationConstraints,
       }
-
-      dispatch({
-        type: Actions.SELECTION_SET_ACTIVE_MODE,
-        payload: 'SELECTED_LOCATIONS',
+      batch(() => {
+        dispatch({
+          type: Actions.NETWORK_OPTIMIZATION_SET_IS_PREVIEW_LOADING,
+          payload: true,
+        })
+        dispatch({
+          type: Actions.SELECTION_SET_ACTIVE_MODE,
+          payload: 'SELECTED_LOCATIONS',
+        })
       })
 
       const { data } = await AroHttp.post('service/v1/optimize/location-preview', body)
@@ -273,12 +278,33 @@ function getLocationPreview(planId, updatedLocationConstraints) {
         locations: [...locations],
         serviceAreas: [],
         analysisAreas: [],
-        allServiceAreas: []
+        allServiceAreas: [],
       }))
+      dispatch({
+        type: Actions.NETWORK_OPTIMIZATION_SET_IS_PREVIEW_LOADING,
+        payload: false,
+      })
 
     } catch (error) {
       console.log(error)
+      swal({
+        title: 'Error',
+        text: error.data.error,
+        type: 'error'
+      })
+
+      dispatch({
+        type: Actions.NETWORK_OPTIMIZATION_SET_IS_PREVIEW_LOADING,
+        payload: false,
+      })
     }
+  }
+}
+
+function setIsPreviewLoading(isPreviewLoading) {
+  return {
+    type: Actions.NETWORK_OPTIMIZATION_SET_IS_PREVIEW_LOADING,
+    payload: isPreviewLoading
   }
 }
 
@@ -292,4 +318,5 @@ export default {
   loadFilters,
   setActiveFilters,
   getLocationPreview,
+  setIsPreviewLoading,
 }

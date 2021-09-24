@@ -47,6 +47,7 @@ export const FilterEditor = ({
   loadSelectionFromObjectFilter,
   validatedFilters,
   serviceAreas,
+  isPreviewLoading,
 }) => {
 
   useEffect(() => {
@@ -260,7 +261,7 @@ export const FilterEditor = ({
       middleSection={!displayOnly && validatedFilters.length > 0 && 
         <div className="button-group">
           <button type="button" className="ei-header-filter-preview" onClick={() => handlePreview()}>Preview On Map</button>
-          <Loader loading={false} title="Calculating..."/>
+          <Loader loading={isPreviewLoading} title="Calculating..."/>
         </div>
       }
       rightSection={!displayOnly && 
@@ -287,6 +288,8 @@ const mapStateToProps = (state) => ({
   planId: state.plan.activePlan.id,
   updatedLocationConstraints: NetworkOptimizationSelectors.getUpdatedLocationConstraints(state),
   validatedFilters: NetworkOptimizationSelectors.getValidatedFilters(state),
+  serviceAreas: state.selection.planTargets.serviceAreas,
+  isPreviewLoading: state.optimization.networkOptimization.isPreviewLoading,
 })
 
 const mapDispatchToProps = dispatch => ({

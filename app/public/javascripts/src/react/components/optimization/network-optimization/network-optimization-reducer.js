@@ -7,6 +7,7 @@ const defaultState = {
   optimizationId: null,
   filters: [],
   activeFilters: [],
+  isPreviewLoading: false,
 }
 
 function setLocationType (state, locationType, isIncluded) {
@@ -72,6 +73,10 @@ function setActiveFilters (state, filters) {
   return {...state, activeFilters: filters}
 }
 
+function setIsPreviewLoading (state, isPreviewLoading) {
+  return {...state, isPreviewLoading }
+}
+
 function optimizationReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.NETWORK_OPTIMIZATION_SET_OPTIMIZATION_INPUTS:
@@ -90,6 +95,8 @@ function optimizationReducer (state = defaultState, action) {
       return setFilters(state, action.payload)
     case Actions.NETWORK_OPTIMIZATION_SET_ACTIVE_FILTERS:
       return setActiveFilters(state, action.payload)
+    case Actions.NETWORK_OPTIMIZATION_SET_IS_PREVIEW_LOADING:
+      return setIsPreviewLoading(state, action.payload)
     default:
       return state
   }
