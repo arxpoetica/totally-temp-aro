@@ -163,7 +163,7 @@ export const FilterEditor = ({
     if (serviceAreas.size > 1){
       swal({
         title: 'Error',
-        text: 'Too many service areas selected',
+        text: 'Preview on map is currently only supported for a single service area.',
         type: 'error'
       })
     } else {
