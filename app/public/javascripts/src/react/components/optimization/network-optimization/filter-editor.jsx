@@ -45,6 +45,7 @@ export const FilterEditor = ({
   planId,
   updatedLocationConstraints,
   loadSelectionFromObjectFilter,
+  validatedFilters,
   serviceAreas,
 }) => {
 
@@ -256,7 +257,7 @@ export const FilterEditor = ({
 
   return (
     <EditorInterface title="Filters" 
-      middleSection={!displayOnly && activeFilters.length > 0 && 
+      middleSection={!displayOnly && validatedFilters.length > 0 && 
         <div className="button-group">
           <button type="button" className="ei-header-filter-preview" onClick={() => handlePreview()}>Preview On Map</button>
           <Loader loading={false} title="Calculating..."/>
@@ -285,7 +286,7 @@ const mapStateToProps = (state) => ({
   optimizationInputs: state.optimization.networkOptimization.optimizationInputs,
   planId: state.plan.activePlan.id,
   updatedLocationConstraints: NetworkOptimizationSelectors.getUpdatedLocationConstraints(state),
-  serviceAreas: state.selection.planTargets.serviceAreas
+  validatedFilters: NetworkOptimizationSelectors.getValidatedFilters(state),
 })
 
 const mapDispatchToProps = dispatch => ({
