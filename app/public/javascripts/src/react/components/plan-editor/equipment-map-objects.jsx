@@ -81,7 +81,7 @@ export class EquipmentMapObjects extends Component {
       let coordinates = [event.latLng.lng(), event.latLng.lat()]
       this.props.moveFeature(mapObject.objectId, coordinates)
     })
-    mapObject.addListener('rightclick', event => {
+    mapObject.addListener('contextmenu', event => {
       const eventXY = WktUtils.getXYFromEvent(event)
       this.props.showContextMenuForEquipment(mapObject.objectId, eventXY.x, eventXY.y)
     })
