@@ -6,6 +6,9 @@
     display: flex;
     flex-direction: column;
   }
+  .draggable-item-button {
+    border: none;
+  }
 </style>
 
 <div class="edit-plan-container">
@@ -14,9 +17,6 @@
     <accordion-panel-contents panel-id="$ctrl.state.EditPlanPanels.EDIT_PLAN">
       <div>
         <r-plan-editor></r-plan-editor>
-        <!--
-        <plan-editor map-global-object-name="map"></plan-editor>
-        -->
       </div>
     </accordion-panel-contents>
   </accordion>
