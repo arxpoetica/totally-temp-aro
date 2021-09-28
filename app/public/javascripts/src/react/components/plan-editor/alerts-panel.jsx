@@ -6,7 +6,7 @@ import { constants } from './constants'
 
 const DefectsPanel = props => {
 
-  const { locationAlerts, alertTypes, map } = props
+  const { locationAlerts, alertTypes, cursorLocationIds, map } = props
   const alerts = Object.entries(locationAlerts)
 
   const [open, setOpen] = useState(false)
@@ -74,6 +74,7 @@ const DefectsPanel = props => {
 const mapStateToProps = state => ({
   locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(state),
   alertTypes: PlanEditorSelectors.AlertTypes,
+  cursorLocationIds: state.planEditor.cursorLocationIds,
   // TODO: why is this named `googleMaps`? Is it ever plural? Isn't it a single map?
   map: state.map.googleMaps,
 })

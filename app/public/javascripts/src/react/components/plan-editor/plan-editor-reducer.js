@@ -19,6 +19,7 @@ const defaultState = {
   subnetFeatures: {},
   selectedSubnetId: '', // need to rename this now that a terminal can be selected, lets do "activeFeature" // unselected this should be null not ''
   boundaryDebounceBySubnetId: {},
+  cursorLocationIds: [],
 }
 
 function setTransaction (state, transaction) {
@@ -247,94 +248,100 @@ function clearBoundaryDebounce (state, subnetId) {
   }
 }
 
-function planEditorReducer (state = defaultState, action) {
-  switch (action.type) {
+function planEditorReducer (state = defaultState, { type, payload }) {
+  switch (type) {
     case Actions.PLAN_EDITOR_CLEAR_TRANSACTION:
       return clearTransaction()
 
     case Actions.PLAN_EDITOR_SET_TRANSACTION:
-      return setTransaction(state, action.payload)
+      return setTransaction(state, payload)
 
     case Actions.PLAN_EDITOR_ADD_FEATURES:
-      return addTransactionFeatures(state, action.payload)
+      return addTransactionFeatures(state, payload)
 
     case Actions.PLAN_EDITOR_DELETE_TRANSACTION_FEATURE:
-      return deleteTransactionFeature(state, action.payload)
+      return deleteTransactionFeature(state, payload)
 
     case Actions.PLAN_EDITOR_MODIFY_FEATURES:
-      return modifyTransactionFeatures(state, action.payload)
+      return modifyTransactionFeatures(state, payload)
 
     case Actions.PLAN_EDITOR_CLEAR_FEATURES:
       return clearTransactionFeatures(state)
 
     case Actions.PLAN_EDITOR_SET_IS_CALCULATING_SUBNETS:
-      return setIsCalculatingSubnets(state, action.payload)
+      return setIsCalculatingSubnets(state, payload)
 
     case Actions.PLAN_EDITOR_SET_IS_CALCULATING_BOUNDARY:
-      return setIsCalculatingBoundary(state, action.payload)
+      return setIsCalculatingBoundary(state, payload)
 
     case Actions.PLAN_EDITOR_SET_IS_CREATING_OBJECT:
-      return setIsCreatingObject(state, action.payload)
+      return setIsCreatingObject(state, payload)
 
     case Actions.PLAN_EDITOR_SET_IS_MODIFYING_OBJECT:
-      return setIsModifyingObject(state, action.payload)
+      return setIsModifyingObject(state, payload)
 
     case Actions.PLAN_EDITOR_SET_IS_DRAGGING_FEATURE_FOR_DROP:
-      return setIsDraggingFeatureForDrop(state, action.payload)
+      return setIsDraggingFeatureForDrop(state, payload)
 
     case Actions.PLAN_EDITOR_SET_IS_DRAWING_BOUNDARY_FOR:
-      return setIsDrawingBoundaryFor(state, action.payload)
+      return setIsDrawingBoundaryFor(state, payload)
 
     case Actions.PLAN_EDITOR_SET_IS_EDITING_FEATURE_PROPERTIES:
-      return setIsEditingFeatureProperties(state, action.payload)
+      return setIsEditingFeatureProperties(state, payload)
 
     case Actions.PLAN_EDITOR_SET_IS_COMMITTING_TRANSACTION:
-      return setIsCommittingTransaction(state, action.payload)
+      return setIsCommittingTransaction(state, payload)
 
     case Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION:
-      return setIsEnteringTransaction(state, action.payload)
+      return setIsEnteringTransaction(state, payload)
 
     case Actions.PLAN_EDITOR_SET_SELECTED_EDIT_FEATURE_IDS:
-      return setSelectedEditFeatureIds(state, action.payload)
+      return setSelectedEditFeatureIds(state, payload)
 
     case Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURE:
-      return deselectFeature(state, action.payload)
+      return deselectFeature(state, payload)
 
     case Actions.PLAN_EDITOR_ADD_REQUESTED_SUBNET_IDS:
-      return addRequestedSubnetIds(state, action.payload)
+      return addRequestedSubnetIds(state, payload)
 
     case Actions.PLAN_EDITOR_REMOVE_REQUESTED_SUBNET_IDS:
-      return removeRequestedSubnetIds(state, action.payload)
+      return removeRequestedSubnetIds(state, payload)
 
     case Actions.PLAN_EDITOR_ADD_SUBNETS:
-      return addSubnets(state, action.payload)
+      return addSubnets(state, payload)
 
     case Actions.PLAN_EDITOR_UPDATE_SUBNET_BOUNDARY:
-      return updateSubnetBoundary(state, action.payload.subnetId, action.payload.geometry)
+      return updateSubnetBoundary(state, payload.subnetId, payload.geometry)
 
     case Actions.PLAN_EDITOR_SET_SUBNET_FEATURES:
-      return setSubnetFeatures(state, action.payload)
+      return setSubnetFeatures(state, payload)
 
     case Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES:
-      return updateSubnetFeatures(state, action.payload)
+      return updateSubnetFeatures(state, payload)
 
     case Actions.PLAN_EDITOR_REMOVE_SUBNET_FEATURE:
-      return removeSubnetFeature(state, action.payload)
+      return removeSubnetFeature(state, payload)
 
     case Actions.PLAN_EDITOR_REMOVE_SUBNETS:
-      return removeSubnets(state, action.payload)
+      return removeSubnets(state, payload)
 
     case Actions.PLAN_EDITOR_CLEAR_SUBNETS:
       return clearSubnets(state)
 
     case Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID:
-      return setSelectedSubnetId(state, action.payload)
+      return setSelectedSubnetId(state, payload)
 
     case Actions.PLAN_EDITOR_SET_BOUNDARY_DEBOUNCE:
-      return setBoundaryDebounce(state, action.payload.subnetId, action.payload.timeoutId)
+      return setBoundaryDebounce(state, payload.subnetId, payload.timeoutId)
 
     case Actions.PLAN_EDITOR_CLEAR_BOUNDARY_DEBOUNCE:
-      return clearBoundaryDebounce(state, action.payload)
+      return clearBoundaryDebounce(state, payload)
+
+    case Actions.PLAN_EDITOR_SET_CURSOR_LOCATION_IDS:
+      return { ...state, cursorLocationIds: payload }
+
+    case Actions.PLAN_EDITOR_CLEAR_CURSOR_LOCATION_IDS:
+      return { ...state, cursorLocationIds: [] }
 
     default:
       return state

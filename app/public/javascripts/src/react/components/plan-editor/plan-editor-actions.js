@@ -921,6 +921,14 @@ function onMapClick (featureIds, latLng) {
   }
 }
 
+function setCursorLocationIds(payload) {
+  return { type: Actions.PLAN_EDITOR_SET_CURSOR_LOCATION_IDS, payload }
+}
+
+function clearCursorLocationIds() {
+  return { type: Actions.PLAN_EDITOR_CLEAR_CURSOR_LOCATION_IDS, payload: [] }
+}
+
 function recalculateBoundary (subnetId) {
   return (dispatch, getState) => {
     dispatch(setIsCalculatingBoundary(true))
@@ -1269,6 +1277,8 @@ export default {
   addSubnets,
   setSelectedSubnetId,
   onMapClick,
+  setCursorLocationIds,
+  clearCursorLocationIds,
   recalculateBoundary,
   boundaryChange,
   recalculateSubnets,
