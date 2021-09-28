@@ -444,7 +444,7 @@ function showContextMenuForEquipmentBoundary (mapObject, x, y, vertex) {
   return (dispatch) => {
     const menuActions = []
     menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteBoundaryVertex', mapObject, vertex))
-    const menuItemFeature = new MenuItemFeature('BOUNDARY', 'Equipment Boundary', menuActions)
+    const menuItemFeature = new MenuItemFeature('BOUNDARY', 'Boundary Vertex', menuActions)
 
     // Show context menu
     dispatch(ContextMenuActions.setContextMenuItems([menuItemFeature]))

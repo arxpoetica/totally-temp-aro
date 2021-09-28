@@ -81,7 +81,7 @@ export class EquipmentMapObjects extends Component {
       let coordinates = [event.latLng.lng(), event.latLng.lat()]
       this.props.moveFeature(mapObject.objectId, coordinates)
     })
-    mapObject.addListener('rightclick', event => {
+    mapObject.addListener('contextmenu', event => {
       const eventXY = WktUtils.getXYFromEvent(event)
       this.props.showContextMenuForEquipment(mapObject.objectId, eventXY.x, eventXY.y)
     })
@@ -131,6 +131,11 @@ export class EquipmentMapObjects extends Component {
         let icon = '/svg/map-icons/selection-1.svg'
         if (id === selectedSubnetId) {
           icon = '/svg/map-icons/selection-2.svg'
+          // re-render the main selection so it appears on top if there are multiple equipments
+          if (this.props.selectedEditFeatureIds.length > 1){
+            this.deleteMapObject(id)
+            this.createMapObject(subnetFeatures[id].feature, false)
+          }
         }
 
         if (this.selectionOverlays[id]) {
