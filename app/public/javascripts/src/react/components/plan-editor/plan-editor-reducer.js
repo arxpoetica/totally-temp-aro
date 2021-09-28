@@ -14,7 +14,6 @@ const defaultState = {
   isEditingFeatureProperties: false,
   isEnteringTransaction: false,
   isCommittingTransaction: false,
-  isPlanEditorChanged: false,
   requestedSubnetIds: [],
   subnets: {},
   subnetFeatures: {},
@@ -124,12 +123,6 @@ function setIsCommittingTransaction (state, isCommittingTransaction) {
 function setIsEnteringTransaction (state, isEnteringTransaction) {
   return { ...state,
     isEnteringTransaction: isEnteringTransaction
-  }
-}
-
-function setIsPlanEditorChanged (state, isPlanEditorChanged) {
-  return { ...state,
-    isPlanEditorChanged: isPlanEditorChanged
   }
 }
 
@@ -300,9 +293,6 @@ function planEditorReducer (state = defaultState, action) {
 
     case Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION:
       return setIsEnteringTransaction(state, action.payload)
-
-    case Actions.PLAN_EDITOR_SET_IS_PLAN_EDITOR_CHANGED:
-      return setIsPlanEditorChanged(state, action.payload)
 
     case Actions.PLAN_EDITOR_SET_SELECTED_EDIT_FEATURE_IDS:
       return setSelectedEditFeatureIds(state, action.payload)

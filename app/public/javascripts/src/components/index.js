@@ -2,13 +2,11 @@
 import { react2angular } from 'react2angular'
 import { ToastContainer } from 'react-toastify'
 
-import PlanSummary from '../react/components/plan-editor/plan-summary.jsx'
 import NetworkPlanManage from '../react/components/sidebar/view/network-plan-manage.jsx'
 import PlanInfo from '../react/components/sidebar/view/plan-info.jsx'
 import PlanSearch from '../react/components/header/plan-search.jsx'
 import UserGroupsModal from '../react/components/global-settings/user-groups-modal.jsx'
 import NotifyBroadcastModal from '../react/components/global-settings/notify-broadcast-modal.jsx'
-import SummaryReports from '../react/components/sidebar/view/summary-reports.jsx'
 import CoverageBoundary from '../react/components/sidebar/view/coverage-boundary.jsx'
 import RoadSegmentDetail from '../react/components/sidebar/view/road-segment-detail.jsx'
 import BoundaryDetail from '../react/components/sidebar/view/boundary-detail.jsx'
@@ -73,7 +71,6 @@ import planInfoRecent from './sidebar/view/plan-info-recent'
 import aroSearch from './sidebar/view/aro-search'
 import aroMultiselectSearch from './sidebar/view/aro-multiselect-search'
 import displayModeButtons from './sidebar/display-mode-buttons'
-import summaryReports from './sidebar/summary-reports'
 import analysisExpertMode from './sidebar/analysis/analysis-expert-mode'
 import analysisMode from './sidebar/analysis/analysis-mode'
 
@@ -145,7 +142,6 @@ app.component('boundaryDetail', boundaryDetail)
   .component('aroSearch', aroSearch)
   .component('aroMultiselectSearch', aroMultiselectSearch)
   .component('displayModeButtons', displayModeButtons)
-  .component('summaryReports', summaryReports)
   .component('analysisExpertMode', analysisExpertMode)
   .component('analysisMode', analysisMode)
   .component('locationRoicReports', locationRoicReports)
@@ -196,13 +192,11 @@ app.component('boundaryDetail', boundaryDetail)
   .component('editorInterfacePrimitive', editorInterfacePrimitive)
   .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
 // ReactJS components
-  .component('rPlanSummary', react2angular(PlanSummary))
   .component('rNetworkPlanManage', react2angular(NetworkPlanManage))
   .component('rPlanInfo', react2angular(PlanInfo))
   .component('rPlanSearch', react2angular(PlanSearch))
   .component('userGroupsModal', react2angular(UserGroupsModal))
   .component('notifyBroadcastModal', react2angular(NotifyBroadcastModal))
-  .component('rSummaryReports', react2angular(SummaryReports))
   .component('rCoverageBoundary', react2angular(CoverageBoundary, ['mapGlobalObjectName']))  
   .component('rRoadSegmentDetail', react2angular(RoadSegmentDetail))
   .component('rBoundaryDetail', react2angular(BoundaryDetail))
