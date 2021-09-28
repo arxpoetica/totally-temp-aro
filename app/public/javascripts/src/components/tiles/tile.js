@@ -492,6 +492,23 @@ class TileComponentController {
       }
     })
 
+    // FIXME: move this to the React jsx files when loading locations from new API
+    this.mouseMoveTimer = null
+    this.overlayMousemoveListener = this.mapRef.addListener('mousemove', event => {
+      // we're only reacting to `mousemove` in plan edit mode
+      if (this.state.selectedDisplayMode.getValue() !== this.state.displayModes.EDIT_PLAN) {
+        return
+      }
+
+      clearTimeout(this.mouseMoveTimer)
+      this.mouseMoveTimer = setTimeout(async() => {
+        // FIXME: let's JUST load location information
+        const hitFeatures = await this.getFeaturesUnderLatLng(event.latLng)
+        console.log(hitFeatures.locations)
+      }, 250)
+    })
+    this.overlayMouseoutListener = this.mapRef.addListener('mouseout', () => clearTimeout(this.mouseMoveTimer))
+
     this.getFeaturesUnderLatLng = function (latLng) {
       // Get latitiude and longitude
       var lat = latLng.lat()
@@ -605,6 +622,17 @@ class TileComponentController {
     if (this.overlayClickListener) {
       google.maps.event.removeListener(this.overlayClickListener)
       this.overlayClickListener = null
+    }
+
+    // FIXME: move this to the React jsx files when loading locations from new API
+    if (this.overlayMouseoutListener) {
+      google.maps.event.removeListener(this.overlayMouseoutListener)
+      this.overlayMouseoutListener = null
+    }
+    if (this.overlayMousemoveListener) {
+      google.maps.event.removeListener(this.overlayMousemoveListener)
+      this.overlayMousemoveListener = null
+      this.mouseMoveTimer = null
     }
 
     if (this.overlayRightclickListener) {
