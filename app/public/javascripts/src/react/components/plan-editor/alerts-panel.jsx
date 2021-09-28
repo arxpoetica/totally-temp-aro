@@ -4,7 +4,7 @@ import cx from 'clsx'
 import PlanEditorSelectors from './plan-editor-selectors.js'
 import { constants } from './constants'
 
-const DefectsPanel = props => {
+const AlertsPanel = props => {
 
   const { locationAlerts, alertTypes, cursorLocationIds, map } = props
   const alerts = Object.entries(locationAlerts)
@@ -82,4 +82,4 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
 })
 
-export default connect(mapStateToProps, mapDispatchToProps)(DefectsPanel)
+export default connect(mapStateToProps, mapDispatchToProps)(AlertsPanel)
