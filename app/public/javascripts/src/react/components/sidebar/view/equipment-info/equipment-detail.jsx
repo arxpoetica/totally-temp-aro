@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import reduxStore from '../../../../../redux-store'
 import wrapComponentWithProvider from '../../../../common/provider-wrapped-component'
 import { viewModePanels } from '../../constants'
@@ -10,12 +10,18 @@ import StateViewModeActions from '../../../state-view-mode/state-view-mode-actio
 import  AroHttp from '../../../../common/aro-http'
 import RxState from '../../../../common/rxState'
 import AroSearch from '../../view/aro-search.jsx'
+import EquipmentInterfaceTree from './equipment-interface-tree.jsx'
+import AroFeatureFactory from '../../../../../service-typegen/dist/AroFeatureFactory'
+import { usePrevious } from '../../../../common/view-utils.js'
+import { dequal } from 'dequal'
+import TileDataService from '../../../../../components/tiles/tile-data-service'
 
 const EquipmentDetailView = Object.freeze({
   List: 0,
   Detail: 1,
   Fiber: 2
 })
+const tileDataService = new TileDataService()
 
 const rxState = new RxState()
 
@@ -33,12 +39,50 @@ export const equipmentDetail = (props) => {
     boundsData: null,
     isWorkingOnCoverage: false,
     isComponentDestroyed: false,
+    equipmentFeature: {},
+    networkNodeType: '',
   })
 
   const { currentEquipmentDetailView, selectedEquipmentGeog, headerIcon, networkNodeLabel, boundsObjectId,
-    showCoverageOutput, coverageOutput, equipmentData, boundsData, isComponentDestroyed } = state
+    showCoverageOutput, coverageOutput, equipmentData, boundsData, isComponentDestroyed, equipmentFeature,
+    networkNodeType } = state
   const { activeViewModePanel, plan, cloneSelection, setMapSelection, loggedInUser, networkEquipment,
-    activeViewModePanelAction, showSiteBoundary, getOptimizationBody, configuration } = props
+    activeViewModePanelAction, showSiteBoundary, getOptimizationBody, configuration, selectedMapFeatures,
+    allowViewModeClickAction } = props
+
+  const prevMapFeatures = usePrevious(selectedMapFeatures)
+
+  useEffect(() => {
+    if (!dequal(prevMapFeatures, selectedMapFeatures)) {
+      if(!allowViewModeClickAction) return
+      if (selectedMapFeatures.hasOwnProperty('roadSegments')
+        && selectedMapFeatures.roadSegments.size > 0) return
+
+      if (selectedMapFeatures.hasOwnProperty('equipmentFeatures') && selectedMapFeatures.equipmentFeatures.length > 0) {
+          var equipmentList = getValidEquipmentFeaturesList(selectedMapFeatures.equipmentFeatures) // Filter Deleted equipment features
+          if (equipmentList.length > 0) {
+            const equipment = equipmentList[0]
+            updateSelectedState(equipment)
+            displayEquipment(plan.id, equipment.object_id)
+            .then((equipmentInfo) => {
+              checkForBounds(equipment.object_id)
+            })
+          }
+      }
+    }
+  }, [selectedMapFeatures])
+
+  const getValidEquipmentFeaturesList = (equipmentFeaturesList) => {
+    var validEquipments = []
+    equipmentFeaturesList.filter((equipment) => {
+      if (tileDataService.modifiedFeatures.hasOwnProperty(equipment.object_id)) {
+        if (!tileDataService.modifiedFeatures[equipment.object_id].deleted) validEquipments.push(equipment)
+      } else {
+        validEquipments.push(equipment)
+      }
+    })
+    return validEquipments
+  }
 
   const updateSelectedState = (selectedFeature) => {
     const newSelection = cloneSelection()
@@ -68,14 +112,12 @@ export const equipmentDetail = (props) => {
               headerIcon: '',networkNodeLabel: equipmentInfo.networkNodeType
             }))
           }
-
-          // this.networkNodeType = equipmentInfo.networkNodeType
-          // this.equipmentFeature = AroFeatureFactory.createObject(equipmentInfo).networkNodeEquipment
-          // this.currentEquipmentDetailView = this.EquipmentDetailView.Detail
-
           setState((state) => ({ ...state,
             equipmentData: equipmentInfo, 
-            selectedEquipmentGeog: equipmentInfo.geometry.coordinates
+            selectedEquipmentGeog: equipmentInfo.geometry.coordinates,
+            equipmentFeature: AroFeatureFactory.createObject(equipmentInfo).networkNodeEquipment,
+            networkNodeType: equipmentInfo.networkNodeType,
+            currentEquipmentDetailView: EquipmentDetailView.Detail
           }))
           activeViewModePanelAction(viewModePanels.EQUIPMENT_INFO)
         } else {
@@ -192,6 +234,12 @@ export const equipmentDetail = (props) => {
       {
         currentEquipmentDetailView === EquipmentDetailView.Detail &&
         <>
+        <EquipmentInterfaceTree
+          objectToView={equipmentFeature}
+          rootMetaData={{networkNodeType: networkNodeType}}
+          isEdit={false}
+          indentationLevel={0}
+        />
         {
           boundsObjectId && showSiteBoundary &&
           <div className="equipment-detail-bounds">
@@ -227,6 +275,7 @@ const mapStateToProps = (state) => ({
   loggedInUser: state.user.loggedInUser,
   showSiteBoundary: state.mapLayers.showSiteBoundary,
   configuration: state.toolbar.appConfiguration,
+  selectedMapFeatures: state.selection.mapFeatures,
 })
 
 const mapDispatchToProps = (dispatch) => ({
@@ -234,6 +283,7 @@ const mapDispatchToProps = (dispatch) => ({
   activeViewModePanelAction: (value) => dispatch(ToolBarActions.activeViewModePanel(value)),
   setMapSelection: (mapSelection) => dispatch(SelectionActions.setMapSelection(mapSelection)),
   getOptimizationBody: () => dispatch(StateViewModeActions.getOptimizationBody()),
+  allowViewModeClickAction: () => dispatch(StateViewModeActions.allowViewModeClickAction()),
 })
 
 export default wrapComponentWithProvider(reduxStore, equipmentDetail, mapStateToProps, mapDispatchToProps)
