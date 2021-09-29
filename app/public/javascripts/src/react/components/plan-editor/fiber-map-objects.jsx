@@ -16,25 +16,39 @@ export class FiberMapObjects extends Component {
   }
 
   componentDidUpdate () {
-    const { selectedSubnetId, subnets } = this.props
+    const { selectedSubnetId, subnets, subnetFeatures } = this.props
     if (this.mapobjects.length) {
       this.deleteMapObject()
     }
-
+    
+    //TODO: prevent re-renders if fiber hasn't changed
+    // if it in in subnets it is either a hub or CO, so it has it's own fiber
     if (subnets[selectedSubnetId]){
       const { subnetLinks, fiberType } = subnets[selectedSubnetId].fiber
       if (subnetLinks) {
-        for (const subnetLink of subnetLinks) {
-          const { geometry } = subnetLink
-          if (geometry.type === 'LineString') {
-            const path = WktUtils.getGoogleMapPathsFromWKTLineString(geometry)
-            this.createMapObject(path, fiberType)
-          } else if (geometry.type === 'MultiLineString') {
-            const path = WktUtils.getGoogleMapPathsFromWKTMultiLineString(geometry)
-            this.createMapObject(path, fiberType)
-          }
-        }
-        // TODO: is there an else / alternative?
+        this.renderFiber(subnetLinks, fiberType)
+      }
+    } 
+    else if (subnetFeatures[selectedSubnetId]) {
+      //if it is a terminal get parent id and render that fiber
+      const { subnetId: parentId } = subnetFeatures[selectedSubnetId]
+      const { subnetLinks, fiberType } = subnets[parentId].fiber
+      if (subnetLinks) {
+        this.renderFiber(subnetLinks, fiberType)
+      }
+    }
+    
+  }
+
+  renderFiber (subnetLinks, fiberType) {
+    for (const subnetLink of subnetLinks) {
+      const { geometry } = subnetLink
+      if (geometry.type === 'LineString') {
+        const path = WktUtils.getGoogleMapPathsFromWKTLineString(geometry)
+        this.createMapObject(path, fiberType)
+      } else if (geometry.type === 'MultiLineString') {
+        const path = WktUtils.getGoogleMapPathsFromWKTMultiLineString(geometry)
+        this.createMapObject(path, fiberType)
       }
     }
   }
@@ -69,6 +83,7 @@ const mapStateToProps = state => ({
   googleMaps: state.map.googleMaps,
   selectedSubnetId: state.planEditor.selectedSubnetId,
   subnets: state.planEditor.subnets,
+  subnetFeatures: state.planEditor.subnetFeatures,
 })
 
 const mapDispatchToProps = dispatch => ({
