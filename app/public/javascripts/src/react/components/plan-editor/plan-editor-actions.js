@@ -1017,6 +1017,13 @@ function recalculateSubnets (transactionId, subnetIds = []) {
   }
 }
 
+function setFiberRenderRequired (bool) {
+  return {
+    type: Actions.PLAN_EDITOR_SET_FIBER_RENDER_REQUIRED,
+    payload: bool,
+  }
+}
+
 // --- //
 
 // helper
@@ -1088,6 +1095,10 @@ function parseRecalcEvents (recalcData) {
       dispatch({
         type: Actions.PLAN_EDITOR_ADD_SUBNETS,
         payload: updatedSubnets,
+      })
+      dispatch({
+        type: Actions.PLAN_EDITOR_SET_FIBER_RENDER_REQUIRED,
+        payload: true,
       })
     })
 
@@ -1272,4 +1283,5 @@ export default {
   recalculateBoundary,
   boundaryChange,
   recalculateSubnets,
+  setFiberRenderRequired,
 }
