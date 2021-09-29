@@ -3,10 +3,11 @@ import { connect } from 'react-redux'
 import cx from 'clsx'
 import PlanEditorSelectors from './plan-editor-selectors'
 import { constants } from './constants'
+const { ALERT_TYPES, Z_INDEX_PIN } = constants
 
 const AlertsPanel = props => {
 
-  const { locationAlerts, alertTypes, cursorLocationIds, map } = props
+  const { locationAlerts, cursorLocationIds, map } = props
   const alerts = Object.entries(locationAlerts)
 
   const [open, setOpen] = useState(false)
@@ -22,7 +23,7 @@ const AlertsPanel = props => {
       },
       animation: google.maps.Animation.BOUNCE,
       position: { lat: latitude, lng: longitude },
-      zIndex: constants.Z_INDEX_PIN,
+      zIndex: Z_INDEX_PIN,
     })
     setBounceMarker(marker)
   }
@@ -57,9 +58,9 @@ const AlertsPanel = props => {
               <div className="text">
                 <div
                   className="svg location"
-                  style={ { backgroundImage: `url('${alertTypes[alert].iconUrl}')` } }
+                  style={ { backgroundImage: `url('${ALERT_TYPES[alert].iconUrl}')` } }
                 ></div>
-                {alertTypes[alert].displayName}
+                {ALERT_TYPES[alert].displayName}
               </div>
             </li>
           )
@@ -73,7 +74,6 @@ const AlertsPanel = props => {
 
 const mapStateToProps = state => ({
   locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(state),
-  alertTypes: PlanEditorSelectors.AlertTypes,
   cursorLocationIds: state.planEditor.cursorLocationIds,
   // TODO: why is this named `googleMaps`? Is it ever plural? Isn't it a single map?
   map: state.map.googleMaps,

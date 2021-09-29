@@ -504,7 +504,7 @@ class TileComponentController {
         // FIXME: let's JUST load location information
         const { locations } = await this.getFeaturesUnderLatLng(event.latLng)
         this.setCursorLocationIds(locations.map(location => location.object_id))
-      }, 250)
+      }, 100)
     })
     this.overlayMouseoutListener = this.mapRef.addListener('mouseout', () => clearTimeout(this.mouseMoveTimer))
 

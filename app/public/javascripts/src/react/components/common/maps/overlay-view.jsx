@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import ReactDOM from 'react-dom'
 import { connect } from 'react-redux'
 
@@ -33,14 +33,14 @@ class CustomOverlayView extends google.maps.OverlayView {
 }
 
 function createOverlayElement() {
-  const el = document.createElement('div')
-  el.style.position = 'absolute'
-  return el
+  const div = document.createElement('div')
+  div.classList.add('map-overlay-view')
+  return div
 }
 
-const _OverlayView = ({ map, elem, position, children }) => {
-  let overlay
+const _OverlayView = ({ map, position, children }) => {
 
+  let overlay
   useEffect(() => {
     // remove overlay from the map
     return () => {
@@ -54,11 +54,10 @@ const _OverlayView = ({ map, elem, position, children }) => {
   // guard
   if (!map) return null
 
-  elem = elem || createOverlayElement()
-  overlay = new CustomOverlayView({ position, content: elem })
+  const elem = useRef(createOverlayElement())
+  overlay = new CustomOverlayView({ position, content: elem.current })
   overlay.setMap(map)
-
-  return ReactDOM.createPortal(children, elem)
+  return ReactDOM.createPortal(children, elem.current)
 }
 
 const mapStateToProps = state => ({
