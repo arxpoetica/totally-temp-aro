@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import cx from 'clsx'
-import PlanEditorSelectors from './plan-editor-selectors.js'
+import PlanEditorSelectors from './plan-editor-selectors'
 import { constants } from './constants'
 
 const AlertsPanel = props => {

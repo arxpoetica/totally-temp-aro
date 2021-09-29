@@ -1,29 +1,22 @@
-import React, { useState, useEffect, ReactDOM } from 'react'
+import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
-import { OverlayView } from '../common/maps/overlay-view'
+import PlanEditorSelectors from './plan-editor-selectors'
+import { OverlayView } from '../common/maps/OverlayView'
 // import cx from 'clsx'
 
-let popup
+const _AlertsPanelPopup = ({ locationAlerts, alertTypes, cursorLocationIds, map }) => {
 
-const AlertsPanelPopup = ({ locationAlerts, alertTypes, cursorLocationIds, map }) => {
-
-  useEffect(() => {
-    popup = new OverlayView({
-      position: new google.maps.LatLng(
-        // TODO: find these values...
-        38.87837240377658,
-        -76.94005246098406,
-      ),
-      // content: document.getElementById('content'),
-      content: document.getElementById('map-canvas'),
-    })
-    popup.setMap()
-
-    return () => delete popup
-  }, [])
+  // TODO: find these values...
+  const position = new google.maps.LatLng(38.87837240377658, -76.94005246098406)
 
   // we don't render anything immediately
-  return null
+  return (
+    <OverlayView position={position}>
+      <div className="alerts-panel-popup" style={{ backgroundColor: 'gray', position: 'absolute' }}>
+        Look at all this content
+      </div>
+    </OverlayView>
+  )
 }
 
 const mapStateToProps = state => ({
@@ -33,7 +26,5 @@ const mapStateToProps = state => ({
   // TODO: why is this named `googleMaps`? Is it ever plural? Isn't it a single map?
   map: state.map.googleMaps,
 })
-
 const mapDispatchToProps = dispatch => ({})
-
-export default connect(mapStateToProps, mapDispatchToProps)(AlertsPanelPopup)
+export const AlertsPanelPopup = connect(mapStateToProps, mapDispatchToProps)(_AlertsPanelPopup)
