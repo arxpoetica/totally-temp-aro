@@ -19,6 +19,7 @@ const defaultState = {
   subnetFeatures: {},
   selectedSubnetId: '', // need to rename this now that a terminal can be selected, lets do "activeFeature" // unselected this should be null not ''
   boundaryDebounceBySubnetId: {},
+  fiberRenderRequired: true,
   cursorLocationIds: [],
 }
 
@@ -336,7 +337,10 @@ function planEditorReducer (state = defaultState, { type, payload }) {
 
     case Actions.PLAN_EDITOR_CLEAR_BOUNDARY_DEBOUNCE:
       return clearBoundaryDebounce(state, payload)
-
+    
+    case Actions.PLAN_EDITOR_SET_FIBER_RENDER_REQUIRED:
+      return { ...state, fiberRenderRequired: payload }
+      
     case Actions.PLAN_EDITOR_SET_CURSOR_LOCATION_IDS:
       return { ...state, cursorLocationIds: payload }
 
