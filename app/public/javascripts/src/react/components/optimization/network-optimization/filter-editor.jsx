@@ -45,7 +45,9 @@ export const FilterEditor = ({
   planId,
   updatedLocationConstraints,
   loadSelectionFromObjectFilter,
+  validatedFilters,
   serviceAreas,
+  isPreviewLoading,
 }) => {
 
   useEffect(() => {
@@ -163,7 +165,7 @@ export const FilterEditor = ({
     if (serviceAreas.size > 1){
       swal({
         title: 'Error',
-        text: 'Too many service areas selected',
+        text: 'Preview on map is currently only supported for a single service area.',
         type: 'error'
       })
     } else {
@@ -256,10 +258,10 @@ export const FilterEditor = ({
 
   return (
     <EditorInterface title="Filters" 
-      middleSection={!displayOnly && activeFilters.length > 0 && 
+      middleSection={!displayOnly && validatedFilters.length > 0 && 
         <div className="button-group">
           <button type="button" className="ei-header-filter-preview" onClick={() => handlePreview()}>Preview On Map</button>
-          <Loader loading={false} title="Calculating..."/>
+          <Loader loading={isPreviewLoading} title="Calculating..."/>
         </div>
       }
       rightSection={!displayOnly && 
@@ -285,7 +287,9 @@ const mapStateToProps = (state) => ({
   optimizationInputs: state.optimization.networkOptimization.optimizationInputs,
   planId: state.plan.activePlan.id,
   updatedLocationConstraints: NetworkOptimizationSelectors.getUpdatedLocationConstraints(state),
-  serviceAreas: state.selection.planTargets.serviceAreas
+  validatedFilters: NetworkOptimizationSelectors.getValidatedFilters(state),
+  serviceAreas: state.selection.planTargets.serviceAreas,
+  isPreviewLoading: state.optimization.networkOptimization.isPreviewLoading,
 })
 
 const mapDispatchToProps = dispatch => ({

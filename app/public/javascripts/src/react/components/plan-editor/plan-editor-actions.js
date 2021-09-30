@@ -142,39 +142,46 @@ function createFeature (feature) {
     AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
       .then(result => {
         let updatedSubnets = JSON.parse(JSON.stringify(state.planEditor.subnets))
+        const { subnetUpdates, equipmentUpdates } = result.data
         const newFeatures = {}
         // the subnet and equipment updates are not connected, right now we get back two arrays
         // For now I am assuming the relevent subnet is the one with type 'modified'
         // TODO: handle there being multiple updated subnets
 
-        if (result.data.subnetUpdates.length === 1 || result.data.subnetUpdates.length === 2 && result.data.equipmentUpdates) {
-          const modifiedSubnet = result.data.subnetUpdates.find(subnet => subnet.type === 'modified')
-          const subnetId = modifiedSubnet.subnet.id
-          
-          result.data.equipmentUpdates.forEach(equipment => {
-            const feature = parseSubnetFeature(equipment.subnetNode)
+        // gets updated subnet ids to send to addSubnets, can be either created or modified
+        const updatedSubnetIds = subnetUpdates.map((subnet) => {
+          return subnet.subnet.id
+        })
 
-            newFeatures[feature.objectId] = {
-              feature: feature,
-              subnetId: subnetId,
-            }
+        // There should always be a modified subnet
+        const modifiedSubnet = subnetUpdates.find(subnet => subnet.type === 'modified')
+        const subnetId = modifiedSubnet.subnet.id
+        
+        equipmentUpdates.forEach(equipment => {
+          // fix difference between id names
+          const feature = parseSubnetFeature(equipment.subnetNode)
 
-            if (updatedSubnets[subnetId]) {
-              updatedSubnets[subnetId].children.push(feature.objectId)
-            }
+          newFeatures[feature.objectId] = {
+            feature: feature,
+            subnetId: subnetId,
+          }
+          if (updatedSubnets[subnetId]) {
+            updatedSubnets[subnetId].children.push(feature.objectId)
+          }
+        })
+
+        batch(() => {
+          dispatch({
+            type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
+            payload: newFeatures,
+          }),
+          dispatch(addSubnets(updatedSubnetIds))
+          dispatch({
+            type: Actions.PLAN_EDITOR_ADD_SUBNETS,
+            payload: updatedSubnets,
           })
-
-          batch(() => {
-            dispatch({
-              type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
-              payload: newFeatures,
-            }),
-            dispatch({
-              type: Actions.PLAN_EDITOR_ADD_SUBNETS,
-              payload: updatedSubnets,
-            })
-          })
-      }
+        })
+      
       })
       .catch(err => console.error(err))
   }
@@ -437,7 +444,7 @@ function showContextMenuForEquipmentBoundary (mapObject, x, y, vertex) {
   return (dispatch) => {
     const menuActions = []
     menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteBoundaryVertex', mapObject, vertex))
-    const menuItemFeature = new MenuItemFeature('BOUNDARY', 'Equipment Boundary', menuActions)
+    const menuItemFeature = new MenuItemFeature('BOUNDARY', 'Boundary Vertex', menuActions)
 
     // Show context menu
     dispatch(ContextMenuActions.setContextMenuItems([menuItemFeature]))
@@ -543,13 +550,6 @@ function setIsEnteringTransaction (isEnteringTransaction) {
   }
 }
 
-function setIsPlanEditorChanged (isPlanEditorChanged) {
-  return {
-    type: Actions.PLAN_EDITOR_SET_IS_PLAN_EDITOR_CHANGED,
-    payload: isPlanEditorChanged
-  }
-}
-
 function moveFeature (featureId, coordinates) {
   return (dispatch, getState) => {
     const state = getState()
@@ -621,6 +621,7 @@ function readFeatures (featureIds) {
   return (dispatch, getState) => {
     const state = getState()
     let featuresToGet = []
+    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
     featureIds.forEach(featureId => {
       if (!state.planEditor.features[featureId]) {
         featuresToGet.push(featureId)
@@ -631,7 +632,7 @@ function readFeatures (featureIds) {
     let retrievedFeatures = []
     featuresToGet.forEach(featureId => {
       promises.push(
-        AroHttp.get(`/service/plan-feature/${state.plan.activePlan.id}/equipment/${featureId}`)
+        AroHttp.get(`/service/plan-transaction/${transactionId}/subnet-equipment/${featureId}`)
           .then(result => {
             if (result.data) {
               // Decorate the equipment with some default values. Technically this is not yet "created" equipment
@@ -920,6 +921,14 @@ function onMapClick (featureIds, latLng) {
   }
 }
 
+function setCursorLocationIds(payload) {
+  return { type: Actions.PLAN_EDITOR_SET_CURSOR_LOCATION_IDS, payload }
+}
+
+function clearCursorLocationIds() {
+  return { type: Actions.PLAN_EDITOR_CLEAR_CURSOR_LOCATION_IDS, payload: [] }
+}
+
 function recalculateBoundary (subnetId) {
   return (dispatch, getState) => {
     dispatch(setIsCalculatingBoundary(true))
@@ -936,7 +945,6 @@ function recalculateBoundary (subnetId) {
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet/${subnetId}/boundary`, boundaryBody)
       .then(res => {
         dispatch(setIsCalculatingBoundary(false)) // may need to extend this for multiple boundaries? (make it and int incriment, decriment)
-        dispatch(setIsPlanEditorChanged(true)) // recaluculate plansummary
       })
       .catch(err => {
         console.error(err)
@@ -1007,7 +1015,6 @@ function recalculateSubnets (transactionId, subnetIds = []) {
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet-cmd/recalc`, recalcBody)
       .then(res => {
         dispatch(setIsCalculatingSubnets(false))
-        dispatch(setIsPlanEditorChanged(true)) // recaluculate plansummary
         // parse changes
         dispatch(parseRecalcEvents(res.data))
       })
@@ -1264,13 +1271,14 @@ export default {
   setIsEditingFeatureProperties,
   setIsCommittingTransaction,
   setIsEnteringTransaction,
-  setIsPlanEditorChanged,
   readFeatures,
   selectEditFeaturesById,
   deselectEditFeatureById,
   addSubnets,
   setSelectedSubnetId,
   onMapClick,
+  setCursorLocationIds,
+  clearCursorLocationIds,
   recalculateBoundary,
   boundaryChange,
   recalculateSubnets,

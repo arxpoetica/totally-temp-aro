@@ -27,9 +27,9 @@ export class EquipmentMapObjects extends Component {
     for (const id of Object.keys(this.mapObjects)) {
       const info = featuresRenderInfo.find(feature => feature.id === id)
       if (info) {
-        const { feature } = subnetFeatures[info.id]
+        const feature = subnetFeatures[info.id] && subnetFeatures[info.id].feature
         // only delete idle terminals when found
-        if (info.idle && feature.networkNodeType.includes('terminal')) {
+        if (feature && info.idle && feature.networkNodeType.includes('terminal')) {
           this.deleteMapObject(id)
         }
       } else {
@@ -81,7 +81,7 @@ export class EquipmentMapObjects extends Component {
       let coordinates = [event.latLng.lng(), event.latLng.lat()]
       this.props.moveFeature(mapObject.objectId, coordinates)
     })
-    mapObject.addListener('rightclick', event => {
+    mapObject.addListener('contextmenu', event => {
       const eventXY = WktUtils.getXYFromEvent(event)
       this.props.showContextMenuForEquipment(mapObject.objectId, eventXY.x, eventXY.y)
     })
@@ -103,7 +103,6 @@ export class EquipmentMapObjects extends Component {
 
       selectionCircle.setMap(null)
       this.props.selectEditFeaturesById(selectedEquipmentIds)
-      // this.props.selectEditFeatureById(objectId)
     })
 
     this.mapObjects[objectId] = mapObject
@@ -132,6 +131,11 @@ export class EquipmentMapObjects extends Component {
         let icon = '/svg/map-icons/selection-1.svg'
         if (id === selectedSubnetId) {
           icon = '/svg/map-icons/selection-2.svg'
+          // re-render the main selection so it appears on top if there are multiple equipments
+          if (this.props.selectedEditFeatureIds.length > 1){
+            this.deleteMapObject(id)
+            this.createMapObject(subnetFeatures[id].feature, false)
+          }
         }
 
         if (this.selectionOverlays[id]) {
@@ -206,7 +210,6 @@ const mapDispatchToProps = dispatch => ({
   showContextMenuForEquipment: (equipmentObjectId, x, y) => {
     dispatch(PlanEditorActions.showContextMenuForEquipment(equipmentObjectId, x, y))
   },
-  selectEditFeatureById: id => dispatch(PlanEditorActions.selectEditFeaturesById([id])),
   setSelectedSubnetId: id => dispatch(PlanEditorActions.setSelectedSubnetId(id)),
   selectEditFeaturesById: featureIds => dispatch(PlanEditorActions.selectEditFeaturesById(featureIds)),
 })

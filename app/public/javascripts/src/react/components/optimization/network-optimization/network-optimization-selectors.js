@@ -32,7 +32,7 @@ const getObjectFilter = createSelector([getValidatedFilters, getClientName], (va
     let value = filter.value1
     let value2 = filter.value2
     // convert dates to milliseconds since epoch for service
-    if (filter.propertyType === 'DATE' || 'DATETIME') {
+    if (filter.propertyType === ('DATE' || 'DATETIME')) {
       value = new Date(filter.value1).getTime()
       if (filter.value2) {
         value2 = new Date(filter.value2).getTime()
