@@ -72,10 +72,7 @@ export const FiberMapObjects = (props) => {
 
   function deleteMapObjects() {
     if (mapObjects.length) {
-      mapObjects.forEach(mapObject => {
-        mapObject.setMap(null)
-
-      })
+      mapObjects.forEach(mapObject => mapObject.setMap(null))
       mapObjects = []
     }
   }
