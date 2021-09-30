@@ -3,7 +3,6 @@
  */
 'use strict'
 
-import { createSelector } from 'reselect'
 import MapTileRenderer from './map-tile-renderer'
 import TileUtilities from './tile-utilities'
 import MapUtilities from '../common/plan/map-utilities'
@@ -11,10 +10,10 @@ import FeatureSelector from './feature-selector'
 import Constants from '../common/constants'
 import SelectionModes from '../../react/components/selection/selection-modes'
 import MenuAction, { MenuActionTypes } from '../common/context-menu/menu-action'
-import MenuItem, { MenuItemTypes } from '../common/context-menu/menu-item'
-import FeatureSets from '../../react/common/featureSets'
+import MenuItem from '../common/context-menu/menu-item'
 import ToolBarActions from '../../react/components/header/tool-bar-actions'
-import PlanEditorSelectors from '../../react/components/plan-editor/plan-editor-selectors.js'
+import PlanEditorActions from '../../react/components/plan-editor/plan-editor-actions'
+import PlanEditorSelectors from '../../react/components/plan-editor/plan-editor-selectors'
 import { dequal } from 'dequal'
 
 class TileComponentController {
@@ -492,6 +491,23 @@ class TileComponentController {
       }
     })
 
+    // FIXME: move this to the plan edit jsx files when loading locations from new API
+    this.mouseMoveTimer = null
+    this.overlayMousemoveListener = this.mapRef.addListener('mousemove', event => {
+      // we're only reacting to `mousemove` in plan edit mode
+      if (this.state.selectedDisplayMode.getValue() !== this.state.displayModes.EDIT_PLAN) {
+        return
+      }
+
+      clearTimeout(this.mouseMoveTimer)
+      this.mouseMoveTimer = setTimeout(async() => {
+        // FIXME: let's JUST load location information
+        const { locations } = await this.getFeaturesUnderLatLng(event.latLng)
+        this.setCursorLocationIds(locations.map(location => location.object_id))
+      }, 100)
+    })
+    this.overlayMouseoutListener = this.mapRef.addListener('mouseout', () => clearTimeout(this.mouseMoveTimer))
+
     this.getFeaturesUnderLatLng = function (latLng) {
       // Get latitiude and longitude
       var lat = latLng.lat()
@@ -605,6 +621,17 @@ class TileComponentController {
     if (this.overlayClickListener) {
       google.maps.event.removeListener(this.overlayClickListener)
       this.overlayClickListener = null
+    }
+
+    // FIXME: move this to the plan edit jsx files when loading locations from new API
+    if (this.overlayMouseoutListener) {
+      google.maps.event.removeListener(this.overlayMouseoutListener)
+      this.overlayMouseoutListener = null
+    }
+    if (this.overlayMousemoveListener) {
+      google.maps.event.removeListener(this.overlayMousemoveListener)
+      this.overlayMousemoveListener = null
+      this.mouseMoveTimer = null
     }
 
     if (this.overlayRightclickListener) {
@@ -769,8 +796,10 @@ class TileComponentController {
 
   mapDispatchToTarget (dispatch) {
     return {
-      rActiveViewModePanelAction: (value) => dispatch(ToolBarActions.activeViewModePanel(value))
-     }
+      rActiveViewModePanelAction: value => dispatch(ToolBarActions.activeViewModePanel(value)),
+      setCursorLocationIds: ids => dispatch(PlanEditorActions.setCursorLocationIds(ids)),
+      clearCursorLocationIds: () => dispatch(PlanEditorActions.clearCursorLocationIds()),
+    }
   }
 
   mergeToTarget (nextState, actions) {

@@ -1,3 +1,5 @@
+// TODO: rework this to use `overlay-view.jsx` ???
+
 // ------- from https://developers.google.com/maps/documentation/javascript/examples/delete-vertex-menu
 /**
  * A menu that lets a user delete a selected vertex of a path.
