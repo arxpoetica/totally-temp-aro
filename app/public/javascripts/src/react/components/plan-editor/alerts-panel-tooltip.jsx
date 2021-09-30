@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import PlanEditorSelectors from './plan-editor-selectors'
-import { MapTooltip } from '../common/maps/map-tooltip'
+import { MapTooltip } from '../common/maps/map-tooltip.jsx'
 import { constants } from './constants'
 const { ALERT_TYPES } = constants
 

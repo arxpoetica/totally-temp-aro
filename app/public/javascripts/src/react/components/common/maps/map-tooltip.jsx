@@ -1,5 +1,5 @@
 import React from 'react'
-import { OverlayView } from './overlay-view'
+import { OverlayView } from './overlay-view.jsx'
 // import cx from 'clsx'
 import './map-tooltip.css'
 
