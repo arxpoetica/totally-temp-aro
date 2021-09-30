@@ -18,5 +18,39 @@ export const constants = Object.freeze({
   DRAG_DROP_GRAB_OFFSET_X: 'grabOffsetX',
   DRAG_DROP_GRAB_OFFSET_Y: 'grabOffsetY',
   DRAG_DROP_GRAB_ICON_W: 'grabIconW',
-  DRAG_DROP_GRAB_ICON_H: 'grabIconH'
+  DRAG_DROP_GRAB_ICON_H: 'grabIconH',
+
+  ALERT_TYPES: {
+    MAX_DROP_LENGTH_EXCEEDED: {
+      key: 'MAX_DROP_LENGTH_EXCEEDED',
+      displayName: 'Drop Cable Length Exceeded',
+      iconUrl: '/svg/alert-panel-location.svg',
+    },
+    ABANDONED_LOCATION: {
+      key: 'ABANDONED_LOCATION',
+      displayName: 'Abandoned Location',
+      iconUrl: '/svg/alert-panel-location.svg',
+    },
+    MAX_TERMINAL_HOMES_EXCEEDED: {
+      key: 'MAX_TERMINAL_HOMES_EXCEEDED',
+      displayName: 'Maximum Terminal Homes Exceeded',
+      iconUrl: '/svg/alert-panel-location.svg',
+    },
+    MAX_HUB_HOMES_EXCEEDED: {
+      key: 'MAX_HUB_HOMES_EXCEEDED',
+      displayName: 'Maximum Hub Homes Exceeded',
+      iconUrl: '/svg/alert-panel-location.svg',
+    },
+    MAX_HUB_DISTANCE_EXCEEDED: {
+      key: 'MAX_HUB_DISTANCE_EXCEEDED',
+      displayName: 'Maximum Hub Distance Exceeded',
+      iconUrl: '/svg/alert-panel-location.svg',
+    },
+    MAX_TERMINAL_DISTANCE_EXCEEDED: {
+      key: 'MAX_TERMINAL_DISTANCE_EXCEEDED',
+      displayName: 'Maximum Terminal Distance Exceeded',
+      iconUrl: '/svg/alert-panel-location.svg',
+    },
+  },
+
 })

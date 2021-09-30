@@ -1,4 +1,6 @@
 import { createSelector } from 'reselect'
+import { constants } from './constants'
+const { ALERT_TYPES } = constants
 
 const getAllBoundaryLayers = state => state.mapLayers.boundary
 const getBoundaryLayersList = createSelector([getAllBoundaryLayers], (boundaries) => boundaries.toJS())
@@ -58,38 +60,6 @@ const getNetworkConfig = state => {
   return networkConfig
 }
 
-const AlertTypes = {
-  MAX_DROP_LENGTH_EXCEEDED: {
-    key: 'MAX_DROP_LENGTH_EXCEEDED',
-    displayName: 'Drop Cable Length Exceeded',
-    iconUrl: '/svg/alert-panel-location.svg',
-  },
-  ABANDONED_LOCATION: {
-    key: 'ABANDONED_LOCATION',
-    displayName: 'Abandoned Location',
-    iconUrl: '/svg/alert-panel-location.svg',
-  },
-  MAX_TERMINAL_HOMES_EXCEEDED: {
-    key: 'MAX_TERMINAL_HOMES_EXCEEDED',
-    displayName: 'Maximum Terminal Homes Exceeded',
-    iconUrl: '/svg/alert-panel-location.svg',
-  },
-  MAX_HUB_HOMES_EXCEEDED: {
-    key: 'MAX_HUB_HOMES_EXCEEDED',
-    displayName: 'Maximum Hub Homes Exceeded',
-    iconUrl: '/svg/alert-panel-location.svg',
-  },
-  MAX_HUB_DISTANCE_EXCEEDED: {
-    key: 'MAX_HUB_DISTANCE_EXCEEDED',
-    displayName: 'Maximum Hub Distance Exceeded',
-    iconUrl: '/svg/alert-panel-location.svg',
-  },
-  MAX_TERMINAL_DISTANCE_EXCEEDED: {
-    key: 'MAX_TERMINAL_DISTANCE_EXCEEDED',
-    displayName: 'Maximum Terminal Distance Exceeded',
-    iconUrl: '/svg/alert-panel-location.svg',
-  },
-}
 // temporary
 const locationWarnImg = new Image(18, 22)
 locationWarnImg.src = '/svg/alert-panel-location.png'
@@ -196,7 +166,7 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
                 point: featurePoint,
               }
             }
-            alerts[featureId].alerts.push(AlertTypes['MAX_HUB_DISTANCE_EXCEEDED'].key)
+            alerts[featureId].alerts.push(ALERT_TYPES['MAX_HUB_DISTANCE_EXCEEDED'].key)
           } else if (distance > maxTerminalDistance && networkNodeType === 'fiber_distribution_terminal'){
             if (!alerts[featureId]) {
               alerts[featureId] = {
@@ -206,7 +176,7 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
                 point: featurePoint,
               }
             }
-            alerts[featureId].alerts.push(AlertTypes['MAX_TERMINAL_DISTANCE_EXCEEDED'].key)
+            alerts[featureId].alerts.push(ALERT_TYPES['MAX_TERMINAL_DISTANCE_EXCEEDED'].key)
           }
         }
 
@@ -230,7 +200,7 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
                 point: terminalPoint,
               }
             }
-            alerts[featureId].alerts.push(AlertTypes['MAX_TERMINAL_HOMES_EXCEEDED'].key)
+            alerts[featureId].alerts.push(ALERT_TYPES['MAX_TERMINAL_HOMES_EXCEEDED'].key)
           }
           featureEntry.feature.dropLinks.forEach(dropLink => {
             dropLink.locationLinks.forEach(locationLink => {
@@ -247,7 +217,7 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
                     point: subnet.subnetLocationsById[locationId].point,
                   }
                 }
-                alerts[locationId].alerts.push(AlertTypes['MAX_DROP_LENGTH_EXCEEDED'].key)
+                alerts[locationId].alerts.push(ALERT_TYPES['MAX_DROP_LENGTH_EXCEEDED'].key)
               }
             })
           })
@@ -268,7 +238,7 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
             point: hubPoint,
           }
         }
-        alerts[subnetId].alerts.push(AlertTypes['MAX_HUB_HOMES_EXCEEDED'].key)
+        alerts[subnetId].alerts.push(ALERT_TYPES['MAX_HUB_HOMES_EXCEEDED'].key)
       }
 
       Object.keys(abandonedLocations).forEach(locationId => {
@@ -280,7 +250,7 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
             point: subnet.subnetLocationsById[locationId].point,
           }
         }
-        alerts[locationId].alerts.push(AlertTypes['ABANDONED_LOCATION'].key)
+        alerts[locationId].alerts.push(ALERT_TYPES['ABANDONED_LOCATION'].key)
       })
     }
   }
@@ -309,7 +279,6 @@ const PlanEditorSelectors = Object.freeze({
   getBoundaryLayersList,
   getFeaturesRenderInfo,
   getIsRecalcSettled,
-  AlertTypes,
   getAlertsForSubnetTree,
   locationWarnImg,
   getSelectedSubnetLocations,
