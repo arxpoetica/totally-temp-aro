@@ -94,9 +94,7 @@ export class EquipmentBoundaryMapObjects extends Component {
       paths: WktUtils.getGoogleMapPathsFromWKTMultiPolygon(geometry),
       clickable: false,
       draggable: false,
-      // FIXME: I think there might be a bug from service? it's coming back as locked
-      // editable: !isLocked,
-      editable: true,
+      editable: !isLocked,
       map: this.props.googleMaps,
     })
     
