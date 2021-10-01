@@ -929,6 +929,14 @@ function clearCursorLocationIds() {
   return { type: Actions.PLAN_EDITOR_CLEAR_CURSOR_LOCATION_IDS, payload: [] }
 }
 
+function addCursorEquipmentIds(payload) {
+  return { type: Actions.PLAN_EDITOR_ADD_CURSOR_EQUIPMENT_IDS, payload }
+}
+
+function clearCursorEquipmentIds() {
+  return { type: Actions.PLAN_EDITOR_CLEAR_CURSOR_EQUIPMENT_IDS, payload: [] }
+}
+
 function recalculateBoundary (subnetId) {
   return (dispatch, getState) => {
     dispatch(setIsCalculatingBoundary(true))
@@ -1291,6 +1299,8 @@ export default {
   onMapClick,
   addCursorLocationIds,
   clearCursorLocationIds,
+  addCursorEquipmentIds,
+  clearCursorEquipmentIds,
   recalculateBoundary,
   boundaryChange,
   recalculateSubnets,

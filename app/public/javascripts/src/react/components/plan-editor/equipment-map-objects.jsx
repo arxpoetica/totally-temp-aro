@@ -69,8 +69,8 @@ export class EquipmentMapObjects extends Component {
       moveFeature,
       showContextMenuForEquipment,
       selectEditFeaturesById,
-      addCursorLocationIds,
-      clearCursorLocationIds,
+      addCursorEquipmentIds,
+      clearCursorEquipmentIds,
     } = this.props
 
     const { objectId } = feature
@@ -117,12 +117,12 @@ export class EquipmentMapObjects extends Component {
     mapObject.addListener('mouseover', () => {
       clearTimeout(mapObject.mouseoverTimer)
       mapObject.mouseoverTimer = setTimeout(() => {
-        addCursorLocationIds([mapObject.objectId])
+        addCursorEquipmentIds([mapObject.objectId])
       }, 350)
     })
     mapObject.addListener('mouseout', () => {
       clearTimeout(mapObject.mouseoverTimer)
-      clearCursorLocationIds()
+      clearCursorEquipmentIds()
     })
 
     this.mapObjects[objectId] = mapObject
@@ -234,8 +234,8 @@ const mapDispatchToProps = dispatch => ({
   },
   setSelectedSubnetId: id => dispatch(PlanEditorActions.setSelectedSubnetId(id)),
   selectEditFeaturesById: featureIds => dispatch(PlanEditorActions.selectEditFeaturesById(featureIds)),
-  addCursorLocationIds: ids => dispatch(PlanEditorActions.addCursorLocationIds(ids)),
-  clearCursorLocationIds: () => dispatch(PlanEditorActions.clearCursorLocationIds()),
+  addCursorEquipmentIds: ids => dispatch(PlanEditorActions.addCursorEquipmentIds(ids)),
+  clearCursorEquipmentIds: () => dispatch(PlanEditorActions.clearCursorEquipmentIds()),
 })
 
 const EquipmentMapObjectsComponent = connect(mapStateToProps, mapDispatchToProps)(EquipmentMapObjects)

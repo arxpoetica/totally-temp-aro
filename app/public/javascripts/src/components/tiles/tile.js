@@ -503,7 +503,9 @@ class TileComponentController {
       this.mousemoveTimer = setTimeout(async() => {
         // FIXME: let's JUST load location information
         const { locations } = await this.getFeaturesUnderLatLng(event.latLng)
-        this.addCursorLocationIds(locations.map(location => location.object_id))
+        const ids = locations.map(location => location.object_id)
+        this.clearCursorLocationIds()
+        this.addCursorLocationIds([...ids, ...this.cursorEquipmentIds])
       }, 100)
     })
     this.overlayMouseoutListener = this.mapRef.addListener('mouseout', () => {
@@ -794,6 +796,7 @@ class TileComponentController {
       subnetFeatures: reduxState.planEditor.subnetFeatures,
       locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(reduxState),
       selectedSubnetLocations: PlanEditorSelectors.getSelectedSubnetLocations(reduxState),
+      cursorEquipmentIds: reduxState.planEditor.cursorEquipmentIds,
     }
   }
 
