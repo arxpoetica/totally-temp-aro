@@ -207,8 +207,9 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
               const locationId = locationLink.locationId
               // remove abandoned entry
               delete abandonedLocations[locationId]
-              // dropcable alert?
-              if (dropLink.dropCableLength > maxDropCableLength) {
+              // dropcable alert
+              // TODO: Differentiate between too long and NaN?
+              if (dropLink.dropCableLength > maxDropCableLength || isNaN(dropLink.dropCableLength)) {
                 if (!alerts[locationId]) {
                   alerts[locationId] = {
                     locationId,
@@ -264,7 +265,8 @@ const getLocationCounts = createSelector(
     for (const id of selectedEditFeatureIds) {
       if (subnetFeatures[id] && subnetFeatures[id].feature.networkNodeType === 'fiber_distribution_hub') {
         // TODO: is this accurate ?
-        locationCountsById[id] = Object.keys(subnets[id].subnetLocationsById).length
+        //locationCountsById[id] = Object.keys(subnets[id].subnetLocationsById).length
+        locationCountsById[id] = Object.values(subnets[id].subnetLocationsById).filter(location => !!location.parentEquipmentId).length
       } else {
         const locationDistanceMap = subnets[id] && subnets[id].fiber && subnets[id].fiber.locationDistanceMap
         locationCountsById[id] = locationDistanceMap ? Object.keys(locationDistanceMap).length : 0
