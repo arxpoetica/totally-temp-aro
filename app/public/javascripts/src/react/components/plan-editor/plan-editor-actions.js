@@ -1081,7 +1081,8 @@ function parseRecalcEvents (recalcData) {
               subnetCopy.children.push(objectId)
               // do not break
             case 'MODIFY':
-              // add || modify
+            case 'UPDATE':
+              // add || modify || update
               // TODO: this is repeat code from below
               let parsedNode = {
                 feature: parseSubnetFeature(recalcNodeEvent.subnetNode),
