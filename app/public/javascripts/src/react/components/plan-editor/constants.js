@@ -28,21 +28,22 @@ export const constants = Object.freeze({
       iconUrl: '/svg/alert-panel-location.svg',
     },
     // terminal alerts
-    MAX_DROP_LENGTH_EXCEEDED: {
-      key: 'MAX_DROP_LENGTH_EXCEEDED',
-      displayName: 'Drop Cable Length Exceeded',
-      iconUrl: '/svg/alert-panel-location.svg',
-    },
     MAX_TERMINAL_HOMES_EXCEEDED: {
       key: 'MAX_TERMINAL_HOMES_EXCEEDED',
       displayName: 'Maximum Terminal Homes Exceeded',
       iconUrl: '/svg/alert-panel-location.svg',
     },
-    MAX_TERMINAL_DISTANCE_EXCEEDED: {
-      key: 'MAX_TERMINAL_DISTANCE_EXCEEDED',
-      displayName: 'Maximum Terminal Distance Exceeded',
+    MAX_DROP_LENGTH_EXCEEDED: {
+      key: 'MAX_DROP_LENGTH_EXCEEDED',
+      displayName: 'Drop Cable Length Exceeded',
       iconUrl: '/svg/alert-panel-location.svg',
     },
+    // TODO: is this even a thing?
+    // MAX_TERMINAL_DISTANCE_EXCEEDED: {
+    //   key: 'MAX_TERMINAL_DISTANCE_EXCEEDED',
+    //   displayName: 'Maximum Terminal Distance Exceeded',
+    //   iconUrl: '/svg/alert-panel-location.svg',
+    // },
     // hub alerts
     MAX_HUB_HOMES_EXCEEDED: {
       key: 'MAX_HUB_HOMES_EXCEEDED',
