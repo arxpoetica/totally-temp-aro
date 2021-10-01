@@ -1,3 +1,7 @@
+// FIXME: how to use get `state.configuration.system.ARO_CLIENT` in a constant like this
+// build replace plugin?
+const ARO_CLIENT = 'aro'
+
 export const constants = Object.freeze({
   Z_INDEX_SELECTION: 1,
   Z_INDEX_MAP_OBJECT: 2,
@@ -25,13 +29,14 @@ export const constants = Object.freeze({
     ABANDONED_LOCATION: {
       key: 'ABANDONED_LOCATION',
       displayName: 'Abandoned Location',
+      // FIXME: move to proper location
       iconUrl: '/svg/alert-panel-location.svg',
     },
     // terminal alerts
     MAX_TERMINAL_HOMES_EXCEEDED: {
       key: 'MAX_TERMINAL_HOMES_EXCEEDED',
       displayName: 'Maximum Terminal Homes Exceeded',
-      iconUrl: '/svg/alert-panel-location.svg',
+      iconUrl: `/images/map_icons/${ARO_CLIENT}/equipment/fiber_distribution_terminal_alert.svg`,
     },
     MAX_DROP_LENGTH_EXCEEDED: {
       key: 'MAX_DROP_LENGTH_EXCEEDED',
@@ -42,18 +47,18 @@ export const constants = Object.freeze({
     // MAX_TERMINAL_DISTANCE_EXCEEDED: {
     //   key: 'MAX_TERMINAL_DISTANCE_EXCEEDED',
     //   displayName: 'Maximum Terminal Distance Exceeded',
-    //   iconUrl: '/svg/alert-panel-location.svg',
+    //   iconUrl: `/images/map_icons/${ARO_CLIENT}/equipment/fiber_distribution_terminal_alert.svg`,
     // },
     // hub alerts
     MAX_HUB_HOMES_EXCEEDED: {
       key: 'MAX_HUB_HOMES_EXCEEDED',
       displayName: 'Maximum Hub Homes Exceeded',
-      iconUrl: '/svg/alert-panel-location.svg',
+      iconUrl: `/images/map_icons/${ARO_CLIENT}/equipment/fiber_distribution_hub_alert.svg`,
     },
     MAX_HUB_DISTANCE_EXCEEDED: {
       key: 'MAX_HUB_DISTANCE_EXCEEDED',
       displayName: 'Maximum Hub Distance Exceeded',
-      iconUrl: '/svg/alert-panel-location.svg',
+      iconUrl: `/images/map_icons/${ARO_CLIENT}/equipment/fiber_distribution_hub_alert.svg`,
     },
   },
 
