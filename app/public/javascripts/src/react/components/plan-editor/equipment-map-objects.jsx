@@ -2,8 +2,8 @@ import { Component } from 'react'
 import { connect } from 'react-redux'
 import PlanEditorActions from './plan-editor-actions'
 import WktUtils from '../../../shared-utils/wkt-utils'
-import PlanEditorSelectors from './plan-editor-selectors.js'
-import { constants } from './constants'
+import PlanEditorSelectors from './plan-editor-selectors'
+import { constants, getIconUrl } from './shared'
 
 export class EquipmentMapObjects extends Component {
   constructor(props) {
@@ -41,20 +41,20 @@ export class EquipmentMapObjects extends Component {
     // either add or update existing features
     for (const { id, idle } of featuresRenderInfo) {
       const mapObject = this.mapObjects[id]
+      const feature = subnetFeatures[id] && subnetFeatures[id].feature
       if (mapObject) {
+        // TODO: can we check somehow if this has actually changed and then update it?
         mapObject.setOpacity(idle ? 0.4 : 1.0)
-      } else {
-        const feature = subnetFeatures[id] && subnetFeatures[id].feature
-        if (feature) {
-          if (idle) {
-            // if idle show everything but the terminals for performance reasons
-            if (!feature.networkNodeType.includes('terminal')) {
-              this.createMapObject(feature, idle)
-            }
-          } else {
-            // if selected (not idle) just show everything in the subnet
+        mapObject.setIcon(getIconUrl(feature, this.props))
+      } else if (feature) {
+        if (idle) {
+          // if idle show everything but the terminals for performance reasons
+          if (!feature.networkNodeType.includes('terminal')) {
             this.createMapObject(feature, idle)
           }
+        } else {
+          // if selected (not idle) just show everything in the subnet
+          this.createMapObject(feature, idle)
         }
       }
     }
@@ -68,9 +68,7 @@ export class EquipmentMapObjects extends Component {
     const mapObject = new google.maps.Marker({
       objectId, // Not used by Google Maps
       position: WktUtils.getGoogleMapLatLngFromWKTPoint(feature.geometry), 
-      icon: {
-        url: this.props.equipmentDefinitions[feature.networkNodeType].iconUrl
-      },
+      icon: { url: getIconUrl(feature, this.props) },
       draggable: !feature.locked, // Allow dragging only if feature is not locked
       opacity: idle ? 0.4 : 1.0,
       map: this.props.googleMaps,
@@ -196,13 +194,15 @@ export class EquipmentMapObjects extends Component {
 }
 
 const mapStateToProps = state => ({
-  equipmentDefinitions: state.mapLayers.networkEquipment.equipments,
+  ARO_CLIENT: state.configuration.system.ARO_CLIENT,
+  equipments: state.mapLayers.networkEquipment.equipments,
   selectedEditFeatureIds: state.planEditor.selectedEditFeatureIds,
   googleMaps: state.map.googleMaps,
   featuresRenderInfo: PlanEditorSelectors.getFeaturesRenderInfo(state),
   selectedSubnetId: state.planEditor.selectedSubnetId,
   subnetFeatures: state.planEditor.subnetFeatures,
   selectedLocations: PlanEditorSelectors.getSelectedSubnetLocations(state),
+  locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(state),
 })
 
 const mapDispatchToProps = dispatch => ({

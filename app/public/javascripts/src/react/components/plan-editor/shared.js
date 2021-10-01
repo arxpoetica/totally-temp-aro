@@ -63,3 +63,19 @@ export const constants = Object.freeze({
   },
 
 })
+
+export const getIconUrl = (feature, { equipments, locationAlerts, ARO_CLIENT }) => {
+  const { objectId, networkNodeType } = feature
+  let { iconUrl } = equipments[networkNodeType]
+  const alert = locationAlerts[objectId]
+  if (alert) {
+    // FIXME: ...this is bad...it's a workaround hack...
+    // we have slated at some point to work on all the icons
+    // https://www.pivotaltracker.com/story/show/179782874
+    // ...when we do, we should also fix this code.
+    iconUrl = iconUrl
+      .split('.').join('_alert.')
+      .split(`/${ARO_CLIENT}/`).join(`/${ARO_CLIENT}/equipment/`)
+  }
+  return iconUrl
+}

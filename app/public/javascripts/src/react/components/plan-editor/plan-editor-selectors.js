@@ -1,5 +1,5 @@
 import { createSelector } from 'reselect'
-import { constants } from './constants'
+import { constants } from './shared'
 const { ALERT_TYPES } = constants
 
 const getAllBoundaryLayers = state => state.mapLayers.boundary

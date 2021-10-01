@@ -2,7 +2,7 @@
 import { useEffect } from 'react'
 import { connect } from 'react-redux'
 import WktUtils from '../../../shared-utils/wkt-utils'
-import { constants } from './constants'
+import { constants } from './shared'
 import PlanEditorActions from './plan-editor-actions'
 
 let renderedSubnetId = ''

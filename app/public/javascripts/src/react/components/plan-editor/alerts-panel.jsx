@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import cx from 'clsx'
 import PlanEditorSelectors from './plan-editor-selectors'
-import { constants } from './constants'
+import { constants } from './shared'
 const { ALERT_TYPES, Z_INDEX_PIN } = constants
 
 const AlertsPanel = props => {

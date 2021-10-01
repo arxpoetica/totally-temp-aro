@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { PropTypes } from 'prop-types'
 import { connect } from 'react-redux'
-import { constants } from './constants'
+import { constants } from './shared'
 import PlanEditorActions from './plan-editor-actions'
 
 export const DraggableNode = props => {
