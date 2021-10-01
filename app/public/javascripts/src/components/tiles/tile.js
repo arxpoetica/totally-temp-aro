@@ -492,24 +492,29 @@ class TileComponentController {
     })
 
     // FIXME: move this to the plan edit jsx files when loading locations from new API
-    this.mouseMoveTimer = null
+    this.mousemoveTimer = null
     this.overlayMousemoveListener = this.mapRef.addListener('mousemove', event => {
       // we're only reacting to `mousemove` in plan edit mode
       if (this.state.selectedDisplayMode.getValue() !== this.state.displayModes.EDIT_PLAN) {
         return
       }
 
-      clearTimeout(this.mouseMoveTimer)
-      this.mouseMoveTimer = setTimeout(async() => {
+      clearTimeout(this.mousemoveTimer)
+      this.mousemoveTimer = setTimeout(async() => {
         // FIXME: let's JUST load location information
         // ToDo: 
         // I think that anytime this file dispatches a redux action it causes a rerender
         // We'll be compleetly replacing this system - until then send info through state.js
         const { locations } = await this.getFeaturesUnderLatLng(event.latLng)
-        this.setCursorLocationIds(locations.map(location => location.object_id))
+        const ids = locations.map(location => location.object_id)
+        this.clearCursorLocationIds()
+        this.addCursorLocationIds([...ids, ...this.cursorEquipmentIds])
       }, 100)
     })
-    this.overlayMouseoutListener = this.mapRef.addListener('mouseout', () => clearTimeout(this.mouseMoveTimer))
+    this.overlayMouseoutListener = this.mapRef.addListener('mouseout', () => {
+      clearTimeout(this.mousemoveTimer)
+      this.clearCursorLocationIds()
+    })
 
     this.getFeaturesUnderLatLng = function (latLng) {
       // Get latitiude and longitude
@@ -634,7 +639,7 @@ class TileComponentController {
     if (this.overlayMousemoveListener) {
       google.maps.event.removeListener(this.overlayMousemoveListener)
       this.overlayMousemoveListener = null
-      this.mouseMoveTimer = null
+      this.mousemoveTimer = null
     }
 
     if (this.overlayRightclickListener) {
@@ -794,13 +799,14 @@ class TileComponentController {
       subnetFeatures: reduxState.planEditor.subnetFeatures,
       locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(reduxState),
       selectedSubnetLocations: PlanEditorSelectors.getSelectedSubnetLocations(reduxState),
+      cursorEquipmentIds: reduxState.planEditor.cursorEquipmentIds,
     }
   }
 
   mapDispatchToTarget (dispatch) {
     return {
       rActiveViewModePanelAction: value => dispatch(ToolBarActions.activeViewModePanel(value)),
-      setCursorLocationIds: ids => dispatch(PlanEditorActions.setCursorLocationIds(ids)),
+      addCursorLocationIds: ids => dispatch(PlanEditorActions.addCursorLocationIds(ids)),
       clearCursorLocationIds: () => dispatch(PlanEditorActions.clearCursorLocationIds()),
     }
   }

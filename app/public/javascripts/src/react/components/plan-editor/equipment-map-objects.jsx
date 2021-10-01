@@ -2,8 +2,8 @@ import { Component } from 'react'
 import { connect } from 'react-redux'
 import PlanEditorActions from './plan-editor-actions'
 import WktUtils from '../../../shared-utils/wkt-utils'
-import PlanEditorSelectors from './plan-editor-selectors.js'
-import { constants } from './constants'
+import PlanEditorSelectors from './plan-editor-selectors'
+import { constants, getIconUrl } from './shared'
 
 export class EquipmentMapObjects extends Component {
   constructor(props) {
@@ -42,20 +42,20 @@ export class EquipmentMapObjects extends Component {
     // either add or update existing features
     for (const { id, idle } of featuresRenderInfo) {
       const mapObject = this.mapObjects[id]
+      const feature = subnetFeatures[id] && subnetFeatures[id].feature
       if (mapObject) {
+        // TODO: can we check somehow if this has actually changed and then update it?
         mapObject.setOpacity(idle ? 0.4 : 1.0)
-      } else {
-        const feature = subnetFeatures[id] && subnetFeatures[id].feature
-        if (feature) {
-          if (idle) {
-            // if idle show everything but the terminals for performance reasons
-            if (!feature.networkNodeType.includes('terminal')) {
-              this.createMapObject(feature, idle)
-            }
-          } else {
-            // if selected (not idle) just show everything in the subnet
+        mapObject.setIcon(getIconUrl(feature, this.props))
+      } else if (feature) {
+        if (idle) {
+          // if idle show everything but the terminals for performance reasons
+          if (!feature.networkNodeType.includes('terminal')) {
             this.createMapObject(feature, idle)
           }
+        } else {
+          // if selected (not idle) just show everything in the subnet
+          this.createMapObject(feature, idle)
         }
       }
     }
@@ -64,33 +64,42 @@ export class EquipmentMapObjects extends Component {
   }
 
   createMapObject(feature, idle) {
+
+    const {
+      googleMaps,
+      moveFeature,
+      showContextMenuForEquipment,
+      selectEditFeaturesById,
+      addCursorEquipmentIds,
+      clearCursorEquipmentIds,
+    } = this.props
+
     const { objectId } = feature
 
     const mapObject = new google.maps.Marker({
       objectId, // Not used by Google Maps
+      mouseoverTimer: null,
       position: WktUtils.getGoogleMapLatLngFromWKTPoint(feature.geometry), 
-      icon: {
-        url: this.props.equipmentDefinitions[feature.networkNodeType].iconUrl
-      },
+      icon: { url: getIconUrl(feature, this.props) },
       draggable: !feature.locked, // Allow dragging only if feature is not locked
       opacity: idle ? 0.4 : 1.0,
-      map: this.props.googleMaps,
+      map: googleMaps,
       zIndex: constants.Z_INDEX_MAP_OBJECT,
     })
 
     mapObject.addListener('dragend', event => {
       let coordinates = [event.latLng.lng(), event.latLng.lat()]
-      this.props.moveFeature(mapObject.objectId, coordinates)
+      moveFeature(mapObject.objectId, coordinates)
     })
     mapObject.addListener('contextmenu', event => {
       const eventXY = WktUtils.getXYFromEvent(event)
-      this.props.showContextMenuForEquipment(mapObject.objectId, eventXY.x, eventXY.y)
+      showContextMenuForEquipment(mapObject.objectId, eventXY.x, eventXY.y)
     })
-    mapObject.addListener('click', (event) => {
+    mapObject.addListener('click', event => {
       // NOTE: this is a workaround to make sure we're selecting
       // equipment that might be piled on top of one another
       const selectionCircle = new google.maps.Circle({
-        map: this.props.googleMaps,
+        map: googleMaps,
         center: event.latLng,
         // FIXME: this radius is only useful at certain zoom levels.
         // How can we set this correctly based on zoom?
@@ -103,7 +112,18 @@ export class EquipmentMapObjects extends Component {
         .map(filteredMapObjects => filteredMapObjects.objectId)
 
       selectionCircle.setMap(null)
-      this.props.selectEditFeaturesById(selectedEquipmentIds)
+      selectEditFeaturesById(selectedEquipmentIds)
+    })
+
+    mapObject.addListener('mouseover', () => {
+      clearTimeout(mapObject.mouseoverTimer)
+      mapObject.mouseoverTimer = setTimeout(() => {
+        addCursorEquipmentIds([mapObject.objectId])
+      }, 350)
+    })
+    mapObject.addListener('mouseout', () => {
+      clearTimeout(mapObject.mouseoverTimer)
+      clearCursorEquipmentIds()
     })
 
     this.mapObjects[objectId] = mapObject
@@ -214,7 +234,8 @@ export class EquipmentMapObjects extends Component {
 }
 
 const mapStateToProps = state => ({
-  equipmentDefinitions: state.mapLayers.networkEquipment.equipments,
+  ARO_CLIENT: state.configuration.system.ARO_CLIENT,
+  equipments: state.mapLayers.networkEquipment.equipments,
   selectedEditFeatureIds: state.planEditor.selectedEditFeatureIds,
   googleMaps: state.map.googleMaps,
   featuresRenderInfo: PlanEditorSelectors.getFeaturesRenderInfo(state),
@@ -222,6 +243,7 @@ const mapStateToProps = state => ({
   subnetFeatures: state.planEditor.subnetFeatures,
   selectedLocations: PlanEditorSelectors.getSelectedSubnetLocations(state),
   cursorLocations: PlanEditorSelectors.getCursorLocations(state),
+  locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -231,6 +253,8 @@ const mapDispatchToProps = dispatch => ({
   },
   setSelectedSubnetId: id => dispatch(PlanEditorActions.setSelectedSubnetId(id)),
   selectEditFeaturesById: featureIds => dispatch(PlanEditorActions.selectEditFeaturesById(featureIds)),
+  addCursorEquipmentIds: ids => dispatch(PlanEditorActions.addCursorEquipmentIds(ids)),
+  clearCursorEquipmentIds: () => dispatch(PlanEditorActions.clearCursorEquipmentIds()),
 })
 
 const EquipmentMapObjectsComponent = connect(mapStateToProps, mapDispatchToProps)(EquipmentMapObjects)

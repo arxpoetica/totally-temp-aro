@@ -921,12 +921,20 @@ function onMapClick (featureIds, latLng) {
   }
 }
 
-function setCursorLocationIds(payload) {
-  return { type: Actions.PLAN_EDITOR_SET_CURSOR_LOCATION_IDS, payload }
+function addCursorLocationIds(payload) {
+  return { type: Actions.PLAN_EDITOR_ADD_CURSOR_LOCATION_IDS, payload }
 }
 
 function clearCursorLocationIds() {
   return { type: Actions.PLAN_EDITOR_CLEAR_CURSOR_LOCATION_IDS, payload: [] }
+}
+
+function addCursorEquipmentIds(payload) {
+  return { type: Actions.PLAN_EDITOR_ADD_CURSOR_EQUIPMENT_IDS, payload }
+}
+
+function clearCursorEquipmentIds() {
+  return { type: Actions.PLAN_EDITOR_CLEAR_CURSOR_EQUIPMENT_IDS, payload: [] }
 }
 
 function recalculateBoundary (subnetId) {
@@ -1289,8 +1297,10 @@ export default {
   addSubnets,
   setSelectedSubnetId,
   onMapClick,
-  setCursorLocationIds,
+  addCursorLocationIds,
   clearCursorLocationIds,
+  addCursorEquipmentIds,
+  clearCursorEquipmentIds,
   recalculateBoundary,
   boundaryChange,
   recalculateSubnets,
