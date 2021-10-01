@@ -31,7 +31,7 @@ export const FiberMapObjects = (props) => {
         renderedSubnetId = parentId
         renderFiber(subnetLinks, fiberType)
       }
-    }
+    } else deleteMapObjects()
 
     function renderFiber(subnetLinks, fiberType) {
       if (mapObjects.length) {
