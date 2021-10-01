@@ -21,14 +21,16 @@ export const constants = Object.freeze({
   DRAG_DROP_GRAB_ICON_H: 'grabIconH',
 
   ALERT_TYPES: {
-    MAX_DROP_LENGTH_EXCEEDED: {
-      key: 'MAX_DROP_LENGTH_EXCEEDED',
-      displayName: 'Drop Cable Length Exceeded',
-      iconUrl: '/svg/alert-panel-location.svg',
-    },
+    // location alerts
     ABANDONED_LOCATION: {
       key: 'ABANDONED_LOCATION',
       displayName: 'Abandoned Location',
+      iconUrl: '/svg/alert-panel-location.svg',
+    },
+    // terminal alerts
+    MAX_DROP_LENGTH_EXCEEDED: {
+      key: 'MAX_DROP_LENGTH_EXCEEDED',
+      displayName: 'Drop Cable Length Exceeded',
       iconUrl: '/svg/alert-panel-location.svg',
     },
     MAX_TERMINAL_HOMES_EXCEEDED: {
@@ -36,6 +38,12 @@ export const constants = Object.freeze({
       displayName: 'Maximum Terminal Homes Exceeded',
       iconUrl: '/svg/alert-panel-location.svg',
     },
+    MAX_TERMINAL_DISTANCE_EXCEEDED: {
+      key: 'MAX_TERMINAL_DISTANCE_EXCEEDED',
+      displayName: 'Maximum Terminal Distance Exceeded',
+      iconUrl: '/svg/alert-panel-location.svg',
+    },
+    // hub alerts
     MAX_HUB_HOMES_EXCEEDED: {
       key: 'MAX_HUB_HOMES_EXCEEDED',
       displayName: 'Maximum Hub Homes Exceeded',
@@ -44,11 +52,6 @@ export const constants = Object.freeze({
     MAX_HUB_DISTANCE_EXCEEDED: {
       key: 'MAX_HUB_DISTANCE_EXCEEDED',
       displayName: 'Maximum Hub Distance Exceeded',
-      iconUrl: '/svg/alert-panel-location.svg',
-    },
-    MAX_TERMINAL_DISTANCE_EXCEEDED: {
-      key: 'MAX_TERMINAL_DISTANCE_EXCEEDED',
-      displayName: 'Maximum Terminal Distance Exceeded',
       iconUrl: '/svg/alert-panel-location.svg',
     },
   },
