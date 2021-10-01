@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import { PropTypes } from 'prop-types'
 import DraggableNode from './draggable-node.jsx'
-import { constants } from './constants'
+import { constants } from './shared'
 
 // TODO: centralize these somewhere...should probably not be hardcoded
 const networkNodeTypes = [

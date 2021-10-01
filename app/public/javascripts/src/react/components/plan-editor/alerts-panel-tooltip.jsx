@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import PlanEditorSelectors from './plan-editor-selectors'
 import { MapTooltip } from '../common/maps/map-tooltip.jsx'
-import { constants } from './constants'
+import { constants } from './shared'
 const { ALERT_TYPES } = constants
 
 const _AlertsPanelTooltip = props => {

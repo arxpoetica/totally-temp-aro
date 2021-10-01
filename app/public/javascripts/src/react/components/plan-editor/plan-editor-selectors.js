@@ -1,5 +1,5 @@
 import { createSelector } from 'reselect'
-import { constants } from './constants'
+import { constants } from './shared'
 const { ALERT_TYPES } = constants
 
 const getAllBoundaryLayers = state => state.mapLayers.boundary
@@ -129,12 +129,12 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
     const subnetLocationsIds = Object.keys(subnet.subnetLocationsById)
 
     if (subnetLocationsIds.length > 0 && typeof networkConfig !== 'undefined') {
-      // TODO: Check these are the right sources of information
-      const maxDropCableLength = networkConfig.terminalConfiguration.maxDistanceMeters
       const maxTerminalHomes = networkConfig.terminalConfiguration.outputConfig.max
+      const maxDropCableLength = networkConfig.terminalConfiguration.maxDistanceMeters
+      // TODO: is this even a thing?
+      // const maxTerminalDistance = networkConfig.hubConfiguration.maxDistanceMeters
       const maxHubHomes = networkConfig.hubConfiguration.outputConfig.max
       const maxHubDistance = networkConfig.hubConfiguration.maxDistanceMeters
-      const maxTerminalDistance = networkConfig.hubConfiguration.maxDistanceMeters
 
       let totalHomes = 0
 
@@ -167,16 +167,17 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
               }
             }
             alerts[featureId].alerts.push(ALERT_TYPES['MAX_HUB_DISTANCE_EXCEEDED'].key)
-          } else if (distance > maxTerminalDistance && networkNodeType === 'fiber_distribution_terminal'){
-            if (!alerts[featureId]) {
-              alerts[featureId] = {
-                locationId: featureId,
-                subnetId,
-                alerts: [],
-                point: featurePoint,
-              }
-            }
-            alerts[featureId].alerts.push(ALERT_TYPES['MAX_TERMINAL_DISTANCE_EXCEEDED'].key)
+            // TODO: is this even a thing?
+            // } else if (distance > maxTerminalDistance && networkNodeType === 'fiber_distribution_terminal'){
+            //   if (!alerts[featureId]) {
+            //     alerts[featureId] = {
+            //       locationId: featureId,
+            //       subnetId,
+            //       alerts: [],
+            //       point: featurePoint,
+            //     }
+            //   }
+            //   alerts[featureId].alerts.push(ALERT_TYPES['MAX_TERMINAL_DISTANCE_EXCEEDED'].key)
           }
         }
 
