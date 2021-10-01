@@ -63,31 +63,42 @@ export class EquipmentMapObjects extends Component {
   }
 
   createMapObject(feature, idle) {
+
+    const {
+      googleMaps,
+      moveFeature,
+      showContextMenuForEquipment,
+      selectEditFeaturesById,
+      setCursorLocationIds,
+      clearCursorLocationIds,
+    } = this.props
+
     const { objectId } = feature
 
     const mapObject = new google.maps.Marker({
       objectId, // Not used by Google Maps
+      mouseoverTimer: null,
       position: WktUtils.getGoogleMapLatLngFromWKTPoint(feature.geometry), 
       icon: { url: getIconUrl(feature, this.props) },
       draggable: !feature.locked, // Allow dragging only if feature is not locked
       opacity: idle ? 0.4 : 1.0,
-      map: this.props.googleMaps,
+      map: googleMaps,
       zIndex: constants.Z_INDEX_MAP_OBJECT,
     })
 
     mapObject.addListener('dragend', event => {
       let coordinates = [event.latLng.lng(), event.latLng.lat()]
-      this.props.moveFeature(mapObject.objectId, coordinates)
+      moveFeature(mapObject.objectId, coordinates)
     })
     mapObject.addListener('contextmenu', event => {
       const eventXY = WktUtils.getXYFromEvent(event)
-      this.props.showContextMenuForEquipment(mapObject.objectId, eventXY.x, eventXY.y)
+      showContextMenuForEquipment(mapObject.objectId, eventXY.x, eventXY.y)
     })
-    mapObject.addListener('click', (event) => {
+    mapObject.addListener('click', event => {
       // NOTE: this is a workaround to make sure we're selecting
       // equipment that might be piled on top of one another
       const selectionCircle = new google.maps.Circle({
-        map: this.props.googleMaps,
+        map: googleMaps,
         center: event.latLng,
         // FIXME: this radius is only useful at certain zoom levels.
         // How can we set this correctly based on zoom?
@@ -100,7 +111,18 @@ export class EquipmentMapObjects extends Component {
         .map(filteredMapObjects => filteredMapObjects.objectId)
 
       selectionCircle.setMap(null)
-      this.props.selectEditFeaturesById(selectedEquipmentIds)
+      selectEditFeaturesById(selectedEquipmentIds)
+    })
+
+    mapObject.addListener('mouseover', () => {
+      clearTimeout(mapObject.mouseoverTimer)
+      mapObject.mouseoverTimer = setTimeout(() => {
+        setCursorLocationIds([mapObject.objectId])
+      }, 350)
+    })
+    mapObject.addListener('mouseout', () => {
+      clearTimeout(mapObject.mouseoverTimer)
+      clearCursorLocationIds()
     })
 
     this.mapObjects[objectId] = mapObject
@@ -212,6 +234,8 @@ const mapDispatchToProps = dispatch => ({
   },
   setSelectedSubnetId: id => dispatch(PlanEditorActions.setSelectedSubnetId(id)),
   selectEditFeaturesById: featureIds => dispatch(PlanEditorActions.selectEditFeaturesById(featureIds)),
+  setCursorLocationIds: ids => dispatch(PlanEditorActions.setCursorLocationIds(ids)),
+  clearCursorLocationIds: () => dispatch(PlanEditorActions.clearCursorLocationIds()),
 })
 
 const EquipmentMapObjectsComponent = connect(mapStateToProps, mapDispatchToProps)(EquipmentMapObjects)

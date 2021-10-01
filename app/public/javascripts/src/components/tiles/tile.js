@@ -492,21 +492,24 @@ class TileComponentController {
     })
 
     // FIXME: move this to the plan edit jsx files when loading locations from new API
-    this.mouseMoveTimer = null
+    this.mousemoveTimer = null
     this.overlayMousemoveListener = this.mapRef.addListener('mousemove', event => {
       // we're only reacting to `mousemove` in plan edit mode
       if (this.state.selectedDisplayMode.getValue() !== this.state.displayModes.EDIT_PLAN) {
         return
       }
 
-      clearTimeout(this.mouseMoveTimer)
-      this.mouseMoveTimer = setTimeout(async() => {
+      clearTimeout(this.mousemoveTimer)
+      this.mousemoveTimer = setTimeout(async() => {
         // FIXME: let's JUST load location information
         const { locations } = await this.getFeaturesUnderLatLng(event.latLng)
         this.setCursorLocationIds(locations.map(location => location.object_id))
       }, 100)
     })
-    this.overlayMouseoutListener = this.mapRef.addListener('mouseout', () => clearTimeout(this.mouseMoveTimer))
+    this.overlayMouseoutListener = this.mapRef.addListener('mouseout', () => {
+      clearTimeout(this.mousemoveTimer)
+      this.clearCursorLocationIds()
+    })
 
     this.getFeaturesUnderLatLng = function (latLng) {
       // Get latitiude and longitude
@@ -631,7 +634,7 @@ class TileComponentController {
     if (this.overlayMousemoveListener) {
       google.maps.event.removeListener(this.overlayMousemoveListener)
       this.overlayMousemoveListener = null
-      this.mouseMoveTimer = null
+      this.mousemoveTimer = null
     }
 
     if (this.overlayRightclickListener) {

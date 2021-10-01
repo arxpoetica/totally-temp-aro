@@ -7,7 +7,7 @@ const { ALERT_TYPES, Z_INDEX_PIN } = constants
 
 const AlertsPanel = props => {
 
-  const { locationAlerts, cursorLocationIds, map } = props
+  const { locationAlerts, map } = props
   const alerts = Object.entries(locationAlerts)
 
   const [open, setOpen] = useState(false)
@@ -74,7 +74,6 @@ const AlertsPanel = props => {
 
 const mapStateToProps = state => ({
   locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(state),
-  cursorLocationIds: state.planEditor.cursorLocationIds,
   // TODO: why is this named `googleMaps`? Is it ever plural? Isn't it a single map?
   map: state.map.googleMaps,
 })

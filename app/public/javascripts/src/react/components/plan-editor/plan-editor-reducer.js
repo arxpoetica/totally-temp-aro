@@ -342,7 +342,7 @@ function planEditorReducer (state = defaultState, { type, payload }) {
       return { ...state, fiberRenderRequired: payload }
       
     case Actions.PLAN_EDITOR_SET_CURSOR_LOCATION_IDS:
-      return { ...state, cursorLocationIds: payload }
+      return { ...state, cursorLocationIds: [...state.cursorLocationIds, ...payload] }
 
     case Actions.PLAN_EDITOR_CLEAR_CURSOR_LOCATION_IDS:
       return { ...state, cursorLocationIds: [] }
