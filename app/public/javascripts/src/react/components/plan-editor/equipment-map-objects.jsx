@@ -19,7 +19,8 @@ export class EquipmentMapObjects extends Component {
   componentDidUpdate() { this.renderObjects() }
 
   renderObjects() {
-    this.deleteDroplinks()
+    // ToDo: this runs every time cursorLocations changes FIX
+    this.deleteDroplinks() // this should be selective not wholesale rerender
 
     const { subnetFeatures, featuresRenderInfo } = this.props
 
@@ -207,6 +208,23 @@ export class EquipmentMapObjects extends Component {
         this.selectionOverlays[id] && this.selectionOverlays[id].setMap(null)
       }
     })
+    // location hover links
+    // ToDo: dry up the repeat code
+    for (const [droplinkId, location] of Object.entries(this.props.cursorLocations)) {
+      // oddly, sometimes `location` is `undefined`
+      if (location && location.parentEquipmentId) {
+        const { latitude, longitude } = location.point
+        const [lng, lat] = this.props.subnetFeatures[location.parentEquipmentId].feature.geometry.coordinates
+        
+        this.droplinks[droplinkId] = new google.maps.Polyline({
+          path: [{ lat, lng }, { lat: latitude, lng: longitude }],
+          strokeColor: '#84d496',
+          strokeWeight: 1.5,
+        })
+        this.droplinks[droplinkId].setMap(this.props.googleMaps)
+      }
+    }
+
   }
 
   componentWillUnmount() {
@@ -224,6 +242,7 @@ const mapStateToProps = state => ({
   selectedSubnetId: state.planEditor.selectedSubnetId,
   subnetFeatures: state.planEditor.subnetFeatures,
   selectedLocations: PlanEditorSelectors.getSelectedSubnetLocations(state),
+  cursorLocations: PlanEditorSelectors.getCursorLocations(state),
   locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(state),
 })
 

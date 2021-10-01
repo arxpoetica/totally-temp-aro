@@ -502,6 +502,9 @@ class TileComponentController {
       clearTimeout(this.mousemoveTimer)
       this.mousemoveTimer = setTimeout(async() => {
         // FIXME: let's JUST load location information
+        // ToDo: 
+        // I think that anytime this file dispatches a redux action it causes a rerender
+        // We'll be compleetly replacing this system - until then send info through state.js
         const { locations } = await this.getFeaturesUnderLatLng(event.latLng)
         const ids = locations.map(location => location.object_id)
         this.clearCursorLocationIds()

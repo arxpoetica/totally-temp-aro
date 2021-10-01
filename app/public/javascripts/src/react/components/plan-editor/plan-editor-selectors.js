@@ -14,6 +14,7 @@ const getSelectedEditFeatureIds = state => state.planEditor.selectedEditFeatureI
 const getIsCalculatingSubnets = state => state.planEditor.isCalculatingSubnets
 const getIsCalculatingBoundary = state => state.planEditor.isCalculatingBoundary
 const getBoundaryDebounceBySubnetId = state => state.planEditor.boundaryDebounceBySubnetId
+const getCursorLocationIds = state => state.planEditor.cursorLocationIds
 
 const getIsRecalcSettled = createSelector(
   [getIsCalculatingSubnets, getIsCalculatingBoundary, getBoundaryDebounceBySubnetId],
@@ -98,6 +99,30 @@ const getSelectedSubnetLocations = createSelector(
     }
     
     return selectedSubnetLocations
+  }
+)
+
+const getCursorLocations = createSelector(
+  [getSelectedSubnetId, getSelectedSubnet, getSubnetFeatures, getSubnets, getCursorLocationIds],
+  (selectedSubnetId, selectedSubnet, subnetFeatures, subnets, cursorLocationIds) => {
+    let selectedSubnetLocations = {}
+    if (selectedSubnet) {
+      selectedSubnetLocations = selectedSubnet.subnetLocationsById
+    } else if (subnetFeatures[selectedSubnetId]
+      && subnetFeatures[selectedSubnetId].subnetId
+      && subnetFeatures[selectedSubnetId].feature.dropLinks
+    ) {
+      let parentSubnetId = subnetFeatures[selectedSubnetId].subnetId
+      selectedSubnetLocations = subnets[parentSubnetId].subnetLocationsById
+    }
+
+    let cursorLocations = Object.keys(selectedSubnetLocations)
+    .filter(key => cursorLocationIds.includes(key))
+    .reduce((obj, key) => {
+      return { ...obj, [key]: selectedSubnetLocations[key] }
+    }, {})
+
+    return cursorLocations
   }
 )
 
@@ -285,6 +310,7 @@ const PlanEditorSelectors = Object.freeze({
   getAlertsForSubnetTree,
   locationWarnImg,
   getSelectedSubnetLocations,
+  getCursorLocations,
   getLocationCounts,
 })
 
