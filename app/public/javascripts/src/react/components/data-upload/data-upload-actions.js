@@ -58,7 +58,8 @@ function saveDataSource (uploadDetails,loggedInUser) {
     if (uploadDetails.selectedDataSourceName === 'tile_system') {
       return createLibraryId(uploadDetails,loggedInUser)
       .then((libraryItem) => {
-        fileUpload(dispatch, uploadDetails,libraryItem.identifier,loggedInUser, libraryItem) 
+        fileUpload(dispatch, uploadDetails,libraryItem.identifier,loggedInUser) 
+        dispatch(setAllLibraryItems(libraryItem.dataType, libraryItem))
       })
       .then((result) => {
         dispatch(setIsUploading(false))
@@ -111,6 +112,7 @@ function saveDataSource (uploadDetails,loggedInUser) {
         uploadDetails.selectedSpatialEdgeType = 'fiber_cable'
         return setCableConstructionType(uploadDetails,loggedInUser)
         .then((libraryItem) => {
+          dispatch(setAllLibraryItems(libraryItem.dataType, libraryItem)),
           fileUpload(dispatch, uploadDetails, libraryItem.identifier, loggedInUser)
         })
         .then((result) => {
@@ -144,7 +146,8 @@ function saveDataSource (uploadDetails,loggedInUser) {
       if (uploadDetails.selectedDataSourceName === 'edge') { 
         addConduit(uploadDetails)
           .then((libraryItem) => {
-            fileUpload(dispatch, uploadDetails, libraryItem.identifier, loggedInUser, libraryItem)
+            dispatch(setAllLibraryItems(libraryItem.dataType, libraryItem)),
+            fileUpload(dispatch, uploadDetails, libraryItem.identifier, loggedInUser)
         })
         .then((result) => {
           dispatch(setIsUploading(false))
@@ -157,7 +160,8 @@ function saveDataSource (uploadDetails,loggedInUser) {
       } else {
         getLibraryId(uploadDetails)
           .then((library) => {
-            fileUpload(dispatch, uploadDetails,library.data.identifier,loggedInUser, library.data) 
+            dispatch(setAllLibraryItems(library.data.dataType, library.data))
+            fileUpload(dispatch, uploadDetails,library.data.identifier,loggedInUser) 
         })
         .then((res) => {
           dispatch(setIsUploading(false))
@@ -229,7 +233,7 @@ function addConduit(uploadDetails) {
     .catch((err) => console.error(err))
 }
 
-function fileUpload (dispatch, uploadDetails, libraryId, loggedInUser, libraryItem) {
+function fileUpload (dispatch, uploadDetails,libraryId,loggedInUser) {
   var formData = new FormData()
   var file = uploadDetails.file
   formData.append('file', file)
@@ -262,11 +266,10 @@ function fileUpload (dispatch, uploadDetails, libraryId, loggedInUser, libraryIt
   })
   var unsubscribeETLClose = SocketManager.subscribe('ETL_CLOSE', msg => {
     if (msg.properties.headers.libraryId === libraryId) {
-      NotificationInterface.updateNotification(dispatch, noteId, `${file.name} COMPLETE!`, false, NotificationTypes['USER_EXPIRE'])
-      // making sure the lib appears in dropdown only when upload is done on db
-      if (libraryItem && libraryItem.dataType) {
-        dispatch(setAllLibraryItems(libraryItem.dataType, libraryItem))
-      }
+      var content = uInt8ArrayToJSON(msg.content)
+      const pct = ((content.validCount / content.totalCount) * 100).toFixed(2)
+      const progressNote = `${pct}% | ${content.errorCount} errors`
+      NotificationInterface.updateNotification(dispatch, noteId, `${processNote} ${progressNote}`)
     }
   })
 
@@ -290,28 +293,13 @@ function fileUpload (dispatch, uploadDetails, libraryId, loggedInUser, libraryIt
 
   AroHttp._fetch(url, options).then((e) => {
     
-    
+    NotificationInterface.updateNotification(dispatch, noteId, `${file.name} COMPLETE!`, false, NotificationTypes['USER_EXPIRE'])
     // the note will be auto-removed in 4 seconds
     // NotificationInterface.removeNotification(dispatch, noteId, 4000)
     // this.isUpLoad = false
     unsubscribeETLStart()
     unsubscribeETLUpdate()
-
-    // subscribing/listening to ETL_CLOSE to know exactly
-    // when the upload of file is done on db.
-    // when pct === 100, data upload done in db, file is now ready for use on UI
-    SocketManager.subscribe('ETL_CLOSE', msg => {
-      if (msg.properties.headers.libraryId === libraryId) {
-        var content = uInt8ArrayToJSON(msg.content)
-        const pct = ((content.validCount / content.totalCount) * 100).toFixed(2)
-        const progressNote = `${pct}% | ${content.errorCount} errors`
-        if (pct === 100) {
-          NotificationInterface.updateNotification(dispatch, noteId, `${processNote} ${progressNote}`)
-          unsubscribeETLClose()
-        }
-      }
-    })
-    
+    unsubscribeETLClose()
     // load new lib info from server
     PlanActions.loadLibraryEntryById(libraryId)
   }).catch((e) => {
