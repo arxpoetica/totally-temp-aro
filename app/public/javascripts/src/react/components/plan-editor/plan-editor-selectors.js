@@ -207,8 +207,9 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
               const locationId = locationLink.locationId
               // remove abandoned entry
               delete abandonedLocations[locationId]
-              // dropcable alert?
-              if (dropLink.dropCableLength > maxDropCableLength) {
+              // dropcable alert
+              // TODO: Differentiate between too long and NaN?
+              if (dropLink.dropCableLength > maxDropCableLength || isNaN(dropLink.dropCableLength)) {
                 if (!alerts[locationId]) {
                   alerts[locationId] = {
                     locationId,
