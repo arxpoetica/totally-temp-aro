@@ -503,7 +503,7 @@ class TileComponentController {
       this.mousemoveTimer = setTimeout(async() => {
         // FIXME: let's JUST load location information
         const { locations } = await this.getFeaturesUnderLatLng(event.latLng)
-        this.setCursorLocationIds(locations.map(location => location.object_id))
+        this.addCursorLocationIds(locations.map(location => location.object_id))
       }, 100)
     })
     this.overlayMouseoutListener = this.mapRef.addListener('mouseout', () => {
@@ -800,7 +800,7 @@ class TileComponentController {
   mapDispatchToTarget (dispatch) {
     return {
       rActiveViewModePanelAction: value => dispatch(ToolBarActions.activeViewModePanel(value)),
-      setCursorLocationIds: ids => dispatch(PlanEditorActions.setCursorLocationIds(ids)),
+      addCursorLocationIds: ids => dispatch(PlanEditorActions.addCursorLocationIds(ids)),
       clearCursorLocationIds: () => dispatch(PlanEditorActions.clearCursorLocationIds()),
     }
   }
