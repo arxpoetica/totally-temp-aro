@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { Line } from 'react-chartjs-2'
 import RoicReportsSummary from './roic-reports-summary.jsx'
+import RoicReportsActions from './roic-reports-actions'
 
 export class RoicReportsLarge extends Component {
   constructor (props) {
@@ -179,11 +180,13 @@ export class RoicReportsLarge extends Component {
   handleNetworkTypeChange (event) {
     const selectedNetworkType = this.props.networkTypes.find(item => item.id === event.target.value)
     this.setState({ selectedNetworkType })
+    this.props.loadROICResultsForPlan(this.props.planId)
   }
 
   handleEntityTypeChange (event) {
     const selectedEntityType = this.props.entityTypes.find(item => item.id === event.target.value)
     this.setState({ selectedEntityType })
+    this.props.loadROICResultsForPlan(this.props.planId)
   }
 
   selectCategory (category) {
@@ -201,5 +204,9 @@ const mapStateToProps = (state) => ({
   roicResults: state.roicReports.roicResults,
 })
 
-const RoicReportsLargeComponent = connect(mapStateToProps, null)(RoicReportsLarge)
+const mapDispatchToProps = (dispatch) => ({
+  loadROICResultsForPlan: (planId) => dispatch(RoicReportsActions.loadROICResultsForPlan(planId)),
+})
+
+const RoicReportsLargeComponent = connect(mapStateToProps, mapDispatchToProps)(RoicReportsLarge)
 export default RoicReportsLargeComponent

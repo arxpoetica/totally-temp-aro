@@ -10,22 +10,25 @@ export class AroFeatureEditorNode extends Component {
   constructor (props) {
     super(props)
 
-    if (!'isCollapsible' in props) props.isCollapsible = true
-    if (!'isEditable' in props) props.isEditable = true
-    if (!'visible' in props.meta) props.meta.visible = true
+    this.isCollapsible = true
+    this.isEditable = true
+    this.visible = true
+    if ('isCollapsible' in props) this.isCollapsible = this.props.isCollapsible
+    if ('isEditable' in props) this.isEditable = this.props.isEditable
+    if ('visible' in props.meta) this.visible = this.props.meta.visible
 
     //this.value = this.props.value
     //console.log({key: this.props.objPath, val: this.value, iVal: this.props.value})
     if ('undefined' === typeof this.props.value) {
       console.log(` --- undefined --- ${this.props.objPath}`)
       // eh something is wrong
-      this.props.meta.visible = false
+      this.visible = false
     }
   }
 
   render () {
-    if (!this.props.meta.visible) return []
-    
+    if (!this.visible) return []
+
     if (this.props.meta.displayDataType.startsWith('object')) {
       return this.renderCollection()
     } else if (this.props.meta.displayDataType.startsWith('array')) {
@@ -47,7 +50,7 @@ export class AroFeatureEditorNode extends Component {
     
     this.props.value.forEach((item, index) => {
       let objPath = `${this.props.objPath}[${index}]`
-      let isEditable = this.props.isEditable && this.props.meta.editable
+      let isEditable = this.isEditable && this.props.meta.editable
       itemMeta.displayName = `${index}`
       jsx.push(<AroFeatureEditorNode objPath={objPath} key={objPath} isEditable={isEditable} value={item} meta={itemMeta} onChange={this.props.onChange} />)
     })
@@ -80,7 +83,7 @@ export class AroFeatureEditorNode extends Component {
       let key = meta.propertyName
       if (key in this.props.value && meta.visible) {
         let value = this.props.value[key]
-        let isEditable = this.props.isEditable && meta.editable
+        let isEditable = this.isEditable && meta.editable
         let objPath = `${this.props.objPath}.${key}`
         jsx.push(<AroFeatureEditorNode objPath={objPath} key={objPath} isEditable={isEditable} value={value} meta={meta} onChange={this.props.onChange} />)
       }
@@ -102,7 +105,7 @@ export class AroFeatureEditorNode extends Component {
   }
 
   renderItem () {
-    let isEditable = this.props.isEditable && this.props.meta.editable
+    let isEditable = this.isEditable && this.props.meta.editable
     var field = ''
     
     let options = []

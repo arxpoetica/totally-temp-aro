@@ -138,6 +138,7 @@ export class RoicReportsSmall extends Component {
     const { roicResults, dataSetProps, timeLabels } = this.props
     const { selectedEntityType, selectedNetworkType, selectedCalcType } = this.state
 
+
     return {
       labels: timeLabels,
       datasets: [
@@ -154,6 +155,7 @@ export class RoicReportsSmall extends Component {
   handleNetworkTypeChange (event) {
     const selectedNetworkType = this.props.networkTypes.find(item => item.id === event.target.value)
     this.setState({ selectedNetworkType })
+    this.props.loadROICResultsForPlan(this.props.planId)
   }
 
   handleCategoriesChange (event) {
@@ -169,6 +171,7 @@ export class RoicReportsSmall extends Component {
   handleEntityTypeChange (event) {
     const selectedEntityType = this.props.entityTypes.find(item => item.id === event.target.value)
     this.setState({ selectedEntityType })
+    this.props.loadROICResultsForPlan(this.props.planId)
   }
 }
 
@@ -178,6 +181,7 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
   loadNetworkNodeTypesEntity: () => dispatch(RoicReportsActions.loadNetworkNodeTypesEntity()),
+  loadROICResultsForPlan: (planId) => dispatch(RoicReportsActions.loadROICResultsForPlan(planId)),
 })
 
 const RoicReportsSmallComponent = connect(mapStateToProps, mapDispatchToProps)(RoicReportsSmall)

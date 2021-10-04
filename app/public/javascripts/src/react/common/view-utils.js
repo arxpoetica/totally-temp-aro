@@ -110,6 +110,10 @@ export const toUTCDate = date => new Date(Date.UTC(
   date.getUTCDate(),
 ))
 
+// These two are for formatting for datetime-local and date input elements
+export const getDateString = (date) => date.toISOString().substring(0, 10)
+export const getDateTimeString = (date) => date.toISOString().substring(0, 16)
+
 // ========================= >>>>> react hooks
 
 // see: https://reactjs.org/docs/hooks-faq.html#how-to-get-the-previous-props-or-state
@@ -117,6 +121,26 @@ export const usePrevious = value => {
   const ref = useRef()
   useEffect(() => { ref.current = value })
   return ref.current
+}
+
+// https://codereview.stackexchange.com/questions/66733/groupby-implementation-in-nodejs/66752#66752
+export const groupBy = (array, keyOrIterator) => {
+  let iterator, key
+
+  // use the function passed in, or create one
+  if(typeof key !== 'function') {
+    key = String(keyOrIterator)
+    iterator = function (item) { return item[key] }
+  } else {
+    iterator = keyOrIterator
+  }
+
+  return array.reduce(function (memo, item) {
+    const key = iterator(item)
+    memo[key] = memo[key] || []
+    memo[key].push(item)
+    return memo
+  }, {})
 }
 
 // https://newbedev.com/converting-lodash-uniqby-to-native-javascript

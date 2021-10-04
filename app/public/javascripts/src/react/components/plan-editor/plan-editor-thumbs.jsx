@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
 import { connect } from 'react-redux'
-import PlanEditorActions from './plan-editor-actions'
 import cx from 'clsx'
+import PlanEditorActions from './plan-editor-actions'
+import PlanEditorSelectors from './plan-editor-selectors'
+import { getIconUrl } from './shared'
 
 const PlanEditorHeader = props => {
 
@@ -10,6 +12,7 @@ const PlanEditorHeader = props => {
     features,
     selectedEditFeatureIds,
     selectedSubnetId,
+    locationCounts,
     setSelectedSubnetId,
     deselectEditFeatureById,
   } = props
@@ -30,22 +33,23 @@ const PlanEditorHeader = props => {
   return selectedEditFeatureIds.map(id => {
 
     const { feature } = features[id]
-    const { iconUrl, label } = equipments[feature.networkNodeType]
+    const { label } = equipments[feature.networkNodeType]
     const { coordinates } = feature.geometry
 
     return (
     <div
       key={id}
       className={cx(
-        'plan-editor-header',
+        'plan-editor-thumb',
         id === selectedSubnetId && 'selected',
       )}
       onClick={event => onClick(event, id)}
     >
       <div className="info">
-        <img src={iconUrl} alt={label}/>
+        <img src={getIconUrl(feature, props)} alt={label}/>
         <h2>{label}</h2>
       </div>
+      {locationCounts[id] > 0 && <p>Household connections: {locationCounts[id]}</p>}
       <div className="subinfo">
         <div className="item">
           <div className="badge badge-dark">LATITUDE</div>
@@ -57,7 +61,7 @@ const PlanEditorHeader = props => {
         </div>
       </div>
       <button type="button" 
-        className="btn btn-sm plan-editor-header-close" 
+        className="btn btn-sm plan-editor-thumb-close" 
         aria-label="Close"
         onClick={event => onClose(event, id)}
       ><i className="fa fa-times"></i></button>
@@ -68,10 +72,13 @@ const PlanEditorHeader = props => {
 }
 
 const mapStateToProps = state => ({
+  ARO_CLIENT: state.configuration.system.ARO_CLIENT,
   equipments: state.mapLayers.networkEquipment.equipments,
   features: state.planEditor.features,
   selectedEditFeatureIds: state.planEditor.selectedEditFeatureIds,
   selectedSubnetId: state.planEditor.selectedSubnetId,
+  locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(state),
+  locationCounts: PlanEditorSelectors.getLocationCounts(state),
 })
 
 const mapDispatchToProps = dispatch => ({

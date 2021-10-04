@@ -54,10 +54,6 @@
       <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.PLAN_INFO" ng-if="$ctrl.state.configuration.perspective.showViewModePanels[$ctrl.state.viewModePanels.PLAN_INFO]">
         <r-network-plan-manage ng-if="($ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.PLAN_INFO) || $ctrl.rActiveViewModePanel === $ctrl.state.viewModePanels.PLAN_INFO"></r-network-plan-manage>
       </accordion-panel-contents>
-      <accordion-panel-title title="'Plan Summary'" panel-id="$ctrl.state.viewModePanels.PLAN_SUMMARY_REPORTS" ng-if="$ctrl.state.configuration.perspective.showViewModePanels[$ctrl.state.viewModePanels.PLAN_SUMMARY_REPORTS]"></accordion-panel-title>
-      <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.PLAN_SUMMARY_REPORTS" ng-if="$ctrl.state.configuration.perspective.showViewModePanels[$ctrl.state.viewModePanels.PLAN_SUMMARY_REPORTS]">
-        <r-summary-reports ng-if="($ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.PLAN_SUMMARY_REPORTS) || $ctrl.rActiveViewModePanel === $ctrl.state.viewModePanels.PLAN_SUMMARY_REPORTS" />
-      </accordion-panel-contents>
       <!-- Planner coverage is a little different. Show it only if we are in COVERAGE_BOUNDARY mode. -->
       <accordion-panel-title title="'Coverage Boundary'"
                              panel-id="$ctrl.state.viewModePanels.COVERAGE_BOUNDARY"

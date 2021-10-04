@@ -142,39 +142,46 @@ function createFeature (feature) {
     AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
       .then(result => {
         let updatedSubnets = JSON.parse(JSON.stringify(state.planEditor.subnets))
+        const { subnetUpdates, equipmentUpdates } = result.data
         const newFeatures = {}
         // the subnet and equipment updates are not connected, right now we get back two arrays
         // For now I am assuming the relevent subnet is the one with type 'modified'
         // TODO: handle there being multiple updated subnets
 
-        if (result.data.subnetUpdates.length === 1 || result.data.subnetUpdates.length === 2 && result.data.equipmentUpdates) {
-          const modifiedSubnet = result.data.subnetUpdates.find(subnet => subnet.type === 'modified')
-          const subnetId = modifiedSubnet.subnet.id
-          
-          result.data.equipmentUpdates.forEach(equipment => {
-            const feature = parseSubnetFeature(equipment.subnetNode)
+        // gets updated subnet ids to send to addSubnets, can be either created or modified
+        const updatedSubnetIds = subnetUpdates.map((subnet) => {
+          return subnet.subnet.id
+        })
 
-            newFeatures[feature.objectId] = {
-              feature: feature,
-              subnetId: subnetId,
-            }
+        // There should always be a modified subnet
+        const modifiedSubnet = subnetUpdates.find(subnet => subnet.type === 'modified')
+        const subnetId = modifiedSubnet.subnet.id
+        
+        equipmentUpdates.forEach(equipment => {
+          // fix difference between id names
+          const feature = parseSubnetFeature(equipment.subnetNode)
 
-            if (updatedSubnets[subnetId]) {
-              updatedSubnets[subnetId].children.push(feature.objectId)
-            }
+          newFeatures[feature.objectId] = {
+            feature: feature,
+            subnetId: subnetId,
+          }
+          if (updatedSubnets[subnetId]) {
+            updatedSubnets[subnetId].children.push(feature.objectId)
+          }
+        })
+
+        batch(() => {
+          dispatch({
+            type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
+            payload: newFeatures,
+          }),
+          dispatch(addSubnets(updatedSubnetIds))
+          dispatch({
+            type: Actions.PLAN_EDITOR_ADD_SUBNETS,
+            payload: updatedSubnets,
           })
-
-          batch(() => {
-            dispatch({
-              type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
-              payload: newFeatures,
-            }),
-            dispatch({
-              type: Actions.PLAN_EDITOR_ADD_SUBNETS,
-              payload: updatedSubnets,
-            })
-          })
-      }
+        })
+      
       })
       .catch(err => console.error(err))
   }
@@ -405,10 +412,13 @@ function assignLocation (locationId, terminalId) {
     toFeature = JSON.parse(JSON.stringify(toFeature))
     let subnetId = toFeature.subnetId
 
-    // unassign location
     let fromTerminalId = state.planEditor.subnets[subnetId].subnetLocationsById[locationId].parentEquipmentId
-    let fromFeature = _spliceLocationFromTerminal(state, locationId, fromTerminalId)
-    if (fromFeature) features.push(fromFeature)
+
+    // unassign location if location is assigned
+    if (fromTerminalId && state.planEditor.subnetFeatures[fromTerminalId]){
+      let fromFeature = _spliceLocationFromTerminal(state, locationId, fromTerminalId)
+      if (fromFeature) features.push(fromFeature)
+    }
 
     // assign location
     let defaultDropLink = {
@@ -434,7 +444,7 @@ function showContextMenuForEquipmentBoundary (mapObject, x, y, vertex) {
   return (dispatch) => {
     const menuActions = []
     menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteBoundaryVertex', mapObject, vertex))
-    const menuItemFeature = new MenuItemFeature('BOUNDARY', 'Equipment Boundary', menuActions)
+    const menuItemFeature = new MenuItemFeature('BOUNDARY', 'Boundary Vertex', menuActions)
 
     // Show context menu
     dispatch(ContextMenuActions.setContextMenuItems([menuItemFeature]))
@@ -611,6 +621,7 @@ function readFeatures (featureIds) {
   return (dispatch, getState) => {
     const state = getState()
     let featuresToGet = []
+    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
     featureIds.forEach(featureId => {
       if (!state.planEditor.features[featureId]) {
         featuresToGet.push(featureId)
@@ -621,7 +632,7 @@ function readFeatures (featureIds) {
     let retrievedFeatures = []
     featuresToGet.forEach(featureId => {
       promises.push(
-        AroHttp.get(`/service/plan-feature/${state.plan.activePlan.id}/equipment/${featureId}`)
+        AroHttp.get(`/service/plan-transaction/${transactionId}/subnet-equipment/${featureId}`)
           .then(result => {
             if (result.data) {
               // Decorate the equipment with some default values. Technically this is not yet "created" equipment
@@ -691,50 +702,55 @@ function deselectEditFeatureById (objectId) {
   }
 }
 
-function addSubnets (subnetIds) {
+function addSubnets (subnetIds, forceReload = false) {
   // FIXME: I (BRIAN) needs to refactor this, it works for the moment but does a lot of extranious things
   //  ALSO there is a "bug" where if we select an FDT before selecting the CO or one of the hubs, we get no info
   //  to fix this we need to find out what subnet the FDT is a part of and run that through here
   return (dispatch, getState) => {
 
-    const { transaction, subnets: cachedSubnets, requestedSubnetIds, features, subnetFeatures} = getState().planEditor
+    const {
+      transaction,
+      subnets: cachedSubnets,
+      requestedSubnetIds,
+      features,
+      subnetFeatures,
+    } = getState().planEditor
 
-    // this little dance only fetches uncached subnets
-    const cachedSubnetIds = Object.keys(cachedSubnets).concat(requestedSubnetIds)
-    let uncachedSubnetIds = subnetIds.filter(id => !cachedSubnetIds.includes(id))
-    
+    // this little dance only fetches uncached (or forced to reload) subnets
+    const cachedSubnetIds = [...Object.keys(cachedSubnets), ...requestedSubnetIds]
+    let uncachedSubnetIds = subnetIds.filter(id => {
+      let isNotCached = !cachedSubnetIds.includes(id)
+      return forceReload || isNotCached // gotta love that double negative...
+    })
+
     // we have everything, no need to query service
     if (uncachedSubnetIds.length <= 0) {
       dispatch(setIsCalculatingSubnets(false))
       return Promise.resolve(subnetIds)
     }
     // pull out any ids that are not subnets
-    let validPsudoSubnets = []
+    let validPseudoSubnets = []
     uncachedSubnetIds = uncachedSubnetIds.filter(id => {
       if (!features[id]) return true // unknown so we'll try it
       let networkNodeType = features[id].feature.networkNodeType
       // TODO: do other networkNodeTypes have subnets?
       //  how would we know? solve that
-      if (networkNodeType === "central_office"
-        || networkNodeType === "fiber_distribution_hub"
-      ) {
+      if (networkNodeType === 'central_office' || networkNodeType === 'fiber_distribution_hub') {
         return true
-      } else {
-        if (subnetFeatures[id]) validPsudoSubnets.push(id)
-        return false
       }
+      if (subnetFeatures[id]) validPseudoSubnets.push(id)
+      return false
     })
 
     // the selected ID isn't a subnet persay so don't query for it
     // TODO: we need to fix this selection discrepancy
     if (uncachedSubnetIds.length <= 0) {
       // is the FDT in state? If so we can select it
-      if (validPsudoSubnets.length > 0) {
-        return Promise.resolve(validPsudoSubnets)
-      } else {
-        // if not we can't
-        return Promise.resolve()
+      if (validPseudoSubnets.length > 0) {
+        return Promise.resolve(validPseudoSubnets)
       }
+      // if not we can't
+      return Promise.resolve()
     }
 
     /*
@@ -757,24 +773,14 @@ function addSubnets (subnetIds) {
         apiSubnets.forEach(subnet => {
           // subnet could be null (don't ask me)
           const subnetId = subnet.subnetId.id
-          fiberApiPromises.push(AroHttp.get(`/service/plan-transaction/${transaction.id}/subnetfeature/${subnetId}`)
-            .then(fiberResult => {
-              subnet.fiber = fiberResult.data
-            })
+          fiberApiPromises.push(
+            AroHttp.get(`/service/plan-transaction/${transaction.id}/subnetfeature/${subnetId}`)
+              .then(fiberResult => subnet.fiber = fiberResult.data)
           )
         })
-    
+
         return Promise.all(fiberApiPromises)
           .then(() => {
-            
-            /*
-            dispatch({
-              type: Actions.PLAN_EDITOR_REMOVE_REQUESTED_SUBNET_IDS,
-              payload: uncachedSubnetIds,
-            })
-            */
-            //return dispatch(parseAddApiSubnets(apiSubnets))
-            //  .then(() => Promise.resolve(apiSubnets))
             dispatch(setIsCalculatingSubnets(false))
             return new Promise((resolve, reject) => {
               dispatch(parseAddApiSubnets(apiSubnets))
@@ -783,12 +789,6 @@ function addSubnets (subnetIds) {
           })
           .catch(err => {
             console.error(err)
-            /*
-            dispatch({
-              type: Actions.PLAN_EDITOR_REMOVE_REQUESTED_SUBNET_IDS,
-              payload: uncachedSubnetIds,
-            })
-            */
             dispatch(setIsCalculatingSubnets(false))
             return Promise.reject()
           })
@@ -921,6 +921,22 @@ function onMapClick (featureIds, latLng) {
   }
 }
 
+function addCursorLocationIds(payload) {
+  return { type: Actions.PLAN_EDITOR_ADD_CURSOR_LOCATION_IDS, payload }
+}
+
+function clearCursorLocationIds() {
+  return { type: Actions.PLAN_EDITOR_CLEAR_CURSOR_LOCATION_IDS, payload: [] }
+}
+
+function addCursorEquipmentIds(payload) {
+  return { type: Actions.PLAN_EDITOR_ADD_CURSOR_EQUIPMENT_IDS, payload }
+}
+
+function clearCursorEquipmentIds() {
+  return { type: Actions.PLAN_EDITOR_CLEAR_CURSOR_EQUIPMENT_IDS, payload: [] }
+}
+
 function recalculateBoundary (subnetId) {
   return (dispatch, getState) => {
     dispatch(setIsCalculatingBoundary(true))
@@ -1017,77 +1033,93 @@ function recalculateSubnets (transactionId, subnetIds = []) {
   }
 }
 
+function setFiberRenderRequired (bool) {
+  return {
+    type: Actions.PLAN_EDITOR_SET_FIBER_RENDER_REQUIRED,
+    payload: bool,
+  }
+}
+
 // --- //
 
 // helper
 function parseRecalcEvents (recalcData) {
-  //copnsole.log(recalcData)
   // this needs to be redone and I think we should make a sealed subnet manager
   // that will manage the subnetFeatures list with changes to a subnet (deleting children etc)
-  return (dispatch, getState) => {
+  return async(dispatch, getState) => {
     const { subnetFeatures } = getState().planEditor
     let newSubnetFeatures = JSON.parse(JSON.stringify(subnetFeatures))
     let updatedSubnets = {}
 
-    const subnets = [...new Set(recalcData.subnets.map(subnet => subnet.feature.objectId))]
-    dispatch(addSubnets(subnets))
-      .then(() => {
-        // need to recapture state because we've altered it w/ `addSubnets`
-        const state = getState()
-        recalcData.subnets.forEach(subnetRecalc => {
-          let subnetId = subnetRecalc.feature.objectId
-          // TODO: looks like this needs to be rewritten 
-          if (state.planEditor.subnets[subnetId]) {
-            const subnetCopy = JSON.parse(JSON.stringify(state.planEditor.subnets[subnetId]))
+    const recalcedSubnets = [...new Set(recalcData.subnets.map(subnet => subnet.feature.objectId))]
+    // TODO: ??? --->
+    // this may have some redundancy in it-- we're only telling the cache to
+    // (sadly) clear because we need to reload locations that are in or our of a modified
+    // subnet boundary. Another way we could handle this it to pass `subnetLocations`
+    // back down with the recalced subnets...
+    await dispatch(addSubnets(recalcedSubnets, true))
 
-            // update fiber
-            // TODO: create parser for this???
-            // ...also use it above in `addSubnets`, where fiber is added
-            subnetCopy.fiber = subnetRecalc.feature
+    // need to recapture state because we've altered it w/ `addSubnets`
+    const { planEditor: { subnets } } = getState()
+    recalcData.subnets.forEach(subnetRecalc => {
+      let subnetId = subnetRecalc.feature.objectId
+      // TODO: looks like this needs to be rewritten 
+      if (subnets[subnetId]) {
+        const subnetCopy = JSON.parse(JSON.stringify(subnets[subnetId]))
 
-            // update equipment
-            subnetRecalc.recalcNodeEvents.forEach(recalcNodeEvent => {
-              let objectId = recalcNodeEvent.subnetNode.id
-              switch (recalcNodeEvent.eventType) {
-                case 'DELETE':
-                  // need to cover the case of deleteing a hub where we need to pull the whole thing
-                  delete newSubnetFeatures[objectId]
-                  let index = subnetCopy.children.indexOf(objectId);
-                  if (index > -1) {
-                    subnetCopy.children.splice(index, 1);
-                  }
-                  break
-                case 'ADD':
-                  // add only
-                  subnetCopy.children.push(objectId)
-                  // do not break
-                case 'MODIFY':
-                  // add || modify
-                  // TODO: this is repeat code from below
-                  let parsedNode = {
-                    feature: parseSubnetFeature(recalcNodeEvent.subnetNode),
-                    subnetId: subnetId,
-                  }
-                  newSubnetFeatures[objectId] = parsedNode
-                  break
+        // update fiber
+        // TODO: create parser for this???
+        // ...also use it above in `addSubnets`, where fiber is added
+        subnetCopy.fiber = subnetRecalc.feature
+
+        // update equipment
+        subnetRecalc.recalcNodeEvents.forEach(recalcNodeEvent => {
+          let objectId = recalcNodeEvent.subnetNode.id
+          switch (recalcNodeEvent.eventType) {
+            case 'DELETE':
+              // need to cover the case of deleteing a hub where we need to pull the whole thing
+              delete newSubnetFeatures[objectId]
+              let index = subnetCopy.children.indexOf(objectId);
+              if (index > -1) {
+                subnetCopy.children.splice(index, 1);
               }
-            })
-            updatedSubnets[subnetId] = subnetCopy
+              break
+            case 'ADD':
+              // add only
+              subnetCopy.children.push(objectId)
+              // do not break
+            case 'MODIFY':
+            case 'UPDATE':
+              // add || modify || update
+              // TODO: this is repeat code from below
+              let parsedNode = {
+                feature: parseSubnetFeature(recalcNodeEvent.subnetNode),
+                subnetId: subnetId,
+              }
+              newSubnetFeatures[objectId] = parsedNode
+              break
           }
         })
+        updatedSubnets[subnetId] = subnetCopy
+      }
+    })
 
-        batch(() => {
-          dispatch({
-            type: Actions.PLAN_EDITOR_SET_SUBNET_FEATURES,
-            payload: newSubnetFeatures,
-          })
-          dispatch({
-            type: Actions.PLAN_EDITOR_ADD_SUBNETS,
-            payload: updatedSubnets,
-          })
-        })
-
+    batch(() => {
+      dispatch({
+        type: Actions.PLAN_EDITOR_SET_SUBNET_FEATURES,
+        payload: newSubnetFeatures,
       })
+      dispatch({
+        type: Actions.PLAN_EDITOR_ADD_SUBNETS,
+        payload: updatedSubnets,
+      })
+      dispatch({
+        type: Actions.PLAN_EDITOR_SET_FIBER_RENDER_REQUIRED,
+        payload: true,
+      })
+    })
+
+
   }
 }
 
@@ -1097,12 +1129,12 @@ function parseAddApiSubnets (apiSubnets) {
     if (apiSubnets.length) {
       let subnets = {}
       let allFeatures = {}
-      // parse 
+      // parse
       apiSubnets.forEach(apiSubnet => {
-        let {subnet, subnetFeatures} = parseSubnet(apiSubnet)
+        let { subnet, subnetFeatures } = parseSubnet(apiSubnet)
         const subnetId = subnet.subnetNode
         subnets[subnetId] = subnet
-        allFeatures = {...allFeatures, ...subnetFeatures}
+        allFeatures = { ...allFeatures, ...subnetFeatures }
       })
       // dispatch add subnets and add subnetFeatures
       return batch(() => {
@@ -1125,6 +1157,7 @@ function parseSubnet (subnet) {
   subnet.subnetNode = parseSubnetFeature(subnet.subnetId)
   delete subnet.subnetId
   subnet.children = subnet.children.map(feature => parseSubnetFeature(feature))
+  subnet.coEquipments = subnet.coEquipments.map(feature => parseSubnetFeature(feature))
   // --- end typo section --- //
 
   // subnetLocations needs to be a dictionary
@@ -1142,15 +1175,12 @@ function parseSubnet (subnet) {
   let subnetFeatures = {}
   // root node
   subnetFeatures[subnetId] = {
-    'feature': subnet.subnetNode,
-    'subnetId': subnet.parentSubnetId,
+    feature: subnet.subnetNode,
+    subnetId: subnet.parentSubnetId,
   }
-  // child nodes
-  subnet.children.forEach(feature => {
-    subnetFeatures[feature.objectId] = {
-      'feature': feature,
-      'subnetId': subnetId,
-    }
+  // child and coEquipment nodes
+  subnet.children.concat(subnet.coEquipments).forEach(feature => {
+    subnetFeatures[feature.objectId] = { feature, subnetId }
     // if the feature has attached locations we need to note that in the locations list
     //  technically we are duplicating data so we need to be sure the reducer machinery keeps these in sync
     if (feature.dropLinks) {
@@ -1168,9 +1198,10 @@ function parseSubnet (subnet) {
 
   // subnet child list is a list of IDs, not full features, features are stored in subnetFeatures
   subnet.children = subnet.children.map(feature => feature.objectId)
+  subnet.coEquipments = subnet.coEquipments.map(feature => feature.objectId)
   subnet.subnetNode = subnet.subnetNode.objectId
 
-  return {subnet, subnetFeatures}
+  return { subnet, subnetFeatures }
 }
 
 // helper function
@@ -1178,9 +1209,14 @@ function parseSubnetFeature (feature) {
   // --- fix service typos - eventually this won't be needed --- //
   feature.objectId = feature.id
   delete feature.id
-
-  feature.geometry = feature.point
-  delete feature.point
+  if (feature.point) {
+    feature.geometry = feature.point
+    delete feature.point
+    // coEquipment calls it geom not point
+  } else if (feature.geom) {
+    feature.geometry = feature.geom
+    delete feature.geom
+  }
   // --- end typo section --- //
 
   return feature
@@ -1261,7 +1297,12 @@ export default {
   addSubnets,
   setSelectedSubnetId,
   onMapClick,
+  addCursorLocationIds,
+  clearCursorLocationIds,
+  addCursorEquipmentIds,
+  clearCursorEquipmentIds,
   recalculateBoundary,
   boundaryChange,
   recalculateSubnets,
+  setFiberRenderRequired,
 }
