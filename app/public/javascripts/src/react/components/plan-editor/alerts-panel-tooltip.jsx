@@ -7,8 +7,8 @@ const { ALERT_TYPES } = constants
 
 const _AlertsPanelTooltip = props => {
 
-  const { cursorLocationIds, locationAlerts } = props
-  const alerts = cursorLocationIds
+  const { locationAlerts, cursorLocationIds, cursorEquipmentIds } = props
+  const alerts = cursorLocationIds.concat(cursorEquipmentIds)
     .map(id => locationAlerts[id] && locationAlerts[id].alerts || [])
     .filter(alerts => alerts.length)
 
@@ -29,6 +29,7 @@ const _AlertsPanelTooltip = props => {
 const mapStateToProps = state => ({
   locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(state),
   cursorLocationIds: state.planEditor.cursorLocationIds,
+  cursorEquipmentIds: state.planEditor.cursorEquipmentIds,
 })
 const mapDispatchToProps = dispatch => ({})
 export const AlertsPanelTooltip = connect(mapStateToProps, mapDispatchToProps)(_AlertsPanelTooltip)
