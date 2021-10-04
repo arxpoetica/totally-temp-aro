@@ -14,9 +14,18 @@ export const equipmentDetailList = (props) => {
     clliToEquipmentInfo: {},
   })
 
-  const { clliToEquipmentInfo } = state
-  const { mapRef, mapLayers, networkNodeTypesEntity, loadNetworkNodeTypesEntity, onClickObject,
-    activeViewModePanel } = props
+  const {
+    clliToEquipmentInfo,
+  } = state
+
+  const {
+    mapRef,
+    mapLayers,
+    networkNodeTypesEntity,
+    loadNetworkNodeTypesEntity,
+    onClickObject,
+    activeViewModePanel,
+  } = props
 
   useEffect(() => {
     getVisibleEquipmentIds()
@@ -28,42 +37,39 @@ export const equipmentDetailList = (props) => {
     }
   }, [])
 
-  useEffect(() => {
-    mapLayers && refreshEquipmentList()
-  }, [mapLayers])
+  useEffect(() => { mapLayers && refreshEquipmentList() }, [mapLayers])
 
   const getVisibleEquipmentIds = () => {
-    if (!mapRef || !mapRef.getBounds()) {
-      return
-    }
+    if (!mapRef || !mapRef.getBounds()) { return }
     // Get visible tiles
-    var visibleTiles = MapUtilities.getVisibleTiles(mapRef)
+    const visibleTiles = MapUtilities.getVisibleTiles(mapRef)
     visibleTiles.forEach((tile) => {
-      var coord = { x: tile.x, y: tile.y }
+      const coord = { x: tile.x, y: tile.y }
       getVisibleTileData(tile.zoom, coord) // fetch tile data
     })
   }
 
   const getVisibleTileData = (zoom, coord) => {
-    var singleTilePromises = []
-    var mapLayersObjKeys = Object.keys(mapLayers)
+    const singleTilePromises = []
+    const mapLayersObjKeys = Object.keys(mapLayers)
 
     mapLayersObjKeys.forEach((mapLayerKey, index) => {
-      var mapLayer = mapLayers[mapLayerKey]
-      var xTile = coord.x
-      var yTile = coord.y
-      var singleTilePromise = tileDataService.getTileData(mapLayer, zoom, xTile, yTile)
+      const mapLayer = mapLayers[mapLayerKey]
+      const xTile = coord.x
+      const yTile = coord.y
+      const singleTilePromise = tileDataService.getTileData(mapLayer, zoom, xTile, yTile)
       singleTilePromises.push(singleTilePromise)
     })
 
     return Promise.all(singleTilePromises)
       .then((singleTileResults) => {
         singleTileResults.forEach((featureData, index) => {
-          var features = []
-          Object.keys(featureData.layerToFeatures).forEach((layerKey) => features = features.concat(featureData.layerToFeatures[layerKey]))
-          for (var iFeature = 0; iFeature < features.length; ++iFeature) {
+          let features = []
+          Object.keys(featureData.layerToFeatures)
+            .forEach((layerKey) => features = features.concat(featureData.layerToFeatures[layerKey]))
+          for (let iFeature = 0; iFeature < features.length; ++iFeature) {
             // Parse the geometry out.
-            var feature = features[iFeature]
+            const feature = features[iFeature]
             if (filterFeature(feature)) {
               const clliToEquipmentInfoObj = {}
               clliToEquipmentInfoObj[feature.properties.object_id] = feature.properties
@@ -78,14 +84,14 @@ export const equipmentDetailList = (props) => {
     return feature.properties &&
       feature.properties.object_id &&
       feature.properties._data_type &&
-      feature.properties._data_type.split('.')[0] == 'equipment' &&
+      feature.properties._data_type.split('.')[0] === 'equipment' &&
       feature.properties.is_deleted !== 'true' && // deleted planned sites
       !isExistingSiteDeleted(feature.properties.object_id) && // deleted exisiting sites
       Object.keys(clliToEquipmentInfo).length <= MAX_EQUIPMENT_LIST
   }
 
   const isExistingSiteDeleted = (objectId) => {
-    var isDeleted = false
+    let isDeleted = false
     if (tileDataService.modifiedFeatures.hasOwnProperty(objectId)) {
       const modifiedFeature = tileDataService.modifiedFeatures[objectId]
       if (modifiedFeature.deleted) {
@@ -103,15 +109,9 @@ export const equipmentDetailList = (props) => {
     }
   }
 
-  const addMapListeners = () => {
-    if (mapRef) {
-      mapRef.addListener('dragend', () => refreshEquipmentList())
-    }
-  }
+  const addMapListeners = () => { if (mapRef) { mapRef.addListener('dragend', () => refreshEquipmentList()) } }
 
-  const removeMapListeners = () => {
-    google.maps.event.clearListeners(mapRef, 'dragend')
-  }
+  const removeMapListeners = () => { google.maps.event.clearListeners(mapRef, 'dragend') }
 
   return (
     <div className="equipment-list">
@@ -125,9 +125,7 @@ export const equipmentDetailList = (props) => {
         <tbody>
           {
             Object.entries(clliToEquipmentInfo).map(([categoryType, equipmentInfo], index) => (
-              <tr style={{cursor: 'pointer'}} key={index} 
-                onClick={() => onClickObject(equipmentInfo, false)}
-              >
+              <tr className="equipment-cursor" key={index} onClick={() => onClickObject(equipmentInfo, false)}>
                 <td>{equipmentInfo.siteClli}</td>
                 <td>{networkNodeTypesEntity[equipmentInfo._data_type.split('.')[1]]}</td>
               </tr>

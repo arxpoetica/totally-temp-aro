@@ -256,7 +256,15 @@
   position: relative;
 }
 
+.equipment-list .equipment-cursor {
+  cursor: pointer;
+}
+
 /* Boundary Coverage */
+
+.bounds-coverage-detail {
+  margin-bottom: 20px;
+}
 
 .bounds-coverage-header {
   cursor: auto;

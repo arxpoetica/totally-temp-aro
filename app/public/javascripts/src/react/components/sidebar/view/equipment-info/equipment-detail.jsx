@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import reduxStore from '../../../../../redux-store'
 import wrapComponentWithProvider from '../../../../common/provider-wrapped-component'
-import { viewModePanels } from '../../constants'
+import { viewModePanels, mapHitFeatures } from '../../constants'
 import BoundaryCoverage from './boundary-coverage.jsx'
 import EquipmentDetailList from './equipment-detail-list.jsx'
 import SelectionActions from '../../../selection/selection-actions'
 import ToolBarActions from '../../../header/tool-bar-actions'
 import StateViewModeActions from '../../../state-view-mode/state-view-mode-actions'
-import  AroHttp from '../../../../common/aro-http'
+import AroHttp from '../../../../common/aro-http'
 import RxState from '../../../../common/rxState'
 import AroSearch from '../../view/aro-search.jsx'
 import EquipmentInterfaceTree from './equipment-interface-tree.jsx'
@@ -22,7 +22,6 @@ const EquipmentDetailView = Object.freeze({
   Fiber: 2
 })
 const tileDataService = new TileDataService()
-
 const rxState = new RxState()
 
 export const equipmentDetail = (props) => {
@@ -43,40 +42,61 @@ export const equipmentDetail = (props) => {
     networkNodeType: '',
   })
 
-  const { currentEquipmentDetailView, selectedEquipmentGeog, headerIcon, networkNodeLabel, boundsObjectId,
-    showCoverageOutput, coverageOutput, equipmentData, boundsData, isComponentDestroyed, equipmentFeature,
-    networkNodeType } = state
-  const { activeViewModePanel, plan, cloneSelection, setMapSelection, loggedInUser, networkEquipment,
-    activeViewModePanelAction, showSiteBoundary, getOptimizationBody, configuration, selectedMapFeatures,
-    allowViewModeClickAction } = props
+  const {
+    currentEquipmentDetailView,
+    selectedEquipmentGeog,
+    headerIcon,
+    networkNodeLabel,
+    boundsObjectId,
+    showCoverageOutput,
+    coverageOutput,
+    equipmentData,
+    boundsData,
+    isComponentDestroyed,
+    equipmentFeature,
+    networkNodeType,
+  } = state
+
+  const {
+    activeViewModePanel,
+    plan,
+    cloneSelection,
+    setMapSelection,
+    loggedInUser,
+    networkEquipment,
+    activeViewModePanelAction,
+    showSiteBoundary,
+    getOptimizationBody,
+    configuration,
+    selectedMapFeatures,
+    allowViewModeClickAction,
+   } = props
 
   const prevMapFeatures = usePrevious(selectedMapFeatures)
 
   useEffect(() => {
     if (!dequal(prevMapFeatures, selectedMapFeatures)) {
-      if(!allowViewModeClickAction) return
-      if (selectedMapFeatures.hasOwnProperty('roadSegments')
-        && selectedMapFeatures.roadSegments.size > 0) return
+      const { equipmentFeatures, roadSegments } = selectedMapFeatures
+      if (!allowViewModeClickAction) return
+      if (selectedMapFeatures.hasOwnProperty(mapHitFeatures.ROAD_SEGMENTS) && roadSegments.size > 0) return
 
-      if (selectedMapFeatures.hasOwnProperty('equipmentFeatures') && selectedMapFeatures.equipmentFeatures.length > 0) {
-          var equipmentList = getValidEquipmentFeaturesList(selectedMapFeatures.equipmentFeatures) // Filter Deleted equipment features
-          if (equipmentList.length > 0) {
-            const equipment = equipmentList[0]
-            updateSelectedState(equipment)
-            displayEquipment(plan.id, equipment.object_id)
-            .then((equipmentInfo) => {
-              checkForBounds(equipment.object_id)
-            })
-          }
+      if (selectedMapFeatures.hasOwnProperty(mapHitFeatures.EQUIPMENT_FEATURES) && equipmentFeatures.length > 0) {
+        const equipmentList = getValidEquipmentFeaturesList(equipmentFeatures) // Filter Deleted equipment features
+        if (equipmentList.length > 0) {
+          const equipment = equipmentList[0]
+          updateSelectedState(equipment)
+          displayEquipment(plan.id, equipment.object_id)
+            .then((equipmentInfo) => { checkForBounds(equipment.object_id) })
+        }
       }
     }
   }, [selectedMapFeatures])
 
   const getValidEquipmentFeaturesList = (equipmentFeaturesList) => {
-    var validEquipments = []
+    const validEquipments = []
     equipmentFeaturesList.filter((equipment) => {
       if (tileDataService.modifiedFeatures.hasOwnProperty(equipment.object_id)) {
-        if (!tileDataService.modifiedFeatures[equipment.object_id].deleted) validEquipments.push(equipment)
+        if (!tileDataService.modifiedFeatures[equipment.object_id].deleted) { validEquipments.push(equipment) }
       } else {
         validEquipments.push(equipment)
       }
@@ -88,9 +108,8 @@ export const equipmentDetail = (props) => {
     const newSelection = cloneSelection()
     newSelection.editable.equipment = {}
     newSelection.details.fiberSegments = new Set()
-	  if (typeof selectedFeature !== 'undefined') {
-      newSelection.editable.equipment[selectedFeature
-        .object_id || selectedFeature.objectId] = selectedFeature
+	  if (selectedFeature) {
+      newSelection.editable.equipment[selectedFeature.object_id || selectedFeature.objectId] = selectedFeature
     }
     setMapSelection(newSelection)
   }
@@ -100,7 +119,7 @@ export const equipmentDetail = (props) => {
 	  return AroHttp.get(`/service/plan-feature/${planId}/equipment/${objectId}?userId=${loggedInUser.id}`)
       .then((result) => {
         const equipmentInfo = result.data
-        if (equipmentInfo.hasOwnProperty('dataType') && equipmentInfo.hasOwnProperty('objectId')) {
+          if (equipmentInfo.hasOwnProperty('dataType') && equipmentInfo.hasOwnProperty('objectId')) {
           if (networkEquipment.equipments.hasOwnProperty(equipmentInfo.networkNodeType)) {
             setState((state) => ({ ...state,
               headerIcon: networkEquipment.equipments[equipmentInfo.networkNodeType].iconUrl,
@@ -109,19 +128,19 @@ export const equipmentDetail = (props) => {
           } else {
             // no icon
             setState((state) => ({ ...state,
-              headerIcon: '',networkNodeLabel: equipmentInfo.networkNodeType
+              headerIcon: '', networkNodeLabel: equipmentInfo.networkNodeType
             }))
           }
           setState((state) => ({ ...state,
-            equipmentData: equipmentInfo, 
+            equipmentData: equipmentInfo,
             selectedEquipmentGeog: equipmentInfo.geometry.coordinates,
             equipmentFeature: AroFeatureFactory.createObject(equipmentInfo).networkNodeEquipment,
             networkNodeType: equipmentInfo.networkNodeType,
-            currentEquipmentDetailView: EquipmentDetailView.Detail
+            currentEquipmentDetailView: EquipmentDetailView.Detail,
           }))
           activeViewModePanelAction(viewModePanels.EQUIPMENT_INFO)
         } else {
-          // this.clearSelection()
+          clearSelection()
         }
         return equipmentInfo
       }).catch((err) => {
@@ -130,10 +149,10 @@ export const equipmentDetail = (props) => {
   }
 
   const viewSelectedEquipment = (selectedEquipment, isZoom) => {
-    var objectId = selectedEquipment.objectId || selectedEquipment.object_id
+    const objectId = selectedEquipment.objectId || selectedEquipment.object_id
     updateSelectedState(selectedEquipment)
     displayEquipment(plan.id, objectId).then((equipmentInfo) => {
-      if (typeof equipmentInfo !== 'undefined') {
+      if (equipmentInfo) {
         const mapObject = {
           latitude: selectedEquipmentGeog[1],
           longitude: selectedEquipmentGeog[0],
@@ -151,8 +170,8 @@ export const equipmentDetail = (props) => {
       setState((state) => ({ ...state, boundsData: null }))
       return
     }
-    var equipmentId = equipmentInfo.objectId
-    var filter = `rootPlanId eq ${plan.id} and networkNodeObjectId eq guid'${equipmentId}'`
+    const equipmentId = equipmentInfo.objectId
+    const filter = `rootPlanId eq ${plan.id} and networkNodeObjectId eq guid'${equipmentId}'`
     AroHttp.get(`/service/odata/NetworkBoundaryEntity?$filter=${filter}`)
       .then((result) => {
         if (result.data.length < 1) {
@@ -169,11 +188,23 @@ export const equipmentDetail = (props) => {
     }
   }
 
-   // ToDo: very similar function to the one in plan-editor.js combine those
-   const calculateCoverage = (boundsData, equipmentPoint, directed) => {
-    if (typeof directed === 'undefined') directed = false
+  const clearSelection = () => {
+    updateSelectedState()
+    setState((state) => ({ ...state,
+      networkNodeType: '',
+      equipmentFeature: {},
+      equipmentData: null,
+      boundsData: null,
+      isWorkingOnCoverage: false,
+      currentEquipmentDetailView: EquipmentDetailView.List,
+    }))
+  }
+
+  // ToDo: very similar function to the one in plan-editor.js combine those
+  const calculateCoverage = (boundsData, equipmentPoint, directed) => {
+    if (directed) directed = false
     // Get the POST body for optimization based on the current application state
-    var optimizationBody = getOptimizationBody()
+    const optimizationBody = getOptimizationBody()
     // Replace analysis_type and add a point and radius
     optimizationBody.boundaryCalculationType = 'FIXED_POLYGON'
     optimizationBody.analysis_type = 'COVERAGE'
@@ -189,7 +220,7 @@ export const equipmentDetail = (props) => {
           return Promise.reject(new Error('Plan editor was closed while a boundary was being calculated'))
         }
         setState((state) => ({ ...state,
-          coverageOutput: result.data, 
+          coverageOutput: result.data,
           showCoverageOutput: true,
           isWorkingOnCoverage: false,
         }))
@@ -218,10 +249,9 @@ export const equipmentDetail = (props) => {
       </div>
       {
         currentEquipmentDetailView === EquipmentDetailView.Detail &&
-          <div className="ei-panel-header clearfix">
+        <div className="ei-panel-header clearfix">
           {
-            headerIcon != ''  &&
-            <img className="ei-panel-header-icon" src={headerIcon} alt="Equipment Icon" />
+            headerIcon && <img className="ei-panel-header-icon" src={headerIcon} alt="Equipment Icon" />
           }
           <div className="ei-panel-header-title">{networkNodeLabel}</div>
           <div className="sidebar-header-subinfo">
@@ -231,38 +261,39 @@ export const equipmentDetail = (props) => {
         </div>
       }
       <div className="equipment-detail ei-panel-content">
-      {
-        currentEquipmentDetailView === EquipmentDetailView.Detail &&
-        <>
-        <EquipmentInterfaceTree
-          objectToView={equipmentFeature}
-          rootMetaData={{networkNodeType: networkNodeType}}
-          isEdit={false}
-          indentationLevel={0}
-        />
         {
-          boundsObjectId && showSiteBoundary &&
-          <div className="equipment-detail-bounds">
-            <hr className="equipment-detail-hr" />
-            <button className="btn btn-primary btn-sm" onClick={() => onRequestCalculateCoverage()}>
-              calculate coverage
-            </button>
+          currentEquipmentDetailView === EquipmentDetailView.Detail &&
+          <>
+            <EquipmentInterfaceTree
+              objectToView={equipmentFeature}
+              rootMetaData={{networkNodeType}}
+              isEdit={false}
+              indentationLevel={0}
+            />
             {
-              showCoverageOutput &&
-              <BoundaryCoverage selectedBoundaryCoverage={coverageOutput} />
+              boundsObjectId && showSiteBoundary &&
+              <div className="equipment-detail-bounds">
+                <hr className="equipment-detail-hr" />
+                <button className="btn btn-primary btn-sm" onClick={() => onRequestCalculateCoverage()}>
+                  calculate coverage
+                </button>
+                {
+                  showCoverageOutput &&
+                  <BoundaryCoverage selectedBoundaryCoverage={coverageOutput} />
+                }
+              </div>
             }
-          </div>
+          </>
         }
-        </>
-      }
-      <br />
-      <div className="ei-panel-header-title">Equipment List</div>
-      {
-        currentEquipmentDetailView === EquipmentDetailView.List && activeViewModePanel === viewModePanels.EQUIPMENT_INFO &&
-        <div className="equipment-list">
-          <EquipmentDetailList onClickObject={viewSelectedEquipment}/>
-        </div>
-      }
+        {
+          currentEquipmentDetailView === EquipmentDetailView.List && activeViewModePanel === viewModePanels.EQUIPMENT_INFO &&
+          <>
+            <div className="ei-panel-header-title">Equipment List</div>
+            <div className="equipment-list">
+              <EquipmentDetailList onClickObject={viewSelectedEquipment} />
+            </div>
+          </>
+        }
       </div>
     </div>
   )

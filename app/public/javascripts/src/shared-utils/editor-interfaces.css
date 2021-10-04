@@ -139,6 +139,10 @@
   font-weight: normal;
 }
 
+.ei-blank-space {
+  margin-left: 4px;
+}
+
 .ei-foldout-state-label{
   /*
   float: right;
@@ -348,6 +352,13 @@ tr>td.ei-table-bottomline {
   display: none;
 }
 
+.ei-foldout-width {
+  width: 100%;
+}
+
+.ei-property-name {
+  flex: 1 1 50%;
+}
 
 /* - pagination - */
 
