@@ -66,6 +66,7 @@
 .ei-filter-input-container {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
 }
 .ei-filter-input {
   margin: 0 5px 0 5px;

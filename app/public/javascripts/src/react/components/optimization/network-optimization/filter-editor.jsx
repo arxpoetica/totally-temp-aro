@@ -1,12 +1,14 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { connect } from 'react-redux'
 import { EditorInterface, EditorInterfaceItem } from './editor-interface.jsx'
 import NetworkOptimizationActions from './network-optimization-actions'
 import NetworkOptimizationSelectors from './network-optimization-selectors.js'
+import EnumInputModal from './enum-input-modal.jsx'
 import { Select } from '../../common/forms/Select.jsx'
 import { Input } from '../../common/forms/Input.jsx'
 import Loader from '../../common/Loader.jsx'
 import { getDateString, getDateTimeString } from '../../../common/view-utils.js'
+
 import cx from 'clsx'
 import './editor-interfaces.css'
 
@@ -21,7 +23,6 @@ const numberOptions = [
   {value: 'LT', label: 'Less Than'},
   {value: 'LTE', label: 'Less Than or Equal'},
   {value: 'RANGE', label: 'Between'},
-  // {value: 'IN', label: 'In'},
 ]
 
 const dateOptions = [
@@ -32,8 +33,68 @@ const dateOptions = [
   {value: 'LT', label: 'Before'},
   {value: 'LTE', label: 'Before or On'},
   {value: 'RANGE', label: 'Between'},
-  // {value: 'IN', label: 'In'},
 ]
+
+const enumOptions = [
+  {value: 'IN', label: 'In'},
+  {value: 'NIN', label: 'Not In'},
+]
+
+const stringOptions = [
+  {value: 'EQ', label: 'Equal'}, 
+  {value: 'NEQ', label: 'Not Equal'},
+]
+
+const newFilter = {
+  displayName: null,
+  enumType: 'NONE',
+  format: null,
+  maxvalue: '',
+  minValue: '',
+  name: null,
+  propertyType: null,
+  value: '',
+  label: '',
+  operator: '',
+  value1: '',
+  value2: '',
+}
+
+const getOperators = (propertyType, enumType) => {
+  if (enumType === 'BOUNDED' || enumType === 'UNBOUNDED') return enumOptions
+
+  switch (propertyType) {
+    case 'NUMBER':
+    case 'INTEGER':
+      return numberOptions
+    case 'STRING':
+      return stringOptions
+    case 'DATETIME':
+    case 'DATE':
+      return dateOptions
+    default:
+      return numberOptions
+  }
+}
+
+
+const getInputType = (propertyType) => {
+  switch (propertyType) {
+    case 'NUMBER':
+    case 'INTEGER':
+      return 'number'
+    case 'STRING':
+      return 'text'
+    case 'DATETIME':
+      return 'datetime-local'
+    case 'DATE':
+      return 'date'
+    default:
+      return 'text'
+  }
+}
+
+
 
 export const FilterEditor = ({
   displayOnly,
@@ -49,6 +110,7 @@ export const FilterEditor = ({
   serviceAreas,
   isPreviewLoading,
 }) => {
+  const [modalIndex, setModalIndex] = useState(-1)
 
   useEffect(() => {
     loadFilters()
@@ -93,20 +155,7 @@ export const FilterEditor = ({
     }
   } ,[optimizationInputs, filters])
 
-  const newFilter = {
-    displayName: null,
-    enumMapped: false,
-    format: null,
-    maxvalue: '',
-    minValue: '',
-    name: null,
-    propertyType: null,
-    value: '',
-    label: '',
-    operator: '',
-    value1: '',
-    value2: '',
-  }
+
 
   const addNewFilter = () => setActiveFilters([...activeFilters, newFilter])
 
@@ -145,22 +194,6 @@ export const FilterEditor = ({
     setActiveFilters([...activeFilters])
   }
 
-  const getInputType = (propertyType) => {
-    switch (propertyType) {
-      case 'NUMBER':
-      case 'INTEGER':
-        return 'number'
-      case 'STRING':
-        return 'text'
-      case 'DATETIME':
-        return 'datetime-local'
-      case 'DATE':
-        return 'date'
-      default:
-        return 'text'
-    }
-  }
-
   const handlePreview = () => {
     if (serviceAreas.size > 1){
       swal({
@@ -171,63 +204,75 @@ export const FilterEditor = ({
     } else {
       loadSelectionFromObjectFilter(planId, updatedLocationConstraints)
     }
-
-
   }
   
-  const ActiveFilterForm = (filter, index ) => {
-    // generate the forms based on type right now just number or boolean
-    // possible formats: STRING, NUMBER, INTEGER, BOOLEAN
-    // possible operations: EQ, NEQ, GT, GTE, LT, LTE, IN, RANGE
-
-    // this first select gets rendered only if the type is BOOLEAN
-    const MainSelect = (filter.propertyType === 'BOOLEAN' 
-      ? <Select
-          value={filter.value1}
-          placeholder="Select"
-          options={boolOptions}
-          onChange={event => selectBool(event, filter, index)}
-          classes="ei-filter-select-operator"
-          disabled={displayOnly}
-        />
-      : <div className='ei-filter-input-container'>
-          {filter.operator &&
-            <Input 
-              type={getInputType(filter.propertyType)}
-              name="value1"
-              value={activeFilters[index].value1}
-              min={filter.minValue}
-              max={filter.maxValue}
-              onChange={event => textChange(event, index)}
-              onBlur={event => textChange(event, index)}
-              classes={cx('ei-filter-input', 
-                filter.format === 'DOLLAR' && 'dollar', 
-                filter.format === 'PERCENT' && 'percent')}
-              disabled={displayOnly}
-          />}
-
-          {/* This second field only gets rendered if type is range, adding second inoput */}
-          {filter.operator === 'RANGE' && (
-            <>
-              and
+  const getInputElements = (filter, index) => {
+    const {propertyType, enumType} = filter
+    // if Bool return simple yes/no
+    if (propertyType === 'BOOLEAN') {
+      return (
+        <Select
+            value={filter.value1}
+            placeholder="Select"
+            options={boolOptions}
+            onChange={event => selectBool(event, filter, index)}
+            classes="ei-filter-select-operator"
+            disabled={displayOnly}
+          />
+      )
+    }
+    // if bounded enum return multi select
+    if (enumType === 'BOUNDED') {
+      return 
+    }
+    // if unbounded return button for input popup
+    if (enumType === 'UNBOUNDED') {
+      return (
+        <div className='ei-filter-input-container'>
+          {filter.operator && <button type='button' onClick={() => setModalIndex(index)}>click</button> }
+        </div>
+      )
+    }
+    //otherwise return input elements
+    else {
+      return (
+        <div className='ei-filter-input-container'>
+            {filter.operator &&
               <Input 
                 type={getInputType(filter.propertyType)}
-                name="value2"
-                value={activeFilters[index].value2}
+                name="value1"
+                value={activeFilters[index].value1}
                 min={filter.minValue}
                 max={filter.maxValue}
                 onChange={event => textChange(event, index)}
                 onBlur={event => textChange(event, index)}
-                classes={cx('ei-filter-input',
-                  filter.format === 'DOLLAR' && 'dollar',
+                classes={cx('ei-filter-input', 
+                  filter.format === 'DOLLAR' && 'dollar', 
                   filter.format === 'PERCENT' && 'percent')}
                 disabled={displayOnly}
-              />
-            </>)}
-        </div>
-    )
+            />}
   
-    return MainSelect
+            {/* This second field only gets rendered if type is range, adding second inoput */}
+            {filter.operator === 'RANGE' && (
+              <>
+                and
+                <Input 
+                  type={getInputType(filter.propertyType)}
+                  name="value2"
+                  value={activeFilters[index].value2}
+                  min={filter.minValue}
+                  max={filter.maxValue}
+                  onChange={event => textChange(event, index)}
+                  onBlur={event => textChange(event, index)}
+                  classes={cx('ei-filter-input',
+                    filter.format === 'DOLLAR' && 'dollar',
+                    filter.format === 'PERCENT' && 'percent')}
+                  disabled={displayOnly}
+                />
+              </>)}
+          </div>
+      )
+    }
   }
   //this is the initial select of the filter type
   const FilterSelect = (index, activeFilter) => {
@@ -243,11 +288,11 @@ export const FilterEditor = ({
             classes="ei-filter-select-container"
             disabled={displayOnly}
           />
-          {/* This renders once a filter has been selected */}
+          {/* This renders once a filter has been selected, show the available operators */}
           {activeFilter && activeFilter.propertyType && activeFilter.propertyType !== 'BOOLEAN' && <Select
             value={activeFilter.operator}
             placeholder="Select"
-            options={activeFilter.propertyType === ('DATETIME' || 'DATE') ? dateOptions : numberOptions}
+            options={getOperators(activeFilter.propertyType, activeFilter.enumType)}
             onChange={event => selectOperator(event, activeFilter, index)}
             classes="ei-filter-select-operator"
             disabled={displayOnly}
@@ -255,7 +300,7 @@ export const FilterEditor = ({
       </>
     )
   }
-
+  
   return (
     <EditorInterface title="Filters" 
       middleSection={!displayOnly && validatedFilters.length > 0 && 
@@ -267,13 +312,18 @@ export const FilterEditor = ({
       rightSection={!displayOnly && 
         <i onClick={() => addNewFilter()} className="ei-header-icon plus-sign svg" />
       }>
+      <EnumInputModal 
+        filterIndex={modalIndex} 
+        startingText={activeFilters[modalIndex] && activeFilters[modalIndex].value1} 
+        closeModal={(index) => setModalIndex(index)}/>
       {activeFilters.map((activeFilter, index) => (
         (activeFilter.displayName 
           ? <EditorInterfaceItem subtitle={FilterSelect(index, activeFilter)} key={index}>
-              {ActiveFilterForm(activeFilter, index)}
+              {getInputElements(activeFilter, index)}
             </EditorInterfaceItem>
           : <EditorInterfaceItem subtitle={FilterSelect(index, activeFilter)} key={index} />
         )
+        
       ))}
     </EditorInterface>
   )
