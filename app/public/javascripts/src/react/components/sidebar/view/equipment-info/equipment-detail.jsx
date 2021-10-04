@@ -119,7 +119,7 @@ export const equipmentDetail = (props) => {
 	  return AroHttp.get(`/service/plan-feature/${planId}/equipment/${objectId}?userId=${loggedInUser.id}`)
       .then((result) => {
         const equipmentInfo = result.data
-          if (equipmentInfo.hasOwnProperty('dataType') && equipmentInfo.hasOwnProperty('objectId')) {
+        if (equipmentInfo.hasOwnProperty('dataType') && equipmentInfo.hasOwnProperty('objectId')) {
           if (networkEquipment.equipments.hasOwnProperty(equipmentInfo.networkNodeType)) {
             setState((state) => ({ ...state,
               headerIcon: networkEquipment.equipments[equipmentInfo.networkNodeType].iconUrl,

@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import { Bar } from 'react-chartjs-2'
+// Below imports are necessary here to load Equipment Feature
+import TrackedEquipment from '../../../../../service-typegen/dist/TrackedEquipment'
+import EquipmentComponent from '../../../../../service-typegen/dist/EquipmentComponent'
+import EquipmentFeature from '../../../../../service-typegen/dist/EquipmentFeature'
+import EquipmentBoundaryFeature from '../../../../../service-typegen/dist/EquipmentBoundaryFeature'
 
 const chartSettings = {
   household: {

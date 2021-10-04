@@ -15,6 +15,7 @@ import ToolBarActions from '../../react/components/header/tool-bar-actions'
 import PlanEditorActions from '../../react/components/plan-editor/plan-editor-actions'
 import PlanEditorSelectors from '../../react/components/plan-editor/plan-editor-selectors'
 import { dequal } from 'dequal'
+import MapLayerActions from '../../react/components/map-layers/map-layer-actions'
 
 class TileComponentController {
   // MapLayer objects contain the following information
@@ -809,6 +810,7 @@ class TileComponentController {
       rActiveViewModePanelAction: value => dispatch(ToolBarActions.activeViewModePanel(value)),
       addCursorLocationIds: ids => dispatch(PlanEditorActions.addCursorLocationIds(ids)),
       clearCursorLocationIds: () => dispatch(PlanEditorActions.clearCursorLocationIds()),
+      setActiveMapLayers: (value) => dispatch(MapLayerActions.setActiveMapLayers(value)),
     }
   }
 
