@@ -1,6 +1,6 @@
 import React from 'react'
 import cx from 'clsx'
-
+import './TextArea.css'
 
 export const TextArea = ({ value, placeholder, disabled, classes, onClick=()=>{}, onChange=()=>{} }) => {
 

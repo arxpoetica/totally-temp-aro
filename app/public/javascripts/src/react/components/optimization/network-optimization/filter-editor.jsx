@@ -111,6 +111,7 @@ export const FilterEditor = ({
   isPreviewLoading,
 }) => {
   const [modalIndex, setModalIndex] = useState(-1)
+  const [modalOpen, setModalOpen] = useState(false)
 
   useEffect(() => {
     loadFilters()
@@ -205,6 +206,11 @@ export const FilterEditor = ({
       loadSelectionFromObjectFilter(planId, updatedLocationConstraints)
     }
   }
+
+  const handleOpenModal = (index) => {
+    setModalIndex(index)
+    setModalOpen(true)
+  }
   
   const getInputElements = (filter, index) => {
     const {propertyType, enumType} = filter
@@ -229,7 +235,8 @@ export const FilterEditor = ({
     if (enumType === 'UNBOUNDED') {
       return (
         <div className='ei-filter-input-container'>
-          {filter.operator && <button type='button' onClick={() => setModalIndex(index)}>{filter.value1 ? 'Edit' : 'Set'}</button> }
+          {filter.operator && !filter.value1 && <span className='empty-warning'>No Input</span>}
+          {filter.operator && <button type='button' disabled={displayOnly} onClick={() => handleOpenModal(index)}>{filter.value1 ? 'Edit' : 'Set Input'}</button> }
         </div>
       )
     }
@@ -314,8 +321,9 @@ export const FilterEditor = ({
       }>
       <EnumInputModal 
         filterIndex={modalIndex} 
+        isOpen={modalOpen}
         startingText={activeFilters[modalIndex] && activeFilters[modalIndex].value1} 
-        closeModal={(index) => setModalIndex(index)}/>
+        closeModal={() => setModalOpen(false)}/>
 
       {activeFilters.map((activeFilter, index) => (
         (activeFilter.displayName 

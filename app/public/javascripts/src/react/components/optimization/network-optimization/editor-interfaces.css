@@ -115,3 +115,8 @@
   content: "%";
 }
 
+.empty-warning {
+  color: red;
+  margin-right: .5rem;
+}
+
