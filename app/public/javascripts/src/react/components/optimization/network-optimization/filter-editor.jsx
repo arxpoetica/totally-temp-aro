@@ -8,57 +8,10 @@ import { Select } from '../../common/forms/Select.jsx'
 import { Input } from '../../common/forms/Input.jsx'
 import Loader from '../../common/Loader.jsx'
 import { getDateString, getDateTimeString } from '../../../common/view-utils.js'
+import { boolOptions, numberOptions, dateOptions, enumOptions, stringOptions, newFilter } from './filter-objects.js'
 
 import cx from 'clsx'
 import './editor-interfaces.css'
-
-
-const boolOptions = [{value: 'True', label: 'Yes'}, {value: 'False', label: 'No'}]
-
-const numberOptions = [
-  {value: 'EQ', label: 'Equal'}, 
-  {value: 'NEQ', label: 'Not Equal'},
-  {value: 'GT', label: 'Greater Than'},
-  {value: 'GTE', label: 'Greater Than or Equal'},
-  {value: 'LT', label: 'Less Than'},
-  {value: 'LTE', label: 'Less Than or Equal'},
-  {value: 'RANGE', label: 'Between'},
-]
-
-const dateOptions = [
-  {value: 'EQ', label: 'Equal'}, 
-  {value: 'NEQ', label: 'Not Equal'},
-  {value: 'GT', label: 'After'},
-  {value: 'GTE', label: 'After or On'},
-  {value: 'LT', label: 'Before'},
-  {value: 'LTE', label: 'Before or On'},
-  {value: 'RANGE', label: 'Between'},
-]
-
-const enumOptions = [
-  {value: 'IN', label: 'In'},
-  {value: 'NIN', label: 'Not In'},
-]
-
-const stringOptions = [
-  {value: 'EQ', label: 'Equal'}, 
-  {value: 'NEQ', label: 'Not Equal'},
-]
-
-const newFilter = {
-  displayName: null,
-  enumType: 'NONE',
-  format: null,
-  maxvalue: '',
-  minValue: '',
-  name: null,
-  propertyType: null,
-  value: '',
-  label: '',
-  operator: '',
-  value1: '',
-  value2: '',
-}
 
 const getOperators = (propertyType, enumType) => {
   if (enumType === 'BOUNDED' || enumType === 'UNBOUNDED') return enumOptions
@@ -228,6 +181,7 @@ export const FilterEditor = ({
       )
     }
     // if bounded enum return multi select
+    //TODO: Small enumeration support
     if (enumType === 'BOUNDED') {
       return 
     }
@@ -236,7 +190,13 @@ export const FilterEditor = ({
       return (
         <div className='ei-filter-input-container'>
           {filter.operator && !filter.value1 && <span className='empty-warning'>No Input</span>}
-          {filter.operator && <button type='button' disabled={displayOnly} onClick={() => handleOpenModal(index)}>{filter.value1 ? 'Edit' : 'Set Input'}</button> }
+          {filter.operator && 
+            <button 
+              type='button' 
+              disabled={displayOnly} 
+              onClick={() => handleOpenModal(index)}>
+                {filter.value1 ? 'Edit' : 'Set Input'}
+            </button> }
         </div>
       )
     }
@@ -337,8 +297,6 @@ export const FilterEditor = ({
     </EditorInterface>
   )
 }
-
-
 
 const mapStateToProps = (state) => ({
   filters: state.optimization.networkOptimization.filters,
