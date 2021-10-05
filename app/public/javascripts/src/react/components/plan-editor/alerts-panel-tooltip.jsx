@@ -8,20 +8,30 @@ const { ALERT_TYPES } = constants
 const _AlertsPanelTooltip = props => {
 
   const { locationAlerts, cursorLocationIds, cursorEquipmentIds } = props
-  const alerts = cursorLocationIds.concat(cursorEquipmentIds)
+  const cursorIds = cursorLocationIds.concat(cursorEquipmentIds)
+  const alerts = cursorIds
     .map(id => locationAlerts[id] && locationAlerts[id].alerts || [])
     .filter(alerts => alerts.length)
 
   let position
-  if (cursorLocationIds.length && locationAlerts[cursorLocationIds[0]]) {
+  if (cursorIds.length && locationAlerts[cursorIds[0]]) {
     // should only need to grab the first one because lat / lon should match all
-    const { latitude, longitude } = locationAlerts[cursorLocationIds[0]].point
+    const { latitude, longitude } = locationAlerts[cursorIds[0]].point
     position = new google.maps.LatLng(latitude, longitude)
   }
 
+  let alertContent = []
+  alerts.forEach((type, index) => {
+    alertContent.push(
+      <li key={`alert_${index}`}>{ALERT_TYPES[type].displayName}</li>
+    )
+  })
+
   return (
     <MapTooltip show={alerts.length} position={position}>
-      {alerts.map(type => ALERT_TYPES[type].displayName).join(', ')}
+      <ul>
+        {alertContent}
+      </ul>
     </MapTooltip>
   )
 }
