@@ -923,7 +923,7 @@ function onMapClick (featureIds, latLng) {
 
 function setCursorLocationIds(payload) {
   return (dispatch, getState) => {
-    const cursorLocationIds = getState().planEditor.cursorLocationIds
+    const { cursorLocationIds } = getState().planEditor
     if (JSON.stringify(cursorLocationIds) !== JSON.stringify(payload)) {
       dispatch({ type: Actions.PLAN_EDITOR_SET_CURSOR_LOCATION_IDS, payload })
     }
