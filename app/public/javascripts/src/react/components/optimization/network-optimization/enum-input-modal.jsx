@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import { TextArea } from '../../common/forms/TextArea.jsx'
+import { FileInput } from '../../common/forms/FileInput.jsx'
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap'
 import NetworkOptimizationActions from './network-optimization-actions.js'
 
@@ -9,26 +10,32 @@ export const EnumInputModal = ({startingText, filterIndex, closeModal, setActive
 
   useEffect(()=> {
     setText(startingText)
-    console.log('ran1')
     return () => {
       setText('')
-      console.log('ran')
     }
   },[startingText])
 
   const saveText = () => {
     activeFilters[filterIndex].value1 = text
-    console.log(activeFilters[filterIndex])
-    console.log(filterIndex)
-    console.log(text)
     setActiveFilters([...activeFilters])
     closeModal(-1)
+  }
+
+  const fileUpload = (event) => {
+    const reader = new FileReader()
+
+    reader.readAsText(event.target.files[0])
+
+    reader.onload = () => {
+      setText(reader.result)
+    };
   }
   return (
     <Modal isOpen={filterIndex > -1} size='lg'>
       <ModalHeader >Modal title</ModalHeader>
       <ModalBody>
         <TextArea value={text} onChange={(event) => setText(event.target.value)}/>
+        <FileInput accept='.csv' onChange={(event) => fileUpload(event)}/>
       </ModalBody>
       <ModalFooter>
         <Button color="primary" onClick={() => saveText()}>Save</Button>{' '}

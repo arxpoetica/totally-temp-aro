@@ -229,7 +229,7 @@ export const FilterEditor = ({
     if (enumType === 'UNBOUNDED') {
       return (
         <div className='ei-filter-input-container'>
-          {filter.operator && <button type='button' onClick={() => setModalIndex(index)}>click</button> }
+          {filter.operator && <button type='button' onClick={() => setModalIndex(index)}>{filter.value1 ? 'Edit' : 'Set'}</button> }
         </div>
       )
     }
@@ -316,6 +316,7 @@ export const FilterEditor = ({
         filterIndex={modalIndex} 
         startingText={activeFilters[modalIndex] && activeFilters[modalIndex].value1} 
         closeModal={(index) => setModalIndex(index)}/>
+
       {activeFilters.map((activeFilter, index) => (
         (activeFilter.displayName 
           ? <EditorInterfaceItem subtitle={FilterSelect(index, activeFilter)} key={index}>
