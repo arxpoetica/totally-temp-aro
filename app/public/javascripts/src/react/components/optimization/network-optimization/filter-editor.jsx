@@ -63,8 +63,7 @@ export const FilterEditor = ({
   serviceAreas,
   isPreviewLoading,
 }) => {
-  const [modalIndex, setModalIndex] = useState(-1)
-  const [modalOpen, setModalOpen] = useState(false)
+  const [modalData, setModalData] = useState({isOpen: false, index: null})
 
   useEffect(() => {
     loadFilters()
@@ -160,11 +159,6 @@ export const FilterEditor = ({
     }
   }
 
-  const handleOpenModal = (index) => {
-    setModalIndex(index)
-    setModalOpen(true)
-  }
-  
   const getInputElements = (filter, index) => {
     const {propertyType, enumType} = filter
     // if Bool return simple yes/no
@@ -194,7 +188,7 @@ export const FilterEditor = ({
             <button 
               type='button' 
               disabled={displayOnly} 
-              onClick={() => handleOpenModal(index)}>
+              onClick={() => setModalData({isOpen: true, index})}>
                 {filter.value1 ? 'Edit' : 'Set Input'}
             </button> }
         </div>
@@ -280,10 +274,10 @@ export const FilterEditor = ({
         <i onClick={() => addNewFilter()} className="ei-header-icon plus-sign svg" />
       }>
       <EnumInputModal 
-        filterIndex={modalIndex} 
-        isOpen={modalOpen}
-        startingText={activeFilters[modalIndex] && activeFilters[modalIndex].value1} 
-        closeModal={() => setModalOpen(false)}/>
+        filterIndex={modalData.index} 
+        isOpen={modalData.isOpen}
+        startingText={activeFilters[modalData.index] && activeFilters[modalData.index].value1} 
+        closeModal={() => setModalData({isOpen: false, index: null})}/>
 
       {activeFilters.map((activeFilter, index) => (
         (activeFilter.displayName 
