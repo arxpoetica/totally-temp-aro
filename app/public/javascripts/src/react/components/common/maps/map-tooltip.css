@@ -28,6 +28,7 @@
 .map-tooltip li {
   margin-bottom: 4px;
 }
+.map-tooltip li:last-child { margin-bottom: 0; }
 
 .map-tooltip .content {
   overflow-y: auto;
