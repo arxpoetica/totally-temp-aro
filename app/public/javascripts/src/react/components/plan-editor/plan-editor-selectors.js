@@ -28,7 +28,7 @@ const getFeaturesRenderInfo = createSelector(
   (selectedSubnetId, subnetFeatures, subnets, selectedSubnet, selectedEditFeatureIds) => {
     if (!selectedSubnet) {
       const subnetId = subnetFeatures[selectedSubnetId] && subnetFeatures[selectedSubnetId].subnetId
-      selectedSubnet = subnetId ? subnets[subnetId] : { children: [] }
+      selectedSubnet = subnetId && subnets[subnetId] ? subnets[subnetId] : { children: [], subnetNode: null }
     }
 
     // highlighted ids within the subnet
@@ -38,7 +38,7 @@ const getFeaturesRenderInfo = createSelector(
         ...selectedSubnet.children,
         ...selectedEditFeatureIds,
       ])
-    ]
+    ].filter(Boolean)
     // everything else outside the context of anything highlighted
     const idleFeatureIds = Object.keys(subnetFeatures)
       .filter(id => !highlightedFeatureIds.includes(id))
@@ -70,7 +70,7 @@ const getRootSubnet = createSelector(
   (selectedFeatureId, subnetFeatures, subnets) => {
     let rootSubnet = subnetFeatures[selectedFeatureId]
     if (rootSubnet) {
-      while(rootSubnet.subnetId !== null) {
+      while(subnetFeatures[rootSubnet.subnetId]) {
         rootSubnet = subnetFeatures[rootSubnet.subnetId]
       }
       rootSubnet = subnets[rootSubnet.feature.objectId]
@@ -113,14 +113,16 @@ const getCursorLocations = createSelector(
       && subnetFeatures[selectedSubnetId].feature.dropLinks
     ) {
       let parentSubnetId = subnetFeatures[selectedSubnetId].subnetId
-      selectedSubnetLocations = subnets[parentSubnetId].subnetLocationsById
+      if (subnets[parentSubnetId]) {
+        selectedSubnetLocations = subnets[parentSubnetId].subnetLocationsById
+      }
     }
 
     let cursorLocations = Object.keys(selectedSubnetLocations)
-    .filter(key => cursorLocationIds.includes(key))
-    .reduce((obj, key) => {
-      return { ...obj, [key]: selectedSubnetLocations[key] }
-    }, {})
+      .filter(key => cursorLocationIds.includes(key))
+      .reduce((obj, key) => {
+        return { ...obj, [key]: selectedSubnetLocations[key] }
+      }, {})
 
     return cursorLocations
   }
@@ -289,10 +291,13 @@ const getLocationCounts = createSelector(
   (subnets, subnetFeatures, selectedEditFeatureIds) => {
     let locationCountsById = {}
     for (const id of selectedEditFeatureIds) {
-      if (subnetFeatures[id] && subnetFeatures[id].feature.networkNodeType === 'fiber_distribution_hub') {
-        // TODO: is this accurate ?
-        //locationCountsById[id] = Object.keys(subnets[id].subnetLocationsById).length
-        locationCountsById[id] = Object.values(subnets[id].subnetLocationsById).filter(location => !!location.parentEquipmentId).length
+      if (
+        subnets[id]
+        && subnetFeatures[id]
+        && subnetFeatures[id].feature.networkNodeType === 'fiber_distribution_hub'
+      ) {
+        const locations = Object.values(subnets[id].subnetLocationsById)
+        locationCountsById[id] = locations.filter(location => !!location.parentEquipmentId).length
       } else {
         const locationDistanceMap = subnets[id] && subnets[id].fiber && subnets[id].fiber.locationDistanceMap
         locationCountsById[id] = locationDistanceMap ? Object.keys(locationDistanceMap).length : 0

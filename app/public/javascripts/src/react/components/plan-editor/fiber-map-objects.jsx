@@ -21,8 +21,10 @@ export const FiberMapObjects = (props) => {
         renderedSubnetId = selectedSubnetId
         renderFiber(subnetLinks, fiberType)
       }
-    } 
-    else if (subnetFeatures[selectedSubnetId]) {
+    } else if (
+      subnetFeatures[selectedSubnetId]
+      && subnets[subnetFeatures[selectedSubnetId].subnetId]
+    ) {
       //if it is a terminal get parent id and render that fiber
       const { subnetId: parentId } = subnetFeatures[selectedSubnetId]
       const { subnetLinks, fiberType } = subnets[parentId].fiber
@@ -31,7 +33,9 @@ export const FiberMapObjects = (props) => {
         renderedSubnetId = parentId
         renderFiber(subnetLinks, fiberType)
       }
-    } else deleteMapObjects()
+    } else {
+      deleteMapObjects()
+    }
 
     function renderFiber(subnetLinks, fiberType) {
       if (mapObjects.length) {
