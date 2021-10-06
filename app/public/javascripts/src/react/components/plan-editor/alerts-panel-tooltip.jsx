@@ -20,17 +20,12 @@ const _AlertsPanelTooltip = props => {
     position = new google.maps.LatLng(latitude, longitude)
   }
 
-  let alertContent = []
-  alerts.forEach((type, index) => {
-    alertContent.push(
-      <li key={`alert_${index}`}>{ALERT_TYPES[type].displayName}</li>
-    )
-  })
-
   return (
     <MapTooltip show={alerts.length} position={position}>
       <ul>
-        {alertContent}
+        {alerts.map((type, index) => 
+          <li key={`alert_${index}`}>{ALERT_TYPES[type].displayName}</li>
+        )}
       </ul>
     </MapTooltip>
   )
