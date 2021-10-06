@@ -810,11 +810,16 @@ function addSubnetTree() {
     dispatch(setIsCalculatingSubnets(true))
     return AroHttp.get(`/service/plan-transaction/${transactionId}/subnet-root-refs`)
       .then(result => {
-        const { data } = result
-        if (data && data[0] && data[0].node && data[0].node.id) {
-          const rootId = result.data[0].node.id
+        const data = result.data || []
+        let rootIds = []
+        data.forEach(subnet => {
+          if (subnet.node && subnet.node.id) {
+            rootIds.push(subnet.node.id)
+          }
+        })
+        if (rootIds.length) {
           // TODO: the addSubnets function needs to be broken up
-          return dispatch(addSubnets([rootId]))
+          return dispatch(addSubnets(rootIds))
             .then(subnetRes => Promise.resolve(subnetRes))
         } else {
           dispatch(setIsCalculatingSubnets(false))
@@ -923,7 +928,7 @@ function onMapClick (featureIds, latLng) {
 
 function setCursorLocationIds(payload) {
   return (dispatch, getState) => {
-    const cursorLocationIds = getState().planEditor.cursorLocationIds
+    const { cursorLocationIds } = getState().planEditor
     if (JSON.stringify(cursorLocationIds) !== JSON.stringify(payload)) {
       dispatch({ type: Actions.PLAN_EDITOR_SET_CURSOR_LOCATION_IDS, payload })
     }
