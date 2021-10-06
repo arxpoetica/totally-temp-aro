@@ -74,7 +74,7 @@ export const FilterEditor = ({
     // this useEffect is for setting previously added filters from state
     // We have to check if the inputs match the plan
     // inputs don't change when switching to an incomplete plan
-    if (optimizationInputs.planId === planId){
+    if (optimizationInputs.planId === planId && !activeFilters.length){
       const { objectFilter } = optimizationInputs.locationConstraints
       if ( objectFilter && objectFilter.propertyConstraints) {
         // removes filters that don't match metadata

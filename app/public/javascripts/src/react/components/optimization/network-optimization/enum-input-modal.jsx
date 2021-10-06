@@ -43,9 +43,9 @@ export const EnumInputModal = ({startingText, filterIndex, isOpen, closeModal, s
 
   return (
     <Modal isOpen={isOpen} size='lg'>
-      <ModalHeader >Large Enum Input</ModalHeader>
+      <ModalHeader >Add {activeFilters[filterIndex] && activeFilters[filterIndex].displayName } Data</ModalHeader>
       <ModalBody>
-        <h3>Copy and past here:</h3>
+        <h3>Copy &#38; Paste <span className='enum-input-subtitle'>(separate by comma's ie 02066,02067,02068)</span></h3>
         <TextArea value={text} onChange={(event) => setText(event.target.value)}/>
         <h3>Or Upload a File:</h3>
         <FileInput accept='.csv' onChange={(event) => fileUpload(event)}/>
