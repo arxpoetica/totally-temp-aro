@@ -289,10 +289,10 @@ export const FilterEditor = ({
           disabled={displayOnly}
         />
         {/* This renders once a filter has been selected, show the available operators */}
-        {activeFilter &&
-          activeFilter.propertyType &&
-          activeFilter.propertyType !== 'BOOLEAN' && (
-            <Select
+        {activeFilter
+         && activeFilter.propertyType 
+         && activeFilter.propertyType !== 'BOOLEAN' 
+         && <Select
               value={activeFilter.operator}
               placeholder="Select"
               options={getOperators(
@@ -303,7 +303,7 @@ export const FilterEditor = ({
               classes="ei-filter-select-operator"
               disabled={displayOnly}
             />
-          )}
+          }
       </>
     )
   }

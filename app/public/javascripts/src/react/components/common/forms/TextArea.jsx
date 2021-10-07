@@ -10,18 +10,13 @@ export const TextArea = ({
   onChange = () => {},
 }) => {
   return (
-    <div className={cx('text-area', classes && classes)}>
+    <div className={cx('textarea', classes && classes)}>
       <textarea
         value={value}
         onChange={(event) => onChange(event)}
         disabled={disabled}
-      >
-        {placeholder && (
-          <option value="" disabled hidden>
-            {placeholder}
-          </option>
-        )}
-      </textarea>
+        placeholder={placeholder}
+      />
     </div>
   )
 }

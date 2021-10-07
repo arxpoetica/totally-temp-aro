@@ -17,9 +17,7 @@ export const EnumInputModal = ({
 
   useEffect(() => {
     setText(startingText)
-    return () => {
-      setText('')
-    }
+    return () => setText('')
   }, [startingText])
 
   const saveText = () => {
@@ -40,7 +38,10 @@ export const EnumInputModal = ({
     const reader = new FileReader()
     // read the csv as text
     reader.readAsText(event.target.files[0])
-    // TODO: Parse CSV file to maintain format
+    // TODO: Parse CSV files so they conform to what service expects for the filter
+    // right now we are just reading the contents of the .csv as text and passing that over to service
+    // eventually we might want to do things like remove column headers, remove spaces etc.
+
     // set text as value of CSV
     reader.onload = () => {
       setText(reader.result)
