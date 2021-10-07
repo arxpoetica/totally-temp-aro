@@ -586,6 +586,7 @@ function deleteFeature (featureId) {
     const state = getState()
 
     let subnetFeature = state.planEditor.subnetFeatures[featureId]
+    let selectedSubnetId = state.planEditor.selectedSubnetId
     subnetFeature = JSON.parse(JSON.stringify(subnetFeature))
     let subnetId = subnetFeature.subnetId
     let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
@@ -610,6 +611,10 @@ function deleteFeature (featureId) {
             type: Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURE,
             payload: featureId,
           })
+          // if deleted equipment is currently selected, move selection to parent
+          if (featureId === selectedSubnetId){
+            dispatch(setSelectedSubnetId(subnetId))
+          }
           dispatch(recalculateSubnets(transactionId))
         })
       })
