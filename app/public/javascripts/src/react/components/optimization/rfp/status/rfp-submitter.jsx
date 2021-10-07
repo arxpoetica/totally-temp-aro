@@ -113,7 +113,7 @@ export class RfpSubmitter extends Component {
         var requestBody = JSON.parse(JSON.stringify(selectedTemplate.value))
         requestBody.rfpId = this.state.newRfpPlanName
         requestBody.targets = targets.map(target => {
-          const { point: { id, lat, lng }, props } = target
+          const { id, lat, lng, props } = target
           return {
             id: id,
             point: {
