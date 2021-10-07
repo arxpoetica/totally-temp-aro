@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
 import { connect } from 'react-redux'
+import cx from 'clsx'
 import PlanEditorActions from './plan-editor-actions'
 import PlanEditorSelectors from './plan-editor-selectors'
-import cx from 'clsx'
+import { getIconUrl } from './shared'
 
 const PlanEditorHeader = props => {
 
@@ -32,7 +33,7 @@ const PlanEditorHeader = props => {
   return selectedEditFeatureIds.map(id => {
 
     const { feature } = features[id]
-    const { iconUrl, label } = equipments[feature.networkNodeType]
+    const { label } = equipments[feature.networkNodeType]
     const { coordinates } = feature.geometry
 
     return (
@@ -45,7 +46,7 @@ const PlanEditorHeader = props => {
       onClick={event => onClick(event, id)}
     >
       <div className="info">
-        <img src={iconUrl} alt={label}/>
+        <img src={getIconUrl(feature, props)} alt={label}/>
         <h2>{label}</h2>
       </div>
       {locationCounts[id] > 0 && <p>Household connections: {locationCounts[id]}</p>}
@@ -71,10 +72,12 @@ const PlanEditorHeader = props => {
 }
 
 const mapStateToProps = state => ({
+  ARO_CLIENT: state.configuration.system.ARO_CLIENT,
   equipments: state.mapLayers.networkEquipment.equipments,
   features: state.planEditor.features,
   selectedEditFeatureIds: state.planEditor.selectedEditFeatureIds,
   selectedSubnetId: state.planEditor.selectedSubnetId,
+  locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(state),
   locationCounts: PlanEditorSelectors.getLocationCounts(state),
 })
 

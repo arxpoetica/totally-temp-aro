@@ -51,7 +51,7 @@
 .alerts-panel .content {
   overflow: auto;
   display: none;
-  max-height: 400px;
+  max-height: 255px;
   padding: 10px;
   border-bottom: 1px solid var(--gray-medium-light);
 }
@@ -78,8 +78,8 @@
 }
 .alerts-panel .location {
   position: relative;
-  width: 25px;
-  height: 32px;
+  width: 20px;
+  height: 20px;
   background-image: url('/svg/alert-panel-location.svg');
 }
 

@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import cx from 'clsx'
-import PlanEditorSelectors from './plan-editor-selectors.js'
-import { constants } from './constants'
+import PlanEditorSelectors from './plan-editor-selectors'
+import { constants } from './shared'
+const { ALERT_TYPES, Z_INDEX_PIN } = constants
 
-const DefectsPanel = props => {
+const AlertsPanel = props => {
 
-  const { locationAlerts, alertTypes, map } = props
+  const { locationAlerts, map } = props
   const alerts = Object.entries(locationAlerts)
 
   const [open, setOpen] = useState(false)
@@ -22,7 +23,7 @@ const DefectsPanel = props => {
       },
       animation: google.maps.Animation.BOUNCE,
       position: { lat: latitude, lng: longitude },
-      zIndex: constants.Z_INDEX_PIN,
+      zIndex: Z_INDEX_PIN,
     })
     setBounceMarker(marker)
   }
@@ -57,9 +58,9 @@ const DefectsPanel = props => {
               <div className="text">
                 <div
                   className="svg location"
-                  style={ { backgroundImage: `url('${alertTypes[alert].iconUrl}')` } }
+                  style={ { backgroundImage: `url('${ALERT_TYPES[alert].iconUrl}')` } }
                 ></div>
-                {alertTypes[alert].displayName}
+                {ALERT_TYPES[alert].displayName}
               </div>
             </li>
           )
@@ -73,7 +74,6 @@ const DefectsPanel = props => {
 
 const mapStateToProps = state => ({
   locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(state),
-  alertTypes: PlanEditorSelectors.AlertTypes,
   // TODO: why is this named `googleMaps`? Is it ever plural? Isn't it a single map?
   map: state.map.googleMaps,
 })
@@ -81,4 +81,4 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
 })
 
-export default connect(mapStateToProps, mapDispatchToProps)(DefectsPanel)
+export default connect(mapStateToProps, mapDispatchToProps)(AlertsPanel)

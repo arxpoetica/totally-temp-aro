@@ -153,26 +153,6 @@
   margin-left: 3px;
 }
 
-/* Summary Reports */
-
-.aro-summary-button-export {
-  margin-bottom: 10px;
-}
-
-/* Plan Summary */
-
-#tblPlanSummary > tbody > tr > .indent-1 {
-  padding-left: 20px !important;
-}
-
-#tblPlanSummary > tbody > tr > .indent-2 {
-  padding-left: 30px !important;
-}
-
-#tblPlanSummary > tbody > tr > #pointer {
-  cursor: pointer;
-}
-
 /* Plan info */
 
 #tblPlanInfo td {

@@ -1,4 +1,6 @@
 import { createSelector } from 'reselect'
+import { constants } from './shared'
+const { ALERT_TYPES } = constants
 
 const getAllBoundaryLayers = state => state.mapLayers.boundary
 const getBoundaryLayersList = createSelector([getAllBoundaryLayers], (boundaries) => boundaries.toJS())
@@ -12,6 +14,7 @@ const getSelectedEditFeatureIds = state => state.planEditor.selectedEditFeatureI
 const getIsCalculatingSubnets = state => state.planEditor.isCalculatingSubnets
 const getIsCalculatingBoundary = state => state.planEditor.isCalculatingBoundary
 const getBoundaryDebounceBySubnetId = state => state.planEditor.boundaryDebounceBySubnetId
+const getCursorLocationIds = state => state.planEditor.cursorLocationIds
 
 const getIsRecalcSettled = createSelector(
   [getIsCalculatingSubnets, getIsCalculatingBoundary, getBoundaryDebounceBySubnetId],
@@ -58,38 +61,6 @@ const getNetworkConfig = state => {
   return networkConfig
 }
 
-const AlertTypes = {
-  MAX_DROP_LENGTH_EXCEEDED: {
-    key: 'MAX_DROP_LENGTH_EXCEEDED',
-    displayName: 'Drop Cable Length Exceeded',
-    iconUrl: '/svg/alert-panel-location.svg',
-  },
-  ABANDONED_LOCATION: {
-    key: 'ABANDONED_LOCATION',
-    displayName: 'Abandoned Location',
-    iconUrl: '/svg/alert-panel-location.svg',
-  },
-  MAX_TERMINAL_HOMES_EXCEEDED: {
-    key: 'MAX_TERMINAL_HOMES_EXCEEDED',
-    displayName: 'Maximum Terminal Homes Exceeded',
-    iconUrl: '/svg/alert-panel-location.svg',
-  },
-  MAX_HUB_HOMES_EXCEEDED: {
-    key: 'MAX_HUB_HOMES_EXCEEDED',
-    displayName: 'Maximum Hub Homes Exceeded',
-    iconUrl: '/svg/alert-panel-location.svg',
-  },
-  MAX_HUB_DISTANCE_EXCEEDED: {
-    key: 'MAX_HUB_DISTANCE_EXCEEDED',
-    displayName: 'Maximum Hub Distance Exceeded',
-    iconUrl: '/svg/alert-panel-location.svg',
-  },
-  MAX_TERMINAL_DISTANCE_EXCEEDED: {
-    key: 'MAX_TERMINAL_DISTANCE_EXCEEDED',
-    displayName: 'Maximum Terminal Distance Exceeded',
-    iconUrl: '/svg/alert-panel-location.svg',
-  },
-}
 // temporary
 const locationWarnImg = new Image(18, 22)
 locationWarnImg.src = '/svg/alert-panel-location.png'
@@ -131,6 +102,30 @@ const getSelectedSubnetLocations = createSelector(
   }
 )
 
+const getCursorLocations = createSelector(
+  [getSelectedSubnetId, getSelectedSubnet, getSubnetFeatures, getSubnets, getCursorLocationIds],
+  (selectedSubnetId, selectedSubnet, subnetFeatures, subnets, cursorLocationIds) => {
+    let selectedSubnetLocations = {}
+    if (selectedSubnet) {
+      selectedSubnetLocations = selectedSubnet.subnetLocationsById
+    } else if (subnetFeatures[selectedSubnetId]
+      && subnetFeatures[selectedSubnetId].subnetId
+      && subnetFeatures[selectedSubnetId].feature.dropLinks
+    ) {
+      let parentSubnetId = subnetFeatures[selectedSubnetId].subnetId
+      selectedSubnetLocations = subnets[parentSubnetId].subnetLocationsById
+    }
+
+    let cursorLocations = Object.keys(selectedSubnetLocations)
+    .filter(key => cursorLocationIds.includes(key))
+    .reduce((obj, key) => {
+      return { ...obj, [key]: selectedSubnetLocations[key] }
+    }, {})
+
+    return cursorLocations
+  }
+)
+
 const getAlertsForSubnetTree = createSelector(
   [getRootSubnet, getSubnets, getSubnetFeatures, getNetworkConfig],
   (rootSubnet, subnets, subnetFeatures, networkConfig) => {
@@ -159,12 +154,12 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
     const subnetLocationsIds = Object.keys(subnet.subnetLocationsById)
 
     if (subnetLocationsIds.length > 0 && typeof networkConfig !== 'undefined') {
-      // TODO: Check these are the right sources of information
-      const maxDropCableLength = networkConfig.terminalConfiguration.maxDistanceMeters
       const maxTerminalHomes = networkConfig.terminalConfiguration.outputConfig.max
+      const maxDropCableLength = networkConfig.terminalConfiguration.maxDistanceMeters
+      // TODO: is this even a thing?
+      // const maxTerminalDistance = networkConfig.hubConfiguration.maxDistanceMeters
       const maxHubHomes = networkConfig.hubConfiguration.outputConfig.max
       const maxHubDistance = networkConfig.hubConfiguration.maxDistanceMeters
-      const maxTerminalDistance = networkConfig.hubConfiguration.maxDistanceMeters
 
       let totalHomes = 0
 
@@ -196,17 +191,18 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
                 point: featurePoint,
               }
             }
-            alerts[featureId].alerts.push(AlertTypes['MAX_HUB_DISTANCE_EXCEEDED'].key)
-          } else if (distance > maxTerminalDistance && networkNodeType === 'fiber_distribution_terminal'){
-            if (!alerts[featureId]) {
-              alerts[featureId] = {
-                locationId: featureId,
-                subnetId,
-                alerts: [],
-                point: featurePoint,
-              }
-            }
-            alerts[featureId].alerts.push(AlertTypes['MAX_TERMINAL_DISTANCE_EXCEEDED'].key)
+            alerts[featureId].alerts.push(ALERT_TYPES['MAX_HUB_DISTANCE_EXCEEDED'].key)
+            // TODO: is this even a thing?
+            // } else if (distance > maxTerminalDistance && networkNodeType === 'fiber_distribution_terminal'){
+            //   if (!alerts[featureId]) {
+            //     alerts[featureId] = {
+            //       locationId: featureId,
+            //       subnetId,
+            //       alerts: [],
+            //       point: featurePoint,
+            //     }
+            //   }
+            //   alerts[featureId].alerts.push(ALERT_TYPES['MAX_TERMINAL_DISTANCE_EXCEEDED'].key)
           }
         }
 
@@ -230,15 +226,16 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
                 point: terminalPoint,
               }
             }
-            alerts[featureId].alerts.push(AlertTypes['MAX_TERMINAL_HOMES_EXCEEDED'].key)
+            alerts[featureId].alerts.push(ALERT_TYPES['MAX_TERMINAL_HOMES_EXCEEDED'].key)
           }
           featureEntry.feature.dropLinks.forEach(dropLink => {
             dropLink.locationLinks.forEach(locationLink => {
               const locationId = locationLink.locationId
               // remove abandoned entry
               delete abandonedLocations[locationId]
-              // dropcable alert?
-              if (dropLink.dropCableLength > maxDropCableLength) {
+              // dropcable alert
+              // TODO: Differentiate between too long and NaN?
+              if (dropLink.dropCableLength > maxDropCableLength || isNaN(dropLink.dropCableLength)) {
                 if (!alerts[locationId]) {
                   alerts[locationId] = {
                     locationId,
@@ -247,7 +244,7 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
                     point: subnet.subnetLocationsById[locationId].point,
                   }
                 }
-                alerts[locationId].alerts.push(AlertTypes['MAX_DROP_LENGTH_EXCEEDED'].key)
+                alerts[locationId].alerts.push(ALERT_TYPES['MAX_DROP_LENGTH_EXCEEDED'].key)
               }
             })
           })
@@ -268,7 +265,7 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
             point: hubPoint,
           }
         }
-        alerts[subnetId].alerts.push(AlertTypes['MAX_HUB_HOMES_EXCEEDED'].key)
+        alerts[subnetId].alerts.push(ALERT_TYPES['MAX_HUB_HOMES_EXCEEDED'].key)
       }
 
       Object.keys(abandonedLocations).forEach(locationId => {
@@ -280,7 +277,7 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
             point: subnet.subnetLocationsById[locationId].point,
           }
         }
-        alerts[locationId].alerts.push(AlertTypes['ABANDONED_LOCATION'].key)
+        alerts[locationId].alerts.push(ALERT_TYPES['ABANDONED_LOCATION'].key)
       })
     }
   }
@@ -294,7 +291,8 @@ const getLocationCounts = createSelector(
     for (const id of selectedEditFeatureIds) {
       if (subnetFeatures[id] && subnetFeatures[id].feature.networkNodeType === 'fiber_distribution_hub') {
         // TODO: is this accurate ?
-        locationCountsById[id] = Object.keys(subnets[id].subnetLocationsById).length
+        //locationCountsById[id] = Object.keys(subnets[id].subnetLocationsById).length
+        locationCountsById[id] = Object.values(subnets[id].subnetLocationsById).filter(location => !!location.parentEquipmentId).length
       } else {
         const locationDistanceMap = subnets[id] && subnets[id].fiber && subnets[id].fiber.locationDistanceMap
         locationCountsById[id] = locationDistanceMap ? Object.keys(locationDistanceMap).length : 0
@@ -309,10 +307,10 @@ const PlanEditorSelectors = Object.freeze({
   getBoundaryLayersList,
   getFeaturesRenderInfo,
   getIsRecalcSettled,
-  AlertTypes,
   getAlertsForSubnetTree,
   locationWarnImg,
   getSelectedSubnetLocations,
+  getCursorLocations,
   getLocationCounts,
 })
 

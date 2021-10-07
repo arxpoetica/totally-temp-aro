@@ -550,13 +550,6 @@ function setIsEnteringTransaction (isEnteringTransaction) {
   }
 }
 
-function setIsPlanEditorChanged (isPlanEditorChanged) {
-  return {
-    type: Actions.PLAN_EDITOR_SET_IS_PLAN_EDITOR_CHANGED,
-    payload: isPlanEditorChanged
-  }
-}
-
 function moveFeature (featureId, coordinates) {
   return (dispatch, getState) => {
     const state = getState()
@@ -817,11 +810,16 @@ function addSubnetTree() {
     dispatch(setIsCalculatingSubnets(true))
     return AroHttp.get(`/service/plan-transaction/${transactionId}/subnet-root-refs`)
       .then(result => {
-        const { data } = result
-        if (data && data[0] && data[0].node && data[0].node.id) {
-          const rootId = result.data[0].node.id
+        const data = result.data || []
+        let rootIds = []
+        data.forEach(subnet => {
+          if (subnet.node && subnet.node.id) {
+            rootIds.push(subnet.node.id)
+          }
+        })
+        if (rootIds.length) {
           // TODO: the addSubnets function needs to be broken up
-          return dispatch(addSubnets([rootId]))
+          return dispatch(addSubnets(rootIds))
             .then(subnetRes => Promise.resolve(subnetRes))
         } else {
           dispatch(setIsCalculatingSubnets(false))
@@ -928,6 +926,27 @@ function onMapClick (featureIds, latLng) {
   }
 }
 
+function setCursorLocationIds(payload) {
+  return (dispatch, getState) => {
+    const { cursorLocationIds } = getState().planEditor
+    if (JSON.stringify(cursorLocationIds) !== JSON.stringify(payload)) {
+      dispatch({ type: Actions.PLAN_EDITOR_SET_CURSOR_LOCATION_IDS, payload })
+    }
+  }
+}
+
+function clearCursorLocationIds() {
+  return this.setCursorLocationIds([])
+}
+
+function addCursorEquipmentIds(payload) {
+  return { type: Actions.PLAN_EDITOR_ADD_CURSOR_EQUIPMENT_IDS, payload }
+}
+
+function clearCursorEquipmentIds() {
+  return { type: Actions.PLAN_EDITOR_CLEAR_CURSOR_EQUIPMENT_IDS, payload: [] }
+}
+
 function recalculateBoundary (subnetId) {
   return (dispatch, getState) => {
     dispatch(setIsCalculatingBoundary(true))
@@ -944,7 +963,6 @@ function recalculateBoundary (subnetId) {
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet/${subnetId}/boundary`, boundaryBody)
       .then(res => {
         dispatch(setIsCalculatingBoundary(false)) // may need to extend this for multiple boundaries? (make it and int incriment, decriment)
-        dispatch(setIsPlanEditorChanged(true)) // recaluculate plansummary
       })
       .catch(err => {
         console.error(err)
@@ -1015,7 +1033,6 @@ function recalculateSubnets (transactionId, subnetIds = []) {
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet-cmd/recalc`, recalcBody)
       .then(res => {
         dispatch(setIsCalculatingSubnets(false))
-        dispatch(setIsPlanEditorChanged(true)) // recaluculate plansummary
         // parse changes
         dispatch(parseRecalcEvents(res.data))
       })
@@ -1023,6 +1040,13 @@ function recalculateSubnets (transactionId, subnetIds = []) {
         console.error(err)
         dispatch(setIsCalculatingSubnets(false))
       })
+  }
+}
+
+function setFiberRenderRequired (bool) {
+  return {
+    type: Actions.PLAN_EDITOR_SET_FIBER_RENDER_REQUIRED,
+    payload: bool,
   }
 }
 
@@ -1075,7 +1099,8 @@ function parseRecalcEvents (recalcData) {
               subnetCopy.children.push(objectId)
               // do not break
             case 'MODIFY':
-              // add || modify
+            case 'UPDATE':
+              // add || modify || update
               // TODO: this is repeat code from below
               let parsedNode = {
                 feature: parseSubnetFeature(recalcNodeEvent.subnetNode),
@@ -1097,6 +1122,10 @@ function parseRecalcEvents (recalcData) {
       dispatch({
         type: Actions.PLAN_EDITOR_ADD_SUBNETS,
         payload: updatedSubnets,
+      })
+      dispatch({
+        type: Actions.PLAN_EDITOR_SET_FIBER_RENDER_REQUIRED,
+        payload: true,
       })
     })
 
@@ -1272,14 +1301,18 @@ export default {
   setIsEditingFeatureProperties,
   setIsCommittingTransaction,
   setIsEnteringTransaction,
-  setIsPlanEditorChanged,
   readFeatures,
   selectEditFeaturesById,
   deselectEditFeatureById,
   addSubnets,
   setSelectedSubnetId,
   onMapClick,
+  setCursorLocationIds,
+  clearCursorLocationIds,
+  addCursorEquipmentIds,
+  clearCursorEquipmentIds,
   recalculateBoundary,
   boundaryChange,
   recalculateSubnets,
+  setFiberRenderRequired,
 }

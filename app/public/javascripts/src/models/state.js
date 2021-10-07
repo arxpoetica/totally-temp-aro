@@ -191,7 +191,6 @@ class State {
       EQUIPMENT_INFO: 'EQUIPMENT_INFO',
       BOUNDARIES_INFO: 'BOUNDARIES_INFO',
       ROAD_SEGMENT_INFO: 'ROAD_SEGMENT_INFO',
-      PLAN_SUMMARY_REPORTS: 'PLAN_SUMMARY_REPORTS',
       COVERAGE_BOUNDARY: 'COVERAGE_BOUNDARY',
       EDIT_LOCATIONS: 'EDIT_LOCATIONS',
       EDIT_SERVICE_LAYER: 'EDIT_SERVICE_LAYER',
@@ -202,7 +201,6 @@ class State {
     // The selected panel when in the edit plan mode
     service.EditPlanPanels = Object.freeze({
       EDIT_PLAN: 'EDIT_PLAN',
-      PLAN_SUMMARY: 'PLAN_SUMMARY',
       EDIT_RINGS: 'EDIT_RINGS'
     })
     service.activeEditPlanPanel = service.EditPlanPanels.EDIT_PLAN
