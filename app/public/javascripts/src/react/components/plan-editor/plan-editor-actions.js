@@ -833,18 +833,13 @@ function addSubnetTree() {
   }
 }
 
-function addSubnetTreeByLatLng (latLng) {
+function addSubnetTreeByLatLng({ lng, lat }) {
   return (dispatch, getState) => {
     const state = getState()
     let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
-    // TODO: we should make a call on standardization
-    //  do we pass around the latLng object or the actual values 
     let command = {
-      cmdType: "QUERY_CO_SUBNET",
-      point:{
-        type: "Point",
-        coordinates: [latLng.lng(), latLng.lat()],
-      }
+      cmdType: 'QUERY_CO_SUBNET',
+      point:{ type: 'Point', coordinates: [lng(), lat()] },
     }
     dispatch(setIsCalculatingSubnets(true))
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/query-subnets`, command)
