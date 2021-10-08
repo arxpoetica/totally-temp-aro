@@ -9,7 +9,7 @@ import ResourceActions from '../resource-editor/resource-actions'
 //import SelectionActions from '../selection/selection-actions'
 import { batch } from 'react-redux'
 import WktUtils from '../../../shared-utils/wkt-utils'
-import PlanEditorSelectors from './plan-editor-selectors.js'
+import PlanEditorSelectors from './plan-editor-selectors'
 
 function resumeOrCreateTransaction (planId, userId) {
   return (dispatch, getState) => {
@@ -127,63 +127,74 @@ function discardTransaction (transactionId) {
   }
 }
 
-function createFeature (feature) {
-  return (dispatch, getState) => {
-    const state = getState()
-    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
-    
-    const body = {
-      commands: [{
-        childId: feature,
-        type: 'add', 
-      }]
-    }
+function createFeature(feature) {
+  return async(dispatch, getState) => {
 
-    AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
-      .then(result => {
-        let updatedSubnets = JSON.parse(JSON.stringify(state.planEditor.subnets))
-        const { subnetUpdates, equipmentUpdates } = result.data
-        const newFeatures = {}
-        // the subnet and equipment updates are not connected, right now we get back two arrays
-        // For now I am assuming the relevent subnet is the one with type 'modified'
-        // TODO: handle there being multiple updated subnets
-
-        // gets updated subnet ids to send to addSubnets, can be either created or modified
-        const updatedSubnetIds = subnetUpdates.map((subnet) => {
-          return subnet.subnet.id
-        })
-
-        // There should always be a modified subnet
-        const modifiedSubnet = subnetUpdates.find(subnet => subnet.type === 'modified')
-        const subnetId = modifiedSubnet.subnet.id
+    try {
         
-        equipmentUpdates.forEach(equipment => {
-          // fix difference between id names
-          const feature = parseSubnetFeature(equipment.subnetNode)
-
-          newFeatures[feature.objectId] = {
-            feature: feature,
-            subnetId: subnetId,
-          }
-          if (updatedSubnets[subnetId]) {
-            updatedSubnets[subnetId].children.push(feature.objectId)
-          }
-        })
-
-        batch(() => {
-          dispatch({
-            type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
-            payload: newFeatures,
-          }),
-          dispatch(addSubnets(updatedSubnetIds))
-          dispatch({
-            type: Actions.PLAN_EDITOR_ADD_SUBNETS,
-            payload: updatedSubnets,
-          })
-        })
+      const state = getState()
+      const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
       
+      const body = { commands: [{ childId: feature, type: 'add' }] }
+      const featureResults = await AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
+
+      let updatedSubnets = JSON.parse(JSON.stringify(state.planEditor.subnets))
+      const { subnetUpdates, equipmentUpdates } = featureResults.data
+      const newFeatures = {}
+      // the subnet and equipment updates are not connected, right now we get back two arrays
+      // For now I am assuming the relevent subnet is the one with type 'modified'
+      // TODO: handle there being multiple updated subnets
+
+      // gets updated subnet ids to send to addSubnets, can be either created or modified
+      const updatedSubnetIds = subnetUpdates.map((subnet) => subnet.subnet.id)
+
+      // There should always be a modified subnet
+      const modifiedSubnet = subnetUpdates.find(subnet => subnet.type === 'modified')
+      const subnetId = modifiedSubnet.subnet.id
+      
+      equipmentUpdates.forEach(equipment => {
+        // fix difference between id names
+        const feature = parseSubnetFeature(equipment.subnetNode)
+
+        newFeatures[feature.objectId] = {
+          feature: feature,
+          subnetId: subnetId,
+        }
+        if (updatedSubnets[subnetId]) {
+          updatedSubnets[subnetId].children.push(feature.objectId)
+        }
       })
-      .catch(err => console.error(err))
+
+      // creating a feature on a blank plan
+      const rootSubnet = PlanEditorSelectors.getRootSubnet(state)
+      if (!rootSubnet) {
+        const { coordinates } = equipmentUpdates[0].subnetNode.geometry
+        // TODO: should this be thrown in the batch somehow?
+        dispatch(setIsCalculatingSubnets(true))
+        const url = `/service/plan-transaction/${transactionId}/subnet_cmd/query-subnets`
+        const results = await AroHttp.post(url, {
+          cmdType: 'QUERY_CO_SUBNET',
+          point: { type: 'Point', coordinates },
+        })
+        dispatch(setIsCalculatingSubnets(false))
+      }
+
+      batch(() => {
+        dispatch({
+          type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
+          payload: newFeatures,
+        }),
+        dispatch(addSubnets(updatedSubnetIds))
+        dispatch({
+          type: Actions.PLAN_EDITOR_ADD_SUBNETS,
+          payload: updatedSubnets,
+        })
+      })
+      } catch (error) {
+        console.error(error)
+      }
+
+
   }
 }
 
@@ -753,15 +764,8 @@ function addSubnets (subnetIds, forceReload = false) {
       return Promise.resolve()
     }
 
-    /*
-    dispatch({
-      type: Actions.PLAN_EDITOR_ADD_REQUESTED_SUBNET_IDS,
-      payload: uncachedSubnetIds,
-    })
-    */
-    
-    let command = {
-      cmdType: 'QUERY_SUBNET_TREE', //"QUERY_SELECTED_SUBNETS",
+    const command = {
+      cmdType: 'QUERY_SUBNET_TREE',
       subnetIds: uncachedSubnetIds,
     }
     // should we rename that now that we are using it for retreiving subnets as well?
@@ -837,7 +841,7 @@ function addSubnetTreeByLatLng({ lng, lat }) {
   return (dispatch, getState) => {
     const state = getState()
     let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
-    let command = {
+    const command = {
       cmdType: 'QUERY_CO_SUBNET',
       point:{ type: 'Point', coordinates: [lng(), lat()] },
     }

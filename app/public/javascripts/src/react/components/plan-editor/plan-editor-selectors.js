@@ -314,6 +314,7 @@ const PlanEditorSelectors = Object.freeze({
   getIsRecalcSettled,
   getAlertsForSubnetTree,
   locationWarnImg,
+  getRootSubnet,
   getSelectedSubnetLocations,
   getCursorLocations,
   getLocationCounts,
