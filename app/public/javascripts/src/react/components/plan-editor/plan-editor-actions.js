@@ -1114,7 +1114,6 @@ function parseRecalcEvents (recalcData) {
               break
           }
         })
-        // 
         updatedSubnets[subnetId] = subnetCopy
       }
     })
