@@ -71,6 +71,7 @@ const mapStateToProps = (state) => ({
 })
 
 const mapDispatchToProps = dispatch => ({
+  // THIS MIGHT HAVE A BUG...
   createFeature: (feature) => dispatch(PlanEditorActions.createFeature('equipment_boundary', feature)),
   stopDrawingBoundary: () => dispatch(PlanEditorActions.stopDrawingBoundary())
 })
