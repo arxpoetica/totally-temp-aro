@@ -131,52 +131,43 @@ function createFeature(feature) {
   return async(dispatch, getState) => {
 
     try {
-        
+
       const state = getState()
       const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
-      
+
       const body = { commands: [{ childId: feature, type: 'add' }] }
       const featureResults = await AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
-
-      let updatedSubnets = JSON.parse(JSON.stringify(state.planEditor.subnets))
       const { subnetUpdates, equipmentUpdates } = featureResults.data
+      // gets updated subnet ids to send to addSubnets, can be either created or modified
+      const updatedSubnetIds = subnetUpdates.map((subnet) => subnet.subnet.id)
+      let subnetsCopy = JSON.parse(JSON.stringify(state.planEditor.subnets))
       const newFeatures = {}
       // the subnet and equipment updates are not connected, right now we get back two arrays
       // For now I am assuming the relevent subnet is the one with type 'modified'
       // TODO: handle there being multiple updated subnets
 
-      // gets updated subnet ids to send to addSubnets, can be either created or modified
-      const updatedSubnetIds = subnetUpdates.map((subnet) => subnet.subnet.id)
-
       // There should always be a modified subnet
       const modifiedSubnet = subnetUpdates.find(subnet => subnet.type === 'modified')
       const subnetId = modifiedSubnet.subnet.id
-      
+
       equipmentUpdates.forEach(equipment => {
         // fix difference between id names
-        const feature = parseSubnetFeature(equipment.subnetNode)
+        const parsedFeature = parseSubnetFeature(equipment.subnetNode)
 
-        newFeatures[feature.objectId] = {
-          feature: feature,
+        newFeatures[parsedFeature.objectId] = {
+          feature: parsedFeature,
           subnetId: subnetId,
         }
-        if (updatedSubnets[subnetId]) {
-          updatedSubnets[subnetId].children.push(feature.objectId)
+        if (subnetsCopy[subnetId]) {
+          subnetsCopy[subnetId].children.push(parsedFeature.objectId)
         }
       })
 
       // creating a feature on a blank plan
       const rootSubnet = PlanEditorSelectors.getRootSubnet(state)
       if (!rootSubnet) {
-        const { coordinates } = equipmentUpdates[0].subnetNode.geometry
         // TODO: should this be thrown in the batch somehow?
-        dispatch(setIsCalculatingSubnets(true))
-        const url = `/service/plan-transaction/${transactionId}/subnet_cmd/query-subnets`
-        const results = await AroHttp.post(url, {
-          cmdType: 'QUERY_CO_SUBNET',
-          point: { type: 'Point', coordinates },
-        })
-        dispatch(setIsCalculatingSubnets(false))
+        const results = await dispatch(addSubnetTreeByLatLng(feature.point.coordinates))
       }
 
       batch(() => {
@@ -187,7 +178,7 @@ function createFeature(feature) {
         dispatch(addSubnets(updatedSubnetIds))
         dispatch({
           type: Actions.PLAN_EDITOR_ADD_SUBNETS,
-          payload: updatedSubnets,
+          payload: subnetsCopy,
         })
       })
       } catch (error) {
@@ -837,40 +828,37 @@ function addSubnetTree() {
   }
 }
 
-function addSubnetTreeByLatLng({ lng, lat }) {
-  return (dispatch, getState) => {
-    const state = getState()
-    let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
-    const command = {
-      cmdType: 'QUERY_CO_SUBNET',
-      point:{ type: 'Point', coordinates: [lng(), lat()] },
-    }
-    dispatch(setIsCalculatingSubnets(true))
-    return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/query-subnets`, command)
-      .then(result => {
-        let rootId = null
-        if (result.data 
-          && result.data[0] 
-          && result.data[0].subnetId 
-          && result.data[0].subnetId.id
-        ){ 
-          rootId = result.data[0].subnetId.id
-        }
-        if (rootId) {
-          // TODO: the addSubnets function needs to be broken up
-          return dispatch(addSubnets([rootId]))
-            .then(subnetRes => {
-              return Promise.resolve(subnetRes)
-            })
-        } else {
-          dispatch(setIsCalculatingSubnets(false))
-          return Promise.resolve([])
-        }
-      }).catch(err => {
-        console.error(err)
+function addSubnetTreeByLatLng([lng, lat]) {
+  return async(dispatch, getState) => {
+
+    try {
+      const state = getState()
+      let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+      const command = {
+        cmdType: 'QUERY_CO_SUBNET',
+        point:{ type: 'Point', coordinates: [lng, lat] },
+      }
+      dispatch(setIsCalculatingSubnets(true))
+      const endpoint = `/service/plan-transaction/${transactionId}/subnet_cmd/query-subnets`
+      const { data } = await AroHttp.post(endpoint, command)
+
+      let rootId = null
+      if (data && data[0] && data[0].subnetId && data[0].subnetId.id) {
+        rootId = data[0].subnetId.id
+      }
+
+      if (rootId) {
+        return dispatch(addSubnets([rootId]))
+      } else {
         dispatch(setIsCalculatingSubnets(false))
-        return Promise.reject()
-      })
+        return Promise.resolve([])
+      }
+    } catch (error) {
+      console.error(err)
+      dispatch(setIsCalculatingSubnets(false))
+      return Promise.reject()
+    }
+
   }
 }
 
@@ -907,20 +895,18 @@ function setSelectedSubnetId (selectedSubnetId) {
   }
 }
 
-function onMapClick (featureIds, latLng) {
+function onMapClick(featureIds, latLng) {
   // TODO: this is a bit of a shim for the moment to handle selecting a terminal that isn't yet loaded
   //  next we'll be selecting subnets by bounds using addSubnetTreeByLatLng 
   // TODO: this file is has become a two course meal of spaghetti and return dispatch soup
   //  Corr, fix yer mess!
-  return (dispatch, getState) => {
+  return async(dispatch, getState) => {
     const state = getState()
     if (!featureIds.length || state.planEditor.subnetFeatures[featureIds[0]]) { 
       dispatch(selectEditFeaturesById(featureIds))
     } else {
-      dispatch(addSubnetTreeByLatLng(latLng))
-        .then(result => {
-          dispatch(selectEditFeaturesById(featureIds))
-        }) 
+      await dispatch(addSubnetTreeByLatLng([latLng.lng(), latLng.lat()]))
+      dispatch(selectEditFeaturesById(featureIds))
     }
   }
 }
