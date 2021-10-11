@@ -586,6 +586,7 @@ function deleteFeature (featureId) {
     const state = getState()
 
     let subnetFeature = state.planEditor.subnetFeatures[featureId]
+    let selectedSubnetId = state.planEditor.selectedSubnetId
     subnetFeature = JSON.parse(JSON.stringify(subnetFeature))
     let subnetId = subnetFeature.subnetId
     let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
@@ -610,6 +611,10 @@ function deleteFeature (featureId) {
             type: Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURE,
             payload: featureId,
           })
+          // if deleted equipment is currently selected, move selection to parent
+          if (featureId === selectedSubnetId){
+            dispatch(setSelectedSubnetId(subnetId))
+          }
           dispatch(recalculateSubnets(transactionId))
         })
       })
@@ -1084,6 +1089,8 @@ function parseRecalcEvents (recalcData) {
 
         // update equipment
         subnetRecalc.recalcNodeEvents.forEach(recalcNodeEvent => {
+          // bug fix: I think this get done else where
+          // given that delete never deletes anything and add always duplicates 
           let objectId = recalcNodeEvent.subnetNode.id
           switch (recalcNodeEvent.eventType) {
             case 'DELETE':
@@ -1096,7 +1103,9 @@ function parseRecalcEvents (recalcData) {
               break
             case 'ADD':
               // add only
-              subnetCopy.children.push(objectId)
+              //if (subnetCopy.children.includes(objectId)) console.log(`duplicate ADD ${objectId}`) // ALL
+              // I don't know why the objectId would alredy be in the children list, we should figure this out
+              if (!subnetCopy.children.includes(objectId)) subnetCopy.children.push(objectId)
               // do not break
             case 'MODIFY':
             case 'UPDATE':
