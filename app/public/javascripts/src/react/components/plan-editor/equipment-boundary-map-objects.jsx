@@ -34,7 +34,7 @@ export class EquipmentBoundaryMapObjects extends Component {
 
   componentDidUpdate (prevProps, prevState) {
     // any changes to state props should cause a rerender
-    const {subnets, subnetFeatures} = this.props
+    const { subnets, subnetFeatures } = this.props
     let selectedSubnetId = this.props.selectedSubnetId
     let activeFeature = subnetFeatures[selectedSubnetId]
     if (!activeFeature) {
@@ -45,11 +45,13 @@ export class EquipmentBoundaryMapObjects extends Component {
       let parentSubnetId = activeFeature.subnetId
       while (parentSubnetId) {
         rootSubnetId = parentSubnetId
-        parentSubnetId = subnetFeatures[rootSubnetId].subnetId
+        const features = subnetFeatures[rootSubnetId]
+        parentSubnetId = features ? features.subnetId : null
       }
-      let newNeighborIds = subnets[rootSubnetId].children.concat([rootSubnetId])
+      const children = subnets[rootSubnetId] && subnets[rootSubnetId].children || []
+      const newNeighborIds = children.concat([rootSubnetId])
       // may need to ensure newNeighborIds are all unique 
-      let index = newNeighborIds.indexOf(selectedSubnetId)
+      const index = newNeighborIds.indexOf(selectedSubnetId)
       if (index >= 0) {
         // pull from array 
         newNeighborIds.splice(index, 1)
@@ -63,7 +65,7 @@ export class EquipmentBoundaryMapObjects extends Component {
         this.createMapObject(selectedSubnetId)
       }
 
-      let idsToCreate = []
+      const idsToCreate = []
       let idsToDelete = Object.keys(this.neighborObjectsById)
       newNeighborIds.forEach(id => {
         let delIndex = idsToDelete.indexOf(id)
