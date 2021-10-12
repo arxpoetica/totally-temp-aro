@@ -50,13 +50,10 @@ export const PlanEditor = props => {
   }
   
   function onFeatureFormSave (newValObj, objectId) {
-    console.log(`SAVE ${objectId}`)
-    console.log(newValObj)
     let feature = features[objectId].feature
     let updatedFeature = { ...feature, 
       networkNodeEquipment: newValObj,
     }
-    console.log(updatedFeature)
     updateFeatureProperties(updatedFeature)
   }
 
