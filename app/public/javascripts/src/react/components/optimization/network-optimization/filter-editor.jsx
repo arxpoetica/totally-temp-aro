@@ -104,7 +104,7 @@ export const FilterEditor = ({
           newActiveFilter.value1 = constraint.value
           newActiveFilter.value2 = constraint.value2
 
-          if (newActiveFilter.enumType = 'BOUNDED') {
+          if (newActiveFilter.enumType === 'BOUNDED') {
             getEnumOptions(newActiveFilter.name)
           }
 
