@@ -256,6 +256,9 @@ function getLocationPreview(planId, updatedLocationConstraints) {
           payload: true,
         })
         dispatch({
+          type: Actions.SELECTION_CLEAR_ALL_PLAN_TARGETS,
+        })
+        dispatch({
           type: Actions.SELECTION_SET_ACTIVE_MODE,
           payload: 'SELECTED_LOCATIONS',
         })
