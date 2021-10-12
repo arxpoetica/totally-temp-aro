@@ -71,7 +71,7 @@
   flex-grow: 1;
 }
 .collapse{
-  overflow: auto
+  overflow: visible;
 }
 
 .card-fixed{
