@@ -311,6 +311,30 @@ function setIsPreviewLoading(isPreviewLoading) {
   }
 }
 
+function getEnumOptions(propertyName) {
+  return async(dispatch, getState) => {
+    try {
+      const state = getState()
+      const client = state.configuration.system.ARO_CLIENT
+      const currentOptions = state.optimization.networkOptimization.enumOptions
+      const dataType = 'location' //hardcoded for now
+
+      if(!currentOptions[propertyName]){
+        const { data } = await AroHttp.get(`service/meta-data/${dataType}/properties/${propertyName}?client=${client}`)
+
+        const enumOptions = {[propertyName]: data}
+
+        dispatch({
+          type: Actions.NETWORK_OPTIMIZATION_ADD_ENUM_OPTIONS,
+          payload: enumOptions,
+        })
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+}
+
 export default {
   loadOptimizationInputs,
   setOptimizationInputs,
@@ -322,4 +346,5 @@ export default {
   setActiveFilters,
   getLocationPreview,
   setIsPreviewLoading,
+  getEnumOptions,
 }

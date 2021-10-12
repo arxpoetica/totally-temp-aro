@@ -7,6 +7,7 @@ const defaultState = {
   optimizationId: null,
   filters: [],
   activeFilters: [],
+  enumOptions: {},
   isPreviewLoading: false,
 }
 
@@ -97,6 +98,8 @@ function optimizationReducer (state = defaultState, action) {
       return setActiveFilters(state, action.payload)
     case Actions.NETWORK_OPTIMIZATION_SET_IS_PREVIEW_LOADING:
       return setIsPreviewLoading(state, action.payload)
+    case Actions.NETWORK_OPTIMIZATION_ADD_ENUM_OPTIONS:
+      return {...state, enumOptions: {...state.enumOptions, ...action.payload}}
     default:
       return state
   }
