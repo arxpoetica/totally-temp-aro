@@ -210,6 +210,9 @@
   top: 0px;
   right: 0px;
 }
+.plan-editor-thumb-fiber {
+  border: 2px solid #ff55da;
+}
 
 /* ========================= >>>>> plan editor actions >>>>> */
 

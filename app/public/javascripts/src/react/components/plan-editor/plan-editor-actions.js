@@ -1050,6 +1050,32 @@ function setFiberRenderRequired (bool) {
   }
 }
 
+function setSelectedFiber (fiberNames) {
+  return (dispatch) => {
+    batch(() => {
+      dispatch({
+        type: Actions.PLAN_EDITOR_SET_FIBER_SELECTION,
+        payload: fiberNames,
+      })
+      dispatch({
+        type: Actions.PLAN_EDITOR_SET_FIBER_RENDER_REQUIRED,
+        payload: true,
+      })
+    })
+  }
+}
+
+function setFiberAnnotations (fiberAnnotations) {
+  return (dispatch) => {
+    // TODO: Post to service when service side is done
+    batch(() => {
+      dispatch({
+        type: Actions.PLAN_EDITOR_SET_FIBER_ANNOTATIONS,
+        payload: fiberAnnotations,
+      })
+    })
+  }
+}
 // --- //
 
 // helper
@@ -1319,4 +1345,6 @@ export default {
   boundaryChange,
   recalculateSubnets,
   setFiberRenderRequired,
+  setSelectedFiber,
+  setFiberAnnotations,
 }
