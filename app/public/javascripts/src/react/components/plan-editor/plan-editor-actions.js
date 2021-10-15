@@ -225,14 +225,14 @@ function modifyFeature (featureType, feature) {
   }
 }
 
-function updateFeatureProperties(feature) {
+function updateFeatureProperties({ feature, rootSubnetId }) {
   return async(dispatch, getState) => {
     try {
       const state = getState()
       const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
 
       // Do a PUT to send the equipment over to service
-      const url = `/service/plan-transaction/${transactionId}/subnet-equipment`
+      const url = `/service/plan-transaction/${transactionId}/subnet-equipment?parentSubnetId=${rootSubnetId}`
       const result = await AroHttp.put(url, feature)
 
       // Decorate the created feature with some default values
