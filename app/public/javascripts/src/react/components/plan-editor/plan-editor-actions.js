@@ -225,29 +225,33 @@ function modifyFeature (featureType, feature) {
   }
 }
 
-function updateFeatureProperties (feature) {
-  return (dispatch, getState) => {
-    const state = getState()
-    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
-    let featureEntry = state.planEditor.features[feature.objectId]
-    // Do a PUT to send the equipment over to service
-    return AroHttp.put(`/service/plan-transaction/${transactionId}/subnet-equipment`, feature)
-      .then(result => {
-        // Decorate the created feature with some default values
-        let crudAction = featureEntry.crudAction || 'read'
-        if (crudAction === 'read') crudAction = 'update'
-        const newFeatureEntry = {
+function updateFeatureProperties(feature) {
+  return async(dispatch, getState) => {
+    try {
+      const state = getState()
+      const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+
+      // Do a PUT to send the equipment over to service
+      const url = `/service/plan-transaction/${transactionId}/subnet-equipment`
+      const result = await AroHttp.put(url, feature)
+
+      // Decorate the created feature with some default values
+      const featureEntry = state.planEditor.features[feature.objectId]
+      let crudAction = featureEntry.crudAction || 'read'
+      if (crudAction === 'read') crudAction = 'update'
+
+      dispatch({
+        type: Actions.PLAN_EDITOR_MODIFY_FEATURES,
+        payload: [{
           ...featureEntry,
           crudAction: crudAction,
-          feature: result.data,//feature,
-        }
-        dispatch({
-          type: Actions.PLAN_EDITOR_MODIFY_FEATURES,
-          payload: [newFeatureEntry]
-        })
-        return Promise.resolve()
+          feature: result.data,
+        }],
       })
-      .catch(err => console.error(err))
+      return Promise.resolve()
+    } catch (error) {
+      console.error(err)
+    }
   }
 }
 

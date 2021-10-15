@@ -34,9 +34,7 @@ export const PlanEditor = props => {
     updateFeatureProperties,
   } = props
 
-  useEffect(() => {
-    resumeOrCreateTransaction(planId, userId)
-  }, [])
+  useEffect(() => resumeOrCreateTransaction(planId, userId), [])
 
   function checkAndCommitTransaction() {
     if (isCommittingTransaction) {
@@ -49,9 +47,10 @@ export const PlanEditor = props => {
     //console.log({propVal, path, newValObj, event})
   }
   
-  function onFeatureFormSave (newValObj, objectId) {
+  function onFeatureFormSave(newValObj, objectId) {
     let feature = features[objectId].feature
-    let updatedFeature = { ...feature, 
+    let updatedFeature = {
+      ...feature, 
       networkNodeEquipment: newValObj,
     }
     updateFeatureProperties(updatedFeature)
