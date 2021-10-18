@@ -6,38 +6,44 @@ import { Input } from '../common/forms/Input.jsx'
 const FiberThumbs = props => {
   const { selectedFiberNames, setSelectedFiber, setFiberAnnotations, fiberAnnotations } = props
 
-  const [formValue, setFormValue] = useState('')
+  const [formValues, setFormValues] = useState({})
   const [formPlaceholder, setFormPlaceHolder] = useState('')
 
   useEffect(() => {
     if (selectedFiberNames.length === 1 && fiberAnnotations[selectedFiberNames[0]]) {
-      setFormValue(fiberAnnotations[selectedFiberNames[0]])
+      setFormValues(fiberAnnotations[selectedFiberNames[0]])
     } else if (selectedFiberNames.length > 1) {
       setFormPlaceHolder('Multiple Routes Selected')
     }
 
     return () => {
-      setFormValue('')
+      setFormValues('')
       setFormPlaceHolder('')
     }
-  }, [ selectedFiberNames, fiberAnnotations, setFormPlaceHolder, setFormValue ])
+  }, [ selectedFiberNames, fiberAnnotations, setFormPlaceHolder, setFormValues ])
 
 
   function deselectFiber(event) {
     event.stopPropagation()
     setSelectedFiber([])
   }
+  function handleChange(event) {
+    const { value, name } = event.target
+    console.log({...formValues, [name]: value})
+    setFormValues({...formValues, [name]: value})
+  }
 
   function handleBlur(event) {
-    event.stopPropagation()
-    const { value } = event.target
-    const annotations = {}
+    
+    const { value, name } = event.target
 
     selectedFiberNames.forEach((fiberName) => {
-      annotations[fiberName] = value
+      // if (annotations[fiberName]) annotations[fiberName][name] = value
+      // console.log({...annotations[fiberName], [name]: value})
+      fiberAnnotations[fiberName] = {...fiberAnnotations[fiberName], [name]: value}
     })
 
-    setFiberAnnotations(annotations)
+    setFiberAnnotations(fiberAnnotations)
   }
 
   return (
@@ -57,8 +63,9 @@ const FiberThumbs = props => {
         <div className='plan-editor-thumb-input-container'>
             Route:
             <Input
-              value={formValue}
-              onChange={(event) => setFormValue(event.target.value)}
+              value={formValues.route}
+              name="route"
+              onChange={(event) => handleChange(event)}
               onBlur={(event) => handleBlur(event)}
               placeholder={formPlaceholder}
               disabled={formPlaceholder}
@@ -68,8 +75,9 @@ const FiberThumbs = props => {
           <div className='plan-editor-thumb-input-container'>
             Fiber Size:
             <Input
-              value={formValue}
-              onChange={(event) => setFormValue(event.target.value)}
+              value={formValues.fiberSize}
+              name="fiberSize"
+              onChange={(event) => handleChange(event)}
               onBlur={(event) => handleBlur(event)}
               placeholder={formPlaceholder}
               disabled={formPlaceholder}
@@ -79,8 +87,9 @@ const FiberThumbs = props => {
           <div className='plan-editor-thumb-input-container'>
             Fiber Count:
             <Input
-              value={formValue}
-              onChange={(event) => setFormValue(event.target.value)}
+              value={formValues.fiberCount}
+              name="fiberCount"
+              onChange={(event) => handleChange(event)}
               onBlur={(event) => handleBlur(event)}
               placeholder={formPlaceholder}
               disabled={formPlaceholder}
@@ -90,8 +99,9 @@ const FiberThumbs = props => {
           <div className='plan-editor-thumb-input-container'>
             Build Type:
             <Input
-              value={formValue}
-              onChange={(event) => setFormValue(event.target.value)}
+              value={formValues.buildType}
+              name="buildType"
+              onChange={(event) => handleChange(event)}
               onBlur={(event) => handleBlur(event)}
               placeholder={formPlaceholder}
               disabled={formPlaceholder}
