@@ -49,7 +49,7 @@ const PlanEditorHeader = props => {
         <img src={getIconUrl(feature, props)} alt={label}/>
         <h2>{label}</h2>
       </div>
-      {locationCounts[id] > 0 && <p>Household connections: {locationCounts[id]}</p>}
+      {locationCounts[id] > 0 && <p className="font-weight-bold household-connections">Household connections: {locationCounts[id]}</p>}
       <div className="subinfo">
         <div className="item">
           <div className="badge badge-dark">LATITUDE</div>
