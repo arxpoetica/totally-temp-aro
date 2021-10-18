@@ -177,6 +177,13 @@ function setIsMapClicked (isMapClicked) {
   }
 }
 
+function setSelectedMapObject(selectedMapObject) {
+  return {
+    type: Actions.SELECTION_SET_SELECTED_MAP_OBJECT,
+    payload: selectedMapObject,
+  }
+}
+
 export default {
   setActiveSelectionMode,
   clearAllPlanTargets,
@@ -190,4 +197,5 @@ export default {
   cloneSelection,
   setMapSelection,
   setIsMapClicked,
+  setSelectedMapObject,
 }
