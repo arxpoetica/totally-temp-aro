@@ -171,11 +171,9 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
       const subnetId = subnet.subnetNode
       subnet.children.forEach(featureId => {
 
-
         // checks for max distance between hub and Central Office
         // right now equipmentCoDistance is on both hubs and COs
-        if (subnet.fiber.equipmentCoDistances !== null && subnetFeatures[featureId]) {
-
+        if (subnet.fiber.equipmentCoDistances && subnetFeatures[featureId]) {
           const distance = subnet.fiber.equipmentCoDistances[featureId]
           const { networkNodeType } = subnetFeatures[featureId].feature
 

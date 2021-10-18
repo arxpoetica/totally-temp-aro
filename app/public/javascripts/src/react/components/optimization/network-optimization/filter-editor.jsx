@@ -7,6 +7,7 @@ import EnumInputModal from './enum-input-modal.jsx'
 import { Select } from '../../common/forms/Select.jsx'
 import { Input } from '../../common/forms/Input.jsx'
 import Loader from '../../common/Loader.jsx'
+import ReactSelect from "react-select"
 import { getDateString, getDateTimeString } from '../../../common/view-utils.js'
 import {
   boolOptions,
@@ -66,6 +67,8 @@ export const FilterEditor = ({
   validatedFilters,
   serviceAreas,
   isPreviewLoading,
+  getEnumOptions,
+  formattedEnumOptions,
 }) => {
   const [modalData, setModalData] = useState({ isOpen: false, index: null })
 
@@ -100,6 +103,11 @@ export const FilterEditor = ({
           newActiveFilter.operator = constraint.op
           newActiveFilter.value1 = constraint.value
           newActiveFilter.value2 = constraint.value2
+
+          if (newActiveFilter.enumType === 'BOUNDED') {
+            getEnumOptions(newActiveFilter.name)
+          }
+
           // convert date from millseonds since epoch to format for datetime-local input
           if (newActiveFilter.propertyType === 'DATETIME') {
             newActiveFilter.value1 = getDateTimeString(
@@ -171,6 +179,12 @@ export const FilterEditor = ({
     setActiveFilters([...activeFilters])
   }
 
+  const selectChange = (newValue, index) => {
+    activeFilters[index].value1 = newValue
+
+    setActiveFilters([...activeFilters])
+  }
+
   const handlePreview = () => {
     if (serviceAreas.size > 1) {
       swal({
@@ -199,9 +213,33 @@ export const FilterEditor = ({
       )
     }
     // if bounded enum return multi select
-    //TODO: Small enumeration support
     if (enumType === 'BOUNDED') {
-      return
+      getEnumOptions(filter.name)
+
+      // convert loaded filter from string to array
+      if (activeFilters[index].value1 && typeof activeFilters[index].value1 === 'string' && formattedEnumOptions[filter.name]) {
+        const names = activeFilters[index].value1.split(',')
+        const options = names.map((name) => {
+          return formattedEnumOptions[filter.name].find((option) => option.value === name)
+        })
+        activeFilters[index].value1 = options
+
+        setActiveFilters([...activeFilters])
+      }
+
+      return (
+        <>
+          { filter.operator 
+            &&  <ReactSelect
+              options={formattedEnumOptions[filter.name]}
+              isMulti={true}
+              value={activeFilters[index].value1}
+              onChange={(newValue) => selectChange(newValue, index)}
+              isDisabled={displayOnly}
+            />}
+        </>
+        
+      )
     }
     // if unbounded return button for input popup
     if (enumType === 'UNBOUNDED') {
@@ -372,6 +410,7 @@ const mapStateToProps = (state) => ({
   updatedLocationConstraints:
     NetworkOptimizationSelectors.getUpdatedLocationConstraints(state),
   validatedFilters: NetworkOptimizationSelectors.getValidatedFilters(state),
+  formattedEnumOptions: NetworkOptimizationSelectors.getFormattedEnumOptions(state),
   serviceAreas: state.selection.planTargets.serviceAreas,
   isPreviewLoading: state.optimization.networkOptimization.isPreviewLoading,
 })
@@ -384,6 +423,7 @@ const mapDispatchToProps = (dispatch) => ({
     dispatch(
       NetworkOptimizationActions.getLocationPreview(planId, constraints),
     ),
+  getEnumOptions: (propertyName) => dispatch(NetworkOptimizationActions.getEnumOptions(propertyName)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(FilterEditor)
