@@ -9,7 +9,7 @@ let renderedSubnetId = ''
 let mapObjects = []
 
 export const FiberMapObjects = (props) => {
-  const { selectedSubnetId, subnets, subnetFeatures, fiberRenderRequired, setFiberRenderRequired, googleMaps, setSelectedFiber, selectedFiberNames } = props
+  const { selectedSubnetId, subnets, subnetFeatures, fiberRenderRequired, setFiberRenderRequired, googleMaps, setSelectedFiber, selectedFiberNames, fiberAnnotations } = props
 
   useEffect(() => {
     if (subnets[selectedSubnetId]){
@@ -58,9 +58,14 @@ export const FiberMapObjects = (props) => {
     }
     function createMapObject(path, name, fiberType) {
       let strokeColor = fiberType === 'DISTRIBUTION' ? '#FF0000' : '#1700ff'
+      let strokeWeight = fiberType === 'DISTRIBUTION' ? 2 : 4
       let selected = false
+      if (fiberAnnotations[name]) strokeColor = '#a73cff'
+
+
       if (selectedFiberNames.includes(name)) {
         strokeColor = '#ff55da'
+        strokeWeight = 6
         selected = true
       }
       const newMapObject = new google.maps.Polyline({
@@ -72,7 +77,7 @@ export const FiberMapObjects = (props) => {
         zIndex: constants.Z_INDEX_MAP_OBJECT,
         strokeColor,
         strokeOpacity: 1.0,
-        strokeWeight: fiberType === 'DISTRIBUTION' ? 2 : 4,
+        strokeWeight,
       })
       mapObjects.push(newMapObject)
 
@@ -119,6 +124,7 @@ const mapStateToProps = state => ({
   subnetFeatures: state.planEditor.subnetFeatures,
   fiberRenderRequired: state.planEditor.fiberRenderRequired,
   selectedFiberNames: state.planEditor.selectedFiber,
+  fiberAnnotations: state.planEditor.fiberAnnotations,
 })
 
 const mapDispatchToProps = dispatch => ({

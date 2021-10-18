@@ -212,6 +212,14 @@
 }
 .plan-editor-thumb-fiber {
   border: 2px solid #ff55da;
+  background-color: white;
+}
+
+.plan-editor-thumb-input-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 600;
 }
 
 /* ========================= >>>>> plan editor actions >>>>> */

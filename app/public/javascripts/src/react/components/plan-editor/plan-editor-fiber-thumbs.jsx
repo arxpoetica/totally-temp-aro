@@ -54,13 +54,50 @@ const FiberThumbs = props => {
           {selectedFiberNames.join(', ')}
         </div>
         <div>
-          <Input
-            value={formValue}
-            onChange={(event) => setFormValue(event.target.value)}
-            onBlur={(event) => handleBlur(event)}
-            placeholder={formPlaceholder}
-            disabled={formPlaceholder}
-          />
+        <div className='plan-editor-thumb-input-container'>
+            Route:
+            <Input
+              value={formValue}
+              onChange={(event) => setFormValue(event.target.value)}
+              onBlur={(event) => handleBlur(event)}
+              placeholder={formPlaceholder}
+              disabled={formPlaceholder}
+              classes={'aro-input-black'}
+            />
+          </div>
+          <div className='plan-editor-thumb-input-container'>
+            Fiber Size:
+            <Input
+              value={formValue}
+              onChange={(event) => setFormValue(event.target.value)}
+              onBlur={(event) => handleBlur(event)}
+              placeholder={formPlaceholder}
+              disabled={formPlaceholder}
+              classes={'aro-input-black'}
+            />
+          </div>
+          <div className='plan-editor-thumb-input-container'>
+            Fiber Count:
+            <Input
+              value={formValue}
+              onChange={(event) => setFormValue(event.target.value)}
+              onBlur={(event) => handleBlur(event)}
+              placeholder={formPlaceholder}
+              disabled={formPlaceholder}
+              classes={'aro-input-black'}
+            />
+          </div>
+          <div className='plan-editor-thumb-input-container'>
+            Build Type:
+            <Input
+              value={formValue}
+              onChange={(event) => setFormValue(event.target.value)}
+              onBlur={(event) => handleBlur(event)}
+              placeholder={formPlaceholder}
+              disabled={formPlaceholder}
+              classes={'aro-input-black'}
+            />
+          </div>
         </div>
         <button type="button" 
           className="btn btn-sm plan-editor-thumb-close" 
