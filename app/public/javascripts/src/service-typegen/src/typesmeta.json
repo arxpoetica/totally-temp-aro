@@ -788,7 +788,11 @@
       "t1",
       "physicallyLinked",
       "fiberAvailable",
-      "fiberCapacity"
+      "fiberCapacity",
+      "route",
+      "fiberSize",
+      "fiberCount",
+      "buildType"
     ],
     "displayProperties": [
       {
@@ -914,6 +918,54 @@
         "enumTypeURL": "",
         "displayDataType": "boolean",
         "defaultValue": "false",
+        "visible": true,
+        "editable": true
+      },
+      {
+        "propertyName": "route",
+        "levelOfDetail": 1,
+        "format": "",
+        "displayName": "Route",
+        "enumEntityName": "",
+        "enumTypeURL": "",
+        "displayDataType": "string",
+        "defaultValue": "",
+        "visible": true,
+        "editable": true
+      },
+      {
+        "propertyName": "fiberSize",
+        "levelOfDetail": 1,
+        "format": "",
+        "displayName": "Fiber Size",
+        "enumEntityName": "",
+        "enumTypeURL": "",
+        "displayDataType": "integer",
+        "defaultValue": "0",
+        "visible": true,
+        "editable": true
+      },
+      {
+        "propertyName": "fiberCount",
+        "levelOfDetail": 1,
+        "format": "",
+        "displayName": "Fiber Count",
+        "enumEntityName": "",
+        "enumTypeURL": "",
+        "displayDataType": "integer",
+        "defaultValue": "0",
+        "visible": true,
+        "editable": true
+      },
+      {
+        "propertyName": "buildType",
+        "levelOfDetail": 1,
+        "format": "",
+        "displayName": "Build Type",
+        "enumEntityName": "",
+        "enumTypeURL": "",
+        "displayDataType": "string",
+        "defaultValue": "",
         "visible": true,
         "editable": true
       }

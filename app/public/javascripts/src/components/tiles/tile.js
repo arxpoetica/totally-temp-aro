@@ -508,8 +508,7 @@ class TileComponentController {
         // We'll be compleetly replacing this system - until then send info through state.js
         const { locations } = await this.getFeaturesUnderLatLng(event.latLng)
         const ids = locations.map(location => location.object_id)
-        this.clearCursorLocationIds()
-        this.addCursorLocationIds([...ids, ...this.cursorEquipmentIds])
+        this.setCursorLocationIds(ids)
       }, 100)
     })
     this.overlayMouseoutListener = this.mapRef.addListener('mouseout', () => {
@@ -801,14 +800,13 @@ class TileComponentController {
       subnetFeatures: reduxState.planEditor.subnetFeatures,
       locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(reduxState),
       selectedSubnetLocations: PlanEditorSelectors.getSelectedSubnetLocations(reduxState),
-      cursorEquipmentIds: reduxState.planEditor.cursorEquipmentIds,
     }
   }
 
   mapDispatchToTarget (dispatch) {
     return {
       rActiveViewModePanelAction: value => dispatch(ToolBarActions.activeViewModePanel(value)),
-      addCursorLocationIds: ids => dispatch(PlanEditorActions.addCursorLocationIds(ids)),
+      setCursorLocationIds: ids => dispatch(PlanEditorActions.setCursorLocationIds(ids)),
       clearCursorLocationIds: () => dispatch(PlanEditorActions.clearCursorLocationIds()),
       setActiveMapLayers: (value) => dispatch(MapLayerActions.setActiveMapLayers(value)),
     }

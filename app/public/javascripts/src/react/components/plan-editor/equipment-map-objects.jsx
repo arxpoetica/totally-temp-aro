@@ -29,6 +29,8 @@ export class EquipmentMapObjects extends Component {
       const info = featuresRenderInfo.find(feature => feature.id === id)
       if (info) {
         const feature = subnetFeatures[info.id] && subnetFeatures[info.id].feature
+        // delete mapObject if feature no longer exists
+        if (!feature) this.deleteMapObject(id)
         // only delete idle terminals when found
         if (feature && info.idle && feature.networkNodeType.includes('terminal')) {
           this.deleteMapObject(id)
@@ -138,11 +140,6 @@ export class EquipmentMapObjects extends Component {
     }
   }
 
-  deleteDroplinks() {
-    Object.values(this.droplinks).forEach(polyline => polyline.setMap(null))
-    this.droplinks = {}
-  }
-
   highlightSelectedMarkers() {
     Object.keys(this.mapObjects).forEach(id => {
       if (this.props.selectedEditFeatureIds.indexOf(id) >= 0) {
@@ -181,50 +178,56 @@ export class EquipmentMapObjects extends Component {
 
         if (subnetFeatures[id]){
           const { feature } = subnetFeatures[id]
-        
           if (
             id === selectedSubnetId
             && feature.networkNodeType === 'fiber_distribution_terminal'
           ) {
             const [lng, lat] = feature.geometry.coordinates
             for (const [droplinkId, location] of Object.entries(selectedLocations)) {
-              // oddly, sometimes `location` is `undefined`
-              if (location) {
-                const { latitude, longitude } = location.point
-                // TODO: enhance when droplink lengths are exceeded???
-                this.droplinks[droplinkId] = new google.maps.Polyline({
-                  path: [{ lat, lng }, { lat: latitude, lng: longitude }],
-                  strokeColor: '#84d496',
-                  strokeWeight: 1.5,
-                })
-                this.droplinks[droplinkId].setMap(googleMaps)
-              }
+              this.makeDropLink(location, {lng, lat}, droplinkId)
             }
           }
         }
-
       } else {
         // This marker is not selected. Turn off selection overlay if it exists
         this.selectionOverlays[id] && this.selectionOverlays[id].setMap(null)
       }
     })
     // location hover links
-    // ToDo: dry up the repeat code
     for (const [droplinkId, location] of Object.entries(this.props.cursorLocations)) {
       // oddly, sometimes `location` is `undefined`
       if (location && location.parentEquipmentId) {
-        const { latitude, longitude } = location.point
         const [lng, lat] = this.props.subnetFeatures[location.parentEquipmentId].feature.geometry.coordinates
-        
-        this.droplinks[droplinkId] = new google.maps.Polyline({
-          path: [{ lat, lng }, { lat: latitude, lng: longitude }],
-          strokeColor: '#84d496',
-          strokeWeight: 1.5,
-        })
-        this.droplinks[droplinkId].setMap(this.props.googleMaps)
+        this.makeDropLink(location, {lng, lat}, droplinkId)
       }
     }
+  }
 
+  makeDropLink(location, parentPt, droplinkId) {
+    if (!droplinkId) droplinkId = location.objectIds[0] 
+    if (droplinkId && parentPt && location && location.parentEquipmentId) {
+      const { latitude, longitude } = location.point
+      if (this.droplinks[droplinkId]) this.deleteDropLink(droplinkId)
+      
+      this.droplinks[droplinkId] = new google.maps.Polyline({
+        path: [parentPt, { lat: latitude, lng: longitude }],
+        strokeColor: '#84d496',
+        strokeWeight: 1.5,
+      })
+      this.droplinks[droplinkId].setMap(this.props.googleMaps)
+    }
+  }
+
+  deleteDropLink(droplinkId) {
+    if (this.droplinks[droplinkId]) {
+      this.droplinks[droplinkId].setMap(null)
+      delete this.droplinks[droplinkId]
+    }
+  }
+  
+  deleteDroplinks() {
+    Object.values(this.droplinks).forEach(polyline => polyline.setMap(null))
+    this.droplinks = {}
   }
 
   componentWillUnmount() {

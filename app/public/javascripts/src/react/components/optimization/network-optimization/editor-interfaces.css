@@ -34,7 +34,7 @@
 .ei-property-icon.trashcan {
   background: url('/svg/trash.svg') no-repeat center transparent;
   height: 20px;
-  width: 20px;
+  min-width: 15px;
   background-size: contain;
   margin-right: 5px;
 }
@@ -66,6 +66,7 @@
 .ei-filter-input-container {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
 }
 .ei-filter-input {
   margin: 0 5px 0 5px;
@@ -112,5 +113,14 @@
 
 .ei-filter-input.percent::before {
   content: "%";
+}
+
+.empty-warning {
+  color: red;
+  margin-right: .5rem;
+}
+
+.enum-input-subtitle {
+  font-size: 1rem;
 }
 
