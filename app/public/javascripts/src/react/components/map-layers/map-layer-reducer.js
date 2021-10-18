@@ -324,10 +324,6 @@ function setEdgeConstructionTypeIds (state, apiTypes) {
   return { ...state, edgeConstructionTypes: newEdgeConstructionTypes}
 }
 
-  function setActiveMapLayers (state, activeMapLayers) {
-    return { ...state, activeMapLayers }
-  }
-
 function mapLayersReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.LAYERS_SET_LOCATION:
@@ -409,7 +405,7 @@ function mapLayersReducer (state = defaultState, action) {
       return setEdgeConstructionTypeIds(state, action.payload)
 
     case Actions.LAYERS_SET_ACTIVE_MAP_LAYERS:
-      return setActiveMapLayers(state, action.payload)
+      return { ...state, activeMapLayers: action.payload }
 
     default:
       return state

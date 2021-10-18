@@ -46,6 +46,57 @@ const chartSettings = {
   }
 }
 
+// ToDo: very similar to the code in tile-data-service.js
+const formatCensusBlockData = (tagData) => {
+  const sepA = ';'
+  const sepB = ':'
+  const kvPairs = tagData.split(sepA)
+  const tags = {}
+  kvPairs.forEach((pair) => {
+    const kv = pair.split(sepB)
+    // incase there are extra ':'s in the value we join all but the first together
+    if (kv[0] !== '') tags['' + kv[0]] = kv.slice(1)
+  })
+  return tags
+}
+
+const showCoverageChartOption = (lengthUnits) => {
+  return {
+    title: {
+      display: true,
+      text: 'Locations by Road Distance'
+    },
+    legend: {
+      display: true,
+      position: 'bottom'
+    },
+    scales: {
+      yAxes: [{
+        scaleLabel: {
+          display: true,
+          labelString: 'locations'
+        },
+        stacked: true
+      }],
+      xAxes: [{
+        scaleLabel: {
+          display: true,
+          labelString: 'distance, ' + lengthUnits,
+          gridLines: {
+            offsetGridLines: false
+          }
+        },
+        stacked: true
+      }]
+    }
+  }
+}
+
+const objKeys = (obj) => {
+  if (typeof obj === 'undefined') obj = {}
+  return Object.keys(obj)
+}
+
 export const BoundaryCoverage = (props) => {
 
   const [state, setState] = useState({
@@ -59,14 +110,6 @@ export const BoundaryCoverage = (props) => {
   const { isWorking, isWorkingOverride, computedCoverage } = state
 
   const { selectedBoundaryCoverage, layerCategories, length_units } = props
-
-  const makeCoverageLocationData = () => {
-    return {
-      locationType: '',
-      totalCount: 0,
-      barChartData: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-  }
 
   const digestBoundaryCoverage = () => {
     const boundsCoverage = {
@@ -84,7 +127,11 @@ export const BoundaryCoverage = (props) => {
 
     for (const locationType in selectedBoundaryCoverage.coverageInfo) {
       const locData = selectedBoundaryCoverage.coverageInfo[locationType]
-      const locCoverage = makeCoverageLocationData()
+      const locCoverage = {
+        locationType: '',
+        totalCount: 0,
+        barChartData: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      }
       locCoverage.locationType = locationType
       locCoverage.totalCount = 0
       let infiniteDistCount = 0
@@ -142,20 +189,6 @@ export const BoundaryCoverage = (props) => {
     return boundsCoverage
   }
 
-  // ToDo: very similar to the code in tile-data-service.js
-  const formatCensusBlockData = (tagData) => {
-    const sepA = ';'
-    const sepB = ':'
-    const kvPairs = tagData.split(sepA)
-    const tags = {}
-    kvPairs.forEach((pair) => {
-      const kv = pair.split(sepB)
-      // incase there are extra ':'s in the value we join all but the first together
-      if (kv[0] !== '') tags['' + kv[0]] = kv.slice(1)
-    })
-    return tags
-  }
-
   const showCoverageChartData = () => {
 
     // a dataset for each location type
@@ -199,46 +232,9 @@ export const BoundaryCoverage = (props) => {
     }
   }
 
-  const showCoverageChartOption = () => {
-    return {
-      title: {
-        display: true,
-        text: 'Locations by Road Distance'
-      },
-      legend: {
-        display: true,
-        position: 'bottom'
-      },
-      scales: {
-        yAxes: [{
-          scaleLabel: {
-            display: true,
-            labelString: 'locations'
-          },
-          stacked: true
-        }],
-        xAxes: [{
-          scaleLabel: {
-            display: true,
-            labelString: 'distance, ' + length_units,
-            gridLines: {
-              offsetGridLines: false
-            }
-          },
-          stacked: true
-        }]
-      }
-    }
-  }
-
   const showCoverageChart = () => { setState((state) => ({ ...state, computedCoverage: digestBoundaryCoverage() })) }
 
   useEffect(() => { showCoverageChart() }, [selectedBoundaryCoverage])
-
-  const objKeys = (obj) => {
-    if (typeof obj === 'undefined') obj = {}
-    return Object.keys(obj)
-  }
 
   return (
     <>
@@ -274,7 +270,7 @@ export const BoundaryCoverage = (props) => {
             width={300}
             height={300}
             data={showCoverageChartData()}
-            options={showCoverageChartOption()}
+            options={showCoverageChartOption(length_units)}
           />
           <div className="bounds-coverage-detail">
             <div className="ei-header bounds-coverage-header">

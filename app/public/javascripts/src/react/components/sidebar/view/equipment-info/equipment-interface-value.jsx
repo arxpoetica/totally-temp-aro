@@ -67,20 +67,20 @@ export const EquipmentInterfaceValue = (props) => {
   const displayValues = (displayProps) => {
     switch (displayProps.displayDataType) {
       case 'date':
-        return <div className="ei-output-text">{dateVal.toDateString()}</div>
+        return dateVal.toDateString()
       case 'datetime':
-        return <div className="ei-output-text">{dateVal.toUTCString()}</div>
+        return dateVal.toUTCString()
       case 'enum':
-        return <div className="ei-output-text">{enumVal}</div>
+        return enumVal
       case 'html':
-        return <div className="ei-output-text">{model}</div>
+        return model
       default:
-        return <div className="ei-output-text">{model !== undefined && model.toString()}</div>
+        return model !== undefined && model.toString()
     }
   }
 
   return (
-    !isEdit && <>{displayValues(displayProps)}</>
+    !isEdit && <div className="ei-output-text">{displayValues(displayProps)}</div>
   )
 }
 

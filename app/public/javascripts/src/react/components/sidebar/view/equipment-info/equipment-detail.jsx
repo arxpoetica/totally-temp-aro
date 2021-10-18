@@ -153,9 +153,10 @@ export const equipmentDetail = (props) => {
     updateSelectedState(selectedEquipment)
     displayEquipment(plan.id, objectId).then((equipmentInfo) => {
       if (equipmentInfo) {
+        const selectedEquipmentCor = equipmentInfo.geometry.coordinates
         const mapObject = {
-          latitude: selectedEquipmentGeog[1],
-          longitude: selectedEquipmentGeog[0],
+          latitude: selectedEquipmentCor[1],
+          longitude: selectedEquipmentCor[0],
         }
         const ZOOM_FOR_EQUIPMENT_SEARCH = 14
         rxState.requestSetMapCenter.sendMessage(mapObject)

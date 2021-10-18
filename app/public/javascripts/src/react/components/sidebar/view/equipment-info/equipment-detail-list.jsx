@@ -81,13 +81,13 @@ export const equipmentDetailList = (props) => {
   }
 
   const filterFeature = (feature) => {
-    return feature.properties &&
-      feature.properties.object_id &&
-      feature.properties._data_type &&
-      feature.properties._data_type.split('.')[0] === 'equipment' &&
-      feature.properties.is_deleted !== 'true' && // deleted planned sites
-      !isExistingSiteDeleted(feature.properties.object_id) && // deleted exisiting sites
-      Object.keys(clliToEquipmentInfo).length <= MAX_EQUIPMENT_LIST
+    return feature.properties
+      && feature.properties.object_id
+      && feature.properties._data_type
+      && feature.properties._data_type.split('.')[0] === 'equipment'
+      && feature.properties.is_deleted !== 'true' // deleted planned sites
+      && !isExistingSiteDeleted(feature.properties.object_id) // deleted exisiting sites
+      && Object.keys(clliToEquipmentInfo).length <= MAX_EQUIPMENT_LIST
   }
 
   const isExistingSiteDeleted = (objectId) => {

@@ -74,7 +74,8 @@ export class AroSearch extends Component {
       this.onSearchResult(searchObj)
     } else if (entityType === entityTypeCons.CENSUS_BLOCKS_ENTITY
         || entityType === entityTypeCons.SERVICE_AREA_VIEW 
-        || entityType === entityTypeCons.ANALYSIS_AREA) {
+        || entityType === entityTypeCons.ANALYSIS_AREA
+    ) {
       this.props.onSelectedBoundary(searchObj)
     } else if (entityType === entityTypeCons.NETWORK_EQUIPMENT_ENTITY) {
       this.props.onSelectionChanged(searchObj, true)
