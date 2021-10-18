@@ -118,9 +118,9 @@ export class RfpSubmitter extends Component {
             id: id,
             point: {
               type: 'Point',
-              coordinates: [lng, lat],
-              props
-            }
+              coordinates: [lng, lat]
+            },
+            props
           }
         })
         this.props.submitRfpReport(this.props.userId, requestBody)
