@@ -49,12 +49,6 @@
 
 /* smaller black text */
 /* examples: filtering, fiber tagging */
-
-.aro-input-black {
-  width: 80%;
-  margin: .1rem;
-}
-
 .aro-input-black input {
   color: black;
   font: 14px var(--font);
@@ -64,6 +58,18 @@
   border: 1px solid var(--gray-medium-light);
   border-radius: 3px;
   width: 100%;
-  text-align: left;
   padding: .3rem;
 }
+
+/* specific to fiber annotation */
+.aro-input-black.fiber-annotation {
+  width: 80%;
+  margin: .1rem;
+  text-align: left;
+}
+
+/* specific to  location filtering */
+.aro-input-black.filter-input {
+  width: 75px;
+}
+

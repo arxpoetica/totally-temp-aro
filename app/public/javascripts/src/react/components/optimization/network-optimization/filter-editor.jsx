@@ -274,7 +274,7 @@ export const FilterEditor = ({
               onChange={(event) => textChange(event, index)}
               onBlur={(event) => textChange(event, index)}
               classes={cx(
-                'ei-filter-input',
+                'aro-input-black filter-input',
                 filter.format === 'DOLLAR' && 'dollar',
                 filter.format === 'PERCENT' && 'percent',
               )}
@@ -295,7 +295,7 @@ export const FilterEditor = ({
                 onChange={(event) => textChange(event, index)}
                 onBlur={(event) => textChange(event, index)}
                 classes={cx(
-                  'ei-filter-input',
+                  'aro-input-black filter-input',
                   filter.format === 'DOLLAR' && 'dollar',
                   filter.format === 'PERCENT' && 'percent',
                 )}

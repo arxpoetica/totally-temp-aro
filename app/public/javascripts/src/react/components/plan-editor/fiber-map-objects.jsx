@@ -60,14 +60,17 @@ export const FiberMapObjects = (props) => {
       let strokeColor = fiberType === 'DISTRIBUTION' ? '#FF0000' : '#1700ff'
       let strokeWeight = fiberType === 'DISTRIBUTION' ? 2 : 4
       let selected = false
+
+      // set color purple if there are annotations
       if (fiberAnnotations[name]) strokeColor = '#a73cff'
 
-
+      // set color pink, increase stroke and set selected true if selected
       if (selectedFiberNames.includes(name)) {
         strokeColor = '#ff55da'
         strokeWeight = 6
         selected = true
       }
+
       const newMapObject = new google.maps.Polyline({
         selected,
         name,
@@ -87,12 +90,14 @@ export const FiberMapObjects = (props) => {
         const selectedFiberNames = []
 
         mapObjects.forEach((mapObject) => {
-          if (mapObject.selected && mapObject.name !== name) {
-            if (shiftKey) {
+          // if selected and not the route clicked add to redux selected list
+          // This is because if I pull selected from state it will be stale
+          if (mapObject.selected && mapObject.name !== name && shiftKey) {
               selectedFiberNames.push(mapObject.name)
-            } else mapObject.setOptions({strokeColor: '#1700ff'})
           }
         })
+
+        // if not already selected, add to selected
         if (!newMapObject.selected) {
           selectedFiberNames.push(newMapObject.name)
         }
