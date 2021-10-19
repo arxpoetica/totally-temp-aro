@@ -80,8 +80,8 @@ const PlanEditorRecalculate = props => {
               type="button"
               className={cx("btn", 
                 Object.keys(fiberAnnotations).length > 0 
-                  ? "btn-warning" 
-                  :"btn-outline-success" )}
+                  ? "btn-outline-danger" 
+                  : "btn-outline-success" )}
               onClick={() => recalculate()}
               disabled={!isRecalcSettled}
             >
