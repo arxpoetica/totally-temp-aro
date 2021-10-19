@@ -5,7 +5,6 @@ export const EquipmentInterfaceValue = (props) => {
 
   const [state, setState] = useState({
     dateVal: new Date(),
-    modelState: '',
     enumVal: '',
   })
 
