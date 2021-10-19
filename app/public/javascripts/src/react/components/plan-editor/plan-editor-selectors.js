@@ -305,6 +305,27 @@ const getLocationCounts = createSelector(
   }
 )
 
+const getTerminalDroplinksById = createSelector(
+  [getSubnetFeatures, getSelectedEditFeatureIds],
+  (subnetFeatures, selectedEditFeatureIds) => {
+    let locationCountsById = {}
+    for (let selectedFeatureId of selectedEditFeatureIds) {
+      if (subnetFeatures[selectedFeatureId]
+        && subnetFeatures[selectedFeatureId].subnetId
+        && subnetFeatures[selectedFeatureId].feature.dropLinks
+        && subnetFeatures[selectedFeatureId].feature.networkNodeType === 'fiber_distribution_terminal'
+        ) {
+        locationCountsById[selectedFeatureId] = 0
+        subnetFeatures[selectedFeatureId].feature.dropLinks.forEach(dropLink => {
+          locationCountsById[selectedFeatureId] += dropLink.locationLinks.length
+        })
+      }
+    }
+    
+    return locationCountsById
+  }
+)
+
 const PlanEditorSelectors = Object.freeze({
   getSelectedSubnet,
   getBoundaryLayersList,
@@ -316,6 +337,8 @@ const PlanEditorSelectors = Object.freeze({
   getSelectedSubnetLocations,
   getCursorLocations,
   getLocationCounts,
+  getTerminalDroplinksById,
+  getSubnetFeatures
 })
 
 export default PlanEditorSelectors
