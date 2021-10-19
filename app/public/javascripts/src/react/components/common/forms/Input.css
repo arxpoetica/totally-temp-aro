@@ -65,6 +65,9 @@
 .aro-input-black.fiber-annotation {
   width: 80%;
   margin: .1rem;
+  
+}
+.aro-input-black.fiber-annotation input {
   text-align: left;
 }
 
