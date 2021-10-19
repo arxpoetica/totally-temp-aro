@@ -501,7 +501,7 @@ class MapTileRenderer {
           // don't render any featureIds in plan edit
           // TODO: if we need to broaden this logic to service layers, may need to think through
           const { _data_type } = feature.properties
-          console.log(_data_type)
+          // console.log(_data_type)
           if (_data_type.includes('equipment') || _data_type.includes('fiber')) {
             continue
           }
