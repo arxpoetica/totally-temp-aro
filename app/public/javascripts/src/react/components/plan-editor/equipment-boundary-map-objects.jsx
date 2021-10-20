@@ -25,6 +25,10 @@ export class EquipmentBoundaryMapObjects extends Component {
       fillColor: '#1f7de6',
       fillOpacity: 0.02,
     }
+
+    this.state = {
+      vertexesToBeDeleted: {}
+    }
   }
 
   render () {
@@ -204,8 +208,34 @@ export class EquipmentBoundaryMapObjects extends Component {
     })
     mapObject.addListener('contextmenu', event => {
       const eventXY = WktUtils.getXYFromEvent(event)
-      self.props.showContextMenuForEquipmentBoundary(mapObject, eventXY.x, eventXY.y, event.vertex)
+      if (event.domEvent.shiftKey) {
+        const vertexesToBeDeletedClone = Object.assign({}, this.vertexesToBeDeleted)
+        const stringifiedXY = `${eventXY.x},${eventXY.y}`
+        if (vertexesToBeDeletedClone[stringifiedXY]) {
+          delete vertexesToBeDeletedClone[stringifiedXY]
+        } else {          
+          vertexesToBeDeletedClone[stringifiedXY] = event.vertex;
+        }
+        this.setState(() => ({ 
+          vertexesToBeDeleted: vertexesToBeDeletedClone
+        }));
+      } else {
+        self.props.showContextMenuForEquipmentBoundary(mapObject, eventXY.x, eventXY.y, event.vertex)
+      }
     })
+
+    google.maps.event.addDomListener(document, 'keyup', (e) => {
+      const code = (e.keyCode ? e.keyCode : e.which);
+      const vertexesToBeDeletedClone = Object.assign({}, this.vertexesToBeDeleted)
+      debugger
+      if ((code === 8 || code === 46) && Object.keys(vertexesToBeDeletedClone).length > 0) {
+        for (const xyCoords in vertexesToBeDeletedClone) {
+          if (vertexesToBeDeletedClone[xyCoords] && mapObject.getPath().getLength() > 3) {
+            mapObject.getPath().removeAt(vertexesToBeDeletedClone[xyCoords])
+          }
+        }
+      }
+    });
   }
 
   clearAll () {
