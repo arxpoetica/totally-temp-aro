@@ -298,7 +298,8 @@ const getLocationCounts = createSelector(
         locationCountsById[id] = locations.filter(location => !!location.parentEquipmentId).length
       } else {
         if (
-          subnetFeatures[id].feature.networkNodeType === 'fiber_distribution_terminal'
+          subnetFeatures[id]
+          && subnetFeatures[id].feature.networkNodeType === 'fiber_distribution_terminal'
           && subnetFeatures[id].feature.dropLinks
         ) {
           locationCountsById[id] = 0
