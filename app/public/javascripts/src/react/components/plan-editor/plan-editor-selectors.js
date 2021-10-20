@@ -302,10 +302,7 @@ const getLocationCounts = createSelector(
           && subnetFeatures[id].feature.networkNodeType === 'fiber_distribution_terminal'
           && subnetFeatures[id].feature.dropLinks
         ) {
-          locationCountsById[id] = 0
-          subnetFeatures[id].feature.dropLinks.forEach(dropLink => {
-            locationCountsById[id] += dropLink.locationLinks.length
-          })
+          locationCountsById[id] = subnetFeatures[id].feature.dropLinks.length
         } else {
           const locationDistanceMap = subnets[id] && subnets[id].fiber && subnets[id].fiber.locationDistanceMap
           locationCountsById[id] = locationDistanceMap ? Object.keys(locationDistanceMap).length : 0
