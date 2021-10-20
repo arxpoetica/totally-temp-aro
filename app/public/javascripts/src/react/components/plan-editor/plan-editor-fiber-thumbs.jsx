@@ -68,17 +68,13 @@ const FiberThumbs = (props) => {
     setFormValues({ ...formValues, [name]: value })
   }
 
-  function handleBlur(event) {
-    const { value, name } = event.target
-
+  function saveAnnotations(event) {
+    const newAnnotations = {}
+    formValues
     selectedFiberNames.forEach((fiberName) => {
-      fiberAnnotations[fiberName] = {
-        ...fiberAnnotations[fiberName],
-        [name]: value,
-      }
+      newAnnotations[fiberName] = formValues
     })
-
-    setFiberAnnotations(fiberAnnotations)
+    setFiberAnnotations(newAnnotations)
   }
 //TODO: right now the fields are hardcoded, for route, fiber size, etc. later this will change to be dynamic
   return (
@@ -96,7 +92,7 @@ const FiberThumbs = (props) => {
                 value={formValues.route}
                 name="route"
                 onChange={(event) => handleChange(event)}
-                onBlur={(event) => handleBlur(event)}
+                // onBlur={(event) => handleBlur(event)}
                 placeholder={formPlaceholders.route}
                 disabled={formPlaceholders.route}
                 classes={'aro-input-black fiber-annotation'}
@@ -108,7 +104,7 @@ const FiberThumbs = (props) => {
                 value={formValues.fiberSize}
                 name="fiberSize"
                 onChange={(event) => handleChange(event)}
-                onBlur={(event) => handleBlur(event)}
+                // onBlur={(event) => handleBlur(event)}
                 placeholder={formPlaceholders.fiberSize}
                 disabled={formPlaceholders.fiberSize}
                 classes={'aro-input-black fiber-annotation'}
@@ -120,7 +116,7 @@ const FiberThumbs = (props) => {
                 value={formValues.fiberCount}
                 name="fiberCount"
                 onChange={(event) => handleChange(event)}
-                onBlur={(event) => handleBlur(event)}
+                // onBlur={(event) => handleBlur(event)}
                 placeholder={formPlaceholders.fiberCount}
                 disabled={formPlaceholders.fiberCount}
                 classes={'aro-input-black fiber-annotation'}
@@ -132,11 +128,21 @@ const FiberThumbs = (props) => {
                 value={formValues.buildType}
                 name="buildType"
                 onChange={(event) => handleChange(event)}
-                onBlur={(event) => handleBlur(event)}
+                // onBlur={(event) => handleBlur(event)}
                 placeholder={formPlaceholders.buildType}
                 disabled={formPlaceholders.buildType}
                 classes={'aro-input-black fiber-annotation'}
               />
+            </div>
+            <div className='fiber-thumb-btn-container'>
+              <button
+              type="button"
+              className="btn btn-sm btn-primary fiber-thumb-btn"
+              onClick={() => saveAnnotations()}
+              > 
+                Save
+              </button>
+              
             </div>
           </div>
           <button

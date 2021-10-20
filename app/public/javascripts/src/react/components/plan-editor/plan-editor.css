@@ -215,6 +215,13 @@
   background-color: white;
 }
 
+.fiber-thumb-btn-container {
+  margin: .3rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
 .plan-editor-thumb-input-container {
   display: flex;
   align-items: center;
