@@ -952,8 +952,8 @@
         "displayName": "Fiber Count",
         "enumEntityName": "",
         "enumTypeURL": "",
-        "displayDataType": "integer",
-        "defaultValue": "0",
+        "displayDataType": "string",
+        "defaultValue": "",
         "visible": true,
         "editable": true
       },
