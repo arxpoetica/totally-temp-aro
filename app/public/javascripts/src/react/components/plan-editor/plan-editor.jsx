@@ -36,7 +36,9 @@ export const PlanEditor = props => {
     updateFeatureProperties,
   } = props
 
-  useEffect(() => resumeOrCreateTransaction(planId, userId), [])
+  useEffect(() => {
+    resumeOrCreateTransaction(planId, userId)
+  }, [])
 
   function checkAndCommitTransaction() {
     if (isCommittingTransaction) {
