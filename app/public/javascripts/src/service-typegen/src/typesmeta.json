@@ -884,7 +884,7 @@
         "enumEntityName": "",
         "enumTypeURL": "",
         "displayDataType": "integer",
-        "defaultValue": "512",
+        "defaultValue": "",
         "visible": true,
         "editable": true
       },
