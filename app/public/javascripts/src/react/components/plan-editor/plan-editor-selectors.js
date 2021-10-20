@@ -297,31 +297,20 @@ const getLocationCounts = createSelector(
         const locations = Object.values(subnets[id].subnetLocationsById)
         locationCountsById[id] = locations.filter(location => !!location.parentEquipmentId).length
       } else {
-        const locationDistanceMap = subnets[id] && subnets[id].fiber && subnets[id].fiber.locationDistanceMap
-        locationCountsById[id] = locationDistanceMap ? Object.keys(locationDistanceMap).length : 0
-      }
-    }
-    return locationCountsById
-  }
-)
-
-const getTerminalDroplinksById = createSelector(
-  [getSubnetFeatures, getSelectedEditFeatureIds],
-  (subnetFeatures, selectedEditFeatureIds) => {
-    let locationCountsById = {}
-    for (let selectedFeatureId of selectedEditFeatureIds) {
-      if (subnetFeatures[selectedFeatureId]
-        && subnetFeatures[selectedFeatureId].subnetId
-        && subnetFeatures[selectedFeatureId].feature.dropLinks
-        && subnetFeatures[selectedFeatureId].feature.networkNodeType === 'fiber_distribution_terminal'
+        if (
+          subnetFeatures[id].feature.networkNodeType === 'fiber_distribution_terminal'
+          && subnetFeatures[id].feature.dropLinks
         ) {
-        locationCountsById[selectedFeatureId] = 0
-        subnetFeatures[selectedFeatureId].feature.dropLinks.forEach(dropLink => {
-          locationCountsById[selectedFeatureId] += dropLink.locationLinks.length
-        })
+          locationCountsById[id] = 0
+          subnetFeatures[id].feature.dropLinks.forEach(dropLink => {
+            locationCountsById[id] += dropLink.locationLinks.length
+          })
+        } else {
+          const locationDistanceMap = subnets[id] && subnets[id].fiber && subnets[id].fiber.locationDistanceMap
+          locationCountsById[id] = locationDistanceMap ? Object.keys(locationDistanceMap).length : 0
+        }
       }
     }
-    
     return locationCountsById
   }
 )
@@ -337,7 +326,6 @@ const PlanEditorSelectors = Object.freeze({
   getSelectedSubnetLocations,
   getCursorLocations,
   getLocationCounts,
-  getTerminalDroplinksById,
   getSubnetFeatures
 })
 
