@@ -27,7 +27,7 @@ export class EquipmentBoundaryMapObjects extends Component {
     }
 
     this.state = {
-      vertexesToBeDeleted: {}
+      vertexesToBeDeleted: []
     }
   }
 
@@ -207,33 +207,40 @@ export class EquipmentBoundaryMapObjects extends Component {
       })
     })
     mapObject.addListener('contextmenu', event => {
-      const eventXY = WktUtils.getXYFromEvent(event)
       if (event.domEvent.shiftKey) {
-        const vertexesToBeDeletedClone = Object.assign({}, this.vertexesToBeDeleted)
-        const stringifiedXY = `${eventXY.x},${eventXY.y}`
-        if (vertexesToBeDeletedClone[stringifiedXY]) {
-          delete vertexesToBeDeletedClone[stringifiedXY]
-        } else {          
-          vertexesToBeDeletedClone[stringifiedXY] = event.vertex;
+        if (event.vertex) {
+          const vertexesToBeDeletedClone = [...this.state.vertexesToBeDeleted]
+          if (vertexesToBeDeletedClone.includes(event.vertex)) {
+            const indexOfVertex = vertexesToBeDeletedClone.indexOf(event.vertex);
+            if (indexOfVertex > -1) {
+              vertexesToBeDeletedClone.splice(indexOfVertex, 1);
+            }
+          } else {          
+            vertexesToBeDeletedClone.push(event.vertex);
+          }
+          this.setState(() => ({ 
+            vertexesToBeDeleted: vertexesToBeDeletedClone
+          }));
         }
-        this.setState(() => ({ 
-          vertexesToBeDeleted: vertexesToBeDeletedClone
-        }));
       } else {
+        const eventXY = WktUtils.getXYFromEvent(event)
         self.props.showContextMenuForEquipmentBoundary(mapObject, eventXY.x, eventXY.y, event.vertex)
       }
     })
 
     google.maps.event.addDomListener(document, 'keyup', (e) => {
       const code = (e.keyCode ? e.keyCode : e.which);
-      const vertexesToBeDeletedClone = Object.assign({}, this.vertexesToBeDeleted)
-      debugger
-      if ((code === 8 || code === 46) && Object.keys(vertexesToBeDeletedClone).length > 0) {
-        for (const xyCoords in vertexesToBeDeletedClone) {
-          if (vertexesToBeDeletedClone[xyCoords] && mapObject.getPath().getLength() > 3) {
-            mapObject.getPath().removeAt(vertexesToBeDeletedClone[xyCoords])
+      const vertexesToBeDeletedClone = [...this.state.vertexesToBeDeleted]
+      if ((code === 8 || code === 46) && vertexesToBeDeletedClone.length > 0) {
+        for (const vertex of vertexesToBeDeletedClone) {
+          if (vertex && mapObject.getPath().getLength() > 3) {
+            mapObject.getPath().removeAt(vertex)
           }
         }
+
+        this.setState(() => ({
+          vertexesToBeDeleted: []
+        }))
       }
     });
   }
