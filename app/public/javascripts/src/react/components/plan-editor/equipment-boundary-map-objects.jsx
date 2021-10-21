@@ -9,7 +9,8 @@ import WktUtils from '../../../shared-utils/wkt-utils'
 export class EquipmentBoundaryMapObjects extends Component {
   constructor (props) {
     super(props)
-    this.mapObject = undefined
+    this.mapObject = undefined;
+    this.mapObjectOverlay = [];
     this.neighborObjectsById = {}
     this.polygonOptions = {
       strokeColor: '#1f7de6',
@@ -24,10 +25,6 @@ export class EquipmentBoundaryMapObjects extends Component {
       strokeWeight: 1.5,
       fillColor: '#1f7de6',
       fillOpacity: 0.02,
-    }
-
-    this.state = {
-      vertexesToBeDeleted: []
     }
   }
 
@@ -207,40 +204,41 @@ export class EquipmentBoundaryMapObjects extends Component {
       })
     })
     mapObject.addListener('contextmenu', event => {
+      const eventXY = WktUtils.getXYFromEvent(event)
       if (event.domEvent.shiftKey) {
         if (event.vertex) {
-          const vertexesToBeDeletedClone = [...this.state.vertexesToBeDeleted]
-          if (vertexesToBeDeletedClone.includes(event.vertex)) {
-            const indexOfVertex = vertexesToBeDeletedClone.indexOf(event.vertex);
-            if (indexOfVertex > -1) {
-              vertexesToBeDeletedClone.splice(indexOfVertex, 1);
-            }
-          } else {          
-            vertexesToBeDeletedClone.push(event.vertex);
+          const indexOfMarker = this.mapObjectOverlay.findIndex((marker) => {
+            return marker.title === `${event.vertex}`
+          });
+
+          if (indexOfMarker > -1) {
+            const [removedMarker] = this.mapObjectOverlay.splice(indexOfMarker, 1)
+            removedMarker.setMap(null);
+          } else {
+            this.mapObjectOverlay = this.mapObjectOverlay.concat(new google.maps.Marker({
+              position: event.latLng,
+              map: this.props.googleMaps,
+              title: `${event.vertex}`,
+              icon: '/svg/trash.svg'
+            }));
           }
-          this.setState(() => ({ 
-            vertexesToBeDeleted: vertexesToBeDeletedClone
-          }));
         }
       } else {
-        const eventXY = WktUtils.getXYFromEvent(event)
         self.props.showContextMenuForEquipmentBoundary(mapObject, eventXY.x, eventXY.y, event.vertex)
       }
     })
 
     google.maps.event.addDomListener(document, 'keyup', (e) => {
       const code = (e.keyCode ? e.keyCode : e.which);
-      const vertexesToBeDeletedClone = [...this.state.vertexesToBeDeleted]
-      if ((code === 8 || code === 46) && vertexesToBeDeletedClone.length > 0) {
-        for (const vertex of vertexesToBeDeletedClone) {
-          if (vertex && mapObject.getPath().getLength() > 3) {
-            mapObject.getPath().removeAt(vertex)
+      if ((code === 8 || code === 46) && this.mapObjectOverlay.length > 0) {
+        for (const marker of this.mapObjectOverlay) {
+          if (marker && mapObject.getPath().getLength() > 3) {
+            mapObject.getPath().removeAt(Number(marker.title))
+            marker.setMap(null);
           }
         }
 
-        this.setState(() => ({
-          vertexesToBeDeleted: []
-        }))
+        this.mapObjectOverlay = [];
       }
     });
   }
