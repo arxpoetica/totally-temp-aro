@@ -3,6 +3,8 @@ import { connect } from 'react-redux'
 import PlanEditorActions from './plan-editor-actions'
 import { Input } from '../common/forms/Input.jsx'
 
+const fieldOptions = ['route', 'fiberSize', 'fiberCount', 'buildType']
+
 const FiberThumbs = (props) => {
   const {
     selectedFiberNames,
@@ -15,39 +17,41 @@ const FiberThumbs = (props) => {
   const [formPlaceholders, setFormPlaceHolders] = useState({})
 
   useEffect(() => {
-    if (selectedFiberNames.length === 1 && fiberAnnotations[selectedFiberNames[0]]) {
+    if (
+      selectedFiberNames.length === 1 
+      && fiberAnnotations[selectedFiberNames[0]]
+    ) {
+      // if only one route selected, just set the values
       setFormValues(fiberAnnotations[selectedFiberNames[0]])
     } else if (selectedFiberNames.length > 1) {
+      const annotationObject = {} // used for comparison to see if fields are identical
+      // { [name]: ['test', 'test2'] } more than one value means switch to placeholder
 
-      const firstSelected = {} // used for comparison to see if fields are identical
-      const fieldsIdentical = {} // for each field hold a bool depending on if the values are identical ex: {route: true, fiberSize: false}
-
+      // for each selected fiber segment
       selectedFiberNames.forEach((fiberRoute) => {
         if (fiberAnnotations[fiberRoute]) {
+          // for each field in the annotations
           Object.keys(fiberAnnotations[fiberRoute]).forEach((annotationName) => {
-            const value = fiberAnnotations[fiberRoute][annotationName]
-            const firstValue = firstSelected[annotationName]
-            // if it doesn't exist yet: set the value
-            if (!firstValue) {
-              firstSelected[annotationName] = value
-              fieldsIdentical[annotationName] = true
-            }
-            // they aren't equal set fieldsIdentical to false and concat strings for displaying multiple values
-            else if (firstValue !== value) {
-              fieldsIdentical[annotationName] = false
-              firstSelected[annotationName] = firstValue.concat(', ', value)
-            }
-            // if they are equal and haven't been set before, set true
-            else if (!fieldsIdentical[annotationName]) fieldsIdentical[annotationName] = true
-          })
+              const newValue = fiberAnnotations[fiberRoute][annotationName]
+              const values = annotationObject[annotationName]
+              // if it doesn't exist yet: set the value
+              if (!values) {
+                annotationObject[annotationName] =  [ newValue ]
+              }
+              // they aren't equal push the new value
+              else if (!values.includes(newValue)) {
+                annotationObject[annotationName].push(newValue)
+              }
+            },
+          )
         }
       })
       const newFormValues = {} // values for form in state
       const newPlaceholders = {} // for multiple values set as placeholders instead
 
-      Object.entries(fieldsIdentical).forEach(([field, value]) => {
-        if (value) newFormValues[field] = firstSelected[field]
-        else newPlaceholders[field] = firstSelected[field]
+      Object.entries(annotationObject).forEach(([field, values]) => {
+        if (values.length === 1) newFormValues[field] = annotationObject[field][0]
+        else newPlaceholders[field] = annotationObject[field].join(', ')
       })
       setFormPlaceHolders(newPlaceholders)
       setFormValues(newFormValues)
@@ -68,15 +72,20 @@ const FiberThumbs = (props) => {
     setFormValues({ ...formValues, [name]: value })
   }
 
-  function saveAnnotations(event) {
-    const newAnnotations = {}
-    formValues
+  function handleBlur(event) {
+    const { value, name } = event.target
+
     selectedFiberNames.forEach((fiberName) => {
-      newAnnotations[fiberName] = formValues
+      fiberAnnotations[fiberName] = {
+        ...fiberAnnotations[fiberName],
+        [name]: value,
+      }
     })
-    setFiberAnnotations(newAnnotations)
+
+    setFiberAnnotations(fiberAnnotations)
   }
-//TODO: right now the fields are hardcoded, for route, fiber size, etc. later this will change to be dynamic
+
+  //TODO: right now the fields are hardcoded, for route, fiber size, etc. later this will change to be dynamic
   return (
     <>
       {selectedFiberNames.length > 0 && (
@@ -86,64 +95,21 @@ const FiberThumbs = (props) => {
           </div>
           <div className="subinfo">{selectedFiberNames.join(', ')}</div>
           <div>
-            <div className="plan-editor-thumb-input-container">
-              Route:
-              <Input
-                value={formValues.route}
-                name="route"
-                onChange={(event) => handleChange(event)}
-                // onBlur={(event) => handleBlur(event)}
-                placeholder={formPlaceholders.route}
-                disabled={formPlaceholders.route}
-                classes={'aro-input-black fiber-annotation'}
-              />
-            </div>
-            <div className="plan-editor-thumb-input-container">
-              Fiber Size:
-              <Input
-                value={formValues.fiberSize}
-                name="fiberSize"
-                onChange={(event) => handleChange(event)}
-                // onBlur={(event) => handleBlur(event)}
-                placeholder={formPlaceholders.fiberSize}
-                disabled={formPlaceholders.fiberSize}
-                classes={'aro-input-black fiber-annotation'}
-              />
-            </div>
-            <div className="plan-editor-thumb-input-container">
-              Fiber Count:
-              <Input
-                value={formValues.fiberCount}
-                name="fiberCount"
-                onChange={(event) => handleChange(event)}
-                // onBlur={(event) => handleBlur(event)}
-                placeholder={formPlaceholders.fiberCount}
-                disabled={formPlaceholders.fiberCount}
-                classes={'aro-input-black fiber-annotation'}
-              />
-            </div>
-            <div className="plan-editor-thumb-input-container">
-              Build Type:
-              <Input
-                value={formValues.buildType}
-                name="buildType"
-                onChange={(event) => handleChange(event)}
-                // onBlur={(event) => handleBlur(event)}
-                placeholder={formPlaceholders.buildType}
-                disabled={formPlaceholders.buildType}
-                classes={'aro-input-black fiber-annotation'}
-              />
-            </div>
-            <div className='fiber-thumb-btn-container'>
-              <button
-              type="button"
-              className="btn btn-sm btn-primary fiber-thumb-btn"
-              onClick={() => saveAnnotations()}
-              > 
-                Save
-              </button>
-              
-            </div>
+            {/* Map options for input */}
+            {fieldOptions.map((fieldOption) => (
+              <div className="plan-editor-thumb-input-container" key={fieldOption}>
+                {fieldOption}
+                <Input
+                  value={formValues[fieldOption]}
+                  name={fieldOption}
+                  onChange={(event) => handleChange(event)}
+                  onBlur={(event) => handleBlur(event)}
+                  placeholder={formPlaceholders[fieldOption]}
+                  disabled={formPlaceholders[fieldOption]}
+                  classes={'aro-input-black fiber-annotation'}
+                />
+              </div>
+            ))}
           </div>
           <button
             type="button"
