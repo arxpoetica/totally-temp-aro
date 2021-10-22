@@ -100,8 +100,7 @@ export class RoicReportsSmall extends Component {
           {/* If we have chart data, show it */}
           {/* roicResults.roicAnalysis.components does not has values,
           so condition is implemented to avoid error while rendering */}
-          {//Object.keys(roicResults.roicAnalysis.components).length > 0
-          selectedNetworkTypeKey in roicResults.roicAnalysis.components
+          {selectedNetworkTypeKey in roicResults.roicAnalysis.components
             ? roicResults.roicAnalysis.components[selectedNetworkTypeKey][selectedEntityType.id + '.' +
               selectedCalcType.id] !== undefined &&
               <Line
@@ -117,8 +116,7 @@ export class RoicReportsSmall extends Component {
           {/* <!-- If we do not have chart data, display a warning --> */}
           {/* roicResults.roicAnalysis.components does not has values,
           so condition is implemented to avoid error while rendering */}
-          {//Object.keys(roicResults.roicAnalysis.components).length > 0
-          selectedNetworkTypeKey in roicResults.roicAnalysis.components
+          {selectedNetworkTypeKey in roicResults.roicAnalysis.components
             ? roicResults.roicAnalysis.components[selectedNetworkTypeKey][selectedEntityType.id + '.' +
               selectedCalcType.id] === undefined && this.chartDataWarning()
             : this.chartDataWarning()

@@ -87,8 +87,7 @@ export class RoicReportsLarge extends Component {
                     <div key={index} style={{flex: '1 1 auto', width: '100%', position: 'relative'}}>
                       <div style={{display: 'flex', flexDirection: 'column', width: '100%', height: '100%', position: 'absolute'}}>
                         <div style={{flex: '1 1 auto'}}>
-                          {//Object.keys(roicResults.roicAnalysis.components).length > 0
-                          selectedNetworkTypeKey in roicResults.roicAnalysis.components
+                          {selectedNetworkTypeKey in roicResults.roicAnalysis.components
                             ? roicResults.roicAnalysis.components[selectedNetworkTypeKey]
                               [selectedEntityType.id + '.' + calcType.id] !== undefined && shouldRenderCharts &&
                               <Line
@@ -98,8 +97,7 @@ export class RoicReportsLarge extends Component {
                               />
                             : ''
                           }
-                          {//Object.keys(roicResults.roicAnalysis.components).length > 0
-                          selectedNetworkTypeKey in roicResults.roicAnalysis.components
+                          {selectedNetworkTypeKey in roicResults.roicAnalysis.components
                             ? roicResults.roicAnalysis.components[selectedNetworkTypeKey]
                               [selectedEntityType.id + '.' + calcType.id] === undefined && this.chartDataWarning()
                             : this.chartDataWarning()
@@ -124,8 +122,7 @@ export class RoicReportsLarge extends Component {
                         height: '100%', position: 'absolute'}}
                       >
                         <div style={{flex: '1 1 auto'}}>
-                          {//Object.keys(roicResults.roicAnalysis.components).length > 0
-                          selectedNetworkTypeKey in roicResults.roicAnalysis.components
+                          {selectedNetworkTypeKey in roicResults.roicAnalysis.components
                             ? roicResults.roicAnalysis.components[selectedNetworkTypeKey]
                               [selectedEntityType.id + '.' + calcType.id] !== undefined && shouldRenderCharts &&
                               <Line
@@ -135,8 +132,7 @@ export class RoicReportsLarge extends Component {
                               />
                             : ''
                           }
-                          {//Object.keys(roicResults.roicAnalysis.components).length > 0
-                          selectedNetworkTypeKey in roicResults.roicAnalysis.components
+                          {selectedNetworkTypeKey in roicResults.roicAnalysis.components
                             ? roicResults.roicAnalysis.components[selectedNetworkTypeKey]
                               [selectedEntityType.id + '.' + calcType.id] === undefined && this.chartDataWarning()
                             : this.chartDataWarning()
@@ -175,7 +171,7 @@ export class RoicReportsLarge extends Component {
       labels: timeLabels,
       datasets: [
         {
-          data: data,
+          data,
           fill: dataSetProps.fill,
           pointBackgroundColor: dataSetProps.pointBackgroundColor,
           pointHoverBackgroundColor: dataSetProps.pointHoverBackgroundColor
