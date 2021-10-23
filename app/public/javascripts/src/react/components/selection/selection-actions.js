@@ -184,6 +184,13 @@ function setSelectedMapObject(selectedMapObject) {
   }
 }
 
+function setObjectIdToMapObject(objectIdToMapObject) {
+  return {
+    type: Actions.SELECTION_SET_OBJECTID_TO_MAP_OBJECT,
+    payload: objectIdToMapObject,
+  }
+}
+
 export default {
   setActiveSelectionMode,
   clearAllPlanTargets,
@@ -198,4 +205,5 @@ export default {
   setMapSelection,
   setIsMapClicked,
   setSelectedMapObject,
+  setObjectIdToMapObject,
 }

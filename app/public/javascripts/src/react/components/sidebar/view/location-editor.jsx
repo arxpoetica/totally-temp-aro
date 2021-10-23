@@ -5,6 +5,8 @@ import AroHttp from '../../../common/aro-http'
 import WorkflowState from '../../../../shared-utils/workflow-state'
 import { createSelector } from 'reselect'
 import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap'
+import CreatableSelect from 'react-select/creatable'
+import SelectionActions from '../../selection/selection-actions'
 
 // We need a selector, else the .toJS() call will create an infinite digest loop
 const getAllLocationLayers = state => state.mapLayers.location
@@ -32,6 +34,9 @@ const locationTypes = {
   celltower: 'Celltowers',
 }
 
+const availableAttributesKeyList = ['loop_extended']
+const availableAttributesValueList = ['true', 'false']
+
 export const LocationEditor = (props) => {
 
   const [state, setState] = useState({
@@ -44,12 +49,14 @@ export const LocationEditor = (props) => {
     userCanChangeWorkflowState: false,
     deletedFeatures: [],
     isExpandLocAttributes: false,
+    attributeOptionsKey: [],
   })
 
   const { currentTransaction, isCommiting, locationTypeToAdd, objectIdToProperties,
     lastUsedNumberOfHouseholds, lastUsedNumberOfEmployees, userCanChangeWorkflowState, deletedFeatures,
     isExpandLocAttributes } = state
-  const { selectedLibraryItem, selectedMapObject, locationTypeToIconUrl } = props
+  const { selectedLibraryItem, selectedMapObject, locationTypeToIconUrl, objectIdToMapObject,
+    setObjectIdToMapObject } = props
 
   useEffect(() => {
     resumeOrCreateTransaction()
@@ -216,7 +223,93 @@ export const LocationEditor = (props) => {
   }
 
   const addLocationAttributes = () => {
-    //this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes['att'] = 'value'
+    const newValues = { ... objectIdToMapObject }
+    newValues[selectedMapObject.objectId].feature.attributes['att'] = 'value'
+    setObjectIdToMapObject(newValues)
+  }
+  
+  const formatAttributes = (key) => {
+    return [{ value: key, label: key}]
+  }
+  
+  const getAttributes = (attribute) => {
+    return attribute.map(item => ( {label: item, value: item} ))
+  }
+
+  const editLocationAttributes = (index, updatedKey, updatedVal) => {
+     const newValues = { ... objectIdToMapObject }
+     const { attributes } = newValues[selectedMapObject.objectId].feature
+     if (updatedKey != Object.keys(attributes)[index]) {
+      // delete key and insert updated key,value
+      var key = Object.keys(attributes)[index]
+      attributes[updatedKey] = attributes[key]
+      delete attributes[key]
+      setObjectIdToMapObject(newValues)
+    } else {
+      attributes[updatedKey] = updatedVal
+      setObjectIdToMapObject(newValues)
+    }
+    markSelectedLocationPropertiesDirty()
+  }
+  
+  const customStyles = {
+    singleValue: (provided, state) => ({
+      ...provided,
+      color: availableAttributesKeyList.indexOf(state.data.value) > -1 ? '#0000FF' : '',
+    }),
+    placeholder: (styles) => ({
+      ...styles,
+      overflow: 'hidden',
+      whiteSpace: 'nowrap'
+    })
+  }
+
+  const deleteLocationAttributes = (index, key) => {
+    askUserToConfirmBeforeDelete(key)
+      .then((okToDelete) => {
+        if (okToDelete) {
+          markSelectedLocationPropertiesDirty()
+          const newValues = { ... objectIdToMapObject }
+          const { attributes } = newValues[selectedMapObject.objectId].feature
+          const keypairToDelete = Object.keys(attributes)[index]
+          delete newValues[selectedMapObject.objectId].feature.attributes[keypairToDelete]
+          setObjectIdToMapObject(newValues)
+        }
+      })
+  }
+
+  const askUserToConfirmBeforeDelete = (key) => {
+    return new Promise((resolve, reject) => {
+      swal({
+        title: `Delete Attribute?`,
+        text: `Are you sure you want to delete "${key}"?`,
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No'
+      }, (result) => {
+        if (result) {
+          resolve(true)
+        } else {
+          resolve(false)
+        }
+      })
+    })
+  }
+
+  const loadAttributesFromServer = () => {
+    if (selectedMapObject) {
+      AroHttp.get(`/service/library/transaction/${currentTransaction.id}/features/${selectedMapObject.objectId}`)
+        .then((result) => {
+          objectIdToMapObject[selectedMapObject.objectId].feature = result.data
+          setObjectIdToMapObject(objectIdToMapObject)
+          objectIdToProperties[selectedMapObject.objectId].isDirty = false
+          objectIdToProperties[selectedMapObject.objectId].numberOfHouseholds = result.data.attributes.number_of_households || 1
+          setState((state) => ({ ...state, objectIdToProperties }))
+        })
+        .catch((err) => console.error(err))
+    }
   }
   
   return (
@@ -224,7 +317,7 @@ export const LocationEditor = (props) => {
       <div className="view-mode-container">
         {/* BEGIN section transaction details */}
         {
-          currentTransaction &&
+          (currentTransaction && Object.keys(objectIdToProperties).length) &&
           <>
             <div className="row">
               <div className="col-md-12" style={{ paddingBottom: "15px" }}>
@@ -432,7 +525,7 @@ export const LocationEditor = (props) => {
                           || (objectIdToProperties[selectedMapObject.objectId].workflowStateId == WorkflowState.INVALIDATED.id)
                       ) ? 'disabled' : null
                     }
-                    onClick={() => setState((state) => ({ ...state, isExpandLocAttributes: true }))}
+                    onClick={() => {setState((state) => ({ ...state, isExpandLocAttributes: true })), loadAttributesFromServer()}}
                   >
                     <i className="far fa-pencil"></i>&nbsp;&nbsp;Expand
                   </button>
@@ -446,7 +539,7 @@ export const LocationEditor = (props) => {
       </div>
 
       {
-        currentTransaction && selectedMapObject && 
+        currentTransaction && selectedMapObject && Object.keys(objectIdToProperties).length && 
           <Modal isOpen={isExpandLocAttributes} size="md" toggle={expandLocAttributes} backdrop={false}>
             <ModalHeader toggle={expandLocAttributes}>
               Edit Location Attributes - {selectedMapObject.objectId}
@@ -523,16 +616,42 @@ export const LocationEditor = (props) => {
                 </tbody>
                 <tbody>
                   <tr>
-                    <td colspan="3"> Other Attributes: </td>
+                    <td colSpan="3"> Other Attributes: </td>
                   </tr>
                   {
                     Object.entries(objectIdToMapObject[selectedMapObject.objectId].feature.attributes).map(([key, val], index) => {
                       return val != null && val != 'null' && key != 'number_of_households' && key != 'location_category' &&               
                         <tr>
-                          <td></td>
-                          <td></td>
+                          <td style={{ width: '200px' }}>
+                            <CreatableSelect
+                              placeholder="Create or search a attribute Key"
+                              isClearable={false}
+                              closeMenuOnSelect={true}
+                              components={{ DropdownIndicator: null }}
+                              styles={customStyles}
+                              value={formatAttributes(key)}
+                              options={getAttributes(availableAttributesKeyList)}
+                              onChange={(event) => editLocationAttributes(index, event.value, val)}
+                            />
+                          </td>
                           <td>
-                            <button className="btn btn-sm btn-danger"><i className="fa fa-trash-alt"></i></button>  
+                            <CreatableSelect
+                              placeholder="Create or search a attribute Value"
+                              isClearable={false}
+                              closeMenuOnSelect={true}
+                              components={{ DropdownIndicator: null }}
+                              value={formatAttributes(objectIdToMapObject[selectedMapObject.objectId].feature.attributes[key])}
+                              options={getAttributes(availableAttributesValueList)}
+                              onChange={(event) => editLocationAttributes(index, key, event.value)}
+                            />
+                          </td>
+                          <td>
+                            <button
+                              className="btn btn-sm btn-danger"
+                              onClick={() => deleteLocationAttributes(index, key)}
+                            >
+                              <i className="fa fa-trash-alt"></i>
+                            </button>  
                           </td>
                         </tr>
                     })
@@ -540,7 +659,7 @@ export const LocationEditor = (props) => {
                 </tbody>
               </table>
               <div>
-                <button className="btn">
+                <button className="btn" onClick={() => addLocationAttributes()}>
                   <i className="fa fa-plus"></i>
                 </button>
               </div>
@@ -590,9 +709,11 @@ const mapStateToProps = (state) => ({
   selectedLibraryItem: state.plan.dataItems.location.selectedLibraryItems[0],
   selectedMapObject: state.selection.selectedMapObject,
   locationTypeToIconUrl: getLocationTypeToIconUrl(state),
+  objectIdToMapObject: state.selection.objectIdToMapObject,
 })
 
 const mapDispatchToProps = (dispatch) => ({
+  setObjectIdToMapObject: objectIdToMapObject => dispatch(SelectionActions.setObjectIdToMapObject(objectIdToMapObject)),
 })
 
 export default wrapComponentWithProvider(reduxStore, LocationEditor, mapStateToProps, mapDispatchToProps)

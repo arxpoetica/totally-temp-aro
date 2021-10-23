@@ -42,6 +42,7 @@ const defaultState = {
   },
   isMapClicked: false,
   selectedMapObject: null,
+  objectIdToMapObject: {}
 }
 
 function setActiveSelectionModeById (state, newSelectionModeId) {
@@ -207,6 +208,9 @@ function selectionReducer (state = defaultState, action) {
 
     case Actions.SELECTION_SET_SELECTED_MAP_OBJECT:
       return setSelectedMapObject(state, action.payload)
+
+    case Actions.SELECTION_SET_OBJECTID_TO_MAP_OBJECT:
+      return { ...state, objectIdToMapObject: action.payload }
 
     default:
       return state
