@@ -635,11 +635,10 @@ export class ToolBar extends Component {
     */
     // check if the user was in plan-edit mode and made some edits to the plan
     // ask to commit or discard changes
-    if (this.props.selectedDisplayMode === this.displayModes.EDIT_PLAN
-      && this.props.transaction.id
+    if (this.props.transaction && this.props.transaction.id
       ) {
       swal({
-        title: 'Save modified settings?',
+        title: 'Unsaved Plan Edit Changes',
         text: 'Do you want to commit your changes to the Plan?',
         type: 'warning',
         confirmButtonColor: '#DD6B55',
