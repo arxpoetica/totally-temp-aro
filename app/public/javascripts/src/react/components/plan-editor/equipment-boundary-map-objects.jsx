@@ -26,6 +26,8 @@ export class EquipmentBoundaryMapObjects extends Component {
       fillColor: '#1f7de6',
       fillOpacity: 0.02,
     }
+    
+    this.clearMapObjectOverlay = this.clearMapObjectOverlay.bind(this);
   }
 
   render () {
@@ -204,68 +206,86 @@ export class EquipmentBoundaryMapObjects extends Component {
       })
     })
     mapObject.addListener('contextmenu', event => {
+      let vertexPayload;
+      if(this.mapObjectOverlay.length > 0) {
+        this.addMarkerOverlay(event);
+        vertexPayload = this.mapObjectOverlay;
+      } else {
+        vertexPayload = event.vertex;
+      }
       const eventXY = WktUtils.getXYFromEvent(event)
-      const vertexPayload = this.mapObjectOverlay.length > 0 ? this.mapObjectOverlay : event.vertex;
-      self.props.showContextMenuForEquipmentBoundary(mapObject, eventXY.x, eventXY.y, vertexPayload)
+      self.props.showContextMenuForEquipmentBoundary(mapObject, eventXY.x, eventXY.y, vertexPayload, this.clearMapObjectOverlay)
     })
-
+    
     mapObject.addListener('click', event => {
       if (event.vertex) {
         if (event.domEvent.shiftKey) {
           const indexOfMarker = this.mapObjectOverlay.findIndex((marker) => {
             return marker.title === `${event.vertex}`
           });
-
+          
           if (indexOfMarker > -1) {
             const [removedMarker] = this.mapObjectOverlay.splice(indexOfMarker, 1)
             removedMarker.setMap(null);
           } else {
-            this.mapObjectOverlay = this.mapObjectOverlay.concat(new google.maps.Marker({
-              position: event.latLng,
-              map: this.props.googleMaps,
-              title: `${event.vertex}`,
-              icon: {
-                path: google.maps.SymbolPath.CIRCLE,
-                fillOpacity: 0,
-                strokeColor: "#FF69B4",
-                strokeOpacity: 1,
-                strokeWeight: 2,
-                scale: 5,
-                anchor: new google.maps.Point(.1, .1)
-              }
-            }));
+            this.addMarkerOverlay(event);
+            console.log(this.mapObjectOverlay);
           }
         }
       } else {
         for (const marker of this.mapObjectOverlay) {
           marker.setMap(null);
         }
-
+        
         this.mapObjectOverlay = [];
       }
     })
-
-    google.maps.event.addDomListener(document, 'keyup', (e) => {
+    
+    google.maps.event.addDomListener(document, 'keydown', (e) => {
       const code = (e.keyCode ? e.keyCode : e.which);
       if ((code === 8 || code === 46) && this.mapObjectOverlay.length > 0) {
-        for (const marker of this.mapObjectOverlay) {
-          mapObject.getPath().removeAt(Number(marker.title))
-          if (mapObject.getPath().getAt(Number(marker.title))) {
-            console.warn("equipment-boundary-map-objects:245, Vertex failed to be deleted.")
-          }
-
-          marker.setMap(null);
-        }
-
-        this.mapObjectOverlay = [];
+        self.props.deleteBoundaryVertices(mapObject, this.mapObjectOverlay, this.clearMapObjectOverlay)
       }
     });
   }
-
+  
   clearAll () {
+    this.clearMapObjectOverlay()
     this.deleteMapObject()
     // delete all neighbors
     this.deleteNeighbors(Object.keys(this.neighborObjectsById))
+  }
+
+  addMarkerOverlay(event) {
+    this.mapObjectOverlay = this.mapObjectOverlay.concat(new google.maps.Marker({
+      position: event.latLng,
+      map: this.props.googleMaps,
+      title: `${event.vertex}`,
+      icon: { url: '/svg/map-icons/marker-circle.png', anchor: new google.maps.Point(6.5, 6.5), scaledSize: new google.maps.Size(12, 12)},
+      // icon: {
+      //   path: google.maps.SymbolPath.CIRCLE,
+      //   fillOpacity: 1,
+      //   fillColor: "white",
+      //   strokeColor: "#FF69B4",
+      //   strokeOpacity: 1,
+      //   strokeWeight: 2,
+      //   scale: 6,
+      //   anchor: new google.maps.Point(.1, .1)
+      // }
+    }));
+  }
+
+  clearMapObjectOverlay() {
+    const mapObjectOverlayClone = [...this.mapObjectOverlay]
+    // Sort is necessary to ensure that indexes will not be reassigned while deleting more than one vertex.
+    for (const marker of mapObjectOverlayClone.sort()) {
+      // We are tracking the multiple selected verticies to delete by markers created.
+      // And storing vertex info on the corrosponding marker.
+      this.mapObject.getPath().removeAt(Number(marker.title))
+      marker.setMap(null);
+    }
+
+    this.mapObjectOverlay = [];
   }
 
   componentWillUnmount () {
@@ -301,6 +321,7 @@ const mapDispatchToProps = dispatch => ({
     dispatch(PlanEditorActions.showContextMenuForEquipmentBoundary(mapObject, x, y, vertex))
   },
   boundaryChange: (subnetId, geometry) => dispatch(PlanEditorActions.boundaryChange(subnetId, geometry)),
+  deleteBoundaryVertices: (mapObjects, vertices, callBack) => dispatch(PlanEditorActions.deleteBoundaryVertices(mapObjects, vertices, callBack)),
   selectBoundary: objectId => dispatch(SelectionActions.setPlanEditorFeatures([objectId])),
 })
 

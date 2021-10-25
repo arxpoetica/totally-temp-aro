@@ -284,18 +284,9 @@ function deleteBoundaryVertex (mapObject, vertex) {
   }
 }
 
-function deleteBoundaryVertices (mapObject, vertices) {
-  return dispatch => {
-    // checks it is a valid vertex and that there are at least 3 other vertices left
-    for (let vertex of vertices) {      
-      if (vertex && mapObject.getPath().getLength() > 3) {
-        // We are tracking the multiple selected verticies to delete by markers created.
-        // And storing vertex info on the corrosponding marker.
-
-        mapObject.getPath().removeAt(Number(vertex.title))
-        vertex.setMap(null)
-      }
-    }
+function deleteBoundaryVertices (mapObject, vertices, callBack) {
+  return async dispatch => {
+    callBack();
   }
 }
 
@@ -463,7 +454,7 @@ function assignLocation (locationId, terminalId) {
   }
 }
 
-function showContextMenuForEquipmentBoundary (mapObject, x, y, vertex) {
+function showContextMenuForEquipmentBoundary (mapObject, x, y, vertex, callBack) {
   return (dispatch) => {
     const menuActions = []
     menuActions.push(
@@ -473,7 +464,8 @@ function showContextMenuForEquipmentBoundary (mapObject, x, y, vertex) {
         'PlanEditorActions',
         Array.isArray(vertex) ? 'deleteBoundaryVertices' : 'deleteBoundaryVertex',
         mapObject,
-        vertex
+        vertex,
+        callBack
       )
     )
 
