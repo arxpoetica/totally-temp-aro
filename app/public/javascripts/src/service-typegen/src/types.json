@@ -403,7 +403,7 @@
             "type": "integer"
           },
           "fiberCount": {
-            "type": "integer"
+            "type": "string"
           },
           "buildType": {
             "type": "string"
@@ -815,7 +815,7 @@
         "type": "integer"
       },
       "fiberCount": {
-        "type": "integer"
+        "type": "string"
       },
       "buildType": {
         "type": "string"
@@ -1075,7 +1075,7 @@
                 "type": "integer"
               },
               "fiberCount": {
-                "type": "integer"
+                "type": "string"
               },
               "buildType": {
                 "type": "string"

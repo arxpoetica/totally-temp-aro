@@ -3,6 +3,7 @@ import { PropTypes } from 'prop-types'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import PlanEditorActions from './plan-editor-actions'
+import PlanEditorSelectors from './plan-editor-selectors'
 import PlanEditorThumbs from './plan-editor-thumbs.jsx'
 import PlanEditorRecalculate from './plan-editor-recalculate.jsx'
 import EquipmentDragger from './equipment-dragger.jsx'
@@ -31,6 +32,7 @@ export const PlanEditor = props => {
     subnets,
     selectedSubnetId,
     equipments,
+    rootSubnet,
     updateFeatureProperties,
   } = props
 
@@ -49,12 +51,12 @@ export const PlanEditor = props => {
     //console.log({propVal, path, newValObj, event})
   }
   
-  function onFeatureFormSave (newValObj, objectId) {
-    let feature = features[objectId].feature
-    let updatedFeature = { ...feature, 
-      networkNodeEquipment: newValObj,
-    }
-    updateFeatureProperties(updatedFeature)
+  function onFeatureFormSave(newValObj, objectId) {
+    const { feature } = features[objectId]
+    updateFeatureProperties({
+      feature: { ...feature, networkNodeEquipment: newValObj },
+      rootSubnetId: rootSubnet.subnetNode,
+    })
   }
 
   return (
@@ -131,13 +133,14 @@ const mapStateToProps = state => ({
   subnets: state.planEditor.subnets,
   selectedSubnetId: state.planEditor.selectedSubnetId,
   equipments: state.mapLayers.networkEquipment.equipments,
+  rootSubnet: PlanEditorSelectors.getRootSubnet(state),
 })
 
 const mapDispatchToProps = dispatch => ({
   resumeOrCreateTransaction: (planId, userId) => dispatch(PlanEditorActions.resumeOrCreateTransaction(planId, userId)),
   commitTransaction: transactionId => dispatch(PlanEditorActions.commitTransaction(transactionId)),
   discardTransaction: transactionId => dispatch(PlanEditorActions.discardTransaction(transactionId)),
-  updateFeatureProperties: feature => dispatch(PlanEditorActions.updateFeatureProperties(feature)),
+  updateFeatureProperties: obj => dispatch(PlanEditorActions.updateFeatureProperties(obj)),
 })
 
 const PlanEditorComponent = wrapComponentWithProvider(reduxStore, PlanEditor, mapStateToProps, mapDispatchToProps)
