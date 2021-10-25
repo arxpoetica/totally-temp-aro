@@ -20,6 +20,7 @@ import PlanInputsModal from './plan-inputs-modal.jsx'
 import GlobalsettingsActions from '../global-settings/globalsettings-action'
 import GlobalSettings from '../global-settings/global-settings.jsx'
 import { logoutApp } from '../../common/view-utils'
+import PlanEditorActions from '../plan-editor/plan-editor-actions'
 
 export class ToolBar extends Component {
   constructor (props) {
@@ -34,7 +35,6 @@ export class ToolBar extends Component {
       EQUIPMENT_INFO: 'EQUIPMENT_INFO',
       BOUNDARIES_INFO: 'BOUNDARIES_INFO',
       ROAD_SEGMENT_INFO: 'ROAD_SEGMENT_INFO',
-      PLAN_SUMMARY_REPORTS: 'PLAN_SUMMARY_REPORTS',
       COVERAGE_BOUNDARY: 'COVERAGE_BOUNDARY',
       EDIT_LOCATIONS: 'EDIT_LOCATIONS',
       EDIT_SERVICE_LAYER: 'EDIT_SERVICE_LAYER',
@@ -629,6 +629,32 @@ export class ToolBar extends Component {
   }
 
   createEphemeralPlan () {
+    /* TODO: Remove this check from here and add it to plan-editor.jsx
+       when plan-edit component unmounts, and the user has unsaved
+       chagnes in plan
+    */
+    // check if the user was in plan-edit mode and made some edits to the plan
+    // ask to commit or discard changes
+    if (this.props.selectedDisplayMode === this.displayModes.EDIT_PLAN
+      && this.props.transaction.id
+      ) {
+      swal({
+        title: 'Save modified settings?',
+        text: 'Do you want to commit your changes to the Plan?',
+        type: 'warning',
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Commit', // 'Yes',
+        showCancelButton: true,
+        cancelButtonText: 'Discard', // 'No',
+        closeOnConfirm: true
+      }, (result) => {
+        if (result) {
+          this.props.commitTransaction(this.props.transaction.id)
+        } else {
+          this.props.clearTransaction()
+        }
+      })
+    } 
     this.props.createNewPlan(true)
       .then((result) => this.props.loadPlan(result.data.id))
       .catch((err) => console.error(err))
@@ -1114,6 +1140,7 @@ const mapStateToProps = (state) => ({
   viewSetting: state.toolbar.viewSetting,
   viewFiberOptions: state.toolbar.viewFiberOptions,
   loggedInUser: state.user.loggedInUser,
+  transaction: state.planEditor.transaction,
 })
 
 const mapDispatchToProps = (dispatch) => ({
@@ -1157,6 +1184,8 @@ const mapDispatchToProps = (dispatch) => ({
   ),
   setShowGlobalSettings: (status) => dispatch(GlobalsettingsActions.setShowGlobalSettings(status)),
   setViewSetting: (viewSetting) => dispatch(ToolBarActions.setViewSetting(viewSetting)),
+  commitTransaction: transactionId => dispatch(PlanEditorActions.commitTransaction(transactionId)),
+  clearTransaction: () => dispatch(PlanEditorActions.clearTransaction()),
 })
 
 const ToolBarComponent = wrapComponentWithProvider(reduxStore, ToolBar, mapStateToProps, mapDispatchToProps)

@@ -3,7 +3,6 @@
  */
 'use strict'
 
-import { createSelector } from 'reselect'
 import MapTileRenderer from './map-tile-renderer'
 import TileUtilities from './tile-utilities'
 import MapUtilities from '../common/plan/map-utilities'
@@ -11,9 +10,10 @@ import FeatureSelector from './feature-selector'
 import Constants from '../common/constants'
 import SelectionModes from '../../react/components/selection/selection-modes'
 import MenuAction, { MenuActionTypes } from '../common/context-menu/menu-action'
-import MenuItem, { MenuItemTypes } from '../common/context-menu/menu-item'
-import FeatureSets from '../../react/common/featureSets'
+import MenuItem from '../common/context-menu/menu-item'
 import ToolBarActions from '../../react/components/header/tool-bar-actions'
+import PlanEditorActions from '../../react/components/plan-editor/plan-editor-actions'
+import PlanEditorSelectors from '../../react/components/plan-editor/plan-editor-selectors'
 import { dequal } from 'dequal'
 
 class TileComponentController {
@@ -292,7 +292,8 @@ class TileComponentController {
       this.state.viewModePanels,
       this.state,
       MapUtilities.getPixelCoordinatesWithinTile.bind(this),
-      this.selectionIds,
+      this.selectedSubnetLocations,
+      this.locationAlerts,
       this.rShowFiberSize,
       this.rViewSetting
     ))
@@ -317,6 +318,7 @@ class TileComponentController {
     this.overlayRightclickListener = this.mapRef.addListener('rightclick', (event) => {
       this.getFeaturesUnderLatLng(event.latLng)
       .then((hitFeatures) => {
+        hitFeatures.event = event
         this.state.mapFeaturesRightClickedEvent.next(hitFeatures)
       })
       // Note: I just fixed a boolean logic typo having to do with rSelectedDisplayMode in getFilteredFeaturesUnderLatLng()
@@ -418,13 +420,19 @@ class TileComponentController {
     })
 
     this.overlayClickListener = this.mapRef.addListener('click', async(event) => {
-      const { isShiftPressed } = this.state
 
       if (this.contextMenuService.isMenuVisible.getValue()) {
         this.contextMenuService.menuOff()
         this.$timeout()
         return
       }
+
+      // let plan edit do its thing
+      if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.EDIT_PLAN) {
+        return
+      }
+
+      const { isShiftPressed } = this.state
 
       try {
         // ToDo: depricate getFilteredFeaturesUnderLatLng switch to this
@@ -481,6 +489,30 @@ class TileComponentController {
       } catch (error) {
         console.error(error)
       }
+    })
+
+    // FIXME: move this to the plan edit jsx files when loading locations from new API
+    this.mousemoveTimer = null
+    this.overlayMousemoveListener = this.mapRef.addListener('mousemove', event => {
+      // we're only reacting to `mousemove` in plan edit mode
+      if (this.state.selectedDisplayMode.getValue() !== this.state.displayModes.EDIT_PLAN) {
+        return
+      }
+
+      clearTimeout(this.mousemoveTimer)
+      this.mousemoveTimer = setTimeout(async() => {
+        // FIXME: let's JUST load location information
+        // ToDo: 
+        // I think that anytime this file dispatches a redux action it causes a rerender
+        // We'll be compleetly replacing this system - until then send info through state.js
+        const { locations } = await this.getFeaturesUnderLatLng(event.latLng)
+        const ids = locations.map(location => location.object_id)
+        this.setCursorLocationIds(ids)
+      }, 100)
+    })
+    this.overlayMouseoutListener = this.mapRef.addListener('mouseout', () => {
+      clearTimeout(this.mousemoveTimer)
+      this.clearCursorLocationIds()
     })
 
     this.getFeaturesUnderLatLng = function (latLng) {
@@ -596,6 +628,17 @@ class TileComponentController {
     if (this.overlayClickListener) {
       google.maps.event.removeListener(this.overlayClickListener)
       this.overlayClickListener = null
+    }
+
+    // FIXME: move this to the plan edit jsx files when loading locations from new API
+    if (this.overlayMouseoutListener) {
+      google.maps.event.removeListener(this.overlayMouseoutListener)
+      this.overlayMouseoutListener = null
+    }
+    if (this.overlayMousemoveListener) {
+      google.maps.event.removeListener(this.overlayMousemoveListener)
+      this.overlayMousemoveListener = null
+      this.mousemoveTimer = null
     }
 
     if (this.overlayRightclickListener) {
@@ -743,7 +786,6 @@ class TileComponentController {
       activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
       selectionModes: reduxState.selection.selectionModes,
       selection: reduxState.selection,
-      selectionIds: reduxState.selection.planEditorFeatures,
       rSelection: reduxState.selection.selection,
       stateMapLayers: reduxState.mapLayers,
       networkAnalysisType: reduxState.optimization.networkOptimization.optimizationInputs.analysis_type,
@@ -752,23 +794,30 @@ class TileComponentController {
       rShowFiberSize: reduxState.toolbar.showFiberSize, // Set to map-tile-render.js from tool-bar.jsx
       rViewSetting: reduxState.toolbar.viewSetting, // Set to map-tile-render.js from aro-debug.jsx
       rSelectedDisplayMode: reduxState.toolbar.rSelectedDisplayMode,
-      rActiveViewModePanel: reduxState.toolbar.rActiveViewModePanel
+      rActiveViewModePanel: reduxState.toolbar.rActiveViewModePanel,
+      subnetFeatures: reduxState.planEditor.subnetFeatures,
+      locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(reduxState),
+      selectedSubnetLocations: PlanEditorSelectors.getSelectedSubnetLocations(reduxState),
     }
   }
 
   mapDispatchToTarget (dispatch) {
     return {
-      rActiveViewModePanelAction: (value) => dispatch(ToolBarActions.activeViewModePanel(value))
-     }
+      rActiveViewModePanelAction: value => dispatch(ToolBarActions.activeViewModePanel(value)),
+      setCursorLocationIds: ids => dispatch(PlanEditorActions.setCursorLocationIds(ids)),
+      clearCursorLocationIds: () => dispatch(PlanEditorActions.clearCursorLocationIds()),
+    }
   }
 
   mergeToTarget (nextState, actions) {
+    // store the previous values before Object.assign
     const currentSelectionModeId = this.activeSelectionModeId
     const oldPlanTargets = this.selection && this.selection.planTargets
     const prevStateMapLayers = { ...this.stateMapLayers }
-    const currentSelectionIds = this.selectionIds
     const rShowFiberSize = this.rShowFiberSize
     const rViewSetting = this.rViewSetting
+    const selectedSubnetLocations = this.selectedSubnetLocations
+    const locationAlerts = this.locationAlerts
 
     var needRefresh = false
     var doConduitUpdate = this.doesConduitNeedUpdate(prevStateMapLayers, nextState.stateMapLayers)
@@ -777,34 +826,42 @@ class TileComponentController {
     Object.assign(this, nextState)
     Object.assign(this, actions)
 
+    let overlayMap = this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX)
+    
     if (doConduitUpdate) {
-      this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setStateMapLayers(nextState.stateMapLayers)
+      overlayMap.setStateMapLayers(nextState.stateMapLayers)
     }
 
     if (currentSelectionModeId !== nextState.activeSelectionModeId ||
         this.hasPlanTargetSelectionChanged(oldPlanTargets, nextState.selection && nextState.selection.planTargets)) {
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
-        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setAnalysisSelectionMode(nextState.activeSelectionModeId)
-        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setSelection(nextState.selection)
+        overlayMap.setAnalysisSelectionMode(nextState.activeSelectionModeId)
+        overlayMap.setSelection(nextState.selection)
         needRefresh = true
       }
     }
 
-    if (!dequal(currentSelectionIds, nextState.selectionIds)) {
-      this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setSelectionIds(nextState.selectionIds)
+    // - plan edit - //
+    if (!dequal(selectedSubnetLocations, nextState.selectedSubnetLocations)) {
+      overlayMap.setSelectedSubnetLocations(nextState.selectedSubnetLocations)
       needRefresh = true
     }
+    if (!dequal(locationAlerts, nextState.locationAlerts)) {
+      overlayMap.setLocationAlerts(nextState.locationAlerts)
+      needRefresh = true
+    }
+    // - //
 
     // Set the current state in rShowFiberSize
     // If this is not set, the redux state does not change, it shows only the initial state, so current state is set in rShowFiberSize.
     if (rShowFiberSize !== nextState.rShowFiberSize) {
-      this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setReactShowFiberSize(nextState.rShowFiberSize)
+      overlayMap.setReactShowFiberSize(nextState.rShowFiberSize)
       needRefresh = true
     }
 
     // Set the current state in rViewSetting
     if (rViewSetting !== nextState.rViewSetting) {
-      this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setReactViewSetting(nextState.rViewSetting)
+      overlayMap.setReactViewSetting(nextState.rViewSetting)
       needRefresh = true
     }
 

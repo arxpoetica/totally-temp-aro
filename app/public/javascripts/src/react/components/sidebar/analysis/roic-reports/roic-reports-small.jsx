@@ -19,10 +19,11 @@ export class RoicReportsSmall extends Component {
   }
 
   render () {
-
+    // ToDo: repeat code in here and roic-reports-large, 
+    //  make smaller components, then large and small will be different compositions of those components
     const { roicResults, networkTypes, categories, entityTypes, graphOptions } = this.props
     const { selectedEntityType, selectedNetworkType, selectedCategory, selectedCalcType } = this.state
-
+    let selectedNetworkTypeKey = selectedNetworkType.id.toUpperCase()
     return (
       <div style={{display: 'flex', flexDirection: 'column'}}>
         <div style={{flex: '0 0 auto'}}>
@@ -99,8 +100,8 @@ export class RoicReportsSmall extends Component {
           {/* If we have chart data, show it */}
           {/* roicResults.roicAnalysis.components does not has values,
           so condition is implemented to avoid error while rendering */}
-          {Object.keys(roicResults.roicAnalysis.components).length > 0
-            ? roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' +
+          {selectedNetworkTypeKey in roicResults.roicAnalysis.components
+            ? roicResults.roicAnalysis.components[selectedNetworkTypeKey][selectedEntityType.id + '.' +
               selectedCalcType.id] !== undefined &&
               <Line
                 display={'block'} width={250} height={533}
@@ -115,8 +116,8 @@ export class RoicReportsSmall extends Component {
           {/* <!-- If we do not have chart data, display a warning --> */}
           {/* roicResults.roicAnalysis.components does not has values,
           so condition is implemented to avoid error while rendering */}
-          {Object.keys(roicResults.roicAnalysis.components).length > 0
-            ? roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' +
+          {selectedNetworkTypeKey in roicResults.roicAnalysis.components
+            ? roicResults.roicAnalysis.components[selectedNetworkTypeKey][selectedEntityType.id + '.' +
               selectedCalcType.id] === undefined && this.chartDataWarning()
             : this.chartDataWarning()
           }
@@ -138,6 +139,7 @@ export class RoicReportsSmall extends Component {
     const { roicResults, dataSetProps, timeLabels } = this.props
     const { selectedEntityType, selectedNetworkType, selectedCalcType } = this.state
 
+
     return {
       labels: timeLabels,
       datasets: [
@@ -154,6 +156,7 @@ export class RoicReportsSmall extends Component {
   handleNetworkTypeChange (event) {
     const selectedNetworkType = this.props.networkTypes.find(item => item.id === event.target.value)
     this.setState({ selectedNetworkType })
+    this.props.loadROICResultsForPlan(this.props.planId)
   }
 
   handleCategoriesChange (event) {
@@ -169,6 +172,7 @@ export class RoicReportsSmall extends Component {
   handleEntityTypeChange (event) {
     const selectedEntityType = this.props.entityTypes.find(item => item.id === event.target.value)
     this.setState({ selectedEntityType })
+    this.props.loadROICResultsForPlan(this.props.planId)
   }
 }
 
@@ -178,6 +182,7 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
   loadNetworkNodeTypesEntity: () => dispatch(RoicReportsActions.loadNetworkNodeTypesEntity()),
+  loadROICResultsForPlan: (planId) => dispatch(RoicReportsActions.loadROICResultsForPlan(planId)),
 })
 
 const RoicReportsSmallComponent = connect(mapStateToProps, mapDispatchToProps)(RoicReportsSmall)

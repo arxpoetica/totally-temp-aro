@@ -1,0 +1,48 @@
+/* ========================= >>>>> map overlay view >>>>> */
+
+.map-overlay-view {
+  position: absolute;
+}
+
+/* ========================= >>>>> map tooltip >>>>> */
+
+.map-tooltip {
+  position: absolute;
+  top: -25px;
+  left: -3px;
+  max-width: 250px;
+  width: max-content;
+  background-color: white;
+  border-radius: 5px;
+  font: 14px/1 var(--font);
+  box-shadow: 0 2px 8px 1px rgba(0, 0, 0, 0.25);
+  transform: translate(-50%, -100%);
+  pointer-events: none;
+}
+
+.map-tooltip ul {
+  padding-inline-start: 18px;
+  margin-bottom: 0px;
+}
+
+.map-tooltip li {
+  margin-bottom: 4px;
+}
+.map-tooltip li:last-child { margin-bottom: 0; }
+
+.map-tooltip .content {
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.map-tooltip .content::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: calc(50% - 3px);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid white;
+}

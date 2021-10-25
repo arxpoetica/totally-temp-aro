@@ -5,23 +5,13 @@ import wrapComponentWithProvider from '../../../common/provider-wrapped-componen
 import NetworkOptimizationActions from './network-optimization-actions'
 import PlanEditorActions from '../../plan-editor/plan-editor-actions'
 import SelectionActions from '../../selection/selection-actions'
+import { EditorInterface, EditorInterfaceItem } from './editor-interface.jsx'
 import PlanTargetListComponent from '../../selection/plan-target-list.jsx'
-import { createSelector } from 'reselect'
 import NetworkOptimizationInputForm from './network-optimization-input-form.jsx'
 import NetworkOptimizationButton from './network-optimization-button.jsx'
-import Constants from '../../../common/constants'
+import NetworkOptimizationSelectors from './network-optimization-selectors'
 import AngConstants from '../../../../components/common/constants' // ToDo: merge constants, put in Redux?
 import DropdownList from 'react-widgets/lib/DropdownList'
-import { getFormValues } from 'redux-form'
-
-const networkOptimizationInputSelector = getFormValues(Constants.NETWORK_OPTIMIZATION_INPUT_FORM)
-const getSelectionModes = state => state.selection.selectionModes
-const getAllSelectionModes = createSelector([getSelectionModes], (selectionModes) => {
-  // NOTE: filter prior used to remove legacy error lines from angular in
-  // `selection-reducer.js` and `selection-modes.js`
-  // THIS COMMENT CAN BE DELETED WHEN THOSE LINES ARE DELETED
-  return JSON.parse(JSON.stringify(selectionModes))
-})
 
 export class NetworkOptimizationInput extends Component {
   render () {
@@ -39,26 +29,21 @@ export class NetworkOptimizationInput extends Component {
           networkAnalysisTypeId={this.props.networkAnalysisTypeId}
           displayOnly={!this.areControlsEnabled()} enableReinitialize />
 
-        <div className='ei-header ei-no-pointer' style={{ marginBottom: '0px' }}>Routing Selection</div>
-        <div className='ei-gen-level ei-internal-level' style={{ paddingLeft: '11px' }}>
-          <div className='ei-items-contain'>
-            <div className='ei-property-item'>
-              <div className='ei-property-label'>Selection Type</div>
-              <div className='ei-property-value'>
-                <DropdownList
-                  data={this.props.allSelectionModes}
-                  valueField='id'
-                  textField='description'
-                  value={this.props.activeSelectionModeId}
-                  readOnly={!this.areControlsEnabled()}
-                  onChange={(val, event) => this.onSelectionModeChange(val, event)} />
-              </div>
-            </div>
-            <div className='ei-property-item'>
-              <div className='ei-property-value'><PlanTargetListComponent displayOnly={!this.areControlsEnabled()} /></div>
-            </div>
-          </div>
-        </div>
+        <EditorInterface title="Routing Selection">
+          <EditorInterfaceItem subtitle="Selection Type">
+            <DropdownList
+              data={this.props.allSelectionModes}
+              valueField='id'
+              textField='description'
+              value={this.props.activeSelectionModeId}
+              readOnly={!this.areControlsEnabled()}
+              onChange={(val, event) => this.onSelectionModeChange(val, event)} />
+          </EditorInterfaceItem>
+          <EditorInterfaceItem>
+            <PlanTargetListComponent displayOnly={!this.areControlsEnabled()} />
+          </EditorInterfaceItem>
+        </EditorInterface>
+
       </div>
     )
   }
@@ -94,24 +79,11 @@ export class NetworkOptimizationInput extends Component {
 
   onRunOptimization () {
     // load settings from otehr spots in the UI
-    var inputs = this.selectAdditionalOptimizationInputs(this.props.modifiedNetworkOptimizationInput)
+    var inputs = this.props.additionalOptimizationInputs
+
+    //sets active filters to validated ones
+    this.props.setActiveFilters(this.props.validatedFilters)
     this.props.runOptimization(inputs, this.props.userId)
-  }
-
-  selectAdditionalOptimizationInputs (optimizationInputs = {}) {
-    // this doesn't need to be a selector, because we grab the info just before sending the request
-    // if we do validation we'll need to make it a selector
-    // plan.selection.planTargets are sent seperately to the server
-    var inputs = JSON.parse(JSON.stringify(optimizationInputs))
-    // ToDo: this should come from redux NOT parent
-    inputs.analysis_type = this.props.networkAnalysisTypeId
-    inputs.planId = this.props.planId
-
-    inputs.locationConstraints = JSON.parse(JSON.stringify(this.props.optimizationInputs.locationConstraints))
-    inputs.locationConstraints.analysisSelectionMode = this.props.activeSelectionModeId
-    // inputs.locationConstraints.analysisLayerId
-    
-    return inputs
   }
 
   onCancelOptimization () {
@@ -137,9 +109,6 @@ export class NetworkOptimizationInput extends Component {
   }
 }
 
-// NetworkOptimizationInput.propTypes = {
-// }
-
 const mapStateToProps = (state) => ({
   userId: state.user.loggedInUser.id,
   planId: state.plan.activePlan.id,
@@ -148,11 +117,15 @@ const mapStateToProps = (state) => ({
   optimizationId: state.optimization.networkOptimization.optimizationId,
   isCanceling: state.optimization.networkOptimization.isCanceling,
   optimizationInputs: state.optimization.networkOptimization.optimizationInputs,
-  modifiedNetworkOptimizationInput: networkOptimizationInputSelector(state),
-  allSelectionModes: getAllSelectionModes(state),
+  allSelectionModes: NetworkOptimizationSelectors.getAllSelectionModes(state),
   activeSelectionModeId: state.selection.activeSelectionMode.id,
   transaction: state.planEditor.transaction,
   activePlan: state.plan.activePlan,
+  networkAnalysisType: state.optimization.networkOptimization.optimizationInputs.analysis_type,
+  activeFilters: state.optimization.networkOptimization.activeFilters,
+  clientName: state.configuration.system.ARO_CLIENT,
+  validatedFilters: NetworkOptimizationSelectors.getValidatedFilters(state),
+  additionalOptimizationInputs: NetworkOptimizationSelectors.getAdditionalOptimizationInputs(state)
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -161,6 +134,7 @@ const mapDispatchToProps = dispatch => ({
   cancelOptimization: (planId, optimizationId) => dispatch(NetworkOptimizationActions.cancelOptimization(planId, optimizationId)),
   setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId)),
   modifyOptimization: (activePlan) => dispatch(NetworkOptimizationActions.modifyOptimization(activePlan)),
+  setActiveFilters: (filters) => dispatch(NetworkOptimizationActions.setActiveFilters(filters)),
 })
 
 const NetworkOptimizationInputComponent = wrapComponentWithProvider(reduxStore, NetworkOptimizationInput, mapStateToProps, mapDispatchToProps)

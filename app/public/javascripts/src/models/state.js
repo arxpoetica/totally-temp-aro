@@ -31,6 +31,7 @@ import ToolBarActions from '../react/components/header/tool-bar-actions'
 import RoicReportsActions from '../react/components/sidebar/analysis/roic-reports/roic-reports-actions'
 import { hsvToRgb } from '../react/common/view-utils'
 import StateViewModeActions from '../react/components/state-view-mode/state-view-mode-actions'
+import PlanEditorActions from '../react/components/plan-editor/plan-editor-actions'
 import RxState from '../react/common/rxState'
 
 const networkAnalysisConstraintsSelector = formValueSelector(ReactComponentConstants.NETWORK_ANALYSIS_CONSTRAINTS)
@@ -190,7 +191,6 @@ class State {
       EQUIPMENT_INFO: 'EQUIPMENT_INFO',
       BOUNDARIES_INFO: 'BOUNDARIES_INFO',
       ROAD_SEGMENT_INFO: 'ROAD_SEGMENT_INFO',
-      PLAN_SUMMARY_REPORTS: 'PLAN_SUMMARY_REPORTS',
       COVERAGE_BOUNDARY: 'COVERAGE_BOUNDARY',
       EDIT_LOCATIONS: 'EDIT_LOCATIONS',
       EDIT_SERVICE_LAYER: 'EDIT_SERVICE_LAYER',
@@ -201,7 +201,6 @@ class State {
     // The selected panel when in the edit plan mode
     service.EditPlanPanels = Object.freeze({
       EDIT_PLAN: 'EDIT_PLAN',
-      PLAN_SUMMARY: 'PLAN_SUMMARY',
       EDIT_RINGS: 'EDIT_RINGS'
     })
     service.activeEditPlanPanel = service.EditPlanPanels.EDIT_PLAN
@@ -472,12 +471,17 @@ class State {
     service.mapFeaturesClickedEvent = new Rx.BehaviorSubject({})
 
     service.mapFeaturesSelectedEvent.skip(1).subscribe((options) => {
-
+      // ToDo: selection mechanism needs to be cerntalised 
       // set all mapFeatures in redux
       if (service.selectedDisplayMode.getValue() == service.displayModes.VIEW) {
         service.setMapFeatures(options)
         // For tracking when map clicked by the user.
         service.setIsMapClicked(true)
+      }
+
+      if (service.selectedDisplayMode.getValue() == service.displayModes.EDIT_PLAN) {
+        const featureIds = options.equipmentFeatures.map(feature => feature.object_id)
+        service.planEditorOnMapClick(featureIds, options.latLng)
       }
 
       // ToDo: this check may need to move into REACT
@@ -487,6 +491,14 @@ class State {
       } else if (options.locations) {
         service.setSelectedLocations(options.locations.map(location => location.location_id))
         // service.setActiveViewModePanel(service.viewModePanels.LOCATION_INFO)
+      }
+    })
+
+    service.mapFeaturesRightClickedEvent.skip(1).subscribe(options => {
+      // plan edit rightclick action from tile.js
+      if (service.selectedDisplayMode.getValue() == service.displayModes.EDIT_PLAN) {
+        console.log(options)
+        service.showContextMenuForLocations (options.locations, options.event)
       }
     })
 
@@ -1537,7 +1549,7 @@ class State {
           PuppeteerMessages.suppressMessages = false
           service.recreateTilesAndCache()
           // Late night commit. The following line throws an error. Subtypes get rendered.
-          //service.requestSetMapZoom.next(map.getZoom() + 1)
+          // service.requestSetMapZoom.next(map.getZoom() + 1)
           $timeout()
         })
         .catch((err) => {
@@ -1816,7 +1828,8 @@ class State {
       //  We are currently maintaining state in two places
       //  BUT as of now are only setting it in redux
       if (nextReduxState.rSelectedDisplayMode &&
-          service.rSelectedDisplayMode !== service.selectedDisplayMode.getValue()) {
+          service.rSelectedDisplayMode !== service.selectedDisplayMode.getValue()) 
+      {
         // console.log(service.rSelectedDisplayMode)
         service.selectedDisplayMode.next(service.rSelectedDisplayMode)
       }
@@ -1923,6 +1936,8 @@ class State {
       setShowGlobalSettings: () => dispatch(GlobalSettingsActions.setShowGlobalSettings(true)),
       setCurrentViewToReleaseNotes: (viewString) => dispatch(GlobalSettingsActions.setCurrentViewToReleaseNotes(viewString)),
       setIsMapClicked: mapFeatures => dispatch(SelectionActions.setIsMapClicked(mapFeatures)),
+      planEditorOnMapClick: (featureIds, latLng) => dispatch(PlanEditorActions.onMapClick(featureIds, latLng)),
+      showContextMenuForLocations: (featureIds, event) => dispatch(PlanEditorActions.showContextMenuForLocations(featureIds, event)),
       setUserGroupsMsg: (userGroupsMsg) => dispatch(GlobalSettingsActions.setUserGroupsMsg(userGroupsMsg)),
     }
   }

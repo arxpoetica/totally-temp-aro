@@ -1,0 +1,126 @@
+
+.ei-header.ei-header-with-icon{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ei-header-filter-preview {
+  color: var(--primary);
+  font-size: .7rem;
+  border: none;
+  background-color: white;
+}
+
+.ei-header-filter-preview:focus {
+  outline: none;
+}
+
+.button-group {
+  position: relative;
+}
+
+.ei-header-icon.plus-sign{
+  background: url('/svg/plus.svg') no-repeat center transparent;
+  height: 15px;
+  width: 15px;
+  background-size: contain;
+}
+
+.ei-header-icon.plus-sign:hover {
+  background-color: #e2e6ea;
+}
+
+.ei-property-icon.trashcan {
+  background: url('/svg/trash.svg') no-repeat center transparent;
+  height: 20px;
+  min-width: 15px;
+  background-size: contain;
+  margin-right: 5px;
+}
+
+.ei-property-icon.trashcan:hover {
+  background-color: #e2e6ea;
+}
+
+.ei-property-item:nth-child(odd) .ei-property-label .select select {
+  background-color: #f9f9f9;
+}
+
+.ei-property-item {
+  flex-wrap: wrap;
+}
+
+.ei-filter-select-container select {
+  border: none;
+  border-radius: 3px;
+}
+.ei-filter-select-operator select {
+  border-radius: 3px;
+}
+
+.ei-filter-select-container select option {
+  background-color: #888888;
+}
+
+.ei-filter-input-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.ei-filter-input {
+  margin: 0 5px 0 5px;
+  display: flex;
+  justify-content: flex-end;
+}
+.ei-filter-input input {
+  color: black;
+  font: 14px var(--font);
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  height: 34px;
+  border: 1px solid var(--gray-medium-light);
+  width: 75px;
+  border-radius: 3px;
+  margin: 0;
+}
+
+.ei-filter-input input[type=datetime-local] {
+  width: 180px;
+}
+
+.ei-filter-input input[type=date] {
+  width: 135px;
+}
+
+.ei-filter-input input:disabled {
+  color: var(--gray-medium-light);
+}
+
+.ei-filter-input:before {
+  top: 8px;
+  left: 5px;
+  font: 14px var(--font);
+  position: absolute;
+}
+.ei-filter-input.dollar input, .ei-filter-input.percent input {
+  padding-left:18px;
+}
+
+.ei-filter-input.dollar::before {
+  content: "$";
+}
+
+.ei-filter-input.percent::before {
+  content: "%";
+}
+
+.empty-warning {
+  color: red;
+  margin-right: .5rem;
+}
+
+.enum-input-subtitle {
+  font-size: 1rem;
+}
+

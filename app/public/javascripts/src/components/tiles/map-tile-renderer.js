@@ -10,7 +10,7 @@ import StrokeStyle from '../../shared-utils/stroke-styles'
 
 class MapTileRenderer {
   constructor (tileSize, tileDataService, mapTileOptions, layerCategories, selectedDisplayMode, selectionModes, analysisSelectionMode, stateMapLayers, displayModes,
-    viewModePanels, state, getPixelCoordinatesWithinTile, selectionIds, rShowFiberSize, rViewSetting, mapLayers = []) {
+    viewModePanels, state, getPixelCoordinatesWithinTile, selectedSubnetLocations, locationAlerts, rShowFiberSize, rViewSetting, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
@@ -27,7 +27,8 @@ class MapTileRenderer {
     this.state = state
     this.getPixelCoordinatesWithinTile = getPixelCoordinatesWithinTile
     this.latestTileUniqueId = 0
-    this.selectionIds = selectionIds
+    this.selectedSubnetLocations = selectedSubnetLocations
+    this.locationAlerts = locationAlerts
     this.rShowFiberSize = rShowFiberSize
     this.rViewSetting = rViewSetting
 
@@ -106,9 +107,14 @@ class MapTileRenderer {
     this.stateMapLayers = stateMapLayers
   }
 
-  setSelectionIds (selectionIds) {
-    this.selectionIds = selectionIds
+  // - plan edit - //
+  setSelectedSubnetLocations (selectedSubnetLocations) {
+    this.selectedSubnetLocations = selectedSubnetLocations
   }
+  setLocationAlerts (locationAlerts) {
+    this.locationAlerts = locationAlerts
+  }
+  // - //
 
   // Sets the selected rshowFiberSize
   setReactShowFiberSize (rShowFiberSize) {
@@ -489,8 +495,26 @@ class MapTileRenderer {
         // Try object_id first, else try location_id
         var featureId = feature.properties.object_id || feature.properties.location_id
 
-        if (this.selectionIds.includes(featureId)) {
-          continue // Do not render any features that are part of a transaction
+        // do not render any features that are part of a transaction while in `EDIT_PLAN` mode
+        if (this.selectedDisplayMode == this.displayModes.EDIT_PLAN) {
+
+          // don't render any featureIds in plan edit
+          // TODO: if we need to broaden this logic to service layers, may need to think through
+          const { _data_type } = feature.properties
+          // console.log(_data_type)
+          if (_data_type.includes('equipment') || _data_type.includes('fiber')) {
+            continue
+          }
+
+          // This feature is to be excluded. Do not render it.
+          // TODO: is this necessary? What is `tileDataService.featuresToExclude`
+          // investigate at some point in the future
+          if (
+            this.tileDataService.featuresToExclude.has(featureId)
+            && !(feature.properties._data_type && feature.properties._data_type.includes('location'))
+          ) {
+            continue
+          }
         }
 
         if (mapLayer.subtypes) {
@@ -503,19 +527,12 @@ class MapTileRenderer {
           }
         }
 
-        if (this.selectedDisplayMode == this.displayModes.EDIT_PLAN &&
-            this.tileDataService.featuresToExclude.has(featureId) &&
-            !(feature.properties._data_type && feature.properties._data_type == 'location')) {
-          // This feature is to be excluded. Do not render it. (edit: ONLY in edit mode)
-          continue
-        }
-
         if (this.selectedDisplayMode == this.displayModes.VIEW &&
             (this.state.activeViewModePanel == this.viewModePanels.EDIT_LOCATIONS ||
               this.state.activeViewModePanel == this.viewModePanels.EDIT_SERVICE_LAYER) &&
             this.tileDataService.featuresToExclude.has(featureId) &&
-            feature.properties._data_type && (feature.properties._data_type == 'location' ||
-              feature.properties._data_type == 'service_layer')) {
+            feature.properties._data_type && (feature.properties._data_type.includes('location') ||
+              feature.properties._data_type.includes('service_layer'))) {
           // this is a location/Service area that is being edited
           continue
         }
@@ -543,6 +560,7 @@ class MapTileRenderer {
       }
 
       var geometry = feature.loadGeometry()
+      
       // Geometry is an array of shapes
       var imageWidthBy2 = entityImage ? entityImage.width / 2 : 0
       var imageHeightBy2 = entityImage ? entityImage.height / 2 : 0
@@ -567,7 +585,7 @@ class MapTileRenderer {
               'mapLayers': this.mapLayers,
               'tileDataService': this.tileDataService,
               'selection': this.selection,
-              oldSelection: this.oldSelection,
+              'oldSelection': this.oldSelection,
               'selectedLocationImage': selectedLocationImage,
               'lockOverlayImage': lockOverlayImage,
               'invalidatedOverlayImage': invalidatedOverlayImage,
@@ -641,7 +659,7 @@ class MapTileRenderer {
 
             } else if (
               (this.state.showFiberSize || this.rShowFiberSize)
-              && feature.properties._data_type === 'fiber'
+              && feature.properties._data_type.includes('fiber')
               && (
                 this.state.viewSetting.selectedFiberOption
                 && this.state.viewSetting.selectedFiberOption.id !== 1
@@ -693,6 +711,11 @@ class MapTileRenderer {
               }
             }
 
+            // lower opacity of fiber in plan edit mode
+            if (this.selectedDisplayMode == this.displayModes.EDIT_PLAN && feature.properties._data_type.includes('fiber')){
+              drawingStyles.lineOpacity = 0.2
+              drawingStyles.lineCap = 'butt'
+            }
             PolylineFeatureRenderer.renderFeature(feature, shape, geometryOffset, ctx, mapLayer, drawingStyles, false, this.tileSize)
           }
         }
@@ -711,7 +734,7 @@ class MapTileRenderer {
         .includes(tileObject.properties.object_id))
     }
     // render point feature
-    PointFeatureRenderer.renderFeatures(pointFeatureRendererList, this.state.configuration.ARO_CLIENT)
+    PointFeatureRenderer.renderFeatures(pointFeatureRendererList, this.state.configuration.ARO_CLIENT, this.selectedSubnetLocations, this.locationAlerts)
     // render polygon feature
     PolygonFeatureRenderer.renderFeatures(closedPolygonFeatureLayersList, featureData, this.selection, this.oldSelection)
   }
@@ -722,7 +745,7 @@ class MapTileRenderer {
         const dataType = feature.properties._data_type
         if (dataType === 'fiber') {
           return polyline.link_id === feature.properties.link_id 
-        } else if (dataType === 'existing_fiber.') { 
+        } else if (dataType.includes('existing_fiber')) { 
           return polyline.id === feature.properties.id 
         } else if (dataType === 'edge.fat') { 
           return polyline.gid === feature.properties.gid 

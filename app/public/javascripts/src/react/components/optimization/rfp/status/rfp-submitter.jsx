@@ -112,13 +112,17 @@ export class RfpSubmitter extends Component {
       .then(targets => {
         var requestBody = JSON.parse(JSON.stringify(selectedTemplate.value))
         requestBody.rfpId = this.state.newRfpPlanName
-        requestBody.targets = targets.map(target => ({
-          id: target.id,
-          point: {
-            type: 'Point',
-            coordinates: [target.lng, target.lat]
+        requestBody.targets = targets.map(target => {
+          const { id, lat, lng, props } = target
+          return {
+            id: id,
+            point: {
+              type: 'Point',
+              coordinates: [lng, lat]
+            },
+            props
           }
-        }))
+        })
         this.props.submitRfpReport(this.props.userId, requestBody)
       })
       .catch(err => console.error(err))
