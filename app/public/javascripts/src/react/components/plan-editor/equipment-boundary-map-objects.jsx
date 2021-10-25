@@ -205,12 +205,13 @@ export class EquipmentBoundaryMapObjects extends Component {
     })
     mapObject.addListener('contextmenu', event => {
       const eventXY = WktUtils.getXYFromEvent(event)
-      self.props.showContextMenuForEquipmentBoundary(mapObject, eventXY.x, eventXY.y, event.vertex)
+      const vertexPayload = this.mapObjectOverlay.length > 0 ? this.mapObjectOverlay : event.vertex;
+      self.props.showContextMenuForEquipmentBoundary(mapObject, eventXY.x, eventXY.y, vertexPayload)
     })
 
     mapObject.addListener('click', event => {
-      if (event.domEvent.shiftKey) {
-        if (event.vertex) {
+      if (event.vertex) {
+        if (event.domEvent.shiftKey) {
           const indexOfMarker = this.mapObjectOverlay.findIndex((marker) => {
             return marker.title === `${event.vertex}`
           });
@@ -235,6 +236,12 @@ export class EquipmentBoundaryMapObjects extends Component {
             }));
           }
         }
+      } else {
+        for (const marker of this.mapObjectOverlay) {
+          marker.setMap(null);
+        }
+
+        this.mapObjectOverlay = [];
       }
     })
 

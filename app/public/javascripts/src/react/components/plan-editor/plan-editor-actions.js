@@ -284,6 +284,21 @@ function deleteBoundaryVertex (mapObject, vertex) {
   }
 }
 
+function deleteBoundaryVertices (mapObject, vertices) {
+  return dispatch => {
+    // checks it is a valid vertex and that there are at least 3 other vertices left
+    for (let vertex of vertices) {      
+      if (vertex && mapObject.getPath().getLength() > 3) {
+        // We are tracking the multiple selected verticies to delete by markers created.
+        // And storing vertex info on the corrosponding marker.
+
+        mapObject.getPath().removeAt(Number(vertex.title))
+        vertex.setMap(null)
+      }
+    }
+  }
+}
+
 function showContextMenuForEquipment (featureId, x, y) {
   return (dispatch) => {
     var menuActions = []
@@ -451,7 +466,17 @@ function assignLocation (locationId, terminalId) {
 function showContextMenuForEquipmentBoundary (mapObject, x, y, vertex) {
   return (dispatch) => {
     const menuActions = []
-    menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteBoundaryVertex', mapObject, vertex))
+    menuActions.push(
+      new MenuItemAction(
+        Array.isArray(vertex) ? 'DELETE_ALL' : 'DELETE',
+        'Delete',
+        'PlanEditorActions',
+        Array.isArray(vertex) ? 'deleteBoundaryVertices' : 'deleteBoundaryVertex',
+        mapObject,
+        vertex
+      )
+    )
+
     const menuItemFeature = new MenuItemFeature('BOUNDARY', 'Boundary Vertex', menuActions)
 
     // Show context menu
@@ -1293,6 +1318,7 @@ export default {
   deleteFeature,
   deleteTransactionFeature,
   deleteBoundaryVertex,
+  deleteBoundaryVertices,
   addTransactionFeatures,
   showContextMenuForEquipment,
   showContextMenuForLocations,
