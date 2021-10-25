@@ -205,6 +205,10 @@ export class EquipmentBoundaryMapObjects extends Component {
     })
     mapObject.addListener('contextmenu', event => {
       const eventXY = WktUtils.getXYFromEvent(event)
+      self.props.showContextMenuForEquipmentBoundary(mapObject, eventXY.x, eventXY.y, event.vertex)
+    })
+
+    mapObject.addListener('click', event => {
       if (event.domEvent.shiftKey) {
         if (event.vertex) {
           const indexOfMarker = this.mapObjectOverlay.findIndex((marker) => {
@@ -219,12 +223,18 @@ export class EquipmentBoundaryMapObjects extends Component {
               position: event.latLng,
               map: this.props.googleMaps,
               title: `${event.vertex}`,
-              icon: '/svg/trash.svg'
+              icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                fillOpacity: 0,
+                strokeColor: "#FF69B4",
+                strokeOpacity: 1,
+                strokeWeight: 2,
+                scale: 5,
+                anchor: new google.maps.Point(.1, .1)
+              }
             }));
           }
         }
-      } else {
-        self.props.showContextMenuForEquipmentBoundary(mapObject, eventXY.x, eventXY.y, event.vertex)
       }
     })
 
@@ -232,10 +242,12 @@ export class EquipmentBoundaryMapObjects extends Component {
       const code = (e.keyCode ? e.keyCode : e.which);
       if ((code === 8 || code === 46) && this.mapObjectOverlay.length > 0) {
         for (const marker of this.mapObjectOverlay) {
-          if (marker && mapObject.getPath().getLength() > 3) {
-            mapObject.getPath().removeAt(Number(marker.title))
-            marker.setMap(null);
+          mapObject.getPath().removeAt(Number(marker.title))
+          if (mapObject.getPath().getAt(Number(marker.title))) {
+            console.warn("equipment-boundary-map-objects:245, Vertex failed to be deleted.")
           }
+
+          marker.setMap(null);
         }
 
         this.mapObjectOverlay = [];
