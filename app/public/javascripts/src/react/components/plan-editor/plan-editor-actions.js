@@ -1028,6 +1028,7 @@ function recalculateSubnets (transactionId, subnetIds = []) {
     const state = getState()
     let activeSubnets = []
     subnetIds.forEach(subnetId => {
+      dispatch(setFiberAnnotations({[subnetId]: []}, subnetId))
       if (state.planEditor.subnets[subnetId]) {
         activeSubnets.push(subnetId)
       } else if (state.planEditor.subnetFeatures[subnetId]
@@ -1092,13 +1093,12 @@ function getFiberAnnotations (subnetId) {
   }
 }
 
-function setFiberAnnotations (fiberAnnotations) {
+function setFiberAnnotations (fiberAnnotations, subnetId) {
   return (dispatch, getState) => {
     const state = getState()
-    const selectedSubnetId = state.planEditor.selectedSubnetId
     const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
 
-    AroHttp.put(`/service/plan-transaction/${transactionId}/subnet/${selectedSubnetId}/annotations`, fiberAnnotations[selectedSubnetId])
+    AroHttp.put(`/service/plan-transaction/${transactionId}/subnet/${subnetId}/annotations`, fiberAnnotations[subnetId])
       .then((res) => {
         dispatch({
           type: Actions.PLAN_EDITOR_SET_FIBER_ANNOTATIONS,

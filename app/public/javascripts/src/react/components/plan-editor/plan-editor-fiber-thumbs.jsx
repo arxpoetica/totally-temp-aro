@@ -107,7 +107,7 @@ const FiberThumbs = (props) => {
       }
     })
 
-    setFiberAnnotations({ [selectedSubnetId]: subnetAnnotations })
+    setFiberAnnotations({ [selectedSubnetId]: subnetAnnotations }, selectedSubnetId)
   }
 
   //TODO: right now the fields are hardcoded, for route, fiber size, etc. later this will change to be dynamic
@@ -161,8 +161,8 @@ const mapStateToProps = (state) => ({
 const mapDispatchToProps = (dispatch) => ({
   setSelectedFiber: (fiberNames) =>
     dispatch(PlanEditorActions.setSelectedFiber(fiberNames)),
-  setFiberAnnotations: (fiberAnnotations) =>
-    dispatch(PlanEditorActions.setFiberAnnotations(fiberAnnotations)),
+  setFiberAnnotations: (fiberAnnotations, subnetId) =>
+    dispatch(PlanEditorActions.setFiberAnnotations(fiberAnnotations, subnetId)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(FiberThumbs)
