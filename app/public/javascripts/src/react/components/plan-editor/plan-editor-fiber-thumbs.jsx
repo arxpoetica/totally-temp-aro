@@ -7,40 +7,52 @@ const fieldOptions = ['route', 'fiberSize', 'fiberCount', 'buildType']
 
 const FiberThumbs = (props) => {
   const {
-    selectedFiberNames,
+    selectedFiber,
     setSelectedFiber,
     setFiberAnnotations,
     fiberAnnotations,
+    selectedSubnetId,
   } = props
 
   const [formValues, setFormValues] = useState({})
   const [formPlaceholders, setFormPlaceHolders] = useState({})
 
   useEffect(() => {
-    if (
-      selectedFiberNames.length === 1 
-      && fiberAnnotations[selectedFiberNames[0]]
-    ) {
+    if (selectedFiber.length === 1 && fiberAnnotations[selectedSubnetId]) {
       // if only one route selected, just set the values
-      setFormValues(fiberAnnotations[selectedFiberNames[0]])
-    } else if (selectedFiberNames.length > 1) {
+      const selectedFiberAnnotations = fiberAnnotations[selectedSubnetId].find(
+        (annotation) =>
+          annotation.fromNode === selectedFiber[0].fromNode &&
+          annotation.toNode === selectedFiber[0].toNode,
+      )
+      if (selectedFiberAnnotations && selectedFiberAnnotations.annotations) {
+        setFormValues(selectedFiberAnnotations.annotations)
+      }
+    } else if (selectedFiber.length > 1 && fiberAnnotations[selectedSubnetId]) {
       const annotationObject = {} // used for comparison to see if fields are identical
       // { [name]: ['test', 'test2'] } more than one value means switch to placeholder
 
       // for each selected fiber segment
-      selectedFiberNames.forEach((fiberRoute) => {
-        if (fiberAnnotations[fiberRoute]) {
+      selectedFiber.forEach((fiberRoute) => {
+        const selectedFiberAnnotations = fiberAnnotations[
+          selectedSubnetId
+        ].find(
+          (annotation) =>
+            annotation.fromNode === fiberRoute.fromNode &&
+            annotation.toNode === fiberRoute.toNode,
+        )
+        if (selectedFiberAnnotations) {
           // for each field in the annotations
-          Object.keys(fiberAnnotations[fiberRoute]).forEach((annotationName) => {
-              const newValue = fiberAnnotations[fiberRoute][annotationName]
-              const values = annotationObject[annotationName]
+          Object.entries(selectedFiberAnnotations.annotations).forEach(
+            ([key, newValue]) => {
+              const values = annotationObject[key]
               // if it doesn't exist yet: set the value
               if (!values) {
-                annotationObject[annotationName] =  [ newValue ]
+                annotationObject[key] = [newValue]
               }
               // they aren't equal push the new value
               else if (!values.includes(newValue)) {
-                annotationObject[annotationName].push(newValue)
+                annotationObject[key].push(newValue)
               }
             },
           )
@@ -50,7 +62,8 @@ const FiberThumbs = (props) => {
       const newPlaceholders = {} // for multiple values set as placeholders instead
 
       Object.entries(annotationObject).forEach(([field, values]) => {
-        if (values.length === 1) newFormValues[field] = annotationObject[field][0]
+        if (values.length === 1)
+          newFormValues[field] = annotationObject[field][0]
         else newPlaceholders[field] = annotationObject[field].join(', ')
       })
       setFormPlaceHolders(newPlaceholders)
@@ -61,7 +74,7 @@ const FiberThumbs = (props) => {
       setFormValues({})
       setFormPlaceHolders({})
     }
-  }, [selectedFiberNames, fiberAnnotations, setFormPlaceHolders, setFormValues])
+  }, [selectedFiber, fiberAnnotations, setFormPlaceHolders, setFormValues])
 
   function deselectFiber() {
     setSelectedFiber([])
@@ -72,32 +85,46 @@ const FiberThumbs = (props) => {
     setFormValues({ ...formValues, [name]: value })
   }
 
-  function handleBlur(event) {
-    const { value, name } = event.target
-
-    selectedFiberNames.forEach((fiberName) => {
-      fiberAnnotations[fiberName] = {
-        ...fiberAnnotations[fiberName],
-        [name]: value,
+  function handleBlur() {
+    const subnetAnnotations = fiberAnnotations[selectedSubnetId]
+    selectedFiber.forEach((fiberRoute) => {
+      if (subnetAnnotations) {
+        const annotation = subnetAnnotations.find(
+          (annotation) =>
+            annotation.fromNode === fiberRoute.fromNode &&
+            annotation.toNode === fiberRoute.toNode,
+        )
+        if (annotation && annotation.annotations) {
+          annotation.annotations = { ...annotation.annotations, ...formValues }
+        } else {
+          const newAnnotation = {
+            fromNode: fiberRoute.fromNode,
+            toNode: fiberRoute.toNode,
+            annotations: formValues,
+          }
+          subnetAnnotations.push(newAnnotation)
+        }
       }
     })
 
-    setFiberAnnotations(fiberAnnotations)
+    setFiberAnnotations({ [selectedSubnetId]: subnetAnnotations })
   }
 
   //TODO: right now the fields are hardcoded, for route, fiber size, etc. later this will change to be dynamic
   return (
     <>
-      {selectedFiberNames.length > 0 && (
+      {selectedFiber.length > 0 && (
         <div className={'plan-editor-thumb-fiber plan-editor-thumb'}>
           <div className="info">
-            <h2>Fiber Route</h2>
+            <h2>Fiber Route{selectedFiber.length > 1 && 's'}</h2>
           </div>
-          <div className="subinfo">{selectedFiberNames.join(', ')}</div>
           <div>
             {/* Map options for input */}
             {fieldOptions.map((fieldOption) => (
-              <div className="plan-editor-thumb-input-container" key={fieldOption}>
+              <div
+                className="plan-editor-thumb-input-container"
+                key={fieldOption}
+              >
                 {fieldOption}
                 <Input
                   value={formValues[fieldOption]}
@@ -126,8 +153,9 @@ const FiberThumbs = (props) => {
 }
 
 const mapStateToProps = (state) => ({
-  selectedFiberNames: state.planEditor.selectedFiber,
+  selectedFiber: state.planEditor.selectedFiber,
   fiberAnnotations: state.planEditor.fiberAnnotations,
+  selectedSubnetId: state.planEditor.selectedSubnetId,
 })
 
 const mapDispatchToProps = (dispatch) => ({

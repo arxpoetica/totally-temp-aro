@@ -17,7 +17,7 @@ export const FiberMapObjects = (props) => {
     setFiberRenderRequired,
     googleMaps,
     setSelectedFiber,
-    selectedFiberNames,
+    selectedFiber,
     fiberAnnotations,
   } = props
 
@@ -53,29 +53,29 @@ export const FiberMapObjects = (props) => {
       }
       if (subnetLinks) {
         for (const subnetLink of subnetLinks) {
-          const { geometry, name } = subnetLink
+          const { geometry, fromNode, toNode } = subnetLink
           if (geometry.type === 'LineString') {
             const path = WktUtils.getGoogleMapPathsFromWKTLineString(geometry)
-            createMapObject(path, name, fiberType)
+            createMapObject(path, fromNode, toNode, fiberType)
           } else if (geometry.type === 'MultiLineString') {
             const path =
               WktUtils.getGoogleMapPathsFromWKTMultiLineString(geometry)
-            createMapObject(path, name, fiberType)
+            createMapObject(path, fromNode, toNode, fiberType)
           }
         }
         setFiberRenderRequired(false)
       }
     }
-    function createMapObject(path, name, fiberType) {
+    function createMapObject(path, fromNode, toNode, fiberType) {
       let strokeColor = fiberType === 'DISTRIBUTION' ? '#FF0000' : '#1700ff'
       let strokeWeight = fiberType === 'DISTRIBUTION' ? 2 : 4
       let selected = false
 
       // set color purple if there are annotations
-      if (fiberAnnotations[name]) strokeColor = '#a73cff'
+      // if (fiberAnnotations[name]) strokeColor = '#a73cff'
 
       // set color pink, increase stroke and set selected true if selected
-      if (selectedFiberNames.includes(name)) {
+      if (selectedFiber.some((fiber) => fiber.fromNode === fromNode && fiber.toNode === toNode)) {
         strokeColor = '#ff55da'
         strokeWeight = 5
         selected = true
@@ -83,7 +83,8 @@ export const FiberMapObjects = (props) => {
 
       const newMapObject = new google.maps.Polyline({
         selected,
-        name,
+        fromNode,
+        toNode,
         path,
         clickable: fiberType === 'FEEDER',
         map: googleMaps,
@@ -96,32 +97,32 @@ export const FiberMapObjects = (props) => {
 
       newMapObject.addListener('click', (event) => {
         const { shiftKey } = event.domEvent // Bool, true if shift key is held down
-        const selectedFiberNames = []
+        const selectedFiberNodes = []
 
         if (shiftKey) {
           // loop to find all other selected routes if shift key is held
           mapObjects.forEach((mapObject) => {
             // if selected and not the clicked route add to redux selected list
-            // This is because if I pull selected from state it will be stale
-            if (mapObject.selected && mapObject.name !== name) {
-              selectedFiberNames.push(mapObject.name)
+            // This is because if you pull selected from state it will be stale
+            if (mapObject.selected && (mapObject.fromNode !== fromNode || mapObject.toNode !== toNode)) {
+              selectedFiberNodes.push({ fromNode: mapObject.fromNode, toNode: mapObject.toNode })
             }
           })
           // if the clicked route was not selected, add it to selected state
           if (!newMapObject.selected) {
-            selectedFiberNames.push(newMapObject.name)
+            selectedFiberNodes.push({ fromNode: newMapObject.fromNode, toNode:newMapObject.toNode })
           }
         } else {
           // if other routes are selected or none are selected still select the clicked route
-          if (mapObjects.some((mapObject) => mapObject.selected && mapObject.name !== name)
+          if (mapObjects.some((mapObject) => (mapObject.selected && (mapObject.fromNode !== fromNode || mapObject.toNode !== toNode)))
               || !newMapObject.selected) {
             // adds clicked route to selected
-            selectedFiberNames.push(newMapObject.name)
+            selectedFiberNodes.push({ fromNode: newMapObject.fromNode, toNode:newMapObject.toNode })
           }
         }
         // if not already selected, add to selected
 
-        setSelectedFiber(selectedFiberNames)
+        setSelectedFiber(selectedFiberNodes)
       })
     }
   }, [
@@ -154,7 +155,7 @@ const mapStateToProps = (state) => ({
   subnets: state.planEditor.subnets,
   subnetFeatures: state.planEditor.subnetFeatures,
   fiberRenderRequired: state.planEditor.fiberRenderRequired,
-  selectedFiberNames: state.planEditor.selectedFiber,
+  selectedFiber: state.planEditor.selectedFiber,
   fiberAnnotations: state.planEditor.fiberAnnotations,
 })
 

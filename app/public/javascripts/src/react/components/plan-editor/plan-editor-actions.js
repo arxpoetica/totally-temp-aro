@@ -832,6 +832,11 @@ function addSubnetTree() {
           }
         })
         if (rootIds.length) {
+          rootIds.forEach((id) => {
+            // get feeder fiber annotations
+            dispatch(getFiberAnnotations(id))
+          })
+          
           // TODO: the addSubnets function needs to be broken up
           return dispatch(addSubnets({ subnetIds: rootIds }))
             .then(subnetRes => Promise.resolve(subnetRes))
@@ -1054,12 +1059,12 @@ function setFiberRenderRequired (bool) {
   }
 }
 
-function setSelectedFiber (fiberNames) {
+function setSelectedFiber (fiberObjects) {
   return (dispatch) => {
     batch(() => {
       dispatch({
         type: Actions.PLAN_EDITOR_SET_FIBER_SELECTION,
-        payload: fiberNames,
+        payload: fiberObjects,
       })
       dispatch({
         type: Actions.PLAN_EDITOR_SET_FIBER_RENDER_REQUIRED,
@@ -1069,15 +1074,40 @@ function setSelectedFiber (fiberNames) {
   }
 }
 
-function setFiberAnnotations (fiberAnnotations) {
-  return (dispatch) => {
-    // TODO: Post to service when service side is done
-    batch(() => {
-      dispatch({
-        type: Actions.PLAN_EDITOR_SET_FIBER_ANNOTATIONS,
-        payload: fiberAnnotations,
+function getFiberAnnotations (subnetId) {
+  return (dispatch, getState) => {
+    const state = getState()
+    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+
+    AroHttp.get(`/service/plan-transaction/${transactionId}/subnet/${subnetId}/annotations`)
+      .then((res) => {
+        dispatch({
+          type: Actions.PLAN_EDITOR_SET_FIBER_ANNOTATIONS,
+          payload: { [subnetId]: res.data }
+        })
       })
-    })
+      .catch((error) => {
+        console.error(error)
+      })
+  }
+}
+
+function setFiberAnnotations (fiberAnnotations) {
+  return (dispatch, getState) => {
+    const state = getState()
+    const selectedSubnetId = state.planEditor.selectedSubnetId
+    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+
+    AroHttp.put(`/service/plan-transaction/${transactionId}/subnet/${selectedSubnetId}/annotations`, fiberAnnotations[selectedSubnetId])
+      .then((res) => {
+        dispatch({
+          type: Actions.PLAN_EDITOR_SET_FIBER_ANNOTATIONS,
+          payload: fiberAnnotations,
+        })
+      })
+      .catch((error) => {
+        console.error(error)
+      })
   }
 }
 // --- //
@@ -1351,4 +1381,5 @@ export default {
   setFiberRenderRequired,
   setSelectedFiber,
   setFiberAnnotations,
+  getFiberAnnotations,
 }

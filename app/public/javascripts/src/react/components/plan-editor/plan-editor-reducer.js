@@ -349,7 +349,7 @@ function planEditorReducer (state = defaultState, { type, payload }) {
       return { ...state, selectedFiber: payload }
 
     case Actions.PLAN_EDITOR_SET_FIBER_ANNOTATIONS:
-      return { ...state, fiberAnnotations: { ...state.fiberAnnotations, ...payload }}
+      return { ...state, fiberAnnotations: { ...state.fiberAnnotations, ...payload}}
 
     default:
       return state
