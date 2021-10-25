@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import PlanEditorActions from './plan-editor-actions'
 import { Input } from '../common/forms/Input.jsx'
 
-const fieldOptions = ['route', 'fiberSize', 'fiberCount', 'buildType']
+const fieldOptions = [{ name:'route', label: 'Route'}, { name:'fiberSize', label: 'Fiber Size'} , { name: 'fiberCount', label: 'Fiber Count'},  {name: 'buildType', label: 'BuildType'}]
 
 const FiberThumbs = (props) => {
   const {
@@ -48,11 +48,11 @@ const FiberThumbs = (props) => {
               const values = annotationObject[key]
               // if it doesn't exist yet: set the value
               if (!values) {
-                annotationObject[key] = [newValue]
+                annotationObject[key] = { value: [newValue.value], label: newValue.label }
               }
               // they aren't equal push the new value
-              else if (!values.includes(newValue)) {
-                annotationObject[key].push(newValue)
+              else if (!values.value.includes(newValue.value)) {
+                annotationObject[key].value.push(newValue.value)
               }
             },
           )
@@ -62,9 +62,9 @@ const FiberThumbs = (props) => {
       const newPlaceholders = {} // for multiple values set as placeholders instead
 
       Object.entries(annotationObject).forEach(([field, values]) => {
-        if (values.length === 1)
-          newFormValues[field] = annotationObject[field][0]
-        else newPlaceholders[field] = annotationObject[field].join(', ')
+        if (values.value.length === 1)
+          newFormValues[field] = {value: annotationObject[field].value[0], label: annotationObject[field].label}
+        else newPlaceholders[field] = annotationObject[field].value.join(', ')
       })
       setFormPlaceHolders(newPlaceholders)
       setFormValues(newFormValues)
@@ -80,9 +80,9 @@ const FiberThumbs = (props) => {
     setSelectedFiber([])
   }
 
-  function handleChange(event) {
+  function handleChange(event, label) {
     const { value, name } = event.target
-    setFormValues({ ...formValues, [name]: value })
+    setFormValues({ ...formValues, [name]: { value, label} })
   }
 
   function handleBlur() {
@@ -123,16 +123,16 @@ const FiberThumbs = (props) => {
             {fieldOptions.map((fieldOption) => (
               <div
                 className="plan-editor-thumb-input-container"
-                key={fieldOption}
+                key={fieldOption.name}
               >
-                {fieldOption}
+                {fieldOption.label}
                 <Input
-                  value={formValues[fieldOption]}
-                  name={fieldOption}
-                  onChange={(event) => handleChange(event)}
+                  value={formValues[fieldOption.name] && formValues[fieldOption.name].value}
+                  name={fieldOption.name}
+                  onChange={(event) => handleChange(event, fieldOption.label)}
                   onBlur={(event) => handleBlur(event)}
-                  placeholder={formPlaceholders[fieldOption]}
-                  disabled={formPlaceholders[fieldOption]}
+                  placeholder={formPlaceholders[fieldOption.name]}
+                  disabled={formPlaceholders[fieldOption.name]}
                   classes={'aro-input-black fiber-annotation'}
                 />
               </div>
