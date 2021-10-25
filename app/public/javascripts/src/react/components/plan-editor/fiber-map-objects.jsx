@@ -72,7 +72,7 @@ export const FiberMapObjects = (props) => {
       let selected = false
 
       // set color purple if there are annotations
-      // if (fiberAnnotations[name]) strokeColor = '#a73cff'
+      if (fiberAnnotations[selectedSubnetId].some((fiber) => fiber.fromNode === fromNode && fiber.toNode === toNode)) strokeColor = '#a73cff'
 
       // set color pink, increase stroke and set selected true if selected
       if (selectedFiber.some((fiber) => fiber.fromNode === fromNode && fiber.toNode === toNode)) {
