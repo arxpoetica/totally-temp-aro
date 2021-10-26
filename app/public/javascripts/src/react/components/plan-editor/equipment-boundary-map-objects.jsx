@@ -257,21 +257,22 @@ export class EquipmentBoundaryMapObjects extends Component {
   }
 
   addMarkerOverlay(event) {
+    const vertex = this.mapObject.getPath().getAt(event.vertex);
+    const position = new google.maps.LatLng(vertex.lat(), vertex.lng())
     this.mapObjectOverlay = this.mapObjectOverlay.concat(new google.maps.Marker({
-      position: event.latLng,
+      position,
       map: this.props.googleMaps,
       title: `${event.vertex}`,
-      icon: { url: '/svg/map-icons/marker-circle.png', anchor: new google.maps.Point(6.5, 6.5), scaledSize: new google.maps.Size(12, 12)},
-      // icon: {
-      //   path: google.maps.SymbolPath.CIRCLE,
-      //   fillOpacity: 1,
-      //   fillColor: "white",
-      //   strokeColor: "#FF69B4",
-      //   strokeOpacity: 1,
-      //   strokeWeight: 2,
-      //   scale: 6,
-      //   anchor: new google.maps.Point(.1, .1)
-      // }
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        fillOpacity: 1,
+        fillColor: "white",
+        strokeColor: "#FF69B4",
+        strokeOpacity: 1,
+        strokeWeight: 3,
+        scale: 6,
+        anchor: new google.maps.Point(.1, .1)
+      }
     }));
   }
 
