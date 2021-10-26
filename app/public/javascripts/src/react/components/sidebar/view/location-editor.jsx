@@ -7,9 +7,11 @@ import { createSelector } from 'reselect'
 import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap'
 import CreatableSelect from 'react-select/creatable'
 import SelectionActions from '../../selection/selection-actions'
+import LocationMapObjects from './location-map-objects.jsx'
 
 // We need a selector, else the .toJS() call will create an infinite digest loop
 const getAllLocationLayers = state => state.mapLayers.location
+const getLocationLayersList = createSelector([getAllLocationLayers], (locationLayers) => locationLayers.toJS())
 const getLocationTypeToIconUrl = createSelector([getAllLocationLayers], locationLayers => {
   var locationTypeToIcon = {}
   locationLayers.forEach(locationLayer => {
@@ -54,9 +56,9 @@ export const LocationEditor = (props) => {
 
   const { currentTransaction, isCommiting, locationTypeToAdd, objectIdToProperties,
     lastUsedNumberOfHouseholds, lastUsedNumberOfEmployees, userCanChangeWorkflowState, deletedFeatures,
-    isExpandLocAttributes } = state
+    isExpandLocAttributes, createMapObjects } = state
   const { selectedLibraryItem, selectedMapObject, locationTypeToIconUrl, objectIdToMapObject,
-    setObjectIdToMapObject } = props
+    setObjectIdToMapObject, locationLayers, ARO_CLIENT, setSelectedMapObject, setCreatedMapObjects } = props
 
   useEffect(() => {
     resumeOrCreateTransaction()
@@ -81,7 +83,11 @@ export const LocationEditor = (props) => {
       var features = result.data
       .filter((item) => item.crudAction !== 'delete')
       .map((item) => item.feature)
-      setState((state) => ({ ...state, deletedFeatures: result.data.filter((item) => item.crudAction === 'delete') }))
+      setState((state) => ({ 
+        ...state, 
+        deletedFeatures: result.data.filter((item) => item.crudAction === 'delete'),
+      }))
+      setCreatedMapObjects(features)
 
       // Put the iconUrl in the features list
       features.forEach((item) => item.iconUrl = '/images/map_icons/aro/households_modified.png')
@@ -163,7 +169,7 @@ export const LocationEditor = (props) => {
 
   // Formats a location (based on the objectId) so that it can be sent in calls to aro-service
   const formatLocationForService = (objectId) => {
-    var mapObject = selectedMapObject
+    var mapObject = objectIdToMapObject[objectId]
     var objectProperties = objectIdToProperties[objectId]
     const workflowStateKey = Object.keys(WorkflowState).filter(key => WorkflowState[key].id === objectProperties.workflowStateId)[0]
     const workflowStateName = WorkflowState[workflowStateKey].name
@@ -311,10 +317,98 @@ export const LocationEditor = (props) => {
         .catch((err) => console.error(err))
     }
   }
+
+  const getObjectIconUrl = (locationDetails) => {
+    const locationType = locationDetails.objectValue.isExistingObject ? locationDetails.objectValue.locationCategory : locationTypeToAdd
+    var iconUrl = null
+    switch (locationType) {
+      case 'business':
+        iconUrl = '/images/map_icons/aro/businesses_small_selected.png'
+        break
+
+      case 'celltower':
+        iconUrl = '/images/map_icons/aro/tower.png'
+        break
+
+      case 'household':
+      default:
+        iconUrl = '/images/map_icons/aro/households_modified.png'
+        break
+    }
+    return Promise.resolve(iconUrl)
+  }
+
+  const checkCanCreateObject = (feature) => {
+    // For frontier client check If households layer is enabled or not, If not enabled don't allow to create a object
+    if (ARO_CLIENT === 'frontier' && !feature.isExistingObject) {
+      var hhLocationLayer = locationLayers.filter((locationType) => locationType.label === 'Residential')[0]
+
+      if (!hhLocationLayer.checked) {
+        swal({
+          title: 'Layer is turned off',
+          text: 'You are trying to add a location but the layer is currently turned off. Please turn on the location layer and try again.',
+          type: 'error'
+        })
+        return false
+      } else {
+        return true
+      }
+    } else {
+      return true
+    }
+  }
+
+  const handleObjectCreated = (mapObject, usingMapClick, feature) => {
+    var numberOfHouseholds = lastUsedNumberOfHouseholds // use last used number of locations until commit
+    if (feature.locationCategory === 'household' && feature.attributes && feature.attributes.number_of_households) {
+      numberOfHouseholds = +feature.attributes.number_of_households
+    }
+    var numberOfEmployees = lastUsedNumberOfEmployees
+    if (feature.locationCategory === 'business' && feature.attributes && feature.attributes.number_of_employees) {
+      numberOfEmployees = +feature.attributes.number_of_employees
+    }
+    var workflowStateId = null
+    if (!(feature.workflow_state_id || feature.workflowState)) {
+      workflowStateId = WorkflowState.CREATED.id
+    } else {
+      // workflow_state_id is encoded in vector tile features
+      // workflowState is encoded in aro-service features (that do not come in from vector tiles)
+      workflowStateId = feature.workflow_state_id || WorkflowState[feature.workflowState].id
+    }
+    const locationCategory = feature.locationCategory || locationTypeToAdd
+    objectIdToProperties[mapObject.objectId] = new LocationProperties(workflowStateId, locationCategory, numberOfHouseholds, numberOfEmployees)
+    setState((state) => ({ ...state, objectIdToProperties }))
+    objectIdToMapObject[mapObject.objectId] = mapObject
+    setObjectIdToMapObject(objectIdToMapObject)
+    var locationObject = formatLocationForService(mapObject.objectId)
+    // The marker is editable if the state is not LOCKED or INVALIDATED
+    const isEditable = !((workflowStateId & WorkflowState.LOCKED.id) ||
+                          (workflowStateId & WorkflowState.INVALIDATED.id))
+
+    if (isEditable) {
+      AroHttp.post(`/service/library/transaction/${currentTransaction.id}/features`, locationObject)
+    }
+  }
+
+  const handleSelectedObjectChanged = (mapObject) => {
+    if (!isExpandLocAttributes) setSelectedMapObject(mapObject)
+  }
   
   return (
     <>
       <div className="view-mode-container">
+        {
+          currentTransaction &&
+          <LocationMapObjects
+            featureType="location"
+            getObjectIconUrl={getObjectIconUrl}
+            checkCreateObject={checkCanCreateObject}
+            modifyingLibraryId={currentTransaction.libraryId}
+            onCreateObject={handleObjectCreated}
+            onSelectObject={handleSelectedObjectChanged}
+          />
+        }
+
         {/* BEGIN section transaction details */}
         {
           (currentTransaction && Object.keys(objectIdToProperties).length) &&
@@ -355,7 +449,7 @@ export const LocationEditor = (props) => {
               }
             </div>
             {
-              selectedMapObject &&
+              (selectedMapObject && Object.keys(objectIdToProperties).length) && objectIdToProperties.hasOwnProperty(selectedMapObject.objectId) &&
                 <div style={{ position: "relative" }}>
                   <table id="tblLocationProperties" className="table table-sm table-striped" style={{ marginBottom: "10px" }}>
                     <tbody>
@@ -539,7 +633,8 @@ export const LocationEditor = (props) => {
       </div>
 
       {
-        currentTransaction && selectedMapObject && Object.keys(objectIdToProperties).length && 
+        currentTransaction && selectedMapObject && Object.keys(objectIdToProperties).length
+          && objectIdToProperties.hasOwnProperty(selectedMapObject.objectId) &&
           <Modal isOpen={isExpandLocAttributes} size="md" toggle={expandLocAttributes} backdrop={false}>
             <ModalHeader toggle={expandLocAttributes}>
               Edit Location Attributes - {selectedMapObject.objectId}
@@ -619,6 +714,7 @@ export const LocationEditor = (props) => {
                     <td colSpan="3"> Other Attributes: </td>
                   </tr>
                   {
+                    objectIdToMapObject[selectedMapObject.objectId].feature.hasOwnProperty('attributes') &&
                     Object.entries(objectIdToMapObject[selectedMapObject.objectId].feature.attributes).map(([key, val], index) => {
                       return val != null && val != 'null' && key != 'number_of_households' && key != 'location_category' &&               
                         <tr>
@@ -710,10 +806,14 @@ const mapStateToProps = (state) => ({
   selectedMapObject: state.selection.selectedMapObject,
   locationTypeToIconUrl: getLocationTypeToIconUrl(state),
   objectIdToMapObject: state.selection.objectIdToMapObject,
+  locationLayers: getLocationLayersList(state),
+  ARO_CLIENT: state.toolbar.appConfiguration.ARO_CLIENT,
 })
 
 const mapDispatchToProps = (dispatch) => ({
   setObjectIdToMapObject: objectIdToMapObject => dispatch(SelectionActions.setObjectIdToMapObject(objectIdToMapObject)),
+  setSelectedMapObject: mapObject => dispatch(SelectionActions.setSelectedMapObject(mapObject)),
+  setCreatedMapObjects: createdMapObjects => dispatch(SelectionActions.setCreatedMapObjects(createdMapObjects))
 })
 
 export default wrapComponentWithProvider(reduxStore, LocationEditor, mapStateToProps, mapDispatchToProps)
