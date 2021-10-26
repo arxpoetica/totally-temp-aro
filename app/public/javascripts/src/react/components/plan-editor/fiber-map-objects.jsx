@@ -120,7 +120,6 @@ export const FiberMapObjects = (props) => {
             selectedFiberNodes.push({ fromNode: newMapObject.fromNode, toNode:newMapObject.toNode })
           }
         }
-        // if not already selected, add to selected
 
         setSelectedFiber(selectedFiberNodes)
       })

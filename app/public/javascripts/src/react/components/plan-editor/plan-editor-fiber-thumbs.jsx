@@ -23,6 +23,7 @@ const FiberThumbs = (props) => {
   const [formPlaceholders, setFormPlaceHolders] = useState({})
 
   useEffect(() => {
+    // this useEffect is for pulling the annotations from state
     if (selectedFiber.length === 1 && fiberAnnotations[selectedSubnetId]) {
       // if only one route selected, just set the values
       const selectedFiberAnnotations = fiberAnnotations[selectedSubnetId].find(
@@ -34,8 +35,11 @@ const FiberThumbs = (props) => {
         setFormValues(selectedFiberAnnotations.annotations)
       }
     } else if (selectedFiber.length > 1 && fiberAnnotations[selectedSubnetId]) {
+      // if multiple routes are selected, compare the values to see if they match
+      // if there is only one value, set it and make it editable
+      // if there are multiple values, display the multiple values as a placeholder
       const annotationObject = {} // used for comparison to see if fields are identical
-      // { [name]: ['test', 'test2'] } more than one value means switch to placeholder
+      // { [name]: { values: ['test'], label: 'label' } more than one value means switch to placeholder
 
       // for each selected fiber segment
       selectedFiber.forEach((fiberRoute) => {
@@ -50,17 +54,17 @@ const FiberThumbs = (props) => {
           // for each field in the annotations
           Object.entries(selectedFiberAnnotations.annotations).forEach(
             ([key, newValue]) => {
-              const values = annotationObject[key]
+              const annotations = annotationObject[key]
               // if it doesn't exist yet: set the value
-              if (!values) {
+              if (!annotations) {
                 annotationObject[key] = {
-                  value: [newValue.value],
+                  values: [newValue.value],
                   label: newValue.label,
                 }
               }
               // they aren't equal push the new value
-              else if (!values.value.includes(newValue.value)) {
-                annotationObject[key].value.push(newValue.value)
+              else if (!annotations.values.includes(newValue.value)) {
+                annotationObject[key].values.push(newValue.value)
               }
             },
           )
@@ -70,11 +74,13 @@ const FiberThumbs = (props) => {
       const newPlaceholders = {} // for multiple values set as placeholders instead
 
       Object.entries(annotationObject).forEach(([field, values]) => {
+        // if the length is one, there is a single value, set it and keep it editable
         if (values.value.length === 1)
           newFormValues[field] = {
             value: annotationObject[field].value[0],
             label: annotationObject[field].label,
           }
+        // otherwise set the multiple values as the placeholder text
         else newPlaceholders[field] = annotationObject[field].value.join(', ')
       })
       setFormPlaceHolders(newPlaceholders)
