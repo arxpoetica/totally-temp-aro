@@ -295,6 +295,8 @@ export class EquipmentBoundaryMapObjects extends Component {
     })
 
     newMarker.addListener("click", () => {
+      // Added this because once the marker is added sometimes you click the marker and sometimes the vertex
+      // So this is a fail safe.
       if (event.domEvent.shiftKey) {
         newMarker.setMap(null)
         const mapObjectOverlayClone = [...this.mapObjectOverlay]
