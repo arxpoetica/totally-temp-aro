@@ -305,10 +305,10 @@ export class EquipmentBoundaryMapObjects extends Component {
         });
         mapObjectOverlayClone.splice(indexOfMarker, 1)
         this.mapObjectOverlay = mapObjectOverlayClone;
-      })
+      }
   
       this.mapObjectOverlay = this.mapObjectOverlay.concat(newMarker);
-      }
+    })
   }
 
   clearMapObjectOverlay(clearVertex = true) {
