@@ -208,7 +208,14 @@ export class EquipmentBoundaryMapObjects extends Component {
     mapObject.addListener('contextmenu', event => {
       let vertexPayload;
       if(this.mapObjectOverlay.length > 0) {
-        this.addMarkerOverlay(event);
+        const indexOfMarker = this.mapObjectOverlay.findIndex((marker) => {
+          return marker.title === `${event.vertex}`
+        });
+        
+        if (event.vertex && indexOfMarker > -1) {
+          // Add vertex to array if it doesn't already exist there.
+          this.addMarkerOverlay(event);
+        }
         vertexPayload = this.mapObjectOverlay;
       } else {
         vertexPayload = event.vertex;
@@ -225,24 +232,32 @@ export class EquipmentBoundaryMapObjects extends Component {
           });
           
           if (indexOfMarker > -1) {
+            // If you select a vertex that is already selected, it will remove it.
             const [removedMarker] = this.mapObjectOverlay.splice(indexOfMarker, 1)
             removedMarker.setMap(null);
           } else {
             this.addMarkerOverlay(event);
-            console.log(this.mapObjectOverlay);
           }
         }
       } else {
-        for (const marker of this.mapObjectOverlay) {
-          marker.setMap(null);
-        }
-        
-        this.mapObjectOverlay = [];
+        // This is set up to deselect all vertices if the click is inside the polygon
+        // but not on a vertex
+        this.clearMapObjectOverlay(false);
+      }
+    })
+
+    this.props.googleMaps.addListener('click', event => {
+      if (!google.maps.geometry.poly.containsLocation(event.latLng, mapObject)) {
+        // Any click that is outside of the polygon will deselect all vertices and remove the markers
+        this.clearMapObjectOverlay(false);
       }
     })
     
     google.maps.event.addDomListener(document, 'keydown', (e) => {
       const code = (e.keyCode ? e.keyCode : e.which);
+      // 8 = Backspace
+      // 46 = Delete
+      // Supporting both of these because not all keyboards have a "delete" key
       if ((code === 8 || code === 46) && this.mapObjectOverlay.length > 0) {
         self.props.deleteBoundaryVertices(mapObject, this.mapObjectOverlay, this.clearMapObjectOverlay)
       }
@@ -250,7 +265,8 @@ export class EquipmentBoundaryMapObjects extends Component {
   }
   
   clearAll () {
-    this.clearMapObjectOverlay()
+    // Clear all markers from map when clearing poly
+    this.clearMapObjectOverlay(false)
     this.deleteMapObject()
     // delete all neighbors
     this.deleteNeighbors(Object.keys(this.neighborObjectsById))
@@ -258,6 +274,8 @@ export class EquipmentBoundaryMapObjects extends Component {
 
   addMarkerOverlay(event) {
     const vertex = this.mapObject.getPath().getAt(event.vertex);
+    // Position of the marker is oriented on the vertex rather than the event.latLng to ensure
+    // the coords are normalized
     const position = new google.maps.LatLng(vertex.lat(), vertex.lng())
     this.mapObjectOverlay = this.mapObjectOverlay.concat(new google.maps.Marker({
       position,
@@ -276,14 +294,18 @@ export class EquipmentBoundaryMapObjects extends Component {
     }));
   }
 
-  clearMapObjectOverlay() {
+  clearMapObjectOverlay(clearVertex = true) {
     const mapObjectOverlayClone = [...this.mapObjectOverlay]
     // Sort is necessary to ensure that indexes will not be reassigned while deleting more than one vertex.
     for (const marker of mapObjectOverlayClone.sort()) {
       // We are tracking the multiple selected verticies to delete by markers created.
       // And storing vertex info on the corrosponding marker.
-      this.mapObject.getPath().removeAt(Number(marker.title))
-      marker.setMap(null);
+      if (this.mapObject.getPath().getAt(Number(marker.title))) {
+        if (clearVertex) {
+          this.mapObject.getPath().removeAt(Number(marker.title))
+        }
+        marker.setMap(null);
+      }
     }
 
     this.mapObjectOverlay = [];

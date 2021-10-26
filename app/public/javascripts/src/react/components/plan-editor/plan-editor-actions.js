@@ -285,7 +285,15 @@ function deleteBoundaryVertex (mapObject, vertex) {
 }
 
 function deleteBoundaryVertices (mapObject, vertices, callBack) {
-  return async dispatch => {
+  return dispatch => {
+      // Sort is necessary to ensure that indexes will not be reassigned while deleting more than one vertex.
+      for (const marker of vertices.sort()) {
+      // We are tracking the multiple selected verticies to delete by markers created.
+      // And storing vertex info on the corrosponding marker.
+      mapObject.getPath().removeAt(Number(marker.title))
+      marker.setMap(null);
+    }
+
     callBack();
   }
 }
@@ -465,11 +473,16 @@ function showContextMenuForEquipmentBoundary (mapObject, x, y, vertex, callBack)
         Array.isArray(vertex) ? 'deleteBoundaryVertices' : 'deleteBoundaryVertex',
         mapObject,
         vertex,
+        // Callback is utilized to update the local state of the react class if it is a multi-delete.
         callBack
       )
     )
 
-    const menuItemFeature = new MenuItemFeature('BOUNDARY', 'Boundary Vertex', menuActions)
+    const menuItemFeature = new MenuItemFeature(
+      'BOUNDARY',
+      `Boundary ${Array.isArray(vertex) ? 'Vertices' : 'Vertex' }`,
+      menuActions
+    )
 
     // Show context menu
     dispatch(ContextMenuActions.setContextMenuItems([menuItemFeature]))
