@@ -73,15 +73,15 @@ const FiberThumbs = (props) => {
       const newFormValues = {} // values for form in state
       const newPlaceholders = {} // for multiple values set as placeholders instead
 
-      Object.entries(annotationObject).forEach(([field, values]) => {
+      Object.entries(annotationObject).forEach(([field, object]) => {
         // if the length is one, there is a single value, set it and keep it editable
-        if (values.value.length === 1)
+        if (object.values && object.values.length === 1)
           newFormValues[field] = {
-            value: annotationObject[field].value[0],
+            value: annotationObject[field].values[0],
             label: annotationObject[field].label,
           }
         // otherwise set the multiple values as the placeholder text
-        else newPlaceholders[field] = annotationObject[field].value.join(', ')
+        else newPlaceholders[field] = annotationObject[field].values.join(', ')
       })
       setFormPlaceHolders(newPlaceholders)
       setFormValues(newFormValues)
