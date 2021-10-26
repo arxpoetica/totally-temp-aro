@@ -3,7 +3,12 @@ import { connect } from 'react-redux'
 import PlanEditorActions from './plan-editor-actions'
 import { Input } from '../common/forms/Input.jsx'
 
-const fieldOptions = [{ name:'route', label: 'Route'}, { name:'fiberSize', label: 'Fiber Size'} , { name: 'fiberCount', label: 'Fiber Count'},  {name: 'buildType', label: 'BuildType'}]
+const fieldOptions = [
+  { name: 'route', label: 'Route' },
+  { name: 'fiberSize', label: 'Fiber Size' },
+  { name: 'fiberCount', label: 'Fiber Count' },
+  { name: 'buildType', label: 'BuildType' },
+]
 
 const FiberThumbs = (props) => {
   const {
@@ -48,7 +53,10 @@ const FiberThumbs = (props) => {
               const values = annotationObject[key]
               // if it doesn't exist yet: set the value
               if (!values) {
-                annotationObject[key] = { value: [newValue.value], label: newValue.label }
+                annotationObject[key] = {
+                  value: [newValue.value],
+                  label: newValue.label,
+                }
               }
               // they aren't equal push the new value
               else if (!values.value.includes(newValue.value)) {
@@ -63,7 +71,10 @@ const FiberThumbs = (props) => {
 
       Object.entries(annotationObject).forEach(([field, values]) => {
         if (values.value.length === 1)
-          newFormValues[field] = {value: annotationObject[field].value[0], label: annotationObject[field].label}
+          newFormValues[field] = {
+            value: annotationObject[field].value[0],
+            label: annotationObject[field].label,
+          }
         else newPlaceholders[field] = annotationObject[field].value.join(', ')
       })
       setFormPlaceHolders(newPlaceholders)
@@ -82,10 +93,10 @@ const FiberThumbs = (props) => {
 
   function handleChange(event, label) {
     const { value, name } = event.target
-    setFormValues({ ...formValues, [name]: { value, label} })
+    setFormValues({ ...formValues, [name]: { value, label } })
   }
 
-  function handleBlur() {
+  function saveAnnotations() {
     const subnetAnnotations = fiberAnnotations[selectedSubnetId]
     selectedFiber.forEach((fiberRoute) => {
       if (subnetAnnotations) {
@@ -107,7 +118,10 @@ const FiberThumbs = (props) => {
       }
     })
 
-    setFiberAnnotations({ [selectedSubnetId]: subnetAnnotations }, selectedSubnetId)
+    setFiberAnnotations(
+      { [selectedSubnetId]: subnetAnnotations },
+      selectedSubnetId,
+    )
   }
 
   //TODO: right now the fields are hardcoded, for route, fiber size, etc. later this will change to be dynamic
@@ -127,16 +141,27 @@ const FiberThumbs = (props) => {
               >
                 {fieldOption.label}
                 <Input
-                  value={formValues[fieldOption.name] && formValues[fieldOption.name].value}
+                  value={
+                    formValues[fieldOption.name] &&
+                    formValues[fieldOption.name].value
+                  }
                   name={fieldOption.name}
                   onChange={(event) => handleChange(event, fieldOption.label)}
-                  onBlur={(event) => handleBlur(event)}
                   placeholder={formPlaceholders[fieldOption.name]}
                   disabled={formPlaceholders[fieldOption.name]}
                   classes={'aro-input-black fiber-annotation'}
                 />
               </div>
             ))}
+          </div>
+          <div className="fiber-thumb-btn-container">
+            <button
+              type="button"
+              className="btn btn-sm btn-primary fiber-thumb-btn"
+              onClick={() => saveAnnotations()}
+            >
+              Save
+            </button>
           </div>
           <button
             type="button"
