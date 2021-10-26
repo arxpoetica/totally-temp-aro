@@ -287,7 +287,7 @@ function deleteBoundaryVertex (mapObject, vertex) {
 function deleteBoundaryVertices (mapObject, vertices, callBack) {
   return dispatch => {
       // Sort is necessary to ensure that indexes will not be reassigned while deleting more than one vertex.
-      for (const marker of vertices.sort()) {
+      for (const marker of vertices.sort((a, b) => Number(b) - Number(a))) {
       // We are tracking the multiple selected verticies to delete by markers created.
       // And storing vertex info on the corrosponding marker.
       mapObject.getPath().removeAt(Number(marker.title))
