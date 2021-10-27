@@ -228,6 +228,7 @@ export class EquipmentBoundaryMapObjects extends Component {
     
     mapObject.addListener('click', event => {
       if (event.vertex) {
+        event.domEvent.stopPropagation();
         if (event.domEvent.shiftKey) {
           const indexOfMarker = this.mapObjectOverlay.findIndex((marker) => {
             return marker.title === `${event.vertex}`
