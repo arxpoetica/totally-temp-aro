@@ -10,7 +10,6 @@ export const Input = ({
   max,
   classes,
   disabled,
-  placeholder,
   onChange = () => {},
   onBlur = () => {},
 }) => {
@@ -36,7 +35,6 @@ export const Input = ({
         disabled={disabled}
         onChange={event => onChange(event)}
         onBlur={event => handleBlur(event)}
-        placeholder={placeholder}
       />
     </div>
   )

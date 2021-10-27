@@ -4,7 +4,6 @@ import cx from 'clsx'
 import PlanEditorActions from './plan-editor-actions'
 import PlanEditorSelectors from './plan-editor-selectors'
 import { getIconUrl } from './shared'
-import FiberAnnotations from './plan-editor-fiber-annotations.jsx'
 
 const PlanEditorHeader = props => {
 
@@ -31,50 +30,44 @@ const PlanEditorHeader = props => {
     deselectEditFeatureById(objectId)
   }
 
-  return (
-    <>
-      {selectedEditFeatureIds.map(id => {
+  return selectedEditFeatureIds.map(id => {
 
-        const { feature } = features[id]
-        const { label } = equipments[feature.networkNodeType]
-        const { coordinates } = feature.geometry
+    const { feature } = features[id]
+    const { label } = equipments[feature.networkNodeType]
+    const { coordinates } = feature.geometry
 
-        return (
-        <div
-          key={id}
-          className={cx(
-            'plan-editor-thumb',
-            id === selectedSubnetId && 'selected',
-          )}
-          onClick={event => onClick(event, id)}
-        >
-          <div className="info">
-            <img src={getIconUrl(feature, props)} alt={label}/>
-            <h2>{label}</h2>
-          </div>
-          {locationCounts[id] > 0 && <p className="household-connections">Household connections: {locationCounts[id]}</p>}
-          <div className="subinfo">
-            <div className="item">
-              <div className="badge badge-dark">LATITUDE</div>
-              {coordinates[1]}
-            </div>
-            <div className="item">
-              <div className="badge badge-dark">LONGITUDE</div>
-              {coordinates[0]}
-            </div>
-          </div>
-          <button type="button" 
-            className="btn btn-sm plan-editor-thumb-close" 
-            aria-label="Close"
-            onClick={event => onClose(event, id)}
-          ><i className="fa fa-times"></i></button>
+    return (
+    <div
+      key={id}
+      className={cx(
+        'plan-editor-thumb',
+        id === selectedSubnetId && 'selected',
+      )}
+      onClick={event => onClick(event, id)}
+    >
+      <div className="info">
+        <img src={getIconUrl(feature, props)} alt={label}/>
+        <h2>{label}</h2>
+      </div>
+      {locationCounts[id] > 0 && <p className="household-connections">Household connections: {locationCounts[id]}</p>}
+      <div className="subinfo">
+        <div className="item">
+          <div className="badge badge-dark">LATITUDE</div>
+          {coordinates[1]}
         </div>
-        )
-      })}
-      <FiberAnnotations />
-    </>
-
-  )
+        <div className="item">
+          <div className="badge badge-dark">LONGITUDE</div>
+          {coordinates[0]}
+        </div>
+      </div>
+      <button type="button" 
+        className="btn btn-sm plan-editor-thumb-close" 
+        aria-label="Close"
+        onClick={event => onClose(event, id)}
+      ><i className="fa fa-times"></i></button>
+    </div>
+    )
+  })
 
 }
 

@@ -6,7 +6,6 @@ import Loader from '../common/Loader.jsx'
 import { selectStylesBlue } from '../../common/view-utils'
 import AroHttp from '../../common/aro-http'
 import PlanEditorSelectors from './plan-editor-selectors.js'
-import cx from 'clsx'
 
 const PlanEditorRecalculate = props => {
 
@@ -16,7 +15,6 @@ const PlanEditorRecalculate = props => {
     selectedSubnetId,
     recalculateSubnets,
     isRecalcSettled,
-    fiberAnnotations,
   } = props
 
   const [options, setOptions] = useState([
@@ -33,23 +31,6 @@ const PlanEditorRecalculate = props => {
   const handleSelectChange = change => {
     console.log(change)
     setSelectedOption(change)
-  }
-
-  const recalculate = () => {
-    if (Object.keys(fiberAnnotations).length > 0) {
-      swal({
-        title: "Are you sure you want to recalculate?",
-        text: "Any adjusted feeder fiber will lose it's attributes.",
-        type: 'warning',
-        showCancelButton: true,
-        closeOnConfirm: true,
-        confirmButtonColor: '#fdbc80',
-        confirmButtonText: 'Yes, recalculate',
-        cancelButtonText: 'Oops, nevermind.',
-      }, (confirm) => {
-        if (confirm) recalculateSubnets(transaction.id, [selectedSubnetId])
-      })	
-    } else recalculateSubnets( transaction.id, [selectedSubnetId])
   }
 
   return (
@@ -78,11 +59,11 @@ const PlanEditorRecalculate = props => {
           <div className="group">
             <button
               type="button"
-              className={cx("btn", 
-                fiberAnnotations[selectedSubnetId] && fiberAnnotations[selectedSubnetId].length > 0 
-                  ? "btn-outline-danger" 
-                  : "btn-outline-success" )}
-              onClick={() => recalculate()}
+              className="btn btn-outline-success"
+              onClick={() => recalculateSubnets(
+                transaction.id,
+                [selectedSubnetId]
+              )}
               disabled={!isRecalcSettled}
             >
               Recalculate Hubs & Terminals
@@ -116,7 +97,6 @@ const mapStateToProps = state => ({
   selectedSubnetId: state.planEditor.selectedSubnetId,
   isCalculatingSubnets: state.planEditor.isCalculatingSubnets,
   isRecalcSettled: PlanEditorSelectors.getIsRecalcSettled(state),
-  fiberAnnotations: state.planEditor.fiberAnnotations,
 })
 
 const mapDispatchToProps = dispatch => ({
