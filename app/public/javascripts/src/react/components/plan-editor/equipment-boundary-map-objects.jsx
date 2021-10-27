@@ -306,15 +306,18 @@ export class EquipmentBoundaryMapObjects extends Component {
         mapObjectOverlayClone.splice(indexOfMarker, 1)
         this.mapObjectOverlay = mapObjectOverlayClone;
       }
-  
-      this.mapObjectOverlay = this.mapObjectOverlay.concat(newMarker);
     })
+
+    this.mapObjectOverlay = this.mapObjectOverlay.concat(newMarker);
   }
 
   clearMapObjectOverlay(clearVertex = true) {
     const mapObjectOverlayClone = [...this.mapObjectOverlay]
     // Sort is necessary to ensure that indexes will not be reassigned while deleting more than one vertex.
-    for (const marker of mapObjectOverlayClone.sort((a, b) => Number(b) - Number(a))) {
+    mapObjectOverlayClone.sort((a, b) => {
+      return Number(b.title) - Number(a.title)
+    })
+    for (const marker of mapObjectOverlayClone) {
       // We are tracking the multiple selected verticies to delete by markers created.
       // And storing vertex info on the corrosponding marker.
       if (this.mapObject.getPath().getAt(Number(marker.title))) {
