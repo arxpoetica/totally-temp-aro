@@ -211,24 +211,6 @@
   right: 0px;
 }
 
-/* annotations */
-.plan-editor-thumb.fiber-annotations {
-  border: 2px solid #ff55da;
-  background-color: white;
-}
-.plan-editor-thumb.fiber-annotations .annotation-input {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-weight: 600;
-}
-.plan-editor-thumb.fiber-annotations .save-button {
-  margin: .3rem;
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-}
-
 /* ========================= >>>>> plan editor actions >>>>> */
 
 .equipment-dragger {

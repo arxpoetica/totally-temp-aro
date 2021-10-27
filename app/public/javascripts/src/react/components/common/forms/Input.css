@@ -46,32 +46,3 @@
   pointer-events: none;
 }
 .aro-input.currency input { padding: 0 15px; }
-
-/* smaller black text */
-/* examples: filtering, fiber tagging */
-.aro-input.black input {
-  color: black;
-  font: 14px var(--font);
-  font-weight: 400;
-  letter-spacing: 0.5px;
-  height: 34px;
-  border: 1px solid var(--gray-medium-light);
-  border-radius: 3px;
-  width: 100%;
-  padding: .3rem;
-}
-
-/* specific to fiber annotation */
-.aro-input.black.fiber-annotation {
-  width: 80%;
-  margin: .1rem;
-}
-.aro-input.black.fiber-annotation input {
-  text-align: left;
-}
-
-/* specific to  location filtering */
-.aro-input.black.filter-input {
-  width: 75px;
-}
-
