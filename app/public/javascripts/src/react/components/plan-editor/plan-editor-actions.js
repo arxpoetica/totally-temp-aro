@@ -832,6 +832,11 @@ function addSubnetTree() {
           }
         })
         if (rootIds.length) {
+          rootIds.forEach((id) => {
+            // get feeder fiber annotations
+            dispatch(getFiberAnnotations(id))
+          })
+          
           // TODO: the addSubnets function needs to be broken up
           return dispatch(addSubnets({ subnetIds: rootIds }))
             .then(subnetRes => Promise.resolve(subnetRes))
@@ -883,6 +888,11 @@ function addSubnetTreeByLatLng([lng, lat]) {
 
 function setSelectedSubnetId (selectedSubnetId) {
   return (dispatch) => {
+    // clear any selected fiber
+    dispatch({
+      type: Actions.PLAN_EDITOR_SET_FIBER_SELECTION,
+      payload: []
+    })
     if (!selectedSubnetId) {
       dispatch({
         type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
@@ -1023,6 +1033,7 @@ function recalculateSubnets (transactionId, subnetIds = []) {
     const state = getState()
     let activeSubnets = []
     subnetIds.forEach(subnetId => {
+      dispatch(setFiberAnnotations({[subnetId]: []}, subnetId))
       if (state.planEditor.subnets[subnetId]) {
         activeSubnets.push(subnetId)
       } else if (state.planEditor.subnetFeatures[subnetId]
@@ -1054,6 +1065,56 @@ function setFiberRenderRequired (bool) {
   }
 }
 
+function setSelectedFiber (fiberObjects) {
+  return (dispatch) => {
+    batch(() => {
+      dispatch({
+        type: Actions.PLAN_EDITOR_SET_FIBER_SELECTION,
+        payload: fiberObjects,
+      })
+      dispatch({
+        type: Actions.PLAN_EDITOR_SET_FIBER_RENDER_REQUIRED,
+        payload: true,
+      })
+    })
+  }
+}
+
+function getFiberAnnotations (subnetId) {
+  return (dispatch, getState) => {
+    const state = getState()
+    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+
+    AroHttp.get(`/service/plan-transaction/${transactionId}/subnet/${subnetId}/annotations`)
+      .then((res) => {
+        dispatch({
+          type: Actions.PLAN_EDITOR_SET_FIBER_ANNOTATIONS,
+          payload: { [subnetId]: res.data }
+        })
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+  }
+}
+
+function setFiberAnnotations (fiberAnnotations, subnetId) {
+  return (dispatch, getState) => {
+    const state = getState()
+    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+
+    AroHttp.put(`/service/plan-transaction/${transactionId}/subnet/${subnetId}/annotations`, fiberAnnotations[subnetId])
+      .then((res) => {
+        dispatch({
+          type: Actions.PLAN_EDITOR_SET_FIBER_ANNOTATIONS,
+          payload: fiberAnnotations,
+        })
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+  }
+}
 // --- //
 
 // helper
@@ -1323,4 +1384,7 @@ export default {
   boundaryChange,
   recalculateSubnets,
   setFiberRenderRequired,
+  setSelectedFiber,
+  setFiberAnnotations,
+  getFiberAnnotations,
 }
