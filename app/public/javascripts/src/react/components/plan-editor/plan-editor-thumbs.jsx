@@ -4,7 +4,7 @@ import cx from 'clsx'
 import PlanEditorActions from './plan-editor-actions'
 import PlanEditorSelectors from './plan-editor-selectors'
 import { getIconUrl } from './shared'
-import FiberThumbs from './plan-editor-fiber-thumbs.jsx'
+import FiberAnnotations from './plan-editor-fiber-annotations.jsx'
 
 const PlanEditorHeader = props => {
 
@@ -71,7 +71,7 @@ const PlanEditorHeader = props => {
         </div>
         )
       })}
-      <FiberThumbs />
+      <FiberAnnotations />
     </>
 
   )

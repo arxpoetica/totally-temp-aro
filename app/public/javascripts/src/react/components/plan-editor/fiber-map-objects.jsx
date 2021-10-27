@@ -72,10 +72,20 @@ export const FiberMapObjects = (props) => {
       let selected = false
 
       // set color purple if there are annotations
-      if (fiberAnnotations[selectedSubnetId] && fiberAnnotations[selectedSubnetId].some((fiber) => fiber.fromNode === fromNode && fiber.toNode === toNode)) strokeColor = '#a73cff'
+      if (
+        fiberAnnotations[selectedSubnetId] &&
+        fiberAnnotations[selectedSubnetId].some(
+          (fiber) => fiber.fromNode === fromNode && fiber.toNode === toNode,
+        )
+      )
+        strokeColor = '#a73cff'
 
       // set color pink, increase stroke and set selected true if selected
-      if (selectedFiber.some((fiber) => fiber.fromNode === fromNode && fiber.toNode === toNode)) {
+      if (
+        selectedFiber.some(
+          (fiber) => fiber.fromNode === fromNode && fiber.toNode === toNode,
+        )
+      ) {
         strokeColor = '#ff55da'
         strokeWeight = 5
         selected = true
@@ -104,20 +114,39 @@ export const FiberMapObjects = (props) => {
           mapObjects.forEach((mapObject) => {
             // if selected and not the clicked route add to redux selected list
             // This is because if you pull selected from state it will be stale
-            if (mapObject.selected && (mapObject.fromNode !== fromNode || mapObject.toNode !== toNode)) {
-              selectedFiberNodes.push({ fromNode: mapObject.fromNode, toNode: mapObject.toNode })
+            if (
+              mapObject.selected &&
+              (mapObject.fromNode !== fromNode || mapObject.toNode !== toNode)
+            ) {
+              selectedFiberNodes.push({
+                fromNode: mapObject.fromNode,
+                toNode: mapObject.toNode,
+              })
             }
           })
           // if the clicked route was not selected, add it to selected state
           if (!newMapObject.selected) {
-            selectedFiberNodes.push({ fromNode: newMapObject.fromNode, toNode:newMapObject.toNode })
+            selectedFiberNodes.push({
+              fromNode: newMapObject.fromNode,
+              toNode: newMapObject.toNode,
+            })
           }
         } else {
           // if other routes are selected or none are selected still select the clicked route
-          if (mapObjects.some((mapObject) => (mapObject.selected && (mapObject.fromNode !== fromNode || mapObject.toNode !== toNode)))
-              || !newMapObject.selected) {
+          if (
+            mapObjects.some(
+              (mapObject) =>
+                mapObject.selected &&
+                (mapObject.fromNode !== fromNode ||
+                  mapObject.toNode !== toNode),
+            ) ||
+            !newMapObject.selected
+          ) {
             // adds clicked route to selected
-            selectedFiberNodes.push({ fromNode: newMapObject.fromNode, toNode:newMapObject.toNode })
+            selectedFiberNodes.push({
+              fromNode: newMapObject.fromNode,
+              toNode: newMapObject.toNode,
+            })
           }
         }
 

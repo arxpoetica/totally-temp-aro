@@ -10,7 +10,7 @@ const fieldOptions = [
   { name: 'buildType', label: 'BuildType' },
 ]
 
-const FiberThumbs = (props) => {
+const FiberAnnotations = (props) => {
   const {
     selectedFiber,
     setSelectedFiber,
@@ -134,33 +134,33 @@ const FiberThumbs = (props) => {
   return (
     <>
       {selectedFiber.length > 0 && (
-        <div className={'plan-editor-thumb-fiber plan-editor-thumb'}>
+        <div className={'fiber-annotations plan-editor-thumb'}>
           <div className="info">
             <h2>Fiber Route{selectedFiber.length > 1 && 's'}</h2>
           </div>
-          <div>
-            {/* Map options for input */}
-            {fieldOptions.map((fieldOption) => (
-              <div
-                className="plan-editor-thumb-input-container"
-                key={fieldOption.name}
-              >
-                {fieldOption.label}
-                <Input
-                  value={
-                    formValues[fieldOption.name] &&
-                    formValues[fieldOption.name].value
-                  }
-                  name={fieldOption.name}
-                  onChange={(event) => handleChange(event, fieldOption.label)}
-                  placeholder={formPlaceholders[fieldOption.name]}
-                  disabled={formPlaceholders[fieldOption.name]}
-                  classes={'aro-input-black fiber-annotation'}
-                />
-              </div>
-            ))}
-          </div>
-          <div className="fiber-thumb-btn-container">
+          
+          {/* Map options for input */}
+          {fieldOptions.map((fieldOption) => (
+            <div
+              className="annotation-input"
+              key={fieldOption.name}
+            >
+              {fieldOption.label}
+              <Input
+                value={
+                  formValues[fieldOption.name] &&
+                  formValues[fieldOption.name].value
+                }
+                name={fieldOption.name}
+                onChange={(event) => handleChange(event, fieldOption.label)}
+                placeholder={formPlaceholders[fieldOption.name]}
+                disabled={formPlaceholders[fieldOption.name]}
+                classes={'black fiber-annotation'}
+              />
+            </div>
+          ))}
+          
+          <div className="save-button">
             <button
               type="button"
               className="btn btn-sm btn-primary fiber-thumb-btn"
@@ -196,4 +196,4 @@ const mapDispatchToProps = (dispatch) => ({
     dispatch(PlanEditorActions.setFiberAnnotations(fiberAnnotations, subnetId)),
 })
 
-export default connect(mapStateToProps, mapDispatchToProps)(FiberThumbs)
+export default connect(mapStateToProps, mapDispatchToProps)(FiberAnnotations)
