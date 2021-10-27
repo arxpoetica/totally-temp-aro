@@ -243,14 +243,14 @@ export class EquipmentBoundaryMapObjects extends Component {
       } else {
         // This is set up to deselect all vertices if the click is inside the polygon
         // but not on a vertex
-        this.clearMapObjectOverlay(false);
+        this.clearMapObjectOverlay();
       }
     })
 
     this.props.googleMaps.addListener('click', event => {
-      if (!google.maps.geometry.poly.containsLocation(event.latLng, mapObject)) {
+      if (!google.maps.geometry.poly.containsLocation(event.latLng, mapObject) && this.mapObjectOverlay.length > 0) {
         // Any click that is outside of the polygon will deselect all vertices
-        this.clearMapObjectOverlay(false);
+        this.clearMapObjectOverlay();
       }
     })
     
@@ -260,14 +260,14 @@ export class EquipmentBoundaryMapObjects extends Component {
       // 46 = Delete
       // Supporting both of these because not all keyboards have a "delete" key
       if ((code === 8 || code === 46) && this.mapObjectOverlay.length > 0) {
-        self.props.deleteBoundaryVertices(mapObject, this.mapObjectOverlay, this.clearMapObjectOverlay)
+        this.props.deleteBoundaryVertices(mapObject, this.mapObjectOverlay, this.clearMapObjectOverlay)
       }
     });
   }
   
   clearAll () {
     // Clear all markers from map when clearing poly
-    this.clearMapObjectOverlay(false)
+    this.clearMapObjectOverlay()
     this.deleteMapObject()
     // delete all neighbors
     this.deleteNeighbors(Object.keys(this.neighborObjectsById))
@@ -311,21 +311,9 @@ export class EquipmentBoundaryMapObjects extends Component {
     this.mapObjectOverlay = this.mapObjectOverlay.concat(newMarker);
   }
 
-  clearMapObjectOverlay(clearVertex = true) {
-    const mapObjectOverlayClone = [...this.mapObjectOverlay]
-    // Sort is necessary to ensure that indexes will not be reassigned while deleting more than one vertex.
-    mapObjectOverlayClone.sort((a, b) => {
-      return Number(b.title) - Number(a.title)
-    })
-    for (const marker of mapObjectOverlayClone) {
-      // We are tracking the multiple selected verticies to delete by markers created.
-      // And storing vertex info on the corrosponding marker.
-      if (this.mapObject.getPath().getAt(Number(marker.title))) {
-        if (clearVertex) {
-          this.mapObject.getPath().removeAt(Number(marker.title))
-        }
-        marker.setMap(null);
-      }
+  clearMapObjectOverlay() {
+    for (const marker of this.mapObjectOverlay) {
+      marker.setMap(null);
     }
 
     this.mapObjectOverlay = [];
@@ -360,8 +348,8 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
   modifyFeature: (equipmentBoundary) => dispatch(PlanEditorActions.modifyFeature('equipment_boundary', equipmentBoundary)),
-  showContextMenuForEquipmentBoundary: (mapObject, x, y, vertex) => {
-    dispatch(PlanEditorActions.showContextMenuForEquipmentBoundary(mapObject, x, y, vertex))
+  showContextMenuForEquipmentBoundary: (mapObject, x, y, vertex, callBack) => {
+    dispatch(PlanEditorActions.showContextMenuForEquipmentBoundary(mapObject, x, y, vertex, callBack))
   },
   boundaryChange: (subnetId, geometry) => dispatch(PlanEditorActions.boundaryChange(subnetId, geometry)),
   deleteBoundaryVertices: (mapObjects, vertices, callBack) => dispatch(PlanEditorActions.deleteBoundaryVertices(mapObjects, vertices, callBack)),
