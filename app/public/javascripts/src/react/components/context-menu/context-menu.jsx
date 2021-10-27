@@ -109,6 +109,10 @@ export class ContextMenu extends Component {
         text: 'Delete',
         cssClass: 'fas fa-trash-alt pl-2 pr-2'
       },
+      DELETE_ALL: {
+        text: 'Delete All',
+        cssClass: 'fas fa-trash-alt pl-2 pr-2'
+      },
       ADD: {
         text: 'Add',
         //cssClass: 'fas fa-circle-plus pl-2 pr-2'

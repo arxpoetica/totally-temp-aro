@@ -284,6 +284,25 @@ function deleteBoundaryVertex (mapObject, vertex) {
   }
 }
 
+function deleteBoundaryVertices (mapObject, vertices, callBack) {
+  return dispatch => {
+      // Sort is necessary to ensure that indexes will not be reassigned while deleting more than one vertex.
+      vertices.sort((a, b) => {
+        return Number(b.title) - Number(a.title)
+      })
+      // We are tracking the multiple selected verticies to delete by markers created.
+      // And storing vertex index on the corrosponding marker.
+
+      for (const marker of vertices) {
+        if (marker && marker.title && mapObject.getPath().getLength() > 3) {
+          mapObject.getPath().removeAt(Number(marker.title))
+        }
+      }
+
+    callBack();
+  }
+}
+
 function showContextMenuForEquipment (featureId, x, y) {
   return (dispatch) => {
     var menuActions = []
@@ -448,11 +467,27 @@ function assignLocation (locationId, terminalId) {
   }
 }
 
-function showContextMenuForEquipmentBoundary (mapObject, x, y, vertex) {
+function showContextMenuForEquipmentBoundary (mapObject, x, y, vertex, callBack) {
   return (dispatch) => {
     const menuActions = []
-    menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteBoundaryVertex', mapObject, vertex))
-    const menuItemFeature = new MenuItemFeature('BOUNDARY', 'Boundary Vertex', menuActions)
+    menuActions.push(
+      new MenuItemAction(
+        Array.isArray(vertex) ? 'DELETE_ALL' : 'DELETE',
+        'Delete',
+        'PlanEditorActions',
+        Array.isArray(vertex) ? 'deleteBoundaryVertices' : 'deleteBoundaryVertex',
+        mapObject,
+        vertex,
+        // Callback is utilized to update the local state of the react class if it is a multi-delete.
+        callBack
+      )
+    )
+
+    const menuItemFeature = new MenuItemFeature(
+      'BOUNDARY',
+      `Boundary ${Array.isArray(vertex) ? 'Vertices' : 'Vertex' }`,
+      menuActions
+    )
 
     // Show context menu
     dispatch(ContextMenuActions.setContextMenuItems([menuItemFeature]))
@@ -1354,6 +1389,7 @@ export default {
   deleteFeature,
   deleteTransactionFeature,
   deleteBoundaryVertex,
+  deleteBoundaryVertices,
   addTransactionFeatures,
   showContextMenuForEquipment,
   showContextMenuForLocations,
