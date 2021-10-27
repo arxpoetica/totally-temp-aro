@@ -10,6 +10,8 @@ export class EquipmentBoundaryMapObjects extends Component {
   constructor (props) {
     super(props)
     this.mapObject = undefined;
+    this.clickOutListener = undefined;
+    this.deleteKeyListener = undefined;
     this.mapObjectOverlay = [];
     this.neighborObjectsById = {}
     this.polygonOptions = {
@@ -227,15 +229,12 @@ export class EquipmentBoundaryMapObjects extends Component {
     mapObject.addListener('click', event => {
       if (event.vertex) {
         if (event.domEvent.shiftKey) {
-          const mapObjectOverlayClone = [...this.mapObjectOverlay]
-          const indexOfMarker = mapObjectOverlayClone.findIndex((marker) => {
+          const indexOfMarker = this.mapObjectOverlay.findIndex((marker) => {
             return marker.title === `${event.vertex}`
           });
           if (indexOfMarker > -1) {
             // If you select a vertex that is already selected, it will remove it.
-            const [removedMarker] = mapObjectOverlayClone.splice(indexOfMarker, 1)
-            removedMarker.setMap(null);
-            this.mapObjectOverlay = mapObjectOverlayClone;
+            this.removeMarker(indexOfMarker);
           } else {
             this.addMarkerOverlay(event);
           }
@@ -247,14 +246,14 @@ export class EquipmentBoundaryMapObjects extends Component {
       }
     })
 
-    this.props.googleMaps.addListener('click', event => {
+    this.clickOutListener = this.props.googleMaps.addListener('click', event => {
       if (!google.maps.geometry.poly.containsLocation(event.latLng, mapObject) && this.mapObjectOverlay.length > 0) {
         // Any click that is outside of the polygon will deselect all vertices
         this.clearMapObjectOverlay();
       }
     })
     
-    google.maps.event.addDomListener(document, 'keydown', (e) => {
+    this.deleteKeyListener = google.maps.event.addDomListener(document, 'keydown', (e) => {
       const code = (e.keyCode ? e.keyCode : e.which);
       // 8 = Backspace
       // 46 = Delete
@@ -271,6 +270,9 @@ export class EquipmentBoundaryMapObjects extends Component {
     this.deleteMapObject()
     // delete all neighbors
     this.deleteNeighbors(Object.keys(this.neighborObjectsById))
+    // Remove global listeners on tear down
+    google.maps.event.removeListener(this.clickOutListener);
+    google.maps.event.removeListener(this.deleteKeyListener);
   }
 
   addMarkerOverlay(event) {
@@ -290,6 +292,8 @@ export class EquipmentBoundaryMapObjects extends Component {
         strokeOpacity: 1,
         strokeWeight: 3,
         scale: 6,
+        // This was added to ensure that the svg was centered on the verte
+        // The vertex coords seem to be .1,.1 off center of the vertex icon itself.
         anchor: new google.maps.Point(.1, .1)
       }
     })
@@ -298,17 +302,21 @@ export class EquipmentBoundaryMapObjects extends Component {
       // Added this because once the marker is added sometimes you click the marker and sometimes the vertex
       // So this is a fail safe.
       if (event.domEvent.shiftKey) {
-        newMarker.setMap(null)
-        const mapObjectOverlayClone = [...this.mapObjectOverlay]
-        const indexOfMarker = mapObjectOverlayClone.findIndex((marker) => {
-          return marker.title === newMarker.title;
+        const indexOfMarker = this.mapObjectOverlay.findIndex((marker) => {
+          return marker.title === marker.title;
         });
-        mapObjectOverlayClone.splice(indexOfMarker, 1)
-        this.mapObjectOverlay = mapObjectOverlayClone;
+        this.removeMarker(indexOfMarker);
       }
     })
 
     this.mapObjectOverlay = this.mapObjectOverlay.concat(newMarker);
+  }
+
+  removeMarker(indexOfMarker) {
+      const mapObjectOverlayClone = [...this.mapObjectOverlay]
+      const [removedMarker] = mapObjectOverlayClone.splice(indexOfMarker, 1)
+      this.mapObjectOverlay = mapObjectOverlayClone;
+      removedMarker.setMap(null);
   }
 
   clearMapObjectOverlay() {
