@@ -79,7 +79,7 @@ const PlanEditorRecalculate = props => {
             <button
               type="button"
               className={cx("btn", 
-                fiberAnnotations[selectedSubnetId] && fiberAnnotations[selectedSubnetId].length > 0 
+                fiberAnnotations && Object.keys(fiberAnnotations).length > 0
                   ? "btn-outline-danger" 
                   : "btn-outline-success" )}
               onClick={() => recalculate()}

@@ -34,6 +34,7 @@ export const PlanEditor = props => {
     equipments,
     rootSubnet,
     updateFeatureProperties,
+    fiberAnnotations,
   } = props
 
   useEffect(() => {
@@ -44,7 +45,20 @@ export const PlanEditor = props => {
     if (isCommittingTransaction) {
       return
     }
-    commitTransaction(transactionId)
+    if (Object.keys(fiberAnnotations).length > 0) {
+      swal({
+        title: "Are you sure you want to Commit?",
+        text: "Any adjusted feeder fiber will lose it's attributes.",
+        type: 'warning',
+        showCancelButton: true,
+        closeOnConfirm: true,
+        confirmButtonColor: '#fdbc80',
+        confirmButtonText: 'Yes, Commit',
+        cancelButtonText: 'Oops, nevermind.',
+      }, (confirm) => {
+        if (confirm) commitTransaction(transactionId)
+      })
+    } else commitTransaction(transactionId)
   }
 
   function onFeatureFormChange (newValObj, propVal, path, event) {
@@ -134,6 +148,7 @@ const mapStateToProps = state => ({
   selectedSubnetId: state.planEditor.selectedSubnetId,
   equipments: state.mapLayers.networkEquipment.equipments,
   rootSubnet: PlanEditorSelectors.getRootSubnet(state),
+  fiberAnnotations: state.planEditor.fiberAnnotations,
 })
 
 const mapDispatchToProps = dispatch => ({
