@@ -4,6 +4,7 @@ import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import ContextMenuActions from '../context-menu/actions'
 import PlanEditorActions from '../plan-editor/plan-editor-actions'
+import ViewSettingsActions from '../view-settings/view-settings-actions'
 import MenuItemFeature from './menu-item-feature'
 import './context-menu.css'
 
@@ -13,7 +14,8 @@ export class ContextMenu extends Component {
     this.MAX_MENU_ITEMS = 6
     this.handleBackdropMouseDown = this.handleBackdropMouseDown.bind(this)
     this.actionModules = {
-      PlanEditorActions: PlanEditorActions
+      PlanEditorActions: PlanEditorActions,
+      ViewSettingsActions: ViewSettingsActions,
     }
   }
 

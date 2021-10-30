@@ -825,7 +825,6 @@ class MapObjectEditorController {
           }
           // Select this map object
           this.selectMapObject(mapObject)
-          this.setSelectedMapObject(mapObject)
         })
       } else {
         return
@@ -1345,7 +1344,6 @@ class MapObjectEditorController {
   mapDispatchToTarget (dispatch) {
     return {
       setPlanEditorFeatures: objectIds => dispatch(SelectionActions.setPlanEditorFeatures(objectIds)),
-      setSelectedMapObject: mapObject => dispatch(SelectionActions.setSelectedMapObject(mapObject))
     }
   }
 }

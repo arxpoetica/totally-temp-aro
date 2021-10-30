@@ -2,8 +2,13 @@ import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import AroHttp from '../../../common/aro-http'
 import uuidStore from '../../../../shared-utils/uuid-store'
-import SelectionActions from '../..//selection/selection-actions'
+import SelectionActions from '../../selection/selection-actions'
 import WorkflowState from '../../../../shared-utils/workflow-state'
+import ContextMenuActions from '../../context-menu/actions'
+import MenuItemFeature from '../../context-menu/menu-item-feature'
+import MenuItemAction from '../../context-menu/menu-item-action'
+import { usePrevious } from '../../../common/view-utils.js'
+import { dequal } from 'dequal'
 
 export const LocationEditor = (props) => {
 
@@ -13,20 +18,46 @@ export const LocationEditor = (props) => {
 
   const { createdMapObjects } = state
 
-  const { mapFeatures, modifyingLibraryId, getObjectIconUrl, featureType,
-    checkCreateObject, mapRef, onCreateObject, setSelectedMapObject, setObjectIdToMapObject,
-    setPlanEditorFeatures, selectedMapObject, onSelectObject, mapObjectsList } = props
+  const { mapFeatures, modifyingLibraryId, getObjectIconUrl, featureType, checkCreateObject, mapRef, onCreateObject, 
+    setObjectIdToMapObject, setPlanEditorFeatures, selectedMapObject, onSelectObject, createMapObjects,
+    onModifyObject, setContextMenuItems, showContextMenu, deletedLocationId, onDeleteObject, removeMapObjects,
+    isRulerEnabled } = props
 
   useEffect(() => {
     // Use the cross hair cursor while this control is initialized
     mapRef.setOptions({ draggableCursor: 'crosshair' })
-    handleMapEntitySelected(mapFeatures)
-
+    if(isRulerEnabled)  { return }
+    !removeMapObjects && handleMapEntitySelected(mapFeatures)
   }, [mapFeatures])
 
   useEffect(() => {
-    mapObjectsList && createMapObjectsFN(mapObjectsList)
-  }, [mapObjectsList])
+    return () => removeCreatedMapObjects()
+  }, [])
+
+  useEffect(() => {
+    updateSelectedMapObject(selectedMapObject)
+  }, [selectedMapObject])
+  
+  const removeCreatedMapObjects = () => {
+    // Remove created objects from map
+    selectMapObject(null)
+    Object.keys(createdMapObjects).forEach((objectId) => {
+      createdMapObjects[objectId].setMap(null)
+    })
+    setState((state) => ({ ...state, createdMapObjects: {} }))
+  }
+
+  const prevDeletedLocationId = usePrevious(deletedLocationId)
+  useEffect(() => {
+    if (!dequal(prevDeletedLocationId, deletedLocationId)) {
+      deleteObjectWithId(deletedLocationId)
+      deleteCreatedMapObject(deletedLocationId)
+    }
+  }, [deletedLocationId])
+
+  useEffect(() => {
+    createMapObjects.length && createMapObjectsFN(createMapObjects)
+  }, [createMapObjects])
 
   const createMapObject = (feature, iconUrl, usingMapClick, existingObjectOverride, deleteExistingBoundary, isMult)  => {
     if (typeof existingObjectOverride === 'undefined') {
@@ -38,11 +69,12 @@ export const LocationEditor = (props) => {
       if (canCreateObject) {
         // if an existing object just show don't edit
         if (feature.isExistingObject && !existingObjectOverride) {
-          this.displayViewObject({ feature: feature })
           selectMapObject(null)
           return
         }
         mapObject = createPointMapObject(feature, iconUrl)
+        // Set up listeners on the map object
+        mapObject.addListener('dragend', (event) => onModifyObject(mapObject))
         mapObject.addListener('click', (event) => {
           selectMapObject(mapObject)
         })
@@ -52,11 +84,80 @@ export const LocationEditor = (props) => {
     } else {
       throw `createMapObject() not supported for geometry type ${feature.geometry.type}`
     }
+
+    mapObject.addListener('rightclick', event => {
+      if (typeof event === 'undefined' || typeof event.vertex !== 'undefined') {
+        return
+      }
+      // 'event' contains a MouseEvent which we use to get X,Y coordinates. The key of the MouseEvent object
+      // changes with google maps implementations. So iterate over the keys to find the right object.
+
+      if (featureType == 'location') {
+        selectMapObject(mapObject)
+      }
+      var eventXY = getXYFromEvent(event)
+      if (!eventXY) {
+        return
+      }
+      updateContextMenu(event.latLng, eventXY.x, eventXY.y, mapObject)
+    })
+
     createdMapObjects[mapObject.objectId] = mapObject
     setState((state) => ({ ...state, createdMapObjects }))
     setObjectIdToMapObject(createdMapObjects)
     if (usingMapClick) selectMapObject(mapObject, isMult)
     return onCreateObject(mapObject, usingMapClick, feature, !deleteExistingBoundary)
+  }
+
+  const selectedMapObjectRef = React.useRef(selectedMapObject)
+  const updateSelectedMapObject = (selectedMapObject) => {
+    selectedMapObjectRef.current = selectedMapObject
+  }
+
+  const updateContextMenu = (latLng, x, y, clickedMapObject) => {
+    if (featureType === 'location' && isFeatureEditable(clickedMapObject.feature)) {
+      var menuActions = []
+      const objectId = clickedMapObject.objectId
+      menuActions.push(
+        new MenuItemAction('DELETE', 'Delete', 'ViewSettingsActions', 'deleteLocationWithId', objectId))
+      const menuItems = new MenuItemFeature('LOCATION', 'Location', menuActions)
+      openContextMenu(x, y, [menuItems])
+    }
+  }
+  
+  const deleteObjectWithId = (objectId) => {
+    if (selectedMapObject && (selectedMapObject.objectId === objectId)) {
+      // Deselect the currently selected object, as it is about to be deleted.
+      selectMapObject(null)
+    }
+    var mapObjectToDelete = createdMapObjects[objectId]
+    if (mapObjectToDelete) {
+      onDeleteObject(mapObjectToDelete)
+    }
+  }
+
+  const deleteCreatedMapObject = (objectId) => {
+    var mapObjectToDelete = createdMapObjects[objectId]
+    if (mapObjectToDelete) {
+      mapObjectToDelete.setMap(null)
+      delete createdMapObjects[objectId]
+      setState((state) => ({ ...state, createdMapObjects }))
+    }
+  }
+
+  const openContextMenu = (x, y, menuItems) => {
+    var bounds = []
+    var boundsByNetworkNodeObjectId = {}
+    menuItems.forEach((menuItem) => {
+      var feature = menuItem.feature
+      if (feature && feature.network_node_object_id) {
+        bounds.push(feature)
+        boundsByNetworkNodeObjectId[feature.network_node_object_id] = menuItem
+      }
+    })
+
+    setContextMenuItems(menuItems)
+    showContextMenu(x, y)
   }
 
   const createPointMapObject = (feature, iconUrl) => {
@@ -174,10 +275,11 @@ export const LocationEditor = (props) => {
 
   const selectMapObject = (mapObject, isMult) => {
     if (typeof isMult === 'undefined') isMult = false
+    const selectedMapObjectCurr = selectedMapObjectRef.current
     // --- clear mult select?
     // First de-select the currently selected map object (if any)
-    if (selectedMapObject && !isMult) {
-      dehighlightMapObject(selectedMapObject)
+    if (selectedMapObjectCurr && !isMult) {
+      dehighlightMapObject(selectedMapObjectCurr)
     }
     // then select the map object
     // can be null if we are de-selecting everything
@@ -212,10 +314,27 @@ export const LocationEditor = (props) => {
   }
 
   const createMapObjectsFN = (features) => {
-    // "features" is an array that comes directly from aro-service. Create map objects for these features
-    features.forEach((feature) => {
-      createMapObject(feature, feature.iconUrl, false) // Feature is not created using a map click
+    if(!removeMapObjects) {
+      // "features" is an array that comes directly from aro-service. Create map objects for these features
+      features.forEach((feature) => {
+        createMapObject(feature, feature.iconUrl, false) // Feature is not created using a map click
+      })
+    }
+  }
+
+  // ----- rightclick menu ----- //
+
+  const getXYFromEvent = (event) => {
+    var mouseEvent = null
+    Object.keys(event).forEach((eventKey) => {
+      if (event.hasOwnProperty(eventKey) && (event[eventKey] instanceof MouseEvent)) {
+        mouseEvent = event[eventKey]
+      }
     })
+    if (!mouseEvent) return
+    var x = mouseEvent.clientX
+    var y = mouseEvent.clientY
+    return { 'x': x, 'y': y }
   }
 
   // No UI for this component. It deals with map objects only.
@@ -224,15 +343,18 @@ export const LocationEditor = (props) => {
 
 const mapStateToProps = (state) => ({
   mapFeatures: state.selection.mapFeatures,
-  mapObjectsList: state.selection.createdMapObjects,
   mapRef: state.map.googleMaps,
   selectedMapObject: state.selection.selectedMapObject,
+  deletedLocationId: state.viewSettings.deletedLocationId,
+  isRulerEnabled: state.toolbar.isRulerEnabled,
 })
 
 const mapDispatchToProps = (dispatch) => ({
   setSelectedMapObject: mapObject => dispatch(SelectionActions.setSelectedMapObject(mapObject)),
   setObjectIdToMapObject: objectIdToMapObject => dispatch(SelectionActions.setObjectIdToMapObject(objectIdToMapObject)),
   setPlanEditorFeatures: objectIds => dispatch(SelectionActions.setPlanEditorFeatures(objectIds)),
+  setContextMenuItems: menuItemFeature => dispatch(ContextMenuActions.setContextMenuItems(menuItemFeature)),
+  showContextMenu: (x, y) => dispatch(ContextMenuActions.showContextMenu(x, y)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(LocationEditor)

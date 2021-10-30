@@ -8,6 +8,9 @@ import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap'
 import CreatableSelect from 'react-select/creatable'
 import SelectionActions from '../../selection/selection-actions'
 import LocationMapObjects from './location-map-objects.jsx'
+import ViewSettingsActions from '../../view-settings/view-settings-actions'
+import TileDataService from '../../../../components/tiles/tile-data-service'
+import ToolBarActions from '../../header/tool-bar-actions'
 
 // We need a selector, else the .toJS() call will create an infinite digest loop
 const getAllLocationLayers = state => state.mapLayers.location
@@ -39,6 +42,8 @@ const locationTypes = {
 const availableAttributesKeyList = ['loop_extended']
 const availableAttributesValueList = ['true', 'false']
 
+const tileDataService = new TileDataService()
+
 export const LocationEditor = (props) => {
 
   const [state, setState] = useState({
@@ -52,25 +57,40 @@ export const LocationEditor = (props) => {
     deletedFeatures: [],
     isExpandLocAttributes: false,
     attributeOptionsKey: [],
+    createMapObjects: [],
+    removeMapObjects: false,
   })
 
   const { currentTransaction, isCommiting, locationTypeToAdd, objectIdToProperties,
     lastUsedNumberOfHouseholds, lastUsedNumberOfEmployees, userCanChangeWorkflowState, deletedFeatures,
-    isExpandLocAttributes, createMapObjects } = state
+    isExpandLocAttributes, createMapObjects, removeMapObjects } = state
   const { selectedLibraryItem, selectedMapObject, locationTypeToIconUrl, objectIdToMapObject,
-    setObjectIdToMapObject, locationLayers, ARO_CLIENT, setSelectedMapObject, setCreatedMapObjects } = props
+    setObjectIdToMapObject, locationLayers, ARO_CLIENT, setSelectedMapObject, deleteLocationWithId,
+    loggedInUser, activeViewModePanel } = props
 
   useEffect(() => {
     resumeOrCreateTransaction()
   }, [])
 
   const resumeOrCreateTransaction = () => {
+    setState((state) => ({ ...state,
+      currentTransaction: null,
+      lastUsedNumberOfHouseholds: 1,
+      lastUsedNumberOfEmployees: 1,
+    }))
     AroHttp.get(`/service/library/transaction`)
     .then((result) => {
       var existingTransactions = result.data.filter((item) => item.libraryId === selectedLibraryItem.identifier)
       if (existingTransactions.length > 0) {
+        // We have an existing transaction for this library item. Use it.
         return Promise.resolve({ data: existingTransactions[0] })
-      } 
+      } else {
+        // Create a new transaction and return it
+        return AroHttp.post('/service/library/transaction', {
+          libraryId: selectedLibraryItem.identifier,
+          userId: loggedInUser.id
+        })
+      }
     })
     .then((result) => {
       setState((state) => ({ ...state, currentTransaction: result.data }))
@@ -86,8 +106,8 @@ export const LocationEditor = (props) => {
       setState((state) => ({ 
         ...state, 
         deletedFeatures: result.data.filter((item) => item.crudAction === 'delete'),
+        createMapObjects: features
       }))
-      setCreatedMapObjects(features)
 
       // Put the iconUrl in the features list
       features.forEach((item) => item.iconUrl = '/images/map_icons/aro/households_modified.png')
@@ -107,9 +127,55 @@ export const LocationEditor = (props) => {
     if (!currentTransaction) {
       console.error('No current transaction. We should never be in this state. Aborting commit...')
     }
+
+    setState((state) => ({ ...state, isCommiting: true, removeMapObjects: true }))
+    // All modifications will already have been saved to the server. Commit the transaction.
+    AroHttp.put(`/service/library/transaction/${currentTransaction.id}`)
+      .then((result) => {
+        // Transaction has been committed, start a new one
+        setState((state) => ({ ...state, isCommiting: false }))
+        // Do not recreate tiles and/or data cache. That will be handled by the tile invalidation messages from aro-service
+        Object.keys(objectIdToMapObject).forEach(objectId => tileDataService.removeFeatureToExclude(objectId))
+        resumeOrCreateTransaction()
+      })
+      .catch((err) => {
+        setState((state) => ({ ...state,
+          currentTransaction: null,
+          isCommiting: false,
+        }))
+        activeViewModePanel('LOCATION_INFO') // Close out this panel
+        console.error(err)
+      })
   }
 
   const discardTransaction = () => {
+    swal({
+      title: 'Delete transaction?',
+      text: `Are you sure you want to delete transaction with ID ${currentTransaction.id} for library ${currentTransaction.libraryName}`,
+      type: 'warning',
+      confirmButtonColor: '#DD6B55',
+      confirmButtonText: 'Yes, discard',
+      cancelButtonText: 'No',
+      showCancelButton: true,
+      closeOnConfirm: true
+    }, (deleteTransaction) => {
+      if (deleteTransaction) {
+        setState((state) => ({ ...state, removeMapObjects: true }))
+        // The user has confirmed that the transaction should be deleted
+        AroHttp.delete(`/service/library/transaction/${currentTransaction.id}`)
+          .then((result) => {
+            // Transaction has been discarded, start a new one
+            Object.keys(objectIdToMapObject).forEach(objectId => tileDataService.removeFeatureToExclude(objectId))
+            // this.state.recreateTilesAndCache()
+            return resumeOrCreateTransaction()
+          })
+          .catch((err) => {
+            setState((state) => ({ ...state, currentTransaction: null }))
+            activeViewModePanel('LOCATION_INFO') // Close out this panel
+            console.error(err)
+          })
+      }
+    })
 
   }
 
@@ -210,7 +276,7 @@ export const LocationEditor = (props) => {
   }
 
   const deleteSelectedObject = () => {
-
+    deleteLocationWithId(selectedMapObject.objectId)
   }
 
   const getFeaturesCount = () => {
@@ -393,7 +459,21 @@ export const LocationEditor = (props) => {
   const handleSelectedObjectChanged = (mapObject) => {
     if (!isExpandLocAttributes) setSelectedMapObject(mapObject)
   }
-  
+
+  const handleObjectModified = (mapObject) => {
+    var locationObject = formatLocationForService(mapObject.objectId)
+      AroHttp.post(`/service/library/transaction/${currentTransaction.id}/features`, locationObject)
+      .then((result) => {
+        objectIdToProperties[mapObject.objectId].isDirty = false
+        setState((state) => ({ ...state, objectIdToProperties }))
+      })
+      .catch((err) => console.error(err))
+  }
+
+  const handleObjectDeleted = (mapObject) => {
+    AroHttp.delete(`/service/library/transaction/${currentTransaction.id}/features/${mapObject.objectId}`)
+  }
+
   return (
     <>
       <div className="view-mode-container">
@@ -406,6 +486,10 @@ export const LocationEditor = (props) => {
             modifyingLibraryId={currentTransaction.libraryId}
             onCreateObject={handleObjectCreated}
             onSelectObject={handleSelectedObjectChanged}
+            onModifyObject={handleObjectModified}
+            onDeleteObject={handleObjectDeleted}
+            createMapObjects={createMapObjects}
+            removeMapObjects={removeMapObjects}
           />
         }
 
@@ -808,12 +892,14 @@ const mapStateToProps = (state) => ({
   objectIdToMapObject: state.selection.objectIdToMapObject,
   locationLayers: getLocationLayersList(state),
   ARO_CLIENT: state.toolbar.appConfiguration.ARO_CLIENT,
+  loggedInUser: state.user.loggedInUser,
 })
 
 const mapDispatchToProps = (dispatch) => ({
   setObjectIdToMapObject: objectIdToMapObject => dispatch(SelectionActions.setObjectIdToMapObject(objectIdToMapObject)),
   setSelectedMapObject: mapObject => dispatch(SelectionActions.setSelectedMapObject(mapObject)),
-  setCreatedMapObjects: createdMapObjects => dispatch(SelectionActions.setCreatedMapObjects(createdMapObjects))
+  deleteLocationWithId: objectId => dispatch(ViewSettingsActions.deleteLocationWithId(objectId)),
+  activeViewModePanel: displayPanel => dispatch(ToolBarActions.activeViewModePanel(displayPanel)),
 })
 
 export default wrapComponentWithProvider(reduxStore, LocationEditor, mapStateToProps, mapDispatchToProps)
