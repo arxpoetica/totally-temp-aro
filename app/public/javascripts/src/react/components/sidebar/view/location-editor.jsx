@@ -16,7 +16,7 @@ import ToolBarActions from '../../header/tool-bar-actions'
 const getAllLocationLayers = state => state.mapLayers.location
 const getLocationLayersList = createSelector([getAllLocationLayers], (locationLayers) => locationLayers.toJS())
 const getLocationTypeToIconUrl = createSelector([getAllLocationLayers], locationLayers => {
-  var locationTypeToIcon = {}
+  const locationTypeToIcon = {}
   locationLayers.forEach(locationLayer => {
     locationTypeToIcon[locationLayer.categoryKey] = locationLayer.iconUrl
   })
@@ -24,7 +24,7 @@ const getLocationTypeToIconUrl = createSelector([getAllLocationLayers], location
 })
 
 class LocationProperties {
-  constructor (workflowStateId, locationCategory, numberOfHouseholds, numberOfEmployees) {
+  constructor(workflowStateId, locationCategory, numberOfHouseholds, numberOfEmployees) {
     this.locationCategory = locationCategory || 'household'
     this.numberOfHouseholds = numberOfHouseholds || 1
     this.numberOfEmployees = numberOfEmployees || 1
@@ -61,16 +61,35 @@ export const LocationEditor = (props) => {
     removeMapObjects: false,
   })
 
-  const { currentTransaction, isCommiting, locationTypeToAdd, objectIdToProperties,
-    lastUsedNumberOfHouseholds, lastUsedNumberOfEmployees, userCanChangeWorkflowState, deletedFeatures,
-    isExpandLocAttributes, createMapObjects, removeMapObjects } = state
-  const { selectedLibraryItem, selectedMapObject, locationTypeToIconUrl, objectIdToMapObject,
-    setObjectIdToMapObject, locationLayers, ARO_CLIENT, setSelectedMapObject, deleteLocationWithId,
-    loggedInUser, activeViewModePanel } = props
+  const {
+    currentTransaction,
+    isCommiting,
+    locationTypeToAdd,
+    objectIdToProperties,
+    lastUsedNumberOfHouseholds,
+    lastUsedNumberOfEmployees,
+    userCanChangeWorkflowState,
+    deletedFeatures,
+    isExpandLocAttributes,
+    createMapObjects,
+    removeMapObjects,
+  } = state
 
-  useEffect(() => {
-    resumeOrCreateTransaction()
-  }, [])
+  const {
+    selectedLibraryItem,
+    selectedMapObject,
+    locationTypeToIconUrl,
+    objectIdToMapObject,
+    setObjectIdToMapObject,
+    locationLayers,
+    ARO_CLIENT,
+    setSelectedMapObject,
+    deleteLocationWithId,
+    loggedInUser,
+    activeViewModePanel,
+  } = props
+
+  useEffect(() => { resumeOrCreateTransaction() }, [])
 
   const resumeOrCreateTransaction = () => {
     setState((state) => ({ ...state,
@@ -80,7 +99,7 @@ export const LocationEditor = (props) => {
     }))
     AroHttp.get(`/service/library/transaction`)
     .then((result) => {
-      var existingTransactions = result.data.filter((item) => item.libraryId === selectedLibraryItem.identifier)
+      const existingTransactions = result.data.filter((item) => item.libraryId === selectedLibraryItem.identifier)
       if (existingTransactions.length > 0) {
         // We have an existing transaction for this library item. Use it.
         return Promise.resolve({ data: existingTransactions[0] })
@@ -100,11 +119,11 @@ export const LocationEditor = (props) => {
       // We have a list of features. Replace them in the objectIdToProperties map.
       const objectIdToPropertiesObj = {}
       // Filter out all non-deleted features - we do not want to create map objects for deleted features.
-      var features = result.data
+      const features = result.data
       .filter((item) => item.crudAction !== 'delete')
       .map((item) => item.feature)
-      setState((state) => ({ 
-        ...state, 
+      setState((state) => ({
+        ...state,
         deletedFeatures: result.data.filter((item) => item.crudAction === 'delete'),
         createMapObjects: features
       }))
@@ -113,7 +132,7 @@ export const LocationEditor = (props) => {
       features.forEach((item) => item.iconUrl = '/images/map_icons/aro/households_modified.png')
 
       features.forEach((feature) => {
-        var locationProperties = new LocationProperties(WorkflowState[feature.workflowState].id)
+        const locationProperties = new LocationProperties(WorkflowState[feature.workflowState].id)
         if (feature.attributes.number_of_households !== undefined) {
           locationProperties.numberOfHouseholds = feature.attributes.number_of_households
         }
@@ -188,7 +207,7 @@ export const LocationEditor = (props) => {
   }
 
   const getWorkflowStateIcon = () => {
-    var locationCategory = locationTypeToAdd
+    let locationCategory = locationTypeToAdd
     if (selectedMapObject) {
       locationCategory = objectIdToProperties[selectedMapObject.objectId].locationCategory
     }
@@ -216,13 +235,13 @@ export const LocationEditor = (props) => {
   // Saves the properties of the selected location to aro-service
   const saveSelectedLocationAndProperties = () => {
     if (selectedMapObject) {
-      var locationObject = formatLocationForService(selectedMapObject.objectId)
+      const locationObject = formatLocationForService(selectedMapObject.objectId)
       AroHttp.put(`/service/library/transaction/${currentTransaction.id}/features`, locationObject)
         .then((result) => {
-          if(result.status === 200){
+          if (result.status === 200) {
             swal({
               title: 'Success',
-              text:  'Properties Saved Successfully',
+              text: 'Properties Saved Successfully',
               type: 'success'
             })
           }
@@ -235,13 +254,13 @@ export const LocationEditor = (props) => {
 
   // Formats a location (based on the objectId) so that it can be sent in calls to aro-service
   const formatLocationForService = (objectId) => {
-    var mapObject = objectIdToMapObject[objectId]
-    var objectProperties = objectIdToProperties[objectId]
+    const mapObject = objectIdToMapObject[objectId]
+    const objectProperties = objectIdToProperties[objectId]
     const workflowStateKey = Object.keys(WorkflowState).filter(key => WorkflowState[key].id === objectProperties.workflowStateId)[0]
     const workflowStateName = WorkflowState[workflowStateKey].name
 
-    var featureObj = {
-      objectId: objectId,
+    const featureObj = {
+      objectId,
       geometry: {
         type: 'Point',
         coordinates: [mapObject.position.lng(), mapObject.position.lat()] // Note - longitude, then latitude
@@ -266,7 +285,7 @@ export const LocationEditor = (props) => {
 
     // featureObj.attributes = mapObject.feature.attributes
     Object.keys(mapObject.feature.attributes).forEach((key) => {
-      if (mapObject.feature.attributes[key] != null && mapObject.feature.attributes[key] != 'null' &&
+      if (mapObject.feature.attributes[key] !== null && mapObject.feature.attributes[key] !== 'null' &&
         key !== 'number_of_households' && key !== 'number_of_employees') {
         featureObj.attributes[key] = mapObject.feature.attributes[key]
       }
@@ -299,21 +318,21 @@ export const LocationEditor = (props) => {
     newValues[selectedMapObject.objectId].feature.attributes['att'] = 'value'
     setObjectIdToMapObject(newValues)
   }
-  
+
   const formatAttributes = (key) => {
-    return [{ value: key, label: key}]
+    return [{ value: key, label: key }]
   }
-  
+
   const getAttributes = (attribute) => {
-    return attribute.map(item => ( {label: item, value: item} ))
+    return attribute.map(item => ({ label: item, value: item }))
   }
 
   const editLocationAttributes = (index, updatedKey, updatedVal) => {
      const newValues = { ... objectIdToMapObject }
      const { attributes } = newValues[selectedMapObject.objectId].feature
-     if (updatedKey != Object.keys(attributes)[index]) {
+     if (updatedKey !== Object.keys(attributes)[index]) {
       // delete key and insert updated key,value
-      var key = Object.keys(attributes)[index]
+      const key = Object.keys(attributes)[index]
       attributes[updatedKey] = attributes[key]
       delete attributes[key]
       setObjectIdToMapObject(newValues)
@@ -323,7 +342,7 @@ export const LocationEditor = (props) => {
     }
     markSelectedLocationPropertiesDirty()
   }
-  
+
   const customStyles = {
     singleValue: (provided, state) => ({
       ...provided,
@@ -386,7 +405,7 @@ export const LocationEditor = (props) => {
 
   const getObjectIconUrl = (locationDetails) => {
     const locationType = locationDetails.objectValue.isExistingObject ? locationDetails.objectValue.locationCategory : locationTypeToAdd
-    var iconUrl = null
+    let iconUrl = null
     switch (locationType) {
       case 'business':
         iconUrl = '/images/map_icons/aro/businesses_small_selected.png'
@@ -407,7 +426,7 @@ export const LocationEditor = (props) => {
   const checkCanCreateObject = (feature) => {
     // For frontier client check If households layer is enabled or not, If not enabled don't allow to create a object
     if (ARO_CLIENT === 'frontier' && !feature.isExistingObject) {
-      var hhLocationLayer = locationLayers.filter((locationType) => locationType.label === 'Residential')[0]
+      const hhLocationLayer = locationLayers.filter((locationType) => locationType.label === 'Residential')[0]
 
       if (!hhLocationLayer.checked) {
         swal({
@@ -425,15 +444,15 @@ export const LocationEditor = (props) => {
   }
 
   const handleObjectCreated = (mapObject, usingMapClick, feature) => {
-    var numberOfHouseholds = lastUsedNumberOfHouseholds // use last used number of locations until commit
+    let numberOfHouseholds = lastUsedNumberOfHouseholds // use last used number of locations until commit
     if (feature.locationCategory === 'household' && feature.attributes && feature.attributes.number_of_households) {
       numberOfHouseholds = +feature.attributes.number_of_households
     }
-    var numberOfEmployees = lastUsedNumberOfEmployees
+    let numberOfEmployees = lastUsedNumberOfEmployees
     if (feature.locationCategory === 'business' && feature.attributes && feature.attributes.number_of_employees) {
       numberOfEmployees = +feature.attributes.number_of_employees
     }
-    var workflowStateId = null
+    let workflowStateId = null
     if (!(feature.workflow_state_id || feature.workflowState)) {
       workflowStateId = WorkflowState.CREATED.id
     } else {
@@ -446,7 +465,7 @@ export const LocationEditor = (props) => {
     setState((state) => ({ ...state, objectIdToProperties }))
     objectIdToMapObject[mapObject.objectId] = mapObject
     setObjectIdToMapObject(objectIdToMapObject)
-    var locationObject = formatLocationForService(mapObject.objectId)
+    const locationObject = formatLocationForService(mapObject.objectId)
     // The marker is editable if the state is not LOCKED or INVALIDATED
     const isEditable = !((workflowStateId & WorkflowState.LOCKED.id) ||
                           (workflowStateId & WorkflowState.INVALIDATED.id))
@@ -461,7 +480,7 @@ export const LocationEditor = (props) => {
   }
 
   const handleObjectModified = (mapObject) => {
-    var locationObject = formatLocationForService(mapObject.objectId)
+    const locationObject = formatLocationForService(mapObject.objectId)
       AroHttp.post(`/service/library/transaction/${currentTransaction.id}/features`, locationObject)
       .then((result) => {
         objectIdToProperties[mapObject.objectId].isDirty = false
@@ -517,7 +536,7 @@ export const LocationEditor = (props) => {
                 </button>
               </div>
             </div>
-            <br/>
+            <br />
             <div className='btn btn-group'>
               {
                 Object.entries(locationTypes).map(([locationType, locationTypeDescription], index) => (
@@ -551,15 +570,15 @@ export const LocationEditor = (props) => {
                                 type="text"
                                 name="numberOfHouseholds"
                                 value={objectIdToProperties[selectedMapObject.objectId].numberOfHouseholds}
-                                onChange={(event) => { 
+                                onChange={(event) => {
                                   onChangeLocProp(event),
                                   markSelectedLocationPropertiesDirty(),
                                   setLastUsedNumberOfHouseholds(objectIdToProperties[selectedMapObject.objectId].numberOfHouseholds)
                                 }}
                                 disabled={
                                   (
-                                    (objectIdToProperties[selectedMapObject.objectId].workflowStateId == WorkflowState.LOCKED.id)
-                                      || (objectIdToProperties[selectedMapObject.objectId].workflowStateId == WorkflowState.INVALIDATED.id)
+                                    (objectIdToProperties[selectedMapObject.objectId].workflowStateId === WorkflowState.LOCKED.id)
+                                      || (objectIdToProperties[selectedMapObject.objectId].workflowStateId === WorkflowState.INVALIDATED.id)
                                   ) ? 'disabled' : null
                                 }
                               />
@@ -583,8 +602,8 @@ export const LocationEditor = (props) => {
                                 }}
                                 disabled={
                                   (
-                                    (objectIdToProperties[selectedMapObject.objectId].workflowStateId == WorkflowState.LOCKED.id)
-                                      || (objectIdToProperties[selectedMapObject.objectId].workflowStateId == WorkflowState.INVALIDATED.id)
+                                    (objectIdToProperties[selectedMapObject.objectId].workflowStateId === WorkflowState.LOCKED.id)
+                                      || (objectIdToProperties[selectedMapObject.objectId].workflowStateId === WorkflowState.INVALIDATED.id)
                                   ) ? 'disabled' : null
                                 }
                               />
@@ -607,7 +626,7 @@ export const LocationEditor = (props) => {
                           Created
                           <br />
                           {/* Locked */}
-                          <input 
+                          <input
                             type="radio"
                             className="radiofill"
                             value={2}
@@ -624,7 +643,7 @@ export const LocationEditor = (props) => {
                             <img
                               className="overlay-lock"
                               src="/images/map_icons/aro/lock_overlay.png"
-                              style={{ verticalAlign: "middle", paddingRight: "5px" }} 
+                              style={{ verticalAlign: "middle", paddingRight: "5px" }}
                             />
                             <img src={getWorkflowStateIcon()} style={{ verticalAlign: "middle", paddingRight: "10px" }} />
                           </span>
@@ -646,7 +665,7 @@ export const LocationEditor = (props) => {
                           />
                           <span>
                             <img className="overlay-close" src="/images/map_icons/aro/invalidated_overlay.png"
-                              style={{ verticalAlign: "middle", paddingRight: "5px" }} 
+                              style={{ verticalAlign: "middle", paddingRight: "5px" }}
                             />
                             <img src={getWorkflowStateIcon()} style={{ verticalAlign: "middle", paddingRight: "10px" }} />
                           </span>
@@ -679,7 +698,7 @@ export const LocationEditor = (props) => {
                     style={{ marginTop: "10px" }}
                     onClick={() => saveSelectedLocationAndProperties()}
                   >
-                    <i className="fa fa-save"></i>&nbsp;&nbsp;Save properties
+                    <i className="fa fa-save" />&nbsp;&nbsp;Save properties
                   </button>
                   {/* Show a delete button if a map object is selected */}
                   <button
@@ -687,29 +706,29 @@ export const LocationEditor = (props) => {
                     style={{ marginTop: "10px" }}
                     disabled={
                       (
-                        (objectIdToProperties[selectedMapObject.objectId].workflowStateId == WorkflowState.LOCKED.id)
-                          || (objectIdToProperties[selectedMapObject.objectId].workflowStateId == WorkflowState.INVALIDATED.id)
+                        (objectIdToProperties[selectedMapObject.objectId].workflowStateId === WorkflowState.LOCKED.id)
+                          || (objectIdToProperties[selectedMapObject.objectId].workflowStateId === WorkflowState.INVALIDATED.id)
                       ) ? 'disabled' : null
                     }
                     onClick={() => deleteSelectedObject()}
                   >
-                    <i className="far fa-trash-alt"></i>&nbsp;&nbsp;Delete selected location
+                    <i className="far fa-trash-alt" />&nbsp;&nbsp;Delete selected location
                   </button>
                   <button
                     className="btn btn-block btn-primary"
                     disabled={
                       (
-                        (objectIdToProperties[selectedMapObject.objectId].workflowStateId == WorkflowState.LOCKED.id)
-                          || (objectIdToProperties[selectedMapObject.objectId].workflowStateId == WorkflowState.INVALIDATED.id)
+                        (objectIdToProperties[selectedMapObject.objectId].workflowStateId === WorkflowState.LOCKED.id)
+                          || (objectIdToProperties[selectedMapObject.objectId].workflowStateId === WorkflowState.INVALIDATED.id)
                       ) ? 'disabled' : null
                     }
-                    onClick={() => {setState((state) => ({ ...state, isExpandLocAttributes: true })), loadAttributesFromServer()}}
+                    onClick={() => { setState((state) => ({ ...state, isExpandLocAttributes: true })), loadAttributesFromServer() }}
                   >
-                    <i className="far fa-pencil"></i>&nbsp;&nbsp;Expand
+                    <i className="far fa-pencil" />&nbsp;&nbsp;Expand
                   </button>
                 </div>
             }
-            <br /> 
+            <br />
             Number of changes in transaction: {getFeaturesCount()}
           </>
         }
@@ -752,15 +771,15 @@ export const LocationEditor = (props) => {
                             type="text"
                             name="numberOfHouseholds"
                             value={objectIdToProperties[selectedMapObject.objectId].numberOfHouseholds}
-                            onChange={(event) => { 
+                            onChange={(event) => {
                               onChangeLocProp(event),
                               markSelectedLocationPropertiesDirty(),
                               setLastUsedNumberOfHouseholds(objectIdToProperties[selectedMapObject.objectId].numberOfHouseholds)
                             }}
                             disabled={
                               (
-                                (objectIdToProperties[selectedMapObject.objectId].workflowStateId == WorkflowState.LOCKED.id)
-                                  || (objectIdToProperties[selectedMapObject.objectId].workflowStateId == WorkflowState.INVALIDATED.id)
+                                (objectIdToProperties[selectedMapObject.objectId].workflowStateId === WorkflowState.LOCKED.id)
+                                  || (objectIdToProperties[selectedMapObject.objectId].workflowStateId === WorkflowState.INVALIDATED.id)
                               ) ? 'disabled' : null
                             }
                           />
@@ -784,8 +803,8 @@ export const LocationEditor = (props) => {
                             }}
                             disabled={
                               (
-                                (objectIdToProperties[selectedMapObject.objectId].workflowStateId == WorkflowState.LOCKED.id)
-                                  || (objectIdToProperties[selectedMapObject.objectId].workflowStateId == WorkflowState.INVALIDATED.id)
+                                (objectIdToProperties[selectedMapObject.objectId].workflowStateId === WorkflowState.LOCKED.id)
+                                  || (objectIdToProperties[selectedMapObject.objectId].workflowStateId === WorkflowState.INVALIDATED.id)
                               ) ? 'disabled' : null
                             }
                           />
@@ -800,7 +819,7 @@ export const LocationEditor = (props) => {
                   {
                     objectIdToMapObject[selectedMapObject.objectId].feature.hasOwnProperty('attributes') &&
                     Object.entries(objectIdToMapObject[selectedMapObject.objectId].feature.attributes).map(([key, val], index) => {
-                      return val != null && val != 'null' && key != 'number_of_households' && key != 'location_category' &&               
+                      return val !== null && val !== 'null' && key !== 'number_of_households' && key !== 'location_category' &&
                         <tr>
                           <td style={{ width: '200px' }}>
                             <CreatableSelect
@@ -830,8 +849,8 @@ export const LocationEditor = (props) => {
                               className="btn btn-sm btn-danger"
                               onClick={() => deleteLocationAttributes(index, key)}
                             >
-                              <i className="fa fa-trash-alt"></i>
-                            </button>  
+                              <i className="fa fa-trash-alt" />
+                            </button>
                           </td>
                         </tr>
                     })
@@ -840,7 +859,7 @@ export const LocationEditor = (props) => {
               </table>
               <div>
                 <button className="btn" onClick={() => addLocationAttributes()}>
-                  <i className="fa fa-plus"></i>
+                  <i className="fa fa-plus" />
                 </button>
               </div>
             </ModalBody>
@@ -852,7 +871,7 @@ export const LocationEditor = (props) => {
               disabled={!objectIdToProperties[selectedMapObject.objectId].isDirty ? 'disabled' : null}
               onClick={() => expandLocAttributes()}
             >
-              <i className="fa fa-undo action-button-icon"></i>&nbsp;&nbsp;Discard changes
+              <i className="fa fa-undo action-button-icon" />&nbsp;&nbsp;Discard changes
             </button>
             <button
               type="button"
@@ -873,14 +892,13 @@ export const LocationEditor = (props) => {
                   || objectIdToProperties[selectedMapObject.objectId].numberOfHouseholds < 1
                 ) ? 'disabled' : null
               }
-              onClick={() => {expandLocAttributes(), saveSelectedLocationAndProperties()}}
+              onClick={() => { expandLocAttributes(), saveSelectedLocationAndProperties() }}
             >
-              <i className="fa fa-save action-button-icon"></i>&nbsp;&nbsp;Save properties
+              <i className="fa fa-save action-button-icon" />&nbsp;&nbsp;Save properties
             </button>
             </ModalFooter>
           </Modal>
       }
-
     </>
   )
 }

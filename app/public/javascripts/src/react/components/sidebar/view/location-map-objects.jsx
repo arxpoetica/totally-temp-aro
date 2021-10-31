@@ -12,32 +12,43 @@ import { dequal } from 'dequal'
 
 export const LocationEditor = (props) => {
 
-  const [state, setState] = useState({
-    createdMapObjects: {},
-  })
+  const [state, setState] = useState({ createdMapObjects: {} })
 
   const { createdMapObjects } = state
 
-  const { mapFeatures, modifyingLibraryId, getObjectIconUrl, featureType, checkCreateObject, mapRef, onCreateObject, 
-    setObjectIdToMapObject, setPlanEditorFeatures, selectedMapObject, onSelectObject, createMapObjects,
-    onModifyObject, setContextMenuItems, showContextMenu, deletedLocationId, onDeleteObject, removeMapObjects,
-    isRulerEnabled } = props
+  const {
+    mapFeatures,
+    modifyingLibraryId,
+    getObjectIconUrl,
+    featureType,
+    checkCreateObject,
+    mapRef,
+    onCreateObject,
+    setObjectIdToMapObject,
+    setPlanEditorFeatures,
+    selectedMapObject,
+    onSelectObject,
+    createMapObjects,
+    onModifyObject,
+    setContextMenuItems,
+    showContextMenu,
+    deletedLocationId,
+    onDeleteObject,
+    removeMapObjects,
+    isRulerEnabled,
+  } = props
 
   useEffect(() => {
     // Use the cross hair cursor while this control is initialized
     mapRef.setOptions({ draggableCursor: 'crosshair' })
-    if(isRulerEnabled)  { return }
+    if (isRulerEnabled) { return }
     !removeMapObjects && handleMapEntitySelected(mapFeatures)
   }, [mapFeatures])
 
-  useEffect(() => {
-    return () => removeCreatedMapObjects()
-  }, [])
+  useEffect(() => { return () => removeCreatedMapObjects() }, [])
 
-  useEffect(() => {
-    updateSelectedMapObject(selectedMapObject)
-  }, [selectedMapObject])
-  
+  useEffect(() => { updateSelectedMapObject(selectedMapObject) }, [selectedMapObject])
+
   const removeCreatedMapObjects = () => {
     // Remove created objects from map
     selectMapObject(null)
@@ -55,17 +66,15 @@ export const LocationEditor = (props) => {
     }
   }, [deletedLocationId])
 
-  useEffect(() => {
-    createMapObjects.length && createMapObjectsFN(createMapObjects)
-  }, [createMapObjects])
+  useEffect(() => { createMapObjects.length && createMapObjectsFN(createMapObjects) }, [createMapObjects])
 
-  const createMapObject = (feature, iconUrl, usingMapClick, existingObjectOverride, deleteExistingBoundary, isMult)  => {
+  const createMapObject = (feature, iconUrl, usingMapClick, existingObjectOverride, deleteExistingBoundary, isMult) => {
     if (typeof existingObjectOverride === 'undefined') {
       existingObjectOverride = false
     }
-    var mapObject = null
+    let mapObject = null
     if (feature.geometry.type === 'Point') {
-      var canCreateObject = checkCreateObject(feature)
+      const canCreateObject = checkCreateObject(feature)
       if (canCreateObject) {
         // if an existing object just show don't edit
         if (feature.isExistingObject && !existingObjectOverride) {
@@ -86,19 +95,15 @@ export const LocationEditor = (props) => {
     }
 
     mapObject.addListener('rightclick', event => {
-      if (typeof event === 'undefined' || typeof event.vertex !== 'undefined') {
-        return
-      }
+      if (typeof event === 'undefined' || typeof event.vertex !== 'undefined') { return }
       // 'event' contains a MouseEvent which we use to get X,Y coordinates. The key of the MouseEvent object
       // changes with google maps implementations. So iterate over the keys to find the right object.
 
-      if (featureType == 'location') {
+      if (featureType === 'location') {
         selectMapObject(mapObject)
       }
-      var eventXY = getXYFromEvent(event)
-      if (!eventXY) {
-        return
-      }
+      const eventXY = getXYFromEvent(event)
+      if (!eventXY) { return }
       updateContextMenu(event.latLng, eventXY.x, eventXY.y, mapObject)
     })
 
@@ -116,28 +121,28 @@ export const LocationEditor = (props) => {
 
   const updateContextMenu = (latLng, x, y, clickedMapObject) => {
     if (featureType === 'location' && isFeatureEditable(clickedMapObject.feature)) {
-      var menuActions = []
-      const objectId = clickedMapObject.objectId
+      const menuActions = []
+      const { objectId } = clickedMapObject
       menuActions.push(
         new MenuItemAction('DELETE', 'Delete', 'ViewSettingsActions', 'deleteLocationWithId', objectId))
       const menuItems = new MenuItemFeature('LOCATION', 'Location', menuActions)
       openContextMenu(x, y, [menuItems])
     }
   }
-  
+
   const deleteObjectWithId = (objectId) => {
     if (selectedMapObject && (selectedMapObject.objectId === objectId)) {
       // Deselect the currently selected object, as it is about to be deleted.
       selectMapObject(null)
     }
-    var mapObjectToDelete = createdMapObjects[objectId]
+    const mapObjectToDelete = createdMapObjects[objectId]
     if (mapObjectToDelete) {
       onDeleteObject(mapObjectToDelete)
     }
   }
 
   const deleteCreatedMapObject = (objectId) => {
-    var mapObjectToDelete = createdMapObjects[objectId]
+    const mapObjectToDelete = createdMapObjects[objectId]
     if (mapObjectToDelete) {
       mapObjectToDelete.setMap(null)
       delete createdMapObjects[objectId]
@@ -146,10 +151,10 @@ export const LocationEditor = (props) => {
   }
 
   const openContextMenu = (x, y, menuItems) => {
-    var bounds = []
-    var boundsByNetworkNodeObjectId = {}
+    const bounds = []
+    const boundsByNetworkNodeObjectId = {}
     menuItems.forEach((menuItem) => {
-      var feature = menuItem.feature
+      const { feature } = menuItem
       if (feature && feature.network_node_object_id) {
         bounds.push(feature)
         boundsByNetworkNodeObjectId[feature.network_node_object_id] = menuItem
@@ -164,7 +169,7 @@ export const LocationEditor = (props) => {
     // Create a "point" map object - a marker
     // The marker is editable if the state is not LOCKED or INVALIDATED
     const isEditable = isFeatureEditable(feature)
-    var mapMarker = new google.maps.Marker({
+    const mapMarker = new google.maps.Marker({
       objectId: feature.objectId, // Not used by Google Maps
       featureType: feature.networkNodeType,
       position: new google.maps.LatLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]),
@@ -188,17 +193,15 @@ export const LocationEditor = (props) => {
   }
 
   const handleMapEntitySelected = (event) => {
-    if (!event || !event.latLng) {
-      return
-    }
+    if (!event || !event.latLng) { return }
 
     // filter out equipment and locations already in the list
     // ToDo: should we do this for all types of features?
-    var filterArrayByObjectId = (featureList) => {
-      let filteredList = []
+    const filterArrayByObjectId = (featureList) => {
+      const filteredList = []
       for (let i = 0; i < featureList.length; i++) {
-        let feature = featureList[i]
-        var objectId = feature.objectId || feature.object_id
+        const feature = featureList[i]
+        const objectId = feature.objectId || feature.object_id
         if (!objectId ||
             (!createdMapObjects.hasOwnProperty(objectId) &&
                 !createdMapObjects.hasOwnProperty(objectId + '_lockIconOverlay') &&
@@ -212,12 +215,12 @@ export const LocationEditor = (props) => {
       return filteredList
     }
 
-    var locations = []
+    let locations = []
     if (event.locations) {
       locations = filterArrayByObjectId(event.locations)
     }
 
-    var feature = {
+    const feature = {
       geometry: {
         type: 'Point',
         coordinates: [event.latLng.lng(), event.latLng.lat()]
@@ -225,8 +228,8 @@ export const LocationEditor = (props) => {
       isExistingObject: false
     }
 
-    var iconKey = 'MAP_OBJECT_CREATE_KEY_OBJECT_ID'
-    var featurePromise = null
+    const iconKey = 'MAP_OBJECT_CREATE_KEY_OBJECT_ID'
+    let featurePromise = null
     if (featureType === 'location' && locations.length > 0) {
       // The map was clicked on, and there was a location under the cursor
       feature.objectId = locations[0].object_id
@@ -235,7 +238,7 @@ export const LocationEditor = (props) => {
       feature.workflow_state_id = locations[0].workflow_state_id
       featurePromise = AroHttp.get(`/service/library/features/${modifyingLibraryId}/${feature.objectId}`)
         .then((result) => {
-          var serviceFeature = result.data
+          const serviceFeature = result.data
           // use feature's coord NOT the event's coords
           feature.geometry.coordinates = serviceFeature.geometry.coordinates
           feature.attributes = serviceFeature.attributes
@@ -249,7 +252,7 @@ export const LocationEditor = (props) => {
       featurePromise = Promise.resolve(feature)
     }
 
-    var featureToUse = null
+    let featureToUse = null
     featurePromise
       .then((result) => {
         featureToUse = result
@@ -265,7 +268,7 @@ export const LocationEditor = (props) => {
     if (feature.workflow_state_id || feature.workflowState) {
       // The marker is editable if the state is not LOCKED or INVALIDATED
       // Vector tile features come in as "workflow_state_id", transaction features as "workflowState"
-      var workflowStateId = feature.workflow_state_id || WorkflowState[feature.workflowState].id
+      const workflowStateId = feature.workflow_state_id || WorkflowState[feature.workflowState].id
       return !((workflowStateId & WorkflowState.LOCKED.id) ||
               (workflowStateId & WorkflowState.INVALIDATED.id))
     } else {
@@ -295,7 +298,7 @@ export const LocationEditor = (props) => {
 
   const highlightMapObject = (mapObject) => {
     if (isMarker(mapObject)) {
-      var label = mapObject.getLabel()
+      const label = mapObject.getLabel()
       label.color = '#009900'
       mapObject.setLabel(label)
     }
@@ -303,7 +306,7 @@ export const LocationEditor = (props) => {
 
   const dehighlightMapObject = (mapObject) => {
     if (isMarker(mapObject)) {
-      var label = mapObject.getLabel()
+      const label = mapObject.getLabel()
       label.color = '#000000'
       mapObject.setLabel(label)
     }
@@ -314,7 +317,7 @@ export const LocationEditor = (props) => {
   }
 
   const createMapObjectsFN = (features) => {
-    if(!removeMapObjects) {
+    if (!removeMapObjects) {
       // "features" is an array that comes directly from aro-service. Create map objects for these features
       features.forEach((feature) => {
         createMapObject(feature, feature.iconUrl, false) // Feature is not created using a map click
@@ -325,16 +328,16 @@ export const LocationEditor = (props) => {
   // ----- rightclick menu ----- //
 
   const getXYFromEvent = (event) => {
-    var mouseEvent = null
+    let mouseEvent = null
     Object.keys(event).forEach((eventKey) => {
       if (event.hasOwnProperty(eventKey) && (event[eventKey] instanceof MouseEvent)) {
         mouseEvent = event[eventKey]
       }
     })
     if (!mouseEvent) return
-    var x = mouseEvent.clientX
-    var y = mouseEvent.clientY
-    return { 'x': x, 'y': y }
+    const x = mouseEvent.clientX
+    const y = mouseEvent.clientY
+    return { x, y }
   }
 
   // No UI for this component. It deals with map objects only.
