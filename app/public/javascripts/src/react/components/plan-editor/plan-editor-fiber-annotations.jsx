@@ -17,6 +17,7 @@ const FiberAnnotations = (props) => {
     setFiberAnnotations,
     fiberAnnotations,
     selectedSubnetId,
+    subnetFeatures,
   } = props
 
   const [formValues, setFormValues] = useState({})
@@ -133,7 +134,10 @@ const FiberAnnotations = (props) => {
   //TODO: right now the fields are hardcoded, for route, fiber size, etc. later this will change to be dynamic
   return (
     <>
-      {selectedFiber.length > 0 && (
+      {selectedFiber.length > 0 
+        && subnetFeatures[selectedSubnetId] 
+        && subnetFeatures[selectedSubnetId].feature.networkNodeType === "central_office" 
+        && (
         <div className={'fiber-annotations plan-editor-thumb'}>
           <div className="info">
             <h2>Fiber Route{selectedFiber.length > 1 && 's'}</h2>
@@ -187,6 +191,7 @@ const mapStateToProps = (state) => ({
   selectedFiber: state.planEditor.selectedFiber,
   fiberAnnotations: state.planEditor.fiberAnnotations,
   selectedSubnetId: state.planEditor.selectedSubnetId,
+  subnetFeatures: state.planEditor.subnetFeatures,
 })
 
 const mapDispatchToProps = (dispatch) => ({
