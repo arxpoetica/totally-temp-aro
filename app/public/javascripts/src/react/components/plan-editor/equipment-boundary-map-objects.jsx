@@ -5,6 +5,7 @@ import { connect } from 'react-redux'
 import PlanEditorActions from './plan-editor-actions'
 import SelectionActions from '../selection/selection-actions'
 import WktUtils from '../../../shared-utils/wkt-utils'
+import { constants } from './shared'
 
 export class EquipmentBoundaryMapObjects extends Component {
   constructor (props) {
@@ -132,14 +133,28 @@ export class EquipmentBoundaryMapObjects extends Component {
     let neighborObject = new google.maps.Polygon({
       subnetId: subnetId, // Not used by Google Maps
       paths: WktUtils.getGoogleMapPathsFromWKTMultiPolygon(geometry),
-      clickable: false,
+      clickable: true,
       draggable: false,
       editable: false,
+      zIndex: this.props.subnets[subnetId].parentSubnetId === null 
+        ? constants.Z_INDEX_CO_SUBNET 
+        : constants.Z_INDEX_HUB_SUBNET,
       map: this.props.googleMaps,
     })
 
     neighborObject.setOptions(this.neighborPolygonOptions)
     this.neighborObjectsById[subnetId] = neighborObject
+
+    const { setSelectedSubnetId, selectEditFeaturesById } = this.props
+
+    // click in the polygon to select the subnet
+    neighborObject.addListener('click', (event) => {
+      // disbale if shift key is held to make selecting fiber routes easier
+      if (!event.domEvent.shiftKey) {
+        setSelectedSubnetId(subnetId)
+        selectEditFeaturesById([subnetId])
+      }
+    })
   }
 
   deleteMapObject () {
@@ -363,6 +378,8 @@ const mapDispatchToProps = dispatch => ({
   boundaryChange: (subnetId, geometry) => dispatch(PlanEditorActions.boundaryChange(subnetId, geometry)),
   deleteBoundaryVertices: (mapObjects, vertices, callBack) => dispatch(PlanEditorActions.deleteBoundaryVertices(mapObjects, vertices, callBack)),
   selectBoundary: objectId => dispatch(SelectionActions.setPlanEditorFeatures([objectId])),
+  setSelectedSubnetId: subnetId => dispatch(PlanEditorActions.setSelectedSubnetId(subnetId)),
+  selectEditFeaturesById: subnetIds => dispatch(PlanEditorActions.selectEditFeaturesById(subnetIds)),
 })
 
 const EquipmentBoundaryMapObjectsComponent = connect(mapStateToProps, mapDispatchToProps)(EquipmentBoundaryMapObjects)
