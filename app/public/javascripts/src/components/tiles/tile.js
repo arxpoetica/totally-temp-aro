@@ -15,6 +15,7 @@ import ToolBarActions from '../../react/components/header/tool-bar-actions'
 import PlanEditorActions from '../../react/components/plan-editor/plan-editor-actions'
 import PlanEditorSelectors from '../../react/components/plan-editor/plan-editor-selectors'
 import { dequal } from 'dequal'
+import MapLayerActions from '../../react/components/map-layers/map-layer-actions'
 
 class TileComponentController {
   // MapLayer objects contain the following information
@@ -723,6 +724,7 @@ class TileComponentController {
       // Map not initialized yet
       return
     }
+    this.setActiveMapLayers(newMapLayers)
     this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setMapLayers(newMapLayers)
     this.refreshMapTiles()
   }
@@ -806,6 +808,7 @@ class TileComponentController {
       rActiveViewModePanelAction: value => dispatch(ToolBarActions.activeViewModePanel(value)),
       setCursorLocationIds: ids => dispatch(PlanEditorActions.setCursorLocationIds(ids)),
       clearCursorLocationIds: () => dispatch(PlanEditorActions.clearCursorLocationIds()),
+      setActiveMapLayers: (value) => dispatch(MapLayerActions.setActiveMapLayers(value)),
     }
   }
 

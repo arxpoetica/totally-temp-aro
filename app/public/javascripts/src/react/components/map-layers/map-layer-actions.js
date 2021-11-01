@@ -289,6 +289,13 @@ function loadEdgeConstructionTypeIds() {
   }
 }
 
+function setActiveMapLayers (activeMapLayers) {
+  return {
+    type: Actions.LAYERS_SET_ACTIVE_MAP_LAYERS,
+    payload: activeMapLayers
+  }
+}
+
 export default {
   setLayerVisibility,
   setNetworkEquipmentLayerVisibility,
@@ -313,4 +320,5 @@ export default {
   setShowSegmentsByTag,
   setEdgeConstructionTypeVisibility,
   loadEdgeConstructionTypeIds,
+  setActiveMapLayers,
 }
