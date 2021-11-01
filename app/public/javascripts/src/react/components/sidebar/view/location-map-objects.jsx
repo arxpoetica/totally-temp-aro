@@ -9,6 +9,44 @@ import MenuItemFeature from '../../context-menu/menu-item-feature'
 import MenuItemAction from '../../context-menu/menu-item-action'
 import { usePrevious } from '../../../common/view-utils.js'
 import { dequal } from 'dequal'
+import { constants } from '../../plan-editor/shared'
+
+// ----- rightclick menu ----- //
+const getXYFromEvent = (event) => {
+  let mouseEvent = null
+  Object.keys(event).forEach((eventKey) => {
+    if (event.hasOwnProperty(eventKey) && (event[eventKey] instanceof MouseEvent)) { mouseEvent = event[eventKey] }
+  })
+  if (!mouseEvent) { return }
+  const x = mouseEvent.clientX
+  const y = mouseEvent.clientY
+  return { x, y }
+}
+
+const highlightMapObject = (mapObject) => {
+  if (isMarker(mapObject)) {
+    const label = mapObject.getLabel()
+    label.color = '#009900'
+    mapObject.setLabel(label)
+  }
+}
+
+const dehighlightMapObject = (mapObject) => {
+  if (isMarker(mapObject)) {
+    const label = mapObject.getLabel()
+    label.color = '#000000'
+    mapObject.setLabel(label)
+  }
+}
+
+const isMarker = (mapObject) => {
+  return mapObject && mapObject.icon
+}
+
+const filterFeatureForSelection = (feature) => {
+  if (feature.is_deleted) { return false }
+  return true
+}
 
 export const LocationEditor = (props) => {
 
@@ -38,11 +76,12 @@ export const LocationEditor = (props) => {
     isRulerEnabled,
   } = props
 
+  const prevMapFeatures = usePrevious(mapFeatures)
   useEffect(() => {
     // Use the cross hair cursor while this control is initialized
     mapRef.setOptions({ draggableCursor: 'crosshair' })
-    if (isRulerEnabled) { return }
-    !removeMapObjects && handleMapEntitySelected(mapFeatures)
+    if (isRulerEnabled) { return } // disable any click action when ruler is enabled
+    if (prevMapFeatures && !dequal(prevMapFeatures, mapFeatures)) { handleMapEntitySelected(mapFeatures) }
   }, [mapFeatures])
 
   useEffect(() => { return () => removeCreatedMapObjects() }, [])
@@ -69,9 +108,8 @@ export const LocationEditor = (props) => {
   useEffect(() => { createMapObjects.length && createMapObjectsFN(createMapObjects) }, [createMapObjects])
 
   const createMapObject = (feature, iconUrl, usingMapClick, existingObjectOverride, deleteExistingBoundary, isMult) => {
-    if (typeof existingObjectOverride === 'undefined') {
-      existingObjectOverride = false
-    }
+    if (typeof existingObjectOverride === undefined) { existingObjectOverride = false }
+
     let mapObject = null
     if (feature.geometry.type === 'Point') {
       const canCreateObject = checkCreateObject(feature)
@@ -83,25 +121,18 @@ export const LocationEditor = (props) => {
         }
         mapObject = createPointMapObject(feature, iconUrl)
         // Set up listeners on the map object
-        mapObject.addListener('dragend', (event) => onModifyObject(mapObject))
-        mapObject.addListener('click', (event) => {
-          selectMapObject(mapObject)
-        })
-      } else {
-        return
-      }
+        mapObject.addListener('dragend', () => onModifyObject(mapObject))
+        mapObject.addListener('click', () => selectMapObject(mapObject))
+      } else { return }
     } else {
       throw `createMapObject() not supported for geometry type ${feature.geometry.type}`
     }
 
     mapObject.addListener('rightclick', event => {
-      if (typeof event === 'undefined' || typeof event.vertex !== 'undefined') { return }
+      if (event || event.vertex) { return }
       // 'event' contains a MouseEvent which we use to get X,Y coordinates. The key of the MouseEvent object
       // changes with google maps implementations. So iterate over the keys to find the right object.
-
-      if (featureType === 'location') {
-        selectMapObject(mapObject)
-      }
+      if (featureType === 'location') { selectMapObject(mapObject) }
       const eventXY = getXYFromEvent(event)
       if (!eventXY) { return }
       updateContextMenu(event.latLng, eventXY.x, eventXY.y, mapObject)
@@ -110,14 +141,12 @@ export const LocationEditor = (props) => {
     createdMapObjects[mapObject.objectId] = mapObject
     setState((state) => ({ ...state, createdMapObjects }))
     setObjectIdToMapObject(createdMapObjects)
-    if (usingMapClick) selectMapObject(mapObject, isMult)
+    if (usingMapClick) { selectMapObject(mapObject, isMult) }
     return onCreateObject(mapObject, usingMapClick, feature, !deleteExistingBoundary)
   }
 
   const selectedMapObjectRef = React.useRef(selectedMapObject)
-  const updateSelectedMapObject = (selectedMapObject) => {
-    selectedMapObjectRef.current = selectedMapObject
-  }
+  const updateSelectedMapObject = (selectedMapObject) => { selectedMapObjectRef.current = selectedMapObject }
 
   const updateContextMenu = (latLng, x, y, clickedMapObject) => {
     if (featureType === 'location' && isFeatureEditable(clickedMapObject.feature)) {
@@ -136,9 +165,7 @@ export const LocationEditor = (props) => {
       selectMapObject(null)
     }
     const mapObjectToDelete = createdMapObjects[objectId]
-    if (mapObjectToDelete) {
-      onDeleteObject(mapObjectToDelete)
-    }
+    if (mapObjectToDelete) { onDeleteObject(mapObjectToDelete) }
   }
 
   const deleteCreatedMapObject = (objectId) => {
@@ -160,7 +187,6 @@ export const LocationEditor = (props) => {
         boundsByNetworkNodeObjectId[feature.network_node_object_id] = menuItem
       }
     })
-
     setContextMenuItems(menuItems)
     showContextMenu(x, y)
   }
@@ -188,7 +214,6 @@ export const LocationEditor = (props) => {
     })
 
     mapMarker.feature = feature
-
     return mapMarker
   }
 
@@ -216,9 +241,7 @@ export const LocationEditor = (props) => {
     }
 
     let locations = []
-    if (event.locations) {
-      locations = filterArrayByObjectId(event.locations)
-    }
+    if (event.locations) { locations = filterArrayByObjectId(event.locations) }
 
     const feature = {
       geometry: {
@@ -228,7 +251,7 @@ export const LocationEditor = (props) => {
       isExistingObject: false
     }
 
-    const iconKey = 'MAP_OBJECT_CREATE_KEY_OBJECT_ID'
+    const iconKey = constants.MAP_OBJECT_CREATE_KEY_OBJECT_ID
     let featurePromise = null
     if (featureType === 'location' && locations.length > 0) {
       // The map was clicked on, and there was a location under the cursor
@@ -257,7 +280,6 @@ export const LocationEditor = (props) => {
       .then((result) => {
         featureToUse = result
         // When we are modifying existing objects, the iconUrl to use is provided by the parent control via a function.
-
         return getObjectIconUrl({ objectKey: iconKey, objectValue: featureToUse })
       })
       .then((iconUrl) => createMapObject(featureToUse, iconUrl, true, featureToUse.directlyEditExistingFeature))
@@ -271,19 +293,15 @@ export const LocationEditor = (props) => {
       const workflowStateId = feature.workflow_state_id || WorkflowState[feature.workflowState].id
       return !((workflowStateId & WorkflowState.LOCKED.id) ||
               (workflowStateId & WorkflowState.INVALIDATED.id))
-    } else {
-      return true // New objects are always editable
-    }
+    } else { return true } // New objects are always editable
   }
 
   const selectMapObject = (mapObject, isMult) => {
-    if (typeof isMult === 'undefined') isMult = false
+    if (typeof isMult === undefined) { isMult = false }
     const selectedMapObjectCurr = selectedMapObjectRef.current
     // --- clear mult select?
     // First de-select the currently selected map object (if any)
-    if (selectedMapObjectCurr && !isMult) {
-      dehighlightMapObject(selectedMapObjectCurr)
-    }
+    if (selectedMapObjectCurr && !isMult) { dehighlightMapObject(selectedMapObjectCurr) }
     // then select the map object
     // can be null if we are de-selecting everything
     if (mapObject) {
@@ -292,28 +310,7 @@ export const LocationEditor = (props) => {
     } else {
       setPlanEditorFeatures([])
     }
-
     onSelectObject(mapObject, isMult)
-  }
-
-  const highlightMapObject = (mapObject) => {
-    if (isMarker(mapObject)) {
-      const label = mapObject.getLabel()
-      label.color = '#009900'
-      mapObject.setLabel(label)
-    }
-  }
-
-  const dehighlightMapObject = (mapObject) => {
-    if (isMarker(mapObject)) {
-      const label = mapObject.getLabel()
-      label.color = '#000000'
-      mapObject.setLabel(label)
-    }
-  }
-
-  const isMarker = (mapObject) => {
-    return mapObject && mapObject.icon
   }
 
   const createMapObjectsFN = (features) => {
@@ -323,21 +320,6 @@ export const LocationEditor = (props) => {
         createMapObject(feature, feature.iconUrl, false) // Feature is not created using a map click
       })
     }
-  }
-
-  // ----- rightclick menu ----- //
-
-  const getXYFromEvent = (event) => {
-    let mouseEvent = null
-    Object.keys(event).forEach((eventKey) => {
-      if (event.hasOwnProperty(eventKey) && (event[eventKey] instanceof MouseEvent)) {
-        mouseEvent = event[eventKey]
-      }
-    })
-    if (!mouseEvent) return
-    const x = mouseEvent.clientX
-    const y = mouseEvent.clientY
-    return { x, y }
   }
 
   // No UI for this component. It deals with map objects only.

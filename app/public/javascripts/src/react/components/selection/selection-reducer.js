@@ -167,10 +167,6 @@ function setIsMapClicked (state, isMapClicked) {
   }
 }
 
-function setSelectedMapObject (state, selectedMapObject) {
-  return { ...state, selectedMapObject: selectedMapObject }
-}
-
 function selectionReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.SELECTION_SET_ACTIVE_MODE:
@@ -207,7 +203,7 @@ function selectionReducer (state = defaultState, action) {
     return setIsMapClicked(state, action.payload)
 
     case Actions.SELECTION_SET_SELECTED_MAP_OBJECT:
-      return setSelectedMapObject(state, action.payload)
+      return { ...state, selectedMapObject: action.payload }
 
     case Actions.SELECTION_SET_OBJECTID_TO_MAP_OBJECT:
       return { ...state, objectIdToMapObject: action.payload }

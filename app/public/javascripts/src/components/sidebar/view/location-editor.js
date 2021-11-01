@@ -336,7 +336,6 @@ class LocationEditorController {
     const locationCategory = feature.locationCategory || this.locationTypeToAdd
     this.objectIdToProperties[mapObject.objectId] = new LocationProperties(workflowStateId, locationCategory, numberOfHouseholds, numberOfEmployees)
     this.objectIdToMapObject[mapObject.objectId] = mapObject
-    this.setObjectIdToMapObject(this.objectIdToMapObject)
     var locationObject = this.formatLocationForService(mapObject.objectId)
     // The marker is editable if the state is not LOCKED or INVALIDATED
     const isEditable = !((workflowStateId & WorkflowState.LOCKED.id) ||
@@ -530,7 +529,6 @@ class LocationEditorController {
       setPlanEditorFeatures: objectIds => dispatch(SelectionActions.setPlanEditorFeatures(objectIds)),
       clearSelectedLocations: () => dispatch(SelectionActions.setLocations([])),
       setSelectedDisplayMode: displayMode => dispatch(ToolBarActions.selectedDisplayMode(displayMode)),
-      setObjectIdToMapObject: objectIdToMapObject => dispatch(SelectionActions.setObjectIdToMapObject(objectIdToMapObject)),
     }
   }
 }

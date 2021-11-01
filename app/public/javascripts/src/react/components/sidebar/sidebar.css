@@ -212,19 +212,55 @@
 
 /* Edit Locations */
 
-.view-mode-container {
+.edit-locations .container {
   position: relative; /* This will require the parent to have position: relative or absolute */
   height: 100%;
   padding: 0px 10px 10px 10px;
 }
+.edit-locations .transaction-details {
+  padding-bottom: 15px;
+}
+.edit-locations .location-prop-tbl {
+  position: relative;
+}
+.edit-locations .save-location-prop {
+  margin-top: 10px;
+}
+.edit-locations .delete-location-prop {
+  margin-top: 10px;
+}
+.edit-locations i {
+  margin-right: 4px;
+}
+#tblLocationProperties {
+  margin-bottom: 10px;
+}
 #tblLocationProperties td {
   line-height: 33px;  /* To vertically align text */
 }
-.overlay-close {
-  position: absolute;
-  margin-top: 20px;
+.edit-loc-modal .action-button {
+  margin-right: 4px;
 }
-.overlay-lock {
+#tblLocationProperties .other-attributes {
+  width: 200px
+}
+.location-prop-tbl .created {
+  vertical-align: middle;
+  padding-right: 7px;
+}
+.location-prop-tbl .overlay-img {
+  vertical-align: middle;
+  padding-right: 10px;
+}
+.location-prop-tbl .overlay-lock {
+  vertical-align: middle;
+  padding-right: 5px;
   position: absolute;
   margin-top: 5px;
+}
+.location-prop-tbl .overlay-close {
+  vertical-align: middle;
+  padding-right: 5px;
+  position: absolute;
+  margin-top: 20px;
 }
