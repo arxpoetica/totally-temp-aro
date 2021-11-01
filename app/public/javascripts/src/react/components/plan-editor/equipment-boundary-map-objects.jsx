@@ -136,9 +136,9 @@ export class EquipmentBoundaryMapObjects extends Component {
       clickable: true,
       draggable: false,
       editable: false,
-      zIndex: this.props.subnets[subnetId].parentSubnetId === null 
-        ? constants.Z_INDEX_CO_SUBNET 
-        : constants.Z_INDEX_HUB_SUBNET,
+      zIndex: !!this.props.subnets[subnetId].parentSubnetId 
+        ? constants.Z_INDEX_HUB_SUBNET 
+        : constants.Z_INDEX_CO_SUBNET,
       map: this.props.googleMaps,
     })
 
