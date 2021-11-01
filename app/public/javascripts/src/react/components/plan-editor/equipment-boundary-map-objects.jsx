@@ -149,7 +149,7 @@ export class EquipmentBoundaryMapObjects extends Component {
 
     // click in the polygon to select the subnet
     neighborObject.addListener('click', (event) => {
-      // disbale if shift key is held to make selecting fiber routes easier
+      // disable if shift key is held to make selecting fiber routes easier
       if (!event.domEvent.shiftKey) {
         setSelectedSubnetId(subnetId)
         selectEditFeaturesById([subnetId])

@@ -135,9 +135,9 @@ const FiberAnnotations = (props) => {
   return (
     <>
       {selectedFiber.length > 0 
-      && subnetFeatures[selectedSubnetId] 
-      && subnetFeatures[selectedSubnetId].feature.networkNodeType === "central_office" 
-      && (
+        && subnetFeatures[selectedSubnetId] 
+        && subnetFeatures[selectedSubnetId].feature.networkNodeType === "central_office" 
+        && (
         <div className={'fiber-annotations plan-editor-thumb'}>
           <div className="info">
             <h2>Fiber Route{selectedFiber.length > 1 && 's'}</h2>
