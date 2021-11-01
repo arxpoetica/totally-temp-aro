@@ -19,10 +19,11 @@ export class RoicReportsSmall extends Component {
   }
 
   render () {
-
+    // ToDo: repeat code in here and roic-reports-large, 
+    //  make smaller components, then large and small will be different compositions of those components
     const { roicResults, networkTypes, categories, entityTypes, graphOptions } = this.props
     const { selectedEntityType, selectedNetworkType, selectedCategory, selectedCalcType } = this.state
-
+    let selectedNetworkTypeKey = selectedNetworkType.id.toUpperCase()
     return (
       <div style={{display: 'flex', flexDirection: 'column'}}>
         <div style={{flex: '0 0 auto'}}>
@@ -99,8 +100,8 @@ export class RoicReportsSmall extends Component {
           {/* If we have chart data, show it */}
           {/* roicResults.roicAnalysis.components does not has values,
           so condition is implemented to avoid error while rendering */}
-          {Object.keys(roicResults.roicAnalysis.components).length > 0
-            ? roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' +
+          {selectedNetworkTypeKey in roicResults.roicAnalysis.components
+            ? roicResults.roicAnalysis.components[selectedNetworkTypeKey][selectedEntityType.id + '.' +
               selectedCalcType.id] !== undefined &&
               <Line
                 display={'block'} width={250} height={533}
@@ -115,8 +116,8 @@ export class RoicReportsSmall extends Component {
           {/* <!-- If we do not have chart data, display a warning --> */}
           {/* roicResults.roicAnalysis.components does not has values,
           so condition is implemented to avoid error while rendering */}
-          {Object.keys(roicResults.roicAnalysis.components).length > 0
-            ? roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' +
+          {selectedNetworkTypeKey in roicResults.roicAnalysis.components
+            ? roicResults.roicAnalysis.components[selectedNetworkTypeKey][selectedEntityType.id + '.' +
               selectedCalcType.id] === undefined && this.chartDataWarning()
             : this.chartDataWarning()
           }

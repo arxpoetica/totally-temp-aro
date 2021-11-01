@@ -3,6 +3,7 @@ import { PropTypes } from 'prop-types'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import PlanEditorActions from './plan-editor-actions'
+import PlanEditorSelectors from './plan-editor-selectors'
 import PlanEditorThumbs from './plan-editor-thumbs.jsx'
 import PlanEditorRecalculate from './plan-editor-recalculate.jsx'
 import EquipmentDragger from './equipment-dragger.jsx'
@@ -31,7 +32,9 @@ export const PlanEditor = props => {
     subnets,
     selectedSubnetId,
     equipments,
+    rootSubnet,
     updateFeatureProperties,
+    fiberAnnotations,
   } = props
 
   useEffect(() => {
@@ -42,22 +45,32 @@ export const PlanEditor = props => {
     if (isCommittingTransaction) {
       return
     }
-    commitTransaction(transactionId)
+    if (Object.keys(fiberAnnotations).length > 0) {
+      swal({
+        title: "Are you sure you want to Commit?",
+        text: "Any adjusted feeder fiber will lose it's attributes.",
+        type: 'warning',
+        showCancelButton: true,
+        closeOnConfirm: true,
+        confirmButtonColor: '#fdbc80',
+        confirmButtonText: 'Yes, Commit',
+        cancelButtonText: 'Oops, nevermind.',
+      }, (confirm) => {
+        if (confirm) commitTransaction(transactionId)
+      })
+    } else commitTransaction(transactionId)
   }
 
   function onFeatureFormChange (newValObj, propVal, path, event) {
     //console.log({propVal, path, newValObj, event})
   }
   
-  function onFeatureFormSave (newValObj, objectId) {
-    console.log(`SAVE ${objectId}`)
-    console.log(newValObj)
-    let feature = features[objectId].feature
-    let updatedFeature = { ...feature, 
-      networkNodeEquipment: newValObj,
-    }
-    console.log(updatedFeature)
-    updateFeatureProperties(updatedFeature)
+  function onFeatureFormSave(newValObj, objectId) {
+    const { feature } = features[objectId]
+    updateFeatureProperties({
+      feature: { ...feature, networkNodeEquipment: newValObj },
+      rootSubnetId: rootSubnet.subnetNode,
+    })
   }
 
   return (
@@ -134,13 +147,15 @@ const mapStateToProps = state => ({
   subnets: state.planEditor.subnets,
   selectedSubnetId: state.planEditor.selectedSubnetId,
   equipments: state.mapLayers.networkEquipment.equipments,
+  rootSubnet: PlanEditorSelectors.getRootSubnet(state),
+  fiberAnnotations: state.planEditor.fiberAnnotations,
 })
 
 const mapDispatchToProps = dispatch => ({
   resumeOrCreateTransaction: (planId, userId) => dispatch(PlanEditorActions.resumeOrCreateTransaction(planId, userId)),
   commitTransaction: transactionId => dispatch(PlanEditorActions.commitTransaction(transactionId)),
   discardTransaction: transactionId => dispatch(PlanEditorActions.discardTransaction(transactionId)),
-  updateFeatureProperties: feature => dispatch(PlanEditorActions.updateFeatureProperties(feature)),
+  updateFeatureProperties: obj => dispatch(PlanEditorActions.updateFeatureProperties(obj)),
 })
 
 const PlanEditorComponent = wrapComponentWithProvider(reduxStore, PlanEditor, mapStateToProps, mapDispatchToProps)

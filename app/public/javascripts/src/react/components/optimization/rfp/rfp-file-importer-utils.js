@@ -20,19 +20,16 @@ export default class RfpPointImporterUtils {
         if (!firstLine.includes('id,latitude,longitude')) {
           throw new Error('In RfpFileImporter: The csv file format is incorrect. The first line must have atleast "id,latitude,longitude"')
         }
-        let [id, lat, lng, ...headerProps] = [...firstLine.split(',')]
+        let [idHead, latHead, lngHead, ...headerProps] = firstLine.split(',')
         var targets = lines
           .filter(line => line) // Ignore null or empty strings
           .map(line => {
             const columns = line.split(',')
-            let [id, lat, lng, ...valueProps] = [...columns]
+            let [id, lat, lng, ...valueProps] = columns
             // creating a hashmap of headers and their value in each line:
             const headerValueMap = {}
             headerProps.forEach((header, idx) => headerValueMap[header] = valueProps[idx])
-            return {
-              point: new Point(+lat, +lng, id),
-              props: headerValueMap
-            }
+            return new Point(+lat, +lng, +id, headerValueMap)
           })
         resolve(targets)
       }

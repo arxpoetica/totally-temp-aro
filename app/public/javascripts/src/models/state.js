@@ -480,13 +480,7 @@ class State {
       }
 
       if (service.selectedDisplayMode.getValue() == service.displayModes.EDIT_PLAN) {
-        let featureIds = []
-        //console.log(options)
-        //console.log({lat: options.latLng.lat(), lng: options.latLng.lng()})
-        options.equipmentFeatures.forEach(feature => {
-          featureIds.push(feature.object_id)
-        })
-        //service.selectPlanEditFeaturesById(featureIds)
+        const featureIds = options.equipmentFeatures.map(feature => feature.object_id)
         service.planEditorOnMapClick(featureIds, options.latLng)
       }
 

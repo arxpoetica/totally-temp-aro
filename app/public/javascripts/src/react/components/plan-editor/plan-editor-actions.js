@@ -9,7 +9,7 @@ import ResourceActions from '../resource-editor/resource-actions'
 //import SelectionActions from '../selection/selection-actions'
 import { batch } from 'react-redux'
 import WktUtils from '../../../shared-utils/wkt-utils'
-import PlanEditorSelectors from './plan-editor-selectors.js'
+import PlanEditorSelectors from './plan-editor-selectors'
 
 function resumeOrCreateTransaction (planId, userId) {
   return (dispatch, getState) => {
@@ -56,8 +56,6 @@ function resumeOrCreateTransaction (planId, userId) {
           dispatch(ResourceActions.loadResourceManager(id, resource, name))
           dispatch(addTransactionFeatures(equipmentList))
           dispatch(addTransactionFeatures(boundaryList))
-
-          //dispatch(addSubnets(subnetIds))
 
           dispatch({
             type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION,
@@ -127,63 +125,70 @@ function discardTransaction (transactionId) {
   }
 }
 
-function createFeature (feature) {
-  return (dispatch, getState) => {
-    const state = getState()
-    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
-    
-    const body = {
-      commands: [{
-        childId: feature,
-        type: 'add', 
-      }]
-    }
+function createFeature(feature) {
+  return async(dispatch, getState) => {
 
-    AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
-      .then(result => {
-        let updatedSubnets = JSON.parse(JSON.stringify(state.planEditor.subnets))
-        const { subnetUpdates, equipmentUpdates } = result.data
-        const newFeatures = {}
-        // the subnet and equipment updates are not connected, right now we get back two arrays
-        // For now I am assuming the relevent subnet is the one with type 'modified'
-        // TODO: handle there being multiple updated subnets
+    try {
 
-        // gets updated subnet ids to send to addSubnets, can be either created or modified
-        const updatedSubnetIds = subnetUpdates.map((subnet) => {
-          return subnet.subnet.id
-        })
+      const state = getState()
+      const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
 
-        // There should always be a modified subnet
-        const modifiedSubnet = subnetUpdates.find(subnet => subnet.type === 'modified')
-        const subnetId = modifiedSubnet.subnet.id
-        
-        equipmentUpdates.forEach(equipment => {
-          // fix difference between id names
-          const feature = parseSubnetFeature(equipment.subnetNode)
+      // creating a feature on a blank plan
+      const rootSubnet = PlanEditorSelectors.getRootSubnet(state)
+      if (!rootSubnet) {
+        const coordinatesResponse = await dispatch(addSubnets({ coordinates: feature.point.coordinates }))
+      }
 
-          newFeatures[feature.objectId] = {
-            feature: feature,
-            subnetId: subnetId,
-          }
-          if (updatedSubnets[subnetId]) {
-            updatedSubnets[subnetId].children.push(feature.objectId)
-          }
-        })
-
-        batch(() => {
-          dispatch({
-            type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
-            payload: newFeatures,
-          }),
-          dispatch(addSubnets(updatedSubnetIds))
-          dispatch({
-            type: Actions.PLAN_EDITOR_ADD_SUBNETS,
-            payload: updatedSubnets,
-          })
-        })
-      
+      const url = `/service/plan-transaction/${transactionId}/subnet_cmd/update-children`
+      const featureResults = await AroHttp.post(url, {
+        commands: [{ childId: feature, type: 'add' }]
       })
-      .catch(err => console.error(err))
+      const { subnetUpdates, equipmentUpdates } = featureResults.data
+
+      // 1. dispatch addSubnets w/ everything that came back...
+      const updatedSubnetIds = subnetUpdates.map((subnet) => subnet.subnet.id)
+      const subnetIdsResponse = await dispatch(addSubnets({ subnetIds: updatedSubnetIds }))
+
+      // 2. wait for return, and run rest after
+      let subnetsCopy = JSON.parse(JSON.stringify(getState().planEditor.subnets))
+      const newFeatures = {}
+      // the subnet and equipment updates are not connected, right now we get back two arrays
+      // For now I am assuming the relevent subnet is the one with type 'modified'
+      // TODO: handle there being multiple updated subnets
+
+      // There should always be a modified subnet
+      // FIXME: this is weird...why are we just finding one
+      const modifiedSubnet = subnetUpdates.find(subnet => subnet.type === 'modified')
+      const subnetId = modifiedSubnet.subnet.id
+
+      equipmentUpdates.forEach(equipment => {
+        // fix difference between id names
+        const parsedFeature = parseSubnetFeature(equipment.subnetNode)
+
+        newFeatures[parsedFeature.objectId] = {
+          feature: parsedFeature,
+          subnetId: subnetId,
+        }
+        if (subnetsCopy[subnetId]) {
+          subnetsCopy[subnetId].children.push(parsedFeature.objectId)
+        }
+      })
+
+      batch(() => {
+        dispatch({
+          type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
+          payload: newFeatures,
+        })
+        dispatch({
+          type: Actions.PLAN_EDITOR_ADD_SUBNETS,
+          payload: subnetsCopy,
+        })
+      })
+      } catch (error) {
+        console.error(error)
+      }
+
+
   }
 }
 
@@ -220,29 +225,33 @@ function modifyFeature (featureType, feature) {
   }
 }
 
-function updateFeatureProperties (feature) {
-  return (dispatch, getState) => {
-    const state = getState()
-    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
-    let featureEntry = state.planEditor.features[feature.objectId]
-    // Do a PUT to send the equipment over to service
-    return AroHttp.put(`/service/plan-transaction/${transactionId}/subnet-equipment`, feature)
-      .then(result => {
-        // Decorate the created feature with some default values
-        let crudAction = featureEntry.crudAction || 'read'
-        if (crudAction === 'read') crudAction = 'update'
-        const newFeatureEntry = {
+function updateFeatureProperties({ feature, rootSubnetId }) {
+  return async(dispatch, getState) => {
+    try {
+      const state = getState()
+      const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+
+      // Do a PUT to send the equipment over to service
+      const url = `/service/plan-transaction/${transactionId}/subnet-equipment?parentSubnetId=${rootSubnetId}`
+      const result = await AroHttp.put(url, feature)
+
+      // Decorate the created feature with some default values
+      const featureEntry = state.planEditor.features[feature.objectId]
+      let crudAction = featureEntry.crudAction || 'read'
+      if (crudAction === 'read') crudAction = 'update'
+
+      dispatch({
+        type: Actions.PLAN_EDITOR_MODIFY_FEATURES,
+        payload: [{
           ...featureEntry,
           crudAction: crudAction,
-          feature: result.data,//feature,
-        }
-        dispatch({
-          type: Actions.PLAN_EDITOR_MODIFY_FEATURES,
-          payload: [newFeatureEntry]
-        })
-        return Promise.resolve()
+          feature: result.data,
+        }],
       })
-      .catch(err => console.error(err))
+      return Promise.resolve()
+    } catch (error) {
+      console.error(err)
+    }
   }
 }
 
@@ -275,9 +284,27 @@ function deleteBoundaryVertex (mapObject, vertex) {
   }
 }
 
+function deleteBoundaryVertices (mapObject, vertices, callBack) {
+  return dispatch => {
+      // Sort is necessary to ensure that indexes will not be reassigned while deleting more than one vertex.
+      vertices.sort((a, b) => {
+        return Number(b.title) - Number(a.title)
+      })
+      // We are tracking the multiple selected verticies to delete by markers created.
+      // And storing vertex index on the corrosponding marker.
+
+      for (const marker of vertices) {
+        if (marker && marker.title && mapObject.getPath().getLength() > 3) {
+          mapObject.getPath().removeAt(Number(marker.title))
+        }
+      }
+
+    callBack();
+  }
+}
+
 function showContextMenuForEquipment (featureId, x, y) {
   return (dispatch) => {
-    // debugger
     var menuActions = []
     menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteFeature', featureId))
     const menuItemFeature = new MenuItemFeature('EQUIPMENT', 'Equipment', menuActions)
@@ -440,11 +467,27 @@ function assignLocation (locationId, terminalId) {
   }
 }
 
-function showContextMenuForEquipmentBoundary (mapObject, x, y, vertex) {
+function showContextMenuForEquipmentBoundary (mapObject, x, y, vertex, callBack) {
   return (dispatch) => {
     const menuActions = []
-    menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteBoundaryVertex', mapObject, vertex))
-    const menuItemFeature = new MenuItemFeature('BOUNDARY', 'Boundary Vertex', menuActions)
+    menuActions.push(
+      new MenuItemAction(
+        Array.isArray(vertex) ? 'DELETE_ALL' : 'DELETE',
+        'Delete',
+        'PlanEditorActions',
+        Array.isArray(vertex) ? 'deleteBoundaryVertices' : 'deleteBoundaryVertex',
+        mapObject,
+        vertex,
+        // Callback is utilized to update the local state of the react class if it is a multi-delete.
+        callBack
+      )
+    )
+
+    const menuItemFeature = new MenuItemFeature(
+      'BOUNDARY',
+      `Boundary ${Array.isArray(vertex) ? 'Vertices' : 'Vertex' }`,
+      menuActions
+    )
 
     // Show context menu
     dispatch(ContextMenuActions.setContextMenuItems([menuItemFeature]))
@@ -586,6 +629,7 @@ function deleteFeature (featureId) {
     const state = getState()
 
     let subnetFeature = state.planEditor.subnetFeatures[featureId]
+    let selectedSubnetId = state.planEditor.selectedSubnetId
     subnetFeature = JSON.parse(JSON.stringify(subnetFeature))
     let subnetId = subnetFeature.subnetId
     let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
@@ -610,6 +654,10 @@ function deleteFeature (featureId) {
             type: Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURE,
             payload: featureId,
           })
+          // if deleted equipment is currently selected, move selection to parent
+          if (featureId === selectedSubnetId){
+            dispatch(setSelectedSubnetId(subnetId))
+          }
           dispatch(recalculateSubnets(transactionId))
         })
       })
@@ -702,7 +750,7 @@ function deselectEditFeatureById (objectId) {
   }
 }
 
-function addSubnets (subnetIds, forceReload = false) {
+function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
   // FIXME: I (BRIAN) needs to refactor this, it works for the moment but does a lot of extranious things
   //  ALSO there is a "bug" where if we select an FDT before selecting the CO or one of the hubs, we get no info
   //  to fix this we need to find out what subnet the FDT is a part of and run that through here
@@ -716,60 +764,61 @@ function addSubnets (subnetIds, forceReload = false) {
       subnetFeatures,
     } = getState().planEditor
 
-    // this little dance only fetches uncached (or forced to reload) subnets
-    const cachedSubnetIds = [...Object.keys(cachedSubnets), ...requestedSubnetIds]
-    let uncachedSubnetIds = subnetIds.filter(id => {
-      let isNotCached = !cachedSubnetIds.includes(id)
-      return forceReload || isNotCached // gotta love that double negative...
-    })
 
-    // we have everything, no need to query service
-    if (uncachedSubnetIds.length <= 0) {
-      dispatch(setIsCalculatingSubnets(false))
-      return Promise.resolve(subnetIds)
-    }
-    // pull out any ids that are not subnets
-    let validPseudoSubnets = []
-    uncachedSubnetIds = uncachedSubnetIds.filter(id => {
-      if (!features[id]) return true // unknown so we'll try it
-      let networkNodeType = features[id].feature.networkNodeType
-      // TODO: do other networkNodeTypes have subnets?
-      //  how would we know? solve that
-      if (networkNodeType === 'central_office' || networkNodeType === 'fiber_distribution_hub') {
-        return true
+    let command = {}
+    if (coordinates) {
+      command.cmdType = 'QUERY_CO_SUBNET'
+      command.point = { type: 'Point', coordinates }
+
+    } else {
+      // this little dance only fetches uncached (or forced to reload) subnets
+      const cachedSubnetIds = [...Object.keys(cachedSubnets), ...requestedSubnetIds]
+      let uncachedSubnetIds = subnetIds.filter(id => {
+        let isNotCached = !cachedSubnetIds.includes(id)
+        return forceReload || isNotCached // gotta love that double negative...
+      })
+
+      // we have everything, no need to query service
+      if (uncachedSubnetIds.length <= 0) {
+        dispatch(setIsCalculatingSubnets(false))
+        return Promise.resolve(subnetIds)
       }
-      if (subnetFeatures[id]) validPseudoSubnets.push(id)
-      return false
-    })
+      // pull out any ids that are not subnets
+      let validPseudoSubnets = []
+      uncachedSubnetIds = uncachedSubnetIds.filter(id => {
+        if (!features[id]) return true // unknown so we'll try it
+        let networkNodeType = features[id].feature.networkNodeType
+        // TODO: do other networkNodeTypes have subnets?
+        //  how would we know? solve that
+        if (networkNodeType === 'central_office' || networkNodeType === 'fiber_distribution_hub') {
+          return true
+        }
+        if (subnetFeatures[id]) validPseudoSubnets.push(id)
+        return false
+      })
 
-    // the selected ID isn't a subnet persay so don't query for it
-    // TODO: we need to fix this selection discrepancy
-    if (uncachedSubnetIds.length <= 0) {
-      // is the FDT in state? If so we can select it
-      if (validPseudoSubnets.length > 0) {
-        return Promise.resolve(validPseudoSubnets)
+      // the selected ID isn't a subnet persay so don't query for it
+      // TODO: we need to fix this selection discrepancy
+      if (uncachedSubnetIds.length <= 0) {
+        // is the FDT in state? If so we can select it
+        if (validPseudoSubnets.length > 0) {
+          return Promise.resolve(validPseudoSubnets)
+        }
+        // if not we can't
+        return Promise.resolve()
       }
-      // if not we can't
-      return Promise.resolve()
+
+      command.cmdType = 'QUERY_SUBNET_TREE'
+      command.subnetIds = uncachedSubnetIds
     }
 
-    /*
-    dispatch({
-      type: Actions.PLAN_EDITOR_ADD_REQUESTED_SUBNET_IDS,
-      payload: uncachedSubnetIds,
-    })
-    */
-    
-    let command = {
-      cmdType: 'QUERY_SUBNET_TREE', //"QUERY_SELECTED_SUBNETS",
-      subnetIds: uncachedSubnetIds,
-    }
     // should we rename that now that we are using it for retreiving subnets as well?
     dispatch(setIsCalculatingSubnets(true))
     return AroHttp.post(`/service/plan-transaction/${transaction.id}/subnet_cmd/query-subnets`, command)
-      .then(result => {
-        let apiSubnets = result.data.filter(Boolean)
+      .then(({ data }) => {
+        let apiSubnets = data.filter(Boolean)
         let fiberApiPromises = []
+        // TODO: break this out into fiber actions
         apiSubnets.forEach(subnet => {
           // subnet could be null (don't ask me)
           const subnetId = subnet.subnetId.id
@@ -818,8 +867,13 @@ function addSubnetTree() {
           }
         })
         if (rootIds.length) {
+          rootIds.forEach((id) => {
+            // get feeder fiber annotations
+            dispatch(getFiberAnnotations(id))
+          })
+          
           // TODO: the addSubnets function needs to be broken up
-          return dispatch(addSubnets(rootIds))
+          return dispatch(addSubnets({ subnetIds: rootIds }))
             .then(subnetRes => Promise.resolve(subnetRes))
         } else {
           dispatch(setIsCalculatingSubnets(false))
@@ -833,50 +887,47 @@ function addSubnetTree() {
   }
 }
 
-function addSubnetTreeByLatLng (latLng) {
-  return (dispatch, getState) => {
-    const state = getState()
-    let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
-    // TODO: we should make a call on standardization
-    //  do we pass around the latLng object or the actual values 
-    let command = {
-      cmdType: "QUERY_CO_SUBNET",
-      point:{
-        type: "Point",
-        coordinates: [latLng.lng(), latLng.lat()],
+function addSubnetTreeByLatLng([lng, lat]) {
+  return async(dispatch, getState) => {
+
+    try {
+      const state = getState()
+      let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+      const command = {
+        cmdType: 'QUERY_CO_SUBNET',
+        point:{ type: 'Point', coordinates: [lng, lat] },
       }
-    }
-    dispatch(setIsCalculatingSubnets(true))
-    return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/query-subnets`, command)
-      .then(result => {
-        let rootId = null
-        if (result.data 
-          && result.data[0] 
-          && result.data[0].subnetId 
-          && result.data[0].subnetId.id
-        ){ 
-          rootId = result.data[0].subnetId.id
-        }
-        if (rootId) {
-          // TODO: the addSubnets function needs to be broken up
-          return dispatch(addSubnets([rootId]))
-            .then(subnetRes => {
-              return Promise.resolve(subnetRes)
-            })
-        } else {
-          dispatch(setIsCalculatingSubnets(false))
-          return Promise.resolve([])
-        }
-      }).catch(err => {
-        console.error(err)
+      dispatch(setIsCalculatingSubnets(true))
+      const endpoint = `/service/plan-transaction/${transactionId}/subnet_cmd/query-subnets`
+      const { data } = await AroHttp.post(endpoint, command)
+
+      let rootId = null
+      if (data && data[0] && data[0].subnetId && data[0].subnetId.id) {
+        rootId = data[0].subnetId.id
+      }
+
+      if (rootId) {
+        return dispatch(addSubnets({ subnetIds: [rootId] }))
+      } else {
         dispatch(setIsCalculatingSubnets(false))
-        return Promise.reject()
-      })
+        return Promise.resolve([])
+      }
+    } catch (error) {
+      console.error(err)
+      dispatch(setIsCalculatingSubnets(false))
+      return Promise.reject()
+    }
+
   }
 }
 
 function setSelectedSubnetId (selectedSubnetId) {
   return (dispatch) => {
+    // clear any selected fiber
+    dispatch({
+      type: Actions.PLAN_EDITOR_SET_FIBER_SELECTION,
+      payload: []
+    })
     if (!selectedSubnetId) {
       dispatch({
         type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
@@ -884,7 +935,7 @@ function setSelectedSubnetId (selectedSubnetId) {
       })
     } else {
       batch(() => {
-        dispatch(addSubnets([selectedSubnetId]))
+        dispatch(addSubnets({ subnetIds: [selectedSubnetId] }))
           .then( (result) => {
             // TODO: we need to figure out the proper subnet select workflow
             // FDTs aren't subnets but can be selcted as such
@@ -908,20 +959,18 @@ function setSelectedSubnetId (selectedSubnetId) {
   }
 }
 
-function onMapClick (featureIds, latLng) {
+function onMapClick(featureIds, latLng) {
   // TODO: this is a bit of a shim for the moment to handle selecting a terminal that isn't yet loaded
   //  next we'll be selecting subnets by bounds using addSubnetTreeByLatLng 
   // TODO: this file is has become a two course meal of spaghetti and return dispatch soup
   //  Corr, fix yer mess!
-  return (dispatch, getState) => {
+  return async(dispatch, getState) => {
     const state = getState()
     if (!featureIds.length || state.planEditor.subnetFeatures[featureIds[0]]) { 
       dispatch(selectEditFeaturesById(featureIds))
     } else {
-      dispatch(addSubnetTreeByLatLng(latLng))
-        .then(result => {
-          dispatch(selectEditFeaturesById(featureIds))
-        }) 
+      await dispatch(addSubnetTreeByLatLng([latLng.lng(), latLng.lat()]))
+      dispatch(selectEditFeaturesById(featureIds))
     }
   }
 }
@@ -1019,6 +1068,7 @@ function recalculateSubnets (transactionId, subnetIds = []) {
     const state = getState()
     let activeSubnets = []
     subnetIds.forEach(subnetId => {
+      dispatch(setFiberAnnotations({[subnetId]: []}, subnetId))
       if (state.planEditor.subnets[subnetId]) {
         activeSubnets.push(subnetId)
       } else if (state.planEditor.subnetFeatures[subnetId]
@@ -1050,6 +1100,56 @@ function setFiberRenderRequired (bool) {
   }
 }
 
+function setSelectedFiber (fiberObjects) {
+  return (dispatch) => {
+    batch(() => {
+      dispatch({
+        type: Actions.PLAN_EDITOR_SET_FIBER_SELECTION,
+        payload: fiberObjects,
+      })
+      dispatch({
+        type: Actions.PLAN_EDITOR_SET_FIBER_RENDER_REQUIRED,
+        payload: true,
+      })
+    })
+  }
+}
+
+function getFiberAnnotations (subnetId) {
+  return (dispatch, getState) => {
+    const state = getState()
+    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+
+    AroHttp.get(`/service/plan-transaction/${transactionId}/subnet/${subnetId}/annotations`)
+      .then((res) => {
+        dispatch({
+          type: Actions.PLAN_EDITOR_SET_FIBER_ANNOTATIONS,
+          payload: { [subnetId]: res.data }
+        })
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+  }
+}
+
+function setFiberAnnotations (fiberAnnotations, subnetId) {
+  return (dispatch, getState) => {
+    const state = getState()
+    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+
+    AroHttp.put(`/service/plan-transaction/${transactionId}/subnet/${subnetId}/annotations`, fiberAnnotations[subnetId])
+      .then((res) => {
+        dispatch({
+          type: Actions.PLAN_EDITOR_SET_FIBER_ANNOTATIONS,
+          payload: fiberAnnotations,
+        })
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+  }
+}
 // --- //
 
 // helper
@@ -1061,13 +1161,13 @@ function parseRecalcEvents (recalcData) {
     let newSubnetFeatures = JSON.parse(JSON.stringify(subnetFeatures))
     let updatedSubnets = {}
 
-    const recalcedSubnets = [...new Set(recalcData.subnets.map(subnet => subnet.feature.objectId))]
+    const recalcedSubnetIds = [...new Set(recalcData.subnets.map(subnet => subnet.feature.objectId))]
     // TODO: ??? --->
     // this may have some redundancy in it-- we're only telling the cache to
     // (sadly) clear because we need to reload locations that are in or our of a modified
     // subnet boundary. Another way we could handle this it to pass `subnetLocations`
     // back down with the recalced subnets...
-    await dispatch(addSubnets(recalcedSubnets, true))
+    await dispatch(addSubnets({ subnetIds: recalcedSubnetIds, forceReload: true }))
 
     // need to recapture state because we've altered it w/ `addSubnets`
     const { planEditor: { subnets } } = getState()
@@ -1084,6 +1184,8 @@ function parseRecalcEvents (recalcData) {
 
         // update equipment
         subnetRecalc.recalcNodeEvents.forEach(recalcNodeEvent => {
+          // bug fix: I think this get done else where
+          // given that delete never deletes anything and add always duplicates 
           let objectId = recalcNodeEvent.subnetNode.id
           switch (recalcNodeEvent.eventType) {
             case 'DELETE':
@@ -1096,7 +1198,9 @@ function parseRecalcEvents (recalcData) {
               break
             case 'ADD':
               // add only
-              subnetCopy.children.push(objectId)
+              //if (subnetCopy.children.includes(objectId)) console.log(`duplicate ADD ${objectId}`) // ALL
+              // I don't know why the objectId would alredy be in the children list, we should figure this out
+              if (!subnetCopy.children.includes(objectId)) subnetCopy.children.push(objectId)
               // do not break
             case 'MODIFY':
             case 'UPDATE':
@@ -1285,6 +1389,7 @@ export default {
   deleteFeature,
   deleteTransactionFeature,
   deleteBoundaryVertex,
+  deleteBoundaryVertices,
   addTransactionFeatures,
   showContextMenuForEquipment,
   showContextMenuForLocations,
@@ -1315,4 +1420,7 @@ export default {
   boundaryChange,
   recalculateSubnets,
   setFiberRenderRequired,
+  setSelectedFiber,
+  setFiberAnnotations,
+  getFiberAnnotations,
 }

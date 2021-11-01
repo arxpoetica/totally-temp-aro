@@ -12,6 +12,26 @@ const getActiveSelectionModeId = (state) => state.selection.activeSelectionMode.
 const getActivefilters = (state) => state.optimization.networkOptimization.activeFilters
 const getSelectionModes = state => state.selection.selectionModes
 const getClientName = (state) => state.configuration.system.ARO_CLIENT
+const getEnumOptions = (state) => state.optimization.networkOptimization.enumOptions
+
+const getFormattedEnumOptions = createSelector([getEnumOptions], (enumOptions) => {
+  const formattedEnumOptions = {}
+  Object.entries(enumOptions).forEach(([name, options]) => {
+    const formattedEnum = options.map((option) => {
+      return { value: option.name, label: option.description }
+    })
+
+    formattedEnumOptions[name] = formattedEnum.sort((a, b) => {
+      const nameA = a.value.toLowerCase()
+      const nameB = b.value.toLowerCase()
+      if (nameA < nameB) return -1
+      if (nameA > nameB) return 1
+      return 0
+    })
+  })
+
+  return formattedEnumOptions
+})
 
 const getAllSelectionModes = createSelector([getSelectionModes], (selectionModes) => {
   // NOTE: filter prior used to remove legacy error lines from angular in
@@ -37,6 +57,11 @@ const getObjectFilter = createSelector([getValidatedFilters, getClientName], (va
       if (filter.value2) {
         value2 = new Date(filter.value2).getTime()
       }
+    }
+    // join array for small enumeration
+    if (filter.value1 && typeof filter.value1 !== 'string' && filter.enumType === 'BOUNDED' ) {
+      const names = filter.value1.map((option) => option.value)
+      value = names.join(',')
     }
   
     return ({
@@ -100,6 +125,7 @@ const NetworkOptimizationSelectors = Object.freeze({
   getAdditionalOptimizationInputs,
   getAllSelectionModes,
   getUpdatedLocationConstraints,
+  getFormattedEnumOptions,
 })
 
 export default NetworkOptimizationSelectors

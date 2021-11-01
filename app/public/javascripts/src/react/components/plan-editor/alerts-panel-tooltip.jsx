@@ -8,7 +8,7 @@ const { ALERT_TYPES } = constants
 const _AlertsPanelTooltip = props => {
 
   const { locationAlerts, cursorLocationIds, cursorEquipmentIds } = props
-  const cursorIds = [...cursorLocationIds, ...cursorEquipmentIds]
+  const cursorIds = cursorLocationIds.concat(cursorEquipmentIds)
   const alerts = cursorIds
     .map(id => locationAlerts[id] && locationAlerts[id].alerts || [])
     .filter(alerts => alerts.length)
@@ -22,7 +22,11 @@ const _AlertsPanelTooltip = props => {
 
   return (
     <MapTooltip show={alerts.length} position={position}>
-      {alerts.map(type => ALERT_TYPES[type].displayName).join(', ')}
+      <ul>
+        {alerts.map((type, index) => 
+          <li key={`alert_${index}`}>{ALERT_TYPES[type].displayName}</li>
+        )}
+      </ul>
     </MapTooltip>
   )
 }

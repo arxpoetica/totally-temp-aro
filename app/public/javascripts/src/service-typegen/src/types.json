@@ -396,6 +396,18 @@
           "t1": {
             "type": "boolean"
           },
+          "route": {
+            "type": "string"
+          },
+          "fiberSize": {
+            "type": "integer"
+          },
+          "fiberCount": {
+            "type": "string"
+          },
+          "buildType": {
+            "type": "string"
+          },
           "physicallyLinked": {
             "type": "boolean"
           },
@@ -796,6 +808,18 @@
       "t1": {
         "type": "boolean"
       },
+      "route": {
+        "type": "string"
+      },
+      "fiberSize": {
+        "type": "integer"
+      },
+      "fiberCount": {
+        "type": "string"
+      },
+      "buildType": {
+        "type": "string"
+      },
       "physicallyLinked": {
         "type": "boolean"
       },
@@ -1043,6 +1067,18 @@
               },
               "t1": {
                 "type": "boolean"
+              },
+              "route": {
+                "type": "string"
+              },
+              "fiberSize": {
+                "type": "integer"
+              },
+              "fiberCount": {
+                "type": "string"
+              },
+              "buildType": {
+                "type": "string"
               },
               "physicallyLinked": {
                 "type": "boolean"

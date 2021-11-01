@@ -22,6 +22,8 @@ const defaultState = {
   fiberRenderRequired: true,
   cursorLocationIds: [],
   cursorEquipmentIds: [],
+  selectedFiber: [],
+  fiberAnnotations: {},
 }
 
 function setTransaction (state, transaction) {
@@ -159,10 +161,6 @@ function removeRequestedSubnetIds (state, subnetIds) {
   }
 }
 
-function addSubnets (state, newSubnets) {
-  return { ...state, subnets: { ...state.subnets, ...newSubnets } }
-}
-
 function updateSubnetBoundary (state, subnetId, geometry) {
   if (!state.subnets[subnetId]) return state
   
@@ -183,10 +181,6 @@ function updateSubnetBoundary (state, subnetId, geometry) {
 
 function setSubnetFeatures (state, subnetFeatures) {
   return { ...state, subnetFeatures: subnetFeatures || {} }
-}
-
-function updateSubnetFeatures (state, updatedSubnetFeatures) {
-  return { ...state, subnetFeatures: { ...state.subnetFeatures, ...updatedSubnetFeatures } }
 }
 
 function removeSubnetFeature (state, featureId) {
@@ -310,7 +304,7 @@ function planEditorReducer (state = defaultState, { type, payload }) {
       return removeRequestedSubnetIds(state, payload)
 
     case Actions.PLAN_EDITOR_ADD_SUBNETS:
-      return addSubnets(state, payload)
+      return { ...state, subnets: { ...state.subnets, ...payload } }
 
     case Actions.PLAN_EDITOR_UPDATE_SUBNET_BOUNDARY:
       return updateSubnetBoundary(state, payload.subnetId, payload.geometry)
@@ -319,7 +313,7 @@ function planEditorReducer (state = defaultState, { type, payload }) {
       return setSubnetFeatures(state, payload)
 
     case Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES:
-      return updateSubnetFeatures(state, payload)
+      return { ...state, subnetFeatures: { ...state.subnetFeatures, ...payload } }
 
     case Actions.PLAN_EDITOR_REMOVE_SUBNET_FEATURE:
       return removeSubnetFeature(state, payload)
@@ -350,6 +344,12 @@ function planEditorReducer (state = defaultState, { type, payload }) {
 
     case Actions.PLAN_EDITOR_CLEAR_CURSOR_EQUIPMENT_IDS:
       return { ...state, cursorEquipmentIds: [] }
+
+    case Actions.PLAN_EDITOR_SET_FIBER_SELECTION:
+      return { ...state, selectedFiber: payload }
+
+    case Actions.PLAN_EDITOR_SET_FIBER_ANNOTATIONS:
+      return { ...state, fiberAnnotations: { ...state.fiberAnnotations, ...payload}}
 
     default:
       return state
