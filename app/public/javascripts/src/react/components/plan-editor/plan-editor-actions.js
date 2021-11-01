@@ -923,11 +923,6 @@ function addSubnetTreeByLatLng([lng, lat]) {
 
 function setSelectedSubnetId (selectedSubnetId) {
   return (dispatch) => {
-    // clear any selected fiber
-    dispatch({
-      type: Actions.PLAN_EDITOR_SET_FIBER_SELECTION,
-      payload: []
-    })
     if (!selectedSubnetId) {
       dispatch({
         type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
