@@ -57,7 +57,9 @@ export const EquipmentInterfaceTree = (props) => {
         !isList() &&
         <>
           {
-            objectToView && objectToView.getDisplayProperties().map((prop, index) => {
+            objectToView
+            && objectToView.getDisplayProperties
+            && objectToView.getDisplayProperties().map((prop, index) => {
 
               const propVal = objectToView[prop.propertyName]
               const foldoutIndex = index
