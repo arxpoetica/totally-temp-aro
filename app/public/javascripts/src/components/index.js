@@ -66,7 +66,6 @@ import equipmentDetail from './sidebar/view/equipment-detail'
 import equipmentDetailList from './sidebar/view/equipment-detail-list'
 import roadSegmentDetail from './sidebar/view/road-segment-detail'
 import coverageBoundary from './sidebar/view/coverage-boundary'
-import locationEditor from './sidebar/view/location-editor'
 import viewMode from './sidebar/view/view-mode'
 import planInfoRecent from './sidebar/view/plan-info-recent'
 import aroSearch from './sidebar/view/aro-search'
@@ -134,7 +133,6 @@ app.component('boundaryDetail', boundaryDetail)
   .component('equipmentDetailList', equipmentDetailList)
   .component('roadSegmentDetail', roadSegmentDetail)
   .component('coverageBoundary', coverageBoundary)
-  .component('locationEditor', locationEditor)
   .component('viewMode', viewMode)
   .component('planInfoRecent', planInfoRecent)
   .component('aroSearch', aroSearch)
