@@ -501,7 +501,8 @@ class MapTileRenderer {
           // don't render any featureIds in plan edit
           // TODO: if we need to broaden this logic to service layers, may need to think through
           const { _data_type } = feature.properties
-          if (_data_type === 'equipment' || _data_type === 'fiber') {
+          // console.log(_data_type)
+          if (_data_type.includes('equipment') || _data_type.includes('fiber')) {
             continue
           }
 
@@ -510,7 +511,7 @@ class MapTileRenderer {
           // investigate at some point in the future
           if (
             this.tileDataService.featuresToExclude.has(featureId)
-            && !(feature.properties._data_type && feature.properties._data_type === 'location')
+            && !(feature.properties._data_type && feature.properties._data_type.includes('location'))
           ) {
             continue
           }
@@ -530,8 +531,8 @@ class MapTileRenderer {
             (this.state.activeViewModePanel == this.viewModePanels.EDIT_LOCATIONS ||
               this.state.activeViewModePanel == this.viewModePanels.EDIT_SERVICE_LAYER) &&
             this.tileDataService.featuresToExclude.has(featureId) &&
-            feature.properties._data_type && (feature.properties._data_type == 'location' ||
-              feature.properties._data_type == 'service_layer')) {
+            feature.properties._data_type && (feature.properties._data_type.includes('location') ||
+              feature.properties._data_type.includes('service_layer'))) {
           // this is a location/Service area that is being edited
           continue
         }
@@ -584,7 +585,7 @@ class MapTileRenderer {
               'mapLayers': this.mapLayers,
               'tileDataService': this.tileDataService,
               'selection': this.selection,
-              oldSelection: this.oldSelection,
+              'oldSelection': this.oldSelection,
               'selectedLocationImage': selectedLocationImage,
               'lockOverlayImage': lockOverlayImage,
               'invalidatedOverlayImage': invalidatedOverlayImage,
@@ -658,7 +659,7 @@ class MapTileRenderer {
 
             } else if (
               (this.state.showFiberSize || this.rShowFiberSize)
-              && feature.properties._data_type === 'fiber'
+              && feature.properties._data_type.includes('fiber')
               && (
                 this.state.viewSetting.selectedFiberOption
                 && this.state.viewSetting.selectedFiberOption.id !== 1
@@ -711,7 +712,7 @@ class MapTileRenderer {
             }
 
             // lower opacity of fiber in plan edit mode
-            if (this.selectedDisplayMode == this.displayModes.EDIT_PLAN && feature.properties._data_type === 'fiber'){
+            if (this.selectedDisplayMode == this.displayModes.EDIT_PLAN && feature.properties._data_type.includes('fiber')){
               drawingStyles.lineOpacity = 0.2
               drawingStyles.lineCap = 'butt'
             }
@@ -744,7 +745,7 @@ class MapTileRenderer {
         const dataType = feature.properties._data_type
         if (dataType === 'fiber') {
           return polyline.link_id === feature.properties.link_id 
-        } else if (dataType === 'existing_fiber.') { 
+        } else if (dataType.includes('existing_fiber')) { 
           return polyline.id === feature.properties.id 
         } else if (dataType === 'edge.fat') { 
           return polyline.gid === feature.properties.gid 

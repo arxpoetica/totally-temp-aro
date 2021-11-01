@@ -252,6 +252,7 @@ export const BoundaryDetail = (props) => {
     if (
       activeViewModePanel !== viewModePanels.EDIT_SERVICE_LAYER
       && activeViewModePanel !== viewModePanels.ROAD_SEGMENT_INFO
+      && activeViewModePanel !== viewModePanels.PLAN_INFO
     ) {
       activeViewModePanelAction(viewModePanels.BOUNDARIES_INFO)
     }

@@ -57,7 +57,14 @@ const defaultState = {
       displayName: 'Underground',
       isVisible: true,
       strokeType: 'UNDERGROUND_LINE'
-    }
+    },
+    'obstacle': {
+      id: null,
+      name: 'obstacle',
+      displayName: 'Obstacle',
+      isVisible: true,
+      strokeType: 'OBSTACLE_LINE'
+    },
   },
   activeMapLayers: {},
 }

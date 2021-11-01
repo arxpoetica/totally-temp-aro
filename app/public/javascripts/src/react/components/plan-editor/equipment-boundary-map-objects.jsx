@@ -9,7 +9,10 @@ import WktUtils from '../../../shared-utils/wkt-utils'
 export class EquipmentBoundaryMapObjects extends Component {
   constructor (props) {
     super(props)
-    this.mapObject = undefined
+    this.mapObject = undefined;
+    this.clickOutListener = undefined;
+    this.deleteKeyListener = undefined;
+    this.mapObjectOverlay = [];
     this.neighborObjectsById = {}
     this.polygonOptions = {
       strokeColor: '#1f7de6',
@@ -25,6 +28,8 @@ export class EquipmentBoundaryMapObjects extends Component {
       fillColor: '#1f7de6',
       fillOpacity: 0.02,
     }
+    
+    this.clearMapObjectOverlay = this.clearMapObjectOverlay.bind(this);
   }
 
   render () {
@@ -203,15 +208,124 @@ export class EquipmentBoundaryMapObjects extends Component {
       })
     })
     mapObject.addListener('contextmenu', event => {
+      let vertexPayload;
+      if(this.mapObjectOverlay.length > 0) {
+        const indexOfMarker = this.mapObjectOverlay.findIndex((marker) => {
+          return marker.title === `${event.vertex}`
+        });
+        
+        if (event.vertex && indexOfMarker === -1) {
+          // Add vertex to array if it doesn't already exist there.
+          this.addMarkerOverlay(event);
+        }
+        vertexPayload = this.mapObjectOverlay;
+      } else {
+        vertexPayload = event.vertex;
+      }
       const eventXY = WktUtils.getXYFromEvent(event)
-      self.props.showContextMenuForEquipmentBoundary(mapObject, eventXY.x, eventXY.y, event.vertex)
+      self.props.showContextMenuForEquipmentBoundary(mapObject, eventXY.x, eventXY.y, vertexPayload, this.clearMapObjectOverlay)
     })
-  }
+    
+    mapObject.addListener('click', event => {
+      if (event.vertex) {
+        event.domEvent.stopPropagation();
+        if (event.domEvent.shiftKey) {
+          const indexOfMarker = this.mapObjectOverlay.findIndex((marker) => {
+            return marker.title === `${event.vertex}`
+          });
+          if (indexOfMarker > -1) {
+            // If you select a vertex that is already selected, it will remove it.
+            this.removeMarker(indexOfMarker);
+          } else {
+            this.addMarkerOverlay(event);
+          }
+        }
+      } else {
+        // This is set up to deselect all vertices if the click is inside the polygon
+        // but not on a vertex
+        this.clearMapObjectOverlay();
+      }
+    })
 
+    this.clickOutListener = this.props.googleMaps.addListener('click', event => {
+      if (!google.maps.geometry.poly.containsLocation(event.latLng, mapObject) && this.mapObjectOverlay.length > 0) {
+        // Any click that is outside of the polygon will deselect all vertices
+        this.clearMapObjectOverlay();
+      }
+    })
+    
+    this.deleteKeyListener = google.maps.event.addDomListener(document, 'keydown', (e) => {
+      const code = (e.keyCode ? e.keyCode : e.which);
+      // 8 = Backspace
+      // 46 = Delete
+      // Supporting both of these because not all keyboards have a "delete" key
+      if ((code === 8 || code === 46) && this.mapObjectOverlay.length > 0) {
+        this.props.deleteBoundaryVertices(mapObject, this.mapObjectOverlay, this.clearMapObjectOverlay)
+      }
+    });
+  }
+  
   clearAll () {
+    // Clear all markers from map when clearing poly
+    this.clearMapObjectOverlay()
     this.deleteMapObject()
     // delete all neighbors
     this.deleteNeighbors(Object.keys(this.neighborObjectsById))
+    // Remove global listeners on tear down
+    google.maps.event.removeListener(this.clickOutListener);
+    google.maps.event.removeListener(this.deleteKeyListener);
+  }
+
+  addMarkerOverlay(event) {
+    const vertex = this.mapObject.getPath().getAt(event.vertex);
+    // Position of the marker is oriented on the vertex rather than the event.latLng to ensure
+    // the coords are normalized
+    const position = new google.maps.LatLng(vertex.lat(), vertex.lng())
+    const newMarker = new google.maps.Marker({
+      position,
+      map: this.props.googleMaps,
+      title: `${event.vertex}`,
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        fillOpacity: 1,
+        fillColor: "white",
+        strokeColor: "#FF69B4",
+        strokeOpacity: 1,
+        strokeWeight: 3,
+        scale: 6,
+        // This was added to ensure that the svg was centered on the verte
+        // The vertex coords seem to be .1,.1 off center of the vertex icon itself.
+        anchor: new google.maps.Point(.1, .1)
+      }
+    })
+
+    newMarker.addListener("click", () => {
+      // Added this because once the marker is added sometimes you click the marker and sometimes the vertex
+      // So this is a fail safe.
+      if (event.domEvent.shiftKey) {
+        const indexOfMarker = this.mapObjectOverlay.findIndex((marker) => {
+          return marker.title === marker.title;
+        });
+        this.removeMarker(indexOfMarker);
+      }
+    })
+
+    this.mapObjectOverlay = this.mapObjectOverlay.concat(newMarker);
+  }
+
+  removeMarker(indexOfMarker) {
+      const mapObjectOverlayClone = [...this.mapObjectOverlay]
+      const [removedMarker] = mapObjectOverlayClone.splice(indexOfMarker, 1)
+      this.mapObjectOverlay = mapObjectOverlayClone;
+      removedMarker.setMap(null);
+  }
+
+  clearMapObjectOverlay() {
+    for (const marker of this.mapObjectOverlay) {
+      marker.setMap(null);
+    }
+
+    this.mapObjectOverlay = [];
   }
 
   componentWillUnmount () {
@@ -243,10 +357,11 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
   modifyFeature: (equipmentBoundary) => dispatch(PlanEditorActions.modifyFeature('equipment_boundary', equipmentBoundary)),
-  showContextMenuForEquipmentBoundary: (mapObject, x, y, vertex) => {
-    dispatch(PlanEditorActions.showContextMenuForEquipmentBoundary(mapObject, x, y, vertex))
+  showContextMenuForEquipmentBoundary: (mapObject, x, y, vertex, callBack) => {
+    dispatch(PlanEditorActions.showContextMenuForEquipmentBoundary(mapObject, x, y, vertex, callBack))
   },
   boundaryChange: (subnetId, geometry) => dispatch(PlanEditorActions.boundaryChange(subnetId, geometry)),
+  deleteBoundaryVertices: (mapObjects, vertices, callBack) => dispatch(PlanEditorActions.deleteBoundaryVertices(mapObjects, vertices, callBack)),
   selectBoundary: objectId => dispatch(SelectionActions.setPlanEditorFeatures([objectId])),
 })
 

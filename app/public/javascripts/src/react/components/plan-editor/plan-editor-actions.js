@@ -284,6 +284,25 @@ function deleteBoundaryVertex (mapObject, vertex) {
   }
 }
 
+function deleteBoundaryVertices (mapObject, vertices, callBack) {
+  return dispatch => {
+      // Sort is necessary to ensure that indexes will not be reassigned while deleting more than one vertex.
+      vertices.sort((a, b) => {
+        return Number(b.title) - Number(a.title)
+      })
+      // We are tracking the multiple selected verticies to delete by markers created.
+      // And storing vertex index on the corrosponding marker.
+
+      for (const marker of vertices) {
+        if (marker && marker.title && mapObject.getPath().getLength() > 3) {
+          mapObject.getPath().removeAt(Number(marker.title))
+        }
+      }
+
+    callBack();
+  }
+}
+
 function showContextMenuForEquipment (featureId, x, y) {
   return (dispatch) => {
     var menuActions = []
@@ -448,11 +467,27 @@ function assignLocation (locationId, terminalId) {
   }
 }
 
-function showContextMenuForEquipmentBoundary (mapObject, x, y, vertex) {
+function showContextMenuForEquipmentBoundary (mapObject, x, y, vertex, callBack) {
   return (dispatch) => {
     const menuActions = []
-    menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteBoundaryVertex', mapObject, vertex))
-    const menuItemFeature = new MenuItemFeature('BOUNDARY', 'Boundary Vertex', menuActions)
+    menuActions.push(
+      new MenuItemAction(
+        Array.isArray(vertex) ? 'DELETE_ALL' : 'DELETE',
+        'Delete',
+        'PlanEditorActions',
+        Array.isArray(vertex) ? 'deleteBoundaryVertices' : 'deleteBoundaryVertex',
+        mapObject,
+        vertex,
+        // Callback is utilized to update the local state of the react class if it is a multi-delete.
+        callBack
+      )
+    )
+
+    const menuItemFeature = new MenuItemFeature(
+      'BOUNDARY',
+      `Boundary ${Array.isArray(vertex) ? 'Vertices' : 'Vertex' }`,
+      menuActions
+    )
 
     // Show context menu
     dispatch(ContextMenuActions.setContextMenuItems([menuItemFeature]))
@@ -832,6 +867,11 @@ function addSubnetTree() {
           }
         })
         if (rootIds.length) {
+          rootIds.forEach((id) => {
+            // get feeder fiber annotations
+            dispatch(getFiberAnnotations(id))
+          })
+          
           // TODO: the addSubnets function needs to be broken up
           return dispatch(addSubnets({ subnetIds: rootIds }))
             .then(subnetRes => Promise.resolve(subnetRes))
@@ -883,6 +923,11 @@ function addSubnetTreeByLatLng([lng, lat]) {
 
 function setSelectedSubnetId (selectedSubnetId) {
   return (dispatch) => {
+    // clear any selected fiber
+    dispatch({
+      type: Actions.PLAN_EDITOR_SET_FIBER_SELECTION,
+      payload: []
+    })
     if (!selectedSubnetId) {
       dispatch({
         type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
@@ -1023,6 +1068,7 @@ function recalculateSubnets (transactionId, subnetIds = []) {
     const state = getState()
     let activeSubnets = []
     subnetIds.forEach(subnetId => {
+      dispatch(setFiberAnnotations({[subnetId]: []}, subnetId))
       if (state.planEditor.subnets[subnetId]) {
         activeSubnets.push(subnetId)
       } else if (state.planEditor.subnetFeatures[subnetId]
@@ -1054,6 +1100,56 @@ function setFiberRenderRequired (bool) {
   }
 }
 
+function setSelectedFiber (fiberObjects) {
+  return (dispatch) => {
+    batch(() => {
+      dispatch({
+        type: Actions.PLAN_EDITOR_SET_FIBER_SELECTION,
+        payload: fiberObjects,
+      })
+      dispatch({
+        type: Actions.PLAN_EDITOR_SET_FIBER_RENDER_REQUIRED,
+        payload: true,
+      })
+    })
+  }
+}
+
+function getFiberAnnotations (subnetId) {
+  return (dispatch, getState) => {
+    const state = getState()
+    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+
+    AroHttp.get(`/service/plan-transaction/${transactionId}/subnet/${subnetId}/annotations`)
+      .then((res) => {
+        dispatch({
+          type: Actions.PLAN_EDITOR_SET_FIBER_ANNOTATIONS,
+          payload: { [subnetId]: res.data }
+        })
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+  }
+}
+
+function setFiberAnnotations (fiberAnnotations, subnetId) {
+  return (dispatch, getState) => {
+    const state = getState()
+    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+
+    AroHttp.put(`/service/plan-transaction/${transactionId}/subnet/${subnetId}/annotations`, fiberAnnotations[subnetId])
+      .then((res) => {
+        dispatch({
+          type: Actions.PLAN_EDITOR_SET_FIBER_ANNOTATIONS,
+          payload: fiberAnnotations,
+        })
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+  }
+}
 // --- //
 
 // helper
@@ -1293,6 +1389,7 @@ export default {
   deleteFeature,
   deleteTransactionFeature,
   deleteBoundaryVertex,
+  deleteBoundaryVertices,
   addTransactionFeatures,
   showContextMenuForEquipment,
   showContextMenuForLocations,
@@ -1323,4 +1420,7 @@ export default {
   boundaryChange,
   recalculateSubnets,
   setFiberRenderRequired,
+  setSelectedFiber,
+  setFiberAnnotations,
+  getFiberAnnotations,
 }
