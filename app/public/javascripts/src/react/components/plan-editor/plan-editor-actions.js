@@ -998,9 +998,9 @@ function recalculateBoundary (subnetId) {
     //const transactionId = state.planEditor.transaction.id
     if (!state.planEditor.subnets[subnetId] || !state.planEditor.transaction) return null // null? meh
     const transactionId = state.planEditor.transaction.id
-    const newPolygon = state.planEditor.subnets[subnetId].subnetBoundary.polygon
+    const { locked, polygon: newPolygon } = state.planEditor.subnets[subnetId].subnetBoundary.polygon
     const boundaryBody = {
-      locked: true,
+      locked,
       polygon: newPolygon,
     }
 
