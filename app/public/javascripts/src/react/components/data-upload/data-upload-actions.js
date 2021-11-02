@@ -111,7 +111,7 @@ function saveDataSource (uploadDetails,loggedInUser) {
         uploadDetails.selectedSpatialEdgeType = 'fiber_cable'
         return setCableConstructionType(uploadDetails,loggedInUser)
         .then((libraryItem) => {
-          fileUpload(dispatch, uploadDetails, libraryItem.identifier, loggedInUser)
+          fileUpload(dispatch, uploadDetails, libraryItem.identifier, loggedInUser, libraryItem)
         })
         .then((result) => {
           dispatch(setIsUploading(false))
@@ -260,15 +260,7 @@ function fileUpload (dispatch, uploadDetails, libraryId, loggedInUser, libraryIt
       NotificationInterface.updateNotification(dispatch, noteId, `${processNote} ${progressNote}`)
     }
   })
-  var unsubscribeETLClose = SocketManager.subscribe('ETL_CLOSE', msg => {
-    if (msg.properties.headers.libraryId === libraryId) {
-      NotificationInterface.updateNotification(dispatch, noteId, `${file.name} COMPLETE!`, false, NotificationTypes['USER_EXPIRE'])
-      // making sure the lib appears in dropdown only when upload is done on db
-      if (libraryItem && libraryItem.dataType) {
-        dispatch(setAllLibraryItems(libraryItem.dataType, libraryItem))
-      }
-    }
-  })
+  
 
   var options = {
     method: 'POST',
@@ -297,23 +289,27 @@ function fileUpload (dispatch, uploadDetails, libraryId, loggedInUser, libraryIt
     unsubscribeETLStart()
     unsubscribeETLUpdate()
 
-    // subscribing/listening to ETL_CLOSE to know exactly
-    // when the upload of file is done on db.
-    // when pct === 100, data upload done in db, file is now ready for use on UI
-    SocketManager.subscribe('ETL_CLOSE', msg => {
+    SocketManager.subscribe('ETL_ERROR', msg => {
       if (msg.properties.headers.libraryId === libraryId) {
         var content = uInt8ArrayToJSON(msg.content)
-        const pct = ((content.validCount / content.totalCount) * 100).toFixed(2)
+        NotificationInterface.updateNotification(dispatch, noteId, `${file.name} FAILED with ${content.errorCount} errors`, false, NotificationTypes['USER_EXPIRE'])
+      }
+    })
+    SocketManager.subscribe('ETL_CLOSE', msg => {
+      if (msg.properties.headers.libraryId === libraryId) {
+        const content = uInt8ArrayToJSON(msg.content)
+        console.log({content});
+        const pct = content.validCount && content.totalCount ? ((content.validCount / content.totalCount) * 100).toFixed(2) : 0
         const progressNote = `${pct}% | ${content.errorCount} errors`
-        if (pct === 100) {
-          NotificationInterface.updateNotification(dispatch, noteId, `${processNote} ${progressNote}`)
-          unsubscribeETLClose()
+        NotificationInterface.updateNotification(dispatch, noteId, `${processNote} ${progressNote}`)
+        NotificationInterface.updateNotification(dispatch, noteId, `${file.name} COMPLETE!`, false, NotificationTypes['USER_EXPIRE'])
+        if (libraryItem && libraryItem.dataType) {
+          dispatch(setAllLibraryItems(libraryItem.dataType, libraryItem))
+          // load new lib info from server
+          PlanActions.loadLibraryEntryById(libraryId)
         }
       }
     })
-    
-    // load new lib info from server
-    PlanActions.loadLibraryEntryById(libraryId)
   }).catch((e) => {
     console.error(e)
     // NotificationInterface.removeNotification(dispatch, noteId)
@@ -324,7 +320,6 @@ function fileUpload (dispatch, uploadDetails, libraryId, loggedInUser, libraryIt
     unsubscribeETLClose()
     swal('Error', e.statusText, 'error')
   })
-
   // ---
 
 }
