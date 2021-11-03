@@ -133,7 +133,7 @@ export class EquipmentBoundaryMapObjects extends Component {
     let neighborObject = new google.maps.Polygon({
       subnetId: subnetId, // Not used by Google Maps
       paths: WktUtils.getGoogleMapPathsFromWKTMultiPolygon(geometry),
-      clickable: true,
+      clickable: false,
       draggable: false,
       editable: false,
       zIndex: !this.props.subnets[subnetId].parentSubnetId 
@@ -144,17 +144,6 @@ export class EquipmentBoundaryMapObjects extends Component {
 
     neighborObject.setOptions(this.neighborPolygonOptions)
     this.neighborObjectsById[subnetId] = neighborObject
-
-    const { setSelectedSubnetId, selectEditFeaturesById } = this.props
-
-    // click in the polygon to select the subnet
-    neighborObject.addListener('click', (event) => {
-      // disable if shift key is held to make selecting fiber routes easier
-      if (!event.domEvent.shiftKey) {
-        setSelectedSubnetId(subnetId)
-        selectEditFeaturesById([subnetId])
-      }
-    })
   }
 
   deleteMapObject () {
