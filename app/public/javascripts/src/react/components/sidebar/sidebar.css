@@ -264,3 +264,75 @@
   position: absolute;
   margin-top: 20px;
 }
+/* Equipment info */
+
+.equipment-detail {
+  position: relative;
+  /* This will require the parent to have position: relative or absolute */
+  padding-bottom: 20px;
+  overflow: auto;
+}
+
+.equipment-detail>div {
+  margin-top: 10px;
+}
+
+.equipment-detail-title {
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+.equipment-list {
+  position: relative;
+  /* height: 100%; */
+  overflow-y: auto;
+}
+
+.equipment-detail-bounds, .equipment-detail .equipment-detail-bounds {
+  margin-top: 40px;
+}
+
+.equipment-detail-hr {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+/* Equipment List */
+
+.equipment-list {
+  position: relative;
+}
+
+.equipment-list .equipment-cursor {
+  cursor: pointer;
+}
+
+/* Boundary Coverage */
+
+.bounds-coverage-detail {
+  margin-bottom: 20px;
+}
+
+.bounds-coverage-header {
+  cursor: auto;
+}
+
+.bounds-coverage-header-sub {
+  padding-left: 10px;
+}
+
+.bounds-coverage-layer-cat {
+  margin-top: 10px;
+  margin-bottom: 4px;
+}
+
+.bounds-coverage-layer-tag {
+  padding-left: 20px;
+  margin-bottom: 10px;
+}
+
+.bounds-coverage-layer-tag-count {
+  margin-left: 20px;
+  font-weight: bold;
+}
