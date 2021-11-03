@@ -428,13 +428,15 @@ class TileComponentController {
         return
       }
 
+      const { isShiftPressed } = this.state
+
       // let plan edit do its thing
       if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.EDIT_PLAN) {
-        this.leftClickTile(event.latLng)
+        if (!isShiftPressed) this.leftClickTile(event.latLng)
+
         return
       }
 
-      const { isShiftPressed } = this.state
 
       try {
         // ToDo: depricate getFilteredFeaturesUnderLatLng switch to this
