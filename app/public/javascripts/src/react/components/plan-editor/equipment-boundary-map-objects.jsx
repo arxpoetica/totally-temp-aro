@@ -143,18 +143,19 @@ export class EquipmentBoundaryMapObjects extends Component {
   createNeighborMapObject (subnetId) {
     // TODO: DRY the two create functions a bit
     if (!this.props.subnets[subnetId]) return
-    const geometry = this.props.subnets[subnetId].subnetBoundary.polygon
+    const { subnetBoundary } = this.props.subnets[subnetId]
+    const { polygon: geometry, locked: isLocked } = subnetBoundary
 
     if (this.neighborObjectsById[subnetId]) {
       this.deleteNeighbors([subnetId])
     }
 
-    let neighborObject = new google.maps.Polygon({
+    const neighborObject = new google.maps.Polygon({
       subnetId: subnetId, // Not used by Google Maps
       paths: WktUtils.getGoogleMapPathsFromWKTMultiPolygon(geometry),
       clickable: false,
       draggable: false,
-      editable: false,
+      editable: !isLocked,
       zIndex: !this.props.subnets[subnetId].parentSubnetId 
         ? constants.Z_INDEX_CO_SUBNET 
         : constants.Z_INDEX_HUB_SUBNET,

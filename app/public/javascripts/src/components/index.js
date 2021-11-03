@@ -2,6 +2,7 @@
 import { react2angular } from 'react2angular'
 import { ToastContainer } from 'react-toastify'
 
+import LocationEditor from '../react/components/sidebar/view/location-editor.jsx'
 import EquipmentDetail from '../react/components/sidebar/view/equipment-info/equipment-detail.jsx'
 import NetworkPlanManage from '../react/components/sidebar/view/network-plan-manage.jsx'
 import PlanInfo from '../react/components/sidebar/view/plan-info.jsx'
@@ -64,7 +65,6 @@ import UINotifications from '../react/components/notification/ui-notifications.j
 import boundaryDetail from './sidebar/view/boundary-detail'
 import roadSegmentDetail from './sidebar/view/road-segment-detail'
 import coverageBoundary from './sidebar/view/coverage-boundary'
-import locationEditor from './sidebar/view/location-editor'
 import viewMode from './sidebar/view/view-mode'
 import planInfoRecent from './sidebar/view/plan-info-recent'
 import aroSearch from './sidebar/view/aro-search'
@@ -129,7 +129,6 @@ import reduxConfig from '../redux-config'
 app.component('boundaryDetail', boundaryDetail)
   .component('roadSegmentDetail', roadSegmentDetail)
   .component('coverageBoundary', coverageBoundary)
-  .component('locationEditor', locationEditor)
   .component('viewMode', viewMode)
   .component('planInfoRecent', planInfoRecent)
   .component('aroSearch', aroSearch)
@@ -181,6 +180,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('editorInterfacePrimitive', editorInterfacePrimitive)
   .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
 // ReactJS components
+  .component('rLocationEditor', react2angular(LocationEditor))
   .component('rEquipmentDetail', react2angular(EquipmentDetail))
   .component('rNetworkPlanManage', react2angular(NetworkPlanManage))
   .component('rPlanInfo', react2angular(PlanInfo))
