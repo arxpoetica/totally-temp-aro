@@ -998,11 +998,8 @@ function recalculateBoundary (subnetId) {
     //const transactionId = state.planEditor.transaction.id
     if (!state.planEditor.subnets[subnetId] || !state.planEditor.transaction) return null // null? meh
     const transactionId = state.planEditor.transaction.id
-    const newPolygon = state.planEditor.subnets[subnetId].subnetBoundary.polygon
-    const boundaryBody = {
-      locked: true,
-      polygon: newPolygon,
-    }
+    const { locked, polygon: newPolygon } = state.planEditor.subnets[subnetId].subnetBoundary
+    const boundaryBody = { locked, polygon: newPolygon }
 
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet/${subnetId}/boundary`, boundaryBody)
       .then(res => {
