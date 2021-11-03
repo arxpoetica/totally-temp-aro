@@ -7,6 +7,14 @@ function setShowLocationLabels (showLocationLabels) {
   }
 }
 
+function deleteLocationWithId (objectId) {
+  return {
+    type: Actions.VIEW_SETTINGS_DELETE_LOCATION_WITH_ID,
+    payload: objectId
+  }
+}
+
 export default {
-  setShowLocationLabels
+  setShowLocationLabels,
+  deleteLocationWithId,
 }
