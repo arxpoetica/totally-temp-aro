@@ -430,6 +430,7 @@ class TileComponentController {
 
       // let plan edit do its thing
       if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.EDIT_PLAN) {
+        this.leftClickTile(event.latLng)
         return
       }
 
@@ -809,6 +810,7 @@ class TileComponentController {
       setCursorLocationIds: ids => dispatch(PlanEditorActions.setCursorLocationIds(ids)),
       clearCursorLocationIds: () => dispatch(PlanEditorActions.clearCursorLocationIds()),
       setActiveMapLayers: (value) => dispatch(MapLayerActions.setActiveMapLayers(value)),
+      leftClickTile: (latLng) => dispatch(PlanEditorActions.leftClickTile(latLng)),
     }
   }
 

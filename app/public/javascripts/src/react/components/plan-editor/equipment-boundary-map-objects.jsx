@@ -40,7 +40,9 @@ export class EquipmentBoundaryMapObjects extends Component {
 
   componentDidUpdate (prevProps, prevState) {
     // any changes to state props should cause a rerender
-    const { subnets, subnetFeatures } = this.props
+    const { subnets, subnetFeatures, clickedLatLng } = this.props
+    if (prevProps.clickedLatLng !== clickedLatLng) this.selectSubnet(clickedLatLng)
+    
     let selectedSubnetId = this.props.selectedSubnetId
     let activeFeature = subnetFeatures[selectedSubnetId]
     if (!activeFeature) {
@@ -87,6 +89,23 @@ export class EquipmentBoundaryMapObjects extends Component {
       this.deleteNeighbors(idsToDelete)
       this.createNeighbors(idsToCreate)
      }
+  }
+
+  selectSubnet ([lat, lng]) {
+    const { setSelectedSubnetId, selectEditFeaturesById } = this.props
+    const latLng = new google.maps.LatLng(lng, lat)
+
+    // loops through mapobjects and checks if latLng is inside
+    for (const mapObject of Object.values(this.neighborObjectsById)) {
+      if (google.maps.geometry.poly.containsLocation(latLng, mapObject)
+          && this.props.subnets[mapObject.subnetId].parentSubnetId){
+        // if it is inside, set that subnet as selected
+        setSelectedSubnetId(mapObject.subnetId)
+        selectEditFeaturesById([mapObject.subnetId])
+
+        break
+      }
+    }
   }
 
   createMapObject (selectedSubnetId) {
@@ -357,6 +376,7 @@ const mapStateToProps = state => ({
   subnets: state.planEditor.subnets,
   selectedSubnetId: state.planEditor.selectedSubnetId,
   subnetFeatures: state.planEditor.subnetFeatures,
+  clickedLatLng: state.planEditor.clickedLatLng,
 })
 
 const mapDispatchToProps = dispatch => ({
