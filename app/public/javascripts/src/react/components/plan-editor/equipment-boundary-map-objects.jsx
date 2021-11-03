@@ -40,7 +40,9 @@ export class EquipmentBoundaryMapObjects extends Component {
 
   componentDidUpdate (prevProps, prevState) {
     // any changes to state props should cause a rerender
-    const { subnets, subnetFeatures } = this.props
+    const { subnets, subnetFeatures, clickedLatLng } = this.props
+    if (prevProps.clickedLatLng !== clickedLatLng) this.selectSubnet(clickedLatLng)
+    
     let selectedSubnetId = this.props.selectedSubnetId
     let activeFeature = subnetFeatures[selectedSubnetId]
     if (!activeFeature) {
@@ -89,6 +91,23 @@ export class EquipmentBoundaryMapObjects extends Component {
      }
   }
 
+  selectSubnet ([lat, lng]) {
+    const { setSelectedSubnetId, selectEditFeaturesById, subnets } = this.props
+    const latLng = new google.maps.LatLng(lat, lng)
+
+    // loops through mapobjects and checks if latLng is inside
+    for (const mapObject of Object.values(this.neighborObjectsById)) {
+      if (google.maps.geometry.poly.containsLocation(latLng, mapObject)
+          && subnets[mapObject.subnetId].parentSubnetId){
+        // if it is inside, set that subnet as selected
+        setSelectedSubnetId(mapObject.subnetId)
+        selectEditFeaturesById([mapObject.subnetId])
+
+        break
+      }
+    }
+  }
+
   createMapObject (selectedSubnetId) {
     // const equipmentBoundary = this.props.transactionFeatures[objectId].feature
     if (!this.props.subnets[selectedSubnetId]) return
@@ -134,7 +153,7 @@ export class EquipmentBoundaryMapObjects extends Component {
     const neighborObject = new google.maps.Polygon({
       subnetId: subnetId, // Not used by Google Maps
       paths: WktUtils.getGoogleMapPathsFromWKTMultiPolygon(geometry),
-      clickable: true,
+      clickable: false,
       draggable: false,
       editable: !isLocked,
       zIndex: !this.props.subnets[subnetId].parentSubnetId 
@@ -145,17 +164,6 @@ export class EquipmentBoundaryMapObjects extends Component {
 
     neighborObject.setOptions(this.neighborPolygonOptions)
     this.neighborObjectsById[subnetId] = neighborObject
-
-    const { setSelectedSubnetId, selectEditFeaturesById } = this.props
-
-    // click in the polygon to select the subnet
-    neighborObject.addListener('click', (event) => {
-      // disable if shift key is held to make selecting fiber routes easier
-      if (!event.domEvent.shiftKey) {
-        setSelectedSubnetId(subnetId)
-        selectEditFeaturesById([subnetId])
-      }
-    })
   }
 
   deleteMapObject () {
@@ -369,6 +377,7 @@ const mapStateToProps = state => ({
   subnets: state.planEditor.subnets,
   selectedSubnetId: state.planEditor.selectedSubnetId,
   subnetFeatures: state.planEditor.subnetFeatures,
+  clickedLatLng: state.planEditor.clickedLatLng,
 })
 
 const mapDispatchToProps = dispatch => ({

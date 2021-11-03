@@ -428,12 +428,15 @@ class TileComponentController {
         return
       }
 
+      const { isShiftPressed } = this.state
+
       // let plan edit do its thing
       if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.EDIT_PLAN) {
+        if (!isShiftPressed) this.leftClickTile(event.latLng)
+
         return
       }
 
-      const { isShiftPressed } = this.state
 
       try {
         // ToDo: depricate getFilteredFeaturesUnderLatLng switch to this
@@ -809,6 +812,7 @@ class TileComponentController {
       setCursorLocationIds: ids => dispatch(PlanEditorActions.setCursorLocationIds(ids)),
       clearCursorLocationIds: () => dispatch(PlanEditorActions.clearCursorLocationIds()),
       setActiveMapLayers: (value) => dispatch(MapLayerActions.setActiveMapLayers(value)),
+      leftClickTile: (latLng) => dispatch(PlanEditorActions.leftClickTile(latLng)),
     }
   }
 

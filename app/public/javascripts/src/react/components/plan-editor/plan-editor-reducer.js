@@ -24,6 +24,7 @@ const defaultState = {
   cursorEquipmentIds: [],
   selectedFiber: [],
   fiberAnnotations: {},
+  clickedLatLng: [],
 }
 
 function setTransaction (state, transaction) {
@@ -350,6 +351,9 @@ function planEditorReducer (state = defaultState, { type, payload }) {
 
     case Actions.PLAN_EDITOR_SET_FIBER_ANNOTATIONS:
       return { ...state, fiberAnnotations: { ...state.fiberAnnotations, ...payload}}
+    
+    case Actions.PLAN_EDITOR_SET_CLICK_LATLNG:
+      return { ...state, clickedLatLng: payload }
 
     default:
       return state
