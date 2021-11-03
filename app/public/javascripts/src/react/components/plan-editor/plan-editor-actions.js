@@ -1147,7 +1147,7 @@ function leftClickTile (latLng) {
   return (dispatch) => {
     dispatch({
       type: Actions.PLAN_EDITOR_SET_CLICK_LATLNG,
-      payload: [latLng.lng(), latLng.lat()],
+      payload: [latLng.lat(), latLng.lng(), ],
     })
   }
 }

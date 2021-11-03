@@ -93,7 +93,7 @@ export class EquipmentBoundaryMapObjects extends Component {
 
   selectSubnet ([lat, lng]) {
     const { setSelectedSubnetId, selectEditFeaturesById, subnets } = this.props
-    const latLng = new google.maps.LatLng(lng, lat)
+    const latLng = new google.maps.LatLng(lat, lng)
 
     // loops through mapobjects and checks if latLng is inside
     for (const mapObject of Object.values(this.neighborObjectsById)) {
