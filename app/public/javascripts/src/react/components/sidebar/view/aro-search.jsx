@@ -62,13 +62,11 @@ export class AroSearch extends Component {
   handleChange(searchText) {
     this.setState({ searchText })
     const { entityType, entityTypeList } = this.props
-    const searchObj = entityTypeList[entityType].find(boundary => {
-      return (
-        boundary.objectId
-        || boundary.code
-        || boundary.tabblockId
-        || boundary.clli
-      ) === searchText.label
+    const searchObj = entityTypeList[entityType].find(type => {
+      return type.objectId === searchText.label
+        || type.code === searchText.label
+        || type.tabblockId === searchText.label
+        || type.clli === searchText.label
     })
     if (entityType === entityTypeCons.LOCATION_OBJECT_ENTITY) {
       this.onSearchResult(searchObj)
