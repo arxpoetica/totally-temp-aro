@@ -81,7 +81,7 @@ const PlanEditorHeader = props => {
 const mapStateToProps = state => ({
   ARO_CLIENT: state.configuration.system.ARO_CLIENT,
   equipments: state.mapLayers.networkEquipment.equipments,
-  features: state.planEditor.features,
+  features: PlanEditorSelectors.getSubnetFeatures(state),
   selectedEditFeatureIds: state.planEditor.selectedEditFeatureIds,
   selectedSubnetId: state.planEditor.selectedSubnetId,
   locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(state),
