@@ -298,7 +298,6 @@ function fileUpload (dispatch, uploadDetails, libraryId, loggedInUser, libraryIt
     SocketManager.subscribe('ETL_CLOSE', msg => {
       if (msg.properties.headers.libraryId === libraryId) {
         const content = uInt8ArrayToJSON(msg.content)
-        console.log({content});
         const pct = content.validCount && content.totalCount ? ((content.validCount / content.totalCount) * 100).toFixed(2) : 0
         const progressNote = `${pct}% | ${content.errorCount} errors`
         NotificationInterface.updateNotification(dispatch, noteId, `${processNote} ${progressNote}`)
@@ -317,7 +316,7 @@ function fileUpload (dispatch, uploadDetails, libraryId, loggedInUser, libraryIt
     // this.isUpLoad = false
     unsubscribeETLStart()
     unsubscribeETLUpdate()
-    unsubscribeETLClose()
+    // unsubscribeETLClose()
     swal('Error', e.statusText, 'error')
   })
   // ---
