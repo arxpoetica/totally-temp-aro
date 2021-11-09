@@ -58,7 +58,7 @@ function saveDataSource (uploadDetails,loggedInUser) {
     if (uploadDetails.selectedDataSourceName === 'tile_system') {
       return createLibraryId(uploadDetails,loggedInUser)
       .then((libraryItem) => {
-        fileUpload(dispatch, uploadDetails,libraryItem.identifier,loggedInUser, libraryItem) 
+        fileUpload(dispatch, uploadDetails,libraryItem.identifier, loggedInUser, libraryItem) 
       })
       .then((result) => {
         dispatch(setIsUploading(false))
@@ -157,7 +157,7 @@ function saveDataSource (uploadDetails,loggedInUser) {
       } else {
         getLibraryId(uploadDetails)
           .then((library) => {
-            fileUpload(dispatch, uploadDetails,library.data.identifier,loggedInUser, library.data) 
+            fileUpload(dispatch, uploadDetails,library.data.identifier, loggedInUser, library.data) 
         })
         .then((res) => {
           dispatch(setIsUploading(false))
@@ -291,7 +291,7 @@ function fileUpload (dispatch, uploadDetails, libraryId, loggedInUser, libraryIt
 
     SocketManager.subscribe('ETL_ERROR', msg => {
       if (msg.properties.headers.libraryId === libraryId) {
-        var content = uInt8ArrayToJSON(msg.content)
+        const content = uInt8ArrayToJSON(msg.content)
         NotificationInterface.updateNotification(dispatch, noteId, `${file.name} FAILED with ${content.errorCount} errors`, false, NotificationTypes['USER_EXPIRE'])
       }
     })
@@ -316,7 +316,6 @@ function fileUpload (dispatch, uploadDetails, libraryId, loggedInUser, libraryIt
     // this.isUpLoad = false
     unsubscribeETLStart()
     unsubscribeETLUpdate()
-    // unsubscribeETLClose()
     swal('Error', e.statusText, 'error')
   })
   // ---
