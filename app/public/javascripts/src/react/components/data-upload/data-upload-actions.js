@@ -292,7 +292,13 @@ function fileUpload (dispatch, uploadDetails, libraryId, loggedInUser, libraryIt
     SocketManager.subscribe('ETL_ERROR', msg => {
       if (msg.properties.headers.libraryId === libraryId) {
         const content = uInt8ArrayToJSON(msg.content)
-        NotificationInterface.updateNotification(dispatch, noteId, `${file.name} FAILED with ${content.errorCount} errors`, false, NotificationTypes['USER_EXPIRE'])
+        NotificationInterface.updateNotification(
+          dispatch,
+          noteId,
+          `${file.name} FAILED with ${content.errorCount} errors`,
+          false,
+          NotificationTypes['USER_EXPIRE']
+        )
       }
     })
     SocketManager.subscribe('ETL_CLOSE', msg => {
