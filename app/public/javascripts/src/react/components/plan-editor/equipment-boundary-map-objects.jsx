@@ -31,6 +31,7 @@ export class EquipmentBoundaryMapObjects extends Component {
     }
     
     this.clearMapObjectOverlay = this.clearMapObjectOverlay.bind(this);
+    this.contextMenuClick = this.contextMenuClick.bind(this);
   }
 
   render () {
@@ -233,23 +234,9 @@ export class EquipmentBoundaryMapObjects extends Component {
         }
       })
     })
+
     mapObject.addListener('contextmenu', event => {
-      let vertexPayload;
-      if(this.mapObjectOverlay.length > 0) {
-        const indexOfMarker = this.mapObjectOverlay.findIndex((marker) => {
-          return marker.title === `${event.vertex}`
-        });
-        
-        if (event.vertex && indexOfMarker === -1) {
-          // Add vertex to array if it doesn't already exist there.
-          this.addMarkerOverlay(event);
-        }
-        vertexPayload = this.mapObjectOverlay;
-      } else {
-        vertexPayload = event.vertex;
-      }
-      const eventXY = WktUtils.getXYFromEvent(event)
-      self.props.showContextMenuForEquipmentBoundary(mapObject, eventXY.x, eventXY.y, vertexPayload, this.clearMapObjectOverlay)
+      this.contextMenuClick(event);
     })
     
     mapObject.addListener('click', event => {
@@ -336,6 +323,10 @@ export class EquipmentBoundaryMapObjects extends Component {
       }
     })
 
+    newMarker.addListener('contextmenu', event => {
+      this.contextMenuClick(event);
+    })
+
     this.mapObjectOverlay = this.mapObjectOverlay.concat(newMarker);
   }
 
@@ -344,6 +335,25 @@ export class EquipmentBoundaryMapObjects extends Component {
       const [removedMarker] = mapObjectOverlayClone.splice(indexOfMarker, 1)
       this.mapObjectOverlay = mapObjectOverlayClone;
       removedMarker.setMap(null);
+  }
+
+  contextMenuClick(event) {
+    let vertexPayload;
+    if(this.mapObjectOverlay.length > 0) {
+      const indexOfMarker = this.mapObjectOverlay.findIndex((marker) => {
+        return marker.title === `${event.vertex}`
+      });
+      
+      if (event.vertex && indexOfMarker === -1) {
+        // Add vertex to array if it doesn't already exist there.
+        this.addMarkerOverlay(event);
+      }
+      vertexPayload = this.mapObjectOverlay;
+    } else {
+      vertexPayload = event.vertex;
+    }
+    const eventXY = WktUtils.getXYFromEvent(event)
+    this.props.showContextMenuForEquipmentBoundary(this.mapObject, eventXY.x, eventXY.y, vertexPayload, this.clearMapObjectOverlay)
   }
 
   clearMapObjectOverlay() {

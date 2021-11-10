@@ -290,16 +290,14 @@ function deleteBoundaryVertices (mapObject, vertices, callBack) {
       vertices.sort((a, b) => {
         return Number(b.title) - Number(a.title)
       })
+
       // We are tracking the multiple selected verticies to delete by markers created.
       // And storing vertex index on the corrosponding marker.
-
-      for (const marker of vertices) {
+      vertices.forEach((marker) => {        
         if (marker && marker.title && mapObject.getPath().getLength() > 3) {
           mapObject.getPath().removeAt(Number(marker.title))
         }
-      }
-
-    callBack();
+      }, callBack)
   }
 }
 
