@@ -10,7 +10,7 @@ import StrokeStyle from '../../shared-utils/stroke-styles'
 
 class MapTileRenderer {
   constructor (tileSize, tileDataService, mapTileOptions, layerCategories, selectedDisplayMode, selectionModes, analysisSelectionMode, stateMapLayers, displayModes,
-    viewModePanels, state, getPixelCoordinatesWithinTile, selectedSubnetLocations, locationAlerts, rShowFiberSize, rViewSetting, mapLayers = []) {
+    viewModePanels, state, getPixelCoordinatesWithinTile, selectedSubnetLocations, locationAlerts, rShowFiberSize, rViewSetting, selectionIds, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
@@ -31,6 +31,7 @@ class MapTileRenderer {
     this.locationAlerts = locationAlerts
     this.rShowFiberSize = rShowFiberSize
     this.rViewSetting = rViewSetting
+    this.selectionIds = selectionIds
 
     const MAX_CONCURRENT_VECTOR_TILE_RENDERS = 5
     this.tileRenderThrottle = new AsyncPriorityQueue((task, callback) => {
@@ -105,6 +106,10 @@ class MapTileRenderer {
 
   setStateMapLayers (stateMapLayers) {
     this.stateMapLayers = stateMapLayers
+  }
+
+  setSelectionIds (selectionIds) {
+    this.selectionIds = selectionIds
   }
 
   // - plan edit - //
@@ -494,6 +499,10 @@ class MapTileRenderer {
       if (feature.properties) {
         // Try object_id first, else try location_id
         var featureId = feature.properties.object_id || feature.properties.location_id
+
+        if (this.selectionIds.includes(featureId)) {
+          continue // Do not render any features that are part of a transaction
+        }
 
         // do not render any features that are part of a transaction while in `EDIT_PLAN` mode
         if (this.selectedDisplayMode == this.displayModes.EDIT_PLAN) {

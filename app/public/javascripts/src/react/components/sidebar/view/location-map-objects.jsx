@@ -129,7 +129,7 @@ export const LocationEditor = (props) => {
     }
 
     mapObject.addListener('rightclick', event => {
-      if (event || event.vertex) { return }
+      if (!event || event.vertex) { return }
       // 'event' contains a MouseEvent which we use to get X,Y coordinates. The key of the MouseEvent object
       // changes with google maps implementations. So iterate over the keys to find the right object.
       if (featureType === 'location') { selectMapObject(mapObject) }
