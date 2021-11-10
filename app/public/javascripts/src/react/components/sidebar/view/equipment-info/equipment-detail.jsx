@@ -76,18 +76,24 @@ export const equipmentDetail = (props) => {
 
   useEffect(() => {
     if (!dequal(prevMapFeatures, selectedMapFeatures)) {
-      const { equipmentFeatures, roadSegments } = selectedMapFeatures
+      const { equipmentFeatures, roadSegments, fiberFeatures } = selectedMapFeatures
+
       if (!allowViewModeClickAction) return
       if (selectedMapFeatures.hasOwnProperty(mapHitFeatures.ROAD_SEGMENTS) && roadSegments.size > 0) return
 
       if (selectedMapFeatures.hasOwnProperty(mapHitFeatures.EQUIPMENT_FEATURES) && equipmentFeatures.length > 0) {
-        const equipmentList = getValidEquipmentFeaturesList(equipmentFeatures) // Filter Deleted equipment features
+
+        // filter deleted equipment features
+        const equipmentList = getValidEquipmentFeaturesList(equipmentFeatures)
+
         if (equipmentList.length > 0) {
           const equipment = equipmentList[0]
           updateSelectedState(equipment)
           displayEquipment(plan.id, equipment.object_id)
             .then((equipmentInfo) => { checkForBounds(equipment.object_id) })
         }
+      } else {
+        console.log({ fiberFeatures, plan })
       }
     }
   }, [selectedMapFeatures])
@@ -108,7 +114,7 @@ export const equipmentDetail = (props) => {
     const newSelection = cloneSelection()
     newSelection.editable.equipment = {}
     newSelection.details.fiberSegments = new Set()
-	  if (selectedFeature) {
+    if (selectedFeature) {
       newSelection.editable.equipment[selectedFeature.object_id || selectedFeature.objectId] = selectedFeature
     }
     setMapSelection(newSelection)
@@ -116,7 +122,7 @@ export const equipmentDetail = (props) => {
 
   const displayEquipment = (planId, objectId) => {
     setState((state) => ({ ...state, coverageOutput: null, showCoverageOutput: false }))
-	  return AroHttp.get(`/service/plan-feature/${planId}/equipment/${objectId}?userId=${loggedInUser.id}`)
+    return AroHttp.get(`/service/plan-feature/${planId}/equipment/${objectId}?userId=${loggedInUser.id}`)
       .then((result) => {
         const equipmentInfo = result.data
         if (equipmentInfo.hasOwnProperty('dataType') && equipmentInfo.hasOwnProperty('objectId')) {
