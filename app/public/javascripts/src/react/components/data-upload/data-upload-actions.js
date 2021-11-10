@@ -58,7 +58,7 @@ function saveDataSource (uploadDetails,loggedInUser) {
     if (uploadDetails.selectedDataSourceName === 'tile_system') {
       return createLibraryId(uploadDetails,loggedInUser)
       .then((libraryItem) => {
-        fileUpload(dispatch, uploadDetails,libraryItem.identifier, loggedInUser, libraryItem) 
+        fileUpload(dispatch, uploadDetails, libraryItem.identifier, loggedInUser, libraryItem) 
       })
       .then((result) => {
         dispatch(setIsUploading(false))
@@ -102,7 +102,7 @@ function saveDataSource (uploadDetails,loggedInUser) {
             showCancelButton: true,
             closeOnConfirm: true
           }, 
-          fileUpload(dispatch, uploadDetails,uploadDetails.dataSetId))
+          fileUpload(dispatch, uploadDetails, uploadDetails.dataSetId))
         }
       }
 
@@ -157,7 +157,7 @@ function saveDataSource (uploadDetails,loggedInUser) {
       } else {
         getLibraryId(uploadDetails)
           .then((library) => {
-            fileUpload(dispatch, uploadDetails,library.data.identifier, loggedInUser, library.data) 
+            fileUpload(dispatch, uploadDetails, library.data.identifier, loggedInUser, library.data) 
         })
         .then((res) => {
           dispatch(setIsUploading(false))
