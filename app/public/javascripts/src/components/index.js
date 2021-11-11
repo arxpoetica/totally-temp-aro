@@ -2,6 +2,8 @@
 import { react2angular } from 'react2angular'
 import { ToastContainer } from 'react-toastify'
 
+import LocationEditor from '../react/components/sidebar/view/location-editor.jsx'
+import EquipmentDetail from '../react/components/sidebar/view/equipment-info/equipment-detail.jsx'
 import NetworkPlanManage from '../react/components/sidebar/view/network-plan-manage.jsx'
 import PlanInfo from '../react/components/sidebar/view/plan-info.jsx'
 import PlanSearch from '../react/components/header/plan-search.jsx'
@@ -61,11 +63,8 @@ import ToolBox from '../react/components/tool/tool-box.jsx'
 import UINotifications from '../react/components/notification/ui-notifications.jsx'
 
 import boundaryDetail from './sidebar/view/boundary-detail'
-import equipmentDetail from './sidebar/view/equipment-detail'
-import equipmentDetailList from './sidebar/view/equipment-detail-list'
 import roadSegmentDetail from './sidebar/view/road-segment-detail'
 import coverageBoundary from './sidebar/view/coverage-boundary'
-import locationEditor from './sidebar/view/location-editor'
 import viewMode from './sidebar/view/view-mode'
 import planInfoRecent from './sidebar/view/plan-info-recent'
 import aroSearch from './sidebar/view/aro-search'
@@ -104,7 +103,6 @@ import aroPanel from './common/aro-panel'
 import aroMultiSelect from './common/aro-multiselect'
 import mapObjectEditor from './common/map-object-editor'
 import contextMenu from './common/context-menu/context-menu'
-import boundaryCoverage from './common/boundary-coverage'
 import dropTarget from './common/drop-target'
 import resourcePermissionsEditor from './common/resource-permissions-editor'
 import aroDrawingManager from './common/aro-drawing-manager'
@@ -129,11 +127,8 @@ import tileDataService from '../components/tiles/tile-data-service'
 import reduxConfig from '../redux-config'
 
 app.component('boundaryDetail', boundaryDetail)
-  .component('equipmentDetail', equipmentDetail)
-  .component('equipmentDetailList', equipmentDetailList)
   .component('roadSegmentDetail', roadSegmentDetail)
   .component('coverageBoundary', coverageBoundary)
-  .component('locationEditor', locationEditor)
   .component('viewMode', viewMode)
   .component('planInfoRecent', planInfoRecent)
   .component('aroSearch', aroSearch)
@@ -171,7 +166,6 @@ app.component('boundaryDetail', boundaryDetail)
   .component('aroMultiSelect', aroMultiSelect)
   .component('mapObjectEditor', mapObjectEditor)
   .component('contextMenu', contextMenu)
-  .component('boundaryCoverage', boundaryCoverage)
   .component('dropTarget', dropTarget)
   .component('resourcePermissionsEditor', resourcePermissionsEditor)
   .component('aroDrawingManager', aroDrawingManager)
@@ -186,6 +180,8 @@ app.component('boundaryDetail', boundaryDetail)
   .component('editorInterfacePrimitive', editorInterfacePrimitive)
   .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
 // ReactJS components
+  .component('rLocationEditor', react2angular(LocationEditor))
+  .component('rEquipmentDetail', react2angular(EquipmentDetail))
   .component('rNetworkPlanManage', react2angular(NetworkPlanManage))
   .component('rPlanInfo', react2angular(PlanInfo))
   .component('rPlanSearch', react2angular(PlanSearch))
@@ -194,7 +190,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rCoverageBoundary', react2angular(CoverageBoundary, ['mapGlobalObjectName']))  
   .component('rRoadSegmentDetail', react2angular(RoadSegmentDetail))
   .component('rBoundaryDetail', react2angular(BoundaryDetail))
-  .component('rAroSearch', react2angular(AroSearch, ['objectName', 'labelId', 'entityType', 'searchColumn', 'configuration']))
+  .component('rAroSearch', react2angular(AroSearch, ['objectName', 'labelId', 'entityType', 'select', 'searchColumn', 'configuration']))
   .component('rRingEditor', react2angular(RingEditor))
   .component('rAnalysisMode', react2angular(AnalysisMode))
   .component('rAroDebug', react2angular(AroDebug))

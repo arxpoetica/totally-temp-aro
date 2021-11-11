@@ -15,6 +15,7 @@ import ToolBarActions from '../../react/components/header/tool-bar-actions'
 import PlanEditorActions from '../../react/components/plan-editor/plan-editor-actions'
 import PlanEditorSelectors from '../../react/components/plan-editor/plan-editor-selectors'
 import { dequal } from 'dequal'
+import MapLayerActions from '../../react/components/map-layers/map-layer-actions'
 
 class TileComponentController {
   // MapLayer objects contain the following information
@@ -295,7 +296,8 @@ class TileComponentController {
       this.selectedSubnetLocations,
       this.locationAlerts,
       this.rShowFiberSize,
-      this.rViewSetting
+      this.rViewSetting,
+      this.selectionIds
     ))
     this.OVERLAY_MAP_INDEX = this.mapRef.overlayMapTypes.getLength() - 1
     //this.state.isShiftPressed = false // make this per-overlay or move it somewhere more global
@@ -427,12 +429,15 @@ class TileComponentController {
         return
       }
 
+      const { isShiftPressed } = this.state
+
       // let plan edit do its thing
       if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.EDIT_PLAN) {
+        if (!isShiftPressed) this.leftClickTile(event.latLng)
+
         return
       }
 
-      const { isShiftPressed } = this.state
 
       try {
         // ToDo: depricate getFilteredFeaturesUnderLatLng switch to this
@@ -723,6 +728,7 @@ class TileComponentController {
       // Map not initialized yet
       return
     }
+    this.setActiveMapLayers(newMapLayers)
     this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setMapLayers(newMapLayers)
     this.refreshMapTiles()
   }
@@ -798,6 +804,7 @@ class TileComponentController {
       subnetFeatures: reduxState.planEditor.subnetFeatures,
       locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(reduxState),
       selectedSubnetLocations: PlanEditorSelectors.getSelectedSubnetLocations(reduxState),
+      selectionIds: reduxState.selection.planEditorFeatures,
     }
   }
 
@@ -806,6 +813,8 @@ class TileComponentController {
       rActiveViewModePanelAction: value => dispatch(ToolBarActions.activeViewModePanel(value)),
       setCursorLocationIds: ids => dispatch(PlanEditorActions.setCursorLocationIds(ids)),
       clearCursorLocationIds: () => dispatch(PlanEditorActions.clearCursorLocationIds()),
+      setActiveMapLayers: (value) => dispatch(MapLayerActions.setActiveMapLayers(value)),
+      leftClickTile: (latLng) => dispatch(PlanEditorActions.leftClickTile(latLng)),
     }
   }
 
@@ -818,6 +827,7 @@ class TileComponentController {
     const rViewSetting = this.rViewSetting
     const selectedSubnetLocations = this.selectedSubnetLocations
     const locationAlerts = this.locationAlerts
+    const currentSelectionIds = this.selectionIds
 
     var needRefresh = false
     var doConduitUpdate = this.doesConduitNeedUpdate(prevStateMapLayers, nextState.stateMapLayers)
@@ -839,6 +849,12 @@ class TileComponentController {
         overlayMap.setSelection(nextState.selection)
         needRefresh = true
       }
+    }
+
+    // Edit Locations
+    if (!dequal(currentSelectionIds, nextState.selectionIds)) {
+      overlayMap.setSelectionIds(nextState.selectionIds)
+      needRefresh = true
     }
 
     // - plan edit - //

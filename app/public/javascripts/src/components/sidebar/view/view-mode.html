@@ -23,8 +23,8 @@
           entity-type="'LocationObjectEntity'"
           search-list="$ctrl.state.entityTypeList.LocationObjectEntity" 
           selected="$ctrl.selectedLocation"
-          search-column="'id,objectId'"
-          configuration="'objectId'">
+          select="'id,objectId'"
+          search-column="'objectId'">
         </r-aro-search>
         <r-location-info>
         </r-location-info>
@@ -37,7 +37,7 @@
 
       <accordion-panel-title title="'Equipment Info'" panel-id="$ctrl.state.viewModePanels.EQUIPMENT_INFO" ng-if="$ctrl.state.configuration.perspective.showViewModePanels[$ctrl.state.viewModePanels.EQUIPMENT_INFO]"></accordion-panel-title>
       <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.EQUIPMENT_INFO" ng-if="$ctrl.state.configuration.perspective.showViewModePanels[$ctrl.state.viewModePanels.EQUIPMENT_INFO]">
-        <equipment-detail></equipment-detail>
+        <r-equipment-detail></r-equipment-detail>
       </accordion-panel-contents>
 
       <accordion-panel-title title="'Boundaries Info'" panel-id="$ctrl.state.viewModePanels.BOUNDARIES_INFO" ng-if="$ctrl.state.configuration.perspective.showViewModePanels[$ctrl.state.viewModePanels.BOUNDARIES_INFO]"></accordion-panel-title>
@@ -76,7 +76,7 @@
       <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.EDIT_LOCATIONS"
                                 ng-if="($ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.EDIT_LOCATIONS
                                        && $ctrl.state.configuration.perspective.showViewModePanels[$ctrl.state.viewModePanels.EDIT_LOCATIONS]) || $ctrl.rActiveViewModePanel === $ctrl.state.viewModePanels.EDIT_LOCATIONS">
-        <location-editor map-global-object-name="map"></location-editor>
+        <r-location-editor></r-location-editor>
       </accordion-panel-contents>
 
       <!-- Edit Service Layer -->

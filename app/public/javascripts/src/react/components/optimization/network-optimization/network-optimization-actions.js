@@ -246,6 +246,7 @@ function setActiveFilters(filters) {
 function getLocationPreview(planId, updatedLocationConstraints) {
   return async(dispatch, getState) => {
     try {
+      const { planTargets } = getState().selection
       const body = {
         planId,
         locationConstraints: updatedLocationConstraints,
@@ -255,9 +256,7 @@ function getLocationPreview(planId, updatedLocationConstraints) {
           type: Actions.NETWORK_OPTIMIZATION_SET_IS_PREVIEW_LOADING,
           payload: true,
         })
-        dispatch({
-          type: Actions.SELECTION_CLEAR_ALL_PLAN_TARGETS,
-        })
+        dispatch(SelectionActions.removePlanTargets(planId, { locations: planTargets.locations }))
         dispatch({
           type: Actions.SELECTION_SET_ACTIVE_MODE,
           payload: 'SELECTED_LOCATIONS',

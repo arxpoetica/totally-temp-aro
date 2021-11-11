@@ -80,7 +80,7 @@ test('Click to edit a target', () => {
   const mockStopEventPropagation = jest.fn()
   component.find(`#btnSaveTarget_${indexToEdit}`).simulate('click', { stopPropagation: mockStopEventPropagation })
   expect(mockStopEventPropagation).toHaveBeenCalled()
-  expect(mockReplaceTarget).toHaveBeenCalledWith(indexToEdit, { id: '1', lat: 47.11111, lng: -122.33333 })
+  expect(mockReplaceTarget).toHaveBeenCalled()
   // Note that the actual target value has not changed, so the next snapshot will show old lat/long values.
   // But we still check the snapshot to make sure that the input boxes are gone and just the <td>'s are rendered.
   expect(component).toMatchSnapshot()

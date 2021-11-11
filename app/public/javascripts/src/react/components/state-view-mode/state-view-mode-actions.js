@@ -37,7 +37,7 @@ function getSelectedEquipmentIds (flattenDeep, networkNodeTypes, configuration) 
 function loadEntityList (entityType, filterObj, select, searchColumn, configuration) {
   return (dispatch, getState) => {
     const state = getState()
-    const planId = state.plan.id
+    const planId = state.plan.activePlan.id
     const dataItems = state.plan.dataItems
     const nameToServiceLayers = state.toolbar.nameToServiceLayers
     const networkNodeTypes = state.roicReports.networkNodeTypes
@@ -91,7 +91,7 @@ function loadEntityList (entityType, filterObj, select, searchColumn, configurat
     if (entityType === entityTypeCons.NETWORK_EQUIPMENT_ENTITY) {
       // Filtering NetworkEquipmentEntity by planId so as to fetch latest equipment info
       filter = filter ? filter.concat(` and (planId eq ${planId})`) : filter
-      const selectedEquipments = StateViewMode.getSelectedEquipmentIds(
+      const selectedEquipments = getSelectedEquipmentIds(
         flattenDeep, networkNodeTypes, configuration
       ).map(id => `networkNodeType eq ${id}`).join(' or ')
       // Search for equipments that are selected in NetworkEquipment modal

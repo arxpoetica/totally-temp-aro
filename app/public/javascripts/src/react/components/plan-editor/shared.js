@@ -3,9 +3,11 @@
 const ARO_CLIENT = 'aro'
 
 export const constants = Object.freeze({
-  Z_INDEX_SELECTION: 1,
-  Z_INDEX_MAP_OBJECT: 2,
-  Z_INDEX_PIN: 3,
+  Z_INDEX_CO_SUBNET: 5,
+  Z_INDEX_HUB_SUBNET: 6,
+  Z_INDEX_SELECTION: 10,
+  Z_INDEX_MAP_OBJECT: 20,
+  Z_INDEX_PIN: 30,
 
   // Drag-and-drop editing on map
   // TODO: go through and figure out what is used and what is not

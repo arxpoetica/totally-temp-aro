@@ -297,8 +297,16 @@ const getLocationCounts = createSelector(
         const locations = Object.values(subnets[id].subnetLocationsById)
         locationCountsById[id] = locations.filter(location => !!location.parentEquipmentId).length
       } else {
-        const locationDistanceMap = subnets[id] && subnets[id].fiber && subnets[id].fiber.locationDistanceMap
-        locationCountsById[id] = locationDistanceMap ? Object.keys(locationDistanceMap).length : 0
+        if (
+          subnetFeatures[id]
+          && subnetFeatures[id].feature.networkNodeType === 'fiber_distribution_terminal'
+          && subnetFeatures[id].feature.dropLinks
+        ) {
+          locationCountsById[id] = subnetFeatures[id].feature.dropLinks.length
+        } else {
+          const locationDistanceMap = subnets[id] && subnets[id].fiber && subnets[id].fiber.locationDistanceMap
+          locationCountsById[id] = locationDistanceMap ? Object.keys(locationDistanceMap).length : 0
+        }
       }
     }
     return locationCountsById
@@ -316,6 +324,7 @@ const PlanEditorSelectors = Object.freeze({
   getSelectedSubnetLocations,
   getCursorLocations,
   getLocationCounts,
+  getSubnetFeatures
 })
 
 export default PlanEditorSelectors
