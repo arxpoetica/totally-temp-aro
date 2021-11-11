@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import reduxStore from '../../../../../redux-store'
 import wrapComponentWithProvider from '../../../../common/provider-wrapped-component'
-import { viewModePanels, mapHitFeatures } from '../../constants'
+import { viewModePanels } from '../../constants'
 import BoundaryCoverage from './boundary-coverage.jsx'
 import EquipmentDetailList from './equipment-detail-list.jsx'
 import SelectionActions from '../../../selection/selection-actions'
@@ -11,6 +11,7 @@ import AroHttp from '../../../../common/aro-http'
 import RxState from '../../../../common/rxState'
 import AroSearch from '../../view/aro-search.jsx'
 import EquipmentInterfaceTree from './equipment-interface-tree.jsx'
+import FiberDisplay from './fiber-display.jsx'
 import AroFeatureFactory from '../../../../../service-typegen/dist/AroFeatureFactory'
 import { usePrevious } from '../../../../common/view-utils.js'
 import { dequal } from 'dequal'
@@ -41,6 +42,7 @@ export const equipmentDetail = (props) => {
     equipmentFeature: {},
     networkNodeType: '',
   })
+  const [fiberMeta, setFiberMeta] = useState([])
 
   const {
     currentEquipmentDetailView,
@@ -78,11 +80,9 @@ export const equipmentDetail = (props) => {
     if (!dequal(prevMapFeatures, selectedMapFeatures)) {
       const { equipmentFeatures, roadSegments, fiberFeatures } = selectedMapFeatures
 
-      if (!allowViewModeClickAction) return
-      if (selectedMapFeatures.hasOwnProperty(mapHitFeatures.ROAD_SEGMENTS) && roadSegments.size > 0) return
+      if (!allowViewModeClickAction || roadSegments && roadSegments.size > 0) return
 
-      if (selectedMapFeatures.hasOwnProperty(mapHitFeatures.EQUIPMENT_FEATURES) && equipmentFeatures.length > 0) {
-
+      if (equipmentFeatures && equipmentFeatures.length > 0) {
         // filter deleted equipment features
         const equipmentList = getValidEquipmentFeaturesList(equipmentFeatures)
 
@@ -92,8 +92,47 @@ export const equipmentDetail = (props) => {
           displayEquipment(plan.id, equipment.object_id)
             .then((equipmentInfo) => { checkForBounds(equipment.object_id) })
         }
-      } else {
-        console.log({ fiberFeatures, plan })
+      } else if (fiberFeatures && fiberFeatures.size > 0) {
+
+        AroHttp.get(`/service/plan/subnets/annotations?plan_id=${plan.id}`)
+          .then(({ data: annotationsBySubnet }) => {
+
+            const fibers = [...fiberFeatures]
+              // dedupe fibers (see https://stackoverflow.com/a/56757215/209803)
+              .filter((fiber, index, array) => {
+                const compareIndex = array.findIndex(compareFiber => {
+                  return JSON.stringify(compareFiber) === JSON.stringify(fiber)
+                })
+                return index === compareIndex
+              })
+
+            if (fibers.length > 0) {
+
+              // // NOTE: just grabbing the first fiber subnet_id,
+              // // because they all belong to the same subnet
+              // const rootFiber = fibers.find(fiber => fiber.fiber_type === fiberTypes.FEEDER)
+              // const subnetId = rootFiber && rootFiber.subnet_id
+
+              const newFiberMeta = fibers.map(fiber => {
+                const subnet = annotationsBySubnet.find(({ subnetId }) => {
+                  return fiber.subnet_id === subnetId
+                })
+                if (subnet) {
+                  // for now, only returning for matches that have
+                  // both to/from ids in both array groups
+                  const annotation = subnet.annotations.find(annotation => {
+                    return annotation.toNode === fiber.to_node
+                      && annotation.fromNode === fiber.from_node
+                  })
+                  fiber.annotations = annotation && annotation.annotations || []
+                }
+                return fiber
+              })
+              setFiberMeta(newFiberMeta)
+            }
+
+          })
+          .catch(error => console.log(error))
       }
     }
   }, [selectedMapFeatures])
@@ -302,6 +341,7 @@ export const equipmentDetail = (props) => {
           </>
         }
       </div>
+      <FiberDisplay fiberMeta={fiberMeta}/>
     </div>
   )
 }
