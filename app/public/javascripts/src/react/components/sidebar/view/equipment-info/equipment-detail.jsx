@@ -97,7 +97,7 @@ export const equipmentDetail = (props) => {
         AroHttp.get(`/service/plan/subnets/annotations?plan_id=${plan.id}`)
           .then(({ data: annotationsBySubnet }) => {
 
-            const fibers = [...fiberFeatures]
+            const fibers = JSON.parse(JSON.stringify([...fiberFeatures]))
               // dedupe fibers (see https://stackoverflow.com/a/56757215/209803)
               .filter((fiber, index, array) => {
                 const compareIndex = array.findIndex(compareFiber => {
@@ -117,15 +117,16 @@ export const equipmentDetail = (props) => {
                 const subnet = annotationsBySubnet.find(({ subnetId }) => {
                   return fiber.subnet_id === subnetId
                 })
+                let annotation
                 if (subnet) {
                   // for now, only returning for matches that have
                   // both to/from ids in both array groups
-                  const annotation = subnet.annotations.find(annotation => {
+                  annotation = subnet.annotations.find(annotation => {
                     return annotation.toNode === fiber.to_node
                       && annotation.fromNode === fiber.from_node
                   })
-                  fiber.annotations = annotation && annotation.annotations || []
                 }
+                fiber.annotations = annotation && Object.values(annotation.annotations) || []
                 return fiber
               })
               setFiberMeta(newFiberMeta)
