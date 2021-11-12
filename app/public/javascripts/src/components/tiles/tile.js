@@ -296,7 +296,8 @@ class TileComponentController {
       this.selectedSubnetLocations,
       this.locationAlerts,
       this.rShowFiberSize,
-      this.rViewSetting
+      this.rViewSetting,
+      this.selectionIds
     ))
     this.OVERLAY_MAP_INDEX = this.mapRef.overlayMapTypes.getLength() - 1
     //this.state.isShiftPressed = false // make this per-overlay or move it somewhere more global
@@ -803,6 +804,7 @@ class TileComponentController {
       subnetFeatures: reduxState.planEditor.subnetFeatures,
       locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(reduxState),
       selectedSubnetLocations: PlanEditorSelectors.getSelectedSubnetLocations(reduxState),
+      selectionIds: reduxState.selection.planEditorFeatures,
     }
   }
 
@@ -825,6 +827,7 @@ class TileComponentController {
     const rViewSetting = this.rViewSetting
     const selectedSubnetLocations = this.selectedSubnetLocations
     const locationAlerts = this.locationAlerts
+    const currentSelectionIds = this.selectionIds
 
     var needRefresh = false
     var doConduitUpdate = this.doesConduitNeedUpdate(prevStateMapLayers, nextState.stateMapLayers)
@@ -846,6 +849,12 @@ class TileComponentController {
         overlayMap.setSelection(nextState.selection)
         needRefresh = true
       }
+    }
+
+    // Edit Locations
+    if (!dequal(currentSelectionIds, nextState.selectionIds)) {
+      overlayMap.setSelectionIds(nextState.selectionIds)
+      needRefresh = true
     }
 
     // - plan edit - //
