@@ -130,6 +130,7 @@ export const equipmentDetail = (props) => {
                 return fiber
               })
               setFiberMeta(newFiberMeta)
+              activeViewModePanelAction(viewModePanels.EQUIPMENT_INFO)
             }
 
           })
