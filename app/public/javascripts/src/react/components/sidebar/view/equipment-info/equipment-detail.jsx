@@ -131,6 +131,7 @@ export const equipmentDetail = (props) => {
               })
               setFiberMeta(newFiberMeta)
               activeViewModePanelAction(viewModePanels.EQUIPMENT_INFO)
+              clearSelection()
             }
 
           })
