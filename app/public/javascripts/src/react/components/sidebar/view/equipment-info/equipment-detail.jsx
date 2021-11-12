@@ -107,12 +107,6 @@ export const equipmentDetail = (props) => {
               })
 
             if (fibers.length > 0) {
-
-              // // NOTE: just grabbing the first fiber subnet_id,
-              // // because they all belong to the same subnet
-              // const rootFiber = fibers.find(fiber => fiber.fiber_type === fiberTypes.FEEDER)
-              // const subnetId = rootFiber && rootFiber.subnet_id
-
               const newFiberMeta = fibers.map(fiber => {
                 const subnet = annotationsBySubnet.find(({ subnetId }) => {
                   return fiber.subnet_id === subnetId
