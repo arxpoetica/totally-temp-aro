@@ -758,6 +758,8 @@ class MapTileRenderer {
           return polyline.id === feature.properties.id 
         } else if (dataType === 'edge.fat') { 
           return polyline.gid === feature.properties.gid 
+        } else if (dataType === 'fiber.fat') {
+          return polyline.gid === feature.properties.gid 
         }
       } 
     }).length > 0

@@ -130,8 +130,9 @@ export const equipmentDetail = (props) => {
                 return fiber
               })
               setFiberMeta(newFiberMeta)
+              updatefiberFeatures(fiberFeatures)
               activeViewModePanelAction(viewModePanels.EQUIPMENT_INFO)
-              clearSelection()
+              clearEquipmentStates()
             }
 
           })
@@ -150,6 +151,13 @@ export const equipmentDetail = (props) => {
       }
     })
     return validEquipments
+  }
+
+  const updatefiberFeatures = (fiberFeatures) => {
+    const newSelection = cloneSelection()
+    newSelection.editable.equipment = {}
+    newSelection.details.fiberSegments = fiberFeatures
+    setMapSelection(newSelection)
   }
 
   const updateSelectedState = (selectedFeature) => {
@@ -239,6 +247,10 @@ export const equipmentDetail = (props) => {
 
   const clearSelection = () => {
     updateSelectedState()
+    clearEquipmentStates()
+  }
+
+  const clearEquipmentStates = () => {
     setState((state) => ({ ...state,
       networkNodeType: '',
       equipmentFeature: {},
