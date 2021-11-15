@@ -5,9 +5,11 @@ import { fiberTypes } from '../../constants'
 const fiberInfo = [
   { key: 'atomic_units', label: 'Atomic Units' },
   { key: 'fiber_strands', label: 'Fiber Strands' },
-  { key: 'link_id', label: 'Link ID' },
   { key: 'spatial_edge_type', label: 'Spatial Edge Type' },
+  // { key: 'link_id', label: 'Link ID' },
   // { key: 'subnet_id', label: 'Subnet ID' },
+  // { key: 'from_node', label: 'From Node' },
+  // { key: 'to_node', label: 'To Node' },
 ]
 
 export default ({ fiberMeta = [] }) => {
@@ -27,8 +29,8 @@ export default ({ fiberMeta = [] }) => {
             : 'Distribution Fiber'
 
           return (
-            <div key={index}>
-              <div className="ei-header">{title}</div>
+            <div key={index} className="pt-0">
+              <div className="ei-header pt-0">{title}</div>
 
               <div className="ei-gen-level ei-internal-level">
                 {fiberInfo.map(({ label, key }, index) =>
