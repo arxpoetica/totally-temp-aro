@@ -546,20 +546,19 @@ class TileComponentController {
             // ToDo: filter out deleted etc
             if (result.location_id) {
               locations = locations.concat(result)
-            } else if (result.hasOwnProperty('_data_type') &&
-            result.code && result._data_type === 'analysis_area') {
+            } else if (result.code && result._data_type === 'analysis_area') {
               analysisAreas.push(result)
             } else if (result.code) {
               serviceAreas = serviceAreas.concat(result)
+            } else if (result.id && (result._data_type.indexOf('equipment') >= 0)) {
+              equipmentFeatures = equipmentFeatures.concat(result)
             } else if ((result.id || result.link_id) && (result._data_type.indexOf('fiber') >= 0)) {
               // fiberFeatures = fiberFeatures.concat(result)
               fiberFeatures.add(result)
             } else if (result.gid) {
               roadSegments.add(result)
-            } else if (result.hasOwnProperty('layerType') && result.layerType == 'census_block') {
+            } else if (result.layerType && result.layerType === 'census_block') {
               censusFeatures.push(result)
-            } else if (result.id && (result._data_type.indexOf('equipment') >= 0)) {
-              equipmentFeatures = equipmentFeatures.concat(result)
             }
           })
 
