@@ -38,8 +38,8 @@ const PlanEditorRecalculate = props => {
   const recalculate = () => {
     if (Object.keys(fiberAnnotations).length > 0) {
       swal({
-        title: "Are you sure you want to recalculate?",
-        text: "Any adjusted feeder fiber will lose it's attributes.",
+        title: 'Are you sure you want to recalculate?',
+        text: `Any adjusted feeder fiber will lose it's attributes.`,
         type: 'warning',
         showCancelButton: true,
         closeOnConfirm: true,
@@ -49,7 +49,9 @@ const PlanEditorRecalculate = props => {
       }, (confirm) => {
         if (confirm) recalculateSubnets(transaction.id, [selectedSubnetId])
       })	
-    } else recalculateSubnets( transaction.id, [selectedSubnetId])
+    } else {
+      recalculateSubnets( transaction.id, [selectedSubnetId])
+    }
   }
 
   return (
