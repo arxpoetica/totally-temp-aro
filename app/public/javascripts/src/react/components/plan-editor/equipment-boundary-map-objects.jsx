@@ -112,8 +112,9 @@ export class EquipmentBoundaryMapObjects extends Component {
     // const equipmentBoundary = this.props.transactionFeatures[objectId].feature
     if (!this.props.subnets[selectedSubnetId]) return
     const geometry = this.props.subnets[selectedSubnetId].subnetBoundary.polygon
-    const isLocked = this.props.subnets[selectedSubnetId].subnetBoundary.locked
-
+    let isEditable = !this.props.subnets[selectedSubnetId].subnetBoundary.locked
+    isEditable = isEditable && selectedSubnetId === this.props.selectedSubnetId
+    
     if (this.mapObject) this.deleteMapObject()
 
     this.mapObject = new google.maps.Polygon({
@@ -121,7 +122,7 @@ export class EquipmentBoundaryMapObjects extends Component {
       paths: WktUtils.getGoogleMapPathsFromWKTMultiPolygon(geometry),
       clickable: false,
       draggable: false,
-      editable: !isLocked,
+      editable: isEditable,
       map: this.props.googleMaps,
     })
     
@@ -144,7 +145,8 @@ export class EquipmentBoundaryMapObjects extends Component {
     // TODO: DRY the two create functions a bit
     if (!this.props.subnets[subnetId]) return
     const { subnetBoundary } = this.props.subnets[subnetId]
-    const { polygon: geometry, locked: isLocked } = subnetBoundary
+    const geometry = subnetBoundary.polygon
+    let isEditable = (!subnetBoundary.locked) && subnetId === this.props.selectedSubnetId
 
     if (this.neighborObjectsById[subnetId]) {
       this.deleteNeighbors([subnetId])
@@ -155,7 +157,7 @@ export class EquipmentBoundaryMapObjects extends Component {
       paths: WktUtils.getGoogleMapPathsFromWKTMultiPolygon(geometry),
       clickable: false,
       draggable: false,
-      editable: !isLocked,
+      editable: isEditable,
       zIndex: !this.props.subnets[subnetId].parentSubnetId 
         ? constants.Z_INDEX_CO_SUBNET 
         : constants.Z_INDEX_HUB_SUBNET,

@@ -422,7 +422,6 @@ class TileComponentController {
     })
 
     this.overlayClickListener = this.mapRef.addListener('click', async(event) => {
-
       if (this.contextMenuService.isMenuVisible.getValue()) {
         this.contextMenuService.menuOff()
         this.$timeout()
@@ -434,10 +433,8 @@ class TileComponentController {
       // let plan edit do its thing
       if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.EDIT_PLAN) {
         if (!isShiftPressed) this.leftClickTile(event.latLng)
-
         return
       }
-
 
       try {
         // ToDo: depricate getFilteredFeaturesUnderLatLng switch to this
@@ -549,20 +546,19 @@ class TileComponentController {
             // ToDo: filter out deleted etc
             if (result.location_id) {
               locations = locations.concat(result)
-            } else if (result.hasOwnProperty('_data_type') &&
-            result.code && result._data_type === 'analysis_area') {
+            } else if (result.code && result._data_type === 'analysis_area') {
               analysisAreas.push(result)
             } else if (result.code) {
               serviceAreas = serviceAreas.concat(result)
-            } else if (result.gid) {
-              roadSegments.add(result)
-            } else if (result.hasOwnProperty('layerType') && result.layerType == 'census_block') {
-              censusFeatures.push(result)
             } else if (result.id && (result._data_type.indexOf('equipment') >= 0)) {
               equipmentFeatures = equipmentFeatures.concat(result)
             } else if ((result.id || result.link_id) && (result._data_type.indexOf('fiber') >= 0)) {
               // fiberFeatures = fiberFeatures.concat(result)
               fiberFeatures.add(result)
+            } else if (result.gid) {
+              roadSegments.add(result)
+            } else if (result.layerType && result.layerType === 'census_block') {
+              censusFeatures.push(result)
             }
           })
 
