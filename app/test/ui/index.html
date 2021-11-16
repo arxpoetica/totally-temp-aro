@@ -28,19 +28,31 @@
 
       map = new google.maps.Map(document.getElementById('map-canvas'), {
         zoom: 12,
-        center: {lat: 47.6097, lng: -122.3331}, // Centroid of Seattle, WA
+        center: { lat: 47.6097, lng: -122.3331 }, // Centroid of Seattle, WA
+        tilt: 0,
         mapTypeId: google.maps.MapTypeId.ROADMAP,
         panControl: false,
+        mapTypeControl: false,
+        mapTypeControlOptions: {
+          position: google.maps.ControlPosition.BOTTOM_RIGHT
+        },
         zoomControlOptions: {
           style: google.maps.ZoomControlStyle.SMALL,
-          position: google.maps.ControlPosition.TOP_RIGHT
+          position: google.maps.ControlPosition.RIGHT_BOTTOM
         },
-        mapTypeControlOptions: {
-          position: google.maps.ControlPosition.TOP_RIGHT
+        streetViewControl: true,
+        streetViewControlOptions: {
+          position: google.maps.ControlPosition.RIGHT_BOTTOM,
+          enableCloseButton: true
         },
+        rotateControl: true,
+        rotateControlOptions: {
+          position: google.maps.ControlPosition.RIGHT_BOTTOM,
+        },
+        gestureHandling: 'cooperative',
         styles: styles,
-        clickableIcons: false, 
-        clickableLabels:false
+        clickableIcons: false,
+        clickableLabels: false,
       });
     }
 
