@@ -173,9 +173,10 @@
           rotateControlOptions: {
             position: google.maps.ControlPosition.RIGHT_BOTTOM,
           },
+          gestureHandling: '<%= GOOGLE_MAPS_GESTURE_HANDLING %>',
           styles: styles,
           clickableIcons: false,
-          clickableLabels:false
+          clickableLabels: false,
         });
 
         mapTypeId === 'SATELLITE' && map.setMapTypeId(google.maps.MapTypeId.HYBRID);

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import reduxStore from '../../../../../redux-store'
 import wrapComponentWithProvider from '../../../../common/provider-wrapped-component'
-import { viewModePanels, mapHitFeatures } from '../../constants'
+import { viewModePanels } from '../../constants'
 import BoundaryCoverage from './boundary-coverage.jsx'
 import EquipmentDetailList from './equipment-detail-list.jsx'
 import SelectionActions from '../../../selection/selection-actions'
@@ -11,6 +11,7 @@ import AroHttp from '../../../../common/aro-http'
 import RxState from '../../../../common/rxState'
 import AroSearch from '../../view/aro-search.jsx'
 import EquipmentInterfaceTree from './equipment-interface-tree.jsx'
+import FiberDisplay from './fiber-display.jsx'
 import AroFeatureFactory from '../../../../../service-typegen/dist/AroFeatureFactory'
 import { usePrevious } from '../../../../common/view-utils.js'
 import { dequal } from 'dequal'
@@ -41,6 +42,7 @@ export const equipmentDetail = (props) => {
     equipmentFeature: {},
     networkNodeType: '',
   })
+  const [fiberMeta, setFiberMeta] = useState([])
 
   const {
     currentEquipmentDetailView,
@@ -76,18 +78,59 @@ export const equipmentDetail = (props) => {
 
   useEffect(() => {
     if (!dequal(prevMapFeatures, selectedMapFeatures)) {
-      const { equipmentFeatures, roadSegments } = selectedMapFeatures
-      if (!allowViewModeClickAction) return
-      if (selectedMapFeatures.hasOwnProperty(mapHitFeatures.ROAD_SEGMENTS) && roadSegments.size > 0) return
+      const { equipmentFeatures, roadSegments, fiberFeatures } = selectedMapFeatures
 
-      if (selectedMapFeatures.hasOwnProperty(mapHitFeatures.EQUIPMENT_FEATURES) && equipmentFeatures.length > 0) {
-        const equipmentList = getValidEquipmentFeaturesList(equipmentFeatures) // Filter Deleted equipment features
+      if (!allowViewModeClickAction || roadSegments && roadSegments.size > 0) return
+
+      if (equipmentFeatures && equipmentFeatures.length > 0) {
+        // filter deleted equipment features
+        const equipmentList = getValidEquipmentFeaturesList(equipmentFeatures)
+
         if (equipmentList.length > 0) {
           const equipment = equipmentList[0]
           updateSelectedState(equipment)
           displayEquipment(plan.id, equipment.object_id)
           .then((equipmentInfo) => { checkForBounds(equipmentInfo) })
         }
+      } else if (fiberFeatures && fiberFeatures.size > 0) {
+
+        AroHttp.get(`/service/plan/subnets/annotations?plan_id=${plan.id}`)
+          .then(({ data: annotationsBySubnet }) => {
+
+            const fibers = JSON.parse(JSON.stringify([...fiberFeatures]))
+              // dedupe fibers (see https://stackoverflow.com/a/56757215/209803)
+              .filter((fiber, index, array) => {
+                const compareIndex = array.findIndex(compareFiber => {
+                  return JSON.stringify(compareFiber) === JSON.stringify(fiber)
+                })
+                return index === compareIndex
+              })
+
+            if (fibers.length > 0) {
+              const newFiberMeta = fibers.map(fiber => {
+                const subnet = annotationsBySubnet.find(({ subnetId }) => {
+                  return fiber.subnet_id === subnetId
+                })
+                let annotation
+                if (subnet) {
+                  // for now, only returning for matches that have
+                  // both to/from ids in both array groups
+                  annotation = subnet.annotations.find(annotation => {
+                    return annotation.toNode === fiber.to_node
+                      && annotation.fromNode === fiber.from_node
+                  })
+                }
+                fiber.annotations = annotation && Object.values(annotation.annotations) || []
+                return fiber
+              })
+              setFiberMeta(newFiberMeta)
+              updatefiberFeatures(fiberFeatures)
+              activeViewModePanelAction(viewModePanels.EQUIPMENT_INFO)
+              clearEquipmentStates()
+            }
+
+          })
+          .catch(error => console.log(error))
       }
     }
   }, [selectedMapFeatures])
@@ -104,11 +147,18 @@ export const equipmentDetail = (props) => {
     return validEquipments
   }
 
+  const updatefiberFeatures = (fiberFeatures) => {
+    const newSelection = cloneSelection()
+    newSelection.editable.equipment = {}
+    newSelection.details.fiberSegments = fiberFeatures
+    setMapSelection(newSelection)
+  }
+
   const updateSelectedState = (selectedFeature) => {
     const newSelection = cloneSelection()
     newSelection.editable.equipment = {}
     newSelection.details.fiberSegments = new Set()
-	  if (selectedFeature) {
+    if (selectedFeature) {
       newSelection.editable.equipment[selectedFeature.object_id || selectedFeature.objectId] = selectedFeature
     }
     setMapSelection(newSelection)
@@ -116,7 +166,7 @@ export const equipmentDetail = (props) => {
 
   const displayEquipment = (planId, objectId) => {
     setState((state) => ({ ...state, coverageOutput: null, showCoverageOutput: false }))
-	  return AroHttp.get(`/service/plan-feature/${planId}/equipment/${objectId}?userId=${loggedInUser.id}`)
+    return AroHttp.get(`/service/plan-feature/${planId}/equipment/${objectId}?userId=${loggedInUser.id}`)
       .then((result) => {
         const equipmentInfo = result.data
         if (equipmentInfo.hasOwnProperty('dataType') && equipmentInfo.hasOwnProperty('objectId')) {
@@ -191,6 +241,10 @@ export const equipmentDetail = (props) => {
 
   const clearSelection = () => {
     updateSelectedState()
+    clearEquipmentStates()
+  }
+
+  const clearEquipmentStates = () => {
     setState((state) => ({ ...state,
       networkNodeType: '',
       equipmentFeature: {},
@@ -296,6 +350,7 @@ export const equipmentDetail = (props) => {
           </>
         }
       </div>
+      <FiberDisplay fiberMeta={fiberMeta}/>
     </div>
   )
 }
