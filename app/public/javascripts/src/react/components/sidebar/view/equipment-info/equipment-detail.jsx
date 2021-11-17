@@ -86,7 +86,7 @@ export const equipmentDetail = (props) => {
           const equipment = equipmentList[0]
           updateSelectedState(equipment)
           displayEquipment(plan.id, equipment.object_id)
-            .then((equipmentInfo) => { checkForBounds(equipment.object_id) })
+          .then((equipmentInfo) => { checkForBounds(equipmentInfo) })
         }
       }
     }
@@ -178,7 +178,7 @@ export const equipmentDetail = (props) => {
         if (result.data.length < 1) {
           setState((state) => ({ ...state, boundsObjectId: null, boundsData: null }))
         } else {
-          setState((state) => ({ ...state, boundsObjectId: result.data.objectId, boundsData: result.data }))
+          setState((state) => ({ ...state, boundsObjectId: result.data[0].objectId, boundsData: result.data[0] }))
         }
       })
   }
