@@ -1,10 +1,9 @@
  // The selected panel when in the View mode
-const viewModePanels = Object.freeze({
+export const viewModePanels = Object.freeze({
   LOCATION_INFO: 'LOCATION_INFO',
   EQUIPMENT_INFO: 'EQUIPMENT_INFO',
   BOUNDARIES_INFO: 'BOUNDARIES_INFO',
   ROAD_SEGMENT_INFO: 'ROAD_SEGMENT_INFO',
-  PLAN_SUMMARY_REPORTS: 'PLAN_SUMMARY_REPORTS',
   COVERAGE_BOUNDARY: 'COVERAGE_BOUNDARY',
   EDIT_LOCATIONS: 'EDIT_LOCATIONS',
   EDIT_SERVICE_LAYER: 'EDIT_SERVICE_LAYER',
@@ -12,7 +11,7 @@ const viewModePanels = Object.freeze({
 })
 
 // The display modes for the application
-const displayModes = Object.freeze({
+export const displayModes = Object.freeze({
   VIEW: 'VIEW',
   ANALYSIS: 'ANALYSIS',
   EDIT_RINGS: 'EDIT_RINGS',
@@ -21,7 +20,7 @@ const displayModes = Object.freeze({
   DEBUG: 'DEBUG'
 })
 
-const entityTypeCons = Object.freeze({
+export const entityTypeCons = Object.freeze({
   LOCATION_OBJECT_ENTITY: 'LocationObjectEntity',
   NETWORK_EQUIPMENT_ENTITY: 'NetworkEquipmentEntity',
   SERVICE_AREA_VIEW: 'ServiceAreaView',
@@ -30,13 +29,13 @@ const entityTypeCons = Object.freeze({
   ANALYSIS_LAYER: 'AnalysisLayer'
 })
 
-const boundryTypeCons = Object.freeze({
+export const boundryTypeCons = Object.freeze({
   CENSUS_BLOCKS: 'census_blocks',
   WIRECENTER: 'wirecenter',
   ANALYSIS_LAYER: 'analysis_layer',
 })
 
-const mapHitFeatures = Object.freeze({
+export const mapHitFeatures = Object.freeze({
   LAT_LNG: 'latLng',
   LOCATIONS: 'locations',
   SERVICE_AREAS: 'serviceAreas',
@@ -47,25 +46,24 @@ const mapHitFeatures = Object.freeze({
   FIBER_FEATURES: 'fiberFeatures'
 })
 
-const controlStates = Object.freeze({
+export const controlStates = Object.freeze({
   NO_TARGET_SELECTED: 'NO_TARGET_SELECTED',
   COMPUTING: 'COMPUTING',
   COMPUTED: 'COMPUTED',
 })
 
-const targetSelectionModes = Object.freeze({
+export const targetSelectionModes = Object.freeze({
   SINGLE_PLAN_TARGET: 0,
   POLYGON_PLAN_TARGET: 1,
   POLYGON_EXPORT_TARGET: 2,
   COVERAGE_BOUNDARY: 5,
 })
 
-export {
-  viewModePanels,
-  displayModes,
-  entityTypeCons,
-  boundryTypeCons,
-  mapHitFeatures,
-  controlStates,
-  targetSelectionModes,
-}
+export const fiberTypes = Object.freeze({
+  // UNKNOWN: 1,
+  // UNKNOWN: 2,
+  FEEDER: 3,
+  DISTRIBUTION: 4,
+  // UNKNOWN: 5,
+  // UNKNOWN: 6,
+})

@@ -41,8 +41,11 @@
   width: 16px;
   height: 16px;
   margin: 0 10px 0 0;
-  color: var(--gray-medium-light);
-  line-height: 0;
+  background: url('/svg/toggle-plus.svg') no-repeat center transparent;
+}
+.accordion .accordion-tools .title .svg.open,
+.accordion .accordion-header .title .svg.open {
+  background-image: url('/svg/toggle-minus.svg');
 }
 .accordion .accordion-content {
   display: none;

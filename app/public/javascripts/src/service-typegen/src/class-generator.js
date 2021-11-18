@@ -4,27 +4,33 @@ var rimraf = require('rimraf')
 var Handlebars = require('handlebars')
 
 class ClassGenerator {
-  constructor () {
-  }
+  constructor () {}
 
   // The main function that generates the source code for our class definitions
   static generateSourceCode () {
+    // TODO: use GET '/v1/schema/attributes' endpoint in the app, not in build
+    var classMetas = require('./typesmeta.json')
+    // TODO: use GET '/v1/schema/json' endpoint in the app, not in build
+    var typeDefinitions = require('./types.json')
+    // TODO: use GET '/v1/schema/type-mapping' endpoint in the app, not in build
+    var dataTypeToUrnList = require('./dataTypeToUrn.json')
+
     // Register Handlebars helpers - used to compile class definition into source code
     this.registerHandlebarsHelpers(Handlebars)
-
     // Hold a list of class names to compiled strings
     var templateSource = fs.readFileSync('./class-template.hbs').toString()
     var typeToSourceCode = {}
     var handlebarsCompiler = Handlebars.compile(templateSource)
     // Create a map of type URN to its display properties
-    var classMetas = require('./typesmeta.json')
+    
     var typeToDisplayProperties = {}
     var typeToOrderedPropertyNames = {}
     classMetas.forEach((classMeta) => {
-      typeToDisplayProperties[classMeta.schemaReference] = classMeta.displayProperties
-      typeToOrderedPropertyNames[classMeta.schemaReference] = classMeta.orderedPropertyNames
+      //typeToDisplayProperties[classMeta.schemaReference] = classMeta.displayProperties.properties || []
+      typeToDisplayProperties[classMeta.schemaReference] = classMeta.displayProperties || []
+      typeToOrderedPropertyNames[classMeta.schemaReference] = classMeta.orderedPropertyNames || []
     })
-    var typeDefinitions = require('./types.json')
+    
     typeDefinitions.forEach((typeDefinition) => this.buildTypeSourceCode(typeDefinition, handlebarsCompiler, typeToSourceCode, typeToDisplayProperties, typeToOrderedPropertyNames))
 
     var referencedTypes = new Set()
@@ -42,7 +48,7 @@ class ClassGenerator {
 
         // Build the AroFeatureFactory
         var templateFactory = Handlebars.compile(fs.readFileSync('./aro-feature-factory.hbs').toString())
-        var dataTypeToUrnList = require('./dataTypeToUrn.json')
+        
         const fileName = path.join(__dirname, `../dist/AroFeatureFactory.js`)
         fs.writeFileSync(fileName, templateFactory(dataTypeToUrnList))
       })
@@ -65,22 +71,23 @@ class ClassGenerator {
     })
     Handlebars.registerHelper('toJSON', (input) => JSON.stringify(input, null, 2))
     Handlebars.registerHelper('toJSONByOrder', (input, propOrder) => {
+      var props = JSON.parse(JSON.stringify(input))
       var prepend = []
       for (var orderI = 0; orderI < propOrder.length; orderI++) {
         var propName = propOrder[orderI]
         var propIndex = -1
-        for (var inputI = 0; inputI < input.length; inputI++) {
-          if (propName == input[inputI].propertyName) {
-            propIndex = inputI
+        for (var propsI = 0; propsI < props.length; propsI++) {
+          if (propName == props[propsI].propertyName) {
+            propIndex = propsI
             break
           }
         }
         if (propIndex > -1) {
-          prepend.push(input.splice(propIndex, 1)[0])
+          prepend.push(props.splice(propIndex, 1)[0])
         }
       }
-      input = prepend.concat(input)
-      return JSON.stringify(input, null, 2)
+      props = prepend.concat(props)
+      return JSON.stringify(props, null, 2)
     })
     // Helper to detect if the object is a map (Java Map, or Javascript POJO)
     Handlebars.registerHelper('isMapObject', (input) => this.isMapObject(input))
@@ -100,9 +107,60 @@ class ClassGenerator {
       const containerUrn = this.getUrnForType(containerType)
       return (input.type === 'array') && (inputUrn !== containerUrn)
     })
+
+    Handlebars.registerHelper('buildFullDisplayProperties', (input, propOrder) => this.buildFullDisplayProperties(input, propOrder))
+
     this.registerImportsHelper(Handlebars)
     this.registerAssignmentHelper(Handlebars)
   }
+
+
+
+
+  static buildFullDisplayProperties (input, propOrder) {
+    var props = JSON.parse(JSON.stringify(input))
+    let metaProps = {}
+    props.forEach(item => {
+      // get order from propOrder
+      item.properties = {}
+      item.displayOrder = propOrder.indexOf(item.propertyName)
+      let displayDataType = item.displayDataType
+      // TODO: arrays are a problem - need to change the way service makes meta data
+      //  like what about an array of integers?
+      let len = displayDataType.length
+      if ('array[' === displayDataType.substring(0, 6)
+        && ']' === displayDataType.charAt(len-1)) {
+          displayDataType = displayDataType.substring(6, len-1)
+          len = displayDataType.length
+      }
+      if ('object{' === displayDataType.substring(0, 7)
+        && '}' === displayDataType.charAt(len-1)) {
+          displayDataType = displayDataType.substring(7, len-1)
+          len = displayDataType.length
+      }
+
+      if ('urn:' === displayDataType.substring(0, 4)) {
+        let className = this.getClassName(displayDataType)
+        item.properties = `${className}.getFullDisplayProperties()`
+      }
+      // displayDataType
+      // if is array or object
+      // item.properties = a dynamic call to type.getFullDisplayProperties
+      metaProps[item.propertyName] = item
+    })
+
+    let stringMProps = JSON.stringify(metaProps, null, 2)
+    stringMProps = stringMProps.replace(/"properties": "(.*?)"/g, (match) => {
+      return '"properties": '+ match.slice(15, -1)
+    })
+
+    //return JSON.stringify(metaProps)
+    //return JSON.stringify(metaProps, null, 2)
+    return stringMProps
+  }
+
+
+
 
   // Register a Handlebars helper that generates the "this.xyz = new Abc()" statements
   // that are used in the constructor of our class

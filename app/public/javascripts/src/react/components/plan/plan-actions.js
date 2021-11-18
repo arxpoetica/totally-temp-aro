@@ -8,6 +8,7 @@ import RingEditActions from '../ring-edit/ring-edit-actions'
 import NetworkOptimizationActions from '../optimization/network-optimization/network-optimization-actions'
 import ToolBarActions from '../header/tool-bar-actions.js'
 import AroHttp from '../../common/aro-http'
+import { batch } from 'react-redux'
 
 function setActivePlanState (planState) {
   return {
@@ -123,12 +124,17 @@ function setActivePlan (plan) {
   return (dispatch, getState) => {
     getState().plan.activePlan && getState().plan.activePlan.id &&
       SocketManager.leaveRoom('plan', getState().plan.activePlan.id) // leave previous plan
-
-    dispatch({
-      type: Actions.PLAN_SET_ACTIVE_PLAN,
-      payload: {
-        plan: plan
-      }
+    batch(() => {
+      dispatch({
+        type: Actions.PLAN_SET_ACTIVE_PLAN,
+        payload: {
+          plan: plan
+        }
+      })
+      dispatch({
+        type: Actions.NETWORK_OPTIMIZATION_SET_ACTIVE_FILTERS,
+        payload: []
+      })
     })
 
     // Join room for this plan

@@ -22,7 +22,7 @@ const defaultState = {
     analysisAreas: {}
   },
   locations: new Set(),
-  planEditorFeatures: [],
+  planEditorFeatures: [],// DEPRICATED
   mapFeatures: {},
   selection: {
     details: {
@@ -41,6 +41,8 @@ const defaultState = {
     }
   },
   isMapClicked: false,
+  selectedMapObject: null,
+  objectIdToMapObject: {},
 }
 
 function setActiveSelectionModeById (state, newSelectionModeId) {
@@ -146,6 +148,7 @@ function setRoadSegments(state, roadSegments) {
   }
 }
 
+// DEPRICATED
 function setPlanEditorSelectedFeatures (state, planEditorFeatures) {
   return { ...state,
     planEditorFeatures: planEditorFeatures
@@ -198,6 +201,12 @@ function selectionReducer (state = defaultState, action) {
 
     case Actions.SELECTION_SET_IS_MAP_CLICKED:
     return setIsMapClicked(state, action.payload)
+
+    case Actions.SELECTION_SET_SELECTED_MAP_OBJECT:
+      return { ...state, selectedMapObject: action.payload }
+
+    case Actions.SELECTION_SET_OBJECTID_TO_MAP_OBJECT:
+      return { ...state, objectIdToMapObject: action.payload }
 
     default:
       return state

@@ -16,6 +16,15 @@ class WktUtils {
     return new google.maps.LatLng(geometry.coordinates[1], geometry.coordinates[0])
   }
 
+  static pathToCoordinates (path) {
+    var pathPoints = []
+    path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
+    if (JSON.stringify(pathPoints[0]) !== JSON.stringify(pathPoints[pathPoints.length-1])) {
+      pathPoints.push(pathPoints[0]) // Close the polygon
+    }
+    return pathPoints
+  }
+
   // Converts a Google Maps Path object into a WKT MultiPolygon Geometry object
   static getWKTMultiPolygonFromGoogleMapPaths (paths) {
     var geometry = {
@@ -23,10 +32,7 @@ class WktUtils {
       coordinates: [[]]
     }
     paths.forEach((path) => {
-      var pathPoints = []
-      path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
-      pathPoints.push(pathPoints[0]) // Close the polygon
-      geometry.coordinates[0].push(pathPoints)
+      geometry.coordinates[0].push( WktUtils.pathToCoordinates(path) )
     })
     return geometry
   }
@@ -37,10 +43,7 @@ class WktUtils {
       type: 'Polygon',
       coordinates: []
     }
-    var pathPoints = []
-    path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
-    pathPoints.push(pathPoints[0]) // Close the polygon
-    geometry.coordinates.push(pathPoints)
+    geometry.coordinates.push( WktUtils.pathToCoordinates(path) )
     return geometry
   }
 

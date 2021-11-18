@@ -81,9 +81,9 @@
   padding-bottom: 4px;
   border-bottom: 2px solid #888888;
   cursor: pointer;
-  
   margin-bottom: 6px;
 }
+
 .ei-foldout-icon{
   padding-left: 0px;
   padding-right: 4px;
@@ -107,6 +107,8 @@
 
 .ei-property-label{
   flex: 1 1 50%;
+  display:flex;
+  align-items: center;
 }
 
 .ei-property-value{
@@ -135,6 +137,10 @@
 .ei-foldout-state-label, .ei-foldout-btn, .ei-foldout-state-label-bottom, .ei-sub-btn, .ei-header-info{
   font-size: 0.7em;
   font-weight: normal;
+}
+
+.ei-blank-space {
+  margin-left: 4px;
 }
 
 .ei-foldout-state-label{
@@ -346,6 +352,13 @@ tr>td.ei-table-bottomline {
   display: none;
 }
 
+.ei-foldout-width {
+  width: 100%;
+}
+
+.ei-property-name {
+  flex: 1 1 50%;
+}
 
 /* - pagination - */
 

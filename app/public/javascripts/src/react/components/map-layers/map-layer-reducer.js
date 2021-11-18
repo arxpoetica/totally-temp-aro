@@ -57,8 +57,16 @@ const defaultState = {
       displayName: 'Underground',
       isVisible: true,
       strokeType: 'UNDERGROUND_LINE'
-    }
-  }
+    },
+    'obstacle': {
+      id: null,
+      name: 'obstacle',
+      displayName: 'Obstacle',
+      isVisible: true,
+      strokeType: 'OBSTACLE_LINE'
+    },
+  },
+  activeMapLayers: {},
 }
 
 // ToDo: reafctor "checked" to be a collection of subtypes
@@ -402,6 +410,9 @@ function mapLayersReducer (state = defaultState, action) {
 
     case Actions.LAYERS_SET_EDGE_CONSTRUCTION_TYPE_IDS:
       return setEdgeConstructionTypeIds(state, action.payload)
+
+    case Actions.LAYERS_SET_ACTIVE_MAP_LAYERS:
+      return { ...state, activeMapLayers: action.payload }
 
     default:
       return state

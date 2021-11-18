@@ -1343,7 +1343,7 @@ class MapObjectEditorController {
 
   mapDispatchToTarget (dispatch) {
     return {
-      setPlanEditorFeatures: objectIds => dispatch(SelectionActions.setPlanEditorFeatures(objectIds))
+      setPlanEditorFeatures: objectIds => dispatch(SelectionActions.setPlanEditorFeatures(objectIds)),
     }
   }
 }

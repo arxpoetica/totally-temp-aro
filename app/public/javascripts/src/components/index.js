@@ -2,12 +2,13 @@
 import { react2angular } from 'react2angular'
 import { ToastContainer } from 'react-toastify'
 
+import LocationEditor from '../react/components/sidebar/view/location-editor.jsx'
+import EquipmentDetail from '../react/components/sidebar/view/equipment-info/equipment-detail.jsx'
 import NetworkPlanManage from '../react/components/sidebar/view/network-plan-manage.jsx'
 import PlanInfo from '../react/components/sidebar/view/plan-info.jsx'
 import PlanSearch from '../react/components/header/plan-search.jsx'
 import UserGroupsModal from '../react/components/global-settings/user-groups-modal.jsx'
 import NotifyBroadcastModal from '../react/components/global-settings/notify-broadcast-modal.jsx'
-import SummaryReports from '../react/components/sidebar/view/summary-reports.jsx'
 import CoverageBoundary from '../react/components/sidebar/view/coverage-boundary.jsx'
 import RoadSegmentDetail from '../react/components/sidebar/view/road-segment-detail.jsx'
 import BoundaryDetail from '../react/components/sidebar/view/boundary-detail.jsx'
@@ -62,17 +63,13 @@ import ToolBox from '../react/components/tool/tool-box.jsx'
 import UINotifications from '../react/components/notification/ui-notifications.jsx'
 
 import boundaryDetail from './sidebar/view/boundary-detail'
-import equipmentDetail from './sidebar/view/equipment-detail'
-import equipmentDetailList from './sidebar/view/equipment-detail-list'
 import roadSegmentDetail from './sidebar/view/road-segment-detail'
 import coverageBoundary from './sidebar/view/coverage-boundary'
-import locationEditor from './sidebar/view/location-editor'
 import viewMode from './sidebar/view/view-mode'
 import planInfoRecent from './sidebar/view/plan-info-recent'
 import aroSearch from './sidebar/view/aro-search'
 import aroMultiselectSearch from './sidebar/view/aro-multiselect-search'
 import displayModeButtons from './sidebar/display-mode-buttons'
-import summaryReports from './sidebar/summary-reports'
 import analysisExpertMode from './sidebar/analysis/analysis-expert-mode'
 import analysisMode from './sidebar/analysis/analysis-mode'
 
@@ -87,11 +84,7 @@ import coverageReportDownloader from './sidebar/analysis/coverage/coverage-repor
 import networkBuildOutput from './sidebar/analysis/network-build/network-build-output'
 import ringEditor from './sidebar/ring-editor'
 import draggableButton from './sidebar/plan-editor/draggable-button'
-import planEditor from './sidebar/plan-editor/plan-editor'
 import planEditorContainer from './sidebar/plan-editor/plan-editor-container'
-import equipmentPropertiesEditor from './sidebar/plan-editor/equipment-properties-editor'
-import boundaryPropertiesEditor from './sidebar/plan-editor/boundary-properties-editor'
-import planSummary from './sidebar/plan-editor/plan-summary'
 import serviceLayerEditor from './sidebar/plan-editor/service-layer-editor'
 import boundaries from './views/boundaries'
 import locations from './views/locations'
@@ -110,7 +103,6 @@ import aroPanel from './common/aro-panel'
 import aroMultiSelect from './common/aro-multiselect'
 import mapObjectEditor from './common/map-object-editor'
 import contextMenu from './common/context-menu/context-menu'
-import boundaryCoverage from './common/boundary-coverage'
 import dropTarget from './common/drop-target'
 import resourcePermissionsEditor from './common/resource-permissions-editor'
 import aroDrawingManager from './common/aro-drawing-manager'
@@ -135,17 +127,13 @@ import tileDataService from '../components/tiles/tile-data-service'
 import reduxConfig from '../redux-config'
 
 app.component('boundaryDetail', boundaryDetail)
-  .component('equipmentDetail', equipmentDetail)
-  .component('equipmentDetailList', equipmentDetailList)
   .component('roadSegmentDetail', roadSegmentDetail)
   .component('coverageBoundary', coverageBoundary)
-  .component('locationEditor', locationEditor)
   .component('viewMode', viewMode)
   .component('planInfoRecent', planInfoRecent)
   .component('aroSearch', aroSearch)
   .component('aroMultiselectSearch', aroMultiselectSearch)
   .component('displayModeButtons', displayModeButtons)
-  .component('summaryReports', summaryReports)
   .component('analysisExpertMode', analysisExpertMode)
   .component('analysisMode', analysisMode)
   .component('locationRoicReports', locationRoicReports)
@@ -157,11 +145,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('coverageReportDownloader', coverageReportDownloader)
   .component('networkBuildOutput', networkBuildOutput)
   .component('ringEditor', ringEditor)
-  .component('planEditor', planEditor)
   .component('planEditorContainer', planEditorContainer)
-  .component('equipmentPropertiesEditor', equipmentPropertiesEditor)
-  .component('boundaryPropertiesEditor', boundaryPropertiesEditor)
-  .component('planSummary', planSummary)
   .component('serviceLayerEditor', serviceLayerEditor)
   .component('draggableButton', draggableButton)
   .component('boundaries', boundaries)
@@ -182,7 +166,6 @@ app.component('boundaryDetail', boundaryDetail)
   .component('aroMultiSelect', aroMultiSelect)
   .component('mapObjectEditor', mapObjectEditor)
   .component('contextMenu', contextMenu)
-  .component('boundaryCoverage', boundaryCoverage)
   .component('dropTarget', dropTarget)
   .component('resourcePermissionsEditor', resourcePermissionsEditor)
   .component('aroDrawingManager', aroDrawingManager)
@@ -197,16 +180,17 @@ app.component('boundaryDetail', boundaryDetail)
   .component('editorInterfacePrimitive', editorInterfacePrimitive)
   .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
 // ReactJS components
+  .component('rLocationEditor', react2angular(LocationEditor))
+  .component('rEquipmentDetail', react2angular(EquipmentDetail))
   .component('rNetworkPlanManage', react2angular(NetworkPlanManage))
   .component('rPlanInfo', react2angular(PlanInfo))
   .component('rPlanSearch', react2angular(PlanSearch))
   .component('userGroupsModal', react2angular(UserGroupsModal))
   .component('notifyBroadcastModal', react2angular(NotifyBroadcastModal))
-  .component('rSummaryReports', react2angular(SummaryReports))
   .component('rCoverageBoundary', react2angular(CoverageBoundary, ['mapGlobalObjectName']))  
   .component('rRoadSegmentDetail', react2angular(RoadSegmentDetail))
   .component('rBoundaryDetail', react2angular(BoundaryDetail))
-  .component('rAroSearch', react2angular(AroSearch, ['objectName', 'labelId', 'entityType', 'searchColumn', 'configuration']))
+  .component('rAroSearch', react2angular(AroSearch, ['objectName', 'labelId', 'entityType', 'select', 'searchColumn', 'configuration']))
   .component('rRingEditor', react2angular(RingEditor))
   .component('rAnalysisMode', react2angular(AnalysisMode))
   .component('rAroDebug', react2angular(AroDebug))

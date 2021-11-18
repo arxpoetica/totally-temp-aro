@@ -21,17 +21,7 @@ function parseColor(input) {
   return input.split("(")[1].split(")")[0].split(",").map(x=>+x)
 }
 
-function defaultStroke (ctx) {
-  // no change to the line style
-  ctx.stroke()
-}
-
-function aerialStroke (ctx) {
-  var oLineCap = ctx.lineCap
-  var oLineWidth = ctx.lineWidth
-  var oStrokeStyle = ctx.strokeStyle
-  ctx.lineCap = 'butt'
-
+function findNegativeColor (oStrokeStyle) {
   var negativeColor = '#ffffff'
   if ('string' === typeof oStrokeStyle) {
     let color = parseColor(oStrokeStyle)
@@ -43,6 +33,22 @@ function aerialStroke (ctx) {
     // if saturation is under 50% and lightness is grerater than 75%, use a black line instead of a white one
     if (derv2 <= 170 && avg >= 185) negativeColor = '#000000'
   }
+  return negativeColor
+}
+
+
+function defaultStroke (ctx) {
+  // no change to the line style
+  ctx.stroke()
+}
+
+function aerialStroke (ctx) {
+  var oLineCap = ctx.lineCap
+  var oLineWidth = ctx.lineWidth
+  var oStrokeStyle = ctx.strokeStyle
+  ctx.lineCap = 'butt'
+
+  var negativeColor = findNegativeColor(oStrokeStyle)
 
   ctx.lineWidth = 1.5 * oLineWidth
   ctx.stroke()
@@ -79,6 +85,33 @@ function undergroundStroke (ctx) {
   ctx.lineCap = oLineCap
 }
 
+function obstacleStroke (ctx) {
+  var oLineCap = ctx.lineCap
+  var oLineWidth = ctx.lineWidth
+  var oLineDash = ctx.getLineDash()
+  var oStrokeStyle = ctx.strokeStyle
+  ctx.lineCap = 'butt'
+
+  var negativeColor = findNegativeColor(oStrokeStyle)
+
+  ctx.lineWidth = 1.5 * oLineWidth
+  ctx.setLineDash([2,2]) //3,2
+  ctx.stroke()
+
+  ctx.lineWidth = 0.5 * oLineWidth
+  ctx.setLineDash([])
+  ctx.stroke()
+
+  ctx.strokeStyle = negativeColor
+  ctx.setLineDash([1,4,3,0]) // 2,4,4,0
+  ctx.stroke()
+  // restore
+  ctx.strokeStyle = oStrokeStyle
+  ctx.lineWidth = oLineWidth
+  ctx.setLineDash(oLineDash)
+  ctx.lineCap = oLineCap
+}
+
 var StrokeStyle = {
   'DEFAULT_LINE': {
     'previewImg': null,
@@ -95,6 +128,10 @@ var StrokeStyle = {
   'UNDERGROUND_LINE': {
     'previewImg': null,
     'styledStroke': undergroundStroke
+  },
+  'OBSTACLE_LINE': {
+    'previewImg': null,
+    'styledStroke': obstacleStroke
   },
 }
 

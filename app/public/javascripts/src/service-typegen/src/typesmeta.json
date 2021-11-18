@@ -3,6 +3,7 @@
     "schemaReference": "urn:jsonschema:com:altvil:aro:service:tags:TagMapping",
     "orderedPropertyNames": [
       "global",
+      "categoryTags",
       "linkTags"
     ],
     "displayProperties": [
@@ -18,6 +19,17 @@
         "editable": true
       },
       {
+        "propertyName": "categoryTags",
+        "levelOfDetail": 0,
+        "format": "",
+        "displayName": "Category Tags",
+        "enumTypeURL": "",
+        "displayDataType": "object{null}",
+        "defaultValue": "${ctx.createClass(object{null})}",
+        "visible": true,
+        "editable": true
+      },
+      {
         "propertyName": "linkTags",
         "levelOfDetail": 0,
         "format": "",
@@ -25,6 +37,37 @@
         "enumTypeURL": "",
         "displayDataType": "object{urn:jsonschema:com:altvil:aro:service:tags:GeogTags}",
         "defaultValue": "${ctx.createClass(object{urn:jsonschema:com:altvil:aro:service:tags:GeogTags})}",
+        "visible": true,
+        "editable": true
+      }
+    ]
+  },
+  {
+    "schemaReference": "urn:jsonschema:com:altvil:aro:model:manager:rr:plan:NetworkArchitectureConfig",
+    "orderedPropertyNames": [
+      "managerType",
+      "networkConfigurations"
+    ],
+    "displayProperties": [
+      {
+        "propertyName": "managerType",
+        "levelOfDetail": 0,
+        "format": "",
+        "displayName": "Manager Type",
+        "enumTypeURL": "",
+        "displayDataType": "string",
+        "defaultValue": "",
+        "visible": true,
+        "editable": true
+      },
+      {
+        "propertyName": "networkConfigurations",
+        "levelOfDetail": 0,
+        "format": "",
+        "displayName": "Network Configurations",
+        "enumTypeURL": "",
+        "displayDataType": "object{null}",
+        "defaultValue": "${ctx.createClass(object{null})}",
         "visible": true,
         "editable": true
       }
@@ -151,6 +194,17 @@
         "defaultValue": "",
         "visible": true,
         "editable": true
+      },
+      {
+        "propertyName": "exportedAttributes",
+        "levelOfDetail": 0,
+        "format": "",
+        "displayName": "Exported Attributes",
+        "enumTypeURL": "",
+        "displayDataType": "object{null}",
+        "defaultValue": "${ctx.createClass(object{null})}",
+        "visible": true,
+        "editable": true
       }
     ]
   },
@@ -220,7 +274,8 @@
       "locationCategory",
       "tagMapping",
       "workflowState",
-      "censusBlockId"
+      "censusBlockId",
+      "exportedAttributes"
     ],
     "displayProperties": [
       {
@@ -313,6 +368,17 @@
         "defaultValue": "0",
         "visible": true,
         "editable": false
+      },
+      {
+        "propertyName": "exportedAttributes",
+        "levelOfDetail": 0,
+        "format": "",
+        "displayName": "Exported Attributes",
+        "enumTypeURL": "",
+        "displayDataType": "object{null}",
+        "defaultValue": "${ctx.createClass(object{null})}",
+        "visible": true,
+        "editable": true
       }
     ]
   },
@@ -406,7 +472,8 @@
       "subtypeId",
       "networkNodeEquipment",
       "subnetId",
-      "deploymentType"
+      "deploymentType",
+      "exportedAttributes"
     ],
     "displayProperties": [
       {
@@ -510,6 +577,17 @@
         "defaultValue": "",
         "visible": true,
         "editable": true
+      },
+      {
+        "propertyName": "exportedAttributes",
+        "levelOfDetail": 0,
+        "format": "",
+        "displayName": "Exported Attributes",
+        "enumTypeURL": "",
+        "displayDataType": "object{null}",
+        "defaultValue": "${ctx.createClass(object{null})}",
+        "visible": true,
+        "editable": true
       }
     ]
   },
@@ -524,7 +602,8 @@
       "networkNodeType",
       "networkObjectId",
       "deploymentType",
-      "product"
+      "product",
+      "exportedAttributes"
     ],
     "displayProperties": [
       {
@@ -627,6 +706,17 @@
         "defaultValue": "${ctx.createClass(object{urn:jsonschema:com:altvil:aro:model:NetworkProductEntity})}",
         "visible": true,
         "editable": true
+      },
+      {
+        "propertyName": "exportedAttributes",
+        "levelOfDetail": 0,
+        "format": "",
+        "displayName": "Exported Attributes",
+        "enumTypeURL": "",
+        "displayDataType": "object{null}",
+        "defaultValue": "${ctx.createClass(object{null})}",
+        "visible": true,
+        "editable": true
       }
     ]
   },
@@ -698,7 +788,11 @@
       "t1",
       "physicallyLinked",
       "fiberAvailable",
-      "fiberCapacity"
+      "fiberCapacity",
+      "route",
+      "fiberSize",
+      "fiberCount",
+      "buildType"
     ],
     "displayProperties": [
       {
@@ -790,15 +884,26 @@
         "enumEntityName": "",
         "enumTypeURL": "",
         "displayDataType": "integer",
-        "defaultValue": "0",
-        "editable": true,
-        "visible": true
+        "defaultValue": "",
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "t1",
         "levelOfDetail": 0,
         "format": "",
         "displayName": "T 1",
+        "enumTypeURL": "",
+        "displayDataType": "boolean",
+        "defaultValue": "false",
+        "visible": true,
+        "editable": true
+      },
+      {
+        "propertyName": "physicallyLinked",
+        "levelOfDetail": 0,
+        "format": "",
+        "displayName": "Physically Linked",
         "enumTypeURL": "",
         "displayDataType": "boolean",
         "defaultValue": "false",
@@ -817,13 +922,50 @@
         "editable": true
       },
       {
-        "propertyName": "physicallyLinked",
-        "levelOfDetail": 0,
+        "propertyName": "route",
+        "levelOfDetail": 1,
         "format": "",
-        "displayName": "Physically Linked",
+        "displayName": "Route",
+        "enumEntityName": "",
         "enumTypeURL": "",
-        "displayDataType": "boolean",
-        "defaultValue": "false",
+        "displayDataType": "string",
+        "defaultValue": "",
+        "visible": true,
+        "editable": true
+      },
+      {
+        "propertyName": "fiberSize",
+        "levelOfDetail": 1,
+        "format": "",
+        "displayName": "Fiber Size",
+        "enumEntityName": "",
+        "enumTypeURL": "",
+        "displayDataType": "integer",
+        "defaultValue": "0",
+        "visible": true,
+        "editable": true
+      },
+      {
+        "propertyName": "fiberCount",
+        "levelOfDetail": 1,
+        "format": "",
+        "displayName": "Fiber Count",
+        "enumEntityName": "",
+        "enumTypeURL": "",
+        "displayDataType": "string",
+        "defaultValue": "",
+        "visible": true,
+        "editable": true
+      },
+      {
+        "propertyName": "buildType",
+        "levelOfDetail": 1,
+        "format": "",
+        "displayName": "Build Type",
+        "enumEntityName": "",
+        "enumTypeURL": "",
+        "displayDataType": "string",
+        "defaultValue": "",
         "visible": true,
         "editable": true
       }

@@ -4,6 +4,7 @@ import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import ContextMenuActions from '../context-menu/actions'
 import PlanEditorActions from '../plan-editor/plan-editor-actions'
+import ViewSettingsActions from '../view-settings/view-settings-actions'
 import MenuItemFeature from './menu-item-feature'
 import './context-menu.css'
 
@@ -13,7 +14,8 @@ export class ContextMenu extends Component {
     this.MAX_MENU_ITEMS = 6
     this.handleBackdropMouseDown = this.handleBackdropMouseDown.bind(this)
     this.actionModules = {
-      PlanEditorActions: PlanEditorActions
+      PlanEditorActions: PlanEditorActions,
+      ViewSettingsActions: ViewSettingsActions,
     }
   }
 
@@ -108,7 +110,21 @@ export class ContextMenu extends Component {
       DELETE: {
         text: 'Delete',
         cssClass: 'fas fa-trash-alt pl-2 pr-2'
-      }
+      },
+      DELETE_ALL: {
+        text: 'Delete All',
+        cssClass: 'fas fa-trash-alt pl-2 pr-2'
+      },
+      ADD: {
+        text: 'Add',
+        //cssClass: 'fas fa-circle-plus pl-2 pr-2'
+        cssClass: 'fas fa-mouse-pointer pl-2 pr-2'
+      },
+      REMOVE: {
+        text: 'Remove',
+        //cssClass: 'fas fa-circle-minus pl-2 pr-2'
+        cssClass: 'fas fa-trash-alt pl-2 pr-2'
+      },
     }
     return <ul className='dropdown-menu sub-menu' style={{ top: (menuItemIndex * 38 + (numberOfMenuItems > this.MAX_MENU_ITEMS ? 20 : 0)) + 'px', padding: '0px' }}>
       {

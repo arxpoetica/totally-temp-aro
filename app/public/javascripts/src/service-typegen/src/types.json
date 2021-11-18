@@ -9,6 +9,12 @@
           "type": "integer"
         }
       },
+      "categoryTags": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "integer"
+        }
+      },
       "linkTags": {
         "type": "object",
         "id": "urn:jsonschema:com:altvil:aro:service:tags:GeogTags",
@@ -51,46 +57,306 @@
   },
   {
     "type": "object",
-    "id": "urn:jsonschema:com:altvil:aro:service:feature:model:ServiceAreaFeature",
+    "id": "urn:jsonschema:com:altvil:aro:model:manager:rr:plan:NetworkArchitectureConfig",
     "properties": {
-      "dataType": {
+      "managerType": {
         "type": "string",
         "enum": [
-          "unknown",
-          "location",
-          "edge",
-          "equipment",
-          "fiber",
-          "construction_location",
-          "service_layer",
-          "tile_system",
-          "cable_construction_area",
-          "equipment_boundary",
-          "census_block",
-          "subnet"
+          "undefined",
+          "price_book",
+          "tsm_manager",
+          "competition_manager",
+          "roic_manager",
+          "arpu_manager",
+          "impedance_mapping_manager",
+          "rate_reach_manager",
+          "network_architecture_manager",
+          "fusion_manager",
+          "planning_constraints_manager"
         ]
       },
-      "objectId": {
-        "type": "string"
-      },
-      "geometry": {
-        "type": "any",
-        "description": "type=Geometry"
-      },
-      "attributes": {
+      "networkConfigurations": {
         "type": "object",
         "additionalProperties": {
-          "type": "string"
+          "type": "object",
+          "id": "urn:jsonschema:com:altvil:aro:service:graph:transform:model:module:NetworkConfiguration",
+          "properties": {
+            "fiberConstraintConfig": {
+              "type": "object",
+              "id": "urn:jsonschema:com:altvil:aro:service:graph:transform:model:constraint:FiberConstraintConfig",
+              "properties": {
+                "version": {
+                  "type": "integer"
+                },
+                "maxFiberDistance": {
+                  "type": "number"
+                },
+                "maxNetworkNodeToEdgeDistance": {
+                  "type": "number"
+                },
+                "maxLocationToEdgeDistance": {
+                  "type": "number"
+                },
+                "entityDistanceMap": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "number"
+                  }
+                },
+                "equipmentDistanceMap": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "number"
+                  }
+                },
+                "inferCoWhenAbsent": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "bulkFiberConfig": {
+              "type": "object",
+              "id": "urn:jsonschema:com:altvil:aro:service:graph:transform:model:bulk:BulkFiberConfig",
+              "properties": {
+                "version": {
+                  "type": "integer"
+                },
+                "bulkConnectorConfig": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "id": "urn:jsonschema:com:altvil:aro:service:graph:transform:model:bulk:BulkConnectorConfig",
+                    "properties": {
+                      "assignmentStrategy": {
+                        "type": "string",
+                        "enum": [
+                          "Undefined",
+                          "SingleConnection",
+                          "DropCoil",
+                          "MultiDwellingUnit",
+                          "MultiDwelingUnit"
+                        ]
+                      },
+                      "nodeType": {
+                        "type": "string",
+                        "enum": [
+                          "undefined",
+                          "central_office",
+                          "splice_point",
+                          "fiber_distribution_hub",
+                          "fiber_distribution_terminal",
+                          "bulk_distribution_terminal",
+                          "bulk_distribution_consumer",
+                          "cell_5g",
+                          "junction_splitter",
+                          "dslam",
+                          "loop_extender",
+                          "network_anchor",
+                          "multiple_dwelling_unit",
+                          "location_connector",
+                          "subnet_node",
+                          "network_connector",
+                          "olt"
+                        ]
+                      },
+                      "equipmentCode": {
+                        "type": "string"
+                      },
+                      "supportedFiberTypes": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "ROOT",
+                            "UNKNOWN",
+                            "BACKBONE",
+                            "FEEDER",
+                            "DISTRIBUTION",
+                            "DROP",
+                            "IOF"
+                          ]
+                        }
+                      },
+                      "supportedNetworkTypes": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "Undefined",
+                            "Fiber",
+                            "Copper",
+                            "FiveG",
+                            "Mixed"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "hubConfiguration": {
+              "type": "object",
+              "id": "urn:jsonschema:com:altvil:aro:service:graph:transform:model:node:DistributionNodeConfig",
+              "properties": {
+                "version": {
+                  "type": "integer"
+                },
+                "inputPort": {
+                  "type": "object",
+                  "id": "urn:jsonschema:com:altvil:aro:service:graph:transform:model:port:PortConstraintConfig",
+                  "properties": {
+                    "min": {
+                      "type": "integer"
+                    },
+                    "target": {
+                      "type": "integer"
+                    },
+                    "max": {
+                      "type": "integer"
+                    },
+                    "types": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "FS_1X1",
+                          "FS_1X4",
+                          "FS_1X8",
+                          "FS_1X12",
+                          "FS_1X32"
+                        ]
+                      }
+                    }
+                  }
+                },
+                "outputConfig": {
+                  "type": "object",
+                  "$ref": "urn:jsonschema:com:altvil:aro:service:graph:transform:model:port:PortConstraintConfig"
+                },
+                "maxDistanceMeters": {
+                  "type": "number"
+                },
+                "optimizeSpans": {
+                  "type": "boolean"
+                },
+                "mergeBucketSize": {
+                  "type": "integer"
+                },
+                "distanceConstraintStrategy": {
+                  "type": "string",
+                  "enum": [
+                    "HONOR_DISTANCE",
+                    "ALWAYS_CONNECT"
+                  ]
+                }
+              }
+            },
+            "terminalConfiguration": {
+              "type": "object",
+              "$ref": "urn:jsonschema:com:altvil:aro:service:graph:transform:model:node:DistributionNodeConfig"
+            },
+            "fiberCapacityConfig": {
+              "type": "object",
+              "id": "urn:jsonschema:com:altvil:aro:service:graph:transform:model:capacity:impl:FiberCapacityConfig",
+              "properties": {
+                "version": {
+                  "type": "integer"
+                },
+                "rules": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "id": "urn:jsonschema:com:altvil:aro:service:graph:transform:model:capacity:impl:FiberCapacityRule",
+                    "properties": {
+                      "ruleType": {
+                        "type": "string",
+                        "enum": [
+                          "AtomicUnitsPerEntity",
+                          "AtomicUnitsPerEmployee"
+                        ]
+                      },
+                      "locationEntityType": {
+                        "type": "string",
+                        "enum": [
+                          "undefined",
+                          "small",
+                          "medium",
+                          "large",
+                          "household",
+                          "celltower"
+                        ]
+                      },
+                      "fiberCapacityType": {
+                        "type": "string",
+                        "enum": [
+                          "Undefined",
+                          "SingleConnection",
+                          "DropCoil",
+                          "MultiDwellingUnit",
+                          "MultiDwelingUnit"
+                        ]
+                      },
+                      "atomicUnits": {
+                        "type": "number"
+                      }
+                    }
+                  }
+                },
+                "consolidationRules": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "id": "urn:jsonschema:com:altvil:aro:service:graph:transform:model:capacity:impl:ConsolidationRule",
+                    "properties": {
+                      "capacityType": {
+                        "type": "string",
+                        "enum": [
+                          "Undefined",
+                          "SingleConnection",
+                          "DropCoil",
+                          "MultiDwellingUnit",
+                          "MultiDwelingUnit"
+                        ]
+                      },
+                      "strategy": {
+                        "type": "string",
+                        "enum": [
+                          "AGGREGATE",
+                          "UPGRADE"
+                        ]
+                      },
+                      "threshold": {
+                        "type": "integer"
+                      },
+                      "updgradedCapacityType": {
+                        "type": "string",
+                        "enum": [
+                          "Undefined",
+                          "SingleConnection",
+                          "DropCoil",
+                          "MultiDwellingUnit",
+                          "MultiDwelingUnit"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "routingMode": {
+              "type": "string",
+              "enum": [
+                "UNDEFINED",
+                "DEFAULT",
+                "DIRECT_ROUTING",
+                "ODN_1",
+                "ODN_2",
+                "ODN_3"
+              ]
+            }
+          }
         }
-      },
-      "name": {
-        "type": "string"
-      },
-      "code": {
-        "type": "string"
-      },
-      "source_id": {
-        "type": "string"
       }
     }
   },
@@ -124,17 +390,29 @@
           "hsiEnabled": {
             "type": "boolean"
           },
+          "fiberCapacity": {
+            "type": "integer"
+          },
           "t1": {
             "type": "boolean"
           },
-          "fiberAvailable": {
-            "type": "boolean"
+          "route": {
+            "type": "string"
+          },
+          "fiberSize": {
+            "type": "integer"
+          },
+          "fiberCount": {
+            "type": "string"
+          },
+          "buildType": {
+            "type": "string"
           },
           "physicallyLinked": {
             "type": "boolean"
           },
-          "fiberCapacity": {
-            "type": "integer"
+          "fiberAvailable": {
+            "type": "boolean"
           }
         }
       },
@@ -289,7 +567,8 @@
           "cable_construction_area",
           "equipment_boundary",
           "census_block",
-          "subnet"
+          "subnet",
+          "copper_cable"
         ]
       },
       "objectId": {
@@ -320,6 +599,12 @@
           "global": {
             "type": "array",
             "items": {
+              "type": "integer"
+            }
+          },
+          "categoryTags": {
+            "type": "object",
+            "additionalProperties": {
               "type": "integer"
             }
           },
@@ -356,6 +641,334 @@
       },
       "censusBlockId": {
         "type": "integer"
+      },
+      "exportedAttributes": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "type": "object",
+    "id": "urn:jsonschema:com:altvil:aro:service:feature:model:EquipmentBoundaryFeature",
+    "properties": {
+      "dataType": {
+        "type": "string",
+        "enum": [
+          "unknown",
+          "location",
+          "edge",
+          "equipment",
+          "fiber",
+          "construction_location",
+          "service_layer",
+          "tile_system",
+          "cable_construction_area",
+          "equipment_boundary",
+          "census_block",
+          "subnet",
+          "copper_cable"
+        ]
+      },
+      "objectId": {
+        "type": "string"
+      },
+      "geometry": {
+        "type": "any",
+        "description": "type=Geometry"
+      },
+      "attributes": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "boundaryTypeId": {
+        "type": "integer"
+      },
+      "networkNodeType": {
+        "type": "string",
+        "enum": [
+          "undefined",
+          "central_office",
+          "splice_point",
+          "fiber_distribution_hub",
+          "fiber_distribution_terminal",
+          "bulk_distribution_terminal",
+          "bulk_distribution_consumer",
+          "cell_5g",
+          "junction_splitter",
+          "dslam",
+          "loop_extender",
+          "network_anchor",
+          "multiple_dwelling_unit",
+          "location_connector",
+          "subnet_node",
+          "network_connector",
+          "olt"
+        ]
+      },
+      "networkObjectId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "deploymentType": {
+        "type": "string",
+        "enum": [
+          "UNDEFINED",
+          "INSTALLED",
+          "PLANNED"
+        ]
+      },
+      "product": {
+        "type": "object",
+        "id": "urn:jsonschema:com:altvil:aro:model:NetworkProductEntity",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "productType": {
+            "type": "string",
+            "enum": [
+              "undefined",
+              "fiber",
+              "dsl",
+              "ethernet",
+              "fixed_wireles"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "speed": {
+            "type": "object",
+            "id": "urn:jsonschema:com:altvil:aro:model:SpeedEntity",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "minDown": {
+                "type": "integer"
+              },
+              "maxDown": {
+                "type": "integer"
+              },
+              "strength": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      },
+      "exportedAttributes": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "type": "object",
+    "id": "urn:jsonschema:com:altvil:aro:model:node:SiteInfo",
+    "properties": {
+      "deploymentDate": {
+        "type": "integer",
+        "format": "utc-millisec"
+      },
+      "siteClli": {
+        "type": "string"
+      },
+      "siteName": {
+        "type": "string"
+      },
+      "address": {
+        "type": "string"
+      },
+      "dpiEnvironment": {
+        "type": "string"
+      },
+      "hsiOfficeCode": {
+        "type": "string"
+      },
+      "hsiEnabled": {
+        "type": "boolean"
+      },
+      "fiberCapacity": {
+        "type": "integer"
+      },
+      "t1": {
+        "type": "boolean"
+      },
+      "route": {
+        "type": "string"
+      },
+      "fiberSize": {
+        "type": "integer"
+      },
+      "fiberCount": {
+        "type": "string"
+      },
+      "buildType": {
+        "type": "string"
+      },
+      "physicallyLinked": {
+        "type": "boolean"
+      },
+      "fiberAvailable": {
+        "type": "boolean"
+      }
+    }
+  },
+  {
+    "type": "object",
+    "id": "urn:jsonschema:com:altvil:aro:model:NetworkProductEntity",
+    "properties": {
+      "id": {
+        "type": "integer"
+      },
+      "productType": {
+        "type": "string",
+        "enum": [
+          "undefined",
+          "fiber",
+          "dsl",
+          "ethernet",
+          "fixed_wireles"
+        ]
+      },
+      "name": {
+        "type": "string"
+      },
+      "speed": {
+        "type": "object",
+        "id": "urn:jsonschema:com:altvil:aro:model:SpeedEntity",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "minDown": {
+            "type": "integer"
+          },
+          "maxDown": {
+            "type": "integer"
+          },
+          "strength": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  },
+  {
+    "type": "object",
+    "id": "urn:jsonschema:com:altvil:aro:service:price:EquipmentComponent",
+    "properties": {
+      "equipmentTypeCategoryId": {
+        "type": "integer"
+      },
+      "equipmentItemId": {
+        "type": "integer"
+      },
+      "quantity": {
+        "type": "number"
+      },
+      "constructionCost": {
+        "type": "number"
+      },
+      "installCost": {
+        "type": "number"
+      },
+      "rank": {
+        "type": "integer"
+      },
+      "equipmentName": {
+        "type": "string"
+      },
+      "code": {
+        "type": "string"
+      },
+      "extendedAttributes": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "subComponents": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "$ref": "urn:jsonschema:com:altvil:aro:service:price:EquipmentComponent"
+        }
+      },
+      "oneTimeCost": {
+        "type": "boolean"
+      }
+    }
+  },
+  {
+    "type": "object",
+    "id": "urn:jsonschema:com:altvil:aro:service:feature:model:ServiceAreaFeature",
+    "properties": {
+      "dataType": {
+        "type": "string",
+        "enum": [
+          "unknown",
+          "location",
+          "edge",
+          "equipment",
+          "fiber",
+          "construction_location",
+          "service_layer",
+          "tile_system",
+          "cable_construction_area",
+          "equipment_boundary",
+          "census_block",
+          "subnet",
+          "copper_cable"
+        ]
+      },
+      "objectId": {
+        "type": "string"
+      },
+      "geometry": {
+        "type": "any",
+        "description": "type=Geometry"
+      },
+      "attributes": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "name": {
+        "type": "string"
+      },
+      "code": {
+        "type": "string"
+      },
+      "source_id": {
+        "type": "string"
+      },
+      "exportedAttributes": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
       }
     }
   },
@@ -377,7 +990,8 @@
           "cable_construction_area",
           "equipment_boundary",
           "census_block",
-          "subnet"
+          "subnet",
+          "copper_cable"
         ]
       },
       "objectId": {
@@ -411,7 +1025,8 @@
           "multiple_dwelling_unit",
           "location_connector",
           "subnet_node",
-          "network_connector"
+          "network_connector",
+          "olt"
         ]
       },
       "subtypeId": {
@@ -447,13 +1062,28 @@
               "hsiEnabled": {
                 "type": "boolean"
               },
+              "fiberCapacity": {
+                "type": "integer"
+              },
               "t1": {
                 "type": "boolean"
               },
-              "fiberAvailable": {
-                "type": "boolean"
+              "route": {
+                "type": "string"
+              },
+              "fiberSize": {
+                "type": "integer"
+              },
+              "fiberCount": {
+                "type": "string"
+              },
+              "buildType": {
+                "type": "string"
               },
               "physicallyLinked": {
+                "type": "boolean"
+              },
+              "fiberAvailable": {
                 "type": "boolean"
               }
             }
@@ -568,78 +1198,8 @@
         }
       },
       "subnetId": {
-        "type": "string"
-      },
-      "deploymentType": {
         "type": "string",
-        "enum": [
-          "UNDEFINED",
-          "INSTALLED",
-          "PLANNED"
-        ]
-      }
-    }
-  },
-  {
-    "type": "object",
-    "id": "urn:jsonschema:com:altvil:aro:service:feature:model:EquipmentBoundaryFeature",
-    "properties": {
-      "dataType": {
-        "type": "string",
-        "enum": [
-          "unknown",
-          "location",
-          "edge",
-          "equipment",
-          "fiber",
-          "construction_location",
-          "service_layer",
-          "tile_system",
-          "cable_construction_area",
-          "equipment_boundary",
-          "census_block",
-          "subnet"
-        ]
-      },
-      "objectId": {
-        "type": "string"
-      },
-      "geometry": {
-        "type": "any",
-        "description": "type=Geometry"
-      },
-      "attributes": {
-        "type": "object",
-        "additionalProperties": {
-          "type": "string"
-        }
-      },
-      "boundaryTypeId": {
-        "type": "integer"
-      },
-      "networkNodeType": {
-        "type": "string",
-        "enum": [
-          "undefined",
-          "central_office",
-          "splice_point",
-          "fiber_distribution_hub",
-          "fiber_distribution_terminal",
-          "bulk_distribution_terminal",
-          "bulk_distribution_consumer",
-          "cell_5g",
-          "junction_splitter",
-          "dslam",
-          "loop_extender",
-          "network_anchor",
-          "multiple_dwelling_unit",
-          "location_connector",
-          "subnet_node",
-          "network_connector"
-        ]
-      },
-      "networkObjectId": {
-        "type": "string"
+        "format": "uuid"
       },
       "deploymentType": {
         "type": "string",
@@ -649,180 +1209,11 @@
           "PLANNED"
         ]
       },
-      "product": {
-        "type": "object",
-        "id": "urn:jsonschema:com:altvil:aro:model:NetworkProductEntity",
-        "properties": {
-          "id": {
-            "type": "integer"
-          },
-          "productType": {
-            "type": "string",
-            "enum": [
-              "undefined",
-              "fiber",
-              "dsl",
-              "ethernet",
-              "fixed_wireles"
-            ]
-          },
-          "name": {
-            "type": "string"
-          },
-          "speed": {
-            "type": "object",
-            "id": "urn:jsonschema:com:altvil:aro:model:SpeedEntity",
-            "properties": {
-              "id": {
-                "type": "integer"
-              },
-              "name": {
-                "type": "string"
-              },
-              "description": {
-                "type": "string"
-              },
-              "minDown": {
-                "type": "integer"
-              },
-              "maxDown": {
-                "type": "integer"
-              },
-              "strength": {
-                "type": "number"
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-  {
-    "type": "object",
-    "id": "urn:jsonschema:com:altvil:aro:model:node:SiteInfo",
-    "properties": {
-      "deploymentDate": {
-        "type": "integer",
-        "format": "utc-millisec"
-      },
-      "siteClli": {
-        "type": "string"
-      },
-      "siteName": {
-        "type": "string"
-      },
-      "address": {
-        "type": "string"
-      },
-      "dpiEnvironment": {
-        "type": "string"
-      },
-      "hsiOfficeCode": {
-        "type": "string"
-      },
-      "hsiEnabled": {
-        "type": "boolean"
-      },
-      "t1": {
-        "type": "boolean"
-      },
-      "fiberAvailable": {
-        "type": "boolean"
-      },
-      "physicallyLinked": {
-        "type": "boolean"
-      }
-    }
-  },
-  {
-    "type": "object",
-    "id": "urn:jsonschema:com:altvil:aro:model:NetworkProductEntity",
-    "properties": {
-      "id": {
-        "type": "integer"
-      },
-      "productType": {
-        "type": "string",
-        "enum": [
-          "undefined",
-          "fiber",
-          "dsl",
-          "ethernet",
-          "fixed_wireles"
-        ]
-      },
-      "name": {
-        "type": "string"
-      },
-      "speed": {
-        "type": "object",
-        "id": "urn:jsonschema:com:altvil:aro:model:SpeedEntity",
-        "properties": {
-          "id": {
-            "type": "integer"
-          },
-          "name": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "minDown": {
-            "type": "integer"
-          },
-          "maxDown": {
-            "type": "integer"
-          },
-          "strength": {
-            "type": "number"
-          }
-        }
-      }
-    }
-  },
-  {
-    "type": "object",
-    "id": "urn:jsonschema:com:altvil:aro:service:price:EquipmentComponent",
-    "properties": {
-      "equipmentTypeCategoryId": {
-        "type": "integer"
-      },
-      "equipmentItemId": {
-        "type": "integer"
-      },
-      "quantity": {
-        "type": "number"
-      },
-      "constructionCost": {
-        "type": "number"
-      },
-      "installCost": {
-        "type": "number"
-      },
-      "rank": {
-        "type": "integer"
-      },
-      "equipmentName": {
-        "type": "string"
-      },
-      "code": {
-        "type": "string"
-      },
-      "extendedAttributes": {
+      "exportedAttributes": {
         "type": "object",
         "additionalProperties": {
           "type": "string"
         }
-      },
-      "subComponents": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "$ref": "urn:jsonschema:com:altvil:aro:service:price:EquipmentComponent"
-        }
-      },
-      "oneTimeCost": {
-        "type": "boolean"
       }
     }
   },

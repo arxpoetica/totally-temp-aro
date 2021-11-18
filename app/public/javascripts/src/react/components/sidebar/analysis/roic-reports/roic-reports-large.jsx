@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { Line } from 'react-chartjs-2'
 import RoicReportsSummary from './roic-reports-summary.jsx'
+import RoicReportsActions from './roic-reports-actions'
 
 export class RoicReportsLarge extends Component {
   constructor (props) {
@@ -23,7 +24,7 @@ export class RoicReportsLarge extends Component {
 
     const { roicResults, networkTypes, categories, entityTypes, graphOptions } = this.props
     const { selectedEntityType, selectedNetworkType, selectedCategory, shouldRenderCharts } = this.state
-
+    let selectedNetworkTypeKey = selectedNetworkType.id.toUpperCase()
     return (
       <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
         <div style={{flex: '0 0 auto'}}>
@@ -86,8 +87,8 @@ export class RoicReportsLarge extends Component {
                     <div key={index} style={{flex: '1 1 auto', width: '100%', position: 'relative'}}>
                       <div style={{display: 'flex', flexDirection: 'column', width: '100%', height: '100%', position: 'absolute'}}>
                         <div style={{flex: '1 1 auto'}}>
-                          {Object.keys(roicResults.roicAnalysis.components).length > 0
-                            ? roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()]
+                          {selectedNetworkTypeKey in roicResults.roicAnalysis.components
+                            ? roicResults.roicAnalysis.components[selectedNetworkTypeKey]
                               [selectedEntityType.id + '.' + calcType.id] !== undefined && shouldRenderCharts &&
                               <Line
                                 display={'block'}
@@ -96,8 +97,8 @@ export class RoicReportsLarge extends Component {
                               />
                             : ''
                           }
-                          {Object.keys(roicResults.roicAnalysis.components).length > 0
-                            ? roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()]
+                          {selectedNetworkTypeKey in roicResults.roicAnalysis.components
+                            ? roicResults.roicAnalysis.components[selectedNetworkTypeKey]
                               [selectedEntityType.id + '.' + calcType.id] === undefined && this.chartDataWarning()
                             : this.chartDataWarning()
                           }
@@ -121,8 +122,8 @@ export class RoicReportsLarge extends Component {
                         height: '100%', position: 'absolute'}}
                       >
                         <div style={{flex: '1 1 auto'}}>
-                          {Object.keys(roicResults.roicAnalysis.components).length > 0
-                            ? roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()]
+                          {selectedNetworkTypeKey in roicResults.roicAnalysis.components
+                            ? roicResults.roicAnalysis.components[selectedNetworkTypeKey]
                               [selectedEntityType.id + '.' + calcType.id] !== undefined && shouldRenderCharts &&
                               <Line
                                 display={'block'}
@@ -131,8 +132,8 @@ export class RoicReportsLarge extends Component {
                               />
                             : ''
                           }
-                          {Object.keys(roicResults.roicAnalysis.components).length > 0
-                            ? roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()]
+                          {selectedNetworkTypeKey in roicResults.roicAnalysis.components
+                            ? roicResults.roicAnalysis.components[selectedNetworkTypeKey]
                               [selectedEntityType.id + '.' + calcType.id] === undefined && this.chartDataWarning()
                             : this.chartDataWarning()
                           }
@@ -158,16 +159,19 @@ export class RoicReportsLarge extends Component {
   }
 
   updateDataSet (calcType) {
-
+    // ToDo: this should be redesigned, it's trying to DRY up code but ends up duplicating the surounding code
     const { roicResults, dataSetProps, timeLabels } = this.props
     const { selectedEntityType, selectedNetworkType } = this.state
-
+    let selectedNetworkTypeKey = selectedNetworkType.id.toUpperCase()
+    let data = {}
+    if (selectedNetworkTypeKey in roicResults.roicAnalysis.components) {
+      data = roicResults.roicAnalysis.components[selectedNetworkTypeKey][selectedEntityType.id + '.' + calcType.id].values
+    }
     return {
       labels: timeLabels,
       datasets: [
         {
-          data: roicResults.roicAnalysis.components[selectedNetworkType.id.toUpperCase()][selectedEntityType.id + '.' +
-          calcType.id].values,
+          data,
           fill: dataSetProps.fill,
           pointBackgroundColor: dataSetProps.pointBackgroundColor,
           pointHoverBackgroundColor: dataSetProps.pointHoverBackgroundColor
@@ -179,11 +183,13 @@ export class RoicReportsLarge extends Component {
   handleNetworkTypeChange (event) {
     const selectedNetworkType = this.props.networkTypes.find(item => item.id === event.target.value)
     this.setState({ selectedNetworkType })
+    this.props.loadROICResultsForPlan(this.props.planId)
   }
 
   handleEntityTypeChange (event) {
     const selectedEntityType = this.props.entityTypes.find(item => item.id === event.target.value)
     this.setState({ selectedEntityType })
+    this.props.loadROICResultsForPlan(this.props.planId)
   }
 
   selectCategory (category) {
@@ -201,5 +207,9 @@ const mapStateToProps = (state) => ({
   roicResults: state.roicReports.roicResults,
 })
 
-const RoicReportsLargeComponent = connect(mapStateToProps, null)(RoicReportsLarge)
+const mapDispatchToProps = (dispatch) => ({
+  loadROICResultsForPlan: (planId) => dispatch(RoicReportsActions.loadROICResultsForPlan(planId)),
+})
+
+const RoicReportsLargeComponent = connect(mapStateToProps, mapDispatchToProps)(RoicReportsLarge)
 export default RoicReportsLargeComponent
