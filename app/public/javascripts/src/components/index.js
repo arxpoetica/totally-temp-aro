@@ -2,6 +2,7 @@
 import { react2angular } from 'react2angular'
 import { ToastContainer } from 'react-toastify'
 
+import ServiceLayerEditor from '../react/components/sidebar/view/service-layer-editor.jsx'
 import LocationEditor from '../react/components/sidebar/view/location-editor.jsx'
 import EquipmentDetail from '../react/components/sidebar/view/equipment-info/equipment-detail.jsx'
 import NetworkPlanManage from '../react/components/sidebar/view/network-plan-manage.jsx'
@@ -180,6 +181,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('editorInterfacePrimitive', editorInterfacePrimitive)
   .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
 // ReactJS components
+  .component('rServiceLayerEditor', react2angular(ServiceLayerEditor))
   .component('rLocationEditor', react2angular(LocationEditor))
   .component('rEquipmentDetail', react2angular(EquipmentDetail))
   .component('rNetworkPlanManage', react2angular(NetworkPlanManage))
