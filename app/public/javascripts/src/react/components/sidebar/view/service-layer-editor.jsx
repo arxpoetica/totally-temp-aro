@@ -7,6 +7,8 @@ import ToolBarActions from '../../header/tool-bar-actions'
 import { viewModePanels, displayModes } from '../constants'
 import TileDataService from '../../../../components/tiles/tile-data-service'
 import MapUtilities from '../../../../components/common/plan/map-utilities'
+import ServiceLayerMapObjects from './service-layer-map-objects.jsx'
+import { constants } from '../../plan-editor/shared'
 
 const tileDataService = new TileDataService()
 
@@ -14,6 +16,8 @@ export const ServiceLayerEditor = (props) => {
 
   const [discardChanges, setDiscardChanges] = useState(false)
   const [currentTransaction, setCurrentTransaction] = useState(null)
+  const [serviceLayerName, setServiceLayerName] = useState(null)
+  const [serviceLayerCode, setServiceLayerCode] = useState(null)
 
   const {
     dataItems,
@@ -159,7 +163,29 @@ export const ServiceLayerEditor = (props) => {
     }
   }
 
-  console.log(selectedMapObject, objectIdToMapObject)
+  // Returns a promise that resolves to the iconUrl for a given object id
+  const getObjectIconUrl = (eventArgs) => {
+    if (eventArgs.objectKey === constants.MAP_OBJECT_CREATE_SERVICE_AREA) {
+      // Icon doesn't matter for Service area, just return an empty string
+      return Promise.resolve('')
+    }
+    return Promise.reject(`Unknown object key ${eventArgs.objectKey}`)
+  }
+
+  const handleObjectCreated = (mapObject, usingMapClick, feature) => {
+    objectIdToMapObject[mapObject.objectId] = mapObject
+    objectIdToMapObject[selectedMapObject.objectId].isDirty = false
+    setObjectIdToMapObject(objectIdToMapObject)
+
+    // Create New SA
+    if (!mapObject.feature.isExistingObject) {
+      mapObject.feature.name = serviceLayerName
+      mapObject.feature.code = serviceLayerCode
+      var serviceLayerFeature = formatServiceLayerForService(mapObject)
+      // send serviceLayer feature to service
+      AroHttp.post(`/service/library/transaction/${currentTransaction.id}/features`, serviceLayerFeature)
+    }
+  }
 
   return (
     <div style={{ margin: '10px' }}>
@@ -228,6 +254,11 @@ export const ServiceLayerEditor = (props) => {
         <i className="fa fa-save"></i>&nbsp;&nbsp;Save service area properties
       </button>
 
+      <ServiceLayerMapObjects
+        featureType="serviceArea"
+        getObjectIconUrl={getObjectIconUrl}
+        onCreateObject={handleObjectCreated}
+      />
     </div>
   )
 }
