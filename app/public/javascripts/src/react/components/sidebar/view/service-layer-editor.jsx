@@ -29,6 +29,8 @@ export const ServiceLayerEditor = (props) => {
     selectedDisplayMode,
     activeViewModePanel,
     setDeletedMapObjects,
+    cloneSelection,
+    setMapSelection,
   } = props
 
   useEffect(() => { resumeOrCreateTransaction() }, [])
@@ -173,6 +175,9 @@ export const ServiceLayerEditor = (props) => {
   }
 
   const handleObjectCreated = (mapObject, usingMapClick, feature) => {
+    console.log(objectIdToMapObject)
+    console.log(selectedMapObject)
+
     objectIdToMapObject[mapObject.objectId] = mapObject
     objectIdToMapObject[selectedMapObject.objectId].isDirty = false
     setObjectIdToMapObject(objectIdToMapObject)
@@ -185,6 +190,29 @@ export const ServiceLayerEditor = (props) => {
       // send serviceLayer feature to service
       AroHttp.post(`/service/library/transaction/${currentTransaction.id}/features`, serviceLayerFeature)
     }
+  }
+
+  const handleSelectedObjectChanged = (mapObject) => {
+    if (currentTransaction == null) return
+    if (mapObject != null) {
+      updateSelectedState(mapObject)
+    }
+    setSelectedMapObject(mapObject)
+  }
+
+  const handleObjectModified = (mapObject) => {
+    var serviceLayerFeature = formatServiceLayerForService(mapObject)
+    AroHttp.put(`/service/library/transaction/${currentTransaction.id}/features`, serviceLayerFeature)
+      .catch((err) => console.error(err))
+  }
+
+  const updateSelectedState = (selectedFeature) => {
+    const newSelection = cloneSelection()
+    newSelection.editable.serviceArea = []
+    if (typeof selectedFeature !== 'undefined') {
+      newSelection.editable.serviceArea[selectedFeature.object_id || selectedFeature.objectId] = selectedFeature
+    }
+    setMapSelection(newSelection)
   }
 
   return (
@@ -258,6 +286,8 @@ export const ServiceLayerEditor = (props) => {
         featureType="serviceArea"
         getObjectIconUrl={getObjectIconUrl}
         onCreateObject={handleObjectCreated}
+        onSelectObject={handleSelectedObjectChanged}
+        onModifyObject={handleObjectModified}
       />
     </div>
   )
@@ -276,6 +306,8 @@ const mapDispatchToProps = (dispatch) => ({
   setDeletedMapObjects: (mapObject) => dispatch(ToolBarActions.setDeletedMapObjects(mapObject)),
   selectedDisplayMode: (value) => dispatch(ToolBarActions.selectedDisplayMode(value)),
   activeViewModePanel: displayPanel => dispatch(ToolBarActions.activeViewModePanel(displayPanel)),
+  cloneSelection: () => dispatch(SelectionActions.cloneSelection()),
+  setMapSelection: (mapSelection) => dispatch(SelectionActions.setMapSelection(mapSelection)),
 })
 
 export default wrapComponentWithProvider(reduxStore, ServiceLayerEditor, mapStateToProps, mapDispatchToProps)

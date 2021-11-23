@@ -27,9 +27,20 @@ const selectedPolygonOptions = {
   fillOpacity: 0.4
 }
 
+const isMarker = (mapObject) => {
+  return mapObject && mapObject.icon
+}
+
+const polygonInvalidMsg = {
+  title: 'Invalid Polygon',
+  text: 'Polygon shape is invalid, please try again. Ensure that the polygon is not self-intersecting.'
+}
+
 export const ServiceLayerMapObjects = (props) => {
 
   const [createdMapObjects, setCreatedMapObjects] = useState({})
+
+  const [selectedMapObjectPreviousShape, setSelectedMapObjectPreviousShape] = useState({})
 
   const {
     mapFeatures,
@@ -41,6 +52,8 @@ export const ServiceLayerMapObjects = (props) => {
     selectedMapObject,
     setPlanEditorFeatures,
     onCreateObject,
+    onModifyObject,
+    onSelectObject,
   } = props
 
   const prevMapFeatures = usePrevious(mapFeatures)
@@ -269,6 +282,13 @@ export const ServiceLayerMapObjects = (props) => {
       } else {
         setPlanEditorFeatures([])
       }
+
+      if (mapObject && !isMarker(mapObject)) { // If selected mapobject is boundary store the geom
+        selectedMapObjectPreviousShape[mapObject.objectId] = mapObject.feature.geometry
+        setSelectedMapObjectPreviousShape(selectedMapObjectPreviousShape)
+      }
+      
+      onSelectObject(mapObject, isMult)
     }
 
     const highlightMapObject = (mapObject) => {
@@ -285,6 +305,19 @@ export const ServiceLayerMapObjects = (props) => {
       // Check if polygon is valid, if valid modify a map object
       var polygonGeoJsonPath = MapUtilities.polygonPathsToWKT(mapObject.getPaths())
       var isValidPolygon = MapUtilities.isPolygonValid({ type: 'Feature', geometry: polygonGeoJsonPath })
+  
+      if (isValidPolygon) {
+        selectedMapObjectPreviousShape[mapObject.objectId] = polygonGeoJsonPath
+        onModifyObject(mapObject)
+      } else {
+        // display error message & undo last invalid change
+        Utilities.displayErrorMessage(polygonInvalidMsg)
+        mapObject.setMap(null)
+  
+        mapObject.feature.geometry = selectedMapObjectPreviousShape[mapObject.objectId]
+  
+        createMapObject(mapObject.feature, null, true, null, true)
+      }
     }
 
   // No UI for this component. It deals with map objects only.
