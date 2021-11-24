@@ -273,7 +273,10 @@ export class EquipmentBoundaryMapObjects extends Component {
       // 46 = Delete
       // Supporting both of these because not all keyboards have a "delete" key
       if ((code === 8 || code === 46) && this.mapObjectOverlay.length > 0) {
-        this.props.deleteBoundaryVertices(mapObject, this.mapObjectOverlay, this.clearMapObjectOverlay)
+        // Sort is necessary to ensure that indexes will not be reassigned while deleting more than one vertex.
+        const mapObjectOverlayClone = [...this.mapObjectOverlay]
+        // Using this.mapObject as the argument being passed instead of the one in the parent function is the only way this consistently works.
+        this.props.deleteBoundaryVertices(this.mapObject, mapObjectOverlayClone, this.clearMapObjectOverlay)
       }
     });
   }
