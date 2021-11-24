@@ -310,8 +310,8 @@ export const equipmentDetail = (props) => {
           }
           <div className="ei-panel-header-title">{networkNodeLabel}</div>
           <div className="sidebar-header-subinfo">
-            <div className="sidebar-header-subinfo-item">lat: {selectedEquipmentGeog[1]}</div>
-            <div className="sidebar-header-subinfo-item">long: {selectedEquipmentGeog[0]}</div>
+            <div className="sidebar-header-subinfo-item">lat: {(selectedEquipmentGeog[1]).toFixed(6)}</div>
+            <div className="sidebar-header-subinfo-item">long: {(selectedEquipmentGeog[0]).toFixed(6)}</div>
           </div>
         </div>
       }
