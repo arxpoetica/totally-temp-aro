@@ -175,11 +175,7 @@ export const ServiceLayerEditor = (props) => {
   }
 
   const handleObjectCreated = (mapObject, usingMapClick, feature) => {
-    console.log(objectIdToMapObject)
-    console.log(selectedMapObject)
-
     objectIdToMapObject[mapObject.objectId] = mapObject
-    objectIdToMapObject[selectedMapObject.objectId].isDirty = false
     setObjectIdToMapObject(objectIdToMapObject)
 
     // Create New SA
@@ -215,6 +211,11 @@ export const ServiceLayerEditor = (props) => {
     setMapSelection(newSelection)
   }
 
+  const handleObjectDeleted = (mapObject) => {
+    setDeletedMapObjects(mapObject)
+    AroHttp.delete(`/service/library/transaction/${currentTransaction.id}/features/${mapObject.objectId}`)
+  }
+
   return (
     <div style={{ margin: '10px' }}>
       {/* Buttons to commit or discard a transaction */}
@@ -236,7 +237,7 @@ export const ServiceLayerEditor = (props) => {
                 name="name"
                 className="form-control"
                 placeholder="Name"
-                value={selectedMapObject && selectedMapObject.feature.name}
+                value={selectedMapObject ? selectedMapObject.feature.name : ''}
                 disabled={!selectedMapObject}
                 onChange={(event) => {
                   onChangeSAProp(event),
@@ -253,7 +254,7 @@ export const ServiceLayerEditor = (props) => {
                 name="code"
                 className="form-control"
                 placeholder="Code"
-                value={selectedMapObject && selectedMapObject.feature.code}
+                value={selectedMapObject ? selectedMapObject.feature.code : ''}
                 disabled={!selectedMapObject}
                 onChange={(event) => {
                   onChangeSAProp(event),
@@ -288,6 +289,7 @@ export const ServiceLayerEditor = (props) => {
         onCreateObject={handleObjectCreated}
         onSelectObject={handleSelectedObjectChanged}
         onModifyObject={handleObjectModified}
+        onDeleteObject={handleObjectDeleted}
       />
     </div>
   )

@@ -14,7 +14,31 @@ function deleteLocationWithId (objectId) {
   }
 }
 
+function selectServiceArea (objectId) {
+  return {
+    type: Actions.VIEW_SETTINGS_SELECT_SERVICE_AREA,
+    payload: objectId
+  }
+}
+
+function editServiceArea (mapObject) {
+  return {
+    type: Actions.VIEW_SETTINGS_EDIT_SERVICE_AREA,
+    payload: mapObject
+  }
+}
+
+function deleteServiceArea (objectId) {
+  return {
+    type: Actions.VIEW_SETTINGS_DELETE_SERVICE_AREA,
+    payload: objectId
+  }
+}
+
 export default {
   setShowLocationLabels,
   deleteLocationWithId,
+  selectServiceArea,
+  editServiceArea,
+  deleteServiceArea,
 }

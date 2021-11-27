@@ -8,8 +8,13 @@ import TileDataService from '../../../../components/tiles/tile-data-service'
 import SelectionActions from '../../selection/selection-actions'
 import MapUtilities from '../../../../components/common/plan/map-utilities'
 import Utilities from '../../../../components/common/utilities'
+import MenuItemFeature from '../../context-menu/menu-item-feature'
+import MenuItemAction from '../../context-menu/menu-item-action'
+import FeatureSelector from '../../../../components/tiles/feature-selector'
+import ContextMenuActions from '../../context-menu/actions'
 
 const tileDataService = new TileDataService()
+const utils = new Utilities()
 
 const polygonOptions = {
   strokeColor: '#FF1493',
@@ -36,6 +41,18 @@ const polygonInvalidMsg = {
   text: 'Polygon shape is invalid, please try again. Ensure that the polygon is not self-intersecting.'
 }
 
+// ----- rightclick menu ----- //
+const getXYFromEvent = (event) => {
+  let mouseEvent = null
+  Object.keys(event).forEach((eventKey) => {
+    if (event.hasOwnProperty(eventKey) && (event[eventKey] instanceof MouseEvent)) { mouseEvent = event[eventKey] }
+  })
+  if (!mouseEvent) { return }
+  const x = mouseEvent.clientX
+  const y = mouseEvent.clientY
+  return { x, y }
+}
+
 export const ServiceLayerMapObjects = (props) => {
 
   const [createdMapObjects, setCreatedMapObjects] = useState({})
@@ -54,6 +71,17 @@ export const ServiceLayerMapObjects = (props) => {
     onCreateObject,
     onModifyObject,
     onSelectObject,
+    selectedBoundaryType,
+    mapLayers,
+    setContextMenuItems,
+    showContextMenu,
+    setObjectIdToMapObject,
+    selectSAWithId,
+    editSAWithId,
+    deleteSAWithId,
+    onDeleteObject,
+    setSelectedMapObject,
+    setMapFeatures,
   } = props
 
   const prevMapFeatures = usePrevious(mapFeatures)
@@ -65,6 +93,31 @@ export const ServiceLayerMapObjects = (props) => {
   }, [mapFeatures])
 
   useEffect(() => { updateSelectedMapObject(selectedMapObject) }, [selectedMapObject])
+
+  // Select Service Area
+  const prevSelectSAWithId = usePrevious(selectSAWithId)
+  useEffect(() => {
+    if (!dequal(prevSelectSAWithId, selectSAWithId)) {
+      selectProposedFeature(selectSAWithId)
+    }
+  }, [selectSAWithId])
+
+  // Edit Service Area
+  const prevEditSAWithId = usePrevious(editSAWithId)
+  useEffect(() => {
+    if (editSAWithId && !dequal(prevEditSAWithId, editSAWithId)) {
+      viewExistingFeature(editSAWithId.result, editSAWithId.latLng )
+    }
+  }, [editSAWithId])
+
+  // Delete Service Area
+  const prevDeleteSAWithId = usePrevious(deleteSAWithId)
+  useEffect(() => {
+    if (!dequal(prevDeleteSAWithId, deleteSAWithId)) {
+      deleteObjectWithId(deleteSAWithId)
+      deleteCreatedMapObject(deleteSAWithId)
+    }
+  }, [deleteSAWithId])
 
   const handleMapEntitySelected = (event) => {
     if (!event || !event.latLng) { return }
@@ -112,7 +165,7 @@ export const ServiceLayerMapObjects = (props) => {
         // If we are editing an existing polygon object, make it editable
         if (feature.isExistingObject && (iconKey === constants.MAP_OBJECT_CREATE_KEY_EQUIPMENT_BOUNDARY ||
           iconKey === constants.MAP_OBJECT_CREATE_SERVICE_AREA)) {
-          selectedMapObject.setEditable(false)
+            selectedMapObject && selectedMapObject.setEditable(false)
         }
       })
       .catch((err) => console.error(err))
@@ -188,6 +241,18 @@ export const ServiceLayerMapObjects = (props) => {
       throw `createMapObject() not supported for geometry type ${feature.geometry.type}`
     }
 
+    mapObject.addListener('rightclick', event => {
+      if (!event || event.vertex) { return }
+      // 'event' contains a MouseEvent which we use to get X,Y coordinates. The key of the MouseEvent object
+      // changes with google maps implementations. So iterate over the keys to find the right object.
+      const eventXY = getXYFromEvent(event)
+      if (!eventXY) { return }
+      updateContextMenu(event.latLng, eventXY.x, eventXY.y, mapObject)
+    })
+
+    createdMapObjects[mapObject.objectId] = mapObject
+    setCreatedMapObjects(createdMapObjects)
+    setObjectIdToMapObject(createdMapObjects)
     if (usingMapClick) { selectMapObject(mapObject, isMult) }
     return onCreateObject(mapObject, usingMapClick, feature, !deleteExistingBoundary)
   }
@@ -224,7 +289,7 @@ export const ServiceLayerMapObjects = (props) => {
     polygon.feature = feature
 
     polygon.hitTest = (latLng) => {
-      if (!this.state.showSiteBoundary) return false
+      if (!showSiteBoundary) return false
       return google.maps.geometry.poly.containsLocation(latLng, polygon)
     }
     return polygon
@@ -283,6 +348,7 @@ export const ServiceLayerMapObjects = (props) => {
         setPlanEditorFeatures([])
       }
 
+      if (!isMult) setSelectedMapObject(mapObject)
       if (mapObject && !isMarker(mapObject)) { // If selected mapobject is boundary store the geom
         selectedMapObjectPreviousShape[mapObject.objectId] = mapObject.feature.geometry
         setSelectedMapObjectPreviousShape(selectedMapObjectPreviousShape)
@@ -320,6 +386,141 @@ export const ServiceLayerMapObjects = (props) => {
       }
     }
 
+    const overlayRightClickListener = mapRef.addListener('rightclick', (event) => {
+      if (featureType == 'equipment' || featureType == 'serviceArea') { // we're editing a equipment and eqipment bounds NOT locations
+        var eventXY = getXYFromEvent(event)
+        if (!eventXY) return
+        updateContextMenu(event.latLng, eventXY.x, eventXY.y, null)
+      }
+    })
+
+    const updateContextMenu = (latLng, x, y, clickedMapObject) => {
+      if (featureType == 'serviceArea') {
+        getFeaturesAtPoint(latLng)
+        .then((results) => {
+        // We may have come here when the user clicked an existing map object. For now, just add it to the list.
+          // This should be replaced by something that loops over all created map objects and picks those that are under the cursor.
+          if (clickedMapObject) {
+            var clickedFeature = {
+              _data_type: 'service_layer',
+              object_id: clickedMapObject.objectId,
+              is_deleted: false
+            }
+            results.push(clickedFeature)
+          }
+
+          var menuItems = []
+          var menuItemsById = {}
+
+          if (results.length == 0) {
+
+          } else {
+            results.forEach((result) => {
+              // populate context menu aray here
+              // we may need different behavour for different controllers using this
+              var options = []
+              const featureType = utils.getFeatureMenuItemType(result)
+              if (result.hasOwnProperty('object_id')) result.objectId = result.object_id
+              var validFeature = false
+
+              // have we already added this one?
+              if (featureType === 'SERVICE_AREA' &&
+                  !menuItemsById.hasOwnProperty(result.objectId)) {
+                validFeature = true
+              }
+
+              if (validFeature) {
+                var feature = result
+                if (createdMapObjects.hasOwnProperty(result.objectId)) {
+                  // it's on the edit layer / in the transaction
+                  feature = createdMapObjects[result.objectId].feature
+                  options.push(new MenuItemAction('SELECT', 'Select', 'ViewSettingsActions', 'selectServiceArea', result.objectId))
+                  options.push(new MenuItemAction('DELETE', 'Delete', 'ViewSettingsActions', 'deleteServiceArea', result.objectId))
+                } else {
+                  const editSA = { result, latLng }
+                  options.push(new MenuItemAction('EDIT', 'Edit', 'ViewSettingsActions', 'editServiceArea', editSA))
+                }
+
+                var name = feature.code || feature.siteClli || 'Unnamed service area'
+
+                menuItemsById[result.objectId] = options
+                menuItems.push(new MenuItemFeature('SERVICE_AREA', name, options))
+              }
+            })
+          }
+
+          if (menuItems.length <= 0) {
+            this.closeContextMenu()
+          } else {
+            openContextMenu(x, y, menuItems)
+         }
+        })
+      }
+    }
+
+    const getFeaturesAtPoint = (latLng) => {
+      var lat = latLng.lat()
+      var lng = latLng.lng()
+  
+      // Get zoom
+      var zoom = mapRef.getZoom()
+  
+      // Get tile coordinates from lat/lng/zoom. Using Mercator projection.
+      var tileCoords = MapUtilities.getTileCoordinates(zoom, lat, lng)
+  
+      // Get the pixel coordinates of the clicked point WITHIN the tile (relative to the top left corner of the tile)
+      var clickedPointPixels = MapUtilities.getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng)
+  
+      return FeatureSelector.performHitDetection(tileDataService, { width: 256, height: 256 }, mapLayers.activeMapLayers,
+        zoom, tileCoords.x, tileCoords.y, clickedPointPixels.x, clickedPointPixels.y, selectedBoundaryType.id)
+    }
+
+    const openContextMenu = (x, y, menuItems) => {
+      const bounds = []
+      const boundsByNetworkNodeObjectId = {}
+      menuItems.forEach((menuItem) => {
+        const { feature } = menuItem
+        if (feature && feature.network_node_object_id) {
+          bounds.push(feature)
+          boundsByNetworkNodeObjectId[feature.network_node_object_id] = menuItem
+        }
+      })
+      setContextMenuItems(menuItems)
+      showContextMenu(x, y)
+    }
+
+    const selectProposedFeature = (objectId) => {
+      if (!createdMapObjects.hasOwnProperty(objectId)) return false
+      selectMapObject(createdMapObjects[objectId])
+      return true
+    }
+
+    const deleteObjectWithId = (objectId) => {
+      if (selectedMapObject && (selectedMapObject.objectId === objectId)) {
+        // Deselect the currently selected object, as it is about to be deleted.
+        selectMapObject(null)
+      }
+      const mapObjectToDelete = createdMapObjects[objectId]
+      if (mapObjectToDelete) { onDeleteObject(mapObjectToDelete) }
+    }
+  
+    const deleteCreatedMapObject = (objectId) => {
+      const mapObjectToDelete = createdMapObjects[objectId]
+      if (mapObjectToDelete) {
+        mapObjectToDelete.setMap(null)
+        delete createdMapObjects[objectId]
+        setCreatedMapObjects(createdMapObjects)
+      }
+    }
+
+    const viewExistingFeature = (feature, latLng) => {
+      var hitFeatures = {}
+      hitFeatures['latLng'] = latLng
+      if (featureType == 'serviceArea') hitFeatures['serviceAreas'] = [feature]
+      setMapFeatures(hitFeatures)
+    }
+
+
   // No UI for this component. It deals with map objects only.
   return null
 }
@@ -330,13 +531,23 @@ const mapStateToProps = (state) => ({
   isRulerEnabled: state.toolbar.isRulerEnabled,
   dataItems: state.plan.dataItems,
   selectedMapObject: state.selection.selectedMapObject,
+  selectedBoundaryType: state.mapLayers.selectedBoundaryType,
+  mapLayers: state.mapLayers,
+  selectSAWithId: state.viewSettings.selectSAWithId,
+  editSAWithId: state.viewSettings.editSAWithId,
+  deleteSAWithId: state.viewSettings.deleteSAWithId,
 })
 
 const mapDispatchToProps = (dispatch) => ({
+  setSelectedMapObject: mapObject => dispatch(SelectionActions.setSelectedMapObject(mapObject)),
   loadEntityList: (entityType, filterObj, select, searchColumn, configuration) => dispatch(
     StateViewModeActions.loadEntityList(entityType, filterObj, select, searchColumn, configuration)
   ),
   setPlanEditorFeatures: objectIds => dispatch(SelectionActions.setPlanEditorFeatures(objectIds)),
+  setContextMenuItems: menuItemFeature => dispatch(ContextMenuActions.setContextMenuItems(menuItemFeature)),
+  showContextMenu: (x, y) => dispatch(ContextMenuActions.showContextMenu(x, y)),
+  setObjectIdToMapObject: objectIdToMapObject => dispatch(SelectionActions.setObjectIdToMapObject(objectIdToMapObject)),
+  setMapFeatures: mapFeatures => dispatch(SelectionActions.setMapFeatures(mapFeatures)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(ServiceLayerMapObjects)

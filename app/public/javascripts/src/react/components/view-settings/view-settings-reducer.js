@@ -3,6 +3,9 @@ import Actions from '../../common/actions'
 const defaultState = {
   showLocationLabels: false,
   deletedLocationId: '',
+  selectSAWithId: '',
+  editSAWithId: '',
+  deleteSAWithId: '',
 }
 
 function setShowLocationLabels (state, showLocationLabels) {
@@ -18,6 +21,15 @@ function viewSettingsReducer (state = defaultState, action) {
 
     case Actions.VIEW_SETTINGS_DELETE_LOCATION_WITH_ID:
       return { ...state, deletedLocationId: action.payload }
+    
+    case Actions.VIEW_SETTINGS_SELECT_SERVICE_AREA:
+      return { ...state, selectSAWithId: action.payload }
+
+    case Actions.VIEW_SETTINGS_EDIT_SERVICE_AREA:
+      return { ...state, editSAWithId: action.payload }
+
+    case Actions.VIEW_SETTINGS_DELETE_SERVICE_AREA:
+      return { ...state, deleteSAWithId: action.payload }
 
     default:
       return state
