@@ -82,6 +82,9 @@ export const ServiceLayerMapObjects = (props) => {
     onDeleteObject,
     setSelectedMapObject,
     setMapFeatures,
+    multiPolygonFeature,
+    removeMapObjects,
+    objectIdToMapObject,
   } = props
 
   const prevMapFeatures = usePrevious(mapFeatures)
@@ -118,6 +121,21 @@ export const ServiceLayerMapObjects = (props) => {
       deleteCreatedMapObject(deleteSAWithId)
     }
   }, [deleteSAWithId])
+
+  // To draw Multi Polygon Feature
+  const prevMultiPolygonFeature = usePrevious(multiPolygonFeature)
+  useEffect(() => {
+    if (prevMultiPolygonFeature && !dequal(prevMultiPolygonFeature, multiPolygonFeature)) {
+      createMapObject(multiPolygonFeature, null, true)
+    }
+  }, [multiPolygonFeature])
+
+  // To Remove Map Objects
+  useEffect(() => {
+    if(removeMapObjects) {
+      removeCreatedMapObjects(objectIdToMapObject)
+    }
+  }, [removeMapObjects])
 
   const handleMapEntitySelected = (event) => {
     if (!event || !event.latLng) { return }
@@ -520,6 +538,14 @@ export const ServiceLayerMapObjects = (props) => {
       setMapFeatures(hitFeatures)
     }
 
+    const removeCreatedMapObjects = (createdMapObjectsObj) => {
+      // Remove created objects from map
+      selectMapObject(null)
+      Object.keys(createdMapObjectsObj).forEach((objectId) => {
+        createdMapObjectsObj[objectId].setMap(null)
+      })
+      setCreatedMapObjects({})
+    }
 
   // No UI for this component. It deals with map objects only.
   return null
@@ -536,6 +562,8 @@ const mapStateToProps = (state) => ({
   selectSAWithId: state.viewSettings.selectSAWithId,
   editSAWithId: state.viewSettings.editSAWithId,
   deleteSAWithId: state.viewSettings.deleteSAWithId,
+  multiPolygonFeature: state.viewSettings.multiPolygonFeature,
+  objectIdToMapObject: state.selection.objectIdToMapObject,
 })
 
 const mapDispatchToProps = (dispatch) => ({

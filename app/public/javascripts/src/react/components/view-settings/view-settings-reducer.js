@@ -6,6 +6,7 @@ const defaultState = {
   selectSAWithId: '',
   editSAWithId: '',
   deleteSAWithId: '',
+  multiPolygonFeature: {},
 }
 
 function setShowLocationLabels (state, showLocationLabels) {
@@ -30,6 +31,9 @@ function viewSettingsReducer (state = defaultState, action) {
 
     case Actions.VIEW_SETTINGS_DELETE_SERVICE_AREA:
       return { ...state, deleteSAWithId: action.payload }
+
+    case Actions.VIEW_SETTINGS_CREATE_MULTI_POLYGON:
+      return { ...state, multiPolygonFeature: action.payload }
 
     default:
       return state

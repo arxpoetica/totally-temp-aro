@@ -35,10 +35,18 @@ function deleteServiceArea (objectId) {
   }
 }
 
+function createMultiPolygon (feature) {
+  return {
+    type: Actions.VIEW_SETTINGS_CREATE_MULTI_POLYGON,
+    payload: feature
+  }
+}
+
 export default {
   setShowLocationLabels,
   deleteLocationWithId,
   selectServiceArea,
   editServiceArea,
   deleteServiceArea,
+  createMultiPolygon,
 }

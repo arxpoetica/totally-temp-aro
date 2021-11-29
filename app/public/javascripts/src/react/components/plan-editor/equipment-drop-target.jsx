@@ -8,6 +8,7 @@ import uuidStore from '../../../shared-utils/uuid-store'
 import PlanEditorActions from './plan-editor-actions'
 import WktUtils from '../../../shared-utils/wkt-utils'
 import './equipment-drop-target.css'
+import ViewSettingsActions from '../view-settings/view-settings-actions'
 
 export class EquipmentDropTarget extends Component {
   constructor (props) {
@@ -59,7 +60,38 @@ export class EquipmentDropTarget extends Component {
         networkNodeType: networkNodeType,
       }
       this.props.createFeature(featureToCreate)
+    } else if (entityBeingDropped === constants.DRAG_IS_BOUNDARY) {
+      var grabOffsetX = event.dataTransfer.getData(constants.DRAG_DROP_GRAB_OFFSET_X)
+      var grabOffsetY = event.dataTransfer.getData(constants.DRAG_DROP_GRAB_OFFSET_Y)
+      var grabImageW = event.dataTransfer.getData(constants.DRAG_DROP_GRAB_ICON_W)
+      var grabImageH = event.dataTransfer.getData(constants.DRAG_DROP_GRAB_ICON_H)
+      var offsetX = (grabImageW * 0.5) - grabOffsetX // center
+      var offsetY = grabImageH - grabOffsetY // bottom
+  
+      var dropLatLng = MapUtils.pixelToLatlng(this.props.googleMaps, event.clientX + offsetX, event.clientY + offsetY)
+      var position = new google.maps.LatLng(dropLatLng.lat(), dropLatLng.lng())
+      var radius = (40000 / Math.pow(2, this.props.googleMaps.getZoom())) * 2 * 256 // radius in meters
+      var path = this.generateHexagonPath(position, radius)
+      var feature = {
+        objectId: uuidStore.getUUID(),
+        geometry: {
+          type: 'MultiPolygon',
+          coordinates: [[path]]
+        },
+        isExistingObject: false
+      }
+      this.props.createMultiPolygon(feature)
     }
+  }
+
+  generateHexagonPath (position, radius) {
+    var pathPoints = []
+    for (var angle = -90; angle < 270; angle += 60) {
+      var point = google.maps.geometry.spherical.computeOffset(position, radius, angle)
+      pathPoints.push([point.lng(), point.lat()])
+    }
+    pathPoints.push(pathPoints[0]) // Close the polygon
+    return pathPoints
   }
 }
 
@@ -74,7 +106,8 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  createFeature: (equipment) => dispatch(PlanEditorActions.createFeature(equipment))
+  createFeature: (equipment) => dispatch(PlanEditorActions.createFeature(equipment)),
+  createMultiPolygon: (feature) => dispatch(ViewSettingsActions.createMultiPolygon(feature)),
 })
 
 const EquipmentDropTargetComponent = wrapComponentWithProvider(reduxStore, EquipmentDropTarget, mapStateToProps, mapDispatchToProps)

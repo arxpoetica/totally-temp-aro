@@ -9,6 +9,7 @@ import TileDataService from '../../../../components/tiles/tile-data-service'
 import MapUtilities from '../../../../components/common/plan/map-utilities'
 import ServiceLayerMapObjects from './service-layer-map-objects.jsx'
 import { constants } from '../../plan-editor/shared'
+import DraggableNode from '../../plan-editor/draggable-node.jsx'
 
 const tileDataService = new TileDataService()
 
@@ -18,6 +19,7 @@ export const ServiceLayerEditor = (props) => {
   const [currentTransaction, setCurrentTransaction] = useState(null)
   const [serviceLayerName, setServiceLayerName] = useState(null)
   const [serviceLayerCode, setServiceLayerCode] = useState(null)
+  const [removeMapObjects, setRemoveMapObjects] = useState(false)
 
   const {
     dataItems,
@@ -86,6 +88,7 @@ export const ServiceLayerEditor = (props) => {
         setDiscardChanges(true)
         setCurrentTransaction(null)
         setDeletedMapObjects([])
+        setRemoveMapObjects(true)
         // Do not recreate tiles and/or data cache. That will be handled by the tile invalidation messages from aro-service
         Object.keys(objectIdToMapObject).forEach(objectId => tileDataService.removeFeatureToExclude(objectId))
         // return this.state.loadModifiedFeatures(this.state.plan.id)
@@ -122,6 +125,7 @@ export const ServiceLayerEditor = (props) => {
             setDiscardChanges(true)
             setCurrentTransaction(null)
             setDeletedMapObjects([])
+            setRemoveMapObjects(true)
             // this.state.recreateTilesAndCache()
             return resumeOrCreateTransaction()
           })
@@ -176,6 +180,7 @@ export const ServiceLayerEditor = (props) => {
 
   const handleObjectCreated = (mapObject, usingMapClick, feature) => {
     objectIdToMapObject[mapObject.objectId] = mapObject
+    objectIdToMapObject[mapObject.objectId].isDirty = false
     setObjectIdToMapObject(objectIdToMapObject)
 
     // Create New SA
@@ -214,6 +219,12 @@ export const ServiceLayerEditor = (props) => {
   const handleObjectDeleted = (mapObject) => {
     setDeletedMapObjects(mapObject)
     AroHttp.delete(`/service/library/transaction/${currentTransaction.id}/features/${mapObject.objectId}`)
+  }
+
+  const checkIsDirty = () => {
+    if (selectedMapObject && Object.keys(objectIdToMapObject).length) {
+      return !objectIdToMapObject[selectedMapObject.objectId].isDirty ? 'btn-light' : 'btn-primary'
+    } return 'btn-light'
   }
 
   return (
@@ -267,30 +278,36 @@ export const ServiceLayerEditor = (props) => {
       </table>
 
       <div style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
-        <div style={{ flex: '0 0 auto' }}>
-          <button className="btn btn-light draggable-item-button">
-          <img src="/images/map_icons/aro/hexagon.png" />
-        </button>
+        <div className="btn btn-light draggable-item-button" style={{ flex: '0 0 auto' }}>
+          <DraggableNode
+            icon="/images/map_icons/aro/hexagon.png"
+            entityType={constants.DRAG_IS_BOUNDARY}
+            entityDetails={constants.MAP_OBJECT_CREATE_SERVICE_AREA}
+            label="Drag and Drop"
+          />
         </div>
       </div>
 
       <button
-        className={`btn btn-block 
-        ${(selectedMapObject && Object.keys(objectIdToMapObject).length) && !objectIdToMapObject[selectedMapObject.objectId].isDirty ? 'btn-light' : 'btn-primary' }`}
+        className={`btn btn-block ${checkIsDirty()}`}
         style={{ marginTop: '10px' }}
         onClick={() => { saveSelectedServiceAreaProperties() }}
       >
         <i className="fa fa-save"></i>&nbsp;&nbsp;Save service area properties
       </button>
 
-      <ServiceLayerMapObjects
-        featureType="serviceArea"
-        getObjectIconUrl={getObjectIconUrl}
-        onCreateObject={handleObjectCreated}
-        onSelectObject={handleSelectedObjectChanged}
-        onModifyObject={handleObjectModified}
-        onDeleteObject={handleObjectDeleted}
-      />
+      {
+        currentTransaction &&
+          <ServiceLayerMapObjects
+            featureType="serviceArea"
+            getObjectIconUrl={getObjectIconUrl}
+            onCreateObject={handleObjectCreated}
+            onSelectObject={handleSelectedObjectChanged}
+            onModifyObject={handleObjectModified}
+            onDeleteObject={handleObjectDeleted}
+            removeMapObjects={removeMapObjects}
+          />
+      }
     </div>
   )
 }
