@@ -42,6 +42,13 @@ function createMultiPolygon (feature) {
   }
 }
 
+function recreateTilesAndCache (value) {
+  return {
+    type: Actions.VIEW_SETTINGS_IS_RECREATE_TILE_AND_CACHE,
+    payload: value
+  }
+}
+
 export default {
   setShowLocationLabels,
   deleteLocationWithId,
@@ -49,4 +56,5 @@ export default {
   editServiceArea,
   deleteServiceArea,
   createMultiPolygon,
+  recreateTilesAndCache
 }

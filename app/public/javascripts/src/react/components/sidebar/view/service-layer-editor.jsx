@@ -10,6 +10,7 @@ import MapUtilities from '../../../../components/common/plan/map-utilities'
 import ServiceLayerMapObjects from './service-layer-map-objects.jsx'
 import { constants } from '../../plan-editor/shared'
 import DraggableNode from '../../plan-editor/draggable-node.jsx'
+import ViewSettingsActions from '../../view-settings/view-settings-actions'
 
 const tileDataService = new TileDataService()
 
@@ -33,6 +34,7 @@ export const ServiceLayerEditor = (props) => {
     setDeletedMapObjects,
     cloneSelection,
     setMapSelection,
+    recreateTilesAndCache,
   } = props
 
   useEffect(() => { resumeOrCreateTransaction() }, [])
@@ -95,12 +97,12 @@ export const ServiceLayerEditor = (props) => {
         return []
       })
       .then(() => resumeOrCreateTransaction())
-      // .then(() => this.state.recreateTilesAndCache())
+      .then(() => recreateTilesAndCache(true))
       .catch((err) => {
         setDiscardChanges(true)
         setCurrentTransaction(null)
         setDeletedMapObjects([])
-        // this.state.recreateTilesAndCache()
+        recreateTilesAndCache(true)
         activeViewModePanel(viewModePanels.LOCATION_INFO) // Close out this panel
         console.error(err)
       })
@@ -126,7 +128,7 @@ export const ServiceLayerEditor = (props) => {
             setCurrentTransaction(null)
             setDeletedMapObjects([])
             setRemoveMapObjects(true)
-            // this.state.recreateTilesAndCache()
+            recreateTilesAndCache(true)
             return resumeOrCreateTransaction()
           })
           .catch((err) => {
@@ -327,6 +329,7 @@ const mapDispatchToProps = (dispatch) => ({
   activeViewModePanel: displayPanel => dispatch(ToolBarActions.activeViewModePanel(displayPanel)),
   cloneSelection: () => dispatch(SelectionActions.cloneSelection()),
   setMapSelection: (mapSelection) => dispatch(SelectionActions.setMapSelection(mapSelection)),
+  recreateTilesAndCache: (mapSelection) => dispatch(ViewSettingsActions.recreateTilesAndCache(mapSelection)),
 })
 
 export default wrapComponentWithProvider(reduxStore, ServiceLayerEditor, mapStateToProps, mapDispatchToProps)
