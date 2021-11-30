@@ -439,7 +439,7 @@ export const ServiceLayerMapObjects = (props) => {
         const menuItems = []
         const menuItemsById = {}
 
-        if (results.length === 0) {
+        if (!results.length) {
           const options = []
           options.push(new MenuItemAction('ADD_BOUNDARY', 'Add Boundary', 'ViewSettingsActions', 'addServiceArea', latLng))
           menuItems.push(new MenuItemFeature('SERVICE_AREA', 'Add Service Area', options))
@@ -553,7 +553,7 @@ export const ServiceLayerMapObjects = (props) => {
   let overlayRightClickListener = mapRef.addListener('rightclick', (event) => {
     if (featureType === 'serviceArea') {
       const eventXY = getXYFromEvent(event)
-      if (!eventXY) return
+      if (!eventXY) { return }
       updateContextMenu(event.latLng, eventXY.x, eventXY.y, null)
     }
   })
