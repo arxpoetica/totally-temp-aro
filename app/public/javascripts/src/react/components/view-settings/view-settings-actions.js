@@ -49,6 +49,13 @@ function recreateTilesAndCache (value) {
   }
 }
 
+function addServiceArea (feature) {
+  return {
+    type: Actions.VIEW_SETTINGS_ADD_SERVICE_AREA,
+    payload: feature
+  }
+}
+
 export default {
   setShowLocationLabels,
   deleteLocationWithId,
@@ -56,5 +63,6 @@ export default {
   editServiceArea,
   deleteServiceArea,
   createMultiPolygon,
-  recreateTilesAndCache
+  recreateTilesAndCache,
+  addServiceArea,
 }

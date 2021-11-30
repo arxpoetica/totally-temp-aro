@@ -12,6 +12,7 @@ import MenuItemFeature from '../../context-menu/menu-item-feature'
 import MenuItemAction from '../../context-menu/menu-item-action'
 import FeatureSelector from '../../../../components/tiles/feature-selector'
 import ContextMenuActions from '../../context-menu/actions'
+import uuidStore from '../../../../shared-utils/uuid-store'
 
 const tileDataService = new TileDataService()
 const utils = new Utilities()
@@ -61,6 +62,11 @@ const isClosedPath = (path) => {
   return (deltaLat < TOLERANCE) && (deltaLng < TOLERANCE)
 }
 
+const drawing = {
+  drawingManager: null,
+  markerIdForBoundary: null // The objectId of the marker for which we are drawing the boundary
+}
+
 export const ServiceLayerMapObjects = (props) => {
 
   const [createdMapObjects, setCreatedMapObjects] = useState({})
@@ -93,6 +99,8 @@ export const ServiceLayerMapObjects = (props) => {
     setContextMenuItems,
     setObjectIdToMapObject,
     setPlanEditorFeatures,
+    addServiceArea,
+    createObjectOnClick,
   } = props
 
   const prevMapFeatures = usePrevious(mapFeatures)
@@ -115,9 +123,29 @@ export const ServiceLayerMapObjects = (props) => {
   const prevEditSAWithId = usePrevious(editSAWithId)
   useEffect(() => {
     if (editSAWithId && !dequal(prevEditSAWithId, editSAWithId)) {
-      viewExistingFeature(editSAWithId.result, editSAWithId.latLng )
+      viewExistingFeature(editSAWithId.result, editSAWithId.latLng)
     }
   }, [editSAWithId])
+
+  // Add Service Area
+  const prevAddServiceArea = usePrevious(addServiceArea)
+  useEffect(() => {
+    if (prevAddServiceArea && !dequal(prevAddServiceArea, addServiceArea)) {
+      startDrawingBoundaryForSA(addServiceArea)
+    }
+  }, [addServiceArea])
+
+  useEffect(() => {
+    return () => {
+      if (overlayRightClickListener) {
+        google.maps.event.removeListener(overlayRightClickListener)
+        overlayRightClickListener = null
+      }
+      removeCreatedMapObjects(objectIdToMapObject)
+      // Go back to the default map cursor
+      mapRef.setOptions({ draggableCursor: null })
+    }
+  }, [])
 
   // Delete Service Area
   const prevDeleteSAWithId = usePrevious(deleteSAWithId)
@@ -171,6 +199,19 @@ export const ServiceLayerMapObjects = (props) => {
           serviceFeature.isExistingObject = true
           return Promise.resolve(serviceFeature)
         })
+    } else {
+      // The map was clicked on, but there was no location under the cursor.
+      // If there is a selected polygon, set it to non-editable
+      if (selectedMapObject && !isMarker(selectedMapObject)) {
+        selectedMapObject.setEditable(false)
+      }
+      selectMapObject(null)
+      if (!createObjectOnClick) { 
+        return // We do not want to create the map object on click
+      }
+      feature.objectId = uuidStore.getUUID()
+      feature.isExistingObject = false
+      featurePromise = Promise.resolve(feature)
     }
 
     let featureToUse = null
@@ -399,7 +440,9 @@ export const ServiceLayerMapObjects = (props) => {
           const menuItemsById = {}
 
           if (results.length === 0) {
-
+            const options = []
+            options.push(new MenuItemAction('ADD_BOUNDARY', 'Add Boundary', 'ViewSettingsActions', 'addServiceArea', latLng))
+            menuItems.push(new MenuItemFeature('SERVICE_AREA', 'Add Service Area', options))
           } else {
             results.forEach((result) => {
               // populate context menu aray here
@@ -425,15 +468,12 @@ export const ServiceLayerMapObjects = (props) => {
                   const editSA = { result, latLng }
                   options.push(new MenuItemAction('EDIT', 'Edit', 'ViewSettingsActions', 'editServiceArea', editSA))
                 }
-
                 const name = feature.code || feature.siteClli || 'Unnamed service area'
-
                 menuItemsById[result.objectId] = options
                 menuItems.push(new MenuItemFeature('SERVICE_AREA', name, options))
               }
             })
           }
-
           openContextMenu(x, y, menuItems)
         })
       }
@@ -510,6 +550,60 @@ export const ServiceLayerMapObjects = (props) => {
       setCreatedMapObjects({})
     }
 
+  let overlayRightClickListener = mapRef.addListener('rightclick', (event) => {
+    if (featureType === 'serviceArea') {
+      var eventXY = getXYFromEvent(event)
+      if (!eventXY) return
+      updateContextMenu(event.latLng, eventXY.x, eventXY.y, null)
+    }
+  })
+
+  const startDrawingBoundaryForSA = (latLng) => {
+    if (drawing.drawingManager) {
+      // If we already have a drawing manager, discard it.
+      console.warn('We already have a drawing manager active')
+      drawing.drawingManager.setMap(null)
+      drawing.drawingManager = null
+    }
+
+    drawing.drawingManager = new google.maps.drawing.DrawingManager({
+      drawingMode: google.maps.drawing.OverlayType.POLYGON,
+      drawingControl: false,
+      polygonOptions: selectedPolygonOptions
+    })
+    drawing.drawingManager.setMap(mapRef)
+    google.maps.event.addListener(drawing.drawingManager, 'overlaycomplete', function (event) {
+      // Create a boundary object using the regular object-creation workflow. A little awkward as we are converting
+      // the polygon object coordinates to aro-service format, and then back to google.maps.Polygon() paths later.
+      // We keep it this way because the object creation workflow does other things like set up events, etc.
+      var feature = {
+        objectId: uuidStore.getUUID(),
+        geometry: {
+          type: 'MultiPolygon',
+          coordinates: [[]]
+        },
+        isExistingObject: false
+      }
+      event.overlay.getPaths().forEach((path) => {
+        var pathPoints = []
+        path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
+        pathPoints.push(pathPoints[0]) // Close the polygon
+        feature.geometry.coordinates[0].push(pathPoints)
+      })
+
+      // Check if polygon is valid, if valid create a map object
+      var isValidPolygon = MapUtilities.isPolygonValid({ type: 'Feature', geometry: { type: 'Polygon', coordinates: feature.geometry.coordinates[0] } })
+      isValidPolygon ? createMapObject(feature, null, true) : Utilities.displayErrorMessage(self.polygonInvalidMsg)
+
+      // Remove the overlay. It will be replaced with the created map object
+      event.overlay.setMap(null)
+      // Kill the drawing manager
+      drawing.drawingManager.setMap(null)
+      drawing.drawingManager = null
+      drawing.markerIdForBoundary = null
+    })
+  }
+
   // No UI for this component. It deals with map objects only.
   return null
 }
@@ -528,6 +622,7 @@ const mapStateToProps = (state) => ({
   multiPolygonFeature: state.viewSettings.multiPolygonFeature,
   objectIdToMapObject: state.selection.objectIdToMapObject,
   showSiteBoundary: state.mapLayers.showSiteBoundary,
+  addServiceArea: state.viewSettings.addServiceArea,
 })
 
 const mapDispatchToProps = (dispatch) => ({

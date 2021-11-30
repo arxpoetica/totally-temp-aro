@@ -294,6 +294,7 @@ export const ServiceLayerEditor = (props) => {
           onModifyObject={handleObjectModified}
           onDeleteObject={handleObjectDeleted}
           removeMapObjects={removeMapObjects}
+          createObjectOnClick={false}
         />
       }
     </div>
