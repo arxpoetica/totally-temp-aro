@@ -16,10 +16,7 @@ const tileDataService = new TileDataService()
 
 export const ServiceLayerEditor = (props) => {
 
-  const [discardChanges, setDiscardChanges] = useState(false)
   const [currentTransaction, setCurrentTransaction] = useState(null)
-  const [serviceLayerName, setServiceLayerName] = useState(null)
-  const [serviceLayerCode, setServiceLayerCode] = useState(null)
   const [removeMapObjects, setRemoveMapObjects] = useState(false)
 
   const {
@@ -41,7 +38,7 @@ export const ServiceLayerEditor = (props) => {
 
   const formatServiceLayerForService = (mapObject) => {
     // ToDo: this should use AroFeatureFactory
-    var serviceFeature = {
+    const serviceFeature = {
       objectId: mapObject.feature.objectId,
       dataType: 'service_layer',
       geometry: MapUtilities.multiPolygonPathsToWKT(mapObject.getPaths()),
@@ -57,10 +54,10 @@ export const ServiceLayerEditor = (props) => {
   const resumeOrCreateTransaction = () => {
     setCurrentTransaction(null)
     // See if we have an existing transaction for the currently selected location library
-    var selectedLibraryItemId = dataItems.service_layer.selectedLibraryItems[0].identifier
+    const selectedLibraryItemId = dataItems.service_layer.selectedLibraryItems[0].identifier
     AroHttp.get(`/service/library/transaction`)
       .then((result) => {
-        var existingTransactions = result.data.filter((item) => item.libraryId === selectedLibraryItemId)
+        const existingTransactions = result.data.filter((item) => item.libraryId === selectedLibraryItemId)
         if (existingTransactions.length > 0) {
           // We have an existing transaction for this library item. Use it.
           return Promise.resolve({ data: existingTransactions[0] })
@@ -72,12 +69,8 @@ export const ServiceLayerEditor = (props) => {
           })
         }
       })
-      .then((result) => {
-        setDiscardChanges(false)
-        setCurrentTransaction(result.data)
-      })
+      .then((result) => { setCurrentTransaction(result.data) })
       .catch((err) => {
-        setDiscardChanges(false)
         selectedDisplayMode(displayModes.VIEW)
         console.warn(err)
       })
@@ -85,9 +78,8 @@ export const ServiceLayerEditor = (props) => {
 
   const commitTransaction = () => {
     AroHttp.put(`/service/library/transaction/${currentTransaction.id}`)
-      .then((result) => {
+      .then(() => {
         // Transaction has been committed, start a new one
-        setDiscardChanges(true)
         setCurrentTransaction(null)
         setDeletedMapObjects([])
         setRemoveMapObjects(true)
@@ -99,7 +91,6 @@ export const ServiceLayerEditor = (props) => {
       .then(() => resumeOrCreateTransaction())
       .then(() => recreateTilesAndCache(true))
       .catch((err) => {
-        setDiscardChanges(true)
         setCurrentTransaction(null)
         setDeletedMapObjects([])
         recreateTilesAndCache(true)
@@ -122,9 +113,8 @@ export const ServiceLayerEditor = (props) => {
       if (deleteTransaction) {
         // The user has confirmed that the transaction should be deleted
         AroHttp.delete(`/service/library/transaction/${currentTransaction.id}`)
-          .then((result) => {
+          .then(() => {
             // Transaction has been discarded, start a new one
-            setDiscardChanges(true)
             setCurrentTransaction(null)
             setDeletedMapObjects([])
             setRemoveMapObjects(true)
@@ -132,7 +122,6 @@ export const ServiceLayerEditor = (props) => {
             return resumeOrCreateTransaction()
           })
           .catch((err) => {
-            setDiscardChanges(true)
             setCurrentTransaction(null)
             setDeletedMapObjects([])
             activeViewModePanel(viewModePanels.LOCATION_INFO) // Close out this panel
@@ -160,7 +149,7 @@ export const ServiceLayerEditor = (props) => {
    // Saves the properties of the selected service area
    const saveSelectedServiceAreaProperties = () => {
     if (selectedMapObject) {
-      var serviceLayerFeature = formatServiceLayerForService(selectedMapObject)
+      const serviceLayerFeature = formatServiceLayerForService(selectedMapObject)
       AroHttp.put(`/service/library/transaction/${currentTransaction.id}/features`, serviceLayerFeature)
         .then((result) => {
           const newValues = { ...objectIdToMapObject }
@@ -180,16 +169,16 @@ export const ServiceLayerEditor = (props) => {
     return Promise.reject(`Unknown object key ${eventArgs.objectKey}`)
   }
 
-  const handleObjectCreated = (mapObject, usingMapClick, feature) => {
+  const handleObjectCreated = (mapObject) => {
     objectIdToMapObject[mapObject.objectId] = mapObject
     objectIdToMapObject[mapObject.objectId].isDirty = false
     setObjectIdToMapObject(objectIdToMapObject)
 
     // Create New SA
     if (!mapObject.feature.isExistingObject) {
-      mapObject.feature.name = serviceLayerName
-      mapObject.feature.code = serviceLayerCode
-      var serviceLayerFeature = formatServiceLayerForService(mapObject)
+      mapObject.feature.name = null
+      mapObject.feature.code = null
+      const serviceLayerFeature = formatServiceLayerForService(mapObject)
       // send serviceLayer feature to service
       AroHttp.post(`/service/library/transaction/${currentTransaction.id}/features`, serviceLayerFeature)
     }
@@ -197,14 +186,12 @@ export const ServiceLayerEditor = (props) => {
 
   const handleSelectedObjectChanged = (mapObject) => {
     if (currentTransaction == null) return
-    if (mapObject != null) {
-      updateSelectedState(mapObject)
-    }
+    if (mapObject != null) { updateSelectedState(mapObject) }
     setSelectedMapObject(mapObject)
   }
 
   const handleObjectModified = (mapObject) => {
-    var serviceLayerFeature = formatServiceLayerForService(mapObject)
+    const serviceLayerFeature = formatServiceLayerForService(mapObject)
     AroHttp.put(`/service/library/transaction/${currentTransaction.id}/features`, serviceLayerFeature)
       .catch((err) => console.error(err))
   }
@@ -234,8 +221,8 @@ export const ServiceLayerEditor = (props) => {
       {/* Buttons to commit or discard a transaction */}
       <div className="text-center">
         <div className="btn-group ">
-          <button className="btn btn-light" onClick={() => commitTransaction()}><i className="fa fa-check-circle"></i>&nbsp;&nbsp;Commit</button>
-          <button className="btn btn-light" onClick={() => discardTransaction()}><i className="fa fa-times-circle"></i>&nbsp;&nbsp;Discard</button>
+          <button className="btn btn-light" onClick={() => commitTransaction()}><i className="fa fa-check-circle" />&nbsp;&nbsp;Commit</button>
+          <button className="btn btn-light" onClick={() => discardTransaction()}><i className="fa fa-times-circle" />&nbsp;&nbsp;Discard</button>
         </div>
       </div>
       <br />
@@ -295,20 +282,19 @@ export const ServiceLayerEditor = (props) => {
         style={{ marginTop: '10px' }}
         onClick={() => { saveSelectedServiceAreaProperties() }}
       >
-        <i className="fa fa-save"></i>&nbsp;&nbsp;Save service area properties
+        <i className="fa fa-save" />&nbsp;&nbsp;Save service area properties
       </button>
 
-      {
-        currentTransaction &&
-          <ServiceLayerMapObjects
-            featureType="serviceArea"
-            getObjectIconUrl={getObjectIconUrl}
-            onCreateObject={handleObjectCreated}
-            onSelectObject={handleSelectedObjectChanged}
-            onModifyObject={handleObjectModified}
-            onDeleteObject={handleObjectDeleted}
-            removeMapObjects={removeMapObjects}
-          />
+      { currentTransaction
+        && <ServiceLayerMapObjects
+          featureType="serviceArea"
+          getObjectIconUrl={getObjectIconUrl}
+          onCreateObject={handleObjectCreated}
+          onSelectObject={handleSelectedObjectChanged}
+          onModifyObject={handleObjectModified}
+          onDeleteObject={handleObjectDeleted}
+          removeMapObjects={removeMapObjects}
+        />
       }
     </div>
   )

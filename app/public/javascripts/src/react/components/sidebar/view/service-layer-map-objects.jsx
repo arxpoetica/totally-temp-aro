@@ -21,7 +21,7 @@ const polygonOptions = {
   strokeOpacity: 0.8,
   strokeWeight: 2,
   fillColor: '#FF1493',
-  fillOpacity: 0.4
+  fillOpacity: 0.4,
 }
 
 const selectedPolygonOptions = {
@@ -29,16 +29,14 @@ const selectedPolygonOptions = {
   strokeOpacity: 0.8,
   strokeWeight: 3,
   fillColor: '#FF1493',
-  fillOpacity: 0.4
+  fillOpacity: 0.4,
 }
 
-const isMarker = (mapObject) => {
-  return mapObject && mapObject.icon
-}
+const isMarker = (mapObject) => { mapObject && mapObject.icon }
 
 const polygonInvalidMsg = {
   title: 'Invalid Polygon',
-  text: 'Polygon shape is invalid, please try again. Ensure that the polygon is not self-intersecting.'
+  text: 'Polygon shape is invalid, please try again. Ensure that the polygon is not self-intersecting.',
 }
 
 // ----- rightclick menu ----- //
@@ -53,38 +51,48 @@ const getXYFromEvent = (event) => {
   return { x, y }
 }
 
+// Return true if the given path is a closed path
+const isClosedPath = (path) => {
+  const firstPoint = path.getAt(0)
+  const lastPoint = path.getAt(path.length - 1)
+  const deltaLat = Math.abs(firstPoint.lat() - lastPoint.lat())
+  const deltaLng = Math.abs(firstPoint.lng() - lastPoint.lng())
+  const TOLERANCE = 0.0001
+  return (deltaLat < TOLERANCE) && (deltaLng < TOLERANCE)
+}
+
 export const ServiceLayerMapObjects = (props) => {
 
   const [createdMapObjects, setCreatedMapObjects] = useState({})
-
   const [selectedMapObjectPreviousShape, setSelectedMapObjectPreviousShape] = useState({})
 
   const {
-    mapFeatures,
     mapRef,
+    mapFeatures,
+    mapLayers,
     isRulerEnabled,
     featureType,
     loadEntityList,
     getObjectIconUrl,
     selectedMapObject,
-    setPlanEditorFeatures,
     onCreateObject,
     onModifyObject,
     onSelectObject,
-    selectedBoundaryType,
-    mapLayers,
-    setContextMenuItems,
-    showContextMenu,
-    setObjectIdToMapObject,
+    onDeleteObject,
     selectSAWithId,
     editSAWithId,
     deleteSAWithId,
-    onDeleteObject,
-    setSelectedMapObject,
+    showContextMenu,
     setMapFeatures,
     multiPolygonFeature,
     removeMapObjects,
     objectIdToMapObject,
+    showSiteBoundary,
+    setSelectedMapObject,
+    selectedBoundaryType,
+    setContextMenuItems,
+    setObjectIdToMapObject,
+    setPlanEditorFeatures,
   } = props
 
   const prevMapFeatures = usePrevious(mapFeatures)
@@ -100,9 +108,7 @@ export const ServiceLayerMapObjects = (props) => {
   // Select Service Area
   const prevSelectSAWithId = usePrevious(selectSAWithId)
   useEffect(() => {
-    if (!dequal(prevSelectSAWithId, selectSAWithId)) {
-      selectProposedFeature(selectSAWithId)
-    }
+    if (!dequal(prevSelectSAWithId, selectSAWithId)) { selectProposedFeature(selectSAWithId) }
   }, [selectSAWithId])
 
   // Edit Service Area
@@ -131,11 +137,7 @@ export const ServiceLayerMapObjects = (props) => {
   }, [multiPolygonFeature])
 
   // To Remove Map Objects
-  useEffect(() => {
-    if(removeMapObjects) {
-      removeCreatedMapObjects(objectIdToMapObject)
-    }
-  }, [removeMapObjects])
+  useEffect(() => { removeMapObjects && removeCreatedMapObjects(objectIdToMapObject) }, [removeMapObjects])
 
   const handleMapEntitySelected = (event) => {
     if (!event || !event.latLng) { return }
@@ -145,15 +147,15 @@ export const ServiceLayerMapObjects = (props) => {
         type: 'Point',
         coordinates: [event.latLng.lng(), event.latLng.lat()]
       },
-      isExistingObject: false
+      isExistingObject: false,
     }
 
-    var iconKey = constants.MAP_OBJECT_CREATE_KEY_OBJECT_ID
+    let iconKey = constants.MAP_OBJECT_CREATE_KEY_OBJECT_ID
     let featurePromise = null
     if (featureType === 'serviceArea' && event.hasOwnProperty('serviceAreas') &&
       event.serviceAreas.length > 0 && event.serviceAreas[0].hasOwnProperty('code')) {
       iconKey = constants.MAP_OBJECT_CREATE_SERVICE_AREA
-      var serviceArea = event.serviceAreas[0]
+      const serviceArea = event.serviceAreas[0]
       feature.isExistingObject = true
       // Get the Service area geometry from aro-service
       featurePromise = loadEntityList('ServiceAreaView', serviceArea.id, 'id,code,name,sourceId,geom', 'id')
@@ -163,7 +165,7 @@ export const ServiceLayerMapObjects = (props) => {
             return Promise.reject(`object: ${serviceArea.object_id} may have been deleted`)
           }
 
-          var serviceFeature = result[0]
+          const serviceFeature = result[0]
           serviceFeature.objectId = serviceArea.object_id
           serviceFeature.geometry = serviceFeature.geom
           serviceFeature.isExistingObject = true
@@ -189,17 +191,6 @@ export const ServiceLayerMapObjects = (props) => {
       .catch((err) => console.error(err))
   }
 
-
-  // Return true if the given path is a closed path
-  const isClosedPath = (path) => {
-    const firstPoint = path.getAt(0)
-    const lastPoint = path.getAt(path.length - 1)
-    const deltaLat = Math.abs(firstPoint.lat() - lastPoint.lat())
-    const deltaLng = Math.abs(firstPoint.lng() - lastPoint.lng())
-    const TOLERANCE = 0.0001
-    return (deltaLat < TOLERANCE) && (deltaLng < TOLERANCE)
-  }
-
   const createMapObject = (feature, iconUrl, usingMapClick, existingObjectOverride, deleteExistingBoundary, isMult) => {
     if (typeof existingObjectOverride === undefined) { existingObjectOverride = false }
 
@@ -216,23 +207,19 @@ export const ServiceLayerMapObjects = (props) => {
       }
 
       // Set up listeners on the map object
-      mapObject.addListener('click', (event) => {
+      mapObject.addListener('click', () => {
         // Select this map object
         selectMapObject(mapObject)
       })
       mapObject.getPaths().forEach(function (path, index) {
-        var isClosed = isClosedPath(path)
-        
-        google.maps.event.addListener(path, 'insert_at', function () {
-          modifyObject(mapObject)
-        })
-        google.maps.event.addListener(path, 'remove_at', function () {
-          modifyObject(mapObject)
-        })
+        const isClosed = isClosedPath(path)
+
+        google.maps.event.addListener(path, 'insert_at', function () { modifyObject(mapObject) })
+        google.maps.event.addListener(path, 'remove_at', function () { modifyObject(mapObject) })
         google.maps.event.addListener(path, 'set_at', function () {
-          // if (!self.isClosedPath(path)) {
           if (isClosed) {
-            // IMPORTANT to check if it is already a closed path, otherwise we will get into an infinite loop when trying to keep it closed
+            // IMPORTANT to check if it is already a closed path,
+            // otherwise we will get into an infinite loop when trying to keep it closed
             if (index === 0) {
               // The first point has been moved, move the last point of the polygon (to keep it a valid, closed polygon)
               path.setAt(0, path.getAt(path.length - 1))
@@ -248,12 +235,8 @@ export const ServiceLayerMapObjects = (props) => {
         })
       })
 
-      var mapObjectPaths = mapObject.getPaths()
       google.maps.event.addListener(mapObject, 'rightclick', event => {
-        if (event.vertex === undefined) {
-          return
-        }
-        //this.deleteMenu.open(this.mapRef, mapObjectPaths.getAt(event.path), event.vertex)
+        if (event.vertex === undefined) { return }
       })
     } else {
       throw `createMapObject() not supported for geometry type ${feature.geometry.type}`
@@ -275,11 +258,11 @@ export const ServiceLayerMapObjects = (props) => {
     return onCreateObject(mapObject, usingMapClick, feature, !deleteExistingBoundary)
   }
 
-   // ToDo: I think we should treat all polygons as multiPolygons
-   const createPolygonMapObject = (feature) => {
+  // ToDo: I think we should treat all polygons as multiPolygons
+  const createPolygonMapObject = (feature) => {
     // Create a "polygon" map object
     tileDataService.addFeatureToExclude(feature.objectId)
-    var polygonPath = []
+    const polygonPath = []
     feature.geometry.coordinates[0].forEach((polygonVertex) => {
       polygonPath.push({
         lat: polygonVertex[1], // Note array index
@@ -287,17 +270,17 @@ export const ServiceLayerMapObjects = (props) => {
       })
     })
 
-    var lastI = polygonPath.length - 1
+    const lastI = polygonPath.length - 1
     if (polygonPath[0].lat === polygonPath[lastI].lat && polygonPath[0].lng === polygonPath[lastI].lng) {
       polygonPath.pop()
     }
-    
-    var polygon = new google.maps.Polygon({
+
+    const polygon = new google.maps.Polygon({
       objectId: feature.objectId, // Not used by Google Maps
       paths: polygonPath,
       clickable: true,
       draggable: false,
-      map: mapRef
+      map: mapRef,
     })
     polygon.setOptions(polygonOptions)
 
@@ -307,7 +290,7 @@ export const ServiceLayerMapObjects = (props) => {
     polygon.feature = feature
 
     polygon.hitTest = (latLng) => {
-      if (!showSiteBoundary) return false
+      if (!showSiteBoundary) { return false }
       return google.maps.geometry.poly.containsLocation(latLng, polygon)
     }
     return polygon
@@ -317,34 +300,29 @@ export const ServiceLayerMapObjects = (props) => {
   const createMultiPolygonMapObject = (feature) => {
       // Create a "polygon" map object
       tileDataService.addFeatureToExclude(feature.objectId)
-      var polygonPaths = []
+      const polygonPaths = []
       feature.geometry.coordinates.forEach(path => {
-        var dPath = []
+        const dPath = []
         path[0].forEach(polygonVertex => {
           dPath.push({
             lat: polygonVertex[1], // Note array index
             lng: polygonVertex[0] // Note array index
           })
         })
-  
-        var lastI = dPath.length - 1
-        if (dPath[0].lat === dPath[lastI].lat && dPath[0].lng === dPath[lastI].lng) {
-          dPath.pop()
-        }
-        
+
+        const lastI = dPath.length - 1
+        if (dPath[0].lat === dPath[lastI].lat && dPath[0].lng === dPath[lastI].lng) { dPath.pop() }
         polygonPaths.push(dPath)
       })
-      var polygon = new google.maps.Polygon({
+      const polygon = new google.maps.Polygon({
         objectId: feature.objectId, // Not used by Google Maps
         paths: polygonPaths,
         clickable: true,
         draggable: false,
-        map: mapRef
+        map: mapRef,
       })
       polygon.setOptions(polygonOptions)
-  
       polygon.feature = feature
-  
       return polygon
     }
 
@@ -366,12 +344,11 @@ export const ServiceLayerMapObjects = (props) => {
         setPlanEditorFeatures([])
       }
 
-      if (!isMult) setSelectedMapObject(mapObject)
+      if (!isMult) { setSelectedMapObject(mapObject) }
       if (mapObject && !isMarker(mapObject)) { // If selected mapobject is boundary store the geom
         selectedMapObjectPreviousShape[mapObject.objectId] = mapObject.feature.geometry
         setSelectedMapObjectPreviousShape(selectedMapObjectPreviousShape)
       }
-      
       onSelectObject(mapObject, isMult)
     }
 
@@ -379,7 +356,7 @@ export const ServiceLayerMapObjects = (props) => {
       mapObject.setOptions(selectedPolygonOptions)
       mapObject.setEditable(true)
     }
-    
+
     const dehighlightMapObject = (mapObject) => {
       mapObject.setOptions(polygonOptions)
       mapObject.setEditable(false)
@@ -387,9 +364,9 @@ export const ServiceLayerMapObjects = (props) => {
 
     const modifyObject = (mapObject) => {
       // Check if polygon is valid, if valid modify a map object
-      var polygonGeoJsonPath = MapUtilities.polygonPathsToWKT(mapObject.getPaths())
-      var isValidPolygon = MapUtilities.isPolygonValid({ type: 'Feature', geometry: polygonGeoJsonPath })
-  
+      const polygonGeoJsonPath = MapUtilities.polygonPathsToWKT(mapObject.getPaths())
+      const isValidPolygon = MapUtilities.isPolygonValid({ type: 'Feature', geometry: polygonGeoJsonPath })
+
       if (isValidPolygon) {
         selectedMapObjectPreviousShape[mapObject.objectId] = polygonGeoJsonPath
         onModifyObject(mapObject)
@@ -397,58 +374,48 @@ export const ServiceLayerMapObjects = (props) => {
         // display error message & undo last invalid change
         Utilities.displayErrorMessage(polygonInvalidMsg)
         mapObject.setMap(null)
-  
         mapObject.feature.geometry = selectedMapObjectPreviousShape[mapObject.objectId]
-  
         createMapObject(mapObject.feature, null, true, null, true)
       }
     }
 
-    const overlayRightClickListener = mapRef.addListener('rightclick', (event) => {
-      if (featureType == 'equipment' || featureType == 'serviceArea') { // we're editing a equipment and eqipment bounds NOT locations
-        var eventXY = getXYFromEvent(event)
-        if (!eventXY) return
-        updateContextMenu(event.latLng, eventXY.x, eventXY.y, null)
-      }
-    })
-
     const updateContextMenu = (latLng, x, y, clickedMapObject) => {
-      if (featureType == 'serviceArea') {
+      if (featureType === 'serviceArea') {
         getFeaturesAtPoint(latLng)
         .then((results) => {
-        // We may have come here when the user clicked an existing map object. For now, just add it to the list.
-          // This should be replaced by something that loops over all created map objects and picks those that are under the cursor.
+          // We may have come here when the user clicked an existing map object. For now, just add it to the list.
+          // This should be replaced by something that loops over all created
+          // map objects and picks those that are under the cursor.
           if (clickedMapObject) {
-            var clickedFeature = {
+            const clickedFeature = {
               _data_type: 'service_layer',
               object_id: clickedMapObject.objectId,
-              is_deleted: false
+              is_deleted: false,
             }
             results.push(clickedFeature)
           }
 
-          var menuItems = []
-          var menuItemsById = {}
+          const menuItems = []
+          const menuItemsById = {}
 
-          if (results.length == 0) {
+          if (results.length === 0) {
 
           } else {
             results.forEach((result) => {
               // populate context menu aray here
               // we may need different behavour for different controllers using this
-              var options = []
+              const options = []
               const featureType = utils.getFeatureMenuItemType(result)
               if (result.hasOwnProperty('object_id')) result.objectId = result.object_id
-              var validFeature = false
+              let validFeature = false
 
               // have we already added this one?
-              if (featureType === 'SERVICE_AREA' &&
-                  !menuItemsById.hasOwnProperty(result.objectId)) {
+              if (featureType === 'SERVICE_AREA' && !menuItemsById.hasOwnProperty(result.objectId)) {
                 validFeature = true
               }
 
               if (validFeature) {
-                var feature = result
+                let feature = result
                 if (createdMapObjects.hasOwnProperty(result.objectId)) {
                   // it's on the edit layer / in the transaction
                   feature = createdMapObjects[result.objectId].feature
@@ -459,7 +426,7 @@ export const ServiceLayerMapObjects = (props) => {
                   options.push(new MenuItemAction('EDIT', 'Edit', 'ViewSettingsActions', 'editServiceArea', editSA))
                 }
 
-                var name = feature.code || feature.siteClli || 'Unnamed service area'
+                const name = feature.code || feature.siteClli || 'Unnamed service area'
 
                 menuItemsById[result.objectId] = options
                 menuItems.push(new MenuItemFeature('SERVICE_AREA', name, options))
@@ -467,28 +434,24 @@ export const ServiceLayerMapObjects = (props) => {
             })
           }
 
-          if (menuItems.length <= 0) {
-            this.closeContextMenu()
-          } else {
-            openContextMenu(x, y, menuItems)
-         }
+          openContextMenu(x, y, menuItems)
         })
       }
     }
 
     const getFeaturesAtPoint = (latLng) => {
-      var lat = latLng.lat()
-      var lng = latLng.lng()
-  
+      const lat = latLng.lat()
+      const lng = latLng.lng()
+
       // Get zoom
-      var zoom = mapRef.getZoom()
-  
+      const zoom = mapRef.getZoom()
+
       // Get tile coordinates from lat/lng/zoom. Using Mercator projection.
-      var tileCoords = MapUtilities.getTileCoordinates(zoom, lat, lng)
-  
+      const tileCoords = MapUtilities.getTileCoordinates(zoom, lat, lng)
+
       // Get the pixel coordinates of the clicked point WITHIN the tile (relative to the top left corner of the tile)
-      var clickedPointPixels = MapUtilities.getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng)
-  
+      const clickedPointPixels = MapUtilities.getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng)
+
       return FeatureSelector.performHitDetection(tileDataService, { width: 256, height: 256 }, mapLayers.activeMapLayers,
         zoom, tileCoords.x, tileCoords.y, clickedPointPixels.x, clickedPointPixels.y, selectedBoundaryType.id)
     }
@@ -508,7 +471,7 @@ export const ServiceLayerMapObjects = (props) => {
     }
 
     const selectProposedFeature = (objectId) => {
-      if (!createdMapObjects.hasOwnProperty(objectId)) return false
+      if (!createdMapObjects.hasOwnProperty(objectId)) { return false }
       selectMapObject(createdMapObjects[objectId])
       return true
     }
@@ -521,7 +484,7 @@ export const ServiceLayerMapObjects = (props) => {
       const mapObjectToDelete = createdMapObjects[objectId]
       if (mapObjectToDelete) { onDeleteObject(mapObjectToDelete) }
     }
-  
+
     const deleteCreatedMapObject = (objectId) => {
       const mapObjectToDelete = createdMapObjects[objectId]
       if (mapObjectToDelete) {
@@ -532,9 +495,9 @@ export const ServiceLayerMapObjects = (props) => {
     }
 
     const viewExistingFeature = (feature, latLng) => {
-      var hitFeatures = {}
-      hitFeatures['latLng'] = latLng
-      if (featureType == 'serviceArea') hitFeatures['serviceAreas'] = [feature]
+      const hitFeatures = {}
+      hitFeatures.latLng = latLng
+      if (featureType === 'serviceArea') { hitFeatures.serviceAreas = [feature] }
       setMapFeatures(hitFeatures)
     }
 
@@ -564,6 +527,7 @@ const mapStateToProps = (state) => ({
   deleteSAWithId: state.viewSettings.deleteSAWithId,
   multiPolygonFeature: state.viewSettings.multiPolygonFeature,
   objectIdToMapObject: state.selection.objectIdToMapObject,
+  showSiteBoundary: state.mapLayers.showSiteBoundary,
 })
 
 const mapDispatchToProps = (dispatch) => ({
