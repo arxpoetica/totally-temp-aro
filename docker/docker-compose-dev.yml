@@ -77,7 +77,12 @@ services:
             DATABASE_URL: postgres://aro:aro@arodb/aro
             ARO_CLIENT: aro
             RAILS_ENV: development
+            # GOOGLE_MAPS_API_KEY: replace-and-uncomment
+            # GOOGLE_MAPS_API_IP_KEY: replace-and-uncomment
+            # # Uncomment next line to fix janky scroll-zoom mouse behavior:
+            # GOOGLE_MAPS_GESTURE_HANDLING: cooperative
             # ARO_SERVICE_URL: http://docker.for.mac.localhost:8080
+            # GOOGLE_MAPS_GESTURE_HANDLING: auto
         working_dir: /srv/www/aro
         command: bash -c "/usr/sbin/sshd -D"
         networks:

@@ -71,12 +71,11 @@ export const equipmentDetailList = (props) => {
             // Parse the geometry out.
             const feature = features[iFeature]
             if (filterFeature(feature)) {
-              const clliToEquipmentInfoObj = {}
-              clliToEquipmentInfoObj[feature.properties.object_id] = feature.properties
-              setState((state) => ({ ...state, clliToEquipmentInfo: clliToEquipmentInfoObj }))
+              clliToEquipmentInfo[feature.properties.object_id] = feature.properties
             }
           }
         })
+        setState((state) => ({ ...state, clliToEquipmentInfo }))
       })
   }
 

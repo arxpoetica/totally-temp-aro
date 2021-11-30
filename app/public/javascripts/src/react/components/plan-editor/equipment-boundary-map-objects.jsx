@@ -31,6 +31,7 @@ export class EquipmentBoundaryMapObjects extends Component {
     }
     
     this.clearMapObjectOverlay = this.clearMapObjectOverlay.bind(this);
+    this.contextMenuClick = this.contextMenuClick.bind(this);
   }
 
   render () {
@@ -112,8 +113,9 @@ export class EquipmentBoundaryMapObjects extends Component {
     // const equipmentBoundary = this.props.transactionFeatures[objectId].feature
     if (!this.props.subnets[selectedSubnetId]) return
     const geometry = this.props.subnets[selectedSubnetId].subnetBoundary.polygon
-    const isLocked = this.props.subnets[selectedSubnetId].subnetBoundary.locked
-
+    let isEditable = !this.props.subnets[selectedSubnetId].subnetBoundary.locked
+    isEditable = isEditable && selectedSubnetId === this.props.selectedSubnetId
+    
     if (this.mapObject) this.deleteMapObject()
 
     this.mapObject = new google.maps.Polygon({
@@ -121,7 +123,7 @@ export class EquipmentBoundaryMapObjects extends Component {
       paths: WktUtils.getGoogleMapPathsFromWKTMultiPolygon(geometry),
       clickable: false,
       draggable: false,
-      editable: !isLocked,
+      editable: isEditable,
       map: this.props.googleMaps,
     })
     
@@ -144,7 +146,8 @@ export class EquipmentBoundaryMapObjects extends Component {
     // TODO: DRY the two create functions a bit
     if (!this.props.subnets[subnetId]) return
     const { subnetBoundary } = this.props.subnets[subnetId]
-    const { polygon: geometry, locked: isLocked } = subnetBoundary
+    const geometry = subnetBoundary.polygon
+    let isEditable = (!subnetBoundary.locked) && subnetId === this.props.selectedSubnetId
 
     if (this.neighborObjectsById[subnetId]) {
       this.deleteNeighbors([subnetId])
@@ -155,7 +158,7 @@ export class EquipmentBoundaryMapObjects extends Component {
       paths: WktUtils.getGoogleMapPathsFromWKTMultiPolygon(geometry),
       clickable: false,
       draggable: false,
-      editable: !isLocked,
+      editable: isEditable,
       zIndex: !this.props.subnets[subnetId].parentSubnetId 
         ? constants.Z_INDEX_CO_SUBNET 
         : constants.Z_INDEX_HUB_SUBNET,
@@ -231,23 +234,9 @@ export class EquipmentBoundaryMapObjects extends Component {
         }
       })
     })
+
     mapObject.addListener('contextmenu', event => {
-      let vertexPayload;
-      if(this.mapObjectOverlay.length > 0) {
-        const indexOfMarker = this.mapObjectOverlay.findIndex((marker) => {
-          return marker.title === `${event.vertex}`
-        });
-        
-        if (event.vertex && indexOfMarker === -1) {
-          // Add vertex to array if it doesn't already exist there.
-          this.addMarkerOverlay(event);
-        }
-        vertexPayload = this.mapObjectOverlay;
-      } else {
-        vertexPayload = event.vertex;
-      }
-      const eventXY = WktUtils.getXYFromEvent(event)
-      self.props.showContextMenuForEquipmentBoundary(mapObject, eventXY.x, eventXY.y, vertexPayload, this.clearMapObjectOverlay)
+      this.contextMenuClick(event);
     })
     
     mapObject.addListener('click', event => {
@@ -284,7 +273,10 @@ export class EquipmentBoundaryMapObjects extends Component {
       // 46 = Delete
       // Supporting both of these because not all keyboards have a "delete" key
       if ((code === 8 || code === 46) && this.mapObjectOverlay.length > 0) {
-        this.props.deleteBoundaryVertices(mapObject, this.mapObjectOverlay, this.clearMapObjectOverlay)
+        // Sort is necessary to ensure that indexes will not be reassigned while deleting more than one vertex.
+        const mapObjectOverlayClone = [...this.mapObjectOverlay]
+        // Using this.mapObject as the argument being passed instead of the one in the parent function is the only way this consistently works.
+        this.props.deleteBoundaryVertices(this.mapObject, mapObjectOverlayClone, this.clearMapObjectOverlay)
       }
     });
   }
@@ -334,6 +326,10 @@ export class EquipmentBoundaryMapObjects extends Component {
       }
     })
 
+    newMarker.addListener('contextmenu', event => {
+      this.contextMenuClick(event);
+    })
+
     this.mapObjectOverlay = this.mapObjectOverlay.concat(newMarker);
   }
 
@@ -342,6 +338,25 @@ export class EquipmentBoundaryMapObjects extends Component {
       const [removedMarker] = mapObjectOverlayClone.splice(indexOfMarker, 1)
       this.mapObjectOverlay = mapObjectOverlayClone;
       removedMarker.setMap(null);
+  }
+
+  contextMenuClick(event) {
+    let vertexPayload;
+    if(this.mapObjectOverlay.length > 0) {
+      const indexOfMarker = this.mapObjectOverlay.findIndex((marker) => {
+        return marker.title === `${event.vertex}`
+      });
+      
+      if (event.vertex && indexOfMarker === -1) {
+        // Add vertex to array if it doesn't already exist there.
+        this.addMarkerOverlay(event);
+      }
+      vertexPayload = this.mapObjectOverlay;
+    } else {
+      vertexPayload = event.vertex;
+    }
+    const eventXY = WktUtils.getXYFromEvent(event)
+    this.props.showContextMenuForEquipmentBoundary(this.mapObject, eventXY.x, eventXY.y, vertexPayload, this.clearMapObjectOverlay)
   }
 
   clearMapObjectOverlay() {
