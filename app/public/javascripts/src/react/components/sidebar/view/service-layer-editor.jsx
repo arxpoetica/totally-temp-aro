@@ -151,7 +151,7 @@ export const ServiceLayerEditor = (props) => {
     if (selectedMapObject) {
       const serviceLayerFeature = formatServiceLayerForService(selectedMapObject)
       AroHttp.put(`/service/library/transaction/${currentTransaction.id}/features`, serviceLayerFeature)
-        .then((result) => {
+        .then(() => {
           const newValues = { ...objectIdToMapObject }
           newValues[selectedMapObject.objectId].isDirty = false
           setObjectIdToMapObject(newValues)
@@ -217,17 +217,23 @@ export const ServiceLayerEditor = (props) => {
   }
 
   return (
-    <div style={{ margin: '10px' }}>
+    <div className="edit-service-area">
       {/* Buttons to commit or discard a transaction */}
       <div className="text-center">
         <div className="btn-group ">
-          <button className="btn btn-light" onClick={() => commitTransaction()}><i className="fa fa-check-circle" />&nbsp;&nbsp;Commit</button>
-          <button className="btn btn-light" onClick={() => discardTransaction()}><i className="fa fa-times-circle" />&nbsp;&nbsp;Discard</button>
+          <button className="btn btn-light" onClick={() => commitTransaction()}>
+            <i className="fa fa-check-circle" />
+            Commit
+          </button>
+          <button className="btn btn-light" onClick={() => discardTransaction()}>
+            <i className="fa fa-times-circle" />
+            Discard
+          </button>
         </div>
       </div>
       <br />
 
-      <table className="table table-sm table-striped" style={{ marginBottom: '10px' }}>
+      <table className="table table-sm table-striped">
         <tbody>
           <tr>
             <td>Name</td>
@@ -266,8 +272,8 @@ export const ServiceLayerEditor = (props) => {
         </tbody>
       </table>
 
-      <div style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
-        <div className="btn btn-light draggable-item-button" style={{ flex: '0 0 auto' }}>
+      <div className="draggable-node">
+        <div className="btn btn-light draggable-item draggable-item-button">
           <DraggableNode
             icon="/images/map_icons/aro/hexagon.png"
             entityType={constants.DRAG_IS_BOUNDARY}
@@ -278,11 +284,12 @@ export const ServiceLayerEditor = (props) => {
       </div>
 
       <button
-        className={`btn btn-block ${checkIsDirty()}`}
-        style={{ marginTop: '10px' }}
+        type="button"
+        className={`btn btn-block ${checkIsDirty()} save-properties`}
         onClick={() => { saveSelectedServiceAreaProperties() }}
       >
-        <i className="fa fa-save" />&nbsp;&nbsp;Save service area properties
+        <i className="fa fa-save" />
+        Save service area properties
       </button>
 
       { currentTransaction
