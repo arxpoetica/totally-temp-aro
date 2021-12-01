@@ -39,7 +39,7 @@ const PlanEditorRecalculate = props => {
     if (Object.keys(fiberAnnotations).length > 0) {
       swal({
         title: 'Are you sure you want to recalculate?',
-        text: `If you've made any changes to the Feeder Fiber route annotations on the Fiber Route, they will be lost.`,
+        text: `If you've made any changes to the Feeder Fiber route, annotations will be lost.`,
         type: 'warning',
         showCancelButton: true,
         closeOnConfirm: true,
