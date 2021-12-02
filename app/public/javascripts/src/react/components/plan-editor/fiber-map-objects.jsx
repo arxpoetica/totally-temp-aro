@@ -53,7 +53,9 @@ export const FiberMapObjects = (props) => {
       }
       if (subnetLinks) {
         for (const subnetLink of subnetLinks) {
-          const { geometry, fromNode, toNode } = subnetLink
+          const { geometry, fromNode, toNode, conduitLinkSummary } = subnetLink
+          // use conduitLinkSummary.spanningEdgeType to get say "road"
+          //  there is also conduitLinkSummary.planConduits[0].ref.spatialEdgeTypeReference not sure how this differs
           if (geometry.type === 'LineString') {
             const path = WktUtils.getGoogleMapPathsFromWKTLineString(geometry)
             createMapObject(path, fromNode, toNode, fiberType)
@@ -67,6 +69,11 @@ export const FiberMapObjects = (props) => {
       }
     }
     function createMapObject(path, fromNode, toNode, fiberType) {
+      // for cable type drawing options use 
+      //  state.mapLayers.networkEquipment.cables.FEEDER.drawingOptions
+      // for conduit type (from conduitLinkSummary.spanningEdgeType) use 
+      //  mapLayers.networkEquipment.conduits.duct.drawingOptions and/or 
+      //  mapLayers.networkEquipment.roads.road.drawingOptions
       let strokeColor = fiberType === 'DISTRIBUTION' ? '#FF0000' : '#1700ff'
       let strokeWeight = fiberType === 'DISTRIBUTION' ? 2 : 4
       let selected = false
