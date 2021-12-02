@@ -58,7 +58,9 @@ function resumeOrCreateTransaction (planId, userId) {
           await dispatch(addTransactionFeatures(boundaryList))
           const state = getState()
           const rootSubnet = PlanEditorSelectors.getRootSubnet(state)
-          await dispatch(selectEditFeaturesById([rootSubnet.subnetNode]))
+          if (rootSubnet) {
+            await dispatch(selectEditFeaturesById([rootSubnet.subnetNode]))
+          }
           dispatch({
             type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION,
             payload: false
