@@ -49,14 +49,16 @@ function resumeOrCreateTransaction (planId, userId) {
           subnetIds.push(subnetRef.node.id)
         })
         */
-        batch(() => {
-          dispatch(addSubnetTree())
+        batch(async() => {
+          await dispatch(addSubnetTree())
           // NOTE: need to load resource manager so drop cable
           // length is available for plan-editor-selectors
-          dispatch(ResourceActions.loadResourceManager(id, resource, name))
-          dispatch(addTransactionFeatures(equipmentList))
-          dispatch(addTransactionFeatures(boundaryList))
-
+          await dispatch(ResourceActions.loadResourceManager(id, resource, name))
+          await dispatch(addTransactionFeatures(equipmentList))
+          await dispatch(addTransactionFeatures(boundaryList))
+          const state = getState()
+          const rootSubnet = PlanEditorSelectors.getRootSubnet(state)
+          await dispatch(selectEditFeaturesById([rootSubnet.subnetNode]))
           dispatch({
             type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION,
             payload: false

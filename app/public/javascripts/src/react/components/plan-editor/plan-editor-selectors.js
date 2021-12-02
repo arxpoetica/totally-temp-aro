@@ -68,7 +68,7 @@ locationWarnImg.src = '/svg/alert-panel-location.png'
 const getRootSubnet = createSelector(
   [getSelectedSubnetId, getSubnetFeatures, getSubnets],
   (selectedFeatureId, subnetFeatures, subnets) => {
-    let rootSubnet = subnetFeatures[selectedFeatureId]
+    let rootSubnet = subnetFeatures[selectedFeatureId] || Object.values(subnetFeatures)[0]
     if (rootSubnet) {
       while(subnetFeatures[rootSubnet.subnetId]) {
         rootSubnet = subnetFeatures[rootSubnet.subnetId]
