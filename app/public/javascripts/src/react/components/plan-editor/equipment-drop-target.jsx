@@ -61,33 +61,33 @@ export class EquipmentDropTarget extends Component {
       }
       this.props.createFeature(featureToCreate)
     } else if (entityBeingDropped === constants.DRAG_IS_BOUNDARY) {
-      var grabOffsetX = event.dataTransfer.getData(constants.DRAG_DROP_GRAB_OFFSET_X)
-      var grabOffsetY = event.dataTransfer.getData(constants.DRAG_DROP_GRAB_OFFSET_Y)
-      var grabImageW = event.dataTransfer.getData(constants.DRAG_DROP_GRAB_ICON_W)
-      var grabImageH = event.dataTransfer.getData(constants.DRAG_DROP_GRAB_ICON_H)
-      var offsetX = (grabImageW * 0.5) - grabOffsetX // center
-      var offsetY = grabImageH - grabOffsetY // bottom
+      const grabOffsetX = event.dataTransfer.getData(constants.DRAG_DROP_GRAB_OFFSET_X)
+      const grabOffsetY = event.dataTransfer.getData(constants.DRAG_DROP_GRAB_OFFSET_Y)
+      const grabImageW = event.dataTransfer.getData(constants.DRAG_DROP_GRAB_ICON_W)
+      const grabImageH = event.dataTransfer.getData(constants.DRAG_DROP_GRAB_ICON_H)
+      const offsetX = (grabImageW * 0.5) - grabOffsetX // center
+      const offsetY = grabImageH - grabOffsetY // bottom
   
-      var dropLatLng = MapUtils.pixelToLatlng(this.props.googleMaps, event.clientX + offsetX, event.clientY + offsetY)
-      var position = new google.maps.LatLng(dropLatLng.lat(), dropLatLng.lng())
-      var radius = (40000 / Math.pow(2, this.props.googleMaps.getZoom())) * 2 * 256 // radius in meters
-      var path = this.generateHexagonPath(position, radius)
-      var feature = {
+      const dropLatLng = MapUtils.pixelToLatlng(this.props.googleMaps, event.clientX + offsetX, event.clientY + offsetY)
+      const position = new google.maps.LatLng(dropLatLng.lat(), dropLatLng.lng())
+      const radius = (40000 / Math.pow(2, this.props.googleMaps.getZoom())) * 2 * 256 // radius in meters
+      const path = this.generateHexagonPath(position, radius)
+      const feature = {
         objectId: uuidStore.getUUID(),
         geometry: {
           type: 'MultiPolygon',
           coordinates: [[path]]
         },
-        isExistingObject: false
+        isExistingObject: false,
       }
       this.props.createMultiPolygon(feature)
     }
   }
 
   generateHexagonPath (position, radius) {
-    var pathPoints = []
-    for (var angle = -90; angle < 270; angle += 60) {
-      var point = google.maps.geometry.spherical.computeOffset(position, radius, angle)
+    const pathPoints = []
+    for (let angle = -90; angle < 270; angle += 60) {
+      const point = google.maps.geometry.spherical.computeOffset(position, radius, angle)
       pathPoints.push([point.lng(), point.lat()])
     }
     pathPoints.push(pathPoints[0]) // Close the polygon

@@ -33,7 +33,7 @@ const selectedPolygonOptions = {
   fillOpacity: 0.4,
 }
 
-const isMarker = (mapObject) => { mapObject && mapObject.icon }
+const isMarker = (mapObject) => mapObject && mapObject.icon
 
 const polygonInvalidMsg = {
   title: 'Invalid Polygon',
