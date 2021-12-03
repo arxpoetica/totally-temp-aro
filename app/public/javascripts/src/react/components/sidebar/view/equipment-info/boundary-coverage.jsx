@@ -105,9 +105,10 @@ export const BoundaryCoverage = (props) => {
     isChartInit: false,
     coverageChart: null,
     computedCoverage: {},
+    coverageChartData: {},
   })
 
-  const { isWorking, isWorkingOverride, computedCoverage } = state
+  const { isWorking, isWorkingOverride, computedCoverage, coverageChartData } = state
 
   const { selectedBoundaryCoverage, layerCategories, length_units } = props
 
@@ -189,7 +190,7 @@ export const BoundaryCoverage = (props) => {
     return boundsCoverage
   }
 
-  const showCoverageChartData = () => {
+  const showCoverageChart = () => {
 
     // a dataset for each location type
     const computedCoverageData = digestBoundaryCoverage()
@@ -226,13 +227,11 @@ export const BoundaryCoverage = (props) => {
     for (i = 0; i < colCount - 1; i++) { labels.push((i + 1) * 1000) }
     labels.push('N/A') // unreachable last col is infinite distance (may be count of 0)
 
-    return {
-      labels,
-      datasets,
-    }
+    setState((state) => ({ ...state, 
+      coverageChartData: { labels, datasets },
+      computedCoverage: computedCoverageData,
+    }))
   }
-
-  const showCoverageChart = () => { setState((state) => ({ ...state, computedCoverage: digestBoundaryCoverage() })) }
 
   useEffect(() => { showCoverageChart() }, [selectedBoundaryCoverage])
 
@@ -269,7 +268,7 @@ export const BoundaryCoverage = (props) => {
             className="plan-editor-bounds-dist-chart"
             width={300}
             height={300}
-            data={showCoverageChartData()}
+            data={coverageChartData}
             options={showCoverageChartOption(length_units)}
           />
           <div className="bounds-coverage-detail">
