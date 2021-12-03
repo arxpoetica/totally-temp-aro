@@ -209,7 +209,6 @@ class State {
       EDIT_RINGS: 'EDIT_RINGS',
       OUTPUT: 'OUTPUT'
     })
-    service.activeEditRingsPanel = service.EditRingsPanels.EDIT_RINGS
 
     service.routingModes = {
       DIRECT_ROUTING: { id: 'DIRECT_ROUTING', label: 'Direct Routing' },
@@ -485,8 +484,8 @@ class State {
       }
 
       // ToDo: this check may need to move into REACT
-      if (service.selectedDisplayMode.getValue() == service.displayModes.EDIT_RINGS
-        && service.activeEditRingsPanel == service.EditRingsPanels.EDIT_RINGS) {
+      if (service.rSelectedDisplayMode === service.displayModes.EDIT_RINGS
+        && service.rActiveEditRingsPanel === service.EditRingsPanels.EDIT_RINGS) {
         service.onFeatureSelectedRedux(options)
       } else if (options.locations) {
         service.setSelectedLocations(options.locations.map(location => location.location_id))

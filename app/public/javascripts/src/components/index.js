@@ -82,7 +82,6 @@ import roicReportsSmall from './sidebar/analysis/roic-reports/roic-reports-small
 import roicReportsModal from './sidebar/analysis/roic-reports/roic-reports-modal'
 import coverageReportDownloader from './sidebar/analysis/coverage/coverage-report-downloader'
 import networkBuildOutput from './sidebar/analysis/network-build/network-build-output'
-import ringEditor from './sidebar/ring-editor'
 import draggableButton from './sidebar/plan-editor/draggable-button'
 import planEditorContainer from './sidebar/plan-editor/plan-editor-container'
 import serviceLayerEditor from './sidebar/plan-editor/service-layer-editor'
@@ -144,7 +143,6 @@ app.component('boundaryDetail', boundaryDetail)
   .component('roicReportsModal', roicReportsModal)
   .component('coverageReportDownloader', coverageReportDownloader)
   .component('networkBuildOutput', networkBuildOutput)
-  .component('ringEditor', ringEditor)
   .component('planEditorContainer', planEditorContainer)
   .component('serviceLayerEditor', serviceLayerEditor)
   .component('draggableButton', draggableButton)
