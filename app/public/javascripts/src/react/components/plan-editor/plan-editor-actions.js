@@ -39,16 +39,10 @@ function resumeOrCreateTransaction (planId, userId) {
       .then(results => {
         let equipmentList = results[0].data
         let boundaryList = results[1].data
-        //let subnetRefList = results[2].data
 
         const resource = 'network_architecture_manager'
         const { id, name } = state.plan.resourceItems[resource].selectedManager
-        /*
-        let subnetIds = []
-        subnetRefList.forEach(subnetRef => {
-          subnetIds.push(subnetRef.node.id)
-        })
-        */
+
         batch(async() => {
           await dispatch(addSubnetTree())
           // NOTE: need to load resource manager so drop cable
@@ -61,6 +55,7 @@ function resumeOrCreateTransaction (planId, userId) {
           if (rootSubnet) {
             await dispatch(selectEditFeaturesById([rootSubnet.subnetNode]))
           }
+          dispatch(setFiberRenderRequired(true))
           dispatch({
             type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION,
             payload: false
@@ -718,19 +713,9 @@ function selectEditFeaturesById (featureIds) {
         // we should have all of our features in state at this point (all valid features that is)
         let state = getState()
         let validFeatures = []
-        let subnetFeatures = []
         featureIds.forEach(featureId => {
           if (state.planEditor.features[featureId]) { 
             validFeatures.push(featureId) 
-            /*
-            let networkNodeType = state.planEditor.features[featureId].feature.networkNodeType
-            // TODO: do other networkNodeTypes have subnets?
-            if (networkNodeType === "central_office"
-              || networkNodeType === "fiber_distribution_hub"
-            ) {
-              subnetFeatures.push(featureId)
-            }
-            */
           }
         })
         batch(() => {
@@ -738,8 +723,6 @@ function selectEditFeaturesById (featureIds) {
             type: Actions.PLAN_EDITOR_SET_SELECTED_EDIT_FEATURE_IDS, 
             payload: validFeatures,
           })
-          // later we may highlight more than one subnet
-          //dispatch(setSelectedSubnetId(subnetFeatures[0]))
           dispatch(setSelectedSubnetId(validFeatures[0]))
         })
       })
