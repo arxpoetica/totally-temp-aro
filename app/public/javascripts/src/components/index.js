@@ -62,7 +62,6 @@ import NetworkArchitectureEditor from '../react/components/resource-manager/netw
 import ToolBox from '../react/components/tool/tool-box.jsx'
 import UINotifications from '../react/components/notification/ui-notifications.jsx'
 
-import boundaryDetail from './sidebar/view/boundary-detail'
 import viewMode from './sidebar/view/view-mode'
 import aroSearch from './sidebar/view/aro-search'
 import aroMultiselectSearch from './sidebar/view/aro-multiselect-search'
@@ -122,8 +121,7 @@ import tileDataService from '../components/tiles/tile-data-service'
 
 import reduxConfig from '../redux-config'
 
-app.component('boundaryDetail', boundaryDetail)
-  .component('viewMode', viewMode)
+app.component('viewMode', viewMode)
   .component('aroSearch', aroSearch)
   .component('aroMultiselectSearch', aroMultiselectSearch)
   .component('displayModeButtons', displayModeButtons)

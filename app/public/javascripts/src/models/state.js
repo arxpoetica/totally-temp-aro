@@ -1261,14 +1261,6 @@ class State {
       AnalysisArea: [],
       AnalysisLayer: []
     }
-    // list of matched boundary list (ServiceAreaView/CensusBlocksEntity/AnalysisArea)
-    service.entityTypeBoundaryList = []
-
-    service.resetBoundarySearch = new Rx.BehaviorSubject(false)
-    service.clearEntityTypeBoundaryList = () => {
-      service.entityTypeBoundaryList = []
-    }
-    service.selectedBoundaryTypeforSearch = null
 
     service.authRolls = []
     service.authRollsByName = {}
