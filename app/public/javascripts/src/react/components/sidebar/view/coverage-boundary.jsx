@@ -11,7 +11,7 @@ export const CoverageBoundary = (props) => {
 
   const [state, setState] = useState({
     controlState: controlStates.NO_TARGET_SELECTED,
-    coverageRadius: 1000, // In whatever units are specified in the configuration.units service
+    coverageRadius: 10000, // In whatever units are specified in the configuration.units service
     householdsCovered: null,
   })
 

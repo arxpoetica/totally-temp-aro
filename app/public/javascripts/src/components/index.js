@@ -64,7 +64,6 @@ import UINotifications from '../react/components/notification/ui-notifications.j
 
 import boundaryDetail from './sidebar/view/boundary-detail'
 import roadSegmentDetail from './sidebar/view/road-segment-detail'
-import coverageBoundary from './sidebar/view/coverage-boundary'
 import viewMode from './sidebar/view/view-mode'
 import planInfoRecent from './sidebar/view/plan-info-recent'
 import aroSearch from './sidebar/view/aro-search'
@@ -127,7 +126,6 @@ import reduxConfig from '../redux-config'
 
 app.component('boundaryDetail', boundaryDetail)
   .component('roadSegmentDetail', roadSegmentDetail)
-  .component('coverageBoundary', coverageBoundary)
   .component('viewMode', viewMode)
   .component('planInfoRecent', planInfoRecent)
   .component('aroSearch', aroSearch)
