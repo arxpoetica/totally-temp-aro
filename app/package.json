@@ -7,7 +7,8 @@
   "private": true,
   "main": "app.js",
   "volta": {
-    "node": "10.23.2"
+    "node": "10.23.2",
+    "npm": "6.14.10"
   },
   "scripts": {
     "test": "NODE_ENV=test mocha test/models/*.js test/helpers/*.js --timeout 50000 --delay",
@@ -17,6 +18,7 @@
     "build-angularjs": "./node_modules/.bin/babel public/javascripts/src -d public/javascripts/lib --presets=@babel/preset-env --ignore public/javascripts/src/service-typegen/,public/javascripts/src/react/ && cd ./public/javascripts/src/components && find . -name \\*.html -exec cp --parents {} ../../lib/components/ \\;",
     "build": "npm run build-service-types && npm run build-vendor-bundle && npm run build-angularjs && webpack",
     "watch-server": "nodemon --inspect=0.0.0.0:9229 ./app.js",
+    "watch-dotenv": "dotenv nodemon --inspect=0.0.0.0:9229 ./app.js",
     "watch-client": "babel public/javascripts/src -d public/javascripts/lib --ignore public/javascripts/src/service-typegen/,public/javascripts/src/react/ --watch --copy-files --source-maps",
     "watch-webpack": "NODE_ENV=development webpack --watch",
     "watch-esbuild": "esbuild public/javascripts/src/components/index.js --outfile=public/javascripts/lib/aro-bundle.js --bundle --define:process.env.NODE_ENV=\\\"development\\\" --external:/svg/* --watch --sourcemap=external",
@@ -132,6 +134,7 @@
     "ansi-colors": "^4.1.1",
     "babel-jest": "^24.1.0",
     "concurrently": "^3.5.1",
+    "dotenv-cli": "4.1.0",
     "enzyme": "^3.8.0",
     "enzyme-adapter-react-16": "^1.9.1",
     "esbuild": "0.9.0",

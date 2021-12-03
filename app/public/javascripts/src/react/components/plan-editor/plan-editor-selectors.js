@@ -68,7 +68,7 @@ locationWarnImg.src = '/svg/alert-panel-location.png'
 const getRootSubnet = createSelector(
   [getSelectedSubnetId, getSubnetFeatures, getSubnets],
   (selectedFeatureId, subnetFeatures, subnets) => {
-    let rootSubnet = subnetFeatures[selectedFeatureId]
+    let rootSubnet = subnetFeatures[selectedFeatureId] || Object.values(subnetFeatures)[0]
     if (rootSubnet) {
       while(subnetFeatures[rootSubnet.subnetId]) {
         rootSubnet = subnetFeatures[rootSubnet.subnetId]
@@ -289,24 +289,24 @@ const getLocationCounts = createSelector(
   (subnets, subnetFeatures, selectedEditFeatureIds) => {
     let locationCountsById = {}
     for (const id of selectedEditFeatureIds) {
-      if (
-        subnets[id]
-        && subnetFeatures[id]
-        && subnetFeatures[id].feature.networkNodeType === 'fiber_distribution_hub'
-      ) {
-        const locations = Object.values(subnets[id].subnetLocationsById)
-        locationCountsById[id] = locations.filter(location => !!location.parentEquipmentId).length
+      const subnet = subnets[id]
+      const feature = subnetFeatures[id]
+      const type = feature && feature.feature.networkNodeType
+
+      if (subnet && type === 'fiber_distribution_hub') {
+        const locations = Object.values(subnet.subnetLocationsById)
+        locationCountsById[id] = locations
+          .filter(location => !!location.parentEquipmentId)
+          .length
+      } else if (subnet && type === 'dslam') {
+        locationCountsById[id] = Object.keys(subnet.subnetLocationsById).length
+      } else if (type === 'fiber_distribution_terminal' && feature.feature.dropLinks) {
+        locationCountsById[id] = feature.feature.dropLinks.length
       } else {
-        if (
-          subnetFeatures[id]
-          && subnetFeatures[id].feature.networkNodeType === 'fiber_distribution_terminal'
-          && subnetFeatures[id].feature.dropLinks
-        ) {
-          locationCountsById[id] = subnetFeatures[id].feature.dropLinks.length
-        } else {
-          const locationDistanceMap = subnets[id] && subnets[id].fiber && subnets[id].fiber.locationDistanceMap
-          locationCountsById[id] = locationDistanceMap ? Object.keys(locationDistanceMap).length : 0
-        }
+        const locationDistanceMap = subnet && subnet.fiber && subnet.fiber.locationDistanceMap
+        locationCountsById[id] = locationDistanceMap
+          ? Object.keys(locationDistanceMap).length
+          : 0
       }
     }
     return locationCountsById
