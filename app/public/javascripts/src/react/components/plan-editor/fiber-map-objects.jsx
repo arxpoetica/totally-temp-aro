@@ -101,8 +101,10 @@ export const FiberMapObjects = (props) => {
       ){
         //strokeColor = '#a73cff'
         highlightColor = '#a73cff'
-        highlightWeight = strokeWeight
-        strokeWeight = Math.max(2, highlightWeight * 0.5)
+        //highlightWeight = strokeWeight
+        //strokeWeight = Math.max(2, highlightWeight * 0.5)
+        strokeWeight = 2
+        highlightWeight = 5
       }
 
       // set color pink, increase stroke and set selected true if selected
@@ -142,7 +144,7 @@ export const FiberMapObjects = (props) => {
           map: googleMaps,
           zIndex: constants.Z_INDEX_MAP_OBJECT - 1,
           strokeColor: highlightColor,
-          strokeOpacity: 1.0,
+          strokeOpacity: 0.5,
           strokeWeight: highlightWeight,
         })
         mapObjects.push(newHighlightObject)
