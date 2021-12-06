@@ -1015,73 +1015,10 @@ class State {
     }
     service.loadNetworkNodeTypesEntity()
 
-    // optimization services
-    service.modifyDialogResult = Object.freeze({
-      CANCEL: 0,
-      OVERWRITE: 1
-    })
     service.progressMessagePollingInterval = null
     service.progressMessage = ''
     service.progressPercent = 0
     service.isCanceling = false // True when we have requested the server to cancel a request
-
-    // expert mode refactor
-    // also used by ring edit and r-network-optimization-input
-    service.handleModifyClicked = () => {
-      var currentPlan = service.plan
-      if (currentPlan.ephemeral) {
-        // This is an ephemeral plan. Don't show any dialogs to the user, simply copy this plan over to a new ephemeral plan
-        var url = `/service/v1/plan-command/copy?source_plan_id=${currentPlan.id}&is_ephemeral=${currentPlan.ephemeral}`
-        return $http.post(url, {})
-          .then((result) => {
-            if (result.status >= 200 && result.status <= 299) {
-              service.setPlanRedux(result.data, true)
-              return Promise.resolve()
-            }
-          })
-          .catch((err) => {
-            console.log(err)
-            return Promise.reject(err)
-          })
-      } else {
-        // This is not an ephemeral plan. Show a dialog to the user asking whether to overwrite current plan or save as a new one.
-        return service.showModifyQuestionDialog()
-          .then((result) => {
-            if (result === service.modifyDialogResult.OVERWRITE) {
-              return $http.delete(`/service/v1/plan/${currentPlan.id}/optimization-state`)
-                .then(() => $http.get(`/service/v1/plan/${currentPlan.id}/optimization-state`))
-                .then(result => {
-                  service.plan.planState = result.data
-                  service.setActivePlanState(result.data)
-                  $timeout()
-                })
-                .catch(err => console.error(err))
-            }
-          })
-          .catch((err) => {
-            console.log(err)
-            return Promise.reject()
-          })
-      }
-    }
-
-    service.showModifyQuestionDialog = () => {
-      return new Promise((resolve, reject) => {
-        swal({
-          title: '',
-          text: 'You are modifying a plan with a completed analysis. Do you wish to overwrite the existing plan?  Overwriting will clear all results which were previously run.',
-          type: 'info',
-          confirmButtonColor: '#b9b9b9',
-          confirmButtonText: 'Overwrite',
-          cancelButtonColor: '#DD6B55',
-          cancelButtonText: 'Cancel',
-          showCancelButton: true,
-          closeOnConfirm: true
-        }, (wasConfirmClicked) => {
-          resolve(wasConfirmClicked ? service.modifyDialogResult.OVERWRITE : service.modifyDialogResult.CANCEL)
-        })
-      })
-    }
 
     service.getOptimizationProgress = (newPlan) => {
       if (!service.plan.planState) {

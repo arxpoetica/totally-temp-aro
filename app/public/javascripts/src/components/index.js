@@ -64,7 +64,6 @@ import UINotifications from '../react/components/notification/ui-notifications.j
 
 import viewMode from './sidebar/view/view-mode'
 import displayModeButtons from './sidebar/display-mode-buttons'
-import analysisMode from './sidebar/analysis/analysis-mode'
 
 import draggableButton from './sidebar/plan-editor/draggable-button'
 import planEditorContainer from './sidebar/plan-editor/plan-editor-container'
@@ -111,7 +110,6 @@ import reduxConfig from '../redux-config'
 
 app.component('viewMode', viewMode)
   .component('displayModeButtons', displayModeButtons)
-  .component('analysisMode', analysisMode)
   .component('planEditorContainer', planEditorContainer)
   .component('serviceLayerEditor', serviceLayerEditor)
   .component('draggableButton', draggableButton)
