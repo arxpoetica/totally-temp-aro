@@ -64,7 +64,6 @@ import UINotifications from '../react/components/notification/ui-notifications.j
 
 import viewMode from './sidebar/view/view-mode'
 import displayModeButtons from './sidebar/display-mode-buttons'
-import analysisExpertMode from './sidebar/analysis/analysis-expert-mode'
 import analysisMode from './sidebar/analysis/analysis-mode'
 
 import locationRoicReports from './sidebar/analysis/roic-reports/location-roic-reports'
@@ -120,7 +119,6 @@ import reduxConfig from '../redux-config'
 
 app.component('viewMode', viewMode)
   .component('displayModeButtons', displayModeButtons)
-  .component('analysisExpertMode', analysisExpertMode)
   .component('analysisMode', analysisMode)
   .component('locationRoicReports', locationRoicReports)
   .component('networkBuildRoicReports', networkBuildRoicReports)
