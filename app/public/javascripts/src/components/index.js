@@ -63,7 +63,6 @@ import ToolBox from '../react/components/tool/tool-box.jsx'
 import UINotifications from '../react/components/notification/ui-notifications.jsx'
 
 import viewMode from './sidebar/view/view-mode'
-import aroMultiselectSearch from './sidebar/view/aro-multiselect-search'
 import displayModeButtons from './sidebar/display-mode-buttons'
 import analysisExpertMode from './sidebar/analysis/analysis-expert-mode'
 import analysisMode from './sidebar/analysis/analysis-mode'
@@ -121,7 +120,6 @@ import tileDataService from '../components/tiles/tile-data-service'
 import reduxConfig from '../redux-config'
 
 app.component('viewMode', viewMode)
-  .component('aroMultiselectSearch', aroMultiselectSearch)
   .component('displayModeButtons', displayModeButtons)
   .component('analysisExpertMode', analysisExpertMode)
   .component('analysisMode', analysisMode)
