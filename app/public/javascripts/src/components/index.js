@@ -66,13 +66,6 @@ import viewMode from './sidebar/view/view-mode'
 import displayModeButtons from './sidebar/display-mode-buttons'
 import analysisMode from './sidebar/analysis/analysis-mode'
 
-import locationRoicReports from './sidebar/analysis/roic-reports/location-roic-reports'
-import networkBuildRoicReports from './sidebar/analysis/roic-reports/network-build-roic-reports'
-
-import roicReports from './sidebar/analysis/roic-reports/roic-reports'
-import roicReportsLarge from './sidebar/analysis/roic-reports/roic-reports-large'
-import roicReportsSmall from './sidebar/analysis/roic-reports/roic-reports-small'
-import roicReportsModal from './sidebar/analysis/roic-reports/roic-reports-modal'
 import draggableButton from './sidebar/plan-editor/draggable-button'
 import planEditorContainer from './sidebar/plan-editor/plan-editor-container'
 import serviceLayerEditor from './sidebar/plan-editor/service-layer-editor'
@@ -119,12 +112,6 @@ import reduxConfig from '../redux-config'
 app.component('viewMode', viewMode)
   .component('displayModeButtons', displayModeButtons)
   .component('analysisMode', analysisMode)
-  .component('locationRoicReports', locationRoicReports)
-  .component('networkBuildRoicReports', networkBuildRoicReports)
-  .component('roicReports', roicReports)
-  .component('roicReportsLarge', roicReportsLarge)
-  .component('roicReportsSmall', roicReportsSmall)
-  .component('roicReportsModal', roicReportsModal)
   .component('planEditorContainer', planEditorContainer)
   .component('serviceLayerEditor', serviceLayerEditor)
   .component('draggableButton', draggableButton)

@@ -282,7 +282,6 @@ class State {
     service.dragStartEvent = new Rx.BehaviorSubject()
     service.dragEndEvent = new Rx.BehaviorSubject()
     service.showPlanResourceEditorModal = false
-    service.showRoicReportsModal = false
     service.editingPlanResourceKey = null
     service.isLoadingPlan = false
 
