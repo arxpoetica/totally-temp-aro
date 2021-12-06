@@ -74,7 +74,6 @@ import roicReports from './sidebar/analysis/roic-reports/roic-reports'
 import roicReportsLarge from './sidebar/analysis/roic-reports/roic-reports-large'
 import roicReportsSmall from './sidebar/analysis/roic-reports/roic-reports-small'
 import roicReportsModal from './sidebar/analysis/roic-reports/roic-reports-modal'
-import coverageReportDownloader from './sidebar/analysis/coverage/coverage-report-downloader'
 import networkBuildOutput from './sidebar/analysis/network-build/network-build-output'
 import draggableButton from './sidebar/plan-editor/draggable-button'
 import planEditorContainer from './sidebar/plan-editor/plan-editor-container'
@@ -129,7 +128,6 @@ app.component('viewMode', viewMode)
   .component('roicReportsLarge', roicReportsLarge)
   .component('roicReportsSmall', roicReportsSmall)
   .component('roicReportsModal', roicReportsModal)
-  .component('coverageReportDownloader', coverageReportDownloader)
   .component('networkBuildOutput', networkBuildOutput)
   .component('planEditorContainer', planEditorContainer)
   .component('serviceLayerEditor', serviceLayerEditor)
