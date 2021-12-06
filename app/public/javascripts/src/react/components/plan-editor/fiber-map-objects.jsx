@@ -72,14 +72,8 @@ export const FiberMapObjects = (props) => {
       }
     }
     function createMapObject(path, fromNode, toNode, fiberType, conduitType = null) {
-      // for cable type drawing options use 
-      //  state.mapLayers.networkEquipment.cables.FEEDER.drawingOptions
-      // for conduit type (from conduitLinkSummary.spanningEdgeType) use 
-      //  mapLayers.networkEquipment.conduits.duct.drawingOptions and/or 
-      //  mapLayers.networkEquipment.roads.road.drawingOptions
-      //let strokeColor = fiberType === 'DISTRIBUTION' ? '#FF0000' : '#1700ff'
       let strokeColor = layerEquipment.cables[fiberType].drawingOptions.strokeStyle
-      let strokeWeight = fiberType === 'DISTRIBUTION' ? 2 : 4
+      let strokeWeight = fiberType === 'DISTRIBUTION' ? 2 : 3
       let selected = false
 
       if (conduitType 
@@ -99,10 +93,7 @@ export const FiberMapObjects = (props) => {
           (fiber) => fiber.fromNode === fromNode && fiber.toNode === toNode,
         )
       ){
-        //strokeColor = '#a73cff'
-        highlightColor = '#a73cff'
-        //highlightWeight = strokeWeight
-        //strokeWeight = Math.max(2, highlightWeight * 0.5)
+        highlightColor = '#ff55da'
         strokeWeight = 2
         highlightWeight = 5
       }
@@ -113,10 +104,7 @@ export const FiberMapObjects = (props) => {
           (fiber) => fiber.fromNode === fromNode && fiber.toNode === toNode,
         )
       ) {
-        //strokeColor = '#ff55da'
-        highlightColor = '#ff55da'
-        strokeWeight = 2
-        highlightWeight = 5
+        strokeWeight = 5
         selected = true
       }
 
@@ -144,7 +132,7 @@ export const FiberMapObjects = (props) => {
           map: googleMaps,
           zIndex: constants.Z_INDEX_MAP_OBJECT - 1,
           strokeColor: highlightColor,
-          strokeOpacity: 0.5,
+          strokeOpacity: 1.0,
           strokeWeight: highlightWeight,
         })
         mapObjects.push(newHighlightObject)
