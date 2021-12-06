@@ -1071,6 +1071,8 @@ function recalculateSubnets (transactionId, subnetIds = []) {
   }
 }
 
+// TODO: with this we're using state to send messages, 
+//  this is incorrect. It points out a flaw in our architecture, fix.
 function setFiberRenderRequired (bool) {
   return {
     type: Actions.PLAN_EDITOR_SET_FIBER_RENDER_REQUIRED,
