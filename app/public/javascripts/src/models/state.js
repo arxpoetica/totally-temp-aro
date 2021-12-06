@@ -1601,6 +1601,7 @@ class State {
           }
           service.configuration.loadPerspective(config.user.perspective)
           service.setNetworkEquipmentLayers(service.configuration.networkEquipment)
+          service.setConstructionAreaLayers(service.configuration.constructionAreas)
           service.setCopperLayers(service.configuration.copperCategories)
 
           service.setAppConfiguration(service.configuration) // Require in tool-bar.jsx
@@ -1909,6 +1910,7 @@ class State {
       loadPlanRedux: planId => dispatch(PlanActions.loadPlan(planId)),
       setGoogleMapsReference: mapRef => dispatch(MapActions.setGoogleMapsReference(mapRef)),
       setNetworkEquipmentLayers: networkEquipmentLayers => dispatch(MapLayerActions.setNetworkEquipmentLayers(networkEquipmentLayers)),
+      setConstructionAreaLayers: constructionAreaLayers => dispatch(MapLayerActions.setConstructionAreaLayers(constructionAreaLayers)),
       setCopperLayers: copperLayers => dispatch(MapLayerActions.setCopperLayers(copperLayers)),
       updateShowSiteBoundary: isVisible => dispatch(MapLayerActions.setShowSiteBoundary(isVisible)),
       setLocationFilters: locationFilters => dispatch(MapLayerActions.setLocationFilters(locationFilters)),

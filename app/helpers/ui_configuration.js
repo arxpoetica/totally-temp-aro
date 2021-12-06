@@ -105,7 +105,7 @@ module.exports = class UIConfiguration {
   getConfigurationSet (configSet) {
     if (!this.configurations[configSet]) {
       // This configuration set has not been loaded yet. Load it.
-      const dbConfigSets = ['boundaryCategories', 'locationCategories', 'copperCategories', 'networkEquipment', 'plan',
+      const dbConfigSets = ['boundaryCategories', 'locationCategories', 'copperCategories', 'constructionAreas', 'networkEquipment', 'plan',
         'perspectives', 'toolbar', 'showPlanDataSelection', 'broadcast', 'userGroups']
       if (dbConfigSets.indexOf(configSet) >= 0) {
         // These configuration settings are stored in the database
