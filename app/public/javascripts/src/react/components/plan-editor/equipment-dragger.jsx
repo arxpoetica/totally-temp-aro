@@ -66,13 +66,11 @@ EquipmentDragger.propTypes = {
   equipmentDefinitions: PropTypes.object,
 }
 
-const mapStateToProps = (state) => {
-  debugger;
-  return({
+const mapStateToProps = (state) => ({
   visibleEquipmentTypes: (state.configuration.ui.perspective && state.configuration.ui.perspective.networkEquipment.areVisible) || [],
   visibleEdgeConstructionTypes: (state.configuration.ui.perspective && state.configuration.ui.perspective.constructionAreas.areVisible) || [],
   equipmentDefinitions: { ...state.mapLayers.networkEquipment.equipments, ...state.mapLayers.constructionAreas.construction_areas },
-})}
+})
 
 const mapDispatchToProps = dispatch => ({})
 
