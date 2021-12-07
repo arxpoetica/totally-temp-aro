@@ -56,9 +56,14 @@ export class EquipmentDropTarget extends Component {
       const featureToCreate = {
         id: uuidStore.getUUID(),
         point: WktUtils.getWKTPointFromGoogleMapLatLng(dropLatLng),
-        networkNodeType: networkNodeType,
       }
-      this.props.createFeature(featureToCreate)
+
+      if (networkNodeType === "undefined") {
+        this.props.createConstructionArea(featureToCreate);
+      } else {
+        featureToCreate.networkNodeType = networkNodeType
+        this.props.createFeature(featureToCreate)
+      }
     }
   }
 }
@@ -74,7 +79,8 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  createFeature: (equipment) => dispatch(PlanEditorActions.createFeature(equipment))
+  createFeature: (equipment) => dispatch(PlanEditorActions.createFeature(equipment)),
+  createConstructionArea: (constructionArea) => dispatch(PlanEditorActions.createConstructionArea(constructionArea)),
 })
 
 const EquipmentDropTargetComponent = wrapComponentWithProvider(reduxStore, EquipmentDropTarget, mapStateToProps, mapDispatchToProps)

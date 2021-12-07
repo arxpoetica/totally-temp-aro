@@ -274,6 +274,12 @@ function addTransactionFeatures (features) {
   }
 }
 
+function createConstructionArea(constructionArea) {
+  return (dispatch, getState) => {
+    return console.log("Hello world")
+  }
+}
+
 function deleteBoundaryVertex (mapObject, vertex) {
   return dispatch => {
     // checks it is a valid vertex and that there are at least 3 other vertices left
@@ -1377,6 +1383,7 @@ export default {
   moveFeature,
   deleteFeature,
   deleteTransactionFeature,
+  createConstructionArea,
   deleteBoundaryVertex,
   deleteBoundaryVertices,
   addTransactionFeatures,
