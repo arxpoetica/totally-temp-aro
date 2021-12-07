@@ -25,6 +25,7 @@ const defaultState = {
   selectedFiber: [],
   fiberAnnotations: {},
   clickedLatLng: [],
+  planThumbInformation: {},
 }
 
 function setTransaction (state, transaction) {
@@ -112,6 +113,16 @@ function setIsDraggingFeatureForDrop (state, isDraggingFeatureForDrop) {
   return { ...state,
     isDraggingFeatureForDrop: isDraggingFeatureForDrop
   }
+}
+
+function setPlanThumbInformation (state, planThumbInformation) {
+  return { ...state, planThumbInformation }
+}
+
+function updatePlanThumbInformation (state, payload) {
+  const planThumbInformationClone = JSON.parse(JSON.stringify(state.planThumbInformation))
+  planThumbInformationClone[payload.key] = payload.planThumbInformation;
+  return { ...state, planThumbInformation: planThumbInformationClone }
 }
 
 function setIsEditingFeatureProperties (state, isEditingFeatureProperties) {
@@ -333,6 +344,12 @@ function planEditorReducer (state = defaultState, { type, payload }) {
 
     case Actions.PLAN_EDITOR_CLEAR_BOUNDARY_DEBOUNCE:
       return clearBoundaryDebounce(state, payload)
+
+    case Actions.PLAN_EDITOR_SET_PLAN_THUMB_INFORMATION:
+      return setPlanThumbInformation(state, payload)
+    
+    case Actions.PLAN_EDITOR_UPDATE_PLAN_THUMB_INFORMATION:
+      return updatePlanThumbInformation(state, payload)
     
     case Actions.PLAN_EDITOR_SET_FIBER_RENDER_REQUIRED:
       return { ...state, fiberRenderRequired: payload }

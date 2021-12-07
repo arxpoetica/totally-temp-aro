@@ -53,12 +53,41 @@ export class EquipmentDropTarget extends Component {
       const dropLatLng = MapUtils.pixelToLatlng(this.props.googleMaps, event.clientX + offsetX, event.clientY + offsetY)
       const networkNodeType = event.dataTransfer.getData(constants.DRAG_DROP_ENTITY_DETAILS_KEY)
 
-      const featureToCreate = {
+      let featureToCreate = {
         id: uuidStore.getUUID(),
         point: WktUtils.getWKTPointFromGoogleMapLatLng(dropLatLng),
       }
-
+      
       if (networkNodeType === "undefined") {
+        const featureCoordinates = featureToCreate.point.coordinates
+        const geometry = {
+          type: 'polygon',
+          coordinates: [
+            [ featureCoordinates[1], featureCoordinates[0] - .005 ]
+            [ featureCoordinates[1], featureCoordinates[0] + .005 ],
+            [ featureCoordinates[1] - .005, featureCoordinates[0] + .005 ],
+            [ featureCoordinates[1] - .005, featureCoordinates[0] - .005 ]
+          ]
+        }
+
+        featureToCreate = {
+          ...featureToCreate,
+          geometry,
+          attributes: {},
+          dataType: "edge_construction_area",
+          // Needs to be updated to be a ternary based off of blocker and inclusion
+          costMultiplier: .2,
+          dateModified: Date.now(),
+          edgeConstructionTypeReference: {},
+          edgeFeatureReferences: [],
+          exportedAttributes: {},
+          objectId: featureToCreate.id,
+          // Needs to be updated to be a ternary based off of blocker and inclusion
+          priority: 1
+        }
+        delete featureToCreate.id;
+        delete featureToCreate.point;
+
         this.props.createConstructionArea(featureToCreate);
       } else {
         featureToCreate.networkNodeType = networkNodeType

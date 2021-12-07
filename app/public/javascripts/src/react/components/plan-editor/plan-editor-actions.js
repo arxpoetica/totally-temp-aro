@@ -275,8 +275,23 @@ function addTransactionFeatures (features) {
 }
 
 function createConstructionArea(constructionArea) {
-  return (dispatch, getState) => {
-    return console.log("Hello world")
+  return async (dispatch, getState) => {
+    try {
+      const state = getState()
+      const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+
+      const url = `/service/plan-transaction/${transactionId}/edge-construction-area`
+      const constructionAreaResults = await AroHttp.post(url, {
+        ...constructionArea
+      })
+      
+      const rootSubnet = PlanEditorSelectors.getRootSubnet(state)
+      // Take in effected subnets.
+
+      // Send constructionArea to the store.
+    } catch (e) {
+      console.warn(e);
+    }
   }
 }
 
