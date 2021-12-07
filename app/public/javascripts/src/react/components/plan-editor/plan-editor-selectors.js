@@ -52,10 +52,10 @@ const getFeaturesRenderInfo = createSelector(
 
 const getNetworkConfig = state => {
   const { network_architecture_manager } = state.plan.resourceItems
-  if (!network_architecture_manager || !network_architecture_manager.selectedManager) { return }
+  if (!network_architecture_manager || !network_architecture_manager.selectedManager) { return null }
   const { id } = network_architecture_manager.selectedManager
   const manager = state.resourceManager.managers && state.resourceManager.managers[id]
-  if (!manager) { return }
+  if (!manager) { return null }
   const networkConfig = manager.definition
     .networkConfigurations.ODN_1
   return networkConfig
