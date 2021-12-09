@@ -49,9 +49,9 @@ function recreateTilesAndCache (value) {
   }
 }
 
-function addServiceArea (feature) {
+function setServiceAreaBoundaryDetails (feature) {
   return {
-    type: Actions.VIEW_SETTINGS_ADD_SERVICE_AREA,
+    type: Actions.VIEW_SETTINGS_SET_SERVICE_AREA_BOUNDARY_DETAILS,
     payload: feature
   }
 }
@@ -64,5 +64,5 @@ export default {
   deleteServiceArea,
   createMultiPolygon,
   recreateTilesAndCache,
-  addServiceArea,
+  setServiceAreaBoundaryDetails,
 }

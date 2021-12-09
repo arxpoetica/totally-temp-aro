@@ -40,18 +40,19 @@ export class EquipmentDropTarget extends Component {
 
   handleDrop (event) {
     const entityBeingDropped = event.dataTransfer.getData(constants.DRAG_DROP_ENTITY_KEY)
+    // Convert pixels to latlng
+    const grabOffsetX = event.dataTransfer.getData(constants.DRAG_DROP_GRAB_OFFSET_X)
+    const grabOffsetY = event.dataTransfer.getData(constants.DRAG_DROP_GRAB_OFFSET_Y)
+    const grabImageW = event.dataTransfer.getData(constants.DRAG_DROP_GRAB_ICON_W)
+    const grabImageH = event.dataTransfer.getData(constants.DRAG_DROP_GRAB_ICON_H)
+    const offsetX = (grabImageW * 0.5) - grabOffsetX // center
+    const offsetY = grabImageH - grabOffsetY // bottom
+    const dropLatLng = MapUtils.pixelToLatlng(this.props.googleMaps, event.clientX + offsetX, event.clientY + offsetY)
+
     if (entityBeingDropped === constants.DRAG_DROP_NETWORK_EQUIPMENT) {
       // A network equipment item was dropped. Handle it.
       event.stopPropagation()
       event.preventDefault()
-      // Convert pixels to latlng
-      const grabOffsetX = event.dataTransfer.getData(constants.DRAG_DROP_GRAB_OFFSET_X)
-      const grabOffsetY = event.dataTransfer.getData(constants.DRAG_DROP_GRAB_OFFSET_Y)
-      const grabImageW = event.dataTransfer.getData(constants.DRAG_DROP_GRAB_ICON_W)
-      const grabImageH = event.dataTransfer.getData(constants.DRAG_DROP_GRAB_ICON_H)
-      const offsetX = (grabImageW * 0.5) - grabOffsetX // center
-      const offsetY = grabImageH - grabOffsetY // bottom
-      const dropLatLng = MapUtils.pixelToLatlng(this.props.googleMaps, event.clientX + offsetX, event.clientY + offsetY)
       const networkNodeType = event.dataTransfer.getData(constants.DRAG_DROP_ENTITY_DETAILS_KEY)
 
       const featureToCreate = {
@@ -61,14 +62,6 @@ export class EquipmentDropTarget extends Component {
       }
       this.props.createFeature(featureToCreate)
     } else if (entityBeingDropped === constants.DRAG_IS_BOUNDARY) {
-      const grabOffsetX = event.dataTransfer.getData(constants.DRAG_DROP_GRAB_OFFSET_X)
-      const grabOffsetY = event.dataTransfer.getData(constants.DRAG_DROP_GRAB_OFFSET_Y)
-      const grabImageW = event.dataTransfer.getData(constants.DRAG_DROP_GRAB_ICON_W)
-      const grabImageH = event.dataTransfer.getData(constants.DRAG_DROP_GRAB_ICON_H)
-      const offsetX = (grabImageW * 0.5) - grabOffsetX // center
-      const offsetY = grabImageH - grabOffsetY // bottom
-  
-      const dropLatLng = MapUtils.pixelToLatlng(this.props.googleMaps, event.clientX + offsetX, event.clientY + offsetY)
       const position = new google.maps.LatLng(dropLatLng.lat(), dropLatLng.lng())
       const radius = (40000 / Math.pow(2, this.props.googleMaps.getZoom())) * 2 * 256 // radius in meters
       const path = this.generateHexagonPath(position, radius)

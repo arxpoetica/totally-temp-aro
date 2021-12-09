@@ -3,12 +3,12 @@ import Actions from '../../common/actions'
 const defaultState = {
   showLocationLabels: false,
   deletedLocationId: '',
-  selectSAWithId: '',
-  editSAWithId: '',
-  deleteSAWithId: '',
+  selectServiceAreaWithId: '',
+  editServiceAreaWithId: '',
+  deleteServiceAreaWithId: '',
   multiPolygonFeature: {},
   isRecreateTiles: false,
-  addServiceArea: {},
+  serviceAreaBoundaryDetails: {},
 }
 
 function setShowLocationLabels (state, showLocationLabels) {
@@ -26,13 +26,13 @@ function viewSettingsReducer (state = defaultState, action) {
       return { ...state, deletedLocationId: action.payload }
     
     case Actions.VIEW_SETTINGS_SELECT_SERVICE_AREA:
-      return { ...state, selectSAWithId: action.payload }
+      return { ...state, selectServiceAreaWithId: action.payload }
 
     case Actions.VIEW_SETTINGS_EDIT_SERVICE_AREA:
-      return { ...state, editSAWithId: action.payload }
+      return { ...state, editServiceAreaWithId: action.payload }
 
     case Actions.VIEW_SETTINGS_DELETE_SERVICE_AREA:
-      return { ...state, deleteSAWithId: action.payload }
+      return { ...state, deleteServiceAreaWithId: action.payload }
 
     case Actions.VIEW_SETTINGS_CREATE_MULTI_POLYGON:
       return { ...state, multiPolygonFeature: action.payload }
@@ -40,8 +40,8 @@ function viewSettingsReducer (state = defaultState, action) {
     case Actions.VIEW_SETTINGS_IS_RECREATE_TILE_AND_CACHE:
       return { ...state, isRecreateTiles: action.payload }
 
-    case Actions.VIEW_SETTINGS_ADD_SERVICE_AREA:
-      return { ...state, addServiceArea: action.payload }
+    case Actions.VIEW_SETTINGS_SET_SERVICE_AREA_BOUNDARY_DETAILS:
+      return { ...state, serviceAreaBoundaryDetails: action.payload }
 
     default:
       return state

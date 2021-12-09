@@ -14,6 +14,20 @@ import ViewSettingsActions from '../../view-settings/view-settings-actions'
 
 const tileDataService = new TileDataService()
 
+const formatServiceLayerForService = (mapObject) => {
+  // ToDo: this should use AroFeatureFactory
+  const serviceFeature = {
+    objectId: mapObject.feature.objectId,
+    dataType: 'service_layer',
+    geometry: MapUtilities.multiPolygonPathsToWKT(mapObject.getPaths()),
+    attributes: {
+      name: mapObject.feature.name,
+      code: mapObject.feature.code
+    }
+  }
+  return serviceFeature
+}
+
 export const ServiceLayerEditor = (props) => {
 
   const [currentTransaction, setCurrentTransaction] = useState(null)
@@ -35,21 +49,6 @@ export const ServiceLayerEditor = (props) => {
   } = props
 
   useEffect(() => { resumeOrCreateTransaction() }, [])
-
-  const formatServiceLayerForService = (mapObject) => {
-    // ToDo: this should use AroFeatureFactory
-    const serviceFeature = {
-      objectId: mapObject.feature.objectId,
-      dataType: 'service_layer',
-      geometry: MapUtilities.multiPolygonPathsToWKT(mapObject.getPaths()),
-      attributes: {
-        name: mapObject.feature.name,
-        code: mapObject.feature.code
-      }
-    }
-    return serviceFeature
-  }
-
 
   const resumeOrCreateTransaction = () => {
     setCurrentTransaction(null)
@@ -131,11 +130,10 @@ export const ServiceLayerEditor = (props) => {
     })
   }
 
-  const onChangeSAProp = (event) => {
+  const onChangeServiceAreaProp = (event) => {
     const { target: { value, name } } = event
-    const selectedMapObjectObj = selectedMapObject
-    selectedMapObjectObj.feature[name] = value
-    setSelectedMapObject(selectedMapObjectObj)
+    selectedMapObject.feature[name] = value
+    setSelectedMapObject(selectedMapObject)
   }
 
   const markSelectedServiceAreaPropertiesDirty = () => {
@@ -216,6 +214,12 @@ export const ServiceLayerEditor = (props) => {
     } return 'btn-light'
   }
 
+  const showServiceAreaProp = (prop) => {
+    if (selectedMapObject) {
+      return selectedMapObject.feature[prop] || ''
+    } return ''
+  }
+
   return (
     <div className="edit-service-area">
       {/* Buttons to commit or discard a transaction */}
@@ -243,10 +247,10 @@ export const ServiceLayerEditor = (props) => {
                 name="name"
                 className="form-control"
                 placeholder="Name"
-                value={selectedMapObject ? selectedMapObject.feature.name : ''}
+                value={showServiceAreaProp('name')}
                 disabled={!selectedMapObject}
                 onChange={(event) => {
-                  onChangeSAProp(event),
+                  onChangeServiceAreaProp(event),
                   markSelectedServiceAreaPropertiesDirty()
                 }}
               />
@@ -260,10 +264,10 @@ export const ServiceLayerEditor = (props) => {
                 name="code"
                 className="form-control"
                 placeholder="Code"
-                value={selectedMapObject ? selectedMapObject.feature.code : ''}
+                value={showServiceAreaProp('code')}
                 disabled={!selectedMapObject}
                 onChange={(event) => {
-                  onChangeSAProp(event),
+                  onChangeServiceAreaProp(event),
                   markSelectedServiceAreaPropertiesDirty()
                 }}
               />

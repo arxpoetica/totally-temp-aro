@@ -67,6 +67,8 @@ const drawing = {
   markerIdForBoundary: null // The objectId of the marker for which we are drawing the boundary
 }
 
+let overlayRightClickListener = null
+
 export const ServiceLayerMapObjects = (props) => {
 
   const [createdMapObjects, setCreatedMapObjects] = useState({})
@@ -85,9 +87,9 @@ export const ServiceLayerMapObjects = (props) => {
     onModifyObject,
     onSelectObject,
     onDeleteObject,
-    selectSAWithId,
-    editSAWithId,
-    deleteSAWithId,
+    selectServiceAreaWithId,
+    editServiceAreaWithId,
+    deleteServiceAreaWithId,
     showContextMenu,
     setMapFeatures,
     multiPolygonFeature,
@@ -99,14 +101,15 @@ export const ServiceLayerMapObjects = (props) => {
     setContextMenuItems,
     setObjectIdToMapObject,
     setPlanEditorFeatures,
-    addServiceArea,
+    serviceAreaBoundaryDetails,
     createObjectOnClick,
   } = props
 
+  // Use the cross hair cursor while this control is initialized
+  useEffect(() => mapRef.setOptions({ draggableCursor: 'crosshair' }), [])
+
   const prevMapFeatures = usePrevious(mapFeatures)
   useEffect(() => {
-    // Use the cross hair cursor while this control is initialized
-    mapRef.setOptions({ draggableCursor: 'crosshair' })
     if (isRulerEnabled) { return } // disable any click action when ruler is enabled
     if (prevMapFeatures && !dequal(prevMapFeatures, mapFeatures)) { handleMapEntitySelected(mapFeatures) }
   }, [mapFeatures])
@@ -114,28 +117,36 @@ export const ServiceLayerMapObjects = (props) => {
   useEffect(() => { updateSelectedMapObject(selectedMapObject) }, [selectedMapObject])
 
   // Select Service Area
-  const prevSelectSAWithId = usePrevious(selectSAWithId)
+  const prevSelectServiceAreaWithId = usePrevious(selectServiceAreaWithId)
   useEffect(() => {
-    if (!dequal(prevSelectSAWithId, selectSAWithId)) { selectProposedFeature(selectSAWithId) }
-  }, [selectSAWithId])
+    if (!dequal(prevSelectServiceAreaWithId, selectServiceAreaWithId)) { selectProposedFeature(selectServiceAreaWithId) }
+  }, [selectServiceAreaWithId])
 
   // Edit Service Area
-  const prevEditSAWithId = usePrevious(editSAWithId)
+  const prevEditServiceAreaWithId = usePrevious(editServiceAreaWithId)
   useEffect(() => {
-    if (editSAWithId && !dequal(prevEditSAWithId, editSAWithId)) {
-      viewExistingFeature(editSAWithId.result, editSAWithId.latLng)
+    if (editServiceAreaWithId && !dequal(prevEditServiceAreaWithId, editServiceAreaWithId)) {
+      viewExistingFeature(editServiceAreaWithId.result, editServiceAreaWithId.latLng)
     }
-  }, [editSAWithId])
+  }, [editServiceAreaWithId])
 
   // Add Service Area
-  const prevAddServiceArea = usePrevious(addServiceArea)
+  const prevServiceAreaBoundaryDetails = usePrevious(serviceAreaBoundaryDetails)
   useEffect(() => {
-    if (prevAddServiceArea && !dequal(prevAddServiceArea, addServiceArea)) {
-      startDrawingBoundaryForSA(addServiceArea)
+    if (prevServiceAreaBoundaryDetails && !dequal(prevServiceAreaBoundaryDetails, serviceAreaBoundaryDetails)) {
+      startDrawingBoundaryForServiceArea(serviceAreaBoundaryDetails)
     }
-  }, [addServiceArea])
+  }, [serviceAreaBoundaryDetails])
 
   useEffect(() => {
+    overlayRightClickListener = mapRef.addListener('rightclick', (event) => {
+      if (featureType === 'serviceArea') {
+        const eventXY = getXYFromEvent(event)
+        if (!eventXY) { return }
+        updateContextMenu(event.latLng, eventXY.x, eventXY.y, null)
+      }
+    })
+
     return () => {
       if (overlayRightClickListener) {
         google.maps.event.removeListener(overlayRightClickListener)
@@ -148,13 +159,13 @@ export const ServiceLayerMapObjects = (props) => {
   }, [])
 
   // Delete Service Area
-  const prevDeleteSAWithId = usePrevious(deleteSAWithId)
+  const prevDeleteServiceAreaWithId = usePrevious(deleteServiceAreaWithId)
   useEffect(() => {
-    if (!dequal(prevDeleteSAWithId, deleteSAWithId)) {
-      deleteObjectWithId(deleteSAWithId)
-      deleteCreatedMapObject(deleteSAWithId)
+    if (!dequal(prevDeleteServiceAreaWithId, deleteServiceAreaWithId)) {
+      deleteObjectWithId(deleteServiceAreaWithId)
+      deleteCreatedMapObject(deleteServiceAreaWithId)
     }
-  }, [deleteSAWithId])
+  }, [deleteServiceAreaWithId])
 
   // To draw Multi Polygon Feature
   const prevMultiPolygonFeature = usePrevious(multiPolygonFeature)
@@ -441,7 +452,7 @@ export const ServiceLayerMapObjects = (props) => {
 
         if (!results.length) {
           const options = []
-          options.push(new MenuItemAction('ADD_BOUNDARY', 'Add Boundary', 'ViewSettingsActions', 'addServiceArea', latLng))
+          options.push(new MenuItemAction('ADD_BOUNDARY', 'Add Boundary', 'ViewSettingsActions', 'setServiceAreaBoundaryDetails', latLng))
           menuItems.push(new MenuItemFeature('SERVICE_AREA', 'Add Service Area', options))
         } else {
           results.forEach((result) => {
@@ -465,8 +476,8 @@ export const ServiceLayerMapObjects = (props) => {
                 options.push(new MenuItemAction('SELECT', 'Select', 'ViewSettingsActions', 'selectServiceArea', result.objectId))
                 options.push(new MenuItemAction('DELETE', 'Delete', 'ViewSettingsActions', 'deleteServiceArea', result.objectId))
               } else {
-                const editSA = { result, latLng }
-                options.push(new MenuItemAction('EDIT', 'Edit', 'ViewSettingsActions', 'editServiceArea', editSA))
+                const serviceAreaFeature = { result, latLng }
+                options.push(new MenuItemAction('EDIT', 'Edit', 'ViewSettingsActions', 'editServiceArea', serviceAreaFeature))
               }
               const name = feature.code || feature.siteClli || 'Unnamed service area'
               menuItemsById[result.objectId] = options
@@ -474,7 +485,7 @@ export const ServiceLayerMapObjects = (props) => {
             }
           })
         }
-        openContextMenu(x, y, menuItems)
+        if (menuItems.length >= 0) { openContextMenu(x, y, menuItems) }
       })
     }
   }
@@ -550,15 +561,7 @@ export const ServiceLayerMapObjects = (props) => {
     setCreatedMapObjects({})
   }
 
-  let overlayRightClickListener = mapRef.addListener('rightclick', (event) => {
-    if (featureType === 'serviceArea') {
-      const eventXY = getXYFromEvent(event)
-      if (!eventXY) { return }
-      updateContextMenu(event.latLng, eventXY.x, eventXY.y, null)
-    }
-  })
-
-  const startDrawingBoundaryForSA = (latLng) => {
+  const startDrawingBoundaryForServiceArea = (latLng) => {
     if (drawing.drawingManager) {
       // If we already have a drawing manager, discard it.
       console.warn('We already have a drawing manager active')
@@ -616,13 +619,13 @@ const mapStateToProps = (state) => ({
   selectedMapObject: state.selection.selectedMapObject,
   selectedBoundaryType: state.mapLayers.selectedBoundaryType,
   mapLayers: state.mapLayers,
-  selectSAWithId: state.viewSettings.selectSAWithId,
-  editSAWithId: state.viewSettings.editSAWithId,
-  deleteSAWithId: state.viewSettings.deleteSAWithId,
+  selectServiceAreaWithId: state.viewSettings.selectServiceAreaWithId,
+  editServiceAreaWithId: state.viewSettings.editServiceAreaWithId,
+  deleteServiceAreaWithId: state.viewSettings.deleteServiceAreaWithId,
   multiPolygonFeature: state.viewSettings.multiPolygonFeature,
   objectIdToMapObject: state.selection.objectIdToMapObject,
   showSiteBoundary: state.mapLayers.showSiteBoundary,
-  addServiceArea: state.viewSettings.addServiceArea,
+  serviceAreaBoundaryDetails: state.viewSettings.serviceAreaBoundaryDetails,
 })
 
 const mapDispatchToProps = (dispatch) => ({
