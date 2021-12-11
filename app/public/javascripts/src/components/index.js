@@ -2,6 +2,7 @@
 import { react2angular } from 'react2angular'
 import { ToastContainer } from 'react-toastify'
 
+import FrontierFooter from '../react/components/footer/frontier-footer.jsx'
 import LocationEditor from '../react/components/sidebar/view/location-editor.jsx'
 import EquipmentDetail from '../react/components/sidebar/view/equipment-info/equipment-detail.jsx'
 import NetworkPlanManage from '../react/components/sidebar/view/network-plan-manage.jsx'
@@ -180,6 +181,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('editorInterfacePrimitive', editorInterfacePrimitive)
   .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
 // ReactJS components
+  .component('rFrontierFooter', react2angular(FrontierFooter))
   .component('rLocationEditor', react2angular(LocationEditor))
   .component('rEquipmentDetail', react2angular(EquipmentDetail))
   .component('rNetworkPlanManage', react2angular(NetworkPlanManage))
