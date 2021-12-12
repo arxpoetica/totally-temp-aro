@@ -281,10 +281,11 @@ function createConstructionArea(constructionArea) {
       const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
 
       const url = `/service/plan-transaction/${transactionId}/edge-construction-area`
+      console.log("HIT")
       const constructionAreaResults = await AroHttp.post(url, {
         ...constructionArea
       })
-      
+      console.log(constructionAreaResults);
       const rootSubnet = PlanEditorSelectors.getRootSubnet(state)
       // Take in effected subnets.
 

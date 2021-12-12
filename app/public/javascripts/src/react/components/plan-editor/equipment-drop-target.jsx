@@ -60,25 +60,49 @@ export class EquipmentDropTarget extends Component {
       
       if (networkNodeType === "undefined") {
         const featureCoordinates = featureToCreate.point.coordinates
-        const geometry = {
-          type: 'polygon',
-          coordinates: [
-            [ featureCoordinates[1], featureCoordinates[0] - .005 ]
-            [ featureCoordinates[1], featureCoordinates[0] + .005 ],
-            [ featureCoordinates[1] - .005, featureCoordinates[0] + .005 ],
-            [ featureCoordinates[1] - .005, featureCoordinates[0] - .005 ]
-          ]
-        }
+        const polygonPath = [
+          // type: 'polygon',
+          // coordinates: [
+            { lat: featureCoordinates[1], lng: featureCoordinates[0] - .0005 },
+            { lat: featureCoordinates[1], lng: featureCoordinates[0] + .0005 },
+            { lat: featureCoordinates[1] - .0005, lng: featureCoordinates[0] + .0005 },
+            { lat: featureCoordinates[1] - .0005, lng: featureCoordinates[0] - .0005 }
+          // ]
+        ]
+
+        const polygon = new google.maps.Polygon({
+          objectId: featureToCreate.id, // Not used by Google Maps
+          paths: polygonPath,
+          clickable: true,
+          draggable: false,
+          editable: true,
+          map: this.props.googleMaps,
+          strokeColor: '#CC5500',
+          strokeOpacity: 1,
+          strokeWeight: 2,
+          fillColor: 'white',
+          fillOpacity: 0,
+        })
+
+        const constructionAreaMarker = new google.maps.Marker({
+          position: new google.maps.LatLng(featureCoordinates[1], featureCoordinates[0]),
+          icon: {
+            url: '/images/map_icons/aro/edge_construction_area.png',
+            anchor: new google.maps.Point(16, 30) // Anchor should be at the center of the crosshair icon
+          },
+          draggable: true,
+          map: this.props.googleMaps
+        })
 
         featureToCreate = {
           ...featureToCreate,
-          geometry,
+          // geometry: WktUtils.getWKTPolygonFromGoogleMapPath(polygon.getPath()),
           attributes: {},
           dataType: "edge_construction_area",
           // Needs to be updated to be a ternary based off of blocker and inclusion
           costMultiplier: .2,
           dateModified: Date.now(),
-          edgeConstructionTypeReference: {},
+          egeConstructionTypeReference: {},
           edgeFeatureReferences: [],
           exportedAttributes: {},
           objectId: featureToCreate.id,
