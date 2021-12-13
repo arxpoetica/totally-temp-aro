@@ -95,7 +95,6 @@ import cables from './views/cables'
 import conduits from './views/conduits'
 import mapSplit from './map/map-split'
 import mapSelectorPlanTarget from './map/map-selector-plan-target'
-import mapSelectorExportLocations from './map/map-selector-export-locations'
 import mapToggleComponent from './map/map-toggle'
 import networkPlanModal from './header/network-plan-modal'
 import networkPlan from './header/network-plan'
@@ -157,7 +156,6 @@ app.component('boundaryDetail', boundaryDetail)
   .component('conduits', conduits)
   .component('mapSplit', mapSplit)
   .component('mapSelectorPlanTarget', mapSelectorPlanTarget)
-  .component('mapSelectorExportLocations', mapSelectorExportLocations)
   .component('mapToggleComponent', mapToggleComponent)
   .component('networkPlanModal', networkPlanModal)
   .component('networkPlan', networkPlan)
