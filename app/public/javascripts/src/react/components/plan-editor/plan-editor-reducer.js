@@ -39,10 +39,10 @@ function clearTransaction () {
   return JSON.parse(JSON.stringify(defaultState))
 }
 
-function addTransactionFeatures (state, equipments) {
+function addTransactionFeatures (state, transactionFeatures) {
   var newFeatures = { ...state.features }
-  equipments.forEach(equipment => {
-    newFeatures[equipment.feature.objectId] = equipment
+  transactionFeatures.forEach(transFeature => {
+    newFeatures[transFeature.feature.objectId] = transFeature
   })
   return { ...state,
     features: newFeatures
@@ -59,15 +59,15 @@ function deleteTransactionFeature (state, objectId) {
   }
 }
 
-function modifyTransactionFeatures (state, newEquipments) {
+function modifyTransactionFeatures (state, newTransactionFeatures) {
   var newFeatures = { ...state.features }
-  newEquipments.forEach(equipment => {
-    if (newFeatures[equipment.feature.objectId]) {
-      newFeatures[equipment.feature.objectId] = equipment
+  newTransactionFeatures.forEach(transFeature => {
+    if (newFeatures[transFeature.feature.objectId]) {
+      newFeatures[transFeature.feature.objectId] = transFeature
     } else {
       // not really sure why this check is needed
       //  I think we can combine the add and modify actions 
-      throw new Error(`Trying to modify equipment with objectId ${equipment.feature.objectId}, but it is not in the existing list of equipments`)
+      throw new Error(`Trying to modify equipment with objectId ${transFeature.feature.objectId}, but it is not in the existing list of transaction features`)
     }
   })
   return { ...state,

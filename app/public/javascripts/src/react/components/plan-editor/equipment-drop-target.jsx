@@ -93,21 +93,19 @@ export class EquipmentDropTarget extends Component {
           draggable: true,
           map: this.props.googleMaps
         })
-
+        const constructionType = this.props.planThumbInformation[featureToCreate.id] ? this.props.planThumbInformation[featureToCreate.id] : 'Blocker';
         featureToCreate = {
           ...featureToCreate,
-          // geometry: WktUtils.getWKTPolygonFromGoogleMapPath(polygon.getPath()),
+          geometry: WktUtils.getWKTPolygonFromGoogleMapPath(polygon.getPath()),
           attributes: {},
           dataType: "edge_construction_area",
-          // Needs to be updated to be a ternary based off of blocker and inclusion
-          costMultiplier: .2,
+          costMultiplier: constructionType === 'Blocker' ? 100 : .1,
           dateModified: Date.now(),
           egeConstructionTypeReference: {},
           edgeFeatureReferences: [],
           exportedAttributes: {},
           objectId: featureToCreate.id,
-          // Needs to be updated to be a ternary based off of blocker and inclusion
-          priority: 1
+          priority: constructionType === 'Blocker' ? 5 : 1,
         }
         delete featureToCreate.id;
         delete featureToCreate.point;
@@ -128,7 +126,8 @@ EquipmentDropTarget.propTypes = {
 
 const mapStateToProps = state => ({
   isDraggingFeatureForDrop: state.planEditor.isDraggingFeatureForDrop,
-  googleMaps: state.map.googleMaps
+  googleMaps: state.map.googleMaps,
+  planThumbInformation: state.planEditor.planThumbInformation
 })
 
 const mapDispatchToProps = dispatch => ({

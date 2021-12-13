@@ -34,6 +34,7 @@ function resumeOrCreateTransaction (planId, userId) {
           AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/equipment_boundary`),
           // need to get ALL the subnets upfront 
           //AroHttp.get(`/service/plan-transaction/${transactionId}/subnet-refs`),
+          AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/edge_construction_area`)
         ])
       })
       .then(results => {
@@ -596,6 +597,20 @@ function setIsEditingFeatureProperties (isEditingFeatureProperties) {
   return {
     type: Actions.PLAN_EDITOR_SET_IS_EDITING_FEATURE_PROPERTIES,
     payload: isEditingFeatureProperties
+  }
+}
+
+function updatePlanThumbInformation (planThumbInformation) {
+  return {
+    type: Actions.PLAN_EDITOR_UPDATE_PLAN_THUMB_INFORMATION,
+    payload: planThumbInformation
+  }
+}
+
+function setPlanThumbInformation (payload) {
+  return {
+    type: Actions.PLAN_EDITOR_SET_PLAN_THUMB_INFORMATION,
+    payload
   }
 }
 
@@ -1418,6 +1433,8 @@ export default {
   setIsEditingFeatureProperties,
   setIsCommittingTransaction,
   setIsEnteringTransaction,
+  updatePlanThumbInformation,
+  setPlanThumbInformation,
   readFeatures,
   selectEditFeaturesById,
   deselectEditFeatureById,

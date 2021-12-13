@@ -16,6 +16,8 @@ const PlanEditorHeader = props => {
     locationCounts,
     setSelectedSubnetId,
     deselectEditFeatureById,
+    updatePlanThumbInformation,
+    constructionAreas
   } = props
 
   function onClick(event, objectId) {
@@ -31,12 +33,17 @@ const PlanEditorHeader = props => {
     deselectEditFeatureById(objectId)
   }
 
+  function onChange(event, id) {
+    event.stopPropagation()
+    updatePlanThumbInformation({key: id, planThumbInformation: event.target.value})
+  }
+
   return (
     <>
       {selectedEditFeatureIds.map(id => {
 
         const { feature } = features[id]
-        const { label } = equipments[feature.networkNodeType]
+        const { label } = feature.networkNodeType ? equipments[feature.networkNodeType] : constructionAreas[feature.dataType]
         const { coordinates } = feature.geometry
 
         return (
@@ -63,6 +70,17 @@ const PlanEditorHeader = props => {
               {coordinates[0]}
             </div>
           </div>
+          { feature.dataType === "edge_construction_area" &&
+            <div className="subinfo">
+                <select onChange={event => onChange(event, id)}>
+                  {constructionAreas.edge_construction_area.plan_thumb_options.map(option => (
+                    <option value={option}>
+                      {option}
+                    </option> 
+                  ))}
+                </select>
+            </div>
+          }
           <button type="button" 
             className="btn btn-sm plan-editor-thumb-close" 
             aria-label="Close"
@@ -81,9 +99,11 @@ const PlanEditorHeader = props => {
 const mapStateToProps = state => ({
   ARO_CLIENT: state.configuration.system.ARO_CLIENT,
   equipments: state.mapLayers.networkEquipment.equipments,
+  constructionAreas: state.mapLayers.constructionAreas.construction_areas,
   features: PlanEditorSelectors.getSubnetFeatures(state),
   selectedEditFeatureIds: state.planEditor.selectedEditFeatureIds,
   selectedSubnetId: state.planEditor.selectedSubnetId,
+  planThumbInformation: state.planEditor.planThumbInformation,
   locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(state),
   locationCounts: PlanEditorSelectors.getLocationCounts(state),
 })
@@ -91,6 +111,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
   setSelectedSubnetId: id => dispatch(PlanEditorActions.setSelectedSubnetId(id)),
   deselectEditFeatureById: id => dispatch(PlanEditorActions.deselectEditFeatureById(id)),
+  updatePlanThumbInformation: payload => dispatch(PlanEditorActions.updatePlanThumbInformation(payload))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(PlanEditorHeader)
