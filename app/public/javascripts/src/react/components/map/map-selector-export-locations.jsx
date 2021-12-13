@@ -6,13 +6,12 @@ import { saveAs } from 'file-saver'
 
 const MAX_EXPORTABLE_AREA = 11000000000
 // Create a drawing manager that will be used for marking out polygons for selecting entities
-let drawingManager = new google.maps.drawing.DrawingManager({
+const drawingManager = new google.maps.drawing.DrawingManager({
   drawingMode: null,
   drawingControl: false
 })
 
 export const MapSelectorExportLocations = (props) => {
-
   const { mapRef, planId, isRulerEnabled } = props
 
   useEffect(() => {
@@ -24,9 +23,7 @@ export const MapSelectorExportLocations = (props) => {
     })
 
     return () => {
-      if (drawingManager) {
-        updateDrawingManagerState(drawingManager, 'marker', null)
-      }
+      if (drawingManager) { updateDrawingManagerState(drawingManager, 'marker', null) }
     }
   }, [])
 
@@ -36,32 +33,32 @@ export const MapSelectorExportLocations = (props) => {
   }
 
   const exportLocationsByPolygon = (polygon) => {
-    if (isRulerEnabled) return // disable any click action when ruler is enabled
+    if (isRulerEnabled) { return } // disable any click action when ruler is enabled
 
-    var area = google.maps.geometry.spherical.computeArea(polygon)
+    const area = google.maps.geometry.spherical.computeArea(polygon)
     if (area > MAX_EXPORTABLE_AREA) {
       return swal({
         title: 'Error',
         text: 'Polygon too big to export',
-        type: 'error'
+        type: 'error',
       })
     }
 
-    var points = []
-    for (var polyI = 0; polyI < polygon.length; polyI++) {
-      var pt = polygon[polyI]
+    const points = []
+    for (let polyI = 0; polyI < polygon.length; polyI++) {
+      const pt = polygon[polyI]
       points[polyI] = [pt.lng(), pt.lat()]
     }
     points.push(points[0])
 
     // Run the export endpoint
-    AroHttp.post('/locations/exportRegion', { 'polygon': points, planId }, { responseType: 'arraybuffer' })
+    AroHttp.post('/locations/exportRegion', { polygon: points, planId }, { responseType: 'arraybuffer' })
       .then((result) => {
         if (result === '') {
           return swal({
             title: 'Error',
             text: 'No data returned',
-            type: 'error'
+            type: 'error',
           })
         }
         saveAs(new Blob([result]), 'exported_locations.csv')
@@ -76,7 +73,7 @@ export const MapSelectorExportLocations = (props) => {
 const mapStateToProps = (state) => ({
   isRulerEnabled: state.toolbar.isRulerEnabled,
   mapRef: state.map.googleMaps,
-  planId: state.plan.activePlan !== null && state.plan.activePlan.id,
+  planId: state.plan.activePlan.id,
 })
 
 export default wrapComponentWithProvider(reduxStore, MapSelectorExportLocations, mapStateToProps, null)
