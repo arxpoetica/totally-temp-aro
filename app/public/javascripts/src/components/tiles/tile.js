@@ -801,6 +801,7 @@ class TileComponentController {
       locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(reduxState),
       selectedSubnetLocations: PlanEditorSelectors.getSelectedSubnetLocations(reduxState),
       selectionIds: reduxState.selection.planEditorFeatures,
+      polygonCoordinates: reduxState.selection.polygonCoordinates,
     }
   }
 
@@ -824,6 +825,7 @@ class TileComponentController {
     const selectedSubnetLocations = this.selectedSubnetLocations
     const locationAlerts = this.locationAlerts
     const currentSelectionIds = this.selectionIds
+    const currentPolygonCoordinates = this.polygonCoordinates
 
     var needRefresh = false
     var doConduitUpdate = this.doesConduitNeedUpdate(prevStateMapLayers, nextState.stateMapLayers)
@@ -880,6 +882,11 @@ class TileComponentController {
     if (needRefresh) {
       this.tileDataService.markHtmlCacheDirty()
       this.refreshMapTiles()
+    }
+
+    // Analysis Mode
+    if (currentPolygonCoordinates && !dequal(currentPolygonCoordinates, nextState.polygonCoordinates)) {
+      this.state.requestPolygonSelect.next(nextState.polygonCoordinates)
     }
   }
 
