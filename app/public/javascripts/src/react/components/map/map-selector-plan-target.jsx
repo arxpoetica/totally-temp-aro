@@ -3,7 +3,7 @@ import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import SelectionActions from '../selection/selection-actions'
 import { usePrevious } from '../../common/view-utils.js'
-import { targetSelectionModes } from '../sidebar/constants'
+import { targetSelectionModes, mapHitFeatures } from '../sidebar/constants'
 import { dequal } from 'dequal'
 
 // Create a drawing manager that will be used for marking out polygons for selecting entities
@@ -26,11 +26,9 @@ export const MapSelectorPlanTarget = (props) => {
    } = props
 
   useEffect(() => {
-    drawingManager.addListener('overlaycomplete', (e) => {
-      requestPolygonSelect({
-        coords: e.overlay.getPath().getArray()
-      })
-      setTimeout(() => e.overlay.setMap(null), 100)
+    drawingManager.addListener('overlaycomplete', (event) => {
+      requestPolygonSelect({ coords: event.overlay.getPath().getArray() })
+      setTimeout(() => event.overlay.setMap(null), 100)
     })
 
     return () => {
@@ -55,16 +53,16 @@ export const MapSelectorPlanTarget = (props) => {
   const prevMapFeatures = usePrevious(mapFeatures)
   useEffect(() => {
     if (prevMapFeatures && !dequal(prevMapFeatures, mapFeatures)) {
-      addOrRemoveSelection(mapFeatures.locations || [], 'locations', 'location_id')
-      addOrRemoveSelection(mapFeatures.serviceAreas || [], 'serviceAreas', 'id')
-      addOrRemoveSelection(mapFeatures.analysisAreas || [], 'analysisAreas', 'id')
+      addOrRemoveSelection(mapFeatures.locations || [], mapHitFeatures.LOCATIONS, 'location_id')
+      addOrRemoveSelection(mapFeatures.serviceAreas || [], mapHitFeatures.SERVICE_AREAS, 'id')
+      addOrRemoveSelection(mapFeatures.analysisAreas || [], mapHitFeatures.ANALYSIS_AREAS, 'id')
     }
   }, [mapFeatures])
 
   const addOrRemoveSelection = (entities, planTargetKey, entityIdKey) => {
     // Get a list of ids to add and remove
-    var idsToAdd = new Set()
-    var idsToRemove = new Set()
+    const idsToAdd = new Set()
+    const idsToRemove = new Set()
     entities.forEach((entity) => {
       if (planTargets[planTargetKey].has(+entity[entityIdKey])) {
         idsToRemove.add(+entity[entityIdKey])
@@ -72,12 +70,8 @@ export const MapSelectorPlanTarget = (props) => {
         idsToAdd.add(+entity[entityIdKey])
       }
     })
-    if (idsToAdd.size > 0) {
-      addPlanTargets(planId, { [planTargetKey]: idsToAdd })
-    }
-    if (idsToRemove.size > 0) {
-      removePlanTargets(planId, { [planTargetKey]: idsToRemove })
-    }
+    if (idsToAdd.size) { addPlanTargets(planId, { [planTargetKey]: idsToAdd }) }
+    if (idsToRemove.size) { removePlanTargets(planId, { [planTargetKey]: idsToRemove }) }
   }
 
   // No UI for this component. It deals with map objects only.
