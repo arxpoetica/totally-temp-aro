@@ -622,10 +622,33 @@ function setIsEditingFeatureProperties (isEditingFeatureProperties) {
   }
 }
 
-function updatePlanThumbInformation (planThumbInformation) {
-  return {
-    type: Actions.PLAN_EDITOR_UPDATE_PLAN_THUMB_INFORMATION,
-    payload: planThumbInformation
+function updatePlanThumbInformation (payload) {
+  return (dispatch, getState) => {
+    const state = getState()
+    const transactionId = state.planEditor.transaction.id
+    const subnet = state.planEditor.subnets[payload.key]
+    const body = JSON.parse(JSON.stringify(state.planEditor.subnetFeatures[payload.key].feature))
+    body.geometry.type = "Polygon";
+    body.geometry.coordinates = subnet.subnetBoundary.polygon.coordinates[0]
+    body.costMultiplier =  payload.planThumbInformation === 'Blocker' ? 100 : .1
+    body.priority = payload.planThumbInformation === 'Blocker' ? 5 : 1
+
+
+    return AroHttp.put(`/service/plan-transaction/${transactionId}/edge-construction-area`, body)
+      .then(async (res) => {
+        dispatch(setIsCalculatingBoundary(false)) // may need to extend this for multiple boundaries? (make it and int incriment, decriment)
+        if (res.data.modifiedSubnets) {
+          const updatedSubnetIds = res.data.modifiedSubnets.map((subnet) => subnet.node.id)
+          await dispatch(addSubnets({ subnetIds: updatedSubnetIds }))
+        }
+        dispatch({
+          type: Actions.PLAN_EDITOR_UPDATE_PLAN_THUMB_INFORMATION,
+          payload: payload
+        })
+      })
+      .catch(err => {
+        console.error(err)
+      })
   }
 }
 
@@ -1127,14 +1150,30 @@ function recalculateBoundary (subnetId) {
     dispatch(setIsCalculatingBoundary(true))
     const state = getState()
     //const transactionId = state.planEditor.transaction.id
-    if (!state.planEditor.subnets[subnetId] || !state.planEditor.transaction) return null // null? meh
+    const subnet = state.planEditor.subnets[subnetId]
+    if (!subnet || !state.planEditor.transaction) return null // null? meh
     const transactionId = state.planEditor.transaction.id
-    const { locked, polygon: newPolygon } = state.planEditor.subnets[subnetId].subnetBoundary
-    const boundaryBody = { locked, polygon: newPolygon }
+    let body, url, method;
+    if (subnet.dataType !== "edge_construction_area") {
+      const { locked, polygon: newPolygon } = subnet.subnetBoundary
+      body = { locked, polygon: newPolygon }
+      url = `/service/plan-transaction/${transactionId}/subnet/${subnetId}/boundary`
+      method = "post"
+    } else {
+      body = JSON.parse(JSON.stringify(state.planEditor.subnetFeatures[subnetId].feature))
+      body.geometry.type = "Polygon";
+      body.geometry.coordinates = subnet.subnetBoundary.polygon.coordinates[0]
+      url = `/service/plan-transaction/${transactionId}/edge-construction-area`
+      method = "put"
+    }
 
-    return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet/${subnetId}/boundary`, boundaryBody)
-      .then(res => {
+    return AroHttp[method](url, body)
+      .then(async (res) => {
         dispatch(setIsCalculatingBoundary(false)) // may need to extend this for multiple boundaries? (make it and int incriment, decriment)
+        if (res.data.modifiedSubnets) {
+          const updatedSubnetIds = res.data.modifiedSubnets.map((subnet) => subnet.node.id)
+          await dispatch(addSubnets({ subnetIds: updatedSubnetIds }))
+        }
       })
       .catch(err => {
         console.error(err)
@@ -1530,7 +1569,7 @@ function parseAPIConstructionAreasToFeature (constructionArea) {
   constructionArea.geometry.type = "Point";
   constructionArea.geometry.coordinates = [
     (constructionArea.geometry.coordinates[0][0][0] + constructionArea.geometry.coordinates[0][1][0]) / 2,
-    constructionArea.geometry.coordinates[0][0][1]
+    (constructionArea.geometry.coordinates[0][0][1] + constructionArea.geometry.coordinates[0][1][1]) / 2
   ]
 
   return constructionArea;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import cx from 'clsx'
 import PlanEditorActions from './plan-editor-actions'
@@ -17,8 +17,21 @@ const PlanEditorHeader = props => {
     setSelectedSubnetId,
     deselectEditFeatureById,
     updatePlanThumbInformation,
-    constructionAreas
+    constructionAreas,
+    planThumbInformation,
+    setPlanThumbInformation
   } = props
+
+  useEffect(() => {
+    const newPlanThumbInformation = {};
+    props.selectedEditFeatureIds.forEach(selectedFeatureId => {
+      let feature = features[selectedFeatureId].feature;
+      if (feature.dataType === "edge_construction_area") {
+        newPlanThumbInformation[selectedFeatureId] = feature.costMultiplier === 100 ? "Blocker" : "Inclusion"
+      }
+    })
+    setPlanThumbInformation(newPlanThumbInformation)
+  }, [props.selectedEditFeatureIds])
 
   function onClick(event, objectId) {
     event.stopPropagation()
@@ -72,7 +85,7 @@ const PlanEditorHeader = props => {
           </div>
           { feature.dataType === "edge_construction_area" &&
             <div className="subinfo">
-                <select onChange={event => onChange(event, id)}>
+                <select value={planThumbInformation[id]} onClick={event => event.stopPropagation()} onChange={event => onChange(event, id)}>
                   {constructionAreas.edge_construction_area.plan_thumb_options.map(option => (
                     <option key={option} value={option}>
                       {option}
@@ -106,12 +119,14 @@ const mapStateToProps = state => ({
   planThumbInformation: state.planEditor.planThumbInformation,
   locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(state),
   locationCounts: PlanEditorSelectors.getLocationCounts(state),
+  planThumbInformation: state.planEditor.planThumbInformation
 })
 
 const mapDispatchToProps = dispatch => ({
   setSelectedSubnetId: id => dispatch(PlanEditorActions.setSelectedSubnetId(id)),
   deselectEditFeatureById: id => dispatch(PlanEditorActions.deselectEditFeatureById(id)),
-  updatePlanThumbInformation: payload => dispatch(PlanEditorActions.updatePlanThumbInformation(payload))
+  updatePlanThumbInformation: payload => dispatch(PlanEditorActions.updatePlanThumbInformation(payload)),
+  setPlanThumbInformation: payload => dispatch(PlanEditorActions.setPlanThumbInformation(payload))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(PlanEditorHeader)
