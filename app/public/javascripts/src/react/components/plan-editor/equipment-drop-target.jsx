@@ -71,7 +71,11 @@ export class EquipmentDropTarget extends Component {
           paths: polygonPath,
         })
 
-        const constructionType = this.props.planThumbInformation[featureToCreate.id] ? this.props.planThumbInformation[featureToCreate.id] : 'Blocker';
+        const constructionType =
+          this.props.planThumbInformation[featureToCreate.id]
+            ? this.props.planThumbInformation[featureToCreate.id]
+            : 'Blocker';
+
         featureToCreate = {
           ...featureToCreate,
           geometry: WktUtils.getWKTPolygonFromGoogleMapPath(polygon.getPath()),

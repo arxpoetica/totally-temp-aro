@@ -24,14 +24,14 @@ const PlanEditorHeader = props => {
 
   useEffect(() => {
     const newPlanThumbInformation = {};
-    props.selectedEditFeatureIds.forEach(selectedFeatureId => {
+    selectedEditFeatureIds.forEach(selectedFeatureId => {
       let feature = features[selectedFeatureId].feature;
       if (feature.dataType === "edge_construction_area") {
         newPlanThumbInformation[selectedFeatureId] = feature.costMultiplier === 100 ? "Blocker" : "Inclusion"
       }
     })
     setPlanThumbInformation(newPlanThumbInformation)
-  }, [props.selectedEditFeatureIds])
+  }, [selectedEditFeatureIds])
 
   function onClick(event, objectId) {
     event.stopPropagation()
@@ -85,7 +85,11 @@ const PlanEditorHeader = props => {
           </div>
           { feature.dataType === "edge_construction_area" &&
             <div className="subinfo">
-                <select value={planThumbInformation[id]} onClick={event => event.stopPropagation()} onChange={event => onChange(event, id)}>
+                <select
+                  value={planThumbInformation[id]}
+                  onClick={event => event.stopPropagation()}
+                  onChange={event => onChange(event, id)}
+                >
                   {constructionAreas.edge_construction_area.plan_thumb_options.map(option => (
                     <option key={option} value={option}>
                       {option}

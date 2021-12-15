@@ -715,7 +715,7 @@ function moveFeature (featureId, coordinates) {
 }
 
 function moveConstructionArea (objectId, newCoordinates) {
-  return (dispatch, getState) => {
+  return async (dispatch, getState) => {
     // Take in the new cordinates and move the entire polygon by the difference between them and the old coordinates
     const state = getState()
     let constructionAreaSubnet = JSON.parse(JSON.stringify(state.planEditor.subnets[objectId]))
@@ -743,29 +743,25 @@ function moveConstructionArea (objectId, newCoordinates) {
     const body = JSON.parse(JSON.stringify(constructionAreaFeature))
     body.geometry.type = "Polygon";
     body.geometry.coordinates = constructionAreaSubnet.subnetBoundary.polygon.coordinates[0]
+    const featurePayload = {};
+    const subnetsCopy = JSON.parse(JSON.stringify(state.planEditor.subnets))
+    featurePayload[objectId] = { feature: constructionAreaFeature, subnetId: null }
+    subnetsCopy[objectId] = constructionAreaSubnet
     
-    return AroHttp.put(`/service/plan-transaction/${transactionId}/edge-construction-area`, body)
-    .then(async (result) => {
-        const featurePayload = {};
-        const subnetsCopy = JSON.parse(JSON.stringify(state.planEditor.subnets))
-        featurePayload[objectId] = { feature: constructionAreaFeature, subnetId: null }
-        subnetsCopy[objectId] = constructionAreaSubnet
+    const result = await AroHttp.put(`/service/plan-transaction/${transactionId}/edge-construction-area`, body)
+    const updatedSubnetIds = result.data.modifiedSubnets.map((subnet) => subnet.node.id)
 
-        const updatedSubnetIds = result.data.modifiedSubnets.map((subnet) => subnet.node.id)
-        await dispatch(addSubnets({ subnetIds: updatedSubnetIds }))
-
-        batch(() => {
-          dispatch({
-            type: Actions.PLAN_EDITOR_ADD_SUBNETS,
-            payload: subnetsCopy
-          })
-          dispatch({
-            type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
-            payload: featurePayload
-          })
-        })
+    batch(() => {
+      dispatch({
+        type: Actions.PLAN_EDITOR_ADD_SUBNETS,
+        payload: subnetsCopy
+      })
+      dispatch({
+        type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
+        payload: featurePayload
+      })
+      dispatch(addSubnets({ subnetIds: updatedSubnetIds }))
     })
-    .catch(err => console.error(err))
   }
 }
 
@@ -811,7 +807,7 @@ function deleteFeature (featureId) {
 }
 
 function deleteConstructionArea (featureId) {
-  return (dispatch, getState) => {
+  return async (dispatch, getState) => {
     const state = getState()
     let subnetFeature = state.planEditor.subnetFeatures[featureId]
     let subnet = state.planEditor.subnets[featureId]
@@ -819,26 +815,22 @@ function deleteConstructionArea (featureId) {
     subnet = JSON.parse(JSON.stringify(subnet))
     let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
 
-    // Do a PUT to send the equipment over to service
-    return AroHttp.delete(`/service/plan-transaction/${transactionId}/edge-construction-area/${featureId}`)
-      .then(result => {
-        batch(() => {
-          dispatch({
-          type: Actions.PLAN_EDITOR_REMOVE_SUBNET_FEATURE,
-            payload: featureId
-          })
-          dispatch({
-            type: Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURE,
-            payload: featureId,
-          })
-          dispatch({
-            type: Actions.PLAN_EDITOR_REMOVE_SUBNETS,
-            payload: [subnet]
-          })
-          dispatch(recalculateSubnets(transactionId))
-        })
+    await AroHttp.delete(`/service/plan-transaction/${transactionId}/edge-construction-area/${featureId}`)
+    batch(() => {
+      dispatch({
+      type: Actions.PLAN_EDITOR_REMOVE_SUBNET_FEATURE,
+        payload: featureId
       })
-      .catch(err => console.error(err))
+      dispatch({
+        type: Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURE,
+        payload: featureId,
+      })
+      dispatch({
+        type: Actions.PLAN_EDITOR_REMOVE_SUBNETS,
+        payload: [subnet]
+      })
+      dispatch(recalculateSubnets(transactionId))
+    })
   }
 }
 
@@ -914,35 +906,32 @@ function selectEditFeaturesById (featureIds) {
 }
 
 function getConsructionAreaByRoot (rootSubnet) {
-  return (dispatch, getState) => {
+  return async (dispatch, getState) => {
     const state = getState();
     const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
     const body = { area: rootSubnet.subnetBoundary.polygon }
-    AroHttp.post(`/service/plan-transaction/${transactionId}/cmd-edge-construction-area/search`, body)
-      .then(response => {
-        const subnetsCopy = JSON.parse(JSON.stringify(getState().planEditor.subnets))
-        const newFeatures = {};
-        response.data.forEach(constructionArea => {
-          const [newSubnet, newFeature] = parseAPIConstructionAreasToStore(constructionArea.feature)
-          subnetsCopy[newFeature.objectId] = newSubnet;
-          newFeatures[newFeature.objectId] = {
-            feature: newFeature,
-            subnetId: null,
-          }
-        })
+    const response = await AroHttp.post(`/service/plan-transaction/${transactionId}/cmd-edge-construction-area/search`, body)
+    const subnetsCopy = JSON.parse(JSON.stringify(getState().planEditor.subnets))
+    const newFeatures = {};
+    response.data.forEach(constructionArea => {
+      const [newSubnet, newFeature] = parseAPIConstructionAreasToStore(constructionArea.feature)
+      subnetsCopy[newFeature.objectId] = newSubnet;
+      newFeatures[newFeature.objectId] = {
+        feature: newFeature,
+        subnetId: null,
+      }
+    })
 
-        batch(() => {
-          dispatch({
-            type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
-            payload: newFeatures,
-          })
-          dispatch({
-            type: Actions.PLAN_EDITOR_ADD_SUBNETS,
-            payload: subnetsCopy,
-          })
-        })
+    batch(() => {
+      dispatch({
+        type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
+        payload: newFeatures,
       })
-      .catch(err => console.warn(err))
+      dispatch({
+        type: Actions.PLAN_EDITOR_ADD_SUBNETS,
+        payload: subnetsCopy,
+      })
+    })
   }
 }
 
