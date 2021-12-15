@@ -1014,33 +1014,6 @@ function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
       command.subnetIds = uncachedSubnetIds
     }
 
-    // const transactionId = transaction.id
-    // const subnetsCopy = JSON.parse(JSON.stringify(getState().planEditor.subnets))
-    // const newFeatures = {};
-    // await AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/edge_construction_area`).then(response => {
-    //   response.data.forEach(constructionArea => {
-    //     const newSubnet = parseAPIConstructionAreasToSubnet(constructionArea.feature)
-    //     subnetsCopy[constructionArea.feature.objectId] = newSubnet;
-    //     const feature = parseAPIConstructionAreasToFeature(constructionArea.feature)
-    //     newFeatures[constructionArea.feature.objectId] = {
-    //       feature: feature,
-    //       subnetId: null,
-    //     }
-    //   })
-    //   return [subnetsCopy, newFeatures]
-    // }).then(([subnetsCopy, newFeatures]) => {
-    //   batch(() => {
-    //     dispatch({
-    //       type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
-    //       payload: newFeatures,
-    //     })
-    //     dispatch({
-    //       type: Actions.PLAN_EDITOR_ADD_SUBNETS,
-    //       payload: subnetsCopy,
-    //     })
-    //   })
-    // })
-
     // should we rename that now that we are using it for retreiving subnets as well?
     dispatch(setIsCalculatingSubnets(true))
     return AroHttp.post(`/service/plan-transaction/${transaction.id}/subnet_cmd/query-subnets`, command)
