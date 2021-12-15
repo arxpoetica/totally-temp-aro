@@ -291,15 +291,14 @@ function createConstructionArea(constructionArea) {
       await dispatch(addSubnets({ subnetIds: updatedSubnetIds }))
 
       // Move a parsed copy of the construction area in to the global state for subnets
-      const newSubnet = parseAPIConstructionAreasToSubnet(newFeature)
+      const [newSubnet, parsedFeature] = parseAPIConstructionAreasToStore(newFeature)
       const subnetsCopy = JSON.parse(JSON.stringify(getState().planEditor.subnets))
       subnetsCopy[newFeature.objectId] = newSubnet;
 
       // Move a parsed copoy of the construction area in to the global state for features
       const newFeatures = {};
-      const feature = parseAPIConstructionAreasToFeature(newFeature)
-      newFeatures[newFeature.objectId] = {
-        feature: feature,
+      newFeatures[parsedFeature.objectId] = {
+        feature: parsedFeature,
         subnetId: null,
       }
 
@@ -871,6 +870,39 @@ function selectEditFeaturesById (featureIds) {
   }
 }
 
+function getConsructionAreaByRoot (rootSubnet) {
+  return (dispatch, getState) => {
+    const state = getState();
+    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+    const body = { area: rootSubnet.subnetBoundary.polygon }
+    AroHttp.post(`/service/plan-transaction/${transactionId}/cmd-edge-construction-area/search`, body)
+      .then(response => {
+        const subnetsCopy = JSON.parse(JSON.stringify(getState().planEditor.subnets))
+        const newFeatures = {};
+        response.data.forEach(constructionArea => {
+          const [newSubnet, newFeature] = parseAPIConstructionAreasToStore(constructionArea.feature)
+          subnetsCopy[newFeature.objectId] = newSubnet;
+          newFeatures[newFeature.objectId] = {
+            feature: newFeature,
+            subnetId: null,
+          }
+        })
+
+        batch(() => {
+          dispatch({
+            type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
+            payload: newFeatures,
+          })
+          dispatch({
+            type: Actions.PLAN_EDITOR_ADD_SUBNETS,
+            payload: subnetsCopy,
+          })
+        })
+      })
+      .catch(err => console.warn(err))
+  }
+}
+
 function deselectEditFeatureById (objectId) {
   return {
     type: Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURE,
@@ -939,32 +971,32 @@ function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
       command.subnetIds = uncachedSubnetIds
     }
 
-    const transactionId = transaction.id
-    const subnetsCopy = JSON.parse(JSON.stringify(getState().planEditor.subnets))
-    const newFeatures = {};
-    await AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/edge_construction_area`).then(response => {
-      response.data.forEach(constructionArea => {
-        const newSubnet = parseAPIConstructionAreasToSubnet(constructionArea.feature)
-        subnetsCopy[constructionArea.feature.objectId] = newSubnet;
-        const feature = parseAPIConstructionAreasToFeature(constructionArea.feature)
-        newFeatures[constructionArea.feature.objectId] = {
-          feature: feature,
-          subnetId: null,
-        }
-      })
-      return [subnetsCopy, newFeatures]
-    }).then(([subnetsCopy, newFeatures]) => {
-      batch(() => {
-        dispatch({
-          type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
-          payload: newFeatures,
-        })
-        dispatch({
-          type: Actions.PLAN_EDITOR_ADD_SUBNETS,
-          payload: subnetsCopy,
-        })
-      })
-    })
+    // const transactionId = transaction.id
+    // const subnetsCopy = JSON.parse(JSON.stringify(getState().planEditor.subnets))
+    // const newFeatures = {};
+    // await AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/edge_construction_area`).then(response => {
+    //   response.data.forEach(constructionArea => {
+    //     const newSubnet = parseAPIConstructionAreasToSubnet(constructionArea.feature)
+    //     subnetsCopy[constructionArea.feature.objectId] = newSubnet;
+    //     const feature = parseAPIConstructionAreasToFeature(constructionArea.feature)
+    //     newFeatures[constructionArea.feature.objectId] = {
+    //       feature: feature,
+    //       subnetId: null,
+    //     }
+    //   })
+    //   return [subnetsCopy, newFeatures]
+    // }).then(([subnetsCopy, newFeatures]) => {
+    //   batch(() => {
+    //     dispatch({
+    //       type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
+    //       payload: newFeatures,
+    //     })
+    //     dispatch({
+    //       type: Actions.PLAN_EDITOR_ADD_SUBNETS,
+    //       payload: subnetsCopy,
+    //     })
+    //   })
+    // })
 
     // should we rename that now that we are using it for retreiving subnets as well?
     dispatch(setIsCalculatingSubnets(true))
@@ -976,6 +1008,9 @@ function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
         apiSubnets.forEach(subnet => {
           // subnet could be null (don't ask me)
           const subnetId = subnet.subnetId.id
+          if (!subnet.parentSubnetId) {
+            dispatch(getConsructionAreaByRoot(subnet))
+          }
           fiberApiPromises.push(
             AroHttp.get(`/service/plan-transaction/${transaction.id}/subnetfeature/${subnetId}`)
               .then(fiberResult => subnet.fiber = fiberResult.data)
@@ -1546,6 +1581,16 @@ function unparseSubnetFeature (feature) {
   // --- end typo section --- //
 
   return feature
+}
+
+function parseAPIConstructionAreasToStore(constructionArea) {
+    // Move a parsed copy of the construction area in to the global state for subnets
+    const newSubnet = parseAPIConstructionAreasToSubnet(constructionArea)
+
+    // Move a parsed copy of the construction area in to the global state for features
+    const feature = parseAPIConstructionAreasToFeature(constructionArea)
+
+    return [newSubnet, feature]
 }
 
 function parseAPIConstructionAreasToSubnet (constructionArea) {
