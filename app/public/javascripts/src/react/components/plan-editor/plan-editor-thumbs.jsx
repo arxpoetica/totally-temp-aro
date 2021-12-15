@@ -74,7 +74,7 @@ const PlanEditorHeader = props => {
             <div className="subinfo">
                 <select onChange={event => onChange(event, id)}>
                   {constructionAreas.edge_construction_area.plan_thumb_options.map(option => (
-                    <option value={option}>
+                    <option key={option} value={option}>
                       {option}
                     </option> 
                   ))}

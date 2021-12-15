@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react'
-import { PropTypes } from 'prop-types'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import PlanEditorActions from './plan-editor-actions'
@@ -14,6 +13,7 @@ import AlertsPanel from './alerts-panel.jsx'
 import { AlertsPanelTooltip } from './alerts-panel-tooltip.jsx'
 import BoundaryDrawCreator from './boundary-draw-creator.jsx'
 import AroFeatureEditor from '../common/editor-interface/aro-feature-editor.jsx'
+import AroFeatureFactory from '../../../service-typegen/dist/AroFeatureFactory'
 import './plan-editor.css'
 
 export const PlanEditor = props => {
@@ -35,6 +35,7 @@ export const PlanEditor = props => {
     rootSubnet,
     updateFeatureProperties,
     fiberAnnotations,
+    constructionAreas
   } = props
 
   useEffect(() => {
@@ -104,15 +105,22 @@ export const PlanEditor = props => {
       <PlanEditorRecalculate />
       <PlanEditorThumbs />
 
-      {selectedEditFeatureIds.map(id =>
-        <AroFeatureEditor key={id}
-          altTitle={equipments[features[id].feature.networkNodeType].label}
-          isEditable={true}
-          feature={features[id].feature}
-          onChange={onFeatureFormChange}
-          onSave={newValObj => onFeatureFormSave(newValObj, id)}
-        ></AroFeatureEditor>
-      )}
+      {selectedEditFeatureIds.map(id => {
+        let aroFeature = AroFeatureFactory.createObject(features[id].feature)
+        if (aroFeature) {
+          return (
+            <AroFeatureEditor key={id}
+              altTitle={equipments[features[id].feature.networkNodeType].label}
+              isEditable={true}
+              feature={features[id].feature}
+              onChange={onFeatureFormChange}
+              onSave={newValObj => onFeatureFormSave(newValObj, id)}
+            />
+          )
+        } else {
+          return <div style={{display: "none"}} key={id}></div>
+        }
+      })}
 
       {false &&
         <div className="temporary" style={{ margin: '0 0 25px' }}>
@@ -147,6 +155,7 @@ const mapStateToProps = state => ({
   subnets: state.planEditor.subnets,
   selectedSubnetId: state.planEditor.selectedSubnetId,
   equipments: state.mapLayers.networkEquipment.equipments,
+  constructionAreas: state.mapLayers.constructionAreas.construction_areas,
   rootSubnet: PlanEditorSelectors.getRootSubnet(state),
   fiberAnnotations: state.planEditor.fiberAnnotations,
 })

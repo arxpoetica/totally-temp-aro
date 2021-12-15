@@ -61,38 +61,16 @@ export class EquipmentDropTarget extends Component {
       if (networkNodeType === "undefined") {
         const featureCoordinates = featureToCreate.point.coordinates
         const polygonPath = [
-          // type: 'polygon',
-          // coordinates: [
-            { lat: featureCoordinates[1], lng: featureCoordinates[0] - .0005 },
-            { lat: featureCoordinates[1], lng: featureCoordinates[0] + .0005 },
-            { lat: featureCoordinates[1] - .0005, lng: featureCoordinates[0] + .0005 },
-            { lat: featureCoordinates[1] - .0005, lng: featureCoordinates[0] - .0005 }
-          // ]
+          { lat: featureCoordinates[1], lng: featureCoordinates[0] - .001 },
+          { lat: featureCoordinates[1], lng: featureCoordinates[0] + .001 },
+          { lat: featureCoordinates[1] - .001, lng: featureCoordinates[0] + .001 },
+          { lat: featureCoordinates[1] - .001, lng: featureCoordinates[0] - .001 }
         ]
-
+        // Create a fake polygon to extract the geometry data
         const polygon = new google.maps.Polygon({
-          objectId: featureToCreate.id, // Not used by Google Maps
           paths: polygonPath,
-          clickable: true,
-          draggable: false,
-          editable: true,
-          map: this.props.googleMaps,
-          strokeColor: '#CC5500',
-          strokeOpacity: 1,
-          strokeWeight: 2,
-          fillColor: 'white',
-          fillOpacity: 0,
         })
 
-        const constructionAreaMarker = new google.maps.Marker({
-          position: new google.maps.LatLng(featureCoordinates[1], featureCoordinates[0]),
-          icon: {
-            url: '/images/map_icons/aro/edge_construction_area.png',
-            anchor: new google.maps.Point(16, 30) // Anchor should be at the center of the crosshair icon
-          },
-          draggable: true,
-          map: this.props.googleMaps
-        })
         const constructionType = this.props.planThumbInformation[featureToCreate.id] ? this.props.planThumbInformation[featureToCreate.id] : 'Blocker';
         featureToCreate = {
           ...featureToCreate,
@@ -101,7 +79,6 @@ export class EquipmentDropTarget extends Component {
           dataType: "edge_construction_area",
           costMultiplier: constructionType === 'Blocker' ? 100 : .1,
           dateModified: Date.now(),
-          egeConstructionTypeReference: {},
           edgeFeatureReferences: [],
           exportedAttributes: {},
           objectId: featureToCreate.id,

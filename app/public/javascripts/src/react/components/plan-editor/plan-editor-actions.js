@@ -34,7 +34,6 @@ function resumeOrCreateTransaction (planId, userId) {
           AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/equipment_boundary`),
           // need to get ALL the subnets upfront 
           //AroHttp.get(`/service/plan-transaction/${transactionId}/subnet-refs`),
-          AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/edge_construction_area`)
         ])
       })
       .then(results => {
@@ -282,15 +281,38 @@ function createConstructionArea(constructionArea) {
       const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
 
       const url = `/service/plan-transaction/${transactionId}/edge-construction-area`
-      console.log("HIT")
       const constructionAreaResults = await AroHttp.post(url, {
         ...constructionArea
       })
-      console.log(constructionAreaResults);
-      const rootSubnet = PlanEditorSelectors.getRootSubnet(state)
-      // Take in effected subnets.
+      const { modifiedSubnets, newFeature } = constructionAreaResults.data
 
-      // Send constructionArea to the store.
+      // Update the modified subnets
+      const updatedSubnetIds = modifiedSubnets.map((subnet) => subnet.node.id)
+      await dispatch(addSubnets({ subnetIds: updatedSubnetIds }))
+
+      // Move a parsed copy of the construction area in to the global state for subnets
+      const newSubnet = parseAPIConstructionAreasToSubnet(newFeature)
+      const subnetsCopy = JSON.parse(JSON.stringify(getState().planEditor.subnets))
+      subnetsCopy[newFeature.objectId] = newSubnet;
+
+      // Move a parsed copoy of the construction area in to the global state for features
+      const newFeatures = {};
+      const feature = parseAPIConstructionAreasToFeature(newFeature)
+      newFeatures[newFeature.objectId] = {
+        feature: feature,
+        subnetId: null,
+      }
+
+      batch(() => {
+        dispatch({
+          type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
+          payload: newFeatures,
+        })
+        dispatch({
+          type: Actions.PLAN_EDITOR_ADD_SUBNETS,
+          payload: subnetsCopy,
+        })
+      })
     } catch (e) {
       console.warn(e);
     }
@@ -706,7 +728,7 @@ function readFeatures (featureIds) {
     let featuresToGet = []
     const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
     featureIds.forEach(featureId => {
-      if (!state.planEditor.features[featureId]) {
+      if (!state.planEditor.features[typeof featureId === "string" ? featureId : featureId.objectId]) {
         featuresToGet.push(featureId)
       }
     })
@@ -714,20 +736,25 @@ function readFeatures (featureIds) {
     let promises = [Promise.resolve()]
     let retrievedFeatures = []
     featuresToGet.forEach(featureId => {
+      const featureType = typeof featureId !== "string" && featureId.dataType === 'edge_construction_area' 
+        ? 'edge-construction-area' 
+        : 'subnet-equipment'
       promises.push(
-        AroHttp.get(`/service/plan-transaction/${transactionId}/subnet-equipment/${featureId}`)
+        AroHttp.get(`/service/plan-transaction/${transactionId}/${featureType}/${typeof featureId === "string" ? featureId : featureId.objectId}`)
           .then(result => {
             if (result.data) {
               // Decorate the equipment with some default values. Technically this is not yet "created" equipment
               // but will have to do for now.
-              retrievedIds.push(featureId)
+              retrievedIds.push(typeof featureId === "string" ? featureId : featureId.objectId)
+              if (result.data.dataType === 'edge_construction_area') {
+                result.data = parseAPIConstructionAreasToFeature(result.data)
+              }
               retrievedFeatures.push({
                 crudAction: 'read',
                 deleted: false,
                 valid: true,
                 feature: result.data
               })
-              //return dispatch(addTransactionFeatures([createdEquipment]))
             }
           })
           .catch(err => console.error(err))
@@ -777,7 +804,7 @@ function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
   // FIXME: I (BRIAN) needs to refactor this, it works for the moment but does a lot of extranious things
   //  ALSO there is a "bug" where if we select an FDT before selecting the CO or one of the hubs, we get no info
   //  to fix this we need to find out what subnet the FDT is a part of and run that through here
-  return (dispatch, getState) => {
+  return async (dispatch, getState) => {
 
     const {
       transaction,
@@ -786,7 +813,6 @@ function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
       features,
       subnetFeatures,
     } = getState().planEditor
-
 
     let command = {}
     if (coordinates) {
@@ -834,6 +860,33 @@ function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
       command.cmdType = 'QUERY_SUBNET_TREE'
       command.subnetIds = uncachedSubnetIds
     }
+
+    const transactionId = transaction.id
+    const subnetsCopy = JSON.parse(JSON.stringify(getState().planEditor.subnets))
+    const newFeatures = {};
+    await AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/edge_construction_area`).then(response => {
+      response.data.forEach(constructionArea => {
+        const newSubnet = parseAPIConstructionAreasToSubnet(constructionArea.feature)
+        subnetsCopy[constructionArea.feature.objectId] = newSubnet;
+        const feature = parseAPIConstructionAreasToFeature(constructionArea.feature)
+        newFeatures[constructionArea.feature.objectId] = {
+          feature: feature,
+          subnetId: null,
+        }
+      })
+      return [subnetsCopy, newFeatures]
+    }).then(([subnetsCopy, newFeatures]) => {
+      batch(() => {
+        dispatch({
+          type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
+          payload: newFeatures,
+        })
+        dispatch({
+          type: Actions.PLAN_EDITOR_ADD_SUBNETS,
+          payload: subnetsCopy,
+        })
+      })
+    })
 
     // should we rename that now that we are using it for retreiving subnets as well?
     dispatch(setIsCalculatingSubnets(true))
@@ -1094,7 +1147,7 @@ function recalculateSubnets (transactionId, subnetIds = []) {
     })
     dispatch(setIsCalculatingSubnets(true))
     const recalcBody = { subnetIds: activeSubnets }
-    
+
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet-cmd/recalc`, recalcBody)
       .then(res => {
         dispatch(setIsCalculatingSubnets(false))
@@ -1399,6 +1452,33 @@ function unparseSubnetFeature (feature) {
   // --- end typo section --- //
 
   return feature
+}
+
+function parseAPIConstructionAreasToSubnet (constructionArea) {
+  const geometry = JSON.parse(JSON.stringify(constructionArea.geometry))
+  geometry.type = "MultiPolygon";
+  geometry.coordinates = [geometry.coordinates]
+  const subnetContents = {
+    subnetBoundary: { polygon: geometry },
+    subnetNode: constructionArea.objectId,
+    children: [],
+    state: "recalced",
+    parentSubnetId: null,
+    coEquipments: [],
+    subnetLocationsById: {},
+    dataType: constructionArea.dataType
+  }      
+  return subnetContents
+}
+
+function parseAPIConstructionAreasToFeature (constructionArea) {
+  constructionArea.geometry.type = "Point";
+  constructionArea.geometry.coordinates = [
+    (constructionArea.geometry.coordinates[0][0][0] + constructionArea.geometry.coordinates[0][1][0]) / 2,
+    constructionArea.geometry.coordinates[0][0][1]
+  ]
+
+  return constructionArea;
 }
 
 // --- //
