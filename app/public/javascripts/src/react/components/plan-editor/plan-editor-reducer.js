@@ -215,7 +215,9 @@ function removeSubnetFeature (state, featureId) {
   } else {
     // if it is not a parent itself then it just removes from subFeatures and from its parent in subnets
     delete updatedSubnetFeatures[featureId]
-    updatedSubnets[subnetId].children = updatedSubnets[subnetId].children.filter(childId => childId !== featureId)
+    if (subnetId) {
+      updatedSubnets[subnetId].children = updatedSubnets[subnetId].children.filter(childId => childId !== featureId)
+    }
   }
   return { ...state, subnetFeatures: updatedSubnetFeatures, subnets: updatedSubnets }
 }

@@ -356,6 +356,17 @@ function showContextMenuForEquipment (featureId, x, y) {
   }
 }
 
+function showContextMenuForConstructionAreas (featureId, x, y) {
+  return (dispatch) => {
+    var menuActions = []
+    menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteConstructionArea', featureId))
+    const menuItemFeature = new MenuItemFeature('CONSTRUCTION_AREA', 'Construction Area', menuActions)
+    // Show context menu
+    dispatch(ContextMenuActions.setContextMenuItems([menuItemFeature]))
+    dispatch(ContextMenuActions.showContextMenu(x, y))
+  }
+}
+
 function showContextMenuForLocations (featureIds, event) {
   return (dispatch, getState) => {
     const state = getState()
@@ -792,6 +803,38 @@ function deleteFeature (featureId) {
           if (featureId === selectedSubnetId){
             dispatch(setSelectedSubnetId(subnetId))
           }
+          dispatch(recalculateSubnets(transactionId))
+        })
+      })
+      .catch(err => console.error(err))
+  }
+}
+
+function deleteConstructionArea (featureId) {
+  return (dispatch, getState) => {
+    const state = getState()
+    let subnetFeature = state.planEditor.subnetFeatures[featureId]
+    let subnet = state.planEditor.subnets[featureId]
+    subnetFeature = JSON.parse(JSON.stringify(subnetFeature))
+    subnet = JSON.parse(JSON.stringify(subnet))
+    let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+
+    // Do a PUT to send the equipment over to service
+    return AroHttp.delete(`/service/plan-transaction/${transactionId}/edge-construction-area/${featureId}`)
+      .then(result => {
+        batch(() => {
+          dispatch({
+          type: Actions.PLAN_EDITOR_REMOVE_SUBNET_FEATURE,
+            payload: featureId
+          })
+          dispatch({
+            type: Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURE,
+            payload: featureId,
+          })
+          dispatch({
+            type: Actions.PLAN_EDITOR_REMOVE_SUBNETS,
+            payload: [subnet]
+          })
           dispatch(recalculateSubnets(transactionId))
         })
       })
@@ -1673,4 +1716,6 @@ export default {
   setFiberAnnotations,
   getFiberAnnotations,
   leftClickTile,
+  showContextMenuForConstructionAreas,
+  deleteConstructionArea
 }

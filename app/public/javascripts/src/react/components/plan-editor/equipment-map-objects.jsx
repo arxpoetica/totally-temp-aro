@@ -72,6 +72,7 @@ export class EquipmentMapObjects extends Component {
       moveFeature,
       moveConstructionArea,
       showContextMenuForEquipment,
+      showContextMenuForConstructionAreas,
       selectEditFeaturesById,
       addCursorEquipmentIds,
       clearCursorEquipmentIds,
@@ -100,7 +101,11 @@ export class EquipmentMapObjects extends Component {
     })
     mapObject.addListener('contextmenu', event => {
       const eventXY = WktUtils.getXYFromEvent(event)
-      showContextMenuForEquipment(mapObject.objectId, eventXY.x, eventXY.y)
+      if (mapObject.dataType === "edge_construction_area") {
+        showContextMenuForConstructionAreas(mapObject.objectId, eventXY.x, eventXY.y)
+      } else {
+        showContextMenuForEquipment(mapObject.objectId, eventXY.x, eventXY.y)
+      }
     })
     mapObject.addListener('click', event => {
       // NOTE: this is a workaround to make sure we're selecting
@@ -260,6 +265,9 @@ const mapDispatchToProps = dispatch => ({
   moveConstructionArea: (id, coordinates) => dispatch(PlanEditorActions.moveConstructionArea(id, coordinates)),
   showContextMenuForEquipment: (equipmentObjectId, x, y) => {
     dispatch(PlanEditorActions.showContextMenuForEquipment(equipmentObjectId, x, y))
+  },
+  showContextMenuForConstructionAreas: (equipmentObjectId, x, y) => {
+    dispatch(PlanEditorActions.showContextMenuForConstructionAreas(equipmentObjectId, x, y))
   },
   setSelectedSubnetId: id => dispatch(PlanEditorActions.setSelectedSubnetId(id)),
   selectEditFeaturesById: featureIds => dispatch(PlanEditorActions.selectEditFeaturesById(featureIds)),
