@@ -70,6 +70,7 @@ export class EquipmentMapObjects extends Component {
     const {
       googleMaps,
       moveFeature,
+      moveConstructionArea,
       showContextMenuForEquipment,
       selectEditFeaturesById,
       addCursorEquipmentIds,
@@ -91,7 +92,11 @@ export class EquipmentMapObjects extends Component {
 
     mapObject.addListener('dragend', event => {
       let coordinates = [event.latLng.lng(), event.latLng.lat()]
-      moveFeature(mapObject.objectId, coordinates)
+      if (mapObject.dataType === "edge_construction_area") {
+        moveConstructionArea(mapObject.objectId, coordinates)
+      } else {
+        moveFeature(mapObject.objectId, coordinates)
+      }
     })
     mapObject.addListener('contextmenu', event => {
       const eventXY = WktUtils.getXYFromEvent(event)
@@ -252,6 +257,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
   moveFeature: (id, coordinates) => dispatch(PlanEditorActions.moveFeature(id, coordinates)),
+  moveConstructionArea: (id, coordinates) => dispatch(PlanEditorActions.moveConstructionArea(id, coordinates)),
   showContextMenuForEquipment: (equipmentObjectId, x, y) => {
     dispatch(PlanEditorActions.showContextMenuForEquipment(equipmentObjectId, x, y))
   },

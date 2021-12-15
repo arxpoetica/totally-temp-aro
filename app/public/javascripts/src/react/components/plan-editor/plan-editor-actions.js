@@ -681,6 +681,61 @@ function moveFeature (featureId, coordinates) {
   }
 }
 
+function moveConstructionArea (objectId, newCoordinates) {
+  return (dispatch, getState) => {
+    // Take in the new cordinates and move the entire polygon by the difference between them and the old coordinates
+    const state = getState()
+    let constructionAreaSubnet = JSON.parse(JSON.stringify(state.planEditor.subnets[objectId]))
+    let constructionAreaFeature = JSON.parse(JSON.stringify(state.planEditor.subnetFeatures[objectId].feature))
+    let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+
+    // Finding difference in lat and lng between old and new
+    const oldCoordinates = constructionAreaFeature.geometry.coordinates;
+    const differenceBetweenCoordinates = [newCoordinates[0] - oldCoordinates[0], newCoordinates[1] - oldCoordinates[1]]
+
+    // Update the "Point" Coordinates on the feature
+    constructionAreaFeature.geometry.coordinates = newCoordinates;
+
+    // Update the boundary coordinates on the subnet.
+    constructionAreaSubnet.subnetBoundary.polygon.coordinates[0][0].forEach((coordinates, j) => {
+      coordinates.forEach((coord, i) => {
+        // loops through coordinates in each path
+        // 0 - left <-> right
+        // 1 - up <-> down
+        constructionAreaSubnet.subnetBoundary.polygon.coordinates[0][0][j][i] += differenceBetweenCoordinates[i];
+      })
+    })
+
+    // The front end requires a Polygon while the front end requires a MultiPolygon. This is parsing it for the back end but maintaining it as is on the front end.
+    const body = JSON.parse(JSON.stringify(constructionAreaFeature))
+    body.geometry.type = "Polygon";
+    body.geometry.coordinates = constructionAreaSubnet.subnetBoundary.polygon.coordinates[0]
+    
+    return AroHttp.put(`/service/plan-transaction/${transactionId}/edge-construction-area`, body)
+    .then(async (result) => {
+        const featurePayload = {};
+        const subnetsCopy = JSON.parse(JSON.stringify(state.planEditor.subnets))
+        featurePayload[objectId] = { feature: constructionAreaFeature, subnetId: null }
+        subnetsCopy[objectId] = constructionAreaSubnet
+
+        const updatedSubnetIds = result.data.modifiedSubnets.map((subnet) => subnet.node.id)
+        await dispatch(addSubnets({ subnetIds: updatedSubnetIds }))
+
+        batch(() => {
+          dispatch({
+            type: Actions.PLAN_EDITOR_ADD_SUBNETS,
+            payload: subnetsCopy
+          })
+          dispatch({
+            type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
+            payload: featurePayload
+          })
+        })
+    })
+    .catch(err => console.error(err))
+  }
+}
+
 function deleteFeature (featureId) {
   return (dispatch, getState) => {
     const state = getState()
@@ -778,8 +833,8 @@ function selectEditFeaturesById (featureIds) {
         let state = getState()
         let validFeatures = []
         featureIds.forEach(featureId => {
-          if (state.planEditor.features[featureId]) { 
-            validFeatures.push(featureId) 
+          if (state.planEditor.features[typeof featureId === "string" ? featureId : featureId.objectId]) { 
+            validFeatures.push(typeof featureId === "string" ? featureId : featureId.objectId) 
           }
         })
         batch(() => {
@@ -1495,6 +1550,7 @@ export default {
   deleteFeature,
   deleteTransactionFeature,
   createConstructionArea,
+  moveConstructionArea,
   deleteBoundaryVertex,
   deleteBoundaryVertices,
   addTransactionFeatures,
