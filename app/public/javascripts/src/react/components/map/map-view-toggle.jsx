@@ -17,7 +17,7 @@ export const MapViewToggle = (props) => {
   const [currentMapType, setCurrentMapType] = useState(mapView.roadmap)
   const [overridenMapType, setOverridenMapType] = useState(null) // Used if the user manually clicks on a map type
 
-  const { mapRef, userPerspective, mapType } = props
+  const { mapRef, userPerspective, mapType, isReportMode } = props
 
   useEffect(() => { ensureMapRefPromiseCreated() }, [])
 
@@ -59,7 +59,7 @@ export const MapViewToggle = (props) => {
     }
   }
 
-  const toggle = () => {
+  const toggleMapView = () => {
     const currentMapTypeState = (currentMapType === mapView.hybrid) ? mapView.roadmap : mapView.hybrid
     setCurrentMapType(currentMapTypeState)
     setOverridenMapType(currentMapTypeState)
@@ -69,13 +69,17 @@ export const MapViewToggle = (props) => {
   }
 
   return (
-    <button
-      type="button"
-      className="map-toggle"
-      onClick={() => toggle()}
-    >
-      <i className={`fa ${buttonIcons[currentMapType]}`} />
-    </button>
+    <>
+      {!isReportMode &&
+        <button
+          type="button"
+          className="map-toggle"
+          onClick={() => toggleMapView()}
+        >
+          <i className={`fa ${buttonIcons[currentMapType]}`} />
+        </button>
+      }
+    </>
   )
 }
 
@@ -83,6 +87,7 @@ const mapStateToProps = (state) => ({
   mapRef: state.map.googleMaps,
   mapType: state.toolbar.appConfiguration.mapType,
   userPerspective: state.user.loggedInUser && state.user.loggedInUser.perspective,
+  isReportMode: state.mapReports.isReportMode,
 })
 
 export default wrapComponentWithProvider(reduxStore, MapViewToggle, mapStateToProps, null)
