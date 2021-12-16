@@ -227,7 +227,7 @@ let mapSplit = {
         <div style="flex: 0 0 70px;"></div>
         <!-- Created a 'reactCompClass' to get the <r-too-bar> component elements in tool-bar.jsx -->
         <r-tool-bar map-global-object-name="map" class="reactCompClass" style="flex: 1 1 auto; position: relative;"></r-tool-bar>
-        <network-plan style="flex: 0 0 auto; margin: auto;"></network-plan>
+        <r-network-plan style="flex: 0 0 auto; margin: auto;" />
         <div id="spacerForIconOnSidebar" style="flex: 0 0 40px;"></div>
         <r-tool-box ng-if="$ctrl.showToolBox"></r-tool-box>
       </div>
