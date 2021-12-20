@@ -9,6 +9,18 @@ export const constants = Object.freeze({
   Z_INDEX_MAP_OBJECT: 20,
   Z_INDEX_PIN: 30,
 
+  // Construction Area Constants
+  BLOCKER: {
+    COST_MULTIPLIER: 1000,
+    PRIORITY: 5,
+    KEY: "Blocker" 
+  },
+  INCLUSION: {
+    COST_MULTIPLIER: 0,
+    PRIORITY: 2,
+    KEY: "Inclusion"
+  },
+
   // Drag-and-drop editing on map
   // TODO: go through and figure out what is used and what is not
   DRAG_DROP_ENTITY_KEY: 'entity_type',

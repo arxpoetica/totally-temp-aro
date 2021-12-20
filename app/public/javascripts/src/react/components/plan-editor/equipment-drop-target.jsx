@@ -74,20 +74,25 @@ export class EquipmentDropTarget extends Component {
         const constructionType =
           this.props.planThumbInformation[featureToCreate.id]
             ? this.props.planThumbInformation[featureToCreate.id]
-            : 'Blocker';
-
+            : constants.BLOCKER.KEY;
+        const isBlocker = constructionType === constants.BLOCKER.KEY
         featureToCreate = {
           ...featureToCreate,
           geometry: WktUtils.getWKTPolygonFromGoogleMapPath(polygon.getPath()),
           attributes: {},
           dataType: "edge_construction_area",
-          costMultiplier: constructionType === 'Blocker' ? 100 : .1,
+          costMultiplier: isBlocker
+            ? constants.BLOCKER.COST_MULTIPLIER
+            : constants.INCLUSION.COST_MULTIPLIER,
           dateModified: Date.now(),
           edgeFeatureReferences: [],
           exportedAttributes: {},
           objectId: featureToCreate.id,
-          priority: constructionType === 'Blocker' ? 5 : 1,
+          priority: isBlocker
+            ? constants.BLOCKER.PRIORITY
+            : constants.INCLUSION.PRIORITY,
         }
+
         delete featureToCreate.id;
         delete featureToCreate.point;
 

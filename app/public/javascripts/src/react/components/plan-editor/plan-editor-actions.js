@@ -10,6 +10,7 @@ import ResourceActions from '../resource-editor/resource-actions'
 import { batch } from 'react-redux'
 import WktUtils from '../../../shared-utils/wkt-utils'
 import PlanEditorSelectors from './plan-editor-selectors'
+import { constants } from './shared'
 
 function resumeOrCreateTransaction (planId, userId) {
   return (dispatch, getState) => {
@@ -638,10 +639,15 @@ function updatePlanThumbInformation (payload) {
     const transactionId = state.planEditor.transaction.id
     const subnet = state.planEditor.subnets[payload.key]
     const body = JSON.parse(JSON.stringify(state.planEditor.subnetFeatures[payload.key].feature))
+    const isBlocker = payload.planThumbInformation === constants.BLOCKER.KEY
     body.geometry.type = "Polygon";
     body.geometry.coordinates = subnet.subnetBoundary.polygon.coordinates[0]
-    body.costMultiplier =  payload.planThumbInformation === 'Blocker' ? 100 : .1
-    body.priority = payload.planThumbInformation === 'Blocker' ? 5 : 1
+    body.costMultiplier = isBlocker
+      ? constants.BLOCKER.COST_MULTIPLIER
+      : constants.INCLUSION.COST_MULTIPLIER
+    body.priority = isBlocker
+      ? constants.BLOCKER.PRIORITY
+      : constants.INCLUSION.PRIORITY
 
 
     return AroHttp.put(`/service/plan-transaction/${transactionId}/edge-construction-area`, body)
@@ -651,9 +657,19 @@ function updatePlanThumbInformation (payload) {
           const updatedSubnetIds = res.data.modifiedSubnets.map((subnet) => subnet.node.id)
           await dispatch(addSubnets({ subnetIds: updatedSubnetIds }))
         }
-        dispatch({
-          type: Actions.PLAN_EDITOR_UPDATE_PLAN_THUMB_INFORMATION,
-          payload: payload
+        const feature = parseAPIConstructionAreasToFeature(res.data.newFeature)
+        const newFeature = {}
+        newFeature[feature.objectId] = { feature, subnetId: null };
+
+        batch(() => {
+          dispatch({
+            type: Actions.PLAN_EDITOR_UPDATE_PLAN_THUMB_INFORMATION,
+            payload: payload
+          })
+          dispatch({
+            type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
+            payload: newFeature
+          })
         })
       })
       .catch(err => {

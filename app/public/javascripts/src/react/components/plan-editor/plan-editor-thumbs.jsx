@@ -5,6 +5,7 @@ import PlanEditorActions from './plan-editor-actions'
 import PlanEditorSelectors from './plan-editor-selectors'
 import { getIconUrl } from './shared'
 import FiberAnnotations from './plan-editor-fiber-annotations.jsx'
+import { constants } from './shared'
 
 const PlanEditorHeader = props => {
 
@@ -23,11 +24,14 @@ const PlanEditorHeader = props => {
   } = props
 
   useEffect(() => {
-    const newPlanThumbInformation = {};
+    const newPlanThumbInformation = JSON.parse(JSON.stringify(planThumbInformation));
     selectedEditFeatureIds.forEach(selectedFeatureId => {
       let feature = features[selectedFeatureId].feature;
       if (feature.dataType === "edge_construction_area") {
-        newPlanThumbInformation[selectedFeatureId] = feature.costMultiplier === 100 ? "Blocker" : "Inclusion"
+        const isBlocker = constants.BLOCKER.COST_MULTIPLIER === feature.costMultiplier
+        newPlanThumbInformation[selectedFeatureId] = isBlocker
+          ? constants.BLOCKER.KEY
+          : constants.INCLUSION.KEY
       }
     })
     setPlanThumbInformation(newPlanThumbInformation)

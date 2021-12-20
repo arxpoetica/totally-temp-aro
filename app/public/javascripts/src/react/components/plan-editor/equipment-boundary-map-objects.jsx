@@ -90,7 +90,7 @@ export class EquipmentBoundaryMapObjects extends Component {
       this.deleteNeighbors(idsToDelete)
       this.createNeighbors(idsToCreate)
 
-      if (this.mapObject.dataType === "edge_construction_area") {
+      if (this.mapObject && this.mapObject.dataType && this.mapObject.dataType === "edge_construction_area") {
         this.deleteMapObject()
         this.createMapObject(selectedSubnetId)
       }
