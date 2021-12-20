@@ -284,8 +284,8 @@ let mapSplit = {
           <r-analysis-mode ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS && $ctrl.state.plan.planType != 'RING' && $ctrl.rSelectedDisplayMode !== 'VIEW'" && $ctrl.rPlan.planType != 'RING'"></r-analysis-mode>
           <r-ring-editor ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.EDIT_RINGS && $ctrl.rSelectedDisplayMode !== 'VIEW'"></r-ring-editor>
           <r-plan-settings ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.PLAN_SETTINGS && $ctrl.rSelectedDisplayMode !== 'VIEW'"></r-plan-settings>
-          <plan-editor-container ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.EDIT_PLAN && $ctrl.rSelectedDisplayMode !== 'VIEW'">
-          </plan-editor-container>
+          <r-plan-editor-container ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.EDIT_PLAN && $ctrl.rSelectedDisplayMode !== 'VIEW'">
+          </r-plan-editor-container>
           <r-aro-debug ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.DEBUG && $ctrl.rSelectedDisplayMode !== 'VIEW'"></r-aro-debug>
         </div>
       </div>
