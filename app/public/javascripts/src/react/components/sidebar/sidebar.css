@@ -364,3 +364,9 @@
   text-overflow: ellipsis;
   overflow: hidden;
 }
+
+/* Display Mode Buttons */
+
+.display-mode-button {
+  width: 60px;   /* So that all the buttons have the same width */
+}

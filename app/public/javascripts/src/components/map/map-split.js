@@ -275,7 +275,7 @@ let mapSplit = {
       <div ng-show="!$ctrl.isCollapsed" style="display: flex; flex-direction: column; height: 100%; padding-right: 10px;">
         <div style="overflow: auto; flex: 0 0 auto">
           <!-- this is necessary to make the display-mode-buttons flow correctly -->
-          <display-mode-buttons></display-mode-buttons>
+          <r-display-mode-buttons />
         </div>
         <div style="flex: 1 1 auto; position: relative;">
           <!-- ng-if is important here because the plan settings components implement $onDestroy() to show a messagebox
