@@ -19,7 +19,10 @@ export const FiberMapObjects = (props) => {
     setSelectedFiber,
     selectedFiber,
     fiberAnnotations,
+    layerEquipment,
   } = props
+
+  const conduitStyles = {...layerEquipment.roads, ...layerEquipment.conduits}
 
   useEffect(() => {
     if (subnets[selectedSubnetId]) {
@@ -53,32 +56,47 @@ export const FiberMapObjects = (props) => {
       }
       if (subnetLinks) {
         for (const subnetLink of subnetLinks) {
-          const { geometry, fromNode, toNode } = subnetLink
+          const { geometry, fromNode, toNode, conduitLinkSummary } = subnetLink
+          // use conduitLinkSummary.spanningEdgeType to get say "road"
+          //  there is also conduitLinkSummary.planConduits[0].ref.spatialEdgeTypeReference not sure how this differs
+          const conduitType = conduitLinkSummary.spanningEdgeType
           if (geometry.type === 'LineString') {
             const path = WktUtils.getGoogleMapPathsFromWKTLineString(geometry)
-            createMapObject(path, fromNode, toNode, fiberType)
+            createMapObject(path, fromNode, toNode, fiberType, conduitType)
           } else if (geometry.type === 'MultiLineString') {
-            const path =
-              WktUtils.getGoogleMapPathsFromWKTMultiLineString(geometry)
-            createMapObject(path, fromNode, toNode, fiberType)
+            const path = WktUtils.getGoogleMapPathsFromWKTMultiLineString(geometry)
+            createMapObject(path, fromNode, toNode, fiberType, conduitType)
           }
         }
         setFiberRenderRequired(false)
       }
     }
-    function createMapObject(path, fromNode, toNode, fiberType) {
-      let strokeColor = fiberType === 'DISTRIBUTION' ? '#FF0000' : '#1700ff'
-      let strokeWeight = fiberType === 'DISTRIBUTION' ? 2 : 4
+    function createMapObject(path, fromNode, toNode, fiberType, conduitType = null) {
+      let strokeColor = layerEquipment.cables[fiberType].drawingOptions.strokeStyle
+      let strokeWeight = fiberType === 'DISTRIBUTION' ? 2 : 3
       let selected = false
 
+      if (conduitType 
+        && conduitType in conduitStyles
+        && conduitType in layerEquipment.cables[fiberType].conduitVisibility
+        && layerEquipment.cables[fiberType].conduitVisibility[conduitType]
+      ){
+        strokeColor = conduitStyles[conduitType].drawingOptions.strokeStyle
+      } 
+
+      let highlightColor = null
+      let highlightWeight = null
       // set color purple if there are annotations
       if (
         fiberAnnotations[selectedSubnetId] &&
         fiberAnnotations[selectedSubnetId].some(
           (fiber) => fiber.fromNode === fromNode && fiber.toNode === toNode,
         )
-      )
-        strokeColor = '#a73cff'
+      ){
+        highlightColor = '#ff55da'
+        strokeWeight = 2
+        highlightWeight = 5
+      }
 
       // set color pink, increase stroke and set selected true if selected
       if (
@@ -86,7 +104,6 @@ export const FiberMapObjects = (props) => {
           (fiber) => fiber.fromNode === fromNode && fiber.toNode === toNode,
         )
       ) {
-        strokeColor = '#ff55da'
         strokeWeight = 5
         selected = true
       }
@@ -104,6 +121,22 @@ export const FiberMapObjects = (props) => {
         strokeWeight,
       })
       mapObjects.push(newMapObject)
+
+      if (highlightColor) {
+        const newHighlightObject = new google.maps.Polyline({
+          selected,
+          fromNode,
+          toNode,
+          path,
+          clickable: false,
+          map: googleMaps,
+          zIndex: constants.Z_INDEX_MAP_OBJECT - 1,
+          strokeColor: highlightColor,
+          strokeOpacity: 1.0,
+          strokeWeight: highlightWeight,
+        })
+        mapObjects.push(newHighlightObject)
+      }
 
       newMapObject.addListener('click', (event) => {
         const { shiftKey } = event.domEvent // Bool, true if shift key is held down
@@ -185,6 +218,7 @@ const mapStateToProps = (state) => ({
   fiberRenderRequired: state.planEditor.fiberRenderRequired,
   selectedFiber: state.planEditor.selectedFiber,
   fiberAnnotations: state.planEditor.fiberAnnotations,
+  layerEquipment: state.mapLayers.networkEquipment,
 })
 
 const mapDispatchToProps = (dispatch) => ({
