@@ -10,6 +10,7 @@ import ResourceActions from '../resource-editor/resource-actions'
 import { batch } from 'react-redux'
 import WktUtils from '../../../shared-utils/wkt-utils'
 import PlanEditorSelectors from './plan-editor-selectors'
+import { constants } from './shared'
 
 function resumeOrCreateTransaction (planId, userId) {
   return (dispatch, getState) => {
@@ -274,6 +275,50 @@ function addTransactionFeatures (features) {
   }
 }
 
+function createConstructionArea(constructionArea) {
+  return async (dispatch, getState) => {
+    try {
+      const state = getState()
+      const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+
+      const url = `/service/plan-transaction/${transactionId}/edge-construction-area`
+      const constructionAreaResults = await AroHttp.post(url, {
+        ...constructionArea
+      })
+      const { modifiedSubnets, newFeature } = constructionAreaResults.data
+
+      // Update the modified subnets
+      const updatedSubnetIds = modifiedSubnets.map((subnet) => subnet.node.id)
+      await dispatch(addSubnets({ subnetIds: updatedSubnetIds }))
+
+      // Move a parsed copy of the construction area in to the global state for subnets
+      const [newSubnet, parsedFeature] = parseAPIConstructionAreasToStore(newFeature)
+      const subnetsCopy = JSON.parse(JSON.stringify(getState().planEditor.subnets))
+      subnetsCopy[newFeature.objectId] = newSubnet;
+
+      // Move a parsed copoy of the construction area in to the global state for features
+      const newFeatures = {};
+      newFeatures[parsedFeature.objectId] = {
+        feature: parsedFeature,
+        subnetId: null,
+      }
+
+      batch(() => {
+        dispatch({
+          type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
+          payload: newFeatures,
+        })
+        dispatch({
+          type: Actions.PLAN_EDITOR_ADD_SUBNETS,
+          payload: subnetsCopy,
+        })
+      })
+    } catch (e) {
+      console.warn(e);
+    }
+  }
+}
+
 function deleteBoundaryVertex (mapObject, vertex) {
   return dispatch => {
     // checks it is a valid vertex and that there are at least 3 other vertices left
@@ -306,6 +351,17 @@ function showContextMenuForEquipment (featureId, x, y) {
     var menuActions = []
     menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteFeature', featureId))
     const menuItemFeature = new MenuItemFeature('EQUIPMENT', 'Equipment', menuActions)
+    // Show context menu
+    dispatch(ContextMenuActions.setContextMenuItems([menuItemFeature]))
+    dispatch(ContextMenuActions.showContextMenu(x, y))
+  }
+}
+
+function showContextMenuForConstructionAreas (featureId, x, y) {
+  return (dispatch) => {
+    var menuActions = []
+    menuActions.push(new MenuItemAction('DELETE', 'Delete', 'PlanEditorActions', 'deleteConstructionArea', featureId))
+    const menuItemFeature = new MenuItemFeature('CONSTRUCTION_AREA', 'Construction Area', menuActions)
     // Show context menu
     dispatch(ContextMenuActions.setContextMenuItems([menuItemFeature]))
     dispatch(ContextMenuActions.showContextMenu(x, y))
@@ -577,6 +633,58 @@ function setIsEditingFeatureProperties (isEditingFeatureProperties) {
   }
 }
 
+function updatePlanThumbInformation (payload) {
+  return (dispatch, getState) => {
+    const state = getState()
+    const transactionId = state.planEditor.transaction.id
+    const subnet = state.planEditor.subnets[payload.key]
+    const body = JSON.parse(JSON.stringify(state.planEditor.subnetFeatures[payload.key].feature))
+    const isBlocker = payload.planThumbInformation === constants.BLOCKER.KEY
+    body.geometry.type = "Polygon";
+    body.geometry.coordinates = subnet.subnetBoundary.polygon.coordinates[0]
+    body.costMultiplier = isBlocker
+      ? constants.BLOCKER.COST_MULTIPLIER
+      : constants.INCLUSION.COST_MULTIPLIER
+    body.priority = isBlocker
+      ? constants.BLOCKER.PRIORITY
+      : constants.INCLUSION.PRIORITY
+
+
+    return AroHttp.put(`/service/plan-transaction/${transactionId}/edge-construction-area`, body)
+      .then(async (res) => {
+        dispatch(setIsCalculatingBoundary(false)) // may need to extend this for multiple boundaries? (make it and int incriment, decriment)
+        if (res.data.modifiedSubnets) {
+          const updatedSubnetIds = res.data.modifiedSubnets.map((subnet) => subnet.node.id)
+          await dispatch(addSubnets({ subnetIds: updatedSubnetIds }))
+        }
+        const feature = parseAPIConstructionAreasToFeature(res.data.newFeature)
+        const newFeature = {}
+        newFeature[feature.objectId] = { feature, subnetId: null };
+
+        batch(() => {
+          dispatch({
+            type: Actions.PLAN_EDITOR_UPDATE_PLAN_THUMB_INFORMATION,
+            payload: payload
+          })
+          dispatch({
+            type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
+            payload: newFeature
+          })
+        })
+      })
+      .catch(err => {
+        console.error(err)
+      })
+  }
+}
+
+function setPlanThumbInformation (payload) {
+  return {
+    type: Actions.PLAN_EDITOR_SET_PLAN_THUMB_INFORMATION,
+    payload
+  }
+}
+
 function setIsCommittingTransaction (isCommittingTransaction) {
   return {
     type: Actions.PLAN_EDITOR_SET_IS_COMMITTING_TRANSACTION,
@@ -622,6 +730,57 @@ function moveFeature (featureId, coordinates) {
   }
 }
 
+function moveConstructionArea (objectId, newCoordinates) {
+  return async (dispatch, getState) => {
+    // Take in the new cordinates and move the entire polygon by the difference between them and the old coordinates
+    const state = getState()
+    let constructionAreaSubnet = JSON.parse(JSON.stringify(state.planEditor.subnets[objectId]))
+    let constructionAreaFeature = JSON.parse(JSON.stringify(state.planEditor.subnetFeatures[objectId].feature))
+    let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+
+    // Finding difference in lat and lng between old and new
+    const oldCoordinates = constructionAreaFeature.geometry.coordinates;
+    const differenceBetweenCoordinates = [newCoordinates[0] - oldCoordinates[0], newCoordinates[1] - oldCoordinates[1]]
+
+    // Update the "Point" Coordinates on the feature
+    constructionAreaFeature.geometry.coordinates = newCoordinates;
+
+    // Update the boundary coordinates on the subnet.
+    constructionAreaSubnet.subnetBoundary.polygon.coordinates[0][0].forEach((coordinates, j) => {
+      coordinates.forEach((coord, i) => {
+        // loops through coordinates in each path
+        // 0 - left <-> right
+        // 1 - up <-> down
+        constructionAreaSubnet.subnetBoundary.polygon.coordinates[0][0][j][i] += differenceBetweenCoordinates[i];
+      })
+    })
+
+    // The front end requires a Polygon while the front end requires a MultiPolygon. This is parsing it for the back end but maintaining it as is on the front end.
+    const body = JSON.parse(JSON.stringify(constructionAreaFeature))
+    body.geometry.type = "Polygon";
+    body.geometry.coordinates = constructionAreaSubnet.subnetBoundary.polygon.coordinates[0]
+    const featurePayload = {};
+    const subnetsCopy = JSON.parse(JSON.stringify(state.planEditor.subnets))
+    featurePayload[objectId] = { feature: constructionAreaFeature, subnetId: null }
+    subnetsCopy[objectId] = constructionAreaSubnet
+    
+    const result = await AroHttp.put(`/service/plan-transaction/${transactionId}/edge-construction-area`, body)
+    const updatedSubnetIds = result.data.modifiedSubnets.map((subnet) => subnet.node.id)
+
+    batch(() => {
+      dispatch({
+        type: Actions.PLAN_EDITOR_ADD_SUBNETS,
+        payload: subnetsCopy
+      })
+      dispatch({
+        type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
+        payload: featurePayload
+      })
+      dispatch(addSubnets({ subnetIds: updatedSubnetIds }))
+    })
+  }
+}
+
 function deleteFeature (featureId) {
   return (dispatch, getState) => {
     const state = getState()
@@ -663,13 +822,41 @@ function deleteFeature (featureId) {
   }
 }
 
+function deleteConstructionArea (featureId) {
+  return async (dispatch, getState) => {
+    const state = getState()
+    let subnetFeature = state.planEditor.subnetFeatures[featureId]
+    let subnet = state.planEditor.subnets[featureId]
+    subnetFeature = JSON.parse(JSON.stringify(subnetFeature))
+    subnet = JSON.parse(JSON.stringify(subnet))
+    let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+
+    await AroHttp.delete(`/service/plan-transaction/${transactionId}/edge-construction-area/${featureId}`)
+    batch(() => {
+      dispatch({
+      type: Actions.PLAN_EDITOR_REMOVE_SUBNET_FEATURE,
+        payload: featureId
+      })
+      dispatch({
+        type: Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURE,
+        payload: featureId,
+      })
+      dispatch({
+        type: Actions.PLAN_EDITOR_REMOVE_SUBNETS,
+        payload: [subnet]
+      })
+      dispatch(recalculateSubnets(transactionId))
+    })
+  }
+}
+
 function readFeatures (featureIds) {
   return (dispatch, getState) => {
     const state = getState()
     let featuresToGet = []
     const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
     featureIds.forEach(featureId => {
-      if (!state.planEditor.features[featureId]) {
+      if (!state.planEditor.features[typeof featureId === "string" ? featureId : featureId.objectId]) {
         featuresToGet.push(featureId)
       }
     })
@@ -677,20 +864,25 @@ function readFeatures (featureIds) {
     let promises = [Promise.resolve()]
     let retrievedFeatures = []
     featuresToGet.forEach(featureId => {
+      const featureType = typeof featureId !== "string" && featureId.dataType === 'edge_construction_area' 
+        ? 'edge-construction-area' 
+        : 'subnet-equipment'
       promises.push(
-        AroHttp.get(`/service/plan-transaction/${transactionId}/subnet-equipment/${featureId}`)
+        AroHttp.get(`/service/plan-transaction/${transactionId}/${featureType}/${typeof featureId === "string" ? featureId : featureId.objectId}`)
           .then(result => {
             if (result.data) {
               // Decorate the equipment with some default values. Technically this is not yet "created" equipment
               // but will have to do for now.
-              retrievedIds.push(featureId)
+              retrievedIds.push(typeof featureId === "string" ? featureId : featureId.objectId)
+              if (result.data.dataType === 'edge_construction_area') {
+                result.data = parseAPIConstructionAreasToFeature(result.data)
+              }
               retrievedFeatures.push({
                 crudAction: 'read',
                 deleted: false,
                 valid: true,
                 feature: result.data
               })
-              //return dispatch(addTransactionFeatures([createdEquipment]))
             }
           })
           .catch(err => console.error(err))
@@ -714,8 +906,8 @@ function selectEditFeaturesById (featureIds) {
         let state = getState()
         let validFeatures = []
         featureIds.forEach(featureId => {
-          if (state.planEditor.features[featureId]) { 
-            validFeatures.push(featureId) 
+          if (state.planEditor.features[typeof featureId === "string" ? featureId : featureId.objectId]) { 
+            validFeatures.push(typeof featureId === "string" ? featureId : featureId.objectId) 
           }
         })
         batch(() => {
@@ -726,6 +918,36 @@ function selectEditFeaturesById (featureIds) {
           dispatch(setSelectedSubnetId(validFeatures[0]))
         })
       })
+  }
+}
+
+function getConsructionAreaByRoot (rootSubnet) {
+  return async (dispatch, getState) => {
+    const state = getState();
+    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+    const body = { area: rootSubnet.subnetBoundary.polygon }
+    const response = await AroHttp.post(`/service/plan-transaction/${transactionId}/cmd-edge-construction-area/search`, body)
+    const subnetsCopy = JSON.parse(JSON.stringify(getState().planEditor.subnets))
+    const newFeatures = {};
+    response.data.forEach(constructionArea => {
+      const [newSubnet, newFeature] = parseAPIConstructionAreasToStore(constructionArea.feature)
+      subnetsCopy[newFeature.objectId] = newSubnet;
+      newFeatures[newFeature.objectId] = {
+        feature: newFeature,
+        subnetId: null,
+      }
+    })
+
+    batch(() => {
+      dispatch({
+        type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
+        payload: newFeatures,
+      })
+      dispatch({
+        type: Actions.PLAN_EDITOR_ADD_SUBNETS,
+        payload: subnetsCopy,
+      })
+    })
   }
 }
 
@@ -740,7 +962,7 @@ function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
   // FIXME: I (BRIAN) needs to refactor this, it works for the moment but does a lot of extranious things
   //  ALSO there is a "bug" where if we select an FDT before selecting the CO or one of the hubs, we get no info
   //  to fix this we need to find out what subnet the FDT is a part of and run that through here
-  return (dispatch, getState) => {
+  return async (dispatch, getState) => {
 
     const {
       transaction,
@@ -749,7 +971,6 @@ function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
       features,
       subnetFeatures,
     } = getState().planEditor
-
 
     let command = {}
     if (coordinates) {
@@ -808,6 +1029,9 @@ function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
         apiSubnets.forEach(subnet => {
           // subnet could be null (don't ask me)
           const subnetId = subnet.subnetId.id
+          if (!subnet.parentSubnetId) {
+            dispatch(getConsructionAreaByRoot(subnet))
+          }
           fiberApiPromises.push(
             AroHttp.get(`/service/plan-transaction/${transaction.id}/subnetfeature/${subnetId}`)
               .then(fiberResult => subnet.fiber = fiberResult.data)
@@ -982,14 +1206,30 @@ function recalculateBoundary (subnetId) {
     dispatch(setIsCalculatingBoundary(true))
     const state = getState()
     //const transactionId = state.planEditor.transaction.id
-    if (!state.planEditor.subnets[subnetId] || !state.planEditor.transaction) return null // null? meh
+    const subnet = state.planEditor.subnets[subnetId]
+    if (!subnet || !state.planEditor.transaction) return null // null? meh
     const transactionId = state.planEditor.transaction.id
-    const { locked, polygon: newPolygon } = state.planEditor.subnets[subnetId].subnetBoundary
-    const boundaryBody = { locked, polygon: newPolygon }
+    let body, url, method;
+    if (subnet.dataType !== "edge_construction_area") {
+      const { locked, polygon: newPolygon } = subnet.subnetBoundary
+      body = { locked, polygon: newPolygon }
+      url = `/service/plan-transaction/${transactionId}/subnet/${subnetId}/boundary`
+      method = "post"
+    } else {
+      body = JSON.parse(JSON.stringify(state.planEditor.subnetFeatures[subnetId].feature))
+      body.geometry.type = "Polygon";
+      body.geometry.coordinates = subnet.subnetBoundary.polygon.coordinates[0]
+      url = `/service/plan-transaction/${transactionId}/edge-construction-area`
+      method = "put"
+    }
 
-    return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet/${subnetId}/boundary`, boundaryBody)
-      .then(res => {
+    return AroHttp[method](url, body)
+      .then(async (res) => {
         dispatch(setIsCalculatingBoundary(false)) // may need to extend this for multiple boundaries? (make it and int incriment, decriment)
+        if (res.data.modifiedSubnets) {
+          const updatedSubnetIds = res.data.modifiedSubnets.map((subnet) => subnet.node.id)
+          await dispatch(addSubnets({ subnetIds: updatedSubnetIds }))
+        }
       })
       .catch(err => {
         console.error(err)
@@ -1057,7 +1297,7 @@ function recalculateSubnets (transactionId, subnetIds = []) {
     })
     dispatch(setIsCalculatingSubnets(true))
     const recalcBody = { subnetIds: activeSubnets }
-    
+
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet-cmd/recalc`, recalcBody)
       .then(res => {
         dispatch(setIsCalculatingSubnets(false))
@@ -1364,6 +1604,43 @@ function unparseSubnetFeature (feature) {
   return feature
 }
 
+function parseAPIConstructionAreasToStore(constructionArea) {
+    // Move a parsed copy of the construction area in to the global state for subnets
+    const newSubnet = parseAPIConstructionAreasToSubnet(constructionArea)
+
+    // Move a parsed copy of the construction area in to the global state for features
+    const feature = parseAPIConstructionAreasToFeature(constructionArea)
+
+    return [newSubnet, feature]
+}
+
+function parseAPIConstructionAreasToSubnet (constructionArea) {
+  const geometry = JSON.parse(JSON.stringify(constructionArea.geometry))
+  geometry.type = "MultiPolygon";
+  geometry.coordinates = [geometry.coordinates]
+  const subnetContents = {
+    subnetBoundary: { polygon: geometry },
+    subnetNode: constructionArea.objectId,
+    children: [],
+    state: "recalced",
+    parentSubnetId: null,
+    coEquipments: [],
+    subnetLocationsById: {},
+    dataType: constructionArea.dataType
+  }      
+  return subnetContents
+}
+
+function parseAPIConstructionAreasToFeature (constructionArea) {
+  constructionArea.geometry.type = "Point";
+  constructionArea.geometry.coordinates = [
+    (constructionArea.geometry.coordinates[0][0][0] + constructionArea.geometry.coordinates[0][1][0]) / 2,
+    (constructionArea.geometry.coordinates[0][0][1] + constructionArea.geometry.coordinates[0][1][1]) / 2
+  ]
+
+  return constructionArea;
+}
+
 // --- //
 
 export default {
@@ -1377,6 +1654,8 @@ export default {
   moveFeature,
   deleteFeature,
   deleteTransactionFeature,
+  createConstructionArea,
+  moveConstructionArea,
   deleteBoundaryVertex,
   deleteBoundaryVertices,
   addTransactionFeatures,
@@ -1395,6 +1674,8 @@ export default {
   setIsEditingFeatureProperties,
   setIsCommittingTransaction,
   setIsEnteringTransaction,
+  updatePlanThumbInformation,
+  setPlanThumbInformation,
   readFeatures,
   selectEditFeaturesById,
   deselectEditFeatureById,
@@ -1413,4 +1694,6 @@ export default {
   setFiberAnnotations,
   getFiberAnnotations,
   leftClickTile,
+  showContextMenuForConstructionAreas,
+  deleteConstructionArea
 }
