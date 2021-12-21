@@ -132,13 +132,6 @@ function setNetworkEquipmentLayers (networkEquipmentLayers) {
   }
 }
 
-function setConstructionAreaLayers (constructionAreaLayers) {
-  return {
-    type: Actions.LAYERS_SET_CONSTRUCTION_AREAS,
-    payload: constructionAreaLayers
-  }
-}
-
 function setConstructionSiteLayers (constructionSiteLayers) {
   return {
     type: Actions.LAYERS_SET_CONSTRUCTION_SITE,
@@ -317,7 +310,6 @@ export default {
   setLocationFilters,
   setLocationFilterChecked,
   setNetworkEquipmentLayers,
-  setConstructionAreaLayers,
   setConstructionSiteLayers,
   setBoundaryLayers,
   setCopperLayers,

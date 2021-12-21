@@ -62,10 +62,6 @@ export class ContextMenu extends Component {
         text: 'Equipment',
         cssClass: 'badge badge-primary badge-equipment'
       },
-      CONSTRUCTION_AREA: {
-        text: 'Construction Area',
-        cssClass: 'badge badge-primary badge-equipment'
-      },
       LOCATION: {
         text: 'Location',
         cssClass: 'badge badge-primary badge-location'

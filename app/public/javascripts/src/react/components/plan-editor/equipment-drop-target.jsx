@@ -53,54 +53,12 @@ export class EquipmentDropTarget extends Component {
       const dropLatLng = MapUtils.pixelToLatlng(this.props.googleMaps, event.clientX + offsetX, event.clientY + offsetY)
       const networkNodeType = event.dataTransfer.getData(constants.DRAG_DROP_ENTITY_DETAILS_KEY)
 
-      let featureToCreate = {
+      const featureToCreate = {
         id: uuidStore.getUUID(),
         point: WktUtils.getWKTPointFromGoogleMapLatLng(dropLatLng),
+        networkNodeType: networkNodeType,
       }
-      
-      if (networkNodeType === "undefined") {
-        const featureCoordinates = featureToCreate.point.coordinates
-        const polygonPath = [
-          { lat: featureCoordinates[1], lng: featureCoordinates[0] - .001 },
-          { lat: featureCoordinates[1], lng: featureCoordinates[0] + .001 },
-          { lat: featureCoordinates[1] - .001, lng: featureCoordinates[0] + .001 },
-          { lat: featureCoordinates[1] - .001, lng: featureCoordinates[0] - .001 }
-        ]
-        // Create a fake polygon to extract the geometry data
-        const polygon = new google.maps.Polygon({
-          paths: polygonPath,
-        })
-
-        const constructionType =
-          this.props.planThumbInformation[featureToCreate.id]
-            ? this.props.planThumbInformation[featureToCreate.id]
-            : constants.BLOCKER.KEY;
-        const isBlocker = constructionType === constants.BLOCKER.KEY
-        featureToCreate = {
-          ...featureToCreate,
-          geometry: WktUtils.getWKTPolygonFromGoogleMapPath(polygon.getPath()),
-          attributes: {},
-          dataType: "edge_construction_area",
-          costMultiplier: isBlocker
-            ? constants.BLOCKER.COST_MULTIPLIER
-            : constants.INCLUSION.COST_MULTIPLIER,
-          dateModified: Date.now(),
-          edgeFeatureReferences: [],
-          exportedAttributes: {},
-          objectId: featureToCreate.id,
-          priority: isBlocker
-            ? constants.BLOCKER.PRIORITY
-            : constants.INCLUSION.PRIORITY,
-        }
-
-        delete featureToCreate.id;
-        delete featureToCreate.point;
-
-        this.props.createConstructionArea(featureToCreate);
-      } else {
-        featureToCreate.networkNodeType = networkNodeType
-        this.props.createFeature(featureToCreate)
-      }
+      this.props.createFeature(featureToCreate)
     }
   }
 }
@@ -112,13 +70,11 @@ EquipmentDropTarget.propTypes = {
 
 const mapStateToProps = state => ({
   isDraggingFeatureForDrop: state.planEditor.isDraggingFeatureForDrop,
-  googleMaps: state.map.googleMaps,
-  planThumbInformation: state.planEditor.planThumbInformation
+  googleMaps: state.map.googleMaps
 })
 
 const mapDispatchToProps = dispatch => ({
-  createFeature: (equipment) => dispatch(PlanEditorActions.createFeature(equipment)),
-  createConstructionArea: (constructionArea) => dispatch(PlanEditorActions.createConstructionArea(constructionArea)),
+  createFeature: (equipment) => dispatch(PlanEditorActions.createFeature(equipment))
 })
 
 const EquipmentDropTargetComponent = wrapComponentWithProvider(reduxStore, EquipmentDropTarget, mapStateToProps, mapDispatchToProps)

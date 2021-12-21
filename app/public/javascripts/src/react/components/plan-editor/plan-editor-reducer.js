@@ -25,7 +25,6 @@ const defaultState = {
   selectedFiber: [],
   fiberAnnotations: {},
   clickedLatLng: [],
-  planThumbInformation: {},
 }
 
 function setTransaction (state, transaction) {
@@ -39,10 +38,10 @@ function clearTransaction () {
   return JSON.parse(JSON.stringify(defaultState))
 }
 
-function addTransactionFeatures (state, transactionFeatures) {
+function addTransactionFeatures (state, equipments) {
   var newFeatures = { ...state.features }
-  transactionFeatures.forEach(transFeature => {
-    newFeatures[transFeature.feature.objectId] = transFeature
+  equipments.forEach(equipment => {
+    newFeatures[equipment.feature.objectId] = equipment
   })
   return { ...state,
     features: newFeatures
@@ -59,15 +58,15 @@ function deleteTransactionFeature (state, objectId) {
   }
 }
 
-function modifyTransactionFeatures (state, newTransactionFeatures) {
+function modifyTransactionFeatures (state, newEquipments) {
   var newFeatures = { ...state.features }
-  newTransactionFeatures.forEach(transFeature => {
-    if (newFeatures[transFeature.feature.objectId]) {
-      newFeatures[transFeature.feature.objectId] = transFeature
+  newEquipments.forEach(equipment => {
+    if (newFeatures[equipment.feature.objectId]) {
+      newFeatures[equipment.feature.objectId] = equipment
     } else {
       // not really sure why this check is needed
       //  I think we can combine the add and modify actions 
-      throw new Error(`Trying to modify equipment with objectId ${transFeature.feature.objectId}, but it is not in the existing list of transaction features`)
+      throw new Error(`Trying to modify equipment with objectId ${equipment.feature.objectId}, but it is not in the existing list of equipments`)
     }
   })
   return { ...state,
@@ -113,16 +112,6 @@ function setIsDraggingFeatureForDrop (state, isDraggingFeatureForDrop) {
   return { ...state,
     isDraggingFeatureForDrop: isDraggingFeatureForDrop
   }
-}
-
-function setPlanThumbInformation (state, planThumbInformation) {
-  return { ...state, planThumbInformation }
-}
-
-function updatePlanThumbInformation (state, payload) {
-  const planThumbInformationClone = JSON.parse(JSON.stringify(state.planThumbInformation))
-  planThumbInformationClone[payload.key] = payload.planThumbInformation;
-  return { ...state, planThumbInformation: planThumbInformationClone }
 }
 
 function setIsEditingFeatureProperties (state, isEditingFeatureProperties) {
@@ -215,9 +204,7 @@ function removeSubnetFeature (state, featureId) {
   } else {
     // if it is not a parent itself then it just removes from subFeatures and from its parent in subnets
     delete updatedSubnetFeatures[featureId]
-    if (subnetId) {
-      updatedSubnets[subnetId].children = updatedSubnets[subnetId].children.filter(childId => childId !== featureId)
-    }
+    updatedSubnets[subnetId].children = updatedSubnets[subnetId].children.filter(childId => childId !== featureId)
   }
   return { ...state, subnetFeatures: updatedSubnetFeatures, subnets: updatedSubnets }
 }
@@ -346,12 +333,6 @@ function planEditorReducer (state = defaultState, { type, payload }) {
 
     case Actions.PLAN_EDITOR_CLEAR_BOUNDARY_DEBOUNCE:
       return clearBoundaryDebounce(state, payload)
-
-    case Actions.PLAN_EDITOR_SET_PLAN_THUMB_INFORMATION:
-      return setPlanThumbInformation(state, payload)
-    
-    case Actions.PLAN_EDITOR_UPDATE_PLAN_THUMB_INFORMATION:
-      return updatePlanThumbInformation(state, payload)
     
     case Actions.PLAN_EDITOR_SET_FIBER_RENDER_REQUIRED:
       return { ...state, fiberRenderRequired: payload }
