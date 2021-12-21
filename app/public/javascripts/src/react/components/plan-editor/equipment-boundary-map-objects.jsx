@@ -89,12 +89,7 @@ export class EquipmentBoundaryMapObjects extends Component {
 
       this.deleteNeighbors(idsToDelete)
       this.createNeighbors(idsToCreate)
-
-      if (this.mapObject && this.mapObject.dataType && this.mapObject.dataType === "edge_construction_area") {
-        this.deleteMapObject()
-        this.createMapObject(selectedSubnetId)
-      }
-    }
+     }
   }
 
   selectSubnet ([lat, lng]) {
@@ -125,7 +120,6 @@ export class EquipmentBoundaryMapObjects extends Component {
 
     this.mapObject = new google.maps.Polygon({
       subnetId: selectedSubnetId, // Not used by Google Maps
-      dataType: this.props.subnets[selectedSubnetId].dataType,
       paths: WktUtils.getGoogleMapPathsFromWKTMultiPolygon(geometry),
       clickable: false,
       draggable: false,

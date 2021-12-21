@@ -44,7 +44,6 @@ function loadConfiguration() {
     'networkEquipment',
     'copperCategories',
     'constructionSiteCategories',
-    'constructionAreas',
     'boundaryCategories',
     'units',
     'mapType',
@@ -63,9 +62,6 @@ function loadConfiguration() {
   const configTypeToSubtype = {
     'networkEquipment': [
       'equipments'
-    ],
-    'constructionAreas': [
-      'construction_areas'
     ]
   }
 

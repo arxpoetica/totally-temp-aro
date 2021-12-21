@@ -15,14 +15,6 @@ const getIsCalculatingSubnets = state => state.planEditor.isCalculatingSubnets
 const getIsCalculatingBoundary = state => state.planEditor.isCalculatingBoundary
 const getBoundaryDebounceBySubnetId = state => state.planEditor.boundaryDebounceBySubnetId
 const getCursorLocationIds = state => state.planEditor.cursorLocationIds
-const getPlanThumbInformation = state => state.planEditor.getPlanThumbInformation
-
-const getSelectedPlanThumbInformation = createSelector(
-  [getSelectedSubnet, getPlanThumbInformation],
-  (selectedSubnet, planThumbInformation) => {
-    return planThumbInformation[selectedSubnet]
-  }
-)
 
 const getIsRecalcSettled = createSelector(
   [getIsCalculatingSubnets, getIsCalculatingBoundary, getBoundaryDebounceBySubnetId],
@@ -332,8 +324,7 @@ const PlanEditorSelectors = Object.freeze({
   getSelectedSubnetLocations,
   getCursorLocations,
   getLocationCounts,
-  getSubnetFeatures,
-  getSelectedPlanThumbInformation
+  getSubnetFeatures
 })
 
 export default PlanEditorSelectors
