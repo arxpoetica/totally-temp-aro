@@ -323,8 +323,7 @@ class TileComponentController {
         hitFeatures.event = event
         this.state.mapFeaturesRightClickedEvent.next(hitFeatures)
       })
-      // Note: I just fixed a boolean logic typo having to do with rSelectedDisplayMode in getFilteredFeaturesUnderLatLng()
-      //  this also MAY be a typo, I think the "&&" may need to be "||"
+
       if (this.rSelectedDisplayMode !== this.state.displayModes.VIEW
         || this.rActiveViewModePanel === this.state.viewModePanels.EDIT_SERVICE_LAYER
       ) return
