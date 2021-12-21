@@ -13,7 +13,6 @@ import AlertsPanel from './alerts-panel.jsx'
 import { AlertsPanelTooltip } from './alerts-panel-tooltip.jsx'
 import BoundaryDrawCreator from './boundary-draw-creator.jsx'
 import AroFeatureEditor from '../common/editor-interface/aro-feature-editor.jsx'
-import AroFeatureFactory from '../../../service-typegen/dist/AroFeatureFactory'
 import './plan-editor.css'
 
 export const PlanEditor = props => {
@@ -106,8 +105,7 @@ export const PlanEditor = props => {
       <PlanEditorThumbs />
 
       {selectedEditFeatureIds.map(id => {
-        let aroFeature = AroFeatureFactory.createObject(features[id].feature)
-        if (aroFeature) {
+        if (features[id].feature.dataType !== "edge_construction_area") {
           return (
             <AroFeatureEditor key={id}
               altTitle={equipments[features[id].feature.networkNodeType].label}
