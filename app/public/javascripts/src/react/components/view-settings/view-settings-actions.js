@@ -14,7 +14,55 @@ function deleteLocationWithId (objectId) {
   }
 }
 
+function selectServiceArea (objectId) {
+  return {
+    type: Actions.VIEW_SETTINGS_SELECT_SERVICE_AREA,
+    payload: objectId
+  }
+}
+
+function editServiceArea (mapObject) {
+  return {
+    type: Actions.VIEW_SETTINGS_EDIT_SERVICE_AREA,
+    payload: mapObject
+  }
+}
+
+function deleteServiceArea (objectId) {
+  return {
+    type: Actions.VIEW_SETTINGS_DELETE_SERVICE_AREA,
+    payload: objectId
+  }
+}
+
+function createMultiPolygon (feature) {
+  return {
+    type: Actions.VIEW_SETTINGS_CREATE_MULTI_POLYGON,
+    payload: feature
+  }
+}
+
+function recreateTilesAndCache (value) {
+  return {
+    type: Actions.VIEW_SETTINGS_IS_RECREATE_TILE_AND_CACHE,
+    payload: value
+  }
+}
+
+function setServiceAreaBoundaryDetails (feature) {
+  return {
+    type: Actions.VIEW_SETTINGS_SET_SERVICE_AREA_BOUNDARY_DETAILS,
+    payload: feature
+  }
+}
+
 export default {
   setShowLocationLabels,
   deleteLocationWithId,
+  selectServiceArea,
+  editServiceArea,
+  deleteServiceArea,
+  createMultiPolygon,
+  recreateTilesAndCache,
+  setServiceAreaBoundaryDetails,
 }
