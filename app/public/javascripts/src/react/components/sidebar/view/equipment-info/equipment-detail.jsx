@@ -344,9 +344,7 @@ export const equipmentDetail = (props) => {
           currentEquipmentDetailView === EquipmentDetailView.List && activeViewModePanel === viewModePanels.EQUIPMENT_INFO &&
           <>
             <div className="ei-panel-header-title">Equipment List</div>
-            <div className="equipment-list">
-              <EquipmentDetailList onClickObject={viewSelectedEquipment} />
-            </div>
+            <EquipmentDetailList onClickObject={viewSelectedEquipment} />
           </>
         }
       </div>
