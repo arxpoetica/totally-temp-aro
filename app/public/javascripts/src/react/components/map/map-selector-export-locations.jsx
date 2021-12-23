@@ -8,7 +8,7 @@ const MAX_EXPORTABLE_AREA = 11000000000
 // Create a drawing manager that will be used for marking out polygons for selecting entities
 const drawingManager = new google.maps.drawing.DrawingManager({
   drawingMode: null,
-  drawingControl: false
+  drawingControl: false,
 })
 
 export const MapSelectorExportLocations = (props) => {
@@ -17,9 +17,9 @@ export const MapSelectorExportLocations = (props) => {
   useEffect(() => {
     updateDrawingManagerState(drawingManager, 'polygon', mapRef)
 
-    drawingManager.addListener('overlaycomplete', (e) => {
-      exportLocationsByPolygon(e.overlay.getPath().getArray())
-      setTimeout(() => e.overlay.setMap(null), 100)
+    drawingManager.addListener('overlaycomplete', (event) => {
+      exportLocationsByPolygon(event.overlay.getPath().getArray())
+      setTimeout(() => event.overlay.setMap(null), 100)
     })
 
     return () => {
