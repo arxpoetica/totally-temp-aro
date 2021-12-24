@@ -87,8 +87,11 @@
       <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.EDIT_SERVICE_LAYER" 
         ng-if="($ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW && 
           $ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.EDIT_SERVICE_LAYER) || $ctrl.rActiveViewModePanel === $ctrl.state.viewModePanels.EDIT_SERVICE_LAYER">
-        <service-layer-editor ng-if="($ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW && 
-        $ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.EDIT_SERVICE_LAYER) || $ctrl.rActiveViewModePanel === $ctrl.state.viewModePanels.EDIT_SERVICE_LAYER"></service-layer-editor>
+        <r-service-layer-editor
+          ng-if="($ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW
+          &&  $ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.EDIT_SERVICE_LAYER)
+          || $ctrl.rActiveViewModePanel === $ctrl.state.viewModePanels.EDIT_SERVICE_LAYER"
+        ></r-service-layer-editor>
       </accordion-panel-contents>
 
     </accordion>

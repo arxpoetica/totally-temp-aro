@@ -5,6 +5,7 @@ import { ToastContainer } from 'react-toastify'
 import DisplayModeButtons from '../react/components/sidebar/display-mode-buttons.jsx'
 import PlanEditorContainer from '../react/components/plan-editor/plan-editor-container.jsx'
 import NetworkPlan from '../react/components/sidebar/network-plan.jsx'
+import ServiceLayerEditor from '../react/components/sidebar/view/service-layer-editor.jsx'
 import LocationEditor from '../react/components/sidebar/view/location-editor.jsx'
 import EquipmentDetail from '../react/components/sidebar/view/equipment-info/equipment-detail.jsx'
 import NetworkPlanManage from '../react/components/sidebar/view/network-plan-manage.jsx'
@@ -86,9 +87,7 @@ import roicReportsModal from './sidebar/analysis/roic-reports/roic-reports-modal
 import coverageReportDownloader from './sidebar/analysis/coverage/coverage-report-downloader'
 import networkBuildOutput from './sidebar/analysis/network-build/network-build-output'
 import ringEditor from './sidebar/ring-editor'
-import draggableButton from './sidebar/plan-editor/draggable-button'
 import planEditorContainer from './sidebar/plan-editor/plan-editor-container'
-import serviceLayerEditor from './sidebar/plan-editor/service-layer-editor'
 import boundaries from './views/boundaries'
 import locations from './views/locations'
 import networkEquipment from './views/network-equipment'
@@ -149,8 +148,6 @@ app.component('boundaryDetail', boundaryDetail)
   .component('networkBuildOutput', networkBuildOutput)
   .component('ringEditor', ringEditor)
   .component('planEditorContainer', planEditorContainer)
-  .component('serviceLayerEditor', serviceLayerEditor)
-  .component('draggableButton', draggableButton)
   .component('boundaries', boundaries)
   .component('locations', locations)
   .component('networkEquipment', networkEquipment)
@@ -186,6 +183,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rDisplayModeButtons', react2angular(DisplayModeButtons))
   .component('rPlanEditorContainer', react2angular(PlanEditorContainer))
   .component('rNetworkPlan', react2angular(NetworkPlan))
+  .component('rServiceLayerEditor', react2angular(ServiceLayerEditor))
   .component('rLocationEditor', react2angular(LocationEditor))
   .component('rEquipmentDetail', react2angular(EquipmentDetail))
   .component('rNetworkPlanManage', react2angular(NetworkPlanManage))

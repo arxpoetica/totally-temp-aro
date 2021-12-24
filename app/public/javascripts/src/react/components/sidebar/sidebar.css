@@ -337,6 +337,32 @@
   font-weight: bold;
 }
 
+/* Edit Service Area */
+
+.edit-service-area {
+  margin: 10px;
+}
+.edit-service-area table {
+  margin-bottom: 10px;
+}
+.edit-service-area table {
+  margin-bottom: 10px;
+}
+.edit-service-area .draggable-node {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+.edit-service-area .draggable-item {
+  flex: 0 0 auto;
+}
+.edit-service-area i {
+  margin-right: 5px;
+}
+.edit-service-area .save-properties {
+  margin-top: 10px;
+}
+
 /* Network Plan */
 
 .network-plan {
