@@ -157,7 +157,7 @@ export const CoverageBoundary = (props) => {
   }
 
   return (
-    <div className="view-mode-container">
+    <div className="coverage-boundary-container">
       {/* Spinner that will be shown while the coverage area is being loaded from the server */}
       {
         controlState === controlStates.COMPUTING &&

@@ -139,7 +139,7 @@
 
 /* View-Mode Coverage Boundary */
 
-.view-mode-container {
+.coverage-boundary-container {
   position: relative; /* This will require the parent to have position: relative or absolute */
   height: 100%;
   padding: 0px 10px 10px 10px;
@@ -399,17 +399,18 @@
 
 /* View Mode */
 
-.plan-settings-container {
+.view-mode-container {
   position: absolute;
   height: 100%;
   width: 100%;
   display: flex;
   flex-direction: column;
+  padding-top: 20px;
 }
-.plan-settings-container .collapse-height {
+.view-mode-container .collapse-height {
   height: 100%;
 }
-.plan-settings-container .card-body-space {
+.view-mode-container .card-body-space {
   padding: 0px;
 }
 .road-info > div {

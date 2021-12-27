@@ -82,7 +82,7 @@ export const ViewMode = (props) => {
   }
 
   return (
-    <div className="plan-settings-container">
+    <div className="view-mode-container">
 
       {/* Location Info */}
       <Card className={showCard(viewModePanels.LOCATION_INFO)}>
