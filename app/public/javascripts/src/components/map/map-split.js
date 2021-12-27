@@ -280,7 +280,7 @@ let mapSplit = {
         <div style="flex: 1 1 auto; position: relative;">
           <!-- ng-if is important here because the plan settings components implement $onDestroy() to show a messagebox
               when destroyed to ask if settings should be saved -->
-          <view-mode ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW || $ctrl.rSelectedDisplayMode === 'VIEW'"></view-mode>
+          <r-view-mode ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW || $ctrl.rSelectedDisplayMode === 'VIEW'"></r-view-mode>
           <r-analysis-mode ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS && $ctrl.state.plan.planType != 'RING' && $ctrl.rSelectedDisplayMode !== 'VIEW'" && $ctrl.rPlan.planType != 'RING'"></r-analysis-mode>
           <r-ring-editor ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.EDIT_RINGS && $ctrl.rSelectedDisplayMode !== 'VIEW'"></r-ring-editor>
           <r-plan-settings ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.PLAN_SETTINGS && $ctrl.rSelectedDisplayMode !== 'VIEW'"></r-plan-settings>
