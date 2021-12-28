@@ -2,6 +2,7 @@
 import { react2angular } from 'react2angular'
 import { ToastContainer } from 'react-toastify'
 
+import MapSplit from '../react/components/map/map-split.jsx'
 import ViewMode from '../react/components/sidebar/view/view-mode.jsx'
 import DisplayModeButtons from '../react/components/sidebar/display-mode-buttons.jsx'
 import PlanEditorContainer from '../react/components/plan-editor/plan-editor-container.jsx'
@@ -181,6 +182,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('editorInterfacePrimitive', editorInterfacePrimitive)
   .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
 // ReactJS components
+  .component('rMapSplit', react2angular(MapSplit))
   .component('rViewMode', react2angular(ViewMode))
   .component('rDisplayModeButtons', react2angular(DisplayModeButtons))
   .component('rPlanEditorContainer', react2angular(PlanEditorContainer))

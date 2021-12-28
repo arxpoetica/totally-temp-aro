@@ -325,6 +325,7 @@ class State {
       }
       */
       service.areTilesRendering = newValue
+      // service.setAreTilesRenderingInRedux(newValue)
       $timeout()
     }
 
@@ -1945,6 +1946,7 @@ class State {
       showContextMenuForLocations: (featureIds, event) => dispatch(PlanEditorActions.showContextMenuForLocations(featureIds, event)),
       setUserGroupsMsg: (userGroupsMsg) => dispatch(GlobalSettingsActions.setUserGroupsMsg(userGroupsMsg)),
       setRecreateTilesAndCache: (mapSelection) => dispatch(ViewSettingsActions.recreateTilesAndCache(mapSelection)),
+      setAreTilesRenderingInRedux: value => dispatch(MapActions.setAreTilesRendering(value)),
     }
   }
 }
