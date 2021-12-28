@@ -935,6 +935,7 @@ class State {
           service.requestCreateMapOverlay.next(null) // Create a new one
           service.mapLayers.next(service.mapLayers.getValue()) // Reset map layers so that the new overlay picks them up
           service.requestMapLayerRefresh.next(null) // Redraw map layers
+          service.setRecreateTilesAndCache(false)
         })
         .catch((err) => console.error(err))
     }
@@ -1813,6 +1814,10 @@ class State {
       const currentActivePlanId = service.plan && service.plan.id
       const newActivePlanId = nextReduxState.plan && nextReduxState.plan.id
       const oldDataItems = service.dataItems
+      const isRecreateTileCurrent = service.isRecreateTiles
+      const isRecreateTileNew = nextReduxState.isRecreateTiles
+
+      if (isRecreateTileNew !== isRecreateTileCurrent) { isRecreateTileNew && service.recreateTilesAndCache() }
 
       // merge state and actions onto controller
       Object.assign(service, nextReduxState)
@@ -1880,6 +1885,7 @@ class State {
       rActiveViewModePanel: reduxState.toolbar.rActiveViewModePanel,
       deletedUncommitedMapObjects: reduxState.toolbar.deletedUncommitedMapObjects,
       rHeatmapOptions: reduxState.toolbar.heatmapOptions,
+      isRecreateTiles: reduxState.viewSettings.isRecreateTiles,
     }
   }
 
@@ -1939,6 +1945,7 @@ class State {
       planEditorOnMapClick: (featureIds, latLng) => dispatch(PlanEditorActions.onMapClick(featureIds, latLng)),
       showContextMenuForLocations: (featureIds, event) => dispatch(PlanEditorActions.showContextMenuForLocations(featureIds, event)),
       setUserGroupsMsg: (userGroupsMsg) => dispatch(GlobalSettingsActions.setUserGroupsMsg(userGroupsMsg)),
+      setRecreateTilesAndCache: (mapSelection) => dispatch(ViewSettingsActions.recreateTilesAndCache(mapSelection)),
     }
   }
 }
