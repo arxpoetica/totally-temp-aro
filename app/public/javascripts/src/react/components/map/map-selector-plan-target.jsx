@@ -9,10 +9,10 @@ import { dequal } from 'dequal'
 // Create a drawing manager that will be used for marking out polygons for selecting entities
 const drawingManager = new google.maps.drawing.DrawingManager({
   drawingMode: null,
-  drawingControl: false
+  drawingControl: false,
 })
 
-export const MapSelectorPlanTarget = (props) => {
+const MapSelectorPlanTarget = (props) => {
   const {
     mapRef,
     planId,
