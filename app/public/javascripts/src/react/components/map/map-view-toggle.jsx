@@ -13,7 +13,7 @@ const buttonIcons = {
 }
 let mapRefPromise = null
 
-export const MapViewToggle = (props) => {
+const MapViewToggle = (props) => {
   const [currentMapType, setCurrentMapType] = useState(mapView.roadmap)
   const [overridenMapType, setOverridenMapType] = useState(null) // Used if the user manually clicks on a map type
 
