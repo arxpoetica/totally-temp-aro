@@ -17,14 +17,16 @@ import PlanEditorContainer from '../plan-editor/plan-editor-container.jsx'
 import AroDebug from '../sidebar/debug/aro-debug.jsx'
 import PlanSettings from '../plan/plan-settings.jsx'
 import UINotifications from '../notification/ui-notifications.jsx'
-// import MapViewToggle from './map-view-toggle.jsx'
+import MapViewToggle from './map-view-toggle.jsx'
 import './map-split.css'
 
 const transitionTimeMsec = 100
-const transitionCSS = `width ${transitionTimeMsec}ms` // This must be the same for the map and sidebar, otherwise animations don't work correctly
+// This must be the same for the map and sidebar, otherwise animations don't work correctly.
+const transitionCSS = `width ${transitionTimeMsec}ms`
+const toolBarResizeEvent = new CustomEvent('toolBarResized')
 let splitterObj = null
 
-export const MapSplit = (props) => {
+const MapSplit = (props) => {
   const [hovering, setHovering] = useState(false)
   const [isCollapsed, setCollapsed] = useState(false)
   const [sizesBeforeCollapse, setSizesBeforeCollapse] = useState(null)
@@ -54,12 +56,11 @@ export const MapSplit = (props) => {
             google.maps.event.trigger(panorama, 'resize')
           }
 
-          const getSidebarWidth = splitterObj.getSizes()[1]
-          setSidebarWidth(getSidebarWidth)
-    
-          if (splitterObj.getSizes()[1] > 0) {
-            const event = new CustomEvent('toolBarResized')
-            window.dispatchEvent(event)
+          const sidebarWidth = splitterObj.getSizes()[1]
+          setSidebarWidth(sidebarWidth)
+
+          if (sidebarWidth > 0) {
+            window.dispatchEvent(toolBarResizeEvent)
             setCollapsed(false)
             setSizesBeforeCollapse(null)
           }
@@ -67,7 +68,7 @@ export const MapSplit = (props) => {
       })
     }
     if (map) { map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(mapViewToggle.current) }
-  },[map])
+  }, [map])
 
   const checkSelectedDisplayMode = (displayMode) => {
     return selectedDisplayMode === displayMode
@@ -78,20 +79,14 @@ export const MapSplit = (props) => {
       // The sidebar is already collapsed. Un-collapse it by restoring the saved sizes
       splitterObj.setSizes(sizesBeforeCollapse)
       setSizesBeforeCollapse(null)
-
       // To Trigger refreshToolbar() in tool-bar.jsx by creating the custom event when sidebar expand
-      //https://stackoverflow.com/questions/52037958/change-value-in-react-js-on-window-resize
-      var event = new CustomEvent('toolBarResized');
-      setTimeout(() => window.dispatchEvent(event), transitionTimeMsec + 50)
+      // https://stackoverflow.com/questions/52037958/change-value-in-react-js-on-window-resize
+      setTimeout(() => window.dispatchEvent(toolBarResizeEvent), transitionTimeMsec + 50)
     } else {
       // Save the current sizes and then collapse the sidebar
       setSizesBeforeCollapse(splitterObj.getSizes())
       splitterObj.setSizes([99.5, 0.5])
-
-      // To Trigger refreshToolbar() in tool-bar.jsx by creating the custom event when sidebar collapse
-      //https://stackoverflow.com/questions/52037958/change-value-in-react-js-on-window-resize
-      var event = new CustomEvent('toolBarResized');
-      setTimeout(() => window.dispatchEvent(event), transitionTimeMsec + 50)
+      setTimeout(() => window.dispatchEvent(toolBarResizeEvent), transitionTimeMsec + 50)
     }
     setCollapsed(!isCollapsed)
     // Trigger a resize so that any tiles that have been uncovered will be loaded
@@ -111,12 +106,12 @@ export const MapSplit = (props) => {
 
         {/* Define the canvas that will hold the map. */}
         <div id="map-canvas-container" style={{ position: 'relative', float: 'left', height: '100%', transition: transitionCSS }}>
-          <div id="map-canvas" className={`map-canvas ${!isReportMode ? 'map-canvas-drop-shadow' : '' }`} style={{ position: 'relative', overflow: 'hidden' }} />
+          <div id="map-canvas" className={`map-canvas ${!isReportMode ? 'map-canvas-drop-shadow' : ''}`} style={{ position: 'relative', overflow: 'hidden' }} />
           {/* Technically the toolbar, etc should be a child of the map canvas, but putting these elements in the map canvas
             causes the map to not show up */}
 
           <div id="header-bar-container" style={{ position: 'absolute', top: '0px', width: '100%', height: '55px', display: 'flex', flexDirection: 'row' }}>
-            <div style={{flex: '0 0 70px' }} />
+            <div style={{ flex: '0 0 70px' }} />
             {/* Created a 'reactCompClass' to get the ToolBar component elements in tool-bar.jsx */}
             <div className="reactCompClass" style={{ flex: '1 1 auto', position: 'relative' }}>
               <ToolBar />
@@ -124,7 +119,7 @@ export const MapSplit = (props) => {
             <div style={{ flex: '0 0 auto', margin: 'auto' }}>
               <NetworkPlan />
             </div>
-            <div id="spacerForIconOnSidebar" style={{flex: '0 0 40px' }} />
+            <div id="spacerForIconOnSidebar" style={{ flex: '0 0 40px' }} />
             {showToolBox
               && <ToolBox />
             }
@@ -133,22 +128,23 @@ export const MapSplit = (props) => {
           {/* Map Selector Plan Target */}
           {/* Map Selector Export Locations */}
           <ToastContainer />
-          {/* A div that overlays on the map to denote disabled state. When shown, it will prevent any keyboard/mouse interactions with the map.
-            Useful when you have made a slow-ish request to service and want to prevent further map interactions till you get a response. */}
-          {disableMap
-            && <div style={{ backgroundColor: 'white', opacity: '0.5', position: 'absolute', left: '0px', top: '0px', right: '0px', bottom: '0px' }}>
-            <div className="d-flex" style={{ height: '100%', textAlign: 'center', alignItems: 'center' }}>
-              <i className="fa fa-5x fa-spinner fa-spin" style={{ width: '100%' }} />
+          {/* A div that overlays on the map to denote disabled state. When shown, it will prevent any keyboard/mouse
+              interactions with the map. Useful when you have made a slow-ish request to service and want to prevent
+              further map interactions till you get a response. */}
+          {disableMap &&
+            <div style={{ backgroundColor: 'white', opacity: '0.5', position: 'absolute', left: '0px', top: '0px', right: '0px', bottom: '0px' }}>
+              <div className="d-flex" style={{ height: '100%', textAlign: 'center', alignItems: 'center' }}>
+                <i className="fa fa-5x fa-spinner fa-spin" style={{ width: '100%' }} />
+              </div>
             </div>
-          </div>
           }
           <EquipmentDropTarget />
           <ContextMenu />
         </div>
 
         {/* Define the sidebar */}
-        {!isReportMode
-          && <div id="sidebar" style={{ float: 'left', backgroundColor: '#fff', height: '100%', padding: '10px 0px', transition: transitionCSS }}>
+        {!isReportMode &&
+          <div id="sidebar" style={{ float: 'left', backgroundColor: '#fff', height: '100%', padding: '10px 0px', transition: transitionCSS }}>
             {/* Define the "expander widget" that can be clicked to collapse/uncollapse the sidebar. Note that putting
             the expander in one div affects the flow of elements in the sidebar, so we create a 0px by 0px div, and
             use this div to position the contents of the expander. This makes sure we don't affect flow. */}
@@ -178,17 +174,15 @@ export const MapSplit = (props) => {
               </div>
             </div>
             {/* Add a wrapping div because the expander changes the layout even though it is outside the panel */}
-            {!isCollapsed
-              && <div style={{ display: 'flex', flexDirection: 'column', height: '100%', paddingRight: '10px' }}>
+            {!isCollapsed &&
+              <div style={{ display: 'flex', flexDirection: 'column', height: '100%', paddingRight: '10px' }}>
                 <div style={{ overflow: 'auto', flex: '0 0 auto' }}>
                   {/* this is necessary to make the display-mode-buttons flow correctly */}
                   <DisplayModeButtons />
                 </div>
                 <div style={{ flex: '1 1 auto', position: 'relative' }}>
-                  {/* ng-if is important here because the plan settings components implement $onDestroy() to show a messagebox
-                    when destroyed to ask if settings should be saved  */}
                   {checkSelectedDisplayMode(displayModes.VIEW) && <ViewMode /> }
-                  {checkSelectedDisplayMode(displayModes.ANALYSIS) && planType != 'RING' && <AnalysisMode /> }
+                  {checkSelectedDisplayMode(displayModes.ANALYSIS) && planType !== 'RING' && <AnalysisMode /> }
                   {checkSelectedDisplayMode(displayModes.EDIT_RINGS) && <RingEditor /> }
                   {checkSelectedDisplayMode(displayModes.EDIT_PLAN) && <PlanEditorContainer /> }
                   {checkSelectedDisplayMode(displayModes.DEBUG) && <AroDebug /> }
@@ -199,7 +193,7 @@ export const MapSplit = (props) => {
           </div>
         }
       </div>
-      <div className="ui-note" style={{ pointerEvents: 'none', position: 'absolute', left: '0px', bottom: '25px' }} >
+      <div className="ui-note" style={{ pointerEvents: 'none', position: 'absolute', left: '0px', bottom: '25px' }}>
         {/* There used to be a "spinner" icon here, which has been removed. On profiling, we found that the
             spinning animation caused the tile rendering to be two times slower (e.g. 200ms with spinner vs 100 ms without)
             Do NOT add any kind of animated element in this control unless you suppress it when tiles are rendering */}
@@ -209,9 +203,10 @@ export const MapSplit = (props) => {
         </div>
       </div>
       {/* Footer */}
+      {/* Remove the Visiblity and Push it into the googlemap */}
       {map &&
-        <div style={{ visibility: 'hidden'}} ref={mapViewToggle}>
-          {/* <MapViewToggle /> */}
+        <div style={{ visibility: 'hidden' }} ref={mapViewToggle}>
+          <MapViewToggle />
         </div>
       }
     </>
@@ -222,11 +217,11 @@ const mapStateToProps = (state) => ({
   showToolBox: state.tool.showToolBox,
   ARO_CLIENT: state.configuration.system.ARO_CLIENT,
   isReportMode: state.mapReports.isReportMode,
-  disableMap: state.planEditor.isCalculatingSubnets ||
-    state.planEditor.isCreatingObject ||
-    state.planEditor.isModifyingObject ||
-    state.planEditor.isCommittingTransaction ||
-    state.planEditor.isEnteringTransaction,
+  disableMap: state.planEditor.isCalculatingSubnets
+    || state.planEditor.isCreatingObject
+    || state.planEditor.isModifyingObject
+    || state.planEditor.isCommittingTransaction
+    || state.planEditor.isEnteringTransaction,
   selectedDisplayMode: state.toolbar.rSelectedDisplayMode,
   planType: state.plan && state.plan.activePlan && state.plan.activePlan.planType,
   areTilesRendering: state.map.areTilesRendering,
