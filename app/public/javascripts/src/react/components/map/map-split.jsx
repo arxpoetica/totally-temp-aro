@@ -105,24 +105,22 @@ const MapSplit = (props) => {
       <div className={`app_wrapper_container ${ARO_CLIENT === 'frontier' ? 'footer' : ''}`}>
 
         {/* Define the canvas that will hold the map. */}
-        <div id="map-canvas-container" style={{ position: 'relative', float: 'left', height: '100%', transition: transitionCSS }}>
-          <div id="map-canvas" className={`map-canvas ${!isReportMode ? 'map-canvas-drop-shadow' : ''}`} style={{ position: 'relative', overflow: 'hidden' }} />
+        <div id="map-canvas-container" className="map-split-container" style={{ transition: transitionCSS }}>
+          <div id="map-canvas" className={`map-canvas map-split ${!isReportMode ? 'map-canvas-drop-shadow' : ''}`} />
           {/* Technically the toolbar, etc should be a child of the map canvas, but putting these elements in the map canvas
             causes the map to not show up */}
 
-          <div id="header-bar-container" style={{ position: 'absolute', top: '0px', width: '100%', height: '55px', display: 'flex', flexDirection: 'row' }}>
-            <div style={{ flex: '0 0 70px' }} />
-            {/* Created a 'reactCompClass' to get the ToolBar component elements in tool-bar.jsx */}
-            <div className="reactCompClass" style={{ flex: '1 1 auto', position: 'relative' }}>
+          <div className="header-bar-container">
+            <div className="header-space" />
+            {/* Created a 'toolbar-container' to get the ToolBar component elements in tool-bar.jsx */}
+            <div className="toolbar-container">
               <ToolBar />
             </div>
-            <div style={{ flex: '0 0 auto', margin: 'auto' }}>
+            <div className="network-plan">
               <NetworkPlan />
             </div>
-            <div id="spacerForIconOnSidebar" style={{ flex: '0 0 40px' }} />
-            {showToolBox
-              && <ToolBox />
-            }
+            <div className="sidebar-icon-space" />
+            { showToolBox && <ToolBox /> }
           </div>
           {/* Plan target map selector should be active only if we are in analysis mode */}
           {/* Map Selector Plan Target */}
@@ -132,9 +130,9 @@ const MapSplit = (props) => {
               interactions with the map. Useful when you have made a slow-ish request to service and want to prevent
               further map interactions till you get a response. */}
           {disableMap &&
-            <div style={{ backgroundColor: 'white', opacity: '0.5', position: 'absolute', left: '0px', top: '0px', right: '0px', bottom: '0px' }}>
-              <div className="d-flex" style={{ height: '100%', textAlign: 'center', alignItems: 'center' }}>
-                <i className="fa fa-5x fa-spinner fa-spin" style={{ width: '100%' }} />
+            <div className="map-spinner-container">
+              <div className="d-flex map-spinner">
+                <i className="fa fa-5x fa-spinner fa-spin spin-icon" />
               </div>
             </div>
           }
@@ -144,7 +142,7 @@ const MapSplit = (props) => {
 
         {/* Define the sidebar */}
         {!isReportMode &&
-          <div id="sidebar" style={{ float: 'left', backgroundColor: '#fff', height: '100%', padding: '10px 0px', transition: transitionCSS }}>
+          <div id="sidebar" className="sidebar-container" style={{ transition: transitionCSS }}>
             {/* Define the "expander widget" that can be clicked to collapse/uncollapse the sidebar. Note that putting
             the expander in one div affects the flow of elements in the sidebar, so we create a 0px by 0px div, and
             use this div to position the contents of the expander. This makes sure we don't affect flow. */}
@@ -175,12 +173,12 @@ const MapSplit = (props) => {
             </div>
             {/* Add a wrapping div because the expander changes the layout even though it is outside the panel */}
             {!isCollapsed &&
-              <div style={{ display: 'flex', flexDirection: 'column', height: '100%', paddingRight: '10px' }}>
-                <div style={{ overflow: 'auto', flex: '0 0 auto' }}>
+              <div className="display-mode-container">
+                <div className="display-mode-buttons">
                   {/* this is necessary to make the display-mode-buttons flow correctly */}
                   <DisplayModeButtons />
                 </div>
-                <div style={{ flex: '1 1 auto', position: 'relative' }}>
+                <div className="display-modes">
                   {checkSelectedDisplayMode(displayModes.VIEW) && <ViewMode /> }
                   {checkSelectedDisplayMode(displayModes.ANALYSIS) && planType !== 'RING' && <AnalysisMode /> }
                   {checkSelectedDisplayMode(displayModes.EDIT_RINGS) && <RingEditor /> }
@@ -193,7 +191,7 @@ const MapSplit = (props) => {
           </div>
         }
       </div>
-      <div className="ui-note" style={{ pointerEvents: 'none', position: 'absolute', left: '0px', bottom: '25px' }}>
+      <div className="ui-note ui-note-container">
         {/* There used to be a "spinner" icon here, which has been removed. On profiling, we found that the
             spinning animation caused the tile rendering to be two times slower (e.g. 200ms with spinner vs 100 ms without)
             Do NOT add any kind of animated element in this control unless you suppress it when tiles are rendering */}
