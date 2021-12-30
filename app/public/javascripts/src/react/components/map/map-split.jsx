@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import ToolBar from '../header/tool-bar.jsx'
@@ -17,6 +17,7 @@ import PlanEditorContainer from '../plan-editor/plan-editor-container.jsx'
 import AroDebug from '../sidebar/debug/aro-debug.jsx'
 import PlanSettings from '../plan/plan-settings.jsx'
 import UINotifications from '../notification/ui-notifications.jsx'
+// import MapViewToggle from './map-view-toggle.jsx'
 import './map-split.css'
 
 const transitionTimeMsec = 100
@@ -24,11 +25,13 @@ const transitionCSS = `width ${transitionTimeMsec}ms` // This must be the same f
 let splitterObj = null
 
 export const MapSplit = (props) => {
+  const [hovering, setHovering] = useState(false)
   const [isCollapsed, setCollapsed] = useState(false)
   const [sizesBeforeCollapse, setSizesBeforeCollapse] = useState(null)
-  const [hovering, setHovering] = useState(false)
+  const mapViewToggle = useRef(null)
 
   const {
+    map,
     planType,
     ARO_CLIENT,
     disableMap,
@@ -40,7 +43,7 @@ export const MapSplit = (props) => {
   } = props
 
   useEffect(() => {
-    if (!splitterObj) {
+    if (!splitterObj && map) {
       splitterObj = Split(['#map-canvas-container', '#sidebar'], {
         sizes: [window.GLOBAL_MAP_SPLITTER_INITIAL_WIDTH || 75, window.GLOBAL_SIDEBAR_INITIAL_WIDTH || 25],
         minSize: [680, 310],
@@ -63,7 +66,8 @@ export const MapSplit = (props) => {
         }
       })
     }
-  },[])
+    if (map) { map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(mapViewToggle.current) }
+  },[map])
 
   const checkSelectedDisplayMode = (displayMode) => {
     return selectedDisplayMode === displayMode
@@ -205,6 +209,11 @@ export const MapSplit = (props) => {
         </div>
       </div>
       {/* Footer */}
+      {map &&
+        <div style={{ visibility: 'hidden'}} ref={mapViewToggle}>
+          {/* <MapViewToggle /> */}
+        </div>
+      }
     </>
   )
 }
@@ -221,6 +230,7 @@ const mapStateToProps = (state) => ({
   selectedDisplayMode: state.toolbar.rSelectedDisplayMode,
   planType: state.plan && state.plan.activePlan && state.plan.activePlan.planType,
   areTilesRendering: state.map.areTilesRendering,
+  map: state.map.googleMaps && state.map.googleMaps,
 })
 
 const mapDispatchToProps = (dispatch) => ({
