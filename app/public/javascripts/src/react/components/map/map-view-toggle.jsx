@@ -19,9 +19,8 @@ const MapViewToggle = (props) => {
 
   const { mapRef, userPerspective, mapType, isReportMode } = props
 
-  useEffect(() => { ensureMapRefPromiseCreated() }, [])
-
   useEffect(() => {
+    // User perspective has changed. Set the overriden configuration to null
     setOverridenMapType(null)
     ensureMapRefPromiseCreated() // In case it has not been created yet
     updateMapType()
