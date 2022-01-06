@@ -115,7 +115,8 @@ export class MapReportsListMapObjects extends Component {
         },
         anchor: new google.maps.Point(deltaX / 2, deltaY / 2),
         icon: '/images/map_icons/aro/blank.png',
-        map: this.props.googleMaps
+        map: this.props.googleMaps,
+        optimized: !ARO_GLOBALS.MABL_TESTING,
       })
       this.pageIdToMapObjects[reportPage.uuid].push(pageNumberMarker)
     }
