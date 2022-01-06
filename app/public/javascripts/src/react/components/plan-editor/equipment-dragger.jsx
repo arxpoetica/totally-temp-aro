@@ -63,7 +63,7 @@ EquipmentDragger.propTypes = {
 }
 
 const mapStateToProps = (state) => ({
-  visibleEquipmentTypes: (state.configuration.ui.perspective && state.configuration.ui.perspective.networkEquipment.areVisible) || [],
+  visibleEquipmentTypes: (state.configuration.ui.perspective && state.configuration.ui.perspective.networkEquipment.planEdit.areAddable) || [],
   equipmentDefinitions: state.mapLayers.networkEquipment.equipments,
 })
 
