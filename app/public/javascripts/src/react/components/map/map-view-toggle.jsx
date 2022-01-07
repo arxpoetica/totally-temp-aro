@@ -36,25 +36,25 @@ const MapViewToggle = (props) => {
     }
   }
 
-  const updateMapType = () => {
-    if (overridenMapType) {
-      // The user has overriden the map type. Use it.
-      mapRefPromise
-        .then((mapRef) => mapRef.setMapTypeId(overridenMapType))
-        .catch((err) => console.log(err))
-    } else {
-      // Depending upon the user perspective, set the map type on the map object
-      mapRefPromise
-        .then((mapRefResult) => {
-          let currentMapTypeState = mapView.roadmap
+  const updateMapType = async() => {
+    try {
+      if (overridenMapType) {
+        // The user has overriden the map type. Use it.
+        const mapRef = await mapRefPromise
+        mapRef.setMapTypeId(overridenMapType)
+      } else {
+        // Depending upon the user perspective, set the map type on the map object
+        const mapRefResult = await mapRefPromise
+        let currentMapTypeState = mapView.roadmap
+        setCurrentMapType(currentMapTypeState)
+        if (mapType) {
+          currentMapTypeState = mapType[userPerspective] || mapType.default
           setCurrentMapType(currentMapTypeState)
-          if (mapType) {
-            currentMapTypeState = mapType[userPerspective] || mapType.default
-            setCurrentMapType(currentMapTypeState)
-          }
-          mapRefResult.setMapTypeId(currentMapTypeState)
-        })
-        .catch((err) => console.log(err))
+        }
+        mapRefResult.setMapTypeId(currentMapTypeState)
+      }
+    } catch (error) {
+      console.log(error)
     }
   }
 
