@@ -25,7 +25,7 @@ export const FiberMapObjects = (props) => {
   const conduitStyles = {...layerEquipment.roads, ...layerEquipment.conduits}
 
   useEffect(() => {
-    if (subnets[selectedSubnetId]) {
+    if (subnets[selectedSubnetId] && subnets[selectedSubnetId].fiber) {
       const { subnetLinks, fiberType } = subnets[selectedSubnetId].fiber
 
       // don'r render if fiber is the same
