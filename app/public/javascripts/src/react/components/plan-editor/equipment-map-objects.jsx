@@ -89,6 +89,7 @@ export class EquipmentMapObjects extends Component {
       opacity: idle ? 0.4 : 1.0,
       map: googleMaps,
       zIndex: constants.Z_INDEX_MAP_OBJECT,
+      optimized: !ARO_GLOBALS.MABL_TESTING,
     })
 
     mapObject.addListener('dragend', event => {
@@ -182,6 +183,7 @@ export class EquipmentMapObjects extends Component {
           clickable: false,
           zIndex: constants.Z_INDEX_SELECTION,
           opacity: 0.7,
+          optimized: !ARO_GLOBALS.MABL_TESTING,
         })
         this.selectionOverlays[id].bindTo('position', this.mapObjects[id], 'position')
         this.selectionOverlays[id].setMap(googleMaps)

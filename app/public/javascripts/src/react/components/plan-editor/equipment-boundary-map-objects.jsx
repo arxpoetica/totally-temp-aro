@@ -318,7 +318,8 @@ export class EquipmentBoundaryMapObjects extends Component {
         // This was added to ensure that the svg was centered on the verte
         // The vertex coords seem to be .1,.1 off center of the vertex icon itself.
         anchor: new google.maps.Point(.1, .1)
-      }
+      },
+      optimized: !ARO_GLOBALS.MABL_TESTING,
     })
 
     newMarker.addListener("click", () => {

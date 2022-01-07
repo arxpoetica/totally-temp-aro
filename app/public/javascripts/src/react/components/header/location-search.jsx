@@ -74,7 +74,8 @@ const ToolBarSearch = (props) => {
     const marker = new google.maps.Marker({
       map: mapRef,
       animation: google.maps.Animation.BOUNCE,
-      position: { lat: latitude, lng: longitude }
+      position: { lat: latitude, lng: longitude },
+      optimized: !ARO_GLOBALS.MABL_TESTING,
     })
     setTimeout(() => { marker.setMap(null) }, 5000)
   }
