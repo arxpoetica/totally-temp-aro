@@ -788,7 +788,10 @@ function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
         let networkNodeType = features[id].feature.networkNodeType
         // TODO: do other networkNodeTypes have subnets?
         //  how would we know? solve that
-        if (networkNodeType === 'central_office' || networkNodeType === 'fiber_distribution_hub') {
+        if (networkNodeType === 'central_office' 
+          || networkNodeType === 'fiber_distribution_hub'
+          || networkNodeType === 'subnet_node'
+        ) {
           return true
         }
         if (subnetFeatures[id]) validPseudoSubnets.push(id)
