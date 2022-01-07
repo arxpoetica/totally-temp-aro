@@ -140,8 +140,14 @@ function createFeature(feature) {
       }
 
       const url = `/service/plan-transaction/${transactionId}/subnet_cmd/update-children`
+      const commandsBody = { childId: feature, type: 'add' };
+      // If it is a ring plan we need to pass in the parentID of the dumby subnet
+      // inorder to find the correct ring plan in service
+      if (state.plan.activePlan.planType === "RING" && rootSubnet) {
+        commandsBody.subnetId = rootSubnet.subnetNode;
+      }
       const featureResults = await AroHttp.post(url, {
-        commands: [{ childId: feature, type: 'add' }]
+        commands: [commandsBody]
       })
       const { subnetUpdates, equipmentUpdates } = featureResults.data
 
@@ -156,10 +162,16 @@ function createFeature(feature) {
       // For now I am assuming the relevent subnet is the one with type 'modified'
       // TODO: handle there being multiple updated subnets
 
-      // There should always be a modified subnet
-      // FIXME: this is weird...why are we just finding one
-      const modifiedSubnet = subnetUpdates.find(subnet => subnet.type === 'modified')
-      const subnetId = modifiedSubnet.subnet.id
+      // For a standard plan there should always be motified subnets
+      // however that is not the case for ring plans as the rootSubnet
+      // is not a real and is used to work in the single parent hirearchy so we can just grab that.
+      const modifiedSubnet = state.plan.activePlan.planType === "RING" && rootSubnet
+        ? rootSubnet
+        : subnetUpdates.find(subnet => subnet.type === 'modified');
+
+      const subnetId = modifiedSubnet.subnet
+        ? modifiedSubnet.subnet.id
+        : modifiedSubnet.subnetNode
 
       equipmentUpdates.forEach(equipment => {
         // fix difference between id names
