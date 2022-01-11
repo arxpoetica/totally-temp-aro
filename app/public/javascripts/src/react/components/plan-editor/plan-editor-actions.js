@@ -204,6 +204,7 @@ function createFeature(feature) {
 }
 
 //TODO: depricate
+// TODO: tuneing - still used in equipment bounds edit, depricate then delete
 function modifyFeature (featureType, feature) {
   console.log('modifyFeature should be depricated')
   // ToDo: this causes an error if you edit a new feature that has yet to be sent to service
@@ -268,6 +269,7 @@ function updateFeatureProperties({ feature, rootSubnetId }) {
 
 // ToDo: there's only one transaction don't require the ID
 // TODO: cleanup?
+// TODO: tuneing - no longer used delete
 function deleteTransactionFeature (transactionId, featureType, transactionFeatureId) {
   return dispatch => {
     return AroHttp.delete(`/service/plan-transactions/${transactionId}/modified-features/${featureType}/${transactionFeatureId}`)
@@ -802,6 +804,7 @@ function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
       // TODO: we need to fix this selection discrepancy
       if (uncachedSubnetIds.length <= 0) {
         // is the FDT in state? If so we can select it
+        console.log(validPseudoSubnets)
         if (validPseudoSubnets.length > 0) {
           return Promise.resolve(validPseudoSubnets)
         }
