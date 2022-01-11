@@ -9,6 +9,18 @@ export const constants = Object.freeze({
   Z_INDEX_MAP_OBJECT: 20,
   Z_INDEX_PIN: 30,
 
+  // Construction Area Constants
+  BLOCKER: {
+    COST_MULTIPLIER: 1000,
+    PRIORITY: 5,
+    KEY: "Blocker" 
+  },
+  INCLUSION: {
+    COST_MULTIPLIER: 0,
+    PRIORITY: 2,
+    KEY: "Inclusion"
+  },
+
   // Drag-and-drop editing on map
   // TODO: go through and figure out what is used and what is not
   DRAG_DROP_ENTITY_KEY: 'entity_type',
@@ -66,11 +78,10 @@ export const constants = Object.freeze({
 
 })
 
-export const getIconUrl = (feature, { equipments, locationAlerts, ARO_CLIENT }) => {
-  const { objectId, networkNodeType } = feature
-  let { iconUrl } = equipments[networkNodeType] || ''
-  let alert = false
-  if (locationAlerts) alert = locationAlerts[objectId]
+export const getIconUrl = (feature, { equipments, constructionAreas, locationAlerts, ARO_CLIENT }) => {
+  const { objectId, networkNodeType, dataType } = feature
+  let { iconUrl } = networkNodeType ? equipments[networkNodeType] : constructionAreas[dataType]
+  const alert = locationAlerts[objectId]
   if (alert) {
     // FIXME: ...this is bad...it's a workaround hack...
     // we have slated at some point to work on all the icons

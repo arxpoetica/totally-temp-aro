@@ -32,7 +32,7 @@ export class EquipmentMapObjects extends Component {
         // delete mapObject if feature no longer exists
         if (!feature) this.deleteMapObject(id)
         // only delete idle terminals when found
-        if (feature && info.idle && feature.networkNodeType.includes('terminal')) {
+        if (feature && info.idle && feature.networkNodeType && feature.networkNodeType.includes('terminal')) {
           this.deleteMapObject(id)
         }
       } else {
@@ -52,7 +52,7 @@ export class EquipmentMapObjects extends Component {
       } else if (feature) {
         if (idle) {
           // if idle show everything but the terminals for performance reasons
-          if (!feature.networkNodeType.includes('terminal')) {
+          if (!feature.networkNodeType || (feature.networkNodeType && !feature.networkNodeType.includes('terminal'))) {
             this.createMapObject(feature, idle)
           }
         } else {
@@ -70,16 +70,18 @@ export class EquipmentMapObjects extends Component {
     const {
       googleMaps,
       moveFeature,
+      moveConstructionArea,
       showContextMenuForEquipment,
+      showContextMenuForConstructionAreas,
       selectEditFeaturesById,
       addCursorEquipmentIds,
       clearCursorEquipmentIds,
     } = this.props
 
     const { objectId } = feature
-
     const mapObject = new google.maps.Marker({
-      objectId, // Not used by Google Maps
+      objectId: objectId, // Not used by Google Maps
+      dataType: feature.dataType, // Not used by Google Maps
       mouseoverTimer: null,
       position: WktUtils.getGoogleMapLatLngFromWKTPoint(feature.geometry), 
       icon: { url: getIconUrl(feature, this.props) },
@@ -87,15 +89,24 @@ export class EquipmentMapObjects extends Component {
       opacity: idle ? 0.4 : 1.0,
       map: googleMaps,
       zIndex: constants.Z_INDEX_MAP_OBJECT,
+      optimized: !ARO_GLOBALS.MABL_TESTING,
     })
 
     mapObject.addListener('dragend', event => {
       let coordinates = [event.latLng.lng(), event.latLng.lat()]
-      moveFeature(mapObject.objectId, coordinates)
+      if (mapObject.dataType === "edge_construction_area") {
+        moveConstructionArea(mapObject.objectId, coordinates)
+      } else {
+        moveFeature(mapObject.objectId, coordinates)
+      }
     })
     mapObject.addListener('contextmenu', event => {
       const eventXY = WktUtils.getXYFromEvent(event)
-      showContextMenuForEquipment(mapObject.objectId, eventXY.x, eventXY.y)
+      if (mapObject.dataType === "edge_construction_area") {
+        showContextMenuForConstructionAreas(mapObject.objectId, eventXY.x, eventXY.y)
+      } else {
+        showContextMenuForEquipment(mapObject.objectId, eventXY.x, eventXY.y)
+      }
     })
     mapObject.addListener('click', event => {
       // NOTE: this is a workaround to make sure we're selecting
@@ -111,7 +122,7 @@ export class EquipmentMapObjects extends Component {
 
       const selectedEquipmentIds = Object.values(this.mapObjects)
         .filter(object => selectionCircle.getBounds().contains(object.getPosition()))
-        .map(filteredMapObjects => filteredMapObjects.objectId)
+        .map(filteredMapObjects => { return { objectId: filteredMapObjects.objectId, dataType: filteredMapObjects.dataType }})
 
       selectionCircle.setMap(null)
       selectEditFeaturesById(selectedEquipmentIds)
@@ -172,6 +183,7 @@ export class EquipmentMapObjects extends Component {
           clickable: false,
           zIndex: constants.Z_INDEX_SELECTION,
           opacity: 0.7,
+          optimized: !ARO_GLOBALS.MABL_TESTING,
         })
         this.selectionOverlays[id].bindTo('position', this.mapObjects[id], 'position')
         this.selectionOverlays[id].setMap(googleMaps)
@@ -243,6 +255,7 @@ export class EquipmentMapObjects extends Component {
 const mapStateToProps = state => ({
   ARO_CLIENT: state.configuration.system.ARO_CLIENT,
   equipments: state.mapLayers.networkEquipment.equipments,
+  constructionAreas: state.mapLayers.constructionAreas.construction_areas,
   selectedEditFeatureIds: state.planEditor.selectedEditFeatureIds,
   googleMaps: state.map.googleMaps,
   featuresRenderInfo: PlanEditorSelectors.getFeaturesRenderInfo(state),
@@ -255,8 +268,12 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
   moveFeature: (id, coordinates) => dispatch(PlanEditorActions.moveFeature(id, coordinates)),
+  moveConstructionArea: (id, coordinates) => dispatch(PlanEditorActions.moveConstructionArea(id, coordinates)),
   showContextMenuForEquipment: (equipmentObjectId, x, y) => {
     dispatch(PlanEditorActions.showContextMenuForEquipment(equipmentObjectId, x, y))
+  },
+  showContextMenuForConstructionAreas: (equipmentObjectId, x, y) => {
+    dispatch(PlanEditorActions.showContextMenuForConstructionAreas(equipmentObjectId, x, y))
   },
   setSelectedSubnetId: id => dispatch(PlanEditorActions.setSelectedSubnetId(id)),
   selectEditFeaturesById: featureIds => dispatch(PlanEditorActions.selectEditFeaturesById(featureIds)),
