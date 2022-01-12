@@ -16,7 +16,6 @@ import AroFeatureEditor from '../common/editor-interface/aro-feature-editor.jsx'
 import './plan-editor.css'
 
 export const PlanEditor = props => {
-
   const {
     planId,
     userId,
@@ -34,7 +33,8 @@ export const PlanEditor = props => {
     rootSubnet,
     updateFeatureProperties,
     fiberAnnotations,
-    constructionAreas
+    visibleConstructionAreas,
+    visibleEquipmentTypes
   } = props
 
   useEffect(() => {
@@ -105,7 +105,11 @@ export const PlanEditor = props => {
       <PlanEditorThumbs />
 
       {selectedEditFeatureIds.map(id => {
-        if (features[id].feature.dataType !== "edge_construction_area") {
+        let feature = features[id].feature;
+        if (
+          (feature.networkNodeType &&  !visibleEquipmentTypes.includes(feature.networkNodeType)) ||
+          (!feature.networkNodeType && !visibleConstructionAreas.includes(feature.dataType))
+        ) {
           return (
             <AroFeatureEditor key={id}
               altTitle={equipments[features[id].feature.networkNodeType].label}
@@ -116,7 +120,7 @@ export const PlanEditor = props => {
             />
           )
         } else {
-          return <div style={{display: "none"}} key={id}></div>
+          return <></>
         }
       })}
 
@@ -142,21 +146,30 @@ export const PlanEditor = props => {
 
 }
 
-const mapStateToProps = state => ({
-  planId: state.plan.activePlan.id,
-  userId: state.user.loggedInUser.id,
-  transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
-  isCommittingTransaction: state.planEditor.isCommittingTransaction,
-  isDrawingBoundaryFor: state.planEditor.isDrawingBoundaryFor,
-  features: state.planEditor.features,
-  selectedEditFeatureIds: state.planEditor.selectedEditFeatureIds,
-  subnets: state.planEditor.subnets,
-  selectedSubnetId: state.planEditor.selectedSubnetId,
-  equipments: state.mapLayers.networkEquipment.equipments,
-  constructionAreas: state.mapLayers.constructionAreas.construction_areas,
-  rootSubnet: PlanEditorSelectors.getRootSubnet(state),
-  fiberAnnotations: state.planEditor.fiberAnnotations,
-})
+const mapStateToProps = (state) => {
+  let planType = state.plan.activePlan.planType
+  let constructionPlanType = state.plan.activePlan.planType
+  if (!(planType in state.configuration.ui.perspective.networkEquipment.planEdit)) planType = 'default'
+  if (!(constructionPlanType in state.configuration.ui.perspective.constructionAreas.planEdit)) constructionPlanType = 'default'
+
+  return {
+    planId: state.plan.activePlan.id,
+    userId: state.user.loggedInUser.id,
+    transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
+    isCommittingTransaction: state.planEditor.isCommittingTransaction,
+    isDrawingBoundaryFor: state.planEditor.isDrawingBoundaryFor,
+    features: state.planEditor.features,
+    selectedEditFeatureIds: state.planEditor.selectedEditFeatureIds,
+    subnets: state.planEditor.subnets,
+    selectedSubnetId: state.planEditor.selectedSubnetId,
+    equipments: state.mapLayers.networkEquipment.equipments,
+    constructionAreas: state.mapLayers.constructionAreas.construction_areas,
+    rootSubnet: PlanEditorSelectors.getRootSubnet(state),
+    fiberAnnotations: state.planEditor.fiberAnnotations,
+    visibleEquipmentTypes: (state.configuration.ui.perspective && state.configuration.ui.perspective.networkEquipment.planEdit[planType].noMetaData) || [],
+    visibleConstructionAreas: (state.configuration.ui.perspective && state.configuration.ui.perspective.constructionAreas.planEdit[constructionPlanType].noMetaData) || [],
+  }
+}
 
 const mapDispatchToProps = dispatch => ({
   resumeOrCreateTransaction: (planId, userId) => dispatch(PlanEditorActions.resumeOrCreateTransaction(planId, userId)),
