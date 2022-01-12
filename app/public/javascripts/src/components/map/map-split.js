@@ -300,7 +300,7 @@ let mapSplit = {
       <r-ui-notifications></r-ui-notifications>
     </div>
   </div>
-  <div ng-include="'javascripts/lib/components/footer/frontier_footer.html'" ng-if="$ctrl.state.configuration.ARO_CLIENT === 'frontier'"></div>
+  <r-frontier-footer />
   `,
   bindings: { },
   controller: MapSplitController
