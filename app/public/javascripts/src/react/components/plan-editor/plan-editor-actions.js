@@ -1035,7 +1035,6 @@ function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
       // TODO: we need to fix this selection discrepancy
       if (uncachedSubnetIds.length <= 0) {
         // is the FDT in state? If so we can select it
-        console.log(validPseudoSubnets)
         if (validPseudoSubnets.length > 0) {
           return Promise.resolve(validPseudoSubnets)
         }
@@ -1364,21 +1363,18 @@ function setSelectedFiber (fiberObjects) {
 }
 
 // helper function
-function checkValidSubnet(subnetFeatures, subnetId) {
-  let isValidSubnet = true
-  if (subnetId in subnetFeatures){
-    const networkNodeType = subnetFeatures[subnetId].feature.networkNodeType
-    isValidSubnet = validSubnetTypes.includes(networkNodeType)
-  }
-  return isValidSubnet
+function getNearestSubnet(planEditor, featureId) {
+  if (featureId in planEditor.subnets) return featureId
+  if (!(featureId in planEditor.subnetFeatures)) return featureId // may not have loaded yet, lets try it
+  return planEditor.subnetFeatures[featureId].subnetId 
 }
 
 function getFiberAnnotations (subnetId) {
   return (dispatch, getState) => {
     const state = getState()
     const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
-    let isValidSubnet = checkValidSubnet(state.planEditor.subnetFeatures, subnetId)
-    if (isValidSubnet){
+    subnetId = getNearestSubnet(state.planEditor, subnetId)
+    if (subnetId){
       AroHttp.get(`/service/plan-transaction/${transactionId}/subnet/${subnetId}/annotations`)
         .then((res) => {
           dispatch({
@@ -1397,9 +1393,10 @@ function setFiberAnnotations (fiberAnnotations, subnetId) {
   return (dispatch, getState) => {
     const state = getState()
     const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
-    let isValidSubnet = checkValidSubnet(state.planEditor.subnetFeatures, subnetId)
-    if (isValidSubnet){
-      AroHttp.put(`/service/plan-transaction/${transactionId}/subnet/${subnetId}/annotations`, fiberAnnotations[subnetId])
+    subnetId = getNearestSubnet(state.planEditor, subnetId)
+    if (subnetId){
+      let annotationList = fiberAnnotations[subnetId] || []
+      AroHttp.put(`/service/plan-transaction/${transactionId}/subnet/${subnetId}/annotations`, annotationList)
         .then((res) => {
           dispatch({
             type: Actions.PLAN_EDITOR_SET_FIBER_ANNOTATIONS,
