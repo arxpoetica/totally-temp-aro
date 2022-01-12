@@ -283,12 +283,6 @@
   font-size: 1.1em;
 }
 
-.equipment-list {
-  position: relative;
-  /* height: 100%; */
-  overflow-y: auto;
-}
-
 .equipment-detail-bounds, .equipment-detail .equipment-detail-bounds {
   margin-top: 40px;
 }
@@ -301,7 +295,9 @@
 /* Equipment List */
 
 .equipment-list {
+  overflow-y: auto;
   position: relative;
+  max-height: 30vh;
 }
 
 .equipment-list .equipment-cursor {

@@ -20,15 +20,19 @@ const networkNodeTypes = [
   'location_connector',
 ]
 
+const edgeConstruction = [
+  "edge_construction_area"
+]
+
 export const EquipmentDragger = props => {
 
-  const { visibleEquipmentTypes, equipmentDefinitions } = props
+  const { visibleEquipmentTypes, equipmentDefinitions, visibleEdgeConstructionTypes } = props
 
   const [editableEquipmentTypes, setEditableEquipmentTypes] = useState([])
 
   useEffect(() => {
-    const editableEquipmentTypes = visibleEquipmentTypes.filter(type => {
-      return networkNodeTypes.includes(type)
+    const editableEquipmentTypes = [...visibleEquipmentTypes, ...visibleEdgeConstructionTypes].filter(type => {
+      return networkNodeTypes.includes(type) || edgeConstruction.includes(type)
     })
     setEditableEquipmentTypes(editableEquipmentTypes)
   }, [])
@@ -64,7 +68,8 @@ EquipmentDragger.propTypes = {
 
 const mapStateToProps = (state) => ({
   visibleEquipmentTypes: (state.configuration.ui.perspective && state.configuration.ui.perspective.networkEquipment.areVisible) || [],
-  equipmentDefinitions: state.mapLayers.networkEquipment.equipments,
+  visibleEdgeConstructionTypes: (state.configuration.ui.perspective && state.configuration.ui.perspective.constructionAreas.areVisible) || [],
+  equipmentDefinitions: { ...state.mapLayers.networkEquipment.equipments, ...state.mapLayers.constructionAreas.construction_areas },
 })
 
 const mapDispatchToProps = dispatch => ({})

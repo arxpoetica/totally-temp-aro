@@ -24,6 +24,7 @@ const AlertsPanel = props => {
       animation: google.maps.Animation.BOUNCE,
       position: { lat: latitude, lng: longitude },
       zIndex: Z_INDEX_PIN,
+      optimized: !ARO_GLOBALS.MABL_TESTING,
     })
     setBounceMarker(marker)
   }
