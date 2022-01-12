@@ -89,7 +89,12 @@ export class EquipmentBoundaryMapObjects extends Component {
 
       this.deleteNeighbors(idsToDelete)
       this.createNeighbors(idsToCreate)
-     }
+
+      if (this.mapObject && this.mapObject.dataType && this.mapObject.dataType === "edge_construction_area") {
+        this.deleteMapObject()
+        this.createMapObject(selectedSubnetId)
+      }
+    }
   }
 
   selectSubnet ([lat, lng]) {
@@ -120,6 +125,7 @@ export class EquipmentBoundaryMapObjects extends Component {
 
     this.mapObject = new google.maps.Polygon({
       subnetId: selectedSubnetId, // Not used by Google Maps
+      dataType: this.props.subnets[selectedSubnetId].dataType,
       paths: WktUtils.getGoogleMapPathsFromWKTMultiPolygon(geometry),
       clickable: false,
       draggable: false,
@@ -312,7 +318,8 @@ export class EquipmentBoundaryMapObjects extends Component {
         // This was added to ensure that the svg was centered on the verte
         // The vertex coords seem to be .1,.1 off center of the vertex icon itself.
         anchor: new google.maps.Point(.1, .1)
-      }
+      },
+      optimized: !ARO_GLOBALS.MABL_TESTING,
     })
 
     newMarker.addListener("click", () => {

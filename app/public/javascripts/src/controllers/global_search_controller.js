@@ -10,7 +10,8 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', '$s
     var marker = new google.maps.Marker({
       map: map,
       animation: google.maps.Animation.BOUNCE,
-      position: { lat: latitude, lng: longitude }
+      position: { lat: latitude, lng: longitude },
+      optimized: !ARO_GLOBALS.MABL_TESTING,
     })
     $timeout(() => marker.setMap(null), 5000)
   }

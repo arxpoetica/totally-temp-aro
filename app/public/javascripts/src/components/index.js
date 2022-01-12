@@ -3,6 +3,7 @@ import { react2angular } from 'react2angular'
 import { ToastContainer } from 'react-toastify'
 
 import MapSelectorPlanTarget from '../react/components/map/map-selector-plan-target.jsx'
+import FrontierFooter from '../react/components/footer/frontier-footer.jsx'
 import ServiceLayerEditor from '../react/components/sidebar/view/service-layer-editor.jsx'
 import LocationEditor from '../react/components/sidebar/view/location-editor.jsx'
 import EquipmentDetail from '../react/components/sidebar/view/equipment-info/equipment-detail.jsx'
@@ -177,6 +178,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
 // ReactJS components
   .component('rMapSelectorPlanTarget', react2angular(MapSelectorPlanTarget))
+  .component('rFrontierFooter', react2angular(FrontierFooter))
   .component('rServiceLayerEditor', react2angular(ServiceLayerEditor))
   .component('rLocationEditor', react2angular(LocationEditor))
   .component('rEquipmentDetail', react2angular(EquipmentDetail))

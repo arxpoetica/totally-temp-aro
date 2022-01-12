@@ -210,7 +210,8 @@ export const LocationEditor = (props) => {
       },
       draggable: isEditable, // Allow dragging only if feature is not locked
       clickable: true, // if it's an icon we can select it then the panel will tell us it's locked
-      map: mapRef
+      map: mapRef,
+      optimized: !ARO_GLOBALS.MABL_TESTING,
     })
 
     mapMarker.feature = feature
