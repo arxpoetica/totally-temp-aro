@@ -68,7 +68,7 @@ EquipmentDragger.propTypes = {
 
 const mapStateToProps = (state) => {
   let planType = state.plan.activePlan.planType
-  if (planType === 'UNDEFINED') planType = 'default'
+  if (!(planType in state.configuration.ui.perspective.networkEquipment.planEdit)) planType = 'default'
   return {
     visibleEquipmentTypes: (state.configuration.ui.perspective && state.configuration.ui.perspective.networkEquipment.planEdit[planType].areAddable) || [],
     visibleEdgeConstructionTypes: (state.configuration.ui.perspective && state.configuration.ui.perspective.constructionAreas.planEdit.areAddable) || [],
