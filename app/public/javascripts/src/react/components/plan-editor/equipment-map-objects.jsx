@@ -190,7 +190,6 @@ export class EquipmentMapObjects extends Component {
 
         if (subnetFeatures[id]){
           const { feature } = subnetFeatures[id]
-          console.log(feature)
           if (
             id === selectedSubnetId
             //&& feature.networkNodeType === 'fiber_distribution_terminal'
@@ -212,7 +211,6 @@ export class EquipmentMapObjects extends Component {
     for (const [droplinkId, location] of Object.entries(this.props.cursorLocations)) {
       // oddly, sometimes `location` is `undefined`
       if (location && location.parentEquipmentId) {
-        console.log(location)
         const [lng, lat] = this.props.subnetFeatures[location.parentEquipmentId].feature.geometry.coordinates
         this.makeDropLink(location, {lng, lat}, droplinkId)
       }
