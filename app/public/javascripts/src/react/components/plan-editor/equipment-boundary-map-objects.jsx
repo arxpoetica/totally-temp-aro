@@ -403,7 +403,8 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  modifyFeature: (equipmentBoundary) => dispatch(PlanEditorActions.modifyFeature('equipment_boundary', equipmentBoundary)),
+  // TODO: tuneing - replace with new API
+  //modifyFeature: (equipmentBoundary) => dispatch(PlanEditorActions.modifyFeature('equipment_boundary', equipmentBoundary)),
   showContextMenuForEquipmentBoundary: (mapObject, x, y, vertex, callBack) => {
     dispatch(PlanEditorActions.showContextMenuForEquipmentBoundary(mapObject, x, y, vertex, callBack))
   },
