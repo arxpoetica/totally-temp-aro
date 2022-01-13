@@ -301,6 +301,7 @@ const getLocationCounts = createSelector(
       const feature = subnetFeatures[id]
       const type = feature && feature.feature.networkNodeType
 
+      // TODO: not a fan of hardcoding by type
       if (subnet && type === 'fiber_distribution_hub') {
         const locations = Object.values(subnet.subnetLocationsById)
         locationCountsById[id] = locations
@@ -308,7 +309,7 @@ const getLocationCounts = createSelector(
           .length
       } else if (subnet && type === 'dslam') {
         locationCountsById[id] = Object.keys(subnet.subnetLocationsById).length
-      } else if (type === 'fiber_distribution_terminal' && feature.feature.dropLinks) {
+      } else if ((type === 'fiber_distribution_terminal' || type === 'location_connector') && feature.feature.dropLinks) {
         locationCountsById[id] = feature.feature.dropLinks.length
       } else {
         const locationDistanceMap = subnet && subnet.fiber && subnet.fiber.locationDistanceMap

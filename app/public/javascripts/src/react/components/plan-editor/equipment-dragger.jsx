@@ -66,11 +66,17 @@ EquipmentDragger.propTypes = {
   equipmentDefinitions: PropTypes.object,
 }
 
-const mapStateToProps = (state) => ({
-  visibleEquipmentTypes: (state.configuration.ui.perspective && state.configuration.ui.perspective.networkEquipment.areVisible) || [],
-  visibleEdgeConstructionTypes: (state.configuration.ui.perspective && state.configuration.ui.perspective.constructionAreas.areVisible) || [],
-  equipmentDefinitions: { ...state.mapLayers.networkEquipment.equipments, ...state.mapLayers.constructionAreas.construction_areas },
-})
+const mapStateToProps = (state) => {
+  let planType = state.plan.activePlan.planType
+  let constructionPlanType = state.plan.activePlan.planType
+  if (!(planType in state.configuration.ui.perspective.networkEquipment.planEdit)) planType = 'default'
+  if (!(constructionPlanType in state.configuration.ui.perspective.constructionAreas.planEdit)) constructionPlanType = 'default'
+  return {
+    visibleEquipmentTypes: (state.configuration.ui.perspective && state.configuration.ui.perspective.networkEquipment.planEdit[planType].areAddable) || [],
+    visibleEdgeConstructionTypes: (state.configuration.ui.perspective && state.configuration.ui.perspective.constructionAreas.planEdit[constructionPlanType].areAddable) || [],
+    equipmentDefinitions: state.mapLayers.networkEquipment.equipments,
+  }
+}
 
 const mapDispatchToProps = dispatch => ({})
 

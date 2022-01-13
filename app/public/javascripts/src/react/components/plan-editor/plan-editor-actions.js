@@ -12,6 +12,14 @@ import WktUtils from '../../../shared-utils/wkt-utils'
 import PlanEditorSelectors from './plan-editor-selectors'
 import { constants } from './shared'
 
+let validSubnetTypes = [
+  'central_office',
+  'fiber_distribution_hub',
+  'dslam',
+  'subnet_node',
+]
+
+
 function resumeOrCreateTransaction (planId, userId) {
   return (dispatch, getState) => {
     const state = getState()
@@ -140,8 +148,14 @@ function createFeature(feature) {
       }
 
       const url = `/service/plan-transaction/${transactionId}/subnet_cmd/update-children`
+      const commandsBody = { childId: feature, type: 'add' };
+      // If it is a ring plan we need to pass in the parentID of the dumby subnet
+      // inorder to find the correct ring plan in service
+      if (state.plan.activePlan.planType === "RING" && rootSubnet) {
+        commandsBody.subnetId = rootSubnet.subnetNode;
+      }
       const featureResults = await AroHttp.post(url, {
-        commands: [{ childId: feature, type: 'add' }]
+        commands: [commandsBody]
       })
       const { subnetUpdates, equipmentUpdates } = featureResults.data
 
@@ -156,10 +170,16 @@ function createFeature(feature) {
       // For now I am assuming the relevent subnet is the one with type 'modified'
       // TODO: handle there being multiple updated subnets
 
-      // There should always be a modified subnet
-      // FIXME: this is weird...why are we just finding one
-      const modifiedSubnet = subnetUpdates.find(subnet => subnet.type === 'modified')
-      const subnetId = modifiedSubnet.subnet.id
+      // For a standard plan there should always be motified subnets
+      // however that is not the case for ring plans as the rootSubnet
+      // is not a real and is used to work in the single parent hirearchy so we can just grab that.
+      const modifiedSubnet = state.plan.activePlan.planType === "RING" && rootSubnet
+        ? rootSubnet
+        : subnetUpdates.find(subnet => subnet.type === 'modified');
+
+      const subnetId = modifiedSubnet.subnet
+        ? modifiedSubnet.subnet.id
+        : modifiedSubnet.subnetNode
 
       equipmentUpdates.forEach(equipment => {
         // fix difference between id names
@@ -193,6 +213,8 @@ function createFeature(feature) {
 }
 
 //TODO: depricate
+// TODO: tuneing - still used in equipment bounds edit, depricate then delete
+/*
 function modifyFeature (featureType, feature) {
   console.log('modifyFeature should be depricated')
   // ToDo: this causes an error if you edit a new feature that has yet to be sent to service
@@ -224,6 +246,7 @@ function modifyFeature (featureType, feature) {
       .catch(err => console.error(err))
   }
 }
+*/
 
 function updateFeatureProperties({ feature, rootSubnetId }) {
   return async(dispatch, getState) => {
@@ -257,6 +280,8 @@ function updateFeatureProperties({ feature, rootSubnetId }) {
 
 // ToDo: there's only one transaction don't require the ID
 // TODO: cleanup?
+// TODO: tuneing - no longer used delete
+/*
 function deleteTransactionFeature (transactionId, featureType, transactionFeatureId) {
   return dispatch => {
     return AroHttp.delete(`/service/plan-transactions/${transactionId}/modified-features/${featureType}/${transactionFeatureId}`)
@@ -267,7 +292,9 @@ function deleteTransactionFeature (transactionId, featureType, transactionFeatur
       .catch(err => console.error(err))
   }
 }
+*/
 
+// TODO: depricate this and planEditor.features
 function addTransactionFeatures (features) {
   return {
     type: Actions.PLAN_EDITOR_ADD_FEATURES,
@@ -997,7 +1024,7 @@ function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
         let networkNodeType = features[id].feature.networkNodeType
         // TODO: do other networkNodeTypes have subnets?
         //  how would we know? solve that
-        if (networkNodeType === 'central_office' || networkNodeType === 'fiber_distribution_hub') {
+        if (validSubnetTypes.includes(networkNodeType)) {
           return true
         }
         if (subnetFeatures[id]) validPseudoSubnets.push(id)
@@ -1335,21 +1362,30 @@ function setSelectedFiber (fiberObjects) {
   }
 }
 
+// helper function
+function getNearestSubnet(planEditor, featureId) {
+  if (featureId in planEditor.subnets) return featureId
+  if (!(featureId in planEditor.subnetFeatures)) return featureId // may not have loaded yet, lets try it
+  return planEditor.subnetFeatures[featureId].subnetId 
+}
+
 function getFiberAnnotations (subnetId) {
   return (dispatch, getState) => {
     const state = getState()
     const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
-
-    AroHttp.get(`/service/plan-transaction/${transactionId}/subnet/${subnetId}/annotations`)
-      .then((res) => {
-        dispatch({
-          type: Actions.PLAN_EDITOR_SET_FIBER_ANNOTATIONS,
-          payload: { [subnetId]: res.data }
+    subnetId = getNearestSubnet(state.planEditor, subnetId)
+    if (subnetId){
+      AroHttp.get(`/service/plan-transaction/${transactionId}/subnet/${subnetId}/annotations`)
+        .then((res) => {
+          dispatch({
+            type: Actions.PLAN_EDITOR_SET_FIBER_ANNOTATIONS,
+            payload: { [subnetId]: res.data }
+          })
         })
-      })
-      .catch((error) => {
-        console.error(error)
-      })
+        .catch((error) => {
+          console.error(error)
+        })
+    }
   }
 }
 
@@ -1357,17 +1393,20 @@ function setFiberAnnotations (fiberAnnotations, subnetId) {
   return (dispatch, getState) => {
     const state = getState()
     const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
-
-    AroHttp.put(`/service/plan-transaction/${transactionId}/subnet/${subnetId}/annotations`, fiberAnnotations[subnetId])
-      .then((res) => {
-        dispatch({
-          type: Actions.PLAN_EDITOR_SET_FIBER_ANNOTATIONS,
-          payload: fiberAnnotations,
+    subnetId = getNearestSubnet(state.planEditor, subnetId)
+    if (subnetId){
+      let annotationList = fiberAnnotations[subnetId] || []
+      AroHttp.put(`/service/plan-transaction/${transactionId}/subnet/${subnetId}/annotations`, annotationList)
+        .then((res) => {
+          dispatch({
+            type: Actions.PLAN_EDITOR_SET_FIBER_ANNOTATIONS,
+            payload: fiberAnnotations,
+          })
         })
-      })
-      .catch((error) => {
-        console.error(error)
-      })
+        .catch((error) => {
+          console.error(error)
+        })
+    }
   }
 }
 
@@ -1649,11 +1688,11 @@ export default {
   discardTransaction,
   resumeOrCreateTransaction,
   createFeature,
-  modifyFeature,
+  //modifyFeature,
   updateFeatureProperties,
   moveFeature,
   deleteFeature,
-  deleteTransactionFeature,
+  //deleteTransactionFeature,
   createConstructionArea,
   moveConstructionArea,
   deleteBoundaryVertex,
