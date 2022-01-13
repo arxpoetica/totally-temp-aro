@@ -473,7 +473,8 @@ class State {
     service.mapFeaturesSelectedEvent.skip(1).subscribe((options) => {
       // ToDo: selection mechanism needs to be cerntalised 
       // set all mapFeatures in redux
-      if (service.selectedDisplayMode.getValue() == service.displayModes.VIEW) {
+      if (service.selectedDisplayMode.getValue() == service.displayModes.VIEW
+        || service.selectedDisplayMode.getValue() == service.displayModes.ANALYSIS) {
         service.setMapFeatures(options)
         // For tracking when map clicked by the user.
         service.setIsMapClicked(true)

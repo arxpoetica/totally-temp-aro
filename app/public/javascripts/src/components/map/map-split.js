@@ -102,7 +102,8 @@ class MapSplitController {
       rSelectedDisplayMode: reduxState.toolbar.rSelectedDisplayMode,
       rSelectedToolBarAction: reduxState.toolbar.selectedToolBarAction,
       rIsRulerEnabled: reduxState.toolbar.isRulerEnabled,
-      rPlan: reduxState.plan.activePlan
+      rPlan: reduxState.plan.activePlan,
+      rSelectedTargetSelectionMode: reduxState.toolbar.selectedTargetSelectionMode,
     }
   }
 
@@ -232,13 +233,15 @@ let mapSplit = {
         <r-tool-box ng-if="$ctrl.showToolBox"></r-tool-box>
       </div>
       <!-- Plan target map selector should be active only if we are in analysis mode -->
-      <map-selector-plan-target map-global-object-name="map"
+      <r-map-selector-plan-target map-global-object-name="map"
         ng-if="(!$ctrl.state.selectedToolBarAction || $ctrl.state.selectedToolBarAction === $ctrl.state.toolbarActions.POLYGON_SELECT || !$ctrl.rSelectedToolBarAction || $ctrl.rSelectedToolBarAction === $ctrl.state.toolbarActions.POLYGON_SELECT)
                && $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS
                && (!$ctrl.state.isRulerEnabled || !$ctrl.rIsRulerEnabled)">
-      </map-selector-plan-target>
-      <map-selector-export-locations map-global-object-name="map" ng-if="$ctrl.selectedDisplayMode === $ctrl.displayModes.VIEW
-        "></map-selector-export-locations>
+      </r-map-selector-plan-target>
+      <r-map-selector-export-locations 
+        ng-if="$ctrl.selectedDisplayMode === $ctrl.displayModes.VIEW
+          && $ctrl.rSelectedTargetSelectionMode === $ctrl.state.targetSelectionModes.POLYGON_EXPORT_TARGET"
+      />
       <r-toast-container></r-toast-container>
       <!-- A div that overlays on the map to denote disabled state. When shown, it will prevent any keyboard/mouse interactions with the map.
            Useful when you have made a slow-ish request to service and want to prevent further map interactions till you get a response. -->
