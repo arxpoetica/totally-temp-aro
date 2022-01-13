@@ -3,6 +3,7 @@ import { react2angular } from 'react2angular'
 import { ToastContainer } from 'react-toastify'
 
 import MapSelectorPlanTarget from '../react/components/map/map-selector-plan-target.jsx'
+import MapSelectorExportLocations from '../react/components/map/map-selector-export-locations.jsx'
 import FrontierFooter from '../react/components/footer/frontier-footer.jsx'
 import ServiceLayerEditor from '../react/components/sidebar/view/service-layer-editor.jsx'
 import LocationEditor from '../react/components/sidebar/view/location-editor.jsx'
@@ -94,7 +95,6 @@ import copper from './views/copper'
 import cables from './views/cables'
 import conduits from './views/conduits'
 import mapSplit from './map/map-split'
-import mapSelectorExportLocations from './map/map-selector-export-locations'
 import mapToggleComponent from './map/map-toggle'
 import networkPlanModal from './header/network-plan-modal'
 import networkPlan from './header/network-plan'
@@ -153,7 +153,6 @@ app.component('boundaryDetail', boundaryDetail)
   .component('copper', copper)
   .component('conduits', conduits)
   .component('mapSplit', mapSplit)
-  .component('mapSelectorExportLocations', mapSelectorExportLocations)
   .component('mapToggleComponent', mapToggleComponent)
   .component('networkPlanModal', networkPlanModal)
   .component('networkPlan', networkPlan)
@@ -178,6 +177,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
 // ReactJS components
   .component('rMapSelectorPlanTarget', react2angular(MapSelectorPlanTarget))
+  .component('rMapSelectorExportLocations', react2angular(MapSelectorExportLocations))
   .component('rFrontierFooter', react2angular(FrontierFooter))
   .component('rServiceLayerEditor', react2angular(ServiceLayerEditor))
   .component('rLocationEditor', react2angular(LocationEditor))
