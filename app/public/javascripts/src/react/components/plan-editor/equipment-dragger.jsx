@@ -71,10 +71,15 @@ const mapStateToProps = (state) => {
   let constructionPlanType = state.plan.activePlan.planType
   if (!(planType in state.configuration.ui.perspective.networkEquipment.planEdit)) planType = 'default'
   if (!(constructionPlanType in state.configuration.ui.perspective.constructionAreas.planEdit)) constructionPlanType = 'default'
+  const equipmentDefinitions = {
+    ...state.mapLayers.networkEquipment.equipments,
+    ...state.mapLayers.constructionAreas.construction_areas
+  }
+
   return {
     visibleEquipmentTypes: (state.configuration.ui.perspective && state.configuration.ui.perspective.networkEquipment.planEdit[planType].areAddable) || [],
     visibleEdgeConstructionTypes: (state.configuration.ui.perspective && state.configuration.ui.perspective.constructionAreas.planEdit[constructionPlanType].areAddable) || [],
-    equipmentDefinitions: state.mapLayers.networkEquipment.equipments,
+    equipmentDefinitions,
   }
 }
 
