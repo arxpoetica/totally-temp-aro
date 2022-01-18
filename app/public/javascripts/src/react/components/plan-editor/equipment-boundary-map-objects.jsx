@@ -58,6 +58,8 @@ export class EquipmentBoundaryMapObjects extends Component {
         const features = subnetFeatures[rootSubnetId]
         parentSubnetId = features ? features.subnetId : null
       }
+
+      // Enable click anywhere subnet for Route Adjusters
       if (activeFeature.feature.dataType === "edge_construction_area") {
         const rootSubnet = this.findCentralOffice();
         rootSubnetId = rootSubnet.feature.objectId;
