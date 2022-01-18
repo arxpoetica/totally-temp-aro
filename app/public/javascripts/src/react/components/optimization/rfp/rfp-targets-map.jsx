@@ -88,7 +88,8 @@ export class RfpTargetsMap extends Component {
         position: { lat: target.lat, lng: target.lng },
         map: this.props.googleMaps,
         icon: '/images/map_icons/aro/target.png',
-        draggable: true
+        draggable: true,
+        optimized: !ARO_GLOBALS.MABL_TESTING,
       })
       this.mapObjectListeners[target.id] = google.maps.event.addListener(mapObj, 'dragend', event => {
         // Replace the target with another target having the same ID, but updated coordinates

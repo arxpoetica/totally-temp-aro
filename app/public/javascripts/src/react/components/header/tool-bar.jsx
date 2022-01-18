@@ -817,7 +817,8 @@ export class ToolBar extends Component {
       },
       map: this.props.mapRef,
       draggable: true,
-      zIndex: 100
+      zIndex: 100,
+      optimized: !ARO_GLOBALS.MABL_TESTING,
     })
 
     this.rulerSegments.push(ruler)
@@ -946,7 +947,8 @@ export class ToolBar extends Component {
         },
         map: this.props.mapRef,
         draggable: false,
-        zIndex: 100
+        zIndex: 100,
+        optimized: !ARO_GLOBALS.MABL_TESTING,
       })
 
       this.copperMarkers.push(copperMarker)

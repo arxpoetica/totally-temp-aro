@@ -351,6 +351,9 @@ function mapLayersReducer (state = defaultState, action) {
     case Actions.LAYERS_SET_NETWORK_EQUIPMENT:
       return setLayers(state, 'networkEquipment', action.payload)
 
+    case Actions.LAYERS_SET_CONSTRUCTION_AREAS:
+      return setLayers(state, 'constructionAreas', action.payload)
+
     case Actions.LAYERS_SET_NETWORK_EQUIPMENT_VISIBILITY:
       return setNetworkEquipmentLayerVisibility(state, action.payload.layerType, action.payload.layer, action.payload.subtype, action.payload.visibility)
 

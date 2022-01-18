@@ -22,7 +22,12 @@ exports.configure = (api, middleware) => {
       ARO_CLIENT_DONOT_USE_IN_CODE: process.env.ARO_CLIENT,
       GOOGLE_MAPS_GESTURE_HANDLING: process.env.GOOGLE_MAPS_GESTURE_HANDLING || 'auto',
       reportPage: request.query.reportPage ? JSON.parse(request.query.reportPage) : undefined,
-      reportOverview: request.query.reportOverview ? JSON.parse(request.query.reportOverview) : undefined
+      reportOverview: request.query.reportOverview ? JSON.parse(request.query.reportOverview) : undefined,
+      // TODO: this is a stop gap until the following ticket is implemented:
+      // https://www.pivotaltracker.com/story/show/180829331
+      ARO_GLOBALS: JSON.stringify({
+        MABL_TESTING: process.env.MABL_TESTING,
+      }),
     })
   })
 

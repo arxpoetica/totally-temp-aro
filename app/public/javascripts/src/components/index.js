@@ -7,6 +7,10 @@ import ViewMode from '../react/components/sidebar/view/view-mode.jsx'
 import DisplayModeButtons from '../react/components/sidebar/display-mode-buttons.jsx'
 import PlanEditorContainer from '../react/components/plan-editor/plan-editor-container.jsx'
 import NetworkPlan from '../react/components/sidebar/network-plan.jsx'
+import MapViewToggle from '../react/components/map/map-view-toggle.jsx'
+import MapSelectorPlanTarget from '../react/components/map/map-selector-plan-target.jsx'
+import MapSelectorExportLocations from '../react/components/map/map-selector-export-locations.jsx'
+import FrontierFooter from '../react/components/footer/frontier-footer.jsx'
 import ServiceLayerEditor from '../react/components/sidebar/view/service-layer-editor.jsx'
 import LocationEditor from '../react/components/sidebar/view/location-editor.jsx'
 import EquipmentDetail from '../react/components/sidebar/view/equipment-info/equipment-detail.jsx'
@@ -97,9 +101,6 @@ import copper from './views/copper'
 import cables from './views/cables'
 import conduits from './views/conduits'
 import mapSplit from './map/map-split'
-import mapSelectorPlanTarget from './map/map-selector-plan-target'
-import mapSelectorExportLocations from './map/map-selector-export-locations'
-import mapToggleComponent from './map/map-toggle'
 import networkPlanModal from './header/network-plan-modal'
 import networkPlan from './header/network-plan'
 import fullScreenContainer from './full-screen/full-screen-container'
@@ -157,9 +158,6 @@ app.component('boundaryDetail', boundaryDetail)
   .component('copper', copper)
   .component('conduits', conduits)
   .component('mapSplit', mapSplit)
-  .component('mapSelectorPlanTarget', mapSelectorPlanTarget)
-  .component('mapSelectorExportLocations', mapSelectorExportLocations)
-  .component('mapToggleComponent', mapToggleComponent)
   .component('networkPlanModal', networkPlanModal)
   .component('networkPlan', networkPlan)
   // .component('uiNotification', uiNotification)
@@ -187,6 +185,10 @@ app.component('boundaryDetail', boundaryDetail)
   .component('rDisplayModeButtons', react2angular(DisplayModeButtons))
   .component('rPlanEditorContainer', react2angular(PlanEditorContainer))
   .component('rNetworkPlan', react2angular(NetworkPlan))
+  .component('rMapViewToggle', react2angular(MapViewToggle))
+  .component('rMapSelectorPlanTarget', react2angular(MapSelectorPlanTarget))
+  .component('rMapSelectorExportLocations', react2angular(MapSelectorExportLocations))
+  .component('rFrontierFooter', react2angular(FrontierFooter))
   .component('rServiceLayerEditor', react2angular(ServiceLayerEditor))
   .component('rLocationEditor', react2angular(LocationEditor))
   .component('rEquipmentDetail', react2angular(EquipmentDetail))
