@@ -101,7 +101,7 @@ export const PlanEditor = props => {
 
       <AlertsPanel />
       <AlertsPanelTooltip />
-      <PlanEditorRecalculate />
+      { selectedSubnetId && features[selectedSubnetId].feature.networkNodeType && <PlanEditorRecalculate /> }
       <PlanEditorThumbs />
 
       {selectedEditFeatureIds.map(id => {
