@@ -58,14 +58,15 @@ export class EquipmentBoundaryMapObjects extends Component {
         const features = subnetFeatures[rootSubnetId]
         parentSubnetId = features ? features.subnetId : null
       }
-
+      let newNeighborIds = [];
       // Enable click anywhere subnet for Route Adjusters
       if (activeFeature.feature.dataType === "edge_construction_area") {
         const rootSubnet = this.findCentralOffice();
         rootSubnetId = rootSubnet.feature.objectId;
+        newNeighborIds.push(selectedSubnetId);
       }
-      const children = subnets[rootSubnetId] && subnets[rootSubnetId].children || []
-      const newNeighborIds = children.concat([rootSubnetId])
+      const children = newNeighborIds.concat(subnets[rootSubnetId] && subnets[rootSubnetId].children || [])
+      newNeighborIds = children.concat([rootSubnetId])
       // may need to ensure newNeighborIds are all unique 
       const index = newNeighborIds.indexOf(selectedSubnetId)
       if (index >= 0) {
