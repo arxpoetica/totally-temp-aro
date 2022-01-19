@@ -13,12 +13,12 @@ export const constants = Object.freeze({
   BLOCKER: {
     COST_MULTIPLIER: 1000,
     PRIORITY: 5,
-    KEY: "Avoid" 
+    KEY: "Blocker" 
   },
   INCLUSION: {
     COST_MULTIPLIER: 0,
     PRIORITY: 2,
-    KEY: "Include"
+    KEY: "Inclusion"
   },
 
   // Drag-and-drop editing on map

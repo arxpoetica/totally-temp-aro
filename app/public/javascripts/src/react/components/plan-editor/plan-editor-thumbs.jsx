@@ -60,10 +60,8 @@ const PlanEditorHeader = props => {
       {selectedEditFeatureIds.map(id => {
 
         const { feature } = features[id]
-        const type = feature.networkNodeType ? feature.networkNodeType : feature.dataType;
-        const mapLayers = feature.networkNodeType ? equipments : constructionAreas;
-        const { label } = mapLayers[type];
-        const { coordinates } = feature.geometry;
+        const { label } = feature.networkNodeType ? equipments[feature.networkNodeType] : constructionAreas[feature.dataType]
+        const { coordinates } = feature.geometry
 
         return (
         <div
@@ -80,28 +78,23 @@ const PlanEditorHeader = props => {
           </div>
           {locationCounts[id] > 0 && <p className="household-connections">Household connections: {locationCounts[id]}</p>}
           <div className="subinfo">
-          {mapLayers[type].planThumbOptions && mapLayers[type].planThumbOptions.thumbText
-            ? <div className="item"> {mapLayers[type].planThumbOptions.thumbText} </div>
-            : <span>
-                <div className="item">
-                  <div className="badge badge-dark">LATITUDE</div>
-                  {coordinates[1]}
-                </div>
-                <div className="item">
-                  <div className="badge badge-dark">LONGITUDE</div>
-                  {coordinates[0]}
-                </div>
-              </span>
-          }
+            <div className="item">
+              <div className="badge badge-dark">LATITUDE</div>
+              {coordinates[1]}
+            </div>
+            <div className="item">
+              <div className="badge badge-dark">LONGITUDE</div>
+              {coordinates[0]}
+            </div>
           </div>
-          {mapLayers[type].planThumbOptions && mapLayers[type].planThumbOptions.dropdownOptions &&
+          { feature.dataType === "edge_construction_area" &&
             <div className="subinfo">
                 <select
                   value={planThumbInformation[id]}
                   onClick={event => event.stopPropagation()}
                   onChange={event => onChange(event, id)}
                 >
-                  {mapLayers[type].planThumbOptions.dropdownOptions.map(option => (
+                  {constructionAreas.edge_construction_area.plan_thumb_options.map(option => (
                     <option key={option} value={option}>
                       {option}
                     </option> 
