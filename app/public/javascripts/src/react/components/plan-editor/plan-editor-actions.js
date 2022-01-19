@@ -53,6 +53,7 @@ function resumeOrCreateTransaction (planId, userId) {
         const { id, name } = state.plan.resourceItems[resource].selectedManager
 
         batch(async() => {
+          // ToDo: do we need to clearTransaction?
           await dispatch(addSubnetTree())
           // NOTE: need to load resource manager so drop cable
           // length is available for plan-editor-selectors
@@ -81,7 +82,7 @@ function resumeOrCreateTransaction (planId, userId) {
   }
 }
 
-function clearTransaction () {
+function clearTransaction (doOpenView = true) {
   return dispatch => {
     dispatch({ type: Actions.PLAN_EDITOR_CLEAR_TRANSACTION })
     dispatch({
@@ -96,10 +97,12 @@ function clearTransaction () {
       dispatch({
         type: Actions.PLAN_EDITOR_CLEAR_FEATURES,
       })
-      dispatch({
-        type: Actions.TOOL_BAR_SET_SELECTED_DISPLAY_MODE,
-        payload: 'VIEW', // ToDo: globalize the constants in tool-bar including displayModes
-      })
+      if (doOpenView) {
+        dispatch({
+          type: Actions.TOOL_BAR_SET_SELECTED_DISPLAY_MODE,
+          payload: 'VIEW', // ToDo: globalize the constants in tool-bar including displayModes
+        })
+      }
     })
   }
 }
