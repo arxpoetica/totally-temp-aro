@@ -191,6 +191,13 @@ function setObjectIdToMapObject(objectIdToMapObject) {
   }
 }
 
+function requestPolygonSelect(polygonCoordinates) {
+  return {
+    type: Actions.SELECTION_SET_POLYGON_COORDINATES,
+    payload: polygonCoordinates,
+  }
+}
+
 export default {
   setActiveSelectionMode,
   clearAllPlanTargets,
@@ -206,4 +213,5 @@ export default {
   setIsMapClicked,
   setSelectedMapObject,
   setObjectIdToMapObject,
+  requestPolygonSelect,
 }

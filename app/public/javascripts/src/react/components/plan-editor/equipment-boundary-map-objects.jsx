@@ -32,6 +32,7 @@ export class EquipmentBoundaryMapObjects extends Component {
     
     this.clearMapObjectOverlay = this.clearMapObjectOverlay.bind(this);
     this.contextMenuClick = this.contextMenuClick.bind(this);
+    this.findCentralOffice = this.findCentralOffice.bind(this);
   }
 
   render () {
@@ -57,8 +58,15 @@ export class EquipmentBoundaryMapObjects extends Component {
         const features = subnetFeatures[rootSubnetId]
         parentSubnetId = features ? features.subnetId : null
       }
-      const children = subnets[rootSubnetId] && subnets[rootSubnetId].children || []
-      const newNeighborIds = children.concat([rootSubnetId])
+      let newNeighborIds = [];
+      // Enable click anywhere subnet for Route Adjusters
+      if (activeFeature.feature.dataType === "edge_construction_area") {
+        const rootSubnet = this.findCentralOffice();
+        rootSubnetId = rootSubnet.feature.objectId;
+        newNeighborIds.push(selectedSubnetId);
+      }
+      const children = newNeighborIds.concat(subnets[rootSubnetId] && subnets[rootSubnetId].children || [])
+      newNeighborIds = children.concat([rootSubnetId])
       // may need to ensure newNeighborIds are all unique 
       const index = newNeighborIds.indexOf(selectedSubnetId)
       if (index >= 0) {
@@ -89,7 +97,12 @@ export class EquipmentBoundaryMapObjects extends Component {
 
       this.deleteNeighbors(idsToDelete)
       this.createNeighbors(idsToCreate)
-     }
+
+      if (this.mapObject && this.mapObject.dataType && this.mapObject.dataType === "edge_construction_area") {
+        this.deleteMapObject()
+        this.createMapObject(selectedSubnetId)
+      }
+    }
   }
 
   selectSubnet ([lat, lng]) {
@@ -120,6 +133,7 @@ export class EquipmentBoundaryMapObjects extends Component {
 
     this.mapObject = new google.maps.Polygon({
       subnetId: selectedSubnetId, // Not used by Google Maps
+      dataType: this.props.subnets[selectedSubnetId].dataType,
       paths: WktUtils.getGoogleMapPathsFromWKTMultiPolygon(geometry),
       clickable: false,
       draggable: false,
@@ -312,7 +326,8 @@ export class EquipmentBoundaryMapObjects extends Component {
         // This was added to ensure that the svg was centered on the verte
         // The vertex coords seem to be .1,.1 off center of the vertex icon itself.
         anchor: new google.maps.Point(.1, .1)
-      }
+      },
+      optimized: !ARO_GLOBALS.MABL_TESTING,
     })
 
     newMarker.addListener("click", () => {
@@ -367,6 +382,19 @@ export class EquipmentBoundaryMapObjects extends Component {
     this.mapObjectOverlay = [];
   }
 
+  findCentralOffice() {
+    const { subnetFeatures } = this.props
+    let rootNode;
+    for (let subnetFeature of Object.values(subnetFeatures)) {
+      if (subnetFeature.feature.networkNodeType === "central_office") {
+        rootNode = subnetFeature;
+        break;
+      }
+    }
+
+    return rootNode;
+  }
+
   componentWillUnmount () {
     this.clearAll()
   }
@@ -396,7 +424,8 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  modifyFeature: (equipmentBoundary) => dispatch(PlanEditorActions.modifyFeature('equipment_boundary', equipmentBoundary)),
+  // TODO: tuneing - replace with new API
+  //modifyFeature: (equipmentBoundary) => dispatch(PlanEditorActions.modifyFeature('equipment_boundary', equipmentBoundary)),
   showContextMenuForEquipmentBoundary: (mapObject, x, y, vertex, callBack) => {
     dispatch(PlanEditorActions.showContextMenuForEquipmentBoundary(mapObject, x, y, vertex, callBack))
   },

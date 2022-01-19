@@ -237,7 +237,8 @@ export class RingEdit extends Component {
                 strokeColor: '#543500'
               },
               draggable: false,
-              clickable: false
+              clickable: false,
+              optimized: !ARO_GLOBALS.MABL_TESTING,
             })
             mapMarker.setMap(this.props.map.googleMaps)
             this.createdMapObjects.push(mapMarker)
