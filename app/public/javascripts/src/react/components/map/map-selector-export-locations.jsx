@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react'
-import reduxStore from '../../../redux-store'
-import wrapComponentWithProvider from '../../common/provider-wrapped-component'
+import { connect } from 'react-redux'
 import AroHttp from '../../common/aro-http'
 import { saveAs } from 'file-saver'
 
@@ -11,7 +10,7 @@ const drawingManager = new google.maps.drawing.DrawingManager({
   drawingControl: false,
 })
 
-export const MapSelectorExportLocations = (props) => {
+const MapSelectorExportLocations = (props) => {
   const { mapRef, planId, isRulerEnabled } = props
 
   useEffect(() => {
@@ -73,7 +72,7 @@ export const MapSelectorExportLocations = (props) => {
 const mapStateToProps = (state) => ({
   isRulerEnabled: state.toolbar.isRulerEnabled,
   mapRef: state.map.googleMaps,
-  planId: state.plan.activePlan.id,
+  planId: state.plan && state.plan.activePlan && state.plan.activePlan.id,
 })
 
-export default wrapComponentWithProvider(reduxStore, MapSelectorExportLocations, mapStateToProps, null)
+export default connect(mapStateToProps, null)(MapSelectorExportLocations)

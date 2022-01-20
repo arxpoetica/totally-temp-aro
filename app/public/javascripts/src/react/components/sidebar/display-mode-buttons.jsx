@@ -1,6 +1,5 @@
 import React from 'react'
-import reduxStore from '../../../redux-store'
-import wrapComponentWithProvider from '../../common/provider-wrapped-component'
+import { connect } from 'react-redux'
 import ToolBarActions from '../header/tool-bar-actions'
 import { displayModes } from './constants'
 
@@ -128,4 +127,4 @@ const mapDispatchToProps = (dispatch) => ({
   setSelectedDisplayMode: (value) => dispatch(ToolBarActions.selectedDisplayMode(value)),
 })
 
-export default wrapComponentWithProvider(reduxStore, DisplayModeButtons, mapStateToProps, mapDispatchToProps)
+export default connect(mapStateToProps, mapDispatchToProps)(DisplayModeButtons)

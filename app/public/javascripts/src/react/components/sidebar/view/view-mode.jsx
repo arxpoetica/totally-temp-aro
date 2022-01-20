@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react'
-import reduxStore from '../../../../redux-store'
-import wrapComponentWithProvider from '../../../common/provider-wrapped-component'
+import { connect } from 'react-redux'
 import { Collapse, Card, CardHeader, CardBody } from 'reactstrap'
 import { viewModePanels, targetSelectionModes, displayModes } from '../constants'
 import { usePrevious } from '../../../common/view-utils.js'
@@ -17,7 +16,7 @@ import CoverageBoundary from './coverage-boundary.jsx'
 import LocationEditor from './location-editor.jsx'
 import ServiceLayerEditor from './service-layer-editor.jsx'
 
-export const ViewMode = (props) => {
+const ViewMode = (props) => {
   const {
     perspective,
     cloneSelection,
@@ -258,4 +257,4 @@ const mapDispatchToProps = (dispatch) => ({
   setMapSelection: (mapSelection) => dispatch(SelectionActions.setMapSelection(mapSelection)),
 })
 
-export default wrapComponentWithProvider(reduxStore, ViewMode, mapStateToProps, mapDispatchToProps)
+export default connect(mapStateToProps, mapDispatchToProps)(ViewMode)

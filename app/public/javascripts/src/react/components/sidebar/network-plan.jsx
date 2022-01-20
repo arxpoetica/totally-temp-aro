@@ -1,8 +1,7 @@
 import React from 'react'
-import reduxStore from '../../../redux-store'
-import wrapComponentWithProvider from '../../common/provider-wrapped-component'
+import { connect } from 'react-redux'
 
-export const NetworkPlan = (props) => {
+const NetworkPlan = (props) => {
   const { activePlan, perspective, toolBarColor } = props
   const { name, ephemeral } = activePlan
 
@@ -26,4 +25,4 @@ const mapStateToProps = (state) => ({
   toolBarColor: state.toolbar.appConfiguration.toolbar && state.toolbar.appConfiguration.toolbar.toolBarColor,
 })
 
-export default wrapComponentWithProvider(reduxStore, NetworkPlan, mapStateToProps, null)
+export default connect(mapStateToProps, null)(NetworkPlan)

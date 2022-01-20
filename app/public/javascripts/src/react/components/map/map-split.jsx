@@ -10,7 +10,7 @@ import { ToastContainer } from 'react-toastify'
 import EquipmentDropTarget from '../plan-editor/equipment-drop-target.jsx'
 import ContextMenu from '../context-menu/context-menu.jsx'
 import ViewMode from '../sidebar/view/view-mode.jsx'
-import { displayModes } from '../sidebar/constants'
+import { displayModes, targetSelectionModes } from '../sidebar/constants'
 import AnalysisMode from '../sidebar/analysis/analysis-mode.jsx'
 import RingEditor from '../sidebar/ring-editor.jsx'
 import PlanEditorContainer from '../plan-editor/plan-editor-container.jsx'
@@ -19,6 +19,9 @@ import PlanSettings from '../plan/plan-settings.jsx'
 import UINotifications from '../notification/ui-notifications.jsx'
 import MapViewToggle from './map-view-toggle.jsx'
 import './map-split.css'
+import FrontierFooter from '../footer/frontier-footer.jsx'
+import MapSelectorExportLocations from '../map/map-selector-export-locations.jsx'
+import MapSelectorPlanTarget from '../map/map-selector-plan-target.jsx'
 
 const transitionTimeMsec = 100
 // This must be the same for the map and sidebar, otherwise animations don't work correctly.
@@ -39,9 +42,12 @@ const MapSplit = (props) => {
     disableMap,
     showToolBox,
     isReportMode,
+    isRulerEnabled,
     setSidebarWidth,
     areTilesRendering,
     selectedDisplayMode,
+    selectedToolBarAction,
+    selectedTargetSelectionMode,
   } = props
 
   useEffect(() => {
@@ -124,7 +130,15 @@ const MapSplit = (props) => {
           </div>
           {/* Plan target map selector should be active only if we are in analysis mode */}
           {/* Map Selector Plan Target */}
+          {
+            checkSelectedDisplayMode(displayModes.ANALYSIS) && !isRulerEnabled &&
+            <MapSelectorPlanTarget />
+          }
           {/* Map Selector Export Locations */}
+          { checkSelectedDisplayMode(displayModes.VIEW)
+            && selectedTargetSelectionMode === targetSelectionModes.POLYGON_EXPORT_TARGET &&
+            <MapSelectorExportLocations />
+          }
           <ToastContainer />
           {/* A div that overlays on the map to denote disabled state. When shown, it will prevent any keyboard/mouse
               interactions with the map. Useful when you have made a slow-ish request to service and want to prevent
@@ -200,7 +214,8 @@ const MapSplit = (props) => {
           <UINotifications />
         </div>
       </div>
-      {/* Footer */}
+      {/* Frontier Footer */}
+      <FrontierFooter />
       {/* Remove the Visiblity and Push it into the googlemap */}
       {map &&
         <div style={{ visibility: 'hidden' }} ref={mapViewToggle}>
@@ -224,6 +239,9 @@ const mapStateToProps = (state) => ({
   planType: state.plan && state.plan.activePlan && state.plan.activePlan.planType,
   areTilesRendering: state.map.areTilesRendering,
   map: state.map.googleMaps && state.map.googleMaps,
+  selectedTargetSelectionMode: state.toolbar.selectedTargetSelectionMode,
+  selectedToolBarAction: state.toolbar.selectedToolBarAction,
+  isRulerEnabled: state.toolbar.isRulerEnabled,
 })
 
 const mapDispatchToProps = (dispatch) => ({
