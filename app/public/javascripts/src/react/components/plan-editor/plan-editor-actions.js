@@ -6,7 +6,6 @@ import MenuItemFeature from '../context-menu/menu-item-feature'
 import MenuItemAction from '../context-menu/menu-item-action'
 import ContextMenuActions from '../context-menu/actions'
 import ResourceActions from '../resource-editor/resource-actions'
-//import SelectionActions from '../selection/selection-actions'
 import { batch } from 'react-redux'
 import WktUtils from '../../../shared-utils/wkt-utils'
 import PlanEditorSelectors from './plan-editor-selectors'
@@ -215,42 +214,6 @@ function createFeature(feature) {
   }
 }
 
-//TODO: depricate
-// TODO: tuneing - still used in equipment bounds edit, depricate then delete
-/*
-function modifyFeature (featureType, feature) {
-  console.log('modifyFeature should be depricated')
-  // ToDo: this causes an error if you edit a new feature that has yet to be sent to service
-  //  everything still functions but it's bad form
-  // ToDo: figure out POST / PUT perhaps one function 
-  //  that determines weather to add (the potentially "modified") feature
-  //  or modifiy the feature if it's already been added to the transaction
-  //  basically we need service to overwrite or if not present, make 
-  return (dispatch, getState) => {
-    const state = getState()
-    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
-    // Do a PUT to send the equipment over to service
-    return AroHttp.put(`/service/plan-transactions/${transactionId}/modified-features/${featureType}`, feature.feature)
-      .then(result => {
-        // Decorate the created feature with some default values
-        let crudAction = feature.crudAction || 'read'
-        if (crudAction === 'read') crudAction = 'update'
-        const newFeature = {
-          ...feature,
-          crudAction: crudAction,
-          feature: result.data
-        }
-        dispatch({
-          type: Actions.PLAN_EDITOR_MODIFY_FEATURES,
-          payload: [newFeature]
-        })
-        return Promise.resolve()
-      })
-      .catch(err => console.error(err))
-  }
-}
-*/
-
 function updateFeatureProperties({ feature, rootSubnetId }) {
   return async(dispatch, getState) => {
     try {
@@ -281,23 +244,6 @@ function updateFeatureProperties({ feature, rootSubnetId }) {
   }
 }
 
-// ToDo: there's only one transaction don't require the ID
-// TODO: cleanup?
-// TODO: tuneing - no longer used delete
-/*
-function deleteTransactionFeature (transactionId, featureType, transactionFeatureId) {
-  return dispatch => {
-    return AroHttp.delete(`/service/plan-transactions/${transactionId}/modified-features/${featureType}/${transactionFeatureId}`)
-      .then(result => dispatch({
-        type: Actions.PLAN_EDITOR_DELETE_TRANSACTION_FEATURE,
-        payload: transactionFeatureId
-      }))
-      .catch(err => console.error(err))
-  }
-}
-*/
-
-// TODO: depricate this and planEditor.features
 function addTransactionFeatures (features) {
   return {
     type: Actions.PLAN_EDITOR_ADD_FEATURES,
@@ -578,33 +524,7 @@ function showContextMenuForEquipmentBoundary (mapObject, x, y, vertex, callBack)
     dispatch(ContextMenuActions.showContextMenu(x, y))
   }
 }
-/*
-function viewFeatureProperties (featureType, planId, objectId, transactionFeatures) {
-  return dispatch => {
-    var equipmentPromise = null
-    if (transactionFeatures[objectId]) {
-      equipmentPromise = Promise.resolve()
-    } else {
-      equipmentPromise = AroHttp.get(`/service/plan-feature/${planId}/${featureType}/${objectId}`)
-        .then(result => {
-          // Decorate the equipment with some default values. Technically this is not yet "created" equipment
-          // but will have to do for now.
-          const createdEquipment = {
-            crudAction: 'read',
-            deleted: false,
-            valid: true,
-            feature: result.data
-          }
-          return dispatch(addTransactionFeatures([createdEquipment]))
-        })
-    }
-    // At this point we are guaranteed to have a created equipment object
-    equipmentPromise
-      .then(result => dispatch(SelectionActions.setPlanEditorFeatures([objectId])))
-      .catch(err => console.error(err))
-  }
-}
-*/
+
 function startDrawingBoundaryFor (equipmentObjectId) {
   return {
     type: Actions.PLAN_EDITOR_SET_IS_DRAWING_BOUNDARY_FOR,
