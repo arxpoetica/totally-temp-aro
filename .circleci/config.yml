@@ -75,6 +75,7 @@ workflows:
                 - dev
                 - uat
                 - plan-editing/main
+                - master_hotfix_subnet_transaction
       - deploy:
           context: aro_qa_builds
           requires:
