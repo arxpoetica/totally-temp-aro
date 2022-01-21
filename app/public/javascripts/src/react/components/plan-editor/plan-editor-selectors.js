@@ -178,7 +178,7 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
           const { networkNodeType } = subnetFeatures[featureId].feature
 
           // transforming feature latlong into location latlong
-          const featurePoint = {}
+          let featurePoint = {}
           featurePoint.longitude = subnetFeatures[featureId].feature.geometry.coordinates[0]
           featurePoint.latitude = subnetFeatures[featureId].feature.geometry.coordinates[1]
 
@@ -216,7 +216,7 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
             if (!alerts[featureId]) {
               // getting location of terminal for alert display
               // then converting to lat long format used on locations
-              const terminalPoint = {}
+              let terminalPoint = {}
               terminalPoint.longitude = featureEntry.feature.geometry.coordinates[0]
               terminalPoint.latitude = featureEntry.feature.geometry.coordinates[1]
               alerts[featureId] = {
@@ -235,7 +235,9 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
               delete abandonedLocations[locationId]
               // dropcable alert
               // TODO: Differentiate between too long and NaN?
-              if (dropLink.dropCableLength > maxDropCableLength || isNaN(dropLink.dropCableLength)) {
+              if (!subnet.subnetLocationsById[locationId]){
+                console.warn(`location ${locationId} of feature ${featureEntry.feature.objectId} is not in the location list of subnet ${subnetId}`)
+              } else if (dropLink.dropCableLength > maxDropCableLength || isNaN(dropLink.dropCableLength)) {
                 if (!alerts[locationId]) {
                   alerts[locationId] = {
                     locationId,
@@ -255,7 +257,7 @@ const getAlertsFromSubnet = (subnet, subnetFeatures, networkConfig) => {
       if (totalHomes > maxHubHomes) {
         if (!alerts[subnetId]) {
           // transforming feature latlong into location latlong
-          const hubPoint = {}
+          let hubPoint = {}
           hubPoint.longitude = subnetFeatures[subnetId].feature.geometry.coordinates[0]
           hubPoint.latitude = subnetFeatures[subnetId].feature.geometry.coordinates[1]
           alerts[subnetId] = {
