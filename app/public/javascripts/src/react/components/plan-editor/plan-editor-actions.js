@@ -1062,7 +1062,6 @@ function recalculateSubnets (transactionId, subnetIds = []) {
     
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet-cmd/recalc`, recalcBody)
       .then(res => {
-        console.log(res)
         dispatch(setIsCalculatingSubnets(false))
         batch(() => {
           // remove annotations from recalculated subnets
