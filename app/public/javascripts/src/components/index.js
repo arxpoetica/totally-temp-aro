@@ -75,11 +75,9 @@ import UINotifications from '../react/components/notification/ui-notifications.j
 import boundaryDetail from './sidebar/view/boundary-detail'
 import roadSegmentDetail from './sidebar/view/road-segment-detail'
 import coverageBoundary from './sidebar/view/coverage-boundary'
-import viewMode from './sidebar/view/view-mode'
 import planInfoRecent from './sidebar/view/plan-info-recent'
 import aroSearch from './sidebar/view/aro-search'
 import aroMultiselectSearch from './sidebar/view/aro-multiselect-search'
-import displayModeButtons from './sidebar/display-mode-buttons'
 import analysisExpertMode from './sidebar/analysis/analysis-expert-mode'
 import analysisMode from './sidebar/analysis/analysis-mode'
 
@@ -93,7 +91,6 @@ import roicReportsModal from './sidebar/analysis/roic-reports/roic-reports-modal
 import coverageReportDownloader from './sidebar/analysis/coverage/coverage-report-downloader'
 import networkBuildOutput from './sidebar/analysis/network-build/network-build-output'
 import ringEditor from './sidebar/ring-editor'
-import planEditorContainer from './sidebar/plan-editor/plan-editor-container'
 import boundaries from './views/boundaries'
 import locations from './views/locations'
 import networkEquipment from './views/network-equipment'
@@ -102,7 +99,6 @@ import cables from './views/cables'
 import conduits from './views/conduits'
 import mapSplit from './map/map-split'
 import networkPlanModal from './header/network-plan-modal'
-import networkPlan from './header/network-plan'
 import fullScreenContainer from './full-screen/full-screen-container'
 import aroPanel from './common/aro-panel'
 import aroMultiSelect from './common/aro-multiselect'
@@ -134,11 +130,9 @@ import reduxConfig from '../redux-config'
 app.component('boundaryDetail', boundaryDetail)
   .component('roadSegmentDetail', roadSegmentDetail)
   .component('coverageBoundary', coverageBoundary)
-  .component('viewMode', viewMode)
   .component('planInfoRecent', planInfoRecent)
   .component('aroSearch', aroSearch)
   .component('aroMultiselectSearch', aroMultiselectSearch)
-  .component('displayModeButtons', displayModeButtons)
   .component('analysisExpertMode', analysisExpertMode)
   .component('analysisMode', analysisMode)
   .component('locationRoicReports', locationRoicReports)
@@ -150,7 +144,6 @@ app.component('boundaryDetail', boundaryDetail)
   .component('coverageReportDownloader', coverageReportDownloader)
   .component('networkBuildOutput', networkBuildOutput)
   .component('ringEditor', ringEditor)
-  .component('planEditorContainer', planEditorContainer)
   .component('boundaries', boundaries)
   .component('locations', locations)
   .component('networkEquipment', networkEquipment)
@@ -159,7 +152,6 @@ app.component('boundaryDetail', boundaryDetail)
   .component('conduits', conduits)
   .component('mapSplit', mapSplit)
   .component('networkPlanModal', networkPlanModal)
-  .component('networkPlan', networkPlan)
   // .component('uiNotification', uiNotification)
   .component('fullScreenContainer', fullScreenContainer)
   .component('aroPanel', aroPanel)
