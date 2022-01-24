@@ -22,6 +22,7 @@ import './map-split.css'
 import FrontierFooter from '../footer/frontier-footer.jsx'
 import MapSelectorExportLocations from '../map/map-selector-export-locations.jsx'
 import MapSelectorPlanTarget from '../map/map-selector-plan-target.jsx'
+import ErrorBoundary from '../common/ErrorBoundary.jsx'
 
 const transitionTimeMsec = 100
 // This must be the same for the map and sidebar, otherwise animations don't work correctly.
@@ -46,7 +47,6 @@ const MapSplit = (props) => {
     setSidebarWidth,
     areTilesRendering,
     selectedDisplayMode,
-    selectedToolBarAction,
     selectedTargetSelectionMode,
   } = props
 
@@ -120,7 +120,9 @@ const MapSplit = (props) => {
             <div className="header-space" />
             {/* Created a 'toolbar-container' to get the ToolBar component elements in tool-bar.jsx */}
             <div className="toolbar-container">
-              <ToolBar />
+              <ErrorBoundary>
+                <ToolBar />
+              </ErrorBoundary>
             </div>
             <div className="network-plan">
               <NetworkPlan />
@@ -193,12 +195,28 @@ const MapSplit = (props) => {
                   <DisplayModeButtons />
                 </div>
                 <div className="display-modes">
-                  {checkSelectedDisplayMode(displayModes.VIEW) && <ViewMode /> }
-                  {checkSelectedDisplayMode(displayModes.ANALYSIS) && planType !== 'RING' && <AnalysisMode /> }
-                  {checkSelectedDisplayMode(displayModes.EDIT_RINGS) && <RingEditor /> }
-                  {checkSelectedDisplayMode(displayModes.EDIT_PLAN) && <PlanEditorContainer /> }
-                  {checkSelectedDisplayMode(displayModes.DEBUG) && <AroDebug /> }
-                  {checkSelectedDisplayMode(displayModes.PLAN_SETTINGS) && <PlanSettings /> }
+                  {/* Error boundaries are React components that catch JavaScript errors anywhere in their child component tree, 
+                    log those errors, and display a fallback UI instead of the component tree that crashed.
+                    https://reactjs.org/docs/error-boundaries.html
+                  */}
+                  <ErrorBoundary>
+                    {checkSelectedDisplayMode(displayModes.VIEW) && <ViewMode /> }
+                  </ErrorBoundary>
+                  <ErrorBoundary>
+                    {checkSelectedDisplayMode(displayModes.ANALYSIS) && planType !== 'RING' && <AnalysisMode /> }
+                  </ErrorBoundary>
+                  <ErrorBoundary>
+                    {checkSelectedDisplayMode(displayModes.EDIT_RINGS) && <RingEditor /> }
+                  </ErrorBoundary>
+                  <ErrorBoundary>
+                    {checkSelectedDisplayMode(displayModes.EDIT_PLAN) && <PlanEditorContainer /> }
+                  </ErrorBoundary>
+                  <ErrorBoundary>
+                    {checkSelectedDisplayMode(displayModes.DEBUG) && <AroDebug /> }
+                  </ErrorBoundary>
+                  <ErrorBoundary>
+                    {checkSelectedDisplayMode(displayModes.PLAN_SETTINGS) && <PlanSettings /> }
+                  </ErrorBoundary>
                 </div>
               </div>
             }
@@ -240,7 +258,6 @@ const mapStateToProps = (state) => ({
   areTilesRendering: state.map.areTilesRendering,
   map: state.map.googleMaps && state.map.googleMaps,
   selectedTargetSelectionMode: state.toolbar.selectedTargetSelectionMode,
-  selectedToolBarAction: state.toolbar.selectedToolBarAction,
   isRulerEnabled: state.toolbar.isRulerEnabled,
 })
 
