@@ -325,7 +325,7 @@ class State {
       }
       */
       service.areTilesRendering = newValue
-      // service.setAreTilesRenderingInRedux(newValue)
+      service.setAreTilesRenderingInRedux(newValue)
       $timeout()
     }
 
