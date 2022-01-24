@@ -38,6 +38,8 @@ test('With targets, no selection', () => {
   })
   const mockAddListener = jest.fn()
 
+  global.ARO_GLOBALS = {MABL_TESTING: false}
+
   global.google = {
     maps: {
       Marker: mockMarkerConstructor,
@@ -66,6 +68,7 @@ test('With targets, no selection', () => {
     icon: '/images/map_icons/aro/target.png',
     id: target.id,
     map: mockGoogleMaps,
+    optimized: true,
     position: {
       lat: target.lat,
       lng: target.lng
@@ -95,6 +98,8 @@ test('With targets and one selection', () => {
       setIcon: mockSetIcon
     }
   })
+
+  global.ARO_GLOBALS = {MABL_TESTING: false}
 
   global.google = {
     maps: {

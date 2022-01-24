@@ -7,6 +7,7 @@ const defaultState = {
   copper: new List(),
   locationFilters: {},
   networkEquipment: new Map(),
+  constructionAreas: new Map(),
   constructionSite: new List(),
   boundary: new List(),
   showSiteBoundary: false,

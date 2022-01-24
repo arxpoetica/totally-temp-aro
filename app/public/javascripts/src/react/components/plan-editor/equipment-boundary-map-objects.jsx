@@ -32,6 +32,7 @@ export class EquipmentBoundaryMapObjects extends Component {
     
     this.clearMapObjectOverlay = this.clearMapObjectOverlay.bind(this);
     this.contextMenuClick = this.contextMenuClick.bind(this);
+    this.findCentralOffice = this.findCentralOffice.bind(this);
   }
 
   render () {
@@ -57,8 +58,15 @@ export class EquipmentBoundaryMapObjects extends Component {
         const features = subnetFeatures[rootSubnetId]
         parentSubnetId = features ? features.subnetId : null
       }
-      const children = subnets[rootSubnetId] && subnets[rootSubnetId].children || []
-      const newNeighborIds = children.concat([rootSubnetId])
+      let newNeighborIds = [];
+      // Enable click anywhere subnet for Route Adjusters
+      if (activeFeature.feature.dataType === "edge_construction_area") {
+        const rootSubnet = this.findCentralOffice();
+        rootSubnetId = rootSubnet.feature.objectId;
+        newNeighborIds.push(selectedSubnetId);
+      }
+      const children = newNeighborIds.concat(subnets[rootSubnetId] && subnets[rootSubnetId].children || [])
+      newNeighborIds = children.concat([rootSubnetId])
       // may need to ensure newNeighborIds are all unique 
       const index = newNeighborIds.indexOf(selectedSubnetId)
       if (index >= 0) {
@@ -372,6 +380,19 @@ export class EquipmentBoundaryMapObjects extends Component {
     }
 
     this.mapObjectOverlay = [];
+  }
+
+  findCentralOffice() {
+    const { subnetFeatures } = this.props
+    let rootNode;
+    for (let subnetFeature of Object.values(subnetFeatures)) {
+      if (subnetFeature.feature.networkNodeType === "central_office") {
+        rootNode = subnetFeature;
+        break;
+      }
+    }
+
+    return rootNode;
   }
 
   componentWillUnmount () {
