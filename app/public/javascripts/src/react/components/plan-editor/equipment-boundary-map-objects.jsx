@@ -386,10 +386,10 @@ export class EquipmentBoundaryMapObjects extends Component {
     const { subnetFeatures, planType } = this.props
     let rootNode;
     for (let subnetFeature of Object.values(subnetFeatures)) {
-      if (subnetFeature.feature.networkNodeType === "central_office" && planType !== "RING") {
-        rootNode = subnetFeature;
-        break;
-      } else if (subnetFeature.feature.networkNodeType === "subnet_node" && planType === "RING") {
+      if (
+        (subnetFeature.feature.networkNodeType === "central_office" && planType !== "RING") ||
+        (subnetFeature.feature.networkNodeType === "subnet_node" && planType === "RING")
+      ) {
         rootNode = subnetFeature;
         break;
       }
