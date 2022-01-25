@@ -1045,6 +1045,7 @@ function recalculateSubnets (transactionId, subnetIds = []) {
   return (dispatch, getState) => {
     const state = getState()
     let activeSubnets = []
+    /*
     subnetIds.forEach(subnetId => {
       dispatch(setFiberAnnotations({[subnetId]: []}, subnetId))
       if (state.planEditor.subnets[subnetId]) {
@@ -1055,14 +1056,22 @@ function recalculateSubnets (transactionId, subnetIds = []) {
         activeSubnets.push(state.planEditor.subnetFeatures[subnetId].subnetId)
       }
     })
+    */
     dispatch(setIsCalculatingSubnets(true))
     const recalcBody = { subnetIds: activeSubnets }
     
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet-cmd/recalc`, recalcBody)
       .then(res => {
         dispatch(setIsCalculatingSubnets(false))
-        // parse changes
-        dispatch(parseRecalcEvents(res.data))
+        batch(() => {
+          // remove annotations from recalculated subnets
+          res.data.subnets.forEach(subnet => {
+            let subnetId = subnet.feature.objectId
+            dispatch(setFiberAnnotations({[subnetId]: []}, subnetId))
+          })
+          // parse changes
+          dispatch(parseRecalcEvents(res.data))
+        })
       })
       .catch(err => {
         console.error(err)
