@@ -323,10 +323,9 @@ class TileComponentController {
         hitFeatures.event = event
         this.state.mapFeaturesRightClickedEvent.next(hitFeatures)
       })
-      // Note: I just fixed a boolean logic typo having to do with rSelectedDisplayMode in getFilteredFeaturesUnderLatLng()
-      //  this also MAY be a typo, I think the "&&" may need to be "||"
-      if ((this.state.selectedDisplayMode.getValue() != this.state.displayModes.VIEW && this.rSelectedDisplayMode != this.state.displayModes.VIEW)  ||
-          (this.state.activeViewModePanel == this.state.viewModePanels.EDIT_SERVICE_LAYER && this.rActiveViewModePanel == this.state.viewModePanels.EDIT_SERVICE_LAYER)
+
+      if (this.rSelectedDisplayMode !== this.state.displayModes.VIEW
+        || this.rActiveViewModePanel === this.state.viewModePanels.EDIT_SERVICE_LAYER
       ) return
 
       this.getFilteredFeaturesUnderLatLng(event.latLng)
@@ -801,6 +800,7 @@ class TileComponentController {
       locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(reduxState),
       selectedSubnetLocations: PlanEditorSelectors.getSelectedSubnetLocations(reduxState),
       selectionIds: reduxState.selection.planEditorFeatures,
+      polygonCoordinates: reduxState.selection.polygonCoordinates,
     }
   }
 
@@ -824,6 +824,7 @@ class TileComponentController {
     const selectedSubnetLocations = this.selectedSubnetLocations
     const locationAlerts = this.locationAlerts
     const currentSelectionIds = this.selectionIds
+    const currentPolygonCoordinates = this.polygonCoordinates
 
     var needRefresh = false
     var doConduitUpdate = this.doesConduitNeedUpdate(prevStateMapLayers, nextState.stateMapLayers)
@@ -880,6 +881,11 @@ class TileComponentController {
     if (needRefresh) {
       this.tileDataService.markHtmlCacheDirty()
       this.refreshMapTiles()
+    }
+
+    // Analysis Mode
+    if (currentPolygonCoordinates && !dequal(currentPolygonCoordinates, nextState.polygonCoordinates)) {
+      this.state.requestPolygonSelect.next(nextState.polygonCoordinates)
     }
   }
 

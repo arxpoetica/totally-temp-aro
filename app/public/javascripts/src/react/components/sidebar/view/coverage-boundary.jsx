@@ -26,7 +26,8 @@ export const CoverageBoundary = (props) => {
       anchor: new google.maps.Point(16, 16) // Anchor should be at the center of the crosshair icon
     },
     draggable: true,
-    map: null
+    map: null,
+    optimized: !ARO_GLOBALS.MABL_TESTING,
   })
 
   targetMarker.addListener('dragend', (event) => handleCoverageTargetUpdated(event.latLng))

@@ -24,6 +24,11 @@
     <link rel="stylesheet" type="text/css" href="/javascripts/src/shared-utils/editor-interfaces.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/client_<%= ARO_CLIENT_DONOT_USE_IN_CODE %>.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/layout_<%= config.ui.layout %>.css">
+    <script>
+      // TODO: this is a stop gap until the following ticket is implemented:
+      // https://www.pivotaltracker.com/story/show/180829331
+      const ARO_GLOBALS = <%- ARO_GLOBALS %>;
+    </script>
     <%if (reportPage || reportOverview) { %>
       <script>
         window.GLOBAL_MAP_SPLITTER_INITIAL_WIDTH = 100

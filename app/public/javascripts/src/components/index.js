@@ -2,6 +2,11 @@
 import { react2angular } from 'react2angular'
 import { ToastContainer } from 'react-toastify'
 
+import MapViewToggle from '../react/components/map/map-view-toggle.jsx'
+import MapSelectorPlanTarget from '../react/components/map/map-selector-plan-target.jsx'
+import MapSelectorExportLocations from '../react/components/map/map-selector-export-locations.jsx'
+import FrontierFooter from '../react/components/footer/frontier-footer.jsx'
+import ServiceLayerEditor from '../react/components/sidebar/view/service-layer-editor.jsx'
 import LocationEditor from '../react/components/sidebar/view/location-editor.jsx'
 import EquipmentDetail from '../react/components/sidebar/view/equipment-info/equipment-detail.jsx'
 import NetworkPlanManage from '../react/components/sidebar/view/network-plan-manage.jsx'
@@ -65,9 +70,7 @@ import UINotifications from '../react/components/notification/ui-notifications.j
 import viewMode from './sidebar/view/view-mode'
 import displayModeButtons from './sidebar/display-mode-buttons'
 
-import draggableButton from './sidebar/plan-editor/draggable-button'
 import planEditorContainer from './sidebar/plan-editor/plan-editor-container'
-import serviceLayerEditor from './sidebar/plan-editor/service-layer-editor'
 import boundaries from './views/boundaries'
 import locations from './views/locations'
 import networkEquipment from './views/network-equipment'
@@ -75,9 +78,6 @@ import copper from './views/copper'
 import cables from './views/cables'
 import conduits from './views/conduits'
 import mapSplit from './map/map-split'
-import mapSelectorPlanTarget from './map/map-selector-plan-target'
-import mapSelectorExportLocations from './map/map-selector-export-locations'
-import mapToggleComponent from './map/map-toggle'
 import networkPlanModal from './header/network-plan-modal'
 import networkPlan from './header/network-plan'
 import fullScreenContainer from './full-screen/full-screen-container'
@@ -111,8 +111,6 @@ import reduxConfig from '../redux-config'
 app.component('viewMode', viewMode)
   .component('displayModeButtons', displayModeButtons)
   .component('planEditorContainer', planEditorContainer)
-  .component('serviceLayerEditor', serviceLayerEditor)
-  .component('draggableButton', draggableButton)
   .component('boundaries', boundaries)
   .component('locations', locations)
   .component('networkEquipment', networkEquipment)
@@ -120,9 +118,6 @@ app.component('viewMode', viewMode)
   .component('copper', copper)
   .component('conduits', conduits)
   .component('mapSplit', mapSplit)
-  .component('mapSelectorPlanTarget', mapSelectorPlanTarget)
-  .component('mapSelectorExportLocations', mapSelectorExportLocations)
-  .component('mapToggleComponent', mapToggleComponent)
   .component('networkPlanModal', networkPlanModal)
   .component('networkPlan', networkPlan)
   // .component('uiNotification', uiNotification)
@@ -145,6 +140,11 @@ app.component('viewMode', viewMode)
   .component('editorInterfacePrimitive', editorInterfacePrimitive)
   .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
 // ReactJS components
+  .component('rMapViewToggle', react2angular(MapViewToggle))
+  .component('rMapSelectorPlanTarget', react2angular(MapSelectorPlanTarget))
+  .component('rMapSelectorExportLocations', react2angular(MapSelectorExportLocations))
+  .component('rFrontierFooter', react2angular(FrontierFooter))
+  .component('rServiceLayerEditor', react2angular(ServiceLayerEditor))
   .component('rLocationEditor', react2angular(LocationEditor))
   .component('rEquipmentDetail', react2angular(EquipmentDetail))
   .component('rNetworkPlanManage', react2angular(NetworkPlanManage))

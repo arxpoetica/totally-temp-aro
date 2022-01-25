@@ -91,13 +91,19 @@ function setNetworkEquipmentSubtypeVisibility (layerType, layer, subtypeId, newV
 }
 
 function setCableConduitVisibility (cableKey, conduitKey, newVisibility) {
-  return {
-    type: Actions.LAYERS_SET_CABLE_CONDUIT_VISIBILITY,
-    payload: {
-      cableKey: cableKey,
-      conduitKey: conduitKey,
-      visibility: newVisibility
-    }
+  return dispatch => {
+    dispatch({
+      type: Actions.LAYERS_SET_CABLE_CONDUIT_VISIBILITY,
+      payload: {
+        cableKey: cableKey,
+        conduitKey: conduitKey,
+        visibility: newVisibility
+      }
+    })
+    dispatch({
+      type: Actions.PLAN_EDITOR_SET_FIBER_RENDER_REQUIRED,
+      payload: true,
+    })
   }
 }
 
@@ -123,6 +129,13 @@ function setNetworkEquipmentLayers (networkEquipmentLayers) {
   return {
     type: Actions.LAYERS_SET_NETWORK_EQUIPMENT,
     payload: networkEquipmentLayers
+  }
+}
+
+function setConstructionAreaLayers (constructionAreaLayers) {
+  return {
+    type: Actions.LAYERS_SET_CONSTRUCTION_AREAS,
+    payload: constructionAreaLayers
   }
 }
 
@@ -304,6 +317,7 @@ export default {
   setLocationFilters,
   setLocationFilterChecked,
   setNetworkEquipmentLayers,
+  setConstructionAreaLayers,
   setConstructionSiteLayers,
   setBoundaryLayers,
   setCopperLayers,

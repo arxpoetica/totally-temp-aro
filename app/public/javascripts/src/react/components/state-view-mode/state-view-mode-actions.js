@@ -111,9 +111,33 @@ function loadEntityList (entityType, filterObj, select, searchColumn, configurat
       )
       if (libraryItems.length > 0) {
         // Filter using selected serviceLayer id
-        const layerfilter = libraryItems.map(
-          libraryName => `layer/id eq ${nameToServiceLayers[libraryName].id}`).join(' or ')
-        filter = filter ? filter.concat(` and (${layerfilter})`) : `${layerfilter}`
+        const getServiceLayersData = () => {
+          return AroHttp.get('/service/odata/ServiceLayer?$select=id,name,description')
+            .then((response) => {
+              let nameToServiceLayersObj = {}
+              if (response.status >= 200 && response.status <= 299) {
+                let serviceLayers = response.data
+                serviceLayers.forEach((layer) => {
+                  nameToServiceLayersObj[layer.name] = layer
+                })
+              }
+              return Promise.resolve(nameToServiceLayersObj)
+            })
+        }
+
+        if (libraryItems.every(libraryName => nameToServiceLayers[libraryName])) {
+          const layerfilter = libraryItems.map(libraryName => {
+            return `layer/id eq ${nameToServiceLayers[libraryName].id}`}).join(' or ')
+          filter = filter ? filter.concat(` and (${layerfilter})`) : `${layerfilter}`
+        } else {
+          getServiceLayersData()
+          .then(serviceLayersObject => libraryItems.map(libraryName => {
+            return `layer/id eq ${serviceLayersObject[libraryName].id}`
+          }).join(' or '))
+          .then(layerText => {
+            filter = filter ? filter.concat(` and (${layerText})`) : `${layerText}`
+          })
+        }
       }
     }
 

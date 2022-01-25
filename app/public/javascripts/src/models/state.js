@@ -452,7 +452,8 @@ class State {
     service.mapFeaturesSelectedEvent.skip(1).subscribe((options) => {
       // ToDo: selection mechanism needs to be cerntalised 
       // set all mapFeatures in redux
-      if (service.selectedDisplayMode.getValue() == service.displayModes.VIEW) {
+      if (service.selectedDisplayMode.getValue() == service.displayModes.VIEW
+        || service.selectedDisplayMode.getValue() == service.displayModes.ANALYSIS) {
         service.setMapFeatures(options)
         // For tracking when map clicked by the user.
         service.setIsMapClicked(true)
@@ -913,6 +914,7 @@ class State {
           service.requestCreateMapOverlay.next(null) // Create a new one
           service.mapLayers.next(service.mapLayers.getValue()) // Reset map layers so that the new overlay picks them up
           service.requestMapLayerRefresh.next(null) // Redraw map layers
+          service.setRecreateTilesAndCache(false)
         })
         .catch((err) => console.error(err))
     }
@@ -1509,6 +1511,7 @@ class State {
           }
           service.configuration.loadPerspective(config.user.perspective)
           service.setNetworkEquipmentLayers(service.configuration.networkEquipment)
+          service.setConstructionAreaLayers(service.configuration.constructionAreas)
           service.setCopperLayers(service.configuration.copperCategories)
 
           service.setAppConfiguration(service.configuration) // Require in tool-bar.jsx
@@ -1655,6 +1658,10 @@ class State {
       const currentActivePlanId = service.plan && service.plan.id
       const newActivePlanId = nextReduxState.plan && nextReduxState.plan.id
       const oldDataItems = service.dataItems
+      const isRecreateTileCurrent = service.isRecreateTiles
+      const isRecreateTileNew = nextReduxState.isRecreateTiles
+
+      if (isRecreateTileNew !== isRecreateTileCurrent) { isRecreateTileNew && service.recreateTilesAndCache() }
 
       // merge state and actions onto controller
       Object.assign(service, nextReduxState)
@@ -1717,6 +1724,7 @@ class State {
       rActiveViewModePanel: reduxState.toolbar.rActiveViewModePanel,
       deletedUncommitedMapObjects: reduxState.toolbar.deletedUncommitedMapObjects,
       rHeatmapOptions: reduxState.toolbar.heatmapOptions,
+      isRecreateTiles: reduxState.viewSettings.isRecreateTiles,
     }
   }
 
@@ -1743,6 +1751,7 @@ class State {
       loadPlanRedux: planId => dispatch(PlanActions.loadPlan(planId)),
       setGoogleMapsReference: mapRef => dispatch(MapActions.setGoogleMapsReference(mapRef)),
       setNetworkEquipmentLayers: networkEquipmentLayers => dispatch(MapLayerActions.setNetworkEquipmentLayers(networkEquipmentLayers)),
+      setConstructionAreaLayers: constructionAreaLayers => dispatch(MapLayerActions.setConstructionAreaLayers(constructionAreaLayers)),
       setCopperLayers: copperLayers => dispatch(MapLayerActions.setCopperLayers(copperLayers)),
       updateShowSiteBoundary: isVisible => dispatch(MapLayerActions.setShowSiteBoundary(isVisible)),
       setLocationFilters: locationFilters => dispatch(MapLayerActions.setLocationFilters(locationFilters)),
@@ -1767,6 +1776,7 @@ class State {
       planEditorOnMapClick: (featureIds, latLng) => dispatch(PlanEditorActions.onMapClick(featureIds, latLng)),
       showContextMenuForLocations: (featureIds, event) => dispatch(PlanEditorActions.showContextMenuForLocations(featureIds, event)),
       setUserGroupsMsg: (userGroupsMsg) => dispatch(GlobalSettingsActions.setUserGroupsMsg(userGroupsMsg)),
+      setRecreateTilesAndCache: (mapSelection) => dispatch(ViewSettingsActions.recreateTilesAndCache(mapSelection)),
     }
   }
 }

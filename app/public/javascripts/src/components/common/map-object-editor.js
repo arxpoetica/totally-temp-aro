@@ -646,7 +646,8 @@ class MapObjectEditorController {
       },
       draggable: isEditable, // Allow dragging only if feature is not locked
       clickable: true, // if it's an icon we can select it then the panel will tell us it's locked
-      map: this.mapRef
+      map: this.mapRef,
+      optimized: !ARO_GLOBALS.MABL_TESTING,
     })
 
     if (!isEditable) {
@@ -659,7 +660,8 @@ class MapObjectEditorController {
             anchor: new google.maps.Point(12, 24)
           },
           clickable: false,
-          map: this.mapRef
+          map: this.mapRef,
+          optimized: !ARO_GLOBALS.MABL_TESTING,
         })
         lockIconOverlay.bindTo('position', mapMarker, 'position')
         this.createdMapObjects[`${feature.objectId}_lockIconOverlay`] = lockIconOverlay
@@ -671,7 +673,8 @@ class MapObjectEditorController {
             anchor: new google.maps.Point(12, 8)
           },
           clickable: false,
-          map: this.mapRef
+          map: this.mapRef,
+          optimized: !ARO_GLOBALS.MABL_TESTING,
         })
         lockIconOverlay.bindTo('position', mapMarker, 'position')
         this.createdMapObjects[`${feature.objectId}_invalidatedIconOverlay`] = lockIconOverlay
