@@ -122,7 +122,7 @@ export const PlanInfo = (props) => {
             const permission = access.rolePermissions
             currentUserCanWrite = ((permission & accessTypes.RESOURCE_WRITE.permissionBits) !== 0)
             currentUserIsAdmin = ((permission & accessTypes.RESOURCE_ADMIN.permissionBits) !== 0)
-            isUserCanEdit = currentUserCanEdit || currentUserCanWrite || currentUserIsAdmin
+            isUserCanEdit = isUserCanEdit || currentUserCanEdit || currentUserCanWrite || currentUserIsAdmin
           }
         })
 
