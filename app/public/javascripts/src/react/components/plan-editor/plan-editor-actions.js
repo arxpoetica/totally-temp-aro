@@ -108,7 +108,14 @@ function clearTransaction (doOpenView = true) {
 
 // ToDo: there's only one transaction don't require the ID
 function commitTransaction (transactionId) {
-  return dispatch => {
+  return (dispatch, getState) => {
+    const state = getState()
+    if (state.isCommittingTransaction 
+      || state.isEnteringTransaction
+      || state.isCalculatingSubnets
+    ) {
+      return Promise.reject()
+    }
     return dispatch(recalculateSubnets(transactionId))
       .then(() => {
         dispatch(setIsCommittingTransaction(true))
@@ -1234,19 +1241,8 @@ function boundaryChange (subnetId, geometry) {
 function recalculateSubnets (transactionId, subnetIds = []) {
   return (dispatch, getState) => {
     const state = getState()
+    if (state.isCalculatingSubnets) return Promise.reject()
     let activeSubnets = []
-    /*
-    subnetIds.forEach(subnetId => {
-      dispatch(setFiberAnnotations({[subnetId]: []}, subnetId))
-      if (state.planEditor.subnets[subnetId]) {
-        activeSubnets.push(subnetId)
-      } else if (state.planEditor.subnetFeatures[subnetId]
-        && state.planEditor.subnetFeatures[subnetId].subnetId
-      ) {
-        activeSubnets.push(state.planEditor.subnetFeatures[subnetId].subnetId)
-      }
-    })
-    */
     dispatch(setIsCalculatingSubnets(true))
     const recalcBody = { subnetIds: activeSubnets }
 
