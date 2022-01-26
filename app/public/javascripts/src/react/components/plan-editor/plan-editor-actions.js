@@ -381,10 +381,10 @@ function showContextMenuForLocations (featureIds, event) {
         dispatch(ContextMenuActions.setContextMenuItems(menuItemFeatures))
         dispatch(ContextMenuActions.showContextMenu(coords.x, coords.y))
       } else {
-        return null
+        return Promise.resolve()
       }
     } else {
-      return null
+      return Promise.resolve()
     }
   }
 }
@@ -410,7 +410,7 @@ function _updateSubnetFeatures (subnetFeatures) {
       )
     })
     
-    if (!transactionId || commands.length <= 0) return null
+    if (!transactionId || commands.length <= 0) return Promise.resolve()
 
     const body = {commands}
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
@@ -455,7 +455,7 @@ function unassignLocation (locationId, terminalId) {
     if (subnetFeature) {
       return dispatch(_updateSubnetFeatures([subnetFeature]))
     } else {
-      return null
+      return Promise.resolve()
     }
   }
 }
@@ -1157,7 +1157,7 @@ function recalculateBoundary (subnetId) {
     const state = getState()
     //const transactionId = state.planEditor.transaction.id
     const subnet = state.planEditor.subnets[subnetId]
-    if (!subnet || !state.planEditor.transaction) return null // null? meh
+    if (!subnet || !state.planEditor.transaction) return Promise.resolve()
     const transactionId = state.planEditor.transaction.id
     let body, url, method;
     if (subnet.dataType !== "edge_construction_area") {
