@@ -1321,6 +1321,7 @@ class State {
       // Set the logged in user in the Redux store
       service.loadAuthPermissionsRedux()
       service.loadAuthRolesRedux()
+      console.log(user)
       service.setLoggedInUserRedux(user)
       service.loadSystemActorsRedux()
       SocketManager.joinRoom('user', user.id)
