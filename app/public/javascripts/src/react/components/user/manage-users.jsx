@@ -367,7 +367,6 @@ export class ManageUsers extends Component {
     )
   }
 
-  // TODO: shouldn't be changing the props of a const - fix all of these
   handleSuperUser(event) {
     let { newUser } = this.state
     newUser.isGlobalSuperUser = event.target.checked
