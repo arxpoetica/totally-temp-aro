@@ -32,7 +32,7 @@ export class EquipmentBoundaryMapObjects extends Component {
     
     this.clearMapObjectOverlay = this.clearMapObjectOverlay.bind(this);
     this.contextMenuClick = this.contextMenuClick.bind(this);
-    this.findCentralOffice = this.findCentralOffice.bind(this);
+    this.neighborRootNode = this.neighborRootNode.bind(this);
   }
 
   render () {
@@ -61,7 +61,7 @@ export class EquipmentBoundaryMapObjects extends Component {
       let newNeighborIds = [];
       // Enable click anywhere subnet for Route Adjusters
       if (activeFeature.feature.dataType === "edge_construction_area") {
-        const rootSubnet = this.findCentralOffice();
+        const rootSubnet = this.neighborRootNode();
         rootSubnetId = rootSubnet.feature.objectId;
         newNeighborIds.push(selectedSubnetId);
       }
@@ -382,11 +382,14 @@ export class EquipmentBoundaryMapObjects extends Component {
     this.mapObjectOverlay = [];
   }
 
-  findCentralOffice() {
-    const { subnetFeatures } = this.props
+  neighborRootNode() {
+    const { subnetFeatures, planType } = this.props
     let rootNode;
     for (let subnetFeature of Object.values(subnetFeatures)) {
-      if (subnetFeature.feature.networkNodeType === "central_office") {
+      if (
+        (subnetFeature.feature.networkNodeType === "central_office" && planType !== "RING") ||
+        (subnetFeature.feature.networkNodeType === "subnet_node" && planType === "RING")
+      ) {
         rootNode = subnetFeature;
         break;
       }
@@ -421,6 +424,7 @@ const mapStateToProps = state => ({
   selectedSubnetId: state.planEditor.selectedSubnetId,
   subnetFeatures: state.planEditor.subnetFeatures,
   clickedLatLng: state.planEditor.clickedLatLng,
+  planType: state.plan.activePlan.planType
 })
 
 const mapDispatchToProps = dispatch => ({
