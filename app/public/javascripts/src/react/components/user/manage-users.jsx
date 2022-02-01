@@ -17,7 +17,7 @@ export class ManageUsers extends Component {
         email: '',
         confirmEmail: '',
         companyName: '',
-        groups: {},
+        groups: [],
         isGlobalSuperUser: false,
         groupIds: [],
       },
@@ -368,7 +368,7 @@ export class ManageUsers extends Component {
   }
 
   handleSuperUser(event) {
-    const { newUser } = this.state
+    let { newUser } = this.state
     newUser.isGlobalSuperUser = event.target.checked
     if (event.target.checked) {
       newUser.isGlobalSuperUser = true
@@ -379,7 +379,7 @@ export class ManageUsers extends Component {
   }
 
   handleListGroupChange(event, id) {
-    const { userList } = this.props
+    let { userList } = this.props
     userList.forEach((user) => {
       if (user.id === id) {
         user.userGroups = event
@@ -389,32 +389,33 @@ export class ManageUsers extends Component {
   }
 
   handleGroupChange(event) {
-    const { newUser } = this.state
+    event = event || []
+    let { newUser } = this.state
     newUser.groups = event
     this.setState({ newUser })
   }
 
   handleMailChange(event) {
-    const { mail } = this.state
+    let { mail } = this.state
     mail[event.target.name] = event.target.value
     this.setState({ mail })
   }
 
   handleUserChange(event) {
-    const { newUser } = this.state
+    let { newUser } = this.state
     newUser[event.target.name] = event.target.value
     this.setState({ newUser })
   }
 
   handleChange(event) {
-    const searchText = event.target.value
+    let searchText = event.target.value
     event.target.name = searchText
     this.setState({ searchText })
   }
 
   handleEnter(event) {
     if (event.key === 'Enter') {
-      const { searchText } = this.state
+      let { searchText } = this.state
       this.props.searchUsers(searchText)
       this.setState({ searchText })
     }
@@ -454,7 +455,7 @@ export class ManageUsers extends Component {
 
   openNewUser() {
     if (this.props.defaultGroup !== null) {
-      const { newUser } = this.state
+      let { newUser } = this.state
       newUser.groups = this.props.defaultGroup
       this.setState({ newUser })
     }
@@ -479,7 +480,7 @@ export class ManageUsers extends Component {
   }
 
   clearNewuser() {
-    const { newUser } = this.state
+    let { newUser } = this.state
     newUser.firstName = ''
     newUser.lastName = ''
     newUser.email = ''

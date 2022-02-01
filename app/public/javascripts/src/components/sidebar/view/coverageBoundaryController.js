@@ -20,7 +20,8 @@ class CoverageBoundaryController {
         anchor: new google.maps.Point(16, 16) // Anchor should be at the center of the crosshair icon
       },
       draggable: true,
-      map: null
+      map: null,
+      optimized: !ARO_GLOBALS.MABL_TESTING,
     })
     this.targetMarker.addListener('dragend', (event) => {
       this.handleCoverageTargetUpdated(event.latLng)

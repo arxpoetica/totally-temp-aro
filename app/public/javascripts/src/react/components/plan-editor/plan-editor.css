@@ -241,15 +241,17 @@
 .equipment-dragger .nodes {
   display: grid;
   grid-gap: 5px;
-  grid-template-columns: repeat(auto-fit, minmax(44px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(48px, 1fr));
+  justify-items: center;
 }
 .equipment-dragger .node {
   position: relative;
-  padding: 0 0 100%;
   background-color: #f3f3f3;
   border: 1px solid transparent;
   transition: all 0.2s ease-in-out;
   cursor: pointer;
+  width: 50px;
+  height: 50px;
 }
 .equipment-dragger .node-wrap {
   display: flex;

@@ -121,6 +121,7 @@ export class ToolBar extends Component {
     this.props.loadServiceLayers() // To load Service layer in advance
 
     this.refreshToolbar = this.refreshToolbar.bind(this) // To bind a function
+    this.createAndLoadPlan = this.createAndLoadPlan.bind(this) // To bind a function
     this.openAccountSettingsModal = this.openAccountSettingsModal.bind(this) // To bind a function
 
     // To Trigger refreshToolbar() by Listening to the custom event from map-split.js $document.ready() method
@@ -647,13 +648,15 @@ export class ToolBar extends Component {
         cancelButtonText: 'Discard', // 'No',
         closeOnConfirm: true
       }, (result) => {
-        if (result) {
-          this.props.commitTransaction(this.props.transaction.id)
-        } else {
-          this.props.clearTransaction()
-        }
+        const action = result ? "commitTransaction" : "clearTransaction"
+        Promise.resolve(this.props[action](this.props.transaction.id)).then(() => this.createAndLoadPlan())
       })
-    } 
+    } else {
+      this.createAndLoadPlan()
+    }
+  }
+
+  createAndLoadPlan() {
     this.props.createNewPlan(true)
       .then((result) => this.props.loadPlan(result.data.id))
       .catch((err) => console.error(err))
@@ -817,7 +820,8 @@ export class ToolBar extends Component {
       },
       map: this.props.mapRef,
       draggable: true,
-      zIndex: 100
+      zIndex: 100,
+      optimized: !ARO_GLOBALS.MABL_TESTING,
     })
 
     this.rulerSegments.push(ruler)
@@ -946,7 +950,8 @@ export class ToolBar extends Component {
         },
         map: this.props.mapRef,
         draggable: false,
-        zIndex: 100
+        zIndex: 100,
+        optimized: !ARO_GLOBALS.MABL_TESTING,
       })
 
       this.copperMarkers.push(copperMarker)

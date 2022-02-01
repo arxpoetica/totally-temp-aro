@@ -4,6 +4,7 @@ import SelectionActions from '../selection/selection-actions'
 import RfpActions from '../optimization/rfp/rfp-actions'
 import RfpStatusTypes from '../optimization/rfp/constants'
 import SocketManager from '../../../react/common/socket-manager'
+import PlanEditorActions from '../plan-editor/plan-editor-actions'
 import RingEditActions from '../ring-edit/ring-edit-actions'
 import NetworkOptimizationActions from '../optimization/network-optimization/network-optimization-actions'
 import ToolBarActions from '../header/tool-bar-actions.js'
@@ -137,6 +138,8 @@ function setActivePlan (plan) {
       })
     })
 
+    // clear any old plan edit data 
+    dispatch(PlanEditorActions.clearTransaction(false))
     // Join room for this plan
     SocketManager.joinRoom('plan', plan.id)
     // Get current plan data items

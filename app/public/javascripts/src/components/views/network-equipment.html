@@ -68,7 +68,7 @@
                 <td colspan="2"><strong>Equipment</strong></td>
               </tr>
               <tr ng-repeat="equipmentLayer in $ctrl.equipmentsArray | orderBy: 'listIndex'"
-                  ng-if="$ctrl.state.configuration.perspective.networkEquipment.areVisible.indexOf(equipmentLayer.key) >= 0">
+                  ng-if="$ctrl.state.configuration.perspective.networkEquipment.mapLayers.areVisible.indexOf(equipmentLayer.key) >= 0">
                 <td>
                   <div>
                     <div class="row-left">

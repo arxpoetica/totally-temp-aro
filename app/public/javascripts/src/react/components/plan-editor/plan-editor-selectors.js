@@ -15,6 +15,14 @@ const getIsCalculatingSubnets = state => state.planEditor.isCalculatingSubnets
 const getIsCalculatingBoundary = state => state.planEditor.isCalculatingBoundary
 const getBoundaryDebounceBySubnetId = state => state.planEditor.boundaryDebounceBySubnetId
 const getCursorLocationIds = state => state.planEditor.cursorLocationIds
+const getPlanThumbInformation = state => state.planEditor.getPlanThumbInformation
+
+const getSelectedPlanThumbInformation = createSelector(
+  [getSelectedSubnet, getPlanThumbInformation],
+  (selectedSubnet, planThumbInformation) => {
+    return planThumbInformation[selectedSubnet]
+  }
+)
 
 const getIsRecalcSettled = createSelector(
   [getIsCalculatingSubnets, getIsCalculatingBoundary, getBoundaryDebounceBySubnetId],
@@ -52,7 +60,7 @@ const getFeaturesRenderInfo = createSelector(
 
 const getNetworkConfig = state => {
   const { network_architecture_manager } = state.plan.resourceItems
-  if (!network_architecture_manager) { return }
+  if (!network_architecture_manager || !network_architecture_manager.selectedManager) { return }
   const { id } = network_architecture_manager.selectedManager
   const manager = state.resourceManager.managers && state.resourceManager.managers[id]
   if (!manager) { return }
@@ -295,6 +303,7 @@ const getLocationCounts = createSelector(
       const feature = subnetFeatures[id]
       const type = feature && feature.feature.networkNodeType
 
+      // TODO: not a fan of hardcoding by type
       if (subnet && type === 'fiber_distribution_hub') {
         const locations = Object.values(subnet.subnetLocationsById)
         locationCountsById[id] = locations
@@ -302,7 +311,7 @@ const getLocationCounts = createSelector(
           .length
       } else if (subnet && type === 'dslam') {
         locationCountsById[id] = Object.keys(subnet.subnetLocationsById).length
-      } else if (type === 'fiber_distribution_terminal' && feature.feature.dropLinks) {
+      } else if ((type === 'fiber_distribution_terminal' || type === 'location_connector') && feature.feature.dropLinks) {
         locationCountsById[id] = feature.feature.dropLinks.length
       } else {
         const locationDistanceMap = subnet && subnet.fiber && subnet.fiber.locationDistanceMap
@@ -326,7 +335,8 @@ const PlanEditorSelectors = Object.freeze({
   getSelectedSubnetLocations,
   getCursorLocations,
   getLocationCounts,
-  getSubnetFeatures
+  getSubnetFeatures,
+  getSelectedPlanThumbInformation
 })
 
 export default PlanEditorSelectors
