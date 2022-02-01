@@ -31,8 +31,11 @@ const ViewMode = (props) => {
 
   const prevSelectedLocations = usePrevious(selectedLocations)
   useEffect(() => {
-    if (!dequal(prevSelectedLocations, selectedLocations) && !dequal(activeViewModePanel, viewModePanels.EDIT_LOCATIONS)
-      && !dequal(activeViewModePanel, viewModePanels.EDIT_SERVICE_LAYER)) {
+    if (
+      !dequal(prevSelectedLocations, selectedLocations)
+      && !dequal(activeViewModePanel, viewModePanels.EDIT_LOCATIONS)
+      && !dequal(activeViewModePanel, viewModePanels.EDIT_SERVICE_LAYER)
+    ) {
       const firstLocationId = selectedLocations.values().next().value
       updateSelectedState(firstLocationId)
       if (firstLocationId) {

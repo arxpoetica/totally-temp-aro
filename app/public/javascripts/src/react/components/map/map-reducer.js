@@ -46,7 +46,7 @@ function configurationReducer (state = defaultState, action) {
     case Actions.MAP_SET_REQUEST_SET_MAP_CENTER:
       return setRequestSetMapCenter(state, action.payload) 
 
-    case Actions.MAP_SET_ARE_TILE_RENDERING:
+    case Actions.MAP_SET_ARE_TILES_RENDERING:
       return { ...state, areTilesRendering: action.payload }
 
     default:

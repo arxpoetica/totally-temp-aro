@@ -33,7 +33,7 @@ function requestSetMapCenter (mapCenter) {
 
 function setAreTilesRendering (value) {
   return {
-    type: Actions.MAP_SET_ARE_TILE_RENDERING,
+    type: Actions.MAP_SET_ARE_TILES_RENDERING,
     payload: value
   }
 }
