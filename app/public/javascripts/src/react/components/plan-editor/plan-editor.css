@@ -11,20 +11,32 @@
 
 .plan-navigation {
   margin: 0 0 10px;
+  border-top: 1px solid #dcdcdc;
+  border-bottom: 1px solid #dcdcdc;
+  font: 14px var(--font);
+}
+.plan-navigation .list {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 16px;
+  border-top: 1px dashed #dcdcdc;
+}
+.plan-navigation > .list {
+  padding: 0;
+  border: none;
+}
+.plan-navigation .item {
 }
 .plan-navigation .header {
   display: flex;
   align-items: center;
-  padding: 10px;
-  border-top: 1px solid var(--gray-medium-light);
-  border-bottom: 1px solid var(--gray-medium-light);
-  font: 18px var(--font);
+  padding: 10px 0;
   cursor: pointer;
   user-select: none;
 }
 .plan-navigation h2 {
   margin: 0;
-  font: bold 16px/1 var(--font);
+  font: inherit;
 }
 .plan-navigation small {
   font: 13px/1 var(--font);

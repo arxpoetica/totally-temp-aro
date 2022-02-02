@@ -1,19 +1,20 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import PlanNavigationList from './plan-navigation-list.jsx'
+import PlanEditorSelectors from '../plan-editor-selectors.js'
 
-const PlanNavigation = props => {
-
+const PlanNavigation = ({ rootSubnet }) => {
   return (
     <div className="plan-navigation">
-
-      <PlanNavigationList title="Central Office"/>
-
+      <PlanNavigationList subnet={rootSubnet}/>
     </div>
   )
-
 }
 
-const mapStateToProps = state => ({})
+const mapStateToProps = state => ({
+  rootSubnet: PlanEditorSelectors.getRootSubnet(state),
+  // googleMaps: state.map.googleMaps,
+  // subnets: state.planEditor.subnets,
+})
 const mapDispatchToProps = dispatch => ({})
 export default connect(mapStateToProps, mapDispatchToProps)(PlanNavigation)
