@@ -1,20 +1,23 @@
 import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import PlanNavigationItem from './plan-navigation-item.jsx'
-import PlanEditorSelectors from '../plan-editor-selectors'
 import { constants } from '../shared'
 import cx from 'clsx'
 const { ALERT_TYPES, Z_INDEX_PIN } = constants
 
 // FIXME: will draw {title} etc. not from props but state
-const PlanNavigationList = ({ subnet, title, depth = 0 }) => {
+const PlanNavigationList = ({ subnets, subnet }) => {
 
   const [open, setOpen] = useState(true)
 
   return (
     <ul className={cx('list', open && 'open')}>
-      {/* <li>{JSON.stringify(subnet)}</li> */}
-      <PlanNavigationItem title={`Depth ${depth + 1}`} depth={depth}/>
+      {/* FIXME: we need to think about how to pass along terminals / locations */}
+      {/* {JSON.stringify(Object.keys(subnet))} */}
+      {subnet.children && subnet.children.map(subnetId => {
+        const subnet = subnets[subnetId]
+        subnet && <PlanNavigationItem key={subnetId} subnet={subnet}/>
+      })}
     </ul>
   )
 }

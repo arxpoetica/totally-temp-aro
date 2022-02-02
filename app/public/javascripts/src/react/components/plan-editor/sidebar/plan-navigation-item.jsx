@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import PlanNavigationList from './plan-navigation-list.jsx'
-import PlanEditorSelectors from '../plan-editor-selectors'
 import { constants } from '../shared'
 import cx from 'clsx'
 const { ALERT_TYPES, Z_INDEX_PIN } = constants
 
 // FIXME: will draw most props from state
-const PlanNavigationItem = ({ title, depth = 0 }) => {
+const PlanNavigationItem = ({ subnet }) => {
 
   const [open, setOpen] = useState(true)
 
@@ -15,12 +14,11 @@ const PlanNavigationItem = ({ title, depth = 0 }) => {
     <li className="item">
       <div className="header">
         <span className="svg plus-minus"></span>
+        <h2>{subnet.subnetNode}</h2>
         <span className="svg warning"></span>
-        <h2>{title}</h2>
       </div>
-      {depth < 4 && <>
-        <PlanNavigationList depth={depth + 1}/>
-      </>}
+      {/* FIXME: we need to think about how to pass along terminals / locations */}
+      <PlanNavigationList subnet={subnet}/>
     </li>
   )
 }
