@@ -6,7 +6,7 @@ import PlanEditorSelectors from '../plan-editor-selectors.js'
 const PlanNavigation = ({ rootSubnet }) => {
   return rootSubnet ? (
     <div className="plan-navigation">
-      <PlanNavigationList subnet={rootSubnet}/>
+      <PlanNavigationList subnets={[rootSubnet]} open={true}/>
     </div>
   ) : null
 }

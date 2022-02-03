@@ -1,35 +1,21 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { connect } from 'react-redux'
 import PlanNavigationItem from './plan-navigation-item.jsx'
-import { constants } from '../shared'
 import cx from 'clsx'
-const { ALERT_TYPES, Z_INDEX_PIN } = constants
 
-// FIXME: will draw {title} etc. not from props but state
-const PlanNavigationList = ({ subnets, subnet }) => {
-
-  const [open, setOpen] = useState(true)
-
-  return (
+// TODO: merge this with `foldout.jsx`?
+const PlanNavigationList = ({ subnets = [], open = false }) => {
+  return subnets.length > 0 ? (
     <ul className={cx('list', open && 'open')}>
-      {/* FIXME: we need to think about how to pass along terminals / locations */}
-      {/* {JSON.stringify(Object.keys(subnet))} */}
-      {subnet.children && subnet.children.map(subnetId => {
-        const subnet = subnets[subnetId]
-        subnet && <PlanNavigationItem key={subnetId} subnet={subnet}/>
-      })}
+      {subnets.map((subnet, index) =>
+        <PlanNavigationItem key={index} subnet={subnet}/>
+      )}
     </ul>
-  )
+  ) : null
 }
 
-const mapStateToProps = state => ({
-  subnets: state.planEditor.subnets,
-  // locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(state),
-  // map: state.map.googleMaps,
-})
-
+const mapStateToProps = state => ({})
 const mapDispatchToProps = dispatch => ({})
-
 export default connect(mapStateToProps, mapDispatchToProps)(PlanNavigationList)
 
 
@@ -53,16 +39,15 @@ export default connect(mapStateToProps, mapDispatchToProps)(PlanNavigationList)
 
 
 
-
+// NOTE: Brian -- leave this for now...we'll delete it soon enough
 
 // // FIXME: will draw {title} etc. not from props but state
 // const PlanNavigationList = ({ title, locationAlerts, map }) => {
 
 //   const alerts = Object.entries(locationAlerts)
 
-//   const [open, setOpen] = useState(false)
+
 // //   const [bounceMarker, setBounceMarker] = useState(null)
-//   const handleOpenState = () => setOpen(!open)
 
 //   const handleMouseEnter = ({ latitude, longitude }) => {
 //     // const marker = new google.maps.Marker({
@@ -87,18 +72,14 @@ export default connect(mapStateToProps, mapDispatchToProps)(PlanNavigationList)
 //   const handleClick = ({ latitude, longitude }) => {
 //     // map.setCenter({ lat: latitude, lng: longitude })
 //   }
-
 //   return (
 //     <div className={cx('plan-navigation-list', open && 'open')}>
 
-//       <div className="header" onClick={handleOpenState}>
+//       <div className="header">
 //         <span className="svg plus-minus"></span>
 //         <span className="svg warning"></span>
 //         <h2>{title} <small>{alerts.length} item{alerts.length ? 's' : ''}</small></h2>
 //       </div>
-
-//       <PlanNavigationList title="One"/>
-//       <PlanNavigationList title="Two"/>
 
 //       {/* <ul className={cx('content', open && 'open')}>
 //         {alerts.map(([id, location]) => (
