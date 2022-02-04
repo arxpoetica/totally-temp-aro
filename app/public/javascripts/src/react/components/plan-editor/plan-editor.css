@@ -7,60 +7,85 @@
   font-weight: bold;
 }
 
-/* ========================= >>>>> alerts panel >>>>> */
+/* ========================= >>>>> plan navigation >>>>> */
 
-.alerts-panel {
+.plan-navigation {
+  overflow: auto;
+  max-height: 255px;
   margin: 0 0 10px;
+  border-top: 1px solid #dcdcdc;
+  border-bottom: 1px solid #dcdcdc;
+  font: 14px var(--font);
 }
-.alerts-panel .header {
+.plan-navigation .list {
+  display: none;
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 26px;
+}
+.plan-navigation .list.open { display: block; }
+.plan-navigation > .list { padding: 0; }
+.plan-navigation .item {
+  border-top: 1px dashed #dcdcdc;
+}
+.plan-navigation > ul > .item:first-child { border: none; }
+.plan-navigation .header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  padding: 10px;
-  border-top: 1px solid var(--gray-medium-light);
-  border-bottom: 1px solid var(--gray-medium-light);
-  font: 18px var(--font);
+  padding: 10px 0;
   cursor: pointer;
   user-select: none;
 }
-.alerts-panel h2 {
+.plan-navigation .info {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.plan-navigation .info.no-plus-minus {
+  padding-left: 22px;
+}
+.plan-navigation .title {
+  overflow: hidden;
   margin: 0;
-  font: bold 16px/1 var(--font);
+  min-width: 0;
+  font: 14px var(--font);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.alerts-panel small {
-  font: 13px/1 var(--font);
+.plan-navigation .defect-info {
+  display: flex;
+  align-items: center;
 }
-.alerts-panel .svg {
+.plan-navigation .defect-title {
+  margin: 0 10px 0 6px;
+  font: 12px var(--font);
+  white-space: nowrap;
+}
+.plan-navigation .svg {
   width: 39px;
   margin: 0 10px 0 0;
   background: none no-repeat center transparent;
   background-size: contain;
 }
-.alerts-panel .plus-minus {
+.plan-navigation .plus-minus {
   width: 16px;
   height: 16px;
   background-image: url('/svg/toggle-plus.svg');
 }
-.alerts-panel.open .plus-minus {
+.plan-navigation .plus-minus.open {
   background-image: url('/svg/toggle-minus.svg');
 }
-.alerts-panel .warning {
+
+
+
+
+.plan-navigation .warning {
   width: 18px;
   height: 18px;
   background-image: url('/svg/alert-panel-warning.svg');
 }
-.alerts-panel .content {
-  overflow: auto;
-  display: none;
-  max-height: 255px;
-  padding: 10px;
-  border-bottom: 1px solid var(--gray-medium-light);
-}
-.alerts-panel.open .content {
-  display: block;
-  margin: 0;
-  padding: 0;
-}
-.alerts-panel .content > li {
+/* .plan-navigation .content > li {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -68,15 +93,15 @@
   border-bottom: 1px solid var(--gray-light);
   cursor: pointer;
 }
-.alerts-panel .content > li:hover {
+.plan-navigation .content > li:hover {
   position: relative;
   z-index: 5;
-}
-.alerts-panel .text {
+} */
+.plan-navigation .text {
   display: flex;
   align-items: center;
 }
-.alerts-panel .location {
+.plan-navigation .location {
   position: relative;
   width: 20px;
   height: 20px;
@@ -85,15 +110,15 @@
 
 /* ========================= >>>>> alerts dropdown >>>>> */
 
-/* .alerts-panel .dropdown {
+/* .plan-navigation .dropdown {
   position: relative;
 }
-.alerts-panel .caret {
+.plan-navigation .caret {
   width: 10px;
   height: 7px;
   background-image: url('/svg/dropdown-caret.svg');
 }
-.alerts-panel .list {
+.plan-navigation .list {
   list-style: none;
   display: none;
   position: absolute;
@@ -106,10 +131,10 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
   text-align: center;
 }
-.alerts-panel li:hover .list {
+.plan-navigation li:hover .list {
   display: block;
 }
-.alerts-panel .list::before {
+.plan-navigation .list::before {
   content: '';
   position: absolute;
   top: -10px;
@@ -119,13 +144,13 @@
   background: url('/svg/dropdown-bevel.svg') no-repeat center transparent;
   z-index: 1;
 }
-.alerts-panel .list li {
+.plan-navigation .list li {
   position: relative;
   padding: 6px 20px;
   white-space: nowrap;
   z-index: 2;
 }
-.alerts-panel .list li:hover {
+.plan-navigation .list li:hover {
   background-color: var(--gray-light);
 } */
 
