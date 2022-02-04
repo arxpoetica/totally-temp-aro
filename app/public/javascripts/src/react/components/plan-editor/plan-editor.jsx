@@ -9,8 +9,8 @@ import EquipmentDragger from './equipment-dragger.jsx'
 import EquipmentMapObjects from './equipment-map-objects.jsx'
 import EquipmentBoundaryMapObjects from './equipment-boundary-map-objects.jsx'
 import FiberMapObjects  from './fiber-map-objects.jsx'
-import AlertsPanel from './alerts-panel.jsx'
-import { AlertsPanelTooltip } from './alerts-panel-tooltip.jsx'
+import PlanNavigation from './sidebar/plan-navigation.jsx'
+import AlertsTooltip from './alerts-tooltip.jsx'
 import BoundaryDrawCreator from './boundary-draw-creator.jsx'
 import AroFeatureEditor from '../common/editor-interface/aro-feature-editor.jsx'
 import './plan-editor.css'
@@ -99,8 +99,8 @@ export const PlanEditor = props => {
       { /* If we are in "draw boundary mode" for any equipment, render the drawing component */ }
       { isDrawingBoundaryFor ? <BoundaryDrawCreator /> : null }
 
-      <AlertsPanel />
-      <AlertsPanelTooltip />
+      <PlanNavigation />
+      <AlertsTooltip />
       { /* We only want PlanEditorRecalculate to show for equipments */ }
       { selectedSubnetId && features[selectedSubnetId] && features[selectedSubnetId].feature.networkNodeType && <PlanEditorRecalculate /> }
       <PlanEditorThumbs />
