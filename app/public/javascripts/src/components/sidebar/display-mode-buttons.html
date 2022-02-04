@@ -48,10 +48,7 @@
           ng-click="$ctrl.setSelectedDisplayMode($ctrl.displayModes.EDIT_PLAN)"
           ng-if="$ctrl.currentUser.perspective !== 'sales'" 
           ng-disabled="
-          (
-            $ctrl.state.plan &&
-            $ctrl.state.plan.planState === 'START_STATE'
-          ) || (!$ctrl.state.plan || $ctrl.state.plan.ephemeral)"
+          !$ctrl.state.plan || $ctrl.state.plan.ephemeral || $ctrl.state.plan.planState === 'START_STATE'"
   >
             <div class="fa fa-2x fa-pencil-alt"
                 data-toggle="tooltip"
