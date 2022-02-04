@@ -1,6 +1,7 @@
 import AroHttp from '../../common/aro-http'
 import Actions from '../../common/actions'
 import PlanActions from '../plan/plan-actions'
+import SelectionActions from '../selection/selection-actions'
 import { hsvToRgb } from '../../common/view-utils'
 
 function setPlanInputsModal (status){
@@ -152,6 +153,9 @@ function loadPlan (planId) {
   return dispatch => {
     trackEvent('LOAD_PLAN', 'CLICK', 'PlanID', planId)
     dispatch(selectedDisplayMode('VIEW'))
+    // TEMPORARY UNTIL WE ALLOW MULTIPLE SERVICE AREA PLAN EDIT
+    // Load selected service areas
+    dispatch(SelectionActions.loadPlanTargetSelectionsFromServer(planId))
     let plan = null
     return AroHttp.get(`/service/v1/plan/${planId}`)
       .then((result) => {

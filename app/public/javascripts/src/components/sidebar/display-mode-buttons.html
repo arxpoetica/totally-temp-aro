@@ -1,0 +1,81 @@
+<style>
+  .display-mode-button {
+    width: 60px;   /* So that all the buttons have the same width */
+  }
+</style>
+<div class="btn-group pull-left" role="group" aria-label="Mode buttons">
+  <button type="button"
+          ng-if="$ctrl.state.configuration.perspective.showDisplayModeButtons.VIEW"
+          ng-class="{ 'btn display-mode-button': true,
+                      'btn-light': $ctrl.selectedDisplayMode !== $ctrl.displayModes.VIEW,
+                      'btn-primary': $ctrl.selectedDisplayMode === $ctrl.displayModes.VIEW }"
+          ng-click="$ctrl.setSelectedDisplayMode($ctrl.displayModes.VIEW)">
+            <div class="fa fa-2x fa-eye"
+                data-toggle="tooltip"
+                data-placement="bottom"
+                title="View Mode"></div>
+  </button>
+  <button type="button"
+          ng-if="$ctrl.state.configuration.perspective.showDisplayModeButtons.ANALYSIS
+                  && $ctrl.state.plan.planType != 'RING'"
+          ng-class="{ 'btn display-mode-button': true,
+                      'btn-light': $ctrl.rSelectedDisplayMode !== $ctrl.displayModes.ANALYSIS,
+                      'btn-primary': $ctrl.rSelectedDisplayMode === $ctrl.displayModes.ANALYSIS }"
+          ng-click="$ctrl.setSelectedDisplayMode($ctrl.displayModes.ANALYSIS)"
+          ng-if="$ctrl.currentUser.perspective !== 'sales'">
+            <div class="fa fa-2x fa-gavel"
+                data-toggle="tooltip"
+                data-placement="bottom"
+                title="Analysis Mode"></div>
+  </button>
+  <button type="button"
+          ng-if="$ctrl.state.plan.planType == 'RING'"
+          ng-class="{ 'btn display-mode-button': true,
+                      'btn-light': $ctrl.rSelectedDisplayMode !== $ctrl.displayModes.EDIT_RINGS,
+                      'btn-primary': $ctrl.rSelectedDisplayMode === $ctrl.displayModes.EDIT_RINGS }"
+          ng-click="$ctrl.setSelectedDisplayMode($ctrl.displayModes.EDIT_RINGS)"
+          ng-if="$ctrl.currentUser.perspective !== 'sales'">
+            <div class="fa fa-2x fa-project-diagram"
+                data-toggle="tooltip"
+                data-placement="bottom"
+                title="Edit Rings"></div>
+  </button>
+  <button type="button"
+          ng-if="$ctrl.state.configuration.perspective.showDisplayModeButtons.EDIT_PLAN"
+          ng-class="{ 'btn display-mode-button': true,
+                      'btn-light': $ctrl.rSelectedDisplayMode !== $ctrl.displayModes.EDIT_PLAN,
+                      'btn-primary': $ctrl.rSelectedDisplayMode === $ctrl.displayModes.EDIT_PLAN }"
+          ng-click="$ctrl.setSelectedDisplayMode($ctrl.displayModes.EDIT_PLAN)"
+          ng-if="$ctrl.currentUser.perspective !== 'sales'" 
+          ng-disabled="$ctrl.displayEditPlanIcon()"
+  >
+            <div class="fa fa-2x fa-pencil-alt"
+                data-toggle="tooltip"
+                data-placement="bottom"
+                title="Edit Plan"></div>
+  </button>
+</div>
+<div class="btn-group float-right">
+  <button type="button"
+          ng-if="$ctrl.state.configuration.perspective.showDisplayModeButtons.DEBUG && $ctrl.state.loggedInUser.isAdministrator"
+          ng-class="{ 'btn display-mode-button': true,
+                      'btn-light': $ctrl.rSelectedDisplayMode !== $ctrl.displayModes.DEBUG,
+                      'btn-primary': $ctrl.rSelectedDisplayMode === $ctrl.displayModes.DEBUG }"
+          ng-click="$ctrl.setSelectedDisplayMode($ctrl.displayModes.DEBUG)">
+            <div class="fa fa-2x fa-bug"
+                  data-toggle="tooltip"
+                  data-placement="bottom"
+                  title="Debugging Mode"></div>
+  </button>
+  <button type="button"
+          ng-if="$ctrl.state.configuration.perspective.showDisplayModeButtons.PLAN_SETTINGS"
+          ng-class="{ 'btn display-mode-button': true,
+                      'btn-light': $ctrl.selectedDisplayMode !== $ctrl.displayModes.PLAN_SETTINGS,
+                      'btn-primary': $ctrl.selectedDisplayMode === $ctrl.displayModes.PLAN_SETTINGS }"
+          ng-click="$ctrl.setSelectedDisplayMode($ctrl.displayModes.PLAN_SETTINGS)">
+            <div class="fa fa-2x fa-cog"
+                  data-toggle="tooltip"
+                  data-placement="bottom"
+                  title="Plan Settings Mode"></div>
+  </button>
+</div>
