@@ -1,0 +1,17 @@
+.react-tool-tip {
+    background-color: red;
+    position: relative;
+}
+
+.react-tool-tip:before {
+    content: "";
+    display: block;
+    width: 0;
+    height: 0;
+    position: relative;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 10px solid red;
+    left: 65px;
+    top: -5px;
+}
