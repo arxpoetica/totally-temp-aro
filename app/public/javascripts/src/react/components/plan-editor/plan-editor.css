@@ -10,12 +10,14 @@
 /* ========================= >>>>> plan navigation >>>>> */
 
 .plan-navigation {
+  /*
   overflow: auto;
   max-height: 255px;
   margin: 0 0 10px;
   border-top: 1px solid #dcdcdc;
   border-bottom: 1px solid #dcdcdc;
   font: 14px var(--font);
+  */
 }
 .plan-navigation .list {
   display: none;
@@ -33,7 +35,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 0;
+  padding: 2px 0;
   cursor: pointer;
   user-select: none;
 }
@@ -45,6 +47,11 @@
 .plan-navigation .info.no-plus-minus {
   padding-left: 22px;
 }
+
+.plan-navigation .nonfoldout-row .info {
+  padding-left: 22px;
+}
+
 .plan-navigation .title {
   overflow: hidden;
   margin: 0;
