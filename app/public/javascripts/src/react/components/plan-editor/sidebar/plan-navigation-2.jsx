@@ -2,31 +2,91 @@ import React from 'react'
 import { connect } from 'react-redux'
 import Foldout from '../../common/foldout.jsx'
 
-const PlanNavigation2 = props => {
-  if (!props.selectedSubnetId || !props.subnets) return null
+export const FaultCode = {
+	UNDEFINED: "Unknown",
+	LOCATION_NOT_ASSIGNED: "Unassigned",
+	LOCATION_LINK_ERROR: "Link Error",
+	LOCATION_DROP_DISTANCE: "Drop Distance Exceeded",
+	EQUIPMENT_FIBER_DISTANCE: "Fiber Distance Exceeded",
+	EQUIPMENT_CAPACITY: "Capacity Exceeded",
+}
 
-  function makeRow (featureId) {
+const PlanNavigation2 = props => {
+  if (!props.selectedSubnetId 
+    || !props.subnets
+    || !props.subnets[props.selectedSubnetId] // meaning we will not show this tree if the selected node is a Terminal or Location
+  ) return null
+
+
+  function makeRow (featureId, faultNode = {childNodes:[],assignedFaultCodes:[]} ) { // TODO: faultNode should probably be a defined type that is also used in state
+    //  OK so this is a bit intricate but stick with me
+    //  Nodes of the network, such as COs, Equipment, Locations, can have alerts. 
+    //  Subnets have Alert Trees listing the alerts on nodes in that subnet.
+    //  This can be confusing because we name the Subnet after it's root node; they have the same ID.
+    //  So the Alert for a Hub, for example, will be on the Subnet with the same ID.
+    //  A Terminal is not the root node of a Hub so the Alert for a Terminal will be a in the Alert Tree of the Subnet with the same ID as the Terminal's parent node, the Hub.
+    //  NOTE: A CO, for example, can have some children that aren't Subnets and some that are. So we'll need to merge it's FaultTree.children with the fault nodes of it's subnet children.
     let payload = {
       element: null, 
       alertCount: 0,
+      isLeaf: true,
     }
 
     let children = []
+    let childFaultNodesById = {}
+    faultNode.childNodes.forEach(childFaultNode => {
+      childFaultNodesById[childFaultNode.faultReference.objectId] = childFaultNode
+    })
     if (props.subnets[featureId]) {
       // it's a subnet
       children = props.subnets[featureId].children
-    } else if (props.subnetFeatures[featureId]){
-      // it's a terminal or a location
-      // temp
-      //children = 
-    }
+    } else if (
+      props.subnetFeatures[featureId]
+      && props.subnetFeatures[featureId].feature.dropLinks
+    ){
+      // it's a terminal
+      //  children is going to be a list of droplinks
+      // planEditor.subnetFeatures["c5356f72-cbc5-49ff-b7e1-fd7e00da5e54"].feature.dropLinks[0].locationLinks[0].locationId
+      props.subnetFeatures[featureId].feature.dropLinks.forEach(dropLink => {
+        dropLink.locationLinks.forEach(locationLink => {
+          children.push(locationLink.locationId)
+        })
+      })
+    } // else it's a location
+
+    // planEditor.subnets["c8b405fd-8b13-4293-9698-c7c310982894"].faultTree.rootNode.assignedFaultCodes
+    // planEditor.subnets["c8b405fd-8b13-4293-9698-c7c310982894"].faultTree.rootNode.faultReference.objectId
+    // planEditor.subnets["c8b405fd-8b13-4293-9698-c7c310982894"].faultTree.rootNode.faultReference.referenceType
+
+    // planEditor.subnets["c8b405fd-8b13-4293-9698-c7c310982894"].faultTree.rootNode.childNodes[0].childNodes[0].assignedFaultCodes
+    // planEditor.subnets["c8b405fd-8b13-4293-9698-c7c310982894"].faultTree.rootNode.childNodes[0].childNodes[0].faultReference.objectId
+    // planEditor.subnets["c8b405fd-8b13-4293-9698-c7c310982894"].faultTree.rootNode.childNodes[0].childNodes[0].faultReference.referenceType
 
     let rows = []
     //var row = null
     children.forEach(childId => {
-      let row = makeRow(childId)
-      if (row.element) rows.push(row.element)
+      let childFaultNode = childFaultNodesById[childId]
+      if (props.subnets[childId]) {
+        childFaultNode = props.subnets[childId].faultTree.rootNode
+      }
+      let row = makeRow(childId, childFaultNode)
+      if (row.element) {
+        if (!row.isLeaf) {
+          rows.unshift(row.element) // put the fold outs at the top
+        } else {
+          rows.push(row.element) // then the leaf nodes
+        }
+      }
       payload.alertCount += row.alertCount
+    })
+
+    let alertElements = []
+    faultNode.assignedFaultCodes.forEach(fCode => {
+      alertElements.push(
+        <div key={`${featureId}_${fCode}`}>
+          {FaultCode[fCode]}
+        </div>
+      )
     })
 
     let featureRow = (
@@ -43,6 +103,7 @@ const PlanNavigation2 = props => {
             src="/images/map_icons/aro/equipment/fiber_distribution_hub_alert.svg" 
           />
           <h2 className="title">{featureId}</h2>
+          {alertElements}
         </div>
         <div className="defect-info">
           <h3 className="defect-title">{payload.alertCount}</h3>
@@ -56,6 +117,7 @@ const PlanNavigation2 = props => {
           {rows}
         </Foldout>
       )
+      payload.isLeaf = false
     } else {
       // no children, no need for a fold out
       payload.element = <div className="nonfoldout-row" key={featureId}>{featureRow}</div>
@@ -64,7 +126,9 @@ const PlanNavigation2 = props => {
     return payload
   }
 
-  let element = makeRow(props.selectedSubnetId).element
+
+  let faultNode = props.subnets[props.selectedSubnetId].faultTree.rootNode
+  let element = makeRow(props.selectedSubnetId, faultNode).element
 
   console.log(" --- plan nav rerender --- ")
   return <div className='plan-navigation slim-line-headers'>{element}</div>

@@ -36,8 +36,10 @@
   justify-content: space-between;
   align-items: center;
   padding: 2px 0;
+  /*
   cursor: pointer;
   user-select: none;
+  */
 }
 .plan-navigation .info {
   display: flex;
