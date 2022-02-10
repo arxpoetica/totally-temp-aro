@@ -33,8 +33,8 @@ export const PlanEditor = props => {
     rootSubnet,
     updateFeatureProperties,
     fiberAnnotations,
-    visibleConstructionAreas,
-    visibleEquipmentTypes
+    noMetaConstructionAreas,
+    noMetaEquipmentTypes
   } = props
 
   useEffect(() => {
@@ -108,8 +108,8 @@ export const PlanEditor = props => {
       {selectedEditFeatureIds.map(id => {
         let feature = features[id].feature;
         if (
-          (feature.networkNodeType &&  !visibleEquipmentTypes.includes(feature.networkNodeType)) ||
-          (!feature.networkNodeType && !visibleConstructionAreas.includes(feature.dataType))
+          (feature.networkNodeType &&  !noMetaEquipmentTypes.includes(feature.networkNodeType)) ||
+          (!feature.networkNodeType && !noMetaConstructionAreas.includes(feature.dataType))
         ) {
           return (
             <AroFeatureEditor key={id}
@@ -121,11 +121,11 @@ export const PlanEditor = props => {
             />
           )
         } else {
-          return <></>
+          return null
         }
       })}
 
-      {false &&
+      {/*false &&
         <div className="temporary" style={{ margin: '0 0 25px' }}>
           <h2>Plan Information</h2>
           <p>userId: {userId}</p>
@@ -141,7 +141,7 @@ export const PlanEditor = props => {
           <h2>Features Information</h2>
           <pre>selectedEditFeatureIds: {JSON.stringify(selectedEditFeatureIds, null, '  ')}</pre>
         </div>
-      }
+      */}
     </div>
   )
 
@@ -167,8 +167,8 @@ const mapStateToProps = (state) => {
     constructionAreas: state.mapLayers.constructionAreas.construction_areas,
     rootSubnet: PlanEditorSelectors.getRootSubnet(state),
     fiberAnnotations: state.planEditor.fiberAnnotations,
-    visibleEquipmentTypes: (state.configuration.ui.perspective && state.configuration.ui.perspective.networkEquipment.planEdit[planType].noMetaData) || [],
-    visibleConstructionAreas: (state.configuration.ui.perspective && state.configuration.ui.perspective.constructionAreas.planEdit[constructionPlanType].noMetaData) || [],
+    noMetaEquipmentTypes: (state.configuration.ui.perspective && state.configuration.ui.perspective.networkEquipment.planEdit[planType].noMetaData) || [],
+    noMetaConstructionAreas: (state.configuration.ui.perspective && state.configuration.ui.perspective.constructionAreas.planEdit[constructionPlanType].noMetaData) || [],
   }
 }
 

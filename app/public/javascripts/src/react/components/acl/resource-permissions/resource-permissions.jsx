@@ -18,6 +18,7 @@ export class ResourcePermissions extends Component {
     }
   }
 
+  // TODO: I think hasPermissions() is stored in state, state should be JSON serializable, move the function to a user utility
   render () {
     if (!this.props.loggedInUser || !this.props.authPermissions['RESOURCE_ADMIN']) return null // maybe fix this little hard code?
     this.isAdmin = false
