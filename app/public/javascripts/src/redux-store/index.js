@@ -42,9 +42,13 @@ import expertMode from '../react/components/sidebar/analysis/expert-mode/expert-
 import roicReports from '../react/components/sidebar/analysis/roic-reports/roic-reports-reducer'
 import stateViewMode from '../react/components/state-view-mode/state-view-mode-reducer'
 
+
+// MAP_SET_ARE_TILES_RENDERING is removed from logger due to infinite rendering
+// https://www.npmjs.com/package/redux-logger#log-everything-except-actions-with-certain-type
 const logger = createLogger({
   level: 'info',
-  collapsed: true
+  collapsed: true,
+  predicate: (getState, action) => action.type !== 'MAP_SET_ARE_TILES_RENDERING'
 })
 const socketMiddleware = createSocketMiddleware()
 
