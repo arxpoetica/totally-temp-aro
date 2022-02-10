@@ -108,7 +108,14 @@ function clearTransaction (doOpenView = true) {
 
 // ToDo: there's only one transaction don't require the ID
 function commitTransaction (transactionId) {
-  return dispatch => {
+  return (dispatch, getState) => {
+    const state = getState()
+    if (state.isCommittingTransaction 
+      || state.isEnteringTransaction
+      || state.isCalculatingSubnets
+    ) {
+      return Promise.reject()
+    }
     return dispatch(recalculateSubnets(transactionId))
       .then(() => {
         dispatch(setIsCommittingTransaction(true))
@@ -381,10 +388,10 @@ function showContextMenuForLocations (featureIds, event) {
         dispatch(ContextMenuActions.setContextMenuItems(menuItemFeatures))
         dispatch(ContextMenuActions.showContextMenu(coords.x, coords.y))
       } else {
-        return null
+        return Promise.resolve()
       }
     } else {
-      return null
+      return Promise.resolve()
     }
   }
 }
@@ -410,7 +417,7 @@ function _updateSubnetFeatures (subnetFeatures) {
       )
     })
     
-    if (!transactionId || commands.length <= 0) return null
+    if (!transactionId || commands.length <= 0) return Promise.resolve()
 
     const body = {commands}
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
@@ -455,7 +462,7 @@ function unassignLocation (locationId, terminalId) {
     if (subnetFeature) {
       return dispatch(_updateSubnetFeatures([subnetFeature]))
     } else {
-      return null
+      return Promise.resolve()
     }
   }
 }
@@ -1157,7 +1164,7 @@ function recalculateBoundary (subnetId) {
     const state = getState()
     //const transactionId = state.planEditor.transaction.id
     const subnet = state.planEditor.subnets[subnetId]
-    if (!subnet || !state.planEditor.transaction) return null // null? meh
+    if (!subnet || !state.planEditor.transaction) return Promise.resolve()
     const transactionId = state.planEditor.transaction.id
     let body, url, method;
     if (subnet.dataType !== "edge_construction_area") {
@@ -1234,19 +1241,8 @@ function boundaryChange (subnetId, geometry) {
 function recalculateSubnets (transactionId, subnetIds = []) {
   return (dispatch, getState) => {
     const state = getState()
+    if (state.isCalculatingSubnets) return Promise.reject()
     let activeSubnets = []
-    /*
-    subnetIds.forEach(subnetId => {
-      dispatch(setFiberAnnotations({[subnetId]: []}, subnetId))
-      if (state.planEditor.subnets[subnetId]) {
-        activeSubnets.push(subnetId)
-      } else if (state.planEditor.subnetFeatures[subnetId]
-        && state.planEditor.subnetFeatures[subnetId].subnetId
-      ) {
-        activeSubnets.push(state.planEditor.subnetFeatures[subnetId].subnetId)
-      }
-    })
-    */
     dispatch(setIsCalculatingSubnets(true))
     const recalcBody = { subnetIds: activeSubnets }
 

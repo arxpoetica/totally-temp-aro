@@ -123,11 +123,11 @@ export const PlanEditor = props => {
             />
           )
         } else {
-          return <></>
+          return null
         }
       })}
 
-      {false &&
+      {/*false &&
         <div className="temporary" style={{ margin: '0 0 25px' }}>
           <h2>Plan Information</h2>
           <p>userId: {userId}</p>
@@ -143,7 +143,7 @@ export const PlanEditor = props => {
           <h2>Features Information</h2>
           <pre>selectedEditFeatureIds: {JSON.stringify(selectedEditFeatureIds, null, '  ')}</pre>
         </div>
-      }
+      */}
     </div>
   )
 

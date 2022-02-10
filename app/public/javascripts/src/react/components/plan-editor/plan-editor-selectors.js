@@ -69,9 +69,18 @@ const getNetworkConfig = state => {
   return networkConfig
 }
 
-// temporary
-const locationWarnImg = new Image(18, 22)
-locationWarnImg.src = '/svg/alert-panel-location.png'
+let locationWarnImgByType = {
+  '1': new Image(20, 20),
+  '2': new Image(20, 20),
+  '3': new Image(20, 20),
+  '4': new Image(20, 20),
+  '5': new Image(20, 20),
+}
+locationWarnImgByType['1'].src = '/svg/alert-panel-small-business.png'
+locationWarnImgByType['2'].src = '/svg/alert-panel-medium-business.png'
+locationWarnImgByType['3'].src = '/svg/alert-panel-large-business.png'
+locationWarnImgByType['4'].src = '/svg/alert-panel-location.png'
+locationWarnImgByType['5'].src = '/svg/alert-panel-tower.png'
 
 const getRootSubnet = createSelector(
   [getSelectedSubnetId, getSubnetFeatures, getSubnets],
@@ -330,7 +339,7 @@ const PlanEditorSelectors = Object.freeze({
   getFeaturesRenderInfo,
   getIsRecalcSettled,
   getAlertsForSubnetTree,
-  locationWarnImg,
+  locationWarnImgByType,
   getRootSubnet,
   getSelectedSubnetLocations,
   getCursorLocations,

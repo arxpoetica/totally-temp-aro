@@ -110,11 +110,36 @@
   display: flex;
   align-items: center;
 }
-.plan-navigation .location {
+
+.plan-navigation .location,
+.plan-navigation .sm-biz,
+.plan-navigation .md-biz,
+.plan-navigation .lg-biz,
+.plan-navigation .tower 
+{
   position: relative;
   width: 20px;
   height: 20px;
-  background-image: url('/svg/alert-panel-location.svg');
+}
+
+.plan-navigation .location {
+  background-image: url('/svg/alert-panel-location.png');
+}
+
+.plan-navigation .sm-biz {
+  background-image: url('/svg/alert-panel-small-business.png');
+}
+
+.plan-navigation .md-biz {
+  background-image: url('/svg/alert-panel-medium-business.png');
+}
+
+.plan-navigation .lg-biz {
+  background-image: url('/svg/alert-panel-large-business.png');
+}
+
+.plan-navigation .tower {
+  background-image: url('/svg/alert-panel-tower.png');
 }
 
 /* ========================= >>>>> alerts dropdown >>>>> */
