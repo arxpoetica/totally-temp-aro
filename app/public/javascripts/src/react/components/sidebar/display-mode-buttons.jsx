@@ -70,7 +70,7 @@ const DisplayModeButtons = (props) => {
               ${selectedDisplayMode !== displayModes.EDIT_PLAN ? 'btn-light' : ''}
               ${selectedDisplayMode === displayModes.EDIT_PLAN ? 'btn-primary' : ''}
             `}
-            disabled={(!plan || plan.ephemeral) ? 'disabled' : null}
+            disabled={(!plan || plan.ephemeral || plan.planState === 'START_STATE') ? 'disabled' : null}
             onClick={() => setSelectedDisplayMode(displayModes.EDIT_PLAN)}
           >
             <div className="fa fa-2x fa-pencil-alt" data-toggle="tooltip" data-placement="bottom" title="Edit Plan" />
