@@ -84,7 +84,7 @@ services:
             # ARO_SERVICE_URL: http://docker.for.mac.localhost:8080
             # GOOGLE_MAPS_GESTURE_HANDLING: auto
             # MABL_TESTING: true
-            LOGGER_EXCLUDES: ["MAP_SET_ARE_TILES_RENDERING"]
+            LOGGER_EXCLUDES: "MAP_SET_ARE_TILES_RENDERING"
         working_dir: /srv/www/aro
         command: bash -c "/usr/sbin/sshd -D"
         networks:
