@@ -2,6 +2,11 @@
 import { react2angular } from 'react2angular'
 import { ToastContainer } from 'react-toastify'
 
+import MapSplit from '../react/components/map/map-split.jsx'
+import ViewMode from '../react/components/sidebar/view/view-mode.jsx'
+import DisplayModeButtons from '../react/components/sidebar/display-mode-buttons.jsx'
+import PlanEditorContainer from '../react/components/plan-editor/plan-editor-container.jsx'
+import NetworkPlan from '../react/components/sidebar/network-plan.jsx'
 import MapViewToggle from '../react/components/map/map-view-toggle.jsx'
 import MapSelectorPlanTarget from '../react/components/map/map-selector-plan-target.jsx'
 import MapSelectorExportLocations from '../react/components/map/map-selector-export-locations.jsx'
@@ -70,11 +75,9 @@ import UINotifications from '../react/components/notification/ui-notifications.j
 import boundaryDetail from './sidebar/view/boundary-detail'
 import roadSegmentDetail from './sidebar/view/road-segment-detail'
 import coverageBoundary from './sidebar/view/coverage-boundary'
-import viewMode from './sidebar/view/view-mode'
 import planInfoRecent from './sidebar/view/plan-info-recent'
 import aroSearch from './sidebar/view/aro-search'
 import aroMultiselectSearch from './sidebar/view/aro-multiselect-search'
-import displayModeButtons from './sidebar/display-mode-buttons'
 import analysisExpertMode from './sidebar/analysis/analysis-expert-mode'
 import analysisMode from './sidebar/analysis/analysis-mode'
 
@@ -88,16 +91,13 @@ import roicReportsModal from './sidebar/analysis/roic-reports/roic-reports-modal
 import coverageReportDownloader from './sidebar/analysis/coverage/coverage-report-downloader'
 import networkBuildOutput from './sidebar/analysis/network-build/network-build-output'
 import ringEditor from './sidebar/ring-editor'
-import planEditorContainer from './sidebar/plan-editor/plan-editor-container'
 import boundaries from './views/boundaries'
 import locations from './views/locations'
 import networkEquipment from './views/network-equipment'
 import copper from './views/copper'
 import cables from './views/cables'
 import conduits from './views/conduits'
-import mapSplit from './map/map-split'
 import networkPlanModal from './header/network-plan-modal'
-import networkPlan from './header/network-plan'
 import fullScreenContainer from './full-screen/full-screen-container'
 import aroPanel from './common/aro-panel'
 import aroMultiSelect from './common/aro-multiselect'
@@ -129,11 +129,9 @@ import reduxConfig from '../redux-config'
 app.component('boundaryDetail', boundaryDetail)
   .component('roadSegmentDetail', roadSegmentDetail)
   .component('coverageBoundary', coverageBoundary)
-  .component('viewMode', viewMode)
   .component('planInfoRecent', planInfoRecent)
   .component('aroSearch', aroSearch)
   .component('aroMultiselectSearch', aroMultiselectSearch)
-  .component('displayModeButtons', displayModeButtons)
   .component('analysisExpertMode', analysisExpertMode)
   .component('analysisMode', analysisMode)
   .component('locationRoicReports', locationRoicReports)
@@ -145,16 +143,13 @@ app.component('boundaryDetail', boundaryDetail)
   .component('coverageReportDownloader', coverageReportDownloader)
   .component('networkBuildOutput', networkBuildOutput)
   .component('ringEditor', ringEditor)
-  .component('planEditorContainer', planEditorContainer)
   .component('boundaries', boundaries)
   .component('locations', locations)
   .component('networkEquipment', networkEquipment)
   .component('cables', cables)
   .component('copper', copper)
   .component('conduits', conduits)
-  .component('mapSplit', mapSplit)
   .component('networkPlanModal', networkPlanModal)
-  .component('networkPlan', networkPlan)
   // .component('uiNotification', uiNotification)
   .component('fullScreenContainer', fullScreenContainer)
   .component('aroPanel', aroPanel)
@@ -175,6 +170,11 @@ app.component('boundaryDetail', boundaryDetail)
   .component('editorInterfacePrimitive', editorInterfacePrimitive)
   .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
 // ReactJS components
+  .component('rMapSplit', react2angular(MapSplit))
+  .component('rViewMode', react2angular(ViewMode))
+  .component('rDisplayModeButtons', react2angular(DisplayModeButtons))
+  .component('rPlanEditorContainer', react2angular(PlanEditorContainer))
+  .component('rNetworkPlan', react2angular(NetworkPlan))
   .component('rMapViewToggle', react2angular(MapViewToggle))
   .component('rMapSelectorPlanTarget', react2angular(MapSelectorPlanTarget))
   .component('rMapSelectorExportLocations', react2angular(MapSelectorExportLocations))
