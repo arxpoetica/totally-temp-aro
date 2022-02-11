@@ -48,7 +48,11 @@ import stateViewMode from '../react/components/state-view-mode/state-view-mode-r
 const logger = createLogger({
   level: 'info',
   collapsed: true,
-  predicate: (getState, action) => action.type !== 'MAP_SET_ARE_TILES_RENDERING'
+  predicate: (getState, action) => {
+    const excludes = ARO_GLOBALS.LOGGER_EXCLUDES
+    if (excludes && excludes.includes(action.type)) return false
+    return true
+  },
 })
 const socketMiddleware = createSocketMiddleware()
 
@@ -87,5 +91,5 @@ let reducer = combineReducers({
 
 // Add support for Redux devtools extension. Yes, even in production.
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
-var store = createStore(reducer, composeEnhancers(applyMiddleware(logger, thunk, socketMiddleware)))
+var store = createStore(reducer, composeEnhancers(applyMiddleware(thunk, socketMiddleware, logger)))
 export default store
