@@ -11,7 +11,7 @@ const googleMapsLicensing = {
 
 exports.configure = (api, middleware) => {
   let loggerExcludes
-  try { loggerExcludes = process.env.LOGGER_EXCLUDES }
+  try { loggerExcludes =  JSON.parse(process.env.LOGGER_EXCLUDES) }
   catch (error) {} // no op
 
   api.get('/', (request, response, next) => {
