@@ -49,7 +49,7 @@ const logger = createLogger({
   level: 'info',
   collapsed: true,
   predicate: (getState, action) => {
-    const excludes = ARO_GLOBALS.LOGGER_EXCLUDES
+    const excludes = ARO_GLOBALS.REDUX_LOGGER_EXCLUDES
     if (excludes && excludes.includes(action.type)) return false
     return true
   },

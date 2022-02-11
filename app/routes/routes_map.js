@@ -11,7 +11,7 @@ const googleMapsLicensing = {
 
 exports.configure = (api, middleware) => {
   let loggerExcludes
-  try { loggerExcludes =  JSON.parse(process.env.LOGGER_EXCLUDES) }
+  try { loggerExcludes =  JSON.parse(process.env.REDUX_LOGGER_EXCLUDES) }
   catch (error) {} // no op
 
   api.get('/', (request, response, next) => {
@@ -31,7 +31,7 @@ exports.configure = (api, middleware) => {
       // https://www.pivotaltracker.com/story/show/180829331
       ARO_GLOBALS: JSON.stringify({
         MABL_TESTING: process.env.MABL_TESTING,
-        LOGGER_EXCLUDES: loggerExcludes,
+        REDUX_LOGGER_EXCLUDES: loggerExcludes,
       }),
     })
   })
