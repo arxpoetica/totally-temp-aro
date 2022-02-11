@@ -50,6 +50,10 @@
   padding-left: 22px;
 }
 
+.plan-navigation .nonfoldout-row {
+  border-bottom: 1px #dddddd dashed;
+}
+
 .plan-navigation .nonfoldout-row .info {
   padding-left: 22px;
 }

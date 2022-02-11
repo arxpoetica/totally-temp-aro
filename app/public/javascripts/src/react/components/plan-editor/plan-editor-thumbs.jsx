@@ -128,7 +128,7 @@ const mapStateToProps = state => ({
   ARO_CLIENT: state.configuration.system.ARO_CLIENT,
   equipments: state.mapLayers.networkEquipment.equipments,
   constructionAreas: state.mapLayers.constructionAreas.construction_areas,
-  features: PlanEditorSelectors.getSubnetFeatures(state),
+  features: state.planEditor.subnetFeatures,
   selectedEditFeatureIds: state.planEditor.selectedEditFeatureIds,
   selectedSubnetId: state.planEditor.selectedSubnetId,
   planThumbInformation: state.planEditor.planThumbInformation,

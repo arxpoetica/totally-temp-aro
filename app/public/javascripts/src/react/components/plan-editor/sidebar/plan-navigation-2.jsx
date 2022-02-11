@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { connect } from 'react-redux'
 import Foldout from '../../common/foldout.jsx'
+//import { getIconUrl } from '../shared'
 
 export const FaultCode = {
 	UNDEFINED: "Unknown",
@@ -17,6 +18,8 @@ const PlanNavigation2 = props => {
     || !props.subnets[props.selectedSubnetId] // meaning we will not show this tree if the selected node is a Terminal or Location
   ) return null
 
+  const [filterForAlerts, setFilterForAlerts] = useState(true)
+
 
   function makeRow (featureId, faultNode = {childNodes:[],assignedFaultCodes:[]} ) { // TODO: faultNode should probably be a defined type that is also used in state
     //  OK so this is a bit intricate but stick with me
@@ -25,12 +28,13 @@ const PlanNavigation2 = props => {
     //  This can be confusing because we name the Subnet after it's root node; they have the same ID.
     //  So the Alert for a Hub, for example, will be on the Subnet with the same ID.
     //  A Terminal is not the root node of a Hub so the Alert for a Terminal will be a in the Alert Tree of the Subnet with the same ID as the Terminal's parent node, the Hub.
-    //  NOTE: A CO, for example, can have some children that aren't Subnets and some that are. So we'll need to merge it's FaultTree.children with the fault nodes of it's subnet children.
+    //  NOTE: A CO, for example, can have some children that aren't Subnets and some that are. So we merge it's FaultTree.children with the fault nodes of it's subnet children.
     let payload = {
       element: null, 
       alertCount: 0,
       isLeaf: true,
     }
+    payload.alertCount += faultNode.assignedFaultCodes.length
 
     let children = []
     let childFaultNodesById = {}
@@ -53,6 +57,17 @@ const PlanNavigation2 = props => {
         })
       })
     } // else it's a location
+
+    // TODO: this whole icon thing is broken, I think Robert is making a new system
+    let iconURL = '' // default?
+    if (props.subnetFeatures[featureId]) {
+      //iconURL = getIconUrl(props.subnetFeatures[featureId])
+      iconURL = '/images/map_icons/aro/equipment/fiber_distribution_hub_alert.svg'
+    } else {
+      // location
+      //  TODO: temporary placeholder icon, change this over to the new system
+      iconURL = "/images/map_icons/aro/households_default.png"
+    }
 
     // planEditor.subnets["c8b405fd-8b13-4293-9698-c7c310982894"].faultTree.rootNode.assignedFaultCodes
     // planEditor.subnets["c8b405fd-8b13-4293-9698-c7c310982894"].faultTree.rootNode.faultReference.objectId
@@ -83,44 +98,54 @@ const PlanNavigation2 = props => {
     let alertElements = []
     faultNode.assignedFaultCodes.forEach(fCode => {
       alertElements.push(
-        <div key={`${featureId}_${fCode}`}>
+        <div className="info" key={`${featureId}_${fCode}`}>
           {FaultCode[fCode]}
         </div>
       )
     })
 
-    let featureRow = (
-      <div className="header">
-        <div className='info'>
-          { /*
-          <div
-            className="svg location"
-            style={{backgroundImage: `url('/images/map_icons/aro/equipment/fiber_distribution_hub_alert.svg')`}}
-          ></div>
-          */ }
-          <img 
-            style={{'width': '20px'}}
-            src="/images/map_icons/aro/equipment/fiber_distribution_hub_alert.svg" 
-          />
-          <h2 className="title">{featureId}</h2>
-          {alertElements}
-        </div>
-        <div className="defect-info">
-          <h3 className="defect-title">{payload.alertCount}</h3>
-          <div className="svg warning"></div>
-        </div>
-      </div>
-    )
-    if (rows.length) {
-      payload.element = (
-        <Foldout displayName={featureRow} key={featureId}>
-          {rows}
-        </Foldout>
+    // filter - if this is an element we don't want don't bother building the row and just return a null element
+    if (!filterForAlerts || payload.alertCount){
+      let featureRow = (
+        <>
+          <div className="header">
+            <div className='info'>
+              { /*
+              <div
+                className="svg location"
+                style={{backgroundImage: `url('/images/map_icons/aro/equipment/fiber_distribution_hub_alert.svg')`}}
+              ></div>
+              */ }
+              <img 
+                style={{'width': '20px'}}
+                src={iconURL} 
+              />
+              <h2 className="title">{featureId}</h2>
+            </div>
+            {payload.alertCount 
+              ? <div className="defect-info">
+                  <h3 className="defect-title">{payload.alertCount}</h3>
+                  <div className="svg warning"></div>
+                </div>
+              : null
+            }
+          </div>
+          <div className="info">
+            {alertElements}
+          </div>
+        </>
       )
-      payload.isLeaf = false
-    } else {
-      // no children, no need for a fold out
-      payload.element = <div className="nonfoldout-row" key={featureId}>{featureRow}</div>
+      if (rows.length) {
+        payload.element = (
+          <Foldout displayName={featureRow} key={featureId}>
+            {rows}
+          </Foldout>
+        )
+        payload.isLeaf = false
+      } else {
+        // no children, no need for a fold out
+        payload.element = <div className="nonfoldout-row" key={featureId}>{featureRow}</div>
+      }
     }
 
     return payload
@@ -131,7 +156,27 @@ const PlanNavigation2 = props => {
   let element = makeRow(props.selectedSubnetId, faultNode).element
 
   console.log(" --- plan nav rerender --- ")
-  return <div className='plan-navigation slim-line-headers'>{element}</div>
+  return (
+    <>
+      <div>
+      <div className='btn-group btn-group-sm' style={{ marginLeft: '5px' }}>
+        <button className={'btn btn-sm ' + (filterForAlerts ? 'btn-primary' : 'btn-light')}
+          onClick={() => setFilterForAlerts(true)}
+          disabled={filterForAlerts}
+        >
+          Alerts
+        </button>
+
+        <button className={'btn btn-sm ' + (filterForAlerts ? 'btn-light' : 'btn-primary')}
+          onClick={() => setFilterForAlerts(false)}
+          disabled={!filterForAlerts}>
+          All
+        </button>
+      </div>
+      </div>
+      <div className='plan-navigation slim-line-headers'>{element}</div>
+    </>
+  )
 }
 
 const mapStateToProps = state => {
