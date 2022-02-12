@@ -8,17 +8,7 @@
 }
 
 /* ========================= >>>>> plan navigation >>>>> */
-
-.plan-navigation {
-  /*
-  overflow: auto;
-  max-height: 255px;
-  margin: 0 0 10px;
-  border-top: 1px solid #dcdcdc;
-  border-bottom: 1px solid #dcdcdc;
-  font: 14px var(--font);
-  */
-}
+/*
 .plan-navigation .list {
   display: none;
   list-style: none;
@@ -27,29 +17,29 @@
 }
 .plan-navigation .list.open { display: block; }
 .plan-navigation > .list { padding: 0; }
+
 .plan-navigation .item {
   border-top: 1px dashed #dcdcdc;
 }
+
 .plan-navigation > ul > .item:first-child { border: none; }
+*/
 .plan-navigation .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 2px 0;
-  /*
-  cursor: pointer;
-  user-select: none;
-  */
 }
 .plan-navigation .info {
   display: flex;
   align-items: center;
   min-width: 0;
 }
+/*
 .plan-navigation .info.no-plus-minus {
   padding-left: 22px;
 }
-
+*/
 .plan-navigation .nonfoldout-row {
   border-bottom: 1px #dddddd dashed;
 }
@@ -81,24 +71,14 @@
   background: none no-repeat center transparent;
   background-size: contain;
 }
-.plan-navigation .plus-minus {
-  width: 16px;
-  height: 16px;
-  background-image: url('/svg/toggle-plus.svg');
-}
-.plan-navigation .plus-minus.open {
-  background-image: url('/svg/toggle-minus.svg');
-}
-
-
-
 
 .plan-navigation .warning {
   width: 18px;
   height: 18px;
   background-image: url('/svg/alert-panel-warning.svg');
 }
-/* .plan-navigation .content > li {
+/* 
+.plan-navigation .content > li {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -109,12 +89,12 @@
 .plan-navigation .content > li:hover {
   position: relative;
   z-index: 5;
-} */
+}
 .plan-navigation .text {
   display: flex;
   align-items: center;
 }
-
+*/
 .plan-navigation .location,
 .plan-navigation .sm-biz,
 .plan-navigation .md-biz,
@@ -145,52 +125,6 @@
 .plan-navigation .tower {
   background-image: url('/svg/alert-panel-tower.png');
 }
-
-/* ========================= >>>>> alerts dropdown >>>>> */
-
-/* .plan-navigation .dropdown {
-  position: relative;
-}
-.plan-navigation .caret {
-  width: 10px;
-  height: 7px;
-  background-image: url('/svg/dropdown-caret.svg');
-}
-.plan-navigation .list {
-  list-style: none;
-  display: none;
-  position: absolute;
-  top: 22px;
-  right: -10px;
-  padding: 8px 0;
-  background-color: white;
-  border: 1px solid var(--gray-light);
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
-  text-align: center;
-}
-.plan-navigation li:hover .list {
-  display: block;
-}
-.plan-navigation .list::before {
-  content: '';
-  position: absolute;
-  top: -10px;
-  right: 10px;
-  width: 27px;
-  height: 21px;
-  background: url('/svg/dropdown-bevel.svg') no-repeat center transparent;
-  z-index: 1;
-}
-.plan-navigation .list li {
-  position: relative;
-  padding: 6px 20px;
-  white-space: nowrap;
-  z-index: 2;
-}
-.plan-navigation .list li:hover {
-  background-color: var(--gray-light);
-} */
 
 /* ========================= >>>>> recalculate plan >>>>> */
 
