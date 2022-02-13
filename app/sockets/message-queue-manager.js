@@ -21,11 +21,11 @@ class MessageQueueManager {
     })
   }
 
-  connectToPublisher () {
+  async connectToPublisher() {
     // Attempt to connect to the publisher
     console.log('Attempting to connect to the RabbitMQ server')
-    amqp.connect(this.connectionString)
-      .then(connection => {
+    try {
+        const connection = await amqp.connect(this.connectionString)
         console.log('Successfully created a connection to the RabbitMQ server')
         connection.on('close', () => {
           console.log(`RabbitMQ connection has closed. Attempting to reconnect in ${RETRY_CONNECTION_IN_MSEC} msec`)
@@ -35,9 +35,7 @@ class MessageQueueManager {
           console.error(`ERROR from RabbitMQ connection:`)
           console.error(err)
         })
-        return connection.createChannel()
-      })
-      .then(channel => {
+        const channel = await connection.createChannel()
         console.log('Successfully created a channel with the RabbitMQ server')
         // Assert queues and set handlers for all the consumers
         this.consumers.forEach(consumer => {
@@ -47,13 +45,12 @@ class MessageQueueManager {
           channel.consume(consumer.queue, consumer.messageHandler, { noAck: true })
           console.log(`Successfully set up a handler for consumer ${JSON.stringify(consumer)}`)
         })
-      })
-      .catch(err => {
-        console.error('ERROR when connecting to the RabbitMQ server')
-        console.error(err)
-        console.error(`Will attempt to reconnect to RabbitMQ server in ${RETRY_CONNECTION_IN_MSEC} msec`)
-        setTimeout(() => this.connectToPublisher(), RETRY_CONNECTION_IN_MSEC)
-      })
+    } catch (error) {
+      console.error('ERROR when connecting to the RabbitMQ server')
+      console.error(error)
+      console.error(`Will attempt to reconnect to RabbitMQ server in ${RETRY_CONNECTION_IN_MSEC} msec`)
+      setTimeout(() => this.connectToPublisher(), RETRY_CONNECTION_IN_MSEC)
+    }
   }
 }
 
