@@ -27,7 +27,7 @@ const PlanNavigation = props => {
     //  Subnets have Alert Trees listing the alerts on nodes in that subnet.
     //  This can be confusing because we name the Subnet after it's root node; they have the same ID.
     //  So the Alert for a Hub, for example, will be on the Subnet with the same ID.
-    //  A Terminal is not the root node of a Hub so the Alert for a Terminal will be a in the Alert Tree of the Subnet with the same ID as the Terminal's parent node, the Hub.
+    //  A Terminal is not the root node of a Subnet so the Alert for a Terminal will be a in the Alert Tree of the Subnet with the same ID as the Terminal's parent node, the Hub.
     //  NOTE: A CO, for example, can have some children that aren't Subnets and some that are. So we merge it's FaultTree.children with the fault nodes of it's subnet children.
     
     // Fault Tree for a subnet
