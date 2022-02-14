@@ -311,6 +311,11 @@ class State {
 
     service.areTilesRendering = false
     service.noteIdTilesRendering = null
+    service.areTilesRenderingDebounceId = null
+    service._setAreTilesRendering = newValue => {
+      service.areTilesRendering = newValue
+      service.setAreTilesRenderingInRedux(newValue)
+    }
     service.setAreTilesRendering = newValue => {
       // can't use the proper notification system because
       //  this function is run at least once per second
@@ -324,9 +329,23 @@ class State {
         service.noteIdTilesRendering = service.postNotification('Rendering Tiles')
       }
       */
-      service.areTilesRendering = newValue
-      service.setAreTilesRenderingInRedux(newValue)
-      $timeout()
+      //service.areTilesRendering = newValue
+      //service.setAreTilesRenderingInRedux(newValue)
+      //$timeout()
+
+      // this fix will need to be moved to Redux 
+      // debounce on settting to false
+      
+      // if there is a previous debounce clear it
+      clearTimeout(service.areTilesRenderingDebounceId)
+      
+      if (!service.areTilesRendering && newValue) {
+        service._setAreTilesRendering(newValue)
+      } else if (service.areTilesRendering && !newValue) {
+        service.areTilesRenderingDebounceId = setTimeout(() => {
+          service._setAreTilesRendering(newValue)
+        }, 350)
+      }
     }
 
     service.angBoundaries = new Rx.BehaviorSubject()
