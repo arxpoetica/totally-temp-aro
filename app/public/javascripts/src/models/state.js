@@ -155,7 +155,23 @@ class State {
         // At this point we will have access to the global map variable
         map.ready(() => resolve())
         service.setGoogleMapsReference(map)
-        service.updateDefaultPlanCoordinates(map) // To set map Coordinates to plan-action redux
+        //service.updateDefaultPlanCoordinates(map) // To set map Coordinates to plan-action redux
+        // TODO: add debounce
+        map.addListener('center_changed', () => {
+          var center = map.getCenter()
+          //dispatch({
+          //  type: Actions.PLAN_UPDATE_DEFAULT_PLAN_COORDINATES,
+          //  payload: {'center_changed' : center}
+          //})
+          service.updateDefaultPlanCoordinates({'center_changed' : center})
+        })
+        map.addListener('zoom_changed', () => {
+          //dispatch({
+          //  type: Actions.PLAN_UPDATE_DEFAULT_PLAN_COORDINATES,
+          //  payload: {'zoom_changed' : map.getZoom()}
+          //})
+          service.updateDefaultPlanCoordinates({'zoom_changed' : map.getZoom()})
+        })
       })
     })
 
@@ -317,28 +333,13 @@ class State {
       service.setAreTilesRenderingInRedux(newValue)
     }
     service.setAreTilesRendering = newValue => {
-      // can't use the proper notification system because
-      //  this function is run at least once per second
-      //  for the life of the app. Fix this.
-      /*
-      if (!newValue && service.areTilesRendering) { // set to off and not off
-        console.log('---------------------------- OFF -------')
-        service.noteIdTilesRendering = service.removeNotification(service.noteIdTilesRendering)
-      } else if (newValue && !service.areTilesRendering) { // set to on and not already on
-        console.log('---------------------------- ON --------')
-        service.noteIdTilesRendering = service.postNotification('Rendering Tiles')
-      }
-      */
-      //service.areTilesRendering = newValue
-      //service.setAreTilesRenderingInRedux(newValue)
-      //$timeout()
-
       // this fix will need to be moved to Redux 
       // debounce on settting to false
       
       // if there is a previous debounce clear it
       clearTimeout(service.areTilesRenderingDebounceId)
       
+
       if (!service.areTilesRendering && newValue) {
         service._setAreTilesRendering(newValue)
       } else if (service.areTilesRendering && !newValue) {
