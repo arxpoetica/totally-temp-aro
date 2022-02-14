@@ -18,66 +18,58 @@ let validSubnetTypes = [
   'subnet_node',
 ]
 
+function resumeOrCreateTransaction(planId, userId) {
+  return async(dispatch, getState) => {
+    try {
 
-function resumeOrCreateTransaction (planId, userId) {
-  return (dispatch, getState) => {
-    const state = getState()
-    dispatch({
-      type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION,
-      payload: true
-    })
-    TransactionManager.resumeOrCreateTransaction(planId, userId)
-      .then(result => {
-        dispatch({
-          type: Actions.PLAN_EDITOR_SET_TRANSACTION,
-          payload: Transaction.fromServiceObject(result.data)
-        })
-        const transactionId = result.data.id
-        // TODO: how much of this is legacy??????
-        // it might need a lot of cleanup
-        // i.e., we might not need to load from these end points. unclear.
-        return Promise.all([
-          AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/equipment`),
-          // depricated? 
-          AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/equipment_boundary`),
-          // need to get ALL the subnets upfront 
-          //AroHttp.get(`/service/plan-transaction/${transactionId}/subnet-refs`),
-        ])
+      const state = getState()
+      dispatch({
+        type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION,
+        payload: true,
       })
-      .then(results => {
-        let equipmentList = results[0].data
-        let boundaryList = results[1].data
-
-        const resource = 'network_architecture_manager'
-        const { id, name } = state.plan.resourceItems[resource].selectedManager
-
-        batch(async() => {
-          // ToDo: do we need to clearTransaction?
-          await dispatch(addSubnetTree())
-          // NOTE: need to load resource manager so drop cable
-          // length is available for plan-editor-selectors
-          await dispatch(ResourceActions.loadResourceManager(id, resource, name))
-          await dispatch(addTransactionFeatures(equipmentList))
-          await dispatch(addTransactionFeatures(boundaryList))
-          const state = getState()
-          const rootSubnet = PlanEditorSelectors.getRootSubnet(state)
-          if (rootSubnet) {
-            await dispatch(selectEditFeaturesById([rootSubnet.subnetNode]))
-          }
-          dispatch(setFiberRenderRequired(true))
-          dispatch({
-            type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION,
-            payload: false
-          })
-        })
+      const { data: transactionData } = await TransactionManager.resumeOrCreateTransaction(planId, userId)
+      dispatch({
+        type: Actions.PLAN_EDITOR_SET_TRANSACTION,
+        payload: Transaction.fromServiceObject(transactionData)
       })
-      .catch(err => {
-        console.error(err)
+      const transactionId = transactionData.id
+
+      const [{ data: equipmentList }, { data: boundaryList }] = await Promise.all([
+        AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/equipment`),
+        // deprecated? 
+        AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/equipment_boundary`),
+      ])
+
+      const resource = 'network_architecture_manager'
+      const { id, name } = state.plan.resourceItems[resource].selectedManager
+
+      batch(async() => {
+        // ToDo: do we need to clearTransaction?
+        await dispatch(addSubnetTree())
+        // NOTE: need to load resource manager so drop cable
+        // length is available for plan-editor-selectors
+        await dispatch(ResourceActions.loadResourceManager(id, resource, name))
+        await dispatch(addTransactionFeatures(equipmentList))
+        await dispatch(addTransactionFeatures(boundaryList))
+        const state = getState()
+        const rootSubnet = PlanEditorSelectors.getRootSubnet(state)
+        if (rootSubnet) {
+          await dispatch(selectEditFeaturesById([rootSubnet.subnetNode]))
+        }
+        dispatch(setFiberRenderRequired(true))
         dispatch({
           type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION,
           payload: false
         })
       })
+
+    } catch (error) {
+      console.error(err)
+      dispatch({
+        type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION,
+        payload: false
+      })
+    }
   }
 }
 

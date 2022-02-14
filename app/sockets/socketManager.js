@@ -26,6 +26,10 @@ const socketConfig = Object.freeze({
   library: {
     exchange: 'library_event',
     queue: 'libraryEvent'
+  },
+  subnet: {
+    exchange: 'subnet',
+    queue: 'subnetEvent'
   }
 })
 
@@ -41,6 +45,7 @@ class SocketManager {
     messageQueueManager.addConsumer(this.getOptimizationProgressConsumer())
     messageQueueManager.addConsumer(this.getPlanEventConsumer())
     messageQueueManager.addConsumer(this.getLibraryEventConsumer())
+    messageQueueManager.addConsumer(this.getSubnetConsumer())
     messageQueueManager.connectToPublisher()
   }
 
@@ -124,6 +129,12 @@ class SocketManager {
       self.sockets.emitToLibrary(msg.properties.headers.libraryId, msg)
     }
     return new Consumer(socketConfig.library.queue, socketConfig.library.exchange, messageHandler)
+  }
+
+  getSubnetConsumer () {
+    const messageHandler = msg => {
+    }
+    return new Consumer(socketConfig.subnet.queue, socketConfig.subnet.exchange, messageHandler)
   }
 
   broadcastMessage (msg) {
