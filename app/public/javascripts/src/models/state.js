@@ -155,22 +155,17 @@ class State {
         // At this point we will have access to the global map variable
         map.ready(() => resolve())
         service.setGoogleMapsReference(map)
-        //service.updateDefaultPlanCoordinates(map) // To set map Coordinates to plan-action redux
-        // TODO: add debounce
+        
+        // TODO: add debounce?
         map.addListener('center_changed', () => {
-          var center = map.getCenter()
-          //dispatch({
-          //  type: Actions.PLAN_UPDATE_DEFAULT_PLAN_COORDINATES,
-          //  payload: {'center_changed' : center}
-          //})
-          service.updateDefaultPlanCoordinates({'center_changed' : center})
+          let center = map.getCenter()
+          let latitude = center.lat()
+          let longitude = center.lng()
+          service.updateDefaultPlanCoordinates({latitude, longitude})
         })
         map.addListener('zoom_changed', () => {
-          //dispatch({
-          //  type: Actions.PLAN_UPDATE_DEFAULT_PLAN_COORDINATES,
-          //  payload: {'zoom_changed' : map.getZoom()}
-          //})
-          service.updateDefaultPlanCoordinates({'zoom_changed' : map.getZoom()})
+          let zoom = map.getZoom()
+          service.updateDefaultPlanCoordinates({zoom})
         })
       })
     })
