@@ -304,6 +304,7 @@ class State {
       }
       */
       service.areTilesRendering = newValue
+      service.setAreTilesRenderingInRedux(newValue)
       $timeout()
     }
 
@@ -476,7 +477,7 @@ class State {
     service.mapFeaturesRightClickedEvent.skip(1).subscribe(options => {
       // plan edit rightclick action from tile.js
       if (service.selectedDisplayMode.getValue() == service.displayModes.EDIT_PLAN) {
-        console.log(options)
+        //console.log(options)
         service.showContextMenuForLocations (options.locations, options.event)
       }
     })
@@ -1777,6 +1778,7 @@ class State {
       showContextMenuForLocations: (featureIds, event) => dispatch(PlanEditorActions.showContextMenuForLocations(featureIds, event)),
       setUserGroupsMsg: (userGroupsMsg) => dispatch(GlobalSettingsActions.setUserGroupsMsg(userGroupsMsg)),
       setRecreateTilesAndCache: (mapSelection) => dispatch(ViewSettingsActions.recreateTilesAndCache(mapSelection)),
+      setAreTilesRenderingInRedux: value => dispatch(MapActions.setAreTilesRendering(value)),
     }
   }
 }

@@ -4,7 +4,8 @@ import FeatureSets from '../../common/featureSets'
 const defaultState = {
   googleMaps: null,
   zoom: 0,
-  selectedFeatures: new FeatureSets()
+  selectedFeatures: new FeatureSets(),
+  areTilesRendering: false,
 }
 
 function setGoogleMapsReference (state, googleMapsReference) {
@@ -43,7 +44,10 @@ function configurationReducer (state = defaultState, action) {
       return setZoom(state, action.payload)
 
     case Actions.MAP_SET_REQUEST_SET_MAP_CENTER:
-      return setRequestSetMapCenter(state, action.payload)      
+      return setRequestSetMapCenter(state, action.payload) 
+
+    case Actions.MAP_SET_ARE_TILES_RENDERING:
+      return { ...state, areTilesRendering: action.payload }
 
     default:
       return state
