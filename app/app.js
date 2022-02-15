@@ -4,7 +4,6 @@ var passport = require('passport')
 var bodyParser = require('body-parser')
 var compression = require('compression')
 const morgan = require('morgan')
-const { LOGGER_FOCUSED } = process.env
 
 var app = module.exports = express()
 morgan.token('body', req => JSON.stringify(req.body))
@@ -42,11 +41,9 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json({ limit: '1000mb' }))
 
 // Print requests out twice - once when we receive them, once when it completes.
-if (!LOGGER_FOCUSED) {
-  app.use(morgan((tokens, req, res) => 'ARO-PRE-REQUEST ' + loggerFunction(tokens, req, res), { immediate: true }))
-  // skip logging for all vector tile calls
-  app.use(morgan(loggerFunction, { skip: ({ url }) => url.includes('.mvt?') }))
-}
+app.use(morgan((tokens, req, res) => 'ARO-PRE-REQUEST ' + loggerFunction(tokens, req, res), { immediate: true }))
+// skip logging for all vector tile calls
+app.use(morgan(loggerFunction, { skip: ({ url }) => url.includes('.mvt?') }))
 
 app.use(require('cookie-session')({
   name: 'session',
