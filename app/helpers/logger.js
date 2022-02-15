@@ -14,6 +14,7 @@ const LOGGER_STATES = Object.freeze({
 // maintained list of possible log system groups
 const LOGGER_GROUPS = Object.freeze({
   RABBIT_MQ: 'RABBIT-MQ',
+  SOCKET: 'SOCKET',
 })
 
 const loggerState = LOGGER_STATE || LOGGER_STATES.ERRORS
@@ -38,23 +39,23 @@ class Logger {
   }
 
   // TODO: make this a private member `#log` when babel upgrade happens
-  _log(type, message) {
+  _log(type, message, detail) {
     if (loggerState !== LOGGER_STATES.SILENT) {
       const fullPrefix = this.prefix ? `${this.prefix} ${type}` : type
       if (loggerState !== LOGGER_STATES.FOCUSED || focuses.includes(this.group)) {
         console.log(fullPrefix, message)
-        if (loggerState === LOGGER_STATES.VERBOSE) {
+        if (detail && loggerState === LOGGER_STATES.VERBOSE) {
           // TODO: could expand on HOW this is displayed???
-          console.log(verboseMessage)
+          console.log(detail)
         }
       }
     }
   }
 
-  info(message) { this._log(kleur.green('[INFO]'), message) }
-  status(message) { this._log(kleur.yellow('[STATUS]'), message) }
-  warn(message) { this._log(kleur.black().bgYellow('[WARNING]'), message) }
-  error(message) { this._log(kleur.black().bgRed('[ERROR]'), message) }
+  info(message, detail) { this._log(kleur.green('[INFO]'), message, detail) }
+  status(message, detail) { this._log(kleur.yellow('[STATUS]'), message, detail) }
+  warn(message, detail) { this._log(kleur.black().bgYellow('[WARNING]'), message, detail) }
+  error(message, detail) { this._log(kleur.black().bgRed('[ERROR]'), message, detail) }
 }
 
 function createLogger(group, color) {

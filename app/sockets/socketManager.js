@@ -30,7 +30,7 @@ const socketConfig = Object.freeze({
   subnet: {
     exchange: 'subnet',
     queue: 'subnetEvent'
-  }
+  },
 })
 
 class SocketManager {
@@ -132,7 +132,9 @@ class SocketManager {
   }
 
   getSubnetConsumer () {
+    const self = this
     const messageHandler = msg => {
+      self.sockets.emitToClient(msg.properties.headers.sessionId, msg)
     }
     return new Consumer(socketConfig.subnet.queue, socketConfig.subnet.exchange, messageHandler)
   }
