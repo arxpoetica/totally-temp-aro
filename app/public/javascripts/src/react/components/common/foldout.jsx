@@ -25,12 +25,12 @@ class Foldout extends Component {
         <div className={`ei-header ${this.state.isCollapsible ? '' : 'ei-no-pointer'}`} onClick={event => this._onClick(event, !isOpen)} >
           {this.state.isCollapsible
             ? (isOpen
-              ? <i className='far fa-minus-square ei-foldout-icon'></i>
-              : <i className='far fa-plus-square ei-foldout-icon'></i>
+              ? <div className='far fa-minus-square ei-foldout-icon'></div>
+              : <div className='far fa-plus-square ei-foldout-icon'></div>
             )
             : ''
           }
-          {this.props.displayName}
+          <div className="ei-foldout-header-content">{this.props.displayName}</div>
         </div>
         <div className='ei-gen-level ei-internal-level' style={{ paddingLeft: this.leftIndent + 'px' }}>
           <div className='ei-items-contain'>
