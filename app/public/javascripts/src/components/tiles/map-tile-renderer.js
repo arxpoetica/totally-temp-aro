@@ -360,7 +360,7 @@ class MapTileRenderer {
     singleTilePromises.push(this.tileDataService.getEntityImageForLayer(this.tileDataService.locationStates.LOCK_ICON_KEY))
     singleTilePromises.push(this.tileDataService.getEntityImageForLayer(this.tileDataService.locationStates.INVALIDATED_ICON_KEY))
 
-    if (!this.state.areTilesRendering) this.state.setAreTilesRendering(true)
+    this.state.setAreTilesRendering(true)
     // Get all the data for this tile
     return Promise.all(singleTilePromises)
       .then((singleTileResults) => {
@@ -392,12 +392,12 @@ class MapTileRenderer {
           htmlCache.isDirty = false
         }
         this.hideStaleDataMarker(zoom, coord.x, coord.y)
-        if (this.state.areTilesRendering) this.state.setAreTilesRendering(false)
+        this.state.setAreTilesRendering(false)
         return Promise.resolve()
       })
       .catch((err) => {
         console.error(err)
-        if (this.state.areTilesRendering) this.state.setAreTilesRendering(false)
+        this.state.setAreTilesRendering(false)
         this.hideStaleDataMarker(zoom, coord.x, coord.y)
       })
   }
