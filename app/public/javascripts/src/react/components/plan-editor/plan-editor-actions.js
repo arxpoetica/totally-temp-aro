@@ -10,6 +10,7 @@ import { batch } from 'react-redux'
 import WktUtils from '../../../shared-utils/wkt-utils'
 import PlanEditorSelectors from './plan-editor-selectors'
 import { constants } from './shared'
+import { v4 as uuidv4 } from 'uuid'
 
 let validSubnetTypes = [
   'central_office',
@@ -33,6 +34,11 @@ function resumeOrCreateTransaction(planId, userId) {
         payload: Transaction.fromServiceObject(transactionData)
       })
       const transactionId = transactionData.id
+      const sessionId = uuidv4()
+      dispatch({
+        type: Actions.PLAN_EDITOR_SET_SESSION_ID,
+        payload: sessionId,
+      })
 
       const [{ data: equipmentList }, { data: boundaryList }] = await Promise.all([
         AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/equipment`),
@@ -64,7 +70,7 @@ function resumeOrCreateTransaction(planId, userId) {
       })
 
     } catch (error) {
-      console.error(err)
+      console.error(error)
       dispatch({
         type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION,
         payload: false
@@ -82,12 +88,9 @@ function clearTransaction (doOpenView = true) {
     })
     batch(() => {
       dispatch(setIsCommittingTransaction(false))
-      dispatch({
-        type: Actions.PLAN_EDITOR_CLEAR_SUBNETS,
-      })
-      dispatch({
-        type: Actions.PLAN_EDITOR_CLEAR_FEATURES,
-      })
+      dispatch({ type: Actions.PLAN_EDITOR_CLEAR_SESSION_ID })
+      dispatch({ type: Actions.PLAN_EDITOR_CLEAR_SUBNETS })
+      dispatch({ type: Actions.PLAN_EDITOR_CLEAR_FEATURES })
       if (doOpenView) {
         dispatch({
           type: Actions.TOOL_BAR_SET_SELECTED_DISPLAY_MODE,
