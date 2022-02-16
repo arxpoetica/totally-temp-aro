@@ -1,6 +1,15 @@
 .react-tool-tip {
-    background-color: red;
-    position: relative;
+    background-color: #fff;
+    z-index: 999;
+    border: solid 1px #bcbcbd;
+    color: #212529;
+    position: absolute;
+    min-width: 250%;
+    word-wrap: normal;
+    font-weight: bold;
+    padding: 3px;
+    text-align: center;
+    margin-top: 10px;
 }
 
 .react-tool-tip:before {
@@ -9,9 +18,22 @@
     width: 0;
     height: 0;
     position: relative;
-    border-left: 10px solid transparent;
-    border-right: 10px solid transparent;
-    border-bottom: 10px solid red;
-    left: 65px;
-    top: -5px;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid #fff;
+    left: 50px;
+    top: -11px;
+}
+
+.react-tool-tip-border-arrow:before {
+    content: "";
+    display: block;
+    width: 0;
+    height: 0;
+    position: absolute;
+    border-left: 14px solid transparent;
+    border-right: 14px solid transparent;
+    border-bottom: 14px solid #bcbcbd;
+    left: 48px;
+    top: 46px;
 }

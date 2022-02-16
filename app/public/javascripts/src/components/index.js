@@ -66,6 +66,7 @@ import ProjectPermissions from '../react/components/project-template/project-per
 import EtlTemplates from '../react/components/etl-templates/etl-templates.jsx'
 import PermissionsTable from '../react/components/acl/resource-permissions/permissions-table.jsx'
 import SearchableSelect from '../react/components/common/searchable-select.jsx'
+import ToolTip from '../react/components/common/tooltip.jsx'
 import PlanningConstraintsEditor from '../react/components/resource-manager/planning-constraints-editor.jsx'
 import FusionEditor from '../react/components/resource-manager/fusion-editor.jsx'
 import NetworkArchitectureEditor from '../react/components/resource-manager/network-architecture-editor.jsx'
@@ -170,11 +171,15 @@ app.component('boundaryDetail', boundaryDetail)
   .component('editorInterfacePrimitive', editorInterfacePrimitive)
   .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
 // ReactJS components
+<<<<<<< HEAD
   .component('rMapSplit', react2angular(MapSplit))
   .component('rViewMode', react2angular(ViewMode))
   .component('rDisplayModeButtons', react2angular(DisplayModeButtons))
   .component('rPlanEditorContainer', react2angular(PlanEditorContainer))
   .component('rNetworkPlan', react2angular(NetworkPlan))
+=======
+  .component('rToolTip', react2angular(ToolTip, ["angularComponent", "angularChildren", "clickChild", "toolTipText", "isActive"]))
+>>>>>>> 41ea65920 (adding tooltip)
   .component('rMapViewToggle', react2angular(MapViewToggle))
   .component('rMapSelectorPlanTarget', react2angular(MapSelectorPlanTarget))
   .component('rMapSelectorExportLocations', react2angular(MapSelectorExportLocations))

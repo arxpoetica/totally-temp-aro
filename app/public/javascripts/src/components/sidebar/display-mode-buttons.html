@@ -2,8 +2,12 @@
   .display-mode-button {
     width: 60px;   /* So that all the buttons have the same width */
   }
+
+  .display-mode-button-group{
+    position: absolute;
+  }
 </style>
-<div class="btn-group pull-left" role="group" aria-label="Mode buttons">
+<div class="btn-group pull-left display-mode-button-group" role="group" aria-label="Mode buttons">
   <button type="button"
           ng-if="$ctrl.state.configuration.perspective.showDisplayModeButtons.VIEW"
           ng-class="{ 'btn display-mode-button': true,
@@ -40,20 +44,15 @@
                 data-placement="bottom"
                 title="Edit Rings"></div>
   </button>
-  <button type="button"
-          ng-if="$ctrl.state.configuration.perspective.showDisplayModeButtons.EDIT_PLAN"
-          ng-class="{ 'btn display-mode-button': true,
-                      'btn-light': $ctrl.rSelectedDisplayMode !== $ctrl.displayModes.EDIT_PLAN,
-                      'btn-primary': $ctrl.rSelectedDisplayMode === $ctrl.displayModes.EDIT_PLAN }"
-          ng-click="$ctrl.setSelectedDisplayMode($ctrl.displayModes.EDIT_PLAN)"
-          ng-if="$ctrl.currentUser.perspective !== 'sales'" 
-          ng-disabled="$ctrl.displayEditPlanIcon()"
+  <r-tool-tip
+    ng-if="$ctrl.state.configuration.perspective.showDisplayModeButtons.EDIT_PLAN"
+    is-active="$ctrl.disableEditPlanIcon()"
+    tool-tip-text="$ctrl.editPlanToolTipText()"
+    angular-children="$ctrl.editPlanButton()"
+    click-child="$ctrl.setSelectedDisplayMode"
+    angular-component="$ctrl"
   >
-            <div class="fa fa-2x fa-pencil-alt"
-                data-toggle="tooltip"
-                data-placement="bottom"
-                title="Edit Plan"></div>
-  </button>
+  </r-tool-tip>
 </div>
 <div class="btn-group float-right">
   <button type="button"
