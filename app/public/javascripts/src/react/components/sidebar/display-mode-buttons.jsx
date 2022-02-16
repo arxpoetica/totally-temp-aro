@@ -2,6 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import ToolBarActions from '../header/tool-bar-actions'
 import { displayModes } from './constants'
+import ToolTip from "../common/tooltip.jsx"
 
 const DisplayModeButtons = (props) => {
   const {
@@ -11,11 +12,47 @@ const DisplayModeButtons = (props) => {
     displayModeButtons,
     selectedDisplayMode,
     setSelectedDisplayMode,
-   } = props
+    selection
+  } = props
+
+  const disableEditPlanIcon = () => {
+    return (
+    !!(
+        // Disable if no plan present
+        !plan || plan.ephemeral ||
+        // Disable if plan has not been ran
+        plan.planState === 'START_STATE' ||
+        (
+          // TEMPORARY UNTIL WE ALLOW MULTIPLE SERVICE AREA PLAN EDIT
+          // Disable if there is more than 1 service area in a plan
+          selection.planTargetDescriptions &&
+          Object.keys(selection.planTargetDescriptions.serviceAreas) > 1
+        )
+      )
+    )
+  }
+
+  const editPlanToolTipText = () => {
+    let baseMessage = "Edit mode is only available for "
+    if (!plan || plan.ephemeral) {
+      baseMessage += "a plan that has been created and ran."
+    } else if (plan.planState === 'START_STATE') {
+      baseMessage += "a plan that has been ran."
+    } else if (
+      selection.planTargetDescriptions &&
+      Object.keys(selection.planTargetDescriptions.serviceAreas) > 1
+    ) {
+      baseMessage += "one service area at a time."
+    } else {
+      baseMessage = "";
+    }
+
+    return baseMessage;
+  }
 
   return (
     <>
-      <div className="btn-group pull-left" role="group" aria-label="Mode buttons">
+      <div className="btn-group pull-left" role="group" aria-label="Mode buttons" style={{position: "absolute"}}>
         {/* View Mode */}
         {displayModeButtons.VIEW &&
           <button
@@ -63,18 +100,20 @@ const DisplayModeButtons = (props) => {
 
         {/* Edit Plan */}
         {displayModeButtons.EDIT_PLAN && currentUser.perspective !== 'sales' &&
-          <button
-            type="button"
-            className={`
-              btn display-mode-button
-              ${selectedDisplayMode !== displayModes.EDIT_PLAN ? 'btn-light' : ''}
-              ${selectedDisplayMode === displayModes.EDIT_PLAN ? 'btn-primary' : ''}
-            `}
-            disabled={(!plan || plan.ephemeral || plan.planState === 'START_STATE') ? 'disabled' : null}
-            onClick={() => setSelectedDisplayMode(displayModes.EDIT_PLAN)}
-          >
-            <div className="fa fa-2x fa-pencil-alt" data-toggle="tooltip" data-placement="bottom" title="Edit Plan" />
-          </button>
+          <ToolTip isActive={disableEditPlanIcon()} toolTipText={editPlanToolTipText()}>
+            <button
+              type="button"
+              className={`
+                btn display-mode-button
+                ${selectedDisplayMode !== displayModes.EDIT_PLAN ? 'btn-light' : ''}
+                ${selectedDisplayMode === displayModes.EDIT_PLAN ? 'btn-primary' : ''}
+              `}
+              disabled={disableEditPlanIcon() ? 'disabled' : null}
+              onClick={() => setSelectedDisplayMode(displayModes.EDIT_PLAN)}
+            >
+              <div className="fa fa-2x fa-pencil-alt" data-toggle="tooltip" data-placement="bottom" title="Edit Plan" />
+            </button>
+          </ToolTip>
         }
       </div>
 
@@ -120,7 +159,7 @@ const mapStateToProps = (state) => ({
   currentUser: state.user.loggedInUser ? state.user.loggedInUser : '',
   plan: state.plan.activePlan,
   planType: state.plan.activePlan && state.plan.activePlan.planType,
-
+  selection: state.selection
 })
 
 const mapDispatchToProps = (dispatch) => ({
