@@ -26,7 +26,7 @@ const DisplayModeButtons = (props) => {
           // TEMPORARY UNTIL WE ALLOW MULTIPLE SERVICE AREA PLAN EDIT
           // Disable if there is more than 1 service area in a plan
           selection.planTargetDescriptions &&
-          Object.keys(selection.planTargetDescriptions.serviceAreas) > 1
+          Object.keys(selection.planTargetDescriptions.serviceAreas).length > 1
         )
       )
     )
@@ -40,7 +40,7 @@ const DisplayModeButtons = (props) => {
       baseMessage += "a plan that has been ran."
     } else if (
       selection.planTargetDescriptions &&
-      Object.keys(selection.planTargetDescriptions.serviceAreas) > 1
+      Object.keys(selection.planTargetDescriptions.serviceAreas).length > 1
     ) {
       baseMessage += "one service area at a time."
     } else {
