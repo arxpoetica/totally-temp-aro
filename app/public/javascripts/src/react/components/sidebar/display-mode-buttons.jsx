@@ -21,7 +21,7 @@ const DisplayModeButtons = (props) => {
         // Disable if no plan present
         !plan || plan.ephemeral ||
         // Disable if plan has not been ran
-        plan.planState === 'START_STATE' ||
+        plan.planState !== 'COMPLETED' ||
         (
           // TEMPORARY UNTIL WE ALLOW MULTIPLE SERVICE AREA PLAN EDIT
           // Disable if there is more than 1 service area in a plan
@@ -36,7 +36,7 @@ const DisplayModeButtons = (props) => {
     let baseMessage = "Edit mode is only available for "
     if (!plan || plan.ephemeral) {
       baseMessage += "a plan that has been created and ran."
-    } else if (plan.planState === 'START_STATE') {
+    } else if (plan.planState !== 'COMPLETED') {
       baseMessage += "a plan that has been ran."
     } else if (
       selection.planTargetDescriptions &&

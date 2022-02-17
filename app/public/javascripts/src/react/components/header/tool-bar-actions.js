@@ -3,6 +3,7 @@ import Actions from '../../common/actions'
 import PlanActions from '../plan/plan-actions'
 import SelectionActions from '../selection/selection-actions'
 import { hsvToRgb } from '../../common/view-utils'
+import { batch } from 'react-redux'
 
 function setPlanInputsModal (status){
   return {
@@ -153,9 +154,6 @@ function loadPlan (planId) {
   return dispatch => {
     trackEvent('LOAD_PLAN', 'CLICK', 'PlanID', planId)
     dispatch(selectedDisplayMode('VIEW'))
-    // TEMPORARY UNTIL WE ALLOW MULTIPLE SERVICE AREA PLAN EDIT
-    // Load selected service areas
-    dispatch(SelectionActions.loadPlanTargetSelectionsFromServer(planId))
     let plan = null
     return AroHttp.get(`/service/v1/plan/${planId}`)
       .then((result) => {
@@ -173,11 +171,16 @@ function loadPlan (planId) {
         // https://www.sitepoint.com/javascript-custom-events/
         const event = new CustomEvent('mapChanged', { detail: mapObject})
         window.dispatchEvent(event)
-
+        
         return Promise.resolve()
       })
       .then(() => {
-        return dispatch(PlanActions.setActivePlan(plan)) // This will also create overlay, tiles, etc.
+        return batch(() => {
+          // TEMPORARY UNTIL WE ALLOW MULTIPLE SERVICE AREA PLAN EDIT
+          // Load selected service areas
+          dispatch(SelectionActions.loadPlanTargetSelectionsFromServer(planId))
+          dispatch(PlanActions.setActivePlan(plan)) // This will also create overlay, tiles, etc.
+        })
       })
   }
 }
