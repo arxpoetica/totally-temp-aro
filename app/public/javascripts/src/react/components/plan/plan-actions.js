@@ -551,7 +551,8 @@ function setSelectedProjectId (selectedProjectId){
   }
 }
 
-function updateDefaultPlanCoordinates (coordinates){
+function updateDefaultPlanCoordinates (payload){
+  /*
   return dispatch => {
     coordinates.addListener('center_changed', () => {
       var center = coordinates.getCenter()
@@ -566,6 +567,11 @@ function updateDefaultPlanCoordinates (coordinates){
         payload: {'zoom_changed' : coordinates.getZoom()}
       })
     })
+  }
+  */
+  return {
+    type: Actions.PLAN_UPDATE_DEFAULT_PLAN_COORDINATES,
+    payload: payload,
   }
 }
 
