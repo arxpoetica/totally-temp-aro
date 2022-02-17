@@ -22,6 +22,14 @@ let validSubnetTypes = [
 function resumeOrCreateTransaction (planId, userId) {
   return (dispatch, getState) => {
     const state = getState()
+    
+    // gaurd against dual transactions
+    if (state.isCommittingTransaction 
+      || state.isEnteringTransaction
+    ) {
+      return Promise.reject()
+    }
+    
     dispatch({
       type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION,
       payload: true
