@@ -36,7 +36,7 @@ const DisplayModeButtons = (props) => {
     let baseMessage = "Edit mode is only available for "
     if (!plan || plan.ephemeral) {
       baseMessage += "a plan that has been created and ran."
-    } else if (plan.planState === 'START_STATE') {
+    } else if (plan.planState !== 'COMPLETED') {
       baseMessage += "a plan that has been ran."
     } else if (
       selection.planTargetDescriptions &&
