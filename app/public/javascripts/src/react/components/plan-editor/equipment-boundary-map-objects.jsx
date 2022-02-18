@@ -10,35 +10,31 @@ import { constants } from './shared'
 export class EquipmentBoundaryMapObjects extends Component {
   constructor (props) {
     super(props)
-    this.mapObject = undefined;
-    this.clickOutListener = undefined;
-    this.deleteKeyListener = undefined;
-    this.mapObjectOverlay = [];
+    this.mapObject = undefined
     this.neighborObjectsById = {}
+    this.clickOutListener = undefined
+    this.deleteKeyListener = undefined
+    this.mapObjectOverlay = []
     this.polygonOptions = {
       strokeColor: '#1f7de6',
-      // strokeOpacity: 1,
       strokeWeight: 3,
       fillColor: '#1f7de6',
       fillOpacity: 0.05,
     }
     this.neighborPolygonOptions = {
       strokeColor: '#1f7de6',
-      //strokeOpacity: 0.5,
       strokeWeight: 1.5,
       fillColor: '#1f7de6',
       fillOpacity: 0.02,
     }
-    
-    this.clearMapObjectOverlay = this.clearMapObjectOverlay.bind(this);
-    this.contextMenuClick = this.contextMenuClick.bind(this);
-    this.neighborRootNode = this.neighborRootNode.bind(this);
+
+    this.clearMapObjectOverlay = this.clearMapObjectOverlay.bind(this)
+    this.contextMenuClick = this.contextMenuClick.bind(this)
+    this.neighborRootNode = this.neighborRootNode.bind(this)
   }
 
-  render () {
-    // No UI for this component. It deals with map objects only.
-    return null
-  }
+  // no ui for this component. it deals with map objects only.
+  render () { return null }
 
   componentDidUpdate (prevProps, prevState) {
     // any changes to state props should cause a rerender
@@ -65,7 +61,8 @@ export class EquipmentBoundaryMapObjects extends Component {
         rootSubnetId = rootSubnet.feature.objectId;
         newNeighborIds.push(selectedSubnetId);
       }
-      const children = newNeighborIds.concat(subnets[rootSubnetId] && subnets[rootSubnetId].children || [])
+      const allSubnets = subnets[rootSubnetId] && subnets[rootSubnetId].children || []
+      const children = newNeighborIds.concat(allSubnets)
       newNeighborIds = children.concat([rootSubnetId])
       // may need to ensure newNeighborIds are all unique 
       const index = newNeighborIds.indexOf(selectedSubnetId)
@@ -143,17 +140,6 @@ export class EquipmentBoundaryMapObjects extends Component {
     
     this.mapObject.setOptions(this.polygonOptions)
     this.setupListenersForMapObject(this.mapObject)
-    /*
-    this.mapObject.addListener('rightclick', event => {
-      // console.log('yay, you right clicked!')
-      // const eventXY = WktUtils.getXYFromEvent(event)
-      // this.props.showContextMenuForEquipmentBoundary(this.props.transactionId, this.mapObject.objectId, eventXY.x, eventXY.y)
-    })
-    this.mapObject.addListener('click', () => {
-      // console.log('yay! you clicked!')
-      // this.props.selectBoundary(objectId)  
-    })
-    */
   }
 
   createNeighborMapObject (subnetId) {
@@ -203,13 +189,6 @@ export class EquipmentBoundaryMapObjects extends Component {
     idsToCreate.forEach(id => {
       this.createNeighborMapObject(id)
     })
-  }
-
-  updateBoundaryShapeFromStore (objectId) {
-    // const geometry = this.props.transactionFeatures[objectId].feature.geometry
-    // const mapObject = this.mapObjects[objectId]
-    // mapObject.setPath(WktUtils.getGoogleMapPathsFromWKTMultiPolygon(geometry))
-    // this.setupListenersForMapObject(mapObject)
   }
 
   modifyBoundaryShape (mapObject) {
@@ -371,7 +350,7 @@ export class EquipmentBoundaryMapObjects extends Component {
       vertexPayload = event.vertex;
     }
     const eventXY = WktUtils.getXYFromEvent(event)
-    this.props.showContextMenuForEquipmentBoundary(this.mapObject, eventXY.x, eventXY.y, vertexPayload, this.clearMapObjectOverlay)
+    this.props.showContextMenuForBoundary(this.mapObject, eventXY.x, eventXY.y, vertexPayload, this.clearMapObjectOverlay)
   }
 
   clearMapObjectOverlay() {
@@ -403,22 +382,9 @@ export class EquipmentBoundaryMapObjects extends Component {
   }
 }
 
-/* 
-EquipmentBoundaryMapObjects.propTypes = {
-  transactionId: PropTypes.number,
-  transactionFeatures: PropTypes.object,
-  googleMaps: PropTypes.object,
-  subnets: PropTypes.object,
-  selectedSubnetId: PropTypes.string,
-}
-*/
-
 const mapStateToProps = state => ({
-  //planId: state.plan.activePlan.id,
   transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
   transactionFeatures: state.planEditor.features,
-  //selectedBoundaryTypeId: state.mapLayers.selectedBoundaryType.id,
-  //selectedFeatures: state.selection.planEditorFeatures,
   googleMaps: state.map.googleMaps,
   subnets: state.planEditor.subnets,
   selectedSubnetId: state.planEditor.selectedSubnetId,
@@ -428,11 +394,9 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  showContextMenuForEquipmentBoundary: (mapObject, x, y, vertex, callBack) => {
-    dispatch(PlanEditorActions.showContextMenuForEquipmentBoundary(mapObject, x, y, vertex, callBack))
-  },
-  boundaryChange: (subnetId, geometry) => dispatch(PlanEditorActions.boundaryChange(subnetId, geometry)),
-  deleteBoundaryVertices: (mapObjects, vertices, callBack) => dispatch(PlanEditorActions.deleteBoundaryVertices(mapObjects, vertices, callBack)),
+  showContextMenuForBoundary: args => dispatch(PlanEditorActions.showContextMenuForBoundary(...args)),
+  boundaryChange: args => dispatch(PlanEditorActions.boundaryChange(...args)),
+  deleteBoundaryVertices: args => dispatch(PlanEditorActions.deleteBoundaryVertices(...args)),
   selectBoundary: objectId => dispatch(SelectionActions.setPlanEditorFeatures([objectId])),
   setSelectedSubnetId: subnetId => dispatch(PlanEditorActions.setSelectedSubnetId(subnetId)),
   selectEditFeaturesById: subnetIds => dispatch(PlanEditorActions.selectEditFeaturesById(subnetIds)),

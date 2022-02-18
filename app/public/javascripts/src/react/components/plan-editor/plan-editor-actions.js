@@ -499,7 +499,7 @@ function assignLocation (locationId, terminalId) {
   }
 }
 
-function showContextMenuForEquipmentBoundary (mapObject, x, y, vertex, callBack) {
+function showContextMenuForBoundary (mapObject, x, y, vertex, callBack) {
   return (dispatch) => {
     const menuActions = []
     menuActions.push(
@@ -1625,7 +1625,7 @@ export default {
   showContextMenuForLocations,
   unassignLocation,
   assignLocation,
-  showContextMenuForEquipmentBoundary,
+  showContextMenuForBoundary,
   startDrawingBoundaryFor,
   stopDrawingBoundary,
   setIsCalculatingSubnets,
