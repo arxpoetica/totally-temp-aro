@@ -362,7 +362,8 @@ class LocationsController {
     const nextSelectedLibrary = this.dataItems && this.dataItems.location && this.dataItems.location.selectedLibraryItems
     if ((currentLocationLayers !== nextState.locationLayers) ||
       (currentSelectedLibrary !== nextSelectedLibrary) ||
-      (currentLocationFilters !== this.locationFilters)) {
+      // Fix for infinite call of tiles renedring notifications.
+      (JSON.stringify(currentLocationFilters) !== JSON.stringify(this.locationFilters))) {
       this.updateMapLayers()
     }
   }

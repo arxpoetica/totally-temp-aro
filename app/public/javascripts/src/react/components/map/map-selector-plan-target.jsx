@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react'
-import reduxStore from '../../../redux-store'
-import wrapComponentWithProvider from '../../common/provider-wrapped-component'
+import { connect } from 'react-redux'
 import SelectionActions from '../selection/selection-actions'
 import { usePrevious } from '../../common/view-utils.js'
 import { targetSelectionModes, mapHitFeatures } from '../sidebar/constants'
@@ -93,4 +92,4 @@ const mapDispatchToProps = (dispatch) => ({
   requestPolygonSelect: polygonCoordinates => dispatch(SelectionActions.requestPolygonSelect(polygonCoordinates)),
 })
 
-export default wrapComponentWithProvider(reduxStore, MapSelectorPlanTarget, mapStateToProps, mapDispatchToProps)
+export default connect(mapStateToProps, mapDispatchToProps)(MapSelectorPlanTarget)

@@ -139,7 +139,7 @@
 
 /* View-Mode Coverage Boundary */
 
-.view-mode-container {
+.coverage-boundary-container {
   position: relative; /* This will require the parent to have position: relative or absolute */
   height: 100%;
   padding: 0px 10px 10px 10px;
@@ -357,4 +357,58 @@
 }
 .edit-service-area .save-properties {
   margin-top: 10px;
+}
+
+/* Network Plan */
+
+.network-plan {
+  top: 0px;
+  white-space: nowrap;
+  right: 0px;
+  text-align: center;
+  background: #1f7de6;
+  padding-left: 10px;
+  padding-right: 10px;
+  border-radius: 0px;
+  cursor: default;
+  color: white;
+}
+
+.network-plan .ephemeral {
+  font-size: 25px;
+  line-height: 40px;
+}
+
+.network-plan .non-ephemeral {
+  font-size: 25px;
+  line-height: 55px;
+  max-width: 170px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+/* Display Mode Buttons */
+
+.display-mode-button {
+  width: 60px;   /* So that all the buttons have the same width */
+}
+
+/* View Mode */
+
+.view-mode-container {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding-top: 20px;
+}
+.view-mode-container .collapse-height {
+  height: 100%;
+}
+.view-mode-container .card-body-space {
+  padding: 0px;
+}
+.road-info > div {
+  margin-top: 10px; /*Line  break for each div*/
 }
