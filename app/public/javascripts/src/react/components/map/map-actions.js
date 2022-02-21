@@ -31,8 +31,16 @@ function requestSetMapCenter (mapCenter) {
   }
 }
 
+function setAreTilesRendering (value) {
+  return {
+    type: Actions.MAP_SET_ARE_TILES_RENDERING,
+    payload: value
+  }
+}
+
 export default {
   setGoogleMapsReference,
   setSelectedMapFeatures,
-  requestSetMapCenter
+  requestSetMapCenter,
+  setAreTilesRendering,
 }
