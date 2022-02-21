@@ -8,17 +8,18 @@ import { targetSelectionModes, controlStates } from '../constants'
 import '../sidebar.css'
 
 export const CoverageBoundary = (props) => {
-
-  const [state, setState] = useState({
-    controlState: controlStates.NO_TARGET_SELECTED,
-    coverageRadius: 10000, // In whatever units are specified in the configuration.units service
-    householdsCovered: null,
-  })
-
-  const { mapGlobalObjectName, configuration, getOptimizationBody, selectedTargetSelectionMode } = props
-
-  const { controlState, coverageRadius, householdsCovered } = state
-
+  const {
+    mapGlobalObjectName,
+    configuration,
+    getOptimizationBody,
+    selectedTargetSelectionMode,
+    mapRef,
+  } = props
+  const [controlState, setControlState] = useState(controlStates.NO_TARGET_SELECTED)
+  // In whatever units are specified in the configuration.units service
+  const [coverageRadius, setCoverageRadius] = useState(10000)
+  const [locationsCovered, setLocationsCovered] = useState(null)
+  let coveragePolygon = null
   const targetMarker = new google.maps.Marker({
     position: new google.maps.LatLng(-122, 48),
     icon: {
@@ -29,22 +30,21 @@ export const CoverageBoundary = (props) => {
     map: null,
     optimized: !ARO_GLOBALS.MABL_TESTING,
   })
-
-  targetMarker.addListener('dragend', (event) => handleCoverageTargetUpdated(event.latLng))
-
-  let coveragePolygon = null
-
-  let mapRef = window[mapGlobalObjectName]
+  // To get the updated state while using event-handler
+  // https://stackoverflow.com/questions/55265255/react-usestate-hook-event-handler-using-initial-state
+  const coverageRadiusRef = useRef(coverageRadius)
 
   // Works as same as componentDidMount, componentWillUnmount
   // https://stackoverflow.com/questions/53945763/componentdidmount-equivalent-on-a-react-function-hooks-component
   useEffect(() => {
-    // We should have a map variable at this point
     if (!mapRef) {
       console.error('ERROR: The Coverage Boundary component initialized, but a map object is not available at this time.')
       return
     }
-
+  
+    targetMarker.addListener(
+      'dragend', (event) => handleCoverageTargetUpdated(event.latLng)
+    )
     // Use the cross hair cursor while this control is initialized
     mapRef.setOptions({ draggableCursor: 'crosshair' })
 
@@ -67,9 +67,6 @@ export const CoverageBoundary = (props) => {
       // Go back to the default map cursor
       mapRef.setOptions({ draggableCursor: null })
 
-      // Set mapRef to null, in case any async code is running that will draw polygons on the map
-      mapRef = null
-
       // Target selection mode cannot be COVERAGE_BOUNDARY anymore
       selectedTargetSelectionMode(targetSelectionModes.SINGLE_PLAN_TARGET)
     }
@@ -86,7 +83,8 @@ export const CoverageBoundary = (props) => {
     targetMarker.position = position
     targetMarker.setMap(mapRef)
     targetMarker.setDraggable(false) // No dragging while we are computing coverage
-    setState((state) => ({ ...state, controlState: controlStates.COMPUTING, householdsCovered: null }))
+    setControlState(controlStates.COMPUTING);
+    setLocationsCovered(null);
     if (coveragePolygon) coveragePolygon.setMap(null)
 
     calculateCoverage()
@@ -102,23 +100,14 @@ export const CoverageBoundary = (props) => {
           clickable: false
         })
         coveragePolygon.setMap(mapRef)
-        setState((state) => ({ ...state, householdsCovered: result.householdsCovered,
-          controlState: controlStates.COMPUTED
-        }))
+        setLocationsCovered(result.locationsCovered)
+        setControlState(controlStates.COMPUTED)
         targetMarker.setDraggable(true) // Allow dragging the marker
       })
       .catch((err) => {
         console.error(err)
         targetMarker.setDraggable(true) // Allow dragging the marker
       })
-  }
-
-  // To get the updated state while using event-handler
-  // https://stackoverflow.com/questions/55265255/react-usestate-hook-event-handler-using-initial-state
-  const coverageRadiusRef = useRef(coverageRadius)
-  const setCoverageRadius = (coverageRadius) => {
-    coverageRadiusRef.current = coverageRadius
-    setState((state) => ({ ...state, coverageRadius }))
   }
 
   const calculateCoverage = () => {
@@ -143,8 +132,12 @@ export const CoverageBoundary = (props) => {
             lng: polygonVertex[0]
           })
         })
+        let newLocationsCovered = 0
+        Object.keys(result.data.coverageInfo).forEach(key => {
+          newLocationsCovered += result.data.coverageInfo[key].length;
+        })
         return Promise.resolve({
-          householdsCovered: result.data.coverageInfo.length,
+          locationsCovered: newLocationsCovered,
           coveragePolygon: polygonPath
         })
       })
@@ -152,9 +145,10 @@ export const CoverageBoundary = (props) => {
   }
 
   const onChangeCoverageRadious = (event) => {
-    const { value: coverageRadius } = event.target
-    setCoverageRadius(coverageRadius)
-    setState((state) => ({ ...state, coverageRadius }))
+    if (event.target && event.target.value) {
+      coverageRadiusRef.current = event.target.value;
+      setCoverageRadius(event.target.value)
+    }
   }
 
   return (
@@ -194,8 +188,8 @@ export const CoverageBoundary = (props) => {
             <td>{configuration.units.length_units}</td>
           </tr>
           <tr>
-            <td>Households covered</td>
-            <td>{householdsCovered || 'N/A'}</td>
+            <td>Locations covered</td>
+            <td>{locationsCovered || 'N/A'}</td>
             <td />
           </tr>
         </tbody>
@@ -206,6 +200,7 @@ export const CoverageBoundary = (props) => {
 
 const mapStateToProps = (state) => ({
   configuration: state.toolbar.appConfiguration,
+  mapRef: state.map.googleMaps,
 })
 
 const mapDispatchToProps = (dispatch) => ({

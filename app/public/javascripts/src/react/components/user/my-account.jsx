@@ -59,13 +59,14 @@ export class MyAccount extends Component {
               />
             </div>
             <div className="form-group">
-              <label>Email *</label>
+              <label>User ID</label>
               <input
                 type="email"
                 name="email"
                 className="form-control"
                 onChange={(event) => this.handleChange(event)}
                 value={this.state.accountDetails.email}
+                disabled
               />
             </div>
           </fieldset>
