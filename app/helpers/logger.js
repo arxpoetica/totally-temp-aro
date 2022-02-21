@@ -1,3 +1,5 @@
+// FIXME: to speed up logging, could use `new Set` and `.has()` for logix
+
 const kleur = require('kleur')
 const { LOGGER_STATE, LOGGER_FOCUSES } = process.env
 
@@ -13,17 +15,23 @@ const LOGGER_STATES = Object.freeze({
 })
 // maintained list of possible log system groups
 const LOGGER_GROUPS = Object.freeze({
-  RABBIT_MQ: 'RABBIT-MQ',
-  SOCKET: 'SOCKET',
+  RABBIT_MQ: { group: 'RABBIT-MQ', color: 'cyan' },
+  SOCKET: { group: 'SOCKET', color: 'yellow' },
+  CACHE: { group: 'CACHE', color: 'gray' },
+  CONFIG: { group: 'CONFIG', color: 'gray' },
+  EMAIL: { group: 'EMAIL', color: 'gray' },
+  ARO_SERVICE: { group: 'ARO-SERVICE', color: 'cyan' },
+  MODELS: { group: 'MODELS', color: 'blue' },
+  ROUTES: { group: 'ROUTES', color: 'magenta' },
 })
 
-const loggerState = LOGGER_STATE || LOGGER_STATES.ERRORS
+const loggerState = LOGGER_STATE || LOGGER_STATES.VERBOSE
 
 let focuses = []
 try { focuses = JSON.parse(LOGGER_FOCUSES) } catch (error) {/* no op */}
 
 console.log()
-console.log(kleur.bgCyan().black(`Running logger in "${loggerState}" mode.`))
+console.log(kleur.bgCyan().black(` Running logger in "${loggerState}" mode `))
 if (focuses.length) {
   console.log(
     'Running logger with the following focuses:',
@@ -58,7 +66,7 @@ class Logger {
   error(message, detail) { this._log(kleur.black().bgRed('[ERROR]'), message, detail) }
 }
 
-function createLogger(group, color) {
+function createLogger({ group, color }) {
   return new Logger(group, color)
 }
 

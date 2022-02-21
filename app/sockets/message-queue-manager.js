@@ -1,9 +1,8 @@
 const amqp = require('amqplib')
 const { createLogger, LOGGER_GROUPS } = require('../helpers/logger')
+const logger = createLogger(LOGGER_GROUPS.RABBIT_MQ)
 const Consumer = require('./consumer')
 const RETRY_CONNECTION_IN_MSEC = 10000
-
-const logger = createLogger(LOGGER_GROUPS.RABBIT_MQ, 'cyan')
 
 class MessageQueueManager {
   constructor (host, username, password) {
