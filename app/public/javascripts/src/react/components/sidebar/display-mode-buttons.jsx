@@ -35,9 +35,9 @@ const DisplayModeButtons = (props) => {
   const editPlanToolTipText = () => {
     let baseMessage = "Edit mode is only available for "
     if (!plan || plan.ephemeral) {
-      baseMessage += "a plan that has been created and ran."
+      baseMessage += "a plan that has saved created and run."
     } else if (plan.planState !== 'COMPLETED') {
-      baseMessage += "a plan that has been ran."
+      baseMessage += "a plan that has been run."
     } else if (
       selection.planTargetDescriptions &&
       Object.keys(selection.planTargetDescriptions.serviceAreas).length > 1
