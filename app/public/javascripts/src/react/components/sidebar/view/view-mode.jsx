@@ -197,7 +197,7 @@ const ViewMode = (props) => {
           </CardHeader>
           <Collapse className="collapse-height" isOpen={checkIsActivePanel(viewModePanels.COVERAGE_BOUNDARY)}>
             <CardBody className="card-body-space">
-              <CoverageBoundary />
+              <CoverageBoundary mapGlobalObjectName="map"/>
             </CardBody>
           </Collapse>
         </Card>

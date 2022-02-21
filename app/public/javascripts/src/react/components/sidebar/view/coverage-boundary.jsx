@@ -13,11 +13,11 @@ export const CoverageBoundary = (props) => {
     configuration,
     getOptimizationBody,
     selectedTargetSelectionMode,
-    mapRef
+    mapRef,
   } = props
   const [controlState, setControlState] = useState(controlStates.NO_TARGET_SELECTED)
   // In whatever units are specified in the configuration.units service
-  const [coverageRadius, setCoverageRadius] = useState(1000)
+  const [coverageRadius, setCoverageRadius] = useState(10000)
   const [locationsCovered, setLocationsCovered] = useState(null)
   let coveragePolygon = null
   const targetMarker = new google.maps.Marker({

@@ -2,7 +2,6 @@ import { List, Map } from 'immutable'
 import { createSelector } from 'reselect'
 import { formValueSelector } from 'redux-form'
 import { toast } from 'react-toastify'
-import format from './string-template'
 import StateViewMode from './state-view-mode'
 import MapLayerHelper from './map-layer-helper'
 import Constants from '../components/common/constants'
@@ -22,7 +21,6 @@ import SocketManager from '../react/common/socket-manager'
 import RingEditActions from '../react/components/ring-edit/ring-edit-actions'
 import NetworkAnalysisActions from '../react/components/optimization/network-analysis/network-analysis-actions'
 import NotificationInterface from '../react/components/notification/notification-interface'
-import ReactComponentConstants from '../react/common/constants'
 import AroNetworkConstraints from '../shared-utils/aro-network-constraints'
 import PuppeteerMessages from '../components/common/puppeteer-messages'
 import NetworkOptimizationActions from '../react/components/optimization/network-optimization/network-optimization-actions'
@@ -33,8 +31,6 @@ import { hsvToRgb } from '../react/common/view-utils'
 import StateViewModeActions from '../react/components/state-view-mode/state-view-mode-actions'
 import PlanEditorActions from '../react/components/plan-editor/plan-editor-actions'
 import RxState from '../react/common/rxState'
-
-const networkAnalysisConstraintsSelector = formValueSelector(ReactComponentConstants.NETWORK_ANALYSIS_CONSTRAINTS)
 
 // We need a selector, else the .toJS() call will create an infinite digest loop
 const getAllLocationLayers = reduxState => reduxState.mapLayers.location
@@ -101,15 +97,6 @@ class State {
       { id: 'NEW_CONNECTION', label: 'New Connection' },
       { id: 'REUSE_CONNECTION', label: 'Reuse Connection' }
     ]
-
-    // ToDo: move this to redux state: optimize
-    service.expertModeTypes = {
-      OPTIMIZATION_SETTINGS: { id: 'OPTIMIZATION_SETTINGS', label: 'Optimization Settings' },
-      MANUAL_PLAN_TARGET_ENTRY: { id: 'MANUAL_PLAN_TARGET_ENTRY', label: 'Manual plan Target Selection', isQueryValid: false },
-      MANUAL_PLAN_SA_ENTRY: { id: 'MANUAL_PLAN_SA_ENTRY', label: 'Manual Plan Service Area Selection', isQueryValid: false }
-    }
-
-    service.selectedExpertMode = service.expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].id
 
     service.viewFiberOptions = [
       {
@@ -220,7 +207,6 @@ class State {
       EDIT_RINGS: 'EDIT_RINGS',
       OUTPUT: 'OUTPUT'
     })
-    service.activeEditRingsPanel = service.EditRingsPanels.EDIT_RINGS
 
     service.routingModes = {
       DIRECT_ROUTING: { id: 'DIRECT_ROUTING', label: 'Direct Routing' },
@@ -307,15 +293,8 @@ class State {
     service.dragStartEvent = new Rx.BehaviorSubject()
     service.dragEndEvent = new Rx.BehaviorSubject()
     service.showPlanResourceEditorModal = false
-    service.showRoicReportsModal = false
     service.editingPlanResourceKey = null
     service.isLoadingPlan = false
-    service.expertMode = {
-      OPTIMIZATION_SETTINGS: null,
-      MANUAL_PLAN_TARGET_ENTRY: null,
-      MANUAL_PLAN_SA_ENTRY: null
-    }
-    service.expertModeScopeContext = null
 
     // Raise an event requesting locations within a polygon to be selected. Coordinates are relative to the visible map.
     service.requestPolygonSelect = new Rx.BehaviorSubject({})
@@ -502,8 +481,8 @@ class State {
       }
 
       // ToDo: this check may need to move into REACT
-      if (service.selectedDisplayMode.getValue() == service.displayModes.EDIT_RINGS
-        && service.activeEditRingsPanel == service.EditRingsPanels.EDIT_RINGS) {
+      if (service.rSelectedDisplayMode === service.displayModes.EDIT_RINGS
+        && service.rActiveEditRingsPanel === service.EditRingsPanels.EDIT_RINGS) {
         service.onFeatureSelectedRedux(options)
       } else if (options.locations) {
         service.setSelectedLocations(options.locations.map(location => location.location_id))
@@ -1054,73 +1033,10 @@ class State {
     }
     service.loadNetworkNodeTypesEntity()
 
-    // optimization services
-    service.modifyDialogResult = Object.freeze({
-      CANCEL: 0,
-      OVERWRITE: 1
-    })
     service.progressMessagePollingInterval = null
     service.progressMessage = ''
     service.progressPercent = 0
     service.isCanceling = false // True when we have requested the server to cancel a request
-
-    // expert mode refactor
-    // also used by ring edit and r-network-optimization-input
-    service.handleModifyClicked = () => {
-      var currentPlan = service.plan
-      if (currentPlan.ephemeral) {
-        // This is an ephemeral plan. Don't show any dialogs to the user, simply copy this plan over to a new ephemeral plan
-        var url = `/service/v1/plan-command/copy?source_plan_id=${currentPlan.id}&is_ephemeral=${currentPlan.ephemeral}`
-        return $http.post(url, {})
-          .then((result) => {
-            if (result.status >= 200 && result.status <= 299) {
-              service.setPlanRedux(result.data, true)
-              return Promise.resolve()
-            }
-          })
-          .catch((err) => {
-            console.log(err)
-            return Promise.reject(err)
-          })
-      } else {
-        // This is not an ephemeral plan. Show a dialog to the user asking whether to overwrite current plan or save as a new one.
-        return service.showModifyQuestionDialog()
-          .then((result) => {
-            if (result === service.modifyDialogResult.OVERWRITE) {
-              return $http.delete(`/service/v1/plan/${currentPlan.id}/optimization-state`)
-                .then(() => $http.get(`/service/v1/plan/${currentPlan.id}/optimization-state`))
-                .then(result => {
-                  service.plan.planState = result.data
-                  service.setActivePlanState(result.data)
-                  $timeout()
-                })
-                .catch(err => console.error(err))
-            }
-          })
-          .catch((err) => {
-            console.log(err)
-            return Promise.reject()
-          })
-      }
-    }
-
-    service.showModifyQuestionDialog = () => {
-      return new Promise((resolve, reject) => {
-        swal({
-          title: '',
-          text: 'You are modifying a plan with a completed analysis. Do you wish to overwrite the existing plan?  Overwriting will clear all results which were previously run.',
-          type: 'info',
-          confirmButtonColor: '#b9b9b9',
-          confirmButtonText: 'Overwrite',
-          cancelButtonColor: '#DD6B55',
-          cancelButtonText: 'Cancel',
-          showCancelButton: true,
-          closeOnConfirm: true
-        }, (wasConfirmClicked) => {
-          resolve(wasConfirmClicked ? service.modifyDialogResult.OVERWRITE : service.modifyDialogResult.CANCEL)
-        })
-      })
-    }
 
     service.getOptimizationProgress = (newPlan) => {
       if (!service.plan.planState) {
@@ -1280,14 +1196,6 @@ class State {
       AnalysisArea: [],
       AnalysisLayer: []
     }
-    // list of matched boundary list (ServiceAreaView/CensusBlocksEntity/AnalysisArea)
-    service.entityTypeBoundaryList = []
-
-    service.resetBoundarySearch = new Rx.BehaviorSubject(false)
-    service.clearEntityTypeBoundaryList = () => {
-      service.entityTypeBoundaryList = []
-    }
-    service.selectedBoundaryTypeforSearch = null
 
     service.authRolls = []
     service.authRollsByName = {}
@@ -1666,56 +1574,6 @@ class State {
     }
 
     service.loadServiceLayers()
-    // expert mode refactor
-    service.executeManualPlanTargetsQuery = () => {
-      var query = service.formatExpertModeQuery(service.expertMode[service.selectedExpertMode], service.expertModeScopeContext)
-      // select id from aro.location_entity where data_source_id = 1 and id in
-      // (239573,239586,239607,91293,91306,91328,237792,86289,86290,109232,239603,145556,145557,239604,239552)
-      $http.post('/locations/getLocationIds', { query: query })
-        .then((result) => {
-          var plan = service.plan
-
-          const dispatchers = service.getDispatchers()
-          if (service.selectedExpertMode === service.expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].id) {
-            dispatchers.setSelectionTypeById(SelectionModes.SELECTED_LOCATIONS)
-          } else {
-            dispatchers.setSelectionTypeById(SelectionModes.SELECTED_AREAS)
-          }
-
-          var addPlanTargets = { locations: new Set(), serviceAreas: new Set() }
-          var removePlanTargets = { locations: new Set(), serviceAreas: new Set() }
-          if (service.selectedExpertMode === service.expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].id) {
-            result.data.forEach((location) => {
-              if (service.reduxPlanTargets.locations.has(+location)) {
-                removePlanTargets.locations.add(+location)
-              } else {
-                addPlanTargets.locations.add(+location)
-              }
-            })
-          } else {
-            result.data.forEach((serviceAreaId) => {
-              if (service.reduxPlanTargets.serviceAreas.has(+serviceAreaId)) {
-                removePlanTargets.serviceAreas.add(+serviceAreaId)
-              } else {
-                addPlanTargets.serviceAreas.add(+serviceAreaId)
-              }
-            })
-          }
-          if (addPlanTargets.locations.size > 0 || addPlanTargets.serviceAreas.size > 0) {
-            dispatchers.addPlanTargets(plan.id, addPlanTargets)
-          }
-          if (removePlanTargets.locations.size > 0 || removePlanTargets.serviceAreas.size > 0) {
-            dispatchers.removePlanTargets(plan.id, removePlanTargets)
-          }
-        })
-        .catch(err => console.log(err))
-    }
-
-    service.formatExpertModeQuery = (string, replaceWithobject) => {
-      var query
-      query = format(string, replaceWithobject)
-      return query;
-    }
 
     service.getValidEquipmentFeaturesList = (equipmentFeaturesList) => {
       var validEquipments = []
@@ -1756,21 +1614,6 @@ class State {
 
     service.toggleSiteBoundary = () => {
       service.updateShowSiteBoundary(!service.showSiteBoundary)
-    }
-
-    service.getDispatchers = () => {
-      // So we can send dispatchers to stateSerializationHelper. This function can go away after stateSerializationHelper is refactored.
-      return {
-        setSelectionTypeById: service.setSelectionTypeById,
-        addPlanTargets: service.addPlanTargets,
-        removePlanTargets: service.removePlanTargets,
-        selectDataItems: service.selectDataItems,
-        setNetworkAnalysisConstraints: service.setNetworkAnalysisConstraints,
-        setNetworkAnalysisConnectivityDefinition: service.setNetworkAnalysisConnectivityDefinition,
-        setPrimarySpatialEdge: service.setPrimarySpatialEdge,
-        clearWormholeFuseDefinitions: service.clearWormholeFuseDefinitions,
-        setWormholeFuseDefinition: service.setWormholeFuseDefinition
-      }
     }
 
     // Define a tile box at zoom level 22 that covers the entire world
@@ -1887,15 +1730,10 @@ class State {
       networkEquipmentLayers: getNetworkEquipmentLayersList(reduxState),
       boundaries: getBoundaryLayersList(reduxState),
       mapRef: reduxState.map.googleMaps,
-      reduxPlanTargets: reduxState.selection.planTargets,
       showSiteBoundary: reduxState.mapLayers.showSiteBoundary,
       boundaryTypes: getBoundaryTypesList(reduxState),
       selectedBoundaryType: reduxState.mapLayers.selectedBoundaryType,
       systemActors: reduxState.user.systemActors,
-      networkAnalysisConnectivityDefinition: reduxState.optimization.networkAnalysis.connectivityDefinition,
-      networkAnalysisConstraints: networkAnalysisConstraintsSelector(reduxState, 'spatialEdgeType', 'snappingDistance', 'maxConnectionDistance', 'maxWormholeDistance', 'ringComplexityCount', 'maxLocationEdgeDistance', 'locationBufferSize', 'conduitBufferSize', 'targetEdgeTypes'),
-      primarySpatialEdge: reduxState.optimization.networkAnalysis.primarySpatialEdge,
-      wormholeFuseDefinitions: reduxState.optimization.networkAnalysis.wormholeFuseDefinitions,
       activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
       optimizationInputs: reduxState.optimization.networkOptimization.optimizationInputs,
       rSelectedDisplayMode: reduxState.toolbar.rSelectedDisplayMode,
@@ -1922,14 +1760,10 @@ class State {
       setMapReportMapObjectsVisibility: isVisible => dispatch(MapReportsActions.showMapObjects(isVisible)),
       setMapReportPageNumbersVisibility: isVisible => dispatch(MapReportsActions.showPageNumbers(isVisible)),
       setPlanRedux: plan => dispatch(PlanActions.setActivePlan(plan)),
-      setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId)),
-      addPlanTargets: (planId, planTargets) => dispatch(SelectionActions.addPlanTargets(planId, planTargets)),
-      removePlanTargets: (planId, planTargets) => dispatch(SelectionActions.removePlanTargets(planId, planTargets)),
       setSelectedLocations: locationIds => dispatch(SelectionActions.setLocations(locationIds)),
       setMapFeatures: mapFeatures => dispatch(SelectionActions.setMapFeatures(mapFeatures)),
       setSelectedDisplayMode: displayMode => dispatch(ToolBarActions.selectedDisplayMode(displayMode)),
       setActivePlanState: planState => dispatch(PlanActions.setActivePlanState(planState)),
-      selectDataItems: (dataItemKey, selectedLibraryItems) => dispatch(PlanActions.selectDataItems(dataItemKey, selectedLibraryItems)),
       loadPlanRedux: planId => dispatch(PlanActions.loadPlan(planId)),
       setGoogleMapsReference: mapRef => dispatch(MapActions.setGoogleMapsReference(mapRef)),
       setNetworkEquipmentLayers: networkEquipmentLayers => dispatch(MapLayerActions.setNetworkEquipmentLayers(networkEquipmentLayers)),
@@ -1940,12 +1774,7 @@ class State {
       setLocationFilterChecked: locationFilters => dispatch(MapLayerActions.setLocationFilterChecked(filterType, ruleKey, isChecked)),
       onFeatureSelectedRedux: features => dispatch(RingEditActions.onFeatureSelected(features)),
       loadNetworkAnalysisReport: planId => dispatch(NetworkAnalysisActions.loadReport(planId)),
-      setNetworkAnalysisConstraints: aroNetworkConstraints => dispatch(NetworkAnalysisActions.setNetworkAnalysisConstraints(aroNetworkConstraints)),
-      setNetworkAnalysisConnectivityDefinition: (spatialEdgeType, networkConnectivityType) => dispatch(NetworkAnalysisActions.setNetworkAnalysisConnectivityDefinition(spatialEdgeType, networkConnectivityType)),
       setOptimizationInputs: inputs => dispatch(NetworkOptimizationActions.setOptimizationInputs(inputs)),
-      setPrimarySpatialEdge: primarySpatialEdge => dispatch(NetworkAnalysisActions.setPrimarySpatialEdge(primarySpatialEdge)),
-      clearWormholeFuseDefinitions: () => dispatch(NetworkAnalysisActions.clearWormholeFuseDefinitions()),
-      setWormholeFuseDefinition: (spatialEdgeType, wormholeFusionTypeId) => dispatch(NetworkAnalysisActions.setWormholeFuseDefinition(spatialEdgeType, wormholeFusionTypeId)),
       setShowLocationLabels: showLocationLabels => dispatch(ViewSettingsActions.setShowLocationLabels(showLocationLabels)),
       setShowEquipmentLabelsChanged: showEquipmentLabels => dispatch(ToolBarActions.setShowEquipmentLabelsChanged(showEquipmentLabels)),
       setAppConfiguration: appConfiguration => dispatch(ToolBarActions.setAppConfiguration(appConfiguration)),

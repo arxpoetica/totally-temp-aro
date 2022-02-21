@@ -72,25 +72,6 @@ import NetworkArchitectureEditor from '../react/components/resource-manager/netw
 import ToolBox from '../react/components/tool/tool-box.jsx'
 import UINotifications from '../react/components/notification/ui-notifications.jsx'
 
-import boundaryDetail from './sidebar/view/boundary-detail'
-import roadSegmentDetail from './sidebar/view/road-segment-detail'
-import coverageBoundary from './sidebar/view/coverage-boundary'
-import planInfoRecent from './sidebar/view/plan-info-recent'
-import aroSearch from './sidebar/view/aro-search'
-import aroMultiselectSearch from './sidebar/view/aro-multiselect-search'
-import analysisExpertMode from './sidebar/analysis/analysis-expert-mode'
-import analysisMode from './sidebar/analysis/analysis-mode'
-
-import locationRoicReports from './sidebar/analysis/roic-reports/location-roic-reports'
-import networkBuildRoicReports from './sidebar/analysis/roic-reports/network-build-roic-reports'
-
-import roicReports from './sidebar/analysis/roic-reports/roic-reports'
-import roicReportsLarge from './sidebar/analysis/roic-reports/roic-reports-large'
-import roicReportsSmall from './sidebar/analysis/roic-reports/roic-reports-small'
-import roicReportsModal from './sidebar/analysis/roic-reports/roic-reports-modal'
-import coverageReportDownloader from './sidebar/analysis/coverage/coverage-report-downloader'
-import networkBuildOutput from './sidebar/analysis/network-build/network-build-output'
-import ringEditor from './sidebar/ring-editor'
 import boundaries from './views/boundaries'
 import locations from './views/locations'
 import networkEquipment from './views/network-equipment'
@@ -126,24 +107,7 @@ import tileDataService from '../components/tiles/tile-data-service'
 
 import reduxConfig from '../redux-config'
 
-app.component('boundaryDetail', boundaryDetail)
-  .component('roadSegmentDetail', roadSegmentDetail)
-  .component('coverageBoundary', coverageBoundary)
-  .component('planInfoRecent', planInfoRecent)
-  .component('aroSearch', aroSearch)
-  .component('aroMultiselectSearch', aroMultiselectSearch)
-  .component('analysisExpertMode', analysisExpertMode)
-  .component('analysisMode', analysisMode)
-  .component('locationRoicReports', locationRoicReports)
-  .component('networkBuildRoicReports', networkBuildRoicReports)
-  .component('roicReports', roicReports)
-  .component('roicReportsLarge', roicReportsLarge)
-  .component('roicReportsSmall', roicReportsSmall)
-  .component('roicReportsModal', roicReportsModal)
-  .component('coverageReportDownloader', coverageReportDownloader)
-  .component('networkBuildOutput', networkBuildOutput)
-  .component('ringEditor', ringEditor)
-  .component('boundaries', boundaries)
+app.component('boundaries', boundaries)
   .component('locations', locations)
   .component('networkEquipment', networkEquipment)
   .component('cables', cables)
