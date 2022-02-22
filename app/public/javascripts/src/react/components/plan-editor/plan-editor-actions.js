@@ -27,12 +27,15 @@ function resumeOrCreateTransaction(planId, userId) {
       if (state.isCommittingTransaction || state.isEnteringTransaction) {
         throw new Error('Guarding against dual transactions.')
       }
-      
+
       dispatch({
         type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION,
         payload: true,
       })
-      const { data: transactionData } = await TransactionManager.resumeOrCreateTransaction(planId, userId)
+
+      const sessionId = await SocketManager.getSessionId()
+      const { data: transactionData } = await TransactionManager
+        .resumeOrCreateTransaction(planId, userId, sessionId)
       dispatch({
         type: Actions.PLAN_EDITOR_SET_TRANSACTION,
         payload: Transaction.fromServiceObject(transactionData),
@@ -69,7 +72,7 @@ function resumeOrCreateTransaction(planId, userId) {
         dispatch(setFiberRenderRequired(true))
         dispatch({
           type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION,
-          payload: false
+          payload: false,
         })
       })
 
@@ -84,7 +87,15 @@ function resumeOrCreateTransaction(planId, userId) {
 }
 
 function clearTransaction (doOpenView = true) {
-  return dispatch => {
+  return (dispatch, getState) => {
+    // FIXME: this functionality is already below in `unsubscribeFromSocket`
+    // but I'm calling it here because there's a race condition deleting the
+    // unsubscriber somewhere, and I can't isolate it. So clearing it twice.
+    // Once up front here, and then again later when it no longer is necessary.
+    // The fix should only call `unsubscriber` once.
+    const { planEditor: { socketUnsubscriber: unsubscriber } } = getState()
+    unsubscriber()
+
     dispatch({ type: Actions.PLAN_EDITOR_CLEAR_TRANSACTION })
     dispatch({
       type: Actions.SELECTION_SET_PLAN_EDITOR_FEATURES, // DEPRICATED
@@ -92,7 +103,8 @@ function clearTransaction (doOpenView = true) {
     })
     batch(() => {
       dispatch(setIsCommittingTransaction(false))
-      dispatch({ type: Actions.PLAN_EDITOR_CLEAR_SOCKET_INFO })
+      // TODO: is this needed?
+      // dispatch({ type: Actions.PLAN_EDITOR_CLEAR_SOCKET_UNSUBSCRIBER })
       dispatch({ type: Actions.PLAN_EDITOR_CLEAR_SUBNETS })
       dispatch({ type: Actions.PLAN_EDITOR_CLEAR_FEATURES })
       if (doOpenView) {
@@ -168,8 +180,8 @@ function subscribeToSocket() {
         }
       })
       dispatch({
-        type: Actions.PLAN_EDITOR_SET_SOCKET_INFO,
-        payload: { sessionId: SocketManager.getSessionId(), unsubscriber},
+        type: Actions.PLAN_EDITOR_SET_SOCKET_UNSUBSCRIBER,
+        payload: unsubscriber,
       })
     } catch (error) {
       console.error(error)
@@ -180,14 +192,13 @@ function subscribeToSocket() {
 function unsubscribeFromSocket() {
   return async (dispatch, getState) => {
     try {
-      const { planEditor: { socketInfo: { unsubscriber } } } = getState()
-      const isFunction = unsubscriber && {}.toString.call(unsubscriber) === '[object Function]'
-      if (isFunction) unsubscriber()
-      else throw new Error('Subnet socket unsubscriber not a function.')
+      const { planEditor: { socketUnsubscriber: unsubscriber } } = getState()
+      unsubscriber()
+      console.log('...unsubscribed from subnet socket channel...')
     } catch (error) {
       console.error(error)
     }
-    dispatch({ type: Actions.PLAN_EDITOR_CLEAR_SOCKET_INFO })
+    dispatch({ type: Actions.PLAN_EDITOR_CLEAR_SOCKET_UNSUBSCRIBER })
   }
 }
 

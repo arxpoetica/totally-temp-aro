@@ -1,13 +1,11 @@
+import { klona } from 'klona'
 import Actions from '../../common/actions'
 
 const defaultState = {
   isPlanEditorActive: false,
   transaction: null,
   // TODO: move this elsewhere?
-  socketInfo: {
-    sessionId: null,
-    unsubscriber: null,
-  },
+  socketUnsubscriber: () => {}, // default is no op
   features: {},
   selectedEditFeatureIds: [],
   isDrawingBoundaryFor: null,
@@ -41,7 +39,7 @@ function setTransaction (state, transaction) {
 }
 
 function clearTransaction () {
-  return JSON.parse(JSON.stringify(defaultState))
+  return klona(defaultState)
 }
 
 function addTransactionFeatures (state, transactionFeatures) {
@@ -125,7 +123,7 @@ function setPlanThumbInformation (state, planThumbInformation) {
 }
 
 function updatePlanThumbInformation (state, payload) {
-  const planThumbInformationClone = JSON.parse(JSON.stringify(state.planThumbInformation))
+  const planThumbInformationClone = klona(state.planThumbInformation)
   planThumbInformationClone[payload.key] = payload.planThumbInformation;
   return { ...state, planThumbInformation: planThumbInformationClone }
 }
@@ -203,7 +201,7 @@ function setSubnetFeatures (state, subnetFeatures) {
 function removeSubnetFeature (state, featureId) {
 
   const subnetId = state.subnetFeatures[featureId].subnetId
-  let updatedSubnets = JSON.parse(JSON.stringify(state.subnets))
+  let updatedSubnets = klona(state.subnets)
   const updatedSubnetFeatures = { ...state.subnetFeatures }
  
   // this checks if the ID is a subnet, not sure if this should happen here or in actions
@@ -255,7 +253,7 @@ function setBoundaryDebounce (state, subnetId, timeoutId) {
 }
 
 function clearBoundaryDebounce (state, subnetId) {
-  let newBoundaryDebounceBySubnetId = JSON.parse(JSON.stringify(state.boundaryDebounceBySubnetId))
+  let newBoundaryDebounceBySubnetId = klona(state.boundaryDebounceBySubnetId)
   delete newBoundaryDebounceBySubnetId[subnetId]
   return {
     ...state, 
@@ -271,17 +269,11 @@ function planEditorReducer (state = defaultState, { type, payload }) {
     case Actions.PLAN_EDITOR_SET_TRANSACTION:
       return setTransaction(state, payload)
 
-    case Actions.PLAN_EDITOR_SET_SOCKET_INFO:
-      return {
-        ...state,
-        socketInfo: {
-          sessionId: payload.sessionId,
-          unsubscriber: payload.unsubscriber,
-        }
-      }
+    case Actions.PLAN_EDITOR_SET_SOCKET_UNSUBSCRIBER:
+      return { ...state, socketUnsubscriber: payload }
 
-    case Actions.PLAN_EDITOR_CLEAR_SOCKET_INFO:
-      return { ...state, socketInfo: { sessionId: null, unsubscriber: null } }
+    case Actions.PLAN_EDITOR_CLEAR_SOCKET_UNSUBSCRIBER:
+      return { ...state, socketUnsubscriber: () => {} }
 
     case Actions.PLAN_EDITOR_ADD_FEATURES:
       return addTransactionFeatures(state, payload)
