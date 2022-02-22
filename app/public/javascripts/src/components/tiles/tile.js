@@ -8,6 +8,7 @@ import TileUtilities from './tile-utilities'
 import MapUtilities from '../common/plan/map-utilities'
 import FeatureSelector from './feature-selector'
 import Constants from '../common/constants'
+import rConstants from '../../react/common/constants'
 import SelectionModes from '../../react/components/selection/selection-modes'
 import MenuAction, { MenuActionTypes } from '../common/context-menu/menu-action'
 import MenuItem from '../common/context-menu/menu-item'
@@ -425,8 +426,8 @@ class TileComponentController {
       if (
         displayMode === this.state.displayModes.ANALYSIS
         && (
-          this.rPlanState === Constants.PLAN_STATE.STARTED
-          || this.rPlanState === Constants.PLAN_STATE.COMPLETED
+          this.rPlanState === rConstants.PLAN_STATE.STARTED
+          || this.rPlanState === rConstants.PLAN_STATE.COMPLETED
         )
       ) {
         return
