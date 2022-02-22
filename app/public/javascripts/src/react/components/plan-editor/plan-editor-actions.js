@@ -6,6 +6,7 @@ import MenuItemFeature from '../context-menu/menu-item-feature'
 import MenuItemAction from '../context-menu/menu-item-action'
 import ContextMenuActions from '../context-menu/actions'
 import ResourceActions from '../resource-editor/resource-actions'
+import SocketManager from '../../common/socket-manager'
 import { batch } from 'react-redux'
 import WktUtils from '../../../shared-utils/wkt-utils'
 import PlanEditorSelectors from './plan-editor-selectors'
@@ -34,7 +35,7 @@ function resumeOrCreateTransaction(planId, userId) {
       const { data: transactionData } = await TransactionManager.resumeOrCreateTransaction(planId, userId)
       dispatch({
         type: Actions.PLAN_EDITOR_SET_TRANSACTION,
-        payload: Transaction.fromServiceObject(transactionData)
+        payload: Transaction.fromServiceObject(transactionData),
       })
       const transactionId = transactionData.id
       const sessionId = uuidv4()
@@ -91,7 +92,7 @@ function clearTransaction (doOpenView = true) {
     })
     batch(() => {
       dispatch(setIsCommittingTransaction(false))
-      dispatch({ type: Actions.PLAN_EDITOR_CLEAR_SESSION_ID })
+      dispatch({ type: Actions.PLAN_EDITOR_CLEAR_SOCKET_INFO })
       dispatch({ type: Actions.PLAN_EDITOR_CLEAR_SUBNETS })
       dispatch({ type: Actions.PLAN_EDITOR_CLEAR_FEATURES })
       if (doOpenView) {
@@ -137,6 +138,56 @@ function discardTransaction (transactionId) {
         console.error(err)
         dispatch(clearTransaction())
       })
+  }
+}
+
+const utf8decoder = new TextDecoder()
+function subscribeToSocket() {
+  return async (dispatch, getState) => {
+    try {
+      const unsubscriber = SocketManager.subscribe('SUBNET_DATA', encodedData => {
+        const data = JSON.parse(utf8decoder.decode(encodedData.content))
+
+        console.log({ name: data.subnetNodeUpdateType, SUBNET_DATA: data })
+        // asynchronous set up of skeleton from socket data
+        switch (data.subnetNodeUpdateType) {
+          case 'START_INITIALIZATION':
+            break
+          case 'INITIAL_STRUCTURE_UPDATE':
+            break
+          case 'START_SUBNET_TREE':
+            break
+          case 'SUBNET_NODE_SYNCED':
+            break
+          case 'END_INITIALIZATION':
+            break
+          case 'END_SUBNET_TREE':
+            break
+          default:
+            throw new Error(`Not handling SUBNET_DATA socket type: ${data.subnetNodeUpdateType}`)
+        }
+      })
+      dispatch({
+        type: Actions.PLAN_EDITOR_SET_SOCKET_INFO,
+        payload: { sessionId: SocketManager.getSessionId(), unsubscriber},
+      })
+    } catch (error) {
+      console.error(error)
+    }
+  }
+}
+
+function unsubscribeFromSocket() {
+  return async (dispatch, getState) => {
+    try {
+      const { planEditor: { socketInfo: { unsubscriber } } } = getState()
+      const isFunction = unsubscriber && {}.toString.call(unsubscriber) === '[object Function]'
+      if (isFunction) unsubscriber()
+      else throw new Error('Subnet socket unsubscriber not a function.')
+    } catch (error) {
+      console.error(error)
+    }
+    dispatch({ type: Actions.PLAN_EDITOR_CLEAR_SOCKET_INFO })
   }
 }
 
@@ -1660,5 +1711,7 @@ export default {
   getFiberAnnotations,
   leftClickTile,
   showContextMenuForConstructionAreas,
-  deleteConstructionArea
+  deleteConstructionArea,
+  subscribeToSocket,
+  unsubscribeFromSocket,
 }

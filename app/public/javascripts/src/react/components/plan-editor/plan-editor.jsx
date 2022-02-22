@@ -21,6 +21,8 @@ export const PlanEditor = props => {
     userId,
     transactionId,
     isCommittingTransaction,
+    subscribeToSocket,
+    unsubscribeFromSocket,
     resumeOrCreateTransaction,
     commitTransaction,
     discardTransaction,
@@ -34,11 +36,13 @@ export const PlanEditor = props => {
     updateFeatureProperties,
     fiberAnnotations,
     noMetaConstructionAreas,
-    noMetaEquipmentTypes
+    noMetaEquipmentTypes,
   } = props
 
   useEffect(() => {
+    subscribeToSocket()
     resumeOrCreateTransaction(planId, userId)
+    return () => unsubscribeFromSocket()
   }, [])
 
   function checkAndCommitTransaction() {
@@ -173,6 +177,8 @@ const mapStateToProps = (state) => {
 }
 
 const mapDispatchToProps = dispatch => ({
+  unsubscribeFromSocket: () => dispatch(PlanEditorActions.unsubscribeFromSocket()),
+  subscribeToSocket: () => dispatch(PlanEditorActions.subscribeToSocket()),
   resumeOrCreateTransaction: (planId, userId) => dispatch(PlanEditorActions.resumeOrCreateTransaction(planId, userId)),
   commitTransaction: transactionId => dispatch(PlanEditorActions.commitTransaction(transactionId)),
   discardTransaction: transactionId => dispatch(PlanEditorActions.discardTransaction(transactionId)),

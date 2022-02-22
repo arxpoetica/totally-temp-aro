@@ -135,6 +135,7 @@ class SocketManager {
     const self = this
     const messageHandler = msg => {
       self.sockets.emitToClient(msg.properties.headers.sessionId, msg)
+      msg.properties.headers.eventType = 'SUBNET_DATA'
     }
     return new Consumer(socketConfig.subnet.queue, socketConfig.subnet.exchange, messageHandler)
   }
@@ -151,5 +152,5 @@ class SocketManager {
 let socketManager = null
 module.exports = {
   initialize: app => { socketManager = new SocketManager(app) },
-  socketManager: () => socketManager
+  socketManager: () => socketManager,
 }

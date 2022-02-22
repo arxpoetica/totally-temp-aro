@@ -4,37 +4,38 @@ import AroHttp from '../../common/aro-http'
 export default class TransactionManager {
   // Workflow:
   // 1. If we don't have any transaction for this plan, create one
-  // 2. If we have multiple transactions for this plan, we are in a bad state. Ask the user if they want to delete all but one.
+  // 2. If we have multiple transactions for this plan, we are in a bad state.
+  //    Ask the user if they want to delete all but one.
   // 3. If we have a transaction for this plan BUT not for the current user
   //    a. Ask if we want to steal the transaction. If yes, steal it. If not, show error message
   // 4. If we have a transaction for this plan and for this user, resume it
-  static resumeOrCreateTransaction (planId, userId) {
-    // Get a list of all open transactions in the system (Do NOT send in userId so we get transactions across all users)
-    return AroHttp.get(`/service/plan-transaction?plan_id=${planId}`)
-      .then((result) => {
-        const currentPlanId = planId
-        const transactionsForPlan = result.data.filter((item) => item.planId === currentPlanId)
-        const transactionsForUserAndPlan = transactionsForPlan.filter((item) => item.userId === userId)
-        if (transactionsForPlan.length === 0) {
-          // A transaction does not exist. Create it.
-          return AroHttp.post(`/service/plan-transactions`, { planId: currentPlanId })
-        } else if (transactionsForPlan > 1) {
-          // We have multiple transactions for this plan. We should never get into this state, but can happen
-          // due to race conditions, network issues, etc.
-          return TransactionManager.deleteBadTransactionsAndCreateNew(transactionsForPlan)
-        } else if (transactionsForUserAndPlan.length === 1) {
-          // We have one open transaction for this user and plan combo. Resume it.
-          return Promise.resolve({ data: transactionsForUserAndPlan[0] }) // Using {data:} so that the signature is consistent
-        } else if (transactionsForPlan.length === 1) {
-          // We have one open transaction for this plan, but it was not started by this user. Ask the user what to do.
-          return TransactionManager.stealOrRejectTransaction(transactionsForPlan[0], planId, userId)
-        }
-      })
-      .catch((err) => {
+  static async resumeOrCreateTransaction (planId, userId) {
+    try {
+      // Get a list of all open transactions in the system
+      // (Do NOT send in userId so we get transactions across all users)
+      const result = await AroHttp.get(`/service/plan-transaction?plan_id=${planId}`)
+      const transactionsForPlan = result.data.filter((item) => item.planId === planId)
+      const transactionsForUserAndPlan = transactionsForPlan.filter((item) => item.userId === userId)
+      if (transactionsForPlan.length === 0) {
+        // A transaction does not exist. Create it.
+        return AroHttp.post(`/service/plan-transactions`, { planId })
+      } else if (transactionsForPlan.length > 1) {
+        // We have multiple transactions for this plan. We should never get into this state, but can happen
+        // due to race conditions, network issues, etc.
+        return TransactionManager.deleteBadTransactionsAndCreateNew(transactionsForPlan)
+      } else if (transactionsForUserAndPlan.length === 1) {
+        // We have one open transaction for this user and plan combo. Resume it.
+        return { data: transactionsForUserAndPlan[0] } // Using {data:} so that the signature is consistent
+      } else if (transactionsForPlan.length === 1) {
+        // We have one open transaction for this plan, but it was not started by this user. Ask the user what to do.
+        return TransactionManager.stealOrRejectTransaction(transactionsForPlan[0], planId, userId)
+      }
+
+    } catch (error) {
         // For transaction resume errors, log it and rethrow the exception
-        console.warn(err)
-        return Promise.reject(err)
-      })
+        console.error(error)
+        return error
+    }
   }
 
   static deleteBadTransactionsAndCreateNew (transactionsForPlan, currentPlanId) {

@@ -20,7 +20,6 @@ class Sockets {
       library: socket.of('/library'),
       broadcast: socket.of('/broadcast'),
       tileInvalidation: socket.of('/tileInvalidation'),
-      subnet: socket.of('/subnet'),
     }
 
     // Set up logic to join/leave rooms

@@ -3,7 +3,11 @@ import Actions from '../../common/actions'
 const defaultState = {
   isPlanEditorActive: false,
   transaction: null,
-  sessionId: null,
+  // TODO: move this elsewhere?
+  socketInfo: {
+    sessionId: null,
+    unsubscriber: null,
+  },
   features: {},
   selectedEditFeatureIds: [],
   isDrawingBoundaryFor: null,
@@ -267,11 +271,17 @@ function planEditorReducer (state = defaultState, { type, payload }) {
     case Actions.PLAN_EDITOR_SET_TRANSACTION:
       return setTransaction(state, payload)
 
-    case Actions.PLAN_EDITOR_SET_SESSION_ID:
-      return { ...state, sessionId: payload }
+    case Actions.PLAN_EDITOR_SET_SOCKET_INFO:
+      return {
+        ...state,
+        socketInfo: {
+          sessionId: payload.sessionId,
+          unsubscriber: payload.unsubscriber,
+        }
+      }
 
-    case Actions.PLAN_EDITOR_CLEAR_SESSION_ID:
-      return { ...state, sessionId: null }
+    case Actions.PLAN_EDITOR_CLEAR_SOCKET_INFO:
+      return { ...state, socketInfo: { sessionId: null, unsubscriber: null } }
 
     case Actions.PLAN_EDITOR_ADD_FEATURES:
       return addTransactionFeatures(state, payload)
