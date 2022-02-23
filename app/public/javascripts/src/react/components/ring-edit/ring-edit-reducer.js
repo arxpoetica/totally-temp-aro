@@ -10,7 +10,8 @@ const defaultState = {
     status: RingStatusTypes.START_STATE,
     progress: 0,
     report: null
-  }
+  },
+  isEditingRing: false,
 }
 
 function setAnalysisStatus (state, status) {
@@ -73,6 +74,12 @@ function updateRing (state, ring) {
   }
 }
 
+function setIsEditingRing (state, isEditingRing) {
+  return { ...state,
+    isEditingRing,
+  }
+}
+
 function ringEditReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.RING_SET_ANALYSIS_STATUS:
@@ -98,6 +105,9 @@ function ringEditReducer (state = defaultState, action) {
 
     case Actions.RING_UPDATE_RING:
       return updateRing(state, action.payload)
+
+    case Actions.RING_SET_IS_EDITING:
+      return setIsEditingRing(state, action.payload)
 
     default:
       return state
