@@ -17,6 +17,8 @@ const defaultState = {
   isEditingFeatureProperties: false,
   isEnteringTransaction: false,
   isCommittingTransaction: false,
+  isDraftsLoaded: false,
+  drafts: {},
   requestedSubnetIds: [],
   subnets: {},
   subnetFeatures: {},
@@ -319,6 +321,26 @@ function planEditorReducer (state = defaultState, { type, payload }) {
 
     case Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURE:
       return deselectFeature(state, payload)
+
+    case Actions.PLAN_EDITOR_SET_IS_DRAFTS_LOADED:
+      return { ...state, isDraftsLoaded: payload }
+
+    // TODO: multiple?
+    case Actions.PLAN_EDITOR_ADD_DRAFTS_SUBNET: {
+      const updatedDrafts = { ...state.drafts }
+      updatedDrafts[payload.subnetId] = payload
+      return { ...state, drafts: updatedDrafts }
+    }
+
+    // TODO: multiple?
+    case Actions.PLAN_EDITOR_REMOVE_DRAFTS_SUBNET: {
+      const updatedDrafts = klona(state.drafts)
+      delete updatedDrafts[payload.subnetId]
+      return { ...state, drafts: updatedDrafts }
+    }
+
+    case Actions.PLAN_EDITOR_CLEAR_DRAFTS:
+      return { ...state, drafts: {} }
 
     case Actions.PLAN_EDITOR_ADD_REQUESTED_SUBNET_IDS:
       return addRequestedSubnetIds(state, payload)

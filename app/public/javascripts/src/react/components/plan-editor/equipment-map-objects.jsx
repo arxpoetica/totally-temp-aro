@@ -261,7 +261,6 @@ const mapStateToProps = state => ({
   subnetFeatures: state.planEditor.subnetFeatures,
   selectedLocations: PlanEditorSelectors.getSelectedSubnetLocations(state),
   cursorLocations: PlanEditorSelectors.getCursorLocations(state),
-  locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(state),
 })
 
 const mapDispatchToProps = dispatch => ({

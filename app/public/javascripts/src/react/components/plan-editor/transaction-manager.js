@@ -59,7 +59,11 @@ export default class TransactionManager {
       }, (deleteOldTransactions) => {
         if (deleteOldTransactions) {
           var deletePromises = []
-          transactionsForPlan.forEach(transactionForPlan => deletePromises.push(AroHttp.delete(`/service/plan-transactions/transaction/${transactionForPlan.id}`)))
+          transactionsForPlan.forEach(transactionForPlan => {
+            deletePromises.push(
+              AroHttp.delete(`/service/plan-transactions/transaction/${transactionForPlan.id}`)
+            )
+          })
           Promise.all(deletePromises)
             .then(res => AroHttp.post(`/service/plan-transactions`, { planId: currentPlanId }))
             .then(res => resolve(res))

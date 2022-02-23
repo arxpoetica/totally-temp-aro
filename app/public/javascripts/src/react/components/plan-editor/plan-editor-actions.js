@@ -23,8 +23,8 @@ let validSubnetTypes = [
 function resumeOrCreateTransaction(planId, userId) {
   return async(dispatch, getState) => {
     try {
-      const state = getState()
-      if (state.isCommittingTransaction || state.isEnteringTransaction) {
+      const { planEditor } = getState()
+      if (planEditor.isCommittingTransaction || planEditor.isEnteringTransaction) {
         throw new Error('Guarding against dual transactions.')
       }
 
@@ -34,53 +34,52 @@ function resumeOrCreateTransaction(planId, userId) {
       })
 
       const sessionId = await SocketManager.getSessionId()
-      const { data: transactionData } = await TransactionManager
-        .resumeOrCreateTransaction(planId, userId, sessionId)
-      dispatch({
-        type: Actions.PLAN_EDITOR_SET_TRANSACTION,
-        payload: Transaction.fromServiceObject(transactionData),
-      })
-      const transactionId = transactionData.id
-      const sessionId = uuidv4()
-      dispatch({
-        type: Actions.PLAN_EDITOR_SET_SESSION_ID,
-        payload: sessionId,
-      })
+      const { data: transactionData }
+        = await TransactionManager.resumeOrCreateTransaction(planId, userId, sessionId)
 
-      const [{ data: equipmentList }, { data: boundaryList }] = await Promise.all([
-        AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/equipment`),
-        // deprecated? 
-        AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/equipment_boundary`),
-      ])
-
-      const resource = 'network_architecture_manager'
-      const { id, name } = state.plan.resourceItems[resource].selectedManager
-
-      batch(async() => {
-        // ToDo: do we need to clearTransaction?
-        await dispatch(addSubnetTree())
-        // NOTE: need to load resource manager so drop cable
-        // length is available for plan-editor-selectors
-        await dispatch(ResourceActions.loadResourceManager(id, resource, name))
-        await dispatch(addTransactionFeatures(equipmentList))
-        await dispatch(addTransactionFeatures(boundaryList))
-        const state = getState()
-        const rootSubnet = PlanEditorSelectors.getRootSubnet(state)
-        if (rootSubnet) {
-          await dispatch(selectEditFeaturesById([rootSubnet.subnetNode]))
-        }
-        dispatch(setFiberRenderRequired(true))
+      if (planEditor.isDraftsLoaded) {
         dispatch({
           type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION,
           payload: false,
         })
+      }
+      dispatch({
+        type: Actions.PLAN_EDITOR_SET_TRANSACTION,
+        payload: Transaction.fromServiceObject(transactionData),
       })
+
+      // const transactionId = transactionData.id
+      // console.log({ transactionId, sessionId, transactionData })
+
+      // const [{ data: equipmentList }, { data: boundaryList }] = await Promise.all([
+      //   AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/equipment`),
+      //   // deprecated? 
+      //   AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/equipment_boundary`),
+      // ])
+
+      // const resource = 'network_architecture_manager'
+      // const { id, name } = state.plan.resourceItems[resource].selectedManager
+
+      // batch(async() => {
+      //   await dispatch(addSubnetTree())
+      //   // NOTE: need to load resource manager so drop cable
+      //   // length is available for plan-editor-selectors
+      //   await dispatch(ResourceActions.loadResourceManager(id, resource, name))
+      //   await dispatch(addTransactionFeatures(equipmentList))
+      //   await dispatch(addTransactionFeatures(boundaryList))
+      //   const state = getState()
+      //   const rootSubnet = PlanEditorSelectors.getRootSubnet(state)
+      //   if (rootSubnet) {
+      //     await dispatch(selectEditFeaturesById([rootSubnet.subnetNode]))
+      //   }
+      //   dispatch(setFiberRenderRequired(true))
+      // })
 
     } catch (error) {
       console.error(error)
       dispatch({
         type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION,
-        payload: false
+        payload: false,
       })
     }
   }
@@ -97,20 +96,19 @@ function clearTransaction (doOpenView = true) {
     unsubscriber()
 
     dispatch({ type: Actions.PLAN_EDITOR_CLEAR_TRANSACTION })
-    dispatch({
-      type: Actions.SELECTION_SET_PLAN_EDITOR_FEATURES, // DEPRICATED
-      payload: []
-    })
     batch(() => {
       dispatch(setIsCommittingTransaction(false))
-      // TODO: is this needed?
-      // dispatch({ type: Actions.PLAN_EDITOR_CLEAR_SOCKET_UNSUBSCRIBER })
+      // DEPRECATED ?
+      dispatch({ type: Actions.SELECTION_SET_PLAN_EDITOR_FEATURES, payload: [] })
+      dispatch({ type: Actions.PLAN_EDITOR_CLEAR_DRAFTS })
+      dispatch({ type: Actions.PLAN_EDITOR_SET_IS_DRAFTS_LOADED, payload: false })
       dispatch({ type: Actions.PLAN_EDITOR_CLEAR_SUBNETS })
       dispatch({ type: Actions.PLAN_EDITOR_CLEAR_FEATURES })
       if (doOpenView) {
         dispatch({
           type: Actions.TOOL_BAR_SET_SELECTED_DISPLAY_MODE,
-          payload: 'VIEW', // ToDo: globalize the constants in tool-bar including displayModes
+          // TODO: globalize the constants in tool-bar including displayModes
+          payload: 'VIEW',
         })
       }
     })
@@ -157,23 +155,31 @@ const utf8decoder = new TextDecoder()
 function subscribeToSocket() {
   return async (dispatch, getState) => {
     try {
-      const unsubscriber = SocketManager.subscribe('SUBNET_DATA', encodedData => {
-        const data = JSON.parse(utf8decoder.decode(encodedData.content))
+      const unsubscriber = SocketManager.subscribe('SUBNET_DATA', rawData => {
+        const data = JSON.parse(utf8decoder.decode(rawData.content))
+        console.log({ name: data.subnetNodeUpdateType, SUBNET_DATA: data, properties: rawData.properties })
 
-        console.log({ name: data.subnetNodeUpdateType, SUBNET_DATA: data })
         // asynchronous set up of skeleton from socket data
         switch (data.subnetNodeUpdateType) {
           case 'START_INITIALIZATION':
+            dispatch({ type: Actions.PLAN_EDITOR_SET_IS_DRAFTS_LOADED, payload: false })
             break
           case 'INITIAL_STRUCTURE_UPDATE':
             break
-          case 'START_SUBNET_TREE':
-            break
+          case 'START_SUBNET_TREE': break // no op
           case 'SUBNET_NODE_SYNCED':
+            const { subnetRef, subnetBoundary } = data.subnetNodeSyncEvent
+            dispatch({
+              type: Actions.PLAN_EDITOR_ADD_DRAFTS_SUBNET,
+              payload: { ...subnetRef, boundary: subnetBoundary }
+            })
             break
+          case 'END_SUBNET_TREE': break // no op
           case 'END_INITIALIZATION':
-            break
-          case 'END_SUBNET_TREE':
+            batch(() => {
+              dispatch({ type: Actions.PLAN_EDITOR_SET_IS_DRAFTS_LOADED, payload: true })
+              dispatch({ type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION, payload: false })
+            })
             break
           default:
             throw new Error(`Not handling SUBNET_DATA socket type: ${data.subnetNodeUpdateType}`)
@@ -183,6 +189,7 @@ function subscribeToSocket() {
         type: Actions.PLAN_EDITOR_SET_SOCKET_UNSUBSCRIBER,
         payload: unsubscriber,
       })
+      // console.log('...subscribed to subnet socket channel...')
     } catch (error) {
       console.error(error)
     }
@@ -194,7 +201,7 @@ function unsubscribeFromSocket() {
     try {
       const { planEditor: { socketUnsubscriber: unsubscriber } } = getState()
       unsubscriber()
-      console.log('...unsubscribed from subnet socket channel...')
+      // console.log('...unsubscribed from subnet socket channel...')
     } catch (error) {
       console.error(error)
     }

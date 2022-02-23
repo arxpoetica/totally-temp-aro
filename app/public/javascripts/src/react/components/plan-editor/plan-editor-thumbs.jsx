@@ -131,10 +131,8 @@ const mapStateToProps = state => ({
   features: state.planEditor.subnetFeatures,
   selectedEditFeatureIds: state.planEditor.selectedEditFeatureIds,
   selectedSubnetId: state.planEditor.selectedSubnetId,
-  planThumbInformation: state.planEditor.planThumbInformation,
-  locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(state),
   locationCounts: PlanEditorSelectors.getLocationCounts(state),
-  planThumbInformation: state.planEditor.planThumbInformation
+  planThumbInformation: state.planEditor.planThumbInformation,
 })
 
 const mapDispatchToProps = dispatch => ({

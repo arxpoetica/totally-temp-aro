@@ -3,6 +3,7 @@ import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import PlanEditorActions from './plan-editor-actions'
 import PlanEditorSelectors from './plan-editor-selectors'
+import PlanEditorDrafts from './plan-editor-drafts.jsx'
 import PlanEditorThumbs from './plan-editor-thumbs.jsx'
 import PlanEditorRecalculate from './plan-editor-recalculate.jsx'
 import EquipmentDragger from './equipment-dragger.jsx'
@@ -27,6 +28,7 @@ export const PlanEditor = props => {
     commitTransaction,
     discardTransaction,
     isDrawingBoundaryFor,
+    drafts,
     features,
     selectedEditFeatureIds,
     subnets,
@@ -96,6 +98,7 @@ export const PlanEditor = props => {
           </button>
         </div>
       </div>
+      <PlanEditorDrafts />
       <EquipmentDragger />
       <EquipmentMapObjects />
       <EquipmentBoundaryMapObjects />
@@ -132,6 +135,15 @@ export const PlanEditor = props => {
       {/*false &&
         <div className="temporary" style={{ margin: '0 0 25px' }}>
           <h2>Plan Information</h2>
+          {Object.keys(drafts).length &&
+            <div style={{ backgroundColor: 'gray', padding: '10px' }}>
+              <h2>Draft Information:</h2>
+              {Object.keys(drafts).map(id => <p key={id}>Draft id: {id}</p>)}
+              {/* {Object.values(drafts).map(draft =>
+                <pre key={draft.subnetId}>{JSON.stringify(draft, null, '  ')}</pre>
+              )} */}
+            </div>
+          }
           <p>userId: {userId}</p>
           <p>planId: {planId}</p>
           <p>transactionId: {transactionId}</p>
@@ -163,6 +175,7 @@ const mapStateToProps = (state) => {
     transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
     isCommittingTransaction: state.planEditor.isCommittingTransaction,
     isDrawingBoundaryFor: state.planEditor.isDrawingBoundaryFor,
+    drafts: state.planEditor.drafts,
     features: state.planEditor.features,
     selectedEditFeatureIds: state.planEditor.selectedEditFeatureIds,
     subnets: state.planEditor.subnets,
