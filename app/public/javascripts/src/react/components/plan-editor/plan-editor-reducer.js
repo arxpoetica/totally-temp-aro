@@ -325,17 +325,14 @@ function planEditorReducer (state = defaultState, { type, payload }) {
     case Actions.PLAN_EDITOR_SET_IS_DRAFTS_LOADED:
       return { ...state, isDraftsLoaded: payload }
 
-    // TODO: multiple?
-    case Actions.PLAN_EDITOR_ADD_DRAFTS_SUBNET: {
-      const updatedDrafts = { ...state.drafts }
-      updatedDrafts[payload.subnetId] = payload
-      return { ...state, drafts: updatedDrafts }
+    case Actions.PLAN_EDITOR_SET_DRAFTS: {
+      return { ...state, drafts: { ...state.drafts, ...payload } }
     }
 
-    // TODO: multiple?
-    case Actions.PLAN_EDITOR_REMOVE_DRAFTS_SUBNET: {
-      const updatedDrafts = klona(state.drafts)
-      delete updatedDrafts[payload.subnetId]
+    // NOTE: not used yet...will we???
+    case Actions.PLAN_EDITOR_UPDATE_DRAFT: {
+      const updatedDrafts = { ...state.drafts }
+      updatedDrafts[payload.subnetId] = payload
       return { ...state, drafts: updatedDrafts }
     }
 

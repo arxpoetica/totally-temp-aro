@@ -4,6 +4,7 @@ import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import PlanEditorActions from './plan-editor-actions'
 import PlanEditorSelectors from './plan-editor-selectors'
 import PlanEditorDrafts from './plan-editor-drafts.jsx'
+import PlanTransactionTools from './sidebar/plan-transaction-tools.jsx'
 import PlanEditorThumbs from './plan-editor-thumbs.jsx'
 import PlanEditorRecalculate from './plan-editor-recalculate.jsx'
 import EquipmentDragger from './equipment-dragger.jsx'
@@ -21,13 +22,11 @@ export const PlanEditor = props => {
     planId,
     userId,
     transactionId,
-    isCommittingTransaction,
+    isDrawingBoundaryFor,
+    isDraftsLoaded,
     subscribeToSocket,
     unsubscribeFromSocket,
     resumeOrCreateTransaction,
-    commitTransaction,
-    discardTransaction,
-    isDrawingBoundaryFor,
     drafts,
     features,
     selectedEditFeatureIds,
@@ -36,7 +35,6 @@ export const PlanEditor = props => {
     equipments,
     rootSubnet,
     updateFeatureProperties,
-    fiberAnnotations,
     noMetaConstructionAreas,
     noMetaEquipmentTypes,
   } = props
@@ -47,30 +45,6 @@ export const PlanEditor = props => {
     return () => unsubscribeFromSocket()
   }, [])
 
-  function checkAndCommitTransaction() {
-    if (isCommittingTransaction) {
-      return
-    }
-    if (Object.keys(fiberAnnotations).length > 0) {
-      swal({
-        title: "Are you sure you want to Commit?",
-        text: "If you've made any changes to the Feeder Fiber route, annotations will be lost.",
-        type: 'warning',
-        showCancelButton: true,
-        closeOnConfirm: true,
-        confirmButtonColor: '#fdbc80',
-        confirmButtonText: 'Yes, Commit',
-        cancelButtonText: 'Oops, nevermind.',
-      }, (confirm) => {
-        if (confirm) commitTransaction(transactionId)
-      })
-    } else commitTransaction(transactionId)
-  }
-
-  function onFeatureFormChange (newValObj, propVal, path, event) {
-    //console.log({propVal, path, newValObj, event})
-  }
-  
   function onFeatureFormSave(newValObj, objectId) {
     const { feature } = features[objectId]
     updateFeatureProperties({
@@ -79,26 +53,10 @@ export const PlanEditor = props => {
     })
   }
 
-  return (
+  return (isDraftsLoaded ?
     <div className="aro-plan-editor" style={{paddingRight: '10px'}}>
-      <div className="text-center mb-2">
-        <div className="btn-group">
-          <button
-            className="btn btn-light"
-            onClick={() => checkAndCommitTransaction()}
-            disabled={isCommittingTransaction}
-          >
-            <i className="fa fa-check-circle" />&nbsp;&nbsp;Commit
-          </button>
-          <button
-            className="btn btn-light"
-            onClick={() => discardTransaction(transactionId)}
-          >
-            <i className="fa fa-times-circle" />&nbsp;&nbsp;Discard
-          </button>
-        </div>
-      </div>
       <PlanEditorDrafts />
+      <PlanTransactionTools />
       <EquipmentDragger />
       <EquipmentMapObjects />
       <EquipmentBoundaryMapObjects />
@@ -123,7 +81,7 @@ export const PlanEditor = props => {
               altTitle={equipments[features[id].feature.networkNodeType].label}
               isEditable={true}
               feature={features[id].feature}
-              onChange={onFeatureFormChange}
+              onChange={() => {}}
               onSave={newValObj => onFeatureFormSave(newValObj, id)}
             />
           )
@@ -159,8 +117,7 @@ export const PlanEditor = props => {
         </div>
       */}
     </div>
-  )
-
+  : null)
 }
 
 const mapStateToProps = (state) => {
@@ -173,8 +130,8 @@ const mapStateToProps = (state) => {
     planId: state.plan.activePlan.id,
     userId: state.user.loggedInUser.id,
     transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
-    isCommittingTransaction: state.planEditor.isCommittingTransaction,
     isDrawingBoundaryFor: state.planEditor.isDrawingBoundaryFor,
+    isDraftsLoaded: state.planEditor.isDraftsLoaded,
     drafts: state.planEditor.drafts,
     features: state.planEditor.features,
     selectedEditFeatureIds: state.planEditor.selectedEditFeatureIds,
@@ -183,7 +140,6 @@ const mapStateToProps = (state) => {
     equipments: state.mapLayers.networkEquipment.equipments,
     constructionAreas: state.mapLayers.constructionAreas.construction_areas,
     rootSubnet: PlanEditorSelectors.getRootSubnet(state),
-    fiberAnnotations: state.planEditor.fiberAnnotations,
     noMetaEquipmentTypes: (state.configuration.ui.perspective && state.configuration.ui.perspective.networkEquipment.planEdit[planType].noMetaData) || [],
     noMetaConstructionAreas: (state.configuration.ui.perspective && state.configuration.ui.perspective.constructionAreas.planEdit[constructionPlanType].noMetaData) || [],
   }
@@ -193,8 +149,6 @@ const mapDispatchToProps = dispatch => ({
   unsubscribeFromSocket: () => dispatch(PlanEditorActions.unsubscribeFromSocket()),
   subscribeToSocket: () => dispatch(PlanEditorActions.subscribeToSocket()),
   resumeOrCreateTransaction: (planId, userId) => dispatch(PlanEditorActions.resumeOrCreateTransaction(planId, userId)),
-  commitTransaction: transactionId => dispatch(PlanEditorActions.commitTransaction(transactionId)),
-  discardTransaction: transactionId => dispatch(PlanEditorActions.discardTransaction(transactionId)),
   updateFeatureProperties: obj => dispatch(PlanEditorActions.updateFeatureProperties(obj)),
 })
 

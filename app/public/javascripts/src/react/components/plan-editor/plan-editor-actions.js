@@ -12,6 +12,7 @@ import WktUtils from '../../../shared-utils/wkt-utils'
 import PlanEditorSelectors from './plan-editor-selectors'
 import { constants } from './shared'
 import { v4 as uuidv4 } from 'uuid'
+import { klona } from 'klona'
 
 let validSubnetTypes = [
   'central_office',
@@ -23,7 +24,7 @@ let validSubnetTypes = [
 function resumeOrCreateTransaction(planId, userId) {
   return async(dispatch, getState) => {
     try {
-      const { planEditor } = getState()
+      const { planEditor, plan } = getState()
       if (planEditor.isCommittingTransaction || planEditor.isEnteringTransaction) {
         throw new Error('Guarding against dual transactions.')
       }
@@ -48,6 +49,7 @@ function resumeOrCreateTransaction(planId, userId) {
         payload: Transaction.fromServiceObject(transactionData),
       })
 
+      // const state = getState()
       // const transactionId = transactionData.id
       // console.log({ transactionId, sessionId, transactionData })
 
@@ -57,14 +59,8 @@ function resumeOrCreateTransaction(planId, userId) {
       //   AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/equipment_boundary`),
       // ])
 
-      // const resource = 'network_architecture_manager'
-      // const { id, name } = state.plan.resourceItems[resource].selectedManager
-
       // batch(async() => {
       //   await dispatch(addSubnetTree())
-      //   // NOTE: need to load resource manager so drop cable
-      //   // length is available for plan-editor-selectors
-      //   await dispatch(ResourceActions.loadResourceManager(id, resource, name))
       //   await dispatch(addTransactionFeatures(equipmentList))
       //   await dispatch(addTransactionFeatures(boundaryList))
       //   const state = getState()
@@ -165,6 +161,28 @@ function subscribeToSocket() {
             dispatch({ type: Actions.PLAN_EDITOR_SET_IS_DRAFTS_LOADED, payload: false })
             break
           case 'INITIAL_STRUCTURE_UPDATE':
+            // TODO: will there ever be more than one?
+            const rootSubnet = data.initialSubnetStructure.rootSubnets[0]
+            const { boundaryMap, rootSubnetDetail, subnetRefs } = rootSubnet
+
+            const drafts = {}
+            for (const ref of subnetRefs) {
+              const draft = klona(ref)
+              draft.boundary = klona(boundaryMap[draft.subnetId] || rootSubnetDetail.subnetBoundary)
+              if (draft.nodeType === 'central_office') {
+                draft.equipment = klona(rootSubnetDetail.children)
+                // for ease, throwing CO on itself for display
+                draft.equipment.push(klona(rootSubnetDetail.subnetId))
+              } else {
+                draft.equipment = []
+              }
+              drafts[draft.subnetId] = draft
+           }
+
+            dispatch({
+              type: Actions.PLAN_EDITOR_SET_DRAFTS,
+              payload: drafts,
+            })
             break
           case 'START_SUBNET_TREE': break // no op
           case 'SUBNET_NODE_SYNCED':
