@@ -481,8 +481,7 @@ class State {
       }
 
       // ToDo: this check may need to move into REACT
-      if (service.rSelectedDisplayMode === service.displayModes.EDIT_RINGS
-        && service.rActiveEditRingsPanel === service.EditRingsPanels.EDIT_RINGS) {
+      if (service.rSelectedDisplayMode === service.displayModes.EDIT_RINGS) {
         service.onFeatureSelectedRedux(options)
       } else if (options.locations) {
         service.setSelectedLocations(options.locations.map(location => location.location_id))
