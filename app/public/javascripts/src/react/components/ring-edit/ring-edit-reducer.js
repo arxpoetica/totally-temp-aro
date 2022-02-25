@@ -74,11 +74,6 @@ function updateRing (state, ring) {
   }
 }
 
-function setIsEditingRing (state, isEditingRing) {
-  return { ...state,
-    isEditingRing,
-  }
-}
 
 function ringEditReducer (state = defaultState, action) {
   switch (action.type) {
@@ -107,7 +102,7 @@ function ringEditReducer (state = defaultState, action) {
       return updateRing(state, action.payload)
 
     case Actions.RING_SET_IS_EDITING:
-      return setIsEditingRing(state, action.payload)
+      return { ...state, isEditingRing: action.payload}
 
     default:
       return state
