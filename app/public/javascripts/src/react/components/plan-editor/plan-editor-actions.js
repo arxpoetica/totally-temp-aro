@@ -183,14 +183,32 @@ function subscribeToSocket() {
               type: Actions.PLAN_EDITOR_SET_DRAFTS,
               payload: drafts,
             })
+
+            console.groupCollapsed(
+              '%c@ BRIAN: fault tree STRUCTURE data is found here... [expand]',
+              'background-color:#ff5000;color:black;',
+            )
+            console.log({ faultTreeStructure: rootSubnetDetail.faultTree })
+            console.log(JSON.stringify(rootSubnetDetail.faultTree, null, '  '))
+            console.groupEnd()
             break
           case 'START_SUBNET_TREE': break // no op
           case 'SUBNET_NODE_SYNCED':
-            const { subnetRef, subnetBoundary } = data.subnetNodeSyncEvent
-            dispatch({
-              type: Actions.PLAN_EDITOR_ADD_DRAFTS_SUBNET,
-              payload: { ...subnetRef, boundary: subnetBoundary }
-            })
+            // const { subnetRef, subnetBoundary } = data.subnetNodeSyncEvent
+            // // console.log({ subnetRef, faultTreeSummary, subnetBoundary })
+            // TODO: compare existing and old draft and then only then update???
+            // dispatch({
+            //   type: Actions.PLAN_EDITOR_UPDATE_DRAFT,
+            //   payload: { ...subnetRef, boundary: subnetBoundary },
+            // })
+            const { faultTreeSummary } = data.subnetNodeSyncEvent
+            console.groupCollapsed(
+              '%c@ BRIAN: fault tree SUMMARY data is found here... [expand]',
+              'background-color:#ff5000;color:black;',
+            )
+            console.log({ faultTreeSummary })
+            console.log(JSON.stringify(faultTreeSummary, null, '  '))
+            console.groupEnd()
             break
           case 'END_SUBNET_TREE': break // no op
           case 'END_INITIALIZATION':

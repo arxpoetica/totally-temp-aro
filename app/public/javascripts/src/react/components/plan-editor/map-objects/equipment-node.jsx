@@ -60,5 +60,6 @@ const mapStateToProps = state => ({
   equipments: state.mapLayers.networkEquipment.equipments,
   // constructionAreas: state.mapLayers.constructionAreas.construction_areas,
 })
-const mapDispatchToProps = dispatch => ({})
+const mapDispatchToProps = dispatch => ({
+})
 export default connect(mapStateToProps, mapDispatchToProps)(EquipmentNode)
