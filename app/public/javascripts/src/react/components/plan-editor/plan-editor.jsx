@@ -90,16 +90,13 @@ export const PlanEditor = props => {
         }
       })}
 
-      {/*false &&
+      {/*
         <div className="temporary" style={{ margin: '0 0 25px' }}>
           <h2>Plan Information</h2>
           {Object.keys(drafts).length &&
             <div style={{ backgroundColor: 'gray', padding: '10px' }}>
               <h2>Draft Information:</h2>
               {Object.keys(drafts).map(id => <p key={id}>Draft id: {id}</p>)}
-              {/* {Object.values(drafts).map(draft =>
-                <pre key={draft.subnetId}>{JSON.stringify(draft, null, '  ')}</pre>
-              )} */}
             </div>
           }
           <p>userId: {userId}</p>
