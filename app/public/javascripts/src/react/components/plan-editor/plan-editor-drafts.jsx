@@ -1,18 +1,75 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import Boundary from './map-objects/boundary.jsx'
 import EquipmentNode from './map-objects/equipment-node.jsx'
 
+// TODO: in the future, might have abstract higher order component to wrap state.
+// Basically, the contract is fragile if we want to reuse `Boundary` or
+// `EquipmendNode` elsewhere. For now, just lifting state to this component
+// for those actions.
+
 const PlanEditorDrafts = props => {
 
-  const { drafts } = props
+  const { drafts, googleMaps } = props
+  const [objects, setObjects] = useState([])
 
-  // FIXME: optimize this...
+  const mapClickHandler = event => {
+    const zoom = googleMaps.getZoom()
+    const latitude = event.latLng.lat()
+    // SEE: https://medium.com/techtrument/how-many-miles-are-in-a-pixel-a0baf4611fff
+    const metersBySinglePixel
+      = 156543.03392 * Math.cos(latitude * Math.PI / 180) / Math.pow(2, zoom)
+    // NOTE: this is a workaround to make sure we're selecting
+    // equipment/boundaries that might be piled on top of one another
+    const circle = new google.maps.Circle({
+      map: googleMaps,
+      center: event.latLng,
+      // radius adjusted according to zoom level
+      radius: metersBySinglePixel * 20,
+      visible: false,
+    })
+
+    const ids = []
+    for (const object of objects) {
+      const { itemId, itemType } = object
+      let isInside
+      if (itemType === 'equipment') {
+        isInside = circle.getBounds().contains(object.getPosition())
+      } else if (itemType === 'boundary') {
+        isInside = google.maps.geometry.poly.containsLocation(event.latLng, object)
+      }
+      if (isInside) ids.push({ itemId, itemType })
+    }
+
+    circle.setMap(null)
+  }
+
+  useEffect(() => {
+    let listener
+    if (objects.length) {
+      listener = googleMaps.addListener('click', mapClickHandler)
+    }
+    return () => {
+      if (listener) google.maps.event.removeListener(listener)
+    }
+  }, [objects])
+
   return Object.values(drafts).map(draft =>
     <React.Fragment key={draft.subnetId}>
-      <Boundary id={draft.subnetId} polygon={draft.boundary.polygon} />
+      <Boundary
+        id={draft.subnetId}
+        polygon={draft.boundary.polygon}
+        // using functional approach to avoid race conditions
+        onLoad={object => setObjects(state => [...state, object])}
+      />
       {draft.equipment.map(node =>
-        <EquipmentNode key={node.id} id={node.id} node={node} />
+        <EquipmentNode
+          key={node.id}
+          id={node.id}
+          node={node}
+          // using functional approach to avoid race conditions
+          onLoad={object => setObjects(state => [...state, object])}
+        />
       )}
     </React.Fragment>
   )
@@ -20,6 +77,7 @@ const PlanEditorDrafts = props => {
 
 const mapStateToProps = state => ({
   drafts: state.planEditor.drafts,
+  googleMaps: state.map.googleMaps,
 })
 const mapDispatchToProps = dispatch => ({})
 export default connect(mapStateToProps, mapDispatchToProps)(PlanEditorDrafts)

@@ -4,7 +4,7 @@ import WktUtils from '../../../../shared-utils/wkt-utils'
 
 const Boundary = props => {
 
-  const { id, polygon, googleMaps } = props
+  const { id, polygon, onLoad, googleMaps } = props
 
   useEffect(() => {
 
@@ -23,12 +23,15 @@ const Boundary = props => {
     }
     // console.log(`the ${id} polygon is being rendered`)
     // these two properties are for our convenience, not used by google maps
-    options.type = 'boundary'
-    if (id) options.id = id
+    options.itemType = 'boundary'
+    if (id) options.itemId = id
     // // TODO: generecize this with Object
     // Object.assign(options, optionOverrides)
 
     const mapObject = new google.maps.Polygon(options)
+
+    // FIXME: should this have an `onUnload`?????
+    onLoad(mapObject)
 
     return () => { mapObject.setMap(null) }
   }, [])

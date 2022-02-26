@@ -7,7 +7,7 @@ import { constants, getIconUrl } from '../shared'
 
 const EquipmentNode = props => {
 
-  const { id, node, googleMaps, equipments } = props
+  const { id, node, onLoad, googleMaps, equipments } = props
 
   useEffect(() => {
 
@@ -20,32 +20,25 @@ const EquipmentNode = props => {
     // ...when we do, we should also fix this code.
     // TODO:: use shared utility function getIconUrl which has alerts...???
       icon: { url: equipments[node.networkNodeType].iconUrl },
+      clickable: false,
       // draggable: !feature.locked, // Allow dragging only if feature is not locked
       draggable: false,
+      editable: false,
       opacity: 0.4,
       map: googleMaps,
       zIndex: constants.Z_INDEX_MAP_OBJECT,
       optimized: !ARO_GLOBALS.MABL_TESTING,
     }
     // these two properties are for our convenience, not used by google maps
-    options.type = 'equipment'
-    if (id) options.id = id
+    options.itemType = 'equipment'
+    if (id) options.itemId = id
     // // TODO: generecize this with Object
     // Object.assign(options, optionOverrides)
 
     const mapObject = new google.maps.Marker(options)
 
-    mapObject.addListener('click', event => {
-      // NOTE: this is a workaround to make sure we're selecting
-      // equipment that might be piled on top of one another
-      const selectionCircle = new google.maps.Circle({
-        map: googleMaps,
-        center: event.latLng,
-        radius: 25,
-        visible: false,
-      })
-      selectionCircle.setMap(null)
-    })
+    // FIXME: should this have an `onUnload`?????
+    onLoad(mapObject)
 
     return () => { mapObject.setMap(null) }
 
