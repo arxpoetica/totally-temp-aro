@@ -34,6 +34,12 @@ function resumeOrCreateTransaction(planId, userId) {
         payload: true,
       })
 
+      // NOTE: need to load resource manager so drop cable
+      // length is available for plan-editor-selectors
+      const resource = 'network_architecture_manager'
+      const { id, name } = plan.resourceItems[resource].selectedManager
+      await dispatch(ResourceActions.loadResourceManager(id, resource, name))
+
       const sessionId = await SocketManager.getSessionId()
       const { data: transactionData }
         = await TransactionManager.resumeOrCreateTransaction(planId, userId, sessionId)
@@ -48,29 +54,6 @@ function resumeOrCreateTransaction(planId, userId) {
         type: Actions.PLAN_EDITOR_SET_TRANSACTION,
         payload: Transaction.fromServiceObject(transactionData),
       })
-
-      // const state = getState()
-      // const transactionId = transactionData.id
-      // console.log({ transactionId, sessionId, transactionData })
-
-      // const [{ data: equipmentList }, { data: boundaryList }] = await Promise.all([
-      //   AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/equipment`),
-      //   // deprecated? 
-      //   AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/equipment_boundary`),
-      // ])
-
-      // batch(async() => {
-      //   await dispatch(addSubnetTree())
-      //   await dispatch(addTransactionFeatures(equipmentList))
-      //   await dispatch(addTransactionFeatures(boundaryList))
-      //   const state = getState()
-      //   const rootSubnet = PlanEditorSelectors.getRootSubnet(state)
-      //   if (rootSubnet) {
-      //     await dispatch(selectEditFeaturesById([rootSubnet.subnetNode]))
-      //   }
-      //   dispatch(setFiberRenderRequired(true))
-      // })
-
     } catch (error) {
       console.error(error)
       dispatch({
@@ -1018,6 +1001,46 @@ function deselectEditFeatureById (objectId) {
   }
 }
 
+function loadSubnets(subnetIds) {
+  return async(dispatch, getState) => {
+    try {
+      const { planEditor } = getState()
+      const transactionId = planEditor.transaction && planEditor.transaction.id
+
+      dispatch(setIsCalculatingSubnets(true))
+
+      const queryString = `selectionTypes=CHILDREN&selectionTypes=CO_EQUIPMENTS&selectionTypes=FAULT_TREE`
+      const promises = subnetIds.map(id => AroHttp.get(
+        `/service/plan-transaction/${transactionId}/subnet/${id}?${queryString}`,
+      ))
+      const results = await Promise.all(promises)
+
+      dispatch(setIsCalculatingSubnets(false))
+
+
+
+      // const [{ data: equipmentList }, { data: boundaryList }] = await Promise.all([
+      //   AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/equipment`),
+      //   // deprecated? 
+      //   AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/equipment_boundary`),
+      // ])
+
+      // batch(async() => {
+      //   await dispatch(addSubnetTree())
+      //   await dispatch(addTransactionFeatures(equipmentList))
+      //   await dispatch(addTransactionFeatures(boundaryList))
+      //   const rootSubnet = PlanEditorSelectors.getRootSubnet(state)
+      //   if (rootSubnet) {
+      //     await dispatch(selectEditFeaturesById([rootSubnet.subnetNode]))
+      //   }
+      //   dispatch(setFiberRenderRequired(true))
+      // })
+    } catch (error) {
+      console.error(error)
+    }
+  }
+}
+
 function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
   // FIXME: I (BRIAN) needs to refactor this, it works for the moment but does a lot of extranious things
   //  ALSO there is a "bug" where if we select an FDT before selecting the CO or one of the hubs, we get no info
@@ -1119,8 +1142,6 @@ function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
   }
 }
 
-// FIXME: this should be called `addSubnetTreeBy...Something` because
-// we need to enhance the UI to allow selecting by service areas.
 function addSubnetTree() {
   return (dispatch, getState) => {
     const state = getState()
@@ -1749,6 +1770,7 @@ export default {
   readFeatures,
   selectEditFeaturesById,
   deselectEditFeatureById,
+  loadSubnets,
   addSubnets,
   setSelectedSubnetId,
   onMapClick,

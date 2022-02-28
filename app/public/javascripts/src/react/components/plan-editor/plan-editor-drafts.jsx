@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import Boundary from './map-objects/boundary.jsx'
 import EquipmentNode from './map-objects/equipment-node.jsx'
+import PlanEditorActions from './plan-editor-actions.js'
 
 // TODO: in the future, might have abstract higher order component to wrap state.
 // Basically, the contract is fragile if we want to reuse `Boundary` or
@@ -10,10 +11,11 @@ import EquipmentNode from './map-objects/equipment-node.jsx'
 
 const PlanEditorDrafts = props => {
 
-  const { drafts, googleMaps } = props
+  const { drafts, googleMaps, loadSubnets } = props
   const [objects, setObjects] = useState([])
 
   const mapClickHandler = event => {
+    event.domEvent.stopPropagation()
     const zoom = googleMaps.getZoom()
     const latitude = event.latLng.lat()
     // SEE: https://medium.com/techtrument/how-many-miles-are-in-a-pixel-a0baf4611fff
@@ -29,7 +31,7 @@ const PlanEditorDrafts = props => {
       visible: false,
     })
 
-    const ids = []
+    const subnetIds = []
     for (const object of objects) {
       const { itemId, itemType } = object
       let isInside
@@ -38,10 +40,13 @@ const PlanEditorDrafts = props => {
       } else if (itemType === 'boundary') {
         isInside = google.maps.geometry.poly.containsLocation(event.latLng, object)
       }
-      if (isInside) ids.push({ itemId, itemType })
+      // if (isInside) subnetIds.push({ objectId: itemId, dataType: itemType })
+      if (isInside) subnetIds.push(itemId)
     }
 
     circle.setMap(null)
+    const uniqueSubnetIds = [...new Set(subnetIds)]
+    loadSubnets(uniqueSubnetIds)
   }
 
   useEffect(() => {
@@ -79,5 +84,8 @@ const mapStateToProps = state => ({
   drafts: state.planEditor.drafts,
   googleMaps: state.map.googleMaps,
 })
-const mapDispatchToProps = dispatch => ({})
+const mapDispatchToProps = dispatch => ({
+  selectEditFeaturesById: ids => dispatch(PlanEditorActions.selectEditFeaturesById(ids)),
+  loadSubnets: subnetIds => dispatch(PlanEditorActions.loadSubnets(subnetIds)),
+})
 export default connect(mapStateToProps, mapDispatchToProps)(PlanEditorDrafts)
