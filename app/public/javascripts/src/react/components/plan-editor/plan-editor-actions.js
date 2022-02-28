@@ -943,6 +943,7 @@ function readFeatures (featureIds) {
 
 function selectEditFeaturesById (featureIds) {
   return (dispatch, getState) => {
+    // NOTE: this seemingly unnecessary call to `readFeatures` puts the features from service in state
     dispatch(readFeatures(featureIds))
       .then(retrievedIds => {
         // we should have all of our features in state at this point (all valid features that is)
@@ -998,46 +999,6 @@ function deselectEditFeatureById (objectId) {
   return {
     type: Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURE,
     payload: objectId,
-  }
-}
-
-function loadSubnets(subnetIds) {
-  return async(dispatch, getState) => {
-    try {
-      const { planEditor } = getState()
-      const transactionId = planEditor.transaction && planEditor.transaction.id
-
-      dispatch(setIsCalculatingSubnets(true))
-
-      const queryString = `selectionTypes=CHILDREN&selectionTypes=CO_EQUIPMENTS&selectionTypes=FAULT_TREE`
-      const promises = subnetIds.map(id => AroHttp.get(
-        `/service/plan-transaction/${transactionId}/subnet/${id}?${queryString}`,
-      ))
-      const results = await Promise.all(promises)
-
-      dispatch(setIsCalculatingSubnets(false))
-
-
-
-      // const [{ data: equipmentList }, { data: boundaryList }] = await Promise.all([
-      //   AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/equipment`),
-      //   // deprecated? 
-      //   AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/equipment_boundary`),
-      // ])
-
-      // batch(async() => {
-      //   await dispatch(addSubnetTree())
-      //   await dispatch(addTransactionFeatures(equipmentList))
-      //   await dispatch(addTransactionFeatures(boundaryList))
-      //   const rootSubnet = PlanEditorSelectors.getRootSubnet(state)
-      //   if (rootSubnet) {
-      //     await dispatch(selectEditFeaturesById([rootSubnet.subnetNode]))
-      //   }
-      //   dispatch(setFiberRenderRequired(true))
-      // })
-    } catch (error) {
-      console.error(error)
-    }
   }
 }
 
@@ -1770,7 +1731,6 @@ export default {
   readFeatures,
   selectEditFeaturesById,
   deselectEditFeatureById,
-  loadSubnets,
   addSubnets,
   setSelectedSubnetId,
   onMapClick,

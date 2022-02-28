@@ -128,7 +128,7 @@ const mapStateToProps = state => ({
   ARO_CLIENT: state.configuration.system.ARO_CLIENT,
   equipments: state.mapLayers.networkEquipment.equipments,
   constructionAreas: state.mapLayers.constructionAreas.construction_areas,
-  features: state.planEditor.subnetFeatures,
+  features: state.planEditor.features,
   selectedEditFeatureIds: state.planEditor.selectedEditFeatureIds,
   selectedSubnetId: state.planEditor.selectedSubnetId,
   // DO NOT DELETE `locationAlerts`: `getIconUrl` chokes without this.

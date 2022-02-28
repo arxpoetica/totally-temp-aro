@@ -11,7 +11,7 @@ import PlanEditorActions from './plan-editor-actions.js'
 
 const PlanEditorDrafts = props => {
 
-  const { drafts, googleMaps, selectedSubnetId, loadSubnets } = props
+  const { drafts, googleMaps, selectedSubnetId, selectEditFeaturesById } = props
   const [objects, setObjects] = useState([])
 
   const mapClickHandler = event => {
@@ -20,6 +20,7 @@ const PlanEditorDrafts = props => {
     // guard against selection if skeleton equipment not displayed
     if (selectedSubnetId) return
 
+    // NOTE: let's abstract this functionality somewhere, so we can reuse
     const zoom = googleMaps.getZoom()
     const latitude = event.latLng.lat()
     // SEE: https://medium.com/techtrument/how-many-miles-are-in-a-pixel-a0baf4611fff
@@ -35,7 +36,7 @@ const PlanEditorDrafts = props => {
       visible: false,
     })
 
-    const subnetIds = []
+    const featureIds = []
     for (const object of objects) {
       const { itemId, itemType } = object
       let isInside
@@ -44,13 +45,13 @@ const PlanEditorDrafts = props => {
       } else if (itemType === 'boundary') {
         isInside = google.maps.geometry.poly.containsLocation(event.latLng, object)
       }
-      // if (isInside) subnetIds.push({ objectId: itemId, dataType: itemType })
-      if (isInside) subnetIds.push(itemId)
+      if (isInside) featureIds.push(itemId)
     }
 
     circle.setMap(null)
-    const uniqueSubnetIds = [...new Set(subnetIds)]
-    loadSubnets(uniqueSubnetIds)
+
+    const uniqueFeatureIds = [...new Set(featureIds)]
+    selectEditFeaturesById(uniqueFeatureIds)
   }
 
   useEffect(() => {
@@ -91,6 +92,5 @@ const mapStateToProps = state => ({
 })
 const mapDispatchToProps = dispatch => ({
   selectEditFeaturesById: ids => dispatch(PlanEditorActions.selectEditFeaturesById(ids)),
-  loadSubnets: subnetIds => dispatch(PlanEditorActions.loadSubnets(subnetIds)),
 })
 export default connect(mapStateToProps, mapDispatchToProps)(PlanEditorDrafts)
