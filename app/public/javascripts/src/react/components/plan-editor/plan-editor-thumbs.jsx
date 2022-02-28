@@ -131,6 +131,9 @@ const mapStateToProps = state => ({
   features: state.planEditor.subnetFeatures,
   selectedEditFeatureIds: state.planEditor.selectedEditFeatureIds,
   selectedSubnetId: state.planEditor.selectedSubnetId,
+  // DO NOT DELETE `locationAlerts`: `getIconUrl` chokes without this.
+  // The wiring is not "hard," but state still depends on it.
+  locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(state),
   locationCounts: PlanEditorSelectors.getLocationCounts(state),
   planThumbInformation: state.planEditor.planThumbInformation,
 })
