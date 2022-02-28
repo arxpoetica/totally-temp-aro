@@ -11,11 +11,15 @@ import PlanEditorActions from './plan-editor-actions.js'
 
 const PlanEditorDrafts = props => {
 
-  const { drafts, googleMaps, loadSubnets } = props
+  const { drafts, googleMaps, selectedSubnetId, loadSubnets } = props
   const [objects, setObjects] = useState([])
 
   const mapClickHandler = event => {
     event.domEvent.stopPropagation()
+
+    // guard against selection if skeleton equipment not displayed
+    if (selectedSubnetId) return
+
     const zoom = googleMaps.getZoom()
     const latitude = event.latLng.lat()
     // SEE: https://medium.com/techtrument/how-many-miles-are-in-a-pixel-a0baf4611fff
@@ -67,7 +71,7 @@ const PlanEditorDrafts = props => {
         // using functional approach to avoid race conditions
         onLoad={object => setObjects(state => [...state, object])}
       />
-      {draft.equipment.map(node =>
+      {!selectedSubnetId && draft.equipment.map(node =>
         <EquipmentNode
           key={node.id}
           id={node.id}
@@ -83,6 +87,7 @@ const PlanEditorDrafts = props => {
 const mapStateToProps = state => ({
   drafts: state.planEditor.drafts,
   googleMaps: state.map.googleMaps,
+  selectedSubnetId: state.planEditor.selectedSubnetId,
 })
 const mapDispatchToProps = dispatch => ({
   selectEditFeaturesById: ids => dispatch(PlanEditorActions.selectEditFeaturesById(ids)),
