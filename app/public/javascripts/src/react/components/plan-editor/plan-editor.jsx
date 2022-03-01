@@ -21,22 +21,22 @@ export const PlanEditor = props => {
   const {
     planId,
     userId,
-    transactionId,
     isDrawingBoundaryFor,
     isDraftsLoaded,
     subscribeToSocket,
     unsubscribeFromSocket,
     resumeOrCreateTransaction,
-    drafts,
     features,
     selectedEditFeatureIds,
-    subnets,
     selectedSubnetId,
     equipments,
     rootSubnet,
     updateFeatureProperties,
     noMetaConstructionAreas,
     noMetaEquipmentTypes,
+    // transactionId,
+    // drafts,
+    // subnets,
   } = props
 
   useEffect(() => {
@@ -126,19 +126,19 @@ const mapStateToProps = (state) => {
   return {
     planId: state.plan.activePlan.id,
     userId: state.user.loggedInUser.id,
-    transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
     isDrawingBoundaryFor: state.planEditor.isDrawingBoundaryFor,
     isDraftsLoaded: state.planEditor.isDraftsLoaded,
-    drafts: state.planEditor.drafts,
     features: state.planEditor.features,
     selectedEditFeatureIds: state.planEditor.selectedEditFeatureIds,
-    subnets: state.planEditor.subnets,
     selectedSubnetId: state.planEditor.selectedSubnetId,
     equipments: state.mapLayers.networkEquipment.equipments,
     constructionAreas: state.mapLayers.constructionAreas.construction_areas,
     rootSubnet: PlanEditorSelectors.getRootSubnet(state),
     noMetaEquipmentTypes: (state.configuration.ui.perspective && state.configuration.ui.perspective.networkEquipment.planEdit[planType].noMetaData) || [],
     noMetaConstructionAreas: (state.configuration.ui.perspective && state.configuration.ui.perspective.constructionAreas.planEdit[constructionPlanType].noMetaData) || [],
+    // transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
+    // drafts: state.planEditor.drafts,
+    // subnets: state.planEditor.subnets,
   }
 }
 

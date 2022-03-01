@@ -1,11 +1,9 @@
 /* globals google */
 import { Component } from 'react'
-import { PropTypes } from 'prop-types'
 import { connect } from 'react-redux'
 import PlanEditorActions from './plan-editor-actions'
 import SelectionActions from '../selection/selection-actions'
 import WktUtils from '../../../shared-utils/wkt-utils'
-import { constants } from './shared'
 
 export class EquipmentBoundaryMapObjects extends Component {
   constructor (props) {
@@ -23,9 +21,8 @@ export class EquipmentBoundaryMapObjects extends Component {
 
   componentDidUpdate (prevProps, prevState) {
     // any changes to state props should cause a rerender
-    const { subnets, subnetFeatures, clickedLatLng, planType } = this.props
-    if (prevProps.clickedLatLng !== clickedLatLng) this.selectSubnet(clickedLatLng)
-    
+    const { subnets, subnetFeatures, planType } = this.props
+
     let selectedSubnetId = this.props.selectedSubnetId
     let activeFeature = subnetFeatures[selectedSubnetId]
     if (!activeFeature) {
@@ -74,23 +71,6 @@ export class EquipmentBoundaryMapObjects extends Component {
       if (this.mapObject && this.mapObject.dataType && this.mapObject.dataType === 'edge_construction_area') {
         this.deleteMapObject()
         this.createMapObject(selectedSubnetId)
-      }
-    }
-  }
-
-  selectSubnet ([lat, lng]) {
-    const { setSelectedSubnetId, selectEditFeaturesById, subnets } = this.props
-    const latLng = new google.maps.LatLng(lat, lng)
-
-    // loops through mapobjects and checks if latLng is inside
-    for (const mapObject of Object.values(this.neighborObjectsById)) {
-      if (google.maps.geometry.poly.containsLocation(latLng, mapObject)
-          && subnets[mapObject.subnetId].parentSubnetId){
-        // if it is inside, set that subnet as selected
-        setSelectedSubnetId(mapObject.subnetId)
-        selectEditFeaturesById([mapObject.subnetId])
-
-        break
       }
     }
   }
@@ -307,7 +287,6 @@ const mapStateToProps = state => ({
   subnets: state.planEditor.subnets,
   selectedSubnetId: state.planEditor.selectedSubnetId,
   subnetFeatures: state.planEditor.subnetFeatures,
-  clickedLatLng: state.planEditor.clickedLatLng,
   planType: state.plan.activePlan.planType
 })
 
@@ -316,8 +295,6 @@ const mapDispatchToProps = dispatch => ({
   boundaryChange: args => dispatch(PlanEditorActions.boundaryChange(...args)),
   deleteBoundaryVertices: args => dispatch(PlanEditorActions.deleteBoundaryVertices(...args)),
   selectBoundary: objectId => dispatch(SelectionActions.setPlanEditorFeatures([objectId])),
-  setSelectedSubnetId: subnetId => dispatch(PlanEditorActions.setSelectedSubnetId(subnetId)),
-  selectEditFeaturesById: subnetIds => dispatch(PlanEditorActions.selectEditFeaturesById(subnetIds)),
 })
 
 const EquipmentBoundaryMapObjectsComponent = connect(mapStateToProps, mapDispatchToProps)(EquipmentBoundaryMapObjects)
