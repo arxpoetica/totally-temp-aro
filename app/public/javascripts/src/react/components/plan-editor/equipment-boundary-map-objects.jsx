@@ -11,26 +11,11 @@ export class EquipmentBoundaryMapObjects extends Component {
   constructor (props) {
     super(props)
     this.mapObject = undefined
-    this.neighborObjectsById = {}
     this.clickOutListener = undefined
     this.deleteKeyListener = undefined
     this.mapObjectOverlay = []
-    this.polygonOptions = {
-      strokeColor: '#1f7de6',
-      strokeWeight: 3,
-      fillColor: '#1f7de6',
-      fillOpacity: 0.05,
-    }
-    this.neighborPolygonOptions = {
-      strokeColor: '#1f7de6',
-      strokeWeight: 1.5,
-      fillColor: '#1f7de6',
-      fillOpacity: 0.02,
-    }
-
     this.clearMapObjectOverlay = this.clearMapObjectOverlay.bind(this)
     this.contextMenuClick = this.contextMenuClick.bind(this)
-    this.neighborRootNode = this.neighborRootNode.bind(this)
   }
 
   // no ui for this component. it deals with map objects only.
@@ -38,7 +23,7 @@ export class EquipmentBoundaryMapObjects extends Component {
 
   componentDidUpdate (prevProps, prevState) {
     // any changes to state props should cause a rerender
-    const { subnets, subnetFeatures, clickedLatLng } = this.props
+    const { subnets, subnetFeatures, clickedLatLng, planType } = this.props
     if (prevProps.clickedLatLng !== clickedLatLng) this.selectSubnet(clickedLatLng)
     
     let selectedSubnetId = this.props.selectedSubnetId
@@ -54,23 +39,30 @@ export class EquipmentBoundaryMapObjects extends Component {
         const features = subnetFeatures[rootSubnetId]
         parentSubnetId = features ? features.subnetId : null
       }
-      let newNeighborIds = [];
+
+      let allIds = []
       // Enable click anywhere subnet for Route Adjusters
-      if (activeFeature.feature.dataType === "edge_construction_area") {
-        const rootSubnet = this.neighborRootNode();
-        rootSubnetId = rootSubnet.feature.objectId;
-        newNeighborIds.push(selectedSubnetId);
+      if (activeFeature.feature.dataType === 'edge_construction_area') {
+        let rootSubnet
+        for (let subnetFeature of Object.values(subnetFeatures)) {
+          if (
+            (subnetFeature.feature.networkNodeType === 'central_office' && planType !== 'RING')
+            || (subnetFeature.feature.networkNodeType === 'subnet_node' && planType === 'RING')
+          ) {
+            rootSubnet = subnetFeature
+            break
+          }
+        }
+        rootSubnetId = rootSubnet.feature.objectId
+        allIds.push(selectedSubnetId)
       }
-      const allSubnets = subnets[rootSubnetId] && subnets[rootSubnetId].children || []
-      const children = newNeighborIds.concat(allSubnets)
-      newNeighborIds = children.concat([rootSubnetId])
-      // may need to ensure newNeighborIds are all unique 
-      const index = newNeighborIds.indexOf(selectedSubnetId)
-      if (index >= 0) {
-        // pull from array 
-        newNeighborIds.splice(index, 1)
-      } else {
-        // selected feature is not a subnet so only show neighbors
+
+      const childrenIds = subnets[rootSubnetId] && subnets[rootSubnetId].children || []
+      const inclusiveIds = allIds.concat(childrenIds)
+      // ensure allIds are unique
+      const uniqueAllIds = [...new Set(inclusiveIds.concat([rootSubnetId]))]
+      // selected feature is not a subnet
+      if (!uniqueAllIds.includes(selectedSubnetId)) {
         selectedSubnetId = null
       }
 
@@ -79,23 +71,7 @@ export class EquipmentBoundaryMapObjects extends Component {
         this.createMapObject(selectedSubnetId)
       }
 
-      const idsToCreate = []
-      let idsToDelete = Object.keys(this.neighborObjectsById)
-      newNeighborIds.forEach(id => {
-        let delIndex = idsToDelete.indexOf(id)
-        if (delIndex >= 0) {
-          // already exists, just don't delete it
-          idsToDelete.splice(delIndex, 1)
-        } else {
-          // doesn't exist need to create it
-          idsToCreate.push(id)
-        }
-      })
-
-      this.deleteNeighbors(idsToDelete)
-      this.createNeighbors(idsToCreate)
-
-      if (this.mapObject && this.mapObject.dataType && this.mapObject.dataType === "edge_construction_area") {
+      if (this.mapObject && this.mapObject.dataType && this.mapObject.dataType === 'edge_construction_area') {
         this.deleteMapObject()
         this.createMapObject(selectedSubnetId)
       }
@@ -136,37 +112,12 @@ export class EquipmentBoundaryMapObjects extends Component {
       draggable: false,
       editable: isEditable,
       map: this.props.googleMaps,
+      strokeColor: '#1f7de6',
+      strokeWeight: 3,
+      fillColor: '#1f7de6',
+      fillOpacity: 0.05,
     })
-    
-    this.mapObject.setOptions(this.polygonOptions)
     this.setupListenersForMapObject(this.mapObject)
-  }
-
-  createNeighborMapObject (subnetId) {
-    // TODO: DRY the two create functions a bit
-    if (!this.props.subnets[subnetId]) return
-    const { subnetBoundary } = this.props.subnets[subnetId]
-    const geometry = subnetBoundary.polygon
-    let isEditable = (!subnetBoundary.locked) && subnetId === this.props.selectedSubnetId
-
-    if (this.neighborObjectsById[subnetId]) {
-      this.deleteNeighbors([subnetId])
-    }
-
-    const neighborObject = new google.maps.Polygon({
-      subnetId: subnetId, // Not used by Google Maps
-      paths: WktUtils.getGoogleMapPathsFromWKTMultiPolygon(geometry),
-      clickable: false,
-      draggable: false,
-      editable: isEditable,
-      zIndex: !this.props.subnets[subnetId].parentSubnetId 
-        ? constants.Z_INDEX_CO_SUBNET 
-        : constants.Z_INDEX_HUB_SUBNET,
-      map: this.props.googleMaps,
-    })
-
-    neighborObject.setOptions(this.neighborPolygonOptions)
-    this.neighborObjectsById[subnetId] = neighborObject
   }
 
   deleteMapObject () {
@@ -174,21 +125,6 @@ export class EquipmentBoundaryMapObjects extends Component {
       this.mapObject.setMap(null)
       delete this.mapObject
     }
-  }
-
-  deleteNeighbors (idsToDelete) {
-    idsToDelete.forEach(id => {
-      if (this.neighborObjectsById[id]) {
-        this.neighborObjectsById[id].setMap(null)
-        delete this.neighborObjectsById[id]
-      }
-    })
-  }
-  
-  createNeighbors (idsToCreate) {
-    idsToCreate.forEach(id => {
-      this.createNeighborMapObject(id)
-    })
   }
 
   modifyBoundaryShape (mapObject) {
@@ -229,64 +165,62 @@ export class EquipmentBoundaryMapObjects extends Component {
     })
 
     mapObject.addListener('contextmenu', event => {
-      this.contextMenuClick(event);
+      this.contextMenuClick(event)
     })
     
     mapObject.addListener('click', event => {
       if (event.vertex) {
-        event.domEvent.stopPropagation();
+        event.domEvent.stopPropagation()
         if (event.domEvent.shiftKey) {
           const indexOfMarker = this.mapObjectOverlay.findIndex((marker) => {
             return marker.title === `${event.vertex}`
-          });
+          })
           if (indexOfMarker > -1) {
             // If you select a vertex that is already selected, it will remove it.
-            this.removeMarker(indexOfMarker);
+            this.removeMarker(indexOfMarker)
           } else {
-            this.addMarkerOverlay(event);
+            this.addMarkerOverlay(event)
           }
         }
       } else {
         // This is set up to deselect all vertices if the click is inside the polygon
         // but not on a vertex
-        this.clearMapObjectOverlay();
+        this.clearMapObjectOverlay()
       }
     })
 
     this.clickOutListener = this.props.googleMaps.addListener('click', event => {
       if (!google.maps.geometry.poly.containsLocation(event.latLng, mapObject) && this.mapObjectOverlay.length > 0) {
         // Any click that is outside of the polygon will deselect all vertices
-        this.clearMapObjectOverlay();
+        this.clearMapObjectOverlay()
       }
     })
     
     this.deleteKeyListener = google.maps.event.addDomListener(document, 'keydown', (e) => {
-      const code = (e.keyCode ? e.keyCode : e.which);
+      const code = (e.keyCode ? e.keyCode : e.which)
       // 8 = Backspace
       // 46 = Delete
-      // Supporting both of these because not all keyboards have a "delete" key
+      // Supporting both of these because not all keyboards have a 'delete' key
       if ((code === 8 || code === 46) && this.mapObjectOverlay.length > 0) {
         // Sort is necessary to ensure that indexes will not be reassigned while deleting more than one vertex.
         const mapObjectOverlayClone = [...this.mapObjectOverlay]
         // Using this.mapObject as the argument being passed instead of the one in the parent function is the only way this consistently works.
         this.props.deleteBoundaryVertices(this.mapObject, mapObjectOverlayClone, this.clearMapObjectOverlay)
       }
-    });
+    })
   }
   
   clearAll () {
     // Clear all markers from map when clearing poly
     this.clearMapObjectOverlay()
     this.deleteMapObject()
-    // delete all neighbors
-    this.deleteNeighbors(Object.keys(this.neighborObjectsById))
     // Remove global listeners on tear down
-    google.maps.event.removeListener(this.clickOutListener);
-    google.maps.event.removeListener(this.deleteKeyListener);
+    google.maps.event.removeListener(this.clickOutListener)
+    google.maps.event.removeListener(this.deleteKeyListener)
   }
 
   addMarkerOverlay(event) {
-    const vertex = this.mapObject.getPath().getAt(event.vertex);
+    const vertex = this.mapObject.getPath().getAt(event.vertex)
     // Position of the marker is oriented on the vertex rather than the event.latLng to ensure
     // the coords are normalized
     const position = new google.maps.LatLng(vertex.lat(), vertex.lng())
@@ -297,8 +231,8 @@ export class EquipmentBoundaryMapObjects extends Component {
       icon: {
         path: google.maps.SymbolPath.CIRCLE,
         fillOpacity: 1,
-        fillColor: "white",
-        strokeColor: "#FF69B4",
+        fillColor: 'white',
+        strokeColor: '#FF69B4',
         strokeOpacity: 1,
         strokeWeight: 3,
         scale: 6,
@@ -309,45 +243,45 @@ export class EquipmentBoundaryMapObjects extends Component {
       optimized: !ARO_GLOBALS.MABL_TESTING,
     })
 
-    newMarker.addListener("click", () => {
+    newMarker.addListener('click', () => {
       // Added this because once the marker is added sometimes you click the marker and sometimes the vertex
       // So this is a fail safe.
       if (event.domEvent.shiftKey) {
         const indexOfMarker = this.mapObjectOverlay.findIndex((marker) => {
-          return marker.title === marker.title;
-        });
-        this.removeMarker(indexOfMarker);
+          return marker.title === marker.title
+        })
+        this.removeMarker(indexOfMarker)
       }
     })
 
     newMarker.addListener('contextmenu', event => {
-      this.contextMenuClick(event);
+      this.contextMenuClick(event)
     })
 
-    this.mapObjectOverlay = this.mapObjectOverlay.concat(newMarker);
+    this.mapObjectOverlay = this.mapObjectOverlay.concat(newMarker)
   }
 
   removeMarker(indexOfMarker) {
       const mapObjectOverlayClone = [...this.mapObjectOverlay]
       const [removedMarker] = mapObjectOverlayClone.splice(indexOfMarker, 1)
-      this.mapObjectOverlay = mapObjectOverlayClone;
-      removedMarker.setMap(null);
+      this.mapObjectOverlay = mapObjectOverlayClone
+      removedMarker.setMap(null)
   }
 
   contextMenuClick(event) {
-    let vertexPayload;
+    let vertexPayload
     if(this.mapObjectOverlay.length > 0) {
       const indexOfMarker = this.mapObjectOverlay.findIndex((marker) => {
         return marker.title === `${event.vertex}`
-      });
+      })
       
       if (event.vertex && indexOfMarker === -1) {
         // Add vertex to array if it doesn't already exist there.
-        this.addMarkerOverlay(event);
+        this.addMarkerOverlay(event)
       }
-      vertexPayload = this.mapObjectOverlay;
+      vertexPayload = this.mapObjectOverlay
     } else {
-      vertexPayload = event.vertex;
+      vertexPayload = event.vertex
     }
     const eventXY = WktUtils.getXYFromEvent(event)
     this.props.showContextMenuForBoundary(this.mapObject, eventXY.x, eventXY.y, vertexPayload, this.clearMapObjectOverlay)
@@ -355,26 +289,10 @@ export class EquipmentBoundaryMapObjects extends Component {
 
   clearMapObjectOverlay() {
     for (const marker of this.mapObjectOverlay) {
-      marker.setMap(null);
+      marker.setMap(null)
     }
 
-    this.mapObjectOverlay = [];
-  }
-
-  neighborRootNode() {
-    const { subnetFeatures, planType } = this.props
-    let rootNode;
-    for (let subnetFeature of Object.values(subnetFeatures)) {
-      if (
-        (subnetFeature.feature.networkNodeType === "central_office" && planType !== "RING") ||
-        (subnetFeature.feature.networkNodeType === "subnet_node" && planType === "RING")
-      ) {
-        rootNode = subnetFeature;
-        break;
-      }
-    }
-
-    return rootNode;
+    this.mapObjectOverlay = []
   }
 
   componentWillUnmount () {
