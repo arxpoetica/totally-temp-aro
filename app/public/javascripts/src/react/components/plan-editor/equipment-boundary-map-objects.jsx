@@ -108,38 +108,36 @@ export class EquipmentBoundaryMapObjects extends Component {
   }
 
   modifyBoundaryShape (mapObject) {
-    let geometry = WktUtils.getWKTMultiPolygonFromGoogleMapPaths(mapObject.getPaths())
+    const geometry = WktUtils.getWKTMultiPolygonFromGoogleMapPaths(mapObject.getPaths())
     this.props.boundaryChange(mapObject.subnetId, geometry)
   }
 
   setupListenersForMapObject (mapObject) {
-    const self = this // to keep reference 
     // TODO: check to make sure all boundaries are legit and concave/non-crossing
-    mapObject.getPaths().forEach(function (path, index) {
-      google.maps.event.addListener(path, 'insert_at', function () {
-        self.modifyBoundaryShape(mapObject)
-      })
-      google.maps.event.addListener(path, 'remove_at', function () {
-        self.modifyBoundaryShape(mapObject)
-      })
+    mapObject.getPaths().forEach((path, index) => {
+      google.maps.event.addListener(path, 'insert_at', () => this.modifyBoundaryShape(mapObject))
+      google.maps.event.addListener(path, 'remove_at', () => this.modifyBoundaryShape(mapObject))
       // FIXME: make deleting vertices work
-      // ToDo: avoid redundant first=last polygons
+      // TODO: avoid redundant first = last polygons
       //  clear these when parsing from service 
       //  and if needed, replace them when unparsing to send back to service
-      google.maps.event.addListener(path, 'set_at', function () {
+      google.maps.event.addListener(path, 'set_at', () => {
         if (!WktUtils.isClosedPath(path)) {
-          // IMPORTANT to check if it is already a closed path, otherwise we will get into an infinite loop when trying to keep it closed
+          // IMPORTANT to check if it is already a closed path,
+          // otherwise we will get into an infinite loop when trying to keep it closed
           if (index === 0) {
-            // The first point has been moved, move the last point of the polygon (to keep it a valid, closed polygon)
+            // The first point has been moved, move the last point of
+            // the polygon to keep it a valid, closed polygon
             path.setAt(0, path.getAt(path.length - 1))
-            self.modifyBoundaryShape(mapObject)
+            this.modifyBoundaryShape(mapObject)
           } else if (index === path.length - 1) {
-            // The last point has been moved, move the first point of the polygon (to keep it a valid, closed polygon)
+            // The last point has been moved, move the first point of
+            // the polygon to keep it a valid, closed polygon
             path.setAt(path.length - 1, path.getAt(0))
-            self.modifyBoundaryShape(mapObject)
+            this.modifyBoundaryShape(mapObject)
           }
         } else {
-          self.modifyBoundaryShape(mapObject)
+          this.modifyBoundaryShape(mapObject)
         }
       })
     })
@@ -291,9 +289,13 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  showContextMenuForBoundary: args => dispatch(PlanEditorActions.showContextMenuForBoundary(...args)),
-  boundaryChange: args => dispatch(PlanEditorActions.boundaryChange(...args)),
-  deleteBoundaryVertices: args => dispatch(PlanEditorActions.deleteBoundaryVertices(...args)),
+  showContextMenuForBoundary: (mapObject, x, y, vertex, callBack) => {
+    dispatch(PlanEditorActions.showContextMenuForBoundary(mapObject, x, y, vertex, callBack))
+  },
+  boundaryChange: (subnetId, geometry) => dispatch(PlanEditorActions.boundaryChange(subnetId, geometry)),
+  deleteBoundaryVertices: (mapObjects, vertices, callBack) => {
+    dispatch(PlanEditorActions.deleteBoundaryVertices(mapObjects, vertices, callBack))
+  },
   selectBoundary: objectId => dispatch(SelectionActions.setPlanEditorFeatures([objectId])),
 })
 

@@ -1295,11 +1295,11 @@ function boundaryChange (subnetId, geometry) {
   return (dispatch, getState) => {
     const timeoutDuration = 3000 // milliseconds
     const state = getState()
-    
+
     if (state.planEditor.boundaryDebounceBySubnetId[subnetId]) {
       clearTimeout( state.planEditor.boundaryDebounceBySubnetId[subnetId] )
     }
-    
+
     const timeoutId = setTimeout(() => {
       batch(() => {
         dispatch(recalculateBoundary(subnetId))
@@ -1311,14 +1311,9 @@ function boundaryChange (subnetId, geometry) {
     }, timeoutDuration)
 
     batch(() => {
-      dispatch({
-        type: Actions.PLAN_EDITOR_SET_BOUNDARY_DEBOUNCE,
-        payload: {subnetId, timeoutId},
-      })
-      dispatch({
-        type: Actions.PLAN_EDITOR_UPDATE_SUBNET_BOUNDARY,
-        payload: {subnetId, geometry},
-      })
+      dispatch({ type: Actions.PLAN_EDITOR_SET_BOUNDARY_DEBOUNCE, payload: {subnetId, timeoutId} })
+      dispatch({ type: Actions.PLAN_EDITOR_UPDATE_SUBNET_BOUNDARY, payload: {subnetId, geometry} })
+      dispatch({ type: Actions.PLAN_EDITOR_UPDATE_DRAFT_BOUNDARY, payload: {subnetId, geometry} })
     })
   }
 }

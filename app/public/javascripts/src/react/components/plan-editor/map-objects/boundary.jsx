@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react'
+import React, { useRef, useEffect } from 'react'
 import { connect } from 'react-redux'
 import WktUtils from '../../../../shared-utils/wkt-utils'
 
 const Boundary = props => {
 
   const { id, polygon, onLoad, googleMaps } = props
+  const didUpdateRef = useRef(false)
+  const mapObject = useRef()
 
   useEffect(() => {
 
@@ -28,15 +30,21 @@ const Boundary = props => {
     // // TODO: generecize this with Object
     // Object.assign(options, optionOverrides)
 
-    const mapObject = new google.maps.Polygon(options)
+    mapObject.current = new google.maps.Polygon(options)
 
     // FIXME: should this have an `onUnload`?????
-    onLoad(mapObject)
+    onLoad(mapObject.current)
 
-    return () => { mapObject.setMap(null) }
+    return () => { mapObject.current.setMap(null) }
   }, [])
 
-  // useEffect(() => {}, [JSON.stringify(polygon)])
+  useEffect(() => {
+    if (didUpdateRef.current) {
+      const paths = WktUtils.getGoogleMapPathsFromWKTMultiPolygon(polygon)
+      mapObject.current.setPaths(paths)
+    }
+    didUpdateRef.current = true
+  }, [polygon])
 
   // no ui for this component
   return null

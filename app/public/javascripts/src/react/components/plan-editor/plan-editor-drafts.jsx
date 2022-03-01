@@ -66,13 +66,14 @@ const PlanEditorDrafts = props => {
 
   return Object.values(drafts).map(draft =>
     <React.Fragment key={draft.subnetId}>
-      <Boundary
-        id={draft.subnetId}
-        polygon={draft.boundary.polygon}
-        // using functional approach to avoid race conditions
-        onLoad={object => setObjects(state => [...state, object])}
-      />
-      {!selectedSubnetId && draft.equipment.map(node =>
+      {selectedSubnetId !== draft.subnetId &&
+        <Boundary
+          id={draft.subnetId}
+          polygon={draft.boundary.polygon}
+          // using functional approach to avoid race conditions
+          onLoad={object => setObjects(state => [...state, object])}
+        />
+      }
         <EquipmentNode
           key={node.id}
           id={node.id}

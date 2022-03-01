@@ -328,6 +328,9 @@ function planEditorReducer (state = defaultState, { type, payload }) {
       return { ...state, drafts: { ...state.drafts, ...payload } }
     }
 
+    case Actions.PLAN_EDITOR_CLEAR_DRAFTS:
+      return { ...state, drafts: {} }
+
     // NOTE: not used yet...will we???
     case Actions.PLAN_EDITOR_UPDATE_DRAFT: {
       const updatedDrafts = { ...state.drafts }
@@ -335,8 +338,19 @@ function planEditorReducer (state = defaultState, { type, payload }) {
       return { ...state, drafts: updatedDrafts }
     }
 
-    case Actions.PLAN_EDITOR_CLEAR_DRAFTS:
-      return { ...state, drafts: {} }
+    case Actions.PLAN_EDITOR_UPDATE_DRAFT_BOUNDARY: {
+      const { subnetId, geometry } = payload
+      if (!state.drafts[subnetId]) return state
+      return {
+        ...state, drafts: {
+          ...state.drafts, [subnetId]: {
+            ...state.drafts[subnetId], boundary: {
+              ...state.subnets[subnetId].boundary, polygon: geometry
+            },
+          },
+        },
+      }
+    }
 
     case Actions.PLAN_EDITOR_ADD_REQUESTED_SUBNET_IDS:
       return addRequestedSubnetIds(state, payload)
