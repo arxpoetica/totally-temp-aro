@@ -207,8 +207,10 @@ function removeSubnetFeature (state, featureId) {
  
   // this checks if the ID is a subnet, not sure if this should happen here or in actions
   // TODO: I feel like there is a better way to check this
-  if (state.subnetFeatures[featureId].feature.networkNodeType === "central_office" ||
-  state.subnetFeatures[featureId].feature.networkNodeType === "fiber_distribution_hub") {
+  if (
+    state.subnetFeatures[featureId].feature.networkNodeType === 'central_office'
+    || state.subnetFeatures[featureId].feature.networkNodeType === 'fiber_distribution_hub'
+  ) {
     // removes each of the children from subnet features
     updatedSubnets[featureId].children.forEach(child => {
       delete updatedSubnetFeatures[child]
@@ -331,25 +333,20 @@ function planEditorReducer (state = defaultState, { type, payload }) {
     case Actions.PLAN_EDITOR_CLEAR_DRAFTS:
       return { ...state, drafts: {} }
 
-    // NOTE: not used yet...will we???
+    case Actions.PLAN_EDITOR_ADD_DRAFT:
+      return { ...state, drafts: { ...state.drafts, payload } }
+
     case Actions.PLAN_EDITOR_UPDATE_DRAFT: {
       const updatedDrafts = { ...state.drafts }
       updatedDrafts[payload.subnetId] = payload
       return { ...state, drafts: updatedDrafts }
     }
 
-    case Actions.PLAN_EDITOR_UPDATE_DRAFT_BOUNDARY: {
-      const { subnetId, geometry } = payload
-      if (!state.drafts[subnetId]) return state
-      return {
-        ...state, drafts: {
-          ...state.drafts, [subnetId]: {
-            ...state.drafts[subnetId], boundary: {
-              ...state.subnets[subnetId].boundary, polygon: geometry
-            },
-          },
-        },
-      }
+    case Actions.PLAN_EDITOR_REMOVE_DRAFT: {
+      if (!state.drafts[payload]) return state
+      const updatedDrafts = { ...state.drafts }
+      delete updatedDrafts[payload]
+      return { ...state, drafts: updatedDrafts }
     }
 
     case Actions.PLAN_EDITOR_ADD_REQUESTED_SUBNET_IDS:

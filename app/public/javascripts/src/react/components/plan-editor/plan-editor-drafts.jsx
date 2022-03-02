@@ -11,7 +11,13 @@ import PlanEditorActions from './plan-editor-actions.js'
 
 const PlanEditorDrafts = props => {
 
-  const { drafts, googleMaps, selectedSubnetId, selectEditFeaturesById } = props
+  const {
+    drafts,
+    googleMaps,
+    selectedSubnetId,
+    selectEditFeaturesById,
+    equipments,
+  } = props
   const [objects, setObjects] = useState([])
 
   const mapClickHandler = event => {
@@ -74,10 +80,12 @@ const PlanEditorDrafts = props => {
           onLoad={object => setObjects(state => [...state, object])}
         />
       }
+      {!selectedSubnetId && draft.equipment.map(node =>
         <EquipmentNode
           key={node.id}
           id={node.id}
-          node={node}
+          point={node.point}
+          iconUrl={equipments[node.networkNodeType].iconUrl}
           // using functional approach to avoid race conditions
           onLoad={object => setObjects(state => [...state, object])}
         />
@@ -90,6 +98,7 @@ const mapStateToProps = state => ({
   drafts: state.planEditor.drafts,
   googleMaps: state.map.googleMaps,
   selectedSubnetId: state.planEditor.selectedSubnetId,
+  equipments: state.mapLayers.networkEquipment.equipments,
 })
 const mapDispatchToProps = dispatch => ({
   selectEditFeaturesById: ids => dispatch(PlanEditorActions.selectEditFeaturesById(ids)),

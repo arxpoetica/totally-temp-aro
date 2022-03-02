@@ -745,29 +745,32 @@ function setIsEnteringTransaction (isEnteringTransaction) {
 function moveFeature (featureId, coordinates) {
   return (dispatch, getState) => {
     const state = getState()
-    let subnetFeature = state.planEditor.subnetFeatures[featureId]
-    subnetFeature = JSON.parse(JSON.stringify(subnetFeature))
-    let subnetId = subnetFeature.subnetId
-    let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
-    
+    const subnetFeature = klona(state.planEditor.subnetFeatures[featureId])
+    const subnetId = subnetFeature.subnetId
+    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+
     subnetFeature.feature.geometry.coordinates = coordinates
     const body = {
       commands: [{
-        // `childId` is one of the children nodes of the subnets
-        // service need to change this to "childNode"
         childId: unparseSubnetFeature(subnetFeature.feature),
-        subnetId: subnetId, // parent subnet id, don't add when `type: 'add'`
-        type: 'update', // `add`, `update`, or `delete`
+        subnetId,
+        type: 'update',
       }]
     }
-    // TODO: this is VERY similar to code above, use _updateSubnetFeatures?
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
-      .then(result => {
-        
+      .then(() => {
         dispatch({
           type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
           payload: {[featureId]: subnetFeature}
         })
+        // only update draft if equipment (on co only) exists
+        const draft = state.planEditor.drafts[subnetId]
+        const equipmentIndex = draft.equipment.findIndex(({ id }) => id === featureId)
+        if (equipmentIndex >= 0) {
+          const draftClone = klona(draft)
+          draftClone.equipment[equipmentIndex].point.coordinates = coordinates
+          dispatch({ type: Actions.PLAN_EDITOR_UPDATE_DRAFT, payload: draftClone })
+        }
       })
       .catch(err => console.error(err))
   }
@@ -825,43 +828,43 @@ function moveConstructionArea (objectId, newCoordinates) {
 }
 
 function deleteFeature (featureId) {
-  return (dispatch, getState) => {
-    const state = getState()
+  return async(dispatch, getState) => {
+    try {
+      const { planEditor } = getState()
+      const { selectedSubnetId, transaction, drafts } = planEditor
+      const transactionId = transaction && transaction.id
+      const { subnetId, feature } = klona(planEditor.subnetFeatures[featureId])
 
-    let subnetFeature = state.planEditor.subnetFeatures[featureId]
-    let selectedSubnetId = state.planEditor.selectedSubnetId
-    subnetFeature = JSON.parse(JSON.stringify(subnetFeature))
-    let subnetId = subnetFeature.subnetId
-    let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
-
-    const body = {
-      commands: [{
-        childId: unparseSubnetFeature(subnetFeature.feature),
-        subnetId, // parent subnet id, don't add when `type: 'add'`
-        type: 'delete',
-      }]
-    }
-
-    // Do a PUT to send the equipment over to service
-    return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
-      .then(result => {
-        batch(() => {
-          dispatch({
-          type: Actions.PLAN_EDITOR_REMOVE_SUBNET_FEATURE,
-            payload: featureId
-          })
-          dispatch({
-            type: Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURE,
-            payload: featureId,
-          })
-          // if deleted equipment is currently selected, move selection to parent
-          if (featureId === selectedSubnetId){
-            dispatch(setSelectedSubnetId(subnetId))
-          }
-          dispatch(recalculateSubnets(transactionId))
-        })
+      const url = `/service/plan-transaction/${transactionId}/subnet_cmd/update-children`
+      await AroHttp.post(url, {
+        commands: [{
+          childId: unparseSubnetFeature(feature),
+          subnetId,
+          type: 'delete',
+        }]
       })
-      .catch(err => console.error(err))
+
+      batch(() => {
+        dispatch({ type: Actions.PLAN_EDITOR_REMOVE_SUBNET_FEATURE, payload: featureId })
+        dispatch({ type: Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURE, payload: featureId })
+        // if deleted equipment is currently selected, move selection to parent
+        if (featureId === selectedSubnetId) dispatch(setSelectedSubnetId(subnetId))
+
+        dispatch({ type: Actions.PLAN_EDITOR_REMOVE_DRAFT, payload: featureId })
+        // if equipment exists on draft (only on CO), delete it too
+        const draft = Object.values(drafts).find(draft => draft.equipment.length)
+        const equipmentIndex = draft.equipment.findIndex(({ id }) => id === featureId)
+        if (equipmentIndex >= 0) {
+          const draftClone = klona(draft)
+          delete draftClone.equipment[equipmentIndex]
+          dispatch({ type: Actions.PLAN_EDITOR_UPDATE_DRAFT, payload: draftClone })
+        }
+
+        dispatch(recalculateSubnets(transactionId))
+      })
+    } catch (error) {
+      console.error(error)
+    }
   }
 }
 
@@ -1313,7 +1316,9 @@ function boundaryChange (subnetId, geometry) {
     batch(() => {
       dispatch({ type: Actions.PLAN_EDITOR_SET_BOUNDARY_DEBOUNCE, payload: {subnetId, timeoutId} })
       dispatch({ type: Actions.PLAN_EDITOR_UPDATE_SUBNET_BOUNDARY, payload: {subnetId, geometry} })
-      dispatch({ type: Actions.PLAN_EDITOR_UPDATE_DRAFT_BOUNDARY, payload: {subnetId, geometry} })
+      const draftClone = klona(state.planEditor.drafts[subnetId])
+      draftClone.boundary.polygon = geometry
+      dispatch({ type: Actions.PLAN_EDITOR_UPDATE_DRAFT, payload: draftClone })
     })
   }
 }
