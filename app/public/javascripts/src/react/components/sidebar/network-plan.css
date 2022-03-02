@@ -1,0 +1,24 @@
+.network-plan {
+    white-space: nowrap;
+    padding-left: 10px;
+    padding-right: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.network-plan .plan-name {
+    font-size: 16px;
+    width: 100%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    color: black;
+    font-weight: bold;
+}
+
+.network-plan .plan-metadata {
+    font-size: 14px;
+    width: 100%;
+    color: grey;
+    padding-bottom: 10px;
+}

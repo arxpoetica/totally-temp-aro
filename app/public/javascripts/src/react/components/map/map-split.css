@@ -135,11 +135,6 @@
   flex: 0 0 70px;
 }
 
-.header-bar-container .network-plan {
-  flex: 0 0 auto;
-  margin: auto;
-}
-
 .header-bar-container .sidebar-icon-space {
   flex: 0 0 40px;
 }

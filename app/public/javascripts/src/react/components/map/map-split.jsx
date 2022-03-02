@@ -124,9 +124,6 @@ const MapSplit = (props) => {
                 <ToolBar />
               </ErrorBoundary>
             </div>
-            <div className="network-plan">
-              <NetworkPlan />
-            </div>
             <div className="sidebar-icon-space" />
             { showToolBox && <ToolBox /> }
           </div>
@@ -189,36 +186,39 @@ const MapSplit = (props) => {
             </div>
             {/* Add a wrapping div because the expander changes the layout even though it is outside the panel */}
             {!isCollapsed &&
-              <div className="display-mode-container">
-                <div className="display-mode-buttons">
-                  {/* this is necessary to make the display-mode-buttons flow correctly */}
-                  <DisplayModeButtons />
+              <>
+                <NetworkPlan />
+                <div className="display-mode-container">
+                  <div className="display-mode-buttons">
+                    {/* this is necessary to make the display-mode-buttons flow correctly */}
+                    <DisplayModeButtons />
+                  </div>
+                  <div className="display-modes">
+                    {/* Error boundaries are React components that catch JavaScript errors anywhere in their child component tree, 
+                      log those errors, and display a fallback UI instead of the component tree that crashed.
+                      https://reactjs.org/docs/error-boundaries.html
+                    */}
+                    <ErrorBoundary>
+                      {checkSelectedDisplayMode(displayModes.VIEW) && <ViewMode /> }
+                    </ErrorBoundary>
+                    <ErrorBoundary>
+                      {checkSelectedDisplayMode(displayModes.ANALYSIS) && planType !== 'RING' && <AnalysisMode /> }
+                    </ErrorBoundary>
+                    <ErrorBoundary>
+                      {checkSelectedDisplayMode(displayModes.EDIT_RINGS) && <RingEditor /> }
+                    </ErrorBoundary>
+                    <ErrorBoundary>
+                      {checkSelectedDisplayMode(displayModes.EDIT_PLAN) && <PlanEditorContainer /> }
+                    </ErrorBoundary>
+                    <ErrorBoundary>
+                      {checkSelectedDisplayMode(displayModes.DEBUG) && <AroDebug /> }
+                    </ErrorBoundary>
+                    <ErrorBoundary>
+                      {checkSelectedDisplayMode(displayModes.PLAN_SETTINGS) && <PlanSettings /> }
+                    </ErrorBoundary>
+                  </div>
                 </div>
-                <div className="display-modes">
-                  {/* Error boundaries are React components that catch JavaScript errors anywhere in their child component tree, 
-                    log those errors, and display a fallback UI instead of the component tree that crashed.
-                    https://reactjs.org/docs/error-boundaries.html
-                  */}
-                  <ErrorBoundary>
-                    {checkSelectedDisplayMode(displayModes.VIEW) && <ViewMode /> }
-                  </ErrorBoundary>
-                  <ErrorBoundary>
-                    {checkSelectedDisplayMode(displayModes.ANALYSIS) && planType !== 'RING' && <AnalysisMode /> }
-                  </ErrorBoundary>
-                  <ErrorBoundary>
-                    {checkSelectedDisplayMode(displayModes.EDIT_RINGS) && <RingEditor /> }
-                  </ErrorBoundary>
-                  <ErrorBoundary>
-                    {checkSelectedDisplayMode(displayModes.EDIT_PLAN) && <PlanEditorContainer /> }
-                  </ErrorBoundary>
-                  <ErrorBoundary>
-                    {checkSelectedDisplayMode(displayModes.DEBUG) && <AroDebug /> }
-                  </ErrorBoundary>
-                  <ErrorBoundary>
-                    {checkSelectedDisplayMode(displayModes.PLAN_SETTINGS) && <PlanSettings /> }
-                  </ErrorBoundary>
-                </div>
-              </div>
+              </>
             }
           </div>
         }

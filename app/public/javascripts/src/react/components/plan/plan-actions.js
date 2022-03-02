@@ -12,9 +12,47 @@ import AroHttp from '../../common/aro-http'
 import { batch } from 'react-redux'
 
 function setActivePlanState (planState) {
-  return {
-    type: Actions.PLAN_SET_ACTIVE_PLAN_STATE,
-    payload: planState
+  return dispatch => {
+    if (planState === "COMPLETED" || planState === "FAILED") {
+      dispatch(setActivePlanErrors())
+    }
+
+    dispatch({
+      type: Actions.PLAN_SET_ACTIVE_PLAN_STATE,
+      payload: planState
+    })
+  }
+}
+
+function setActivePlanErrors() {
+  return (dispatch, getState) => {
+    const state = getState();
+    const activePlan = state.plan.activePlan
+    AroHttp.get(`/service/v1/plan/${activePlan.id}/errors?user_id=${activePlan.createdBy}`)
+      .then((response) => {
+        const uniqueErrors = {
+          PRE_VALIDATION: {},
+          NONE: {},
+          CANCELLED: {},
+          RUNTIME_EXCEPTION: {},
+          ROOT_OPTIMIZATION_FAILURE: {}
+        };
+
+        response.data.forEach((error) => {
+          const uniqueError = uniqueErrors[error.errorCategory][error.serviceAreaCode]
+          if (
+            state.selection.planTargetDescriptions.serviceAreas[error.serviceAreaId] &&
+            (!uniqueError || uniqueError !== error.errorMessage)
+          ) {
+            uniqueErrors[error.errorCategory][error.serviceAreaCode] = error.errorMessage;
+          }
+        })
+
+        dispatch({
+          type: Actions.SET_ACTIVE_PLAN_ERRORS,
+          payload: uniqueErrors
+        })
+      })
   }
 }
 
@@ -678,4 +716,5 @@ export default {
   deletePlan,
   getOrCreateEphemeralPlan,
   editActivePlan,
+  setActivePlanErrors
 }

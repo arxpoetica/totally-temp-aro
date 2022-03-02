@@ -1,5 +1,6 @@
 import AroHttp from '../../common/aro-http'
 import Actions from '../../common/actions'
+import PlanActions from '../plan/plan-actions'
 
 function setActiveSelectionMode (selectionModeId) {
   return {
@@ -89,6 +90,9 @@ function addPlanTargets (planId, planTargets) {
             })
           }
         })
+
+        // load errors
+        dispatch(PlanActions.setActivePlanErrors())
 
         if (layerKeys.length) {
           dispatch({

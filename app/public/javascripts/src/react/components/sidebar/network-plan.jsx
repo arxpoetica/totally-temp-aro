@@ -1,28 +1,72 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
+import AroHttp from '../../common/aro-http'
+import TopProgressBar from './top-progress-bar.jsx'
+import './network-plan.css'
 
 const NetworkPlan = (props) => {
-  const { activePlan, perspective, toolBarColor } = props
-  const { name, ephemeral } = activePlan
+  const [userFullName, setUserFullName] = useState("N/A")
+  const {
+    activePlan: {
+      planState,
+      createdBy,
+      updatedDate, 
+      createdDate,
+      name,
+      ephemeral
+    },
+    selection
+  } = props
 
+  const planInProgress = planState === "STARTED"
+
+  useEffect(() => {
+    if (createdBy) {
+      AroHttp.get(`/service/auth/users/${createdBy}`)
+        .then((response) => {
+          setUserFullName(response.data.fullName)
+        })
+        .catch(() => {
+          setUserFullName("N/A")
+        })
+    }
+  }, [createdBy])
+
+  const getTitle = () => {
+    let title = ephemeral ? "Existing Network" : name
+    const serviceAreas = Object.values(selection.planTargetDescriptions.serviceAreas)
+      if (serviceAreas.length === 1) {
+      title = serviceAreas[0].code + ' - ' + title
+    } else if (serviceAreas.length > 1) {
+      title = 'Multiple - ' + title
+    }
+
+    return title
+  }
   return (
-    <div className="network-plan" style={{ backgroundColor: `${toolBarColor}` }}>
-      {/* For ephemeral plans, the name has not been set by the user */}
-      {ephemeral && perspective === 'admin'
-        && <div className="ephemeral">Existing Network</div>
+    <div className="network-plan" style={{ paddingBottom: ephemeral && "10px" }}>
+      <div
+        className="plan-name"
+        title={getTitle()}
+        style={{ color: planInProgress ? "#1f7de6" : "black" }}
+      >
+        {getTitle()}
+      </div>
+      {name &&
+        <div className="plan-metadata" style={{ marginBottom: !planInProgress && "10px" }}>
+          {userFullName} |
+          Created {new Date(createdDate).toLocaleDateString('en-US')} |
+          Modified {new Date(updatedDate).toLocaleDateString('en-US')}
+        </div>
       }
-      {/* For saved plans, display the plan name only */}
-      {!ephemeral
-        && <div className="non-ephemeral" title={name}>{name}</div>
-      }
+      {planInProgress && <TopProgressBar /> }
     </div>
   )
 }
 
 const mapStateToProps = (state) => ({
-  activePlan: state.plan.activePlan !== null && state.plan.activePlan,
-  perspective: state.user.loggedInUser && state.user.loggedInUser.perspective,
-  toolBarColor: state.toolbar.appConfiguration.toolbar && state.toolbar.appConfiguration.toolbar.toolBarColor,
+  activePlan: state.plan.activePlan || {},
+  selection: state.selection
 })
 
 export default connect(mapStateToProps, null)(NetworkPlan)
