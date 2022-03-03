@@ -160,11 +160,11 @@ function subscribeToSocket() {
                 draft.equipment = []
               }
               drafts[draft.subnetId] = draft
-           }
-
-            dispatch({
-              type: Actions.PLAN_EDITOR_SET_DRAFTS,
-              payload: drafts,
+            }
+            batch(() => {
+              dispatch({ type: Actions.PLAN_EDITOR_SET_DRAFTS, payload: drafts })
+              dispatch({ type: Actions.PLAN_EDITOR_SET_IS_DRAFTS_LOADED, payload: true })
+              dispatch({ type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION, payload: false })
             })
 
             console.groupCollapsed(
@@ -194,12 +194,7 @@ function subscribeToSocket() {
             console.groupEnd()
             break
           case 'END_SUBNET_TREE': break // no op
-          case 'END_INITIALIZATION':
-            batch(() => {
-              dispatch({ type: Actions.PLAN_EDITOR_SET_IS_DRAFTS_LOADED, payload: true })
-              dispatch({ type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION, payload: false })
-            })
-            break
+          case 'END_INITIALIZATION': break // no op
           default:
             throw new Error(`Not handling SUBNET_DATA socket type: ${data.subnetNodeUpdateType}`)
         }
