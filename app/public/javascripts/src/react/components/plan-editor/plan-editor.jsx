@@ -34,9 +34,6 @@ export const PlanEditor = props => {
     updateFeatureProperties,
     noMetaConstructionAreas,
     noMetaEquipmentTypes,
-    // transactionId,
-    // drafts,
-    // subnets,
   } = props
 
   useEffect(() => {
@@ -53,68 +50,53 @@ export const PlanEditor = props => {
     })
   }
 
-  return (isDraftsLoaded ?
+  return (
     <div className="aro-plan-editor" style={{paddingRight: '10px'}}>
-      <PlanEditorDrafts />
-      <PlanTransactionTools />
-      <EquipmentDragger />
-      <EquipmentMapObjects />
-      <EquipmentBoundaryMapObjects />
-      <FiberMapObjects />
-      { /* If we are in "draw boundary mode" for any equipment, render the drawing component */ }
-      { isDrawingBoundaryFor ? <BoundaryDrawCreator /> : null }
 
+      {/* certain things shouldn't be visible until drafts are loaded */}
+      {isDraftsLoaded && <>
+        <PlanTransactionTools />
+        <EquipmentDragger />
+        <EquipmentMapObjects />
+        <EquipmentBoundaryMapObjects />
+        <FiberMapObjects />
+        { /* If we are in "draw boundary mode" for any equipment, render the drawing component */ }
+        { isDrawingBoundaryFor ? <BoundaryDrawCreator /> : null }
+
+        { /* We only want PlanEditorRecalculate to show for equipments */ }
+        {
+          selectedSubnetId
+          && features[selectedSubnetId]
+          && features[selectedSubnetId].feature.networkNodeType
+          && <PlanEditorRecalculate />
+        }
+        <PlanEditorThumbs />
+
+        {selectedEditFeatureIds.map(id => {
+          let feature = features[id].feature;
+          if (
+            (feature.networkNodeType &&  !noMetaEquipmentTypes.includes(feature.networkNodeType)) ||
+            (!feature.networkNodeType && !noMetaConstructionAreas.includes(feature.dataType))
+          ) {
+            return (
+              <AroFeatureEditor key={id}
+                altTitle={equipments[features[id].feature.networkNodeType].label}
+                isEditable={true}
+                feature={features[id].feature}
+                onChange={() => {}}
+                onSave={newValObj => onFeatureFormSave(newValObj, id)}
+              />
+            )
+          }
+          return null
+        })}
+      </>}
+
+      <PlanEditorDrafts />
       <PlanNavigation />
       <AlertsTooltip />
-      { /* We only want PlanEditorRecalculate to show for equipments */ }
-      { selectedSubnetId && features[selectedSubnetId] && features[selectedSubnetId].feature.networkNodeType && <PlanEditorRecalculate /> }
-      <PlanEditorThumbs />
-
-      {selectedEditFeatureIds.map(id => {
-        let feature = features[id].feature;
-        if (
-          (feature.networkNodeType &&  !noMetaEquipmentTypes.includes(feature.networkNodeType)) ||
-          (!feature.networkNodeType && !noMetaConstructionAreas.includes(feature.dataType))
-        ) {
-          return (
-            <AroFeatureEditor key={id}
-              altTitle={equipments[features[id].feature.networkNodeType].label}
-              isEditable={true}
-              feature={features[id].feature}
-              onChange={() => {}}
-              onSave={newValObj => onFeatureFormSave(newValObj, id)}
-            />
-          )
-        } else {
-          return null
-        }
-      })}
-
-      {/*
-        <div className="temporary" style={{ margin: '0 0 25px' }}>
-          <h2>Plan Information</h2>
-          {Object.keys(drafts).length &&
-            <div style={{ backgroundColor: 'gray', padding: '10px' }}>
-              <h2>Draft Information:</h2>
-              {Object.keys(drafts).map(id => <p key={id}>Draft id: {id}</p>)}
-            </div>
-          }
-          <p>userId: {userId}</p>
-          <p>planId: {planId}</p>
-          <p>transactionId: {transactionId}</p>
-          <p>selectedSubnetId: {selectedSubnetId}</p>
-          {Object.keys(subnets).length && <>
-            <br/>
-            <h2>Subnet Information</h2>
-            {Object.keys(subnets).map(id => <p key={id}>subnet id: {id}</p>)}
-          </>}
-          <br/>
-          <h2>Features Information</h2>
-          <pre>selectedEditFeatureIds: {JSON.stringify(selectedEditFeatureIds, null, '  ')}</pre>
-        </div>
-      */}
     </div>
-  : null)
+  )
 }
 
 const mapStateToProps = (state) => {
@@ -136,9 +118,6 @@ const mapStateToProps = (state) => {
     rootSubnet: PlanEditorSelectors.getRootSubnet(state),
     noMetaEquipmentTypes: (state.configuration.ui.perspective && state.configuration.ui.perspective.networkEquipment.planEdit[planType].noMetaData) || [],
     noMetaConstructionAreas: (state.configuration.ui.perspective && state.configuration.ui.perspective.constructionAreas.planEdit[constructionPlanType].noMetaData) || [],
-    // transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
-    // drafts: state.planEditor.drafts,
-    // subnets: state.planEditor.subnets,
   }
 }
 

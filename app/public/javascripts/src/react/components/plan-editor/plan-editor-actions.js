@@ -44,15 +44,15 @@ function resumeOrCreateTransaction(planId, userId) {
       const { data: transactionData }
         = await TransactionManager.resumeOrCreateTransaction(planId, userId, sessionId)
 
-      if (planEditor.isDraftsLoaded) {
+      batch(() => {
         dispatch({
           type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION,
           payload: false,
         })
-      }
-      dispatch({
-        type: Actions.PLAN_EDITOR_SET_TRANSACTION,
-        payload: Transaction.fromServiceObject(transactionData),
+        dispatch({
+          type: Actions.PLAN_EDITOR_SET_TRANSACTION,
+          payload: Transaction.fromServiceObject(transactionData),
+        })
       })
     } catch (error) {
       console.error(error)
@@ -1101,42 +1101,6 @@ function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
   }
 }
 
-function addSubnetTree() {
-  return (dispatch, getState) => {
-    const state = getState()
-    let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
-
-    dispatch(setIsCalculatingSubnets(true))
-    return AroHttp.get(`/service/plan-transaction/${transactionId}/subnet-root-refs`)
-      .then(result => {
-        const data = result.data || []
-        let rootIds = []
-        data.forEach(subnet => {
-          if (subnet.node && subnet.node.id) {
-            rootIds.push(subnet.node.id)
-          }
-        })
-        if (rootIds.length) {
-          rootIds.forEach((id) => {
-            // get feeder fiber annotations
-            dispatch(getFiberAnnotations(id))
-          })
-          
-          // TODO: the addSubnets function needs to be broken up
-          return dispatch(addSubnets({ subnetIds: rootIds }))
-            .then(subnetRes => Promise.resolve(subnetRes))
-        } else {
-          dispatch(setIsCalculatingSubnets(false))
-          return Promise.resolve([])
-        }
-      }).catch(err => {
-        console.error(err)
-        dispatch(setIsCalculatingSubnets(false))
-        return Promise.reject()
-      })
-  }
-}
-
 function addSubnetTreeByLatLng([lng, lat]) {
   return async(dispatch, getState) => {
 
@@ -1602,31 +1566,6 @@ function parseSubnetFeature (feature) {
   // --- end typo section --- //
 
   return feature
-}
-
-// helper function
-function composeSubnet (subnet, state) {
-  // to bring in child refrences 
-  //  used to unparse subnets to send back to the server 
-  //  BUT ALSO may be used internally which why we don't unfix the typos here
-  subnet = JSON.parse(JSON.stringify(subnet))
-  subnet.children = subnet.children.map(objectId => {
-    return JSON.parse(JSON.stringify(state.planEditor.subnetFeatures[objectId].feature))
-  })
-  subnet.subnetNode = JSON.parse(JSON.stringify(state.planEditor.subnetFeatures[subnet.subnetNode].feature))
-
-  return subnet
-}
-
-// helper function 
-function unparseSubnet (subnet, state) {
-  subnet = composeSubnet(subnet, state)
-  subnet.children = subnet.children.map(feature => unparseSubnetFeature(feature))
-
-  subnet.subnetId = unparseSubnetFeature(subnet.subnetNode)
-  delete subnet.subnetNode
-
-  return subnet
 }
 
 // helper function
