@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import AroHttp from '../../common/aro-http'
 import TopProgressBar from './top-progress-bar.jsx'
+import ToolBarActions from '../header/tool-bar-actions'
+import { displayModes } from './constants'
 import './network-plan.css'
 
 const NetworkPlan = (props) => {
@@ -13,9 +15,11 @@ const NetworkPlan = (props) => {
       updatedDate, 
       createdDate,
       name,
-      ephemeral
+      ephemeral,
+      planErrors
     },
-    selection
+    selection,
+    setSelectedDisplayMode
   } = props
 
   const planInProgress = planState === "STARTED"
@@ -31,6 +35,33 @@ const NetworkPlan = (props) => {
         })
     }
   }, [createdBy])
+
+  const alertIcon = () => {
+    let alertClass = "";
+    if (planErrors) {
+      const hasErrors = Object.values(planErrors).some(errorCategory => {
+        return Object.values(errorCategory).length > 0;
+      })
+  
+      if (planInProgress) {
+        alertClass = "running-plan"
+      } else if (hasErrors) {
+        if (Object.values(planErrors.PRE_VALIDATION).length > 0) {
+          alertClass = "partial-fail-plan"
+        }
+        if (Object.values(planErrors.CANCELLED).length > 0) {
+          alertClass = "partial-fail-plan"
+        }
+        if (Object.values(planErrors.RUNTIME_EXCEPTION).length > 0) {
+          alertClass = "hard-fail-plan"
+        }
+      } else if (planState === "COMPLETED") {
+        alertClass = "passed-plan"
+      }
+    }
+
+    return alertClass
+  }
 
   const getTitle = () => {
     let title = ephemeral ? "Existing Network" : name
@@ -50,6 +81,12 @@ const NetworkPlan = (props) => {
         title={getTitle()}
         style={{ color: planInProgress ? "#1f7de6" : "black" }}
       >
+        { alertIcon() &&
+          <div
+            className={`plan-state-icon ${alertIcon()}`}
+            onClick={() => setSelectedDisplayMode(displayModes.ANALYSIS)}
+          />
+        }
         {getTitle()}
       </div>
       {name &&
@@ -69,4 +106,8 @@ const mapStateToProps = (state) => ({
   selection: state.selection
 })
 
-export default connect(mapStateToProps, null)(NetworkPlan)
+const mapDispatchToProps = (dispatch) => ({
+  setSelectedDisplayMode: (value) => dispatch(ToolBarActions.selectedDisplayMode(value)),
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(NetworkPlan)

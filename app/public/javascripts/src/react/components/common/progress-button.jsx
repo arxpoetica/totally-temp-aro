@@ -21,9 +21,9 @@ export default class ProgressButton extends Component {
   render () {
     switch (this.props.status) {
       case this.statusTypes.UNINITIALIZED:
-      case this.statusTypes.RUNNING:
         return this.renderUninitializedButton()
-
+      case this.statusTypes.RUNNING:
+        return this.renderCancelButton()
       case this.statusTypes.CANCELED:
       case this.statusTypes.FINISHED:
       case this.statusTypes.FAILED:
@@ -34,17 +34,24 @@ export default class ProgressButton extends Component {
     }
   }
 
+  renderCancelButton () {
+    return (
+      <button className='btn btn-danger'
+        style={{ width: "100%", marginBottom: "10px" }}
+        onClick={() => this.onCancel()}
+        disabled={this.props.isCanceling}
+      >
+      {this.props.isCanceling ? 'Canceling' : 'Cancel'}
+    </button>
+    )
+  }
+
   renderUninitializedButton () {
-    const disabled = this.props.status === this.statusTypes.RUNNING;
     return (
       <button
         className="btn btn-block btn-primary"
-        style={{
-          marginBottom: '10px',
-          background: disabled ? 'grey' : '#1f7de6'
-        }}
+        style={{ marginBottom: '10px' }}
         onClick={() => this.onRun()}
-        disabled={disabled}
       >
         <i className='fa fa-bolt'/> Run
       </button>

@@ -208,6 +208,7 @@ function makeCurrentPlanNonEphemeral (planName, planType) {
         serviceAreaIds: []
       }
     }
+    delete newPlan.planErrors
 
     newPlan.tagMapping.global = currentPlanTags.map(tag => tag.id)
     newPlan.tagMapping.linkTags.serviceAreaIds = currentPlanServiceAreaTags.map(tag => tag.id)
