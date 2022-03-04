@@ -17,7 +17,7 @@ const defaultState = {
   isEditingFeatureProperties: false,
   isEnteringTransaction: false,
   isCommittingTransaction: false,
-  isDraftsLoaded: false,
+  draftsState: null,
   drafts: {},
   requestedSubnetIds: [],
   subnets: {},
@@ -323,8 +323,8 @@ function planEditorReducer (state = defaultState, { type, payload }) {
     case Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURE:
       return deselectFeature(state, payload)
 
-    case Actions.PLAN_EDITOR_SET_IS_DRAFTS_LOADED:
-      return { ...state, isDraftsLoaded: payload }
+    case Actions.PLAN_EDITOR_SET_DRAFTS_STATE:
+      return { ...state, draftsState: payload }
 
     case Actions.PLAN_EDITOR_SET_DRAFTS: {
       return { ...state, drafts: { ...state.drafts, ...payload } }

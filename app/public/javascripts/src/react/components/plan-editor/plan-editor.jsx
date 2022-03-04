@@ -15,6 +15,7 @@ import PlanNavigation from './sidebar/plan-navigation.jsx'
 import AlertsTooltip from './alerts-tooltip.jsx'
 import BoundaryDrawCreator from './boundary-draw-creator.jsx'
 import AroFeatureEditor from '../common/editor-interface/aro-feature-editor.jsx'
+import { isDraftLoadingOrLoaded } from './shared'
 import './plan-editor.css'
 
 export const PlanEditor = props => {
@@ -22,7 +23,7 @@ export const PlanEditor = props => {
     planId,
     userId,
     isDrawingBoundaryFor,
-    isDraftsLoaded,
+    draftsState,
     subscribeToSocket,
     unsubscribeFromSocket,
     resumeOrCreateTransaction,
@@ -54,7 +55,7 @@ export const PlanEditor = props => {
     <div className="aro-plan-editor" style={{paddingRight: '10px'}}>
 
       {/* certain things shouldn't be visible until drafts are loaded */}
-      {isDraftsLoaded && <>
+      {isDraftLoadingOrLoaded(draftsState) && <>
         <PlanTransactionTools />
         <EquipmentDragger />
         <EquipmentMapObjects />
@@ -109,7 +110,7 @@ const mapStateToProps = (state) => {
     planId: state.plan.activePlan.id,
     userId: state.user.loggedInUser.id,
     isDrawingBoundaryFor: state.planEditor.isDrawingBoundaryFor,
-    isDraftsLoaded: state.planEditor.isDraftsLoaded,
+    draftsState: state.planEditor.draftsState,
     features: state.planEditor.features,
     selectedEditFeatureIds: state.planEditor.selectedEditFeatureIds,
     selectedSubnetId: state.planEditor.selectedSubnetId,

@@ -3,6 +3,8 @@ import { connect } from 'react-redux'
 import { displayModes } from './constants'
 import ToolTip from '../common/tooltip.jsx'
 import DisplayButton from './display-button.jsx'
+import { constants } from '../plan-editor/shared'
+const { DRAFT_STATES } = constants
 
 const DisplayModeButtons = props => {
   const {
@@ -12,7 +14,7 @@ const DisplayModeButtons = props => {
     selectedDisplayMode,
     displayModeButtons,
     selection,
-    isDraftsLoaded,
+    draftsState,
   } = props
 
   const disableEditPlan = () => {
@@ -50,7 +52,7 @@ const DisplayModeButtons = props => {
 
   const disabledButton = () => {
     const editMode = selectedDisplayMode === (displayModes.EDIT_PLAN || displayModes.EDIT_RINGS)
-    if (editMode && !isDraftsLoaded) {
+    if (editMode && draftsState !== DRAFT_STATES.END_INITIALIZATION) {
       return 'disabled'
     }
   }
@@ -103,7 +105,7 @@ const mapStateToProps = (state) => ({
   plan: state.plan.activePlan,
   planType: state.plan.activePlan && state.plan.activePlan.planType,
   selection: state.selection,
-  isDraftsLoaded: state.planEditor.isDraftsLoaded,
+  draftsState: state.planEditor.draftsState,
 })
 
 const mapDispatchToProps = (dispatch) => ({})

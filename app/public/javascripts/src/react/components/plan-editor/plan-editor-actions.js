@@ -1,3 +1,4 @@
+import { klona } from 'klona'
 import Actions from '../../common/actions'
 import TransactionManager from './transaction-manager'
 import Transaction from './transaction'
@@ -11,8 +12,7 @@ import { batch } from 'react-redux'
 import WktUtils from '../../../shared-utils/wkt-utils'
 import PlanEditorSelectors from './plan-editor-selectors'
 import { constants } from './shared'
-import { v4 as uuidv4 } from 'uuid'
-import { klona } from 'klona'
+const { DRAFT_STATES, BLOCKER, INCLUSION } = constants
 
 let validSubnetTypes = [
   'central_office',
@@ -80,7 +80,7 @@ function clearTransaction (doOpenView = true) {
       // DEPRECATED ?
       dispatch({ type: Actions.SELECTION_SET_PLAN_EDITOR_FEATURES, payload: [] })
       dispatch({ type: Actions.PLAN_EDITOR_CLEAR_DRAFTS })
-      dispatch({ type: Actions.PLAN_EDITOR_SET_IS_DRAFTS_LOADED, payload: false })
+      dispatch({ type: Actions.PLAN_EDITOR_SET_DRAFTS_STATE, payload: null })
       dispatch({ type: Actions.PLAN_EDITOR_CLEAR_SUBNETS })
       dispatch({ type: Actions.PLAN_EDITOR_CLEAR_FEATURES })
       if (doOpenView) {
@@ -134,16 +134,21 @@ const utf8decoder = new TextDecoder()
 function subscribeToSocket() {
   return async (dispatch, getState) => {
     try {
+
+      // * during initialization, don't let them flip
+      // * when entering transaction just check if draft is loaded
+      //   * if not, re-call POST transaction API
+      // * finish up NODE SYNC BELOW
+
+
       const unsubscriber = SocketManager.subscribe('SUBNET_DATA', rawData => {
         const data = JSON.parse(utf8decoder.decode(rawData.content))
         console.log({ name: data.subnetNodeUpdateType, SUBNET_DATA: data, properties: rawData.properties })
 
         // asynchronous set up of skeleton from socket data
         switch (data.subnetNodeUpdateType) {
-          case 'START_INITIALIZATION':
-            dispatch({ type: Actions.PLAN_EDITOR_SET_IS_DRAFTS_LOADED, payload: false })
-            break
-          case 'INITIAL_STRUCTURE_UPDATE':
+          case DRAFT_STATES.START_INITIALIZATION: break // no op
+          case DRAFT_STATES.INITIAL_STRUCTURE_UPDATE:
             // TODO: will there ever be more than one?
             const rootSubnet = data.initialSubnetStructure.rootSubnets[0]
             const { boundaryMap, rootSubnetDetail, subnetRefs } = rootSubnet
@@ -163,7 +168,6 @@ function subscribeToSocket() {
             }
             batch(() => {
               dispatch({ type: Actions.PLAN_EDITOR_SET_DRAFTS, payload: drafts })
-              dispatch({ type: Actions.PLAN_EDITOR_SET_IS_DRAFTS_LOADED, payload: true })
               dispatch({ type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION, payload: false })
             })
 
@@ -175,8 +179,8 @@ function subscribeToSocket() {
             console.log(JSON.stringify(rootSubnetDetail.faultTree, null, '  '))
             console.groupEnd()
             break
-          case 'START_SUBNET_TREE': break // no op
-          case 'SUBNET_NODE_SYNCED':
+          case DRAFT_STATES.START_SUBNET_TREE: break // no op
+          case DRAFT_STATES.SUBNET_NODE_SYNCED:
             // const { subnetRef, subnetBoundary } = data.subnetNodeSyncEvent
             // // console.log({ subnetRef, faultTreeSummary, subnetBoundary })
             // TODO: compare existing and old draft and then only then update???
@@ -193,11 +197,19 @@ function subscribeToSocket() {
             console.log(JSON.stringify(faultTreeSummary, null, '  '))
             console.groupEnd()
             break
-          case 'END_SUBNET_TREE': break // no op
-          case 'END_INITIALIZATION': break // no op
+          case DRAFT_STATES.END_SUBNET_TREE: break // no op
+          case DRAFT_STATES.END_INITIALIZATION: break // no op
           default:
             throw new Error(`Not handling SUBNET_DATA socket type: ${data.subnetNodeUpdateType}`)
         }
+
+        if (DRAFT_STATES[data.subnetNodeUpdateType]) {
+          dispatch({
+            type: Actions.PLAN_EDITOR_SET_DRAFTS_STATE,
+            payload: data.subnetNodeUpdateType,
+          })
+        }
+
       })
       dispatch({
         type: Actions.PLAN_EDITOR_SET_SOCKET_UNSUBSCRIBER,
@@ -677,15 +689,15 @@ function updatePlanThumbInformation (payload) {
     const transactionId = state.planEditor.transaction.id
     const subnet = state.planEditor.subnets[payload.key]
     const body = JSON.parse(JSON.stringify(state.planEditor.subnetFeatures[payload.key].feature))
-    const isBlocker = payload.planThumbInformation === constants.BLOCKER.KEY
+    const isBlocker = payload.planThumbInformation === BLOCKER.KEY
     body.geometry.type = "Polygon";
     body.geometry.coordinates = subnet.subnetBoundary.polygon.coordinates[0]
     body.costMultiplier = isBlocker
-      ? constants.BLOCKER.COST_MULTIPLIER
-      : constants.INCLUSION.COST_MULTIPLIER
+      ? BLOCKER.COST_MULTIPLIER
+      : INCLUSION.COST_MULTIPLIER
     body.priority = isBlocker
-      ? constants.BLOCKER.PRIORITY
-      : constants.INCLUSION.PRIORITY
+      ? BLOCKER.PRIORITY
+      : INCLUSION.PRIORITY
 
 
     return AroHttp.put(`/service/plan-transaction/${transactionId}/edge-construction-area`, body)
