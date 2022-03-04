@@ -27,6 +27,7 @@ export default class ProgressButton extends Component {
       case this.statusTypes.CANCELED:
       case this.statusTypes.FINISHED:
       case this.statusTypes.FAILED:
+        console.log("HIT")
         return this.renderFinishedButton()
 
       default:

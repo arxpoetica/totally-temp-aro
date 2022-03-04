@@ -11,6 +11,7 @@ const NetworkPlan = (props) => {
   const {
     activePlan: {
       planState,
+      planType,
       createdBy,
       updatedDate, 
       createdDate,
@@ -84,7 +85,11 @@ const NetworkPlan = (props) => {
         { alertIcon() &&
           <div
             className={`plan-state-icon ${alertIcon()}`}
-            onClick={() => setSelectedDisplayMode(displayModes.ANALYSIS)}
+            onClick={() => setSelectedDisplayMode(
+              planType === 'RING'
+                ? displayModes.EDIT_RINGS
+                : displayModes.ANALYSIS
+            )}
           />
         }
         {getTitle()}
