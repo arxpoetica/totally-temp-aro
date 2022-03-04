@@ -17,18 +17,16 @@ export default class TransactionManager {
       const result = await AroHttp.get(url)
       const transactionsForPlan = result.data.filter((item) => item.planId === planId)
       const transactionsForUserAndPlan = transactionsForPlan.filter((item) => item.userId === userId)
-      if (transactionsForPlan.length === 0) {
-        // A transaction does not exist. Create it.
-        return AroHttp.post(`/service/plan-transactions?session_id=${sessionId}`, { planId })
-      } else if (transactionsForPlan.length > 1) {
+      if (transactionsForPlan.length > 1) {
         // We have multiple transactions for this plan.
         // We should never get into this state, but can happen
         // due to race conditions, network issues, etc.
-        return TransactionManager.deleteBadTransactionsAndCreateNew(transactionsForPlan)
-      } else if (transactionsForUserAndPlan.length === 1) {
+        return TransactionManager.deleteBadTransactionsAndCreateNew(transactionsForPlan, planId, sessionId)
+      } else if (transactionsForPlan.length === 0 || transactionsForUserAndPlan.length === 1) {
+        // A transaction does not exist. Create it...OR...
         // We have one open transaction for this user and plan combo. Resume it.
-        // Using {data:} so that the signature is consistent
-        return { data: transactionsForUserAndPlan[0] }
+        // NOTE: we still have to fire `POST` to resume
+        return AroHttp.post(`/service/plan-transactions?session_id=${sessionId}`, { planId })
       } else if (transactionsForPlan.length === 1) {
         // We have one open transaction for this plan,
         // but it was not started by this user. Ask the user what to do.
@@ -43,7 +41,7 @@ export default class TransactionManager {
     }
   }
 
-  static deleteBadTransactionsAndCreateNew (transactionsForPlan, currentPlanId) {
+  static deleteBadTransactionsAndCreateNew (transactionsForPlan, currentPlanId, sessionId) {
     // Sometimes we will get into a state where we have multiple open transactions for the same plan. Ask the
     // user whether they want to delete all and start a new transaction
     return new Promise((resolve, reject) => {
@@ -65,7 +63,7 @@ export default class TransactionManager {
             )
           })
           Promise.all(deletePromises)
-            .then(res => AroHttp.post(`/service/plan-transactions`, { planId: currentPlanId }))
+            .then(res => AroHttp.post(`/service/plan-transactions?session_id=${sessionId}`, { planId: currentPlanId }))
             .then(res => resolve(res))
             .catch(err => reject(err))
         } else {

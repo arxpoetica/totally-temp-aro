@@ -88,12 +88,12 @@ export const constants = Object.freeze({
 })
 
 const { DRAFT_STATES } = constants
-export const isDraftLoadingOrLoaded = draftState => {
-  return draftState === (
-    DRAFT_STATES.START_SUBNET_TREE
-    || DRAFT_STATES.SUBNET_NODE_SYNCED
-    || DRAFT_STATES.END_SUBNET_TREE
-    || DRAFT_STATES.END_INITIALIZATION
+export const isDraftLoadingOrLoaded = draftsState => {
+  return (
+    draftsState === DRAFT_STATES.START_SUBNET_TREE
+    || draftsState === DRAFT_STATES.SUBNET_NODE_SYNCED
+    || draftsState === DRAFT_STATES.END_SUBNET_TREE
+    || draftsState === DRAFT_STATES.END_INITIALIZATION
   )
 }
 
