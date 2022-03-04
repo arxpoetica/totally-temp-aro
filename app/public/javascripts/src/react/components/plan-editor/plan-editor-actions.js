@@ -1,3 +1,4 @@
+import { klona } from 'klona'
 import Actions from '../../common/actions'
 import TransactionManager from './transaction-manager'
 import Transaction from './transaction'
@@ -6,10 +7,12 @@ import MenuItemFeature from '../context-menu/menu-item-feature'
 import MenuItemAction from '../context-menu/menu-item-action'
 import ContextMenuActions from '../context-menu/actions'
 import ResourceActions from '../resource-editor/resource-actions'
+import SocketManager from '../../common/socket-manager'
 import { batch } from 'react-redux'
 import WktUtils from '../../../shared-utils/wkt-utils'
 import PlanEditorSelectors from './plan-editor-selectors'
 import { constants } from './shared'
+const { DRAFT_STATES, BLOCKER, INCLUSION } = constants
 
 let validSubnetTypes = [
   'central_office',
@@ -18,96 +21,73 @@ let validSubnetTypes = [
   'subnet_node',
 ]
 
+function resumeOrCreateTransaction(planId, userId) {
+  return async(dispatch, getState) => {
+    try {
+      const { planEditor, plan } = getState()
+      if (planEditor.isCommittingTransaction || planEditor.isEnteringTransaction) {
+        throw new Error('Guarding against dual transactions.')
+      }
 
-function resumeOrCreateTransaction (planId, userId) {
-  return (dispatch, getState) => {
-    const state = getState()
-    
-    // gaurd against dual transactions
-    if (state.isCommittingTransaction 
-      || state.isEnteringTransaction
-    ) {
-      return Promise.reject()
-    }
-    
-    dispatch({
-      type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION,
-      payload: true
-    })
-    TransactionManager.resumeOrCreateTransaction(planId, userId)
-      .then(result => {
-        dispatch({
-          type: Actions.PLAN_EDITOR_SET_TRANSACTION,
-          payload: Transaction.fromServiceObject(result.data)
-        })
-        const transactionId = result.data.id
-        // TODO: how much of this is legacy??????
-        // it might need a lot of cleanup
-        // i.e., we might not need to load from these end points. unclear.
-        return Promise.all([
-          AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/equipment`),
-          // depricated? 
-          AroHttp.get(`/service/plan-transactions/${transactionId}/transaction-features/equipment_boundary`),
-          // need to get ALL the subnets upfront 
-          //AroHttp.get(`/service/plan-transaction/${transactionId}/subnet-refs`),
-        ])
+      dispatch({
+        type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION,
+        payload: true,
       })
-      .then(results => {
-        let equipmentList = results[0].data
-        let boundaryList = results[1].data
 
-        const resource = 'network_architecture_manager'
-        const { id, name } = state.plan.resourceItems[resource].selectedManager
+      // NOTE: need to load resource manager so drop cable
+      // length is available for plan-editor-selectors
+      const resource = 'network_architecture_manager'
+      const { id, name } = plan.resourceItems[resource].selectedManager
+      await dispatch(ResourceActions.loadResourceManager(id, resource, name))
 
-        batch(async() => {
-          // ToDo: do we need to clearTransaction?
-          await dispatch(addSubnetTree())
-          // NOTE: need to load resource manager so drop cable
-          // length is available for plan-editor-selectors
-          await dispatch(ResourceActions.loadResourceManager(id, resource, name))
-          await dispatch(addTransactionFeatures(equipmentList))
-          await dispatch(addTransactionFeatures(boundaryList))
-          const state = getState()
-          const rootSubnet = PlanEditorSelectors.getRootSubnet(state)
-          if (rootSubnet) {
-            await dispatch(selectEditFeaturesById([rootSubnet.subnetNode]))
-          }
-          dispatch(setFiberRenderRequired(true))
-          dispatch({
-            type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION,
-            payload: false
-          })
-        })
-      })
-      .catch(err => {
-        console.error(err)
+      const sessionId = await SocketManager.getSessionId()
+      const { data: transactionData }
+        = await TransactionManager.resumeOrCreateTransaction(planId, userId, sessionId)
+
+      batch(() => {
         dispatch({
           type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION,
-          payload: false
+          payload: false,
+        })
+        dispatch({
+          type: Actions.PLAN_EDITOR_SET_TRANSACTION,
+          payload: Transaction.fromServiceObject(transactionData),
         })
       })
+    } catch (error) {
+      console.error(error)
+      dispatch({
+        type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION,
+        payload: false,
+      })
+    }
   }
 }
 
 function clearTransaction (doOpenView = true) {
-  return dispatch => {
+  return (dispatch, getState) => {
+    // FIXME: this functionality is already below in `unsubscribeFromSocket`
+    // but I'm calling it here because there's a race condition deleting the
+    // unsubscriber somewhere, and I can't isolate it. So clearing it twice.
+    // Once up front here, and then again later when it no longer is necessary.
+    // The fix should only call `unsubscriber` once.
+    const { planEditor: { socketUnsubscriber: unsubscriber } } = getState()
+    unsubscriber()
+
     dispatch({ type: Actions.PLAN_EDITOR_CLEAR_TRANSACTION })
-    dispatch({
-      type: Actions.SELECTION_SET_PLAN_EDITOR_FEATURES, // DEPRICATED
-      payload: []
-    })
     batch(() => {
       dispatch(setIsCommittingTransaction(false))
-      dispatch({
-        type: Actions.PLAN_EDITOR_CLEAR_SUBNETS,
-      })
-      dispatch({
-        type: Actions.PLAN_EDITOR_CLEAR_FEATURES,
-      })
+      // DEPRECATED ?
+      dispatch({ type: Actions.SELECTION_SET_PLAN_EDITOR_FEATURES, payload: [] })
+      dispatch({ type: Actions.PLAN_EDITOR_CLEAR_DRAFTS })
+      dispatch({ type: Actions.PLAN_EDITOR_SET_DRAFTS_STATE, payload: null })
+      dispatch({ type: Actions.PLAN_EDITOR_CLEAR_SUBNETS })
+      dispatch({ type: Actions.PLAN_EDITOR_CLEAR_FEATURES })
       if (doOpenView) {
         dispatch({
           type: Actions.TOOL_BAR_SET_SELECTED_DISPLAY_MODE,
-          payload: 'VIEW', // ToDo: globalize the constants in tool-bar including displayModes
+          // TODO: globalize the constants in tool-bar including displayModes
+          payload: 'VIEW',
         })
       }
     })
@@ -147,6 +127,111 @@ function discardTransaction (transactionId) {
         console.error(err)
         dispatch(clearTransaction())
       })
+  }
+}
+
+const utf8decoder = new TextDecoder()
+function subscribeToSocket() {
+  return async (dispatch, getState) => {
+    try {
+
+      // * during initialization, don't let them flip
+      // * when entering transaction just check if draft is loaded
+      //   * if not, re-call POST transaction API
+      // * finish up NODE SYNC BELOW
+
+
+      const unsubscriber = SocketManager.subscribe('SUBNET_DATA', rawData => {
+        const data = JSON.parse(utf8decoder.decode(rawData.content))
+        console.log({ name: data.subnetNodeUpdateType, SUBNET_DATA: data, properties: rawData.properties })
+
+        // asynchronous set up of skeleton from socket data
+        switch (data.subnetNodeUpdateType) {
+          case DRAFT_STATES.START_INITIALIZATION: break // no op
+          case DRAFT_STATES.INITIAL_STRUCTURE_UPDATE:
+            // TODO: will there ever be more than one?
+            const rootSubnet = data.initialSubnetStructure.rootSubnets[0]
+            const { boundaryMap, rootSubnetDetail, subnetRefs } = rootSubnet
+
+            const drafts = {}
+            for (const ref of subnetRefs) {
+              const draft = klona(ref)
+              draft.boundary = klona(boundaryMap[draft.subnetId] || rootSubnetDetail.subnetBoundary)
+              if (draft.nodeType === 'central_office') {
+                draft.equipment = klona(rootSubnetDetail.children)
+                // for ease, throwing CO on itself for display
+                draft.equipment.push(klona(rootSubnetDetail.subnetId))
+              } else {
+                draft.equipment = []
+              }
+              drafts[draft.subnetId] = draft
+            }
+            batch(() => {
+              dispatch({ type: Actions.PLAN_EDITOR_SET_DRAFTS, payload: drafts })
+              dispatch({ type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION, payload: false })
+            })
+
+            console.groupCollapsed(
+              '%c@ BRIAN: fault tree STRUCTURE data is found here... [expand]',
+              'background-color:#ff5000;color:black;',
+            )
+            console.log({ faultTreeStructure: rootSubnetDetail.faultTree })
+            console.log(JSON.stringify(rootSubnetDetail.faultTree, null, '  '))
+            console.groupEnd()
+            break
+          case DRAFT_STATES.START_SUBNET_TREE: break // no op
+          case DRAFT_STATES.SUBNET_NODE_SYNCED:
+            // const { subnetRef, subnetBoundary } = data.subnetNodeSyncEvent
+            // // console.log({ subnetRef, faultTreeSummary, subnetBoundary })
+            // TODO: compare existing and old draft and then only then update???
+            // dispatch({
+            //   type: Actions.PLAN_EDITOR_UPDATE_DRAFT,
+            //   payload: { ...subnetRef, boundary: subnetBoundary },
+            // })
+            const { faultTreeSummary } = data.subnetNodeSyncEvent
+            console.groupCollapsed(
+              '%c@ BRIAN: fault tree SUMMARY data is found here... [expand]',
+              'background-color:#ff5000;color:black;',
+            )
+            console.log({ faultTreeSummary })
+            console.log(JSON.stringify(faultTreeSummary, null, '  '))
+            console.groupEnd()
+            break
+          case DRAFT_STATES.END_SUBNET_TREE: break // no op
+          case DRAFT_STATES.END_INITIALIZATION: break // no op
+          default:
+            throw new Error(`Not handling SUBNET_DATA socket type: ${data.subnetNodeUpdateType}`)
+        }
+
+        if (DRAFT_STATES[data.subnetNodeUpdateType]) {
+          dispatch({
+            type: Actions.PLAN_EDITOR_SET_DRAFTS_STATE,
+            payload: data.subnetNodeUpdateType,
+          })
+        }
+
+      })
+      dispatch({
+        type: Actions.PLAN_EDITOR_SET_SOCKET_UNSUBSCRIBER,
+        payload: unsubscriber,
+      })
+      // console.log('...subscribed to subnet socket channel...')
+    } catch (error) {
+      console.error(error)
+    }
+  }
+}
+
+function unsubscribeFromSocket() {
+  return async (dispatch, getState) => {
+    try {
+      const { planEditor: { socketUnsubscriber: unsubscriber } } = getState()
+      unsubscriber()
+      // console.log('...unsubscribed from subnet socket channel...')
+    } catch (error) {
+      console.error(error)
+    }
+    dispatch({ type: Actions.PLAN_EDITOR_CLEAR_SOCKET_UNSUBSCRIBER })
   }
 }
 
@@ -512,7 +597,7 @@ function assignLocation (locationId, terminalId) {
   }
 }
 
-function showContextMenuForEquipmentBoundary (mapObject, x, y, vertex, callBack) {
+function showContextMenuForBoundary (mapObject, x, y, vertex, callBack) {
   return (dispatch) => {
     const menuActions = []
     menuActions.push(
@@ -604,15 +689,15 @@ function updatePlanThumbInformation (payload) {
     const transactionId = state.planEditor.transaction.id
     const subnet = state.planEditor.subnets[payload.key]
     const body = JSON.parse(JSON.stringify(state.planEditor.subnetFeatures[payload.key].feature))
-    const isBlocker = payload.planThumbInformation === constants.BLOCKER.KEY
+    const isBlocker = payload.planThumbInformation === BLOCKER.KEY
     body.geometry.type = "Polygon";
     body.geometry.coordinates = subnet.subnetBoundary.polygon.coordinates[0]
     body.costMultiplier = isBlocker
-      ? constants.BLOCKER.COST_MULTIPLIER
-      : constants.INCLUSION.COST_MULTIPLIER
+      ? BLOCKER.COST_MULTIPLIER
+      : INCLUSION.COST_MULTIPLIER
     body.priority = isBlocker
-      ? constants.BLOCKER.PRIORITY
-      : constants.INCLUSION.PRIORITY
+      ? BLOCKER.PRIORITY
+      : INCLUSION.PRIORITY
 
 
     return AroHttp.put(`/service/plan-transaction/${transactionId}/edge-construction-area`, body)
@@ -667,29 +752,32 @@ function setIsEnteringTransaction (isEnteringTransaction) {
 function moveFeature (featureId, coordinates) {
   return (dispatch, getState) => {
     const state = getState()
-    let subnetFeature = state.planEditor.subnetFeatures[featureId]
-    subnetFeature = JSON.parse(JSON.stringify(subnetFeature))
-    let subnetId = subnetFeature.subnetId
-    let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
-    
+    const subnetFeature = klona(state.planEditor.subnetFeatures[featureId])
+    const subnetId = subnetFeature.subnetId
+    const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
+
     subnetFeature.feature.geometry.coordinates = coordinates
     const body = {
       commands: [{
-        // `childId` is one of the children nodes of the subnets
-        // service need to change this to "childNode"
         childId: unparseSubnetFeature(subnetFeature.feature),
-        subnetId: subnetId, // parent subnet id, don't add when `type: 'add'`
-        type: 'update', // `add`, `update`, or `delete`
+        subnetId,
+        type: 'update',
       }]
     }
-    // TODO: this is VERY similar to code above, use _updateSubnetFeatures?
     return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
-      .then(result => {
-        
+      .then(() => {
         dispatch({
           type: Actions.PLAN_EDITOR_UPDATE_SUBNET_FEATURES,
           payload: {[featureId]: subnetFeature}
         })
+        // only update draft if equipment (on co only) exists
+        const draft = state.planEditor.drafts[subnetId]
+        const equipmentIndex = draft.equipment.findIndex(({ id }) => id === featureId)
+        if (equipmentIndex >= 0) {
+          const draftClone = klona(draft)
+          draftClone.equipment[equipmentIndex].point.coordinates = coordinates
+          dispatch({ type: Actions.PLAN_EDITOR_UPDATE_DRAFT, payload: draftClone })
+        }
       })
       .catch(err => console.error(err))
   }
@@ -747,43 +835,43 @@ function moveConstructionArea (objectId, newCoordinates) {
 }
 
 function deleteFeature (featureId) {
-  return (dispatch, getState) => {
-    const state = getState()
+  return async(dispatch, getState) => {
+    try {
+      const { planEditor } = getState()
+      const { selectedSubnetId, transaction, drafts } = planEditor
+      const transactionId = transaction && transaction.id
+      const { subnetId, feature } = klona(planEditor.subnetFeatures[featureId])
 
-    let subnetFeature = state.planEditor.subnetFeatures[featureId]
-    let selectedSubnetId = state.planEditor.selectedSubnetId
-    subnetFeature = JSON.parse(JSON.stringify(subnetFeature))
-    let subnetId = subnetFeature.subnetId
-    let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
-
-    const body = {
-      commands: [{
-        childId: unparseSubnetFeature(subnetFeature.feature),
-        subnetId, // parent subnet id, don't add when `type: 'add'`
-        type: 'delete',
-      }]
-    }
-
-    // Do a PUT to send the equipment over to service
-    return AroHttp.post(`/service/plan-transaction/${transactionId}/subnet_cmd/update-children`, body)
-      .then(result => {
-        batch(() => {
-          dispatch({
-          type: Actions.PLAN_EDITOR_REMOVE_SUBNET_FEATURE,
-            payload: featureId
-          })
-          dispatch({
-            type: Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURE,
-            payload: featureId,
-          })
-          // if deleted equipment is currently selected, move selection to parent
-          if (featureId === selectedSubnetId){
-            dispatch(setSelectedSubnetId(subnetId))
-          }
-          dispatch(recalculateSubnets(transactionId))
-        })
+      const url = `/service/plan-transaction/${transactionId}/subnet_cmd/update-children`
+      await AroHttp.post(url, {
+        commands: [{
+          childId: unparseSubnetFeature(feature),
+          subnetId,
+          type: 'delete',
+        }]
       })
-      .catch(err => console.error(err))
+
+      batch(() => {
+        dispatch({ type: Actions.PLAN_EDITOR_REMOVE_SUBNET_FEATURE, payload: featureId })
+        dispatch({ type: Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURE, payload: featureId })
+        // if deleted equipment is currently selected, move selection to parent
+        if (featureId === selectedSubnetId) dispatch(setSelectedSubnetId(subnetId))
+
+        dispatch({ type: Actions.PLAN_EDITOR_REMOVE_DRAFT, payload: featureId })
+        // if equipment exists on draft (only on CO), delete it too
+        const draft = Object.values(drafts).find(draft => draft.equipment.length)
+        const equipmentIndex = draft.equipment.findIndex(({ id }) => id === featureId)
+        if (equipmentIndex >= 0) {
+          const draftClone = klona(draft)
+          delete draftClone.equipment[equipmentIndex]
+          dispatch({ type: Actions.PLAN_EDITOR_UPDATE_DRAFT, payload: draftClone })
+        }
+
+        dispatch(recalculateSubnets(transactionId))
+      })
+    } catch (error) {
+      console.error(error)
+    }
   }
 }
 
@@ -865,6 +953,7 @@ function readFeatures (featureIds) {
 
 function selectEditFeaturesById (featureIds) {
   return (dispatch, getState) => {
+    // NOTE: this seemingly unnecessary call to `readFeatures` puts the features from service in state
     dispatch(readFeatures(featureIds))
       .then(retrievedIds => {
         // we should have all of our features in state at this point (all valid features that is)
@@ -1016,44 +1105,6 @@ function addSubnets({ subnetIds = [], forceReload = false, coordinates }) {
             dispatch(setIsCalculatingSubnets(false))
             return Promise.reject()
           })
-      }).catch(err => {
-        console.error(err)
-        dispatch(setIsCalculatingSubnets(false))
-        return Promise.reject()
-      })
-  }
-}
-
-// FIXME: this should be called `addSubnetTreeBy...Something` because
-// we need to enhance the UI to allow selecting by service areas.
-function addSubnetTree() {
-  return (dispatch, getState) => {
-    const state = getState()
-    let transactionId = state.planEditor.transaction && state.planEditor.transaction.id
-
-    dispatch(setIsCalculatingSubnets(true))
-    return AroHttp.get(`/service/plan-transaction/${transactionId}/subnet-root-refs`)
-      .then(result => {
-        const data = result.data || []
-        let rootIds = []
-        data.forEach(subnet => {
-          if (subnet.node && subnet.node.id) {
-            rootIds.push(subnet.node.id)
-          }
-        })
-        if (rootIds.length) {
-          rootIds.forEach((id) => {
-            // get feeder fiber annotations
-            dispatch(getFiberAnnotations(id))
-          })
-          
-          // TODO: the addSubnets function needs to be broken up
-          return dispatch(addSubnets({ subnetIds: rootIds }))
-            .then(subnetRes => Promise.resolve(subnetRes))
-        } else {
-          dispatch(setIsCalculatingSubnets(false))
-          return Promise.resolve([])
-        }
       }).catch(err => {
         console.error(err)
         dispatch(setIsCalculatingSubnets(false))
@@ -1218,11 +1269,11 @@ function boundaryChange (subnetId, geometry) {
   return (dispatch, getState) => {
     const timeoutDuration = 3000 // milliseconds
     const state = getState()
-    
+
     if (state.planEditor.boundaryDebounceBySubnetId[subnetId]) {
       clearTimeout( state.planEditor.boundaryDebounceBySubnetId[subnetId] )
     }
-    
+
     const timeoutId = setTimeout(() => {
       batch(() => {
         dispatch(recalculateBoundary(subnetId))
@@ -1234,14 +1285,11 @@ function boundaryChange (subnetId, geometry) {
     }, timeoutDuration)
 
     batch(() => {
-      dispatch({
-        type: Actions.PLAN_EDITOR_SET_BOUNDARY_DEBOUNCE,
-        payload: {subnetId, timeoutId},
-      })
-      dispatch({
-        type: Actions.PLAN_EDITOR_UPDATE_SUBNET_BOUNDARY,
-        payload: {subnetId, geometry},
-      })
+      dispatch({ type: Actions.PLAN_EDITOR_SET_BOUNDARY_DEBOUNCE, payload: {subnetId, timeoutId} })
+      dispatch({ type: Actions.PLAN_EDITOR_UPDATE_SUBNET_BOUNDARY, payload: {subnetId, geometry} })
+      const draftClone = klona(state.planEditor.drafts[subnetId])
+      draftClone.boundary.polygon = geometry
+      dispatch({ type: Actions.PLAN_EDITOR_UPDATE_DRAFT, payload: draftClone })
     })
   }
 }
@@ -1346,14 +1394,6 @@ function setFiberAnnotations (fiberAnnotations, subnetId) {
   }
 }
 
-function leftClickTile (latLng) {
-  return (dispatch) => {
-    dispatch({
-      type: Actions.PLAN_EDITOR_SET_CLICK_LATLNG,
-      payload: [latLng.lat(), latLng.lng(), ],
-    })
-  }
-}
 // --- //
 
 // helper
@@ -1541,31 +1581,6 @@ function parseSubnetFeature (feature) {
 }
 
 // helper function
-function composeSubnet (subnet, state) {
-  // to bring in child refrences 
-  //  used to unparse subnets to send back to the server 
-  //  BUT ALSO may be used internally which why we don't unfix the typos here
-  subnet = JSON.parse(JSON.stringify(subnet))
-  subnet.children = subnet.children.map(objectId => {
-    return JSON.parse(JSON.stringify(state.planEditor.subnetFeatures[objectId].feature))
-  })
-  subnet.subnetNode = JSON.parse(JSON.stringify(state.planEditor.subnetFeatures[subnet.subnetNode].feature))
-
-  return subnet
-}
-
-// helper function 
-function unparseSubnet (subnet, state) {
-  subnet = composeSubnet(subnet, state)
-  subnet.children = subnet.children.map(feature => unparseSubnetFeature(feature))
-
-  subnet.subnetId = unparseSubnetFeature(subnet.subnetNode)
-  delete subnet.subnetNode
-
-  return subnet
-}
-
-// helper function
 function unparseSubnetFeature (feature) {
   feature = JSON.parse(JSON.stringify(feature))
   // --- unfix service typos - eventually this won't be needed --- //
@@ -1638,7 +1653,7 @@ export default {
   showContextMenuForLocations,
   unassignLocation,
   assignLocation,
-  showContextMenuForEquipmentBoundary,
+  showContextMenuForBoundary,
   startDrawingBoundaryFor,
   stopDrawingBoundary,
   setIsCalculatingSubnets,
@@ -1668,7 +1683,8 @@ export default {
   setSelectedFiber,
   setFiberAnnotations,
   getFiberAnnotations,
-  leftClickTile,
   showContextMenuForConstructionAreas,
-  deleteConstructionArea
+  deleteConstructionArea,
+  subscribeToSocket,
+  unsubscribeFromSocket,
 }

@@ -1,151 +1,96 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import ToolBarActions from '../header/tool-bar-actions'
 import { displayModes } from './constants'
-import ToolTip from "../common/tooltip.jsx"
+import ToolTip from '../common/tooltip.jsx'
+import DisplayButton from './display-button.jsx'
+import { constants } from '../plan-editor/shared'
+const { DRAFT_STATES } = constants
 
-const DisplayModeButtons = (props) => {
+const DisplayModeButtons = props => {
   const {
     plan,
     planType,
     currentUser,
-    displayModeButtons,
     selectedDisplayMode,
-    setSelectedDisplayMode,
-    selection
+    displayModeButtons,
+    selection,
+    draftsState,
   } = props
 
-  const disableEditPlanIcon = () => {
-    return (
-    !!(
-        // Disable if no plan present
-        !plan || plan.ephemeral ||
-        // Disable if plan has not been ran
-        plan.planState !== 'COMPLETED' ||
-        (
-          // TEMPORARY UNTIL WE ALLOW MULTIPLE SERVICE AREA PLAN EDIT
-          // Disable if there is more than 1 service area in a plan
-          selection.planTargetDescriptions &&
-          Object.keys(selection.planTargetDescriptions.serviceAreas).length > 1
-        )
+  const disableEditPlan = () => {
+    return !!(
+      // Disable if no plan present
+      !plan || plan.ephemeral ||
+      // Disable if plan has not been ran
+      plan.planState !== 'COMPLETED' ||
+      (
+        // TEMPORARY UNTIL WE ALLOW MULTIPLE SERVICE AREA PLAN EDIT
+        // Disable if there is more than 1 service area in a plan
+        selection.planTargetDescriptions &&
+        Object.keys(selection.planTargetDescriptions.serviceAreas).length > 1
       )
     )
   }
 
   const editPlanToolTipText = () => {
-    let baseMessage = "Edit mode is only available for "
+    let baseMessage = 'Edit mode is only available for '
     if (!plan || plan.ephemeral) {
-      baseMessage += "a plan that has been saved, created, and run."
+      baseMessage += 'a plan that has been saved, created, and run.'
     } else if (plan.planState !== 'COMPLETED') {
-      baseMessage += "a plan that has been run."
+      baseMessage += 'a plan that has been run.'
     } else if (
       selection.planTargetDescriptions &&
       Object.keys(selection.planTargetDescriptions.serviceAreas).length > 1
     ) {
-      baseMessage += "one service area at a time."
+      baseMessage += 'one service area at a time.'
     } else {
-      baseMessage = "";
+      baseMessage = ''
     }
 
-    return baseMessage;
+    return baseMessage
+  }
+
+  const disabledButton = () => {
+    const editMode = selectedDisplayMode === (displayModes.EDIT_PLAN || displayModes.EDIT_RINGS)
+    if (editMode && draftsState !== DRAFT_STATES.END_INITIALIZATION) {
+      return 'disabled'
+    }
   }
 
   return (
     <>
       <div className="btn-group pull-left" role="group" aria-label="Mode buttons" style={{position: "absolute"}}>
-        {/* View Mode */}
+
         {displayModeButtons.VIEW &&
-          <button
-            type="button"
-            className={`
-              btn display-mode-button
-              ${selectedDisplayMode !== displayModes.VIEW ? 'btn-light' : ''}
-              ${selectedDisplayMode === displayModes.VIEW ? 'btn-primary' : ''}
-            `}
-            onClick={() => setSelectedDisplayMode(displayModes.VIEW)}
-          >
-            <div className="fa fa-2x fa-eye" data-toggle="tooltip" data-placement="bottom" title="View Mode" />
-          </button>
+          <DisplayButton title="View Mode" mode="VIEW" disabled={disabledButton()}/>
         }
 
-        {/* Analysis Mode */}
         {displayModeButtons.ANALYSIS && planType !== 'RING' && currentUser.perspective !== 'sales' &&
-          <button
-            type="button"
-            className={`
-              btn display-mode-button
-              ${selectedDisplayMode !== displayModes.ANALYSIS ? 'btn-light' : ''}
-              ${selectedDisplayMode === displayModes.ANALYSIS ? 'btn-primary' : ''}
-            `}
-            onClick={() => setSelectedDisplayMode(displayModes.ANALYSIS)}
-          >
-            <div className="fa fa-2x fa-gavel" data-toggle="tooltip" data-placement="bottom" title="Analysis Mode" />
-          </button>
+          <DisplayButton title="Analysis Mode" mode="ANALYSIS" disabled={disabledButton()} />
         }
 
-        {/* Edit Rings */}
         {planType === 'RING' && currentUser.perspective !== 'sales' &&
-          <button
-            type="button"
-            className={`
-              btn display-mode-button
-              ${selectedDisplayMode !== displayModes.EDIT_RINGS ? 'btn-light' : ''}
-              ${selectedDisplayMode === displayModes.EDIT_RINGS ? 'btn-primary' : ''}
-            `}
-            onClick={() => setSelectedDisplayMode(displayModes.EDIT_RINGS)}
-          >
-            <div className="fa fa-2x fa-project-diagram" data-toggle="tooltip" data-placement="bottom" title="Edit Rings" />
-          </button>
+          <DisplayButton title="Edit Rings" mode="EDIT_RINGS" />
         }
 
-        {/* Edit Plan */}
         {displayModeButtons.EDIT_PLAN && currentUser.perspective !== 'sales' &&
-          <ToolTip isActive={disableEditPlanIcon()} toolTipText={editPlanToolTipText()}>
-            <button
-              type="button"
-              className={`
-                btn display-mode-button
-                ${selectedDisplayMode !== displayModes.EDIT_PLAN ? 'btn-light' : ''}
-                ${selectedDisplayMode === displayModes.EDIT_PLAN ? 'btn-primary' : ''}
-              `}
-              disabled={disableEditPlanIcon() ? 'disabled' : null}
-              onClick={() => setSelectedDisplayMode(displayModes.EDIT_PLAN)}
-            >
-              <div className="fa fa-2x fa-pencil-alt" data-toggle="tooltip" data-placement="bottom" title="Edit Plan" />
-            </button>
+          <ToolTip isActive={disableEditPlan()} toolTipText={editPlanToolTipText()}>
+            <DisplayButton
+              title="Edit Plan"
+              mode="EDIT_PLAN"
+              disabled={disableEditPlan() ? 'disabled' : null}
+            />
           </ToolTip>
         }
       </div>
 
       <div className="btn-group float-right">
-        {/* Debugging Mode */}
         {displayModeButtons.DEBUG && currentUser.isAdministrator &&
-          <button
-            type="button"
-            className={`
-              btn display-mode-button
-              ${selectedDisplayMode !== displayModes.DEBUG ? 'btn-light' : ''}
-              ${selectedDisplayMode === displayModes.DEBUG ? 'btn-primary' : ''}
-            `}
-            onClick={() => setSelectedDisplayMode(displayModes.DEBUG)}
-          >
-            <div className="fa fa-2x fa-bug" data-toggle="tooltip" data-placement="bottom" title="Debugging Mode" />
-          </button>
+          <DisplayButton title="Debugging Mode" mode="DEBUG" disabled={disabledButton()} />
         }
 
-        {/* Plan Settings Mode */}
         {displayModeButtons.PLAN_SETTINGS &&
-          <button
-            type="button"
-            className={`
-              btn display-mode-button
-              ${selectedDisplayMode !== displayModes.PLAN_SETTINGS ? 'btn-light' : ''}
-              ${selectedDisplayMode === displayModes.PLAN_SETTINGS ? 'btn-primary' : ''}
-            `}
-            onClick={() => setSelectedDisplayMode(displayModes.PLAN_SETTINGS)}
-          >
-            <div className="fa fa-2x fa-cog" data-toggle="tooltip" data-placement="bottom" title="Plan Settings Mode" />
-          </button>
+          <DisplayButton title="Plan Settings Mode" mode="PLAN_SETTINGS" disabled={disabledButton()} />
         }
       </div>
     </>
@@ -159,11 +104,10 @@ const mapStateToProps = (state) => ({
   currentUser: state.user.loggedInUser ? state.user.loggedInUser : '',
   plan: state.plan.activePlan,
   planType: state.plan.activePlan && state.plan.activePlan.planType,
-  selection: state.selection
+  selection: state.selection,
+  draftsState: state.planEditor.draftsState,
 })
 
-const mapDispatchToProps = (dispatch) => ({
-  setSelectedDisplayMode: (value) => dispatch(ToolBarActions.selectedDisplayMode(value)),
-})
+const mapDispatchToProps = (dispatch) => ({})
 
 export default connect(mapStateToProps, mapDispatchToProps)(DisplayModeButtons)

@@ -76,7 +76,26 @@ export const constants = Object.freeze({
     },
   },
 
+  DRAFT_STATES: {
+    START_INITIALIZATION: 'START_INITIALIZATION',
+    INITIAL_STRUCTURE_UPDATE: 'INITIAL_STRUCTURE_UPDATE',
+    START_SUBNET_TREE: 'START_SUBNET_TREE',
+    SUBNET_NODE_SYNCED: 'SUBNET_NODE_SYNCED',
+    END_SUBNET_TREE: 'END_SUBNET_TREE',
+    END_INITIALIZATION: 'END_INITIALIZATION',
+  },
+
 })
+
+const { DRAFT_STATES } = constants
+export const isDraftLoadingOrLoaded = draftsState => {
+  return (
+    draftsState === DRAFT_STATES.START_SUBNET_TREE
+    || draftsState === DRAFT_STATES.SUBNET_NODE_SYNCED
+    || draftsState === DRAFT_STATES.END_SUBNET_TREE
+    || draftsState === DRAFT_STATES.END_INITIALIZATION
+  )
+}
 
 export const getIconUrl = (feature, { equipments, constructionAreas, locationAlerts, ARO_CLIENT }) => {
   const { objectId, networkNodeType, dataType } = feature

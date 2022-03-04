@@ -26,7 +26,11 @@ const socketConfig = Object.freeze({
   library: {
     exchange: 'library_event',
     queue: 'libraryEvent'
-  }
+  },
+  subnet: {
+    exchange: 'subnet',
+    queue: 'subnetEvent'
+  },
 })
 
 class SocketManager {
@@ -41,26 +45,25 @@ class SocketManager {
     messageQueueManager.addConsumer(this.getOptimizationProgressConsumer())
     messageQueueManager.addConsumer(this.getPlanEventConsumer())
     messageQueueManager.addConsumer(this.getLibraryEventConsumer())
+    messageQueueManager.addConsumer(this.getSubnetConsumer())
     messageQueueManager.connectToPublisher()
   }
 
   // Set up a connection to the aro-service RabbitMQ server for getting vector tile data. This function is also
   // responsible for routing the vector tile data to the correct connected client.
   getVectorTileConsumer () {
-    const self = this
-    const messageHandler = msg => {
+    return new Consumer(socketConfig.vectorTile.queue, socketConfig.vectorTile.exchange, msg => {
       const uuid = JSON.parse(msg.content.toString()).uuid
-      const clientId = self.vectorTileRequestToRoom[uuid]
+      const clientId = this.vectorTileRequestToRoom[uuid]
       if (!clientId) {
         console.error(`ERROR: No socket clientId found for vector tile UUID ${uuid}`)
       } else {
         console.log(`Vector Tile Socket: Routing message with UUID ${uuid} to /${clientId}`)
-        delete self.vectorTileRequestToRoom[uuid]
+        delete this.vectorTileRequestToRoom[uuid]
         msg.properties.headers.eventType = socketConfig.vectorTile.message
-        self.sockets.emitToClient(clientId, msg)
+        this.sockets.emitToClient(clientId, msg)
       }
-    }
-    return new Consumer(socketConfig.vectorTile.queue, socketConfig.vectorTile.exchange, messageHandler)
+    })
   }
 
   // Map a vector tile request UUID to a client ID.
@@ -71,20 +74,17 @@ class SocketManager {
   // Set up a connection to the aro-service RabbitMQ server for getting vector tile invalidation data. These messages
   // should be broadcast to all connected clients (via the tileInvalidation namespace).
   getTileInvalidationConsumer () {
-    const self = this
-    const messageHandler = msg => {
+    return new Consumer(socketConfig.invalidation.queue, socketConfig.invalidation.exchange, msg => {
       console.log('Received tile invalidation message from service')
       console.log(msg.content.toString())
       msg.properties.headers.eventType = socketConfig.invalidation.message
-      self.sockets.sockets.tileInvalidation.emit('message', msg)
-    }
-    return new Consumer(socketConfig.invalidation.queue, socketConfig.invalidation.exchange, messageHandler)
+      this.sockets.sockets.tileInvalidation.emit('message', msg)
+    })
   }
 
   getOptimizationProgressConsumer () {
     // Create progress channel
-    const self = this
-    const messageHandler = msg => {
+    return new Consumer(socketConfig.progress.queue, socketConfig.progress.exchange, msg => {
       const processId = JSON.parse(msg.content.toString()).processId
       if (!processId) {
         console.error(`ERROR: No socket roomId found for processId ${processId}`)
@@ -104,26 +104,31 @@ class SocketManager {
             msg.data.optimizationState = 'STARTED'
           }
         }
-        self.sockets.emitToPlan(processId, msg)
+        this.sockets.emitToPlan(processId, msg)
       }
-    }
-    return new Consumer(socketConfig.progress.queue, socketConfig.progress.exchange, messageHandler)
+    })
   }
 
   getPlanEventConsumer () {
-    const self = this
     const messageHandler = msg => {
-      self.sockets.emitToPlan(msg.properties.headers.planId, msg)
+      this.sockets.emitToPlan(msg.properties.headers.planId, msg)
     }
     return new Consumer(socketConfig.plan.queue, socketConfig.plan.exchange, messageHandler)
   }
 
   getLibraryEventConsumer () {
-    const self = this
-    const messageHandler = msg => {
-      self.sockets.emitToLibrary(msg.properties.headers.libraryId, msg)
-    }
-    return new Consumer(socketConfig.library.queue, socketConfig.library.exchange, messageHandler)
+    return new Consumer(socketConfig.library.queue, socketConfig.library.exchange, msg => {
+      this.sockets.emitToLibrary(msg.properties.headers.libraryId, msg)
+    })
+  }
+
+  getSubnetConsumer () {
+    return new Consumer(socketConfig.subnet.queue, socketConfig.subnet.exchange, msg => {
+      console.log('Received subnet message from service')
+      console.log(msg.content.toString())
+      msg.properties.headers.eventType = 'SUBNET_DATA'
+      this.sockets.emitToClient(msg.properties.headers.sessionId, msg)
+    })
   }
 
   broadcastMessage (msg) {
@@ -138,5 +143,5 @@ class SocketManager {
 let socketManager = null
 module.exports = {
   initialize: app => { socketManager = new SocketManager(app) },
-  socketManager: () => socketManager
+  socketManager: () => socketManager,
 }

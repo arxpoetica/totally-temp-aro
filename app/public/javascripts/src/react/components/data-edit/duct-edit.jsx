@@ -262,7 +262,6 @@ const mapDispatchToProps = dispatch => ({
   newDuct: (duct) => dispatch(dataEditActions.newDuct(duct)),
   setDuct: (ductId, duct) => dispatch(dataEditActions.setDuct(ductId, duct)),
   uploadDucts: (libraryId) => dispatch(dataEditActions.uploadDucts(libraryId)),
-  resumeOrCreateTransaction: (planId, userId) => dispatch(planEditorActions.resumeOrCreateTransaction(planId, userId))
 })
 
 const DuctEditComponent = wrapComponentWithProvider(reduxStore, DuctEdit, mapStateToProps, mapDispatchToProps)
