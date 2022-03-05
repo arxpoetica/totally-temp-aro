@@ -193,9 +193,29 @@ function subscribeToSocket() {
               '%c@ BRIAN: fault tree SUMMARY data is found here... [expand]',
               'background-color:#ff5000;color:black;',
             )
-            console.log({ faultTreeSummary })
+            console.log({ data })
             console.log(JSON.stringify(faultTreeSummary, null, '  '))
             console.groupEnd()
+
+            // data.subnetNodeSyncEvent.subnetRef.subnetId
+            // data.subnetNodeSyncEvent.faultTreeSummary
+            let subnetId = data.subnetNodeSyncEvent.subnetRef.subnetId
+            let draftProps = {}
+            draftProps[subnetId] = {}
+            if (Object.keys(data.subnetNodeSyncEvent.faultTreeSummary).length) {
+              draftProps[subnetId].faultTreeSummary = data.subnetNodeSyncEvent.faultTreeSummary
+            }
+            if (Object.keys(data.subnetNodeSyncEvent.subnetBoundary).length) {
+              // TODO: we should keep property names the same
+              draftProps[subnetId].boundary = data.subnetNodeSyncEvent.subnetBoundary
+            }
+            if (Object.keys(draftProps[subnetId]).length) {
+              dispatch({
+                type: Actions.PLAN_EDITOR_MERGE_DRAFT_PROPS,
+                payload: draftProps,
+              })
+            }
+
             break
           case DRAFT_STATES.END_SUBNET_TREE: break // no op
           case DRAFT_STATES.END_INITIALIZATION: break // no op

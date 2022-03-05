@@ -163,6 +163,20 @@ function deselectFeature (state, objectId) {
   }
 }
 
+// will merge props into draft entries 
+function mergeDraftProps (state, drafts) {
+  let mergedDrafts = {}
+  Object.keys(drafts).forEach(id => {
+    if (!mergedDrafts[id]) mergedDrafts[id] = {}
+    let stateDraft = state.drafts[id] || {}
+    mergedDrafts[id] = { ...stateDraft, ...mergedDrafts[id], ...drafts[id]}
+  })
+
+  return { ...state, 
+    drafts: { ...state.drafts, ...mergedDrafts }
+  }
+}
+
 function addRequestedSubnetIds (state, subnetIds) {
   let updatedRequestedSubnetIds = [ ...new Set(state.requestedSubnetIds.concat(subnetIds))]
   return { ...state,
@@ -347,6 +361,10 @@ function planEditorReducer (state = defaultState, { type, payload }) {
       const updatedDrafts = { ...state.drafts }
       delete updatedDrafts[payload]
       return { ...state, drafts: updatedDrafts }
+    }
+
+    case Actions.PLAN_EDITOR_MERGE_DRAFT_PROPS: {
+      return mergeDraftProps(state, payload)
     }
 
     case Actions.PLAN_EDITOR_ADD_REQUESTED_SUBNET_IDS:
