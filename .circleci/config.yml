@@ -74,7 +74,7 @@ workflows:
                 - master
                 - dev
                 - uat
-                - plan-edit-tuning/179702913-initial-load
+                - plan-edit-tuning/main
       - deploy:
           context: aro_qa_builds
           requires:
