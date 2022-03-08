@@ -21,11 +21,12 @@ let validSubnetTypes = [
   'subnet_node',
 ]
 
-function resumeOrCreateTransaction(planId, userId) {
+function resumeOrCreateTransaction() {
   return async(dispatch, getState) => {
     try {
-      const { planEditor, plan } = getState()
-      if (planEditor.isCommittingTransaction || planEditor.isEnteringTransaction) {
+      const { planEditor, plan, user } = getState()
+      const { isCommittingTransaction, isEnteringTransaction, isPlanEditorActive, draftsState } = planEditor
+      if (isCommittingTransaction || isEnteringTransaction) {
         throw new Error('Guarding against dual transactions.')
       }
 
@@ -40,9 +41,12 @@ function resumeOrCreateTransaction(planId, userId) {
       const { id, name } = plan.resourceItems[resource].selectedManager
       await dispatch(ResourceActions.loadResourceManager(id, resource, name))
 
+      const planId = plan.activePlan.id
+      const userId = user.loggedInUser.id
       const sessionId = await SocketManager.getSessionId()
+      const draftExists = draftsState === constants.DRAFT_STATES.END_INITIALIZATION
       const { data: transactionData }
-        = await TransactionManager.resumeOrCreateTransaction(planId, userId, sessionId)
+        = await TransactionManager.resumeOrCreateTransaction(planId, userId, sessionId, draftExists)
 
       batch(() => {
         dispatch({
@@ -135,11 +139,7 @@ function subscribeToSocket() {
   return async (dispatch, getState) => {
     try {
 
-      // * during initialization, don't let them flip
-      // * when entering transaction just check if draft is loaded
-      //   * if not, re-call POST transaction API
-      // * finish up NODE SYNC BELOW
-
+      // TODO: move this into a controller
 
       const unsubscriber = SocketManager.subscribe('SUBNET_DATA', rawData => {
         const data = JSON.parse(utf8decoder.decode(rawData.content))
@@ -149,7 +149,6 @@ function subscribeToSocket() {
         switch (data.subnetNodeUpdateType) {
           case DRAFT_STATES.START_INITIALIZATION: break // no op
           case DRAFT_STATES.INITIAL_STRUCTURE_UPDATE:
-            // TODO: will there ever be more than one?
             const rootSubnet = data.initialSubnetStructure.rootSubnets[0]
             const { boundaryMap, rootSubnetDetail, subnetRefs } = rootSubnet
 
@@ -206,7 +205,6 @@ function subscribeToSocket() {
               draftProps[subnetId].faultTreeSummary = data.subnetNodeSyncEvent.faultTreeSummary
             }
             if (Object.keys(data.subnetNodeSyncEvent.subnetBoundary).length) {
-              // TODO: we should keep property names the same
               draftProps[subnetId].boundary = data.subnetNodeSyncEvent.subnetBoundary
             }
             if (Object.keys(draftProps[subnetId]).length) {
