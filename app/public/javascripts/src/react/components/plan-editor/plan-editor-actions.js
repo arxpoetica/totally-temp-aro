@@ -25,7 +25,7 @@ function resumeOrCreateTransaction() {
   return async(dispatch, getState) => {
     try {
       const { planEditor, plan, user } = getState()
-      const { isCommittingTransaction, isEnteringTransaction, isPlanEditorActive, draftsState } = planEditor
+      const { isCommittingTransaction, isEnteringTransaction, draftsState } = planEditor
       if (isCommittingTransaction || isEnteringTransaction) {
         throw new Error('Guarding against dual transactions.')
       }
@@ -155,7 +155,7 @@ function subscribeToSocket() {
             const drafts = {}
             for (const ref of subnetRefs) {
               const draft = klona(ref)
-              draft.boundary = klona(boundaryMap[draft.subnetId] || rootSubnetDetail.subnetBoundary)
+              draft.subnetBoundary = klona(boundaryMap[draft.subnetId] || rootSubnetDetail.subnetBoundary)
               if (draft.nodeType === 'central_office') {
                 draft.equipment = klona(rootSubnetDetail.children)
                 // for ease, throwing CO on itself for display
@@ -169,43 +169,18 @@ function subscribeToSocket() {
               dispatch({ type: Actions.PLAN_EDITOR_SET_DRAFTS, payload: drafts })
               dispatch({ type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION, payload: false })
             })
-
-            console.groupCollapsed(
-              '%c@ BRIAN: fault tree STRUCTURE data is found here... [expand]',
-              'background-color:#ff5000;color:black;',
-            )
-            console.log({ faultTreeStructure: rootSubnetDetail.faultTree })
-            console.log(JSON.stringify(rootSubnetDetail.faultTree, null, '  '))
-            console.groupEnd()
             break
           case DRAFT_STATES.START_SUBNET_TREE: break // no op
           case DRAFT_STATES.SUBNET_NODE_SYNCED:
-            // const { subnetRef, subnetBoundary } = data.subnetNodeSyncEvent
-            // // console.log({ subnetRef, faultTreeSummary, subnetBoundary })
-            // TODO: compare existing and old draft and then only then update???
-            // dispatch({
-            //   type: Actions.PLAN_EDITOR_UPDATE_DRAFT,
-            //   payload: { ...subnetRef, boundary: subnetBoundary },
-            // })
-            const { faultTreeSummary } = data.subnetNodeSyncEvent
-            console.groupCollapsed(
-              '%c@ BRIAN: fault tree SUMMARY data is found here... [expand]',
-              'background-color:#ff5000;color:black;',
-            )
-            console.log({ data })
-            console.log(JSON.stringify(faultTreeSummary, null, '  '))
-            console.groupEnd()
-
-            // data.subnetNodeSyncEvent.subnetRef.subnetId
-            // data.subnetNodeSyncEvent.faultTreeSummary
+            const { subnetBoundary, faultTreeSummary } = data.subnetNodeSyncEvent
             let subnetId = data.subnetNodeSyncEvent.subnetRef.subnetId
             let draftProps = {}
             draftProps[subnetId] = {}
-            if (Object.keys(data.subnetNodeSyncEvent.faultTreeSummary).length) {
-              draftProps[subnetId].faultTreeSummary = data.subnetNodeSyncEvent.faultTreeSummary
+            if (Object.keys(faultTreeSummary).length) {
+              draftProps[subnetId].faultTreeSummary = faultTreeSummary
             }
-            if (Object.keys(data.subnetNodeSyncEvent.subnetBoundary).length) {
-              draftProps[subnetId].boundary = data.subnetNodeSyncEvent.subnetBoundary
+            if (Object.keys(subnetBoundary).length) {
+              draftProps[subnetId].subnetBoundary = subnetBoundary
             }
             if (Object.keys(draftProps[subnetId]).length) {
               dispatch({
@@ -1306,7 +1281,7 @@ function boundaryChange (subnetId, geometry) {
       dispatch({ type: Actions.PLAN_EDITOR_SET_BOUNDARY_DEBOUNCE, payload: {subnetId, timeoutId} })
       dispatch({ type: Actions.PLAN_EDITOR_UPDATE_SUBNET_BOUNDARY, payload: {subnetId, geometry} })
       const draftClone = klona(state.planEditor.drafts[subnetId])
-      draftClone.boundary.polygon = geometry
+      draftClone.subnetBoundary.polygon = geometry
       dispatch({ type: Actions.PLAN_EDITOR_UPDATE_DRAFT, payload: draftClone })
     })
   }

@@ -75,7 +75,7 @@ const PlanEditorDrafts = props => {
       {selectedSubnetId !== draft.subnetId &&
         <Boundary
           id={draft.subnetId}
-          polygon={draft.boundary.polygon}
+          polygon={draft.subnetBoundary.polygon}
           // using functional approach to avoid race conditions
           onLoad={object => setObjects(state => [...state, object])}
         />
