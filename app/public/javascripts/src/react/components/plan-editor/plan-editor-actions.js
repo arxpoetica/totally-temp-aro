@@ -155,6 +155,7 @@ function subscribeToSocket() {
             const drafts = {}
             for (const ref of subnetRefs) {
               const draft = klona(ref)
+              draft.nodeSynced = false
               draft.subnetBoundary = klona(boundaryMap[draft.subnetId] || rootSubnetDetail.subnetBoundary)
               if (draft.nodeType === 'central_office') {
                 draft.equipment = klona(rootSubnetDetail.children)
@@ -172,10 +173,10 @@ function subscribeToSocket() {
             break
           case DRAFT_STATES.START_SUBNET_TREE: break // no op
           case DRAFT_STATES.SUBNET_NODE_SYNCED:
-            const { subnetBoundary, faultTreeSummary } = data.subnetNodeSyncEvent
-            let subnetId = data.subnetNodeSyncEvent.subnetRef.subnetId
-            let draftProps = {}
-            draftProps[subnetId] = {}
+            const { subnetBoundary, faultTreeSummary, subnetRef } = data.subnetNodeSyncEvent
+            const { subnetId } = subnetRef
+            const draftProps = {}
+            draftProps[subnetId] = { nodeSynced: true }
             if (Object.keys(faultTreeSummary).length) {
               draftProps[subnetId].faultTreeSummary = faultTreeSummary
             }

@@ -70,28 +70,51 @@ const PlanEditorDrafts = props => {
     }
   }, [objects])
 
-  return Object.values(drafts).map(draft =>
-    <React.Fragment key={draft.subnetId}>
-      {selectedSubnetId !== draft.subnetId &&
-        <Boundary
-          id={draft.subnetId}
-          polygon={draft.subnetBoundary.polygon}
-          // using functional approach to avoid race conditions
-          onLoad={object => setObjects(state => [...state, object])}
-        />
+  const draftsArray = Object.values(drafts)
+  const rootDraft = draftsArray.find(draft => !draft.parentSubnetId)
+
+  return <>
+    {draftsArray.map(draft => {
+      const { subnetId, subnetBoundary, nodeSynced } = draft
+      const options = { strokeOpacity: nodeSynced ? 1 : 0.5 }
+
+      if (selectedSubnetId !== subnetId) {
+        return (
+          <Boundary
+            key={subnetId}
+            id={subnetId}
+            polygon={subnetBoundary.polygon}
+            options={options}
+            // using functional approach to avoid race conditions
+            onLoad={object => setObjects(state => [...state, object])}
+          />
+        )
       }
-      {!selectedSubnetId && draft.equipment.map(node =>
-        <EquipmentNode
-          key={node.id}
-          id={node.id}
-          point={node.point}
-          iconUrl={equipments[node.networkNodeType].iconUrl}
-          // using functional approach to avoid race conditions
-          onLoad={object => setObjects(state => [...state, object])}
-        />
-      )}
-    </React.Fragment>
-  )
+      return null
+    })}
+
+    {!selectedSubnetId && rootDraft && rootDraft.equipment.map(node => {
+      const { id, point, networkNodeType } = node
+      const nodeSynced = drafts[id] && drafts[id].nodeSynced
+      if (
+        nodeSynced
+        && networkNodeType !== 'bulk_distribution_terminal'
+        && networkNodeType !== 'multiple_dwelling_unit'
+      ) {
+        return (
+          <EquipmentNode
+            key={id}
+            id={id}
+            point={point}
+            iconUrl={equipments[networkNodeType].iconUrl}
+            // using functional approach to avoid race conditions
+            onLoad={object => setObjects(state => [...state, object])}
+          />
+        )
+      }
+      return null
+    })}
+  </>
 }
 
 const mapStateToProps = state => ({
