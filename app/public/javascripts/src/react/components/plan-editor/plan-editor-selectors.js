@@ -31,7 +31,7 @@ const getIsRecalcSettled = createSelector(
   }
 )
 
-const getFeaturesRenderInfo = createSelector(
+const getFocusedEquipmentIds = createSelector(
   [getSelectedSubnetId, getSubnetFeatures, getSubnets, getSelectedSubnet, getSelectedEditFeatureIds],
   (selectedSubnetId, subnetFeatures, subnets, selectedSubnet, selectedEditFeatureIds) => {
     if (!selectedSubnet) {
@@ -39,22 +39,15 @@ const getFeaturesRenderInfo = createSelector(
       selectedSubnet = subnetId && subnets[subnetId] ? subnets[subnetId] : { children: [], subnetNode: null }
     }
 
-    // highlighted ids within the subnet
-    const highlightedFeatureIds = [
+    // visible/focused equipment ids within the selected subnet
+    return [
+      // make unique with `Set`
       ...new Set([
         selectedSubnet.subnetNode,
         ...selectedSubnet.children,
         ...selectedEditFeatureIds,
       ])
     ].filter(Boolean)
-    // everything else outside the context of anything highlighted
-    const idleFeatureIds = Object.keys(subnetFeatures)
-      .filter(id => !highlightedFeatureIds.includes(id))
-
-    return [
-      ...highlightedFeatureIds.map(id => ({ id, idle: false })),
-      ...idleFeatureIds.map(id => ({ id, idle: true })),
-    ]
   }
 )
 
@@ -336,7 +329,7 @@ const getLocationCounts = createSelector(
 const PlanEditorSelectors = Object.freeze({
   getSelectedSubnet,
   getBoundaryLayersList,
-  getFeaturesRenderInfo,
+  getFocusedEquipmentIds,
   getIsRecalcSettled,
   getAlertsForSubnetTree,
   locationWarnImgByType,

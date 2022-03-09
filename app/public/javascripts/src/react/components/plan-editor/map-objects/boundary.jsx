@@ -18,10 +18,10 @@ const Boundary = props => {
       editable: false,
       map: googleMaps,
       // strokeColor: '#1f7de6',
-      strokeColor: '#999999',
+      strokeColor: '#777777',
       strokeWeight: 3,
       // fillColor: '#1f7de6',
-      fillColor: '#999999',
+      fillColor: '#777777',
       fillOpacity: 0.05,
     }
 
