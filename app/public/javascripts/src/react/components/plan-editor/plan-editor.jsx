@@ -20,8 +20,6 @@ import './plan-editor.css'
 
 export const PlanEditor = props => {
   const {
-    planId,
-    userId,
     isDrawingBoundaryFor,
     draftsState,
     subscribeToSocket,
@@ -39,7 +37,7 @@ export const PlanEditor = props => {
 
   useEffect(() => {
     subscribeToSocket()
-    resumeOrCreateTransaction(planId, userId)
+    resumeOrCreateTransaction()
     return () => unsubscribeFromSocket()
   }, [])
 
@@ -107,8 +105,6 @@ const mapStateToProps = (state) => {
   if (!(constructionPlanType in state.configuration.ui.perspective.constructionAreas.planEdit)) constructionPlanType = 'default'
 
   return {
-    planId: state.plan.activePlan.id,
-    userId: state.user.loggedInUser.id,
     isDrawingBoundaryFor: state.planEditor.isDrawingBoundaryFor,
     draftsState: state.planEditor.draftsState,
     features: state.planEditor.features,
@@ -125,7 +121,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = dispatch => ({
   unsubscribeFromSocket: () => dispatch(PlanEditorActions.unsubscribeFromSocket()),
   subscribeToSocket: () => dispatch(PlanEditorActions.subscribeToSocket()),
-  resumeOrCreateTransaction: (planId, userId) => dispatch(PlanEditorActions.resumeOrCreateTransaction(planId, userId)),
+  resumeOrCreateTransaction: () => dispatch(PlanEditorActions.resumeOrCreateTransaction()),
   updateFeatureProperties: obj => dispatch(PlanEditorActions.updateFeatureProperties(obj)),
 })
 

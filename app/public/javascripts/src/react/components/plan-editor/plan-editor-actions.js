@@ -21,11 +21,12 @@ let validSubnetTypes = [
   'subnet_node',
 ]
 
-function resumeOrCreateTransaction(planId, userId) {
+function resumeOrCreateTransaction() {
   return async(dispatch, getState) => {
     try {
-      const { planEditor, plan } = getState()
-      if (planEditor.isCommittingTransaction || planEditor.isEnteringTransaction) {
+      const { planEditor, plan, user } = getState()
+      const { isCommittingTransaction, isEnteringTransaction, draftsState } = planEditor
+      if (isCommittingTransaction || isEnteringTransaction) {
         throw new Error('Guarding against dual transactions.')
       }
 
@@ -40,9 +41,12 @@ function resumeOrCreateTransaction(planId, userId) {
       const { id, name } = plan.resourceItems[resource].selectedManager
       await dispatch(ResourceActions.loadResourceManager(id, resource, name))
 
+      const planId = plan.activePlan.id
+      const userId = user.loggedInUser.id
       const sessionId = await SocketManager.getSessionId()
+      const draftExists = draftsState === constants.DRAFT_STATES.END_INITIALIZATION
       const { data: transactionData }
-        = await TransactionManager.resumeOrCreateTransaction(planId, userId, sessionId)
+        = await TransactionManager.resumeOrCreateTransaction(planId, userId, sessionId, draftExists)
 
       batch(() => {
         dispatch({
@@ -135,11 +139,7 @@ function subscribeToSocket() {
   return async (dispatch, getState) => {
     try {
 
-      // * during initialization, don't let them flip
-      // * when entering transaction just check if draft is loaded
-      //   * if not, re-call POST transaction API
-      // * finish up NODE SYNC BELOW
-
+      // TODO: move this into a controller
 
       const unsubscriber = SocketManager.subscribe('SUBNET_DATA', rawData => {
         const data = JSON.parse(utf8decoder.decode(rawData.content))
@@ -149,14 +149,14 @@ function subscribeToSocket() {
         switch (data.subnetNodeUpdateType) {
           case DRAFT_STATES.START_INITIALIZATION: break // no op
           case DRAFT_STATES.INITIAL_STRUCTURE_UPDATE:
-            // TODO: will there ever be more than one?
             const rootSubnet = data.initialSubnetStructure.rootSubnets[0]
             const { boundaryMap, rootSubnetDetail, subnetRefs } = rootSubnet
 
             const drafts = {}
             for (const ref of subnetRefs) {
               const draft = klona(ref)
-              draft.boundary = klona(boundaryMap[draft.subnetId] || rootSubnetDetail.subnetBoundary)
+              draft.nodeSynced = false
+              draft.subnetBoundary = klona(boundaryMap[draft.subnetId] || rootSubnetDetail.subnetBoundary)
               if (draft.nodeType === 'central_office') {
                 draft.equipment = klona(rootSubnetDetail.children)
                 // for ease, throwing CO on itself for display
@@ -170,44 +170,18 @@ function subscribeToSocket() {
               dispatch({ type: Actions.PLAN_EDITOR_SET_DRAFTS, payload: drafts })
               dispatch({ type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION, payload: false })
             })
-
-            console.groupCollapsed(
-              '%c@ BRIAN: fault tree STRUCTURE data is found here... [expand]',
-              'background-color:#ff5000;color:black;',
-            )
-            console.log({ faultTreeStructure: rootSubnetDetail.faultTree })
-            console.log(JSON.stringify(rootSubnetDetail.faultTree, null, '  '))
-            console.groupEnd()
             break
           case DRAFT_STATES.START_SUBNET_TREE: break // no op
           case DRAFT_STATES.SUBNET_NODE_SYNCED:
-            // const { subnetRef, subnetBoundary } = data.subnetNodeSyncEvent
-            // // console.log({ subnetRef, faultTreeSummary, subnetBoundary })
-            // TODO: compare existing and old draft and then only then update???
-            // dispatch({
-            //   type: Actions.PLAN_EDITOR_UPDATE_DRAFT,
-            //   payload: { ...subnetRef, boundary: subnetBoundary },
-            // })
-            const { faultTreeSummary } = data.subnetNodeSyncEvent
-            console.groupCollapsed(
-              '%c@ BRIAN: fault tree SUMMARY data is found here... [expand]',
-              'background-color:#ff5000;color:black;',
-            )
-            console.log({ data })
-            console.log(JSON.stringify(faultTreeSummary, null, '  '))
-            console.groupEnd()
-
-            // data.subnetNodeSyncEvent.subnetRef.subnetId
-            // data.subnetNodeSyncEvent.faultTreeSummary
-            let subnetId = data.subnetNodeSyncEvent.subnetRef.subnetId
-            let draftProps = {}
-            draftProps[subnetId] = {}
-            if (Object.keys(data.subnetNodeSyncEvent.faultTreeSummary).length) {
-              draftProps[subnetId].faultTreeSummary = data.subnetNodeSyncEvent.faultTreeSummary
+            const { subnetBoundary, faultTreeSummary, subnetRef } = data.subnetNodeSyncEvent
+            const { subnetId } = subnetRef
+            const draftProps = {}
+            draftProps[subnetId] = { nodeSynced: true }
+            if (Object.keys(faultTreeSummary).length) {
+              draftProps[subnetId].faultTreeSummary = faultTreeSummary
             }
-            if (Object.keys(data.subnetNodeSyncEvent.subnetBoundary).length) {
-              // TODO: we should keep property names the same
-              draftProps[subnetId].boundary = data.subnetNodeSyncEvent.subnetBoundary
+            if (Object.keys(subnetBoundary).length) {
+              draftProps[subnetId].subnetBoundary = subnetBoundary
             }
             if (Object.keys(draftProps[subnetId]).length) {
               dispatch({
@@ -1308,7 +1282,7 @@ function boundaryChange (subnetId, geometry) {
       dispatch({ type: Actions.PLAN_EDITOR_SET_BOUNDARY_DEBOUNCE, payload: {subnetId, timeoutId} })
       dispatch({ type: Actions.PLAN_EDITOR_UPDATE_SUBNET_BOUNDARY, payload: {subnetId, geometry} })
       const draftClone = klona(state.planEditor.drafts[subnetId])
-      draftClone.boundary.polygon = geometry
+      draftClone.subnetBoundary.polygon = geometry
       dispatch({ type: Actions.PLAN_EDITOR_UPDATE_DRAFT, payload: draftClone })
     })
   }

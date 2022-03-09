@@ -163,7 +163,7 @@ function deselectFeature (state, objectId) {
   }
 }
 
-// will merge props into draft entries 
+// will merge props into draft entries
 function mergeDraftProps (state, drafts) {
   let mergedDrafts = {}
   Object.keys(drafts).forEach(id => {

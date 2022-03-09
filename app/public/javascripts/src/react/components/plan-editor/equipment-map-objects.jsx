@@ -22,19 +22,15 @@ export class EquipmentMapObjects extends Component {
     // ToDo: this runs every time cursorLocations changes FIX
     this.deleteDroplinks() // this should be selective not wholesale rerender
 
-    const { subnetFeatures, featuresRenderInfo } = this.props
+    const { subnetFeatures, focusedEquipmentIds } = this.props
 
     // delete any not present
     for (const id of Object.keys(this.mapObjects)) {
-      const info = featuresRenderInfo.find(feature => feature.id === id)
-      if (info) {
-        const feature = subnetFeatures[info.id] && subnetFeatures[info.id].feature
+      const isVisibleId = focusedEquipmentIds.includes(id)
+      if (isVisibleId) {
         // delete mapObject if feature no longer exists
+        const feature = subnetFeatures[id] && subnetFeatures[id].feature
         if (!feature) this.deleteMapObject(id)
-        // only delete idle terminals when found
-        if (feature && info.idle && feature.networkNodeType && feature.networkNodeType.includes('terminal')) {
-          this.deleteMapObject(id)
-        }
       } else {
         // if not found, just delete straight across
         this.deleteMapObject(id)
@@ -42,30 +38,17 @@ export class EquipmentMapObjects extends Component {
     }
 
     // either add or update existing features
-    for (const { id, idle } of featuresRenderInfo) {
-      const mapObject = this.mapObjects[id]
-      const feature = subnetFeatures[id] && subnetFeatures[id].feature
-      if (mapObject) {
-        // TODO: can we check somehow if this has actually changed and then update it?
-        mapObject.setOpacity(idle ? 0.4 : 1.0)
-        mapObject.setIcon(getIconUrl(feature, this.props))
-      } else if (feature) {
-        if (idle) {
-          // if idle show everything but the terminals for performance reasons
-          if (!feature.networkNodeType || (feature.networkNodeType && !feature.networkNodeType.includes('terminal'))) {
-            this.createMapObject(feature, idle)
-          }
-        } else {
-          // if selected (not idle) just show everything in the subnet
-          this.createMapObject(feature, idle)
-        }
+    for (const id of focusedEquipmentIds) {
+      if (!this.mapObjects[id]) {
+        const feature = subnetFeatures[id] && subnetFeatures[id].feature
+        if (feature) this.createMapObject(feature)
       }
     }
 
     this.highlightSelectedMarkers()
   }
 
-  createMapObject(feature, idle) {
+  createMapObject(feature) {
 
     const {
       googleMaps,
@@ -86,7 +69,7 @@ export class EquipmentMapObjects extends Component {
       position: WktUtils.getGoogleMapLatLngFromWKTPoint(feature.geometry), 
       icon: { url: getIconUrl(feature, this.props) },
       draggable: !feature.locked, // Allow dragging only if feature is not locked
-      opacity: idle ? 0.4 : 1.0,
+      opacity: 1,
       map: googleMaps,
       zIndex: constants.Z_INDEX_MAP_OBJECT,
       optimized: !ARO_GLOBALS.MABL_TESTING,
@@ -163,7 +146,7 @@ export class EquipmentMapObjects extends Component {
           // re-render the main selection so it appears on top if there are multiple equipments
           if (this.props.selectedEditFeatureIds.length > 1){
             this.deleteMapObject(id)
-            this.createMapObject(subnetFeatures[id].feature, false)
+            this.createMapObject(subnetFeatures[id].feature)
           }
         }
 
@@ -256,7 +239,7 @@ const mapStateToProps = state => ({
   constructionAreas: state.mapLayers.constructionAreas.construction_areas,
   selectedEditFeatureIds: state.planEditor.selectedEditFeatureIds,
   googleMaps: state.map.googleMaps,
-  featuresRenderInfo: PlanEditorSelectors.getFeaturesRenderInfo(state),
+  focusedEquipmentIds: PlanEditorSelectors.getFocusedEquipmentIds(state),
   selectedSubnetId: state.planEditor.selectedSubnetId,
   subnetFeatures: state.planEditor.subnetFeatures,
   selectedLocations: PlanEditorSelectors.getSelectedSubnetLocations(state),
