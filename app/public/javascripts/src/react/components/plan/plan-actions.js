@@ -30,7 +30,7 @@ function setActivePlanErrors() {
     const activePlan = state.plan.activePlan
     AroHttp.get(`/service/v1/plan/${activePlan.id}/errors?user_id=${activePlan.createdBy}`)
       .then((response) => {
-        const uniqueErrors = {
+        const activePlanErrors = {
           PRE_VALIDATION: {},
           NONE: {},
           CANCELLED: {},
@@ -39,18 +39,13 @@ function setActivePlanErrors() {
         };
 
         response.data.forEach((error) => {
-          const uniqueError = uniqueErrors[error.errorCategory][error.serviceAreaCode]
-          if (
-            state.selection.planTargetDescriptions.serviceAreas[error.serviceAreaId] &&
-            (!uniqueError || uniqueError !== error.errorMessage)
-          ) {
-            uniqueErrors[error.errorCategory][error.serviceAreaCode] = error.errorMessage;
-          }
+            activePlanErrors[error.errorCategory][error.serviceAreaCode] = 
+              error.errorMessage;
         })
 
         dispatch({
           type: Actions.PLAN_SET_ACTIVE_PLAN_ERRORS,
-          payload: uniqueErrors
+          payload: activePlanErrors
         })
       })
   }
@@ -194,7 +189,9 @@ function setActivePlan (plan) {
     dispatch(RingEditActions.loadRings(plan.id))
     // load rings
     dispatch(loadPlanResourceSelectionFromServer(plan))
-    
+    // load errors
+    dispatch(setActivePlanErrors())
+
     if (plan.planType === 'RFP') {
       dispatch({
         type: Actions.RFP_SET_STATUS,

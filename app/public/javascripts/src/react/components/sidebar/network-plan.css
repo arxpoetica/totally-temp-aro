@@ -25,7 +25,7 @@
     padding-bottom: 10px;
 }
 
-.plan-state-icon {
+.network-plan .plan-state-icon {
     width: 32px;
     height: 32px;
     background-size: 60%;
@@ -34,18 +34,18 @@
     cursor: pointer;
 }
 
-.partial-fail-plan {
+.network-plan .partial-fail-plan {
     background-image: url('/svg/plan-partial-fail.svg');
 }
 
-.hard-fail-plan {
+.network-plan .hard-fail-plan {
     background-image: url('/svg/plan-hard-fail.svg');
 }
 
-.passed-plan {
+.network-plan .passed-plan {
     background-image: url('/svg/plan-passed.svg');
 }
 
-.running-plan {
+.network-plan .running-plan {
     background-image: url('/svg/plan-running.svg');
 }
