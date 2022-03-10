@@ -359,34 +359,6 @@
   margin-top: 10px;
 }
 
-/* Network Plan */
-
-.network-plan {
-  top: 0px;
-  white-space: nowrap;
-  right: 0px;
-  text-align: center;
-  background: #1f7de6;
-  padding-left: 10px;
-  padding-right: 10px;
-  border-radius: 0px;
-  cursor: default;
-  color: white;
-}
-
-.network-plan .ephemeral {
-  font-size: 25px;
-  line-height: 40px;
-}
-
-.network-plan .non-ephemeral {
-  font-size: 25px;
-  line-height: 55px;
-  max-width: 170px;
-  text-overflow: ellipsis;
-  overflow: hidden;
-}
-
 /* Display Mode Buttons */
 
 .display-mode-button {

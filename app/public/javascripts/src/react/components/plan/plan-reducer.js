@@ -32,6 +32,14 @@ function setActivePlanState (state, planState) {
   }
 }
 
+function setActivePlanErrors(state, planErrors) {
+  return { ...state,
+    activePlan: { ...state.activePlan,
+      planErrors
+    }
+  }
+}
+
 function setDataItems (state, dataItems, uploadDataSources) {
   return { ...state,
     dataItems: dataItems,
@@ -175,6 +183,9 @@ function planReducer (state = defaultState, action) {
 
     case Actions.PLAN_SET_ACTIVE_PLAN_STATE:
       return setActivePlanState(state, action.payload)
+
+    case Actions.PLAN_SET_ACTIVE_PLAN_ERRORS:
+      return setActivePlanErrors(state, action.payload)
 
     case Actions.PLAN_SET_DATA_ITEMS:
       return setDataItems(state, action.payload.dataItems, action.payload.uploadDataSources)

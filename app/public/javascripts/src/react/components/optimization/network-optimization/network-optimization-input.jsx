@@ -16,7 +16,7 @@ import DropdownList from 'react-widgets/lib/DropdownList'
 export class NetworkOptimizationInput extends Component {
   render () {
     return (
-      <div style={{ paddingRight: '16px', paddingTop: '8px' }}>
+      <div style={{ paddingRight: '10px', paddingTop: '8px', paddingLeft: '10px' }}>
         <NetworkOptimizationButton
           onRun={() => this.requestRunOptimization()}
           onModify={() => this.onModifyOptimization()}
