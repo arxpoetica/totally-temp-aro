@@ -40,7 +40,7 @@ function addNode (ring, feature, planId, userId) {
     var ringClone = ring.clone()
     var featureIndex = ringClone.nodes.findIndex((ele) => ele.objectId === feature.objectId)
 
-    if (featureIndex !== -1) return
+    if (featureIndex !== -1) return Promise.reject()
     ringClone.addNode(feature)
 
     // todo make ring update action
@@ -59,7 +59,7 @@ function removeNode (ring, featureId, planId, userId) {
   return (dispatch) => {
     var ringClone = ring.clone()
     var featureIndex = ringClone.nodes.findIndex((ele) => ele.objectId === featureId)
-    if (featureIndex === -1) return
+    if (featureIndex === -1) return Promise.reject()
     ringClone.removeNode(featureId)
 
     // todo make ring update action
@@ -113,10 +113,18 @@ function renameRing (ring, name, planId, userId) {
 
 function onFeatureSelected (features) {
   // this may be a bit funky, revisit this
+  // this is set up kind of wrong - 
+  //  currently onClick we check if ring edit is open and if the Make Ring tab is open 
+  //  then we send a message to add the node
+  //  Instead
+  //  the Make Ring component should be listening to clicks when it exists
+  //  That way nothing needs to be aware of the component,
+  //  makes for better componentization 
   return (dispatch, getState) => {
     const state = getState()
 
-    if (state.ringEdit.selectedRingId &&
+    if (state.ringEdit.isEditingRing &&
+      state.ringEdit.selectedRingId &&
       state.ringEdit.rings.hasOwnProperty(state.ringEdit.selectedRingId) &&
       features.equipmentFeatures &&
       features.equipmentFeatures.length > 0
@@ -124,7 +132,7 @@ function onFeatureSelected (features) {
       // add selected feature to selected ring
       // OR delete selected feature from selected ring
       var validNodes = features.equipmentFeatures.filter(feature => feature._data_type.includes('central_office'))
-      if (validNodes.length === 0) return // {type:null}
+      if (validNodes.length === 0) return Promise.reject()
       var feature = { ...validNodes[0] }
       feature.objectId = feature.object_id
       var ring = state.ringEdit.rings[state.ringEdit.selectedRingId]
@@ -144,6 +152,8 @@ function onFeatureSelected (features) {
             dispatch(addNode(ring, feature, planId, userId))
           }).catch(err => console.error(err))
       }
+    } else {
+      return Promise.reject()
     }
   }
 }
@@ -228,6 +238,13 @@ function setAnalysisProgress (progress) {
   }
 }
 
+function setIsEditingRing (isEditingRing) {
+  return {
+    type: Actions.RING_SET_IS_EDITING,
+    payload: isEditingRing,
+  }
+}
+
 export default {
   setSelectedRingId,
   newRing,
@@ -243,5 +260,6 @@ export default {
   requestSubNet,
   getEquipmentDataPromise,
   setAnalysisStatus,
-  setAnalysisProgress
+  setAnalysisProgress,
+  setIsEditingRing,
 }
