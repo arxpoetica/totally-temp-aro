@@ -127,11 +127,12 @@ const PlanNavigation = props => {
     let faultSum = sumFaultCounts(payload.faultCounts)
     // now we have alert counts and child rows (if any) 
     
-    // TODO: this whole icon thing is broken, I think Robert is making a new system
-    //let iconURL = '/images/map_icons/aro/equipment/fiber_distribution_hub_alert.svg'
-    let iconURL = props.iconsByType[ node.draft.nodeType ]
-    //mapLayers.networkEquipment.equipments.central_office.iconUrl
-    //mapLayers.location._tail.array[0].key
+    let iconURL;
+    if (faultSum) {
+      iconURL = props.iconsByType._alert[ node.draft.nodeType ]
+    } else {
+      iconURL = props.iconsByType[ node.draft.nodeType ]
+    }
 
     //  we filter by alert 
     // filter - if this is an element we don't want don't bother building the row and just return a null element
@@ -327,7 +328,7 @@ const PlanNavigation = props => {
   //let element = makeRow(props.selectedSubnetId, faultNode).element
   let tree = makeTree(props.drafts)
   console.log(tree)
-  //console.log( props.iconsByType ) 
+  console.log( props.iconsByType ) 
   let element = []
   Object.keys(tree).forEach(id => {
     element.push(makeRow(tree[id]).element)
