@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import Foldout from '../../common/foldout.jsx'
 import SubnetDetail from './subnet-detail.jsx'
 //import { getIconUrl } from '../shared'
+import MapLayerSelectors from '../../../components/map-layers/map-layer-selectors'
 
 export const FaultCode = { // future: may add unique icons for each
 	UNDEFINED: "Unknown",
@@ -27,6 +28,10 @@ const PlanNavigation = props => {
 
   const [filterForAlerts, setFilterForAlerts] = useState(true)
 
+  function getEquipmentIcon (networkNodeType, ) {
+
+  }
+
   function makeListNode () {
     return {draft: {}, children: {}}
   }
@@ -39,8 +44,8 @@ const PlanNavigation = props => {
     //  we also get root['123'].['abc']: "value"
     //  AND 
     //  when subnet['123'].['abc'] = subnet['abc']
-    //  subnet['abc'].val = 'AND value'
-    //  also yealds subnet['123'].['abc'].val: 'AND value'
+    //  subnet['abc'].val = 'value too'
+    //  also yealds subnet['123'].['abc'].val: 'value too'
     let roots = {}
     let subnets = {}
     Object.keys(drafts).forEach(id => {
@@ -59,12 +64,13 @@ const PlanNavigation = props => {
         if (!subnets[parentSubnetId]) {
           subnets[parentSubnetId] = makeListNode()
         }
-        subnets[parentSubnetId].children[id] = subnets[id] // NOTE the self reference 
-        //subnets[parentSubnetId].childAlertCount += draft.faultTreeSummary.faultCounts
+        subnets[parentSubnetId].children[id] = subnets[id] // NOTE the self reference
       }
     })
     // now because of reference, roots should have a tree structure of each root node down to leaf
     //  and the subnets object can be discarded
+    //  interestingly subnets is BOTH flat AND structured because of self reference (could be useful for other aplications)
+    //  do keep in mind if you serialize the subnets object you loose the pointers and thus loose the self reference 
     return roots
   }
 
@@ -122,7 +128,10 @@ const PlanNavigation = props => {
     // now we have alert counts and child rows (if any) 
     
     // TODO: this whole icon thing is broken, I think Robert is making a new system
-    let iconURL = '/images/map_icons/aro/equipment/fiber_distribution_hub_alert.svg'
+    //let iconURL = '/images/map_icons/aro/equipment/fiber_distribution_hub_alert.svg'
+    let iconURL = props.iconsByType[ node.draft.nodeType ]
+    //mapLayers.networkEquipment.equipments.central_office.iconUrl
+    //mapLayers.location._tail.array[0].key
 
     //  we filter by alert 
     // filter - if this is an element we don't want don't bother building the row and just return a null element
@@ -157,7 +166,7 @@ const PlanNavigation = props => {
               : null
             }
           </div>
-          <div className="info">
+          <div>
             {alertElements}
           </div>
           {props.selectedSubnetId == featureId
@@ -318,6 +327,7 @@ const PlanNavigation = props => {
   //let element = makeRow(props.selectedSubnetId, faultNode).element
   let tree = makeTree(props.drafts)
   console.log(tree)
+  //console.log( props.iconsByType ) 
   let element = []
   Object.keys(tree).forEach(id => {
     element.push(makeRow(tree[id]).element)
@@ -326,20 +336,19 @@ const PlanNavigation = props => {
   return (
     <>
       <div>
-      <div className='btn-group btn-group-sm' style={{ marginLeft: '5px' }}>
-        <button className={'btn btn-sm ' + (filterForAlerts ? 'btn-primary' : 'btn-light')}
-          onClick={() => setFilterForAlerts(true)}
-          disabled={filterForAlerts}
-        >
-          Alerts
-        </button>
-
-        <button className={'btn btn-sm ' + (filterForAlerts ? 'btn-light' : 'btn-primary')}
-          onClick={() => setFilterForAlerts(false)}
-          disabled={!filterForAlerts}>
-          All
-        </button>
-      </div>
+        <div className='btn-group btn-group-sm' style={{ marginLeft: '5px' }}>
+          <button className={'btn btn-sm ' + (filterForAlerts ? 'btn-primary' : 'btn-light')}
+            onClick={() => setFilterForAlerts(true)}
+            disabled={filterForAlerts}
+          >
+            Alerts
+          </button>
+          <button className={'btn btn-sm ' + (filterForAlerts ? 'btn-light' : 'btn-primary')}
+            onClick={() => setFilterForAlerts(false)}
+            disabled={!filterForAlerts}>
+            All
+          </button>
+        </div>
       </div>
       <div className='plan-navigation slim-line-headers'>{element}</div>
     </>
@@ -352,6 +361,7 @@ const mapStateToProps = state => {
     //subnets: state.planEditor.subnets, use only in child
     //subnetFeatures: state.planEditor.subnetFeatures,
     drafts: state.planEditor.drafts,
+    iconsByType: MapLayerSelectors.getIconsByType(state),
   }
 }
 
