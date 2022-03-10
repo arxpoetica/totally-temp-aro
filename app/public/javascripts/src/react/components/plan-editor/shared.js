@@ -44,7 +44,7 @@ export const constants = Object.freeze({
       key: 'ABANDONED_LOCATION',
       displayName: 'Abandoned Location',
       // FIXME: move to proper location
-      iconUrl: '/svg/alert-panel-location.svg',
+      iconUrl: '/images/map_icons/aro/households_default_alert.png',
     },
     // terminal alerts
     MAX_TERMINAL_HOMES_EXCEEDED: {
@@ -55,7 +55,7 @@ export const constants = Object.freeze({
     MAX_DROP_LENGTH_EXCEEDED: {
       key: 'MAX_DROP_LENGTH_EXCEEDED',
       displayName: 'Drop Cable Length Exceeded',
-      iconUrl: '/svg/alert-panel-location.svg',
+      iconUrl: '/images/map_icons/aro/households_default_alert.png',
     },
     // TODO: is this even a thing?
     // MAX_TERMINAL_DISTANCE_EXCEEDED: {
