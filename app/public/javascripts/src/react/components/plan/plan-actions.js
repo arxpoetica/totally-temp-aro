@@ -49,7 +49,7 @@ function setActivePlanErrors() {
         })
 
         dispatch({
-          type: Actions.SET_ACTIVE_PLAN_ERRORS,
+          type: Actions.PLAN_SET_ACTIVE_PLAN_ERRORS,
           payload: uniqueErrors
         })
       })

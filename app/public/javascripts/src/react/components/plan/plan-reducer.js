@@ -184,7 +184,7 @@ function planReducer (state = defaultState, action) {
     case Actions.PLAN_SET_ACTIVE_PLAN_STATE:
       return setActivePlanState(state, action.payload)
 
-    case Actions.SET_ACTIVE_PLAN_ERRORS:
+    case Actions.PLAN_SET_ACTIVE_PLAN_ERRORS:
       return setActivePlanErrors(state, action.payload)
 
     case Actions.PLAN_SET_DATA_ITEMS:
