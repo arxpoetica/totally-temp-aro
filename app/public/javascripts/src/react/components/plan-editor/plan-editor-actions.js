@@ -971,7 +971,10 @@ function readFeatures (featureIds) {
   }
 }
 
-function selectEditFeaturesById (featureIds) {
+function appendEditFeaturesById (featureIds) {
+  return selectEditFeaturesById (featureIds, true)
+}
+function selectEditFeaturesById (featureIds, append=false) {
   return (dispatch, getState) => {
     // NOTE: this seemingly unnecessary call to `readFeatures` puts the features from service in state
     dispatch(readFeatures(featureIds))
@@ -984,12 +987,17 @@ function selectEditFeaturesById (featureIds) {
             validFeatures.push(typeof featureId === "string" ? featureId : featureId.objectId) 
           }
         })
+        let subnetToSelect = validFeatures[0]
+        if (append) {
+          validFeatures = state.planEditor.selectedEditFeatureIds.concat(validFeatures)
+          validFeatures = [...new Set(validFeatures)] // unique features only
+        }
         batch(() => {
           dispatch({
             type: Actions.PLAN_EDITOR_SET_SELECTED_EDIT_FEATURE_IDS, 
             payload: validFeatures,
           })
-          dispatch(setSelectedSubnetId(validFeatures[0]))
+          dispatch(setSelectedSubnetId(subnetToSelect))
         })
       })
   }
@@ -1688,6 +1696,7 @@ export default {
   setPlanThumbInformation,
   readFeatures,
   selectEditFeaturesById,
+  appendEditFeaturesById,
   deselectEditFeatureById,
   addSubnets,
   setSelectedSubnetId,

@@ -34,12 +34,18 @@
   display: flex;
   align-items: center;
   min-width: 0;
+  font-weight: normal;
 }
 /*
 .plan-navigation .info.no-plus-minus {
   padding-left: 22px;
 }
 */
+
+.plan-nav-alert-list {
+  padding-left: 20px;
+}
+
 .plan-navigation .nonfoldout-row {
   border-bottom: 1px #dddddd dashed;
 }
@@ -179,6 +185,16 @@
   padding: 8px;
   border: 2px solid #49a24a;
 }
+
+.plan-nav-node-name .title {
+  border-bottom: 2px solid rgba(0,0,0,0);
+  cursor: pointer;
+}
+
+.plan-nav-node-name:hover .title, .plan-nav-node-name.selected .title{
+  border-bottom: 2px solid #49a24a;
+}
+
 .plan-editor-thumb h2 { margin: 0 0 10px; }
 .plan-editor-thumb .info {
   display: flex;

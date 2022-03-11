@@ -97,7 +97,8 @@
 .ei-foldout-icon{
   padding-left: 0px;
   padding-right: 4px;
-  align-self: center;
+  align-self: end;
+  padding-bottom: 4px;
 }
 
 .ei-foldout-header-content{
