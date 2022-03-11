@@ -44,7 +44,7 @@ export const constants = Object.freeze({
       key: 'ABANDONED_LOCATION',
       displayName: 'Abandoned Location',
       // FIXME: move to proper location
-      iconUrl: '/svg/alert-panel-location.svg',
+      iconUrl: '/images/map_icons/aro/households_default_alert.png',
     },
     // terminal alerts
     MAX_TERMINAL_HOMES_EXCEEDED: {
@@ -55,7 +55,7 @@ export const constants = Object.freeze({
     MAX_DROP_LENGTH_EXCEEDED: {
       key: 'MAX_DROP_LENGTH_EXCEEDED',
       displayName: 'Drop Cable Length Exceeded',
-      iconUrl: '/svg/alert-panel-location.svg',
+      iconUrl: '/images/map_icons/aro/households_default_alert.png',
     },
     // TODO: is this even a thing?
     // MAX_TERMINAL_DISTANCE_EXCEEDED: {
@@ -106,9 +106,18 @@ export const getIconUrl = (feature, { equipments, constructionAreas, locationAle
     // we have slated at some point to work on all the icons
     // https://www.pivotaltracker.com/story/show/179782874
     // ...when we do, we should also fix this code.
-    iconUrl = iconUrl
-      .split('.').join('_alert.')
-      .split(`/${ARO_CLIENT}/`).join(`/${ARO_CLIENT}/equipment/`)
+    // iconUrl = iconUrl
+    //   .split('.').join('_alert.')
+    //   .split(`/${ARO_CLIENT}/`).join(`/${ARO_CLIENT}/equipment/`)
+    
+    const alertSuffix = '_alert.png' // we've only made .png but ideally they would match the file type
+
+    let dotP = iconUrl.lastIndexOf('.')
+    iconUrl = iconUrl.substring(0, dotP) + alertSuffix
+
+    let lastSlash = iconUrl.lastIndexOf('/')
+    iconUrl = iconUrl.substring(0, lastSlash) + '/equipment/' + iconUrl.substring(lastSlash+1)
+    
   }
   return iconUrl
 }

@@ -107,23 +107,23 @@
 }
 
 .plan-navigation .location {
-  background-image: url('/svg/alert-panel-location.png');
+  background-image: url('/images/map_icons/aro/households_default_alert.png');
 }
 
 .plan-navigation .sm-biz {
-  background-image: url('/svg/alert-panel-small-business.png');
+  background-image: url('/images/map_icons/aro/businesses_small_default_alert.png');
 }
 
 .plan-navigation .md-biz {
-  background-image: url('/svg/alert-panel-medium-business.png');
+  background-image: url('/images/map_icons/aro/businesses_medium_default_alert.png');
 }
 
 .plan-navigation .lg-biz {
-  background-image: url('/svg/alert-panel-large-business.png');
+  background-image: url('/images/map_icons/aro/businesses_large_default_alert.png');
 }
 
 .plan-navigation .tower {
-  background-image: url('/svg/alert-panel-tower.png');
+  background-image: url('/images/map_icons/aro/tower_alert.png');
 }
 
 /* ========================= >>>>> recalculate plan >>>>> */
