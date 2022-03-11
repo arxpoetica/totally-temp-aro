@@ -22,11 +22,6 @@ const PlanEditorDrafts = props => {
   const [objects, setObjects] = useState([])
 
   const mapClickHandler = event => {
-    event.domEvent.stopPropagation()
-
-    // guard against selection if skeleton equipment not displayed
-    if (selectedSubnetId) return
-
     const metersPerPixel = getMetersPerPixel(event.latLng.lat(), googleMaps.getZoom())
     // NOTE: this is a workaround to make sure we're selecting
     // equipment/boundaries that might be piled on top of one another
@@ -38,7 +33,7 @@ const PlanEditorDrafts = props => {
       radius: metersPerPixel * 15,
     })
 
-    const featureIds = []
+    const equipmentIds = []
     for (const object of objects) {
       const { itemId, itemType } = object
       let isInside
@@ -47,13 +42,13 @@ const PlanEditorDrafts = props => {
       } else if (itemType === 'boundary') {
         isInside = google.maps.geometry.poly.containsLocation(event.latLng, object)
       }
-      if (isInside) featureIds.push(itemId)
+      if (isInside) equipmentIds.push(itemId)
     }
 
     selectionCircle.setMap(null)
 
-    const uniqueFeatureIds = [...new Set(featureIds)]
-    selectEditFeaturesById(uniqueFeatureIds)
+    const uniqueEquipmentIds = [...new Set(equipmentIds)]
+    selectEditFeaturesById(uniqueEquipmentIds)
   }
 
   useEffect(() => {
