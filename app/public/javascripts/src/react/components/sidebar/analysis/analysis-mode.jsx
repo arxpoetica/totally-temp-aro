@@ -119,7 +119,7 @@ export class AnalysisMode extends Component {
           </CardHeader>
           <Collapse isOpen={collapseCards === this.analysisModePanels.OUTPUT}>
             {collapseCards === this.analysisModePanels.OUTPUT &&
-              <CardBody style={{padding:'0px'}}>
+              <CardBody style={{padding:'0px', paddingBottom: "15%"}}>
                 <AnalysisErrors />
                 {networkAnalysisType === 'NETWORK_PLAN' &&
                   <div style={{height: '100%'}}>
