@@ -121,3 +121,16 @@ export const getIconUrl = (feature, { equipments, constructionAreas, locationAle
   }
   return iconUrl
 }
+
+/**
+ * Returns the number of meters in a pixel on the screen based on
+ * latitude and zoom. This can be useful for drawing lines, polygons,
+ * or shapes to pixel dimensions at any given zoom level.
+ * See: https://medium.com/techtrument/how-many-miles-are-in-a-pixel-a0baf4611fff
+ * @param {number} latitude
+ * @param {number} zoom
+ * @returns {number} Meters as a measure per pixel
+ */
+export const getMetersPerPixel = (latitude, zoom) => {
+  return 156543.03392 * Math.cos(latitude * Math.PI / 180) / Math.pow(2, zoom)
+}

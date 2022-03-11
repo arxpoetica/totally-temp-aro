@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import PlanEditorActions from './plan-editor-actions'
 import WktUtils from '../../../shared-utils/wkt-utils'
 import PlanEditorSelectors from './plan-editor-selectors'
-import { constants, getIconUrl } from './shared'
+import { constants, getIconUrl, getMetersPerPixel } from './shared'
 
 export class EquipmentMapObjects extends Component {
   constructor(props) {
@@ -92,6 +92,8 @@ export class EquipmentMapObjects extends Component {
       }
     })
     mapObject.addListener('click', event => {
+
+      const metersPerPixel = getMetersPerPixel(event.latLng.lat(), googleMaps.getZoom())
       // NOTE: this is a workaround to make sure we're selecting
       // equipment that might be piled on top of one another
       const selectionCircle = new google.maps.Circle({
@@ -99,8 +101,8 @@ export class EquipmentMapObjects extends Component {
         center: event.latLng,
         // FIXME: this radius is only useful at certain zoom levels.
         // How can we set this correctly based on zoom?
-        radius: 25,
         visible: false,
+        radius: metersPerPixel * 15,
       })
 
       const selectedEquipmentIds = Object.values(this.mapObjects)

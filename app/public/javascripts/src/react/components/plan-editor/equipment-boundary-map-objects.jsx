@@ -160,18 +160,15 @@ export class EquipmentBoundaryMapObjects extends Component {
             this.addMarkerOverlay(event)
           }
         }
-      } else {
-        // This is set up to deselect all vertices if the click is inside the polygon
-        // but not on a vertex
-        this.clearMapObjectOverlay()
       }
     })
 
+    if (this.clickOutListener) {
+      google.maps.event.removeListener(this.clickOutListener)
+    }
     this.clickOutListener = this.props.googleMaps.addListener('click', event => {
-      if (!google.maps.geometry.poly.containsLocation(event.latLng, mapObject) && this.mapObjectOverlay.length > 0) {
-        // Any click that is outside of the polygon will deselect all vertices
-        this.clearMapObjectOverlay()
-      }
+      // Any click that is outside of the polygon will deselect all vertices
+      if (this.mapObjectOverlay.length > 0) this.clearMapObjectOverlay()
     })
     
     this.deleteKeyListener = google.maps.event.addDomListener(document, 'keydown', (e) => {
@@ -296,7 +293,6 @@ const mapDispatchToProps = dispatch => ({
   deleteBoundaryVertices: (mapObjects, vertices, callBack) => {
     dispatch(PlanEditorActions.deleteBoundaryVertices(mapObjects, vertices, callBack))
   },
-  selectBoundary: objectId => dispatch(SelectionActions.setPlanEditorFeatures([objectId])),
 })
 
 const EquipmentBoundaryMapObjectsComponent = connect(mapStateToProps, mapDispatchToProps)(EquipmentBoundaryMapObjects)

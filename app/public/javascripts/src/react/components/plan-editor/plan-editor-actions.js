@@ -1388,6 +1388,14 @@ function setFiberAnnotations (fiberAnnotations, subnetId) {
   }
 }
 
+function leftClickTile (latLng) {
+  return (dispatch) => {
+    dispatch({
+      type: Actions.PLAN_EDITOR_SET_CLICK_LATLNG,
+      payload: [latLng.lat(), latLng.lng(), ],
+    })
+  }
+}
 // --- //
 
 // helper
@@ -1677,6 +1685,7 @@ export default {
   setSelectedFiber,
   setFiberAnnotations,
   getFiberAnnotations,
+  leftClickTile,
   showContextMenuForConstructionAreas,
   deleteConstructionArea,
   subscribeToSocket,
