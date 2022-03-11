@@ -148,7 +148,15 @@ const PlanNavigation = props => {
           )
         }
       })
-      
+      /*
+      if (props.selectedSubnetId == featureId) {
+        childRows.unshift(
+          <div className="info" key={`selected_${featureId}`}>
+            <SubnetDetail></SubnetDetail>
+          </div>
+        )
+      }
+      */
       let featureRow = (
         <>
           <div className="header">
@@ -170,10 +178,6 @@ const PlanNavigation = props => {
           <div>
             {alertElements}
           </div>
-          {props.selectedSubnetId == featureId
-            ? <SubnetDetail></SubnetDetail>
-            : null
-          }
         </>
       )
       if (childRows.length) {
@@ -327,8 +331,8 @@ const PlanNavigation = props => {
   //let faultNode = props.subnets[props.selectedSubnetId].faultTree.rootNode
   //let element = makeRow(props.selectedSubnetId, faultNode).element
   let tree = makeTree(props.drafts)
-  console.log(tree)
-  console.log( props.iconsByType ) 
+  //console.log(tree)
+  //console.log( props.iconsByType ) 
   let element = []
   Object.keys(tree).forEach(id => {
     element.push(makeRow(tree[id]).element)
