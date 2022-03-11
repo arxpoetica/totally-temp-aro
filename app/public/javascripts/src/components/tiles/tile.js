@@ -440,7 +440,6 @@ class TileComponentController {
       const { isShiftPressed } = this.state
 
       // let plan edit do its thing
-      if (displayMode === this.state.displayModes.EDIT_PLAN) {
       if (displayMode === EDIT_PLAN || displayMode === EDIT_RINGS) {
         if (!isShiftPressed) this.leftClickTile(event.latLng)
         return

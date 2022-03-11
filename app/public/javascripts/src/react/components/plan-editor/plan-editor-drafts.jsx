@@ -89,11 +89,12 @@ const PlanEditorDrafts = props => {
       return null
     })}
 
-    {!selectedSubnetId && rootDraft && rootDraft.equipment.map(node => {
+    {rootDraft && rootDraft.equipment.map(node => {
       const { id, point, networkNodeType } = node
       const nodeSynced = drafts[id] && drafts[id].nodeSynced
       if (
         nodeSynced
+        && selectedSubnetId !== id
         && networkNodeType !== 'bulk_distribution_terminal'
         && networkNodeType !== 'multiple_dwelling_unit'
       ) {
