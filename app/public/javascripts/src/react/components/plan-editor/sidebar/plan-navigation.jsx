@@ -25,7 +25,7 @@ const DefaultFaultCounts = {
 }
 
 const PlanNavigation = props => {
-  if (!props.drafts) return null;
+  if (!Object.keys(props.drafts).length) return null;
 
   const [filterForAlerts, setFilterForAlerts] = useState(true)
 
@@ -188,7 +188,7 @@ const PlanNavigation = props => {
       )
       if (childRows.length) {
         payload.element = (
-          <Foldout displayName={featureRow} key={featureId} isOpen={payload.isChildSelected}>
+          <Foldout displayName={featureRow} key={featureId} initIsOpen={payload.isChildSelected}>
             {childRows}
           </Foldout>
         )
