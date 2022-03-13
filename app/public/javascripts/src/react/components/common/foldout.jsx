@@ -16,10 +16,10 @@ class Foldout extends Component {
   componentDidUpdate(prevProps, prevState) {
     // check if initIsOpen updated
     // this is admittedly ugly but react doesn't really have a better way
-    // console.log({prevProps, props: this.props})
-    // console.log(Object.is(prevProps, this.props))
-    // console.log({prevState, state: this.state})
-    // console.log(Object.is(prevState, this.state))
+    console.log({prevProps, props: this.props})
+    console.log(Object.is(prevProps, this.props))
+    console.log({prevState, state: this.state})
+    console.log(Object.is(prevState, this.state))
     
     if (! 'initIsOpen' in this.props) return
     if (this.props.initIsOpen == this.state.isOpen) return
