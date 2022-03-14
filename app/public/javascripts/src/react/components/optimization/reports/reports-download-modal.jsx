@@ -122,14 +122,14 @@ export class ReportsDownloadModal extends Component {
     }
   }
 }
-
+/*
 ReportsDownloadModal.propTypes = {
   planId: PropTypes.number,
   reportsMetaData: PropTypes.array,
   reportTypes: PropTypes.array,
   showReportModal: PropTypes.bool
 }
-
+*/
 const mapStateToProps = state => ({
   planId: state.plan.activePlan.id,
   reportsMetaData: state.optimization.report.reportsMetaData,

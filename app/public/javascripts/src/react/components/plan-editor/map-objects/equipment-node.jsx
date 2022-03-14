@@ -26,7 +26,7 @@ const EquipmentNode = props => {
       // draggable: !feature.locked, // Allow dragging only if feature is not locked
       draggable: false,
       editable: false,
-      opacity: 0.4,
+      opacity: 0.6,
       map: googleMaps,
       zIndex: constants.Z_INDEX_MAP_OBJECT,
       optimized: !ARO_GLOBALS.MABL_TESTING,

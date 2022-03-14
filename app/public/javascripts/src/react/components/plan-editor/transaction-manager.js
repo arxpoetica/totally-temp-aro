@@ -9,7 +9,7 @@ export default class TransactionManager {
   // 3. If we have a transaction for this plan BUT not for the current user
   //    a. Ask if we want to steal the transaction. If yes, steal it. If not, show error message
   // 4. If we have a transaction for this plan and for this user, resume it
-  static async resumeOrCreateTransaction (planId, userId, sessionId) {
+  static async resumeOrCreateTransaction (planId, userId, sessionId, draftExists) {
     try {
       // Get a list of all open transactions in the system
       // (Do NOT send in userId so we get transactions across all users)
@@ -23,9 +23,12 @@ export default class TransactionManager {
         // due to race conditions, network issues, etc.
         return TransactionManager.deleteBadTransactionsAndCreateNew(transactionsForPlan, planId, sessionId)
       } else if (transactionsForPlan.length === 0 || transactionsForUserAndPlan.length === 1) {
-        // A transaction does not exist. Create it...OR...
-        // We have one open transaction for this user and plan combo. Resume it.
-        // NOTE: we still have to fire `POST` to resume
+        // 1. The draft already exists in state.
+        // Resume the already existing transaction.
+        if (draftExists) return { data: transactionsForUserAndPlan[0] }
+        // 2. Somehow we've lost the draft,
+        // most likely from a page refresh
+        // We need to re-send the `POST` to resume
         return AroHttp.post(`/service/plan-transactions?session_id=${sessionId}`, { planId })
       } else if (transactionsForPlan.length === 1) {
         // We have one open transaction for this plan,

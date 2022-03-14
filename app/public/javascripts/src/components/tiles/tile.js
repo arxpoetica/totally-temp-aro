@@ -423,13 +423,11 @@ class TileComponentController {
 
     this.overlayClickListener = this.mapRef.addListener('click', async(event) => {
       const displayMode = this.state.selectedDisplayMode.getValue()
-      if (
-        displayMode === this.state.displayModes.ANALYSIS
-        && (
-          this.rPlanState === rConstants.PLAN_STATE.STARTED
-          || this.rPlanState === rConstants.PLAN_STATE.COMPLETED
-        )
-      ) {
+      const { ANALYSIS, EDIT_PLAN, EDIT_RINGS } = this.state.displayModes
+      const { rPlanState } = this
+      const { STARTED, COMPLETED } = rConstants.PLAN_STATE
+
+      if (displayMode === ANALYSIS && (rPlanState === STARTED || rPlanState === COMPLETED)) {
         return
       }
 
@@ -440,6 +438,12 @@ class TileComponentController {
       }
 
       const { isShiftPressed } = this.state
+
+      // let plan edit do its thing
+      if (displayMode === EDIT_PLAN || displayMode === EDIT_RINGS) {
+        if (!isShiftPressed) this.leftClickTile(event.latLng)
+        return
+      }
 
       try {
         // ToDo: depricate getFilteredFeaturesUnderLatLng switch to this
@@ -817,6 +821,7 @@ class TileComponentController {
       setCursorLocationIds: ids => dispatch(PlanEditorActions.setCursorLocationIds(ids)),
       clearCursorLocationIds: () => dispatch(PlanEditorActions.clearCursorLocationIds()),
       setActiveMapLayers: (value) => dispatch(MapLayerActions.setActiveMapLayers(value)),
+      leftClickTile: (latLng) => dispatch(PlanEditorActions.leftClickTile(latLng)),
     }
   }
 

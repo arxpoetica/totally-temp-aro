@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import Boundary from './map-objects/boundary.jsx'
 import EquipmentNode from './map-objects/equipment-node.jsx'
 import PlanEditorActions from './plan-editor-actions.js'
+import { getMetersPerPixel } from './shared.js'
 
 // TODO: in the future, might have abstract higher order component to wrap state.
 // Basically, the contract is fragile if we want to reuse `Boundary` or
@@ -21,43 +22,33 @@ const PlanEditorDrafts = props => {
   const [objects, setObjects] = useState([])
 
   const mapClickHandler = event => {
-    event.domEvent.stopPropagation()
-
-    // guard against selection if skeleton equipment not displayed
-    if (selectedSubnetId) return
-
-    // NOTE: let's abstract this functionality somewhere, so we can reuse
-    const zoom = googleMaps.getZoom()
-    const latitude = event.latLng.lat()
-    // SEE: https://medium.com/techtrument/how-many-miles-are-in-a-pixel-a0baf4611fff
-    const metersBySinglePixel
-      = 156543.03392 * Math.cos(latitude * Math.PI / 180) / Math.pow(2, zoom)
+    const metersPerPixel = getMetersPerPixel(event.latLng.lat(), googleMaps.getZoom())
     // NOTE: this is a workaround to make sure we're selecting
     // equipment/boundaries that might be piled on top of one another
-    const circle = new google.maps.Circle({
+    const selectionCircle = new google.maps.Circle({
       map: googleMaps,
       center: event.latLng,
       // radius adjusted according to zoom level
-      radius: metersBySinglePixel * 20,
       visible: false,
+      radius: metersPerPixel * 15,
     })
 
-    const featureIds = []
+    const equipmentIds = []
     for (const object of objects) {
       const { itemId, itemType } = object
       let isInside
       if (itemType === 'equipment') {
-        isInside = circle.getBounds().contains(object.getPosition())
+        isInside = selectionCircle.getBounds().contains(object.getPosition())
       } else if (itemType === 'boundary') {
         isInside = google.maps.geometry.poly.containsLocation(event.latLng, object)
       }
-      if (isInside) featureIds.push(itemId)
+      if (isInside) equipmentIds.push(itemId)
     }
 
-    circle.setMap(null)
+    selectionCircle.setMap(null)
 
-    const uniqueFeatureIds = [...new Set(featureIds)]
-    selectEditFeaturesById(uniqueFeatureIds)
+    const uniqueEquipmentIds = [...new Set(equipmentIds)]
+    selectEditFeaturesById(uniqueEquipmentIds)
   }
 
   useEffect(() => {
@@ -70,28 +61,52 @@ const PlanEditorDrafts = props => {
     }
   }, [objects])
 
-  return Object.values(drafts).map(draft =>
-    <React.Fragment key={draft.subnetId}>
-      {selectedSubnetId !== draft.subnetId &&
-        <Boundary
-          id={draft.subnetId}
-          polygon={draft.boundary.polygon}
-          // using functional approach to avoid race conditions
-          onLoad={object => setObjects(state => [...state, object])}
-        />
+  const draftsArray = Object.values(drafts)
+  const rootDraft = draftsArray.find(draft => !draft.parentSubnetId)
+
+  return <>
+    {draftsArray.map(draft => {
+      const { subnetId, subnetBoundary, nodeSynced } = draft
+      const options = { strokeOpacity: nodeSynced ? 1 : 0.5 }
+
+      if (selectedSubnetId !== subnetId) {
+        return (
+          <Boundary
+            key={subnetId}
+            id={subnetId}
+            polygon={subnetBoundary.polygon}
+            options={options}
+            // using functional approach to avoid race conditions
+            onLoad={object => setObjects(state => [...state, object])}
+          />
+        )
       }
-      {!selectedSubnetId && draft.equipment.map(node =>
-        <EquipmentNode
-          key={node.id}
-          id={node.id}
-          point={node.point}
-          iconUrl={equipments[node.networkNodeType].iconUrl}
-          // using functional approach to avoid race conditions
-          onLoad={object => setObjects(state => [...state, object])}
-        />
-      )}
-    </React.Fragment>
-  )
+      return null
+    })}
+
+    {rootDraft && rootDraft.equipment.map(node => {
+      const { id, point, networkNodeType } = node
+      const nodeSynced = drafts[id] && drafts[id].nodeSynced
+      if (
+        nodeSynced
+        && selectedSubnetId !== id
+        && networkNodeType !== 'bulk_distribution_terminal'
+        && networkNodeType !== 'multiple_dwelling_unit'
+      ) {
+        return (
+          <EquipmentNode
+            key={id}
+            id={id}
+            point={point}
+            iconUrl={equipments[networkNodeType].iconUrl}
+            // using functional approach to avoid race conditions
+            onLoad={object => setObjects(state => [...state, object])}
+          />
+        )
+      }
+      return null
+    })}
+  </>
 }
 
 const mapStateToProps = state => ({
