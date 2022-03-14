@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { connect } from 'react-redux'
 import { FaultCode } from './plan-navigation.jsx'
 import Foldout from '../../common/foldout.jsx'
+import MapLayerSelectors from '../../map-layers/map-layer-selectors'
 
 
 const SubnetDetail = props => {
@@ -25,7 +26,18 @@ const SubnetDetail = props => {
     let element = null
     let alertElements = []
     const featureId = faultNode.faultReference.objectId
-    const iconURL = ''
+    // two problems here
+    //  A: We get all our info from fault tree 
+    //  so this doesn't really work when showing the "ALL" network under a hub
+    //  worse yet, however we show the network under a hub if we use the same function for a CO 
+    //  we're going to get duplicate info with the plan nav list of hubs
+    //
+    //  B: there is a server side bug where all entries in subnetLocationsById show networkNodeType: as the parent, we need the location type
+    let iconURL = props.iconsByType._alert['household']
+    if (props.subnetFeatures[featureId]) {
+      let featureType = props.subnetFeatures[featureId].feature.networkNodeType
+      iconURL = props.iconsByType._alert[featureType]
+    }
     faultNode.assignedFaultCodes.forEach(fCode => {
       alertElements.push(
         <div className="info" key={`${featureId}_${fCode}`}>
@@ -78,7 +90,7 @@ const SubnetDetail = props => {
   }
 
   let element = makeFaultRows(props.subnets[props.selectedSubnetId].faultTree)
-
+  console.log(props.iconsByType)
   return (
     <div>
       {element}
@@ -91,6 +103,7 @@ const mapStateToProps = state => {
     selectedSubnetId: state.planEditor.selectedSubnetId,
     subnets: state.planEditor.subnets, 
     subnetFeatures: state.planEditor.subnetFeatures,
+    iconsByType: MapLayerSelectors.getIconsByType(state),
   }
 }
 

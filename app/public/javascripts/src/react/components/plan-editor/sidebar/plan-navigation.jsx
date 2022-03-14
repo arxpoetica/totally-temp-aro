@@ -346,6 +346,7 @@ const PlanNavigation = props => {
 
   return (
     <>
+      {/*  will bring this back in when we figure out the "all" listing 
       <div>
         <div className='btn-group btn-group-sm' style={{ marginLeft: '5px' }}>
           <button className={'btn btn-sm ' + (filterForAlerts ? 'btn-primary' : 'btn-light')}
@@ -361,6 +362,7 @@ const PlanNavigation = props => {
           </button>
         </div>
       </div>
+      */}
       <div className='plan-navigation slim-line-headers'>{element}</div>
     </>
   )
