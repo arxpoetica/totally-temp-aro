@@ -48,6 +48,7 @@ const PlanEditorDrafts = props => {
     selectionCircle.setMap(null)
 
     const uniqueEquipmentIds = [...new Set(equipmentIds)]
+    uniqueEquipmentIds.sort(id => drafts[id].nodeType === 'central_office' ? 1 : -1)
     selectEditFeaturesById(uniqueEquipmentIds)
   }
 

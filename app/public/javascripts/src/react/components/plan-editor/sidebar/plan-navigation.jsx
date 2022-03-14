@@ -4,6 +4,7 @@ import Foldout from '../../common/foldout.jsx'
 import SubnetDetail from './subnet-detail.jsx'
 //import { getIconUrl } from '../shared'
 import MapLayerSelectors from '../../../components/map-layers/map-layer-selectors'
+import PlanEditorActions from '../plan-editor-actions'
 
 export const FaultCode = { // future: may add unique icons for each
 	UNDEFINED: "Unknown",
@@ -24,12 +25,13 @@ const DefaultFaultCounts = {
 }
 
 const PlanNavigation = props => {
-  if (!props.drafts) return null;
+  if (!Object.keys(props.drafts).length) return null;
 
-  const [filterForAlerts, setFilterForAlerts] = useState(true)
+  const [filterForAlerts, setFilterForAlerts] = useState(false)
 
-  function getEquipmentIcon (networkNodeType, ) {
-
+  function onNodeClick (event, featureId) {
+    event.stopPropagation()
+    props.appendEditFeaturesById([featureId])
   }
 
   function makeListNode () {
@@ -96,9 +98,12 @@ const PlanNavigation = props => {
   }
 
   function makeRow (node) {
+    let featureId = node.draft.subnetId
+    const isSelected = props.selectedSubnetId == featureId
     let payload = {
       element: null, 
       isLeaf: true,
+      isChildSelected: isSelected,
       faultCounts: JSON.parse(JSON.stringify(DefaultFaultCounts)),
     }
     // we need alert count from leaves up so we build the children first 
@@ -107,17 +112,17 @@ const PlanNavigation = props => {
       let childNode = node.children[childId]
       let childRow = makeRow(childNode)
       if (childRow.element) {
-        if (!childRow.isLeaf) {
-          childRows.unshift(childRow.element) // put the fold outs at the top
-        } else {
-          childRows.push(childRow.element) // then the leaf nodes
-        }
+        // if (!childRow.isLeaf) {
+        //   childRows.unshift(childRow.element) // put the fold outs at the top
+        // } else {
+        //   childRows.push(childRow.element) // then the leaf nodes
+        // }
+        childRows.push(childRow.element)
         // merge alerts childRow.faultCounts
         payload.faultCounts = mergeFaultCounts(payload.faultCounts, childRow.faultCounts)
+        payload.isChildSelected = payload.isChildSelected || childRow.isChildSelected
       }
     })
-    //let nodeType = node.draft.nodeType
-    let featureId = node.draft.subnetId
     // Do we want to include node faults in the total count?
     let nodeFaultCounts = JSON.parse(JSON.stringify(DefaultFaultCounts))
     if (node.draft.faultTreeSummary && node.draft.faultTreeSummary.faultCounts) {
@@ -137,7 +142,6 @@ const PlanNavigation = props => {
     //  we filter by alert 
     // filter - if this is an element we don't want don't bother building the row and just return a null element
     if (!filterForAlerts || faultSum){
-
       let alertElements = []
       Object.keys(nodeFaultCounts).forEach(fCode => {
         if (nodeFaultCounts[fCode]) {
@@ -148,19 +152,21 @@ const PlanNavigation = props => {
           )
         }
       })
-      /*
-      if (props.selectedSubnetId == featureId) {
+      
+      if (isSelected) {
         childRows.unshift(
           <div className="info" key={`selected_${featureId}`}>
             <SubnetDetail></SubnetDetail>
           </div>
         )
       }
-      */
+      
       let featureRow = (
         <>
           <div className="header">
-            <div className='info'>
+            <div className={'info plan-nav-node-name' + (isSelected ? ' selected' : '')}
+              onClick={event => onNodeClick(event, featureId)}
+            >
               <img 
                 style={{'width': '20px'}}
                 src={iconURL} 
@@ -175,14 +181,14 @@ const PlanNavigation = props => {
               : null
             }
           </div>
-          <div>
+          <div className="plan-nav-alert-list">
             {alertElements}
           </div>
         </>
       )
       if (childRows.length) {
         payload.element = (
-          <Foldout displayName={featureRow} key={featureId}>
+          <Foldout displayName={featureRow} key={featureId} initIsOpen={payload.isChildSelected}>
             {childRows}
           </Foldout>
         )
@@ -192,7 +198,7 @@ const PlanNavigation = props => {
         payload.element = <div className="nonfoldout-row" key={featureId}>{featureRow}</div>
       }
     }
-
+    
     return payload
     //  we make a fold out if children 
     //  else we make a flat header 
@@ -340,6 +346,7 @@ const PlanNavigation = props => {
 
   return (
     <>
+      {/* will bring this back in when we figure out the "all" listing  */}
       <div>
         <div className='btn-group btn-group-sm' style={{ marginLeft: '5px' }}>
           <button className={'btn btn-sm ' + (filterForAlerts ? 'btn-primary' : 'btn-light')}
@@ -355,6 +362,7 @@ const PlanNavigation = props => {
           </button>
         </div>
       </div>
+     
       <div className='plan-navigation slim-line-headers'>{element}</div>
     </>
   )
@@ -370,6 +378,8 @@ const mapStateToProps = state => {
   }
 }
 
-const mapDispatchToProps = dispatch => ({})
+const mapDispatchToProps = dispatch => ({
+  appendEditFeaturesById: ids => dispatch(PlanEditorActions.appendEditFeaturesById(ids)),
+})
 
 export default connect(mapStateToProps, mapDispatchToProps)(PlanNavigation)
