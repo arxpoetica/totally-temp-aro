@@ -85,7 +85,7 @@ const SubnetDetail = props => {
       //payload.isLeaf = false
     } else {
       // no children, no need for a fold out
-      element = <div className="nonfoldout-row" key={featureId}>Hellow world{featureRow}</div>
+      element = <div className="nonfoldout-row" key={featureId}>{featureRow}</div>
     }
       
     return element
