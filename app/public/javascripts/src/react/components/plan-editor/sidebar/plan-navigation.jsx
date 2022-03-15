@@ -5,6 +5,8 @@ import SubnetDetail from './subnet-detail.jsx'
 //import { getIconUrl } from '../shared'
 import MapLayerSelectors from '../../../components/map-layers/map-layer-selectors'
 import PlanEditorActions from '../plan-editor-actions'
+import NavigationMarker from './navigation-marker.jsx'
+import WktUtils from '../../../../shared-utils/wkt-utils.js'
 
 export const FaultCode = { // future: may add unique icons for each
 	UNDEFINED: "Unknown",
@@ -25,13 +27,26 @@ const DefaultFaultCounts = {
 }
 
 const PlanNavigation = props => {
-  if (!Object.keys(props.drafts).length) return null;
+  if (!Object.keys(props.drafts).length) return null
+
+  const { map } = props
 
   const [filterForAlerts, setFilterForAlerts] = useState(false)
+  const [hoverPosition, setHoverPosition] = useState(null)
+
+  function getHoverPosition(featureId) {
+    // TODO: we need a better way of grabbing the central office
+    const rootDraft = Object
+      .values(props.drafts)
+      .find(draft => !draft.parentSubnetId)
+    const node = rootDraft.equipment.find(node => node.id === featureId)
+    return WktUtils.getGoogleMapLatLngFromWKTPoint(node.point)
+  }
 
   function onNodeClick (event, featureId) {
     event.stopPropagation()
     props.appendEditFeaturesById([featureId])
+    map.setCenter(getHoverPosition(featureId))
   }
 
   function makeListNode () {
@@ -163,8 +178,14 @@ const PlanNavigation = props => {
 
       let featureRow = (
         <>
-          <div className="header">
-            <div className={'info plan-nav-node-name' + (isSelected ? ' selected' : '')}
+          {/* {console.log(props.drafts[featureId])} */}
+          <div
+            className="header"
+            onMouseEnter={() => setHoverPosition(getHoverPosition(featureId))}
+            onMouseLeave={() => setHoverPosition(null)}
+          >
+            <div
+              className={'info plan-nav-node-name' + (isSelected ? ' selected' : '')}
               onClick={event => onNodeClick(event, featureId)}
             >
               <img 
@@ -210,11 +231,7 @@ const PlanNavigation = props => {
     //  if this is the selected subnet we include SubnetDetail 
   }
 
-  //let faultNode = props.subnets[props.selectedSubnetId].faultTree.rootNode
-  //let element = makeRow(props.selectedSubnetId, faultNode).element
   let tree = makeTree(props.drafts)
-  //console.log(tree)
-  //console.log( props.iconsByType ) 
   let element = []
   Object.keys(tree).forEach(id => {
     element.push(makeRow(tree[id]).element)
@@ -222,7 +239,6 @@ const PlanNavigation = props => {
 
   return (
     <>
-      {/* will bring this back in when we figure out the "all" listing  */}
       <div>
         <div className='btn-group btn-group-sm' style={{ marginLeft: '5px' }}>
           <button className={'btn btn-sm ' + (filterForAlerts ? 'btn-primary' : 'btn-light')}
@@ -238,8 +254,8 @@ const PlanNavigation = props => {
           </button>
         </div>
       </div>
-     
       <div className='plan-navigation slim-line-headers'>{element}</div>
+      <NavigationMarker isHover={!!hoverPosition} position={hoverPosition} />
     </>
   )
 }
@@ -251,6 +267,7 @@ const mapStateToProps = state => {
     subnetFeatures: state.planEditor.subnetFeatures,
     drafts: state.planEditor.drafts,
     iconsByType: MapLayerSelectors.getIconsByType(state),
+    map: state.map.googleMaps,
   }
 }
 
