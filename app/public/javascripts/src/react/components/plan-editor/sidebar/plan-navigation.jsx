@@ -160,7 +160,7 @@ const PlanNavigation = props => {
           </div>
         )
       }
-      
+
       let featureRow = (
         <>
           <div className="header">
@@ -171,7 +171,11 @@ const PlanNavigation = props => {
                 style={{'width': '20px'}}
                 src={iconURL} 
               />
-              <h2 className="title">{featureId}</h2>
+              <h2 className="title">
+                {
+                  props.drafts[featureId].nodeType.replaceAll("_", " ")
+                }
+              </h2>
             </div>
             {faultSum 
               ? <div className="defect-info">
@@ -244,7 +248,7 @@ const mapStateToProps = state => {
   return {
     selectedSubnetId: state.planEditor.selectedSubnetId,
     //subnets: state.planEditor.subnets, use only in child
-    //subnetFeatures: state.planEditor.subnetFeatures,
+    subnetFeatures: state.planEditor.subnetFeatures,
     drafts: state.planEditor.drafts,
     iconsByType: MapLayerSelectors.getIconsByType(state),
   }

@@ -63,6 +63,7 @@
   font: 14px var(--font);
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-transform: capitalize;
 }
 .plan-navigation .defect-info {
   display: flex;
