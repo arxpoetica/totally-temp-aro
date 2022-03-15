@@ -24,11 +24,12 @@ const DefaultFaultCounts = {
   "EQUIPMENT_CAPACITY": 0,
 }
 
+const equipmentIndex = {};
+
 const PlanNavigation = props => {
   if (!Object.keys(props.drafts).length) return null;
 
   const [filterForAlerts, setFilterForAlerts] = useState(false)
-
   function onNodeClick (event, featureId) {
     event.stopPropagation()
     props.appendEditFeaturesById([featureId])
@@ -160,7 +161,18 @@ const PlanNavigation = props => {
           </div>
         )
       }
-
+      // Index for the default named equipments for user's sake
+      // Have checks for if it already exists because rerenders cause the count
+      // to go in to the thousands.
+      const nodeType = props.drafts[featureId].nodeType
+      if(equipmentIndex[nodeType] && !equipmentIndex[nodeType][featureId]) {
+        equipmentIndex[nodeType].total += 1
+        equipmentIndex[nodeType][featureId] = equipmentIndex[nodeType].total
+      } else {
+        equipmentIndex[nodeType] = { total: 1 }
+        equipmentIndex[nodeType][featureId] = 1
+      }
+      
       let featureRow = (
         <>
           <div className="header">
@@ -172,9 +184,7 @@ const PlanNavigation = props => {
                 src={iconURL} 
               />
               <h2 className="title">
-                {
-                  props.drafts[featureId].nodeType.replaceAll("_", " ")
-                }
+                { nodeType.replaceAll("_", " ") } #{ equipmentIndex[nodeType][featureId] }
               </h2>
             </div>
             {faultSum 

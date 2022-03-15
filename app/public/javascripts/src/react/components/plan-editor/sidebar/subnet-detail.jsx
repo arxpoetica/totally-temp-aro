@@ -4,6 +4,7 @@ import { FaultCode } from './plan-navigation.jsx'
 import Foldout from '../../common/foldout.jsx'
 import MapLayerSelectors from '../../map-layers/map-layer-selectors'
 
+const equipmentIndex = {};
 
 const SubnetDetail = props => {
   function disableRows() {
@@ -70,6 +71,20 @@ const SubnetDetail = props => {
       alertCount = countDefects(faultNode)
     }
 
+    // Index for the default named equipments for user's sake
+    // Have checks for if it already exists because rerenders cause the count
+    // to go in to the thousands.
+    const nodeType = props.subnetFeatures[featureId]
+      ? props.subnetFeatures[featureId].feature.networkNodeType
+      : "location"
+    if(equipmentIndex[nodeType] && !equipmentIndex[nodeType][featureId]) {
+      equipmentIndex[nodeType].total += 1
+      equipmentIndex[nodeType][featureId] = equipmentIndex[nodeType].total
+    } else {
+      equipmentIndex[nodeType] = { total: 1 }
+      equipmentIndex[nodeType][featureId] = 1
+    }
+
     let featureRow = (
       <>
         <div className="header">
@@ -79,11 +94,7 @@ const SubnetDetail = props => {
               src={iconURL} 
             />
             <h2 className="title">
-              {
-                props.subnetFeatures[featureId]
-                  ? props.subnetFeatures[featureId].feature.networkNodeType.replaceAll("_", " ")
-                  : "Location"
-              }
+              { nodeType.replaceAll("_", " ") } #{ equipmentIndex[nodeType][featureId] }
             </h2>
           </div>
           {alertCount ? (
