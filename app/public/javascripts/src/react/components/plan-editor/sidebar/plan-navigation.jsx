@@ -5,6 +5,7 @@ import SubnetDetail from './subnet-detail.jsx'
 //import { getIconUrl } from '../shared'
 import MapLayerSelectors from '../../../components/map-layers/map-layer-selectors'
 import PlanEditorActions from '../plan-editor-actions'
+import PlanEditorSelectors from '../plan-editor-selectors'
 import NavigationMarker from './navigation-marker.jsx'
 import WktUtils from '../../../../shared-utils/wkt-utils.js'
 
@@ -31,24 +32,18 @@ const equipmentIndex = {};
 const PlanNavigation = props => {
   if (!Object.keys(props.drafts).length) return null
 
-  const { map } = props
-
   const [filterForAlerts, setFilterForAlerts] = useState(false)
   const [hoverPosition, setHoverPosition] = useState(null)
 
   function getHoverPosition(featureId) {
-    // TODO: we need a better way of grabbing the central office
-    const rootDraft = Object
-      .values(props.drafts)
-      .find(draft => !draft.parentSubnetId)
-    const node = rootDraft.equipment.find(node => node.id === featureId)
+    const node = props.rootDraft.equipment.find(node => node.id === featureId)
     return WktUtils.getGoogleMapLatLngFromWKTPoint(node.point)
   }
 
   function onNodeClick (event, featureId) {
     event.stopPropagation()
     props.appendEditFeaturesById([featureId])
-    map.setCenter(getHoverPosition(featureId))
+    props.map.setCenter(getHoverPosition(featureId))
   }
 
   function makeListNode () {
@@ -274,9 +269,9 @@ const PlanNavigation = props => {
 const mapStateToProps = state => {
   return {
     selectedSubnetId: state.planEditor.selectedSubnetId,
-    //subnets: state.planEditor.subnets, use only in child
     subnetFeatures: state.planEditor.subnetFeatures,
     drafts: state.planEditor.drafts,
+    rootDraft: PlanEditorSelectors.getRootDraft(state),
     iconsByType: MapLayerSelectors.getIconsByType(state),
     map: state.map.googleMaps,
   }

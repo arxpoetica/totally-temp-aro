@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import Boundary from './map-objects/boundary.jsx'
 import EquipmentNode from './map-objects/equipment-node.jsx'
-import PlanEditorActions from './plan-editor-actions.js'
-import { getMetersPerPixel } from './shared.js'
+import PlanEditorActions from './plan-editor-actions'
+import PlanEditorSelectors from './plan-editor-selectors'
+import { getMetersPerPixel } from './shared'
 
 // TODO: in the future, might have abstract higher order component to wrap state.
 // Basically, the contract is fragile if we want to reuse `Boundary` or
@@ -14,11 +15,13 @@ const PlanEditorDrafts = props => {
 
   const {
     drafts,
+    rootDraft,
     googleMaps,
     selectedSubnetId,
     selectEditFeaturesById,
     equipments,
   } = props
+
   const [objects, setObjects] = useState([])
 
   const mapClickHandler = event => {
@@ -63,7 +66,6 @@ const PlanEditorDrafts = props => {
   }, [objects])
 
   const draftsArray = Object.values(drafts)
-  const rootDraft = draftsArray.find(draft => !draft.parentSubnetId)
 
   return <>
     {draftsArray.map(draft => {
@@ -112,6 +114,7 @@ const PlanEditorDrafts = props => {
 
 const mapStateToProps = state => ({
   drafts: state.planEditor.drafts,
+  rootDraft: PlanEditorSelectors.getRootDraft(state),
   googleMaps: state.map.googleMaps,
   selectedSubnetId: state.planEditor.selectedSubnetId,
   equipments: state.mapLayers.networkEquipment.equipments,
