@@ -63,13 +63,13 @@ const SubnetDetail = props => {
             />
             <h2 className="title">{featureId}</h2>
           </div>
-          {payload.alertCount 
-            ? <div className="defect-info">
-                <h3 className="defect-title">{payload.alertCount}</h3>
-                <div className="svg warning"></div>
-              </div>
-            : null
-          }
+          {faultNode.assignedFaultCodes.length && (
+            <div className="defect-info">
+              <h3 className="defect-title">{faultNode.assignedFaultCodes.length}</h3>
+              <div className="svg warning"></div>
+            </div>
+          )}
+          
         </div>
         <div className="info">
           {alertElements}
