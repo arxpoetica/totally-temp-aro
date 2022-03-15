@@ -24,6 +24,17 @@ const SubnetDetail = props => {
     return elements
   }
 
+  function countDefects(node, alertCount = 0) {
+    if (node.childNodes.length === 0) {
+      return node.assignedFaultCodes.length
+    }
+    node.childNodes.forEach((childNode) => {
+      alertCount += countDefects(childNode, alertCount)
+    })
+
+    return alertCount;
+  }
+
   function makeFaultRow (faultNode) {
     let element = null
     let alertElements = []
@@ -53,6 +64,12 @@ const SubnetDetail = props => {
       rows.push(makeFaultRow(childNode))
     })
 
+    let alertCount = faultNode.assignedFaultCodes.length;
+    if (alertCount === 0 && faultNode.childNodes.length > 0) {
+      // Handle nested subnets not in the draft skeleton
+      alertCount = countDefects(faultNode)
+    }
+
     let featureRow = (
       <>
         <div className="header">
@@ -61,15 +78,20 @@ const SubnetDetail = props => {
               style={{'width': '20px'}}
               src={iconURL} 
             />
-            <h2 className="title">{featureId}</h2>
+            <h2 className="title">
+              {
+                props.subnetFeatures[featureId]
+                  ? props.subnetFeatures[featureId].feature.networkNodeType.replaceAll("_", " ")
+                  : "Location"
+              }
+            </h2>
           </div>
-          {faultNode.assignedFaultCodes.length && (
+          {alertCount ? (
             <div className="defect-info">
-              <h3 className="defect-title">{faultNode.assignedFaultCodes.length}</h3>
+              <h3 className="defect-title">{alertCount}</h3>
               <div className="svg warning"></div>
             </div>
-          )}
-          
+          ) : null}
         </div>
         <div className="info">
           {alertElements}

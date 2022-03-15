@@ -191,6 +191,7 @@
 .plan-nav-node-name .title {
   border-bottom: 2px solid rgba(0,0,0,0);
   cursor: pointer;
+  text-transform: capitalize;
 }
 
 .plan-nav-node-name:hover .title, .plan-nav-node-name.selected .title{
