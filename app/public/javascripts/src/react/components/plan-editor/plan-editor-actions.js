@@ -143,7 +143,7 @@ function subscribeToSocket() {
 
       const unsubscriber = SocketManager.subscribe('SUBNET_DATA', rawData => {
         const data = JSON.parse(utf8decoder.decode(rawData.content))
-        console.log({ name: data.subnetNodeUpdateType, SUBNET_DATA: data, properties: rawData.properties })
+        // console.log({ name: data.subnetNodeUpdateType, SUBNET_DATA: data, properties: rawData.properties })
 
         // asynchronous set up of skeleton from socket data
         switch (data.subnetNodeUpdateType) {

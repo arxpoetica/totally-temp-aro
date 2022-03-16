@@ -3,15 +3,28 @@ import { connect } from 'react-redux'
 import { FaultCode } from './plan-navigation.jsx'
 import Foldout from '../../common/foldout.jsx'
 import MapLayerSelectors from '../../map-layers/map-layer-selectors'
+import PlanEditorSelectors from '../plan-editor-selectors'
+import NavigationMarker from './navigation-marker.jsx'
+import WktUtils from '../../../../shared-utils/wkt-utils.js'
 
+const equipmentIndex = {};
 
 const SubnetDetail = props => {
-  if (!props.selectedSubnetId 
-    || !props.subnets
-    || !props.subnets[props.selectedSubnetId] // meaning we will not show this detail if the selected node is a Terminal or Location
-    || !props.subnets[props.selectedSubnetId].faultTree.rootNode.childNodes.length
-  ) return null
-  
+  const [hoverPosition, setHoverPosition] = useState(null)
+
+  function getHoverPosition(featureId) {
+    const { point } = props.locationAlerts[featureId]
+    return { lat: point.latitude, lng: point.longitude }
+  }
+
+  function disableRows() {
+    return (!props.selectedSubnetId 
+      || !props.subnets
+      || !props.subnets[props.selectedSubnetId] // meaning we will not show this detail if the selected node is a Terminal or Location
+      || !props.subnets[props.selectedSubnetId].faultTree.rootNode.childNodes.length
+    )
+  }
+
   function makeFaultRows (faultTree) {
     let elements = []
     // planEditor.subnets["6a98a2e6-6785-41cd-8700-a2c9109f1ceb"].faultTree.rootNode.childNodes[0].childNodes
@@ -20,6 +33,17 @@ const SubnetDetail = props => {
     })
 
     return elements
+  }
+
+  function countDefects(node, alertCount = 0) {
+    if (node.childNodes.length === 0) {
+      return node.assignedFaultCodes.length
+    }
+    node.childNodes.forEach((childNode) => {
+      alertCount += countDefects(childNode, alertCount)
+    })
+
+    return alertCount;
   }
 
   function makeFaultRow (faultNode) {
@@ -51,23 +75,49 @@ const SubnetDetail = props => {
       rows.push(makeFaultRow(childNode))
     })
 
+    let alertCount = faultNode.assignedFaultCodes.length;
+    if (alertCount === 0 && faultNode.childNodes.length > 0) {
+      // Handle nested subnets not in the draft skeleton
+      alertCount = countDefects(faultNode)
+    }
+
+    // Index for the default named equipments for user's sake
+    // Have checks for if it already exists because rerenders cause the count
+    // to go in to the thousands.
+    const nodeType = props.subnetFeatures[featureId]
+      ? props.subnetFeatures[featureId].feature.networkNodeType
+      : "location"
+    if(equipmentIndex[nodeType] && !equipmentIndex[nodeType][featureId]) {
+      equipmentIndex[nodeType].total += 1
+      equipmentIndex[nodeType][featureId] = equipmentIndex[nodeType].total
+    } else {
+      equipmentIndex[nodeType] = { total: 1 }
+      equipmentIndex[nodeType][featureId] = 1
+    }
+
     let featureRow = (
       <>
         <div className="header">
-          <div className='info'>
+          <div
+            className="info"
+            onMouseEnter={() => setHoverPosition(getHoverPosition(featureId))}
+            onMouseLeave={() => setHoverPosition(null)}
+            onClick={() => props.map.setCenter(getHoverPosition(featureId))}
+          >
             <img 
-              style={{'width': '20px'}}
+              style={{ 'width': '20px' }}
               src={iconURL} 
             />
-            <h2 className="title">{featureId}</h2>
+            <h2 className="title">
+              { nodeType.replaceAll("_", " ") } #{ equipmentIndex[nodeType][featureId] }
+            </h2>
           </div>
-          {/*payload.alertCount 
-            ? <div className="defect-info">
-                <h3 className="defect-title">{payload.alertCount}</h3>
-                <div className="svg warning"></div>
-              </div>
-            : null
-          */}
+          {alertCount ? (
+            <div className="defect-info">
+              <h3 className="defect-title">{alertCount}</h3>
+              <div className="svg warning"></div>
+            </div>
+          ) : null}
         </div>
         <div className="info">
           {alertElements}
@@ -89,12 +139,11 @@ const SubnetDetail = props => {
     return element
   }
 
-  let element = makeFaultRows(props.subnets[props.selectedSubnetId].faultTree)
-  console.log(props.iconsByType)
   return (
-    <div>
-      {element}
-    </div>
+    <>
+      {!disableRows() && makeFaultRows(props.subnets[props.selectedSubnetId].faultTree)}
+      <NavigationMarker isHover={!!hoverPosition} position={hoverPosition} />
+    </>
   )
 }
 
@@ -103,7 +152,10 @@ const mapStateToProps = state => {
     selectedSubnetId: state.planEditor.selectedSubnetId,
     subnets: state.planEditor.subnets, 
     subnetFeatures: state.planEditor.subnetFeatures,
+    rootDraft: PlanEditorSelectors.getRootDraft(state),
+    locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(state),
     iconsByType: MapLayerSelectors.getIconsByType(state),
+    map: state.map.googleMaps,
   }
 }
 

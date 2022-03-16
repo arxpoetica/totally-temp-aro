@@ -17,6 +17,11 @@ const getBoundaryDebounceBySubnetId = state => state.planEditor.boundaryDebounce
 const getCursorLocationIds = state => state.planEditor.cursorLocationIds
 const getPlanThumbInformation = state => state.planEditor.getPlanThumbInformation
 
+const getDrafts = state => state.planEditor.drafts
+const getRootDraft = createSelector([getDrafts], (drafts) => {
+  return Object.values(drafts).find(draft => !draft.parentSubnetId)
+})
+
 const getSelectedPlanThumbInformation = createSelector(
   [getSelectedSubnet, getPlanThumbInformation],
   (selectedSubnet, planThumbInformation) => {
@@ -334,11 +339,12 @@ const PlanEditorSelectors = Object.freeze({
   getAlertsForSubnetTree,
   locationWarnImgByType,
   getRootSubnet,
+  getRootDraft,
   getSelectedSubnetLocations,
   getCursorLocations,
   getLocationCounts,
   getSubnetFeatures,
-  getSelectedPlanThumbInformation
+  getSelectedPlanThumbInformation,
 })
 
 export default PlanEditorSelectors

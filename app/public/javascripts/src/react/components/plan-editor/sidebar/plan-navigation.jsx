@@ -5,6 +5,9 @@ import SubnetDetail from './subnet-detail.jsx'
 //import { getIconUrl } from '../shared'
 import MapLayerSelectors from '../../../components/map-layers/map-layer-selectors'
 import PlanEditorActions from '../plan-editor-actions'
+import PlanEditorSelectors from '../plan-editor-selectors'
+import NavigationMarker from './navigation-marker.jsx'
+import WktUtils from '../../../../shared-utils/wkt-utils.js'
 
 export const FaultCode = { // future: may add unique icons for each
 	UNDEFINED: "Unknown",
@@ -24,14 +27,23 @@ const DefaultFaultCounts = {
   "EQUIPMENT_CAPACITY": 0,
 }
 
+const equipmentIndex = {};
+
 const PlanNavigation = props => {
-  if (!Object.keys(props.drafts).length) return null;
+  if (!Object.keys(props.drafts).length) return null
 
   const [filterForAlerts, setFilterForAlerts] = useState(false)
+  const [hoverPosition, setHoverPosition] = useState(null)
+
+  function getHoverPosition(featureId) {
+    const node = props.rootDraft.equipment.find(node => node.id === featureId)
+    return WktUtils.getGoogleMapLatLngFromWKTPoint(node.point)
+  }
 
   function onNodeClick (event, featureId) {
     event.stopPropagation()
     props.appendEditFeaturesById([featureId])
+    props.map.setCenter(getHoverPosition(featureId))
   }
 
   function makeListNode () {
@@ -160,18 +172,35 @@ const PlanNavigation = props => {
           </div>
         )
       }
+      // Index for the default named equipments for user's sake
+      // Have checks for if it already exists because rerenders cause the count
+      // to go in to the thousands.
+      const nodeType = props.drafts[featureId].nodeType
+      if(equipmentIndex[nodeType] && !equipmentIndex[nodeType][featureId]) {
+        equipmentIndex[nodeType].total += 1
+        equipmentIndex[nodeType][featureId] = equipmentIndex[nodeType].total
+      } else {
+        equipmentIndex[nodeType] = { total: 1 }
+        equipmentIndex[nodeType][featureId] = 1
+      }
       
       let featureRow = (
         <>
+          {/* {console.log(props.drafts[featureId])} */}
           <div className="header">
-            <div className={'info plan-nav-node-name' + (isSelected ? ' selected' : '')}
+            <div
+              className={'info plan-nav-node-name' + (isSelected ? ' selected' : '')}
+              onMouseEnter={() => setHoverPosition(getHoverPosition(featureId))}
+              onMouseLeave={() => setHoverPosition(null)}
               onClick={event => onNodeClick(event, featureId)}
             >
               <img 
                 style={{'width': '20px'}}
                 src={iconURL} 
               />
-              <h2 className="title">{featureId}</h2>
+              <h2 className="title">
+                { nodeType.replaceAll("_", " ") } #{ equipmentIndex[nodeType][featureId] }
+              </h2>
             </div>
             {faultSum 
               ? <div className="defect-info">
@@ -205,140 +234,8 @@ const PlanNavigation = props => {
     //  if alerts on THIS NODE we include them in the header
     //  if this is the selected subnet we include SubnetDetail 
   }
-  /*
-  function makeRow_OLD (featureId, faultNode = {childNodes:[],assignedFaultCodes:[]} ) { // TODO: faultNode should probably be a defined type that is also used in state
-    //  OK so this is a bit intricate but stick with me
-    //  Nodes of the network, such as COs, Equipment, Locations, can have alerts. 
-    //  Subnets have Alert Trees listing the alerts on nodes in that subnet.
-    //  This can be confusing because we name the Subnet after it's root node; they have the same ID.
-    //  So the Alert for a Hub, for example, will be on the Subnet with the same ID.
-    //  A Terminal is not the root node of a Subnet so the Alert for a Terminal will be a in the Alert Tree of the Subnet with the same ID as the Terminal's parent node, the Hub.
-    //  NOTE: A CO, for example, can have some children that aren't Subnets and some that are. So we merge it's FaultTree.children with the fault nodes of it's subnet children.
-    
-    // Fault Tree for a subnet
-    // planEditor.subnets["c8b405fd-8b13-4293-9698-c7c310982894"].faultTree.rootNode.assignedFaultCodes
-    // planEditor.subnets["c8b405fd-8b13-4293-9698-c7c310982894"].faultTree.rootNode.faultReference.objectId
-    // planEditor.subnets["c8b405fd-8b13-4293-9698-c7c310982894"].faultTree.rootNode.faultReference.referenceType
 
-    // Fault Tree for Terminal via the parent subnet
-    // planEditor.subnets["c8b405fd-8b13-4293-9698-c7c310982894"].faultTree.rootNode.childNodes[0].childNodes[0].assignedFaultCodes
-    // planEditor.subnets["c8b405fd-8b13-4293-9698-c7c310982894"].faultTree.rootNode.childNodes[0].childNodes[0].faultReference.objectId
-    // planEditor.subnets["c8b405fd-8b13-4293-9698-c7c310982894"].faultTree.rootNode.childNodes[0].childNodes[0].faultReference.referenceType
-    
-    let payload = {
-      element: null, 
-      alertCount: 0,
-      isLeaf: true,
-    }
-    payload.alertCount += faultNode.assignedFaultCodes.length
-
-    let children = []
-    let childFaultNodesById = {}
-    faultNode.childNodes.forEach(childFaultNode => {
-      childFaultNodesById[childFaultNode.faultReference.objectId] = childFaultNode
-    })
-    if (props.subnets[featureId]) {
-      // it's a subnet
-      children = props.subnets[featureId].children
-    } else if (
-      props.subnetFeatures[featureId]
-      && props.subnetFeatures[featureId].feature.dropLinks
-    ){
-      // it's a terminal
-      //  children is going to be a list of droplinks
-      // planEditor.subnetFeatures["c5356f72-cbc5-49ff-b7e1-fd7e00da5e54"].feature.dropLinks[0].locationLinks[0].locationId
-      props.subnetFeatures[featureId].feature.dropLinks.forEach(dropLink => {
-        dropLink.locationLinks.forEach(locationLink => {
-          children.push(locationLink.locationId)
-        })
-      })
-    } // else it's a location
-
-    // TODO: this whole icon thing is broken, I think Robert is making a new system
-    let iconURL = '' // default?
-    if (props.subnetFeatures[featureId]) {
-      //iconURL = getIconUrl(props.subnetFeatures[featureId])
-      iconURL = '/images/map_icons/aro/equipment/fiber_distribution_hub_alert.svg'
-    } else {
-      // location
-      //  TODO: temporary placeholder icon, change this over to the new system
-      iconURL = "/images/map_icons/aro/households_default.png"
-    }
-
-    let rows = []
-    //var row = null
-    children.forEach(childId => {
-      let childFaultNode = childFaultNodesById[childId]
-      if (props.subnets[childId]) {
-        childFaultNode = props.subnets[childId].faultTree.rootNode
-      }
-      let row = makeRow(childId, childFaultNode)
-      if (row.element) {
-        if (!row.isLeaf) {
-          rows.unshift(row.element) // put the fold outs at the top
-        } else {
-          rows.push(row.element) // then the leaf nodes
-        }
-      }
-      payload.alertCount += row.alertCount
-    })
-
-    let alertElements = []
-    faultNode.assignedFaultCodes.forEach(fCode => {
-      alertElements.push(
-        <div className="info" key={`${featureId}_${fCode}`}>
-          {FaultCode[fCode]}
-        </div>
-      )
-    })
-
-    // filter - if this is an element we don't want don't bother building the row and just return a null element
-    if (!filterForAlerts || payload.alertCount){
-      let featureRow = (
-        <>
-          <div className="header">
-            <div className='info'>
-              <img 
-                style={{'width': '20px'}}
-                src={iconURL} 
-              />
-              <h2 className="title">{featureId}</h2>
-            </div>
-            {payload.alertCount 
-              ? <div className="defect-info">
-                  <h3 className="defect-title">{payload.alertCount}</h3>
-                  <div className="svg warning"></div>
-                </div>
-              : null
-            }
-          </div>
-          <div className="info">
-            {alertElements}
-          </div>
-        </>
-      )
-      if (rows.length) {
-        payload.element = (
-          <Foldout displayName={featureRow} key={featureId}>
-            {rows}
-          </Foldout>
-        )
-        payload.isLeaf = false
-      } else {
-        // no children, no need for a fold out
-        payload.element = <div className="nonfoldout-row" key={featureId}>{featureRow}</div>
-      }
-    }
-
-    return payload
-  }
-  */
-
-  //let faultNode = props.subnets[props.selectedSubnetId].faultTree.rootNode
-  //let element = makeRow(props.selectedSubnetId, faultNode).element
   let tree = makeTree(props.drafts)
-  //console.log(tree)
-  //console.log( props.iconsByType ) 
   let element = []
   Object.keys(tree).forEach(id => {
     element.push(makeRow(tree[id]).element)
@@ -346,7 +243,6 @@ const PlanNavigation = props => {
 
   return (
     <>
-      {/* will bring this back in when we figure out the "all" listing  */}
       <div>
         <div className='btn-group btn-group-sm' style={{ marginLeft: '5px' }}>
           <button className={'btn btn-sm ' + (filterForAlerts ? 'btn-primary' : 'btn-light')}
@@ -362,8 +258,8 @@ const PlanNavigation = props => {
           </button>
         </div>
       </div>
-     
       <div className='plan-navigation slim-line-headers'>{element}</div>
+      <NavigationMarker isHover={!!hoverPosition} position={hoverPosition} />
     </>
   )
 }
@@ -371,10 +267,11 @@ const PlanNavigation = props => {
 const mapStateToProps = state => {
   return {
     selectedSubnetId: state.planEditor.selectedSubnetId,
-    //subnets: state.planEditor.subnets, use only in child
-    //subnetFeatures: state.planEditor.subnetFeatures,
+    subnetFeatures: state.planEditor.subnetFeatures,
     drafts: state.planEditor.drafts,
+    rootDraft: PlanEditorSelectors.getRootDraft(state),
     iconsByType: MapLayerSelectors.getIconsByType(state),
+    map: state.map.googleMaps,
   }
 }
 

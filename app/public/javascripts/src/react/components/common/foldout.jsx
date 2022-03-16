@@ -42,7 +42,7 @@ class Foldout extends Component {
   render () {
     let isOpen = this.props.isOpen || this.state.isOpen
     return (
-      <div className='ei-foldout'>
+      <div className='ei-foldout' style={{ width: "100%" }}>
         <div className={`ei-header ${this.state.isCollapsible ? '' : 'ei-no-pointer'}`} onClick={event => this._onClick(event, !isOpen)} >
           {this.state.isCollapsible
             ? (isOpen
