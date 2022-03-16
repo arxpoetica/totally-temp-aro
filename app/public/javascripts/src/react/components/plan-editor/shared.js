@@ -43,7 +43,6 @@ export const constants = Object.freeze({
     ABANDONED_LOCATION: {
       key: 'ABANDONED_LOCATION',
       displayName: 'Abandoned Location',
-      // FIXME: move to proper location
       iconUrl: '/images/map_icons/aro/households_default_alert.png',
     },
     // terminal alerts
@@ -57,12 +56,6 @@ export const constants = Object.freeze({
       displayName: 'Drop Cable Length Exceeded',
       iconUrl: '/images/map_icons/aro/households_default_alert.png',
     },
-    // TODO: is this even a thing?
-    // MAX_TERMINAL_DISTANCE_EXCEEDED: {
-    //   key: 'MAX_TERMINAL_DISTANCE_EXCEEDED',
-    //   displayName: 'Maximum Terminal Distance Exceeded',
-    //   iconUrl: `/images/map_icons/${ARO_CLIENT}/equipment/fiber_distribution_terminal_alert.svg`,
-    // },
     // hub alerts
     MAX_HUB_HOMES_EXCEEDED: {
       key: 'MAX_HUB_HOMES_EXCEEDED',
@@ -71,7 +64,7 @@ export const constants = Object.freeze({
     },
     MAX_HUB_DISTANCE_EXCEEDED: {
       key: 'MAX_HUB_DISTANCE_EXCEEDED',
-      displayName: 'Maximum Hub Distance Exceeded',
+      displayName: 'Fiber Distance Exceeded',
       iconUrl: `/images/map_icons/${ARO_CLIENT}/equipment/fiber_distribution_hub_alert.svg`,
     },
   },
