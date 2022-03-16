@@ -9,6 +9,13 @@ import NavigationMarker from './navigation-marker.jsx'
 const SubnetDetail = props => {
   const [hoverPosition, setHoverPosition] = useState(null)
 
+  function onNodeClick(featuredId) {
+    props.map.setCenter(getHoverPosition(featureId))
+    // Allow the user to see the nav marker after setCenter then clear
+    setTimeout(() => {
+      setHoverPosition(null)
+    }, 500)
+  }
   function getHoverPosition(featureId) {
     const { point } = props.locationAlerts[featureId]
     return { lat: point.latitude, lng: point.longitude }
@@ -89,7 +96,7 @@ const SubnetDetail = props => {
             className="info"
             onMouseEnter={() => setHoverPosition(getHoverPosition(featureId))}
             onMouseLeave={() => setHoverPosition(null)}
-            onClick={() => props.map.setCenter(getHoverPosition(featureId))}
+            onClick={() => onNodeClick(featureId)}
           >
             <img 
               style={{ 'width': '20px' }}

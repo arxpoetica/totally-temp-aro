@@ -42,6 +42,10 @@ const PlanNavigation = props => {
     event.stopPropagation()
     props.appendEditFeaturesById([featureId])
     props.map.setCenter(getHoverPosition(featureId))
+    // Allow the user to see the nav marker after setCenter then clear
+    setTimeout(() => {
+      setHoverPosition(null)
+    }, 500)
   }
 
   function makeListNode () {
