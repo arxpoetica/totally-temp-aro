@@ -166,10 +166,9 @@ function subscribeToSocket() {
               }
               drafts[draft.subnetId] = draft
             }
-            batch(async() => {
-              await dispatch({ type: Actions.PLAN_EDITOR_SET_DRAFTS, payload: drafts })
-              await dispatch({ type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION, payload: false })
-              dispatch(getFiberAnnotations(rootSubnetDetail.subnetId.id))
+            batch(() => {
+              dispatch({ type: Actions.PLAN_EDITOR_SET_DRAFTS, payload: drafts })
+              dispatch({ type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION, payload: false })
             })
             break
           case DRAFT_STATES.START_SUBNET_TREE: break // no op
@@ -190,10 +189,12 @@ function subscribeToSocket() {
                 payload: draftProps,
               })
             }
-
             break
           case DRAFT_STATES.END_SUBNET_TREE: break // no op
-          case DRAFT_STATES.END_INITIALIZATION: break // no op
+          case DRAFT_STATES.END_INITIALIZATION:
+            const rootDraft = PlanEditorSelectors.getRootDraft(getState())
+            dispatch(getFiberAnnotations(rootDraft.subnetId))
+            break
           default:
             throw new Error(`Not handling SUBNET_DATA socket type: ${data.subnetNodeUpdateType}`)
         }

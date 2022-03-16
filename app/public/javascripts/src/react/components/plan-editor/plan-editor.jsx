@@ -37,7 +37,7 @@ export const PlanEditor = props => {
 
   useEffect(() => {
     subscribeToSocket()
-    resumeOrCreateTransaction()
+      .then(() => resumeOrCreateTransaction())
     return () => unsubscribeFromSocket()
   }, [])
 
