@@ -58,6 +58,8 @@ const NetworkPlan = (props) => {
         }
       } else if (planState === "COMPLETED") {
         alertClass = "passed-plan"
+      } else if (planState === "CANCELLED") {
+        alertClass = "partial-fail-plan"
       }
     }
 
