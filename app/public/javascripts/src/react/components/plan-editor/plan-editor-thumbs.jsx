@@ -39,14 +39,14 @@ const PlanEditorHeader = props => {
 
   function onClick(event, objectId) {
     event.stopPropagation()
-    if (objectId === selectedSubnetId) { objectId = '' } // deselect
-    if (!features[objectId]) { objectId = '' } // deselect
+    if (objectId === selectedSubnetId) { objectId = null } // deselect
+    if (!features[objectId]) { objectId = null } // deselect
     setSelectedSubnetId(objectId)
   }
 
   function onClose(event, objectId) {
     event.stopPropagation()
-    if (objectId === selectedSubnetId) { setSelectedSubnetId('') }
+    if (objectId === selectedSubnetId) { setSelectedSubnetId() }
     deselectEditFeatureById(objectId)
   }
 

@@ -2,32 +2,34 @@ import React, { useState } from 'react'
 import { connect } from 'react-redux'
 import Foldout from '../../common/foldout.jsx'
 import SubnetDetail from './subnet-detail.jsx'
-//import { getIconUrl } from '../shared'
 import MapLayerSelectors from '../../../components/map-layers/map-layer-selectors'
 import PlanEditorActions from '../plan-editor-actions'
 import PlanEditorSelectors from '../plan-editor-selectors'
 import NavigationMarker from './navigation-marker.jsx'
 import WktUtils from '../../../../shared-utils/wkt-utils.js'
 
-export const FaultCode = { // future: may add unique icons for each
-	UNDEFINED: "Unknown",
-	LOCATION_NOT_ASSIGNED: "Unassigned",
-	LOCATION_LINK_ERROR: "Link Error",
-	LOCATION_DROP_DISTANCE: "Drop Distance Exceeded",
-	EQUIPMENT_FIBER_DISTANCE: "Fiber Distance Exceeded",
-	EQUIPMENT_CAPACITY: "Capacity Exceeded",
+// FIXME: needs to be aligned with `ALERT_TYPES`
+// import { constants } from '../shared'
+// const { ALERT_TYPES } = constants
+// TODO: future: may add unique icons for each
+export const FaultCode = {
+	UNDEFINED: 'Unknown',
+	LOCATION_NOT_ASSIGNED: 'Abandoned Location', // ABANDONED_LOCATION
+	LOCATION_LINK_ERROR: 'Link Error', // ?????
+  // not covered? MAX_TERMINAL_HOMES_EXCEEDED
+	LOCATION_DROP_DISTANCE: 'Drop Cable Length Exceeded', // MAX_DROP_LENGTH_EXCEEDED
+	EQUIPMENT_CAPACITY: 'Maximum Hub Homes Exceeded', // MAX_HUB_HOMES_EXCEEDED
+	EQUIPMENT_FIBER_DISTANCE: 'Fiber Distance Exceeded', // MAX_HUB_DISTANCE_EXCEEDED
 }
 
 const DefaultFaultCounts = {
-  "UNDEFINED": 0,
-  "LOCATION_NOT_ASSIGNED": 0,
-  "LOCATION_LINK_ERROR": 0,
-  "LOCATION_DROP_DISTANCE": 0,
-  "EQUIPMENT_FIBER_DISTANCE": 0,
-  "EQUIPMENT_CAPACITY": 0,
+  UNDEFINED: 0,
+  LOCATION_NOT_ASSIGNED: 0,
+  LOCATION_LINK_ERROR: 0,
+  LOCATION_DROP_DISTANCE: 0,
+  EQUIPMENT_CAPACITY: 0,
+  EQUIPMENT_FIBER_DISTANCE: 0,
 }
-
-const equipmentIndex = {};
 
 const PlanNavigation = props => {
   if (!Object.keys(props.drafts).length) return null
@@ -44,6 +46,10 @@ const PlanNavigation = props => {
     event.stopPropagation()
     props.appendEditFeaturesById([featureId])
     props.map.setCenter(getHoverPosition(featureId))
+    // Allow the user to see the nav marker after setCenter then clear
+    setTimeout(() => {
+      setHoverPosition(null)
+    }, 500)
   }
 
   function makeListNode () {
@@ -172,17 +178,7 @@ const PlanNavigation = props => {
           </div>
         )
       }
-      // Index for the default named equipments for user's sake
-      // Have checks for if it already exists because rerenders cause the count
-      // to go in to the thousands.
       const nodeType = props.drafts[featureId].nodeType
-      if(equipmentIndex[nodeType] && !equipmentIndex[nodeType][featureId]) {
-        equipmentIndex[nodeType].total += 1
-        equipmentIndex[nodeType][featureId] = equipmentIndex[nodeType].total
-      } else {
-        equipmentIndex[nodeType] = { total: 1 }
-        equipmentIndex[nodeType][featureId] = 1
-      }
       
       let featureRow = (
         <>
@@ -199,7 +195,7 @@ const PlanNavigation = props => {
                 src={iconURL} 
               />
               <h2 className="title">
-                { nodeType.replaceAll("_", " ") } #{ equipmentIndex[nodeType][featureId] }
+                { nodeType.replaceAll("_", " ") }
               </h2>
             </div>
             {faultSum 

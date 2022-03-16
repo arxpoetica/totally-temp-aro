@@ -189,10 +189,12 @@ function subscribeToSocket() {
                 payload: draftProps,
               })
             }
-
             break
           case DRAFT_STATES.END_SUBNET_TREE: break // no op
-          case DRAFT_STATES.END_INITIALIZATION: break // no op
+          case DRAFT_STATES.END_INITIALIZATION:
+            const rootDraft = PlanEditorSelectors.getRootDraft(getState())
+            dispatch(getFiberAnnotations(rootDraft.subnetId))
+            break
           default:
             throw new Error(`Not handling SUBNET_DATA socket type: ${data.subnetNodeUpdateType}`)
         }
@@ -853,11 +855,11 @@ function deleteFeature (featureId) {
 
         dispatch({ type: Actions.PLAN_EDITOR_REMOVE_DRAFT, payload: featureId })
         // if equipment exists on draft (only on CO), delete it too
-        const draft = Object.values(drafts).find(draft => draft.equipment.length)
-        const equipmentIndex = draft.equipment.findIndex(({ id }) => id === featureId)
+        const rootDraft = Object.values(drafts).find(draft => draft.equipment.length)
+        const equipmentIndex = rootDraft.equipment.findIndex(({ id }) => id === featureId)
         if (equipmentIndex >= 0) {
-          const draftClone = klona(draft)
-          delete draftClone.equipment[equipmentIndex]
+          const draftClone = klona(rootDraft)
+          draftClone.equipment.splice(equipmentIndex, 1)
           dispatch({ type: Actions.PLAN_EDITOR_UPDATE_DRAFT, payload: draftClone })
         }
 
@@ -1154,7 +1156,7 @@ function setSelectedSubnetId (selectedSubnetId) {
     if (!selectedSubnetId) {
       dispatch({
         type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
-        payload: '',
+        payload: null,
       })
     } else {
       batch(() => {
@@ -1164,7 +1166,7 @@ function setSelectedSubnetId (selectedSubnetId) {
             // FDTs aren't subnets but can be selcted as such
             // that is where the following discrepancy comes from 
             //console.log(result)
-            if (!result) selectedSubnetId = ''
+            if (!result) selectedSubnetId = null
             dispatch({
               type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
               payload: selectedSubnetId,
@@ -1173,7 +1175,7 @@ function setSelectedSubnetId (selectedSubnetId) {
             console.error(err)
             dispatch({
               type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
-              payload: '',
+              payload: null,
             })
           })
 

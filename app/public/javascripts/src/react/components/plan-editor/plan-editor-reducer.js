@@ -22,7 +22,7 @@ const defaultState = {
   requestedSubnetIds: [],
   subnets: {},
   subnetFeatures: {},
-  selectedSubnetId: '', // need to rename this now that a terminal can be selected, lets do "activeFeature" // unselected this should be null not ''
+  selectedSubnetId: null, // need to rename this now that a terminal can be selected, lets do "activeFeature" // unselected this should be null not ''
   boundaryDebounceBySubnetId: {},
   fiberRenderRequired: true,
   cursorLocationIds: [],

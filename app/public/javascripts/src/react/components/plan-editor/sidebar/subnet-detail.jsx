@@ -7,13 +7,23 @@ import PlanEditorSelectors from '../plan-editor-selectors'
 import NavigationMarker from './navigation-marker.jsx'
 import WktUtils from '../../../../shared-utils/wkt-utils.js'
 
-const equipmentIndex = {};
-
 const SubnetDetail = props => {
   const [hoverPosition, setHoverPosition] = useState(null)
 
+  function onNodeClick(featuredId) {
+    props.map.setCenter(getHoverPosition(featureId))
+    // Allow the user to see the nav marker after setCenter then clear
+    setTimeout(() => {
+      setHoverPosition(null)
+    }, 500)
+  }
   function getHoverPosition(featureId) {
-    const { point } = props.locationAlerts[featureId]
+    let locationAlert = props.locationAlerts[featureId]
+    if (!locationAlert) {
+      const node = props.rootDraft.equipment.find(node => node.id === featureId)
+      return WktUtils.getGoogleMapLatLngFromWKTPoint(node.point)
+    }
+    const { point } = locationAlert
     return { lat: point.latitude, lng: point.longitude }
   }
 
@@ -81,19 +91,9 @@ const SubnetDetail = props => {
       alertCount = countDefects(faultNode)
     }
 
-    // Index for the default named equipments for user's sake
-    // Have checks for if it already exists because rerenders cause the count
-    // to go in to the thousands.
     const nodeType = props.subnetFeatures[featureId]
       ? props.subnetFeatures[featureId].feature.networkNodeType
       : "location"
-    if(equipmentIndex[nodeType] && !equipmentIndex[nodeType][featureId]) {
-      equipmentIndex[nodeType].total += 1
-      equipmentIndex[nodeType][featureId] = equipmentIndex[nodeType].total
-    } else {
-      equipmentIndex[nodeType] = { total: 1 }
-      equipmentIndex[nodeType][featureId] = 1
-    }
 
     let featureRow = (
       <>
@@ -102,14 +102,14 @@ const SubnetDetail = props => {
             className="info"
             onMouseEnter={() => setHoverPosition(getHoverPosition(featureId))}
             onMouseLeave={() => setHoverPosition(null)}
-            onClick={() => props.map.setCenter(getHoverPosition(featureId))}
+            onClick={() => onNodeClick(featureId)}
           >
             <img 
               style={{ 'width': '20px' }}
               src={iconURL} 
             />
             <h2 className="title">
-              { nodeType.replaceAll("_", " ") } #{ equipmentIndex[nodeType][featureId] }
+              { nodeType.replaceAll("_", " ") }
             </h2>
           </div>
           {alertCount ? (

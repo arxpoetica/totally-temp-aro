@@ -1,11 +1,10 @@
 /* globals google */
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { connect } from 'react-redux'
 import WktUtils from '../../../shared-utils/wkt-utils'
 import { constants } from './shared'
 import PlanEditorActions from './plan-editor-actions'
 
-let renderedSubnetId = ''
 let mapObjects = []
 
 export const FiberMapObjects = (props) => {
@@ -23,15 +22,14 @@ export const FiberMapObjects = (props) => {
   } = props
 
   const conduitStyles = {...layerEquipment.roads, ...layerEquipment.conduits}
-
+  const [renderedSubnetId, setRenderedSubnetId] = useState('')
   useEffect(() => {
     if (subnets[selectedSubnetId] && subnets[selectedSubnetId].fiber) {
       const { subnetLinks, fiberType } = subnets[selectedSubnetId].fiber
-
       // don'r render if fiber is the same
       // fiber Renderrequired being true means the fiber should be rendered regardless
       if (renderedSubnetId !== selectedSubnetId || fiberRenderRequired) {
-        renderedSubnetId = selectedSubnetId
+        setRenderedSubnetId(selectedSubnetId)
         renderFiber(subnetLinks, fiberType)
       }
     } else if (
@@ -43,10 +41,11 @@ export const FiberMapObjects = (props) => {
       const { subnetLinks, fiberType } = subnets[parentId].fiber
 
       if (renderedSubnetId !== parentId || fiberRenderRequired) {
-        renderedSubnetId = parentId
+        setRenderedSubnetId(parentId)
         renderFiber(subnetLinks, fiberType)
       }
     } else {
+      setRenderedSubnetId('')
       deleteMapObjects()
     }
 
