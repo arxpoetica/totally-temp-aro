@@ -5,9 +5,6 @@ import Foldout from '../../common/foldout.jsx'
 import MapLayerSelectors from '../../map-layers/map-layer-selectors'
 import PlanEditorSelectors from '../plan-editor-selectors'
 import NavigationMarker from './navigation-marker.jsx'
-import WktUtils from '../../../../shared-utils/wkt-utils.js'
-
-const equipmentIndex = {};
 
 const SubnetDetail = props => {
   const [hoverPosition, setHoverPosition] = useState(null)
@@ -81,19 +78,9 @@ const SubnetDetail = props => {
       alertCount = countDefects(faultNode)
     }
 
-    // Index for the default named equipments for user's sake
-    // Have checks for if it already exists because rerenders cause the count
-    // to go in to the thousands.
     const nodeType = props.subnetFeatures[featureId]
       ? props.subnetFeatures[featureId].feature.networkNodeType
       : "location"
-    if(equipmentIndex[nodeType] && !equipmentIndex[nodeType][featureId]) {
-      equipmentIndex[nodeType].total += 1
-      equipmentIndex[nodeType][featureId] = equipmentIndex[nodeType].total
-    } else {
-      equipmentIndex[nodeType] = { total: 1 }
-      equipmentIndex[nodeType][featureId] = 1
-    }
 
     let featureRow = (
       <>
@@ -109,7 +96,7 @@ const SubnetDetail = props => {
               src={iconURL} 
             />
             <h2 className="title">
-              { nodeType.replaceAll("_", " ") } #{ equipmentIndex[nodeType][featureId] }
+              { nodeType.replaceAll("_", " ") }
             </h2>
           </div>
           {alertCount ? (
