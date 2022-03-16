@@ -16,6 +16,7 @@ export const FaultCode = {
 	UNDEFINED: 'Unknown',
 	LOCATION_NOT_ASSIGNED: 'Abandoned Location', // ABANDONED_LOCATION
 	LOCATION_LINK_ERROR: 'Link Error', // ?????
+  // not covered? MAX_TERMINAL_HOMES_EXCEEDED
 	LOCATION_DROP_DISTANCE: 'Drop Cable Length Exceeded', // MAX_DROP_LENGTH_EXCEEDED
 	EQUIPMENT_CAPACITY: 'Maximum Hub Homes Exceeded', // MAX_HUB_HOMES_EXCEEDED
 	EQUIPMENT_FIBER_DISTANCE: 'Fiber Distance Exceeded', // MAX_HUB_DISTANCE_EXCEEDED

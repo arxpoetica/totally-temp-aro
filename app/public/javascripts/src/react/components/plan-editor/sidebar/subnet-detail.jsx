@@ -5,6 +5,7 @@ import Foldout from '../../common/foldout.jsx'
 import MapLayerSelectors from '../../map-layers/map-layer-selectors'
 import PlanEditorSelectors from '../plan-editor-selectors'
 import NavigationMarker from './navigation-marker.jsx'
+import WktUtils from '../../../../shared-utils/wkt-utils.js'
 
 const SubnetDetail = props => {
   const [hoverPosition, setHoverPosition] = useState(null)
@@ -17,7 +18,12 @@ const SubnetDetail = props => {
     }, 500)
   }
   function getHoverPosition(featureId) {
-    const { point } = props.locationAlerts[featureId]
+    let locationAlert = props.locationAlerts[featureId]
+    if (!locationAlert) {
+      const node = props.rootDraft.equipment.find(node => node.id === featureId)
+      return WktUtils.getGoogleMapLatLngFromWKTPoint(node.point)
+    }
+    const { point } = locationAlert
     return { lat: point.latitude, lng: point.longitude }
   }
 
