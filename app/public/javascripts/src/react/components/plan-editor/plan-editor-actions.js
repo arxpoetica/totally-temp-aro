@@ -854,11 +854,11 @@ function deleteFeature (featureId) {
 
         dispatch({ type: Actions.PLAN_EDITOR_REMOVE_DRAFT, payload: featureId })
         // if equipment exists on draft (only on CO), delete it too
-        const draft = Object.values(drafts).find(draft => draft.equipment.length)
-        const equipmentIndex = draft.equipment.findIndex(({ id }) => id === featureId)
+        const rootDraft = Object.values(drafts).find(draft => draft.equipment.length)
+        const equipmentIndex = rootDraft.equipment.findIndex(({ id }) => id === featureId)
         if (equipmentIndex >= 0) {
-          const draftClone = klona(draft)
-          delete draftClone.equipment[equipmentIndex]
+          const draftClone = klona(rootDraft)
+          draftClone.equipment.splice(equipmentIndex, 1)
           dispatch({ type: Actions.PLAN_EDITOR_UPDATE_DRAFT, payload: draftClone })
         }
 
