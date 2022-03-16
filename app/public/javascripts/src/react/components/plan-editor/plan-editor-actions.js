@@ -166,9 +166,10 @@ function subscribeToSocket() {
               }
               drafts[draft.subnetId] = draft
             }
-            batch(() => {
-              dispatch({ type: Actions.PLAN_EDITOR_SET_DRAFTS, payload: drafts })
-              dispatch({ type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION, payload: false })
+            batch(async() => {
+              await dispatch({ type: Actions.PLAN_EDITOR_SET_DRAFTS, payload: drafts })
+              await dispatch({ type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION, payload: false })
+              dispatch(getFiberAnnotations(rootSubnetDetail.subnetId.id))
             })
             break
           case DRAFT_STATES.START_SUBNET_TREE: break // no op
