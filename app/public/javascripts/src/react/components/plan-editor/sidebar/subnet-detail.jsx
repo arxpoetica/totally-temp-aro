@@ -3,10 +3,20 @@ import { connect } from 'react-redux'
 import { FaultCode } from './plan-navigation.jsx'
 import Foldout from '../../common/foldout.jsx'
 import MapLayerSelectors from '../../map-layers/map-layer-selectors'
+import PlanEditorSelectors from '../plan-editor-selectors'
+import NavigationMarker from './navigation-marker.jsx'
+import WktUtils from '../../../../shared-utils/wkt-utils.js'
 
 const equipmentIndex = {};
 
 const SubnetDetail = props => {
+  const [hoverPosition, setHoverPosition] = useState(null)
+
+  function getHoverPosition(featureId) {
+    const { point } = props.locationAlerts[featureId]
+    return { lat: point.latitude, lng: point.longitude }
+  }
+
   function disableRows() {
     return (!props.selectedSubnetId 
       || !props.subnets
@@ -88,9 +98,14 @@ const SubnetDetail = props => {
     let featureRow = (
       <>
         <div className="header">
-          <div className='info'>
+          <div
+            className="info"
+            onMouseEnter={() => setHoverPosition(getHoverPosition(featureId))}
+            onMouseLeave={() => setHoverPosition(null)}
+            onClick={() => props.map.setCenter(getHoverPosition(featureId))}
+          >
             <img 
-              style={{'width': '20px'}}
+              style={{ 'width': '20px' }}
               src={iconURL} 
             />
             <h2 className="title">
@@ -127,6 +142,7 @@ const SubnetDetail = props => {
   return (
     <>
       {!disableRows() && makeFaultRows(props.subnets[props.selectedSubnetId].faultTree)}
+      <NavigationMarker isHover={!!hoverPosition} position={hoverPosition} />
     </>
   )
 }
@@ -136,7 +152,10 @@ const mapStateToProps = state => {
     selectedSubnetId: state.planEditor.selectedSubnetId,
     subnets: state.planEditor.subnets, 
     subnetFeatures: state.planEditor.subnetFeatures,
+    rootDraft: PlanEditorSelectors.getRootDraft(state),
+    locationAlerts: PlanEditorSelectors.getAlertsForSubnetTree(state),
     iconsByType: MapLayerSelectors.getIconsByType(state),
+    map: state.map.googleMaps,
   }
 }
 

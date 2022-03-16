@@ -187,13 +187,11 @@ const PlanNavigation = props => {
       let featureRow = (
         <>
           {/* {console.log(props.drafts[featureId])} */}
-          <div
-            className="header"
-            onMouseEnter={() => setHoverPosition(getHoverPosition(featureId))}
-            onMouseLeave={() => setHoverPosition(null)}
-          >
+          <div className="header">
             <div
               className={'info plan-nav-node-name' + (isSelected ? ' selected' : '')}
+              onMouseEnter={() => setHoverPosition(getHoverPosition(featureId))}
+              onMouseLeave={() => setHoverPosition(null)}
               onClick={event => onNodeClick(event, featureId)}
             >
               <img 
