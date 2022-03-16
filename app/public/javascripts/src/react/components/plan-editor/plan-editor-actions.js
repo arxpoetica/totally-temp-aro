@@ -1155,7 +1155,7 @@ function setSelectedSubnetId (selectedSubnetId) {
     if (!selectedSubnetId) {
       dispatch({
         type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
-        payload: '',
+        payload: null,
       })
     } else {
       batch(() => {
@@ -1165,7 +1165,7 @@ function setSelectedSubnetId (selectedSubnetId) {
             // FDTs aren't subnets but can be selcted as such
             // that is where the following discrepancy comes from 
             //console.log(result)
-            if (!result) selectedSubnetId = ''
+            if (!result) selectedSubnetId = null
             dispatch({
               type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
               payload: selectedSubnetId,
@@ -1174,7 +1174,7 @@ function setSelectedSubnetId (selectedSubnetId) {
             console.error(err)
             dispatch({
               type: Actions.PLAN_EDITOR_SET_SELECTED_SUBNET_ID,
-              payload: '',
+              payload: null,
             })
           })
 
