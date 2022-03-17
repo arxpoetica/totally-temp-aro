@@ -44,6 +44,7 @@ services:
             IGNITE_PROFILE: ignite_debug
             ZK_HOST: zookeeper
             RABBITMQ_HOST: rabbitmq
+            DATA_CONSTRAINT_LOCATIONS: "${DATA_CONSTRAINT_LOCATIONS:-200000}"
         networks:
             - main
 
