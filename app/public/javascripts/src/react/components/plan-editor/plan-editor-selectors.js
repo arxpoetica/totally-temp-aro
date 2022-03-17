@@ -17,6 +17,11 @@ const getBoundaryDebounceBySubnetId = state => state.planEditor.boundaryDebounce
 const getCursorLocationIds = state => state.planEditor.cursorLocationIds
 const getPlanThumbInformation = state => state.planEditor.getPlanThumbInformation
 
+const getDrafts = state => state.planEditor.drafts
+const getRootDraft = createSelector([getDrafts], (drafts) => {
+  return Object.values(drafts).find(draft => !draft.parentSubnetId)
+})
+
 const getSelectedPlanThumbInformation = createSelector(
   [getSelectedSubnet, getPlanThumbInformation],
   (selectedSubnet, planThumbInformation) => {
@@ -31,7 +36,7 @@ const getIsRecalcSettled = createSelector(
   }
 )
 
-const getFeaturesRenderInfo = createSelector(
+const getFocusedEquipmentIds = createSelector(
   [getSelectedSubnetId, getSubnetFeatures, getSubnets, getSelectedSubnet, getSelectedEditFeatureIds],
   (selectedSubnetId, subnetFeatures, subnets, selectedSubnet, selectedEditFeatureIds) => {
     if (!selectedSubnet) {
@@ -39,22 +44,15 @@ const getFeaturesRenderInfo = createSelector(
       selectedSubnet = subnetId && subnets[subnetId] ? subnets[subnetId] : { children: [], subnetNode: null }
     }
 
-    // highlighted ids within the subnet
-    const highlightedFeatureIds = [
+    // visible/focused equipment ids within the selected subnet
+    return [
+      // make unique with `Set`
       ...new Set([
         selectedSubnet.subnetNode,
         ...selectedSubnet.children,
         ...selectedEditFeatureIds,
       ])
     ].filter(Boolean)
-    // everything else outside the context of anything highlighted
-    const idleFeatureIds = Object.keys(subnetFeatures)
-      .filter(id => !highlightedFeatureIds.includes(id))
-
-    return [
-      ...highlightedFeatureIds.map(id => ({ id, idle: false })),
-      ...idleFeatureIds.map(id => ({ id, idle: true })),
-    ]
   }
 )
 
@@ -76,11 +74,11 @@ let locationWarnImgByType = {
   '4': new Image(20, 20),
   '5': new Image(20, 20),
 }
-locationWarnImgByType['1'].src = '/svg/alert-panel-small-business.png'
-locationWarnImgByType['2'].src = '/svg/alert-panel-medium-business.png'
-locationWarnImgByType['3'].src = '/svg/alert-panel-large-business.png'
-locationWarnImgByType['4'].src = '/svg/alert-panel-location.png'
-locationWarnImgByType['5'].src = '/svg/alert-panel-tower.png'
+locationWarnImgByType['1'].src = '/images/map_icons/aro/businesses_small_default_alert.png'
+locationWarnImgByType['2'].src = '/images/map_icons/aro/businesses_medium_default_alert.png'
+locationWarnImgByType['3'].src = '/images/map_icons/aro/businesses_large_default_alert.png'
+locationWarnImgByType['4'].src = '/images/map_icons/aro/households_default_alert.png'
+locationWarnImgByType['5'].src = '/images/map_icons/aro/tower_alert.png'
 
 const getRootSubnet = createSelector(
   [getSelectedSubnetId, getSubnetFeatures, getSubnets],
@@ -336,16 +334,17 @@ const getLocationCounts = createSelector(
 const PlanEditorSelectors = Object.freeze({
   getSelectedSubnet,
   getBoundaryLayersList,
-  getFeaturesRenderInfo,
+  getFocusedEquipmentIds,
   getIsRecalcSettled,
   getAlertsForSubnetTree,
   locationWarnImgByType,
   getRootSubnet,
+  getRootDraft,
   getSelectedSubnetLocations,
   getCursorLocations,
   getLocationCounts,
   getSubnetFeatures,
-  getSelectedPlanThumbInformation
+  getSelectedPlanThumbInformation,
 })
 
 export default PlanEditorSelectors

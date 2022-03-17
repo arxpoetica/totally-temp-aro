@@ -1,8 +1,11 @@
+import { klona } from 'klona'
 import Actions from '../../common/actions'
 
 const defaultState = {
   isPlanEditorActive: false,
   transaction: null,
+  // TODO: move this elsewhere?
+  socketUnsubscriber: () => {}, // default is no op
   features: {},
   selectedEditFeatureIds: [],
   isDrawingBoundaryFor: null,
@@ -14,10 +17,12 @@ const defaultState = {
   isEditingFeatureProperties: false,
   isEnteringTransaction: false,
   isCommittingTransaction: false,
+  draftsState: null,
+  drafts: {},
   requestedSubnetIds: [],
   subnets: {},
   subnetFeatures: {},
-  selectedSubnetId: '', // need to rename this now that a terminal can be selected, lets do "activeFeature" // unselected this should be null not ''
+  selectedSubnetId: null, // need to rename this now that a terminal can be selected, lets do "activeFeature" // unselected this should be null not ''
   boundaryDebounceBySubnetId: {},
   fiberRenderRequired: true,
   cursorLocationIds: [],
@@ -36,7 +41,7 @@ function setTransaction (state, transaction) {
 }
 
 function clearTransaction () {
-  return JSON.parse(JSON.stringify(defaultState))
+  return klona(defaultState)
 }
 
 function addTransactionFeatures (state, transactionFeatures) {
@@ -120,7 +125,7 @@ function setPlanThumbInformation (state, planThumbInformation) {
 }
 
 function updatePlanThumbInformation (state, payload) {
-  const planThumbInformationClone = JSON.parse(JSON.stringify(state.planThumbInformation))
+  const planThumbInformationClone = klona(state.planThumbInformation)
   planThumbInformationClone[payload.key] = payload.planThumbInformation;
   return { ...state, planThumbInformation: planThumbInformationClone }
 }
@@ -156,6 +161,20 @@ function deselectFeature (state, objectId) {
   newSelectedFeatureIds.splice(i, 1)
   return { ...state,
     selectedEditFeatureIds: newSelectedFeatureIds
+  }
+}
+
+// will merge props into draft entries
+function mergeDraftProps (state, drafts) {
+  let mergedDrafts = {}
+  Object.keys(drafts).forEach(id => {
+    if (!mergedDrafts[id]) mergedDrafts[id] = {}
+    let stateDraft = state.drafts[id] || {}
+    mergedDrafts[id] = { ...stateDraft, ...mergedDrafts[id], ...drafts[id]}
+  })
+
+  return { ...state, 
+    drafts: { ...state.drafts, ...mergedDrafts }
   }
 }
 
@@ -198,13 +217,15 @@ function setSubnetFeatures (state, subnetFeatures) {
 function removeSubnetFeature (state, featureId) {
 
   const subnetId = state.subnetFeatures[featureId].subnetId
-  let updatedSubnets = JSON.parse(JSON.stringify(state.subnets))
+  let updatedSubnets = klona(state.subnets)
   const updatedSubnetFeatures = { ...state.subnetFeatures }
  
   // this checks if the ID is a subnet, not sure if this should happen here or in actions
   // TODO: I feel like there is a better way to check this
-  if (state.subnetFeatures[featureId].feature.networkNodeType === "central_office" ||
-  state.subnetFeatures[featureId].feature.networkNodeType === "fiber_distribution_hub") {
+  if (
+    state.subnetFeatures[featureId].feature.networkNodeType === 'central_office'
+    || state.subnetFeatures[featureId].feature.networkNodeType === 'fiber_distribution_hub'
+  ) {
     // removes each of the children from subnet features
     updatedSubnets[featureId].children.forEach(child => {
       delete updatedSubnetFeatures[child]
@@ -250,7 +271,7 @@ function setBoundaryDebounce (state, subnetId, timeoutId) {
 }
 
 function clearBoundaryDebounce (state, subnetId) {
-  let newBoundaryDebounceBySubnetId = JSON.parse(JSON.stringify(state.boundaryDebounceBySubnetId))
+  let newBoundaryDebounceBySubnetId = klona(state.boundaryDebounceBySubnetId)
   delete newBoundaryDebounceBySubnetId[subnetId]
   return {
     ...state, 
@@ -265,6 +286,12 @@ function planEditorReducer (state = defaultState, { type, payload }) {
 
     case Actions.PLAN_EDITOR_SET_TRANSACTION:
       return setTransaction(state, payload)
+
+    case Actions.PLAN_EDITOR_SET_SOCKET_UNSUBSCRIBER:
+      return { ...state, socketUnsubscriber: payload }
+
+    case Actions.PLAN_EDITOR_CLEAR_SOCKET_UNSUBSCRIBER:
+      return { ...state, socketUnsubscriber: () => {} }
 
     case Actions.PLAN_EDITOR_ADD_FEATURES:
       return addTransactionFeatures(state, payload)
@@ -310,6 +337,36 @@ function planEditorReducer (state = defaultState, { type, payload }) {
 
     case Actions.PLAN_EDITOR_DESELECT_EDIT_FEATURE:
       return deselectFeature(state, payload)
+
+    case Actions.PLAN_EDITOR_SET_DRAFTS_STATE:
+      return { ...state, draftsState: payload }
+
+    case Actions.PLAN_EDITOR_SET_DRAFTS: {
+      return { ...state, drafts: { ...state.drafts, ...payload } }
+    }
+
+    case Actions.PLAN_EDITOR_CLEAR_DRAFTS:
+      return { ...state, drafts: {} }
+
+    case Actions.PLAN_EDITOR_ADD_DRAFT:
+      return { ...state, drafts: { ...state.drafts, payload } }
+
+    case Actions.PLAN_EDITOR_UPDATE_DRAFT: {
+      const updatedDrafts = { ...state.drafts }
+      updatedDrafts[payload.subnetId] = payload
+      return { ...state, drafts: updatedDrafts }
+    }
+
+    case Actions.PLAN_EDITOR_REMOVE_DRAFT: {
+      if (!state.drafts[payload]) return state
+      const updatedDrafts = { ...state.drafts }
+      delete updatedDrafts[payload]
+      return { ...state, drafts: updatedDrafts }
+    }
+
+    case Actions.PLAN_EDITOR_MERGE_DRAFT_PROPS: {
+      return mergeDraftProps(state, payload)
+    }
 
     case Actions.PLAN_EDITOR_ADD_REQUESTED_SUBNET_IDS:
       return addRequestedSubnetIds(state, payload)
@@ -370,7 +427,7 @@ function planEditorReducer (state = defaultState, { type, payload }) {
 
     case Actions.PLAN_EDITOR_SET_FIBER_ANNOTATIONS:
       return { ...state, fiberAnnotations: { ...state.fiberAnnotations, ...payload}}
-    
+
     case Actions.PLAN_EDITOR_SET_CLICK_LATLNG:
       return { ...state, clickedLatLng: payload }
 

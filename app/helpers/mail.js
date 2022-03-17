@@ -2,6 +2,9 @@ var nodemailer = require('nodemailer')
 var ses = require('nodemailer-ses-transport')
 var AWS = require('aws-sdk')
 var config = require('./config')
+const { createLogger, LOGGER_GROUPS } = require('./logger')
+const logger = createLogger(LOGGER_GROUPS.EMAIL)
+
 // Find the URL hostname. Cant use the NodeJS URL class because our container is at v6.11
 const searchStr = '://'   // Can be http:// or https://
 var APP_BASE_HOST = config.base_url.substr(config.base_url.indexOf(searchStr) + searchStr.length)
@@ -12,7 +15,7 @@ if (APP_BASE_HOST.indexOf(':') >= 0) {
 var region = process.env.AWS_REGION
 if (!region) {
   region = 'us-east-1'
-  console.warn('NO AWS_REGION found. Using', region)
+  logger.warn(`NO AWS_REGION found. Using ${region}`)
 }
 AWS.config.update({ region: region })
 
@@ -26,9 +29,10 @@ exports.sendMail = (options) => {
     transporter.sendMail(options, (err, info) => {
       if (err) {
         reject(err)
-        return console.log(err)
+        return logger.error(err)
       }
-      console.log('Message sent:', info)
+      logger.info('Message sent:')
+      logger.info(info)
       resolve()
     })
   })

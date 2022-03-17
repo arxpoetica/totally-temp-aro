@@ -5,7 +5,7 @@ import { MapTooltip } from '../common/maps/map-tooltip.jsx'
 import { constants } from './shared'
 const { ALERT_TYPES } = constants
 
-const _AlertsPanelTooltip = props => {
+const AlertsTooltip = props => {
 
   const { locationAlerts, cursorLocationIds, cursorEquipmentIds } = props
   const cursorIds = cursorLocationIds.concat(cursorEquipmentIds)
@@ -37,4 +37,4 @@ const mapStateToProps = state => ({
   cursorEquipmentIds: state.planEditor.cursorEquipmentIds,
 })
 const mapDispatchToProps = dispatch => ({})
-export const AlertsPanelTooltip = connect(mapStateToProps, mapDispatchToProps)(_AlertsPanelTooltip)
+export default connect(mapStateToProps, mapDispatchToProps)(AlertsTooltip)

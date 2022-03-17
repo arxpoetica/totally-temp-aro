@@ -43,8 +43,7 @@ export const constants = Object.freeze({
     ABANDONED_LOCATION: {
       key: 'ABANDONED_LOCATION',
       displayName: 'Abandoned Location',
-      // FIXME: move to proper location
-      iconUrl: '/svg/alert-panel-location.svg',
+      iconUrl: '/images/map_icons/aro/households_default_alert.png',
     },
     // terminal alerts
     MAX_TERMINAL_HOMES_EXCEEDED: {
@@ -55,14 +54,8 @@ export const constants = Object.freeze({
     MAX_DROP_LENGTH_EXCEEDED: {
       key: 'MAX_DROP_LENGTH_EXCEEDED',
       displayName: 'Drop Cable Length Exceeded',
-      iconUrl: '/svg/alert-panel-location.svg',
+      iconUrl: '/images/map_icons/aro/households_default_alert.png',
     },
-    // TODO: is this even a thing?
-    // MAX_TERMINAL_DISTANCE_EXCEEDED: {
-    //   key: 'MAX_TERMINAL_DISTANCE_EXCEEDED',
-    //   displayName: 'Maximum Terminal Distance Exceeded',
-    //   iconUrl: `/images/map_icons/${ARO_CLIENT}/equipment/fiber_distribution_terminal_alert.svg`,
-    // },
     // hub alerts
     MAX_HUB_HOMES_EXCEEDED: {
       key: 'MAX_HUB_HOMES_EXCEEDED',
@@ -71,12 +64,31 @@ export const constants = Object.freeze({
     },
     MAX_HUB_DISTANCE_EXCEEDED: {
       key: 'MAX_HUB_DISTANCE_EXCEEDED',
-      displayName: 'Maximum Hub Distance Exceeded',
+      displayName: 'Fiber Distance Exceeded',
       iconUrl: `/images/map_icons/${ARO_CLIENT}/equipment/fiber_distribution_hub_alert.svg`,
     },
   },
 
+  DRAFT_STATES: {
+    START_INITIALIZATION: 'START_INITIALIZATION',
+    INITIAL_STRUCTURE_UPDATE: 'INITIAL_STRUCTURE_UPDATE',
+    START_SUBNET_TREE: 'START_SUBNET_TREE',
+    SUBNET_NODE_SYNCED: 'SUBNET_NODE_SYNCED',
+    END_SUBNET_TREE: 'END_SUBNET_TREE',
+    END_INITIALIZATION: 'END_INITIALIZATION',
+  },
+
 })
+
+const { DRAFT_STATES } = constants
+export const isDraftLoadingOrLoaded = draftsState => {
+  return (
+    draftsState === DRAFT_STATES.START_SUBNET_TREE
+    || draftsState === DRAFT_STATES.SUBNET_NODE_SYNCED
+    || draftsState === DRAFT_STATES.END_SUBNET_TREE
+    || draftsState === DRAFT_STATES.END_INITIALIZATION
+  )
+}
 
 export const getIconUrl = (feature, { equipments, constructionAreas, locationAlerts, ARO_CLIENT }) => {
   const { objectId, networkNodeType, dataType } = feature
@@ -87,9 +99,31 @@ export const getIconUrl = (feature, { equipments, constructionAreas, locationAle
     // we have slated at some point to work on all the icons
     // https://www.pivotaltracker.com/story/show/179782874
     // ...when we do, we should also fix this code.
-    iconUrl = iconUrl
-      .split('.').join('_alert.')
-      .split(`/${ARO_CLIENT}/`).join(`/${ARO_CLIENT}/equipment/`)
+    // iconUrl = iconUrl
+    //   .split('.').join('_alert.')
+    //   .split(`/${ARO_CLIENT}/`).join(`/${ARO_CLIENT}/equipment/`)
+    
+    const alertSuffix = '_alert.png' // we've only made .png but ideally they would match the file type
+
+    let dotP = iconUrl.lastIndexOf('.')
+    iconUrl = iconUrl.substring(0, dotP) + alertSuffix
+
+    let lastSlash = iconUrl.lastIndexOf('/')
+    iconUrl = iconUrl.substring(0, lastSlash) + '/equipment/' + iconUrl.substring(lastSlash+1)
+    
   }
   return iconUrl
+}
+
+/**
+ * Returns the number of meters in a pixel on the screen based on
+ * latitude and zoom. This can be useful for drawing lines, polygons,
+ * or shapes to pixel dimensions at any given zoom level.
+ * See: https://medium.com/techtrument/how-many-miles-are-in-a-pixel-a0baf4611fff
+ * @param {number} latitude
+ * @param {number} zoom
+ * @returns {number} Meters as a measure per pixel
+ */
+export const getMetersPerPixel = (latitude, zoom) => {
+  return 156543.03392 * Math.cos(latitude * Math.PI / 180) / Math.pow(2, zoom)
 }

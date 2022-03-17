@@ -42,9 +42,8 @@ app.use(bodyParser.json({ limit: '1000mb' }))
 
 // Print requests out twice - once when we receive them, once when it completes.
 app.use(morgan((tokens, req, res) => 'ARO-PRE-REQUEST ' + loggerFunction(tokens, req, res), { immediate: true }))
-app.use(morgan(loggerFunction, {
-  skip: (req, res) => req.url.indexOf('/service/v1/tiles/') === 0 // Skip logging for all vector tile calls
-}))
+// skip logging for all vector tile calls
+app.use(morgan(loggerFunction, { skip: ({ url }) => url.includes('.mvt?') }))
 
 app.use(require('cookie-session')({
   name: 'session',

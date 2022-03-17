@@ -8,11 +8,11 @@
   padding-left: 21px;
   padding-bottom: 16px;
   background-color: #ffffff;
-  border-left: 1px #eeeeee dashed;
+  border-left: 1px #dddddd dashed;
 }
 
 .ring-sub-table > table{
-  border-left: 1px #eeeeee solid;
+  border-left: 1px #dddddd solid;
   margin-bottom: 0px;
 }
 
