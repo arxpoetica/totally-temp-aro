@@ -1,6 +1,8 @@
 var database = require('./database')
 const UIConfigurationClass = require('./ui_configuration')
 const UIConfiguration = new UIConfigurationClass()
+const { createLogger, LOGGER_GROUPS } = require('./logger')
+const logger = createLogger(LOGGER_GROUPS.CACHE)
 
 exports.serviceLayers = []
 exports.analysisLayers = []
@@ -109,13 +111,13 @@ function loadConfiguration() {
           return Promise.resolve()
         })
     })
-    .catch(err => console.error(err))
+    .catch(err => logger.error(err))
 }
 
 function loadEnumStrings () {
   UIConfiguration.getEnumStrings()
     .then(result => { exports.enumStrings = result })
-    .catch(err => console.error(err))
+    .catch(err => logger.error(err))
 }
 
 exports.clearUiConfigurationCache = () => UIConfiguration.clearCache()
@@ -128,8 +130,11 @@ exports.refresh = () => {
     loadConfiguration(),
     loadEnumStrings()
   ])
-    .then(() => console.log(`Cache loaded ${exports.serviceLayers.length} service areas, ${exports.analysisLayers.length} analysis layers`))
+    .then(() => logger.info(`Cache loaded ${exports.serviceLayers.length} service areas, ${exports.analysisLayers.length} analysis layers`))
 }
 
 exports.refresh()
-  .catch((err) => console.log('Error refreshing cache', err.stack))
+  .catch((err) => {
+    logger.error('Error refreshing cache')
+    logger.error(err.stack)
+  })

@@ -15,9 +15,12 @@ function runOptimization(inputs, userId) { // shouldn't be getting userId from c
     const type = inputs.analysis_type === 'NETWORK_ANALYSIS' ? 'analyze' : 'optimize'
     AroHttp.post(`/service/v1/${type}/masterplan?userId=${userId}`, inputs)
       .then((response) => {
-        dispatch({
-          type: Actions.NETWORK_OPTIMIZATION_SET_OPTIMIZATION_ID,
-          payload: response.data.optimizationIdentifier
+        batch(() => {
+          dispatch({
+            type: Actions.NETWORK_OPTIMIZATION_SET_OPTIMIZATION_ID,
+            payload: response.data.optimizationIdentifier
+          })
+          dispatch(SelectionActions.loadPlanTargetSelectionsFromServer(response.data.planId))
         })
       })
       .catch(err => console.log(err))

@@ -10,13 +10,13 @@ import PlanTargetListComponent from '../../selection/plan-target-list.jsx'
 import NetworkOptimizationInputForm from './network-optimization-input-form.jsx'
 import NetworkOptimizationButton from './network-optimization-button.jsx'
 import NetworkOptimizationSelectors from './network-optimization-selectors'
-import AngConstants from '../../../../components/common/constants' // ToDo: merge constants, put in Redux?
+import Constants from '../../../common/constants'
 import DropdownList from 'react-widgets/lib/DropdownList'
 
 export class NetworkOptimizationInput extends Component {
   render () {
     return (
-      <div style={{ paddingRight: '16px', paddingTop: '8px' }}>
+      <div style={{ paddingRight: '10px', paddingTop: '8px', paddingLeft: '10px' }}>
         <NetworkOptimizationButton
           onRun={() => this.requestRunOptimization()}
           onModify={() => this.onModifyOptimization()}
@@ -101,7 +101,7 @@ export class NetworkOptimizationInput extends Component {
 
   // ToDo: this is also in analysis-mode.js
   areControlsEnabled () {
-    return (this.props.planState === AngConstants.PLAN_STATE.START_STATE) || (this.props.planState === AngConstants.PLAN_STATE.INITIALIZED)
+    return (this.props.planState === Constants.PLAN_STATE.START_STATE) || (this.props.planState === Constants.PLAN_STATE.INITIALIZED)
   }
 
   onModifyOptimization () {

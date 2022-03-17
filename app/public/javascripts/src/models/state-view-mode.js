@@ -88,17 +88,6 @@ class StateViewMode {
     return flattenDeep(selectedEquipmentIds)
   }
 
-  static loadBoundaryEntityList ($http, state, dataItems, filterObj) {
-    if (filterObj == '') return
-    if (state.selectedBoundaryTypeforSearch) {
-      var visibleBoundaryLayer = state.selectedBoundaryTypeforSearch
-
-      visibleBoundaryLayer.type === 'census_blocks' && StateViewMode.loadEntityList($http, state, dataItems, 'CensusBlocksEntity', filterObj, 'id,tabblockId', 'tabblockId')
-      visibleBoundaryLayer.type === 'wirecenter' && StateViewMode.loadEntityList($http, state, dataItems, 'ServiceAreaView', filterObj, 'id,code,name,centroid', 'code,name')
-      visibleBoundaryLayer.type === 'analysis_layer' && StateViewMode.loadEntityList($http, state, dataItems, 'AnalysisArea', filterObj, 'id,code,centroid', 'code')
-    }
-  }
-
   static loadEntityList ($http, state, dataItems, entityType, filterObj, select, searchColumn, configuration) {
     if (filterObj == '') return
     var entityListUrl = `/service/odata/${entityType}?$select=${select}`
@@ -198,10 +187,6 @@ class StateViewMode {
     return $http.get(entityListUrl)
       .then((results) => {
         state.entityTypeList[entityType] = results.data
-        if (entityType === 'ServiceAreaView' || entityType === 'CensusBlocksEntity' ||
-        entityType === 'AnalysisArea') {
-          state.entityTypeBoundaryList = state.entityTypeList[entityType]
-        }
         return results.data
       })
   }

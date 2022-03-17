@@ -8,7 +8,6 @@ import wrapComponentWithProvider from '../../../common/provider-wrapped-componen
 import socketManager from '../../../../react/common/socket-manager'
 // import AroHttp from '../../common/aro-http'
 // import RingStatusTypes from './constants'
-import AngConstants from '../../../../components/common/constants' // ToDo: merge constants, put in Redux?
 import ProgressButton from '../../common/progress-button.jsx'
 import Constants from '../../../common/constants'
 const selector = formValueSelector(Constants.RING_OPTIONS_BASIC_FORM)
@@ -21,11 +20,11 @@ export class NetworkOptimizationButton extends ProgressButton {
     this.statusTypes = {
       // TODO: we need to consolidate state types
       // to see what I mean, take a look in `plan-settings.jsx`
-      UNINITIALIZED: AngConstants.PLAN_STATE.START_STATE,
-      RUNNING: AngConstants.PLAN_STATE.STARTED,
-      CANCELED: AngConstants.PLAN_STATE.CANCELED,
-      FAILED: AngConstants.PLAN_STATE.FAILED,
-      FINISHED: AngConstants.PLAN_STATE.COMPLETED,
+      UNINITIALIZED: Constants.PLAN_STATE.START_STATE,
+      RUNNING: Constants.PLAN_STATE.STARTED,
+      CANCELED: Constants.PLAN_STATE.CANCELED,
+      FAILED: Constants.PLAN_STATE.FAILED,
+      FINISHED: Constants.PLAN_STATE.COMPLETED,
     }
 
     this.unsubscriber = socketManager.subscribe('PROGRESS_MESSAGE_DATA', (progressData) => {

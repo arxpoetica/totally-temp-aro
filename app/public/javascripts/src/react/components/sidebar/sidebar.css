@@ -139,7 +139,7 @@
 
 /* View-Mode Coverage Boundary */
 
-.view-mode-container {
+.coverage-boundary-container {
   position: relative; /* This will require the parent to have position: relative or absolute */
   height: 100%;
   padding: 0px 10px 10px 10px;
@@ -357,4 +357,30 @@
 }
 .edit-service-area .save-properties {
   margin-top: 10px;
+}
+
+/* Display Mode Buttons */
+
+.display-mode-button {
+  width: 60px;   /* So that all the buttons have the same width */
+}
+
+/* View Mode */
+
+.view-mode-container {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding-top: 20px;
+}
+.view-mode-container .collapse-height {
+  height: 100%;
+}
+.view-mode-container .card-body-space {
+  padding: 0px;
+}
+.road-info > div {
+  margin-top: 10px; /*Line  break for each div*/
 }

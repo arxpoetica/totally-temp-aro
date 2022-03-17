@@ -17,7 +17,7 @@ import NetWorkBuildOutput from './network-build/network-build-output.jsx'
 import ExpertMode from './expert-mode/expert-mode.jsx'
 import ExpertModeButton from './expert-mode/expert-mode-button.jsx'
 import CoverageReportDownloader from './coverage/coverage-report-downloader.jsx'
-
+import AnalysisErrors from './analysis-errors.jsx'
 export class AnalysisMode extends Component {
   constructor (props) {
     super(props)
@@ -119,7 +119,8 @@ export class AnalysisMode extends Component {
           </CardHeader>
           <Collapse isOpen={collapseCards === this.analysisModePanels.OUTPUT}>
             {collapseCards === this.analysisModePanels.OUTPUT &&
-              <CardBody style={{padding:'0px'}}>
+              <CardBody style={{padding:'0px', paddingBottom: "15%"}}>
+                <AnalysisErrors />
                 {networkAnalysisType === 'NETWORK_PLAN' &&
                   <div style={{height: '100%'}}>
                     <NetWorkBuildOutput />

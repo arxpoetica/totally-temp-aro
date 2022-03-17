@@ -5,6 +5,8 @@
 
 var helpers = require('../helpers')
 var database = helpers.database
+const { createLogger, LOGGER_GROUPS } = require('./logger')
+const logger = createLogger(LOGGER_GROUPS.CONFIG)
 
 module.exports = class UIConfiguration {
 
@@ -20,7 +22,7 @@ module.exports = class UIConfiguration {
     try {
       jsonContents = require(fileWithPath)
     } catch (err) {
-      console.warn(`File ${fileWithPath} could not be located in ui_configuration.js. Will use default settings.`)
+      logger.warn(`File ${fileWithPath} could not be located in ui_configuration.js. Will use default settings.`)
       jsonContents = defaultValue
     }
     return jsonContents
@@ -57,7 +59,7 @@ module.exports = class UIConfiguration {
         UIConfiguration.basicDeepObjMerge(baseConfig, clientConfig)
         return Promise.resolve(baseConfig)
       })
-      .catch(err => console.error(err))
+      .catch(err => logger.error(err))
   }
 
   getEnumStrings () {
@@ -96,10 +98,10 @@ module.exports = class UIConfiguration {
             //throw new Error('A client string definition was encountered, but there is no corresponding base definition. Always define the base definition')
           }
         })
-        console.log('Enum Strings loaded from database')
+        logger.info('Enum Strings loaded from database')
         return Promise.resolve(enumStrings)
       })
-      .catch(err => console.error(err))
+      .catch(err => logger.error(err))
   }
 
   getConfigurationSet (configSet) {

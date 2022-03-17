@@ -46,6 +46,7 @@ export class RingButton extends ProgressButton {
 
   // override
   onRun () {
+    this.props.setActivePlanState(RingStatusTypes.STARTED)
     this.runSubNet()
   }
 
