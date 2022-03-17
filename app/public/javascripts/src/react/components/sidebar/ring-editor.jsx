@@ -82,7 +82,7 @@ export class RingEditor extends Component {
             Output
           </CardHeader>
           <Collapse isOpen={activeEditRingsPanel === this.editRingsPanels.OUTPUT}>
-            <CardBody style={{ padding: '0px' }}>
+            <CardBody style={{ padding: '0px', paddingBottom: "15%" }}>
               {activeEditRingsPanel === this.editRingsPanels.OUTPUT &&
                 <NetWorkBuildOutput reportTypes="['RING']" />
               }

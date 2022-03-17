@@ -15,7 +15,8 @@ function ToolTip(props) {
                     <div
                         className="react-tool-tip"
                         style={{
-                            display: hover ? "block" : "none"
+                            display: hover ? "block" : "none",
+                            minWidth: props.minWidth
                         }}
                     >
                         {props.toolTipText}

@@ -12,9 +12,42 @@ import AroHttp from '../../common/aro-http'
 import { batch } from 'react-redux'
 
 function setActivePlanState (planState) {
-  return {
-    type: Actions.PLAN_SET_ACTIVE_PLAN_STATE,
-    payload: planState
+  return dispatch => {
+    if (planState === "COMPLETED" || planState === "FAILED") {
+      dispatch(setActivePlanErrors())
+    }
+
+    dispatch({
+      type: Actions.PLAN_SET_ACTIVE_PLAN_STATE,
+      payload: planState
+    })
+  }
+}
+
+function setActivePlanErrors() {
+  return (dispatch, getState) => {
+    const state = getState();
+    const activePlan = state.plan.activePlan
+    AroHttp.get(`/service/v1/plan/${activePlan.id}/errors?user_id=${activePlan.createdBy}`)
+      .then((response) => {
+        const activePlanErrors = {
+          PRE_VALIDATION: {},
+          NONE: {},
+          CANCELLED: {},
+          RUNTIME_EXCEPTION: {},
+          ROOT_OPTIMIZATION_FAILURE: {}
+        };
+
+        response.data.forEach((error) => {
+            activePlanErrors[error.errorCategory][error.serviceAreaCode] = 
+              error.errorMessage;
+        })
+
+        dispatch({
+          type: Actions.PLAN_SET_ACTIVE_PLAN_ERRORS,
+          payload: activePlanErrors
+        })
+      })
   }
 }
 
@@ -156,7 +189,9 @@ function setActivePlan (plan) {
     dispatch(RingEditActions.loadRings(plan.id))
     // load rings
     dispatch(loadPlanResourceSelectionFromServer(plan))
-    
+    // load errors
+    dispatch(setActivePlanErrors())
+
     if (plan.planType === 'RFP') {
       dispatch({
         type: Actions.RFP_SET_STATUS,
@@ -678,4 +713,5 @@ export default {
   deletePlan,
   getOrCreateEphemeralPlan,
   editActivePlan,
+  setActivePlanErrors
 }

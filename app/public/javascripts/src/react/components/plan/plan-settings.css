@@ -68,8 +68,8 @@
 .collapse-show{
   transition: flex-grow 100ms, flex-shrink 100ms, visibility 0ms 100ms;
   overflow-x: hidden;
-  flex-grow: 1;
 }
+
 .collapse{
   overflow: visible;
 }

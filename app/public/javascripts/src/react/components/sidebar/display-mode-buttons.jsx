@@ -74,7 +74,11 @@ const DisplayModeButtons = props => {
         }
 
         {displayModeButtons.EDIT_PLAN && currentUser.perspective !== 'sales' &&
-          <ToolTip isActive={disableEditPlan()} toolTipText={editPlanToolTipText()}>
+          <ToolTip
+            isActive={disableEditPlan()}
+            toolTipText={editPlanToolTipText()}
+            minWidth="350%"
+          >
             <DisplayButton
               title="Edit Plan"
               mode="EDIT_PLAN"

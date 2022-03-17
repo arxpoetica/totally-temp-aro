@@ -55,7 +55,11 @@ export class RfpTargetsMap extends Component {
     targetIdsToDelete.forEach(id => this.deleteMapObject(id))
 
     // At this point we will have all markers. Update their position (some markers may have changed position)
-    this.props.targets.forEach(target => this.createdMapObjects[target.id].setPosition({ lat: target.lat, lng: target.lng }))
+    this.props.targets.forEach(target => {
+      if (this.createdMapObjects[target.id]) {
+        this.createdMapObjects[target.id].setPosition({ lat: target.lat, lng: target.lng })
+      }
+    })
   }
 
   synchronizeSelectedTarget (previousSelectedTarget = null) {
