@@ -52,7 +52,7 @@
   /*
   margin-top: -6px;
   */
-  border-left: 1px #eeeeee dashed;
+  border-left: 1px #dddddd dashed;
 }
 
 .ei-gen-level{
@@ -82,12 +82,30 @@
   border-bottom: 2px solid #888888;
   cursor: pointer;
   margin-bottom: 6px;
+  display: flex;
+}
+
+.slim-line-headers .ei-header{
+  padding-top: 0;
+}
+
+.slim-line-headers .dsCollapsedPlaceholder{
+  margin-top: -17px;
+  margin-bottom: -4px;
 }
 
 .ei-foldout-icon{
   padding-left: 0px;
   padding-right: 4px;
+  align-self: end;
+  padding-bottom: 4px;
 }
+
+.ei-foldout-header-content{
+  flex-grow: 1;
+  min-width: 0; /* keeps div from overflowing parent so sub content can handle their own overflow. I know it's weird, see: https://stackoverflow.com/questions/36230944/prevent-flex-items-from-overflowing-a-container */
+}
+
 .ei-no-pointer{
   cursor: inherit;
 }

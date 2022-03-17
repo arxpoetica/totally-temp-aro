@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import reduxStore from '../../../redux-store'
-import wrapComponentWithProvider from '../../common/provider-wrapped-component'
+import { connect } from 'react-redux'
 
 const mapView = {
   hybrid: 'hybrid',
@@ -89,4 +88,4 @@ const mapStateToProps = (state) => ({
   isReportMode: state.mapReports.isReportMode,
 })
 
-export default wrapComponentWithProvider(reduxStore, MapViewToggle, mapStateToProps, null)
+export default connect(mapStateToProps, null)(MapViewToggle)

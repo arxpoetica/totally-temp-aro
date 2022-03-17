@@ -7,6 +7,7 @@ import RingButton from '../ring-edit/ring-button.jsx'
 import RingEdit from '../ring-edit/ring-edit.jsx'
 import NetWorkBuildOutput from './analysis/network-build/network-build-output.jsx'
 import NetworkOptimizationActions from '../optimization/network-optimization/network-optimization-actions'
+import RingEditActions from '../ring-edit/ring-edit-actions'
 
 export class RingEditor extends Component {
   constructor(props) {
@@ -22,6 +23,10 @@ export class RingEditor extends Component {
     }
   }
 
+  componentDidMount(){
+    this.props.setIsEditingRing(this.state.activeEditRingsPanel === this.editRingsPanels.EDIT_RINGS)
+  }
+
   onModifyOptimization() {
     this.props.modifyOptimization(this.props.activePlan)
   }
@@ -29,7 +34,9 @@ export class RingEditor extends Component {
   handleToggleAccordion(eventArg) {
     const { event } = eventArg.target.dataset
     const { activeEditRingsPanel } = this.state
-    this.setState({ activeEditRingsPanel: activeEditRingsPanel === event ? this.editRingsPanels.EDIT_RINGS : event })
+    const newActiveEditRingsPanel = activeEditRingsPanel === event ? this.editRingsPanels.EDIT_RINGS : event // I am not sure why this is the way it is or even if it's correct. Shouldn't it just be newActiveEditRingsPanel = event
+    this.setState({ activeEditRingsPanel: newActiveEditRingsPanel })
+    this.props.setIsEditingRing( (this.editRingsPanels.EDIT_RINGS === newActiveEditRingsPanel) )
   }
 
   render() {
@@ -75,7 +82,7 @@ export class RingEditor extends Component {
             Output
           </CardHeader>
           <Collapse isOpen={activeEditRingsPanel === this.editRingsPanels.OUTPUT}>
-            <CardBody style={{ padding: '0px' }}>
+            <CardBody style={{ padding: '0px', paddingBottom: "15%" }}>
               {activeEditRingsPanel === this.editRingsPanels.OUTPUT &&
                 <NetWorkBuildOutput reportTypes="['RING']" />
               }
@@ -94,6 +101,7 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
   modifyOptimization: (activePlan) => dispatch(NetworkOptimizationActions.modifyOptimization(activePlan)),
+  setIsEditingRing: (isEditingRing) => dispatch(RingEditActions.setIsEditingRing(isEditingRing)),
 })
 
 const RingEditorComponent = wrapComponentWithProvider(

@@ -1,5 +1,14 @@
 import io from 'socket.io-client'
-import SocketNamespaces from './socket-namespaces'
+
+const SocketNamespaces = Object.freeze([
+  'client',
+  'plan',
+  'user',
+  'library',
+  'broadcast',
+  'tileInvalidation',
+  'subnet',
+])
 
 class SocketManager {
   constructor () {
@@ -7,7 +16,9 @@ class SocketManager {
 
     // Hold the current namespace+room connections. Useful to re-connect to rooms after a socket disconnect/reconnect.
     this.roomConnections = {}
-    SocketNamespaces.forEach(socketNamespace => { this.roomConnections[socketNamespace] = new Set() })
+    SocketNamespaces.forEach(socketNamespace => {
+      this.roomConnections[socketNamespace] = new Set()
+    })
 
     // Initialize websocket
     this.sockets = {}
@@ -106,4 +117,5 @@ class SocketManager {
 
 let socketManager = new SocketManager()
 
-export default socketManager // Note we are exporting the instance and not the class
+// NOTE: we are exporting the instance and not the class
+export default socketManager

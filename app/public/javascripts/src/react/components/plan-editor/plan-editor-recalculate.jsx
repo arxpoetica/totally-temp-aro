@@ -122,7 +122,6 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  // discardTransaction: transactionId => dispatch(PlanEditorActions.discardTransaction(transactionId)),
   recalculateSubnets: (transactionId, subnetIds) => dispatch(PlanEditorActions.recalculateSubnets(transactionId, subnetIds)),
 })
 

@@ -2,6 +2,7 @@ import Actions from '../../common/actions'
 import { List, Map, remove } from 'immutable'
 import actions from 'redux-form/lib/actions'
 
+// TODO: remove or reevaluate the use of the lib 'immutable'
 const defaultState = {
   location: new List(),
   copper: new List(),

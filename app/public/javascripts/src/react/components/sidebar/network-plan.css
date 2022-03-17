@@ -1,0 +1,51 @@
+.network-plan {
+    white-space: nowrap;
+    padding-left: 10px;
+    padding-right: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.network-plan .plan-name {
+    font-size: 16px;
+    width: 100%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    color: black;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+}
+
+.network-plan .plan-metadata {
+    font-size: 14px;
+    width: 100%;
+    color: grey;
+    padding-bottom: 10px;
+}
+
+.network-plan .plan-state-icon {
+    width: 32px;
+    height: 32px;
+    background-size: 60%;
+    background-repeat: no-repeat;
+    background-position: 4px 5px;
+    cursor: pointer;
+}
+
+.network-plan .partial-fail-plan {
+    background-image: url('/svg/plan-partial-fail.svg');
+}
+
+.network-plan .hard-fail-plan {
+    background-image: url('/svg/plan-hard-fail.svg');
+}
+
+.network-plan .passed-plan {
+    background-image: url('/svg/plan-passed.svg');
+}
+
+.network-plan .running-plan {
+    background-image: url('/svg/plan-running.svg');
+}

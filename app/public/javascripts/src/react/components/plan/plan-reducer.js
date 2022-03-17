@@ -32,6 +32,14 @@ function setActivePlanState (state, planState) {
   }
 }
 
+function setActivePlanErrors(state, planErrors) {
+  return { ...state,
+    activePlan: { ...state.activePlan,
+      planErrors
+    }
+  }
+}
+
 function setDataItems (state, dataItems, uploadDataSources) {
   return { ...state,
     dataItems: dataItems,
@@ -150,20 +158,15 @@ function setParentProjectForNewProject (state, parentProjectForNewProject) {
 }
 
 // ToDo: I think this the coords of current map view not defaultPlanCoordinates
-function updateDefaultPlanCoordinates (state, coordinates) {  
-  let defaultPlanCoordinates = {}
-  if(coordinates.center_changed){
-    defaultPlanCoordinates['latitude'] = coordinates.center_changed.lat()
-    defaultPlanCoordinates['longitude'] = coordinates.center_changed.lng()
-    defaultPlanCoordinates['zoom'] = state.defaultPlanCoordinates.zoom
-  } else if(coordinates.zoom_changed) {
-    defaultPlanCoordinates['latitude'] = state.defaultPlanCoordinates.latitude
-    defaultPlanCoordinates['longitude'] = state.defaultPlanCoordinates.longitude
-    defaultPlanCoordinates['zoom'] = coordinates.zoom_changed
-  }
-
+function updateDefaultPlanCoordinates (state, defaultPlanCoordinates) {
+  // TODO: this probably doesn't need to be constantly updated
+  //  perhaps things that require defaultPlanCoordinates can get it from map
+  //  Even if we keep this I'd like to debounce it so lets figure out what depends on this and if it needs it to the millisecond
   return { ...state,
-    defaultPlanCoordinates: defaultPlanCoordinates,
+    defaultPlanCoordinates: {
+      ...state.defaultPlanCoordinates,
+      ...defaultPlanCoordinates,
+    }
   }
 }
 
@@ -180,6 +183,9 @@ function planReducer (state = defaultState, action) {
 
     case Actions.PLAN_SET_ACTIVE_PLAN_STATE:
       return setActivePlanState(state, action.payload)
+
+    case Actions.PLAN_SET_ACTIVE_PLAN_ERRORS:
+      return setActivePlanErrors(state, action.payload)
 
     case Actions.PLAN_SET_DATA_ITEMS:
       return setDataItems(state, action.payload.dataItems, action.payload.uploadDataSources)

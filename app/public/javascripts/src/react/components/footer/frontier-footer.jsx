@@ -1,8 +1,7 @@
 import React from 'react'
-import reduxStore from '../../../redux-store'
-import wrapComponentWithProvider from '../../common/provider-wrapped-component'
+import { connect } from 'react-redux'
 
-export const FrontierFooter = ({ configuration }) => {
+const FrontierFooter = ({ configuration }) => {
   return (
     configuration.ARO_CLIENT === 'frontier'
     && (
@@ -52,4 +51,4 @@ const mapStateToProps = (state) => ({
   configuration: state.toolbar.appConfiguration,
 })
 
-export default wrapComponentWithProvider(reduxStore, FrontierFooter, mapStateToProps, null)
+export default connect(mapStateToProps, null)(FrontierFooter)
