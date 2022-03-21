@@ -113,6 +113,7 @@
 .display-mode-container .display-modes {
   flex: 1 1 auto;
   position: relative;
+  max-height: 85%;
 }
 
 .ui-note-container {
