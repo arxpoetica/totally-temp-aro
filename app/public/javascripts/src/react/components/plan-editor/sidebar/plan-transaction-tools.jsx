@@ -1,41 +1,62 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import PlanEditorActions from '../plan-editor-actions'
+import { Grid, Button, Menu } from '@mantine/core'
 
 const PlanTransactionTools = props => {
 
   const {
     isCommittingTransaction,
-    fiberAnnotations,
     transactionId,
     discardTransaction,
   } = props
 
   return (
-    <div className="text-center mb-2">
-      <div className="btn-group">
-        <button
-          className="btn btn-light"
-          onClick={() => checkAndCommitTransaction(props)}
-          disabled={isCommittingTransaction}
-        >
-          <i className="fa fa-check-circle" />&nbsp;&nbsp;Commit
-        </button>
-        <button
-          className="btn btn-light"
+
+    <Grid justify="center">
+      <Grid.Col span={6}>
+        <Button
+          fullWidth
+          variant="default"
           onClick={() => discardTransaction(transactionId)}
         >
-          <i className="fa fa-times-circle" />&nbsp;&nbsp;Discard
-        </button>
-      </div>
-    </div>
+          Cancel
+        </Button>
+      </Grid.Col>
+      <Grid.Col span={6}>
+              {/* &nbsp;&nbsp;&gt; */}
+        <Menu
+          control={
+            <Button fullWidth>
+              Commit/Recalculate
+            </Button>
+          }
+          size="xl"
+          styles={{ root: { display: 'block' } }}
+        >
+          <Menu.Item
+            onClick={() => console.log('TODO:')}
+            variant="default"
+          >
+            Recalulate Hubs &amp; Terminals
+          </Menu.Item>
+          <Menu.Item
+            onClick={() => checkAndCommitTransaction(props)}
+            variant="default"
+            disabled={isCommittingTransaction}
+          >
+            Commit all changes &amp; run plan
+          </Menu.Item>
+        </Menu>
+      </Grid.Col>
+    </Grid>
+
   )
 }
 
 const mapStateToProps = state => ({
   transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
   isCommittingTransaction: state.planEditor.isCommittingTransaction,
-
   fiberAnnotations: state.planEditor.fiberAnnotations,
 })
 
