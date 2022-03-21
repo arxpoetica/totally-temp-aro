@@ -7,6 +7,7 @@ import SocketManager from '../../../react/common/socket-manager'
 import PlanEditorActions from '../plan-editor/plan-editor-actions'
 import RingEditActions from '../ring-edit/ring-edit-actions'
 import NetworkOptimizationActions from '../optimization/network-optimization/network-optimization-actions'
+import UserActions from '../user/user-actions'
 import ToolBarActions from '../header/tool-bar-actions.js'
 import AroHttp from '../../common/aro-http'
 import { batch } from 'react-redux'
@@ -579,9 +580,12 @@ function setParentProjectForNewProject (parentProjectForNewProject){
 
 function setSelectedProjectId (selectedProjectId){
   return dispatch => {
-    dispatch({
-      type: Actions.PLAN_SET_SELECTED_PROJECT_ID,
-      payload: selectedProjectId
+    batch(() => {
+      dispatch({
+        type: Actions.PLAN_SET_SELECTED_PROJECT_ID,
+        payload: selectedProjectId
+      })
+      dispatch(UserActions.setLoggedInUserProjectId(selectedProjectId))
     })
   }
 }
