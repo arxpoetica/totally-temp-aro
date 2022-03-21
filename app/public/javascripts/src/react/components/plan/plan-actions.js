@@ -192,6 +192,8 @@ function setActivePlan (plan) {
     dispatch(loadPlanResourceSelectionFromServer(plan))
     // load errors
     dispatch(setActivePlanErrors())
+    // load project id to user and base plan
+    dispatch(setSelectedProjectId(plan.projectId))
 
     if (plan.planType === 'RFP') {
       dispatch({
@@ -434,8 +436,8 @@ function loadProjectConfig (userId, authPermissions) {
           }
         }
           
-        var allProjects = myProjects
-        var parentProjectForNewProject = allProjects[0]
+        const allProjects = myProjects
+        const parentProjectForNewProject = allProjects[0]
         
         dispatch({
           type: Actions.PLAN_SET_ALL_PROJECT,
@@ -447,11 +449,8 @@ function loadProjectConfig (userId, authPermissions) {
         return AroHttp.get(`/service/auth/users/${userId}/configuration`)
       })
       .then((result) => {
-        var selectedProjectId = result.data.projectTemplateId
-        dispatch({
-          type: Actions.PLAN_SET_SELECTED_PROJECT_ID,
-          payload: selectedProjectId
-        })
+        const selectedProjectId = result.data.projectTemplateId
+        dispatch(setSelectedProjectId(selectedProjectId))
       })
       .catch((err) => console.error(err))
   }
@@ -580,13 +579,11 @@ function setParentProjectForNewProject (parentProjectForNewProject){
 
 function setSelectedProjectId (selectedProjectId){
   return dispatch => {
-    batch(() => {
-      dispatch({
-        type: Actions.PLAN_SET_SELECTED_PROJECT_ID,
-        payload: selectedProjectId
-      })
-      dispatch(UserActions.setLoggedInUserProjectId(selectedProjectId))
+    dispatch({
+      type: Actions.PLAN_SET_SELECTED_PROJECT_ID,
+      payload: selectedProjectId
     })
+    dispatch(UserActions.setLoggedInUserProjectId(selectedProjectId))
   }
 }
 

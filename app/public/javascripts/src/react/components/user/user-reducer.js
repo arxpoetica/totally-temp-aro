@@ -37,7 +37,7 @@ function setLoggedInUserProject (state, projectId) {
   return {
     ...state,
     loggedInUser: { 
-      ...loggedInUser,
+      ...state.loggedInUser,
       projectId: projectId 
     }
   }
