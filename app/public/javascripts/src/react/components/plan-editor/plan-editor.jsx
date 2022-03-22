@@ -33,6 +33,9 @@ export const PlanEditor = props => {
     updateFeatureProperties,
     noMetaConstructionAreas,
     noMetaEquipmentTypes,
+    transactionId,
+    rootDraft,
+    getFiberAnnotations,
   } = props
 
   useEffect(() => {
@@ -40,6 +43,12 @@ export const PlanEditor = props => {
       .then(() => resumeOrCreateTransaction())
     return () => unsubscribeFromSocket()
   }, [])
+
+  useEffect(() => {
+    if (transactionId && rootDraft) {
+      getFiberAnnotations(rootDraft.subnetId)
+    }
+  }, [transactionId, !!rootDraft])
 
   function onFeatureFormSave(newValObj, objectId) {
     const { feature } = features[objectId]
@@ -115,6 +124,8 @@ const mapStateToProps = (state) => {
     rootSubnet: PlanEditorSelectors.getRootSubnet(state),
     noMetaEquipmentTypes: (state.configuration.ui.perspective && state.configuration.ui.perspective.networkEquipment.planEdit[planType].noMetaData) || [],
     noMetaConstructionAreas: (state.configuration.ui.perspective && state.configuration.ui.perspective.constructionAreas.planEdit[constructionPlanType].noMetaData) || [],
+    transactionId: state.planEditor.transaction && state.planEditor.transaction.id,
+    rootDraft: PlanEditorSelectors.getRootDraft(state),
   }
 }
 
@@ -123,6 +134,7 @@ const mapDispatchToProps = dispatch => ({
   subscribeToSocket: () => dispatch(PlanEditorActions.subscribeToSocket()),
   resumeOrCreateTransaction: () => dispatch(PlanEditorActions.resumeOrCreateTransaction()),
   updateFeatureProperties: obj => dispatch(PlanEditorActions.updateFeatureProperties(obj)),
+  getFiberAnnotations: subnetId => dispatch(PlanEditorActions.getFiberAnnotations(subnetId)),
 })
 
 const PlanEditorComponent = wrapComponentWithProvider(reduxStore, PlanEditor, mapStateToProps, mapDispatchToProps)
