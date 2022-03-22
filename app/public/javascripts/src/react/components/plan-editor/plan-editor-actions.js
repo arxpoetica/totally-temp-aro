@@ -191,10 +191,7 @@ function subscribeToSocket() {
             }
             break
           case DRAFT_STATES.END_SUBNET_TREE: break // no op
-          case DRAFT_STATES.END_INITIALIZATION:
-            const rootDraft = PlanEditorSelectors.getRootDraft(getState())
-            dispatch(getFiberAnnotations(rootDraft.subnetId))
-            break
+          case DRAFT_STATES.END_INITIALIZATION: break // no op
           default:
             throw new Error(`Not handling SUBNET_DATA socket type: ${data.subnetNodeUpdateType}`)
         }
