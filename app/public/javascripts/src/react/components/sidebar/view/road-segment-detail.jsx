@@ -152,7 +152,7 @@ export const RoadSegmentDetail = (props) => {
   }
 
   return selectedEdgeInfo
-    ? <div className="plan-settings-container">
+    ? <div>
 
       {correctZoomLevel
         ? <>
