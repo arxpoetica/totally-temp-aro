@@ -50,6 +50,7 @@ const getFocusedEquipmentIds = createSelector(
       ...new Set([
         selectedSubnet.subnetNode,
         ...selectedSubnet.children,
+        ...selectedSubnet.coEquipments || [],
         ...selectedEditFeatureIds,
       ])
     ].filter(Boolean)

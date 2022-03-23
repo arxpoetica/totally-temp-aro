@@ -55,7 +55,8 @@ export class EquipmentBoundaryMapObjects extends Component {
       }
 
       const childrenIds = subnets[rootSubnetId] && subnets[rootSubnetId].children || []
-      const inclusiveIds = allIds.concat(childrenIds)
+      const coEquipmentIds = subnets[rootSubnetId] && subnets[rootSubnetId].coEquipments || []
+      const inclusiveIds = allIds.concat([...childrenIds, ...coEquipmentIds])
       // ensure allIds are unique
       const uniqueAllIds = [...new Set(inclusiveIds.concat([rootSubnetId]))]
       // selected feature is not a subnet
