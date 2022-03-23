@@ -33,6 +33,16 @@ function setLoggedInUser (state, loggedInUser) {
   }
 }
 
+function setLoggedInUserProject (state, projectId) {
+  return {
+    ...state,
+    loggedInUser: { 
+      ...state.loggedInUser,
+      projectId: projectId 
+    }
+  }
+}
+
 // Set all the system actors (i.e. users and groups)
 function setSystemActors (state, systemActors) {
   return { ...state,
@@ -215,6 +225,9 @@ function userReducer (state = defaultState, action) {
 
     case Actions.USER_SET_LOGGED_IN_USER:
       return setLoggedInUser(state, action.payload)
+
+    case Actions.USER_SET_LOGGED_IN_USER_PROJECT:
+      return setLoggedInUserProject(state, action.payload)
 
     case Actions.USER_UPDATE_USER:
       return updateLoggedInUser(state, action.payload)

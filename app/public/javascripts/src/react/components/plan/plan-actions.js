@@ -7,6 +7,7 @@ import SocketManager from '../../../react/common/socket-manager'
 import PlanEditorActions from '../plan-editor/plan-editor-actions'
 import RingEditActions from '../ring-edit/ring-edit-actions'
 import NetworkOptimizationActions from '../optimization/network-optimization/network-optimization-actions'
+import UserActions from '../user/user-actions'
 import ToolBarActions from '../header/tool-bar-actions.js'
 import AroHttp from '../../common/aro-http'
 import { batch } from 'react-redux'
@@ -191,6 +192,8 @@ function setActivePlan (plan) {
     dispatch(loadPlanResourceSelectionFromServer(plan))
     // load errors
     dispatch(setActivePlanErrors())
+    // load project id to user and base plan
+    dispatch(setSelectedProjectId(plan.projectId))
 
     if (plan.planType === 'RFP') {
       dispatch({
@@ -433,8 +436,8 @@ function loadProjectConfig (userId, authPermissions) {
           }
         }
           
-        var allProjects = myProjects
-        var parentProjectForNewProject = allProjects[0]
+        const allProjects = myProjects
+        const parentProjectForNewProject = allProjects[0]
         
         dispatch({
           type: Actions.PLAN_SET_ALL_PROJECT,
@@ -446,11 +449,8 @@ function loadProjectConfig (userId, authPermissions) {
         return AroHttp.get(`/service/auth/users/${userId}/configuration`)
       })
       .then((result) => {
-        var selectedProjectId = result.data.projectTemplateId
-        dispatch({
-          type: Actions.PLAN_SET_SELECTED_PROJECT_ID,
-          payload: selectedProjectId
-        })
+        const selectedProjectId = result.data.projectTemplateId
+        dispatch(setSelectedProjectId(selectedProjectId))
       })
       .catch((err) => console.error(err))
   }
@@ -583,6 +583,7 @@ function setSelectedProjectId (selectedProjectId){
       type: Actions.PLAN_SET_SELECTED_PROJECT_ID,
       payload: selectedProjectId
     })
+    dispatch(UserActions.setLoggedInUserProjectId(selectedProjectId))
   }
 }
 

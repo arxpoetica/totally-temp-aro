@@ -44,6 +44,19 @@ export const FiberMapObjects = (props) => {
         setRenderedSubnetId(parentId)
         renderFiber(subnetLinks, fiberType)
       }
+    } else if (
+      subnetFeatures[selectedSubnetId] &&
+      subnetFeatures[selectedSubnetId].feature.dataType === "edge_construction_area"
+    ) {
+      const rootSubnetFeature = Object.values(subnetFeatures)
+        .find(feature => !feature.subnetId && !feature.feature.dataType)
+      const rootSubnetId = rootSubnetFeature.feature.objectId
+      const { subnetLinks, fiberType } = subnets[rootSubnetId].fiber
+
+      if (renderedSubnetId !== rootSubnetId || fiberRenderRequired) {
+        setRenderedSubnetId(rootSubnetId)
+        renderFiber(subnetLinks, fiberType)
+      }
     } else {
       setRenderedSubnetId('')
       deleteMapObjects()
