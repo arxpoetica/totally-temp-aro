@@ -39,9 +39,25 @@ const getIsRecalcSettled = createSelector(
 const getFocusedEquipmentIds = createSelector(
   [getSelectedSubnetId, getSubnetFeatures, getSubnets, getSelectedSubnet, getSelectedEditFeatureIds],
   (selectedSubnetId, subnetFeatures, subnets, selectedSubnet, selectedEditFeatureIds) => {
+  const routeAdjusters = []
+  const rootSubnets = []
     if (!selectedSubnet) {
       const subnetId = subnetFeatures[selectedSubnetId] && subnetFeatures[selectedSubnetId].subnetId
       selectedSubnet = subnetId && subnets[subnetId] ? subnets[subnetId] : { children: [], subnetNode: null }
+    }
+    if (subnetFeatures[selectedSubnetId] && !subnetFeatures[selectedSubnetId].subnetId) {
+      Object.values(subnetFeatures).forEach(subnet => {
+        if (subnet && subnet.feature.dataType === "edge_construction_area") {
+          routeAdjusters.push(subnet.feature.objectId)
+        }
+      })
+    }
+    if (subnetFeatures[selectedSubnetId] && subnetFeatures[selectedSubnetId].feature.dataType === "edge_construction_area") {
+      Object.values(subnetFeatures).forEach(subnet => {
+        if (subnet && !subnet.feature.dataType && !subnet.subnetId) {
+          rootSubnets.push(subnet.feature.objectId)
+        }
+      })
     }
 
     // visible/focused equipment ids within the selected subnet
@@ -49,6 +65,8 @@ const getFocusedEquipmentIds = createSelector(
       // make unique with `Set`
       ...new Set([
         selectedSubnet.subnetNode,
+        ...routeAdjusters,
+        ...rootSubnets,
         ...selectedSubnet.children,
         ...selectedSubnet.coEquipments || [],
         ...selectedEditFeatureIds,
