@@ -45,10 +45,10 @@ export const PlanEditor = props => {
   }, [])
 
   useEffect(() => {
-    if (transactionId && rootDraft) {
+    if (transactionId && rootDraft && draftsState === "END_INITIALIZATION") {
       getFiberAnnotations(rootDraft.subnetId)
     }
-  }, [transactionId, !!rootDraft])
+  }, [transactionId, !!rootDraft, draftsState])
 
   function onFeatureFormSave(newValObj, objectId) {
     const { feature } = features[objectId]
