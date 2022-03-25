@@ -8,6 +8,7 @@ import TileUtilities from './tile-utilities'
 import MapUtilities from '../common/plan/map-utilities'
 import FeatureSelector from './feature-selector'
 import Constants from '../common/constants'
+import rConstants from '../../react/common/constants'
 import SelectionModes from '../../react/components/selection/selection-modes'
 import MenuAction, { MenuActionTypes } from '../common/context-menu/menu-action'
 import MenuItem from '../common/context-menu/menu-item'
@@ -421,6 +422,15 @@ class TileComponentController {
     })
 
     this.overlayClickListener = this.mapRef.addListener('click', async(event) => {
+      const displayMode = this.state.selectedDisplayMode.getValue()
+      const { ANALYSIS, EDIT_PLAN, EDIT_RINGS } = this.state.displayModes
+      const { rPlanState } = this
+      const { STARTED, COMPLETED } = rConstants.PLAN_STATE
+
+      if (displayMode === ANALYSIS && (rPlanState === STARTED || rPlanState === COMPLETED)) {
+        return
+      }
+
       if (this.contextMenuService.isMenuVisible.getValue()) {
         this.contextMenuService.menuOff()
         this.$timeout()
@@ -430,7 +440,7 @@ class TileComponentController {
       const { isShiftPressed } = this.state
 
       // let plan edit do its thing
-      if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.EDIT_PLAN) {
+      if (displayMode === EDIT_PLAN) {
         if (!isShiftPressed) this.leftClickTile(event.latLng)
         return
       }
@@ -801,6 +811,7 @@ class TileComponentController {
       selectedSubnetLocations: PlanEditorSelectors.getSelectedSubnetLocations(reduxState),
       selectionIds: reduxState.selection.planEditorFeatures,
       polygonCoordinates: reduxState.selection.polygonCoordinates,
+      rPlanState: reduxState.plan && reduxState.plan.activePlan && reduxState.plan.activePlan.planState,
     }
   }
 

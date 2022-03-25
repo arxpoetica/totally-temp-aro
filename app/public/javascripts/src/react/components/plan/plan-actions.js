@@ -7,14 +7,48 @@ import SocketManager from '../../../react/common/socket-manager'
 import PlanEditorActions from '../plan-editor/plan-editor-actions'
 import RingEditActions from '../ring-edit/ring-edit-actions'
 import NetworkOptimizationActions from '../optimization/network-optimization/network-optimization-actions'
+import UserActions from '../user/user-actions'
 import ToolBarActions from '../header/tool-bar-actions.js'
 import AroHttp from '../../common/aro-http'
 import { batch } from 'react-redux'
 
 function setActivePlanState (planState) {
-  return {
-    type: Actions.PLAN_SET_ACTIVE_PLAN_STATE,
-    payload: planState
+  return dispatch => {
+    if (planState === "COMPLETED" || planState === "FAILED") {
+      dispatch(setActivePlanErrors())
+    }
+
+    dispatch({
+      type: Actions.PLAN_SET_ACTIVE_PLAN_STATE,
+      payload: planState
+    })
+  }
+}
+
+function setActivePlanErrors() {
+  return (dispatch, getState) => {
+    const state = getState();
+    const activePlan = state.plan.activePlan
+    AroHttp.get(`/service/v1/plan/${activePlan.id}/errors?user_id=${activePlan.createdBy}`)
+      .then((response) => {
+        const activePlanErrors = {
+          PRE_VALIDATION: {},
+          NONE: {},
+          CANCELLED: {},
+          RUNTIME_EXCEPTION: {},
+          ROOT_OPTIMIZATION_FAILURE: {}
+        };
+
+        response.data.forEach((error) => {
+            activePlanErrors[error.errorCategory][error.serviceAreaCode] = 
+              error.errorMessage;
+        })
+
+        dispatch({
+          type: Actions.PLAN_SET_ACTIVE_PLAN_ERRORS,
+          payload: activePlanErrors
+        })
+      })
   }
 }
 
@@ -156,7 +190,11 @@ function setActivePlan (plan) {
     dispatch(RingEditActions.loadRings(plan.id))
     // load rings
     dispatch(loadPlanResourceSelectionFromServer(plan))
-    
+    // load errors
+    dispatch(setActivePlanErrors())
+    // load project id to user and base plan
+    dispatch(setSelectedProjectId(plan.projectId))
+
     if (plan.planType === 'RFP') {
       dispatch({
         type: Actions.RFP_SET_STATUS,
@@ -398,8 +436,8 @@ function loadProjectConfig (userId, authPermissions) {
           }
         }
           
-        var allProjects = myProjects
-        var parentProjectForNewProject = allProjects[0]
+        const allProjects = myProjects
+        const parentProjectForNewProject = allProjects[0]
         
         dispatch({
           type: Actions.PLAN_SET_ALL_PROJECT,
@@ -411,11 +449,8 @@ function loadProjectConfig (userId, authPermissions) {
         return AroHttp.get(`/service/auth/users/${userId}/configuration`)
       })
       .then((result) => {
-        var selectedProjectId = result.data.projectTemplateId
-        dispatch({
-          type: Actions.PLAN_SET_SELECTED_PROJECT_ID,
-          payload: selectedProjectId
-        })
+        const selectedProjectId = result.data.projectTemplateId
+        dispatch(setSelectedProjectId(selectedProjectId))
       })
       .catch((err) => console.error(err))
   }
@@ -548,10 +583,12 @@ function setSelectedProjectId (selectedProjectId){
       type: Actions.PLAN_SET_SELECTED_PROJECT_ID,
       payload: selectedProjectId
     })
+    dispatch(UserActions.setLoggedInUserProjectId(selectedProjectId))
   }
 }
 
-function updateDefaultPlanCoordinates (coordinates){
+function updateDefaultPlanCoordinates (payload){
+  /*
   return dispatch => {
     coordinates.addListener('center_changed', () => {
       var center = coordinates.getCenter()
@@ -566,6 +603,11 @@ function updateDefaultPlanCoordinates (coordinates){
         payload: {'zoom_changed' : coordinates.getZoom()}
       })
     })
+  }
+  */
+  return {
+    type: Actions.PLAN_UPDATE_DEFAULT_PLAN_COORDINATES,
+    payload: payload,
   }
 }
 
@@ -672,4 +714,5 @@ export default {
   deletePlan,
   getOrCreateEphemeralPlan,
   editActivePlan,
+  setActivePlanErrors
 }

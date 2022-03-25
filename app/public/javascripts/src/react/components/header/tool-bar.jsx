@@ -550,7 +550,7 @@ export class ToolBar extends Component {
   }
 
   refreshToolbar () {
-    const element = jQuery(".reactCompClass").get() // To get the <r-tool-bar> component Elements
+    const element = jQuery(".toolbar-container").get() // To get the <r-tool-bar> component Elements
     if (element) {
 
       const toolBarElement = jQuery(".tool-bar").get()

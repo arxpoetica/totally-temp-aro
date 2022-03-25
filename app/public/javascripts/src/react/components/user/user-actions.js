@@ -88,6 +88,15 @@ function setLoggedInUser (loggedInUser) {
   }
 }
 
+function setLoggedInUserProjectId (projectId) {
+  return dispatch => {
+    dispatch({
+      type: Actions.USER_SET_LOGGED_IN_USER_PROJECT,
+      payload: projectId
+    })
+  }
+}
+
 // Load the list of system actors (i.e. users and groups)
 function loadSystemActors () {
   return dispatch => {
@@ -344,4 +353,5 @@ export default {
   searchUsers,
   saveUsers,
   clearUserList,
+  setLoggedInUserProjectId
 }

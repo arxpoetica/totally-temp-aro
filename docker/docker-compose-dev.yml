@@ -44,6 +44,7 @@ services:
             IGNITE_PROFILE: ignite_debug
             ZK_HOST: zookeeper
             RABBITMQ_HOST: rabbitmq
+            DATA_CONSTRAINT_LOCATIONS: "${DATA_CONSTRAINT_LOCATIONS:-200000}"
         networks:
             - main
 
@@ -84,6 +85,8 @@ services:
             # ARO_SERVICE_URL: http://docker.for.mac.localhost:8080
             # GOOGLE_MAPS_GESTURE_HANDLING: auto
             # MABL_TESTING: true
+            REDUX_LOGGER_EXCLUDES: >
+                ["MAP_SET_ARE_TILES_RENDERING", "PLAN_UPDATE_DEFAULT_PLAN_COORDINATES"]
         working_dir: /srv/www/aro
         command: bash -c "/usr/sbin/sshd -D"
         networks:

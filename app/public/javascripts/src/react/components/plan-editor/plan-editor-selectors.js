@@ -17,6 +17,11 @@ const getBoundaryDebounceBySubnetId = state => state.planEditor.boundaryDebounce
 const getCursorLocationIds = state => state.planEditor.cursorLocationIds
 const getPlanThumbInformation = state => state.planEditor.getPlanThumbInformation
 
+const getDrafts = state => state.planEditor.drafts
+const getRootDraft = createSelector([getDrafts], (drafts) => {
+  return Object.values(drafts).find(draft => !draft.parentSubnetId)
+})
+
 const getSelectedPlanThumbInformation = createSelector(
   [getSelectedSubnet, getPlanThumbInformation],
   (selectedSubnet, planThumbInformation) => {
@@ -31,30 +36,42 @@ const getIsRecalcSettled = createSelector(
   }
 )
 
-const getFeaturesRenderInfo = createSelector(
+const getFocusedEquipmentIds = createSelector(
   [getSelectedSubnetId, getSubnetFeatures, getSubnets, getSelectedSubnet, getSelectedEditFeatureIds],
   (selectedSubnetId, subnetFeatures, subnets, selectedSubnet, selectedEditFeatureIds) => {
+  const routeAdjusters = []
+  const rootSubnets = []
     if (!selectedSubnet) {
       const subnetId = subnetFeatures[selectedSubnetId] && subnetFeatures[selectedSubnetId].subnetId
       selectedSubnet = subnetId && subnets[subnetId] ? subnets[subnetId] : { children: [], subnetNode: null }
     }
+    if (subnetFeatures[selectedSubnetId] && !subnetFeatures[selectedSubnetId].subnetId) {
+      Object.values(subnetFeatures).forEach(subnet => {
+        if (subnet && subnet.feature.dataType === "edge_construction_area") {
+          routeAdjusters.push(subnet.feature.objectId)
+        }
+      })
+    }
+    if (subnetFeatures[selectedSubnetId] && subnetFeatures[selectedSubnetId].feature.dataType === "edge_construction_area") {
+      Object.values(subnetFeatures).forEach(subnet => {
+        if (subnet && !subnet.feature.dataType && !subnet.subnetId) {
+          rootSubnets.push(subnet.feature.objectId)
+        }
+      })
+    }
 
-    // highlighted ids within the subnet
-    const highlightedFeatureIds = [
+    // visible/focused equipment ids within the selected subnet
+    return [
+      // make unique with `Set`
       ...new Set([
         selectedSubnet.subnetNode,
+        ...routeAdjusters,
+        ...rootSubnets,
         ...selectedSubnet.children,
+        ...selectedSubnet.coEquipments || [],
         ...selectedEditFeatureIds,
       ])
     ].filter(Boolean)
-    // everything else outside the context of anything highlighted
-    const idleFeatureIds = Object.keys(subnetFeatures)
-      .filter(id => !highlightedFeatureIds.includes(id))
-
-    return [
-      ...highlightedFeatureIds.map(id => ({ id, idle: false })),
-      ...idleFeatureIds.map(id => ({ id, idle: true })),
-    ]
   }
 )
 
@@ -69,9 +86,18 @@ const getNetworkConfig = state => {
   return networkConfig
 }
 
-// temporary
-const locationWarnImg = new Image(18, 22)
-locationWarnImg.src = '/svg/alert-panel-location.png'
+let locationWarnImgByType = {
+  '1': new Image(20, 20),
+  '2': new Image(20, 20),
+  '3': new Image(20, 20),
+  '4': new Image(20, 20),
+  '5': new Image(20, 20),
+}
+locationWarnImgByType['1'].src = '/images/map_icons/aro/businesses_small_default_alert.png'
+locationWarnImgByType['2'].src = '/images/map_icons/aro/businesses_medium_default_alert.png'
+locationWarnImgByType['3'].src = '/images/map_icons/aro/businesses_large_default_alert.png'
+locationWarnImgByType['4'].src = '/images/map_icons/aro/households_default_alert.png'
+locationWarnImgByType['5'].src = '/images/map_icons/aro/tower_alert.png'
 
 const getRootSubnet = createSelector(
   [getSelectedSubnetId, getSubnetFeatures, getSubnets],
@@ -327,16 +353,17 @@ const getLocationCounts = createSelector(
 const PlanEditorSelectors = Object.freeze({
   getSelectedSubnet,
   getBoundaryLayersList,
-  getFeaturesRenderInfo,
+  getFocusedEquipmentIds,
   getIsRecalcSettled,
   getAlertsForSubnetTree,
-  locationWarnImg,
+  locationWarnImgByType,
   getRootSubnet,
+  getRootDraft,
   getSelectedSubnetLocations,
   getCursorLocations,
   getLocationCounts,
   getSubnetFeatures,
-  getSelectedPlanThumbInformation
+  getSelectedPlanThumbInformation,
 })
 
 export default PlanEditorSelectors

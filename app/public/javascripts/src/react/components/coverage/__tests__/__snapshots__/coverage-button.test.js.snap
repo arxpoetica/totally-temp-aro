@@ -1,77 +1,18 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`When a coverage report is running at 10% progress 1`] = `
-<div
+<button
+  className="btn btn-danger"
+  onClick={[Function]}
   style={
     Object {
-      "display": "flex",
-      "height": "34px",
       "marginBottom": "10px",
-      "position": "relative",
       "width": "100%",
     }
   }
 >
-  <div
-    style={
-      Object {
-        "flex": "1 1 auto",
-      }
-    }
-  >
-    <div
-      className="progress"
-      style={
-        Object {
-          "height": "100%",
-        }
-      }
-    >
-      <div
-        aria-valuemax="1"
-        aria-valuemin="0"
-        aria-valuenow={0.1}
-        className="progress-bar progress-bar-optimization"
-        role="progressbar"
-        style={
-          Object {
-            "lineHeight": "34px",
-            "width": "10%",
-          }
-        }
-      />
-      <div
-        style={
-          Object {
-            "backgroundColor": "rgba(0, 0, 0, 0.4)",
-            "borderRadius": "3px",
-            "color": "white",
-            "fontWeight": "bold",
-            "left": "50%",
-            "position": "absolute",
-            "textAlign": "center",
-            "top": "50%",
-            "transform": "translateX(-50%) translateY(-50%)",
-            "width": "80px",
-          }
-        }
-      >
-        10%
-      </div>
-    </div>
-  </div>
-  <button
-    className="btn btn-danger"
-    onClick={[Function]}
-    style={
-      Object {
-        "flex": "0 0 auto",
-      }
-    }
-  >
-    Cancel
-  </button>
-</div>
+  Cancel
+</button>
 `;
 
 exports[`When the user does not have a coverage report 1`] = `
