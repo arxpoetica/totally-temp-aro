@@ -178,7 +178,7 @@ const PlanNavigation = props => {
           </div>
         )
       }
-      const nodeType = props.drafts[featureId].nodeType
+      const nodeType = props.drafts[featureId] && props.drafts[featureId].nodeType
       
       let featureRow = (
         <>
@@ -195,7 +195,7 @@ const PlanNavigation = props => {
                 src={iconURL} 
               />
               <h2 className="title">
-                { nodeType.replaceAll("_", " ") }
+                { nodeType && nodeType.replaceAll("_", " ") }
               </h2>
             </div>
             {faultSum 
