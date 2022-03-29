@@ -100,14 +100,16 @@ const FiberAnnotations = (props) => {
 
   function getRootSubnetId(subnetId) {
     let rootSubnetFeature = subnetFeatures[subnetId]
-    // adding different checks in this if statement allows the
-    // fiber annotations to display in the side panel for those equipment
-    if (rootSubnetFeature.feature.networkNodeType === "splice_point") {
-      rootSubnetFeature = Object.values(subnetFeatures).find(subnetFeature => {
-        return !subnetFeature.subnetId
-          && subnetFeature.feature.networkNodeType === "central_office"
-          && subnetFeature.feature.objectId === rootSubnetFeature.subnetId
-      })
+    if (rootSubnetFeature) {
+      // adding different checks in this if statement allows the
+      // fiber annotations to display in the side panel for those equipment
+      if (rootSubnetFeature.feature.networkNodeType === "splice_point") {
+        rootSubnetFeature = Object.values(subnetFeatures).find(subnetFeature => {
+          return !subnetFeature.subnetId
+            && subnetFeature.feature.networkNodeType === "central_office"
+            && subnetFeature.feature.objectId === rootSubnetFeature.subnetId
+        })
+      }
     }
 
     return rootSubnetFeature
@@ -121,7 +123,7 @@ const FiberAnnotations = (props) => {
   }
 
   function saveAnnotations() {
-    const subnetAnnotations = fiberAnnotations[selectedSubnetId]
+    const subnetAnnotations = fiberAnnotations[getRootSubnetId(selectedSubnetId)]
     selectedFiber.forEach((fiberRoute) => {
       if (subnetAnnotations) {
         const annotation = subnetAnnotations.find(
