@@ -25,9 +25,9 @@ const FiberAnnotations = (props) => {
 
   useEffect(() => {
     // this useEffect is for pulling the annotations from state
-    if (selectedFiber.length === 1 && fiberAnnotations[selectedSubnetId]) {
+    if (selectedFiber.length === 1 && fiberAnnotations[getRootSubnetId(selectedSubnetId)]) {
       // if only one route selected, just set the values
-      const selectedFiberAnnotations = fiberAnnotations[selectedSubnetId].find(
+      const selectedFiberAnnotations = fiberAnnotations[getRootSubnetId(selectedSubnetId)].find(
         (annotation) =>
           annotation.fromNode === selectedFiber[0].fromNode &&
           annotation.toNode === selectedFiber[0].toNode,
@@ -35,7 +35,7 @@ const FiberAnnotations = (props) => {
       if (selectedFiberAnnotations && selectedFiberAnnotations.annotations) {
         setFormValues(selectedFiberAnnotations.annotations)
       }
-    } else if (selectedFiber.length > 1 && fiberAnnotations[selectedSubnetId]) {
+    } else if (selectedFiber.length > 1 && fiberAnnotations[getRootSubnetId(selectedSubnetId)]) {
       // if multiple routes are selected, compare the values to see if they match
       // if there is only one value, set it and make it editable
       // if there are multiple values, display the multiple values as a placeholder
@@ -45,7 +45,7 @@ const FiberAnnotations = (props) => {
       // for each selected fiber segment
       selectedFiber.forEach((fiberRoute) => {
         const selectedFiberAnnotations = fiberAnnotations[
-          selectedSubnetId
+          getRootSubnetId(selectedSubnetId)
         ].find(
           (annotation) =>
             annotation.fromNode === fiberRoute.fromNode &&
@@ -92,10 +92,27 @@ const FiberAnnotations = (props) => {
       setFormValues({})
       setFormPlaceHolders({})
     }
-  }, [selectedFiber, fiberAnnotations, setFormPlaceHolders, setFormValues])
+  }, [selectedFiber, fiberAnnotations, setFormPlaceHolders, setFormValues, selectedSubnetId])
 
   function deselectFiber() {
     setSelectedFiber([])
+  }
+
+  function getRootSubnetId(subnetId) {
+    let rootSubnetFeature = subnetFeatures[subnetId]
+    // adding different checks in this if statement allows the
+    // fiber annotations to display in the side panel for those equipment
+    if (rootSubnetFeature.feature.networkNodeType === "splice_point") {
+      rootSubnetFeature = Object.values(subnetFeatures).find(subnetFeature => {
+        return !subnetFeature.subnetId
+          && subnetFeature.feature.networkNodeType === "central_office"
+          && subnetFeature.feature.objectId === rootSubnetFeature.subnetId
+      })
+    }
+
+    return rootSubnetFeature
+      && rootSubnetFeature.feature
+      && rootSubnetFeature.feature.objectId;
   }
 
   function handleChange(event, label) {
@@ -126,8 +143,8 @@ const FiberAnnotations = (props) => {
     })
 
     setFiberAnnotations(
-      { [selectedSubnetId]: subnetAnnotations },
-      selectedSubnetId,
+      { [getRootSubnetId(selectedSubnetId)]: subnetAnnotations },
+      getRootSubnetId(selectedSubnetId),
     )
   }
 
@@ -135,8 +152,10 @@ const FiberAnnotations = (props) => {
   return (
     <>
       {selectedFiber.length > 0 
-        && subnetFeatures[selectedSubnetId] 
-        && subnetFeatures[selectedSubnetId].feature.networkNodeType === "central_office" 
+        && subnetFeatures[getRootSubnetId(selectedSubnetId)] 
+        && (
+          subnetFeatures[getRootSubnetId(selectedSubnetId)].feature.networkNodeType === "central_office"
+          )
         && (
         <div className={'fiber-annotations plan-editor-thumb'}>
           <div className="info">
