@@ -48,9 +48,8 @@ export const FiberMapObjects = (props) => {
       subnetFeatures[selectedSubnetId] &&
       subnetFeatures[selectedSubnetId].feature.dataType === "edge_construction_area"
     ) {
-      const rootSubnetFeature = Object.values(subnetFeatures)
-        .find(feature => !feature.subnetId && !feature.feature.dataType)
-      const rootSubnetId = rootSubnetFeature.feature.objectId
+      
+      const rootSubnetId = getRootSubnetId()
       const { subnetLinks, fiberType } = subnets[rootSubnetId].fiber
 
       if (renderedSubnetId !== rootSubnetId || fiberRenderRequired) {
@@ -83,6 +82,29 @@ export const FiberMapObjects = (props) => {
         setFiberRenderRequired(false)
       }
     }
+
+    function getRootSubnetId(subnetId) {
+      let rootSubnetFeature = subnetFeatures[subnetId]
+      if (rootSubnetFeature) {
+        // adding different checks in this if statement allows the
+        // fiber annotations to display in the side panel for those equipment
+        if (rootSubnetFeature.feature.networkNodeType === "splice_point") {
+          rootSubnetFeature = Object.values(subnetFeatures).find(subnetFeature => {
+            return !subnetFeature.subnetId
+              && subnetFeature.feature.networkNodeType === "central_office"
+              && subnetFeature.feature.objectId === rootSubnetFeature.subnetId
+          })
+        }
+      } else {
+        rootSubnetFeature = Object.values(subnetFeatures)
+        .find(feature => !feature.subnetId && !feature.feature.dataType)
+      }
+  
+      return rootSubnetFeature
+        && rootSubnetFeature.feature
+        && rootSubnetFeature.feature.objectId;
+    }
+
     function createMapObject(path, fromNode, toNode, fiberType, conduitType = null) {
       let strokeColor = layerEquipment.cables[fiberType].drawingOptions.strokeStyle
       let strokeWeight = fiberType === 'DISTRIBUTION' ? 2 : 3
@@ -99,9 +121,10 @@ export const FiberMapObjects = (props) => {
       let highlightColor = null
       let highlightWeight = null
       // set color purple if there are annotations
+      const selectedRootSubnetId = getRootSubnetId(selectedSubnetId)
       if (
-        fiberAnnotations[selectedSubnetId] &&
-        fiberAnnotations[selectedSubnetId].some(
+        fiberAnnotations[selectedRootSubnetId] &&
+        fiberAnnotations[selectedRootSubnetId].some(
           (fiber) => fiber.fromNode === fromNode && fiber.toNode === toNode,
         )
       ){

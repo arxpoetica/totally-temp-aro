@@ -24,10 +24,11 @@ const FiberAnnotations = (props) => {
   const [formPlaceholders, setFormPlaceHolders] = useState({})
 
   useEffect(() => {
+    const rootSubnetId = getRootSubnetId(selectedSubnetId)
     // this useEffect is for pulling the annotations from state
-    if (selectedFiber.length === 1 && fiberAnnotations[getRootSubnetId(selectedSubnetId)]) {
+    if (selectedFiber.length === 1 && fiberAnnotations[rootSubnetId]) {
       // if only one route selected, just set the values
-      const selectedFiberAnnotations = fiberAnnotations[getRootSubnetId(selectedSubnetId)].find(
+      const selectedFiberAnnotations = fiberAnnotations[rootSubnetId].find(
         (annotation) =>
           annotation.fromNode === selectedFiber[0].fromNode &&
           annotation.toNode === selectedFiber[0].toNode,
@@ -35,7 +36,7 @@ const FiberAnnotations = (props) => {
       if (selectedFiberAnnotations && selectedFiberAnnotations.annotations) {
         setFormValues(selectedFiberAnnotations.annotations)
       }
-    } else if (selectedFiber.length > 1 && fiberAnnotations[getRootSubnetId(selectedSubnetId)]) {
+    } else if (selectedFiber.length > 1 && fiberAnnotations[rootSubnetId]) {
       // if multiple routes are selected, compare the values to see if they match
       // if there is only one value, set it and make it editable
       // if there are multiple values, display the multiple values as a placeholder
@@ -45,7 +46,7 @@ const FiberAnnotations = (props) => {
       // for each selected fiber segment
       selectedFiber.forEach((fiberRoute) => {
         const selectedFiberAnnotations = fiberAnnotations[
-          getRootSubnetId(selectedSubnetId)
+          rootSubnetId
         ].find(
           (annotation) =>
             annotation.fromNode === fiberRoute.fromNode &&
@@ -123,7 +124,8 @@ const FiberAnnotations = (props) => {
   }
 
   function saveAnnotations() {
-    const subnetAnnotations = fiberAnnotations[getRootSubnetId(selectedSubnetId)]
+    const rootSubnetId = getRootSubnetId(selectedSubnetId)
+    const subnetAnnotations = fiberAnnotations[rootSubnetId]
     selectedFiber.forEach((fiberRoute) => {
       if (subnetAnnotations) {
         const annotation = subnetAnnotations.find(
@@ -145,8 +147,8 @@ const FiberAnnotations = (props) => {
     })
 
     setFiberAnnotations(
-      { [getRootSubnetId(selectedSubnetId)]: subnetAnnotations },
-      getRootSubnetId(selectedSubnetId),
+      { [rootSubnetId]: subnetAnnotations },
+      rootSubnetId,
     )
   }
 
