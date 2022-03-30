@@ -144,28 +144,29 @@ function subscribeToSocket() {
       const unsubscriber = SocketManager.subscribe('SUBNET_DATA', rawData => {
         const data = JSON.parse(utf8decoder.decode(rawData.content))
         // console.log({ name: data.subnetNodeUpdateType, SUBNET_DATA: data, properties: rawData.properties })
-
+        console.log(data)
         // asynchronous set up of skeleton from socket data
         switch (data.subnetNodeUpdateType) {
           case DRAFT_STATES.START_INITIALIZATION: break // no op
           case DRAFT_STATES.INITIAL_STRUCTURE_UPDATE:
-            const rootSubnet = data.initialSubnetStructure.rootSubnets[0]
-            const { boundaryMap, rootSubnetDetail, subnetRefs } = rootSubnet
+            let drafts = {}
+            data.initialSubnetStructure.rootSubnets.forEach(rootSubnet => {
+              const { boundaryMap, rootSubnetDetail, subnetRefs } = rootSubnet
 
-            const drafts = {}
-            for (const ref of subnetRefs) {
-              const draft = klona(ref)
-              draft.nodeSynced = false
-              draft.subnetBoundary = klona(boundaryMap[draft.subnetId] || rootSubnetDetail.subnetBoundary)
-              if (draft.nodeType === 'central_office') {
-                draft.equipment = klona(rootSubnetDetail.children)
-                // for ease, throwing CO on itself for display
-                draft.equipment.push(klona(rootSubnetDetail.subnetId))
-              } else {
-                draft.equipment = []
+              for (const ref of subnetRefs) {
+                const draft = klona(ref)
+                draft.nodeSynced = false
+                draft.subnetBoundary = klona(boundaryMap[draft.subnetId] || rootSubnetDetail.subnetBoundary)
+                if (draft.nodeType === 'central_office') {
+                  draft.equipment = klona(rootSubnetDetail.children)
+                  // for ease, throwing CO on itself for display
+                  draft.equipment.push(klona(rootSubnetDetail.subnetId))
+                } else {
+                  draft.equipment = []
+                }
+                drafts[draft.subnetId] = draft
               }
-              drafts[draft.subnetId] = draft
-            }
+            })
             batch(() => {
               dispatch({ type: Actions.PLAN_EDITOR_SET_DRAFTS, payload: drafts })
               dispatch({ type: Actions.PLAN_EDITOR_SET_IS_ENTERING_TRANSACTION, payload: false })
@@ -902,6 +903,7 @@ function readFeatures (featureIds) {
     let featuresToGet = []
     const transactionId = state.planEditor.transaction && state.planEditor.transaction.id
     featureIds.forEach(featureId => {
+      console.log(featureId)
       if (!state.planEditor.features[typeof featureId === "string" ? featureId : featureId.objectId]) {
         featuresToGet.push(featureId)
       }

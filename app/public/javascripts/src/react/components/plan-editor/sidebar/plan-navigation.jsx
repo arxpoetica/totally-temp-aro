@@ -39,6 +39,7 @@ const PlanNavigation = props => {
 
   function getHoverPosition(featureId) {
     const node = props.rootDraft.equipment.find(node => node.id === featureId)
+    //if (!node || !node.point) return null
     return WktUtils.getGoogleMapLatLngFromWKTPoint(node.point)
   }
 

@@ -37,6 +37,7 @@ const PlanEditorDrafts = props => {
     })
 
     const equipmentIds = []
+    console.log(objects)
     for (const object of objects) {
       const { itemId, itemType } = object
       let isInside
@@ -45,13 +46,14 @@ const PlanEditorDrafts = props => {
       } else if (itemType === 'boundary') {
         isInside = google.maps.geometry.poly.containsLocation(event.latLng, object)
       }
-      if (isInside) equipmentIds.push(itemId)
+      if (isInside && itemId) equipmentIds.push(itemId)
     }
-
+    console.log(equipmentIds)
     selectionCircle.setMap(null)
 
     const uniqueEquipmentIds = [...new Set(equipmentIds)]
     uniqueEquipmentIds.sort(id => drafts[id].nodeType === 'central_office' ? 1 : -1)
+    console.log(uniqueEquipmentIds)
     selectEditFeaturesById(uniqueEquipmentIds)
   }
 
